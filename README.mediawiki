@@ -1,5 +1,6 @@
 == About ==
 This project is used to develop applications for stm32 - ST's ARM Cortex-M3 MCUs, using cmake, GCC, newlib (libc) and STM32F10x Standard Peripherals Library.
+
 Requirements:
 * cmake >= 2.6
 * GCC toolchain with newlib.
@@ -27,13 +28,13 @@ Than you need to adjust some variables in CMakeLists.txt (example for stm32f103v
 * MOD_SOURCES contains list of StdPeriphLib's modules needed for project.
 * All projects sources should be listed in PROJECT_SOURCES variable.
 Also, you need to adjust StdPeriphLib modules in stm32f10x_conf.h.
-=== Building ===
+=== Build ===
 Generate Makefile:
-<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir></nowiki>
+ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
 Build:
-<nowiki>make</nowiki>
+ make
 The result is a .elf, .bin, and hex files.
 For using with Eclipse CDT:
-<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir></nowiki>
+ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
 For release build:
-<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir></nowiki>
+ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>
