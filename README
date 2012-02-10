@@ -1,0 +1,39 @@
+== About ==
+This project is used to develop applications for stm32 - ST's ARM Cortex-M3 MCUs, using cmake, GCC, newlib (libc) and STM32F10x Standard Peripherals Library.
+Requirements:
+* cmake >= 2.6
+* GCC toolchain with newlib.
+* STM32F10x Standard Peripherals Library
+Project contains:
+* CMake toolchain file, that configures cmake to use arm toolchain, and sets some variables for STM32F10x Standard Peripherals Library.
+* CMake project template.
+* Example projects
+** blinky - blink LED using timers and PWM.
+** newlib - show date from RTC using uart and libc functions from newlib
+== Usage ==
+=== Configure ===
+First of all you need to configure toolchain, you can do this by editing values in stm32.cmake or pass it throught command line.
+Variables for toolchain:
+* TOOLCHAIN_PREFIX - where toolchain is located, '''default''': /usr
+* STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
+* TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
+Than you need to adjust some variables in CMakeLists.txt (example for stm32f103ve):
+* PROJECT(stm32-blinky) - Set the project name.
+* SET(STM32_FLASH_SIZE "512K") - Select chip's flash size.
+* SET(STM32_RAM_SIZE "64K") - Select chip's RAM size.
+* SET(STM32_STACK_ADDRESS "0x20010000") - Select stack address = ram origin + ram size
+* SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32F10X_HD") - Select your device type in defines (CL, HD, HD_VL, LD, LD_VL, MD, MD_VL, XL, more information in StdPeriphLib)
+* SET(STARTUP_SOURCE ${STM32_STARTUP_HD}) - Select your device type for startup files (CL, HD, HD_VL, LD, LD_VL, MD, MD_VL, XL, more information in StdPeriphLib)
+* MOD_SOURCES contains list of StdPeriphLib's modules needed for project.
+* All projects sources should be listed in PROJECT_SOURCES variable.
+Also, you need to adjust StdPeriphLib modules in stm32f10x_conf.h.
+=== Building ===
+Generate Makefile:
+<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir></nowiki>
+Build:
+<nowiki>make</nowiki>
+The result is a .elf, .bin, and hex files.
+For using with Eclipse CDT:
+<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir></nowiki>
+For release build:
+<nowiki>cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir></nowiki>
