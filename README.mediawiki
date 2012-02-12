@@ -14,7 +14,6 @@ Project contains:
 ** blinky - blink LED using timers and PWM.
 ** newlib - show date from RTC using uart and libc functions from newlib
 
-== Usage ==
 == Building & Installing ==
 First of all you need to configure toolchain and libraries, you can do this by editing gcc_stm32.cmake or pass it throught command line.
 Variables for toolchain:
