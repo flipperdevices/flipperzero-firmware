@@ -6,35 +6,63 @@ Requirements:
 * GCC toolchain with newlib.
 * STM32F10x Standard Peripherals Library
 Project contains:
-* CMake toolchain file, that configures cmake to use arm toolchain, and sets some variables for STM32F10x Standard Peripherals Library.
+* CMake toolchain file, that configures cmake to use arm toolchain.
+* CMake projects that builds CMSIS and STM32F10x Standard Peripherals Library into static libraries.
+* CMake modules to find and configure CMSIS ans StdPeriphLib libraries.
 * CMake project template.
 * Example projects
 ** blinky - blink LED using timers and PWM.
 ** newlib - show date from RTC using uart and libc functions from newlib
+
 == Usage ==
-=== Configure ===
-First of all you need to configure toolchain, you can do this by editing values in stm32.cmake or pass it throught command line.
+== Building & Installing ==
+First of all you need to configure toolchain and libraries, you can do this by editing gcc_stm32.cmake or pass it throught command line.
 Variables for toolchain:
 * TOOLCHAIN_PREFIX - where toolchain is located, '''default''': /usr
-* STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
 * TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
+Variables for CMSIS and StdPeriphLib:
+* STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
+* USE_ASSERT - Use internal asserts in Standard Peripherals Library.
+
+=== Build CMSIS and Standard Peripherals Library ===
+In cmsis folder:
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ make && make install
+In stdperiph folder
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ make && make install
+'''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules.
+
+'''Note:''' To prevent header collision file "misc.h" from Standard Peripherals Library will be installed as stm32f10x_misc.h
+
+== Usage ==
+After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
 Than you need to adjust some variables in CMakeLists.txt (example for stm32f103ve):
-* PROJECT(stm32-blinky) - Set the project name.
-* SET(STM32_FLASH_SIZE "512K") - Select chip's flash size.
-* SET(STM32_RAM_SIZE "64K") - Select chip's RAM size.
-* SET(STM32_STACK_ADDRESS "0x20010000") - Select stack address = ram origin + ram size
-* SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSTM32F10X_HD") - Select your device type in defines (CL, HD, HD_VL, LD, LD_VL, MD, MD_VL, XL, more information in StdPeriphLib)
-* SET(STARTUP_SOURCE ${STM32_STARTUP_HD}) - Select your device type for startup files (CL, HD, HD_VL, LD, LD_VL, MD, MD_VL, XL, more information in StdPeriphLib)
-* MOD_SOURCES contains list of StdPeriphLib's modules needed for project.
+* PROJECT(stm32-template) - Set the project name.
+* FIND_PACKAGE(StdPeriphLib REQUIRED) - comment/remove this if you don't need StdPeriphLib. CMSIS package are always required.
+* STM32_SET_PARAMS("512K" "64K" "0x20010000") - Set chip's flash size, ram size, and stack bottom address. Also, you can change min heap size, stack size, etc. - look into FindCMSIS.cmake
 * All projects sources should be listed in PROJECT_SOURCES variable.
-Also, you need to adjust StdPeriphLib modules in stm32f10x_conf.h.
+Also, if you using StdPeriphLib you need to adjust modules in stm32f10x_conf.h.
+
 === Build ===
 Generate Makefile:
- cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
+ cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
+Where <chip type>:
+* HD - High Density MCUs
+* HD_VL - High Density Value Line MCUs
+* MD - Medium Density MCUs
+* MD_VL - Medium Density Value Line MCUs
+* LD - Low Density MCUs
+* LD_VL - Low Density Value Line MCUs
+* CL - Connectivity Line MCUs
+* XL - XL Density MCUs
 Build:
  make
-The result is a .elf, .bin, and hex files.
+The result is a .elf file, to build .hex:
+ make <project name>.hex
+or .bin:
+ make <project name>.bin
 For using with Eclipse CDT:
- cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
+ cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
 For release build:
- cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>
+ cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>
