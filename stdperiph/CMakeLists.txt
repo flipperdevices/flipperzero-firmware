@@ -9,8 +9,6 @@ IF(NOT STM32_StdPeriphLib_DIR)
 ENDIF()
 
 INCLUDE_DIRECTORIES(
-    ${STM32_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/
-    ${STM32_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/CoreSupport/
     ${STM32_StdPeriphLib_DIR}/Libraries/STM32F10x_StdPeriph_Driver/inc/
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
