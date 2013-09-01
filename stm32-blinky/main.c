@@ -3,13 +3,14 @@
 void initGPIO()
 {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);
 
     GPIO_InitTypeDef GPIO_Config;
-    GPIO_Config.GPIO_Pin =  GPIO_Pin_6;
+    GPIO_Config.GPIO_Pin =  GPIO_Pin_8;
     GPIO_Config.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Config.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_Config);
+    GPIO_Init(GPIOC, &GPIO_Config);
+    GPIO_PinRemapConfig( GPIO_FullRemap_TIM3, ENABLE );
 }
 
 void initTimers()
@@ -30,9 +31,9 @@ void initTimers()
     // 2500 / 5000 = 50% duty cycle.
     TIM_OCConfig.TIM_Pulse = 2499;
     TIM_OCConfig.TIM_OCPolarity = TIM_OCPolarity_High;
-    TIM_OC1Init(TIM3, &TIM_OCConfig);
+    TIM_OC3Init(TIM3, &TIM_OCConfig);
 
-    TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
+    TIM_OC3PreloadConfig(TIM3, TIM_OCPreload_Enable);
     TIM_ARRPreloadConfig(TIM3, ENABLE);
 
     TIM_Cmd(TIM3, ENABLE);
