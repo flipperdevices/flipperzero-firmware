@@ -31,7 +31,7 @@ bool minmea_check(const char *sentence)
         return false;
 
     // The optional checksum is an XOR of all bytes between "$" and "*".
-    while (*sentence && *sentence != '*' && isprint(*sentence))
+    while (*sentence && *sentence != '*' && isprint((unsigned char) *sentence))
         checksum ^= *sentence++;
 
     if (*sentence == '*') {
@@ -58,7 +58,7 @@ bool minmea_check(const char *sentence)
 }
 
 static inline bool minmea_isfield(char c) {
-    return isprint(c) && c != ',' && c != '*';
+    return isprint((unsigned char) c) && c != ',' && c != '*';
 }
 
 bool minmea_scan(const char *sentence, const char *format, ...)
@@ -120,7 +120,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         sign = 1;
                     } else if (*field == '-' && !sign && value == -1) {
                         sign = -1;
-                    } else if (isdigit(*field)) {
+                    } else if (isdigit((unsigned char) *field)) {
                         if (value == -1)
                             value = 0;
                         value = (10 * value) + (*field - '0');
@@ -185,7 +185,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 int d = -1, m = -1, y = -1;
                 // Always six digits.
                 for (int i=0; i<6; i++)
-                    if (!isdigit(field[i]))
+                    if (!isdigit((unsigned char) field[i]))
                         goto end_D;
 
                 d = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
@@ -204,7 +204,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 int h = -1, i = -1, s = -1, u = -1;
                 // Minimum required: integer time.
                 for (int i=0; i<6; i++)
-                    if (!isdigit(field[i]))
+                    if (!isdigit((unsigned char) field[i]))
                         goto end_T;
 
                 h = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
@@ -216,7 +216,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 if (*field++ == '.') {
                     int value = 0;
                     int scale = 1000000;
-                    while (isdigit(*field) && scale > 1) {
+                    while (isdigit((unsigned char) *field) && scale > 1) {
                         value = (value * 10) + (*field++ - '0');
                         scale /= 10;
                     }
