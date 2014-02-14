@@ -102,6 +102,8 @@ static inline int minmea_rescale(int value, int from, int to)
 {
     if (from == 0)
         return 0;
+    if (from == to)
+        return value;
     return (value * to + from / 2) / from;
 }
 
