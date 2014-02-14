@@ -21,6 +21,31 @@ systems.
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
+## Fractional number format
+
+Internally, minmea stores fractional numbers as pairs of two integers: ``(value, scale)``.
+For example, a value of ``"-123.456"`` would be parsed as ``(-123456, 1000)``. As this
+format is quite unwieldy, minmea provides the following convenience macros for converting
+to either fixed-point or floating-point format:
+
+* ``minmea_rescale(-123456, 1000, 10) => -1235``
+* ``minmea_float(-123456, 1000) => -123.456``
+
+## Coordinate format
+
+NMEA uses the clunky ``DDMM.MMMM`` format which, honestly, is not good in the internet era.
+Internally, minmea stores it as a fractional number (see above); for practical uses,
+the value should be probably converted to the DD.DDDDD floating point format using the
+following macro:
+
+* ``minmea_coord(-375165, 100) => -37.860832``
+
+The library doesn't perform this conversion automatically for the following reasons:
+
+* The conversion is not reversible.
+* It requires floating point hardware.
+* The user might want to perform this conversion later on or retain the original values.
+
 ## Example
 
 ```c
