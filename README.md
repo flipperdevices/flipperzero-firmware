@@ -1,0 +1,78 @@
+# minmea, the lightweight GPS NMEA 0183 parser library
+
+Minmea is a minimalistic GPS parser library intended for resource-constrained
+platforms, especially microcontrollers and other embedded systems.
+
+## Features
+
+* Written in ISO C99.
+* No dynamic memory allocation.
+* No floating point usage in the core library.
+* Supports both fixed and floating point values.
+* One source file and one header - can't get any simpler.
+* Easily extendable to support new sentences.
+* Complete with a test suite and static analysis.
+
+## Supported sentences
+
+* ``$GPRMC``
+* ``$GPGGA``
+
+Adding support for more sentences is trivial; see ``minmea.c`` source.
+
+## Example
+
+```c
+    char line[MINMEA_MAX_LENGTH];
+    while (fgets(line, sizeof(line), stdin) != NULL) {
+        printf("%s", line);
+        switch (minmea_type(line)) {
+            case MINMEA_GPRMC: {
+                struct minmea_gprmc frame;
+                if (minmea_parse_gprmc(&frame, line)) {
+                    printf("+++ raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
+                            frame.latitude, frame.latitude_scale,
+                            frame.longitude, frame.longitude_scale,
+                            frame.speed, frame.speed_scale);
+                    printf("+++ fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
+                            minmea_rescale(frame.latitude, frame.latitude_scale, 1000),
+                            minmea_rescale(frame.longitude, frame.longitude_scale, 1000),
+                            minmea_rescale(frame.speed, frame.speed_scale, 1000));
+                    printf("+++ floating point degree coordinates and speed: (%f,%f) %f\n",
+                            minmea_coord(frame.latitude, frame.latitude_scale),
+                            minmea_coord(frame.longitude, frame.longitude_scale),
+                            minmea_float(frame.speed, frame.speed_scale));
+                }
+            } break;
+
+            case MINMEA_GPGGA: {
+                struct minmea_gpgga frame;
+                if (minmea_parse_gpgga(&frame, line)) {
+                    printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
+                }
+            } break;
+
+            default: {
+            } break;
+        }
+    }
+```
+
+## Integration with your project
+
+Simply add ``minmea.[ch]`` to your project, ``#include "minmea.h"`` and you're
+good to go.
+
+## Running unit tests
+
+Building and running the tests requires the following:
+
+* Check Framework (http://check.sourceforge.net/).
+* Clang Static Analyzer (http://clang-analyzer.llvm.org/).
+
+If you have both in your ``$PATH``, running the tests should be as simple as
+typing ``make``.
+
+## Bugs
+
+There are plenty. Report them on GitHub, or - even better - open a pull request.
