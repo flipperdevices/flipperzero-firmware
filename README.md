@@ -1,7 +1,8 @@
-# minmea, the lightweight GPS NMEA 0183 parser library
+# minmea, a lightweight GPS NMEA 0183 parser library
 
-Minmea is a minimalistic GPS parser library intended for resource-constrained
-platforms, especially microcontrollers and other embedded systems.
+Minmea is a minimalistic GPS parser library written in pure C intended for
+resource-constrained platforms, especially microcontrollers and other embedded
+systems.
 
 ## Features
 
@@ -76,3 +77,13 @@ typing ``make``.
 ## Bugs
 
 There are plenty. Report them on GitHub, or - even better - open a pull request.
+Please write unit tests for any new functions you add - it's fun!
+
+## Licensing
+
+Minmea is open source software; see ``COPYING`` for amusement. Email me if the
+license bothers you and I'll happily re-license under anything else under the sun.
+
+## Author
+
+Minmea was written by Kosma Moczek <kosma@cloudyourcar.com> at Cloud Your Car.
