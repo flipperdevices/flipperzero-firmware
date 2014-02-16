@@ -22,6 +22,7 @@ Variables for toolchain:
 * TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
 * STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently only F1 family supported.
 '''Note:''' If STM32_CHIP variable is set, STM32_FAMILY is optional.
+
 Variables for CMSIS and StdPeriphLib:
 * STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
 * USE_ASSERT - Use internal asserts in Standard Peripherals Library.
@@ -75,3 +76,10 @@ Next cmake variables are useful for linker tuning:
 * STM32_EXT_RAM_SIZE - External RAM size (default: 0 bytes)
 * STM32_MIN_STACK_SIZE - Minimum stack size for error detection at link-time (default: 512 bytes)
 * STM32_MIN_HEAP_SIZE - Minimum heap size for error detection at link-time (default: 0 bytes)
+
+=== Useful cmake macros ===
+* STM32_GET_CHIP_TYPE(CHIP CHIP_TYPE) - gets chip type (HD, MD, etc.) from chip name.
+* STM32_GET_CHIP_PARAMETERS(CHIP FLASH_SIZE RAM_SIZE) - gets chip ram/flash size from chip name.
+* STM32_SET_CHIP_DEFINITIONS(TARGET CHIP_TYPE) - sets chip family and type-specific compiler flags for target.
+* STM32_SET_FLASH_PARAMS(TARGET ...) - sets chip flash/ram parameters for targer.
+* STM32_SET_TARGET_PROPERTIES(TARGET) - sets all needed parameters and compiler flags for target. 
