@@ -2,11 +2,12 @@
 This project is used to develop applications for stm32 - ST's ARM Cortex-M3 MCUs, using cmake, GCC, newlib (libc) and STM32F10x Standard Peripherals Library.
 
 Requirements:
-* cmake >= 2.6
+* cmake >= 2.8
 * GCC toolchain with newlib.
-* STM32F10x Standard Peripherals Library
+* STM32F10x Standard Peripherals Library for STM32F1 family
 Project contains:
-* CMake toolchain file, that configures cmake to use arm toolchain.
+* CMake common toolchain file, that configures cmake to use arm toolchain.
+* CMake family-specific toolchain file, that configures family-specific parameters.
 * CMake projects that builds CMSIS and STM32F10x Standard Peripherals Library into static libraries.
 * CMake modules to find and configure CMSIS ans StdPeriphLib libraries.
 * CMake project template.
@@ -15,20 +16,22 @@ Project contains:
 ** newlib - show date from RTC using uart and libc functions from newlib
 
 == Building & Installing ==
-First of all you need to configure toolchain and libraries, you can do this by editing gcc_stm32.cmake or pass it throught command line.
+First of all you need to configure toolchain and libraries, you can do this by editing gcc_stm32.cmake or (better way) pass it throught command line.
 Variables for toolchain:
 * TOOLCHAIN_PREFIX - where toolchain is located, '''default''': /usr
 * TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
+* STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently only F1 family supported.
+'''Note:''' If STM32_CHIP variable is set, STM32_FAMILY is optional.
 Variables for CMSIS and StdPeriphLib:
 * STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
 * USE_ASSERT - Use internal asserts in Standard Peripherals Library.
 
 === Build CMSIS and Standard Peripherals Library ===
 In cmsis folder:
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
  make && make install
 In stdperiph folder
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_cmake_folder_of_this_project>/Modules -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
  make && make install
 '''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules.
 
@@ -36,32 +39,39 @@ In stdperiph folder
 
 == Usage ==
 After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
-Than you need to adjust some variables in CMakeLists.txt (example for stm32f103ve):
-* PROJECT(stm32-template) - Set the project name.
-* FIND_PACKAGE(StdPeriphLib REQUIRED) - comment/remove this if you don't need StdPeriphLib. CMSIS package are always required.
-* STM32_SET_PARAMS("512K" "64K" "0x20010000") - Set chip's flash size, ram size, and stack bottom address. Also, you can change min heap size, stack size, etc. - look into FindCMSIS.cmake
-* All projects sources should be listed in PROJECT_SOURCES variable.
-Also, if you using StdPeriphLib you need to adjust modules in stm32f10x_conf.h.
+Template project can be found in stm32-template folder.
+
+=== Configure === 
+Common usage:
+ cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
+Where <nowiki><chip></nowiki> - stm32 chip name (e.g. STM32F100C8). 
+This command will generate Makefile for project.
+Scripts will try to detected chip parameters (type, flash/ram size) from chip name. 
+You can set this parameters directly using following cmake variables:
+* STM32_CHIP_TYPE - family-depended chip type. Global variable STM32_CHIP_TYPES contains list of valid types for current family (e.g. for F1 family: HD, HD_VL, MD, MD_VL, LD, LD_VL, CL, XL)
+* STM32_FLASH_SIZE - chip flash size (e.g. 64K)
+* STM32_RAM_SIZE - chip RAM size (e.g. 4K)
+
+For using with Eclipse CDT:
+ cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
+For release build:
+ cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>
 
 === Build ===
-Generate Makefile:
- cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
-Where <chip type>:
-* HD - High Density MCUs
-* HD_VL - High Density Value Line MCUs
-* MD - Medium Density MCUs
-* MD_VL - Medium Density Value Line MCUs
-* LD - Low Density MCUs
-* LD_VL - Low Density Value Line MCUs
-* CL - Connectivity Line MCUs
-* XL - XL Density MCUs
-Build:
  make
-The result is a .elf file, to build .hex:
+To build .hex:
  make <project name>.hex
 or .bin:
  make <project name>.bin
-For using with Eclipse CDT:
- cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
-For release build:
- cmake -DSTM32_CHIP_TYPE=<chip type> -DCMAKE_TOOLCHAIN_FILE=<path_to_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>
+
+=== Linker script variables ===
+Next cmake variables are useful for linker tuning:
+* STM32_FLASH_ORIGIN - Start address of flash (default: 0x08000000)
+* STM32_RAM_ORIGIN - Start address of RAM (default: 0x20000000)
+* STM32_EXT_RAM_ORIGIN - Start address of external RAM (default: 0x60000000)
+* STM32_STACK_ADDRESS - Address of stack bottom (default: RAM_ORIGIN + RAM_SIZE)
+* STM32_FLASH_SIZE - Flash size (default: from chip name)
+* STM32_RAM_SIZE - RAM size (default: from chip name)
+* STM32_EXT_RAM_SIZE - External RAM size (default: 0 bytes)
+* STM32_MIN_STACK_SIZE - Minimum stack size for error detection at link-time (default: 512 bytes)
+* STM32_MIN_HEAP_SIZE - Minimum heap size for error detection at link-time (default: 0 bytes)
