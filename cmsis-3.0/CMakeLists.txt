@@ -46,6 +46,7 @@ ELSEIF(${STM32_FAMILY} STREQUAL "F4")
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
         ${CMSIS3_DIR}/CMSIS/Include/core_cm4.h 
+        ${CMSIS3_DIR}/CMSIS/Include/core_cm4_simd.h
         ${CMSIS3_DIR}/CMSIS/Include/core_cmFunc.h
         ${CMSIS3_DIR}/CMSIS/Include/core_cmInstr.h
     )

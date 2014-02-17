@@ -33,12 +33,14 @@ ELSEIF(${STM32_FAMILY} STREQUAL "F4")
 
     INCLUDE_DIRECTORIES(
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/
     )
     
     SET(CMSIS_HEADERS 
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
-        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/core_cm4.h 
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/core_cm4.h
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/core_cm4_simd.h
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/core_cmFunc.h
         ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Include/core_cmInstr.h
     )
