@@ -32,6 +32,30 @@ IF(${STM32_FAMILY} STREQUAL "F1")
     
     SET(CMSIS_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/stm32f1_flash.ld.in)
     SET(STARTUP_PREFIX ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_)
+ELSEIF(${STM32_FAMILY} STREQUAL "F4")
+    IF(NOT STM32F4_StdPeriphLib_DIR)
+        SET(STM32F4_StdPeriphLib_DIR "/opt/STM32F4xx_DSP_StdPeriph_Lib_V1.3.0")
+        MESSAGE(STATUS "No STM32F4_StdPeriphLib_DIR specified, using default: " ${STM32F4_StdPeriphLib_DIR})
+    ENDIF()
+
+    INCLUDE_DIRECTORIES(
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/
+    )
+        
+    SET(CMSIS_HEADERS 
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
+        ${CMSIS3_DIR}/CMSIS/Include/core_cm4.h 
+        ${CMSIS3_DIR}/CMSIS/Include/core_cmFunc.h
+        ${CMSIS3_DIR}/CMSIS/Include/core_cmInstr.h
+    )
+    
+    SET(CMSIS_SOURCES 
+        ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
+    )
+    
+    SET(CMSIS_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/stm32f4_flash.ld.in)
+    SET(STARTUP_PREFIX ${STM32F4_StdPeriphLib_DIR}/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f)
 ENDIF()
 
 INCLUDE_DIRECTORIES(

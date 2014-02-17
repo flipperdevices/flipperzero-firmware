@@ -5,10 +5,11 @@ Requirements:
 * cmake >= 2.8
 * GCC toolchain with newlib.
 * STM32F10x Standard Peripherals Library for STM32F1 family
+* STM32F4 DSP and Standard Peripherals Library for STM32F4 family
 Project contains:
 * CMake common toolchain file, that configures cmake to use arm toolchain.
 * CMake family-specific toolchain file, that configures family-specific parameters.
-* CMake projects that builds CMSIS and STM32F10x Standard Peripherals Library into static libraries.
+* CMake projects that builds CMSIS and Standard Peripherals Library into static libraries.
 * CMake modules to find and configure CMSIS ans StdPeriphLib libraries.
 * CMake project template.
 * Example projects
@@ -20,11 +21,12 @@ First of all you need to configure toolchain and libraries, you can do this by e
 Variables for toolchain:
 * TOOLCHAIN_PREFIX - where toolchain is located, '''default''': /usr
 * TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
-* STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently only F1 family supported.
+* STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently, F1 and F4 family are supported.
 '''Note:''' If STM32_CHIP variable is set, STM32_FAMILY is optional.
 
 Variables for CMSIS and StdPeriphLib:
-* STM32_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
+* STM32F1_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
+* STM32F4_StdPeriphLib_DIR - path to STM32F4 DSP and Standard Peripherals Library '''default''': /opt/STM32F4xx_DSP_StdPeriph_Lib_V1.3.0
 * USE_ASSERT - Use internal asserts in Standard Peripherals Library.
 
 === Build CMSIS and Standard Peripherals Library ===
@@ -34,9 +36,11 @@ In cmsis folder:
 In stdperiph folder
  cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_cmake_folder_of_this_project>/Modules -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
  make && make install
+'''Note:''' For building for STM32F4 family, change -DSTM32_FAMILY=F1 to -DSTM32_FAMILY=F4
+
 '''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules.
 
-'''Note:''' To prevent header collision file "misc.h" from Standard Peripherals Library will be installed as stm32f10x_misc.h
+'''Note:''' To prevent header collision file "misc.h" from Standard Peripherals Library will be installed as stm32f10x_misc.h / stm32f4xx_misc.h
 
 == Usage ==
 After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
@@ -45,7 +49,7 @@ Template project can be found in stm32-template folder.
 === Configure === 
 Common usage:
  cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
-Where <nowiki><chip></nowiki> - stm32 chip name (e.g. STM32F100C8). 
+Where <nowiki><chip></nowiki> - stm32 chip name (e.g. STM32F100C8, STM32F407IG). 
 This command will generate Makefile for project.
 Scripts will try to detected chip parameters (type, flash/ram size) from chip name. 
 You can set this parameters directly using following cmake variables:
@@ -69,11 +73,9 @@ or .bin:
 Next cmake variables are useful for linker tuning:
 * STM32_FLASH_ORIGIN - Start address of flash (default: 0x08000000)
 * STM32_RAM_ORIGIN - Start address of RAM (default: 0x20000000)
-* STM32_EXT_RAM_ORIGIN - Start address of external RAM (default: 0x60000000)
 * STM32_STACK_ADDRESS - Address of stack bottom (default: RAM_ORIGIN + RAM_SIZE)
 * STM32_FLASH_SIZE - Flash size (default: from chip name)
 * STM32_RAM_SIZE - RAM size (default: from chip name)
-* STM32_EXT_RAM_SIZE - External RAM size (default: 0 bytes)
 * STM32_MIN_STACK_SIZE - Minimum stack size for error detection at link-time (default: 512 bytes)
 * STM32_MIN_HEAP_SIZE - Minimum heap size for error detection at link-time (default: 0 bytes)
 

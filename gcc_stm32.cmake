@@ -1,6 +1,6 @@
 INCLUDE(CMakeForceCompiler)
 
-SET(STM32_SUPPORTED_FAMILIES "F1" CACHE INTERNAL "stm32 supported families")
+SET(STM32_SUPPORTED_FAMILIES F1 F4 CACHE INTERNAL "stm32 supported families")
 
 IF(NOT TOOLCHAIN_PREFIX)
      SET(TOOLCHAIN_PREFIX "/usr")
@@ -18,7 +18,7 @@ IF(NOT STM32_FAMILY)
         SET(STM32_FAMILY "F1" CACHE INTERNAL "stm32 family")
         MESSAGE(STATUS "Neither STM32_FAMILY nor STM32_CHIP specified, using default STM32_FAMILY: ${STM32_FAMILY}")
     ELSE()
-        STRING(REGEX REPLACE "^[sS][tT][mM]32(([fF][1-4])|([lL][0-1])|([tT])|([wW])).+$" "\\1" STM32_FAMILY ${STM32_CHIP})
+        STRING(REGEX REPLACE "^[sS][tT][mM]32(([fF][0-4])|([lL][0-1])|([tT])|([wW])).+$" "\\1" STM32_FAMILY ${STM32_CHIP})
         STRING(TOUPPER ${STM32_FAMILY} STM32_FAMILY)
         MESSAGE(STATUS "Selected STM32 family: ${STM32_FAMILY}")
     ENDIF()
