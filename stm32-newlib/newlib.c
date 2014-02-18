@@ -3,13 +3,28 @@
 #include <sys/times.h>
 #include <sys/unistd.h>
 #include <sys/time.h>
-#include <stm32f10x.h>
+
+#if defined STM32F1
+# include <stm32f10x.h>
+#elif defined STM32F4
+# include <stm32f4xx.h>
+#endif
+
+#if defined STM32F4
+uint64_t virtualClock = 0;
+#endif
 
 extern uint32_t __get_MSP(void);
 
-#define STDOUT_USART USART1
-#define STDERR_USART USART1
-#define STDIN_USART USART1
+#if defined STM32F1
+# define STDOUT_USART USART1
+# define STDERR_USART USART1
+# define STDIN_USART USART1
+#elif defined STM32F4
+# define STDOUT_USART USART3
+# define STDERR_USART USART3
+# define STDIN_USART USART3
+#endif
 
 #undef errno
 extern int errno;
@@ -54,8 +69,13 @@ int _getpid()
 
 int _gettimeofday(struct timeval *tv, struct timezone *tz)
 {
+#if defined STM32F1
     tv->tv_sec = RTC_GetCounter();
     tv->tv_usec = 0;
+#elif defined STM32F4
+    tv->tv_sec = virtualClock / 1000;
+    tv->tv_usec = (virtualClock % 1000) * 1000;
+#endif
     return 0;
 }
 
@@ -94,13 +114,9 @@ int _lseek(int file, int ptr, int dir)
 caddr_t _sbrk(int incr)
 {
     extern char _ebss;
-    static char *heap_end;
+    static char *heap_end= &_ebss;
     char *prev_heap_end;
 
-    if (heap_end == 0)
-    {
-        heap_end = &_ebss;
-    }
     prev_heap_end = heap_end;
 
     char * stack = (char*) __get_MSP();
