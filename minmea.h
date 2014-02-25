@@ -27,6 +27,7 @@ enum minmea_type {
     MINMEA_UNKNOWN = 0,
     MINMEA_GPRMC,
     MINMEA_GPGGA,
+    MINMEA_GPGSA,
 };
 
 struct minmea_date {
@@ -65,6 +66,37 @@ struct minmea_gpgga {
     int dgps_age;
 };
 
+enum minmea_gpgsa_mode {
+	GPGSA_MODE_AUTO,
+	GPGSA_MODE_FORCED
+};
+
+enum minmea_gpgsa_fix_type {
+	GPGSA_FIX_NONE,
+	GPGSA_FIX_2D,
+	GPGSA_FIX_3D
+};
+
+struct minmea_gpgsa {
+	int mode;
+	int fix_type;
+	int sat1;
+	int sat2;
+	int sat3;
+	int sat4;
+	int sat5;
+	int sat6;
+	int sat7;
+	int sat8;
+	int sat9;
+	int sat10;
+	int sat11;
+	int sat12;
+    int pdop, pdop_scale;
+    int hdop, hdop_scale;
+    int vdop, vdop_scale;
+};
+
 /**
  * Check sequence validity and checksum. Returns true for valid sequences.
  */
@@ -93,6 +125,7 @@ bool minmea_scan(const char *sentence, const char *format, ...);
  */
 bool minmea_parse_gprmc(struct minmea_gprmc *frame, const char *sentence);
 bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence);
+bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence);
 
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.
