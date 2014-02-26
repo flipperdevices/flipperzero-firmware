@@ -332,11 +332,44 @@ START_TEST(test_minmea_parse_gpgga1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gpgsa1)
+{
+    const char *sentence = "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39";
+    struct minmea_gpgsa frame = {};
+    struct minmea_gpgsa expected = {
+    	.mode = GPGSA_MODE_AUTO,
+    	.fix_type = GPGSA_FIX_3D,
+    	.sat1 = 4,
+    	.sat2 = 5,
+    	.sat3 = 0,
+    	.sat4 = 9,
+    	.sat5 = 12,
+    	.sat6 = 0,
+    	.sat7 = 0,
+    	.sat8 = 24,
+    	.sat9 = 0,
+    	.sat10 = 0,
+    	.sat11 = 0,
+    	.sat12 = 0,
+    	.pdop = 25,
+    	.pdop_scale = 10,
+    	.hdop = 13,
+    	.hdop_scale = 10,
+    	.vdop = 21,
+    	.vdop_scale = 10
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gpgsa(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
         "$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62",
         "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47",
+        "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39",
         NULL,
     };
 
@@ -352,6 +385,12 @@ START_TEST(test_minmea_usage1)
                 ck_assert(minmea_parse_gpgga(&frame, *sentence) == true);
             } break;
             
+            case MINMEA_GPGSA: {
+                struct minmea_gpgsa frame;
+                ck_assert(minmea_parse_gpgsa(&frame, *sentence) == true);
+            } break;
+
+
             default: {
             } break;
         }
@@ -428,6 +467,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gprmc1);
     tcase_add_test(tc_parse, test_minmea_parse_gprmc2);
     tcase_add_test(tc_parse, test_minmea_parse_gpgga1);
+    tcase_add_test(tc_parse, test_minmea_parse_gpgsa1);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");

@@ -271,6 +271,8 @@ enum minmea_type minmea_type(const char *sentence)
         return MINMEA_GPRMC;
     if (!strcmp(type, "GPGGA"))
         return MINMEA_GPGGA;
+    if (!strcmp(type, "GPGSA"))
+        return MINMEA_GPGSA;
 
     return MINMEA_UNKNOWN;
 }
@@ -331,6 +333,65 @@ bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence)
     frame->longitude *= longitude_direction;
 
     return true;
+}
+
+bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence){
+	// $GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39
+	char type[6];
+
+	if (!minmea_scan(sentence, "tciiiiiiiiiiiiifff",
+			type,
+			&frame->mode,
+			&frame->fix_type,
+			&frame->sat1,
+			&frame->sat2,
+			&frame->sat3,
+			&frame->sat4,
+			&frame->sat5,
+			&frame->sat6,
+			&frame->sat7,
+			&frame->sat8,
+			&frame->sat9,
+			&frame->sat10,
+			&frame->sat11,
+			&frame->sat12,
+			&frame->pdop,
+			&frame->pdop_scale,
+			&frame->hdop,
+			&frame->hdop_scale,
+			&frame->vdop,
+			&frame->vdop_scale
+			)){
+		return false;
+	}
+	if (strcmp(type, "GPGSA")){
+		return false;
+	}
+
+	if(frame->mode == 'A'){
+		frame->mode = GPGSA_MODE_AUTO;
+	}
+	else if(frame->mode == 'M'){
+		frame->mode = GPGSA_MODE_FORCED;
+	}
+	else{
+		return false;
+	}
+
+	if(frame->fix_type == 1){
+		frame->fix_type = GPGSA_FIX_NONE;
+	}
+	else if(frame->fix_type == 2){
+		frame->fix_type = GPGSA_FIX_2D;
+	}
+	else if(frame->fix_type == 3){
+		frame->fix_type = GPGSA_FIX_3D;
+	}
+	else{
+		return false;
+	}
+
+	return true;
 }
 
 int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time)
