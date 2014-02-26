@@ -339,7 +339,7 @@ START_TEST(test_minmea_parse_gpgsa1)
     struct minmea_gpgsa expected = {
         .mode = MINMEA_GPGSA_MODE_AUTO,
         .fix_type = MINMEA_GPGSA_FIX_3D,
-	.sats = { 4, 5, 0, 9, 12, 0, 0, 24, 0, 0, 0, 0 },
+        .sats = { 4, 5, 0, 9, 12, 0, 0, 24, 0, 0, 0, 0 },
         .pdop = 25,
         .pdop_scale = 10,
         .hdop = 13,

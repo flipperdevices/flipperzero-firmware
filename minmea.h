@@ -74,7 +74,7 @@ enum minmea_gpgsa_mode {
 enum minmea_gpgsa_fix_type {
     MINMEA_GPGSA_FIX_NONE = 1,
     MINMEA_GPGSA_FIX_2D = 2,
-    MINMEA_GPGSA_FIX_3D =3,
+    MINMEA_GPGSA_FIX_3D = 3,
 };
 
 struct minmea_gpgsa {
