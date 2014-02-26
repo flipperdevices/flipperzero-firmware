@@ -344,18 +344,18 @@ bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence)
             type,
             &frame->mode,
             &frame->fix_type,
-            &frame->sat1,
-            &frame->sat2,
-            &frame->sat3,
-            &frame->sat4,
-            &frame->sat5,
-            &frame->sat6,
-            &frame->sat7,
-            &frame->sat8,
-            &frame->sat9,
-            &frame->sat10,
-            &frame->sat11,
-            &frame->sat12,
+            &frame->sats[0],
+            &frame->sats[1],
+            &frame->sats[2],
+            &frame->sats[3],
+            &frame->sats[4],
+            &frame->sats[5],
+            &frame->sats[6],
+            &frame->sats[7],
+            &frame->sats[8],
+            &frame->sats[9],
+            &frame->sats[10],
+            &frame->sats[11],
             &frame->pdop,
             &frame->pdop_scale,
             &frame->hdop,
@@ -366,22 +366,6 @@ bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence)
         return false;
     }
     if (strcmp(type, "GPGSA"))
-        return false;
-
-    if (frame->mode == 'A')
-        frame->mode = GPGSA_MODE_AUTO;
-    else if (frame->mode == 'M')
-        frame->mode = GPGSA_MODE_FORCED;
-    else
-        return false;
-
-    if (frame->fix_type == 1)
-        frame->fix_type = GPGSA_FIX_NONE;
-    else if (frame->fix_type == 2)
-        frame->fix_type = GPGSA_FIX_2D;
-    else if (frame->fix_type == 3)
-        frame->fix_type = GPGSA_FIX_3D;
-    else
         return false;
 
     return true;
