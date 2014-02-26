@@ -67,31 +67,31 @@ struct minmea_gpgga {
 };
 
 enum minmea_gpgsa_mode {
-	GPGSA_MODE_AUTO,
-	GPGSA_MODE_FORCED
+    GPGSA_MODE_AUTO,
+    GPGSA_MODE_FORCED
 };
 
 enum minmea_gpgsa_fix_type {
-	GPGSA_FIX_NONE,
-	GPGSA_FIX_2D,
-	GPGSA_FIX_3D
+    GPGSA_FIX_NONE,
+    GPGSA_FIX_2D,
+    GPGSA_FIX_3D
 };
 
 struct minmea_gpgsa {
-	int mode;
-	int fix_type;
-	int sat1;
-	int sat2;
-	int sat3;
-	int sat4;
-	int sat5;
-	int sat6;
-	int sat7;
-	int sat8;
-	int sat9;
-	int sat10;
-	int sat11;
-	int sat12;
+    int mode;
+    int fix_type;
+    int sat1;
+    int sat2;
+    int sat3;
+    int sat4;
+    int sat5;
+    int sat6;
+    int sat7;
+    int sat8;
+    int sat9;
+    int sat10;
+    int sat11;
+    int sat12;
     int pdop, pdop_scale;
     int hdop, hdop_scale;
     int vdop, vdop_scale;

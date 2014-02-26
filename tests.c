@@ -337,26 +337,26 @@ START_TEST(test_minmea_parse_gpgsa1)
     const char *sentence = "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39";
     struct minmea_gpgsa frame = {};
     struct minmea_gpgsa expected = {
-    	.mode = GPGSA_MODE_AUTO,
-    	.fix_type = GPGSA_FIX_3D,
-    	.sat1 = 4,
-    	.sat2 = 5,
-    	.sat3 = 0,
-    	.sat4 = 9,
-    	.sat5 = 12,
-    	.sat6 = 0,
-    	.sat7 = 0,
-    	.sat8 = 24,
-    	.sat9 = 0,
-    	.sat10 = 0,
-    	.sat11 = 0,
-    	.sat12 = 0,
-    	.pdop = 25,
-    	.pdop_scale = 10,
-    	.hdop = 13,
-    	.hdop_scale = 10,
-    	.vdop = 21,
-    	.vdop_scale = 10
+        .mode = GPGSA_MODE_AUTO,
+        .fix_type = GPGSA_FIX_3D,
+        .sat1 = 4,
+        .sat2 = 5,
+        .sat3 = 0,
+        .sat4 = 9,
+        .sat5 = 12,
+        .sat6 = 0,
+        .sat7 = 0,
+        .sat8 = 24,
+        .sat9 = 0,
+        .sat10 = 0,
+        .sat11 = 0,
+        .sat12 = 0,
+        .pdop = 25,
+        .pdop_scale = 10,
+        .hdop = 13,
+        .hdop_scale = 10,
+        .vdop = 21,
+        .vdop_scale = 10
     };
     ck_assert(minmea_check(sentence) == true);
     ck_assert(minmea_parse_gpgsa(&frame, sentence) == true);
