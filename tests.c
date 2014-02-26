@@ -20,6 +20,8 @@ static const char *valid_sequences[] = {
     "$GPGGA,,,,,,0,00,99.99,,,,,,*48",
     "$GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30",
     "$GPGLL,,,,,,V,N*64",
+    "$GPXTE,A,A,0.67,L,N*6F",
+    "$GPXTE,A,A,0.67,L,N*6f",
     NULL,
 };
 
@@ -32,6 +34,8 @@ static const char *invalid_sequences[] = {
     "$$GPGGA,,,,,,0,00,99.99,,,,,,*48",
     "GPGSA,A,1,,,,,,,,,,,,,99.99,99.99,99.99*30",
     "gps: $GPGLL,,,,,,V,N",
+    "$GPXTE,A,A,0.67,L,N*6e",
+    "$GPXTE,A,A,0.67,L,N*6g",
     NULL,
 };
 
