@@ -18,6 +18,7 @@ systems.
 
 * ``$GPRMC``
 * ``$GPGGA``
+* ``$GPGSA``
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
