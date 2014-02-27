@@ -1,10 +1,10 @@
-SET(CMAKE_C_FLAGS "-mthumb -flto -fno-builtin -mcpu=cortex-m3 -Wall -std=c99 -ffunction-sections -fdata-sections -fomit-frame-pointer -mabi=aapcs -fno-unroll-loops -ffast-math -ftree-vectorize" CACHE INTERNAL "c compiler flags")
-SET(CMAKE_CXX_FLAGS "-mthumb -flto -fno-builtin -mcpu=cortex-m3 -Wall -std=c++11 -ffunction-sections -fdata-sections -fomit-frame-pointer -mabi=aapcs -fno-unroll-loops -ffast-math -ftree-vectorize" CACHE INTERNAL "cxx compiler flags")
+SET(CMAKE_C_FLAGS "-mthumb -fno-builtin -mcpu=cortex-m3 -Wall -std=gnu99 -ffunction-sections -fdata-sections -fomit-frame-pointer -mabi=aapcs -fno-unroll-loops -ffast-math -ftree-vectorize" CACHE INTERNAL "c compiler flags")
+SET(CMAKE_CXX_FLAGS "-mthumb -fno-builtin -mcpu=cortex-m3 -Wall -std=c++11 -ffunction-sections -fdata-sections -fomit-frame-pointer -mabi=aapcs -fno-unroll-loops -ffast-math -ftree-vectorize" CACHE INTERNAL "cxx compiler flags")
 SET(CMAKE_ASM_FLAGS "-mthumb -mcpu=cortex-m3" CACHE INTERNAL "asm compiler flags")
 
-SET(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -Wl,--gc-sections -mthumb -mcpu=cortex-m3 -flto -mabi=aapcs" CACHE INTERNAL "executable linker flags")
-SET(CMAKE_MODULE_LINKER_FLAGS "-mthumb -mcpu=cortex-m3 -flto -mabi=aapcs" CACHE INTERNAL "module linker flags")
-SET(CMAKE_SHARED_LINKER_FLAGS "-mthumb -mcpu=cortex-m3 -flto -mabi=aapcs" CACHE INTERNAL "shared linker flags")
+SET(CMAKE_EXE_LINKER_FLAGS "-nostartfiles -Wl,--gc-sections -mthumb -mcpu=cortex-m3 -mabi=aapcs" CACHE INTERNAL "executable linker flags")
+SET(CMAKE_MODULE_LINKER_FLAGS "-mthumb -mcpu=cortex-m3 -mabi=aapcs" CACHE INTERNAL "module linker flags")
+SET(CMAKE_SHARED_LINKER_FLAGS "-mthumb -mcpu=cortex-m3 -mabi=aapcs" CACHE INTERNAL "shared linker flags")
 
 SET(STM32_CHIP_TYPES CL HD HD_VL MD MD_VL LD LD_VL XL CACHE INTERNAL "stm32f1 chip types")
 SET(STM32_CODES "10[57]" "10[13].[CDE]" "100.[CDE]" "10[123].[8B]" "100.[8B]" "10[123].[46]" "100.[46]" "10[13].[FG]")
