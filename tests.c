@@ -408,10 +408,10 @@ END_TEST
 
 START_TEST(test_minmea_rescale)
 {
-    ck_assert(minmea_rescale(42, 0, 3) == 0);
-    ck_assert(minmea_rescale(1234, 10, 1) == 123);
-    ck_assert(minmea_rescale(1235, 10, 1) == 124);
-    ck_assert(minmea_rescale(1234, 10, 1000) == 123400);
+    ck_assert_int_eq(minmea_rescale(42, 0, 3), 0);
+    ck_assert_int_eq(minmea_rescale(1234, 10, 1), 123);
+    ck_assert_int_eq(minmea_rescale(1235, 10, 1), 124);
+    ck_assert_int_eq(minmea_rescale(1234, 10, 1000), 123400);
 }
 END_TEST
 
