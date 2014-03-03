@@ -123,10 +123,7 @@ bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence);
 int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time);
 
 /**
- * Rescale signed integer value to a different full-scale value, with rounding.
- * The "from" value in the numerator cancels out with the denominator, leaving
- * just 1/2 - which makes integer truncation act as rounding. Returns zero for
- * invalid values.
+ * Rescale a fixed-point value to a different scale. Rounds towards zero.
  */
 static inline int minmea_rescale(int value, int from, int to)
 {
@@ -134,7 +131,10 @@ static inline int minmea_rescale(int value, int from, int to)
         return 0;
     if (from == to)
         return value;
-    return (value * to + from / 2) / from;
+    if (from > to)
+        return (value + ((value > 0) - (value < 0)) * from/to/2) / (from/to);
+    else
+        return value * (to/from);
 }
 
 /**

@@ -417,10 +417,19 @@ END_TEST
 
 START_TEST(test_minmea_rescale)
 {
+    /* basic and edge cases. */
     ck_assert_int_eq(minmea_rescale(42, 0, 3), 0);
     ck_assert_int_eq(minmea_rescale(1234, 10, 1), 123);
     ck_assert_int_eq(minmea_rescale(1235, 10, 1), 124);
     ck_assert_int_eq(minmea_rescale(1234, 10, 1000), 123400);
+
+    /* round towards zero. */
+    ck_assert_int_eq(minmea_rescale(-1234, 10, 1), -123);
+    ck_assert_int_eq(minmea_rescale(-1235, 10, 1), -124);
+    ck_assert_int_eq(minmea_rescale(-1236, 10, 1), -124);
+
+    /* shouldn't overflow on large numbers. */
+    ck_assert_int_eq(minmea_rescale(510693608, 100000, 10000), 51069361);
 }
 END_TEST
 
