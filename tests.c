@@ -117,6 +117,20 @@ START_TEST(test_minmea_scan_f)
     ck_assert(minmea_scan("-1.23,V", "f", &value, &scale) == true);
     ck_assert_int_eq(value, -123);
     ck_assert_int_eq(scale, 100);
+
+    /* some GPS units have absurdly big precision. handle whatever int handles. */
+    ck_assert(minmea_scan("5106.94091", "f", &value, &scale) == true);
+    ck_assert_int_eq(value, 510694091);
+    ck_assert_int_eq(scale, 100000);
+
+    /* for now we support +-180 degrees with 5 decimal digits; anything
+     * more will overflow. */
+    ck_assert(minmea_scan("18000.00000", "f", &value, &scale) == true);
+    ck_assert_int_eq(value, 1800000000);
+    ck_assert_int_eq(scale, 100000);
+    ck_assert(minmea_scan("-18000.00000", "f", &value, &scale) == true);
+    ck_assert_int_eq(value, -1800000000);
+    ck_assert_int_eq(scale, 100000);
 }
 END_TEST
 
