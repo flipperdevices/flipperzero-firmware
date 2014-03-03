@@ -110,6 +110,9 @@ typing ``make``.
 * There's no support for omitting parts of the library from building. As
   a workaround, use the ``-ffunction-sections -Wl,--gc-sections`` linker flags
   (or equivalent) to remove the unused functions (parsers) from the final image.
+* Some systems lack ``timegm``. On these systems, the recommended course of
+  action is to build with ``-Dtimegm=mktime`` - assuming the system runs in the
+  default ``UTC`` timezone.
 
 ## Bugs
 
