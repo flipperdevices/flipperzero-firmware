@@ -100,6 +100,17 @@ Building and running the tests requires the following:
 If you have both in your ``$PATH``, running the tests should be as simple as
 typing ``make``.
 
+## Limitations
+
+* Fractional numbers are represented as ``int`` internally, which is 32 bits on
+  most embedded platforms. Therefore, the maximum supported coordinate precision
+  is ``[+-]DDDMM.MMMMM``. The library does not check for integer overflow at the
+  moment; coordinates with more precision will not parse correctly.
+* Only a handful of frames is supported right now.
+* There's no support for omitting parts of the library from building. As
+  a workaround, use the ``-ffunction-sections -Wl,--gc-sections`` linker flags
+  (or equivalent) to remove the unused functions (parsers) from the final image.
+
 ## Bugs
 
 There are plenty. Report them on GitHub, or - even better - open a pull request.
