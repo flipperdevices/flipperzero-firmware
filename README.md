@@ -16,9 +16,9 @@ systems.
 
 ## Supported sentences
 
-* ``$GPRMC``
-* ``$GPGGA``
-* ``$GPGSA``
+* ``RMC`` (Recommended Minimum: position, velocity, time)
+* ``GGA`` (Fix Data)
+* ``GSA`` (DOP and active satellites)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
