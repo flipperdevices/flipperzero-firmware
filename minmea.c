@@ -175,7 +175,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 *buf = '\0';
             } break;
 
-            case 't': { // NMEA talker+sequence identifier (char *).
+            case 't': { // NMEA talker+sentence identifier (char *).
                 if (field[0] != '$')
                     goto end;
                 for (int i=0; i<5; i++)
@@ -259,7 +259,7 @@ end:
     return result;
 }
 
-enum minmea_type minmea_type(const char *sentence)
+enum minmea_sentence_id minmea_sentence_id(const char *sentence)
 {
     if (!minmea_check(sentence))
         return MINMEA_INVALID;
@@ -268,17 +268,17 @@ enum minmea_type minmea_type(const char *sentence)
     if (!minmea_scan(sentence, "t", type))
         return MINMEA_INVALID;
 
-    if (!strcmp(type, "GPRMC"))
-        return MINMEA_GPRMC;
-    if (!strcmp(type, "GPGGA"))
-        return MINMEA_GPGGA;
-    if (!strcmp(type, "GPGSA"))
-        return MINMEA_GPGSA;
+    if (!strcmp(type+2, "RMC"))
+        return MINMEA_SENTENCE_RMC;
+    if (!strcmp(type+2, "GGA"))
+        return MINMEA_SENTENCE_GGA;
+    if (!strcmp(type+2, "GSA"))
+        return MINMEA_SENTENCE_GSA;
 
     return MINMEA_UNKNOWN;
 }
 
-bool minmea_parse_gprmc(struct minmea_gprmc *frame, const char *sentence)
+bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence)
 {
     // $GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62
     char type[6];
@@ -297,7 +297,7 @@ bool minmea_parse_gprmc(struct minmea_gprmc *frame, const char *sentence)
             &frame->date,
             &frame->variation, &frame->variation_scale, &variation_direction))
         return false;
-    if (strcmp(type, "GPRMC"))
+    if (strcmp(type+2, "RMC"))
         return false;
 
     frame->valid = (validity == 'A');
@@ -308,7 +308,7 @@ bool minmea_parse_gprmc(struct minmea_gprmc *frame, const char *sentence)
     return true;
 }
 
-bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence)
+bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence)
 {
     // $GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47
     char type[6];
@@ -327,7 +327,7 @@ bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence)
             &frame->height, &frame->height_scale, &frame->height_units,
             &frame->dgps_age))
         return false;
-    if (strcmp(type, "GPGGA"))
+    if (strcmp(type+2, "GGA"))
         return false;
 
     frame->latitude *= latitude_direction;
@@ -336,7 +336,7 @@ bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence)
     return true;
 }
 
-bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence)
+bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence)
 {
     // $GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39
     char type[6];
@@ -366,7 +366,7 @@ bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence)
             )){
         return false;
     }
-    if (strcmp(type, "GPGSA"))
+    if (strcmp(type+2, "GSA"))
         return false;
 
     return true;

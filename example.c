@@ -17,10 +17,10 @@ int main()
     char line[MINMEA_MAX_LENGTH];
     while (fgets(line, sizeof(line), stdin) != NULL) {
         printf("%s", line);
-        switch (minmea_type(line)) {
-            case MINMEA_GPRMC: {
-                struct minmea_gprmc frame;
-                if (minmea_parse_gprmc(&frame, line)) {
+        switch (minmea_sentence_id(line)) {
+            case MINMEA_SENTENCE_RMC: {
+                struct minmea_sentence_rmc frame;
+                if (minmea_parse_rmc(&frame, line)) {
                     printf("+++ raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
                             frame.latitude, frame.latitude_scale,
                             frame.longitude, frame.longitude_scale,
@@ -36,9 +36,9 @@ int main()
                 }
             } break;
 
-            case MINMEA_GPGGA: {
-                struct minmea_gpgga frame;
-                if (minmea_parse_gpgga(&frame, line)) {
+            case MINMEA_SENTENCE_GGA: {
+                struct minmea_sentence_gga frame;
+                if (minmea_parse_gga(&frame, line)) {
                     printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
                 }
             } break;

@@ -23,12 +23,12 @@ extern "C" {
 
 #define MINMEA_MAX_LENGTH 80
 
-enum minmea_type {
+enum minmea_sentence_id {
     MINMEA_INVALID = -1,
     MINMEA_UNKNOWN = 0,
-    MINMEA_GPRMC,
-    MINMEA_GPGGA,
-    MINMEA_GPGSA,
+    MINMEA_SENTENCE_RMC,
+    MINMEA_SENTENCE_GGA,
+    MINMEA_SENTENCE_GSA,
 };
 
 struct minmea_date {
@@ -44,7 +44,7 @@ struct minmea_time {
     int microseconds;
 };
 
-struct minmea_gprmc {
+struct minmea_sentence_rmc {
     struct minmea_time time;
     bool valid;
     int latitude, latitude_scale;
@@ -55,7 +55,7 @@ struct minmea_gprmc {
     int variation, variation_scale;
 };
 
-struct minmea_gpgga {
+struct minmea_sentence_gga {
     struct minmea_time time;
     int latitude, latitude_scale;
     int longitude, longitude_scale;
@@ -67,18 +67,18 @@ struct minmea_gpgga {
     int dgps_age;
 };
 
-enum minmea_gpgsa_mode {
+enum minmea_gsa_mode {
     MINMEA_GPGSA_MODE_AUTO = 'A',
     MINMEA_GPGSA_MODE_FORCED = 'M',
 };
 
-enum minmea_gpgsa_fix_type {
+enum minmea_gsa_fix_type {
     MINMEA_GPGSA_FIX_NONE = 1,
     MINMEA_GPGSA_FIX_2D = 2,
     MINMEA_GPGSA_FIX_3D = 3,
 };
 
-struct minmea_gpgsa {
+struct minmea_sentence_gsa {
     char mode;
     int fix_type;
     int sats[12];
@@ -88,14 +88,14 @@ struct minmea_gpgsa {
 };
 
 /**
- * Check sequence validity and checksum. Returns true for valid sequences.
+ * Check sentence validity and checksum. Returns true for valid sentences.
  */
 bool minmea_check(const char *sentence);
 
 /**
- * Determine sequence type.
+ * Determine sentence identifier.
  */
-enum minmea_type minmea_type(const char *sequence);
+enum minmea_sentence_id minmea_sentence_id(const char *sentence);
 
 /**
  * Scanf-like processor for NMEA sentences. Supports the following formats:
@@ -111,11 +111,11 @@ enum minmea_type minmea_type(const char *sequence);
 bool minmea_scan(const char *sentence, const char *format, ...);
 
 /*
- * Parse a specific type of frame. Return true on success.
+ * Parse a specific type of sentence. Return true on success.
  */
-bool minmea_parse_gprmc(struct minmea_gprmc *frame, const char *sentence);
-bool minmea_parse_gpgga(struct minmea_gpgga *frame, const char *sentence);
-bool minmea_parse_gpgsa(struct minmea_gpgsa *frame, const char *sentence);
+bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
+bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
+bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
 
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.

@@ -284,11 +284,11 @@ START_TEST(test_minmea_scan_complex2)
 }
 END_TEST
 
-START_TEST(test_minmea_parse_gprmc1)
+START_TEST(test_minmea_parse_rmc1)
 {
     const char *sentence = "$GPRMC,081836.75,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E";
-    struct minmea_gprmc frame = {};
-    struct minmea_gprmc expected = {
+    struct minmea_sentence_rmc frame = {};
+    struct minmea_sentence_rmc expected = {
         .time = { 8, 18, 36, 750000 },
         .valid = true,
         .latitude = -375165,
@@ -304,16 +304,16 @@ START_TEST(test_minmea_parse_gprmc1)
         .variation_scale = 10,
     };
     ck_assert(minmea_check(sentence) == true);
-    ck_assert(minmea_parse_gprmc(&frame, sentence) == true);
+    ck_assert(minmea_parse_rmc(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
 
-START_TEST(test_minmea_parse_gprmc2)
+START_TEST(test_minmea_parse_rmc2)
 {
     const char *sentence = "$GPRMC,,A,3751.65,N,14507.36,W,,,,,";
-    struct minmea_gprmc frame = {};
-    struct minmea_gprmc expected = {
+    struct minmea_sentence_rmc frame = {};
+    struct minmea_sentence_rmc expected = {
         .time = { -1, -1, -1, -1 },
         .valid = true,
         .latitude = 375165,
@@ -323,16 +323,16 @@ START_TEST(test_minmea_parse_gprmc2)
         .date = { -1, -1, -1 },
     };
     ck_assert(minmea_check(sentence) == true);
-    ck_assert(minmea_parse_gprmc(&frame, sentence) == true);
+    ck_assert(minmea_parse_rmc(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
 
-START_TEST(test_minmea_parse_gpgga1)
+START_TEST(test_minmea_parse_gga1)
 {
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47";
-    struct minmea_gpgga frame = {};
-    struct minmea_gpgga expected = {
+    struct minmea_sentence_gga frame = {};
+    struct minmea_sentence_gga expected = {
         .time = { 12, 35, 19, 0 },
         .latitude = 4807038,
         .latitude_scale = 1000,
@@ -351,16 +351,16 @@ START_TEST(test_minmea_parse_gpgga1)
         .dgps_age = 0,
     };
     ck_assert(minmea_check(sentence) == true);
-    ck_assert(minmea_parse_gpgga(&frame, sentence) == true);
+    ck_assert(minmea_parse_gga(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
 
-START_TEST(test_minmea_parse_gpgsa1)
+START_TEST(test_minmea_parse_gsa1)
 {
     const char *sentence = "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39";
-    struct minmea_gpgsa frame = {};
-    struct minmea_gpgsa expected = {
+    struct minmea_sentence_gsa frame = {};
+    struct minmea_sentence_gsa expected = {
         .mode = MINMEA_GPGSA_MODE_AUTO,
         .fix_type = MINMEA_GPGSA_FIX_3D,
         .sats = { 4, 5, 0, 9, 12, 0, 0, 24, 0, 0, 0, 0 },
@@ -372,7 +372,7 @@ START_TEST(test_minmea_parse_gpgsa1)
         .vdop_scale = 10
     };
     ck_assert(minmea_check(sentence) == true);
-    ck_assert(minmea_parse_gpgsa(&frame, sentence) == true);
+    ck_assert(minmea_parse_gsa(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
@@ -387,20 +387,20 @@ START_TEST(test_minmea_usage1)
     };
 
     for (const char **sentence=sentences; *sentence; sentence++) {
-        switch (minmea_type(*sentence)) {
-            case MINMEA_GPRMC: {
-                struct minmea_gprmc frame;
-                ck_assert(minmea_parse_gprmc(&frame, *sentence) == true);
+        switch (minmea_sentence_id(*sentence)) {
+            case MINMEA_SENTENCE_RMC: {
+                struct minmea_sentence_rmc frame;
+                ck_assert(minmea_parse_rmc(&frame, *sentence) == true);
             } break;
             
-            case MINMEA_GPGGA: {
-                struct minmea_gpgga frame;
-                ck_assert(minmea_parse_gpgga(&frame, *sentence) == true);
+            case MINMEA_SENTENCE_GGA: {
+                struct minmea_sentence_gga frame;
+                ck_assert(minmea_parse_gga(&frame, *sentence) == true);
             } break;
             
-            case MINMEA_GPGSA: {
-                struct minmea_gpgsa frame;
-                ck_assert(minmea_parse_gpgsa(&frame, *sentence) == true);
+            case MINMEA_SENTENCE_GSA: {
+                struct minmea_sentence_gsa frame;
+                ck_assert(minmea_parse_gsa(&frame, *sentence) == true);
             } break;
 
 
@@ -486,10 +486,10 @@ Suite *minmea_suite(void)
     suite_add_tcase(s, tc_scan);
   
     TCase *tc_parse = tcase_create("minmea_parse");
-    tcase_add_test(tc_parse, test_minmea_parse_gprmc1);
-    tcase_add_test(tc_parse, test_minmea_parse_gprmc2);
-    tcase_add_test(tc_parse, test_minmea_parse_gpgga1);
-    tcase_add_test(tc_parse, test_minmea_parse_gpgsa1);
+    tcase_add_test(tc_parse, test_minmea_parse_rmc1);
+    tcase_add_test(tc_parse, test_minmea_parse_rmc2);
+    tcase_add_test(tc_parse, test_minmea_parse_gga1);
+    tcase_add_test(tc_parse, test_minmea_parse_gsa1);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
