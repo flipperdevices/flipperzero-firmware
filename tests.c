@@ -382,7 +382,7 @@ START_TEST(test_minmea_usage1)
     const char *sentences[] = {
         "$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62",
         "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47",
-        "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39",
+        "$GNGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1",
         NULL,
     };
 
@@ -407,6 +407,11 @@ START_TEST(test_minmea_usage1)
             default: {
             } break;
         }
+
+        char talker[3];
+        char expected[3] = { (*sentence)[1], (*sentence)[2], '\0' };
+        ck_assert(minmea_talker_id(talker, *sentence) == true);
+        ck_assert_str_eq(talker, expected);
     }
 }
 END_TEST

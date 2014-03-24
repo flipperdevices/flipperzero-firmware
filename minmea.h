@@ -93,6 +93,11 @@ struct minmea_sentence_gsa {
 bool minmea_check(const char *sentence);
 
 /**
+ * Determine talker identifier.
+ */
+bool minmea_talker_id(char talker[3], const char *sentence);
+
+/**
  * Determine sentence identifier.
  */
 enum minmea_sentence_id minmea_sentence_id(const char *sentence);

@@ -259,6 +259,19 @@ end:
     return result;
 }
 
+bool minmea_talker_id(char talker[3], const char *sentence)
+{
+    char type[6];
+    if (!minmea_scan(sentence, "t", type))
+        return false;
+
+    talker[0] = type[0];
+    talker[1] = type[1];
+    talker[2] = '\0';
+
+    return true;
+}
+
 enum minmea_sentence_id minmea_sentence_id(const char *sentence)
 {
     if (!minmea_check(sentence))
