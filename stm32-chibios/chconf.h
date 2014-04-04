@@ -72,6 +72,7 @@
 
 #if !defined(CH_USE_MAILBOXES)
 #define CH_USE_MAILBOXES                TRUE
+#endif
 
 #if !defined(CH_USE_QUEUES)
 #define CH_USE_QUEUES                   TRUE
