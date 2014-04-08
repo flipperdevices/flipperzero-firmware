@@ -172,7 +172,7 @@ IF(STM32_FAMILY STREQUAL "F4")
         STM32/USARTv1
         STM32/SPIv1
         STM32/USARTv1
-        STM32/USBv1
+        STM32/OTGv1
     )
     
     SET(INDEX 0)
