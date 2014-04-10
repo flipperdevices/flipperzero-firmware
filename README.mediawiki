@@ -38,7 +38,7 @@ In stdperiph folder
  make && make install
 '''Note:''' For building for STM32F4 family, change -DSTM32_FAMILY=F1 to -DSTM32_FAMILY=F4
 
-'''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules.
+'''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules. You may specify an additional search path with -DEXTRA_FIND_PATH=<path-to-search>
 
 '''Note:''' To prevent header collision file "misc.h" from Standard Peripherals Library will be installed as stm32f10x_misc.h / stm32f4xx_misc.h
 
