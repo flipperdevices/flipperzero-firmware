@@ -19,6 +19,7 @@ systems.
 * ``RMC`` (Recommended Minimum: position, velocity, time)
 * ``GGA`` (Fix Data)
 * ``GSA`` (DOP and active satellites)
+* ``GLL`` (Geographic Position -- Latitude/Longitude)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 

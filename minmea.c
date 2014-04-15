@@ -287,6 +287,8 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence)
         return MINMEA_SENTENCE_GGA;
     if (!strcmp(type+2, "GSA"))
         return MINMEA_SENTENCE_GSA;
+    if (!strcmp(type+2, "GLL"))
+        return MINMEA_SENTENCE_GLL;
 
     return MINMEA_UNKNOWN;
 }
@@ -381,6 +383,30 @@ bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence)
     }
     if (strcmp(type+2, "GSA"))
         return false;
+
+    return true;
+}
+
+bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence)
+{
+    // $GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41$;
+    char type[6];
+    int latitude_direction;
+    int longitude_direction;
+
+    if (!minmea_scan(sentence, "tfdfdTcc",
+            type,
+            &frame->latitude, &frame->latitude_scale, &latitude_direction,
+            &frame->longitude, &frame->longitude_scale, &longitude_direction,
+            &frame->time,
+            &frame->status,
+            &frame->mode))
+        return false;
+    if (strcmp(type+2, "GLL"))
+        return false;
+
+    frame->latitude *= latitude_direction;
+    frame->longitude *= longitude_direction;
 
     return true;
 }
