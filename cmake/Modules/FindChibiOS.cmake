@@ -175,23 +175,6 @@ IF(STM32_FAMILY STREQUAL "F4")
         STM32/OTGv1
     )
     
-    SET(INDEX 0)
-    FOREACH(module ${CHIBIOS_HAL_LLD_MODULES})
-        LIST(GET CHIBIOS_HAL_PLATFORM_MODULE_PATHES ${INDEX} path)
-        
-        SET(CHIBIOS_${module}_PLATFORM_SEARCH_PATH ${CHIBIOS_ROOT}/os/hal/platforms/${path})
-        SET(CHIBIOS_${module}_PLATFORM_SEARCH_HEADERS ${module}_lld.h)
-        SET(CHIBIOS_${module}_PLATFORM_SOURCES ${module}_lld.c)
-        
-        IF(${module} STREQUAL ext)
-           SET(CHIBIOS_${module}_PLATFORM_SEARCH_HEADERS ${CHIBIOS_ext_PLATFORM_SEARCH_HEADERS} ext_lld_isr.h)
-           SET(CHIBIOS_${module}_PLATFORM_SEARCH_PATH ${CHIBIOS_ext_PLATFORM_SEARCH_PATH} ${CHIBIOS_ROOT}/os/hal/platforms/STM32F4xx)
-           SET(CHIBIOS_${module}_PLATFORM_SOURCES ${CHIBIOS_ext_PLATFORM_SOURCES} ext_lld_isr.c)
-        ENDIF()
-        
-        MATH(EXPR INDEX "${INDEX} + 1")
-    ENDFOREACH()
-        
     IF(NOT ChibiOS_LINKER_SCRIPT)
         IF(NOT STM32_CHIP_TYPE)
             STM32_GET_CHIP_TYPE(${STM32_CHIP} STM32_CHIP_TYPE)
@@ -213,7 +196,105 @@ IF(STM32_FAMILY STREQUAL "F4")
             MESSAGE(STATUS "ChibiOS doesn't have linker script for your chip, please specify it directly using ChibiOS_LINKER_SCRIPT variable.")
         ENDIF()
     ENDIF()
+    
+    SET(CHIBIOS_${module}_PLATFORM_SEARCH_PATH ${CHIBIOS_ext_PLATFORM_SEARCH_PATH} ${CHIBIOS_ROOT}/os/hal/platforms/STM32F4xx)
+    
+ELSEIF(STM32_FAMILY STREQUAL "F1")
+    
+    SET(CHIBIOS_kernel_PLATFORM_SEARCH_PATH 
+        ${CHIBIOS_ROOT}/os/ports/common/ARMCMx/CMSIS/include
+        ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx
+    )
+    SET(CHIBIOS_kernel_PLATFORM_SOURCES
+        vectors.c
+    ) 
+    SET(CHIBIOS_kernel_PLATFORM_SEARCH_HEADERS
+        core_cm3.h
+        cmparams.h
+    )
+    
+    SET(CHIBIOS_hal_PLATFORM_SEARCH_PATH 
+        ${CHIBIOS_ROOT}/os/hal/platforms/STM32F1xx
+        ${CHIBIOS_ROOT}/os/hal/platforms/STM32
+    )
+    SET(CHIBIOS_hal_PLATFORM_SEARCH_HEADERS
+        hal_lld.h
+        stm32.h
+        stm32f10x.h
+    )
+    SET(CHIBIOS_hal_PLATFORM_SOURCES  
+        hal_lld.c
+        stm32_dma.c
+    )
+    
+    SET(CHIBIOS_HAL_PLATFORM_MODULE_PATHES
+        STM32F1xx
+        STM32
+        STM32
+        STM32/TIMv1
+        STM32/I2Cv1
+        STM32/TIMv1
+        STM32
+        STM32/GPIOv1
+        STM32/TIMv1
+        STM32/RTCv1
+        STM32
+        STM32/USARTv1
+        STM32/SPIv1
+        STM32/USARTv1
+        STM32/USBv1
+    )
+            
+    IF(NOT ChibiOS_LINKER_SCRIPT)
+        IF(NOT STM32_CHIP_TYPE)
+            STM32_GET_CHIP_TYPE(${STM32_CHIP} STM32_CHIP_TYPE)
+        ENDIF()
+        IF(NOT STM32_FLASH_SIZE)
+            STM32_GET_CHIP_PARAMETERS(${STM32_CHIP} STM32_FLASH_SIZE STM32_RAM_SIZE)
+        ENDIF()
+        IF(${STM32_CHIP_TYPE} STREQUAL MD_VL)
+            IF(${STM32_FLASH_SIZE} STREQUAL 128K)
+                FIND_FILE(ChibiOS_LINKER_SCRIPT NAMES STM32F100xB.ld PATHS ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx/ld NO_DEFAULT_PATH CMAKE_FIND_ROOT_PATH_BOTH)
+            ENDIF()
+        ELSEIF(${STM32_CHIP_TYPE} STREQUAL MD)
+            IF(${STM32_FLASH_SIZE} STREQUAL 128K)
+                FIND_FILE(ChibiOS_LINKER_SCRIPT NAMES STM32F103xB.ld PATHS ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx/ld NO_DEFAULT_PATH CMAKE_FIND_ROOT_PATH_BOTH)
+            ENDIF()
+        ELSEIF(${STM32_CHIP_TYPE} STREQUAL HD)
+            IF(${STM32_FLASH_SIZE} STREQUAL 384K)
+                FIND_FILE(ChibiOS_LINKER_SCRIPT NAMES STM32F103xD.ld PATHS ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx/ld NO_DEFAULT_PATH CMAKE_FIND_ROOT_PATH_BOTH)
+            ELSEIF(${STM32_FLASH_SIZE} STREQUAL 512K)
+                FIND_FILE(ChibiOS_LINKER_SCRIPT NAMES STM32F103xE.ld PATHS ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx/ld NO_DEFAULT_PATH CMAKE_FIND_ROOT_PATH_BOTH)
+            ENDIF()
+        ELSEIF(${STM32_CHIP_TYPE} STREQUAL XL)
+            IF(${STM32_FLASH_SIZE} STREQUAL 1024K)
+                FIND_FILE(ChibiOS_LINKER_SCRIPT NAMES STM32F103xG.ld PATHS ${CHIBIOS_ROOT}/os/ports/GCC/ARMCMx/STM32F1xx/ld NO_DEFAULT_PATH CMAKE_FIND_ROOT_PATH_BOTH)
+            ENDIF()
+        ENDIF()
+    ENDIF()            
+    
+    SET(CHIBIOS_${module}_PLATFORM_SEARCH_PATH ${CHIBIOS_ext_PLATFORM_SEARCH_PATH} ${CHIBIOS_ROOT}/os/hal/platforms/STM32F1xx)
 ENDIF()
+
+IF(NOT ChibiOS_LINKER_SCRIPT)
+    MESSAGE(STATUS "ChibiOS doesn't have linker script for your chip, please specify it directly using ChibiOS_LINKER_SCRIPT variable.")
+ENDIF()
+
+SET(INDEX 0)
+FOREACH(module ${CHIBIOS_HAL_LLD_MODULES})
+    LIST(GET CHIBIOS_HAL_PLATFORM_MODULE_PATHES ${INDEX} path)
+        
+    SET(CHIBIOS_${module}_PLATFORM_SEARCH_PATH ${CHIBIOS_ROOT}/os/hal/platforms/${path})
+    SET(CHIBIOS_${module}_PLATFORM_SEARCH_HEADERS ${module}_lld.h)
+    SET(CHIBIOS_${module}_PLATFORM_SOURCES ${module}_lld.c)
+        
+    IF(${module} STREQUAL ext)
+       SET(CHIBIOS_${module}_PLATFORM_SEARCH_HEADERS ${CHIBIOS_ext_PLATFORM_SEARCH_HEADERS} ext_lld_isr.h)
+       SET(CHIBIOS_${module}_PLATFORM_SOURCES ${CHIBIOS_ext_PLATFORM_SOURCES} ext_lld_isr.c)
+    ENDIF()
+        
+    MATH(EXPR INDEX "${INDEX} + 1")
+ENDFOREACH()
 
 FOREACH(comp ${ChibiOS_FIND_COMPONENTS}) 
     LIST(FIND CHIBIOS_COMPONENTS ${comp} INDEX)
