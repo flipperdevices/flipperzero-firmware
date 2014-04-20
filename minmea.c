@@ -287,6 +287,8 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence)
         return MINMEA_SENTENCE_GGA;
     if (!strcmp(type+2, "GSA"))
         return MINMEA_SENTENCE_GSA;
+	if (!strcmp(type+2,"GST"))
+		return MINMEA_SENTENCE_GST;
 
     return MINMEA_UNKNOWN;
 }
@@ -384,6 +386,29 @@ bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence)
 
     return true;
 }
+
+bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence)
+{
+    // $GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58
+    char type[6];
+
+    if (!minmea_scan(sentence, "tTfffffff",
+            type,
+            &frame->time,
+            &frame->RMS_deviation,&frame->RMS_deviation_scale,
+			&frame->semi_major_sd,&frame->semi_major_sd_scale,
+            &frame->semi_minor_sd,&frame->semi_minor_sd_scale,
+            &frame->semi_major_orientation,&frame->semi_major_orientation_scale,
+            &frame->lattitude_error_deviation,&frame->lattitude_error_deviation_scale,
+            &frame->longitude_error_deviation,&frame->longitude_error_deviation_scale,
+            &frame->altitude_error_deviation,&frame->altitude_error_deviation_scale))
+        return false;
+    if (strcmp(type+2, "GST"))
+        return false;
+
+    return true;
+}
+
 
 int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time)
 {

@@ -29,6 +29,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_RMC,
     MINMEA_SENTENCE_GGA,
     MINMEA_SENTENCE_GSA,
+	MINMEA_SENTENCE_GST
 };
 
 struct minmea_date {
@@ -65,6 +66,17 @@ struct minmea_sentence_gga {
     int altitude, altitude_scale; char altitude_units;
     int height, height_scale; char height_units;
     int dgps_age;
+};
+
+struct minmea_sentence_gst {
+struct minmea_time time;
+int RMS_deviation, RMS_deviation_scale;
+int semi_major_sd, semi_major_sd_scale;
+int semi_minor_sd, semi_minor_sd_scale;
+int semi_major_orientation, semi_major_orientation_scale;
+int lattitude_error_deviation, lattitude_error_deviation_scale;
+int longitude_error_deviation, longitude_error_deviation_scale;
+int altitude_error_deviation, altitude_error_deviation_scale;
 };
 
 enum minmea_gsa_mode {
@@ -121,6 +133,7 @@ bool minmea_scan(const char *sentence, const char *format, ...);
 bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
 bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
 bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
+bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence);
 
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.
