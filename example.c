@@ -42,7 +42,24 @@ int main()
                     printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
                 }
             } break;
-
+            case MINMEA_SENTENCE_GST: {
+                struct minmea_sentence_gst frame;
+                if (minmea_parse_gst(&frame, line)) {
+                    printf("+++ raw lattitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/d)\n",
+                            frame.lattitude_error_deviation, frame.lattitude_error_deviation_scale,
+                            frame.longitude_error_deviation, frame.longitude_error_deviation_scale,
+                            frame.altitude_error_deviation, frame.altitude_error_deviation_scale);
+                    printf("+++ fixed point lattitude,longitude and altitude error deviation \
+                           scaled to three decimal places: (%d,%d,%d)\n",
+                            minmea_rescale(frame.lattitude_error_deviation, frame.lattitude_error_deviation_scale,1000),
+                            minmea_rescale(frame.longitude_error_deviation, frame.longitude_error_deviation_scale,1000),
+                            minmea_rescale(frame.altitude_error_deviation, frame.altitude_error_deviation_scale,1000));
+                    printf("+++ floating point degree lattitude,longitude and altitude error deviation: (%f,%f,%f)",
+                            minmea_coord(frame.lattitude_error_deviation, frame.lattitude_error_deviation_scale),
+                            minmea_coord(frame.longitude_error_deviation, frame.longitude_error_deviation_scale),
+                            minmea_coord(frame.altitude_error_deviation, frame.altitude_error_deviation_scale));
+                }
+            } break;
             default: {
             } break;
         }
