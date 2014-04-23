@@ -29,7 +29,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_RMC,
     MINMEA_SENTENCE_GGA,
     MINMEA_SENTENCE_GSA,
-    MINMEA_SENTENCE_GST
+    MINMEA_SENTENCE_GST,
 };
 
 struct minmea_date {
@@ -74,7 +74,7 @@ struct minmea_sentence_gst {
     int semi_major_deviation, semi_major_deviation_scale;
     int semi_minor_deviation, semi_minor_deviation_scale;
     int semi_major_orientation, semi_major_orientation_scale;
-    int lattitude_error_deviation, lattitude_error_deviation_scale;
+    int latitude_error_deviation, latitude_error_deviation_scale;
     int longitude_error_deviation, longitude_error_deviation_scale;
     int altitude_error_deviation, altitude_error_deviation_scale;
 };

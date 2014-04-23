@@ -32,6 +32,7 @@ static const char *valid_sequences[] = {
     "$GPGLL,5106.94086,N,01701.51680,E,123204.00,A,A*63",
     "$GPRMC,123205.00,A,5106.94085,N,01701.51689,E,0.016,,280214,,,A*7B",
     "$GPVTG,,T,,M,0.016,N,0.030,K,A*27",
+    "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58".
     NULL,
 };
 
@@ -284,6 +285,50 @@ START_TEST(test_minmea_scan_complex2)
 }
 END_TEST
 
+START_TEST(test_minmea_scan_complex3)
+{
+    const char *sentence = "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58";
+    char type[6];
+    struct minmea_time time;
+    int rms_deviation, rms_deviation_scale;
+    int semi_major_deviation, semi_major_deviation_scale;
+    int semi_minor_deviation, semi_minor_deviation_scale;
+    int semi_major_orientation, semi_major_orientation_scale;
+    int latitude_error_deviation, latitude_error_deviation_scale;
+    int longitude_error_deviation, longitude_error_deviation_scale;
+    int altitude_error_deviation, altitude_error_deviation_scale;
+    ck_assert(minmea_scan(sentence, "tTfffffff",
+        type,
+        &time,
+        &rms_deviation, &rms_deviation_scale,
+        &semi_major_deviation, &semi_major_deviation_scale,
+        &semi_minor_deviation, &semi_minor_deviation_scale,
+        &semi_major_orientation, &semi_major_orientation_scale,
+        &latitude_error_deviation, &latitude_error_deviation_scale,
+        &longitude_error_deviation, &longitude_error_deviation_scale,
+        &altitude_error_deviation, &altitude_error_deviation_scale) == true);
+    ck_assert_str_eq(type, "GPGST");
+    ck_assert_int_eq(time.hours, 2);
+    ck_assert_int_eq(time.minutes, 46);
+    ck_assert_int_eq(time.seconds, 3);
+    ck_assert_int_eq(time.microseconds, 0);
+    ck_assert_int_eq(rms_deviation, 32);
+    ck_assert_int_eq(rms_deviation_scale, 10);
+    ck_assert_int_eq(semi_major_deviation, 66);
+    ck_assert_int_eq(semi_major_deviation_scale, 10);
+    ck_assert_int_eq(semi_minor_deviation, 47);
+    ck_assert_int_eq(semi_minor_deviation_scale, 10);
+    ck_assert_int_eq(semi_major_orientation, 473);
+    ck_assert_int_eq(semi_major_orientation_scale, 10);
+    ck_assert_int_eq(latitude_error_deviation, 58);
+    ck_assert_int_eq(latitude_error_deviation, 10);
+    ck_assert_int_eq(longitude_error_deviation, 56);
+    ck_assert_int_eq(longitude_error_deviation, 10);
+    ck_assert_int_eq(altitude_error_deviation, 220);
+    ck_assert_int_eq(altitude_error_deviation_scale,10);
+}
+END_TEST
+
 START_TEST(test_minmea_parse_rmc1)
 {
     const char *sentence = "$GPRMC,081836.75,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E";
@@ -356,6 +401,33 @@ START_TEST(test_minmea_parse_gga1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gst1)
+{
+    const char *sentence = "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58";
+    struct minmea_sentence_gst frame = {};
+    struct minmea_sentence_gst expected = {
+        .time = { 2, 46, 3, 0 },
+        .rms_deviation = 32,
+        .rms_deviation_scale = 10,
+        .semi_major_deviation = 66,
+        .semi_major_deviation_scale = 10,
+        .semi_minor_deviation = 47,
+        .semi_minor_deviation_scale = 10,
+        .semi_major_orientation = 473,
+        .semi_major_orientation_scale = 10,
+        .latitude_error_deviation = 58,
+        .latitude_error_deviation_scale = 10,
+        .longitude_error_deviation = 56,
+        .longitude_error_deviation_scale = 10,
+        .altitude_error_deviation = 220,
+        .altitude_error_deviation_scale = 10,
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gst(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_parse_gsa1)
 {
     const char *sentence = "$GPGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1*39";
@@ -383,6 +455,7 @@ START_TEST(test_minmea_usage1)
         "$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62",
         "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47",
         "$GNGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1",
+        "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58",
         NULL,
     };
 
@@ -392,17 +465,21 @@ START_TEST(test_minmea_usage1)
                 struct minmea_sentence_rmc frame;
                 ck_assert(minmea_parse_rmc(&frame, *sentence) == true);
             } break;
-            
+
             case MINMEA_SENTENCE_GGA: {
                 struct minmea_sentence_gga frame;
                 ck_assert(minmea_parse_gga(&frame, *sentence) == true);
             } break;
-            
+
             case MINMEA_SENTENCE_GSA: {
                 struct minmea_sentence_gsa frame;
                 ck_assert(minmea_parse_gsa(&frame, *sentence) == true);
             } break;
 
+            case MINMEA_SENTENCE_GST: {
+                struct minmea_sentence_gst frame;
+                ck_assert(minmea_parse_gst(&frame, *sentence) == true);
+            } break;
 
             default: {
             } break;
@@ -473,7 +550,7 @@ END_TEST
 Suite *minmea_suite(void)
 {
     Suite *s = suite_create ("minmea");
-  
+
     TCase *tc_check = tcase_create("minmea_check");
     tcase_add_test(tc_check, test_minmea_check);
     suite_add_tcase(s, tc_check);
@@ -489,7 +566,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_scan, test_minmea_scan_complex1);
     tcase_add_test(tc_scan, test_minmea_scan_complex2);
     suite_add_tcase(s, tc_scan);
-  
+
     TCase *tc_parse = tcase_create("minmea_parse");
     tcase_add_test(tc_parse, test_minmea_parse_rmc1);
     tcase_add_test(tc_parse, test_minmea_parse_rmc2);

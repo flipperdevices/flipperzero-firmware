@@ -287,7 +287,7 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence)
         return MINMEA_SENTENCE_GGA;
     if (!strcmp(type+2, "GSA"))
         return MINMEA_SENTENCE_GSA;
-    if (!strcmp(type+2,"GST"))
+    if (!strcmp(type+2, "GST"))
         return MINMEA_SENTENCE_GST;
 
     return MINMEA_UNKNOWN;
@@ -395,13 +395,13 @@ bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence)
     if (!minmea_scan(sentence, "tTfffffff",
             type,
             &frame->time,
-            &frame->rms_deviation,&frame->rms_deviation_scale,
-            &frame->semi_major_deviation,&frame->semi_major_deviation_scale,
-            &frame->semi_minor_deviation,&frame->semi_minor_deviation_scale,
-            &frame->semi_major_orientation,&frame->semi_major_orientation_scale,
-            &frame->lattitude_error_deviation,&frame->lattitude_error_deviation_scale,
-            &frame->longitude_error_deviation,&frame->longitude_error_deviation_scale,
-            &frame->altitude_error_deviation,&frame->altitude_error_deviation_scale))
+            &frame->rms_deviation, &frame->rms_deviation_scale,
+            &frame->semi_major_deviation, &frame->semi_major_deviation_scale,
+            &frame->semi_minor_deviation, &frame->semi_minor_deviation_scale,
+            &frame->semi_major_orientation, &frame->semi_major_orientation_scale,
+            &frame->latitude_error_deviation, &frame->latitude_error_deviation_scale,
+            &frame->longitude_error_deviation, &frame->longitude_error_deviation_scale,
+            &frame->altitude_error_deviation, &frame->altitude_error_deviation_scale))
         return false;
     if (strcmp(type+2, "GST"))
         return false;
