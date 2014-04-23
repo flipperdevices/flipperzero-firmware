@@ -287,6 +287,8 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence)
         return MINMEA_SENTENCE_GGA;
     if (!strcmp(type+2, "GSA"))
         return MINMEA_SENTENCE_GSA;
+    if (!strcmp(type+2, "GSV"))
+        return MINMEA_SENTENCE_GSV;
 
     return MINMEA_UNKNOWN;
 }
@@ -380,6 +382,41 @@ bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence)
         return false;
     }
     if (strcmp(type+2, "GSA"))
+        return false;
+
+    return true;
+}
+
+bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence)
+{
+    // $GPGSV,3,1,11,03,03,111,00,04,15,270,00,06,01,010,00,13,06,292,00*74
+    char type[6];
+
+    if (!minmea_scan(sentence, "tiiiiiiiiiiiiiiiiiii",
+            type,
+            &frame->total_msgs,
+            &frame->msg_nr,
+            &frame->total_sats,
+            &frame->sats[0].nr,
+            &frame->sats[0].elevation,
+            &frame->sats[0].azimuth,
+            &frame->sats[0].snr,
+            &frame->sats[1].nr,
+            &frame->sats[1].elevation,
+            &frame->sats[1].azimuth,
+            &frame->sats[1].snr,
+            &frame->sats[2].nr,
+            &frame->sats[2].elevation,
+            &frame->sats[2].azimuth,
+            &frame->sats[2].snr,
+            &frame->sats[3].nr,
+            &frame->sats[3].elevation,
+            &frame->sats[3].azimuth,
+            &frame->sats[3].snr
+            )) {
+        return false;
+    }
+    if (strcmp(type+2, "GSV"))
         return false;
 
     return true;
