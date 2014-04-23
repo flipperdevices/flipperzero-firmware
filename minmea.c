@@ -72,27 +72,45 @@ static inline bool minmea_isfield(char c) {
 bool minmea_scan(const char *sentence, const char *format, ...)
 {
     bool result = false;
+    bool optional = false;
     va_list ap;
     va_start(ap, format);
 
     const char *field = sentence;
 #define next_field() \
     do { \
-        while (minmea_isfield(*sentence++)) {} \
-        field = sentence; \
+        /* Progress to the next field. */ \
+        while (minmea_isfield(*sentence)) \
+            sentence++; \
+        /* Make sure there is a field there. */ \
+        if (*sentence == ',') { \
+            sentence++; \
+            field = sentence; \
+        } else { \
+            field = NULL; \
+        } \
     } while (0)
 
     while (*format) {
         char type = *format++;
 
+        if (type == ';') {
+            // All further fields are optional.
+            optional = true;
+            continue;
+        }
+
+        if (!field && !optional) {
+            // Field requested but we ran out if input. Bail out.
+            goto parse_error;
+        }
+
         switch (type) {
             case 'c': { // Single character field (char).
                 char value = '\0';
 
-                if (minmea_isfield(*field))
+                if (field && minmea_isfield(*field))
                     value = *field;
-                else
-                    value = '\0';
 
                 *va_arg(ap, char *) = value;
             } break;
@@ -100,7 +118,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
             case 'd': { // Single character direction field (int).
                 int value = 0;
 
-                if (minmea_isfield(*field)) {
+                if (field && minmea_isfield(*field)) {
                     switch (*field) {
                         case 'N':
                         case 'E':
@@ -111,7 +129,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                             value = -1;
                             break;
                         default:
-                            goto end;
+                            goto parse_error;
                     }
                 }
 
@@ -123,27 +141,29 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 int value = -1;
                 int scale = 0;
 
-                while (minmea_isfield(*field)) {
-                    if (*field == '+' && !sign && value == -1) {
-                        sign = 1;
-                    } else if (*field == '-' && !sign && value == -1) {
-                        sign = -1;
-                    } else if (isdigit((unsigned char) *field)) {
-                        if (value == -1)
-                            value = 0;
-                        value = (10 * value) + (*field - '0');
-                        if (scale)
-                            scale *= 10;
-                    } else if (*field == '.' && scale == 0) {
-                        scale = 1;
-                    } else {
-                        goto end;
+                if (field) {
+                    while (minmea_isfield(*field)) {
+                        if (*field == '+' && !sign && value == -1) {
+                            sign = 1;
+                        } else if (*field == '-' && !sign && value == -1) {
+                            sign = -1;
+                        } else if (isdigit((unsigned char) *field)) {
+                            if (value == -1)
+                                value = 0;
+                            value = (10 * value) + (*field - '0');
+                            if (scale)
+                                scale *= 10;
+                        } else if (*field == '.' && scale == 0) {
+                            scale = 1;
+                        } else {
+                            goto parse_error;
+                        }
+                        field++;
                     }
-                    field++;
                 }
 
                 if ((sign || scale) && value == -1)
-                    goto end;
+                    goto parse_error;
 
                 if (value == -1) {
                     value = 0;
@@ -157,12 +177,14 @@ bool minmea_scan(const char *sentence, const char *format, ...)
             } break;
 
             case 'i': { // Integer value, default 0 (int).
-                int value;
+                int value = 0;
 
-                char *endptr;
-                value = strtol(field, &endptr, 10);
-                if (minmea_isfield(*endptr))
-                    goto end;
+                if (field) {
+                    char *endptr;
+                    value = strtol(field, &endptr, 10);
+                    if (minmea_isfield(*endptr))
+                        goto parse_error;
+                }
 
                 *va_arg(ap, int *) = value;
             } break;
@@ -170,17 +192,24 @@ bool minmea_scan(const char *sentence, const char *format, ...)
             case 's': { // String value (char *).
                 char *buf = va_arg(ap, char *);
 
-                while (minmea_isfield(*field))
-                    *buf++ = *field++;
+                if (field) {
+                    while (minmea_isfield(*field))
+                        *buf++ = *field++;
+                }
+
                 *buf = '\0';
             } break;
 
             case 't': { // NMEA talker+sentence identifier (char *).
+                // This field is always mandatory.
+                if (!field)
+                    goto parse_error;
+
                 if (field[0] != '$')
-                    goto end;
+                    goto parse_error;
                 for (int i=0; i<5; i++)
                     if (!minmea_isfield(field[1+i]))
-                        goto end;
+                        goto parse_error;
 
                 char *buf = va_arg(ap, char *);
                 memcpy(buf, field+1, 5);
@@ -191,16 +220,18 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 struct minmea_date *date = va_arg(ap, struct minmea_date *);
 
                 int d = -1, m = -1, y = -1;
-                // Always six digits.
-                for (int i=0; i<6; i++)
-                    if (!isdigit((unsigned char) field[i]))
-                        goto end_D;
 
-                d = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
-                m = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
-                y = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
+                if (field && minmea_isfield(*field)) {
+                    // Always six digits.
+                    for (int i=0; i<6; i++)
+                        if (!isdigit((unsigned char) field[i]))
+                            goto parse_error;
 
-            end_D:
+                    d = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
+                    m = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
+                    y = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
+                }
+
                 date->day = d;
                 date->month = m;
                 date->year = y;
@@ -210,30 +241,32 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 struct minmea_time *time = va_arg(ap, struct minmea_time *);
 
                 int h = -1, i = -1, s = -1, u = -1;
-                // Minimum required: integer time.
-                for (int i=0; i<6; i++)
-                    if (!isdigit((unsigned char) field[i]))
-                        goto end_T;
 
-                h = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
-                i = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
-                s = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
-                field += 6;
+                if (field && minmea_isfield(*field)) {
+                    // Minimum required: integer time.
+                    for (int i=0; i<6; i++)
+                        if (!isdigit((unsigned char) field[i]))
+                            goto parse_error;
 
-                // Extra: fractional time. Saved as microseconds.
-                if (*field++ == '.') {
-                    int value = 0;
-                    int scale = 1000000;
-                    while (isdigit((unsigned char) *field) && scale > 1) {
-                        value = (value * 10) + (*field++ - '0');
-                        scale /= 10;
+                    h = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
+                    i = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
+                    s = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
+                    field += 6;
+
+                    // Extra: fractional time. Saved as microseconds.
+                    if (*field++ == '.') {
+                        int value = 0;
+                        int scale = 1000000;
+                        while (isdigit((unsigned char) *field) && scale > 1) {
+                            value = (value * 10) + (*field++ - '0');
+                            scale /= 10;
+                        }
+                        u = value * scale;
+                    } else {
+                        u = 0;
                     }
-                    u = value * scale;
-                } else {
-                    u = 0;
                 }
 
-            end_T:
                 time->hours = h;
                 time->minutes = i;
                 time->seconds = s;
@@ -244,17 +277,16 @@ bool minmea_scan(const char *sentence, const char *format, ...)
             } break;
 
             default: { // Unknown.
-                goto end;
+                goto parse_error;
             } break;
         }
 
-        // Advance to next field.
         next_field();
     }
 
     result = true;
 
-end:
+parse_error:
     va_end(ap);
     return result;
 }

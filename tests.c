@@ -61,7 +61,7 @@ END_TEST
 
 START_TEST(test_minmea_scan_c)
 {
-    char ch;
+    char ch, extra;
 
     ck_assert(minmea_scan("A,123.45", "c", &ch) == true);
     ck_assert_int_eq(ch, 'A');
@@ -71,6 +71,19 @@ START_TEST(test_minmea_scan_c)
 
     ck_assert(minmea_scan(",123.45", "c", &ch) == true);
     ck_assert_int_eq(ch, '\0');
+
+    ck_assert(minmea_scan("A,B", "cc", &ch, &extra) == true);
+    ck_assert_int_eq(ch, 'A');
+    ck_assert_int_eq(extra, 'B');
+
+    ck_assert(minmea_scan("C", "cc", &ch, &extra) == false);
+
+    ck_assert(minmea_scan("D", "c;c", &ch, &extra) == true);
+    ck_assert_int_eq(ch, 'D');
+    ck_assert_int_eq(extra, '\0');
+    ck_assert(minmea_scan("E,F", "c;c", &ch, &extra) == true);
+    ck_assert_int_eq(ch, 'E');
+    ck_assert_int_eq(extra, 'F');
 }
 END_TEST
 
@@ -131,6 +144,45 @@ START_TEST(test_minmea_scan_f)
     ck_assert(minmea_scan("-18000.00000", "f", &value, &scale) == true);
     ck_assert_int_eq(value, -1800000000);
     ck_assert_int_eq(scale, 100000);
+
+    /* optional values */
+    ck_assert(minmea_scan("foo", "_;f", &value, &scale) == true);
+    ck_assert_int_eq(scale, 0);
+    ck_assert(minmea_scan("foo,", "_;f", &value, &scale) == true);
+    ck_assert_int_eq(scale, 0);
+    ck_assert(minmea_scan("foo,12.3", "_;f", &value, &scale) == true);
+    ck_assert_int_eq(value, 123);
+    ck_assert_int_eq(scale, 10);
+}
+END_TEST
+
+START_TEST(test_minmea_scan_i)
+{
+    int value, extra;
+
+    // valid parses
+    ck_assert(minmea_scan("14", "i", &value) == true);
+    ck_assert_int_eq(value, 14);
+    ck_assert(minmea_scan("-1234", "i", &value) == true);
+    ck_assert_int_eq(value, -1234);
+
+    // empty field
+    ck_assert(minmea_scan("", "i", &value) == true);
+    ck_assert_int_eq(value, 0);
+
+    // invalid value
+    ck_assert(minmea_scan("foo", "i", &value) == false);
+
+    // missing field
+    ck_assert(minmea_scan("41", "ii", &value, &extra) == false);
+
+    /* optional values */
+    ck_assert(minmea_scan("10", "i;i", &value, &extra) == true);
+    ck_assert_int_eq(value, 10);
+    ck_assert(minmea_scan("20,30", "i;i", &value, &extra) == true);
+    ck_assert_int_eq(value, 20);
+    ck_assert_int_eq(extra, 30);
+    ck_assert(minmea_scan("42,foo", "i;i", &value, &extra) == false);
 }
 END_TEST
 
@@ -138,9 +190,16 @@ START_TEST(test_minmea_scan_s)
 {
     char value[MINMEA_MAX_LENGTH];
 
+    ck_assert(minmea_scan(",bar,baz", "s", value) == true);
+    ck_assert_str_eq(value, "");
     ck_assert(minmea_scan("foo,bar,baz", "s", value) == true);
     ck_assert_str_eq(value, "foo");
-    ck_assert(minmea_scan(",bar,baz", "s", value) == true);
+
+    ck_assert(minmea_scan("dummy", "_;s", value) == true);
+    ck_assert_str_eq(value, "");
+    ck_assert(minmea_scan("dummy,foo", "_;s", value) == true);
+    ck_assert_str_eq(value, "foo");
+    ck_assert(minmea_scan("dummy,", "_;s", value) == true);
     ck_assert_str_eq(value, "");
 }
 END_TEST
@@ -164,6 +223,9 @@ START_TEST(test_minmea_scan_D)
 {
     struct minmea_date date;
 
+    ck_assert(minmea_scan("$GPXXX,3112", "_D", &date) == false);
+    ck_assert(minmea_scan("$GPXXX,foobar", "_D", &date) == false);
+
     ck_assert(minmea_scan("$GPXXX,311299", "_D", &date) == true);
     ck_assert_int_eq(date.day, 31);
     ck_assert_int_eq(date.month, 12);
@@ -179,6 +241,9 @@ END_TEST
 START_TEST(test_minmea_scan_T)
 {
     struct minmea_time time;
+
+    ck_assert(minmea_scan("$GPXXX,2359", "_T", &time) == false);
+    ck_assert(minmea_scan("$GPXXX,foobar", "_T", &time) == false);
 
     ck_assert(minmea_scan("$GPXXX,235960", "_T", &time) == true);
     ck_assert_int_eq(time.hours, 23);
@@ -482,6 +547,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_scan, test_minmea_scan_c);
     tcase_add_test(tc_scan, test_minmea_scan_d);
     tcase_add_test(tc_scan, test_minmea_scan_f);
+    tcase_add_test(tc_scan, test_minmea_scan_i);
     tcase_add_test(tc_scan, test_minmea_scan_s);
     tcase_add_test(tc_scan, test_minmea_scan_t);
     tcase_add_test(tc_scan, test_minmea_scan_D);
