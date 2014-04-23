@@ -42,6 +42,7 @@ int main()
                     printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
                 }
             } break;
+
             case MINMEA_SENTENCE_GST: {
                 struct minmea_sentence_gst frame;
                 if (minmea_parse_gst(&frame, line)) {
