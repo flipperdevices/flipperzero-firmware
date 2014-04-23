@@ -43,6 +43,20 @@ int main()
                 }
             } break;
 
+            case MINMEA_SENTENCE_GSV: {
+                struct minmea_sentence_gsv frame;
+                if (minmea_parse_gsv(&frame, line)) {
+                    printf("$GPGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
+                    printf("$GPGSV: sattelites in view: %d\n", frame.total_sats);
+                    for (int i = 0; i < 4; i++)
+                        printf("$GPGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
+                            frame.sats[i].nr,
+                            frame.sats[i].elevation,
+                            frame.sats[i].azimuth,
+                            frame.sats[i].snr);
+                }
+            } break;
+
             default: {
             } break;
         }
