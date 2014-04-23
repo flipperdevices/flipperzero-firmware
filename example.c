@@ -61,6 +61,7 @@ int main()
                             minmea_coord(frame.altitude_error_deviation, frame.altitude_error_deviation_scale));
                 }
             } break;
+
             default: {
             } break;
         }
