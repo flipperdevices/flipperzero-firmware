@@ -19,6 +19,7 @@ systems.
 * ``RMC`` (Recommended Minimum: position, velocity, time)
 * ``GGA`` (Fix Data)
 * ``GSA`` (DOP and active satellites)
+* ``GST`` (Pseudorange Noise Statistics)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
