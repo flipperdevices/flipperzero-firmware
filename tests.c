@@ -34,7 +34,7 @@ static const char *valid_sequences[] = {
     "$GPGLL,5106.94086,N,01701.51680,E,123204.00,A,A*63",
     "$GPRMC,123205.00,A,5106.94085,N,01701.51689,E,0.016,,280214,,,A*7B",
     "$GPVTG,,T,,M,0.016,N,0.030,K,A*27",
-    "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58".
+    "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58",
     NULL,
 };
 
@@ -388,9 +388,9 @@ START_TEST(test_minmea_scan_complex3)
     ck_assert_int_eq(semi_major_orientation, 473);
     ck_assert_int_eq(semi_major_orientation_scale, 10);
     ck_assert_int_eq(latitude_error_deviation, 58);
-    ck_assert_int_eq(latitude_error_deviation, 10);
+    ck_assert_int_eq(latitude_error_deviation_scale, 10);
     ck_assert_int_eq(longitude_error_deviation, 56);
-    ck_assert_int_eq(longitude_error_deviation, 10);
+    ck_assert_int_eq(longitude_error_deviation_scale, 10);
     ck_assert_int_eq(altitude_error_deviation, 220);
     ck_assert_int_eq(altitude_error_deviation_scale,10);
 }
@@ -633,6 +633,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_scan, test_minmea_scan_T);
     tcase_add_test(tc_scan, test_minmea_scan_complex1);
     tcase_add_test(tc_scan, test_minmea_scan_complex2);
+    tcase_add_test(tc_scan, test_minmea_scan_complex3);
     suite_add_tcase(s, tc_scan);
 
     TCase *tc_parse = tcase_create("minmea_parse");
@@ -640,6 +641,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_rmc2);
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
     tcase_add_test(tc_parse, test_minmea_parse_gsa1);
+    tcase_add_test(tc_parse, test_minmea_parse_gst1);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
