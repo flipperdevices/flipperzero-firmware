@@ -46,7 +46,7 @@ int main()
             case MINMEA_SENTENCE_GST: {
                 struct minmea_sentence_gst frame;
                 if (minmea_parse_gst(&frame, line)) {
-                    printf("+++ raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/d)\n",
+                    printf("+++ raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/%d)\n",
                             frame.latitude_error_deviation, frame.latitude_error_deviation_scale,
                             frame.longitude_error_deviation, frame.longitude_error_deviation_scale,
                             frame.altitude_error_deviation, frame.altitude_error_deviation_scale);
