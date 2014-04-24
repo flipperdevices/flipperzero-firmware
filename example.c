@@ -43,6 +43,25 @@ int main()
                 }
             } break;
 
+            case MINMEA_SENTENCE_GST: {
+                struct minmea_sentence_gst frame;
+                if (minmea_parse_gst(&frame, line)) {
+                    printf("+++ raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/d)\n",
+                            frame.latitude_error_deviation, frame.latitude_error_deviation_scale,
+                            frame.longitude_error_deviation, frame.longitude_error_deviation_scale,
+                            frame.altitude_error_deviation, frame.altitude_error_deviation_scale);
+                    printf("+++ fixed point latitude,longitude and altitude error deviation \
+                           scaled to one decimal place: (%d,%d,%d)\n",
+                            minmea_rescale(frame.latitude_error_deviation, frame.latitude_error_deviation_scale,10),
+                            minmea_rescale(frame.longitude_error_deviation, frame.longitude_error_deviation_scale,10),
+                            minmea_rescale(frame.altitude_error_deviation, frame.altitude_error_deviation_scale,10));
+                    printf("+++ floating point degree latitude,longitude and altitude error deviation: (%f,%f,%f)",
+                            minmea_coord(frame.latitude_error_deviation, frame.latitude_error_deviation_scale),
+                            minmea_coord(frame.longitude_error_deviation, frame.longitude_error_deviation_scale),
+                            minmea_coord(frame.altitude_error_deviation, frame.altitude_error_deviation_scale));
+                }
+            } break;
+
             default: {
             } break;
         }
