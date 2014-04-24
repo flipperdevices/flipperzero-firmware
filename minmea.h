@@ -9,6 +9,8 @@
 #ifndef MINMEA_H
 #define MINMEA_H
 
+#define _BSD_SOURCE
+
 #ifdef __cplusplus
 extern "C" {
 #endif
