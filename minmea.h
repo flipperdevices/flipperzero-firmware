@@ -31,7 +31,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_RMC,
     MINMEA_SENTENCE_GGA,
     MINMEA_SENTENCE_GSA,
-    MINMEA_SENTENCE_GSV
+    MINMEA_SENTENCE_GSV,
 };
 
 struct minmea_date {
