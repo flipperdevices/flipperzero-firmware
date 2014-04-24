@@ -32,6 +32,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_GGA,
     MINMEA_SENTENCE_GSA,
     MINMEA_SENTENCE_GST,
+    MINMEA_SENTENCE_GSV,
 };
 
 struct minmea_date {
@@ -101,6 +102,20 @@ struct minmea_sentence_gsa {
     int vdop, vdop_scale;
 };
 
+struct minmea_sat_info {
+    int nr;
+    int elevation;
+    int azimuth;
+    int snr;
+};
+
+struct minmea_sentence_gsv {
+    int total_msgs;
+    int msg_nr;
+    int total_sats;
+    struct minmea_sat_info sats[4];
+};
+
 /**
  * Check sentence validity and checksum. Returns true for valid sentences.
  */
@@ -136,6 +151,7 @@ bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
 bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
 bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
 bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence);
+bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
 
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.

@@ -20,6 +20,7 @@ systems.
 * ``GGA`` (Fix Data)
 * ``GSA`` (DOP and active satellites)
 * ``GST`` (Pseudorange Noise Statistics)
+* ``GSV`` (Satellites in view)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
@@ -77,6 +78,20 @@ The library doesn't perform this conversion automatically for the following reas
                 struct minmea_sentence_gga frame;
                 if (minmea_parse_gga(&frame, line)) {
                     printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
+                }
+            } break;
+
+            case MINMEA_SENTENCE_GSV: {
+                struct minmea_sentence_gsv frame;
+                if (minmea_parse_gsv(&frame, line)) {
+                    printf("$GPGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
+                    printf("$GPGSV: sattelites in view: %d\n", frame.total_sats);
+                    for (int i = 0; i < 4; i++)
+                        printf("$GPGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
+                            frame.sats[i].nr,
+                            frame.sats[i].elevation,
+                            frame.sats[i].azimuth,
+                            frame.sats[i].snr);
                 }
             } break;
         }

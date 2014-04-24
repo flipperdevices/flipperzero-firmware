@@ -516,6 +516,47 @@ START_TEST(test_minmea_parse_gsa1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gsv1)
+{
+    const char *sentence = "$GPGSV,3,3,11,22,42,067,42,24,14,311,43,27,05,244,00,,,,*4D";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 3,
+        .msg_nr = 3,
+        .total_sats = 11,
+        .sats = {
+            {
+                .nr = 22,
+                .elevation = 42,
+                .azimuth = 67,
+                .snr = 42
+            },
+            {
+                .nr = 24,
+                .elevation = 14,
+                .azimuth = 311,
+                .snr = 43
+            },
+            {
+                .nr = 27,
+                .elevation = 5,
+                .azimuth = 244,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
@@ -642,6 +683,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
     tcase_add_test(tc_parse, test_minmea_parse_gsa1);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv1);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
