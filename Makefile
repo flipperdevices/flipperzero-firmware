@@ -5,7 +5,7 @@
 # published by Sam Hocevar. See the COPYING file for more details.
 
 CFLAGS = -g -Wall -Wextra -Werror -std=c99
-LDFLAGS = -lcheck
+LDLIBS = -lcheck
 
 all: scan-build test example
 	@echo "+++ All good."""
