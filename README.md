@@ -34,6 +34,10 @@ to either fixed-point or floating-point format:
 * ``minmea_rescale({-123456, 1000}, 10) => -1235``
 * ``minmea_float({-123456, 1000}) => -123.456``
 
+The compound type ``struct minmea_float`` uses ``int_least32_t`` internally. Therefore,
+the coordinate precision is guaranteed to be at least ``[+-]DDDMM.MMMMM`` (five decimal digits)
+or ±20cm LSB at the equator.
+
 ## Coordinate format
 
 NMEA uses the clunky ``DDMM.MMMM`` format which, honestly, is not good in the internet era.
@@ -114,10 +118,6 @@ typing ``make``.
 
 ## Limitations
 
-* Fractional numbers are represented as ``int`` internally, which is 32 bits on
-  most embedded platforms. Therefore, the maximum supported coordinate precision
-  is ``[+-]DDDMM.MMMMM``. The library does not check for integer overflow at the
-  moment; coordinates with more precision will not parse correctly.
 * Only a handful of frames is supported right now.
 * There's no support for omitting parts of the library from building. As
   a workaround, use the ``-ffunction-sections -Wl,--gc-sections`` linker flags
