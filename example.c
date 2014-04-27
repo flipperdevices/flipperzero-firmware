@@ -22,17 +22,17 @@ int main()
                 struct minmea_sentence_rmc frame;
                 if (minmea_parse_rmc(&frame, line)) {
                     printf("+++ raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
-                            frame.latitude, frame.latitude_scale,
-                            frame.longitude, frame.longitude_scale,
-                            frame.speed, frame.speed_scale);
+                            frame.latitude.value, frame.latitude.scale,
+                            frame.longitude.value, frame.longitude.scale,
+                            frame.speed.value, frame.speed.scale);
                     printf("+++ fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
-                            minmea_rescale(frame.latitude, frame.latitude_scale, 1000),
-                            minmea_rescale(frame.longitude, frame.longitude_scale, 1000),
-                            minmea_rescale(frame.speed, frame.speed_scale, 1000));
+                            minmea_rescale(&frame.latitude, 1000),
+                            minmea_rescale(&frame.longitude, 1000),
+                            minmea_rescale(&frame.speed, 1000));
                     printf("+++ floating point degree coordinates and speed: (%f,%f) %f\n",
-                            minmea_coord(frame.latitude, frame.latitude_scale),
-                            minmea_coord(frame.longitude, frame.longitude_scale),
-                            minmea_float(frame.speed, frame.speed_scale));
+                            minmea_tocoord(&frame.latitude),
+                            minmea_tocoord(&frame.longitude),
+                            minmea_tofloat(&frame.speed));
                 }
             } break;
 
@@ -47,18 +47,18 @@ int main()
                 struct minmea_sentence_gst frame;
                 if (minmea_parse_gst(&frame, line)) {
                     printf("+++ raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/%d)\n",
-                            frame.latitude_error_deviation, frame.latitude_error_deviation_scale,
-                            frame.longitude_error_deviation, frame.longitude_error_deviation_scale,
-                            frame.altitude_error_deviation, frame.altitude_error_deviation_scale);
+                            frame.latitude_error_deviation.value, frame.latitude_error_deviation.scale,
+                            frame.longitude_error_deviation.value, frame.longitude_error_deviation.scale,
+                            frame.altitude_error_deviation.value, frame.altitude_error_deviation.scale);
                     printf("+++ fixed point latitude,longitude and altitude error deviation \
                            scaled to one decimal place: (%d,%d,%d)\n",
-                            minmea_rescale(frame.latitude_error_deviation, frame.latitude_error_deviation_scale,10),
-                            minmea_rescale(frame.longitude_error_deviation, frame.longitude_error_deviation_scale,10),
-                            minmea_rescale(frame.altitude_error_deviation, frame.altitude_error_deviation_scale,10));
-                    printf("+++ floating point degree latitude,longitude and altitude error deviation: (%f,%f,%f)",
-                            minmea_coord(frame.latitude_error_deviation, frame.latitude_error_deviation_scale),
-                            minmea_coord(frame.longitude_error_deviation, frame.longitude_error_deviation_scale),
-                            minmea_coord(frame.altitude_error_deviation, frame.altitude_error_deviation_scale));
+                            minmea_rescale(&frame.latitude_error_deviation, 10),
+                            minmea_rescale(&frame.longitude_error_deviation, 10),
+                            minmea_rescale(&frame.altitude_error_deviation, 10));
+                    printf("+++ floating point degree latitude, longitude and altitude error deviation: (%f,%f,%f)",
+                            minmea_tofloat(&frame.latitude_error_deviation),
+                            minmea_tofloat(&frame.longitude_error_deviation),
+                            minmea_tofloat(&frame.altitude_error_deviation));
                 }
             } break;
 
