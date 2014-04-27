@@ -126,6 +126,10 @@ START_TEST(test_minmea_scan_f)
     ck_assert(minmea_scan("", "f", &f) == true);
     ck_assert_int_eq(f.scale, 0);
 
+    ck_assert(minmea_scan("42", "f", &f) == true);
+    ck_assert_int_eq(f.value, 42);
+    ck_assert_int_eq(f.scale, 1);
+
     ck_assert(minmea_scan("15.345", "f", &f) == true);
     ck_assert_int_eq(f.value, 15345);
     ck_assert_int_eq(f.scale, 1000);
@@ -134,19 +138,40 @@ START_TEST(test_minmea_scan_f)
     ck_assert_int_eq(f.value, -123);
     ck_assert_int_eq(f.scale, 100);
 
-    /* some GPS units have absurdly big precision. handle whatever int handles. */
-    ck_assert(minmea_scan("5106.94091", "f", &f) == true);
-    ck_assert_int_eq(f.value, 510694091);
-    ck_assert_int_eq(f.scale, 100000);
-
-    /* for now we support +-180 degrees with 5 decimal digits; anything
-     * more will overflow. */
+    /* the guaranteed range is 32 bits which translates to +-180 degrees
+     * with 5 decimal digits. make sure we support that. */
     ck_assert(minmea_scan("18000.00000", "f", &f) == true);
     ck_assert_int_eq(f.value, 1800000000);
     ck_assert_int_eq(f.scale, 100000);
     ck_assert(minmea_scan("-18000.00000", "f", &f) == true);
     ck_assert_int_eq(f.value, -1800000000);
     ck_assert_int_eq(f.scale, 100000);
+
+    if (sizeof(int_least32_t) == 4) {
+        /* fits in 32 bits */
+        ck_assert(minmea_scan("2147483647", "f", &f) == true);
+        ck_assert_int_eq(f.value, 2147483647);
+        ck_assert_int_eq(f.scale, 1);
+        /* doesn't fit, truncate precision */
+        ck_assert(minmea_scan("2147483.648", "f", &f) == true);
+        ck_assert_int_eq(f.value, 214748364);
+        ck_assert_int_eq(f.scale, 100);
+        /* doesn't fit, bail out */
+        ck_assert(minmea_scan("2147483648", "f", &f) == false);
+    } else if (sizeof(int_least32_t) == 8) {
+        /* fits in 64 bits */
+        ck_assert(minmea_scan("9223372036854775807", "f", &f) == true);
+        ck_assert_int_eq(f.value, 9223372036854775807);
+        ck_assert_int_eq(f.scale, 1);
+        /* doesn't fit, truncate precision */
+        ck_assert(minmea_scan("9223372036854775.808", "f", &f) == true);
+        ck_assert_int_eq(f.value, 922337203685477580);
+        ck_assert_int_eq(f.scale, 100);
+        /* doesn't fit, bail out */
+        ck_assert(minmea_scan("9223372036854775808", "f", &f) == false);
+    } else {
+        ck_abort_msg("your platform is esoteric. please fix this unit test.");
+    }
 
     /* optional f.values */
     ck_assert(minmea_scan("foo", "_;f", &f) == true);
