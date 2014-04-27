@@ -148,9 +148,20 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         } else if (*field == '-' && !sign && value == -1) {
                             sign = -1;
                         } else if (isdigit((unsigned char) *field)) {
+                            int digit = *field - '0';
                             if (value == -1)
                                 value = 0;
-                            value = (10 * value) + (*field - '0');
+                            if (value > (INT_LEAST32_MAX-digit) / 10) {
+                                /* we ran out of bits, what do we do? */
+                                if (scale) {
+                                    /* truncate extra precision */
+                                    break;
+                                } else {
+                                    /* integer overflow. bail out. */
+                                    goto parse_error;
+                                }
+                            }
+                            value = (10 * value) + digit;
                             if (scale)
                                 scale *= 10;
                         } else if (*field == '.' && scale == 0) {
