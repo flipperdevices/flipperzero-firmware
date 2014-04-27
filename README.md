@@ -26,22 +26,22 @@ Adding support for more sentences is trivial; see ``minmea.c`` source.
 
 ## Fractional number format
 
-Internally, minmea stores fractional numbers as pairs of two integers: ``(value, scale)``.
-For example, a value of ``"-123.456"`` would be parsed as ``(-123456, 1000)``. As this
-format is quite unwieldy, minmea provides the following convenience macros for converting
+Internally, minmea stores fractional numbers as pairs of two integers: ``{value, scale}``.
+For example, a value of ``"-123.456"`` would be parsed as ``{-123456, 1000}``. As this
+format is quite unwieldy, minmea provides the following convenience functions for converting
 to either fixed-point or floating-point format:
 
-* ``minmea_rescale(-123456, 1000, 10) => -1235``
-* ``minmea_float(-123456, 1000) => -123.456``
+* ``minmea_rescale({-123456, 1000}, 10) => -1235``
+* ``minmea_float({-123456, 1000}) => -123.456``
 
 ## Coordinate format
 
 NMEA uses the clunky ``DDMM.MMMM`` format which, honestly, is not good in the internet era.
 Internally, minmea stores it as a fractional number (see above); for practical uses,
 the value should be probably converted to the DD.DDDDD floating point format using the
-following macro:
+following function:
 
-* ``minmea_coord(-375165, 100) => -37.860832``
+* ``minmea_tocoord({-375165, 100}) => -37.860832``
 
 The library doesn't perform this conversion automatically for the following reasons:
 
@@ -59,35 +59,35 @@ The library doesn't perform this conversion automatically for the following reas
             case MINMEA_SENTENCE_RMC: {
                 struct minmea_sentence_rmc frame;
                 if (minmea_parse_rmc(&frame, line)) {
-                    printf("+++ raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
-                            frame.latitude, frame.latitude_scale,
-                            frame.longitude, frame.longitude_scale,
-                            frame.speed, frame.speed_scale);
-                    printf("+++ fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
-                            minmea_rescale(frame.latitude, frame.latitude_scale, 1000),
-                            minmea_rescale(frame.longitude, frame.longitude_scale, 1000),
-                            minmea_rescale(frame.speed, frame.speed_scale, 1000));
-                    printf("+++ floating point degree coordinates and speed: (%f,%f) %f\n",
-                            minmea_coord(frame.latitude, frame.latitude_scale),
-                            minmea_coord(frame.longitude, frame.longitude_scale),
-                            minmea_float(frame.speed, frame.speed_scale));
+                    printf("$xxRMC: raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
+                            frame.latitude.value, frame.latitude.scale,
+                            frame.longitude.value, frame.longitude.scale,
+                            frame.speed.value, frame.speed.scale);
+                    printf("$xxRMC fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
+                            minmea_rescale(&frame.latitude, 1000),
+                            minmea_rescale(&frame.longitude, 1000),
+                            minmea_rescale(&frame.speed, 1000));
+                    printf("$xxRMC floating point degree coordinates and speed: (%f,%f) %f\n",
+                            minmea_tocoord(&frame.latitude),
+                            minmea_tocoord(&frame.longitude),
+                            minmea_tofloat(&frame.speed));
                 }
             } break;
 
             case MINMEA_SENTENCE_GGA: {
                 struct minmea_sentence_gga frame;
                 if (minmea_parse_gga(&frame, line)) {
-                    printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
+                    printf("$xxGGA: fix quality: %d\n", frame.fix_quality);
                 }
             } break;
 
             case MINMEA_SENTENCE_GSV: {
                 struct minmea_sentence_gsv frame;
                 if (minmea_parse_gsv(&frame, line)) {
-                    printf("$GPGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
-                    printf("$GPGSV: sattelites in view: %d\n", frame.total_sats);
+                    printf("$xxGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
+                    printf("$xxGSV: sattelites in view: %d\n", frame.total_sats);
                     for (int i = 0; i < 4; i++)
-                        printf("$GPGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
+                        printf("$xxGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
                             frame.sats[i].nr,
                             frame.sats[i].elevation,
                             frame.sats[i].azimuth,
