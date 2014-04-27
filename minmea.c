@@ -166,8 +166,12 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                     goto parse_error;
 
                 if (value == -1) {
+                    /* No digits were scanned. */
                     value = 0;
                     scale = 0;
+                } else if (scale == 0) {
+                    /* No decimal point. */
+                    scale = 1;
                 }
                 if (sign)
                     value *= sign;
