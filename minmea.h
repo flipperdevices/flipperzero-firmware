@@ -35,6 +35,11 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_GSV,
 };
 
+struct minmea_float {
+    int_least32_t value;
+    int_least32_t scale;
+};
+
 struct minmea_date {
     int day;
     int month;
@@ -51,35 +56,35 @@ struct minmea_time {
 struct minmea_sentence_rmc {
     struct minmea_time time;
     bool valid;
-    int latitude, latitude_scale;
-    int longitude, longitude_scale;
-    int speed, speed_scale;
-    int course, course_scale;
+    struct minmea_float latitude;
+    struct minmea_float longitude;
+    struct minmea_float speed;
+    struct minmea_float course;
     struct minmea_date date;
-    int variation, variation_scale;
+    struct minmea_float variation;
 };
 
 struct minmea_sentence_gga {
     struct minmea_time time;
-    int latitude, latitude_scale;
-    int longitude, longitude_scale;
+    struct minmea_float latitude;
+    struct minmea_float longitude;
     int fix_quality;
     int satellites_tracked;
-    int hdop, hdop_scale;
-    int altitude, altitude_scale; char altitude_units;
-    int height, height_scale; char height_units;
+    struct minmea_float hdop;
+    struct minmea_float altitude; char altitude_units;
+    struct minmea_float height; char height_units;
     int dgps_age;
 };
 
 struct minmea_sentence_gst {
     struct minmea_time time;
-    int rms_deviation, rms_deviation_scale;
-    int semi_major_deviation, semi_major_deviation_scale;
-    int semi_minor_deviation, semi_minor_deviation_scale;
-    int semi_major_orientation, semi_major_orientation_scale;
-    int latitude_error_deviation, latitude_error_deviation_scale;
-    int longitude_error_deviation, longitude_error_deviation_scale;
-    int altitude_error_deviation, altitude_error_deviation_scale;
+    struct minmea_float rms_deviation;
+    struct minmea_float semi_major_deviation;
+    struct minmea_float semi_minor_deviation;
+    struct minmea_float semi_major_orientation;
+    struct minmea_float latitude_error_deviation;
+    struct minmea_float longitude_error_deviation;
+    struct minmea_float altitude_error_deviation;
 };
 
 enum minmea_gsa_mode {
@@ -97,9 +102,9 @@ struct minmea_sentence_gsa {
     char mode;
     int fix_type;
     int sats[12];
-    int pdop, pdop_scale;
-    int hdop, hdop_scale;
-    int vdop, vdop_scale;
+    struct minmea_float pdop;
+    struct minmea_float hdop;
+    struct minmea_float vdop;
 };
 
 struct minmea_sat_info {
@@ -161,40 +166,40 @@ int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, cons
 /**
  * Rescale a fixed-point value to a different scale. Rounds towards zero.
  */
-static inline int minmea_rescale(int value, int from, int to)
+static inline int_least32_t minmea_rescale(struct minmea_float *f, int_least32_t new_scale)
 {
-    if (from == 0)
+    if (f->scale == 0)
         return 0;
-    if (from == to)
-        return value;
-    if (from > to)
-        return (value + ((value > 0) - (value < 0)) * from/to/2) / (from/to);
+    if (f->scale == new_scale)
+        return f->value;
+    if (f->scale > new_scale)
+        return (f->value + ((f->value > 0) - (f->value < 0)) * f->scale/new_scale/2) / (f->scale/new_scale);
     else
-        return value * (to/from);
+        return f->value * (new_scale/f->scale);
 }
 
 /**
  * Convert a fixed-point value to a floating-point value.
  * Returns NaN for "unknown" values.
  */
-static inline float minmea_float(int value, int scale)
+static inline float minmea_tofloat(struct minmea_float *f)
 {
-    if (scale == 0)
+    if (f->scale == 0)
         return NAN;
-    return (float) value / (float) scale;
+    return (float) f->value / (float) f->scale;
 }
 
 /**
  * Convert a raw coordinate to a floating point DD.DDD... value.
  * Returns NaN for "unknown" values.
  */
-static inline float minmea_coord(int value, int scale)
+static inline float minmea_tocoord(struct minmea_float *f)
 {
-    if (scale == 0)
+    if (f->scale == 0)
         return NAN;
-    int degrees = value / (scale * 100);
-    int minutes = value % (scale * 100);
-    return (float) degrees + (float) minutes / (60 * scale);
+    int_least32_t degrees = f->value / (f->scale * 100);
+    int_least32_t minutes = f->value % (f->scale * 100);
+    return (float) degrees + (float) minutes / (60 * f->scale);
 }
 
 #ifdef __cplusplus

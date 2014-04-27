@@ -112,50 +112,50 @@ END_TEST
 
 START_TEST(test_minmea_scan_f)
 {
-    int value, scale;
+    struct minmea_float f;
 
-    ck_assert(minmea_scan("-", "f", &value, &scale) == false);
-    ck_assert(minmea_scan("10-", "f", &value, &scale) == false);
-    ck_assert(minmea_scan("+-10", "f", &value, &scale) == false);
-    ck_assert(minmea_scan("12..45", "f", &value, &scale) == false);
-    ck_assert(minmea_scan("blah", "f", &value, &scale) == false);
-    ck_assert(minmea_scan("12.3.4", "f", &value, &scale) == false);
+    ck_assert(minmea_scan("-", "f", &f) == false);
+    ck_assert(minmea_scan("10-", "f", &f) == false);
+    ck_assert(minmea_scan("+-10", "f", &f) == false);
+    ck_assert(minmea_scan("12..45", "f", &f) == false);
+    ck_assert(minmea_scan("blah", "f", &f) == false);
+    ck_assert(minmea_scan("12.3.4", "f", &f) == false);
 
-    ck_assert(minmea_scan(",", "f", &value, &scale) == true);
-    ck_assert_int_eq(scale, 0);
-    ck_assert(minmea_scan("", "f", &value, &scale) == true);
-    ck_assert_int_eq(scale, 0);
+    ck_assert(minmea_scan(",", "f", &f) == true);
+    ck_assert_int_eq(f.scale, 0);
+    ck_assert(minmea_scan("", "f", &f) == true);
+    ck_assert_int_eq(f.scale, 0);
 
-    ck_assert(minmea_scan("15.345", "f", &value, &scale) == true);
-    ck_assert_int_eq(value, 15345);
-    ck_assert_int_eq(scale, 1000);
+    ck_assert(minmea_scan("15.345", "f", &f) == true);
+    ck_assert_int_eq(f.value, 15345);
+    ck_assert_int_eq(f.scale, 1000);
 
-    ck_assert(minmea_scan("-1.23,V", "f", &value, &scale) == true);
-    ck_assert_int_eq(value, -123);
-    ck_assert_int_eq(scale, 100);
+    ck_assert(minmea_scan("-1.23,V", "f", &f) == true);
+    ck_assert_int_eq(f.value, -123);
+    ck_assert_int_eq(f.scale, 100);
 
     /* some GPS units have absurdly big precision. handle whatever int handles. */
-    ck_assert(minmea_scan("5106.94091", "f", &value, &scale) == true);
-    ck_assert_int_eq(value, 510694091);
-    ck_assert_int_eq(scale, 100000);
+    ck_assert(minmea_scan("5106.94091", "f", &f) == true);
+    ck_assert_int_eq(f.value, 510694091);
+    ck_assert_int_eq(f.scale, 100000);
 
     /* for now we support +-180 degrees with 5 decimal digits; anything
      * more will overflow. */
-    ck_assert(minmea_scan("18000.00000", "f", &value, &scale) == true);
-    ck_assert_int_eq(value, 1800000000);
-    ck_assert_int_eq(scale, 100000);
-    ck_assert(minmea_scan("-18000.00000", "f", &value, &scale) == true);
-    ck_assert_int_eq(value, -1800000000);
-    ck_assert_int_eq(scale, 100000);
+    ck_assert(minmea_scan("18000.00000", "f", &f) == true);
+    ck_assert_int_eq(f.value, 1800000000);
+    ck_assert_int_eq(f.scale, 100000);
+    ck_assert(minmea_scan("-18000.00000", "f", &f) == true);
+    ck_assert_int_eq(f.value, -1800000000);
+    ck_assert_int_eq(f.scale, 100000);
 
-    /* optional values */
-    ck_assert(minmea_scan("foo", "_;f", &value, &scale) == true);
-    ck_assert_int_eq(scale, 0);
-    ck_assert(minmea_scan("foo,", "_;f", &value, &scale) == true);
-    ck_assert_int_eq(scale, 0);
-    ck_assert(minmea_scan("foo,12.3", "_;f", &value, &scale) == true);
-    ck_assert_int_eq(value, 123);
-    ck_assert_int_eq(scale, 10);
+    /* optional f.values */
+    ck_assert(minmea_scan("foo", "_;f", &f) == true);
+    ck_assert_int_eq(f.scale, 0);
+    ck_assert(minmea_scan("foo,", "_;f", &f) == true);
+    ck_assert_int_eq(f.scale, 0);
+    ck_assert(minmea_scan("foo,12.3", "_;f", &f) == true);
+    ck_assert_int_eq(f.value, 123);
+    ck_assert_int_eq(f.scale, 10);
 }
 END_TEST
 
@@ -273,42 +273,42 @@ START_TEST(test_minmea_scan_complex1)
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n";
     char type[6];
     struct minmea_time time;
-    int latitude, latitude_scale, latitude_direction;
-    int longitude, longitude_scale, longitude_direction;
+    struct minmea_float latitude; int latitude_direction;
+    struct minmea_float longitude; int longitude_direction;
     int fix_quality;
     int satellites;
-    int hdop, hdop_scale;
-    int altitude, altitude_scale; char altitude_units;
-    int height, height_scale; char height_units;
+    struct minmea_float hdop;
+    struct minmea_float altitude; char altitude_units;
+    struct minmea_float height; char height_units;
     ck_assert(minmea_scan(sentence, "tTfdfdiiffcfc__",
         type,
         &time,
-        &latitude, &latitude_scale, &latitude_direction,
-        &longitude, &longitude_scale, &longitude_direction,
+        &latitude, &latitude_direction,
+        &longitude, &longitude_direction,
         &fix_quality,
         &satellites,
-        &hdop, &hdop_scale,
-        &altitude, &altitude_scale, &altitude_units,
-        &height, &height_scale, &height_units) == true);
+        &hdop,
+        &altitude, &altitude_units,
+        &height, &height_units) == true);
     ck_assert_str_eq(type, "GPGGA");
     ck_assert_int_eq(time.hours, 12);
     ck_assert_int_eq(time.minutes, 35);
     ck_assert_int_eq(time.seconds, 19);
-    ck_assert_int_eq(latitude, 4807038);
-    ck_assert_int_eq(latitude_scale, 1000);
+    ck_assert_int_eq(latitude.value, 4807038);
+    ck_assert_int_eq(latitude.scale, 1000);
     ck_assert_int_eq(latitude_direction, 1);
-    ck_assert_int_eq(longitude, 1131000);
-    ck_assert_int_eq(longitude_scale, 1000);
+    ck_assert_int_eq(longitude.value, 1131000);
+    ck_assert_int_eq(longitude.scale, 1000);
     ck_assert_int_eq(longitude_direction, 1);
     ck_assert_int_eq(fix_quality, 1);
     ck_assert_int_eq(satellites, 8);
-    ck_assert_int_eq(hdop, 9);
-    ck_assert_int_eq(hdop_scale, 10);
-    ck_assert_int_eq(altitude, 5454);
-    ck_assert_int_eq(altitude_scale, 10);
+    ck_assert_int_eq(hdop.value, 9);
+    ck_assert_int_eq(hdop.scale, 10);
+    ck_assert_int_eq(altitude.value, 5454);
+    ck_assert_int_eq(altitude.scale, 10);
     ck_assert_int_eq(altitude_units, 'M');
-    ck_assert_int_eq(height, 469);
-    ck_assert_int_eq(height_scale, 10);
+    ck_assert_int_eq(height.value, 469);
+    ck_assert_int_eq(height.scale, 10);
     ck_assert_int_eq(height_units, 'M');
 
 }
@@ -319,34 +319,34 @@ START_TEST(test_minmea_scan_complex2)
     const char *sentence = "$GPBWC,081837,,,,,,T,,M,,N,*13";
     char type[6];
     struct minmea_time time;
-    int latitude, latitude_scale, latitude_direction;
-    int longitude, longitude_scale, longitude_direction;
-    int bearing_true, bearing_true_scale; char bearing_true_mark;
-    int bearing_magnetic, bearing_magnetic_scale; char bearing_magnetic_mark;
-    int distance, distance_scale; char distance_units;
+    struct minmea_float latitude; int latitude_direction;
+    struct minmea_float longitude; int longitude_direction;
+    struct minmea_float bearing_true; char bearing_true_mark;
+    struct minmea_float bearing_magnetic; char bearing_magnetic_mark;
+    struct minmea_float distance; char distance_units;
     char name[MINMEA_MAX_LENGTH];
     ck_assert(minmea_scan(sentence, "tTfdfdfcfcfcs",
         type,
         &time,
-        &latitude, &latitude_scale, &latitude_direction,
-        &longitude, &longitude_scale, &longitude_direction,
-        &bearing_true, &bearing_true_scale, &bearing_true_mark,
-        &bearing_magnetic, &bearing_magnetic_scale, &bearing_magnetic_mark,
-        &distance, &distance_scale, &distance_units,
+        &latitude, &latitude_direction,
+        &longitude, &longitude_direction,
+        &bearing_true, &bearing_true_mark,
+        &bearing_magnetic, &bearing_magnetic_mark,
+        &distance, &distance_units,
         name) == true);
     ck_assert_str_eq(type, "GPBWC");
     ck_assert_int_eq(time.hours, 8);
     ck_assert_int_eq(time.minutes, 18);
     ck_assert_int_eq(time.seconds, 37);
-    ck_assert_int_eq(latitude_scale, 0);
+    ck_assert_int_eq(latitude.scale, 0);
     ck_assert_int_eq(latitude_direction, 0);
-    ck_assert_int_eq(longitude_scale, 0);
+    ck_assert_int_eq(longitude.scale, 0);
     ck_assert_int_eq(longitude_direction, 0);
-    ck_assert_int_eq(bearing_true_scale, 0);
+    ck_assert_int_eq(bearing_true.scale, 0);
     ck_assert_int_eq(bearing_true_mark, 'T');
-    ck_assert_int_eq(bearing_magnetic_scale, 0);
+    ck_assert_int_eq(bearing_magnetic.scale, 0);
     ck_assert_int_eq(bearing_magnetic_mark, 'M');
-    ck_assert_int_eq(distance_scale, 0);
+    ck_assert_int_eq(distance.scale, 0);
     ck_assert_int_eq(distance_units, 'N');
     ck_assert_str_eq(name, "");
 }
@@ -357,42 +357,42 @@ START_TEST(test_minmea_scan_complex3)
     const char *sentence = "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58";
     char type[6];
     struct minmea_time time;
-    int rms_deviation, rms_deviation_scale;
-    int semi_major_deviation, semi_major_deviation_scale;
-    int semi_minor_deviation, semi_minor_deviation_scale;
-    int semi_major_orientation, semi_major_orientation_scale;
-    int latitude_error_deviation, latitude_error_deviation_scale;
-    int longitude_error_deviation, longitude_error_deviation_scale;
-    int altitude_error_deviation, altitude_error_deviation_scale;
+    struct minmea_float rms_deviation;
+    struct minmea_float semi_major_deviation;
+    struct minmea_float semi_minor_deviation;
+    struct minmea_float semi_major_orientation;
+    struct minmea_float latitude_error_deviation;
+    struct minmea_float longitude_error_deviation;
+    struct minmea_float altitude_error_deviation;
     ck_assert(minmea_scan(sentence, "tTfffffff",
         type,
         &time,
-        &rms_deviation, &rms_deviation_scale,
-        &semi_major_deviation, &semi_major_deviation_scale,
-        &semi_minor_deviation, &semi_minor_deviation_scale,
-        &semi_major_orientation, &semi_major_orientation_scale,
-        &latitude_error_deviation, &latitude_error_deviation_scale,
-        &longitude_error_deviation, &longitude_error_deviation_scale,
-        &altitude_error_deviation, &altitude_error_deviation_scale) == true);
+        &rms_deviation,
+        &semi_major_deviation,
+        &semi_minor_deviation,
+        &semi_major_orientation,
+        &latitude_error_deviation,
+        &longitude_error_deviation,
+        &altitude_error_deviation) == true);
     ck_assert_str_eq(type, "GPGST");
     ck_assert_int_eq(time.hours, 2);
     ck_assert_int_eq(time.minutes, 46);
     ck_assert_int_eq(time.seconds, 3);
     ck_assert_int_eq(time.microseconds, 0);
-    ck_assert_int_eq(rms_deviation, 32);
-    ck_assert_int_eq(rms_deviation_scale, 10);
-    ck_assert_int_eq(semi_major_deviation, 66);
-    ck_assert_int_eq(semi_major_deviation_scale, 10);
-    ck_assert_int_eq(semi_minor_deviation, 47);
-    ck_assert_int_eq(semi_minor_deviation_scale, 10);
-    ck_assert_int_eq(semi_major_orientation, 473);
-    ck_assert_int_eq(semi_major_orientation_scale, 10);
-    ck_assert_int_eq(latitude_error_deviation, 58);
-    ck_assert_int_eq(latitude_error_deviation_scale, 10);
-    ck_assert_int_eq(longitude_error_deviation, 56);
-    ck_assert_int_eq(longitude_error_deviation_scale, 10);
-    ck_assert_int_eq(altitude_error_deviation, 220);
-    ck_assert_int_eq(altitude_error_deviation_scale,10);
+    ck_assert_int_eq(rms_deviation.value, 32);
+    ck_assert_int_eq(rms_deviation.scale, 10);
+    ck_assert_int_eq(semi_major_deviation.value, 66);
+    ck_assert_int_eq(semi_major_deviation.scale, 10);
+    ck_assert_int_eq(semi_minor_deviation.value, 47);
+    ck_assert_int_eq(semi_minor_deviation.scale, 10);
+    ck_assert_int_eq(semi_major_orientation.value, 473);
+    ck_assert_int_eq(semi_major_orientation.scale, 10);
+    ck_assert_int_eq(latitude_error_deviation.value, 58);
+    ck_assert_int_eq(latitude_error_deviation.scale, 10);
+    ck_assert_int_eq(longitude_error_deviation.value, 56);
+    ck_assert_int_eq(longitude_error_deviation.scale, 10);
+    ck_assert_int_eq(altitude_error_deviation.value, 220);
+    ck_assert_int_eq(altitude_error_deviation.scale, 10);
 }
 END_TEST
 
@@ -403,17 +403,12 @@ START_TEST(test_minmea_parse_rmc1)
     static const struct minmea_sentence_rmc expected = {
         .time = { 8, 18, 36, 750000 },
         .valid = true,
-        .latitude = -375165,
-        .latitude_scale = 100,
-        .longitude = 1450736,
-        .longitude_scale = 100,
-        .speed = 0,
-        .speed_scale = 10,
-        .course = 3600,
-        .course_scale = 10,
+        .latitude = { -375165, 100 },
+        .longitude = { 1450736, 100 },
+        .speed = { 0, 10 },
+        .course = { 3600, 10 },
         .date = { 13, 9, 98 },
-        .variation = 113,
-        .variation_scale = 10,
+        .variation = { 113, 10 },
     };
     ck_assert(minmea_check(sentence) == true);
     ck_assert(minmea_parse_rmc(&frame, sentence) == true);
@@ -428,10 +423,8 @@ START_TEST(test_minmea_parse_rmc2)
     static const struct minmea_sentence_rmc expected = {
         .time = { -1, -1, -1, -1 },
         .valid = true,
-        .latitude = 375165,
-        .latitude_scale = 100,
-        .longitude = -1450736,
-        .longitude_scale = 100,
+        .latitude = { 375165, 100 },
+        .longitude = { -1450736, 100 },
         .date = { -1, -1, -1 },
     };
     ck_assert(minmea_check(sentence) == true);
@@ -446,19 +439,14 @@ START_TEST(test_minmea_parse_gga1)
     struct minmea_sentence_gga frame = {};
     static const struct minmea_sentence_gga expected = {
         .time = { 12, 35, 19, 0 },
-        .latitude = 4807038,
-        .latitude_scale = 1000,
-        .longitude = 1131000,
-        .longitude_scale = 1000,
+        .latitude = { 4807038, 1000 },
+        .longitude = { 1131000, 1000 },
         .fix_quality = 1,
         .satellites_tracked = 8,
-        .hdop = 9,
-        .hdop_scale = 10,
-        .altitude = 5454,
-        .altitude_scale = 10,
+        .hdop = { 9, 10 },
+        .altitude = { 5454, 10 },
         .altitude_units = 'M',
-        .height = 469,
-        .height_scale = 10,
+        .height = { 469, 10 },
         .height_units = 'M',
         .dgps_age = 0,
     };
@@ -474,20 +462,13 @@ START_TEST(test_minmea_parse_gst1)
     struct minmea_sentence_gst frame = {};
     struct minmea_sentence_gst expected = {
         .time = { 2, 46, 3, 0 },
-        .rms_deviation = 32,
-        .rms_deviation_scale = 10,
-        .semi_major_deviation = 66,
-        .semi_major_deviation_scale = 10,
-        .semi_minor_deviation = 47,
-        .semi_minor_deviation_scale = 10,
-        .semi_major_orientation = 473,
-        .semi_major_orientation_scale = 10,
-        .latitude_error_deviation = 58,
-        .latitude_error_deviation_scale = 10,
-        .longitude_error_deviation = 56,
-        .longitude_error_deviation_scale = 10,
-        .altitude_error_deviation = 220,
-        .altitude_error_deviation_scale = 10,
+        .rms_deviation = { 32, 10 },
+        .semi_major_deviation = { 66, 10 },
+        .semi_minor_deviation = { 47, 10 },
+        .semi_major_orientation = { 473, 10 },
+        .latitude_error_deviation = { 58, 10 },
+        .longitude_error_deviation = { 56, 10 },
+        .altitude_error_deviation = { 220, 10 },
     };
     ck_assert(minmea_check(sentence) == true);
     ck_assert(minmea_parse_gst(&frame, sentence) == true);
@@ -503,12 +484,9 @@ START_TEST(test_minmea_parse_gsa1)
         .mode = MINMEA_GPGSA_MODE_AUTO,
         .fix_type = MINMEA_GPGSA_FIX_3D,
         .sats = { 4, 5, 0, 9, 12, 0, 0, 24, 0, 0, 0, 0 },
-        .pdop = 25,
-        .pdop_scale = 10,
-        .hdop = 13,
-        .hdop_scale = 10,
-        .vdop = 21,
-        .vdop_scale = 10
+        .pdop = { 25, 10 },
+        .hdop = { 13, 10 },
+        .vdop = { 21, 10 },
     };
     ck_assert(minmea_check(sentence) == true);
     ck_assert(minmea_parse_gsa(&frame, sentence) == true);
@@ -622,36 +600,36 @@ END_TEST
 START_TEST(test_minmea_rescale)
 {
     /* basic and edge cases. */
-    ck_assert_int_eq(minmea_rescale(42, 0, 3), 0);
-    ck_assert_int_eq(minmea_rescale(1234, 10, 1), 123);
-    ck_assert_int_eq(minmea_rescale(1235, 10, 1), 124);
-    ck_assert_int_eq(minmea_rescale(1234, 10, 1000), 123400);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { 42, 0 }, 3), 0);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { 1234, 10 }, 1), 123);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { 1235, 10 }, 1), 124);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { 1234, 10 }, 1000), 123400);
 
     /* round towards zero. */
-    ck_assert_int_eq(minmea_rescale(-1234, 10, 1), -123);
-    ck_assert_int_eq(minmea_rescale(-1235, 10, 1), -124);
-    ck_assert_int_eq(minmea_rescale(-1236, 10, 1), -124);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { -1234, 10 }, 1), -123);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { -1235, 10 }, 1), -124);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { -1236, 10 }, 1), -124);
 
     /* shouldn't overflow on large numbers. */
-    ck_assert_int_eq(minmea_rescale(510693608, 100000, 10000), 51069361);
+    ck_assert_int_eq(minmea_rescale(&(struct minmea_float) { 510693608, 100000 }, 10000), 51069361);
 }
 END_TEST
 
 START_TEST(test_minmea_float)
 {
-    ck_assert(isnan(minmea_float(42, 0)));
-    ck_assert(minmea_float(7, 1) == 7.0);
-    ck_assert(minmea_float(-200, 100) == -2.0);
-    ck_assert(minmea_float(15, 10) == 1.5);
+    ck_assert(isnan(minmea_tofloat(&(struct minmea_float) { 42, 0 })));
+    ck_assert(minmea_tofloat(&(struct minmea_float) { 7, 1}) == 7.0);
+    ck_assert(minmea_tofloat(&(struct minmea_float) { -200, 100}) == -2.0);
+    ck_assert(minmea_tofloat(&(struct minmea_float) { 15, 10}) == 1.5);
 }
 END_TEST
 
 START_TEST(test_minmea_coord)
 {
-    ck_assert(isnan(minmea_coord(42, 0)));
-    ck_assert(minmea_coord(4200, 1) == 42.0);
-    ck_assert(minmea_coord(420000, 100) == 42.0);
-    ck_assert(minmea_coord(423000, 100) == 42.5);
+    ck_assert(isnan(minmea_tocoord(&(struct minmea_float) { 42, 0 })));
+    ck_assert(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) == 42.0);
+    ck_assert(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) == 42.0);
+    ck_assert(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) == 42.5);
 }
 END_TEST
 

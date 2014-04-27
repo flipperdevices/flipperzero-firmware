@@ -136,10 +136,10 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 *va_arg(ap, int *) = value;
             } break;
 
-            case 'f': { // Fractional value with scale (int, int).
+            case 'f': { // Fractional value with scale (struct minmea_float).
                 int sign = 0;
-                int value = -1;
-                int scale = 0;
+                int_least32_t value = -1;
+                int_least32_t scale = 0;
 
                 if (field) {
                     while (minmea_isfield(*field)) {
@@ -172,8 +172,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 if (sign)
                     value *= sign;
 
-                *va_arg(ap, int *) = value;
-                *va_arg(ap, int *) = scale;
+                *va_arg(ap, struct minmea_float *) = (struct minmea_float) {value, scale};
             } break;
 
             case 'i': { // Integer value, default 0 (int).
@@ -339,20 +338,20 @@ bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence)
             type,
             &frame->time,
             &validity,
-            &frame->latitude, &frame->latitude_scale, &latitude_direction,
-            &frame->longitude, &frame->longitude_scale, &longitude_direction,
-            &frame->speed, &frame->speed_scale,
-            &frame->course, &frame->course_scale,
+            &frame->latitude, &latitude_direction,
+            &frame->longitude, &longitude_direction,
+            &frame->speed,
+            &frame->course,
             &frame->date,
-            &frame->variation, &frame->variation_scale, &variation_direction))
+            &frame->variation, &variation_direction))
         return false;
     if (strcmp(type+2, "RMC"))
         return false;
 
     frame->valid = (validity == 'A');
-    frame->latitude *= latitude_direction;
-    frame->longitude *= longitude_direction;
-    frame->variation *= variation_direction;
+    frame->latitude.value *= latitude_direction;
+    frame->longitude.value *= longitude_direction;
+    frame->variation.value *= variation_direction;
 
     return true;
 }
@@ -367,20 +366,20 @@ bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence)
     if (!minmea_scan(sentence, "tTfdfdiiffcfci_",
             type,
             &frame->time,
-            &frame->latitude, &frame->latitude_scale, &latitude_direction,
-            &frame->longitude, &frame->longitude_scale, &longitude_direction,
+            &frame->latitude, &latitude_direction,
+            &frame->longitude, &longitude_direction,
             &frame->fix_quality,
             &frame->satellites_tracked,
-            &frame->hdop, &frame->hdop_scale,
-            &frame->altitude, &frame->altitude_scale, &frame->altitude_units,
-            &frame->height, &frame->height_scale, &frame->height_units,
+            &frame->hdop,
+            &frame->altitude, &frame->altitude_units,
+            &frame->height, &frame->height_units,
             &frame->dgps_age))
         return false;
     if (strcmp(type+2, "GGA"))
         return false;
 
-    frame->latitude *= latitude_direction;
-    frame->longitude *= longitude_direction;
+    frame->latitude.value *= latitude_direction;
+    frame->longitude.value *= longitude_direction;
 
     return true;
 }
@@ -407,14 +406,9 @@ bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence)
             &frame->sats[10],
             &frame->sats[11],
             &frame->pdop,
-            &frame->pdop_scale,
             &frame->hdop,
-            &frame->hdop_scale,
-            &frame->vdop,
-            &frame->vdop_scale
-            )){
+            &frame->vdop))
         return false;
-    }
     if (strcmp(type+2, "GSA"))
         return false;
 
@@ -429,13 +423,13 @@ bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence)
     if (!minmea_scan(sentence, "tTfffffff",
             type,
             &frame->time,
-            &frame->rms_deviation, &frame->rms_deviation_scale,
-            &frame->semi_major_deviation, &frame->semi_major_deviation_scale,
-            &frame->semi_minor_deviation, &frame->semi_minor_deviation_scale,
-            &frame->semi_major_orientation, &frame->semi_major_orientation_scale,
-            &frame->latitude_error_deviation, &frame->latitude_error_deviation_scale,
-            &frame->longitude_error_deviation, &frame->longitude_error_deviation_scale,
-            &frame->altitude_error_deviation, &frame->altitude_error_deviation_scale))
+            &frame->rms_deviation,
+            &frame->semi_major_deviation,
+            &frame->semi_minor_deviation,
+            &frame->semi_major_orientation,
+            &frame->latitude_error_deviation,
+            &frame->longitude_error_deviation,
+            &frame->altitude_error_deviation))
         return false;
     if (strcmp(type+2, "GST"))
         return false;
