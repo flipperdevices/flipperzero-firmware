@@ -222,7 +222,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                 if (field[0] != '$')
                     goto parse_error;
                 for (int f=0; f<5; f++)
-                    if (!minmea_isfield(field[f+i]))
+                    if (!minmea_isfield(field[1+f]))
                         goto parse_error;
 
                 char *buf = va_arg(ap, char *);
