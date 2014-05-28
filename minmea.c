@@ -493,15 +493,15 @@ int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, cons
         return -1;
 
     struct tm tm;
+    memset(&tm, 0, sizeof(tm));
     tm.tm_year = 2000 + date->year - 1900;
     tm.tm_mon = date->month - 1;
     tm.tm_mday = date->day;
     tm.tm_hour = time->hours;
     tm.tm_min = time->minutes;
     tm.tm_sec = time->seconds;
-    tm.tm_isdst = 0;
-    time_t timestamp = timegm(&tm);
 
+    time_t timestamp = timegm(&tm);
     if (timestamp != -1) {
         tv->tv_sec = timestamp;
         tv->tv_usec = time->microseconds;
