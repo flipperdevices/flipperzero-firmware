@@ -182,7 +182,7 @@ bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.
  */
-int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time);
+int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time_);
 
 /**
  * Rescale a fixed-point value to a different scale. Rounds towards zero.

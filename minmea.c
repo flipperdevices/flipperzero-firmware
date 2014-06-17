@@ -252,7 +252,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
             } break;
 
             case 'T': { // Time (int, int, int, int), -1 if empty.
-                struct minmea_time *time = va_arg(ap, struct minmea_time *);
+                struct minmea_time *time_ = va_arg(ap, struct minmea_time *);
 
                 int h = -1, i = -1, s = -1, u = -1;
 
@@ -281,10 +281,10 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                     }
                 }
 
-                time->hours = h;
-                time->minutes = i;
-                time->seconds = s;
-                time->microseconds = u;
+                time_->hours = h;
+                time_->minutes = i;
+                time_->seconds = s;
+                time_->microseconds = u;
             } break;
 
             case '_': { // Ignore the field.
@@ -513,9 +513,9 @@ bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence)
     return true;
 }
 
-int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time)
+int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time_)
 {
-    if (date->year == -1 || time->hours == -1)
+    if (date->year == -1 || time_->hours == -1)
         return -1;
 
     struct tm tm;
@@ -523,14 +523,14 @@ int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, cons
     tm.tm_year = 2000 + date->year - 1900;
     tm.tm_mon = date->month - 1;
     tm.tm_mday = date->day;
-    tm.tm_hour = time->hours;
-    tm.tm_min = time->minutes;
-    tm.tm_sec = time->seconds;
+    tm.tm_hour = time_->hours;
+    tm.tm_min = time_->minutes;
+    tm.tm_sec = time_->seconds;
 
     time_t timestamp = timegm(&tm);
     if (timestamp != -1) {
         tv->tv_sec = timestamp;
-        tv->tv_usec = time->microseconds;
+        tv->tv_usec = time_->microseconds;
         return 0;
     } else {
         return -1;
