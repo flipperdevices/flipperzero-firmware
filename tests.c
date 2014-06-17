@@ -640,6 +640,11 @@ START_TEST(test_minmea_rescale)
 }
 END_TEST
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+/* The float values used in tests should be exactly representable under IEEE754;
+ * false negatives will occur otherwise. */
+
 START_TEST(test_minmea_float)
 {
     ck_assert(isnan(minmea_tofloat(&(struct minmea_float) { 42, 0 })));
@@ -657,6 +662,8 @@ START_TEST(test_minmea_coord)
     ck_assert(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) == 42.5);
 }
 END_TEST
+
+#pragma GCC diagnostic pop
 
 Suite *minmea_suite(void)
 {
