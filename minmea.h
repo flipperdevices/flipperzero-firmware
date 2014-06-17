@@ -89,8 +89,8 @@ enum minmea_gll_mode {
 };
 
 struct minmea_sentence_gll {
-    int latitude, latitude_scale;
-    int longitude, longitude_scale;
+    struct minmea_float latitude;
+    struct minmea_float longitude;
     struct minmea_time time;
     char status;
     char mode;

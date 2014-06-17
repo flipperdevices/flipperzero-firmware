@@ -523,18 +523,13 @@ START_TEST(test_minmea_parse_gll1)
 {
     const char *sentence = "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41";
     struct minmea_sentence_gll frame = {};
-    struct minmea_sentence_gll expected = {};
-
-    expected.latitude = 37232475;
-    expected.latitude_scale = 10000;
-    expected.longitude = -121583416;
-    expected.longitude_scale = 10000;
-    expected.time.hours = 16;
-    expected.time.minutes = 12;
-    expected.time.seconds = 29;
-    expected.time.microseconds = 487000;
-    expected.status = MINMEA_GLL_STATUS_DATA_VALID;
-    expected.mode = MINMEA_GLL_MODE_AUTONOMOUS;
+    struct minmea_sentence_gll expected = {
+        .latitude = { 37232475, 10000 },
+        .longitude = { -121583416, 10000 },
+        .time = { 16, 12, 29, 487000 },
+        .status = MINMEA_GLL_STATUS_DATA_VALID,
+        .mode = MINMEA_GLL_MODE_AUTONOMOUS,
+    };
 
     ck_assert(minmea_check(sentence) == true);
     ck_assert(minmea_parse_gll(&frame, sentence) == true);

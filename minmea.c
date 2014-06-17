@@ -441,8 +441,8 @@ bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence)
 
     if (!minmea_scan(sentence, "tfdfdTcc",
             type,
-            &frame->latitude, &frame->latitude_scale, &latitude_direction,
-            &frame->longitude, &frame->longitude_scale, &longitude_direction,
+            &frame->latitude, &latitude_direction,
+            &frame->longitude, &longitude_direction,
             &frame->time,
             &frame->status,
             &frame->mode))
@@ -450,8 +450,8 @@ bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence)
     if (strcmp(type+2, "GLL"))
         return false;
 
-    frame->latitude *= latitude_direction;
-    frame->longitude *= longitude_direction;
+    frame->latitude.value *= latitude_direction;
+    frame->longitude.value *= longitude_direction;
 
     return true;
 }
