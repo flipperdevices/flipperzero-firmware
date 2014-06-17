@@ -596,6 +596,171 @@ START_TEST(test_minmea_parse_gsv1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gsv2)
+{
+    const char *sentence = "$GPGSV,4,2,11,08,51,203,30,09,45,215,28*75";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 2,
+        .total_sats = 11,
+        .sats = {
+            {
+                .nr = 8,
+                .elevation = 51,
+                .azimuth = 203,
+                .snr = 30
+            },
+            {
+                .nr = 9,
+                .elevation = 45,
+                .azimuth = 215,
+                .snr = 28
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv3)
+{
+    const char *sentence = "$GPGSV,4,4,13,39,31,170,27*40";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 4,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 39,
+                .elevation = 31,
+                .azimuth = 170,
+                .snr = 27
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv4)
+{
+    const char *sentence = "$GPGSV,4,4,13*7B";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 4,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv5)
+{
+    const char *sentence = "$GPGSV,4,1,13,02,28,259,33,04,12,212,27,05,34,305,30,07,79,138,*7F";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 1,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 2,
+                .elevation = 28,
+                .azimuth = 259,
+                .snr = 33
+            },
+            {
+                .nr = 4,
+                .elevation = 12,
+                .azimuth = 212,
+                .snr = 27
+            },
+            {
+                .nr = 5,
+                .elevation = 34,
+                .azimuth = 305,
+                .snr = 30
+            },
+            {
+                .nr = 7,
+                .elevation = 79,
+                .azimuth = 138,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
@@ -734,6 +899,10 @@ static Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gll2);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
     tcase_add_test(tc_parse, test_minmea_parse_gsv1);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv2);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv3);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv4);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv5);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
