@@ -707,7 +707,7 @@ END_TEST
 
 #pragma GCC diagnostic pop
 
-Suite *minmea_suite(void)
+static Suite *minmea_suite(void)
 {
     Suite *s = suite_create ("minmea");
 
