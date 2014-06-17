@@ -537,6 +537,24 @@ START_TEST(test_minmea_parse_gll1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gll2)
+{
+    const char *sentence = "$GPGLL,4916.45,N,12311.12,W,225444,A";
+    struct minmea_sentence_gll frame = {};
+    struct minmea_sentence_gll expected = {
+        .latitude = { 491645, 100 },
+        .longitude = { -1231112, 100 },
+        .time = { 22, 54, 44 },
+        .status = MINMEA_GLL_STATUS_DATA_VALID,
+        .mode = 0,
+    };
+
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gll(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_parse_gsv1)
 {
     const char *sentence = "$GPGSV,3,3,11,22,42,067,42,24,14,311,43,27,05,244,00,,,,*4D";
@@ -717,6 +735,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
     tcase_add_test(tc_parse, test_minmea_parse_gsa1);
     tcase_add_test(tc_parse, test_minmea_parse_gll1);
+    tcase_add_test(tc_parse, test_minmea_parse_gll2);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
     tcase_add_test(tc_parse, test_minmea_parse_gsv1);
     suite_add_tcase(s, tc_parse);

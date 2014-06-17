@@ -439,7 +439,7 @@ bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence)
     int latitude_direction;
     int longitude_direction;
 
-    if (!minmea_scan(sentence, "tfdfdTcc",
+    if (!minmea_scan(sentence, "tfdfdTc;c",
             type,
             &frame->latitude, &latitude_direction,
             &frame->longitude, &longitude_direction,
