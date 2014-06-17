@@ -78,14 +78,14 @@ struct minmea_sentence_gga {
 };
 
 enum minmea_gll_status {
-    MINMEA_GLL_STATUS_DATA_VALID     = 'A',
+    MINMEA_GLL_STATUS_DATA_VALID = 'A',
     MINMEA_GLL_STATUS_DATA_NOT_VALID = 'V',
 };
 
 enum minmea_gll_mode {
     MINMEA_GLL_MODE_AUTONOMOUS = 'A',
-    MINMEA_GLL_MODE_DPGS       = 'D',
-    MINMEA_GLL_MODE_DR         = 'E',
+    MINMEA_GLL_MODE_DPGS = 'D',
+    MINMEA_GLL_MODE_DR = 'E',
 };
 
 struct minmea_sentence_gll {
