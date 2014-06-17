@@ -12,7 +12,7 @@
 
 #include "minmea.h"
 
-int main()
+int main(void)
 {
     char line[MINMEA_MAX_LENGTH];
     while (fgets(line, sizeof(line), stdin) != NULL) {

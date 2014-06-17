@@ -754,7 +754,7 @@ Suite *minmea_suite(void)
     return s;
 }
 
-int main()
+int main(void)
 {
     int number_failed;
     Suite *s = minmea_suite();
