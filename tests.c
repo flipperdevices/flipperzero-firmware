@@ -519,7 +519,7 @@ START_TEST(test_minmea_parse_gsa1)
 }
 END_TEST
 
-START_TEST(test_minmea_parse_gpgll)
+START_TEST(test_minmea_parse_gll1)
 {
     const char *sentence = "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41";
     struct minmea_sentence_gll frame = {};
@@ -721,7 +721,7 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_rmc2);
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
     tcase_add_test(tc_parse, test_minmea_parse_gsa1);
-    tcase_add_test(tc_parse, test_minmea_parse_gpgll);
+    tcase_add_test(tc_parse, test_minmea_parse_gll1);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
     tcase_add_test(tc_parse, test_minmea_parse_gsv1);
     suite_add_tcase(s, tc_parse);
