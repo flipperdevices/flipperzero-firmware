@@ -19,7 +19,7 @@ systems.
 * ``RMC`` (Recommended Minimum: position, velocity, time)
 * ``GGA`` (Fix Data)
 * ``GSA`` (DOP and active satellites)
-* ``GLL`` (Geographic Position -- Latitude/Longitude)
+* ``GLL`` (Geographic Position: Latitude/Longitude)
 * ``GST`` (Pseudorange Noise Statistics)
 * ``GSV`` (Satellites in view)
 
