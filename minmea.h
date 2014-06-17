@@ -31,6 +31,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_RMC,
     MINMEA_SENTENCE_GGA,
     MINMEA_SENTENCE_GSA,
+    MINMEA_SENTENCE_GLL,
     MINMEA_SENTENCE_GST,
     MINMEA_SENTENCE_GSV,
 };
@@ -74,6 +75,25 @@ struct minmea_sentence_gga {
     struct minmea_float altitude; char altitude_units;
     struct minmea_float height; char height_units;
     int dgps_age;
+};
+
+enum minmea_gll_status {
+    MINMEA_GLL_STATUS_DATA_VALID = 'A',
+    MINMEA_GLL_STATUS_DATA_NOT_VALID = 'V',
+};
+
+enum minmea_gll_mode {
+    MINMEA_GLL_MODE_AUTONOMOUS = 'A',
+    MINMEA_GLL_MODE_DPGS = 'D',
+    MINMEA_GLL_MODE_DR = 'E',
+};
+
+struct minmea_sentence_gll {
+    struct minmea_float latitude;
+    struct minmea_float longitude;
+    struct minmea_time time;
+    char status;
+    char mode;
 };
 
 struct minmea_sentence_gst {
@@ -155,6 +175,7 @@ bool minmea_scan(const char *sentence, const char *format, ...);
 bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
 bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
 bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
+bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence);
 bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence);
 bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
 

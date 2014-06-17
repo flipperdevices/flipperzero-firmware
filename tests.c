@@ -519,6 +519,42 @@ START_TEST(test_minmea_parse_gsa1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gll1)
+{
+    const char *sentence = "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41";
+    struct minmea_sentence_gll frame = {};
+    struct minmea_sentence_gll expected = {
+        .latitude = { 37232475, 10000 },
+        .longitude = { -121583416, 10000 },
+        .time = { 16, 12, 29, 487000 },
+        .status = MINMEA_GLL_STATUS_DATA_VALID,
+        .mode = MINMEA_GLL_MODE_AUTONOMOUS,
+    };
+
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gll(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gll2)
+{
+    const char *sentence = "$GPGLL,4916.45,N,12311.12,W,225444,A";
+    struct minmea_sentence_gll frame = {};
+    struct minmea_sentence_gll expected = {
+        .latitude = { 491645, 100 },
+        .longitude = { -1231112, 100 },
+        .time = { 22, 54, 44 },
+        .status = MINMEA_GLL_STATUS_DATA_VALID,
+        .mode = 0,
+    };
+
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gll(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_parse_gsv1)
 {
     const char *sentence = "$GPGSV,3,3,11,22,42,067,42,24,14,311,43,27,05,244,00,,,,*4D";
@@ -566,6 +602,7 @@ START_TEST(test_minmea_usage1)
         "$GPRMC,081836,A,3751.65,S,14507.36,E,000.0,360.0,130998,011.3,E*62",
         "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47",
         "$GNGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1",
+        "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41",
         "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58",
         NULL,
     };
@@ -585,6 +622,11 @@ START_TEST(test_minmea_usage1)
             case MINMEA_SENTENCE_GSA: {
                 struct minmea_sentence_gsa frame;
                 ck_assert(minmea_parse_gsa(&frame, *sentence) == true);
+            } break;
+
+            case MINMEA_SENTENCE_GLL: {
+                struct minmea_sentence_gll frame;
+                ck_assert(minmea_parse_gll(&frame, *sentence) == true);
             } break;
 
             case MINMEA_SENTENCE_GST: {
@@ -692,6 +734,8 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_rmc2);
     tcase_add_test(tc_parse, test_minmea_parse_gga1);
     tcase_add_test(tc_parse, test_minmea_parse_gsa1);
+    tcase_add_test(tc_parse, test_minmea_parse_gll1);
+    tcase_add_test(tc_parse, test_minmea_parse_gll2);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
     tcase_add_test(tc_parse, test_minmea_parse_gsv1);
     suite_add_tcase(s, tc_parse);
