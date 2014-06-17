@@ -20,27 +20,33 @@ systems.
 * ``GGA`` (Fix Data)
 * ``GSA`` (DOP and active satellites)
 * ``GLL`` (Geographic Position -- Latitude/Longitude)
+* ``GST`` (Pseudorange Noise Statistics)
+* ``GSV`` (Satellites in view)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source.
 
 ## Fractional number format
 
-Internally, minmea stores fractional numbers as pairs of two integers: ``(value, scale)``.
-For example, a value of ``"-123.456"`` would be parsed as ``(-123456, 1000)``. As this
-format is quite unwieldy, minmea provides the following convenience macros for converting
+Internally, minmea stores fractional numbers as pairs of two integers: ``{value, scale}``.
+For example, a value of ``"-123.456"`` would be parsed as ``{-123456, 1000}``. As this
+format is quite unwieldy, minmea provides the following convenience functions for converting
 to either fixed-point or floating-point format:
 
-* ``minmea_rescale(-123456, 1000, 10) => -1235``
-* ``minmea_float(-123456, 1000) => -123.456``
+* ``minmea_rescale({-123456, 1000}, 10) => -1235``
+* ``minmea_float({-123456, 1000}) => -123.456``
+
+The compound type ``struct minmea_float`` uses ``int_least32_t`` internally. Therefore,
+the coordinate precision is guaranteed to be at least ``[+-]DDDMM.MMMMM`` (five decimal digits)
+or ±20cm LSB at the equator.
 
 ## Coordinate format
 
 NMEA uses the clunky ``DDMM.MMMM`` format which, honestly, is not good in the internet era.
 Internally, minmea stores it as a fractional number (see above); for practical uses,
 the value should be probably converted to the DD.DDDDD floating point format using the
-following macro:
+following function:
 
-* ``minmea_coord(-375165, 100) => -37.860832``
+* ``minmea_tocoord({-375165, 100}) => -37.860832``
 
 The library doesn't perform this conversion automatically for the following reasons:
 
@@ -51,36 +57,49 @@ The library doesn't perform this conversion automatically for the following reas
 ## Example
 
 ```c
-    char line[MINMEA_MAX_LENGTH];
-    while (fgets(line, sizeof(line), stdin) != NULL) {
-        printf("%s", line);
-        switch (minmea_sentence_id(line)) {
-            case MINMEA_SENTENCE_RMC: {
-                struct minmea_sentence_rmc frame;
-                if (minmea_parse_rmc(&frame, line)) {
-                    printf("+++ raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
-                            frame.latitude, frame.latitude_scale,
-                            frame.longitude, frame.longitude_scale,
-                            frame.speed, frame.speed_scale);
-                    printf("+++ fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
-                            minmea_rescale(frame.latitude, frame.latitude_scale, 1000),
-                            minmea_rescale(frame.longitude, frame.longitude_scale, 1000),
-                            minmea_rescale(frame.speed, frame.speed_scale, 1000));
-                    printf("+++ floating point degree coordinates and speed: (%f,%f) %f\n",
-                            minmea_coord(frame.latitude, frame.latitude_scale),
-                            minmea_coord(frame.longitude, frame.longitude_scale),
-                            minmea_float(frame.speed, frame.speed_scale));
-                }
-            } break;
+char line[MINMEA_MAX_LENGTH];
+while (fgets(line, sizeof(line), stdin) != NULL) {
+    switch (minmea_sentence_id(line)) {
+        case MINMEA_SENTENCE_RMC: {
+            struct minmea_sentence_rmc frame;
+            if (minmea_parse_rmc(&frame, line)) {
+                printf("$RMC: raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
+                        frame.latitude.value, frame.latitude.scale,
+                        frame.longitude.value, frame.longitude.scale,
+                        frame.speed.value, frame.speed.scale);
+                printf("$RMC fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
+                        minmea_rescale(&frame.latitude, 1000),
+                        minmea_rescale(&frame.longitude, 1000),
+                        minmea_rescale(&frame.speed, 1000));
+                printf("$RMC floating point degree coordinates and speed: (%f,%f) %f\n",
+                        minmea_tocoord(&frame.latitude),
+                        minmea_tocoord(&frame.longitude),
+                        minmea_tofloat(&frame.speed));
+            }
+        } break;
 
-            case MINMEA_SENTENCE_GGA: {
-                struct minmea_sentence_gga frame;
-                if (minmea_parse_gga(&frame, line)) {
-                    printf("$GPGGA: fix quality: %d\n", frame.fix_quality);
-                }
-            } break;
-        }
+        case MINMEA_SENTENCE_GGA: {
+            struct minmea_sentence_gga frame;
+            if (minmea_parse_gga(&frame, line)) {
+                printf("$GGA: fix quality: %d\n", frame.fix_quality);
+            }
+        } break;
+
+        case MINMEA_SENTENCE_GSV: {
+            struct minmea_sentence_gsv frame;
+            if (minmea_parse_gsv(&frame, line)) {
+                printf("$GSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
+                printf("$GSV: sattelites in view: %d\n", frame.total_sats);
+                for (int i = 0; i < 4; i++)
+                    printf("$GSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
+                        frame.sats[i].nr,
+                        frame.sats[i].elevation,
+                        frame.sats[i].azimuth,
+                        frame.sats[i].snr);
+            }
+        } break;
     }
+}
 ```
 
 ## Integration with your project
@@ -100,10 +119,6 @@ typing ``make``.
 
 ## Limitations
 
-* Fractional numbers are represented as ``int`` internally, which is 32 bits on
-  most embedded platforms. Therefore, the maximum supported coordinate precision
-  is ``[+-]DDDMM.MMMMM``. The library does not check for integer overflow at the
-  moment; coordinates with more precision will not parse correctly.
 * Only a handful of frames is supported right now.
 * There's no support for omitting parts of the library from building. As
   a workaround, use the ``-ffunction-sections -Wl,--gc-sections`` linker flags
