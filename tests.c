@@ -850,21 +850,23 @@ END_TEST
 /* The float values used in tests should be exactly representable under IEEE754;
  * false negatives will occur otherwise. */
 
+#define assert_float_eq(x, y) ck_assert(fabsf((x) - (y)) <= 0.0f)
+
 START_TEST(test_minmea_float)
 {
     ck_assert(isnan(minmea_tofloat(&(struct minmea_float) { 42, 0 })));
-    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { 7, 1}) - 7.0f) <= 0.0f);
-    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { -200, 100}) - (-2.0f)) <= 0.0f);
-    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { 15, 10}) - 1.5f) <= 0.0f);
+    assert_float_eq(minmea_tofloat(&(struct minmea_float) { 7, 1 }), 7.0f);
+    assert_float_eq(minmea_tofloat(&(struct minmea_float) { -200, 100 }), -2.0f);
+    assert_float_eq(minmea_tofloat(&(struct minmea_float) { 15, 10 }), 1.5f);
 }
 END_TEST
 
 START_TEST(test_minmea_coord)
 {
     ck_assert(isnan(minmea_tocoord(&(struct minmea_float) { 42, 0 })));
-    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) - 42.0f) <= 0.0f);
-    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) - 42.0f) <= 0.0f);
-    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) - 42.5f) <= 0.0f);
+    assert_float_eq(minmea_tocoord(&(struct minmea_float) { 4200, 1 }), 42.0f);
+    assert_float_eq(minmea_tocoord(&(struct minmea_float) { 420000, 100 }), 42.0f);
+    assert_float_eq(minmea_tocoord(&(struct minmea_float) { 423000, 100 }), 42.5f);
 }
 END_TEST
 
