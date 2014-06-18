@@ -50,8 +50,8 @@ int main(void)
                             frame.latitude_error_deviation.value, frame.latitude_error_deviation.scale,
                             frame.longitude_error_deviation.value, frame.longitude_error_deviation.scale,
                             frame.altitude_error_deviation.value, frame.altitude_error_deviation.scale);
-                    printf("$xxGST fixed point latitude,longitude and altitude error deviation \
-                           scaled to one decimal place: (%d,%d,%d)\n",
+                    printf("$xxGST fixed point latitude,longitude and altitude error deviation"
+                           " scaled to one decimal place: (%d,%d,%d)\n",
                             minmea_rescale(&frame.latitude_error_deviation, 10),
                             minmea_rescale(&frame.longitude_error_deviation, 10),
                             minmea_rescale(&frame.altitude_error_deviation, 10));
