@@ -124,8 +124,9 @@ typing ``make``.
   a workaround, use the ``-ffunction-sections -Wl,--gc-sections`` linker flags
   (or equivalent) to remove the unused functions (parsers) from the final image.
 * Some systems lack ``timegm``. On these systems, the recommended course of
-  action is to build with ``-Dtimegm=mktime`` - assuming the system runs in the
-  default ``UTC`` timezone.
+  action is to build with ``-Dtimegm=mktime`` which will work correctly as long
+  the system runs in the default ``UTC`` timezone. Native Windows builds should
+  use ``-Dtimegm=_mkgmtime`` instead which will work correctly in all timezones.
 
 ## Bugs
 

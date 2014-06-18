@@ -531,7 +531,7 @@ int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, cons
     tm.tm_min = time_->minutes;
     tm.tm_sec = time_->seconds;
 
-    time_t timestamp = timegm(&tm);
+    time_t timestamp = timegm(&tm); /* See README.md if your system lacks timegm(). */
     if (timestamp != -1) {
         tv->tv_sec = timestamp;
         tv->tv_usec = time_->microseconds;
