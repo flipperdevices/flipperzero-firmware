@@ -249,47 +249,47 @@ END_TEST
 
 START_TEST(test_minmea_scan_D)
 {
-    struct minmea_date date;
+    struct minmea_date d;
 
-    ck_assert(minmea_scan("$GPXXX,3112", "_D", &date) == false);
-    ck_assert(minmea_scan("$GPXXX,foobar", "_D", &date) == false);
+    ck_assert(minmea_scan("$GPXXX,3112", "_D", &d) == false);
+    ck_assert(minmea_scan("$GPXXX,foobar", "_D", &d) == false);
 
-    ck_assert(minmea_scan("$GPXXX,311299", "_D", &date) == true);
-    ck_assert_int_eq(date.day, 31);
-    ck_assert_int_eq(date.month, 12);
-    ck_assert_int_eq(date.year, 99);
+    ck_assert(minmea_scan("$GPXXX,311299", "_D", &d) == true);
+    ck_assert_int_eq(d.day, 31);
+    ck_assert_int_eq(d.month, 12);
+    ck_assert_int_eq(d.year, 99);
 
-    ck_assert(minmea_scan("$GPXXX,,,,,,,,,nope", "_D", &date) == true);
-    ck_assert_int_eq(date.day, -1);
-    ck_assert_int_eq(date.month, -1);
-    ck_assert_int_eq(date.year, -1);
+    ck_assert(minmea_scan("$GPXXX,,,,,,,,,nope", "_D", &d) == true);
+    ck_assert_int_eq(d.day, -1);
+    ck_assert_int_eq(d.month, -1);
+    ck_assert_int_eq(d.year, -1);
 }
 END_TEST
 
 START_TEST(test_minmea_scan_T)
 {
-    struct minmea_time time_;
+    struct minmea_time t;
 
-    ck_assert(minmea_scan("$GPXXX,2359", "_T", &time_) == false);
-    ck_assert(minmea_scan("$GPXXX,foobar", "_T", &time_) == false);
+    ck_assert(minmea_scan("$GPXXX,2359", "_T", &t) == false);
+    ck_assert(minmea_scan("$GPXXX,foobar", "_T", &t) == false);
 
-    ck_assert(minmea_scan("$GPXXX,235960", "_T", &time_) == true);
-    ck_assert_int_eq(time_.hours, 23);
-    ck_assert_int_eq(time_.minutes, 59);
-    ck_assert_int_eq(time_.seconds, 60);
-    ck_assert_int_eq(time_.microseconds, 0);
+    ck_assert(minmea_scan("$GPXXX,235960", "_T", &t) == true);
+    ck_assert_int_eq(t.hours, 23);
+    ck_assert_int_eq(t.minutes, 59);
+    ck_assert_int_eq(t.seconds, 60);
+    ck_assert_int_eq(t.microseconds, 0);
 
-    ck_assert(minmea_scan("$GPXXX,213700.001", "_T", &time_) == true);
-    ck_assert_int_eq(time_.hours, 21);
-    ck_assert_int_eq(time_.minutes, 37);
-    ck_assert_int_eq(time_.seconds, 0);
-    ck_assert_int_eq(time_.microseconds, 1000);
+    ck_assert(minmea_scan("$GPXXX,213700.001", "_T", &t) == true);
+    ck_assert_int_eq(t.hours, 21);
+    ck_assert_int_eq(t.minutes, 37);
+    ck_assert_int_eq(t.seconds, 0);
+    ck_assert_int_eq(t.microseconds, 1000);
 
-    ck_assert(minmea_scan("$GPXXX,,,,,,,nope", "_T", &time_) == true);
-    ck_assert_int_eq(time_.hours, -1);
-    ck_assert_int_eq(time_.minutes, -1);
-    ck_assert_int_eq(time_.seconds, -1);
-    ck_assert_int_eq(time_.microseconds, -1);
+    ck_assert(minmea_scan("$GPXXX,,,,,,,nope", "_T", &t) == true);
+    ck_assert_int_eq(t.hours, -1);
+    ck_assert_int_eq(t.minutes, -1);
+    ck_assert_int_eq(t.seconds, -1);
+    ck_assert_int_eq(t.microseconds, -1);
 }
 END_TEST
 
@@ -297,7 +297,7 @@ START_TEST(test_minmea_scan_complex1)
 {
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n";
     char type[6];
-    struct minmea_time time_;
+    struct minmea_time t;
     struct minmea_float latitude; int latitude_direction;
     struct minmea_float longitude; int longitude_direction;
     int fix_quality;
@@ -307,7 +307,7 @@ START_TEST(test_minmea_scan_complex1)
     struct minmea_float height; char height_units;
     ck_assert(minmea_scan(sentence, "tTfdfdiiffcfc__",
         type,
-        &time_,
+        &t,
         &latitude, &latitude_direction,
         &longitude, &longitude_direction,
         &fix_quality,
@@ -316,9 +316,9 @@ START_TEST(test_minmea_scan_complex1)
         &altitude, &altitude_units,
         &height, &height_units) == true);
     ck_assert_str_eq(type, "GPGGA");
-    ck_assert_int_eq(time_.hours, 12);
-    ck_assert_int_eq(time_.minutes, 35);
-    ck_assert_int_eq(time_.seconds, 19);
+    ck_assert_int_eq(t.hours, 12);
+    ck_assert_int_eq(t.minutes, 35);
+    ck_assert_int_eq(t.seconds, 19);
     ck_assert_int_eq(latitude.value, 4807038);
     ck_assert_int_eq(latitude.scale, 1000);
     ck_assert_int_eq(latitude_direction, 1);
@@ -343,7 +343,7 @@ START_TEST(test_minmea_scan_complex2)
 {
     const char *sentence = "$GPBWC,081837,,,,,,T,,M,,N,*13";
     char type[6];
-    struct minmea_time time_;
+    struct minmea_time t;
     struct minmea_float latitude; int latitude_direction;
     struct minmea_float longitude; int longitude_direction;
     struct minmea_float bearing_true; char bearing_true_mark;
@@ -352,7 +352,7 @@ START_TEST(test_minmea_scan_complex2)
     char name[MINMEA_MAX_LENGTH];
     ck_assert(minmea_scan(sentence, "tTfdfdfcfcfcs",
         type,
-        &time_,
+        &t,
         &latitude, &latitude_direction,
         &longitude, &longitude_direction,
         &bearing_true, &bearing_true_mark,
@@ -360,9 +360,9 @@ START_TEST(test_minmea_scan_complex2)
         &distance, &distance_units,
         name) == true);
     ck_assert_str_eq(type, "GPBWC");
-    ck_assert_int_eq(time_.hours, 8);
-    ck_assert_int_eq(time_.minutes, 18);
-    ck_assert_int_eq(time_.seconds, 37);
+    ck_assert_int_eq(t.hours, 8);
+    ck_assert_int_eq(t.minutes, 18);
+    ck_assert_int_eq(t.seconds, 37);
     ck_assert_int_eq(latitude.scale, 0);
     ck_assert_int_eq(latitude_direction, 0);
     ck_assert_int_eq(longitude.scale, 0);
@@ -381,7 +381,7 @@ START_TEST(test_minmea_scan_complex3)
 {
     const char *sentence = "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58";
     char type[6];
-    struct minmea_time time_;
+    struct minmea_time t;
     struct minmea_float rms_deviation;
     struct minmea_float semi_major_deviation;
     struct minmea_float semi_minor_deviation;
@@ -391,7 +391,7 @@ START_TEST(test_minmea_scan_complex3)
     struct minmea_float altitude_error_deviation;
     ck_assert(minmea_scan(sentence, "tTfffffff",
         type,
-        &time_,
+        &t,
         &rms_deviation,
         &semi_major_deviation,
         &semi_minor_deviation,
@@ -400,10 +400,10 @@ START_TEST(test_minmea_scan_complex3)
         &longitude_error_deviation,
         &altitude_error_deviation) == true);
     ck_assert_str_eq(type, "GPGST");
-    ck_assert_int_eq(time_.hours, 2);
-    ck_assert_int_eq(time_.minutes, 46);
-    ck_assert_int_eq(time_.seconds, 3);
-    ck_assert_int_eq(time_.microseconds, 0);
+    ck_assert_int_eq(t.hours, 2);
+    ck_assert_int_eq(t.minutes, 46);
+    ck_assert_int_eq(t.seconds, 3);
+    ck_assert_int_eq(t.microseconds, 0);
     ck_assert_int_eq(rms_deviation.value, 32);
     ck_assert_int_eq(rms_deviation.scale, 10);
     ck_assert_int_eq(semi_major_deviation.value, 66);
@@ -813,19 +813,19 @@ END_TEST
 
 START_TEST(test_minmea_gettimeofday)
 {
-    struct minmea_date date = { 14, 2, 14 };
-    struct minmea_time time_ = { 13, 0, 9, 123456 };
+    struct minmea_date d = { 14, 2, 14 };
+    struct minmea_time t = { 13, 0, 9, 123456 };
     struct timeval tv;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time_) == 0);
+    ck_assert(minmea_gettimeofday(&tv, &d, &t) == 0);
     ck_assert_int_eq(tv.tv_sec, 1392382809);
     ck_assert_int_eq(tv.tv_usec, 123456);
 
-    date.year = -1;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time_) != 0);
-    date.year = 2014;
+    d.year = -1;
+    ck_assert(minmea_gettimeofday(&tv, &d, &t) != 0);
+    d.year = 2014;
 
-    time_.hours = -1;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time_) != 0);
+    t.hours = -1;
+    ck_assert(minmea_gettimeofday(&tv, &d, &t) != 0);
 }
 END_TEST
 
