@@ -34,12 +34,18 @@ int main(void)
                             minmea_tocoord(&frame.longitude),
                             minmea_tofloat(&frame.speed));
                 }
+                else {
+                    printf("$xxRMC sentence is not parsed\n");
+                }
             } break;
 
             case MINMEA_SENTENCE_GGA: {
                 struct minmea_sentence_gga frame;
                 if (minmea_parse_gga(&frame, line)) {
                     printf("$xxGGA: fix quality: %d\n", frame.fix_quality);
+                }
+                else {
+                    printf("$xxGGA sentence is not parsed\n");
                 }
             } break;
 
@@ -60,6 +66,9 @@ int main(void)
                             minmea_tofloat(&frame.longitude_error_deviation),
                             minmea_tofloat(&frame.altitude_error_deviation));
                 }
+                else {
+                    printf("$xxGST sentence is not parsed\n");
+                }
             } break;
 
             case MINMEA_SENTENCE_GSV: {
@@ -74,9 +83,17 @@ int main(void)
                             frame.sats[i].azimuth,
                             frame.sats[i].snr);
                 }
+                else {
+                    printf("$xxGSV sentence is not parsed\n");
+                }
+            } break;
+
+            case MINMEA_INVALID: {
+                printf("$xxxxx sentence is not valid\n");
             } break;
 
             default: {
+                printf("$xxxxx sentence is not parsed\n");
             } break;
         }
     }
