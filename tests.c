@@ -688,18 +688,18 @@ END_TEST
 START_TEST(test_minmea_float)
 {
     ck_assert(isnan(minmea_tofloat(&(struct minmea_float) { 42, 0 })));
-    ck_assert(minmea_tofloat(&(struct minmea_float) { 7, 1}) == 7.0);
-    ck_assert(minmea_tofloat(&(struct minmea_float) { -200, 100}) == -2.0);
-    ck_assert(minmea_tofloat(&(struct minmea_float) { 15, 10}) == 1.5);
+    ck_assert(fabs(minmea_tofloat(&(struct minmea_float) { 7, 1}) - 7.0) <= 0.0f);
+    ck_assert(fabs(minmea_tofloat(&(struct minmea_float) { -200, 100}) - (-2.0)) <= 0.0f);
+    ck_assert(fabs(minmea_tofloat(&(struct minmea_float) { 15, 10}) - 1.5) <= 0.0f);
 }
 END_TEST
 
 START_TEST(test_minmea_coord)
 {
     ck_assert(isnan(minmea_tocoord(&(struct minmea_float) { 42, 0 })));
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) == 42.0);
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) == 42.0);
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) == 42.5);
+    ck_assert(fabs(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) - 42.0) <= 0.0f);
+    ck_assert(fabs(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) - 42.0) <= 0.0f);
+    ck_assert(fabs(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) - 42.5) <= 0.0f);
 }
 END_TEST
 
