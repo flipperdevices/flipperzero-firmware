@@ -19,7 +19,7 @@ scan-build: clean
 	scan-build $(MAKE) tests
 
 clean:
-	$(RM) tests *.o
+	$(RM) tests example *.o
 
 tests: tests.o minmea.o
 example: example.o minmea.o

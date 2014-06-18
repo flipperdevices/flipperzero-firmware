@@ -12,7 +12,9 @@
 
 #include "minmea.h"
 
-int main()
+#define INDENT_SPACES "  "
+
+int main(void)
 {
     char line[MINMEA_MAX_LENGTH];
     while (fgets(line, sizeof(line), stdin) != NULL) {
@@ -21,62 +23,79 @@ int main()
             case MINMEA_SENTENCE_RMC: {
                 struct minmea_sentence_rmc frame;
                 if (minmea_parse_rmc(&frame, line)) {
-                    printf("$xxRMC: raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
+                    printf(INDENT_SPACES "$xxRMC: raw coordinates and speed: (%d/%d,%d/%d) %d/%d\n",
                             frame.latitude.value, frame.latitude.scale,
                             frame.longitude.value, frame.longitude.scale,
                             frame.speed.value, frame.speed.scale);
-                    printf("$xxRMC fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
+                    printf(INDENT_SPACES "$xxRMC fixed-point coordinates and speed scaled to three decimal places: (%d,%d) %d\n",
                             minmea_rescale(&frame.latitude, 1000),
                             minmea_rescale(&frame.longitude, 1000),
                             minmea_rescale(&frame.speed, 1000));
-                    printf("$xxRMC floating point degree coordinates and speed: (%f,%f) %f\n",
+                    printf(INDENT_SPACES "$xxRMC floating point degree coordinates and speed: (%f,%f) %f\n",
                             minmea_tocoord(&frame.latitude),
                             minmea_tocoord(&frame.longitude),
                             minmea_tofloat(&frame.speed));
+                }
+                else {
+                    printf(INDENT_SPACES "$xxRMC sentence is not parsed\n");
                 }
             } break;
 
             case MINMEA_SENTENCE_GGA: {
                 struct minmea_sentence_gga frame;
                 if (minmea_parse_gga(&frame, line)) {
-                    printf("$xxGGA: fix quality: %d\n", frame.fix_quality);
+                    printf(INDENT_SPACES "$xxGGA: fix quality: %d\n", frame.fix_quality);
+                }
+                else {
+                    printf(INDENT_SPACES "$xxGGA sentence is not parsed\n");
                 }
             } break;
 
             case MINMEA_SENTENCE_GST: {
                 struct minmea_sentence_gst frame;
                 if (minmea_parse_gst(&frame, line)) {
-                    printf("$xxGST: raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/%d)\n",
+                    printf(INDENT_SPACES "$xxGST: raw latitude,longitude and altitude error deviation: (%d/%d,%d/%d,%d/%d)\n",
                             frame.latitude_error_deviation.value, frame.latitude_error_deviation.scale,
                             frame.longitude_error_deviation.value, frame.longitude_error_deviation.scale,
                             frame.altitude_error_deviation.value, frame.altitude_error_deviation.scale);
-                    printf("$xxGST fixed point latitude,longitude and altitude error deviation \
-                           scaled to one decimal place: (%d,%d,%d)\n",
+                    printf(INDENT_SPACES "$xxGST fixed point latitude,longitude and altitude error deviation"
+                           " scaled to one decimal place: (%d,%d,%d)\n",
                             minmea_rescale(&frame.latitude_error_deviation, 10),
                             minmea_rescale(&frame.longitude_error_deviation, 10),
                             minmea_rescale(&frame.altitude_error_deviation, 10));
-                    printf("$xxGST floating point degree latitude, longitude and altitude error deviation: (%f,%f,%f)",
+                    printf(INDENT_SPACES "$xxGST floating point degree latitude, longitude and altitude error deviation: (%f,%f,%f)",
                             minmea_tofloat(&frame.latitude_error_deviation),
                             minmea_tofloat(&frame.longitude_error_deviation),
                             minmea_tofloat(&frame.altitude_error_deviation));
+                }
+                else {
+                    printf(INDENT_SPACES "$xxGST sentence is not parsed\n");
                 }
             } break;
 
             case MINMEA_SENTENCE_GSV: {
                 struct minmea_sentence_gsv frame;
                 if (minmea_parse_gsv(&frame, line)) {
-                    printf("$xxGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
-                    printf("$xxGSV: sattelites in view: %d\n", frame.total_sats);
+                    printf(INDENT_SPACES "$xxGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
+                    printf(INDENT_SPACES "$xxGSV: sattelites in view: %d\n", frame.total_sats);
                     for (int i = 0; i < 4; i++)
-                        printf("$xxGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
+                        printf(INDENT_SPACES "$xxGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
                             frame.sats[i].nr,
                             frame.sats[i].elevation,
                             frame.sats[i].azimuth,
                             frame.sats[i].snr);
                 }
+                else {
+                    printf(INDENT_SPACES "$xxGSV sentence is not parsed\n");
+                }
+            } break;
+
+            case MINMEA_INVALID: {
+                printf(INDENT_SPACES "$xxxxx sentence is not valid\n");
             } break;
 
             default: {
+                printf(INDENT_SPACES "$xxxxx sentence is not parsed\n");
             } break;
         }
     }

@@ -268,28 +268,28 @@ END_TEST
 
 START_TEST(test_minmea_scan_T)
 {
-    struct minmea_time time;
+    struct minmea_time time_;
 
-    ck_assert(minmea_scan("$GPXXX,2359", "_T", &time) == false);
-    ck_assert(minmea_scan("$GPXXX,foobar", "_T", &time) == false);
+    ck_assert(minmea_scan("$GPXXX,2359", "_T", &time_) == false);
+    ck_assert(minmea_scan("$GPXXX,foobar", "_T", &time_) == false);
 
-    ck_assert(minmea_scan("$GPXXX,235960", "_T", &time) == true);
-    ck_assert_int_eq(time.hours, 23);
-    ck_assert_int_eq(time.minutes, 59);
-    ck_assert_int_eq(time.seconds, 60);
-    ck_assert_int_eq(time.microseconds, 0);
+    ck_assert(minmea_scan("$GPXXX,235960", "_T", &time_) == true);
+    ck_assert_int_eq(time_.hours, 23);
+    ck_assert_int_eq(time_.minutes, 59);
+    ck_assert_int_eq(time_.seconds, 60);
+    ck_assert_int_eq(time_.microseconds, 0);
 
-    ck_assert(minmea_scan("$GPXXX,213700.001", "_T", &time) == true);
-    ck_assert_int_eq(time.hours, 21);
-    ck_assert_int_eq(time.minutes, 37);
-    ck_assert_int_eq(time.seconds, 0);
-    ck_assert_int_eq(time.microseconds, 1000);
+    ck_assert(minmea_scan("$GPXXX,213700.001", "_T", &time_) == true);
+    ck_assert_int_eq(time_.hours, 21);
+    ck_assert_int_eq(time_.minutes, 37);
+    ck_assert_int_eq(time_.seconds, 0);
+    ck_assert_int_eq(time_.microseconds, 1000);
 
-    ck_assert(minmea_scan("$GPXXX,,,,,,,nope", "_T", &time) == true);
-    ck_assert_int_eq(time.hours, -1);
-    ck_assert_int_eq(time.minutes, -1);
-    ck_assert_int_eq(time.seconds, -1);
-    ck_assert_int_eq(time.microseconds, -1);
+    ck_assert(minmea_scan("$GPXXX,,,,,,,nope", "_T", &time_) == true);
+    ck_assert_int_eq(time_.hours, -1);
+    ck_assert_int_eq(time_.minutes, -1);
+    ck_assert_int_eq(time_.seconds, -1);
+    ck_assert_int_eq(time_.microseconds, -1);
 }
 END_TEST
 
@@ -297,7 +297,7 @@ START_TEST(test_minmea_scan_complex1)
 {
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47\r\n";
     char type[6];
-    struct minmea_time time;
+    struct minmea_time time_;
     struct minmea_float latitude; int latitude_direction;
     struct minmea_float longitude; int longitude_direction;
     int fix_quality;
@@ -307,7 +307,7 @@ START_TEST(test_minmea_scan_complex1)
     struct minmea_float height; char height_units;
     ck_assert(minmea_scan(sentence, "tTfdfdiiffcfc__",
         type,
-        &time,
+        &time_,
         &latitude, &latitude_direction,
         &longitude, &longitude_direction,
         &fix_quality,
@@ -316,9 +316,9 @@ START_TEST(test_minmea_scan_complex1)
         &altitude, &altitude_units,
         &height, &height_units) == true);
     ck_assert_str_eq(type, "GPGGA");
-    ck_assert_int_eq(time.hours, 12);
-    ck_assert_int_eq(time.minutes, 35);
-    ck_assert_int_eq(time.seconds, 19);
+    ck_assert_int_eq(time_.hours, 12);
+    ck_assert_int_eq(time_.minutes, 35);
+    ck_assert_int_eq(time_.seconds, 19);
     ck_assert_int_eq(latitude.value, 4807038);
     ck_assert_int_eq(latitude.scale, 1000);
     ck_assert_int_eq(latitude_direction, 1);
@@ -343,7 +343,7 @@ START_TEST(test_minmea_scan_complex2)
 {
     const char *sentence = "$GPBWC,081837,,,,,,T,,M,,N,*13";
     char type[6];
-    struct minmea_time time;
+    struct minmea_time time_;
     struct minmea_float latitude; int latitude_direction;
     struct minmea_float longitude; int longitude_direction;
     struct minmea_float bearing_true; char bearing_true_mark;
@@ -352,7 +352,7 @@ START_TEST(test_minmea_scan_complex2)
     char name[MINMEA_MAX_LENGTH];
     ck_assert(minmea_scan(sentence, "tTfdfdfcfcfcs",
         type,
-        &time,
+        &time_,
         &latitude, &latitude_direction,
         &longitude, &longitude_direction,
         &bearing_true, &bearing_true_mark,
@@ -360,9 +360,9 @@ START_TEST(test_minmea_scan_complex2)
         &distance, &distance_units,
         name) == true);
     ck_assert_str_eq(type, "GPBWC");
-    ck_assert_int_eq(time.hours, 8);
-    ck_assert_int_eq(time.minutes, 18);
-    ck_assert_int_eq(time.seconds, 37);
+    ck_assert_int_eq(time_.hours, 8);
+    ck_assert_int_eq(time_.minutes, 18);
+    ck_assert_int_eq(time_.seconds, 37);
     ck_assert_int_eq(latitude.scale, 0);
     ck_assert_int_eq(latitude_direction, 0);
     ck_assert_int_eq(longitude.scale, 0);
@@ -381,7 +381,7 @@ START_TEST(test_minmea_scan_complex3)
 {
     const char *sentence = "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58";
     char type[6];
-    struct minmea_time time;
+    struct minmea_time time_;
     struct minmea_float rms_deviation;
     struct minmea_float semi_major_deviation;
     struct minmea_float semi_minor_deviation;
@@ -391,7 +391,7 @@ START_TEST(test_minmea_scan_complex3)
     struct minmea_float altitude_error_deviation;
     ck_assert(minmea_scan(sentence, "tTfffffff",
         type,
-        &time,
+        &time_,
         &rms_deviation,
         &semi_major_deviation,
         &semi_minor_deviation,
@@ -400,10 +400,10 @@ START_TEST(test_minmea_scan_complex3)
         &longitude_error_deviation,
         &altitude_error_deviation) == true);
     ck_assert_str_eq(type, "GPGST");
-    ck_assert_int_eq(time.hours, 2);
-    ck_assert_int_eq(time.minutes, 46);
-    ck_assert_int_eq(time.seconds, 3);
-    ck_assert_int_eq(time.microseconds, 0);
+    ck_assert_int_eq(time_.hours, 2);
+    ck_assert_int_eq(time_.minutes, 46);
+    ck_assert_int_eq(time_.seconds, 3);
+    ck_assert_int_eq(time_.microseconds, 0);
     ck_assert_int_eq(rms_deviation.value, 32);
     ck_assert_int_eq(rms_deviation.scale, 10);
     ck_assert_int_eq(semi_major_deviation.value, 66);
@@ -596,6 +596,171 @@ START_TEST(test_minmea_parse_gsv1)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_gsv2)
+{
+    const char *sentence = "$GPGSV,4,2,11,08,51,203,30,09,45,215,28*75";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 2,
+        .total_sats = 11,
+        .sats = {
+            {
+                .nr = 8,
+                .elevation = 51,
+                .azimuth = 203,
+                .snr = 30
+            },
+            {
+                .nr = 9,
+                .elevation = 45,
+                .azimuth = 215,
+                .snr = 28
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv3)
+{
+    const char *sentence = "$GPGSV,4,4,13,39,31,170,27*40";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 4,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 39,
+                .elevation = 31,
+                .azimuth = 170,
+                .snr = 27
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv4)
+{
+    const char *sentence = "$GPGSV,4,4,13*7B";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 4,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            },
+            {
+                .nr = 0,
+                .elevation = 0,
+                .azimuth = 0,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_gsv5)
+{
+    const char *sentence = "$GPGSV,4,1,13,02,28,259,33,04,12,212,27,05,34,305,30,07,79,138,*7F";
+    struct minmea_sentence_gsv frame = {};
+    static const struct minmea_sentence_gsv expected = {
+        .total_msgs = 4,
+        .msg_nr = 1,
+        .total_sats = 13,
+        .sats = {
+            {
+                .nr = 2,
+                .elevation = 28,
+                .azimuth = 259,
+                .snr = 33
+            },
+            {
+                .nr = 4,
+                .elevation = 12,
+                .azimuth = 212,
+                .snr = 27
+            },
+            {
+                .nr = 5,
+                .elevation = 34,
+                .azimuth = 305,
+                .snr = 30
+            },
+            {
+                .nr = 7,
+                .elevation = 79,
+                .azimuth = 138,
+                .snr = 0
+            }
+        }
+    };
+    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_parse_gsv(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
@@ -649,18 +814,18 @@ END_TEST
 START_TEST(test_minmea_gettimeofday)
 {
     struct minmea_date date = { 14, 2, 14 };
-    struct minmea_time time = { 13, 0, 9, 123456 };
+    struct minmea_time time_ = { 13, 0, 9, 123456 };
     struct timeval tv;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time) == 0);
+    ck_assert(minmea_gettimeofday(&tv, &date, &time_) == 0);
     ck_assert_int_eq(tv.tv_sec, 1392382809);
     ck_assert_int_eq(tv.tv_usec, 123456);
 
     date.year = -1;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time) != 0);
+    ck_assert(minmea_gettimeofday(&tv, &date, &time_) != 0);
     date.year = 2014;
 
-    time.hours = -1;
-    ck_assert(minmea_gettimeofday(&tv, &date, &time) != 0);
+    time_.hours = -1;
+    ck_assert(minmea_gettimeofday(&tv, &date, &time_) != 0);
 }
 END_TEST
 
@@ -682,32 +847,28 @@ START_TEST(test_minmea_rescale)
 }
 END_TEST
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 /* The float values used in tests should be exactly representable under IEEE754;
  * false negatives will occur otherwise. */
 
 START_TEST(test_minmea_float)
 {
     ck_assert(isnan(minmea_tofloat(&(struct minmea_float) { 42, 0 })));
-    ck_assert(minmea_tofloat(&(struct minmea_float) { 7, 1}) == 7.0);
-    ck_assert(minmea_tofloat(&(struct minmea_float) { -200, 100}) == -2.0);
-    ck_assert(minmea_tofloat(&(struct minmea_float) { 15, 10}) == 1.5);
+    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { 7, 1}) - 7.0f) <= 0.0f);
+    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { -200, 100}) - (-2.0f)) <= 0.0f);
+    ck_assert(fabsf(minmea_tofloat(&(struct minmea_float) { 15, 10}) - 1.5f) <= 0.0f);
 }
 END_TEST
 
 START_TEST(test_minmea_coord)
 {
     ck_assert(isnan(minmea_tocoord(&(struct minmea_float) { 42, 0 })));
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) == 42.0);
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) == 42.0);
-    ck_assert(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) == 42.5);
+    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 4200, 1 }) - 42.0f) <= 0.0f);
+    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 420000, 100 }) - 42.0f) <= 0.0f);
+    ck_assert(fabsf(minmea_tocoord(&(struct minmea_float) { 423000, 100 }) - 42.5f) <= 0.0f);
 }
 END_TEST
 
-#pragma GCC diagnostic pop
-
-Suite *minmea_suite(void)
+static Suite *minmea_suite(void)
 {
     Suite *s = suite_create ("minmea");
 
@@ -738,6 +899,10 @@ Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gll2);
     tcase_add_test(tc_parse, test_minmea_parse_gst1);
     tcase_add_test(tc_parse, test_minmea_parse_gsv1);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv2);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv3);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv4);
+    tcase_add_test(tc_parse, test_minmea_parse_gsv5);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
@@ -754,7 +919,7 @@ Suite *minmea_suite(void)
     return s;
 }
 
-int main()
+int main(void)
 {
     int number_failed;
     Suite *s = minmea_suite();
