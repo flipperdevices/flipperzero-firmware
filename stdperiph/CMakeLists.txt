@@ -43,6 +43,7 @@ IF(${STM32_FAMILY} STREQUAL "F1")
         ${STDPERIPH_HEADER_DIR}/stm32f10x_tim.h
         ${STDPERIPH_HEADER_DIR}/stm32f10x_usart.h
         ${STDPERIPH_HEADER_DIR}/stm32f10x_wwdg.h
+        ${STDPERIPH_HEADER_DIR}/misc.h
     )
     
     SET(STDPERIPH_SOURCES
@@ -72,6 +73,7 @@ IF(${STM32_FAMILY} STREQUAL "F1")
     )
     
     INSTALL(FILES ${STDPERIPH_HEADER_DIR}/misc.h RENAME stm32f10x_misc.h DESTINATION include/stm32f1)
+    INSTALL(FILES ${STDPERIPH_SOURCES} DESTINATION share/stdperiph/stm32f1)
 ELSEIF(${STM32_FAMILY} STREQUAL "F4")
     IF(NOT STM32F4_StdPeriphLib_DIR)
         SET(STM32F4_StdPeriphLib_DIR "/opt/STM32F4xx_DSP_StdPeriph_Lib_V1.3.0")
@@ -115,7 +117,7 @@ ELSEIF(${STM32_FAMILY} STREQUAL "F4")
         ${STDPERIPH_HEADER_DIR}/stm32f4xx_tim.h
         ${STDPERIPH_HEADER_DIR}/stm32f4xx_usart.h
         ${STDPERIPH_HEADER_DIR}/stm32f4xx_wwdg.h
-
+        ${STDPERIPH_HEADER_DIR}/misc.h
     )
     
     SET(STDPERIPH_SOURCES
@@ -165,6 +167,8 @@ ELSEIF(${STM32_FAMILY} STREQUAL "F4")
     )
         
     INSTALL(FILES ${STDPERIPH_HEADER_DIR}/misc.h RENAME stm32f4xx_misc.h DESTINATION include/stm32f4)
+    INSTALL(FILES ${STDPERIPH_SOURCES} ${STDPERIPH_SOURCES_40_41xxx} ${STDPERIPH_SOURCES_427_437xx}
+            DESTINATION share/stdperiph/stm32f4)
 ENDIF()
 
 INCLUDE_DIRECTORIES(
@@ -172,7 +176,7 @@ INCLUDE_DIRECTORIES(
     ${CMSIS_INCLUDE_DIR}
 )
 
-IF(USE_ASSERT)
+IF(STDPERIPH_USE_ASSERT)
     ADD_DEFINITIONS("-D\"assert_param(expr)\"=\"((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))\"")
 ELSE()
     ADD_DEFINITIONS("-D\"assert_param(expr)\"=\"((void)0)\"")

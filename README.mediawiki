@@ -45,6 +45,7 @@ In stdperiph folder
 == Usage ==
 After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
 Template project can be found in stm32-template folder.
+You can use StdPeriphLib and CMSIS both as static libraries or list of source files (see stm32-blinky and stm32-blinky-sources example). 
 
 === Configure === 
 Common usage:
@@ -86,3 +87,4 @@ Next cmake variables are useful for linker tuning:
 * STM32_SET_FLASH_PARAMS(TARGET ...) - sets chip flash/ram parameters for targer.
 * STM32_SET_TARGET_PROPERTIES(TARGET) - sets all needed parameters and compiler flags for target. 
 * STM32_GENERATE_LIBRARIES(NAME SOURCES LIBRARIES) - generates libraries for all chip types in family. Resulting libraries stored in LIBRARIES and have names in ${NAME}_${FAMILY}_${CHIP_TYPE} format.
+* STM32_SET_HSE_VALUE - change HSE frequency definitions (in Hz). You have to use CMSIS and stdperiph sources directly to use this macro (see stm32-blinky-sources example). 
