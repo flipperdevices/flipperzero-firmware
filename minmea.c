@@ -517,7 +517,7 @@ bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence)
     return true;
 }
 
-int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time_)
+int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const struct minmea_time *time_)
 {
     if (date->year == -1 || time_->hours == -1)
         return -1;
@@ -533,8 +533,8 @@ int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, cons
 
     time_t timestamp = timegm(&tm); /* See README.md if your system lacks timegm(). */
     if (timestamp != -1) {
-        tv->tv_sec = timestamp;
-        tv->tv_usec = time_->microseconds;
+        ts->tv_sec = timestamp;
+        ts->tv_nsec = time_->microseconds * 1000;
         return 0;
     } else {
         return -1;

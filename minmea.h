@@ -9,8 +9,6 @@
 #ifndef MINMEA_H
 #define MINMEA_H
 
-#define _BSD_SOURCE
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,7 +19,6 @@ extern "C" {
 #include <errno.h>
 #include <time.h>
 #include <math.h>
-#include <sys/time.h>
 
 #define MINMEA_MAX_LENGTH 80
 
@@ -182,7 +179,7 @@ bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.
  */
-int minmea_gettimeofday(struct timeval *tv, const struct minmea_date *date, const struct minmea_time *time_);
+int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const struct minmea_time *time_);
 
 /**
  * Rescale a fixed-point value to a different scale. Rounds towards zero.

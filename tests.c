@@ -811,21 +811,21 @@ START_TEST(test_minmea_usage1)
 }
 END_TEST
 
-START_TEST(test_minmea_gettimeofday)
+START_TEST(test_minmea_gettime)
 {
     struct minmea_date d = { 14, 2, 14 };
     struct minmea_time t = { 13, 0, 9, 123456 };
-    struct timeval tv;
-    ck_assert(minmea_gettimeofday(&tv, &d, &t) == 0);
-    ck_assert_int_eq(tv.tv_sec, 1392382809);
-    ck_assert_int_eq(tv.tv_usec, 123456);
+    struct timespec ts;
+    ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+    ck_assert_int_eq(ts.tv_sec, 1392382809);
+    ck_assert_int_eq(ts.tv_nsec, 123456000);
 
     d.year = -1;
-    ck_assert(minmea_gettimeofday(&tv, &d, &t) != 0);
+    ck_assert(minmea_gettime(&ts, &d, &t) != 0);
     d.year = 2014;
 
     t.hours = -1;
-    ck_assert(minmea_gettimeofday(&tv, &d, &t) != 0);
+    ck_assert(minmea_gettime(&ts, &d, &t) != 0);
 }
 END_TEST
 
@@ -912,7 +912,7 @@ static Suite *minmea_suite(void)
     suite_add_tcase(s, tc_usage);
 
     TCase *tc_utils = tcase_create("minmea_utils");
-    tcase_add_test(tc_utils, test_minmea_gettimeofday);
+    tcase_add_test(tc_utils, test_minmea_gettime);
     tcase_add_test(tc_utils, test_minmea_rescale);
     tcase_add_test(tc_utils, test_minmea_float);
     tcase_add_test(tc_utils, test_minmea_coord);
