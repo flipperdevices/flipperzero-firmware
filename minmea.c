@@ -166,6 +166,11 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                                 scale *= 10;
                         } else if (*field == '.' && scale == 0) {
                             scale = 1;
+                        } else if (*field == ' ') {
+                            /* Allow spaces at the start of the field. Not NMEA
+                             * conformant, but some modules do this. */
+                            if (sign != 0 || value != -1 || scale != 0)
+                                goto parse_error;
                         } else {
                             goto parse_error;
                         }

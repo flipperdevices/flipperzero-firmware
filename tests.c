@@ -181,6 +181,18 @@ START_TEST(test_minmea_scan_f)
     ck_assert(minmea_scan("foo,12.3", "_;f", &f) == true);
     ck_assert_int_eq(f.value, 123);
     ck_assert_int_eq(f.scale, 10);
+
+    /* accept spaces at the start of the field. some modules do this, unfortunately. */
+    ck_assert(minmea_scan(" -1.23,V", "f", &f) == true);
+    ck_assert_int_eq(f.value, -123);
+    ck_assert_int_eq(f.scale, 100);
+    ck_assert(minmea_scan("     -4.56,V", "f", &f) == true);
+    ck_assert_int_eq(f.value, -456);
+    ck_assert_int_eq(f.scale, 100);
+    ck_assert(minmea_scan("-3.33 ,V", "f", &f) == false);
+    ck_assert(minmea_scan(" -3.33 ,V", "f", &f) == false);
+    ck_assert(minmea_scan("-3. 33,V", "f", &f) == false);
+    ck_assert(minmea_scan("0 .0,V", "f", &f) == false);
 }
 END_TEST
 
