@@ -15,18 +15,17 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = ${STACK_ADDRESS};    /* end of RAM */
+_estack = ${STM32_STACK_ADDRESS};    /* end of RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = ${MIN_HEAP_SIZE};      /* required amount of heap  */
-_Min_Stack_Size = ${MIN_STACK_SIZE}; /* required amount of stack */
+_Min_Heap_Size = ${STM32_MIN_HEAP_SIZE};      /* required amount of heap  */
+_Min_Stack_Size = ${STM32_MIN_STACK_SIZE}; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
 {
-  FLASH (rx)      : ORIGIN = ${FLASH_ORIGIN}, LENGTH = ${FLASH_SIZE}
-  RAM (xrw)       : ORIGIN = ${RAM_ORIGIN}, LENGTH = ${RAM_SIZE}
-  MEMORY_B1 (rx)  : ORIGIN = ${EXT_RAM_ORIGIN}, LENGTH = ${EXT_RAM_SIZE}
+  FLASH (rx)      : ORIGIN = ${STM32_FLASH_ORIGIN}, LENGTH = ${STM32_FLASH_SIZE}
+  RAM (xrw)       : ORIGIN = ${STM32_RAM_ORIGIN}, LENGTH = ${STM32_RAM_SIZE}
 }
 
 /* Define output sections */
@@ -131,16 +130,6 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
-
-  /* MEMORY_bank1 section, code must be located here explicitly            */
-  /* Example: extern int foo(void) __attribute__ ((section (".mb1text"))); */
-  .memory_b1_text :
-  {
-    *(.mb1text)        /* .mb1text sections (code) */
-    *(.mb1text*)       /* .mb1text* sections (code)  */
-    *(.mb1rodata)      /* read-only data (constants) */
-    *(.mb1rodata*)
-  } >MEMORY_B1
 
   /* Remove information from the standard libraries */
   /DISCARD/ :
