@@ -1,0 +1,6 @@
+language: c
+compiler:
+    - gcc
+    - clang
+install: apt-get install check
+script: make test
