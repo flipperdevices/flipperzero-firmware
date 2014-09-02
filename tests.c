@@ -159,13 +159,15 @@ START_TEST(test_minmea_scan_f)
         /* doesn't fit, bail out */
         ck_assert(minmea_scan("2147483648", "f", &f) == false);
     } else if (sizeof(int_least32_t) == 8) {
+        /* Casting to int64_t is ugly, but otherwise we get this on machines with 32-bit int_least32_t:
+         * error: comparison is always false due to limited range of data type [-Werror=type-limits] */
         /* fits in 64 bits */
         ck_assert(minmea_scan("9223372036854775807", "f", &f) == true);
-        ck_assert_int_eq(f.value, 9223372036854775807);
+        ck_assert_int_eq((int64_t) f.value, 9223372036854775807LL);
         ck_assert_int_eq(f.scale, 1);
         /* doesn't fit, truncate precision */
         ck_assert(minmea_scan("9223372036854775.808", "f", &f) == true);
-        ck_assert_int_eq(f.value, 922337203685477580);
+        ck_assert_int_eq((int64_t) f.value, 922337203685477580LL);
         ck_assert_int_eq(f.scale, 100);
         /* doesn't fit, bail out */
         ck_assert(minmea_scan("9223372036854775808", "f", &f) == false);
