@@ -7,6 +7,7 @@
  */
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wtype-limits"
 
 #include <stdlib.h>
 #include <string.h>
