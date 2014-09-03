@@ -1,10 +1,13 @@
 language: c
 compiler:
-    - gcc
-    - clang
+  - gcc
+  - clang
 install: sudo apt-get install check
 script: make test
 notifications:
-    email:
-        on_success: change
-        on_failure: change
+  email:
+    on_success: change
+    on_failure: change
+  hipchat:
+    rooms:
+      secure: YyEHOTiTaO+aPJ+ijalzJrn9/ceO3HNPGScD5690s9rrbPkMjGxrgw7RIqnu49R6rROuJqqFZ1tyJCk2VpvMk63YfK8yct/PPbbbhVrV9+ui59nnHptyTU3W8iGlj8mkE5Mb0cUSsGqKNxdqhybQqpmAsTGgxpGP4XusX2g+ugM=
