@@ -4,3 +4,7 @@ compiler:
     - clang
 install: sudo apt-get install check
 script: make test
+notifications:
+    email:
+        on_success: change
+        on_failure: change
