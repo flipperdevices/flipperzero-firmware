@@ -9,5 +9,6 @@ notifications:
     on_success: change
     on_failure: change
   hipchat:
+    format: html
     rooms:
       secure: r14/5ydt3YeCGxPlEsEk1D3zH/07AuwxOmVK5R2Emc6vAksLc1FDsRnmxFrbS+fsV50uc8w97EWU2uavsmv7D0kzV4L/bxZmd1z44egsppVR+N5FoyJlQxYzSBLx1pequ+HYV3psMdWjcchpVoRZmqCgaYzCpE3vRIM5grUD4OI=
