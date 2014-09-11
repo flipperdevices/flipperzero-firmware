@@ -5,7 +5,7 @@
 # published by Sam Hocevar. See the COPYING file for more details.
 
 CFLAGS = -g -Wall -Wextra -Werror -std=c99
-CFLAGS += -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE
+CFLAGS += -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE -D_DARWIN_C_SOURCE
 LDLIBS = -lcheck
 
 all: scan-build test example
