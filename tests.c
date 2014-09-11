@@ -56,6 +56,21 @@ static const char *invalid_sentences[] = {
     NULL,
 };
 
+START_TEST(test_minmea_checksum)
+{
+    ck_assert_int_eq(minmea_checksum(""), 0x00);
+    ck_assert_int_eq(minmea_checksum("$"), 0x00);
+    ck_assert_int_eq(minmea_checksum("*"), 0x00);
+    ck_assert_int_eq(minmea_checksum("$*"), 0x00);
+    ck_assert_int_eq(minmea_checksum("$GPTXT,01,01,02,ANTSTATUS=INIT*25"), 0x25);
+    ck_assert_int_eq(minmea_checksum("$GPTXT,01,01,02,ANTSTATUS=INIT"), 0x25);
+    ck_assert_int_eq(minmea_checksum("GPTXT,01,01,02,ANTSTATUS=INIT*25"), 0x25);
+    ck_assert_int_eq(minmea_checksum("GPTXT,01,01,02,ANTSTATUS=INIT"), 0x25);
+    ck_assert_int_eq(minmea_checksum("$GPXTE,A,A,0.67,L,N*6F"), 0x6f);
+    ck_assert_int_eq(minmea_checksum("GPXTE,A,A,0.67,L,N*6f"), 0x6f);
+}
+END_TEST
+
 START_TEST(test_minmea_check)
 {
     for (const char **sentence=valid_sentences_nochecksum; *sentence; sentence++) {
@@ -912,6 +927,10 @@ END_TEST
 static Suite *minmea_suite(void)
 {
     Suite *s = suite_create ("minmea");
+
+    TCase *tc_checksum = tcase_create("minmea_checksum");
+    tcase_add_test(tc_checksum, test_minmea_checksum);
+    suite_add_tcase(s, tc_checksum);
 
     TCase *tc_check = tcase_create("minmea_check");
     tcase_add_test(tc_check, test_minmea_check);

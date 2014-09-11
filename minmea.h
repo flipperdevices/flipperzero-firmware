@@ -139,6 +139,11 @@ struct minmea_sentence_gsv {
 };
 
 /**
+ * Calculate raw sentence checksum. Does not check sentence integrity.
+ */
+uint8_t minmea_checksum(const char *sentence);
+
+/**
  * Check sentence validity and checksum. Returns true for valid sentences.
  */
 bool minmea_check(const char *sentence, bool strict);

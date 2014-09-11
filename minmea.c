@@ -26,6 +26,21 @@ static int hex2int(char c)
     return -1;
 }
 
+uint8_t minmea_checksum(const char *sentence)
+{
+    // Support senteces with or without the starting dollar sign.
+    if (*sentence == '$')
+        sentence++;
+
+    uint8_t checksum = 0x00;
+
+    // The optional checksum is an XOR of all bytes between "$" and "*".
+    while (*sentence && *sentence != '*')
+        checksum ^= *sentence++;
+
+    return checksum;
+}
+
 bool minmea_check(const char *sentence, bool strict)
 {
     uint8_t checksum = 0x00;
