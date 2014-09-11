@@ -16,11 +16,11 @@
 
 #include "minmea.h"
 
-static const char *valid_sequences_nochecksum[] = {
+static const char *valid_sentences_nochecksum[] = {
     "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 };
 
-static const char *valid_sequences_checksum[] = {
+static const char *valid_sentences_checksum[] = {
     "$GPTXT,01,01,02,ANTSTATUS=INIT*25",
     "$GPRMC,,V,,,,,,,,,,N*53",
     "$GPVTG,,,,,,,,,N*30",
@@ -42,7 +42,7 @@ static const char *valid_sequences_checksum[] = {
     NULL,
 };
 
-static const char *invalid_sequences[] = {
+static const char *invalid_sentences[] = {
     "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "$GPTXT,01,01,02,ANTSTATUS=INIT*26",
@@ -58,19 +58,19 @@ static const char *invalid_sequences[] = {
 
 START_TEST(test_minmea_check)
 {
-    for (const char **sequence=valid_sequences_nochecksum; *sequence; sequence++) {
-        ck_assert_msg(minmea_check(*sequence, false) == true, *sequence);
-        ck_assert_msg(minmea_check(*sequence, true) == false, *sequence);
+    for (const char **sentence=valid_sentences_nochecksum; *sentence; sentence++) {
+        ck_assert_msg(minmea_check(*sentence, false) == true, *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == false, *sentence);
     }
 
-    for (const char **sequence=valid_sequences_checksum; *sequence; sequence++) {
-        ck_assert_msg(minmea_check(*sequence, false) == true, *sequence);
-        ck_assert_msg(minmea_check(*sequence, true) == true, *sequence);
+    for (const char **sentence=valid_sentences_checksum; *sentence; sentence++) {
+        ck_assert_msg(minmea_check(*sentence, false) == true, *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == true, *sentence);
     }
 
-    for (const char **sequence=invalid_sequences; *sequence; sequence++) {
-        ck_assert_msg(minmea_check(*sequence, false) == false, *sequence);
-        ck_assert_msg(minmea_check(*sequence, true) == false, *sequence);
+    for (const char **sentence=invalid_sentences; *sentence; sentence++) {
+        ck_assert_msg(minmea_check(*sentence, false) == false, *sentence);
+        ck_assert_msg(minmea_check(*sentence, true) == false, *sentence);
     }
 }
 END_TEST
