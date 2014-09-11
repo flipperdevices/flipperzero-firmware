@@ -19,7 +19,7 @@ int main(void)
     char line[MINMEA_MAX_LENGTH];
     while (fgets(line, sizeof(line), stdin) != NULL) {
         printf("%s", line);
-        switch (minmea_sentence_id(line)) {
+        switch (minmea_sentence_id(line, false)) {
             case MINMEA_SENTENCE_RMC: {
                 struct minmea_sentence_rmc frame;
                 if (minmea_parse_rmc(&frame, line)) {

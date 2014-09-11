@@ -16,8 +16,11 @@
 
 #include "minmea.h"
 
-static const char *valid_sequences[] = {
+static const char *valid_sequences_nochecksum[] = {
     "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+};
+
+static const char *valid_sequences_checksum[] = {
     "$GPTXT,01,01,02,ANTSTATUS=INIT*25",
     "$GPRMC,,V,,,,,,,,,,N*53",
     "$GPVTG,,,,,,,,,N*30",
@@ -55,11 +58,20 @@ static const char *invalid_sequences[] = {
 
 START_TEST(test_minmea_check)
 {
-    for (const char **sequence=valid_sequences; *sequence; sequence++)
-        ck_assert_msg(minmea_check(*sequence) == true, *sequence);
+    for (const char **sequence=valid_sequences_nochecksum; *sequence; sequence++) {
+        ck_assert_msg(minmea_check(*sequence, false) == true, *sequence);
+        ck_assert_msg(minmea_check(*sequence, true) == false, *sequence);
+    }
 
-    for (const char **sequence=invalid_sequences; *sequence; sequence++)
-        ck_assert_msg(minmea_check(*sequence) == false, *sequence);
+    for (const char **sequence=valid_sequences_checksum; *sequence; sequence++) {
+        ck_assert_msg(minmea_check(*sequence, false) == true, *sequence);
+        ck_assert_msg(minmea_check(*sequence, true) == true, *sequence);
+    }
+
+    for (const char **sequence=invalid_sequences; *sequence; sequence++) {
+        ck_assert_msg(minmea_check(*sequence, false) == false, *sequence);
+        ck_assert_msg(minmea_check(*sequence, true) == false, *sequence);
+    }
 }
 END_TEST
 
@@ -450,7 +462,8 @@ START_TEST(test_minmea_parse_rmc1)
         .date = { 13, 9, 98 },
         .variation = { 113, 10 },
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == false);
     ck_assert(minmea_parse_rmc(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -467,7 +480,8 @@ START_TEST(test_minmea_parse_rmc2)
         .longitude = { -1450736, 100 },
         .date = { -1, -1, -1 },
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == false);
     ck_assert(minmea_parse_rmc(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -490,7 +504,8 @@ START_TEST(test_minmea_parse_gga1)
         .height_units = 'M',
         .dgps_age = 0,
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gga(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -510,7 +525,8 @@ START_TEST(test_minmea_parse_gst1)
         .longitude_error_deviation = { 56, 10 },
         .altitude_error_deviation = { 220, 10 },
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gst(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -528,7 +544,8 @@ START_TEST(test_minmea_parse_gsa1)
         .hdop = { 13, 10 },
         .vdop = { 21, 10 },
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsa(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -546,7 +563,8 @@ START_TEST(test_minmea_parse_gll1)
         .mode = MINMEA_GLL_MODE_AUTONOMOUS,
     };
 
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gll(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -564,7 +582,8 @@ START_TEST(test_minmea_parse_gll2)
         .mode = 0,
     };
 
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == false);
     ck_assert(minmea_parse_gll(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -605,7 +624,8 @@ START_TEST(test_minmea_parse_gsv1)
             }
         }
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsv(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -646,7 +666,8 @@ START_TEST(test_minmea_parse_gsv2)
             }
         }
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsv(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -687,7 +708,8 @@ START_TEST(test_minmea_parse_gsv3)
             }
         }
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsv(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -728,7 +750,8 @@ START_TEST(test_minmea_parse_gsv4)
             }
         }
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsv(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -769,7 +792,8 @@ START_TEST(test_minmea_parse_gsv5)
             }
         }
     };
-    ck_assert(minmea_check(sentence) == true);
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gsv(&frame, sentence) == true);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
@@ -788,7 +812,7 @@ START_TEST(test_minmea_usage1)
     };
 
     for (const char **sentence=sentences; *sentence; sentence++) {
-        switch (minmea_sentence_id(*sentence)) {
+        switch (minmea_sentence_id(*sentence, false)) {
             case MINMEA_SENTENCE_RMC: {
                 struct minmea_sentence_rmc frame;
                 ck_assert(minmea_parse_rmc(&frame, *sentence) == true);

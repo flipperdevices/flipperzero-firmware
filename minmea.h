@@ -141,7 +141,7 @@ struct minmea_sentence_gsv {
 /**
  * Check sentence validity and checksum. Returns true for valid sentences.
  */
-bool minmea_check(const char *sentence);
+bool minmea_check(const char *sentence, bool strict);
 
 /**
  * Determine talker identifier.
@@ -151,7 +151,7 @@ bool minmea_talker_id(char talker[3], const char *sentence);
 /**
  * Determine sentence identifier.
  */
-enum minmea_sentence_id minmea_sentence_id(const char *sentence);
+enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict);
 
 /**
  * Scanf-like processor for NMEA sentences. Supports the following formats:

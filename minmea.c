@@ -26,7 +26,7 @@ static int hex2int(char c)
     return -1;
 }
 
-bool minmea_check(const char *sentence)
+bool minmea_check(const char *sentence, bool strict)
 {
     uint8_t checksum = 0x00;
 
@@ -42,6 +42,7 @@ bool minmea_check(const char *sentence)
     while (*sentence && *sentence != '*' && isprint((unsigned char) *sentence))
         checksum ^= *sentence++;
 
+    // If checksum is present...
     if (*sentence == '*') {
         // Extract checksum.
         sentence++;
@@ -56,6 +57,9 @@ bool minmea_check(const char *sentence)
         // Check for checksum mismatch.
         if (checksum != expected)
             return false;
+    } else if (strict) {
+        // Discard non-checksummed frames in strict mode.
+        return false;
     }
 
     // The only stuff allowed at this point is a newline.
@@ -323,9 +327,9 @@ bool minmea_talker_id(char talker[3], const char *sentence)
     return true;
 }
 
-enum minmea_sentence_id minmea_sentence_id(const char *sentence)
+enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict)
 {
-    if (!minmea_check(sentence))
+    if (!minmea_check(sentence, strict))
         return MINMEA_INVALID;
 
     char type[6];
