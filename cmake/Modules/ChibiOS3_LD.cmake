@@ -1,4 +1,4 @@
-IF(NOT CHIBIOS_PROCESS_STACK_SIZE)
+ IF(NOT CHIBIOS_PROCESS_STACK_SIZE)
   SET(CHIBIOS_PROCESS_STACK_SIZE 0x400)
   MESSAGE(STATUS "No CHIBIOS_PROCESS_STACK_SIZE specified, using default: ${CHIBIOS_PROCESS_STACK_SIZE}")
 ENDIF()
@@ -14,6 +14,24 @@ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--defsym=__main_stack_
 
 # Auto-generate linker script
 IF(NOT ChibiOS_LINKER_SCRIPT)
-    FILE(WRITE ${CMAKE_BINARY_DIR}/chibios_link.ld.in "MEMORY\n{\nflash : org = 0x08000000, len = \${STM32_FLASH_SIZE}\nram : org = 0x20000000, len = \${STM32_RAM_SIZE}\n}\nINCLUDE rules.ld\n")
+    FILE(WRITE ${CMAKE_BINARY_DIR}/chibios_link.ld.in 
+      "MEMORY\n"
+      "{\n"
+      "  flash : org = 0x08000000, len = \${STM32_FLASH_SIZE}\n"
+      "  ram0 : org = 0x20000000, len = \${STM32_RAM_SIZE}\n"
+      "  ram1 : org = 0x00000000, len = 0\n"
+      "  ram2 : org = 0x00000000, len = 0\n"
+      "  ram3 : org = 0x00000000, len = 0\n"
+      "  ram4 : org = 0x00000000, len = 0\n"
+      "  ram5 : org = 0x00000000, len = 0\n"
+      "  ram6 : org = 0x00000000, len = 0\n"
+      "  ram7 : org = 0x00000000, len = 0\n"
+      "}\n"
+      "REGION_ALIAS(\"MAIN_STACK_RAM\", ram0);\n"
+      "REGION_ALIAS(\"PROCESS_STACK_RAM\", ram0);\n"
+      "REGION_ALIAS(\"DATA_RAM\", ram0);\n"
+      "REGION_ALIAS(\"BSS_RAM\", ram0);\n"
+      "INCLUDE rules.ld\n"      
+    )
     SET(ChibiOS_LINKER_SCRIPT ${CMAKE_BINARY_DIR}/chibios_link.ld.in)
 ENDIF()     

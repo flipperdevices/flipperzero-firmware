@@ -48,8 +48,45 @@ IF(STM32_FAMILY STREQUAL "F1")
     )
     SET(CHIBIOS_hal_PLATFORM_SEARCH_HEADERS
         hal_lld.h
+        stm32_dma.h
         nvic.h
-        stm32_registry.h
+    )
+    SET(CHIBIOS_hal_PLATFORM_SOURCES  
+        hal_lld.c
+        stm32_dma.c
+        nvic.c
+    )
+ELSEIF(STM32_FAMILY STREQUAL "F4")
+    SET(CHIBIOS_HAL_PLATFORM_MODULES adc can dac ext gpt i2c icu mac pal pwm rtc sdc serial spi st uart usb)
+    SET(CHIBIOS_HAL_PLATFORM_MODULES_PATHES 
+      STM32F4xx 
+      LLD
+      LLD/DACv1
+      LLD
+      LLD/TIMv1
+      LLD/I2Cv1
+      LLD/TIMv1
+      LLD
+      LLD/GPIOv2
+      LLD/TIMv1
+      LLD/RTCv2
+      LLD
+      LLD/USARTv1 
+      LLD/SPIv1
+      LLD/TIMv1
+      LLD/USARTv1
+      LLD/OTGv1
+    )
+    
+    SET(CHIBIOS_hal_PLATFORM_SEARCH_PATH
+        ${CHIBIOS_ROOT}/os/hal/ports/common/ARMCMx
+        ${CHIBIOS_ROOT}/os/hal/ports/STM32/STM32F4xx
+        ${CHIBIOS_ROOT}/os/hal/ports/STM32
+    )
+    SET(CHIBIOS_hal_PLATFORM_SEARCH_HEADERS
+        hal_lld.h
+        stm32_dma.h
+        nvic.h
     )
     SET(CHIBIOS_hal_PLATFORM_SOURCES  
         hal_lld.c
