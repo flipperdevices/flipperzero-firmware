@@ -1,4 +1,4 @@
-PROJECT(stm32stdperiph)
+PROJECT(stm32hal)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 ENABLE_LANGUAGE(ASM)
@@ -75,126 +75,166 @@ IF(${STM32_FAMILY} STREQUAL "F1")
     INSTALL(FILES ${STDPERIPH_HEADER_DIR}/misc.h RENAME stm32f10x_misc.h DESTINATION include/stm32f1)
     INSTALL(FILES ${STDPERIPH_SOURCES} DESTINATION share/stdperiph/stm32f1)
 ELSEIF(${STM32_FAMILY} STREQUAL "F4")
-    IF(NOT STM32F4_StdPeriphLib_DIR)
-        SET(STM32F4_StdPeriphLib_DIR "/opt/STM32F4xx_DSP_StdPeriph_Lib_V1.3.0")
-        MESSAGE(STATUS "No STM32F4_StdPeriphLib_DIR specified, using default: " ${STM32F4_StdPeriphLib_DIR})
+    IF(NOT STM32Cube_DIR)
+        SET(STM32Cube_DIR "/opt/STM32Cube_FW_F4_V1.6.0")
+        MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
     ENDIF()
-
-    INCLUDE_DIRECTORIES(
-        ${STM32F4_StdPeriphLib_DIR}/Libraries/STM32F4xx_StdPeriph_Driver/inc/
+    
+    SET(HAL_HEADER_DIR ${STM32Cube_DIR}/Drivers/STM32F4xx_HAL_Driver/Inc)
+    SET(HAL_SOURCE_DIR ${STM32Cube_DIR}/Drivers/STM32F4xx_HAL_Driver/Src)
+    
+    INCLUDE_DIRECTORIES(${HAL_HEADER_DIR})
+    
+    SET(HAL_HEADERS         
+        ${HAL_HEADER_DIR}/stm32f4xx_hal.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_adc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_adc_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_can.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_cec.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_conf_template.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_cortex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_crc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_cryp.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_cryp_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dac.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dac_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dcmi.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dcmi_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_def.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dma.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dma2d.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_dma_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_eth.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_flash.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_flash_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_flash_ramfunc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_fmpi2c.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_fmpi2c_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_gpio.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_gpio_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_hash.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_hash_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_hcd.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_i2c.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_i2c_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_i2s.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_i2s_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_irda.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_iwdg.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_ltdc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_nand.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_nor.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_pccard.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_pcd.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_pcd_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_pwr.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_pwr_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_qspi.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_rcc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_rcc_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_rng.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_rtc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_rtc_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_sai.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_sai_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_sd.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_sdram.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_smartcard.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_spdifrx.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_spi.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_sram.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_tim.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_tim_ex.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_uart.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_usart.h
+        ${HAL_HEADER_DIR}/stm32f4xx_hal_wwdg.h
+        ${HAL_HEADER_DIR}/stm32f4xx_ll_fmc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_ll_fsmc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_ll_sdmmc.h
+        ${HAL_HEADER_DIR}/stm32f4xx_ll_usb.h
     )
     
-    SET(STDPERIPH_SOURCE_DIR ${STM32F4_StdPeriphLib_DIR}/Libraries/STM32F4xx_StdPeriph_Driver/src)
-    SET(STDPERIPH_HEADER_DIR ${STM32F4_StdPeriphLib_DIR}/Libraries/STM32F4xx_StdPeriph_Driver/inc)
-    
-    SET(STDPERIPH_HEADERS         
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_adc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_can.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_crc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_cryp.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_dac.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_dbgmcu.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_dcmi.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_dma.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_dma2d.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_exti.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_flash.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_fmc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_fsmc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_gpio.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_hash.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_i2c.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_iwdg.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_ltdc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_pwr.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_rcc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_rng.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_rtc.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_sai.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_sdio.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_spi.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_syscfg.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_tim.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_usart.h
-        ${STDPERIPH_HEADER_DIR}/stm32f4xx_wwdg.h
-        ${STDPERIPH_HEADER_DIR}/misc.h
+    SET(HAL_SOURCES
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_adc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_adc_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_can.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_cec.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_cortex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_crc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_cryp.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_cryp_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dac.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dac_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dcmi.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dcmi_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dma.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dma2d.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_dma_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_eth.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_flash.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_flash_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_flash_ramfunc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_fmpi2c.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_fmpi2c_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_gpio.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_hash.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_hash_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_hcd.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_i2c.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_i2c_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_i2s.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_i2s_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_irda.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_iwdg.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_ltdc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_msp_template.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_nand.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_nor.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_pccard.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_pcd.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_pcd_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_pwr.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_pwr_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_qspi.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_rcc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_rcc_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_rng.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_rtc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_rtc_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_sai.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_sai_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_sd.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_sdram.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_smartcard.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_spdifrx.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_spi.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_sram.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_tim.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_tim_ex.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_uart.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_usart.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_hal_wwdg.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_ll_fmc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_ll_fsmc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_ll_sdmmc.c
+        ${HAL_SOURCE_DIR}/stm32f4xx_ll_usb.c
     )
     
-    SET(STDPERIPH_SOURCES
-        ${STDPERIPH_SOURCE_DIR}/misc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_adc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_can.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_crc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_cryp.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_cryp_aes.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_cryp_des.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_cryp_tdes.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_dac.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_dbgmcu.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_dcmi.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_dma.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_dma2d.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_exti.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_flash.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_gpio.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_hash.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_hash_md5.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_hash_sha1.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_i2c.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_iwdg.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_ltdc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_pwr.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_rcc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_rng.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_rtc.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_sai.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_sdio.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_spi.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_syscfg.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_tim.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_usart.c
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_wwdg.c
-    )
+    INSTALL(FILES ${HAL_HEADER_DIR}/Legacy/stm32_hal_legacy.h DESTINATION include/stm32f4/Legacy)
     
-    SET(STDPERIPH_SOURCES_40_41xxx
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fsmc.c
-    )
-    SET(STDPERIPH_SOURCES_427_437xx
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fmc.c
-    )
-    SET(STDPERIPH_SOURCES_429_439xx
-        ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fmc.c
-    )
-        
-    INSTALL(FILES ${STDPERIPH_HEADER_DIR}/misc.h RENAME stm32f4xx_misc.h DESTINATION include/stm32f4)
-    INSTALL(FILES ${STDPERIPH_SOURCES} ${STDPERIPH_SOURCES_40_41xxx} ${STDPERIPH_SOURCES_427_437xx}
-            DESTINATION share/stdperiph/stm32f4)
-ENDIF()
-
-INCLUDE_DIRECTORIES(
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMSIS_INCLUDE_DIR}
-)
-
-IF(STDPERIPH_USE_ASSERT)
-    ADD_DEFINITIONS("-D\"assert_param(expr)\"=\"((expr) ? (void)0 : assert_failed((uint8_t *)__FILE__, __LINE__))\"")
-ELSE()
-    ADD_DEFINITIONS("-D\"assert_param(expr)\"=\"((void)0)\"")
+#     SET(STDPERIPH_SOURCES_40_41xxx
+#         ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fsmc.c
+#     )
+#     SET(STDPERIPH_SOURCES_427_437xx
+#         ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fmc.c
+#     )
+#     SET(STDPERIPH_SOURCES_429_439xx
+#         ${STDPERIPH_SOURCE_DIR}/stm32f4xx_fmc.c
+#     )
 ENDIF()
 
 STRING(TOLOWER ${STM32_FAMILY} STM32_FAMILY_LOWER)
-ADD_CUSTOM_TARGET(stdperiph_${STM32_FAMILY_LOWER})
 
-FOREACH(CHIP_TYPE ${STM32_CHIP_TYPES})
-    STRING(TOLOWER ${CHIP_TYPE} CHIP_TYPE_LOWER)
-    
-    LIST(APPEND STDPERIPH_LIBRARIES stdperiph_${STM32_FAMILY_LOWER}_${CHIP_TYPE_LOWER})
-    SET(TARGET_NAME stdperiph_${STM32_FAMILY_LOWER}_${CHIP_TYPE_LOWER})
-    ADD_LIBRARY(${TARGET_NAME} ${STDPERIPH_SOURCES} ${STDPERIPH_SOURCES_${CHIP_TYPE}})
-    STM32_SET_CHIP_DEFINITIONS(${TARGET_NAME} ${CHIP_TYPE})
-    ADD_DEPENDENCIES(stdperiph_${STM32_FAMILY_LOWER} ${TARGET_NAME})
-ENDFOREACH()
-
-INSTALL(TARGETS ${STDPERIPH_LIBRARIES} RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
-
-INSTALL(FILES ${STDPERIPH_HEADERS} DESTINATION include/stm32${STM32_FAMILY_LOWER})
+INSTALL(FILES ${HAL_HEADERS} DESTINATION include/stm32${STM32_FAMILY_LOWER})
+INSTALL(FILES ${HAL_SOURCES} DESTINATION share/stm32hal/${STM32_FAMILY_LOWER})
