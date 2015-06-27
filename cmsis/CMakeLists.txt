@@ -4,38 +4,50 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 ENABLE_LANGUAGE(ASM)
 
 IF(${STM32_FAMILY} STREQUAL "F1")
-    IF(NOT STM32F1_StdPeriphLib_DIR)
-        SET(STM32F1_StdPeriphLib_DIR "/opt/STM32F10x_StdPeriph_Lib_V3.5.0")
-        MESSAGE(STATUS "No STM32F1_StdPeriphLib_DIR specified, using default: " ${STM32F1_StdPeriphLib_DIR})
+IF(NOT STM32Cube_DIR)
+        SET(STM32Cube_DIR "/opt/STM32Cube_FW_F1_V1.1.0")
+        MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
     ENDIF()
-
-    INCLUDE_DIRECTORIES(
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/CoreSupport/
-    )
     
-    SET(CMSIS_HEADERS 
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.h
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/stm32f10x.h
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/CoreSupport/core_cm3.h
+    SET(CMSIS_HEADERS        
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f100xb.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f100xe.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f101x6.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f101xb.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f101xe.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f101xg.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f102x6.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f102xb.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103x6.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xe.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xg.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f105xc.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f107xc.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h
+
+        
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/arm_common_tables.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/arm_const_structs.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/arm_math.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/core_cm3.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/core_cmFunc.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/core_cmInstr.h
+        ${STM32Cube_DIR}/Drivers/CMSIS/Include/core_cmSimd.h
     )
     
     SET(CMSIS_SOURCES 
-        ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.c
+        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/system_stm32f1xx.c
     )
     
-    SET(CMSIS_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/stm32f1_flash.ld.in)
-    SET(STARTUP_PREFIX ${STM32F1_StdPeriphLib_DIR}/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/startup/gcc_ride7/startup_stm32f10x_)
+    SET(CMSIS_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/stm32f1.ld.in)
+    SET(STARTUP_PREFIX ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc/startup_stm32f)
 ELSEIF(${STM32_FAMILY} STREQUAL "F4")
     IF(NOT STM32Cube_DIR)
         SET(STM32Cube_DIR "/opt/STM32Cube_FW_F4_V1.6.0")
         MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
     ENDIF()
-
-    INCLUDE_DIRECTORIES(
-        ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include
-        ${STM32Cube_DIR}/Drivers/CMSIS/Include
-    )
     
     SET(CMSIS_HEADERS 
         ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
