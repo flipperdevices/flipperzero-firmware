@@ -5,26 +5,14 @@
 #include <sys/time.h>
 
 #if defined STM32F1
-# include <stm32f10x.h>
+# include <stm32f1xx_hal.h>
 #elif defined STM32F4
-# include <stm32f4xx.h>
-#endif
-
-#if defined STM32F4
-uint64_t virtualClock = 0;
+# include <stm32f4xx_hal.h>
 #endif
 
 extern uint32_t __get_MSP(void);
-
-#if defined STM32F1
-# define STDOUT_USART USART1
-# define STDERR_USART USART1
-# define STDIN_USART USART1
-#elif defined STM32F4
-# define STDOUT_USART USART3
-# define STDERR_USART USART3
-# define STDIN_USART USART3
-#endif
+extern UART_HandleTypeDef UART_Handle;
+extern uint64_t virtualTimer;
 
 #undef errno
 extern int errno;
@@ -69,13 +57,8 @@ int _getpid()
 
 int _gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-#if defined STM32F1
-    tv->tv_sec = RTC_GetCounter();
-    tv->tv_usec = 0;
-#elif defined STM32F4
-    tv->tv_sec = virtualClock / 1000;
-    tv->tv_usec = (virtualClock % 1000) * 1000;
-#endif
+    tv->tv_sec = virtualTimer / 1000;
+    tv->tv_usec = (virtualTimer % 1000) * 1000;
     return 0;
 }
 
@@ -138,11 +121,8 @@ int _read(int file, char *ptr, int len)
     switch (file)
     {
     case STDIN_FILENO:
-        while (USART_GetFlagStatus(STDIN_USART, USART_FLAG_RXNE) == RESET);
-        char c = (char)(USART_ReceiveData(STDIN_USART) & (uint16_t) 0x01FF);
-        *ptr++ = c;
+        HAL_UART_Receive(&UART_Handle, (uint8_t *)ptr, 1, HAL_MAX_DELAY);
         return 1;
-        break;
     default:
         errno = EBADF;
         return -1;
@@ -174,22 +154,13 @@ int _wait(int *status)
 
 int _write(int file, char *ptr, int len)
 {
-    int n;
     switch (file)
     {
     case STDOUT_FILENO: /*stdout*/
-        for (n = 0; n < len; n++)
-        {
-            while (USART_GetFlagStatus(STDOUT_USART, USART_FLAG_TC) == RESET);
-            USART_SendData(STDOUT_USART, (uint8_t) * ptr++);
-        }
+        HAL_UART_Transmit(&UART_Handle, (uint8_t*)ptr, len, HAL_MAX_DELAY);
         break;
     case STDERR_FILENO: /* stderr */
-        for (n = 0; n < len; n++)
-        {
-            while (USART_GetFlagStatus(STDERR_USART, USART_FLAG_TC) == RESET);
-            USART_SendData(STDERR_USART, (uint8_t) * ptr++);
-        }
+        HAL_UART_Transmit(&UART_Handle, (uint8_t*)ptr, len, HAL_MAX_DELAY);
         break;
     default:
         errno = EBADF;
