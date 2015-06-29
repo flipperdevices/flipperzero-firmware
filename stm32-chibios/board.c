@@ -1,4 +1,3 @@
-#include "ch.h"
 #include "hal.h"
 
 const PALConfig pal_default_config =
