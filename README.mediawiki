@@ -1,20 +1,21 @@
 == About ==
-This project is used to develop applications for stm32 - ST's ARM Cortex-M3 MCUs, using cmake, GCC, newlib (libc) and STM32F10x Standard Peripherals Library.
+This project is used to develop applications for stm32 - ST's ARM Cortex-M3(4) MCUs, using cmake, GCC, newlib (libc), STM32CubeMX package or ChibiOS.
 
 Requirements:
 * cmake >= 2.8
-* GCC toolchain with newlib.
-* STM32F10x Standard Peripherals Library for STM32F1 family
-* STM32F4 DSP and Standard Peripherals Library for STM32F4 family
+* GCC toolchain with newlib (optionally).
+* STM32CubeMX package for STM32F1 or STM32F4 families.
 Project contains:
 * CMake common toolchain file, that configures cmake to use arm toolchain.
 * CMake family-specific toolchain file, that configures family-specific parameters.
-* CMake projects that builds CMSIS and Standard Peripherals Library into static libraries.
-* CMake modules to find and configure CMSIS ans StdPeriphLib libraries.
+* CMake projects that installs CMSIS and STM32CubeMX (STM32HAL) sources into sysroot.
+* CMake modules to find and configure CMSIS ans STM32HAL components.
+* CMake modules to find and configure ChibiOS components.
 * CMake project template.
 * Example projects
 ** blinky - blink LED using timers and PWM.
-** newlib - show date from RTC using uart and libc functions from newlib
+** newlib - show date using uart and libc functions from newlib
+** stm32-chibios - blink led using ChibiOS/NIL
 
 == Building & Installing ==
 First of all you need to configure toolchain and libraries, you can do this by editing gcc_stm32.cmake or (better way) pass it throught command line.
@@ -24,10 +25,8 @@ Variables for toolchain:
 * STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently, F1 and F4 family are supported.
 '''Note:''' If STM32_CHIP variable is set, STM32_FAMILY is optional.
 
-Variables for CMSIS and StdPeriphLib:
-* STM32F1_StdPeriphLib_DIR - path to STM32F10x Standard Peripherals Library '''default''': /opt/STM32F10x_StdPeriph_Lib_V3.5.0
-* STM32F4_StdPeriphLib_DIR - path to STM32F4 DSP and Standard Peripherals Library '''default''': /opt/STM32F4xx_DSP_StdPeriph_Lib_V1.3.0
-* USE_ASSERT - Use internal asserts in Standard Peripherals Library.
+Variables for CMSIS and STM32CubeMX:
+* STM32Cube_DIR - path to STM32CubeMX directory '''default''': /opt/STM32Cube_FW_F1_V1.1.0 /opt/STM32Cube_FW_F4_V1.6.0
 
 === Build CMSIS and Standard Peripherals Library ===
 In cmsis folder:
@@ -40,12 +39,9 @@ In stdperiph folder
 
 '''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules. You may specify an additional search path with -DEXTRA_FIND_PATH=<path-to-search>
 
-'''Note:''' To prevent header collision file "misc.h" from Standard Peripherals Library will be installed as stm32f10x_misc.h / stm32f4xx_misc.h
-
 == Usage ==
 After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
 Template project can be found in stm32-template folder.
-You can use StdPeriphLib and CMSIS both as static libraries or list of source files (see stm32-blinky and stm32-blinky-sources example). 
 
 === Configure === 
 Common usage:
@@ -54,7 +50,7 @@ Where <nowiki><chip></nowiki> - stm32 chip name (e.g. STM32F100C8, STM32F407IG).
 This command will generate Makefile for project.
 Scripts will try to detected chip parameters (type, flash/ram size) from chip name. 
 You can set this parameters directly using following cmake variables:
-* STM32_CHIP_TYPE - family-depended chip type. Global variable STM32_CHIP_TYPES contains list of valid types for current family (e.g. for F1 family: HD, HD_VL, MD, MD_VL, LD, LD_VL, CL, XL)
+* STM32_CHIP_TYPE - family-depended chip type. Global variable STM32_CHIP_TYPES contains list of valid types for current family
 * STM32_FLASH_SIZE - chip flash size (e.g. 64K)
 * STM32_RAM_SIZE - chip RAM size (e.g. 4K)
 
@@ -87,4 +83,9 @@ Next cmake variables are useful for linker tuning:
 * STM32_SET_FLASH_PARAMS(TARGET ...) - sets chip flash/ram parameters for targer.
 * STM32_SET_TARGET_PROPERTIES(TARGET) - sets all needed parameters and compiler flags for target. 
 * STM32_GENERATE_LIBRARIES(NAME SOURCES LIBRARIES) - generates libraries for all chip types in family. Resulting libraries stored in LIBRARIES and have names in ${NAME}_${FAMILY}_${CHIP_TYPE} format.
-* STM32_SET_HSE_VALUE - change HSE frequency definitions (in Hz). You have to use CMSIS and stdperiph sources directly to use this macro (see stm32-blinky-sources example). 
+* STM32_SET_HSE_VALUE - change HSE frequency definitions (in Hz).
+
+=== ChibiOS Support ===
+This projects also supports ChibiOS v3.x.x (both nil and rt kernels). 
+CMake modules for ChibiOS can find specified ChibiOS components using COMPONENTS directive. 
+See project stm32-chibios for example usage. 
