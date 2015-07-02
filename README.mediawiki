@@ -30,17 +30,17 @@ Variables for CMSIS and STM32CubeMX:
 
 === Build CMSIS and Standard Peripherals Library ===
 In cmsis folder:
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_stm32-cmake>/cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
  make && make install
 In stdperiph folder
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_cmake_folder_of_this_project>/Modules -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
+ cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_stm32-cmake>/cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
  make && make install
 '''Note:''' For building for STM32F4 family, change -DSTM32_FAMILY=F1 to -DSTM32_FAMILY=F4
 
 '''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules. You may specify an additional search path with -DEXTRA_FIND_PATH=<path-to-search>
 
 == Usage ==
-After building you need to copy cmake modules in cmake's modules path, or just set CMAKE_MODULE_PATH in project. 
+After building you'll need to copy contents of cmake folder into cmake's modules path, or just set CMAKE_MODULE_PATH variable. 
 Template project can be found in stm32-template folder.
 
 === Configure === 
@@ -68,22 +68,23 @@ or .bin:
 
 === Linker script variables ===
 Next cmake variables are useful for linker tuning:
+* STM32_LINKER_SCRIPT - Path to custom linker script. You can use cmake variables (listed below) in itd.
 * STM32_FLASH_ORIGIN - Start address of flash (default: 0x08000000)
 * STM32_RAM_ORIGIN - Start address of RAM (default: 0x20000000)
-* STM32_STACK_ADDRESS - Address of stack bottom (default: RAM_ORIGIN + RAM_SIZE)
+* STM32_CCRAM_ORIGIN - Start address of Core-Couped RAM (only for F4 family) (default: 0x10000000)
 * STM32_FLASH_SIZE - Flash size (default: from chip name)
 * STM32_RAM_SIZE - RAM size (default: from chip name)
+* STM32_CCRAM_SIZE - Core-Couped RAM size (only for F4 family) (default: 64 KiB)
 * STM32_MIN_STACK_SIZE - Minimum stack size for error detection at link-time (default: 512 bytes)
 * STM32_MIN_HEAP_SIZE - Minimum heap size for error detection at link-time (default: 0 bytes)
 
 === Useful cmake macros ===
-* STM32_GET_CHIP_TYPE(CHIP CHIP_TYPE) - gets chip type (HD, MD, etc.) from chip name.
+* STM32_GET_CHIP_TYPE(CHIP CHIP_TYPE) - gets chip type from chip name.
 * STM32_GET_CHIP_PARAMETERS(CHIP FLASH_SIZE RAM_SIZE) - gets chip ram/flash size from chip name.
 * STM32_SET_CHIP_DEFINITIONS(TARGET CHIP_TYPE) - sets chip family and type-specific compiler flags for target.
 * STM32_SET_FLASH_PARAMS(TARGET ...) - sets chip flash/ram parameters for targer.
 * STM32_SET_TARGET_PROPERTIES(TARGET) - sets all needed parameters and compiler flags for target. 
 * STM32_GENERATE_LIBRARIES(NAME SOURCES LIBRARIES) - generates libraries for all chip types in family. Resulting libraries stored in LIBRARIES and have names in ${NAME}_${FAMILY}_${CHIP_TYPE} format.
-* STM32_SET_HSE_VALUE - change HSE frequency definitions (in Hz).
 
 === ChibiOS Support ===
 This projects also supports ChibiOS v3.x.x (both nil and rt kernels). 

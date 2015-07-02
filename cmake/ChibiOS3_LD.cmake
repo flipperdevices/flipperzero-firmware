@@ -22,7 +22,7 @@ IF(NOT ChibiOS_LINKER_SCRIPT)
       "  ram1 : org = 0x00000000, len = 0\n"
       "  ram2 : org = 0x00000000, len = 0\n"
       "  ram3 : org = 0x00000000, len = 0\n"
-      "  ram4 : org = 0x00000000, len = 0\n"
+      "  ram4 : org = \${STM32_CCRAM_ORIGIN}, len = \${STM32_CCRAM_SIZE}\n"
       "  ram5 : org = 0x00000000, len = 0\n"
       "  ram6 : org = 0x00000000, len = 0\n"
       "  ram7 : org = 0x00000000, len = 0\n"
