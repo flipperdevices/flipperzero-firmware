@@ -51,7 +51,7 @@ For release build:
 
 ## Build
 
- ```make`
+ ```make```
  
 To build .hex:
 
