@@ -8,13 +8,12 @@ Requirements:
 Project contains:
 * CMake common toolchain file, that configures cmake to use arm toolchain.
 * CMake family-specific toolchain file, that configures family-specific parameters.
-* CMake projects that installs CMSIS and STM32CubeMX (STM32HAL) sources into sysroot.
 * CMake modules to find and configure CMSIS ans STM32HAL components.
 * CMake modules to find and configure ChibiOS components.
 * CMake project template.
 * Example projects
-** blinky - blink LED using timers and PWM.
-** newlib - show date using uart and libc functions from newlib
+** stm32-blinky - blink LED using timers and PWM.
+** stm32-newlib - show date using uart and libc functions from newlib
 ** stm32-chibios - blink led using ChibiOS/NIL
 
 == Building & Installing ==
@@ -24,23 +23,10 @@ Variables for toolchain:
 * TARGET_TRIPLET - toolchain target triplet, '''default''': arm-none-eabi
 * STM32_FAMILY - STM32 family (F0, F1, F4, etc.) currently, F1 and F4 family are supported.
 '''Note:''' If STM32_CHIP variable is set, STM32_FAMILY is optional.
-
-Variables for CMSIS and STM32CubeMX:
 * STM32Cube_DIR - path to STM32CubeMX directory '''default''': /opt/STM32Cube_FW_F1_V1.1.0 /opt/STM32Cube_FW_F4_V1.6.0
 
-=== Build CMSIS and Standard Peripherals Library ===
-In cmsis folder:
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_stm32-cmake>/cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
- make && make install
-In stdperiph folder
- cmake -DCMAKE_TOOLCHAIN_FILE=../gcc_stm32.cmake -DCMAKE_MODULE_PATH=<path_to_stm32-cmake>/cmake -DSTM32_FAMILY=F1 -DCMAKE_INSTALL_PREFIX=<path_to_toolchain>/arm-none-eabi/ -DCMAKE_BUILD_TYPE=Release
- make && make install
-'''Note:''' For building for STM32F4 family, change -DSTM32_FAMILY=F1 to -DSTM32_FAMILY=F4
-
-'''Note:''' You can use different CMAKE_INSTALL_PREFIX, but than you'll have to configure cmake search paths when using cmake modules. You may specify an additional search path with -DEXTRA_FIND_PATH=<path-to-search>
-
 == Usage ==
-After building you'll need to copy contents of cmake folder into cmake's modules path, or just set CMAKE_MODULE_PATH variable. 
+For using scripts you'll need to copy contents of cmake folder into cmake's modules path, or use CMAKE_MODULE_PATH variable. 
 Template project can be found in stm32-template folder.
 
 === Configure === 
