@@ -51,6 +51,8 @@ For release build:
 
 ## Build
 
+To build elf file:
+
  ```make```
  
 To build .hex:
