@@ -31,7 +31,7 @@ Template project can be found in stm32-template folder.
 ## Configure
 Common usage:
 
- ```cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>```
+ ``` cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir> ```
 
 Where <chip> - stm32 chip name (e.g. STM32F100C8, STM32F407IG). 
 This command will generate Makefile for project.
@@ -43,25 +43,25 @@ You can set this parameters directly using following cmake variables:
 
 For using with Eclipse CDT:
 
- ```cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>```
+ ``` cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir> ```
 
 For release build:
 
- ```cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir>```
+ ``` cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Release <path_to_source_dir> ```
 
 ## Build
 
 To build elf file:
 
- ```make```
+ ``` make ```
  
 To build .hex:
 
- ```make <project name>.hex```
+ ``` make <project name>.hex ```
  
 or .bin:
 
- ```make <project name>.bin```
+ ``` make <project name>.bin ```
 
 ## Linker script variables
 Next cmake variables are useful for linker tuning:
