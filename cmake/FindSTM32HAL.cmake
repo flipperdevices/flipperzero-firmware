@@ -1,231 +1,87 @@
 IF(STM32_FAMILY STREQUAL "F1")
+    SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c 
+                       i2s irda iwdg nand nor pccard pcd pwr rcc rtc sd smartcard
+                       spi sram tim uart usart wwdg fsmc sdmmc usb)
+
+    SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
+    
+    # Components that have _ex sources
+    SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim)
+    
+    # Components that have ll_ in names instead of hal_
+    SET(HAL_LL_COMPONENTS fsmc sdmmc usb)
+    
+    SET(HAL_PREFIX stm32f1xx_)
+    
     SET(HAL_HEADERS
         stm32f1xx_hal.h
-        stm32f1xx_hal_adc.h
-        stm32f1xx_hal_adc_ex.h
-        stm32f1xx_hal_can.h
-        stm32f1xx_hal_can_ex.h
-        stm32f1xx_hal_cec.h
-        stm32f1xx_hal_cortex.h
-        stm32f1xx_hal_crc.h
-        stm32f1xx_hal_dac.h
-        stm32f1xx_hal_dac_ex.h
         stm32f1xx_hal_def.h
-        stm32f1xx_hal_dma.h
-        stm32f1xx_hal_dma_ex.h
-        stm32f1xx_hal_eth.h
-        stm32f1xx_hal_flash.h
-        stm32f1xx_hal_flash_ex.h
-        stm32f1xx_hal_gpio.h
-        stm32f1xx_hal_gpio_ex.h
-        stm32f1xx_hal_hcd.h
-        stm32f1xx_hal_i2c.h
-        stm32f1xx_hal_i2s.h
-        stm32f1xx_hal_irda.h
-        stm32f1xx_hal_iwdg.h
-        stm32f1xx_hal_nand.h
-        stm32f1xx_hal_nor.h
-        stm32f1xx_hal_pccard.h
-        stm32f1xx_hal_pcd.h
-        stm32f1xx_hal_pcd_ex.h
-        stm32f1xx_hal_pwr.h
-        stm32f1xx_hal_rcc.h
-        stm32f1xx_hal_rcc_ex.h
-        stm32f1xx_hal_rtc.h
-        stm32f1xx_hal_rtc_ex.h
-        stm32f1xx_hal_sd.h
-        stm32f1xx_hal_smartcard.h
-        stm32f1xx_hal_spi.h
-        stm32f1xx_hal_sram.h
-        stm32f1xx_hal_tim.h
-        stm32f1xx_hal_tim_ex.h
-        stm32f1xx_hal_uart.h
-        stm32f1xx_hal_usart.h
-        stm32f1xx_hal_wwdg.h
-        stm32f1xx_ll_fsmc.h
-        stm32f1xx_ll_sdmmc.h
-        stm32f1xx_ll_usb.h
     )
     SET(HAL_SRCS
         stm32f1xx_hal.c
-        stm32f1xx_hal_adc.c
-        stm32f1xx_hal_adc_ex.c
-        stm32f1xx_hal_can.c
-        stm32f1xx_hal_cec.c
-        stm32f1xx_hal_cortex.c
-        stm32f1xx_hal_crc.c
-        stm32f1xx_hal_dac.c
-        stm32f1xx_hal_dac_ex.c
-        stm32f1xx_hal_dma.c
-        stm32f1xx_hal_eth.c
-        stm32f1xx_hal_flash.c
-        stm32f1xx_hal_flash_ex.c
-        stm32f1xx_hal_gpio.c
-        stm32f1xx_hal_gpio_ex.c
-        stm32f1xx_hal_hcd.c
-        stm32f1xx_hal_i2c.c
-        stm32f1xx_hal_i2s.c
-        stm32f1xx_hal_irda.c
-        stm32f1xx_hal_iwdg.c
-        stm32f1xx_hal_nand.c
-        stm32f1xx_hal_nor.c
-        stm32f1xx_hal_pccard.c
-        stm32f1xx_hal_pcd.c
-        stm32f1xx_hal_pcd_ex.c
-        stm32f1xx_hal_pwr.c
-        stm32f1xx_hal_rcc.c
-        stm32f1xx_hal_rcc_ex.c
-        stm32f1xx_hal_rtc.c
-        stm32f1xx_hal_rtc_ex.c
-        stm32f1xx_hal_sd.c
-        stm32f1xx_hal_smartcard.c
-        stm32f1xx_hal_spi.c
-        stm32f1xx_hal_spi_ex.c
-        stm32f1xx_hal_sram.c
-        stm32f1xx_hal_tim.c
-        stm32f1xx_hal_tim_ex.c
-        stm32f1xx_hal_uart.c
-        stm32f1xx_hal_usart.c
-        stm32f1xx_hal_wwdg.c
-        stm32f1xx_ll_fsmc.c
-        stm32f1xx_ll_sdmmc.c
-        stm32f1xx_ll_usb.c
     )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
+    SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash 
+                       flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg ltdc 
+                       nand nor pccard pcd pwr qspi rcc rng rtc sai sd sdram 
+                       smartcard spdifrx spi sram tim uart usart wwdg fmc fsmc 
+                       sdmmc usb)
+
+    SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
+    
+    # Components that have _ex sources
+    SET(HAL_EX_COMPONENTS adc cryp dac dcmi dma flash fmpi2c hash i2c i2s pcd 
+                          pwr rcc rtc sai tim)
+    
+    # Components that have ll_ in names instead of hal_
+    SET(HAL_LL_COMPONENTS fmc fsmc sdmmc usb)
+    
+    SET(HAL_PREFIX stm32f4xx_)
+    
     SET(HAL_HEADERS
         stm32f4xx_hal.h
-        stm32f4xx_hal_adc.h
-        stm32f4xx_hal_adc_ex.h
-        stm32f4xx_hal_can.h
-        stm32f4xx_hal_cec.h
-        stm32f4xx_hal_cortex.h
-        stm32f4xx_hal_crc.h
-        stm32f4xx_hal_cryp.h
-        stm32f4xx_hal_cryp_ex.h
-        stm32f4xx_hal_dac.h
-        stm32f4xx_hal_dac_ex.h
-        stm32f4xx_hal_dcmi.h
-        stm32f4xx_hal_dcmi_ex.h
         stm32f4xx_hal_def.h
-        stm32f4xx_hal_dma.h
-        stm32f4xx_hal_dma2d.h
-        stm32f4xx_hal_dma_ex.h
-        stm32f4xx_hal_eth.h
-        stm32f4xx_hal_flash.h
-        stm32f4xx_hal_flash_ex.h
-        stm32f4xx_hal_flash_ramfunc.h
-        stm32f4xx_hal_fmpi2c.h
-        stm32f4xx_hal_fmpi2c_ex.h
-        stm32f4xx_hal_gpio.h
-        stm32f4xx_hal_gpio_ex.h
-        stm32f4xx_hal_hash.h
-        stm32f4xx_hal_hash_ex.h
-        stm32f4xx_hal_hcd.h
-        stm32f4xx_hal_i2c.h
-        stm32f4xx_hal_i2c_ex.h
-        stm32f4xx_hal_i2s.h
-        stm32f4xx_hal_i2s_ex.h
-        stm32f4xx_hal_irda.h
-        stm32f4xx_hal_iwdg.h
-        stm32f4xx_hal_ltdc.h
-        stm32f4xx_hal_nand.h
-        stm32f4xx_hal_nor.h
-        stm32f4xx_hal_pccard.h
-        stm32f4xx_hal_pcd.h
-        stm32f4xx_hal_pcd_ex.h
-        stm32f4xx_hal_pwr.h
-        stm32f4xx_hal_pwr_ex.h
-        stm32f4xx_hal_qspi.h
-        stm32f4xx_hal_rcc.h
-        stm32f4xx_hal_rcc_ex.h
-        stm32f4xx_hal_rng.h
-        stm32f4xx_hal_rtc.h
-        stm32f4xx_hal_rtc_ex.h
-        stm32f4xx_hal_sai.h
-        stm32f4xx_hal_sai_ex.h
-        stm32f4xx_hal_sd.h
-        stm32f4xx_hal_sdram.h
-        stm32f4xx_hal_smartcard.h
-        stm32f4xx_hal_spdifrx.h
-        stm32f4xx_hal_spi.h
-        stm32f4xx_hal_sram.h
-        stm32f4xx_hal_tim.h
-        stm32f4xx_hal_tim_ex.h
-        stm32f4xx_hal_uart.h
-        stm32f4xx_hal_usart.h
-        stm32f4xx_hal_wwdg.h
-        stm32f4xx_ll_fmc.h
-        stm32f4xx_ll_fsmc.h
-        stm32f4xx_ll_sdmmc.h
-        stm32f4xx_ll_usb.h
     )
     
     SET(HAL_SRCS
         stm32f4xx_hal.c
-        stm32f4xx_hal_adc.c
-        stm32f4xx_hal_adc_ex.c
-        stm32f4xx_hal_can.c
-        stm32f4xx_hal_cec.c
-        stm32f4xx_hal_cortex.c
-        stm32f4xx_hal_crc.c
-        stm32f4xx_hal_cryp.c
-        stm32f4xx_hal_cryp_ex.c
-        stm32f4xx_hal_dac.c
-        stm32f4xx_hal_dac_ex.c
-        stm32f4xx_hal_dcmi.c
-        stm32f4xx_hal_dcmi_ex.c
-        stm32f4xx_hal_dma.c
-        stm32f4xx_hal_dma2d.c
-        stm32f4xx_hal_dma_ex.c
-        stm32f4xx_hal_eth.c
-        stm32f4xx_hal_flash.c
-        stm32f4xx_hal_flash_ex.c
-        stm32f4xx_hal_flash_ramfunc.c
-        stm32f4xx_hal_fmpi2c.c
-        stm32f4xx_hal_fmpi2c_ex.c
-        stm32f4xx_hal_gpio.c
-        stm32f4xx_hal_hash.c
-        stm32f4xx_hal_hash_ex.c
-        stm32f4xx_hal_hcd.c
-        stm32f4xx_hal_i2c.c
-        stm32f4xx_hal_i2c_ex.c
-        stm32f4xx_hal_i2s.c
-        stm32f4xx_hal_i2s_ex.c
-        stm32f4xx_hal_irda.c
-        stm32f4xx_hal_iwdg.c
-        stm32f4xx_hal_ltdc.c
-        stm32f4xx_hal_nand.c
-        stm32f4xx_hal_nor.c
-        stm32f4xx_hal_pccard.c
-        stm32f4xx_hal_pcd.c
-        stm32f4xx_hal_pcd_ex.c
-        stm32f4xx_hal_pwr.c
-        stm32f4xx_hal_pwr_ex.c
-        stm32f4xx_hal_qspi.c
-        stm32f4xx_hal_rcc.c
-        stm32f4xx_hal_rcc_ex.c
-        stm32f4xx_hal_rng.c
-        stm32f4xx_hal_rtc.c
-        stm32f4xx_hal_rtc_ex.c
-        stm32f4xx_hal_sai.c
-        stm32f4xx_hal_sai_ex.c
-        stm32f4xx_hal_sd.c
-        stm32f4xx_hal_sdram.c
-        stm32f4xx_hal_smartcard.c
-        stm32f4xx_hal_spdifrx.c
-        stm32f4xx_hal_spi.c
-        stm32f4xx_hal_sram.c
-        stm32f4xx_hal_tim.c
-        stm32f4xx_hal_tim_ex.c
-        stm32f4xx_hal_uart.c
-        stm32f4xx_hal_usart.c
-        stm32f4xx_hal_wwdg.c
-        stm32f4xx_ll_fmc.c
-        stm32f4xx_ll_fsmc.c
-        stm32f4xx_ll_sdmmc.c
-        stm32f4xx_ll_usb.c
     )
 ENDIF()
+
+IF(NOT STM32HAL_FIND_COMPONENTS)
+    SET(STM32HAL_FIND_COMPONENTS ${HAL_COMPONENTS})
+    MESSAGE(STATUS "No STM32HAL components selected, using all: ${STM32HAL_FIND_COMPONENTS}")
+ENDIF()
+
+FOREACH(cmp ${HAL_REQUIRED_COMPONENTS})
+    LIST(FIND STM32HAL_FIND_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
+    IF(${STM32HAL_FOUND_INDEX} LESS 0)
+        LIST(APPEND STM32HAL_FIND_COMPONENTS ${cmp})
+    ENDIF()
+ENDFOREACH()
+
+FOREACH(cmp ${STM32HAL_FIND_COMPONENTS})
+    LIST(FIND HAL_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
+    IF(${STM32HAL_FOUND_INDEX} LESS 0)
+        MESSAGE(FATAL_ERROR "Unknown STM32HAL component: ${cmp}. Available components: ${HAL_COMPONENTS}")
+    ENDIF()
+    LIST(FIND HAL_LL_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
+    IF(${STM32HAL_FOUND_INDEX} LESS 0)
+        LIST(APPEND HAL_HEADERS ${HAL_PREFIX}hal_${cmp}.h)
+        LIST(APPEND HAL_SRCS ${HAL_PREFIX}hal_${cmp}.c)
+    ELSE()
+        LIST(APPEND HAL_HEADERS ${HAL_PREFIX}ll_${cmp}.h)
+        LIST(APPEND HAL_SRCS ${HAL_PREFIX}ll_${cmp}.c)
+    ENDIF()
+    LIST(FIND HAL_EX_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
+    IF(NOT (${STM32HAL_FOUND_INDEX} LESS 0))
+        LIST(APPEND HAL_HEADERS ${HAL_PREFIX}hal_${cmp}_ex.h)
+        LIST(APPEND HAL_SRCS ${HAL_PREFIX}hal_${cmp}_ex.c)        
+    ENDIF()
+ENDFOREACH()
+
+LIST(REMOVE_DUPLICATES HAL_HEADERS)
+LIST(REMOVE_DUPLICATES HAL_SRCS)
 
 STRING(TOLOWER ${STM32_FAMILY} STM32_FAMILY_LOWER)
 
@@ -236,14 +92,16 @@ FIND_PATH(STM32HAL_INCLUDE_DIR ${HAL_HEADERS}
 )
 
 FOREACH(HAL_SRC ${HAL_SRCS})
-    SET(HAL_SRC_FILE HAL_SRC_FILE-NOTFOUND)
-    FIND_FILE(HAL_SRC_FILE ${HAL_SRC} 
+    SET(HAL_${HAL_SRC}_FILE HAL_SRC_FILE-NOTFOUND)
+    FIND_FILE(HAL_${HAL_SRC}_FILE ${HAL_SRC} 
         PATH_SUFFIXES src stm32${STM32_FAMILY_LOWER}
         HINTS ${STM32Cube_DIR}/Drivers/STM32${STM32_FAMILY}xx_HAL_Driver/Src
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-    LIST(APPEND STM32HAL_SOURCES ${HAL_SRC_FILE})
+    LIST(APPEND STM32HAL_SOURCES ${HAL_${HAL_SRC}_FILE})
 ENDFOREACH()
+
+MESSAGE(${STM32HAL_SOURCES})
 
 INCLUDE(FindPackageHandleStandardArgs)
 
