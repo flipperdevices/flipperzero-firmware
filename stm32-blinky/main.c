@@ -8,38 +8,42 @@ void initGPIO()
 {
     GPIO_InitTypeDef GPIO_Config;
 
-    __GPIOA_CLK_ENABLE();
-
     GPIO_Config.Mode = GPIO_MODE_AF_PP;
     GPIO_Config.Pull = GPIO_NOPULL;
     GPIO_Config.Speed = GPIO_SPEED_HIGH;
 
 #if defined STM32F1
+    __GPIOC_CLK_ENABLE();
     __AFIO_CLK_ENABLE();
 
     GPIO_Config.Pin = GPIO_PIN_8;
+    HAL_GPIO_Init(GPIOC, &GPIO_Config);
 #elif defined STM32F4
+    __GPIOA_CLK_ENABLE();
+
     GPIO_Config.Alternate = GPIO_AF2_TIM3;
     GPIO_Config.Pin = GPIO_PIN_6;
-#endif
     HAL_GPIO_Init(GPIOA, &GPIO_Config);
+#endif
 }
 
 void initTimers()
 {
-    __TIM3_CLK_ENABLE();
-
     TIM_HandleTypeDef TIM_Handle;
 
-    TIM_Handle.Instance = TIM3;
     // 10 kHz timer.
 #if defined STM32F1
-    TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetSysClockFreq() / 10000) - 1;
+    __TIM8_CLK_ENABLE();
+    TIM_Handle.Instance = TIM8;
+    TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetPCLK2Freq() / 10000) - 1;
 #elif defined STM32F4
-    TIM_Handle.Init.Prescaler = (uint16_t)(2 * HAL_RCC_GetSysClockFreq() / 10000) - 1;
+    __TIM3_CLK_ENABLE();
+    TIM_Handle.Instance = TIM3;
+    // TIM3 Clocked from SYSCLK = 168 MHz
+    TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetSysClockFreq() / 10000) - 1;
 #endif
-    // 10000 / 5000 = 1 Hz blinking.
-    TIM_Handle.Init.Period = 5000;
+    // 1 Hz blinking
+    TIM_Handle.Init.Period = 10000;
     TIM_Handle.Init.ClockDivision = 0;
     TIM_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
 
@@ -49,8 +53,8 @@ void initTimers()
     TIM_OC_InitTypeDef TIM_OCConfig;
 
     TIM_OCConfig.OCMode = TIM_OCMODE_PWM1;
-    // 2500 / 5000 = 50% duty cycle.
-    TIM_OCConfig.Pulse = 2499;
+    // 5000 / 10000 = 50% duty cycle.
+    TIM_OCConfig.Pulse = 4999;
     TIM_OCConfig.OCPolarity = TIM_OCPOLARITY_HIGH;
     TIM_OCConfig.OCFastMode = TIM_OCFAST_DISABLE;
 
