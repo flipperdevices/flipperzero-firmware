@@ -1,18 +1,18 @@
 IF(STM32_FAMILY STREQUAL "F1")
-    SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c 
+    SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c
                        i2s irda iwdg nand nor pccard pcd pwr rcc rtc sd smartcard
                        spi sram tim uart usart wwdg fsmc sdmmc usb)
 
     SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
-    
+
     # Components that have _ex sources
     SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim)
-    
+
     # Components that have ll_ in names instead of hal_
     SET(HAL_LL_COMPONENTS fsmc sdmmc usb)
-    
+
     SET(HAL_PREFIX stm32f1xx_)
-    
+
     SET(HAL_HEADERS
         stm32f1xx_hal.h
         stm32f1xx_hal_def.h
@@ -20,29 +20,53 @@ IF(STM32_FAMILY STREQUAL "F1")
     SET(HAL_SRCS
         stm32f1xx_hal.c
     )
+ELSEIF(STM32_FAMILY STREQUAL "F2")
+    SET(HAL_COMPONENTS adc can cortex crc cryp dac dcmi dma eth flash
+                       gpio hash hcd i2c i2s irda iwdg nand nor pccard
+                       pcd pwr rcc rng rtc sd smartcard spi sram tim
+                       uart sart wwdg fsmc sdmmc usbb)
+
+    SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
+
+    # Components that have _ex sources
+    SET(HAL_EX_COMPONENTS adc dac dma flash pwr rcc rtc tim)
+
+    # Components that have ll_ in names instead of hal_
+    SET(HAL_LL_COMPONENTS fsmc sdmmc usb)
+
+    SET(HAL_PREFIX stm32f2xx_)
+
+    SET(HAL_HEADERS
+        stm32f2xx_hal.h
+        stm32f2xx_hal_def.h
+    )
+
+    SET(HAL_SRCS
+        stm32f2xx_hal.c
+    )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
-    SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash 
-                       flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg ltdc 
-                       nand nor pccard pcd pwr qspi rcc rng rtc sai sd sdram 
-                       smartcard spdifrx spi sram tim uart usart wwdg fmc fsmc 
+    SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash
+                       flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg ltdc
+                       nand nor pccard pcd pwr qspi rcc rng rtc sai sd sdram
+                       smartcard spdifrx spi sram tim uart usart wwdg fmc fsmc
                        sdmmc usb)
 
     SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
-    
+
     # Components that have _ex sources
-    SET(HAL_EX_COMPONENTS adc cryp dac dcmi dma flash fmpi2c hash i2c i2s pcd 
+    SET(HAL_EX_COMPONENTS adc cryp dac dcmi dma flash fmpi2c hash i2c i2s pcd
                           pwr rcc rtc sai tim)
-    
+
     # Components that have ll_ in names instead of hal_
     SET(HAL_LL_COMPONENTS fmc fsmc sdmmc usb)
-    
+
     SET(HAL_PREFIX stm32f4xx_)
-    
+
     SET(HAL_HEADERS
         stm32f4xx_hal.h
         stm32f4xx_hal_def.h
     )
-    
+
     SET(HAL_SRCS
         stm32f4xx_hal.c
     )
@@ -76,7 +100,7 @@ FOREACH(cmp ${STM32HAL_FIND_COMPONENTS})
     LIST(FIND HAL_EX_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
     IF(NOT (${STM32HAL_FOUND_INDEX} LESS 0))
         LIST(APPEND HAL_HEADERS ${HAL_PREFIX}hal_${cmp}_ex.h)
-        LIST(APPEND HAL_SRCS ${HAL_PREFIX}hal_${cmp}_ex.c)        
+        LIST(APPEND HAL_SRCS ${HAL_PREFIX}hal_${cmp}_ex.c)
     ENDIF()
 ENDFOREACH()
 
@@ -93,7 +117,7 @@ FIND_PATH(STM32HAL_INCLUDE_DIR ${HAL_HEADERS}
 
 FOREACH(HAL_SRC ${HAL_SRCS})
     SET(HAL_${HAL_SRC}_FILE HAL_SRC_FILE-NOTFOUND)
-    FIND_FILE(HAL_${HAL_SRC}_FILE ${HAL_SRC} 
+    FIND_FILE(HAL_${HAL_SRC}_FILE ${HAL_SRC}
         PATH_SUFFIXES src stm32${STM32_FAMILY_LOWER}
         HINTS ${STM32Cube_DIR}/Drivers/STM32${STM32_FAMILY}xx_HAL_Driver/Src
         CMAKE_FIND_ROOT_PATH_BOTH

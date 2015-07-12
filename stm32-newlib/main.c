@@ -1,5 +1,7 @@
 #if defined STM32F1
 # include <stm32f1xx_hal.h>
+#elif defined STM32F2
+# include <stm32f2xx_hal.h>
 #elif defined STM32F4
 # include <stm32f4xx_hal.h>
 #endif
@@ -34,6 +36,17 @@ void initGPIO()
     GPIO_Config.Pin = GPIO_PIN_10;
 
     HAL_GPIO_Init(GPIOA, &GPIO_Config);
+#elif defined STM32F2
+    __GPIOB_CLK_ENABLE();
+
+    /* USART1 */
+    GPIO_Config.Alternate = GPIO_AF7_USART1;
+    GPIO_Config.Mode = GPIO_MODE_AF_PP;
+    GPIO_Config.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+    GPIO_Config.Pull = GPIO_NOPULL;
+    GPIO_Config.Speed = GPIO_SPEED_FAST;
+
+    HAL_GPIO_Init(GPIOB, &GPIO_Config);
 #elif defined STM32F4
     __GPIOC_CLK_ENABLE();
 
@@ -51,6 +64,9 @@ void initGPIO()
 void initUART()
 {
 #if defined STM32F1
+    __USART1_CLK_ENABLE();
+    UART_Handle.Instance = USART1;
+#elif defined STM32F2
     __USART1_CLK_ENABLE();
     UART_Handle.Instance = USART1;
 #elif defined STM32F4
@@ -73,9 +89,8 @@ void initClock(void)
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
     RCC_OscInitTypeDef RCC_OscInitStruct;
 
-    __HAL_RCC_PWR_CLK_ENABLE();
-
 #if defined STM32F1
+    __HAL_RCC_PWR_CLK_ENABLE();
     uint8_t fLatency;
 
     RCC_OscInitStruct.OscillatorType  = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_LSE;
@@ -123,7 +138,28 @@ void initClock(void)
 
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, fLatency);
 
+#elif defined STM32F2
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 25;
+    RCC_OscInitStruct.PLL.PLLN = 240;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 5;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
+     clocks dividers */
+    RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3);
+
 #elif defined STM32F4
+    __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
     // 8 MHz * 336 / 8 / 2 = 168 MHz SYSCLK
