@@ -9,12 +9,12 @@ IF(STM32_CHIP_TYPE OR STM32_CHIP)
     STRING(TOLOWER ${STM32_CHIP_TYPE} STM32_CHIP_TYPE_LOWER)
 ENDIF()
 
-SET(CMSIS_COMMON_HEADERS 
-    arm_common_tables.h 
-    arm_const_structs.h 
-    arm_math.h 
-    core_cmFunc.h 
-    core_cmInstr.h 
+SET(CMSIS_COMMON_HEADERS
+    arm_common_tables.h
+    arm_const_structs.h
+    arm_math.h
+    core_cmFunc.h
+    core_cmInstr.h
     core_cmSimd.h
 )
 
@@ -23,22 +23,36 @@ IF(STM32_FAMILY STREQUAL "F1")
         SET(STM32Cube_DIR "/opt/STM32Cube_FW_F1_V1.1.0")
         MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
     ENDIF()
-    
-    LIST(APPEND CMSIS_COMMON_HEADERS core_cm3.h) 
+
+    LIST(APPEND CMSIS_COMMON_HEADERS core_cm3.h)
     SET(CMSIS_DEVICE_HEADERS stm32f1xx.h system_stm32f1xx.h)
     SET(CMSIS_DEVICE_SOURCES system_stm32f1xx.c)
+ELSEIF(STM32_FAMILY STREQUAL "F2")
+    IF(NOT STM32Cube_DIR)
+        SET(STM32Cube_DIR "/opt/STM32Cube_FW_F2_V1.1.0")
+        MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
+    ENDIF()
+
+    STRING(REGEX REPLACE "^(2[01]7).[BCDEFG]" "\\1" STM32_DEVICE_NUM ${STM32_CHIP_TYPE})
+    SET(CMSIS_STARTUP_SOURCE startup_stm32f${STM32_DEVICE_NUM}xx.s)
+
+    LIST(APPEND CMSIS_COMMON_HEADERS core_cm4.h)
+    SET(CMSIS_DEVICE_HEADERS stm32f2xx.h system_stm32f2xx.h)
+    SET(CMSIS_DEVICE_SOURCES system_stm32f2xx.c)
 ELSEIF(STM32_FAMILY STREQUAL "F4")
     IF(NOT STM32Cube_DIR)
         SET(STM32Cube_DIR "/opt/STM32Cube_FW_F4_V1.6.0")
         MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
     ENDIF()
-    
-    LIST(APPEND CMSIS_COMMON_HEADERS core_cm4.h) 
+
+    LIST(APPEND CMSIS_COMMON_HEADERS core_cm4.h)
     SET(CMSIS_DEVICE_HEADERS stm32f4xx.h system_stm32f4xx.h)
     SET(CMSIS_DEVICE_SOURCES system_stm32f4xx.c)
 ENDIF()
 
-SET(CMSIS_STARTUP_SOURCE startup_stm32f${STM32_CHIP_TYPE_LOWER}.s)
+IF(NOT CMSIS_STARTUP_SOURCE)
+    SET(CMSIS_STARTUP_SOURCE startup_stm32f${STM32_CHIP_TYPE_LOWER}.s)
+ENDIF()
 
 FIND_PATH(CMSIS_COMMON_INCLUDE_DIR ${CMSIS_COMMON_HEADERS}
     PATH_SUFFIXES include stm32${STM32_FAMILY_LOWER} cmsis
@@ -59,9 +73,9 @@ SET(CMSIS_INCLUDE_DIRS
 
 FOREACH(SRC ${CMSIS_DEVICE_SOURCES})
     SET(SRC_FILE SRC_FILE-NOTFOUND)
-    FIND_FILE(SRC_FILE ${SRC} 
+    FIND_FILE(SRC_FILE ${SRC}
         PATH_SUFFIXES src stm32${STM32_FAMILY_LOWER} cmsis
-        HINTS ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32${STM32_FAMILY}xx/Source/Templates/ 
+        HINTS ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32${STM32_FAMILY}xx/Source/Templates/
         CMAKE_FIND_ROOT_PATH_BOTH
     )
     LIST(APPEND CMSIS_SOURCES ${SRC_FILE})
@@ -69,7 +83,7 @@ ENDFOREACH()
 
 IF(STM32_CHIP_TYPE)
     SET(SRC_FILE SRC_FILE-NOTFOUND)
-    FIND_FILE(SRC_FILE ${CMSIS_STARTUP_SOURCE} 
+    FIND_FILE(SRC_FILE ${CMSIS_STARTUP_SOURCE}
         PATH_SUFFIXES src stm32${STM32_FAMILY_LOWER} cmsis
         HINTS ${STM32Cube_DIR}/Drivers/CMSIS/Device/ST/STM32${STM32_FAMILY}xx/Source/Templates/gcc/
         CMAKE_FIND_ROOT_PATH_BOTH
