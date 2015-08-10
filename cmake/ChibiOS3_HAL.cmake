@@ -21,13 +21,14 @@ FOREACH(module ${CHIBIOS_HAL_MODULES})
 ENDFOREACH()
 
 IF(STM32_FAMILY STREQUAL "F1")
-    SET(CHIBIOS_HAL_PLATFORM_MODULES adc can ext gpt i2c icu mac pal pwm rtc sdc serial spi st uart usb)
+    SET(CHIBIOS_HAL_PLATFORM_MODULES adc can ext gpt i2c i2s icu mac pal pwm rtc sdc serial spi st uart usb)
     SET(CHIBIOS_HAL_PLATFORM_MODULES_PATHES 
       STM32F1xx 
       LLD
       LLD
       LLD/TIMv1
       LLD/I2Cv1
+      LLD/SPIv1
       LLD/TIMv1
       LLD
       LLD/GPIOv1
@@ -57,7 +58,7 @@ IF(STM32_FAMILY STREQUAL "F1")
         nvic.c
     )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
-    SET(CHIBIOS_HAL_PLATFORM_MODULES adc can dac ext gpt i2c icu mac pal pwm rtc sdc serial spi st uart usb)
+    SET(CHIBIOS_HAL_PLATFORM_MODULES adc can dac ext gpt i2c i2s icu mac pal pwm rtc sdc serial spi st uart usb)
     SET(CHIBIOS_HAL_PLATFORM_MODULES_PATHES 
       STM32F4xx 
       LLD
@@ -65,6 +66,7 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
       LLD
       LLD/TIMv1
       LLD/I2Cv1
+      LLD/SPIv1
       LLD/TIMv1
       LLD
       LLD/GPIOv2
