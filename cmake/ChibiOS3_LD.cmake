@@ -31,6 +31,7 @@ IF(NOT ChibiOS_LINKER_SCRIPT)
       "REGION_ALIAS(\"PROCESS_STACK_RAM\", ram0);\n"
       "REGION_ALIAS(\"DATA_RAM\", ram0);\n"
       "REGION_ALIAS(\"BSS_RAM\", ram0);\n"
+      "REGION_ALIAS(\"HEAP_RAM\", ram0);\n"
       "INCLUDE rules.ld\n"      
     )
     SET(ChibiOS_LINKER_SCRIPT ${CMAKE_BINARY_DIR}/chibios_link.ld.in)

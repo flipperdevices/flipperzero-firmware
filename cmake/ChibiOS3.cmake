@@ -40,7 +40,9 @@ ELSE()
   INCLUDE(ChibiOS3_NIL)
 ENDIF()
 
-SET(CHIBIOS_COMPONENTS nil rt hal ${CHIBIOS_HAL_MODULES})
+INCLUDE(ChibiOS3_Various)
+
+SET(CHIBIOS_COMPONENTS nil rt hal ${CHIBIOS_HAL_MODULES} ${CHIBIOS_HAL_LIB_MODULES} ${CHIBIOS_VARIOUS_MODULES})
 
 IF(NOT ChibiOS_LINKER_SCRIPT)
     MESSAGE(STATUS "ChibiOS doesn't have linker script for your chip, please specify it directly using ChibiOS_LINKER_SCRIPT variable.")

@@ -1,3 +1,4 @@
+SET(CHIBIOS_HAL_LIB_MODULES chprintf memstreams nullstreams)
 SET(CHIBIOS_HAL_MODULES adc can dac ext gpt i2c i2s icu mac mmc_spi mmcsd pal pwm rtc sdc serial serial_usb spi st uart usb)
 
 IF(${CHIBIOS_KERNEL} STREQUAL nil)
@@ -18,6 +19,12 @@ FOREACH(module ${CHIBIOS_HAL_MODULES})
   IF(${module} STREQUAL mmcsd)
     SET(CHIBIOS_${module}_SOURCES hal_mmcsd.c)
   ENDIF()
+ENDFOREACH()
+
+FOREACH(module ${CHIBIOS_HAL_LIB_MODULES})
+  SET(CHIBIOS_${module}_SEARCH_PATH ${CHIBIOS_ROOT}/os/hal/lib/streams)
+  SET(CHIBIOS_${module}_SOURCES ${module}.c)
+  SET(CHIBIOS_${module}_SEARCH_HEADERS ${module}.h)
 ENDFOREACH()
 
 IF(STM32_FAMILY STREQUAL "F1")
@@ -84,6 +91,7 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
         ${CHIBIOS_ROOT}/os/hal/ports/common/ARMCMx
         ${CHIBIOS_ROOT}/os/hal/ports/STM32/STM32F4xx
         ${CHIBIOS_ROOT}/os/hal/ports/STM32
+        ${CHIBIOS_ROOT}/os/hal/ports/STM32/LLD/DMAv2
     )
     SET(CHIBIOS_hal_PLATFORM_SEARCH_HEADERS
         hal_lld.h
