@@ -8,21 +8,26 @@ SET(FATFS_COMMON_SOURCES
     ff.c
     ff_gen_drv.c
 )
-SET(FATFS_DIRVER_SOURCES
-    sd_diskio.c
-    sdram_diskio.c
-    sram_diskio.c
-    usbh_diskio.c
-)
-SET(FATFS_OPTION_SOURCES
-    cc932.c
-    cc936.c
-    cc949.c
-    cc950.c
-    ccsbcs.c
-    syscall.c
-    unicode.c
-)
+
+if(STORAGE_DRIVER EQUAL SDCARD)
+    SET(FATFS_DIRVER_SOURCES sd_diskio.c)
+elseif(STORAGE_DRIVER EQUAL SDRAM)
+    SET(FATFS_DIRVER_SOURCES sdram_diskio.c)
+elseif(STORAGE_DRIVER EQUAL SRAM)
+    SET(FATFS_DIRVER_SOURCES sram_diskio.c)
+elseif(STORAGE_DRIVER EQUAL USB)
+    SET(FATFS_DIRVER_SOURCES usbh_diskio.c)
+endif()
+
+SET(FATFS_OPTION_SOURCES syscall.c unicode.c)
+#if(CODE_PAGE EQUAL CP932)
+#list(APPEND FATFS_OPTION_SOURCES cc932.c)
+#(    cc936.c
+#    cc949.c
+#    cc950.c
+#    ccsbcs.c
+#    unicode.c
+#)
 
 SET(FATFS_COMMON_HEADERS
     diskio.h
