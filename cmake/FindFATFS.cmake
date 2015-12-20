@@ -9,15 +9,24 @@ SET(FATFS_COMMON_SOURCES
     ff_gen_drv.c
 )
 
-if(STORAGE_DRIVER EQUAL SDCARD)
-    SET(FATFS_DIRVER_SOURCES sd_diskio.c)
-elseif(STORAGE_DRIVER EQUAL SDRAM)
-    SET(FATFS_DIRVER_SOURCES sdram_diskio.c)
-elseif(STORAGE_DRIVER EQUAL SRAM)
-    SET(FATFS_DIRVER_SOURCES sram_diskio.c)
-elseif(STORAGE_DRIVER EQUAL USB)
-    SET(FATFS_DIRVER_SOURCES usbh_diskio.c)
+IF(NOT STORAGE_DRIVER)
+    MESSAGE(STATUS "No storage driver specified")
+else()
+    if("SDCARD" IN_LIST STORAGE_DRIVER)
+        LIST(APPEND FATFS_DRIVER_SOURCES sd_diskio.c)
+    endif()
+    if("SDRAM" IN_LIST STORAGE_DRIVER)
+        LIST(APPEND FATFS_DRIVER_SOURCES sdram_diskio.c)
+    endif()
+    if("SRAM" IN_LIST STORAGE_DRIVER)
+        LIST(APPEND FATFS_DRIVER_SOURCES sram_diskio.c)
+    endif()
+    if("USBH" IN_LIST STORAGE_DRIVER)
+        LIST(APPEND FATFS_DRIVER_SOURCES usbh_diskio.c)
+    endif()
 endif()
+MESSAGE(STATUS "debug1 : " ${STORAGE_DRIVER})
+MESSAGE(STATUS "debug2 : " ${FATFS_DRIVER_SOURCES})
 
 SET(FATFS_OPTION_SOURCES syscall.c unicode.c)
 #if(CODE_PAGE EQUAL CP932)
@@ -68,7 +77,7 @@ FOREACH(SRC ${FATFS_COMMON_SOURCES})
     LIST(APPEND FATFS_SOURCES ${SRC_FILE})
 ENDFOREACH()
 
-FOREACH(SRC ${FATFS_DIRVER_SOURCES})
+FOREACH(SRC ${FATFS_DRIVER_SOURCES})
     SET(SRC_FILE SRC_FILE-NOTFOUND)
     FIND_FILE(SRC_FILE ${SRC}
         HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FatFs/src/drivers/
@@ -85,8 +94,9 @@ FOREACH(SRC ${FATFS_OPTION_SOURCES})
     )
     LIST(APPEND FATFS_SOURCES ${SRC_FILE})
 ENDFOREACH()
-#message(STATUS "fatfs include " ${FATFS_INCLUDE_DIRS})
-#message(STATUS "fatfs sources " ${FATFS_SOURCES})
+
+message(STATUS "fatfs include " ${FATFS_INCLUDE_DIRS})
+message(STATUS "fatfs sources " ${FATFS_SOURCES})
 
 INCLUDE(FindPackageHandleStandardArgs)
 
