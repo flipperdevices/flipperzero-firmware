@@ -1,4 +1,26 @@
-IF(STM32_FAMILY STREQUAL "F1")
+IF(STM32_FAMILY STREQUAL "F0")
+    SET(HAL_COMPONENTS adc can cec comp cortex crc dac dma flash gpio i2c
+                       i2s irda iwdg pcd pwr rcc rtc smartcard smbus
+                       spi tim tsc uart usart wwdg)
+
+    SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
+
+    # Components that have _ex sources
+    SET(HAL_EX_COMPONENTS adc crc dac flash i2c pcd pwr rcc rtc smartcard spi tim uart)
+
+    # Components that have ll_ in names instead of hal_
+    SET(HAL_LL_COMPONENTS "")
+
+    SET(HAL_PREFIX stm32f0xx_)
+
+    SET(HAL_HEADERS
+        stm32f0xx_hal.h
+        stm32f0xx_hal_def.h
+    )
+    SET(HAL_SRCS
+        stm32f0xx_hal.c
+    )
+ELSEIF(STM32_FAMILY STREQUAL "F1")
     SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c
                        i2s irda iwdg nand nor pccard pcd pwr rcc rtc sd smartcard
                        spi sram tim uart usart wwdg fsmc sdmmc usb)
