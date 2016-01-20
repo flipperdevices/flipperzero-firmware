@@ -1,12 +1,12 @@
 # About
 
-This project is used to develop applications for the STM32 - ST's ARM Cortex-M3(4) MCUs. It uses cmake and GCC, along with newlib (libc), STM32CubeMX or ChibiOS.
+This project is used to develop applications for the STM32 - ST's ARM Cortex-M0(3,4) MCUs. It uses cmake and GCC, along with newlib (libc), STM32CubeMX or ChibiOS.
 
 ## Requirements
 
 * cmake >= 2.8
 * GCC toolchain with newlib (optional).
-* STM32CubeMX package for STM32F1, STM32F2 or STM32F4 families.
+* STM32CubeMX package for STM32F0, STM32F1, STM32F2 or STM32F4 families.
 
 ## Project contains
 
@@ -32,8 +32,8 @@ First of all you need to configure toolchain and libraries, you can do this by e
 * `TOOLCHAIN_PREFIX` - where toolchain is located, **default**: `/usr`
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `STM32_CHIP` - STM32 device code, e.g. `STM32F407VG` or `STM32F103VG`
-* `STM32_FAMILY` - STM32 family (F0, F1, F4, etc.) currently, F1, F2 and F4 family are supported. **Note:** If `STM32_CHIP` variable is set, `STM32_FAMILY` is optional.
-* `STM32Cube_DIR` - path to STM32CubeMX directory **default**: `/opt/STM32Cube_FW_F1_V1.1.0 /opt/STM32Cube_FW_F2_V1.1.0 /opt/STM32Cube_FW_F4_V1.6.0`
+* `STM32_FAMILY` - STM32 family (F0, F1, F4, etc.) currently,F0, F1, F2 and F4 family are supported. **Note:** If `STM32_CHIP` variable is set, `STM32_FAMILY` is optional.
+* `STM32Cube_DIR` - path to STM32CubeMX directory **default**: `/opt/STM32Cube_FW_F0_V1.4.0 /opt/STM32Cube_FW_F1_V1.1.0 /opt/STM32Cube_FW_F2_V1.1.0 /opt/STM32Cube_FW_F4_V1.6.0`
 
 To use the toolchain, you'll need to copy contents of the `cmake` folder into cmake's modules path, or use the `CMAKE_MODULE_PATH` variable.
 
