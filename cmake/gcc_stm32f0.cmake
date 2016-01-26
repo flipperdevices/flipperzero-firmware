@@ -6,8 +6,8 @@ SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -mthumb -mcpu=cortex-m0 -mabi=aapc
 SET(CMAKE_MODULE_LINKER_FLAGS "-mthumb -mcpu=cortex-m0 -mabi=aapcs" CACHE INTERNAL "module linker flags")
 SET(CMAKE_SHARED_LINKER_FLAGS "-mthumb -mcpu=cortex-m0 -mabi=aapcs" CACHE INTERNAL "shared linker flags")
 
-SET(STM32_CHIP_TYPES 030xC 031x6 038x6 042x6 048x6 051x8 058x8 070xB 071xB 072xB 078xB 091xC 098xC CACHE INTERNAL "stm32f0 chip types")
-SET(STM32_CODES "030.[468C]" "031.[46]" "038.6" "042.[46]" "048.6" "051.[468]" "058.8" "070.[6B]" "071.[8B]" "072.[8B]" "078.B" "091.[BC]" "098.C")
+SET(STM32_CHIP_TYPES 030x6 30x8 031x6 038xx 042x6 048x6 051x8 058xx 070x6 070xB 071xB 072xB 078xx 091xC 098xx 030xC CACHE INTERNAL "stm32f0 chip types")
+SET(STM32_CODES "030.[46]" "030.8" "031.[46]" "038.6" "042.[46]" "048.6" "051.[468]" "058.8" "070.6" "070.B" "071.[8B]" "072.[8B]" "078.B" "091.[BC]" "098.C" "030.C")
 
 MACRO(STM32_GET_CHIP_TYPE CHIP CHIP_TYPE)
     STRING(REGEX REPLACE "^[sS][tT][mM]32[fF]((03[018].[468C])|(04[28].[46])|(05[18].[468])|(07[0128].[68B])|(09[18].[BC])).+$" "\\1" STM32_CODE ${CHIP})
