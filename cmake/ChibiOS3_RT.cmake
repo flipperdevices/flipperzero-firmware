@@ -13,12 +13,9 @@ SET(CHIBIOS_rt_SEARCH_HEADERS
   chtypes.h
 )
 SET(CHIBIOS_rt_SOURCES  
-  crt0_v7m.s
   crt1.c
   vectors.c
   chcore.c
-  chcore_v7m.c
-  chcoreasm_v7m.s
   chsys.c
   chdebug.c
   chvt.c
@@ -40,7 +37,20 @@ SET(CHIBIOS_rt_SOURCES
   chmempools.c
 )
 
-IF(STM32_FAMILY STREQUAL "F1")
+IF(STM32_FAMILY STREQUAL "F0")
+  SET(CHIBIOS_rt_SOURCES  ${CHIBIOS_rt_SOURCES} crt0_v6m.s chcore_v6m.c chcoreasm_v6m.s)
+  SET(CHIBIOS_rt_PLATFORM_SEARCH_PATH
+          ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F0xx
+          ${CHIBIOS_ROOT}/os/ext/CMSIS/include
+          ${CHIBIOS_ROOT}/os/ext/CMSIS/ST
+          )
+  SET(CHIBIOS_rt_PLATFORM_SEARCH_HEADERS
+          core_cm0.h
+          stm32f0xx.h
+          cmparams.h
+          )
+ELSEIF(STM32_FAMILY STREQUAL "F1")
+  SET(CHIBIOS_rt_SOURCES  ${CHIBIOS_rt_SOURCES} crt0_v7m.s chcore_v7m.c chcoreasm_v7m.s)
   SET(CHIBIOS_rt_PLATFORM_SEARCH_PATH
     ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F1xx
     ${CHIBIOS_ROOT}/os/ext/CMSIS/include
@@ -52,6 +62,7 @@ IF(STM32_FAMILY STREQUAL "F1")
     cmparams.h
   )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
+  SET(CHIBIOS_rt_SOURCES  ${CHIBIOS_rt_SOURCES} crt0_v7m.s chcore_v7m.c chcoreasm_v7m.s)
   SET(CHIBIOS_rt_PLATFORM_SEARCH_PATH
     ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F4xx
     ${CHIBIOS_ROOT}/os/ext/CMSIS/include
