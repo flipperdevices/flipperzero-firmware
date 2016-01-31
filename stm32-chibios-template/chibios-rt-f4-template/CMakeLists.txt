@@ -8,9 +8,9 @@ project(chibios-rt-f4-template)
 ENABLE_LANGUAGE(ASM)
 
 # test build all available ChibiOS COMPONENTS for F4 chip
-#FIND_PACKAGE(ChibiOS COMPONENTS rt hal adc can dac ext gpt i2c i2s icu mac mmc_spi pal pwm rtc sdc serial serial_usb spi st uart usb chprintf memstreams nullstreams evtimer shell syscalls REQUIRED)
+FIND_PACKAGE(ChibiOS 16 COMPONENTS rt hal adc can dac ext gpt i2c i2s icu mac mmc_spi pal pwm rtc sdc serial serial_usb spi st uart usb chprintf memstreams nullstreams evtimer shell syscalls REQUIRED)
 
-FIND_PACKAGE(ChibiOS COMPONENTS rt hal pal  REQUIRED)
+#FIND_PACKAGE(ChibiOS COMPONENTS rt hal pal  REQUIRED)
 
 INCLUDE_DIRECTORIES(
         ${CMAKE_CURRENT_SOURCE_DIR}

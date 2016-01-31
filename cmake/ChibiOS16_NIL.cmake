@@ -23,7 +23,7 @@ IF(STM32_FAMILY STREQUAL "F0")
   SET(CHIBIOS_nil_PLATFORM_SEARCH_PATH
     ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F0xx
     ${CHIBIOS_ROOT}/os/ext/CMSIS/include
-    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST
+    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST/STM32F0xx/
   )
   SET(CHIBIOS_nil_PLATFORM_SEARCH_HEADERS
     core_cm0.h
@@ -35,11 +35,11 @@ ELSEIF(STM32_FAMILY STREQUAL "F1")
   SET(CHIBIOS_nil_PLATFORM_SEARCH_PATH
     ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F1xx
     ${CHIBIOS_ROOT}/os/ext/CMSIS/include
-    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST
+    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST/STM32F1xx/
   )
   SET(CHIBIOS_nil_PLATFORM_SEARCH_HEADERS
     core_cm3.h
-    stm32f10x.h
+    stm32f1xx.h
     cmparams.h
   )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
@@ -47,7 +47,7 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
   SET(CHIBIOS_nil_PLATFORM_SEARCH_PATH
     ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32F4xx
     ${CHIBIOS_ROOT}/os/ext/CMSIS/include
-    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST
+    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST/STM32F4xx/
   )
   SET(CHIBIOS_nil_PLATFORM_SEARCH_HEADERS
     core_cm4.h
