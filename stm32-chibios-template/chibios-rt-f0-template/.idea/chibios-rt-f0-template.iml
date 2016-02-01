@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/compilers/GCC/crt1.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/compilers/GCC/crt1.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/compilers/GCC/vectors.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/compilers/GCC/vectors.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/chprintf.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/chprintf.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/memstreams.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/memstreams.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/nullstreams.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/nullstreams.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/osal/rt/osal.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/osal/rt/osal.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/ADCv1/adc_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/ADCv1/adc_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/CANv1/can_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/CANv1/can_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DACv1/dac_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DACv1/dac_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DMAv1/stm32_dma.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DMAv1/stm32_dma.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/EXTIv1/ext_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/EXTIv1/ext_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/GPIOv2/pal_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/GPIOv2/pal_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/I2Cv2/i2c_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/I2Cv2/i2c_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/MACv1/mac_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/MACv1/mac_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/RTCv2/rtc_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/RTCv2/rtc_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SDMMCv1/sdc_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SDMMCv1/sdc_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv1/i2s_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv1/i2s_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv2/spi_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv2/spi_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/gpt_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/gpt_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/icu_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/icu_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/pwm_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/pwm_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/st_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/st_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/serial_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/serial_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/uart_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/uart_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USBv1/usb_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USBv1/usb_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/ext_lld_isr.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/ext_lld_isr.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/hal_lld.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/hal_lld.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/common/ARMCMx/nvic.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/common/ARMCMx/nvic.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/adc.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/adc.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/can.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/can.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/dac.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/dac.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/ext.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/ext.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/gpt.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/gpt.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/hal.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/hal.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/hal_queues.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/hal_queues.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/i2c.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/i2c.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/i2s.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/i2s.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/icu.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/icu.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/mac.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/mac.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/mmc_spi.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/mmc_spi.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/pal.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/pal.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/pwm.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/pwm.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/rtc.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/rtc.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/sdc.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/sdc.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/serial.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/serial.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/serial_usb.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/serial_usb.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/spi.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/spi.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/st.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/st.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/uart.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/uart.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/usb.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/src/usb.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore_v6m.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore_v6m.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chcond.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chcond.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chdebug.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chdebug.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chdynamic.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chdynamic.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chevents.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chevents.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chheap.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chheap.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmboxes.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmboxes.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmemcore.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmemcore.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmempools.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmempools.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmsg.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmsg.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmtx.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chmtx.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chqueues.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chqueues.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chregistry.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chregistry.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chschd.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chschd.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chsem.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chsem.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chstats.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chstats.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chsys.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chsys.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chthreads.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chthreads.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chtm.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chtm.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chvt.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/src/chvt.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/evtimer.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/evtimer.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/shell.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/shell.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/syscalls.c">
+      <sourceFolder url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/syscalls.c" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/work/test.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/work/test.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/config/chconf.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/config/halconf.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/config/mcuconf.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/board/board.c" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/board/board.h" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/ext/CMSIS/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/ext/CMSIS/ST/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/common/ARMCMx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/GPIOv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DACv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DMAv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/CANv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/ADCv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/RTCv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/I2Cv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/EXTIv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USBv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SDMMCv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/MACv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/osal/rt" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/devices/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/arm-none-eabi/include" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/lib/gcc/arm-none-eabi/5.2.1/include" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/lib/gcc/arm-none-eabi/5.2.1/include-fixed" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/ext/CMSIS/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/ext/CMSIS/ST/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/common/ARMCMx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/GPIOv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DACv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DMAv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/CANv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/ADCv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/RTCv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/I2Cv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/EXTIv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USBv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SDMMCv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/MACv1" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/osal/rt" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/include" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/common/ports/ARMCMx/devices/STM32F0xx" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/arm-none-eabi/include" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/lib/gcc/arm-none-eabi/5.2.1/include" />
+          <root url="file://$MODULE_DIR$/../../../gcc-arm-none-eabi-5_2-2015q4/lib/gcc/arm-none-eabi/5.2.1/include-fixed" />
+        </SOURCES>
+        <excluded>
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/nullstreams.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/memstreams.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/lib/streams/chprintf.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/common/ARMCMx/nvic.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/hal_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/STM32F0xx/ext_lld_isr.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/GPIOv2/pal_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DACv1/dac_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/DMAv1/stm32_dma.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/CANv1/can_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv2/spi_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SPIv1/i2s_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/ADCv1/adc_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/RTCv2/rtc_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/I2Cv2/i2c_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/EXTIv1/ext_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/gpt_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/st_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/icu_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/TIMv1/pwm_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USBv1/usb_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/SDMMCv1/sdc_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/serial_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/USARTv2/uart_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/ports/STM32/LLD/MACv1/mac_lld.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/hal/osal/rt/osal.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore_v6m.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/rt/ports/ARMCMx/chcore.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/evtimer.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/syscalls.c" />
+          <root url="file://$MODULE_DIR$/../../../ChibiOS_16.1.2/os/various/shell.c" />
+        </excluded>
+      </library>
+    </orderEntry>
+  </component>
+</module>

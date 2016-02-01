@@ -85,7 +85,7 @@ You can use cmake variables below to tune the generated linker. To specify a cus
 
 # ChibiOS Support
 
-This project also supports ChibiOS v3.x.x (both nil and rt kernels).
+This project also supports ChibiOS v3.x.x and ChibiOS v16.x.x (both nil and rt kernels).
 
 CMake modules for ChibiOS can find specified ChibiOS components using the COMPONENTS directive.
 
