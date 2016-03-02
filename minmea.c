@@ -265,9 +265,12 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         if (!isdigit((unsigned char) field[f]))
                             goto parse_error;
 
-                    d = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
-                    m = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
-                    y = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
+                    char dArr[3] = {field[0], field[1], '\0'};
+                    char mArr[3] = {field[2], field[3], '\0'};
+                    char yArr[3] = {field[4], field[5], '\0'};
+                    d = strtol(dArr, NULL, 10);
+                    m = strtol(mArr, NULL, 10);
+                    y = strtol(yArr, NULL, 10);
                 }
 
                 date->day = d;
@@ -286,9 +289,12 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         if (!isdigit((unsigned char) field[f]))
                             goto parse_error;
 
-                    h = strtol((char[]) {field[0], field[1], '\0'}, NULL, 10);
-                    i = strtol((char[]) {field[2], field[3], '\0'}, NULL, 10);
-                    s = strtol((char[]) {field[4], field[5], '\0'}, NULL, 10);
+                    char hArr[3] = {field[0], field[1], '\0'};
+                    char iArr[3] = {field[2], field[3], '\0'};
+                    char sArr[3] = {field[4], field[5], '\0'};
+                    h = strtol(hArr, NULL, 10);
+                    i = strtol(iArr, NULL, 10);
+                    s = strtol(sArr, NULL, 10);
                     field += 6;
 
                     // Extra: fractional time. Saved as microseconds.
