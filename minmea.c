@@ -265,9 +265,9 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         if (!isdigit((unsigned char) field[f]))
                             goto parse_error;
 
-                    char dArr[3] = {field[0], field[1], '\0'};
-                    char mArr[3] = {field[2], field[3], '\0'};
-                    char yArr[3] = {field[4], field[5], '\0'};
+                    char dArr[] = {field[0], field[1], '\0'};
+                    char mArr[] = {field[2], field[3], '\0'};
+                    char yArr[] = {field[4], field[5], '\0'};
                     d = strtol(dArr, NULL, 10);
                     m = strtol(mArr, NULL, 10);
                     y = strtol(yArr, NULL, 10);
@@ -289,9 +289,9 @@ bool minmea_scan(const char *sentence, const char *format, ...)
                         if (!isdigit((unsigned char) field[f]))
                             goto parse_error;
 
-                    char hArr[3] = {field[0], field[1], '\0'};
-                    char iArr[3] = {field[2], field[3], '\0'};
-                    char sArr[3] = {field[4], field[5], '\0'};
+                    char hArr[] = {field[0], field[1], '\0'};
+                    char iArr[] = {field[2], field[3], '\0'};
+                    char sArr[] = {field[4], field[5], '\0'};
                     h = strtol(hArr, NULL, 10);
                     i = strtol(iArr, NULL, 10);
                     s = strtol(sArr, NULL, 10);
