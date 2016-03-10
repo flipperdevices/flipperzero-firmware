@@ -46,7 +46,7 @@ ELSEIF(STM32_FAMILY STREQUAL "F2")
     SET(HAL_COMPONENTS adc can cortex crc cryp dac dcmi dma eth flash
                        gpio hash hcd i2c i2s irda iwdg nand nor pccard
                        pcd pwr rcc rng rtc sd smartcard spi sram tim
-                       uart sart wwdg fsmc sdmmc usbb)
+                       uart usart wwdg fsmc sdmmc usb)
 
     SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
 
