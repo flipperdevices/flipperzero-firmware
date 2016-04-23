@@ -31,6 +31,7 @@ enum minmea_sentence_id {
     MINMEA_SENTENCE_GLL,
     MINMEA_SENTENCE_GST,
     MINMEA_SENTENCE_GSV,
+    MINMEA_SENTENCE_VTG,
 };
 
 struct minmea_float {
@@ -79,10 +80,15 @@ enum minmea_gll_status {
     MINMEA_GLL_STATUS_DATA_NOT_VALID = 'V',
 };
 
-enum minmea_gll_mode {
-    MINMEA_GLL_MODE_AUTONOMOUS = 'A',
-    MINMEA_GLL_MODE_DPGS = 'D',
-    MINMEA_GLL_MODE_DR = 'E',
+// FAA mode added to some fields in NMEA 2.3.
+enum minmea_faa_mode {
+    MINMEA_FAA_MODE_AUTONOMOUS = 'A',
+    MINMEA_FAA_MODE_DIFFERENTIAL = 'D',
+    MINMEA_FAA_MODE_ESTIMATED = 'E',
+    MINMEA_FAA_MODE_MANUAL = 'M',
+    MINMEA_FAA_MODE_SIMULATED = 'S',
+    MINMEA_FAA_MODE_NOT_VALID = 'N',
+    MINMEA_FAA_MODE_PRECISE = 'P',
 };
 
 struct minmea_sentence_gll {
@@ -138,6 +144,14 @@ struct minmea_sentence_gsv {
     struct minmea_sat_info sats[4];
 };
 
+struct minmea_sentence_vtg {
+    struct minmea_float true_track_degrees;
+    struct minmea_float magnetic_track_degrees;
+    struct minmea_float speed_knots;
+    struct minmea_float speed_kph;
+    enum minmea_faa_mode faa_mode;
+};
+
 /**
  * Calculate raw sentence checksum. Does not check sentence integrity.
  */
@@ -180,6 +194,7 @@ bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);
 bool minmea_parse_gll(struct minmea_sentence_gll *frame, const char *sentence);
 bool minmea_parse_gst(struct minmea_sentence_gst *frame, const char *sentence);
 bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence);
+bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence);
 
 /**
  * Convert GPS UTC date/time representation to a UNIX timestamp.

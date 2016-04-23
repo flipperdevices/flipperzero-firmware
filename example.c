@@ -90,6 +90,23 @@ int main(void)
                 }
             } break;
 
+            case MINMEA_SENTENCE_VTG: {
+               struct minmea_sentence_vtg frame;
+               if (minmea_parse_vtg(&frame, line)) {
+                    printf(INDENT_SPACES "$xxVTG: true track degrees = %f\n",
+                           minmea_tofloat(&frame.true_track_degrees));
+                    printf(INDENT_SPACES "        magnetic track degrees = %f\n",
+                           minmea_tofloat(&frame.magnetic_track_degrees));
+                    printf(INDENT_SPACES "        speed knots = %f\n",
+                            minmea_tofloat(&frame.speed_knots));
+                    printf(INDENT_SPACES "        speed kph = %f\n",
+                            minmea_tofloat(&frame.speed_kph));
+               }
+               else {
+                    printf(INDENT_SPACES "$xxVTG sentence is not parsed\n");
+               }
+            } break;
+
             case MINMEA_INVALID: {
                 printf(INDENT_SPACES "$xxxxx sentence is not valid\n");
             } break;

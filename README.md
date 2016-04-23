@@ -24,8 +24,9 @@ systems.
 * ``GLL`` (Geographic Position: Latitude/Longitude)
 * ``GST`` (Pseudorange Noise Statistics)
 * ``GSV`` (Satellites in view)
+* ``VTG`` (Track made good and Ground speed)
 
-Adding support for more sentences is trivial; see ``minmea.c`` source.
+Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation on NMEA is at http://www.catb.org/gpsd/NMEA.html
 
 ## Fractional number format
 

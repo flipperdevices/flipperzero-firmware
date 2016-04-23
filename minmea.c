@@ -369,6 +369,8 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict)
         return MINMEA_SENTENCE_GST;
     if (!strcmp(type+2, "GSV"))
         return MINMEA_SENTENCE_GSV;
+    if (!strcmp(type+2, "VTG"))
+        return MINMEA_SENTENCE_VTG;
 
     return MINMEA_UNKNOWN;
 }
@@ -543,6 +545,40 @@ bool minmea_parse_gsv(struct minmea_sentence_gsv *frame, const char *sentence)
     }
     if (strcmp(type+2, "GSV"))
         return false;
+
+    return true;
+}
+
+bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence)
+{
+    // $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K*48
+    // $GPVTG,156.1,T,140.9,M,0.0,N,0.0,K*41
+    // $GPVTG,096.5,T,083.5,M,0.0,N,0.0,K,D*22
+    // $GPVTG,188.36,T,,M,0.820,N,1.519,K,A*3F
+    char type[6];
+    char c_true, c_magnetic, c_knots, c_kph, c_faa_mode;
+
+    if (!minmea_scan(sentence, "tfcfcfcfc;c",
+            type,
+            &frame->true_track_degrees,
+            &c_true,
+            &frame->magnetic_track_degrees,
+            &c_magnetic,
+            &frame->speed_knots,
+            &c_knots,
+            &frame->speed_kph,
+            &c_kph,
+            &c_faa_mode))
+        return false;
+    if (strcmp(type+2, "VTG"))
+        return false;
+    // check chars
+    if (c_true != 'T' ||
+        c_magnetic != 'M' ||
+        c_knots != 'N' ||
+        c_kph != 'K')
+        return false;
+    frame->faa_mode = c_faa_mode;
 
     return true;
 }

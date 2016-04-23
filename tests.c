@@ -569,14 +569,19 @@ END_TEST
 START_TEST(test_minmea_parse_gll1)
 {
     const char *sentence = "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41";
-    struct minmea_sentence_gll frame = {};
-    struct minmea_sentence_gll expected = {
-        .latitude = { 37232475, 10000 },
-        .longitude = { -121583416, 10000 },
-        .time = { 16, 12, 29, 487000 },
-        .status = MINMEA_GLL_STATUS_DATA_VALID,
-        .mode = MINMEA_GLL_MODE_AUTONOMOUS,
-    };
+    struct minmea_sentence_gll frame;
+    struct minmea_sentence_gll expected;
+
+    // clear structs before initialization to enable use of memcmp()
+    // todo: add for other structs
+    memset(&frame, 0, sizeof(frame));
+    memset(&expected, 0, sizeof(expected));
+
+    expected.latitude = (struct minmea_float){ 37232475, 10000 };
+    expected.longitude = (struct minmea_float){ -121583416, 10000 };
+    expected.time = (struct minmea_time){ 16, 12, 29, 487000 };
+    expected.status = MINMEA_GLL_STATUS_DATA_VALID;
+    expected.mode = MINMEA_FAA_MODE_AUTONOMOUS;
 
     ck_assert(minmea_check(sentence, false) == true);
     ck_assert(minmea_check(sentence, true) == true);
@@ -815,6 +820,50 @@ START_TEST(test_minmea_parse_gsv5)
 END_TEST
 
 
+START_TEST(test_minmea_parse_vtg1)
+{
+    const char *sentence = "$GPVTG,054.7,T,034.4,M,005.5,N,010.2,K*48";
+    // clear structs before initialization to enable use of memcmp()
+    struct minmea_sentence_vtg frame = {};
+    struct minmea_sentence_vtg expected = {};
+
+    expected = (struct minmea_sentence_vtg){
+        .true_track_degrees = { 547, 10 },
+        .magnetic_track_degrees = { 344, 10 },
+        .speed_knots = { 55, 10 },
+        .speed_kph = { 102, 10 },
+        .faa_mode = 0,
+    };
+
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
+    ck_assert(minmea_parse_vtg(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
+START_TEST(test_minmea_parse_vtg2)
+{
+    const char *sentence = "$GPVTG,188.36,T,,M,0.820,N,1.519,K,A*3F";
+    // clear structs before initialization to enable use of memcmp()
+    struct minmea_sentence_vtg frame = {};
+    struct minmea_sentence_vtg expected = {};
+
+    expected = (struct minmea_sentence_vtg){
+        .true_track_degrees = { 18836, 100 },
+        .magnetic_track_degrees = { 0, 0 },
+        .speed_knots = { 820, 1000 },
+        .speed_kph = { 1519, 1000 },
+        .faa_mode = MINMEA_FAA_MODE_AUTONOMOUS,
+    };
+
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
+    ck_assert(minmea_parse_vtg(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
@@ -823,6 +872,7 @@ START_TEST(test_minmea_usage1)
         "$GNGSA,A,3,04,05,,09,12,,,24,,,,,2.5,1.3,2.1",
         "$GPGLL,3723.2475,N,12158.3416,W,161229.487,A,A*41",
         "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58",
+        "$GPVTG,096.5,T,083.5,M,0.0,N,0.0,K,D*22",
         NULL,
     };
 
@@ -851,6 +901,11 @@ START_TEST(test_minmea_usage1)
             case MINMEA_SENTENCE_GST: {
                 struct minmea_sentence_gst frame;
                 ck_assert(minmea_parse_gst(&frame, *sentence) == true);
+            } break;
+
+            case MINMEA_SENTENCE_VTG: {
+                struct minmea_sentence_vtg frame;
+                ck_assert(minmea_parse_vtg(&frame, *sentence) == true);
             } break;
 
             default: {
@@ -963,6 +1018,8 @@ static Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gsv3);
     tcase_add_test(tc_parse, test_minmea_parse_gsv4);
     tcase_add_test(tc_parse, test_minmea_parse_gsv5);
+    tcase_add_test(tc_parse, test_minmea_parse_vtg1);
+    tcase_add_test(tc_parse, test_minmea_parse_vtg2);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
