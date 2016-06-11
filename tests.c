@@ -18,6 +18,7 @@
 
 static const char *valid_sentences_nochecksum[] = {
     "$GPTXT,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    NULL,
 };
 
 static const char *valid_sentences_checksum[] = {
