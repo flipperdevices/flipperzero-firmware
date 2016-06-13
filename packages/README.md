@@ -18,9 +18,9 @@ You need the right GCC compiler, which is `gcc-arm-none-eabi`. Fortunately, if y
 Ubuntu, this is really easy to get from Launchpad, thanks to Terry Guo's PPA:
 
 ~~~
-sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded
+sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
 sudo apt-get update
-sudo apt-get install gcc-arm-none-eabi
+sudo apt-get install gcc-arm-embedded
 ~~~
 
 Building the deb
