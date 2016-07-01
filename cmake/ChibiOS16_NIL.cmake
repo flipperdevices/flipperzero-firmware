@@ -54,4 +54,16 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
     stm32f4xx.h
     cmparams.h
   )
+ELSEIF(STM32_FAMILY STREQUAL "L0")
+  SET(CHIBIOS_nil_SOURCES  ${CHIBIOS_nil_SOURCES} crt0_v6m.s nilcore_v6m.c nilcoreasm_v6m.s)
+  SET(CHIBIOS_nil_PLATFORM_SEARCH_PATH
+    ${CHIBIOS_ROOT}/os/common/ports/ARMCMx/devices/STM32L0xx
+    ${CHIBIOS_ROOT}/os/ext/CMSIS/include
+    ${CHIBIOS_ROOT}/os/ext/CMSIS/ST/STM32L0xx/
+  )
+  SET(CHIBIOS_nil_PLATFORM_SEARCH_HEADERS
+    core_cm0plus.h
+    stm32l0xx.h
+    cmparams.h
+  )
 ENDIF()
