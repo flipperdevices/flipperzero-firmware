@@ -40,7 +40,9 @@ to either fixed-point or floating-point format:
 
 The compound type ``struct minmea_float`` uses ``int_least32_t`` internally. Therefore,
 the coordinate precision is guaranteed to be at least ``[+-]DDDMM.MMMMM`` (five decimal digits)
-or ±20cm LSB at the equator.
+or ±2cm LSB at the equator. Note that GPS modules commonly only provide four deciminal digits
+(``[+-]DDDMM.MMMM``), which equates to ±20cm (0.0001 minute is 0.0001/60 degrees and one degree
+is about 111km) at the equator.
 
 ## Coordinate format
 
