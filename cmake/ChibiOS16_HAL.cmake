@@ -19,6 +19,10 @@ FOREACH(module ${CHIBIOS_HAL_MODULES})
   IF(${module} STREQUAL mmcsd)
     SET(CHIBIOS_${module}_SOURCES hal_mmcsd.c)
   ENDIF()
+
+  IF(${module} STREQUAL serial_usb)
+    SET(CHIBIOS_${module}_SOURCES ${CHIBIOS_${module}_SOURCES} hal_buffers.c)
+  ENDIF()
 ENDFOREACH()
 
 FOREACH(module ${CHIBIOS_HAL_LIB_MODULES})
