@@ -66,6 +66,26 @@ ELSEIF(STM32_FAMILY STREQUAL "F2")
     SET(HAL_SRCS
         stm32f2xx_hal.c
     )
+ELSEIF(STM32_FAMILY STREQUAL "F3")
+    SET(HAL_COMPONENTS adc can cec comp cortex crc dac dma flash gpio i2c i2s
+                       irda nand nor opamp pccard pcd pwr rcc rtc sdadc
+                       smartcard smbus spi sram tim tsc uart usart wwdg)
+
+    SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
+
+    SET(HAL_EX_COMPONENTS adc crc dac flash i2c i2s opamp pcd pwr
+                          rcc rtc smartcard spi tim uart)
+
+    SET(HAL_PREFIX stm32f3xx_)
+
+    SET(HAL_HEADERS
+        stm32f3xx_hal.h
+        stm32f3xx_hal_def.h
+    )
+
+    SET(HAL_SRCS
+        stm32f3xx_hal.c
+    )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
     SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash
                        flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg ltdc
