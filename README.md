@@ -62,7 +62,7 @@ The library doesn't perform this conversion automatically for the following reas
 ```c
 char line[MINMEA_MAX_LENGTH];
 while (fgets(line, sizeof(line), stdin) != NULL) {
-    switch (minmea_sentence_id(line)) {
+    switch (minmea_sentence_id(line, false)) {
         case MINMEA_SENTENCE_RMC: {
             struct minmea_sentence_rmc frame;
             if (minmea_parse_rmc(&frame, line)) {
