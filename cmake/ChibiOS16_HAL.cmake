@@ -9,7 +9,7 @@ ENDIF()
 
 SET(CHIBIOS_hal_SEARCH_PATH ${CHIBIOS_ROOT}/os/hal/include ${CHIBIOS_ROOT}/os/hal/src/ ${CHIBIOS_OSAL_PATH})
 SET(CHIBIOS_hal_SEARCH_HEADERS hal.h osal.h)
-SET(CHIBIOS_hal_SOURCES hal.c hal_queues.c osal.c)
+SET(CHIBIOS_hal_SOURCES hal.c hal_buffers.c hal_queues.c osal.c)
 
 FOREACH(module ${CHIBIOS_HAL_MODULES})
   SET(CHIBIOS_${module}_SEARCH_PATH ${CHIBIOS_ROOT}/os/hal/include ${CHIBIOS_ROOT}/os/hal/src)
