@@ -1,12 +1,12 @@
 # About
 
-This project is used to develop applications for the STM32 - ST's ARM Cortex-M0(3,4,7) MCUs. It uses cmake and GCC, along with newlib (libc), STM32CubeMX or ChibiOS.
+This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. It uses cmake and GCC, along with newlib (libc), STM32CubeMX or ChibiOS.
 
 ## Requirements
 
-* cmake >= 2.8
+* cmake >= 3.0
 * GCC toolchain with newlib (optional).
-* STM32CubeMX package for STM32F0, STM32F1, STM32F2, STM32F4 or STM32F7 families.
+* STM32CubeMX package for STM32F0, STM32F1, STM32F2, STM32F3, STM32F4, STM32F7, STM32L0, families.
 
 ## Project contains
 
