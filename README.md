@@ -71,13 +71,13 @@ You can use cmake variables below to tune the generated linker. To specify a cus
 * `STM32_RAM_SIZE` - RAM size (**default**: from chip name)
 * `STM32_MIN_STACK_SIZE` - Minimum stack size for error detection at link-time (**default**: 512 bytes)
 * `STM32_MIN_HEAP_SIZE` - Minimum heap size for error detection at link-time (**default**: 0 bytes)
-* `STM32_CCRAM_ORIGIN` - Start address of Core-Coupled RAM (only for F4 family) (**default**: 0x10000000)
-* `STM32_CCRAM_SIZE` - Core-Coupled RAM size (only for F4 and F7 family) (**default**: 64 KiB)
+* `STM32_CCRAM_ORIGIN` - Start address of Core-Coupled RAM (**default**: 0x10000000)
+* `STM32_CCRAM_SIZE` - Core-Coupled RAM size (**default**: 64 KiB)
 
 ## Useful cmake macros
 
 * `STM32_GET_CHIP_TYPE(CHIP CHIP_TYPE)` - gets chip type from chip name.
-* `STM32_GET_CHIP_PARAMETERS(CHIP FLASH_SIZE RAM_SIZE)` - gets chip ram/flash size from chip name.
+* `STM32_GET_CHIP_PARAMETERS(CHIP FLASH_SIZE RAM_SIZE CCRAM_SIZE)` - gets chip ram/flash size from chip name.
 * `STM32_SET_FLASH_PARAMS(TARGET ...)` - sets chip flash/ram parameters for target.
 * `STM32_SET_CHIP_DEFINITIONS(TARGET CHIP_TYPE)` - sets chip family and type-specific compiler flags for target.
 * `STM32_SET_TARGET_PROPERTIES(TARGET)` - sets all needed parameters and compiler flags for target.
