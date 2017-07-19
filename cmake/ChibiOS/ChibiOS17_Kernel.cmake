@@ -1,21 +1,3 @@
-LIST(FIND ChibiOS_FIND_COMPONENTS nil ChibiOS_FIND_COMPONENTS_nil)
-LIST(FIND ChibiOS_FIND_COMPONENTS rt ChibiOS_FIND_COMPONENTS_rt)
-
-IF((${ChibiOS_FIND_COMPONENTS_nil} LESS 0) AND (${ChibiOS_FIND_COMPONENTS_rt} LESS 0))
-  MESSAGE(STATUS "No kernel component selected, using Nil kernel")
-  LIST(APPEND ChibiOS_FIND_COMPONENTS nil)
-  SET(CHIBIOS_KERNEL nil)
-ELSE()
-  IF((NOT (${ChibiOS_FIND_COMPONENTS_nil} LESS 0)) AND (NOT (${ChibiOS_FIND_COMPONENTS_rt} LESS 0)))
-    MESSAGE(FATAL_ERROR "Cannot use RT and Nil kernel at the same time")
-  ENDIF()
-  IF(NOT (${ChibiOS_FIND_COMPONENTS_nil} LESS 0))
-    SET(CHIBIOS_KERNEL nil)
-  ELSE()
-    SET(CHIBIOS_KERNEL rt)
-  ENDIF()
-ENDIF()
-
 SET(CHIBIOS_kernel_SEARCH_PATH 
   ${CHIBIOS_ROOT}/os/license
   ${CHIBIOS_ROOT}/os/common/ports/ARMCMx
