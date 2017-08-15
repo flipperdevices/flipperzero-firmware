@@ -25,6 +25,7 @@ systems.
 * ``GST`` (Pseudorange Noise Statistics)
 * ``GSV`` (Satellites in view)
 * ``VTG`` (Track made good and Ground speed)
+* ``ZDA`` (Time & Date - UTC, day, month, year and local time zone)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation on NMEA is at http://www.catb.org/gpsd/NMEA.html
 
