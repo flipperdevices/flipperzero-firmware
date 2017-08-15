@@ -143,4 +143,6 @@ license bothers you and I'll happily re-license under anything else under the su
 
 ## Author
 
-Minmea was written by Kosma Moczek &lt;kosma@cloudyourcar.com&gt; at Cloud Your Car.
+Minmea was written by Kosma Moczek &lt;kosma@kosma.pl&gt; and Patryk Szymczak
+&lt;patryk.szymczak@gmail.com@gt; at Cloud Your Car, with bugs fixed by countless
+good people.
