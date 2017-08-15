@@ -40,6 +40,7 @@ static const char *valid_sentences_checksum[] = {
     "$GPRMC,123205.00,A,5106.94085,N,01701.51689,E,0.016,,280214,,,A*7B",
     "$GPVTG,,T,,M,0.016,N,0.030,K,A*27",
     "$GPGST,024603.00,3.2,6.6,4.7,47.3,5.8,5.6,22.0*58",
+    "$GPZDA,160012.71,11,03,2004,-1,00*7D",
     NULL,
 };
 
@@ -865,6 +866,26 @@ START_TEST(test_minmea_parse_vtg2)
 }
 END_TEST
 
+START_TEST(test_minmea_parse_zda1)
+{
+    const char *sentence = "$GPZDA,160012.71,11,03,2004,-1,00*7D";
+    struct minmea_sentence_zda frame = {};
+    struct minmea_sentence_zda expected = {};
+
+    expected = (struct minmea_sentence_zda) {
+        .time = { 16, 0, 12, 710000 },
+        .date = { 11, 3, 2004 },
+        .hour_offset = -1,
+        .minute_offset = 0,
+    };
+
+    ck_assert(minmea_check(sentence, false) == true);
+    ck_assert(minmea_check(sentence, true) == true);
+    ck_assert(minmea_parse_zda(&frame, sentence) == true);
+    ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
+}
+END_TEST
+
 START_TEST(test_minmea_usage1)
 {
     const char *sentences[] = {
@@ -1021,6 +1042,7 @@ static Suite *minmea_suite(void)
     tcase_add_test(tc_parse, test_minmea_parse_gsv5);
     tcase_add_test(tc_parse, test_minmea_parse_vtg1);
     tcase_add_test(tc_parse, test_minmea_parse_vtg2);
+    tcase_add_test(tc_parse, test_minmea_parse_zda1);
     suite_add_tcase(s, tc_parse);
 
     TCase *tc_usage = tcase_create("minmea_usage");
