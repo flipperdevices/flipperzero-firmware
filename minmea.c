@@ -619,10 +619,12 @@ int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const st
 
     struct tm tm;
     memset(&tm, 0, sizeof(tm));
-    tm.tm_year = date->year % 100;  // ZDA parser stores 4 digit year, filter centuries here so raw information is preserved in struct minmea_sentence_zda if user needs it.
-    if (tm.tm_year < 80)    // GPS epoch begins 1980, assume a year range of 1980 to 2079 for the library.
-    {
-        tm.tm_year = 2000 + tm.tm_year - 1900;
+    if (date->year < 80) {
+        tm.tm_year = 2000 + date->year - 1900;  // 2000-2079
+    } else if (date->year >= 1900) {
+        tm.tm_year = date->year - 1900; // 4 digit year, use directly
+    } else {
+        tm.tm_year = date->year;    // 1980-1999
     }
     tm.tm_mon = date->month - 1;
     tm.tm_mday = date->day;
