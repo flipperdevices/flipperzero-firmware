@@ -962,15 +962,15 @@ START_TEST(test_minmea_gettime)
     /* two digit year conversions */
     d.year = 80;
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
-    ck_assert_int_eq(ts.tv_sec, 319381209);		/* 1980 */
+    ck_assert_int_eq(ts.tv_sec, 319381209);      /* 1980 */
     d.year = 37;
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
-    ck_assert_int_eq(ts.tv_sec, 2118229209);	/* 2037 */
+    ck_assert_int_eq(ts.tv_sec, 2118229209);     /* 2037 */
     /* skip >= 2038 tests on 32-bit time_t platforms */
-	if (sizeof(time_t) == sizeof(int64_t)) {
-    	d.year = 79;
-    	ck_assert(minmea_gettime(&ts, &d, &t) == 0);
-    	ck_assert_int_eq(ts.tv_sec, 3443605209);	/* 2079 */
+    if (sizeof(time_t) == sizeof(int64_t)) {
+        d.year = 79;
+        ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(ts.tv_sec, 3443605209); /* 2079 */
     }
 
     /* four digit year conversions */
@@ -984,14 +984,14 @@ START_TEST(test_minmea_gettime)
     ck_assert(minmea_gettime(&ts, &d, &t) == 0);
     ck_assert_int_eq(ts.tv_sec, 2118229209);
     /* skip >= 2038 tests on 32-bit time_t platforms */
-	if (sizeof(time_t) == sizeof(int64_t)) {
-    	d.year = 2079;
-    	ck_assert(minmea_gettime(&ts, &d, &t) == 0);
-    	ck_assert_int_eq(ts.tv_sec, 3443605209);
-    	d.year = 2080;
-    	ck_assert(minmea_gettime(&ts, &d, &t) == 0);
-    	ck_assert_int_eq(ts.tv_sec, 3475141209);
-	}
+    if (sizeof(time_t) == sizeof(int64_t)) {
+        d.year = 2079;
+        ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(ts.tv_sec, 3443605209);
+        d.year = 2080;
+        ck_assert(minmea_gettime(&ts, &d, &t) == 0);
+        ck_assert_int_eq(ts.tv_sec, 3475141209);
+    }
 }
 END_TEST
 
