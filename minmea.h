@@ -19,6 +19,9 @@ extern "C" {
 #include <errno.h>
 #include <time.h>
 #include <math.h>
+#ifdef MINMEA_INCLUDE_COMPAT
+#include <minmea_compat.h>
+#endif
 
 #define MINMEA_MAX_LENGTH 80
 

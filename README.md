@@ -13,6 +13,7 @@ systems.
 * No floating point usage in the core library.
 * Supports both fixed and floating point values.
 * One source file and one header - can't get any simpler.
+* Tested under Linux, OS X, Windows and embedded ARM GCC.
 * Easily extendable to support new sentences.
 * Complete with a test suite and static analysis.
 
@@ -28,6 +29,14 @@ systems.
 * ``ZDA`` (Time & Date - UTC, day, month, year and local time zone)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation on NMEA is at http://www.catb.org/gpsd/NMEA.html
+
+## Compatibility
+
+Minmea runs out-of-the-box under most Unix-compatible systems. Support for non-Unix systems
+(including native Windows builds under MSVC) is provided via compatibility headers:
+
+1. Define `MINMEA_INCLUDE_COMPAT` in the build environment.
+2. Add appropriate compatibility header from under `compat/` directory as `minmea_compat.h`.
 
 ## Fractional number format
 
@@ -131,8 +140,7 @@ typing ``make``.
   (or equivalent) to remove the unused functions (parsers) from the final image.
 * Some systems lack ``timegm``. On these systems, the recommended course of
   action is to build with ``-Dtimegm=mktime`` which will work correctly as long
-  the system runs in the default ``UTC`` timezone. Native Windows builds should
-  use ``-Dtimegm=_mkgmtime`` instead which will work correctly in all timezones.
+  the system runs in the default ``UTC`` timezone.
 
 ## Bugs
 
