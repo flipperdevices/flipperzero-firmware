@@ -28,7 +28,8 @@ systems.
 * ``VTG`` (Track made good and Ground speed)
 * ``ZDA`` (Time & Date - UTC, day, month, year and local time zone)
 
-Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation on NMEA is at http://www.catb.org/gpsd/NMEA.html
+Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation
+on NMEA is at http://www.catb.org/gpsd/NMEA.html
 
 ## Compatibility
 
@@ -66,7 +67,7 @@ following function:
 The library doesn't perform this conversion automatically for the following reasons:
 
 * The conversion is not reversible.
-* It requires floating point hardware.
+* It requires floating point support.
 * The user might want to perform this conversion later on or retain the original values.
 
 ## Example
