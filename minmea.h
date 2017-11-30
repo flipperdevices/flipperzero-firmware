@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 
+#include <ctype.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
@@ -275,6 +276,14 @@ static inline float minmea_tocoord(const struct minmea_float *f)
     int_least32_t degrees = f->value / (f->scale * 100);
     int_least32_t minutes = f->value % (f->scale * 100);
     return (float) degrees + (float) minutes / (60 * f->scale);
+}
+
+/**
+ * Check whether a character belongs to the set of characters allowed in a
+ * sentence data field.
+ */
+static inline bool minmea_isfield(char c) {
+    return isprint((unsigned char) c) && c != ',' && c != '*';
 }
 
 #ifdef __cplusplus

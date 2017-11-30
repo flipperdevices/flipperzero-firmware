@@ -10,7 +10,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdarg.h>
 
 #define boolstr(s) ((s) ? "true" : "false")
@@ -83,10 +82,6 @@ bool minmea_check(const char *sentence, bool strict)
     }
 
     return true;
-}
-
-static inline bool minmea_isfield(char c) {
-    return isprint((unsigned char) c) && c != ',' && c != '*';
 }
 
 bool minmea_scan(const char *sentence, const char *format, ...)
