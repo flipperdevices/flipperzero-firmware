@@ -11,6 +11,8 @@
 // timespec definition
 #include <ti/sysbios/posix/types.h>
 
+#define timegm  mktime
+
 #endif
 
 /* vim: set ts=4 sw=4 et: */
