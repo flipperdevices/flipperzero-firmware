@@ -90,3 +90,14 @@ This project also supports ChibiOS v3.x.x and ChibiOS v16.x.x (both nil and rt k
 CMake modules for ChibiOS can find specified ChibiOS components using the COMPONENTS directive.
 
 See project `stm32-chibios` for example usage.
+
+# FreeRTOS Support
+
+FreeRTOS is also supported. To include it in your project you should set a variable named `FREERTOS_HEAP_IMPL` with 
+a proper number of FreeRTOS heap implementation. You can do this by invoking:
+
+```
+SET(FREERTOS_HEAP_IMPL 4)
+```
+
+before `FIND_PACKAGE` command.
