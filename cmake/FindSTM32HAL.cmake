@@ -13,13 +13,6 @@ IF(STM32_FAMILY STREQUAL "F0")
 
     SET(HAL_PREFIX stm32f0xx_)
 
-    SET(HAL_HEADERS
-        stm32f0xx_hal.h
-        stm32f0xx_hal_def.h
-    )
-    SET(HAL_SRCS
-        stm32f0xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "F1")
     SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c
                        i2s irda iwdg nand nor pccard pcd pwr rcc rtc sd smartcard
@@ -35,13 +28,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F1")
 
     SET(HAL_PREFIX stm32f1xx_)
 
-    SET(HAL_HEADERS
-        stm32f1xx_hal.h
-        stm32f1xx_hal_def.h
-    )
-    SET(HAL_SRCS
-        stm32f1xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "F2")
     SET(HAL_COMPONENTS adc can cortex crc cryp dac dcmi dma eth flash
                        gpio hash hcd i2c i2s irda iwdg nand nor pccard
@@ -58,14 +44,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F2")
 
     SET(HAL_PREFIX stm32f2xx_)
 
-    SET(HAL_HEADERS
-        stm32f2xx_hal.h
-        stm32f2xx_hal_def.h
-    )
-
-    SET(HAL_SRCS
-        stm32f2xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "F3")
     SET(HAL_COMPONENTS adc can cec comp cortex crc dac dma flash gpio i2c i2s
                        irda nand nor opamp pccard pcd pwr rcc rtc sdadc
@@ -78,14 +56,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F3")
 
     SET(HAL_PREFIX stm32f3xx_)
 
-    SET(HAL_HEADERS
-        stm32f3xx_hal.h
-        stm32f3xx_hal_def.h
-    )
-
-    SET(HAL_SRCS
-        stm32f3xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "F4")
     SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash
                        flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg ltdc
@@ -104,14 +74,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
 
     SET(HAL_PREFIX stm32f4xx_)
 
-    SET(HAL_HEADERS
-        stm32f4xx_hal.h
-        stm32f4xx_hal_def.h
-    )
-
-    SET(HAL_SRCS
-        stm32f4xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "F7")
     SET(HAL_COMPONENTS adc can cec cortex crc cryp dac dcmi dma dma2d eth flash
                        gpio hash hcd i2c i2s irda iwdg lptim ltdc nand nor pcd
@@ -129,14 +91,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F7")
 
     SET(HAL_PREFIX stm32f7xx_)
 
-    SET(HAL_HEADERS
-        stm32f7xx_hal.h
-        stm32f7xx_hal_def.h
-    )
-
-    SET(HAL_SRCS
-        stm32f7xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "L0")
     SET(HAL_COMPONENTS adc comp cortex crc crs cryp dac dma exti firewall flash gpio i2c
                        i2s irda iwdg lcd lptim lpuart pcd pwr rcc rng rtc smartcard
@@ -152,16 +106,9 @@ ELSEIF(STM32_FAMILY STREQUAL "L0")
 
     SET(HAL_PREFIX stm32l0xx_)
 
-    SET(HAL_HEADERS
-        stm32l0xx_hal.h
-        stm32l0xx_hal_def.h
-    )
-    SET(HAL_SRCS
-        stm32l0xx_hal.c
-    )
 ELSEIF(STM32_FAMILY STREQUAL "L4")
     SET(HAL_COMPONENTS adc can comp cortex crc cryp dac dcmi dfsdm dma dma2d dsi 
-                       firewall flash flash_ramfunc gfxmmu gpio hash hcd i2c irda iwdg 
+                       firewall flash flash_ramfunc gfxmmu gpio hash hcd i2c irda iwdg
                        lcd lptim ltdc nand nor opamp ospi pcd pwr qspi rcc rng rtc sai
                        sd smartcard smbus spi sram swpmi tim tsc uart usart wwdg)
 
@@ -178,16 +125,16 @@ ELSEIF(STM32_FAMILY STREQUAL "L4")
 
     SET(HAL_PREFIX stm32l4xx_)
 
-    SET(HAL_HEADERS
-        stm32l4xx_hal.h
-        stm32l4xx_hal_def.h
-    )
-
-    SET(HAL_SRCS
-        stm32l4xx_hal.c
-    )    
 ENDIF()
 
+SET(HAL_HEADERS
+	${HAL_PREFIX}hal.h
+	${HAL_PREFIX}hal_def.h
+)
+
+SET(HAL_SRCS
+	${HAL_PREFIX}hal.c
+)
 IF(NOT STM32HAL_FIND_COMPONENTS)
     SET(STM32HAL_FIND_COMPONENTS ${HAL_COMPONENTS})
     MESSAGE(STATUS "No STM32HAL components selected, using all: ${STM32HAL_FIND_COMPONENTS}")
