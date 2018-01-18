@@ -8,9 +8,6 @@ IF(STM32_FAMILY STREQUAL "F0")
     # Components that have _ex sources
     SET(HAL_EX_COMPONENTS adc crc dac flash i2c pcd pwr rcc rtc smartcard spi tim uart)
 
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS "")
-
     SET(HAL_PREFIX stm32f0xx_)
 
 ELSEIF(STM32_FAMILY STREQUAL "F1")
@@ -22,9 +19,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F1")
 
     # Components that have _ex sources
     SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim)
-
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS fsmc sdmmc usb)
 
     SET(HAL_PREFIX stm32f1xx_)
 
@@ -38,9 +32,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F2")
 
     # Components that have _ex sources
     SET(HAL_EX_COMPONENTS adc dac dma flash pwr rcc rtc tim)
-
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS fsmc sdmmc usb)
 
     SET(HAL_PREFIX stm32f2xx_)
 
@@ -69,9 +60,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F4")
     SET(HAL_EX_COMPONENTS adc cryp dac dcmi dma flash fmpi2c hash i2c i2s pcd
                           pwr rcc rtc sai tim)
 
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS fmc fsmc sdmmc usb)
-
     SET(HAL_PREFIX stm32f4xx_)
 
 ELSEIF(STM32_FAMILY STREQUAL "F7")
@@ -86,9 +74,6 @@ ELSEIF(STM32_FAMILY STREQUAL "F7")
     SET(HAL_EX_COMPONENTS adc crc cryp dac dcmi dma flash hash i2c pcd
                           pwr rcc rtc sai tim)
 
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS fmc sdmmc usb)
-
     SET(HAL_PREFIX stm32f7xx_)
 
 ELSEIF(STM32_FAMILY STREQUAL "L0")
@@ -100,9 +85,6 @@ ELSEIF(STM32_FAMILY STREQUAL "L0")
 
     # Components that have _ex sources
     SET(HAL_EX_COMPONENTS adc comp crc cryp dac flash i2c pcd pwr rcc rtc smartcard tim uart usart)
-
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS crs exti lpuart utils)
 
     SET(HAL_PREFIX stm32l0xx_)
 
@@ -118,11 +100,6 @@ ELSEIF(STM32_FAMILY STREQUAL "L4")
     SET(HAL_EX_COMPONENTS adc crc cryp dac dfsdm dma flash hash i2c ltdc 
                           opamp pcd pwr rcc rtc sai sd smartcard spi tim uart usart)
                           
-
-    # Components that have ll_ in names instead of hal_
-    SET(HAL_LL_COMPONENTS adc comp crc crs dac dma dma2d exti fmc gpio i2c lptim lpuart
-                          opamp pwr rcc rng rtc sdmmc spi swpmi tim usart usb utils)
-
     SET(HAL_PREFIX stm32l4xx_)
 
 ENDIF()
@@ -151,14 +128,9 @@ FOREACH(cmp ${STM32HAL_FIND_COMPONENTS})
     LIST(FIND HAL_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
     IF(${STM32HAL_FOUND_INDEX} LESS 0)
         MESSAGE(FATAL_ERROR "Unknown STM32HAL component: ${cmp}. Available components: ${HAL_COMPONENTS}")
-    ENDIF()
-    LIST(FIND HAL_LL_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
-    IF(${STM32HAL_FOUND_INDEX} LESS 0)
+	ELSE()
         LIST(APPEND HAL_HEADERS ${HAL_PREFIX}hal_${cmp}.h)
         LIST(APPEND HAL_SRCS ${HAL_PREFIX}hal_${cmp}.c)
-    ELSE()
-        LIST(APPEND HAL_HEADERS ${HAL_PREFIX}ll_${cmp}.h)
-        LIST(APPEND HAL_SRCS ${HAL_PREFIX}ll_${cmp}.c)
     ENDIF()
     LIST(FIND HAL_EX_COMPONENTS ${cmp} STM32HAL_FOUND_INDEX)
     IF(NOT (${STM32HAL_FOUND_INDEX} LESS 0))
