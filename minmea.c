@@ -323,7 +323,7 @@ bool minmea_scan(const char *sentence, const char *format, ...)
 
             default: { // Unknown.
                 goto parse_error;
-            } break;
+            }
         }
 
         next_field();
@@ -581,7 +581,7 @@ bool minmea_parse_vtg(struct minmea_sentence_vtg *frame, const char *sentence)
         c_knots != 'N' ||
         c_kph != 'K')
         return false;
-    frame->faa_mode = c_faa_mode;
+    frame->faa_mode = (enum minmea_faa_mode)c_faa_mode;
 
     return true;
 }
@@ -633,7 +633,7 @@ int minmea_gettime(struct timespec *ts, const struct minmea_date *date, const st
     tm.tm_sec = time_->seconds;
 
     time_t timestamp = timegm(&tm); /* See README.md if your system lacks timegm(). */
-    if (timestamp != -1) {
+    if (timestamp != (time_t)-1) {
         ts->tv_sec = timestamp;
         ts->tv_nsec = time_->microseconds * 1000;
         return 0;
