@@ -9,8 +9,8 @@ IF(STM32_FAMILY STREQUAL "F0")
     SET(LL_PREFIX stm32f0xx_)
 
 ELSEIF(STM32_FAMILY STREQUAL "F1")
-    SET(LL_COMPONENTS	adc bus cortex crc dac dma exti gpio i2c
-						i2s iwdg pwr rcc rtc spi system tim usart utils wwdg)
+    SET(LL_COMPONENTS	adc bus cortex crc dac dma exti gpio i2c i2s
+						iwdg pwr rcc rtc spi system tim usart usb utils wwdg)
 
     SET(LL_REQUIRED_COMPONENTS bus cortex pwr rcc system utils)
 
