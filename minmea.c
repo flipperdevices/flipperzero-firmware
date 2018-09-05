@@ -415,7 +415,7 @@ bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence)
     int latitude_direction;
     int longitude_direction;
 
-    if (!minmea_scan(sentence, "tTfdfdiiffcfci_",
+    if (!minmea_scan(sentence, "tTfdfdiiffcfcf_",
             type,
             &frame->time,
             &frame->latitude, &latitude_direction,
