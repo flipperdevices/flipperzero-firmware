@@ -519,7 +519,7 @@ START_TEST(test_minmea_parse_gga1)
         .altitude_units = 'M',
         .height = { 469, 10 },
         .height_units = 'M',
-        .dgps_age = 0,
+        .dgps_age = { 0, 10 },
     };
     ck_assert(minmea_check(sentence, false) == true);
     ck_assert(minmea_check(sentence, true) == true);
