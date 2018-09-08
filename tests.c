@@ -525,7 +525,7 @@ START_TEST(test_minmea_parse_gga1)
     ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gga(&frame, sentence) == true);
     memset(&expected.altitude_units + 1, 0, 3);
-	memset(&expected.height_units + 1, 0, 3);
+    memset(&expected.height_units + 1, 0, 3);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
