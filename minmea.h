@@ -76,7 +76,7 @@ struct minmea_sentence_gga {
     struct minmea_float hdop;
     struct minmea_float altitude; char altitude_units;
     struct minmea_float height; char height_units;
-    int dgps_age;
+    struct minmea_float dgps_age;
 };
 
 enum minmea_gll_status {
