@@ -509,19 +509,17 @@ START_TEST(test_minmea_parse_gga1)
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47";
     struct minmea_sentence_gga frame = {};
     struct minmea_sentence_gga expected = {};
-    expected = (struct minmea_sentence_gga) {
-        .time = { 12, 35, 19, 0 },
-        .latitude = { 4807038, 1000 },
-        .longitude = { 1131000, 1000 },
-        .fix_quality = 1,
-        .satellites_tracked = 8,
-        .hdop = { 9, 10 },
-        .altitude = { 5454, 10 },
-        .altitude_units = 'M',
-        .height = { 469, 10 },
-        .height_units = 'M',
-        .dgps_age = { 0, 0 },
-    };
+    expected.time = { 12, 35, 19, 0 };
+	expected.latitude = { 4807038, 1000 };
+	expected.longitude = { 1131000, 1000 };
+	expected.fix_quality = 1;
+	expected.satellites_tracked = 8;
+	expected.hdop = { 9, 10 };
+	expected.altitude = { 5454, 10 };
+	expected.altitude_units = 'M';
+	expected.height = { 469, 10 };
+	expected.height_units = 'M';
+	expected.dgps_age = { 0, 0 };
     ck_assert(minmea_check(sentence, false) == true);
     ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gga(&frame, sentence) == true);
