@@ -508,7 +508,8 @@ START_TEST(test_minmea_parse_gga1)
 {
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47";
     struct minmea_sentence_gga frame = {};
-    struct minmea_sentence_gga expected = {
+    struct minmea_sentence_gga expected = {};
+    expected = (struct minmea_sentence_gga) {
         .time = { 12, 35, 19, 0 },
         .latitude = { 4807038, 1000 },
         .longitude = { 1131000, 1000 },
@@ -524,8 +525,6 @@ START_TEST(test_minmea_parse_gga1)
     ck_assert(minmea_check(sentence, false) == true);
     ck_assert(minmea_check(sentence, true) == true);
     ck_assert(minmea_parse_gga(&frame, sentence) == true);
-    memset(&expected.altitude_units + 1, 0, 3);
-    memset(&expected.height_units + 1, 0, 3);
     ck_assert(!memcmp(&frame, &expected, sizeof(frame)));
 }
 END_TEST
