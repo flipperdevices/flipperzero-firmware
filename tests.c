@@ -507,8 +507,8 @@ END_TEST
 START_TEST(test_minmea_parse_gga1)
 {
     const char *sentence = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M,46.9,M,,*47";
-    struct minmea_sentence_gga frame = { 0 };
-    struct minmea_sentence_gga expected = { 0 };
+    struct minmea_sentence_gga frame = {};
+    struct minmea_sentence_gga expected = {};
     expected.time = (struct minmea_time) { 12, 35, 19, 0 };
     expected.latitude = (struct minmea_float) { 4807038, 1000 };
     expected.longitude = (struct minmea_float) { 1131000, 1000 };
