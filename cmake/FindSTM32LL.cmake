@@ -57,6 +57,13 @@ ELSEIF(STM32_FAMILY STREQUAL "L0")
 
     SET(LL_PREFIX stm32l0xx_)
 
+ELSEIF(STM32_FAMILY STREQUAL "L1")
+    SET(LL_COMPONENTS	adc comp crc dac dma exti fsmc gpio i2c opamp pwr rcc 
+						rtc sdmmc spi tim usart utils)
+    SET(LL_REQUIRED_COMPONENTS pwr rcc utils)
+
+    SET(LL_PREFIX stm32l1xx_)
+
 ELSEIF(STM32_FAMILY STREQUAL "L4")
     SET(LL_COMPONENTS	adc bus comp cortex crc crs dac dma2d dmamux dma exti 
 						gpio i2c iwdg lptim lpuart opamp pwr rcc rng rtc spi 
@@ -111,7 +118,7 @@ FOREACH(LL_SRC ${LL_SRCS})
 	)
 	LIST(APPEND STM32LL_SOURCES ${LL_${LL_SRC_CLEAN}_FILE})
 ENDFOREACH()
-
+    
 INCLUDE(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(STM32LL DEFAULT_MSG STM32LL_INCLUDE_DIR STM32LL_SOURCES)
