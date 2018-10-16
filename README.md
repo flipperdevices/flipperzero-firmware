@@ -127,8 +127,8 @@ good to go.
 
 Building and running the tests requires the following:
 
-* Check Framework (http://check.sourceforge.net/).
-* Clang Static Analyzer (http://clang-analyzer.llvm.org/).
+* Check Framework (https://libcheck.github.io/check/).
+* Clang Static Analyzer (https://clang-analyzer.llvm.org/).
 
 If you have both in your ``$PATH``, running the tests should be as simple as
 typing ``make``.
