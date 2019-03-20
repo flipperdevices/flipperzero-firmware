@@ -4,6 +4,8 @@
 # include <stm32f2xx_hal.h>
 #elif defined STM32F4
 # include <stm32f4xx_hal.h>
+#elif defined STM32G0
+#include <stm32g0xx_hal.h>
 #endif
 
 #include <stdio.h>
@@ -58,6 +60,16 @@ void initGPIO()
     GPIO_Config.Speed = GPIO_SPEED_FAST;
 
     HAL_GPIO_Init(GPIOC, &GPIO_Config);
+#elif defined STM32G0
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    GPIO_Config.Pin = GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_Config.Mode = GPIO_MODE_AF_PP;
+    GPIO_Config.Pull = GPIO_PULLUP;
+    GPIO_Config.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_Config.Alternate = GPIO_AF1_USART2;
+
+    HAL_GPIO_Init(GPIOA, &GPIO_Config);
 #endif
 }
 
@@ -72,6 +84,10 @@ void initUART()
 #elif defined STM32F4
     __USART3_CLK_ENABLE();
     UART_Handle.Instance = USART3;
+#elif defined STM32G0
+    __HAL_RCC_USART2_CLK_ENABLE();
+    UART_Handle.Instance = USART2;
+
 #endif
 
     UART_Handle.Init.BaudRate = 115200;
@@ -84,6 +100,7 @@ void initUART()
 
     HAL_UART_Init(&UART_Handle);
 }
+
 void initClock(void)
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
@@ -184,6 +201,29 @@ void initClock(void)
     {
         __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
     }
+#elif defined STM32G0
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+    HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                  |RCC_CLOCKTYPE_PCLK1;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+    PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+
 #endif
 }
 
@@ -204,6 +244,7 @@ void initAll(void)
 int main(void)
 {
     initAll();
+
     for (;;)
     {
         char c = 0;
