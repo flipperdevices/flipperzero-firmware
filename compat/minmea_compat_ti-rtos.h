@@ -6,13 +6,22 @@
  * published by Sam Hocevar. See the COPYING file for more details.
  */
 
-#if defined(__TI_ARM__)
+#ifndef MINMEA_COMPAT_H_
+#define MINMEA_COMPAT_H_
 
-// timespec definition
-#include <ti/sysbios/posix/types.h>
+#if defined(__TI_ARM__)
+    #include <ti/posix/ccs/sys/types.h>
+    #include <ti/posix/ccs/time.h>
+#elif defined(__IAR_SYSTEMS_ICC__)
+    #include <ti/posix/iar/sys/types.h>
+    #include <ti/posix/iar/time.h>
+#elif defined(gcc)
+    #include <ti/posix/gcc/sys/types.h>
+    #include <ti/posix/gcc/time.h>
+#endif /* __TI_ARM__ */
 
 #define timegm  mktime
 
-#endif
+#endif /* MINMEA_COMPAT_H */
 
 /* vim: set ts=4 sw=4 et: */
