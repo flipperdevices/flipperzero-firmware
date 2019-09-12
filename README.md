@@ -29,7 +29,7 @@ systems.
 * ``ZDA`` (Time & Date - UTC, day, month, year and local time zone)
 
 Adding support for more sentences is trivial; see ``minmea.c`` source. Good documentation
-on NMEA is at http://www.catb.org/gpsd/NMEA.html
+on NMEA is at https://gpsd.gitlab.io/gpsd/NMEA.html
 
 ## Compatibility
 
