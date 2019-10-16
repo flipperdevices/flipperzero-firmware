@@ -176,8 +176,8 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode)
   display_obj.clearScreen();
   display_obj.initScrollValues();
   display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_WHITE, TFT_BLUE);
-  display_obj.tft.fillRect(0,0,240,16, TFT_BLUE);
+  display_obj.tft.setTextColor(TFT_WHITE, TFT_MAGENTA);
+  display_obj.tft.fillRect(0,0,240,16, TFT_MAGENTA);
   display_obj.tft.drawCentreString(" Beacon Sniffer ",120,0,2);
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
@@ -203,8 +203,8 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode)
   display_obj.clearScreen();
   display_obj.initScrollValues();
   display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, TFT_MAGENTA);
-  display_obj.tft.fillRect(0,0,240,16, TFT_MAGENTA);
+  display_obj.tft.setTextColor(TFT_BLACK, TFT_CYAN);
+  display_obj.tft.fillRect(0,0,240,16, TFT_CYAN);
   display_obj.tft.drawCentreString(" Probe Request Sniffer ",120,0,2);
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);

@@ -203,8 +203,8 @@ void MenuFunctions::RunSetup()
   // Build WiFi Menu
   wifiMenu.parentMenu = &mainMenu; // Main Menu is second menu parent
   addNodes(&wifiMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiMenu.parentMenu);});
-  addNodes(&wifiMenu, "Probe Request Sniff", TFT_MAGENTA, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE);});
-  addNodes(&wifiMenu, "Beacon Sniff", TFT_BLUE, NULL, 2, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP);});
+  addNodes(&wifiMenu, "Probe Request Sniff", TFT_CYAN, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE);});
+  addNodes(&wifiMenu, "Beacon Sniff", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP);});
 
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
