@@ -34,6 +34,7 @@ struct MenuNode {
 
 // Full Menus
 struct Menu {
+    String name;
     SimpleList<MenuNode>* list;
     Menu                * parentMenu;
     uint8_t               selected;
@@ -44,13 +45,22 @@ class MenuFunctions
 {
   private:    
     Menu* current_menu;
-    
+
+    // Main menu stuff
     Menu mainMenu;
     Menu wifiMenu;
     Menu bluetoothMenu;
 
+    // WiFi menu stuff
+    Menu wifiSnifferMenu;
+    Menu wifiScannerMenu;
+    Menu wifiAttackMenu;
+
+    // Bluetooth menu stuff
+    Menu bluetoothSnifferMenu;
+    Menu bluetoothScannerMenu;
+
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    //SimpleList<TFT_eSPI_Button>* key;
     
     void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
     void showMenuList(Menu* menu, int layer);
@@ -64,7 +74,6 @@ class MenuFunctions
     void buildButtons(Menu* menu);
     void changeMenu(Menu* menu);
     void displayCurrentMenu();
-    void handlePress(boolean pressed, uint16_t t_x, uint16_t t_y);
     void main();
     void RunSetup();
 };

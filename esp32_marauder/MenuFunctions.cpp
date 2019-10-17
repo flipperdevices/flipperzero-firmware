@@ -3,7 +3,6 @@
 
 MenuFunctions::MenuFunctions()
 {
-  //Serial.println("Initializing Menu Object...");
 }
 
 // Function to check menu input
@@ -15,13 +14,9 @@ void MenuFunctions::main()
   // Get the display buffer out of the way
   if (wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF)
     display_obj.displayBuffer();
-  //else
-  //  display_obj.displayBuffer(true);
 
-  //Serial.println("Cycle");
 
   // Pressed will be set true is there is a valid touch on the screen
-  //vTaskDelay(10 / portTICK_PERIOD_MS);
   boolean pressed = display_obj.tft.getTouch(&t_x, &t_y);
   //boolean pressed = false;
 
@@ -74,159 +69,81 @@ void MenuFunctions::main()
     if (key[b].justReleased())
     {
       key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-      //Serial.print("Executing button -> ");
-      //Serial.println(current_menu->list->get(b).name);
       current_menu->list->get(b).callable();
     }
     display_obj.tft.setFreeFont(NULL);
   }
-
-  // This is if there are any scans or sniffs going on
-  if(digitalRead(FLASH_BUTTON) == 0)
-  {
-    // Stop the current scan
-    if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
-    (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-    (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
-    {
-      Serial.println("Stopping scan...");
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-  
-      // If we don't do this, the text and button coordinates will be off
-      display_obj.tft.init();
-  
-      // Take us back to the menu
-      changeMenu(current_menu);
-    }
-  }
-  
-  //else
-  //{
-  //  display_obj.displayBuffer();
-  //}
   x = -1;
   y = -1;
 }
 
 
-void MenuFunctions::handlePress(boolean pressed, uint16_t t_x, uint16_t t_y)
-{
-  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed))
-  {  
-    // Stop the current scan
-    if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
-    (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-    (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
-    {
-      Serial.println("Stopping scan...");
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-  
-      // If we don't do this, the text and button coordinates will be off
-      display_obj.tft.init();
-  
-      // Take us back to the menu
-      changeMenu(current_menu);
-    }
-
-    return;
-  }
-  
-  // / Check if any key coordinate boxes contain the touch coordinates
-  for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-    if (pressed && key[b].contains(t_x, t_y)) {
-      key[b].press(true);  // tell the button it is pressed
-    } else {
-      key[b].press(false);  // tell the button it is NOT pressed
-    }
-  }
-
-  // Check if any key has changed state
-  for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-    display_obj.tft.setFreeFont(MENU_FONT);
-    if (key[b].justPressed()) {
-      key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
-    }
-
-    // If button was just release, execute the button's function
-    if (key[b].justReleased())
-    {
-      key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-      //Serial.print("Executing button -> ");
-      //Serial.println(current_menu->list->get(b).name);
-      current_menu->list->get(b).callable();
-    }
-    display_obj.tft.setFreeFont(NULL);
-  }
-
-  // This is if there are any scans or sniffs going on
-  if(digitalRead(FLASH_BUTTON) == 0)
-  {
-    // Stop the current scan
-    if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
-    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
-    (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-    (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
-    {
-      Serial.println("Stopping scan...");
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-  
-      // If we don't do this, the text and button coordinates will be off
-      display_obj.tft.init();
-  
-      // Take us back to the menu
-      changeMenu(current_menu);
-    }
-  }
-}
-
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
+  // Main menu stuff
   mainMenu.list = new SimpleList<MenuNode>(); // Get list in first menu ready
   wifiMenu.list = new SimpleList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new SimpleList<MenuNode>(); // Get list in third menu ready
+
+  // WiFi menu stuff
+  wifiSnifferMenu.list = new SimpleList<MenuNode>();
+  wifiScannerMenu.list = new SimpleList<MenuNode>();
+  wifiAttackMenu.list = new SimpleList<MenuNode>();
+
+  // Bluetooth menu stuff
+  bluetoothSnifferMenu.list = new SimpleList<MenuNode>();
+  bluetoothScannerMenu.list = new SimpleList<MenuNode>();
+
+  // Work menu names
+  mainMenu.name = " ESP32 Marauder ";
+  wifiMenu.name = " WiFi ";
+  bluetoothMenu.name = " Bluetooth ";
+  wifiSnifferMenu.name = " WiFi Sniffers ";
+  wifiScannerMenu.name = " WiFi Scanners";
+  bluetoothSnifferMenu.name = " Bluetooth Sniffers ";
+  bluetoothScannerMenu.name = " Bluetooth Scanners ";
 
   // Build Main Menu
   mainMenu.parentMenu = NULL;
   addNodes(&mainMenu, "WiFi", TFT_GREEN, NULL, 0, [this](){changeMenu(&wifiMenu);});
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, 1, [this](){changeMenu(&bluetoothMenu);});
-  addNodes(&mainMenu, "Pee", TFT_MAGENTA, NULL, 2, NULL);
+  addNodes(&mainMenu, "Reboot", TFT_LIGHTGREY, NULL, 2, [](){ESP.restart();});
 
   // Build WiFi Menu
   wifiMenu.parentMenu = &mainMenu; // Main Menu is second menu parent
   addNodes(&wifiMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiMenu.parentMenu);});
-  addNodes(&wifiMenu, "Probe Request Sniff", TFT_CYAN, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE);});
-  addNodes(&wifiMenu, "Beacon Sniff", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP);});
+  addNodes(&wifiMenu, "Sniffers", TFT_LIGHTGREY, NULL, 1, [this](){changeMenu(&wifiSnifferMenu);});
+  addNodes(&wifiMenu, "Scanners", TFT_YELLOW, NULL, 1, [this](){Serial.println("Coming soon...");});
+  addNodes(&wifiMenu, "Attacks", TFT_ORANGE, NULL, 1, [this](){Serial.println("Coming soon...");});
+
+  wifiSnifferMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
+  addNodes(&wifiSnifferMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiSnifferMenu.parentMenu);});
+  addNodes(&wifiSnifferMenu, "Probe Request Sniff", TFT_CYAN, NULL, 2, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_CYAN);});
+  addNodes(&wifiSnifferMenu, "Beacon Sniff", TFT_MAGENTA, NULL, 3, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);});
 
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
   addNodes(&bluetoothMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothMenu.parentMenu);});
-  addNodes(&bluetoothMenu, "Bluetooth Sniffer", TFT_GREEN, NULL, 1, [this](){wifi_scan_obj.StartScan(BT_SCAN_ALL);});
-  addNodes(&bluetoothMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS);});
+  addNodes(&bluetoothMenu, "Sniffers", TFT_LIGHTGREY, NULL, 1, [this](){changeMenu(&bluetoothSnifferMenu);});
+  addNodes(&bluetoothMenu, "Scanners", TFT_YELLOW, NULL, 1, [this](){changeMenu(&bluetoothScannerMenu);});
+
+  bluetoothSnifferMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
+  addNodes(&bluetoothSnifferMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothSnifferMenu.parentMenu);});
+  addNodes(&bluetoothSnifferMenu, "Bluetooth Sniffer", TFT_GREEN, NULL, 1, [this](){wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);});
+
+  bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
+  addNodes(&bluetoothScannerMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothScannerMenu.parentMenu);});
+  addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
 
 
   // Set the current menu to the mainMenu
   changeMenu(&mainMenu);
-
-  // Show the current menu
-  //Serial.println("\n\nCurrent Menu Tree:");
-  //Serial.println("-------------------------------");
-  //showMenuList(current_menu, 0);
-  //xTaskCreate(&MenuFunctions::getPresses, "getPresses", 2048, NULL, 5, NULL);
 }
 
 // Function to change menu
 void MenuFunctions::changeMenu(Menu* menu)
 {  
-  //display_obj.clearScreen();
   display_obj.initScrollValues();
   display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
   display_obj.tft.init();
@@ -267,19 +184,13 @@ void MenuFunctions::addNodes(Menu* menu, String name, uint16_t color, Menu* chil
 void MenuFunctions::buildButtons(Menu* menu)
 {
   Serial.println("Bulding buttons...");
-  //display_obj.clearScreen();
   if (menu->list != NULL)
   {
     for (int i = 0; i < menu->list->size(); i++)
     {
       TFT_eSPI_Button new_button;
-      //Serial.print("Building button -> ");
-      //Serial.println(menu->list->get(i).name);
       char buf[menu->list->get(i).name.length() + 1] = {};
       menu->list->get(i).name.toCharArray(buf, menu->list->get(i).name.length() + 1);
-      //for (int x = 0; x < sizeof(buf); x++)
-      //  Serial.print(buf[x]);
-      //Serial.println();
       key[i].initButton(&display_obj.tft,
                         KEY_X + 0 * (KEY_W + KEY_SPACING_X),
                         KEY_Y + i * (KEY_H + KEY_SPACING_Y), // x, y, w, h, outline, fill, text
@@ -302,6 +213,8 @@ void MenuFunctions::displayCurrentMenu()
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   display_obj.tft.fillRect(0,0,240,16, TFT_DARKGREY);
   display_obj.tft.drawCentreString(" ESP32 Marauder ",120,0,2);
+  //String current_name = &current_menu->parentMenu->name;
+  //display_obj.tft.drawCentreString(current_name,120,0,2);
   if (current_menu->list != NULL)
   {
     display_obj.tft.setFreeFont(MENU_FONT);

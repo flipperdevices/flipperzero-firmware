@@ -8,7 +8,6 @@ https://github.com/bodmer
 
 Display::Display()
 {
-  //Serial.println("Initializing Display Object...");
 }
 
 void Display::main()
@@ -45,8 +44,6 @@ void Display::RunSetup()
     Serial.println("SPIFFS initialisation failed!");
     while (1) yield(); // Stay here twiddling thumbs waiting
   }
-  //Serial.println("\r\nInitialisation done.");
-  //listFiles(); // Lists the files so you can see what is in the SPIFFS
 
 
   // Draw the title screen
@@ -78,14 +75,8 @@ void Display::displayBuffer(bool do_clear)
     while (display_buffer->size() > 0)
     {
       xPos = 0;
-      //yDraw = scroll_line(TFT_RED);
-      //tft.setCursor(xPos, yDraw);
-
-      //tft.print(display_buffer->shift());
-      //tft.print(display_buffer->get(0));
       if ((display_buffer->size() > 0) && (!loading))
       {
-        //tft.print(display_buffer->pop());
         printing = true;
         delay(print_delay_1);
         yDraw = scroll_line(TFT_RED);
@@ -93,28 +84,10 @@ void Display::displayBuffer(bool do_clear)
         tft.print(display_buffer->shift());
         printing = false;
         delay(print_delay_2);
-        //display_buffer->remove(0);
       }
       
       blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
     }
-    
-    /*
-    while (display_buffer->get(0) != "")
-    {
-      Serial.println("Printing");
-      delay(10);
-      xPos = 0;
-      yDraw = scroll_line(TFT_RED);
-      tft.setCursor(xPos, yDraw);
-      if (display_buffer->get(0) != "")
-      {
-        tft.print(display_buffer->get(0));
-        display_buffer->replace(0, "");
-      }
-      blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
-    }
-    */
   }
 }
 
@@ -183,13 +156,8 @@ void Display::scrollAddress(uint16_t vsp) {
 // JPEG_functions
 void Display::drawJpeg(const char *filename, int xpos, int ypos) {
 
-  //Serial.println("===========================");
-  //Serial.print("Drawing file: "); Serial.println(filename);
-  //Serial.println("===========================");
-
   // Open the named file (the Jpeg decoder library will close it after rendering image)
   fs::File jpegFile = SPIFFS.open( filename, "r");    // File handle reference for SPIFFS
-  //  File jpegFile = SD.open( filename, FILE_READ);  // or, file handle reference for SD library
 
   //ESP32 always seems to return 1 for jpegFile so this null trap does not work
   if ( !jpegFile ) {
@@ -200,8 +168,6 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
   // Use one of the three following methods to initialise the decoder,
   // the filename can be a String or character array type:
 
-  //boolean decoded = JpegDec.decodeFsFile(jpegFile); // Pass a SPIFFS file handle to the decoder,
-  //boolean decoded = JpegDec.decodeSdFile(jpegFile); // or pass the SD file handle to the decoder,
   boolean decoded = JpegDec.decodeFsFile(filename);  // or pass the filename (leading / distinguishes SPIFFS files)
 
   if (decoded) {
@@ -286,11 +252,6 @@ void Display::jpegRender(int xpos, int ypos) {
 
   // calculate how long it took to draw the image
   drawTime = millis() - drawTime; // Calculate the time it took
-
-  // print the results to the serial port
-  //Serial.print  ("Total render time was    : "); Serial.print(drawTime); Serial.println(" ms");
-  //Serial.println("=====================================");
-
 }
 
 //====================================================================================

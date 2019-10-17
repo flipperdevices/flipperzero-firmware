@@ -50,9 +50,9 @@ class WiFiScan
       uint8_t payload[0];
     } wifi_ieee80211_packet_t;
 
-    void RunBeaconScan(uint8_t scan_mode);
-    void RunProbeScan(uint8_t scan_mode);
-    void RunBluetoothScan(uint8_t scan_mode);
+    void RunBeaconScan(uint8_t scan_mode, uint16_t color);
+    void RunProbeScan(uint8_t scan_mode, uint16_t color);
+    void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
 
   public:
@@ -61,14 +61,11 @@ class WiFiScan
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);
-    void StartScan(uint8_t scan_mode);
+    void StartScan(uint8_t scan_mode, uint16_t color = 0);
     void StopScan(uint8_t scan_mode);
-
-    //static String bad_list[bad_list_length] = {"HC-03", "HC-05", "HC-06"};
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
-    //static void sniffer_callback(void* buf, wifi_promiscuous_pkt_type_t type);
 };
 #endif

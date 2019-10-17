@@ -18,34 +18,6 @@ MenuFunctions menu_function_obj;
 
 uint32_t currentTime  = 0;
 
-/*
-void getPresses(void *pvParameter)
-{
-  uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
-   
-  while (true)
-  {
-    boolean pressed = display_obj.tft.getTouch(&t_x, &t_y);
-    Serial.print("X: ");
-    Serial.print(t_x);
-    Serial.print(" Y: ");
-    Serial.println(t_y);
-
-    menu_function_obj.pressed = pressed;
-
-    
-    //menu_function_obj.handlePress(pressed, t_x, t_y);
-    if (pressed)
-    {
-      menu_function_obj.x = t_x;
-      menu_function_obj.y = t_y;
-    }
-
-    
-    delay(1);
-  }
-}*/
-
 void setup()
 {
 
@@ -63,16 +35,6 @@ void setup()
 
   // Build menus
   menu_function_obj.RunSetup();
-  //menu_function_obj.displayCurrentMenu();
-
-  //xTaskCreate(&getPresses, "getPresses", 2048, NULL, 5, NULL);
-  
-
-  // Start a scan mode automatically
-  // In the real version, just setup wifi
-  // and wait for user input for scan modes
-  //wifi_scan_obj.StartScan(WIFI_SCAN_PROBE);
-
 }
 
 
@@ -84,9 +46,7 @@ void loop()
   // Update all of our objects
   display_obj.main(); 
   wifi_scan_obj.main(currentTime);
-  //if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
   menu_function_obj.main();
 
-  //vTaskDelay(portMAX_DELAY);
   delay(1);
 }
