@@ -101,6 +101,7 @@ void MenuFunctions::RunSetup()
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiScannerMenu.name = " WiFi Scanners";
+  wifiAttackMenu.name = " WiFi Attacks ";
   bluetoothSnifferMenu.name = " Bluetooth Sniffers ";
   bluetoothScannerMenu.name = " Bluetooth Scanners ";
 
@@ -114,24 +115,35 @@ void MenuFunctions::RunSetup()
   wifiMenu.parentMenu = &mainMenu; // Main Menu is second menu parent
   addNodes(&wifiMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiMenu.parentMenu);});
   addNodes(&wifiMenu, "Sniffers", TFT_LIGHTGREY, NULL, 1, [this](){changeMenu(&wifiSnifferMenu);});
-  addNodes(&wifiMenu, "Scanners", TFT_YELLOW, NULL, 1, [this](){Serial.println("Coming soon...");});
-  addNodes(&wifiMenu, "Attacks", TFT_ORANGE, NULL, 1, [this](){Serial.println("Coming soon...");});
+  addNodes(&wifiMenu, "Scanners", TFT_YELLOW, NULL, 1, [this](){changeMenu(&wifiScannerMenu);});
+  addNodes(&wifiMenu, "Attacks", TFT_ORANGE, NULL, 1, [this](){changeMenu(&wifiAttackMenu);});
 
+  // Build WiFi sniffer Menu
   wifiSnifferMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiSnifferMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiSnifferMenu.parentMenu);});
   addNodes(&wifiSnifferMenu, "Probe Request Sniff", TFT_CYAN, NULL, 2, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_CYAN);});
   addNodes(&wifiSnifferMenu, "Beacon Sniff", TFT_MAGENTA, NULL, 3, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);});
 
+  // Build WiFi scanner Menu
+  wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
+  addNodes(&wifiScannerMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
+
+  // Build WiFi attack menu
+  wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
+  addNodes(&wifiAttackMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiAttackMenu.parentMenu);});
+  
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
   addNodes(&bluetoothMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothMenu.parentMenu);});
   addNodes(&bluetoothMenu, "Sniffers", TFT_LIGHTGREY, NULL, 1, [this](){changeMenu(&bluetoothSnifferMenu);});
   addNodes(&bluetoothMenu, "Scanners", TFT_YELLOW, NULL, 1, [this](){changeMenu(&bluetoothScannerMenu);});
 
+  // Build bluetooth sniffer Menu
   bluetoothSnifferMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
   addNodes(&bluetoothSnifferMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothSnifferMenu.parentMenu);});
   addNodes(&bluetoothSnifferMenu, "Bluetooth Sniffer", TFT_GREEN, NULL, 1, [this](){wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);});
 
+  // Build bluetooth scanner Menu
   bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
   addNodes(&bluetoothScannerMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothScannerMenu.parentMenu);});
   addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
