@@ -109,6 +109,8 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   display_obj.display_buffer->clear();
   Serial.print("display_buffer->size(): ");
   Serial.println(display_obj.display_buffer->size());
+
+  display_obj.tteBar = false;
 }
 
 // Function for updating scan status
@@ -131,16 +133,18 @@ void WiFiScan::main(uint32_t currentTime)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
+  display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
   display_obj.print_delay_2 = 10;
   display_obj.clearScreen();
-  display_obj.initScrollValues();
+  display_obj.initScrollValues(true);
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setTextColor(TFT_WHITE, color);
   display_obj.tft.fillRect(0,0,240,16, color);
   display_obj.tft.drawCentreString(" Beacon Sniffer ",120,0,2);
+  display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
+  display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -156,16 +160,18 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
+  display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
   display_obj.print_delay_2 = 10;
   display_obj.clearScreen();
-  display_obj.initScrollValues();
+  display_obj.initScrollValues(true);
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setTextColor(TFT_BLACK, color);
   display_obj.tft.fillRect(0,0,240,16, color);
   display_obj.tft.drawCentreString(" Probe Request Sniffer ",120,0,2);
+  display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
+  display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -186,26 +192,30 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
   pBLEScan = BLEDevice::getScan(); //create new scan
   if (scan_mode == BT_SCAN_ALL)
   {
+    display_obj.tteBar = true;
     display_obj.clearScreen();
-    display_obj.initScrollValues();
+    display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
     display_obj.tft.fillRect(0,0,240,16, color);
     display_obj.tft.drawCentreString(" Bluetooth Sniff ",120,0,2);
+    display_obj.touchToExit();
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
+    display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanAllCallback());
   }
   else if (scan_mode == BT_SCAN_SKIMMERS)
   {
+    display_obj.tteBar = true;
     display_obj.clearScreen();
-    display_obj.initScrollValues();
+    display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
     display_obj.tft.fillRect(0,0,240,16, color);
     display_obj.tft.drawCentreString(" Detect Card Skimmers ",120,0,2);
+    display_obj.touchToExit();
     display_obj.tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-    display_obj.setupScrollArea(TOP_FIXED_AREA, BOT_FIXED_AREA);
+    display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback());
   }
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster

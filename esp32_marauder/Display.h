@@ -17,6 +17,7 @@
 #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
 #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
 #define TOP_FIXED_AREA 16 // Number of lines in top fixed area (lines counted from top of screen)
+#define TOP_FIXED_AREA_2 32 // If we have the "touch to exit" bar
 #define YMAX 320 // Bottom of screen area
 #define minimum(a,b)     (((a) < (b)) ? (a) : (b))
 //#define MENU_FONT NULL
@@ -49,8 +50,8 @@ class Display
     String version_number = "v0.1";
 
     bool printing = false;
-
     bool loading = false;
+    bool tteBar = false;
 
     int print_delay_1, print_delay_2 = 10;
 
@@ -82,7 +83,7 @@ class Display
     void displayBuffer(bool do_clear = false);
     void drawJpeg(const char *filename, int xpos, int ypos);
     void getTouchWhileFunction(bool pressed);
-    void initScrollValues();
+    void initScrollValues(bool tte = false);
     void jpegInfo();
     void jpegRender(int xpos, int ypos);
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
@@ -93,5 +94,6 @@ class Display
     int scroll_line(uint32_t color);
     void setupScrollArea(uint16_t tfa, uint16_t bfa);
     void showCenterText(String text, int y);
+    void touchToExit();
 };
 #endif

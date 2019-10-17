@@ -57,6 +57,13 @@ void Display::RunSetup()
   delay(5000);
 }
 
+void Display::touchToExit()
+{
+  tft.setTextColor(TFT_BLACK, TFT_LIGHTGREY);
+  tft.fillRect(0,16,240,16, TFT_LIGHTGREY);
+  tft.drawCentreString("Touch screen to exit",120,16,2);
+}
+
 
 // Function to just draw the screen black
 void Display::clearScreen()
@@ -98,16 +105,25 @@ void Display::showCenterText(String text, int y)
 }
 
 
-void Display::initScrollValues()
+void Display::initScrollValues(bool tte)
 {
   Serial.println("initScrollValues()");
   yDraw = YMAX - BOT_FIXED_AREA - TEXT_HEIGHT;
 
   xPos = 0;
 
-  yStart = TOP_FIXED_AREA;
+  if (!tte)
+  {
+    yStart = TOP_FIXED_AREA;
 
-  yArea = YMAX - TOP_FIXED_AREA - BOT_FIXED_AREA;
+    yArea = YMAX - TOP_FIXED_AREA - BOT_FIXED_AREA;
+  }
+  else
+  {
+    yStart = TOP_FIXED_AREA_2;
+
+    yArea = YMAX - TOP_FIXED_AREA_2 - BOT_FIXED_AREA;
+  }
 
   for(int i = 0; i < 18; i++) blank[i] = 0;
 }
@@ -119,12 +135,26 @@ int Display::scroll_line(uint32_t color) {
   //Serial.println("scroll_line()");
   int yTemp = yStart; // Store the old yStart, this is where we draw the next line
   // Use the record of line lengths to optimise the rectangle size we need to erase the top line
-  tft.fillRect(0,yStart,blank[(yStart-TOP_FIXED_AREA)/TEXT_HEIGHT],TEXT_HEIGHT, color);
 
-  // Change the top of the scroll area
-  yStart+=TEXT_HEIGHT;
-  // The value must wrap around as the screen memory is a circular buffer
-  if (yStart >= YMAX - BOT_FIXED_AREA) yStart = TOP_FIXED_AREA + (yStart - YMAX + BOT_FIXED_AREA);
+  // Check if we have the "touch to exit bar"
+  if (!tteBar)
+  {
+    tft.fillRect(0,yStart,blank[(yStart-TOP_FIXED_AREA)/TEXT_HEIGHT],TEXT_HEIGHT, color);
+  
+    // Change the top of the scroll area
+    yStart+=TEXT_HEIGHT;
+    // The value must wrap around as the screen memory is a circular buffer
+    if (yStart >= YMAX - BOT_FIXED_AREA) yStart = TOP_FIXED_AREA + (yStart - YMAX + BOT_FIXED_AREA);
+  }
+  else
+  {
+    tft.fillRect(0,yStart,blank[(yStart-TOP_FIXED_AREA_2)/TEXT_HEIGHT],TEXT_HEIGHT, color);
+  
+    // Change the top of the scroll area
+    yStart+=TEXT_HEIGHT;
+    // The value must wrap around as the screen memory is a circular buffer
+    if (yStart >= YMAX - BOT_FIXED_AREA) yStart = TOP_FIXED_AREA_2 + (yStart - YMAX + BOT_FIXED_AREA);
+  }
   // Now we can scroll the display
   scrollAddress(yStart);
   return  yTemp;

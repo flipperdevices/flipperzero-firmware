@@ -212,9 +212,14 @@ void MenuFunctions::displayCurrentMenu()
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   display_obj.tft.fillRect(0,0,240,16, TFT_DARKGREY);
-  display_obj.tft.drawCentreString(" ESP32 Marauder ",120,0,2);
+  //display_obj.tft.drawCentreString(" ESP32 Marauder ",120,0,2);
+  //Serial.println("Getting size...");
+  //char buf[&current_menu->parentMenu->name.length() + 1] = {};
+  //Serial.println("Got size...");
+  //current_menu->parentMenu->name.toCharArray(buf, current_menu->parentMenu->name.length() + 1);
   //String current_name = &current_menu->parentMenu->name;
-  //display_obj.tft.drawCentreString(current_name,120,0,2);
+  //Serial.println("gottem");
+  display_obj.tft.drawCentreString(current_menu->name,120,0,2);
   if (current_menu->list != NULL)
   {
     display_obj.tft.setFreeFont(MENU_FONT);
