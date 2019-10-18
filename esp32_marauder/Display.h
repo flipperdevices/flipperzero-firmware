@@ -17,7 +17,6 @@
 #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
 #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
 #define TOP_FIXED_AREA 16 // Number of lines in top fixed area (lines counted from top of screen)
-#define TOP_FIXED_AREA_2 32 // If we have the "touch to exit" bar
 #define YMAX 320 // Bottom of screen area
 #define minimum(a,b)     (((a) < (b)) ? (a) : (b))
 //#define MENU_FONT NULL
@@ -53,6 +52,7 @@ class Display
     bool loading = false;
     bool tteBar = false;
 
+    int TOP_FIXED_AREA_2 = 32;
     int print_delay_1, print_delay_2 = 10;
 
     //Menu* current_menu;
@@ -95,5 +95,6 @@ class Display
     void setupScrollArea(uint16_t tfa, uint16_t bfa);
     void showCenterText(String text, int y);
     void touchToExit();
+    void twoPartDisplay(String center_text);
 };
 #endif

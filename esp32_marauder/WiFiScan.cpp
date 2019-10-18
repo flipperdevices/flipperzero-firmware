@@ -47,22 +47,45 @@ class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
 class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) {
       String bad_list[bad_list_length] = {"HC-03", "HC-05", "HC-06"};
-      Serial.print("Device: ");
-      if(advertisedDevice.getName().length() != 0)
+      if (display_obj.display_buffer->size() >= 0)
       {
-        Serial.print(advertisedDevice.getName().c_str());
-        for(int i = 0; i < bad_list_length; i++)
+        Serial.print("Device: ");
+        String display_string = "";
+        display_string.concat(" RSSI: ");
+        display_string.concat(advertisedDevice.getRSSI());
+        display_string.concat(" ");
+        if(advertisedDevice.getName().length() != 0)
         {
-          if(strcmp(advertisedDevice.getName().c_str(), bad_list[i].c_str()) == 0)
+          display_string.concat(advertisedDevice.getName().c_str());
+          Serial.print(advertisedDevice.getName().c_str());
+          for(int i = 0; i < bad_list_length; i++)
           {
-            Serial.println("Found some shit");
+            if(strcmp(advertisedDevice.getName().c_str(), bad_list[i].c_str()) == 0)
+            {
+              Serial.println("Found some shit");
+            }
           }
         }
+        else
+        {
+          Serial.print(advertisedDevice.getAddress().toString().c_str());
+          display_string.concat(advertisedDevice.getAddress().toString().c_str());
+        }
+  
+        int temp_len = display_string.length();
+        for (int i = 0; i < 40 - temp_len; i++)
+        {
+          display_string.concat(" ");
+        }
+        Serial.print(" RSSI: ");
+        Serial.println(advertisedDevice.getRSSI());
+  
+        while (display_obj.printing)
+          delay(1);
+        display_obj.loading = true;
+        display_obj.display_buffer->add(display_string);
+        display_obj.loading = false;
       }
-      else
-        Serial.print(advertisedDevice.getAddress().toString().c_str());
-      Serial.print(" RSSI: ");
-      Serial.println(advertisedDevice.getRSSI());
     }
 };
 
@@ -133,6 +156,7 @@ void WiFiScan::main(uint32_t currentTime)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
+  display_obj.TOP_FIXED_AREA_2 = 32;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
   display_obj.print_delay_2 = 10;
@@ -144,7 +168,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
   display_obj.tft.drawCentreString(" Beacon Sniffer ",120,0,2);
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -160,6 +184,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
+  display_obj.TOP_FIXED_AREA_2 = 32;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
   display_obj.print_delay_2 = 10;
@@ -171,7 +196,7 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
   display_obj.tft.drawCentreString(" Probe Request Sniffer ",120,0,2);
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -192,6 +217,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
   pBLEScan = BLEDevice::getScan(); //create new scan
   if (scan_mode == BT_SCAN_ALL)
   {
+    display_obj.TOP_FIXED_AREA_2 = 32;
     display_obj.tteBar = true;
     display_obj.clearScreen();
     display_obj.initScrollValues(true);
@@ -201,21 +227,23 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.tft.drawCentreString(" Bluetooth Sniff ",120,0,2);
     display_obj.touchToExit();
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+    display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanAllCallback());
   }
   else if (scan_mode == BT_SCAN_SKIMMERS)
   {
+    display_obj.TOP_FIXED_AREA_2 = 160;
     display_obj.tteBar = true;
     display_obj.clearScreen();
+    display_obj.tft.fillScreen(TFT_DARKGREY);
     display_obj.initScrollValues(true);
     display_obj.tft.setTextWrap(false);
     display_obj.tft.setTextColor(TFT_BLACK, color);
     display_obj.tft.fillRect(0,0,240,16, color);
     display_obj.tft.drawCentreString(" Detect Card Skimmers ",120,0,2);
-    display_obj.touchToExit();
-    display_obj.tft.setTextColor(TFT_ORANGE, TFT_BLACK);
-    display_obj.setupScrollArea(TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+    display_obj.twoPartDisplay("Scanning for Bluetooth-enabled skimmers...");
+    display_obj.tft.setTextColor(TFT_BLACK, TFT_DARKGREY);
+    display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback());
   }
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster

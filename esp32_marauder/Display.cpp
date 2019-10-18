@@ -57,6 +57,13 @@ void Display::RunSetup()
   delay(5000);
 }
 
+void Display::twoPartDisplay(String center_text)
+{
+  tft.setTextColor(TFT_BLACK, TFT_YELLOW);
+  tft.fillRect(0,16,240,144, TFT_YELLOW);
+  tft.drawCentreString(center_text,120,82,1);
+}
+
 void Display::touchToExit()
 {
   tft.setTextColor(TFT_BLACK, TFT_LIGHTGREY);
