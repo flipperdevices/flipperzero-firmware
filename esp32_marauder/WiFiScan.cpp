@@ -51,40 +51,55 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
       {
         Serial.print("Device: ");
         String display_string = "";
-        display_string.concat(" RSSI: ");
-        display_string.concat(advertisedDevice.getRSSI());
-        display_string.concat(" ");
+        //display_string.concat(" RSSI: ");
+        //display_string.concat(advertisedDevice.getRSSI());
+        //display_string.concat(" ");
         if(advertisedDevice.getName().length() != 0)
         {
-          display_string.concat(advertisedDevice.getName().c_str());
+          //display_string.concat(advertisedDevice.getName().c_str());
           Serial.print(advertisedDevice.getName().c_str());
           for(int i = 0; i < bad_list_length; i++)
           {
             if(strcmp(advertisedDevice.getName().c_str(), bad_list[i].c_str()) == 0)
             {
-              Serial.println("Found some shit");
+              display_string.concat("Potential Skimmer: ");
+              display_string.concat(" ");
+              display_string.concat(advertisedDevice.getName().c_str());
+              int temp_len = display_string.length();
+              for (int i = 0; i < 40 - temp_len; i++)
+              {
+                display_string.concat(" ");
+              }
+              while (display_obj.printing)
+                delay(1);
+              display_obj.loading = true;
+              display_obj.display_buffer->add(display_string);
+              display_obj.loading = false;
             }
           }
         }
         else
         {
           Serial.print(advertisedDevice.getAddress().toString().c_str());
-          display_string.concat(advertisedDevice.getAddress().toString().c_str());
+          //display_string.concat(advertisedDevice.getAddress().toString().c_str());
         }
-  
+        /*
         int temp_len = display_string.length();
         for (int i = 0; i < 40 - temp_len; i++)
         {
           display_string.concat(" ");
         }
+        */
         Serial.print(" RSSI: ");
         Serial.println(advertisedDevice.getRSSI());
-  
+
+        /*
         while (display_obj.printing)
           delay(1);
         display_obj.loading = true;
         display_obj.display_buffer->add(display_string);
         display_obj.loading = false;
+        */
       }
     }
 };
@@ -241,8 +256,8 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.tft.setTextColor(TFT_BLACK, color);
     display_obj.tft.fillRect(0,0,240,16, color);
     display_obj.tft.drawCentreString(" Detect Card Skimmers ",120,0,2);
-    display_obj.twoPartDisplay("Scanning for Bluetooth-enabled skimmers...");
-    display_obj.tft.setTextColor(TFT_BLACK, TFT_DARKGREY);
+    display_obj.twoPartDisplay("Scanning for\nBluetooth-enabled skimmers\nHC-03, HC-05, and HC-06...");
+    display_obj.tft.setTextColor(TFT_RED, TFT_DARKGREY);
     display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback());
   }

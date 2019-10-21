@@ -11,7 +11,7 @@ extern WiFiScan wifi_scan_obj;
 #define KEY_X 120 // Centre of key
 #define KEY_Y 50
 #define KEY_W 240 // Width and height
-#define KEY_H 18
+#define KEY_H 22
 #define KEY_SPACING_X 0 // X and Y gap
 #define KEY_SPACING_Y 1
 #define KEY_TEXTSIZE 1   // Font size multiplier

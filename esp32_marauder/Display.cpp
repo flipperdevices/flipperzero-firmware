@@ -61,7 +61,15 @@ void Display::twoPartDisplay(String center_text)
 {
   tft.setTextColor(TFT_BLACK, TFT_YELLOW);
   tft.fillRect(0,16,240,144, TFT_YELLOW);
-  tft.drawCentreString(center_text,120,82,1);
+  //tft.drawCentreString(center_text,120,82,1);
+  tft.setTextWrap(true);
+  tft.setFreeFont(NULL);
+  //showCenterText(center_text, 82);
+  //tft.drawCentreString(center_text,120,82,1);
+  tft.setCursor(0, 82);
+  tft.println(center_text);
+  tft.setFreeFont(MENU_FONT);
+  tft.setTextWrap(false);
 }
 
 void Display::touchToExit()
