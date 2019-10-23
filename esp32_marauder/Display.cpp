@@ -107,8 +107,10 @@ void Display::displayBuffer(bool do_clear)
         printing = false;
         delay(print_delay_2);
       }
-      
-      blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
+      if (!tteBar)
+        blank[(18+(yStart - TOP_FIXED_AREA) / TEXT_HEIGHT)%19] = xPos;
+      else
+        blank[(18+(yStart - TOP_FIXED_AREA_2) / TEXT_HEIGHT)%19] = xPos;
     }
   }
 }

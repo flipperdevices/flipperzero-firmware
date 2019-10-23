@@ -257,7 +257,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.tft.fillRect(0,0,240,16, color);
     display_obj.tft.drawCentreString(" Detect Card Skimmers ",120,0,2);
     display_obj.twoPartDisplay("Scanning for\nBluetooth-enabled skimmers\nHC-03, HC-05, and HC-06...");
-    display_obj.tft.setTextColor(TFT_RED, TFT_DARKGREY);
+    display_obj.tft.setTextColor(TFT_BLACK, TFT_DARKGREY);
     display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback());
   }
