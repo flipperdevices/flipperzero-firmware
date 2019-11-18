@@ -1,3 +1,9 @@
+/* FLASH SETTINGS
+Board: LOLIN D32
+Flash Frequency: 80MHz
+Partition Scheme: No OTA
+*/
+
 #include <WiFi.h>
 #include <Wire.h>
 #include "esp_wifi.h"
