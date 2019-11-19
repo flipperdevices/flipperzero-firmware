@@ -8,6 +8,7 @@
 # Table Of Condensation
 - [About](#about)
   - [YouTube](#youtube)
+- [Preparing Arduino IDE](#preparing-arduino-ide)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
 - [For Sale Soon](#for-sale-soon)
@@ -18,6 +19,21 @@ The ESP32 Marauder is a suite of WiFi/Bluetooth offensive and defensive tools cr
 
 ### YouTube
 <p align="left"><a href="https://www.youtube.com/watch?v=BGFO1wA29o8&t=36s"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/esp32marauder_thumbnail.jpg" width="500"></p>
+  
+# Preparing Arduino IDE
+1. Install the [Arduino IDE](https://www.arduino.cc/en/main/software)
+2. In the Arduino IDE, go to `File`>`Preferences`
+3. Add the following URL to `Additional Boards Manager URLs:`
+  - https://dl.espressif.com/dl/package_esp32_index.json
+4. Go to `Tools`>`Board`>`Boards Manager`, search for `esp32` and install `esp32 by Espressif Systems`
+6. Install Spacehuhn's [SimpleList](https://github.com/spacehuhn/SimpleList) library in your Arduino IDE
+  - Download the SimpleList repo
+  - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the SimpleList-master.zip you just downloaded
+7. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE
+  - Download the TFT_eSPI repo
+  - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the SimpleList-master.zip you just downloaded
+  - Make the following modifications shown in [this issue](https://github.com/justcallmekoko/ESP32Marauder/issues/2#issuecomment-555695918) to the TFT_eSPI library you just installed
+8. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
   
 # Under Development
 Currently the ESP32 Marauder has limited firmware capabilities. Most of the work so far has been put into designing the hardware. New firmware features will be added over time and will eventually reach a point where this project will be a fully capable hacking machine.
