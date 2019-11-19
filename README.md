@@ -9,7 +9,7 @@
 - [About](#about)
   - [YouTube](#youtube)
 - [Flashing Firmware](#flashing-firmware)
-- [Setting Up Arduino IDE](#setting-up-arduino-ide)
+  - [Setting Up Arduino IDE](#setting-up-arduino-ide)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
 - [For Sale Soon](#for-sale-soon)
