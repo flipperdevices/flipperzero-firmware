@@ -14,6 +14,7 @@
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
+#define STANDARD_FONT_CHAR_LIMIT 40 // number of characters on a single line with normal font
 #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
 #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
 #define TOP_FIXED_AREA 16 // Number of lines in top fixed area (lines counted from top of screen)

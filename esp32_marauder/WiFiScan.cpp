@@ -1,5 +1,6 @@
 #include "WiFiScan.h"
 
+//esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
     void onResult(BLEAdvertisedDevice advertisedDevice) {
@@ -112,12 +113,15 @@ WiFiScan::WiFiScan()
 // Function to prepare to run a specific scan
 void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 {  
+  //Serial.println("Starting Scan...");
   if (scan_mode == WIFI_SCAN_OFF)
     StopScan(scan_mode);
   else if (scan_mode == WIFI_SCAN_PROBE)
     RunProbeScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_AP)
     RunBeaconScan(scan_mode, color);
+  else if (scan_mode == WIFI_ATTACK_BEACON_SPAM)
+    RunBeaconSpam(scan_mode, color);
   else if (scan_mode == BT_SCAN_ALL)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == BT_SCAN_SKIMMERS)
@@ -132,10 +136,10 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_ST) ||
-  (currentScanMode == WIFI_SCAN_ALL))
-  {
+  (currentScanMode == WIFI_SCAN_ALL) ||
+  (currentScanMode == WIFI_ATTACK_BEACON_SPAM))
     esp_wifi_set_promiscuous(false);
-  }
+    
   else if ((currentScanMode == BT_SCAN_ALL) ||
   (currentScanMode == BT_SCAN_SKIMMERS))
   {
@@ -151,21 +155,31 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   display_obj.tteBar = false;
 }
 
-// Function for updating scan status
-void WiFiScan::main(uint32_t currentTime)
+// Function to prepare for beacon spam
+void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 {
-  // WiFi operations
-  if ((currentScanMode == WIFI_SCAN_PROBE) ||
-  (currentScanMode == WIFI_SCAN_AP) ||
-  (currentScanMode == WIFI_SCAN_ST) ||
-  (currentScanMode == WIFI_SCAN_ALL))
-  {
-    if (currentTime - initTime >= 1000)
-    {
-      initTime = millis();
-      channelHop();
-    }
-  }
+  //Serial.println("Beacon Spam...");
+  display_obj.TOP_FIXED_AREA_2 = 32;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,0,240,16, color);
+  display_obj.tft.drawCentreString(" Beacon Spam Random ",120,0,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  initTime = millis();
+  //display_obj.clearScreen();
+  //Serial.println("End of func");
 }
 
 // Function to start running a beacon scan
@@ -397,6 +411,61 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   }
 }
 
+// Function for sending crafted beacon frames
+void WiFiScan::broadcastRandomSSID(uint32_t currentTime) {
+
+  set_channel = random(1,12); 
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  delay(1);  
+
+  // Randomize SRC MAC
+  packet[10] = packet[16] = random(256);
+  packet[11] = packet[17] = random(256);
+  packet[12] = packet[18] = random(256);
+  packet[13] = packet[19] = random(256);
+  packet[14] = packet[20] = random(256);
+  packet[15] = packet[21] = random(256);
+
+  packet[37] = 6;
+  
+  
+  // Randomize SSID (Fixed size 6. Lazy right?)
+  packet[38] = alfa[random(65)];
+  packet[39] = alfa[random(65)];
+  packet[40] = alfa[random(65)];
+  packet[41] = alfa[random(65)];
+  packet[42] = alfa[random(65)];
+  packet[43] = alfa[random(65)];
+  
+  packet[56] = set_channel;
+
+  uint8_t postSSID[13] = {0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, //supported rate
+                      0x03, 0x01, 0x04 /*DSSS (Current Channel)*/ };
+
+
+
+  // Add everything that goes after the SSID
+  for(int i = 0; i < 12; i++) 
+    packet[38 + 6 + i] = postSSID[i];
+
+  //Serial.println("About to send packets...");
+
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+
+  packets_sent = packets_sent + 3;
+
+  //Serial.print("Packets sent: ");
+  //Serial.println(packets_sent);
+  
+  //Serial.println("Sent packets");
+}
+
+
 //void WiFiScan::sniffer_callback(void* buf, wifi_promiscuous_pkt_type_t type) {
 //  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
 //  showMetadata(snifferPacket, type);
@@ -411,4 +480,45 @@ void WiFiScan::channelHop()
   }
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   delay(1);
+}
+
+
+// Function for updating scan status
+void WiFiScan::main(uint32_t currentTime)
+{
+  // WiFi operations
+  if ((currentScanMode == WIFI_SCAN_PROBE) ||
+  (currentScanMode == WIFI_SCAN_AP) ||
+  (currentScanMode == WIFI_SCAN_ST) ||
+  (currentScanMode == WIFI_SCAN_ALL))
+  {
+    if (currentTime - initTime >= 1000)
+    {
+      initTime = millis();
+      channelHop();
+    }
+  }
+  else if ((currentScanMode == WIFI_ATTACK_BEACON_SPAM))
+  {
+    // Need this for loop because getTouch causes ~10ms delay
+    // which makes beacon spam less effective
+    for (int i = 0; i < 55; i++)
+      broadcastRandomSSID(currentTime);
+
+    if (currentTime - initTime >= 1000)
+    {
+      initTime = millis();
+      //Serial.print("packets/sec: ");
+      //Serial.println(packets_sent);
+      String displayString = "";
+      String displayString2 = "";
+      displayString.concat("packets/sec: ");
+      displayString.concat(packets_sent);
+      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+        displayString2.concat(" ");
+      display_obj.showCenterText(displayString2, 160);
+      display_obj.showCenterText(displayString, 160);
+      packets_sent = 0;
+    }
+  }
 }

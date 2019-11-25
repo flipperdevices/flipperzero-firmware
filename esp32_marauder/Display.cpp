@@ -10,11 +10,6 @@ Display::Display()
 {
 }
 
-void Display::main()
-{
-  return;
-}
-
 // Function to prepare the display and the menus
 void Display::RunSetup()
 {
@@ -462,4 +457,8 @@ void Display::listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
 }
 #endif
 
+void Display::main()
+{
+  return;
+}
 // End SPIFFS_functions

@@ -6,6 +6,7 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
+#include <WiFi.h>
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
 #include "Display.h"
@@ -24,6 +25,7 @@
 
 extern Display display_obj;
 
+esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
 class WiFiScan
 {
@@ -32,10 +34,9 @@ class WiFiScan
     bool run_setup = true;
     int set_channel = 1;
     int bluetoothScanTime = 5;
+    int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
     BLEScan* pBLEScan;
-
-    esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
 
@@ -70,6 +71,8 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
+    void broadcastRandomSSID(uint32_t currentTime);
+    void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
@@ -77,6 +80,8 @@ class WiFiScan
 
   public:
     WiFiScan();
+
+    
     
     void channelHop();
     uint8_t currentScanMode = 0;

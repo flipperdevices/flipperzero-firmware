@@ -47,12 +47,18 @@ void setup()
 void loop()
 {
   // get the current time
+  //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   currentTime = millis();
 
   // Update all of our objects
   display_obj.main(); 
   wifi_scan_obj.main(currentTime);
+  //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   menu_function_obj.main();
+
+  //Serial.print("Run Time: ");
+  //Serial.print(millis() - currentTime);
+  //Serial.println("ms");
 
   delay(1);
 }

@@ -8,20 +8,30 @@ MenuFunctions::MenuFunctions()
 // Function to check menu input
 void MenuFunctions::main()
 {
+  boolean pressed = false;
   // This is code from bodmer's keypad example
   uint16_t t_x = 0, t_y = 0; // To store the touch coordinates
 
   // Get the display buffer out of the way
-  if (wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF)
+  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     display_obj.displayBuffer();
 
 
   // Pressed will be set true is there is a valid touch on the screen
-  boolean pressed = display_obj.tft.getTouch(&t_x, &t_y);
+  int pre_getTouch = millis();
+
+  // getTouch causes a 10ms delay which makes beacon spam less effective
+  //if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
+  pressed = display_obj.tft.getTouch(&t_x, &t_y);
   //boolean pressed = false;
 
+  //Serial.print("getTouch: ");
+  //Serial.print(millis() - pre_getTouch);
+  //Serial.println("ms");
+
   
-  // This is if there are scans going on
+  // This is if there are scans/attacks going on
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed))
   //if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (x != -1) && (y != -1))
   {  
@@ -30,6 +40,7 @@ void MenuFunctions::main()
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
+    (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
     (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
     (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
     {
@@ -50,28 +61,31 @@ void MenuFunctions::main()
   }
   
   // / Check if any key coordinate boxes contain the touch coordinates
-  for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-    if (pressed && key[b].contains(t_x, t_y)) {
-      key[b].press(true);  // tell the button it is pressed
-    } else {
-      key[b].press(false);  // tell the button it is NOT pressed
+  if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
+  {
+    for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+      if (pressed && key[b].contains(t_x, t_y)) {
+        key[b].press(true);  // tell the button it is pressed
+      } else {
+        key[b].press(false);  // tell the button it is NOT pressed
+      }
     }
-  }
-
-  // Check if any key has changed state
-  for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-    display_obj.tft.setFreeFont(MENU_FONT);
-    if (key[b].justPressed()) {
-      key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
+  
+    // Check if any key has changed state
+    for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+      display_obj.tft.setFreeFont(MENU_FONT);
+      if (key[b].justPressed()) {
+        key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
+      }
+  
+      // If button was just release, execute the button's function
+      if (key[b].justReleased())
+      {
+        key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
+        current_menu->list->get(b).callable();
+      }
+      display_obj.tft.setFreeFont(NULL);
     }
-
-    // If button was just release, execute the button's function
-    if (key[b].justReleased())
-    {
-      key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-      current_menu->list->get(b).callable();
-    }
-    display_obj.tft.setFreeFont(NULL);
   }
   x = -1;
   y = -1;
@@ -131,6 +145,7 @@ void MenuFunctions::RunSetup()
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiAttackMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiAttackMenu.parentMenu);});
+  addNodes(&wifiAttackMenu, "Beacon Spam Random", TFT_ORANGE, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);});
   
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
