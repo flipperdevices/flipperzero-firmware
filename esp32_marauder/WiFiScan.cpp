@@ -138,7 +138,10 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_ST) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM))
+  {
     esp_wifi_set_promiscuous(false);
+    WiFi.mode(WIFI_OFF);
+  }
     
   else if ((currentScanMode == BT_SCAN_ALL) ||
   (currentScanMode == BT_SCAN_SKIMMERS))
