@@ -33,7 +33,6 @@ void MenuFunctions::main()
   
   // This is if there are scans/attacks going on
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed))
-  //if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (x != -1) && (y != -1))
   {  
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
@@ -60,9 +59,11 @@ void MenuFunctions::main()
     return;
   }
   
-  // / Check if any key coordinate boxes contain the touch coordinates
+  // Check if any key coordinate boxes contain the touch coordinates
+  // This is for when on a menu
   if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   {
+    // Need this to set all keys to false
     for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
       if (pressed && key[b].contains(t_x, t_y)) {
         key[b].press(true);  // tell the button it is pressed
@@ -72,7 +73,7 @@ void MenuFunctions::main()
     }
   
     // Check if any key has changed state
-    for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
+    for (uint8_t b = 0; b < current_menu->list->size(); b++) {
       display_obj.tft.setFreeFont(MENU_FONT);
       if (key[b].justPressed()) {
         key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
@@ -213,6 +214,8 @@ void MenuFunctions::buildButtons(Menu* menu)
   Serial.println("Bulding buttons...");
   if (menu->list != NULL)
   {
+    //for (int i = 0; i < sizeof(key); i++)
+    //  key[i] = NULL;
     for (int i = 0; i < menu->list->size(); i++)
     {
       TFT_eSPI_Button new_button;
