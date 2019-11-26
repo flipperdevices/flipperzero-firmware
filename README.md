@@ -105,7 +105,7 @@ while (fgets(line, sizeof(line), stdin) != NULL) {
             struct minmea_sentence_gsv frame;
             if (minmea_parse_gsv(&frame, line)) {
                 printf("$GSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
-                printf("$GSV: sattelites in view: %d\n", frame.total_sats);
+                printf("$GSV: satellites in view: %d\n", frame.total_sats);
                 for (int i = 0; i < 4; i++)
                     printf("$GSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
                         frame.sats[i].nr,
