@@ -77,7 +77,7 @@ int main(void)
                 struct minmea_sentence_gsv frame;
                 if (minmea_parse_gsv(&frame, line)) {
                     printf(INDENT_SPACES "$xxGSV: message %d of %d\n", frame.msg_nr, frame.total_msgs);
-                    printf(INDENT_SPACES "$xxGSV: sattelites in view: %d\n", frame.total_sats);
+                    printf(INDENT_SPACES "$xxGSV: satellites in view: %d\n", frame.total_sats);
                     for (int i = 0; i < 4; i++)
                         printf(INDENT_SPACES "$xxGSV: sat nr %d, elevation: %d, azimuth: %d, snr: %d dbm\n",
                             frame.sats[i].nr,
