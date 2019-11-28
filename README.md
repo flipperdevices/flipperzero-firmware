@@ -55,5 +55,5 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
   - Also a well designed menu structure. I adapted it to the TFT GUI because it worked perfectly
 - [Bodmer](https://github.com/Bodmer) for a comprehensive TFT touch screen library [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
 
-# For Sale Soon
-ask your parents
+# For Sale Now
+You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
