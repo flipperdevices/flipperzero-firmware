@@ -57,3 +57,5 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
 
 # For Sale Now
 You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
+
+<a href="https://www.tindie.com/stores/justcallmekoko/?ref=offsite_badges&utm_source=sellers_justcallmekoko&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
