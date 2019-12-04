@@ -9,6 +9,7 @@
 - [About](#about)
   - [YouTube](#youtube)
   - [Hackster Article](#hackster-article)
+  - [Capabilities](#capabilities)
 - [Do It Yourself](#do-it-yourself)
   - [Hardware](#hardware)
   - [Flashing Firmware](#flashing-firmware)
@@ -26,6 +27,20 @@ The ESP32 Marauder is a suite of WiFi/Bluetooth offensive and defensive tools cr
 
 ### Hackster Article
 You can check out the marauder article written [here](https://www.hackster.io/news/esp32-marauder-puts-a-bluetooth-wi-fi-pen-testing-toolkit-in-your-pocket-32d389f6e66f) as well as other interesting engineering projects.
+
+## Capabilities
+### Current
+- Probe Request Sniff: Sniff for WiFi [probe request frames](https://mrncciew.com/2014/10/27/cwap-802-11-probe-requestresponse/) sent by wireless devices
+- Beacon Sniff: Sniff [beacon frames](https://en.wikipedia.org/wiki/Beacon_frame) sent by wireless acccess points
+- Beacon Spam Random: Spam hundreds of random beacon frames to wireless devices within range
+- Bluetooth Sniffer: Sniff bluetooth devices within range
+- Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
+
+### Developing
+- Emulate Bluetooth: Emulate a bluetooth device with a specific name
+- Bluetooth Spam: Spam hundreds of fake bluetooth devices
+- Rick Roll: Broadcast the rick roll lyrics as WiFi access points
+- Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
 
 # Do It Yourself
 
