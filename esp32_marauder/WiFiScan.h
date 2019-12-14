@@ -20,8 +20,9 @@
 #define WIFI_SCAN_ST 3
 #define WIFI_SCAN_ALL 4
 #define WIFI_ATTACK_BEACON_SPAM 5
-#define BT_SCAN_ALL 6
-#define BT_SCAN_SKIMMERS 7
+#define WIFI_ATTACK_RICK_ROLL 6
+#define BT_SCAN_ALL 7
+#define BT_SCAN_SKIMMERS 8
 
 extern Display display_obj;
 
@@ -39,6 +40,17 @@ class WiFiScan
     BLEScan* pBLEScan;
 
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
+
+    char* rick_roll[8] = {
+      "01 Never gonna give you up",
+      "02 Never gonna let you down",
+      "03 Never gonna run around",
+      "04 and desert you",
+      "05 Never gonna make you cry",
+      "06 Never gonna say goodbye",
+      "07 Never gonna tell a lie",
+      "08 and hurt you"
+    };
 
     char* prefix = "G";
 
@@ -72,6 +84,8 @@ class WiFiScan
                     };
 
     void broadcastRandomSSID(uint32_t currentTime);
+    void broadcastSetSSID(uint32_t current_time, char* ESSID);
+    void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);

@@ -14,7 +14,8 @@ void MenuFunctions::main()
 
   // Get the display buffer out of the way
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
     display_obj.displayBuffer();
 
 
@@ -40,6 +41,7 @@ void MenuFunctions::main()
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
     (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+    (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
     (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
     (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
     {
@@ -61,7 +63,8 @@ void MenuFunctions::main()
   
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
-  if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
+  if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
   {
     // Need this to set all keys to false
     for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
@@ -147,6 +150,7 @@ void MenuFunctions::RunSetup()
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiAttackMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiAttackMenu.parentMenu);});
   addNodes(&wifiAttackMenu, "Beacon Spam Random", TFT_ORANGE, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);});
+  addNodes(&wifiAttackMenu, "Rick Roll Beacon", TFT_YELLOW, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);});
   
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
