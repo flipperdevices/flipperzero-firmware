@@ -33,7 +33,7 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Probe Request Sniff: Sniff for WiFi [probe request frames](https://mrncciew.com/2014/10/27/cwap-802-11-probe-requestresponse/) sent by wireless devices
 - Beacon Sniff: Sniff [beacon frames](https://en.wikipedia.org/wiki/Beacon_frame) sent by wireless acccess points
 - Beacon Spam Random: Spam hundreds of random beacon frames to wireless devices within range
-- Rick Roll: Broadcast the rick roll lyrics as WiFi access points
+- Rick Roll Beacon: Broadcast the rick roll lyrics as WiFi access points
 - Bluetooth Sniffer: Sniff bluetooth devices within range
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
 
