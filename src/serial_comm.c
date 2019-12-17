@@ -388,7 +388,7 @@ esp_loader_error_t loader_spi_attach_cmd(uint32_t config)
 }
 
 
-__attribute__ ((weak)) void esp_loader_debug_print(const char *str)
+__attribute__ ((weak)) void loader_port_debug_print(const char *str)
 {
 
 }
