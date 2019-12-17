@@ -14,7 +14,7 @@ In order to support new target, following function has to be implemented by user
 * enter_bootloader()
 * delay_miliseconds()
 
-Following functions are part of serial_io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not directly call from library. 
+Following functions are part of serial_io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library. 
 
 * serial_init()
 * serial_deinit()
@@ -28,6 +28,6 @@ Please refer to ports in `port` directory. Currently, only [ESP32 port](port/esp
 
 At this point, this component can only be integrated with IDF. Improvement of existing CMakeList.txt file is to be done.   
 
-## Known limitaions
+## Known limitations
 
 Size of new binary image has to be known before flashing.
