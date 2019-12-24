@@ -39,7 +39,6 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 
 ### Developing
 - Emulate Bluetooth: Emulate a bluetooth device with a specific name
-- Bluetooth Spam: Spam hundreds of fake bluetooth devices
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
 
 # Do It Yourself
