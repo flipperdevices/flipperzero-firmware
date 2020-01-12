@@ -51,14 +51,20 @@ void loop()
   currentTime = millis();
 
   // Update all of our objects
-  display_obj.main(); 
-  wifi_scan_obj.main(currentTime);
-  //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
-  menu_function_obj.main();
+  if (!display_obj.draw_tft)
+  {
+    display_obj.main(); 
+    wifi_scan_obj.main(currentTime);
+    //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
+    menu_function_obj.main();
+    delay(1);
+  }
+  else
+  {
+    display_obj.drawStylus();
+  }
 
   //Serial.print("Run Time: ");
   //Serial.print(millis() - currentTime);
   //Serial.println("ms");
-
-  delay(1);
 }

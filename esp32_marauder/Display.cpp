@@ -224,6 +224,23 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
   }
 }
 
+void Display::drawStylus()
+{
+  uint16_t x = 0, y = 0; // To store the touch coordinates
+
+  // Pressed will be set true is there is a valid touch on the screen
+  boolean pressed = tft.getTouch(&x, &y);
+
+  // Draw a white spot at the detected coordinates
+  if (pressed) {
+    tft.fillCircle(x, y, 2, TFT_WHITE);
+    //Serial.print("x,y = ");
+    //Serial.print(x);
+    //Serial.print(",");
+    //Serial.println(y);
+  }
+}
+
 //====================================================================================
 //   Decode and render the Jpeg image onto the TFT screen
 //====================================================================================

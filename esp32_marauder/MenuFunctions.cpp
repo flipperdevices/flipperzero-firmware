@@ -99,10 +99,13 @@ void MenuFunctions::main()
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
-  // Main menu stuff
+  // root menu stuff
   mainMenu.list = new SimpleList<MenuNode>(); // Get list in first menu ready
+
+  // Main menu stuff
   wifiMenu.list = new SimpleList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new SimpleList<MenuNode>(); // Get list in third menu ready
+  generalMenu.list = new SimpleList<MenuNode>();
 
   // WiFi menu stuff
   wifiSnifferMenu.list = new SimpleList<MenuNode>();
@@ -116,6 +119,7 @@ void MenuFunctions::RunSetup()
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
   wifiMenu.name = " WiFi ";
+  generalMenu.name = " General Apps ";
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiScannerMenu.name = " WiFi Scanners";
@@ -127,7 +131,8 @@ void MenuFunctions::RunSetup()
   mainMenu.parentMenu = NULL;
   addNodes(&mainMenu, "WiFi", TFT_GREEN, NULL, 0, [this](){changeMenu(&wifiMenu);});
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, 1, [this](){changeMenu(&bluetoothMenu);});
-  addNodes(&mainMenu, "Reboot", TFT_LIGHTGREY, NULL, 2, [](){ESP.restart();});
+  addNodes(&mainMenu, "General Apps", TFT_MAGENTA, NULL, 2, [this](){changeMenu(&generalMenu);});
+  addNodes(&mainMenu, "Reboot", TFT_LIGHTGREY, NULL, 3, [](){ESP.restart();});
 
   // Build WiFi Menu
   wifiMenu.parentMenu = &mainMenu; // Main Menu is second menu parent
@@ -167,6 +172,10 @@ void MenuFunctions::RunSetup()
   bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
   addNodes(&bluetoothScannerMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(bluetoothScannerMenu.parentMenu);});
   addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, 2, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
+
+  generalMenu.parentMenu = &mainMenu;
+  addNodes(&generalMenu, "Back", TFT_RED, NULL, 0, [this](){display_obj.draw_tft = false; changeMenu(generalMenu.parentMenu);});
+  addNodes(&generalMenu, "Draw", TFT_WHITE, NULL, 1, [this](){display_obj.clearScreen(); display_obj.draw_tft = true;});
 
 
   // Set the current menu to the mainMenu

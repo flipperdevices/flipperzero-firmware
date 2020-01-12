@@ -48,8 +48,10 @@ class MenuFunctions
 
     // Main menu stuff
     Menu mainMenu;
+    
     Menu wifiMenu;
     Menu bluetoothMenu;
+    Menu generalMenu;
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;
