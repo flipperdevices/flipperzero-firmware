@@ -24,38 +24,39 @@
 
 using namespace std;
 
-vector<int8_t> write_buffer;
-vector<int8_t> read_buffer;
-uint32_t receive_delay = 0;
+static vector<int8_t> write_buffer;
+static vector<int8_t> read_buffer;
+static uint32_t receive_delay = 0;
+static int32_t timer = 0;
 
 
-esp_error_t serial_init(uint32_t baud_rate)
+esp_loader_error_t loader_port_serial_init(uint32_t baud_rate)
 {
-    return ESP_SUCCESS;
+    return ESP_LOADER_SUCCESS;
 }
 
-void serial_deinit()
+void loader_port_serial_deinit()
 {
 
 }
 
-esp_error_t serial_write(const int8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     copy(&data[0], &data[size], back_inserter(write_buffer));
 
-    return ESP_SUCCESS;
+    return ESP_LOADER_SUCCESS;
 }
 
-esp_error_t serial_read(int8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     if (read_buffer.size() < size) {
-        return ESP_ERROR_TIMEOUT;
+        return ESP_LOADER_ERROR_TIMEOUT;
     }
 
     if (receive_delay != 0 && timeout != 0) {
         if (receive_delay > timeout) {
             receive_delay -= timeout;    
-            return ESP_ERROR_TIMEOUT;
+            return ESP_LOADER_ERROR_TIMEOUT;
         }
         receive_delay = 0;
     }
@@ -63,24 +64,37 @@ esp_error_t serial_read(int8_t *data, uint16_t size, uint32_t timeout)
     copy_n(read_buffer.begin(), size, data);
     read_buffer.erase(read_buffer.begin(), read_buffer.begin() + size);
 
-    return ESP_SUCCESS;
+    return ESP_LOADER_SUCCESS;
 }
 
-void enter_bootloader()
+void loader_port_enter_bootloader()
 {
     // GPIO0 and GPIO2 must be LOW
     // Then Reset
 }
 
-void reset_target()
+void loader_port_reset_target()
 {
 
 }
 
-void delay_miliseconds(uint32_t ms)
+void loader_port_delay_ms(uint32_t ms)
 {
 
 }
+
+
+void loader_port_start_timer(uint32_t ms)
+{
+    timer = (int32_t)ms;
+}
+
+
+uint32_t loader_port_remaining_time(void)
+{
+    return (timer > 0) ? timer : 0;
+}
+
 
 
 // ----------  For testing purposes only  ----------
