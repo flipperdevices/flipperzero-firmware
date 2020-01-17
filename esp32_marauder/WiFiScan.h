@@ -18,11 +18,12 @@
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2
 #define WIFI_SCAN_ST 3
-#define WIFI_SCAN_ALL 4
-#define WIFI_ATTACK_BEACON_SPAM 5
-#define WIFI_ATTACK_RICK_ROLL 6
-#define BT_SCAN_ALL 7
-#define BT_SCAN_SKIMMERS 8
+#define WIFI_SCAN_DEAUTH 4
+#define WIFI_SCAN_ALL 5
+#define WIFI_ATTACK_BEACON_SPAM 6
+#define WIFI_ATTACK_RICK_ROLL 7
+#define BT_SCAN_ALL 8
+#define BT_SCAN_SKIMMERS 9
 
 extern Display display_obj;
 
@@ -88,6 +89,7 @@ class WiFiScan
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
+    void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
@@ -105,6 +107,7 @@ class WiFiScan
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };
 #endif

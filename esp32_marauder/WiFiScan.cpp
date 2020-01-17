@@ -120,6 +120,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunProbeScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_AP)
     RunBeaconScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_DEAUTH)
+    RunDeauthScan(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_BEACON_SPAM)
     RunBeaconSpam(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_RICK_ROLL)
@@ -139,6 +141,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_ST) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
+  (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL))
   {
@@ -237,6 +240,32 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&beaconSnifferCallback);
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  initTime = millis();
+}
+
+void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
+{
+  display_obj.TOP_FIXED_AREA_2 = 32;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,0,240,16, color);
+  display_obj.tft.drawCentreString(" Deauthentication Sniffer ",120,0,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_promiscuous_filter(&filt);
+  esp_wifi_set_promiscuous_rx_cb(&deauthSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   initTime = millis();
 }
@@ -363,6 +392,61 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
         Serial.print((char)snifferPacket->payload[i + 38]);
         display_string.concat((char)snifferPacket->payload[i + 38]);
       }
+
+      int temp_len = display_string.length();
+      for (int i = 0; i < 40 - temp_len; i++)
+      {
+        display_string.concat(" ");
+      }
+
+      Serial.print(" ");
+
+      if (display_obj.display_buffer->size() == 0)
+      {
+        display_obj.loading = true;
+        display_obj.display_buffer->add(display_string);
+        display_obj.loading = false;
+      }
+      
+
+      
+      Serial.println();
+    }
+  }
+}
+
+void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
+{
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+    // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+    if ((snifferPacket->payload[0] == 0xA0 || snifferPacket->payload[0] == 0xC0 ) && (display_obj.display_buffer->size() == 0))
+    {
+      delay(random(0, 10));
+      Serial.print("RSSI: ");
+      Serial.print(snifferPacket->rx_ctrl.rssi);
+      Serial.print(" Ch: ");
+      Serial.print(snifferPacket->rx_ctrl.channel);
+      Serial.print(" BSSID: ");
+      char addr[] = "00:00:00:00:00:00";
+      getMAC(addr, snifferPacket->payload, 10);
+      Serial.print(addr);
+      display_string.concat(" RSSI: ");
+      display_string.concat(snifferPacket->rx_ctrl.rssi);
+
+      display_string.concat(" ");
+      display_string.concat(addr);
 
       for (int i = 0; i < 19 - snifferPacket->payload[37]; i++)
       {
@@ -583,6 +667,7 @@ void WiFiScan::main(uint32_t currentTime)
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_ST) ||
+  (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_SCAN_ALL))
   {
     if (currentTime - initTime >= 1000)
