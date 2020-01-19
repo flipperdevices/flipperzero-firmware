@@ -474,8 +474,55 @@ void Display::listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
 }
 #endif
 
-void Display::main()
+
+void Display::updateBanner(String msg)
 {
+  this->img.deleteSprite();
+  
+  this->img.setColorDepth(8);
+
+  this->img.createSprite(SCREEN_WIDTH, TEXT_HEIGHT);
+
+  this->buildBanner(msg, current_banner_pos);
+
+  this->img.pushSprite(0, 0);
+
+  current_banner_pos--;
+
+  if (current_banner_pos <= 0)
+    current_banner_pos = SCREEN_WIDTH;
+}
+
+
+void Display::buildBanner(String msg, int xpos)
+{
+  int h = TEXT_HEIGHT;
+
+  // We could just use fillSprite(color) but lets be a bit more creative...
+
+  // Fill with rainbow stripes
+  //while (h--) img.drawFastHLine(0, h, SCREEN_WIDTH, 255);
+
+  // Draw some graphics, the text will apear to scroll over these
+  //img.fillRect  (SCREEN_WIDTH / 2 - 20, TEXT_HEIGHT / 2 - 10, 40, 20, TFT_YELLOW);
+  //img.fillCircle(SCREEN_WIDTH / 2, TEXT_HEIGHT / 2, 10, TFT_ORANGE);
+
+  // Now print text on top of the graphics
+  img.setTextSize(2);           // Font size scaling is x1
+  img.setTextFont(0);           // Font 4 selected
+  img.setTextColor(TFT_WHITE);  // Black text, no background colour
+  img.setTextWrap(false);       // Turn of wrap so we can print past end of sprite
+
+  // Need to print twice so text appears to wrap around at left and right edges
+  img.setCursor(xpos, 2);  // Print text at xpos
+  img.print(msg);
+
+  img.setCursor(xpos - SCREEN_WIDTH, 2); // Print text at xpos - sprite width
+  img.print(msg);
+}
+
+void Display::main()
+{  
   return;
 }
 // End SPIFFS_functions

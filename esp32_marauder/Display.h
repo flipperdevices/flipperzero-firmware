@@ -47,6 +47,7 @@ class Display
   public:
     Display();
     TFT_eSPI tft = TFT_eSPI();
+    TFT_eSprite img = TFT_eSprite(&tft);
     String version_number = "v0.2";
 
     bool printing = false;
@@ -56,6 +57,7 @@ class Display
 
     int TOP_FIXED_AREA_2 = 32;
     int print_delay_1, print_delay_2 = 10;
+    int current_banner_pos = SCREEN_WIDTH;
 
     //Menu* current_menu;
     
@@ -80,7 +82,8 @@ class Display
     // for a full width line, meanwhile the serial buffer may be filling... and overflowing
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
-    
+
+    void buildBanner(String msg, int xpos);
     void clearScreen();
     void displayBuffer(bool do_clear = false);
     void drawJpeg(const char *filename, int xpos, int ypos);
@@ -99,5 +102,6 @@ class Display
     void showCenterText(String text, int y);
     void touchToExit();
     void twoPartDisplay(String center_text);
+    void updateBanner(String msg);
 };
 #endif
