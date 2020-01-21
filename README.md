@@ -13,7 +13,7 @@
 - [Do It Yourself](#do-it-yourself)
   - [Hardware](#hardware)
   - [Flashing Firmware](#flashing-firmware)
-    - [Setting Up Arduino IDE](#setting-up-arduino-ide)
+    - [Using Arduino IDE](#setting-up-arduino-ide)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
 - [For Sale Soon](#for-sale-soon)
@@ -49,7 +49,7 @@ This project requires the following hardware in order to work:
 - 2.8" TFT Touch Screen w/ ili9341
   
 ## Flashing Firmware
-### Setting Up Arduino IDE
+### Using Arduino IDE
 1. Install the [Arduino IDE](https://www.arduino.cc/en/main/software)
 2. In the Arduino IDE, go to `File`>`Preferences`
 3. Add the following URL to `Additional Boards Manager URLs:`
