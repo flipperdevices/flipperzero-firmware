@@ -1,0 +1,60 @@
+stages:
+  - build
+  - test
+
+variables:
+  IDF_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-idf.git
+  SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
+  QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
+
+.clone_and_setup_idf: &clone_and_setup_idf |
+  cit_add_ssh_key "${GITLAB_KEY}"
+  git clone "${IDF_REPO}"
+  cd esp-idf
+  tools/idf_tools.py --non-interactive install && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
+  git submodule update --init
+  export IDF_PATH=$(pwd)
+
+before_script:
+  # Use CI Tools
+  - curl -sSL ${CIT_LOADER_URL} | sh
+  - source citools/import_functions
+  - PATH=$CI_PROJECT_DIR/esp-idf/tools:$PATH
+
+build_with_idf:
+  stage: build
+  image: ${CI_DOCKER_REGISTRY}/esp32-ci-env
+  tags:
+    - build
+    - internet
+  script:
+    - *clone_and_setup_idf
+    - cd $CI_PROJECT_DIR/example
+    - idf.py build
+
+
+run_tests:
+  stage: test
+  image: ${CI_DOCKER_REGISTRY}/qemu:esp-develop-20191124
+  tags:
+    - build
+    - internet
+  script:
+    - cd $CI_PROJECT_DIR/test
+    - dd if=/dev/zero bs=1024 count=4096 of="empty_file.bin"
+
+    # Run QEMU in backround (deamonized)
+    - ${QEMU_PATH}
+      -daemonize
+      -machine esp32
+      -drive file=empty_file.bin,if=mtd,format=raw
+      -global driver=esp32.gpio,property=strap_mode,value=0x0f
+      -serial tcp::5555,server,nowait
+    
+    - cd $CI_PROJECT_DIR/test && mkdir build && cd build
+
+    # Compile and run qemu tests
+    - cmake .. -DQEMU_TEST=True && make && ./serial_flasher_test
+
+    # Compile and run host tests
+    - cmake .. -DQEMU_TEST=False && make && ./serial_flasher_test

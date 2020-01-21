@@ -6,10 +6,6 @@ if [ -z "${QEMU_PATH}" ]; then
     exit 1
 fi
 
-# Restore content of hello-world.bin image before passing to qemu,
-# as it was modified by tests, flashing new application.
-# cp ../images/generated_hello-world.bin ../images/hello-world.bin
-
 # generate empty file into which application will be flashed and compared against.
 dd if=/dev/zero bs=1024 count=4096 of="empty_file.bin"
 
