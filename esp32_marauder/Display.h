@@ -48,7 +48,7 @@ class Display
     Display();
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
-    String version_number = "v0.2";
+    String version_number = "v0.2.1";
 
     bool printing = false;
     bool loading = false;
