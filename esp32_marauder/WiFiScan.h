@@ -20,10 +20,13 @@
 #define WIFI_SCAN_ST 3
 #define WIFI_SCAN_DEAUTH 4
 #define WIFI_SCAN_ALL 5
-#define WIFI_ATTACK_BEACON_SPAM 6
-#define WIFI_ATTACK_RICK_ROLL 7
-#define BT_SCAN_ALL 8
-#define BT_SCAN_SKIMMERS 9
+#define WIFI_PACKET_MONITOR 6
+#define WIFI_ATTACK_BEACON_SPAM 7
+#define WIFI_ATTACK_RICK_ROLL 8
+#define BT_SCAN_ALL 9
+#define BT_SCAN_SKIMMERS 10
+
+#define MAX_CHANNEL 14
 
 extern Display display_obj;
 
@@ -32,6 +35,23 @@ esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, b
 class WiFiScan
 {
   private:
+    int x_pos; //position along the graph x axis
+    float y_pos_x; //current graph y axis position of X value
+    float y_pos_x_old = 120; //old y axis position of X value
+    float y_pos_y; //current graph y axis position of Y value
+    float y_pos_y_old = 120; //old y axis position of Y value
+    float y_pos_z; //current graph y axis position of Z value
+    float y_pos_z_old = 120; //old y axis position of Z value
+    int midway = 0;
+    byte x_scale = 1; //scale of graph x axis, controlled by touchscreen buttons
+    byte y_scale = 1;
+
+    bool do_break = false;
+
+    //int num_beacon = 0; // GREEN
+    //int num_probe = 0; // BLUE
+    //int num_deauth = 0; // RED
+
     uint32_t initTime = 0;
     bool run_setup = true;
     int set_channel = 1;
@@ -84,6 +104,14 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
+    void packetMonitorMain();
+    void changeChannel();
+    void updateMidway();
+    void tftDrawXScalButtons();
+    void tftDrawYScaleButtons();
+    void tftDrawChannelScaleButtons();
+    void tftDrawColorKey();
+    void tftDrawGraphObjects();
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
@@ -91,11 +119,14 @@ class WiFiScan
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
+    void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
 
   public:
     WiFiScan();
+
+    bool orient_display = false;
 
     
     
@@ -109,5 +140,6 @@ class WiFiScan
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };
 #endif

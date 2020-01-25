@@ -52,6 +52,137 @@ void Display::RunSetup()
   delay(5000);
 }
 
+void Display::tftDrawGraphObjects(byte x_scale)
+{
+  //draw the graph objects
+  tft.fillRect(11, 5, x_scale+1, 120, TFT_BLACK); // positive start point
+  tft.fillRect(11, 121, x_scale+1, 119, TFT_BLACK); // negative start point
+  tft.drawFastVLine(10, 5, 230, TFT_WHITE); // y axis
+  tft.drawFastHLine(10, HEIGHT_1 - 1, 310, TFT_WHITE); // x axis
+  tft.setTextColor(TFT_YELLOW); tft.setTextSize(1); // set parameters for y axis labels
+  //tft.setCursor(3, 116); tft.print(midway);  // "0" at center of ya axis
+  tft.setCursor(3, 6); tft.print("+"); // "+' at top of y axis
+  tft.setCursor(3, 228); tft.print("0"); // "-" at bottom of y axis
+}
+
+void Display::tftDrawColorKey()
+{
+  //Display color key
+  tft.setTextSize(1); tft.setTextColor(TFT_WHITE);
+  tft.fillRect(14, 0, 15, 8, TFT_GREEN); tft.setCursor(30, 0); tft.print(" - Beacons"); 
+  tft.fillRect(14, 8, 15, 8, TFT_RED); tft.setCursor(30, 8); tft.print(" - Deauths");
+  tft.fillRect(14, 16, 15, 8, TFT_BLUE); tft.setCursor(30, 16); tft.print(" - Probes");
+}
+
+void Display::tftDrawXScaleButtons(byte x_scale)
+{
+  tft.drawFastVLine(234, 0, 20, TFT_WHITE);
+  tft.setCursor(208, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print("X Scale:"); tft.print(x_scale);
+
+  key[0].initButton(&tft, // x - box
+                        220,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_CYAN, // Fill
+                        TFT_BLACK, // Text
+                        "-",
+                        2);
+  key[1].initButton(&tft, // x + box
+                        249,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_CYAN, // Fill
+                        TFT_BLACK, // Text
+                        "+",
+                        2);
+
+  key[0].drawButton();
+  key[1].drawButton();
+}
+
+void Display::tftDrawYScaleButtons(byte y_scale)
+{
+  tft.drawFastVLine(290, 0, 20, TFT_WHITE);
+  tft.setCursor(265, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print("Y Scale:"); tft.print(y_scale);
+
+  key[2].initButton(&tft, // y - box
+                        276,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_MAGENTA, // Fill
+                        TFT_BLACK, // Text
+                        "-",
+                        2);
+  key[3].initButton(&tft, // y + box
+                        305,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_MAGENTA, // Fill
+                        TFT_BLACK, // Text
+                        "+",
+                        2);
+
+  key[2].drawButton();
+  key[3].drawButton();
+}
+
+void Display::tftDrawChannelScaleButtons(int set_channel)
+{
+  tft.drawFastVLine(178, 0, 20, TFT_WHITE);
+  tft.setCursor(145, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print("Channel:"); tft.print(set_channel);
+
+  key[4].initButton(&tft, // channel - box
+                        164,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_BLUE, // Fill
+                        TFT_BLACK, // Text
+                        "-",
+                        2);
+  key[5].initButton(&tft, // channel + box
+                        193,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_BLACK, // Outline
+                        TFT_BLUE, // Fill
+                        TFT_BLACK, // Text
+                        "+",
+                        2);
+
+  key[4].drawButton();
+  key[5].drawButton();
+}
+
+void Display::tftDrawExitScaleButtons()
+{
+  //tft.drawFastVLine(178, 0, 20, TFT_WHITE);
+  //tft.setCursor(145, 21); tft.setTextColor(TFT_WHITE); tft.setTextSize(1); tft.print("Channel:"); tft.print(set_channel);
+
+  key[6].initButton(&tft, // Exit box
+                        137,
+                        10, // x, y, w, h, outline, fill, text
+                        20,
+                        20,
+                        TFT_ORANGE, // Outline
+                        TFT_RED, // Fill
+                        TFT_BLACK, // Text
+                        "X",
+                        2);
+
+  key[6].drawButton();
+}
+
 void Display::twoPartDisplay(String center_text)
 {
   tft.setTextColor(TFT_BLACK, TFT_YELLOW);

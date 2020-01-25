@@ -56,7 +56,8 @@ void loop()
     display_obj.main(); 
     wifi_scan_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
-    menu_function_obj.main();
+    if (wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR)
+      menu_function_obj.main();
     delay(1);
   }
   else

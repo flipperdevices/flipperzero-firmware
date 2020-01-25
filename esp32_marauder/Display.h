@@ -14,6 +14,8 @@
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
+#define HEIGHT_1 240
+#define WIDTH_1 320
 #define STANDARD_FONT_CHAR_LIMIT 40 // number of characters on a single line with normal font
 #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
 #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
@@ -25,6 +27,7 @@
 //#define MENU_FONT &FreeMonoBold9pt7b
 //#define MENU_FONT &FreeSans9pt7b
 //#define MENU_FONT &FreeSansBold9pt7b
+#define BUTTON_ARRAY_LEN 7
 
 
 class Display
@@ -48,7 +51,8 @@ class Display
     Display();
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
-    String version_number = "v0.2.1";
+    TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
+    String version_number = "v0.3.0";
 
     bool printing = false;
     bool loading = false;
@@ -83,6 +87,12 @@ class Display
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
+    void tftDrawGraphObjects(byte x_scale);
+    void tftDrawColorKey();
+    void tftDrawXScaleButtons(byte x_scale);
+    void tftDrawYScaleButtons(byte y_scale);
+    void tftDrawChannelScaleButtons(int set_channel);
+    void tftDrawExitScaleButtons();
     void buildBanner(String msg, int xpos);
     void clearScreen();
     void displayBuffer(bool do_clear = false);

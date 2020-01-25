@@ -15,7 +15,7 @@ extern WiFiScan wifi_scan_obj;
 #define KEY_SPACING_X 0 // X and Y gap
 #define KEY_SPACING_Y 1
 #define KEY_TEXTSIZE 1   // Font size multiplier
-#define BUTTON_ARRAY_LEN 5
+//#define BUTTON_ARRAY_LEN 5
 
 #define FLASH_BUTTON 0
 
@@ -62,10 +62,11 @@ class MenuFunctions
     Menu bluetoothSnifferMenu;
     Menu bluetoothScannerMenu;
 
-    TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
+    //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
     
     void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
     void showMenuList(Menu* menu, int layer);
+    void orientDisplay();
 
   public:    
     MenuFunctions();

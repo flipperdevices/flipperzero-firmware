@@ -8,8 +8,13 @@ MenuFunctions::MenuFunctions()
 // Function to check menu input
 void MenuFunctions::main()
 {
-  if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
+  if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+    if (wifi_scan_obj.orient_display) {
+      this->orientDisplay();
+      wifi_scan_obj.orient_display = false;
+    }
     display_obj.updateBanner(current_menu->name);
+  }
 
   //this->displayCurrentMenu();
   
@@ -74,24 +79,24 @@ void MenuFunctions::main()
   {
     // Need this to set all keys to false
     for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
-      if (pressed && key[b].contains(t_x, t_y)) {
-        key[b].press(true);  // tell the button it is pressed
+      if (pressed && display_obj.key[b].contains(t_x, t_y)) {
+        display_obj.key[b].press(true);  // tell the button it is pressed
       } else {
-        key[b].press(false);  // tell the button it is NOT pressed
+        display_obj.key[b].press(false);  // tell the button it is NOT pressed
       }
     }
   
     // Check if any key has changed state
     for (uint8_t b = 0; b < current_menu->list->size(); b++) {
       display_obj.tft.setFreeFont(MENU_FONT);
-      if (key[b].justPressed()) {
-        key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
+      if (display_obj.key[b].justPressed()) {
+        display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
       }
   
       // If button was just release, execute the button's function
-      if (key[b].justReleased())
+      if (display_obj.key[b].justReleased())
       {
-        key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
+        display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
         current_menu->list->get(b).callable();
       }
       display_obj.tft.setFreeFont(NULL);
@@ -99,6 +104,23 @@ void MenuFunctions::main()
   }
   x = -1;
   y = -1;
+}
+
+void MenuFunctions::orientDisplay()
+{
+  display_obj.tft.init();
+  
+  display_obj.tft.setRotation(0); // Portrait
+
+  display_obj.tft.setCursor(0, 0);
+
+  uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait
+  
+  display_obj.tft.setTouch(calData);
+
+  //display_obj.clearScreen();
+
+  changeMenu(current_menu);
 }
 
 
@@ -156,7 +178,8 @@ void MenuFunctions::RunSetup()
 
   // Build WiFi scanner Menu
   wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
-  addNodes(&wifiScannerMenu, "Back", TFT_RED, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
+  addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
+  addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, 1, [this](){wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);});
 
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -241,7 +264,7 @@ void MenuFunctions::buildButtons(Menu* menu)
       TFT_eSPI_Button new_button;
       char buf[menu->list->get(i).name.length() + 1] = {};
       menu->list->get(i).name.toCharArray(buf, menu->list->get(i).name.length() + 1);
-      key[i].initButton(&display_obj.tft,
+      display_obj.key[i].initButton(&display_obj.tft,
                         KEY_X + 0 * (KEY_W + KEY_SPACING_X),
                         KEY_Y + i * (KEY_H + KEY_SPACING_Y), // x, y, w, h, outline, fill, text
                         KEY_W,
@@ -275,7 +298,7 @@ void MenuFunctions::displayCurrentMenu()
     display_obj.tft.setFreeFont(MENU_FONT);
     for (int i = 0; i < current_menu->list->size(); i++)
     {
-      key[i].drawButton2(current_menu->list->get(i).name);
+      display_obj.key[i].drawButton2(current_menu->list->get(i).name);
     }
     display_obj.tft.setFreeFont(NULL);
   }
