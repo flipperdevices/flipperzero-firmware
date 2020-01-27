@@ -1,6 +1,8 @@
+MESSAGE("STM Board: ${STM_BOARD}")
 IF(STM32_FAMILY STREQUAL "F4")
 	IF(STM_BOARD STREQUAL "STM32F429I-Discovery")
-		SET(BSP_COMPONENTS eeprom
+		SET(BSP_COMPONENTS 
+                eeprom
 			    gyroscope
 			    io
 			    lcd
@@ -10,6 +12,19 @@ IF(STM32_FAMILY STREQUAL "F4")
 		SET(BSP_HEADERS stm32f429i_discovery.h)
 		SET(BSP_SRC stm32f429i_discovery.c)
 	ENDIF()
+    IF(STM_BOARD STREQUAL "STM324xG_EVAL")
+        SET(BSP_COMPONENTS 
+            lcd 
+            camera 
+            eeprom 
+            io 
+            sd 
+            sram 
+            ts)
+        SET(BSP_PREFIX stm324xg_eval_)
+        SET(BSP_HEADERS stm324xg_eval.h)
+        SET(BSP_SRC stm324xg_eval.c)
+    ENDIF()
 	set(COMMON_COMPONENTS ampire480272
 			      ampire640480
 			      cs43l22
