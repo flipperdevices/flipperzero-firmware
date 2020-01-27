@@ -30,6 +30,7 @@ typedef enum
     ESP_LOADER_SUCCESS,                /*!< Success */
     ESP_LOADER_ERROR_FAIL,             /*!< Unspecified error */
     ESP_LOADER_ERROR_TIMEOUT,          /*!< Timeout elapsed */
+    ESP_LOADER_ERROR_INVALID_MD5,      /*!< Computed and receied MD5 does not match */
     ESP_LOADER_ERROR_INVALID_RESPONSE  /*!< Internal error */
 } esp_loader_error_t;
 
@@ -132,6 +133,38 @@ esp_loader_error_t esp_loader_write_register(uint32_t address, uint32_t reg_valu
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
 esp_loader_error_t esp_loader_read_register(uint32_t address, uint32_t *reg_value);
+
+/**
+  * @brief Change baud rate.
+  *
+  * @note  Baud rate has to be also adjusted accordingly on host MCU, as
+  *        target's baud rate is changed upon return from this function.
+  *
+  * @param baudrate[in]     new baud rate to be set.
+  *
+  * @return
+  *     - ESP_LOADER_SUCCESS Success
+  *     - ESP_LOADER_ERROR_TIMEOUT Timeout
+  *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  */
+esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate);
+
+/**
+  * @brief Verify target's flash integrity by checking MD5.
+  *        MD5 checksum is computed from data pushed to target's memory by calling
+  *        esp_loader_flash_write() function and compared against target's MD5.
+  *        Target computes checksum based on offset and image_size passed to 
+  *        esp_loader_flash_start() function.
+  *
+  * @note  This function is only available if MD5_ENABLED is set.
+  *
+  * @return
+  *     - ESP_LOADER_SUCCESS Success
+  *     - ESP_LOADER_ERROR_INVALID_MD5 MD5 does not match
+  *     - ESP_LOADER_ERROR_TIMEOUT Timeout
+  *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  */
+esp_loader_error_t esp_loader_flash_verify(void);
 
 /**
   * @brief Toggles reset pin.

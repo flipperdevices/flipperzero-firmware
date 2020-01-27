@@ -154,3 +154,9 @@ void loader_port_debug_print(const char *str)
 {
     printf("DEBUG: %s\n", str);
 }
+
+esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+{
+    esp_err_t err = uart_set_baudrate(UART_PORT, baudrate);
+    return (err == ESP_OK) ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_FAIL;
+}

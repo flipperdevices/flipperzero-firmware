@@ -103,6 +103,8 @@ TEST_CASE( "Can write application to flash" )
     
     REQUIRE ( file_compare(new_image, qemu_image, new_image_size) );
 
+    ESP_ERR_CHECK ( esp_loader_flash_verify() );
+
     // NOTE: loader_flash_finish() is not called to prevent reset of target 
 }
 

@@ -18,8 +18,11 @@
 
 static const char *TAG = "example";
 
+const uint32_t HIGHER_BAUD_RATE = 921600;
 const uint32_t APP_START_ADDRESS = 0x10000;
-static char payload[1024];
+static uint8_t payload[1024];
+
+esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
 
 
 static void flash_binary(FILE *image, size_t image_size)
@@ -34,6 +37,18 @@ static void flash_binary(FILE *image, size_t image_size)
         return;
     }
     ESP_LOGI(TAG, "Connected to target");
+
+    err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "Unable to change baud rate on target.");
+        return;
+    }
+
+    err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "Unable to change baud rate.");
+        return;
+    }
 
     err = esp_loader_flash_start(APP_START_ADDRESS, image_size, sizeof(payload));
     if (err != ESP_LOADER_SUCCESS) {
@@ -63,6 +78,13 @@ static void flash_binary(FILE *image, size_t image_size)
     };
 
     ESP_LOGI(TAG, "Finished programming");
+
+    err = esp_loader_flash_verify();
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "MD5 does not match. err: %d", err);
+        return;
+    }
+    ESP_LOGI(TAG, "Flash verified");
 }
 
 

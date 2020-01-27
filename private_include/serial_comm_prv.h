@@ -28,6 +28,8 @@ extern "C" {
 #define READ_DIRECTION  1
 #define WRITE_DIRECTION 0
 
+#define MD5_SIZE 32
+
 typedef enum __attribute__((packed))
 {
     FLASH_BEGIN = 0x02,
@@ -130,16 +132,48 @@ typedef struct __attribute__((packed))
 
 typedef struct __attribute__((packed))
 {
+    command_common_t common;
+    uint32_t new_baudrate;
+    uint32_t old_baudrate;
+} change_baudrate_command_t;
+
+typedef struct __attribute__((packed))
+{
+    command_common_t common;
+    uint32_t address;
+    uint32_t size;
+    uint32_t reserved_0;
+    uint32_t reserved_1;
+} spi_flash_md5_command_t;
+
+typedef struct __attribute__((packed))
+{
     uint8_t direction;
     uint8_t command;    // One of command_t
     uint16_t size;
     uint32_t value;
-    uint8_t status;
+} common_response_t;
+
+typedef struct __attribute__((packed))
+{
+    uint8_t failed;
     uint8_t error;
     uint8_t reserved_0; // ESP32 ROM only
     uint8_t reserved_1; // ESP32 ROM only
+} response_status_t;
+
+typedef struct __attribute__((packed))
+{
+    common_response_t common;
+    response_status_t status;
 } response_t;
 
+typedef struct __attribute__((packed))
+{
+    common_response_t common;
+    uint8_t md5[MD5_SIZE];     // ROM only
+    response_status_t status;
+} rom_md5_response_t;
 
 #ifdef __cplusplus
 }

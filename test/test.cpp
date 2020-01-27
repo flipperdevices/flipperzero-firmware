@@ -53,14 +53,14 @@ static void arrays_match(int8_t *array_1, int8_t *array_2, size_t size)
 struct __attribute__((packed)) expected_response {
     expected_response(command_t cmd)
     {
-        data.direction = READ_DIRECTION;
-        data.command = cmd;
-        data.size = 16;
-        data.value = 0;
-        data.status = STATUS_SUCCESS;
-        data.error = 0;
-        data.reserved_0 = 0;
-        data.reserved_1 = 0;
+        data.common.direction = READ_DIRECTION;
+        data.common.command = cmd;
+        data.common.size = 16;
+        data.common.value = 0;
+        data.status.failed = STATUS_SUCCESS;
+        data.status.error = 0;
+        data.status.reserved_0 = 0;
+        data.status.reserved_1 = 0;
     }
 
     response_t data;
@@ -83,18 +83,6 @@ expected_response sync_response(SYNC);
 
 
 struct __attribute__((packed)) flash_start_frame {
-    uint8_t delimiter_1 = 0xc0;
-    spi_attach_command_t attach_cmd = {
-        .common = {
-            .direction = WRITE_DIRECTION,
-            .command = SPI_ATTACH,
-            .size = 8,
-            .checksum = 0,
-        },
-        .configuration = 0,
-        .zero = 0
-    };
-    uint8_t delimiter_2 = 0xc0;
     uint8_t delimiter_3 = 0xc0;
     begin_command_t begin_cmd  = {
         .common = {
@@ -218,7 +206,6 @@ TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
 
     // Check flash start operation 
     clear_buffers();
-    queue_response(attach_response);
     queue_response(flash_begin_response);
 
     REQUIRE ( esp_loader_flash_start(0, sizeof(data) * 3, BLOCK_SIZE) == ESP_LOADER_SUCCESS );
@@ -246,6 +233,7 @@ TEST_CASE( "Can connect within specified time " )
 {
     clear_buffers();
     queue_response(sync_response);
+    queue_response(attach_response);
 
     esp_loader_connect_args_t connect_config = {
         .sync_timeout = 10,
@@ -278,7 +266,7 @@ TEST_CASE( "Register can be read correctly" )
 {
     clear_buffers();
     uint32_t reg_value = 0;
-    read_reg_response.data.value = 55;
+    read_reg_response.data.common.value = 55;
 
     queue_response(read_reg_response);
 
@@ -291,7 +279,7 @@ TEST_CASE( "Register can be read correctly" )
 TEST_CASE( "Register can be written correctly" )
 {
     write_reg_cmd_response expected;
-    write_reg_response.data.value = 55;
+    write_reg_response.data.common.value = 55;
 
     clear_buffers();
     queue_response(write_reg_response);
@@ -362,7 +350,7 @@ TEST_CASE( "Sync command is constructed correctly" )
 TEST_CASE( "Register can be read and decoded correctly" )
 {
     clear_buffers();
-    read_reg_response.data.value = 55;
+    read_reg_response.data.common.value = 55;
     queue_response(read_reg_response);
 
     uint32_t reg_value = 0;
@@ -371,7 +359,17 @@ TEST_CASE( "Register can be read and decoded correctly" )
     REQUIRE( reg_value == 55 );
 }
 
+TEST_CASE( "Received response (in SLIP format) is decoded correctly" )
+{
+    clear_buffers();
+    read_reg_response.data.common.value = 0xC0BD; // C0, BD has to be replaced 
+    queue_response(read_reg_response);
 
+    uint32_t reg_value = 0;
+    esp_loader_read_register(0, &reg_value);
+
+    REQUIRE( reg_value == 0xC0BD );
+}
 
 
 // --------------------  Serial mock test  -----------------------

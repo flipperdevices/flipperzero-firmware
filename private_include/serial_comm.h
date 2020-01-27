@@ -48,12 +48,9 @@ esp_loader_error_t loader_sync_cmd(void);
 
 esp_loader_error_t loader_spi_attach_cmd(uint32_t config);
 
+esp_loader_error_t loader_change_baudrate_cmd(uint32_t baudrate);
 
-// TODO implement the rest of supported commands
-// esp_loader_error_t set_spi_params(uint32_t *params);
-// esp_loader_error_t change_baudrate(uint32_t *baud);
-// esp_loader_error_t flash_write_defl();
-// esp_loader_error_t spi_flash_md5_is(uint8_t data[16]);
+esp_loader_error_t loader_md5_cmd(uint32_t address, uint32_t size, uint8_t *md5_out);
 
 
 #ifdef __cplusplus

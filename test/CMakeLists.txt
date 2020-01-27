@@ -9,6 +9,7 @@ set( TEST_SOURCES
   test_main.cpp 
   ../src/serial_comm.c
   ../src/esp_loader.c
+  ../src/md5_hash.c
 )
 
 # Set -DQEMU_TEST=True to run qemu tests. Host tests are run otherwise.

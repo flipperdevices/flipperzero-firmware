@@ -1,6 +1,7 @@
 set(COMPONENT_SRCS 
     "src/esp_loader.c"
     "src/serial_comm.c"
+    "src/md5_hash.c"
     "port/esp32_uart.c")
 
 set(COMPONENT_ADD_INCLUDEDIRS "include")

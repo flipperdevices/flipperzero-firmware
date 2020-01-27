@@ -17,6 +17,8 @@
 #include "serial_comm.h"
 #include "serial_io.h"
 #include <stddef.h>
+#include <string.h>
+// #include <stdio.h>
 
 
 static uint32_t s_sequence_number = 0;
@@ -25,7 +27,7 @@ static const uint8_t DELIMITER = 0xc0;
 static const uint8_t C0_REPLACEMENT[2] = {0xdb, 0xdc};
 static const uint8_t BD_REPLACEMENT[2] = {0xdb, 0xdd};
 
-static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value);
+static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, void* resp, uint32_t resp_size);
 
 
 static inline esp_loader_error_t serial_read(uint8_t *buff, size_t size)
@@ -49,20 +51,11 @@ static uint8_t compute_checksum(const uint8_t *data, uint32_t size)
     return checksum;
 }
 
-
-static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t buff_size)
+static esp_loader_error_t SLIP_receive_data(uint8_t *buff, uint32_t size)
 {
     uint8_t ch;
 
-    // Wait for delimiter
-    do {
-        esp_loader_error_t err = serial_read(&ch, 1);
-        if (err != ESP_LOADER_SUCCESS) {
-            return err;
-        }
-    } while (ch != DELIMITER);
-
-    for (int i = 0; i < buff_size; i++) {
+    for (int i = 0; i < size; i++) {
         RETURN_ON_ERROR( serial_read(&ch, 1)) ;
 
         if (ch == 0xdb) {
@@ -78,6 +71,24 @@ static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t buff_size)
             buff[i] = ch;
         }
     }
+
+    return ESP_LOADER_SUCCESS;
+}
+
+
+static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t size)
+{
+    uint8_t ch;
+
+    // Wait for delimiter
+    do {
+        esp_loader_error_t err = serial_read(&ch, 1);
+        if (err != ESP_LOADER_SUCCESS) {
+            return err;
+        }
+    } while (ch != DELIMITER);
+
+    RETURN_ON_ERROR( SLIP_receive_data(buff, size) );
 
     // Delimiter
     RETURN_ON_ERROR( serial_read(&ch, 1) );
@@ -130,19 +141,21 @@ static esp_loader_error_t SLIP_send_delimiter(void)
 
 static esp_loader_error_t send_cmd(const void *cmd_data, uint32_t size, uint32_t *reg_value)
 {
+    response_t response;
     command_t command = ((command_common_t *)cmd_data)->command;
 
     RETURN_ON_ERROR( SLIP_send_delimiter() );
     RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, size) );
     RETURN_ON_ERROR( SLIP_send_delimiter() );
 
-    return check_response(command, reg_value);
+    return check_response(command, reg_value, &response, sizeof(response));
 }
 
 
 static esp_loader_error_t send_cmd_with_data(const void *cmd_data, size_t cmd_size,
-        const void *data, size_t data_size)
+                                             const void *data, size_t data_size)
 {
+    response_t response;
     command_t command = ((command_common_t *)cmd_data)->command;
 
     RETURN_ON_ERROR( SLIP_send_delimiter() );
@@ -150,12 +163,31 @@ static esp_loader_error_t send_cmd_with_data(const void *cmd_data, size_t cmd_si
     RETURN_ON_ERROR( SLIP_send(data, data_size) );
     RETURN_ON_ERROR( SLIP_send_delimiter() );
 
-    return check_response(command, NULL);
+    return check_response(command, NULL, &response, sizeof(response));
+}
+
+
+static esp_loader_error_t send_cmd_md5(const void *cmd_data, size_t cmd_size, uint8_t md5_out[MD5_SIZE])
+{
+    rom_md5_response_t response;
+    command_t command = ((command_common_t *)cmd_data)->command;
+
+    RETURN_ON_ERROR( SLIP_send_delimiter() );
+    RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, cmd_size) );
+    RETURN_ON_ERROR( SLIP_send_delimiter() );
+
+    RETURN_ON_ERROR( check_response(command, NULL, &response, sizeof(response)) );
+
+    memcpy(md5_out, response.md5, MD5_SIZE);
+
+    return ESP_LOADER_SUCCESS;
 }
 
 
 static void log_loader_internal_error(error_code_t error)
 {
+    loader_port_debug_print("Error: ");
+
     switch (error) {
         case INVALID_CRC:     loader_port_debug_print("INVALID_CRC"); break;
         case INVALID_COMMAND: loader_port_debug_print("INVALID_COMMAND"); break;
@@ -166,28 +198,32 @@ static void log_loader_internal_error(error_code_t error)
         case DEFLATE_ERROR:   loader_port_debug_print("DEFLATE_ERROR"); break;
         default:              loader_port_debug_print("UNKNOWN ERROR"); break;
     }
+    
+    loader_port_debug_print("\n");
 }
 
 
-static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value)
+static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, void* resp, uint32_t resp_size)
 {
-    response_t response;
     esp_loader_error_t err;
+    common_response_t *response = (common_response_t *)resp;
 
     do {
-        err = SLIP_receive_packet((uint8_t *)&response, sizeof(response_t));
+        err = SLIP_receive_packet(resp, resp_size);
         if (err != ESP_LOADER_SUCCESS) {
             return err;
         }
-    } while ((response.direction != READ_DIRECTION) || (response.command != cmd));
+    } while ((response->direction != READ_DIRECTION) || (response->command != cmd));
 
-    if (response.status == STATUS_FAILURE) {
-        log_loader_internal_error(response.error);
+    response_status_t *status = (response_status_t *)(resp + resp_size - sizeof(response_status_t));
+
+    if (status->failed) {
+        log_loader_internal_error(status->error);
         return ESP_LOADER_ERROR_INVALID_RESPONSE;
     }
 
     if (reg_value != NULL) {
-        *reg_value = response.value;
+        *reg_value = response->value;
     }
 
     return ESP_LOADER_SUCCESS;
@@ -195,13 +231,13 @@ static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value)
 
 
 esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
-        uint32_t erase_size,
-        uint32_t block_size,
-        uint32_t blocks_to_write)
+                                          uint32_t erase_size,
+                                          uint32_t block_size,
+                                          uint32_t blocks_to_write)
 {
     begin_command_t begin_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
             .size = 16,
             .checksum = 0
@@ -222,7 +258,7 @@ esp_loader_error_t loader_flash_data_cmd(const uint8_t *data, uint32_t size)
 {
     data_command_t data_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = FLASH_DATA,
             .size = 16,
             .checksum = compute_checksum(data, size)
@@ -241,7 +277,7 @@ esp_loader_error_t loader_flash_end_cmd(bool stay_in_loader)
 {
     flash_end_command_t end_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = FLASH_END,
             .size = 4,
             .checksum = 0
@@ -257,7 +293,7 @@ esp_loader_error_t loader_sync_cmd(void)
 {
     sync_command_t sync_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = SYNC,
             .size = 36,
             .checksum = 0
@@ -275,72 +311,12 @@ esp_loader_error_t loader_sync_cmd(void)
 }
 
 
-esp_loader_error_t loader_mem_begin_cmd(uint32_t offset,
-                                        uint32_t total_size,
-                                        uint32_t packet_size,
-                                        uint32_t packets_to_write)
-{
-    begin_command_t begin_cmd = {
-        .common = {
-            .direction = 0,
-            .command = MEM_BEGIN,
-            .size = 16,
-            .checksum = 0
-        },
-        .erase_size = total_size,
-        .packet_count = packets_to_write,
-        .packet_size = packet_size,
-        .offset = offset
-    };
-
-    s_sequence_number = 0;
-
-    return send_cmd(&begin_cmd, sizeof(begin_cmd), NULL);
-}
-
-
-esp_loader_error_t loader_mem_data_cmd(uint8_t *data, uint32_t size)
-{
-    data_command_t data_cmd = {
-        .common = {
-            .direction = 0,
-            .command = MEM_DATA,
-            .size = 16,
-            .checksum = compute_checksum(data, size)
-        },
-        .data_size = size,
-        .sequence_number = s_sequence_number++,
-        .zero_0 = 0,
-        .zero_1 = 0
-    };
-
-    return send_cmd_with_data(&data_cmd, sizeof(data_cmd), data, size);
-}
-
-
-esp_loader_error_t loader_mem_end_cmd(bool stay_in_loader, uint32_t address)
-{
-    mem_end_command_t end_cmd = {
-        .common = {
-            .direction = 0,
-            .command = MEM_END,
-            .size = 8,
-            .checksum = 0
-        },
-        .stay_in_loader = stay_in_loader,
-        .entry_point_address = address
-    };
-
-    return send_cmd(&end_cmd, sizeof(end_cmd), NULL);
-}
-
-
 esp_loader_error_t loader_write_reg_cmd(uint32_t address, uint32_t value,
                                         uint32_t mask, uint32_t delay_us)
 {
     write_reg_command_t write_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = WRITE_REG,
             .size = 16,
             .checksum = 0
@@ -359,7 +335,7 @@ esp_loader_error_t loader_read_reg_cmd(uint32_t address, uint32_t *reg)
 {
     read_reg_command_t read_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = READ_REG,
             .size = 16,
             .checksum = 0
@@ -375,7 +351,7 @@ esp_loader_error_t loader_spi_attach_cmd(uint32_t config)
 {
     spi_attach_command_t attach_cmd = {
         .common = {
-            .direction = 0,
+            .direction = WRITE_DIRECTION,
             .command = SPI_ATTACH,
             .size = 8,
             .checksum = 0
@@ -387,6 +363,39 @@ esp_loader_error_t loader_spi_attach_cmd(uint32_t config)
     return send_cmd(&attach_cmd, sizeof(attach_cmd), NULL);
 }
 
+esp_loader_error_t loader_change_baudrate_cmd(uint32_t baudrate)
+{
+    change_baudrate_command_t baudrate_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = CHANGE_BAUDRATE,
+            .size = 8,
+            .checksum = 0
+        },
+        .new_baudrate = baudrate,
+        .old_baudrate = 0 // ESP32 ROM only
+    };
+
+    return send_cmd(&baudrate_cmd, sizeof(baudrate_cmd), NULL);
+}
+
+esp_loader_error_t loader_md5_cmd(uint32_t address, uint32_t size, uint8_t *md5_out)
+{
+    spi_flash_md5_command_t md5_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = SPI_FLASH_MD5,
+            .size = 16,
+            .checksum = 0
+        },
+        .address = address,
+        .size = size,
+        .reserved_0 = 0,
+        .reserved_1 = 0
+    };
+
+    return send_cmd_md5(&md5_cmd, sizeof(md5_cmd), md5_out);
+}
 
 __attribute__ ((weak)) void loader_port_debug_print(const char *str)
 {
