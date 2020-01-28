@@ -25,8 +25,6 @@ else()
         LIST(APPEND FATFS_DRIVER_SOURCES usbh_diskio.c)
     endif()
 endif()
-MESSAGE(STATUS "debug1 : " ${STORAGE_DRIVER})
-MESSAGE(STATUS "debug2 : " ${FATFS_DRIVER_SOURCES})
 
 SET(FATFS_OPTION_SOURCES syscall.c unicode.c)
 #if(CODE_PAGE EQUAL CP932)
@@ -63,10 +61,17 @@ FIND_PATH(FATFS_DRIVER_INCLUDE_DIR ${FATFS_DRIVER_HEADERS}
     CMAKE_FIND_ROOT_PATH_BOTH
 )
 
+IF(${FATFS_DRIVER_INCLUDE_DIR} STREQUAL FATFS_DRIVER_INCLUDE_DIR-NOTFOUND)
+    MESSAGE("Driver header files not located in STM firemware, please manually include the appropriate X_diskio.h directory")
+    SET(FATFS_INCLUDE_DIRS
+    ${FATFS_COMMON_INCLUDE_DIR}
+        )
+ELSE()
 SET(FATFS_INCLUDE_DIRS
     ${FATFS_COMMON_INCLUDE_DIR}
     ${FATFS_DRIVER_INCLUDE_DIR}
 )
+ENDIF()
 
 FOREACH(SRC ${FATFS_COMMON_SOURCES})
     SET(SRC_FILE SRC_FILE-NOTFOUND)
@@ -83,7 +88,12 @@ FOREACH(SRC ${FATFS_DRIVER_SOURCES})
         HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FatFs/src/drivers/
         CMAKE_FIND_ROOT_PATH_BOTH
     )
+STRING(FIND ${SRC_FILE} "NOTFOUND" SRC_FILE_NOTFOUND)
+IF(NOT ${SRC_FILE_NOTFOUND} EQUAL -1)
+    MESSAGE("Driver source files not located in STM firemware, please manually source the appropriate X_diskio.c files")
+ELSE()
     LIST(APPEND FATFS_SOURCES ${SRC_FILE})
+ENDIF()
 ENDFOREACH()
 
 FOREACH(SRC ${FATFS_OPTION_SOURCES})
