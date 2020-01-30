@@ -12,6 +12,7 @@
   - [Capabilities](#capabilities)
 - [Do It Yourself](#do-it-yourself)
   - [Hardware](#hardware)
+    - [Connections](#connections)
   - [Flashing Firmware](#flashing-firmware)
     - [Using Arduino IDE](#setting-up-arduino-ide)
 - [Under Development](#under-development)
