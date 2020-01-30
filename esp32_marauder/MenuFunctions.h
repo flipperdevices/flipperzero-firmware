@@ -34,6 +34,10 @@ extern WiFiScan wifi_scan_obj;
 #define CC_SKIMMERS 9
 #define SNIFFERS 10
 #define WIFI 11
+#define BEACON_SPAM 12
+#define RICK_ROLL 13
+#define REBOOT 14
+#define GENERAL_APPS 15
 
 struct Menu;
 
