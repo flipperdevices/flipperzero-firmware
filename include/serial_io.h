@@ -22,6 +22,16 @@
 extern "C" {
 #endif
 
+typedef struct
+{
+  uint32_t baud_rate;
+  uint32_t uart_port;
+  uint32_t uart_rx_pin;
+  uint32_t uart_tx_pin;
+  uint32_t reset_trigger_pin;
+  uint32_t gpio0_trigger_pin;
+} loader_serial_config_t;
+
 /**
   * @brief Initializes serial interface.
   *
@@ -31,13 +41,17 @@ extern "C" {
   *     - ESP_LOADER_SUCCESS Success
   *     - ESP_LOADER_ERROR_FAIL Initialization failure
   */
-esp_loader_error_t loader_port_serial_init(uint32_t baud_rate);
-
+esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config);
 
 /**
   * @brief Deinitialize serial interface.
   */
 void loader_port_serial_deinit(void);
+
+/**
+  * @brief Changes baud rate of serial peripheral.
+  */
+esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
 
 /**
   * @brief Writes data to serial interface.

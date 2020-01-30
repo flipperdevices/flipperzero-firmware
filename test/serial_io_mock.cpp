@@ -30,7 +30,7 @@ static uint32_t receive_delay = 0;
 static int32_t timer = 0;
 
 
-esp_loader_error_t loader_port_serial_init(uint32_t baud_rate)
+esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
 {
     return ESP_LOADER_SUCCESS;
 }

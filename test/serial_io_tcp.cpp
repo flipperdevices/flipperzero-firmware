@@ -33,7 +33,7 @@ const uint32_t PORT = 5555;
 static int sock = 0;
 ofstream file;
 
-esp_loader_error_t loader_port_serial_init(uint32_t baud_rate)
+esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
 {
     struct sockaddr_in serv_addr;
 
