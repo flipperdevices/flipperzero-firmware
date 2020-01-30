@@ -51,7 +51,29 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 This project requires the following hardware in order to work:
 - Any ESP32 Development Board
 - 2.8" TFT Touch Screen w/ ili9341
-  
+- Jumper Wires
+- Breadboard
+
+### Connections
+Make the following connections between your 2.8" TFT Screen and your ESP32 board. You may need to refer to a pinout sheet specific to the ESP32 dev board you have chosen. For more infomation about this circuit, please refer to [this schematic](https://github.com/justcallmekoko/ESP32Marauder/blob/master/schematics/Schematic_ESP32-Marauder-2_ESP32-Marauder-2-Schematic_20191007113616_png.png)
+
+| 2.8" TFT | ESP32  |
+| -------- | ------ |
+| VCC      | VCC    |
+| GND      | GND    |
+| CS       | GPIO17 |
+| RESET    | GPIO5  |
+| D/C      | GPIO16 |
+| MOSI     | GPIO23 |
+| SCK      | GPIO18 |
+| LED      | GPIO32 |
+| MISO     | GPIO19 |
+| T_CLK    | GPIO18 |
+| T_CS     | GPIO21 |
+| T_DI     | GPIO23 |
+| T_DO     | GPIO19 |
+| T_IRQ    | N/C    |
+
 ## Flashing Firmware
 ### Using Arduino IDE
 1. Install the [Arduino IDE](https://www.arduino.cc/en/main/software)
