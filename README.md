@@ -66,6 +66,12 @@ This project requires the following hardware in order to work:
     - Make the following modifications shown in [this issue](https://github.com/justcallmekoko/ESP32Marauder/issues/2#issuecomment-555695918) to the TFT_eSPI library you just installed
 8. Follow [these instructions](https://github.com/me-no-dev/arduino-esp32fs-plugin) for installing ESP32 Spiffs Tool
 9. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
+10. Download or clone this repository
+11. Open `esp32_marauder.ino`
+12. Plug your ESP32 into a USB port and select the COM port under `Tools`>`Port`
+12. Select `LOLIN D32` under `Tools`>`Boards`
+13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
+14. Click the upload button
   
 # Under Development
 Currently the ESP32 Marauder has limited firmware capabilities. Most of the work so far has been put into designing the hardware. New firmware features will be added over time and will eventually reach a point where this project will be a fully capable hacking machine.
