@@ -198,6 +198,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&wifiSnifferCallback);
@@ -223,6 +224,7 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
   packets_sent = 0;
   //esp_wifi_set_mode(WIFI_MODE_STA);
   WiFi.mode(WIFI_AP_STA);
+  esp_wifi_start();
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_max_tx_power(78);
@@ -250,6 +252,7 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
   packets_sent = 0;
   //esp_wifi_set_mode(WIFI_MODE_STA);
   WiFi.mode(WIFI_AP_STA);
+  esp_wifi_start();
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_max_tx_power(78);
@@ -278,6 +281,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&beaconSnifferCallback);
@@ -304,6 +308,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&deauthSnifferCallback);
@@ -332,6 +337,7 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&probeSnifferCallback);
