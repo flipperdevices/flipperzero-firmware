@@ -22,8 +22,10 @@
 
 int main( int argc, char* argv[] ) {
     
+    const loader_serial_config_t dummy_config = { 0 };
+
     // global setup...
-    if( loader_port_serial_init(0) != ESP_LOADER_SUCCESS ) {
+    if( loader_port_serial_init(&dummy_config) != ESP_LOADER_SUCCESS ) {
         std::cout << "Serial initialization failed";
         return 0;
     }

@@ -13,6 +13,8 @@
 #include "esp_spiffs.h"
 #include "esp_loader.h"
 #include "serial_io.h"
+#include "driver/gpio.h"
+#include "driver/uart.h"
 #include <sys/param.h>
 
 
@@ -21,8 +23,6 @@ static const char *TAG = "example";
 const uint32_t HIGHER_BAUD_RATE = 921600;
 const uint32_t APP_START_ADDRESS = 0x10000;
 static uint8_t payload[1024];
-
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
 
 
 static void flash_binary(FILE *image, size_t image_size)
@@ -132,8 +132,18 @@ static FILE *get_image_and_its_size(size_t *image_size)
 
 void app_main(void)
 {
+
+    const loader_serial_config_t config = {
+        .baud_rate = 115200,
+        .uart_port = UART_NUM_1,
+        .uart_rx_pin = GPIO_NUM_5,
+        .uart_tx_pin = GPIO_NUM_4,
+        .reset_trigger_pin = GPIO_NUM_25,
+        .gpio0_trigger_pin = GPIO_NUM_26,
+    };
+
     // Initialize UART
-    esp_loader_error_t err = loader_port_serial_init(115200);
+    esp_loader_error_t err = loader_port_serial_init(&config);
     if (err != ESP_LOADER_SUCCESS) {
         ESP_LOGE(TAG, "serial initialization failed.");
         return;
