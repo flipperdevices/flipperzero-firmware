@@ -2,6 +2,7 @@
 Board: LOLIN D32
 Flash Frequency: 80MHz
 Partition Scheme: No OTA
+https://www.online-utility.org/image/convert/to/XBM
 */
 
 #include <WiFi.h>
@@ -17,6 +18,7 @@ Partition Scheme: No OTA
 #include "Display.h"
 #include "WiFiScan.h"
 #include "MenuFunctions.h"
+//#include "icons.h"
 
 Display display_obj;
 WiFiScan wifi_scan_obj;

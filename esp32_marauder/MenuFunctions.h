@@ -15,10 +15,25 @@ extern WiFiScan wifi_scan_obj;
 #define KEY_SPACING_X 0 // X and Y gap
 #define KEY_SPACING_Y 1
 #define KEY_TEXTSIZE 1   // Font size multiplier
+#define ICON_W 22
+#define ICON_H 22
 //#define BUTTON_ARRAY_LEN 5
 
 #define FLASH_BUTTON 0
 
+// Icon definitions
+#define ATTACKS 0
+#define BEACON_SNIFF 1
+#define BLUETOOTH 2
+#define BLUETOOTH_SNIFF 3
+#define DEAUTH_SNIFF 4
+#define DRAW 5
+#define PACKET_MONITOR 6
+#define PROBE_SNIFF 7
+#define SCANNERS 8
+#define CC_SKIMMERS 9
+#define SNIFFERS 10
+#define WIFI 11
 
 struct Menu;
 
@@ -27,9 +42,9 @@ struct Menu;
 struct MenuNode {
     String name;
     uint16_t color;
-    Menu *childMenu;
+    int icon;
     TFT_eSPI_Button* button;
-    std::function<void()> callable; // Make a function that changes menu to a child menu
+    std::function<void()> callable;
 };
 
 // Full Menus
@@ -61,6 +76,9 @@ class MenuFunctions
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
     Menu bluetoothScannerMenu;
+
+    // Menu icons
+    
 
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
     

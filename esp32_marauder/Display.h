@@ -11,6 +11,8 @@
 #include <TFT_eSPI.h>
 //#include "Free_Fonts.h"
 
+//#include "icons.h"
+
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -52,7 +54,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.3.0";
+    String version_number = "v0.3.1";
 
     bool printing = false;
     bool loading = false;
