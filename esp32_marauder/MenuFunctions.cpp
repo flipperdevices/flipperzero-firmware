@@ -374,13 +374,15 @@ void MenuFunctions::displayCurrentMenu()
     for (int i = 0; i < current_menu->list->size(); i++)
     {
       display_obj.key[i].drawButton2(current_menu->list->get(i).name);
-      display_obj.tft.drawXBitmap(0, 
-                                  KEY_Y + i * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2), 
-                                  menu_icons[current_menu->list->get(i).icon], 
-                                  ICON_W, 
-                                  ICON_H, 
-                                  TFT_BLACK, 
-                                  current_menu->list->get(i).color);
+
+      if (current_menu->list->get(i).name != "Back")
+        display_obj.tft.drawXBitmap(0, 
+                                    KEY_Y + i * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2), 
+                                    menu_icons[current_menu->list->get(i).icon], 
+                                    ICON_W, 
+                                    ICON_H, 
+                                    TFT_BLACK, 
+                                    current_menu->list->get(i).color);
     }
     display_obj.tft.setFreeFont(NULL);
   }
