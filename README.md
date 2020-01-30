@@ -36,10 +36,12 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Rick Roll Beacon: Broadcast the rick roll lyrics as WiFi access points
 - Bluetooth Sniffer: Sniff bluetooth devices within range
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
+- Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
+- Deauthentication Packet Sniffer: Detect deauthentication packets sent on all channels
+- Draw: Just doodle on the screen or whatever
 
 ### Developing
 - Emulate Bluetooth: Emulate a bluetooth device with a specific name
-- Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
 
 # Do It Yourself
 
