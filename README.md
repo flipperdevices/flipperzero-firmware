@@ -81,6 +81,7 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
 - [Spacehuhn](https://github.com/spacehuhn) for an easy to use linked list library [SimpleList](https://github.com/spacehuhn/SimpleList)
   - Also a well designed menu structure. I adapted it to the TFT GUI because it worked perfectly
 - [Bodmer](https://github.com/Bodmer) for a comprehensive TFT touch screen library [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
+- [HyderHasnain](https://github.com/hyderhasnain) for an adaptable [line graph](https://github.com/hyderhasnain/arduino_touchscreen_controller/blob/master/Code/AccelGraph_Original.ino) to be used as the packet monitor
 
 # For Sale Now
 You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
