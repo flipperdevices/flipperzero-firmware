@@ -1,4 +1,4 @@
-# ESP32 Marauder v0.3.2
+# ESP32 Marauder v0.4.0
 <p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/marauder3L.jpg?raw=true" width="300"></p>
 <p align="center">
   <b>A suite of WiFi/Bluetooth offensive and defensive tools for the ESP32</b>
@@ -39,8 +39,9 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Bluetooth Sniffer: Sniff bluetooth devices within range
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
-- Deauthentication Packet Sniffer: Detect deauthentication packets sent on all channels
+- Deauth Sniff: Detect deauthentication packets sent on all channels
 - Draw: Just doodle on the screen or whatever
+- Update Firmware: Update Marauder firmware over the air via web interface
 
 ### Developing
 - Emulate Bluetooth: Emulate a bluetooth device with a specific name
