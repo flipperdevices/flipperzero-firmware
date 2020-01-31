@@ -98,6 +98,22 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 12. Select `LOLIN D32` under `Tools`>`Boards`
 13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
 14. Click the upload button
+
+# Updating Firmware
+There are multiple options available for updating the firmware for Marauder. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
+If you own an ESP32 Marauder and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
+
+1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
+2. With Marauder powered on, select the main menu option `Update Firmware`
+  - Marauder will display details on screen about the status of the update
+3. Connect to the MarauderOTA WiFi network from your computer
+4. On your web browser, navigate to `http://192.168.4.1`
+5. Enter the username and password
+  - Username: admin
+  - Password: admin
+6. Click the `Browse` button and select the .bin file you downloaded from the releases
+7. Click `Update`
+  - Marauder will automatically reboot once the update has been applied
   
 # Under Development
 Currently the ESP32 Marauder has limited firmware capabilities. Most of the work so far has been put into designing the hardware. New firmware features will be added over time and will eventually reach a point where this project will be a fully capable hacking machine.
