@@ -3,9 +3,11 @@
 
 #include "WiFiScan.h"
 #include "Display.h"
+#include "Web.h"
 
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
+extern Web web_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -38,6 +40,7 @@ extern WiFiScan wifi_scan_obj;
 #define RICK_ROLL 13
 #define REBOOT 14
 #define GENERAL_APPS 15
+#define UPDATE 16
 
 struct Menu;
 

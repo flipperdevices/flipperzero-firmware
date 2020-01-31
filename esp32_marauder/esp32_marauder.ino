@@ -18,11 +18,13 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "Display.h"
 #include "WiFiScan.h"
 #include "MenuFunctions.h"
+#include "Web.h"
 //#include "icons.h"
 
 Display display_obj;
 WiFiScan wifi_scan_obj;
 MenuFunctions menu_function_obj;
+Web web_obj;
 
 uint32_t currentTime  = 0;
 
@@ -34,8 +36,10 @@ void setup()
   digitalWrite(TFT_BL, LOW);
   
   Serial.begin(115200);
-  Serial.println("\n\n--------------------------------");
-  Serial.println("         ESP32 Marauder      ");
+  Serial.println("\n\n--------------------------------\n");
+  Serial.println("         ESP32 Marauder      \n");
+  Serial.println("            " + display_obj.version_number + "\n");
+  Serial.println("       By: justcallmekoko\n");
   Serial.println("--------------------------------\n\n");
 
   // Run display setup
@@ -48,12 +52,14 @@ void setup()
 
 void loop()
 {
+  
   // get the current time
   //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   currentTime = millis();
 
   // Update all of our objects
-  if (!display_obj.draw_tft)
+  if ((!display_obj.draw_tft) &&
+      (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   {
     display_obj.main(); 
     wifi_scan_obj.main(currentTime);
@@ -62,10 +68,17 @@ void loop()
       menu_function_obj.main();
     delay(1);
   }
-  else
+  else if ((display_obj.draw_tft) &&
+           (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   {
     display_obj.drawStylus();
   }
+  else
+  {
+    web_obj.main();
+  }
+
+  //Serial.println(wifi_scan_obj.currentScanMode);
 
   //Serial.print("Run Time: ");
   //Serial.print(millis() - currentTime);

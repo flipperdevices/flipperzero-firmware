@@ -14,6 +14,7 @@
 
 #define bad_list_length 3
 
+#define OTA_UPDATE 100
 #define WIFI_SCAN_OFF 0
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2
