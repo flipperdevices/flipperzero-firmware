@@ -214,6 +214,7 @@ void MenuFunctions::main()
   y = -1;
 }
 
+// Return display to normal after having been in landscape
 void MenuFunctions::orientDisplay()
 {
   display_obj.tft.init();
