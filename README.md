@@ -15,9 +15,10 @@
     - [Connections](#connections)
   - [Flashing Firmware](#flashing-firmware)
     - [Using Arduino IDE](#setting-up-arduino-ide)
+  - [Updating Firmware](#updating-firmware)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
-- [For Sale Soon](#for-sale-soon)
+- [For Sale Now](#for-sale-now)
 
 # About
 Sometimes you just gotta do what you gotta do. Am I right, ladies?
@@ -99,8 +100,8 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
 14. Click the upload button
 
-# Updating Firmware
-There are multiple options available for updating the firmware for Marauder. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
+## Updating Firmware
+There are multiple options available to update the Marauder firmware. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
 If you own an ESP32 Marauder and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
 
 1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
