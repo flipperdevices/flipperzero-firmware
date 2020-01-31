@@ -74,6 +74,7 @@ class MenuFunctions
     Menu wifiMenu;
     Menu bluetoothMenu;
     Menu generalMenu;
+    Menu updateMenu;
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;

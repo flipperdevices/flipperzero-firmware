@@ -112,7 +112,8 @@ MenuFunctions::MenuFunctions()
 // Function to check menu input
 void MenuFunctions::main()
 {
-  if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) {
+  if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
+      (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
     if (wifi_scan_obj.orient_display) {
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
@@ -139,6 +140,9 @@ void MenuFunctions::main()
   // getTouch causes a 10ms delay which makes beacon spam less effective
   //if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
   pressed = display_obj.tft.getTouch(&t_x, &t_y);
+
+  //if (pressed)
+  //  Serial.println("Pressed, son");
   //boolean pressed = false;
 
   //Serial.print("getTouch: ");
@@ -147,7 +151,7 @@ void MenuFunctions::main()
 
   
   // This is if there are scans/attacks going on
-  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed))
+  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed) && (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   {  
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
@@ -238,6 +242,7 @@ void MenuFunctions::RunSetup()
   wifiMenu.list = new SimpleList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new SimpleList<MenuNode>(); // Get list in third menu ready
   generalMenu.list = new SimpleList<MenuNode>();
+  updateMenu.list = new SimpleList<MenuNode>();
 
   // WiFi menu stuff
   wifiSnifferMenu.list = new SimpleList<MenuNode>();
@@ -252,6 +257,7 @@ void MenuFunctions::RunSetup()
   mainMenu.name = " ESP32 Marauder ";
   wifiMenu.name = " WiFi ";
   generalMenu.name = " General Apps ";
+  updateMenu.name = " Update Firmware ";
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiScannerMenu.name = " WiFi Scanners";
@@ -264,7 +270,7 @@ void MenuFunctions::RunSetup()
   addNodes(&mainMenu, "WiFi", TFT_GREEN, NULL, WIFI, [this](){changeMenu(&wifiMenu);});
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, BLUETOOTH, [this](){changeMenu(&bluetoothMenu);});
   addNodes(&mainMenu, "General Apps", TFT_MAGENTA, NULL, GENERAL_APPS, [this](){changeMenu(&generalMenu);});
-  addNodes(&mainMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; web_obj.setupOTAupdate();});
+  addNodes(&mainMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
   addNodes(&mainMenu, "Reboot", TFT_LIGHTGREY, NULL, REBOOT, [](){ESP.restart();});
 
   // Build WiFi Menu
@@ -311,6 +317,9 @@ void MenuFunctions::RunSetup()
   generalMenu.parentMenu = &mainMenu;
   addNodes(&generalMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){display_obj.draw_tft = false; changeMenu(generalMenu.parentMenu);});
   addNodes(&generalMenu, "Draw", TFT_WHITE, NULL, DRAW, [this](){display_obj.clearScreen(); display_obj.draw_tft = true;});
+
+  updateMenu.parentMenu = &mainMenu;
+  addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true);});
 
 
   // Set the current menu to the mainMenu

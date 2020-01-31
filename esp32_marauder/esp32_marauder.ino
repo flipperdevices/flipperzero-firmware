@@ -58,14 +58,17 @@ void loop()
   currentTime = millis();
 
   // Update all of our objects
-  if ((!display_obj.draw_tft) &&
-      (wifi_scan_obj.currentScanMode != OTA_UPDATE))
+  //if ((!display_obj.draw_tft) &&
+  //    (wifi_scan_obj.currentScanMode != OTA_UPDATE))
+  if (!display_obj.draw_tft)
   {
     display_obj.main(); 
     wifi_scan_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if (wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR)
       menu_function_obj.main();
+      if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
+        web_obj.main();
     delay(1);
   }
   else if ((display_obj.draw_tft) &&
@@ -73,10 +76,10 @@ void loop()
   {
     display_obj.drawStylus();
   }
-  else
-  {
-    web_obj.main();
-  }
+  //else
+  //{
+  //  web_obj.main();
+  //}
 
   //Serial.println(wifi_scan_obj.currentScanMode);
 

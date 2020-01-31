@@ -32,12 +32,26 @@ void Web::main()
 
 void Web::setupOTAupdate()
 {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_WHITE);
+
+  display_obj.tft.print("Configuring update server...\n\n");  
   Serial.println("Configuring update server...");
+
+  display_obj.tft.setTextColor(TFT_YELLOW);
   
   // Start WiFi AP
   WiFi.softAP(ssid, password);
   Serial.println("");
-  
+
+  display_obj.tft.print("SSID: ");
+  display_obj.tft.println(ssid);
+  display_obj.tft.print("IP address: ");
+  display_obj.tft.print(WiFi.softAPIP());
+  display_obj.tft.print("\n");
   Serial.print("IP address: ");
   Serial.println(WiFi.softAPIP());
 
@@ -69,6 +83,10 @@ void Web::setupOTAupdate()
   }, [this]() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
+      display_obj.tft.setTextColor(TFT_YELLOW);
+      display_obj.tft.print("Update: ");
+      display_obj.tft.print(upload.filename.c_str());
+      display_obj.tft.print("\n");
       Serial.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         Update.printError(Serial);
@@ -78,9 +96,32 @@ void Web::setupOTAupdate()
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
         Update.printError(Serial);
       }
+      //display_obj.tft.println(upload.totalSize);
+      /*
+      String display_string = "";
+      display_obj.tft.setCursor(0, 164);
+      for (int i = 0; i < 40; i++) {
+        display_string.concat(" ");
+      }
+      */
+      display_obj.tft.setTextColor(TFT_CYAN);
+      display_obj.tft.fillRect(0, 164, 240, 8, TFT_BLACK);
+      //delay(1);
+      //display_obj.tft.print(display_string);
+      display_obj.tft.setCursor(0, 164);
+      display_obj.tft.print("Bytes complete: ");
+      display_obj.tft.print(upload.totalSize);
+      display_obj.tft.print("\n");
+      
+      //Serial.println(upload.totalSize);
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
+        display_obj.tft.setTextColor(TFT_GREEN);
+        display_obj.tft.print("Update Success: ");
+        display_obj.tft.print(upload.totalSize);
+        display_obj.tft.print("\nRebooting...\n");
         Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+        delay(1000);
       } else {
         Update.printError(Serial);
       }
@@ -88,5 +129,7 @@ void Web::setupOTAupdate()
   });
   server.begin();
 
+  display_obj.tft.setTextColor(TFT_GREEN);
+  display_obj.tft.println("\nCompleted update server setup");
   Serial.println("Completed update server setup");
 }

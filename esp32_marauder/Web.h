@@ -11,6 +11,10 @@ Code taken from espressif ESP32 OTA Update example
 #include <ESPmDNS.h>
 #include <Update.h>
 
+#include "Display.h"
+
+extern Display display_obj;
+
 class Web
 {
   private:
