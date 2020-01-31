@@ -2,7 +2,8 @@
 <p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/marauder3L.jpg?raw=true" width="300"></p>
 <p align="center">
   <b>A suite of WiFi/Bluetooth offensive and defensive tools for the ESP32</b>
-  <br>
+  <br><br>
+  <a href="https://www.tindie.com/products/justcallmekoko/esp32-marauder/"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
 </p>
 
 # Table Of Condensation
@@ -127,5 +128,3 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
 
 # For Sale Now
 You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
-
-<a href="https://www.tindie.com/stores/justcallmekoko/?ref=offsite_badges&utm_source=sellers_justcallmekoko&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
