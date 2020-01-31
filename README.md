@@ -47,7 +47,6 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 
 ### Developing
 - Emulate Bluetooth: Emulate a bluetooth device with a specific name
-- OTA Firmware Update: Update Marauder firmware over the air with .bin file
 
 # Do It Yourself
 
