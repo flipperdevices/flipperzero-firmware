@@ -106,15 +106,15 @@ If you own an ESP32 Marauder and have not build the project, you can follow thes
 
 1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
 2. With Marauder powered on, select the main menu option `Update Firmware`
-  - Marauder will display details on screen about the status of the update
+    - Marauder will display details on screen about the status of the update
 3. Connect to the MarauderOTA WiFi network from your computer
 4. On your web browser, navigate to `http://192.168.4.1`
 5. Enter the username and password
-  - Username: admin
-  - Password: admin
+    - Username: admin
+    - Password: admin
 6. Click the `Browse` button and select the .bin file you downloaded from the releases
 7. Click `Update`
-  - Marauder will automatically reboot once the update has been applied
+    - Marauder will automatically reboot once the update has been applied
   
 # Under Development
 Currently the ESP32 Marauder has limited firmware capabilities. Most of the work so far has been put into designing the hardware. New firmware features will be added over time and will eventually reach a point where this project will be a fully capable hacking machine.
