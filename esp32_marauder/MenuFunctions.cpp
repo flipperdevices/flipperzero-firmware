@@ -216,7 +216,6 @@ void MenuFunctions::main()
   y = -1;
 }
 
-// Return display to normal after having been in landscape
 void MenuFunctions::orientDisplay()
 {
   display_obj.tft.init();
@@ -418,6 +417,7 @@ void MenuFunctions::displayCurrentMenu()
     {
       //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
       display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
+      //display_obj.key[i].drawButton(true);
 
       if (current_menu->list->get(i).name != "Back")
         display_obj.tft.drawXBitmap(0, 
