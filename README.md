@@ -87,18 +87,18 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 3. Add the following URL to `Additional Boards Manager URLs:`
     - https://dl.espressif.com/dl/package_esp32_index.json
 4. Go to `Tools`>`Board`>`Boards Manager`, search for `esp32` and install `esp32 by Espressif Systems`
-6. Install Spacehuhn's [SimpleList](https://github.com/spacehuhn/SimpleList) library in your Arduino IDE
+5. Install Spacehuhn's [SimpleList](https://github.com/spacehuhn/SimpleList) library in your Arduino IDE
     - Download the SimpleList repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the SimpleList-master.zip you just downloaded
-7. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE
+6. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE
     - Download the TFT_eSPI repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the TFT-eSPI-master.zip you just downloaded
     - Make the following modifications shown in [this issue](https://github.com/justcallmekoko/ESP32Marauder/issues/2#issuecomment-555695918) to the TFT_eSPI library you just installed
-8. Follow [these instructions](https://github.com/me-no-dev/arduino-esp32fs-plugin) for installing ESP32 Spiffs Tool
-9. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
-10. Download or clone this repository
-11. Open `esp32_marauder.ino`
-12. Plug your ESP32 into a USB port and select the COM port under `Tools`>`Port`
+7. Follow [these instructions](https://github.com/me-no-dev/arduino-esp32fs-plugin) for installing ESP32 Spiffs Tool
+8. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
+9. Download or clone this repository
+10. Open `esp32_marauder.ino`
+11. Plug your ESP32 into a USB port and select the COM port under `Tools`>`Port`
 12. Select `LOLIN D32` under `Tools`>`Boards`
 13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
 14. Click the upload button
