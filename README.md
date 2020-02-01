@@ -1,8 +1,12 @@
-# ESP32 Marauder v0.3.2
+[![License: MIT](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/justcallmekoko/ESP32Marauder/blob/master/LICENSE)
+<!---[![Build Status](https://travis-ci.com/justcallmekoko/ESP32Marauder.svg?branch=master)](https://travis-ci.com/justcallmekoko/ESP32Marauder)--->
+
+# ESP32 Marauder v0.4.0
 <p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/marauder3L.jpg?raw=true" width="300"></p>
 <p align="center">
   <b>A suite of WiFi/Bluetooth offensive and defensive tools for the ESP32</b>
-  <br>
+  <br><br>
+  <a href="https://www.tindie.com/products/justcallmekoko/esp32-marauder/"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
 </p>
 
 # Table Of Condensation
@@ -15,9 +19,10 @@
     - [Connections](#connections)
   - [Flashing Firmware](#flashing-firmware)
     - [Using Arduino IDE](#setting-up-arduino-ide)
+  - [Updating Firmware](#updating-firmware)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
-- [For Sale Soon](#for-sale-soon)
+- [For Sale Now](#for-sale-now)
 
 # About
 Sometimes you just gotta do what you gotta do. Am I right, ladies?
@@ -39,12 +44,12 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Bluetooth Sniffer: Sniff bluetooth devices within range
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
-- Deauthentication Packet Sniffer: Detect deauthentication packets sent on all channels
+- Deauth Sniff: Detect deauthentication packets sent on all channels
 - Draw: Just doodle on the screen or whatever
+- Update Firmware: Update Marauder firmware over the air via web interface
 
 ### Developing
 - Emulate Bluetooth: Emulate a bluetooth device with a specific name
-- OTA Firmware Update: Update Marauder firmware over the air with .bin file
 
 # Do It Yourself
 
@@ -82,21 +87,38 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 3. Add the following URL to `Additional Boards Manager URLs:`
     - https://dl.espressif.com/dl/package_esp32_index.json
 4. Go to `Tools`>`Board`>`Boards Manager`, search for `esp32` and install `esp32 by Espressif Systems`
-6. Install Spacehuhn's [SimpleList](https://github.com/spacehuhn/SimpleList) library in your Arduino IDE
+5. Install Spacehuhn's [SimpleList](https://github.com/spacehuhn/SimpleList) library in your Arduino IDE
     - Download the SimpleList repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the SimpleList-master.zip you just downloaded
-7. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE
+<!---6. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE--->
+6. Install my fork of Bodmer's [TFT_eSPI](https://github.com/justcallmekoko/TFT_eSPI) library in your Arduino IDE
     - Download the TFT_eSPI repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the TFT-eSPI-master.zip you just downloaded
     - Make the following modifications shown in [this issue](https://github.com/justcallmekoko/ESP32Marauder/issues/2#issuecomment-555695918) to the TFT_eSPI library you just installed
-8. Follow [these instructions](https://github.com/me-no-dev/arduino-esp32fs-plugin) for installing ESP32 Spiffs Tool
-9. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
-10. Download or clone this repository
-11. Open `esp32_marauder.ino`
-12. Plug your ESP32 into a USB port and select the COM port under `Tools`>`Port`
+7. Follow [these instructions](https://github.com/me-no-dev/arduino-esp32fs-plugin) for installing ESP32 Spiffs Tool
+8. Install the [CH340 Drivers](https://github.com/justcallmekoko/ESP32Marauder/blob/master/Drivers/CH34x_Install_Windows_v3_4.EXE)
+9. Download or clone this repository
+10. Open `esp32_marauder.ino`
+11. Plug your ESP32 into a USB port and select the COM port under `Tools`>`Port`
 12. Select `LOLIN D32` under `Tools`>`Boards`
 13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
 14. Click the upload button
+
+## Updating Firmware
+There are multiple options available to update the Marauder firmware. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
+If you own an ESP32 Marauder and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
+
+1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
+2. With Marauder powered on, select the main menu option `Update Firmware`
+    - Marauder will display details on screen about the status of the update
+3. Connect to the MarauderOTA WiFi network from your computer
+4. On your web browser, navigate to `http://192.168.4.1`
+5. Enter the username and password
+    - Username: admin
+    - Password: admin
+6. Click the `Browse` button and select the .bin file you downloaded from the releases
+7. Click `Update`
+    - Marauder will automatically reboot once the update has been applied
   
 # Under Development
 Currently the ESP32 Marauder has limited firmware capabilities. Most of the work so far has been put into designing the hardware. New firmware features will be added over time and will eventually reach a point where this project will be a fully capable hacking machine.
@@ -109,5 +131,3 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
 
 # For Sale Now
 You can buy the ESP32 Marauder using [this link](https://www.tindie.com/products/justcallmekoko/esp32-marauder/)
-
-<a href="https://www.tindie.com/stores/justcallmekoko/?ref=offsite_badges&utm_source=sellers_justcallmekoko&utm_medium=badges&utm_campaign=badge_large"><img src="https://d2ss6ovg47m0r5.cloudfront.net/badges/tindie-larges.png" alt="I sell on Tindie" width="200" height="104"></a>
