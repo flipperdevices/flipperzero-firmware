@@ -19,6 +19,7 @@ extern Web web_obj;
 #define KEY_TEXTSIZE 1   // Font size multiplier
 #define ICON_W 22
 #define ICON_H 22
+#define BUTTON_PADDING 22
 //#define BUTTON_ARRAY_LEN 5
 
 #define FLASH_BUTTON 0

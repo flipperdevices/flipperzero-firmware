@@ -1,7 +1,7 @@
 /* FLASH SETTINGS
 Board: LOLIN D32
 Flash Frequency: 80MHz
-Partition Scheme: No OTA
+Partition Scheme: Minimal SPIFFS
 https://www.online-utility.org/image/convert/to/XBM
 */
 
