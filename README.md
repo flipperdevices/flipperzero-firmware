@@ -91,7 +91,7 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
     - Download the SimpleList repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the SimpleList-master.zip you just downloaded
 <!---6. Install Bodmer's [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI) library in your Arduino IDE--->
-6. Install my fork of Bodmer's [TFT_eSPI](https://github.com/justcallmekoko/TFT_eSP) library in your Arduino IDE
+6. Install my fork of Bodmer's [TFT_eSPI](https://github.com/justcallmekoko/TFT_eSPI) library in your Arduino IDE
     - Download the TFT_eSPI repo
     - In the Arduino IDE, go to `Sketch`>`Include Library`>`Add .ZIP Library...` and add the TFT-eSPI-master.zip you just downloaded
     - Make the following modifications shown in [this issue](https://github.com/justcallmekoko/ESP32Marauder/issues/2#issuecomment-555695918) to the TFT_eSPI library you just installed
