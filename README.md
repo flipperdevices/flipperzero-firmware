@@ -112,6 +112,7 @@ If you own an ESP32 Marauder and have not build the project, you can follow thes
 2. With Marauder powered on, select the main menu option `Update Firmware`
     - Marauder will display details on screen about the status of the update
 3. Connect to the MarauderOTA WiFi network from your computer
+    - password: justcallmekoko
 4. On your web browser, navigate to `http://192.168.4.1`
 5. Enter the username and password
     - Username: admin
