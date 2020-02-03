@@ -106,7 +106,7 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 
 ## Updating Firmware
 There are multiple options available to update the Marauder firmware. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
-If you own an ESP32 Marauder and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
+If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
 
 1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
 2. With Marauder powered on, select the main menu option `Update Firmware`
