@@ -199,14 +199,17 @@ void MenuFunctions::main()
       display_obj.tft.setFreeFont(MENU_FONT);
       if (display_obj.key[b].justPressed()) {
         //display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
-        display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
+        //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
+        display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
+        
       }
   
       // If button was just release, execute the button's function
       if (display_obj.key[b].justReleased())
       {
         //display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-        display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
+        //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
+        display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
         current_menu->list->get(b).callable();
       }
       display_obj.tft.setFreeFont(NULL);
@@ -391,6 +394,8 @@ void MenuFunctions::buildButtons(Menu* menu)
                         menu->list->get(i).color, // Text
                         buf,
                         KEY_TEXTSIZE);
+
+      display_obj.key[i].setLabelDatum(BUTTON_PADDING, 0, ML_DATUM);
     }
   }
 }
@@ -416,8 +421,9 @@ void MenuFunctions::displayCurrentMenu()
     for (int i = 0; i < current_menu->list->size(); i++)
     {
       //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
-      display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
+      //display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(true);
+      display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
 
       if (current_menu->list->get(i).name != "Back")
         display_obj.tft.drawXBitmap(0, 

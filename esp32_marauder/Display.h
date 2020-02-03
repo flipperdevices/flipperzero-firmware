@@ -8,10 +8,8 @@
 #include <SimpleList.h>
 #include <SPI.h>
 #include "SPIFFS.h"
-#include <TFT_eSPI.h>
-//#include "Free_Fonts.h"
 
-//#include "icons.h"
+#include <TFT_eSPI.h>
 
 
 #define SCREEN_WIDTH 240
