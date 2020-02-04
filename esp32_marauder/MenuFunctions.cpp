@@ -241,22 +241,22 @@ void MenuFunctions::orientDisplay()
 void MenuFunctions::RunSetup()
 {
   // root menu stuff
-  mainMenu.list = new SimpleList<MenuNode>(); // Get list in first menu ready
+  mainMenu.list = new LinkedList<MenuNode>(); // Get list in first menu ready
 
   // Main menu stuff
-  wifiMenu.list = new SimpleList<MenuNode>(); // Get list in second menu ready
-  bluetoothMenu.list = new SimpleList<MenuNode>(); // Get list in third menu ready
-  generalMenu.list = new SimpleList<MenuNode>();
-  updateMenu.list = new SimpleList<MenuNode>();
+  wifiMenu.list = new LinkedList<MenuNode>(); // Get list in second menu ready
+  bluetoothMenu.list = new LinkedList<MenuNode>(); // Get list in third menu ready
+  generalMenu.list = new LinkedList<MenuNode>();
+  updateMenu.list = new LinkedList<MenuNode>();
 
   // WiFi menu stuff
-  wifiSnifferMenu.list = new SimpleList<MenuNode>();
-  wifiScannerMenu.list = new SimpleList<MenuNode>();
-  wifiAttackMenu.list = new SimpleList<MenuNode>();
+  wifiSnifferMenu.list = new LinkedList<MenuNode>();
+  wifiScannerMenu.list = new LinkedList<MenuNode>();
+  wifiAttackMenu.list = new LinkedList<MenuNode>();
 
   // Bluetooth menu stuff
-  bluetoothSnifferMenu.list = new SimpleList<MenuNode>();
-  bluetoothScannerMenu.list = new SimpleList<MenuNode>();
+  bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
+  bluetoothScannerMenu.list = new LinkedList<MenuNode>();
 
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";

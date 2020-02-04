@@ -17,7 +17,7 @@ void Display::RunSetup()
   run_setup = false;
 
   // Need to declare new
-  display_buffer = new SimpleList<String>();
+  display_buffer = new LinkedList<String>();
   
   tft.init();
   tft.setRotation(0); // Portrait

@@ -58,7 +58,7 @@ struct MenuNode {
 // Full Menus
 struct Menu {
     String name;
-    SimpleList<MenuNode>* list;
+    LinkedList<MenuNode>* list;
     Menu                * parentMenu;
     uint8_t               selected;
 };

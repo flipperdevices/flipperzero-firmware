@@ -5,7 +5,8 @@
 #include <FS.h>
 #include <functional>
 #include <JPEGDecoder.h>
-#include <SimpleList.h>
+//#include <SimpleList.h>
+#include <LinkedList.h>
 #include <SPI.h>
 #include "SPIFFS.h"
 
@@ -52,7 +53,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.4.1";
+    String version_number = "v0.4.2";
 
     bool printing = false;
     bool loading = false;
@@ -69,7 +70,7 @@ class Display
     //Menu wifiMenu;
     //Menu bluetoothMenu;
 
-    SimpleList<String>* display_buffer;
+    LinkedList<String>* display_buffer;
 
     // The initial y coordinate of the top of the bottom text line
     uint16_t yDraw = YMAX - BOT_FIXED_AREA - TEXT_HEIGHT;
