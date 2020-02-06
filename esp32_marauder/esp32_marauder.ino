@@ -15,6 +15,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "esp_system.h"
 #include <Arduino.h>
 
+#include "Assets.h"
 #include "Display.h"
 #include "WiFiScan.h"
 #include "MenuFunctions.h"

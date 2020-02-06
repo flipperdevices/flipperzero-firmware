@@ -9,6 +9,7 @@
 #include <LinkedList.h>
 #include <SPI.h>
 #include "SPIFFS.h"
+#include "Assets.h"
 
 #include <TFT_eSPI.h>
 
@@ -53,7 +54,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.4.2";
+    String version_number = "v0.4.3";
 
     bool printing = false;
     bool loading = false;
