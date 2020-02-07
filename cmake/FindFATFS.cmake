@@ -9,8 +9,10 @@ SET(FATFS_COMMON_SOURCES
     ff_gen_drv.c
 )
 
+CMAKE_POLICY(SET CMP0057 NEW)
+
 IF(NOT STORAGE_DRIVER)
-    MESSAGE(STATUS "No storage driver specified")
+    MESSAGE(STATUS "No storage driver specified, please SET STORAGE_DRIVER to {SDCARD, SDRAM, SRAM, USBH}")
 else()
     if("SDCARD" IN_LIST STORAGE_DRIVER)
         LIST(APPEND FATFS_DRIVER_SOURCES sd_diskio.c)
