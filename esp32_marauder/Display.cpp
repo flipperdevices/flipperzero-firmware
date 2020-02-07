@@ -101,6 +101,9 @@ void Display::tftDrawXScaleButtons(byte x_scale)
                         "+",
                         2);
 
+  key[0].setLabelDatum(1, 5, MC_DATUM);
+  key[1].setLabelDatum(1, 5, MC_DATUM);
+
   key[0].drawButton();
   key[1].drawButton();
 }
@@ -130,6 +133,9 @@ void Display::tftDrawYScaleButtons(byte y_scale)
                         TFT_BLACK, // Text
                         "+",
                         2);
+
+  key[2].setLabelDatum(1, 5, MC_DATUM);
+  key[3].setLabelDatum(1, 5, MC_DATUM);
 
   key[2].drawButton();
   key[3].drawButton();
@@ -161,6 +167,9 @@ void Display::tftDrawChannelScaleButtons(int set_channel)
                         "+",
                         2);
 
+  key[4].setLabelDatum(1, 5, MC_DATUM);
+  key[5].setLabelDatum(1, 5, MC_DATUM);
+
   key[4].drawButton();
   key[5].drawButton();
 }
@@ -180,6 +189,8 @@ void Display::tftDrawExitScaleButtons()
                         TFT_BLACK, // Text
                         "X",
                         2);
+
+  key[6].setLabelDatum(1, 5, MC_DATUM);
 
   key[6].drawButton();
 }
