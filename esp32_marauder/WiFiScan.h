@@ -15,6 +15,7 @@
 #define bad_list_length 3
 
 #define OTA_UPDATE 100
+#define SHOW_INFO 101
 #define WIFI_SCAN_OFF 0
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2
@@ -130,7 +131,11 @@ class WiFiScan
     bool orient_display = false;
 
     
-    
+
+    String getStaMAC();
+    String getApMAC();
+    String freeRAM();
+    void RunInfo();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);

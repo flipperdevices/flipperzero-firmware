@@ -170,6 +170,84 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   display_obj.tteBar = false;
 }
 
+String WiFiScan::getStaMAC()
+{
+  char *buf;
+  uint8_t mac[6];
+  char macAddrChr[18] = {0};
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_STA, mac);
+  sprintf(macAddrChr, 
+          "%02X:%02X:%02X:%02X:%02X:%02X",
+          mac[0],
+          mac[1],
+          mac[2],
+          mac[3],
+          mac[4],
+          mac[5]);
+  return String(macAddrChr);
+}
+
+String WiFiScan::getApMAC()
+{
+  char *buf;
+  uint8_t mac[6];
+  char macAddrChr[18] = {0};
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_AP, mac);
+  sprintf(macAddrChr, 
+          "%02X:%02X:%02X:%02X:%02X:%02X",
+          mac[0],
+          mac[1],
+          mac[2],
+          mac[3],
+          mac[4],
+          mac[5]);
+  return String(macAddrChr);
+}
+
+
+String WiFiScan::freeRAM()
+{
+  char s[150];
+  sprintf(s, "RAM Free: %u bytes", system_get_free_heap_size());
+  return String(s);
+}
+
+
+void WiFiScan::RunInfo()
+{
+  String sta_mac = this->getStaMAC();
+  String ap_mac = this->getApMAC();
+  String free_ram = this->freeRAM();
+  
+  Serial.print("STA MAC: ");
+  Serial.println(sta_mac);
+  Serial.print("AP MAC: ");
+  Serial.println(ap_mac);
+  Serial.println(free_ram);
+
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.println(" Station MAC: " + sta_mac);
+  display_obj.tft.println("      AP MAC: " + ap_mac);
+  display_obj.tft.println("    " + free_ram);
+
+  
+}
+
 void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
 {
   display_obj.tft.init();

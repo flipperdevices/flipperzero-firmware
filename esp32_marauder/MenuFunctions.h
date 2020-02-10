@@ -42,6 +42,8 @@ extern Web web_obj;
 #define REBOOT 14
 #define GENERAL_APPS 15
 #define UPDATE 16
+#define DEVICE 17
+#define DEVICE_INFO 18
 
 struct Menu;
 
@@ -75,7 +77,11 @@ class MenuFunctions
     Menu wifiMenu;
     Menu bluetoothMenu;
     Menu generalMenu;
+    Menu deviceMenu;
+
+    // Device menu stuff
     Menu updateMenu;
+    Menu infoMenu;
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;

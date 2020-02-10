@@ -11,7 +11,8 @@ MenuFunctions::MenuFunctions()
 void MenuFunctions::main()
 {
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
-      (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
+      (wifi_scan_obj.currentScanMode == OTA_UPDATE) || 
+      (wifi_scan_obj.currentScanMode == SHOW_INFO)) {
     if (wifi_scan_obj.orient_display) {
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
@@ -49,7 +50,10 @@ void MenuFunctions::main()
 
   
   // This is if there are scans/attacks going on
-  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && (pressed) && (wifi_scan_obj.currentScanMode != OTA_UPDATE))
+  if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) && 
+      (pressed) && 
+      (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
+      (wifi_scan_obj.currentScanMode != SHOW_INFO))
   {  
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
@@ -145,7 +149,11 @@ void MenuFunctions::RunSetup()
   wifiMenu.list = new LinkedList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new LinkedList<MenuNode>(); // Get list in third menu ready
   generalMenu.list = new LinkedList<MenuNode>();
+  deviceMenu.list = new LinkedList<MenuNode>();
+
+  // Device menu stuff
   updateMenu.list = new LinkedList<MenuNode>();
+  infoMenu.list = new LinkedList<MenuNode>();
 
   // WiFi menu stuff
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
@@ -159,8 +167,10 @@ void MenuFunctions::RunSetup()
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
   wifiMenu.name = " WiFi ";
+  deviceMenu.name = " Device ";
   generalMenu.name = " General Apps ";
   updateMenu.name = " Update Firmware ";
+  infoMenu.name = " Device Info ";
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiScannerMenu.name = " WiFi Scanners";
@@ -173,7 +183,7 @@ void MenuFunctions::RunSetup()
   addNodes(&mainMenu, "WiFi", TFT_GREEN, NULL, WIFI, [this](){changeMenu(&wifiMenu);});
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, BLUETOOTH, [this](){changeMenu(&bluetoothMenu);});
   addNodes(&mainMenu, "General Apps", TFT_MAGENTA, NULL, GENERAL_APPS, [this](){changeMenu(&generalMenu);});
-  addNodes(&mainMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
+  addNodes(&mainMenu, "Device", TFT_BLUE, NULL, DEVICE, [this](){changeMenu(&deviceMenu);});
   addNodes(&mainMenu, "Reboot", TFT_LIGHTGREY, NULL, REBOOT, [](){ESP.restart();});
 
   // Build WiFi Menu
@@ -221,9 +231,16 @@ void MenuFunctions::RunSetup()
   addNodes(&generalMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){display_obj.draw_tft = false; changeMenu(generalMenu.parentMenu);});
   addNodes(&generalMenu, "Draw", TFT_WHITE, NULL, DRAW, [this](){display_obj.clearScreen(); display_obj.draw_tft = true;});
 
-  updateMenu.parentMenu = &mainMenu;
+  deviceMenu.parentMenu = &mainMenu;
+  addNodes(&deviceMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(deviceMenu.parentMenu);});
+  addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
+  addNodes(&deviceMenu, "Device Info", TFT_WHITE, NULL, DEVICE_INFO, [this](){wifi_scan_obj.currentScanMode = SHOW_INFO; changeMenu(&infoMenu); wifi_scan_obj.RunInfo();});
+
+  updateMenu.parentMenu = &deviceMenu;
   addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true);});
 
+  infoMenu.parentMenu = &deviceMenu;
+  addNodes(&infoMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(infoMenu.parentMenu);});
 
   // Set the current menu to the mainMenu
   changeMenu(&mainMenu);
@@ -293,7 +310,7 @@ void MenuFunctions::buildButtons(Menu* menu)
                         buf,
                         KEY_TEXTSIZE);
 
-      display_obj.key[i].setLabelDatum(BUTTON_PADDING - (KEY_W/2), 0, ML_DATUM);
+      display_obj.key[i].setLabelDatum(BUTTON_PADDING - (KEY_W/2), 2, ML_DATUM);
     }
   }
 }
