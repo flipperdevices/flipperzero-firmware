@@ -87,6 +87,7 @@ void Web::setupOTAupdate()
       display_obj.tft.print("Update: ");
       display_obj.tft.print(upload.filename.c_str());
       display_obj.tft.print("\n");
+      //display_obj.updateBanner(menu_function_obj.current_menu->name);
       Serial.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
         Update.printError(Serial);
