@@ -11,6 +11,7 @@ Code taken from espressif ESP32 OTA Update example
 #include <ESPmDNS.h>
 #include <Update.h>
 
+#include "Assets.h"
 #include "Display.h"
 
 extern Display display_obj;
@@ -72,7 +73,14 @@ class Web
      */
      
     const char* serverIndex = 
-    "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
+    "<script src='/jquery.min.js'></script>"
+    "Because the lack of an asynchronous webserver in this Arduino sketch like 'ESPAsyncWebServer', <br/>"
+    "both file 'serverIndex' and 'jquery.min.js' can't be read from the webserver at the same time. <br/><br/>"
+    "Your web browser probably requests those two files simultaneously and therefore <br/>"
+    "the javascript file failed to load. By a refresh of this page, the browser cash has already <br/>"
+    "load 'serverIndex' file, the web browser will do a second attempt to only read the javascript file. <br/>"
+    "This second attempt, with an idle webserver, will be processed.<br/><br/>"
+    "Long story short, press F5 (refresh web browser) before uploading your firmware. <br/><br/>"
     "<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
        "<input type='file' name='update'>"
             "<input type='submit' value='Update'>"
@@ -113,6 +121,7 @@ class Web
     Web();
 
     void main();
+    static void onJavaScript();
     void setupOTAupdate();
 };
 

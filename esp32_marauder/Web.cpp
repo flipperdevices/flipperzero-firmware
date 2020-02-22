@@ -30,6 +30,14 @@ void Web::main()
   delay(1);
 }
 
+// Callback for the embedded jquery.min.js page
+void Web::onJavaScript(void) {
+    Serial.println("onJavaScript(void)");
+    server.setContentLength(jquery_min_js_v3_2_1_gz_len);
+    server.sendHeader(F("Content-Encoding"), F("gzip"));
+    server.send_P(200, "text/javascript", jquery_min_js_v3_2_1_gz, jquery_min_js_v3_2_1_gz_len);
+}
+
 void Web::setupOTAupdate()
 {
   display_obj.tft.setTextWrap(false);
@@ -65,7 +73,9 @@ void Web::setupOTAupdate()
   }
   Serial.println("mDNS responder started");
   */
-  
+
+  // return javascript jquery
+  server.on("/jquery.min.js", HTTP_GET, onJavaScript);
   /*return index page which is stored in serverIndex */
   server.on("/", HTTP_GET, [this]() {
     server.sendHeader("Connection", "close");
