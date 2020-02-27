@@ -1,5 +1,3 @@
-include(FindPackageHandleStandardArgs)
-
 function(stm32_add_cmsis TARGET)
     stm32_get_chip(${TARGET} FAMILY DEVICE) 
     stm32_get_type(${FAMILY} ${DEVICE} TYPE)
