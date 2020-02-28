@@ -75,6 +75,20 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         NO_DEFAULT_PATH
     )
     list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}_SOURCE}")
+	
+	if ((NOT CMSIS_${FAMILY}_COMMON_INCLUDE) OR 
+	    (NOT CMSIS_${FAMILY}_INCLUDE) OR 
+	    (NOT CMSIS_${FAMILY}_SOURCE))
+		continue()
+	endif()
+	
+    if(NOT (TARGET CMSIS::STM32::${FAMILY}))
+		add_library(CMSIS::STM32::${FAMILY} INTERFACE IMPORTED)
+		target_link_libraries(CMSIS::STM32::${FAMILY} INTERFACE STM32::${FAMILY})
+		target_include_directories(CMSIS::STM32::${FAMILY} INTERFACE "${CMSIS_${FAMILY}_COMMON_INCLUDE}")
+		target_include_directories(CMSIS::STM32::${FAMILY} INTERFACE "${CMSIS_${FAMILY}_INCLUDE}")
+        target_sources(CMSIS::STM32::${FAMILY} INTERFACE "${CMSIS_${FAMILY}_SOURCE}")
+	endif()
 
     set(DEVICES_FOUND TRUE)
     foreach(DEVICE ${DEVICES})
@@ -92,13 +106,15 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
             set(DEVICES_FOUND FALSE)
             break()
         endif()
+		
+		if(NOT (TARGET CMSIS::STM32::${FAMILY}::${TYPE}))
+			add_library(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE IMPORTED)
+			target_link_libraries(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE CMSIS::STM32::${FAMILY} STM32::${FAMILY}::${TYPE})
+			target_sources(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE "${CMSIS_${FAMILY}_${TYPE}_STARTUP}")
+		endif()
         
         add_library(CMSIS::STM32::${DEVICE} INTERFACE IMPORTED)
-        target_link_libraries(CMSIS::STM32::${DEVICE} INTERFACE STM32::${FAMILY}::${TYPE})
-        target_include_directories(CMSIS::STM32::${DEVICE} INTERFACE "${CMSIS_${FAMILY}_COMMON_INCLUDE}")
-        target_include_directories(CMSIS::STM32::${DEVICE} INTERFACE "${CMSIS_${FAMILY}_INCLUDE}")
-        target_sources(CMSIS::STM32::${DEVICE} INTERFACE "${CMSIS_${FAMILY}_SOURCE}")
-        target_sources(CMSIS::STM32::${DEVICE} INTERFACE "${CMSIS_${FAMILY}_${TYPE}_STARTUP}")
+        target_link_libraries(CMSIS::STM32::${DEVICE} INTERFACE CMSIS::STM32::${FAMILY}::${TYPE})
         cmsis_generate_default_linker_script(${FAMILY} ${DEVICE})
     endforeach()
         
