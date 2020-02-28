@@ -3,20 +3,14 @@ cmake_minimum_required(VERSION 3.8)
 
 project(cmsis-test C ASM)
 
+find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
+
 set(SOURCES main.c)
 
-include(${CMAKE_SOURCE_DIR}/../stm32_devices.cmake)
-stm32_get_devices_by_family(F4 DEVICES)
+include(stm32/devices)
 
-foreach(DEVICE ${DEVICES})
-    string(TOLOWER ${DEVICE} DEVICE_L)
-    set(TARGET cmsis-test-${DEVICE_L})
-    
-    message(STATUS "Testing ${DEVICE}...")
-    add_executable(${TARGET} ${SOURCES})
-    set_target_properties(${TARGET} PROPERTIES 
-        STM32_CHIP ${DEVICE}
-        STM32_GCC_SPECS nosys
-    )
-    stm32_target(${TARGET})
+stm32_get_devices_by_family(F4 DEVICES)
+foreach(DEVICE ${DEVICES})    
+    add_executable(cmsis-test-${DEVICE} ${SOURCES})
+    target_link_libraries(cmsis-test-${DEVICE} CMSIS::STM32::${DEVICE} STM32::NoSys)
 endforeach()

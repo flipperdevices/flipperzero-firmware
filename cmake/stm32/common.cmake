@@ -26,18 +26,16 @@ find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size PATHS ${TOOLCHAIN_BIN
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_BIN_PATH})
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH})
 
-include(stm32/f4)
-include(stm32/linker)
-include(stm32/cmsis)
-
-function(stm32_get_chip TARGET FAMILY DEVICE)
-    get_target_property(CHIP ${TARGET} STM32_CHIP)
-    string(TOUPPER ${CHIP} CHIP)
-    
-    if(NOT CHIP)
-        message(FATAL_ERROR "Please specify STM32 chip for target ${TARGET} using STM32_CHIP property")
+function(stm32_get_chip_type FAMILY DEVICE TYPE)
+    if(${FAMILY} STREQUAL "F4")
+        stm32f4_get_type(${DEVICE} T)
     endif()
-    
+    set(${TYPE} ${T} PARENT_SCOPE)
+endfunction()
+
+function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
+    string(TOUPPER ${CHIP} CHIP)
+        
     string(REGEX MATCH "^STM32([A-Z][0-9])([0-9][0-9][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
     
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
@@ -52,138 +50,36 @@ function(stm32_get_chip TARGET FAMILY DEVICE)
         message(FATAL_ERROR "Unsupported family ${STM32_FAMILY} for device ${CHIP}")
     endif()
 
+    stm32_get_chip_type(${STM32_FAMILY} ${STM32_DEVICE} STM32_TYPE)
+    
     set(${FAMILY} ${STM32_FAMILY} PARENT_SCOPE)
     set(${DEVICE} ${STM32_DEVICE} PARENT_SCOPE)
+    set(${TYPE} ${STM32_TYPE} PARENT_SCOPE)
 endfunction()
 
-function(stm32_get_type FAMILY DEVICE TYPE)
-    if(${FAMILY} STREQUAL "F4")
-        stm32f4_get_type(${DEVICE} T)
+foreach(FAMILY ${STM32_SUPPORTED_FAMILIES})
+    if(NOT (TARGET STM32::${FAMILY}))
+        add_library(STM32::${FAMILY} INTERFACE IMPORTED)
+        target_compile_options(STM32::${FAMILY} INTERFACE 
+            --sysroot="${TOOLCHAIN_SYSROOT}"
+            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -ffast-math
+            $<$<CONFIG:Debug>:-Og>
+            $<$<CONFIG:Release>:-Os>
+        )
+        target_link_options(STM32::${FAMILY} INTERFACE 
+            --sysroot="${TOOLCHAIN_SYSROOT}"
+            -mthumb -mabi=aapcs -Wl,--gc-sections
+            $<$<CONFIG:Debug>:-Og>
+            $<$<CONFIG:Release>:-Os -s>
+        )
     endif()
-    set(${TYPE} ${T} PARENT_SCOPE)
-endfunction()
+endforeach()
 
-function(stm32_configure_compiler TARGET)
-    stm32_get_chip(${TARGET} STM32_FAMILY STM32_DEVICE) 
-    
-    target_compile_options(${TARGET} PRIVATE 
-        --sysroot="${TOOLCHAIN_SYSROOT}"
-        -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -ffast-math
-        $<$<CONFIG:Debug>:-Og>
-        $<$<CONFIG:Release>:-Os>
-    )
-    target_link_options(${TARGET} PRIVATE 
-        --sysroot="${TOOLCHAIN_SYSROOT}"
-        -mthumb -mabi=aapcs -Wl,--gc-sections
-        $<$<CONFIG:Debug>:-Og>
-        $<$<CONFIG:Release>:-Os -s>
-    )
+if(NOT (TARGET STM32::NoSys))
+    add_library(STM32::NoSys INTERFACE IMPORTED)
+    target_compile_options(STM32::NoSys INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nosys.specs>)
+    target_link_options(STM32::NoSys INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nosys.specs>)
+endif()
 
-    get_target_property(SPECS ${TARGET} STM32_GCC_SPECS)
-    if(SPECS)
-        target_compile_options(${TARGET} PRIVATE $<$<C_COMPILER_ID:GNU>:--specs=${SPECS}.specs>)
-        target_link_options(${TARGET} PRIVATE $<$<C_COMPILER_ID:GNU>:--specs=${SPECS}.specs>)
-    endif()
-    
-    if(${STM32_FAMILY} STREQUAL "F4")
-        stm32f4_configure_compiler(${TARGET})
-    endif()
-endfunction()
+include(stm32/f4)
 
-function(stm32_target TARGET)
-    get_target_property(TARGET_TYPE ${TARGET} TYPE)
-    stm32_configure_compiler(${TARGET})
-    if(TARGET_TYPE STREQUAL EXECUTABLE)
-        get_target_property(NO_LINKER_SCRIPT ${TARGET} STM32_NO_LINKER_SCRIPT)
-        if(NOT NO_LINKER_SCRIPT)
-            stm32_generate_linker_script(${TARGET})
-        endif()
-        get_target_property(NO_CMSIS ${TARGET} STM32_NO_CMSIS)
-        if(NOT NO_CMSIS)
-            stm32_add_cmsis(${TARGET})
-        endif()
-    endif()
-endfunction()
-
-# function(nrf52_add_sdk_startup TARGET)
-#     get_target_property(TARGET_NO_SDK ${TARGET} STM32_NO_SDK)
-#     if(TARGET_NO_SDK)
-#         return()
-#     endif()
-# 
-#     target_include_directories(${TARGET} PRIVATE "${NRF5_SDK_PATH}/components/toolchain/cmsis/include")
-#     target_include_directories(${TARGET} PRIVATE "${NRF5_SDK_PATH}/modules/nrfx/mdk")
-#     
-#     nrf52_get_chip(${TARGET} STM32_CHIP STM32_CHIP_VARIANT)
-#     
-#     unset(STM32_STARTUP_FILE CACHE)
-#     find_file(STM32_STARTUP_FILE
-#         NAMES gcc_startup_nrf52${STM32_CHIP}.S gcc_startup_nrf52.S
-#         PATHS "${NRF5_SDK_PATH}/modules/nrfx/mdk"
-#         NO_DEFAULT_PATH
-#     )
-#     
-#     unset(STM32_SYSTEM_FILE CACHE)
-#     find_file(STM32_SYSTEM_FILE
-#         NAMES system_nrf52${STM32_CHIP}.c system_nrf52.c
-#         PATHS "${NRF5_SDK_PATH}/modules/nrfx/mdk"
-#         NO_DEFAULT_PATH
-#     )
-#     
-#     if((NOT STM32_STARTUP_FILE) OR (NOT STM32_SYSTEM_FILE))
-#         message(WARNING "Cannot find startup sources for target ${TARGET}, check NRF5_SDK_PATH variable")
-#     else()
-#         target_sources(${TARGET} PRIVATE "${STM32_STARTUP_FILE}" "${STM32_SYSTEM_FILE}")
-#     endif()
-# endfunction()
-# 
-# function(nrf52_add_linker_script TARGET SCRIPT)
-#     target_link_options(${TARGET} PRIVATE -T "${SCRIPT}")
-#     target_link_options(${TARGET} PRIVATE -L "${NRF5_SDK_PATH}/modules/nrfx/mdk")
-# endfunction()
-# 
-# function(nrf52_generate_linker_script TARGET)
-#     get_target_property(TARGET_NO_LINKER_SCRIPT ${TARGET} STM32_NO_LINKER_SCRIPT)
-#     if(TARGET_NO_LINKER_SCRIPT)
-#         return()
-#     endif()
-#     set(STM32_LINKER_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.ld)
-#     nrf52_linker_generate_script(${TARGET} "${STM32_LINKER_FILE}")
-#     nrf52_add_linker_script(${TARGET} "${STM32_LINKER_FILE}")
-# endfunction()
-# 
-# function(nrf52_configure_compiler TARGET)
-#     nrf52_get_chip(${TARGET} STM32_CHIP STM32_CHIP_VARIANT)
-#     
-#     if(STM32_CHIP EQUAL 840)
-#         target_compile_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
-#         target_compile_definitions(${TARGET} PRIVATE -DFLOAT_ABI_HARD)
-#         target_link_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
-#     elseif(STM32_CHIP EQUAL 832)
-#         target_compile_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
-#         target_link_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16)
-#         target_compile_definitions(${TARGET} PRIVATE -DFLOAT_ABI_HARD)
-#     elseif(STM32_CHIP EQUAL 811)
-#         target_compile_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=soft)
-#         target_compile_definitions(${TARGET} PRIVATE -DFLOAT_ABI_SOFT)
-#         target_link_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=soft)
-#     elseif(STM32_CHIP EQUAL 810)
-#         target_compile_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=soft)
-#         target_compile_definitions(${TARGET} PRIVATE -DFLOAT_ABI_SOFT)
-#         target_link_options(${TARGET} PRIVATE -mcpu=cortex-m4 -mfloat-abi=soft)
-#     endif()
-#     
-#     target_compile_options(${TARGET} PRIVATE -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -fshort-enums $<$<CONFIG:Release>:-Os>)
-#     target_compile_definitions(${TARGET} PRIVATE -DSTM32${STM32_CHIP}_XX${STM32_CHIP_VARIANT})
-#     target_link_options(${TARGET} PRIVATE -mthumb -mabi=aapcs -Wl,--gc-sections --specs=nano.specs $<$<CONFIG:Release>:-Os>)
-# endfunction()
-# 
-# function(nrf52_target TARGET)
-#     get_target_property(TARGET_TYPE ${TARGET} TYPE)    
-#     nrf52_configure_compiler(${TARGET})
-#     if(TARGET_TYPE STREQUAL EXECUTABLE)
-#         nrf52_add_sdk_startup(${TARGET})
-#         nrf52_generate_linker_script(${TARGET})
-#         target_link_libraries(${TARGET} PRIVATE -lc -lnosys -lm)
-#     endif()
-# endfunction()

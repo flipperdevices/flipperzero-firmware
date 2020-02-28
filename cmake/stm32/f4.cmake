@@ -20,6 +20,26 @@ set(STM32F4_CCRAM_SIZES
     64K 64K 64K 64K  0K 64K 64K
 )
 
+target_compile_options(STM32::F4 INTERFACE 
+    -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+)
+target_link_options(STM32::F4 INTERFACE 
+    -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+)
+target_compile_definitions(STM32::F4 INTERFACE 
+    STM32F4
+)
+
+foreach(TYPE ${STM32F4_TYPES})
+    if(NOT (TARGET STM32::F4::${TYPE}))
+        add_library(STM32::F4::${TYPE} INTERFACE IMPORTED)
+        target_link_libraries(STM32::F4::${TYPE} INTERFACE STM32::F4)
+        target_compile_definitions(STM32::F4::${TYPE} INTERFACE 
+            STM32F${TYPE}
+        )
+    endif()
+endforeach()
+
 function(stm32f4_get_type DEVICE TYPE)
     set(INDEX 0)
     foreach(C_TYPE ${STM32F4_TYPES})
@@ -35,7 +55,10 @@ function(stm32f4_get_type DEVICE TYPE)
     set(${TYPE} ${RESULT_TYPE} PARENT_SCOPE)
 endfunction()
 
-function(stm32f4_memory_size DEVICE FLASH_SIZE RAM_SIZE CCRAM_SIZE)
+function(stm32f4_memory_info DEVICE 
+        FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
+        FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
+)
     string(REGEX REPLACE "^F4[0-9][0-9].([8BCDEGHI])$" "\\1" SIZE_CODE ${DEVICE})
     
     if(SIZE_CODE STREQUAL "8")
@@ -67,20 +90,9 @@ function(stm32f4_memory_size DEVICE FLASH_SIZE RAM_SIZE CCRAM_SIZE)
     set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
     set(${RAM_SIZE} ${RAM} PARENT_SCOPE)
     set(${CCRAM_SIZE} ${CCRAM} PARENT_SCOPE)
-endfunction()
-
-function(stm32f4_configure_compiler TARGET)
-    stm32_get_chip(${TARGET} FAMILY DEVICE)
-    stm32f4_get_type(${DEVICE} TYPE)
-    
-    target_compile_options(${TARGET} PRIVATE 
-        -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
-    )
-    target_link_options(${TARGET} PRIVATE 
-        -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard
-    )
-    target_compile_definitions(${TARGET} PRIVATE 
-        STM32F4 
-        STM32F${TYPE}
-    )
+    set(${STACK_SIZE} 0x400 PARENT_SCOPE)
+    set(${HEAP_SIZE} 0x200 PARENT_SCOPE)
+    set(${FLASH_ORIGIN} 0x8000000 PARENT_SCOPE)
+    set(${RAM_ORIGIN} 0x20000000 PARENT_SCOPE)
+    set(${CCRAM_ORIGIN} 0x10000000 PARENT_SCOPE)
 endfunction()
