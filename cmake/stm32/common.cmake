@@ -57,6 +57,11 @@ function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
     set(${TYPE} ${STM32_TYPE} PARENT_SCOPE)
 endfunction()
 
+function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
+    get_filename_component(SCRIPT "${SCRIPT}" ABSOLUTE)
+    target_link_options(${TARGET} ${VISIBILITY} -T "${SCRIPT}")
+endfunction()
+
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES})
     if(NOT (TARGET STM32::${FAMILY}))
         add_library(STM32::${FAMILY} INTERFACE IMPORTED)
