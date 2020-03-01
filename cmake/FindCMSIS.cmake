@@ -1,16 +1,14 @@
 if(NOT CMSIS_FIND_COMPONENTS)
-    set(CMSIS_FIND_COMPONENTS STM32F4)
+    set(CMSIS_FIND_COMPONENTS STM32F0 STM32F4)
 endif()
 
 include(stm32/devices)
     
-function(cmsis_generate_default_linker_script FAMILY DEVICE)    
-    if(${FAMILY} STREQUAL "F4")
-        stm32f4_memory_info(${DEVICE} 
-            FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
-            FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
-        )
-    endif()
+function(cmsis_generate_default_linker_script FAMILY DEVICE)
+    stm32_get_memory_info(${FAMILY} ${DEVICE} 
+        FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
+        FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
+    )
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}.ld"
         COMMAND ${CMAKE_COMMAND} 
             -DFLASH_ORIGIN="${FLASH_ORIGIN}" 
@@ -58,6 +56,10 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
         NO_DEFAULT_PATH
     )  
+    
+    if (NOT CMSIS_${FAMILY}_PATH)
+        continue()
+    endif()
     
     if(NOT CMSIS_${FAMILY}_VERSION)
         file(STRINGS "${CMSIS_${FAMILY}_PATH}/ARM.CMSIS.pdsc" VERSION_STRINGS REGEX "<release version=\"([0-9]*\\.[0-9]*\\.[0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">")

@@ -27,10 +27,18 @@ find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH})
 
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
-    if(${FAMILY} STREQUAL "F4")
-        stm32f4_get_type(${DEVICE} T)
+    set(INDEX 0)
+    foreach(C_TYPE ${STM32_${FAMILY}_TYPES})
+        list(GET STM32_${FAMILY}_TYPE_MATCH ${INDEX} REGEXP)
+        if(${DEVICE} MATCHES ${REGEXP})
+            set(RESULT_TYPE ${C_TYPE})
+        endif()
+        math(EXPR INDEX "${INDEX}+1")
+    endforeach()
+    if(NOT RESULT_TYPE)
+        message(FATAL_ERROR "Invalid/unsupported device: ${DEVICE}")
     endif()
-    set(${TYPE} ${T} PARENT_SCOPE)
+    set(${TYPE} ${RESULT_TYPE} PARENT_SCOPE)
 endfunction()
 
 function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
@@ -57,28 +65,56 @@ function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
     set(${TYPE} ${STM32_TYPE} PARENT_SCOPE)
 endfunction()
 
+function(stm32_get_memory_info FAMILY DEVICE 
+    FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
+    FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
+)
+    string(REGEX REPLACE "^[FHL][0-9][0-9][0-9].([468BCDEGHI])$" "\\1" SIZE_CODE ${DEVICE})
+    
+    if(SIZE_CODE STREQUAL "4")
+        set(FLASH "16K")
+    elseif(SIZE_CODE STREQUAL "6")
+        set(FLASH "32K")
+    elseif(SIZE_CODE STREQUAL "8")
+        set(FLASH "64K")
+    elseif(SIZE_CODE STREQUAL "B")
+        set(FLASH "128K")
+    elseif(SIZE_CODE STREQUAL "C")
+        set(FLASH "256K")
+    elseif(SIZE_CODE STREQUAL "D")
+        set(FLASH "384K")
+    elseif(SIZE_CODE STREQUAL "E")
+        set(FLASH "512K")
+    elseif(SIZE_CODE STREQUAL "G")
+        set(FLASH "1024K")
+    elseif(SIZE_CODE STREQUAL "H")
+        set(FLASH "1536K")
+    elseif(SIZE_CODE STREQUAL "I")
+        set(FLASH "2048K")
+    else()
+        set(FLASH "16K")
+        message(WARNING "Unknow flash size for device ${DEVICE}")
+    endif()
+    
+    stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
+    list(FIND STM32_${FAMILY}_TYPES ${TYPE} TYPE_INDEX)
+    list(GET STM32_${FAMILY}_RAM_SIZES ${TYPE_INDEX} RAM)
+    list(GET STM32_${FAMILY}_CCRAM_SIZES ${TYPE_INDEX} CCRAM)
+
+    set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
+    set(${RAM_SIZE} ${RAM} PARENT_SCOPE)
+    set(${CCRAM_SIZE} ${CCRAM} PARENT_SCOPE)
+    set(${STACK_SIZE} 0x400 PARENT_SCOPE)
+    set(${HEAP_SIZE} 0x200 PARENT_SCOPE)
+    set(${FLASH_ORIGIN} 0x8000000 PARENT_SCOPE)
+    set(${RAM_ORIGIN} 0x20000000 PARENT_SCOPE)
+    set(${CCRAM_ORIGIN} 0x10000000 PARENT_SCOPE)
+endfunction()
+
 function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
     get_filename_component(SCRIPT "${SCRIPT}" ABSOLUTE)
     target_link_options(${TARGET} ${VISIBILITY} -T "${SCRIPT}")
 endfunction()
-
-foreach(FAMILY ${STM32_SUPPORTED_FAMILIES})
-    if(NOT (TARGET STM32::${FAMILY}))
-        add_library(STM32::${FAMILY} INTERFACE IMPORTED)
-        target_compile_options(STM32::${FAMILY} INTERFACE 
-            --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -ffast-math
-            $<$<CONFIG:Debug>:-Og>
-            $<$<CONFIG:Release>:-Os>
-        )
-        target_link_options(STM32::${FAMILY} INTERFACE 
-            --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wl,--gc-sections
-            $<$<CONFIG:Debug>:-Og>
-            $<$<CONFIG:Release>:-Os -s>
-        )
-    endif()
-endforeach()
 
 if(NOT (TARGET STM32::NoSys))
     add_library(STM32::NoSys INTERFACE IMPORTED)
@@ -86,5 +122,7 @@ if(NOT (TARGET STM32::NoSys))
     target_link_options(STM32::NoSys INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nosys.specs>)
 endif()
 
+include(stm32/utilities)
+include(stm32/f0)
 include(stm32/f4)
 
