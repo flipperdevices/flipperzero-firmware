@@ -69,7 +69,7 @@ function(stm32_get_memory_info FAMILY DEVICE
     FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
     FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
 )
-    string(REGEX REPLACE "^[FHL][0-9][0-9][0-9].([468BCDEGHI])$" "\\1" SIZE_CODE ${DEVICE})
+    string(REGEX REPLACE "^[FGHL][0-9][0-9][0-9].([468BCDEFGHI])$" "\\1" SIZE_CODE ${DEVICE})
     
     if(SIZE_CODE STREQUAL "4")
         set(FLASH "16K")
@@ -85,6 +85,8 @@ function(stm32_get_memory_info FAMILY DEVICE
         set(FLASH "384K")
     elseif(SIZE_CODE STREQUAL "E")
         set(FLASH "512K")
+    elseif(SIZE_CODE STREQUAL "F")
+        set(FLASH "768K")
     elseif(SIZE_CODE STREQUAL "G")
         set(FLASH "1024K")
     elseif(SIZE_CODE STREQUAL "H")
@@ -100,6 +102,11 @@ function(stm32_get_memory_info FAMILY DEVICE
     list(FIND STM32_${FAMILY}_TYPES ${TYPE} TYPE_INDEX)
     list(GET STM32_${FAMILY}_RAM_SIZES ${TYPE_INDEX} RAM)
     list(GET STM32_${FAMILY}_CCRAM_SIZES ${TYPE_INDEX} CCRAM)
+    
+    if(FAMILY STREQUAL "F1")
+        stm32f1_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
+    endif()
+    
 
     set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
     set(${RAM_SIZE} ${RAM} PARENT_SCOPE)
@@ -124,5 +131,6 @@ endif()
 
 include(stm32/utilities)
 include(stm32/f0)
+include(stm32/f1)
 include(stm32/f4)
 
