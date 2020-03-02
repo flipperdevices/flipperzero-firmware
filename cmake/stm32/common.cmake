@@ -69,9 +69,11 @@ function(stm32_get_memory_info FAMILY DEVICE
     FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
     FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
 )
-    string(REGEX REPLACE "^[FGHL][0-9][0-9][0-9].([468BCDEFGHI])$" "\\1" SIZE_CODE ${DEVICE})
+    string(REGEX REPLACE "^[FGHL][0-9][0-9][0-9].([3468BCDEFGHIZ])$" "\\1" SIZE_CODE ${DEVICE})
     
-    if(SIZE_CODE STREQUAL "4")
+    if(SIZE_CODE STREQUAL "3")
+        set(FLASH "8K")
+    elseif(SIZE_CODE STREQUAL "4")
         set(FLASH "16K")
     elseif(SIZE_CODE STREQUAL "6")
         set(FLASH "32K")
@@ -93,6 +95,8 @@ function(stm32_get_memory_info FAMILY DEVICE
         set(FLASH "1536K")
     elseif(SIZE_CODE STREQUAL "I")
         set(FLASH "2048K")
+    elseif(SIZE_CODE STREQUAL "Z")
+        set(FLASH "192K")
     else()
         set(FLASH "16K")
         message(WARNING "Unknow flash size for device ${DEVICE}")
@@ -106,13 +110,18 @@ function(stm32_get_memory_info FAMILY DEVICE
     if(FAMILY STREQUAL "F1")
         stm32f1_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
     endif()
-    
 
     set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
     set(${RAM_SIZE} ${RAM} PARENT_SCOPE)
     set(${CCRAM_SIZE} ${CCRAM} PARENT_SCOPE)
-    set(${STACK_SIZE} 0x400 PARENT_SCOPE)
-    set(${HEAP_SIZE} 0x200 PARENT_SCOPE)
+    if (RAM STREQUAL "2K")
+        # Potato MCUs
+        set(${STACK_SIZE} 0x200 PARENT_SCOPE)
+        set(${HEAP_SIZE} 0x100 PARENT_SCOPE)
+    else()
+        set(${STACK_SIZE} 0x400 PARENT_SCOPE)
+        set(${HEAP_SIZE} 0x200 PARENT_SCOPE)
+    endif()
     set(${FLASH_ORIGIN} 0x8000000 PARENT_SCOPE)
     set(${RAM_ORIGIN} 0x20000000 PARENT_SCOPE)
     set(${CCRAM_ORIGIN} 0x10000000 PARENT_SCOPE)
@@ -132,6 +141,7 @@ endif()
 include(stm32/utilities)
 include(stm32/f0)
 include(stm32/g0)
+include(stm32/l0)
 include(stm32/f1)
 include(stm32/f4)
 

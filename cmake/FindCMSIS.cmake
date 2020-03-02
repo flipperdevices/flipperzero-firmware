@@ -1,5 +1,5 @@
 if(NOT CMSIS_FIND_COMPONENTS)
-    set(CMSIS_FIND_COMPONENTS STM32F0 STM32G0 STM32F1 STM32F4)
+    set(CMSIS_FIND_COMPONENTS STM32F0 STM32G0 STM32L0 STM32F1 STM32F4)
 endif()
 
 include(stm32/devices)
@@ -50,28 +50,37 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube_FW_${FAMILY} CACHE PATH "Path to STM32Cube_FW_${FAMILY}")
         message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
-    
+        
     find_path(CMSIS_${FAMILY}_PATH
-        NAMES ARM.CMSIS.pdsc
+        NAMES Include/cmsis_gcc.h
         PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
         NO_DEFAULT_PATH
     )
-    
     if (NOT CMSIS_${FAMILY}_PATH)
         continue()
     endif()
     
     if(NOT CMSIS_${FAMILY}_VERSION)
-        file(STRINGS "${CMSIS_${FAMILY}_PATH}/ARM.CMSIS.pdsc" VERSION_STRINGS REGEX "<release version=\"([0-9]*\\.[0-9]*\\.[0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">")
-        list(GET VERSION_STRINGS 0 STR)
-        string(REGEX MATCH "<release version=\"([0-9]*)\\.([0-9]*)\\.([0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">" MATCHED ${STR})
-        set(CMSIS_${FAMILY}_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" CACHE INTERNAL "CMSIS STM32${FAMILY} version")
+        find_file(CMSIS_${FAMILY}_PDSC
+            NAMES ARM.CMSIS.pdsc
+            PATHS "${CMSIS_${FAMILY}_PATH}"
+            NO_DEFAULT_PATH
+        )
+        if (NOT CMSIS_${FAMILY}_PDSC)
+            set(CMSIS_${FAMILY}_VERSION "0.0.0")
+        else()
+            file(STRINGS "${CMSIS_${FAMILY}_PDSC}" VERSION_STRINGS REGEX "<release version=\"([0-9]*\\.[0-9]*\\.[0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">")
+            list(GET VERSION_STRINGS 0 STR)
+            string(REGEX MATCH "<release version=\"([0-9]*)\\.([0-9]*)\\.([0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">" MATCHED ${STR})
+            set(CMSIS_${FAMILY}_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" CACHE INTERNAL "CMSIS STM32${FAMILY} version")
+        endif()
     endif()
+    
     set(CMSIS_${COMP}_VERSION ${CMSIS_${FAMILY}_VERSION})
     set(CMSIS_VERSION ${CMSIS_${COMP}_VERSION})
     
     find_path(CMSIS_${FAMILY}_COMMON_INCLUDE
-        NAMES cmsis_version.h
+        NAMES cmsis_gcc.h
         PATHS "${CMSIS_${FAMILY}_PATH}/Include"
         NO_DEFAULT_PATH
     )
