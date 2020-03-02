@@ -131,6 +131,7 @@ endif()
 
 include(stm32/utilities)
 include(stm32/f0)
+include(stm32/g0)
 include(stm32/f1)
 include(stm32/f4)
 
