@@ -16,6 +16,12 @@ include(stm32/devices)
 foreach(FAMILY ${TEST_FAMILIES})
     stm32_get_devices_by_family(${FAMILY} DEVICES)
     foreach(DEVICE ${DEVICES})    
+        stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
+        stm32_get_memory_info(${FAMILY} ${DEVICE} 
+            FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
+            FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
+        )
+        message(STATUS "STM32${DEVICE}: ${FAMILY} family, type ${TYPE}, ${FLASH_SIZE} flash, ${RAM_SIZE} RAM")
         add_executable(cmsis-test-${DEVICE} ${SOURCES})
         target_link_libraries(cmsis-test-${DEVICE} CMSIS::STM32::${DEVICE} STM32::NoSys)
     endforeach()

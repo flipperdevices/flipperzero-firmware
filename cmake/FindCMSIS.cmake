@@ -55,7 +55,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         NAMES ARM.CMSIS.pdsc
         PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
         NO_DEFAULT_PATH
-    )  
+    )
     
     if (NOT CMSIS_${FAMILY}_PATH)
         continue()
@@ -112,7 +112,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         string(TOLOWER ${TYPE} TYPE_L)
         
         find_file(CMSIS_${FAMILY}_${TYPE}_STARTUP
-            NAMES startup_stm32f${TYPE_L}.s
+            NAMES startup_stm32${TYPE_L}.s
             PATHS "${CMSIS_${FAMILY}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates/gcc"
             NO_DEFAULT_PATH
         )
@@ -122,14 +122,14 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
             break()
         endif()
         
-        if(NOT (TARGET CMSIS::STM32::${FAMILY}::${TYPE}))
-            add_library(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE IMPORTED)
-            target_link_libraries(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE CMSIS::STM32::${FAMILY} STM32::${FAMILY}::${TYPE})
-            target_sources(CMSIS::STM32::${FAMILY}::${TYPE} INTERFACE "${CMSIS_${FAMILY}_${TYPE}_STARTUP}")
+        if(NOT (TARGET CMSIS::STM32::${TYPE}))
+            add_library(CMSIS::STM32::${TYPE} INTERFACE IMPORTED)
+            target_link_libraries(CMSIS::STM32::${TYPE} INTERFACE CMSIS::STM32::${FAMILY} STM32::${TYPE})
+            target_sources(CMSIS::STM32::${TYPE} INTERFACE "${CMSIS_${FAMILY}_${TYPE}_STARTUP}")
         endif()
         
         add_library(CMSIS::STM32::${DEVICE} INTERFACE IMPORTED)
-        target_link_libraries(CMSIS::STM32::${DEVICE} INTERFACE CMSIS::STM32::${FAMILY}::${TYPE})
+        target_link_libraries(CMSIS::STM32::${DEVICE} INTERFACE CMSIS::STM32::${TYPE})
         cmsis_generate_default_linker_script(${FAMILY} ${DEVICE})
     endforeach()
         

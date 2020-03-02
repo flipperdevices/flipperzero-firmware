@@ -18,11 +18,11 @@ function(stm32_util_create_family_targets FAMILY)
         )
     endif()
     foreach(TYPE ${STM32_${FAMILY}_TYPES})
-        if(NOT (TARGET STM32::${FAMILY}::${TYPE}))
-            add_library(STM32::${FAMILY}::${TYPE} INTERFACE IMPORTED)
-            target_link_libraries(STM32::${FAMILY}::${TYPE} INTERFACE STM32::${FAMILY})
-            target_compile_definitions(STM32::${FAMILY}::${TYPE} INTERFACE 
-                STM32F${TYPE}
+        if(NOT (TARGET STM32::${TYPE}))
+            add_library(STM32::${TYPE} INTERFACE IMPORTED)
+            target_link_libraries(STM32::${TYPE} INTERFACE STM32::${FAMILY})
+            target_compile_definitions(STM32::${TYPE} INTERFACE 
+                STM32${TYPE}
             )
         endif()
     endforeach()
