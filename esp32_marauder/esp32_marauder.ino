@@ -15,16 +15,19 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "esp_system.h"
 #include <Arduino.h>
 
+
 #include "Assets.h"
 #include "Display.h"
 #include "WiFiScan.h"
 #include "MenuFunctions.h"
+#include "SDInterface.h"
 #include "Web.h"
 //#include "icons.h"
 
 Display display_obj;
 WiFiScan wifi_scan_obj;
 MenuFunctions menu_function_obj;
+SDInterface sd_obj;
 Web web_obj;
 
 uint32_t currentTime  = 0;
@@ -35,6 +38,10 @@ void setup()
   pinMode(FLASH_BUTTON, INPUT);
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, LOW);
+
+  // Preset SPI CS pins to avoid bus conflicts
+  digitalWrite(TFT_CS, HIGH);
+  digitalWrite(SD_CS, HIGH);
   
   Serial.begin(115200);
   Serial.println("\n\n--------------------------------\n");
@@ -42,6 +49,12 @@ void setup()
   Serial.println("            " + display_obj.version_number + "\n");
   Serial.println("       By: justcallmekoko\n");
   Serial.println("--------------------------------\n\n");
+
+  // Do some SD stuff
+  if(sd_obj.initSD())
+    Serial.println("SD Card supported");
+  else
+    Serial.println("SD Card NOT Supported");
 
   // Run display setup
   display_obj.RunSetup();

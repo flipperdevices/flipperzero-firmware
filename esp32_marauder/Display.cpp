@@ -27,7 +27,14 @@ void Display::RunSetup()
 
   // Calibration data
   //uint16_t calData[5] = { 390, 3516, 253, 3520, 7 }; tft.setRotation(1); // Portrait
-  uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait
+
+  #ifdef TFT_SHIELD
+    uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
+    Serial.println("Using TFT Shield");
+  #else if defined(TFT_DIY)
+    uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+    Serial.println("Using TFT DIY");
+  #endif
   tft.setTouch(calData);
 
   //tft.fillScreen(TFT_BLACK);

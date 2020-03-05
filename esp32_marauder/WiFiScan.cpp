@@ -245,6 +245,29 @@ void WiFiScan::RunInfo()
   display_obj.tft.println("      AP MAC: " + ap_mac);
   display_obj.tft.println("    " + free_ram);
 
+  if (sd_obj.supported) {
+    display_obj.tft.println("     SD Card: Connected");
+    display_obj.tft.print("SD Card Size: ");
+    //display_obj.tft.println((byte)(sd_obj.cardSizeMB % 10));
+    const int NUM_DIGITS = log10(sd_obj.cardSizeMB) + 1;
+  
+    char sz[NUM_DIGITS + 1];
+   
+    sz[NUM_DIGITS] =  0;
+    for ( size_t i = NUM_DIGITS; i--; sd_obj.cardSizeMB /= 10)
+    {
+        sz[i] = '0' + (sd_obj.cardSizeMB % 10);
+    }
+   
+    display_obj.tft.print(sz);
+    display_obj.tft.println("MB");
+  
+  }
+  else {
+    display_obj.tft.println("     SD Card: Not Connected");
+    display_obj.tft.print("SD Card Size: 0");
+  }
+
   
 }
 
@@ -253,7 +276,13 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
-  uint16_t calData[5] = { 391, 3491, 266, 3505, 7 };
+  #ifdef TFT_SHIELD
+    uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
+    Serial.println("Using TFT Shield");
+  #else if defined(TFT_DIY)
+    uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+    Serial.println("Using TFT DIY");
+  #endif
   display_obj.tft.setTouch(calData);
 
   //display_obj.tft.setFreeFont(1);

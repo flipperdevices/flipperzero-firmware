@@ -129,7 +129,16 @@ void MenuFunctions::orientDisplay()
 
   display_obj.tft.setCursor(0, 0);
 
-  uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait
+  //uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait
+  //uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+
+  #ifdef TFT_SHIELD
+    uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
+    Serial.println("Using TFT Shield");
+  #else if defined(TFT_DIY)
+    uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
+    Serial.println("Using TFT DIY");
+  #endif
   
   display_obj.tft.setTouch(calData);
 

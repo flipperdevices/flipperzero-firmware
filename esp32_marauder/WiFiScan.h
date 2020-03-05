@@ -7,9 +7,11 @@
 #include <BLEAdvertisedDevice.h>
 
 #include <WiFi.h>
+#include <math.h>
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
 #include "Display.h"
+#include "SDInterface.h"
 //#include "MenuFunctions.h"
 
 #define bad_list_length 3
@@ -31,6 +33,7 @@
 #define MAX_CHANNEL 14
 
 extern Display display_obj;
+extern SDInterface sd_obj;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
