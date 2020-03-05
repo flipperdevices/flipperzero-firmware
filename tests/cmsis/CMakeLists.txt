@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 if(NOT TEST_FAMILIES)
-    set(TEST_FAMILIES F0 G0 L0 F1 F4)
+    set(TEST_FAMILIES F0 G0 L0 F1 L1 F4)
 endif()
 
 project(cmsis-test C ASM)
