@@ -248,20 +248,8 @@ void WiFiScan::RunInfo()
   if (sd_obj.supported) {
     display_obj.tft.println("     SD Card: Connected");
     display_obj.tft.print("SD Card Size: ");
-    //display_obj.tft.println((byte)(sd_obj.cardSizeMB % 10));
-    const int NUM_DIGITS = log10(sd_obj.cardSizeMB) + 1;
-  
-    char sz[NUM_DIGITS + 1];
-   
-    sz[NUM_DIGITS] =  0;
-    for ( size_t i = NUM_DIGITS; i--; sd_obj.cardSizeMB /= 10)
-    {
-        sz[i] = '0' + (sd_obj.cardSizeMB % 10);
-    }
-   
-    display_obj.tft.print(sz);
+    display_obj.tft.print(sd_obj.card_sz);
     display_obj.tft.println("MB");
-  
   }
   else {
     display_obj.tft.println("     SD Card: Not Connected");

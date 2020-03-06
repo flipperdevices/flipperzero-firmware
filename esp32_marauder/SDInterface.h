@@ -16,9 +16,10 @@ class SDInterface {
     uint64_t cardSizeMB;
     uint64_t cardSizeGB;
     bool supported = false;
+
+    String card_sz;
   
-    bool initSD();
-  
+    bool initSD();  
 };
 
 #endif
