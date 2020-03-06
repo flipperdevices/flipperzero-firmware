@@ -814,13 +814,15 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   }
 }
 
-void WiFiScan::packetMonitorMain()
+void WiFiScan::packetMonitorMain(uint32_t currentTime)
 {
   //---------MAIN 'FOR' LOOP! THIS IS WHERE ALL THE ACTION HAPPENS! HAS TO BE FAST!!!!!---------\\
   
   
-  for (x_pos = (11 + x_scale); x_pos <= 320; x_pos += x_scale) //go along every point on the x axis and do something, start over when finished
+//  for (x_pos = (11 + x_scale); x_pos <= 320; x_pos += x_scale) //go along every point on the x axis and do something, start over when finished
+  for (x_pos = (11 + x_scale); x_pos <= 320; x_pos = x_pos)
   {
+    currentTime = millis();
     do_break = false;
     
     y_pos_x = 0;
@@ -962,58 +964,68 @@ void WiFiScan::packetMonitorMain()
         }
       }
     }
-    
-    y_pos_x = ((-num_beacon * (y_scale * 10)) + (HEIGHT_1 - 2)); // GREEN
-    y_pos_y = ((-num_deauth * (y_scale * 10)) + (HEIGHT_1 - 2)); // RED
-    y_pos_z = ((-num_probe * (y_scale * 10)) + (HEIGHT_1 - 2)); // BLUE
 
-    num_beacon = 0;
-    num_probe = 0;
-    num_deauth = 0;
-    
-    //CODE FOR PLOTTING CONTINUOUS LINES!!!!!!!!!!!!
-    //Plot "X" value
-    display_obj.tft.drawLine(x_pos - x_scale, y_pos_x_old, x_pos, y_pos_x, TFT_GREEN);
-    //Plot "Z" value
-    display_obj.tft.drawLine(x_pos - x_scale, y_pos_z_old, x_pos, y_pos_z, TFT_BLUE);
-    //Plot "Y" value
-    display_obj.tft.drawLine(x_pos - x_scale, y_pos_y_old, x_pos, y_pos_y, TFT_RED);
-    
-    //Draw preceding black 'boxes' to erase old plot lines, !!!WEIRD CODE TO COMPENSATE FOR BUTTONS AND COLOR KEY SO 'ERASER' DOESN'T ERASE BUTTONS AND COLOR KEY!!!
-    //if ((x_pos <= 90) || ((x_pos >= 198) && (x_pos <= 320))) //above x axis
-    if ((x_pos <= 90) || ((x_pos >= 117) && (x_pos <= 320))) //above x axis
-    {
-      display_obj.tft.fillRect(x_pos+1, 28, 10, 93, TFT_BLACK); //compensate for buttons!
-    }
-    else
-    {
-      display_obj.tft.fillRect(x_pos+1, 0, 10, 121, TFT_BLACK); //don't compensate for buttons!
-    }
-    //if ((x_pos >= 254) && (x_pos <= 320)) //below x axis
-    //if (x_pos <= 90)
-    if (x_pos < 0) // below x axis
-    {
-      //tft.fillRect(x_pos+1, 121, 10, 88, TFT_BLACK);
-      display_obj.tft.fillRect(x_pos+1, 121, 10, 88, TFT_CYAN);
-    }
-    else
-    {
-      //tft.fillRect(x_pos+1, 121, 10, 119, TFT_BLACK);
-      display_obj.tft.fillRect(x_pos+1, 121, 10, 118, TFT_BLACK);
-    }
-    
-    //tftDisplayTime();
-    
-    if ( (y_pos_x == 120) || (y_pos_y == 120) || (y_pos_z == 120) )
-    {
-      display_obj.tft.drawFastHLine(10, 120, 310, TFT_WHITE); // x axis
-    }
-     
-    y_pos_x_old = y_pos_x; //set old y pos values to current y pos values 
-    y_pos_y_old = y_pos_y;
-    y_pos_z_old = y_pos_z;
+    if (currentTime - initTime >= GRAPH_REFRESH) {
+      //Serial.println("-----------------------------------------");
+      //Serial.println("Time elapsed: " + (String)(currentTime - initTime) + "ms");
+      x_pos += x_scale;
+      initTime = millis();
+      y_pos_x = ((-num_beacon * (y_scale * 5)) + (HEIGHT_1 - 2)); // GREEN
+      y_pos_y = ((-num_deauth * (y_scale * 5)) + (HEIGHT_1 - 2)); // RED
+      y_pos_z = ((-num_probe * (y_scale * 5)) + (HEIGHT_1 - 2)); // BLUE
 
-    //delay(50);
+      //Serial.println("num_beacon: " + (String)num_beacon);
+      //Serial.println("num_deauth: " + (String)num_deauth);
+      //Serial.println(" num_probe: " + (String)num_probe);
+  
+      num_beacon = 0;
+      num_probe = 0;
+      num_deauth = 0;
+      
+      //CODE FOR PLOTTING CONTINUOUS LINES!!!!!!!!!!!!
+      //Plot "X" value
+      display_obj.tft.drawLine(x_pos - x_scale, y_pos_x_old, x_pos, y_pos_x, TFT_GREEN);
+      //Plot "Z" value
+      display_obj.tft.drawLine(x_pos - x_scale, y_pos_z_old, x_pos, y_pos_z, TFT_BLUE);
+      //Plot "Y" value
+      display_obj.tft.drawLine(x_pos - x_scale, y_pos_y_old, x_pos, y_pos_y, TFT_RED);
+      
+      //Draw preceding black 'boxes' to erase old plot lines, !!!WEIRD CODE TO COMPENSATE FOR BUTTONS AND COLOR KEY SO 'ERASER' DOESN'T ERASE BUTTONS AND COLOR KEY!!!
+      //if ((x_pos <= 90) || ((x_pos >= 198) && (x_pos <= 320))) //above x axis
+      if ((x_pos <= 90) || ((x_pos >= 117) && (x_pos <= 320))) //above x axis
+      {
+        display_obj.tft.fillRect(x_pos+1, 28, 10, 93, TFT_BLACK); //compensate for buttons!
+      }
+      else
+      {
+        display_obj.tft.fillRect(x_pos+1, 0, 10, 121, TFT_BLACK); //don't compensate for buttons!
+      }
+      //if ((x_pos >= 254) && (x_pos <= 320)) //below x axis
+      //if (x_pos <= 90)
+      if (x_pos < 0) // below x axis
+      {
+        //tft.fillRect(x_pos+1, 121, 10, 88, TFT_BLACK);
+        display_obj.tft.fillRect(x_pos+1, 121, 10, 88, TFT_CYAN);
+      }
+      else
+      {
+        //tft.fillRect(x_pos+1, 121, 10, 119, TFT_BLACK);
+        display_obj.tft.fillRect(x_pos+1, 121, 10, 118, TFT_BLACK);
+      }
+      
+      //tftDisplayTime();
+      
+      if ( (y_pos_x == 120) || (y_pos_y == 120) || (y_pos_z == 120) )
+      {
+        display_obj.tft.drawFastHLine(10, 120, 310, TFT_WHITE); // x axis
+      }
+       
+      y_pos_x_old = y_pos_x; //set old y pos values to current y pos values 
+      y_pos_y_old = y_pos_y;
+      y_pos_z_old = y_pos_z;
+  
+      //delay(50);
+    }
    
   }
   
@@ -1071,7 +1083,7 @@ void WiFiScan::main(uint32_t currentTime)
   }
   else if (currentScanMode == WIFI_PACKET_MONITOR)
   {
-    packetMonitorMain();
+    packetMonitorMain(currentTime);
   }
   else if ((currentScanMode == WIFI_ATTACK_BEACON_SPAM))
   {

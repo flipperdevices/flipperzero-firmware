@@ -30,6 +30,8 @@
 #define BT_SCAN_ALL 9
 #define BT_SCAN_SKIMMERS 10
 
+#define GRAPH_REFRESH 50
+
 #define MAX_CHANNEL 14
 
 extern Display display_obj;
@@ -109,7 +111,7 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
-    void packetMonitorMain();
+    void packetMonitorMain(uint32_t currentTime);
     void changeChannel();
     void updateMidway();
     void tftDrawXScalButtons();
