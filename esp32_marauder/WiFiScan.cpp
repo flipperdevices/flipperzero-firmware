@@ -911,7 +911,7 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
 
         // Y + button pressed
         else if (b == 3) {
-          if (y_scale < 6) {
+          if (y_scale < 9) {
             y_scale++;
             delay(70);
             display_obj.tft.fillRect(127, 0, 193, 28, TFT_BLACK);
@@ -970,9 +970,9 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
       //Serial.println("Time elapsed: " + (String)(currentTime - initTime) + "ms");
       x_pos += x_scale;
       initTime = millis();
-      y_pos_x = ((-num_beacon * (y_scale * 5)) + (HEIGHT_1 - 2)); // GREEN
-      y_pos_y = ((-num_deauth * (y_scale * 5)) + (HEIGHT_1 - 2)); // RED
-      y_pos_z = ((-num_probe * (y_scale * 5)) + (HEIGHT_1 - 2)); // BLUE
+      y_pos_x = ((-num_beacon * (y_scale * 3)) + (HEIGHT_1 - 2)); // GREEN
+      y_pos_y = ((-num_deauth * (y_scale * 3)) + (HEIGHT_1 - 2)); // RED
+      y_pos_z = ((-num_probe * (y_scale * 3)) + (HEIGHT_1 - 2)); // BLUE
 
       //Serial.println("num_beacon: " + (String)num_beacon);
       //Serial.println("num_deauth: " + (String)num_deauth);
