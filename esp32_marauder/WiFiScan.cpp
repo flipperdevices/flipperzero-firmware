@@ -150,8 +150,10 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
-  (currentScanMode == WIFI_ATTACK_RICK_ROLL))
+  (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
+  (currentScanMode == WIFI_PACKET_MONITOR))
   {
+    Serial.println("Ahhh yes...promiscuity will end");
     esp_wifi_set_promiscuous(false);
     WiFi.mode(WIFI_OFF);
   }
@@ -794,6 +796,7 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
   if (type == WIFI_PKT_MGMT)
   {
+    len -= 4;
     int fctl = ntohs(frameControl->fctl);
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
@@ -811,6 +814,8 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     {
       num_probe++;
     }
+
+    sd_obj.addPacket(snifferPacket->payload, len);
   }
 }
 
@@ -1026,6 +1031,8 @@ void WiFiScan::packetMonitorMain(uint32_t currentTime)
   
       //delay(50);
     }
+
+    sd_obj.main();
    
   }
   

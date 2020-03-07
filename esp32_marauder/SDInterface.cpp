@@ -46,7 +46,31 @@ bool SDInterface::initSD() {
       //this->card_sz = display_string;  
       this->card_sz = sz;
     }
+
+    buffer_obj = Buffer();
+
+    if (this->supported)
+      buffer_obj.open(&SD);
     
     return true;
   }
 }
+
+void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
+  if ((this->supported) && (this->do_save)) {
+    //Serial.println("Adding packet to buffer...");
+    buffer_obj.addPacket(buf, len);
+  }
+}
+
+void SDInterface::main() {
+  if ((this->supported) && (this->do_save)) {
+    //Serial.println("Saving packet...");
+    buffer_obj.save(&SD);
+  }
+}
+
+//void SDInterface::savePacket(uint8_t* buf, uint32_t len) {
+//  if (this->supported)
+//    buffer_obj.save(
+//}

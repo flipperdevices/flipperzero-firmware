@@ -22,6 +22,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "MenuFunctions.h"
 #include "SDInterface.h"
 #include "Web.h"
+#include "Buffer.h"
 //#include "icons.h"
 
 Display display_obj;
@@ -29,6 +30,7 @@ WiFiScan wifi_scan_obj;
 MenuFunctions menu_function_obj;
 SDInterface sd_obj;
 Web web_obj;
+Buffer buffer_obj;
 
 uint32_t currentTime  = 0;
 
@@ -78,6 +80,7 @@ void loop()
   {
     display_obj.main(); 
     wifi_scan_obj.main(currentTime);
+    sd_obj.main();
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if (wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR)
       menu_function_obj.main();
