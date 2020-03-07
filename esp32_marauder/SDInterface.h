@@ -14,10 +14,10 @@ class SDInterface {
 
   public:
     uint8_t cardType;
-    uint64_t cardSizeBT;
-    uint64_t cardSizeKB;
+    //uint64_t cardSizeBT;
+    //uint64_t cardSizeKB;
     uint64_t cardSizeMB;
-    uint64_t cardSizeGB;
+    //uint64_t cardSizeGB;
     bool supported = false;
     bool do_save = true;
 
@@ -26,6 +26,7 @@ class SDInterface {
     bool initSD();
 
     void addPacket(uint8_t* buf, uint32_t len);
+    void openCapture();
     void main();
     //void savePacket(uint8_t* buf, uint32_t len);
 };

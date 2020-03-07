@@ -20,15 +20,15 @@ bool SDInterface::initSD() {
     else
         Serial.println("SD: UNKNOWN Card Mounted");
 
-    this->cardSizeBT = SD.cardSize();
-    this->cardSizeKB = SD.cardSize() / 1024;
+    //this->cardSizeBT = SD.cardSize();
+    //this->cardSizeKB = SD.cardSize() / 1024;
     this->cardSizeMB = SD.cardSize() / (1024 * 1024);
-    this->cardSizeGB = SD.cardSize() / (1024 * 1024 * 1024);
+    //this->cardSizeGB = SD.cardSize() / (1024 * 1024 * 1024);
     
-    Serial.printf("SD Card Size: %llu Bytes\n", this->cardSizeBT);
-    Serial.printf("SD Card Size: %lluKB\n", this->cardSizeKB);
+    //Serial.printf("SD Card Size: %llu Bytes\n", this->cardSizeBT);
+    //Serial.printf("SD Card Size: %lluKB\n", this->cardSizeKB);
     Serial.printf("SD Card Size: %lluMB\n", this->cardSizeMB);
-    Serial.printf("SD Card Size: %lluGB\n", this->cardSizeGB);
+    //Serial.printf("SD Card Size: %lluGB\n", this->cardSizeGB);
 
     if (this->supported) {
       //display_obj.tft.println((byte)(sd_obj.cardSizeMB % 10));
@@ -49,8 +49,8 @@ bool SDInterface::initSD() {
 
     buffer_obj = Buffer();
 
-    if (this->supported)
-      buffer_obj.open(&SD);
+    //if (this->supported)
+    //  buffer_obj.open(&SD);
     
     return true;
   }
@@ -61,6 +61,11 @@ void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
     //Serial.println("Adding packet to buffer...");
     buffer_obj.addPacket(buf, len);
   }
+}
+
+void SDInterface::openCapture() {
+  if (this->supported)
+    buffer_obj.open(&SD);
 }
 
 void SDInterface::main() {

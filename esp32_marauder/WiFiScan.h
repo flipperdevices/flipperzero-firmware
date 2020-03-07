@@ -10,6 +10,7 @@
 #include <math.h>
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
+#include "esp_bt.h"
 #include "Display.h"
 #include "SDInterface.h"
 #include "Buffer.h"

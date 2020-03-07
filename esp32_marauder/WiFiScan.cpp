@@ -163,6 +163,20 @@ void WiFiScan::StopScan(uint8_t scan_mode)
     Serial.println("Stopping BLE scan...");
     pBLEScan->stop();
     Serial.println("BLE Scan Stopped");
+    
+    
+    Serial.println("Clearing BLE Results...");
+    pBLEScan->clearResults();
+    Serial.println("Deinitializing BT Controller...");
+    BLEDevice::deinit();
+    //Serial.println("Disable and Deinit BLE...");
+    //esp_bt_controller_disable();
+    //esp_bt_controller_deinit();
+    //Serial.println("Releasing BLE Memory...");
+    //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
+    //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
+    
+    
   }
 
   display_obj.display_buffer->clear();
@@ -266,6 +280,9 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
+
+  sd_obj.openCapture();
+  
   #ifdef TFT_SHIELD
     uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
     Serial.println("Using TFT Shield");
@@ -447,6 +464,24 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
 {
   display_obj.print_delay_1 = 50;
   display_obj.print_delay_2 = 20;
+
+  /*
+  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+  esp_err_t init_ret = esp_bt_controller_init(&bt_cfg);
+  if (init_ret != ESP_OK)
+    Serial.println("Could not initialize BT Controller: " + (String)init_ret);
+  
+  //esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
+  //esp_bt_controller_disable();
+  
+  
+  esp_err_t ret = esp_bt_controller_enable(ESP_BT_MODE_BTDM);
+  if (ret != ESP_OK)
+    Serial.println("Could not enable BT Controller: " + (String)ret);
+
+  Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
+  */
+  
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
   if (scan_mode == BT_SCAN_ALL)
@@ -463,6 +498,8 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
     display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
     pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanAllCallback());
+    //bluetoothScanAllCallback myCallbacks;
+    //pBLEScan->setAdvertisedDeviceCallbacks(&myCallbacks);
   }
   else if (scan_mode == BT_SCAN_SKIMMERS)
   {

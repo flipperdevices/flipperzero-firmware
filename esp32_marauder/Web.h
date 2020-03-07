@@ -20,14 +20,14 @@ class Web
 {
   private:
     
-    const char* host = "esp32marauder";
-    const char* ssid = "MarauderOTA";
-    const char* password = "justcallmekoko";
+    PROGMEM const char* host = "esp32marauder";
+    PROGMEM const char* ssid = "MarauderOTA";
+    PROGMEM const char* password = "justcallmekoko";
 
     bool serving = false;
     int num_sta = 0;
 
-    const char* loginIndex = 
+    PROGMEM const char* loginIndex = 
      "<form name='loginForm'>"
         "<table width='20%' bgcolor='A09F9F' align='center'>"
             "<tr>"
@@ -72,7 +72,7 @@ class Web
      * Server Index Page
      */
      
-    const char* serverIndex = 
+    PROGMEM const char* serverIndex = 
     "<script src='/jquery.min.js'></script>"
     "Because the lack of an asynchronous webserver in this Arduino sketch like 'ESPAsyncWebServer', <br/>"
     "both file 'serverIndex' and 'jquery.min.js' can't be read from the webserver at the same time. <br/><br/>"

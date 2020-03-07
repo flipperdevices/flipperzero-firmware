@@ -56,7 +56,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.5.1";
+    String version_number = "v0.5.2";
 
     bool printing = false;
     bool loading = false;
