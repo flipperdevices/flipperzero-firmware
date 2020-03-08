@@ -104,17 +104,39 @@ void MenuFunctions::main()
         //display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
         //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
         display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
-        
+        if (current_menu->list->get(b).name != "Back")
+          display_obj.tft.drawXBitmap(0, 
+                                      KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2), 
+                                      menu_icons[current_menu->list->get(b).icon], 
+                                      ICON_W, 
+                                      ICON_H, 
+                                      current_menu->list->get(b).color, 
+                                      TFT_BLACK);        
       }
+      //else if (pressed)
+      //  display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
   
       // If button was just release, execute the button's function
-      if (display_obj.key[b].justReleased())
+      if ((display_obj.key[b].justReleased()) && (!pressed))
       {
         //display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
         //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
         display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
         current_menu->list->get(b).callable();
       }
+      // This 
+      else if ((display_obj.key[b].justReleased()) && (pressed)) {
+        display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
+        if (current_menu->list->get(b).name != "Back")
+          display_obj.tft.drawXBitmap(0, 
+                                      KEY_Y + b * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2), 
+                                      menu_icons[current_menu->list->get(b).icon], 
+                                      ICON_W, 
+                                      ICON_H, 
+                                      TFT_BLACK, 
+                                      current_menu->list->get(b).color);
+      }
+      
       display_obj.tft.setFreeFont(NULL);
     }
   }
