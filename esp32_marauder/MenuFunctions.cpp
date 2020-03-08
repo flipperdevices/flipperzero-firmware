@@ -31,6 +31,7 @@ void MenuFunctions::main()
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
     display_obj.displayBuffer();
+    //Serial.println(wifi_scan_obj.freeRAM());
 
 
   // Pressed will be set true is there is a valid touch on the screen
@@ -246,7 +247,7 @@ void MenuFunctions::RunSetup()
   addNodes(&deviceMenu, "Device Info", TFT_WHITE, NULL, DEVICE_INFO, [this](){wifi_scan_obj.currentScanMode = SHOW_INFO; changeMenu(&infoMenu); wifi_scan_obj.RunInfo();});
 
   updateMenu.parentMenu = &deviceMenu;
-  addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true);});
+  addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true); web_obj.shutdownServer();});
 
   infoMenu.parentMenu = &deviceMenu;
   addNodes(&infoMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(infoMenu.parentMenu);});

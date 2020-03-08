@@ -44,17 +44,17 @@ void Buffer::addPacket(uint8_t* buf, uint32_t len){
   
   // buffer is full -> drop packet
   if((useA && bufSizeA + len >= BUF_SIZE && bufSizeB > 0) || (!useA && bufSizeB + len >= BUF_SIZE && bufSizeA > 0)){
-    Serial.print(";"); 
+    //Serial.print(";"); 
     return;
   }
   
   if(useA && bufSizeA + len + 16 >= BUF_SIZE && bufSizeB == 0){
     useA = false;
-    Serial.println("\nswitched to buffer B");
+    //Serial.println("\nswitched to buffer B");
   }
   else if(!useA && bufSizeB + len + 16 >= BUF_SIZE && bufSizeA == 0){
     useA = true;
-    Serial.println("\nswitched to buffer A");
+    //Serial.println("\nswitched to buffer A");
   }
 
   uint32_t microSeconds = micros(); // e.g. 45200400 => 45s 200ms 400us
@@ -116,7 +116,7 @@ void Buffer::save(fs::FS* fs){
     return;
   }
   
-  Serial.println("saving file");
+  //Serial.println("saving file");
   
   uint32_t startTime = millis();
   uint32_t finishTime;
@@ -147,7 +147,7 @@ void Buffer::save(fs::FS* fs){
   
   finishTime = millis() - startTime;
 
-  Serial.printf("\n%u bytes written for %u ms\n", len, finishTime);
+  //Serial.printf("\n%u bytes written for %u ms\n", len, finishTime);
   
   saving = false;
   
@@ -195,7 +195,7 @@ void Buffer::forceSave(fs::FS* fs){
 
   file.close();
 
-  Serial.printf("saved %u bytes\n",len);
+  //Serial.printf("saved %u bytes\n",len);
 
   saving = false;
   writing = true;

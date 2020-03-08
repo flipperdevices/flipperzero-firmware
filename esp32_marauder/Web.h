@@ -13,8 +13,10 @@ Code taken from espressif ESP32 OTA Update example
 
 #include "Assets.h"
 #include "Display.h"
+#include "WiFiScan.h"
 
 extern Display display_obj;
+extern WiFiScan wifi_scan_obj;
 
 class Web
 {
@@ -25,6 +27,7 @@ class Web
     PROGMEM const char* password = "justcallmekoko";
 
     bool serving = false;
+    
     int num_sta = 0;
 
     PROGMEM const char* loginIndex = 
@@ -121,8 +124,9 @@ class Web
     Web();
 
     void main();
-    static void onJavaScript();
+    PROGMEM static void onJavaScript();
     void setupOTAupdate();
+    void shutdownServer();
 };
 
 #endif

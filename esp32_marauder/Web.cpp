@@ -11,6 +11,8 @@ void Web::main()
 {
   //Serial.println("Running the shits");
   // Notify if client has connected to the update server
+
+  
   int current_sta = WiFi.softAPgetStationNum();
   
   if (current_sta < this->num_sta)
@@ -25,6 +27,7 @@ void Web::main()
     Serial.print("Update server: Client connected -> ");
     Serial.println(this->num_sta);
   }
+  
   
   server.handleClient();
   delay(1);
@@ -46,15 +49,30 @@ void Web::setupOTAupdate()
   display_obj.tft.setTextSize(1);
   display_obj.tft.setTextColor(TFT_WHITE);
 
+  Serial.println(wifi_scan_obj.freeRAM());
   display_obj.tft.print("Configuring update server...\n\n");  
   Serial.println("Configuring update server...");
 
   display_obj.tft.setTextColor(TFT_YELLOW);
   
   // Start WiFi AP
+  Serial.println("Initializing WiFi...");
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&wifi_scan_obj.cfg);
+  //esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  if (esp_wifi_set_storage(WIFI_STORAGE_FLASH) != ESP_OK)
+    Serial.println("Could not set WiFi Storage!");
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  Serial.println(wifi_scan_obj.freeRAM());
+
+  Serial.println("Starting softAP...");
   WiFi.softAP(ssid, password);
   Serial.println("");
 
+  Serial.println(wifi_scan_obj.freeRAM());
+
+  Serial.println("Displaying settings to TFT...");
   display_obj.tft.print("SSID: ");
   display_obj.tft.println(ssid);
   display_obj.tft.print("IP address: ");
@@ -75,6 +93,8 @@ void Web::setupOTAupdate()
   */
 
   // return javascript jquery
+  Serial.println("Setting server behavior...");
+  Serial.println(wifi_scan_obj.freeRAM());
   server.on("/jquery.min.js", HTTP_GET, onJavaScript);
   /*return index page which is stored in serverIndex */
   server.on("/", HTTP_GET, [this]() {
@@ -138,9 +158,25 @@ void Web::setupOTAupdate()
       }
     }
   });
+
+  
+  Serial.println("Finished setting server behavior");
+  Serial.println(wifi_scan_obj.freeRAM());
+  Serial.println("Starting server...");
   server.begin();
 
   display_obj.tft.setTextColor(TFT_GREEN);
   display_obj.tft.println("\nCompleted update server setup");
   Serial.println("Completed update server setup");
+  Serial.println(wifi_scan_obj.freeRAM());
+}
+
+void Web::shutdownServer() {
+  Serial.println("Closing Update Server...");
+  server.stop();
+  WiFi.mode(WIFI_OFF);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_stop();
+  esp_wifi_deinit();
+  Serial.println(wifi_scan_obj.freeRAM());
 }

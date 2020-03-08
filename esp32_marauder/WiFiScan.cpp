@@ -8,7 +8,11 @@ int num_deauth = 0;
 int num_probe = 0;
 
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
+    
     void onResult(BLEAdvertisedDevice advertisedDevice) {
+
+      //advertisedDevice.getScan()->stop();
+      
       String display_string = "";
       if (display_obj.display_buffer->size() >= 0)
       {
@@ -241,14 +245,14 @@ String WiFiScan::freeRAM()
 
 void WiFiScan::RunInfo()
 {
-  String sta_mac = this->getStaMAC();
-  String ap_mac = this->getApMAC();
+  //String sta_mac = this->getStaMAC();
+  //String ap_mac = this->getApMAC();
   String free_ram = this->freeRAM();
   
-  Serial.print("STA MAC: ");
-  Serial.println(sta_mac);
-  Serial.print("AP MAC: ");
-  Serial.println(ap_mac);
+  //Serial.print("STA MAC: ");
+  //Serial.println(sta_mac);
+  //Serial.print("AP MAC: ");
+  //Serial.println(ap_mac);
   Serial.println(free_ram);
 
   display_obj.tft.setTextWrap(false);
@@ -257,8 +261,8 @@ void WiFiScan::RunInfo()
   display_obj.tft.setTextSize(1);
   display_obj.tft.setTextColor(TFT_CYAN);
 
-  display_obj.tft.println(" Station MAC: " + sta_mac);
-  display_obj.tft.println("      AP MAC: " + ap_mac);
+  //display_obj.tft.println(" Station MAC: " + sta_mac);
+  //display_obj.tft.println("      AP MAC: " + ap_mac);
   display_obj.tft.println("    " + free_ram);
 
   if (sd_obj.supported) {
