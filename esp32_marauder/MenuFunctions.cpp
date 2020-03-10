@@ -184,6 +184,8 @@ void MenuFunctions::RunSetup()
   deviceMenu.list = new LinkedList<MenuNode>();
 
   // Device menu stuff
+  whichUpdateMenu.list = new LinkedList<MenuNode>();
+  confirmMenu.list = new LinkedList<MenuNode>();
   updateMenu.list = new LinkedList<MenuNode>();
   infoMenu.list = new LinkedList<MenuNode>();
 
@@ -201,6 +203,8 @@ void MenuFunctions::RunSetup()
   wifiMenu.name = " WiFi ";
   deviceMenu.name = " Device ";
   generalMenu.name = " General Apps ";
+  whichUpdateMenu.name = "Select Method ";
+  confirmMenu.name = " Confirm Update ";
   updateMenu.name = " Update Firmware ";
   infoMenu.name = " Device Info ";
   bluetoothMenu.name = " Bluetooth ";
@@ -259,18 +263,36 @@ void MenuFunctions::RunSetup()
   addNodes(&bluetoothScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(bluetoothScannerMenu.parentMenu);});
   addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, CC_SKIMMERS, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
 
+  // General apps menu
   generalMenu.parentMenu = &mainMenu;
   addNodes(&generalMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){display_obj.draw_tft = false; changeMenu(generalMenu.parentMenu);});
   addNodes(&generalMenu, "Draw", TFT_WHITE, NULL, DRAW, [this](){display_obj.clearScreen(); display_obj.draw_tft = true;});
 
+  // Device menu
   deviceMenu.parentMenu = &mainMenu;
   addNodes(&deviceMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(deviceMenu.parentMenu);});
-  addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
+  //addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
+  addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&whichUpdateMenu);});
   addNodes(&deviceMenu, "Device Info", TFT_WHITE, NULL, DEVICE_INFO, [this](){wifi_scan_obj.currentScanMode = SHOW_INFO; changeMenu(&infoMenu); wifi_scan_obj.RunInfo();});
 
+  // Select update
+  whichUpdateMenu.parentMenu = &deviceMenu;
+  addNodes(&whichUpdateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(whichUpdateMenu.parentMenu);});
+  addNodes(&whichUpdateMenu, "Web Update", TFT_GREEN, NULL, WEB_UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
+  addNodes(&whichUpdateMenu, "SD Update", TFT_MAGENTA, NULL, SD_UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&confirmMenu);});
+  
+  // Confirm SD update menu
+  confirmMenu.parentMenu = &whichUpdateMenu;
+  addNodes(&confirmMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(confirmMenu.parentMenu);});
+  //addNodes(&confirmMenu, "Yes", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); sd_obj.runUpdate();});
+  addNodes(&confirmMenu, "Yes", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; sd_obj.runUpdate();});
+  
+  // Web Update
   updateMenu.parentMenu = &deviceMenu;
   addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true); web_obj.shutdownServer();});
+  //addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu);});
 
+  // Device info menu
   infoMenu.parentMenu = &deviceMenu;
   addNodes(&infoMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(infoMenu.parentMenu);});
 

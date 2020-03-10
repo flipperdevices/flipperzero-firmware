@@ -44,6 +44,8 @@ extern Web web_obj;
 #define UPDATE 16
 #define DEVICE 17
 #define DEVICE_INFO 18
+#define SD_UPDATE 19
+#define WEB_UPDATE 20
 
 struct Menu;
 
@@ -80,6 +82,8 @@ class MenuFunctions
     Menu deviceMenu;
 
     // Device menu stuff
+    Menu whichUpdateMenu;
+    Menu confirmMenu;
     Menu updateMenu;
     Menu infoMenu;
 

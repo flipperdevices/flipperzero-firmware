@@ -68,6 +68,86 @@ void SDInterface::openCapture() {
     buffer_obj.open(&SD);
 }
 
+void SDInterface::runUpdate() {
+  display_obj.clearScreen();
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 0);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_MAGENTA);
+
+  display_obj.tft.println("Opening /update.bin...");
+  File updateBin = SD.open("/update.bin");
+  if (updateBin) {
+    if(updateBin.isDirectory()){
+      display_obj.tft.println("Error, could not find update.bin");
+      Serial.println("Error, update.bin is not a file");
+      updateBin.close();
+      return;
+    }
+
+    size_t updateSize = updateBin.size();
+
+    if (updateSize > 0) {
+      display_obj.tft.println("Starting SD Update...");
+      Serial.println("Try to start update");
+      this->performUpdate(updateBin, updateSize);
+    }
+    else {
+      display_obj.tft.println("Error, update.bin is empty");
+      Serial.println("Error, file is empty");
+    }
+
+    updateBin.close();
+    
+      // whe finished remove the binary from sd card to indicate end of the process
+    display_obj.tft.println("Exiting update process...");
+    Serial.println("Exiting update process...");
+    //SD.remove("/update.bin");      
+  }
+  else {
+    display_obj.tft.println("Could not load update.bin from /");
+    Serial.println("Could not load update.bin from sd root");
+  }
+}
+
+void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
+  if (Update.begin(updateSize)) {   
+    display_obj.tft.println("File size: " + String(updateSize));
+    display_obj.tft.println("Writing file to partition...");
+    size_t written = Update.writeStream(updateSource);
+    if (written == updateSize) {
+      display_obj.tft.println("Written: " + String(written) + " successfully");
+      Serial.println("Written : " + String(written) + " successfully");
+    }
+    else {
+      display_obj.tft.println("Written only : " + String(written) + "/" + String(updateSize) + ". Retry?");
+      Serial.println("Written only : " + String(written) + "/" + String(updateSize) + ". Retry?");
+    }
+    if (Update.end()) {
+      Serial.println("OTA done!");
+      if (Update.isFinished()) {
+        display_obj.tft.println("Update complete");
+        Serial.println("Update successfully completed. Rebooting.");
+      }
+      else {
+        display_obj.tft.println("Update could not complete");
+        Serial.println("Update not finished? Something went wrong!");
+      }
+    }
+    else {
+      display_obj.tft.println("Error Occurred. Error #: " + String(Update.getError()));
+      Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+    }
+
+  }
+  else
+  {
+    display_obj.tft.println("Not enough space to begin OTA");
+    Serial.println("Not enough space to begin OTA");
+  }
+}
+
 void SDInterface::main() {
   if ((this->supported) && (this->do_save)) {
     //Serial.println("Saving packet...");

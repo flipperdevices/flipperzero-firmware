@@ -3,8 +3,11 @@
 
 #include "SD.h"
 #include "Buffer.h"
+#include "Display.h"
+#include <Update.h>
 
 extern Buffer buffer_obj;
+extern Display display_obj;
 
 #define SD_CS 12
 
@@ -27,6 +30,8 @@ class SDInterface {
 
     void addPacket(uint8_t* buf, uint32_t len);
     void openCapture();
+    void runUpdate();
+    void performUpdate(Stream &updateSource, size_t updateSize);
     void main();
     //void savePacket(uint8_t* buf, uint32_t len);
 };
