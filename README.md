@@ -27,8 +27,10 @@
   - [Hardware](#hardware)
     - [Connections](#connections)
   - [Flashing Firmware](#flashing-firmware)
-    - [Using Arduino IDE](#setting-up-arduino-ide)
+    - [Using Arduino IDE](#using-arduino-ide)
   - [Updating Firmware](#updating-firmware)
+    - [Web Update](#web-update)
+    - [SD Update](#sd-update)
   - [Enclosure](#enclosure)
 - [Under Development](#under-development)
 - [Special Thanks](#special-thanks)
@@ -36,7 +38,7 @@
 
 # About
 Sometimes you just gotta do what you gotta do. Am I right, ladies?
-The ESP32 Marauder is a suite of WiFi/Bluetooth offensive and defensive tools created for the ESP32 and was originally inspired by [Spacehuhn's](https://github.com/Spacehuhn) [esp8266_deauther](https://github.com/Spacehuhn/esp8366_deauther) project. The tool itself serves as a portable device used to test and analyze WiFi and Bluetooth devices. Use this tool and its firmware with caution as the use of some of its capabilities without explicit consent from the target owner is unlawful in most countries. For more information about this project and how it's assembled, follow the video link below.  
+The ESP32 Marauder is a suite of WiFi/Bluetooth offensive and defensive tools created for the ESP32 and was originally inspired by [Spacehuhn's](https://github.com/Spacehuhn) [esp8266_deauther](https://github.com/Spacehuhn/esp8366_deauther) project. The tool itself serves as a portable device used to test and analyze WiFi and Bluetooth devices. Use this tool and its firmware with caution as the use of some of its capabilities without explicit consent from the target owner is unlawful in most countries. For more information about this project and how it's assembled, follow the video link below. Track features and issues [here](https://github.com/justcallmekoko/ESP32Marauder/issues). Check out [#esp32marauder](https://www.instagram.com/explore/tags/esp32marauder/) on Instagram.  
 **Note:** Because of espressif's ESP32-IDF, the ESP32 included with Marauder is incapable of transmitting deauthentication frames.
 
 ### YouTube
@@ -56,10 +58,8 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
 - Deauth Sniff: Detect deauthentication packets sent on all channels
 - Draw: Just doodle on the screen or whatever
-- Update Firmware: Update Marauder firmware over the air via web interface
-
-### Developing
-- Emulate Bluetooth: Emulate a bluetooth device with a specific name
+- Update Firmware: Update Marauder firmware over the air via web interface or with SD card
+- Save PCAP files to SD card
 
 # Do It Yourself
 
@@ -73,22 +73,23 @@ This project requires the following hardware in order to work:
 ### Connections
 Make the following connections between your 2.8" TFT Screen and your ESP32 board. You may need to refer to a pinout sheet specific to the ESP32 dev board you have chosen. For more infomation about this circuit, please refer to [this schematic](https://github.com/justcallmekoko/ESP32Marauder/blob/master/schematics/Schematic_ESP32-Marauder-2_ESP32-Marauder-2-Schematic_20191007113616_png.png)
 
-| 2.8" TFT | ESP32  |
-| -------- | ------ |
-| VCC      | VCC    |
-| GND      | GND    |
-| CS       | GPIO17 |
-| RESET    | GPIO5  |
-| D/C      | GPIO16 |
-| MOSI     | GPIO23 |
-| SCK      | GPIO18 |
-| LED      | GPIO32 |
-| MISO     | GPIO19 |
-| T_CLK    | GPIO18 |
-| T_CS     | GPIO21 |
-| T_DI     | GPIO23 |
-| T_DO     | GPIO19 |
-| T_IRQ    | N/C    |
+| SD Card | 2.8" TFT | ESP32  |
+| ------- | -------- | ------ |
+|         | VCC      | VCC    |
+|         | GND      | GND    |
+|         | CS       | GPIO17 |
+|         | RESET    | GPIO5  |
+|         | D/C      | GPIO16 |
+| SD_MOSI | MOSI     | GPIO23 |
+| SD_SCK  | SCK      | GPIO18 |
+|         | LED      | GPIO32 |
+| SD_MISO | MISO     | GPIO19 |
+|         | T_CLK    | GPIO18 |
+|         | T_CS     | GPIO21 |
+|         | T_DI     | GPIO23 |
+|         | T_DO     | GPIO19 |
+|         | T_IRQ    |        |
+| SD_CS   |          | GPIO12 |
 
 ## Flashing Firmware
 ### Using Arduino IDE
@@ -116,10 +117,11 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 
 ## Updating Firmware
 There are multiple options available to update the Marauder firmware. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
-If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, you can follow these instructions for installing the latest update over the air via Marauder's web interface.  
+If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, you can follow [these instructions](#web-update) for installing the latest update over the air via Marauder's web interface or [these instructions](#sd-update) for installing the latest update using an SD Card.  
 
+### Web Update
 1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
-2. With Marauder powered on, select the main menu option `Update Firmware`
+2. With Marauder powered on, navigate to `Device`>`Update Firmware`>`Web Update`
     - Marauder will display details on screen about the status of the update
 3. Connect to the MarauderOTA WiFi network from your computer
     - password: justcallmekoko
@@ -129,6 +131,15 @@ If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, y
     - Password: admin
 6. Click the `Browse` button and select the .bin file you downloaded from the releases
 7. Click `Update`
+    - Marauder will automatically reboot once the update has been applied
+    
+### SD Update
+1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
+2. Copy the bin file you downloaded to the root of an SD card
+3. Rename the bin file on the SD card to `update.bin`
+4. With Marauder powered off, insert the SD card into Marauder
+5. Power Marauder on and navigate to `Device`>`Update Firmware`>`SD Update`
+6. Click `Yes` to confirm the update
     - Marauder will automatically reboot once the update has been applied
     
 ## Enclosure
@@ -154,6 +165,7 @@ Currently the ESP32 Marauder has limited firmware capabilities. Most of the work
 # Special Thanks
 - [Spacehuhn](https://github.com/spacehuhn) for an easy to use linked list library [SimpleList](https://github.com/spacehuhn/SimpleList)
   - Also a well designed menu structure. I adapted it to the TFT GUI because it worked perfectly
+  - Also...providing the buffer class used to save pcap files to an SD card
 - [Ivanseidel](https://github.com/ivanseidel) for providing a thread safe [LinkedList](https://github.com/ivanseidel/LinkedList) library
 - [Bodmer](https://github.com/Bodmer) for a comprehensive TFT touch screen library [TFT_eSPI](https://github.com/Bodmer/TFT_eSPI)
 - [HyderHasnain](https://github.com/hyderhasnain) for an adaptable [line graph](https://github.com/hyderhasnain/arduino_touchscreen_controller/blob/master/Code/AccelGraph_Original.ino) to be used as the packet monitor
