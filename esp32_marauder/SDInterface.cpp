@@ -113,8 +113,10 @@ void SDInterface::runUpdate() {
     ESP.restart();
   }
   else {
+    display_obj.tft.setTextColor(TFT_RED);
     display_obj.tft.println("Could not load update.bin from /");
     Serial.println("Could not load update.bin from sd root");
+    display_obj.tft.setTextColor(TFT_WHITE);
   }
 }
 

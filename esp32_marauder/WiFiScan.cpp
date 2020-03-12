@@ -263,6 +263,8 @@ void WiFiScan::RunInfo()
 
   //display_obj.tft.println(" Station MAC: " + sta_mac);
   //display_obj.tft.println("      AP MAC: " + ap_mac);
+  display_obj.tft.println("    Firmware: Marauder");
+  display_obj.tft.println("     Version: " + display_obj.version_number + "\n");
   display_obj.tft.println("    " + free_ram);
 
   if (sd_obj.supported) {
