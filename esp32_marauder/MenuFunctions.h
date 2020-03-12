@@ -71,6 +71,9 @@ struct Menu {
 class MenuFunctions
 {
   private:    
+
+    String u_result = "";
+    
     Menu* current_menu;
 
     // Main menu stuff
@@ -83,6 +86,7 @@ class MenuFunctions
 
     // Device menu stuff
     Menu whichUpdateMenu;
+    Menu failedUpdateMenu;
     Menu confirmMenu;
     Menu updateMenu;
     Menu infoMenu;

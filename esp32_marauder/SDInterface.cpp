@@ -69,19 +69,21 @@ void SDInterface::openCapture() {
 }
 
 void SDInterface::runUpdate() {
-  display_obj.clearScreen();
+  //display_obj.clearScreen();
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setFreeFont(NULL);
-  display_obj.tft.setCursor(0, 0);
+  display_obj.tft.setCursor(0, 100);
   display_obj.tft.setTextSize(1);
-  display_obj.tft.setTextColor(TFT_MAGENTA);
+  display_obj.tft.setTextColor(TFT_WHITE);
 
   display_obj.tft.println("Opening /update.bin...");
   File updateBin = SD.open("/update.bin");
   if (updateBin) {
     if(updateBin.isDirectory()){
+      display_obj.tft.setTextColor(TFT_RED);
       display_obj.tft.println("Error, could not find update.bin");
       Serial.println("Error, update.bin is not a file");
+      display_obj.tft.setTextColor(TFT_WHITE);
       updateBin.close();
       return;
     }
@@ -94,16 +96,21 @@ void SDInterface::runUpdate() {
       this->performUpdate(updateBin, updateSize);
     }
     else {
+      display_obj.tft.setTextColor(TFT_RED);
       display_obj.tft.println("Error, update.bin is empty");
       Serial.println("Error, file is empty");
+      display_obj.tft.setTextColor(TFT_WHITE);
+      return;
     }
 
     updateBin.close();
     
       // whe finished remove the binary from sd card to indicate end of the process
-    display_obj.tft.println("Exiting update process...");
-    Serial.println("Exiting update process...");
+    display_obj.tft.println("rebooting...");
+    Serial.println("rebooting...");
     //SD.remove("/update.bin");      
+    delay(1000);
+    ESP.restart();
   }
   else {
     display_obj.tft.println("Could not load update.bin from /");
@@ -131,8 +138,10 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
         Serial.println("Update successfully completed. Rebooting.");
       }
       else {
+        display_obj.tft.setTextColor(TFT_RED);
         display_obj.tft.println("Update could not complete");
         Serial.println("Update not finished? Something went wrong!");
+        display_obj.tft.setTextColor(TFT_WHITE);
       }
     }
     else {

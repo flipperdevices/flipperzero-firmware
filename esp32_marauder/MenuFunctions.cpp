@@ -184,6 +184,7 @@ void MenuFunctions::RunSetup()
   deviceMenu.list = new LinkedList<MenuNode>();
 
   // Device menu stuff
+  failedUpdateMenu.list = new LinkedList<MenuNode>();
   whichUpdateMenu.list = new LinkedList<MenuNode>();
   confirmMenu.list = new LinkedList<MenuNode>();
   updateMenu.list = new LinkedList<MenuNode>();
@@ -203,6 +204,7 @@ void MenuFunctions::RunSetup()
   wifiMenu.name = " WiFi ";
   deviceMenu.name = " Device ";
   generalMenu.name = " General Apps ";
+  failedUpdateMenu.name = " Updating... ";
   whichUpdateMenu.name = "Select Method ";
   confirmMenu.name = " Confirm Update ";
   updateMenu.name = " Update Firmware ";
@@ -279,19 +281,23 @@ void MenuFunctions::RunSetup()
   whichUpdateMenu.parentMenu = &deviceMenu;
   addNodes(&whichUpdateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(whichUpdateMenu.parentMenu);});
   addNodes(&whichUpdateMenu, "Web Update", TFT_GREEN, NULL, WEB_UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
-  addNodes(&whichUpdateMenu, "SD Update", TFT_MAGENTA, NULL, SD_UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&confirmMenu);});
+  if (sd_obj.supported) addNodes(&whichUpdateMenu, "SD Update", TFT_MAGENTA, NULL, SD_UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&confirmMenu);});
   
   // Confirm SD update menu
   confirmMenu.parentMenu = &whichUpdateMenu;
   addNodes(&confirmMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(confirmMenu.parentMenu);});
   //addNodes(&confirmMenu, "Yes", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); sd_obj.runUpdate();});
-  addNodes(&confirmMenu, "Yes", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; sd_obj.runUpdate();});
+  addNodes(&confirmMenu, "Yes", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&failedUpdateMenu); sd_obj.runUpdate();});
   
   // Web Update
   updateMenu.parentMenu = &deviceMenu;
   addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu); WiFi.softAPdisconnect(true); web_obj.shutdownServer();});
   //addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu);});
 
+  // Failed update menu
+  failedUpdateMenu.parentMenu = &whichUpdateMenu;
+  addNodes(&failedUpdateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(failedUpdateMenu.parentMenu);});
+  
   // Device info menu
   infoMenu.parentMenu = &deviceMenu;
   addNodes(&infoMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(infoMenu.parentMenu);});
