@@ -82,13 +82,17 @@ static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t size)
 
     // Wait for delimiter
     do {
-        esp_loader_error_t err = serial_read(&ch, 1);
-        if (err != ESP_LOADER_SUCCESS) {
-            return err;
-        }
+        RETURN_ON_ERROR( serial_read(&ch, 1) );
     } while (ch != DELIMITER);
 
-    RETURN_ON_ERROR( SLIP_receive_data(buff, size) );
+    // Workaround: bootloader sends two dummy(0xc0) bytes after response when baud rate is changed.
+    do {
+        RETURN_ON_ERROR( serial_read(&ch, 1) );
+    } while (ch == DELIMITER);
+
+    buff[0] = ch;
+
+    RETURN_ON_ERROR( SLIP_receive_data(&buff[1], size - 1) );
 
     // Delimiter
     RETURN_ON_ERROR( serial_read(&ch, 1) );

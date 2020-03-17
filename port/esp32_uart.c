@@ -25,12 +25,39 @@
 // #define SERIAL_DEBUG_ENABLE
 
 #ifdef SERIAL_DEBUG_ENABLE
-void serial_debug_print(const uint8_t *data, uint16_t size)
+
+static void dec_to_hex_str(const uint8_t dec, uint8_t hex_str[3])
 {
-    ESP_LOG_BUFFER_HEX("LOADER ESP32 PORT", data, size);
+    static const uint8_t dec_to_hex[] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    };
+
+    hex_str[0] = dec_to_hex[(dec >> 4)];
+    hex_str[1] = dec_to_hex[(dec & 0xF)];
+    hex_str[2] = '\0';
 }
+
+static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
+{
+    static bool write_prev = false;
+    uint8_t hex_str[3];
+
+    if(write_prev != write) {
+        write_prev = write;
+        printf("\n--- %s ---\n", write ? "WRITE" : "READ");
+    }
+
+    for(uint32_t i = 0; i < size; i++) {
+        dec_to_hex_str(data[i], hex_str);
+        printf("%s ", hex_str);
+    }
+}
+
 #else
-void serial_debug_print(const uint8_t *data, uint16_t size) { }
+
+static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) { }
+
 #endif
 
 static int64_t s_time_end;
@@ -81,7 +108,7 @@ esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
 
 esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    serial_debug_print(data, size);
+    serial_debug_print(data, size, true);
 
     uart_write_bytes(s_uart_port, (const char *)data, size);
     esp_err_t err = uart_wait_tx_done(s_uart_port, pdMS_TO_TICKS(timeout));
@@ -99,7 +126,9 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
 esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     int read = uart_read_bytes(s_uart_port, data, size, pdMS_TO_TICKS(timeout));
-    
+
+    serial_debug_print(data, read, false);
+
     if (read < 0) {
         return ESP_LOADER_ERROR_FAIL;
     } else if (read < size) {
