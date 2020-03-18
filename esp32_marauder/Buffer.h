@@ -13,7 +13,7 @@
 class Buffer {
   public:
     Buffer();
-    void open(fs::FS* fs);
+    void open(fs::FS* fs, String fn = "");
     void close(fs::FS* fs);
     void addPacket(uint8_t* buf, uint32_t len);
     void save(fs::FS* fs);

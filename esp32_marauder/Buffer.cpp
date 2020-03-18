@@ -5,10 +5,10 @@ Buffer::Buffer(){
   bufB = (uint8_t*)malloc(BUF_SIZE);
 }
 
-void Buffer::open(fs::FS* fs){
+void Buffer::open(fs::FS* fs, String fn){
   int i=0;
   do{
-    fileName = "/"+(String)i+".pcap";
+    fileName = "/"+fn+"_"+(String)i+".pcap";
     i++;
   } while(fs->exists(fileName));
 

@@ -63,9 +63,9 @@ void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
   }
 }
 
-void SDInterface::openCapture() {
+void SDInterface::openCapture(String file_name) {
   if (this->supported)
-    buffer_obj.open(&SD);
+    buffer_obj.open(&SD, file_name);
 }
 
 void SDInterface::runUpdate() {
@@ -162,7 +162,7 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
 void SDInterface::main() {
   if ((this->supported) && (this->do_save)) {
     //Serial.println("Saving packet...");
-    buffer_obj.save(&SD);
+    buffer_obj.forceSave(&SD);
   }
 }
 

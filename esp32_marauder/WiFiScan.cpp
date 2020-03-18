@@ -287,7 +287,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
 
-  sd_obj.openCapture();
+  sd_obj.openCapture("packet_monitor");
   
   #ifdef TFT_SHIELD
     uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
@@ -384,6 +384,8 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.openCapture("beacon");
+  
   display_obj.TOP_FIXED_AREA_2 = 32;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
@@ -411,6 +413,8 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.openCapture("deauth");
+  
   display_obj.TOP_FIXED_AREA_2 = 32;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
@@ -440,6 +444,8 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.openCapture("probe");
+  
   display_obj.TOP_FIXED_AREA_2 = 32;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
@@ -555,6 +561,7 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
 
   if (type == WIFI_PKT_MGMT)
   {
+    len -= 4;
     int fctl = ntohs(frameControl->fctl);
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
@@ -598,6 +605,8 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
 
       
       Serial.println();
+
+      sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
@@ -613,6 +622,7 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
 
   if (type == WIFI_PKT_MGMT)
   {
+    len -= 4;
     int fctl = ntohs(frameControl->fctl);
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
@@ -652,6 +662,8 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
 
       
       Serial.println();
+
+      sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
@@ -666,6 +678,7 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
   if (type == WIFI_PKT_MGMT)
   {
+    len -= 4;
     int fctl = ntohs(frameControl->fctl);
     const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
     const WifiMgmtHdr *hdr = &ipkt->hdr;
@@ -710,6 +723,8 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       }
       
       Serial.println();    
+
+      sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
