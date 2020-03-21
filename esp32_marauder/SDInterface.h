@@ -14,6 +14,7 @@ extern Display display_obj;
 class SDInterface {
 
   private:
+    uint32_t initTime = 0;
 
   public:
     uint8_t cardType;
@@ -32,7 +33,7 @@ class SDInterface {
     void openCapture(String file_name = "");
     void runUpdate();
     void performUpdate(Stream &updateSource, size_t updateSize);
-    void main();
+    void main(uint32_t currentTime = 0);
     //void savePacket(uint8_t* buf, uint32_t len);
 };
 

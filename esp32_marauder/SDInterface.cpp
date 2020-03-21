@@ -8,7 +8,7 @@ bool SDInterface::initSD() {
     this->supported = false;
     return false;
   }
-  else {
+  else if (!this->supported){
     this->supported = true;
     this->cardType = SD.cardType();
     if (cardType == CARD_MMC)
@@ -159,7 +159,16 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
   }
 }
 
-void SDInterface::main() {
+void SDInterface::main(uint32_t currentTime) {
+  /*
+  if (currentTime != 0) {
+    if (currentTime - initTime >= 3000) {
+      //Serial.println("Checking for SD");
+      this->initTime = millis();
+      this->initSD();
+    }
+  }*/
+  
   if ((this->supported) && (this->do_save)) {
     //Serial.println("Saving packet...");
     buffer_obj.forceSave(&SD);
