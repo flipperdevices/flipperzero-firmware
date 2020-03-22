@@ -14,7 +14,10 @@
 #include "Display.h"
 #include "SDInterface.h"
 #include "Buffer.h"
+<<<<<<< HEAD
 //#include "BatteryInterface.h"
+=======
+>>>>>>> parent of 40e11b7... Capture EAPOL packets
 //#include "MenuFunctions.h"
 
 #define bad_list_length 3
@@ -24,7 +27,7 @@
 #define WIFI_SCAN_OFF 0
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2
-#define WIFI_SCAN_EAPOL 3
+#define WIFI_SCAN_ST 3
 #define WIFI_SCAN_DEAUTH 4
 #define WIFI_SCAN_ALL 5
 #define WIFI_PACKET_MONITOR 6
@@ -33,14 +36,17 @@
 #define BT_SCAN_ALL 9
 #define BT_SCAN_SKIMMERS 10
 
-#define GRAPH_REFRESH 100
+#define GRAPH_REFRESH 50
 
 #define MAX_CHANNEL 14
 
 extern Display display_obj;
 extern SDInterface sd_obj;
 extern Buffer buffer_obj;
+<<<<<<< HEAD
 //extern BatteryInterface battery_obj;
+=======
+>>>>>>> parent of 40e11b7... Capture EAPOL packets
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
@@ -117,7 +123,6 @@ class WiFiScan
                     };
 
     void packetMonitorMain(uint32_t currentTime);
-    void eapolMonitorMain(uint32_t currentTime);
     void changeChannel();
     void updateMidway();
     void tftDrawXScalButtons();
@@ -131,7 +136,6 @@ class WiFiScan
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
-    void RunEapolScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
@@ -158,7 +162,6 @@ class WiFiScan
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
-    static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };
 #endif

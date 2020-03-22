@@ -59,6 +59,7 @@ void MenuFunctions::main()
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
+    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ST) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
     (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
@@ -241,7 +242,10 @@ void MenuFunctions::RunSetup()
   wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
   addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this](){wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);});
+<<<<<<< HEAD
   addNodes(&wifiScannerMenu, "EAPOL Scan", TFT_VIOLET, NULL, EAPOL, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);});
+=======
+>>>>>>> parent of 40e11b7... Capture EAPOL packets
 
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent

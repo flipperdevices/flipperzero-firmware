@@ -56,7 +56,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.6.1";
+    String version_number = "v0.5.4";
 
     bool printing = false;
     bool loading = false;
@@ -92,7 +92,6 @@ class Display
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
     void tftDrawGraphObjects(byte x_scale);
-    void tftDrawEapolColorKey();
     void tftDrawColorKey();
     void tftDrawXScaleButtons(byte x_scale);
     void tftDrawYScaleButtons(byte y_scale);

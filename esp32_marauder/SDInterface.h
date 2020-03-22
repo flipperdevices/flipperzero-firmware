@@ -14,7 +14,6 @@ extern Display display_obj;
 class SDInterface {
 
   private:
-    uint32_t initTime = 0;
 
   public:
     uint8_t cardType;

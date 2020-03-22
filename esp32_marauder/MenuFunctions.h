@@ -4,12 +4,10 @@
 #include "WiFiScan.h"
 #include "Display.h"
 #include "Web.h"
-#include "SDInterface.h"
 
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
-extern SDInterface sd_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -48,7 +46,6 @@ extern SDInterface sd_obj;
 #define DEVICE_INFO 18
 #define SD_UPDATE 19
 #define WEB_UPDATE 20
-#define EAPOL 21
 
 struct Menu;
 

@@ -8,7 +8,7 @@ bool SDInterface::initSD() {
     this->supported = false;
     return false;
   }
-  else if (!this->supported){
+  else {
     this->supported = true;
     this->cardType = SD.cardType();
     if (cardType == CARD_MMC)
