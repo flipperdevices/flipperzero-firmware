@@ -46,6 +46,7 @@ extern Web web_obj;
 #define DEVICE_INFO 18
 #define SD_UPDATE 19
 #define WEB_UPDATE 20
+#define EAPOL 21
 
 struct Menu;
 

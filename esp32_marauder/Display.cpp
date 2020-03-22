@@ -73,6 +73,13 @@ void Display::tftDrawGraphObjects(byte x_scale)
   tft.setCursor(3, 228); tft.print("0"); // "-" at bottom of y axis
 }
 
+void Display::tftDrawEapolColorKey()
+{
+  //Display color key
+  tft.setTextSize(1); tft.setTextColor(TFT_WHITE);
+  tft.fillRect(14, 0, 15, 8, TFT_CYAN); tft.setCursor(30, 0); tft.print(" - EAPOL"); 
+}
+
 void Display::tftDrawColorKey()
 {
   //Display color key

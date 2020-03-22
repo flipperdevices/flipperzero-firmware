@@ -14,10 +14,6 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "freertos/task.h"
 #include "esp_system.h"
 #include <Arduino.h>
-<<<<<<< HEAD
-//#include <Preferences.h>
-=======
->>>>>>> parent of 40e11b7... Capture EAPOL packets
 
 
 #include "Assets.h"
@@ -27,10 +23,6 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "SDInterface.h"
 #include "Web.h"
 #include "Buffer.h"
-<<<<<<< HEAD
-//#include "BatteryInterface.h"
-=======
->>>>>>> parent of 40e11b7... Capture EAPOL packets
 //#include "icons.h"
 
 Display display_obj;
@@ -39,22 +31,11 @@ MenuFunctions menu_function_obj;
 SDInterface sd_obj;
 Web web_obj;
 Buffer buffer_obj;
-<<<<<<< HEAD
-//BatteryInterface battery_obj;
-
-//Preferences preferences;
-=======
->>>>>>> parent of 40e11b7... Capture EAPOL packets
 
 uint32_t currentTime  = 0;
 
 void setup()
 {
-<<<<<<< HEAD
-
-  //Serial.println("\n\n-------------------------------------\n");
-=======
->>>>>>> parent of 40e11b7... Capture EAPOL packets
 
   pinMode(FLASH_BUTTON, INPUT);
   pinMode(TFT_BL, OUTPUT);
@@ -103,7 +84,8 @@ void loop()
     wifi_scan_obj.main(currentTime);
     sd_obj.main();
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
-    if (wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR)
+    if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
+        (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL))
       menu_function_obj.main();
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
         web_obj.main();
