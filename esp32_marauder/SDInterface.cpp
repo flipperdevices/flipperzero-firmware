@@ -159,16 +159,7 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
   }
 }
 
-void SDInterface::main(uint32_t currentTime) {
-  /*
-  if (currentTime != 0) {
-    if (currentTime - initTime >= 3000) {
-      //Serial.println("Checking for SD");
-      this->initTime = millis();
-      this->initSD();
-    }
-  }*/
-  
+void SDInterface::main() {
   if ((this->supported) && (this->do_save)) {
     //Serial.println("Saving packet...");
     buffer_obj.forceSave(&SD);

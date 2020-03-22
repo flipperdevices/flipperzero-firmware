@@ -284,7 +284,7 @@ void WiFiScan::RunInfo()
     display_obj.tft.println("     SD Card: Not Connected");
     display_obj.tft.println("SD Card Size: 0");
   }
-
+  /*
   battery_obj.battery_level = battery_obj.getBatteryLevel();
   if (battery_obj.i2c_supported) {
     display_obj.tft.println("  IP5306 I2C: supported");
@@ -292,6 +292,7 @@ void WiFiScan::RunInfo()
   }
   else
     display_obj.tft.println("  IP5306 I2C: not supported");
+  */
 
   
 }

@@ -33,7 +33,7 @@ class SDInterface {
     void openCapture(String file_name = "");
     void runUpdate();
     void performUpdate(Stream &updateSource, size_t updateSize);
-    void main(uint32_t currentTime = 0);
+    void main();
     //void savePacket(uint8_t* buf, uint32_t len);
 };
 
