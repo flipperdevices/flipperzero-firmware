@@ -56,6 +56,7 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Bluetooth Sniffer: Sniff bluetooth devices within range
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
+- EAPOL/PMKID Scan: Capture EAPOL/PMKID frames
 - Deauth Sniff: Detect deauthentication packets sent on all channels
 - Draw: Just doodle on the screen or whatever
 - Update Firmware: Update Marauder firmware over the air via web interface or with SD card
