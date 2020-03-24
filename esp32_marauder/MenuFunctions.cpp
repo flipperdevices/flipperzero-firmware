@@ -241,7 +241,7 @@ void MenuFunctions::RunSetup()
   wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
   addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this](){wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);});
-  addNodes(&wifiScannerMenu, "EAPOL Scan", TFT_VIOLET, NULL, EAPOL, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);});
+  addNodes(&wifiScannerMenu, "EAPOL/PMKID Scan", TFT_VIOLET, NULL, EAPOL, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);});
 
 
   // Build WiFi attack menu

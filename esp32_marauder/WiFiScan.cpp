@@ -335,6 +335,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
 {
+  num_eapol = 0;
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
@@ -990,6 +991,11 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
   int len = snifferPacket->rx_ctrl.sig_len;
 
+  if (len == 173) {
+    Serial.println("Maybe the PMKID");
+    //sd_obj.addPacket(snifferPacket->payload, len);
+  }
+
   if (type == WIFI_PKT_MGMT)
   {
     len -= 4;
@@ -1021,9 +1027,11 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
   if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) )){
     Serial.println("EAPOL!!");
-    sd_obj.addPacket(snifferPacket->payload, len);
+    //sd_obj.addPacket(snifferPacket->payload, len);
     num_eapol++;
   }
+
+  sd_obj.addPacket(snifferPacket->payload, len);
 }
 
 void WiFiScan::eapolMonitorMain(uint32_t currentTime)
@@ -1183,6 +1191,10 @@ void WiFiScan::eapolMonitorMain(uint32_t currentTime)
       x_pos += x_scale;
       initTime = millis();
       y_pos_x = ((-num_eapol * (y_scale * 3)) + (HEIGHT_1 - 2)); // GREEN
+      if (y_pos_x >= HEIGHT_1) {
+        Serial.println("Max EAPOL number reached. Adjusting...");
+        num_eapol = 0;
+      }
       //y_pos_y = ((-num_deauth * (y_scale * 3)) + (HEIGHT_1 - 2)); // RED
       //y_pos_z = ((-num_probe * (y_scale * 3)) + (HEIGHT_1 - 2)); // BLUE
 
