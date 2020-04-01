@@ -18,7 +18,7 @@ ELSEIF(STM32_FAMILY STREQUAL "F1")
     SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
 
     # Components that have _ex sources
-    SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim)
+    SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim spi)
 
     SET(HAL_PREFIX stm32f1xx_)
 
