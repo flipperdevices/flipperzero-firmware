@@ -272,20 +272,30 @@ void WiFiScan::RunInfo()
 
   //display_obj.tft.println(" Station MAC: " + sta_mac);
   //display_obj.tft.println("      AP MAC: " + ap_mac);
-  display_obj.tft.println("    Firmware: Marauder");
-  display_obj.tft.println("     Version: " + display_obj.version_number + "\n");
-  display_obj.tft.println("    " + free_ram);
+  display_obj.tft.println("     Firmware: Marauder");
+  display_obj.tft.println("      Version: " + display_obj.version_number + "\n");
+  display_obj.tft.println("     " + free_ram);
 
   if (sd_obj.supported) {
-    display_obj.tft.println("     SD Card: Connected");
-    display_obj.tft.print("SD Card Size: ");
+    display_obj.tft.println("      SD Card: Connected");
+    display_obj.tft.print(" SD Card Size: ");
     display_obj.tft.print(sd_obj.card_sz);
     display_obj.tft.println("MB");
   }
   else {
-    display_obj.tft.println("     SD Card: Not Connected");
-    display_obj.tft.println("SD Card Size: 0");
+    display_obj.tft.println("      SD Card: Not Connected");
+    display_obj.tft.println(" SD Card Size: 0");
   }  
+
+  battery_obj.battery_level = battery_obj.getBatteryLevel();
+  if (battery_obj.i2c_supported) {
+    display_obj.tft.println("   IP5306 I2C: supported");
+    display_obj.tft.println("  Battery Lvl: " + (String)battery_obj.battery_level + "%");
+  }
+  else
+    display_obj.tft.println("   IP5306 I2C: not supported");
+
+  display_obj.tft.println("Internal temp: " + (String)temp_obj.current_temp + " C");
 }
 
 void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)

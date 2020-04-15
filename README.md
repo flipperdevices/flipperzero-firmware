@@ -3,7 +3,7 @@
 <!---[![Build Status](https://travis-ci.com/justcallmekoko/ESP32Marauder.svg?branch=master)](https://travis-ci.com/justcallmekoko/ESP32Marauder)--->
 <!---Shields/Badges https://shields.io/--->
 
-# ESP32 Marauder v0.6.2
+# ESP32 Marauder v0.6.3
 <p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/marauder3L.jpg?raw=true" width="300"></p>
 <p align="center">
   <b>A suite of WiFi/Bluetooth offensive and defensive tools for the ESP32</b>
@@ -135,6 +135,7 @@ If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, y
     - Marauder will automatically reboot once the update has been applied
     
 ### SD Update
+*Using a Samsung MicroSD card will cause Marauder not to boot*
 1. Download the [latest release](https://github.com/justcallmekoko/ESP32Marauder/releases/latest) of the Marauder firmware
 2. Copy the bin file you downloaded to the root of an SD card
 3. Rename the bin file on the SD card to `update.bin`

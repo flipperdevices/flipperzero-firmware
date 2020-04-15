@@ -23,7 +23,20 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "SDInterface.h"
 #include "Web.h"
 #include "Buffer.h"
+#include "BatteryInterface.h"
+#include "TemperatureInterface.h"
 //#include "icons.h"
+
+/*
+#ifdef __cplusplus
+extern "C" {
+#endif
+uint8_t temprature_sens_read();
+#ifdef __cplusplus
+}
+#endif
+uint8_t temprature_sens_read();
+*/
 
 Display display_obj;
 WiFiScan wifi_scan_obj;
@@ -31,6 +44,8 @@ MenuFunctions menu_function_obj;
 SDInterface sd_obj;
 Web web_obj;
 Buffer buffer_obj;
+BatteryInterface battery_obj;
+TemperatureInterface temp_obj;
 
 uint32_t currentTime  = 0;
 
@@ -54,6 +69,8 @@ void setup()
   Serial.println("       By: justcallmekoko\n");
   Serial.println("--------------------------------\n\n");
 
+  //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
+
   // Do some SD stuff
   if(sd_obj.initSD())
     Serial.println("SD Card supported");
@@ -65,12 +82,25 @@ void setup()
 
   // Build menus
   menu_function_obj.RunSetup();
+
+  // Battery stuff
+  battery_obj.RunSetup();
+
+  // Temperature stuff
+  temp_obj.RunSetup();
+
+  battery_obj.battery_level = battery_obj.getBatteryLevel();
+
+  if (battery_obj.i2c_supported) {
+    Serial.println("IP5306 I2C Supported: true");
+  }
+  else
+    Serial.println("IP5306 I2C Supported: false");
 }
 
 
 void loop()
 {
-  
   // get the current time
   //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
   currentTime = millis();
@@ -83,6 +113,8 @@ void loop()
     display_obj.main(); 
     wifi_scan_obj.main(currentTime);
     sd_obj.main();
+    battery_obj.main(currentTime);
+    temp_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
         (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL))
