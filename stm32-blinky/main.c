@@ -1,14 +1,11 @@
 #if defined STM32F1
-#include <stm32f1xx_hal.h>
+# include <stm32f1xx_hal.h>
 #elif defined STM32F2
-#include <stm32f2xx_hal.h>
+# include <stm32f2xx_hal.h>
 #elif defined STM32F4
-#include <stm32f4xx_hal.h>
+# include <stm32f4xx_hal.h>
 #elif defined STM32G0
-#include <stm32g0xx_hal.h>
-#include <stm32g0xx_hal_gpio_ex.h>
-#include <stm32g0xx_hal_rcc.h>
-
+# include <stm32g0xx_hal.h>
 #endif
 
 void initGPIO()
@@ -70,6 +67,7 @@ void initTimers()
 #elif defined STM32F4
     __TIM3_CLK_ENABLE();
     TIM_Handle.Instance = TIM3;
+    // TIM3 Clocked from SYSCLK = 168 MHz
     TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetSysClockFreq() / 10000) - 1;
 #elif defined STM32G0
 

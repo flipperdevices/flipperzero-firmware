@@ -85,8 +85,8 @@ void initUART()
     __USART3_CLK_ENABLE();
     UART_Handle.Instance = USART3;
 #elif defined STM32G0
-    __HAL_RCC_USART2_CLK_ENABLE();
-    UART_Handle.Instance = USART2;
+    __HAL_RCC_USART1_CLK_ENABLE();
+    UART_Handle.Instance = USART1;
 
 #endif
 
@@ -220,8 +220,8 @@ void initClock(void)
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
 
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
-    PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+    PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
     HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
 #endif
@@ -253,7 +253,7 @@ int main(void)
         switch (c)
         {
         case 's':
-            scanf("%d", &t);
+            scanf("%lld", &t);
             setTime(t);
             printf("Current time changed: %d - %s\r", t, ctime(&t));
             break;
