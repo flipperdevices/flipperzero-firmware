@@ -99,7 +99,6 @@ ELSEIF(STM32_FAMILY STREQUAL "G0")
 
     SET(HAL_PREFIX stm32g0xx_)
 
-
 ELSEIF(STM32_FAMILY STREQUAL "L0")
     SET(HAL_COMPONENTS adc comp cortex crc crs cryp dac dma exti firewall flash gpio i2c
                        i2s irda iwdg lcd lptim lpuart pcd pwr rcc rng rtc smartcard

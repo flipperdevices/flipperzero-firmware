@@ -6,6 +6,7 @@ This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx 
 
 * cmake >= 3.0
 * GCC toolchain with newlib (optional).
+
 * STM32CubeMX package for STM32F0, STM32F1, STM32F2, STM32F3, STM32F4, STM32F7, STM32G0, STM32H7, STM32L0, STM32L1, STM32L4 families.
 
 ## Project contains
