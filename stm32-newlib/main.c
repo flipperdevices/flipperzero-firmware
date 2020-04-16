@@ -244,7 +244,6 @@ void initAll(void)
 int main(void)
 {
     initAll();
-
     for (;;)
     {
         char c = 0;
@@ -253,7 +252,7 @@ int main(void)
         switch (c)
         {
         case 's':
-            scanf("%lld", &t);
+            scanf("%d", &t);
             setTime(t);
             printf("Current time changed: %d - %s\r", t, ctime(&t));
             break;
