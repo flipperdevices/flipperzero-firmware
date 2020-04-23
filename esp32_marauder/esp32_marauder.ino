@@ -25,6 +25,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "Buffer.h"
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"
+#include "LedInterface.h"
 //#include "icons.h"
 
 /*
@@ -46,6 +47,9 @@ Web web_obj;
 Buffer buffer_obj;
 BatteryInterface battery_obj;
 TemperatureInterface temp_obj;
+LedInterface led_obj;
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
 uint32_t currentTime  = 0;
 
@@ -70,6 +74,9 @@ void setup()
   Serial.println("--------------------------------\n\n");
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
+
+  // Do some LED stuff
+  led_obj.RunSetup();
 
   // Do some SD stuff
   if(sd_obj.initSD())
@@ -96,6 +103,8 @@ void setup()
   }
   else
     Serial.println("IP5306 I2C Supported: false");
+
+  Serial.println(wifi_scan_obj.freeRAM());
 }
 
 
@@ -115,6 +124,7 @@ void loop()
     sd_obj.main();
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
+    //led_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
         (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL))
