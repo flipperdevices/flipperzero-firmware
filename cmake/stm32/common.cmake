@@ -155,4 +155,6 @@ include(stm32/f3)
 include(stm32/f4)
 include(stm32/g4)
 include(stm32/l4)
+include(stm32/f7)
+
 
