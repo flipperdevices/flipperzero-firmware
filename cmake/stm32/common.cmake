@@ -113,6 +113,8 @@ function(stm32_get_memory_info FAMILY DEVICE
         stm32l1_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
     elseif(FAMILY STREQUAL "F2")
         stm32f2_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
+    elseif(FAMILY STREQUAL "F3")
+        stm32f3_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
     endif()
 
     set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
@@ -149,5 +151,6 @@ include(stm32/l0)
 include(stm32/f1)
 include(stm32/l1)
 include(stm32/f2)
+include(stm32/f3)
 include(stm32/f4)
 
