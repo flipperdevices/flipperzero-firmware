@@ -1,4 +1,4 @@
-set(STM32_SUPPORTED_FAMILIES L0 L1 L4 F0 F1 F2 F3 F4 F7 H7)
+set(STM32_SUPPORTED_FAMILIES L0 L1 L4 F0 F1 F2 F3 F4 G4 F7 H7)
 
 if(NOT STM32_TOOLCHAIN_PATH)
      set(STM32_TOOLCHAIN_PATH "/usr")
@@ -153,4 +153,5 @@ include(stm32/l1)
 include(stm32/f2)
 include(stm32/f3)
 include(stm32/f4)
+include(stm32/g4)
 
