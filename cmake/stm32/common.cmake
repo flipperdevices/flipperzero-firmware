@@ -1,4 +1,4 @@
-set(STM32_SUPPORTED_FAMILIES L0 L1 L4 F0 F1 F2 F3 F4 G4 F7 H7)
+set(STM32_SUPPORTED_FAMILIES L0 L1 L4 F0 F1 F2 F3 F4 G4 L4 F7 H7)
 
 if(NOT STM32_TOOLCHAIN_PATH)
      set(STM32_TOOLCHAIN_PATH "/usr")
@@ -44,7 +44,7 @@ endfunction()
 function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
     string(TOUPPER ${CHIP} CHIP)
         
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9][0-9][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
+    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
     
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown chip ${CHIP}")
@@ -69,7 +69,7 @@ function(stm32_get_memory_info FAMILY DEVICE
     FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
     FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
 )
-    string(REGEX REPLACE "^[FGHL][0-9][0-9][0-9].([3468BCDEFGHIZ])$" "\\1" SIZE_CODE ${DEVICE})
+    string(REGEX REPLACE "^[FGHL][0-9][0-9A-Z][0-9].([3468BCDEFGHIZ])$" "\\1" SIZE_CODE ${DEVICE})
     
     if(SIZE_CODE STREQUAL "3")
         set(FLASH "8K")
@@ -154,4 +154,5 @@ include(stm32/f2)
 include(stm32/f3)
 include(stm32/f4)
 include(stm32/g4)
+include(stm32/l4)
 
