@@ -17,14 +17,14 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 G0 L0 F1
 * CMake toolchain file that can generate a tunable linker script [cmake/stm32/linker_ld.cmake](cmake/stm32/linker_ld.cmake)
 * CMake module to find and configure CMSIS library [cmake/FindCMSIS.cmake](cmake/FindCMSIS.cmake)
 * CMake module to find and configure STM32 HAL library [cmake/FindHAL.cmake](cmake/FindHAL.cmake)
-* CMake project template and examples [cmake/examples](cmake/examples)
-* Some testing project to check cmake scripts working properly [cmake/tests](cmake/tests)
+* CMake project template and examples [examples](examples)
+* Some testing project to check cmake scripts working properly [tests](tests)
 
 ## Examples
 
-* `template` ([cmake/examples/template](cmake/examples/template)) - project template, empty source linked compiled with CMSIS.
-* `custom-linker-script` ([cmake/examples/custom-linker-script](cmake/examples/custom-linker-script)) - similiar to `template` but using custom linker script.
-* `blinky` ([cmake/examples/blinky](cmake/examples/blinky)) - blink led using STM32 HAL library and SysTick.
+* `template` ([examples/template](examples/template)) - project template, empty source linked compiled with CMSIS.
+* `custom-linker-script` ([examples/custom-linker-script](examples/custom-linker-script)) - similiar to `template` but using custom linker script.
+* `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
 
 # Usage
 
