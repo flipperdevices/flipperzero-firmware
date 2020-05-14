@@ -646,12 +646,12 @@ void Display::updateBanner(String msg)
 
   this->buildBanner(msg, current_banner_pos);
 
-  this->img.pushSprite(0, 0);
+  this->img.pushSprite(0, STATUS_BAR_WIDTH);
 
   current_banner_pos--;
 
   if (current_banner_pos <= 0)
-    current_banner_pos = SCREEN_WIDTH;
+    current_banner_pos = SCREEN_WIDTH + 2;
 }
 
 

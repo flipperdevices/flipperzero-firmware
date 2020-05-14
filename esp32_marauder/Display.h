@@ -13,8 +13,8 @@
 
 #include <TFT_eSPI.h>
 
-//#define TFT_SHIELD
-#define TFT_DIY
+#define TFT_SHIELD
+//#define TFT_DIY
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -32,6 +32,9 @@
 //#define MENU_FONT &FreeSans9pt7b
 //#define MENU_FONT &FreeSansBold9pt7b
 #define BUTTON_ARRAY_LEN 7
+#define STATUS_BAR_WIDTH 16
+
+#define STATUSBAR_COLOR 0x4A49
 
 
 class Display
@@ -56,7 +59,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.6.4";
+    String version_number = "v0.6.5";
 
     bool printing = false;
     bool loading = false;

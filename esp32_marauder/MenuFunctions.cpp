@@ -17,6 +17,10 @@ void MenuFunctions::main()
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
     }
+    if ((display_obj.current_banner_pos <= 0) || (display_obj.current_banner_pos == SCREEN_WIDTH))
+    {
+      this->drawStatusBar();
+    }
     display_obj.updateBanner(current_menu->name);
   }
 
@@ -141,6 +145,45 @@ void MenuFunctions::main()
   }
   x = -1;
   y = -1;
+}
+
+void MenuFunctions::drawStatusBar()
+{
+  display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+  //display_obj.tft.fillRect(0, STATUS_BAR_WIDTH + 1, 240, 1, TFT_DARKGREY);
+  display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
+  //display_obj.tft.setTextSize(2);
+
+  uint16_t the_color;
+
+  if ((String)battery_obj.battery_level != "25")
+    the_color = TFT_GREEN;
+  else
+    the_color = TFT_RED;
+  
+  display_obj.tft.setCursor(0, 1);
+  display_obj.tft.drawXBitmap(186, 
+                              0, 
+                              menu_icons[STATUS_BAT], 
+                              16, 
+                              16, 
+                              STATUSBAR_COLOR, 
+                              the_color);
+  display_obj.tft.drawString((String)battery_obj.battery_level + "%", 200, 1, 2);
+
+  if (sd_obj.supported)
+    the_color = TFT_GREEN;
+  else
+    the_color = TFT_RED;
+
+  display_obj.tft.drawXBitmap(170, 
+                              0, 
+                              menu_icons[STATUS_SD], 
+                              16, 
+                              16, 
+                              STATUSBAR_COLOR, 
+                              the_color);
+  //display_obj.tft.print((String)battery_obj.battery_level + "%");
 }
 
 void MenuFunctions::orientDisplay()
@@ -382,6 +425,7 @@ void MenuFunctions::displayCurrentMenu()
   Serial.println("Displaying current menu...");
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
+  this->drawStatusBar();
   //display_obj.tft.fillRect(0,0,240,16, TFT_DARKGREY);
   //display_obj.tft.drawCentreString(" ESP32 Marauder ",120,0,2);
   //Serial.println("Getting size...");

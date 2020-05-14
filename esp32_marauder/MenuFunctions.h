@@ -3,11 +3,15 @@
 
 #include "WiFiScan.h"
 #include "Display.h"
+#include "BatteryInterface.h"
+#include "SDInterface.h"
 #include "Web.h"
 
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
+extern SDInterface sd_obj;
+extern BatteryInterface battery_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -47,6 +51,8 @@ extern Web web_obj;
 #define SD_UPDATE 19
 #define WEB_UPDATE 20
 #define EAPOL 21
+#define STATUS_BAT 22
+#define STATUS_SD 23
 
 struct Menu;
 
@@ -107,6 +113,7 @@ class MenuFunctions
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
     
     void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
+    void drawStatusBar();
     void showMenuList(Menu* menu, int layer);
     void orientDisplay();
 
