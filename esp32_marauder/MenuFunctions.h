@@ -80,6 +80,8 @@ class MenuFunctions
   private:    
 
     String u_result = "";
+
+    uint32_t initTime = 0;
     
     Menu* current_menu;
 
@@ -114,6 +116,7 @@ class MenuFunctions
     
     void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
     void drawStatusBar();
+    void updateStatusBar();
     void showMenuList(Menu* menu, int layer);
     void orientDisplay();
 
@@ -126,7 +129,7 @@ class MenuFunctions
     void buildButtons(Menu* menu);
     void changeMenu(Menu* menu);
     void displayCurrentMenu();
-    void main();
+    void main(uint32_t currentTime);
     void RunSetup();
 };
 

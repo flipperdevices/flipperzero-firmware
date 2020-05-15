@@ -15,6 +15,7 @@ class BatteryInterface {
 
   public:
     int8_t battery_level = 0;
+    int8_t old_level = 0;
     bool i2c_supported = false;
 
     BatteryInterface();

@@ -128,7 +128,7 @@ void loop()
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
         (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL))
-      menu_function_obj.main();
+      menu_function_obj.main(currentTime);
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
         web_obj.main();
     delay(1);

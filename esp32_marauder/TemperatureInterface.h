@@ -12,6 +12,7 @@ class TemperatureInterface {
     TemperatureInterface();
 
     uint8_t current_temp = 0;
+    uint8_t old_temp = 0;
 
     uint8_t getCurrentTemp();
     void RunSetup();

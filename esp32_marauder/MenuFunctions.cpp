@@ -8,7 +8,7 @@ MenuFunctions::MenuFunctions()
 }
 
 // Function to check menu input
-void MenuFunctions::main()
+void MenuFunctions::main(uint32_t currentTime)
 {
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) || 
@@ -17,11 +17,18 @@ void MenuFunctions::main()
       this->orientDisplay();
       wifi_scan_obj.orient_display = false;
     }
-    if ((display_obj.current_banner_pos <= 0) || (display_obj.current_banner_pos == SCREEN_WIDTH))
-    {
-      this->drawStatusBar();
-    }
+    //if ((display_obj.current_banner_pos <= 0) || (display_obj.current_banner_pos == SCREEN_WIDTH))
+    //{
+    //  this->drawStatusBar();
+    //}
     display_obj.updateBanner(current_menu->name);
+  }
+
+  if (currentTime != 0) {
+    if (currentTime - initTime >= 100) {
+      this->initTime = millis();
+      this->updateStatusBar();
+    }
   }
 
   //this->displayCurrentMenu();
@@ -147,6 +154,69 @@ void MenuFunctions::main()
   y = -1;
 }
 
+void MenuFunctions::updateStatusBar()
+{
+  uint16_t the_color;
+
+  // Draw temp info
+  if (temp_obj.current_temp < 70)
+    the_color = TFT_GREEN;
+  else if ((temp_obj.current_temp >= 70) && (temp_obj.current_temp < 80))
+    the_color = TFT_YELLOW;
+  else if ((temp_obj.current_temp >= 80) && (temp_obj.current_temp < 90))
+    the_color = TFT_ORANGE;
+  else if ((temp_obj.current_temp >= 90) && (temp_obj.current_temp < 100))
+    the_color = TFT_RED;
+  else
+    the_color = TFT_MAROON;
+
+  display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
+  if (temp_obj.current_temp != temp_obj.old_temp) {
+    temp_obj.old_temp = temp_obj.current_temp;
+    display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+    display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+  }
+  display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
+
+  // Draw battery info
+  if (battery_obj.i2c_supported)
+  {
+    if ((String)battery_obj.battery_level != "25")
+      the_color = TFT_GREEN;
+    else
+      the_color = TFT_RED;
+
+    if (battery_obj.battery_level != battery_obj.old_level) {
+      battery_obj.old_level = battery_obj.battery_level;
+      display_obj.tft.fillRect(204, 0, SCREEN_WIDTH, STATUS_BAR_WIDTH, STATUSBAR_COLOR); 
+      display_obj.tft.setCursor(0, 1);
+      display_obj.tft.drawXBitmap(186, 
+                                  0, 
+                                  menu_icons[STATUS_BAT], 
+                                  16, 
+                                  16, 
+                                  STATUSBAR_COLOR, 
+                                  the_color);
+      display_obj.tft.drawString((String)battery_obj.battery_level + "%", 204, 0, 2);
+    }
+  }
+
+  // Draw SD info
+  if (sd_obj.supported)
+    the_color = TFT_GREEN;
+  else
+    the_color = TFT_RED;
+
+  display_obj.tft.drawXBitmap(170, 
+                              0, 
+                              menu_icons[STATUS_SD], 
+                              16, 
+                              16, 
+                              STATUSBAR_COLOR, 
+                              the_color);
+  //display_obj.tft.print((String)battery_obj.battery_level + "%");
+}
+
 void MenuFunctions::drawStatusBar()
 {
   display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
@@ -156,21 +226,46 @@ void MenuFunctions::drawStatusBar()
 
   uint16_t the_color;
 
-  if ((String)battery_obj.battery_level != "25")
+  // Draw temp info
+  if (temp_obj.current_temp < 70)
     the_color = TFT_GREEN;
-  else
+  else if ((temp_obj.current_temp >= 70) && (temp_obj.current_temp < 80))
+    the_color = TFT_YELLOW;
+  else if ((temp_obj.current_temp >= 80) && (temp_obj.current_temp < 90))
+    the_color = TFT_ORANGE;
+  else if ((temp_obj.current_temp >= 90) && (temp_obj.current_temp < 100))
     the_color = TFT_RED;
-  
-  display_obj.tft.setCursor(0, 1);
-  display_obj.tft.drawXBitmap(186, 
-                              0, 
-                              menu_icons[STATUS_BAT], 
-                              16, 
-                              16, 
-                              STATUSBAR_COLOR, 
-                              the_color);
-  display_obj.tft.drawString((String)battery_obj.battery_level + "%", 200, 1, 2);
+  else
+    the_color = TFT_MAROON;
 
+  display_obj.tft.setTextColor(the_color, STATUSBAR_COLOR);
+  temp_obj.old_temp = temp_obj.current_temp;
+  display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+  display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
+  display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
+
+  // Draw battery info
+  if (battery_obj.i2c_supported)
+  {
+    if ((String)battery_obj.battery_level != "25")
+      the_color = TFT_GREEN;
+    else
+      the_color = TFT_RED;
+
+    battery_obj.old_level = battery_obj.battery_level;
+    display_obj.tft.fillRect(204, 0, SCREEN_WIDTH, STATUS_BAR_WIDTH, STATUSBAR_COLOR); 
+    display_obj.tft.setCursor(0, 1);
+    display_obj.tft.drawXBitmap(186, 
+                                0, 
+                                menu_icons[STATUS_BAT], 
+                                16, 
+                                16, 
+                                STATUSBAR_COLOR, 
+                                the_color);
+    display_obj.tft.drawString((String)battery_obj.battery_level + "%", 204, 0, 2);
+  }
+
+  // Draw SD info
   if (sd_obj.supported)
     the_color = TFT_GREEN;
   else
@@ -276,9 +371,9 @@ void MenuFunctions::RunSetup()
   // Build WiFi sniffer Menu
   wifiSnifferMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiSnifferMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiSnifferMenu.parentMenu);});
-  addNodes(&wifiSnifferMenu, "Probe Request Sniff", TFT_CYAN, NULL, PROBE_SNIFF, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_CYAN);});
-  addNodes(&wifiSnifferMenu, "Beacon Sniff", TFT_MAGENTA, NULL, BEACON_SNIFF, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);});
-  addNodes(&wifiSnifferMenu, "Deauth Sniff", TFT_RED, NULL, DEAUTH_SNIFF, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);});
+  addNodes(&wifiSnifferMenu, "Probe Request Sniff", TFT_CYAN, NULL, PROBE_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_CYAN);});
+  addNodes(&wifiSnifferMenu, "Beacon Sniff", TFT_MAGENTA, NULL, BEACON_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);});
+  addNodes(&wifiSnifferMenu, "Deauth Sniff", TFT_RED, NULL, DEAUTH_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);});
 
   // Build WiFi scanner Menu
   wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -290,8 +385,8 @@ void MenuFunctions::RunSetup()
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiAttackMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiAttackMenu.parentMenu);});
-  addNodes(&wifiAttackMenu, "Beacon Spam Random", TFT_ORANGE, NULL, BEACON_SPAM, [this](){wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);});
-  addNodes(&wifiAttackMenu, "Rick Roll Beacon", TFT_YELLOW, NULL, RICK_ROLL, [this](){wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);});
+  addNodes(&wifiAttackMenu, "Beacon Spam Random", TFT_ORANGE, NULL, BEACON_SPAM, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);});
+  addNodes(&wifiAttackMenu, "Rick Roll Beacon", TFT_YELLOW, NULL, RICK_ROLL, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);});
   
   // Build Bluetooth Menu
   bluetoothMenu.parentMenu = &mainMenu; // Second Menu is third menu parent
@@ -302,12 +397,12 @@ void MenuFunctions::RunSetup()
   // Build bluetooth sniffer Menu
   bluetoothSnifferMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
   addNodes(&bluetoothSnifferMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(bluetoothSnifferMenu.parentMenu);});
-  addNodes(&bluetoothSnifferMenu, "Bluetooth Sniffer", TFT_GREEN, NULL, BLUETOOTH_SNIFF, [this](){wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);});
+  addNodes(&bluetoothSnifferMenu, "Bluetooth Sniffer", TFT_GREEN, NULL, BLUETOOTH_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);});
 
   // Build bluetooth scanner Menu
   bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
   addNodes(&bluetoothScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(bluetoothScannerMenu.parentMenu);});
-  addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, CC_SKIMMERS, [this](){wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
+  addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, CC_SKIMMERS, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);});
 
   // General apps menu
   generalMenu.parentMenu = &mainMenu;
@@ -348,6 +443,8 @@ void MenuFunctions::RunSetup()
 
   // Set the current menu to the mainMenu
   changeMenu(&mainMenu);
+
+  this->initTime = millis();
 }
 
 // Function to change menu

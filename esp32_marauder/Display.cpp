@@ -231,8 +231,8 @@ void Display::twoPartDisplay(String center_text)
 void Display::touchToExit()
 {
   tft.setTextColor(TFT_BLACK, TFT_LIGHTGREY);
-  tft.fillRect(0,16,HEIGHT_1,16, TFT_LIGHTGREY);
-  tft.drawCentreString("Touch screen to exit",120,16,2);
+  tft.fillRect(0,32,HEIGHT_1,16, TFT_LIGHTGREY);
+  tft.drawCentreString("Touch screen to exit",120,32,2);
 }
 
 
@@ -259,6 +259,7 @@ void Display::displayBuffer(bool do_clear)
         delay(print_delay_1);
         yDraw = scroll_line(TFT_RED);
         tft.setCursor(xPos, yDraw);
+        tft.setTextColor(TFT_GREEN, TFT_BLACK);
         tft.print(display_buffer->shift());
         printing = false;
         delay(print_delay_2);
@@ -336,7 +337,10 @@ int Display::scroll_line(uint32_t color) {
 
 // Function to setup hardware scroll for TFT screen
 void Display::setupScrollArea(uint16_t tfa, uint16_t bfa) {
-  Serial.println("setupScrollAread()");
+  Serial.println("setupScrollArea()");
+  Serial.println("   tfa: " + (String)tfa);
+  Serial.println("   bfa: " + (String)bfa);
+  Serial.println("yStart: " + (String)this->yStart);
   tft.writecommand(ILI9341_VSCRDEF); // Vertical scroll definition
   tft.writedata(tfa >> 8);           // Top Fixed Area line count
   tft.writedata(tfa);

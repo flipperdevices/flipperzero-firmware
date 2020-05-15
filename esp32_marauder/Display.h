@@ -23,7 +23,7 @@
 #define STANDARD_FONT_CHAR_LIMIT 40 // number of characters on a single line with normal font
 #define TEXT_HEIGHT 16 // Height of text to be printed and scrolled
 #define BOT_FIXED_AREA 0 // Number of lines in bottom fixed area (lines counted from bottom of screen)
-#define TOP_FIXED_AREA 16 // Number of lines in top fixed area (lines counted from top of screen)
+#define TOP_FIXED_AREA 48 // Number of lines in top fixed area (lines counted from top of screen)
 #define YMAX 320 // Bottom of screen area
 #define minimum(a,b)     (((a) < (b)) ? (a) : (b))
 //#define MENU_FONT NULL
@@ -66,7 +66,7 @@ class Display
     bool tteBar = false;
     bool draw_tft = false;
 
-    int TOP_FIXED_AREA_2 = 32;
+    int TOP_FIXED_AREA_2 = 48;
     int print_delay_1, print_delay_2 = 10;
     int current_banner_pos = SCREEN_WIDTH;
 
@@ -85,9 +85,9 @@ class Display
     uint16_t xPos = 0;
 
     // The initial y coordinate of the top of the scrolling area
-    uint16_t yStart = TOP_FIXED_AREA;
+    uint16_t yStart = TOP_FIXED_AREA_2;
     // yArea must be a integral multiple of TEXT_HEIGHT
-    uint16_t yArea = YMAX - TOP_FIXED_AREA - BOT_FIXED_AREA;
+    uint16_t yArea = YMAX - TOP_FIXED_AREA_2 - BOT_FIXED_AREA;
 
     // We have to blank the top line each time the display is scrolled, but this takes up to 13 milliseconds
     // for a full width line, meanwhile the serial buffer may be filling... and overflowing
