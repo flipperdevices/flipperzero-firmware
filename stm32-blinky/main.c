@@ -4,6 +4,8 @@
 # include <stm32f2xx_hal.h>
 #elif defined STM32F4
 # include <stm32f4xx_hal.h>
+#elif defined STM32G0
+# include <stm32g0xx_hal.h>
 #endif
 
 void initGPIO()
@@ -12,26 +14,40 @@ void initGPIO()
 
     GPIO_Config.Mode = GPIO_MODE_AF_PP;
     GPIO_Config.Pull = GPIO_NOPULL;
-    GPIO_Config.Speed = GPIO_SPEED_HIGH;
 
 #if defined STM32F1
     __GPIOC_CLK_ENABLE();
     __AFIO_CLK_ENABLE();
 
     GPIO_Config.Pin = GPIO_PIN_8;
+    GPIO_Config.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(GPIOC, &GPIO_Config);
 #elif defined STM32F2
     __GPIOD_CLK_ENABLE();
 
     GPIO_Config.Alternate = GPIO_AF2_TIM4;
     GPIO_Config.Pin = GPIO_PIN_12;
+    GPIO_Config.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(GPIOD, &GPIO_Config);
 #elif defined STM32F4
     __GPIOA_CLK_ENABLE();
 
     GPIO_Config.Alternate = GPIO_AF2_TIM3;
     GPIO_Config.Pin = GPIO_PIN_6;
+    GPIO_Config.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_Config);
+#elif defined STM32G0
+    __GPIOA_CLK_ENABLE();
+#if defined STM32G070xx
+    GPIO_Config.Alternate = GPIO_AF2_TIM1;
+#else
+    GPIO_Config.Alternate = GPIO_AF2_TIM2;
+#endif
+
+    GPIO_Config.Pin = GPIO_PIN_5;
+    GPIO_Config.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_Config);
+
 #endif
 }
 
@@ -53,7 +69,20 @@ void initTimers()
     TIM_Handle.Instance = TIM3;
     // TIM3 Clocked from SYSCLK = 168 MHz
     TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetSysClockFreq() / 10000) - 1;
+#elif defined STM32G0
+
+#if defined STM32G070xx
+    TIM_Handle.Instance = TIM1;
+    __TIM1_CLK_ENABLE();
+#else
+    TIM_Handle.Instance = TIM2;
+    __TIM2_CLK_ENABLE();
 #endif
+
+    TIM_Handle.Init.Prescaler = (uint16_t)(HAL_RCC_GetSysClockFreq() / 10000) - 1;
+
+#endif
+
     // 1 Hz blinking
     TIM_Handle.Init.Period = 10000;
     TIM_Handle.Init.ClockDivision = 0;
@@ -77,6 +106,9 @@ void initTimers()
     HAL_TIM_PWM_ConfigChannel(&TIM_Handle, &TIM_OCConfig, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&TIM_Handle, TIM_CHANNEL_1);
 #elif defined STM32F4
+    HAL_TIM_PWM_ConfigChannel(&TIM_Handle, &TIM_OCConfig, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&TIM_Handle, TIM_CHANNEL_1);
+#elif defined STM32G0
     HAL_TIM_PWM_ConfigChannel(&TIM_Handle, &TIM_OCConfig, TIM_CHANNEL_1);
     HAL_TIM_PWM_Start(&TIM_Handle, TIM_CHANNEL_1);
 #endif
@@ -181,6 +213,23 @@ static void initClock(void)
     {
         __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
     }
+#elif defined STM32G0
+
+    HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                  |RCC_CLOCKTYPE_PCLK1;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+
 #endif
 }
 
