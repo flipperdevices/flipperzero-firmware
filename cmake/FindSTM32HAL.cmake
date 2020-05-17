@@ -13,12 +13,12 @@ IF(STM32_FAMILY STREQUAL "F0")
 ELSEIF(STM32_FAMILY STREQUAL "F1")
     SET(HAL_COMPONENTS adc can cec cortex crc dac dma eth flash gpio hcd i2c
                        i2s irda iwdg nand nor pccard pcd pwr rcc rtc sd smartcard
-                       spi sram tim uart usart wwdg fsmc sdmmc usb)
+                       spi sram tim uart usart wwdg)
 
     SET(HAL_REQUIRED_COMPONENTS cortex pwr rcc)
 
     # Components that have _ex sources
-    SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim)
+    SET(HAL_EX_COMPONENTS adc dac flash gpio pcd rcc rtc tim spi)
 
     SET(HAL_PREFIX stm32f1xx_)
 
