@@ -3,6 +3,11 @@ IF(NOT STM32Cube_DIR)
     MESSAGE(STATUS "No STM32Cube_DIR specified, using default: " ${STM32Cube_DIR})
 ENDIF()
 
+IF(NOT USBDevice_FIND_COMPONENTS)
+    SET(USBDevice_FIND_COMPONENTS ${USBDevice_COMPONENTS})
+    MESSAGE(STATUS "No USBDevice components selected, using all: ${USBDevice_FIND_COMPONENTS}")
+ENDIF()
+
 SET(USBDevice_SRC
     Core/Src/usbd_ctlreq.c
     Core/Src/usbd_core.c
@@ -69,12 +74,20 @@ SET(USBDevice_COMPONENTS_MSC_SOURCES
 #    Class/MSC/Src/usbd_msc_storage_template.c
 )
 
-SET(USBDevice_COMPONENTS_HID_HEADERS
-    Class/HID/Inc/usbd_hid.h
-)
-SET(USBDevice_COMPONENTS_HID_SOURCES
-    Class/HID/Src/usbd_hid.c
-)
+IF(NOT USBDevice_HID_CONFIG_DIR)
+    MESSAGE(STATUS "No user defined HID sources, using library sources")
+    SET(USBDevice_COMPONENTS_HID_HEADERS
+        Class/HID/Inc/usbd_hid.h
+    )
+    SET(USBDevice_COMPONENTS_HID_SOURCES
+        Class/HID/Src/usbd_hid.c
+    )
+ELSE()
+    MESSAGE(STATUS "Using user defined HID sources in ${USBDevice_HID_CONFIG_DIR}")
+    LIST(APPEND USBDevice_SOURCES ${USBDevice_HID_CONFIG_DIR}/usbd_hid.c)
+    LIST(APPEND USBDevice_INCLUDE_DIR ${USBDevice_HID_CONFIG_DIR})
+    LIST(REMOVE_ITEM USBDevice_FIND_COMPONENTS HID)
+ENDIF()
 
 SET(USBDevice_COMPONENTS_CustomHID_HEADERS
 #    Class/CustomHID/Inc/usbd_customhid_if_template.h
@@ -84,11 +97,6 @@ SET(USBDevice_COMPONENTS_CustomHID_SOURCES
     Class/CustomHID/Src/usbd_customhid.c
 #    Class/CustomHID/Src/usbd_customhid_if_template.c
 )
-
-IF(NOT USBDevice_FIND_COMPONENTS)
-    SET(USBDevice_FIND_COMPONENTS ${USBDevice_COMPONENTS})
-    MESSAGE(STATUS "No USBDevice components selected, using all: ${USBDevice_FIND_COMPONENTS}")
-ENDIF()
 
 FOREACH(cmp ${USBDevice_FIND_COMPONENTS})
     LIST(FIND USBDevice_COMPONENTS ${cmp} USBDevice_FOUND_INDEX)
