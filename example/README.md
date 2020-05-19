@@ -2,23 +2,31 @@
 
 ## Overview
 
-Example demonstrates how to flash ESP32 from another (host) MCU using esp_serial_flash component API. In this case, ESP32 is also used as host MCU. Binary to be flashed from one ESP32 to another is stored in partition named `spiffs`.
+Example demonstrates how to flash ESP32/ESP32-S2/ESP8266 from another (host) MCU using esp_serial_flash component API. In this case, ESP32 is also used as host MCU. Binary to be flashed from host MCU to ESP* is stored in partition named `spiffs`. Binaries are placed in separate folder for each target.
 
 This example is based on spiffsgen example located in IDF. For more information how to use SPIFFS Image Generator, refer to [spiffsgen example](https://github.com/espressif/esp-idf/tree/master/examples/storage/spiffsgen)
 
 Following steps are performed in order to re-program target's memory:
 
-1. UART1 through which new binary will be transfered is initialized.
-2. Filesystem is initialized and mounted.
-3. Binary file is opened and its size is acquired, as it has to be known before flashing.
-4. Host puts slave device into boot mode tries to connect by calling `loader_connect()`.
-5. Then `loader_flash_start()` is called to enter flashing mode.
-6. `loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
+1. Filesystem is initialized and mounted.
+2. UART1 through which new binary will be transfered is initialized.
+3. Host puts slave device into boot mode tries to connect by calling `esp_loader_connect()`.
+4. Binary file is opened and its size is acquired, as it has to be known before flashing.
+5. Then `esp_loader_flash_start()` is called to enter flashing mode and erase amount of memory to be flashed.
+6. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
+
+Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is called after connection is established in order to increase flashing speed. This does not apply for ESP8266, as its bootloader does not support this command. However, ESP8266 is capable of detecting baud rate during connection phase, and can be changed before calling `esp_loader_connect`, if necessary.
+
+## Target selection
+
+User can configure targets and `loader_config_user.h` header.
+Currently, three targets (ESP32, ESP32-S2, ESP8266) are supported.
+By default, example is compiled for ESP32 target.
 
 ## Hardware Required
 
 * Two development boards with ESP32 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.).
-* A USB cable for power supply and programming.
+* One or two USB cables for power supply and programming.
 
 ## Hardware connection
 
@@ -31,6 +39,7 @@ Table below shows connection between two ESP32 devices.
 |    IO4       |      RX0      |
 |    IO5       |      TX0      |
 
+Note: interconnection is the same for all three targets (slaves). 
 
 ### Build and flash
 

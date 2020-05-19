@@ -2,10 +2,10 @@
 
 ## Overview
 
-Serial flasher component provides portable library for flashing ESP32 from other host microcontroller. ESP32 is normally programmed via serial interface (UART) and port layer for given host microcontroller has to be implemented, if not available. Details can be found in section below.
+Serial flasher component provides portable library for flashing `ESP32`, `ESP32-S2`, `ESP8266` from other host microcontroller. Espressif SoCs are normally programmed via serial interface (UART) and port layer for given host microcontroller has to be implemented, if not available. Details can be found in section below.
 
 
-## Supporting new target
+## Supporting new host target
 
 In order to support new target, following function has to be implemented by user:
 
@@ -29,8 +29,10 @@ Please refer to ports in `port` directory. Currently, only [ESP32 port](port/esp
 
 ## Component integration
 
-At this point, this component can only be integrated with IDF. Improvement of existing CMakeList.txt file is to be done.   
+Apart from writing port (if not available), user has to provide `loader_config_user.h` header file and add its include path into build system. By defining appropriate macros, default configuration can be overwritten. As for now, slave target to be flashed (one of Espressif SoCs) and flash integrity verification can be configured. In case header file remains empty, `esp-serial-flasher` is compiled for ESP32 target by default.
 
 ## Known limitations
+
+At this point, component can only be integrated with IDF. Proper CMakeList.txt file is to be done.   
 
 Size of new binary image has to be known before flashing.

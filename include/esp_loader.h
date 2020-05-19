@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "loader_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +32,7 @@ typedef enum
     ESP_LOADER_ERROR_FAIL,             /*!< Unspecified error */
     ESP_LOADER_ERROR_TIMEOUT,          /*!< Timeout elapsed */
     ESP_LOADER_ERROR_INVALID_MD5,      /*!< Computed and receied MD5 does not match */
+    ESP_LOADER_ERROR_INVALID_TARGET,   /*!< Connected target is invalid */
     ESP_LOADER_ERROR_INVALID_RESPONSE  /*!< Internal error */
 } esp_loader_error_t;
 
@@ -147,7 +149,9 @@ esp_loader_error_t esp_loader_read_register(uint32_t address, uint32_t *reg_valu
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
+#ifndef TARGET_ESP8266
 esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate);
+#endif
 
 /**
   * @brief Verify target's flash integrity by checking MD5.

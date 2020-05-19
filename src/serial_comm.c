@@ -20,6 +20,7 @@
 #include <string.h>
 // #include <stdio.h>
 
+#define CMD_SIZE(cmd) ( sizeof(cmd) - sizeof(command_common_t) )
 
 static uint32_t s_sequence_number = 0;
 
@@ -243,7 +244,7 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = 16,
+            .size = CMD_SIZE(begin_cmd),
             .checksum = 0
         },
         .erase_size = erase_size,
@@ -264,13 +265,11 @@ esp_loader_error_t loader_flash_data_cmd(const uint8_t *data, uint32_t size)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_DATA,
-            .size = 16,
+            .size = CMD_SIZE(data_cmd) + size,
             .checksum = compute_checksum(data, size)
         },
         .data_size = size,
         .sequence_number = s_sequence_number++,
-        .zero_0 = 0,
-        .zero_1 = 0
     };
 
     return send_cmd_with_data(&data_cmd, sizeof(data_cmd), data, size);
@@ -283,7 +282,7 @@ esp_loader_error_t loader_flash_end_cmd(bool stay_in_loader)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_END,
-            .size = 4,
+            .size = CMD_SIZE(end_cmd),
             .checksum = 0
         },
         .stay_in_loader = stay_in_loader
@@ -299,7 +298,7 @@ esp_loader_error_t loader_sync_cmd(void)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = SYNC,
-            .size = 36,
+            .size = CMD_SIZE(sync_cmd),
             .checksum = 0
         },
         .sync_sequence = {
@@ -322,7 +321,7 @@ esp_loader_error_t loader_write_reg_cmd(uint32_t address, uint32_t value,
         .common = {
             .direction = WRITE_DIRECTION,
             .command = WRITE_REG,
-            .size = 16,
+            .size = CMD_SIZE(write_cmd),
             .checksum = 0
         },
         .address = address,
@@ -341,7 +340,7 @@ esp_loader_error_t loader_read_reg_cmd(uint32_t address, uint32_t *reg)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = READ_REG,
-            .size = 16,
+            .size = CMD_SIZE(read_cmd),
             .checksum = 0
         },
         .address = address,
@@ -357,7 +356,7 @@ esp_loader_error_t loader_spi_attach_cmd(uint32_t config)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = SPI_ATTACH,
-            .size = 8,
+            .size = CMD_SIZE(attach_cmd),
             .checksum = 0
         },
         .configuration = config,
@@ -373,7 +372,7 @@ esp_loader_error_t loader_change_baudrate_cmd(uint32_t baudrate)
         .common = {
             .direction = WRITE_DIRECTION,
             .command = CHANGE_BAUDRATE,
-            .size = 8,
+            .size = CMD_SIZE(baudrate_cmd),
             .checksum = 0
         },
         .new_baudrate = baudrate,
@@ -389,7 +388,7 @@ esp_loader_error_t loader_md5_cmd(uint32_t address, uint32_t size, uint8_t *md5_
         .common = {
             .direction = WRITE_DIRECTION,
             .command = SPI_FLASH_MD5,
-            .size = 16,
+            .size = CMD_SIZE(md5_cmd),
             .checksum = 0
         },
         .address = address,

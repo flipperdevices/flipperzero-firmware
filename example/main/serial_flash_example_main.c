@@ -20,12 +20,30 @@
 
 static const char *TAG = "example";
 
-const uint32_t PARTITION_TABLE_ADDRESS = 0x8000;
-const uint32_t APPLICATION_ADDRESS = 0x10000;
+#ifndef TARGET_ESP8266
 const uint32_t BOOTLOADER_ADDRESS = 0x1000;
+#else
+const uint32_t BOOTLOADER_ADDRESS = 0x0;
+#endif
+const uint32_t PARTITION_ADDRESS = 0x8000;
+const uint32_t APPLICATION_ADDRESS = 0x10000;
 
 const uint32_t HIGHER_BAUD_RATE = 230400;
 static uint8_t payload[1024];
+
+#if defined TARGET_ESP8266
+#define PARTITION_FILE "/spiffs/ESP8266/partition-table.bin"
+#define BOOTLOADER_FILE "/spiffs/ESP8266/bootloader.bin"
+#define APPLICATION_FILE "/spiffs/ESP8266/hello-world.bin"
+#elif defined TARGET_ESP32
+#define PARTITION_FILE "/spiffs/ESP32/partition-table.bin"
+#define BOOTLOADER_FILE "/spiffs/ESP32/bootloader.bin"
+#define APPLICATION_FILE "/spiffs/ESP32/hello-world.bin"
+#elif defined TARGET_ESP32_S2
+#define PARTITION_FILE "/spiffs/ESP32_S2/partition-table.bin"
+#define BOOTLOADER_FILE "/spiffs/ESP32_S2/bootloader.bin"
+#define APPLICATION_FILE "/spiffs/ESP32_S2/hello-world.bin"
+#endif
 
 
 static void flash_binary(FILE *image, size_t image_size, size_t address)
@@ -62,11 +80,13 @@ static void flash_binary(FILE *image, size_t image_size, size_t address)
 
     ESP_LOGI(TAG, "Finished programming");
 
+#ifndef TARGET_ESP8266
     err = esp_loader_flash_verify();
     if (err != ESP_LOADER_SUCCESS) {
         ESP_LOGE(TAG, "MD5 does not match. err: %d", err);
         return;
     }
+#endif
     ESP_LOGI(TAG, "Flash verified");
 }
 
@@ -112,7 +132,7 @@ static esp_err_t connect_to_target()
 
     // Initialize UART
     esp_loader_error_t err = loader_port_serial_init(&config);
-    if(err != ESP_LOADER_SUCCESS) {
+    if (err != ESP_LOADER_SUCCESS) {
         ESP_LOGE(TAG, "serial initialization failed.");
         return err;
     }
@@ -121,22 +141,24 @@ static esp_err_t connect_to_target()
 
     err = esp_loader_connect(&connect_config);
     if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Cannot connect to target.");
+        ESP_LOGE(TAG, "Cannot connect to target. Error: %u", err);
         return err;
     }
     ESP_LOGI(TAG, "Connected to target");
 
-    // err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
-    // if (err != ESP_LOADER_SUCCESS) {
-    //     ESP_LOGE(TAG, "Unable to change baud rate on target.");
-    //     return err;
-    // }
+#ifndef TARGET_ESP8266
+    err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "Unable to change baud rate on target.");
+        return err;
+    }
 
-    // err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
-    // if (err != ESP_LOADER_SUCCESS) {
-    //     ESP_LOGE(TAG, "Unable to change baud rate.");
-    //     return err;
-    // }
+    err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "Unable to change baud rate.");
+        return err;
+    }
+#endif
 
     return ESP_OK;
 }
@@ -172,9 +194,9 @@ void app_main(void)
 {
     if ( register_vfs() == ESP_OK ) {
         if ( connect_to_target() == ESP_OK) {
-            upload_file("/spiffs/partition-table.bin", PARTITION_TABLE_ADDRESS);
-            upload_file("/spiffs/bootloader.bin", BOOTLOADER_ADDRESS);
-            upload_file("/spiffs/hello-world.bin", APPLICATION_ADDRESS);
+            upload_file(PARTITION_FILE, PARTITION_ADDRESS);
+            upload_file(BOOTLOADER_FILE, BOOTLOADER_ADDRESS);
+            upload_file(APPLICATION_FILE, APPLICATION_ADDRESS);
         }
         esp_vfs_spiffs_unregister(NULL);
     }

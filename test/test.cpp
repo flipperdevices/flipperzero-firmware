@@ -132,7 +132,7 @@ struct __attribute__((packed)) flash_write_frame {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_DATA,
-            .size = 16,
+            .size = 16 + PAYLOAD_SIZE,
             .checksum = 0xef,
         },
         .data_size = PAYLOAD_SIZE,
@@ -231,8 +231,16 @@ TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
 
 TEST_CASE( "Can connect within specified time " )
 {
+    // Set date registers used for detection of attached chip
+    auto uart_date_reg_1 = read_reg_response;
+    auto uart_date_reg_2 = read_reg_response;
+    uart_date_reg_1.data.common.value = 0x15122500;
+    uart_date_reg_2.data.common.value = 0;
+
     clear_buffers();
     queue_response(sync_response);
+    queue_response(uart_date_reg_1);
+    queue_response(uart_date_reg_2);
     queue_response(attach_response);
 
     esp_loader_connect_args_t connect_config = {
@@ -301,7 +309,7 @@ TEST_CASE ( "SLIP is encoded correctly" )
         0xc0,       // Begin
         0x00,         // Write direction
         0x03,         // FLASH_DATA command
-        16, 0,        // Number of characters to send
+        16 + sizeof(data), 0, // Number of characters to send
         0x33, 0, 0, 0,// Checksum
         sizeof(data), 0, 0, 0, // Data size
         0, 0, 0, 0,   // Sequence number

@@ -25,8 +25,28 @@
 #define MAX(a, b) ((a) > (b)) ? (a) : (b)
 #endif
 
+typedef struct {
+    uint32_t reg_1;
+    uint32_t reg_2;
+} date_registers_t;
+
+static const date_registers_t date_regs = {
+#if defined TARGET_ESP8266
+    .reg_1 = 0x00062000,
+    .reg_2 = 0
+#elif defined TARGET_ESP32
+    .reg_1 = 0x15122500,
+    .reg_2 = 0
+#elif defined TARGET_ESP32_S2
+    .reg_1 = 0x00000500,
+    .reg_2 = 0x19031400
+#endif
+};
+
+static const uint32_t UART_DATE_REG_ADDR = 0x60000078;    // used to differentiate ESP8266 vs ESP32*
+static const uint32_t UART_DATE_REG2_ADDR = 0x3f400074;   // used to differentiate ESP32-S2 vs other models
+
 static const uint32_t DEFAULT_TIMEOUT = 500;
-static const uint32_t SPI_PIN_CONFIG_DEFAULT = 0;
 static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most flash operations
 static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 3000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
@@ -73,6 +93,19 @@ static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
     return MAX(timeout, DEFAULT_FLASH_TIMEOUT);
 }
 
+static esp_loader_error_t detect_chip(void)
+{
+    uint32_t reg_1, reg_2;
+
+    RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG_ADDR,  &reg_1) );
+    RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG2_ADDR, &reg_2) );
+
+    if (date_regs.reg_1 == reg_1 && (date_regs.reg_2 == 0 || date_regs.reg_2 == reg_2)) {
+        return ESP_LOADER_SUCCESS;
+    } else {
+        return ESP_LOADER_ERROR_INVALID_TARGET;
+    }
+}
 
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 {
@@ -94,8 +127,15 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
         }
     } while (err != ESP_LOADER_SUCCESS);
 
+    RETURN_ON_ERROR( detect_chip() );
+
+#ifndef TARGET_ESP8266
+    uint32_t SPI_PIN_CONFIG_DEFAULT = 0;
     loader_port_start_timer(DEFAULT_TIMEOUT);
-    return loader_spi_attach_cmd(SPI_PIN_CONFIG_DEFAULT);
+    err = loader_spi_attach_cmd(SPI_PIN_CONFIG_DEFAULT);
+#endif
+
+    return err;
 }
 
 
@@ -154,12 +194,14 @@ esp_loader_error_t esp_loader_write_register(uint32_t address, uint32_t reg_valu
     return loader_write_reg_cmd(address, reg_value, 0xFFFFFFFF, 0);
 }
 
+#ifndef TARGET_ESP8266
 esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
 {
     loader_port_start_timer(DEFAULT_TIMEOUT);
 
     return loader_change_baudrate_cmd(baudrate);
 }
+#endif
 
 #if MD5_ENABLED
 
@@ -195,16 +237,16 @@ esp_loader_error_t esp_loader_flash_verify(void)
     RETURN_ON_ERROR( loader_md5_cmd(s_start_address, s_image_size, received_md5) );
 
     bool md5_match = memcmp(hex_md5, received_md5, MD5_SIZE) == 0;
-    
-    if(!md5_match) {
+
+    if (!md5_match) {
         hex_md5[MD5_SIZE] = '\n';
         received_md5[MD5_SIZE] = '\n';
 
         loader_port_debug_print("Error: MD5 checksum does not match:\n");
         loader_port_debug_print("Expected:\n");
-        loader_port_debug_print((char*)received_md5);
+        loader_port_debug_print((char *)received_md5);
         loader_port_debug_print("Actual:\n");
-        loader_port_debug_print((char*)hex_md5);
+        loader_port_debug_print((char *)hex_md5);
 
         return ESP_LOADER_ERROR_INVALID_MD5;
     }
