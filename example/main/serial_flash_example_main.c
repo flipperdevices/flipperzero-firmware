@@ -20,39 +20,22 @@
 
 static const char *TAG = "example";
 
-const uint32_t HIGHER_BAUD_RATE = 921600;
-const uint32_t APP_START_ADDRESS = 0x10000;
+const uint32_t PARTITION_TABLE_ADDRESS = 0x8000;
+const uint32_t APPLICATION_ADDRESS = 0x10000;
+const uint32_t BOOTLOADER_ADDRESS = 0x1000;
+
+const uint32_t HIGHER_BAUD_RATE = 230400;
 static uint8_t payload[1024];
 
 
-static void flash_binary(FILE *image, size_t image_size)
+static void flash_binary(FILE *image, size_t image_size, size_t address)
 {
     esp_loader_error_t err;
     int32_t packet_number = 0;
-    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
-    err = esp_loader_connect(&connect_config);
+    err = esp_loader_flash_start(address, image_size, sizeof(payload));
     if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Cannot connect to target.");
-        return;
-    }
-    ESP_LOGI(TAG, "Connected to target");
-
-    err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Unable to change baud rate on target.");
-        return;
-    }
-
-    err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Unable to change baud rate.");
-        return;
-    }
-
-    err = esp_loader_flash_start(APP_START_ADDRESS, image_size, sizeof(payload));
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Flash start operation failed.");
+        ESP_LOGE(TAG, "Flash start operation failed with error %d.", err);
         return;
     }
     ESP_LOGI(TAG, "Start programming");
@@ -87,8 +70,78 @@ static void flash_binary(FILE *image, size_t image_size)
     ESP_LOGI(TAG, "Flash verified");
 }
 
+static FILE *get_image_and_its_size(const char *path, size_t *image_size)
+{
+    FILE *image = fopen(path, "r");
+    if (image == NULL) {
+        ESP_LOGE(TAG, "Failed to open file %s", path);
+        esp_vfs_spiffs_unregister(NULL);
+        return NULL;
+    }
 
-static FILE *get_image_and_its_size(size_t *image_size)
+    fseek(image, 0L, SEEK_END);
+    *image_size = ftell(image);
+    rewind(image);
+
+    ESP_LOGW(TAG, "File %s opened. Size: %u bytes", path, *image_size);
+
+    return image;
+}
+
+static void upload_file(const char *path, size_t address)
+{
+    size_t image_size;
+    FILE *image = get_image_and_its_size(path, &image_size);
+
+    if (image != NULL) {
+        flash_binary(image, image_size, address);
+        fclose(image);
+    }
+}
+
+static esp_err_t connect_to_target()
+{
+    const loader_serial_config_t config = {
+        .baud_rate = 115200,
+        .uart_port = UART_NUM_1,
+        .uart_rx_pin = GPIO_NUM_5,
+        .uart_tx_pin = GPIO_NUM_4,
+        .reset_trigger_pin = GPIO_NUM_25,
+        .gpio0_trigger_pin = GPIO_NUM_26,
+    };
+
+    // Initialize UART
+    esp_loader_error_t err = loader_port_serial_init(&config);
+    if(err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "serial initialization failed.");
+        return err;
+    }
+
+    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
+
+    err = esp_loader_connect(&connect_config);
+    if (err != ESP_LOADER_SUCCESS) {
+        ESP_LOGE(TAG, "Cannot connect to target.");
+        return err;
+    }
+    ESP_LOGI(TAG, "Connected to target");
+
+    // err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
+    // if (err != ESP_LOADER_SUCCESS) {
+    //     ESP_LOGE(TAG, "Unable to change baud rate on target.");
+    //     return err;
+    // }
+
+    // err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
+    // if (err != ESP_LOADER_SUCCESS) {
+    //     ESP_LOGE(TAG, "Unable to change baud rate.");
+    //     return err;
+    // }
+
+    return ESP_OK;
+}
+
+static esp_err_t register_vfs()
 {
     ESP_LOGI(TAG, "Initializing SPIFFS");
 
@@ -110,54 +163,19 @@ static FILE *get_image_and_its_size(size_t *image_size)
         } else {
             ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
         }
-        return NULL;
     }
 
-    FILE *image = fopen("/spiffs/hello-world.bin", "r");
-    if (image == NULL) {
-        ESP_LOGE(TAG, "Failed to open file");
-        esp_vfs_spiffs_unregister(NULL);
-        return NULL;
-    }
-
-    fseek(image, 0L, SEEK_END);
-    *image_size = ftell(image);
-    rewind(image);
-
-    ESP_LOGI(TAG, "Image size: %u", *image_size);
-
-    return image;
+    return ret;
 }
-
 
 void app_main(void)
 {
-
-    const loader_serial_config_t config = {
-        .baud_rate = 115200,
-        .uart_port = UART_NUM_1,
-        .uart_rx_pin = GPIO_NUM_5,
-        .uart_tx_pin = GPIO_NUM_4,
-        .reset_trigger_pin = GPIO_NUM_25,
-        .gpio0_trigger_pin = GPIO_NUM_26,
-    };
-
-    // Initialize UART
-    esp_loader_error_t err = loader_port_serial_init(&config);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "serial initialization failed.");
-        return;
+    if ( register_vfs() == ESP_OK ) {
+        if ( connect_to_target() == ESP_OK) {
+            upload_file("/spiffs/partition-table.bin", PARTITION_TABLE_ADDRESS);
+            upload_file("/spiffs/bootloader.bin", BOOTLOADER_ADDRESS);
+            upload_file("/spiffs/hello-world.bin", APPLICATION_ADDRESS);
+        }
+        esp_vfs_spiffs_unregister(NULL);
     }
-
-    size_t image_size;
-    FILE *image = get_image_and_its_size(&image_size);
-    if (image == NULL) {
-        return;
-    }
-
-    flash_binary(image, image_size);
-
-    // All done, close file, unmount partition and disable SPIFFS
-    fclose(image);
-    esp_vfs_spiffs_unregister(NULL);
 }
