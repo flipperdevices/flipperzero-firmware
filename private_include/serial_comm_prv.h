@@ -181,6 +181,18 @@ typedef struct __attribute__((packed))
     response_status_t status;
 } rom_md5_response_t;
 
+typedef struct __attribute__((packed))
+{
+    command_common_t common;
+    uint32_t id;
+    uint32_t total_size;
+    uint32_t block_size;
+    uint32_t sector_size;
+    uint32_t page_size;
+    uint32_t status_mask;
+} write_spi_command_t;  
+
+
 #ifdef __cplusplus
 }
 #endif

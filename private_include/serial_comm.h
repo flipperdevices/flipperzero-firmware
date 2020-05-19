@@ -52,6 +52,7 @@ esp_loader_error_t loader_change_baudrate_cmd(uint32_t baudrate);
 
 esp_loader_error_t loader_md5_cmd(uint32_t address, uint32_t size, uint8_t *md5_out);
 
+esp_loader_error_t loader_spi_parameters(uint32_t total_size);
 
 #ifdef __cplusplus
 }

@@ -400,6 +400,26 @@ esp_loader_error_t loader_md5_cmd(uint32_t address, uint32_t size, uint8_t *md5_
     return send_cmd_md5(&md5_cmd, sizeof(md5_cmd), md5_out);
 }
 
+esp_loader_error_t loader_spi_parameters(uint32_t total_size)
+{
+    write_spi_command_t spi_cmd = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = SPI_SET_PARAMS,
+            .size = 24,
+            .checksum = 0
+        },
+        .id = 0,
+        .total_size = total_size,
+        .block_size = 64 * 1024,
+        .sector_size = 4 * 1024,
+        .page_size = 0x100,
+        .status_mask = 0xFFFF,
+    };
+
+    return send_cmd(&spi_cmd, sizeof(spi_cmd), NULL);
+}
+
 __attribute__ ((weak)) void loader_port_debug_print(const char *str)
 {
 
