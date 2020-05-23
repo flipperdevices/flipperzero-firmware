@@ -1,4 +1,4 @@
-set(STM32_SUPPORTED_FAMILIES L0 L1 L4 F0 F1 F2 F3 F4 G4 L4 F7 H7)
+set(STM32_SUPPORTED_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4)
 
 if(NOT STM32_TOOLCHAIN_PATH)
      set(STM32_TOOLCHAIN_PATH "/usr")
@@ -99,7 +99,7 @@ function(stm32_get_memory_info FAMILY DEVICE
         set(FLASH "192K")
     else()
         set(FLASH "16K")
-        message(WARNING "Unknow flash size for device ${DEVICE}")
+        message(WARNING "Unknow flash size for device ${DEVICE}. Set to ${FLASH}")
     endif()
     
     stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
@@ -146,17 +146,16 @@ endif()
 
 include(stm32/utilities)
 include(stm32/f0)
-include(stm32/g0)
-include(stm32/l0)
 include(stm32/f1)
-include(stm32/l1)
 include(stm32/f2)
 include(stm32/f3)
 include(stm32/f4)
-include(stm32/g4)
-include(stm32/l4)
 include(stm32/f7)
+include(stm32/g0)
+include(stm32/g4)
 include(stm32/h7)
-
+include(stm32/l0)
+include(stm32/l1)
+include(stm32/l4)
 
 
