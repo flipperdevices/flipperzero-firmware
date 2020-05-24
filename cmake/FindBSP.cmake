@@ -22,7 +22,6 @@ set(BSP_F1_COMPONENTS
 )
 set(BSP_F1_SOURCES_STM3210C_EVAL accelerometer audio eeprom io lcd sd ts)
 set(BSP_F1_SOURCES_STM3210E_EVAL audio lcd nand nor sd serialflash sram tsensor)
-set(BSP_F1_DEVICE_STM32F1xx_Nucleo F103RB)
 set(BSP_F1_DEVICE_STM32VL_Discovery F100RB)
 set(BSP_F1_DEVICE_STM3210C_EVAL F107VC)
 set(BSP_F1_DEVICE_STM3210E_EVAL F103ZE)
@@ -34,7 +33,6 @@ set(BSP_F2_COMPONENTS
     cs43l22 ili9320 ili9325 ili9341 ov2640 st7735 stmpe811
 )
 set(BSP_F2_SOURCES_STM322xG_EVAL audio camera eeprom io lcd sd sram ts)
-set(BSP_F2_DEVICE_STM32F2xx_Nucleo_144 F207ZG)
 set(BSP_F2_DEVICE_STM322xG_EVAL F207IG)
 
 set(BSP_F3_BOARDS 
@@ -50,7 +48,6 @@ set(BSP_F3_SOURCES_STM32303C_EVAL audio eeprom lcd sd tsensor)
 set(BSP_F3_SOURCES_STM32303E_EVAL audio eeprom lcd sd tsensor)
 set(BSP_F3_SOURCES_STM32373C_EVAL audio eeprom lcd sd tsensor)
 set(BSP_F3_DEVICE_STM32F3_Discovery F303VC)
-set(BSP_F3_DEVICE_STM32F3xx_Nucleo_144 F303ZE)
 set(BSP_F3_DEVICE_STM32F3348_Discovery F334C8)
 set(BSP_F3_DEVICE_STM32303C_EVAL F303VC)
 set(BSP_F3_DEVICE_STM32303E_EVAL F303VE)
@@ -116,6 +113,61 @@ set(BSP_F7_DEVICE_STM32F7508_Discovery F750N8)
 set(BSP_F7_DEVICE_STM32746G_Discovery F746NG)
 set(BSP_F7_DEVICE_STM32756G_EVAL F756NG)
 
+set(BSP_G0_BOARDS
+    STM32G0xx_Nucleo STM32G0xx_Nucleo_32 STM32G071B-Discovery STM32G081B_EVAL 
+    STM32G0316-Discovery
+)
+set(BSP_G0_COMPONENTS 
+    hx8347d ina230 sn65dp141 ssd1315 st7735 stlm75 tusb546
+)
+set(BSP_G0_DIR_STM32G0316_Discovery STM32G0316-DISCO)
+set(BSP_G0_SOURCES_STM32G071B_Discovery lcd pwr pwrmon)
+set(BSP_G0_SOURCES_STM32G081B_EVAL lcd mux pwr sd tsensor)
+set(BSP_G0_DEVICE_STM32G071B_Discovery G071RB)
+set(BSP_G0_DEVICE_STM32G081B_EVAL G081RB)
+set(BSP_G0_DEVICE_STM32G0316_Discovery G031J6)
+
+set(BSP_G4_BOARDS
+    B-G474E-DPOW1 STM32G4xx_Nucleo STM32G474E-EVAL
+)
+set(BSP_G4_COMPONENTS 
+    hx8347d mfxstm32l152 mt25ql512abb st7735 stts751 wm8994
+)
+set(BSP_G4_SOURCES_B-G474E-DPOW1 usbpd_pwr)
+set(BSP_G4_SOURCES_STM32G481B_EVAL audio bus env_sensor idd io lcd qspi sd smartcard sram usbpd_pwr)
+set(BSP_G4_DEVICE_B_G474E_DPOW1 G474RE)
+set(BSP_G4_DEVICE_STM32G474E_EVAL G474QE)
+
+set(BSP_H7_BOARDS
+    STM32H7B3I-Discovery STM32H7B3I-EVAL STM32H7xx_Nucleo STM32H743I-EVAL
+    STM32H745I-Discovery STM32H747I-Discovery STM32H747I-EVAL 
+    STM32H750B-Discovery
+)
+set(BSP_H7_COMPONENTS 
+    adv7533 ampire480272 ampire640480 cs42l51 es_wifi exc7200 ft6x06 ft5336 
+    is42s16800j is42s32800g is42s32800j lan8742 m24lr64 mfxstm32l152 
+    mt25tl01g mt48lc4m32b2 mx25lm51245g otm8009a ov5640 ov9655 rk043fn48h 
+    rk070er9427 s5k5cag st7735 stmpe811 ts3510 wm8994
+)
+set(BSP_H7_DIR_STM32H7B3I_Discovery STM32H7B3I-DK)
+set(BSP_H7_DIR_STM32H745I_Discovery STM32H745I-DISCO)
+set(BSP_H7_DIR_STM32H747I_Discovery STM32H747I-DISCO)
+set(BSP_H7_DIR_STM32H750B_Discovery STM32H750B-DK)
+set(BSP_H7_SOURCES_STM32H7B3I_Discovery audio bus camera eeprom lcd ospi sd sdram ts)
+set(BSP_H7_SOURCES_STM32H7B3I_EVAL audio bus camera eeprom io lcd nor ospi sd sdram sram ts)
+set(BSP_H7_SOURCES_STM32H743I_EVAL audio bus eeprom io lcd nor qspi sd sdram sram ts)
+set(BSP_H7_SOURCES_STM32H745I_Discovery audio bus lcd mmc qspi sdram ts)
+set(BSP_H7_SOURCES_STM32H747I_Discovery audio bus camera lcd qspi sd sdram ts)
+set(BSP_H7_SOURCES_STM32H747I_EVAL audio bus eeprom io lcd nor qspi sd sdram sram ts)
+set(BSP_H7_SOURCES_STM32H750B_Discovery audio bus lcd mmc qspi sdram ts)
+set(BSP_H7_DEVICE_STM32H7B3I_Discovery H7B3LI)
+set(BSP_H7_DEVICE_STM32H7B3I_EVAL H7B3LI)
+set(BSP_H7_DEVICE_STM32H743I_EVAL H743XI)
+set(BSP_H7_DEVICE_STM32H745I_Discovery H745XI)
+set(BSP_H7_DEVICE_STM32H747I_Discovery H747XI)
+set(BSP_H7_DEVICE_STM32H747I_EVAL H743XI)
+set(BSP_H7_DEVICE_STM32H750B_Discovery H750XB)
+
 if(NOT BSP_FIND_COMPONENTS)
     set(BSP_FIND_COMPONENTS 
         STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
@@ -161,23 +213,23 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
     foreach(BOARD ${BSP_${FAMILY}_BOARDS})
         string(REPLACE "-" "_" BOARD_CANONICAL ${BOARD})
         string(TOLOWER ${BOARD_CANONICAL} BOARD_CANONICAL_L)
-        
-        find_file(BSP_${BOARD_CANONICAL}_SOURCE
-            NAMES ${BOARD_CANONICAL_L}.c
-            PATHS "${BSP_${FAMILY}_PATH}/${BOARD}"
+
+        find_path(BSP_${BOARD_CANONICAL}_PATH
+            NAMES ${BOARD_CANONICAL_L}.h
+            PATHS "${BSP_${FAMILY}_PATH}/${BOARD}" "${BSP_${FAMILY}_PATH}/${BSP_${FAMILY}_DIR_${BOARD_CANONICAL}}"
             NO_DEFAULT_PATH
         )
-        if (NOT BSP_${BOARD_CANONICAL}_SOURCE)
+        if (NOT BSP_${BOARD_CANONICAL}_PATH)
             continue()
         endif()
         
         add_library(BSP::STM32::${BOARD_CANONICAL} INTERFACE IMPORTED)
         target_link_libraries(BSP::STM32::${BOARD_CANONICAL} INTERFACE BSP::STM32::${FAMILY} CMSIS::STM32::${FAMILY})
-        target_include_directories(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${FAMILY}_PATH}/${BOARD}")
-        target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_SOURCE}")
+        target_include_directories(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}")
+        target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}.c")
         
         foreach(SRC ${BSP_${FAMILY}_SOURCES_${BOARD_CANONICAL}})
-            target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${FAMILY}_PATH}/${BOARD}/${BOARD_CANONICAL_L}_${SRC}.c")
+            target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}_${SRC}.c")
         endforeach()
         if(BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL})
             target_link_libraries(BSP::STM32::${BOARD_CANONICAL} INTERFACE CMSIS::STM32::${BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL}})
