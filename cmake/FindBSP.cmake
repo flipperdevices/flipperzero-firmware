@@ -11,6 +11,10 @@ set(BSP_F0_SOURCES_STM32F072B_Discovery stm32f072b_discovery_eeprom.c stm32f072b
 set(BSP_F0_SOURCES_STM32F0308_Discovery stm32f0308_discovery.c)
 set(BSP_F0_SOURCES_STM32072B_EVAL stm32072b_eval_eeprom.c stm32072b_eval_lcd.c stm32072b_eval_sd.c stm32072b_eval_tsensor.c stm32072b_eval.c)
 set(BSP_F0_SOURCES_STM32091C_EVAL stm32091c_eval_eeprom.c stm32091c_eval_lcd.c stm32091c_eval_sd.c stm32091c_eval_tsensor.c stm32091c_eval.c)
+set(BSP_F0_DEVICE_STM32F072B_Discovery F072RB)
+set(BSP_F0_DEVICE_STM32F0308_Discovery F030R8)
+set(BSP_F0_DEVICE_STM32072B_EVAL F072VB)
+set(BSP_F0_DEVICE_STM32091C_EVAL F091VC)
 
 if(NOT BSP_FIND_COMPONENTS)
     set(BSP_FIND_COMPONENTS 
@@ -63,6 +67,9 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
         foreach(SRC ${BSP_${FAMILY}_SOURCES_${BOARD_CANONICAL}})
             target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${FAMILY}_PATH}/${BOARD}/${SRC}")
         endforeach()
+        if(BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL})
+            target_link_libraries(BSP::STM32::${BOARD_CANONICAL} INTERFACE CMSIS::STM32::${BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL}})
+        endif()
     endforeach()
     
     foreach(BCOMP ${BSP_${FAMILY}_COMPONENTS}) 

@@ -14,10 +14,6 @@ set(TEST_F0_COMPONENTS
 )
 set(DEVICE_STM32F0xx_Nucleo_32 F031K6)
 set(DEVICE_STM32F0xx_Nucleo F030R8)
-set(DEVICE_STM32F072B_Discovery F072RB)
-set(DEVICE_STM32F0308_Discovery F030R8)
-set(DEVICE_STM32072B_EVAL F072VB)
-set(DEVICE_STM32091C_EVAL F091VC)
 
 project(bsp-test C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
@@ -33,10 +29,12 @@ foreach(FAMILY ${TEST_FAMILIES})
         add_executable(bsp-test-${BOARD} ${SOURCES})
         target_link_libraries(bsp-test-${BOARD} 
             BSP::STM32::${BOARD} 
-            HAL::STM32::${FAMILY} 
-            CMSIS::STM32::${DEVICE_${BOARD}}
+            HAL::STM32::${FAMILY}
             STM32::NoSys
         )
+        if(DEVICE_${BOARD})
+            target_link_libraries(bsp-test-${BOARD} CMSIS::STM32::${DEVICE_${BOARD}})
+        endif()        
         foreach(COMP ${TEST_${FAMILY}_COMPONENTS})
             target_link_libraries(bsp-test-${BOARD} BSP::STM32::${FAMILY}::${COMP})
         endforeach()
