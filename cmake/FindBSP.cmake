@@ -168,6 +168,56 @@ set(BSP_H7_DEVICE_STM32H747I_Discovery H747XI)
 set(BSP_H7_DEVICE_STM32H747I_EVAL H743XI)
 set(BSP_H7_DEVICE_STM32H750B_Discovery H750XB)
 
+set(BSP_L0_BOARDS
+    STM32L0xx_Nucleo STM32L0xx_Nucleo_32 STM32L073Z_EVAL STM32L0538-Discovery
+)
+set(BSP_L0_COMPONENTS 
+    gde021a1 hx8347d mfxstm32l152 st7735 stlm75
+)
+set(BSP_L0_SOURCES_STM32L073Z_EVAL eeprom glass_lcd idd io lcd sd tsensor)
+set(BSP_L0_SOURCES_STM32L0538_Discovery epd)
+set(BSP_L0_DEVICE_STM32L073Z_EVAL L073VZ)
+set(BSP_L0_DEVICE_STM32L0538_Discovery L053C8)
+
+set(BSP_L1_BOARDS
+    STM32L1xx_Nucleo STM32L100C-Discovery STM32L152C-Discovery STM32L152D_EVAL
+)
+set(BSP_L1_COMPONENTS 
+    cs43l22 hx8347d ili9320 ili9325 spfd5408 st7735 stlm75
+)
+set(BSP_L1_SOURCES_STM32L152C_Discovery glass_lcd)
+set(BSP_L1_SOURCES_STM32L152D_EVAL audio eeprom audio glass_lcd lcd nor sd sram tsensor)
+set(BSP_L1_DEVICE_STM32L100C_Discovery L100RC)
+set(BSP_L1_DEVICE_STM32L152C_Discovery L152RC)
+set(BSP_L1_DEVICE_STM32L152D_EVAL L152ZD)
+
+set(BSP_L4_BOARDS 
+    STM32L475E-IOT01 STM32L4P5G-Discovery STM32L4R9I_EVAL STM32L4R9I-Discovery 
+    STM32L4xx_Nucleo STM32L4xx_Nucleo_32 STM32L4xx_Nucleo_144 STM32L476G_EVAL 
+    STM32L476G-Discovery STM32L496G-Discovery
+)
+set(BSP_L4_COMPONENTS
+    cs42l51 cs43l22 cy8c4014lqi ft3x67 ft6x06 ft5336 hts221 hx8347g hx8347i 
+    iss66wvh8m8 l3gd20 lis3mdl lps22hb ls016b8uy lsm6dsl lsm303c lsm303dlhc 
+    m24sr mfxstm32l152 mx25lm51245g mx25r6435f n25q128a n25q256a ov9655 
+    rk043fn48h st7735 st7789h2 stmpe811 stmpe1600 wm8994
+)
+set(BSP_L4_SOURCES_B_L475E_IOT01 accelerometer gyro hsensor magneto psensor qspi tsensor iot01)
+set(BSP_L4_SOURCES_STM32L4P5G_Discovery idd io lcd mmc ospi_nor psram ts)
+set(BSP_L4_SOURCES_STM32L4R9I_EVAL audio dsi_lcd dsi_ts eeprom idd io nor ospi_nor ospi_ram rgb_ts sd sram)
+set(BSP_L4_SOURCES_STM32L4R9I_Discovery audio camera idd io lcd ospi_nor psram sd ts)
+set(BSP_L4_SOURCES_STM32L476G_EVAL audio eeprom glass_lcd idd io lcd nor qspi sd sram ts)
+set(BSP_L4_SOURCES_STM32L476G_Discovery audio compass glass_lcd gyroscope qspi)
+set(BSP_L4_SOURCES_STM32L496G_Discovery audio camera idd io lcd qspi sd sram ts)
+set(BSP_L4_DIR_STM32L475E_IOT01 B-L475E-IOT01)
+set(BSP_L4_DEVICE_STM32L475E_IOT01 L475VG)
+set(BSP_L4_DEVICE_STM32L4P5G_Discovery L4P5AG)
+set(BSP_L4_DEVICE_STM32L4R9I_EVAL L4R9AI)
+set(BSP_L4_DEVICE_STM32L4R9I_Discovery L4R9AI)
+set(BSP_L4_DEVICE_STM32L476G_EVAL L476ZG)
+set(BSP_L4_DEVICE_STM32L476G_Discovery L476VG)
+set(BSP_L4_DEVICE_STM32L496G_Discovery L496AG)
+
 if(NOT BSP_FIND_COMPONENTS)
     set(BSP_FIND_COMPONENTS 
         STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7

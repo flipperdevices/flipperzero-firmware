@@ -3,9 +3,10 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake
 
 if(NOT TEST_FAMILIES)
     # Can't test H7 because it needs some non-free components
-    set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4)
+    set(TEST_FAMILIES F0 F1 F2 F3 F4 F7 G0 G4 L0 L1 L4)
 endif()
 
+# Nucleo boards can have different devices on it
 set(DEVICE_STM32F0xx_Nucleo_32 F031K6)
 set(DEVICE_STM32F0xx_Nucleo F030R8)
 set(DEVICE_STM32F1xx_Nucleo F103RB)
@@ -19,9 +20,16 @@ set(DEVICE_STM32F7xx_Nucleo_144 F746ZG)
 set(DEVICE_STM32G0xx_Nucleo G070RB)
 set(DEVICE_STM32G0xx_Nucleo_32 G031K8)
 set(DEVICE_STM32G4xx_Nucleo G474RE)
-set(DEVICE_STM32H7xx_Nucleo H7A3ZI)
+set(DEVICE_STM32L0xx_Nucleo L053R8)
+set(DEVICE_STM32L0xx_Nucleo_32 L011K4)
+set(DEVICE_STM32L1xx_Nucleo L152RE)
+set(DEVICE_STM32L4xx_Nucleo L412RB)
+set(DEVICE_STM32L4xx_Nucleo_32 L412KB)
+set(DEVICE_STM32L4xx_Nucleo_144 L496ZG)
 set(DEFINES_STM32469I_EVAL USE_IOEXPANDER)
 set(DEFINES_STM32F769I_EVAL USE_IOEXPANDER) 
+set(DEFINES_STM32L476G_EVAL USE_IOEXPANDER) 
+set(DEFINES_STM32L4R9I_EVAL USE_ROCKTECH_480x272) 
 
 # Ban some boards because their BSP need non-free components
 set(BANNED_BOARDS STM32756G_EVAL)
