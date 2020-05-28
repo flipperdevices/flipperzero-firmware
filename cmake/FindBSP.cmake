@@ -234,7 +234,7 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
     string(REGEX MATCH "^STM32([FGHL][0-9]).*$" COMP_U ${COMP_U})
     
     if(NOT CMAKE_MATCH_1)
-        message(FATAL_ERROR "Unknown HAL component: ${COMP}")
+        message(FATAL_ERROR "Unknown BSP component: ${COMP}")
     endif()
         
     set(FAMILY ${CMAKE_MATCH_1})
@@ -317,4 +317,3 @@ find_package_handle_standard_args(BSP
     FOUND_VAR BSP_FOUND
     HANDLE_COMPONENTS
 )
-
