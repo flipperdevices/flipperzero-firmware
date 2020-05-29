@@ -70,6 +70,7 @@ void MenuFunctions::main(uint32_t currentTime)
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
+    (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
     (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
@@ -380,6 +381,7 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
   addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this](){wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);});
   addNodes(&wifiScannerMenu, "EAPOL/PMKID Scan", TFT_VIOLET, NULL, EAPOL, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);});
+  addNodes(&wifiScannerMenu, "Detect Pwnagotchi", TFT_RED, NULL, BEACON_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_RED);});
 
 
   // Build WiFi attack menu

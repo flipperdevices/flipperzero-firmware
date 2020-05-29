@@ -132,6 +132,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunEapolScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_AP)
     RunBeaconScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_PWN)
+    RunPwnScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_DEAUTH)
     RunDeauthScan(scan_mode, color);
   else if (scan_mode == WIFI_PACKET_MONITOR)
@@ -153,6 +155,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
 {
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
+  (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_EAPOL) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
@@ -444,6 +447,35 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
   //Serial.println("End of func");
 }
 
+void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
+{
+  sd_obj.openCapture("pwnagotchi");
+  
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_WHITE, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Detect Pwnagotchi ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_promiscuous_filter(&filt);
+  esp_wifi_set_promiscuous_rx_cb(&pwnSnifferCallback);
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  initTime = millis();
+}
+
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
@@ -611,6 +643,99 @@ void WiFiScan::scanCompleteCB(BLEScanResults scanResults) {
 // Function to extract MAC addr from a packet at given offset
 void WiFiScan::getMAC(char *addr, uint8_t* data, uint16_t offset) {
   sprintf(addr, "%02x:%02x:%02x:%02x:%02x:%02x", data[offset+0], data[offset+1], data[offset+2], data[offset+3], data[offset+4], data[offset+5]);
+}
+
+void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
+{
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+  String src = "";
+  String essid = "";
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+    // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+    if ((snifferPacket->payload[0] == 0x80) && (display_obj.display_buffer->size() == 0))
+    {
+      char addr[] = "00:00:00:00:00:00";
+      getMAC(addr, snifferPacket->payload, 10);
+      src.concat(addr);
+      if (src == "de:ad:be:ef:de:ad") {
+        
+        
+        delay(random(0, 10));
+        Serial.print("RSSI: ");
+        Serial.print(snifferPacket->rx_ctrl.rssi);
+        Serial.print(" Ch: ");
+        Serial.print(snifferPacket->rx_ctrl.channel);
+        Serial.print(" BSSID: ");
+        Serial.print(addr);
+        //display_string.concat(addr);
+        display_string.concat("CH: " + (String)snifferPacket->rx_ctrl.channel);
+        Serial.print(" ESSID: ");
+        display_string.concat(" -> ");
+
+        // Just grab the first 255 bytes of the pwnagotchi beacon
+        // because that is where the name is
+        //for (int i = 0; i < snifferPacket->payload[37]; i++)
+        for (int i = 0; i < len - 37; i++)
+        {
+          Serial.print((char)snifferPacket->payload[i + 38]);
+          //display_string.concat((char)snifferPacket->payload[i + 38]);
+          essid.concat((char)snifferPacket->payload[i + 38]);
+        }
+        //essid.concat("\": \"\"}}");
+        //Serial.println("\n" + (String)(snifferPacket->payload[37]) + " -> " + essid);
+
+        // Load json
+        DynamicJsonBuffer jsonBuffer;
+        JsonObject& json = jsonBuffer.parseObject(essid);
+        if (!json.success()) {
+          Serial.println("\nCould not parse Pwnagotchi json");
+        }
+        else {
+          Serial.println("\nSuccessfully parsed json");
+          String json_output;
+          json.printTo(json_output);
+          Serial.println(json_output);
+          display_string.concat(json["name"].as<String>() + " pwnd: " + json["pwnd_tot"].as<String>());
+        }
+  
+        int temp_len = display_string.length();
+        for (int i = 0; i < 40 - temp_len; i++)
+        {
+          display_string.concat(" ");
+        }
+  
+        Serial.print(" ");
+  
+        if (display_obj.display_buffer->size() == 0)
+        {
+          display_obj.loading = true;
+          display_obj.display_buffer->add(display_string);
+          display_obj.loading = false;
+        }
+        
+  
+        
+        Serial.println();
+  
+        sd_obj.addPacket(snifferPacket->payload, len);
+
+        //String json_sample = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
+        //String json_sample_2 = "{\"epoch\":40,\"grid_version\":\"1.10.1\",\"identity\":\"d340e3f4b6c85d804e8470cdbe9b0b3e9a79c2989e8895f2cbcd75ce0461dc20\",\"name\":\"WillStunForFood\",\"policy\":{\"advertise\":true,\"ap_ttl\":30,\"associate\":true,\"bond_encounters_factor\":20000,\"bore\": \"\"}}";
+      }
+    }
+  }
 }
 
 void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
@@ -1536,6 +1661,7 @@ void WiFiScan::main(uint32_t currentTime)
   // WiFi operations
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
+  (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_SCAN_ALL))
   {

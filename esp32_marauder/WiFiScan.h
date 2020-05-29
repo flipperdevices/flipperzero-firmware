@@ -5,6 +5,7 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
+#include <ArduinoJson.h>
 
 #include <WiFi.h>
 #include <math.h>
@@ -25,14 +26,15 @@
 #define WIFI_SCAN_OFF 0
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2
-#define WIFI_SCAN_EAPOL 3
-#define WIFI_SCAN_DEAUTH 4
-#define WIFI_SCAN_ALL 5
-#define WIFI_PACKET_MONITOR 6
-#define WIFI_ATTACK_BEACON_SPAM 7
-#define WIFI_ATTACK_RICK_ROLL 8
-#define BT_SCAN_ALL 9
-#define BT_SCAN_SKIMMERS 10
+#define WIFI_SCAN_PWN 3
+#define WIFI_SCAN_EAPOL 4
+#define WIFI_SCAN_DEAUTH 5
+#define WIFI_SCAN_ALL 6
+#define WIFI_PACKET_MONITOR 7
+#define WIFI_ATTACK_BEACON_SPAM 8
+#define WIFI_ATTACK_RICK_ROLL 9
+#define BT_SCAN_ALL 10
+#define BT_SCAN_SKIMMERS 11
 
 #define GRAPH_REFRESH 100
 
@@ -131,6 +133,7 @@ class WiFiScan
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
+    void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunEapolScan(uint8_t scan_mode, uint16_t color);
@@ -157,6 +160,7 @@ class WiFiScan
     void StopScan(uint8_t scan_mode);
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
+    static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
