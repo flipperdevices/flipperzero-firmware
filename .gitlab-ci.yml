@@ -29,9 +29,10 @@ build_with_idf:
     - internet
   script:
     - *clone_and_setup_idf
-    - cd $CI_PROJECT_DIR/example
+    - cd $CI_PROJECT_DIR/examples/flash_multiple_partitions
     - idf.py build
-
+    - cd $CI_PROJECT_DIR/examples/flash_at_firmware
+    - idf.py build
 
 run_tests:
   stage: test
