@@ -730,9 +730,6 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         Serial.println();
   
         sd_obj.addPacket(snifferPacket->payload, len);
-
-        //String json_sample = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-        //String json_sample_2 = "{\"epoch\":40,\"grid_version\":\"1.10.1\",\"identity\":\"d340e3f4b6c85d804e8470cdbe9b0b3e9a79c2989e8895f2cbcd75ce0461dc20\",\"name\":\"WillStunForFood\",\"policy\":{\"advertise\":true,\"ap_ttl\":30,\"associate\":true,\"bond_encounters_factor\":20000,\"bore\": \"\"}}";
       }
     }
   }
