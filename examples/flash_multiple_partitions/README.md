@@ -17,12 +17,6 @@ Following steps are performed in order to re-program target's memory:
 
 Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is called after connection is established in order to increase flashing speed. This does not apply for ESP8266, as its bootloader does not support this command. However, ESP8266 is capable of detecting baud rate during connection phase, and can be changed before calling `esp_loader_connect`, if necessary.
 
-## Target selection
-
-User can configure targets and `loader_config_user.h` header.
-Currently, three targets (ESP32, ESP32-S2, ESP8266) are supported.
-By default, example is compiled for ESP32 target.
-
 ## Hardware Required
 
 * Two development boards with ESP32 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.).
@@ -41,7 +35,7 @@ Table below shows connection between two ESP32 devices.
 
 Note: interconnection is the same for all three targets (slaves). 
 
-### Build and flash
+## Build and flash
 
 To run the example, type the following command:
 
@@ -52,6 +46,15 @@ idf.py -p PORT flash monitor
 (To exit the serial monitor, type ``Ctrl-]``.)
 
 See the Getting Started Guide for full steps to configure and use ESP-IDF to build projects.
+
+## Configuration
+
+For details about available configuration option, please refer to top level [README.md](../../README.md). Compile definitions can be specified on command line when running `idf.py`, for example:
+
+```
+idf.py build -DTARGET_SOC=ESP32_S2 -DMD5_ENABLED=1
+```
+By default, example is compiled for ESP32 target with MD5 check disabled.
 
 ## Example output
 

@@ -13,13 +13,6 @@ Following steps are performed in order to re-program target's memory:
 5. Then `esp_loader_flash_start()` is called to enter flashing mode and erase amount of memory to be flashed.
 6. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
 
-## Target selection
-
-By default, example is compiled for ESP32 target.
-When target is not ESP32, user has set corresponding target in `loader_config_user.h` header file and provide appropriate binary.
-
-For available AT command firmwares refer to [AT firmwares](https://www.espressif.com/en/support/download/at)
-
 ## Hardware Required
 
 * `ESP_WROVER_KIT` (with SD card connector)
@@ -51,6 +44,18 @@ idf.py -p PORT flash monitor
 (To exit the serial monitor, type ``Ctrl-]``.)
 
 See the Getting Started Guide for full steps to configure and use ESP-IDF to build projects.
+
+## Configuration
+
+For details about available configuration option, please refer to top level [README.md](../../README.md). Compile definitions can be specified on command line when running `idf.py`, for example:
+
+```
+idf.py build -DTARGET_SOC=ESP32_S2 -DMD5_ENABLED=1
+```
+By default, example is compiled for ESP32 target with MD5 check disabled.
+When target is not ESP32, provide appropriate AT command firmware binary.
+
+For available AT command firmwares refer to [AT firmwares](https://www.espressif.com/en/support/download/at)
 
 ## Example output
 

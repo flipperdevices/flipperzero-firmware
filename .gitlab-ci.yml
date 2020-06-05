@@ -4,6 +4,7 @@ stages:
 
 variables:
   IDF_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-idf.git
+  STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
   SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
 
@@ -11,9 +12,19 @@ variables:
   cit_add_ssh_key "${GITLAB_KEY}"
   git clone "${IDF_REPO}"
   cd esp-idf
-  tools/idf_tools.py --non-interactive install && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
+  tools/idf_tools.py --non-interactive install all && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
   git submodule update --init
   export IDF_PATH=$(pwd)
+
+.clone_and_setup_stm32: &clone_and_setup_stm32 |
+  cd $CI_PROJECT_DIR
+  git submodule update --init
+  git clone "${STM32_CUBE_F4_REPO}"
+  mkdir $CI_PROJECT_DIR/examples/stm32_example/build
+
+  wget -O gcc-arm-none-eabi.tar.bz2 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A'
+  tar -xjf gcc-arm-none-eabi.tar.bz2
+  mv gcc-arm-none-eabi-* gcc-arm-none-eabi
 
 before_script:
   # Use CI Tools
@@ -33,6 +44,10 @@ build_with_idf:
     - idf.py build
     - cd $CI_PROJECT_DIR/examples/flash_at_firmware
     - idf.py build
+
+    - *clone_and_setup_stm32
+    - cd $CI_PROJECT_DIR/examples/stm32_example/build
+    - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 .. && cmake --build .
 
 run_tests:
   stage: test

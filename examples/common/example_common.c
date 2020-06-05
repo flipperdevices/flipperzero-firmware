@@ -60,7 +60,7 @@ void flash_binary(FILE *image, size_t image_size, size_t address)
 
     ESP_LOGI(TAG, "Finished programming");
 
-#ifndef TARGET_ESP8266
+#if MD5_ENABLED
     err = esp_loader_flash_verify();
     if (err != ESP_LOADER_SUCCESS) {
         ESP_LOGE(TAG, "MD5 does not match. err: %d", err);

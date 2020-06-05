@@ -19,8 +19,6 @@
 extern "C" {
 #endif
 
-#include "loader_config_user.h"
-
 // MD5 checksum can be used to check, if new image was flashed successfully.
 // When enabled, esp_loader_flash_verify() function can be called to to verify
 // flash integrity. In case verification is unnecessary, this option can be 
