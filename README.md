@@ -31,6 +31,10 @@ Please refer to ports in `port` directory. Currently, only [ESP32 port](port/esp
 
 At this point, this component can only be integrated with IDF. Improvement of existing CMakeList.txt file is to be done.   
 
+## Licence
+
+Code is distributed under Apache 2.0 license.
+
 ## Known limitations
 
 Size of new binary image has to be known before flashing.
