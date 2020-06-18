@@ -6,12 +6,13 @@ LedInterface::LedInterface() {
 
 void LedInterface::RunSetup() {
   Serial.println("Setting neopixel to black...");
+  strip.setBrightness(0);
   strip.begin();
-  strip.setBrightness(50);
   strip.setPixelColor(0, strip.Color(0, 0, 0));
   strip.show();
   delay(100);
-  strip.setPixelColor(0, strip.Color(255, 0, 0));
+  strip.setBrightness(50);
+  strip.setPixelColor(0, strip.Color(0, 0, 0));
   strip.show();
   this->initTime = millis();
 }

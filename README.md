@@ -63,7 +63,7 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 - Save PCAP files to SD card
 
 # Do It Yourself
-
+<p align="center"><img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/diy.png?raw=true" width="300"></p>
 ## Hardware
 This project requires the following hardware in order to work:
 - Any ESP32 Development Board

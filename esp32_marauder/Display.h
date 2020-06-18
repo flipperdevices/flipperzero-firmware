@@ -13,8 +13,8 @@
 
 #include <TFT_eSPI.h>
 
-#define TFT_SHIELD
-//#define TFT_DIY
+//#define TFT_SHIELD
+#define TFT_DIY
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -59,7 +59,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.6.6";
+    String version_number = "v0.6.7";
 
     bool printing = false;
     bool loading = false;
