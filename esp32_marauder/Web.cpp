@@ -43,6 +43,8 @@ void Web::onJavaScript(void) {
 
 void Web::setupOTAupdate()
 {
+  uint8_t newMACAddress[] = {0x06, 0x07, 0x0D, 0x09, 0x0E, 0x0D};
+  
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setFreeFont(NULL);
   display_obj.tft.setCursor(0, 100);
@@ -67,6 +69,7 @@ void Web::setupOTAupdate()
   Serial.println(wifi_scan_obj.freeRAM());
 
   Serial.println("Starting softAP...");
+  esp_wifi_set_mac(ESP_IF_WIFI_AP, &newMACAddress[0]);
   WiFi.softAP(ssid, password);
   Serial.println("");
 
