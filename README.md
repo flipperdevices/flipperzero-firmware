@@ -23,6 +23,14 @@ This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx 
 * `stm32-blinky` - blink LED using timers and PWM.
 * `stm32-newlib` - show date using uart and libc functions from newlib.
 * `stm32-chibios` - blink led using ChibiOS/NIL.
+* `stm32-hal-freertos-uart-tensorflow` - HAL OS (FreeRTOS) example using UART 
+    and TensorFlow Lite Micro to perform sine wave interpolation with
+    `flash` (`st-flash`) and `debug` (`openocd` +  `gdb`) targets.
+
+    Requires `OPENOCD_BOARD` to be set to specify the openocd config required.
+    These are usually found in `/usr/share/openocd/scripts/`. For example a
+    STM32F41G_EVAL board using an ST-link would use `OPENOCD_BOARD=board/stm3241g_eval_stlink.cfg`.
+    If none is given CMake will search the project root for `.cfg` files.
 
 # Usage
 
