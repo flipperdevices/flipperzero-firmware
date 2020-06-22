@@ -117,6 +117,11 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 13. Click `ESP32 Sketch Data Upload` and wait for the SPIFFS upload to finish
 14. Click the upload button
 
+<p align="center">
+  <img alt="Marauder logo" src="https://raw.githubusercontent.com/justcallmekoko/ESP32Marauder/master/pictures/m5stack.jpg?raw=true" height="300">
+  <img alt="Marauder logo" src="https://github.com/justcallmekoko/ESP32Marauder/blob/master/pictures/odroid_marauder.jpg?raw=true" height="300">
+</p>
+
 ## Updating Firmware
 There are multiple options available to update the Marauder firmware. If you have already built the project from this repo, you can just pull the latest commit and flash the firmware using the Arduino IDE (see [here](#using-arduino-ide)).  
 If you own an ESP32 Marauder (v0.4.0 or later) and have not build the project, you can follow [these instructions](#web-update) for installing the latest update over the air via Marauder's web interface or [these instructions](#sd-update) for installing the latest update using an SD Card.  
