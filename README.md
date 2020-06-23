@@ -32,6 +32,8 @@ This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx 
     STM32F41G_EVAL board using an ST-link would use `OPENOCD_BOARD=board/stm3241g_eval_stlink.cfg`.
     If none is given CMake will search the project root for `.cfg` files.
 
+    Can be found in a maintained form [here](https://github.com/alxhoff/STM3240G-EVAL-TensorFlow-Hello-World).
+
 # Usage
 
 First of all you need to configure toolchain and libraries, you can do this by editing `gcc_stm32.cmake` or, preferably, by passing it through the command line.
