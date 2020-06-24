@@ -64,7 +64,7 @@ FIND_PATH(FATFS_DRIVER_INCLUDE_DIR ${FATFS_DRIVER_HEADERS}
 )
 
 IF(${FATFS_DRIVER_INCLUDE_DIR} STREQUAL FATFS_DRIVER_INCLUDE_DIR-NOTFOUND)
-    MESSAGE("Driver header files not located in STM firemware, please manually include the appropriate X_diskio.h directory")
+    MESSAGE(WARNING "Driver header files not located in STM firmware, please manually include the appropriate X_diskio.h directory")
     SET(FATFS_INCLUDE_DIRS
     ${FATFS_COMMON_INCLUDE_DIR}
         )
@@ -92,7 +92,7 @@ FOREACH(SRC ${FATFS_DRIVER_SOURCES})
     )
 STRING(FIND ${SRC_FILE} "NOTFOUND" SRC_FILE_NOTFOUND)
 IF(NOT ${SRC_FILE_NOTFOUND} EQUAL -1)
-    MESSAGE("Driver source files not located in STM firemware, please manually source the appropriate X_diskio.c files")
+    MESSAGE(WARNING "Driver source files not located in STM firmware, please manually source the appropriate X_diskio.c files")
 ELSE()
     LIST(APPEND FATFS_SOURCES ${SRC_FILE})
 ENDIF()
