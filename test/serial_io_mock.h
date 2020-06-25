@@ -21,6 +21,7 @@
 void clear_buffers();
 
 void write_buffer_print();
+size_t write_buffer_size();
 int8_t* write_buffer_data();
 
 void set_read_buffer(const void *data, size_t size);

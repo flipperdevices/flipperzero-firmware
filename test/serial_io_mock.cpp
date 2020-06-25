@@ -129,6 +129,11 @@ int8_t *write_buffer_data()
     return write_buffer.data();
 }
 
+size_t write_buffer_size()
+{
+    return write_buffer.size();
+}
+
 void set_read_buffer(const void *data, size_t size)
 {
     SLIP_encode((const int8_t *)data, size, read_buffer);
@@ -137,7 +142,7 @@ void set_read_buffer(const void *data, size_t size)
 void print_array(int8_t *data, uint32_t size)
 {
     for (uint32_t i = 0; i < size; i++) {
-        printf("%0x, ", (uint8_t)data[i]);
+        printf("%02x, ", (uint8_t)data[i]);
     }
     printf("\n");
 }

@@ -1,0 +1,190 @@
+/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "serial_io.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/uart.h"
+#include "driver/gpio.h"
+#include "esp_timer.h"
+#include "esp_log.h"
+#include <unistd.h>
+
+// #define SERIAL_DEBUG_ENABLE
+
+#ifdef SERIAL_DEBUG_ENABLE
+
+static void dec_to_hex_str(const uint8_t dec, uint8_t hex_str[3])
+{
+    static const uint8_t dec_to_hex[] = {
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    };
+
+    hex_str[0] = dec_to_hex[(dec >> 4)];
+    hex_str[1] = dec_to_hex[(dec & 0xF)];
+    hex_str[2] = '\0';
+}
+
+static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
+{
+    static bool write_prev = false;
+    uint8_t hex_str[3];
+
+    if(write_prev != write) {
+        write_prev = write;
+        printf("\n--- %s ---\n", write ? "WRITE" : "READ");
+    }
+
+    for(uint32_t i = 0; i < size; i++) {
+        dec_to_hex_str(data[i], hex_str);
+        printf("%s ", hex_str);
+    }
+}
+
+#else
+
+static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) { }
+
+#endif
+
+static int64_t s_time_end;
+static int32_t s_uart_port;
+static int32_t s_reset_trigger_pin;
+static int32_t s_gpio0_trigger_pin;
+
+esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
+{
+    s_uart_port = config->uart_port;
+    s_reset_trigger_pin = config->reset_trigger_pin;
+    s_gpio0_trigger_pin = config->gpio0_trigger_pin;
+
+    // Initialize UART
+    uart_config_t uart_config = {
+        .baud_rate = config->baud_rate,
+        .data_bits = UART_DATA_8_BITS,
+        .parity    = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
+    };
+
+    const int rx_buffer_size = 2 * 200;
+    const int tx_buffer_size = 2 * 200;
+
+    if ( uart_param_config(s_uart_port, &uart_config) != ESP_OK ) {
+        return ESP_LOADER_ERROR_FAIL;
+    }
+    if ( uart_set_pin(s_uart_port, config->uart_tx_pin, config->uart_rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK ) {
+        return ESP_LOADER_ERROR_FAIL;
+    }
+    if ( uart_driver_install(s_uart_port, rx_buffer_size, tx_buffer_size, 0, NULL, 0) != ESP_OK ) {
+        return ESP_LOADER_ERROR_FAIL;
+    }
+
+    // Initialize boot pin selection pins
+    gpio_pad_select_gpio(s_reset_trigger_pin);
+    gpio_set_pull_mode(s_reset_trigger_pin, GPIO_PULLUP_ONLY);
+    gpio_set_direction(s_reset_trigger_pin, GPIO_MODE_OUTPUT);
+
+    gpio_pad_select_gpio(s_gpio0_trigger_pin);
+    gpio_set_pull_mode(s_gpio0_trigger_pin, GPIO_PULLUP_ONLY);
+    gpio_set_direction(s_gpio0_trigger_pin, GPIO_MODE_OUTPUT);
+
+    return ESP_LOADER_SUCCESS;
+}
+
+
+esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+{
+    serial_debug_print(data, size, true);
+
+    uart_write_bytes(s_uart_port, (const char *)data, size);
+    esp_err_t err = uart_wait_tx_done(s_uart_port, pdMS_TO_TICKS(timeout));
+    
+    if (err == ESP_OK) {
+        return ESP_LOADER_SUCCESS;
+    } else if (err == ESP_ERR_TIMEOUT) {
+        return ESP_LOADER_ERROR_TIMEOUT;
+    } else {
+        return ESP_LOADER_ERROR_FAIL;
+    }
+}
+
+
+esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+{
+    int read = uart_read_bytes(s_uart_port, data, size, pdMS_TO_TICKS(timeout));
+
+    serial_debug_print(data, read, false);
+
+    if (read < 0) {
+        return ESP_LOADER_ERROR_FAIL;
+    } else if (read < size) {
+        return ESP_LOADER_ERROR_TIMEOUT;
+    } else {
+        return ESP_LOADER_SUCCESS;
+    }
+}
+
+
+// Set GPIO0 LOW, then
+// assert reset pin for 50 milliseconds.
+void loader_port_enter_bootloader(void)
+{
+    gpio_set_level(s_gpio0_trigger_pin, 0);
+    gpio_set_level(s_reset_trigger_pin, 0);
+    gpio_set_level(s_reset_trigger_pin, 1);
+    loader_port_delay_ms(50);
+    gpio_set_level(s_gpio0_trigger_pin, 1);
+}
+
+
+void loader_port_reset_target(void)
+{
+    gpio_set_level(s_reset_trigger_pin, 0);
+    loader_port_delay_ms(50);
+    gpio_set_level(s_reset_trigger_pin, 1);
+}
+
+
+void loader_port_delay_ms(uint32_t ms)
+{
+    usleep(ms * 1000);
+}
+
+
+void loader_port_start_timer(uint32_t ms)
+{
+    s_time_end = esp_timer_get_time() + ms * 1000;
+}
+
+
+uint32_t loader_port_remaining_time(void)
+{
+    int64_t remaining = (s_time_end - esp_timer_get_time()) / 1000;
+    return (remaining > 0) ? (uint32_t)remaining : 0;
+}
+
+
+void loader_port_debug_print(const char *str)
+{
+    printf("DEBUG: %s\n", str);
+}
+
+esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+{
+    esp_err_t err = uart_set_baudrate(s_uart_port, baudrate);
+    return (err == ESP_OK) ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_FAIL;
+}

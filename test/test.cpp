@@ -73,6 +73,7 @@ inline void queue_response(expected_response &response, size_t size = sizeof(exp
     set_read_buffer(&response, size);
 }
 
+expected_response set_params_response(SPI_SET_PARAMS);
 expected_response flash_begin_response(FLASH_BEGIN);
 expected_response flash_data_response(FLASH_DATA);
 expected_response flash_end_response(FLASH_END);
@@ -83,6 +84,24 @@ expected_response sync_response(SYNC);
 
 
 struct __attribute__((packed)) flash_start_frame {
+    
+    uint8_t delimiter_1 = 0xc0;
+    write_spi_command_t write_spi_command = {
+        .common = {
+            .direction = WRITE_DIRECTION,
+            .command = SPI_SET_PARAMS,
+            .size = 24,
+            .checksum = 0
+        },
+        .id = 0,
+        .total_size = 0x00400000, // Assume 4MB flash size
+        .block_size = 64 * 1024,
+        .sector_size = 4 * 1024,
+        .page_size = 0x100,
+        .status_mask = 0xFFFF,
+    };
+    uint8_t delimiter_2 = 0xc0;
+
     uint8_t delimiter_3 = 0xc0;
     begin_command_t begin_cmd  = {
         .common = {
@@ -132,7 +151,7 @@ struct __attribute__((packed)) flash_write_frame {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_DATA,
-            .size = 16,
+            .size = 16 + PAYLOAD_SIZE,
             .checksum = 0xef,
         },
         .data_size = PAYLOAD_SIZE,
@@ -188,6 +207,28 @@ template<size_t PAYLOAD_SIZE>
 uint32_t flash_write_frame<PAYLOAD_SIZE>::seq_num = 0;
 
 
+size_t queue_responses_to_ignore()
+{
+    auto flash_id_response = read_reg_response;
+    flash_id_response.data.common.value = 0x16 << 16; // emulate 4MB flash
+
+    queue_response(read_reg_response);  // Save SPI_USR_REG 
+    queue_response(read_reg_response);  // Save SPI_USR2_REG
+    queue_response(write_reg_response); // SPI_MISO_DLEN_REG
+    queue_response(write_reg_response); // Set new SPI_USR_REG
+    queue_response(write_reg_response); // Set new SPI_USR2_REG
+    queue_response(write_reg_response); // Zero out SPI_W0_REG
+    queue_response(write_reg_response); // SPI_CMD_REG Start transaction
+    queue_response(read_reg_response);  // SPI_CMD_REG Transaction done
+    queue_response(flash_id_response);  // SPI_W0_REG Read data
+    queue_response(write_reg_response); // Restore SPI_USR_REG
+    queue_response(write_reg_response); // Restore SPI_USR2_REG
+ 
+    // Delimiters are added manually to every packet (+2).
+    size_t bytes_to_ignore = (sizeof(write_reg_command_t) + 2) * 7 + (sizeof(read_reg_command_t) + 2) * 4 ;
+
+    return bytes_to_ignore;
+}
 
 TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
             multiple data frames. Last data frame is padded with 0xFF" )
@@ -206,11 +247,14 @@ TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
 
     // Check flash start operation 
     clear_buffers();
+    size_t bytes_to_ignore = queue_responses_to_ignore();
+
+    queue_response(set_params_response);
     queue_response(flash_begin_response);
 
     REQUIRE ( esp_loader_flash_start(0, sizeof(data) * 3, BLOCK_SIZE) == ESP_LOADER_SUCCESS );
-    
-    REQUIRE( memcmp(write_buffer_data(), &expected_start, sizeof(expected_start)) == 0 );
+    // Ignore read/write register commands in this test.
+    REQUIRE( memcmp(write_buffer_data() + bytes_to_ignore, &expected_start, sizeof(expected_start)) == 0 );
 
 
     // Check flash write operation 
@@ -224,15 +268,21 @@ TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
     REQUIRE( esp_loader_flash_write(data, 200) == ESP_LOADER_SUCCESS );
 
     REQUIRE( memcmp(write_buffer_data(), &expected_data, sizeof(expected_data)) == 0 );
-
-    // queue_response(flash_end_response);
 }
 
 
 TEST_CASE( "Can connect within specified time " )
 {
+    // Set date registers used for detection of attached chip
+    auto uart_date_reg_1 = read_reg_response;
+    auto uart_date_reg_2 = read_reg_response;
+    uart_date_reg_1.data.common.value = 0x15122500;
+    uart_date_reg_2.data.common.value = 0;
+
     clear_buffers();
     queue_response(sync_response);
+    queue_response(uart_date_reg_1);
+    queue_response(uart_date_reg_2);
     queue_response(attach_response);
 
     esp_loader_connect_args_t connect_config = {
@@ -301,7 +351,7 @@ TEST_CASE ( "SLIP is encoded correctly" )
         0xc0,       // Begin
         0x00,         // Write direction
         0x03,         // FLASH_DATA command
-        16, 0,        // Number of characters to send
+        16 + sizeof(data), 0, // Number of characters to send
         0x33, 0, 0, 0,// Checksum
         sizeof(data), 0, 0, 0, // Data size
         0, 0, 0, 0,   // Sequence number
