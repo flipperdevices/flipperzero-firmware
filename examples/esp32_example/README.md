@@ -15,6 +15,12 @@ Following steps are performed in order to re-program target's memory:
 
 Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is called after connection is established in order to increase flashing speed. This does not apply for ESP8266, as its bootloader does not support this command. However, ESP8266 is capable of detecting baud rate during connection phase, and can be changed before calling `esp_loader_connect`, if necessary.
 
+## SPI pin initialization
+
+In majority of cases `ESP_LOADER_CONNECT_DEFAULT` helper macro is used in order to initialize `loader_connect_args_t` data structure passed to `esp_loader_connect`. Helper macro sets `spi_pin_config` field of the data structure to zero, thus, default SPI pins are used to connect to FLASH memory. In special cases, such as custom design in which FLASH is connected to different pins, `spi_pin_config` field has to be set accordingly. For more detailed information refer to [serial protocol](https://github.com/espressif/esptool/wiki/Serial-Protocol).
+
+When programming ESP32-PICO-V4 (SiP), `ESP_LOADER_SPI_CONFIG_ESP32PICOD4` macro can be used to initialize `spi_pin_config`, due to special connection between ESP32 and SPI FLASH chip.
+
 ## Hardware Required
 
 * Two development boards with ESP32 SoC (e.g., ESP32-DevKitC, ESP-WROVER-KIT, etc.).

@@ -179,9 +179,8 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
     RETURN_ON_ERROR( detect_chip() );
 
 #ifndef TARGET_ESP8266
-    uint32_t SPI_PIN_CONFIG_DEFAULT = 0;
     loader_port_start_timer(DEFAULT_TIMEOUT);
-    err = loader_spi_attach_cmd(SPI_PIN_CONFIG_DEFAULT);
+    err = loader_spi_attach_cmd(connect_args->spi_pin_config.val);
 #endif
 
     return err;

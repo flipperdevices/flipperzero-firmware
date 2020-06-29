@@ -40,6 +40,21 @@ typedef enum
 } esp_loader_error_t;
 
 /**
+ * @brief SPI pin configuration arguments
+ */
+typedef union {
+    struct {
+        uint32_t pin_clk: 6;
+        uint32_t pin_q:   6;
+        uint32_t pin_d:   6;
+        uint32_t pin_cs:  6;
+        uint32_t pin_hd:  6;
+        uint32_t zero:    2;
+    };
+    uint32_t val;
+} esp_loader_spi_config_t;
+
+/**
  * @brief Connection arguments
  */
 typedef struct 
@@ -47,11 +62,25 @@ typedef struct
   uint32_t sync_timeout;  /*!< Maximum time to wait for response from serial interface. */
   int32_t trials;         /*!< Number of trials to connect to target. If greater than 1,
                                100 millisecond delay is inserted after each try. */
+  esp_loader_spi_config_t spi_pin_config;  /*!< Determine which SPI peripheral and pins should be used to
+                                                connect to SPI flash. By setting spi_pin_config.val to zero, 
+                                                default configuration will be used. For more detailed 
+                                                information refer to serial protocol of esptool */
 } esp_loader_connect_args_t;
 
 #define ESP_LOADER_CONNECT_DEFAULT() { \
+  .spi_pin_config.val = 0,  \
   .sync_timeout = 100,  \
   .trials = 10  \
+}
+
+#define ESP_LOADER_SPI_CONFIG_ESP32PICOD4() (esp_loader_spi_config_t) { \
+  .pin_hd = 11, \
+  .pin_cs = 16, \
+  .pin_d = 8,   \
+  .pin_q = 17,  \
+  .pin_clk = 6, \
+  .zero = 0     \
 }
 
 /**
