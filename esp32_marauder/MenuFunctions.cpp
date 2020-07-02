@@ -71,6 +71,7 @@ void MenuFunctions::main(uint32_t currentTime)
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
+    (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) || 
     (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
     (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
@@ -179,6 +180,12 @@ void MenuFunctions::updateStatusBar()
   }
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
 
+  if (wifi_scan_obj.set_channel != wifi_scan_obj.old_channel) {
+    wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
+    display_obj.tft.fillRect(75, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 75, 0, 2);
+  }
+
   // Draw battery info
   if (battery_obj.i2c_supported)
   {
@@ -244,6 +251,10 @@ void MenuFunctions::drawStatusBar()
   display_obj.tft.fillRect(0, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
+
+  wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
+  display_obj.tft.fillRect(75, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+  display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 75, 0, 2);
 
   // Draw battery info
   if (battery_obj.i2c_supported)
@@ -381,8 +392,8 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){changeMenu(wifiScannerMenu.parentMenu);});
   addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this](){wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);});
   addNodes(&wifiScannerMenu, "EAPOL/PMKID Scan", TFT_VIOLET, NULL, EAPOL, [this](){wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);});
-  addNodes(&wifiScannerMenu, "Detect Pwnagotchi", TFT_RED, NULL, BEACON_SNIFF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_RED);});
-
+  addNodes(&wifiScannerMenu, "Detect Pwnagotchi", TFT_RED, NULL, PWNAGOTCHI, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_RED);});
+  addNodes(&wifiScannerMenu, "Detect Espressif", TFT_ORANGE, NULL, ESPRESSIF, [this](){display_obj.clearScreen(); this->drawStatusBar(); wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_ORANGE);});
 
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -417,6 +428,7 @@ void MenuFunctions::RunSetup()
   //addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&updateMenu); web_obj.setupOTAupdate();});
   addNodes(&deviceMenu, "Update Firmware", TFT_ORANGE, NULL, UPDATE, [this](){wifi_scan_obj.currentScanMode = OTA_UPDATE; changeMenu(&whichUpdateMenu);});
   addNodes(&deviceMenu, "Device Info", TFT_WHITE, NULL, DEVICE_INFO, [this](){wifi_scan_obj.currentScanMode = SHOW_INFO; changeMenu(&infoMenu); wifi_scan_obj.RunInfo();});
+  //addNodes(&deviceMenu, "Join WiFi", TFT_YELLOW, NULL, SNIFFERS, [this](){display_obj.clearScreen(); wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW);});
 
   // Select update
   whichUpdateMenu.parentMenu = &deviceMenu;

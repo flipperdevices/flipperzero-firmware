@@ -55,7 +55,6 @@ uint32_t currentTime  = 0;
 
 void setup()
 {
-
   pinMode(FLASH_BUTTON, INPUT);
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, LOW);
@@ -75,8 +74,7 @@ void setup()
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
-  // Do some LED stuff
-  led_obj.RunSetup();
+  Serial.println(wifi_scan_obj.freeRAM());
 
   // Do some SD stuff
   if(sd_obj.initSD())
@@ -85,15 +83,19 @@ void setup()
     Serial.println("SD Card NOT Supported");
 
   // Run display setup
+  Serial.println(wifi_scan_obj.freeRAM());
   display_obj.RunSetup();
 
   // Build menus
+  Serial.println(wifi_scan_obj.freeRAM());
   menu_function_obj.RunSetup();
 
   // Battery stuff
+  Serial.println(wifi_scan_obj.freeRAM());
   battery_obj.RunSetup();
 
   // Temperature stuff
+  Serial.println(wifi_scan_obj.freeRAM());
   temp_obj.RunSetup();
 
   battery_obj.battery_level = battery_obj.getBatteryLevel();
@@ -105,6 +107,9 @@ void setup()
     Serial.println("IP5306 I2C Supported: false");
 
   Serial.println(wifi_scan_obj.freeRAM());
+
+  // Do some LED stuff
+  led_obj.RunSetup();
 }
 
 

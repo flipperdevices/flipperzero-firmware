@@ -146,6 +146,10 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == BT_SCAN_SKIMMERS)
     RunBluetoothScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_ESPRESSIF)
+    RunEspressifScan(scan_mode, color);
+  //else if (scan_mode == LV_JOIN_WIFI)
+  //  RunLvJoinWiFi(scan_mode, color);
 
   WiFiScan::currentScanMode = scan_mode;
 }
@@ -156,6 +160,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_PWN) ||
+  (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_EAPOL) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
@@ -254,6 +259,28 @@ String WiFiScan::freeRAM()
   return String(s);
 }
 
+/*
+void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
+
+  display_obj.tft.init();
+  display_obj.tft.setRotation(1);
+  
+  #ifdef TFT_SHIELD
+    uint16_t calData[5] = { 391, 3491, 266, 3505, 7 }; // Landscape TFT Shield
+    Serial.println("Using TFT Shield");
+  #else if defined(TFT_DIY)
+    uint16_t calData[5] = { 213, 3469, 320, 3446, 1 }; // Landscape TFT DIY
+    Serial.println("Using TFT DIY");
+  #endif
+  display_obj.tft.setTouch(calData);
+  
+  display_obj.initLVGL();
+
+  lv_obj_t * scr = lv_cont_create(NULL, NULL);
+  lv_disp_load_scr(scr);
+
+  display_obj.joinWiFiGFX();
+}*/
 
 void WiFiScan::RunInfo()
 {
@@ -299,6 +326,34 @@ void WiFiScan::RunInfo()
     display_obj.tft.println("   IP5306 I2C: not supported");
 
   display_obj.tft.println("Internal temp: " + (String)temp_obj.current_temp + " C");
+}
+
+void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
+  sd_obj.openCapture("espressif");
+  
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_WHITE, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Detect Espressif ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_promiscuous_filter(&filt);
+  esp_wifi_set_promiscuous_rx_cb(&espressifSnifferCallback);
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  initTime = millis();
 }
 
 void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
@@ -643,6 +698,82 @@ void WiFiScan::scanCompleteCB(BLEScanResults scanResults) {
 // Function to extract MAC addr from a packet at given offset
 void WiFiScan::getMAC(char *addr, uint8_t* data, uint16_t offset) {
   sprintf(addr, "%02x:%02x:%02x:%02x:%02x:%02x", data[offset+0], data[offset+1], data[offset+2], data[offset+3], data[offset+4], data[offset+5]);
+}
+
+void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
+{
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+  String src_addr_string = "";
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+  }
+  int fctl = ntohs(frameControl->fctl);
+  const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+  const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+  // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+  //if ((snifferPacket->payload[0] == 0x80) && (display_obj.display_buffer->size() == 0))
+  //{
+
+  char addr[] = "00:00:00:00:00:00";
+  getMAC(addr, snifferPacket->payload, 10);
+
+  src_addr_string.concat(addr);
+  bool match = false;
+
+  for (int i = 0; i < (sizeof(espressif_macs) / sizeof(espressif_macs[0])); i++) {
+    if (src_addr_string.startsWith(espressif_macs[i])) {
+      match = true;
+      break;
+    }
+  }
+  
+  if (!match)
+    return;
+
+  delay(random(0, 10));
+  Serial.print("RSSI: ");
+  Serial.print(snifferPacket->rx_ctrl.rssi);
+  Serial.print(" Ch: ");
+  Serial.print(snifferPacket->rx_ctrl.channel);
+  Serial.print(" BSSID: ");
+    
+  Serial.print(addr);
+  //display_string.concat(" RSSI: ");
+  //display_string.concat(snifferPacket->rx_ctrl.rssi);
+  display_string.concat("CH: " + (String)snifferPacket->rx_ctrl.channel);
+
+  //display_string.concat(" ");
+  display_string.concat(" -> ");
+  display_string.concat(addr);
+
+  for (int i = 0; i < 19 - snifferPacket->payload[37]; i++)
+  {
+    display_string.concat(" ");
+  }
+
+  Serial.print(" ");
+
+  //if (display_obj.display_buffer->size() == 0)
+  //{
+  display_obj.loading = true;
+  display_obj.display_buffer->add(display_string);
+  display_obj.loading = false;
+  //}
+  
+
+  
+  Serial.println();
+
+  sd_obj.addPacket(snifferPacket->payload, len);
+  //}
 }
 
 void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
@@ -1659,6 +1790,7 @@ void WiFiScan::main(uint32_t currentTime)
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
   (currentScanMode == WIFI_SCAN_PWN) ||
+  (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_SCAN_ALL))
   {
@@ -1729,4 +1861,6 @@ void WiFiScan::main(uint32_t currentTime)
       packets_sent = 0;
     }
   }
+  //else if (currentScanMode == LV_JOIN_WIFI)
+  //  lv_task_handler();
 }

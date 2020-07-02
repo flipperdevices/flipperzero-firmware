@@ -7,6 +7,10 @@ Big thanks to bodmer for having great TFT and JPEG libraries
 https://github.com/bodmer
 */
 
+//PROGMEM lv_obj_t * slider_label;
+//PROGMEM lv_obj_t * ta1;
+//PROGMEM lv_obj_t * ta2;
+
 Display::Display()
 {
 }
@@ -63,6 +67,75 @@ void Display::RunSetup()
 
   delay(5000);
 }
+
+/* Interrupt driven periodic handler */
+/*
+void Display::lv_tick_handler()
+{
+  lv_tick_inc(LVGL_TICK_PERIOD);
+}*/
+
+/* Display flushing */
+/*void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+{
+  extern Display display_obj;
+  uint16_t c;
+
+  display_obj.tft.startWrite();
+  display_obj.tft.setAddrWindow(area->x1, area->y1, (area->x2 - area->x1 + 1), (area->y2 - area->y1 + 1));
+  for (int y = area->y1; y <= area->y2; y++) {
+    for (int x = area->x1; x <= area->x2; x++) {
+      c = color_p->full;
+      display_obj.tft.writeColor(c, 1);
+      color_p++;
+    }
+  }
+  display_obj.tft.endWrite();
+  lv_disp_flush_ready(disp);
+}*/
+
+/*
+bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
+{
+  extern Display display_obj;
+  
+  uint16_t touchX, touchY;
+
+  bool touched = display_obj.tft.getTouch(&touchX, &touchY, 600);
+
+  if(!touched)
+  {
+    return false;
+  }
+
+  if(touchX>WIDTH_1 || touchY > HEIGHT_1)
+  {
+    Serial.println("Y or y outside of expected parameters..");
+    Serial.print("y:");
+    Serial.print(touchX);
+    Serial.print(" x:");
+    Serial.print(touchY);
+  }
+  else
+  {
+
+    data->state = touched ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL; 
+
+    //if(data->state == LV_INDEV_STATE_PR) touchpad_get_xy(&last_x, &last_y);
+   
+    data->point.x = touchX;
+    data->point.y = touchY;
+
+    Serial.print("Data x");
+    Serial.println(touchX);
+    
+    Serial.print("Data y");
+    Serial.println(touchY);
+
+  }
+
+  return false;
+}*/
 
 void Display::tftDrawGraphObjects(byte x_scale)
 {
@@ -686,8 +759,111 @@ void Display::buildBanner(String msg, int xpos)
   img.print(msg);
 }
 
+/*
+void Display::initLVGL() {
+  tick.attach_ms(LVGL_TICK_PERIOD, lv_tick_handler);
+  
+  lv_init();
+
+  lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
+
+  lv_disp_drv_t disp_drv;
+  lv_disp_drv_init(&disp_drv);
+  disp_drv.hor_res = WIDTH_1;
+  disp_drv.ver_res = HEIGHT_1;
+  disp_drv.flush_cb = my_disp_flush;
+  disp_drv.buffer = &disp_buf;
+  lv_disp_drv_register(&disp_drv);
+
+  lv_indev_drv_t indev_drv;
+  lv_indev_drv_init(&indev_drv);             
+  indev_drv.type = LV_INDEV_TYPE_POINTER;    
+  indev_drv.read_cb = my_touchpad_read;      
+  lv_indev_drv_register(&indev_drv);         
+}*/
+
+/*
+void Display::deinitLVGL() {
+  lv_deinit();
+}
+*/
+
+/*
+void Display::joinWiFiGFX(){
+
+  // Create one text area
+  ta1 = lv_textarea_create(lv_scr_act(), NULL);
+  lv_textarea_set_one_line(ta1, true);
+  lv_obj_set_width(ta1, LV_HOR_RES / 2 - 20);
+  lv_obj_set_pos(ta1, 5, 20);
+  //lv_ta_set_cursor_type(ta, LV_CURSOR_BLOCK);
+  lv_textarea_set_text(ta1, "");
+  lv_obj_set_event_cb(ta1, ta_event_cb);
+
+  // Create first label
+  lv_obj_t * ssid_label = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(ssid_label, "SSID:");
+  lv_obj_align(ssid_label, ta1, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
+
+  // Create second text area
+  ta2 = lv_textarea_create(lv_scr_act(), ta1);
+  lv_textarea_set_pwd_mode(ta2, true);
+  lv_textarea_set_pwd_show_time(ta2, 1000);
+  lv_textarea_set_cursor_hidden(ta2, true);
+  lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_RIGHT, -5, 20);
+
+  // Create second label
+  lv_obj_t * pw_label = lv_label_create(lv_scr_act(), NULL);
+  lv_label_set_text(pw_label, "Password:");
+  lv_obj_align(pw_label, ta2, LV_ALIGN_OUT_TOP_LEFT, 0, 0);
+
+  // Create a keyboard and apply the styles
+  kb = lv_keyboard_create(lv_scr_act(), NULL);
+  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+  lv_obj_set_event_cb(kb, keyboard_event_cb);
+
+  // Focus it on one of the text areas to start
+  lv_keyboard_set_textarea(kb, ta1);
+  lv_keyboard_set_cursor_manage(kb, true);
+  
+}*/
+
+/*
+void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+  lv_keyboard_def_event_cb(kb, event);
+  if(event == LV_EVENT_APPLY){
+    printf("LV_EVENT_APPLY\n");
+    //String ta1_text = lv_textarea_get_text(lv_keyboard_get_textarea(kb));
+    String ta1_text = lv_textarea_get_text(ta1);
+    String ta2_text = lv_textarea_get_text(ta2);
+    Serial.println(ta1_text);
+    Serial.println(ta2_text);
+    //joinWiFi(ta1_text, ta2_text);
+  }else if(event == LV_EVENT_CANCEL){
+    printf("LV_EVENT_CANCEL\n");
+    lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+  }
+}*/
+
+/*
+void ta_event_cb(lv_obj_t * ta, lv_event_t event)
+{
+  if(event == LV_EVENT_CLICKED) {
+    if(kb != NULL)
+      lv_keyboard_set_textarea(kb, ta);
+  }
+
+  //else if(event == LV_EVENT_INSERT) {
+  //  const char * str = lv_event_get_data();
+  //  if(str[0] == '\n') {
+  //    printf("Ready\n");
+  //  }
+  //}
+}*/
+
 void Display::main()
 {  
+  //lv_task_handler();
   return;
 }
 // End SPIFFS_functions

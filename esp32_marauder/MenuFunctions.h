@@ -53,6 +53,8 @@ extern BatteryInterface battery_obj;
 #define EAPOL 21
 #define STATUS_BAT 22
 #define STATUS_SD 23
+#define PWNAGOTCHI 24
+#define ESPRESSIF 25
 
 struct Menu;
 
@@ -71,7 +73,7 @@ struct Menu {
     String name;
     LinkedList<MenuNode>* list;
     Menu                * parentMenu;
-    uint8_t               selected;
+    //uint8_t               selected;
 };
 
 

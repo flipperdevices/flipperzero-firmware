@@ -17,6 +17,7 @@
 #include "Buffer.h"
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"
+#include "Assets.h"
 //#include "MenuFunctions.h"
 
 #define bad_list_length 3
@@ -35,6 +36,8 @@
 #define WIFI_ATTACK_RICK_ROLL 9
 #define BT_SCAN_ALL 10
 #define BT_SCAN_SKIMMERS 11
+#define WIFI_SCAN_ESPRESSIF 12
+//#define LV_JOIN_WIFI 12
 
 #define GRAPH_REFRESH 100
 
@@ -70,12 +73,12 @@ class WiFiScan
 
     uint32_t initTime = 0;
     bool run_setup = true;
-    int set_channel = 1;
     int bluetoothScanTime = 5;
     int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
     BLEScan* pBLEScan;
 
+    String connected_network = "";
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
 
     char* rick_roll[8] = {
@@ -133,6 +136,7 @@ class WiFiScan
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
+    void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
@@ -140,10 +144,15 @@ class WiFiScan
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
+    //void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
 
   public:
     WiFiScan();
+
+    int set_channel = 1;
+
+    int old_channel = 0;
 
     bool orient_display = false;
 
@@ -160,6 +169,7 @@ class WiFiScan
     void StopScan(uint8_t scan_mode);
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
+    static void espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);

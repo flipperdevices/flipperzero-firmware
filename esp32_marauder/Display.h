@@ -8,6 +8,8 @@
 //#include <SimpleList.h>
 #include <LinkedList.h>
 #include <SPI.h>
+#include <lvgl.h>
+#include <Ticker.h>
 #include "SPIFFS.h"
 #include "Assets.h"
 
@@ -33,9 +35,21 @@
 //#define MENU_FONT &FreeSansBold9pt7b
 #define BUTTON_ARRAY_LEN 7
 #define STATUS_BAR_WIDTH 16
+//#define LVGL_TICK_PERIOD 6
 
 #define STATUSBAR_COLOR 0x4A49
 
+//PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
+//PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
+
+//PROGMEM static lv_disp_buf_t disp_buf;
+//PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
+
+//PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
+//PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+
+// lvgl stuff
+//PROGMEM static lv_obj_t *kb;
 
 class Display
 {
@@ -53,13 +67,15 @@ class Display
     //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
     //void changeMenu(Menu* menu);
     //void showMenuList(Menu* menu, int layer);
+    //static void lv_tick_handler();
 
   public:
     Display();
+    Ticker tick;
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    String version_number = "v0.6.7";
+    String version_number = "v0.6.8";
 
     bool printing = false;
     bool loading = false;
@@ -94,6 +110,9 @@ class Display
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
+    //void initLVGL();
+    //void deinitLVGL();
+    //void joinWiFiGFX();
     void tftDrawGraphObjects(byte x_scale);
     void tftDrawEapolColorKey();
     void tftDrawColorKey();
