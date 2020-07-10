@@ -180,12 +180,21 @@ void MenuFunctions::updateStatusBar()
   }
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
 
+  // WiFi Channel Stuff
   if (wifi_scan_obj.set_channel != wifi_scan_obj.old_channel) {
     wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
-    display_obj.tft.fillRect(75, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 75, 0, 2);
+    display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+    display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
   }
 
+  // RAM Stuff
+  wifi_scan_obj.freeRAM();
+  if (wifi_scan_obj.free_ram != wifi_scan_obj.old_free_ram) {
+    wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
+    display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+    display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
+  }
+  
   // Draw battery info
   if (battery_obj.i2c_supported)
   {
@@ -252,9 +261,17 @@ void MenuFunctions::drawStatusBar()
   display_obj.tft.drawString((String)temp_obj.current_temp + " C", 4, 0, 2);
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
 
+
+  // WiFi Channel Stuff
   wifi_scan_obj.old_channel = wifi_scan_obj.set_channel;
-  display_obj.tft.fillRect(75, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
-  display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 75, 0, 2);
+  display_obj.tft.fillRect(50, 0, 50, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+  display_obj.tft.drawString("CH: " + (String)wifi_scan_obj.set_channel, 50, 0, 2);
+
+  // RAM Stuff
+  wifi_scan_obj.freeRAM();
+  wifi_scan_obj.old_free_ram = wifi_scan_obj.free_ram;
+  display_obj.tft.fillRect(100, 0, 60, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
+  display_obj.tft.drawString((String)wifi_scan_obj.free_ram + "B", 100, 0, 2);
 
   // Draw battery info
   if (battery_obj.i2c_supported)

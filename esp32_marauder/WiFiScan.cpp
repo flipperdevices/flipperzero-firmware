@@ -256,6 +256,7 @@ String WiFiScan::freeRAM()
 {
   char s[150];
   sprintf(s, "RAM Free: %u bytes", system_get_free_heap_size());
+  this->free_ram = String(system_get_free_heap_size());
   return String(s);
 }
 

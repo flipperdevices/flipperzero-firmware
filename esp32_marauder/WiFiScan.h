@@ -156,6 +156,9 @@ class WiFiScan
 
     bool orient_display = false;
 
+    String free_ram = "";
+    String old_free_ram = "";
+
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
 
     String getStaMAC();
