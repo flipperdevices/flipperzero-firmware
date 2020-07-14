@@ -293,7 +293,7 @@ static esp_loader_error_t detect_flash_size(size_t *flash_size)
     RETURN_ON_ERROR( spi_flash_command(SPI_FLASH_READ_ID, NULL, 0, &flash_id, 24) );
     uint32_t size_id = flash_id >> 16;
 
-    if (size_id < 0x12 && size_id > 0x18) {
+    if (size_id < 0x12 || size_id > 0x18) {
         return ESP_LOADER_ERROR_UNSUPPORTED_CHIP;
     }
 
@@ -302,13 +302,12 @@ static esp_loader_error_t detect_flash_size(size_t *flash_size)
     return ESP_LOADER_SUCCESS;
 }
 
-
 esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, uint32_t block_size)
 {
     uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
     uint32_t erase_size = block_size * blocks_to_write;
     s_flash_write_size = block_size;
-    size_t flash_size;
+    size_t flash_size = 0;
 
     if (detect_flash_size(&flash_size) == ESP_LOADER_SUCCESS) {
         if (image_size > flash_size) {
