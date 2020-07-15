@@ -8,15 +8,15 @@
 //#include <SimpleList.h>
 #include <LinkedList.h>
 #include <SPI.h>
-#include <lvgl.h>
+//#include <lvgl.h>
 #include <Ticker.h>
 #include "SPIFFS.h"
 #include "Assets.h"
 
 #include <TFT_eSPI.h>
 
-//#define TFT_SHIELD
-#define TFT_DIY
+#define TFT_SHIELD
+//#define TFT_DIY
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
