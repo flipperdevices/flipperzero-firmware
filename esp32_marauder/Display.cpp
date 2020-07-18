@@ -462,6 +462,10 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
   }
 }
 
+uint16_t xlast;
+uint16_t ylast;
+uint32_t AH;
+float wd = 3;
 void Display::drawStylus()
 {
   uint16_t x = 0, y = 0; // To store the touch coordinates
@@ -471,11 +475,43 @@ void Display::drawStylus()
 
   // Draw a white spot at the detected coordinates
   if (pressed) {
-    tft.fillCircle(x, y, 2, TFT_WHITE);
+    //    tft.fillCircle(x, y, 2, TFT_WHITE);
+    if ( xlast > 0 && ylast > 0 ) {
+      int dx = abs(x - xlast), sx = xlast < x ? 1 : -1;
+      int dy = abs(y - ylast), sy = ylast < y ? 1 : -1;
+      int err = dx - dy, e2, x2, y2;                        /* error value e_xy */
+      float ed = dx + dy == 0 ? 1 : sqrt((float)dx * dx + (float)dy * dy);
+
+      for (wd = (wd + 1) / 2; ; ) {                               /* pixel loop */
+        tft.drawPixel(xlast, ylast, TFT_WHITE);
+        e2 = err; x2 = xlast;
+        if (2 * e2 >= -dx) {                                         /* x step */
+          for (e2 += dy, y2 = ylast; e2 < ed * wd && (y != y2 || dx > dy); e2 += dx)
+            tft.drawPixel(xlast, y2 += sy, TFT_WHITE);
+          if (xlast == x) break;
+          e2 = err; err -= dy; xlast += sx;
+        }
+        if (2 * e2 <= dy) {                                          /* y step */
+          for (e2 = dx - e2; e2 < ed * wd && (x != x2 || dx < dy); e2 += dy)
+            tft.drawPixel(x2 += sx, ylast, TFT_WHITE);
+          if (ylast == y) break;
+          err += dx; ylast += sy;
+        }
+      }
+//      tft.drawLine(xlast, ylast, x, y, TFT_WHITE);
+    }
+    xlast = x;
+    ylast = y;
+    AH = 0;
     //Serial.print("x,y = ");
     //Serial.print(x);
     //Serial.print(",");
     //Serial.println(y);
+  } else if ( AH < 5 ) {
+    AH++;
+  } else if ( AH == 5 ) {
+    xlast = 0;
+    ylast = 0;
   }
 }
 
