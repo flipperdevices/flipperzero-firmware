@@ -11,24 +11,6 @@ env:
 
 before_install:
 
-  # TODO: undo
-  # remove submodules, we don't want those to be actually tested for compliance
-  - git submodule status | rm -Rf `cut -d ' ' -f 3`
-
-  # Formatting checks:
-  # Check for files starting with a blank line
-  - find . -path './.git' -prune -or -type f -print0 | xargs -0 -L1 bash -c 'head -1 "$0" | grep --binary-files=without-match --regexp="^$"; if [[ "$?" == "0" ]]; then echo "Blank line found at start of $0."; false; fi'
-  # Check for tabs
-  - find . -path './.git' -prune -or -type f \( ! -iname ".gitmodules" \) -exec grep --with-filename --line-number --binary-files=without-match --regexp=$'\t' '{}' \; -exec echo 'Tab found.' \; -exec false '{}' +
-  # Check for trailing whitespace
-  - find . -path './.git' -prune -or -type f -exec grep --with-filename --line-number --binary-files=without-match --regexp='[[:blank:]]$' '{}' \; -exec echo 'Trailing whitespace found.' \; -exec false '{}' +
-  # Check for non-Unix line endings
-  - find . -path './.git' -prune -or -type f -exec grep --files-with-matches --binary-files=without-match --regexp=$'\r$' '{}' \; -exec echo 'Non-Unix EOL detected.' \; -exec false '{}' +
-  # Check for blank lines at end of files
-  - find . -path './.git' -prune -or -type f -print0 | xargs -0 -L1 bash -c 'tail -1 "$0" | grep --binary-files=without-match --regexp="^$"; if [[ "$?" == "0" ]]; then echo "Blank line found at end of $0."; false; fi'
-  # Check for files that don't end in a newline (https://stackoverflow.com/a/25686825)
-  - find . -path './.git' -prune -or -type f -print0 | xargs -0 -L1 bash -c 'if test "$(grep --files-with-matches --binary-files=without-match --max-count=1 --regexp='.*' "$0")" && test "$(tail --bytes=1 "$0")"; then echo "No new line at end of $0."; false; fi'
-
   - git clone https://github.com/per1234/arduino-ci-script.git "${HOME}/scripts/arduino-ci-script"
   - cd "${HOME}/scripts/arduino-ci-script"
   # Get new tags from the remote
@@ -46,19 +28,22 @@ before_install:
   - set_application_folder "$APPLICATION_FOLDER"
   - set_sketchbook_folder "$SKETCHBOOK_FOLDER"
 
-  - install_ide '("1.8.0" "1.8.9" "newest")'
+  #- install_ide '("1.8.11" "1.8.12" "newest")'
+  - install_ide '("newest")'
 
   # Install the library from the repository
-  - install_library
-  - install_library "M5Stack"
-  - install_library 'https://github.com/bblanchon/ArduinoJson.git' # "ArduinoJSON"
-
-  - ls ${TRAVIS_BUILD_DIR} -la
-  - ls ${TRAVIS_BUILD_DIR}/examples/M5Stack-SD-Menu/ -la
-  - ls $SKETCHBOOK_FOLDER -la
-  - ls $SKETCHBOOK_FOLDER/libraries -la
-  - pwd
-  # what the fsck is wrong install_package() ??
+  #- install_library "https://github.com/lvgl/lv_port_esp32/archive/master.zip"
+  - install_library "TFT_eSPI"
+  - install_library "JPEGDecoder"
+  - install_library "LinkedList"
+  - install_library "lv_arduino"
+  - install_library "https://github.com/adafruit/Adafruit_NeoPixel/archive/1.5.0.zip" ## "Adafruit_NeoPixel"
+  - install_library 'https://github.com/bblanchon/ArduinoJson/releases/download/v5.13.5/ArduinoJson-v5.13.5.zip'
+  
+  - cp ${TRAVIS_BUILD_DIR}/User_Setup.h /home/travis/arduino-sketchbook/libraries/TFT_eSPI/User_Setup.h
+  #- install_library 'https://github.com/bblanchon/ArduinoJson.git'
+  #- install_library "https://github.com/spacehuhn/SimpleList.git"
+  # 
   - install_package "esp32:esp32" "https://dl.espressif.com/dl/package_esp32_index.json" #  # esp32:esp32:m5stack-core-esp32
   #- /home/travis/arduino-ide/arduino-1.8.10/arduino --pref "compiler.warning_level=none" --save-prefs   &>/dev/null
   #- /home/travis/arduino-ide/arduino-1.8.10/arduino --pref "build.warn_data_percentage=75" --save-prefs   &>/dev/null
@@ -69,8 +54,9 @@ before_install:
 script:
   # Compile all example sketches included with the library
   # build_sketch arguments: sketch name, fqbn, allow failure, IDE version/list/range
-  - check_library_manager_compliance "$TRAVIS_BUILD_DIR"
-  - build_sketch "${TRAVIS_BUILD_DIR}/examples/M5Stack-SD-Menu/M5Stack-SD-Menu.ino" "esp32:esp32:m5stack-core-esp32:FlashFreq=80,UploadSpeed=921600" "false" "newest"
+  # - check_library_manager_compliance "$TRAVIS_BUILD_DIR"
+  - set_ide_preference "compiler.warning_level=auto"
+  - build_sketch "${TRAVIS_BUILD_DIR}/esp32_marauder/esp32_marauder.ino" "esp32:esp32:d32_pro:FlashFreq=80,UploadSpeed=921600,PartitionScheme=min_spiffs" "false" "newest"
 
 after_script:
   # Commit a report of the job results to the CI-reports repository
