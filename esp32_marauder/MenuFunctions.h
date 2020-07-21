@@ -1,11 +1,14 @@
 #ifndef MenuFunctions_h
 #define MenuFunctions_h
 
+#define BATTERY_ANALOG_ON 0
+
 #include "WiFiScan.h"
 #include "Display.h"
 #include "BatteryInterface.h"
 #include "SDInterface.h"
 #include "Web.h"
+
 
 extern Display display_obj;
 extern WiFiScan wifi_scan_obj;
@@ -27,6 +30,12 @@ extern BatteryInterface battery_obj;
 //#define BUTTON_ARRAY_LEN 5
 
 #define FLASH_BUTTON 0
+
+#if BATTERY_ANALOG_ON == 1
+#define BATTERY_PIN 13
+#define ANALOG_PIN 34
+#define CHARGING_PIN 27
+#endif
 
 // Icon definitions
 #define ATTACKS 0
@@ -61,35 +70,35 @@ struct Menu;
 // Individual Nodes of a menu
 
 struct MenuNode {
-    String name;
-    uint16_t color;
-    int icon;
-    TFT_eSPI_Button* button;
-    std::function<void()> callable;
+  String name;
+  uint16_t color;
+  int icon;
+  TFT_eSPI_Button* button;
+  std::function<void()> callable;
 };
 
 // Full Menus
 struct Menu {
-    String name;
-    LinkedList<MenuNode>* list;
-    Menu                * parentMenu;
-    //uint8_t               selected;
+  String name;
+  LinkedList<MenuNode>* list;
+  Menu                * parentMenu;
+  //uint8_t               selected;
 };
 
 
 class MenuFunctions
 {
-  private:    
+  private:
 
     String u_result = "";
 
     uint32_t initTime = 0;
-    
+
     Menu* current_menu;
 
     // Main menu stuff
     Menu mainMenu;
-    
+
     Menu wifiMenu;
     Menu bluetoothMenu;
     Menu generalMenu;
@@ -112,17 +121,19 @@ class MenuFunctions
     Menu bluetoothScannerMenu;
 
     // Menu icons
-    
+
 
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    
+
     void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
     void drawStatusBar();
     void updateStatusBar();
+    void battery(bool initial = false);
+    void battery2(bool initial = false);
     void showMenuList(Menu* menu, int layer);
     void orientDisplay();
 
-  public:    
+  public:
     MenuFunctions();
 
     uint16_t x = -1, y = -1;

@@ -58,7 +58,11 @@ void setup()
   pinMode(FLASH_BUTTON, INPUT);
   pinMode(TFT_BL, OUTPUT);
   digitalWrite(TFT_BL, LOW);
-
+#if BATTERY_ANALOG_ON == 1
+  pinMode(BATTERY_PIN, OUTPUT);
+  pinMode(CHARGING_PIN, INPUT);
+#endif
+  
   // Preset SPI CS pins to avoid bus conflicts
   digitalWrite(TFT_CS, HIGH);
   digitalWrite(SD_CS, HIGH);
