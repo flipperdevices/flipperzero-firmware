@@ -70,6 +70,15 @@ void setup()
   Serial.begin(115200);
   
   Serial.begin(115200);
+  
+  display_obj.RunSetup();
+  display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  digitalWrite(TFT_BL, HIGH);
+
+  display_obj.tft.println("Marauder " + display_obj.version_number + "\n");
+
+  display_obj.tft.println("Started Serial");
+  
   Serial.println("\n\n--------------------------------\n");
   Serial.println("         ESP32 Marauder      \n");
   Serial.println("            " + display_obj.version_number + "\n");
@@ -80,27 +89,41 @@ void setup()
 
   Serial.println(wifi_scan_obj.freeRAM());
 
+  display_obj.tft.println("Checked RAM");
+
   // Do some SD stuff
-  if(sd_obj.initSD())
+  if(sd_obj.initSD()) {
     Serial.println("SD Card supported");
-  else
+    display_obj.tft.println("Initialized SD Card");
+  }
+  else {
     Serial.println("SD Card NOT Supported");
+    display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+    display_obj.tft.println("Failed to Initialize SD Card");
+    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  }
 
   // Run display setup
   Serial.println(wifi_scan_obj.freeRAM());
-  display_obj.RunSetup();
+  //display_obj.RunSetup();
 
   // Build menus
   Serial.println(wifi_scan_obj.freeRAM());
-  menu_function_obj.RunSetup();
+  //menu_function_obj.RunSetup();
+
+  //display_obj.tft.println("Created Menu Structure");
 
   // Battery stuff
   Serial.println(wifi_scan_obj.freeRAM());
   battery_obj.RunSetup();
 
+  display_obj.tft.println("Checked battery configuration");
+
   // Temperature stuff
   Serial.println(wifi_scan_obj.freeRAM());
   temp_obj.RunSetup();
+
+  display_obj.tft.println("Initialized temperature interface");
 
   battery_obj.battery_level = battery_obj.getBatteryLevel();
 
@@ -114,6 +137,28 @@ void setup()
 
   // Do some LED stuff
   led_obj.RunSetup();
+
+  display_obj.tft.println("Initialized LED Interface");
+
+  display_obj.tft.println("Starting...");
+
+  delay(1000);
+
+  display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+  digitalWrite(TFT_BL, LOW);
+
+  // Draw the title screen
+  display_obj.drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
+
+  //showCenterText(version_number, 250);
+  display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
+
+  digitalWrite(TFT_BL, HIGH);
+
+  delay(5000);
+
+  menu_function_obj.RunSetup();
 }
 
 

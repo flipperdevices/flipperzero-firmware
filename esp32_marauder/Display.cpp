@@ -58,14 +58,14 @@ void Display::RunSetup()
 
 
   // Draw the title screen
-  drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
+  //drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
 
   //showCenterText(version_number, 250);
-  tft.drawCentreString(version_number, 120, 250, 2);
+  //tft.drawCentreString(version_number, 120, 250, 2);
 
-  digitalWrite(TFT_BL, HIGH);
+  //digitalWrite(TFT_BL, HIGH);
 
-  delay(5000);
+  //delay(5000);
 }
 
 /* Interrupt driven periodic handler */
@@ -462,6 +462,12 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
   }
 }
 
+void Display::setupDraw() {
+  this->tft.drawLine(0, 0, 10, 0, TFT_MAGENTA);
+  this->tft.drawLine(0, 0, 0, 10, TFT_GREEN);
+  this->tft.drawLine(0, 0, 0, 0, TFT_CYAN);
+}
+
 uint16_t xlast;
 uint16_t ylast;
 uint32_t AH;
@@ -471,6 +477,13 @@ void Display::drawStylus()
 
   // Pressed will be set true is there is a valid touch on the screen
   boolean pressed = tft.getTouch(&x, &y);
+
+  if ((x <= 10) && (y <= 10) && (pressed)) {
+    Serial.println("Exit draw function");
+    this->draw_tft = false;
+    this->exit_draw = true;
+    return;
+  }
 
   // Draw a white spot at the detected coordinates
   if (pressed) {

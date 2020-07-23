@@ -81,6 +81,7 @@ class Display
     bool loading = false;
     bool tteBar = false;
     bool draw_tft = false;
+    bool exit_draw = false;
 
     int TOP_FIXED_AREA_2 = 48;
     int print_delay_1, print_delay_2 = 10;
@@ -124,6 +125,7 @@ class Display
     void clearScreen();
     void displayBuffer(bool do_clear = false);
     void drawJpeg(const char *filename, int xpos, int ypos);
+    void setupDraw();
     void drawStylus();
     void getTouchWhileFunction(bool pressed);
     void initScrollValues(bool tte = false);

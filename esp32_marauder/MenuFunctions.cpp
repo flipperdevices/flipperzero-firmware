@@ -10,6 +10,10 @@ MenuFunctions::MenuFunctions()
 // Function to check menu input
 void MenuFunctions::main(uint32_t currentTime)
 {
+  if (display_obj.exit_draw) {
+    display_obj.exit_draw = false;
+    changeMenu(current_menu);
+  }
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) ||
       (wifi_scan_obj.currentScanMode == SHOW_INFO)) {
@@ -578,6 +582,7 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&generalMenu, "Draw", TFT_WHITE, NULL, DRAW, [this]() {
     display_obj.clearScreen();
+    display_obj.setupDraw();
     display_obj.draw_tft = true;
   });
 
