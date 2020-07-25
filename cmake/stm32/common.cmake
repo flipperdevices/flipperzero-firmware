@@ -65,7 +65,7 @@ function(stm32_get_chip_info CHIP FAMILY TYPE DEVICE)
     set(${TYPE} ${STM32_TYPE} PARENT_SCOPE)
 endfunction()
 
-function(stm32_get_memory_info FAMILY DEVICE 
+function(stm32_get_memory_info FAMILY DEVICE CORE
     FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
     FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
 )
@@ -106,6 +106,9 @@ function(stm32_get_memory_info FAMILY DEVICE
     list(FIND STM32_${FAMILY}_TYPES ${TYPE} TYPE_INDEX)
     list(GET STM32_${FAMILY}_RAM_SIZES ${TYPE_INDEX} RAM)
     list(GET STM32_${FAMILY}_CCRAM_SIZES ${TYPE_INDEX} CCRAM)
+    set(FLASH_ORIGIN_VALUE 0x8000000)
+    set(RAM_ORIGIN_VALUE 0x20000000 PARENT_SCOPE)
+    set(CCRAM_ORIGIN_VALUE 0x10000000 PARENT_SCOPE)
     
     if(FAMILY STREQUAL "F1")
         stm32f1_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
@@ -115,6 +118,9 @@ function(stm32_get_memory_info FAMILY DEVICE
         stm32f2_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
     elseif(FAMILY STREQUAL "F3")
         stm32f3_get_memory_info(${DEVICE} ${TYPE} FLASH RAM)
+    elseif(FAMILY STREQUAL "H7")
+        stm32h7_get_memory_info(${DEVICE} ${TYPE} ${CORE} RAM FLASH_ORIGIN_VALUE RAM_ORIGIN_VALUE)
+        set(FLASH "(${FLASH}>>1)")
     endif()
 
     set(${FLASH_SIZE} ${FLASH} PARENT_SCOPE)
@@ -128,9 +134,9 @@ function(stm32_get_memory_info FAMILY DEVICE
         set(${STACK_SIZE} 0x400 PARENT_SCOPE)
         set(${HEAP_SIZE} 0x200 PARENT_SCOPE)
     endif()
-    set(${FLASH_ORIGIN} 0x8000000 PARENT_SCOPE)
-    set(${RAM_ORIGIN} 0x20000000 PARENT_SCOPE)
-    set(${CCRAM_ORIGIN} 0x10000000 PARENT_SCOPE)
+    set(${FLASH_ORIGIN} ${FLASH_ORIGIN_VALUE} PARENT_SCOPE)
+    set(${RAM_ORIGIN} ${RAM_ORIGIN_VALUE} PARENT_SCOPE)
+    set(${CCRAM_ORIGIN} ${CCRAM_ORIGIN_VALUE} PARENT_SCOPE)
 endfunction()
 
 function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
