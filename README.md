@@ -96,7 +96,7 @@ Make the following connections between your 2.8" TFT Screen and your ESP32 board
 |         | T_IRQ    |        |
 | SD_CS   |          | GPIO12 |
 
-For the analog battery circuit, use a 4 to 1 voltage divider, and (optional) a mosfet
+For the analog battery circuit, use a 4 to 1 voltage divider, and (optional) a mosfet.
 For the charge detection circuit, use a 1 to 2 voltage divider (the charge detection is optional and only changes the battery icon colour while charging)
 | BATTERY | ESP32  |
 | ------- | ------ |
