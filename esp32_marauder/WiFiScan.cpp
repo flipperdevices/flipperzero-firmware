@@ -9,8 +9,12 @@ int num_probe = 0;
 int num_eapol = 0;
 
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
-    
-    void onResult(BLEAdvertisedDevice advertisedDevice) {
+
+    /* Original BLE */
+    //void onResult(BLEAdvertisedDevice advertisedDevice) {
+
+    /* NimBLE */
+    void onResult(BLEAdvertisedDevice *advertisedDevice) {
 
       //advertisedDevice.getScan()->stop();
       
@@ -18,24 +22,24 @@ class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
       if (display_obj.display_buffer->size() >= 0)
       {
         display_string.concat(" RSSI: ");
-        display_string.concat(advertisedDevice.getRSSI());
+        display_string.concat(advertisedDevice->getRSSI());
         Serial.print(" RSSI: ");
-        Serial.print(advertisedDevice.getRSSI());
+        Serial.print(advertisedDevice->getRSSI());
 
         display_string.concat(" ");
         Serial.print(" ");
         
         Serial.print("Device: ");
-        if(advertisedDevice.getName().length() != 0)
+        if(advertisedDevice->getName().length() != 0)
         {
-          display_string.concat(advertisedDevice.getName().c_str());
-          Serial.print(advertisedDevice.getName().c_str());
+          display_string.concat(advertisedDevice->getName().c_str());
+          Serial.print(advertisedDevice->getName().c_str());
           
         }
         else
         {
-          display_string.concat(advertisedDevice.getAddress().toString().c_str());
-          Serial.print(advertisedDevice.getAddress().toString().c_str());
+          display_string.concat(advertisedDevice->getAddress().toString().c_str());
+          Serial.print(advertisedDevice->getAddress().toString().c_str());
         }
 
         int temp_len = display_string.length();
@@ -56,7 +60,11 @@ class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
 };
 
 class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
-    void onResult(BLEAdvertisedDevice advertisedDevice) {
+    /* Original BLE */
+    //void onResult(BLEAdvertisedDevice advertisedDevice) {
+
+    /* NimBLE */
+    void onResult(BLEAdvertisedDevice *advertisedDevice) {
       String bad_list[bad_list_length] = {"HC-03", "HC-05", "HC-06"};
       if (display_obj.display_buffer->size() >= 0)
       {
@@ -65,17 +73,17 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
         //display_string.concat(" RSSI: ");
         //display_string.concat(advertisedDevice.getRSSI());
         //display_string.concat(" ");
-        if(advertisedDevice.getName().length() != 0)
+        if(advertisedDevice->getName().length() != 0)
         {
           //display_string.concat(advertisedDevice.getName().c_str());
-          Serial.print(advertisedDevice.getName().c_str());
+          Serial.print(advertisedDevice->getName().c_str());
           for(int i = 0; i < bad_list_length; i++)
           {
-            if(strcmp(advertisedDevice.getName().c_str(), bad_list[i].c_str()) == 0)
+            if(strcmp(advertisedDevice->getName().c_str(), bad_list[i].c_str()) == 0)
             {
               display_string.concat("Potential Skimmer: ");
               display_string.concat(" ");
-              display_string.concat(advertisedDevice.getName().c_str());
+              display_string.concat(advertisedDevice->getName().c_str());
               int temp_len = display_string.length();
               for (int i = 0; i < 40 - temp_len; i++)
               {
@@ -91,7 +99,7 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
         }
         else
         {
-          Serial.print(advertisedDevice.getAddress().toString().c_str());
+          Serial.print(advertisedDevice->getAddress().toString().c_str());
           //display_string.concat(advertisedDevice.getAddress().toString().c_str());
         }
         /*
@@ -102,7 +110,7 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
         }
         */
         Serial.print(" RSSI: ");
-        Serial.println(advertisedDevice.getRSSI());
+        Serial.println(advertisedDevice->getRSSI());
 
         /*
         while (display_obj.printing)

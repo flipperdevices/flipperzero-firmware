@@ -1,11 +1,15 @@
 #ifndef WiFiScan_h
 #define WiFiScan_h
 
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEScan.h>
-#include <BLEAdvertisedDevice.h>
+//#include <BLEDevice.h>
+//#include <BLEUtils.h>
+//#include <BLEScan.h>
+//#include <BLEAdvertisedDevice.h>
 #include <ArduinoJson.h>
+
+// Testing NimBLE
+#include <NimBLEDevice.h>
+#include <NimBLEAdvertisedDevice.h>
 
 #include <WiFi.h>
 #include <math.h>
