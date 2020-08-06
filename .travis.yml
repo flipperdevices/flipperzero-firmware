@@ -39,6 +39,7 @@ before_install:
   - install_library "lv_arduino"
   - install_library "https://github.com/adafruit/Adafruit_NeoPixel/archive/1.5.0.zip" ## "Adafruit_NeoPixel"
   - install_library 'https://github.com/bblanchon/ArduinoJson/releases/download/v5.13.5/ArduinoJson-v5.13.5.zip'
+  - install_library 'https://github.com/h2zero/NimBLE-Arduino/archive/master.zip' # NimBLE
   
   - cp ${TRAVIS_BUILD_DIR}/User_Setup.h /home/travis/arduino-sketchbook/libraries/TFT_eSPI/User_Setup.h
   #- install_library 'https://github.com/bblanchon/ArduinoJson.git'
