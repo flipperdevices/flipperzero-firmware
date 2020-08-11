@@ -114,6 +114,6 @@ CMSIS package will generate linker script for your device automatically (target 
 ## Useful cmake function
 
 * `stm32_get_chip_info(CHIP FAMILY TYPE DEVICE)` - classify device using name, will return device family, type and canonical name (uppercase without any package codes)
-* `stm32_get_memory_info(FAMILY DEVICE FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN)` - get information about device memories. Linker script generator uses values from this function
+* `stm32_get_memory_info(FAMILY DEVICE CORE FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN)` - get information about device memories. Linker script generator uses values from this function
 * `stm32_get_devices_by_family(FAMILY DEVICES)` - return into `DEVICES` all supported devices by family
 

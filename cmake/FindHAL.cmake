@@ -170,10 +170,15 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
     
+    string(REGEX MATCH "_M[47]$" CORE ${COMP_U})
     string(REGEX MATCH "^STM32([FGHL][0-9]).*$" COMP_U ${COMP_U})
     
     if(NOT CMAKE_MATCH_1)
         message(FATAL_ERROR "Unknown HAL component: ${COMP}")
+    endif()
+
+    if(CORE)
+        string(REPLACE "_" "::" CORE_C "${CORE}")
     endif()
         
     set(FAMILY ${CMAKE_MATCH_1})
@@ -193,64 +198,64 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
         continue()
     endif()
     
-    find_path(HAL_${FAMILY}_INCLUDE
+    find_path(HAL_${FAMILY}${CORE}_INCLUDE
         NAMES stm32${FAMILY_L}xx_hal.h
         PATHS "${HAL_${FAMILY}_PATH}/Inc"
         NO_DEFAULT_PATH
     )
-    find_file(HAL_${FAMILY}_SOURCE
+    find_file(HAL_${FAMILY}${CORE}_SOURCE
         NAMES stm32${FAMILY_L}xx_hal.c
         PATHS "${HAL_${FAMILY}_PATH}/Src"
         NO_DEFAULT_PATH
     )
     
-    if ((NOT HAL_${FAMILY}_INCLUDE) OR (NOT HAL_${FAMILY}_SOURCE))
+    if ((NOT HAL_${FAMILY}${CORE}_INCLUDE) OR (NOT HAL_${FAMILY}${CORE}_SOURCE))
         set(HAL_${COMP}_FOUND FALSE)
         continue()
     endif()
 
-    if(NOT (TARGET HAL::STM32::${FAMILY}))
-        add_library(HAL::STM32::${FAMILY} INTERFACE IMPORTED)
-        target_link_libraries(HAL::STM32::${FAMILY} INTERFACE STM32::${FAMILY} CMSIS::STM32::${FAMILY})
-        target_include_directories(HAL::STM32::${FAMILY} INTERFACE "${HAL_${FAMILY}_INCLUDE}")
-        target_sources(HAL::STM32::${FAMILY} INTERFACE "${HAL_${FAMILY}_SOURCE}")
+    if(NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}))
+        add_library(HAL::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
+        target_link_libraries(HAL::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C})
+        target_include_directories(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE}_INCLUDE}")
+        target_sources(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE}_SOURCE}")
     endif()
     
     foreach(DRV ${HAL_DRIVERS_${FAMILY}})
         string(TOLOWER ${DRV} DRV_L)
         string(TOUPPER ${DRV} DRV)
         
-        find_file(HAL_${FAMILY}_${DRV}_SOURCE
+        find_file(HAL_${FAMILY}${CORE}_${DRV}_SOURCE
             NAMES stm32${FAMILY_L}xx_hal_${DRV_L}.c
             PATHS "${HAL_${FAMILY}_PATH}/Src"
             NO_DEFAULT_PATH
         )
-        list(APPEND HAL_${FAMILY}_SOURCES "${HAL_${FAMILY}_${DRV}_SOURCE}")
-        if(NOT HAL_${FAMILY}_${DRV}_SOURCE)
+        list(APPEND HAL_${FAMILY}${CORE}_SOURCES "${HAL_${FAMILY}_${DRV}_SOURCE}")
+        if(NOT HAL_${FAMILY}${CORE}_${DRV}_SOURCE)
             message(WARNING "Cannot find ${DRV} driver for ${COMP}")
         endif()
                 
-        if(HAL_${FAMILY}_${DRV}_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}::${DRV})))
-            add_library(HAL::STM32::${FAMILY}::${DRV} INTERFACE IMPORTED)
-            target_link_libraries(HAL::STM32::${FAMILY}::${DRV} INTERFACE HAL::STM32::${FAMILY})
-            target_sources(HAL::STM32::${FAMILY}::${DRV} INTERFACE "${HAL_${FAMILY}_${DRV}_SOURCE}")
+        if(HAL_${FAMILY}${CORE}_${DRV}_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}::${DRV})))
+            add_library(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE IMPORTED)
+            target_link_libraries(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE HAL::STM32::${FAMILY}${CORE_C})
+            target_sources(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE "${HAL_${FAMILY}${CORE}_${DRV}_SOURCE}")
         endif()
                 
-        if(HAL_${FAMILY}_${DRV}_SOURCE AND (${DRV_L} IN_LIST HAL_EX_DRIVERS_${FAMILY}))
-            find_file(HAL_${FAMILY}_${DRV}_EX_SOURCE
+        if(HAL_${FAMILY}${CORE}_${DRV}_SOURCE AND (${DRV_L} IN_LIST HAL_EX_DRIVERS_${FAMILY}))
+            find_file(HAL_${FAMILY}${CORE}_${DRV}_EX_SOURCE
                 NAMES stm32${FAMILY_L}xx_hal_${DRV_L}_ex.c
                 PATHS "${HAL_${FAMILY}_PATH}/Src"
                 NO_DEFAULT_PATH
             )
-            list(APPEND HAL_${FAMILY}_SOURCES "${HAL_${FAMILY}_${DRV}_EX_SOURCE}")
-            if(NOT HAL_${FAMILY}_${DRV}_EX_SOURCE)
+            list(APPEND HAL_${FAMILY}${CORE}_SOURCES "${HAL_${FAMILY}${CORE}_${DRV}_EX_SOURCE}")
+            if(NOT HAL_${FAMILY}${CORE}_${DRV}_EX_SOURCE)
                 message(WARNING "Cannot find ${DRV}Ex driver for ${COMP}")
             endif()
             
-            if((TARGET HAL::STM32::${FAMILY}::${DRV}) AND (NOT (TARGET HAL::STM32::${FAMILY}::${DRV}Ex)))
-                add_library(HAL::STM32::${FAMILY}::${DRV}Ex INTERFACE IMPORTED)
-                target_link_libraries(HAL::STM32::${FAMILY}::${DRV}Ex INTERFACE HAL::STM32::${FAMILY}::${DRV})
-                target_sources(HAL::STM32::${FAMILY}::${DRV}Ex INTERFACE "${HAL_${FAMILY}_${DRV}_EX_SOURCE}")
+            if((TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}) AND (NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex)))
+                add_library(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE IMPORTED)
+                target_link_libraries(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE HAL::STM32::${FAMILY}${CORE_C}::${DRV})
+                target_sources(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE "${HAL_${FAMILY}${CORE}_${DRV}_EX_SOURCE}")
             endif()
         endif()
     endforeach()
@@ -259,25 +264,25 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
         string(TOLOWER ${DRV} DRV_L)
         string(TOUPPER ${DRV} DRV)
         
-        find_file(HAL_${FAMILY}_${DRV}_LL_SOURCE
+        find_file(HAL_${FAMILY}${CORE}_${DRV}_LL_SOURCE
             NAMES stm32${FAMILY_L}xx_ll_${DRV_L}.c
             PATHS "${HAL_${FAMILY}_PATH}/Src"
             NO_DEFAULT_PATH
         )
-        list(APPEND HAL_${FAMILY}_SOURCES "${HAL_${FAMILY}_${DRV}_LL_SOURCE}")
-        if(NOT HAL_${FAMILY}_${DRV}_LL_SOURCE)
+        list(APPEND HAL_${FAMILY}${CORE}_SOURCES "${HAL_${FAMILY}_${DRV}_LL_SOURCE}")
+        if(NOT HAL_${FAMILY}${CORE}_${DRV}_LL_SOURCE)
             message(WARNING "Cannot find LL_${DRV} driver for ${COMP}")
         endif()
     
-        if(HAL_${FAMILY}_${DRV}_LL_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}::LL_${DRV})))
-            add_library(HAL::STM32::${FAMILY}::LL_${DRV} INTERFACE IMPORTED)
-            target_link_libraries(HAL::STM32::${FAMILY}::LL_${DRV} INTERFACE HAL::STM32::${FAMILY})
-            target_sources(HAL::STM32::${FAMILY}::LL_${DRV} INTERFACE "${HAL_${FAMILY}_${DRV}_LL_SOURCE}")
+        if(HAL_${FAMILY}${CORE}_${DRV}_LL_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV})))
+            add_library(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE IMPORTED)
+            target_link_libraries(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE HAL::STM32::${FAMILY})
+            target_sources(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE "${HAL_${FAMILY}${CORE}_${DRV}_LL_SOURCE}")
         endif()
     endforeach()
     
     set(HAL_${COMP}_FOUND TRUE)
-    foreach(FILE ${HAL_${FAMILY}_SOURCES})
+    foreach(FILE ${HAL_${FAMILY}${CORE}_SOURCES})
         if(NOT FILE)
             set(HAL_${COMP}_FOUND FALSE)
             break()
@@ -285,9 +290,11 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     endforeach()
         
     if(HAL_${COMP}_FOUND)
-        list(APPEND HAL_INCLUDE_DIRS "${HAL_${FAMILY}_INCLUDE}")
-        list(APPEND HAL_SOURCES "${HAL_${FAMILY}_SOURCES}")
+        list(APPEND HAL_INCLUDE_DIRS "${HAL_${FAMILY}${CORE}_INCLUDE}")
+        list(APPEND HAL_SOURCES "${HAL_${FAMILY}${CORE}_SOURCES}")
     endif()
+    list(REMOVE_DUPLICATES HAL_INCLUDE_DIRS)
+    list(REMOVE_DUPLICATES HAL_SOURCES)
 endforeach()
 
 include(FindPackageHandleStandardArgs)

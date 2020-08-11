@@ -17,7 +17,7 @@ foreach(FAMILY ${TEST_FAMILIES})
     stm32_get_devices_by_family(${FAMILY} DEVICES)
     foreach(DEVICE ${DEVICES})    
         stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
-        stm32_get_memory_info(${FAMILY} ${DEVICE} 
+        stm32_get_memory_info(${FAMILY} ${DEVICE} "" # Use a blank core here.
             FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
             FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
         )
