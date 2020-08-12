@@ -1,5 +1,3 @@
-# Only CM7 core is supported for now...
-
 set(STM32_H7_TYPES 
     H743xx H753xx H750xx H742xx H745xx H755xx H747xx H757xx
     H7A3xx H7A3xxQ H7B3xx H7B3xxQ H7B0xx H7B0xxQ
@@ -20,6 +18,14 @@ set(STM32_H7_M4_RAM_SIZES
 set(STM32_H7_CCRAM_SIZES 
       0K   0K   0K   0K   0K   0K   0K   0K
       0K   0K   0K   0K   0K   0K
+)
+
+set(STM32_H7_NO_FLASH_SPLIT
+      H750xx H7B0xx
+)
+
+set(STM32_H7_DUAL_CORE
+      H745xx H755xx H747xx H757xx
 )
 
 stm32_util_create_family_targets(H7 M7)
@@ -46,19 +52,35 @@ target_compile_definitions(STM32::H7::M4 INTERFACE
     -DCORE_CM4
 )
 
-function(stm32h7_get_memory_info DEVICE TYPE CORE RAM FLASH_ORIGIN RAM_ORIGIN)
+function(stm32h7_get_memory_info DEVICE TYPE CORE RAM FLASH_ORIGIN RAM_ORIGIN TWO_FLASH_BANKS)
+    if(${TYPE} IN_LIST STM32_H7_NO_FLASH_SPLIT)
+        set(${TWO_FLASH_BANKS} FALSE PARENT_SCOPE)  
+    else()
+        set(${TWO_FLASH_BANKS} TRUE PARENT_SCOPE)
+    endif()
+    if(NOT CORE)
+        set(CORE "M7")
+    endif()
     list(FIND STM32_H7_TYPES ${TYPE} TYPE_INDEX)
-    if(CORE STREQUAL "_M7")
+    if(CORE STREQUAL "M7")
         list(GET STM32_H7_RAM_SIZES ${TYPE_INDEX} RAM_VALUE)
         set(${RAM} ${RAM_VALUE} PARENT_SCOPE)
         set(${FLASH_ORIGIN} 0x8000000 PARENT_SCOPE)
         set(${RAM_ORIGIN} 0x20000000 PARENT_SCOPE)
-    elseif(CORE STREQUAL "_M4")
+    elseif((${TYPE} IN_LIST STM32_H7_DUAL_CORE) AND (CORE STREQUAL "M4"))
         list(GET STM32_H7_M4_RAM_SIZES ${TYPE_INDEX} RAM_VALUE)
         set(${RAM} ${RAM_VALUE} PARENT_SCOPE)
         set(${FLASH_ORIGIN} 0x8100000 PARENT_SCOPE)
         set(${RAM_ORIGIN} 0x10000000 PARENT_SCOPE)
     else()
         message(FATAL_ERROR "Unknown core ${CORE}")
+    endif()
+endfunction()
+
+function(stm32h7_get_device_cores DEVICE TYPE CORES)
+    if(${TYPE} IN_LIST STM32_H7_DUAL_CORE)
+        set(${CORES} M7 M4 PARENT_SCOPE)
+    else()
+        set(${CORES} M7 PARENT_SCOPE)
     endif()
 endfunction()

@@ -2,20 +2,34 @@ if(NOT CMSIS_FIND_COMPONENTS)
     set(CMSIS_FIND_COMPONENTS
         STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
         STM32G0 STM32G4
-        STM32H7
+        STM32H7_M7 STM32H7_M4
         STM32L0 STM32L1 STM32L4
     )
 endif()
 
+if(STM32H7 IN_LIST CMSIS_FIND_COMPONENTS)
+    list(REMOVE_ITEM CMSIS_FIND_COMPONENTS STM32H7)
+    list(APPEND CMSIS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
+endif()
+list(REMOVE_DUPLICATES CMSIS_FIND_COMPONENTS)
+
 include(stm32/devices)
-    
+
 function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
-    string(REPLACE "_" "::" CORE_C ${CORE})
-    stm32_get_memory_info(${FAMILY} ${DEVICE} ${CORE}
-        FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE 
-        FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN
-    )
-    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}${CORE}.ld"
+    if(CORE)
+        set(CORE_C "::${CORE}")
+        set(CORE_U "_${CORE}")
+    endif()
+    
+    set(OUTPUT_LD_FILE "${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}${CORE_U}.ld")
+    
+    stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} FLASH SIZE FLASH_SIZE ORIGIN FLASH_ORIGIN)
+    stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} RAM SIZE RAM_SIZE ORIGIN RAM_ORIGIN)
+    stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} CCRAM SIZE CCRAM_SIZE ORIGIN CCRAM_ORIGIN)
+    stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} HEAP SIZE HEAP_SIZE)
+    stm32_get_memory_info(FAMILY ${FAMILY} DEVICE ${DEVICE} CORE ${CORE} STACK SIZE STACK_SIZE)
+    
+    add_custom_command(OUTPUT "${OUTPUT_LD_FILE}"
         COMMAND ${CMAKE_COMMAND} 
             -DFLASH_ORIGIN="${FLASH_ORIGIN}" 
             -DRAM_ORIGIN="${RAM_ORIGIN}" 
@@ -25,19 +39,19 @@ function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
             -DCCRAM_SIZE="${CCRAM_SIZE}" 
             -DSTACK_SIZE="${STACK_SIZE}" 
             -DHEAP_SIZE="${HEAP_SIZE}" 
-            -DLINKER_SCRIPT="${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}${CORE}.ld"
+            -DLINKER_SCRIPT="${OUTPUT_LD_FILE}"
             -P "${STM32_CMAKE_DIR}/stm32/linker_ld.cmake"
     )
-    add_custom_target(CMSIS_LD_${DEVICE}${CORE} DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}${CORE}.ld)
-    add_dependencies(CMSIS::STM32::${DEVICE}${CORE_C} CMSIS_LD_${DEVICE}${CORE})
-    stm32_add_linker_script(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/${DEVICE}${CORE}.ld")
+    add_custom_target(CMSIS_LD_${DEVICE}${CORE_U} DEPENDS "${OUTPUT_LD_FILE}")
+    add_dependencies(CMSIS::STM32::${DEVICE}${CORE_C} CMSIS_LD_${DEVICE}${CORE_U})
+    stm32_add_linker_script(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE "${OUTPUT_LD_FILE}")
 endfunction() 
 
 foreach(COMP ${CMSIS_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP)
     
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?(_M[47])?.*$" COMP ${COMP})
+    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
     
     if((NOT CMAKE_MATCH_1) AND (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown CMSIS component: ${COMP}")
@@ -48,12 +62,19 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         set(DEVICES "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
     else()
         set(FAMILY ${CMAKE_MATCH_1})
-        stm32_get_devices_by_family(${FAMILY} DEVICES)
+        stm32_get_devices_by_family(DEVICES FAMILY ${FAMILY} CORE ${CORE})
     endif()
+    
     if(CMAKE_MATCH_3)
         set(CORE ${CMAKE_MATCH_3})
-        string(REGEX REPLACE "_" "::" CORE_C ${CORE})
+        set(CORE_C "::${CORE}")
+        set(CORE_U "_${CORE}")
+    else()
+        unset(CORE)
+        unset(CORE_C)
+        unset(CORE_U)
     endif()
+    
     string(TOLOWER ${FAMILY} FAMILY_L)
     
     if(NOT STM32_CUBE_${FAMILY}_PATH)
@@ -61,100 +82,105 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
         
-    find_path(CMSIS_${FAMILY}${CORE}_PATH
+    find_path(CMSIS_${FAMILY}${CORE_U}_PATH
         NAMES Include/cmsis_gcc.h
         PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
         NO_DEFAULT_PATH
     )
-    if (NOT CMSIS_${FAMILY}${CORE}_PATH)
+    if (NOT CMSIS_${FAMILY}${CORE_U}_PATH)
         continue()
     endif()
     
-    if(NOT CMSIS_${FAMILY}${CORE}_VERSION)
-        find_file(CMSIS_${FAMILY}${CORE}_PDSC
+    if(NOT CMSIS_${FAMILY}${CORE_U}_VERSION)
+        find_file(CMSIS_${FAMILY}${CORE_U}_PDSC
             NAMES ARM.CMSIS.pdsc
-            PATHS "${CMSIS_${FAMILY}${CORE}_PATH}"
+            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}"
             NO_DEFAULT_PATH
         )
-        if (NOT CMSIS_${FAMILY}${CORE}_PDSC)
-            set(CMSIS_${FAMILY}${CORE}_VERSION "0.0.0")
+        if (NOT CMSIS_${FAMILY}${CORE_U}_PDSC)
+            set(CMSIS_${FAMILY}${CORE_U}_VERSION "0.0.0")
         else()
-            file(STRINGS "${CMSIS_${FAMILY}${CORE}_PDSC}" VERSION_STRINGS REGEX "<release version=\"([0-9]*\\.[0-9]*\\.[0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">")
+            file(STRINGS "${CMSIS_${FAMILY}${CORE_U}_PDSC}" VERSION_STRINGS REGEX "<release version=\"([0-9]*\\.[0-9]*\\.[0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">")
             list(GET VERSION_STRINGS 0 STR)
             string(REGEX MATCH "<release version=\"([0-9]*)\\.([0-9]*)\\.([0-9]*)\" date=\"[0-9]+\\-[0-9]+\\-[0-9]+\">" MATCHED ${STR})
-            set(CMSIS_${FAMILY}${CORE}_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" CACHE INTERNAL "CMSIS STM32${FAMILY}${CORE} version")
+            set(CMSIS_${FAMILY}${CORE_U}_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" CACHE INTERNAL "CMSIS STM32${FAMILY}${CORE_U} version")
         endif()
     endif()
     
-    set(CMSIS_${COMP}_VERSION ${CMSIS_${FAMILY}${CORE}_VERSION})
+    set(CMSIS_${COMP}_VERSION ${CMSIS_${FAMILY}${CORE_U}_VERSION})
     set(CMSIS_VERSION ${CMSIS_${COMP}_VERSION})
     
-    find_path(CMSIS_${FAMILY}${CORE}_COMMON_INCLUDE
+    find_path(CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE
         NAMES cmsis_gcc.h
-        PATHS "${CMSIS_${FAMILY}${CORE}_PATH}/Include"
+        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include"
         NO_DEFAULT_PATH
     )
-    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE}_COMMON_INCLUDE}")
+    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE}")
     
-    find_path(CMSIS_${FAMILY}${CORE}_INCLUDE
+    find_path(CMSIS_${FAMILY}${CORE_U}_INCLUDE
         NAMES stm32${FAMILY_L}xx.h
-        PATHS "${CMSIS_${FAMILY}${CORE}_PATH}/Device/ST/STM32${FAMILY}xx/Include"
+        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Include"
         NO_DEFAULT_PATH
     )
-    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE}_INCLUDE}")
+    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_INCLUDE}")
     
-    find_file(CMSIS_${FAMILY}${CORE}_SOURCE
+    find_file(CMSIS_${FAMILY}${CORE_U}_SOURCE
         NAMES system_stm32${FAMILY_L}xx.c
-        PATHS "${CMSIS_${FAMILY}${CORE}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates"
+        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates"
         NO_DEFAULT_PATH
     )
-    list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE}_SOURCE}")
+    list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
     
-    if ((NOT CMSIS_${FAMILY}${CORE}_COMMON_INCLUDE) OR 
-        (NOT CMSIS_${FAMILY}${CORE}_INCLUDE) OR 
-        (NOT CMSIS_${FAMILY}${CORE}_SOURCE))
+    if ((NOT CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE) OR 
+        (NOT CMSIS_${FAMILY}${CORE_U}_INCLUDE) OR 
+        (NOT CMSIS_${FAMILY}${CORE_U}_SOURCE))
         continue()
     endif()
 
     if(NOT (TARGET CMSIS::STM32::${FAMILY}${CORE_C}))
         add_library(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
         target_link_libraries(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C})
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE}_COMMON_INCLUDE}")
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE}_INCLUDE}")
-        target_sources(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE}_SOURCE}")
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE}")
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_INCLUDE}")
+        target_sources(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
     endif()
 
     set(DEVICES_FOUND TRUE)
     foreach(DEVICE ${DEVICES})
+        stm32_get_cores(DEV_CORES FAMILY ${FAMILY} DEVICE ${DEVICE})
+        if(CORE AND (NOT ${CORE} IN_LIST DEV_CORES))
+            continue()
+        endif()
+                
         stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
         string(TOLOWER ${DEVICE} DEVICE_L)
         string(TOLOWER ${TYPE} TYPE_L)
         
-        find_file(CMSIS_${FAMILY}${CORE}_${TYPE}_STARTUP
+        find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
             NAMES startup_stm32${TYPE_L}.s
-            PATHS "${CMSIS_${FAMILY}${CORE}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates/gcc"
+            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates/gcc"
             NO_DEFAULT_PATH
         )
-        list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE}_${TYPE}_STARTUP}")
-        if(NOT CMSIS_${FAMILY}${CORE}_${TYPE}_STARTUP)
+        list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP}")
+        if(NOT CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP)
             set(DEVICES_FOUND FALSE)
             break()
         endif()
         
-        if(NOT (TARGET CMSIS::STM32::${TYPE}${CORE}))
+        if(NOT (TARGET CMSIS::STM32::${TYPE}${CORE_C}))
             add_library(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE IMPORTED)
             target_link_libraries(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE CMSIS::STM32::${FAMILY}${CORE_C} STM32::${TYPE}${CORE_C})
-            target_sources(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE}_${TYPE}_STARTUP}")
+            target_sources(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP}")
         endif()
         
         add_library(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE IMPORTED)
         target_link_libraries(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE CMSIS::STM32::${TYPE}${CORE_C})
-        cmsis_generate_default_linker_script(${FAMILY} ${DEVICE} ${CORE})
+        cmsis_generate_default_linker_script(${FAMILY} ${DEVICE} "${CORE}")
     endforeach()
-        
-    if(CMSIS_${FAMILY}${CORE}_COMMON_INCLUDE AND 
-       CMSIS_${FAMILY}${CORE}_INCLUDE AND 
-       CMSIS_${FAMILY}${CORE}_SOURCE AND
+
+    if(CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE AND 
+       CMSIS_${FAMILY}${CORE_U}_INCLUDE AND 
+       CMSIS_${FAMILY}${CORE_U}_SOURCE AND
        DEVICES_FOUND)
        set(CMSIS_${COMP}_FOUND TRUE)
     else()

@@ -1052,9 +1052,14 @@ set(STM32_ALL_DEVICES
     WLE5JC
 )
 
-function(stm32_get_devices_by_family FAMILY DEVICES)
+function(stm32_get_devices_by_family DEVICES)
+    set(ARG_OPTIONS "")
+    set(ARG_SINGLE FAMILY)
+    set(ARG_MULTIPLE "")
+    cmake_parse_arguments(PARSE_ARGV 1 ARG "${ARG_OPTIONS}" "${ARG_SINGLE}" "${ARG_MULTIPLE}")
     set(LIST ${STM32_ALL_DEVICES})
-    list(FILTER LIST INCLUDE REGEX "^${FAMILY}")
+    if(ARG_FAMILY)
+        list(FILTER LIST INCLUDE REGEX "^${ARG_FAMILY}")
+    endif()
     set(${DEVICES} ${LIST} PARENT_SCOPE)
 endfunction()
-

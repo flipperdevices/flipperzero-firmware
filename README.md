@@ -69,6 +69,10 @@ CMSIS creates following targets:
 
 So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
 
+***Note**: Some devices in STM32H7 family has two different cores (Cortex-M7 and Cortex-M4). 
+To specify core to build, all targets for H7 family also have suffix (::M7 or ::M4).
+For example, targets for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
+
 Also, there is special library `STM32::NoSys` which adds `--specs=nosys.specs` to compiler flags.
 
 ## HAL
@@ -86,6 +90,8 @@ HAL module will search all drivers supported by family and create following targ
 * `HAL::STM32::<FAMILY>::<DRIVER>` (e.g. `HAL::STM32::F4::GPIO`) - HAL driver <DRIVER>, depends on `HAL::STM32::<FAMILY>`
 * `HAL::STM32::<FAMILY>::<DRIVER>Ex` (e.g. `HAL::STM32::F4::ADCEx`) - HAL Extension driver , depends on `HAL::STM32::<FAMILY>::<DRIVER>`
 * `HAL::STM32::<FAMILY>::LL_<DRIVER>` (e.g. `HAL::STM32::F4::LL_ADC`) - HAL LL (Low-Level) driver , depends on `HAL::STM32::<FAMILY>`
+
+***Note**: Targets for STM32H7 will look like `HAL::STM32::<FAMILY>::[M7|M4]`, `HAL::STM32::<FAMILY>::[M7|M4]::<DRIVER>`, etc.*
 
 Here is typical usage:
 
@@ -113,7 +119,7 @@ CMSIS package will generate linker script for your device automatically (target 
 
 ## Useful cmake function
 
-* `stm32_get_chip_info(CHIP FAMILY TYPE DEVICE)` - classify device using name, will return device family, type and canonical name (uppercase without any package codes)
-* `stm32_get_memory_info(FAMILY DEVICE CORE FLASH_SIZE RAM_SIZE CCRAM_SIZE STACK_SIZE HEAP_SIZE FLASH_ORIGIN RAM_ORIGIN CCRAM_ORIGIN)` - get information about device memories. Linker script generator uses values from this function
-* `stm32_get_devices_by_family(FAMILY DEVICES)` - return into `DEVICES` all supported devices by family
+* `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
+* `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
+* `stm32_get_devices_by_family(DEVICES [FAMILY <family>])` - return into `DEVICES` all supported devices by family (or all devices if `<family>` is empty)
 

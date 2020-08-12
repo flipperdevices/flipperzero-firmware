@@ -222,21 +222,36 @@ if(NOT BSP_FIND_COMPONENTS)
     set(BSP_FIND_COMPONENTS 
         STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
         STM32G0 STM32G4 
-        STM32H7
+        STM32H7_M7 STM32H7_M4
         STM32L0 STM32L1 STM32L4 
     )
 endif()
+
+if(STM32H7 IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM BSP_FIND_COMPONENTS STM32H7)
+    list(APPEND BSP_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
+endif()
+list(REMOVE_DUPLICATES BSP_FIND_COMPONENTS)
 
 foreach(COMP ${BSP_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([FGHL][0-9]).*$" COMP_U ${COMP_U})
-    
+    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})
     if(NOT CMAKE_MATCH_1)
-        message(FATAL_ERROR "Unknown BSP component: ${COMP}")
+        message(FATAL_ERROR "Unknown HAL component: ${COMP}")
     endif()
-        
+    
+    if(CMAKE_MATCH_3)
+        set(CORE ${CMAKE_MATCH_3})
+        set(CORE_C "::${CORE}")
+        set(CORE_U "_${CORE}")
+    else()
+        unset(CORE)
+        unset(CORE_C)
+        unset(CORE_U)
+    endif()
+
     set(FAMILY ${CMAKE_MATCH_1})
     string(TOLOWER ${FAMILY} FAMILY_L)
     
@@ -256,13 +271,19 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
     
     set(BSP_${FAMILY}_INCLUDE "${BSP_${FAMILY}_PATH}/Components/Common")
     
-    add_library(BSP::STM32::${FAMILY} INTERFACE IMPORTED)
-    target_link_libraries(BSP::STM32::${FAMILY} INTERFACE STM32::${FAMILY})
-    target_include_directories(BSP::STM32::${FAMILY} INTERFACE "${BSP_${FAMILY}_PATH}/Components/Common")
+    add_library(BSP::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
+    target_link_libraries(BSP::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C})
+    target_include_directories(BSP::STM32::${FAMILY}${CORE_C} INTERFACE "${BSP_${FAMILY}_PATH}/Components/Common")
         
     foreach(BOARD ${BSP_${FAMILY}_BOARDS})
         string(REPLACE "-" "_" BOARD_CANONICAL ${BOARD})
         string(TOLOWER ${BOARD_CANONICAL} BOARD_CANONICAL_L)
+        set(BOARD_DEVICE ${BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL}})
+        
+        stm32_get_cores(DEV_CORES FAMILY ${FAMILY} DEVICE ${BOARD_DEVICE})
+        if(CORE AND (NOT ${CORE} IN_LIST DEV_CORES))
+            continue()
+        endif()
 
         find_path(BSP_${BOARD_CANONICAL}_PATH
             NAMES ${BOARD_CANONICAL_L}.h
@@ -273,16 +294,16 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
             continue()
         endif()
         
-        add_library(BSP::STM32::${BOARD_CANONICAL} INTERFACE IMPORTED)
-        target_link_libraries(BSP::STM32::${BOARD_CANONICAL} INTERFACE BSP::STM32::${FAMILY} CMSIS::STM32::${FAMILY})
-        target_include_directories(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}")
-        target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}.c")
+        add_library(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE IMPORTED)
+        target_link_libraries(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE BSP::STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C})
+        target_include_directories(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}")
+        target_sources(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}.c")
         
         foreach(SRC ${BSP_${FAMILY}_SOURCES_${BOARD_CANONICAL}})
-            target_sources(BSP::STM32::${BOARD_CANONICAL} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}_${SRC}.c")
+            target_sources(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE "${BSP_${BOARD_CANONICAL}_PATH}/${BOARD_CANONICAL_L}_${SRC}.c")
         endforeach()
         if(BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL})
-            target_link_libraries(BSP::STM32::${BOARD_CANONICAL} INTERFACE CMSIS::STM32::${BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL}})
+            target_link_libraries(BSP::STM32::${BOARD_CANONICAL}${CORE_C} INTERFACE CMSIS::STM32::${BSP_${FAMILY}_DEVICE_${BOARD_CANONICAL}}${CORE_C})
         endif()
     endforeach()
     
@@ -290,9 +311,9 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
         string(TOLOWER ${BCOMP} BCOMP_L)
         string(TOUPPER ${BCOMP} BCOMP_U)
         
-        add_library(BSP::STM32::${FAMILY}::${BCOMP_U} INTERFACE IMPORTED)
-        target_link_libraries(BSP::STM32::${FAMILY}::${BCOMP_U} INTERFACE BSP::STM32::${FAMILY} CMSIS::STM32::${FAMILY})
-        target_include_directories(BSP::STM32::${FAMILY}::${BCOMP_U} INTERFACE "${BSP_${FAMILY}_PATH}/Components/${BCOMP}")
+        add_library(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE IMPORTED)
+        target_link_libraries(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE BSP::STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C})
+        target_include_directories(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE "${BSP_${FAMILY}_PATH}/Components/${BCOMP}")
         
         find_file(BSP_${BOARD_CANONICAL}_${COMP}_SOURCE
             NAMES ${BCOMP}.c
@@ -300,7 +321,7 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
             NO_DEFAULT_PATH
         )
         if (BSP_${BOARD_CANONICAL}_${COMP}_SOURCE)
-            target_sources(BSP::STM32::${FAMILY}::${BCOMP_U} INTERFACE "${BSP_${BOARD_CANONICAL}_${COMP}_SOURCE}")
+            target_sources(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE "${BSP_${BOARD_CANONICAL}_${COMP}_SOURCE}")
         endif()
     endforeach()
     
