@@ -3,7 +3,7 @@ stages:
   - test
 
 variables:
-  IDF_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-idf.git
+  IDF_REPO: ${IDF_GIT_SERVER}/espressif/esp-idf.git
   STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
   SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
@@ -66,7 +66,7 @@ run_tests:
       -drive file=empty_file.bin,if=mtd,format=raw
       -global driver=esp32.gpio,property=strap_mode,value=0x0f
       -serial tcp::5555,server,nowait
-    
+
     - cd $CI_PROJECT_DIR/test && mkdir build && cd build
 
     # Compile and run qemu tests
