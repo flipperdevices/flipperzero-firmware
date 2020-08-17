@@ -23,12 +23,15 @@ BUILD_DIR = build
 C_SOURCES =  \
 Src/main.c
 
-CPP_SOURCES = ../app/app.cpp
+CPP_SOURCES = ../core/app.cpp
 
-C_SOURCES += ../app/write.c
+C_SOURCES += ../core/write.c
+C_SOURCES += ../core/furi.c
 C_SOURCES += Src/flipper_hal.c
 C_SOURCES += Src/lo_os.c
 C_SOURCES += Src/lo_hal.c
+
+C_SOURCES += ../applications/furi_test/furi_test.c
 
 #######################################
 # binaries
@@ -56,10 +59,11 @@ C_DEFS =  \
 # C includes
 C_INCLUDES =  \
 -IInc \
--I../app
+-I../applications \
+-I../core
 
 # compile gcc flags
-CFLAGS = $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+CFLAGS = $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -pthread
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
@@ -78,7 +82,7 @@ CPPFLAGS = -fno-threadsafe-statics
 # libraries
 LIBS = -lc -lm
 LIBDIR = 
-LDFLAGS = $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections -pthread
 
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET)

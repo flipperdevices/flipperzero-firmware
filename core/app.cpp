@@ -3,9 +3,18 @@
 
 extern "C" {
     FILE* get_debug();
+
+    #include "startup.h"
+    #include "furi.h"
 }
 
 extern "C" void app() {
+    // FURI startup
+    for(size_t i = 0; i < sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0]); i++) {
+        furiac_start(FLIPPER_STARTUP[i].app, FLIPPER_STARTUP[i].name, NULL);
+    }
+
+    /*
     FILE* debug_uart = get_debug();
 
     fprintf(debug_uart, "hello Flipper!\n");
@@ -20,5 +29,10 @@ extern "C" void app() {
         app_gpio_write(red_led, true);
         delay(100);
         app_gpio_write(red_led, false);
+    }
+    */
+
+    while(1) {
+        delay(500);
     }
 }
