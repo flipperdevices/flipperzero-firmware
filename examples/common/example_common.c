@@ -13,131 +13,91 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
+#include <string.h>
 #include <sys/param.h>
-#include "esp_err.h"
-#include "esp_log.h"
 #include "serial_io.h"
 #include "esp_loader.h"
-#include "driver/uart.h"
-#include "driver/gpio.h"
 #include "example_common.h"
 
-#define HIGHER_BAUD_RATE 230400
+esp_loader_error_t connect_to_target(uint32_t higrer_baudrate)
+{
+    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
-void flash_binary(FILE *image, size_t image_size, size_t address)
+    esp_loader_error_t err = esp_loader_connect(&connect_config);
+    if (err != ESP_LOADER_SUCCESS) {
+        printf("Cannot connect to target. Error: %u\n", err);
+        return err;
+    }
+    printf("Connected to target\n");
+
+#ifndef TARGET_ESP8266
+    if (higrer_baudrate) {
+        err = esp_loader_change_baudrate(higrer_baudrate);
+        if (err != ESP_LOADER_SUCCESS) {
+            printf("Unable to change baud rate on target.");
+            return err;
+        }
+
+        err = loader_port_change_baudrate(higrer_baudrate);
+        if (err != ESP_LOADER_SUCCESS) {
+            printf("Unable to change baud rate.");
+            return err;
+        }
+        printf("Baudrate changed\n");
+    }
+#endif
+
+    return ESP_LOADER_SUCCESS;
+}
+
+
+esp_loader_error_t flash_binary(const unsigned char *bin, size_t size, size_t address)
 {
     esp_loader_error_t err;
-    int32_t packet_number = 0;
     static uint8_t payload[1024];
+    const unsigned char *bin_addr = bin;
 
-    ESP_LOGI(TAG, "Erasing flash...");
-    err = esp_loader_flash_start(address, image_size, sizeof(payload));
+    printf("Erasing flash (this may take a while)...\n");
+    err = esp_loader_flash_start(address, size, sizeof(payload));
     if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Erasing flash failed with error %d.", err);
-        return;
+        printf("Erasing flash failed with error %d.\n", err);
+        return err;
     }
-    ESP_LOGI(TAG, "Start programming");
+    printf("Start programming\n");
 
-    while (image_size > 0) {
-        size_t to_read = MIN(image_size, sizeof(payload));
+    size_t binary_size = size;
+    size_t written = 0; 
 
-        size_t read = fread(payload, 1, to_read, image);
-        if (read != to_read) {
-            ESP_LOGE(TAG, "Error occurred while reading file. to_read %u, read %u", to_read, read);
-            return;
-        }
+    while (size > 0) {
+        size_t to_read = MIN(size, sizeof(payload));
+        memcpy(payload, bin_addr, to_read);
 
         err = esp_loader_flash_write(payload, to_read);
         if (err != ESP_LOADER_SUCCESS) {
-            ESP_LOGE(TAG, "Packet could not be written");
-            return;
+            printf("\nPacket could not be written! Error %d.\n", err);
+            return err;
         }
 
-        printf("packet: %d  written: %u B\n", packet_number++, to_read);
+        size -= to_read;
+        bin_addr += to_read;
+        written += to_read;
 
-        image_size -= to_read;
+        int progress = (int)(((float)written / binary_size) * 100);
+        printf("\rProgress: %d %%", progress);
+        fflush(stdout);
     };
 
-    ESP_LOGI(TAG, "Finished programming");
+    printf("\nFinished programming\n");
 
 #if MD5_ENABLED
     err = esp_loader_flash_verify();
     if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "MD5 does not match. err: %d", err);
-        return;
-    }
-    ESP_LOGI(TAG, "Flash verified");
-#endif
-}
-
-FILE *get_image_and_its_size(const char *path, size_t *image_size)
-{
-    FILE *image = fopen(path, "r");
-    if (image == NULL) {
-        ESP_LOGE(TAG, "Failed to open file %s", path);
-        return NULL;
-    }
-
-    fseek(image, 0L, SEEK_END);
-    *image_size = ftell(image);
-    rewind(image);
-
-    ESP_LOGW(TAG, "File %s opened. Size: %u bytes", path, *image_size);
-
-    return image;
-}
-
-void upload_file(const char *path, size_t address)
-{
-    size_t image_size;
-    FILE *image = get_image_and_its_size(path, &image_size);
-
-    if (image != NULL) {
-        flash_binary(image, image_size, address);
-        fclose(image);
-    }
-}
-
-esp_err_t connect_to_target()
-{
-    const loader_serial_config_t config = {
-        .baud_rate = 115200,
-        .uart_port = UART_NUM_1,
-        .uart_rx_pin = GPIO_NUM_5,
-        .uart_tx_pin = GPIO_NUM_4,
-        .reset_trigger_pin = GPIO_NUM_25,
-        .gpio0_trigger_pin = GPIO_NUM_26,
-    };
-
-    // Initialize UART
-    esp_loader_error_t err = loader_port_serial_init(&config);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "serial initialization failed.");
+        printf("MD5 does not match. err: %d\n", err);
         return err;
     }
-
-    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
-
-    err = esp_loader_connect(&connect_config);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Cannot connect to target. Error: %u", err);
-        return err;
-    }
-    ESP_LOGI(TAG, "Connected to target");
-
-#ifndef TARGET_ESP8266
-    err = esp_loader_change_baudrate(HIGHER_BAUD_RATE);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Unable to change baud rate on target.");
-        return err;
-    }
-
-    err = loader_port_change_baudrate(HIGHER_BAUD_RATE);
-    if (err != ESP_LOADER_SUCCESS) {
-        ESP_LOGE(TAG, "Unable to change baud rate.");
-        return err;
-    }
+    printf("Flash verified\n");
 #endif
 
-    return ESP_OK;
+    return ESP_LOADER_SUCCESS;
 }

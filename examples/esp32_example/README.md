@@ -2,9 +2,7 @@
 
 ## Overview
 
-Example demonstrates how to flash ESP32/ESP32-S2/ESP8266 from another (host) MCU using esp_serial_flash component API. In this case, ESP32 is also used as host MCU. Binary to be flashed from host MCU to ESP* is stored in partition named `spiffs`. Binaries are placed in separate folder for each target.
-
-This example is based on spiffsgen example located in IDF. For more information how to use SPIFFS Image Generator, refer to [spiffsgen example](https://github.com/espressif/esp-idf/tree/master/examples/storage/spiffsgen)
+Example demonstrates how to flash ESP32/ESP32-S2/ESP8266 from another (host) MCU using esp_serial_flash component API. In this case, ESP32 is also used as host MCU. Binaries to be flashed from host MCU to another Espressif SoC can be found in `binaries` folder and are converted into C-array during build process.
 
 Following steps are performed in order to re-program target's memory:
 
@@ -49,12 +47,13 @@ See the Getting Started Guide for full steps to configure and use ESP-IDF to bui
 
 ## Configuration
 
-For details about available configuration option, please refer to top level [README.md](../../README.md). Compile definitions can be specified on command line when running `idf.py`, for example:
+For details about available configuration option, please refer to top level [README.md](../../README.md). 
+Compile definitions can be specified on command line when running `idf.py`, for example:
 
 ```
 idf.py build -DTARGET_SOC=ESP32_S2 -DMD5_ENABLED=1
 ```
-By default, example is compiled for ESP32 target with MD5 check disabled.
+Binaries to be flashed are placed in separate folder for each target and converted to C-array for any given SoC based on `TARGET_SOC` configuration option passed to command line. By default, example is compiled for ESP32 target with MD5 check enabled.
 
 ## Example output
 

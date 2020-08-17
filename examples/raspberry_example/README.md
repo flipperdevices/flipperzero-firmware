@@ -2,7 +2,7 @@
 
 ## Overview
 
-Example demonstrates how to flash ESP32 from Raspberry Pi 4 (Model B) using esp_serial_flash component API. Binaries to be flashed from Raspberry Pi to ESP32 can be found in `images` directory and converted into C-arrays during build process. USART0 is dedicated for communication with ESP32.
+Example demonstrates how to flash ESP32 from Raspberry Pi 4 (Model B) using esp_serial_flash component API. AT command firmware to be flashed from Raspberry Pi to ESP32 can be found in `binaries`. USART0 is dedicated for communication with ESP32.
 
 Following steps are performed in order to re-program target's memory:
 

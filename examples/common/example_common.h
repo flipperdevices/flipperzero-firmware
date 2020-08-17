@@ -15,9 +15,21 @@
 
 #pragma once
 
-static const char *TAG = "example";
+#ifndef TARGET_ESP8266
+    #define BOOTLOADER_ADDRESS 0x1000
+#else
+    #define BOOTLOADER_ADDRESS 0x0
+#endif
 
-void flash_binary(FILE *image, size_t image_size, size_t address);
-FILE *get_image_and_its_size(const char *path, size_t *image_size);
-void upload_file(const char *path, size_t address);
-esp_err_t connect_to_target();
+#define PARTITION_ADDRESS   0x8000
+#define APPLICATION_ADDRESS 0x10000
+
+extern const unsigned char bootloader_bin[];
+extern const unsigned bootloader_bin_size;
+extern const unsigned char hello_world_bin[];
+extern const unsigned hello_world_bin_size;
+extern const unsigned char partition_table_bin[];
+extern const unsigned partition_table_bin_size;
+
+esp_loader_error_t connect_to_target(uint32_t higrer_baudrate);
+esp_loader_error_t flash_binary(const unsigned char *bin, size_t size, size_t address);

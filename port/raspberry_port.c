@@ -207,10 +207,10 @@ static esp_loader_error_t read_data(char *buffer, uint32_t size)
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_rpi_init(const char *device,
-                                        uint32_t baudrate,
-                                        uint32_t reset_trigger_pin,
-                                        uint32_t gpio0_trigger_pin)
+esp_loader_error_t loader_port_raspberry_init(const char *device,
+                                              uint32_t baudrate,
+                                              uint32_t reset_trigger_pin,
+                                              uint32_t gpio0_trigger_pin)
 {
     s_reset_trigger_pin = reset_trigger_pin;
     s_gpio0_trigger_pin = gpio0_trigger_pin;

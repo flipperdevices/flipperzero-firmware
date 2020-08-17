@@ -1,8 +1,8 @@
-# Flash multiple partitions example
+# STM32 example
 
 ## Overview
 
-Example demonstrates how to flash ESP32 from another STM32 (host MCU) using esp_serial_flash component API. STM32F4-Discovery board is used in this example, as STM32F407VG has FLASH memory large enough to fit the whole hello-world example of ESP32. Binaries to be flashed from host MCU to ESP32 can be found in images directory and converted into C-arrays during build process. USART1 is dedicated for communication with ESP32, whereas, USART2 can be used for debug purposes by attaching UART-to-USB bridge.
+Example demonstrates how to flash ESP32 from another STM32 (host MCU) using esp_serial_flash component API. STM32F4-Discovery board is used in this example, as STM32F407VG has FLASH memory large enough to fit the whole hello-world example of ESP32. Binaries to be flashed from host MCU to ESP32 can be found in `binaries` directory and converted into C-arrays during build process. USART1 is dedicated for communication with ESP32, whereas, USART2 can be used for debug purposes by attaching UART-to-USB bridge.
 
 Following steps are performed in order to re-program target's memory:
 
@@ -44,6 +44,8 @@ Run cmake (with appropriate parameters) and build:
 ```
 cmake -DTOOLCHAIN_PREFIX="/path_to_toolchain" -DSTM32Cube_DIR="path_to_stm32Cube" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
 ```
+
+Binaries to be flashed are placed in separate folder for each target and converted to C-array for any given SoC based on `TARGET_SOC` configuration option passed to command line. By default, example is compiled for ESP32 target with MD5 check enabled.
 
 For more details regarding to esp_serial_flasher configuration and STM32 support, please refer to top level [README.md](../../README.md).
 
