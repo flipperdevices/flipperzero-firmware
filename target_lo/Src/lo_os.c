@@ -47,6 +47,12 @@ TaskHandle_t xTaskCreateStatic(
 }
 
 void vTaskDelete(TaskHandle_t xTask) {
+
+    if(xTask == NULL) {
+        // kill itself
+        pthread_exit(NULL);
+    }
+
     // maybe thread already join
     if (pthread_kill(*xTask, 0) == ESRCH) return;
 
