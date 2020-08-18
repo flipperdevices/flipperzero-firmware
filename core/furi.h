@@ -7,8 +7,12 @@ typedef void(*FlipperApplication)(void*);
 
 // Furiac application handler
 typedef struct {
-	TaskHandle_t handler;
+    TaskHandle_t handler;
 } FuriApp;
+
+typedef struct {
+
+} FuriRecord;
 
 /*
 Simply starts application.
@@ -38,3 +42,9 @@ bool furiac_exit(void* param);
 Stop specified app without returning to prev application.
 */
 bool furiac_kill(FuriApp app);
+
+/*
+Creates named FURI record.
+Returns NULL if registry have not enough memory for creating.
+*/
+FuriRecord* furi_create(char* name);

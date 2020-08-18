@@ -34,8 +34,37 @@ FuriApp furiac_start(FlipperApplication app, const char* name, void* param) {
 }
 
 bool furiac_kill(FuriApp app) {
+    // check handler
     if(app.handler == NULL) return false;
-    
+
+    // kill task
     vTaskDelete(app.handler);
+
+    // cleanup its registry
+
+
     return true;
+}
+
+bool furiac_exit(void* param) {
+    // run prev
+
+    // kill itself
+    vTaskDelete(NULL);
+
+    // cleanup registry
+
+    return true;
+}
+
+FuriApp furiac_switch(FlipperApplication app, char* name, void* param) {
+    // run next
+    FuriApp next = furiac_start(app, name, param);
+
+    // save prev to its registry
+
+    // kill itself
+    vTaskDelete(NULL);
+
+    return next;
 }
