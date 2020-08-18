@@ -32,3 +32,10 @@ FuriApp furiac_start(FlipperApplication app, const char* name, void* param) {
 
     return res;
 }
+
+bool furiac_kill(FuriApp app) {
+    if(app.handler == NULL) return false;
+    
+    vTaskDelete(app.handler);
+    return true;
+}

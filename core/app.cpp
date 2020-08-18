@@ -33,6 +33,7 @@ extern "C" void app() {
     */
 
     while(1) {
-        delay(500);
+        printf("furi main thread\n");
+        delay(2000);
     }
 }

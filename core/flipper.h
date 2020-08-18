@@ -5,6 +5,7 @@ extern "C" {
     #include "main.h"
     #include "flipper_hal.h"
     #include "cmsis_os.h"
+    #include "furi.h"
 
 #ifdef __cplusplus
 }

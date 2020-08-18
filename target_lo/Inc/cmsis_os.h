@@ -20,3 +20,5 @@ TaskHandle_t xTaskCreateStatic(
     StackType_t * const puxStackBuffer,
     StaticTask_t * const pxTaskBuffer
 );
+
+void vTaskDelete(TaskHandle_t xTask);
