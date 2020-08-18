@@ -25,7 +25,7 @@ Src/main.c
 
 CPP_SOURCES = ../core/app.cpp
 
-C_SOURCES += ../core/write.c
+C_SOURCES += ../core/debug.c
 C_SOURCES += ../core/furi.c
 C_SOURCES += Src/flipper_hal.c
 C_SOURCES += Src/lo_os.c

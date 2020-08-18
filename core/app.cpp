@@ -2,10 +2,9 @@
 #include <stdio.h>
 
 extern "C" {
-    FILE* get_debug();
-
     #include "startup.h"
     #include "furi.h"
+    #include "debug.h"
 }
 
 extern "C" void app() {
