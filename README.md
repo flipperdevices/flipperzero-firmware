@@ -1,6 +1,8 @@
-Welcome to the flipperzero-firmware wiki!
+# Flipper Zero Firmware community repo
 
-Flipper zero is open source multi-tool device for researching and pentesting radio protocols, access control systems, hardware, and more.
+![](https://github.com/Flipper-Zero/wiki/blob/master/images/firmware-wiki-header.gif)  
+This repo contains [Flipper Zero](https://flipperzero.one/zero)'s Firmware core, cleaned from all dirty demos, and prepared for contributors. Our goal is to create nice and clean code along with good documentation, to make it a pleasure for everyone to work with.  This repo will become completely public closer to the device shipping date. 
+
 
 # Building
 
@@ -14,6 +16,15 @@ To contribute to code or to wiki make the following steps:
 2. Read [contribution guide](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Contributing)
 3. Ensure you read and sign [Flipper CLA](https://cla-assistant.io/glitchcore/flipper-cla-host)
 4. Read Flipper [Roadmap](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Flipper-roadmap)
+
+# Project structure
+```
+├── app                     # App
+├── target_f1               # target f1
+├── target_lo               # local target (for linux)
+├── wiki                    # Documentation (wiki) generates from this files
+└── wiki-deploy.sh          # Script to generate Wiki from local .md files
+```
 
 # UI
 
