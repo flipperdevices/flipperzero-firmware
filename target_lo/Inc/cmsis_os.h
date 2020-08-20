@@ -1,4 +1,5 @@
 #include "main.h"
+#include <stdbool.h>
 
 void osDelay(uint32_t ms);
 
@@ -22,3 +23,5 @@ TaskHandle_t xTaskCreateStatic(
 );
 
 void vTaskDelete(TaskHandle_t xTask);
+TaskHandle_t xTaskGetCurrentTaskHandle(void);
+bool task_equal(TaskHandle_t a, TaskHandle_t b);

@@ -16,7 +16,7 @@ void furi_widget(void* param) {
 
     while(1) {
         fprintf(debug_uart, "furi widget\n");
-        delay(20);
+        delay(10);
     }
 }
 
@@ -29,9 +29,9 @@ void furi_test_app(void* param) {
 
     fprintf(debug_uart, "start furi test app\n");
 
-    FuriApp widget = furiac_start(furi_widget, "furi_widget", "test widget");
+    FuriApp* widget = furiac_start(furi_widget, "furi_widget", "test widget");
 
-    for(size_t i = 0; i < 10; i++) {
+    for(size_t i = 0; i < 3; i++) {
         fprintf(debug_uart, "wait backend\n");
         delay(10);
     }
@@ -48,9 +48,13 @@ void furi_test_app(void* param) {
         fprintf(debug_uart, "furi test app %d\n", cnt);
         delay(10);
 
-        if(cnt > 10) {
+        if(cnt == 2) {
             fprintf(debug_uart, "go to next app\n");
             furiac_switch(furi_next_test_app, "next_test", NULL);
+            fprintf(debug_uart, "unsuccessful switch\n");
+            while(1) {
+                delay(1000);
+            }
         }
 
         cnt++;

@@ -10,6 +10,7 @@ void osDelay(uint32_t ms) {
     printf("[DELAY] %d ms\n", ms);
 }
 
+// temporary struct to pass function ptr and param to wrapper
 typedef struct {
     TaskFunction_t func;
     void * param;
@@ -64,4 +65,16 @@ void vTaskDelete(TaskHandle_t xTask) {
 
     // cleanup thread handler
     *xTask = 0;
+}
+
+TaskHandle_t xTaskGetCurrentTaskHandle(void) {
+    TaskHandle_t thread = malloc(sizeof(TaskHandle_t));
+    *thread = pthread_self();
+    return thread;
+}
+
+bool task_equal(TaskHandle_t a, TaskHandle_t b) {
+    if(a == NULL || b == NULL) return false;
+    
+    return pthread_equal(*a, *b) != 0;
 }
