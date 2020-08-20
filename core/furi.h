@@ -4,20 +4,43 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define MAX_TASK_RECORDS 8
+#define MAX_RECORD_SUBSCRIBERS 8
+
 /// application is just a function
 typedef void(*FlipperApplication)(void*);
 
-// store info about active task
+/// pointer to value callback function
+typedef void(*FlipperRecordCallback)(void*);
+
+/// pointer to state callback function
+typedef void(*FlipperRecordStateCallback)(bool);
+
+struct _FuriApp;
+
 typedef struct {
-    FlipperApplication application;
-    FlipperApplication prev;
-    TaskHandle_t handler;
-} FuriApp;
+    FlipperRecordCallback cb; ///< value cb
+    FlipperRecordStateCallback state_cb; ///< state cb
+    _FuriApp* application; ///< pointer to application
+} FuriRecordSubscriber;
 
 /// FURI record handler
 typedef struct {
-	uint8_t dummy;
+    const char* name;
+    void* value;
+    SemaphoreHandle_t mutex;
+    FuriRecordSubscriber subscribers[MAX_RECORD_SUBSCRIBERS];
 } FuriRecord;
+
+// store info about active task
+struct _FuriApp {
+    FlipperApplication application;
+    FlipperApplication prev;
+    TaskHandle_t handler;
+    FuriRecord* records[MAX_TASK_RECORDS]; ///< list of records which task open
+};
+
+typedef struct _FuriApp FuriApp;
 
 /*!
 Simply starts application.

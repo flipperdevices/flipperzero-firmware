@@ -33,6 +33,8 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
         printf("[FURIAC] start task\n");
     #endif
 
+    // TODO check first free item (.handler == NULL) and use it
+
     if(current_buffer_idx >= MAX_TASK_COUNT) {
         // max task count exceed
         #ifdef DEBUG
