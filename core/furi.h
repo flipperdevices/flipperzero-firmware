@@ -13,15 +13,23 @@ typedef void(*FlipperApplication)(void*);
 /// pointer to value callback function
 typedef void(*FlipperRecordCallback)(void*);
 
+typedef enum {
+    FlipperRecordStateOpen, ///< record open in another app
+    FlipperRecordStateMute, ///< record open and mute this handler
+    FlipperRecordStateUnmute, ///< record unmuted
+    FlipperRecordStateDeleted ///< record owner halt
+} FlipperRecordState;
+
 /// pointer to state callback function
-typedef void(*FlipperRecordStateCallback)(bool);
+typedef void(*FlipperRecordStateCallback)(FlipperRecordState);
 
 struct _FuriApp;
 
 typedef struct {
     FlipperRecordCallback cb; ///< value cb
     FlipperRecordStateCallback state_cb; ///< state cb
-    _FuriApp* application; ///< pointer to application
+    uint8_t mute_token; ///< see "wiki/FURI#mute-algorithm"
+    bool no_mute;
 } FuriRecordSubscriber;
 
 /// FURI record handler
@@ -32,13 +40,19 @@ typedef struct {
     FuriRecordSubscriber subscribers[MAX_RECORD_SUBSCRIBERS];
 } FuriRecord;
 
-// store info about active task
-struct _FuriApp {
+/// FURI record handler for use after open
+typedef struct {
+    FuriRecord* record; ///< full record (for read/write/take/give value)
+    FuriRecordSubscriber* subscriber; ///< current handler info
+} FuriRecordHandler;
+
+/// store info about active task
+typedef struct {
     FlipperApplication application;
     FlipperApplication prev;
     TaskHandle_t handler;
     FuriRecord* records[MAX_TASK_RECORDS]; ///< list of records which task open
-};
+} FuriApp;
 
 typedef struct _FuriApp FuriApp;
 
@@ -73,9 +87,13 @@ bool furiac_kill(FuriApp* app);
 
 /*!
 Creates named FURI record.
+\param[in] name you can open this record anywhere
+\param[in] value pointer to data.
+If NULL, create FURI Pipe (only callbacks management, no data/mutex)
+
 Returns NULL if registry have not enough memory for creating.
 */
-FuriRecord* furi_create(char* name);
+FuriRecordHandler* furi_create(char* name, void* value);
 
 /*!
 Opens existing FURI record by name.
@@ -85,4 +103,49 @@ When appication has exited or record has closed, all handlers is unmuted.
 It may be useful for concurrently acces to resources like framebuffer or beeper.
 \param[in] no_mute if true, another applications cannot mute this handler.
 */
-FuriRecord* furi_open(char* name, bool solo, bool no_mute);
+FuriRecordHandler* furi_open(
+    char* name,
+    bool solo,
+    bool no_mute,
+    FlipperRecordCallback value_callback,
+    FlipperRecordStateCallback state_callback
+);
+
+/*!
+
+*/
+void furi_close(FuriRecordHandler* handler);
+
+/*!
+read message from record.
+Returns true if success, false otherwise (closed/non-existent record)
+Also return false if you try to read from FURI pipe
+
+TODO: enum return value with execution status
+*/
+bool furi_read(FuriRecordHandler* record, void* data, size_t size);
+
+/*!
+write message to record.
+Returns true if success, false otherwise (closed/non-existent record or muted).
+
+TODO: enum return value with execution status
+*/
+bool furi_write(FuriRecordHandler* record, const void* data, size_t size);
+
+/*!
+lock value mutex.
+It can be useful if records contain pointer to buffer which you want to change.
+You must call furi_give after operation on data and
+you shouldn't block executing between take and give calls
+
+Returns pointer to data, NULL if closed/non-existent record or muted
+
+TODO: enum return value with execution status
+*/
+void* furi_take(FuriRecordHandler* record);
+
+/*!
+unlock value mutex.
+*/
+void furi_give(FuriRecordHandler* record);
