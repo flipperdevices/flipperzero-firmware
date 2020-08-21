@@ -23,8 +23,6 @@ typedef enum {
 /// pointer to state callback function
 typedef void(*FlipperRecordStateCallback)(FlipperRecordState);
 
-struct _FuriApp;
-
 typedef struct {
     FlipperRecordCallback cb; ///< value cb
     FlipperRecordStateCallback state_cb; ///< state cb
@@ -37,6 +35,7 @@ typedef struct {
     const char* name;
     void* value;
     SemaphoreHandle_t mutex;
+    uint8_t subscribers_count;
     FuriRecordSubscriber subscribers[MAX_RECORD_SUBSCRIBERS];
 } FuriRecord;
 
@@ -51,10 +50,9 @@ typedef struct {
     FlipperApplication application;
     FlipperApplication prev;
     TaskHandle_t handler;
+    uint8_t records_count; ///< count of records which task open
     FuriRecord* records[MAX_TASK_RECORDS]; ///< list of records which task open
 } FuriApp;
-
-typedef struct _FuriApp FuriApp;
 
 /*!
 Simply starts application.
@@ -84,6 +82,10 @@ void furiac_exit(void* param);
 Stop specified app without returning to prev application.
 */
 bool furiac_kill(FuriApp* app);
+
+// find task pointer by handle
+FuriApp* find_task(TaskHandle_t handler);
+
 
 /*!
 Creates named FURI record.
