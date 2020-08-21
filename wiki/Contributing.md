@@ -17,6 +17,10 @@ If you are just beginning in Flipper, **Read the [wiki](https://github.com/Flipp
 * **Make docs** you can do very cool things but other people cannot use if it is not described in the documentation
 * **We are open to changes.** You can suggest changes to any part of the code, wiki, guidelines, workflow, automation, etc. by creating issue or PR if you understand how it can be done better. 
 
+## Welcome message
+
+Good point to add something about yourself. Create [welcome issue](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/new?assignees=glitchcore%2C+zhovner&labels=welcome&template=welcome.md&title=), tell community about yourself, what tasks you can take and what help do you need. You can find another users messages by [message tag](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues?q=is%3Aissue+label%3Awelcome+).
+
 ## Status of wiki sections
 
 * Some sections mark as `incomplete`. This means that there is not even a description of how the feature can be implemented. You can start [discussion](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/new?assignees=&labels=discussion&template=discuss-issue.md&title=) thread or directly begin to write wiki page (see [Contributing](#contributing)).
@@ -27,6 +31,10 @@ If you are just beginning in Flipper, **Read the [wiki](https://github.com/Flipp
 ## Wiki editing `(not implemented)`
 
 All wiki files storage in main repository in `wiki` folder. You can change wiki by creating PR with `documentation` label. After merge to master, wiki contents copying to GitHub `Wiki` section.
+
+## Backlog
+
+Some tasks were postponed, you can find it by tag [backlog](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues?q=label%3Abacklog+), maybe you are ready to implement something of it.
 
 ### For maintainers
 
