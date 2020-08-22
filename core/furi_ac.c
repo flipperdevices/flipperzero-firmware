@@ -57,6 +57,7 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
     // save task
     task_buffer[current_buffer_idx].application = app;
     task_buffer[current_buffer_idx].prev = NULL;
+    task_buffer[current_buffer_idx].records_count = 0;
 
     current_buffer_idx++;
 

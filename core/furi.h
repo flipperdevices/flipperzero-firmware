@@ -24,9 +24,10 @@ typedef enum {
 typedef void(*FlipperRecordStateCallback)(FlipperRecordState);
 
 typedef struct {
+    bool allocated;
     FlipperRecordCallback cb; ///< value cb
     FlipperRecordStateCallback state_cb; ///< state cb
-    uint8_t mute_token; ///< see "wiki/FURI#mute-algorithm"
+    uint8_t mute_counter; ///< see "wiki/FURI#mute-algorithm"
     bool no_mute;
 } FuriRecordSubscriber;
 
@@ -34,8 +35,9 @@ typedef struct {
 typedef struct {
     const char* name;
     void* value;
+    StaticSemaphore_t mutex_buffer;
     SemaphoreHandle_t mutex;
-    uint8_t subscribers_count;
+    uint8_t mute_counter;
     FuriRecordSubscriber subscribers[MAX_RECORD_SUBSCRIBERS];
 } FuriRecord;
 
@@ -93,9 +95,9 @@ Creates named FURI record.
 \param[in] value pointer to data.
 If NULL, create FURI Pipe (only callbacks management, no data/mutex)
 
-Returns NULL if registry have not enough memory for creating.
+Returns false if registry have not enough memory for creating.
 */
-FuriRecordHandler* furi_create(char* name, void* value);
+bool furi_create(char* name, void* value);
 
 /*!
 Opens existing FURI record by name.
@@ -106,7 +108,7 @@ It may be useful for concurrently acces to resources like framebuffer or beeper.
 \param[in] no_mute if true, another applications cannot mute this handler.
 */
 FuriRecordHandler* furi_open(
-    char* name,
+    const char* name,
     bool solo,
     bool no_mute,
     FlipperRecordCallback value_callback,
