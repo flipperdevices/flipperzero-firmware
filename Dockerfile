@@ -9,6 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 python python-pip libstdc++-arm-none-eabi-newlib && \
 apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal --target=thumbv7em-none-eabihf
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal --target thumbv7em-none-eabi thumbv7em-none-eabihf
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV USER=root
