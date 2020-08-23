@@ -6,8 +6,8 @@
 #include <signal.h>
 
 void osDelay(uint32_t ms) {
-    usleep(ms * 1000);
     printf("[DELAY] %d ms\n", ms);
+    usleep(ms * 1000);
 }
 
 // temporary struct to pass function ptr and param to wrapper
