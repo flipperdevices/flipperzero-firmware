@@ -25,22 +25,6 @@ it simply start, then start child widget, wait about 1 sec (with ping evey 200 m
 kill the widget, continue with 500 ms ping.
 */
 void furi_test_app(void* param) {
-    FILE* debug_uart = get_debug();
-
-    fprintf(debug_uart, "start furi test app\n");
-
-    FuriApp* widget = furiac_start(furi_widget, "furi_widget", "test widget");
-
-    for(size_t i = 0; i < 3; i++) {
-        fprintf(debug_uart, "wait backend\n");
-        delay(10);
-    }
-
-    if(furiac_kill(widget)) {
-        fprintf(debug_uart, "widget killed\n");
-    } else {
-        fprintf(debug_uart, "kill widget fail\n");
-    }
 
     uint8_t cnt = 0;
 
