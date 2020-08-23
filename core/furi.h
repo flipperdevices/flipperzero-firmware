@@ -11,7 +11,7 @@
 typedef void(*FlipperApplication)(void*);
 
 /// pointer to value callback function
-typedef void(*FlipperRecordCallback)(void*);
+typedef void(*FlipperRecordCallback)(void*, size_t);
 
 typedef enum {
     FlipperRecordStateOpen, ///< record open in another app
@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
     const char* name;
     void* value;
+    size_t size;
     StaticSemaphore_t mutex_buffer;
     SemaphoreHandle_t mutex;
     uint8_t mute_counter;

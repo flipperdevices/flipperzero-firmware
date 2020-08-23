@@ -119,18 +119,60 @@ void furi_close(FuriRecordHandler* handler) {
     handler->record->mute_counter = max_mute_counter;
 }
 
-bool furi_read(FuriRecordHandler* record, void* data, size_t size) {
-
+static furi_notify(FuriRecordHandler* handler, void* value, size_t size) {
+    for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
+        if(handler->record->subscribers[i].allocated) {
+            if(handler->record->subscribers[i].cb != NULL) {
+                handler->record->subscribers[i].cb(value, size);
+            }
+        }
+    }
 }
 
-bool furi_write(FuriRecordHandler* record, const void* data, size_t size) {
-
+void* furi_take(FuriRecordHandler* handler) {
+    // take mutex
 }
 
-void* furi_take(FuriRecordHandler* record) {
-
+void furi_give(FuriRecordHandler* handler) {
+    // release mutex
 }
 
-void furi_give(FuriRecordHandler* record) {
+bool furi_read(FuriRecordHandler* handler, void* value, size_t size) {
+    if(handler == NULL || handler->record == NULL || data == NULL) return false;
 
+    if(size > handler->record->size) return false;
+
+    // return false if read from pipe
+    if(handler->record->value == NULL) return false;
+
+    furi_take(handler);
+    memcpy(value, handler->record->value, size);
+    furi_give(handler);
+    furi_notify(handler, value, size);
+
+    return true;
+}
+
+bool furi_write(FuriRecordHandler* handler, const void* value, size_t size) {
+    if(handler == NULL || handler->record == NULL || data == NULL) return false;
+
+    if(size > handler->record->size) return false;
+
+    // check mute
+    if(
+        handler->record->mute_counter != handler->subscriber->mute_counter
+        && !handler->subscriber->no_mute
+    ) return false;
+
+    if(handler->record->value != NULL) {
+        // real write to value
+        furi_take(handler);
+        memcpy(handler->record->value, value, size);
+        furi_give(handler);
+        
+        // notify subscribers
+        furi_notify(handler, handler->record->value, handler->record->size);
+    } else {
+        furi_notify(handler, value, size);
+    }
 }
