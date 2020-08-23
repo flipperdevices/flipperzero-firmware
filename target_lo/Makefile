@@ -33,6 +33,7 @@ C_SOURCES += Src/lo_os.c
 C_SOURCES += Src/lo_hal.c
 
 C_SOURCES += ../applications/tests/furiac_test.c
+C_SOURCES += ../applications/tests/furi_record_test.c
 C_SOURCES += ../applications/tests/test_index.c
 
 #######################################

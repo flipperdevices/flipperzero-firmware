@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <string.h>
+#include "flipper.h"
+#include "debug.h"
+
 /*
 TEST: pipe record
 
@@ -9,8 +14,10 @@ TEST: pipe record
 6. close record
 7. try to write, get error
 */
+bool furi_pipe_record(FILE* debug_uart) {
 
-
+	return true;
+}
 
 /*
 TEST: holding data
@@ -22,6 +29,10 @@ TEST: holding data
 5. Try to write/read wrong size of data
 6. Create another task, do concurrent access to data with take/give
 */
+bool furi_holding_data(FILE* debug_uart) {
+
+	return true;
+}
 
 /*
 TEST: non-existent data
@@ -29,6 +40,10 @@ TEST: non-existent data
 2. Check for NULL handler
 3. Try to write/read, get error
 */
+bool furi_nonexistent_data(FILE* debug_uart) {
+
+	return true;
+}
 
 /*
 TEST: mute algorithm
@@ -63,3 +78,7 @@ Try to write data to D and check that subscriber get data.
 9. Exit "parent application"
 Check A state cb get FlipperRecordStateDeleted
 */
+bool furi_mute_algorithm(FILE* debug_uart) {
+
+	return true;
+}
