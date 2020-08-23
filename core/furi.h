@@ -14,7 +14,6 @@ typedef void(*FlipperApplication)(void*);
 typedef void(*FlipperRecordCallback)(void*, size_t);
 
 typedef enum {
-    FlipperRecordStateOpen, ///< record open in another app
     FlipperRecordStateMute, ///< record open and mute this handler
     FlipperRecordStateUnmute, ///< record unmuted
     FlipperRecordStateDeleted ///< record owner halt
