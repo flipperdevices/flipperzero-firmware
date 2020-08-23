@@ -26,4 +26,5 @@ TaskHandle_t xTaskCreateStatic(
 
 void vTaskDelete(TaskHandle_t xTask);
 TaskHandle_t xTaskGetCurrentTaskHandle(void);
+SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* pxMutexBuffer);
 bool task_equal(TaskHandle_t a, TaskHandle_t b);

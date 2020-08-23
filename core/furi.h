@@ -11,7 +11,7 @@
 typedef void(*FlipperApplication)(void*);
 
 /// pointer to value callback function
-typedef void(*FlipperRecordCallback)(void*, size_t);
+typedef void(*FlipperRecordCallback)(const void*, size_t);
 
 typedef enum {
     FlipperRecordStateMute, ///< record open and mute this handler
@@ -99,7 +99,7 @@ If NULL, create FURI Pipe (only callbacks management, no data/mutex)
 
 Returns false if registry have not enough memory for creating.
 */
-bool furi_create(char* name, void* value);
+bool furi_create(const char* name, void* value);
 
 /*!
 Opens existing FURI record by name.
@@ -109,7 +109,7 @@ When appication has exited or record has closed, all handlers is unmuted.
 It may be useful for concurrently acces to resources like framebuffer or beeper.
 \param[in] no_mute if true, another applications cannot mute this handler.
 */
-FuriRecordHandler* furi_open(
+FuriRecordHandler furi_open(
     const char* name,
     bool solo,
     bool no_mute,

@@ -78,3 +78,8 @@ bool task_equal(TaskHandle_t a, TaskHandle_t b) {
     
     return pthread_equal(*a, *b) != 0;
 }
+
+SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* pxMutexBuffer) {
+    // TODO add posix mutex init
+    return NULL;
+}
