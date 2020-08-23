@@ -95,11 +95,12 @@ FuriApp* find_task(TaskHandle_t handler);
 Creates named FURI record.
 \param[in] name you can open this record anywhere
 \param[in] value pointer to data.
+\param[in] size size of data.
 If NULL, create FURI Pipe (only callbacks management, no data/mutex)
 
 Returns false if registry have not enough memory for creating.
 */
-bool furi_create(const char* name, void* value);
+bool furi_create(const char* name, void* value, size_t size);
 
 /*!
 Opens existing FURI record by name.

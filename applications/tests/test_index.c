@@ -7,6 +7,7 @@ bool furi_ac_switch_exit(FILE* debug_uart);
 
 bool furi_pipe_record(FILE* debug_uart);
 bool furi_holding_data(FILE* debug_uart);
+bool furi_concurrent_access(FILE* debug_uart);
 bool furi_nonexistent_data(FILE* debug_uart);
 bool furi_mute_algorithm(FILE* debug_uart);
 
@@ -35,6 +36,12 @@ void flipper_test_app(void* p) {
         fprintf(debug_uart, "[TEST] furi_holding_data PASSED\n");
     } else {
         fprintf(debug_uart, "[TEST] furi_holding_data FAILED\n");
+    }
+
+    if(furi_concurrent_access(debug_uart)) {
+        fprintf(debug_uart, "[TEST] furi_concurrent_access PASSED\n");
+    } else {
+        fprintf(debug_uart, "[TEST] furi_concurrent_access FAILED\n");
     }
 
     if(furi_nonexistent_data(debug_uart)) {

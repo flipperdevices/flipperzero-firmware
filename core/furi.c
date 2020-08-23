@@ -27,7 +27,7 @@ static FuriRecord* find_record(const char* name) {
     return res;
 }
 
-bool furi_create(const char* name, void* value) {
+bool furi_create(const char* name, void* value, size_t size) {
     #ifdef DEBUG
         printf("[FURI] creating %s record\n", name);
     #endif
@@ -41,8 +41,11 @@ bool furi_create(const char* name, void* value) {
     }
 
     records[current_buffer_idx].mute_counter = 0;
-    records[current_buffer_idx].mutex = xSemaphoreCreateMutexStatic; // TODO: create mutex
+    records[current_buffer_idx].mutex = xSemaphoreCreateMutexStatic(
+        &records[current_buffer_idx].mutex_buffer
+    );
     records[current_buffer_idx].value = value;
+    records[current_buffer_idx].size = size;
     records[current_buffer_idx].name = name;
 
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
@@ -82,6 +85,7 @@ FuriRecordHandler furi_open(
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         if(!records[current_buffer_idx].subscribers[i].allocated) {
             subscriber = &records[current_buffer_idx].subscribers[i];
+            break;
         }
     }
 
