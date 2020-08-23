@@ -14,9 +14,54 @@ TEST: pipe record
 6. close record
 7. try to write, get error
 */
-bool furi_pipe_record(FILE* debug_uart) {
 
-	return true;
+static uint8_t pipe_record_value = 0;
+
+void pipe_record_cb(const void* value, size_t size) {
+    // hold value to static var
+    pipe_record_value = *((uint8_t*)value);
+}
+
+bool furi_pipe_record(FILE* debug_uart) {
+    if(!furi_create("test/pipe", NULL)) {
+        fprintf(debug_uart, "cannot create record\n");
+        return false;
+    }
+
+    FuriRecordHandler pipe_record = furi_open(
+        "test/pipe", false, false, pipe_record_cb, NULL
+    );
+    if(pipe_record.record == NULL) {
+        fprintf(debug_uart, "cannot open record\n");
+        return false;
+    }
+
+    const uint8_t WRITE_VALUE = 1;
+
+    if(!furi_write(&pipe_record, &WRITE_VALUE, sizeof(uint8_t))) {
+        fprintf(debug_uart, "cannot write to record\n");
+        return false;
+    }
+
+    if(pipe_record_value != WRITE_VALUE) {
+        fprintf(debug_uart, "wrong value (get %d, write %d)\n", pipe_record_value, WRITE_VALUE);
+        return false;
+    }
+
+    uint8_t read_value = 0;
+    if(furi_read(&pipe_record, &read_value, sizeof(uint8_t))) {
+        fprintf(debug_uart, "reading from pipe record not allowed\n");
+        return false;
+    }
+
+    furi_close(&pipe_record);
+
+    if(furi_write(&pipe_record, &WRITE_VALUE, sizeof(uint8_t))) {
+        fprintf(debug_uart, "writing to closed record not allowed\n");
+        return false;
+    }
+    
+    return true;
 }
 
 /*
@@ -31,7 +76,7 @@ TEST: holding data
 */
 bool furi_holding_data(FILE* debug_uart) {
 
-	return true;
+    return true;
 }
 
 /*
@@ -42,7 +87,7 @@ TEST: non-existent data
 */
 bool furi_nonexistent_data(FILE* debug_uart) {
 
-	return true;
+    return true;
 }
 
 /*
@@ -80,5 +125,5 @@ Check A state cb get FlipperRecordStateDeleted
 */
 bool furi_mute_algorithm(FILE* debug_uart) {
 
-	return true;
+    return true;
 }

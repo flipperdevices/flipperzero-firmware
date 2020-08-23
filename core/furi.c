@@ -15,9 +15,11 @@ static size_t current_buffer_idx = 0;
 
 // find record pointer by name
 static FuriRecord* find_record(const char* name) {
+    if(name == NULL) return NULL;
+
     FuriRecord* res = NULL;
     for(size_t i = 0; i < MAX_RECORD_COUNT; i++) {
-        if(strcmp(records[i].name, name) == 0) {
+        if(records[i].name != NULL && strcmp(name, records[i].name) == 0) {
             res = &records[i];
         }
     }
@@ -26,6 +28,10 @@ static FuriRecord* find_record(const char* name) {
 }
 
 bool furi_create(const char* name, void* value) {
+    #ifdef DEBUG
+        printf("[FURI] creating %s record\n", name);
+    #endif
+
     if(current_buffer_idx >= MAX_RECORD_COUNT) {
         // max record count exceed
         #ifdef DEBUG
@@ -53,6 +59,10 @@ FuriRecordHandler furi_open(
     FlipperRecordCallback value_callback,
     FlipperRecordStateCallback state_callback
 ) {
+    #ifdef DEBUG
+        printf("[FURI] opening %s record\n", name);
+    #endif
+
     // get furi record by name
     FuriRecord* record = find_record(name);
 
@@ -109,6 +119,10 @@ FuriRecordHandler furi_open(
 
 
 void furi_close(FuriRecordHandler* handler) {
+    #ifdef DEBUG
+        printf("[FURI] closing %s record\n", handler->record->name);
+    #endif
+
     // deallocate subscriber
     handler->subscriber->allocated = false;
 
@@ -145,6 +159,10 @@ void furi_give(FuriRecordHandler* handler) {
 }
 
 bool furi_read(FuriRecordHandler* handler, void* value, size_t size) {
+    #ifdef DEBUG
+        printf("[FURI] read from %s\n", handler->record->name);
+    #endif
+
     if(handler == NULL || handler->record == NULL || value == NULL) return false;
 
     if(size > handler->record->size) return false;
@@ -161,9 +179,16 @@ bool furi_read(FuriRecordHandler* handler, void* value, size_t size) {
 }
 
 bool furi_write(FuriRecordHandler* handler, const void* value, size_t size) {
+    #ifdef DEBUG
+        printf("[FURI] write to %s\n", handler->record->name);
+    #endif
+
     if(handler == NULL || handler->record == NULL || value == NULL) return false;
 
-    if(size > handler->record->size) return false;
+    // check if closed
+    if(!handler->subscriber->allocated) return false;
+
+    if(handler->record->value != NULL && size > handler->record->size) return false;
 
     // check mute
     if(
