@@ -2,7 +2,8 @@
 #include "flipper.h"
 #include "debug.h"
 
-#include "furiac_test.c"
+bool furi_ac_create_kill(FILE* debug_uart);
+bool furi_ac_switch_exit(FILE* debug_uart);
 
 void flipper_test_app(void* p) {
     FILE* debug_uart = get_debug();

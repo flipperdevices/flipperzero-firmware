@@ -1,4 +1,7 @@
+#include <stdio.h>
 #include <string.h>
+#include "flipper.h"
+#include "debug.h"
 
 /*
 Test: creating and killing task
