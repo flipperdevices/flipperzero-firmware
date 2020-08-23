@@ -9,11 +9,21 @@ extern "C" {
 
 extern "C" void app() {
     // FURI startup
+    FuriApp* handlers[sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0])];
+
     for(size_t i = 0; i < sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0]); i++) {
-        furiac_start(FLIPPER_STARTUP[i].app, FLIPPER_STARTUP[i].name, NULL);
+        handlers[i] = furiac_start(FLIPPER_STARTUP[i].app, FLIPPER_STARTUP[i].name, NULL);
     }
 
-    while(1) {
-        delay(10000); // TODO add deferred event queue
-    }
+    bool is_alive = false;
+    do {
+        is_alive = false;
+        for(size_t i = 0; i < sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0]); i++) {
+            if(handlers[i]->handler != NULL) {
+                is_alive = true;
+            }
+        }
+        delay(500);
+        // TODO add deferred event queue here
+    } while(is_alive);
 }
