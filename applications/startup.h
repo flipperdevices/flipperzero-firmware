@@ -1,7 +1,7 @@
 #pragma once
 
 #include "furi.h"
-#include "furi_test/furi_test.h"
+#include "tests/test_index.h"
 
 typedef struct {
     FlipperApplication app;
@@ -9,5 +9,5 @@ typedef struct {
 } FlipperStartupApp;
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
-    {.app = furi_test_app, .name = "furi_test"}
+    {.app = flipper_test_app, .name = "test app"}
 };

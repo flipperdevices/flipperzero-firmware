@@ -9,6 +9,8 @@ typedef uint32_t UBaseType_t;
 typedef uint32_t StackType_t;
 typedef uint32_t StaticTask_t;
 typedef pthread_t* TaskHandle_t;
+typedef uint32_t StaticSemaphore_t;
+typedef void* SemaphoreHandle_t;
 
 #define tskIDLE_PRIORITY 0
 

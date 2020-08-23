@@ -50,7 +50,9 @@ typedef struct {
 
 /// store info about active task
 typedef struct {
+    const char* name;
     FlipperApplication application;
+    const char* prev_name;
     FlipperApplication prev;
     TaskHandle_t handler;
     uint8_t records_count; ///< count of records which task open

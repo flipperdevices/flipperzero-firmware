@@ -13,26 +13,7 @@ extern "C" void app() {
         furiac_start(FLIPPER_STARTUP[i].app, FLIPPER_STARTUP[i].name, NULL);
     }
 
-    /*
-    FILE* debug_uart = get_debug();
-
-    fprintf(debug_uart, "hello Flipper!\n");
-
-    GpioPin red_led = {LED_RED_GPIO_Port, LED_RED_Pin};
-
-    app_gpio_init(red_led, GpioModeOutput);
-
-    
     while(1) {
-        delay(100);
-        app_gpio_write(red_led, true);
-        delay(100);
-        app_gpio_write(red_led, false);
-    }
-    */
-
-    while(1) {
-        printf("furi main thread\n");
-        delay(2000);
+        delay(10000); // TODO add deferred event queue
     }
 }
