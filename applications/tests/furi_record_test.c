@@ -275,6 +275,8 @@ Check A state cb get FlipperRecordStateMute.
 Try to write data to A and check that subscriber get no data. (muted)
 Try to write data to B and check that subscriber get data.
 
+TODO: test 3 not pass beacuse state callback not implemented
+
 4. Open hadler C: no_mute=false, solo=true, NULL subscriber.
 Try to write data to A and check that subscriber get no data. (muted)
 Try to write data to B and check that subscriber get data. (not muted because open with no_mute)
@@ -301,7 +303,7 @@ TODO: test 7 not pass beacuse cleanup is not implemented
 */
 
 static uint8_t mute_last_value = 0;
-static FlipperRecordState mute_last_state = FlipperRecordStateMute;
+static FlipperRecordState mute_last_state = 255;
 
 void mute_record_cb(const void* value, size_t size) {
     // hold value to static var
