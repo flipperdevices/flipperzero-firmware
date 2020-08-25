@@ -277,5 +277,6 @@ clean:
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
+-include $(wildcard $(RUST_LIB_PATH)/*.d)
 
 # *** EOF ***
