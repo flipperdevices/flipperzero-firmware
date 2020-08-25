@@ -93,10 +93,16 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
 ASM_SOURCES =  \
 startup_stm32l476xx.s
 
-CPP_SOURCES = ../app/app.cpp
+CPP_SOURCES = ../core/app.cpp
 
-C_SOURCES += ../app/write.c
+C_SOURCES += ../core/debug.c
+C_SOURCES += ../core/furi.c
+C_SOURCES += ../core/furi_ac.c
 C_SOURCES += Src/flipper_hal.c
+
+C_SOURCES += ../applications/tests/furiac_test.c
+C_SOURCES += ../applications/tests/furi_record_test.c
+C_SOURCES += ../applications/tests/test_index.c
 
 #######################################
 # binaries
