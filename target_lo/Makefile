@@ -13,6 +13,7 @@ OPT = -Og
 #######################################
 # paths
 #######################################
+PROJECT_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # Build path
 BUILD_DIR = build
 
@@ -53,8 +54,7 @@ BIN = $(CP) -O binary -S
 # Rust library
 #######################################
 
-ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-RUST_LIB_SRC = $(realpath $(ROOT_DIR)/../core-rs)
+RUST_LIB_SRC = $(realpath $(PROJECT_DIR)/../core-rs)
 RUST_LIB_NAME = flipper_core
 RUST_LIB_TARGET = x86_64-unknown-linux-gnu
 RUST_LIB_FLAGS = --target=$(RUST_LIB_TARGET)
