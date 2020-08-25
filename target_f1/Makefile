@@ -28,6 +28,7 @@ OPT = -Og
 #######################################
 # paths
 #######################################
+PROJECT_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 # Build path
 BUILD_DIR = build
 
@@ -155,7 +156,26 @@ SZ = $(PREFIX)size
 endif
 HEX = $(CP) -O ihex
 BIN = $(CP) -O binary -S
- 
+
+
+#######################################
+# Rust library
+#######################################
+
+RUST_LIB_SRC = $(realpath $(PROJECT_DIR)/../core-rs)
+RUST_LIB_NAME = flipper_core
+RUST_LIB_TARGET = thumbv7em-none-eabihf
+RUST_LIB_FLAGS = --target=$(RUST_LIB_TARGET)
+
+ifeq ($(DEBUG), 1)
+    RUST_LIB_PATH = $(RUST_LIB_SRC)/target/$(RUST_LIB_TARGET)/debug
+else
+	RUST_LIB_FLAGS += --release
+    RUST_LIB_PATH = $(RUST_LIB_SRC)/target/$(RUST_LIB_TARGET)/release
+endif
+
+RUST_LIB_CMD = cd $(RUST_LIB_SRC) && cargo build $(RUST_LIB_FLAGS)
+
 #######################################
 # CFLAGS
 #######################################
@@ -218,8 +238,8 @@ CPPFLAGS = -fno-threadsafe-statics
 LDSCRIPT = STM32L476RGTx_FLASH.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
-LIBDIR = 
+LIBS = -lc -lm -lnosys -l$(RUST_LIB_NAME)
+LIBDIR = -L$(RUST_LIB_PATH)
 LDFLAGS = $(MCU) -specs=nano.specs -specs=nosys.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 # default action: build all
@@ -258,7 +278,10 @@ $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/%.pb.c $(BUILD_DIR)/%.pb.h: ../flipper_proto/%.proto
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=$(BUILD_DIR) $<
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
+$(RUST_LIB_PATH)/lib$(RUST_LIB_NAME).a:
+	$(RUST_LIB_CMD)
+
+$(BUILD_DIR)/$(TARGET).elf: $(RUST_LIB_PATH)/lib$(RUST_LIB_NAME).a $(OBJECTS) Makefile
 	$(CPP) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
 
@@ -276,6 +299,7 @@ $(BUILD_DIR):
 #######################################
 clean:
 	-rm -fR $(BUILD_DIR)
+	cd $(RUST_LIB_SRC) && cargo clean
   
 #######################################
 # dependencies
