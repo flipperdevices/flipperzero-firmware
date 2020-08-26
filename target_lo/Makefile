@@ -109,6 +109,10 @@ example_blink:
 	EXAMPLE_BLINK=1 make
 	$(BUILD_DIR)/$(TARGET)
 
+test:
+	TEST=1 make
+	$(BUILD_DIR)/$(TARGET)
+
 
 #######################################
 # build the application
