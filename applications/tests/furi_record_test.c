@@ -22,10 +22,10 @@ void pipe_record_cb(const void* value, size_t size) {
     pipe_record_value = *((uint8_t*)value);
 }
 
-bool test_furi_pipe_record(FILE* log) {
+bool test_furi_pipe_record(FuriRecordSubscriber* log) {
     // 1. create pipe record
     if(!furi_create("test/pipe", NULL, 0)) {
-        fprintf(log, "cannot create record\n");
+        fuprintf(log, "cannot create record\n");
         return false;
     }
 
@@ -34,27 +34,27 @@ bool test_furi_pipe_record(FILE* log) {
         "test/pipe", false, false, pipe_record_cb, NULL
     );
     if(pipe_record == NULL) {
-        fprintf(log, "cannot open record\n");
+        fuprintf(log, "cannot open record\n");
         return false;
     }
 
     const uint8_t WRITE_VALUE = 1;
     // 3. write data
     if(!furi_write(pipe_record, &WRITE_VALUE, sizeof(uint8_t))) {
-        fprintf(log, "cannot write to record\n");
+        fuprintf(log, "cannot write to record\n");
         return false;
     }
 
     // 4. check that subscriber get data
     if(pipe_record_value != WRITE_VALUE) {
-        fprintf(log, "wrong value (get %d, write %d)\n", pipe_record_value, WRITE_VALUE);
+        fuprintf(log, "wrong value (get %d, write %d)\n", pipe_record_value, WRITE_VALUE);
         return false;
     }
 
     // 5. try to read, get error
     uint8_t read_value = 0;
     if(furi_read(pipe_record, &read_value, sizeof(uint8_t))) {
-        fprintf(log, "reading from pipe record not allowed\n");
+        fuprintf(log, "reading from pipe record not allowed\n");
         return false;
     }
 
@@ -63,7 +63,7 @@ bool test_furi_pipe_record(FILE* log) {
 
     // 7. try to write, get error
     if(furi_write(pipe_record, &WRITE_VALUE, sizeof(uint8_t))) {
-        fprintf(log, "writing to closed record not allowed\n");
+        fuprintf(log, "writing to closed record not allowed\n");
         return false;
     }
 
@@ -88,11 +88,11 @@ void holding_record_cb(const void* value, size_t size) {
     holding_record_value = *((uint8_t*)value);
 }
 
-bool test_furi_holding_data(FILE* log) {
+bool test_furi_holding_data(FuriRecordSubscriber* log) {
     // 1. Create holding record
     uint8_t holder = 0;
     if(!furi_create("test/holding", (void*)&holder, sizeof(holder))) {
-        fprintf(log, "cannot create record\n");
+        fuprintf(log, "cannot create record\n");
         return false;
     }
 
@@ -101,43 +101,43 @@ bool test_furi_holding_data(FILE* log) {
         "test/holding", false, false, holding_record_cb, NULL
     );
     if(holding_record == NULL) {
-        fprintf(log, "cannot open record\n");
+        fuprintf(log, "cannot open record\n");
         return false;
     }
 
     const uint8_t WRITE_VALUE = 1;
     // 3. write data
     if(!furi_write(holding_record, &WRITE_VALUE, sizeof(uint8_t))) {
-        fprintf(log, "cannot write to record\n");
+        fuprintf(log, "cannot write to record\n");
         return false;
     }
 
     // 4. check that subscriber get data
     if(holding_record_value != WRITE_VALUE) {
-        fprintf(log, "wrong sub value (get %d, write %d)\n", holding_record_value, WRITE_VALUE);
+        fuprintf(log, "wrong sub value (get %d, write %d)\n", holding_record_value, WRITE_VALUE);
         return false;
     }
 
     // 5. Read and check data
     uint8_t read_value = 0;
     if(!furi_read(holding_record, &read_value, sizeof(uint8_t))) {
-        fprintf(log, "cannot read from record\n");
+        fuprintf(log, "cannot read from record\n");
         return false;
     }
 
     if(read_value != WRITE_VALUE) {
-        fprintf(log, "wrong read value (get %d, write %d)\n", read_value, WRITE_VALUE);
+        fuprintf(log, "wrong read value (get %d, write %d)\n", read_value, WRITE_VALUE);
         return false;
     }
 
     // 6. Try to write/read wrong size of data
     if(furi_write(holding_record, &WRITE_VALUE, 100)) {
-        fprintf(log, "overflowed write not allowed\n");
+        fuprintf(log, "overflowed write not allowed\n");
         return false;
     }
 
     if(furi_read(holding_record, &read_value, 100)) {
-        fprintf(log, "overflowed read not allowed\n");
+        fuprintf(log, "overflowed read not allowed\n");
         return false;
     }
 
@@ -161,13 +161,13 @@ typedef struct {
 } ConcurrentValue;
 
 void furi_concurent_app(void* p) {
-    FILE* log = (FILE*)p;
+    FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     FuriRecordSubscriber* holding_record = furi_open(
         "test/concurrent", false, false, NULL, NULL
     );
     if(holding_record == NULL) {
-        fprintf(log, "cannot open record\n");
+        fuprintf(log, "cannot open record\n");
         furiac_exit(NULL);
     }
 
@@ -175,7 +175,7 @@ void furi_concurent_app(void* p) {
         ConcurrentValue* value = (ConcurrentValue*)furi_take(holding_record);
 
         if(value == NULL) {
-            fprintf(log, "cannot take record\n");
+            fuprintf(log, "cannot take record\n");
             furi_give(holding_record);
             furiac_exit(NULL);
         }
@@ -193,11 +193,11 @@ void furi_concurent_app(void* p) {
     furiac_exit(NULL);
 }
 
-bool test_furi_concurrent_access(FILE* log) {
+bool test_furi_concurrent_access(FuriRecordSubscriber* log) {
     // 1. Create holding record
     ConcurrentValue holder = {.a = 0, .b = 0};
     if(!furi_create("test/concurrent", (void*)&holder, sizeof(ConcurrentValue))) {
-        fprintf(log, "cannot create record\n");
+        fuprintf(log, "cannot create record\n");
         return false;
     }
 
@@ -206,7 +206,7 @@ bool test_furi_concurrent_access(FILE* log) {
         "test/concurrent", false, false, NULL, NULL
     );
     if(holding_record == NULL) {
-        fprintf(log, "cannot open record\n");
+        fuprintf(log, "cannot open record\n");
         return false;
     }
 
@@ -220,7 +220,7 @@ bool test_furi_concurrent_access(FILE* log) {
         ConcurrentValue* value = (ConcurrentValue*)furi_take(holding_record);
 
         if(value == NULL) {
-            fprintf(log, "cannot take record\n");
+            fuprintf(log, "cannot take record\n");
             furi_give(holding_record);
             return false;
         }
@@ -238,12 +238,12 @@ bool test_furi_concurrent_access(FILE* log) {
     delay(20);
 
     if(second_app->handler != NULL) {
-        fprintf(log, "second app still alive\n");
+        fuprintf(log, "second app still alive\n");
         return false;
     }
 
     if(holder.a != holder.b) {
-        fprintf(log, "broken integrity: a=%d, b=%d\n", holder.a, holder.b);
+        fuprintf(log, "broken integrity: a=%d, b=%d\n", holder.a, holder.b);
         return false;
     }
 
@@ -258,7 +258,7 @@ TEST: non-existent data
 
 TODO: implement this test
 */
-bool test_furi_nonexistent_data(FILE* log) {
+bool test_furi_nonexistent_data(FuriRecordSubscriber* log) {
 
     return true;
 }
@@ -317,11 +317,11 @@ void mute_record_state_cb(FlipperRecordState state) {
 }
 
 void furi_mute_parent_app(void* p) {
-    FILE* log = (FILE*)p;
+    FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     // 1. Create pipe record
     if(!furi_create("test/mute", NULL, 0)) {
-        fprintf(log, "cannot create record\n");
+        fuprintf(log, "cannot create record\n");
         furiac_exit(NULL);
     }
 
@@ -330,7 +330,7 @@ void furi_mute_parent_app(void* p) {
         "test/mute", false, false, mute_record_cb, NULL
     );
     if(watch_handler == NULL) {
-        fprintf(log, "cannot open watch handler\n");
+        fuprintf(log, "cannot open watch handler\n");
         furiac_exit(NULL);
     }
 
@@ -340,7 +340,7 @@ void furi_mute_parent_app(void* p) {
     }
 }
 
-bool test_furi_mute_algorithm(FILE* log) {
+bool test_furi_mute_algorithm(FuriRecordSubscriber* log) {
     // 1. Create "parent" application:
     FuriApp* parent_app = furiac_start(
         furi_mute_parent_app, "parent app", (void*)log
@@ -353,7 +353,7 @@ bool test_furi_mute_algorithm(FILE* log) {
         "test/mute", false, false, NULL, mute_record_state_cb
     );
     if(handler_a == NULL) {
-        fprintf(log, "cannot open handler A\n");
+        fuprintf(log, "cannot open handler A\n");
         return false;
     }
 
@@ -361,12 +361,12 @@ bool test_furi_mute_algorithm(FILE* log) {
 
     // Try to write data to A and check subscriber
     if(!furi_write(handler_a, &test_counter, sizeof(uint8_t))) {
-        fprintf(log, "write to A failed\n");
+        fuprintf(log, "write to A failed\n");
         return false;
     }
 
     if(mute_last_value != test_counter) {
-        fprintf(log, "value A mismatch: %d vs %d\n", mute_last_value, test_counter);
+        fuprintf(log, "value A mismatch: %d vs %d\n", mute_last_value, test_counter);
         return false;
     }
 
@@ -375,13 +375,13 @@ bool test_furi_mute_algorithm(FILE* log) {
         "test/mute", true, true, NULL, NULL
     );
     if(handler_b == NULL) {
-        fprintf(log, "cannot open handler B\n");
+        fuprintf(log, "cannot open handler B\n");
         return false;
     }
 
     // Check A state cb get FlipperRecordStateMute.
     if(mute_last_state != FlipperRecordStateMute) {
-        fprintf(log, "A state is not FlipperRecordStateMute: %d\n", mute_last_state);
+        fuprintf(log, "A state is not FlipperRecordStateMute: %d\n", mute_last_state);
         return false;
     }
 
@@ -389,12 +389,12 @@ bool test_furi_mute_algorithm(FILE* log) {
 
     // Try to write data to A and check that subscriber get no data. (muted)
     if(furi_write(handler_a, &test_counter, sizeof(uint8_t))) {
-        fprintf(log, "A not muted\n");
+        fuprintf(log, "A not muted\n");
         return false;
     }
 
     if(mute_last_value == test_counter) {
-        fprintf(log, "value A must be muted\n");
+        fuprintf(log, "value A must be muted\n");
         return false;
     }
 
@@ -403,12 +403,12 @@ bool test_furi_mute_algorithm(FILE* log) {
 
     // Try to write data to B and check that subscriber get data.
     if(!furi_write(handler_b, &test_counter, sizeof(uint8_t))) {
-        fprintf(log, "write to B failed\n");
+        fuprintf(log, "write to B failed\n");
         return false;
     }
 
     if(mute_last_value != test_counter) {
-        fprintf(log, "value B mismatch: %d vs %d\n", mute_last_value, test_counter);
+        fuprintf(log, "value B mismatch: %d vs %d\n", mute_last_value, test_counter);
         return false;
     }
 
@@ -418,7 +418,7 @@ bool test_furi_mute_algorithm(FILE* log) {
         "test/mute", true, false, NULL, NULL
     );
     if(handler_c == NULL) {
-        fprintf(log, "cannot open handler C\n");
+        fuprintf(log, "cannot open handler C\n");
         return false;
     }
 
@@ -431,7 +431,7 @@ bool test_furi_mute_algorithm(FILE* log) {
         "test/mute", false, false, NULL, NULL
     );
     if(handler_d == NULL) {
-        fprintf(log, "cannot open handler D\n");
+        fuprintf(log, "cannot open handler D\n");
         return false;
     }
 
@@ -447,7 +447,7 @@ bool test_furi_mute_algorithm(FILE* log) {
 
     // 7. Exit "parent application"
     if(!furiac_kill(parent_app)) {
-        fprintf(log, "kill parent_app fail\n");
+        fuprintf(log, "kill parent_app fail\n");
         return false;
     }
 

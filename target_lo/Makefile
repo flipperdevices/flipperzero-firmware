@@ -137,15 +137,18 @@ all: $(BUILD_DIR)/$(TARGET)
 
 example_blink:
 	EXAMPLE_BLINK=1 make
+	rm $(BUILD_DIR)/app.o
 	$(BUILD_DIR)/$(TARGET)
 
 
 example_uart_write:
 	EXAMPLE_UART_WRITE=1 make
+	rm $(BUILD_DIR)/app.o
 	$(BUILD_DIR)/$(TARGET)
 
 test:
 	TEST=1 make
+	rm $(BUILD_DIR)/app.o
 	$(BUILD_DIR)/$(TARGET)
 
 

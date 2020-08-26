@@ -11,6 +11,9 @@ extern "C" {
 extern "C" void app() {
     register_tty_uart();
 
+    FuriRecordSubscriber* log = get_default_log();
+    fuprintf(log, "\n=== Welcome to Flipper Zero! ===\n\n");
+
     // FURI startup
     FuriApp* handlers[sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0])];
 

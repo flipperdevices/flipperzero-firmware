@@ -2,5 +2,5 @@
 
 #include "furi.h"
 
-FILE* get_default_log();
-FILE* get_log(FuriRecordSubscriber* record);
+FuriRecordSubscriber* get_default_log();
+void fuprintf(FuriRecordSubscriber* f, const char * format, ...);
