@@ -100,7 +100,8 @@ RUST_LIB_CMD = cd $(RUST_LIB_SRC) && cargo build $(RUST_LIB_FLAGS)
 C_INCLUDES =  \
 -IInc \
 -I../applications \
--I../core
+-I../core \
+-I../core-rs/bindings
 
 # compile gcc flags
 CFLAGS = $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -pthread
