@@ -12,7 +12,7 @@ First, let's create a simple led blinking application.
 
 Flipper application is just a function:
 
-```
+```C
 void application_name(void* p) {
     // Setup
 
@@ -48,7 +48,8 @@ For work with pin we should:
 
 1. Create new file (for example, `blink.c`) in `applications` folder.
 2. Create code like this:
-```
+
+```C
 #include "flipper.h"
 
 void application_blink(void* p) {
@@ -69,13 +70,13 @@ void application_blink(void* p) {
 3. To start your application on Flipper startup, add it to autorun:
     * in `applications/startup.h` add prototype of main application function:
 
-    ```
+    ```C
     void application_blink(void* p);
     ```
 
     * add entry to `FLIPPER_STARTUP` array (pointer to application function and application name):
 
-    ```
+    ```C
     const FlipperStartupApp FLIPPER_STARTUP[] = {
         #ifdef TEST
         {.app = flipper_test_app, .name = "test app"}
