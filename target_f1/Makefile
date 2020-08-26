@@ -132,6 +132,11 @@ C_SOURCES += ../applications/examples/blink.c
 C_DEFS += -DEXAMPLE_BLINK
 endif
 
+ifeq ($(EXAMPLE_UART_WRITE), 1)
+C_SOURCES += ../applications/examples/uart_write.c
+C_DEFS += -DEXAMPLE_UART_WRITE
+endif
+
 # User application
 
 # Add C_SOURCES +=, C_DEFS += or CPP_SOURCES += here
@@ -253,6 +258,9 @@ all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET
 
 example_blink:
 	EXAMPLE_BLINK=1 make
+
+example_uart_write:
+	EXAMPLE_UART_WRITE=1 make
 
 test:
 	TEST=1 make
