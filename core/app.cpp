@@ -4,10 +4,13 @@
 extern "C" {
     #include "startup.h"
     #include "furi.h"
-    #include "debug.h"
+    #include "log.h"
+    #include "tty_uart.h"
 }
 
 extern "C" void app() {
+    register_tty_uart();
+
     // FURI startup
     FuriApp* handlers[sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0])];
 

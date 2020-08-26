@@ -111,7 +111,8 @@ startup_stm32l476xx.s
 
 CPP_SOURCES += ../core/app.cpp
 
-C_SOURCES += ../core/debug.c
+C_SOURCES += ../core/log.c
+C_SOURCES += ../core/tty_uart.c
 C_SOURCES += ../core/furi.c
 C_SOURCES += ../core/furi_ac.c
 

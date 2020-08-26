@@ -32,11 +32,13 @@ C_SOURCES += Src/lo_os.c
 C_SOURCES += Src/lo_hal.c
 
 C_DEFS += -DFURI_DEBUG
+
 # Core
 
 CPP_SOURCES += ../core/app.cpp
 
-C_SOURCES += ../core/debug.c
+C_SOURCES += ../core/log.c
+C_SOURCES += ../core/tty_uart.c
 C_SOURCES += ../core/furi.c
 C_SOURCES += ../core/furi_ac.c
 

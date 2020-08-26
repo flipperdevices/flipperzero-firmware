@@ -55,7 +55,7 @@ bool furi_create(const char* name, void* value, size_t size) {
     return true;
 }
 
-FuriRecordHandler furi_open(
+FuriRecordSubscriber* furi_open(
     const char* name,
     bool solo,
     bool no_mute,
@@ -75,8 +75,7 @@ FuriRecordHandler furi_open(
             printf("[FURI] cannot find record %s\n", name);
         #endif
 
-        FuriRecordHandler res = {.record = NULL, .subscriber = NULL};
-        return res;
+        return NULL;
     }
 
     // allocate subscriber
@@ -94,9 +93,8 @@ FuriRecordHandler furi_open(
         #ifdef FURI_DEBUG
             printf("[FURI] cannot add subscriber (full)\n");
         #endif
-
-        FuriRecordHandler res = {.record = NULL, .subscriber = NULL};
-        return res;
+        
+        return NULL;
     }
 
     // increase mute_counter
@@ -110,6 +108,7 @@ FuriRecordHandler furi_open(
     subscriber->no_mute = no_mute;
     subscriber->cb = value_callback;
     subscriber->state_cb = state_callback;
+    subscriber->record = record;
 
     // register record in application
     FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
@@ -117,18 +116,17 @@ FuriRecordHandler furi_open(
     current_task->records[current_task->records_count] = record;
     current_task->records_count++;
 
-    FuriRecordHandler res = {.record = record, .subscriber = subscriber};
-    return res;
+    return subscriber;
 }
 
 
-void furi_close(FuriRecordHandler* handler) {
+void furi_close(FuriRecordSubscriber* handler) {
     #ifdef FURI_DEBUG
         printf("[FURI] closing %s record\n", handler->record->name);
     #endif
 
     // deallocate subscriber
-    handler->subscriber->allocated = false;
+    handler->allocated = false;
 
     // set mute counter to next max value
     uint8_t max_mute_counter = 0;
@@ -142,7 +140,7 @@ void furi_close(FuriRecordHandler* handler) {
     handler->record->mute_counter = max_mute_counter;
 }
 
-static void furi_notify(FuriRecordHandler* handler, const void* value, size_t size) {
+static void furi_notify(FuriRecordSubscriber* handler, const void* value, size_t size) {
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         if(handler->record->subscribers[i].allocated) {
             if(handler->record->subscribers[i].cb != NULL) {
@@ -152,17 +150,17 @@ static void furi_notify(FuriRecordHandler* handler, const void* value, size_t si
     }
 }
 
-void* furi_take(FuriRecordHandler* handler) {
+void* furi_take(FuriRecordSubscriber* handler) {
     // take mutex
 
     return handler->record->value;
 }
 
-void furi_give(FuriRecordHandler* handler) {
+void furi_give(FuriRecordSubscriber* handler) {
     // release mutex
 }
 
-bool furi_read(FuriRecordHandler* handler, void* value, size_t size) {
+bool furi_read(FuriRecordSubscriber* handler, void* value, size_t size) {
     #ifdef FURI_DEBUG
         printf("[FURI] read from %s\n", handler->record->name);
     #endif
@@ -182,7 +180,7 @@ bool furi_read(FuriRecordHandler* handler, void* value, size_t size) {
     return true;
 }
 
-bool furi_write(FuriRecordHandler* handler, const void* value, size_t size) {
+bool furi_write(FuriRecordSubscriber* handler, const void* value, size_t size) {
     #ifdef FURI_DEBUG
         printf("[FURI] write to %s\n", handler->record->name);
     #endif
@@ -190,14 +188,14 @@ bool furi_write(FuriRecordHandler* handler, const void* value, size_t size) {
     if(handler == NULL || handler->record == NULL || value == NULL) return false;
 
     // check if closed
-    if(!handler->subscriber->allocated) return false;
+    if(!handler->allocated) return false;
 
     if(handler->record->value != NULL && size > handler->record->size) return false;
 
     // check mute
     if(
-        handler->record->mute_counter != handler->subscriber->mute_counter
-        && !handler->subscriber->no_mute
+        handler->record->mute_counter != handler->mute_counter
+        && !handler->no_mute
     ) return false;
 
     if(handler->record->value != NULL) {
