@@ -1,18 +1,22 @@
-Научимся использовать FURI, писать в пайпы.
+In this example we try to use FURI for interacting between user application and core subsystem.
 
-Заодно посмотрим как печатать отладочную инфу.
+First of all, we open FURI record by name "tty". This record is used for send some debug/logging info and interact with user by kind-of-TTY (like UART or USB CDC). By default on Flipper target all writes to tty record handled by debug UART (configured by `DEBUG_UART` define). On local target all writes simply prints to stdout.
 
-Откроем канал
+Open record:
 
 ```C
 FuriRecordSubscriber* log = get_default_log();
 ```
 
-Это обертка над
+This is just wrapper on common FURI method:
 
 ```C
 furi_open("tty", false, false, NULL, NULL);
 ```
+
+"tty" is FURI pipe record. It means that there is no "data" hold in record, it only manage callbacks: when you call `furi_write`, all subscriber's callback is called. You can find default implementation in `core/tty_uart.c`.
+
+Let's get a look at full example code:
 
 ```C
 #include "flipper.h"
@@ -49,3 +53,19 @@ void application_uart_write(void* p) {
     }
 }
 ```
+
+This code demonstrates two way to work with record:
+
+1. Directly writes some data by `furi_write`
+2. Uses `fuprintf` wrapper on `printf`.
+
+For creating application and set it to autorun, read [Blink example](Blink-app).
+
+_You can also find source of this example in `applications/examples/uart_write.c` and run it by `docker-compose exec dev make -C target_lo example_uart_write`_
+
+![](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/application_examples/example_uart_write.gif)
+
+_Code for target F1 can be compiled by `docker-compose exec dev make -C target_f1 example_uart_write`_
+
+![](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/application_examples/example_uart_write_hw.gif)
+
