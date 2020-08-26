@@ -162,6 +162,18 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   WiFiScan::currentScanMode = scan_mode;
 }
 
+void WiFiScan::shutdownWiFi() {
+  Serial.println("Ahhh yes...promiscuity will end");
+  esp_wifi_set_promiscuous(false);
+  WiFi.persistent(false);
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_stop();
+  esp_wifi_deinit();
+}
+
 // Function to stop all wifi scans
 void WiFiScan::StopScan(uint8_t scan_mode)
 {
@@ -176,13 +188,8 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR))
   {
-    Serial.println("Ahhh yes...promiscuity will end");
-    esp_wifi_set_promiscuous(false);
-    WiFi.mode(WIFI_OFF);
-
-    esp_wifi_set_mode(WIFI_MODE_NULL);
-    esp_wifi_stop();
-    esp_wifi_deinit();
+    sd_obj.stopSD();
+    this->shutdownWiFi();
   }
 
   
@@ -220,11 +227,11 @@ String WiFiScan::getStaMAC()
   char *buf;
   uint8_t mac[6];
   char macAddrChr[18] = {0};
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  esp_wifi_set_mode(WIFI_MODE_NULL);
-  esp_wifi_start();
+  //esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //esp_wifi_set_mode(WIFI_MODE_NULL);
+  //esp_wifi_start();
   esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_STA, mac);
   sprintf(macAddrChr, 
           "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -234,6 +241,7 @@ String WiFiScan::getStaMAC()
           mac[3],
           mac[4],
           mac[5]);
+  this->shutdownWiFi();
   return String(macAddrChr);
 }
 
@@ -242,7 +250,7 @@ String WiFiScan::getApMAC()
   char *buf;
   uint8_t mac[6];
   char macAddrChr[18] = {0};
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -256,6 +264,7 @@ String WiFiScan::getApMAC()
           mac[3],
           mac[4],
           mac[5]);
+  this->shutdownWiFi();
   return String(macAddrChr);
 }
 
@@ -293,8 +302,8 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
 
 void WiFiScan::RunInfo()
 {
-  //String sta_mac = this->getStaMAC();
-  //String ap_mac = this->getApMAC();
+  String sta_mac = this->getStaMAC();
+  String ap_mac = this->getApMAC();
   String free_ram = this->freeRAM();
   
   //Serial.print("STA MAC: ");
@@ -309,35 +318,41 @@ void WiFiScan::RunInfo()
   display_obj.tft.setTextSize(1);
   display_obj.tft.setTextColor(TFT_CYAN);
 
-  //display_obj.tft.println(" Station MAC: " + sta_mac);
-  //display_obj.tft.println("      AP MAC: " + ap_mac);
-  display_obj.tft.println("     Firmware: Marauder");
-  display_obj.tft.println("      Version: " + display_obj.version_number + "\n");
-  display_obj.tft.println("     " + free_ram);
+  display_obj.tft.println(F("     Firmware: Marauder"));
+  display_obj.tft.print(F("      Version: "));
+  display_obj.tft.print(display_obj.version_number);
+  display_obj.tft.println(F("\n"));
+  display_obj.tft.print(F("  Station MAC: "));
+  display_obj.tft.println(sta_mac);
+  display_obj.tft.print(F("       AP MAC: "));
+  display_obj.tft.println(ap_mac);
+  display_obj.tft.print(F("     "));
+  display_obj.tft.println(free_ram);
 
   if (sd_obj.supported) {
-    display_obj.tft.println("      SD Card: Connected");
-    display_obj.tft.print(" SD Card Size: ");
+    display_obj.tft.println(F("      SD Card: Connected"));
+    display_obj.tft.print(F(" SD Card Size: "));
     display_obj.tft.print(sd_obj.card_sz);
-    display_obj.tft.println("MB");
+    display_obj.tft.println(F("MB"));
   }
   else {
-    display_obj.tft.println("      SD Card: Not Connected");
-    display_obj.tft.println(" SD Card Size: 0");
+    display_obj.tft.println(F("      SD Card: Not Connected"));
+    display_obj.tft.println(F(" SD Card Size: 0"));
   }  
 
   battery_obj.battery_level = battery_obj.getBatteryLevel();
   if (battery_obj.i2c_supported) {
-    display_obj.tft.println("   IP5306 I2C: supported");
+    display_obj.tft.println(F("   IP5306 I2C: supported"));
     display_obj.tft.println("  Battery Lvl: " + (String)battery_obj.battery_level + "%");
   }
   else
-    display_obj.tft.println("   IP5306 I2C: not supported");
+    display_obj.tft.println(F("   IP5306 I2C: not supported"));
 
   display_obj.tft.println("Internal temp: " + (String)temp_obj.current_temp + " C");
 }
 
 void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
+  sd_obj.startSD();
   sd_obj.openCapture("espressif");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -353,7 +368,7 @@ void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -370,7 +385,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
-
+  sd_obj.startSD();
   sd_obj.openCapture("packet_monitor");
   
   #ifdef TFT_SHIELD
@@ -398,7 +413,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tftDrawExitScaleButtons();
 
   Serial.println("Running packet scan...");
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -416,7 +431,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
-
+  sd_obj.startSD();
   sd_obj.openCapture("eapol");
 
   #ifdef TFT_SHIELD
@@ -444,7 +459,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   display_obj.tftDrawExitScaleButtons();
 
 
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -473,7 +488,11 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   packets_sent = 0;
   //esp_wifi_set_mode(WIFI_MODE_STA);
-  WiFi.mode(WIFI_AP_STA);
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  //WiFi.mode(WIFI_AP_STA);
   esp_wifi_start();
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
@@ -501,7 +520,11 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   packets_sent = 0;
   //esp_wifi_set_mode(WIFI_MODE_STA);
-  WiFi.mode(WIFI_AP_STA);
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
   esp_wifi_start();
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
@@ -513,6 +536,7 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.startSD();
   sd_obj.openCapture("pwnagotchi");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -528,7 +552,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -543,6 +567,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.startSD();
   sd_obj.openCapture("beacon");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -558,7 +583,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -572,6 +597,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.startSD();
   sd_obj.openCapture("deauth");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -587,7 +613,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
   display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -603,6 +629,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
+  sd_obj.startSD();
   sd_obj.openCapture("probe");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -618,7 +645,7 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
   display_obj.touchToExit();
   display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -831,7 +858,10 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         {
           Serial.print((char)snifferPacket->payload[i + 38]);
           //display_string.concat((char)snifferPacket->payload[i + 38]);
-          essid.concat((char)snifferPacket->payload[i + 38]);
+          if (isAscii(snifferPacket->payload[i + 38]))
+            essid.concat((char)snifferPacket->payload[i + 38]);
+          else
+            Serial.println("Got non-ascii character: " + (String)(char)snifferPacket->payload[i + 38]);
         }
         //essid.concat("\": \"\"}}");
         //Serial.println("\n" + (String)(snifferPacket->payload[37]) + " -> " + essid);
@@ -841,6 +871,7 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         JsonObject& json = jsonBuffer.parseObject(essid);
         if (!json.success()) {
           Serial.println("\nCould not parse Pwnagotchi json");
+          display_string.concat(essid);
         }
         else {
           Serial.println("\nSuccessfully parsed json");

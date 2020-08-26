@@ -638,7 +638,7 @@ void MenuFunctions::RunSetup()
     WiFi.softAPdisconnect(true);
     web_obj.shutdownServer();
   });
-  //addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu);});
+  addNodes(&updateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this](){wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF; changeMenu(updateMenu.parentMenu);});
 
   // Failed update menu
   failedUpdateMenu.parentMenu = &whichUpdateMenu;

@@ -1,13 +1,41 @@
 #include "SDInterface.h"
 
+bool SDInterface::startSD() {
+  Serial.println("Starting SD card...");
+  if (SD.begin(SD_CS)) {
+    buffer_obj = Buffer();
+    this->sd_running = true;
+    return true;
+  }
+  else {
+    //delete &buffer_obj;
+    //buffer_obj = NULL;
+    this->sd_running = false;
+    return false;
+  }
+}
+
+bool SDInterface::stopSD() {
+  Serial.println("Stopping SD card");
+  //delete &buffer_obj;
+  //buffer_obj = NULL;
+  this->sd_running = false;
+  SD.end();
+}
+
 bool SDInterface::initSD() {
   String display_string = "";
   
-  if (!SD.begin(SD_CS)) {
+  if (!this->startSD()) {
     Serial.println("Failed to mount SD Card");
     this->supported = false;
+    this->stopSD();
     return false;
   }
+//  else {
+//    SD.end(); // Release memory used for SD
+//    return false;
+//  }
   else {
     this->supported = true;
     this->cardType = SD.cardType();
@@ -47,10 +75,13 @@ bool SDInterface::initSD() {
       this->card_sz = sz;
     }
 
-    buffer_obj = Buffer();
+    //buffer_obj = Buffer();
 
     //if (this->supported)
     //  buffer_obj.open(&SD);
+
+    // Clean up the SD
+    this->stopSD();
     
     return true;
   }
@@ -69,6 +100,7 @@ void SDInterface::openCapture(String file_name) {
 }
 
 void SDInterface::runUpdate() {
+  this->startSD();
   //display_obj.clearScreen();
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setFreeFont(NULL);
@@ -104,6 +136,8 @@ void SDInterface::runUpdate() {
     }
 
     updateBin.close();
+
+    this->stopSD();
     
       // whe finished remove the binary from sd card to indicate end of the process
     display_obj.tft.println("rebooting...");
@@ -160,7 +194,7 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
 }
 
 void SDInterface::main() {
-  if ((this->supported) && (this->do_save)) {
+  if ((this->supported) && (this->do_save) && (this->sd_running)) {
     //Serial.println("Saving packet...");
     buffer_obj.forceSave(&SD);
   }

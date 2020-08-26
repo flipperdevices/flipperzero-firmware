@@ -173,6 +173,7 @@ class WiFiScan
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);
     void StartScan(uint8_t scan_mode, uint16_t color = 0);
+    void shutdownWiFi();
     void StopScan(uint8_t scan_mode);
     
     static void getMAC(char *addr, uint8_t* data, uint16_t offset);
