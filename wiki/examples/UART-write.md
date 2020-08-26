@@ -1,3 +1,20 @@
+Научимся использовать FURI, писать в пайпы.
+
+Заодно посмотрим как печатать отладочную инфу.
+
+Откроем канал
+
+```C
+FuriRecordSubscriber* log = get_default_log();
+```
+
+Это обертка над
+
+```C
+furi_open("tty", false, false, NULL, NULL);
+```
+
+```C
 #include "flipper.h"
 #include <string.h>
 #include "log.h"
@@ -31,3 +48,4 @@ void application_uart_write(void* p) {
         delay(950);
     }
 }
+```
