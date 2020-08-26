@@ -35,7 +35,7 @@ bool furi_create(const char* name, void* value, size_t size) {
     if(current_buffer_idx >= MAX_RECORD_COUNT) {
         // max record count exceed
         #ifdef FURI_DEBUG
-            printf("[FURI] max record count exceed\n");
+            printf("[FURI] create: max record count exceed\n");
         #endif
         return NULL;
     }
@@ -51,6 +51,8 @@ bool furi_create(const char* name, void* value, size_t size) {
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         records[current_buffer_idx].subscribers[i].allocated = false;
     }
+
+    current_buffer_idx++;
 
     return true;
 }
@@ -82,8 +84,8 @@ FuriRecordSubscriber* furi_open(
     FuriRecordSubscriber* subscriber = NULL;
 
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
-        if(!records[current_buffer_idx].subscribers[i].allocated) {
-            subscriber = &records[current_buffer_idx].subscribers[i];
+        if(!record->subscribers[i].allocated) {
+            subscriber = &record->subscribers[i];
             break;
         }
     }
@@ -91,7 +93,7 @@ FuriRecordSubscriber* furi_open(
     if(subscriber == NULL) {
         // cannot add subscriber (full)
         #ifdef FURI_DEBUG
-            printf("[FURI] cannot add subscriber (full)\n");
+            printf("[FURI] open: cannot add subscriber (full)\n");
         #endif
         
         return NULL;
@@ -113,8 +115,14 @@ FuriRecordSubscriber* furi_open(
     // register record in application
     FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
 
-    current_task->records[current_task->records_count] = record;
-    current_task->records_count++;
+    if(current_task != NULL) {
+        current_task->records[current_task->records_count] = record;
+        current_task->records_count++;
+    } else {
+        #ifdef FURI_DEBUG
+            printf("[FURI] open: no current task\n");
+        #endif
+    }
 
     return subscriber;
 }
@@ -185,18 +193,39 @@ bool furi_write(FuriRecordSubscriber* handler, const void* value, size_t size) {
         printf("[FURI] write to %s\n", handler->record->name);
     #endif
 
-    if(handler == NULL || handler->record == NULL || value == NULL) return false;
+    if(handler == NULL || handler->record == NULL || value == NULL) {
+        #ifdef FURI_DEBUG
+            printf("[FURI] write: null param %x %x\n", (uint32_t)(size_t)handler, (uint32_t)(size_t)value);
+        #endif
+
+        return false;
+    }
 
     // check if closed
-    if(!handler->allocated) return false;
+    if(!handler->allocated) {
+        #ifdef FURI_DEBUG
+            printf("[FURI] write: handler closed\n");
+        #endif
+        return false;
+    }
 
-    if(handler->record->value != NULL && size > handler->record->size) return false;
+    if(handler->record->value != NULL && size > handler->record->size) {
+        #ifdef FURI_DEBUG
+            printf("[FURI] write: wrong size %d\n", (uint32_t)size);
+        #endif
+        return false;
+    }
 
     // check mute
     if(
         handler->record->mute_counter != handler->mute_counter
         && !handler->no_mute
-    ) return false;
+    ) {
+        #ifdef FURI_DEBUG
+            printf("[FURI] write: muted\n");
+        #endif
+        return false;
+    }
 
     if(handler->record->value != NULL) {
         // real write to value
