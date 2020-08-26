@@ -15,7 +15,7 @@ bool test_furi_mute_algorithm(FILE* log);
 
 void flipper_test_app(void* p) {
     FILE* log = get_default_log();
-
+    
     if(test_furi_ac_create_kill(log)) {
         fprintf(log, "[TEST] test_furi_ac_create_kill PASSED\n");
     } else {
