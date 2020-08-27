@@ -580,7 +580,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
-  //sd_obj.startSD();
+  sd_obj.startSD();
   sd_obj.openCapture("beacon");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
