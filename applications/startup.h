@@ -13,7 +13,8 @@ void flipper_test_app(void* p);
 
 void application_blink(void* p);
 void application_uart_write(void* p);
-void application_ipc(void* p);
+void application_ipc_display(void* p);
+void application_ipc_widget(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
     #ifdef TEST
@@ -27,6 +28,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = application_uart_write, .name = "uart write"},
     #endif
     #ifdef EXAMPLE_IPC
-    {.app = application_ipc, .name = "ipc"},
+    {.app = application_ipc, .name = "ipc display"},
+    {.app = application_ipc, .name = "ipc widget"},
     #endif
 };

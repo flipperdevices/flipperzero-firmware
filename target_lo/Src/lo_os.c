@@ -83,3 +83,28 @@ SemaphoreHandle_t xSemaphoreCreateMutexStatic(StaticSemaphore_t* pxMutexBuffer) 
     // TODO add posix mutex init
     return NULL;
 }
+
+BaseType_t xQueueSend(
+    QueueHandle_t xQueue, const void * pvItemToQueue, TickType_t xTicksToWait
+) {
+    // TODO: add implementation
+    return pdTRUE;
+}
+
+BaseType_t xQueueReceive(
+    QueueHandle_t xQueue, void *pvBuffer, TickType_t xTicksToWait
+) {
+    // TODO: add implementation
+    osDelay(100);
+
+    return pdFALSE;
+}
+
+QueueHandle_t xQueueCreateStatic(
+    UBaseType_t uxQueueLength,
+    UBaseType_t uxItemSize,
+    uint8_t* pucQueueStorageBuffer,
+    StaticQueue_t *pxQueueBuffer
+) {
+    return NULL;
+}
