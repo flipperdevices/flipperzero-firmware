@@ -28,7 +28,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = application_uart_write, .name = "uart write"},
     #endif
     #ifdef EXAMPLE_IPC
-    {.app = application_ipc, .name = "ipc display"},
-    {.app = application_ipc, .name = "ipc widget"},
+    {.app = application_ipc_display, .name = "ipc display"},
+    {.app = application_ipc_widget, .name = "ipc widget"},
     #endif
 };

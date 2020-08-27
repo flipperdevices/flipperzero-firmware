@@ -10,7 +10,7 @@ typedef struct {
     FuriRecordSubscriber* log; // app logger
 } IpcCtx;
 
-static void handle_fb_change(void* fb, size_t fb_size, void* raw_ctx) {
+static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
     IpcCtx* ctx = (IpcCtx*)raw_ctx; // make right type
 
     fuprintf(ctx->log, "[cb] framebuffer updated");
