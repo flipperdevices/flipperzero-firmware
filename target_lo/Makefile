@@ -63,6 +63,11 @@ C_SOURCES += ../applications/examples/uart_write.c
 C_DEFS += -DEXAMPLE_UART_WRITE
 endif
 
+ifeq ($(EXAMPLE_IPC), 1)
+C_SOURCES += ../applications/examples/ipc.c
+C_DEFS += -DEXAMPLE_IPC
+endif
+
 # User application
 
 # Add C_SOURCES +=, C_DEFS += or CPP_SOURCES += here
@@ -136,19 +141,24 @@ LDFLAGS = $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-
 all: $(BUILD_DIR)/$(TARGET)
 
 example_blink:
+	rm -f $(BUILD_DIR)/app.o
 	EXAMPLE_BLINK=1 make
-	rm $(BUILD_DIR)/app.o
 	$(BUILD_DIR)/$(TARGET)
 
 
 example_uart_write:
+	rm -f $(BUILD_DIR)/app.o
 	EXAMPLE_UART_WRITE=1 make
-	rm $(BUILD_DIR)/app.o
+	$(BUILD_DIR)/$(TARGET)
+
+example_ipc:
+	rm -f $(BUILD_DIR)/app.o
+	EXAMPLE_IPC=1 make
 	$(BUILD_DIR)/$(TARGET)
 
 test:
+	rm -f $(BUILD_DIR)/app.o
 	TEST=1 make
-	rm $(BUILD_DIR)/app.o
 	$(BUILD_DIR)/$(TARGET)
 
 

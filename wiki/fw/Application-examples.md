@@ -27,3 +27,4 @@ void application_name(void* p) {
 
 * **[Blink](Blink-app)** show how to create app and control GPIO
 * **[UART write](UART-write)** operate with FURI pipe and print some messages
+* **[Inter-process communication](IPC-example)** describes how to interact between application through FURI
