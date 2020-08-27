@@ -19,8 +19,10 @@ bool SDInterface::stopSD() {
   Serial.println("Stopping SD card");
   //delete &buffer_obj;
   //buffer_obj = NULL;
-  this->sd_running = false;
-  SD.end();
+  //this->sd_running = false;
+  //sdcard_uninit();
+  //SD.end();
+  Serial.println(ESP.getFreeHeap());
 }
 
 bool SDInterface::initSD() {
@@ -75,7 +77,7 @@ bool SDInterface::initSD() {
       this->card_sz = sz;
     }
 
-    //buffer_obj = Buffer();
+    buffer_obj = Buffer();
 
     //if (this->supported)
     //  buffer_obj.open(&SD);

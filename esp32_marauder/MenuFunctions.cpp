@@ -263,6 +263,7 @@ void MenuFunctions::battery2(bool initial)
 void MenuFunctions::updateStatusBar()
 {
   uint16_t the_color; 
+  display_obj.tft.setTextSize(1);
 
   // Draw temp info
   if (temp_obj.current_temp < 70)
@@ -320,6 +321,7 @@ void MenuFunctions::updateStatusBar()
 
 void MenuFunctions::drawStatusBar()
 {
+  display_obj.tft.setTextSize(1);
   display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   //display_obj.tft.fillRect(0, STATUS_BAR_WIDTH + 1, 240, 1, TFT_DARKGREY);
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);

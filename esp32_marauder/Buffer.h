@@ -18,6 +18,9 @@ class Buffer {
     void addPacket(uint8_t* buf, uint32_t len);
     void save(fs::FS* fs);
     void forceSave(fs::FS* fs);
+
+    uint32_t bufSizeA = 0;
+    uint32_t bufSizeB = 0;
   private:
     void write(int32_t n);
     void write(uint32_t n);
@@ -26,9 +29,6 @@ class Buffer {
     
     uint8_t* bufA;
     uint8_t* bufB;
-
-    uint32_t bufSizeA = 0;
-    uint32_t bufSizeB = 0;
 
     bool writing = false; // acceppting writes to buffer
     bool useA = true; // writing to bufA or bufB

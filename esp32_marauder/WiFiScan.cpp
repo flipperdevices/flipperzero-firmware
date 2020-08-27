@@ -131,6 +131,9 @@ WiFiScan::WiFiScan()
 // Function to prepare to run a specific scan
 void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 {  
+  Serial.println("bufSizeA: " + (String)buffer_obj.bufSizeA);
+  Serial.println("bufSizeB: " + (String)buffer_obj.bufSizeB);
+  
   //Serial.println("Starting Scan...");
   if (scan_mode == WIFI_SCAN_OFF)
     StopScan(scan_mode);
@@ -165,13 +168,23 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 void WiFiScan::shutdownWiFi() {
   Serial.println("Ahhh yes...promiscuity will end");
   esp_wifi_set_promiscuous(false);
-  WiFi.persistent(false);
+  //Serial.println("WiFi.persistent(false)");
+  //WiFi.persistent(false); // I think this broke something when leaving packet monitor
+  Serial.println("WiFi.disconnect(true);");
   WiFi.disconnect(true);
+  Serial.println("WIFI_OFF");
   WiFi.mode(WIFI_OFF);
 
+  Serial.println("esp_wifi_set_mode(WIFI_MODE_NULL);");
   esp_wifi_set_mode(WIFI_MODE_NULL);
+  Serial.println("esp_wifi_stop();");
   esp_wifi_stop();
+  Serial.println("esp_wifi_deinit();");
   esp_wifi_deinit();
+  Serial.println("Finished stopping WiFi");
+
+  Serial.println("bufSizeA: " + (String)buffer_obj.bufSizeA);
+  Serial.println("bufSizeB: " + (String)buffer_obj.bufSizeB);
 }
 
 // Function to stop all wifi scans
@@ -352,7 +365,7 @@ void WiFiScan::RunInfo()
 }
 
 void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("espressif");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -385,7 +398,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("packet_monitor");
   
   #ifdef TFT_SHIELD
@@ -431,7 +444,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   display_obj.tft.init();
   display_obj.tft.setRotation(1);
   display_obj.tft.fillScreen(TFT_BLACK);
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("eapol");
 
   #ifdef TFT_SHIELD
@@ -459,7 +472,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   display_obj.tftDrawExitScaleButtons();
 
 
-  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
   esp_wifi_init(&cfg);
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -536,7 +549,7 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("pwnagotchi");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -567,7 +580,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 // Function to start running a beacon scan
 void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 {
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("beacon");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -597,7 +610,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 
 void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 {
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("deauth");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
@@ -629,7 +642,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 // Function for running probe request scan
 void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 {
-  sd_obj.startSD();
+  //sd_obj.startSD();
   sd_obj.openCapture("probe");
   
   display_obj.TOP_FIXED_AREA_2 = 48;
