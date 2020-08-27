@@ -50,6 +50,7 @@ bool furi_create(const char* name, void* value, size_t size) {
 
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         records[current_buffer_idx].subscribers[i].allocated = false;
+        records[current_buffer_idx].subscribers[i].ctx = NULL;
     }
 
     current_buffer_idx++;
@@ -62,7 +63,8 @@ FuriRecordSubscriber* furi_open(
     bool solo,
     bool no_mute,
     FlipperRecordCallback value_callback,
-    FlipperRecordStateCallback state_callback
+    FlipperRecordStateCallback state_callback,
+    void* ctx
 ) {
     #ifdef FURI_DEBUG
         printf("[FURI] opening %s record\n", name);
@@ -111,6 +113,7 @@ FuriRecordSubscriber* furi_open(
     subscriber->cb = value_callback;
     subscriber->state_cb = state_callback;
     subscriber->record = record;
+    subscriber->ctx = ctx;
 
     // register record in application
     FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
@@ -152,7 +155,7 @@ static void furi_notify(FuriRecordSubscriber* handler, const void* value, size_t
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         if(handler->record->subscribers[i].allocated) {
             if(handler->record->subscribers[i].cb != NULL) {
-                handler->record->subscribers[i].cb(value, size);
+                handler->record->subscribers[i].cb(value, size, handler->ctx);
             }
         }
     }
