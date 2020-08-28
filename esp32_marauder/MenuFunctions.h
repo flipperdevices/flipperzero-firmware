@@ -72,7 +72,7 @@ PROGMEM static lv_disp_buf_t disp_buf;
 PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
 
 PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
-PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+PROGMEM static void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
@@ -132,6 +132,11 @@ class MenuFunctions
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
     Menu bluetoothScannerMenu;
+    Menu bluetoothGeneralMenu;
+
+    // Settings things menus
+    Menu shutdownWiFiMenu;
+    Menu shutdownBLEMenu;
 
     static void lv_tick_handler();
 

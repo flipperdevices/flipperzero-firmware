@@ -141,7 +141,7 @@ void MenuFunctions::joinWiFiGFX(){
   // Create a keyboard and apply the styles
   kb = lv_keyboard_create(lv_scr_act(), NULL);
   lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
-  lv_obj_set_event_cb(kb, keyboard_event_cb);
+  lv_obj_set_event_cb(kb, join_wifi_keyboard_event_cb);
 
   // Focus it on one of the text areas to start
   lv_keyboard_set_textarea(kb, ta1);
@@ -149,8 +149,8 @@ void MenuFunctions::joinWiFiGFX(){
   
 }
 
-
-void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+// Keyboard callback dedicated to joining wifi
+void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
   extern Display display_obj;
   extern MenuFunctions menu_function_obj;
   extern WiFiScan wifi_scan_obj;
@@ -622,6 +622,11 @@ void MenuFunctions::RunSetup()
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
   bluetoothScannerMenu.list = new LinkedList<MenuNode>();
+  bluetoothGeneralMenu.list = new LinkedList<MenuNode>();
+
+  // Settings stuff
+  shutdownWiFiMenu.list = new LinkedList<MenuNode>();
+  shutdownBLEMenu.list = new LinkedList<MenuNode>();
 
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
@@ -640,6 +645,9 @@ void MenuFunctions::RunSetup()
   wifiGeneralMenu.name = " WiFi General ";
   bluetoothSnifferMenu.name = " Bluetooth Sniffers ";
   bluetoothScannerMenu.name = " Bluetooth Scanners ";
+  bluetoothGeneralMenu.name = " Bluetooth General ";
+  shutdownWiFiMenu.name = " Shutdown WiFi ";
+  shutdownBLEMenu.name = " Shutdown BLE ";
 
   // Build Main Menu
   mainMenu.parentMenu = NULL;
@@ -747,6 +755,15 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
     joinWiFiGFX();
   });
+  addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_ORANGE, NULL, SCANNERS, [this]() {
+    changeMenu(&shutdownWiFiMenu);
+  });
+
+  // Build shutdown wifi menu
+  shutdownWiFiMenu.parentMenu = &wifiGeneralMenu;
+  addNodes(&shutdownWiFiMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(shutdownWiFiMenu.parentMenu);
+  });
 
 
   // Build Bluetooth Menu
@@ -759,6 +776,9 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&bluetoothMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
     changeMenu(&bluetoothScannerMenu);
+  });
+  addNodes(&bluetoothMenu, "General", TFT_PURPLE, NULL, GENERAL_APPS, [this]() {
+    changeMenu(&bluetoothGeneralMenu);
   });
 
   // Build bluetooth sniffer Menu
@@ -781,6 +801,21 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);
+  });
+
+  // Build bluetooth general menu
+  bluetoothGeneralMenu.parentMenu = &bluetoothMenu;
+  addNodes(&bluetoothGeneralMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(bluetoothGeneralMenu.parentMenu);
+  });
+  addNodes(&bluetoothGeneralMenu, "Shutdown BLE", TFT_ORANGE, NULL, SCANNERS, [this]() {
+    changeMenu(&shutdownBLEMenu);
+  });
+
+  // Build shutdown BLE menu
+  shutdownBLEMenu.parentMenu = &bluetoothGeneralMenu;
+  addNodes(&shutdownBLEMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(shutdownBLEMenu.parentMenu);
   });
 
   // General apps menu
