@@ -167,7 +167,7 @@ void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
     printf("LV_EVENT_CANCEL\n");
     //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
     menu_function_obj.deinitLVGL();
-    wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+    //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
     display_obj.exit_draw = true; // set everything back to normal
   }
 }
@@ -757,6 +757,7 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_ORANGE, NULL, SCANNERS, [this]() {
     changeMenu(&shutdownWiFiMenu);
+    wifi_scan_obj.RunShutdownWiFi();
   });
 
   // Build shutdown wifi menu

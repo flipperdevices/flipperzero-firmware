@@ -171,13 +171,15 @@ class WiFiScan
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
 
     void RunSetup();
-    void shutdownWiFi();
-    void shutdownBLE();
+    bool shutdownWiFi();
+    bool shutdownBLE();
     void joinWiFi(String ssid, String password);
     String getStaMAC();
     String getApMAC();
     String freeRAM();
     void RunInfo();
+    void RunShutdownWiFi();
+    void RunShutdownBLE();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);

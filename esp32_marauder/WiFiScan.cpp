@@ -151,8 +151,15 @@ void WiFiScan::joinWiFi(String ssid, String password)
     this->wifi_initialized = true;
     return;
   }
-  else if (WiFi.status() == WL_CONNECTED)
+  else if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("Already connected. Disconnecting...");
     WiFi.disconnect();
+  }
+
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
     
   WiFi.begin(ssid.c_str(), password.c_str());
 
@@ -224,12 +231,12 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   WiFiScan::currentScanMode = scan_mode;
 }
 
-void WiFiScan::shutdownWiFi() {
+bool WiFiScan::shutdownWiFi() {
   if (this->wifi_initialized) {
     Serial.println("Ahhh yes...promiscuity will end");
     esp_wifi_set_promiscuous(false);
     //WiFi.persistent(false);
-    WiFi.disconnect(true);
+    WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
   
     esp_wifi_set_mode(WIFI_MODE_NULL);
@@ -237,12 +244,15 @@ void WiFiScan::shutdownWiFi() {
     esp_wifi_deinit();
   
     this->wifi_initialized = false;
+    return true;
   }
-  else
+  else {
     Serial.println(F("WiFi is not currently running"));
+    return false;
+  }
 }
 
-void WiFiScan::shutdownBLE() {
+bool WiFiScan::shutdownBLE() {
   if (this->ble_initialized) {
     Serial.println("Stopping BLE scan...");
     pBLEScan->stop();
@@ -261,9 +271,12 @@ void WiFiScan::shutdownBLE() {
     //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
   
     this->ble_initialized = false;
+    return true;
   }
-  else
+  else {
     Serial.println(F("BLE is not currently running"));
+    return false;
+  }
 }
 
 // Function to stop all wifi scans
@@ -391,6 +404,35 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
   lv_disp_load_scr(scr);
 
   //display_obj.joinWiFiGFX();
+}
+
+void WiFiScan::RunShutdownWiFi() {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.print(F("Shutting down WiFi..."));
+
+  if (this->wifi_initialized) {
+    this->shutdownWiFi();
+    display_obj.tft.setTextColor(TFT_GREEN);
+    display_obj.tft.println(F("OK"));
+  }
+  else {
+    display_obj.tft.setTextColor(TFT_RED);
+    display_obj.tft.println(F("FAIL"));
+    display_obj.tft.println(F("WiFi not currently initialized"));
+  }
+}
+
+void WiFiScan::RunShutdownBLE() {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
 }
 
 void WiFiScan::RunInfo()
