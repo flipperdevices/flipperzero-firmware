@@ -72,6 +72,11 @@ void application_ipc_display(void* p) {
         queue_buffer, &queue_descriptor
     );
 
+    if(*(int*)event_queue == -1) {
+        fuprintf(log, "[display] cannot create event queue\n");
+        furiac_exit(NULL);
+    }
+
     // save log and event queue in context structure
     IpcCtx ctx = {.event_queue = event_queue, .log = log};
 
@@ -134,7 +139,7 @@ void application_ipc_widget(void* p) {
         furiac_exit(NULL);
     }
 
-    int8_t counter = 0;
+    uint8_t counter = 0;
 
     while(1) {
         delay(100);
