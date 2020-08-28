@@ -14,7 +14,6 @@ extern Display display_obj;
 class SDInterface {
 
   private:
-    bool sd_running = false;
 
   public:
     uint8_t cardType;
@@ -29,8 +28,6 @@ class SDInterface {
   
     bool initSD();
 
-    bool stopSD();
-    bool startSD();
     void addPacket(uint8_t* buf, uint32_t len);
     void openCapture(String file_name = "");
     void runUpdate();
