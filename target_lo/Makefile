@@ -96,7 +96,7 @@ else
     RUST_LIB_PATH = $(RUST_LIB_SRC)/target/$(RUST_LIB_TARGET)/release
 endif
 
-RUST_LIB_CMD = cd $(RUST_LIB_SRC) && cargo build $(RUST_LIB_FLAGS)
+RUST_LIB_CMD = cd $(RUST_LIB_SRC) && cargo build -p flipper-core $(RUST_LIB_FLAGS)
 
 #######################################
 # CFLAGS
@@ -108,7 +108,7 @@ C_INCLUDES =  \
 -IInc \
 -I../applications \
 -I../core \
--I../core-rs/bindings
+-I../core-rs/flipper-core/bindings
 
 # compile gcc flags
 CFLAGS = $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -pthread
