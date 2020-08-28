@@ -4,7 +4,7 @@ bool SDInterface::initSD() {
   String display_string = "";
   
   if (!SD.begin(SD_CS)) {
-    Serial.println("Failed to mount SD Card");
+    Serial.println(F("Failed to mount SD Card"));
     this->supported = false;
     return false;
   }
@@ -12,13 +12,13 @@ bool SDInterface::initSD() {
     this->supported = true;
     this->cardType = SD.cardType();
     if (cardType == CARD_MMC)
-      Serial.println("SD: MMC Mounted");
+      Serial.println(F("SD: MMC Mounted"));
     else if(cardType == CARD_SD)
-        Serial.println("SD: SDSC Mounted");
+        Serial.println(F("SD: SDSC Mounted"));
     else if(cardType == CARD_SDHC)
-        Serial.println("SD: SDHC Mounted");
+        Serial.println(F("SD: SDHC Mounted"));
     else
-        Serial.println("SD: UNKNOWN Card Mounted");
+        Serial.println(F("SD: UNKNOWN Card Mounted"));
 
     //this->cardSizeBT = SD.cardSize();
     //this->cardSizeKB = SD.cardSize() / 1024;
@@ -76,13 +76,13 @@ void SDInterface::runUpdate() {
   display_obj.tft.setTextSize(1);
   display_obj.tft.setTextColor(TFT_WHITE);
 
-  display_obj.tft.println("Opening /update.bin...");
+  display_obj.tft.println(F("Opening /update.bin..."));
   File updateBin = SD.open("/update.bin");
   if (updateBin) {
     if(updateBin.isDirectory()){
       display_obj.tft.setTextColor(TFT_RED);
-      display_obj.tft.println("Error, could not find update.bin");
-      Serial.println("Error, update.bin is not a file");
+      display_obj.tft.println(F("Error, could not find update.bin"));
+      Serial.println(F("Error, update.bin is not a file"));
       display_obj.tft.setTextColor(TFT_WHITE);
       updateBin.close();
       return;
@@ -91,14 +91,14 @@ void SDInterface::runUpdate() {
     size_t updateSize = updateBin.size();
 
     if (updateSize > 0) {
-      display_obj.tft.println("Starting SD Update...");
-      Serial.println("Try to start update");
+      display_obj.tft.println(F("Starting SD Update..."));
+      Serial.println(F("Try to start update"));
       this->performUpdate(updateBin, updateSize);
     }
     else {
       display_obj.tft.setTextColor(TFT_RED);
-      display_obj.tft.println("Error, update.bin is empty");
-      Serial.println("Error, file is empty");
+      display_obj.tft.println(F("Error, update.bin is empty"));
+      Serial.println(F("Error, file is empty"));
       display_obj.tft.setTextColor(TFT_WHITE);
       return;
     }
@@ -106,16 +106,16 @@ void SDInterface::runUpdate() {
     updateBin.close();
     
       // whe finished remove the binary from sd card to indicate end of the process
-    display_obj.tft.println("rebooting...");
-    Serial.println("rebooting...");
+    display_obj.tft.println(F("rebooting..."));
+    Serial.println(F("rebooting..."));
     //SD.remove("/update.bin");      
     delay(1000);
     ESP.restart();
   }
   else {
     display_obj.tft.setTextColor(TFT_RED);
-    display_obj.tft.println("Could not load update.bin from /");
-    Serial.println("Could not load update.bin from sd root");
+    display_obj.tft.println(F("Could not load update.bin from /"));
+    Serial.println(F("Could not load update.bin from sd root"));
     display_obj.tft.setTextColor(TFT_WHITE);
   }
 }
@@ -123,7 +123,7 @@ void SDInterface::runUpdate() {
 void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
   if (Update.begin(updateSize)) {   
     display_obj.tft.println("File size: " + String(updateSize));
-    display_obj.tft.println("Writing file to partition...");
+    display_obj.tft.println(F("Writing file to partition..."));
     size_t written = Update.writeStream(updateSource);
     if (written == updateSize) {
       display_obj.tft.println("Written: " + String(written) + " successfully");
@@ -136,8 +136,8 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
     if (Update.end()) {
       Serial.println("OTA done!");
       if (Update.isFinished()) {
-        display_obj.tft.println("Update complete");
-        Serial.println("Update successfully completed. Rebooting.");
+        display_obj.tft.println(F("Update complete"));
+        Serial.println(F("Update successfully completed. Rebooting."));
       }
       else {
         display_obj.tft.setTextColor(TFT_RED);

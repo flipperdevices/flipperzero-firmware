@@ -165,6 +165,7 @@ class WiFiScan
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
 
+    void shutdownWiFi();
     String getStaMAC();
     String getApMAC();
     String freeRAM();

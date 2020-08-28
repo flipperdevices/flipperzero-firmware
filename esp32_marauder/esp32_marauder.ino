@@ -79,11 +79,11 @@ void setup()
 
   display_obj.tft.println("Started Serial");
   
-  Serial.println("\n\n--------------------------------\n");
-  Serial.println("         ESP32 Marauder      \n");
+  Serial.println(F("\n\n--------------------------------\n"));
+  Serial.println(F("         ESP32 Marauder      \n"));
   Serial.println("            " + display_obj.version_number + "\n");
-  Serial.println("       By: justcallmekoko\n");
-  Serial.println("--------------------------------\n\n");
+  Serial.println(F("       By: justcallmekoko\n"));
+  Serial.println(F("--------------------------------\n\n"));
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
@@ -93,13 +93,13 @@ void setup()
 
   // Do some SD stuff
   if(sd_obj.initSD()) {
-    Serial.println("SD Card supported");
-    display_obj.tft.println("Initialized SD Card");
+    Serial.println(F("SD Card supported"));
+    display_obj.tft.println(F("Initialized SD Card"));
   }
   else {
-    Serial.println("SD Card NOT Supported");
+    Serial.println(F("SD Card NOT Supported"));
     display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-    display_obj.tft.println("Failed to Initialize SD Card");
+    display_obj.tft.println(F("Failed to Initialize SD Card"));
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
   }
 
@@ -117,30 +117,30 @@ void setup()
   Serial.println(wifi_scan_obj.freeRAM());
   battery_obj.RunSetup();
 
-  display_obj.tft.println("Checked battery configuration");
+  display_obj.tft.println(F("Checked battery configuration"));
 
   // Temperature stuff
   Serial.println(wifi_scan_obj.freeRAM());
   temp_obj.RunSetup();
 
-  display_obj.tft.println("Initialized temperature interface");
+  display_obj.tft.println(F("Initialized temperature interface"));
 
   battery_obj.battery_level = battery_obj.getBatteryLevel();
 
   if (battery_obj.i2c_supported) {
-    Serial.println("IP5306 I2C Supported: true");
+    Serial.println(F("IP5306 I2C Supported: true"));
   }
   else
-    Serial.println("IP5306 I2C Supported: false");
+    Serial.println(F("IP5306 I2C Supported: false"));
 
   Serial.println(wifi_scan_obj.freeRAM());
 
   // Do some LED stuff
   led_obj.RunSetup();
 
-  display_obj.tft.println("Initialized LED Interface");
+  display_obj.tft.println(F("Initialized LED Interface"));
 
-  display_obj.tft.println("Starting...");
+  display_obj.tft.println(F("Starting..."));
 
   delay(1000);
 

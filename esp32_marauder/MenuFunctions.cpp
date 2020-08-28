@@ -262,6 +262,7 @@ void MenuFunctions::battery2(bool initial)
 
 void MenuFunctions::updateStatusBar()
 {
+  display_obj.tft.setTextSize(1);
   uint16_t the_color; 
 
   // Draw temp info
@@ -320,6 +321,7 @@ void MenuFunctions::updateStatusBar()
 
 void MenuFunctions::drawStatusBar()
 {
+  display_obj.tft.setTextSize(1);
   display_obj.tft.fillRect(0, 0, 240, STATUS_BAR_WIDTH, STATUSBAR_COLOR);
   //display_obj.tft.fillRect(0, STATUS_BAR_WIDTH + 1, 240, 1, TFT_DARKGREY);
   display_obj.tft.setTextColor(TFT_WHITE, STATUSBAR_COLOR);
@@ -677,10 +679,10 @@ void MenuFunctions::changeMenu(Menu * menu)
 void MenuFunctions::showMenuList(Menu * menu, int layer)
 {
   // Iterate through all of the menu nodes in the menu
-  for (int i = 0; i < menu->list->size(); i++)
+  for (uint8_t i = 0; i < menu->list->size(); i++)
   {
     // Depending on layer, indent
-    for (int x = 0; x < layer * 4; x++)
+    for (uint8_t x = 0; x < layer * 4; x++)
       Serial.print(" ");
     Serial.print("Node: ");
     Serial.println(menu->list->get(i).name);
@@ -732,7 +734,7 @@ void MenuFunctions::buildButtons(Menu * menu)
 
 void MenuFunctions::displayCurrentMenu()
 {
-  Serial.println("Displaying current menu...");
+  Serial.println(F("Displaying current menu..."));
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   this->drawStatusBar();
