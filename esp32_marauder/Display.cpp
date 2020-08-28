@@ -7,9 +7,9 @@ Big thanks to bodmer for having great TFT and JPEG libraries
 https://github.com/bodmer
 */
 
-//PROGMEM lv_obj_t * slider_label;
-//PROGMEM lv_obj_t * ta1;
-//PROGMEM lv_obj_t * ta2;
+PROGMEM lv_obj_t * slider_label;
+PROGMEM lv_obj_t * ta1;
+PROGMEM lv_obj_t * ta2;
 
 Display::Display()
 {
@@ -56,6 +56,8 @@ void Display::RunSetup()
     while (1) yield(); // Stay here twiddling thumbs waiting
   }
 
+  this->initLVGL();
+
 
   // Draw the title screen
   //drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
@@ -69,14 +71,14 @@ void Display::RunSetup()
 }
 
 /* Interrupt driven periodic handler */
-/*
+
 void Display::lv_tick_handler()
 {
   lv_tick_inc(LVGL_TICK_PERIOD);
-}*/
+}
 
 /* Display flushing */
-/*void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
   extern Display display_obj;
   uint16_t c;
@@ -92,9 +94,9 @@ void Display::lv_tick_handler()
   }
   display_obj.tft.endWrite();
   lv_disp_flush_ready(disp);
-}*/
+}
 
-/*
+
 bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
 {
   extern Display display_obj;
@@ -135,7 +137,7 @@ bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
   }
 
   return false;
-}*/
+}
 
 void Display::tftDrawGraphObjects(byte x_scale)
 {
@@ -816,7 +818,7 @@ void Display::buildBanner(String msg, int xpos)
   img.print(msg);
 }
 
-/*
+
 void Display::initLVGL() {
   tick.attach_ms(LVGL_TICK_PERIOD, lv_tick_handler);
   
@@ -837,15 +839,16 @@ void Display::initLVGL() {
   indev_drv.type = LV_INDEV_TYPE_POINTER;    
   indev_drv.read_cb = my_touchpad_read;      
   lv_indev_drv_register(&indev_drv);         
-}*/
-
-/*
-void Display::deinitLVGL() {
-  lv_deinit();
 }
-*/
 
-/*
+
+void Display::deinitLVGL() {
+  Serial.println(F("Deinit LVGL"));
+  //lv_deinit();
+}
+
+
+
 void Display::joinWiFiGFX(){
 
   // Create one text area
@@ -864,8 +867,8 @@ void Display::joinWiFiGFX(){
 
   // Create second text area
   ta2 = lv_textarea_create(lv_scr_act(), ta1);
-  lv_textarea_set_pwd_mode(ta2, true);
-  lv_textarea_set_pwd_show_time(ta2, 1000);
+  //lv_textarea_set_pwd_mode(ta2, true); // This shit makes it so backspace does not work
+  //lv_textarea_set_pwd_show_time(ta2, 1000);
   lv_textarea_set_cursor_hidden(ta2, true);
   lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_RIGHT, -5, 20);
 
@@ -883,10 +886,11 @@ void Display::joinWiFiGFX(){
   lv_keyboard_set_textarea(kb, ta1);
   lv_keyboard_set_cursor_manage(kb, true);
   
-}*/
+}
 
-/*
+
 void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+  extern Display display_obj;
   lv_keyboard_def_event_cb(kb, event);
   if(event == LV_EVENT_APPLY){
     printf("LV_EVENT_APPLY\n");
@@ -898,11 +902,13 @@ void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
     //joinWiFi(ta1_text, ta2_text);
   }else if(event == LV_EVENT_CANCEL){
     printf("LV_EVENT_CANCEL\n");
-    lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+    //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+    display_obj.deinitLVGL();
+    display_obj.exit_draw = true; // set everything back to normal
   }
-}*/
+}
 
-/*
+
 void ta_event_cb(lv_obj_t * ta, lv_event_t event)
 {
   if(event == LV_EVENT_CLICKED) {
@@ -916,11 +922,12 @@ void ta_event_cb(lv_obj_t * ta, lv_event_t event)
   //    printf("Ready\n");
   //  }
   //}
-}*/
+}
 
-void Display::main()
+void Display::main(uint8_t scan_mode)
 {  
-  //lv_task_handler();
+  if (scan_mode == LV_JOIN_WIFI)
+    lv_task_handler();
   return;
 }
 // End SPIFFS_functions

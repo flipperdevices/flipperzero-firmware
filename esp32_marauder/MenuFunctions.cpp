@@ -10,9 +10,12 @@ MenuFunctions::MenuFunctions()
 // Function to check menu input
 void MenuFunctions::main(uint32_t currentTime)
 {
+  // Some function exited and we need to go back to normal
   if (display_obj.exit_draw) {
+    wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     display_obj.exit_draw = false;
-    changeMenu(current_menu);
+    this->orientDisplay();
+    //changeMenu(current_menu);
   }
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) ||
@@ -25,13 +28,15 @@ void MenuFunctions::main(uint32_t currentTime)
     //{
     //  this->drawStatusBar();
     //}
-    display_obj.updateBanner(current_menu->name);
+    if (wifi_scan_obj.currentScanMode != LV_JOIN_WIFI)
+      display_obj.updateBanner(current_menu->name);
   }
 
   if (currentTime != 0) {
     if (currentTime - initTime >= 100) {
       this->initTime = millis();
-      this->updateStatusBar();
+      if (wifi_scan_obj.currentScanMode != LV_JOIN_WIFI)
+        this->updateStatusBar();
     }
   }
 
@@ -380,6 +385,7 @@ void MenuFunctions::drawStatusBar()
 
 void MenuFunctions::orientDisplay()
 {
+  Serial.println(F("orientDisplay()"));
   display_obj.tft.init();
 
   display_obj.tft.setRotation(0); // Portrait
@@ -603,7 +609,7 @@ void MenuFunctions::RunSetup()
     changeMenu(&infoMenu);
     wifi_scan_obj.RunInfo();
   });
-  //addNodes(&deviceMenu, "Join WiFi", TFT_YELLOW, NULL, SNIFFERS, [this](){display_obj.clearScreen(); wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW);});
+  addNodes(&deviceMenu, "Join WiFi", TFT_YELLOW, NULL, SNIFFERS, [this](){display_obj.clearScreen(); wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW);});
 
   // Select update
   whichUpdateMenu.parentMenu = &deviceMenu;
@@ -710,7 +716,7 @@ void MenuFunctions::buildButtons(Menu * menu)
   {
     //for (int i = 0; i < sizeof(key); i++)
     //  key[i] = NULL;
-    for (int i = 0; i < menu->list->size(); i++)
+    for (uint8_t i = 0; i < menu->list->size(); i++)
     {
       TFT_eSPI_Button new_button;
       char buf[menu->list->get(i).name.length() + 1] = {};
@@ -750,7 +756,7 @@ void MenuFunctions::displayCurrentMenu()
   if (current_menu->list != NULL)
   {
     display_obj.tft.setFreeFont(MENU_FONT);
-    for (int i = 0; i < current_menu->list->size(); i++)
+    for (uint8_t i = 0; i < current_menu->list->size(); i++)
     {
       //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);

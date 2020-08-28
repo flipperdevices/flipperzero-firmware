@@ -41,7 +41,7 @@
 #define BT_SCAN_ALL 10
 #define BT_SCAN_SKIMMERS 11
 #define WIFI_SCAN_ESPRESSIF 12
-//#define LV_JOIN_WIFI 12
+#define LV_JOIN_WIFI 13
 
 #define GRAPH_REFRESH 100
 
@@ -148,7 +148,7 @@ class WiFiScan
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
     void RunPacketMonitor(uint8_t scan_mode, uint16_t color);
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
-    //void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
+    void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
 
   public:
@@ -163,9 +163,13 @@ class WiFiScan
     String free_ram = "";
     String old_free_ram = "";
 
+    //lv_obj_t * scr = lv_cont_create(NULL, NULL);
+
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
 
+    void RunSetup();
     void shutdownWiFi();
+    void shutdownBLE();
     String getStaMAC();
     String getApMAC();
     String freeRAM();

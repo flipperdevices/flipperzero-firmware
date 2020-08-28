@@ -42,8 +42,8 @@ class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
           Serial.print(advertisedDevice->getAddress().toString().c_str());
         }
 
-        int temp_len = display_string.length();
-        for (int i = 0; i < 40 - temp_len; i++)
+        uint8_t temp_len = display_string.length();
+        for (uint8_t i = 0; i < 40 - temp_len; i++)
         {
           display_string.concat(" ");
         }
@@ -77,15 +77,15 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
         {
           //display_string.concat(advertisedDevice.getName().c_str());
           Serial.print(advertisedDevice->getName().c_str());
-          for(int i = 0; i < bad_list_length; i++)
+          for(uint8_t i = 0; i < bad_list_length; i++)
           {
             if(strcmp(advertisedDevice->getName().c_str(), bad_list[i].c_str()) == 0)
             {
               display_string.concat("Potential Skimmer: ");
               display_string.concat(" ");
               display_string.concat(advertisedDevice->getName().c_str());
-              int temp_len = display_string.length();
-              for (int i = 0; i < 40 - temp_len; i++)
+              uint8_t temp_len = display_string.length();
+              for (uint8_t i = 0; i < 40 - temp_len; i++)
               {
                 display_string.concat(" ");
               }
@@ -128,6 +128,13 @@ WiFiScan::WiFiScan()
 {
 }
 
+void WiFiScan::RunSetup() {
+  BLEDevice::init("");
+  pBLEScan = BLEDevice::getScan(); //create new scan
+  
+  this->shutdownBLE();
+}
+
 // Function to prepare to run a specific scan
 void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 {  
@@ -156,8 +163,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_ESPRESSIF)
     RunEspressifScan(scan_mode, color);
-  //else if (scan_mode == LV_JOIN_WIFI)
-  //  RunLvJoinWiFi(scan_mode, color);
+  else if (scan_mode == LV_JOIN_WIFI)
+    RunLvJoinWiFi(scan_mode, color);
 
   WiFiScan::currentScanMode = scan_mode;
 }
@@ -172,6 +179,24 @@ void WiFiScan::shutdownWiFi() {
   esp_wifi_set_mode(WIFI_MODE_NULL);
   esp_wifi_stop();
   esp_wifi_deinit();
+}
+
+void WiFiScan::shutdownBLE() {
+  Serial.println("Stopping BLE scan...");
+  pBLEScan->stop();
+  Serial.println("BLE Scan Stopped");
+  
+  
+  Serial.println("Clearing BLE Results...");
+  pBLEScan->clearResults();
+  Serial.println("Deinitializing BT Controller...");
+  BLEDevice::deinit();
+  //Serial.println("Disable and Deinit BLE...");
+  //esp_bt_controller_disable();
+  //esp_bt_controller_deinit();
+  //Serial.println("Releasing BLE Memory...");
+  //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
+  //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
 }
 
 // Function to stop all wifi scans
@@ -195,14 +220,14 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   else if ((currentScanMode == BT_SCAN_ALL) ||
   (currentScanMode == BT_SCAN_SKIMMERS))
   {
-    Serial.println("Stopping BLE scan...");
-    pBLEScan->stop();
-    Serial.println("BLE Scan Stopped");
+    //Serial.println("Stopping BLE scan...");
+    //pBLEScan->stop();
+    //Serial.println("BLE Scan Stopped");
     
     
-    Serial.println("Clearing BLE Results...");
-    pBLEScan->clearResults();
-    Serial.println("Deinitializing BT Controller...");
+    //Serial.println("Clearing BLE Results...");
+    //pBLEScan->clearResults();
+    /*Serial.println("Deinitializing BT Controller...");
     BLEDevice::deinit();
     //Serial.println("Disable and Deinit BLE...");
     //esp_bt_controller_disable();
@@ -210,7 +235,8 @@ void WiFiScan::StopScan(uint8_t scan_mode)
     //Serial.println("Releasing BLE Memory...");
     //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
     //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
-    
+    */
+    this->shutdownBLE();
     
   }
 
@@ -276,7 +302,7 @@ String WiFiScan::freeRAM()
   return String(s);
 }
 
-/*
+
 void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
 
   display_obj.tft.init();
@@ -291,13 +317,13 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
   #endif
   display_obj.tft.setTouch(calData);
   
-  display_obj.initLVGL();
+  //display_obj.initLVGL();
 
   lv_obj_t * scr = lv_cont_create(NULL, NULL);
   lv_disp_load_scr(scr);
 
   display_obj.joinWiFiGFX();
-}*/
+}
 
 void WiFiScan::RunInfo()
 {

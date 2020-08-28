@@ -8,13 +8,31 @@
 //#include <SimpleList.h>
 #include <LinkedList.h>
 #include <SPI.h>
-//#include <lvgl.h>
+#include <lvgl.h>
 #include <Ticker.h>
 //#include <M5Stack.h>
 #include "SPIFFS.h"
 #include "Assets.h"
 
 #include <TFT_eSPI.h>
+
+// WiFi stuff
+#define OTA_UPDATE 100
+#define SHOW_INFO 101
+#define WIFI_SCAN_OFF 0
+#define WIFI_SCAN_PROBE 1
+#define WIFI_SCAN_AP 2
+#define WIFI_SCAN_PWN 3
+#define WIFI_SCAN_EAPOL 4
+#define WIFI_SCAN_DEAUTH 5
+#define WIFI_SCAN_ALL 6
+#define WIFI_PACKET_MONITOR 7
+#define WIFI_ATTACK_BEACON_SPAM 8
+#define WIFI_ATTACK_RICK_ROLL 9
+#define BT_SCAN_ALL 10
+#define BT_SCAN_SKIMMERS 11
+#define WIFI_SCAN_ESPRESSIF 12
+#define LV_JOIN_WIFI 13
 
 //#define TFT_SHIELD
 #define TFT_DIY
@@ -36,21 +54,21 @@
 //#define MENU_FONT &FreeSansBold9pt7b
 #define BUTTON_ARRAY_LEN 7
 #define STATUS_BAR_WIDTH 16
-//#define LVGL_TICK_PERIOD 6
+#define LVGL_TICK_PERIOD 6
 
 #define STATUSBAR_COLOR 0x4A49
 
-//PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
-//PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
+PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
+PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
 
-//PROGMEM static lv_disp_buf_t disp_buf;
-//PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
+PROGMEM static lv_disp_buf_t disp_buf;
+PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
 
-//PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
-//PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
+PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
-//PROGMEM static lv_obj_t *kb;
+PROGMEM static lv_obj_t *kb;
 
 class Display
 {
@@ -68,7 +86,7 @@ class Display
     //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
     //void changeMenu(Menu* menu);
     //void showMenuList(Menu* menu, int layer);
-    //static void lv_tick_handler();
+    static void lv_tick_handler();
 
   public:
     Display();
@@ -112,9 +130,9 @@ class Display
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
-    //void initLVGL();
-    //void deinitLVGL();
-    //void joinWiFiGFX();
+    void initLVGL();
+    void deinitLVGL();
+    void joinWiFiGFX();
     void tftDrawGraphObjects(byte x_scale);
     void tftDrawEapolColorKey();
     void tftDrawColorKey();
@@ -134,7 +152,7 @@ class Display
     void jpegRender(int xpos, int ypos);
     void listDir(fs::FS &fs, const char * dirname, uint8_t levels);
     void listFiles();
-    void main();
+    void main(uint8_t scan_mode);
     void RunSetup();
     void scrollAddress(uint16_t vsp);
     int scroll_line(uint32_t color);

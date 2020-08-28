@@ -87,6 +87,8 @@ void setup()
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
+  wifi_scan_obj.RunSetup();
+
   Serial.println(wifi_scan_obj.freeRAM());
 
   display_obj.tft.println("Checked RAM");
@@ -173,7 +175,7 @@ void loop()
   //    (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   if (!display_obj.draw_tft)
   {
-    display_obj.main(); 
+    display_obj.main(wifi_scan_obj.currentScanMode); 
     wifi_scan_obj.main(currentTime);
     sd_obj.main();
     battery_obj.main(currentTime);
