@@ -147,6 +147,7 @@ void WiFiScan::joinWiFi(String ssid, String password)
     lv_obj_set_width(mbox1, 200);
     //lv_obj_set_event_cb(mbox1, event_handler);
     lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0); /*Align to the corner*/
+    this->wifi_initialized = true;
     return;
   }
   else if (WiFi.status() == WL_CONNECTED)
@@ -168,6 +169,7 @@ void WiFiScan::joinWiFi(String ssid, String password)
       lv_obj_set_width(mbox1, 200);
       //lv_obj_set_event_cb(mbox1, event_handler);
       lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0); /*Align to the corner*/
+      WiFi.mode(WIFI_OFF);
       return;
     }
   }
@@ -184,6 +186,7 @@ void WiFiScan::joinWiFi(String ssid, String password)
   Serial.println("\nConnected to the WiFi network");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  this->wifi_initialized = true;
 }
 
 // Function to prepare to run a specific scan
@@ -221,33 +224,45 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 }
 
 void WiFiScan::shutdownWiFi() {
-  Serial.println("Ahhh yes...promiscuity will end");
-  esp_wifi_set_promiscuous(false);
-  //WiFi.persistent(false);
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
-
-  esp_wifi_set_mode(WIFI_MODE_NULL);
-  esp_wifi_stop();
-  esp_wifi_deinit();
+  if (this->wifi_initialized) {
+    Serial.println("Ahhh yes...promiscuity will end");
+    esp_wifi_set_promiscuous(false);
+    //WiFi.persistent(false);
+    WiFi.disconnect(true);
+    WiFi.mode(WIFI_OFF);
+  
+    esp_wifi_set_mode(WIFI_MODE_NULL);
+    esp_wifi_stop();
+    esp_wifi_deinit();
+  
+    this->wifi_initialized = false;
+  }
+  else
+    Serial.println(F("WiFi is not currently running"));
 }
 
 void WiFiScan::shutdownBLE() {
-  Serial.println("Stopping BLE scan...");
-  pBLEScan->stop();
-  Serial.println("BLE Scan Stopped");
+  if (this->ble_initialized) {
+    Serial.println("Stopping BLE scan...");
+    pBLEScan->stop();
+    Serial.println("BLE Scan Stopped");
+    
+    
+    Serial.println("Clearing BLE Results...");
+    pBLEScan->clearResults();
+    Serial.println("Deinitializing BT Controller...");
+    BLEDevice::deinit();
+    //Serial.println("Disable and Deinit BLE...");
+    //esp_bt_controller_disable();
+    //esp_bt_controller_deinit();
+    //Serial.println("Releasing BLE Memory...");
+    //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
+    //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
   
-  
-  Serial.println("Clearing BLE Results...");
-  pBLEScan->clearResults();
-  Serial.println("Deinitializing BT Controller...");
-  BLEDevice::deinit();
-  //Serial.println("Disable and Deinit BLE...");
-  //esp_bt_controller_disable();
-  //esp_bt_controller_deinit();
-  //Serial.println("Releasing BLE Memory...");
-  //esp_bt_controller_mem_release(ESP_BT_MODE_BLE);
-  //Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
+    this->ble_initialized = false;
+  }
+  else
+    Serial.println(F("BLE is not currently running"));
 }
 
 // Function to stop all wifi scans
@@ -447,6 +462,7 @@ void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&espressifSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -492,6 +508,7 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&wifiSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   uint32_t initTime = millis();
 }
 
@@ -538,6 +555,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&eapolSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -563,6 +581,7 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
@@ -595,6 +614,7 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
@@ -626,6 +646,7 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&pwnSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -656,6 +677,7 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&beaconSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -685,6 +707,7 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&deauthSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -716,6 +739,7 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
   esp_wifi_set_promiscuous_filter(&filt);
   esp_wifi_set_promiscuous_rx_cb(&probeSnifferCallback);
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
   initTime = millis();
 }
 
@@ -782,6 +806,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
   pBLEScan->setWindow(99);  // less or equal setInterval value
   pBLEScan->start(0, scanCompleteCB);
   Serial.println("Started BLE Scan");
+  this->ble_initialized = true;
   initTime = millis();
 }
 

@@ -159,6 +159,8 @@ class WiFiScan
     int old_channel = 0;
 
     bool orient_display = false;
+    bool wifi_initialized = false;
+    bool ble_initialized = false;
 
     String free_ram = "";
     String old_free_ram = "";

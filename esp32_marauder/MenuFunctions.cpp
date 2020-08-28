@@ -617,6 +617,7 @@ void MenuFunctions::RunSetup()
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
   wifiScannerMenu.list = new LinkedList<MenuNode>();
   wifiAttackMenu.list = new LinkedList<MenuNode>();
+  //wifiGeneralMenu.list = new LinkedList<MenuNode>();
 
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
@@ -636,6 +637,7 @@ void MenuFunctions::RunSetup()
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiScannerMenu.name = " WiFi Scanners";
   wifiAttackMenu.name = " WiFi Attacks ";
+  //wifiGeneralMenu.name = " WiFi General ";
   bluetoothSnifferMenu.name = " Bluetooth Sniffers ";
   bluetoothScannerMenu.name = " Bluetooth Scanners ";
 
@@ -671,6 +673,9 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiMenu, "Attacks", TFT_RED, NULL, ATTACKS, [this]() {
     changeMenu(&wifiAttackMenu);
   });
+  //addNodes(&wifiMenu, "General", TFT_PURPLE, NULL, GENERAL_APPS, [this]() {
+  //  changeMenu(&wifiGeneralMenu);
+  //});
 
   // Build WiFi sniffer Menu
   wifiSnifferMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -730,12 +735,18 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);
   });
-  addNodes(&wifiAttackMenu, "Join WiFi", TFT_DARKCYAN, NULL, SNIFFERS, [this](){
-    display_obj.clearScreen(); 
-    wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
-    wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
-    joinWiFiGFX();
-  });
+
+  // Build WiFi General menu
+  //wifiGeneralMenu.parentMenu = &wifiMenu;
+  //addNodes(&wifiGeneralMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+  //  changeMenu(wifiGeneralMenu.parentMenu);
+  //});
+  //addNodes(&wifiGeneralMenu, "Join WiFi", TFT_DARKCYAN, NULL, SNIFFERS, [this](){
+  //  display_obj.clearScreen(); 
+  //  wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
+  //  wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
+  //  joinWiFiGFX();
+  //});
 
 
   // Build Bluetooth Menu

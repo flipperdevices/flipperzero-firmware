@@ -127,6 +127,7 @@ class MenuFunctions
     Menu wifiSnifferMenu;
     Menu wifiScannerMenu;
     Menu wifiAttackMenu;
+    //Menu wifiGeneralMenu;
 
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
