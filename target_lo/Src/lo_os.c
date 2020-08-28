@@ -4,6 +4,9 @@
 #include <pthread.h>
 #include <errno.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
 void osDelay(uint32_t ms) {
     // printf("[DELAY] %d ms\n", ms);
@@ -100,11 +103,20 @@ BaseType_t xQueueReceive(
     return pdFALSE;
 }
 
+static uint32_t queue_global_id = 0;
+
 QueueHandle_t xQueueCreateStatic(
     UBaseType_t uxQueueLength,
     UBaseType_t uxItemSize,
     uint8_t* pucQueueStorageBuffer,
     StaticQueue_t *pxQueueBuffer
 ) {
-    return NULL;
+    int* msgid = malloc(sizeof(int));
+
+    key_t key = queue_global_id;
+    queue_global_id++;
+
+    *msgid = msgget(key, IPC_CREAT);
+
+    return (QueueHandle_t)msgid;
 }
