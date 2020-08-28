@@ -82,7 +82,7 @@ class WiFiScan
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
     BLEScan* pBLEScan;
 
-    String connected_network = "";
+    //String connected_network = "";
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
 
     char* rick_roll[8] = {
@@ -162,6 +162,7 @@ class WiFiScan
 
     String free_ram = "";
     String old_free_ram = "";
+    String connected_network = "";
 
     //lv_obj_t * scr = lv_cont_create(NULL, NULL);
 
@@ -170,6 +171,7 @@ class WiFiScan
     void RunSetup();
     void shutdownWiFi();
     void shutdownBLE();
+    void joinWiFi(String ssid, String password);
     String getStaMAC();
     String getApMAC();
     String freeRAM();

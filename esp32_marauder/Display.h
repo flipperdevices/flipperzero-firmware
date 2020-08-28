@@ -58,6 +58,7 @@
 
 #define STATUSBAR_COLOR 0x4A49
 
+/*
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
 
@@ -69,6 +70,7 @@ PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
+*/
 
 class Display
 {
@@ -86,11 +88,11 @@ class Display
     //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
     //void changeMenu(Menu* menu);
     //void showMenuList(Menu* menu, int layer);
-    static void lv_tick_handler();
+    //static void lv_tick_handler();
 
   public:
     Display();
-    Ticker tick;
+    //Ticker tick;
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
@@ -130,9 +132,9 @@ class Display
     // We can speed up scrolling of short text lines by just blanking the character we drew
     int blank[19]; // We keep all the strings pixel lengths to optimise the speed of the top line blanking
 
-    void initLVGL();
-    void deinitLVGL();
-    void joinWiFiGFX();
+    //void initLVGL();
+    //void deinitLVGL();
+    //void joinWiFiGFX();
     void tftDrawGraphObjects(byte x_scale);
     void tftDrawEapolColorKey();
     void tftDrawColorKey();

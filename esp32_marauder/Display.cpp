@@ -7,9 +7,9 @@ Big thanks to bodmer for having great TFT and JPEG libraries
 https://github.com/bodmer
 */
 
-PROGMEM lv_obj_t * slider_label;
-PROGMEM lv_obj_t * ta1;
-PROGMEM lv_obj_t * ta2;
+//PROGMEM lv_obj_t * slider_label;
+//PROGMEM lv_obj_t * ta1;
+//PROGMEM lv_obj_t * ta2;
 
 Display::Display()
 {
@@ -56,7 +56,7 @@ void Display::RunSetup()
     while (1) yield(); // Stay here twiddling thumbs waiting
   }
 
-  this->initLVGL();
+  //this->initLVGL();
 
 
   // Draw the title screen
@@ -71,13 +71,14 @@ void Display::RunSetup()
 }
 
 /* Interrupt driven periodic handler */
-
+/*
 void Display::lv_tick_handler()
 {
   lv_tick_inc(LVGL_TICK_PERIOD);
-}
+}*/
 
 /* Display flushing */
+/*
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
   extern Display display_obj;
@@ -137,7 +138,7 @@ bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
   }
 
   return false;
-}
+}*/
 
 void Display::tftDrawGraphObjects(byte x_scale)
 {
@@ -818,7 +819,7 @@ void Display::buildBanner(String msg, int xpos)
   img.print(msg);
 }
 
-
+/*
 void Display::initLVGL() {
   tick.attach_ms(LVGL_TICK_PERIOD, lv_tick_handler);
   
@@ -922,7 +923,7 @@ void ta_event_cb(lv_obj_t * ta, lv_event_t event)
   //    printf("Ready\n");
   //  }
   //}
-}
+}*/
 
 void Display::main(uint8_t scan_mode)
 {  

@@ -135,6 +135,57 @@ void WiFiScan::RunSetup() {
   this->shutdownBLE();
 }
 
+void WiFiScan::joinWiFi(String ssid, String password)
+{
+  static const char * btns[] ={"Close", ""};
+  int count = 0;
+  
+  if ((WiFi.status() == WL_CONNECTED) && (ssid == connected_network) && (ssid != "")) {
+    lv_obj_t * mbox1 = lv_msgbox_create(lv_scr_act(), NULL);
+    lv_msgbox_set_text(mbox1, "Already Connected");
+    lv_msgbox_add_btns(mbox1, btns);
+    lv_obj_set_width(mbox1, 200);
+    //lv_obj_set_event_cb(mbox1, event_handler);
+    lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0); /*Align to the corner*/
+    return;
+  }
+  else if (WiFi.status() == WL_CONNECTED)
+    WiFi.disconnect();
+    
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    count++;
+    if (count == 10)
+    {
+      Serial.println("\nCould not connect to WiFi network");
+      lv_obj_t * mbox1 = lv_msgbox_create(lv_scr_act(), NULL);
+      lv_msgbox_set_text(mbox1, "Failed to connect");
+      lv_msgbox_add_btns(mbox1, btns);
+      lv_obj_set_width(mbox1, 200);
+      //lv_obj_set_event_cb(mbox1, event_handler);
+      lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0); /*Align to the corner*/
+      return;
+    }
+  }
+
+  lv_obj_t * mbox1 = lv_msgbox_create(lv_scr_act(), NULL);
+  lv_msgbox_set_text(mbox1, "Connected");
+  lv_msgbox_add_btns(mbox1, btns);
+  lv_obj_set_width(mbox1, 200);
+  //lv_obj_set_event_cb(mbox1, event_handler);
+  lv_obj_align(mbox1, NULL, LV_ALIGN_CENTER, 0, 0); /*Align to the corner*/
+
+  connected_network = ssid;
+  
+  Serial.println("\nConnected to the WiFi network");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
 // Function to prepare to run a specific scan
 void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 {  
@@ -211,7 +262,8 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
-  (currentScanMode == WIFI_PACKET_MONITOR))
+  (currentScanMode == WIFI_PACKET_MONITOR) ||
+  (currentScanMode == LV_JOIN_WIFI))
   {
     this->shutdownWiFi();
   }
@@ -322,7 +374,7 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
   lv_obj_t * scr = lv_cont_create(NULL, NULL);
   lv_disp_load_scr(scr);
 
-  display_obj.joinWiFiGFX();
+  //display_obj.joinWiFiGFX();
 }
 
 void WiFiScan::RunInfo()

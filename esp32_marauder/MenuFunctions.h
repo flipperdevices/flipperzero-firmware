@@ -65,6 +65,18 @@ extern BatteryInterface battery_obj;
 #define PWNAGOTCHI 24
 #define ESPRESSIF 25
 
+PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
+PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
+
+PROGMEM static lv_disp_buf_t disp_buf;
+PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
+
+PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
+PROGMEM static void keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+
+// lvgl stuff
+PROGMEM static lv_obj_t *kb;
+
 struct Menu;
 
 // Individual Nodes of a menu
@@ -120,6 +132,8 @@ class MenuFunctions
     Menu bluetoothSnifferMenu;
     Menu bluetoothScannerMenu;
 
+    static void lv_tick_handler();
+
     // Menu icons
 
 
@@ -136,8 +150,14 @@ class MenuFunctions
   public:
     MenuFunctions();
 
+    Ticker tick;
+
     uint16_t x = -1, y = -1;
     boolean pressed = false;
+
+    void initLVGL();
+    void deinitLVGL();
+    void joinWiFiGFX();
 
     void buildButtons(Menu* menu);
     void changeMenu(Menu* menu);
