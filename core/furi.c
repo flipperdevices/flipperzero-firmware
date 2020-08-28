@@ -155,7 +155,11 @@ static void furi_notify(FuriRecordSubscriber* handler, const void* value, size_t
     for(size_t i = 0; i < MAX_RECORD_SUBSCRIBERS; i++) {
         if(handler->record->subscribers[i].allocated) {
             if(handler->record->subscribers[i].cb != NULL) {
-                handler->record->subscribers[i].cb(value, size, handler->ctx);
+                handler->record->subscribers[i].cb(
+                    value,
+                    size,
+                    handler->record->subscribers[i].ctx
+                );
             }
         }
     }
@@ -169,7 +173,16 @@ void* furi_take(FuriRecordSubscriber* handler) {
 }
 
 void furi_give(FuriRecordSubscriber* handler) {
+    if(handler == NULL || handler->record == NULL) return;
+
     // release mutex
+}
+
+void furi_commit(FuriRecordSubscriber* handler) {
+    if(handler == NULL || handler->record == NULL) return;
+
+    furi_give(handler);
+    furi_notify(handler, handler->record->value, handler->record->size);
 }
 
 bool furi_read(FuriRecordSubscriber* handler, void* value, size_t size) {

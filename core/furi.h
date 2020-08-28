@@ -157,3 +157,8 @@ void* furi_take(FuriRecordSubscriber* record);
 unlock value mutex.
 */
 void furi_give(FuriRecordSubscriber* record);
+
+/*!
+unlock value mutex and notify subscribers that data is chaned.
+*/
+void furi_commit(FuriRecordSubscriber* handler);

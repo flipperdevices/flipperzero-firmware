@@ -1,7 +1,3 @@
-One of the most important component of Flipper Core is [FURI](FURI) (Flipper Universal Registry Implementation). It helps control the applications flow, make dynamic linking and interaction between applications.
-
-In fact, FURI is just wrapper around RTOS thread management and mutexes, and callback management.
-
 In this article we create few application, interact between apps, use OS functions and interact with HAL.
 
 # General agreements
