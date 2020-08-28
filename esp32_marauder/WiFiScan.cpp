@@ -131,6 +131,7 @@ WiFiScan::WiFiScan()
 void WiFiScan::RunSetup() {
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
+  this->ble_initialized = true;
   
   this->shutdownBLE();
 }
