@@ -19,9 +19,9 @@ bool SDInterface::stopSD() {
   Serial.println("Stopping SD card");
   //delete &buffer_obj;
   //buffer_obj = NULL;
-  this->sd_running = false;
+  //this->sd_running = false;
   //sdcard_uninit();
-  SD.end();
+  //SD.end();
   Serial.println(ESP.getFreeHeap());
 }
 
