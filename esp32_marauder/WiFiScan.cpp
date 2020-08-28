@@ -433,6 +433,19 @@ void WiFiScan::RunShutdownBLE() {
   display_obj.tft.setCursor(0, 100);
   display_obj.tft.setTextSize(1);
   display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.print(F("Shutting down BLE..."));
+
+  if (this->ble_initialized) {
+    this->shutdownBLE();
+    display_obj.tft.setTextColor(TFT_GREEN);
+    display_obj.tft.println(F("OK"));
+  }
+  else {
+    display_obj.tft.setTextColor(TFT_RED);
+    display_obj.tft.println(F("FAIL"));
+    display_obj.tft.println(F("BLE not currently initialized"));
+  }
 }
 
 void WiFiScan::RunInfo()

@@ -811,6 +811,7 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&bluetoothGeneralMenu, "Shutdown BLE", TFT_ORANGE, NULL, SCANNERS, [this]() {
     changeMenu(&shutdownBLEMenu);
+    wifi_scan_obj.RunShutdownBLE();
   });
 
   // Build shutdown BLE menu
