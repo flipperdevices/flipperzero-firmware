@@ -7,6 +7,9 @@ edition = "2018"
 [lib]
 crate-type = ["staticlib"]
 
+[target.'cfg(target_arch = "arm")'.dependencies]
+flipper-f1-sys = { path = "../flipper-f1-sys" }
+
 [build-dependencies]
 cbindgen = "0.14"
 
