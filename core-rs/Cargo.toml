@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "flipper-core",
+    "flipper-f1-sys",
 ]
 
 [profile.release]
