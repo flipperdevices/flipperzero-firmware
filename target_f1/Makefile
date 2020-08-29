@@ -256,12 +256,15 @@ rust_lib:
 	$(RUST_LIB_CMD)
 
 example_blink:
+	rm $(BUILD_DIR)/app.o
 	EXAMPLE_BLINK=1 make
 
 example_uart_write:
+	rm $(BUILD_DIR)/app.o
 	EXAMPLE_UART_WRITE=1 make
 
 test:
+	rm $(BUILD_DIR)/app.o
 	TEST=1 make
 
 .PHONY: all rust_lib example_blink example_uart_write test
