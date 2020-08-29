@@ -6,6 +6,6 @@ inputs:
     default: ''
 runs:
   using: 'docker'
-  image: '../../../Dockerfile'
+  image: '../../../docker/Dockerfile'
   args:
     - ${{ inputs.run }}
