@@ -8,6 +8,8 @@ int num_deauth = 0;
 int num_probe = 0;
 int num_eapol = 0;
 
+LinkedList<ssid>* ssids;
+
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
 
     /* Original BLE */
@@ -138,9 +140,9 @@ void WiFiScan::RunSetup() {
 }
 
 int WiFiScan::clearSSIDs() {
-  int num_cleared = this->ssids->size();
-  this->ssids->clear();
-  Serial.println("ssids: " + (String)this->ssids->size());
+  int num_cleared = ssids->size();
+  ssids->clear();
+  Serial.println("ssids: " + (String)ssids->size());
   return num_cleared;
 }
 
@@ -153,8 +155,8 @@ int WiFiScan::generateSSIDs() {
       essid.concat(alfa[random(65)]);
 
     ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}};
-    this->ssids->add(s);
-    Serial.println(this->ssids->get(this->ssids->size() - 1).essid);
+    ssids->add(s);
+    Serial.println(ssids->get(ssids->size() - 1).essid);
   }
 
   return num_gen;
@@ -454,7 +456,7 @@ void WiFiScan::RunGenerateSSIDs() {
   display_obj.tft.println(F("Generating SSIDs..."));
 
   display_obj.tft.println("SSIDs Generated: " + (String)this->generateSSIDs());
-  display_obj.tft.println("    Total SSIDs: " + (String)this->ssids->size());
+  display_obj.tft.println("    Total SSIDs: " + (String)ssids->size());
 }
 
 void WiFiScan::RunShutdownWiFi() {
@@ -695,6 +697,36 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
 }
 
 // Function to prepare for beacon list
+void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color) {
+  sd_obj.openCapture("beacon_list");
+  
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Beacon Spam List ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  esp_wifi_set_promiscuous_filter(&filt);
+  esp_wifi_set_promiscuous_rx_cb(&beaconListSnifferCallback);
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
+  initTime = millis();
+}
+/*
 void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
 {
   //Serial.println("Beacon list...");
@@ -726,6 +758,7 @@ void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
   //display_obj.clearScreen();
   //Serial.println("End of func");
 }
+*/
 
 // Function to prepare for beacon spam
 void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
@@ -1282,6 +1315,88 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       display_string.concat(addr);
       Serial.print(" Requesting: ");
       display_string.concat(" -> ");
+      for (int i = 0; i < snifferPacket->payload[25]; i++)
+      {
+        Serial.print((char)snifferPacket->payload[26 + i]);
+        display_string.concat((char)snifferPacket->payload[26 + i]);
+      }
+
+      // Print spaces because of the rotating lines of the hardware scroll.
+      // The same characters print from previous lines so I just overwrite them
+      // with spaces.
+      for (int i = 0; i < 19 - snifferPacket->payload[25]; i++)
+      {
+        display_string.concat(" ");
+      }
+
+      if (display_obj.display_buffer->size() == 0)
+      {
+        //while (display_obj.printing)
+        //  delay(1);
+        display_obj.loading = true;
+        display_obj.display_buffer->add(display_string);
+        display_obj.loading = false;
+      }
+      
+      Serial.println();    
+
+      sd_obj.addPacket(snifferPacket->payload, len);
+    }
+  }
+}
+
+void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+  String essid = "";
+  bool found = false;
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+
+    // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+    if ((snifferPacket->payload[0] == 0x40) && (display_obj.display_buffer->size() == 0))
+    {
+
+      for (uint8_t i = 0; i < snifferPacket->payload[25]; i++)
+      {
+        essid.concat((char)snifferPacket->payload[26 + i]);
+      }
+
+      for (int i = 0; i < ssids->size(); i++) {
+        if (ssids->get(i).essid == essid) {
+          Serial.println("Found a sheep");
+          found = true;
+          break;
+        }
+      }
+
+      if (!found)
+        return;
+      
+      delay(random(0, 10));
+      Serial.print("RSSI: ");
+      Serial.print(snifferPacket->rx_ctrl.rssi);
+      Serial.print(" Ch: ");
+      Serial.print(snifferPacket->rx_ctrl.channel);
+      Serial.print(" Client: ");
+      char addr[] = "00:00:00:00:00:00";
+      getMAC(addr, snifferPacket->payload, 10);
+      Serial.print(addr);
+      display_string.concat(addr);
+      Serial.print(" Requesting: ");
+      display_string.concat(" -> ");
+
+      // ESSID
       for (int i = 0; i < snifferPacket->payload[25]; i++)
       {
         Serial.print((char)snifferPacket->payload[26 + i]);
@@ -2162,23 +2277,23 @@ void WiFiScan::main(uint32_t currentTime)
     }
   }
   else if ((currentScanMode == WIFI_ATTACK_BEACON_LIST)) {
-    for (int i = 0; i < this->ssids->size(); i++)
-      this->broadcastCustomBeacon(currentTime, this->ssids->get(i));
+    for (int i = 0; i < ssids->size(); i++)
+      this->broadcastCustomBeacon(currentTime, ssids->get(i));
 
     if (currentTime - initTime >= 1000)
     {
       initTime = millis();
       //Serial.print("packets/sec: ");
       //Serial.println(packets_sent);
-      String displayString = "";
-      String displayString2 = "";
-      displayString.concat("packets/sec: ");
-      displayString.concat(packets_sent);
-      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
-        displayString2.concat(" ");
-      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-      display_obj.showCenterText(displayString2, 160);
-      display_obj.showCenterText(displayString, 160);
+      //String displayString = "";
+      //String displayString2 = "";
+      //displayString.concat("packets/sec: ");
+      //displayString.concat(packets_sent);
+      //for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+      //  displayString2.concat(" ");
+      //display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      //display_obj.showCenterText(displayString2, 160);
+      //display_obj.showCenterText(displayString, 160);
       packets_sent = 0;
     }
   }

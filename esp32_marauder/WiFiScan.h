@@ -162,7 +162,7 @@ class WiFiScan
   public:
     WiFiScan();
 
-    LinkedList<ssid>* ssids;
+    //LinkedList<ssid>* ssids;
 
     int set_channel = 1;
 
@@ -206,6 +206,7 @@ class WiFiScan
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };
