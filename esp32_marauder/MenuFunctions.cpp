@@ -755,7 +755,7 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
     joinWiFiGFX();
   });
-  addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_ORANGE, NULL, SCANNERS, [this]() {
+  addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_ORANGE, NULL, SHUTDOWN, [this]() {
     changeMenu(&shutdownWiFiMenu);
     wifi_scan_obj.RunShutdownWiFi();
   });
@@ -809,7 +809,7 @@ void MenuFunctions::RunSetup()
   addNodes(&bluetoothGeneralMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(bluetoothGeneralMenu.parentMenu);
   });
-  addNodes(&bluetoothGeneralMenu, "Shutdown BLE", TFT_ORANGE, NULL, SCANNERS, [this]() {
+  addNodes(&bluetoothGeneralMenu, "Shutdown BLE", TFT_ORANGE, NULL, SHUTDOWN, [this]() {
     changeMenu(&shutdownBLEMenu);
     wifi_scan_obj.RunShutdownBLE();
   });
