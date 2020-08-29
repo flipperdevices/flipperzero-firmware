@@ -138,6 +138,8 @@ class MenuFunctions
     // Settings things menus
     Menu shutdownWiFiMenu;
     Menu shutdownBLEMenu;
+    Menu generateSSIDsMenu;
+    Menu clearSSIDsMenu;
 
     static void lv_tick_handler();
 

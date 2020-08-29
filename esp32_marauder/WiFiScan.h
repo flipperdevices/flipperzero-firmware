@@ -55,6 +55,11 @@ extern TemperatureInterface temp_obj;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 
+struct ssid {
+  String essid;
+  int bssid[6];
+};
+
 class WiFiScan
 {
   private:
@@ -154,6 +159,8 @@ class WiFiScan
   public:
     WiFiScan();
 
+    LinkedList<ssid>* ssids;
+
     int set_channel = 1;
 
     int old_channel = 0;
@@ -171,6 +178,8 @@ class WiFiScan
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
 
     void RunSetup();
+    int clearSSIDs();
+    int generateSSIDs();
     bool shutdownWiFi();
     bool shutdownBLE();
     void joinWiFi(String ssid, String password);
@@ -180,6 +189,8 @@ class WiFiScan
     void RunInfo();
     void RunShutdownWiFi();
     void RunShutdownBLE();
+    void RunGenerateSSIDs();
+    void RunClearSSIDs();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);

@@ -627,6 +627,8 @@ void MenuFunctions::RunSetup()
   // Settings stuff
   shutdownWiFiMenu.list = new LinkedList<MenuNode>();
   shutdownBLEMenu.list = new LinkedList<MenuNode>();
+  generateSSIDsMenu.list = new LinkedList<MenuNode>();
+  clearSSIDsMenu.list = new LinkedList<MenuNode>();
 
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
@@ -648,6 +650,9 @@ void MenuFunctions::RunSetup()
   bluetoothGeneralMenu.name = " Bluetooth General ";
   shutdownWiFiMenu.name = " Shutdown WiFi ";
   shutdownBLEMenu.name = " Shutdown BLE ";
+  generateSSIDsMenu.name = " Generate SSIDs ";
+  clearSSIDsMenu.name = " Clear SSIDs ";
+  
 
   // Build Main Menu
   mainMenu.parentMenu = NULL;
@@ -755,15 +760,35 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
     joinWiFiGFX();
   });
-  addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_ORANGE, NULL, SHUTDOWN, [this]() {
+  addNodes(&wifiGeneralMenu, "Shutdown WiFi", TFT_CYAN, NULL, SHUTDOWN, [this]() {
     changeMenu(&shutdownWiFiMenu);
     wifi_scan_obj.RunShutdownWiFi();
+  });
+  addNodes(&wifiGeneralMenu, "Generate SSIDs", TFT_SKYBLUE, NULL, GENERAL_APPS, [this]() {
+    changeMenu(&generateSSIDsMenu);
+    wifi_scan_obj.RunGenerateSSIDs();
+  });
+  addNodes(&wifiGeneralMenu, "Clear SSIDs", TFT_SILVER, NULL, GENERAL_APPS, [this]() {
+    changeMenu(&clearSSIDsMenu);
+    wifi_scan_obj.RunClearSSIDs();
   });
 
   // Build shutdown wifi menu
   shutdownWiFiMenu.parentMenu = &wifiGeneralMenu;
   addNodes(&shutdownWiFiMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(shutdownWiFiMenu.parentMenu);
+  });
+
+  // Build generate ssids menu
+  generateSSIDsMenu.parentMenu = &wifiGeneralMenu;
+  addNodes(&generateSSIDsMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(generateSSIDsMenu.parentMenu);
+  });
+
+  // Build clear ssids menu
+  clearSSIDsMenu.parentMenu = &wifiGeneralMenu;
+  addNodes(&clearSSIDsMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(clearSSIDsMenu.parentMenu);
   });
 
 

@@ -129,11 +129,35 @@ WiFiScan::WiFiScan()
 }
 
 void WiFiScan::RunSetup() {
+  ssids = new LinkedList<ssid>();
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
   this->ble_initialized = true;
   
   this->shutdownBLE();
+}
+
+int WiFiScan::clearSSIDs() {
+  int num_cleared = this->ssids->size();
+  this->ssids->clear();
+  Serial.println("ssids: " + (String)this->ssids->size());
+  return num_cleared;
+}
+
+int WiFiScan::generateSSIDs() {
+  uint8_t num_gen = 20;
+  for (uint8_t x = 0; x < num_gen; x++) {
+    String essid = "";
+
+    for (uint8_t i = 0; i < 6; i++)
+      essid.concat(alfa[random(65)]);
+
+    ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}};
+    this->ssids->add(s);
+    Serial.println(this->ssids->get(this->ssids->size() - 1).essid);
+  }
+
+  return num_gen;
 }
 
 void WiFiScan::joinWiFi(String ssid, String password)
@@ -404,6 +428,30 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
   lv_disp_load_scr(scr);
 
   //display_obj.joinWiFiGFX();
+}
+
+void WiFiScan::RunClearSSIDs() {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.println(F("Clearing SSIDs..."));
+  display_obj.tft.println("SSIDs Cleared: " + (String)this->clearSSIDs());
+}
+
+void WiFiScan::RunGenerateSSIDs() {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.println(F("Generating SSIDs..."));
+
+  display_obj.tft.println("SSIDs Generated: " + (String)this->generateSSIDs());
+  display_obj.tft.println("    Total SSIDs: " + (String)this->ssids->size());
 }
 
 void WiFiScan::RunShutdownWiFi() {
