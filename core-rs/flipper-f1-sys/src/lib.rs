@@ -16,5 +16,5 @@ pub mod cmsis_os {
 
 pub mod hal {
     include!(concat!(env!("OUT_DIR"), "/stm32_hal_bindings.rs"));
-    //include!(concat!(env!("OUT_DIR"), "/stm32_hal_statics.rs"));
+    include!(concat!(env!("OUT_DIR"), "/stm32_hal_statics.rs"));
 }

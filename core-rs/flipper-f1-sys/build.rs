@@ -8,7 +8,7 @@ fn main() {
     let generator = BindingsGenerator::new();
     generator.generate_cmsis_os_bindings();
     generator.generate_stm32_hal_bindings();
-    //generator.generate_stm32_hal_statics();
+    generator.generate_stm32_hal_statics();
 }
 
 struct BindingsGenerator {
@@ -214,6 +214,18 @@ impl BindingsGenerator {
             .whitelist_function("HAL_SPI_Transmit_IT")
             .whitelist_function("HAL_SPI_Receive_IT")
             .whitelist_function("HAL_SPI_TransmitReceive_IT")
+
+            .whitelist_type("ADC_HandleTypeDef")
+            .opaque_type("ADC_HandleTypeDef")
+
+            .whitelist_type("COMP_HandleTypeDef")
+            .opaque_type("COMP_HandleTypeDef")
+
+            .whitelist_type("DAC_HandleTypeDef")
+            .opaque_type("DAC_HandleTypeDef")
+
+            .whitelist_type("TIM_HandleTypeDef")
+            .opaque_type("TIM_HandleTypeDef")
         ;
 
         let bindings = builder.generate().expect("Unable to generate bindings");
