@@ -741,7 +741,7 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiAttackMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(wifiAttackMenu.parentMenu);
   });
-  addNodes(&wifiAttackMenu, "Beacon Spam List", TFT_RED, NULL, BEACON_SPAM, [this]() {
+  addNodes(&wifiAttackMenu, "Beacon Spam List", TFT_RED, NULL, BEACON_LIST, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_LIST, TFT_RED);
@@ -772,11 +772,11 @@ void MenuFunctions::RunSetup()
     changeMenu(&shutdownWiFiMenu);
     wifi_scan_obj.RunShutdownWiFi();
   });
-  addNodes(&wifiGeneralMenu, "Generate SSIDs", TFT_SKYBLUE, NULL, GENERAL_APPS, [this]() {
+  addNodes(&wifiGeneralMenu, "Generate SSIDs", TFT_SKYBLUE, NULL, GENERATE, [this]() {
     changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  addNodes(&wifiGeneralMenu, "Clear SSIDs", TFT_SILVER, NULL, GENERAL_APPS, [this]() {
+  addNodes(&wifiGeneralMenu, "Clear SSIDs", TFT_SILVER, NULL, CLEAR_ICO, [this]() {
     changeMenu(&clearSSIDsMenu);
     wifi_scan_obj.RunClearSSIDs();
   });
