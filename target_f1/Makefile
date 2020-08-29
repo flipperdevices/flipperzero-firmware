@@ -141,10 +141,6 @@ endif
 
 # Add C_SOURCES +=, C_DEFS += or CPP_SOURCES += here
 
-C_SOURCES += ../applications/tests/furiac_test.c
-C_SOURCES += ../applications/tests/furi_record_test.c
-C_SOURCES += ../applications/tests/test_index.c
-
 #######################################
 # binaries
 #######################################
