@@ -256,6 +256,9 @@ LDFLAGS = $(MCU) -specs=nano.specs -specs=nosys.specs -T$(LDSCRIPT) $(LIBDIR) $(
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
+rust_lib:
+	$(RUST_LIB_CMD)
+
 example_blink:
 	EXAMPLE_BLINK=1 make
 
@@ -264,6 +267,8 @@ example_uart_write:
 
 test:
 	TEST=1 make
+
+.PHONY: all rust_lib example_blink example_uart_write test
 
 #######################################
 # build the application
@@ -292,8 +297,7 @@ $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 $(BUILD_DIR)/%.pb.c $(BUILD_DIR)/%.pb.h: ../flipper_proto/%.proto
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=$(BUILD_DIR) $<
 
-$(RUST_LIB_PATH)/lib$(RUST_LIB_NAME).a:
-	$(RUST_LIB_CMD)
+$(RUST_LIB_PATH)/lib$(RUST_LIB_NAME).a: rust_lib
 
 $(BUILD_DIR)/$(TARGET).elf: $(RUST_LIB_PATH)/lib$(RUST_LIB_NAME).a $(OBJECTS) Makefile
 	$(CPP) $(OBJECTS) $(LDFLAGS) -o $@
@@ -319,8 +323,5 @@ clean:
 # dependencies
 #######################################
 -include $(wildcard $(BUILD_DIR)/*.d)
-
-# Builds with bindgen have broken dependency file
-#-include $(wildcard $(RUST_LIB_PATH)/*.d)
 
 # *** EOF ***
