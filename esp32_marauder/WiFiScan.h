@@ -42,6 +42,7 @@
 #define BT_SCAN_SKIMMERS 11
 #define WIFI_SCAN_ESPRESSIF 12
 #define LV_JOIN_WIFI 13
+#define WIFI_ATTACK_BEACON_LIST 14
 
 #define GRAPH_REFRESH 100
 
@@ -142,9 +143,11 @@ class WiFiScan
     void tftDrawColorKey();
     void tftDrawGraphObjects();
     void broadcastRandomSSID(uint32_t currentTime);
+    void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
+    void RunBeaconList(uint8_t scan_mode, uint16_t color);
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);

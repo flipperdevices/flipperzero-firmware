@@ -230,7 +230,8 @@ void MenuFunctions::main(uint32_t currentTime)
   // Get the display buffer out of the way
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
     display_obj.displayBuffer();
   //Serial.println(wifi_scan_obj.freeRAM());
 
@@ -266,6 +267,7 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
+        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
         (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
         (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
     {
@@ -288,7 +290,8 @@ void MenuFunctions::main(uint32_t currentTime)
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
   if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
-      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
   {
     // Need this to set all keys to false
     for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
@@ -737,6 +740,11 @@ void MenuFunctions::RunSetup()
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
   addNodes(&wifiAttackMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(wifiAttackMenu.parentMenu);
+  });
+  addNodes(&wifiAttackMenu, "Beacon Spam List", TFT_RED, NULL, BEACON_SPAM, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_LIST, TFT_RED);
   });
   addNodes(&wifiAttackMenu, "Beacon Spam Random", TFT_ORANGE, NULL, BEACON_SPAM, [this]() {
     display_obj.clearScreen();

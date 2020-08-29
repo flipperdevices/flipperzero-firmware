@@ -239,6 +239,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunDeauthScan(scan_mode, color);
   else if (scan_mode == WIFI_PACKET_MONITOR)
     RunPacketMonitor(scan_mode, color);
+  else if (scan_mode == WIFI_ATTACK_BEACON_LIST)
+    RunBeaconList(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_BEACON_SPAM)
     RunBeaconSpam(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_RICK_ROLL)
@@ -313,6 +315,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_EAPOL) ||
   (currentScanMode == WIFI_SCAN_ALL) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
+  (currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR) ||
@@ -681,6 +684,39 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
   packets_sent = 0;
   //esp_wifi_set_mode(WIFI_MODE_STA);
   WiFi.mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
+  initTime = millis();
+  //display_obj.clearScreen();
+  //Serial.println("End of func");
+}
+
+// Function to prepare for beacon list
+void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
+{
+  //Serial.println("Beacon list...");
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Beacon Spam List ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
   esp_wifi_start();
   esp_wifi_set_promiscuous_filter(NULL);
   esp_wifi_set_promiscuous(true);
@@ -1274,6 +1310,68 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
+}
+
+void WiFiScan::broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid) {
+  set_channel = random(1,12); 
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  delay(1);  
+
+  // Randomize SRC MAC
+  packet[10] = packet[16] = custom_ssid.bssid[0];
+  packet[11] = packet[17] = custom_ssid.bssid[1];
+  packet[12] = packet[18] = custom_ssid.bssid[2];
+  packet[13] = packet[19] = custom_ssid.bssid[3];
+  packet[14] = packet[20] = custom_ssid.bssid[4];
+  packet[15] = packet[21] = custom_ssid.bssid[5];
+
+  
+  /////////////////////////////
+  //int essid_len = random(6, 10);
+
+  // random prefix to beacon essid
+  //uint8_t rand_reg[essid_len] = {};
+  //for (int i = 0; i < essid_len; i++)
+  //  rand_reg[i] = alfa[random(65)];
+
+  char ESSID[custom_ssid.essid.length() + 1] = {};
+  custom_ssid.essid.toCharArray(ESSID, custom_ssid.essid.length() + 1);
+
+  int ssidLen = strlen(ESSID);
+  //int rand_len = sizeof(rand_reg);
+  int fullLen = ssidLen;
+  packet[37] = fullLen;
+
+  // Insert random prefix
+  //for (int i = 0; i < rand_len; i++)
+  //  packet[38+i] = rand_reg[i];
+
+  // Insert my tag
+  for(int i = 0; i < ssidLen; i++)
+    packet[38 + i] = ESSID[i];
+
+  /////////////////////////////
+  
+  packet[50 + fullLen] = set_channel;
+
+  uint8_t postSSID[13] = {0x01, 0x08, 0x82, 0x84, 0x8b, 0x96, 0x24, 0x30, 0x48, 0x6c, //supported rate
+                      0x03, 0x01, 0x04 /*DSSS (Current Channel)*/ };
+
+
+
+  // Add everything that goes after the SSID
+  for(int i = 0; i < 12; i++) 
+    packet[38 + fullLen + i] = postSSID[i];
+  
+
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+  //esp_wifi_80211_tx(WIFI_IF_AP, packet, sizeof(packet), false);
+
+  packets_sent = packets_sent + 3;
 }
 
 // Function to send beacons with random ESSID length
@@ -2045,6 +2143,27 @@ void WiFiScan::main(uint32_t currentTime)
     // which makes beacon spam less effective
     for (int i = 0; i < 55; i++)
       broadcastRandomSSID(currentTime);
+
+    if (currentTime - initTime >= 1000)
+    {
+      initTime = millis();
+      //Serial.print("packets/sec: ");
+      //Serial.println(packets_sent);
+      String displayString = "";
+      String displayString2 = "";
+      displayString.concat("packets/sec: ");
+      displayString.concat(packets_sent);
+      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+        displayString2.concat(" ");
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.showCenterText(displayString2, 160);
+      display_obj.showCenterText(displayString, 160);
+      packets_sent = 0;
+    }
+  }
+  else if ((currentScanMode == WIFI_ATTACK_BEACON_LIST)) {
+    for (int i = 0; i < this->ssids->size(); i++)
+      this->broadcastCustomBeacon(currentTime, this->ssids->get(i));
 
     if (currentTime - initTime >= 1000)
     {
