@@ -27,10 +27,26 @@ static FuriRecord* find_record(const char* name) {
     return res;
 }
 
+// TODO: change open-create to only open
 bool furi_create(const char* name, void* value, size_t size) {
     #ifdef FURI_DEBUG
         printf("[FURI] creating %s record\n", name);
     #endif
+
+    FuriRecord* record = find_record(name);
+
+    if(record != NULL) {
+        #ifdef FURI_DEBUG
+            printf("[FURI] record already exist\n");
+        #endif
+
+        record->value = value;
+        record->size = size;
+
+        return true;
+    }
+
+    // record not exist, create new
 
     if(current_buffer_idx >= MAX_RECORD_COUNT) {
         // max record count exceed
@@ -79,7 +95,16 @@ FuriRecordSubscriber* furi_open(
             printf("[FURI] cannot find record %s\n", name);
         #endif
 
-        return NULL;
+        // create record if not exist
+        if(!furi_create(name, NULL, 0)) {
+            return NULL;
+        }
+
+        record = find_record(name);
+
+        if(record == NULL) {
+            return NULL;
+        }
     }
 
     // allocate subscriber
