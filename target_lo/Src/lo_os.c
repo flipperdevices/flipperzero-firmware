@@ -111,6 +111,7 @@ QueueHandle_t xQueueCreateStatic(
     uint8_t* pucQueueStorageBuffer,
     StaticQueue_t *pxQueueBuffer
 ) {
+    // TODO: check this implementation
     int* msgid = malloc(sizeof(int));
 
     key_t key = queue_global_id;
@@ -119,4 +120,44 @@ QueueHandle_t xQueueCreateStatic(
     *msgid = msgget(key, IPC_CREAT);
 
     return (QueueHandle_t)msgid;
+}
+
+SemaphoreHandle_t xSemaphoreCreateCountingStatic(
+    UBaseType_t uxMaxCount,
+    UBaseType_t uxInitialCount,
+    StaticSemaphore_t* pxSemaphoreBuffer
+) {
+    pxSemaphoreBuffer->take_counter = 0;
+    pxSemaphoreBuffer->give_counter = 0;
+    return pxSemaphoreBuffer;
+}
+
+BaseType_t xSemaphoreTake(SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait) {
+    if(xSemaphore == NULL) return false;
+    
+    // TODO: need to add inter-process sync or use POSIX primitives
+    xSemaphore->take_counter++;
+
+    TickType_t ticks = xTicksToWait;
+
+    while(
+        xSemaphore->take_counter != xSemaphore->give_counter
+        && (ticks > 0 || xTicksToWait == portMAX_DELAY)
+    ) {
+        osDelay(1);
+        ticks--;
+    }
+
+    if(xTicksToWait != 0 && ticks == 0) return pdFALSE;
+
+    return pdTRUE;
+}
+
+BaseType_t xSemaphoreGive(SemaphoreHandle_t xSemaphore) {
+    if(xSemaphore == NULL) return false;
+
+    // TODO: need to add inter-process sync or use POSIX primitives
+    xSemaphore->give_counter++;
+
+    return pdTRUE;
 }

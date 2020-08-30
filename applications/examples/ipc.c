@@ -3,11 +3,11 @@
 
 #define FB_WIDTH 10
 #define FB_HEIGHT 3
-#define FB_SIZE FB_WIDTH * FB_HEIGHT
+#define FB_SIZE (FB_WIDTH * FB_HEIGHT)
 
 // context structure used for pass some object from app thread to callback
 typedef struct {
-    QueueHandle_t event_queue; // queue to pass events from callback to app thread
+    SemaphoreHandle_t events; // queue to pass events from callback to app thread
     FuriRecordSubscriber* log; // app logger
 } IpcCtx;
 
@@ -17,8 +17,7 @@ static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
     fuprintf(ctx->log, "[cb] framebuffer updated\n");
 
     // send event to app thread
-    uint8_t token = 0;
-    xQueueSend(ctx->event_queue, &token, 0);
+    xSemaphoreGive(ctx->events);
 
     // Attention! Please, do not make blocking operation like IO and waits inside callback
     // Remember that callback execute in calling thread/context
@@ -64,21 +63,17 @@ void application_ipc_display(void* p) {
         furiac_exit(NULL);
     }
 
-    // create stack-based queue
-    StaticQueue_t queue_descriptor;
-    uint8_t queue_buffer[1 * sizeof(uint8_t)];
-    QueueHandle_t event_queue = xQueueCreateStatic(
-        1, sizeof(uint8_t),
-        queue_buffer, &queue_descriptor
-    );
+    StaticSemaphore_t event_descriptor;
+    // create stack-based counting semaphore
+    SemaphoreHandle_t events = xSemaphoreCreateCountingStatic(255, 0, &event_descriptor);
 
-    if(*(int*)event_queue == -1) {
-        fuprintf(log, "[display] cannot create event queue\n");
+    if(events == NULL) {
+        fuprintf(log, "[display] cannot create event semaphore\n");
         furiac_exit(NULL);
     }
 
     // save log and event queue in context structure
-    IpcCtx ctx = {.event_queue = event_queue, .log = log};
+    IpcCtx ctx = {.events = events, .log = log};
 
     // subscribe to record. ctx will be passed to handle_fb_change
     FuriRecordSubscriber* fb_record = furi_open(
@@ -104,12 +99,10 @@ void application_ipc_display(void* p) {
     }
     #endif
 
-    uint8_t token = 0;
-
     while(1) {
         // wait for event
-        if(xQueueReceive(event_queue, &token, portMAX_DELAY) == pdTRUE) {
-            fuprintf(log, "[display] get fb update");
+        if(xSemaphoreTake(events, portMAX_DELAY) == pdTRUE) {
+            fuprintf(log, "[display] get fb update\n\n");
 
             #ifdef HW_DISPLAY
             // on Flipper target draw the screen
@@ -124,6 +117,7 @@ void application_ipc_display(void* p) {
         }
     }
 }
+
 
 // Widget application
 void application_ipc_widget(void* p) {
@@ -142,11 +136,17 @@ void application_ipc_widget(void* p) {
     uint8_t counter = 0;
 
     while(1) {
-        delay(100);
+        delay(120);
 
         // write some ascii demo here: '#'' symbol run on overall screen
         char* fb = (char*)furi_take(fb_record);
+
+        for(size_t i = 0; i < FB_SIZE; i++) {
+            fb[i] = ' ';
+        }
+
         fb[counter % FB_SIZE] = '#';
+
         furi_commit(fb_record);
 
         counter++;

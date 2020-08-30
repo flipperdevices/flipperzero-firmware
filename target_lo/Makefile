@@ -31,7 +31,7 @@ C_SOURCES += Src/flipper_hal.c
 C_SOURCES += Src/lo_os.c
 C_SOURCES += Src/lo_hal.c
 
-C_DEFS += -DFURI_DEBUG
+# C_DEFS += -DFURI_DEBUG
 
 # Core
 

@@ -11,10 +11,20 @@ typedef size_t UBaseType_t;
 typedef uint32_t StackType_t;
 typedef uint32_t StaticTask_t;
 typedef pthread_t* TaskHandle_t;
-typedef uint32_t StaticSemaphore_t;
-typedef void* SemaphoreHandle_t;
-typedef void* QueueHandle_t;
+
+
+typedef enum {
+    SemaphoreTypeCounting
+} SemaphoreType;
+typedef struct {
+    SemaphoreType type;
+    uint8_t take_counter;
+    uint8_t give_counter;
+} StaticSemaphore_t;
+typedef StaticSemaphore_t* SemaphoreHandle_t;
+
 typedef uint32_t StaticQueue_t;
+typedef StaticQueue_t* QueueHandle_t;
 
 #define portMAX_DELAY -1
 
@@ -46,8 +56,16 @@ QueueHandle_t xQueueCreateStatic(
     UBaseType_t uxQueueLength,
     UBaseType_t uxItemSize,
     uint8_t* pucQueueStorageBuffer,
-    StaticQueue_t *pxQueueBuffer
+    StaticQueue_t* pxQueueBuffer
 );
+
+SemaphoreHandle_t xSemaphoreCreateCountingStatic(
+    UBaseType_t uxMaxCount,
+    UBaseType_t uxInitialCount,
+    StaticSemaphore_t *pxSemaphoreBuffer
+);
+BaseType_t xSemaphoreTake(SemaphoreHandle_t xSemaphore, TickType_t xTicksToWait);
+BaseType_t xSemaphoreGive(SemaphoreHandle_t xSemaphore);
 
 BaseType_t xQueueSend(
     QueueHandle_t xQueue, const void * pvItemToQueue, TickType_t xTicksToWait
