@@ -33,6 +33,8 @@
 #define BT_SCAN_SKIMMERS 11
 #define WIFI_SCAN_ESPRESSIF 12
 #define LV_JOIN_WIFI 13
+#define LV_ADD_SSID 14
+#define WIFI_ATTACK_BEACON_LIST 15
 
 //#define TFT_SHIELD
 #define TFT_DIY

@@ -69,11 +69,11 @@ bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data)
     data->point.x = touchX;
     data->point.y = touchY;
 
-    Serial.print("Data x");
-    Serial.println(touchX);
+    //Serial.print("Data x");
+    //Serial.println(touchX);
     
-    Serial.print("Data y");
-    Serial.println(touchY);
+    //Serial.print("Data y");
+    //Serial.println(touchY);
 
   }
 
@@ -108,7 +108,46 @@ void MenuFunctions::deinitLVGL() {
   //lv_deinit();
 }
 
+void MenuFunctions::addSSIDGFX(){
+  extern LinkedList<ssid>* ssids;
+  
+  String display_string = "";
+  // Create a keyboard and apply the styles
+  kb = lv_keyboard_create(lv_scr_act(), NULL);
+  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+  lv_obj_set_event_cb(kb, add_ssid_keyboard_event_cb);
 
+  // Create one text area
+  // Store all SSIDs
+  ta1 = lv_textarea_create(lv_scr_act(), NULL);
+  lv_textarea_set_one_line(ta1, false);
+  lv_obj_set_width(ta1, LV_HOR_RES);
+  lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
+  lv_obj_set_pos(ta1, 5, 20);
+  lv_textarea_set_cursor_hidden(ta1, true);
+  lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
+  lv_textarea_set_placeholder_text(ta1, "SSID List");
+
+  // Create second text area
+  // Add SSIDs
+  ta2 = lv_textarea_create(lv_scr_act(), ta1);
+  lv_textarea_set_cursor_hidden(ta2, false);
+  lv_textarea_set_one_line(ta2, true);
+  lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
+  lv_textarea_set_text(ta2, "");
+  lv_textarea_set_placeholder_text(ta2, "Add SSIDs");
+
+  // After generating text areas, add text to first text box
+  for (int i = 0; i < ssids->size(); i++)
+    display_string.concat((String)ssids->get(i).essid + "\n");
+    
+  lv_textarea_set_text(ta1, display_string.c_str());
+
+  // Focus it on one of the text areas to start
+  lv_keyboard_set_textarea(kb, ta2);
+  lv_keyboard_set_cursor_manage(kb, true);
+  
+}
 
 void MenuFunctions::joinWiFiGFX(){
 
@@ -147,6 +186,43 @@ void MenuFunctions::joinWiFiGFX(){
   lv_keyboard_set_textarea(kb, ta1);
   lv_keyboard_set_cursor_manage(kb, true);
   
+}
+
+// Keyboard callback dedicated to joining wifi
+void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event){
+  extern Display display_obj;
+  extern MenuFunctions menu_function_obj;
+  extern WiFiScan wifi_scan_obj;
+  extern LinkedList<ssid>* ssids;
+  
+  lv_keyboard_def_event_cb(kb, event);
+
+  // User has applied text box
+  if(event == LV_EVENT_APPLY){
+    String display_string = "";
+    printf("LV_EVENT_APPLY\n");
+
+    // Get text from SSID text box
+    String ta2_text = lv_textarea_get_text(ta2);
+    //Serial.println(ta1_text);
+    Serial.println(ta2_text);
+
+    // Add text box text to list of SSIDs
+    wifi_scan_obj.addSSID(ta2_text);
+
+    // Update large text box with ssid
+    for (int i = 0; i < ssids->size(); i++)
+      display_string.concat((String)ssids->get(i).essid + "\n");
+    lv_textarea_set_text(ta1, display_string.c_str());
+
+    lv_textarea_set_text(ta2, "");
+  }else if(event == LV_EVENT_CANCEL){
+    printf("LV_EVENT_CANCEL\n");
+    //lv_textarea_set_text(lv_keyboard_get_textarea(kb), "");
+    menu_function_obj.deinitLVGL();
+    //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+    display_obj.exit_draw = true; // set everything back to normal
+  }
 }
 
 // Keyboard callback dedicated to joining wifi
@@ -209,14 +285,16 @@ void MenuFunctions::main(uint32_t currentTime)
     //{
     //  this->drawStatusBar();
     //}
-    if (wifi_scan_obj.currentScanMode != LV_JOIN_WIFI)
+    if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
+        (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
       display_obj.updateBanner(current_menu->name);
   }
 
   if (currentTime != 0) {
     if (currentTime - initTime >= 100) {
       this->initTime = millis();
-      if (wifi_scan_obj.currentScanMode != LV_JOIN_WIFI)
+      if ((wifi_scan_obj.currentScanMode != LV_JOIN_WIFI) &&
+          (wifi_scan_obj.currentScanMode != LV_ADD_SSID))
         this->updateStatusBar();
     }
   }
@@ -775,6 +853,12 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiGeneralMenu, "Generate SSIDs", TFT_SKYBLUE, NULL, GENERATE, [this]() {
     changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
+  });
+  addNodes(&wifiGeneralMenu, "Add SSID", TFT_NAVY, NULL, GENERATE, [this](){
+    display_obj.clearScreen(); 
+    //wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
+    addSSIDGFX();
   });
   addNodes(&wifiGeneralMenu, "Clear SSIDs", TFT_SILVER, NULL, CLEAR_ICO, [this]() {
     changeMenu(&clearSSIDsMenu);

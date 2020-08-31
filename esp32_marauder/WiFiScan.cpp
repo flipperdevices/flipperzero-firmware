@@ -146,6 +146,14 @@ int WiFiScan::clearSSIDs() {
   return num_cleared;
 }
 
+bool WiFiScan::addSSID(String essid) {
+  ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}};
+  ssids->add(s);
+  Serial.println(ssids->get(ssids->size() - 1).essid);
+
+  return true;
+}
+
 int WiFiScan::generateSSIDs() {
   uint8_t num_gen = 20;
   for (uint8_t x = 0; x < num_gen; x++) {
@@ -254,6 +262,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   else if (scan_mode == WIFI_SCAN_ESPRESSIF)
     RunEspressifScan(scan_mode, color);
   else if (scan_mode == LV_JOIN_WIFI)
+    RunLvJoinWiFi(scan_mode, color);
+  else if (scan_mode == LV_ADD_SSID)
     RunLvJoinWiFi(scan_mode, color);
 
   WiFiScan::currentScanMode = scan_mode;
@@ -411,7 +421,6 @@ String WiFiScan::freeRAM()
   this->free_ram = String(system_get_free_heap_size());
   return String(s);
 }
-
 
 void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
 

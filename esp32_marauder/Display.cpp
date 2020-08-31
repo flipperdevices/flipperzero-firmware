@@ -927,7 +927,8 @@ void ta_event_cb(lv_obj_t * ta, lv_event_t event)
 
 void Display::main(uint8_t scan_mode)
 {  
-  if (scan_mode == LV_JOIN_WIFI)
+  if ((scan_mode == LV_JOIN_WIFI) ||
+      (scan_mode == LV_ADD_SSID))
     lv_task_handler();
   return;
 }

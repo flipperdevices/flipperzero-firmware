@@ -42,7 +42,8 @@
 #define BT_SCAN_SKIMMERS 11
 #define WIFI_SCAN_ESPRESSIF 12
 #define LV_JOIN_WIFI 13
-#define WIFI_ATTACK_BEACON_LIST 14
+#define LV_ADD_SSID 14
+#define WIFI_ATTACK_BEACON_LIST 15
 
 #define GRAPH_REFRESH 100
 
@@ -182,6 +183,7 @@ class WiFiScan
 
     void RunSetup();
     int clearSSIDs();
+    bool addSSID(String essid);
     int generateSSIDs();
     bool shutdownWiFi();
     bool shutdownBLE();
