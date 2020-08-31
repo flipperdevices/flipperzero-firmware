@@ -840,7 +840,7 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiGeneralMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(wifiGeneralMenu.parentMenu);
   });
-  addNodes(&wifiGeneralMenu, "Join WiFi", TFT_DARKCYAN, NULL, SNIFFERS, [this](){
+  addNodes(&wifiGeneralMenu, "Join WiFi", TFT_DARKCYAN, NULL, JOIN_WIFI, [this](){
     display_obj.clearScreen(); 
     wifi_scan_obj.currentScanMode = LV_JOIN_WIFI; 
     wifi_scan_obj.StartScan(LV_JOIN_WIFI, TFT_YELLOW); 
@@ -854,7 +854,7 @@ void MenuFunctions::RunSetup()
     changeMenu(&generateSSIDsMenu);
     wifi_scan_obj.RunGenerateSSIDs();
   });
-  addNodes(&wifiGeneralMenu, "Add SSID", TFT_NAVY, NULL, GENERATE, [this](){
+  addNodes(&wifiGeneralMenu, "Add SSID", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
     display_obj.clearScreen(); 
     //wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
     wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_YELLOW); 
