@@ -52,14 +52,23 @@ You can check out the marauder article written [here](https://www.hackster.io/ne
 
 ## Capabilities
 ### Current
+- Join WiFi: Just join a WiFi network
+- Shutdown WiFi: Shutdown the Marauder WiFi interface to save some RAM
+- Generate SSIDs: Add 20 random SSIDs to your list of SSIDs
+- Add SSID: Use an on-screen keyboard to add your own SSIDs to the SSID list
+- Clear SSIDs: Clear the list of SSIDs
 - Probe Request Sniff: Sniff for WiFi [probe request frames](https://mrncciew.com/2014/10/27/cwap-802-11-probe-requestresponse/) sent by wireless devices
 - Beacon Sniff: Sniff [beacon frames](https://en.wikipedia.org/wiki/Beacon_frame) sent by wireless acccess points
+- Beacon Spam List: Spam a list of SSIDs and monitoring connection attempts to those networks
 - Beacon Spam Random: Spam hundreds of random beacon frames to wireless devices within range
 - Rick Roll Beacon: Broadcast the rick roll lyrics as WiFi access points
 - Bluetooth Sniffer: Sniff bluetooth devices within range
+- Shutdown BLE: Shutdown the Marauder BLE interface to save RAM
 - Detect Card Skimmers: Detect bluetooth enabled credit card skimmers
 - Packet Monitor: Show WiFi packet density on a given channel using a time bar graph
 - EAPOL/PMKID Scan: Capture EAPOL/PMKID frames
+- Detect Pwnagotchi: Detect any pwnagotchis in range
+- Detect Espressif: Detect any espressif devices in range
 - Deauth Sniff: Detect deauthentication packets sent on all channels
 - Draw: Just doodle on the screen or whatever
 - Update Firmware: Update Marauder firmware over the air via web interface or with SD card

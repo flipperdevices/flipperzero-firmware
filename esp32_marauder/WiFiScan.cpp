@@ -378,6 +378,7 @@ String WiFiScan::getStaMAC()
   esp_wifi_set_mode(WIFI_MODE_NULL);
   esp_wifi_start();
   esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_STA, mac);
+  this->wifi_initialized = true;
   sprintf(macAddrChr, 
           "%02X:%02X:%02X:%02X:%02X:%02X",
           mac[0],
@@ -401,6 +402,7 @@ String WiFiScan::getApMAC()
   esp_wifi_set_mode(WIFI_MODE_NULL);
   esp_wifi_start();
   esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_AP, mac);
+  this->wifi_initialized = true;
   sprintf(macAddrChr, 
           "%02X:%02X:%02X:%02X:%02X:%02X",
           mac[0],
