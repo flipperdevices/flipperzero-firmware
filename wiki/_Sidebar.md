@@ -1,6 +1,6 @@
 ### ⚠️ Warning ⚠️
 
-_Do not edit wiki in web-interface. Read [How to edit Wiki](Contributing#how-to-edit-wiki)_
+_Do not edit this Wiki in web-interface. Read [How to edit Wiki](Contributing#how-to-edit-wiki)_
 
 # [Home](Home)
 
