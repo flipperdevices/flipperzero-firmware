@@ -2,6 +2,8 @@ _please, do not edit wiki directly in web-interface. Read [contrubution guide](C
 
 # [Home](Home)
 
+# [Developer blog](Developer-blog)
+
 # [Contributing](Contributing)
 * [Communication](Communication)
 
