@@ -32,13 +32,12 @@ Good point to add something about yourself. Create [welcome issue](https://githu
 
 > ⚠️ **Do not edit Wiki direcrly in web-interface. Your changes will be lost after automatic rebuild**
 
+1. Edit files in `wiki` and `wiki_static` files in your branch
+2. Create PR with `documentation` label
+3. Wait for automatic rebuild after merged in master branch
+
 The [Wiki](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki) connected to this repostiry is automatically generated from `.md` files located in repository via Github Actions. 
 
-**Steps to edit Wiki:**
-
-* Edit files in `wiki` and `wiki_static` files in your branch
-* Create PR with `documentation` label
-* Wait for automatic rebuild after merged in master branch
 
 **Folder structure:**
 ```
