@@ -28,9 +28,12 @@ Good point to add something about yourself. Create [welcome issue](https://githu
 * Some sections mark as `not documented`. There is some implementation and you can add some documentation here.
 * If section of wiki has no mark, this is actual documentation for part of Flipper.
 
-## Wiki editing `(not implemented)`
+## How to edit Wiki
 
-All wiki files storage in main repository in `wiki` folder. You can change wiki by creating PR with `documentation` label. After merge to master, wiki contents copying to GitHub `Wiki` section.
+The [Wiki](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki) connected to this repostiry is automatically generated from `.md` files located in repository via Github Actions. ⚠️ **Do not edit Wiki direcrly in web-interface. Your changes will be lost after automatic rebuild** ⚠️
+
+
+You can change wiki by creating PR with `documentation` label. After merge to master, wiki contents copying to GitHub `Wiki` section.
 
 ## Backlog
 
