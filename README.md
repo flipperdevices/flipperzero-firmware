@@ -1,6 +1,6 @@
 # Flipper Zero Firmware community repo
 
-![](https://github.com/Flipper-Zero/wiki/blob/master/images/firmware-wiki-header.gif)
+![](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/firmware-wiki-header.gif)
 
 Welcome to [Flipper Zero](https://flipperzero.one/zero)'s Firmware repo! Our goal is to create nice and clean code along with good documentation, to make it a pleasure for everyone to work with. This repo will become completely public closer to the device shipping date. 
 
@@ -8,7 +8,7 @@ Welcome to [Flipper Zero](https://flipperzero.one/zero)'s Firmware repo! Our goa
 
 ## Hardware
 
-Current Flipper Zero prototype is based on board [Version 0 (F1B1C0.0)](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Hardware-version-F1B1C0.0) that have a lots of bugs. We have finished the next version of PCB, where these bugs are fixed, and now waiting for it its manufacturing. This new board will be used as Developer Kit for early firmware development and will be sent to developers.
+Current Flipper Zero prototype is based on board [Version 0 (F1B1C0.0)](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Hardware-version-F1B1C0.0) that have a lot of bugs. We have finished the next version of PCB, where these bugs are fixed, and now waiting for it its manufacturing. This new board will be used as Developer Kit for early firmware development and will be sent to developers.
 
 ## Firmware
 
@@ -40,7 +40,7 @@ Read more in [building instructions](https://github.com/Flipper-Zero/flipperzero
 * Make basic code examples [Task #15](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/15)
 * Transfer old code to new architecture
 
-**We are open for changes!** You can suggest changes to any part of the code, wiki, guidelines, workflow, automation, etc.
+**We are open for changes!** You can suggest changes for any part of the code, wiki, guidelines, workflow, automation, etc.
 
 If you are deary to start, please read [contribution guide](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Contributing) about creating issue, editing wiki, improving codebase and configuring environment.
 
