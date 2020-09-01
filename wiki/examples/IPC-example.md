@@ -142,4 +142,4 @@ IpcCtx ctx = {.events = events, .log = log};
 
 You can find full example code in `applications/examples/ipc.c`, and run it by `docker-compose exec dev make -C target_lo example_ipc`.
 
-![]()
+![](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/application_examples/example_ipc.gif)
