@@ -1,13 +1,11 @@
-В этом примере мы посмотрим, как обмениваться данными между приложениями.
-Как мы уже знаем, для обмена данными испольузются FURI Record: одно приложение создает запись, а другое открывает ее по имени.
+In this example we show how to interact data between different applications.
+As we already know, we can use FURI Record for this purpose: one application create named record and other application opens it by name.
 
-В этом примере мы сымитируем работу с дисплеем: одно приложение, назовем его `application_ipc_display` будет выполнять роль драйвера экрана, а второе приложение `application_ipc_widget` будет рисовать простую демку.
+We will simulate the display. The first application (called `application_ipc_display`) will be display driver, and the second app (called `application_ipc_widget`) will be draw such simple demo on the screen.
 
 # Dsiplay definition
 
-Работа с экраном будет осуществляться путем записи "пикселей" во фреймбуфер.
-
-Для начала, создадим фреймбуфер
+For work with the display we create simple framebuffer and write some "pixels" into it.
 
 ```C
 #define FB_WIDTH 10
@@ -21,7 +19,7 @@ for(size_t i = 0; i < FB_SIZE; i++) {
 }
 ```
 
-На компе просто будем его рисовать:
+On local target we just draw framebuffer content like this:
 ```
     +==========+
     |          |
@@ -39,11 +37,11 @@ for(uint8_t i = 0; i < FB_HEIGHT; i++) {
 fuprintf(log, "+==========+\n");
 ```
 
-_Замечание: после добавления эмуляции дисплея этот пример будет работать с настоящим 128×64 фреймбуфером._
+_Notice: after creating display emulator this example should be changed to work with real 128×64 display using u8g2_
 
 # Demo "widget" application
 
-Приложение открывает запись, содержащую фреймбуфер
+The application opens record with framebuffer:
 
 ```C
 FuriRecordSubscriber* fb_record = furi_open(
@@ -51,11 +49,13 @@ FuriRecordSubscriber* fb_record = furi_open(
 );
 ```
 
-Далее оно каждые 120 мс очищает экран и записывает во фреймбуфер "пиксель", перемещая его по экрану. Для этого необходимо захватить фреймбуфер:
+Then it clear display and draw "pixel" every 120 ms, and pixel move across the screen.
+
+For do that we should tale framebuffer:
 
 `char* fb = (char*)furi_take(fb_record);`
 
-Записать в него данные:
+Write some data:
 
 ```C
 if(fb == NULL) furiac_exit(NULL);
@@ -66,20 +66,19 @@ for(size_t i = 0; i < FB_SIZE; i++) {
 
 fb[counter % FB_SIZE] = '#';
 ```
-
-И отпустить фреймбуфер:
+And give framebuffer (use `furi_commit` to notify another apps that record was changed):
 
 `furi_commit(fb_record);`
 
-`counter` увеличивается на каждой итерации, создавая перемещение "пикселя".
+`counter` is increasing on every iteration to make "pixel" moving.
 
 # Display driver
 
-Приложение драйвера экрана после старта инициализирует фреймбуфер и создает новую запись, помещая в нее ссылку на буфер:
+The driver application creates framebuffer after start (see [Display definition](#Display-definition)) and creates new FURI record with framebuffer pointer:
 
 `furi_create("test_fb", (void*)_framebuffer, FB_SIZE)`
 
-Затем он открывает эту запись и подписывается на изменения
+Next it opens this record and subscribe to its changing:
 
 ```
 FuriRecordSubscriber* fb_record = furi_open(
@@ -87,7 +86,7 @@ FuriRecordSubscriber* fb_record = furi_open(
 );
 ```
 
-Теперь при записи в фреймбуфер (когда в приложении `application_ipc_widget` вызывается функция `furi_commit`) вызывается обработчик:
+The handler is called any time when some app writes to framebuffer record (by calling `furi_commit`):
 
 ```C
 static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
@@ -103,7 +102,7 @@ static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
 }
 ```
 
-That callback execute in calling thread/context, поэтому обработчик с помощью семафора сообщает основному потоку приложения о том, что фреймбуфер обновился. Основной поток ожидает семафор и при получении события выполняет "отрисовку":
+That callback execute in calling thread/context, so handler pass control flow to app thread by semaphore. App thread wait for semaphore and then do the "rendering":
 
 ```C
 if(xSemaphoreTake(events, portMAX_DELAY) == pdTRUE) {
@@ -122,7 +121,7 @@ if(xSemaphoreTake(events, portMAX_DELAY) == pdTRUE) {
 }
 ```
 
-Для того, чтобы callback получил доступ к семафору, используется структура, содержащая контекст. Эта структура передается в виде аргумента в `furi_open` и попадает в обработчик:
+A structure containing the context is used so that the callback can access the semaphore. This structure is passed as an argument to `furi_open` and goes to the handler:
 
 ```C
 typedef struct {
@@ -131,7 +130,7 @@ typedef struct {
 } IpcCtx;
 ```
 
-Нам остается только создать семафор и сформировать контекст:
+We just have to create a semaphore and define a context:
 
 ```C
 StaticSemaphore_t event_descriptor;
@@ -141,6 +140,6 @@ SemaphoreHandle_t events = xSemaphoreCreateCountingStatic(255, 0, &event_descrip
 IpcCtx ctx = {.events = events, .log = log};
 ```
 
-Вы можете найти полный текст примера в `applications/examples/ipc.c`, для запуска выполните `docker-compose exec dev make -C target_lo example_ipc`.
+You can find full example code in `applications/examples/ipc.c`, and run it by `docker-compose exec dev make -C target_lo example_ipc`.
 
 ![]()
