@@ -14,7 +14,7 @@ During the early prototyping stages of Flipper Zero, we have used a lot of 3rd-p
 
 ### Release 0.1
 
-**[Download release]()**
+**[Download release](https://github.com/Flipper-Zero/flipperzero-firmware-community/releases/tag/0.1.0)**
 
 You can run firmware locally (with HAL stub).
 
