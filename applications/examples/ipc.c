@@ -24,6 +24,8 @@ static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
 }
 
 static void print_fb(char* fb, FuriRecordSubscriber* log) {
+    if(fb == NULL) return;
+    
     /* draw framebuffer like this:
     +==========+
     |          |
@@ -140,6 +142,8 @@ void application_ipc_widget(void* p) {
 
         // write some ascii demo here: '#'' symbol run on overall screen
         char* fb = (char*)furi_take(fb_record);
+
+        if(fb == NULL) furiac_exit(NULL);
 
         for(size_t i = 0; i < FB_SIZE; i++) {
             fb[i] = ' ';
