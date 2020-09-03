@@ -80,12 +80,6 @@ You can regenerate platform code:
 
 There are some arduino-style defines (digitalWrite, delay, etc.). Include `Arduino.h` from `/app/Arduino.h`
 
-## Debug print
-
-You can use `pintf` to write any message to debug UART. UART specify in `Makefile` as `-DDEBUG_UART=<>`.
-
-Implementation of write method located at `/app/write.c`
-
 # Flipper Universal Registry Implementation (FURI)
 
 FURI is used to:
@@ -130,26 +124,3 @@ After start, bootloader run first. It can:
 2. Reflashes firmware from temporary area after updating from usb/bluetooth
 3. Restores factory default firmware for protected flash area
 4. Restores application settings to default by clearing `/etc` volume
-
-# Building
-
-## Build in docker container (main way)
-
-1. Install [docker compose](https://docs.docker.com/compose/install/)
-2. After startup you should run `docker-compose up -d` to run the container.
-3. Then you can run `docker-compose exec dev make -C <target_dir>` to build application.
-
-If Dockerfile is changed you should run `docker-compose down` and `docker-compose build` for rebuild the image.
-
-### Local build and run
-
-You can run firmware locally (with HAL stub).
-
-* `docker-compose exec dev make -C target_lo` for build
-* `docker-compose exec dev target_lo/build/target_lo` for run
-* `docker-compose exec dev make -C target_lo test` for running tests
-
-## Build in IDE
-
-* Arduino IDE (in progress)
-* PlatformIO (in progress)

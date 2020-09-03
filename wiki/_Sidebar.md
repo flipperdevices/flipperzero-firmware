@@ -13,8 +13,6 @@ _Do not edit this Wiki in web-interface. Read [How to edit Wiki](Contributing#ho
 
 * [Flipper-applications](Flipper-applications)
 * [FURI](FURI)
-* [Flipper applications](Flipper-applications)
-* [FURI records list](FURI-records-list)
 * [Timers](Timers)
 * [UI](UI)
 
