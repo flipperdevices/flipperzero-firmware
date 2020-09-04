@@ -17,10 +17,10 @@ static FuriApp task_buffer[MAX_TASK_COUNT];
 static size_t current_buffer_idx = 0;
 
 // find task pointer by handle
-FuriApp* find_task(TaskHandle_t handler) {
+FuriApp* find_task(osThreadId handler) {
     FuriApp* res = NULL;
     for(size_t i = 0; i < MAX_TASK_COUNT; i++) {
-        if(task_equal(task_buffer[i].handler, handler)) {
+        if(task_equal(task_buffer[i].thread, handler)) {
             res = &task_buffer[i];
         }
     }
@@ -28,12 +28,14 @@ FuriApp* find_task(TaskHandle_t handler) {
     return res;
 }
 
-FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
+FuriApp* furiac_start(FlipperApplication app, const char* name, const void* param) {
+    osThreadDef_t thread_def;
+
     #ifdef FURI_DEBUG
         printf("[FURIAC] start %s\n", name);
     #endif
 
-    // TODO check first free item (.handler == NULL) and use it
+    // TODO check first free item (.thread == NULL) and use it
 
     if(current_buffer_idx >= MAX_TASK_COUNT) {
         // max task count exceed
@@ -44,14 +46,15 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
     }
 
     // create task on static stack memory
-    task_buffer[current_buffer_idx].handler = xTaskCreateStatic(
-        (TaskFunction_t)app,
-        (const char * const)name,
-        DEFAULT_STACK_SIZE / 4, // freertos specify stack size in words
-        (void * const) param,
-        tskIDLE_PRIORITY + 3, // normal priority
-        stack_buffer[current_buffer_idx],
-        &task_info_buffer[current_buffer_idx]
+    thread_def.pthread = app;
+    thread_def.name = (char *)name;
+    thread_def.stacksize = DEFAULT_STACK_SIZE / 4; // freertos specify stack size in words
+    thread_def.tpriority = tskIDLE_PRIORITY + 3; // normal priority
+    thread_def.buffer = stack_buffer[current_buffer_idx];
+    thread_def.controlblock = &task_info_buffer[current_buffer_idx];
+    task_buffer[current_buffer_idx].thread = osThreadCreate(
+        &thread_def,
+        (void *) param
     );
 
     // save task
@@ -72,21 +75,21 @@ bool furiac_kill(FuriApp* app) {
     #endif
 
     // check handler
-    if(app == NULL || app->handler == NULL) return false;
+    if(app == NULL || app->thread == NULL) return false;
 
     // kill task
-    vTaskDelete(app->handler);
+    osThreadTerminate(app->thread);
 
     // cleanup its registry
     // TODO realy free memory
-    app->handler = NULL;
+    app->thread = NULL;
 
     return true;
 }
 
-void furiac_exit(void* param) {
+void furiac_exit(const void* param) {
     // get current task handler
-    FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
+    FuriApp* current_task = find_task(osThreadGetId());
 
     // run prev
     if(current_task != NULL) {
@@ -104,16 +107,16 @@ void furiac_exit(void* param) {
 
         // cleanup registry
         // TODO realy free memory
-        current_task->handler = NULL;
+        current_task->thread = NULL;
     }
 
     // kill itself
-     vTaskDelete(NULL);
+     osThreadTerminate(NULL);
 }
 
-void furiac_switch(FlipperApplication app, char* name, void* param) {
+void furiac_switch(FlipperApplication app, char* name, const void* param) {
     // get current task handler
-    FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
+    FuriApp* current_task = find_task(osThreadGetId());
 
     if(current_task == NULL) {
         #ifdef FURI_DEBUG
@@ -134,6 +137,6 @@ void furiac_switch(FlipperApplication app, char* name, void* param) {
         next->prev_name = current_task->name;
 
         // kill itself
-        vTaskDelete(NULL);
+        osThreadTerminate(NULL);
     }
 }

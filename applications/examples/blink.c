@@ -1,6 +1,6 @@
 #include "flipper.h"
 
-void application_blink(void* p) {
+void application_blink(const void* p) {
     // create pin
     GpioPin led = {.pin = GPIO_PIN_8, .port = GPIOA};
     

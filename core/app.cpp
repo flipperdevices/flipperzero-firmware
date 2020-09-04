@@ -25,7 +25,7 @@ extern "C" void app() {
     do {
         is_alive = false;
         for(size_t i = 0; i < sizeof(FLIPPER_STARTUP)/sizeof(FLIPPER_STARTUP[0]); i++) {
-            if(handlers[i]->handler != NULL) {
+            if(handlers[i]->thread != NULL) {
                 is_alive = true;
             }
         }

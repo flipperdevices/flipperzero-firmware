@@ -8,13 +8,13 @@ typedef struct {
 } FlipperStartupApp;
 
 #ifdef TEST
-void flipper_test_app(void* p);
+void flipper_test_app(const void* p);
 #endif
 
-void application_blink(void* p);
-void application_uart_write(void* p);
-void application_ipc_display(void* p);
-void application_ipc_widget(void* p);
+void application_blink(const void* p);
+void application_uart_write(const void* p);
+void application_ipc_display(const void* p);
+void application_ipc_widget(const void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
     #ifdef TEST

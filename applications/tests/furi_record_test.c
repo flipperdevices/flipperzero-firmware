@@ -160,7 +160,7 @@ typedef struct {
     uint8_t b;
 } ConcurrentValue;
 
-void furi_concurent_app(void* p) {
+void furi_concurent_app(const void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     FuriRecordSubscriber* holding_record = furi_open(
@@ -237,7 +237,7 @@ bool test_furi_concurrent_access(FuriRecordSubscriber* log) {
 
     delay(20);
 
-    if(second_app->handler != NULL) {
+    if(second_app->thread != NULL) {
         fuprintf(log, "second app still alive\n");
         return false;
     }
@@ -253,7 +253,7 @@ bool test_furi_concurrent_access(FuriRecordSubscriber* log) {
 /*
 TEST: non-existent data
 1. Try to open non-existent record
-2. Check for NULL handler
+2. Check for NULL thread
 3. Try to write/read, get error
 
 TODO: implement this test
@@ -316,7 +316,7 @@ void mute_record_state_cb(FlipperRecordState state, void* ctx) {
     mute_last_state = state;
 }
 
-void furi_mute_parent_app(void* p) {
+void furi_mute_parent_app(const void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     // 1. Create pipe record

@@ -7,7 +7,7 @@
 
 // context structure used for pass some object from app thread to callback
 typedef struct {
-    SemaphoreHandle_t events; // queue to pass events from callback to app thread
+    osSemaphoreId events; // queue to pass events from callback to app thread
     FuriRecordSubscriber* log; // app logger
 } IpcCtx;
 
@@ -17,7 +17,7 @@ static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
     fuprintf(ctx->log, "[cb] framebuffer updated\n");
 
     // send event to app thread
-    xSemaphoreGive(ctx->events);
+    osSemaphoreRelease(ctx->events);
 
     // Attention! Please, do not make blocking operation like IO and waits inside callback
     // Remember that callback execute in calling thread/context
@@ -46,7 +46,7 @@ static void print_fb(char* fb, FuriRecordSubscriber* log) {
     fuprintf(log, "+==========+\n");
 }
 
-void application_ipc_display(void* p) {
+void application_ipc_display(const void* p) {
     // get logger
     FuriRecordSubscriber* log = get_default_log();
 
@@ -65,9 +65,11 @@ void application_ipc_display(void* p) {
         furiac_exit(NULL);
     }
 
-    StaticSemaphore_t event_descriptor;
+    osStaticSemaphoreDef_t event_descriptor;
+    osSemaphoreDef_t semaphore_def;
+    semaphore_def.controlblock = &event_descriptor;
     // create stack-based counting semaphore
-    SemaphoreHandle_t events = xSemaphoreCreateCountingStatic(255, 0, &event_descriptor);
+    osSemaphoreId events = osSemaphoreCreate(&semaphore_def, 255);
 
     if(events == NULL) {
         fuprintf(log, "[display] cannot create event semaphore\n");

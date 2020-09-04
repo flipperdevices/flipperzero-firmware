@@ -57,8 +57,8 @@ bool furi_create(const char* name, void* value, size_t size) {
     }
 
     records[current_buffer_idx].mute_counter = 0;
-    records[current_buffer_idx].mutex = xSemaphoreCreateMutexStatic(
-        &records[current_buffer_idx].mutex_buffer
+    records[current_buffer_idx].mutex = osMutexCreate(
+        &records[current_buffer_idx].mutex_def
     );
     records[current_buffer_idx].value = value;
     records[current_buffer_idx].size = size;
@@ -141,7 +141,7 @@ FuriRecordSubscriber* furi_open(
     subscriber->ctx = ctx;
 
     // register record in application
-    FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
+    FuriApp* current_task = find_task(osThreadGetId());
 
     if(current_task != NULL) {
         current_task->records[current_task->records_count] = record;

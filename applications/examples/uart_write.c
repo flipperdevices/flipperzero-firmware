@@ -2,7 +2,7 @@
 #include <string.h>
 #include "log.h"
 
-void application_uart_write(void* p) {
+void application_uart_write(const void* p) {
     // Red led for showing progress
     GpioPin led = {.pin = GPIO_PIN_8, .port = GPIOA};
     pinMode(led, GpioModeOpenDrain);
