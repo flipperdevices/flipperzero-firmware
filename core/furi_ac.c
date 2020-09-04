@@ -10,8 +10,10 @@
 #define DEFAULT_STACK_SIZE 1024 // Stack size in bytes
 #define MAX_TASK_COUNT 8
 
-static StaticTask_t task_info_buffer[MAX_TASK_COUNT];
-static StackType_t stack_buffer[MAX_TASK_COUNT][DEFAULT_STACK_SIZE / 4];
+#ifdef configSUPPORT_STATIC_ALLOCATION
+static osStaticThreadDef_t task_info_buffer[MAX_TASK_COUNT];
+static uint32_t stack_buffer[MAX_TASK_COUNT][DEFAULT_STACK_SIZE / 4];
+#endif
 static FuriApp task_buffer[MAX_TASK_COUNT];
 
 static size_t current_buffer_idx = 0;
@@ -47,11 +49,13 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, const void* para
 
     // create task on static stack memory
     thread_def.pthread = app;
-    thread_def.name = (char *)name;
     thread_def.stacksize = DEFAULT_STACK_SIZE / 4; // freertos specify stack size in words
-    thread_def.tpriority = tskIDLE_PRIORITY + 3; // normal priority
+    thread_def.tpriority = osPriorityNormal; // normal priority
+    #ifdef configSUPPORT_STATIC_ALLOCATION
+    thread_def.name = (char *)name;
     thread_def.buffer = stack_buffer[current_buffer_idx];
     thread_def.controlblock = &task_info_buffer[current_buffer_idx];
+    #endif
     task_buffer[current_buffer_idx].thread = osThreadCreate(
         &thread_def,
         (void *) param

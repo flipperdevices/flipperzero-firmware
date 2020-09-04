@@ -65,9 +65,11 @@ void application_ipc_display(const void* p) {
         furiac_exit(NULL);
     }
 
-    osStaticSemaphoreDef_t event_descriptor;
     osSemaphoreDef_t semaphore_def;
+    #ifdef configSUPPORT_STATIC_ALLOCATION
+    osStaticSemaphoreDef_t event_descriptor;
     semaphore_def.controlblock = &event_descriptor;
+    #endif
     // create stack-based counting semaphore
     osSemaphoreId events = osSemaphoreCreate(&semaphore_def, 255);
 
@@ -105,7 +107,7 @@ void application_ipc_display(const void* p) {
 
     while(1) {
         // wait for event
-        if(xSemaphoreTake(events, portMAX_DELAY) == pdTRUE) {
+        if(osSemaphoreWait(events, osWaitForever) == osOK) {
             fuprintf(log, "[display] get fb update\n\n");
 
             #ifdef HW_DISPLAY
