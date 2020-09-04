@@ -90,7 +90,7 @@ FURI is used to:
 
 Read more at [FURI page](FURI)
 
-# FS
+# FS (not implemented)
 
 File system is used to volaile storage some files (config, application data, etc.). There are some folders mounted to different volumes:
 
@@ -104,11 +104,13 @@ File system is used to volaile storage some files (config, application data, etc
 
 Each flipper functionality except OS/HAL/FURI doing by Flipper application. Some application are called at startup, the rest are called by the user (for example, from menu).
 
+(you can see some [examples](Application-examples))
+
 For exchange data between application each app expose own record in FURI. You can subscribe on/read record to get data from application and write to record to send data to application.
 
 **[List of FURI records](FURI-records-list)**
 
-# Bootloader
+# Bootloader (not implemented)
 
 After start, bootloader run first. It can:
 
