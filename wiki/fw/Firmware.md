@@ -108,12 +108,6 @@ For exchange data between application each app expose own record in FURI. You ca
 
 **[List of FURI records](FURI-records-list)**
 
-# Flipper libraries
-
-Unlike applications that run after startup, libraries are a collection of constants, types, or functions that the user can call from within the application.
-
-**[List of Flipper libraries](Flipper-libraries)**
-
 # Bootloader
 
 After start, bootloader run first. It can:
