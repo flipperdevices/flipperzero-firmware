@@ -48,6 +48,17 @@
 
 # Our plans
 
-Сделать платы
-Настроить окружение: тесты, линтинг.
-Пилить ядро и портировать старый код.
+First of all we need to completely setup our environment for building, testing and debugging code:
+
+1. Make UI emulator
+2. Make remote debug/test bench
+3. Check F2B0C1.1 and send it to contributors
+4. Make code style check, unit testing and overall CI.
+
+Then, we need build system (including dymanic linking specificity), toolset for load apps on flipper and run hardware tests, IDE integrations.
+
+And we should concentrate on core API and architecture: improving FURI features, making examples and porting old Flipper prototype code to check that our API is usable. Also I want to design core API so that changing HAL/OS will not very painful for app developers.
+
+After we make UI emulator/send real hardware to UI developers we can start UI architecture: interface guidelines, GUI toolkit.
+
+Also you can analyse features right now design and propose how Flipper user features can work. It also help us to design core API and requirement for core, test bench and build system.
