@@ -1,5 +1,5 @@
 #include "furi.h"
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include <string.h>
 
 // TODO: this file contains printf, that not implemented on uC target
@@ -10,6 +10,9 @@
 
 #define MAX_RECORD_COUNT 32
 
+#ifdef configSUPPORT_STATIC_ALLOCATION
+static StaticSemaphore_t mutex_info_buffer[MAX_RECORD_COUNT];
+#endif
 static FuriRecord records[MAX_RECORD_COUNT];
 static size_t current_buffer_idx = 0;
 
@@ -56,10 +59,18 @@ bool furi_create(const char* name, void* value, size_t size) {
         return NULL;
     }
 
+    osMutexAttr_t mutex_attr = {
+        .name = NULL,
+        .attr_bits = osMutexRecursive | osMutexPrioInherit,
+        .cb_mem = NULL,
+        .cb_size = 0
+    };
+    #ifdef configSUPPORT_STATIC_ALLOCATION
+    mutex_attr.cb_mem = &mutex_info_buffer[current_buffer_idx];
+    mutex_attr.cb_size = sizeof(StaticSemaphore_t);
+    #endif
     records[current_buffer_idx].mute_counter = 0;
-    records[current_buffer_idx].mutex = osMutexCreate(
-        &records[current_buffer_idx].mutex_def
-    );
+    records[current_buffer_idx].mutex = osMutexNew(&mutex_attr);
     records[current_buffer_idx].value = value;
     records[current_buffer_idx].size = size;
     records[current_buffer_idx].name = name;
@@ -122,7 +133,7 @@ FuriRecordSubscriber* furi_open(
         #ifdef FURI_DEBUG
             printf("[FURI] open: cannot add subscriber (full)\n");
         #endif
-        
+
         return NULL;
     }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cmsis_os.h"
+#include "cmsis_os2.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -8,7 +8,7 @@
 #define MAX_RECORD_SUBSCRIBERS 8
 
 /// application is just a function
-typedef void(*FlipperApplication)(const void*);
+typedef void(*FlipperApplication)(void*);
 
 /// pointer to value callback function
 typedef void(*FlipperRecordCallback)(const void*, size_t, void*);
@@ -39,8 +39,7 @@ struct _FuriRecord {
     const char* name;
     void* value;
     size_t size;
-    osMutexDef_t mutex_def;
-    osSemaphoreId mutex;
+    osMutexId_t mutex;
     uint8_t mute_counter;
     FuriRecordSubscriber subscribers[MAX_RECORD_SUBSCRIBERS];
 };
@@ -53,7 +52,7 @@ typedef struct {
     FlipperApplication application;
     const char* prev_name;
     FlipperApplication prev;
-    osThreadId thread;
+    osThreadId_t thread;
     uint8_t records_count; ///< count of records which task open
     FuriRecord* records[MAX_TASK_RECORDS]; ///< list of records which task open
 } FuriApp;
@@ -63,7 +62,7 @@ Simply starts application.
 It call app entrypoint with param passed as argument.
 Useful for daemon applications and pop-up.
 */
-FuriApp* furiac_start(FlipperApplication app, const char* name, const void* param);
+FuriApp* furiac_start(FlipperApplication app, const char* name, void* param);
 
 /*!
 Swtich to other application.
@@ -72,7 +71,7 @@ argument and save current application entrypoint to prev field
 in current application registry.
 Useful for UI or "active" application.
 */
-void furiac_switch(FlipperApplication app, char* name, const void* param);
+void furiac_switch(FlipperApplication app, char* name, void* param);
 
 /*!
 Stop current application
@@ -80,7 +79,7 @@ Stop current application
 from prev entry in current application registry, cleanup current
 application registry.
 */
-void furiac_exit(const void* param);
+void furiac_exit(void* param);
 
 /*!
 Stop specified app without returning to prev application.
@@ -88,7 +87,7 @@ Stop specified app without returning to prev application.
 bool furiac_kill(FuriApp* app);
 
 // find task pointer by handle
-FuriApp* find_task(osThreadId thread);
+FuriApp* find_task(osThreadId_t thread);
 
 
 /*!

@@ -160,7 +160,7 @@ typedef struct {
     uint8_t b;
 } ConcurrentValue;
 
-void furi_concurent_app(const void* p) {
+void furi_concurent_app(void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     FuriRecordSubscriber* holding_record = furi_open(
@@ -316,7 +316,7 @@ void mute_record_state_cb(FlipperRecordState state, void* ctx) {
     mute_last_state = state;
 }
 
-void furi_mute_parent_app(const void* p) {
+void furi_mute_parent_app(void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     // 1. Create pipe record

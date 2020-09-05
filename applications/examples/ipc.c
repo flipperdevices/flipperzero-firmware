@@ -7,7 +7,7 @@
 
 // context structure used for pass some object from app thread to callback
 typedef struct {
-    osSemaphoreId events; // queue to pass events from callback to app thread
+    osSemaphoreId_t events; // queue to pass events from callback to app thread
     FuriRecordSubscriber* log; // app logger
 } IpcCtx;
 
@@ -46,7 +46,7 @@ static void print_fb(char* fb, FuriRecordSubscriber* log) {
     fuprintf(log, "+==========+\n");
 }
 
-void application_ipc_display(const void* p) {
+void application_ipc_display(void* p) {
     // get logger
     FuriRecordSubscriber* log = get_default_log();
 
@@ -65,13 +65,19 @@ void application_ipc_display(const void* p) {
         furiac_exit(NULL);
     }
 
-    osSemaphoreDef_t semaphore_def;
+    osSemaphoreAttr_t semaphore_attr = {
+        .name = NULL,
+        .attr_bits = 0,
+        .cb_mem = NULL,
+        .cb_size = 0
+    };
     #ifdef configSUPPORT_STATIC_ALLOCATION
-    osStaticSemaphoreDef_t event_descriptor;
-    semaphore_def.controlblock = &event_descriptor;
+    StaticSemaphore_t event_descriptor;
+    semaphore_attr.cb_mem = &event_descriptor;
+    semaphore_attr.cb_size = sizeof(StaticSemaphore_t);
     #endif
     // create stack-based counting semaphore
-    osSemaphoreId events = osSemaphoreCreate(&semaphore_def, 255);
+    osSemaphoreId_t events = osSemaphoreNew(255, 0, &semaphore_attr);
 
     if(events == NULL) {
         fuprintf(log, "[display] cannot create event semaphore\n");
@@ -107,7 +113,7 @@ void application_ipc_display(const void* p) {
 
     while(1) {
         // wait for event
-        if(osSemaphoreWait(events, osWaitForever) == osOK) {
+        if(osSemaphoreAcquire(events, osWaitForever) == osOK) {
             fuprintf(log, "[display] get fb update\n\n");
 
             #ifdef HW_DISPLAY

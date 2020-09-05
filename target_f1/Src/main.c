@@ -75,7 +75,7 @@ static void MX_TIM5_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_TIM8_Init(void);
-void StartDefaultTask(void const * argument);
+void StartDefaultTask(void * argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -146,8 +146,12 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 1024);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  const osThreadAttr_t defaultTaskAttr = {
+    .name = "default",
+    .priority = osPriorityNormal,
+    .stack_size = 1024
+  };
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTaskAttr);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -812,7 +816,7 @@ void app();
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+void StartDefaultTask(void * argument)
 {
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();

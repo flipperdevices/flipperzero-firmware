@@ -35,10 +35,14 @@ void app_gpio_init(GpioPin gpio, GpioMode mode) {
 }
 
 // TODO delay from timer
-void delay_us(uint32_t time) {
+void app_delay_us(uint32_t time) {
   time *= 11.8;
 
   while(time--) {}
+}
+
+void app_delay(uint32_t time) {
+  osDelay(time);
 }
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel) {

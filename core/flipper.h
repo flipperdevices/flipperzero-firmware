@@ -6,7 +6,7 @@ extern "C" {
 
     #include "main.h"
     #include "flipper_hal.h"
-    #include "cmsis_os.h"
+    #include "cmsis_os2.h"
     #include "furi.h"
     #include "log.h"
 

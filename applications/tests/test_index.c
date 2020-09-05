@@ -13,7 +13,7 @@ bool test_furi_concurrent_access(FuriRecordSubscriber* log);
 bool test_furi_nonexistent_data(FuriRecordSubscriber* log);
 bool test_furi_mute_algorithm(FuriRecordSubscriber* log);
 
-void flipper_test_app(const void* p) {
+void flipper_test_app(void* p) {
     FuriRecordSubscriber* log = get_default_log();
     
     if(test_furi_ac_create_kill(log)) {

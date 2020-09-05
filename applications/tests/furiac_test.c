@@ -14,7 +14,7 @@ Test: creating and killing task
 6. check that value stay unchanged
 */
 
-void create_kill_app(const void* p) {
+void create_kill_app(void* p) {
     // this app simply increase counter
     uint8_t* counter = (uint8_t*)p;
     while(1) {
@@ -75,10 +75,10 @@ typedef struct {
     size_t count;
 } TestSwitchSequence;
 
-void task_a(const void*);
-void task_b(const void*);
+void task_a(void*);
+void task_b(void*);
 
-void task_a(const void *p) {
+void task_a(void *p) {
     // simply starts, add 'A' letter to sequence and switch
     // if sequence counter = 0, call task B, exit otherwise
 
@@ -102,7 +102,7 @@ void task_a(const void *p) {
 }
 
 // application simply add 'B' end exit
-void task_b(const void* p) {
+void task_b(void* p) {
     TestSwitchSequence* seq = (TestSwitchSequence*)p;
 
     seq->sequence[seq->count] = 'B';
