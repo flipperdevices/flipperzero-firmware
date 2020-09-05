@@ -1,0 +1,6 @@
+[manifest]
+path = code
+[zephyr]
+base = zephyr
+[build]
+board = native_posix

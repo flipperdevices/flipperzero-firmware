@@ -22,43 +22,24 @@ typedef struct {
     GpioMode mode;
 } GpioPin;
 
+#define LED_RED {.pin = GPIO_PIN_8, .port = GPIOA}
+
 void app_gpio_init(GpioPin gpio, GpioMode mode);
 
-inline void app_gpio_write(GpioPin gpio, bool state) {
-    if(gpio.pin != 0) {
-        if(state) {
-            printf("[GPIO] %s%d on\n", gpio.port, gpio.pin);
-        } else {
-            printf("[GPIO] %s%d off\n", gpio.port, gpio.pin);
-        }
-    } else {
-        printf("[GPIO] no pin\n");
-    }
-}
+void app_gpio_write(GpioPin gpio, bool state);
 
-inline bool app_gpio_read(GpioPin gpio) {
-    // TODO emulate pin state?
+bool app_gpio_read(GpioPin gpio);
 
-    return false;
-}
-
-void delay_us(uint32_t time);
+void app_delay_us(uint32_t time);
+void app_delay(uint32_t time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 
-extern TIM_HandleTypeDef htim8;
+void app_tim_ic_init(bool both);
 
-inline void app_tim_ic_init(bool both) {
-    printf("[TIM] init\n");
-}
+void app_tim_pulse(uint32_t width);
 
-inline void app_tim_pulse(uint32_t width) {
-    printf("[TIM] pulse %d\n", width);
-}
-
-inline void app_tim_stop() {
-    printf("[TIM] stop\n");
-}
+void app_tim_stop();
 
 #define GPIOA "PA"
 #define GPIOB "PB"
