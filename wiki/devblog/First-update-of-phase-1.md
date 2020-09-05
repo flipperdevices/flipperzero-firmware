@@ -44,5 +44,10 @@
 1. Task about linting and control codestyle [#12](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/12) is stuck
 2. Also we had massive discussion about integration with IDE. If you feel pain with our current developer environment and want to use your favorite IDE, welcome to [#18](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/18)!
 3. What about my idea of wiki widgets to attach issues to wiki page? [#66](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/66)
+4. We want to web-browser interface for UI emulator ([#97](https://github.com/Flipper-Zero/flipperzero-firmware-community/issues/97)) and looking for people who want to design webpage. React/TS is preferred.
 
 # Our plans
+
+Сделать платы
+Настроить окружение: тесты, линтинг.
+Пилить ядро и портировать старый код.
