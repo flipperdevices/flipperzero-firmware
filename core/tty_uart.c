@@ -1,10 +1,10 @@
 #include "furi.h"
 #include "main.h"
 
-extern UART_HandleTypeDef DEBUG_UART;
+extern SerialDevice DEBUG_UART;
 
 void handle_uart_write(const void* data, size_t size, void* ctx) {
-	HAL_UART_Transmit(&DEBUG_UART, (uint8_t*)data, (uint16_t)size, HAL_MAX_DELAY);
+	app_serial_write(&DEBUG_UART, (uint8_t*)data, (uint16_t)size, HAL_MAX_DELAY);
 }
 
 bool register_tty_uart() {

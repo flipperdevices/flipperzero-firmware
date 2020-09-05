@@ -53,6 +53,9 @@ typedef enum {
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
 
+#define SerialDevice UART_HandleTypeDef
+#define app_serial_write HAL_UART_Transmit
+
 /* USER CODE END EM */
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);

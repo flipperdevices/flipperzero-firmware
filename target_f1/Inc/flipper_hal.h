@@ -20,6 +20,8 @@ typedef struct {
     uint32_t pin;
 } GpioPin;
 
+#define LED_RED {.pin = GPIO_PIN_8, .port = GPIOA}
+
 void app_gpio_init(GpioPin gpio, GpioMode mode);
 
 inline void app_gpio_write(GpioPin gpio, bool state) {
@@ -40,7 +42,8 @@ inline bool app_gpio_read(GpioPin gpio) {
     return false;
 }
 
-void delay_us(uint32_t time);
+void app_delay_us(uint32_t time);
+void app_delay(uint32_t time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 

@@ -20,8 +20,8 @@ extern "C" {
 #define digitalWrite app_gpio_write
 #define digitalRead app_gpio_read
 #define EEMEM
-#define delayMicroseconds delay_us
-#define delay osDelay
+#define delayMicroseconds app_delay_us
+#define delay app_delay
 #define byte uint8_t
 
 #define OUTPUT GpioModeOutput
