@@ -1,0 +1,11 @@
+Instructions to set up a command-line development environment:
+
+  https://docs.zephyrproject.org/2.3.0/getting_started/index.html
+
+Command to get the Zephyr source code:
+
+  west update
+
+Command to build and flash the firmware:
+
+  west build code -t flash
