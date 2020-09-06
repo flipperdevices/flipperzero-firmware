@@ -24,3 +24,8 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: make -C target_f1
+
+      - name: Build target_d3 in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C target_d3
