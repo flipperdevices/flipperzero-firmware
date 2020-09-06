@@ -47,7 +47,7 @@ impl BindingsGenerator {
             "Drivers/STM32L4xx_HAL_Driver/Inc",
             "Drivers/STM32L4xx_HAL_Driver/Inc/Legacy",
             "Middlewares/Third_Party/FreeRTOS/Source/include",
-            "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS",
+            "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
             "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
             "Drivers/CMSIS/Device/ST/STM32L4xx/Include",
             "Drivers/CMSIS/Include",
@@ -109,7 +109,7 @@ impl BindingsGenerator {
         let builder = self.builder()
             .whitelist_recursively(false)
 
-            .header(format!("{}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.h", self.clib_dir.to_string_lossy()))
+            .header(format!("{}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h", self.clib_dir.to_string_lossy()))
 
             .whitelist_type("osStatus")
             .rustified_enum("osStatus")
