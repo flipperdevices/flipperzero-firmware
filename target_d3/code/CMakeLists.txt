@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13.1)
 
-find_package(Zephyr)
+find_package(Zephyr REQUIRED HINTS ../zephyr)
 
 project(flipper-zero-firmware)
 
