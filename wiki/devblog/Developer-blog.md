@@ -1,4 +1,4 @@
-# [1 sep 2020] First update of phase 1
+# [[1 sep 2020] First update of phase 1](First-update-of-phase-1)
 
 ## Peoples and management
 
@@ -69,7 +69,7 @@ Andrew Strokov @glitchcore
 
 _________________
 
-# [18 aug 2020] Initial state of project
+# [[18 aug 2020] Initial state of project](Initial-state-of-project)
 
 ## Hardware release: F1B1C0.0
 
