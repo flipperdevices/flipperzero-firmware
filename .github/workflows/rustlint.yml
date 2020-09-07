@@ -6,7 +6,6 @@ on:
 
 defaults:
   run:
-    working-directory: core-rs
     shell: bash
 
 env:
@@ -32,7 +31,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check --verbose
+          args: --all --manifest-path=core-rs/Cargo.toml -- --check --verbose
   clippy:
     name: clippy
     runs-on: ubuntu-latest
@@ -52,4 +51,4 @@ jobs:
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --all-features -- ${{ env.CLIPPY_PARAMS }}
+          args: --all-features --manifest-path=core-rs/Cargo.toml -- ${{ env.CLIPPY_PARAMS }}
