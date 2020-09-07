@@ -116,7 +116,34 @@ C_SOURCES += ../core/tty_uart.c
 C_SOURCES += ../core/furi.c
 C_SOURCES += ../core/furi_ac.c
 
+C_SOURCES += ../lib/u8g2/u8x8_d_st7565.c \
+../lib/u8g2/u8g2_d_setup.c \
+../lib/u8g2/u8g2_intersection.c \
+../lib/u8g2/u8g2_setup.c \
+../lib/u8g2/u8g2_d_memory.c \
+../lib/u8g2/u8x8_cad.c \
+../lib/u8g2/u8x8_byte.c \
+../lib/u8g2/u8x8_gpio.c \
+../lib/u8g2/u8x8_display.c \
+../lib/u8g2/u8x8_setup.c \
+../lib/u8g2/u8g2_hvline.c \
+../lib/u8g2/u8g2_ll_hvline.c \
+../lib/u8g2/u8g2_circle.c \
+../lib/u8g2/u8g2_box.c \
+../lib/u8g2/u8g2_buffer.c \
+../lib/u8g2/u8g2_font.c \
+../lib/u8g2/u8g2_fonts.c \
+../lib/u8g2/u8x8_8x8.c \
+../lib/u8g2/u8g2_bitmap.c
+
 # System applications
+
+C_SOURCES += ../applications/display-u8g2/display-u8g2.c
+
+# Examples
+
+# TODO example without condition
+C_SOURCES += ../applications/examples/u8g2_example.c
 
 ifeq ($(TEST), 1)
 C_SOURCES += ../applications/tests/furiac_test.c
@@ -215,6 +242,7 @@ AS_INCLUDES =  \
 C_INCLUDES =  \
 -IInc \
 -I../applications \
+-I../lib \
 -I../core \
 -IDrivers/STM32L4xx_HAL_Driver/Inc \
 -IDrivers/STM32L4xx_HAL_Driver/Inc/Legacy \
