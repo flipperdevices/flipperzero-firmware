@@ -127,6 +127,9 @@ static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
 void display_u8g2(void* p) {
     FuriRecordSubscriber* log = get_default_log();
 
+    // TODO we need different app to contol backlight
+    HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_SET);
+
     u8g2_t _u8g2;
     u8g2_Setup_st7565_erc12864_alt_f(&_u8g2, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
     u8g2_InitDisplay(&_u8g2); // send init sequence to the display, display is in sleep mode after this

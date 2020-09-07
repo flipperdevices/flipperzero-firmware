@@ -188,7 +188,8 @@ example_ipc:
 
 test:
 	rm -f $(BUILD_DIR)/app.o
-	TEST=1 make run
+	TEST=1 make
+	timeout --signal=9 5 $(BUILD_DIR)/$(TARGET)
 
 .PHONY: all rust_lib example_blink example_uart_write test
 

@@ -99,6 +99,9 @@ inline void app_tim_stop() {
 #define DISPLAY_CS_GPIO_Port "DISPLAY CS"
 #define DISPLAY_CS_Pin 0
 
+#define DISPLAY_BACKLIGHT_GPIO_Port "BACKLIGHT"
+#define DISPLAY_BACKLIGHT_Pin 0
+
 typedef const char* SPI_HandleTypeDef;
 
 typedef uint32_t HAL_StatusTypeDef;
