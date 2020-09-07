@@ -1,0 +1,54 @@
+name: Rust Lint
+
+on:
+  push:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CLIPPY_PARAMS: -W clippy::all -W clippy::pedantic -W clippy::nursery -W clippy::cargo
+
+jobs:
+  rustfmt:
+    name: rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - name: Run rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check --verbose
+  clippy:
+    name: clippy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@master
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: clippy
+
+      - name: Run clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- ${{ env.CLIPPY_PARAMS }}
