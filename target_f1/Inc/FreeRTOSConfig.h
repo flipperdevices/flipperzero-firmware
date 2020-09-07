@@ -68,6 +68,7 @@
 #define configQUEUE_REGISTRY_SIZE                8
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  1
 #define configUSE_RECURSIVE_MUTEXES              1
+#define configUSE_COUNTING_SEMAPHORES            1
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0

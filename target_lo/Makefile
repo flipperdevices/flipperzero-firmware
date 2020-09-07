@@ -35,6 +35,7 @@ endif
 
 all: zephyr rust_lib
 	west build code
+	timeout --signal=9 5 $(BUILD_DIR)/zephyr/zephyr.elf
 
 zephyr:
 	west update
