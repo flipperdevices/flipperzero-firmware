@@ -6,6 +6,7 @@ on:
 
 defaults:
   run:
+    working-directory: core-rs
     shell: bash
 
 env:
