@@ -3,4 +3,4 @@ path = code
 [zephyr]
 base = zephyr
 [build]
-board = native_posix
+board = native_posix_64

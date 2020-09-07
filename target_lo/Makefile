@@ -35,6 +35,9 @@ endif
 
 all: zephyr rust_lib
 	west build code
+
+test: zephyr rust_lib
+	west build code -- -DTEST=ON
 	timeout --signal=9 5 $(BUILD_DIR)/zephyr/zephyr.elf
 
 zephyr:
