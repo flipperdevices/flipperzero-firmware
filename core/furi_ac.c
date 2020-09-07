@@ -114,7 +114,7 @@ void furiac_exit(void* param) {
     }
 
     // kill itself
-     osThreadTerminate(NULL);
+    osThreadExit();
 }
 
 void furiac_switch(FlipperApplication app, char* name, void* param) {
@@ -140,6 +140,6 @@ void furiac_switch(FlipperApplication app, char* name, void* param) {
         next->prev_name = current_task->name;
 
         // kill itself
-        osThreadTerminate(NULL);
+        osThreadExit();
     }
 }
