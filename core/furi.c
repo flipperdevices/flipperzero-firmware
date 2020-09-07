@@ -204,7 +204,7 @@ static void furi_notify(FuriRecordSubscriber* handler, const void* value, size_t
 void* furi_take(FuriRecordSubscriber* handler) {
     if(handler == NULL || handler->record == NULL) return NULL;
 
-    if (xSemaphoreTake(handler->record->mutex, portMAX_DELAY) == pdTRUE) {
+    if (osMutexAcquire(handler->record->mutex, osWaitForever) == osOK) {
         return handler->record->value;
     } else {
         return NULL;
@@ -214,7 +214,7 @@ void* furi_take(FuriRecordSubscriber* handler) {
 void furi_give(FuriRecordSubscriber* handler) {
     if(handler == NULL || handler->record == NULL) return;
 
-    xSemaphoreGive(handler->record->mutex);
+    osMutexRelease(handler->record->mutex);
 }
 
 void furi_commit(FuriRecordSubscriber* handler) {
