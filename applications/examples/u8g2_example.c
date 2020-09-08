@@ -2,9 +2,10 @@
 #include "flipper.h"
 
 void u8g2_example(void* p) {
-    FuriRecordSubscriber* log = get_default_log();
+    FuriRecordSubscriber* 
 
-    delay(1000); // TODO govno
+    // TODO try open record and retry on timeout (needs FURI behaviour change)
+    delay(1000);
     
     // open record
     FuriRecordSubscriber* fb_record = furi_open(
