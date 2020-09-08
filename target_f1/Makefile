@@ -304,6 +304,13 @@ test:
 	TEST=1 make
 	rm $(BUILD_DIR)/app.o
 
+syntax_check:
+	clang-format -style=file -n --Werror --ferror-limit=0 Src/*.c
+	echo "Syntax OK"
+
+syntax_fix:
+	clang-format -i -style=file Src/*.c
+
 .PHONY: all rust_lib example_blink example_uart_write test
 
 #######################################
