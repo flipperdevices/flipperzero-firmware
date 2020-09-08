@@ -129,10 +129,6 @@ void display_u8g2(void* p) {
 
     // TODO we need different app to contol backlight
     HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_SET);
-    delay(20);
-    HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_RESET);
-    delay(20);
-    HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_SET);
 
     u8g2_t _u8g2;
     u8g2_Setup_st7565_erc12864_alt_f(&_u8g2, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
@@ -173,11 +169,16 @@ void display_u8g2(void* p) {
 
     while(1) {
         // wait for event
-        if(xSemaphoreTake(update, portMAX_DELAY) == pdTRUE) {
+        if(xSemaphoreTake(update, 1000) == pdTRUE) {
+            HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_SET);
+
             u8g2_t* u8g2 = (u8g2_t*)furi_take(fb_record);
             u8g2_SetPowerSave(u8g2, 0); // wake up display
             u8g2_SendBuffer(u8g2);
             furi_give(fb_record);
+        } else {
+            // TODO we need different app to contol backlight
+            HAL_GPIO_WritePin(DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin, GPIO_PIN_RESET);
         }
     }
 }
