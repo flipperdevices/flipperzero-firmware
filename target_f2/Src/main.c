@@ -47,8 +47,6 @@ ADC_HandleTypeDef hadc1;
 
 COMP_HandleTypeDef hcomp1;
 
-DAC_HandleTypeDef hdac1;
-
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi3;
 
@@ -70,7 +68,6 @@ static void MX_SPI1_Init(void);
 static void MX_SPI3_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_COMP1_Init(void);
-static void MX_DAC1_Init(void);
 static void MX_TIM5_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_USART1_UART_Init(void);
@@ -119,7 +116,6 @@ int main(void)
   MX_SPI3_Init();
   MX_ADC1_Init();
   MX_COMP1_Init();
-  MX_DAC1_Init();
   MX_TIM5_Init();
   MX_TIM15_Init();
   MX_USART1_UART_Init();
@@ -311,7 +307,7 @@ static void MX_COMP1_Init(void)
 
   /* USER CODE END COMP1_Init 1 */
   hcomp1.Instance = COMP1;
-  hcomp1.Init.InvertingInput = COMP_INPUT_MINUS_DAC1_CH1;
+  hcomp1.Init.InvertingInput = COMP_INPUT_MINUS_1_2VREFINT;
   hcomp1.Init.NonInvertingInput = COMP_INPUT_PLUS_IO1;
   hcomp1.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
   hcomp1.Init.Hysteresis = COMP_HYSTERESIS_NONE;
@@ -326,47 +322,6 @@ static void MX_COMP1_Init(void)
   /* USER CODE BEGIN COMP1_Init 2 */
 
   /* USER CODE END COMP1_Init 2 */
-
-}
-
-/**
-  * @brief DAC1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_DAC1_Init(void)
-{
-
-  /* USER CODE BEGIN DAC1_Init 0 */
-
-  /* USER CODE END DAC1_Init 0 */
-
-  DAC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN DAC1_Init 1 */
-
-  /* USER CODE END DAC1_Init 1 */
-  /** DAC Initialization 
-  */
-  hdac1.Instance = DAC1;
-  if (HAL_DAC_Init(&hdac1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** DAC channel OUT1 config 
-  */
-  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
-  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
-  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
-  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_ENABLE;
-  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
-  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN DAC1_Init 2 */
-
-  /* USER CODE END DAC1_Init 2 */
 
 }
 
@@ -680,22 +635,23 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, DISPLAY_DI_Pin|CC1101_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, DISPLAY_DI_Pin|LED_RED_Pin|CC1101_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin|LED_GREEN_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, NFC_CS_Pin|VIBRO_Pin|DISPLAY_CS_Pin|SD_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DISPLAY_RST_Pin|IR_TX_Pin|DISPLAY_BACKLIGHT_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LED_BLUE_Pin|DISPLAY_RST_Pin|IR_TX_Pin|LED_GREEN_Pin 
+                          |DISPLAY_BACKLIGHT_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, VIBRO_Pin|DISPLAY_CS_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin : BUTTON_BACK_Pin */
+  GPIO_InitStruct.Pin = BUTTON_BACK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(BUTTON_BACK_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pins : PC13 PC0 PC1 PC9 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_9;
+  /*Configure GPIO pins : PC0 PC1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -706,11 +662,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(CHRG_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BUTTON_DOWN_Pin BUTTON_BACK_Pin */
-  GPIO_InitStruct.Pin = BUTTON_DOWN_Pin|BUTTON_BACK_Pin;
+  /*Configure GPIO pin : BUTTON_DOWN_Pin */
+  GPIO_InitStruct.Pin = BUTTON_DOWN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(BUTTON_DOWN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DISPLAY_DI_Pin CC1101_CS_Pin */
   GPIO_InitStruct.Pin = DISPLAY_DI_Pin|CC1101_CS_Pin;
@@ -719,11 +675,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA5 PA7 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_7;
+  /*Configure GPIO pins : PA4 PA5 PA6 PA7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : NFC_CS_Pin VIBRO_Pin DISPLAY_CS_Pin SD_CS_Pin */
+  GPIO_InitStruct.Pin = NFC_CS_Pin|VIBRO_Pin|DISPLAY_CS_Pin|SD_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BUTTON_UP_Pin BUTTON_RIGHT_Pin BUTTON_OK_Pin */
   GPIO_InitStruct.Pin = BUTTON_UP_Pin|BUTTON_RIGHT_Pin|BUTTON_OK_Pin;
@@ -751,18 +714,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : VIBRO_Pin DISPLAY_CS_Pin */
-  GPIO_InitStruct.Pin = VIBRO_Pin|DISPLAY_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
   /*Configure GPIO pin : LED_RED_Pin */
   GPIO_InitStruct.Pin = LED_RED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(LED_RED_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PD2 */

@@ -67,6 +67,8 @@ void register_tim8_callback_ch2(void(*callback)(uint16_t ccr, TimerEvent tim_eve
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BUTTON_BACK_Pin GPIO_PIN_13
+#define BUTTON_BACK_GPIO_Port GPIOC
 #define CHRG_Pin GPIO_PIN_2
 #define CHRG_GPIO_Port GPIOC
 #define CHRG_EXTI_IRQn EXTI2_IRQn
@@ -81,11 +83,8 @@ void register_tim8_callback_ch2(void(*callback)(uint16_t ccr, TimerEvent tim_eve
 #define DISPLAY_DI_GPIO_Port GPIOA
 #define SPEAKER_Pin GPIO_PIN_3
 #define SPEAKER_GPIO_Port GPIOA
-#define RFID_REF_Pin GPIO_PIN_4
-#define RFID_REF_GPIO_Port GPIOA
-#define BUTTON_BACK_Pin GPIO_PIN_6
-#define BUTTON_BACK_GPIO_Port GPIOA
-#define BUTTON_BACK_EXTI_IRQn EXTI9_5_IRQn
+#define NFC_CS_Pin GPIO_PIN_4
+#define NFC_CS_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
 #define RFID_RF_IN_GPIO_Port GPIOC
 #define BUTTON_UP_Pin GPIO_PIN_0
@@ -109,6 +108,8 @@ void register_tim8_callback_ch2(void(*callback)(uint16_t ccr, TimerEvent tim_eve
 #define iButton_GPIO_Port GPIOC
 #define DISPLAY_CS_Pin GPIO_PIN_8
 #define DISPLAY_CS_GPIO_Port GPIOC
+#define SD_CS_Pin GPIO_PIN_9
+#define SD_CS_GPIO_Port GPIOC
 #define LED_RED_Pin GPIO_PIN_8
 #define LED_RED_GPIO_Port GPIOA
 #define TMS_Pin GPIO_PIN_13
