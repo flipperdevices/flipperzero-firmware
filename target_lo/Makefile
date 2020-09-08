@@ -71,12 +71,16 @@ C_SOURCES += ../applications/tests/test_index.c
 C_DEFS += -DTEST
 endif
 
+ifneq ($(TEST), 1)
 C_SOURCES += ../applications/display-u8g2/display-u8g2.c
+endif
 
 # Examples
 
 # TODO example without condition
+ifneq ($(TEST), 1)
 C_SOURCES += ../applications/examples/u8g2_example.c
+endif
 
 ifeq ($(EXAMPLE_BLINK), 1)
 C_SOURCES += ../applications/examples/blink.c
