@@ -142,6 +142,8 @@ C_SOURCES += ../applications/display-u8g2/display-u8g2.c
 
 # Examples
 
+C_SOURCES += ../applications/hw_test/hw_test.c
+
 # TODO example without condition
 C_SOURCES += ../applications/examples/u8g2_example.c
 
