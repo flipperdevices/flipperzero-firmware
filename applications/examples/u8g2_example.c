@@ -2,7 +2,7 @@
 #include "flipper.h"
 
 void u8g2_example(void* p) {
-    FuriRecordSubscriber* 
+    FuriRecordSubscriber* log = get_default_log();
 
     // TODO try open record and retry on timeout (needs FURI behaviour change)
     delay(1000);
