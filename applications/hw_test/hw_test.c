@@ -18,7 +18,6 @@ void hw_test(void* p) {
         furiac_exit(NULL);
     }
 
-    // TODO get sound from FURI
     float notes[] = {
         0.0,
         330.0,
@@ -51,6 +50,7 @@ void hw_test(void* p) {
                 freq = 0;
             }
 
+            // TODO get sound from FURI
             pwm_set(width, freq, &htim5, TIM_CHANNEL_4);
             // delay(1);
 
