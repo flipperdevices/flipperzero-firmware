@@ -142,8 +142,6 @@ C_SOURCES += ../applications/display-u8g2/display-u8g2.c
 
 # Examples
 
-C_SOURCES += ../applications/hw_test/hw_test.c
-
 # TODO example without condition
 C_SOURCES += ../applications/examples/u8g2_example.c
 
@@ -172,6 +170,8 @@ C_DEFS += -DEXAMPLE_IPC
 endif
 
 # User application
+
+C_SOURCES += ../applications/coreglitch_demo_0/coreglitch_demo_0.c
 
 # Add C_SOURCES +=, C_DEFS += or CPP_SOURCES += here
 

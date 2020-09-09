@@ -3,10 +3,10 @@
 
 extern TIM_HandleTypeDef htim5;
 
-void hw_test(void* p) {
+void coreglitch_demo_0(void* p) {
     FuriRecordSubscriber* log = get_default_log();
 
-    fuprintf(log, "hw test\n");
+    fuprintf(log, "coreglitch demo!\n");
 
     // open record
     FuriRecordSubscriber* fb_record = furi_open(

@@ -20,7 +20,7 @@ void display_u8g2(void* p);
 
 void u8g2_example(void* p);
 
-void hw_test(void* p);
+void coreglitch_demo_0(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
     #ifndef TEST
@@ -28,7 +28,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = u8g2_example, .name = "u8g2_example"},
     #endif
 
-    // {.app = hw_test, .name = "hw_test"},
+    // {.app = coreglitch_demo_0, .name = "coreglitch_demo_0"},
     
     #ifdef TEST
     {.app = flipper_test_app, .name = "test app"},
