@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 #include "cmsis_os.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -162,3 +166,7 @@ void furi_give(FuriRecordSubscriber* record);
 unlock value mutex and notify subscribers that data is chaned.
 */
 void furi_commit(FuriRecordSubscriber* handler);
+
+#ifdef __cplusplus
+}
+#endif
