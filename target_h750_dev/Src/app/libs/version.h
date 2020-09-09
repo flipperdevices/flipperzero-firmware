@@ -1,3 +1,4 @@
+#pragma once
 /*
   this file must be touched every compile
   for example, cmake: file(TOUCH_NOCREATE "Src/app/libs/version.h")

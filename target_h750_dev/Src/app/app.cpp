@@ -9,6 +9,8 @@
 #include "sd_diskio.h"
 
 #include "libs/version.h"
+#include "libs/unique_id.h"
+#include <inttypes.h>
 #include "libs/ProtocolHelper.h"
 
 //extern UART_HandleTypeDef huart1;
@@ -34,10 +36,11 @@ void app(void){
   proto.open("/dev/tty/hw");
   proto.clearScreen();
   proto.printf("System start\r\n");
+  proto.printf("Flipper id: %lu\r\n", get_flipper_unique_id());
   proto.printf("Build time: %s %s\r\n", VERSION_DATE, VERSION_TIME);
   proto.printf("Heap:\r\n");
-  proto.printf("  %lu B\r\n", configTOTAL_HEAP_SIZE);
-  proto.printf("  %lu B free\r\n", xPortGetFreeHeapSize());
+  proto.printf("  %lu bytes total\r\n", configTOTAL_HEAP_SIZE);
+  proto.printf("  %lu bytes free\r\n", xPortGetFreeHeapSize());
 
   furiac_start(app_led_blinker, "led_blinker", NULL);
 
@@ -85,7 +88,7 @@ void app_led_blinker(void *p)
 
   pinMode(pin_a1, OutputPushPull, NoPullup, LowSpeed);
 
-  while(1) 
+  while(1)
   {
     digitalWrite(pin_a1, 0);
     osDelay(500);
