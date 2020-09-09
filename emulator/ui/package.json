@@ -1,0 +1,44 @@
+{
+  "name": "flipper-emulator-ui",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.5.0",
+    "@testing-library/user-event": "^7.2.1",
+    "@types/bl": "^2.1.0",
+    "@types/jest": "^24.9.1",
+    "@types/msgpack5": "^3.4.1",
+    "@types/node": "^12.12.56",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "assert-never": "^1.2.0",
+    "bl": "^2.2.0",
+    "msgpack5": "^4.2.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-scripts": "3.4.3",
+    "typescript": "^3.7.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

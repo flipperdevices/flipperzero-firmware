@@ -1,0 +1,33 @@
+{
+  "name": "flipper-emulator-server",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "start": "node dist/server.js",
+    "test": "npm run build && npm run tslint",
+    "tslint": "tslint -c tslint.json -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Flipper-Zero/flipperzero-firmware-community.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/Flipper-Zero/flipperzero-firmware-community/",
+  "dependencies": {
+    "p-event": "^4.2.0",
+    "source-map-support": "^0.5.19",
+    "temp": "^0.9.1",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "@types/temp": "^0.8.34",
+    "@types/ws": "^7.2.6",
+    "tslint": "^5.18.0",
+    "typescript": "^4.0.2"
+  }
+}

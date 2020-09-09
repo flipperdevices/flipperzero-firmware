@@ -13,3 +13,25 @@ services:
     environment:
       DISPLAY: $DISPLAY
       PATH: /root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  dev-server:
+    image: node:12.18.4
+    command: "bash -c 'npm ci && npm run start'"
+    ports:
+      - "3001:3001"
+    tty: true
+    stdin_open: true
+    #    TODO setup cache from npm
+    volumes:
+      - .:/project
+    working_dir: "/project/emulator/server"
+  dev-ui:
+    image: node:12.18.4
+    command: "bash -c 'npm ci && npm run start'"
+    ports:
+      - "3000:3000"
+    tty: true
+    stdin_open: true
+    #    TODO setup cache from npm
+    volumes:
+      - .:/project
+    working_dir: "/project/emulator/uis"
