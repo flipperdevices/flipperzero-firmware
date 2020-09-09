@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 
-echo "BUILD CONTAINER"
-sudo docker build ./docker --tag flipper-syntax-check
-
-echo "RUN CONTAINER"
-sudo docker run --rm --name c-syntax-check --entrypoint /syntax_check.sh -v $(pwd):/project flipper-syntax-check \
+echo "RUN SYNTAX CHECK INSIDE CONTAINER"
+sudo docker exec -it flipperzero-firmware-community_dev_1 /syntax_check.sh
