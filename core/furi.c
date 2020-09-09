@@ -190,10 +190,10 @@ static void furi_notify(FuriRecordSubscriber* handler, const void* value, size_t
     }
 }
 
-void* furi_take(FuriRecordSubscriber* handler) {
+void* furi_take(FuriRecordSubscriber* handler, TickType_t xTicksToWait) {
     if(handler == NULL || handler->record == NULL) return NULL;
 
-    if (xSemaphoreTake(handler->record->mutex, portMAX_DELAY) == pdTRUE) {
+    if (xSemaphoreTake(handler->record->mutex, xTicksToWait) == pdTRUE) {
         return handler->record->value;
     } else {
         return NULL;

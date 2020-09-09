@@ -155,7 +155,7 @@ Returns pointer to data, NULL if closed/non-existent record or muted
 
 TODO: enum return value with execution status
 */
-void* furi_take(FuriRecordSubscriber* record);
+void* furi_take(FuriRecordSubscriber* record, TickType_t xTicksToWait);
 
 /*!
 unlock value mutex.
