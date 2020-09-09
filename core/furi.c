@@ -225,7 +225,7 @@ bool furi_read(FuriRecordSubscriber* handler, void* value, size_t size) {
     // return false if read from pipe
     if(handler->record->value == NULL) return false;
 
-    furi_take(handler);
+    furi_take(handler, portMAX_DELAY);
     memcpy(value, handler->record->value, size);
     furi_give(handler);
     furi_notify(handler, value, size);
@@ -274,7 +274,7 @@ bool furi_write(FuriRecordSubscriber* handler, const void* value, size_t size) {
 
     if(handler->record->value != NULL) {
         // real write to value
-        furi_take(handler);
+        furi_take(handler, portMAX_DELAY);
         memcpy(handler->record->value, value, size);
         furi_give(handler);
 
