@@ -11,16 +11,16 @@
 
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
-#if LOG_LEVEL >= LOG_LEVEL_ERROR 
-  #define LOGE(...) (proto->printf("E: " __VA_ARGS__))
-#else 
-  #define LOGE(...)
+#if LOG_LEVEL >= LOG_LEVEL_ERROR
+#define LOGE(...) (proto->printf("E: " __VA_ARGS__))
+#else
+#define LOGE(...)
 #endif
 
-#if LOG_LEVEL >= LOG_LEVEL_DEBUG 
-  #define LOGD(...) (proto->printf("D: " __VA_ARGS__))
-#else 
-  #define LOGD(...)
+#if LOG_LEVEL >= LOG_LEVEL_DEBUG
+#define LOGD(...) (proto->printf("D: " __VA_ARGS__))
+#else
+#define LOGD(...)
 #endif
 
 /*
@@ -69,347 +69,351 @@
   <- OK\n
 */
 
-FRESULT scan_files(char *path, ProtocolHelper* proto);
+FRESULT scan_files(char *path, ProtocolHelper *proto);
 
-void app_fileprotocol(ProtocolHelper* proto)
+void app_fileprotocol(ProtocolHelper *proto)
 {
   proto->printf("flipper file protocol\n");
 
-  char* fs_path = NULL;
+  char *fs_path = NULL;
   FIL file;
-  FuriRecordSubscriber* fs_record = furi_open("/dev/filesystem", true, false, NULL, NULL, NULL);
+  FuriRecordSubscriber *fs_record = furi_open("/dev/filesystem", true, false, NULL, NULL, NULL);
   uint8_t result = FR_OK;
 
-  if(fs_record == NULL) 
+  if (fs_record == NULL)
   {
     LOGE("filesystem not found\r\n");
-    vTaskDelete(NULL);
+    return;
   }
 
-  while(1)
+  while (1)
   {
-    char* command_data = proto->readUntil('\n');
+    LOGD("waiting for command" EOL);
+    char *command_data = proto->readUntil('\n');
     LOGD("%s" EOL, command_data);
 
-    char* command = strtok_r(command_data, " ", &command_data);
+    char *command = strtok_r(command_data, " ", &command_data);
 
-    if(command == NULL)
+    if (command == NULL)
     {
       LOGE("no command" EOL);
       continue;
     }
 
-    switch(strhash(command))
+    switch (strhash(command))
     {
-      case strhash("f_open"):
+    case strhash("f_open"):
+    {
+      char *filename = strtok_r(command_data, " ", &command_data);
+      char *mode = strtok_r(command_data, " ", &command_data);
+      BYTE f_open_mode;
+      bool f_open_mode_valid = false;
+
+      if (filename == NULL || mode == NULL)
       {
-        char* filename = strtok_r(command_data, " ", &command_data);
-        char* mode = strtok_r(command_data, " ", &command_data);
-        BYTE f_open_mode;
-        bool f_open_mode_valid = false;
-
-        if(filename == NULL || mode == NULL)
-        {
-          LOGE("usage f_open filename mode" EOL);
-          break;
-        }
-
-        if(strcmp(mode, "r") == 0)
-        {
-          f_open_mode = FA_READ | FA_OPEN_EXISTING;
-          f_open_mode_valid = true; 
-        }
-        else if(strcmp(mode, "w") == 0)
-        {
-          f_open_mode = FA_WRITE | FA_OPEN_ALWAYS;
-          f_open_mode_valid = true;
-        }
-
-        if(f_open_mode_valid == false)
-        {
-          LOGE("unknown mode" EOL);
-          break;
-        }
-
-        if(fs_path != NULL)
-        {
-          LOGE("file already opened" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        fs_path = static_cast<char*>(furi_take(fs_record, 1000));
-
-        if(fs_path == NULL)
-        {
-          LOGE("filesystem is busy" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        LOGD("file \"%s\", mode = \"%s\"" EOL, filename, mode);
-        result = f_open(&file, filename, f_open_mode);
-
-        if (result != FR_OK)
-        {
-          LOGE("cannot open file: %d" EOL, result);
-          furi_give(fs_record);
-          fs_path = NULL;
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-        break;
+        LOGE("usage f_open filename mode" EOL);
+        continue;
       }
-      case strhash("f_valid"):
+
+      if (strcmp(mode, "r") == 0)
       {
-        if(fs_path == NULL)
-        {
-          proto->printf("ERR\n");
-        }
-        else
-        {
-          proto->printf("OK\n");
-        }
-        break;
+        f_open_mode = FA_READ | FA_OPEN_EXISTING;
+        f_open_mode_valid = true;
       }
-      case strhash("f_write"):
+      else if (strcmp(mode, "w") == 0)
       {
-        char* size = strtok_r(command_data, " ", &command_data);
-        uint16_t bytes_to_write = 0;
-        uint16_t bytes_written = 0;
-        bytes_to_write = atoi(size);
-        
-        if(bytes_to_write == 0 || bytes_to_write > 128)
-        {
-          LOGE("size param error" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        if(fs_path == NULL)
-        {
-          LOGE("no file" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-
-        command_data = proto->readLength(bytes_to_write);
-        result = f_write(&file, command_data, bytes_to_write, reinterpret_cast<unsigned int*>(&bytes_written));
-        
-        if (result != FR_OK)
-        {
-          LOGE("cannot write to file: %d" EOL, result);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        LOGD("to_write %d, written %d" EOL, bytes_to_write, bytes_written);
-
-        if(bytes_to_write != bytes_written)
-        {
-          LOGE("disk full, to_write %d, written %d" EOL, bytes_to_write, bytes_written);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-        break;
+        f_open_mode = FA_WRITE | FA_OPEN_ALWAYS;
+        f_open_mode_valid = true;
       }
-      case strhash("f_read"):
+
+      if (f_open_mode_valid == false)
       {
-        char* size = strtok_r(command_data, " ", &command_data);
-        uint16_t bytes_to_read = 0;
-        uint16_t bytes_readed = 0;
-        bytes_to_read = atoi(size);
-        char bytes[128];
-
-        if(bytes_to_read == 0 || bytes_to_read > 128)
-        {
-          LOGE("size param error" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        if(fs_path == NULL)
-        {
-          LOGE("no file" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-
-        result = f_read(&file, bytes, bytes_to_read, reinterpret_cast<unsigned int*>(&bytes_readed));
-        
-        if (result != FR_OK)
-        {
-          LOGE("cannot read from file: %d" EOL, result);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->write(bytes, bytes_readed);
-        proto->printf("\n");
-        LOGD("to_read %d, readed %d" EOL, bytes_to_read, bytes_readed);
-
-        if(bytes_to_read != bytes_readed)
-        {
-          LOGE("readed more than file, to_read %d, readed %d" EOL, bytes_to_read, bytes_readed);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-        break;
+        LOGE("unknown mode" EOL);
+        continue;
       }
-      case strhash("f_size"):
-      {
-        if(fs_path == NULL)
-        {
-          LOGE("no file" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
 
-        proto->printf("%lu" EOL, f_size(&file));
-        break;
+      if (fs_path != NULL)
+      {
+        LOGE("file already opened" EOL);
+        proto->printf("ERR\n");
+        continue;
       }
-      case strhash("f_close"):
+
+      fs_path = static_cast<char *>(furi_take(fs_record, 1000));
+
+      if (fs_path == NULL)
       {
-        result = f_close(&file);
+        LOGE("filesystem is busy" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
 
-        if (result != FR_OK)
-        {
-          LOGE("cannot close file: %d" EOL, result);
-          proto->printf("ERR\n");
-        }
+      LOGD("file \"%s\", mode = \"%s\"" EOL, filename, mode);
+      result = f_open(&file, filename, f_open_mode);
 
+      if (result != FR_OK)
+      {
+        LOGE("cannot open file: %d" EOL, result);
         furi_give(fs_record);
         fs_path = NULL;
+        proto->printf("ERR\n");
+        continue;
+      }
 
+      proto->printf("OK\n");
+      break;
+    }
+    case strhash("f_valid"):
+    {
+      if (fs_path == NULL)
+      {
+        proto->printf("ERR\n");
+      }
+      else
+      {
         proto->printf("OK\n");
-        break;
       }
-      case strhash("f_lseek"):
+      break;
+    }
+    case strhash("f_write"):
+    {
+      char *size = strtok_r(command_data, " ", &command_data);
+      uint16_t bytes_to_write = 0;
+      uint16_t bytes_written = 0;
+      bytes_to_write = atoi(size);
+
+      if (bytes_to_write == 0 || bytes_to_write > 128)
       {
-        char* size = strtok_r(command_data, " ", &command_data);
-        uint32_t bytes_to_seek = 0;
-        bytes_to_seek = atoi(size);
-
-        if(fs_path == NULL)
-        {
-          LOGE("no file" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        result = f_lseek(&file, bytes_to_seek);
-        
-        if(result != FR_OK)
-        {
-          LOGE("cant seek, %d" EOL, result);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("OK\n");
-        break;
+        LOGE("size param error" EOL);
+        proto->printf("ERR\n");
+        continue;
       }
-      case strhash("f_tell"):
+
+      if (fs_path == NULL)
       {
-        if(fs_path == NULL)
-        {
-          LOGE("no file" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        proto->printf("%lu" EOL, f_tell(&file));
-
-        break;
+        LOGE("no file" EOL);
+        proto->printf("ERR\n");
+        continue;
       }
-      case strhash("id"):
+
+      proto->printf("OK\n");
+
+      command_data = proto->readLength(bytes_to_write);
+      result = f_write(&file, command_data, bytes_to_write, reinterpret_cast<unsigned int *>(&bytes_written));
+
+      if (result != FR_OK)
       {
-        proto->printf("%lu" EOL, get_flipper_unique_id());
-        break;
+        LOGE("cannot write to file: %d" EOL, result);
+        proto->printf("ERR\n");
+        continue;
       }
-      case strhash("ls"):
+
+      LOGD("to_write %d, written %d" EOL, bytes_to_write, bytes_written);
+
+      if (bytes_to_write != bytes_written)
       {
-        if(fs_path != NULL)
-        {
-          LOGE("file already opened" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        fs_path = static_cast<char*>(furi_take(fs_record, 1000));
-
-        if(fs_path == NULL)
-        {
-          LOGE("filesystem is busy" EOL);
-          proto->printf("ERR\n");
-          break;
-        }
-
-        scan_files(fs_path, proto);
-
-        furi_give(fs_record);
-        fs_path = NULL;
-
-        proto->printf("OK\n");
-        break;
+        LOGE("disk full, to_write %d, written %d" EOL, bytes_to_write, bytes_written);
+        proto->printf("ERR\n");
+        continue;
       }
-      default:
-        LOGE("unknown command" EOL);
-        break;
+
+      proto->printf("OK\n");
+      break;
+    }
+    case strhash("f_read"):
+    {
+      char *size = strtok_r(command_data, " ", &command_data);
+      uint16_t bytes_to_read = 0;
+      uint16_t bytes_readed = 0;
+      bytes_to_read = atoi(size);
+      char bytes[128];
+
+      if (bytes_to_read == 0 || bytes_to_read > 128)
+      {
+        LOGE("size param error" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      if (fs_path == NULL)
+      {
+        LOGE("no file" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->printf("OK\n");
+
+      result = f_read(&file, bytes, bytes_to_read, reinterpret_cast<unsigned int *>(&bytes_readed));
+
+      if (result != FR_OK)
+      {
+        LOGE("cannot read from file: %d" EOL, result);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->write(bytes, bytes_readed);
+      proto->printf("\n");
+      LOGD("to_read %d, readed %d" EOL, bytes_to_read, bytes_readed);
+
+      if (bytes_to_read != bytes_readed)
+      {
+        LOGE("readed more than file, to_read %d, readed %d" EOL, bytes_to_read, bytes_readed);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->printf("OK\n");
+      break;
+    }
+    case strhash("f_size"):
+    {
+      if (fs_path == NULL)
+      {
+        LOGE("no file" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->printf("%lu" EOL, f_size(&file));
+      break;
+    }
+    case strhash("f_close"):
+    {
+      result = f_close(&file);
+
+      if (result != FR_OK)
+      {
+        LOGE("cannot close file: %d" EOL, result);
+        proto->printf("ERR\n");
+      }
+
+      furi_give(fs_record);
+      fs_path = NULL;
+
+      proto->printf("OK\n");
+      break;
+    }
+    case strhash("f_lseek"):
+    {
+      char *size = strtok_r(command_data, " ", &command_data);
+      uint32_t bytes_to_seek = 0;
+      bytes_to_seek = atoi(size);
+
+      if (fs_path == NULL)
+      {
+        LOGE("no file" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      result = f_lseek(&file, bytes_to_seek);
+
+      if (result != FR_OK)
+      {
+        LOGE("cant seek, %d" EOL, result);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->printf("OK\n");
+      break;
+    }
+    case strhash("f_tell"):
+    {
+      if (fs_path == NULL)
+      {
+        LOGE("no file" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      proto->printf("%lu" EOL, f_tell(&file));
+
+      break;
+    }
+    case strhash("id"):
+    {
+      proto->printf("%lu" EOL, get_flipper_unique_id());
+      break;
+    }
+    case strhash("ls"):
+    {
+      if (fs_path != NULL)
+      {
+        LOGE("file already opened" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      fs_path = static_cast<char *>(furi_take(fs_record, 1000));
+
+      if (fs_path == NULL)
+      {
+        LOGE("filesystem is busy" EOL);
+        proto->printf("ERR\n");
+        continue;
+      }
+
+      scan_files(fs_path, proto);
+
+      furi_give(fs_record);
+      fs_path = NULL;
+
+      proto->printf("OK\n");
+      break;
+    }
+    default:
+      LOGE("unknown command" EOL);
+      break;
     }
   }
+
+  LOGD("protocol close" EOL);
 }
 
-FRESULT scan_files(char *path, ProtocolHelper* proto)
+FRESULT scan_files(char *path, ProtocolHelper *proto)
 {
-	FRESULT res;
-	DIR dir;
-	UINT i;
-	static FILINFO fno;
+  FRESULT res;
+  DIR dir;
+  UINT i;
+  static FILINFO fno;
 
   /* Open the directory */
-	res = f_opendir(&dir, path); 
-	if (res == FR_OK)
-	{
-		while(1)
-		{
+  res = f_opendir(&dir, path);
+  if (res == FR_OK)
+  {
+    while (1)
+    {
       /* Read a directory item */
-			res = f_readdir(&dir, &fno); 
-			if (res != FR_OK || fno.fname[0] == 0)
+      res = f_readdir(&dir, &fno);
+      if (res != FR_OK || fno.fname[0] == 0)
       {
         /* Break on error or end of dir */
         break;
       }
-				
-			if (fno.fattrib & AM_DIR)
-			{ 
+
+      if (fno.fattrib & AM_DIR)
+      {
         /* It is a directory */
-				i = strlen(path);
-				sprintf(&path[i], "/%s", fno.fname);
+        i = strlen(path);
+        sprintf(&path[i], "/%s", fno.fname);
 
         /* Enter the directory */
-				res = scan_files(path, proto);
-				if (res != FR_OK) break;
-				path[i] = 0;
-			}
-			else
-			{ 
+        res = scan_files(path, proto);
+        if (res != FR_OK)
+          break;
+        path[i] = 0;
+      }
+      else
+      {
         /* It is a file. */
-				proto->printf("%s/%s\r\n", path, fno.fname);
-			}
-		}
-		f_closedir(&dir);
-	} 
+        proto->printf("%s/%s\r\n", path, fno.fname);
+      }
+    }
+    f_closedir(&dir);
+  }
 
-	return res;
+  return res;
 }

@@ -4,4 +4,4 @@
 #include "../libs/helpers.hpp"
 #include <string.h>
 
-void app_fileprotocol(ProtocolHelper* proto);
+void app_fileprotocol(ProtocolHelper *proto);
