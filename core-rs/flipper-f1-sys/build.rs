@@ -79,7 +79,6 @@ impl BindingsGenerator {
             .derive_debug(false)
             .clang_arg("-DUSE_HAL_DRIVER")
             .clang_arg("-DSTM32L476xx")
-
             .clang_arg("-DBUTON_INVERT=false")
             .clang_arg("-DDEBUG_UART=huart1")
             .clang_args(

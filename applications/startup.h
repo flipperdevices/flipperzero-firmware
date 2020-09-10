@@ -34,14 +34,14 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = flipper_test_app, .name = "test app"},
     #endif
 
-    #ifdef EXAMPLE_BLINK
-    {.app = application_blink, .name = "blink"},
-    #endif
-    #ifdef EXAMPLE_UART_WRITE
-    {.app = application_uart_write, .name = "uart write"},
-    #endif
-    #ifdef EXAMPLE_IPC
-    {.app = application_ipc_display, .name = "ipc display"},
-    {.app = application_ipc_widget, .name = "ipc widget"},
-    #endif
+#ifdef EXAMPLE_BLINK
+    { .app = application_blink, .name = "blink" },
+#endif
+#ifdef EXAMPLE_UART_WRITE
+    { .app = application_uart_write, .name = "uart write" },
+#endif
+#ifdef EXAMPLE_IPC
+    { .app = application_ipc_display, .name = "ipc display" },
+    { .app = application_ipc_widget, .name = "ipc widget" },
+#endif
 };

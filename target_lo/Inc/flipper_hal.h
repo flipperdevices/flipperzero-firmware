@@ -10,11 +10,7 @@ GPIO and HAL implementations
 #include <stdbool.h>
 #include "main.h"
 
-typedef enum {
-    GpioModeInput,
-    GpioModeOutput,
-    GpioModeOpenDrain
-} GpioMode;
+typedef enum { GpioModeInput, GpioModeOutput, GpioModeOpenDrain } GpioMode;
 
 typedef struct {
     const char* port;

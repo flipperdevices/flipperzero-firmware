@@ -25,4 +25,4 @@ fi
 
 read -p "Do you want fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 rustfmt $RUST_FILES
-$CLANG_FORMAT_BIN -style=file $C_FILES
+$CLANG_FORMAT_BIN -style=file -i $C_FILES

@@ -10,18 +10,17 @@ GPIO and HAL implementations
 
 void app_gpio_init(GpioPin gpio, GpioMode mode) {
     if(gpio.pin != 0) {
-
         switch(mode) {
-            case GpioModeInput:
-                printf("[GPIO] %s%d input\n", gpio.port, gpio.pin);
+        case GpioModeInput:
+            printf("[GPIO] %s%d input\n", gpio.port, gpio.pin);
             break;
 
-            case GpioModeOutput: 
-                printf("[GPIO] %s%d push pull\n", gpio.port, gpio.pin);
+        case GpioModeOutput:
+            printf("[GPIO] %s%d push pull\n", gpio.port, gpio.pin);
             break;
 
-            case GpioModeOpenDrain:
-                printf("[GPIO] %s%d open drain\n", gpio.port, gpio.pin);
+        case GpioModeOpenDrain:
+            printf("[GPIO] %s%d open drain\n", gpio.port, gpio.pin);
             break;
         }
 
