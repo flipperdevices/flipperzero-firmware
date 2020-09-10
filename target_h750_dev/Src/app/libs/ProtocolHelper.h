@@ -17,10 +17,6 @@ typedef enum {
   modeReadLength = 3,
 } ProtocolHelper_Read_Mode;
 
-// Tag used for difference beetween callback (cbc::obtain_connector)
-// because it work like a "get static method"
-
-template <std::size_t Tag>
 class ProtocolHelper
 {
   public:
@@ -45,8 +41,8 @@ class ProtocolHelper
     StaticSemaphore_t xWriteMutexBuffer;
 };
 
-template <std::size_t Tag>
-bool ProtocolHelper<Tag>::open(const char* tty)
+
+bool ProtocolHelper::open(const char* tty)
 {
   this->tty = tty;
   this->xWriteSemaphore = xSemaphoreCreateMutexStatic( &this->xWriteMutexBuffer );
@@ -58,8 +54,9 @@ bool ProtocolHelper<Tag>::open(const char* tty)
     return false;
   }
 
-  auto callback = cbc::obtain_connector<Tag>(this, &ProtocolHelper::receive);
-  rx_tty = furi_open(string(this->tty + "/rx").c_str(), false, false, callback, NULL, NULL);
+  auto callback = cbc::obtain_connector(this, &ProtocolHelper::receive);
+
+  rx_tty = furi_open(string(this->tty + "/rx").c_str(), false, false, callback, NULL, this);
 
   if(rx_tty == NULL) 
   {
@@ -70,8 +67,8 @@ bool ProtocolHelper<Tag>::open(const char* tty)
   return true;
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::clearScreen()
+
+void ProtocolHelper::clearScreen()
 {
   // move the cursor to the upper left corner of the screen
   // \033 = ESCAPE (ASCII 27, OCT 33)
@@ -81,16 +78,16 @@ void ProtocolHelper<Tag>::clearScreen()
   this->write(command_clear_screen, sizeof(command_clear_screen));
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::write(const char * buffer, uint16_t length)
+
+void ProtocolHelper::write(const char * buffer, uint16_t length)
 {
   while( xSemaphoreTake( this->xWriteSemaphore, portMAX_DELAY ) != pdTRUE ){ };
   furi_write(tx_tty, buffer, length);
   xSemaphoreGive( this->xWriteSemaphore );
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::printf(const char * format, ...)
+
+void ProtocolHelper::printf(const char * format, ...)
 {
 	char buffer[256];
 	uint16_t length = 0;
@@ -103,29 +100,30 @@ void ProtocolHelper<Tag>::printf(const char * format, ...)
   this->write(buffer, length);
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::close(void)
+
+void ProtocolHelper::close(void)
 {
   furi_close(tx_tty);
   furi_close(rx_tty);
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::receive(const void* data, size_t size, void* ctx)
+
+void ProtocolHelper::receive(const void* data, size_t size, void* ctx)
 {
-  if(this->mode == modeNone){
+  ProtocolHelper *proto = static_cast<ProtocolHelper*>(ctx);
+  if(proto->mode == modeNone){
     return;
   }
 
-  if((this->position + size) <= MAX_LINE_LENGTH)
+  if((proto->position + size) <= MAX_LINE_LENGTH)
   {
-    memcpy((this->read_buffer + this->position), data, size);
-    this->position += size;
+    memcpy((proto->read_buffer + proto->position), data, size);
+    proto->position += size;
   }
 }
 
-template <std::size_t Tag>
-char ProtocolHelper<Tag>::read(void)
+
+char ProtocolHelper::read(void)
 {
   this->clearBuffer();
 
@@ -136,8 +134,8 @@ char ProtocolHelper<Tag>::read(void)
   return this->read_buffer[this->position - 1];
 }
 
-template <std::size_t Tag>
-char* ProtocolHelper<Tag>::readUntil(const char symbol)
+
+char* ProtocolHelper::readUntil(const char symbol)
 {
   this->clearBuffer();
 
@@ -147,8 +145,7 @@ char* ProtocolHelper<Tag>::readUntil(const char symbol)
   return this->read_buffer;
 }
 
-template <std::size_t Tag>
-char* ProtocolHelper<Tag>::readLength(uint8_t length)
+char* ProtocolHelper::readLength(uint8_t length)
 {
   this->clearBuffer();
 
@@ -158,8 +155,7 @@ char* ProtocolHelper<Tag>::readLength(uint8_t length)
   return this->read_buffer;
 }
 
-template <std::size_t Tag>
-void ProtocolHelper<Tag>::clearBuffer(void)
+void ProtocolHelper::clearBuffer(void)
 {
   this->position = 0;
   memset(this->read_buffer, 0, MAX_LINE_LENGTH);

@@ -6,30 +6,28 @@
 #include "drivers/flipper_gpio.h"
 #include "drivers/flipper_tty_hw.h"
 #include "drivers/flipper_tty_usb.h"
-#include "sd_diskio.h"
+#include "drivers/flipper_fs.h"
 
 #include "libs/version.h"
 #include "libs/unique_id.h"
 #include <inttypes.h>
 #include "libs/ProtocolHelper.h"
 
-//extern UART_HandleTypeDef huart1;
-//UART uart1(&huart1);
-
 extern "C" void main_loop(void){
 	app();
 }
 
 void app_led_blinker(void *p);
-void app_fs(void *p);
+void app_filesystem(void *p);
 
-ProtocolHelper<1> proto;
-ProtocolHelper<2> proto_usb;
+ProtocolHelper proto;
+ProtocolHelper proto_usb;
 
 void app(void){
   initGpioDriver();
   initTTYHWDriver();
   initTTYUSBDriver();
+  initFsDriver();
 
   proto_usb.open("/dev/tty/usb");
 
@@ -43,6 +41,7 @@ void app(void){
   proto.printf("  %lu bytes free\r\n", xPortGetFreeHeapSize());
 
   furiac_start(app_led_blinker, "led_blinker", NULL);
+  //furiac_start(app_filesystem, "filesystem", NULL);
 
   while (true)
   {
@@ -53,7 +52,7 @@ void app(void){
 
   while (true)
   {
-    if (HAL_GPIO_ReadPin(KEY1_INPUT_GPIO_Port, KEY1_INPUT_Pin) == GPIO_PIN_RESET)
+    /*if (HAL_GPIO_ReadPin(KEY1_INPUT_GPIO_Port, KEY1_INPUT_Pin) == GPIO_PIN_RESET)
     {
       proto_usb.printf("Hello\r\n");
     }
@@ -61,13 +60,13 @@ void app(void){
     if (HAL_GPIO_ReadPin(KEY2_INPUT_GPIO_Port, KEY2_INPUT_Pin) == GPIO_PIN_RESET)
     {
       proto.printf("Heap: %lu B free\r\n", xPortGetFreeHeapSize());
-    }
+    }*/
 
     osDelay(250);
   }
 };
 
-void app_led_blinker(void *p) 
+void app_led_blinker(void* argument) 
 {
   proto.printf("led task start\r\n");
   FuriRecordSubscriber* gpio_a1_record = furi_open("/dev/gpio/a/1", true, false, NULL, NULL, NULL);
@@ -107,51 +106,68 @@ FRESULT scan_files(char *path)
 	UINT i;
 	static FILINFO fno;
 
-	res = f_opendir(&dir, path); /* Open the directory */
+  proto.printf("Scan %s\r\n", path);
+  /* Open the directory */
+	res = f_opendir(&dir, path); 
 	if (res == FR_OK)
 	{
-		for (;;)
+		while(1)
 		{
-			res = f_readdir(&dir, &fno); /* Read a directory item */
+      /* Read a directory item */
+			res = f_readdir(&dir, &fno); 
 			if (res != FR_OK || fno.fname[0] == 0)
-				break; /* Break on error or end of dir */
+      {
+        /* Break on error or end of dir */
+        proto.printf("EOD\r\n");
+        break;
+      }
+				
 			if (fno.fattrib & AM_DIR)
-			{ /* It is a directory */
+			{ 
+        /* It is a directory */
 				i = strlen(path);
 				sprintf(&path[i], "/%s", fno.fname);
-				res = scan_files(path); /* Enter the directory */
+
+        /* Enter the directory */
+				res = scan_files(path);
 				if (res != FR_OK) break;
 				path[i] = 0;
 			}
 			else
-			{ /* It is a file. */
+			{ 
+        /* It is a file. */
 				proto.printf("%s/%s\r\n", path, fno.fname);
 			}
 		}
 		f_closedir(&dir);
-	}
+	} 
 
 	return res;
 }
 
-void app_fs(void *p){
+void app_filesystem(void* argument){
   proto.printf("fs task start\r\n");
-  
-  uint8_t res = 0;
-	FATFS SDFatFs;
-  FIL MyFile;
-	char SD_Path[4];
 
-  res = f_mount(&SDFatFs, (TCHAR const*)SD_Path, 1);
-	if(res != FR_OK)
+  uint8_t res = 0;
+  FuriRecordSubscriber* fs_record = furi_open("/dev/filesystem", true, false, NULL, NULL, NULL);
+
+  if(fs_record == NULL) 
   {
-    proto.printf("f_mount = %d\r\n", res);
-    return;
+    proto.printf("filesystem not found\r\n");
+    vTaskDelete(NULL);
   }
 
-  FATFS *fs2;
+  char* fs_path = static_cast<char*>(furi_take(fs_record, 1000));
+
+  if(fs_path == NULL)
+  {
+    proto.printf("filesystem is busy\r\n");
+    vTaskDelete(NULL);
+  }
+
+  FATFS *fs_data;
   DWORD fre_clust, fre_sect, tot_sect;
-  res = f_getfree(SDPath, &fre_clust, &fs2);
+  res = f_getfree(fs_path, &fre_clust, &fs_data);
   if(res != FR_OK)
   {
     proto.printf("f_getfree = %d\r\n", res);
@@ -159,14 +175,14 @@ void app_fs(void *p){
   }
   
   // Get total sectors and free sectors
-  tot_sect = (fs2->n_fatent - 2) * fs2->csize;
-  fre_sect = fre_clust * fs2->csize;
+  tot_sect = (fs_data->n_fatent - 2) * fs_data->csize;
+  fre_sect = fre_clust * fs_data->csize;
   // Print the free space (assuming 512 bytes/sector)
-  proto.printf("Sector size: %hu b\r\n", (fs2->ssize) );
-  proto.printf("%10lu kB total disk space\r\n", (tot_sect / (fs2->ssize / 256)) );
-  proto.printf("%10lu kB available\r\n", (fre_sect / (fs2->ssize / 256)));
+  proto.printf("Sector size: %hu b\r\n", (fs_data->ssize) );
+  proto.printf("%10lu kB total disk space\r\n", (tot_sect / (fs_data->ssize / 256)) );
+  proto.printf("%10lu kB available\r\n", (fre_sect / (fs_data->ssize / 256)));
 
-  scan_files(SDPath);
+  scan_files(fs_path);
 
   proto.printf("fs task end\r\n");
   while(1)
