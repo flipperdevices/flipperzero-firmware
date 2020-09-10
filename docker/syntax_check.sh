@@ -24,5 +24,10 @@ if [[ $rust_syntax_rc -eq 0 ]] && [[ $c_syntax_rc -eq 0 ]]; then
 fi
 
 read -p "Do you want fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+
 rustfmt $RUST_FILES
+
+# We use root in container and clang-format rewriting files. We'll need change owner to original
+local_user=$(stat -c '%u' .clang-format)
 $CLANG_FORMAT_BIN -style=file -i $C_FILES
+chown $local_user $C_FILES
