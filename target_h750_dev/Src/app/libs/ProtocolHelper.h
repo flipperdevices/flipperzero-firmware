@@ -35,18 +35,22 @@ class ProtocolHelper
   private:
     void clearBuffer(void);
     string tty;
-    char buffer[MAX_LINE_LENGTH + 1];
+    char read_buffer[MAX_LINE_LENGTH + 1];
     volatile uint16_t position = 0;
     FuriRecordSubscriber* tx_tty;
     FuriRecordSubscriber* rx_tty;
     void receive(const void* data, size_t size, void* ctx);
     volatile ProtocolHelper_Read_Mode mode = modeNone;
+    SemaphoreHandle_t xWriteSemaphore = NULL;
+    StaticSemaphore_t xWriteMutexBuffer;
 };
 
 template <std::size_t Tag>
 bool ProtocolHelper<Tag>::open(const char* tty)
 {
   this->tty = tty;
+  this->xWriteSemaphore = xSemaphoreCreateMutexStatic( &this->xWriteMutexBuffer );
+
   tx_tty = furi_open(string(this->tty + "/tx").c_str(), false, false, NULL, NULL, NULL);
 
   if(tx_tty == NULL) 
@@ -74,13 +78,15 @@ void ProtocolHelper<Tag>::clearScreen()
   // ESCAPE [ 2 J — Erase Data
   // ESCAPE [ H — Cursor Position 1,1 
   const char command_clear_screen[] = "\033[H\033[J";
-  furi_write(tx_tty, command_clear_screen, sizeof(command_clear_screen));
+  this->write(command_clear_screen, sizeof(command_clear_screen));
 }
 
 template <std::size_t Tag>
 void ProtocolHelper<Tag>::write(const char * buffer, uint16_t length)
 {
+  while( xSemaphoreTake( this->xWriteSemaphore, portMAX_DELAY ) != pdTRUE ){ };
   furi_write(tx_tty, buffer, length);
+  xSemaphoreGive( this->xWriteSemaphore );
 }
 
 template <std::size_t Tag>
@@ -94,7 +100,7 @@ void ProtocolHelper<Tag>::printf(const char * format, ...)
 	length = vsnprintf(buffer, 256, format, args);
 	va_end(args);
 
-  furi_write(tx_tty, buffer, length);
+  this->write(buffer, length);
 }
 
 template <std::size_t Tag>
@@ -108,12 +114,12 @@ template <std::size_t Tag>
 void ProtocolHelper<Tag>::receive(const void* data, size_t size, void* ctx)
 {
   if(this->mode == modeNone){
-    //return;
+    return;
   }
 
   if((this->position + size) <= MAX_LINE_LENGTH)
   {
-    memcpy((this->buffer + this->position), data, size);
+    memcpy((this->read_buffer + this->position), data, size);
     this->position += size;
   }
 }
@@ -127,7 +133,7 @@ char ProtocolHelper<Tag>::read(void)
   this->mode = modeRead;
   while(old_position == this->position){}
   this->mode = modeNone;
-  return this->buffer[this->position - 1];
+  return this->read_buffer[this->position - 1];
 }
 
 template <std::size_t Tag>
@@ -136,9 +142,9 @@ char* ProtocolHelper<Tag>::readUntil(const char symbol)
   this->clearBuffer();
 
   this->mode = modeReadUntil;
-  while(this->buffer[this->position] != symbol){}
+  while(this->read_buffer[this->position] != symbol){}
   this->mode = modeNone;
-  return this->buffer;
+  return this->read_buffer;
 }
 
 template <std::size_t Tag>
@@ -149,12 +155,12 @@ char* ProtocolHelper<Tag>::readLength(uint8_t length)
   this->mode = modeReadLength;
   while(this->position < length){}
   this->mode = modeNone;
-  return this->buffer;
+  return this->read_buffer;
 }
 
 template <std::size_t Tag>
 void ProtocolHelper<Tag>::clearBuffer(void)
 {
   this->position = 0;
-  memset(buffer, 0, MAX_LINE_LENGTH);
+  memset(this->read_buffer, 0, MAX_LINE_LENGTH);
 }
