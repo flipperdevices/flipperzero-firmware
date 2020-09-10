@@ -80,7 +80,7 @@ void ProtocolHelper::receive(const void* data, size_t size, void* ctx)
   } 
   else 
   {
-    // TODO: think abous to do this not so losting data
+    // TODO: this can lose data
     if(size <= MAX_LINE_LENGTH)
     {
       proto->position = 0;
@@ -108,12 +108,12 @@ char ProtocolHelper::read(void)
 
 char* ProtocolHelper::readUntil(const char symbol)
 {
-  // TODO rewrite ugly buffer-losting algo
   uint16_t scan_position = 0;
   this->clearBuffer();
   this->mode = modeReadUntil;
   while(1)
   {
+    // TODO: rewrite ugly buffer-losing algo
     if(this->read_buffer[scan_position] == symbol)
     {
       break;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "main.h"
 #include "../core/furi.h"
 #include <string>
