@@ -99,6 +99,8 @@ file(GLOB SOURCES
   "Src/app/*.c"
   "Src/app/libs/*.cpp"
   "Src/app/libs/*.c"
+  "Src/app/apps/*.cpp"
+  "Src/app/apps/*.c"
 
   "Src/app/drivers/*.cpp"
   "Src/app/drivers/*.c"

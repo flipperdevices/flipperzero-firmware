@@ -13,6 +13,8 @@
 #include <inttypes.h>
 #include "libs/ProtocolHelper.h"
 
+#include "apps/app_fileprotocol.h"
+
 extern "C" void main_loop(void){
 	app();
 }
@@ -43,12 +45,14 @@ void app(void){
   furiac_start(app_led_blinker, "led_blinker", NULL);
   //furiac_start(app_filesystem, "filesystem", NULL);
 
-  while (true)
+  /*while (true)
   {
-    char a = proto_usb.read();
-    proto_usb.printf("%c", a);
-    proto.printf("%c", a);
-  }
+    char* a = proto_usb.readUntil('z');
+    proto_usb.printf("%s", a);
+    proto.printf("%s", a);
+  }*/
+
+  app_fileprotocol(&proto);
 
   while (true)
   {
@@ -106,7 +110,6 @@ FRESULT scan_files(char *path)
 	UINT i;
 	static FILINFO fno;
 
-  proto.printf("Scan %s\r\n", path);
   /* Open the directory */
 	res = f_opendir(&dir, path); 
 	if (res == FR_OK)
@@ -118,7 +121,6 @@ FRESULT scan_files(char *path)
 			if (res != FR_OK || fno.fname[0] == 0)
       {
         /* Break on error or end of dir */
-        proto.printf("EOD\r\n");
         break;
       }
 				
@@ -173,10 +175,11 @@ void app_filesystem(void* argument){
     proto.printf("f_getfree = %d\r\n", res);
     return;
   }
-  
+
   // Get total sectors and free sectors
   tot_sect = (fs_data->n_fatent - 2) * fs_data->csize;
   fre_sect = fre_clust * fs_data->csize;
+
   // Print the free space (assuming 512 bytes/sector)
   proto.printf("Sector size: %hu b\r\n", (fs_data->ssize) );
   proto.printf("%10lu kB total disk space\r\n", (tot_sect / (fs_data->ssize / 256)) );
@@ -184,7 +187,11 @@ void app_filesystem(void* argument){
 
   scan_files(fs_path);
 
+  furi_give(fs_record);
+  furi_close(fs_record);
+
   proto.printf("fs task end\r\n");
+
   while(1)
   {
     osDelay(1000);
