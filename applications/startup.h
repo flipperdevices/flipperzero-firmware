@@ -23,16 +23,16 @@ void u8g2_example(void* p);
 void coreglitch_demo_0(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
-    #ifndef TEST
-    {.app = display_u8g2, .name = "display_u8g2"},
-    {.app = u8g2_example, .name = "u8g2_example"},
-    #endif
+#ifndef TEST
+    { .app = display_u8g2, .name = "display_u8g2" },
+    { .app = u8g2_example, .name = "u8g2_example" },
+#endif
 
-    // {.app = coreglitch_demo_0, .name = "coreglitch_demo_0"},
-    
-    #ifdef TEST
-    {.app = flipper_test_app, .name = "test app"},
-    #endif
+// {.app = coreglitch_demo_0, .name = "coreglitch_demo_0"},
+
+#ifdef TEST
+    { .app = flipper_test_app, .name = "test app" },
+#endif
 
 #ifdef EXAMPLE_BLINK
     { .app = application_blink, .name = "blink" },
