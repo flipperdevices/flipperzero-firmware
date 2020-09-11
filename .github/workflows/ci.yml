@@ -15,6 +15,11 @@ jobs:
       - name: Build docker image
         uses: ./.github/actions/docker
 
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        with:
+          run: /syntax_check.sh
+
       - name: Build target_lo in docker
         uses: ./.github/actions/docker
         with:
