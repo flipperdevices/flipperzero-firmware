@@ -87,7 +87,7 @@ void HAL_MspInit(void) {
 * @retval None
 */
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(hadc->Instance == ADC1) {
         /* USER CODE BEGIN ADC1_MspInit 0 */
 
@@ -152,7 +152,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc) {
 * @retval None
 */
 void HAL_COMP_MspInit(COMP_HandleTypeDef* hcomp) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(hcomp->Instance == COMP1) {
         /* USER CODE BEGIN COMP1_MspInit 0 */
 
@@ -203,7 +203,7 @@ void HAL_COMP_MspDeInit(COMP_HandleTypeDef* hcomp) {
 * @retval None
 */
 void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(hspi->Instance == SPI1) {
         /* USER CODE BEGIN SPI1_MspInit 0 */
 
@@ -321,7 +321,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm) {
 * @retval None
 */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(htim_base->Instance == TIM8) {
         /* USER CODE BEGIN TIM8_MspInit 0 */
 
@@ -369,7 +369,7 @@ void HAL_TIM_OC_MspInit(TIM_HandleTypeDef* htim_oc) {
 }
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(htim->Instance == TIM5) {
         /* USER CODE BEGIN TIM5_MspPostInit 0 */
 
@@ -482,7 +482,7 @@ void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef* htim_oc) {
 * @retval None
 */
 void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(huart->Instance == USART1) {
         /* USER CODE BEGIN USART1_MspInit 0 */
 

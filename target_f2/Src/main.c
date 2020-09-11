@@ -167,9 +167,9 @@ int main(void) {
   * @retval None
   */
 void SystemClock_Config(void) {
-    RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
-    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
     /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -229,8 +229,8 @@ static void MX_ADC1_Init(void) {
 
     /* USER CODE END ADC1_Init 0 */
 
-    ADC_MultiModeTypeDef multimode = { 0 };
-    ADC_ChannelConfTypeDef sConfig = { 0 };
+    ADC_MultiModeTypeDef multimode = {0};
+    ADC_ChannelConfTypeDef sConfig = {0};
 
     /* USER CODE BEGIN ADC1_Init 1 */
 
@@ -389,8 +389,8 @@ static void MX_TIM5_Init(void) {
 
     /* USER CODE END TIM5_Init 0 */
 
-    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
-    TIM_OC_InitTypeDef sConfigOC = { 0 };
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_OC_InitTypeDef sConfigOC = {0};
 
     /* USER CODE BEGIN TIM5_Init 1 */
 
@@ -432,9 +432,9 @@ static void MX_TIM8_Init(void) {
 
     /* USER CODE END TIM8_Init 0 */
 
-    TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
-    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
-    TIM_IC_InitTypeDef sConfigIC = { 0 };
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_IC_InitTypeDef sConfigIC = {0};
 
     /* USER CODE BEGIN TIM8_Init 1 */
 
@@ -484,9 +484,9 @@ static void MX_TIM15_Init(void) {
 
     /* USER CODE END TIM15_Init 0 */
 
-    TIM_MasterConfigTypeDef sMasterConfig = { 0 };
-    TIM_OC_InitTypeDef sConfigOC = { 0 };
-    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = { 0 };
+    TIM_MasterConfigTypeDef sMasterConfig = {0};
+    TIM_OC_InitTypeDef sConfigOC = {0};
+    TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
     /* USER CODE BEGIN TIM15_Init 1 */
 
@@ -572,7 +572,7 @@ static void MX_USART1_UART_Init(void) {
   * @retval None
   */
 static void MX_GPIO_Init(void) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOC_CLK_ENABLE();

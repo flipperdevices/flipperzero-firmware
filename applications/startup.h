@@ -24,24 +24,24 @@ void coreglitch_demo_0(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifndef TEST
-    { .app = display_u8g2, .name = "display_u8g2" },
-    { .app = u8g2_example, .name = "u8g2_example" },
+    {.app = display_u8g2, .name = "display_u8g2"},
+    {.app = u8g2_example, .name = "u8g2_example"},
 #endif
 
 // {.app = coreglitch_demo_0, .name = "coreglitch_demo_0"},
 
 #ifdef TEST
-    { .app = flipper_test_app, .name = "test app" },
+    {.app = flipper_test_app, .name = "test app"},
 #endif
 
 #ifdef EXAMPLE_BLINK
-    { .app = application_blink, .name = "blink" },
+    {.app = application_blink, .name = "blink"},
 #endif
 #ifdef EXAMPLE_UART_WRITE
-    { .app = application_uart_write, .name = "uart write" },
+    {.app = application_uart_write, .name = "uart write"},
 #endif
 #ifdef EXAMPLE_IPC
-    { .app = application_ipc_display, .name = "ipc display" },
-    { .app = application_ipc_widget, .name = "ipc widget" },
+    {.app = application_ipc_display, .name = "ipc display"},
+    {.app = application_ipc_widget, .name = "ipc widget"},
 #endif
 };

@@ -155,7 +155,7 @@ void display_u8g2(void* p) {
     }
 
     // save log and event queue in context structure
-    DisplayCtx ctx = { .update = update, .log = log };
+    DisplayCtx ctx = {.update = update, .log = log};
 
     // subscribe to record. ctx will be passed to handle_fb_change
     FuriRecordSubscriber* fb_record =

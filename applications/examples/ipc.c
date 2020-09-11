@@ -75,7 +75,7 @@ void application_ipc_display(void* p) {
     }
 
     // save log and event queue in context structure
-    IpcCtx ctx = { .events = events, .log = log };
+    IpcCtx ctx = {.events = events, .log = log};
 
     // subscribe to record. ctx will be passed to handle_fb_change
     FuriRecordSubscriber* fb_record =

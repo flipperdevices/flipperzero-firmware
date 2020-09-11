@@ -135,16 +135,16 @@ uint8_t* USBD_FS_USR_BOSDescriptor(USBD_SpeedTypeDef speed, uint16_t* length);
   * @{
   */
 
-USBD_DescriptorsTypeDef FS_Desc = { USBD_FS_DeviceDescriptor,
-                                    USBD_FS_LangIDStrDescriptor,
-                                    USBD_FS_ManufacturerStrDescriptor,
-                                    USBD_FS_ProductStrDescriptor,
-                                    USBD_FS_SerialStrDescriptor,
-                                    USBD_FS_ConfigStrDescriptor,
-                                    USBD_FS_InterfaceStrDescriptor
+USBD_DescriptorsTypeDef FS_Desc = {USBD_FS_DeviceDescriptor,
+                                   USBD_FS_LangIDStrDescriptor,
+                                   USBD_FS_ManufacturerStrDescriptor,
+                                   USBD_FS_ProductStrDescriptor,
+                                   USBD_FS_SerialStrDescriptor,
+                                   USBD_FS_ConfigStrDescriptor,
+                                   USBD_FS_InterfaceStrDescriptor
 #if(USBD_LPM_ENABLED == 1)
-                                    ,
-                                    USBD_FS_USR_BOSDescriptor
+                                   ,
+                                   USBD_FS_USR_BOSDescriptor
 #endif /* (USBD_LPM_ENABLED == 1) */
 };
 
@@ -199,8 +199,7 @@ __ALIGN_BEGIN uint8_t USBD_FS_BOSDesc[USB_SIZ_BOS_DESC] __ALIGN_END = {
     0x2, /* LPM capability bit set*/
     0x0,
     0x0,
-    0x0
-};
+    0x0};
 #endif /* (USBD_LPM_ENABLED == 1) */
 
 /**
@@ -221,8 +220,7 @@ __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END = {
     USB_LEN_LANGID_STR_DESC,
     USB_DESC_TYPE_STRING,
     LOBYTE(USBD_LANGID_STRING),
-    HIBYTE(USBD_LANGID_STRING)
-};
+    HIBYTE(USBD_LANGID_STRING)};
 
 #if defined(__ICCARM__) /* IAR Compiler */
 #pragma data_alignment = 4

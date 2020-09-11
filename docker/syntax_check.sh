@@ -7,10 +7,8 @@ cd /project
 
 echo "RUN C\C++ SYNTAX CHECK"
 C_FILES=$(find . \
-    -not \( -path ./target_f1/Middlewares -prune \) \
-    -not \( -path ./target_f2/Middlewares -prune \) \
-    -not \( -path ./target_f1/Drivers -prune \) \
-    -not \( -path ./target_f2/Drivers -prune \) \
+    -not \( -path './target_*/Middlewares' -prune \) \
+    -not \( -path './target_*/Drivers' -prune \) \
     -not \( -path ./lib -prune \) \
     -name *.c -o -name *.h -o -name *.cpp)
 $CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES

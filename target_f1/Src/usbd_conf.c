@@ -68,7 +68,7 @@ extern void SystemClock_Config(void);
 /* MSP Init */
 
 void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle) {
-    GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
     if(pcdHandle->Instance == USB_OTG_FS) {
         /* USER CODE BEGIN USB_OTG_FS_MspInit 0 */
 

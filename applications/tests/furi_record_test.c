@@ -192,7 +192,7 @@ void furi_concurent_app(void* p) {
 
 bool test_furi_concurrent_access(FuriRecordSubscriber* log) {
     // 1. Create holding record
-    ConcurrentValue holder = { .a = 0, .b = 0 };
+    ConcurrentValue holder = {.a = 0, .b = 0};
     if(!furi_create("test/concurrent", (void*)&holder, sizeof(ConcurrentValue))) {
         fuprintf(log, "cannot create record\n");
         return false;
