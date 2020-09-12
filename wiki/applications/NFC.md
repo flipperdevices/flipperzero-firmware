@@ -1,18 +1,44 @@
-The NFC standard (ISO-14443) operates at 13.56MHz. We are going to use the ST25R3916 chip, the same chip as used in the HydraNFC project.
+# NFC 
 
-Supported cards:
 
-* ISO-14443 tag (mifare?) reading & writing & emulation  
-* Emulation — Mifare Classic & Ultralight
+## Card detector (High Frequency)
 
+Кард детектор позволяет определить тип незивестной карты в диапазоне 13,56 MHz (HF). Этот тест не дает точный результат, а позволяет только предположить примерно. В конце теста, если было найдено совпадение, будет предложено перейти в приложение, которое может работать с найденным типом карты. 
+
+Для этого используется рутина:
+
+1. Check if card `ISO-14443` `A` or `B` or FeliCa
+3. Check if ATQA(?) last byte indicate ISO-balba compatible card or not
+2. Match UID, SAK, ATQA, ATS, ATR from database
+3. Try to authenticate as Mifare, EMV, etc..
+3. Return founded type and suggest suitable application or return error
+
+
+## Reader detector (High Frequency)
+
+Unknown reader on the wall можно попробовать определить. Для этого мы можем сэмулировать карту и передавать команды на экран, поняв какую карту ожидает ридер.
+
+1. Silently read WUPA (0x52) or REQA (0x26) without triggering SELECT on reader
+2. Emulate card
+    2.1 Answer on ATQA
+    2.2 Answer on SELECT 
+    2.3 ...
+3. Consistently emulate popular cards before valid authentication from reader found 
 
 ## Reader mode
 
+* Mifare classic reader  _How to select dictionary?_
+  * Brute force
+  * Save dump
+  * Write dump to SD-card
+* Mifare Ultralight reader
+  * Save dump
+  * Write dump?
+* EMV reader
 
 ## Write mode
 
-
-## Emulate mode
+## Emulation 
 
 # USB NFC Reader [Not implemented]
 ![USB NFC Reader](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/NFC/usb-nfc-reader.png)
@@ -30,6 +56,14 @@ We can use Flipper Zero as a regular USB NFC adapter along with `LibNFC` library
 
 
 # UI
+<!--- Menu structure -->
+# NFC
+
+## Detect card
+
+- 
+
+<!--- Menu structure end -->
 
 ### NFC
 * Reader
