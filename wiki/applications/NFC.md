@@ -2,7 +2,7 @@
 
 ## Card detector
 
-<img width="500" src="./../../wiki_static/NFC/nfc-card-detector.png" />
+<img width="800" src="./../../wiki_static/NFC/nfc-card-detector.png" />
 
 Card type is often unknown. Card detector runs tests against the unknown card to determine it's type. These tests are not 100% accurate, but they help to start exploring. If the test finished successfully, it can recommend to run a suitable application for the card type.
 
@@ -16,7 +16,7 @@ Card type is often unknown. Card detector runs tests against the unknown card to
 
 ## Reader detector
 
-<img width="500" src="./../../wiki_static/NFC/nfc-wall-reader.png" />
+<img width="800" src="./../../wiki_static/NFC/nfc-wall-reader.png" />
 
 Wall readers usually looks the same, but may accept various types type of cards. With reader detector feature we can emulate dummy card on Flipper and sniff commands that reader send to card.  
 
@@ -46,7 +46,7 @@ Wall readers usually looks the same, but may accept various types type of cards.
 ## Emulation 
 
 # USB NFC Reader [Not implemented]
-<img width="500" src="./../../wiki_static/NFC/usb-nfc-reader.png" />
+<img width="800" src="./../../wiki_static/NFC/usb-nfc-reader.png" />
 
 There are many use cases that impossible to run directly on Flipper Zero. Most of these cases require powerful CPU for cryptographic attacks:  
 
