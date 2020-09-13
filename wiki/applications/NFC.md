@@ -1,25 +1,30 @@
 # NFC 
 
+## Card detector
 
-## Card detector (High Frequency)
+<img width="500" src="./../../wiki_static/NFC/nfc-card-detector.png" />
 
-Кард детектор позволяет определить тип незивестной карты в диапазоне 13,56 MHz (HF). Этот тест не дает точный результат, а позволяет только предположить примерно. В конце теста, если было найдено совпадение, будет предложено перейти в приложение, которое может работать с найденным типом карты. 
+Card type is often unknown. Card detector runs tests against the unknown card to determine it's type. These tests are not 100% accurate, but they help to start exploring. If the test finished successfully, it can recommend to run a suitable application for the card type.
 
-Для этого используется рутина:
+### Card detector routine:
 
-1. Check if card `ISO-14443` `A` or `B` or FeliCa
-3. Check if ATQA(?) last byte indicate ISO-balba compatible card or not
-2. Match UID, SAK, ATQA, ATS, ATR from database
-3. Try to authenticate as Mifare, EMV, etc..
-3. Return founded type and suggest suitable application or return error
+1. Check if card `ISO-14443` `A` or `B` or `FeliCa`
+2. Check the 6 byte of `SAK` to determine if `ISO-14443-4` compliant
+3. Match combination of UID, SAK, ATQA, ATS, ATR from database
+4. Try to authenticate as Mifare, EMV, etc..
+5. Return founded type and suggest suitable application or return error
+
+## Reader detector
+
+<img width="500" src="./../../wiki_static/NFC/nfc-wall-reader.png" />
+
+Wall readers usually looks the same, but may accept various types type of cards. With reader detector feature we can emulate dummy card on Flipper and sniff commands that reader send to card.  
 
 
-## Reader detector (High Frequency)
-
-Unknown reader on the wall можно попробовать определить. Для этого мы можем сэмулировать карту и передавать команды на экран, поняв какую карту ожидает ридер.
+### Reader detector
 
 1. Silently read WUPA (0x52) or REQA (0x26) without triggering SELECT on reader
-2. Emulate card
+2. Emulate dummy card
     2.1 Answer on ATQA
     2.2 Answer on SELECT 
     2.3 ...
@@ -41,7 +46,7 @@ Unknown reader on the wall можно попробовать определит�
 ## Emulation 
 
 # USB NFC Reader [Not implemented]
-![USB NFC Reader](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/NFC/usb-nfc-reader.png)
+<img width="500" src="./../../wiki_static/NFC/usb-nfc-reader.png" />
 
 There are many use cases that impossible to run directly on Flipper Zero. Most of these cases require powerful CPU for cryptographic attacks:  
 
@@ -50,9 +55,9 @@ There are many use cases that impossible to run directly on Flipper Zero. Most o
 
 We can use Flipper Zero as a regular USB NFC adapter along with `LibNFC` library, so all existing software will work out of the box without any modifications. This mode must be run from menu `NFC -> USB NFC adapter`. In this mode all commands from PC should be forwarded directly to NFC chip `ST25R3916` via USB serial interface. 
 
-### TODO (USB NFC Reader)
+# Schematic
 
-* Write `LibNFC` driver for Flipper's NFC chip `ST25R3916`
+<img src="./../../wiki_static/NFC/ST25R3916-schematic.png" />
 
 
 # UI
@@ -62,9 +67,4 @@ We can use Flipper Zero as a regular USB NFC adapter along with `LibNFC` library
 ## Detect card
 
 - 
-
 <!--- Menu structure end -->
-
-### NFC
-* Reader
-* Emulate
