@@ -2,7 +2,7 @@
 
 ## Card detector
 
-<img width="800" src="./../../wiki_static/NFC/nfc-card-detector.png" />
+![](./../../wiki_static/NFC/nfc-card-detector.png)
 
 Card type is often unknown. Card detector runs tests against the unknown card to determine it's type. These tests are not 100% accurate, but they help to start exploring. If the test finished successfully, it can recommend to run a suitable application for the card type.
 
@@ -16,7 +16,7 @@ Card type is often unknown. Card detector runs tests against the unknown card to
 
 ## Reader detector
 
-<img width="800" src="./../../wiki_static/NFC/nfc-wall-reader.png" />
+![](./../../wiki_static/NFC/nfc-wall-reader.png)
 
 Wall readers usually looks the same, but may accept various types type of cards. With reader detector feature we can emulate dummy card on Flipper and sniff commands that reader send to card.  
 
@@ -40,10 +40,15 @@ Wall readers usually looks the same, but may accept various types type of cards.
   * Save dump
   * Write dump?
 * EMV reader
+* Simple UID reader
 
-## Write mode
+## Write/Emulate mode
 
-## Emulation 
+Saved dumps stored on SD-card and accessible from `Saved dumps` menu. All saved dumps can be emulated or written to card if possible. User can view dump info and choose the action: 
+
+* Emulate
+* Write
+* Edit? _(Editing big dumps can be can be difficult)_ 
 
 # USB NFC Reader [Not implemented]
 <img width="800" src="./../../wiki_static/NFC/usb-nfc-reader.png" />
@@ -57,14 +62,54 @@ We can use Flipper Zero as a regular USB NFC adapter along with `LibNFC` library
 
 # Schematic
 
-<img src="./../../wiki_static/NFC/ST25R3916-schematic.png" />
+![](./../../wiki_static/NFC/ST25R3916-schematic.png)
 
 
-# UI
+# Menu
+![](./../../wiki_static/NFC/nfc-ui.png)
+
 <!--- Menu structure -->
 # NFC
 
 ## Detect card
 
-- 
+- Activating RF field and wait for card. 
+Run tests when card found.
+- Found match
+  - Mifare Classic found.
+Run Mifare reader? 
+- No found
+  - Cannot detect card type  
+
+## Reader detector
+
+- Passive listen for WUPA/REQA-B
+  - Commands live stream 
+    0x26
+    0x26
+    0x26
+- Start active emulating 
+- .
+  - Mifare reader found
+- .
+  - EMV reader found
+
+## Read card
+
+- Mifare Classic
+- Mifare Ultralight
+- EMV get PAN
+- what more?
+
+## Saved dumps
+
+- mfc_a6b804bf
+- home
+- mfu_04bfac72
+- emv_paywave_1007
+
+## USB NFC Reader
+
+- Activates instantly.
+No more display updates
 <!--- Menu structure end -->
