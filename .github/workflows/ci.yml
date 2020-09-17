@@ -18,6 +18,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
           image_name: docker-build
+          dockerfile: docker/Dockerfile
 
       - name: Build docker image
         uses: ./.github/actions/docker
