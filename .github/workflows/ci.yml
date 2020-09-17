@@ -12,11 +12,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - uses: satackey/action-docker-layer-caching@v0.0.8
-        continue-on-error: true
+      - uses: whoan/docker-build-with-cache-action@v5
         with:
-          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          image_name: docker-build
+
       - name: Build docker image
         uses: ./.github/actions/docker
 
