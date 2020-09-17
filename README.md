@@ -63,4 +63,3 @@ Common UI feature (menu, screens...) at [UI page](https://github.com/Flipper-Zer
 * Project website: [flipperzero.one](https://flipperzero.one)
 * Kickstarter page: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
 * Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
-
