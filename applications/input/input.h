@@ -33,11 +33,15 @@ typedef struct {
 } Input;
 
 inline Input* open_input(const char* name) {
-    return furi_open(name);
+    return (Input*)furi_open(name);
 }
 
-inline bool read_state(MutexValue state, InputState* value, uint32_t timeout) {
-    return read_mutex(state, (void*)value, timeout);
+inline InputState* get_input_state(MutexValue state, uint32_t timeout) {
+    return get_mutex(state, timeout);
+}
+
+inline void release_input_state(MutexValue state, InputState* value) {
+    relase_mutex(state, (void*)value);
 }
 
 inline bool subscribe_events(PubSub events, void(*cb)(InputEvent*, void*), void* ctx) {
@@ -62,17 +66,17 @@ void app_fn(void* p) {
     subscribe_events(input->events, handle_keyboard, NULL);
 
     // blocking way
-    InputState state;
     while(1) {
-        if(read_state(input->state, &state, MAX_TIMEOUT)) {
-            if(state.up) {
-                printf("up is pressed");
-                delay(1000);
+        { InputState* state = get_input_state(input->state, MAX_TIMEOUT);
+            if(state != NULL) {
+                if(state->up) {
+                    printf("up is pressed");
+                    delay(1000);
+                }
             }
-        }
+        release_input_state(state); }
 
         delay(10);
     }
 }
-
 */
