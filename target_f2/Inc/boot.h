@@ -8,14 +8,18 @@ Boot control quirks
 #define __BOOT_H
 
 /*
- * @brief On OS boot hook, check's if dfu-mode requested.
- * Passes control to boot loader or returns to system init.
+ * @brief Before hardware initizliation hook
 */
-void on_os_boot();
+void boot_before_hw_hook();
 
 /*
- * @brief request dfu and reboot.
+ * @brief After hardware initialization hook
 */
-void restart_in_dfu();
+void boot_after_hw_hook();
+
+/*
+ * @brief Request DFU and reboot
+*/
+void boot_restart_in_dfu();
 
 #endif
