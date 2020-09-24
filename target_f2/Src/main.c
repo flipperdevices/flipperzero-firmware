@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "boot.h"
 #include "cmsis_os.h"
 #include "usb_device.h"
 
@@ -90,7 +91,7 @@ void StartDefaultTask(void const * argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  on_os_boot();
   /* USER CODE END 1 */
   
 
