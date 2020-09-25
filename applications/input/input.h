@@ -46,7 +46,7 @@ inline bool subscribe_events(PubSub events, void(*cb)(InputEvent*, void*), void*
 
 /* example usage
 
-void handle_keyboard(InputEvent event, void* _ctx) {
+void handle_keyboard(InputEvent* event, void* _ctx) {
     if(event->state) {
         printf("you press %d", event->input);
     } else {
