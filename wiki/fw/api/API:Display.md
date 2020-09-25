@@ -1,4 +1,4 @@
-All display operations based on u8g2 library.
+All display operations based on [u8g2](https://github.com/olikraus/u8g2) library.
 
 API available as struct, contains u8g2 functions, instance and fonts:
 

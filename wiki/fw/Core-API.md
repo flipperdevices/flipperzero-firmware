@@ -7,11 +7,11 @@
 
 # HAL
 
-[Zephyr HAL]()
+We use [Zephyr HAL](https://docs.zephyrproject.org/latest/reference/peripherals/index.html).
 
 # OS
 
-[CMSIS OS v2]()
+We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__CMSIS__RTOS.html) for thread management and IPC.
 
 # UI
 
@@ -19,7 +19,7 @@
 
 ## [display](API:Display)
 
-## led
+## [LED](API:LED)
 
 ## vibro
 
