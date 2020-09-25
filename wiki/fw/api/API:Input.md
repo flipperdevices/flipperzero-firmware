@@ -2,9 +2,9 @@ All input API available by struct:
 
 ```C
 typedef struct {
-    PubSub events; /// keyboards events after debounce: press/release, PubSub<InputEvent*>
-    PubSub raw_events; /// raw keyboards events: press/release, PubSub<InputEvent*>
-    ValueMutex state; /// current keyboard state, ValueMutex<InputState*>
+    Subscriber* events; /// debounced keyboards events: press/release, Subscriber<InputEvent*>
+    Subscriber* raw_events; /// raw keyboards events: press/release, Subscriber<InputEvent*>
+    ValueMutex* state; /// current keyboard state, ValueMutex<InputState*>
 } Input;
 ```
 
@@ -37,8 +37,8 @@ To read buttons state you should use `read_state` function:
 
 ```C
 /// read current state of all buttons. Return true if success, false otherwise
-inline bool read_state(ValueMutex state, InputState* value, uint32_t timeout) {
-    return read_mutex(state, (void*)value, timeout);
+inline bool read_state(ValueMutex* state, InputState* value, uint32_t timeout) {
+    return read_mutex(state, (void*)value, sizeof(InputState), timeout);
 }
 ```
 
@@ -63,12 +63,12 @@ typedef enum {
 } Inputs;
 ```
 
-Use `subscribe_events` to register your callback:
+Use `subscribe_input_events` to register your callback:
 
 ```C
 /// subscribe on button press/release events. Return true if success, false otherwise
-inline bool subscribe_events(PubSub events, void(*cb)(InputEvent*, void*), void* ctx) {
-    return subscribe_pubsub(events, void(*)(InputEvent*, void*)(cb), ctx);
+inline bool subscribe_input_events(Subscriber* events, void(*cb)(InputEvent*, void*), void* ctx) {
+    return subscribe_pubsub(events, void(*)(void*, void*)(cb), ctx);
 }
 ```
 
@@ -84,17 +84,17 @@ void handle_keyboard(InputEvent* event, void* _ctx) {
     }
 }
 
-void app_fn(void* p) {
+void input_example(void* p) {
     Input* input = open_input("/dev/kb");
-    if(input == NULL) furiac_exit(NULL); // keyboard not available, critical error
+    if(input == NULL) return; // keyboard not available, critical error
 
     // async way
-    subscribe_events(input->events, handle_keyboard, NULL);
+    subscribe_input_events(input->events, handle_keyboard, NULL);
 
     // blocking way
     InputState state;
     while(1) {
-        if(read_state(input->state, &state, MAX_TIMEOUT)) {
+        if(read_state(input->state, &state, OsWaitForever)) {
             if(state.up) {
                 printf("up is pressed");
                 delay(1000);

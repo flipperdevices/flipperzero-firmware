@@ -4,7 +4,7 @@ API available as struct, contains u8g2 functions, instance and fonts:
 
 ```C
 typedef struct {
-    ValueManager display; /// ValueManager<u8g2_t*>
+    ValueManager* display; /// ValueManager<u8g2_t*>
     void (*u8g2_SetFont)(u8g2_t *u8g2, const uint8_t  *font);
     void (*u8g2_SetDrawColor)(u8g2_t *u8g2, uint8_t color);
     void (*u8g2_SetFontMode)(u8g2_t *u8g2, uint8_t is_transparent);
@@ -23,7 +23,7 @@ First of all you can open display API instance by calling `open_display`
 ```C
 /// Get display instance and API
 inline Display* open_display(const char* name) {
-    return furi_open(name);
+    return (Display*)furi_open(name);
 }
 ```
 
@@ -47,7 +47,7 @@ inline void commit_display(Display* api, u8g2_t* display) {
 ```C
 void u8g2_example(void* p) {
     Display* display_api = open_display("/dev/display");
-    if(display_api == NULL) furiac_exit(NULL); // display not available, critical error
+    if(display_api == NULL) return; // display not available, critical error
 
     u8g2_t* display = take_display(display_api);
     if(display != NULL) {
