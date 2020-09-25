@@ -15,7 +15,7 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 # UI
 
-## [Input](API:Input)
+* **[Input](API:Input)**
 
 ## [Display](API:Display)
 
