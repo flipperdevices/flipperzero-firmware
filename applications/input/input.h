@@ -1,5 +1,6 @@
 #include "flipper.h"
 
+/// List of buttons
 typedef enum {
     InputsUp = 0,
     InputsDown,
@@ -7,15 +8,16 @@ typedef enum {
     InputsLeft,
     InputsOk,
     InputsBack,
-    InputsCharging,
     InputsSize
 } Inputs;
 
+/// used to pass button press/release evens
 typedef struct {
-    Inputs input;
-    bool state;
+    Inputs input; /// what button
+    bool state; /// true = press, false = release
 } InputEvent;
 
+/// Current state of buttons
 typedef struct {
     bool up;
     bool down;
@@ -23,7 +25,6 @@ typedef struct {
     bool left;
     bool ok;
     bool back;
-    bool charging;
 } InputState;
 
 typedef struct {
@@ -32,20 +33,24 @@ typedef struct {
     MutexValue state;
 } Input;
 
+/// Get input struct
 inline Input* open_input(const char* name) {
     return furi_open(name);
 }
 
+/// read current state of all buttons
 inline bool read_state(MutexValue state, InputState* value, uint32_t timeout) {
     return read_mutex(state, (void*)value, timeout);
 }
 
+/// subscribe on button press/release events
 inline bool subscribe_events(PubSub events, void(*cb)(InputEvent*, void*), void* ctx) {
     return subscribe_pubsub(events, void(*)(InputEvent*, void*)(cb), ctx);
 }
 
 /* example usage
 
+// function used to handle keyboard events
 void handle_keyboard(InputEvent* event, void* _ctx) {
     if(event->state) {
         printf("you press %d", event->input);
