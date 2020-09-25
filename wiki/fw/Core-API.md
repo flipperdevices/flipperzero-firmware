@@ -17,13 +17,13 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 * **[Input](API:Input)**
 
-## [Display](API:Display)
+* **[Display](API:Display)**
 
-## [LED](API:LED)
+* **[LED](API:LED)**
 
 ## vibro
 
-## [Sound](API:Sound)
+* **[Sound](API:Sound)**
 
 ## backlight
 
