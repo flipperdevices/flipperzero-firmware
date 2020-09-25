@@ -15,15 +15,15 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 # UI
 
-## [input](API:Input)
+## [Input](API:Input)
 
-## [display](API:Display)
+## [Display](API:Display)
 
 ## [LED](API:LED)
 
 ## vibro
 
-## sound
+## [Sound](API:Sound)
 
 ## backlight
 
