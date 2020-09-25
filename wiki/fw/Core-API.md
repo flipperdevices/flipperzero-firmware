@@ -2,6 +2,7 @@
 
 * ValueMutex
 * PubSub, Publisher, Subscriber
+* ValueManager
 * LayeredReducer
 
 # HAL

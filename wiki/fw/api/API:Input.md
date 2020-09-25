@@ -4,7 +4,7 @@ All input API available by struct:
 typedef struct {
     PubSub events; /// keyboards events after debounce: press/release, PubSub<InputEvent*>
     PubSub raw_events; /// raw keyboards events: press/release, PubSub<InputEvent*>
-    MutexValue state; /// current keyboard state, MutexValue<InputState*>
+    ValueMutex state; /// current keyboard state, ValueMutex<InputState*>
 } Input;
 ```
 
@@ -37,7 +37,7 @@ To read buttons state you should use `read_state` function:
 
 ```C
 /// read current state of all buttons. Return true if success, false otherwise
-inline bool read_state(MutexValue state, InputState* value, uint32_t timeout) {
+inline bool read_state(ValueMutex state, InputState* value, uint32_t timeout) {
     return read_mutex(state, (void*)value, timeout);
 }
 ```

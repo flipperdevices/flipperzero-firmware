@@ -4,17 +4,17 @@ API available as struct, contains u8g2 functions, instance and fonts:
 
 ```C
 typedef struct {
-	MutexValue display; /// MutexValue<u8g2_t*>
-	void (*u8g2_SetFont)(u8g2_t *u8g2, const uint8_t  *font);
-	void (*u8g2_SetDrawColor)(u8g2_t *u8g2, uint8_t color);
-	void (*u8g2_SetFontMode)(u8g2_t *u8g2, uint8_t is_transparent);
-	u8g2_uint_t (*u8g2_DrawStr)(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str);
+    ValueManager display; /// ValueManager<u8g2_t*>
+    void (*u8g2_SetFont)(u8g2_t *u8g2, const uint8_t  *font);
+    void (*u8g2_SetDrawColor)(u8g2_t *u8g2, uint8_t color);
+    void (*u8g2_SetFontMode)(u8g2_t *u8g2, uint8_t is_transparent);
+    u8g2_uint_t (*u8g2_DrawStr)(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str);
 
-	Fonts fonts;
+    Fonts fonts;
 } Display;
 
 typedef struct {
-	const uint8_t* u8g2_font_6x10_mf;
+    const uint8_t* u8g2_font_6x10_mf;
 } Fonts;
 ```
 
@@ -34,11 +34,11 @@ For draw something to display you can get display instance pointer by calling `t
 ```C
 /// return pointer in case off success, NULL otherwise
 inline u8g2_t* take_display(Display* api, uint32_t timeout) {
-	return (u8g2_t*)take_mutex(api->display, timeout);
+    return (u8g2_t*)take_mutex(api->display->value, timeout);
 }
 
 inline void commit_display(Display* api, u8g2_t* display) {
-	commit_mutex(api->display, display);
+    commit_valuemanager(api->display, display);
 }
 ```
 
