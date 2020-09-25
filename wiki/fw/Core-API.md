@@ -1,8 +1,22 @@
+# Basic concepts:
+
+* ValueMutex
+* PubSub, Publisher, Subscriber
+* LayeredReducer
+
+# HAL
+
+[Zephyr HAL]()
+
+# OS
+
+[CMSIS OS v2]()
+
 # UI
 
 ## [input](API:Input)
 
-## display
+## [display](API:Display)
 
 ## led
 

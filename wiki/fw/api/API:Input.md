@@ -2,9 +2,9 @@ All input API available by struct:
 
 ```C
 typedef struct {
-    PubSub events; /// keyboards events after debounce: press/release, PubSub<InputEvent>
-    PubSub raw_events; /// raw keyboards events: press/release, PubSub<InputEvent>
-    MutexValue state; /// current keyboard state, MutexValue<InputState>
+    PubSub events; /// keyboards events after debounce: press/release, PubSub<InputEvent*>
+    PubSub raw_events; /// raw keyboards events: press/release, PubSub<InputEvent*>
+    MutexValue state; /// current keyboard state, MutexValue<InputState*>
 } Input;
 ```
 
@@ -72,7 +72,7 @@ inline bool subscribe_events(PubSub events, void(*cb)(InputEvent*, void*), void*
 }
 ```
 
-Usage example:
+## Usage example
 
 ```C
 // function used to handle keyboard events
