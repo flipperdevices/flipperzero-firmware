@@ -121,3 +121,4 @@ void led_example(void* p) {
     // write RGB value
     write_led(led_manager, &(Rgb{.red = 0xFA, green = 0xCE, .blue = 0x8D}), OsWaitForever);
 }
+```
