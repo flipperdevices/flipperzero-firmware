@@ -92,7 +92,7 @@ void handle_led_state(Rgb* rgb, void* _ctx) {
 }
 
 void led_example(void* p) {
-    LedApi* led_api = open_display("/dev/led");
+    LedApi* led_api = open_led("/dev/led");
     if(led_api == NULL) return; // led not available, critical error
 
     // subscribe to led state updates
