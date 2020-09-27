@@ -1,0 +1,79 @@
+# ValueMutex
+
+The most simple concept is ValueMutex. It is wrapper around mutex and value pointer. You can take and give mutex to work with value and read and write value.
+
+```C
+typedef struct {
+    void* value;
+    osMutex mutex;
+    
+    // some internals;
+} ValueMutex;
+```
+
+Create ValueMutex
+
+```C
+bool init_mutex(ValueMutex* valuemutex, void* value) {
+    valuemutex->mutex = osMutexCreateStatic(valuemutex->__static);
+    
+    valuemutex->value = value;
+    
+    return true;
+}
+```
+
+For work with data stored in mutex you should call `take_mutex`. It return pointer to data if success, NULL otherwise.
+
+You must release mutex after end of work with data. Call `give_mutex` and pass ValueData instance and pointer to data.
+
+```C
+void* take_mutex(ValueMutex* valuemutex, uint32_t timeout) {
+    if(osMutexTake(valuemutex->mutex, timeout) == osOk) {
+        return valuemutex->value;
+    } else {
+        return NULL;
+    }
+}
+
+bool give_mutex(ValueMutex* valuemutex, void* value) {
+    if(value != valuemutex->value) return false;
+    
+    if(!osMutexGive(valuemutex->mutex)) return false;
+    
+    return true;
+}
+```
+Instead of take-access-give sequence you can use `read_mutex` and `write_mutex` functions. Same functions return true in case of success, false otherwise.
+
+```C
+bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {
+    void* value = take_mutex(valuemutex, timeout);
+    if(value == NULL) return false;
+    memcpy(data, value, len):
+    if(!give_mutex(valuemutex, value)) return false;
+    
+    return true;
+}
+
+bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {
+    void* value = take_mutex(valuemutex, timeout);
+    if(value == NULL) return false;
+    memcpy(value, data, len):
+    if(!give_mutex(valuemutex, value)) return false;
+    
+    return true;
+}
+```
+# ValueManager
+
+
+```C
+typedef struct {
+    ValueMutex value;
+    PubSub pubsub;
+}ValueManager;
+```
+
+
+LayerReducer
