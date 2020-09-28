@@ -17,16 +17,16 @@ On directinal pad only one button out of 4 can be pressed at once. `OK` and `⮌
 
 # Reboot combination
 
-Reset combination triggers hard reboot that cannot be intercept by any software. Used when application freeze or as normal way to reboot device.
+Reset combination triggers hard reboot that cannot be intercepted by any software. Used when application freezes or as normal way to reboot device.
  
  1. Press and hold `Left ←` + `⮌ Back` for reset
  2. Release to normal boot
 
-![](../wiki_static/ui/reset-combo.png)
+![Reboot combination](../wiki_static/ui/reboot-combo.png)
 
 # Reboot to Bootloader (Firmware update mode)
 
-Same as hard reboot, but stay in Firmware Update mode after boot. Usefull when firmware is broken and user cannot boot in normal mode.
+Same as hard reboot, but stay in Firmware Update mode after boot. Useful when firmware is broken and user cannot boot in normal mode.
 
 1. Press and hold `Left ←` + `⮌ Back` for reset
 2. Release `Left ←` and keep holding `⮌ Back` until `Firmware Update` mode appears
@@ -34,15 +34,19 @@ Same as hard reboot, but stay in Firmware Update mode after boot. Usefull when f
 
 To exit from `Firmware Update` mode use [reboot combination](#reboot-combination) 
 
+![Reboot to Bootloader](./../wiki_static/ui/reboot-to-bootloader.png)
+
 # DFU mode (Rescue mode)
 
+Reboot to rescue DFU mode. Useful when firmware and bootloader is broken.  
 
+1. Press and hold `Left ←` + `⮌ Back` + `OK`
+2. Release `Left ←` + `⮌ Back` and keep `OK` pressed
+3. Release `OK`
 
-Combination `Left ←` + `⮌ Back` + `OK`, then release `Left ←` + `⮌ Back` and keep `OK` pressed.
+![](../wiki_static/ui/reboot-to-dfu.png)
 
-![](../wiki_static/ui/dfu-combo.png)
-
-## Menu structure
+# Menu structure
 
 ![](../wiki_static/ui/menu-navigation.png)
 
