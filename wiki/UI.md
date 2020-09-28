@@ -1,6 +1,7 @@
 # Controls 
 
-Flipper Zero have 5 button directional pad. Buttons `← Left`, `→ Right`, `↑ Up`, `↓ Down` can be pressed only one at a time, and **CAN'T BE used in combination**.  
+Flipper Zero have 5 button directional pad.  
+Buttons `← Left`, `→ Right`, `↑ Up`, `↓ Down` can be pressed only one at a time, and **CAN'T BE used in combination**.  
 Buttons `◉ OK` and `⮌ Back` is independed from other buttons and can be used for combinations.
 
 ```
