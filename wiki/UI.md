@@ -1,29 +1,97 @@
 # Controls 
 
-имена всех кнопок
+Flipper Zero have 5 button directional pad. Buttons `← Left`, `→ Right`, `↑ Up`, `↓ Down` can be pressed only one at a time, and **CAN'T BE used in combination**.  
+Buttons `◉ OK` and `⮌ Back` is independed from other buttons and can be used for combinations.
 
-На джойстике можно нажать только одну кнопку из четырех зараз. ОК и назад независимы
+```
+        Up
+        ↑
+Left ← (OK) → Right
+        ↓
+       Down         ⮌ Back   
+```
 
-Комбинация ресет (Влево + назад) зажать отпустить 
+![](./../wiki_static/ui/buttons.png)
 
-Комбинация DFU мод (Влево + назад + ок)
+On directinal pad only one button out of 4 can be pressed at once. `OK` and `⮌ Back` buttons are indepandent.  
 
-## Standby mode 
+# Reboot combination
+
+Reset combination triggers hard reboot that cannot be intercept by any software. Used when application freeze or as normal way to reboot device.
+ 
+ 1. Press and hold `Left ←` + `⮌ Back` for reset
+ 2. Release to normal boot
+
+![](../wiki_static/ui/reset-combo.png)
+
+# Reboot to Bootloader (Firmware update mode)
+
+Same as hard reboot, but stay in Firmware Update mode after boot. Usefull when firmware is broken and user cannot boot in normal mode.
+
+1. Press and hold `Left ←` + `⮌ Back` for reset
+2. Release `Left ←` and keep holding `⮌ Back` until `Firmware Update` mode appears
+3. Release `⮌ Back`
+
+To exit from `Firmware Update` mode use [reboot combination](#reboot-combination) 
+
+# DFU mode (Rescue mode)
 
 
+
+Combination `Left ←` + `⮌ Back` + `OK`, then release `Left ←` + `⮌ Back` and keep `OK` pressed.
+
+![](../wiki_static/ui/dfu-combo.png)
+
+## Menu structure
+
+![](../wiki_static/ui/menu-navigation.png)
+
+## Standby screen 
+
+On standby screen we can see battery life status and dolphin animation. 
+
+![](../wiki_static/ui/UI-Standby.png)
 
 ## Main menu
 
-![](./../wiki_static/ui/UI-mai-menu-screen.png)
+Active row is always in the middle of the screen.
 
-* [443/866Mhz Transceiver](Sub-1-GHz-radio)
-* [Proximity tag 125khz](125-kHz-RFID)
-* [Bad USB](USB)
-* [Infrared](Infrared)
-* [iButton (1-Wire)](iButton-contact-keys)
-* [Plugins](Plugins)
-* Settings
-* [Dolphin](Tamagotchi)
+![](./../wiki_static/ui/UI-main-menu-screen.png)
+
+### Active row
+
+Font: `Born2bSportyV2`  
+Size: 16 px  
+
+![](./../wiki_static/ui/UI-active-row-text.png)
+
+### Non-active row
+
+Font: `Helvetipixel`  
+Size: 16 px  
+
+![](./../wiki_static/ui/UI-non-active-row-text.png)
+
+### Icon
+
+![](./../wiki_static/ui/UI-icon.png)
+
+### Scrollbar
+
+Scrollbar has 32 dots and a simple thumb
+
+![](./../wiki_static/ui/UI-Scrollbar-and-thumb.png)
+
+## Application menu
+
+Font: `Helvetipixel`
+Size: 16 px
+
+![](../wiki_static/ui/UI-app-menu.png)
+
+## Application screen with buttons
+
+
 
 ## Settings menu
 
