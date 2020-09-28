@@ -16,8 +16,7 @@ $CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
 c_syntax_rc=$?
 
 echo "RUN RUST SYNTAX CHECK"
-RUST_FILES=$(find . -name *.rs)
-rustfmt --check $RUST_FILES
+cd core-rs && cargo fmt -- --check
 rust_syntax_rc=$?
 
 if [[ $rust_syntax_rc -eq 0 ]] && [[ $c_syntax_rc -eq 0 ]]; then
