@@ -1,6 +1,20 @@
+# Controls 
+
+имена всех кнопок
+
+На джойстике можно нажать только одну кнопку из четырех зараз. ОК и назад независимы
+
+Комбинация ресет (Влево + назад) зажать отпустить 
+
+Комбинация DFU мод (Влево + назад + ок)
+
+## Standby mode 
+
+
+
 ## Main menu
 
-<img width="400" src="https://hsto.org/webt/uh/wo/01/uhwo01ftylu-gdb_4qp2vxgjmte.png" />
+![](./../wiki_static/ui/UI-mai-menu-screen.png)
 
 * [443/866Mhz Transceiver](Sub-1-GHz-radio)
 * [Proximity tag 125khz](125-kHz-RFID)
