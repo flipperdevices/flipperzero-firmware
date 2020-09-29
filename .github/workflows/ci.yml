@@ -32,3 +32,13 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: make -C target_f1
+
+      - name: Publish target_f1 artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target_f1
+          path: |
+            target_f1/build/target_prod.elf
+            target_f1/build/target_prod.bin
+            target_f1/build/target_prod.hex
+          if-no-files-found: error
