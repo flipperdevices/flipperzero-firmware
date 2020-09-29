@@ -8,13 +8,14 @@ void platform_init();
 
 /*
  * Check if dfu mode requested
+ * @return 1 if dfu mode requested, 0 if not
 */
 int platform_is_dfu_requested();
 
 /*
- * Switch to bootloader
+ * Switch to dfu mode
 */
-void platform_switch2boot();
+void platform_switch2dfu();
 
 /*
  * Switch to OS

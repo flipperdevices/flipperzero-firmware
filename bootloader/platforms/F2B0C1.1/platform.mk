@@ -1,10 +1,10 @@
 BOOT_ADDRESS	= 0x08000000
 OS_OFFSET		= 0x00008000
 
-BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DOS_ADDRESS=$(OS_ADDRESS)
+BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DOS_OFFSET=$(OS_OFFSET)
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
-CFLAGS			+= $(MCU_FLAGS) -DSTM32L4R7xx -Wall -fdata-sections -ffunction-sections
+CFLAGS			+= $(MCU_FLAGS) $(BOOT_CFLAGS) -DSTM32L4R7xx -Wall -fdata-sections -ffunction-sections
 LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 
 CUBE_DIR		= ../target_f2

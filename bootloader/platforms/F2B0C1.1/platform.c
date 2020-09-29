@@ -134,32 +134,30 @@ int platform_is_dfu_requested()
     return 0;
 }
 
-void platform_switch2boot()
+void platform_switch(void *offset)
 {
-    // Remap, set MSP and pass control
-    LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
-    LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     asm volatile(
-        "movs r3, #0\n"
-        "ldr r3, [r3, #0]\n"
-        "msr msp, r3\n"
-        : : : "r3"
+        "ldr    r3, [%0]    \n"
+        "msr    msp, r3     \n"
+        "ldr    r3, [%1]    \n"
+        "mov    pc, r3      \n"
+        :
+        : "r"(offset), "r"(offset+0x4)
+        : "r3"
     );
-    ((void (*)(void)) *((uint32_t*) 0x00000004))();
+}
+
+void platform_switch2dfu()
+{
+    LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
+    // Remap memory to system bootloader
+    LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
+    platform_switch(0x0);
 }
 
 void platform_switch2os()
 {
     LL_GPIO_ResetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
-    // TODO: set VTOR
-    SCB->VTOR = 0x8000;
-    __set_MSP(0x08008000);
-    // __ASM volatile(
-    //     "movs r3, #0\n"
-    //     "ldr r3, [r3, #0]\n"
-    //     "MSR msp, r3\n"
-    //     : : : "r3"
-    // );
-    // TODO: proper firmware address
-    ((void (*)(void)) *((uint32_t*) 0x08008004))();	
+    SCB->VTOR = OS_OFFSET;
+    platform_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }

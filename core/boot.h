@@ -1,7 +1,7 @@
 /*
 Flipper devices inc.
 
-Bootloader API
+Bootloader API, must be implemented by target
 */
 
 #ifndef __BOOT_H

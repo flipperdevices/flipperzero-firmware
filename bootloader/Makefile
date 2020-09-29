@@ -53,18 +53,18 @@ DEPS = $(OBJECTS:.o=.d)
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 CPPFLAGS = -fno-threadsafe-statics
 
-all: $(TARGET).elf $(TARGET).hex $(TARGET).bin
+all: $(OBJ_DIR)/$(TARGET).elf $(OBJ_DIR)/$(TARGET).hex $(OBJ_DIR)/$(TARGET).bin
 
-$(TARGET).elf: $(OBJECTS)
+$(OBJ_DIR)/$(TARGET).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
 	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 	$(SZ) $@
 
-$(TARGET).hex: $(TARGET).elf
+$(OBJ_DIR)/$(TARGET).hex: $(OBJ_DIR)/$(TARGET).elf
 	@echo "\tHEX\t" $@
 	@$(HEX) $< $@
 	
-$(TARGET).bin: $(TARGET).elf
+$(OBJ_DIR)/$(TARGET).bin: $(OBJ_DIR)/$(TARGET).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
@@ -80,14 +80,14 @@ $(OBJ_DIR)/%.o: %.cpp
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-flash: $(TARGET).bin
-	st-flash --reset write $(TARGET).bin $(BOOT_ADDRESS)
+flash: $(OBJ_DIR)/$(TARGET).bin
+	st-flash --reset write $(OBJ_DIR)/$(TARGET).bin $(BOOT_ADDRESS)
 
 debug:
-	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(TARGET).elf
+	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(TARGET).elf
 
 clean:
-	$(RM) $(TARGET).elf $(TARGET).hex $(TARGET).bin $(OBJ_DIR)/*
+	$(RM) $(OBJ_DIR)/*
 
 zz: | clean flash
 
