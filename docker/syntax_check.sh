@@ -12,6 +12,8 @@ C_FILES=$(find . \
     -not \( -path './target_*/build' -prune \) \
     -not \( -path ./lib -prune \) \
     -name *.c -o -name *.h -o -name *.cpp)
+
+ulimit -s 65536
 $CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
 c_syntax_rc=$?
 
