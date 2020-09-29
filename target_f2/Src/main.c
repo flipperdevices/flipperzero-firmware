@@ -91,7 +91,6 @@ void StartDefaultTask(void const * argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  boot_before_hw_hook();
   /* USER CODE END 1 */
   
 
@@ -123,7 +122,6 @@ int main(void)
   MX_TIM8_Init();
 
   /* USER CODE BEGIN 2 */
-  boot_after_hw_hook();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
