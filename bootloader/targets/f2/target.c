@@ -149,7 +149,7 @@ void target_switch(void *offset)
 
 void target_switch2dfu()
 {
-    LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
+    LL_GPIO_ResetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     target_switch(0x0);
@@ -157,7 +157,7 @@ void target_switch2dfu()
 
 void target_switch2os()
 {
-    LL_GPIO_ResetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
+    LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
     SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
