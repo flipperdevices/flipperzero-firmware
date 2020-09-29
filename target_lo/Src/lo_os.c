@@ -188,20 +188,18 @@ static pthread_key_t tls_keys[TLS_ITEM_COUNT];
 static pthread_once_t tls_keys_once = PTHREAD_ONCE_INIT;
 
 static void create_tls_keys() {
-    for (size_t i = 0; i < TLS_ITEM_COUNT; i++) {
+    for(size_t i = 0; i < TLS_ITEM_COUNT; i++) {
         pthread_key_create(&tls_keys[i], NULL);
     }
 }
 
-void* pvTaskGetThreadLocalStoragePointer(
-    TaskHandle_t xTaskToQuery, BaseType_t xIndex
-) {
+void* pvTaskGetThreadLocalStoragePointer(TaskHandle_t xTaskToQuery, BaseType_t xIndex) {
     // Non-current task TLS access is not allowed
-    if (xTaskToQuery != NULL) {
+    if(xTaskToQuery != NULL) {
         return NULL;
     }
 
-    if (xIndex >= TLS_ITEM_COUNT) {
+    if(xIndex >= TLS_ITEM_COUNT) {
         return NULL;
     }
 
@@ -210,15 +208,13 @@ void* pvTaskGetThreadLocalStoragePointer(
     return pthread_getspecific(tls_keys[xIndex]);
 }
 
-void vTaskSetThreadLocalStoragePointer(
-    TaskHandle_t xTaskToSet, BaseType_t xIndex, void *pvValue
-) {
+void vTaskSetThreadLocalStoragePointer(TaskHandle_t xTaskToSet, BaseType_t xIndex, void* pvValue) {
     // Non-current task TLS access is not allowed
-    if (xTaskToSet != NULL) {
+    if(xTaskToSet != NULL) {
         return;
     }
 
-    if (xIndex >= TLS_ITEM_COUNT) {
+    if(xIndex >= TLS_ITEM_COUNT) {
         return;
     }
 
