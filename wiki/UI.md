@@ -14,7 +14,7 @@ Left ← (OK) → Right
 
 ![](./../wiki_static/ui/buttons.png)
 
-On directinal pad only one button out of 4 can be pressed at once. `OK` and `⮌ Back` buttons are indepandent.  
+On directinal pad only one button out of 4 can be pressed at once. `◉ OK` and `⮌ Back` buttons are indepandent.  
 
 # Reboot combination
 
@@ -41,9 +41,9 @@ To exit from `Firmware Update` mode use [reboot combination](#reboot-combination
 
 Reboot to rescue DFU mode. Useful when firmware and bootloader is broken.  
 
-1. Press and hold `Left ←` + `⮌ Back` + `OK`
-2. Release `Left ←` + `⮌ Back` and keep `OK` pressed
-3. Release `OK`
+1. Press and hold `Left ←` + `⮌ Back` + `◉ OK`
+2. Release `Left ←` + `⮌ Back` and keep `◉ OK` pressed
+3. Release `◉ OK`
 
 ![](../wiki_static/ui/reboot-to-dfu.png)
 
@@ -51,13 +51,13 @@ Reboot to rescue DFU mode. Useful when firmware and bootloader is broken.
 
 ![](../wiki_static/ui/menu-navigation.png)
 
-## Standby screen 
+# Standby screen 
 
 On standby screen we can see battery life status and dolphin animation. 
 
 ![](../wiki_static/ui/UI-Standby.png)
 
-## Main menu
+# Main menu
 
 Active row is always in the middle of the screen.
 
@@ -87,7 +87,7 @@ Scrollbar has 32 dots and a simple thumb
 
 ![](./../wiki_static/ui/UI-Scrollbar-and-thumb.png)
 
-## Application menu
+# Application menu
 
 Font: `Helvetipixel`
 Size: 16 px
@@ -98,12 +98,12 @@ Size: 16 px
 
 
 
-## Settings menu
+# Settings menu
 
 * Display
 * Power
 
-## Pass-code lock
+# Pass-code lock
 
 Flipper will store your secrets like U2F token and house keys. What if Flipper gets lost?
 
