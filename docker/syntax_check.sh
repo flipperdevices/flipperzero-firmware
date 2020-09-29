@@ -10,6 +10,7 @@ C_FILES=$(find . \
     -not \( -path './target_*/Middlewares' -prune \) \
     -not \( -path './target_*/Drivers' -prune \) \
     -not \( -path './target_*/build' -prune \) \
+    -not \( -path './target_f*/Inc/FreeRTOSConfig.h' -prune \) \
     -not \( -path ./lib -prune \) \
     -name *.c -o -name *.h -o -name *.cpp)
 

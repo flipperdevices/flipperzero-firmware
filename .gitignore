@@ -1,3 +1,6 @@
 .idea/
 target_*/build/
 bindings/
+
+# Visual Studio Code
+.vscode/

@@ -52,22 +52,23 @@
 extern uint32_t SystemCoreClock;
 void xPortSysTickHandler(void);
 #endif
-#define configUSE_PREEMPTION 1
-#define configSUPPORT_STATIC_ALLOCATION 1
-#define configSUPPORT_DYNAMIC_ALLOCATION 1
-#define configUSE_IDLE_HOOK 1
-#define configUSE_TICK_HOOK 0
-#define configCPU_CLOCK_HZ (SystemCoreClock)
-#define configTICK_RATE_HZ ((TickType_t)1000)
-#define configMAX_PRIORITIES (7)
-#define configMINIMAL_STACK_SIZE ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE ((size_t)8192)
-#define configMAX_TASK_NAME_LEN (16)
-#define configUSE_16_BIT_TICKS 0
-#define configUSE_MUTEXES 1
-#define configQUEUE_REGISTRY_SIZE 8
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
-#define configUSE_COUNTING_SEMAPHORES 1
+#define configUSE_PREEMPTION                     1
+#define configSUPPORT_STATIC_ALLOCATION          1
+#define configSUPPORT_DYNAMIC_ALLOCATION         1
+#define configUSE_IDLE_HOOK                      1
+#define configUSE_TICK_HOOK                      0
+#define configCPU_CLOCK_HZ                       ( SystemCoreClock )
+#define configTICK_RATE_HZ                       ((TickType_t)1000)
+#define configMAX_PRIORITIES                     ( 7 )
+#define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
+#define configTOTAL_HEAP_SIZE                    ((size_t)8192)
+#define configMAX_TASK_NAME_LEN                  ( 16 )
+#define configUSE_16_BIT_TICKS                   0
+#define configUSE_MUTEXES                        1
+#define configQUEUE_REGISTRY_SIZE                8
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION  1
+#define configUSE_COUNTING_SEMAPHORES			 1
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS  1
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 0
