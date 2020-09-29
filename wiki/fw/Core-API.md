@@ -1,4 +1,4 @@
-# Basic concepts:
+# [Basic concepts](Basic-API)
 
 * ValueMutex
 * PubSub, Publisher, Subscriber
@@ -11,59 +11,52 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 # UI
 
-* **[Input](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Input)**
+* **[Input](Input-API)**
 
-* **[Display](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Display)**
+* **[Display](Display-API)**
 
-* **[LED](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:LED)**
+* **[LED](LED-API)**
 
-* **[Vibro]((https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Vibro)**
+* **[Vibro](Vibro-API)**
 
-* **[Sound](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Sound)**
+* **[Sound](Sound-API)**
 
-* **[Backlight]((https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Backlight)**
+* **[Backlight](Backlight-API)**
 
-# System
+# [System](System-state-API)
 
-## batt voltage
+* batt voltage
+* batt charge
 
-## batt charge
+# [CC1101](CC1101-API)
 
-# CC1101
+* SPI
+* IRQ
 
-## SPI
+# [SD Card](SD-card-API)
 
-## IRQ
+* SPI
 
-# SD Card
+# [NFC](NFC-API)
 
-## SPI
+* SPI
+* IRQ
 
-# NFC
+# [IR](IR-API)
 
-## SPI
+* TX LED
+* RX ADC
 
-## IRQ
+# [RFID 125 kHz](LF-RFID-API)
 
-# IR
+* Carrier control
+* Pull control
+* Comparator RX (shared with touch key)
 
-## TX LED
+# [Touch key](Touch-key-API)
 
-## RX ADC
-
-# RFID 125 kHz
-
-## Carrier
-
-## Pull
-
-## Comparator RX (shared with touch key)
-
-# Touch key
-
-## Pull
-
-## Comparator RX (shared with RFID 125 kHz)
+* Pull
+* Comparator RX (shared with RFID 125 kHz)
 
 # External GPIO
 
@@ -71,7 +64,7 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 # External I2C
 
-# UART
+# [UART](Serial-API)
 
 # USB
 
