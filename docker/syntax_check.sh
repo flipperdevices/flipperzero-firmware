@@ -10,8 +10,8 @@ C_FILES=$(find . \
     -not \( -path './target_*/Middlewares' -prune \) \
     -not \( -path './target_*/Drivers' -prune \) \
     -not \( -path './target_*/build' -prune \) \
-    -not \( -path './target_f*/Inc/FreeRTOSConfig.h' -prune \) \
     -not \( -path ./lib -prune \) \
+    ! -iname './target_f1/Inc/FreeRTOSConfig.h' \
     -name *.c -o -name *.h -o -name *.cpp)
 
 ulimit -s 65536
