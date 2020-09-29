@@ -1,4 +1,4 @@
-#include <platform.h>
+#include <target.h>
 #include <stm32l4xx.h>
 #include <stm32l4xx_ll_system.h>
 #include <stm32l4xx_ll_bus.h>
@@ -111,7 +111,7 @@ void usb_wire_reset()
     LL_GPIO_SetOutputPin(BOOT_USB_PORT, BOOT_USB_PIN);
 }
 
-void platform_init()
+void target_init()
 {
     clock_init();
     rtc_init();
@@ -120,7 +120,7 @@ void platform_init()
     usb_wire_reset();
 }
 
-int platform_is_dfu_requested()
+int target_is_dfu_requested()
 {
     if (LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
         LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_NONE);
@@ -134,7 +134,7 @@ int platform_is_dfu_requested()
     return 0;
 }
 
-void platform_switch(void *offset)
+void target_switch(void *offset)
 {
     asm volatile(
         "ldr    r3, [%0]    \n"
@@ -147,17 +147,17 @@ void platform_switch(void *offset)
     );
 }
 
-void platform_switch2dfu()
+void target_switch2dfu()
 {
     LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
-    platform_switch(0x0);
+    target_switch(0x0);
 }
 
-void platform_switch2os()
+void target_switch2os()
 {
     LL_GPIO_ResetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
     SCB->VTOR = OS_OFFSET;
-    platform_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
+    target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }

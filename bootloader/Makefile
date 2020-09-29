@@ -1,4 +1,4 @@
-TARGET			= bootloader
+PROJECT			= bootloader
 
 SRC_DIR			= src
 OBJ_DIR			= .obj
@@ -7,11 +7,12 @@ ASM_SOURCES		= $(wildcard $(SRC_DIR)/*.s)
 C_SOURCES		= $(wildcard $(SRC_DIR)/*.c)
 CPP_SOURCES		= $(wildcard $(SRC_DIR)/*.cpp)
 
-# Platform dependent code
-PLATFORM		?= F2B0C1.1
-include			platforms/$(PLATFORM)/platform.mk
-CFLAGS			+= -Iplatforms/include
-C_SOURCES		+= $(wildcard platforms/$(PLATFORM)/*.c)
+# 
+TARGET			?= f2
+TARGET_DIR		= targets/$(TARGET)
+include			$(TARGET_DIR)/target.mk
+CFLAGS			+= -Itargets/include
+C_SOURCES		+= $(wildcard $(TARGET_DIR)/*.c)
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
@@ -53,18 +54,18 @@ DEPS = $(OBJECTS:.o=.d)
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 CPPFLAGS = -fno-threadsafe-statics
 
-all: $(OBJ_DIR)/$(TARGET).elf $(OBJ_DIR)/$(TARGET).hex $(OBJ_DIR)/$(TARGET).bin
+all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin
 
-$(OBJ_DIR)/$(TARGET).elf: $(OBJECTS)
+$(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
 	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 	$(SZ) $@
 
-$(OBJ_DIR)/$(TARGET).hex: $(OBJ_DIR)/$(TARGET).elf
+$(OBJ_DIR)/$(PROJECT).hex: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tHEX\t" $@
 	@$(HEX) $< $@
 	
-$(OBJ_DIR)/$(TARGET).bin: $(OBJ_DIR)/$(TARGET).elf
+$(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
@@ -80,11 +81,11 @@ $(OBJ_DIR)/%.o: %.cpp
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-flash: $(OBJ_DIR)/$(TARGET).bin
-	st-flash --reset write $(OBJ_DIR)/$(TARGET).bin $(BOOT_ADDRESS)
+flash: $(OBJ_DIR)/$(PROJECT).bin
+	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(BOOT_ADDRESS)
 
 debug:
-	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(TARGET).elf
+	st-util & arm-none-eabi-gdb -ex "PROJECT extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
 
 clean:
 	$(RM) $(OBJ_DIR)/*

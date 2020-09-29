@@ -1,14 +1,14 @@
-#include "platform.h"
+#include "target.h"
 
 int main() {
     // Initialize hardware
-    platform_init();
+    target_init();
     // Check if dfu requested
-    if (platform_is_dfu_requested()) {
-        platform_switch2dfu();
+    if (target_is_dfu_requested()) {
+        target_switch2dfu();
     }
     // Switch to OS
-    platform_switch2os();
+    target_switch2os();
     // Never should get here
     return 0;
 }

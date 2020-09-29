@@ -10,14 +10,14 @@ What it does?
 - [ ] FS check
 - [ ] Recovery mode
 
-# Platforms
+# Targets
 
 | Name      | Bootloader    | Firmware      | Reset | DFU           |
 |           | Address       | Address       | Combo | Combo         |
 ---------------------------------------------------------------------
-| F2B0C1.1  | 0x08000000    | 0x00008000    | L+R   | L+R, hold R   |
+| f2        | 0x08000000    | 0x00008000    | L+R   | L+R, hold R   |
 
-Platform independend code and headers in `src`and `platforms/include` folders.
+Target independend code and headers in `src`and `target/include` folders.
 
 # Building
 
@@ -32,7 +32,7 @@ Platform independend code and headers in `src`and `platforms/include` folders.
 ## Build Options
 
 - `DEBUG` - 0/1 - enable or disable debug build. Default is 1.
-- `PLATFORM` - string - platform to build. Default is `F2B0C1.1`.
+- `TARGET` - string - target to build. Default is `f2`.
 
 # Flashing 
 

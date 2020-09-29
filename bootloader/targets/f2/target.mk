@@ -18,4 +18,4 @@ C_SOURCES		+= $(CUBE_HAL_DIR)/Src/stm32l4xx_ll_utils.c
 CFLAGS			+= -I$(CUBE_CMSIS_DIR)/Include
 CFLAGS			+= -I$(CUBE_CMSIS_DIR)/Device/ST/STM32L4xx/Include
 CFLAGS			+= -I$(CUBE_HAL_DIR)/Inc
-LDFLAGS			+= -Tplatforms/F2B0C1.1/STM32L476RGTx_FLASH.ld
+LDFLAGS			+= -Ttargets/f2/STM32L476RGTx_FLASH.ld
