@@ -91,7 +91,7 @@ void handle_sound_state(Tone* tone, void* _ctx) {
 }
 
 void sound_example(void* p) {
-    soundApi* sound_api = open_display("/dev/sound");
+    soundApi* sound_api = open_sound("/dev/sound");
     if(sound_api == NULL) return; // sound not available, critical error
 
     // subscribe to sound state updates

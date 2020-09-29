@@ -13,7 +13,7 @@ You can get API instance by calling `open_input`:
 ```C
 /// Get input struct
 inline Input* open_input(const char* name) {
-    return furi_open(name);
+    return (Input*)furi_open(name);
 }
 ```
 

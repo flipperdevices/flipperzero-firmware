@@ -5,10 +5,6 @@
 * ValueManager
 * LayeredReducer
 
-# HAL
-
-We use [Zephyr HAL](https://docs.zephyrproject.org/latest/reference/peripherals/index.html).
-
 # OS
 
 We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__CMSIS__RTOS.html) for thread management and IPC.
@@ -21,11 +17,11 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 * **[LED](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:LED)**
 
-* **vibro**
+* **[Vibro]((https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Vibro)**
 
 * **[Sound](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Sound)**
 
-* **backlight**
+* **[Backlight]((https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/API:Backlight)**
 
 # System
 
