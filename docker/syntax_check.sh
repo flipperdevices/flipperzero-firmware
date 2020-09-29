@@ -10,8 +10,8 @@ C_FILES=$(find . \
     -not \( -path './target_*/Middlewares' -prune \) \
     -not \( -path './target_*/Drivers' -prune \) \
     -not \( -path './target_*/build' -prune \) \
+    -not \( -path './target_*/Inc' -prune \) \
     -not \( -path ./lib -prune \) \
-    ! -iname './target_f1/Inc/FreeRTOSConfig.h' \
     -name *.c -o -name *.h -o -name *.cpp)
 
 ulimit -s 65536
@@ -19,7 +19,7 @@ $CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
 c_syntax_rc=$?
 
 echo "RUN RUST SYNTAX CHECK"
-cd core-rs && cargo fmt -- --check
+cd /project/core-rs && cargo fmt -- --check
 rust_syntax_rc=$?
 
 if [[ $rust_syntax_rc -eq 0 ]] && [[ $c_syntax_rc -eq 0 ]]; then
@@ -29,7 +29,9 @@ fi
 
 read -p "Do you want fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 
-rustfmt $RUST_FILES
+cd /project/core-rs && cargo fmt --
+
+cd /project
 
 # We use root in container and clang-format rewriting files. We'll need change owner to original
 local_user=$(stat -c '%u' .clang-format)
