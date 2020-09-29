@@ -75,14 +75,12 @@ typedef void(PubSubCallback*)(void*, void*);
 
 typedef struct {
     PubSubCallback cb;
-    PubSubItem next;
-    PubSubItem prev;
     void* ctx;
 } PubSubItem;
 
 typedef struct {
     PubSubItem items[NUM_OF_CALLBACKS];
-    PubSubItem head; ///< first subscriber or NULL
+    size_t count; ///< count of callbacks
 } PubSub;
 ```
 
@@ -90,7 +88,7 @@ To create PubSub you should create PubSub instance and call `init_pubsub`.
 
 ```C
 void init_pubsub(PubSub* pubsub) {
-    pubsub->head = NULL;
+    pubsub->count = 0;
 }
 ```
 
@@ -98,13 +96,11 @@ Use `subscribe_pubsub` to register your callback.
 
 ```C
 // TODO add mutex to reconfigurate PubSub
-PubSubItem* subscribe_pubsub(PubSub pubsub, PubSubCallback cb, void* ctx) {
-    // find free pubsub item
-    PubSubItem current = (pubsub->items);
-    
-    if(current == NULL) return NULL;
-    
-    // something linked list magic
+PubSubItem* subscribe_pubsub(PubSub* pubsub, PubSubCallback cb, void* ctx) {
+    if(pubsub->count >= NUM_OF_CALLBACKS) return NULL;
+
+    pubsub->count++;
+    PubSubItem* current = pubsub->items[pubsub->count];
     
     current->cb = cb;
     currrnt->ctx = ctx;
@@ -113,17 +109,19 @@ PubSubItem* subscribe_pubsub(PubSub pubsub, PubSubCallback cb, void* ctx) {
 }
 ```
 
-
-
 Use `notify_pubsub` to notify subscribers.
 
 ```C
-void notify_pubsub(PubSub pubsub, void* arg) {
+void notify_pubsub(PubSub* pubsub, void* arg) {
     // iterate over subscribers
-    PubSub item;
-    item->cb(arg, item->ctx);
+    for(size_t i = 0; i < pubsub->count; i++) {
+        pubsub->items[i]->cb(arg, pubsub->items[i]->ctx);
+    }
 }
 ```
+
+TODO: add `unsubscribe_pubsub`, and rearrange all items to keep subscribers item continuous
+TODO: after implementing "app_exit_handler" unsubscribe on exit.
 
 # ValueManager
 
