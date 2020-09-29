@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+
 CLANG_FORMAT_BIN="/usr/bin/clang-format-10"
 PATH="$HOME/.cargo/bin:${PATH}"
 
-cd /project
+PROJECT_DIR=$(pwd)
+
+cd $PROJECT_DIR
 
 echo "RUN C\C++ SYNTAX CHECK"
 C_FILES=$(find . \
@@ -19,7 +23,7 @@ $CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
 c_syntax_rc=$?
 
 echo "RUN RUST SYNTAX CHECK"
-cd /project/core-rs && cargo fmt -- --check
+cd $PROJECT_DIR/core-rs && cargo fmt -- --check
 rust_syntax_rc=$?
 
 if [[ $rust_syntax_rc -eq 0 ]] && [[ $c_syntax_rc -eq 0 ]]; then
@@ -29,9 +33,9 @@ fi
 
 read -p "Do you want fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 
-cd /project/core-rs && cargo fmt --
+cd $PROJECT_DIR/core-rs && cargo fmt --
 
-cd /project
+cd $PROJECT_DIR
 
 # We use root in container and clang-format rewriting files. We'll need change owner to original
 local_user=$(stat -c '%u' .clang-format)
