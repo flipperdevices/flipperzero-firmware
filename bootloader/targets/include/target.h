@@ -22,5 +22,4 @@ void target_switch2dfu();
 */
 void target_switch2os();
 
-
 #endif

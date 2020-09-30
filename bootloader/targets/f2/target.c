@@ -9,43 +9,45 @@
 #include <stm32l4xx_ll_gpio.h>
 
 // Boot request enum
-#define BOOT_REQUEST_NONE   0x00000000
-#define BOOT_REQUEST_DFU    0xDF00B000
+#define BOOT_REQUEST_NONE 0x00000000
+#define BOOT_REQUEST_DFU 0xDF00B000
 // Boot to DFU pin
-#define BOOT_DFU_PORT       GPIOB
-#define BOOT_DFU_PIN        LL_GPIO_PIN_8
+#define BOOT_DFU_PORT GPIOB
+#define BOOT_DFU_PIN LL_GPIO_PIN_8
 // LCD backlight
-#define BOOT_LCD_BL_PORT    GPIOB
-#define BOOT_LCD_BL_PIN     LL_GPIO_PIN_6
+#define BOOT_LCD_BL_PORT GPIOB
+#define BOOT_LCD_BL_PIN LL_GPIO_PIN_6
 // LEDs
-#define LED_RED_PORT        GPIOA
-#define LED_RED_PIN         LL_GPIO_PIN_8
-#define LED_GREEN_PORT      GPIOB
-#define LED_GREEN_PIN       LL_GPIO_PIN_14
-#define LED_BLUE_PORT       GPIOB
-#define LED_BLUE_PIN        LL_GPIO_PIN_1
+#define LED_RED_PORT GPIOA
+#define LED_RED_PIN LL_GPIO_PIN_8
+#define LED_GREEN_PORT GPIOB
+#define LED_GREEN_PIN LL_GPIO_PIN_14
+#define LED_BLUE_PORT GPIOB
+#define LED_BLUE_PIN LL_GPIO_PIN_1
 // USB pins
-#define BOOT_USB_PORT       GPIOA
-#define BOOT_USB_DM_PIN     LL_GPIO_PIN_11
-#define BOOT_USB_DP_PIN     LL_GPIO_PIN_12
-#define BOOT_USB_PIN        ( BOOT_USB_DM_PIN | BOOT_USB_DP_PIN )
+#define BOOT_USB_PORT GPIOA
+#define BOOT_USB_DM_PIN LL_GPIO_PIN_11
+#define BOOT_USB_DP_PIN LL_GPIO_PIN_12
+#define BOOT_USB_PIN (BOOT_USB_DM_PIN | BOOT_USB_DP_PIN)
 
-void clock_init()
-{
+void clock_init() {
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
     LL_RCC_MSI_Enable();
-    while (LL_RCC_MSI_IsReady() != 1) {}
+    while(LL_RCC_MSI_IsReady() != 1) {
+    }
 
     /* Main PLL configuration and activation */
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 40, LL_RCC_PLLR_DIV_2);
     LL_RCC_PLL_Enable();
     LL_RCC_PLL_EnableDomain_SYS();
-    while(LL_RCC_PLL_IsReady() != 1) {}
+    while(LL_RCC_PLL_IsReady() != 1) {
+    }
 
     /* Sysclk activation on the main PLL */
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {};
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
+    };
 
     /* Set APB1 & APB2 prescaler*/
     LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
@@ -61,8 +63,7 @@ void clock_init()
     LL_SetSystemCoreClock(80000000);
 }
 
-void gpio_init()
-{
+void gpio_init() {
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
     // USB D+
@@ -92,27 +93,23 @@ void gpio_init()
     LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
 }
 
-void rtc_init()
-{
+void rtc_init() {
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
     LL_PWR_EnableBkUpAccess();
     LL_RCC_EnableRTC();
 }
 
-void lcd_backlight_on()
-{
+void lcd_backlight_on() {
     LL_GPIO_SetOutputPin(BOOT_LCD_BL_PORT, BOOT_LCD_BL_PIN);
 }
 
-void usb_wire_reset()
-{
+void usb_wire_reset() {
     LL_GPIO_ResetOutputPin(BOOT_USB_PORT, BOOT_USB_PIN);
     LL_mDelay(10);
     LL_GPIO_SetOutputPin(BOOT_USB_PORT, BOOT_USB_PIN);
 }
 
-void target_init()
-{
+void target_init() {
     clock_init();
     rtc_init();
     gpio_init();
@@ -120,43 +117,37 @@ void target_init()
     usb_wire_reset();
 }
 
-int target_is_dfu_requested()
-{
-    if (LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
+int target_is_dfu_requested() {
+    if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
         LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_NONE);
         return 1;
     }
 
-    if (LL_GPIO_IsInputPinSet(BOOT_DFU_PORT, BOOT_DFU_PIN)) {
+    if(LL_GPIO_IsInputPinSet(BOOT_DFU_PORT, BOOT_DFU_PIN)) {
         return 1;
     }
 
     return 0;
 }
 
-void target_switch(void *offset)
-{
-    asm volatile(
-        "ldr    r3, [%0]    \n"
-        "msr    msp, r3     \n"
-        "ldr    r3, [%1]    \n"
-        "mov    pc, r3      \n"
-        :
-        : "r"(offset), "r"(offset+0x4)
-        : "r3"
-    );
+void target_switch(void* offset) {
+    asm volatile("ldr    r3, [%0]    \n"
+                 "msr    msp, r3     \n"
+                 "ldr    r3, [%1]    \n"
+                 "mov    pc, r3      \n"
+                 :
+                 : "r"(offset), "r"(offset + 0x4)
+                 : "r3");
 }
 
-void target_switch2dfu()
-{
+void target_switch2dfu() {
     LL_GPIO_ResetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     target_switch(0x0);
 }
 
-void target_switch2os()
-{
+void target_switch2os() {
     LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
     SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));

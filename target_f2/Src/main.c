@@ -88,10 +88,9 @@ void StartDefaultTask(void const* argument);
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
-  /* USER CODE BEGIN 1 */
-  /* USER CODE END 1 */
+int main(void) {
+    /* USER CODE BEGIN 1 */
+    /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
 
