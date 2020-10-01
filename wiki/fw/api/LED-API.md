@@ -88,10 +88,10 @@ void led_example(void* p) {
     if(led_api == NULL) return; // led not available, critical error
 
     // subscribe to led state updates
-    subscribe_led_changes(led_api->state->pubsub, handle_led_state, NULL);
+    subscribe_led_changes(led_api, handle_led_state, NULL);
     // get current led value
     Rgb led_value;
-    if(read_led(led_api->state->value, &led_value, OsWaitForever)) {
+    if(read_led(led_api, &led_value, OsWaitForever)) {
         printf(
             "initial led: #%02X%02X%02X\n",
             led_value->red,
