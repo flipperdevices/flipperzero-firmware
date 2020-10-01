@@ -12,7 +12,7 @@ LED API provided by struct:
 
 ```C
 typedef struct {
-    ValueComposer* composer; /// every app add its layer to set value, LayeredReducer<Rgb*>
+    ValueComposer* composer; /// every app add its value to compose, <Rgb*>
     ValueManager* state; /// LED value state and changes <Rgb*>
 } LedApi;
 ```
@@ -57,7 +57,7 @@ typedef struct {
     ValueComposerHandle* composer_handle;
 } SystemLed;
 
-inline bool init_led(SystemLed* led, ValueComposer* composer, uint32_t layer) {
+inline bool init_led_composer(SystemLed* led, ValueComposer* composer, uint32_t layer) {
     if(!init_mutex(&led->value_mutex, (void*)&led->value, sizeof(Rgb))) {
         return false;
     }
@@ -89,7 +89,7 @@ void led_example(void* p) {
 
     // subscribe to led state updates
     subscribe_led_changes(led_api->state->pubsub, handle_led_state, NULL);
-
+    // get current led value
     Rgb led_value;
     if(read_led(led_api->state->value, &led_value, OsWaitForever)) {
         printf(
@@ -100,8 +100,9 @@ void led_example(void* p) {
         );
     }
 
+    // create compose to control led
     SystemLed system_led;
-    if(!init_led(&system_led, led_api->composer, UiLayerBelowNotify)) return;
+    if(!init_led_composer(&system_led, led_api->composer, UiLayerBelowNotify)) return;
 
     // write RGB value
     write_led(&system_led, &(Rgb{.red = 0xFA, green = 0xCE, .blue = 0x8D}));
