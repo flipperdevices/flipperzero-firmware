@@ -103,7 +103,8 @@ C_DEFS +=  \
 -DUSE_HAL_DRIVER \
 -DSTM32L476xx \
 -DBUTON_INVERT=false \
--DDEBUG_UART=huart1
+-DDEBUG_UART=huart1 \
+-DUSE_INPUT
 
 ASM_SOURCES +=  \
 startup_stm32l476xx.s
@@ -139,7 +140,8 @@ C_SOURCES += ../lib/u8g2/u8x8_d_st7565.c \
 
 # System applications
 
-C_SOURCES += ../applications/display-u8g2/display-u8g2.c
+C_SOURCES += ../applications/display-u8g2/display-u8g2.c \
+../applications/input/input.c \
 
 # Examples
 
