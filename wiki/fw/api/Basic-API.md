@@ -60,6 +60,7 @@ The most simple concept is ValueMutex. It is wrapper around mutex and value poin
 ```C
 typedef struct {
     void* value;
+    size_t size;
     osMutex mutex;
     
     osMutexDescriptor __static // some internals;
@@ -69,11 +70,12 @@ typedef struct {
 Create ValueMutex. Create instance of ValueMutex and call `init_mutex`.
 
 ```C
-bool init_mutex(ValueMutex* valuemutex, void* value) {
+bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
     valuemutex->mutex = osMutexCreateStatic(valuemutex->__static);
     if(valuemutex->mutex == NULL) return false;
     
     valuemutex->value = value;
+    valuemutex->size = size;
     
     return true;
 }
@@ -105,8 +107,8 @@ Instead of take-access-give sequence you can use `read_mutex` and `write_mutex` 
 ```C
 bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {
     void* value = acquire_mutex(valuemutex, timeout);
-    if(value == NULL) return false;
-    memcpy(data, value, len):
+    if(value == NULL || len > valuemutex->size) return false;
+    memcpy(data, value, len > 0 ? len : valuemutex->size):
     if(!release_mutex(valuemutex, value)) return false;
     
     return true;
@@ -114,8 +116,8 @@ bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout
 
 bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {
     void* value = acquire_mutex(valuemutex, timeout);
-    if(value == NULL) return false;
-    memcpy(value, data, len):
+    if(value == NULL || len > valuemutex->size) return false;
+    memcpy(value, data, len > 0 ? len : valuemutex->size):
     if(!release_mutex(valuemutex, value)) return false;
     
     return true;
@@ -134,7 +136,7 @@ void provider_app(void* _p) {
     // create record with mutex
     uint32_t example_value = 0;
     ValueMutex example_mutex;
-    if(init_mutex(&example_mutex, (void*)&example_value)) {
+    if(!init_mutex(&example_mutex, (void*)&example_value, sizeof(uint32_t))) {
         printf("critical error\n");
         flapp_exit(NULL);
     }
@@ -310,6 +312,36 @@ void pubsub_test() {
 }
 ```
 
+# ValueComposer
+
+```C
+typedef void(ValueComposerCallback)(void* ctx, void* state);
+
+void COPY_COMPOSE(void* ctx, void* state) {
+    read_mutex((ValueMutex*)ctx, state, 0);
+}
+
+typedef enum {
+    UiLayerBelowNotify
+    UiLayerNotify,
+    UiLayerAboveNotify
+} UiLayer;
+```
+
+```C
+ValueComposerHandle* add_compose_layer(
+    ValueComposer* composer, ValueComposerCallback cb, void* ctx, uint32_t layer
+);
+```
+
+```C
+bool remove_compose_layer(ValueComposerHandle* handle);
+```
+
+```C
+void request_compose(ValueComposerHandle* handle);
+```
+
 # ValueManager
 
 More complicated concept is ValueManager. It is like ValueMutex, but user can subscribe to value updates.
@@ -352,20 +384,4 @@ bool commit_managed(ValueManager* managed, void* value) {
     
     return true;
 }
-```
-
-# ValueComposer
-
-```C
-ValueComposerHandle* add_compose_layer(
-    ValueComposer* composer, ValueComposerCallback cb, void* ctx, uint32_t layer
-);
-```
-
-```C
-bool remove_compose_layer(ValueComposerHandle* handle);
-```
-
-```C
-void request_compose();
 ```

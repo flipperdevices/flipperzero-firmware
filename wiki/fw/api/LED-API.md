@@ -12,9 +12,8 @@ LED API provided by struct:
 
 ```C
 typedef struct {
-    LayeredReducer* source; /// every app add its layer to set value, LayeredReducer<Rgb*>
-    Subscriber* updates; /// LED value changes Supscriber<Rgb*>
-    ValueMutex* state; /// LED state, ValueMutex<Rgb*>
+    ValueComposer* composer; /// every app add its layer to set value, LayeredReducer<Rgb*>
+    ValueManager* state; /// LED value state and changes <Rgb*>
 } LedApi;
 ```
 
@@ -29,46 +28,12 @@ inline LedApi* open_led(const char* name) {
 
 Default system led is `/dev/led`.
 
-Then add new layer to control LED by calling `add_led_layer`:
-
-```C
-inline ValueManager* add_led_layer(Rgb* layer, uint8_t priority) {
-    ValueManager* manager = register_valuemanager((void*)layer);
-    if(manager == NULL) return NULL;
-
-    if(!add_layered_reducer(manager, priority, layer_compose_default)) {
-        unregister_valuemanager(manager);
-        return NULL;
-    }
-
-    return manager;
-}
-```
-
-For change led you can get display instance pointer by calling `take_led`, do something and commit your changes by calling `commit_led`. Or you can call `write_led`:
-
-```C
-/// return pointer in case off success, NULL otherwise
-inline Rgb* take_led(ValueManager* led, uint32_t timeout) {
-    return (Rgb*)take_mutex(led->value, timeout);
-}
-
-inline void commit_led(ValueManager* led, Rgb* value) {
-    commit_valuemanager(led, value);
-}
-
-/// return true if success, false otherwise
-inline bool write_led(ValueManager* led, Rgb* value, uint32_t timeout) {
-    return write_valuemanager(state, (void*)value, sizeof(Rgb), timeout);
-}
-```
-
 To read current led state you should use `read_led` function:
 
 ```C
 /// return true if success, false otherwise
-inline bool read_led(ValueManager* led, Rgb* value, uint32_t timeout) {
-    return read_mutex(led->value, (void*)value, sizeof(Rgb), timeout);
+inline bool read_led(LedApi* led, Rgb* value, uint32_t timeout) {
+    return read_mutex(led->state->value, (void*)value, sizeof(Rgb), timeout);
 }
 ```
 
@@ -78,10 +43,37 @@ Use `subscribe_led_changes` to register your callback:
 
 ```C
 /// return true if success, false otherwise
-inline bool subscribe_led_changes(Subscriber* updates, void(*cb)(Rgb*, void*), void* ctx) {
-    return subscribe_pubsub(events, void(*)(void*, void*)(cb), ctx);
+inline bool subscribe_led_changes(LedApi* led, void(*cb)(Rgb*, void*), void* ctx) {
+    return subscribe_pubsub(led->state->pubsub, void(*)(void*, void*)(cb), ctx);
 }
 ```
+
+Userspace helpers
+
+```C
+typedef struct {
+    Rgb value;
+    ValueMutex value_mutex;
+    ValueComposerHandle* composer_handle;
+} SystemLed;
+
+inline bool init_led(SystemLed* led, ValueComposer* composer, uint32_t layer) {
+    if(!init_mutex(&led->value_mutex, (void*)&led->value, sizeof(Rgb))) {
+        return false;
+    }
+    led->composer_handle = add_compose_layer(
+        composer, COPY_COMPOSE, &led->value_mutex, layer
+    ); // just copy led state on update
+
+    return led->composer_handle != NULL;
+}
+
+inline void write_led(SystemLed* led, Rgb* value) {
+    write_mutex(&led->value_mutex, (void*)value, sizeof(Rgb), OsWaitForever);
+    request_compose(led->composer_handle);
+}
+```
+
 
 ## Usage example
 
@@ -96,29 +88,22 @@ void led_example(void* p) {
     if(led_api == NULL) return; // led not available, critical error
 
     // subscribe to led state updates
-    subscribe_led_changes(led_api->updates, handle_led_state, NULL);
+    subscribe_led_changes(led_api->state->pubsub, handle_led_state, NULL);
 
-    Rgb current_state;
-    if(read_led(led_api->state, &current_state, OsWaitForever)) {
+    Rgb led_value;
+    if(read_led(led_api->state->value, &led_value, OsWaitForever)) {
         printf(
             "initial led: #%02X%02X%02X\n",
-            current_state->red,
-            current_state->green,
-            current_state->blue
+            led_value->red,
+            led_value->green,
+            led_value->blue
         );
     }
 
-    // add layer to control led
-    ValueManager* led_manager = add_led_layer(&current_state, UI_LAYER_APP);
-
-    // write only blue by getting pointer
-    Rgb* rgb = take_led(led_manager, OsWaitForever);
-    if(rgb != NULL) {
-        rgb->blue = 0;
-    }
-    commit_led(led_manager, rgb);
+    SystemLed system_led;
+    if(!init_led(&system_led, led_api->composer, UiLayerBelowNotify)) return;
 
     // write RGB value
-    write_led(led_manager, &(Rgb{.red = 0xFA, green = 0xCE, .blue = 0x8D}), OsWaitForever);
+    write_led(&system_led, &(Rgb{.red = 0xFA, green = 0xCE, .blue = 0x8D}));
 }
 ```
