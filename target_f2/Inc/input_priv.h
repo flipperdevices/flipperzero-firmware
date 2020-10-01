@@ -23,7 +23,7 @@ const bool input_invert[] = {
     false, // {BUTTON_LEFT_GPIO_Port, BUTTON_LEFT_Pin},
     false, // {BUTTON_OK_GPIO_Port, BUTTON_OK_Pin},
     false, // {BUTTON_BACK_GPIO_Port, BUTTON_BACK_Pin},
-    false // {CHRG_GPIO_Port, CHRG_Pin}
+    true, // {CHRG_GPIO_Port, CHRG_Pin}
 };
 
 #endif /* __INPUT_PRIV_H */
