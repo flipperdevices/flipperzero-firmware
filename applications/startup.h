@@ -15,6 +15,7 @@ void application_blink(void* p);
 void application_uart_write(void* p);
 void application_ipc_display(void* p);
 void application_ipc_widget(void* p);
+void application_input_dump(void* p);
 
 void display_u8g2(void* p);
 
@@ -49,5 +50,8 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef EXAMPLE_IPC
     {.app = application_ipc_display, .name = "ipc display"},
     {.app = application_ipc_widget, .name = "ipc widget"},
+#endif
+#ifdef EXAMPLE_INPUT_DUMP
+    {.app = application_input_dump, .name = "input dump"},
 #endif
 };

@@ -172,6 +172,11 @@ C_SOURCES += ../applications/examples/ipc.c
 C_DEFS += -DEXAMPLE_IPC
 endif
 
+ifeq ($(EXAMPLE_INPUT_DUMP), 1)
+C_SOURCES += ../applications/examples/input_dump.c
+C_DEFS += -DEXAMPLE_INPUT_DUMP
+endif
+
 # User application
 
 C_SOURCES += ../applications/coreglitch_demo_0/coreglitch_demo_0.c
@@ -303,6 +308,10 @@ example_uart_write:
 
 example_ipc:
 	EXAMPLE_IPC=1 make
+	rm $(BUILD_DIR)/app.o
+
+example_input_dump:
+	EXAMPLE_INPUT_DUMP=1 make
 	rm $(BUILD_DIR)/app.o
 
 test:
