@@ -252,6 +252,15 @@ Use `unsubscribe_pubsub` to unregister callback.
 void unsubscribe_pubsub(PubSubId* pubsub_id) {
     // TODO: add, and rearrange all items to keep subscribers item continuous
     // TODO: keep ids link actual
+    // TODO: also add mutex on every pubsub changes
+
+    // trivial implementation for NUM_OF_CALLBACKS = 1
+    if(NUM_OF_CALLBACKS != 1) return;
+
+    if(pubsub_id != NULL || pubsub_id->self != NULL || pubsub_id->item != NULL) return;
+
+    pubsub_id->self->count = 0;
+    pubsub_id->item = NULL;
 }
 
 ```
@@ -267,9 +276,43 @@ void notify_pubsub(PubSub* pubsub, void* arg) {
 }
 ```
 
+## Usage example
+
+```C
+/*
+MANIFEST
+name="test"
+stack=128
+*/
+
+void example_pubsub_handler(void* arg, void* ctx) {
+    printf("get %d from %s\n", *(uint32_t*)arg, (const char*)ctx);
+}
+
+void pubsub_test() {
+    const char* app_name = "test app";
+
+    PubSub example_pubsub;
+    init_pubsub(&example_pubsub);
+
+    if(!subscribe_pubsub(&example_pubsub, example_pubsub_handler, (void*)app_name)) {
+        printf("critical error\n");
+        flapp_exit(NULL);
+    }
+
+    uint32_t counter = 0;
+    while(1) {
+        notify_pubsub(&example_pubsub, (void*)&counter);
+        counter++;
+
+        osDelay(100);
+    }
+}
+```
+
 # ValueManager
 
-More complicated concept is ValueManager. It is like ValueMutex, but user can subscribe to update value.
+More complicated concept is ValueManager. It is like ValueMutex, but user can subscribe to value updates.
 
 ```C
 typedef struct {
@@ -326,6 +369,3 @@ bool remove_compose_layer(ValueComposerHandle* handle);
 ```C
 void request_compose();
 ```
-
-## Usage example
-
