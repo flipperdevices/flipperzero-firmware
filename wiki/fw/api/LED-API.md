@@ -57,12 +57,12 @@ typedef struct {
     ValueComposerHandle* composer_handle;
 } SystemLed;
 
-inline bool init_led_composer(SystemLed* led, ValueComposer* composer, uint32_t layer) {
+inline bool init_led_composer(SystemLed* led, LedApi* api, uint32_t layer) {
     if(!init_mutex(&led->value_mutex, (void*)&led->value, sizeof(Rgb))) {
         return false;
     }
     led->composer_handle = add_compose_layer(
-        composer, COPY_COMPOSE, &led->value_mutex, layer
+        api->composer, COPY_COMPOSE, &led->value_mutex, layer
     ); // just copy led state on update
 
     return led->composer_handle != NULL;
@@ -102,7 +102,7 @@ void led_example(void* p) {
 
     // create compose to control led
     SystemLed system_led;
-    if(!init_led_composer(&system_led, led_api->composer, UiLayerBelowNotify)) return;
+    if(!init_led_composer(&system_led, led_api, UiLayerBelowNotify)) return;
 
     // write RGB value
     write_led(&system_led, &(Rgb{.red = 0xFA, green = 0xCE, .blue = 0x8D}));
