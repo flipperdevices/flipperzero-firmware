@@ -23,6 +23,12 @@ jobs:
       - name: Build docker image
         uses: ./.github/actions/docker
 
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        continue-on-error: true
+        with:
+          run: /syntax_check.sh
+
       - name: Build target_lo in docker
         uses: ./.github/actions/docker
         with:
@@ -32,3 +38,43 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: make -C target_f1
+
+      - name: Publish target_f1 artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target_f1
+          path: |
+            target_f1/build/target_prod.elf
+            target_f1/build/target_prod.bin
+            target_f1/build/target_prod.hex
+          if-no-files-found: error
+
+      - name: Build target_f2 in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C target_f2
+
+      - name: Publish target_f2 artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: target_f2
+          path: |
+            target_f2/build/target_prod.elf
+            target_f2/build/target_prod.bin
+            target_f2/build/target_prod.hex
+          if-no-files-found: error
+
+      - name: Build bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader
+
+      - name: Publish bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader
+          path: |
+            bootloader/.obj/bootloader.elf
+            bootloader/.obj/bootloader.bin
+            bootloader/.obj/bootloader.hex
+          if-no-files-found: error
