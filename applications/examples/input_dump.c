@@ -1,5 +1,4 @@
 #include "flipper.h"
-#include "input.h"
 #include <stdio.h>
 
 static void state_cb(const void* value, size_t size, void* ctx) {

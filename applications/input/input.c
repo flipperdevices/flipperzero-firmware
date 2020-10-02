@@ -1,4 +1,4 @@
-#include <input.h>
+#include <input/input.h>
 #include <input_priv.h>
 #include <stdio.h>
 #include <furi.h>
