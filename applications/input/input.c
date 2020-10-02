@@ -72,7 +72,7 @@ void input_task(void* p) {
             uint32_t changed_bits = new_state_bits ^ state_bits;
 
             if (changed_bits != 0) {
-                printf("[input] %02x -> %02x\n", state_bits, new_state_bits);
+                // printf("[input] %02x -> %02x\n", state_bits, new_state_bits);
                 InputState new_state = _BITS2STATE(new_state_bits);
                 furi_write(input_state_record, &new_state, sizeof(new_state));
 
