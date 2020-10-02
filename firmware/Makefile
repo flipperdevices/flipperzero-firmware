@@ -11,10 +11,6 @@ CPP_SOURCES		= $(wildcard $(SRC_DIR)/*.cpp)
 TARGET			?= f2
 TARGET_DIR		= targets/$(TARGET)
 include			$(TARGET_DIR)/target.mk
-CFLAGS			+= -Itargets/include
-CFLAGS			+= -I../applications
-CFLAGS			+= -Isrc
-C_SOURCES		+= $(wildcard $(TARGET_DIR)/*.c)
 
 # Libs
 # TODO: mk for apps
@@ -43,6 +39,10 @@ C_SOURCES		+= $(U8G2_DIR)/u8g2_font.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_fonts.c
 C_SOURCES		+= $(U8G2_DIR)/u8x8_8x8.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_bitmap.c
+
+CFLAGS			+= -Itargets/include
+CFLAGS			+= -I../applications
+CFLAGS			+= -Isrc
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
@@ -116,7 +116,7 @@ flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(FW_ADDRESS)
 
 debug:
-	st-util & arm-none-eabi-gdb -ex "PROJECT extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
+	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
 
 clean:
 	$(RM) $(OBJ_DIR)/*

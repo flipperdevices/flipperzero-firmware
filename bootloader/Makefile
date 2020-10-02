@@ -86,7 +86,7 @@ flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(BOOT_ADDRESS)
 
 debug:
-	st-util & arm-none-eabi-gdb -ex "PROJECT extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
+	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
 
 clean:
 	$(RM) $(OBJ_DIR)/*

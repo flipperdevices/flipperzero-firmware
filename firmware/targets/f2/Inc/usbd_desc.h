@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : usbd_cdc_if.h
+  * @file           : usbd_desc.c
   * @version        : v2.0_Cube
-  * @brief          : Header for usbd_cdc_if.c file.
+  * @brief          : Header for usbd_conf.c file.
   ******************************************************************************
   * @attention
   *
@@ -18,36 +18,53 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USBD_CDC_IF_H__
-#define __USBD_CDC_IF_H__
+#ifndef __USBD_DESC__C__
+#define __USBD_DESC__C__
 
 #ifdef __cplusplus
-extern "C" {
+ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "usbd_cdc.h"
+#include "usbd_def.h"
 
 /* USER CODE BEGIN INCLUDE */
 
 /* USER CODE END INCLUDE */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-  * @brief For Usb device.
   * @{
   */
 
-/** @defgroup USBD_CDC_IF USBD_CDC_IF
-  * @brief Usb VCP device module
+/** @defgroup USBD_DESC USBD_DESC
+  * @brief Usb device descriptors module.
   * @{
   */
 
-/** @defgroup USBD_CDC_IF_Exported_Defines USBD_CDC_IF_Exported_Defines
+/** @defgroup USBD_DESC_Exported_Constants USBD_DESC_Exported_Constants
+  * @brief Constants.
+  * @{
+  */
+#define         DEVICE_ID1          (UID_BASE)
+#define         DEVICE_ID2          (UID_BASE + 0x4)
+#define         DEVICE_ID3          (UID_BASE + 0x8)
+
+#define  USB_SIZ_STRING_SERIAL       0x1A
+
+/* USER CODE BEGIN EXPORTED_CONSTANTS */
+
+/* USER CODE END EXPORTED_CONSTANTS */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_Defines USBD_DESC_Exported_Defines
   * @brief Defines.
   * @{
   */
+
 /* USER CODE BEGIN EXPORTED_DEFINES */
 
 /* USER CODE END EXPORTED_DEFINES */
@@ -56,7 +73,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup USBD_CDC_IF_Exported_Types USBD_CDC_IF_Exported_Types
+/** @defgroup USBD_DESC_Exported_TypesDefinitions USBD_DESC_Exported_TypesDefinitions
   * @brief Types.
   * @{
   */
@@ -69,7 +86,7 @@ extern "C" {
   * @}
   */
 
-/** @defgroup USBD_CDC_IF_Exported_Macros USBD_CDC_IF_Exported_Macros
+/** @defgroup USBD_DESC_Exported_Macros USBD_DESC_Exported_Macros
   * @brief Aliases.
   * @{
   */
@@ -82,13 +99,13 @@ extern "C" {
   * @}
   */
 
-/** @defgroup USBD_CDC_IF_Exported_Variables USBD_CDC_IF_Exported_Variables
+/** @defgroup USBD_DESC_Exported_Variables USBD_DESC_Exported_Variables
   * @brief Public variables.
   * @{
   */
 
-/** CDC Interface callback. */
-extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
+/** Descriptor for the Usb device. */
+extern USBD_DescriptorsTypeDef FS_Desc;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 
@@ -98,12 +115,10 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
   * @}
   */
 
-/** @defgroup USBD_CDC_IF_Exported_FunctionsPrototype USBD_CDC_IF_Exported_FunctionsPrototype
+/** @defgroup USBD_DESC_Exported_FunctionsPrototype USBD_DESC_Exported_FunctionsPrototype
   * @brief Public functions declaration.
   * @{
   */
-
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
 
@@ -125,6 +140,6 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 }
 #endif
 
-#endif /* __USBD_CDC_IF_H__ */
+#endif /* __USBD_DESC__C__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

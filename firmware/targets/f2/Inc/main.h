@@ -38,8 +38,6 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
-typedef enum { TimerEventInputCapture, TimerEventEndOfPulse } TimerEvent;
-
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -52,14 +50,10 @@ typedef enum { TimerEventInputCapture, TimerEventEndOfPulse } TimerEvent;
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
-void register_tim8_callback_ch2(void (*callback)(uint16_t ccr, TimerEvent tim_event));
 
 /* USER CODE END EFP */
 
@@ -129,31 +123,6 @@ void register_tim8_callback_ch2(void (*callback)(uint16_t ccr, TimerEvent tim_ev
 #define BUTTON_OK_GPIO_Port GPIOB
 #define BUTTON_OK_EXTI_IRQn EXTI9_5_IRQn
 /* USER CODE BEGIN Private defines */
-
-#define LD2_Pin LED_RED_Pin
-#define LD2_GPIO_Port LED_RED_GPIO_Port
-
-#define EM_PIN_GPIO_Port RFID_OUT_GPIO_Port
-#define EM_PIN_Pin RFID_OUT_Pin
-
-#define MISO_PIN                          \
-    GpioPin {                             \
-        .port = GPIOC, .pin = GPIO_PIN_11 \
-    }
-// #define MOSI_PIN 11
-#define SS_PIN                                            \
-    GpioPin {                                             \
-        .port = CC1101_CS_GPIO_Port, .pin = CC1101_CS_Pin \
-    }
-//2 main, 5 remote, 3 M16
-#define GDO2                   \
-    GpioPin {                  \
-        .port = NULL, .pin = 0 \
-    }
-#define GDO0                                              \
-    GpioPin {                                             \
-        .port = CC1101_G0_GPIO_Port, .pin = CC1101_G0_Pin \
-    }
 
 /* USER CODE END Private defines */
 
