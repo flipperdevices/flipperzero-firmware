@@ -10,7 +10,7 @@ static void state_cb(const void* value, size_t size, void* ctx) {
 static void event_cb(const void* value, size_t size, void* ctx) {
     const InputEvent* event = value;
 
-    printf("event: %02x %s\n", event->input, event->state?"pressed":"released");
+    printf("event: %02x %s\n", event->input, event->state ? "pressed" : "released");
 }
 
 void application_input_dump(void* p) {
@@ -18,8 +18,10 @@ void application_input_dump(void* p) {
     delay(1000);
 
     // open record
-    FuriRecordSubscriber* state_record = furi_open("input_state", false, false, state_cb, NULL, NULL);
-    FuriRecordSubscriber* event_record = furi_open("input_events", false, false, event_cb, NULL, NULL);
+    FuriRecordSubscriber* state_record =
+        furi_open("input_state", false, false, state_cb, NULL, NULL);
+    FuriRecordSubscriber* event_record =
+        furi_open("input_events", false, false, event_cb, NULL, NULL);
 
     for(;;) {
         delay(100);
