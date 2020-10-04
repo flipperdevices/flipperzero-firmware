@@ -43,13 +43,7 @@ void u8g2_qrcode(void* p) {
 
     // clear display
     if(fb != NULL) {
-        u8g2_SetDrawColor(fb, 0);
-
-        for(uint8_t y = 0; y < u8g2_GetDisplayHeight(fb); y++) {
-            for(uint8_t x = 0; x < u8g2_GetDisplayWidth(fb); x++) {
-                u8g2_DrawPixel(fb, x, y);
-            }
-        }
+        u8g2_ClearBuffer(fb);
     }
 
     while(1) {
