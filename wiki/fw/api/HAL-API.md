@@ -119,7 +119,7 @@ void cc1101_example() {
     subscribe_pubsub(cc1101_device->irq, handle_irq, NULL);
 
     {
-        // acquire device bus
+        // acquire device as device bus
         SpiBus* spi_bus = acquire_mutex_block(cc1101_device->bus);
 
         // make transaction
@@ -136,7 +136,7 @@ void cc1101_example() {
             release_mutex(cc1101_device->spi, spi);
         }
 
-        // release bus
+        // release device (device bus)
         release_mutex(cc1101_device->bus, spi_bus);
     }
 }
