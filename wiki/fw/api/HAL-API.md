@@ -48,6 +48,17 @@ inline static bool spi_xfer_block(SPI_HandleTypeDef* spi, uint8_t* tx_data, uint
 }
 ```
 
+# SPI Bus
+
+Common implementation of SPI bus: serial interface + CS pin
+
+```C
+typedef struct {
+    GpioPin* cs; ///< CS pin
+    ValueMutex* spi; ///< <SPI_HandleTypeDef*>
+} SpiBus;
+```
+
 # System devices
 
 API available as `ValueMutex<Cc1101Bus>`:
@@ -56,8 +67,7 @@ API available as `ValueMutex<Cc1101Bus>`:
 
 ```C
 typedef struct {
-    GpioPin* cs; ///< CS pin
-    ValueMutex* spi; ///< <SPI_HandleTypeDef*>
+    ValueMutex* spi; ///< <SpiBus>
     PubSub* irq;
 } Cc1101Bus;
 ```
@@ -83,26 +93,25 @@ void handle_irq(void* _arg, void* _ctx) {
 }
 
 void cc1101_example() {
-    ValueMutex* cc1101_bus_mutex = open_input("/dev/cc1101_bus");
-    if(cc1101_bus_mutex == NULL) return; // bus not available, critical error
+    ValueMutex* cc1101_bus = open_input("/dev/cc1101_bus");
+    if(cc1101_bus == NULL) return; // bus not available, critical error
+
+    subscribe_pubsub(cc1101_bus->irq, handle_irq, NULL);
 
     {
         // acquire bus 
-        Cc1101Bus* cc1101_bus = acquire_mutex_block(cc1101_bus_mutex);
-
-        // subscribe to IRQ
-        PubSubId* irq_subscriber = subscribe_pubsub(cc1101_bus->irq, handle_irq, NULL);
+        SpiBus* spi_bus = acquire_mutex_block(cc1101_bus->spi);
 
         // make transaction
         uint8_t request[4] = {0xDE, 0xAD, 0xBE, 0xEF};
         uint8_t response[4];
 
         {
-            SPI_HandleTypeDef* spi = acquire_mutex_block(cc1101_bus->spi);
+            SPI_HandleTypeDef* spi = acquire_mutex_block(spi_bus->spi);
 
-            gpio_write(cc1101_bus->cs, false);
+            gpio_write(spi_bus->cs, false);
             spi_xfer_block(spi, request, response, 4);
-            gpio_write(cc1101_bus->cs, true);
+            gpio_write(spi_bus->cs, true);
 
             release_mutex(cc1101_bus->spi, spi);
         }
