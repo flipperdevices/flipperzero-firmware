@@ -6,7 +6,7 @@ Driver call render callback and pass API contains u8g2 functions, instance and f
 
 ```C
 typedef struct {
-    ValueComposer* compose;
+    u8g2_t* display;
 
     void (*u8g2_SetFont)(u8g2_t *u8g2, const uint8_t  *font);
     void (*u8g2_SetDrawColor)(u8g2_t *u8g2, uint8_t color);
@@ -50,10 +50,10 @@ And then call `request_compose` every time you need to redraw your image.
 ```C
 
 void example_render(void* ctx, DisplayApi* api) {
-    api->u8g2_SetFont(display, display_api->fonts.u8g2_font_6x10_mf);
-    display_api->u8g2_SetDrawColor(display, 1);
-    display_api->u8g2_SetFontMode(display, 1);
-    display_api->u8g2_DrawStr(display, 2, 12, (char*)ctx); // ctx contains some static text
+    api->u8g2_SetFont(api->display, display_api->fonts.u8g2_font_6x10_mf);
+    api->u8g2_SetDrawColor(api->display, 1);
+    api->u8g2_SetFontMode(api->display, 1);
+    api->u8g2_DrawStr(api->display, 2, 12, (char*)ctx); // ctx contains some static text
 }
 
 void u8g2_example(void* p) {
