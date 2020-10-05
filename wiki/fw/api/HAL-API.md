@@ -48,7 +48,7 @@ inline static bool spi_xfer_block(SPI_HandleTypeDef* spi, uint8_t* tx_data, uint
 }
 ```
 
-# SPI Bus
+## SPI Bus
 
 Common implementation of SPI bus: serial interface + CS pin
 
@@ -59,7 +59,7 @@ typedef struct {
 } SpiBus;
 ```
 
-# SPI device
+## SPI device
 
 For dedicated work with one device there is `SpiDevice` entity. It contains ValueMutex around SpiBus: after you acquire device you can acquire spi to work with it (don't forget SPI bus is shared around many device, release it after every transaction as quick as possible).
 
@@ -69,7 +69,7 @@ typedef struct {
 } SpiDevice;
 ```
 
-# SPI IRQ device
+## SPI IRQ device
 
 Many devices (like CC1101 and NFC) present as SPI bus and IRQ line. For work with it there is special entity `SpiIrqDevice`. Use `subscribe_pubsub` for subscribinq to irq events.
 
@@ -80,7 +80,7 @@ typedef struct {
 } SpiIrqDevice;
 ```
 
-# Display device
+## Display device
 
 Special implementation of SPI bus: serial interface + CS, Res, D/I lines.
 
