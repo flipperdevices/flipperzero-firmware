@@ -5,6 +5,12 @@
 * ValueManager
 * LayeredReducer
 
+# [HAL and devices](HAL-API)
+
+* GPIO
+* SPI
+* SPI devices: Sub-GHz chip, NFC, SD card, display
+
 # OS
 
 We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__CMSIS__RTOS.html) for thread management and IPC.
@@ -17,30 +23,16 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 * **[LED](LED-API)**
 
-* **[Vibro](Vibro-API)**
+* **[Vibro](Vibro-API)** (unimplemented)
 
-* **[Sound](Sound-API)**
+* **[Sound](Sound-API)** (unimplemented)
 
-* **[Backlight](Backlight-API)**
+* **[Backlight](Backlight-API)** (unimplemented)
 
 # [System](System-state-API)
 
 * batt voltage
 * batt charge
-
-# [CC1101](CC1101-API)
-
-* SPI
-* IRQ
-
-# [SD Card](SD-card-API)
-
-* SPI
-
-# [NFC](NFC-API)
-
-* SPI
-* IRQ
 
 # [IR](IR-API)
 

@@ -59,31 +59,51 @@ typedef struct {
 } SpiBus;
 ```
 
-# System devices
+# SPI device
 
-API available as `ValueMutex<Cc1101Bus>`:
-
-## CC1101
+For dedicated work with one device there is `SpiDevice` entity. It contains ValueMutex around SpiBus: after you acquire device you can acquire spi to work with it (don't forget SPI bus is shared around many device, release it after every transaction as quick as possible).
 
 ```C
 typedef struct {
-    ValueMutex* spi; ///< <SpiBus>
-    PubSub* irq;
-} Cc1101Bus;
+    ValueMutex* bus; ///< <SpiBus*>
+} SpiDevice;
 ```
 
-You can get API instance by calling `open_cc1101_bus`:
+# SPI IRQ device
+
+Many devices (like CC1101 and NFC) present as SPI bus and IRQ line. For work with it there is special entity `SpiIrqDevice`. Use `subscribe_pubsub` for subscribinq to irq events.
 
 ```C
-/// Get input struct
-inline Cc1101Bus* open_cc1101_bus(const char* name) {
-    return (Cc1101Bus*)furi_open(name);
-}
+typedef struct {
+    ValueMutex* bus; ///< <SpiBus*>
+    PubSub* irq;
+} SpiIrqDevice;
 ```
 
-Use `subscribe_pubsub` for subscribinq to irq events.
+# Display device
 
-Default bus name is `/dev/cc1101_bus`.
+Special implementation of SPI bus: serial interface + CS, Res, D/I lines.
+
+```C
+typedef struct {
+    GpioPin* cs; ///< CS pin
+    GpioPin* res; ///< reset pin
+    GpioPin* di; ///< D/I pin
+    ValueMutex* spi; ///< <SPI_HandleTypeDef*>
+} DisplayBus;
+
+```C
+typedef struct {
+    ValueMutex* bus; ///< <DisplayBus*>
+} DisplayDevice;
+```
+
+# SPI devices
+
+* `/dev/sdcard` - SD card SPI, `SpiDevice`
+* `/dev/cc1101_bus` - Sub-GHz radio (CC1101), `SpiIrqDevice`
+* `/dev/nfc` - NFC (ST25R3916), `SpiIrqDevice`
+* `/dev/display` - `DisplayDevice`
 
 ### Application example
 
@@ -93,14 +113,14 @@ void handle_irq(void* _arg, void* _ctx) {
 }
 
 void cc1101_example() {
-    ValueMutex* cc1101_bus = open_input("/dev/cc1101_bus");
-    if(cc1101_bus == NULL) return; // bus not available, critical error
+    SpiIrqDevice* cc1101_device = open_input("/dev/cc1101_bus");
+    if(cc1101_device == NULL) return; // bus not available, critical error
 
-    subscribe_pubsub(cc1101_bus->irq, handle_irq, NULL);
+    subscribe_pubsub(cc1101_device->irq, handle_irq, NULL);
 
     {
-        // acquire bus 
-        SpiBus* spi_bus = acquire_mutex_block(cc1101_bus->spi);
+        // acquire device bus
+        SpiBus* spi_bus = acquire_mutex_block(cc1101_device->bus);
 
         // make transaction
         uint8_t request[4] = {0xDE, 0xAD, 0xBE, 0xEF};
@@ -113,11 +133,11 @@ void cc1101_example() {
             spi_xfer_block(spi, request, response, 4);
             gpio_write(spi_bus->cs, true);
 
-            release_mutex(cc1101_bus->spi, spi);
+            release_mutex(cc1101_device->spi, spi);
         }
 
         // release bus
-        release_mutex(cc1101_bus_mutex, cc1101_bus);
+        release_mutex(cc1101_device->bus, spi_bus);
     }
 }
 ```
