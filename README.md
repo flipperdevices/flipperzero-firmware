@@ -24,8 +24,8 @@ You can read project updates in our developer blog:
 
 You can run firmware locally (with HAL stub).
 
-* `docker-compose exec dev make -C target_lo` for build
-* `docker-compose exec dev target_lo/build/target_lo` for run
+* `docker-compose exec dev make -C firmware TARGET=local` for build
+* `docker-compose exec dev make -C firmware TARGET=local run` for run
 
 ## Architecture and components
 
