@@ -44,6 +44,13 @@ CFLAGS			+= -I$(APP_DIR)
 C_SOURCES		+= $(APP_DIR)/display-u8g2/display-u8g2.c
 C_SOURCES		+= $(APP_DIR)/examples/u8g2_example.c
 
+ifeq ($(TEST), 1)
+C_SOURCES += ../applications/tests/furiac_test.c
+C_SOURCES += ../applications/tests/furi_record_test.c
+C_SOURCES += ../applications/tests/test_index.c
+CFLAGS += -DTEST
+endif
+
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG -g
@@ -114,6 +121,9 @@ $(OBJ_DIR)/%.o: %.cpp
 
 flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(FW_ADDRESS)
+
+upload:
+	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FW_ADDRESS)
 
 debug:
 	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
