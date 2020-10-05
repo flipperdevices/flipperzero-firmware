@@ -94,6 +94,11 @@ void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout) {
     }
 }
 
+// infinitly wait for mutex
+inline static void* acquire_mutex_block(ValueMutex* valuemutex) {
+    return acquire_mutex(valuemutex, OsWaitForever);
+}
+
 bool release_mutex(ValueMutex* valuemutex, void* value) {
     if(value != valuemutex->value) return false;
     
@@ -114,6 +119,10 @@ bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout
     return true;
 }
 
+inline static bool read_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
+    return read_mutex(valuemutex, data, len, OsWaitForever);
+}
+
 bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {
     void* value = acquire_mutex(valuemutex, timeout);
     if(value == NULL || len > valuemutex->size) return false;
@@ -121,6 +130,10 @@ bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeou
     if(!release_mutex(valuemutex, value)) return false;
     
     return true;
+}
+
+inline static bool write_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
+    return write_mutex(valuemutex, data, len, OsWaitForever);
 }
 ```
 
@@ -341,6 +354,8 @@ bool remove_compose_layer(ValueComposerHandle* handle);
 ```C
 void request_compose(ValueComposerHandle* handle);
 ```
+
+See [LED](LED-API) or [Display](Display-API) API for examples.
 
 # ValueManager
 
