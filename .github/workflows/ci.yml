@@ -34,7 +34,7 @@ jobs:
       - name: Build F2 bootloader in docker
         uses: ./.github/actions/docker
         with:
-          run: make -C bootloader
+          run: make -C bootloader 
 
       - name: Publish F2 bootloader artifacts
         uses: actions/upload-artifact@v2
@@ -49,7 +49,7 @@ jobs:
       - name: Build local testing firmware in docker
         uses: ./.github/actions/docker
         with:
-          run: make -C firmware TARGET=local
+          run: make -C firmware TARGET=local && make -C firmware clean
 
       - name: Build F2 firmware in docker
         uses: ./.github/actions/docker
