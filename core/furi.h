@@ -56,6 +56,8 @@ typedef struct {
     TaskHandle_t handler;
     uint8_t records_count; ///< count of records which task open
     FuriRecord* records[MAX_TASK_RECORDS]; ///< list of records which task open
+
+    bool ready;
 } FuriApp;
 
 /*!
@@ -81,6 +83,16 @@ from prev entry in current application registry, cleanup current
 application registry.
 */
 void furiac_exit(void* param);
+
+/*!
+Mark application as prepared and ready to perform actions
+*/
+void furiac_ready();
+
+/* 
+Wait for the libraries we depend on
+*/
+void furiac_wait_libs(const char* libs);
 
 /*!
 Stop specified app without returning to prev application.
@@ -109,12 +121,13 @@ When appication has exited or record has closed, all handlers is unmuted.
 It may be useful for concurrently acces to resources like framebuffer or beeper.
 \param[in] no_mute if true, another applications cannot mute this handler.
 */
-FuriRecordSubscriber* furi_open(const char* name,
-                                bool solo,
-                                bool no_mute,
-                                FlipperRecordCallback value_callback,
-                                FlipperRecordStateCallback state_callback,
-                                void* ctx);
+FuriRecordSubscriber* furi_open(
+    const char* name,
+    bool solo,
+    bool no_mute,
+    FlipperRecordCallback value_callback,
+    FlipperRecordStateCallback state_callback,
+    void* ctx);
 
 /*!
 
