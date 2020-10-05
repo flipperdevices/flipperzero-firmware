@@ -1,17 +1,20 @@
 All display operations based on [u8g2](https://github.com/olikraus/u8g2) library.
 
-API available as struct, contains u8g2 functions, instance and fonts:
+API available as `ValueComposer`.
+
+Driver call render callback and pass API contains u8g2 functions, instance and fonts:
 
 ```C
 typedef struct {
-    ValueManager* display; /// ValueManager<u8g2_t*>
+    ValueComposer* compose;
+
     void (*u8g2_SetFont)(u8g2_t *u8g2, const uint8_t  *font);
     void (*u8g2_SetDrawColor)(u8g2_t *u8g2, uint8_t color);
     void (*u8g2_SetFontMode)(u8g2_t *u8g2, uint8_t is_transparent);
     u8g2_uint_t (*u8g2_DrawStr)(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, const char *str);
 
     Fonts fonts;
-} Display;
+} DisplayApi;
 
 typedef struct {
     const uint8_t* u8g2_font_6x10_mf;
@@ -29,33 +32,37 @@ inline Display* open_display(const char* name) {
 
 Default display name is `/dev/display`.
 
-For draw something to display you can get display instance pointer by calling `take_display`, do something and commit your changes by calling `commit_display`:
+For draw something to display you need to register new layer in display composer:
 
 ```C
-/// return pointer in case off success, NULL otherwise
-inline u8g2_t* take_display(Display* api, uint32_t timeout) {
-    return (u8g2_t*)take_mutex(api->display->value, timeout);
-}
+typedef void (RenderCallback*)(void* ctx, DisplayApi* api);
 
-inline void commit_display(Display* api, u8g2_t* display) {
-    commit_valuemanager(api->display, display);
+inline ValueComposerHandle* init_display_composer(
+    Display* api, RenderCallback render, void* ctx, uint32_t layer) {
+    return add_compose_layer(api->composer, (ValueComposerCallback)render, ctx, layer);
 }
 ```
+
+And then call `request_compose` every time you need to redraw your image.
 
 ## Usage example
 
 ```C
+
+void example_render(void* ctx, DisplayApi* api) {
+    api->u8g2_SetFont(display, display_api->fonts.u8g2_font_6x10_mf);
+    display_api->u8g2_SetDrawColor(display, 1);
+    display_api->u8g2_SetFontMode(display, 1);
+    display_api->u8g2_DrawStr(display, 2, 12, (char*)ctx); // ctx contains some static text
+}
+
 void u8g2_example(void* p) {
     Display* display_api = open_display("/dev/display");
     if(display_api == NULL) return; // display not available, critical error
 
-    u8g2_t* display = take_display(display_api);
-    if(display != NULL) {
-        display_api->u8g2_SetFont(display, display_api->fonts.u8g2_font_6x10_mf);
-        display_api->u8g2_SetDrawColor(display, 1);
-        display_api->u8g2_SetFontMode(display, 1);
-        display_api->u8g2_DrawStr(display, 2, 12, "hello world!");
-    }
-    commit_display(display_api, display);
+    ValueComposerHandle display_handler = init_display_composer(
+        display_api, example_render, (void*)"Hello world", UiLayerBelowNotify);
+
+    request_compose(display_handler);
 }
 ```
