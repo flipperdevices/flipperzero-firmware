@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cmsis_os.h"
+#include <semphr.h>
 #include <stdbool.h>
 #include <stdint.h>
 

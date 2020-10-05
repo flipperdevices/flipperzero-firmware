@@ -1,8 +1,9 @@
 PROJECT			= firmware
 
-SRC_DIR			= src
+SRC_DIR			= ../core
 OBJ_DIR			= .obj
 
+CFLAGS			+= -I$(SRC_DIR)
 ASM_SOURCES		= $(wildcard $(SRC_DIR)/*.s)
 C_SOURCES		= $(wildcard $(SRC_DIR)/*.c)
 CPP_SOURCES		= $(wildcard $(SRC_DIR)/*.cpp)
@@ -13,10 +14,6 @@ TARGET_DIR		= targets/$(TARGET)
 include			$(TARGET_DIR)/target.mk
 
 # Libs
-# TODO: mk for apps
-C_SOURCES		+= ../applications/display-u8g2/display-u8g2.c
-C_SOURCES		+= ../applications/examples/u8g2_example.c
-
 CFLAGS			+= -I../lib
 U8G2_DIR		= ../lib/u8g2
 CFLAGS			+= -I$(U8G2_DIR)
@@ -40,9 +37,12 @@ C_SOURCES		+= $(U8G2_DIR)/u8g2_fonts.c
 C_SOURCES		+= $(U8G2_DIR)/u8x8_8x8.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_bitmap.c
 
-CFLAGS			+= -Itargets/include
-CFLAGS			+= -I../applications
-CFLAGS			+= -Isrc
+# Applications
+# TODO: mk for apps
+APP_DIR			= ../applications
+CFLAGS			+= -I$(APP_DIR)
+C_SOURCES		+= $(APP_DIR)/display-u8g2/display-u8g2.c
+C_SOURCES		+= $(APP_DIR)/examples/u8g2_example.c
 
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
@@ -89,8 +89,8 @@ all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).b
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
-	$(SZ) $@
+	@$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	@$(SZ) $@
 
 $(OBJ_DIR)/$(PROJECT).hex: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tHEX\t" $@
