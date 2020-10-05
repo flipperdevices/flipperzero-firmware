@@ -1,6 +1,9 @@
+TOOLCHAIN = arm
+
 BOOT_ADDRESS	= 0x08000000
 FW_ADDRESS		= 0x08008000
 OS_OFFSET		= 0x00008000
+FLASH_ADDRESS	= 0x08008000
 
 BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DFW_ADDRESS=$(FW_ADDRESS) -DOS_OFFSET=$(OS_OFFSET)
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
@@ -9,8 +12,6 @@ CFLAGS			+= $(MCU_FLAGS) $(BOOT_CFLAGS) -DSTM32L476xx -Wall -fdata-sections -ffu
 LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs 
 
 CUBE_DIR		= ../lib/STM32CubeL4
-CFLAGS			+= -I$(CUBE_DIR)/Include
-
 C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pcd.c \
 	$(CUBE_DIR)/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_pcd_ex.c \
@@ -65,7 +66,8 @@ CFLAGS			+= \
 	-DDEBUG_UART=huart1
 LDFLAGS			+= -T$(TARGET_DIR)/STM32L476RGTx_FLASH.ld
 
-CFLAGS			+= -I$(TARGET_DIR)/Inc \
+CFLAGS += \
+	-I$(TARGET_DIR)/Inc \
 	-I$(CUBE_DIR)/Drivers/STM32L4xx_HAL_Driver/Inc \
 	-I$(CUBE_DIR)/Drivers/STM32L4xx_HAL_Driver/Inc/Legacy \
 	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/include \
