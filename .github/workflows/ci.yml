@@ -14,6 +14,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        submodules: true
         
       - uses: satackey/action-docker-layer-caching@v0.0.8
         continue-on-error: true
@@ -78,3 +79,8 @@ jobs:
             bootloader/.obj/bootloader.bin
             bootloader/.obj/bootloader.hex
           if-no-files-found: error
+
+      - name: Build firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware
