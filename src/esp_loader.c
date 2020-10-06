@@ -181,6 +181,8 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 #ifndef TARGET_ESP8266
     loader_port_start_timer(DEFAULT_TIMEOUT);
     err = loader_spi_attach_cmd(connect_args->spi_pin_config.val);
+#else
+    err = loader_flash_begin_cmd(0, 0, 0, 0);
 #endif
 
     return err;
