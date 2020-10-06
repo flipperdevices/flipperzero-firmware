@@ -8,8 +8,16 @@
 # [HAL and devices](HAL-API)
 
 * GPIO
-* SPI
-* SPI devices: Sub-GHz chip, NFC, SD card, display
+* PWM
+* ADC
+
+# [SPI Devices](SPI-Devices-API.md)
+
+* Sub-GHz chip
+* NFC
+* SD card
+* display
+* external SPI
 
 # OS
 

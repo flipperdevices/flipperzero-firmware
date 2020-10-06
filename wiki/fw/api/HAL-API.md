@@ -17,127 +17,74 @@ void gpio_write(GpioPin* gpio, bool state);
 bool gpio_read(GpioPin* gpio);
 ```
 
-# SPI
-
-HAL struct `SPI_HandleTypeDef*` used for handling SPI info.
-
-For transmit/receive data use `spi_xfer` function:
+When application is exited, system place pin to Z-state by calling `gpio_disable`.
 
 ```C
-bool spi_xfer(
-    SPI_HandleTypeDef* spi,
-    uint8_t* tx_data, uint8_t* rx_data, size_t len,
-    PubSubCallback cb, void* ctx);
-```
-
-* `tx_data` and `rx_data` size must be equal (and equal `len`)
-* `cb` called after spi operation is completed, `(NULL, ctx)` passed to callback.
-
-Blocking verison:
-
-```C
-inline static bool spi_xfer_block(SPI_HandleTypeDef* spi, uint8_t* tx_data, uint8_t* rx_data, size_t len) {
-    semaphoreInfo s;
-    osSemaphore block = createSemaphoreStatic(s);
-    if(!spi_xfer(spi, tx_data, rx_data, len, RELEASE_SEMAPHORE, (void*)block)) {
-        osReleaseSemaphore(block);
-        return false;
-    }
-    osWaitSemaphore(block);
-    return false;
+// put GPIO to Z-state (used for restore pin state on app exit)
+void gpio_disable(ValueMutex* gpio_mutex) {
+    GpioPin* gpio = acquire_mutex(gpio_mutex, 0);
+    gpio_init(gpio, GpioModeInput);
+    release_mutex(gpio_mutex, gpio);
 }
 ```
 
-## SPI Bus
-
-Common implementation of SPI bus: serial interface + CS pin
+Available GPIO stored in FURI as `ValueMutex<GpioPin*>`.
 
 ```C
-typedef struct {
-    GpioPin* cs; ///< CS pin
-    ValueMutex* spi; ///< <SPI_HandleTypeDef*>
-} SpiBus;
-```
+inline static ValueMutex* open_gpio_mutex(const char* name) {
+    ValueMutex* gpio_mutex = (ValueMutex*)furi_open(name);
+    if(gpio_mutex != NULL) flapp_on_exit(gpio_disable, gpio_mutex);
 
-## SPI device
-
-For dedicated work with one device there is `SpiDevice` entity. It contains ValueMutex around SpiBus: after you acquire device you can acquire spi to work with it (don't forget SPI bus is shared around many device, release it after every transaction as quick as possible).
-
-```C
-typedef struct {
-    ValueMutex* bus; ///< <SpiBus*>
-} SpiDevice;
-```
-
-## SPI IRQ device
-
-Many devices (like CC1101 and NFC) present as SPI bus and IRQ line. For work with it there is special entity `SpiIrqDevice`. Use `subscribe_pubsub` for subscribinq to irq events.
-
-```C
-typedef struct {
-    ValueMutex* bus; ///< <SpiBus*>
-    PubSub* irq;
-} SpiIrqDevice;
-```
-
-## Display device
-
-Special implementation of SPI bus: serial interface + CS, Res, D/I lines.
-
-```C
-typedef struct {
-    GpioPin* cs; ///< CS pin
-    GpioPin* res; ///< reset pin
-    GpioPin* di; ///< D/I pin
-    ValueMutex* spi; ///< <SPI_HandleTypeDef*>
-} DisplayBus;
-
-```C
-typedef struct {
-    ValueMutex* bus; ///< <DisplayBus*>
-} DisplayDevice;
-```
-
-# SPI devices
-
-* `/dev/sdcard` - SD card SPI, `SpiDevice`
-* `/dev/cc1101_bus` - Sub-GHz radio (CC1101), `SpiIrqDevice`
-* `/dev/nfc` - NFC (ST25R3916), `SpiIrqDevice`
-* `/dev/display` - `DisplayDevice`
-
-### Application example
-
-```C
-// Be careful, this function called from IRQ context
-void handle_irq(void* _arg, void* _ctx) {
+    return gpio_mutex;
 }
 
-void cc1101_example() {
-    SpiIrqDevice* cc1101_device = open_input("/dev/cc1101_bus");
-    if(cc1101_device == NULL) return; // bus not available, critical error
+// helper
+inline static GpioPin* open_gpio(const char* name) {
+    ValueMutex* gpio_mutex = open_gpio(name);
+    return acquire_mutex_block(gpio_mutex);
+}
+```
 
-    subscribe_pubsub(cc1101_device->irq, handle_irq, NULL);
+## Available GPIO (F2)
 
-    {
-        // acquire device as device bus
-        SpiBus* spi_bus = acquire_mutex_block(cc1101_device->bus);
+* PA4
+* PA5
+* PA6
+* PA7
+* PB2
+* PC3
+* PC0
+* PC1
+* PB6
+* PB7
+* PA13
+* PA14
+* RFID_PULL
+* IR_TX
+* IBUTTON
 
-        // make transaction
-        uint8_t request[4] = {0xDE, 0xAD, 0xBE, 0xEF};
-        uint8_t response[4];
+## Usage example
 
-        {
-            SPI_HandleTypeDef* spi = acquire_mutex_block(spi_bus->spi);
+```C
+void gpio_example() {
+    GpioPin* pin = open_gpio("PB6");
+    gpio_init(pin, GpioModeOutput);
 
-            gpio_write(spi_bus->cs, false);
-            spi_xfer_block(spi, request, response, 4);
-            gpio_write(spi_bus->cs, true);
-
-            release_mutex(cc1101_device->spi, spi);
-        }
-
-        // release device (device bus)
-        release_mutex(cc1101_device->bus, spi_bus);
+    while(1) {
+        gpio_write(pin, true);
+        delay(100);
+        gpio_write(pin, false);
+        delay(100);
     }
 }
 ```
+
+# PWM
+
+## Available PWM (F2)
+
+* SPEAKER
+* RFID_OUT
+
+
+# ADC
