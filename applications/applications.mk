@@ -2,13 +2,13 @@ APP_DIR		= $(PROJECT_ROOT)/applications
 
 CFLAGS		+= -I$(APP_DIR)
 
-APP_DISPLAY	?= 1
+APP_DISPLAY	?= 0
 ifeq ($(APP_DISPLAY), 1)
 CFLAGS		+= -DAPP_DISPLAY
 C_SOURCES	+= $(APP_DIR)/display-u8g2/display-u8g2.c
 endif
 
-APP_INPUT	?= 1
+APP_INPUT	?= 0
 ifeq ($(APP_INPUT), 1)
 CFLAGS		+= -DAPP_INPUT
 C_SOURCES	+= $(APP_DIR)/input/input.c
