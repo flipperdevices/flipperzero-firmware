@@ -28,7 +28,7 @@ inline void app_gpio_write(GpioPin gpio, bool state) {
     }
 }
 
-inline bool app_gpio_read(GpioPin gpio) {
+static inline bool app_gpio_read(GpioPin gpio) {
     if(gpio.pin != 0) {
         return (gpio.port->IDR & gpio.pin) != 0x00u;
     }
