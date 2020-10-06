@@ -41,11 +41,11 @@ inline static ValueMutex* open_gpio_mutex(const char* name) {
 // helper
 inline static GpioPin* open_gpio(const char* name) {
     ValueMutex* gpio_mutex = open_gpio(name);
-    return acquire_mutex(gpio_mutex, 0);
+    return (GpioPin*)acquire_mutex(gpio_mutex, 0);
 }
 ```
 
-## Available GPIO (F2)
+## Available GPIO (target F2)
 
 * PA4
 * PA5
@@ -62,6 +62,7 @@ inline static GpioPin* open_gpio(const char* name) {
 * RFID_PULL
 * IR_TX
 * IBUTTON
+* VIBRO
 
 ## Usage example
 
@@ -73,7 +74,7 @@ void gpio_example() {
         printf("pin not available\n");
         return;
     }
-    
+
     gpio_init(pin, GpioModeOutput);
 
     while(1) {
@@ -87,10 +88,71 @@ void gpio_example() {
 
 # PWM
 
-## Available PWM (F2)
+PWM defined as `PwmPin`. To set PWM channel:
+
+```C
+void pwm_set(PwmPin* pwm, float value, float freq);
+```
+
+When application is exited, system disable pwm by calling `pwm_disable`.
+
+```C
+// put GPIO to Z-state (used for restore pin state on app exit)
+void pwm_disable(ValueMutex* pwm_mutex) {
+    PwmPin* pwm = acquire_mutex(pwm_mutex, 0);
+    pwm_set(pwm, 0., 0.);
+    release_mutex(pwm_mutex, pwm);
+}
+```
+
+Available PWM stored in FURI as `ValueMutex<PwmPin*>`.
+
+```C
+inline static ValueMutex* open_pwm_mutex(const char* name) {
+    ValueMutex* pwm_mutex = (ValueMutex*)furi_open(name);
+    if(pwm_mutex != NULL) flapp_on_exit(pwm_disable, pwm_mutex);
+
+    return pwm_mutex;
+}
+
+// helper
+inline static PwmPin* open_pwm(const char* name) {
+    ValueMutex* pwm_mutex = open_gpio(name);
+    return (PwmPin*)acquire_mutex(pwm_mutex, 0);
+}
+```
+
+## Available PWM (target F2)
 
 * SPEAKER
 * RFID_OUT
 
+## Usage example
+
+```C
+void sound_example() {
+    PwmPin* speaker = open_pwm("SPEAKER");
+
+    if(speaker == NULL) {
+        printf("speaker not available\n");
+        return;
+    }
+
+    while(1) {
+        pwm_set(speaker, 1000., 0.1);
+        delay(2);
+        pwm_set(speaker, 110., 0.5);
+        delay(198);
+        pwm_set(speaker, 330., 0.5);
+        delay(200);
+    }
+}
+```
 
 # ADC
+
+Coming soon...
+
+# I2C
+
+Coming soon...

@@ -1,15 +1,19 @@
 # [Basic concepts](Basic-API)
 
 * ValueMutex
-* PubSub, Publisher, Subscriber
+* PubSub
 * ValueManager
-* LayeredReducer
+* ValueComposer
 
 # [HAL and devices](HAL-API)
 
 * GPIO
 * PWM
 * ADC
+* I2C
+
+* IR RX (unimplemented)
+* Comparator RX (touch key and RFID 125 kHz RX) (unimplemented)
 
 # [SPI Devices](SPI-Devices-API.md)
 
@@ -31,38 +35,12 @@ We use [CMSIS OS v2](https://www.keil.com/pack/doc/CMSIS_Dev/RTOS2/html/group__C
 
 * **[LED](LED-API)**
 
-* **[Vibro](Vibro-API)** (unimplemented)
-
-* **[Sound](Sound-API)** (unimplemented)
-
 * **[Backlight](Backlight-API)** (unimplemented)
 
-# [System](System-state-API)
+# [Power](Power-API)
 
 * batt voltage
 * batt charge
-
-# [IR](IR-API)
-
-* TX LED
-* RX ADC
-
-# [RFID 125 kHz](LF-RFID-API)
-
-* Carrier control
-* Pull control
-* Comparator RX (shared with touch key)
-
-# [Touch key](Touch-key-API)
-
-* Pull
-* Comparator RX (shared with RFID 125 kHz)
-
-# External GPIO
-
-# External SPI
-
-# External I2C
 
 # [UART](Serial-API)
 
