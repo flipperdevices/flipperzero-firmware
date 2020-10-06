@@ -11,11 +11,9 @@ OBJECTS += $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
 # Generate dependencies
 DEPS = $(OBJECTS:.o=.d)
 
-OUTFILES = $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin
-
 $(shell mkdir -p $(OBJ_DIR))
 
-all: $(OUTFILES)
+all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
@@ -54,6 +52,13 @@ debug:
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) $(OBJ_DIR)/*
+
+.PHONY: check-and-reinit-submodules
+check-and-reinit-submodules:
+	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
+		echo "INFO: Need to reinitialize git submodules"; \
+		git submodule update --init; \
+	fi
 
 zz: | clean flash
 
