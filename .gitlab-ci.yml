@@ -3,13 +3,12 @@ stages:
   - test
 
 variables:
-  IDF_REPO: ${IDF_GIT_SERVER}/espressif/esp-idf.git
+  IDF_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@${IDF_MIRROR_HOST}/espressif/esp-idf.git
   STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
   SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
 
 .clone_and_setup_idf: &clone_and_setup_idf |
-  cit_add_ssh_key "${GITLAB_KEY}"
   git clone "${IDF_REPO}"
   cd esp-idf
   tools/idf_tools.py --non-interactive install all && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
