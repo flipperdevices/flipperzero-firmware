@@ -41,7 +41,7 @@ inline static ValueMutex* open_gpio_mutex(const char* name) {
 // helper
 inline static GpioPin* open_gpio(const char* name) {
     ValueMutex* gpio_mutex = open_gpio(name);
-    return acquire_mutex_block(gpio_mutex);
+    return acquire_mutex(gpio_mutex, 0);
 }
 ```
 
@@ -68,6 +68,12 @@ inline static GpioPin* open_gpio(const char* name) {
 ```C
 void gpio_example() {
     GpioPin* pin = open_gpio("PB6");
+
+    if(pin == NULL) {
+        printf("pin not available\n");
+        return;
+    }
+    
     gpio_init(pin, GpioModeOutput);
 
     while(1) {
