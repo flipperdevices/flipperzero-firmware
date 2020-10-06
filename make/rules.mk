@@ -47,7 +47,8 @@ upload:
 	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS)
 
 debug:
-	st-util & arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf
+	set -m; st-util -n --semihosting & echo $$! > st-util.PID
+	arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf; kill `cat st-util.PID`; rm st-util.PID
 
 clean:
 	@echo "\tCLEAN\t"
