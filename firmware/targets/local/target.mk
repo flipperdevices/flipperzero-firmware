@@ -10,3 +10,6 @@ C_SOURCES += $(TARGET_DIR)/Src/lo_hal.c
 CFLAGS += -I$(TARGET_DIR)/Inc
 CFLAGS += -Wall -fdata-sections -ffunction-sections -pthread
 LDFLAGS += -pthread
+
+run: all
+	$(OBJ_DIR)/$(PROJECT).elf
