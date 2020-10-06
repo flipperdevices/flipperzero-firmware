@@ -40,13 +40,19 @@ $(OBJ_DIR)/%.o: %.cpp
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-flash: $(OBJ_DIR)/$(PROJECT).bin
+$(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(FLASH_ADDRESS)
+	touch $@
 
-upload:
+$(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
 	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS)
+	touch $@
 
-debug:
+flash: $(OBJ_DIR)/flash
+
+upload: $(OBJ_DIR)/upload
+
+debug: flash
 	set -m; st-util -n --semihosting & echo $$! > st-util.PID
 	arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf; kill `cat st-util.PID`; rm st-util.PID
 
@@ -61,11 +67,13 @@ check-and-reinit-submodules:
 		git submodule update --init; \
 	fi
 
+z: clean
+	$(MAKE) all
+
 zz: clean
 	$(MAKE) flash
 
 zzz: clean
-	$(MAKE) flash
 	$(MAKE) debug
 
 -include $(DEPS)
