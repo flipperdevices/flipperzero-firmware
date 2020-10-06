@@ -61,8 +61,11 @@ check-and-reinit-submodules:
 		git submodule update --init; \
 	fi
 
-zz: | clean flash
+zz: clean
+	$(MAKE) flash
 
-zzz: | clean flash debug
+zzz: clean
+	$(MAKE) flash
+	$(MAKE) debug
 
 -include $(DEPS)
