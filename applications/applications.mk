@@ -2,16 +2,10 @@ APP_DIR		= $(PROJECT_ROOT)/applications
 
 CFLAGS		+= -I$(APP_DIR)
 
-APP_DISPLAY	?= 0
-ifeq ($(APP_DISPLAY), 1)
-CFLAGS		+= -DAPP_DISPLAY
-C_SOURCES	+= $(APP_DIR)/display-u8g2/display-u8g2.c
-endif
-
-APP_INPUT	?= 0
-ifeq ($(APP_INPUT), 1)
-CFLAGS		+= -DAPP_INPUT
-C_SOURCES	+= $(APP_DIR)/input/input.c
+APP_RELEASE ?= 0
+ifeq ($(APP_RELEASE), 1)
+APP_DISPLAY = 1
+APP_INPUT = 1
 endif
 
 APP_TEST	?= 0
@@ -44,16 +38,32 @@ APP_EXAMPLE_INPUT_DUMP ?= 0
 ifeq ($(APP_EXAMPLE_INPUT_DUMP), 1)
 CFLAGS		+= -DAPP_EXAMPLE_INPUT_DUMP
 C_SOURCES	+= $(APP_DIR)/examples/input_dump.c
+APP_INPUT = 1
 endif
 
 APP_EXAMPLE_QRCODE ?= 0
 ifeq ($(APP_EXAMPLE_QRCODE), 1)
 CFLAGS		+= -DAPP_EXAMPLE_QRCODE
 C_SOURCES	+= $(APP_DIR)/examples/u8g2_qrcode.c
+APP_DISPLAY = 1
 endif
 
 APP_EXAMPLE_DISPLAY ?= 0
 ifeq ($(APP_EXAMPLE_QRCODE), 1)
 CFLAGS		+= -DAPP_EXAMPLE_DISPLAY
 C_SOURCES	+= $(APP_DIR)/examples/u8g2_example.c
+APP_DISPLAY = 1
+endif
+
+# device drivers
+
+ifeq ($(APP_DISPLAY), 1)
+CFLAGS		+= -DAPP_DISPLAY
+C_SOURCES	+= $(APP_DIR)/display-u8g2/display-u8g2.c
+endif
+
+APP_INPUT	?= 0
+ifeq ($(APP_INPUT), 1)
+CFLAGS		+= -DAPP_INPUT
+C_SOURCES	+= $(APP_DIR)/input/input.c
 endif
