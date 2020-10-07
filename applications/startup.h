@@ -66,12 +66,12 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = u8g2_qrcode, .name = "u8g2_qrcode", .libs = "display_u8g2"},
 #endif
 
-#ifdef EXAMPLE_FATFS
-   {.app = fatfs_list, .name = "fatfs_list", .libs = "display_u8g2 input_task"},
+#ifdef APP_EXAMPLE_FATFS
+    {.app = fatfs_list, .name = "fatfs_list", .libs = "display_u8g2 input_task"},
 #endif
 
 #ifdef APP_EXAMPLE_DISPLAY
     {.app = u8g2_example, .name = "u8g2_example", .libs = "display_u8g2"},
 #endif
-    
+
 };
