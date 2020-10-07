@@ -28,6 +28,10 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
+$(OBJ_DIR)/app.o:   .FORCE
+
+.PHONY: .FORCE
+
 $(OBJ_DIR)/%.o: %.c
 	@echo "\tCC\t" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
