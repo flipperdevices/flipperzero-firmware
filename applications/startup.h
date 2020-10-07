@@ -27,6 +27,7 @@ void input_task(void* p);
 void coreglitch_demo_0(void* p);
 
 void u8g2_qrcode(void* p);
+void fatfs_list(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifndef TEST
@@ -60,5 +61,9 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef EXAMPLE_QRCODE
     {.app = u8g2_qrcode, .name = "u8g2_qrcode", .libs = "display_u8g2"},
+#endif
+
+#ifdef EXAMPLE_FATFS
+   {.app = fatfs_list, .name = "fatfs_list", .libs = "display_u8g2 input_task"},
 #endif
 };

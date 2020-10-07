@@ -138,6 +138,18 @@ C_SOURCES += ../lib/u8g2/u8x8_d_st7565.c \
 ../lib/u8g2/u8x8_8x8.c \
 ../lib/u8g2/u8g2_bitmap.c
 
+# FatFs library
+
+C_SOURCES += Src/fatfs/fatfs.c \
+Src/fatfs/user_diskio.c \
+Src/fatfs/stm32_adafruit_sd.c \
+Src/fatfs/spi_sd_hal.c \
+../lib/fatfs/ff.c \
+../lib/fatfs/ff_gen_drv.c \
+../lib/fatfs/diskio.c \
+../lib/FatFs/option/syscall.c \
+../lib/FatFs/option/unicode.c
+
 # System applications
 
 C_SOURCES += ../applications/display-u8g2/display-u8g2.c \
@@ -181,6 +193,11 @@ ifeq ($(EXAMPLE_QRCODE), 1)
 C_SOURCES += ../applications/examples/u8g2_qrcode.c
 C_SOURCES += ../lib/qrcode/qrcode.c
 C_DEFS += -DEXAMPLE_QRCODE
+endif
+
+ifeq ($(EXAMPLE_FATFS), 1)
+C_SOURCES += ../applications/examples/fatfs_list.c
+C_DEFS += -DEXAMPLE_FATFS
 endif
 
 # User application
@@ -269,7 +286,8 @@ C_INCLUDES =  \
 -IDrivers/CMSIS/Include \
 -IMiddlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -IMiddlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc \
--I../core-rs/flipper-core/bindings
+-I../core-rs/flipper-core/bindings \
+-ISrc/fatfs
 
 
 # compile gcc flags
@@ -324,6 +342,9 @@ example_qrcode:
 	EXAMPLE_QRCODE=1 make
 	rm $(BUILD_DIR)/app.o
 
+example_fatfs:
+	EXAMPLE_FATFS=1 make
+	rm $(BUILD_DIR)/app.o
 test:
 	TEST=1 make
 	rm $(BUILD_DIR)/app.o
