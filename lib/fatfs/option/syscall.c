@@ -41,8 +41,9 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 
     int ret;
 
-    osSemaphoreDef(SEM);
-    *sobj = osSemaphoreCreate(osSemaphore(SEM), 1);
+    //osSemaphoreDef(SEM);
+    //*sobj = osSemaphoreCreate(osSemaphore(SEM), 1);
+    *sobj = osMutexNew(NULL);
     ret = (*sobj != NULL);
 
     return ret;
@@ -62,7 +63,7 @@ int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to any erro
 	_SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
 )
 {
-    osSemaphoreDelete (sobj);
+    osMutexDelete(sobj);
     return 1;
 }
 
@@ -81,9 +82,8 @@ int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a gran
 {
   int ret = 0;
 
-  if(osSemaphoreWait(sobj, _FS_TIMEOUT) == osOK)
-  {
-    ret = 1;
+  if(osMutexAcquire(sobj, _FS_TIMEOUT) == osOK) {
+      ret = 1;
   }
 
   return ret;
@@ -101,7 +101,7 @@ void ff_rel_grant (
 	_SYNC_t sobj	/* Sync object to be signaled */
 )
 {
-  osSemaphoreRelease(sobj);
+    osMutexRelease(sobj);
 }
 
 #endif
