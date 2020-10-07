@@ -1,4 +1,5 @@
 APP_DIR		= $(PROJECT_ROOT)/applications
+LIB_DIR 	= $(PROJECT_ROOT)/lib
 
 CFLAGS		+= -I$(APP_DIR)
 
@@ -45,6 +46,7 @@ APP_EXAMPLE_QRCODE ?= 0
 ifeq ($(APP_EXAMPLE_QRCODE), 1)
 CFLAGS		+= -DAPP_EXAMPLE_QRCODE
 C_SOURCES	+= $(APP_DIR)/examples/u8g2_qrcode.c
+C_SOURCES	+= $(LIB_DIR)/qrcode/qrcode.c
 APP_DISPLAY = 1
 endif
 
