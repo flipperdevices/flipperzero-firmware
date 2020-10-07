@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-#define DEFAULT_STACK_SIZE 1024 // Stack size in bytes
+#define DEFAULT_STACK_SIZE 2048 // Stack size in bytes
 #define MAX_TASK_COUNT 8
 #define INVALID_TASK_ID UINT16_MAX
 
