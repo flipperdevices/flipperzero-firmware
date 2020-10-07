@@ -13,6 +13,13 @@ DEPS = $(OBJECTS:.o=.d)
 
 $(shell mkdir -p $(OBJ_DIR))
 
+BUILD_FLAGS_SHELL=\
+	echo -n "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
+	diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp > /dev/null \
+		&& ( echo "CFLAGS ok"; rm $(OBJ_DIR)/BUILD_FLAGS.tmp) \
+		|| ( echo "CFLAGS has been changed"; mv $(OBJ_DIR)/BUILD_FLAGS.tmp $(OBJ_DIR)/BUILD_FLAGS )
+$(info $(shell $(BUILD_FLAGS_SHELL)))
+
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
@@ -39,12 +46,6 @@ $(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
 $(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
-
-$(OBJ_DIR)/BUILD_FLAGS:
-	@echo -n "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp
-	@diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp \
-		&& rm $(OBJ_DIR)/BUILD_FLAGS.tmp \
-		|| ( echo "CFLAGS changed, rebuild required"; mv $(OBJ_DIR)/BUILD_FLAGS.tmp $(OBJ_DIR)/BUILD_FLAGS)
 
 $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(FLASH_ADDRESS)
