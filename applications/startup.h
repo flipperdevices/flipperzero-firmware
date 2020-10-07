@@ -8,7 +8,7 @@ typedef struct {
     const char* libs;
 } FlipperStartupApp;
 
-#ifdef TEST
+#ifdef APP_TEST
 void flipper_test_app(void* p);
 #endif
 

@@ -20,7 +20,7 @@ typedef struct {
 
 void app_gpio_init(GpioPin gpio, GpioMode mode);
 
-inline void app_gpio_write(GpioPin gpio, bool state) {
+static inline void app_gpio_write(GpioPin gpio, bool state) {
     if(gpio.pin != 0) {
         if(state) {
             printf("[GPIO] %s%d on\n", gpio.port, gpio.pin);
@@ -32,7 +32,7 @@ inline void app_gpio_write(GpioPin gpio, bool state) {
     }
 }
 
-inline bool app_gpio_read(GpioPin gpio) {
+static inline bool app_gpio_read(GpioPin gpio) {
     // TODO emulate pin state?
 
     return false;
@@ -48,15 +48,15 @@ void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 
 extern TIM_HandleTypeDef htim8;
 
-inline void app_tim_ic_init(bool both) {
+static inline void app_tim_ic_init(bool both) {
     printf("[TIM] init\n");
 }
 
-inline void app_tim_pulse(uint32_t width) {
+static inline void app_tim_pulse(uint32_t width) {
     printf("[TIM] pulse %d\n", width);
 }
 
-inline void app_tim_stop() {
+static inline void app_tim_stop() {
     printf("[TIM] stop\n");
 }
 
