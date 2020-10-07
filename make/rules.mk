@@ -28,17 +28,23 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/%.o: %.c
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.s
+$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tASM\t" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/BUILD_FLAGS:
+	@echo -n "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp
+	@diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp \
+		&& rm $(OBJ_DIR)/BUILD_FLAGS.tmp \
+		|| ( echo "CFLAGS changed, rebuild required"; mv $(OBJ_DIR)/BUILD_FLAGS.tmp $(OBJ_DIR)/BUILD_FLAGS)
 
 $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 	st-flash --reset write $(OBJ_DIR)/$(PROJECT).bin $(FLASH_ADDRESS)
@@ -54,7 +60,12 @@ upload: $(OBJ_DIR)/upload
 
 debug: flash
 	set -m; st-util -n --semihosting & echo $$! > st-util.PID
-	arm-none-eabi-gdb -ex "target extended-remote 127.0.0.1:4242" $(OBJ_DIR)/$(PROJECT).elf; kill `cat st-util.PID`; rm st-util.PID
+	arm-none-eabi-gdb \
+		-ex "target extended-remote 127.0.0.1:4242" \
+		-ex "set confirm off" \
+		$(OBJ_DIR)/$(PROJECT).elf; \
+	kill `cat st-util.PID`; \
+	rm st-util.PID
 
 clean:
 	@echo "\tCLEAN\t"
