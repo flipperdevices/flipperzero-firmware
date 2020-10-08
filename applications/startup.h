@@ -35,6 +35,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = input_task, .name = "input_task", .libs = {0}},
 #endif
 
+#ifdef APP_MENU
+    {.app = menu_task, .name = "menu_task", .libs = "input_task display_u8g2"},
+#endif
+
 // {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = ""},
 
 #ifdef APP_TEST

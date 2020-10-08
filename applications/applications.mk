@@ -5,8 +5,17 @@ CFLAGS		+= -I$(APP_DIR)
 
 APP_RELEASE ?= 0
 ifeq ($(APP_RELEASE), 1)
-APP_DISPLAY = 1
-APP_INPUT = 1
+APP_DISPLAY	= 1
+APP_INPUT	= 1
+endif
+
+APP_MENU	?= 1
+ifeq ($(APP_MENU), 1)
+APP_DISPLAY	= 1
+APP_INPUT	= 1
+APP_WIDGETS	= 1
+CFLAGS		+= -DAPP_MENU
+C_SOURCES	+= $(wildcard $(APP_DIR)/menu/*.c)
 endif
 
 APP_TEST	?= 0
@@ -78,4 +87,10 @@ APP_INPUT	?= 0
 ifeq ($(APP_INPUT), 1)
 CFLAGS		+= -DAPP_INPUT
 C_SOURCES	+= $(APP_DIR)/input/input.c
+endif
+
+APP_WIDGETS	?= 0
+ifeq ($(APP_WIDGETS), 1)
+CFLAGS		+= -DAPP_WIDGETS
+C_SOURCES	+= $(wildcard $(APP_DIR)/widgets/*.c)
 endif
