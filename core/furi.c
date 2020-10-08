@@ -28,7 +28,7 @@ static FuriRecord* find_record(const char* name) {
 }
 
 // TODO: change open-create to only open
-bool furi_create(const char* name, void* value, size_t size) {
+bool furi_create_deprecated(const char* name, void* value, size_t size) {
 #ifdef FURI_DEBUG
     printf("[FURI] creating %s record\n", name);
 #endif
@@ -73,7 +73,7 @@ bool furi_create(const char* name, void* value, size_t size) {
     return true;
 }
 
-FuriRecordSubscriber* furi_open(
+FuriRecordSubscriber* furi_open_deprecated(
     const char* name,
     bool solo,
     bool no_mute,
@@ -94,7 +94,7 @@ FuriRecordSubscriber* furi_open(
 #endif
 
         // create record if not exist
-        if(!furi_create(name, NULL, 0)) {
+        if(!furi_create_deprecated(name, NULL, 0)) {
             return NULL;
         }
 
