@@ -21,7 +21,7 @@
 
 
 
-#include "../ff.h"
+#include "fatfs/ff.h"
 
 
 #if _FS_REENTRANT

@@ -1,9 +1,7 @@
-/* USER CODE BEGIN Header */
 /**
- ******************************************************************************
-  * @file    user_diskio.h
-  * @brief   This file contains the common defines and functions prototypes for  
-  *          the user_diskio driver.
+  ******************************************************************************
+  * @file   fatfs.h
+  * @brief  Header for fatfs applications
   ******************************************************************************
   * @attention
   *
@@ -17,32 +15,35 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __USER_DISKIO_H
-#define __USER_DISKIO_H
-
+#ifndef __fatfs_H
+#define __fatfs_H
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* USER CODE BEGIN 0 */
-
-/* Includes ------------------------------------------------------------------*/
-#include "stm32_adafruit_sd.h"
+#include "fatfs/ff.h"
 #include "fatfs/ff_gen_drv.h"
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-extern Diskio_drvTypeDef USER_Driver;
+#include "user_diskio.h" /* defines USER_Driver as external */
 
-/* USER CODE END 0 */
+/* USER CODE BEGIN Includes */
 
+/* USER CODE END Includes */
+
+extern uint8_t retUSER; /* Return value for USER */
+extern char USERPath[4]; /* USER logical drive path */
+extern FATFS USERFatFS; /* File system object for USER logical drive */
+extern FIL USERFile; /* File object for USER */
+
+void MX_FATFS_Init(void);
+
+/* USER CODE BEGIN Prototypes */
+
+/* USER CODE END Prototypes */
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __USER_DISKIO_H */
+#endif /*__fatfs_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

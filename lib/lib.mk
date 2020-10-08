@@ -28,5 +28,4 @@ FATFS_DIR		= $(LIB_DIR)/fatfs
 C_SOURCES		+= $(FATFS_DIR)/ff.c
 C_SOURCES		+= $(FATFS_DIR)/ff_gen_drv.c
 C_SOURCES		+= $(FATFS_DIR)/diskio.c
-C_SOURCES		+= $(FATFS_DIR)/option/syscall.c
 C_SOURCES		+= $(FATFS_DIR)/option/unicode.c
