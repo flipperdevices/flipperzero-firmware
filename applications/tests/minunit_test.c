@@ -6,9 +6,11 @@
 
 static int foo = 0;
 
+FuriRecordSubscriber* test_log = NULL;
+
 void test_setup(void) {
 	foo = 7;
-    FuriRecordSubscriber* log = get_default_log();
+    test_log = get_default_log();
 }
 
 void test_teardown(void) {
@@ -20,31 +22,31 @@ MU_TEST(test_check) {
 }
 
 MU_TEST(mu_test_furi_ac_create_kill) {
-	mu_assert_int_eq(test_furi_ac_create_kill(log), true);
+	mu_assert_int_eq(test_furi_ac_create_kill(test_log), true);
 }
 
 MU_TEST(mu_test_furi_ac_switch_exit) {
-	mu_assert_int_eq(test_furi_ac_switch_exit(log), true);
+	mu_assert_int_eq(test_furi_ac_switch_exit(test_log), true);
 }
 
 MU_TEST(mu_test_furi_pipe_record) {
-	mu_assert_int_eq(test_furi_pipe_record(log), true);
+	mu_assert_int_eq(test_furi_pipe_record(test_log), true);
 }
 
 MU_TEST(mu_test_furi_holding_data) {
-	mu_assert_int_eq(test_furi_holding_data(log), true);
+	mu_assert_int_eq(test_furi_holding_data(test_log), true);
 }
 
 MU_TEST(mu_test_furi_concurrent_access) {
-	mu_assert_int_eq(test_furi_concurrent_access(log), true);
+	mu_assert_int_eq(test_furi_concurrent_access(test_log), true);
 }
 
 MU_TEST(mu_test_furi_nonexistent_data) {
-	mu_assert_int_eq(test_furi_nonexistent_data(log), true);
+	mu_assert_int_eq(test_furi_nonexistent_data(test_log), true);
 }
 
 MU_TEST(mu_test_furi_mute_algorithm) {
-	mu_assert_int_eq(test_furi_mute_algorithm(log), true);
+	mu_assert_int_eq(test_furi_mute_algorithm(test_log), true);
 }
 
 MU_TEST_SUITE(test_suite) {
