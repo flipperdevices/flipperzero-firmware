@@ -1,4 +1,4 @@
-#include "api-pubsub.h"
+#include "pubsub.h"
 
 void init_pubsub(PubSub* pubsub) {
     pubsub->count = 0;
