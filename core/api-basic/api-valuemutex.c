@@ -1,4 +1,4 @@
-#include "api-basic.h"
+#include "api-valuemutex.h"
 
 bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
     valuemutex->mutex = osMutexCreate();
@@ -33,10 +33,6 @@ bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout
     if(!release_mutex(valuemutex, value)) return false;
     
     return true;
-}
-
-inline static bool read_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
-    return read_mutex(valuemutex, data, len, OsWaitForever);
 }
 
 bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout) {

@@ -8,6 +8,12 @@ extern "C" {
 #include "flipper_hal.h"
 #include "cmsis_os.h"
 #include "furi-deprecated.h"
+
+#include "api-furi.h"
+#include "api-flapp.h"
+#include "api-valuemutex.h"
+#include "api-pubsub.h"
+
 #include "log.h"
 #include "input/input.h"
 
