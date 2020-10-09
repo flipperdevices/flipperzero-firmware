@@ -4,9 +4,10 @@
 #include <string.h>
 
 struct menu_item_t {
-    uint8_t type;
+    menu_item_type_t type;
     const char * label;
     void * icon;
+    menu_item_t * parent;
     void * data;
 };
 
@@ -18,24 +19,52 @@ menu_item_t * menu_item_alloc()
     return p;
 }
 
-menu_item_t * menu_item_alloc_init(uint8_t type, const char *label, void *icon, void *data)
+menu_item_t * menu_item_alloc_menu(const char *label, void *icon)
 {
     menu_item_t * menu_item = menu_item_alloc();
-    menu_item_set_type(menu_item, type);
-    menu_item_set_label(menu_item, label);
-    menu_item_set_icon(menu_item, icon);
-    menu_item_set_data(menu_item, data);
+
+    menu_item->type = MENU_ITEM_TYPE_MENU;
+    menu_item->label = label;
+    menu_item->icon = icon;
+
+    menu_items_t *items = malloc(sizeof(menu_items_t));
+    menu_items_init(*items);
+    menu_item->data = items;
+
+    return menu_item;
 }
 
+menu_item_t * menu_item_alloc_function(const char *label, void *icon, menu_function_t function)
+{
+    menu_item_t * menu_item = menu_item_alloc();
+
+    menu_item->type = MENU_ITEM_TYPE_FUNCTION;
+    menu_item->label = label;
+    menu_item->icon = icon;
+    menu_item->data = function;
+
+    return menu_item;
+}
 
 void menu_item_release(menu_item_t * menu_item)
 {
+    if (menu_item->type == MENU_ITEM_TYPE_MENU) {
+        //TODO: release subitems
+    }
     free(menu_item);
 }
 
-void menu_item_set_type(menu_item_t * menu_item, uint8_t type)
+menu_item_t * menu_item_get_parent(menu_item_t * menu_item)
 {
-    menu_item->type = type;
+    return menu_item->parent;
+}
+
+void menu_subitem_add(menu_item_t * menu_item, menu_item_t * sub_item)
+{
+    assert(menu_item->type == MENU_ITEM_TYPE_MENU);
+    menu_items_t *items = menu_item->data;
+    sub_item->parent = menu_item;
+    menu_items_push_back(*items, sub_item);
 }
 
 uint8_t menu_item_get_type(menu_item_t * menu_item)
@@ -63,12 +92,14 @@ void * menu_item_get_icon(menu_item_t * menu_item)
     return menu_item->icon;
 }
 
-void menu_item_set_data(menu_item_t * menu_item, void * data)
+menu_items_t * menu_item_get_subitems(menu_item_t * menu_item)
 {
-    menu_item->data = data;
+    assert(menu_item->type == MENU_ITEM_TYPE_MENU);
+    return menu_item->data;
 }
 
-void * menu_item_get_data(menu_item_t * menu_item)
+menu_function_t menu_item_get_function(menu_item_t * menu_item)
 {
+    assert(menu_item->type == MENU_ITEM_TYPE_FUNCTION);
     return menu_item->data;
 }
