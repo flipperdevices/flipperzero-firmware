@@ -24,14 +24,14 @@ void pipe_record_cb(const void* value, size_t size, void* ctx) {
 
 bool test_furi_pipe_record(FuriRecordSubscriber* log) {
     // 1. create pipe record
-    if(!furi_create("test/pipe", NULL, 0)) {
+    if(!furi_create_deprecated("test/pipe", NULL, 0)) {
         fuprintf(log, "cannot create record\n");
         return false;
     }
 
     // 2. Open/subscribe to it
     FuriRecordSubscriber* pipe_record =
-        furi_open("test/pipe", false, false, pipe_record_cb, NULL, NULL);
+        furi_open_deprecated("test/pipe", false, false, pipe_record_cb, NULL, NULL);
     if(pipe_record == NULL) {
         fuprintf(log, "cannot open record\n");
         return false;
@@ -90,14 +90,14 @@ void holding_record_cb(const void* value, size_t size, void* ctx) {
 bool test_furi_holding_data(FuriRecordSubscriber* log) {
     // 1. Create holding record
     uint8_t holder = 0;
-    if(!furi_create("test/holding", (void*)&holder, sizeof(holder))) {
+    if(!furi_create_deprecated("test/holding", (void*)&holder, sizeof(holder))) {
         fuprintf(log, "cannot create record\n");
         return false;
     }
 
     // 2. Open/Subscribe on it
     FuriRecordSubscriber* holding_record =
-        furi_open("test/holding", false, false, holding_record_cb, NULL, NULL);
+        furi_open_deprecated("test/holding", false, false, holding_record_cb, NULL, NULL);
     if(holding_record == NULL) {
         fuprintf(log, "cannot open record\n");
         return false;
@@ -162,7 +162,7 @@ void furi_concurent_app(void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     FuriRecordSubscriber* holding_record =
-        furi_open("test/concurrent", false, false, NULL, NULL, NULL);
+        furi_open_deprecated("test/concurrent", false, false, NULL, NULL, NULL);
     if(holding_record == NULL) {
         fuprintf(log, "cannot open record\n");
         furiac_exit(NULL);
@@ -193,14 +193,14 @@ void furi_concurent_app(void* p) {
 bool test_furi_concurrent_access(FuriRecordSubscriber* log) {
     // 1. Create holding record
     ConcurrentValue holder = {.a = 0, .b = 0};
-    if(!furi_create("test/concurrent", (void*)&holder, sizeof(ConcurrentValue))) {
+    if(!furi_create_deprecated("test/concurrent", (void*)&holder, sizeof(ConcurrentValue))) {
         fuprintf(log, "cannot create record\n");
         return false;
     }
 
     // 2. Open it
     FuriRecordSubscriber* holding_record =
-        furi_open("test/concurrent", false, false, NULL, NULL, NULL);
+        furi_open_deprecated("test/concurrent", false, false, NULL, NULL, NULL);
     if(holding_record == NULL) {
         fuprintf(log, "cannot open record\n");
         return false;
@@ -313,14 +313,14 @@ void furi_mute_parent_app(void* p) {
     FuriRecordSubscriber* log = (FuriRecordSubscriber*)p;
 
     // 1. Create pipe record
-    if(!furi_create("test/mute", NULL, 0)) {
+    if(!furi_create_deprecated("test/mute", NULL, 0)) {
         fuprintf(log, "cannot create record\n");
         furiac_exit(NULL);
     }
 
     // 2. Open watch handler: solo=false, no_mute=false, subscribe to data
     FuriRecordSubscriber* watch_handler =
-        furi_open("test/mute", false, false, mute_record_cb, NULL, NULL);
+        furi_open_deprecated("test/mute", false, false, mute_record_cb, NULL, NULL);
     if(watch_handler == NULL) {
         fuprintf(log, "cannot open watch handler\n");
         furiac_exit(NULL);
@@ -340,7 +340,7 @@ bool test_furi_mute_algorithm(FuriRecordSubscriber* log) {
 
     // 2. Open handler A: solo=false, no_mute=false, NULL subscriber. Subscribe to state.
     FuriRecordSubscriber* handler_a =
-        furi_open("test/mute", false, false, NULL, mute_record_state_cb, NULL);
+        furi_open_deprecated("test/mute", false, false, NULL, mute_record_state_cb, NULL);
     if(handler_a == NULL) {
         fuprintf(log, "cannot open handler A\n");
         return false;
@@ -360,7 +360,8 @@ bool test_furi_mute_algorithm(FuriRecordSubscriber* log) {
     }
 
     // 3. Open handler B: solo=true, no_mute=true, NULL subscriber.
-    FuriRecordSubscriber* handler_b = furi_open("test/mute", true, true, NULL, NULL, NULL);
+    FuriRecordSubscriber* handler_b =
+        furi_open_deprecated("test/mute", true, true, NULL, NULL, NULL);
     if(handler_b == NULL) {
         fuprintf(log, "cannot open handler B\n");
         return false;
@@ -399,7 +400,8 @@ bool test_furi_mute_algorithm(FuriRecordSubscriber* log) {
     }
 
     // 4. Open hadler C: solo=true, no_mute=false, NULL subscriber.
-    FuriRecordSubscriber* handler_c = furi_open("test/mute", true, false, NULL, NULL, NULL);
+    FuriRecordSubscriber* handler_c =
+        furi_open_deprecated("test/mute", true, false, NULL, NULL, NULL);
     if(handler_c == NULL) {
         fuprintf(log, "cannot open handler C\n");
         return false;
@@ -410,7 +412,8 @@ bool test_furi_mute_algorithm(FuriRecordSubscriber* log) {
     // TODO: Try to write data to C and check that subscriber get data.
 
     // 5. Open handler D: solo=false, no_mute=false, NULL subscriber.
-    FuriRecordSubscriber* handler_d = furi_open("test/mute", false, false, NULL, NULL, NULL);
+    FuriRecordSubscriber* handler_d =
+        furi_open_deprecated("test/mute", false, false, NULL, NULL, NULL);
     if(handler_d == NULL) {
         fuprintf(log, "cannot open handler D\n");
         return false;
