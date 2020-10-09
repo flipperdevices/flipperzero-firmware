@@ -78,5 +78,6 @@ int run_minunit() {
 	MU_REPORT();
 	fuprintf(test_log, "\n\n%d tests, %d assertions, %d failures\n", 0, 1, 2);
 	delay(100);
+
 	return MU_EXIT_CODE;
 }
