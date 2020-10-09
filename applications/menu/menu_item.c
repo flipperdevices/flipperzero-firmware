@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <furi.h>
 
 struct menu_item_t {
     menu_item_type_t type;
@@ -13,9 +14,7 @@ struct menu_item_t {
 
 menu_item_t * menu_item_alloc()
 {
-    menu_item_t * p = malloc(sizeof(menu_item_t));
-    assert(p != NULL);
-    memset(p, 0, sizeof(menu_item_t));
+    menu_item_t * p = furi_alloc(sizeof(menu_item_t));
     return p;
 }
 
@@ -27,7 +26,7 @@ menu_item_t * menu_item_alloc_menu(const char *label, void *icon)
     menu_item->label = label;
     menu_item->icon = icon;
 
-    menu_items_t *items = malloc(sizeof(menu_items_t));
+    menu_items_t *items = furi_alloc(sizeof(menu_items_t));
     menu_items_init(*items);
     menu_item->data = items;
 

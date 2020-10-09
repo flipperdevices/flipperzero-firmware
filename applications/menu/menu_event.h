@@ -16,7 +16,6 @@ typedef struct {
     void *data;
 } menu_message_t;
 
-
 typedef struct menu_event_t menu_event_t;
 
 menu_event_t * menu_event_alloc();

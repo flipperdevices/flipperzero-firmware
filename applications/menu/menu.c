@@ -4,13 +4,13 @@
 #include <stdbool.h>
 
 #include <furi.h>
-#include <widgets/widget_menu.h>
+#include <gui/widget.h>
+#include <gui/canvas.h>
 
 #include "menu_event.h"
 #include "menu_item.h"
-
 typedef struct {
-    widget_menu_t           *widget;
+    widget_t                *widget;
     menu_event_t            *event;
     menu_item_t             *current;
     uint32_t                position;
@@ -19,11 +19,13 @@ typedef struct {
 
 menu_t * menu;
 
+void menu_widget_callback(canvas_t *canvas, void *context);
+
 menu_t * menu_alloc()
 {
-    menu_t * menu = malloc(sizeof(menu_t));
-    assert(menu != NULL);
-    memset(menu, 0, sizeof(menu_t));
+    menu_t * menu = furi_alloc(sizeof(menu_t));
+    menu->widget = widget_alloc(menu_widget_callback, menu);
+    menu->event = menu_event_alloc();
     return menu;
 }
 
@@ -50,49 +52,53 @@ void menu_build_main()
     menu_subitem_add(menu->current, settings);
 }
 
-void menu_draw()
+void menu_widget_callback(canvas_t *canvas, void *context)
 {
-    const size_t widget_items_size = 5;
-    widget_items_t widget_items[widget_items_size];
-    menu_items_t *items = menu_item_get_subitems(menu->current);
-
-    for (size_t i=0; i<widget_items_size; i++) {
-        size_t shift_position = i + menu->position + menu_items_size(*items) - 2;
-        shift_position = shift_position % (menu_items_size(*items));
-        widget_items[i].label = menu_item_get_label(*menu_items_get(*items, shift_position));
+    if (!menu->is_active) {
+        canvas_clear(canvas);
+        return;
     }
 
-    widget_menu_draw_main(menu->widget, widget_items, widget_items_size);
+    menu_items_t *items = menu_item_get_subitems(menu->current);
+
+    canvas_clear(canvas);
+    canvas_color_set(canvas, COLOR_BLACK);
+    canvas_font_set(canvas, CANVAS_FONT_SECONDARY);
+
+    for (size_t i=0; i<5; i++) {
+        size_t shift_position = i + menu->position + menu_items_size(*items) - 2;
+        shift_position = shift_position % (menu_items_size(*items));
+        menu_item_t *item = *menu_items_get(*items, shift_position);
+        canvas_str_draw(canvas, 2, 12*(i+1), menu_item_get_label(item));
+    }
+}
+
+void menu_update() {
     menu_event_active_notify(menu->event);
+    widget_update(menu->widget);
 }
 
 void menu_up()
 {
     menu_items_t *items = menu_item_get_subitems(menu->current);
-    if (menu->position == 0) {
-        menu->position = menu_items_size(*items)-1;
-    } else {
-        menu->position--;
-    }
-    menu_draw();
+    if (menu->position == 0) menu->position = menu_items_size(*items);
+    menu->position--;
+    menu_update();
 }
 
 void menu_down()
 {
     menu_items_t *items = menu_item_get_subitems(menu->current);
-    if (menu->position >= menu_items_size(*items)) {
-        menu->position = 0;
-    } else {
-        menu->position++;
-    }
-    menu_draw();
+    menu->position++;
+    menu->position = menu->position % menu_items_size(*items);
+    menu_update();
 }
 
 void menu_ok()
 {
     if (!menu->is_active) {
         menu->is_active = true;
-        menu_draw();
+        menu_update();
         return;
     }
 
@@ -103,10 +109,10 @@ void menu_ok()
     if (type == MENU_ITEM_TYPE_MENU) {
         menu->current = item;
         menu->position = 0;
-        menu_draw();
+        menu_update();
     } else if (type == MENU_ITEM_TYPE_FUNCTION) {
         menu_function_t function = menu_item_get_function(item);
-        function();
+        if (function) function();
     }
 }
 
@@ -116,7 +122,7 @@ void menu_back()
     if (parent) {
         menu->current = parent;
         menu->position = 0;
-        menu_draw();
+        menu_update();
     } else {
         menu_exit();
     }
@@ -126,19 +132,14 @@ void menu_exit()
 {
     menu->position = 0;
     menu->is_active = false;
-    widget_menu_draw_idle(menu->widget);
+    menu_update();
 }
 
 void menu_task(void * p)
 {
     menu = menu_alloc();
-
-    menu->widget = widget_menu_alloc();
-    menu->event = menu_event_alloc();
-
     menu_build_main();
-
-    widget_menu_draw_idle(menu->widget);
+    menu_update();
 
     while(1) {
         menu_message_t * m = menu_event_next(menu->event);
