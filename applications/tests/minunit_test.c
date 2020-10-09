@@ -12,6 +12,9 @@ bool test_furi_concurrent_access();
 bool test_furi_nonexistent_data();
 bool test_furi_mute_algorithm();
 
+// v2 tests
+void test_furi_valuemutex();
+
 static int foo = 0;
 
 void test_setup(void) {
@@ -57,7 +60,7 @@ MU_TEST(mu_test_furi_mute_algorithm) {
 */
 // v2 tests
 MU_TEST(mu_test_furi_valuemutex) {
-    mu_assert_int_eq(test_furi_valuemutex(), true);
+    test_furi_valuemutex();
 }
 
 MU_TEST_SUITE(test_suite) {
