@@ -385,7 +385,7 @@ static void (*minunit_teardown)(void) = NULL;
 	if (pointer1 != pointer2) {\
 		printf(".");\
 	} else {\
-		snprintf(minunit_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: Expected the pointers to point to the same memory location", __func__, __FILE__, __LINE__);\
+		snprintf(minunit_last_message, MINUNIT_MESSAGE_LEN, "%s failed:\n\t%s:%d: Expected the pointers to point to the different memory location", __func__, __FILE__, __LINE__);\
 		minunit_status = 1;\
 		return;\
 	}\
