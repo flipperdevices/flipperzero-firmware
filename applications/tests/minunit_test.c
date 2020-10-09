@@ -23,7 +23,7 @@ void test_teardown(void) {
 }
 
 MU_TEST(test_check) {
-    mu_check(foo != 6);
+    mu_check(foo == 6);
 }
 
 MU_TEST(mu_test_furi_ac_create_kill) {
