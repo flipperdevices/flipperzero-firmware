@@ -9,10 +9,10 @@ extern "C" {
 #include "cmsis_os.h"
 #include "furi-deprecated.h"
 
-#include "api-furi.h"
-#include "api-flapp.h"
-#include "api-valuemutex.h"
-#include "api-pubsub.h"
+#include "api-basic/furi.h"
+#include "api-basic/flapp.h"
+#include "api-basic/valuemutex.h"
+#include "api-basic/pubsub.h"
 
 #include "log.h"
 #include "input/input.h"
