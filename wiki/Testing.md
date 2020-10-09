@@ -67,7 +67,7 @@ Local target:
 
 * `docker-compose exec dev make -C firmware TARGET=local APP_TEST=1 clean`
 * `docker-compose exec dev make -C firmware TARGET=local APP_TEST=1 run`
-* check tests pass/fail
+* check tests pass/fail (by exitcode == 0)
 
 * `docker-compose exec dev make -C firmware TARGET=local APP_EXAMPLE_BLINK=1 run`
 * GPIO on and off
@@ -94,6 +94,9 @@ F2 target:
 * `docker-compose exec dev make -C firmware TARGET=f2 APP_TEST=1 clean`
 * `docker-compose exec dev make -C firmware TARGET=f2 APP_TEST=1 flash`
 * check UART for test pass/fail
+* blue led when test is running
+* green led if test is passed
+* red led if test is failed
 
 * `docker-compose exec dev make -C firmware TARGET=f2 APP_EXAMPLE_BLINK=1 flash`
 * Red LED blink (1s period)
