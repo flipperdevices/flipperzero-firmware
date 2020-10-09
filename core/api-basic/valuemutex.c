@@ -1,4 +1,4 @@
-#include "api-valuemutex.h"
+#include "valuemutex.h"
 
 bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {
     valuemutex->mutex = osMutexCreate();

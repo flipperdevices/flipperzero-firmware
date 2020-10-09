@@ -13,6 +13,7 @@ extern "C" {
 #include "api-basic/flapp.h"
 #include "api-basic/valuemutex.h"
 #include "api-basic/pubsub.h"
+#include "api-basic/value-expanders.h"
 
 #include "log.h"
 #include "input/input.h"
