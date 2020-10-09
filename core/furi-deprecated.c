@@ -1,5 +1,4 @@
 #include "furi-deprecated.h"
-#include "cmsis_os.h"
 #include <string.h>
 
 // TODO: this file contains printf, that not implemented on uC target
