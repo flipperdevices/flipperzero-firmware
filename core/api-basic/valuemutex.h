@@ -13,7 +13,7 @@ You can take and give mutex to work with value and read and write value.
 typedef struct {
     void* value;
     size_t size;
-    osMutex mutex;
+    osMutexId_t mutex;
 } ValueMutex;
 
 /*
@@ -31,7 +31,7 @@ void* acquire_mutex(ValueMutex* valuemutex, uint32_t timeout);
 Helper: infinitly wait for mutex
 */
 static inline void* acquire_mutex_block(ValueMutex* valuemutex) {
-    return acquire_mutex(valuemutex, OsWaitForever);
+    return acquire_mutex(valuemutex, osWaitForever);
 }
 
 /*
@@ -49,11 +49,11 @@ bool read_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout
 bool write_mutex(ValueMutex* valuemutex, void* data, size_t len, uint32_t timeout);
 
 inline static bool write_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
-    return write_mutex(valuemutex, data, len, OsWaitForever);
+    return write_mutex(valuemutex, data, len, osWaitForever);
 }
 
 inline static bool read_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
-    return read_mutex(valuemutex, data, len, OsWaitForever);
+    return read_mutex(valuemutex, data, len, osWaitForever);
 }
 
 /*

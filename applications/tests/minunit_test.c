@@ -55,6 +55,10 @@ MU_TEST(mu_test_furi_mute_algorithm) {
     mu_assert_int_eq(test_furi_mute_algorithm(test_log), true);
 }
 */
+// v2 tests
+MU_TEST(mu_test_furi_valuemutex) {
+    mu_assert_int_eq(test_furi_valuemutex(), true);
+}
 
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
@@ -67,6 +71,9 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_concurrent_access);
     MU_RUN_TEST(mu_test_furi_nonexistent_data);
     // MU_RUN_TEST(mu_test_furi_mute_algorithm);
+
+    // v2 tests
+    MU_RUN_TEST(mu_test_furi_valuemutex);
 }
 
 int run_minunit() {
