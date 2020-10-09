@@ -1,4 +1,4 @@
-#include "furi.h"
+#include "furi-deprecated.h"
 #include "cmsis_os.h"
 #include <string.h>
 

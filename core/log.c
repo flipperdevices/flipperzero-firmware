@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "furi.h"
+#include "flipper.h"
 
 #define PRINT_STR_SIZE 64
 

@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
-#include "furi.h"
+#include "flipper.h"
 #include "main.h"
 
 extern UART_HandleTypeDef DEBUG_UART;
