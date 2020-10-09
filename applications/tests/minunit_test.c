@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "flipper.h"
 #include "log.h"
-
+#include "minunit_vars.h"
 #include "minunit.h"
 
 bool test_furi_ac_create_kill();

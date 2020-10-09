@@ -72,18 +72,7 @@
 /*  Accuracy with which floats are compared */
 #define MINUNIT_EPSILON 1E-12
 
-/*  Misc. counters */
-static int minunit_run = 0;
-static int minunit_assert = 0;
-static int minunit_fail = 0;
-static int minunit_status = 0;
-
-/*  Timers */
-static double minunit_real_timer = 0;
-static double minunit_proc_timer = 0;
-
-/*  Last message */
-static char minunit_last_message[MINUNIT_MESSAGE_LEN];
+#include "minunit_vars_ex.h"
 
 /*  Test setup and teardown function pointers */
 static void (*minunit_setup)(void) = NULL;
