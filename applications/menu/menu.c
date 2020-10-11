@@ -18,6 +18,7 @@ struct menu_t {
     widget_t                *widget;
     // State
     menu_item_t             *root;
+    menu_item_t             *settings;
     menu_item_t             *current;
     uint32_t                position;
 };
@@ -64,18 +65,23 @@ void menu_build_main(menu_t *menu)
     menu_item_add(menu, menu_item_alloc_function("U2F", NULL, NULL));
     menu_item_add(menu, menu_item_alloc_function("Tamagotchi", NULL, NULL));
     menu_item_add(menu, menu_item_alloc_function("Plugins", NULL, NULL));
-    
-    menu_item_t *settings = menu_item_alloc_menu("Setting", NULL);
-    menu_item_subitem_add(settings, menu_item_alloc_function("one", NULL, NULL));
-    menu_item_subitem_add(settings, menu_item_alloc_function("two", NULL, NULL));
-    menu_item_subitem_add(settings, menu_item_alloc_function("three", NULL, NULL));
 
-    menu_item_add(menu, settings);
+    menu->settings = menu_item_alloc_menu("Setting", NULL);
+    menu_item_subitem_add(menu->settings, menu_item_alloc_function("one", NULL, NULL));
+    menu_item_subitem_add(menu->settings, menu_item_alloc_function("two", NULL, NULL));
+    menu_item_subitem_add(menu->settings, menu_item_alloc_function("three", NULL, NULL));
+
+    menu_item_add(menu, menu->settings);
 }
 
 void menu_item_add(menu_t *menu, menu_item_t *item)
 {
     menu_item_subitem_add(menu->root, item);
+}
+
+void menu_settings_item_add(menu_t *menu, menu_item_t *item)
+{
+    menu_item_subitem_add(menu->settings, item);
 }
 
 void menu_widget_callback(canvas_t *canvas, void *context)
@@ -178,9 +184,9 @@ void menu_exit(menu_t *menu)
     menu_update(menu);
 }
 
-void menu_task(void * p)
+void menu_task(void *p)
 {
-    menu_t * menu = menu_alloc();
+    menu_t *menu = menu_alloc();
     menu_build_main(menu);
     menu_update(menu);
 

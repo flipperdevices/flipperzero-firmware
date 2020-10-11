@@ -29,4 +29,4 @@ void menu_event_activity_notify(menu_event_t *menu_event);
 
 menu_message_t menu_event_next(menu_event_t *menu_event);
 
-void menu_event_input_callback(InputEvent *input_event, menu_event_t *menu_event);
+void menu_event_input_callback(InputEvent *input_event, void *context);

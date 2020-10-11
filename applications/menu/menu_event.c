@@ -16,7 +16,7 @@ struct menu_event_t {
 
 void menu_event_timeout_callback(void *arg)
 {
-    menu_event_t * menu_event = arg;
+    menu_event_t *menu_event = arg;
     menu_message_t message;
     message.type = MENU_MESSAGE_TYPE_IDLE;
     osMessageQueuePut(menu_event->mqueue, &message, 0, 0);
@@ -24,7 +24,7 @@ void menu_event_timeout_callback(void *arg)
 
 menu_event_t * menu_event_alloc()
 {
-    menu_event_t * menu_event = furi_alloc(sizeof(menu_event_t));
+    menu_event_t *menu_event = furi_alloc(sizeof(menu_event_t));
 
     menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(menu_event_t), NULL);
     assert(menu_event->mqueue != NULL);
@@ -56,8 +56,9 @@ menu_message_t menu_event_next(menu_event_t *menu_event) {
     return message;
 }
 
-void menu_event_input_callback(InputEvent *input_event, menu_event_t *menu_event)
+void menu_event_input_callback(InputEvent *input_event, void *context)
 {
+    menu_event_t *menu_event = context;
     menu_message_t message;
 
     if (!input_event->state) return;

@@ -9,10 +9,10 @@ struct gui_event_t {
     osMessageQueueId_t      mqueue;
 };
 
-void gui_event_input_events_callback(const void* value, size_t size, void* ctx)
+void gui_event_input_events_callback(const void* value, size_t size, void *ctx)
 {
     assert(ctx);
-    gui_event_t * gui_event = ctx;
+    gui_event_t *gui_event = ctx;
 
     gui_message_t message;
     message.type = GUI_MESSAGE_TYPE_INPUT;
@@ -24,7 +24,7 @@ void gui_event_input_events_callback(const void* value, size_t size, void* ctx)
 
 gui_event_t * gui_event_alloc()
 {
-    gui_event_t * gui_event = furi_alloc(sizeof(gui_event_t));
+    gui_event_t *gui_event = furi_alloc(sizeof(gui_event_t));
     // Allocate message que
     gui_event->mqueue = osMessageQueueNew(GUI_EVENT_MQUEUE_SIZE, sizeof(gui_event_t), NULL);
     assert(gui_event->mqueue);
