@@ -1,4 +1,5 @@
 #include "canvas.h"
+#include "canvas_i.h"
 
 #include <assert.h>
 #include <furi.h>
@@ -7,12 +8,10 @@
 struct canvas_t {
     FuriRecordSubscriber *fb_record;
     u8g2_t *fb;
-
-    uint8_t width;
-    uint8_t height;
-
     uint8_t offset_x;
     uint8_t offset_y;
+    uint8_t width;
+    uint8_t height;
 };
 
 canvas_t * canvas_alloc()
@@ -25,15 +24,26 @@ canvas_t * canvas_alloc()
 
 void canvas_free(canvas_t *canvas)
 {
+    assert(canvas);
     free(canvas);
 }
 
 void canvas_commit(canvas_t *canvas)
 {
+    assert(canvas);
     if (canvas->fb) {
         furi_commit(canvas->fb_record);
         canvas->fb = NULL;
     }
+}
+
+void canvas_frame_set(canvas_t *canvas, uint8_t offset_x, uint8_t offset_y, uint8_t width, uint8_t height)
+{
+    assert(canvas);
+    canvas->offset_x = offset_x;
+    canvas->offset_y = offset_y;
+    canvas->width = width;
+    canvas->height = height;
 }
 
 u8g2_t * canvas_fb(canvas_t *canvas) {

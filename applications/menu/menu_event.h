@@ -22,7 +22,7 @@ menu_event_t * menu_event_alloc();
 
 void menu_event_free(menu_event_t * menu_event);
 
-void menu_event_active_notify(menu_event_t * menu_event);
+void menu_event_activity_notify(menu_event_t * menu_event);
 
 menu_message_t * menu_event_next(menu_event_t * menu_event);
 

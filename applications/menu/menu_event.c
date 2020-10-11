@@ -67,7 +67,7 @@ menu_event_t * menu_event_alloc()
     return menu_event;
 }
 
-void menu_event_active_notify(menu_event_t * menu_event)
+void menu_event_activity_notify(menu_event_t * menu_event)
 {
     osTimerStart(menu_event->timeout_timer, 60000U); // 1m timeout, return to main
 }
