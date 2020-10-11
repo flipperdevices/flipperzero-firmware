@@ -75,7 +75,7 @@ void widget_draw(widget_t * widget, canvas_t *canvas)
     if (widget->draw_callback) widget->draw_callback(canvas, widget->draw_callback_context);
 }
 
-void widget_input(widget_t * widget, InputEvent event)
+void widget_input(widget_t * widget, InputEvent *event)
 {
     assert(widget);
     assert(widget->gui);

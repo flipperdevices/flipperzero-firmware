@@ -20,7 +20,6 @@ struct menu_t {
     menu_item_t             *root;
     menu_item_t             *current;
     uint32_t                position;
-    bool                    is_active;
 };
 
 void menu_widget_callback(canvas_t *canvas, void *context);
@@ -35,7 +34,7 @@ menu_t * menu_alloc()
     // Allocate and configure widget
     menu->widget = widget_alloc();
     widget_draw_callback_set(menu->widget, menu_widget_callback, menu);
-    // widget_input_callback_set(menu->event, menu);
+    widget_input_callback_set(menu->widget, menu_event_input_callback, menu->event);
 
     // Open GUI and register fullscreen widget
     menu->gui_record = furi_open("gui", false, false, NULL, NULL, NULL);
@@ -52,7 +51,7 @@ void menu_build_main(menu_t *menu)
 {
     assert(menu);
     // Root point
-    menu->root = menu->current = menu_item_alloc_menu(NULL, NULL);
+    menu->root = menu_item_alloc_menu(NULL, NULL);
 
     menu_item_add(menu, menu_item_alloc_function("Sub 1 gHz", NULL, NULL));
     menu_item_add(menu, menu_item_alloc_function("125 kHz RFID", NULL, NULL));
@@ -84,8 +83,11 @@ void menu_widget_callback(canvas_t *canvas, void *context)
     assert(canvas); assert(context);
 
     menu_t *menu = context;
-    if (!menu->is_active) {
+    if (!menu->current) {
         canvas_clear(canvas);
+        canvas_color_set(canvas, COLOR_BLACK);
+        canvas_font_set(canvas, CANVAS_FONT_PRIMARY);
+        canvas_str_draw(canvas, 2, 32, "Idle Screen");
         return;
     }
 
@@ -135,8 +137,8 @@ void menu_ok(menu_t *menu)
 {
     assert(menu);
 
-    if (!menu->is_active) {
-        menu->is_active = true;
+    if (!menu->current) {
+        menu->current = menu->root;
         menu_update(menu);
         return;
     }
@@ -172,7 +174,7 @@ void menu_exit(menu_t *menu)
 {
     assert(menu);
     menu->position = 0;
-    menu->is_active = false;
+    menu->current = NULL;
     menu_update(menu);
 }
 
@@ -181,33 +183,30 @@ void menu_task(void * p)
     menu_t * menu = menu_alloc();
     menu_build_main(menu);
     menu_update(menu);
-    
+
     if(!furi_create("menu", menu, sizeof(menu))) {
         printf("[menu_task] cannot create the menu record\n");
         furiac_exit(NULL);
     }
 
     while(1) {
-        menu_message_t * m = menu_event_next(menu->event);
-        if (m == NULL) {
-            continue;
-        }
+        menu_message_t m = menu_event_next(menu->event);
 
-        if (!menu->is_active && m->type != MENU_MESSAGE_TYPE_OK) {
+        if (!menu->current && m.type != MENU_MESSAGE_TYPE_OK) {
             continue;
-        } else if (m->type == MENU_MESSAGE_TYPE_UP) {
+        } else if (m.type == MENU_MESSAGE_TYPE_UP) {
             menu_up(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_DOWN) {
+        } else if (m.type == MENU_MESSAGE_TYPE_DOWN) {
             menu_down(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_OK) {
+        } else if (m.type == MENU_MESSAGE_TYPE_OK) {
             menu_ok(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_LEFT) {
+        } else if (m.type == MENU_MESSAGE_TYPE_LEFT) {
             menu_back(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_RIGHT) {
+        } else if (m.type == MENU_MESSAGE_TYPE_RIGHT) {
             menu_ok(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_BACK) {
+        } else if (m.type == MENU_MESSAGE_TYPE_BACK) {
             menu_back(menu);
-        } else if (m->type == MENU_MESSAGE_TYPE_IDLE) {
+        } else if (m.type == MENU_MESSAGE_TYPE_IDLE) {
             menu_exit(menu);
         } else {
             // TODO: fail somehow?

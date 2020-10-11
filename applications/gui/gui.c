@@ -5,23 +5,16 @@
 #include <stdio.h>
 #include <m-array.h>
 
+#include "gui_event.h"
 #include "canvas.h"
 #include "canvas_i.h"
 #include "widget.h"
 #include "widget_i.h"
 
-#define GUI_EVENT_MQUEUE_SIZE 32
-#define GUI_EVENT_TYPE_REDRAW 0x00
-
 ARRAY_DEF(widget_array, widget_t *, M_PTR_OPLIST);
 
-typedef struct {
-    uint8_t type;
-} gui_event_t;
-
 struct gui_t {
-    osMessageQueueId_t  mqueue;
-    gui_event_t         event;
+    gui_event_t         *event;
     canvas_t            *canvas;
     widget_array_t      widgets_status_bar;
     widget_array_t      widgets;
@@ -64,9 +57,9 @@ void gui_widget_dialog_add(gui_t *gui, widget_t *widget)
 void gui_update(gui_t *gui)
 {
     assert(gui);
-    gui_event_t event;
-    event.type = GUI_EVENT_TYPE_REDRAW;
-    osMessageQueuePut(gui->mqueue, &event, 0, 0);
+    gui_message_t message;
+    message.type = GUI_MESSAGE_TYPE_REDRAW;
+    gui_event_messsage_send(gui->event, &message);
 }
 
 bool gui_redraw_fs(gui_t *gui) {
@@ -78,6 +71,7 @@ bool gui_redraw_fs(gui_t *gui) {
         if (widget_is_enabled(widget)) {
             widget_draw(widget, gui->canvas);
             is_fullscreen_drawn = true;
+            break;
         }
     }
     return is_fullscreen_drawn;
@@ -103,6 +97,7 @@ void gui_redraw_dialogs(gui_t *gui)
         widget_t *widget = *widget_array_get(gui->widgets_dialog, widgets_dialog_count-i-1);
         if (widget_is_enabled(widget)) {
             widget_draw(widget, gui->canvas);
+            break;
         }
     }
 }
@@ -120,6 +115,20 @@ void gui_redraw(gui_t *gui)
     canvas_commit(gui->canvas);
 }
 
+void gui_input(gui_t *gui, InputEvent input_event)
+{
+    assert(gui);
+
+    size_t widgets_fs_count = widget_array_size(gui->widgets_fs);
+    for (size_t i=0; i<widgets_fs_count; i++) {
+        widget_t *widget = *widget_array_get(gui->widgets_fs, widgets_fs_count-i-1);
+        if (widget_is_enabled(widget)) {
+            widget_input(widget, &input_event);
+            return;
+        }
+    }
+}
+
 gui_t * gui_alloc()
 {
     gui_t *gui = furi_alloc(sizeof(gui_t));
@@ -128,9 +137,8 @@ gui_t * gui_alloc()
     widget_array_init(gui->widgets);
     widget_array_init(gui->widgets_fs);
     widget_array_init(gui->widgets_dialog);
-    // Message queue
-    gui->mqueue = osMessageQueueNew(GUI_EVENT_MQUEUE_SIZE, sizeof(gui_event_t), NULL);
-    assert(gui->mqueue);
+    // Event dispatcher
+    gui->event = gui_event_alloc();
     // Drawing canvas
     gui->canvas = canvas_alloc();
 
@@ -140,18 +148,19 @@ gui_t * gui_alloc()
 void gui_task(void *p)
 {
     gui_t *gui = gui_alloc();
-
+    // Create FURI record
     if(!furi_create("gui", gui, sizeof(gui))) {
         printf("[gui_task] cannot create the gui record\n");
         furiac_exit(NULL);
     }
-
+    // Forever dispatch 
     while (1) {
-        if (osMessageQueueGet(gui->mqueue, &gui->event, NULL, osWaitForever) == osOK) {
-            if (gui->event.type == GUI_EVENT_TYPE_REDRAW) {
-                // TODO: furi lock
-                gui_redraw(gui);
-            }
-        } 
+        gui_message_t message = gui_event_message_next(gui->event);
+        if (message.type == GUI_MESSAGE_TYPE_REDRAW) {
+            // TODO: furi lock maybe?
+            gui_redraw(gui);
+        } else if (message.type == GUI_MESSAGE_TYPE_INPUT) {
+            gui_input(gui, message.input);
+        }
     }
 }

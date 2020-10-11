@@ -7,7 +7,7 @@ typedef struct canvas_t canvas_t;
 typedef struct widget_t widget_t;
 
 typedef void (*widget_draw_callback_t)(canvas_t *canvas, void *context);
-typedef void (*widget_input_callback_t)(InputEvent event, void *context);
+typedef void (*widget_input_callback_t)(InputEvent *event, void *context);
 
 widget_t * widget_alloc();
 void widget_free(widget_t * widget);
