@@ -10,4 +10,3 @@ void gui_widget_add(GUI *gui, Widget *widget);
 void gui_widget_fs_add(GUI *gui, Widget *widget);
 
 void gui_widget_dialog_add(GUI *gui, Widget *widget);
-

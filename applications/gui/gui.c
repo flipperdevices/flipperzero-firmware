@@ -65,41 +65,44 @@ void gui_update(GUI* gui) {
     gui_event_messsage_send(gui->event, &message);
 }
 
-bool gui_redraw_fs(GUI* gui) {
-    canvas_frame_set(gui->canvas, 0, 0, 128, 64);
-    bool is_fullscreen_drawn = false;
-    size_t widgets_fs_count = widget_array_size(gui->widgets_fs);
-    for(size_t i = 0; i < widgets_fs_count; i++) {
-        Widget* widget = *widget_array_get(gui->widgets_fs, widgets_fs_count - i - 1);
+Widget* gui_widget_find_enabled(widget_array_t array) {
+    size_t widgets_count = widget_array_size(array);
+    for(size_t i = 0; i < widgets_count; i++) {
+        Widget* widget = *widget_array_get(array, widgets_count - i - 1);
         if(widget_is_enabled(widget)) {
-            widget_draw(widget, gui->canvas);
-            is_fullscreen_drawn = true;
-            break;
+            return widget;
         }
     }
-    return is_fullscreen_drawn;
+    return NULL;
+}
+
+bool gui_redraw_fs(GUI* gui) {
+    canvas_frame_set(gui->canvas, 0, 0, 128, 64);
+    Widget* widget = gui_widget_find_enabled(gui->widgets_fs);
+    if(widget) {
+        widget_draw(widget, gui->canvas);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void gui_redraw_status_bar(GUI* gui) {
     canvas_frame_set(gui->canvas, 0, 0, 128, 64);
-    widget_draw(*widget_array_back(gui->widgets_status_bar), gui->canvas);
+    Widget* widget = gui_widget_find_enabled(gui->widgets_status_bar);
+    if (widget) widget_draw(widget, gui->canvas);
 }
 
 void gui_redraw_normal(GUI* gui) {
     canvas_frame_set(gui->canvas, 0, 9, 128, 55);
-    widget_draw(*widget_array_back(gui->widgets), gui->canvas);
+    Widget* widget = gui_widget_find_enabled(gui->widgets);
+    if (widget) widget_draw(widget, gui->canvas);
 }
 
 void gui_redraw_dialogs(GUI* gui) {
     canvas_frame_set(gui->canvas, 10, 20, 118, 44);
-    size_t widgets_dialog_count = widget_array_size(gui->widgets_dialog);
-    for(size_t i = 0; i < widgets_dialog_count; i++) {
-        Widget* widget = *widget_array_get(gui->widgets_dialog, widgets_dialog_count - i - 1);
-        if(widget_is_enabled(widget)) {
-            widget_draw(widget, gui->canvas);
-            break;
-        }
-    }
+    Widget* widget = gui_widget_find_enabled(gui->widgets_dialog);
+    if (widget) widget_draw(widget, gui->canvas);
 }
 
 void gui_redraw(GUI* gui) {
@@ -117,13 +120,12 @@ void gui_redraw(GUI* gui) {
 void gui_input(GUI* gui, InputEvent *input_event) {
     assert(gui);
 
-    size_t widgets_fs_count = widget_array_size(gui->widgets_fs);
-    for(size_t i = 0; i < widgets_fs_count; i++) {
-        Widget* widget = *widget_array_get(gui->widgets_fs, widgets_fs_count - i - 1);
-        if(widget_is_enabled(widget)) {
-            widget_input(widget, input_event);
-            return;
-        }
+    Widget* widget = gui_widget_find_enabled(gui->widgets_dialog);
+    if (!widget) widget = gui_widget_find_enabled(gui->widgets_fs);
+    if (!widget) widget = gui_widget_find_enabled(gui->widgets);
+
+    if (widget) {
+        widget_input(widget, input_event);
     }
 }
 
