@@ -4,40 +4,37 @@
 #include <string.h>
 #include <furi.h>
 
-struct menu_item_t {
-    menu_item_type_t    type;
-    const char          *label;
-    void                *icon;
-    menu_item_t         *parent;
-    void                *data;
+struct MenuItem {
+    MenuItemType type;
+    const char* label;
+    void* icon;
+    MenuItem* parent;
+    void* data;
 };
 
-menu_item_t * menu_item_alloc()
-{
-    menu_item_t *menu_item = furi_alloc(sizeof(menu_item_t));
+MenuItem* menu_item_alloc() {
+    MenuItem* menu_item = furi_alloc(sizeof(MenuItem));
     return menu_item;
 }
 
-menu_item_t * menu_item_alloc_menu(const char *label, void *icon)
-{
-    menu_item_t *menu_item = menu_item_alloc();
+MenuItem* menu_item_alloc_menu(const char* label, void* icon) {
+    MenuItem* menu_item = menu_item_alloc();
 
-    menu_item->type = MENU_ITEM_TYPE_MENU;
+    menu_item->type = MenuItemTypeMenu;
     menu_item->label = label;
     menu_item->icon = icon;
 
-    menu_items_array_t *items = furi_alloc(sizeof(menu_items_array_t));
-    menu_items_array_init(*items);
+    MenuItemArray_t* items = furi_alloc(sizeof(MenuItemArray_t));
+    MenuItemArray_init(*items);
     menu_item->data = items;
 
     return menu_item;
 }
 
-menu_item_t * menu_item_alloc_function(const char *label, void *icon, menu_function_t function)
-{
-    menu_item_t *menu_item = menu_item_alloc();
+MenuItem* menu_item_alloc_function(const char* label, void* icon, MenuItemCallback function) {
+    MenuItem* menu_item = menu_item_alloc();
 
-    menu_item->type = MENU_ITEM_TYPE_FUNCTION;
+    menu_item->type = MenuItemTypeFunction;
     menu_item->label = label;
     menu_item->icon = icon;
     menu_item->data = function;
@@ -45,58 +42,48 @@ menu_item_t * menu_item_alloc_function(const char *label, void *icon, menu_funct
     return menu_item;
 }
 
-void menu_item_release(menu_item_t *menu_item)
-{
-    if (menu_item->type == MENU_ITEM_TYPE_MENU) free(menu_item->data);
+void menu_item_release(MenuItem* menu_item) {
+    if(menu_item->type == MenuItemTypeMenu) free(menu_item->data);
     free(menu_item);
 }
 
-menu_item_t * menu_item_get_parent(menu_item_t *menu_item)
-{
+MenuItem* menu_item_get_parent(MenuItem* menu_item) {
     return menu_item->parent;
 }
 
-void menu_item_subitem_add(menu_item_t *menu_item, menu_item_t *sub_item)
-{
-    assert(menu_item->type == MENU_ITEM_TYPE_MENU);
-    menu_items_array_t *items = menu_item->data;
+void menu_item_subitem_add(MenuItem* menu_item, MenuItem* sub_item) {
+    assert(menu_item->type == MenuItemTypeMenu);
+    MenuItemArray_t* items = menu_item->data;
     sub_item->parent = menu_item;
-    menu_items_array_push_back(*items, sub_item);
+    MenuItemArray_push_back(*items, sub_item);
 }
 
-uint8_t menu_item_get_type(menu_item_t *menu_item)
-{
+uint8_t menu_item_get_type(MenuItem* menu_item) {
     return menu_item->type;
 }
 
-void menu_item_set_label(menu_item_t *menu_item, const char *label)
-{
+void menu_item_set_label(MenuItem* menu_item, const char* label) {
     menu_item->label = label;
 }
 
-const char * menu_item_get_label(menu_item_t *menu_item)
-{
+const char* menu_item_get_label(MenuItem* menu_item) {
     return menu_item->label;
 }
 
-void menu_item_set_icon(menu_item_t *menu_item, void *icon)
-{
+void menu_item_set_icon(MenuItem* menu_item, void* icon) {
     menu_item->icon = icon;
 }
 
-void * menu_item_get_icon(menu_item_t *menu_item)
-{
+void* menu_item_get_icon(MenuItem* menu_item) {
     return menu_item->icon;
 }
 
-menu_items_array_t * menu_item_get_subitems(menu_item_t *menu_item)
-{
-    assert(menu_item->type == MENU_ITEM_TYPE_MENU);
+MenuItemArray_t* menu_item_get_subitems(MenuItem* menu_item) {
+    assert(menu_item->type == MenuItemTypeMenu);
     return menu_item->data;
 }
 
-menu_function_t menu_item_get_function(menu_item_t *menu_item)
-{
-    assert(menu_item->type == MENU_ITEM_TYPE_FUNCTION);
+MenuItemCallback menu_item_get_function(MenuItem* menu_item) {
+    assert(menu_item->type == MenuItemTypeFunction);
     return menu_item->data;
 }

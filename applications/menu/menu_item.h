@@ -4,34 +4,34 @@
 #include <m-array.h>
 
 typedef enum {
-    MENU_ITEM_TYPE_MENU     = 0x00,
-    MENU_ITEM_TYPE_FUNCTION = 0x01
-} menu_item_type_t;
+    MenuItemTypeMenu        = 0x00,
+    MenuItemTypeFunction    = 0x01,
+} MenuItemType;
 
-typedef void (*menu_function_t)();
-typedef struct menu_item_t menu_item_t;
+typedef struct MenuItem MenuItem;
+typedef void (*MenuItemCallback)();
 
-ARRAY_DEF(menu_items_array, menu_item_t *, M_PTR_OPLIST);
+ARRAY_DEF(MenuItemArray, MenuItem *, M_PTR_OPLIST);
 
-menu_item_t * menu_item_alloc_menu(const char *label, void *icon);
+MenuItem * menu_item_alloc_menu(const char *label, void *icon);
 
-menu_item_t * menu_item_alloc_function(const char *label, void *icon, menu_function_t function);
+MenuItem * menu_item_alloc_function(const char *label, void *icon, MenuItemCallback function);
 
-void menu_item_release(menu_item_t *menu_item);
+void menu_item_release(MenuItem *menu_item);
 
-menu_item_t * menu_item_get_parent(menu_item_t *menu_item);
+MenuItem * menu_item_get_parent(MenuItem *menu_item);
 
-void menu_item_subitem_add(menu_item_t *menu_item, menu_item_t *sub_item);
+void menu_item_subitem_add(MenuItem *menu_item, MenuItem *sub_item);
 
-menu_item_type_t menu_item_get_type(menu_item_t *menu_item);
+MenuItemType menu_item_get_type(MenuItem *menu_item);
 
-void menu_item_set_label(menu_item_t *menu_item, const char *label);
-const char * menu_item_get_label(menu_item_t *menu_item);
+void menu_item_set_label(MenuItem *menu_item, const char *label);
+const char * menu_item_get_label(MenuItem *menu_item);
 
-void menu_item_set_icon(menu_item_t *menu_item, void *icon);
-void * menu_item_get_icon(menu_item_t *menu_item);
+void menu_item_set_icon(MenuItem *menu_item, void *icon);
+void * menu_item_get_icon(MenuItem *menu_item);
 
-menu_items_array_t * menu_item_get_subitems(menu_item_t *menu_item);
+MenuItemArray_t * menu_item_get_subitems(MenuItem *menu_item);
 
-menu_function_t menu_item_get_function(menu_item_t *menu_item);
+MenuItemCallback menu_item_get_function(MenuItem *menu_item);
 

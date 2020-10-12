@@ -4,18 +4,18 @@
 #include <input/input.h>
 
 typedef enum {
-    MENU_MESSAGE_TYPE_UP    = 0x00,
-    MENU_MESSAGE_TYPE_DOWN  = 0x01,
-    MENU_MESSAGE_TYPE_LEFT  = 0x02,
-    MENU_MESSAGE_TYPE_RIGHT = 0x03,
-    MENU_MESSAGE_TYPE_OK    = 0x04,
-    MENU_MESSAGE_TYPE_BACK  = 0x05,
-    MENU_MESSAGE_TYPE_IDLE  = 0x06,
-    MENU_MESSAGE_TYPE_WTF   = 0xFF
-} menu_message_type_t;
+    MenuMessageTypeUp       = 0x00,
+    MenuMessageTypeDown     = 0x01,
+    MenuMessageTypeLeft     = 0x02,
+    MenuMessageTypeRight    = 0x03,
+    MenuMessageTypeOk       = 0x04,
+    MenuMessageTypeBack     = 0x05,
+    MenuMessageTypeIdle     = 0x06,
+    MenuMessageTypeUnknown  = 0xFF,
+} MenuMessageType;
 
 typedef struct {
-    menu_message_type_t type;
+    MenuMessageType type;
     void                *data;
 } menu_message_t;
 

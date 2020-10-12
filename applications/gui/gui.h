@@ -1,13 +1,13 @@
 #pragma once
 
-typedef struct widget_t widget_t;
-typedef struct gui_t gui_t;
+typedef struct Widget Widget;
+typedef struct GUI GUI;
 
-void gui_widget_status_bar_add(gui_t *gui, widget_t *widget);
+void gui_widget_status_bar_add(GUI *gui, Widget *widget);
 
-void gui_widget_add(gui_t *gui, widget_t *widget);
+void gui_widget_add(GUI *gui, Widget *widget);
 
-void gui_widget_fs_add(gui_t *gui, widget_t *widget);
+void gui_widget_fs_add(GUI *gui, Widget *widget);
 
-void gui_widget_dialog_add(gui_t *gui, widget_t *widget);
+void gui_widget_dialog_add(GUI *gui, Widget *widget);
 

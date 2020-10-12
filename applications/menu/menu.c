@@ -1,5 +1,5 @@
 #include "menu.h"
-#include <cmsis_os2.h>
+#include <cmsis_os.h>
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -11,23 +11,22 @@
 #include "menu_event.h"
 #include "menu_item.h"
 
-struct menu_t {
-    menu_event_t            *event;
+struct Menu {
+    menu_event_t* event;
     // GUI
-    FuriRecordSubscriber    *gui_record;
-    widget_t                *widget;
+    FuriRecordSubscriber* gui_record;
+    Widget* widget;
     // State
-    menu_item_t             *root;
-    menu_item_t             *settings;
-    menu_item_t             *current;
-    uint32_t                position;
+    MenuItem* root;
+    MenuItem* settings;
+    MenuItem* current;
+    uint32_t position;
 };
 
-void menu_widget_callback(canvas_t *canvas, void *context);
+void menu_widget_callback(Canvas* canvas, void* context);
 
-menu_t * menu_alloc()
-{
-    menu_t *menu = furi_alloc(sizeof(menu_t));
+Menu* menu_alloc() {
+    Menu* menu = furi_alloc(sizeof(Menu));
 
     // Event dispatcher
     menu->event = menu_event_alloc();
@@ -40,7 +39,7 @@ menu_t * menu_alloc()
     // Open GUI and register fullscreen widget
     menu->gui_record = furi_open("gui", false, false, NULL, NULL, NULL);
     assert(menu->gui_record);
-    gui_t *gui = furi_take(menu->gui_record);
+    GUI* gui = furi_take(menu->gui_record);
     assert(gui);
     gui_widget_fs_add(gui, menu->widget);
     furi_commit(menu->gui_record);
@@ -48,8 +47,7 @@ menu_t * menu_alloc()
     return menu;
 }
 
-void menu_build_main(menu_t *menu)
-{
+void menu_build_main(Menu* menu) {
     assert(menu);
     // Root point
     menu->root = menu_item_alloc_menu(NULL, NULL);
@@ -74,22 +72,20 @@ void menu_build_main(menu_t *menu)
     menu_item_add(menu, menu->settings);
 }
 
-void menu_item_add(menu_t *menu, menu_item_t *item)
-{
+void menu_item_add(Menu* menu, MenuItem* item) {
     menu_item_subitem_add(menu->root, item);
 }
 
-void menu_settings_item_add(menu_t *menu, menu_item_t *item)
-{
+void menu_settings_item_add(Menu* menu, MenuItem* item) {
     menu_item_subitem_add(menu->settings, item);
 }
 
-void menu_widget_callback(canvas_t *canvas, void *context)
-{
-    assert(canvas); assert(context);
+void menu_widget_callback(Canvas* canvas, void* context) {
+    assert(canvas);
+    assert(context);
 
-    menu_t *menu = context;
-    if (!menu->current) {
+    Menu* menu = context;
+    if(!menu->current) {
         canvas_clear(canvas);
         canvas_color_set(canvas, COLOR_BLACK);
         canvas_font_set(canvas, CANVAS_FONT_PRIMARY);
@@ -97,77 +93,72 @@ void menu_widget_callback(canvas_t *canvas, void *context)
         return;
     }
 
-    menu_items_array_t *items = menu_item_get_subitems(menu->current);
+    MenuItemArray_t* items = menu_item_get_subitems(menu->current);
 
     canvas_clear(canvas);
     canvas_color_set(canvas, COLOR_BLACK);
     canvas_font_set(canvas, CANVAS_FONT_SECONDARY);
 
-    for (size_t i=0; i<5; i++) {
-        size_t shift_position = i + menu->position + menu_items_array_size(*items) - 2;
-        shift_position = shift_position % (menu_items_array_size(*items));
-        menu_item_t *item = *menu_items_array_get(*items, shift_position);
-        canvas_str_draw(canvas, 2, 12*(i+1), menu_item_get_label(item));
+    for(size_t i = 0; i < 5; i++) {
+        size_t shift_position = i + menu->position + MenuItemArray_size(*items) - 2;
+        shift_position = shift_position % (MenuItemArray_size(*items));
+        MenuItem* item = *MenuItemArray_get(*items, shift_position);
+        canvas_str_draw(canvas, 2, 12 * (i + 1), menu_item_get_label(item));
     }
 }
 
-void menu_update(menu_t *menu)
-{
+void menu_update(Menu* menu) {
     assert(menu);
 
     menu_event_activity_notify(menu->event);
     widget_update(menu->widget);
 }
 
-void menu_up(menu_t *menu)
-{
+void menu_up(Menu* menu) {
     assert(menu);
 
-    menu_items_array_t *items = menu_item_get_subitems(menu->current);
-    if (menu->position == 0) menu->position = menu_items_array_size(*items);
+    MenuItemArray_t* items = menu_item_get_subitems(menu->current);
+    if(menu->position == 0) menu->position = MenuItemArray_size(*items);
     menu->position--;
     menu_update(menu);
 }
 
-void menu_down(menu_t *menu)
-{
+void menu_down(Menu* menu) {
     assert(menu);
 
-    menu_items_array_t *items = menu_item_get_subitems(menu->current);
+    MenuItemArray_t* items = menu_item_get_subitems(menu->current);
     menu->position++;
-    menu->position = menu->position % menu_items_array_size(*items);
+    menu->position = menu->position % MenuItemArray_size(*items);
     menu_update(menu);
 }
 
-void menu_ok(menu_t *menu)
-{
+void menu_ok(Menu* menu) {
     assert(menu);
 
-    if (!menu->current) {
+    if(!menu->current) {
         menu->current = menu->root;
         menu_update(menu);
         return;
     }
 
-    menu_items_array_t *items = menu_item_get_subitems(menu->current);
-    menu_item_t *item = *menu_items_array_get(*items, menu->position);
-    menu_item_type_t type = menu_item_get_type(item);
+    MenuItemArray_t* items = menu_item_get_subitems(menu->current);
+    MenuItem* item = *MenuItemArray_get(*items, menu->position);
+    MenuItemType type = menu_item_get_type(item);
 
-    if (type == MENU_ITEM_TYPE_MENU) {
+    if(type == MenuItemTypeMenu) {
         menu->current = item;
         menu->position = 0;
         menu_update(menu);
-    } else if (type == MENU_ITEM_TYPE_FUNCTION) {
-        menu_function_t function = menu_item_get_function(item);
-        if (function) function();
+    } else if(type == MenuItemTypeFunction) {
+        MenuItemCallback function = menu_item_get_function(item);
+        if(function) function();
     }
 }
 
-void menu_back(menu_t *menu)
-{
+void menu_back(Menu* menu) {
     assert(menu);
-    menu_item_t *parent = menu_item_get_parent(menu->current);
-    if (parent) {
+    MenuItem* parent = menu_item_get_parent(menu->current);
+    if(parent) {
         menu->current = parent;
         menu->position = 0;
         menu_update(menu);
@@ -176,17 +167,15 @@ void menu_back(menu_t *menu)
     }
 }
 
-void menu_exit(menu_t *menu)
-{
+void menu_exit(Menu* menu) {
     assert(menu);
     menu->position = 0;
     menu->current = NULL;
     menu_update(menu);
 }
 
-void menu_task(void *p)
-{
-    menu_t *menu = menu_alloc();
+void menu_task(void* p) {
+    Menu* menu = menu_alloc();
     menu_build_main(menu);
     menu_update(menu);
 
@@ -198,21 +187,21 @@ void menu_task(void *p)
     while(1) {
         menu_message_t m = menu_event_next(menu->event);
 
-        if (!menu->current && m.type != MENU_MESSAGE_TYPE_OK) {
+        if(!menu->current && m.type != MenuMessageTypeOk) {
             continue;
-        } else if (m.type == MENU_MESSAGE_TYPE_UP) {
+        } else if(m.type == MenuMessageTypeUp) {
             menu_up(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_DOWN) {
+        } else if(m.type == MenuMessageTypeDown) {
             menu_down(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_OK) {
+        } else if(m.type == MenuMessageTypeOk) {
             menu_ok(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_LEFT) {
+        } else if(m.type == MenuMessageTypeLeft) {
             menu_back(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_RIGHT) {
+        } else if(m.type == MenuMessageTypeRight) {
             menu_ok(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_BACK) {
+        } else if(m.type == MenuMessageTypeBack) {
             menu_back(menu);
-        } else if (m.type == MENU_MESSAGE_TYPE_IDLE) {
+        } else if(m.type == MenuMessageTypeIdle) {
             menu_exit(menu);
         } else {
             // TODO: fail somehow?
