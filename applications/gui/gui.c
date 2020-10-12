@@ -114,14 +114,14 @@ void gui_redraw(GUI* gui) {
     canvas_commit(gui->canvas);
 }
 
-void gui_input(GUI* gui, InputEvent input_event) {
+void gui_input(GUI* gui, InputEvent *input_event) {
     assert(gui);
 
     size_t widgets_fs_count = widget_array_size(gui->widgets_fs);
     for(size_t i = 0; i < widgets_fs_count; i++) {
         Widget* widget = *widget_array_get(gui->widgets_fs, widgets_fs_count - i - 1);
         if(widget_is_enabled(widget)) {
-            widget_input(widget, &input_event);
+            widget_input(widget, input_event);
             return;
         }
     }
@@ -153,10 +153,9 @@ void gui_task(void* p) {
     while(1) {
         GUIMessage message = gui_event_message_next(gui->event);
         if(message.type == GUIMessageTypeRedraw) {
-            // TODO: furi lock maybe?
             gui_redraw(gui);
         } else if(message.type == GUIMessageTypeInput) {
-            gui_input(gui, message.input);
+            gui_input(gui, &message.input);
         }
     }
 }

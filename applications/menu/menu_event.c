@@ -9,53 +9,69 @@
 
 #define MENU_MESSAGE_MQUEUE_SIZE 16
 
-struct menu_event_t {
-    osMessageQueueId_t mqueue;
-    osTimerId_t timeout_timer;
+struct MenuEvent {
+    osMessageQueueId_t  mqueue;
+    osTimerId_t         timeout_timer;
+    osMutexId_t         lock_mutex;
 };
 
-void menu_event_timeout_callback(void* arg) {
-    menu_event_t* menu_event = arg;
-    menu_message_t message;
+void MenuEventimeout_callback(void* arg) {
+    MenuEvent* menu_event = arg;
+    MenuMessage message;
     message.type = MenuMessageTypeIdle;
     osMessageQueuePut(menu_event->mqueue, &message, 0, 0);
 }
 
-menu_event_t* menu_event_alloc() {
-    menu_event_t* menu_event = furi_alloc(sizeof(menu_event_t));
+MenuEvent* menu_event_alloc() {
+    MenuEvent* menu_event = furi_alloc(sizeof(MenuEvent));
 
-    menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(menu_event_t), NULL);
-    assert(menu_event->mqueue != NULL);
+    menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(MenuEvent), NULL);
+    assert(menu_event->mqueue);
 
     menu_event->timeout_timer =
-        osTimerNew(menu_event_timeout_callback, osTimerOnce, menu_event, NULL);
-    assert(menu_event->timeout_timer != NULL);
+        osTimerNew(MenuEventimeout_callback, osTimerOnce, menu_event, NULL);
+    assert(menu_event->timeout_timer);
+
+    menu_event->lock_mutex = osMutexNew(NULL);
+    assert(menu_event->lock_mutex);
+
+    menu_event_lock(menu_event);
 
     return menu_event;
 }
 
-void menu_event_free(menu_event_t* menu_event) {
+void menu_event_free(MenuEvent* menu_event) {
     assert(menu_event);
     assert(osMessageQueueDelete(menu_event->mqueue) == osOK);
     free(menu_event);
 }
 
-void menu_event_activity_notify(menu_event_t* menu_event) {
+void menu_event_lock(MenuEvent *menu_event) {
+    assert(osMutexAcquire(menu_event->lock_mutex, osWaitForever) == osOK);
+}
+
+void menu_event_unlock(MenuEvent *menu_event) {
+    assert(osMutexRelease(menu_event->lock_mutex) == osOK);
+}
+
+void menu_event_activity_notify(MenuEvent* menu_event) {
     assert(menu_event);
     osTimerStart(menu_event->timeout_timer, 60000U); // 1m timeout, return to main
 }
 
-menu_message_t menu_event_next(menu_event_t* menu_event) {
+MenuMessage menu_event_next(MenuEvent* menu_event) {
     assert(menu_event);
-    menu_message_t message;
+    MenuMessage message;
+    menu_event_unlock(menu_event);
     while(osMessageQueueGet(menu_event->mqueue, &message, NULL, osWaitForever) != osOK) {
     };
+    menu_event_lock(menu_event);
     return message;
 }
 
 void menu_event_input_callback(InputEvent* input_event, void* context) {
-    menu_event_t* menu_event = context;
-    menu_message_t message;
+    MenuEvent* menu_event = context;
+    MenuMessage message;
 
     if(!input_event->state) return;
 

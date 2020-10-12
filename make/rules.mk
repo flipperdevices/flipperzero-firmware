@@ -14,11 +14,18 @@ DEPS = $(OBJECTS:.o=.d)
 $(shell mkdir -p $(OBJ_DIR))
 
 BUILD_FLAGS_SHELL=\
-	echo -n "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
-	diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp > /dev/null \
+	echo "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
+	diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp 2>/dev/null \
 		&& ( echo "CFLAGS ok"; rm $(OBJ_DIR)/BUILD_FLAGS.tmp) \
 		|| ( echo "CFLAGS has been changed"; mv $(OBJ_DIR)/BUILD_FLAGS.tmp $(OBJ_DIR)/BUILD_FLAGS )
 $(info $(shell $(BUILD_FLAGS_SHELL)))
+
+CHECK_AND_REINIT_SUBMODULES_SHELL=\
+	if git submodule status | egrep -q '^[-]|^[+]' ; then \
+		echo "INFO: Need to reinitialize git submodules"; \
+		git submodule update --init; \
+	fi
+$(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin
 
@@ -35,15 +42,15 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
+$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tASM\t" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -71,13 +78,6 @@ debug: flash
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) $(OBJ_DIR)/*
-
-.PHONY: check-and-reinit-submodules
-check-and-reinit-submodules:
-	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
-		echo "INFO: Need to reinitialize git submodules"; \
-		git submodule update --init; \
-	fi
 
 z: clean
 	$(MAKE) all

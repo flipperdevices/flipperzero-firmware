@@ -12,7 +12,7 @@
 #include "menu_item.h"
 
 struct Menu {
-    menu_event_t* event;
+    MenuEvent* event;
     // GUI
     FuriRecordSubscriber* gui_record;
     Widget* widget;
@@ -39,10 +39,6 @@ Menu* menu_alloc() {
     // Open GUI and register fullscreen widget
     menu->gui_record = furi_open("gui", false, false, NULL, NULL, NULL);
     assert(menu->gui_record);
-    GUI* gui = furi_take(menu->gui_record);
-    assert(gui);
-    gui_widget_fs_add(gui, menu->widget);
-    furi_commit(menu->gui_record);
 
     return menu;
 }
@@ -85,26 +81,28 @@ void menu_widget_callback(Canvas* canvas, void* context) {
     assert(context);
 
     Menu* menu = context;
+
+    menu_event_lock(menu->event);
+
     if(!menu->current) {
         canvas_clear(canvas);
         canvas_color_set(canvas, COLOR_BLACK);
         canvas_font_set(canvas, CANVAS_FONT_PRIMARY);
         canvas_str_draw(canvas, 2, 32, "Idle Screen");
-        return;
+    } else {
+        MenuItemArray_t* items = menu_item_get_subitems(menu->current);
+        canvas_clear(canvas);
+        canvas_color_set(canvas, COLOR_BLACK);
+        canvas_font_set(canvas, CANVAS_FONT_SECONDARY);
+        for(size_t i = 0; i < 5; i++) {
+            size_t shift_position = i + menu->position + MenuItemArray_size(*items) - 2;
+            shift_position = shift_position % (MenuItemArray_size(*items));
+            MenuItem* item = *MenuItemArray_get(*items, shift_position);
+            canvas_str_draw(canvas, 2, 12 * (i + 1), menu_item_get_label(item));
+        }
     }
 
-    MenuItemArray_t* items = menu_item_get_subitems(menu->current);
-
-    canvas_clear(canvas);
-    canvas_color_set(canvas, COLOR_BLACK);
-    canvas_font_set(canvas, CANVAS_FONT_SECONDARY);
-
-    for(size_t i = 0; i < 5; i++) {
-        size_t shift_position = i + menu->position + MenuItemArray_size(*items) - 2;
-        shift_position = shift_position % (MenuItemArray_size(*items));
-        MenuItem* item = *MenuItemArray_get(*items, shift_position);
-        canvas_str_draw(canvas, 2, 12 * (i + 1), menu_item_get_label(item));
-    }
+    menu_event_unlock(menu->event);
 }
 
 void menu_update(Menu* menu) {
@@ -177,7 +175,12 @@ void menu_exit(Menu* menu) {
 void menu_task(void* p) {
     Menu* menu = menu_alloc();
     menu_build_main(menu);
-    menu_update(menu);
+
+    // Register widget
+    GUI* gui = furi_take(menu->gui_record);
+    assert(gui);
+    gui_widget_fs_add(gui, menu->widget);
+    furi_commit(menu->gui_record);
 
     if(!furi_create("menu", menu, sizeof(menu))) {
         printf("[menu_task] cannot create the menu record\n");
@@ -185,7 +188,7 @@ void menu_task(void* p) {
     }
 
     while(1) {
-        menu_message_t m = menu_event_next(menu->event);
+        MenuMessage m = menu_event_next(menu->event);
 
         if(!menu->current && m.type != MenuMessageTypeOk) {
             continue;

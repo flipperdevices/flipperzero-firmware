@@ -16,17 +16,21 @@ typedef enum {
 
 typedef struct {
     MenuMessageType type;
-    void                *data;
-} menu_message_t;
+    void            *data;
+} MenuMessage;
 
-typedef struct menu_event_t menu_event_t;
+typedef struct MenuEvent MenuEvent;
 
-menu_event_t * menu_event_alloc();
+MenuEvent * menu_event_alloc();
 
-void menu_event_free(menu_event_t *menu_event);
+void menu_event_free(MenuEvent *menu_event);
 
-void menu_event_activity_notify(menu_event_t *menu_event);
+void menu_event_lock(MenuEvent *menu_event);
 
-menu_message_t menu_event_next(menu_event_t *menu_event);
+void menu_event_unlock(MenuEvent *menu_event);
+
+void menu_event_activity_notify(MenuEvent *menu_event);
+
+MenuMessage menu_event_next(MenuEvent *menu_event);
 
 void menu_event_input_callback(InputEvent *input_event, void *context);

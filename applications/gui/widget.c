@@ -23,16 +23,19 @@ Widget* widget_alloc(WidgetDrawCallback callback, void* callback_context) {
 }
 
 void widget_free(Widget* widget) {
+    assert(widget);
     assert(widget->gui == NULL);
     free(widget);
 }
 
 void widget_enabled_set(Widget* widget, bool enabled) {
+    assert(widget);
     widget->is_enabled = enabled;
     widget_update(widget);
 }
 
 bool widget_is_enabled(Widget* widget) {
+    assert(widget);
     return widget->is_enabled;
 }
 
@@ -61,6 +64,7 @@ void widget_gui_set(Widget* widget, GUI* gui) {
 
 void widget_draw(Widget* widget, Canvas* canvas) {
     assert(widget);
+    assert(canvas);
     assert(widget->gui);
 
     if(widget->draw_callback) widget->draw_callback(canvas, widget->draw_callback_context);
@@ -68,6 +72,7 @@ void widget_draw(Widget* widget, Canvas* canvas) {
 
 void widget_input(Widget* widget, InputEvent* event) {
     assert(widget);
+    assert(event);
     assert(widget->gui);
 
     if(widget->input_callback) widget->input_callback(event, widget->input_callback_context);
