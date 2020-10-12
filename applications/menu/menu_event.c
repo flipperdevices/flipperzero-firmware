@@ -7,7 +7,7 @@
 
 #include <furi.h>
 
-#define MENU_MESSAGE_MQUEUE_SIZE 16
+#define MENU_MESSAGE_MQUEUE_SIZE 8
 
 struct MenuEvent {
     osMessageQueueId_t  mqueue;
@@ -25,7 +25,7 @@ void MenuEventimeout_callback(void* arg) {
 MenuEvent* menu_event_alloc() {
     MenuEvent* menu_event = furi_alloc(sizeof(MenuEvent));
 
-    menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(MenuEvent), NULL);
+    menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(MenuMessage), NULL);
     assert(menu_event->mqueue);
 
     menu_event->timeout_timer =

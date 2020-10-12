@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#define GUI_EVENT_MQUEUE_SIZE 16
+#define GUI_EVENT_MQUEUE_SIZE 8
 
 struct GUIEvent {
     FuriRecordSubscriber* input_event_record;
