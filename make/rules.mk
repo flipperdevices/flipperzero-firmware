@@ -35,15 +35,15 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
 	@echo "\tCC\t" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
 	@echo "\tASM\t" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS check-and-reinit-submodules
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -87,5 +87,11 @@ zz: clean
 
 zzz: clean
 	$(MAKE) debug
+
+FORMAT_SOURCES := $(shell find ../applications -iname "*.c" -iname "*.cpp")
+FORMAT_SOURCES += $(shell find ../core -iname "*.c" -iname "*.cpp")
+
+format:
+	clang-format -style=file -i $(FORMAT_SOURCES)
 
 -include $(DEPS)
