@@ -16,7 +16,7 @@
 #define MAX_RECORD_SUBSCRIBERS 8
 
 inline static void* furi_alloc(size_t size) {
-    void * p = malloc(size);
+    void* p = malloc(size);
     assert(p);
     return memset(p, 0, size);
 }

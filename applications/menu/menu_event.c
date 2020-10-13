@@ -10,9 +10,9 @@
 #define MENU_MESSAGE_MQUEUE_SIZE 8
 
 struct MenuEvent {
-    osMessageQueueId_t  mqueue;
-    osTimerId_t         timeout_timer;
-    osMutexId_t         lock_mutex;
+    osMessageQueueId_t mqueue;
+    osTimerId_t timeout_timer;
+    osMutexId_t lock_mutex;
 };
 
 void MenuEventimeout_callback(void* arg) {
@@ -46,11 +46,11 @@ void menu_event_free(MenuEvent* menu_event) {
     free(menu_event);
 }
 
-void menu_event_lock(MenuEvent *menu_event) {
+void menu_event_lock(MenuEvent* menu_event) {
     assert(osMutexAcquire(menu_event->lock_mutex, osWaitForever) == osOK);
 }
 
-void menu_event_unlock(MenuEvent *menu_event) {
+void menu_event_unlock(MenuEvent* menu_event) {
     assert(osMutexRelease(menu_event->lock_mutex) == osOK);
 }
 
