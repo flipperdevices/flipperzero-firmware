@@ -1,7 +1,7 @@
 #include "gui.h"
 #include "gui_i.h"
 
-#include <furi.h>
+#include <flipper.h>
 #include <stdio.h>
 #include <m-array.h>
 
@@ -11,15 +11,15 @@
 #include "widget.h"
 #include "widget_i.h"
 
-ARRAY_DEF(widget_array, Widget*, M_PTR_OPLIST);
+ARRAY_DEF(WidgetArray, Widget*, M_PTR_OPLIST);
 
 struct GUI {
     GUIEvent* event;
     Canvas* canvas;
-    widget_array_t widgets_status_bar;
-    widget_array_t widgets;
-    widget_array_t widgets_fs;
-    widget_array_t widgets_dialog;
+    WidgetArray_t widgets_status_bar;
+    WidgetArray_t widgets;
+    WidgetArray_t widgets_fs;
+    WidgetArray_t widgets_dialog;
 };
 
 void gui_widget_status_bar_add(GUI* gui, Widget* widget) {
@@ -27,7 +27,7 @@ void gui_widget_status_bar_add(GUI* gui, Widget* widget) {
     assert(widget);
 
     gui_event_lock(gui->event);
-    widget_array_push_back(gui->widgets_status_bar, widget);
+    WidgetArray_push_back(gui->widgets_status_bar, widget);
     widget_gui_set(widget, gui);
     gui_event_unlock(gui->event);
 
@@ -39,7 +39,7 @@ void gui_widget_add(GUI* gui, Widget* widget) {
     assert(widget);
 
     gui_event_lock(gui->event);
-    widget_array_push_back(gui->widgets, widget);
+    WidgetArray_push_back(gui->widgets, widget);
     widget_gui_set(widget, gui);
     gui_event_unlock(gui->event);
 
@@ -51,7 +51,7 @@ void gui_widget_fs_add(GUI* gui, Widget* widget) {
     assert(widget);
 
     gui_event_lock(gui->event);
-    widget_array_push_back(gui->widgets_fs, widget);
+    WidgetArray_push_back(gui->widgets_fs, widget);
     widget_gui_set(widget, gui);
     gui_event_unlock(gui->event);
 
@@ -63,7 +63,7 @@ void gui_widget_dialog_add(GUI* gui, Widget* widget) {
     assert(widget);
 
     gui_event_lock(gui->event);
-    widget_array_push_back(gui->widgets_dialog, widget);
+    WidgetArray_push_back(gui->widgets_dialog, widget);
     widget_gui_set(widget, gui);
     gui_event_unlock(gui->event);
 
@@ -77,10 +77,10 @@ void gui_update(GUI* gui) {
     gui_event_messsage_send(gui->event, &message);
 }
 
-Widget* gui_widget_find_enabled(widget_array_t array) {
-    size_t widgets_count = widget_array_size(array);
+Widget* gui_widget_find_enabled(WidgetArray_t array) {
+    size_t widgets_count = WidgetArray_size(array);
     for(size_t i = 0; i < widgets_count; i++) {
-        Widget* widget = *widget_array_get(array, widgets_count - i - 1);
+        Widget* widget = *WidgetArray_get(array, widgets_count - i - 1);
         if(widget_is_enabled(widget)) {
             return widget;
         }
@@ -144,10 +144,10 @@ void gui_input(GUI* gui, InputEvent* input_event) {
 GUI* gui_alloc() {
     GUI* gui = furi_alloc(sizeof(GUI));
     // Initialize widget arrays
-    widget_array_init(gui->widgets_status_bar);
-    widget_array_init(gui->widgets);
-    widget_array_init(gui->widgets_fs);
-    widget_array_init(gui->widgets_dialog);
+    WidgetArray_init(gui->widgets_status_bar);
+    WidgetArray_init(gui->widgets);
+    WidgetArray_init(gui->widgets_fs);
+    WidgetArray_init(gui->widgets_dialog);
     // Event dispatcher
     gui->event = gui_event_alloc();
     // Drawing canvas
@@ -159,7 +159,7 @@ GUI* gui_alloc() {
 void gui_task(void* p) {
     GUI* gui = gui_alloc();
     // Create FURI record
-    if(!furi_create("gui", gui, sizeof(gui))) {
+    if(!furi_create_deprecated("gui", gui, sizeof(gui))) {
         printf("[gui_task] cannot create the gui record\n");
         furiac_exit(NULL);
     }

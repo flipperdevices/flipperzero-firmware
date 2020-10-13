@@ -2,7 +2,7 @@
 #include "canvas_i.h"
 
 #include <assert.h>
-#include <furi.h>
+#include <flipper.h>
 #include <u8g2.h>
 
 struct Canvas {
@@ -16,7 +16,7 @@ struct Canvas {
 
 Canvas* canvas_alloc() {
     Canvas* canvas = furi_alloc(sizeof(Canvas));
-    canvas->fb_record = furi_open("u8g2_fb", false, false, NULL, NULL, NULL);
+    canvas->fb_record = furi_open_deprecated("u8g2_fb", false, false, NULL, NULL, NULL);
     assert(canvas->fb_record);
     return canvas;
 }

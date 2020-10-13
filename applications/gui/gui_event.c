@@ -1,6 +1,6 @@
 #include "gui_event.h"
 
-#include <furi.h>
+#include <flipper.h>
 #include <assert.h>
 
 #define GUI_EVENT_MQUEUE_SIZE 8
@@ -30,7 +30,7 @@ GUIEvent* gui_event_alloc() {
 
     // Input
     gui_event->input_event_record =
-        furi_open("input_events", false, false, gui_event_input_events_callback, NULL, gui_event);
+        furi_open_deprecated("input_events", false, false, gui_event_input_events_callback, NULL, gui_event);
     assert(gui_event->input_event_record != NULL);
     // Lock mutex
     gui_event->lock_mutex = osMutexNew(NULL);

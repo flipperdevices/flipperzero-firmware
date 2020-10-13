@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <furi.h>
+#include <flipper.h>
 
 #define MENU_MESSAGE_MQUEUE_SIZE 8
 

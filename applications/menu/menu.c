@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <furi.h>
+#include <flipper.h>
 #include <gui/gui.h>
 #include <gui/canvas.h>
 #include <gui/widget.h>
@@ -37,7 +37,7 @@ Menu* menu_alloc() {
     widget_input_callback_set(menu->widget, menu_event_input_callback, menu->event);
 
     // Open GUI and register fullscreen widget
-    menu->gui_record = furi_open("gui", false, false, NULL, NULL, NULL);
+    menu->gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
     assert(menu->gui_record);
 
     return menu;
@@ -182,7 +182,7 @@ void menu_task(void* p) {
     gui_widget_fs_add(gui, menu->widget);
     furi_commit(menu->gui_record);
 
-    if(!furi_create("menu", menu, sizeof(menu))) {
+    if(!furi_create_deprecated("menu", menu, sizeof(menu))) {
         printf("[menu_task] cannot create the menu record\n");
         furiac_exit(NULL);
     }

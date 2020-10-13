@@ -2,7 +2,7 @@
 #include "widget_i.h"
 
 #include <cmsis_os.h>
-#include <furi.h>
+#include <flipper.h>
 
 #include "gui.h"
 #include "gui_i.h"

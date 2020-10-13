@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <furi.h>
+#include <flipper.h>
 
 struct MenuItem {
     MenuItemType type;
