@@ -68,7 +68,7 @@ upload: $(OBJ_DIR)/upload
 
 debug: flash
 	set -m; st-util -n --semihosting & echo $$! > $(OBJ_DIR)/st-util.PID
-	arm-none-eabi-gdb \
+	arm-none-eabi-gdb-py \
 		-ex "target extended-remote 127.0.0.1:4242" \
 		-ex "set confirm off" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
@@ -92,7 +92,7 @@ FORMAT_SOURCES := $(shell find ../applications -iname "*.h" -o -iname "*.c" -o -
 FORMAT_SOURCES += $(shell find ../core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
 
 format:
-	echo $(FORMAT_SOURCES)
-	clang-format -style=file -i $(FORMAT_SOURCES)
+	@echo "Formatting sources with clang-format"
+	@clang-format -style=file -i $(FORMAT_SOURCES)
 
 -include $(DEPS)
