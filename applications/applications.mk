@@ -3,13 +3,19 @@ LIB_DIR 	= $(PROJECT_ROOT)/lib
 
 CFLAGS		+= -I$(APP_DIR)
 
+ifeq ($(TARGET), local)
+PRODUCTION_HW := 0
+else
+PRODUCTION_HW := 1
+endif
+
 APP_RELEASE ?= 0
 ifeq ($(APP_RELEASE), 1)
 APP_DISPLAY	= 1
 APP_INPUT	= 1
 endif
 
-APP_MENU	?= 1
+APP_MENU	?= $(PRODUCTION_HW)
 ifeq ($(APP_MENU), 1)
 APP_INPUT	= 1
 APP_GUI		= 1
