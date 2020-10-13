@@ -67,13 +67,13 @@ flash: $(OBJ_DIR)/flash
 upload: $(OBJ_DIR)/upload
 
 debug: flash
-	set -m; st-util -n --semihosting & echo $$! > st-util.PID
+	set -m; st-util -n --semihosting & echo $$! > $(OBJ_DIR)/st-util.PID
 	arm-none-eabi-gdb \
 		-ex "target extended-remote 127.0.0.1:4242" \
 		-ex "set confirm off" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
-	kill `cat st-util.PID`; \
-	rm st-util.PID
+	kill `cat $(OBJ_DIR)/st-util.PID`; \
+	rm $(OBJ_DIR)/st-util.PID
 
 clean:
 	@echo "\tCLEAN\t"
@@ -88,10 +88,11 @@ zz: clean
 zzz: clean
 	$(MAKE) debug
 
-FORMAT_SOURCES := $(shell find ../applications -iname "*.c" -iname "*.cpp")
-FORMAT_SOURCES += $(shell find ../core -iname "*.c" -iname "*.cpp")
+FORMAT_SOURCES := $(shell find ../applications -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
+FORMAT_SOURCES += $(shell find ../core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
 
 format:
+	echo $(FORMAT_SOURCES)
 	clang-format -style=file -i $(FORMAT_SOURCES)
 
 -include $(DEPS)
