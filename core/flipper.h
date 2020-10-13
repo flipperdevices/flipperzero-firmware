@@ -7,7 +7,8 @@ extern "C" {
 #include "main.h"
 #include "flipper_hal.h"
 #include "cmsis_os.h"
-#include "furi.h"
+#include "furi-deprecated.h"
+
 #include "log.h"
 #include "input/input.h"
 
@@ -29,3 +30,5 @@ extern "C" {
 #define INPUT GpioModeInput
 #define LOW false
 #define HIGH true
+
+void set_exitcode(uint32_t _exitcode);

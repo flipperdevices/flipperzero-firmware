@@ -1,5 +1,4 @@
-#include "furi.h"
-#include "cmsis_os.h"
+#include "flipper.h"
 
 // TODO: this file contains printf, that not implemented on uC target
 
@@ -28,7 +27,7 @@ uint16_t furiac_get_task_id_by_name(const char* app_name) {
 }
 
 void furiac_wait_libs(const FlipperAppLibrary* libs) {
-    for(uint8_t i = 0; i < libs->count; i++){
+    for(uint8_t i = 0; i < libs->count; i++) {
         uint16_t app_id = furiac_get_task_id_by_name(libs->name[i]);
 
         if(app_id == INVALID_TASK_ID) {
