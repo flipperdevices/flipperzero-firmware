@@ -42,6 +42,7 @@ MenuEvent* menu_event_alloc() {
 
 void menu_event_free(MenuEvent* menu_event) {
     assert(menu_event);
+    menu_event_unlock(menu_event);
     assert(osMessageQueueDelete(menu_event->mqueue) == osOK);
     free(menu_event);
 }

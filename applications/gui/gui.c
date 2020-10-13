@@ -26,8 +26,11 @@ void gui_widget_status_bar_add(GUI* gui, Widget* widget) {
     assert(gui);
     assert(widget);
 
+    gui_event_lock(gui->event);
     widget_array_push_back(gui->widgets_status_bar, widget);
     widget_gui_set(widget, gui);
+    gui_event_unlock(gui->event);
+
     gui_update(gui);
 }
 
@@ -35,8 +38,11 @@ void gui_widget_add(GUI* gui, Widget* widget) {
     assert(gui);
     assert(widget);
 
+    gui_event_lock(gui->event);
     widget_array_push_back(gui->widgets, widget);
     widget_gui_set(widget, gui);
+    gui_event_unlock(gui->event);
+
     gui_update(gui);
 }
 
@@ -44,8 +50,11 @@ void gui_widget_fs_add(GUI* gui, Widget* widget) {
     assert(gui);
     assert(widget);
 
+    gui_event_lock(gui->event);
     widget_array_push_back(gui->widgets_fs, widget);
     widget_gui_set(widget, gui);
+    gui_event_unlock(gui->event);
+
     gui_update(gui);
 }
 
@@ -53,8 +62,11 @@ void gui_widget_dialog_add(GUI* gui, Widget* widget) {
     assert(gui);
     assert(widget);
 
+    gui_event_lock(gui->event);
     widget_array_push_back(gui->widgets_dialog, widget);
     widget_gui_set(widget, gui);
+    gui_event_unlock(gui->event);
+
     gui_update(gui);
 }
 
@@ -151,6 +163,7 @@ void gui_task(void* p) {
         printf("[gui_task] cannot create the gui record\n");
         furiac_exit(NULL);
     }
+    furiac_ready();
     // Forever dispatch
     while(1) {
         GUIMessage message = gui_event_message_next(gui->event);

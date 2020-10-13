@@ -20,6 +20,10 @@ GUIEvent* gui_event_alloc();
 
 void gui_event_free(GUIEvent* gui_event);
 
+void gui_event_lock(GUIEvent* gui_event);
+
+void gui_event_unlock(GUIEvent* gui_event);
+
 void gui_event_messsage_send(GUIEvent* gui_event, GUIMessage* message);
 
 GUIMessage gui_event_message_next(GUIEvent* gui_event);

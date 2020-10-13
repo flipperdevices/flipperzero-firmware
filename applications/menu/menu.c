@@ -186,7 +186,8 @@ void menu_task(void* p) {
         printf("[menu_task] cannot create the menu record\n");
         furiac_exit(NULL);
     }
-
+    furiac_ready();
+    
     while(1) {
         MenuMessage m = menu_event_next(menu->event);
 
