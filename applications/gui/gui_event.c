@@ -49,12 +49,12 @@ void gui_event_free(GUIEvent* gui_event) {
 
 void gui_event_lock(GUIEvent* gui_event) {
     assert(gui_event);
-    // assert(osMutexAcquire(gui_event->lock_mutex, osWaitForever) == osOK);
+    assert(osMutexAcquire(gui_event->lock_mutex, osWaitForever) == osOK);
 }
 
 void gui_event_unlock(GUIEvent* gui_event) {
     assert(gui_event);
-    // assert(osMutexRelease(gui_event->lock_mutex) == osOK);
+    assert(osMutexRelease(gui_event->lock_mutex) == osOK);
 }
 
 void gui_event_messsage_send(GUIEvent* gui_event, GUIMessage* message) {
