@@ -1,6 +1,23 @@
 #pragma once
 
-#include "flipper.h"
+#include "flipper_v2.h"
+#include "m-list.h"
+
+typedef void(*PubSubCallback)(void*, void*);
+typedef struct PubSubType PubSub;
+
+typedef struct {
+    PubSubCallback cb;
+    void* ctx;
+    PubSub* self;
+} PubSubItem;
+
+LIST_DEF(list_pubsub_cb, PubSubItem, M_POD_OPLIST);
+
+struct PubSubType {
+    list_pubsub_cb_t items;
+    osMutexId_t mutex;
+};
 
 /*
 == PubSub ==
@@ -10,7 +27,7 @@ Notifier side can pass `void*` arg to subscriber callback,
 and also subscriber can set `void*` context pointer that pass into
 callback (you can see callback signature below).
 */
-
+/*
 typedef void(PubSubCallback*)(void*, void*);
 
 typedef struct {
@@ -28,26 +45,32 @@ typedef struct {
     PubSubId ids[NUM_OF_CALLBACKS]; ///< permanent links to item
     size_t count; ///< count of callbacks
 } PubSub;
+*/
 
 /*
 To create PubSub you should create PubSub instance and call `init_pubsub`.
 */
-void init_pubsub(PubSub* pubsub);
+bool init_pubsub(PubSub* pubsub);
+
+/*
+Since we use dynamic memory - we must explicity delete pubsub
+*/
+bool delete_pubsub(PubSub* pubsub);
 
 /*
 Use `subscribe_pubsub` to register your callback.
 */
-PubSubId* subscribe_pubsub(PubSub* pubsub, PubSubCallback cb, void* ctx);
+PubSubItem* subscribe_pubsub(PubSub* pubsub, PubSubCallback cb, void* ctx);
 
 /*
 Use `unsubscribe_pubsub` to unregister callback.
 */
-void unsubscribe_pubsub(PubSubId* pubsub_id);
+bool unsubscribe_pubsub(PubSubItem* pubsub_id);
 
 /*
 Use `notify_pubsub` to notify subscribers.
 */
-void notify_pubsub(PubSub* pubsub, void* arg);
+bool notify_pubsub(PubSub* pubsub, void* arg);
 
 /*
 
