@@ -15,8 +15,22 @@ void free(void* ptr) {
 }
 
 void* realloc(void* ptr, size_t size) {
-    vPortFree(ptr);
-    return pvPortMalloc(size);
+    if(size == 0) {
+        vPortFree(ptr);
+        return NULL;
+    }
+
+    void* p;
+    p = pvPortMalloc(size);
+    if(p) {
+        // TODO implement secure realloc
+        // insecure, but will do job in our case
+        if(ptr != NULL) {
+            memcpy(p, ptr, size);
+            vPortFree(ptr);
+        }
+    }
+    return p;
 }
 
 void* calloc(size_t count, size_t size) {
