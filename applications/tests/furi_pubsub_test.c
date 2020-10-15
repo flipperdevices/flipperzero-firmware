@@ -21,15 +21,30 @@ void test_furi_pubsub() {
     PubSub test_pubsub;
     PubSubItem* test_pubsub_item;
 
+    // init pubsub case
     result = init_pubsub(&test_pubsub);
     mu_assert(result, "init pubsub failed");
 
+    // subscribe pubsub case
     test_pubsub_item = subscribe_pubsub(&test_pubsub, test_pubsub_handler, (void*)&context_value);
     mu_assert_pointers_not_eq(test_pubsub_item, NULL);
 
-    notify_pubsub(&test_pubsub, (void*)&notify_value);
+    /// notify pubsub case
+    result = notify_pubsub(&test_pubsub, (void*)&notify_value);
+    mu_assert(result, "notify pubsub failed");
     mu_assert_int_eq(pubsub_value, notify_value);
     mu_assert_int_eq(pubsub_context_value, context_value);
 
-    
+    // unsubscribe pubsub case
+    result = unsubscribe_pubsub(test_pubsub_item);
+    mu_assert(result, "unsubscribe pubsub failed");
+
+    result = unsubscribe_pubsub(test_pubsub_item);
+    mu_assert(!result, "unsubscribe pubsub not failed");
+
+    // delete pubsub case
+    result = delete_pubsub(&test_pubsub);
+    mu_assert(result, "unsubscribe pubsub failed");
+
+    // TODO test case that the pubsub_delete will remove pubsub from heap
 }
