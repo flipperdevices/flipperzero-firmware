@@ -1,3 +1,8 @@
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <cmsis_os.h>
+
 #define configTOTAL_HEAP_SIZE ((size_t)(8192 * 16))
 #define configAPPLICATION_ALLOCATED_HEAP 0
 #define portBYTE_ALIGNMENT 8
@@ -26,5 +31,14 @@
 #define configASSERT(var)
 #endif
 
-void vTaskSuspendAll();
-void xTaskResumeAll();
+bool prvHeapInit(void);
+
+void acquire_memalloc_mutex();
+void release_memalloc_mutex();
+
+/* Define the linked list structure.  This is used to link free blocks in order
+of their memory address. */
+typedef struct A_BLOCK_LINK {
+    struct A_BLOCK_LINK* pxNextFreeBlock; /*<< The next free block in the list. */
+    size_t xBlockSize; /*<< The size of the free block. */
+} BlockLink_t;

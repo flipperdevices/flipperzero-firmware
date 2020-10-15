@@ -33,11 +33,7 @@
  * See heap_1.c, heap_2.c and heap_3.c for alternative implementations, and the
  * memory management pages of http://www.FreeRTOS.org for more information.
  */
-#include <stdlib.h>
-#include <heap.h>
-#include <stdint.h>
-#include <cmsis_os.h>
-#include <stdio.h>
+#include "heap.h"
 
 osMutexId_t heap_managment_mutex;
 
@@ -56,13 +52,6 @@ extern uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
 #endif /* configAPPLICATION_ALLOCATED_HEAP */
 
-/* Define the linked list structure.  This is used to link free blocks in order
-of their memory address. */
-typedef struct A_BLOCK_LINK {
-    struct A_BLOCK_LINK* pxNextFreeBlock; /*<< The next free block in the list. */
-    size_t xBlockSize; /*<< The size of the free block. */
-} BlockLink_t;
-
 /*-----------------------------------------------------------*/
 
 /*
@@ -73,11 +62,8 @@ typedef struct A_BLOCK_LINK {
  */
 static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert);
 
-/*
- * Called automatically to setup the required heap structures the first time
- * pvPortMalloc() is called.
- */
-static void prvHeapInit(void);
+// this function is not thread-safe, so it must be called in single thread context
+bool prvHeapInit(void);
 
 /*-----------------------------------------------------------*/
 
@@ -106,7 +92,7 @@ void* pvPortMalloc(size_t xWantedSize) {
     BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
     void* pvReturn = NULL;
 
-    vTaskSuspendAll();
+    acquire_memalloc_mutex();
     {
         /* If this is the first call to malloc then the heap will require
 		initialisation to setup the list of free blocks. */
@@ -206,7 +192,7 @@ void* pvPortMalloc(size_t xWantedSize) {
 
         traceMALLOC(pvReturn, xWantedSize);
     }
-    (void)xTaskResumeAll();
+    release_memalloc_mutex();
 
 #if(configUSE_MALLOC_FAILED_HOOK == 1)
     {
@@ -246,14 +232,14 @@ void vPortFree(void* pv) {
 				allocated. */
                 pxLink->xBlockSize &= ~xBlockAllocatedBit;
 
-                vTaskSuspendAll();
+                acquire_memalloc_mutex();
                 {
                     /* Add this block to the list of free blocks. */
                     xFreeBytesRemaining += pxLink->xBlockSize;
                     traceFREE(pv, pxLink->xBlockSize);
                     prvInsertBlockIntoFreeList(((BlockLink_t*)pxLink));
                 }
-                (void)xTaskResumeAll();
+                release_memalloc_mutex();
             } else {
                 mtCOVERAGE_TEST_MARKER();
             }
@@ -279,7 +265,7 @@ void vPortInitialiseBlocks(void) {
 }
 /*-----------------------------------------------------------*/
 
-static void prvHeapInit(void) {
+bool prvHeapInit(void) {
     BlockLink_t* pxFirstFreeBlock;
     uint8_t* pucAlignedHeap;
     size_t uxAddress;
@@ -328,6 +314,8 @@ static void prvHeapInit(void) {
         .name = NULL, .attr_bits = 0, .cb_mem = NULL, .cb_size = 0U};
 
     heap_managment_mutex = osMutexNew(&heap_managment_mutext_attr);
+
+    return heap_managment_mutex != NULL;
 }
 /*-----------------------------------------------------------*/
 
@@ -379,10 +367,10 @@ static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert) {
 }
 
 // TODO really suspend tasks
-void vTaskSuspendAll() {
+void acquire_memalloc_mutex() {
     osMutexAcquire(heap_managment_mutex, osWaitForever);
 }
 
-void xTaskResumeAll() {
+void release_memalloc_mutex() {
     osMutexRelease(heap_managment_mutex);
 }

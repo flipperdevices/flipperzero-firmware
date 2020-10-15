@@ -22,7 +22,7 @@ bool heap_equal(size_t heap_size, size_t heap_size_old) {
     const bool result = ((heap_size >= heap_low) && (heap_size <= heap_high));
 
     // debug allocation info
-    if(!result){
+    if(!result) {
         printf("\n(hl: %zu) <= (p: %zu) <= (hh: %zu)\n", heap_low, heap_size, heap_high);
     }
 
