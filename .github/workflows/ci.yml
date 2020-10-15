@@ -1,12 +1,14 @@
 name: 'CI'
 
-on:
-  push:
-    branches: [ master ]
-    paths-ignore:
-    - 'wiki/**'
-    - 'wiki_static/**'
-  pull_request:
+on: [push]
+
+# on:
+#   push:
+#     branches: [ master ]
+#     paths-ignore:
+#     - 'wiki/**'
+#     - 'wiki_static/**'
+#   pull_request:
 
 jobs:
   build:
