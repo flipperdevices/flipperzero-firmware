@@ -56,7 +56,7 @@ MU_TEST(mu_test_furi_concurrent_access) {
 }
 
 MU_TEST(mu_test_furi_memmgr) {
-    // this test is not accurate, but gives a basic understanding 
+    // this test is not accurate, but gives a basic understanding
     // that memory management is working fine
     test_furi_memmgr();
 }
@@ -74,7 +74,7 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_create_open);
     MU_RUN_TEST(mu_test_furi_valuemutex);
     MU_RUN_TEST(mu_test_furi_concurrent_access);
-    
+
     MU_RUN_TEST(mu_test_furi_memmgr);
 }
 
