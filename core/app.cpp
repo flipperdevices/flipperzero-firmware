@@ -13,7 +13,8 @@ extern "C" void set_exitcode(uint32_t _exitcode) {
     exitcode = _exitcode;
 }
 
-extern "C" int app() {
+extern "C" int app()
+{
     register_tty_uart();
 
     FuriRecordSubscriber* log = get_default_log();
