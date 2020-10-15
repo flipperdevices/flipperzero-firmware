@@ -35,7 +35,7 @@
  */
 #include "heap.h"
 
-osMutexId_t heap_managment_mutex;
+osMutexId_t heap_managment_mutex = NULL;
 
 /* Block sizes must not get too small. */
 #define heapMINIMUM_BLOCK_SIZE ((size_t)(xHeapStructSize << 1))
@@ -372,11 +372,18 @@ static void prvInsertBlockIntoFreeList(BlockLink_t* pxBlockToInsert) {
     }
 }
 
-// TODO really suspend tasks
+/* 
+at first run (heap init) it not work properly and prvHeapInit
+is not thread-safe. But then we init mutex or die
+*/
 void acquire_memalloc_mutex() {
-    osMutexAcquire(heap_managment_mutex, osWaitForever);
+    if(heap_managment_mutex != NULL) {
+        osMutexAcquire(heap_managment_mutex, osWaitForever);
+    }
 }
 
 void release_memalloc_mutex() {
-    osMutexRelease(heap_managment_mutex);
+    if(heap_managment_mutex != NULL) {
+        osMutexRelease(heap_managment_mutex);
+    }
 }
