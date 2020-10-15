@@ -255,9 +255,13 @@ osStatus_t osMutexRelease (osMutexId_t mutex_id) {
 }
 
 osStatus_t osMutexDelete (osMutexId_t mutex_id) {
-    if(pthread_mutex_destroy(&mutex_id->mutex) == 0) {
+    osMutexRelease(mutex_id);
+    
+    int res = 0;
+    if((res = pthread_mutex_destroy(&mutex_id->mutex)) == 0) {
         return osOK;
     } else {
+        printf("res = %d\n", res);
         return osError;
     }
 }
