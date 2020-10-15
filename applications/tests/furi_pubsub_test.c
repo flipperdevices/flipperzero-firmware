@@ -48,7 +48,6 @@ void test_furi_pubsub() {
     mu_assert(result, "notify pubsub failed");
     mu_assert_int_not_eq(pubsub_value, notify_value_1);
 
-
     // delete pubsub case
     result = delete_pubsub(&test_pubsub);
     mu_assert(result, "unsubscribe pubsub failed");
