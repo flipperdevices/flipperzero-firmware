@@ -16,6 +16,8 @@ void test_furi_valuemutex();
 void test_furi_concurrent_access();
 void test_furi_pubsub();
 
+void test_furi_memmgr();
+
 static int foo = 0;
 
 void test_setup(void) {
@@ -59,6 +61,12 @@ MU_TEST(mu_test_furi_pubsub) {
     test_furi_pubsub();
 }
 
+MU_TEST(mu_test_furi_memmgr) {
+    // this test is not accurate, but gives a basic understanding
+    // that memory management is working fine
+    test_furi_memmgr();
+}
+
 MU_TEST_SUITE(test_suite) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
@@ -73,6 +81,8 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(mu_test_furi_valuemutex);
     MU_RUN_TEST(mu_test_furi_concurrent_access);
     MU_RUN_TEST(mu_test_furi_pubsub);
+
+    MU_RUN_TEST(mu_test_furi_memmgr);
 }
 
 int run_minunit() {
