@@ -3,6 +3,15 @@
 #include "flipper_v2.h"
 #include "m-list.h"
 
+/*
+== PubSub ==
+
+PubSub allows users to subscribe on notifies and notify subscribers.
+Notifier side can pass `void*` arg to subscriber callback,
+and also subscriber can set `void*` context pointer that pass into
+callback (you can see callback signature below).
+*/
+
 typedef void(*PubSubCallback)(void*, void*);
 typedef struct PubSubType PubSub;
 
@@ -18,34 +27,6 @@ struct PubSubType {
     list_pubsub_cb_t items;
     osMutexId_t mutex;
 };
-
-/*
-== PubSub ==
-
-PubSub allows users to subscribe on notifies and notify subscribers.
-Notifier side can pass `void*` arg to subscriber callback,
-and also subscriber can set `void*` context pointer that pass into
-callback (you can see callback signature below).
-*/
-/*
-typedef void(PubSubCallback*)(void*, void*);
-
-typedef struct {
-    PubSubCallback cb;
-    void* ctx;
-} PubSubItem;
-
-typedef struct {
-    PubSub* self;
-    PubSubItem* item;
-} PubSubId;
-
-typedef struct {
-    PubSubItem items[NUM_OF_CALLBACKS];
-    PubSubId ids[NUM_OF_CALLBACKS]; ///< permanent links to item
-    size_t count; ///< count of callbacks
-} PubSub;
-*/
 
 /*
 To create PubSub you should create PubSub instance and call `init_pubsub`.
