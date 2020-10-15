@@ -7,9 +7,6 @@
 bool test_furi_ac_create_kill();
 bool test_furi_ac_switch_exit();
 
-bool test_furi_nonexistent_data();
-bool test_furi_mute_algorithm();
-
 // v2 tests
 void test_furi_create_open();
 void test_furi_valuemutex();
@@ -38,10 +35,6 @@ MU_TEST(mu_test_furi_ac_create_kill) {
 
 MU_TEST(mu_test_furi_ac_switch_exit) {
     mu_assert_int_eq(test_furi_ac_switch_exit(), true);
-}
-
-MU_TEST(mu_test_furi_nonexistent_data) {
-    mu_assert_int_eq(test_furi_nonexistent_data(), true);
 }
 
 // v2 tests
@@ -73,8 +66,6 @@ MU_TEST_SUITE(test_suite) {
     MU_RUN_TEST(test_check);
     MU_RUN_TEST(mu_test_furi_ac_create_kill);
     MU_RUN_TEST(mu_test_furi_ac_switch_exit);
-
-    MU_RUN_TEST(mu_test_furi_nonexistent_data);
 
     // v2 tests
     MU_RUN_TEST(mu_test_furi_create_open);
