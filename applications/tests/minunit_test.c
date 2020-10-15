@@ -56,6 +56,8 @@ MU_TEST(mu_test_furi_concurrent_access) {
 }
 
 MU_TEST(mu_test_furi_memmgr) {
+    // this test is not accurate, but gives a basic understanding 
+    // that memory management is working fine
     test_furi_memmgr();
 }
 
