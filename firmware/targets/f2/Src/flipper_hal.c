@@ -34,12 +34,17 @@ void app_gpio_init(GpioPin gpio, GpioMode mode) {
     }
 }
 
-// TODO delay from timer
-void delay_us(uint32_t time) {
-    time *= 11.8;
+void delay_us_init_DWT(void) {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    DWT->CYCCNT = 0U;
+}
 
-    while(time--) {
-    }
+void delay_us(uint32_t time) {
+    uint32_t start = DWT->CYCCNT;
+    uint32_t time_ticks = time * (SystemCoreClock / 1000000);
+    while((DWT->CYCCNT - start) < time_ticks) {
+    };
 }
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel) {
