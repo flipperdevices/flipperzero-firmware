@@ -97,6 +97,10 @@ void request_compose(ValueComposerHandle* handle) {
     }
 }
 
+void COPY_COMPOSE(void* ctx, void* state) {
+    read_mutex((ValueMutex*)ctx, state, 0, osWaitForever);
+}
+
 bool init_managed(ValueManager* managed, void* value, size_t size) {
     if(!init_pubsub(&managed->pubsub)) return false;
     if(!init_mutex(&managed->value, value, size)) {

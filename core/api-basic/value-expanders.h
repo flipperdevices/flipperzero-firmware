@@ -30,9 +30,7 @@ struct ValueComposer {
     osMutexId_t mutex;
 };
 
-void COPY_COMPOSE(void* ctx, void* state) {
-    read_mutex((ValueMutex*)ctx, state, 0, osWaitForever);
-}
+void COPY_COMPOSE(void* ctx, void* state);
 
 bool init_composer(ValueComposer* composer, void* value);
 
