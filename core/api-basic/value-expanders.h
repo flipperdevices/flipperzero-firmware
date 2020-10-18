@@ -3,21 +3,41 @@
 #include "flipper.h"
 #include "valuemutex.h"
 #include "pubsub.h"
+#include "m-list.h"
 
 /*
 == Value composer ==
 */
 
-typedef void(ValueComposerCallback)(void* ctx, void* state);
+typedef struct ValueComposer ValueComposer;
+
+typedef void(*ValueComposerCallback)(void* ctx, void* state);
+
+typedef enum { UiLayerBelowNotify, UiLayerNotify, UiLayerAboveNotify } UiLayer;
+
+typedef struct {
+    ValueComposerCallback cb;
+    void* ctx;
+    UiLayer layer;
+    ValueComposer* composer;
+} ValueComposerHandle;
+
+LIST_DEF(list_composer_cb, ValueComposerHandle, M_POD_OPLIST);
+
+struct ValueComposer {
+    ValueMutex value;
+    list_composer_cb_t layers[3];
+    osMutexId_t mutex;
+};
 
 void COPY_COMPOSE(void* ctx, void* state) {
-    read_mutex((ValueMutex*)ctx, state, 0);
+    read_mutex((ValueMutex*)ctx, state, 0, osWaitForever);
 }
 
-typedef enum { UiLayerBelowNotify UiLayerNotify, UiLayerAboveNotify } UiLayer;
+bool init_composer(ValueComposer* composer, void* value);
 
 ValueComposerHandle*
-add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, uint32_t layer);
+add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, UiLayer layer);
 
 bool remove_compose_layer(ValueComposerHandle* handle);
 
