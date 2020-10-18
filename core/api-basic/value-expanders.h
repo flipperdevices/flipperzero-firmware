@@ -61,6 +61,8 @@ typedef struct {
     PubSub pubsub;
 } ValueManager;
 
+bool init_managed(ValueManager* managed, void* value, size_t size);
+
 /*
 acquire value, changes it and send notify with current value.
 */

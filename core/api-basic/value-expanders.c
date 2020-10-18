@@ -97,6 +97,15 @@ void request_compose(ValueComposerHandle* handle) {
 }
 
 
+bool init_managed(ValueManager* managed, void* value, size_t size) {
+    if (!init_pubsub(&managed->pubsub)) return false;
+    if (!init_mutex(&managed->value, value, size)) {
+        delete_pubsub(&managed->pubsub);
+        return false;
+    }
+    return true;
+}
+
 bool write_managed(ValueManager* managed, void* data, size_t len, uint32_t timeout) {
     void* value = acquire_mutex(&managed->value, timeout);
     if(value == NULL) return false;
