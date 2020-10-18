@@ -11,7 +11,7 @@
 
 typedef struct ValueComposer ValueComposer;
 
-typedef void(*ValueComposerCallback)(void* ctx, void* state);
+typedef void (*ValueComposerCallback)(void* ctx, void* state);
 
 typedef enum { UiLayerBelowNotify, UiLayerNotify, UiLayerAboveNotify } UiLayer;
 

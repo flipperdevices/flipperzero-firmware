@@ -1,9 +1,9 @@
 #include "value-expanders.h"
 
 bool init_composer(ValueComposer* composer, void* value) {
-    if (!init_mutex(&composer->value, value, 0)) return false;
+    if(!init_mutex(&composer->value, value, 0)) return false;
 
-    for (size_t i = 0; i < sizeof(composer->layers)/sizeof(composer->layers[0]); i++) {
+    for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
         list_composer_cb_init(composer->layers[i]);
     }
 
@@ -74,18 +74,19 @@ void request_compose(ValueComposerHandle* handle) {
 
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
         void* state = acquire_mutex(&composer->value, 0);
-        if (state == NULL) {
+        if(state == NULL) {
             // This should not happen
             osMutexRelease(composer->mutex);
             return;
         }
 
         // Compose all levels for now
-        for (size_t i = 0; i < sizeof(composer->layers)/sizeof(composer->layers[0]); i++) {
+        for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
             // iterate over items
             list_composer_cb_it_t it;
-            for(list_composer_cb_it(it, composer->layers[handle->layer]); !list_composer_cb_end_p(it);
-            list_composer_cb_next(it)) {
+            for(list_composer_cb_it(it, composer->layers[handle->layer]);
+                !list_composer_cb_end_p(it);
+                list_composer_cb_next(it)) {
                 const ValueComposerHandle* h = list_composer_cb_cref(it);
                 h->cb(h->ctx, state);
             }
@@ -96,10 +97,9 @@ void request_compose(ValueComposerHandle* handle) {
     }
 }
 
-
 bool init_managed(ValueManager* managed, void* value, size_t size) {
-    if (!init_pubsub(&managed->pubsub)) return false;
-    if (!init_mutex(&managed->value, value, size)) {
+    if(!init_pubsub(&managed->pubsub)) return false;
+    if(!init_mutex(&managed->value, value, size)) {
         delete_pubsub(&managed->pubsub);
         return false;
     }
