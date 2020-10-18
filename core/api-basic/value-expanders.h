@@ -1,6 +1,8 @@
 #pragma once
 
 #include "flipper.h"
+#include "valuemutex.h"
+#include "pubsub.h"
 
 /*
 == Value composer ==
