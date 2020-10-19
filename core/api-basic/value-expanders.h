@@ -49,6 +49,13 @@ bool remove_compose_layer(ValueComposerHandle* handle);
 
 void request_compose(ValueComposerHandle* handle);
 
+/*
+Perform composition if requested.
+
+`start_cb` and `end_cb` will be called before and after all layer callbacks, respectively.
+Both `start_cb` and `end_cb` can be NULL. They can be used to set initial state (e.g. clear screen)
+and commit the final state.
+*/
 void perform_compose(
     ValueComposer* composer,
     ValueComposerCallback start_cb,

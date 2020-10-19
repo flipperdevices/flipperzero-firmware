@@ -115,7 +115,7 @@ void perform_compose(
             return;
         }
 
-        start_cb(ctx, state);
+        if(start_cb != NULL) start_cb(ctx, state);
 
         // Compose all levels for now
         for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
@@ -128,7 +128,7 @@ void perform_compose(
             }
         }
 
-        end_cb(ctx, state);
+        if(end_cb != NULL) end_cb(ctx, state);
 
         release_mutex(&composer->value, state);
         osMutexRelease(composer->mutex);
