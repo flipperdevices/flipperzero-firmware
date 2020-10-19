@@ -35,4 +35,6 @@ void test_furi_value_manager() {
     mu_check(commit_managed(&managed, ptr));
 
     mu_assert_int_eq(pubsub_value, notify_value_1);
+
+    mu_check(delete_managed(&managed));
 }
