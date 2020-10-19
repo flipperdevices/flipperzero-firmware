@@ -4,6 +4,7 @@
 #include "valuemutex.h"
 #include "pubsub.h"
 #include "m-list.h"
+#include <stdatomic.h>
 
 /*
 == Value composer ==
@@ -28,6 +29,7 @@ struct ValueComposer {
     ValueMutex value;
     list_composer_cb_t layers[3];
     osMutexId_t mutex;
+    volatile atomic_bool request;
 };
 
 void COPY_COMPOSE(void* ctx, void* state);
@@ -46,6 +48,12 @@ add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, 
 bool remove_compose_layer(ValueComposerHandle* handle);
 
 void request_compose(ValueComposerHandle* handle);
+
+void perform_compose(
+    ValueComposer* composer,
+    ValueComposerCallback start_cb,
+    ValueComposerCallback end_cb,
+    void* ctx);
 
 // See [LED](LED-API) or [Display](Display-API) API for examples.
 

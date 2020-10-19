@@ -16,6 +16,8 @@ bool init_composer(ValueComposer* composer, void* value) {
     composer->mutex = osMutexNew(&value_mutex_attr);
     if(composer->mutex == NULL) return false;
 
+    atomic_init(&composer->request, false);
+
     return true;
 }
 
@@ -25,7 +27,7 @@ bool delete_composer(ValueComposer* composer) {
         result &= delete_mutex(&composer->value);
 
         for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
-            list_pubsub_cb_clear(composer->layers[i]);
+            list_composer_cb_clear(composer->layers[i]);
         }
 
         result &= osMutexDelete(composer->mutex) == osOK;
@@ -51,6 +53,9 @@ add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, 
         //flapp_on_exit(remove_compose_layer, handle);
 
         osMutexRelease(composer->mutex);
+
+        // Layers changed, request composition
+        atomic_exchange(&composer->request, true);
 
         return handle;
     } else {
@@ -80,6 +85,9 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
 
         osMutexRelease(composer->mutex);
 
+        // Layers changed, request composition
+        atomic_exchange(&composer->request, true);
+
         return result;
     } else {
         return false;
@@ -88,6 +96,16 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
 
 void request_compose(ValueComposerHandle* handle) {
     ValueComposer* composer = handle->composer;
+    atomic_exchange(&composer->request, true);
+}
+
+void perform_compose(
+    ValueComposer* composer,
+    ValueComposerCallback start_cb,
+    ValueComposerCallback end_cb,
+    void* ctx) {
+    bool request = atomic_exchange(&composer->request, false);
+    if(!request) return;
 
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
         void* state = acquire_mutex(&composer->value, 0);
@@ -97,17 +115,20 @@ void request_compose(ValueComposerHandle* handle) {
             return;
         }
 
+        start_cb(ctx, state);
+
         // Compose all levels for now
         for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
             // iterate over items
             list_composer_cb_it_t it;
-            for(list_composer_cb_it(it, composer->layers[handle->layer]);
-                !list_composer_cb_end_p(it);
+            for(list_composer_cb_it(it, composer->layers[i]); !list_composer_cb_end_p(it);
                 list_composer_cb_next(it)) {
                 const ValueComposerHandle* h = list_composer_cb_cref(it);
                 h->cb(h->ctx, state);
             }
         }
+
+        end_cb(ctx, state);
 
         release_mutex(&composer->value, state);
         osMutexRelease(composer->mutex);
