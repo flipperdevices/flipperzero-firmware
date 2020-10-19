@@ -12,6 +12,7 @@ void test_furi_create_open();
 void test_furi_valuemutex();
 void test_furi_concurrent_access();
 void test_furi_pubsub();
+void test_furi_value_composer();
 void test_furi_value_manager();
 
 void test_furi_memmgr();
@@ -62,6 +63,7 @@ MU_TEST(mu_test_furi_memmgr) {
 }
 
 MU_TEST(mu_test_furi_value_expanders) {
+    test_furi_value_composer();
     test_furi_value_manager();
 }
 
