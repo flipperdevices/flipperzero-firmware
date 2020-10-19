@@ -17,7 +17,8 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * CMake toolchain file that can generate a tunable linker script [cmake/stm32/linker_ld.cmake](cmake/stm32/linker_ld.cmake)
 * CMake module to find and configure CMSIS library [cmake/FindCMSIS.cmake](cmake/FindCMSIS.cmake)
 * CMake module to find and configure STM32 HAL library [cmake/FindHAL.cmake](cmake/FindHAL.cmake)
-* CMake project template and examples [examples](examples)
+* CMake modules for various libraries/RTOSes
+* CMake project template and [examples](examples)
 * Some testing project to check cmake scripts working properly [tests](tests)
 
 ## Examples
@@ -26,6 +27,7 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * `custom-linker-script` ([examples/custom-linker-script](examples/custom-linker-script)) - similiar to `template` but using custom linker script.
 * `fetch-cube` ([examples/fetch-cube](examples/fetch-cube)) - example of using FetchContent for fetching STM32Cube from ST's git.
 * `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
+* `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
 
 # Usage
 
@@ -123,4 +125,28 @@ CMSIS package will generate linker script for your device automatically (target 
 * `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
 * `stm32_get_devices_by_family(DEVICES [FAMILY <family>])` - return into `DEVICES` all supported devices by family (or all devices if `<family>` is empty)
+
+# Additional CMake modules
+
+stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in embedded world.
+
+## FreeRTOS
+
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. 
+Typical usage:
+
+```
+find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
+target_link_libraries(... FreeRTOS::ARM_CM4F)
+```
+
+Following FreeRTOS ports supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+
+Other FreeRTOS libraries:
+
+* `FreeRTOS::Coroutine` - co-routines (`croutines.c`)
+* `FreeRTOS::EventGroups` - event groups (`event_groups.c`)
+* `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
+* `FreeRTOS::Timers` - timers (`timers.c`)
+* `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
 
