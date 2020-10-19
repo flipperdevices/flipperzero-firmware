@@ -19,6 +19,23 @@ bool init_composer(ValueComposer* composer, void* value) {
     return true;
 }
 
+bool delete_composer(ValueComposer* composer) {
+    if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
+        bool result = true;
+        result &= delete_mutex(&composer->value);
+
+        for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
+            list_pubsub_cb_clear(composer->layers[i]);
+        }
+
+        result &= osMutexDelete(composer->mutex) == osOK;
+
+        return result;
+    } else {
+        return false;
+    }
+}
+
 ValueComposerHandle*
 add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, UiLayer layer) {
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
@@ -108,6 +125,13 @@ bool init_managed(ValueManager* managed, void* value, size_t size) {
         return false;
     }
     return true;
+}
+
+bool delete_managed(ValueManager* managed) {
+    bool result = true;
+    result &= delete_mutex(&managed->value);
+    result &= delete_pubsub(&managed->pubsub);
+    return result;
 }
 
 bool write_managed(ValueManager* managed, void* data, size_t len, uint32_t timeout) {

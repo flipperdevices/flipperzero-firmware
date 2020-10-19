@@ -34,6 +34,12 @@ void COPY_COMPOSE(void* ctx, void* state);
 
 bool init_composer(ValueComposer* composer, void* value);
 
+/*
+Free resources allocated by `init_composer`.
+This function doesn't free the memory occupied by `ValueComposer` itself.
+*/
+bool delete_composer(ValueComposer* composer);
+
 ValueComposerHandle*
 add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, UiLayer layer);
 
@@ -60,6 +66,12 @@ typedef struct {
 } ValueManager;
 
 bool init_managed(ValueManager* managed, void* value, size_t size);
+
+/*
+Free resources allocated by `init_managed`.
+This function doesn't free the memory occupied by `ValueManager` itself.
+*/
+bool delete_managed(ValueManager* managed);
 
 /*
 acquire value, changes it and send notify with current value.
