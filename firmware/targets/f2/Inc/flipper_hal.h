@@ -36,7 +36,7 @@ static inline bool app_gpio_read(GpioPin gpio) {
     return false;
 }
 void delay_us_init_DWT(void);
-void delay_us(uint32_t time);
+void delay_us(float time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 
