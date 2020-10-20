@@ -4,7 +4,6 @@
 #include "valuemutex.h"
 #include "pubsub.h"
 #include "m-list.h"
-#include <stdatomic.h>
 
 /*
 == Value composer ==
@@ -29,7 +28,7 @@ struct ValueComposer {
     ValueMutex value;
     list_composer_cb_t layers[3];
     osMutexId_t mutex;
-    volatile atomic_bool request;
+    bool request;
 };
 
 void COPY_COMPOSE(void* ctx, void* state);

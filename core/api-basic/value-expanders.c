@@ -16,7 +16,7 @@ bool init_composer(ValueComposer* composer, void* value) {
     composer->mutex = osMutexNew(&value_mutex_attr);
     if(composer->mutex == NULL) return false;
 
-    atomic_init(&composer->request, false);
+    composer->request = false;
 
     return true;
 }
@@ -55,7 +55,7 @@ add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, 
         osMutexRelease(composer->mutex);
 
         // Layers changed, request composition
-        atomic_exchange(&composer->request, true);
+        composer->request = true;
 
         return handle;
     } else {
@@ -86,7 +86,7 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
         osMutexRelease(composer->mutex);
 
         // Layers changed, request composition
-        atomic_exchange(&composer->request, true);
+        composer->request = true;
 
         return result;
     } else {
@@ -96,7 +96,7 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
 
 void request_compose(ValueComposerHandle* handle) {
     ValueComposer* composer = handle->composer;
-    atomic_exchange(&composer->request, true);
+    composer->request = true;
 }
 
 void perform_compose(
@@ -104,8 +104,8 @@ void perform_compose(
     ValueComposerCallback start_cb,
     ValueComposerCallback end_cb,
     void* ctx) {
-    bool request = atomic_exchange(&composer->request, false);
-    if(!request) return;
+    if(!composer->request) return;
+    composer->request = false;
 
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
         void* state = acquire_mutex(&composer->value, 0);
