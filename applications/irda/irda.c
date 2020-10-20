@@ -1,9 +1,10 @@
 #include "flipper.h"
 #include "irda_nec.h"
 
+
+
 void irda(void* p) {
     // TODO use FURI
-    HAL_GPIO_WritePin(IR_TX_GPIO_Port, IR_TX_Pin, GPIO_PIN_SET);
 
     while(1) {
         printf("sending ir packet\n");

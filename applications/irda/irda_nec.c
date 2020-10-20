@@ -1,37 +1,24 @@
+#include "flipper.h"
 #include "irda_nec.h"
-#include "irda.h"
+#include "irda_protocols.h"
 
-// carrier freq = 38kHz
-// carrier timing: 1000 / 38 = 26,315
-// with rounding and pin toggling overhead i get 12+12 us delay
-#define NEC_CARRIER_FREQUENCY 38000
-#define NEC_CARRIER_PERIOD (1000000.0 / (float)NEC_CARRIER_FREQUENCY)
-#define NEC_PIN_UP_US 12
-#define NEC_PIN_DOWN_US 12
-
-static inline __attribute__((always_inline)) void ir_nec_pulse() {
-    ir_on();
-    delay_us(NEC_PIN_UP_US);
-    ir_off();
-    delay_us(NEC_PIN_DOWN_US);
-}
+// our tx pin is TIM2_CH4
+extern TIM_HandleTypeDef htim2;
 
 void ir_nec_preambula(void) {
     // 9ms carrier + 4.5ms pause
-    const uint16_t periods_in_9ms = (9000.0 / NEC_CARRIER_PERIOD);
-    for(uint16_t i = 0; i < periods_in_9ms; i++) {
-        ir_nec_pulse();
-    }
+    pwm_set(NEC_DUTY_CYCLE, NEC_CARRIER_FREQUENCY, &htim2, TIM_CHANNEL_4);
+    delay_us(9000);
+    pwm_stop(&htim2, TIM_CHANNEL_4);
     delay_us(4500);
 }
 
 void ir_nec_send_bit(bool bit) {
     // 0 is 562.5us carrier + 1687.5us pause
     // 1 is 562.5us carrier + 562.5us pause
-    const uint16_t periods_in_562_5us = (562.5 / NEC_CARRIER_PERIOD);
-    for(uint16_t i = 0; i < periods_in_562_5us; i++) {
-        ir_nec_pulse();
-    }
+    pwm_set(NEC_DUTY_CYCLE, NEC_CARRIER_FREQUENCY, &htim2, TIM_CHANNEL_4);
+    delay_us(562.5);
+    pwm_stop(&htim2, TIM_CHANNEL_4);
     if(bit) {
         delay_us(562.5);
     } else {
