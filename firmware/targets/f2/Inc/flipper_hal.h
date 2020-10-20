@@ -39,6 +39,7 @@ void delay_us_init_DWT(void);
 void delay_us(float time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
+void pwm_stop(TIM_HandleTypeDef* tim, uint32_t channel);
 
 extern TIM_HandleTypeDef htim8;
 
