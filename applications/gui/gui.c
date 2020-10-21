@@ -59,6 +59,10 @@ void gui_add_widget(GuiApi* gui_api, Widget* widget, WidgetLayer layer) {
     gui_update(gui);
 }
 
+void gui_remove_widget(Gui* gui, Widget* widget) {
+    
+}
+
 void gui_update(Gui* gui) {
     assert(gui);
     GuiMessage message;
@@ -146,6 +150,7 @@ Gui* gui_alloc() {
     gui->canvas_api = canvas_api_init();
 
     gui->api.add_widget = gui_add_widget;
+    gui->api.remove_widget = gui_remove_widget;
 
     return gui;
 }

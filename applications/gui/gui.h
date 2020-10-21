@@ -15,4 +15,5 @@ typedef struct Widget Widget;
 typedef struct GuiApi GuiApi;
 struct GuiApi {
     void (*add_widget)(GuiApi* gui_api, Widget* widget, WidgetLayer layer);
+    void (*remove_widget)(GuiApi* gui_api, Widget* widget);
 };
