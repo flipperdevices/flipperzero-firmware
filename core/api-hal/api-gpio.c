@@ -2,7 +2,7 @@
 
 // init GPIO
 void gpio_init(GpioPin* gpio, GpioMode mode){
-    hal_gpio_init(gpio, mode, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
+    hal_gpio_init(gpio, mode, GpioPullNo, GpioSpeedLow);
 }
 
 // init GPIO, extended version
@@ -23,7 +23,7 @@ bool gpio_read(GpioPin* gpio){
 // put GPIO to Z-state
 void gpio_disable(ValueMutex* gpio_mutex){
     GpioPin* gpio_pin = acquire_mutex(gpio_mutex, FLIPPER_HELPER_TIMEOUT);
-    hal_gpio_init(gpio_pin, GPIO_MODE_ANALOG, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW);
+    hal_gpio_init(gpio_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     release_mutex(gpio_mutex, gpio_pin);
 }
 
