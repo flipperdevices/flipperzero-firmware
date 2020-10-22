@@ -5,7 +5,7 @@
 
 typedef struct {
     ValueMutex* gpio_mutex;
-    GpioPin* gpio
+    GpioPin* gpio;
 } GpioDisableRecord;
 
 // init GPIO
