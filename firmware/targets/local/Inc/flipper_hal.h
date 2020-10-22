@@ -10,39 +10,10 @@ GPIO and HAL implementations
 #include <stdbool.h>
 #include "main.h"
 
-typedef enum { GpioModeInput, GpioModeOutput, GpioModeOpenDrain } GpioMode;
-
-typedef struct {
-    const char* port;
-    uint32_t pin;
-    GpioMode mode;
-} GpioPin;
-
-void app_gpio_init(GpioPin gpio, GpioMode mode);
-
-static inline void app_gpio_write(GpioPin gpio, bool state) {
-    if(gpio.pin != 0) {
-        if(state) {
-            printf("[GPIO] %s%d on\n", gpio.port, gpio.pin);
-        } else {
-            printf("[GPIO] %s%d off\n", gpio.port, gpio.pin);
-        }
-    } else {
-        printf("[GPIO] no pin\n");
-    }
-}
-
-static inline bool app_gpio_read(GpioPin gpio) {
-    // TODO emulate pin state?
-
-    return false;
-}
 
 typedef enum { GPIO_PIN_SET = 1, GPIO_PIN_RESET = 0 } HAL_GPIO_PIN_STATE;
 
 void HAL_GPIO_WritePin(const char* port, uint32_t pin, HAL_GPIO_PIN_STATE state);
-
-void delay_us(uint32_t time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 
