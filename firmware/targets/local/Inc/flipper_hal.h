@@ -10,27 +10,6 @@ GPIO and HAL implementations
 #include <stdbool.h>
 #include "main.h"
 
-
-typedef enum { GPIO_PIN_SET = 1, GPIO_PIN_RESET = 0 } HAL_GPIO_PIN_STATE;
-
-void HAL_GPIO_WritePin(const char* port, uint32_t pin, HAL_GPIO_PIN_STATE state);
-
-void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
-
-extern TIM_HandleTypeDef htim8;
-
-static inline void app_tim_ic_init(bool both) {
-    printf("[TIM] init\n");
-}
-
-static inline void app_tim_pulse(uint32_t width) {
-    printf("[TIM] pulse %d\n", width);
-}
-
-static inline void app_tim_stop() {
-    printf("[TIM] stop\n");
-}
-
 #define GPIOA "PA"
 #define GPIOB "PB"
 #define GPIOC "PC"
