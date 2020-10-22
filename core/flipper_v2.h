@@ -14,7 +14,12 @@ extern "C" {
 
 #include "api-basic/memmgr.h"
 
+#include "api-hal/api-gpio.h"
+
 #include "gui/gui.h"
+
+// tmeout for helper functions
+#define FLIPPER_HELPER_TIMEOUT 10
 
 #ifdef __cplusplus
 }
