@@ -6,7 +6,7 @@ void application_blink(void* p) {
     GpioPin led = {.pin = GPIO_PIN_8, .port = GPIOA};
 
     // TODO open record
-    GpioPin *led_record = &led;
+    GpioPin* led_record = &led;
 
     // configure pin
     pinMode(led_record, GpioModeOutputOpenDrain);
