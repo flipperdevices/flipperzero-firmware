@@ -1,30 +1,33 @@
 #include "api-gpio.h"
 
 // init GPIO
-void gpio_init(GpioPin* gpio, GpioMode mode){
+void gpio_init(GpioPin* gpio, GpioMode mode) {
     hal_gpio_init(gpio, mode, GpioPullNo, GpioSpeedLow);
 }
 
 // init GPIO, extended version
-void gpio_init_ex(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed){
+void gpio_init_ex(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed) {
     hal_gpio_init(gpio, mode, pull, speed);
 }
 
 // write value to GPIO, false = LOW, true = HIGH
-void gpio_write(GpioPin* gpio, bool state){
+void gpio_write(GpioPin* gpio, bool state) {
     hal_gpio_write(gpio, state);
 }
 
 // read value from GPIO, false = LOW, true = HIGH
-bool gpio_read(GpioPin* gpio){
+bool gpio_read(GpioPin* gpio) {
     return hal_gpio_read(gpio);
 }
 
 // put GPIO to Z-state
-void gpio_disable(ValueMutex* gpio_mutex){
-    GpioPin* gpio_pin = acquire_mutex(gpio_mutex, FLIPPER_HELPER_TIMEOUT);
+void gpio_disable(GpioDisableRecord* gpio_record) {
+    GpioPin* gpio_pin = acquire_mutex(gpio_record->gpio_mutex, 0);
+    if(gpio_pin == NULL) {
+        gpio_pin = gpio_record->gpio;
+    }
     hal_gpio_init(gpio_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    release_mutex(gpio_mutex, gpio_pin);
+    release_mutex(gpio_record->gpio_mutex, gpio_pin);
 }
 
 // get GPIO record

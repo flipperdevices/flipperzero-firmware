@@ -3,6 +3,11 @@
 #include "flipper_v2.h"
 #include "api-hal-gpio.h"
 
+typedef struct {
+    ValueMutex* gpio_mutex;
+    GpioPin* gpio
+} GpioDisableRecord;
+
 // init GPIO
 void gpio_init(GpioPin* gpio, GpioMode mode);
 
@@ -16,7 +21,7 @@ void gpio_write(GpioPin* gpio, bool state);
 bool gpio_read(GpioPin* gpio);
 
 // put GPIO to Z-state
-void gpio_disable(ValueMutex* gpio_mutex);
+void gpio_disable(GpioDisableRecord* gpio_record);
 
 // get GPIO record
 ValueMutex* gpio_open_mutex(const char* name);
