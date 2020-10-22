@@ -235,7 +235,7 @@ extern "C" void cc1101_workaround(void* p) {
     GpioPin cs_pin = {CC1101_CS_GPIO_Port, CC1101_CS_Pin};
 
     // TODO open record
-    GpioPin *cs_pin_record = &cs_pin;
+    GpioPin* cs_pin_record = &cs_pin;
     CC1101 cc1101(cs_pin_record);
     printf("[cc1101] init device\n");
 

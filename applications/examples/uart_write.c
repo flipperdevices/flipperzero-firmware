@@ -7,7 +7,7 @@ void application_uart_write(void* p) {
     // Red led for showing progress
     GpioPin led = {.pin = GPIO_PIN_8, .port = GPIOA};
     // TODO open record
-    GpioPin *led_record = &led;
+    GpioPin* led_record = &led;
 
     pinMode(led_record, GpioModeOutputOpenDrain);
 

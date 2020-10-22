@@ -12,7 +12,7 @@
 /******************************************************************************/
 GpioPin ss_pin;
 
-CC1101::CC1101(GpioPin *ss_pin) {
+CC1101::CC1101(GpioPin* ss_pin) {
     /*
     pinMode(gdo0_pin, OUTPUT); //GDO0 as asynchronous serial mode input
     pinMode(gdo2_pin, INPUT); //GDO2 as asynchronous serial mode output
