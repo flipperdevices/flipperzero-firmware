@@ -42,15 +42,15 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS $(ASSETS)
 	@echo "\tCC\t" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS $(ASSETS)
 	@echo "\tASM\t" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
-$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
+$(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS $(ASSETS)
 	@echo "\tCPP\t" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -61,6 +61,10 @@ $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 $(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
 	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS)
 	touch $@
+
+$(ASSETS): $(ASSETS_SOURCES)
+	@echo "\tGEN\t" $@
+	@$(ASSETS_COMPILLER) icons -s $(ASSETS_SOURCE_DIR) -o $(ASSETS_OUTPUT_DIR)
 
 flash: $(OBJ_DIR)/flash
 
@@ -79,6 +83,7 @@ debug: flash
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) $(OBJ_DIR)/*
+	@$(RM) $(ASSETS)
 
 z: clean
 	$(MAKE) all
