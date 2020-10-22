@@ -1,0 +1,25 @@
+#pragma once
+#include "flipper.h"
+#include "flipper_v2.h"
+#include "api-hal-gpio.h"
+
+// init GPIO
+void gpio_init(GpioPin* gpio, GpioMode mode);
+
+// init GPIO, extended version
+void gpio_init_ex(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed);
+
+// write value to GPIO, false = LOW, true = HIGH
+void gpio_write(GpioPin* gpio, bool state);
+
+// read value from GPIO, false = LOW, true = HIGH
+bool gpio_read(GpioPin* gpio);
+
+// put GPIO to Z-state
+void gpio_disable(ValueMutex* gpio_mutex);
+
+// get GPIO record
+ValueMutex* gpio_open_mutex(const char* name);
+
+// get GPIO record and acquire mutex
+GpioPin* gpio_open(const char* name);
