@@ -63,7 +63,7 @@ $(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
 	touch $@
 
 $(ASSETS): $(ASSETS_SOURCES)
-	@echo "\tGEN\t" $@
+	@echo "\tASSETS\t" $@
 	@$(ASSETS_COMPILLER) icons -s $(ASSETS_SOURCE_DIR) -o $(ASSETS_OUTPUT_DIR)
 
 flash: $(OBJ_DIR)/flash

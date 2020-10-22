@@ -91,7 +91,13 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
                 size_t shift_position = i + menu->position + MenuItemArray_size(*items) - 2;
                 shift_position = shift_position % (MenuItemArray_size(*items));
                 MenuItem* item = *MenuItemArray_get(*items, shift_position);
-                canvas->draw_str(canvas, 2, 12 * (i + 1), menu_item_get_label(item));
+                const char *label = menu_item_get_label(item);
+                const Icon *icon = menu_item_get_icon(item);
+                if (icon) {
+                    canvas->draw_icon(canvas, 2, 12 * (i + 1)-14, icon);
+                }
+
+                canvas->draw_str(canvas, 16, 12 * (i + 1), label);
             }
         } else {
             canvas->draw_str(canvas, 2, 32, "Empty");

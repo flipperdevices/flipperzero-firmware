@@ -11,25 +11,20 @@ ICONS_SUPPORTED_FORMATS = ["png"]
 
 ICONS_TEMPLATE_H_HEADER = """#pragma once
 
-#include <stdint.h>
-
-typedef struct {
-    const uint8_t width;
-    const uint8_t height;
-    const uint8_t frame_count;
-    const uint8_t frame_rate;
-    const uint8_t **data;
-} Icon;
+#include <gui/icon.h>
 
 typedef enum {
 """
 ICONS_TEMPLATE_H_ICON_NAME = "\t{name},\n"
 ICONS_TEMPLATE_H_FOOTER = """} IconName;
 
-const Icon * icon_get(IconName name);
+const Icon * assets_icons_get(IconName name);
 """
 
-ICONS_TEMPLATE_C_HEADER = "#include \"icons.h\"\n\n"
+ICONS_TEMPLATE_C_HEADER = """#include \"assets_icons.h\"
+#include <gui/icon_i.h>
+
+"""
 ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t *{name}[] = {data};\n"
 ICONS_TEMPLATE_C_ICONS_ARRAY_START = "const Icon icons[] = {\n"
@@ -37,7 +32,7 @@ ICONS_TEMPLATE_C_ICONS_ITEM = "\t{{ .width={width}, .height={height}, .frame_cou
 ICONS_TEMPLATE_C_ICONS_ARRAY_END = "};"
 ICONS_TEMPLATE_C_FOOTER = """
 
-const Icon * icon_get(IconName name) {
+const Icon * assets_icons_get(IconName name) {
     return &icons[name];
 }
 """
@@ -72,7 +67,7 @@ class Assets:
 
     def icons(self):
         self.logger.debug(f"Converting icons")
-        icons_c = open(os.path.join(self.args.output_directory, "icons.c"), "w");
+        icons_c = open(os.path.join(self.args.output_directory, "assets_icons.c"), "w");
         icons_c.write(ICONS_TEMPLATE_C_HEADER)
         icons = []
         # Traverse icons tree, append image data to source file
@@ -137,7 +132,7 @@ class Assets:
         icons_c.write("\n")
         # Create Header
         self.logger.debug(f"Creating header")
-        icons_h = open(os.path.join(self.args.output_directory, "icons.h"), "w");
+        icons_h = open(os.path.join(self.args.output_directory, "assets_icons.h"), "w");
         icons_h.write(ICONS_TEMPLATE_H_HEADER)
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))

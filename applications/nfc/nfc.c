@@ -6,6 +6,7 @@
 #include <gui/gui.h>
 #include <gui/widget.h>
 #include <gui/canvas.h>
+#include <assets_icons.h>
 
 #include <menu/menu.h>
 #include <menu/menu_item.h>
@@ -230,7 +231,7 @@ Nfc* nfc_alloc() {
     widget_draw_callback_set(nfc->widget, nfc_draw_callback, nfc);
     widget_input_callback_set(nfc->widget, nfc_input_callback, nfc);
 
-    nfc->menu = menu_item_alloc_menu("NFC", NULL);
+    nfc->menu = menu_item_alloc_menu("NFC", assets_icons_get(A_NFC_14));
     menu_item_subitem_add(
         nfc->menu, menu_item_alloc_function("Test", NULL, nfc_test_callback, nfc));
     menu_item_subitem_add(
