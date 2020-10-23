@@ -54,7 +54,7 @@ const NecPacket packets[] = {
     {.addr = 0xFF, .data = 0xF0},
 };
 
-const float duty_cycles[] = {0.1, 0.25, 0.33, 0.5};
+const float duty_cycles[] = {0.1, 0.25, 0.333, 0.5, 1.0};
 
 void render_carrier(CanvasApi* canvas, State* state) {
     canvas->set_font(canvas, FontSecondary);
@@ -173,7 +173,7 @@ void irda(void* p) {
     uint8_t mode_count = sizeof(modes) / sizeof(modes[0]);
     uint8_t duty_cycles_count = sizeof(duty_cycles) / sizeof(duty_cycles[0]);
 
-    _state.carrier_duty_cycle_id = duty_cycles_count - 1;
+    _state.carrier_duty_cycle_id = duty_cycles_count - 2;
     _state.carrier_freq = 36000;
     _state.mode_id = 0;
     _state.nec_packet_id = 0;
