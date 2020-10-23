@@ -49,7 +49,7 @@ void coreglitch_demo_0(void* p) {
             }
 
             // TODO get sound from FURI
-            pwm_set(width, freq, &htim5, TIM_CHANNEL_4);
+            hal_pwm_set(width, freq, &htim5, TIM_CHANNEL_4);
             // delay(1);
 
             cnt++;
