@@ -21,6 +21,8 @@ extern "C" {
 // tmeout for helper functions
 #define FLIPPER_HELPER_TIMEOUT 10
 
+bool init_flipper_api(void);
+
 #ifdef __cplusplus
 }
 #endif
