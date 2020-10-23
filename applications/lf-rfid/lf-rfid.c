@@ -73,10 +73,7 @@ void lf_rfid_workaround(void* p) {
 
     Event event;
     while(1) {
-        osStatus_t event_status = osMessageQueueGet(
-            event_queue, &event, NULL,
-            10000
-        );
+        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 10000);
         State* state = (State*)acquire_mutex_block(&state_mutex);
 
         if(event_status == osOK) {
