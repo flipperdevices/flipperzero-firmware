@@ -77,24 +77,34 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     
     string(TOLOWER ${FAMILY} FAMILY_L)
     
-    if(NOT STM32_CUBE_${FAMILY}_PATH)
+    if((NOT STM32_CMSIS_${FAMILY}_PATH) AND (NOT STM32_CUBE_${FAMILY}_PATH))
         set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube${FAMILY} CACHE PATH "Path to STM32Cube${FAMILY}")
-        message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
+        message(STATUS "Neither STM32_CUBE_${FAMILY}_PATH nor STM32_CMSIS_${FAMILY}_PATH specified using default  STM32_CUBE_${FAMILY}_PATH: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
         
-    find_path(CMSIS_${FAMILY}${CORE_U}_PATH
+    find_path(CMSIS_${FAMILY}${CORE_U}_CORE_PATH
         NAMES Include/cmsis_gcc.h
-        PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
+        PATHS "${STM32_CMSIS_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS"
+        NO_DEFAULT_PATH
+    )
+    if (NOT CMSIS_${FAMILY}${CORE_U}_CORE_PATH)
+        continue()
+    endif()
+	
+    find_path(CMSIS_${FAMILY}${CORE_U}_PATH
+        NAMES Include/stm32${FAMILY_L}xx.h
+        PATHS "${STM32_CMSIS_${FAMILY}_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/CMSIS/Device/ST/STM32${FAMILY}xx"
         NO_DEFAULT_PATH
     )
     if (NOT CMSIS_${FAMILY}${CORE_U}_PATH)
         continue()
     endif()
-    
+    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}/Include" "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include")
+
     if(NOT CMSIS_${FAMILY}${CORE_U}_VERSION)
         find_file(CMSIS_${FAMILY}${CORE_U}_PDSC
             NAMES ARM.CMSIS.pdsc
-            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}"
+            PATHS "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}"
             NO_DEFAULT_PATH
         )
         if (NOT CMSIS_${FAMILY}${CORE_U}_PDSC)
@@ -109,39 +119,23 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     
     set(CMSIS_${COMP}_VERSION ${CMSIS_${FAMILY}${CORE_U}_VERSION})
     set(CMSIS_VERSION ${CMSIS_${COMP}_VERSION})
-    
-    find_path(CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE
-        NAMES cmsis_gcc.h
-        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include"
-        NO_DEFAULT_PATH
-    )
-    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE}")
-    
-    find_path(CMSIS_${FAMILY}${CORE_U}_INCLUDE
-        NAMES stm32${FAMILY_L}xx.h
-        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Include"
-        NO_DEFAULT_PATH
-    )
-    list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_INCLUDE}")
-    
+        
     find_file(CMSIS_${FAMILY}${CORE_U}_SOURCE
         NAMES system_stm32${FAMILY_L}xx.c
-        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates"
+        PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates"
         NO_DEFAULT_PATH
     )
     list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
     
-    if ((NOT CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE) OR 
-        (NOT CMSIS_${FAMILY}${CORE_U}_INCLUDE) OR 
-        (NOT CMSIS_${FAMILY}${CORE_U}_SOURCE))
+    if (NOT CMSIS_${FAMILY}${CORE_U}_SOURCE)
         continue()
     endif()
 
     if(NOT (TARGET CMSIS::STM32::${FAMILY}${CORE_C}))
         add_library(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
         target_link_libraries(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C})
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE}")
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_INCLUDE}")
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}/Include")
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include")
         target_sources(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
     endif()
 
@@ -158,7 +152,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         
         find_file(CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP
             NAMES startup_stm32${TYPE_L}.s
-            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Device/ST/STM32${FAMILY}xx/Source/Templates/gcc"
+            PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates/gcc"
             NO_DEFAULT_PATH
         )
         list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP}")
@@ -178,10 +172,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         cmsis_generate_default_linker_script(${FAMILY} ${DEVICE} "${CORE}")
     endforeach()
 
-    if(CMSIS_${FAMILY}${CORE_U}_COMMON_INCLUDE AND 
-       CMSIS_${FAMILY}${CORE_U}_INCLUDE AND 
-       CMSIS_${FAMILY}${CORE_U}_SOURCE AND
-       DEVICES_FOUND)
+    if(DEVICES_FOUND)
        set(CMSIS_${COMP}_FOUND TRUE)
     else()
        set(CMSIS_${COMP}_FOUND FALSE)

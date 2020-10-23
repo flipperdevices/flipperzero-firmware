@@ -26,6 +26,7 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * `template` ([examples/template](examples/template)) - project template, empty source linked compiled with CMSIS.
 * `custom-linker-script` ([examples/custom-linker-script](examples/custom-linker-script)) - similiar to `template` but using custom linker script.
 * `fetch-cube` ([examples/fetch-cube](examples/fetch-cube)) - example of using FetchContent for fetching STM32Cube from ST's git.
+* `fetch-cmsis-hal` ([examples/fetch-cmsis-hal](examples/fetch-cmsis-hal)) - example of using FetchContent for fetching STM32 CMSIS and HAL from ST's git.
 * `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
 * `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
 

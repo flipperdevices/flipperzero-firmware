@@ -194,14 +194,14 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     set(FAMILY ${CMAKE_MATCH_1})
     string(TOLOWER ${FAMILY} FAMILY_L)
     
-    if(NOT STM32_CUBE_${FAMILY}_PATH)
+    if((NOT STM32_HAL_${FAMILY}_PATH) AND (NOT STM32_CUBE_${FAMILY}_PATH))
         set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube${FAMILY} CACHE PATH "Path to STM32Cube${FAMILY}")
-        message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
+        message(STATUS "Neither STM32_CUBE_${FAMILY}_PATH nor STM32_HAL_${FAMILY}_PATH specified using default STM32_CUBE_${FAMILY}_PATH: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
         
     find_path(HAL_${FAMILY}_PATH
         NAMES Inc/stm32${FAMILY_L}xx_hal.h
-        PATHS "${STM32_CUBE_${FAMILY}_PATH}/Drivers/STM32${FAMILY}xx_HAL_Driver"
+        PATHS "${STM32_HAL_${FAMILY}_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/STM32${FAMILY}xx_HAL_Driver"
         NO_DEFAULT_PATH
     )
     if (NOT HAL_${FAMILY}_PATH)
