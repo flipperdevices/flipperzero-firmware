@@ -2,7 +2,6 @@
 
 extern "C" {
 #include "flipper.h"
-#include "flipper_v2.h"
 #include "log.h"
 #include "applications.h"
 #include "tty_uart.h"
@@ -15,7 +14,6 @@ extern "C" void set_exitcode(uint32_t _exitcode) {
 }
 
 extern "C" int app() {
-    init_flipper_api();
     register_tty_uart();
 
     FuriRecordSubscriber* log = get_default_log();
