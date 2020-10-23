@@ -2,9 +2,6 @@
 #include "irda_nec.h"
 #include "irda_protocols.h"
 
-// our tx pin is TIM2_CH4
-extern TIM_HandleTypeDef htim2;
-
 void ir_nec_preambula(void) {
     // 9ms carrier + 4.5ms pause
     pwm_set(NEC_DUTY_CYCLE, NEC_CARRIER_FREQUENCY, &htim2, TIM_CHANNEL_4);
@@ -32,14 +29,14 @@ void ir_nec_send_byte(uint8_t data) {
     }
 }
 
-void ir_nec_send(uint16_t addr, uint8_t data) {
+void ir_nec_send(uint8_t addr, uint8_t data) {
     // nec protocol is:
-    // preambula + addr high + addr low + command + inverse command + bit pulse
+    // preambula + addr + inverse addr + command + inverse command + bit pulse
     //
     // oddly enough, my analyzer (https://github.com/ukw100/IRMP) displays the reverse command
     // and I don’t know if this is my fault or a feature of the analyzer
     // TODO: check the dictionary and check with a known remote
-    uint8_t nec_packet[4] = {addr >> 8, addr, ~(uint8_t)data, data};
+    uint8_t nec_packet[4] = {addr, ~(uint8_t)addr, ~(uint8_t)data, data};
     ir_nec_preambula();
     ir_nec_send_byte(nec_packet[0]);
     ir_nec_send_byte(nec_packet[1]);

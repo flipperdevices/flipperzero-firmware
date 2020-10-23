@@ -53,10 +53,6 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = cc1101_workaround, .name = "cc1101 workaround", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 
-#ifdef APP_IRDA
-    {.app = irda, .name = "irda", .libs = {0}},
-#endif
-
 #ifdef APP_NFC
     {.app = nfc_task, .name = "nfc_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
@@ -100,5 +96,8 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_CC1101
     {.app = cc1101_workaround, .name = "cc1101 workaround", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+#ifdef APP_IRDA
+    {.app = irda, .name = "irda", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 };
