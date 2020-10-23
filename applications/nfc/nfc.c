@@ -31,8 +31,6 @@ struct Nfc {
     Dispatcher* dispatcher;
     Widget* widget;
     MenuItem* menu;
-    FuriRecordSubscriber* gui_record;
-    FuriRecordSubscriber* menu_record;
     rfalNfcDiscoverParam* disParams;
 
     osThreadAttr_t worker_attr;
@@ -241,43 +239,49 @@ Nfc* nfc_alloc() {
     menu_item_subitem_add(
         nfc->menu, menu_item_alloc_function("Brdige", NULL, nfc_bridge_callback, nfc));
 
-    nfc->gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
-    assert(nfc->gui_record);
-
-    nfc->menu_record = furi_open_deprecated("menu", false, false, NULL, NULL, NULL);
-    assert(nfc->menu_record);
-
     nfc->worker_attr.name = "nfc_worker";
     // nfc->worker_attr.attr_bits = osThreadJoinable;
     nfc->worker_attr.stack_size = 4096;
     return nfc;
 }
 
+#define fury_with(name, function_body) \
+{\
+    ValueMutex *v_m = furi_open(name);\
+    assert(v_m);\
+    void* p = acquire_mutex_block(v_m);\
+    assert(p); \
+    ({\
+        void __fn__ function_body\
+        __fn__;\
+    })(p);\
+    release_mutex(v_m, p);\
+}
+
 void nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
 
-    GuiApi* gui = furi_take(nfc->gui_record);
+    FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
+    assert(gui_record);
+    GuiApi* gui = furi_take(gui_record);
     assert(gui);
     widget_enabled_set(nfc->widget, false);
-    gui->add_widget(gui, nfc->widget, WidgetLayerFullscreen);
-    furi_commit(nfc->gui_record);
+    gui->add_widget(gui, nfc->widget, GuiLayerFullscreen);
+    furi_commit(gui_record);
 
-    ValueMutex* menu_mutex = furi_open("menu");
-    assert(menu_mutex);
-
-    Menu* menu = acquire_mutex_block(menu_mutex);
-    menu_item_add(menu, nfc->menu);
-    release_mutex(menu_mutex, menu);
+    fury_with("menu", (Menu *menu) {
+        menu_item_add(menu, nfc->menu);
+    });
 
     if(!furi_create("nfc", nfc)) {
         printf("[nfc_task] cannot create nfc record\n");
         furiac_exit(NULL);
     }
 
-    furiac_ready();
-
     nfc->ret = rfalNfcInitialize();
     rfalLowPowerModeStart();
+
+    furiac_ready();
 
     NfcMessage message;
     while(1) {

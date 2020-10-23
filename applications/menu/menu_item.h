@@ -27,6 +27,9 @@ void menu_item_subitem_add(MenuItem* menu_item, MenuItem* sub_item);
 
 MenuItemType menu_item_get_type(MenuItem* menu_item);
 
+void menu_item_set_position(MenuItem* menu_item, size_t position);
+size_t menu_item_get_position(MenuItem* menu_item);
+
 void menu_item_set_label(MenuItem* menu_item, const char* label);
 const char* menu_item_get_label(MenuItem* menu_item);
 

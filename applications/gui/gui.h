@@ -4,16 +4,17 @@
 #include "canvas.h"
 
 typedef enum {
-    WidgetLayerStatusBar,
-    WidgetLayerMain,
-    WidgetLayerFullscreen,
-    WidgetLayerDialog
-} WidgetLayer;
+    GuiLayerTamagotchi, /* Special layer for tamagotchi, for internal use only */
 
-typedef struct Widget Widget;
+    GuiLayerStatusBar,  /* Status bar widget layer */
+    GuiLayerMain,       /* Main widget layer, status bar is shown */
+    GuiLayerFullscreen, /* Fullscreen widget layer */
+
+    GuiLayerMAX         /* Don't use or move, special value */
+} GuiLayer;
 
 typedef struct GuiApi GuiApi;
 struct GuiApi {
-    void (*add_widget)(GuiApi* gui_api, Widget* widget, WidgetLayer layer);
+    void (*add_widget)(GuiApi* gui_api, Widget* widget, GuiLayer layer);
     void (*remove_widget)(GuiApi* gui_api, Widget* widget);
 };

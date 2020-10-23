@@ -6,10 +6,15 @@
 
 struct MenuItem {
     MenuItemType type;
+    
     const char* label;
     const Icon* icon;
+    
+    size_t position;
     MenuItem* parent;
     void* data;
+
+    // callback related
     MenuItemCallback callback;
     void* callback_context;
 };
@@ -71,6 +76,16 @@ void menu_item_subitem_add(MenuItem* menu_item, MenuItem* sub_item) {
 uint8_t menu_item_get_type(MenuItem* menu_item) {
     assert(menu_item);
     return menu_item->type;
+}
+
+void menu_item_set_position(MenuItem* menu_item, size_t position) {
+    assert(menu_item);
+    menu_item->position = position;
+}
+
+size_t menu_item_get_position(MenuItem* menu_item) {
+    assert(menu_item);
+    return menu_item->position;
 }
 
 void menu_item_set_label(MenuItem* menu_item, const char* label) {
