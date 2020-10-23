@@ -28,6 +28,7 @@ void backlight_control(void* p);
 void irda(void* p);
 void app_loader(void* p);
 void cc1101_workaround(void* p);
+void nfc_task(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -54,6 +55,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_IRDA
     {.app = irda, .name = "irda", .libs = {0}},
+#endif
+
+#ifdef APP_NFC
+    {.app = nfc_task, .name = "nfc_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
 // {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = ""},
