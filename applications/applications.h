@@ -34,6 +34,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = display_u8g2, .name = "display_u8g2", .libs = {0}},
 #endif
 
+#ifdef APP_EXAMPLE_BLINK
+    {.app = application_blink, .name = "blink", .libs = {0}},
+#endif
+
 #ifdef APP_INPUT
     {.app = input_task, .name = "input_task", .libs = {0}},
 #endif
