@@ -232,11 +232,7 @@ extern "C" void cc1101_workaround(void* p) {
     gui->add_widget(gui, widget, WidgetLayerFullscreen);
 
     printf("[cc1101] creating device\n");
-    GpioPin cs_pin = {CC1101_CS_GPIO_Port, CC1101_CS_Pin};
-
-    // TODO open record
-    GpioPin* cs_pin_record = &cs_pin;
-    CC1101 cc1101(cs_pin_record);
+    CC1101 cc1101(GpioPin{CC1101_CS_GPIO_Port, CC1101_CS_Pin});
     printf("[cc1101] init device\n");
 
     uint8_t address = cc1101.Init();
@@ -258,11 +254,9 @@ extern "C" void cc1101_workaround(void* p) {
 
     // create pin
     GpioPin led = {GPIOA, GPIO_PIN_8};
-    // TODO open record
-    GpioPin* led_record = &led;
 
     // configure pin
-    pinMode(led_record, GpioModeOutputOpenDrain);
+    pinMode(led, GpioModeOpenDrain);
 
     const int16_t RSSI_THRESHOLD = -89;
 
@@ -328,8 +322,7 @@ extern "C" void cc1101_workaround(void* p) {
         }
 
         digitalWrite(
-            led_record,
-            (state->last_rssi > RSSI_THRESHOLD && !state->need_cc1101_conf) ? LOW : HIGH);
+            led, (state->last_rssi > RSSI_THRESHOLD && !state->need_cc1101_conf) ? LOW : HIGH);
 
         release_mutex(&state_mutex, state);
         widget_update(widget);
