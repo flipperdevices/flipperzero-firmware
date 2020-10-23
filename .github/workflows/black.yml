@@ -6,7 +6,7 @@ on:
       - '**.py'
   pull_request:
     paths:
-      - '**.py'    
+      - '*'    
 
 jobs:
   lint:
