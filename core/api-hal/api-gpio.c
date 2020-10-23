@@ -1,23 +1,24 @@
 #include "api-gpio.h"
 
+osMutexId_t gpioInitMutex;
+
+bool gpio_api_init(void) {
+    gpioInitMutex = osMutexNew(NULL);
+    if(gpioInitMutex == NULL) return false;
+    return true;
+}
+
 // init GPIO
 void gpio_init(GpioPin* gpio, GpioMode mode) {
-    hal_gpio_init(gpio, mode, GpioPullNo, GpioSpeedLow);
+    if(osMutexAcquire(gpioInitMutex, osWaitForever) == osOK) {
+        hal_gpio_init(gpio, mode, GpioPullNo, GpioSpeedLow);
+        osMutexRelease(gpioInitMutex);
+    }
 }
 
 // init GPIO, extended version
 void gpio_init_ex(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed) {
     hal_gpio_init(gpio, mode, pull, speed);
-}
-
-// write value to GPIO, false = LOW, true = HIGH
-void gpio_write(GpioPin* gpio, bool state) {
-    hal_gpio_write(gpio, state);
-}
-
-// read value from GPIO, false = LOW, true = HIGH
-bool gpio_read(GpioPin* gpio) {
-    return hal_gpio_read(gpio);
 }
 
 // put GPIO to Z-state

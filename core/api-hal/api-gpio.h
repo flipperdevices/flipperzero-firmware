@@ -8,6 +8,9 @@ typedef struct {
     GpioPin* gpio;
 } GpioDisableRecord;
 
+// init GPIO API
+bool gpio_api_init();
+
 // init GPIO
 void gpio_init(GpioPin* gpio, GpioMode mode);
 
@@ -15,10 +18,14 @@ void gpio_init(GpioPin* gpio, GpioMode mode);
 void gpio_init_ex(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed);
 
 // write value to GPIO, false = LOW, true = HIGH
-void gpio_write(GpioPin* gpio, bool state);
+static inline void gpio_write(GpioPin* gpio, bool state) {
+    hal_gpio_write(gpio, state);
+}
 
 // read value from GPIO, false = LOW, true = HIGH
-bool gpio_read(GpioPin* gpio);
+static inline bool gpio_read(GpioPin* gpio) {
+    return hal_gpio_read(gpio);
+}
 
 // put GPIO to Z-state
 void gpio_disable(GpioDisableRecord* gpio_record);

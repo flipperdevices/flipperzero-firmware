@@ -2,7 +2,9 @@
 #include "main.h"
 #include "stdbool.h"
 
-// hw-api
+// this defined in xx_hal_gpio.c, so...
+#define GPIO_NUMBER (16U)
+
 typedef enum {
     GpioModeInput = GPIO_MODE_INPUT,
     GpioModeOutputPushPull = GPIO_MODE_OUTPUT_PP,
@@ -40,7 +42,20 @@ typedef struct {
 void hal_gpio_init(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed);
 
 // write value to GPIO, false = LOW, true = HIGH
-void hal_gpio_write(GpioPin* gpio, bool state);
+static inline void hal_gpio_write(GpioPin* gpio, bool state) {
+    // writing to BSSR is an atomic operation
+    if(state == true) {
+        gpio->port->BSRR = gpio->pin;
+    } else {
+        gpio->port->BSRR = (uint32_t)gpio->pin << GPIO_NUMBER;
+    }
+}
 
 // read value from GPIO, false = LOW, true = HIGH
-bool hal_gpio_read(GpioPin* gpio);
+static inline bool hal_gpio_read(GpioPin* gpio) {
+    if((gpio->port->IDR & gpio->pin) != 0x00U) {
+        return true;
+    } else {
+        return false;
+    }
+}
