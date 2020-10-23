@@ -39,6 +39,7 @@ static inline bool app_gpio_read(GpioPin gpio) {
 void delay_us(uint32_t time);
 
 void pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
+void pwmn_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t channel);
 
 extern TIM_HandleTypeDef htim8;
 
