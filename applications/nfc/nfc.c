@@ -245,19 +245,6 @@ Nfc* nfc_alloc() {
     return nfc;
 }
 
-#define fury_with(name, function_body) \
-{\
-    ValueMutex *v_m = furi_open(name);\
-    assert(v_m);\
-    void* p = acquire_mutex_block(v_m);\
-    assert(p); \
-    ({\
-        void __fn__ function_body\
-        __fn__;\
-    })(p);\
-    release_mutex(v_m, p);\
-}
-
 void nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
 
@@ -269,7 +256,7 @@ void nfc_task(void* p) {
     gui->add_widget(gui, nfc->widget, GuiLayerFullscreen);
     furi_commit(gui_record);
 
-    fury_with("menu", (Menu *menu) {
+    with_value_mutex("menu", (Menu *menu) {
         menu_item_add(menu, nfc->menu);
     });
 

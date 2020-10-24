@@ -23,13 +23,11 @@ void tamagotchi_draw_callback(CanvasApi* canvas, void* context) {
 }
 
 void tamagotchi_input_callback(InputEvent* event, void* context) {
-    if(!event->state) return;
+    if(!event->state || event->input != InputOk) return;
 
-    ValueMutex* menu_mutex = furi_open("menu");
-    assert(menu_mutex);
-    Menu* menu = acquire_mutex_block(menu_mutex);
-    menu_ok(menu);
-    release_mutex(menu_mutex, menu);
+    with_value_mutex("menu", (Menu *menu) {
+        menu_ok(menu);
+    });
 }
 
 Tamagotchi* tamagotchi_alloc() {

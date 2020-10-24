@@ -40,6 +40,25 @@ static inline void* acquire_mutex_block(ValueMutex* valuemutex) {
     return acquire_mutex(valuemutex, osWaitForever);
 }
 
+/* 
+ * With statement for value mutex, acts as lambda
+ * @param name a resource name, const char*
+ * @param function_body a (){} lambda declaration,
+ * executed within you parent function context.
+*/
+#define with_value_mutex(name, function_body) \
+{\
+    ValueMutex *v_m = furi_open(name);\
+    assert(v_m);\
+    void* p = acquire_mutex_block(v_m);\
+    assert(p); \
+    ({\
+        void __fn__ function_body\
+        __fn__;\
+    })(p);\
+    release_mutex(v_m, p);\
+}
+
 /*
 Release mutex after end of work with data.
 Call `release_mutex` and pass ValueData instance and pointer to data.
