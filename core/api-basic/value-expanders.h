@@ -3,6 +3,7 @@
 #include "flipper.h"
 #include "valuemutex.h"
 #include "pubsub.h"
+#include "event.h"
 #include "m-list.h"
 
 /*
@@ -28,7 +29,7 @@ struct ValueComposer {
     ValueMutex value;
     list_composer_cb_t layers[3];
     osMutexId_t mutex;
-    bool request;
+    Event request;
 };
 
 void COPY_COMPOSE(void* ctx, void* state);

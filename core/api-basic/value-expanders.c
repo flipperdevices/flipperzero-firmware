@@ -16,7 +16,7 @@ bool init_composer(ValueComposer* composer, void* value) {
     composer->mutex = osMutexNew(&value_mutex_attr);
     if(composer->mutex == NULL) return false;
 
-    composer->request = false;
+    if(!init_event(&composer->request)) return false;
 
     return true;
 }
@@ -55,7 +55,7 @@ add_compose_layer(ValueComposer* composer, ValueComposerCallback cb, void* ctx, 
         osMutexRelease(composer->mutex);
 
         // Layers changed, request composition
-        composer->request = true;
+        signal_event(&composer->request);
 
         return handle;
     } else {
@@ -86,7 +86,7 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
         osMutexRelease(composer->mutex);
 
         // Layers changed, request composition
-        composer->request = true;
+        signal_event(&composer->request);
 
         return result;
     } else {
@@ -96,7 +96,7 @@ bool remove_compose_layer(ValueComposerHandle* handle) {
 
 void request_compose(ValueComposerHandle* handle) {
     ValueComposer* composer = handle->composer;
-    composer->request = true;
+    signal_event(&composer->request);
 }
 
 void perform_compose(
@@ -104,8 +104,7 @@ void perform_compose(
     ValueComposerCallback start_cb,
     ValueComposerCallback end_cb,
     void* ctx) {
-    if(!composer->request) return;
-    composer->request = false;
+    if(!wait_event_with_timeout(&composer->request, 0)) return;
 
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
         void* state = acquire_mutex(&composer->value, 0);
