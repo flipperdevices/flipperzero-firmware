@@ -62,6 +62,15 @@ void perform_compose(
     ValueComposerCallback end_cb,
     void* ctx);
 
+/*
+Perform composition.
+
+This function should be called with value mutex acquired.
+This function is here for convenience, so that developers can write their own compose loops.
+See `perform_compose` function body for an example.
+*/
+void perform_compose_internal(ValueComposer* composer, void* state);
+
 // See [LED](LED-API) or [Display](Display-API) API for examples.
 
 /*

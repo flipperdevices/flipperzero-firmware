@@ -106,16 +106,18 @@ void perform_compose(
     void* ctx) {
     if(!wait_event_with_timeout(&composer->request, 0)) return;
 
+    void* state = acquire_mutex(&composer->value, 0);
+    if(state == NULL) return;
+
+    if(start_cb != NULL) start_cb(ctx, state);
+    perform_compose_internal(composer, state);
+    if(end_cb != NULL) end_cb(ctx, state);
+
+    release_mutex(&composer->value, state);
+}
+
+void perform_compose_internal(ValueComposer* composer, void* state) {
     if(osMutexAcquire(composer->mutex, osWaitForever) == osOK) {
-        void* state = acquire_mutex(&composer->value, 0);
-        if(state == NULL) {
-            // This should not happen
-            osMutexRelease(composer->mutex);
-            return;
-        }
-
-        if(start_cb != NULL) start_cb(ctx, state);
-
         // Compose all levels for now
         for(size_t i = 0; i < sizeof(composer->layers) / sizeof(composer->layers[0]); i++) {
             // iterate over items
@@ -127,9 +129,6 @@ void perform_compose(
             }
         }
 
-        if(end_cb != NULL) end_cb(ctx, state);
-
-        release_mutex(&composer->value, state);
         osMutexRelease(composer->mutex);
     }
 }
