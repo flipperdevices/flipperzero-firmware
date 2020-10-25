@@ -30,6 +30,7 @@ typedef struct {
 struct Nfc {
     Dispatcher* dispatcher;
     Widget* widget;
+    ValueMutex *menu_vm;
     MenuItem* menu;
     rfalNfcDiscoverParam* disParams;
 
@@ -229,6 +230,9 @@ Nfc* nfc_alloc() {
     widget_draw_callback_set(nfc->widget, nfc_draw_callback, nfc);
     widget_input_callback_set(nfc->widget, nfc_input_callback, nfc);
 
+    nfc->menu_vm = furi_open("menu");
+    assert(nfc->menu_vm);
+
     nfc->menu = menu_item_alloc_menu("NFC", assets_icons_get(A_NFC_14));
     menu_item_subitem_add(
         nfc->menu, menu_item_alloc_function("Test", NULL, nfc_test_callback, nfc));
@@ -256,7 +260,7 @@ void nfc_task(void* p) {
     gui->add_widget(gui, nfc->widget, GuiLayerFullscreen);
     furi_commit(gui_record);
 
-    with_value_mutex("menu", (Menu *menu) {
+    with_value_mutex(nfc->menu_vm, (Menu *menu) {
         menu_item_add(menu, nfc->menu);
     });
 

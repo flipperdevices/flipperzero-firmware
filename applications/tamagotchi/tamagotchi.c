@@ -12,6 +12,7 @@
 
 struct Tamagotchi {
     Widget* widget;
+    ValueMutex *menu_vm;
 };
 
 void tamagotchi_draw_callback(CanvasApi* canvas, void* context) {
@@ -23,9 +24,11 @@ void tamagotchi_draw_callback(CanvasApi* canvas, void* context) {
 }
 
 void tamagotchi_input_callback(InputEvent* event, void* context) {
+    Tamagotchi* tamagotchi = context;
+
     if(!event->state || event->input != InputOk) return;
 
-    with_value_mutex("menu", (Menu *menu) {
+    with_value_mutex(tamagotchi->menu_vm, (Menu *menu) {
         menu_ok(menu);
     });
 }
@@ -36,6 +39,9 @@ Tamagotchi* tamagotchi_alloc() {
     tamagotchi->widget = widget_alloc();
     widget_draw_callback_set(tamagotchi->widget, tamagotchi_draw_callback, tamagotchi);
     widget_input_callback_set(tamagotchi->widget, tamagotchi_input_callback, tamagotchi);
+
+    tamagotchi->menu_vm = furi_open("menu");
+    assert(tamagotchi->menu_vm);
 
     return tamagotchi;
 }
