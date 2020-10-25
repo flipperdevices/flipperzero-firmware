@@ -82,7 +82,7 @@ class Assets:
                 frame_count = 0
                 frame_rate = 0
                 frame_names = []
-                for filename in filenames:
+                for filename in sorted(filenames):
                     fullfilename = os.path.join(dirpath, filename)
                     if filename == 'frame_rate':
                         frame_rate = int(open(fullfilename, "r").read().strip())
