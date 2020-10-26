@@ -80,7 +80,6 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
 
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
-    canvas->set_font(canvas, FontPrimary);
 
     size_t position = menu_item_get_position(menu->current);
     MenuItemArray_t* items = menu_item_get_subitems(menu->current);
@@ -93,6 +92,11 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
             MenuItem* item = *MenuItemArray_get(*items, shift_position);
             const char* label = menu_item_get_label(item);
             Icon* icon = menu_item_get_icon(item);
+            if(i==1) {
+                canvas->set_font(canvas, FontPrimary);
+            } else {
+                canvas->set_font(canvas, FontSecondary);
+            }
             if(icon) canvas->draw_icon(canvas, 2, 2 + 20 * (i + 1) - 14, icon);
             if(label) canvas->draw_str(canvas, 18, 2 + 20 * (i + 1), label);
         }
