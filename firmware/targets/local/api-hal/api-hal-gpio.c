@@ -17,6 +17,10 @@ void hal_gpio_init(GpioPin* gpio, GpioMode mode, GpioPull pull, GpioSpeed speed)
         case GpioModeOutputOpenDrain:
             printf("[GPIO] %s%d open drain\n", gpio->port, gpio->pin);
             break;
+        
+        default:
+            printf("[GPIO] %s%d mode %d unsupported\n", gpio->port, gpio->pin, mode);
+            break;
         }
     } else {
         printf("[GPIO] no pin\n");
