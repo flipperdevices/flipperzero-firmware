@@ -92,7 +92,7 @@ void render_carrier(CanvasApi* canvas, State* state) {
 
 void render_nec(CanvasApi* canvas, State* state) {
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 2, 25, "< nec protocol mode >");
+    canvas->draw_str(canvas, 2, 25, "< nec mode >");
     canvas->draw_str(canvas, 2, 37, "? /\\ \\/ packet");
     {
         char buf[24];
@@ -107,7 +107,7 @@ void render_nec(CanvasApi* canvas, State* state) {
 
 void render_samsung(CanvasApi* canvas, State* state) {
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 2, 25, "< samsg32 protocol mode");
+    canvas->draw_str(canvas, 2, 25, "< samsung32 mode");
     canvas->draw_str(canvas, 2, 37, "? /\\ \\/ packet");
     {
         char buf[24];
