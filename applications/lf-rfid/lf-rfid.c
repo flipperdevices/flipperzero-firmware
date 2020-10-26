@@ -50,7 +50,7 @@ void lf_rfid_workaround(void* p) {
 
     State _state;
     _state.freq_khz = 125;
-    _state.on = true;
+    _state.on = false;
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -80,6 +80,10 @@ void lf_rfid_workaround(void* p) {
             if(event.type == EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
+                    hal_pwmn_stop(&htim15, TIM_CHANNEL_1); // TODO: move to furiac_onexit
+                    // TODO remove all widgets create by app
+                    widget_enabled_set(widget, false);
+                    furiac_exit(NULL);
                 }
 
                 if(event.value.input.state && event.value.input.input == InputUp) {
@@ -91,7 +95,6 @@ void lf_rfid_workaround(void* p) {
                 }
 
                 if(event.value.input.state && event.value.input.input == InputLeft) {
-                    state->freq_khz += 1;
                 }
 
                 if(event.value.input.state && event.value.input.input == InputRight) {
@@ -105,7 +108,7 @@ void lf_rfid_workaround(void* p) {
             // event timeout
         }
 
-        pwmn_set(state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &htim15, TIM_CHANNEL_1);
+        hal_pwmn_set(state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &htim15, TIM_CHANNEL_1);
 
         // common code, for example, force update UI
         widget_update(widget);
