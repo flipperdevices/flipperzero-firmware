@@ -8,7 +8,8 @@ void elements_scrollbar(CanvasApi* canvas, uint8_t pos, uint8_t total) {
         canvas->draw_dot(canvas, width - 2, i);
     }
 
-    uint8_t block_h = ((float)height) / total;
-
-    canvas->draw_box(canvas, width - 3, block_h * pos, 3, block_h);
+    if(total) {
+        uint8_t block_h = ((float)height) / total;
+        canvas->draw_box(canvas, width - 3, block_h * pos, 3, block_h);
+    }
 }
