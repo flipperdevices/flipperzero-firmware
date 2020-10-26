@@ -30,7 +30,7 @@ void app_loader(void* p);
 void cc1101_workaround(void* p);
 void lf_rfid_workaround(void* p);
 void nfc_task(void* p);
-void tamagotchi_task(void* p);
+void irukagotchi_task(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -55,8 +55,8 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = app_loader, .name = "app_loader", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
-#ifdef APP_TAMAGOTCHI
-    {.app = tamagotchi_task, .name = "tamagotchi_task", .libs = {1, FURI_LIB{"menu_task"}}},
+#ifdef APP_IRUKAGOTCHI
+    {.app = irukagotchi_task, .name = "irukagotchi_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
 #ifdef APP_CC1101

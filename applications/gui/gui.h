@@ -4,7 +4,7 @@
 #include "canvas.h"
 
 typedef enum {
-    GuiLayerTamagotchi, /* Special layer for tamagotchi, for internal use only */
+    GuiLayerNone, /* Special layer for internal use only */
 
     GuiLayerStatusBar, /* Status bar widget layer */
     GuiLayerMain, /* Main widget layer, status bar is shown */

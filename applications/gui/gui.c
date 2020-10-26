@@ -71,9 +71,9 @@ bool gui_redraw_normal(Gui* gui) {
     return false;
 }
 
-bool gui_redraw_flipper(Gui* gui) {
+bool gui_redraw_none(Gui* gui) {
     canvas_frame_set(gui->canvas_api, 0, 9, 118, 44);
-    Widget* widget = gui_widget_find_enabled(gui->layers[GuiLayerTamagotchi]);
+    Widget* widget = gui_widget_find_enabled(gui->layers[GuiLayerNone]);
     if(widget) {
         widget_draw(widget, gui->canvas_api);
         return true;
@@ -88,7 +88,7 @@ void gui_redraw(Gui* gui) {
 
     if(!gui_redraw_fs(gui)) {
         if(!gui_redraw_normal(gui)) {
-            gui_redraw_flipper(gui);
+            gui_redraw_none(gui);
         }
         gui_redraw_status_bar(gui);
     }
@@ -103,7 +103,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
 
     Widget* widget = gui_widget_find_enabled(gui->layers[GuiLayerFullscreen]);
     if(!widget) widget = gui_widget_find_enabled(gui->layers[GuiLayerMain]);
-    if(!widget) widget = gui_widget_find_enabled(gui->layers[GuiLayerTamagotchi]);
+    if(!widget) widget = gui_widget_find_enabled(gui->layers[GuiLayerNone]);
 
     if(widget) {
         widget_input(widget, input_event);
