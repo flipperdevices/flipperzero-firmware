@@ -96,7 +96,7 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
             if(icon) canvas->draw_icon(canvas, 2, 2 + 20 * (i + 1) - 14, icon);
             if(label) canvas->draw_str(canvas, 18, 2 + 20 * (i + 1), label);
         }
-        canvas->draw_frame(canvas, 0, 26, 128-4, 22);
+        canvas->draw_frame(canvas, 0, 26, 128 - 4, 22);
         elements_scrollbar(canvas, position, items_count);
     } else {
         canvas->draw_str(canvas, 2, 32, "Empty");
