@@ -8,7 +8,7 @@ void elements_scrollbar(CanvasApi* canvas, uint8_t pos, uint8_t total) {
     canvas->draw_box(canvas, width - 3, 0, 3, height);
     // dot line
     canvas->set_color(canvas, ColorBlack);
-    for(uint8_t i = 1; i < height; i += 2) {
+    for(uint8_t i = 0; i < height; i += 2) {
         canvas->draw_dot(canvas, width - 2, i);
     }
     // Position block

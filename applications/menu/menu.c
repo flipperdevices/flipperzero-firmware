@@ -70,11 +70,9 @@ void menu_settings_item_add(Menu* menu, MenuItem* item) {
 }
 
 void menu_draw_primary(Menu* menu, CanvasApi* canvas) {
-
 }
 
 void menu_draw_secondary(Menu* menu, CanvasApi* canvas) {
-    
 }
 
 void menu_widget_callback(CanvasApi* canvas, void* context) {
@@ -95,25 +93,26 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
     if(items_count) {
         MenuItem* item;
         size_t shift_position;
-
+        // First line
         canvas->set_font(canvas, FontSecondary);
         shift_position = (0 + position + items_count - 1) % (MenuItemArray_size(*items));
         item = *MenuItemArray_get(*items, shift_position);
         canvas->draw_icon(canvas, 4, 3, menu_item_get_icon(item));
         canvas->draw_str(canvas, 22, 14, menu_item_get_label(item));
-
-        shift_position = (2 + position + items_count - 1) % (MenuItemArray_size(*items));
-        item = *MenuItemArray_get(*items, shift_position);
-        canvas->draw_icon(canvas, 4, 46, menu_item_get_icon(item));
-        canvas->draw_str(canvas, 22, 57, menu_item_get_label(item));
-
+        // Second line main
         canvas->set_font(canvas, FontPrimary);
         shift_position = (1 + position + items_count - 1) % (MenuItemArray_size(*items));
         item = *MenuItemArray_get(*items, shift_position);
         canvas->draw_icon(canvas, 4, 24, menu_item_get_icon(item));
         canvas->draw_str(canvas, 22, 35, menu_item_get_label(item));
-
-        elements_frame(canvas, 0, 20, 128 - 4, 22);
+        // Third line
+        canvas->set_font(canvas, FontSecondary);
+        shift_position = (2 + position + items_count - 1) % (MenuItemArray_size(*items));
+        item = *MenuItemArray_get(*items, shift_position);
+        canvas->draw_icon(canvas, 4, 46, menu_item_get_icon(item));
+        canvas->draw_str(canvas, 22, 57, menu_item_get_label(item));
+        // Frame and scrollbar
+        elements_frame(canvas, 0, 20, 128 - 5, 22);
         elements_scrollbar(canvas, position, items_count);
     } else {
         canvas->draw_str(canvas, 2, 32, "Empty");
