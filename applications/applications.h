@@ -36,6 +36,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = display_u8g2, .name = "display_u8g2", .libs = {0}},
 #endif
 
+#ifdef APP_EXAMPLE_BLINK
+    {.app = application_blink, .name = "blink", .libs = {0}},
+#endif
+
 #ifdef APP_INPUT
     {.app = input_task, .name = "input_task", .libs = {0}},
 #endif
@@ -66,8 +70,6 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = nfc_task, .name = "nfc_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
-// {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = ""},
-
 #ifdef APP_TEST
     {.app = flipper_test_app, .name = "test app", .libs = {0}},
 #endif
@@ -87,6 +89,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_EXAMPLE_DISPLAY
     {.app = u8g2_example, .name = "u8g2_example", .libs = {1, FURI_LIB{"display_u8g2"}}},
+#endif
+
+#ifdef APP_SPEAKER_DEMO
+    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = ""},
 #endif
 };
 
@@ -113,5 +119,9 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_IRDA
     {.app = irda, .name = "irda", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
+#ifdef BUILD_SPEAKER_DEMO
+    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = {0}},
 #endif
 };
