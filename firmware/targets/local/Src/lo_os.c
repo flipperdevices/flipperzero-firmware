@@ -74,12 +74,6 @@ TaskHandle_t xTaskGetCurrentTaskHandle(void) {
     return thread;
 }
 
-bool task_equal(TaskHandle_t a, TaskHandle_t b) {
-    if(a == NULL || b == NULL) return false;
-
-    return pthread_equal(*a, *b) != 0;
-}
-
 BaseType_t xQueueSend(QueueHandle_t xQueue, const void* pvItemToQueue, TickType_t xTicksToWait) {
     // TODO: add implementation
     return pdTRUE;
