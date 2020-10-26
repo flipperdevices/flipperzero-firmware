@@ -32,7 +32,7 @@ void render_carrier(CanvasApi* canvas, State* state);
 void input_nec(AppEvent* event, State* state);
 void render_nec(CanvasApi* canvas, State* state);
 void render_carrier(CanvasApi* canvas, State* state);
-void input_samsung(Event* event, State* state);
+void input_samsung(AppEvent* event, State* state);
 void render_samsung(CanvasApi* canvas, State* state);
 
 typedef struct {
@@ -180,7 +180,7 @@ void input_nec(AppEvent* event, State* state) {
     }
 }
 
-void input_samsung(Event* event, State* state) {
+void input_samsung(AppEvent* event, State* state) {
     uint8_t packets_count = sizeof(samsung_packets) / sizeof(samsung_packets[0]);
 
     if(event->value.input.input == InputOk) {
