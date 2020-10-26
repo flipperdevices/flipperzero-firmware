@@ -69,6 +69,14 @@ void menu_settings_item_add(Menu* menu, MenuItem* item) {
     menu_item_subitem_add(menu->settings, item);
 }
 
+void menu_draw_primary(Menu* menu, CanvasApi* canvas) {
+
+}
+
+void menu_draw_secondary(Menu* menu, CanvasApi* canvas) {
+    
+}
+
 void menu_widget_callback(CanvasApi* canvas, void* context) {
     assert(canvas);
     assert(context);
@@ -85,25 +93,31 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
     MenuItemArray_t* items = menu_item_get_subitems(menu->current);
     size_t items_count = MenuItemArray_size(*items);
     if(items_count) {
-        for(size_t i = 0; i < 3; i++) {
-            size_t shift_position = i + position + MenuItemArray_size(*items) - 1;
-            shift_position = shift_position % (MenuItemArray_size(*items));
+        MenuItem* item;
+        size_t shift_position;
 
-            MenuItem* item = *MenuItemArray_get(*items, shift_position);
-            const char* label = menu_item_get_label(item);
-            Icon* icon = menu_item_get_icon(item);
-            if(i == 1) {
-                canvas->set_font(canvas, FontPrimary);
-            } else {
-                canvas->set_font(canvas, FontSecondary);
-            }
-            if(icon) canvas->draw_icon(canvas, 2, 2 + 20 * (i + 1) - 14, icon);
-            if(label) canvas->draw_str(canvas, 18, 2 + 20 * (i + 1), label);
-        }
-        canvas->draw_frame(canvas, 0, 26, 128 - 4, 22);
+        canvas->set_font(canvas, FontSecondary);
+        shift_position = (0 + position + items_count - 1) % (MenuItemArray_size(*items));
+        item = *MenuItemArray_get(*items, shift_position);
+        canvas->draw_icon(canvas, 4, 3, menu_item_get_icon(item));
+        canvas->draw_str(canvas, 22, 14, menu_item_get_label(item));
+
+        shift_position = (2 + position + items_count - 1) % (MenuItemArray_size(*items));
+        item = *MenuItemArray_get(*items, shift_position);
+        canvas->draw_icon(canvas, 4, 46, menu_item_get_icon(item));
+        canvas->draw_str(canvas, 22, 57, menu_item_get_label(item));
+
+        canvas->set_font(canvas, FontPrimary);
+        shift_position = (1 + position + items_count - 1) % (MenuItemArray_size(*items));
+        item = *MenuItemArray_get(*items, shift_position);
+        canvas->draw_icon(canvas, 4, 24, menu_item_get_icon(item));
+        canvas->draw_str(canvas, 22, 35, menu_item_get_label(item));
+
+        elements_frame(canvas, 0, 20, 128 - 4, 22);
         elements_scrollbar(canvas, position, items_count);
     } else {
         canvas->draw_str(canvas, 2, 32, "Empty");
+        elements_scrollbar(canvas, 0, 0);
     }
 
     release_mutex((ValueMutex*)context, menu);
