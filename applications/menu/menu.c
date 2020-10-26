@@ -92,7 +92,7 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
             MenuItem* item = *MenuItemArray_get(*items, shift_position);
             const char* label = menu_item_get_label(item);
             Icon* icon = menu_item_get_icon(item);
-            if(i==1) {
+            if(i == 1) {
                 canvas->set_font(canvas, FontPrimary);
             } else {
                 canvas->set_font(canvas, FontSecondary);
