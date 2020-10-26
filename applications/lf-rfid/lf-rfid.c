@@ -108,7 +108,8 @@ void lf_rfid_workaround(void* p) {
             // event timeout
         }
 
-        hal_pwmn_set(state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &htim15, TIM_CHANNEL_1);
+        hal_pwmn_set(
+            state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &htim15, TIM_CHANNEL_1);
 
         // common code, for example, force update UI
         widget_update(widget);
