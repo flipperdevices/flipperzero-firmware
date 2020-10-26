@@ -32,11 +32,6 @@ GuiEvent* gui_event_alloc() {
     assert(gui_event->input_event_record != NULL);
     subscribe_pubsub(gui_event->input_event_record, gui_event_input_events_callback, gui_event);
 
-    // Lock mutex
-    gui_event->lock_mutex = osMutexNew(NULL);
-    assert(gui_event->lock_mutex);
-    gui_event_lock(gui_event);
-
     return gui_event;
 }
 
