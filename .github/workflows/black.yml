@@ -5,9 +5,7 @@ on:
     paths:
       - '**.py'
   pull_request:
-    paths:
-      - '*'    
-
+  
 jobs:
   lint:
     runs-on: ubuntu-latest
