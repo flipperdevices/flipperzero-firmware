@@ -5,6 +5,7 @@
 
 #include <flipper_v2.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
 
 #include "menu_event.h"
 #include "menu_item.h"
@@ -83,7 +84,8 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
 
     size_t position = menu_item_get_position(menu->current);
     MenuItemArray_t* items = menu_item_get_subitems(menu->current);
-    if(MenuItemArray_size(*items)) {
+    size_t items_count = MenuItemArray_size(*items);
+    if(items_count) {
         for(size_t i = 0; i < 3; i++) {
             size_t shift_position = i + position + MenuItemArray_size(*items) - 1;
             shift_position = shift_position % (MenuItemArray_size(*items));
@@ -94,6 +96,8 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
             if(icon) canvas->draw_icon(canvas, 2, 2 + 20 * (i + 1) - 14, icon);
             if(label) canvas->draw_str(canvas, 18, 2 + 20 * (i + 1), label);
         }
+        canvas->draw_frame(canvas, 0, 26, 128-4, 22);
+        elements_scrollbar(canvas, position, items_count);
     } else {
         canvas->draw_str(canvas, 2, 32, "Empty");
     }

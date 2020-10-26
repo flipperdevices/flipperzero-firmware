@@ -26,4 +26,7 @@ struct CanvasApi {
 
     void (*draw_str)(CanvasApi* canvas, uint8_t x, uint8_t y, const char* str);
     void (*draw_icon)(CanvasApi* canvas, uint8_t x, uint8_t y, Icon* icon);
+    void (*draw_dot)(CanvasApi* canvas, uint8_t x, uint8_t y);
+    void (*draw_box)(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+    void (*draw_frame)(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 };

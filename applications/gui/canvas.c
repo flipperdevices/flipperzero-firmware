@@ -23,6 +23,9 @@ void canvas_color_set(CanvasApi* api, uint8_t color);
 void canvas_font_set(CanvasApi* api, Font font);
 void canvas_str_draw(CanvasApi* api, uint8_t x, uint8_t y, const char* str);
 void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon);
+void canvas_dot_draw(CanvasApi* api, uint8_t x, uint8_t y);
+void canvas_box_draw(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+void canvas_draw_frame(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
 uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
 uint8_t u8x8_hw_spi_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
@@ -47,6 +50,9 @@ CanvasApi* canvas_api_init() {
     canvas->api.set_font = canvas_font_set;
     canvas->api.draw_str = canvas_str_draw;
     canvas->api.draw_icon = canvas_icon_draw;
+    canvas->api.draw_dot = canvas_dot_draw;
+    canvas->api.draw_box = canvas_box_draw;
+    canvas->api.draw_frame = canvas_draw_frame;
 
     return (CanvasApi*)canvas;
 }
@@ -129,4 +135,22 @@ void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon) {
     y += canvas->offset_y;
     u8g2_DrawXBM(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+}
+
+void canvas_dot_draw(CanvasApi* api, uint8_t x, uint8_t y) {
+    assert(api);
+    Canvas* canvas = (Canvas*)api;
+    u8g2_DrawPixel(&canvas->fb, x, y);
+}
+
+void canvas_box_draw(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    assert(api);
+    Canvas* canvas = (Canvas*)api;
+    u8g2_DrawBox(&canvas->fb, x, y, width, height);
+}
+
+void canvas_draw_frame(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    assert(api);
+    Canvas* canvas = (Canvas*)api;
+    u8g2_DrawFrame(&canvas->fb, x, y, width, height);
 }
