@@ -157,7 +157,8 @@ void input_nec(Event* event, State* state) {
     if(event->value.input.input == InputOk) {
         if(event->value.input.state) {
             vTaskSuspendAll();
-            ir_nec_send(nec_packets[state->nec_packet_id].addr, nec_packets[state->nec_packet_id].data);
+            ir_nec_send(
+                nec_packets[state->nec_packet_id].addr, nec_packets[state->nec_packet_id].data);
             xTaskResumeAll();
         }
     }
@@ -185,7 +186,9 @@ void input_samsung(Event* event, State* state) {
     if(event->value.input.input == InputOk) {
         if(event->value.input.state) {
             vTaskSuspendAll();
-            ir_samsung_send(samsung_packets[state->samsung_packet_id].addr, samsung_packets[state->samsung_packet_id].data);
+            ir_samsung_send(
+                samsung_packets[state->samsung_packet_id].addr,
+                samsung_packets[state->samsung_packet_id].data);
             xTaskResumeAll();
         }
     }

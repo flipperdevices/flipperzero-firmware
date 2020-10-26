@@ -27,7 +27,8 @@ void ir_samsung_send_byte(uint8_t data) {
 }
 
 void ir_samsung_send(uint16_t addr, uint16_t data) {
-    uint8_t samsung_packet[4] = {(uint8_t)addr, (uint8_t)(addr >> 8), (uint8_t)data, (uint8_t)(data >> 8)};
+    uint8_t samsung_packet[4] = {
+        (uint8_t)addr, (uint8_t)(addr >> 8), (uint8_t)data, (uint8_t)(data >> 8)};
     ir_samsung_preambula();
     ir_samsung_send_byte(samsung_packet[0]);
     ir_samsung_send_byte(samsung_packet[1]);
