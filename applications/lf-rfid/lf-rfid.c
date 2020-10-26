@@ -10,7 +10,7 @@ typedef struct {
         InputEvent input;
     } value;
     EventType type;
-} Event;
+} AppEvent;
 
 typedef struct {
     uint32_t freq_khz;
@@ -37,7 +37,7 @@ static void render_callback(CanvasApi* canvas, void* ctx) {
 static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueueId_t event_queue = (QueueHandle_t)ctx;
 
-    Event event;
+    AppEvent event;
     event.type = EventTypeKey;
     event.value.input = *input_event;
     osMessageQueuePut(event_queue, &event, 0, 0);
@@ -46,7 +46,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 extern TIM_HandleTypeDef htim15;
 
 void lf_rfid_workaround(void* p) {
-    osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(Event), NULL);
+    osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
 
     State _state;
     _state.freq_khz = 125;
@@ -71,7 +71,7 @@ void lf_rfid_workaround(void* p) {
     }
     gui->add_widget(gui, widget, WidgetLayerFullscreen);
 
-    Event event;
+    AppEvent event;
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 10000);
         State* state = (State*)acquire_mutex_block(&state_mutex);
