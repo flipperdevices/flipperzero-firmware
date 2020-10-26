@@ -15,6 +15,8 @@ void delay_us(float microseconds) {
     };
 }
 
+// cannot be used in ISR
+// TODO add delay_ISR variant
 void delay(float milliseconds) {
     uint32_t ticks = milliseconds / (1000.0f / osKernelGetTickFreq());
     osStatus_t result = osDelay(ticks);
