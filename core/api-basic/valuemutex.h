@@ -47,15 +47,12 @@ static inline void* acquire_mutex_block(ValueMutex* valuemutex) {
  * executed within you parent function context.
 */
 #define with_value_mutex(value_mutex, function_body) \
-{\
-    void* p = acquire_mutex_block(value_mutex);\
-    assert(p); \
-    ({\
-        void __fn__ function_body\
-        __fn__;\
-    })(p);\
-    release_mutex(value_mutex, p);\
-}
+    {                                                \
+        void* p = acquire_mutex_block(value_mutex);  \
+        assert(p);                                   \
+        ({ void __fn__ function_body __fn__; })(p);  \
+        release_mutex(value_mutex, p);               \
+    }
 
 /*
 Release mutex after end of work with data.

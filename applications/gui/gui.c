@@ -87,7 +87,7 @@ void gui_redraw(Gui* gui) {
     gui_lock(gui);
 
     if(!gui_redraw_fs(gui)) {
-        if (!gui_redraw_normal(gui)) {
+        if(!gui_redraw_normal(gui)) {
             gui_redraw_flipper(gui);
         }
         gui_redraw_status_bar(gui);
@@ -144,10 +144,10 @@ void gui_remove_widget(GuiApi* gui_api, Widget* widget) {
 
     widget_gui_set(widget, NULL);
     WidgetArray_it_t it;
-    for (size_t i=0; i<GuiLayerMAX; i++) {
+    for(size_t i = 0; i < GuiLayerMAX; i++) {
         WidgetArray_it(it, gui->layers[i]);
         while(!WidgetArray_end_p(it)) {
-            if (*WidgetArray_ref(it) == widget) {
+            if(*WidgetArray_ref(it) == widget) {
                 WidgetArray_remove(gui->layers[i], it);
             }
             WidgetArray_next(it);
@@ -170,7 +170,7 @@ Gui* gui_alloc() {
     // Drawing canvas api
     gui->canvas_api = canvas_api_init();
     // Compose Layers
-    for (size_t i=0; i<GuiLayerMAX; i++) {
+    for(size_t i = 0; i < GuiLayerMAX; i++) {
         WidgetArray_init(gui->layers[i]);
     }
 

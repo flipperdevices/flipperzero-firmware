@@ -6,10 +6,10 @@
 
 struct MenuItem {
     MenuItemType type;
-    
+
     const char* label;
     Icon* icon;
-    
+
     size_t position;
     MenuItem* parent;
     void* data;

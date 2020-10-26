@@ -19,4 +19,3 @@ bool icon_is_animated(Icon* icon);
 void icon_start_animation(Icon* icon);
 
 void icon_stop_animation(Icon* icon);
-

@@ -11,9 +11,9 @@
 #include <assets_icons.h>
 
 struct Tamagotchi {
-    Icon *icon;
+    Icon* icon;
     Widget* widget;
-    ValueMutex *menu_vm;
+    ValueMutex* menu_vm;
 };
 
 void tamagotchi_draw_callback(CanvasApi* canvas, void* context) {
@@ -31,9 +31,8 @@ void tamagotchi_input_callback(InputEvent* event, void* context) {
 
     if(!event->state || event->input != InputOk) return;
 
-    with_value_mutex(tamagotchi->menu_vm, (Menu *menu) {
-        menu_ok(menu);
-    });
+    with_value_mutex(
+        tamagotchi->menu_vm, (Menu * menu) { menu_ok(menu); });
 }
 
 Tamagotchi* tamagotchi_alloc() {
@@ -53,7 +52,7 @@ Tamagotchi* tamagotchi_alloc() {
 }
 
 void tamagotchi_task() {
-    Tamagotchi *tamagotchi = tamagotchi_alloc();
+    Tamagotchi* tamagotchi = tamagotchi_alloc();
 
     FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
     assert(gui_record);
@@ -62,10 +61,9 @@ void tamagotchi_task() {
     gui->add_widget(gui, tamagotchi->widget, GuiLayerTamagotchi);
     furi_commit(gui_record);
 
-
     furiac_ready();
 
-    while (1) {
+    while(1) {
         osDelay(osWaitForever);
     }
 }

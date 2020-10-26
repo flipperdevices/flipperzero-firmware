@@ -6,11 +6,11 @@
 typedef enum {
     GuiLayerTamagotchi, /* Special layer for tamagotchi, for internal use only */
 
-    GuiLayerStatusBar,  /* Status bar widget layer */
-    GuiLayerMain,       /* Main widget layer, status bar is shown */
+    GuiLayerStatusBar, /* Status bar widget layer */
+    GuiLayerMain, /* Main widget layer, status bar is shown */
     GuiLayerFullscreen, /* Fullscreen widget layer */
 
-    GuiLayerMAX         /* Don't use or move, special value */
+    GuiLayerMAX /* Don't use or move, special value */
 } GuiLayer;
 
 typedef struct GuiApi GuiApi;

@@ -127,5 +127,6 @@ void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon) {
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+    u8g2_DrawXBM(
+        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
 }

@@ -89,10 +89,10 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
             shift_position = shift_position % (MenuItemArray_size(*items));
 
             MenuItem* item = *MenuItemArray_get(*items, shift_position);
-            const char *label = menu_item_get_label(item);
-            Icon *icon = menu_item_get_icon(item);
-            if (icon) canvas->draw_icon(canvas, 2, 2+20*(i+1)-14, icon);
-            if (label) canvas->draw_str(canvas, 16, 2+20*(i+1), label);
+            const char* label = menu_item_get_label(item);
+            Icon* icon = menu_item_get_icon(item);
+            if(icon) canvas->draw_icon(canvas, 2, 2 + 20 * (i + 1) - 14, icon);
+            if(label) canvas->draw_str(canvas, 16, 2 + 20 * (i + 1), label);
         }
     } else {
         canvas->draw_str(canvas, 2, 32, "Empty");
@@ -141,7 +141,7 @@ void menu_ok(Menu* menu) {
     }
 
     MenuItemArray_t* items = menu_item_get_subitems(menu->current);
-    if (!items || MenuItemArray_size(*items)==0) {
+    if(!items || MenuItemArray_size(*items) == 0) {
         return;
     }
 

@@ -31,7 +31,7 @@ struct Nfc {
     Dispatcher* dispatcher;
     Icon* icon;
     Widget* widget;
-    ValueMutex *menu_vm;
+    ValueMutex* menu_vm;
     MenuItem* menu;
     rfalNfcDiscoverParam* disParams;
 
@@ -223,7 +223,7 @@ void nfc_bridge_callback(void* context) {
 
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
-    
+
     nfc->dispatcher = dispatcher_alloc(32, sizeof(NfcMessage));
 
     nfc->icon = assets_icons_get(A_NFC_14);
@@ -261,9 +261,8 @@ void nfc_task(void* p) {
     gui->add_widget(gui, nfc->widget, GuiLayerFullscreen);
     furi_commit(gui_record);
 
-    with_value_mutex(nfc->menu_vm, (Menu *menu) {
-        menu_item_add(menu, nfc->menu);
-    });
+    with_value_mutex(
+        nfc->menu_vm, (Menu * menu) { menu_item_add(menu, nfc->menu); });
 
     if(!furi_create("nfc", nfc)) {
         printf("[nfc_task] cannot create nfc record\n");

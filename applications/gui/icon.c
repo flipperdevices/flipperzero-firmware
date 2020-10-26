@@ -5,7 +5,7 @@
 #include <flipper.h>
 #include <assert.h>
 
-Icon* icon_alloc(const IconData *data) {
+Icon* icon_alloc(const IconData* data) {
     Icon* icon = furi_alloc(sizeof(Icon));
     icon->data = data;
     return icon;
@@ -16,14 +16,14 @@ void icon_free(Icon* icon) {
     free(icon);
 }
 
-const uint8_t * icon_get_data(Icon* icon) {
+const uint8_t* icon_get_data(Icon* icon) {
     assert(icon);
-    if (icon->tick) {
+    if(icon->tick) {
         uint32_t now = osKernelGetTickCount();
         if(now < icon->tick) {
             icon->tick = now;
             icon_next_frame(icon);
-        } else if(now-icon->tick > osKernelGetTickFreq()/icon->data->frame_rate) {
+        } else if(now - icon->tick > osKernelGetTickFreq() / icon->data->frame_rate) {
             icon->tick = now;
             icon_next_frame(icon);
         }
@@ -33,7 +33,7 @@ const uint8_t * icon_get_data(Icon* icon) {
 
 void icon_next_frame(Icon* icon) {
     assert(icon);
-    icon->frame = (icon->frame+1) % icon->data->frame_count;
+    icon->frame = (icon->frame + 1) % icon->data->frame_count;
 }
 
 uint8_t icon_get_width(Icon* icon) {
@@ -61,4 +61,3 @@ void icon_stop_animation(Icon* icon) {
     icon->tick = 0;
     icon->frame = 0;
 }
-

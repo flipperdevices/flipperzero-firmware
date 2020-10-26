@@ -32,7 +32,7 @@ void widget_free(Widget* widget) {
 
 void widget_enabled_set(Widget* widget, bool enabled) {
     assert(widget);
-    if (widget->is_enabled != enabled) {
+    if(widget->is_enabled != enabled) {
         widget->is_enabled = enabled;
         widget_update(widget);
     }
