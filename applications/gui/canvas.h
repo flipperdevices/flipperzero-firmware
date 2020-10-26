@@ -25,5 +25,5 @@ struct CanvasApi {
     void (*set_font)(CanvasApi* canvas, Font font);
 
     void (*draw_str)(CanvasApi* canvas, uint8_t x, uint8_t y, const char* str);
-    void (*draw_icon)(CanvasApi* canvas, uint8_t x, uint8_t y, const Icon* icon);
+    void (*draw_icon)(CanvasApi* canvas, uint8_t x, uint8_t y, Icon* icon);
 };

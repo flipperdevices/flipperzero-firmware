@@ -147,7 +147,7 @@ void gui_remove_widget(GuiApi* gui_api, Widget* widget) {
     for (size_t i=0; i<GuiLayerMAX; i++) {
         WidgetArray_it(it, gui->layers[i]);
         while(!WidgetArray_end_p(it)) {
-            if (WidgetArray_ref(it) == widget) {
+            if (*WidgetArray_ref(it) == widget) {
                 WidgetArray_remove(gui->layers[i], it);
             }
             WidgetArray_next(it);

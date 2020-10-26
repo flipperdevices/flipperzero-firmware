@@ -1,6 +1,7 @@
 #include "canvas.h"
 #include "canvas_i.h"
 #include "icon.h"
+#include "icon_i.h"
 
 #include <assert.h>
 #include <flipper.h>
@@ -21,7 +22,7 @@ void canvas_clear(CanvasApi* api);
 void canvas_color_set(CanvasApi* api, uint8_t color);
 void canvas_font_set(CanvasApi* api, Font font);
 void canvas_str_draw(CanvasApi* api, uint8_t x, uint8_t y, const char* str);
-void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, const Icon* icon);
+void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon);
 
 uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
 uint8_t u8x8_hw_spi_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
@@ -121,7 +122,7 @@ void canvas_str_draw(CanvasApi* api, uint8_t x, uint8_t y, const char* str) {
     u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
-void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, const Icon* icon) {
+void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon) {
     assert(api);
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;

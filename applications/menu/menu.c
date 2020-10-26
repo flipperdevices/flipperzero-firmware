@@ -90,7 +90,7 @@ void menu_widget_callback(CanvasApi* canvas, void* context) {
 
             MenuItem* item = *MenuItemArray_get(*items, shift_position);
             const char *label = menu_item_get_label(item);
-            const Icon *icon = menu_item_get_icon(item);
+            Icon *icon = menu_item_get_icon(item);
             if (icon) canvas->draw_icon(canvas, 2, 2+20*(i+1)-14, icon);
             if (label) canvas->draw_str(canvas, 16, 2+20*(i+1), label);
         }

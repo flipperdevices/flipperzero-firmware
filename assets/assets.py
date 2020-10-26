@@ -18,7 +18,7 @@ typedef enum {
 ICONS_TEMPLATE_H_ICON_NAME = "\t{name},\n"
 ICONS_TEMPLATE_H_FOOTER = """} IconName;
 
-const Icon * assets_icons_get(IconName name);
+Icon * assets_icons_get(IconName name);
 """
 
 ICONS_TEMPLATE_C_HEADER = """#include \"assets_icons.h\"
@@ -27,13 +27,13 @@ ICONS_TEMPLATE_C_HEADER = """#include \"assets_icons.h\"
 """
 ICONS_TEMPLATE_C_FRAME = "const uint8_t {name}[] = {data};\n"
 ICONS_TEMPLATE_C_DATA = "const uint8_t *{name}[] = {data};\n"
-ICONS_TEMPLATE_C_ICONS_ARRAY_START = "const Icon icons[] = {\n"
-ICONS_TEMPLATE_C_ICONS_ITEM = "\t{{ .width={width}, .height={height}, .frame_count={frame_count}, .frame_rate={frame_rate}, .data=_{name} }},\n"
+ICONS_TEMPLATE_C_ICONS_ARRAY_START = "const IconData icons[] = {\n"
+ICONS_TEMPLATE_C_ICONS_ITEM = "\t{{ .width={width}, .height={height}, .frame_count={frame_count}, .frame_rate={frame_rate}, .frames=_{name} }},\n"
 ICONS_TEMPLATE_C_ICONS_ARRAY_END = "};"
 ICONS_TEMPLATE_C_FOOTER = """
 
-const Icon * assets_icons_get(IconName name) {
-    return &icons[name];
+Icon * assets_icons_get(IconName name) {
+    return icon_alloc(&icons[name]);
 }
 """
 

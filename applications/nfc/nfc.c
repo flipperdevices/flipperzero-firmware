@@ -29,6 +29,7 @@ typedef struct {
 
 struct Nfc {
     Dispatcher* dispatcher;
+    Icon* icon;
     Widget* widget;
     ValueMutex *menu_vm;
     MenuItem* menu;
@@ -222,10 +223,10 @@ void nfc_bridge_callback(void* context) {
 
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
-    assert(nfc);
-
+    
     nfc->dispatcher = dispatcher_alloc(32, sizeof(NfcMessage));
 
+    nfc->icon = assets_icons_get(A_NFC_14);
     nfc->widget = widget_alloc();
     widget_draw_callback_set(nfc->widget, nfc_draw_callback, nfc);
     widget_input_callback_set(nfc->widget, nfc_input_callback, nfc);
@@ -233,7 +234,7 @@ Nfc* nfc_alloc() {
     nfc->menu_vm = furi_open("menu");
     assert(nfc->menu_vm);
 
-    nfc->menu = menu_item_alloc_menu("NFC", assets_icons_get(A_NFC_14));
+    nfc->menu = menu_item_alloc_menu("NFC", nfc->icon);
     menu_item_subitem_add(
         nfc->menu, menu_item_alloc_function("Test", NULL, nfc_test_callback, nfc));
     menu_item_subitem_add(

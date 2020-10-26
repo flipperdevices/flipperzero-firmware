@@ -11,15 +11,18 @@
 #include <assets_icons.h>
 
 struct Tamagotchi {
+    Icon *icon;
     Widget* widget;
     ValueMutex *menu_vm;
 };
 
 void tamagotchi_draw_callback(CanvasApi* canvas, void* context) {
+    Tamagotchi* tamagotchi = context;
+
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
     canvas->set_font(canvas, FontPrimary);
-    canvas->draw_icon(canvas, 10, 20, assets_icons_get(A_Tamagotchi_14));
+    canvas->draw_icon(canvas, 10, 20, tamagotchi->icon);
     canvas->draw_str(canvas, 30, 32, "Tamagotchi");
 }
 
@@ -35,6 +38,9 @@ void tamagotchi_input_callback(InputEvent* event, void* context) {
 
 Tamagotchi* tamagotchi_alloc() {
     Tamagotchi* tamagotchi = furi_alloc(sizeof(Tamagotchi));
+
+    tamagotchi->icon = assets_icons_get(A_Tamagotchi_14);
+    icon_start_animation(tamagotchi->icon);
 
     tamagotchi->widget = widget_alloc();
     widget_draw_callback_set(tamagotchi->widget, tamagotchi_draw_callback, tamagotchi);
