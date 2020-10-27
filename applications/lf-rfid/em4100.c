@@ -1,44 +1,66 @@
 #include "flipper_v2.h"
 
-void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data){
+void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data) {
     uint8_t value[10];
-    
-    value[0] = (VENDOR>>4) & 0XF;
-    value[1] = VENDOR & 0XF;
-    for (int i=1; i<8; i++){
-        value[i+2] = (ID>>(28-i*4)) &0xF;
+
+    // vendor rows (4 bit in a row)
+    value[0] = (VENDOR >> 4) & 0xF;
+    value[1] = VENDOR & 0xF;
+
+    const uint8_t ROW_SIZE = 4;
+    const uint8_t HEADER_SIZE = 9;
+
+    // ID rows (4 bit in a row)
+    for(int i = 0; i < 8; i++) {
+        value[i + 2] = (ID >> (28 - i * ROW_SIZE)) & 0xF;
     }
 
-    for (uint8_t i = 0; i < 9; i++) data[i]=1; // header
-    for (uint8_t i = 0; i < 10; i++) {         // data
-        for (uint8_t j = 0; j < 4; j++) {
-            data[9 + i*5 +j] = value[i] >> (3-j) & 1;
+    for(uint8_t i = 0; i < HEADER_SIZE; i++) {
+        data[i] = 1; // header
+    }
+
+    for(uint8_t i = 0; i < 10; i++) { // data
+        for(uint8_t j = 0; j < ROW_SIZE; j++) {
+            data[HEADER_SIZE + i * (ROW_SIZE + 1) + j] = (value[i] >> ((ROW_SIZE - 1) - j)) & 1;
         }
 
-        data[9 + i*5 + 4] = ( data[9 + i*5 + 0]
-                            + data[9 + i*5 + 1]
-                            + data[9 + i*5 + 2]
-                            + data[9 + i*5 + 3]) % 2;
-    }
-    
-    for (uint8_t i = 0; i < 4; i++) { //checksum
-        int checksum=0;
-        for (uint8_t j = 0; j < 10; j++) {
-            checksum += data[9 + i + j*5];
-        }
-        data[i+59] = checksum%2;
+        // row parity
+        data[HEADER_SIZE + i * (ROW_SIZE + 1) + ROW_SIZE] =
+            (data[HEADER_SIZE + i * (ROW_SIZE + 1) + 0] +
+             data[HEADER_SIZE + i * (ROW_SIZE + 1) + 1] +
+             data[HEADER_SIZE + i * (ROW_SIZE + 1) + 2] +
+             data[HEADER_SIZE + i * (ROW_SIZE + 1) + 3]) %
+            2;
     }
 
-    data[63] = 0; //footer
+    for(uint8_t i = 0; i < ROW_SIZE; i++) { //checksum
+        uint8_t checksum = 0;
+        for(uint8_t j = 0; j < 10; j++) {
+            checksum += data[HEADER_SIZE + i + j * (ROW_SIZE + 1)];
+        }
+        data[i + 59] = checksum % 2;
+    }
+
+    data[63] = 0; // stop bit
+
+    printf("em data: ");
+    for(uint8_t i = 0; i < 64; i++) {
+        printf("%d ", data[i]);
+    }
+    printf("\n");
 }
 
 void em4100_emulation(uint8_t* data, GpioPin* pin) {
-    for (uint8_t i = 0; i < 15; i++){
-        for (uint8_t j = 0; j < 64; j++){
-            gpio_write(pin, !data[j]);
-            delay_us(200);
+    taskENTER_CRITICAL();
+    gpio_write(pin, true);
+
+    for(uint8_t i = 0; i < 8; i++) {
+        for(uint8_t j = 0; j < 64; j++) {
+            delay_us(270);
             gpio_write(pin, data[j]);
-            delay_us(200);
+            delay_us(270);
+            gpio_write(pin, !data[j]);
         }
     }
+    taskEXIT_CRITICAL();
 }

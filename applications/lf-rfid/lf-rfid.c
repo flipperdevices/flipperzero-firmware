@@ -58,7 +58,7 @@ void lf_rfid_workaround(void* p) {
     gpio_init(pull_pin_record, GpioModeOutputPushPull);
 
     uint8_t emulation_data[64];
-    prepare_data(0xdeadbeef, 0x12341234, emulation_data);
+    prepare_data(4378151, 01, emulation_data);
 
     State _state;
     _state.freq_khz = 125;
@@ -125,9 +125,7 @@ void lf_rfid_workaround(void* p) {
             state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &htim15, TIM_CHANNEL_1);
 
         if(!state->on) {
-            for(uint8_t i = 0; i < 10; i++) {
-                em4100_emulation(emulation_data, pull_pin_record);
-            }
+            em4100_emulation(emulation_data, pull_pin_record);
         }
 
         // common code, for example, force update UI
