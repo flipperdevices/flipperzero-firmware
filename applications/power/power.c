@@ -6,7 +6,7 @@
 #include <assets_icons.h>
 
 #define BATTERY_MIN_VOLTAGE 3.2f
-#define BATTERY_MAX_VOLTAGE 4.2f
+#define BATTERY_MAX_VOLTAGE 4.0f
 #define BATTERY_INIT 0xFFAACCEE
 
 extern ADC_HandleTypeDef hadc1;
@@ -37,6 +37,9 @@ void power_draw_battery_callback(CanvasApi* canvas, void* context) {
     if(power->charge != BATTERY_INIT) {
         float charge = ((float)power->charge / 1000 * 2 - BATTERY_MIN_VOLTAGE) /
                        (BATTERY_MAX_VOLTAGE - BATTERY_MIN_VOLTAGE);
+        if(charge > 1) {
+            charge = 1;
+        }
         canvas->draw_box(canvas, 2, 2, charge * 14, 4);
     }
 }
