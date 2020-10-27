@@ -251,7 +251,8 @@ uint8_t CC1101::Init(void) {
 #endif
     Reset(); //CC1101 reset
 
-    uint8_t partnum, version;
+    uint8_t partnum __attribute__((unused));
+    uint8_t version;
     partnum = SpiReadStatus(CC1101_PARTNUM);
     version = SpiReadStatus(CC1101_VERSION);
 
