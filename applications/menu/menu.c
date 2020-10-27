@@ -136,7 +136,7 @@ void menu_set_icon(Menu* menu, Icon* icon) {
 
     menu->icon = icon;
 
-    if (menu->icon) {
+    if(menu->icon) {
         icon_start_animation(menu->icon);
     }
 }
@@ -144,7 +144,7 @@ void menu_set_icon(Menu* menu, Icon* icon) {
 void menu_update(Menu* menu) {
     assert(menu);
 
-    if (menu->current) {
+    if(menu->current) {
         size_t position = menu_item_get_position(menu->current);
         MenuItemArray_t* items = menu_item_get_subitems(menu->current);
         size_t items_count = MenuItemArray_size(*items);

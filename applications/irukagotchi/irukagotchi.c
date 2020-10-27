@@ -22,7 +22,7 @@ void irukagotchi_draw_callback(CanvasApi* canvas, void* context) {
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
     canvas->set_font(canvas, FontPrimary);
-    canvas->draw_icon(canvas, 0, 10, irukagotchi->icon);
+    canvas->draw_icon(canvas, 0, 0, irukagotchi->icon);
     canvas->draw_str(canvas, 80, 30, "111001");
     canvas->draw_str(canvas, 80, 42, "011010");
 }
@@ -39,7 +39,7 @@ void irukagotchi_input_callback(InputEvent* event, void* context) {
 Irukagotchi* irukagotchi_alloc() {
     Irukagotchi* irukagotchi = furi_alloc(sizeof(Irukagotchi));
 
-    irukagotchi->icon = assets_icons_get(I_Flipper_idle_76x52);
+    irukagotchi->icon = assets_icons_get(I_Flipper_young_80x60);
     icon_start_animation(irukagotchi->icon);
 
     irukagotchi->widget = widget_alloc();
