@@ -5,3 +5,4 @@
 
 bool task_equal(TaskHandle_t a, TaskHandle_t b);
 bool task_is_isr_context(void);
+__attribute__((unused)) void taskDISABLE_INTERRUPTS(void);

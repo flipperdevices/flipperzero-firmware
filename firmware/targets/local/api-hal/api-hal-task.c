@@ -1,4 +1,4 @@
-#include "api-hal-task.h";
+#include "api-hal-task.h"
 
 bool task_equal(TaskHandle_t a, TaskHandle_t b) {
     if(a == NULL || b == NULL) return false;
@@ -8,3 +8,7 @@ bool task_equal(TaskHandle_t a, TaskHandle_t b) {
 bool task_is_isr_context(void) {
     return false;
 }
+
+void taskDISABLE_INTERRUPTS(void){
+    // we cant disable main os sheduler
+};
