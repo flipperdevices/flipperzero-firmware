@@ -1,8 +1,7 @@
 #include "flipper_v2.h"
 #include <stdio.h>
 
-typedef union
-{
+typedef union {
     unsigned int packed;
     InputState state;
 } InputDump;
