@@ -23,11 +23,16 @@
 #endif
 // !__FURI_CHECK_FUNC
 
-// Use full debug info only in debug mode
+// We have two levels of assertion
+// One - furi_check, which always runs, the only difference is in the level of debug information
+// The second is furi_assert, which doesn't compile in release mode
 #ifdef NDEBUG
 #define furi_check(__e) ((__e) ? (void)0 : __furi_check())
+#define furi_assert(__e) ((void)0)
 #else
 #define furi_check(__e) \
+    ((__e) ? (void)0 : __furi_check_debug(__FILE__, __LINE__, __FURI_CHECK_FUNC, #__e))
+#define furi_assert(__e) \
     ((__e) ? (void)0 : __furi_check_debug(__FILE__, __LINE__, __FURI_CHECK_FUNC, #__e))
 #endif
 // !NDEBUG
