@@ -41,7 +41,7 @@ ValueMutex* menu_init() {
 
     // Open GUI and register fullscreen widget
     GuiApi* gui = furi_open("gui");
-    furi_assert(gui);
+    furi_check(gui);
     gui->add_widget(gui, menu->widget, GuiLayerFullscreen);
 
     widget_enabled_set(menu->widget, false);

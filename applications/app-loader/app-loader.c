@@ -57,7 +57,6 @@ void app_loader(void* p) {
     state.handler = NULL;
 
     state.widget = widget_alloc();
-    furi_check(state.widget);
     widget_enabled_set(state.widget, false);
     widget_draw_callback_set(state.widget, render_callback, &state);
     widget_input_callback_set(state.widget, input_callback, &state);
