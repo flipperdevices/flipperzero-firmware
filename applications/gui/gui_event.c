@@ -10,7 +10,9 @@ struct GuiEvent {
 };
 
 void gui_event_input_events_callback(const void* value, void* ctx) {
-    furi_check(ctx);
+    furi_assert(value);
+    furi_assert(ctx);
+
     GuiEvent* gui_event = ctx;
 
     GuiMessage message;
@@ -22,7 +24,8 @@ void gui_event_input_events_callback(const void* value, void* ctx) {
 
 GuiEvent* gui_event_alloc() {
     GuiEvent* gui_event = furi_alloc(sizeof(GuiEvent));
-    // Allocate message que
+
+    // Allocate message queue
     gui_event->mqueue = osMessageQueueNew(GUI_EVENT_MQUEUE_SIZE, sizeof(GuiMessage), NULL);
     furi_check(gui_event->mqueue);
 
@@ -35,19 +38,19 @@ GuiEvent* gui_event_alloc() {
 }
 
 void gui_event_free(GuiEvent* gui_event) {
-    furi_check(gui_event);
+    furi_assert(gui_event);
     furi_check(osMessageQueueDelete(gui_event->mqueue) == osOK);
     free(gui_event);
 }
 
 void gui_event_messsage_send(GuiEvent* gui_event, GuiMessage* message) {
-    furi_check(gui_event);
-    furi_check(message);
+    furi_assert(gui_event);
+    furi_assert(message);
     osMessageQueuePut(gui_event->mqueue, message, 0, 0);
 }
 
 GuiMessage gui_event_message_next(GuiEvent* gui_event) {
-    furi_check(gui_event);
+    furi_assert(gui_event);
     GuiMessage message;
 
     furi_check(osMessageQueueGet(gui_event->mqueue, &message, NULL, osWaitForever) == osOK);

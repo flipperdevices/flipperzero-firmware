@@ -139,7 +139,9 @@ void nfc_worker_task(void* context) {
 }
 
 void nfc_draw_callback(CanvasApi* canvas, void* context) {
-    furi_check(context);
+    furi_assert(canvas);
+    furi_assert(context);
+
     Nfc* nfc = context;
 
     dispatcher_lock(nfc->dispatcher);
@@ -174,7 +176,8 @@ void nfc_draw_callback(CanvasApi* canvas, void* context) {
 }
 
 void nfc_input_callback(InputEvent* event, void* context) {
-    furi_check(context);
+    furi_assert(event);
+    furi_assert(context);
     Nfc* nfc = context;
 
     if(!event->state) return;
@@ -183,7 +186,7 @@ void nfc_input_callback(InputEvent* event, void* context) {
 }
 
 void nfc_test_callback(void* context) {
-    furi_check(context);
+    furi_assert(context);
     Nfc* nfc = context;
 
     dispatcher_lock(nfc->dispatcher);
@@ -200,21 +203,21 @@ void nfc_test_callback(void* context) {
 }
 
 void nfc_read_callback(void* context) {
-    furi_check(context);
+    furi_assert(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);
 }
 
 void nfc_write_callback(void* context) {
-    furi_check(context);
+    furi_assert(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);
 }
 
 void nfc_bridge_callback(void* context) {
-    furi_check(context);
+    furi_assert(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);

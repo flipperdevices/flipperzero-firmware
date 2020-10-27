@@ -34,7 +34,7 @@ Widget* gui_widget_find_enabled(WidgetArray_t array) {
 }
 
 void gui_update(Gui* gui) {
-    furi_check(gui);
+    furi_assert(gui);
     GuiMessage message;
     message.type = GuiMessageTypeRedraw;
     gui_event_messsage_send(gui->event, &message);
@@ -83,7 +83,7 @@ bool gui_redraw_none(Gui* gui) {
 }
 
 void gui_redraw(Gui* gui) {
-    furi_check(gui);
+    furi_assert(gui);
     gui_lock(gui);
 
     if(!gui_redraw_fs(gui)) {
@@ -98,7 +98,9 @@ void gui_redraw(Gui* gui) {
 }
 
 void gui_input(Gui* gui, InputEvent* input_event) {
-    furi_check(gui);
+    furi_assert(gui);
+    furi_assert(input_event);
+
     gui_lock(gui);
 
     Widget* widget = gui_widget_find_enabled(gui->layers[GuiLayerFullscreen]);
@@ -113,18 +115,18 @@ void gui_input(Gui* gui, InputEvent* input_event) {
 }
 
 void gui_lock(Gui* gui) {
-    furi_check(gui);
+    furi_assert(gui);
     furi_check(osMutexAcquire(gui->mutex, osWaitForever) == osOK);
 }
 
 void gui_unlock(Gui* gui) {
-    furi_check(gui);
+    furi_assert(gui);
     furi_check(osMutexRelease(gui->mutex) == osOK);
 }
 
 void gui_add_widget(GuiApi* gui_api, Widget* widget, GuiLayer layer) {
-    furi_check(gui_api);
-    furi_check(widget);
+    furi_assert(gui_api);
+    furi_assert(widget);
     furi_check(layer < GuiLayerMAX);
     Gui* gui = (Gui*)gui_api;
 
@@ -136,8 +138,8 @@ void gui_add_widget(GuiApi* gui_api, Widget* widget, GuiLayer layer) {
 }
 
 void gui_remove_widget(GuiApi* gui_api, Widget* widget) {
-    furi_check(gui_api);
-    furi_check(widget);
+    furi_assert(gui_api);
+    furi_assert(widget);
     Gui* gui = (Gui*)gui_api;
 
     gui_lock(gui);

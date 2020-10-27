@@ -35,20 +35,18 @@ MenuEvent* menu_event_alloc() {
 }
 
 void menu_event_free(MenuEvent* menu_event) {
-    osStatus_t status;
-    furi_check(menu_event);
-    status = osMessageQueueDelete(menu_event->mqueue);
-    furi_check(status == osOK);
+    furi_assert(menu_event);
+    furi_check(osMessageQueueDelete(menu_event->mqueue) == osOK);
     free(menu_event);
 }
 
 void menu_event_activity_notify(MenuEvent* menu_event) {
-    furi_check(menu_event);
+    furi_assert(menu_event);
     osTimerStart(menu_event->timeout_timer, 60000U); // 1m timeout, return to main
 }
 
 MenuMessage menu_event_next(MenuEvent* menu_event) {
-    furi_check(menu_event);
+    furi_assert(menu_event);
     MenuMessage message;
     while(osMessageQueueGet(menu_event->mqueue, &message, NULL, osWaitForever) != osOK) {
     };
