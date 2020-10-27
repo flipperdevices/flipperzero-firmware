@@ -1,6 +1,5 @@
 #include "nfc.h"
 
-#include <assert.h>
 #include <flipper_v2.h>
 
 #include <gui/gui.h>
@@ -140,7 +139,7 @@ void nfc_worker_task(void* context) {
 }
 
 void nfc_draw_callback(CanvasApi* canvas, void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
 
     dispatcher_lock(nfc->dispatcher);
@@ -175,7 +174,7 @@ void nfc_draw_callback(CanvasApi* canvas, void* context) {
 }
 
 void nfc_input_callback(InputEvent* event, void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
 
     if(!event->state) return;
@@ -184,7 +183,7 @@ void nfc_input_callback(InputEvent* event, void* context) {
 }
 
 void nfc_test_callback(void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
 
     dispatcher_lock(nfc->dispatcher);
@@ -201,21 +200,21 @@ void nfc_test_callback(void* context) {
 }
 
 void nfc_read_callback(void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);
 }
 
 void nfc_write_callback(void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);
 }
 
 void nfc_bridge_callback(void* context) {
-    assert(context);
+    furi_check(context);
     Nfc* nfc = context;
     nfc->screen = 1;
     widget_enabled_set(nfc->widget, true);
@@ -232,7 +231,7 @@ Nfc* nfc_alloc() {
     widget_input_callback_set(nfc->widget, nfc_input_callback, nfc);
 
     nfc->menu_vm = furi_open("menu");
-    assert(nfc->menu_vm);
+    furi_check(nfc->menu_vm);
 
     nfc->menu = menu_item_alloc_menu("NFC", nfc->icon);
     menu_item_subitem_add(
@@ -254,9 +253,9 @@ void nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
 
     FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
-    assert(gui_record);
+    furi_check(gui_record);
     GuiApi* gui = furi_take(gui_record);
-    assert(gui);
+    furi_check(gui);
     widget_enabled_set(nfc->widget, false);
     gui->add_widget(gui, nfc->widget, GuiLayerFullscreen);
     furi_commit(gui_record);

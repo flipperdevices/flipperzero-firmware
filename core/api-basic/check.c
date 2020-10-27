@@ -33,6 +33,7 @@ void __furi_check_debug(const char* file, int line, const char* function, const 
 }
 
 void __furi_abort(void) {
+    taskDISABLE_INTERRUPTS();
     while(1) {
     }
 }
