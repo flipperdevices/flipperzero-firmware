@@ -142,7 +142,7 @@ void nfc_worker_task(void* context) {
         }
         widget_update(nfc->widget);
     }
-    
+
     isr_enabled = false;
     rfalFieldOff();
     rfalLowPowerModeStart();
