@@ -62,5 +62,7 @@ void em4100_emulation(uint8_t* data, GpioPin* pin) {
             gpio_write(pin, !data[j]);
         }
     }
+
+    gpio_write(pin, false);
     taskEXIT_CRITICAL();
 }

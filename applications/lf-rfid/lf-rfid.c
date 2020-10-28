@@ -126,6 +126,8 @@ void lf_rfid_workaround(void* p) {
 
         if(!state->on) {
             em4100_emulation(emulation_data, pull_pin_record);
+        } else {
+            gpio_write(pull_pin_record, false);
         }
 
         // common code, for example, force update UI
