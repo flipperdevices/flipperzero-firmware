@@ -60,7 +60,7 @@ Power* power_alloc() {
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();
     widget_set_width(power->usb_widget, icon_get_width(power->usb_icon));
-    
+
     ValueManager* input_state_manager = furi_open("input_state");
     InputState input_state;
     read_mutex_block(input_state_manager, &input_state, sizeof(input_state));
