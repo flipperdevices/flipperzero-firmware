@@ -1,0 +1,15 @@
+name: Python Lint
+
+on: 
+  push:
+    paths:
+      - '**.py'
+  pull_request:
+  
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: psf/black@stable

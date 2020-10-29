@@ -1,10 +1,6 @@
 # JetBrains IDEs
 .idea/
 
-target_lo/build/
-target_*/build/
-bindings/
-
 
 # Python VirtEnvironments
 .env
@@ -18,3 +14,17 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+.obj/
+target_lo/build/
+target_*/build/
+bindings/
+.DS_Store
+.mxproject
+
+# Visual Studio Code
+.vscode/
+
+# legendary cmake's
+build
+CMakeLists.txt
+firmware/targets/f2/CMakeLists.txt

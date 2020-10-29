@@ -23,26 +23,26 @@ void create_kill_app(void* p) {
     }
 }
 
-bool test_furi_ac_create_kill(FuriRecordSubscriber* log) {
+bool test_furi_ac_create_kill() {
     uint8_t counter = 0;
 
     uint8_t value_a = counter;
 
     FuriApp* widget = furiac_start(create_kill_app, "create_kill_app", (void*)&counter);
     if(widget == NULL) {
-        fuprintf(log, "create widget fail\n");
+        printf("create widget fail\n");
         return false;
     }
 
     delay(10);
 
     if(!furiac_kill(widget)) {
-        fuprintf(log, "kill widget fail\n");
+        printf("kill widget fail\n");
         return false;
     }
 
     if(value_a == counter) {
-        fuprintf(log, "counter unchanged\n");
+        printf("counter unchanged\n");
         return false;
     }
 
@@ -51,7 +51,7 @@ bool test_furi_ac_create_kill(FuriRecordSubscriber* log) {
     delay(10);
 
     if(value_a != counter) {
-        fuprintf(log, "counter changes after kill (counter = %d vs %d)\n", value_a, counter);
+        printf("counter changes after kill (counter = %d vs %d)\n", value_a, counter);
         return false;
     }
 
@@ -78,7 +78,7 @@ typedef struct {
 void task_a(void*);
 void task_b(void*);
 
-void task_a(void *p) {
+void task_a(void* p) {
     // simply starts, add 'A' letter to sequence and switch
     // if sequence counter = 0, call task B, exit otherwise
 
@@ -111,20 +111,20 @@ void task_b(void* p) {
     furiac_exit(p);
 }
 
-bool test_furi_ac_switch_exit(FuriRecordSubscriber* log) {
+bool test_furi_ac_switch_exit() {
     // init sequence
     TestSwitchSequence seq;
     seq.count = 0;
 
     furiac_start(task_a, "task A", (void*)&seq);
     // TODO how to check that all child task ends?
-    
+
     delay(10); // wait while task do its work
 
     seq.sequence[seq.count] = '\0';
 
     if(strcmp(seq.sequence, "ABA/") != 0) {
-        fuprintf(log, "wrong sequence: %s\n", seq.sequence);
+        printf("wrong sequence: %s\n", seq.sequence);
         return false;
     }
 

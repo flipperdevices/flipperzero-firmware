@@ -1,5 +1,7 @@
 # Flipper Zero Firmware community repo
 
+[![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
+
 ![](https://github.com/Flipper-Zero/flipperzero-firmware-community/raw/master/wiki_static/firmware-wiki-header.gif)
 
 Welcome to [Flipper Zero](https://flipperzero.one/zero)'s Firmware repo! Our goal is to create nice and clean code along with good documentation, to make it a pleasure for everyone to work with. This repo will become completely public closer to the device shipping date. 
@@ -18,12 +20,26 @@ You can read project updates in our developer blog:
 
 **[Firmware page](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Firmware)**
 
-## Build and run:
+## Update firmware
 
-You can run firmware locally (with HAL stub).
+Flipper Zero's firmware consists of two components: [Bootloader](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Bootloader) and main firmware. Bootloader controls firmware update process over USB. You need working bootloader installed before update firmware over USB.
 
-* `docker-compose exec dev make -C target_lo` for build
-* `docker-compose exec dev target_lo/build/target_lo` for run
+1. Download latest [Firmware](http://missed_link) ⚠️ **TODO** permanent link to latest firmware from master ⚠️
+
+2. Reboot Flipper to [Firmware update mode](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/UI#reboot-to-bootloader-firmware-update-mode)
+
+3. Run `dfu-util -D firmware.bin -a 0 -s 0x08008000:leave`
+
+## Build from source
+
+You can run firmware locally (with HAL stub):
+
+* `docker-compose exec dev make -C firmware TARGET=local APP_TEST=1 run` for running tests
+* `docker-compose exec dev make -C firmware TARGET=local APP_*=1 run` for running examples (see `applications/applications.mk` for list of applications/examples)
+
+Or you can use your dev. board:
+
+`docker-compose exec dev make -C firmware TARGET=f2 APP_*=1 flash` for build and flash dev board (see `applications/applications.mk` for list of applications/examples)
 
 ## Architecture and components
 
@@ -32,17 +48,18 @@ Flipper consists of the two main parts:
 * Core: OS, HAL, FS, bootloader, FURI
 * Applications: features like RFID or Tamagotchi, and also background tasks like button debouncing and backlight control.
 
-### UI
+### User Interface
 
-Common UI feature (menu, screens...) at [UI page](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/UI)
+[User Interface](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/UI)
 
 ### Features
 
 * [Basic Features](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Basic-features)
+* [SD-card](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/SD-Card)
 * [Sub-1 GHz radio](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Sub-1-GHz-radio) (Transceiver Based on CC1101 chip for 315/433/868 MHz)
 * [125 kHz RFID](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/125-kHz-RFID)
 * [Infrared](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Infrared)
-* [iButton contact keys](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/iButton-contact-keys)
+* [iButton contact keys](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/iButton)
 * [USB](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/USB)
 * [Bluetooth](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Bluetooth)
 * [GPIO/HW Modules](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/GPIO)
@@ -54,6 +71,11 @@ Common UI feature (menu, screens...) at [UI page](https://github.com/Flipper-Zer
 # Hardware
 
 **[Hardware page](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/Hardware)**
+
+# Tools
+
+* [St-Link](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/ST-Link)
+* [VPN](https://github.com/Flipper-Zero/flipperzero-firmware-community/wiki/VPN)
 
 # Links
 

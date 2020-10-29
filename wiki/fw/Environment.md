@@ -14,15 +14,18 @@ For simple case as unit tests or integration test that no require hardware we mo
 
 You can run firmware locally (with HAL stub).
 
-* `docker-compose exec dev make -C target_lo` for build
-* `docker-compose exec dev target_lo/build/target_lo` for run
-* `docker-compose exec dev make -C target_lo test` for running tests
+* `docker-compose exec dev make -C firmware TARGET=local APP_TEST=1 run` for running tests
+* `docker-compose exec dev make -C firmware TARGET=local APP_*=1 run` for running examples (see `applications/applications.mk` for list of applications/examples)
 
 For UI we do "UI emulator" (not implemented)
 
 1. Web page with display and other UI elements, controls
 2. Local (linux) version of firmware. All calls, writing data to UI like display or LED, redirects to unix socket writes, and messages from unix socket redirect to firmware (emulates button press, change batt level, insert/remove USB, etc.)
 3. Webserver that run linux version fw, pass events from webpage to unixsocket and vice versa.
+
+## F2 build
+
+`docker-compose exec dev make -C firmware TARGET=f2 APP_*=1 flash` for build and flash dev board (see `applications/applications.mk` for list of applications/examples)
 
 ## Firmware emulation (not implemented)
 
@@ -32,7 +35,7 @@ For more HW- and RTOS- specific checks we run real FW in [Renode](https://interr
 
 Eventually we run real FW on remote debug/test bench (#26): flipper board + RPi + some stuff to control and check real hardware.
 
-# Debug/test bench (not implemented)
+# Debug/test bench (in progress)
 
 * 24×7 connected target Flipper device and accessible via Internet. Raspberry PI or some Linux single-board PC can be used as basic high-level control board.
 * Tool can push/click each user buttons by hardware by "control board" (low level). Usage of optocouples/reed-switch relays is fine for that.
@@ -58,3 +61,7 @@ Eventually we run real FW on remote debug/test bench (#26): flipper board + RPi 
 2. Run CI tests:
 	* For test automation we can use RobotDemo or simple expect tool/python scripts/etc.
 	* Apply test cases and submit its results.
+
+# Testing
+
+You can read about testing in [Testing](Testing) page.

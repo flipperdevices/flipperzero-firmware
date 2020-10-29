@@ -1,5 +1,4 @@
-#include "furi.h"
-#include "cmsis_os.h"
+#include "flipper.h"
 
 // TODO: this file contains printf, that not implemented on uC target
 
@@ -7,14 +6,44 @@
 #include <stdio.h>
 #endif
 
-#define DEFAULT_STACK_SIZE 1024 // Stack size in bytes
-#define MAX_TASK_COUNT 8
+#include <string.h>
+
+#define DEFAULT_STACK_SIZE 2048 // Stack size in bytes
+#define MAX_TASK_COUNT 10
+#define INVALID_TASK_ID UINT16_MAX
 
 static StaticTask_t task_info_buffer[MAX_TASK_COUNT];
 static StackType_t stack_buffer[MAX_TASK_COUNT][DEFAULT_STACK_SIZE / 4];
 static FuriApp task_buffer[MAX_TASK_COUNT];
 
 static size_t current_buffer_idx = 0;
+
+uint16_t furiac_get_task_id_by_name(const char* app_name) {
+    for(size_t i = 0; i < MAX_TASK_RECORDS; i++) {
+        if(strcmp(task_buffer[i].name, app_name) == 0) return i;
+    }
+
+    return INVALID_TASK_ID;
+}
+
+void furiac_wait_libs(const FlipperAppLibrary* libs) {
+    for(uint8_t i = 0; i < libs->count; i++) {
+        uint16_t app_id = furiac_get_task_id_by_name(libs->name[i]);
+
+        if(app_id == INVALID_TASK_ID) {
+#ifdef FURI_DEBUG
+            printf("[FURIAC] Invalid library name %s\n", lib_name);
+#endif
+        } else {
+            while(!task_buffer[app_id].ready) {
+#ifdef FURI_DEBUG
+                printf("[FURIAC] waiting for library \"%s\"\n", lib_name);
+#endif
+                osDelay(50);
+            }
+        }
+    }
+}
 
 // find task pointer by handle
 FuriApp* find_task(TaskHandle_t handler) {
@@ -29,30 +58,32 @@ FuriApp* find_task(TaskHandle_t handler) {
 }
 
 FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
-    #ifdef FURI_DEBUG
-        printf("[FURIAC] start %s\n", name);
-    #endif
+#ifdef FURI_DEBUG
+    printf("[FURIAC] start %s\n", name);
+#endif
 
     // TODO check first free item (.handler == NULL) and use it
 
     if(current_buffer_idx >= MAX_TASK_COUNT) {
-        // max task count exceed
-        #ifdef FURI_DEBUG
-            printf("[FURIAC] max task count exceed\n");
-        #endif
+// max task count exceed
+#ifdef FURI_DEBUG
+        printf("[FURIAC] max task count exceed\n");
+#endif
         return NULL;
     }
+
+    // application ready
+    task_buffer[current_buffer_idx].ready = false;
 
     // create task on static stack memory
     task_buffer[current_buffer_idx].handler = xTaskCreateStatic(
         (TaskFunction_t)app,
-        (const char * const)name,
+        (const char* const)name,
         DEFAULT_STACK_SIZE / 4, // freertos specify stack size in words
-        (void * const) param,
+        (void* const)param,
         tskIDLE_PRIORITY + 3, // normal priority
         stack_buffer[current_buffer_idx],
-        &task_info_buffer[current_buffer_idx]
-    );
+        &task_info_buffer[current_buffer_idx]);
 
     // save task
     task_buffer[current_buffer_idx].application = app;
@@ -67,9 +98,9 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
 }
 
 bool furiac_kill(FuriApp* app) {
-    #ifdef FURI_DEBUG
-        printf("[FURIAC] kill %s\n", app->name);
-    #endif
+#ifdef FURI_DEBUG
+    printf("[FURIAC] kill %s\n", app->name);
+#endif
 
     // check handler
     if(app == NULL || app->handler == NULL) return false;
@@ -90,16 +121,16 @@ void furiac_exit(void* param) {
 
     // run prev
     if(current_task != NULL) {
-        #ifdef FURI_DEBUG
-            printf("[FURIAC] exit %s\n", current_task->name);
-        #endif
+#ifdef FURI_DEBUG
+        printf("[FURIAC] exit %s\n", current_task->name);
+#endif
 
         if(current_task->prev != NULL) {
             furiac_start(current_task->prev, current_task->prev_name, param);
         } else {
-            #ifdef FURI_DEBUG
-                printf("[FURIAC] no prev\n");
-            #endif
+#ifdef FURI_DEBUG
+            printf("[FURIAC] no prev\n");
+#endif
         }
 
         // cleanup registry
@@ -108,7 +139,7 @@ void furiac_exit(void* param) {
     }
 
     // kill itself
-     vTaskDelete(NULL);
+    vTaskDelete(NULL);
 }
 
 void furiac_switch(FlipperApplication app, char* name, void* param) {
@@ -116,14 +147,14 @@ void furiac_switch(FlipperApplication app, char* name, void* param) {
     FuriApp* current_task = find_task(xTaskGetCurrentTaskHandle());
 
     if(current_task == NULL) {
-        #ifdef FURI_DEBUG
-            printf("[FURIAC] no current task found\n");
-        #endif
+#ifdef FURI_DEBUG
+        printf("[FURIAC] no current task found\n");
+#endif
     }
 
-    #ifdef FURI_DEBUG
-        printf("[FURIAC] switch %s to %s\n", current_task->name, name);
-    #endif
+#ifdef FURI_DEBUG
+    printf("[FURIAC] switch %s to %s\n", current_task->name, name);
+#endif
 
     // run next
     FuriApp* next = furiac_start(app, name, param);
@@ -135,5 +166,26 @@ void furiac_switch(FlipperApplication app, char* name, void* param) {
 
         // kill itself
         vTaskDelete(NULL);
+    }
+}
+
+// set task to ready state
+void furiac_ready() {
+    /* 
+        TODO:
+        Currently i think that better way is to use application name
+        and restrict applications to "one task per application"
+    */
+    FuriApp* app = find_task(xTaskGetCurrentTaskHandle());
+
+    if(app == NULL) {
+#ifdef FURI_DEBUG
+        printf("[FURIAC] cannot find task to set ready state\n");
+#endif
+    } else {
+#ifdef FURI_DEBUG
+        printf("[FURIAC] task is ready\n");
+#endif
+        app->ready = true;
     }
 }

@@ -1,71 +1,46 @@
 #include <stdio.h>
 #include "flipper.h"
+#include "flipper_v2.h"
 #include "log.h"
 
-#include "flipper-core.h"
+// #include "flipper-core.h" TODO: Rust build disabled
 
-bool test_furi_ac_create_kill(FuriRecordSubscriber* log);
-bool test_furi_ac_switch_exit(FuriRecordSubscriber* log);
-
-bool test_furi_pipe_record(FuriRecordSubscriber* log);
-bool test_furi_holding_data(FuriRecordSubscriber* log);
-bool test_furi_concurrent_access(FuriRecordSubscriber* log);
-bool test_furi_nonexistent_data(FuriRecordSubscriber* log);
-bool test_furi_mute_algorithm(FuriRecordSubscriber* log);
+int run_minunit();
 
 void flipper_test_app(void* p) {
-    FuriRecordSubscriber* log = get_default_log();
-    
-    if(test_furi_ac_create_kill(log)) {
-        fuprintf(log, "[TEST] test_furi_ac_create_kill PASSED\n");
+    // create pins
+    GpioPin red = {.pin = LED_RED_Pin, .port = LED_RED_GPIO_Port};
+    GpioPin green = {.pin = LED_GREEN_Pin, .port = LED_GREEN_GPIO_Port};
+    GpioPin blue = {.pin = LED_BLUE_Pin, .port = LED_BLUE_GPIO_Port};
+
+    GpioPin* red_record = &red;
+    GpioPin* green_record = &green;
+    GpioPin* blue_record = &blue;
+
+    // configure pins
+    pinMode(red_record, GpioModeOutputOpenDrain);
+    pinMode(green_record, GpioModeOutputOpenDrain);
+    pinMode(blue_record, GpioModeOutputOpenDrain);
+
+    digitalWrite(red_record, HIGH);
+    digitalWrite(green_record, HIGH);
+    digitalWrite(blue_record, LOW);
+
+    uint32_t exitcode = run_minunit();
+
+    if(exitcode == 0) {
+        // test passed
+        digitalWrite(red_record, HIGH);
+        digitalWrite(green_record, LOW);
+        digitalWrite(blue_record, HIGH);
     } else {
-        fuprintf(log, "[TEST] test_furi_ac_create_kill FAILED\n");
+        // test failed
+        digitalWrite(red_record, LOW);
+        digitalWrite(green_record, HIGH);
+        digitalWrite(blue_record, HIGH);
     }
 
-    if(test_furi_ac_switch_exit(log)) {
-        fuprintf(log, "[TEST] test_furi_ac_switch_exit PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_ac_switch_exit FAILED\n");
-    }
-
-    if(test_furi_pipe_record(log)) {
-        fuprintf(log, "[TEST] test_furi_pipe_record PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_pipe_record FAILED\n");
-    }
-
-    if(test_furi_holding_data(log)) {
-        fuprintf(log, "[TEST] test_furi_holding_data PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_holding_data FAILED\n");
-    }
-
-    if(test_furi_concurrent_access(log)) {
-        fuprintf(log, "[TEST] test_furi_concurrent_access PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_concurrent_access FAILED\n");
-    }
-
-    if(test_furi_nonexistent_data(log)) {
-        fuprintf(log, "[TEST] test_furi_nonexistent_data PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_nonexistent_data FAILED\n");
-    }
-
-    if(test_furi_mute_algorithm(log)) {
-        fuprintf(log, "[TEST] test_furi_mute_algorithm PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] test_furi_mute_algorithm FAILED\n");
-    }
-
-    if(add(1, 2) == 3) {
-        fuprintf(log, "[TEST] Rust add PASSED\n");
-    } else {
-        fuprintf(log, "[TEST] Rust add FAILED\n");
-    }
-
-    rust_uart_write();
-
+    set_exitcode(exitcode);
 
     furiac_exit(NULL);
 }
