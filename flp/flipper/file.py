@@ -25,9 +25,6 @@ class FileMode(Enum):
 
 
 class File:
-    """
-
-    """
     opened: bool = False
     filename: str
     conn: serial.Serial
@@ -92,7 +89,8 @@ class File:
         size = self.size()
         a = bytearray()
         seek = 0
-        while seek < block_size * (size // block_size - 1):  # Reading in blocks of block_size
+        # Reading in blocks of block_size
+        while seek < block_size * (size // block_size - 1):
             seek += block_size
             self.lseek(seek)
             a.extend(self.read(block_size))
