@@ -3,8 +3,8 @@
 #include "icon.h"
 #include "icon_i.h"
 
-#include <assert.h>
 #include <flipper.h>
+#include <flipper_v2.h>
 
 typedef struct {
     CanvasApi api;
@@ -60,7 +60,7 @@ CanvasApi* canvas_api_init() {
 }
 
 void canvas_api_free(CanvasApi* api) {
-    assert(api);
+    furi_assert(api);
     free(api);
 }
 
@@ -71,7 +71,7 @@ void canvas_reset(CanvasApi* api) {
 }
 
 void canvas_commit(CanvasApi* api) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     u8g2_SetPowerSave(&canvas->fb, 0); // wake up display
     u8g2_SendBuffer(&canvas->fb);
@@ -83,7 +83,7 @@ void canvas_frame_set(
     uint8_t offset_y,
     uint8_t width,
     uint8_t height) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     canvas->offset_x = offset_x;
     canvas->offset_y = offset_y;
@@ -92,31 +92,31 @@ void canvas_frame_set(
 }
 
 uint8_t canvas_width(CanvasApi* api) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     return canvas->width;
 }
 
 uint8_t canvas_height(CanvasApi* api) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     return canvas->height;
 }
 
 void canvas_clear(CanvasApi* api) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     u8g2_ClearBuffer(&canvas->fb);
 }
 
 void canvas_color_set(CanvasApi* api, Color color) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
 void canvas_font_set(CanvasApi* api, Font font) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     u8g2_SetFontMode(&canvas->fb, 1);
     if(font == FontPrimary) {
@@ -124,12 +124,12 @@ void canvas_font_set(CanvasApi* api, Font font) {
     } else if(font == FontSecondary) {
         u8g2_SetFont(&canvas->fb, u8g2_font_HelvetiPixel_tr);
     } else {
-        assert(0);
+        furi_check(0);
     }
 }
 
 void canvas_str_draw(CanvasApi* api, uint8_t x, uint8_t y, const char* str) {
-    assert(api);
+    furi_assert(api);
     if(!str) return;
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
@@ -138,7 +138,7 @@ void canvas_str_draw(CanvasApi* api, uint8_t x, uint8_t y, const char* str) {
 }
 
 void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon) {
-    assert(api);
+    furi_assert(api);
     if(!icon) return;
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
@@ -148,7 +148,7 @@ void canvas_icon_draw(CanvasApi* api, uint8_t x, uint8_t y, Icon* icon) {
 }
 
 void canvas_dot_draw(CanvasApi* api, uint8_t x, uint8_t y) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
     y += canvas->offset_y;
@@ -156,7 +156,7 @@ void canvas_dot_draw(CanvasApi* api, uint8_t x, uint8_t y) {
 }
 
 void canvas_box_draw(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
     y += canvas->offset_y;
@@ -164,7 +164,7 @@ void canvas_box_draw(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_
 }
 
 void canvas_draw_frame(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;
     y += canvas->offset_y;
@@ -172,7 +172,7 @@ void canvas_draw_frame(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint
 }
 
 void canvas_draw_line(CanvasApi* api, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2) {
-    assert(api);
+    furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     x1 += canvas->offset_x;
     y1 += canvas->offset_y;
