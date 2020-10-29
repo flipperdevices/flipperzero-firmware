@@ -18,7 +18,6 @@ struct Power {
     Icon* battery_icon;
     Widget* battery_widget;
 
-    PubSub* input_event_record;
     uint32_t charge;
 };
 
@@ -61,7 +60,12 @@ Power* power_alloc() {
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();
     widget_set_width(power->usb_widget, icon_get_width(power->usb_icon));
-    widget_enabled_set(power->usb_widget, false);
+    
+    ValueManager* input_state_manager = furi_open("input_state");
+    InputState input_state;
+    read_mutex_block(input_state_manager, &input_state, sizeof(input_state));
+    widget_enabled_set(power->usb_widget, input_state.charging);
+
     widget_draw_callback_set(power->usb_widget, power_draw_usb_callback, power);
 
     power->battery_icon = assets_icons_get(I_Battery_19x8);
@@ -69,9 +73,9 @@ Power* power_alloc() {
     widget_set_width(power->battery_widget, icon_get_width(power->battery_icon));
     widget_draw_callback_set(power->battery_widget, power_draw_battery_callback, power);
 
-    power->input_event_record = furi_open("input_events");
-    assert(power->input_event_record);
-    subscribe_pubsub(power->input_event_record, power_input_events_callback, power);
+    PubSub* input_event_record = furi_open("input_events");
+    assert(input_event_record);
+    subscribe_pubsub(input_event_record, power_input_events_callback, power);
 
     power->charge = BATTERY_INIT;
 
