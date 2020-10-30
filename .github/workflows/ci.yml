@@ -72,8 +72,7 @@ jobs:
       #       firmware/.obj/f2/firmware.hex
       #     if-no-files-found: error
       - name: Extract branch name
-        shell: bash
-        run: ${GITHUB_REF}
+        run: Branch ${GITHUB_REF##*/}
 
       - name: rsync upload
         uses: burnett01/rsync-deployments@4.1
