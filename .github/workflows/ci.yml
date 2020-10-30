@@ -18,34 +18,34 @@ jobs:
             submodules: true
             lfs: true
 
-      # - uses: satackey/action-docker-layer-caching@v0.0.8
-      #   continue-on-error: true
-      #   with:
-      #     key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-      #     restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
-      # - name: Build docker image
-      #   uses: ./.github/actions/docker
+      - uses: satackey/action-docker-layer-caching@v0.0.8
+        continue-on-error: true
+        with:
+          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+      - name: Build docker image
+        uses: ./.github/actions/docker
 
-      # - name: Check syntax
-      #   uses: ./.github/actions/docker
-      #   continue-on-error: false
-      #   with:
-      #     run: /syntax_check.sh
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        continue-on-error: false
+        with:
+          run: /syntax_check.sh
 
-      # - name: Build F2 bootloader in docker
-      #   uses: ./.github/actions/docker
-      #   with:
-      #     run: make -C bootloader TARGET=f2
+      - name: Build F2 bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=f2
 
-      # - name: Publish F2 bootloader artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: bootloader_f2
-      #     path: |
-      #       bootloader/.obj/f2/bootloader.elf
-      #       bootloader/.obj/f2/bootloader.bin
-      #       bootloader/.obj/f2/bootloader.hex
-      #     if-no-files-found: error
+      - name: Publish F2 bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader_f2
+          path: |
+            bootloader/.obj/f2/bootloader.elf
+            bootloader/.obj/f2/bootloader.bin
+            bootloader/.obj/f2/bootloader.hex
+          if-no-files-found: error
 
       # - name: Build local testing firmware in docker
       #   uses: ./.github/actions/docker
@@ -71,12 +71,18 @@ jobs:
       #       firmware/.obj/f2/firmware.bin
       #       firmware/.obj/f2/firmware.hex
       #     if-no-files-found: error
-
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f2
       - name: rsync upload
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzp --delete
-          path: testci.txt
+          path: bootloader_f2
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
