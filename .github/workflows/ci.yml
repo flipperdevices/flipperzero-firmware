@@ -84,7 +84,7 @@ jobs:
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzp --delete
-          path: bootloader_f2
+          path: bootloader_f2.zip
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
