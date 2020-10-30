@@ -46,6 +46,7 @@ jobs:
             bootloader/.obj/f2/bootloader.bin
             bootloader/.obj/f2/bootloader.hex
           if-no-files-found: error
+          retention-days: 7
 
       - name: Build local testing firmware in docker
         uses: ./.github/actions/docker
@@ -71,6 +72,7 @@ jobs:
             firmware/.obj/f2/firmware.bin
             firmware/.obj/f2/firmware.hex
           if-no-files-found: error
+          retention-days: 7
   upload:
     name: Upload artifacts to external storage
     needs: build
