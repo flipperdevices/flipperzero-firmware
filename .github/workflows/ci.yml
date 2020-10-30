@@ -73,7 +73,7 @@ jobs:
       #     if-no-files-found: error
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+        run: ${GITHUB_REF}
 
       - name: rsync upload
         uses: burnett01/rsync-deployments@4.1
