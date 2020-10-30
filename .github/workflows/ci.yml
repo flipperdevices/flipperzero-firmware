@@ -80,6 +80,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: bootloader_f2
+      - name: ls for downloaded file
+        run: ls -R
       - name: rsync upload
         uses: burnett01/rsync-deployments@4.1
         with:
