@@ -72,6 +72,8 @@ jobs:
       #       firmware/.obj/f2/firmware.hex
       #     if-no-files-found: error
   upload:
+    name: Upload artifacts to external storage
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Get artifact
