@@ -2,7 +2,7 @@ name: 'CI'
 
 on:
   push:
-    branches: [ master ]
+    branches: [ external-storage-artifacts ]
     paths-ignore:
     - 'wiki/**'
     - 'wiki_static/**'
@@ -71,3 +71,12 @@ jobs:
             firmware/.obj/f2/firmware.bin
             firmware/.obj/f2/firmware.hex
           if-no-files-found: error
+      - name: rsync upload
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: testci.txt
+          remote_path: ${{ secrets.RSYNC_DEPLOY_BASE_PATH }}
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
