@@ -2,7 +2,6 @@ name: 'CI'
 
 on:
   push:
-    branches: [ external-storage-artifacts ]
     paths-ignore:
     - 'wiki/**'
     - 'wiki_static/**'
