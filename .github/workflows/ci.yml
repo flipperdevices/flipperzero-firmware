@@ -18,59 +18,63 @@ jobs:
             submodules: true
             lfs: true
 
-      - uses: satackey/action-docker-layer-caching@v0.0.8
-        continue-on-error: true
-        with:
-          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
-      - name: Build docker image
-        uses: ./.github/actions/docker
+      # - uses: satackey/action-docker-layer-caching@v0.0.8
+      #   continue-on-error: true
+      #   with:
+      #     key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+      #     restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+      # - name: Build docker image
+      #   uses: ./.github/actions/docker
 
-      - name: Check syntax
-        uses: ./.github/actions/docker
-        continue-on-error: false
-        with:
-          run: /syntax_check.sh
+      # - name: Check syntax
+      #   uses: ./.github/actions/docker
+      #   continue-on-error: false
+      #   with:
+      #     run: /syntax_check.sh
 
-      - name: Build F2 bootloader in docker
-        uses: ./.github/actions/docker
-        with:
-          run: make -C bootloader TARGET=f2
+      # - name: Build F2 bootloader in docker
+      #   uses: ./.github/actions/docker
+      #   with:
+      #     run: make -C bootloader TARGET=f2
 
-      - name: Publish F2 bootloader artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: bootloader_f2
-          path: |
-            bootloader/.obj/f2/bootloader.elf
-            bootloader/.obj/f2/bootloader.bin
-            bootloader/.obj/f2/bootloader.hex
-          if-no-files-found: error
+      # - name: Publish F2 bootloader artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: bootloader_f2
+      #     path: |
+      #       bootloader/.obj/f2/bootloader.elf
+      #       bootloader/.obj/f2/bootloader.bin
+      #       bootloader/.obj/f2/bootloader.hex
+      #     if-no-files-found: error
 
-      - name: Build local testing firmware in docker
-        uses: ./.github/actions/docker
-        with:
-          run: make -C firmware TARGET=local
+      # - name: Build local testing firmware in docker
+      #   uses: ./.github/actions/docker
+      #   with:
+      #     run: make -C firmware TARGET=local
 
-      - name: Run local tests
-        uses: ./.github/actions/docker
-        with:
-          run: make -C firmware TARGET=local APP_TEST=1 run
+      # - name: Run local tests
+      #   uses: ./.github/actions/docker
+      #   with:
+      #     run: make -C firmware TARGET=local APP_TEST=1 run
 
-      - name: Build F2 firmware in docker
-        uses: ./.github/actions/docker
-        with:
-          run: make -C firmware TARGET=f2 APP_RELEASE=1
+      # - name: Build F2 firmware in docker
+      #   uses: ./.github/actions/docker
+      #   with:
+      #     run: make -C firmware TARGET=f2 APP_RELEASE=1
 
-      - name: Publish F2 firmware artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: firmware_f2
-          path: |
-            firmware/.obj/f2/firmware.elf
-            firmware/.obj/f2/firmware.bin
-            firmware/.obj/f2/firmware.hex
-          if-no-files-found: error
+      # - name: Publish F2 firmware artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: firmware_f2
+      #     path: |
+      #       firmware/.obj/f2/firmware.elf
+      #       firmware/.obj/f2/firmware.bin
+      #       firmware/.obj/f2/firmware.hex
+      #     if-no-files-found: error
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF##*/})"
+
       - name: rsync upload
         uses: burnett01/rsync-deployments@4.1
         with:
