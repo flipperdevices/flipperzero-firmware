@@ -5,7 +5,15 @@ project(stm32-blinky C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
 find_package(CMSIS COMPONENTS STM32L0 STM32F1 STM32F4 REQUIRED)
-find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 REQUIRED)
+find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 RCC GPIO CORTEX REQUIRED)
+# Find all drivers:
+#find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 REQUIRED)
+# Find drivers for all families:
+#find_package(HAL COMPONENTS RCC GPIO CORTEX REQUIRED)
+# Find LL driver:
+#find_package(HAL COMPONENTS LL_GPIO REQUIRED)
+# Find everything:
+#find_package(HAL REQUIRED)
 
 # STM32F4-Discovery
 add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
