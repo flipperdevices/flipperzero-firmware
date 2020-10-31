@@ -49,7 +49,7 @@ void application_blink(void* p) {
         gpio_write(red_record, false);
         gpio_write(green_record, false);
         gpio_write(blue_record, false);
-        osDelay(delay_time/10);
+        osDelay(delay_time / 10);
         gpio_write(red_record, true);
         gpio_write(green_record, true);
         gpio_write(blue_record, true);
