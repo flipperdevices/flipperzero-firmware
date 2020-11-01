@@ -104,7 +104,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-  __asm("bkpt 1");
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */
