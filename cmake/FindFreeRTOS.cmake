@@ -1,142 +1,104 @@
-IF(STM32_FAMILY STREQUAL "F0")
-	SET(PORT_GCC_DIR_SUFFIX "CM0")
-ELSEIF(STM32_FAMILY STREQUAL "F1")
-	SET(PORT_GCC_DIR_SUFFIX "CM3")
-ELSEIF(STM32_FAMILY STREQUAL "F2")
-	SET(PORT_GCC_DIR_SUFFIX "CM3")
-ELSEIF(STM32_FAMILY STREQUAL "F3")
-	SET(PORT_GCC_DIR_SUFFIX "CM4F")
-ELSEIF(STM32_FAMILY STREQUAL "F4")
-	SET(PORT_GCC_DIR_SUFFIX "CM4F")
-ELSEIF(STM32_FAMILY STREQUAL "F7")
-	SET(PORT_GCC_DIR_SUFFIX "CM7")
-ELSEIF(STM32_FAMILY STREQUAL "H7")
-	SET(PORT_GCC_DIR_SUFFIX "CM7/r0p1")
-ELSEIF(STM32_FAMILY STREQUAL "L0")
-	SET(PORT_GCC_DIR_SUFFIX "CM0")
-ELSEIF(STM32_FAMILY STREQUAL "L1")
-	SET(PORT_GCC_DIR_SUFFIX "CM4F")
-ENDIF()
+if(NOT FreeRTOS_FIND_COMPONENTS)
+    set(FreeRTOS_FIND_COMPONENTS
+        ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7
+    )
+endif()
+list(REMOVE_DUPLICATES FreeRTOS_FIND_COMPONENTS)
 
-SET(FREERTOS_SRC_FILES
-	croutine.c
-	event_groups.c
-	list.c
-	queue.c
-	tasks.c
-	timers.c
+set(FreeRTOS_HEAPS 1 2 3 4 5)
+
+if(NOT FREERTOS_PATH)
+    set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
+    message(STATUS "No FREERTOS_PATH specified using default: ${FREERTOS_PATH}")
+endif()
+
+find_path(FreeRTOS_COMMON_INCLUDE
+    NAMES FreeRTOS.h
+    PATHS "${FREERTOS_PATH}/Source/include"
+    NO_DEFAULT_PATH
 )
+list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_COMMON_INCLUDE}")
 
-SET(FREERTOS_HEADERS
-	croutine.h
-	deprecated_definitions.h
-	event_groups.h
-	FreeRTOS.h
-	list.h
-	mpu_prototypes.h
-	mpu_wrappers.h
-	portable.h
-	projdefs.h
-	queue.h
-	semphr.h
-	StackMacros.h
-	task.h
-	timers.h
+find_path(FreeRTOS_SOURCE_DIR
+    NAMES tasks.c
+    PATHS "${FREERTOS_PATH}/Source"
+    NO_DEFAULT_PATH
 )
+if(NOT (TARGET FreeRTOS))
+    add_library(FreeRTOS INTERFACE IMPORTED)
+    target_sources(FreeRTOS INTERFACE 
+        "${FreeRTOS_SOURCE_DIR}/tasks.c"
+        "${FreeRTOS_SOURCE_DIR}/list.c"
+        "${FreeRTOS_SOURCE_DIR}/queue.c"
+    )
+    target_include_directories(FreeRTOS INTERFACE "${FreeRTOS_COMMON_INCLUDE}")
+endif()
 
-IF(FREERTOS_CMSIS_V2)
-    SET(CMSIS_OS_SRC_FILE cmsis_os1.c)
-ELSE()
-    SET(CMSIS_OS_SRC_FILE cmsis_os.c)
-ENDIF()
-SET(CMSIS_OS_INC_FILE cmsis_os.h)
+if(NOT (TARGET FreeRTOS::Coroutine))
+    add_library(FreeRTOS::Coroutine INTERFACE IMPORTED)
+    target_sources(FreeRTOS::Coroutine INTERFACE "${FreeRTOS_SOURCE_DIR}/croutine.c")
+    target_link_libraries(FreeRTOS::Coroutine INTERFACE FreeRTOS)
+endif()
 
-SET(PORT_ARM_SRC_FILE port.c)
-SET(PORTMACRO_ARM_HEADER portmacro.h)
+if(NOT (TARGET FreeRTOS::EventGroups))
+    add_library(FreeRTOS::EventGroups INTERFACE IMPORTED)
+    target_sources(FreeRTOS::EventGroups INTERFACE "${FreeRTOS_SOURCE_DIR}/event_groups.c")
+    target_link_libraries(FreeRTOS::EventGroups INTERFACE FreeRTOS)
+endif()
 
-IF(NOT FREERTOS_HEAP_IMPL)
-	MESSAGE(FATAL_ERROR "FREERTOS_HEAP_IMPL not defined. Define it to include proper heap implementation file.")
-ELSE()
-	SET(HEAP_IMP_FILE heap_${FREERTOS_HEAP_IMPL}.c)
-ENDIF()
+if(NOT (TARGET FreeRTOS::StreamBuffer))
+    add_library(FreeRTOS::StreamBuffer INTERFACE IMPORTED)
+    target_sources(FreeRTOS::StreamBuffer INTERFACE "${FreeRTOS_SOURCE_DIR}/stream_buffer.c")
+    target_link_libraries(FreeRTOS::StreamBuffer INTERFACE FreeRTOS)
+endif()
 
-FIND_PATH(FREERTOS_COMMON_INC_DIR ${FREERTOS_HEADERS}
-	PATH_SUFFIXES include
-	HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-	CMAKE_FIND_ROOT_PATH_BOTH
+if(NOT (TARGET FreeRTOS::Timers))
+    add_library(FreeRTOS::Timers INTERFACE IMPORTED)
+    target_sources(FreeRTOS::Timers INTERFACE "${FreeRTOS_SOURCE_DIR}/timers.c")
+    target_link_libraries(FreeRTOS::Timers INTERFACE FreeRTOS)
+endif()
+
+foreach(HEAP ${FreeRTOS_HEAPS})
+    if(NOT (TARGET FreeRTOS::Heap::${HEAP}))
+        add_library(FreeRTOS::Heap::${HEAP} INTERFACE IMPORTED)
+        target_sources(FreeRTOS::Heap::${HEAP} INTERFACE "${FreeRTOS_SOURCE_DIR}/portable/MemMang/heap_${HEAP}.c")
+        target_link_libraries(FreeRTOS::Heap::${HEAP} INTERFACE FreeRTOS)
+    endif()
+endforeach()
+
+foreach(PORT ${FreeRTOS_FIND_COMPONENTS})
+    find_path(FreeRTOS_${PORT}_PATH
+        NAMES portmacro.h
+        PATHS "${FREERTOS_PATH}/Source/portable/GCC/${PORT}"
+        NO_DEFAULT_PATH
+    )
+    list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_${PORT}_PATH}")
+    
+    find_file(FreeRTOS_${PORT}_SOURCE
+        NAMES port.c
+        PATHS "${FreeRTOS_${PORT}_PATH}"
+        NO_DEFAULT_PATH
+    )
+    if(NOT (TARGET FreeRTOS::${PORT}))
+        add_library(FreeRTOS::${PORT} INTERFACE IMPORTED)
+        target_link_libraries(FreeRTOS::${PORT} INTERFACE FreeRTOS)
+        target_sources(FreeRTOS::${PORT} INTERFACE "${FreeRTOS_${PORT}_SOURCE}")
+        target_include_directories(FreeRTOS::${PORT} INTERFACE "${FreeRTOS_${PORT}_PATH}")
+    endif()
+    
+    if(FreeRTOS_${PORT}_PATH AND 
+       FreeRTOS_${PORT}_SOURCE AND 
+       FreeRTOS_COMMON_INCLUDE AND
+       FreeRTOS_SOURCE_DIR)
+       set(FreeRTOS_${PORT}_FOUND TRUE)
+    else()
+       set(FreeRTOS_${PORT}_FOUND FALSE)
+    endif()
+endforeach()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(FreeRTOS
+    REQUIRED_VARS FreeRTOS_INCLUDE_DIRS
+    FOUND_VAR FreeRTOS_FOUND
+    HANDLE_COMPONENTS
 )
-
-SET(CMSIS_OS_INC_DIR CMSIS_OS_INC_DIR-NOTFOUND)
-IF(FREERTOS_CMSIS_V2)
-    FIND_PATH(CMSIS_OS_INC_DIR ${CMSIS_OS_INC_FILE}
-        PATH_SUFFIXES CMSIS_RTOS_V2
-        HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-        CMAKE_FIND_ROOT_PATH_BOTH
-        )
-ELSE()
-    FIND_PATH(CMSIS_OS_INC_DIR ${CMSIS_OS_INC_FILE}
-        PATH_SUFFIXES CMSIS_RTOS
-        HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-        CMAKE_FIND_ROOT_PATH_BOTH
-        )
-ENDIF()
-
-FIND_PATH(PORTMACRO_INC_DIR ${PORTMACRO_ARM_HEADER}
-	PATH_SUFFIXES ARM_${PORT_GCC_DIR_SUFFIX}
-	HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC
-	CMAKE_FIND_ROOT_PATH_BOTH
-)
-
-FOREACH(SRC ${FREERTOS_SRC_FILES})
-    STRING(MAKE_C_IDENTIFIER "${SRC}" SRC_CLEAN)
-	SET(FREERTOS_${SRC_CLEAN}_FILE FREERTOS_SRC_FILE-NOTFOUND)
-	FIND_FILE(FREERTOS_${SRC_CLEAN}_FILE ${SRC}
-		HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-		CMAKE_FIND_ROOT_PATH_BOTH
-	)
-	LIST(APPEND FREERTOS_SOURCES ${FREERTOS_${SRC_CLEAN}_FILE})
-ENDFOREACH()
-
-SET(CMSIS_OS_SOURCE ${CMSIS_OS_SRC_FILE}-NOTFOUND)
-IF(FREERTOS_CMSIS_V2)
-    FIND_FILE(CMSIS_OS_SOURCE ${CMSIS_OS_SRC_FILE}
-        PATH_SUFFIXES CMSIS_RTOS_V2
-        HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-        CMAKE_FIND_ROOT_PATH_BOTH
-        )
-ELSE()
-    FIND_FILE(CMSIS_OS_SOURCE ${CMSIS_OS_SRC_FILE}
-        PATH_SUFFIXES CMSIS_RTOS
-        HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source
-        CMAKE_FIND_ROOT_PATH_BOTH
-        )
-ENDIF()
-
-FIND_FILE(PORT_ARM_SOURCE ${PORT_ARM_SRC_FILE}
-	PATH_SUFFIXES ARM_${PORT_GCC_DIR_SUFFIX}
-	HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC
-	CMAKE_FIND_ROOT_PATH_BOTH
-)
-
-FIND_FILE(HEAP_IMP_SOURCE ${HEAP_IMP_FILE}
-	PATH_SUFFIXES MemMang
-	HINTS ${STM32Cube_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable
-	CMAKE_FIND_ROOT_PATH_BOTH
-)
-
-SET(FreeRTOS_INCLUDE_DIRS
-	${FREERTOS_COMMON_INC_DIR}
-	${CMSIS_OS_INC_DIR}
-	${PORTMACRO_INC_DIR}
-)
-
-SET(FreeRTOS_SOURCES
-	${FREERTOS_SOURCES}
-	${CMSIS_OS_SOURCE}
-	${PORT_ARM_SOURCE}
-	${HEAP_IMP_SOURCE}
-)
-
-INCLUDE(FindPackageHandleStandardArgs)
-
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FreeRTOS DEFAULT_MSG FreeRTOS_INCLUDE_DIRS FreeRTOS_SOURCES)

@@ -1,114 +1,153 @@
 # About
 
-This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. It uses cmake and GCC, along with newlib (libc), STM32CubeMX or ChibiOS.
+This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. 
+It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 device families.
 
 ## Requirements
 
-* cmake >= 3.0
+* cmake >= 3.13
 * GCC toolchain with newlib (optional).
-
-* STM32CubeMX package for STM32F0, STM32F1, STM32F2, STM32F3, STM32F4, STM32F7, STM32G0, STM32H7, STM32L0, STM32L1, STM32L4 families.
+* STM32Cube package for appropriate STM32 family.
 
 ## Project contains
 
-* CMake common toolchain file, that configures cmake to use the arm toolchain.
-* CMake toolchain file that can generate a tunable linker script
-* CMake STM32 family-specific toolchain file, that configures family-specific parameters.
-* CMake modules to find and configure CMSIS and STM32HAL components.
-* CMake modules to find and configure ChibiOS components.
-* CMake project template.
+* CMake toolchain file, that configures cmake to use the arm toolchain: [cmake/stm32_gcc.cmake](cmake/stm32_gcc.cmake).
+* CMake module that contains useful functions: [cmake/stm32/common.cmake](cmake/stm32/common.cmake)
+* CMake modules that contains information about each family - RAM/flash sizes, CPU types, device types and device naming (e.g. it can tell that STM32F407VG is F4 family with 1MB flash, 128KB RAM with CMSIS type F407xx)
+* CMake toolchain file that can generate a tunable linker script [cmake/stm32/linker_ld.cmake](cmake/stm32/linker_ld.cmake)
+* CMake module to find and configure CMSIS library [cmake/FindCMSIS.cmake](cmake/FindCMSIS.cmake)
+* CMake module to find and configure STM32 HAL library [cmake/FindHAL.cmake](cmake/FindHAL.cmake)
+* CMake modules for various libraries/RTOSes
+* CMake project template and [examples](examples)
+* Some testing project to check cmake scripts working properly [tests](tests)
 
 ## Examples
 
-* `stm32-blinky` - blink LED using timers and PWM.
-* `stm32-newlib` - show date using uart and libc functions from newlib.
-* `stm32-chibios` - blink led using ChibiOS/NIL.
-* `stm32-hal-freertos-uart-tensorflow` - HAL OS (FreeRTOS) example using UART 
-    and TensorFlow Lite Micro to perform sine wave interpolation with
-    `flash` (`st-flash`) and `debug` (`openocd` +  `gdb`) targets.
-
-    Requires `OPENOCD_BOARD` to be set to specify the openocd config required.
-    These are usually found in `/usr/share/openocd/scripts/`. For example a
-    STM32F41G_EVAL board using an ST-link would use `OPENOCD_BOARD=board/stm3241g_eval_stlink.cfg`.
-    If none is given CMake will search the project root for `.cfg` files.
-
-    Can be found in a maintained form [here](https://github.com/alxhoff/STM3240G-EVAL-TensorFlow-Hello-World).
+* `template` ([examples/template](examples/template)) - project template, empty source linked compiled with CMSIS.
+* `custom-linker-script` ([examples/custom-linker-script](examples/custom-linker-script)) - similiar to `template` but using custom linker script.
+* `fetch-cube` ([examples/fetch-cube](examples/fetch-cube)) - example of using FetchContent for fetching STM32Cube from ST's git.
+* `fetch-cmsis-hal` ([examples/fetch-cmsis-hal](examples/fetch-cmsis-hal)) - example of using FetchContent for fetching STM32 CMSIS and HAL from ST's git.
+* `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
+* `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
 
 # Usage
 
-First of all you need to configure toolchain and libraries, you can do this by editing `gcc_stm32.cmake` or, preferably, by passing it through the command line.
+First of all you need to configure toolchain and library pathes using CMake varibles. 
+You can do this by passing values through command line during cmake run or by setting variables inside your CMakeLists.txt
 
 ## Configuration
 
 * `TOOLCHAIN_PREFIX` - where toolchain is located, **default**: `/usr`
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
-* `STM32_CHIP` - STM32 device code, e.g. `STM32F407VG` or `STM32F103VG`
-* `STM32_FAMILY` - STM32 family (F0, F1, F4, etc.) currently, F0, F1, F2, F4, F7, G0, H7, L0, L1 and L4 families are supported. **Note:** If `STM32_CHIP` variable is set, `STM32_FAMILY` is optional.
-* `STM32Cube_DIR` - path to STM32CubeMX directory **default**: `/opt/STM32Cube_FW_F0_V1.4.0 /opt/STM32Cube_FW_F1_V1.1.0 /opt/STM32Cube_FW_F2_V1.1.0 /opt/STM32Cube_FW_F4_V1.6.0`
-
-To use the toolchain, you'll need to copy contents of the `cmake` folder into cmake's modules path, or use the `CMAKE_MODULE_PATH` variable.
+* `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
 
 ## Common usage
 
-    cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_source_dir>
+First thing that you need to do after toolchain configration in your `CMakeLists.txt` script is to find CMSIS package:
+```
+find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
+```
+You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit `COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and ALL chips (you'll need ALL STM32Cube packages somewhere).
 
-Where `<chip>` is the STM32 chip name (e.g. `STM32F100C8`, `STM32F407IG`).
+Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`
 
-This command will generate Makefile for project. For a `Release` build, change `CMAKE_BUILD_TYPE`.
+CMSIS consists of three main components:
 
-The script will try to detect chip parameters automatically from the chip name (type, flash/ram size), or, you can set these directly with these variables:
+* Family-specific headers, e.g. `stm32f4xx.h`
+* Device type-specific startup sources (e.g. `startup_stm32f407xx.s`)
+* Device-specific linker scripts which requires information about memory sizes
 
-* `STM32_CHIP_TYPE` - family-dependent chip type. Global variable `STM32_CHIP_TYPES` contains list of valid types for current family (e.g `207xG`)
-* `STM32_FLASH_SIZE` - chip flash size (e.g. 64K)
-* `STM32_RAM_SIZE` - chip RAM size (e.g. 4K)
+stm32-cmake uses modern CMake features notably imported targets and target properties.
+Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagates them as dependencies. So in simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
+```
+add_executable(stm32-template main.c)
+target_link_libraries(stm32-template CMSIS::STM32::F407VG)
+```
+That will add include directories, startup source, linker script and compiler flags to your executable.
 
-### Usage with Eclipse CDT:
+CMSIS creates following targets:
 
-    cmake -DSTM32_CHIP=<chip> -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug -G "Eclipse CDT4 - Unix Makefiles" <path_to_source_dir>
+* `CMSIS::STM32::<FAMILY>` (e.g. `CMSIS::STM32::F4`) - common includes, compiler flags and defines for family
+* `CMSIS::STM32::<TYPE>` (e.g. `CMSIS::STM32::F407xx`) - common startup source for device type, depends on `CMSIS::STM32::<FAMILY>`
+* `CMSIS::STM32::<DEVICE>` (e.g. `CMSIS::STM32::F407VG`) - linker script for device, depends on `CMSIS::STM32::<TYPE>`
 
-## Building
+So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
 
-* To build elf file: `make`
-* To build .hex: `make <project name>.hex`
-* To build .bin: `make <project name>.bin`
+***Note**: Some devices in STM32H7 family has two different cores (Cortex-M7 and Cortex-M4). 
+To specify core to build, all targets for H7 family also have suffix (::M7 or ::M4).
+For example, targets for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
+
+Also, there is special library `STM32::NoSys` which adds `--specs=nosys.specs` to compiler flags.
+
+## HAL
+
+STM32 HAL can be used similiar to CMSIS.
+```
+find_package(HAL COMPONENTS STM32F4 REQUIRED)
+set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+```
+*`CMAKE_INCLUDE_CURRENT_DIR` here because HAL requires `stm32<family>xx_hal_conf.h` file being in include headers path.*
+
+HAL module will search all drivers supported by family and create following targets:
+
+* `HAL::STM32::<FAMILY>` (e.g. `HAL::STM32::F4`) - common HAL source, depends on `CMSIS::STM32::<FAMILY>`
+* `HAL::STM32::<FAMILY>::<DRIVER>` (e.g. `HAL::STM32::F4::GPIO`) - HAL driver <DRIVER>, depends on `HAL::STM32::<FAMILY>`
+* `HAL::STM32::<FAMILY>::<DRIVER>Ex` (e.g. `HAL::STM32::F4::ADCEx`) - HAL Extension driver , depends on `HAL::STM32::<FAMILY>::<DRIVER>`
+* `HAL::STM32::<FAMILY>::LL_<DRIVER>` (e.g. `HAL::STM32::F4::LL_ADC`) - HAL LL (Low-Level) driver , depends on `HAL::STM32::<FAMILY>`
+
+***Note**: Targets for STM32H7 will look like `HAL::STM32::<FAMILY>::[M7|M4]`, `HAL::STM32::<FAMILY>::[M7|M4]::<DRIVER>`, etc.*
+
+Here is typical usage:
+
+```
+add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
+target_link_libraries(stm32-blinky-f4 
+    HAL::STM32::F4::RCC
+    HAL::STM32::F4::GPIO
+    HAL::STM32::F4::CORTEX
+    CMSIS::STM32::F407VG
+    STM32::NoSys 
+)
+```
+
+### Building
+
+```
+    $ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
+    $ make
+```
 
 ## Linker script & variables
 
-You can use cmake variables below to tune the generated linker. To specify a custom linker script, set `STM32_LINKER_SCRIPT` (you can still use these variables in your custom script).
+CMSIS package will generate linker script for your device automatically (target `CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use `stm32_add_linker_script` function.
 
-* `STM32_FLASH_ORIGIN` - Start address of flash (**default**: 0x08000000)
-* `STM32_RAM_ORIGIN` - Start address of RAM (**default**: 0x20000000)
-* `STM32_FLASH_SIZE` - Flash size (**default**: from chip name)
-* `STM32_RAM_SIZE` - RAM size (**default**: from chip name)
-* `STM32_MIN_STACK_SIZE` - Minimum stack size for error detection at link-time (**default**: 512 bytes)
-* `STM32_MIN_HEAP_SIZE` - Minimum heap size for error detection at link-time (**default**: 0 bytes)
-* `STM32_CCRAM_ORIGIN` - Start address of Core-Coupled RAM (**default**: 0x10000000)
-* `STM32_CCRAM_SIZE` - Core-Coupled RAM size (**default**: 64 KiB)
+## Useful cmake function
 
-## Useful cmake macros
+* `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
+* `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
+* `stm32_get_devices_by_family(DEVICES [FAMILY <family>])` - return into `DEVICES` all supported devices by family (or all devices if `<family>` is empty)
 
-* `STM32_GET_CHIP_TYPE(CHIP CHIP_TYPE)` - gets chip type from chip name.
-* `STM32_GET_CHIP_PARAMETERS(CHIP FLASH_SIZE RAM_SIZE CCRAM_SIZE)` - gets chip ram/flash size from chip name.
-* `STM32_SET_FLASH_PARAMS(TARGET ...)` - sets chip flash/ram parameters for target.
-* `STM32_SET_CHIP_DEFINITIONS(TARGET CHIP_TYPE)` - sets chip family and type-specific compiler flags for target.
-* `STM32_SET_TARGET_PROPERTIES(TARGET)` - sets all needed parameters and compiler flags for target.
-* `STM32_GENERATE_LIBRARIES(NAME SOURCES LIBRARIES)` - generates libraries for all chip types in family. Resulting libraries stored in LIBRARIES and have names in ${NAME}_${FAMILY}_${CHIP_TYPE} format.
+# Additional CMake modules
 
-# ChibiOS Support
+stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in embedded world.
 
-This project also supports ChibiOS v3.x.x and ChibiOS v16.x.x (both nil and rt kernels).
+## FreeRTOS
 
-CMake modules for ChibiOS can find specified ChibiOS components using the COMPONENTS directive.
-
-See project `stm32-chibios` for example usage.
-
-# FreeRTOS Support
-
-FreeRTOS is also supported. To include it in your project you should set a variable named `FREERTOS_HEAP_IMPL` with 
-a proper number of FreeRTOS heap implementation. You can do this by invoking:
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. 
+Typical usage:
 
 ```
-SET(FREERTOS_HEAP_IMPL 4)
+find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
+target_link_libraries(... FreeRTOS::ARM_CM4F)
 ```
 
-before `FIND_PACKAGE` command.
+Following FreeRTOS ports supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+
+Other FreeRTOS libraries:
+
+* `FreeRTOS::Coroutine` - co-routines (`croutines.c`)
+* `FreeRTOS::EventGroups` - event groups (`event_groups.c`)
+* `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
+* `FreeRTOS::Timers` - timers (`timers.c`)
+* `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
+
