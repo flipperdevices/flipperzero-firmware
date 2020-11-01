@@ -37,6 +37,10 @@ set(BANNED_BOARDS STM32756G_EVAL)
 project(bsp-test C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
+if(FETCH_ST_SOURCES)
+    stm32_fetch_cube(${TEST_FAMILIES})
+endif()
+
 find_package(CMSIS REQUIRED)
 find_package(HAL REQUIRED)
 find_package(BSP REQUIRED)

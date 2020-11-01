@@ -1,4 +1,4 @@
-name: CMake
+name: Tests
 
 on: [push]
 
@@ -39,5 +39,18 @@ jobs:
 
     - name: Build tests/cmsis
       working-directory: ${{runner.workspace}}/tests/cmsis/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Create build directory for tests/hal
+      run: cmake -E make_directory ${{runner.workspace}}/tests/hal/build
+
+    - name: Configure tests/hal
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/hal/build
+      run: cmake -DFETCH_ST_SOURCES=TRUE $GITHUB_WORKSPACE/tests/hal/
+
+    - name: Build tests/hal
+      working-directory: ${{runner.workspace}}/tests/hal/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE
