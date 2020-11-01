@@ -8,6 +8,11 @@ endif()
 project(hal-test C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
+if(FETCH_ST_SOURCES)
+    stm32_fetch_cmsis(${TEST_FAMILIES})
+    stm32_fetch_hal(${TEST_FAMILIES})
+endif()
+
 find_package(CMSIS REQUIRED)
 find_package(HAL REQUIRED)
 

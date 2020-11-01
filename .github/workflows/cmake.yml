@@ -24,7 +24,20 @@ jobs:
       working-directory: ${{runner.workspace}}/tests/fetch/build
       run: cmake $GITHUB_WORKSPACE/tests/fetch/
 
-    - name: Build
+    - name: Build tests/fetch
       working-directory: ${{runner.workspace}}/tests/fetch/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
+
+    - name: Create build directory for tests/cmsis
+      run: cmake -E make_directory ${{runner.workspace}}/tests/cmsis/build
+
+    - name: Configure tests/cmsis
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/cmsis/build
+      run: cmake -DFETCH_ST_SOURCES=TRUE $GITHUB_WORKSPACE/tests/cmsis/
+
+    - name: Build tests/cmsis
+      working-directory: ${{runner.workspace}}/tests/cmsis/build
       shell: bash
       run: cmake --build . --config $BUILD_TYPE

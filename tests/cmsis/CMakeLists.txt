@@ -7,6 +7,10 @@ endif()
 
 project(cmsis-test C ASM)
 
+if(FETCH_ST_SOURCES)
+    stm32_fetch_cmsis(${TEST_FAMILIES})
+endif()
+
 find_package(CMSIS REQUIRED)
 
 set(SOURCES main.c)
