@@ -1,0 +1,30 @@
+name: CMake
+
+on: [push]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Install ARM toolchain
+      run: sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi 
+
+    - name: Create build directory for tests/fetch
+      run: cmake -E make_directory ${{runner.workspace}}/tests/fetch/build
+
+    - name: Configure tests/fetch
+      shell: bash
+      working-directory: ${{runner.workspace}}/tests/fetch/build
+      run: cmake $GITHUB_WORKSPACE/tests/fetch/
+
+    - name: Build
+      working-directory: ${{runner.workspace}}/tests/fetch/build
+      shell: bash
+      run: cmake --build . --config $BUILD_TYPE
