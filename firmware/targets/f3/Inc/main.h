@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32l4xx_hal.h"
+#include "stm32wbxx_hal.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,80 +60,73 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BUTTON_BACK_Pin GPIO_PIN_13
 #define BUTTON_BACK_GPIO_Port GPIOC
-#define BUTTON_BACK_EXTI_IRQn EXTI15_10_IRQn
-#define CHRG_Pin GPIO_PIN_2
-#define CHRG_GPIO_Port GPIOC
-#define CHRG_EXTI_IRQn EXTI2_IRQn
-#define BATT_V_Pin GPIO_PIN_3
-#define BATT_V_GPIO_Port GPIOC
+#define SPEAKER_Pin GPIO_PIN_8
+#define SPEAKER_GPIO_Port GPIOB
+#define IR_TX_Pin GPIO_PIN_9
+#define IR_TX_GPIO_Port GPIOB
+#define BUTTON_OK_Pin GPIO_PIN_2
+#define BUTTON_OK_GPIO_Port GPIOC
+#define BUTTON_OK_EXTI_IRQn EXTI2_IRQn
 #define IR_RX_Pin GPIO_PIN_0
 #define IR_RX_GPIO_Port GPIOA
-#define BUTTON_DOWN_Pin GPIO_PIN_1
-#define BUTTON_DOWN_GPIO_Port GPIOA
-#define BUTTON_DOWN_EXTI_IRQn EXTI1_IRQn
-#define DISPLAY_DI_Pin GPIO_PIN_2
-#define DISPLAY_DI_GPIO_Port GPIOA
-#define SPEAKER_Pin GPIO_PIN_3
-#define SPEAKER_GPIO_Port GPIOA
-#define NFC_CS_Pin GPIO_PIN_4
-#define NFC_CS_GPIO_Port GPIOC
+#define LED_RED_Pin GPIO_PIN_1
+#define LED_RED_GPIO_Port GPIOA
+#define LED_GREEN_Pin GPIO_PIN_2
+#define LED_GREEN_GPIO_Port GPIOA
+#define LED_BLUE_Pin GPIO_PIN_3
+#define LED_BLUE_GPIO_Port GPIOA
+#define RFID_PULL_Pin GPIO_PIN_8
+#define RFID_PULL_GPIO_Port GPIOA
+#define CC1101_G0_Pin GPIO_PIN_4
+#define CC1101_G0_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
 #define RFID_RF_IN_GPIO_Port GPIOC
-#define BUTTON_UP_Pin GPIO_PIN_0
+#define BUTTON_UP_Pin GPIO_PIN_10
 #define BUTTON_UP_GPIO_Port GPIOB
-#define BUTTON_UP_EXTI_IRQn EXTI0_IRQn
-#define LED_BLUE_Pin GPIO_PIN_1
-#define LED_BLUE_GPIO_Port GPIOB
-#define DISPLAY_RST_Pin GPIO_PIN_10
+#define BUTTON_LEFT_Pin GPIO_PIN_11
+#define BUTTON_LEFT_GPIO_Port GPIOB
+#define DISPLAY_RST_Pin GPIO_PIN_0
 #define DISPLAY_RST_GPIO_Port GPIOB
-#define IR_TX_Pin GPIO_PIN_11
-#define IR_TX_GPIO_Port GPIOB
+#define BUTTON_DOWN_Pin GPIO_PIN_1
+#define BUTTON_DOWN_GPIO_Port GPIOB
+#define NFC_CS_Pin GPIO_PIN_4
+#define NFC_CS_GPIO_Port GPIOE
+#define BUTTON_RIGHT_Pin GPIO_PIN_12
+#define BUTTON_RIGHT_GPIO_Port GPIOB
 #define RFID_OUT_Pin GPIO_PIN_13
 #define RFID_OUT_GPIO_Port GPIOB
-#define LED_GREEN_Pin GPIO_PIN_14
-#define LED_GREEN_GPIO_Port GPIOB
-#define RFID_PULL_Pin GPIO_PIN_15
-#define RFID_PULL_GPIO_Port GPIOB
-#define RFID_PULL_EXTI_IRQn EXTI15_10_IRQn
-#define VIBRO_Pin GPIO_PIN_6
-#define VIBRO_GPIO_Port GPIOC
-#define iButton_Pin GPIO_PIN_7
-#define iButton_GPIO_Port GPIOC
-#define DISPLAY_CS_Pin GPIO_PIN_8
+#define iBTN_Pin GPIO_PIN_14
+#define iBTN_GPIO_Port GPIOB
+#define SPI_D_MOSI_Pin GPIO_PIN_15
+#define SPI_D_MOSI_GPIO_Port GPIOB
+#define DISPLAY_DI_Pin GPIO_PIN_6
+#define DISPLAY_DI_GPIO_Port GPIOC
+#define DISPLAY_BACKLIGHT_Pin GPIO_PIN_15
+#define DISPLAY_BACKLIGHT_GPIO_Port GPIOA
+#define DISPLAY_CS_Pin GPIO_PIN_11
 #define DISPLAY_CS_GPIO_Port GPIOC
-#define SD_CS_Pin GPIO_PIN_9
+#define SD_CS_Pin GPIO_PIN_12
 #define SD_CS_GPIO_Port GPIOC
-#define LED_RED_Pin GPIO_PIN_8
-#define LED_RED_GPIO_Port GPIOA
-#define TMS_Pin GPIO_PIN_13
-#define TMS_GPIO_Port GPIOA
-#define TCK_Pin GPIO_PIN_14
-#define TCK_GPIO_Port GPIOA
-#define CC1101_CS_Pin GPIO_PIN_15
-#define CC1101_CS_GPIO_Port GPIOA
-#define BUTTON_LEFT_Pin GPIO_PIN_4
-#define BUTTON_LEFT_GPIO_Port GPIOB
-#define BUTTON_LEFT_EXTI_IRQn EXTI4_IRQn
-#define DISPLAY_BACKLIGHT_Pin GPIO_PIN_6
-#define DISPLAY_BACKLIGHT_GPIO_Port GPIOB
-#define CC1101_G0_Pin GPIO_PIN_7
-#define CC1101_G0_GPIO_Port GPIOB
-#define BUTTON_RIGHT_Pin GPIO_PIN_8
-#define BUTTON_RIGHT_GPIO_Port GPIOB
-#define BUTTON_RIGHT_EXTI_IRQn EXTI9_5_IRQn
-#define BUTTON_OK_Pin GPIO_PIN_9
-#define BUTTON_OK_GPIO_Port GPIOB
-#define BUTTON_OK_EXTI_IRQn EXTI9_5_IRQn
+#define CC1101_CS_Pin GPIO_PIN_0
+#define CC1101_CS_GPIO_Port GPIOD
+#define SPI_D_SCK_Pin GPIO_PIN_1
+#define SPI_D_SCK_GPIO_Port GPIOD
+#define SPI_R_SCK_Pin GPIO_PIN_3
+#define SPI_R_SCK_GPIO_Port GPIOB
+#define SPI_R_MISO_Pin GPIO_PIN_4
+#define SPI_R_MISO_GPIO_Port GPIOB
+#define SPI_R_MOSI_Pin GPIO_PIN_5
+#define SPI_R_MOSI_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
-#define MISO_PIN GpioPin{.port = GPIOC, .pin = GPIO_PIN_11}
+#define MISO_PIN GpioPin{.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin}
 
-#define SPI_R hspi3
-#define SPI_D hspi1
+#define SPI_R hspi1
+#define SPI_D hspi2
 
-#define TIM_A htim2
-#define TIM_B htim5
-#define TIM_C htim15
+#define TIM_A htim1
+#define TIM_B htim2
+#define TIM_C htim16
 
 /* USER CODE END Private defines */
 

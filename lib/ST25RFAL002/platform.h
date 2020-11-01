@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <cmsis_os2.h>
-#include "stm32l4xx_hal.h"
+#include <gpio.h>
 #include "timer.h"
 #include "math.h"
 #include "spi.h"

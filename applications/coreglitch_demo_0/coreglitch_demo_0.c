@@ -1,7 +1,7 @@
 #include "flipper.h"
 #include "u8g2/u8g2.h"
 
-extern TIM_HandleTypeDef htim5;
+extern TIM_HandleTypeDef TIM_B;
 
 void coreglitch_demo_0(void* p) {
     FuriRecordSubscriber* log = get_default_log();
@@ -40,7 +40,7 @@ void coreglitch_demo_0(void* p) {
             }
 
             // TODO get sound from FURI
-            hal_pwm_set(width, freq, &htim5, TIM_CHANNEL_4);
+            hal_pwm_set(width, freq, &TIM_B, TIM_CHANNEL_4);
             // delay(1);
 
             cnt++;

@@ -124,10 +124,10 @@ void input_carrier(AppEvent* event, State* state) {
             hal_pwm_set(
                 duty_cycles[state->carrier_duty_cycle_id],
                 state->carrier_freq,
-                &htim2,
+                &TIM_A,
                 TIM_CHANNEL_4);
         } else {
-            hal_pwm_stop(&htim2, TIM_CHANNEL_4);
+            hal_pwm_stop(&TIM_A, TIM_CHANNEL_4);
         }
     }
 
