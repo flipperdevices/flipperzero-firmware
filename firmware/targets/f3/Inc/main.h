@@ -60,6 +60,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define BUTTON_BACK_Pin GPIO_PIN_13
 #define BUTTON_BACK_GPIO_Port GPIOC
+#define BUTTON_BACK_EXTI_IRQn EXTI15_10_IRQn
 #define SPEAKER_Pin GPIO_PIN_8
 #define SPEAKER_GPIO_Port GPIOB
 #define IR_TX_Pin GPIO_PIN_9
@@ -83,16 +84,20 @@ void Error_Handler(void);
 #define RFID_RF_IN_GPIO_Port GPIOC
 #define BUTTON_UP_Pin GPIO_PIN_10
 #define BUTTON_UP_GPIO_Port GPIOB
+#define BUTTON_UP_EXTI_IRQn EXTI15_10_IRQn
 #define BUTTON_LEFT_Pin GPIO_PIN_11
 #define BUTTON_LEFT_GPIO_Port GPIOB
+#define BUTTON_LEFT_EXTI_IRQn EXTI15_10_IRQn
 #define DISPLAY_RST_Pin GPIO_PIN_0
 #define DISPLAY_RST_GPIO_Port GPIOB
 #define BUTTON_DOWN_Pin GPIO_PIN_1
 #define BUTTON_DOWN_GPIO_Port GPIOB
+#define BUTTON_DOWN_EXTI_IRQn EXTI1_IRQn
 #define NFC_CS_Pin GPIO_PIN_4
 #define NFC_CS_GPIO_Port GPIOE
 #define BUTTON_RIGHT_Pin GPIO_PIN_12
 #define BUTTON_RIGHT_GPIO_Port GPIOB
+#define BUTTON_RIGHT_EXTI_IRQn EXTI15_10_IRQn
 #define RFID_OUT_Pin GPIO_PIN_13
 #define RFID_OUT_GPIO_Port GPIOB
 #define iBTN_Pin GPIO_PIN_14
