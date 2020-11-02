@@ -4,3 +4,7 @@ C_SOURCES		=
 CPP_SOURCES		= 
 ASSETS			= 
 DEBUG_AGENT		= 
+
+CFLAGS			= 
+CPPFLAGS		= 
+LDFLAGS			= 
