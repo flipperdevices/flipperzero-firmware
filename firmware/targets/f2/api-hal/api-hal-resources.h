@@ -1,0 +1,9 @@
+#pragma once
+#include "main.h"
+#include "flipper_v2.h"
+
+#define DEBOUNCE_TICKS 10
+#define GPIO_INPUT_PINS_COUNT 7
+
+extern const GpioPin input_gpio[GPIO_INPUT_PINS_COUNT];
+extern const bool input_invert[GPIO_INPUT_PINS_COUNT];
