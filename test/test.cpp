@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <array>
+#include <map>
 #include <iostream>
 #include <algorithm>
 
@@ -110,28 +111,38 @@ struct __attribute__((packed)) write_reg_cmd_response {
     uint8_t delimiter_2 = 0xc0;
 };
 
+map<target_chip_t, uint32_t> chip_magic_value = {
+    {ESP8266_CHIP,  0xfff0c101},
+    {ESP32_CHIP,    0x00f01d83},
+    {ESP32S2_CHIP,  0x000007c6},
+};
 
-void queue_connect_response(uint32_t date_reg_1 = 0x15122500,
-                            uint32_t date_reg_2 = 0, 
-                            target_chip_t target = ESP32_CHIP)
+void queue_connect_response(target_chip_t target = ESP32_CHIP)
 {
-    // Set date registers used for detection of attached chip
-    auto uart_date_reg_1 = read_reg_response;
-    auto uart_date_reg_2 = read_reg_response;
-    uart_date_reg_1.data.common.value = date_reg_1;
-    uart_date_reg_2.data.common.value = date_reg_2;
+    // Set magic value register used for detection of attached chip
+    auto magic_value_response = read_reg_response;
+    magic_value_response.data.common.value = chip_magic_value[target];
 
     clear_buffers();
     queue_response(sync_response);
-    queue_response(uart_date_reg_1);
-    queue_response(uart_date_reg_2);
+    queue_response(magic_value_response);
 
     if (target == ESP8266_CHIP) {
         queue_response(flash_begin_response);
     } else {
+        auto efuse_pin_config_reg_1 = read_reg_response;
+        auto efuse_pin_config_reg_2 = read_reg_response;
+
+        queue_response(efuse_pin_config_reg_1);
+        queue_response(efuse_pin_config_reg_2);
         queue_response(attach_response);
     }
 
+}
+
+TEST_CASE( "chip_magic_value contains all supported chips " )
+{
+    REQUIRE( chip_magic_value.size() ==  ESP_MAX_CHIP );
 }
 
 TEST_CASE( "Can connect within specified time " )
@@ -171,25 +182,25 @@ TEST_CASE( "Can detect attached target" )
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
     SECTION( "Can detect ESP32" ) {
-        queue_connect_response(0x15122500, 0);
+        queue_connect_response(ESP32_CHIP);
         REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
         REQUIRE( esp_loader_get_target() == ESP32_CHIP );
     }
 
     SECTION( "Can detect ESP32S2" ) {
-        queue_connect_response(0x00000500, 0x19031400);
+        queue_connect_response(ESP32S2_CHIP);
         REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
         REQUIRE( esp_loader_get_target() == ESP32S2_CHIP );
     }
 
     SECTION( "Can detect ESP8266" ) {
-        queue_connect_response(0x00062000, 0, ESP8266_CHIP);
+        queue_connect_response(ESP8266_CHIP);
         REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
         REQUIRE( esp_loader_get_target() == ESP8266_CHIP );
     }
 
     SECTION( "Can detect unknown chip" ) {
-        queue_connect_response(0xaa, 0xbb);
+        queue_connect_response(ESP_UNKNOWN_CHIP);
         REQUIRE( esp_loader_connect(&connect_config) == ESP_LOADER_ERROR_INVALID_TARGET);
     }
 }
