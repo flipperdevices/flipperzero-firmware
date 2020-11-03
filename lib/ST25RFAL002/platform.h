@@ -18,8 +18,8 @@ void platformUnprotectST25RComm();
 #define ST25R_SS_PIN NFC_CS_Pin
 #define ST25R_SS_PORT NFC_CS_GPIO_Port
 
-#define ST25R_INT_PIN RFID_PULL_Pin
-#define ST25R_INT_PORT RFID_PULL_GPIO_Port
+#define ST25R_INT_PIN NFC_IRQ_Pin
+#define ST25R_INT_PORT NFC_IRQ_GPIO_Port
 
 #define RFAL_FEATURE_LISTEN_MODE               true       /*!< Enable/Disable RFAL support for Listen Mode                               */
 #define RFAL_FEATURE_WAKEUP_MODE               true       /*!< Enable/Disable RFAL support for the Wake-Up mode                          */

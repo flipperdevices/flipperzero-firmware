@@ -76,6 +76,9 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOA
 #define LED_BLUE_Pin GPIO_PIN_3
 #define LED_BLUE_GPIO_Port GPIOA
+#define ST25_IRQ_Pin GPIO_PIN_7
+#define ST25_IRQ_GPIO_Port GPIOA
+#define ST25_IRQ_EXTI_IRQn EXTI9_5_IRQn
 #define RFID_PULL_Pin GPIO_PIN_8
 #define RFID_PULL_GPIO_Port GPIOA
 #define CC1101_G0_Pin GPIO_PIN_4
@@ -132,6 +135,9 @@ void Error_Handler(void);
 #define TIM_A htim1
 #define TIM_B htim2
 #define TIM_C htim16
+
+#define NFC_IRQ_Pin ST25_IRQ_Pin
+#define NFC_IRQ_GPIO_Port ST25_IRQ_GPIO_Port
 
 /* USER CODE END Private defines */
 

@@ -135,6 +135,9 @@ void Error_Handler(void);
 #define TIM_B htim5
 #define TIM_C htim15
 
+#define NFC_IRQ_Pin RFID_PULL_Pin
+#define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

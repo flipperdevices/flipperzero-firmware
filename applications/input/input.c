@@ -109,7 +109,7 @@ void input_task(void* p) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t pin) {
 #ifdef APP_NFC
-    if(pin == RFID_PULL_Pin) {
+    if(pin == NFC_IRQ_Pin) {
         nfc_isr();
         return;
     }
