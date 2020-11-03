@@ -199,6 +199,53 @@ void NFC_SPI_Reconfigure() {
   }
 }
 
+void SD_SPI_Reconfigure_Slow(void) {
+  if (HAL_SPI_DeInit(&SPI_SD_HANDLE) != HAL_OK) {
+      Error_Handler();
+  }
+
+  SPI_SD_HANDLE.Init.Mode = SPI_MODE_MASTER;
+  SPI_SD_HANDLE.Init.Direction = SPI_DIRECTION_2LINES;
+  SPI_SD_HANDLE.Init.DataSize = SPI_DATASIZE_8BIT;
+  SPI_SD_HANDLE.Init.CLKPolarity = SPI_POLARITY_LOW;
+  SPI_SD_HANDLE.Init.CLKPhase = SPI_PHASE_1EDGE;
+  SPI_SD_HANDLE.Init.NSS = SPI_NSS_SOFT;
+  SPI_SD_HANDLE.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+  SPI_SD_HANDLE.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  SPI_SD_HANDLE.Init.TIMode = SPI_TIMODE_DISABLE;
+  SPI_SD_HANDLE.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  SPI_SD_HANDLE.Init.CRCPolynomial = 7;
+  SPI_SD_HANDLE.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+  SPI_SD_HANDLE.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+
+  if(HAL_SPI_Init(&SPI_SD_HANDLE) != HAL_OK) {
+      Error_Handler();
+  }
+}
+
+void SD_SPI_Reconfigure_Fast(void) {
+  if (HAL_SPI_DeInit(&SPI_SD_HANDLE) != HAL_OK) {
+      Error_Handler();
+  }
+
+  SPI_SD_HANDLE.Init.Mode = SPI_MODE_MASTER;
+  SPI_SD_HANDLE.Init.Direction = SPI_DIRECTION_2LINES;
+  SPI_SD_HANDLE.Init.DataSize = SPI_DATASIZE_8BIT;
+  SPI_SD_HANDLE.Init.CLKPolarity = SPI_POLARITY_LOW;
+  SPI_SD_HANDLE.Init.CLKPhase = SPI_PHASE_1EDGE;
+  SPI_SD_HANDLE.Init.NSS = SPI_NSS_SOFT;
+  SPI_SD_HANDLE.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  SPI_SD_HANDLE.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  SPI_SD_HANDLE.Init.TIMode = SPI_TIMODE_DISABLE;
+  SPI_SD_HANDLE.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  SPI_SD_HANDLE.Init.CRCPolynomial = 7;
+  SPI_SD_HANDLE.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+  SPI_SD_HANDLE.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+
+  if(HAL_SPI_Init(&SPI_SD_HANDLE) != HAL_OK) {
+      Error_Handler();
+  }
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

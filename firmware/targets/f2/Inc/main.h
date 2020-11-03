@@ -130,6 +130,7 @@ void Error_Handler(void);
 
 #define SPI_R hspi3
 #define SPI_D hspi1
+#define SPI_SD_HANDLE SPI_R
 
 #define TIM_A htim2
 #define TIM_B htim5

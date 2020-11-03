@@ -42,6 +42,8 @@ void MX_SPI2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void NFC_SPI_Reconfigure();
+void SD_SPI_Reconfigure_Slow();
+void SD_SPI_Reconfigure_Fast();
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
