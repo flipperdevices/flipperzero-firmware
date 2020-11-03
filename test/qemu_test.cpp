@@ -34,6 +34,7 @@ TEST_CASE( "Can connect " )
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
     ESP_ERR_CHECK( esp_loader_connect(&connect_config) );
+    REQUIRE( esp_loader_get_target() == ESP32_CHIP );
 }
 
 

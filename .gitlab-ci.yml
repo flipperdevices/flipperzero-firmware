@@ -41,9 +41,8 @@ build_with_idf:
     - *clone_and_setup_idf
     - cd $CI_PROJECT_DIR/examples/esp32_example
     # Build for all supported targets
-    - idf.py build -DTARGET_SOC=ESP32    -DMD5_ENABLED=1
-    - idf.py build -DTARGET_SOC=ESP8266  -DMD5_ENABLED=0
-    - idf.py build -DTARGET_SOC=ESP32_S2 -DMD5_ENABLED=1
+    - idf.py build -DMD5_ENABLED=1
+    - idf.py build -DMD5_ENABLED=0
 
     - *clone_and_setup_stm32
     - cd $CI_PROJECT_DIR/examples/stm32_example/build

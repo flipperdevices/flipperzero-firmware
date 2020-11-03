@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "loader_config.h"
 #include "serial_comm_prv.h"
 #include "serial_comm.h"
 #include "serial_io.h"
@@ -30,33 +29,10 @@
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 #endif
 
-typedef struct {
-    uint32_t reg_1;
-    uint32_t reg_2;
-} date_registers_t;
-
-static const date_registers_t date_regs = {
-#if defined TARGET_ESP8266
-    .reg_1 = 0x00062000,
-    .reg_2 = 0
-#elif defined TARGET_ESP32
-    .reg_1 = 0x15122500,
-    .reg_2 = 0
-#elif defined TARGET_ESP32_S2
-    .reg_1 = 0x00000500,
-    .reg_2 = 0x19031400
-#endif
-};
-
-static const uint32_t UART_DATE_REG_ADDR = 0x60000078;    // used to differentiate ESP8266 vs ESP32*
-static const uint32_t UART_DATE_REG2_ADDR = 0x3f400074;   // used to differentiate ESP32-S2 vs other models
-
-static const uint32_t DEFAULT_TIMEOUT = 500;
+static const uint32_t DEFAULT_TIMEOUT = 1000;
 static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most flash operations
 static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 3000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
-
-static uint32_t s_flash_write_size = 0;
 
 #define MEGABYTE  1024 * 1024
 
@@ -74,34 +50,83 @@ typedef enum {
     SPI_FLASH_READ_ID = 0x9F
 } spi_flash_cmd_t;
 
-#if defined TARGET_ESP8266
-#define SPI_REG_BASE    0x60000200
-#define SPI_CMD_REG     SPI_REG_BASE + 0x00
-#define SPI_USR_REG     SPI_REG_BASE + 0x1c
-#define SPI_USR1_REG    SPI_REG_BASE + 0x20
-#define SPI_USR2_REG    SPI_REG_BASE + 0x24
-#define SPI_W0_REG      SPI_REG_BASE + 0x40
-#define SPI_MOSI_DLEN_REG 0
-#define SPI_MISO_DLEN_REG 0
-#elif defined TARGET_ESP32_S2
-#define SPI_REG_BASE    0x3f402000
-#define SPI_CMD_REG     SPI_REG_BASE + 0x00
-#define SPI_USR_REG     SPI_REG_BASE + 0x18
-#define SPI_USR1_REG    SPI_REG_BASE + 0x1c
-#define SPI_USR2_REG    SPI_REG_BASE + 0x20
-#define SPI_W0_REG      SPI_REG_BASE + 0x58
-#define SPI_MOSI_DLEN_REG SPI_REG_BASE + 0x24
-#define SPI_MISO_DLEN_REG SPI_REG_BASE + 0x28
-#elif defined TARGET_ESP32
-#define SPI_REG_BASE    0x60002000
-#define SPI_CMD_REG     SPI_REG_BASE + 0x00
-#define SPI_USR_REG     SPI_REG_BASE + 0x1c
-#define SPI_USR1_REG    SPI_REG_BASE + 0x20
-#define SPI_USR2_REG    SPI_REG_BASE + 0x24
-#define SPI_W0_REG      SPI_REG_BASE + 0x80
-#define SPI_MOSI_DLEN_REG SPI_REG_BASE + 0x28
-#define SPI_MISO_DLEN_REG SPI_REG_BASE + 0x2c
-#endif
+typedef struct {
+    uint32_t cmd;
+    uint32_t usr;
+    uint32_t usr1;
+    uint32_t usr2;
+    uint32_t w0;
+    uint32_t mosi_dlen;
+    uint32_t miso_dlen;
+} target_registers_t;
+
+typedef struct {
+    uint32_t reg_1;
+    uint32_t reg_2;
+} date_registers_t;
+
+
+static const uint32_t UART_DATE_REG_ADDR  = 0x60000078;   // used to differentiate ESP8266 vs ESP32*
+static const uint32_t UART_DATE_REG2_ADDR = 0x3f400074;   // used to differentiate ESP32-S2 vs other models
+
+#define ESP8266_SPI_REG_BASE 0x60000200
+#define ESP32S2_SPI_REG_BASE 0x3f402000
+#define ESP32_SPI_REG_BASE   0x60002000
+
+static const target_registers_t registers[ESP_MAX_CHIP] = {
+    // ESP8266
+    {
+        .cmd  = ESP8266_SPI_REG_BASE + 0x00,
+        .usr  = ESP8266_SPI_REG_BASE + 0x1c,
+        .usr1 = ESP8266_SPI_REG_BASE + 0x20,
+        .usr2 = ESP8266_SPI_REG_BASE + 0x24,
+        .w0   = ESP8266_SPI_REG_BASE + 0x40,
+        .mosi_dlen = 0,
+        .miso_dlen = 0,
+    },
+    // ESP32
+    {
+        .cmd  = ESP32_SPI_REG_BASE + 0x00,
+        .usr  = ESP32_SPI_REG_BASE + 0x1c,
+        .usr1 = ESP32_SPI_REG_BASE + 0x20,
+        .usr2 = ESP32_SPI_REG_BASE + 0x24,
+        .w0   = ESP32_SPI_REG_BASE + 0x80,
+        .mosi_dlen = ESP32_SPI_REG_BASE + 0x28,
+        .miso_dlen = ESP32_SPI_REG_BASE + 0x2c,
+    },
+    // ESP32S2
+    {
+        .cmd  = ESP32S2_SPI_REG_BASE + 0x00,
+        .usr  = ESP32S2_SPI_REG_BASE + 0x18,
+        .usr1 = ESP32S2_SPI_REG_BASE + 0x1c,
+        .usr2 = ESP32S2_SPI_REG_BASE + 0x20,
+        .w0   = ESP32S2_SPI_REG_BASE + 0x58,
+        .mosi_dlen = ESP32S2_SPI_REG_BASE + 0x24,
+        .miso_dlen = ESP32S2_SPI_REG_BASE + 0x28,
+    }
+};
+
+static uint32_t s_flash_write_size = 0;
+static target_chip_t s_target = ESP_UNKNOWN_CHIP;
+static const target_registers_t *s_reg = &registers[ESP32S2_CHIP];
+
+static const date_registers_t s_date_regs[ESP_MAX_CHIP] = {
+    // ESP8266
+    {
+        .reg_1 = 0x00062000,
+        .reg_2 = 0,
+    },
+    // ESP32
+    {
+        .reg_1 = 0x15122500,
+        .reg_2 = 0,
+    },
+    // ESP32S2
+    {
+        .reg_1 = 0x00000500,
+        .reg_2 = 0x19031400,
+    }
+};
 
 #if MD5_ENABLED
 
@@ -142,19 +167,24 @@ static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
     return MAX(timeout, DEFAULT_FLASH_TIMEOUT);
 }
 
-static esp_loader_error_t detect_chip(void)
+static esp_loader_error_t detect_chip(target_chip_t *target)
 {
     uint32_t reg_1, reg_2;
 
     RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG_ADDR,  &reg_1) );
     RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG2_ADDR, &reg_2) );
 
-    if (date_regs.reg_1 == reg_1 && (date_regs.reg_2 == 0 || date_regs.reg_2 == reg_2)) {
-        return ESP_LOADER_SUCCESS;
-    } else {
-        return ESP_LOADER_ERROR_INVALID_TARGET;
+    for (int chip = 0; chip < ESP_MAX_CHIP; chip++) {
+        const date_registers_t *r = &s_date_regs[chip];
+        if (r->reg_1 == reg_1 && (r->reg_2 == 0 || r->reg_2 == reg_2)) {
+            *target = (target_chip_t)chip;
+            return ESP_LOADER_SUCCESS;
+        }
     }
+
+    return ESP_LOADER_ERROR_INVALID_TARGET;
 }
+
 
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 {
@@ -176,35 +206,38 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
         }
     } while (err != ESP_LOADER_SUCCESS);
 
-    RETURN_ON_ERROR( detect_chip() );
+    RETURN_ON_ERROR( detect_chip(&s_target) );
 
-#ifndef TARGET_ESP8266
-    loader_port_start_timer(DEFAULT_TIMEOUT);
-    err = loader_spi_attach_cmd(connect_args->spi_pin_config.val);
-#else
-    err = loader_flash_begin_cmd(0, 0, 0, 0);
-#endif
+    s_reg = &registers[s_target];
+
+    if (s_target == ESP8266_CHIP) {
+        err = loader_flash_begin_cmd(0, 0, 0, 0, s_target);
+    } else {
+        loader_port_start_timer(DEFAULT_TIMEOUT);
+        err = loader_spi_attach_cmd(connect_args->spi_pin_config.val);
+    }
 
     return err;
 }
 
-#ifndef TARGET_ESP8266
+target_chip_t esp_loader_get_target(void)
+{
+    return s_target;
+}
 
 static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bits)
 {
     if (mosi_bits > 0) {
-        RETURN_ON_ERROR( esp_loader_write_register(SPI_MOSI_DLEN_REG, mosi_bits - 1) );
+        RETURN_ON_ERROR( esp_loader_write_register(s_reg->mosi_dlen, mosi_bits - 1) );
     }
     if (miso_bits > 0) {
-        RETURN_ON_ERROR( esp_loader_write_register(SPI_MISO_DLEN_REG, miso_bits - 1) );
+        RETURN_ON_ERROR( esp_loader_write_register(s_reg->miso_dlen, miso_bits - 1) );
     }
 
     return ESP_LOADER_SUCCESS;
 }
 
-#else
-
-static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bits)
+static esp_loader_error_t spi_set_data_lengths_8266(size_t mosi_bits, size_t miso_bits)
 {
     uint32_t mosi_bitlen_shift = 17;
     uint32_t miso_bitlen_shift = 8;
@@ -212,10 +245,8 @@ static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bit
     uint32_t miso_mask = (miso_bits == 0) ? 0 : miso_bits - 1;
     uint32_t usr_reg = (miso_mask << miso_bitlen_shift) | (mosi_mask << mosi_bitlen_shift);
 
-    return esp_loader_write_register(SPI_USR1_REG, usr_reg);
+    return esp_loader_write_register(s_reg->usr1, usr_reg);
 }
-
-#endif
 
 static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, size_t tx_size, void *data_rx, size_t rx_size)
 {
@@ -231,10 +262,14 @@ static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, 
     // Save SPI configuration
     uint32_t old_spi_usr;
     uint32_t old_spi_usr2;
-    RETURN_ON_ERROR( esp_loader_read_register(SPI_USR_REG, &old_spi_usr) );
-    RETURN_ON_ERROR( esp_loader_read_register(SPI_USR2_REG, &old_spi_usr2) );
+    RETURN_ON_ERROR( esp_loader_read_register(s_reg->usr, &old_spi_usr) );
+    RETURN_ON_ERROR( esp_loader_read_register(s_reg->usr2, &old_spi_usr2) );
 
-    RETURN_ON_ERROR( spi_set_data_lengths(tx_size, rx_size) );
+    if (s_target == ESP8266_CHIP) {
+        RETURN_ON_ERROR( spi_set_data_lengths_8266(tx_size, rx_size) );
+    } else {
+        RETURN_ON_ERROR( spi_set_data_lengths(tx_size, rx_size) );
+    }
 
     uint32_t usr_reg_2 = (7 << CMD_LEN_SHIFT) | cmd;
     uint32_t usr_reg = SPI_USR_CMD;
@@ -245,16 +280,16 @@ static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, 
         usr_reg |= SPI_USR_MOSI;
     }
 
-    RETURN_ON_ERROR( esp_loader_write_register(SPI_USR_REG, usr_reg) );
-    RETURN_ON_ERROR( esp_loader_write_register(SPI_USR2_REG, usr_reg_2 ) );
+    RETURN_ON_ERROR( esp_loader_write_register(s_reg->usr, usr_reg) );
+    RETURN_ON_ERROR( esp_loader_write_register(s_reg->usr2, usr_reg_2 ) );
 
     if (tx_size == 0) {
         // clear data register before we read it
-        RETURN_ON_ERROR( esp_loader_write_register(SPI_W0_REG, 0) );
+        RETURN_ON_ERROR( esp_loader_write_register(s_reg->w0, 0) );
     } else {
         uint32_t *data = (uint32_t *)data_tx;
         uint32_t words_to_write = MIN((tx_size + 31) / 8 * 4, 1);
-        uint32_t data_reg_addr = SPI_W0_REG;
+        uint32_t data_reg_addr = s_reg->w0;
 
         while (words_to_write--) {
             uint32_t word = *data++;
@@ -263,12 +298,12 @@ static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, 
         }
     }
 
-    RETURN_ON_ERROR( esp_loader_write_register(SPI_CMD_REG, SPI_CMD_USR) );
+    RETURN_ON_ERROR( esp_loader_write_register(s_reg->cmd, SPI_CMD_USR) );
 
     uint32_t trials = 10;
     while (trials--) {
         uint32_t cmd_reg;
-        RETURN_ON_ERROR( esp_loader_read_register(SPI_CMD_REG, &cmd_reg) );
+        RETURN_ON_ERROR( esp_loader_read_register(s_reg->cmd, &cmd_reg) );
         if ((cmd_reg & SPI_CMD_USR) == 0) {
             break;
         }
@@ -278,11 +313,11 @@ static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, 
         return ESP_LOADER_ERROR_TIMEOUT;
     }
 
-    RETURN_ON_ERROR( esp_loader_read_register(SPI_W0_REG, data_rx) );
+    RETURN_ON_ERROR( esp_loader_read_register(s_reg->w0, data_rx) );
 
     // Restore SPI configuration
-    RETURN_ON_ERROR( esp_loader_write_register(SPI_USR_REG, old_spi_usr) );
-    RETURN_ON_ERROR( esp_loader_write_register(SPI_USR2_REG, old_spi_usr2) );
+    RETURN_ON_ERROR( esp_loader_write_register(s_reg->usr, old_spi_usr) );
+    RETURN_ON_ERROR( esp_loader_write_register(s_reg->usr2, old_spi_usr2) );
 
     return ESP_LOADER_SUCCESS;
 }
@@ -323,7 +358,7 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
     init_md5(offset, image_size);
 
     loader_port_start_timer(timeout_per_mb(erase_size, ERASE_REGION_TIMEOUT_PER_MB));
-    return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write);
+    return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write, s_target);
 }
 
 
@@ -368,14 +403,16 @@ esp_loader_error_t esp_loader_write_register(uint32_t address, uint32_t reg_valu
     return loader_write_reg_cmd(address, reg_value, 0xFFFFFFFF, 0);
 }
 
-#ifndef TARGET_ESP8266
 esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
 {
+    if (s_target == ESP8266_CHIP) {
+        return ESP_LOADER_ERROR_UNSUPPORTED_FUNC;
+    }
+
     loader_port_start_timer(DEFAULT_TIMEOUT);
 
     return loader_change_baudrate_cmd(baudrate);
 }
-#endif
 
 #if MD5_ENABLED
 
@@ -399,6 +436,10 @@ static void hexify(const uint8_t raw_md5[16], uint8_t hex_md5_out[32])
 
 esp_loader_error_t esp_loader_flash_verify(void)
 {
+    if (s_target == ESP8266_CHIP) {
+        return ESP_LOADER_ERROR_UNSUPPORTED_FUNC;
+    }
+
     uint8_t raw_md5[16];
     uint8_t hex_md5[MD5_SIZE + 1];
     uint8_t received_md5[MD5_SIZE + 1];

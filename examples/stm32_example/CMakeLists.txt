@@ -14,15 +14,7 @@ project(stm32_flasher)
     
 enable_language(ASM)
 
-if(TARGET_SOC STREQUAL "ESP32_S2")
-    set(binary_path ${CMAKE_CURRENT_LIST_DIR}/../binaries/ESP32_S2)
-elseif(TARGET_SOC STREQUAL "ESP8266")
-    set(binary_path ${CMAKE_CURRENT_LIST_DIR}/../binaries/ESP8266)
-else()
-    set(binary_path ${CMAKE_CURRENT_LIST_DIR}/../binaries/ESP32)
-endif()
-
-create_resources(${binary_path} Src/binaries.c)
+create_resources(${CMAKE_CURRENT_LIST_DIR}/../binaries/Hello-world Src/binaries.c)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} Inc)
  

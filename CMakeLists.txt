@@ -32,15 +32,4 @@ else()
 
 endif()
 
-
-if(TARGET_SOC STREQUAL "ESP32")
-    target_compile_definitions(${target} PUBLIC -DTARGET_ESP32)
-elseif(TARGET_SOC STREQUAL "ESP32_S2")
-    target_compile_definitions(${target} PUBLIC -DTARGET_ESP32_S2)
-elseif(TARGET_SOC STREQUAL "ESP8266")
-    target_compile_definitions(${target} PUBLIC -DTARGET_ESP8266)
-endif()
-
-if(DEFINED MD5_ENABLED)
-    target_compile_definitions(${target} PUBLIC -DMD5_ENABLED=${MD5_ENABLED})
-endif()
+target_compile_definitions(${target} PUBLIC -DMD5_ENABLED=1)

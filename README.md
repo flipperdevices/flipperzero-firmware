@@ -28,21 +28,15 @@ Please refer to ports in `port` directory. Currently, only ports for [ESP32 port
 
 ## Configuration
 
-Apart from writing port (if not available), user has to provide few configuration options:
-* TARGET_SOC: one of Espressif SoCs can be selected as target to be flashed. Currently, following SoCs are supported:
-    * ESP32
-    * ESP32_S2
-    * ESP8266
-* MD5_ENABLED: if enabled, serial flasher will verify flash integrity after writing to memory.
-
+Apart from writing port (if not available), user can enable flash integrity check functionality by setting MD5_ENABLED option. If enabled, serial flasher is capable of verify flash integrity after writing to memory.
 
 Configuration can be passed to `cmake` via command line:
 
 ```
-cmake -DTARGET_SOC=ESP32 -DMD5_ENABLED=1 .. && cmake --build .
+cmake -DMD5_ENABLED=1 .. && cmake --build .
 ```
 
-Note: in case, no compile definitions are povided, ESP32 is set as target and MD5 check is enabled by default. As ROM bootloader of ESP8266 does not support MD5_CHECK, `-DMD5_ENABLED=0` has to be passed to command line.
+Note: in case, no compile definitions are provided, ESP32 is set as target and MD5 check is enabled by default. As ROM bootloader of ESP8266 does not support MD5_CHECK, `-DMD5_ENABLED=0` has to be passed to command line.
 
 ### STM32 support
 

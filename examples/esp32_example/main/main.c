@@ -15,13 +15,14 @@
 #include "driver/gpio.h"
 #include "serial_io.h"
 #include "esp_loader.h"
-#include "loader_config.h"
 #include "example_common.h"
 
 #define HIGHER_BAUDRATE 230400
 
 void app_main(void)
 {
+    example_binaries_t bin;
+
     const loader_serial_config_t config = {
         .baud_rate = 115200,
         .uart_port = UART_NUM_1,
@@ -37,8 +38,11 @@ void app_main(void)
     }
 
     if (connect_to_target(HIGHER_BAUDRATE) == ESP_LOADER_SUCCESS) {
-        flash_binary(bootloader_bin, bootloader_bin_size, BOOTLOADER_ADDRESS);
-        flash_binary(partition_table_bin, partition_table_bin_size, PARTITION_ADDRESS);
-        flash_binary(hello_world_bin, hello_world_bin_size, APPLICATION_ADDRESS);
+
+        get_example_binaries(esp_loader_get_target(), &bin);
+
+        flash_binary(bin.boot.data, bin.boot.size, bin.boot.addr);
+        flash_binary(bin.part.data, bin.part.size, bin.part.addr);
+        flash_binary(bin.app.data,  bin.app.size,  bin.app.addr);
     }
 }
