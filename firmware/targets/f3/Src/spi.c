@@ -102,6 +102,10 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN SPI1_MspInit 1 */
+  
+  // SD Card need faster spi gpio
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE END SPI1_MspInit 1 */
   }
@@ -234,8 +238,8 @@ void SD_SPI_Reconfigure_Slow(void) {
 }
 
 void SD_SPI_Reconfigure_Fast(void) {
-  if (HAL_SPI_DeInit(&SPI_SD_HANDLE) != HAL_OK) {
-      Error_Handler();
+  if(HAL_SPI_DeInit(&SPI_SD_HANDLE) != HAL_OK) {
+        Error_Handler();
   }
 
   SPI_SD_HANDLE.Init.Mode = SPI_MODE_MASTER;
