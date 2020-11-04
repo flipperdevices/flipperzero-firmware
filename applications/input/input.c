@@ -57,10 +57,10 @@ void input_task(void* p) {
 
             // dirty hack, f3 has no CHARGING pin
             // TODO rewrite this
-            if(i < GPIO_INPUT_PINS_COUNT){
+            if(i < GPIO_INPUT_PINS_COUNT) {
                 input_state = gpio_read(&input_gpio[i]) ^ input_invert[i];
             }
-            
+
             if(input_state) {
                 if(debounce_counters[i] < DEBOUNCE_TICKS) {
                     debounce_counters[i] += 1;
