@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
         with:
             submodules: true
-            lfs: true
+            lfs: false
 
       - uses: satackey/action-docker-layer-caching@v0.0.8
         continue-on-error: true
