@@ -40,8 +40,7 @@ void clock_init() {
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 32, LL_RCC_PLLR_DIV_2);
     LL_RCC_PLL_Enable();
     LL_RCC_PLL_EnableDomain_SYS();
-    while(LL_RCC_PLL_IsReady() != 1)
-    {
+    while(LL_RCC_PLL_IsReady() != 1) {
     }
 
     /* Sysclk activation on the main PLL */
@@ -52,8 +51,7 @@ void clock_init() {
     LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-    {
+    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL) {
     }
 
     /* Set AHB SHARED prescaler*/

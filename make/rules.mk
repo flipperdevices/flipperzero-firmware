@@ -95,6 +95,7 @@ zzz: clean
 	$(MAKE) debug
 
 FORMAT_SOURCES := $(shell find ../applications -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
+FORMAT_SOURCES += $(shell find ../bootloader -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
 FORMAT_SOURCES += $(shell find ../core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
 
 format:
