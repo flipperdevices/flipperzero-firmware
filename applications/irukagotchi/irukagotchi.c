@@ -20,7 +20,7 @@ void irukagotchi_draw_callback(CanvasApi* canvas, void* context) {
 
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
-    canvas->draw_icon(canvas, 128-80, 0, irukagotchi->icon);
+    canvas->draw_icon(canvas, 128 - 80, 0, irukagotchi->icon);
     canvas->set_font(canvas, FontSecondary);
     canvas->draw_str(canvas, 2, 10, BUILD_DATE);
     canvas->draw_str(canvas, 2, 22, GIT_BRANCH);
