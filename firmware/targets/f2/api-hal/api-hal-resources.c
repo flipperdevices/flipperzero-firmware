@@ -21,3 +21,10 @@ const bool input_invert[GPIO_INPUT_PINS_COUNT] = {
     false, // {BUTTON_BACK_GPIO_Port, BUTTON_BACK_Pin},
     true, // {CHRG_GPIO_Port, CHRG_Pin}
 };
+
+const GpioPin led_gpio[3] = {
+    {LED_RED_GPIO_Port, LED_RED_Pin},
+    {LED_GREEN_GPIO_Port, LED_GREEN_Pin},
+    {LED_BLUE_GPIO_Port, LED_BLUE_Pin}};
+
+const GpioPin backlight_gpio = {DISPLAY_BACKLIGHT_GPIO_Port, DISPLAY_BACKLIGHT_Pin};
