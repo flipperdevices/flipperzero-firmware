@@ -22,9 +22,10 @@ void irukagotchi_draw_callback(CanvasApi* canvas, void* context) {
     canvas->set_color(canvas, ColorBlack);
     canvas->draw_icon(canvas, 0, 0, irukagotchi->icon);
     canvas->set_font(canvas, FontPrimary);
-    canvas->draw_str(canvas, 78, 25, "[0^w^0]!");
+    canvas->draw_str(canvas, 78, 16, "[0^w^0]!");
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 78, 40, GIT_BRANCH);
+    canvas->draw_str(canvas, 78, 28, GIT_BRANCH);
+    canvas->draw_str(canvas, 78, 40, GIT_BRANCH_NUM);
     canvas->draw_str(canvas, 78, 52, GIT_COMMIT);
 }
 
