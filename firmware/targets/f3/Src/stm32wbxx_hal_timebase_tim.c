@@ -57,7 +57,7 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   HAL_RCC_GetClockConfig(&clkconfig, &pFLatency);
 
   /* Compute TIM17 clock */
-  uwTimclock = 2*HAL_RCC_GetPCLK2Freq();
+  uwTimclock = HAL_RCC_GetPCLK2Freq();
 
   /* Compute the prescaler value to have TIM17 counter clock equal to 1MHz */
   uwPrescalerValue = (uint32_t) ((uwTimclock / 1000000) - 1);
