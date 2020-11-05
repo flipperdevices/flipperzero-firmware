@@ -41,7 +41,7 @@ void coreglitch_demo_0(void* p) {
 
             // TODO get sound from FURI
             hal_pwm_set(width, freq, &SPEAKER_TIM, SPEAKER_CH);
-            
+
             // delay(1);
 
             cnt++;
