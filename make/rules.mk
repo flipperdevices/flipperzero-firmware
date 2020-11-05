@@ -11,7 +11,7 @@ OBJECTS += $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
 # Generate dependencies
 DEPS = $(OBJECTS:.o=.d)
 
-$(shell mkdir -p $(OBJ_DIR))
+$(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
 
 BUILD_FLAGS_SHELL=\
 	echo "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
