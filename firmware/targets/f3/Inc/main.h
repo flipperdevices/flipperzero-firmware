@@ -173,6 +173,9 @@ extern TIM_HandleTypeDef htim16;
 #define LFRFID_TIM htim1
 #define LFRFID_CH TIM_CHANNEL_1
 
+#define IRDA_TIM htim1
+#define IRDA_CH TIM_CHANNEL_3
+
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
 
