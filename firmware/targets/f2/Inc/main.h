@@ -139,6 +139,9 @@ void Error_Handler(void);
 #define SPEAKER_TIM TIM_B
 #define SPEAKER_CH TIM_CHANNEL_4
 
+#define LFRFID_TIM htim15
+#define LFRFID_CH TIM_CHANNEL_1
+
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
 

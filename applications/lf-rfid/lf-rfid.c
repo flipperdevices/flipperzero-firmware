@@ -51,7 +51,7 @@ void lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
 
     // create pin
-    GpioPin pull_pin = {.pin = GPIO_PIN_15, .port = GPIOB};
+    GpioPin pull_pin = {.pin = RFID_PULL_Pin, .port = RFID_PULL_GPIO_Port};
     // TODO open record
     GpioPin* pull_pin_record = &pull_pin;
 
@@ -122,7 +122,7 @@ void lf_rfid_workaround(void* p) {
         }
 
         hal_pwmn_set(
-            state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &TIM_C, TIM_CHANNEL_1);
+            state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
 
         if(!state->on) {
             em4100_emulation(emulation_data, pull_pin_record);

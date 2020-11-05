@@ -159,12 +159,19 @@ void Error_Handler(void);
 #define SPI_D hspi2
 #define SPI_SD_HANDLE SPI_R
 
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim16;
+
 #define TIM_A htim1
 #define TIM_B htim2
 #define TIM_C htim16
 
 #define SPEAKER_TIM htim16
 #define SPEAKER_CH TIM_CHANNEL_1
+
+#define LFRFID_TIM htim1
+#define LFRFID_CH TIM_CHANNEL_1
 
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
