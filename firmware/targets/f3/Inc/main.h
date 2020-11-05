@@ -153,7 +153,10 @@ void Error_Handler(void);
 #define SPI_R_MOSI_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
-#define MISO_PIN GpioPin{.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin}
+#define MISO_PIN                                            \
+    GpioPin {                                               \
+        .port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin \
+    }
 
 #define SPI_R hspi1
 #define SPI_D hspi2
@@ -173,8 +176,15 @@ extern TIM_HandleTypeDef htim16;
 #define LFRFID_TIM htim1
 #define LFRFID_CH TIM_CHANNEL_1
 
-#define IRDA_TIM htim1
-#define IRDA_CH TIM_CHANNEL_3
+#define IRDA_TX_TIM htim1
+#define IRDA_TX_CH TIM_CHANNEL_3
+
+// only for reference
+// IRDA RX timer dont exist in F2
+// and timer need more data to init (NVIC IRQn to set priority)
+#define IRDA_RX_TIM htim2
+#define IRDA_RX_FALLING_CH TIM_CHANNEL_1
+#define IRDA_RX_RISING_CH TIM_CHANNEL_2
 
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
