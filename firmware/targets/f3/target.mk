@@ -53,6 +53,7 @@ C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart_ex.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_comp.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/list.c \

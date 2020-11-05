@@ -88,7 +88,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
     GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF10_USB;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 

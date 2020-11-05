@@ -21,7 +21,9 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
+#include "comp.h"
 #include "i2c.h"
+#include "rf.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -104,6 +106,8 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM16_Init();
+  MX_COMP1_Init();
+  MX_RF_Init();
   /* USER CODE BEGIN 2 */
   MX_FATFS_Init();
   delay_us_init_DWT();
@@ -140,7 +144,7 @@ void SystemClock_Config(void)
   /** Configure LSE Drive Capability
   */
   HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_MEDIUMLOW);
   /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
@@ -171,8 +175,8 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.AHBCLK2Divider = RCC_SYSCLK_DIV2;
   RCC_ClkInitStruct.AHBCLK4Divider = RCC_SYSCLK_DIV1;
 
@@ -182,9 +186,10 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RTC
-                              |RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1
-                              |RCC_PERIPHCLK_USB|RCC_PERIPHCLK_ADC;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RFWAKEUP
+                              |RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_USB
+                              |RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLLSAI1.PLLN = 6;
   PeriphClkInitStruct.PLLSAI1.PLLP = RCC_PLLP_DIV2;
   PeriphClkInitStruct.PLLSAI1.PLLQ = RCC_PLLQ_DIV2;
@@ -195,8 +200,9 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
   PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-  PeriphClkInitStruct.SmpsClockSelection = RCC_SMPSCLKSOURCE_HSI;
-  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLKDIV_RANGE1;
+  PeriphClkInitStruct.RFWakeUpClockSelection = RCC_RFWKPCLKSOURCE_HSE_DIV1024;
+  PeriphClkInitStruct.SmpsClockSelection = RCC_SMPSCLKSOURCE_HSE;
+  PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLKDIV_RANGE0;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();

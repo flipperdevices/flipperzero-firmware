@@ -61,13 +61,25 @@ void Error_Handler(void);
 #define BUTTON_BACK_Pin GPIO_PIN_13
 #define BUTTON_BACK_GPIO_Port GPIOC
 #define BUTTON_BACK_EXTI_IRQn EXTI15_10_IRQn
+#define QUARTZ_32MHZ_IN_Pin GPIO_PIN_14
+#define QUARTZ_32MHZ_IN_GPIO_Port GPIOC
+#define QUARTZ_32MHZ_OUT_Pin GPIO_PIN_15
+#define QUARTZ_32MHZ_OUT_GPIO_Port GPIOC
+#define BOOT0_Pin GPIO_PIN_3
+#define BOOT0_GPIO_Port GPIOH
 #define SPEAKER_Pin GPIO_PIN_8
 #define SPEAKER_GPIO_Port GPIOB
 #define IR_TX_Pin GPIO_PIN_9
 #define IR_TX_GPIO_Port GPIOB
+#define PC0_Pin GPIO_PIN_0
+#define PC0_GPIO_Port GPIOC
+#define PC1_Pin GPIO_PIN_1
+#define PC1_GPIO_Port GPIOC
 #define BUTTON_OK_Pin GPIO_PIN_2
 #define BUTTON_OK_GPIO_Port GPIOC
 #define BUTTON_OK_EXTI_IRQn EXTI2_IRQn
+#define PC3_Pin GPIO_PIN_3
+#define PC3_GPIO_Port GPIOC
 #define IR_RX_Pin GPIO_PIN_0
 #define IR_RX_GPIO_Port GPIOA
 #define LED_RED_Pin GPIO_PIN_1
@@ -76,15 +88,25 @@ void Error_Handler(void);
 #define LED_GREEN_GPIO_Port GPIOA
 #define LED_BLUE_Pin GPIO_PIN_3
 #define LED_BLUE_GPIO_Port GPIOA
-#define ST25_IRQ_Pin GPIO_PIN_7
-#define ST25_IRQ_GPIO_Port GPIOA
-#define ST25_IRQ_EXTI_IRQn EXTI9_5_IRQn
+#define PA4_Pin GPIO_PIN_4
+#define PA4_GPIO_Port GPIOA
+#define PA5_Pin GPIO_PIN_5
+#define PA5_GPIO_Port GPIOA
+#define PA6_Pin GPIO_PIN_6
+#define PA6_GPIO_Port GPIOA
+#define PA7_Pin GPIO_PIN_7
+#define PA7_GPIO_Port GPIOA
 #define RFID_PULL_Pin GPIO_PIN_8
 #define RFID_PULL_GPIO_Port GPIOA
+#define RFID_PULL_EXTI_IRQn EXTI9_5_IRQn
+#define I2C_SCL_Pin GPIO_PIN_9
+#define I2C_SCL_GPIO_Port GPIOA
 #define CC1101_G0_Pin GPIO_PIN_4
 #define CC1101_G0_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
 #define RFID_RF_IN_GPIO_Port GPIOC
+#define PB2_Pin GPIO_PIN_2
+#define PB2_GPIO_Port GPIOB
 #define BUTTON_UP_Pin GPIO_PIN_10
 #define BUTTON_UP_GPIO_Port GPIOB
 #define BUTTON_UP_EXTI_IRQn EXTI15_10_IRQn
@@ -109,8 +131,12 @@ void Error_Handler(void);
 #define SPI_D_MOSI_GPIO_Port GPIOB
 #define DISPLAY_DI_Pin GPIO_PIN_6
 #define DISPLAY_DI_GPIO_Port GPIOC
+#define I2C_SDA_Pin GPIO_PIN_10
+#define I2C_SDA_GPIO_Port GPIOA
 #define DISPLAY_BACKLIGHT_Pin GPIO_PIN_15
 #define DISPLAY_BACKLIGHT_GPIO_Port GPIOA
+#define PC10_Pin GPIO_PIN_10
+#define PC10_GPIO_Port GPIOC
 #define DISPLAY_CS_Pin GPIO_PIN_11
 #define DISPLAY_CS_GPIO_Port GPIOC
 #define SD_CS_Pin GPIO_PIN_12
@@ -137,8 +163,11 @@ void Error_Handler(void);
 #define TIM_B htim2
 #define TIM_C htim16
 
-#define NFC_IRQ_Pin ST25_IRQ_Pin
-#define NFC_IRQ_GPIO_Port ST25_IRQ_GPIO_Port
+#define SPEAKER_TIM TIM_C
+#define SPEAKER_CH TIM_CHANNEL_1
+
+#define NFC_IRQ_Pin RFID_PULL_Pin
+#define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
 
 /* USER CODE END Private defines */
 

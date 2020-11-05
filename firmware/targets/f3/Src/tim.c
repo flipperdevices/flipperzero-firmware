@@ -116,6 +116,7 @@ void MX_TIM16_Init(void)
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
 {
 
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(tim_baseHandle->Instance==TIM1)
   {
   /* USER CODE BEGIN TIM1_MspInit 0 */
@@ -149,10 +150,49 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM16_MspInit 0 */
     /* TIM16 clock enable */
     __HAL_RCC_TIM16_CLK_ENABLE();
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**TIM16 GPIO Configuration
+    PB8     ------> TIM16_CH1
+    */
+    GPIO_InitStruct.Pin = SPEAKER_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF14_TIM16;
+    HAL_GPIO_Init(SPEAKER_GPIO_Port, &GPIO_InitStruct);
+
   /* USER CODE BEGIN TIM16_MspInit 1 */
 
   /* USER CODE END TIM16_MspInit 1 */
   }
+}
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
+{
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  if(timHandle->Instance==TIM1)
+  {
+  /* USER CODE BEGIN TIM1_MspPostInit 0 */
+
+  /* USER CODE END TIM1_MspPostInit 0 */
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    /**TIM1 GPIO Configuration
+    PB13     ------> TIM1_CH1N
+    */
+    GPIO_InitStruct.Pin = RFID_OUT_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
+    HAL_GPIO_Init(RFID_OUT_GPIO_Port, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN TIM1_MspPostInit 1 */
+
+  /* USER CODE END TIM1_MspPostInit 1 */
+  }
+
 }
 
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
@@ -190,6 +230,12 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM16_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM16_CLK_DISABLE();
+
+    /**TIM16 GPIO Configuration
+    PB8     ------> TIM16_CH1
+    */
+    HAL_GPIO_DeInit(SPEAKER_GPIO_Port, SPEAKER_Pin);
+
   /* USER CODE BEGIN TIM16_MspDeInit 1 */
 
   /* USER CODE END TIM16_MspDeInit 1 */
