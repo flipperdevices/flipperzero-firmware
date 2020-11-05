@@ -7,11 +7,13 @@
 typedef enum {
     EventTypeTick,
     EventTypeKey,
+    EventTypeLed,
 } EventType;
 
 typedef struct {
     union {
         InputEvent input;
+        bool 
     } value;
     EventType type;
 } AppEvent;
@@ -227,6 +229,9 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 }
 
 void irda(void* p) {
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
+    HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
+
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
 
     State _state;
@@ -293,5 +298,23 @@ void irda(void* p) {
 
         release_mutex(&state_mutex, state);
         widget_update(widget);
+    }
+}
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2)
+    {
+        if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+        {
+            
+            int period = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+            int pulseWidth = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+        } else if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+        {
+            int period = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_1);
+            int pulseWidth = HAL_TIM_ReadCapturedValue(&htim2, TIM_CHANNEL_2);
+        }
+        
     }
 }
