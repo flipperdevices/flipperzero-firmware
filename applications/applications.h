@@ -106,7 +106,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_SPEAKER_DEMO
-    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = ""},
+    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = {0}},
 #endif
 };
 

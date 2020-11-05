@@ -12,7 +12,10 @@ void hal_pwm_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t chann
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = (uint16_t)(tim->Init.Period * value);
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+    sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
     HAL_TIM_PWM_ConfigChannel(tim, &sConfigOC, channel);
     HAL_TIM_PWM_Start(tim, channel);
 }
@@ -29,7 +32,10 @@ void hal_pwmn_set(float value, float freq, TIM_HandleTypeDef* tim, uint32_t chan
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = (uint16_t)(tim->Init.Period * value);
     sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+    sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
     HAL_TIM_PWM_ConfigChannel(tim, &sConfigOC, channel);
     HAL_TIMEx_PWMN_Start(tim, channel);
 }

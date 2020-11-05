@@ -163,7 +163,7 @@ void Error_Handler(void);
 #define TIM_B htim2
 #define TIM_C htim16
 
-#define SPEAKER_TIM TIM_C
+#define SPEAKER_TIM htim16
 #define SPEAKER_CH TIM_CHANNEL_1
 
 #define NFC_IRQ_Pin RFID_PULL_Pin
