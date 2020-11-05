@@ -81,7 +81,7 @@ debug: flash
 	rm $(OBJ_DIR)/agent.PID
 
 bm_debug: flash
-	blackmagic & echo $$! > $(OBJ_DIR)/agent.PID
+	set -m; blackmagic & echo $$! > $(OBJ_DIR)/agent.PID
 	arm-none-eabi-gdb \
 		-ex "target extended-remote 127.0.0.1:2000" \
 		-ex "set confirm off" \
