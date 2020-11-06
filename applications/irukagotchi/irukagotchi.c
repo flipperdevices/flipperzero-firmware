@@ -20,13 +20,12 @@ void irukagotchi_draw_callback(CanvasApi* canvas, void* context) {
 
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
-    canvas->draw_icon(canvas, 0, 0, irukagotchi->icon);
-    canvas->set_font(canvas, FontPrimary);
-    canvas->draw_str(canvas, 78, 16, "[0^w^0]!");
+    canvas->draw_icon(canvas, 128 - 80, 0, irukagotchi->icon);
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 78, 28, GIT_BRANCH);
-    canvas->draw_str(canvas, 78, 40, GIT_BRANCH_NUM);
-    canvas->draw_str(canvas, 78, 52, GIT_COMMIT);
+    canvas->draw_str(canvas, 2, 10, TARGET " " BUILD_DATE);
+    canvas->draw_str(canvas, 2, 22, GIT_BRANCH);
+    canvas->draw_str(canvas, 2, 34, GIT_BRANCH_NUM);
+    canvas->draw_str(canvas, 2, 46, GIT_COMMIT);
 }
 
 void irukagotchi_input_callback(InputEvent* event, void* context) {

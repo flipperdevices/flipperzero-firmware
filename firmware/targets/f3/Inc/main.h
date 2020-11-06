@@ -153,10 +153,7 @@ void Error_Handler(void);
 #define SPI_R_MOSI_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
-#define MISO_PIN                                            \
-    GpioPin {                                               \
-        .port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin \
-    }
+#define MISO_PIN GpioPin{.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin}
 
 #define SPI_R hspi1
 #define SPI_D hspi2
