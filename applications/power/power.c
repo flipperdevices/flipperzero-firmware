@@ -6,7 +6,6 @@
 #include <assets_icons.h>
 #include <api-hal-power.h>
 
-
 struct Power {
     Icon* usb_icon;
     Widget* usb_widget;
@@ -28,7 +27,7 @@ void power_draw_battery_callback(CanvasApi* canvas, void* context) {
     Power* power = context;
 
     canvas->draw_icon(canvas, 0, 0, power->battery_icon);
-    canvas->draw_box(canvas, 2, 2, (float) power->charge / 100 * 14, 4);
+    canvas->draw_box(canvas, 2, 2, (float)power->charge / 100 * 14, 4);
 }
 
 Power* power_alloc() {
@@ -38,7 +37,7 @@ Power* power_alloc() {
     power->usb_widget = widget_alloc();
     widget_set_width(power->usb_widget, icon_get_width(power->usb_icon));
     widget_draw_callback_set(power->usb_widget, power_draw_usb_callback, power);
-    
+
     power->battery_icon = assets_icons_get(I_Battery_19x8);
     power->battery_widget = widget_alloc();
     widget_set_width(power->battery_widget, icon_get_width(power->battery_icon));
