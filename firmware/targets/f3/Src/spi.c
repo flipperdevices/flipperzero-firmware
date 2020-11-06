@@ -200,7 +200,11 @@ void NFC_SPI_Reconfigure() {
   SPI_R.Init.CLKPolarity = SPI_POLARITY_LOW;
   SPI_R.Init.CLKPhase = SPI_PHASE_2EDGE;
   SPI_R.Init.NSS = SPI_NSS_SOFT;
+<<<<<<< HEAD
   SPI_R.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+=======
+  SPI_R.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8; // 8mhz, 10mhz is max
+>>>>>>> master
   SPI_R.Init.FirstBit = SPI_FIRSTBIT_MSB;
   SPI_R.Init.TIMode = SPI_TIMODE_DISABLE;
   SPI_R.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;

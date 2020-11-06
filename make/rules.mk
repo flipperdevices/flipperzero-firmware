@@ -80,6 +80,19 @@ debug: flash
 	kill `cat $(OBJ_DIR)/agent.PID`; \
 	rm $(OBJ_DIR)/agent.PID
 
+bm_debug: flash
+	set -m; blackmagic & echo $$! > $(OBJ_DIR)/agent.PID
+	arm-none-eabi-gdb \
+		-ex "target extended-remote 127.0.0.1:2000" \
+		-ex "set confirm off" \
+		-ex "monitor debug_bmp enable"\
+		-ex "monitor swdp_scan"\
+		-ex "attach 1"\
+		-ex "source ../debug/FreeRTOS/FreeRTOS.py" \
+		$(OBJ_DIR)/$(PROJECT).elf; \
+	kill `cat $(OBJ_DIR)/agent.PID`; \
+	rm $(OBJ_DIR)/agent.PID
+
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) $(OBJ_DIR)/*
