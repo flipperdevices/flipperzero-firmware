@@ -52,6 +52,24 @@ void fatfs_list(void* p) {
     furi_log = get_default_log();
     fuprintf(furi_log, "[fatfs_list] app start\n");
 
+    // create pin
+    GpioPin sd_cs_pin = sd_cs_gpio;
+    // TODO open record
+    GpioPin* sd_cs_record = &sd_cs_pin;
+
+    // configure pin as input
+    gpio_init_ex(sd_cs_record, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
+    fuprintf(furi_log, "[fatfs_list] wait for sd insert\n");
+
+    while(gpio_read(sd_cs_record) == 1){
+        delay(100);
+    }
+
+    fuprintf(furi_log, "[fatfs_list] sd inserted\n");
+    // configure pin back
+    gpio_init_ex(sd_cs_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    delay(100);
+
     FuriRecordSubscriber* fb_record =
         furi_open_deprecated("u8g2_fb", false, false, NULL, NULL, NULL);
     if(fb_record == NULL) {
