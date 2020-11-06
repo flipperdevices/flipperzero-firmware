@@ -61,7 +61,7 @@ void fatfs_list(void* p) {
     gpio_init_ex(sd_cs_record, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
     fuprintf(furi_log, "[fatfs_list] wait for sd insert\n");
 
-    while(gpio_read(sd_cs_record) == 1){
+    while(gpio_read(sd_cs_record) == 1) {
         delay(100);
     }
 
