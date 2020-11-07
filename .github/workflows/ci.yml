@@ -2,9 +2,11 @@ name: 'CI'
 
 on:
   push:
+    branches:
+      - prepare-update
     paths-ignore:
-    - 'wiki/**'
-    - 'wiki_static/**'
+      - 'wiki/**'
+      - 'wiki_static/**'
   pull_request:
 
 jobs:
@@ -119,8 +121,6 @@ jobs:
         with:
           name: firmware_f2
           path: firmware
-      - name: ls for downloaded file
-        run: ls -R
       - name: Upload bootloader
         uses: burnett01/rsync-deployments@4.1
         with:
@@ -139,3 +139,26 @@ jobs:
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
           remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+
+  fullfirmware:
+    name: Create latest full firmware
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f2
+          path: bootloader
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f2
+          path: firmware
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          username: ${{ secrets.RSYNC_DEPLOY_USER }}
+          key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+          script: ls -R ${{ secrets.RSYNC_DEPLOY_BASE_PATH }}
