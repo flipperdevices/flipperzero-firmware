@@ -1,58 +1,43 @@
 #include "flipper_v2.h"
 
-static void event_cb(const void* value, void* ctx) {
-    const InputEvent* event = value;
-
-    uint32_t* delay_time = acquire_mutex(ctx, 0);
-    if(delay_time == NULL) return;
-
-    if(event->input == InputUp && *delay_time < 1000) {
-        *delay_time += 5;
-    }
-
-    if(event->input == InputDown && *delay_time > 10) {
-        *delay_time -= 5;
-    }
-    release_mutex(ctx, delay_time);
+void rgb_set(bool r, bool g, bool b, GpioPin* led_r, GpioPin* led_g, GpioPin* led_b) {
+    gpio_write(led_r, !r);
+    gpio_write(led_g, !g);
+    gpio_write(led_b, !b);
 }
 
-void application_strobe(void* p) {
-    // WAT
-    osDelay(100);
+void application_blink(void* p) {
+    // create pin
+    GpioPin led_r = led_gpio[0];
+    GpioPin led_g = led_gpio[1];
+    GpioPin led_b = led_gpio[2];
 
-    // create pins
-    GpioPin red = {.pin = LED_RED_Pin, .port = LED_RED_GPIO_Port};
-    GpioPin green = {.pin = LED_GREEN_Pin, .port = LED_GREEN_GPIO_Port};
-    GpioPin blue = {.pin = LED_BLUE_Pin, .port = LED_BLUE_GPIO_Port};
+    // TODO open record
+    GpioPin* led_r_record = &led_r;
+    GpioPin* led_g_record = &led_g;
+    GpioPin* led_b_record = &led_b;
 
-    GpioPin* red_record = &red;
-    GpioPin* green_record = &green;
-    GpioPin* blue_record = &blue;
-
-    // configure pins
-    gpio_init(red_record, GpioModeOutputOpenDrain);
-    gpio_init(green_record, GpioModeOutputOpenDrain);
-    gpio_init(blue_record, GpioModeOutputOpenDrain);
-
-    uint32_t delay_time_holder = 100;
-    ValueMutex delay_mutex;
-    init_mutex(&delay_mutex, &delay_time_holder, sizeof(delay_time_holder));
-
-    PubSub* event_record = furi_open("input_events");
-    furi_check(event_record);
-    subscribe_pubsub(event_record, event_cb, &delay_mutex);
+    // configure pin
+    gpio_init(led_r_record, GpioModeOutputOpenDrain);
+    gpio_init(led_g_record, GpioModeOutputOpenDrain);
+    gpio_init(led_b_record, GpioModeOutputOpenDrain);
 
     while(1) {
-        uint32_t delay_time = 100;
-        read_mutex_block(&delay_mutex, &delay_time, sizeof(delay_time));
-
-        gpio_write(red_record, false);
-        gpio_write(green_record, false);
-        gpio_write(blue_record, false);
-        osDelay(delay_time / 10);
-        gpio_write(red_record, true);
-        gpio_write(green_record, true);
-        gpio_write(blue_record, true);
-        osDelay(delay_time);
+        rgb_set(1, 0, 0, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(0, 1, 0, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(1, 1, 0, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(0, 0, 1, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(1, 0, 1, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(0, 1, 1, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(1, 1, 1, led_r_record, led_g_record, led_b_record);
+        delay(500);
+        rgb_set(0, 0, 0, led_r_record, led_g_record, led_b_record);
+        delay(500);
     }
 }
