@@ -155,10 +155,16 @@ jobs:
         with:
           name: firmware_f2
           path: firmware
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@master
+      - name: Get firmware
+        uses: actions/download-artifact@v2
         with:
-          host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-          username: ${{ secrets.RSYNC_DEPLOY_USER }}
-          key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-          script: ls -R ${{ secrets.RSYNC_DEPLOY_BASE_PATH }}
+          name: firmware_f2
+          path: firmware     
+      - name: cp 
+        run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
+      - name: truncate 
+        run: truncate -s 32768 full_firmware_latest.bin
+      - name: cat 
+        run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
+      - name: ls for downloaded file
+        run: ls -R
