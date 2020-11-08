@@ -144,32 +144,33 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-    if: ${{ github.ref }} == 'refs/heads/master'
+    # if: ${{ github.ref }} == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
+        if: ${{ github.ref }} == 'refs/heads/master'
         run: |
           echo ${{ github.ref }}
-      - name: Get bootloader
-        uses: actions/download-artifact@v2
-        with:
-          name: bootloader_f2
-          path: bootloader
-      - name: Get firmware
-        uses: actions/download-artifact@v2
-        with:
-          name: firmware_f2
-          path: firmware
-      - name: Get firmware
-        uses: actions/download-artifact@v2
-        with:
-          name: firmware_f2
-          path: firmware     
-      - name: cp 
-        run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
-      - name: truncate 
-        run: truncate -s 32768 full_firmware_latest.bin
-      - name: cat 
-        run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
-      - name: ls 
-        run: ls -R
+      # - name: Get bootloader
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: bootloader_f2
+      #     path: bootloader
+      # - name: Get firmware
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: firmware_f2
+      #     path: firmware
+      # - name: Get firmware
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: firmware_f2
+      #     path: firmware     
+      # - name: cp 
+      #   run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
+      # - name: truncate 
+      #   run: truncate -s 32768 full_firmware_latest.bin
+      # - name: cat 
+      #   run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
+      # - name: ls 
+      #   run: ls -R
