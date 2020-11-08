@@ -10,15 +10,14 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build artifacts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-            submodules: true
-
+  # build:
+  #   name: Build artifacts
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #           submodules: true
       # - uses: satackey/action-docker-layer-caching@v0.0.8
       #   continue-on-error: true
       #   with:
@@ -188,6 +187,10 @@ jobs:
     if: github.ref == 'refs/heads/prepare-update'    
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+            submodules: true      
       - name: Echo debug
         run: echo ${{ github.ref }}
       - name: Get template and font
