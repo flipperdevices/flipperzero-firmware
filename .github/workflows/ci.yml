@@ -198,7 +198,7 @@ jobs:
           wget https://zhovner.com/tmp/latest-firmware-template.png
           wget https://zhovner.com/tmp/Born2bSportyV2.ttf
       - name: Set test env
-        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count ${GITHUB_REF##*/})" >> $GITHUB_ENV
       - name: Test output
         run: echo $NUMBER_OF_COMMITS
       - name: Gen pic
