@@ -148,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
-        if: ${{ github.ref }} == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           echo ${{ github.ref }}
       # - name: Get bootloader
