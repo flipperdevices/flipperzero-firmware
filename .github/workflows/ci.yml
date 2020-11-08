@@ -198,6 +198,10 @@ jobs:
         run: |
           wget https://zhovner.com/tmp/latest-firmware-template.png
           wget https://zhovner.com/tmp/Born2bSportyV2.ttf
+      - name: Debug git history
+        run: git log -5
+      - name: Debug git history
+        run: git rev-list master | wc -l
       - name: Set test env
         run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
       - name: Test output
