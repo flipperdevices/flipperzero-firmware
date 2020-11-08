@@ -144,32 +144,42 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-    if: github.ref == 'refs/heads/master'
+#    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/prepare-update'    
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
         run: |
           echo ${{ github.ref }}
-      # - name: Get bootloader
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: bootloader_f2
-      #     path: bootloader
-      # - name: Get firmware
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: firmware_f2
-      #     path: firmware
-      # - name: Get firmware
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: firmware_f2
-      #     path: firmware     
-      # - name: cp 
-      #   run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
-      # - name: truncate 
-      #   run: truncate -s 32768 full_firmware_latest.bin
-      # - name: cat 
-      #   run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
-      # - name: ls 
-      #   run: ls -R
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f2
+          path: bootloader
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f2
+          path: firmware
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f2
+          path: firmware     
+      - name: cp 
+        run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
+      - name: truncate 
+        run: truncate -s 32768 full_firmware_latest.bin
+      - name: cat 
+        run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
+      - name: ls 
+        run: ls -R
+      - name: Upload fullfirmware
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: full_firmware_latest.bin
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
