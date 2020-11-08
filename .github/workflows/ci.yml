@@ -199,14 +199,12 @@ jobs:
         run: |
           wget https://zhovner.com/tmp/latest-firmware-template.png
           wget https://zhovner.com/tmp/Born2bSportyV2.ttf
-      - name: Debug git history
-        run: git log -5
-      - name: Debug git history
-        run: git rev-list master | wc -l
       - name: Set test env
         run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-      - name: Test output
+      - name: Test output NUMBER_OF_COMMITS
         run: echo $NUMBER_OF_COMMITS
+      - name: Test output date
+        run: date +"%d %b" | awk '{ print toupper($0) }'       
       - name: Gen pic
         run: convert latest-firmware-template.png -font ./Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS OCT 31" out.png
       - name: Upload pic
