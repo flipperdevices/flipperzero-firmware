@@ -144,13 +144,10 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-#    if: github.ref == 'refs/heads/master'
-    if: github.ref == 'refs/heads/prepare-update'    
+    if: github.ref == 'refs/heads/master'
+#    if: github.ref == 'refs/heads/prepare-update'    
     runs-on: ubuntu-latest
     steps:
-      - name: Echo debug
-        run: |
-          echo ${{ github.ref }}
       - name: Get bootloader
         uses: actions/download-artifact@v2
         with:
@@ -179,6 +176,33 @@ jobs:
         with:
           switches: -avzp --delete
           path: full_firmware_latest.bin
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+
+  genpic:
+    name: Generate pic
+    needs: upload
+#    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/prepare-update'    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo debug
+        run: echo ${{ github.ref }}
+      - name: Install Imagemagic
+        run: apt install imagemagick
+      - name: Get template and font
+        run: |
+          wget https://zhovner.com/tmp/latest-firmware-template.png
+          wget https://zhovner.com/tmp/Born2bSportyV2.ttf
+      - name: Gen pic
+        run: convert latest-firmware-template.png -font ./Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "313 OCT 31" out.png          
+      - name: Upload pic
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: out.png
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
