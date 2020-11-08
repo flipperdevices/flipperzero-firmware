@@ -143,8 +143,7 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-#    if: github.ref == 'refs/heads/master'
-    if: github.ref == 'refs/heads/prepare-update'    
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Get bootloader
@@ -175,16 +174,15 @@ jobs:
         with:
           switches: -avzp --delete
           path: full_firmware_latest.bin
-          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
           remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
 
   genpic:
     name: Generate pic
-    needs: upload
-#    if: github.ref == 'refs/heads/master'
-    if: github.ref == 'refs/heads/prepare-update'    
+    needs: fullfirmware
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -217,7 +215,7 @@ jobs:
         with:
           switches: -avzp --delete
           path: out.png
-          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
           remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
