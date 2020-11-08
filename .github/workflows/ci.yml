@@ -144,11 +144,11 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-    if: ${{ ${GITHUB_REF##*/} == 'master' }}
+    # if: github.head_ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
-        run: echo ${GITHUB_REF##*/}
+        run: echo ${{ github.head_ref }}
       - name: Get bootloader
         uses: actions/download-artifact@v2
         with:
