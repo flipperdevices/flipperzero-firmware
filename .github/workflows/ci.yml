@@ -144,7 +144,7 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-    if: github.head_ref == 'refs/heads/master'
+    if: ${{ github.ref }} == 'refs/heads/prepare-update'
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
