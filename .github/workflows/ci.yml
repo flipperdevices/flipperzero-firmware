@@ -190,14 +190,16 @@ jobs:
     steps:
       - name: Echo debug
         run: echo ${{ github.ref }}
-      - name: Install Imagemagic
-        run: sudo apt install imagemagick
       - name: Get template and font
         run: |
           wget https://zhovner.com/tmp/latest-firmware-template.png
           wget https://zhovner.com/tmp/Born2bSportyV2.ttf
+      - name: Set test env
+        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count master)" >> $GITHUB_ENV
+      - name: Test output
+        run: echo $NUMBER_OF_COMMITS
       - name: Gen pic
-        run: convert latest-firmware-template.png -font ./Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "313 OCT 31" out.png          
+        run: convert latest-firmware-template.png -font ./Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS OCT 31" out.png
       - name: Upload pic
         uses: burnett01/rsync-deployments@4.1
         with:
