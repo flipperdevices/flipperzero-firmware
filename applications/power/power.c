@@ -1,6 +1,9 @@
 #include "power.h"
 
 #include <flipper_v2.h>
+
+#include <menu/menu.h>
+#include <menu/menu_item.h>
 #include <gui/gui.h>
 #include <gui/widget.h>
 #include <assets_icons.h>
@@ -12,6 +15,9 @@ struct Power {
 
     Icon* battery_icon;
     Widget* battery_widget;
+
+    ValueMutex* menu_vm;
+    MenuItem* menu;
 
     uint8_t charge;
 };
@@ -30,8 +36,17 @@ void power_draw_battery_callback(CanvasApi* canvas, void* context) {
     canvas->draw_box(canvas, 2, 2, (float)power->charge / 100 * 14, 4);
 }
 
+void power_off(void *context) {
+    api_hal_power_off();
+}
+
 Power* power_alloc() {
     Power* power = furi_alloc(sizeof(Power));
+
+    power->menu_vm = furi_open("menu");
+    furi_check(power->menu_vm);
+
+    power->menu = menu_item_alloc_function("Poweroff", NULL, power_off, power);
 
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();
@@ -63,10 +78,15 @@ void power_task(void* p) {
     gui->add_widget(gui, power->battery_widget, GuiLayerStatusBarRight);
     furi_commit(gui_record);
 
+    with_value_mutex(
+        power->menu_vm, (Menu * menu) { menu_item_add(menu, power->menu); });
+
     if(!furi_create("power", power)) {
         printf("[power_task] unable to create power record\n");
         furiac_exit(NULL);
     }
+
+    api_hal_power_init();
 
     furiac_ready();
 

@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+/* Initialize Driver */
+void bq27220_init();
+
 /* Get battery voltage in mV */
 uint16_t bq27220_get_voltage();
 

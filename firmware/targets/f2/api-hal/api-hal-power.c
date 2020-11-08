@@ -4,6 +4,7 @@
 #define BATTERY_MIN_VOLTAGE 3.2f
 #define BATTERY_MAX_VOLTAGE 4.0f
 
+void api_hal_power_init() {}
 
 uint8_t api_hal_power_get_pct() {
     float value;
@@ -25,3 +26,5 @@ uint8_t api_hal_power_get_pct() {
 bool api_hal_power_is_charging() {
     return false;
 }
+
+void api_hal_power_off() {}
