@@ -36,7 +36,7 @@ void power_draw_battery_callback(CanvasApi* canvas, void* context) {
     canvas->draw_box(canvas, 2, 2, (float)power->charge / 100 * 14, 4);
 }
 
-void power_off(void *context) {
+void power_off(void* context) {
     api_hal_power_off();
 }
 
