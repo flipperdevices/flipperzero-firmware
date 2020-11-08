@@ -190,7 +190,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-            submodules: true      
+          ref: master
+          submodules: true      
       - name: Echo debug
         run: echo ${{ github.ref }}
       - name: Get template and font
@@ -198,7 +199,7 @@ jobs:
           wget https://zhovner.com/tmp/latest-firmware-template.png
           wget https://zhovner.com/tmp/Born2bSportyV2.ttf
       - name: Set test env
-        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count ${GITHUB_REF##*/})" >> $GITHUB_ENV
+        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
       - name: Test output
         run: echo $NUMBER_OF_COMMITS
       - name: Gen pic
