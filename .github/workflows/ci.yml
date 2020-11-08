@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+    name: Build artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -143,8 +144,11 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
+    # if: ${GITHUB_REF##*/} == 'master'
     runs-on: ubuntu-latest
     steps:
+      - name: Echo debug
+        run: echo ${GITHUB_REF##*/}
       - name: Get bootloader
         uses: actions/download-artifact@v2
         with:
@@ -166,5 +170,5 @@ jobs:
         run: truncate -s 32768 full_firmware_latest.bin
       - name: cat 
         run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
-      - name: ls for downloaded file
+      - name: ls 
         run: ls -R
