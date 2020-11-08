@@ -8,138 +8,133 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
-      - name: Test echo 
-        run: echo "kek"
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #           submodules: true
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+            submodules: true
 
-  #     - uses: satackey/action-docker-layer-caching@v0.0.8
-  #       continue-on-error: true
-  #       with:
-  #         key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-  #         restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
-  #     - name: Build docker image
-  #       uses: ./.github/actions/docker
+      - uses: satackey/action-docker-layer-caching@v0.0.8
+        continue-on-error: true
+        with:
+          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+      - name: Build docker image
+        uses: ./.github/actions/docker
 
-  #     - name: Check syntax
-  #       uses: ./.github/actions/docker
-  #       continue-on-error: false
-  #       with:
-  #         run: /syntax_check.sh
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        continue-on-error: false
+        with:
+          run: /syntax_check.sh
 
-  #     - name: Build F2 bootloader in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C bootloader TARGET=f2
+      - name: Build F2 bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=f2
 
-  #     - name: Publish F2 bootloader artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: bootloader_f2
-  #         path: |
-  #           bootloader/.obj/f2/bootloader.elf
-  #           bootloader/.obj/f2/bootloader.bin
-  #           bootloader/.obj/f2/bootloader.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Publish F2 bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader_f2
+          path: |
+            bootloader/.obj/f2/bootloader.elf
+            bootloader/.obj/f2/bootloader.bin
+            bootloader/.obj/f2/bootloader.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build local testing firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=local
+      - name: Build local testing firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=local
 
-  #     - name: Run local tests
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=local APP_TEST=1 run
+      - name: Run local tests
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=local APP_TEST=1 run
 
-  #     - name: Build F2 firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=f2 APP_RELEASE=1
+      - name: Build F2 firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=f2 APP_RELEASE=1
 
-  #     - name: Publish F2 firmware artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: firmware_f2
-  #         path: |
-  #           firmware/.obj/f2/firmware.elf
-  #           firmware/.obj/f2/firmware.bin
-  #           firmware/.obj/f2/firmware.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Publish F2 firmware artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware_f2
+          path: |
+            firmware/.obj/f2/firmware.elf
+            firmware/.obj/f2/firmware.bin
+            firmware/.obj/f2/firmware.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build F3 bootloader in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C bootloader TARGET=f3
+      - name: Build F3 bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=f3
 
-  #     - name: Publish F3 bootloader artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: bootloader_f3
-  #         path: |
-  #           bootloader/.obj/f3/bootloader.elf
-  #           bootloader/.obj/f3/bootloader.bin
-  #           bootloader/.obj/f3/bootloader.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Publish F3 bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader_f3
+          path: |
+            bootloader/.obj/f3/bootloader.elf
+            bootloader/.obj/f3/bootloader.bin
+            bootloader/.obj/f3/bootloader.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build F3 firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=f3 APP_RELEASE=1
+      - name: Build F3 firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=f3 APP_RELEASE=1
 
-  #     - name: Publish F3 firmware artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: firmware_f3
-  #         path: |
-  #           firmware/.obj/f3/firmware.elf
-  #           firmware/.obj/f3/firmware.bin
-  #           firmware/.obj/f3/firmware.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Publish F3 firmware artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware_f3
+          path: |
+            firmware/.obj/f3/firmware.elf
+            firmware/.obj/f3/firmware.bin
+            firmware/.obj/f3/firmware.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  # upload:
-  #   name: Upload artifacts to external storage
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Get bootloader
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: bootloader_f2
-  #         path: bootloader
-  #     - name: Get firmware
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: firmware_f2
-  #         path: firmware
-  #     - name: ls for downloaded file
-  #       run: ls -R
-  #     - name: Upload bootloader
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: bootloader
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-  #     - name: Upload firmware
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: firmware
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+  upload:
+    name: Upload artifacts to external storage
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f2
+          path: bootloader
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f2
+          path: firmware
+      - name: ls for downloaded file
+        run: ls -R
+      - name: Upload bootloader
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: bootloader
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+      - name: Upload firmware
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: firmware
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
