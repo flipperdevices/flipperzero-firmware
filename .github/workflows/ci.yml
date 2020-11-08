@@ -148,7 +148,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Echo debug
-        run: echo ${{ github.head_ref }}
+        run: |
+          echo ${{ github.ref }}
       - name: Get bootloader
         uses: actions/download-artifact@v2
         with:
