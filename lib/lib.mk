@@ -45,3 +45,9 @@ C_SOURCES		+= $(wildcard $(ST25RFAL002_DIR)/*.c)
 C_SOURCES		+= $(wildcard $(ST25RFAL002_DIR)/source/*.c)
 C_SOURCES		+= $(wildcard $(ST25RFAL002_DIR)/source/st25r3916/*.c)
 endif
+
+# Callback Connector library
+CFLAGS			+= -I$(LIB_DIR)/callbackconnector
+
+# App template library
+CFLAGS			+= -I$(LIB_DIR)/app-template
