@@ -14,3 +14,9 @@ bool api_hal_power_is_charging();
 
 /* Poweroff system */
 void api_hal_power_off();
+
+/* OTG enable */
+void api_hal_power_enable_otg();
+
+/* OTG disable */
+void api_hal_power_disable_otg();

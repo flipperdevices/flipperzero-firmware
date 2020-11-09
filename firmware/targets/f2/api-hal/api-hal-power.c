@@ -28,3 +28,7 @@ bool api_hal_power_is_charging() {
 }
 
 void api_hal_power_off() {}
+
+void api_hal_power_enable_otg() {}
+
+void api_hal_power_disable_otg() {}

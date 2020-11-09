@@ -36,8 +36,16 @@ void power_draw_battery_callback(CanvasApi* canvas, void* context) {
     canvas->draw_box(canvas, 2, 2, (float)power->charge / 100 * 14, 4);
 }
 
-void power_off(void* context) {
+void power_off_callback(void* context) {
     api_hal_power_off();
+}
+
+void power_enable_otg_callback(void* context) {
+    api_hal_power_enable_otg();
+}
+
+void power_disable_otg_callback(void* context) {
+    api_hal_power_disable_otg();
 }
 
 Power* power_alloc() {
@@ -46,7 +54,14 @@ Power* power_alloc() {
     power->menu_vm = furi_open("menu");
     furi_check(power->menu_vm);
 
-    power->menu = menu_item_alloc_function("Poweroff", NULL, power_off, power);
+    power->menu = menu_item_alloc_menu("Power", NULL);
+    menu_item_subitem_add(
+        power->menu, menu_item_alloc_function("Poweroff", NULL, power_off_callback, power));
+    menu_item_subitem_add(
+        power->menu, menu_item_alloc_function("Enable OTG", NULL, power_enable_otg_callback, power));
+    menu_item_subitem_add(
+        power->menu, menu_item_alloc_function("Disable OTG", NULL, power_disable_otg_callback, power));
+
 
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();

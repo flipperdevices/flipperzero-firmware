@@ -14,7 +14,9 @@ uint16_t bq27220_read_word(uint8_t address) {
     return *(uint16_t*)data;
 }
 
-void bq27220_init() {}
+void bq27220_init() {
+    // Upload config
+}
 
 uint16_t bq27220_get_voltage() {
     return bq27220_read_word(CommandVoltage);

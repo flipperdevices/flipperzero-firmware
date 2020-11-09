@@ -50,3 +50,17 @@ bool bq25896_is_charging() {
     bq25896_read_reg(0x0B, &data);
     return data.CHRG_STAT != CHRG_STAT_NO;
 }
+
+void bq25896_enable_otg() {
+    REG03 data;
+    bq25896_read_reg(0x03, &data);
+    data.OTG_CONFIG = 1;
+    bq25896_write_reg(0x09, &data);
+}
+
+void bq25896_disable_otg() {
+    REG03 data;
+    bq25896_read_reg(0x03, &data);
+    data.OTG_CONFIG = 0;
+    bq25896_write_reg(0x09, &data);
+}
