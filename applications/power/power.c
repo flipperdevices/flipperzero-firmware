@@ -58,10 +58,11 @@ Power* power_alloc() {
     menu_item_subitem_add(
         power->menu, menu_item_alloc_function("Poweroff", NULL, power_off_callback, power));
     menu_item_subitem_add(
-        power->menu, menu_item_alloc_function("Enable OTG", NULL, power_enable_otg_callback, power));
+        power->menu,
+        menu_item_alloc_function("Enable OTG", NULL, power_enable_otg_callback, power));
     menu_item_subitem_add(
-        power->menu, menu_item_alloc_function("Disable OTG", NULL, power_disable_otg_callback, power));
-
+        power->menu,
+        menu_item_alloc_function("Disable OTG", NULL, power_disable_otg_callback, power));
 
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();
