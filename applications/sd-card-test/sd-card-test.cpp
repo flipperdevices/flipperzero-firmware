@@ -118,13 +118,10 @@ void SdTest::init_sd_card() {
     }
 }
 
-PARTITION VolToPart[] = {{0, 1}};
-
 void SdTest::mount_sd_card() {
     FRESULT result;
     BYTE work[_MAX_SS * 4];
-    DWORD plist[] = {100, 0, 0, 0};
-    result = f_fdisk(0, plist, work);
+
     result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work, _MAX_SS);
 
     result = f_mount(&sd_fat_fs, sd_path, 1);
