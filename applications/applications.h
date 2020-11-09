@@ -33,6 +33,7 @@ void nfc_task(void* p);
 void irukagotchi_task(void* p);
 void power_task(void* p);
 void sd_card_test(void* p);
+void simple_app_test(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -111,7 +112,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_SD_TEST
-    {.app = sd_card_test, .name = "sd_card_test", .libs = {2, FURI_LIB{"display_u8g2", "input_task"}}},
+    {.app = sd_card_test, .name = "sd_card_test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 };
 
@@ -142,5 +143,9 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_SPEAKER_DEMO
     {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .libs = {0}},
+#endif
+
+#ifdef BUILD_SD_TEST
+    {.app = sd_card_test, .name = "sd_card_test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 };

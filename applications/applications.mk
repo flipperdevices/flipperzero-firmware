@@ -190,6 +190,19 @@ APP_INPUT = 1
 APP_GUI = 1
 endif
 
+APP_SD_TEST ?= 0
+ifeq ($(APP_SD_TEST), 1)
+CFLAGS		+= -DAPP_SD_TEST
+BUILD_SD_TEST = 1
+endif
+BUILD_SD_TEST ?= 0
+ifeq ($(BUILD_SD_TEST), 1)
+CFLAGS		+= -DBUILD_SD_TEST
+C_SOURCES	+= $(wildcard $(APP_DIR)/sd-card-test/*.cpp)
+APP_INPUT = 1
+APP_GUI = 1
+endif
+
 APP_SPEAKER_DEMO ?= 0
 ifeq ($(APP_SPEAKER_DEMO), 1)
 CFLAGS		+= -DAPP_SPEAKER_DEMO
