@@ -164,42 +164,51 @@ typedef struct {
 #define BOOST_LIM_2150      (0b110)
 #define BOOST_LIM_RSVD      (0b111)
 
+
+typedef enum {
+    VBusStatNo = 0b000,
+    VBusStatUSB = 0b001,
+    VBusStatExternal = 0b010,
+    VBusStatOTG = 0b111,
+} VBusStat;
+
+typedef enum {
+    ChrgStatNo = 0b00,
+    ChrgStatPre = 0b01,
+    ChrgStatFast = 0b10,
+    ChrgStatDone = 0b11,
+} ChrgStat;
+
 typedef struct {
     bool VSYS_STAT:1;       // VSYS Regulation Status
     bool RES:1;             // Reserved: Always reads 1
     bool PG_STAT:1;         // Power Good Status
-    uint8_t CHRG_STAT:2;    // Charging Status
-    uint8_t VBUS_STAT:3;    // VBUS Status register
+    ChrgStat CHRG_STAT:2;    // Charging Status
+    VBusStat VBUS_STAT:3;    // VBUS Status register
 } REG0B;
 
-#define VBUS_STAT_NO        (0b000)
-#define VBUS_STAT_USB       (0b001)
-#define VBUS_STAT_EXT       (0b010)
-#define VBUS_STAT_OTG       (0b111)
+typedef enum {
+    ChrgFaultNO = 0b00,
+    ChrgFaultIN = 0b01,
+    ChrgFaultTH = 0b10,
+    ChrgFaultTIM = 0b11,
+} ChrgFault;
 
-#define CHRG_STAT_NO        (0b00)
-#define CHRG_STAT_PRE       (0b01)
-#define CHRG_STAT_FAST      (0b10)
-#define CHRG_STAT_DONE      (0b11)
+typedef enum {
+    NtcFaultNo = 0b000,
+    NtcFaultWarm = 0b010,
+    NtcFaultCool = 0b011,
+    NtcFaultCold = 0b101,
+    NtcFaultHot = 0b110,
+} NtcFault;
 
 typedef struct {
-    uint8_t NTC_FAULT:3;    // NTC Fault Status
+    NtcFault NTC_FAULT:3;    // NTC Fault Status
     bool BAT_FAULT:1;       // Battery Fault Status
-    uint8_t CHRG_FAULT:2;   // Charge Fault Status
+    ChrgFault CHRG_FAULT:2;   // Charge Fault Status
     bool BOOST_FAULT:1;     // Boost Mode Fault Status
     bool WATCHDOG_FAULT:1;  // Watchdog Fault Status
 } REG0C;
-
-#define CHRG_FAULT_NO       (0b00)
-#define CHRG_FAULT_IN       (0b01)
-#define CHRG_FAULT_TH       (0b10)
-#define CHRG_FAULT_TIM      (0b11)
-
-#define NTC_FAULT_NO        (0b000)
-#define NTC_FAULT_WARM      (0b010)
-#define NTC_FAULT_COOL      (0b011)
-#define NTC_FAULT_COLD      (0b101)
-#define NTC_FAULT_HOT       (0b110)
 
 typedef struct {
     uint8_t VINDPM:7;       // Absolute VINDPM Threshold, offset: +2600mV
