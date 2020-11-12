@@ -273,10 +273,8 @@ extern "C" void cc1101_workaround(void* p) {
     // 50khz channel spacing
     cc1101.SpiWriteReg(CC1101_MDMCFG0, 0xF8);
 
-    // create pin
-    GpioPin led = {GPIOA, GPIO_PIN_8};
     // TODO open record
-    GpioPin* led_record = &led;
+    GpioPin* led_record = (GpioPin*)&led_gpio[1];
 
     // configure pin
     gpio_init(led_record, GpioModeOutputOpenDrain);
