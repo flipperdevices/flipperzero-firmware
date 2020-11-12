@@ -16,10 +16,7 @@ static void button_handler(const void* value, void* _ctx) {
 }
 
 void application_vibro(void* p) {
-    Ctx ctx = {
-        .led = (GpioPin*)&led_gpio[1],
-        .vibro = (GpioPin*)&vibro_gpio
-    };
+    Ctx ctx = {.led = (GpioPin*)&led_gpio[1], .vibro = (GpioPin*)&vibro_gpio};
 
     gpio_init(ctx.led, GpioModeOutputOpenDrain);
     gpio_init(ctx.vibro, GpioModeOutputPushPull);
