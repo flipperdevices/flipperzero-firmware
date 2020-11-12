@@ -37,9 +37,8 @@ void setup_freq(CC1101* cc1101, const FreqConfig* config) {
     cc1101->SpiWriteReg(CC1101_AGCCTRL0, 0xB0); // max AGC WAIT_TIME; 0 filter_length
     cc1101->SetMod(GFSK); // set to GFSK for fast rssi measurement | +8 is dcfilter off
 
-    uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC/65536);
-    cc1101->SetFreq(
-        (freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg) & 0xFF);
+    uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC / 65536);
+    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg)&0xFF);
     cc1101->SetChannel(config->channel);
 
     /*
@@ -78,9 +77,8 @@ void tx(CC1101* cc1101, const FreqConfig* config) {
     cc1101->SpiWriteReg(CC1101_AGCCTRL0, 0x91); //back to recommended config
     */
 
-    uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC/65536);
-    cc1101->SetFreq(
-        (freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg) & 0xFF);
+    uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC / 65536);
+    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg)&0xFF);
     cc1101->SetChannel(config->channel);
 
     cc1101->SetTransmit();
