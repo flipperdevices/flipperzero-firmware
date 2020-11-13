@@ -201,7 +201,7 @@ endif
 BUILD_SD_TEST ?= 0
 ifeq ($(BUILD_SD_TEST), 1)
 CFLAGS		+= -DBUILD_SD_TEST
-C_SOURCES	+= $(wildcard $(APP_DIR)/sd-card-test/*.cpp)
+CPP_SOURCES	+= $(wildcard $(APP_DIR)/sd-card-test/*.cpp)
 APP_INPUT = 1
 APP_GUI = 1
 endif
