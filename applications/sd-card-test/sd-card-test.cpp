@@ -57,6 +57,7 @@ public:
     void wait_for_button(Input input_button);
     bool ask(Input input_button_cancel, Input input_button_ok);
     void blink_red();
+    void set_red();
     void blink_green();
 
     // "tests"
@@ -691,6 +692,11 @@ void SdTest::blink_red() {
     gpio_write(red_led_record, 1);
 }
 
+void SdTest::set_red() 
+{
+    gpio_write(red_led_record, 0);
+}
+
 void SdTest::blink_green() {
     gpio_write(green_led_record, 0);
     delay(50);
@@ -770,7 +776,7 @@ const char* SdTest::fatfs_error_desc(FRESULT res) {
 // set text, but with infinite loop
 template <class T> void SdTest::set_error(std::initializer_list<T> list) {
     set_text(list);
-    blink_red();
+    set_red();
     wait_for_button(InputBack);
     exit();
 }
