@@ -10,14 +10,12 @@
 #include <string.h>
 
 #define DEFAULT_STACK_SIZE 2048 // Stack size in bytes
-#define MAX_TASK_COUNT 10
+#define MAX_TASK_COUNT 12
 #define INVALID_TASK_ID UINT16_MAX
 
 static StaticTask_t task_info_buffer[MAX_TASK_COUNT];
 static StackType_t stack_buffer[MAX_TASK_COUNT][DEFAULT_STACK_SIZE / 4];
 static FuriApp task_buffer[MAX_TASK_COUNT];
-
-static size_t current_buffer_idx = 0;
 
 uint16_t furiac_get_task_id_by_name(const char* app_name) {
     for(size_t i = 0; i < MAX_TASK_RECORDS; i++) {
@@ -63,13 +61,18 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
     printf("[FURIAC] start %s\n", name);
 #endif
 
-    // TODO check first free item (.handler == NULL) and use it
+    size_t current_buffer_idx = MAX_TASK_COUNT;
+
+    for(size_t i = 0; i < MAX_TASK_COUNT; i++) {
+        if(task_buffer[i].handler == NULL) {
+            current_buffer_idx = i;
+            break;
+        }
+    }
 
     if(current_buffer_idx >= MAX_TASK_COUNT) {
-// max task count exceed
-#ifdef FURI_DEBUG
-        printf("[FURIAC] max task count exceed\n");
-#endif
+        // max task count exceed
+        printf("[FURIAC] (%s) max task count exceed\n", name);
         return NULL;
     }
 
@@ -93,9 +96,7 @@ FuriApp* furiac_start(FlipperApplication app, const char* name, void* param) {
     task_buffer[current_buffer_idx].records_count = 0;
     task_buffer[current_buffer_idx].name = name;
 
-    current_buffer_idx++;
-
-    return &task_buffer[current_buffer_idx - 1];
+    return &task_buffer[current_buffer_idx];
 }
 
 bool furiac_kill(FuriApp* app) {
@@ -166,7 +167,7 @@ void furiac_switch(FlipperApplication app, char* name, void* param) {
         next->prev_name = current_task->name;
 
         // kill itself
-        vTaskDelete(NULL);
+        furiac_exit(NULL);
     }
 }
 
