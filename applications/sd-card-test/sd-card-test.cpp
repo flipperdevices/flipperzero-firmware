@@ -305,7 +305,6 @@ void SdTest::write_benchmark() {
     const uint32_t b1_size = 1;
     const uint32_t b8_size = 8;
     const uint32_t b32_size = 32;
-    const uint32_t b128_size = 128;
     const uint32_t b256_size = 256;
     const uint32_t b4096_size = 4096;
 
@@ -419,7 +418,6 @@ void SdTest::read_benchmark() {
     const uint32_t b1_size = 1;
     const uint32_t b8_size = 8;
     const uint32_t b32_size = 32;
-    const uint32_t b128_size = 128;
     const uint32_t b256_size = 256;
     const uint32_t b4096_size = 4096;
 
@@ -650,7 +648,7 @@ void SdTest::wait_for_button(Input input_button) {
     while(1) {
         osStatus_t result = osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
 
-        if(event.type == SdTestEvent::EventTypeKey) {
+        if(result == osOK && event.type == SdTestEvent::EventTypeKey) {
             if(event.value.input.state == true) {
                 if(event.value.input.input == InputBack) {
                     exit();
@@ -676,7 +674,7 @@ bool SdTest::ask(Input input_button_cancel, Input input_button_ok) {
     while(1) {
         osStatus_t result = osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
 
-        if(event.type == SdTestEvent::EventTypeKey) {
+        if(result == osOK && event.type == SdTestEvent::EventTypeKey) {
             if(event.value.input.state == true) {
                 if(event.value.input.input == InputBack) {
                     exit();
@@ -834,5 +832,4 @@ void SdTest::render(CanvasApi* canvas) {
 extern "C" void sd_card_test(void* p) {
     SdTest* app = new SdTest();
     app->run();
-    delete app;
 }
