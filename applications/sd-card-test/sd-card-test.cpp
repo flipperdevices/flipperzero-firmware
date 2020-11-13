@@ -2,6 +2,11 @@
 #include "fatfs/ff.h"
 #include "stm32_adafruit_sd.h"
 
+void print_stack_size() {
+    uint32_t stack_space_left = osThreadGetStackSpace(osThreadGetId());
+    printf("stack left: %lu\n", stack_space_left);
+}
+
 // event enumeration type
 typedef uint8_t event_t;
 
@@ -44,6 +49,8 @@ public:
     GpioPin* green_led_record;
     FATFS sd_fat_fs;
     char sd_path[6];
+    const uint32_t benchmark_data_size = 4096;
+    uint8_t* benchmark_data;
 
     // funcs
     void run();
@@ -59,8 +66,17 @@ public:
     void detect_sd_card();
     void show_warning();
     void init_sd_card();
+    bool is_sd_card_formatted();
     void mount_sd_card();
+    void format_sd_card();
     void get_sd_card_info();
+
+    void prepare_benchmark_data();
+    void write_benchmark();
+    uint32_t write_benchmark_internal(const uint32_t test_size, const uint32_t test_count);
+
+    void read_benchmark();
+    void hash_benchmark();
 };
 
 // start app
@@ -77,29 +93,52 @@ void SdTest::run() {
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
     gpio_init(green_led_record, GpioModeOutputOpenDrain);
 
-    detect_sd_card();
+    /*detect_sd_card();
     show_warning();
     init_sd_card();
+    if(!is_sd_card_formatted()) {
+        format_sd_card();
+    }
     mount_sd_card();
-    get_sd_card_info();
-    set_text({"123", "456"});
-    while(1) {
-    };
+    get_sd_card_info();*/
+
+    init_sd_card();
+    mount_sd_card();
+    prepare_benchmark_data();
+    //write_benchmark();
+    read_benchmark();
+
+    set_text({
+        "test complete",
+        "",
+        "",
+        "",
+        "",
+        "press BACK to exit",
+    });
+    wait_for_button(InputBack);
+    exit();
 }
 
 void SdTest::detect_sd_card() {
     const uint8_t str_buffer_size = 40;
+    const uint8_t dots_animation_size = 4;
     char str_buffer[str_buffer_size];
-    const char dots[4][4] = {"", ".", "..", "..."};
+    const char dots[dots_animation_size][4] = {"", ".", "..", "..."};
     uint8_t i = 0;
 
     // detect sd card pin
     while(!hal_gpio_read_sd_detect()) {
         delay(100);
+
         snprintf(str_buffer, str_buffer_size, "Waiting%s", dots[i]);
-        set_text({(const char*)str_buffer, "Please insert sd card"});
-        i++;
-        if(i >= 4) i = 0;
+        set_text({static_cast<const char*>(str_buffer), "Please insert sd card"});
+
+        if(i < (dots_animation_size - 1)) {
+            i++;
+        } else {
+            i = 0;
+        }
     }
 }
 
@@ -107,8 +146,8 @@ void SdTest::show_warning() {
     set_text(
         {"!!Warning!!",
          "during the tests",
-         "card will be formatted",
-         "",
+         "card may be formatted",
+         "or data on card may be lost",
          "",
          "press UP DOWN OK to continue"});
 
@@ -126,36 +165,46 @@ void SdTest::init_sd_card() {
     }
 }
 
-void SdTest::mount_sd_card() {
+bool SdTest::is_sd_card_formatted() {
     FRESULT result;
-    BYTE work[_MAX_SS * 4];
-
-    result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work, _MAX_SS);
+    set_text({"checking if card needs to be formatted"});
 
     result = f_mount(&sd_fat_fs, sd_path, 1);
+    if(result == FR_NO_FILESYSTEM) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
+void SdTest::mount_sd_card() {
+    FRESULT result;
+    set_text({"mounting sdcard"});
+
+    result = f_mount(&sd_fat_fs, sd_path, 1);
     if(result) {
-        if(result == FR_NO_FILESYSTEM) {
-            // we get sd card without volume
-            set_text(
-                {"!!Warning!!",
-                 "no filesystem on card",
-                 "card will be formatted",
-                 "",
-                 "               press OK",
-                 "             to continue"});
-            wait_for_button(InputOk);
+        set_error({"SD card mount error", fatfs_error_desc(result)});
+    }
+}
 
-            result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work, _MAX_SS);
+void SdTest::format_sd_card() {
+    FRESULT result;
+    BYTE work[_MAX_SS * 4];
+    set_text({"formatting sdcard"});
 
-        } else {
-            set_error({"SD card mount error", fatfs_error_desc(result)});
-        }
+    result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work, _MAX_SS);
+    if(result) {
+        set_error({"SD card format error", fatfs_error_desc(result)});
+    }
+
+    result = f_setlabel("Flipper SD");
+    if(result) {
+        set_error({"SD card set label error", fatfs_error_desc(result)});
     }
 }
 
 void SdTest::get_sd_card_info() {
-    const uint8_t str_buffer_size = 40;
+    const uint8_t str_buffer_size = 26;
     char str_buffer[4][str_buffer_size];
     char volume_label[128];
     DWORD serial_num;
@@ -171,12 +220,12 @@ void SdTest::get_sd_card_info() {
     snprintf(str_buffer[1], str_buffer_size, "S/N: %lu", serial_num);
 
     set_text(
-        {(const char*)str_buffer[0],
-         (const char*)str_buffer[1],
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
          "",
          "",
-         "             press OK",
-         "             to continue"});
+         "",
+         "press OK to continue"});
 
     wait_for_button(InputOk);
 
@@ -193,14 +242,156 @@ void SdTest::get_sd_card_info() {
     snprintf(str_buffer[3], str_buffer_size, "%lu KB free", free_sectors / 1024 * fs->ssize);
 
     set_text(
-        {(const char*)str_buffer[0],
-         (const char*)str_buffer[1],
-         (const char*)str_buffer[2],
-         (const char*)str_buffer[3],
-         "             press OK",
-         "             to continue"});
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         "",
+         "press OK to continue"});
 
     wait_for_button(InputOk);
+}
+
+void SdTest::prepare_benchmark_data() {
+    set_text({"preparing benchmark data"});
+    benchmark_data = static_cast<uint8_t*>(malloc(benchmark_data_size));
+
+    if(benchmark_data == NULL) {
+        set_error({"cannot allocate buffer", "for benchmark data"});
+    }
+
+    for(size_t i = 0; i < benchmark_data_size; i++) {
+        benchmark_data[i] = static_cast<uint8_t>(i);
+    }
+
+    set_text({"benchmark data prepared"});
+}
+
+void SdTest::write_benchmark() {
+    const uint32_t b1_size = 1;
+    const uint32_t b8_size = 8;
+    const uint32_t b32_size = 32;
+    const uint32_t b128_size = 128;
+    const uint32_t b256_size = 256;
+    const uint32_t b4096_size = 4096;
+
+    const uint32_t benchmark_data_size = 16384 * 4;
+
+    uint32_t benchmark_bps = 0;
+
+    const uint8_t str_buffer_size = 26;
+    char str_buffer[5][str_buffer_size] = {"", "", "", "", ""};
+
+    set_text({"write speed test"});
+    delay(100);
+
+    // 1b test
+    benchmark_bps = write_benchmark_internal(b1_size, benchmark_data_size / b1_size);
+    snprintf(str_buffer[0], str_buffer_size, "1-byte: %lu bps", benchmark_bps);
+    set_text(
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         static_cast<const char*>(str_buffer[4])});
+    delay(100);
+
+    // 8b test
+    benchmark_bps = write_benchmark_internal(b8_size, benchmark_data_size / b8_size);
+    snprintf(str_buffer[1], str_buffer_size, "8-byte: %lu bps", benchmark_bps);
+    set_text(
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         static_cast<const char*>(str_buffer[4])});
+    delay(100);
+
+    // 32b test
+    benchmark_bps = write_benchmark_internal(b32_size, benchmark_data_size / b32_size);
+    snprintf(str_buffer[2], str_buffer_size, "32-byte: %lu bps", benchmark_bps);
+    set_text(
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         static_cast<const char*>(str_buffer[4])});
+    delay(100);
+
+    // 256b test
+    benchmark_bps = write_benchmark_internal(b256_size, benchmark_data_size / b256_size);
+    snprintf(str_buffer[3], str_buffer_size, "256-byte: %lu bps", benchmark_bps);
+    set_text(
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         static_cast<const char*>(str_buffer[4])});
+    delay(100);
+
+    // 4096b test
+    benchmark_bps = write_benchmark_internal(b4096_size, benchmark_data_size / b4096_size);
+    snprintf(str_buffer[4], str_buffer_size, "4096-byte: %lu bps", benchmark_bps);
+    set_text(
+        {static_cast<const char*>(str_buffer[0]),
+         static_cast<const char*>(str_buffer[1]),
+         static_cast<const char*>(str_buffer[2]),
+         static_cast<const char*>(str_buffer[3]),
+         static_cast<const char*>(str_buffer[4]),
+         "press OK to continue"});
+
+    wait_for_button(InputOk);
+}
+
+uint32_t SdTest::write_benchmark_internal(const uint32_t test_size, const uint32_t test_count) {
+    FIL file;
+
+    uint32_t start_tick, stop_tick, benchmark_bps, benchmark_time, bytes_written;
+    FRESULT result;
+    const uint8_t str_buffer_size = 26;
+    char str_buffer[str_buffer_size];
+
+    result = f_open(&file, "write.test", FA_WRITE | FA_OPEN_ALWAYS);
+    if(result) {
+        snprintf(str_buffer, str_buffer_size, "in %lu-byte test", test_size);
+        set_error({"cannot open file ", static_cast<const char*>(str_buffer)});
+    }
+
+    start_tick = osKernelGetTickCount();
+    for(size_t i = 0; i < test_count; i++) {
+        result =
+            f_write(&file, benchmark_data, test_size, reinterpret_cast<UINT*>(&bytes_written));
+        if(bytes_written != test_size || result) {
+            snprintf(str_buffer, str_buffer_size, "in %lu-byte test", test_size);
+            set_error({"cannot write to file ", static_cast<const char*>(str_buffer)});
+        }
+    }
+    stop_tick = osKernelGetTickCount();
+
+    result = f_close(&file);
+    if(result) {
+        snprintf(str_buffer, str_buffer_size, "in %lu-byte test", test_size);
+        set_error({"cannot close file ", static_cast<const char*>(str_buffer)});
+    }
+
+    benchmark_time = stop_tick - start_tick;
+    benchmark_bps = (test_count * test_size) * osKernelGetTickFreq() / benchmark_time;
+
+    return benchmark_bps;
+}
+
+void SdTest::read_benchmark() {
+    const uint32_t benchmark_data_size = 16384 * 4;
+
+    uint32_t benchmark_bps = 0;
+
+    const uint8_t str_buffer_size = 26;
+    char str_buffer[5][str_buffer_size] = {"", "", "", "", ""};
+
+    FRESULT result;
+}
+
+void SdTest::hash_benchmark() {
 }
 
 void SdTest::wait_for_button(Input input_button) {
@@ -211,11 +402,15 @@ void SdTest::wait_for_button(Input input_button) {
 
         if(event.type == SdTestEvent::EventTypeKey) {
             if(event.value.input.state == true) {
-                if(event.value.input.input == input_button) {
-                    blink_green();
-                    break;
+                if(event.value.input.input == InputBack) {
+                    exit();
                 } else {
-                    blink_red();
+                    if(event.value.input.input == input_button) {
+                        blink_green();
+                        break;
+                    } else {
+                        blink_red();
+                    }
                 }
             }
         }
@@ -308,8 +503,8 @@ const char* SdTest::fatfs_error_desc(FRESULT res) {
 // set text, but with infinite loop
 template <class T> void SdTest::set_error(std::initializer_list<T> list) {
     set_text(list);
-    while(1) {
-    };
+    wait_for_button(InputBack);
+    exit();
 }
 
 // set text, sort of variadic function
@@ -347,6 +542,8 @@ void SdTest::render(CanvasApi* canvas) {
 
 // app enter function
 extern "C" void sd_card_test(void* p) {
+    print_stack_size();
     SdTest* app = new SdTest();
+    print_stack_size();
     app->run();
 }
