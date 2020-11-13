@@ -47,7 +47,7 @@ public:
 
     // funcs
     void run();
-    void render(CanvasApi* canvas, SdTestState* state);
+    void render(CanvasApi* canvas);
     template <class T> void set_text(std::initializer_list<T> list);
     template <class T> void set_error(std::initializer_list<T> list);
     const char* fatfs_error_desc(FRESULT res);
@@ -88,11 +88,19 @@ void SdTest::run() {
 }
 
 void SdTest::detect_sd_card() {
-    set_text({"Waiting", "insert sd card"});
+    const uint8_t str_buffer_size = 40;
+    char str_buffer[str_buffer_size];
+    const char dots[4][4] = {"", ".", "..", "..."};
+    uint8_t i = 0;
+
     // detect sd card pin
-    /*while(!hal_gpio_read_sd_detect()) {
+    while(!hal_gpio_read_sd_detect()) {
         delay(100);
-    }*/
+        snprintf(str_buffer, str_buffer_size, "Waiting%s", dots[i]);
+        set_text({(const char*)str_buffer, "Please insert sd card"});
+        i++;
+        if(i >= 4) i = 0;
+    }
 }
 
 void SdTest::show_warning() {
@@ -101,12 +109,12 @@ void SdTest::show_warning() {
          "during the tests",
          "card will be formatted",
          "",
-         "    press UP DOWN OK",
-         "             to continue"});
+         "",
+         "press UP DOWN OK to continue"});
 
-    //wait_for_button(InputUp);
-    //wait_for_button(InputDown);
-    //wait_for_button(InputOk);
+    wait_for_button(InputUp);
+    wait_for_button(InputDown);
+    wait_for_button(InputOk);
 }
 
 void SdTest::init_sd_card() {
@@ -147,7 +155,7 @@ void SdTest::mount_sd_card() {
 }
 
 void SdTest::get_sd_card_info() {
-    const uint8_t str_buffer_size = 26;
+    const uint8_t str_buffer_size = 40;
     char str_buffer[4][str_buffer_size];
     char volume_label[128];
     DWORD serial_num;
@@ -329,11 +337,11 @@ template <class T> void SdTest::set_text(std::initializer_list<T> list) {
 }
 
 // render app
-void SdTest::render(CanvasApi* canvas, SdTestState* state) {
+void SdTest::render(CanvasApi* canvas) {
     canvas->set_color(canvas, ColorBlack);
     canvas->set_font(canvas, FontSecondary);
-    for(uint8_t i = 0; i < state->lines_count; i++) {
-        canvas->draw_str(canvas, 0, (i + 1) * 10, state->line[i]);
+    for(uint8_t i = 0; i < state.lines_count; i++) {
+        canvas->draw_str(canvas, 0, (i + 1) * 10, state.line[i]);
     }
 }
 
