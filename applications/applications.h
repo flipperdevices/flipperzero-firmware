@@ -33,7 +33,7 @@ void nfc_task(void* p);
 void irukagotchi_task(void* p);
 void power_task(void* p);
 void sd_card_test(void* p);
-void simple_app_test(void* p);
+void application_vibro(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -41,7 +41,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_EXAMPLE_BLINK
-    {.app = application_blink, .name = "blink", .libs = {0}},
+    {.app = application_blink, .name = "blink", .libs = {1, FURI_LIB{"input_task"}}},
 #endif
 
 #ifdef APP_INPUT
@@ -118,7 +118,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 const FlipperStartupApp FLIPPER_APPS[] = {
 #ifdef BUILD_EXAMPLE_BLINK
-    {.app = application_blink, .name = "blink", .libs = {0}},
+    {.app = application_blink, .name = "blink", .libs = {1, FURI_LIB{"input_task"}}},
 #endif
 
 #ifdef BUILD_EXAMPLE_UART_WRITE
@@ -147,5 +147,9 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_SD_TEST
     {.app = sd_card_test, .name = "sd_card_test", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
+#ifdef BUILD_VIBRO_DEMO
+    {.app = application_vibro, .name = "application_vibro", .libs = {1, FURI_LIB{"input_task"}}},
 #endif
 };

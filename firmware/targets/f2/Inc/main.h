@@ -146,11 +146,14 @@ extern TIM_HandleTypeDef htim15;
 #define LFRFID_TIM htim15
 #define LFRFID_CH TIM_CHANNEL_1
 
-#define IRDA_TIM htim2
-#define IRDA_CH TIM_CHANNEL_4
+#define IRDA_TX_TIM htim2
+#define IRDA_TX_CH TIM_CHANNEL_3
 
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
+
+#define VIBRO_Pin GPIO_PIN_6
+#define VIBRO_GPIO_Port GPIOC
 
 /* USER CODE END Private defines */
 
