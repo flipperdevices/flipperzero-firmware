@@ -71,6 +71,7 @@ public:
     void get_sd_card_info();
 
     void prepare_benchmark_data();
+    void free_benchmark_data();
     void write_benchmark();
     uint32_t write_benchmark_internal(const uint32_t size, const uint32_t tcount);
 
@@ -108,6 +109,7 @@ void SdTest::run() {
     write_benchmark();
     read_benchmark();
     hash_benchmark();
+    free_benchmark_data();
 
     set_text({
         "test complete",
@@ -204,6 +206,7 @@ void SdTest::mount_sd_card() {
     blink_green();
 }
 
+// format sd card
 void SdTest::format_sd_card() {
     FRESULT result;
     BYTE work[_MAX_SS * 4];
@@ -222,6 +225,8 @@ void SdTest::format_sd_card() {
     blink_green();
 }
 
+// get info about sd card, label, sn
+// sector, cluster, total and free size
 void SdTest::get_sd_card_info() {
     const uint8_t str_buffer_size = 26;
     char str_buffer[4][str_buffer_size];
@@ -275,6 +280,7 @@ void SdTest::get_sd_card_info() {
     wait_for_button(InputOk);
 }
 
+// prepare benchmark data (allocate data in ram)
 void SdTest::prepare_benchmark_data() {
     set_text({"preparing benchmark data"});
     benchmark_data = static_cast<uint8_t*>(malloc(benchmark_data_size));
@@ -290,6 +296,11 @@ void SdTest::prepare_benchmark_data() {
     set_text({"benchmark data prepared"});
 }
 
+void SdTest::free_benchmark_data() {
+    free(benchmark_data);
+}
+
+// write speed test
 void SdTest::write_benchmark() {
     const uint32_t b1_size = 1;
     const uint32_t b8_size = 8;
@@ -386,6 +397,7 @@ uint32_t SdTest::write_benchmark_internal(const uint32_t size, const uint32_t co
     return benchmark_bps;
 }
 
+// read speed test
 void SdTest::read_benchmark() {
     const uint32_t benchmark_data_size = 16384 * 8;
     uint32_t bytes_written;
@@ -631,6 +643,7 @@ void SdTest::hash_benchmark() {
     wait_for_button(InputOk);
 }
 
+// wait for button press
 void SdTest::wait_for_button(Input input_button) {
     SdTestEvent event;
     osMessageQueueReset(event_queue);
@@ -655,6 +668,7 @@ void SdTest::wait_for_button(Input input_button) {
     osMessageQueueReset(event_queue);
 }
 
+// ask user to proceed or cancel
 bool SdTest::ask(Input input_button_cancel, Input input_button_ok) {
     bool return_result;
     SdTestEvent event;
@@ -686,17 +700,19 @@ bool SdTest::ask(Input input_button_cancel, Input input_button_ok) {
     return return_result;
 }
 
+// blink red led
 void SdTest::blink_red() {
     gpio_write(red_led_record, 0);
     delay(50);
     gpio_write(red_led_record, 1);
 }
 
-void SdTest::set_red() 
-{
+// light up red led
+void SdTest::set_red() {
     gpio_write(red_led_record, 0);
 }
 
+// blink green led
 void SdTest::blink_green() {
     gpio_write(green_led_record, 0);
     delay(50);
@@ -818,4 +834,5 @@ void SdTest::render(CanvasApi* canvas) {
 extern "C" void sd_card_test(void* p) {
     SdTest* app = new SdTest();
     app->run();
+    delete app;
 }
