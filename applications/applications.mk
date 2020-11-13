@@ -20,6 +20,7 @@ BUILD_CC1101 = 1
 BUILD_LF_RFID = 1
 BUILD_SPEAKER_DEMO = 1
 BUILD_VIBRO_DEMO = 1
+BUILD_TEST = 1
 endif
 
 APP_NFC ?= 0
@@ -57,9 +58,14 @@ C_SOURCES	+= $(wildcard $(APP_DIR)/menu/*.c)
 C_SOURCES	+= $(wildcard $(APP_DIR)/app-loader/*.c)
 endif
 
-APP_TEST	?= 0
+APP_TEST ?= 0
 ifeq ($(APP_TEST), 1)
-CFLAGS		+= -DAPP_TEST
+CFLAGS += -DAPP_TEST
+BUILD_TEST = 1
+endif
+BUILD_TEST ?= 0
+ifeq ($(BUILD_TEST), 1)
+CFLAGS		+= -DBUILD_TEST
 C_SOURCES	+= $(APP_DIR)/tests/furiac_test.c
 C_SOURCES	+= $(APP_DIR)/tests/furi_record_test.c
 C_SOURCES	+= $(APP_DIR)/tests/test_index.c

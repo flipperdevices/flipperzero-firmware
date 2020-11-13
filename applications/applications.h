@@ -2,7 +2,7 @@
 
 #include "flipper.h"
 
-#ifdef APP_TEST
+#ifdef BUILD_TEST
 void flipper_test_app(void* p);
 #endif
 
@@ -142,5 +142,9 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_VIBRO_DEMO
     {.app = application_vibro, .name = "application_vibro", .libs = {1, FURI_LIB{"input_task"}}},
+#endif
+
+#ifdef BUILD_TEST
+    {.app = flipper_test_app, .name = "test app", .libs = {0}},
 #endif
 };
