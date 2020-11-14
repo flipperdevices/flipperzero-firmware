@@ -34,6 +34,7 @@ void irukagotchi_task(void* p);
 void power_task(void* p);
 void sd_card_test(void* p);
 void application_vibro(void* p);
+void app_gpio_test(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -114,6 +115,14 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_SD_TEST
     {.app = sd_card_test, .name = "sd_card_test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
+
+
+#ifdef APP_GPIO_DEMO
+    {
+        .app = app_gpio_test,
+        .name = "gpio test",
+        .libs = {1, FURI_LIB{"gui_task"}},
+#endif
 };
 
 const FlipperStartupApp FLIPPER_APPS[] = {
@@ -151,5 +160,9 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_VIBRO_DEMO
     {.app = application_vibro, .name = "application_vibro", .libs = {1, FURI_LIB{"input_task"}}},
+#endif
+
+#ifdef BUILD_GPIO_DEMO
+    {.app = app_gpio_test, .name = "gpio test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 };
