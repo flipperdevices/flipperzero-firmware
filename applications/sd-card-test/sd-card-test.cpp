@@ -209,11 +209,19 @@ void SdTest::mount_sd_card() {
 // format sd card
 void SdTest::format_sd_card() {
     FRESULT result;
-    BYTE work[_MAX_SS * 4];
+    BYTE* work_area;
+
     set_text({"formatting sdcard", "procedure can be lengthy", "please wait"});
     delay(100);
 
-    result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work, _MAX_SS);
+    work_area = static_cast<BYTE*>(malloc(_MAX_SS));
+    if(work_area == NULL){
+        set_error({"SD card format error", "cannot allocate memory"});
+    }
+
+    result = f_mkfs(sd_path, (FM_FAT | FM_FAT32 | FM_EXFAT), 0, work_area, _MAX_SS);
+    free(work_area);
+
     if(result) {
         set_error({"SD card format error", fatfs_error_desc(result)});
     }
