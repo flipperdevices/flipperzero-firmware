@@ -2,13 +2,13 @@
 #include <flipper_v2.h>
 
 struct Ring {
-    uint8_t * data;
+    uint8_t* data;
     size_t size;
     volatile size_t read_ptr;
     volatile size_t write_ptr;
 };
 
-Ring * ring_alloc(size_t size) {
+Ring* ring_alloc(size_t size) {
     Ring* ring = furi_alloc(sizeof(Ring));
     ring->size = size + 1;
     ring->data = furi_alloc(ring->size);
@@ -22,46 +22,46 @@ void ring_free(Ring* ring) {
     free(ring);
 }
 
-size_t ring_size(Ring *ring) {
+size_t ring_size(Ring* ring) {
     furi_assert(ring);
     return ring->size - 1;
 }
 
 inline static size_t ring_read_calculate(Ring* ring, size_t r, size_t w) {
-    if (w >= r) {
+    if(w >= r) {
         return w - r;
     } else {
         return ring->size - (r - w);
     }
 }
 
-size_t ring_read_space(Ring *ring) {
+size_t ring_read_space(Ring* ring) {
     furi_assert(ring);
 
     const size_t r = ring->read_ptr;
     const size_t w = ring->write_ptr;
 
-    return ring_read_calculate(ring, r,w);
+    return ring_read_calculate(ring, r, w);
 }
 
 inline static size_t ring_write_calculate(Ring* ring, size_t r, size_t w) {
-    if (r > w) {
+    if(r > w) {
         return r - w - 1;
     } else {
         return ring->size - (r - w);
     }
 }
 
-size_t ring_write_space(Ring *ring) {
+size_t ring_write_space(Ring* ring) {
     furi_assert(ring);
 
     const size_t r = ring->read_ptr;
     const size_t w = ring->write_ptr;
-    
+
     return ring_write_calculate(ring, r, w);
 }
 
-size_t ring_push(Ring *ring, uint8_t* data, size_t size) {
+size_t ring_push(Ring* ring, const uint8_t* data, size_t size) {
     furi_assert(ring);
     furi_assert(data);
 
@@ -69,13 +69,13 @@ size_t ring_push(Ring *ring, uint8_t* data, size_t size) {
     size_t w = ring->write_ptr;
     const size_t write_space = ring_write_calculate(ring, r, w);
 
-    if (write_space == 0) return 0;
+    if(write_space == 0) return 0;
 
     const size_t to_write = size > write_space ? write_space : size;
     size_t end, first, second;
 
     end = w + to_write;
-    if (end > ring->size) {
+    if(end > ring->size) {
         first = ring->size - w;
         second = end % ring->size;
     } else {
@@ -86,7 +86,7 @@ size_t ring_push(Ring *ring, uint8_t* data, size_t size) {
     memcpy(ring->data + w, data, first);
     w = (w + first) % ring->size;
 
-    if (second) {
+    if(second) {
         memcpy(ring->data + w, data + first, second);
         w = (w + second) % ring->size;
     }
@@ -96,7 +96,7 @@ size_t ring_push(Ring *ring, uint8_t* data, size_t size) {
     return to_write;
 }
 
-size_t ring_pull(Ring *ring, uint8_t* data, size_t size) {
+size_t ring_pull(Ring* ring, uint8_t* data, size_t size) {
     furi_assert(ring);
     furi_assert(data);
 
@@ -104,13 +104,13 @@ size_t ring_pull(Ring *ring, uint8_t* data, size_t size) {
     const size_t w = ring->write_ptr;
     const size_t read_space = ring_read_calculate(ring, r, w);
 
-    if (read_space == 0) return 0;
+    if(read_space == 0) return 0;
 
     size_t to_read = size > read_space ? read_space : size;
     size_t end, first, second;
 
     end = r + to_read;
-    if (end > ring->size) {
+    if(end > ring->size) {
         first = ring->size - r;
         second = end % ring->size;
     } else {
@@ -121,7 +121,7 @@ size_t ring_pull(Ring *ring, uint8_t* data, size_t size) {
     memcpy(data, ring->data + r, first);
     r = (r + first) % ring->size;
 
-    if (second) {
+    if(second) {
         memcpy(data + first, ring->data + r, second);
         r = (r + second) % ring->size;
     }
@@ -131,7 +131,7 @@ size_t ring_pull(Ring *ring, uint8_t* data, size_t size) {
     return to_read;
 }
 
-void ring_clear(Ring *ring) {
+void ring_clear(Ring* ring) {
     furi_assert(ring);
     ring->read_ptr = 0;
     ring->write_ptr = 0;

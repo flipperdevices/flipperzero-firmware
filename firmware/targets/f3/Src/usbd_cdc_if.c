@@ -53,6 +53,7 @@
 
 extern void _api_hal_vcp_init();
 extern void _api_hal_vcp_deinit();
+extern void _api_hal_vcp_control_line(uint8_t state);
 extern void _api_hal_vcp_rx_callback(char* buffer, size_t size);
 extern void _api_hal_vcp_tx_complete(size_t size);
 
@@ -213,6 +214,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
       /*******************************************************************************/
   } else if (cmd == CDC_GET_LINE_CODING) {
   } else if (cmd == CDC_SET_CONTROL_LINE_STATE) {
+    _api_hal_vcp_control_line(((USBD_SetupReqTypedef*)pbuf)->wValue);
   } else if (cmd == CDC_SEND_BREAK) {
   } else {
   }
@@ -239,8 +241,8 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   _api_hal_vcp_rx_callback((char*)Buf, *Len);
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);
   /* USER CODE END 6 */
 }

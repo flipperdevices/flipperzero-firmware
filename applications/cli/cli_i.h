@@ -2,14 +2,16 @@
 
 #include "cli.h"
 
-#include <m-array.h>
 #include <m-string.h>
+#include <m-dict.h>
 
-#define CLI_LINE_SIZE_MAX 
+#define CLI_LINE_SIZE_MAX
 
-ARRAY_DEF(CliCommandArray, CliCommand*, M_PTR_OPLIST);
+DICT_DEF2(CliCommandDict, string_t, STRING_OPLIST, CliCallback, M_PTR_OPLIST)
 
 typedef enum {
+    CliSymbolAsciiSOH = 0x01,
+    CliSymbolAsciiEOT = 0x04,
     CliSymbolAsciiBell = 0x07,
     CliSymbolAsciiBackspace = 0x08,
     CliSymbolAsciiTab = 0x09,
@@ -20,16 +22,11 @@ typedef enum {
     CliSymbolAsciiDel = 0x7F,
 } CliSymbols;
 
-typedef enum {
-    CliStateEmpty,
-    CliStateSome,
-    CliStateExecuting
-} CliState;
+typedef enum { CliStateIdle, CliStateRunning } CliState;
 
 struct Cli {
-    CliCommandArray_t commands;
+    CliCommandDict_t commands;
     string_t line;
-    size_t caret;
     CliState state;
 };
 

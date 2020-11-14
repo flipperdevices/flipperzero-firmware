@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <string.h>
 
+/* Init VCP HAL
+ * Allocates ring buffer and initializes state
+ */
 void api_hal_vcp_init();
 
 /* Recieve data from VCP
