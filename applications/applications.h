@@ -116,14 +116,13 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = sd_card_test, .name = "sd_card_test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 
-
 #ifdef APP_GPIO_DEMO
     {
         .app = app_gpio_test,
         .name = "gpio test",
         .libs = {1, FURI_LIB{"gui_task"}},
 #endif
-};
+    };
 
 const FlipperStartupApp FLIPPER_APPS[] = {
 #ifdef BUILD_EXAMPLE_BLINK
