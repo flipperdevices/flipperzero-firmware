@@ -26,7 +26,7 @@ void cli_putc(char c) {
     api_hal_vcp_tx((uint8_t*)&c, 1);
 }
 
-void cli_print(char* str) {
+void cli_print(const char* str) {
     api_hal_vcp_tx((uint8_t*)str, strlen(str));
 }
 
