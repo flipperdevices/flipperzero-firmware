@@ -215,7 +215,7 @@ void SdTest::format_sd_card() {
     delay(100);
 
     work_area = static_cast<BYTE*>(malloc(_MAX_SS));
-    if(work_area == NULL){
+    if(work_area == NULL) {
         set_error({"SD card format error", "cannot allocate memory"});
     }
 
