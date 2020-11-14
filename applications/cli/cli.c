@@ -31,12 +31,10 @@ void cli_print(char* str) {
 }
 
 void cli_print_version() {
-    cli_print(
-        "Build date:" BUILD_DATE ". "
-        "Git Commit:" GIT_COMMIT ". "
-        "Git Branch:" GIT_BRANCH ". "
-        "Commit Number:" GIT_BRANCH_NUM "."
-    );
+    cli_print("Build date:" BUILD_DATE ". "
+              "Git Commit:" GIT_COMMIT ". "
+              "Git Branch:" GIT_BRANCH ". "
+              "Commit Number:" GIT_BRANCH_NUM ".");
 }
 
 void cli_motd() {
@@ -71,7 +69,7 @@ void cli_process_input(Cli* cli) {
         cli_putc(CliSymbolAsciiBell);
     } else if(c == CliSymbolAsciiBackspace || c == CliSymbolAsciiDel) {
         size_t s = string_size(cli->line);
-        if(s>0) {
+        if(s > 0) {
             s--;
             string_left(cli->line, s);
             cli_putc(CliSymbolAsciiBackspace);
@@ -123,4 +121,3 @@ void cli_task(void* p) {
         cli_process_input(cli);
     }
 }
-
