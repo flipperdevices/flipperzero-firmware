@@ -236,11 +236,14 @@ void SdTest::get_sd_card_info() {
     FATFS* fs;
     DWORD free_clusters, free_sectors, total_sectors;
 
+    // suppress "'%s' directive output may be truncated" warning about snprintf
+    int __attribute__((unused)) snprintf_count = 0;
+
     // get label and s/n
     result = f_getlabel(sd_path, volume_label, &serial_num);
     if(result) set_error({"f_getlabel error", fatfs_error_desc(result)});
 
-    snprintf(str_buffer[0], str_buffer_size, "Label: %s", volume_label);
+    snprintf_count = snprintf(str_buffer[0], str_buffer_size, "Label: %s", volume_label);
     snprintf(str_buffer[1], str_buffer_size, "S/N: %lu", serial_num);
 
     set_text(
