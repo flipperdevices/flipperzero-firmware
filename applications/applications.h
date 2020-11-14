@@ -112,9 +112,12 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_GPIO_DEMO
-    {.app = app_gpio_test, .name = "gpio test", .libs = {1, FURI_LIB{"gui_task"}},
+    {
+        .app = app_gpio_test,
+        .name = "gpio test",
+        .libs = {1, FURI_LIB{"gui_task"}},
 #endif
-};
+    };
 
 const FlipperStartupApp FLIPPER_APPS[] = {
 #ifdef BUILD_EXAMPLE_BLINK

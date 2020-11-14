@@ -221,7 +221,7 @@ endif
 BUILD_GPIO_DEMO ?= 0
 ifeq ($(BUILD_GPIO_DEMO), 1)
 CFLAGS		+= -DBUILD_GPIO_DEMO
-C_SOURCES	+= $(APP_DIR)/gpio-tester/*.c
+C_SOURCES	+= $(wildcard $(APP_DIR)/gpio-tester/*.c)
 endif
 
 # device drivers
