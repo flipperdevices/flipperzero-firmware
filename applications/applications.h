@@ -35,6 +35,7 @@ void power_task(void* p);
 void sd_card_test(void* p);
 void application_vibro(void* p);
 void app_gpio_test(void* p);
+void cli_task(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -85,6 +86,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_NFC
     {.app = nfc_task, .name = "nfc_task", .libs = {1, FURI_LIB{"menu_task"}}},
+#endif
+
+#ifdef APP_CLI
+    {.app = cli_task, .name = "cli_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
 #ifdef APP_TEST
