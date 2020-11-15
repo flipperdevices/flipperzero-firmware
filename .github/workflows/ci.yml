@@ -139,8 +139,7 @@ jobs:
   fullfirmware:
     name: Create latest full firmware
     needs: upload
-    # if: github.ref == 'refs/heads/master'
-    if: github.ref == 'refs/heads/refactoring-update'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Get bootloader
@@ -174,23 +173,15 @@ jobs:
   genpic:
     name: Generate pic
     needs: fullfirmware
-    # if: github.ref == 'refs/heads/master'
-    if: github.ref == 'refs/heads/refactoring-update'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          # ref: master 
-          ref: refactoring-update
+          ref: master 
           submodules: true      
-      # - name: Echo debug
-      #   run: echo ${{ github.ref }}
-      # - name: Get template and font
-      #   run: |
-      #     wget https://zhovner.com/tmp/latest-firmware-template.png
-      #     wget https://zhovner.com/tmp/Born2bSportyV2.ttf
       - name: Set test env
         run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
       - name: Test output NUMBER_OF_COMMITS
