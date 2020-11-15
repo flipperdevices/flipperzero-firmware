@@ -7,7 +7,12 @@
 
 #define CLI_LINE_SIZE_MAX
 
-DICT_DEF2(CliCommandDict, string_t, STRING_OPLIST, CliCallback, M_PTR_OPLIST)
+typedef struct {
+    CliCallback callback;
+    void* context;
+} CliCommand;
+
+DICT_DEF2(CliCommandDict, string_t, STRING_OPLIST, CliCommand, M_POD_OPLIST)
 
 typedef enum {
     CliSymbolAsciiSOH = 0x01,

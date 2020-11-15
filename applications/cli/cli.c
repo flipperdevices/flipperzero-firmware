@@ -50,6 +50,22 @@ void cli_prompt() {
     cli_print("\r\n>: ");
 }
 
+void cli_enter(Cli* cli) {
+    // Normalize input
+
+    // Search for command
+    CliCommand* command = CliCommandDict_get(cli->commands, cli->line);
+    if(command) {
+        cli_nl();
+        cli->state = CliStateRunning;
+        command->callback(NULL, command->context);
+        cli_reset_state(cli);
+        cli_prompt();
+    } else {
+        cli_putc(CliSymbolAsciiBell);
+    }
+}
+
 void cli_process_input(Cli* cli) {
     char c;
     size_t r = api_hal_vcp_rx((uint8_t*)&c, 1);
@@ -79,33 +95,37 @@ void cli_process_input(Cli* cli) {
             cli_putc(CliSymbolAsciiBell);
         }
     } else if(c == CliSymbolAsciiCR) {
-        CliCallback* command_pp = CliCommandDict_get(cli->commands, cli->line);
-        if(command_pp) {
-            cli_nl();
-            cli->state = CliStateRunning;
-            (*command_pp)(NULL);
-            cli_reset_state(cli);
-            cli_prompt();
-        } else {
-            cli_putc(CliSymbolAsciiBell);
-        }
+        cli_enter(cli);
     } else if(c >= 0x20 && c < 0x7F) {
         string_push_back(cli->line, c);
         cli_putc(c);
+    } else {
+        cli_putc(CliSymbolAsciiBell);
     }
 }
 
-void cli_add_command(Cli* cli, const char* name, CliCallback command) {
+void cli_add_command(Cli* cli, const char* name, CliCallback callback, void* context) {
     string_t name_str;
     string_init_set_str(name_str, name);
-    CliCommandDict_set_at(cli->commands, name_str, command);
+    CliCommand c;
+    c.callback = callback;
+    c.context = context;
+    CliCommandDict_set_at(cli->commands, name_str, c);
 }
 
-void cli_help(char* args) {
-    cli_print("Help: no help, sorry.");
+void cli_help(char* args, void* context) {
+    Cli* cli = context;
+    cli_print("Commands we have:");
+    CliCommandDict_it_t it;
+    for(CliCommandDict_it(it, cli->commands); !CliCommandDict_end_p(it); CliCommandDict_next(it)) {
+        CliCommandDict_itref_t *ref = CliCommandDict_ref(it);
+        cli_print(" ");
+        cli_print(string_get_cstr(ref->key));
+    };
 }
 
-void cli_version(char* args) {
+void cli_version(char* args, void* context) {
+    Cli* cli = context;
     cli_print_version();
 }
 
@@ -114,8 +134,8 @@ void cli_task(void* p) {
 
     furiac_ready();
 
-    cli_add_command(cli, "help", cli_help);
-    cli_add_command(cli, "version", cli_version);
+    cli_add_command(cli, "help", cli_help, cli);
+    cli_add_command(cli, "version", cli_version, cli);
 
     while(1) {
         cli_process_input(cli);
