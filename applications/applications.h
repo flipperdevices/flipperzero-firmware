@@ -42,6 +42,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = display_u8g2, .name = "display_u8g2", .libs = {0}},
 #endif
 
+#ifdef APP_CLI
+    {.app = cli_task, .name = "cli_task", .libs = {0}},
+#endif
+
 #ifdef APP_EXAMPLE_BLINK
     {.app = application_blink, .name = "blink", .libs = {1, FURI_LIB{"input_task"}}},
 #endif
@@ -69,7 +73,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_POWER
-    {.app = power_task, .name = "power_task", .libs = {1, FURI_LIB{"gui_task"}}},
+    {.app = power_task, .name = "power_task", .libs = {2, FURI_LIB{"cli_task", "gui_task"}}},
 #endif
 
 #ifdef APP_CC1101
@@ -86,10 +90,6 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_NFC
     {.app = nfc_task, .name = "nfc_task", .libs = {1, FURI_LIB{"menu_task"}}},
-#endif
-
-#ifdef APP_CLI
-    {.app = cli_task, .name = "cli_task", .libs = {1, FURI_LIB{"menu_task"}}},
 #endif
 
 #ifdef APP_TEST
