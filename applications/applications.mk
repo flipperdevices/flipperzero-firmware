@@ -246,6 +246,17 @@ CFLAGS		+= -DBUILD_GPIO_DEMO
 C_SOURCES	+= $(wildcard $(APP_DIR)/gpio-tester/*.c)
 endif
 
+APP_MUSIC_PLAYER ?= 0
+ifeq ($(APP_MUSIC_PLAYER), 1)
+CFLAGS		+= -DAPP_MUSIC_PLAYER
+BUILD_MUSIC_PLAYER = 1
+endif
+BUILD_MUSIC_PLAYER ?= 0
+ifeq ($(BUILD_MUSIC_PLAYER), 1)
+CFLAGS		+= -DBUILD_MUSIC_PLAYER
+C_SOURCES	+= $(wildcard $(APP_DIR)/music-player/*.c)
+endif
+
 # device drivers
 
 APP_GUI	?= 0
