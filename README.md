@@ -51,7 +51,10 @@ find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
 ```
 You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit `COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and ALL chips (you'll need ALL STM32Cube packages somewhere).
 
-Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`
+Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`.
+
+***Note**: Some devices in STM32H7 family has two different cores (Cortex-M7 and Cortex-M4).
+For those device the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
 
 CMSIS consists of three main components:
 
@@ -75,9 +78,8 @@ CMSIS creates following targets:
 
 So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
 
-***Note**: Some devices in STM32H7 family has two different cores (Cortex-M7 and Cortex-M4). 
-To specify core to build, all targets for H7 family also have suffix (::M7 or ::M4).
-For example, targets for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
+***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
+For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
 Also, there is special library `STM32::NoSys` which adds `--specs=nosys.specs` to compiler flags.
 
