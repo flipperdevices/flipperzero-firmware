@@ -68,7 +68,7 @@ void cli_backspace(Cli* cli) {
 void cli_enter(Cli* cli) {
     // Normalize input
     string_strim(cli->line);
-    if (string_size(cli->line) == 0) {
+    if(string_size(cli->line) == 0) {
         cli_prompt();
         return;
     }
@@ -77,7 +77,7 @@ void cli_enter(Cli* cli) {
     string_t command;
     string_init(command);
     size_t ws = string_search_char(cli->line, ' ');
-    if (ws == STRING_FAILURE) {
+    if(ws == STRING_FAILURE) {
         string_set(command, cli->line);
         string_clear(cli->line);
         string_init(cli->line);
