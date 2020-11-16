@@ -56,7 +56,6 @@ void _api_hal_vcp_control_line(uint8_t state) {
 }
 
 void _api_hal_vcp_rx_callback(const uint8_t* buffer, size_t size) {
-    // TODO: ugly usage of semaphore, rewrite with task notification + counter
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     size_t ret = xStreamBufferSendFromISR(api_hal_vcp.rx_stream, buffer, size, &xHigherPriorityTaskWoken);
     if (ret != size) {
