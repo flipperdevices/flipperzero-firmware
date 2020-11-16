@@ -2,7 +2,9 @@
 
 #include "cli.h"
 
-#include <m-string.h>
+#include <flipper.h>
+#include <flipper_v2.h>
+
 #include <m-dict.h>
 
 #define CLI_LINE_SIZE_MAX
@@ -27,15 +29,14 @@ typedef enum {
     CliSymbolAsciiDel = 0x7F,
 } CliSymbols;
 
-typedef enum { CliStateIdle, CliStateRunning } CliState;
-
 struct Cli {
     CliCommandDict_t commands;
+    osMutexId_t mutex;
     string_t line;
-    CliState state;
 };
 
 Cli* cli_alloc();
 void cli_free(Cli* cli);
 void cli_reset_state(Cli* cli);
+void cli_print_version();
 void cli_putc(char c);
