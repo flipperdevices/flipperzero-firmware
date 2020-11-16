@@ -14,14 +14,16 @@ endif()
 
 find_path(FreeRTOS_COMMON_INCLUDE
     NAMES FreeRTOS.h
-    PATHS "${FREERTOS_PATH}/Source/include"
+    PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
+    PATH_SUFFIXES  "Source/include"
     NO_DEFAULT_PATH
 )
 list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_COMMON_INCLUDE}")
 
 find_path(FreeRTOS_SOURCE_DIR
     NAMES tasks.c
-    PATHS "${FREERTOS_PATH}/Source"
+    PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
+    PATH_SUFFIXES  "Source"
     NO_DEFAULT_PATH
 )
 if(NOT (TARGET FreeRTOS))
@@ -69,7 +71,8 @@ endforeach()
 foreach(PORT ${FreeRTOS_FIND_COMPONENTS})
     find_path(FreeRTOS_${PORT}_PATH
         NAMES portmacro.h
-        PATHS "${FREERTOS_PATH}/Source/portable/GCC/${PORT}"
+        PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
+        PATH_SUFFIXES "Source/portable/GCC/${PORT}"  "Source/portable/GCC/${PORT}/r0p1"
         NO_DEFAULT_PATH
     )
     list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_${PORT}_PATH}")
