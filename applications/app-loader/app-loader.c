@@ -109,21 +109,44 @@ void app_loader(void* p) {
         */
     }
 
-    with_value_mutex(menu_mutex, (Menu * menu) {
-        menu_item_add(menu, menu_item_alloc_function("Sub-1 GHz", assets_icons_get(A_Sub1ghz_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("125kHz", assets_icons_get(A_125khz_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("Infrared", assets_icons_get(A_Infrared_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("iButton", assets_icons_get(A_iButton_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("Bluetooth", assets_icons_get(A_Bluetooth_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("GPIO", assets_icons_get(A_GPIO_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("NFC", assets_icons_get(A_NFC_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("U2F", assets_icons_get(A_U2F_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("File Manager", assets_icons_get(A_FileManager_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("Games", assets_icons_get(A_Games_14), NULL, NULL));
-        menu_item_add(menu, state.menu_plugins);
-        menu_item_add(menu, menu_item_alloc_function("Passport", assets_icons_get(A_Passport_14), NULL, NULL));
-        menu_item_add(menu, menu_item_alloc_function("Settings", assets_icons_get(A_Settings_14), NULL, NULL));
-    });
+    with_value_mutex(
+        menu_mutex, (Menu * menu) {
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("Sub-1 GHz", assets_icons_get(A_Sub1ghz_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("125kHz", assets_icons_get(A_125khz_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("Infrared", assets_icons_get(A_Infrared_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("iButton", assets_icons_get(A_iButton_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function(
+                    "Bluetooth", assets_icons_get(A_Bluetooth_14), NULL, NULL));
+            menu_item_add(
+                menu, menu_item_alloc_function("GPIO", assets_icons_get(A_GPIO_14), NULL, NULL));
+            menu_item_add(
+                menu, menu_item_alloc_function("NFC", assets_icons_get(A_NFC_14), NULL, NULL));
+            menu_item_add(
+                menu, menu_item_alloc_function("U2F", assets_icons_get(A_U2F_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function(
+                    "File Manager", assets_icons_get(A_FileManager_14), NULL, NULL));
+            menu_item_add(
+                menu, menu_item_alloc_function("Games", assets_icons_get(A_Games_14), NULL, NULL));
+            menu_item_add(menu, state.menu_plugins);
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("Passport", assets_icons_get(A_Passport_14), NULL, NULL));
+            menu_item_add(
+                menu,
+                menu_item_alloc_function("Settings", assets_icons_get(A_Settings_14), NULL, NULL));
+        });
 
     printf("[app loader] start\n");
 
