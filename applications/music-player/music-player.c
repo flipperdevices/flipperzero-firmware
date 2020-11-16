@@ -394,6 +394,7 @@ void music_player(void* p) {
     MusicDemoContext context = {.state_mutex = &state_mutex, .event_queue = event_queue};
     osThreadId_t player = osThreadNew(music_player_thread, &context, &player_attr);
 
+    MusicDemoEvent event;
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
 
