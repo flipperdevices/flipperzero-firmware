@@ -1,5 +1,14 @@
 #include "app-template.h"
 
+#include <rfal_analogConfig.h>
+#include <rfal_rf.h>
+#include <rfal_nfc.h>
+#include <rfal_nfca.h>
+#include <st25r3916.h>
+#include <st25r3916_irq.h>
+
+#include "fatfs/ff.h"
+
 // event enumeration type
 typedef uint8_t event_t;
 
@@ -41,6 +50,23 @@ public:
 
 // start app
 void AppSdNFC::run() {
+    GpioPin* red_led_record;
+    GpioPin* green_led_record;
+
+    // create pin
+    GpioPin red_led = led_gpio[0];
+    GpioPin green_led = led_gpio[1];
+
+    // TODO open record
+    red_led_record = &red_led;
+    green_led_record = &green_led;
+
+    // configure pin
+    gpio_init(red_led_record, GpioModeOutputOpenDrain);
+    gpio_init(green_led_record, GpioModeOutputOpenDrain);
+
+    gpio_write(green_led_record, false);
+    
     AppSdNFCEvent event;
     while(1) {
         if(get_event(&event, 1000)) {
