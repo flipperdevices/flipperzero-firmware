@@ -1,13 +1,16 @@
 #include "app-template.h"
 
+extern "C" {
 #include <rfal_analogConfig.h>
 #include <rfal_rf.h>
 #include <rfal_nfc.h>
 #include <rfal_nfca.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
+}
 
 #include "fatfs/ff.h"
+#include "stm32_adafruit_sd.h"
 
 // event enumeration type
 typedef uint8_t event_t;
@@ -16,11 +19,11 @@ typedef uint8_t event_t;
 class AppSdNFCState {
 public:
     // state data
-    uint8_t example_data;
+    const char* name;
 
     // state initializer
     AppSdNFCState() {
-        example_data = 12;
+        name = "sd nfc test";
     }
 };
 
@@ -44,15 +47,17 @@ public:
 // with template variables <state, events>
 class AppSdNFC : public AppTemplate<AppSdNFCState, AppSdNFCEvent> {
 public:
+    GpioPin* red_led_record;
+    GpioPin* green_led_record;
+
     void run();
     void render(CanvasApi* canvas);
+    void set_error(const char* text);
+    void set_text(const char* text);
 };
 
 // start app
 void AppSdNFC::run() {
-    GpioPin* red_led_record;
-    GpioPin* green_led_record;
-
     // create pin
     GpioPin red_led = led_gpio[0];
     GpioPin green_led = led_gpio[1];
@@ -65,8 +70,26 @@ void AppSdNFC::run() {
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
     gpio_init(green_led_record, GpioModeOutputOpenDrain);
 
+    uint8_t rfal_result = rfalNfcInitialize();
+    if(rfal_result) {
+        set_error("rfal init fail");
+    }
+
+    rfal_result = rfalLowPowerModeStart();
+    if(rfal_result) {
+        set_error("rfal low p fail");
+    }
+
+    delay(100);
+
+    uint8_t bsp_result = BSP_SD_Init();
+    if(bsp_result) {
+        set_error("sd init fail");
+    }
+
     gpio_write(green_led_record, false);
-    
+    set_text("all good");
+
     AppSdNFCEvent event;
     while(1) {
         if(get_event(&event, 1000)) {
@@ -80,9 +103,6 @@ void AppSdNFC::run() {
                 if(event.value.input.state && event.value.input.input == InputUp) {
                     // to read or write state you need to execute
                     // acquire modify release state
-                    acquire_state();
-                    state.example_data = 24;
-                    release_state();
                 }
             }
         }
@@ -94,11 +114,23 @@ void AppSdNFC::run() {
 
 // render app
 void AppSdNFC::render(CanvasApi* canvas) {
-    // here you dont need to call acquire_state or release_state
-    // to read or write app state, that already handled by caller
     canvas->set_color(canvas, ColorBlack);
     canvas->set_font(canvas, FontPrimary);
-    canvas->draw_str(canvas, 2, state.example_data, "Example app");
+    canvas->draw_str(canvas, 2, 12, state.name);
+}
+
+void AppSdNFC::set_error(const char* text) {
+    gpio_write(red_led_record, false);
+    set_text(text);
+    update_gui();
+    while(1)
+        ;
+}
+
+void AppSdNFC::set_text(const char* text) {
+    acquire_state();
+    state.name = text;
+    release_state();
 }
 
 // app enter function
