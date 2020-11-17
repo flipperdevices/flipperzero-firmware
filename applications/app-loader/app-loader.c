@@ -113,7 +113,7 @@ void app_loader(void* p) {
                     FLIPPER_APPS[i].name, assets_icons_get(A_Infrared_14), handle_menu, ctx));
 
             // Add cli command
-            if (cli) {
+            if(cli) {
                 string_t cli_name;
                 string_init_set_str(cli_name, "app_");
                 string_cat_str(cli_name, FLIPPER_APPS[i].name);
