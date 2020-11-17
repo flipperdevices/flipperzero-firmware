@@ -89,7 +89,6 @@ void app_loader(void* p) {
     }
 
     Cli* cli = furi_open("cli");
-    furi_check(cli);
 
     // Open GUI and register widget
     GuiApi* gui = furi_open("gui");
@@ -112,12 +111,15 @@ void app_loader(void* p) {
                 state.menu_plugins,
                 menu_item_alloc_function(
                     FLIPPER_APPS[i].name, assets_icons_get(A_Infrared_14), handle_menu, ctx));
+
             // Add cli command
-            string_t cli_name;
-            string_init_set_str(cli_name, "app_");
-            string_cat_str(cli_name, FLIPPER_APPS[i].name);
-            cli_add_command(cli, string_get_cstr(cli_name), handle_cli, ctx);
-            string_clear(cli_name);
+            if (cli) {
+                string_t cli_name;
+                string_init_set_str(cli_name, "app_");
+                string_cat_str(cli_name, FLIPPER_APPS[i].name);
+                cli_add_command(cli, string_get_cstr(cli_name), handle_cli, ctx);
+                string_clear(cli_name);
+            }
         }
     }
 
