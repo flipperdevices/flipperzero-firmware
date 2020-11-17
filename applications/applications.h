@@ -38,6 +38,7 @@ void app_gpio_test(void* p);
 void app_ibutton(void* p);
 void cli_task(void* p);
 void music_player(void* p);
+void sdnfc(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -133,6 +134,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_GPIO_DEMO
     {.app = app_gpio_test, .name = "gpio test", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
+#ifdef APP_SDNFC
+    {.app = sdnfc, .name = "sdnfc", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 };
 
