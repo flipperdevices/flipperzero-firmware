@@ -4,10 +4,8 @@
 
 // start app
 void AppiButton::run() {
-    acquire_state();
     mode[0] = new AppiButtonModeDallasRead(this);
     mode[1] = new AppiButtonModeDallasEmulate(this);
-    release_state();
 
     switch_to_mode(0);
 
@@ -22,6 +20,8 @@ void AppiButton::run() {
     // configure pin
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
     gpio_init(green_led_record, GpioModeOutputOpenDrain);
+
+    app_ready();
 
     AppiButtonEvent event;
     while(1) {
@@ -61,9 +61,7 @@ void AppiButton::render(CanvasApi* canvas) {
     canvas->set_font(canvas, FontPrimary);
     canvas->draw_str(canvas, 2, 12, "iButton");
 
-    if(mode[state.mode_index] != NULL) {
-        mode[state.mode_index]->render(canvas, &state);
-    }
+    mode[state.mode_index]->render(canvas, &state);
 }
 
 void AppiButton::blink_red() {
