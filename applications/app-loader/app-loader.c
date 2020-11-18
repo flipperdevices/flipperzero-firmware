@@ -56,7 +56,7 @@ static void handle_menu(void* _ctx) {
 
 static void handle_cli(string_t args, void* _ctx) {
     AppLoaderContext* ctx = (AppLoaderContext*)_ctx;
-    
+
     if(ctx->app->app == NULL) return;
 
     cli_print("Starting furi application\r\n");
