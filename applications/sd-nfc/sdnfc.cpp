@@ -82,7 +82,7 @@ void AppSdNFC::run() {
         set_text("rfal init fail");
         blink_red();
     }
-
+    
     uint8_t bsp_result = BSP_SD_Init();
     if(bsp_result) {
         set_error("sd init fail");
