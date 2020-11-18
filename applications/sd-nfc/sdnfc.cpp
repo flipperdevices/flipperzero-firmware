@@ -82,7 +82,7 @@ void AppSdNFC::run() {
         set_text("rfal init fail");
         blink_red();
     }
-    
+
     uint8_t bsp_result = BSP_SD_Init();
     if(bsp_result) {
         set_error("sd init fail");
@@ -135,26 +135,22 @@ void AppSdNFC::set_text(const char* text) {
     release_state();
 }
 
-void AppSdNFC::light_red() 
-{
+void AppSdNFC::light_red() {
     gpio_write(red_led_record, false);
 }
 
-void AppSdNFC::light_green() 
-{
+void AppSdNFC::light_green() {
     gpio_write(green_led_record, false);
 }
 
-void AppSdNFC::blink_red() 
-{
+void AppSdNFC::blink_red() {
     gpio_write(red_led_record, false);
     delay(500);
     gpio_write(red_led_record, true);
     delay(500);
 }
 
-void AppSdNFC::blink_green() 
-{
+void AppSdNFC::blink_green() {
     gpio_write(green_led_record, false);
     delay(500);
     gpio_write(green_led_record, true);
