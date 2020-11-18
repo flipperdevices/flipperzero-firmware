@@ -39,9 +39,11 @@ void AppiButtonModeDallasEmulate::render(CanvasApi* canvas, AppiButtonState* sta
     canvas->draw_str(canvas, 2, 25, "< dallas emulate");
     canvas->draw_str(canvas, 2, 37, "unimplemented");
     {
-        char buf[24];
-        sprintf(
+        const uint8_t buffer_size = 32;
+        char buf[buffer_size];
+        snprintf(
             buf,
+            buffer_size,
             "%x:%x:%x:%x:%x:%x:%x:%x",
             state->dallas_address[0],
             state->dallas_address[1],
