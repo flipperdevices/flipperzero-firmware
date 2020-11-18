@@ -17,8 +17,7 @@ public:
         app = parent_app;
 
         // TODO open record
-        GpioPin one_wire_pin = ibutton_gpio;
-        GpioPin* one_wire_pin_record = &one_wire_pin;
+        const GpioPin* one_wire_pin_record = &ibutton_gpio;
         onewire_slave = new OneWireGpioSlave(one_wire_pin_record);
     };
 };

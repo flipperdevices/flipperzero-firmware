@@ -9,13 +9,9 @@ void AppiButton::run() {
 
     switch_to_mode(0);
 
-    // create pin
-    GpioPin red_led = led_gpio[0];
-    GpioPin green_led = led_gpio[1];
-
     // TODO open record
-    red_led_record = &red_led;
-    green_led_record = &green_led;
+    red_led_record = &led_gpio[0];
+    green_led_record = &led_gpio[1];
 
     // configure pin
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
