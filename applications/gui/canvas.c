@@ -27,7 +27,13 @@ void canvas_dot_draw(CanvasApi* api, uint8_t x, uint8_t y);
 void canvas_box_draw(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void canvas_draw_frame(CanvasApi* api, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 void canvas_draw_line(CanvasApi* api, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
-void canvas_draw_xbm(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t* bitmap);
+void canvas_draw_xbm(
+    CanvasApi* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t w,
+    uint8_t h,
+    const uint8_t* bitmap);
 void canvas_draw_glyph(CanvasApi* canvas, uint8_t x, uint8_t y, uint16_t ch);
 
 uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
@@ -187,7 +193,13 @@ void canvas_draw_line(CanvasApi* api, uint8_t x1, uint8_t y1, uint8_t x2, uint8_
     u8g2_DrawLine(&canvas->fb, x1, y1, x2, y2);
 }
 
-void canvas_draw_xbm(CanvasApi* api, uint8_t x, uint8_t y, uint8_t w, uint8_t h, const uint8_t* bitmap) {
+void canvas_draw_xbm(
+    CanvasApi* api,
+    uint8_t x,
+    uint8_t y,
+    uint8_t w,
+    uint8_t h,
+    const uint8_t* bitmap) {
     furi_assert(api);
     Canvas* canvas = (Canvas*)api;
     x += canvas->offset_x;

@@ -135,7 +135,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_FLOOPPER_BLOOPPER
-    {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
+        {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
     };
 
@@ -187,5 +187,5 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 #ifdef BUILD_FLOOPPER_BLOOPPER
     {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
-    
+
 };
