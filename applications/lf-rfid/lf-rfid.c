@@ -47,6 +47,17 @@ extern TIM_HandleTypeDef TIM_C;
 void em4100_emulation(uint8_t* data, GpioPin* pin);
 void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
 
+GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
+GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
+
+void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp) {
+    gpio_write(&debug_0, true);
+    delay_us(5.);
+    gpio_write(&debug_0, false);
+}
+
+extern COMP_HandleTypeDef hcomp1;
+
 void lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
 
@@ -57,9 +68,15 @@ void lf_rfid_workaround(void* p) {
 
     gpio_init(pull_pin_record, GpioModeOutputPushPull);
 
+    gpio_init(&debug_0, GpioModeOutputPushPull);
+    gpio_init(&debug_0, GpioModeOutputPushPull);
+
     // pulldown iBtn pin to prevent interference from ibutton
     gpio_init((GpioPin*)&ibutton_gpio, GpioModeOutputOpenDrain);
     gpio_write((GpioPin*)&ibutton_gpio, false);
+
+    // start comp
+    HAL_COMP_Start(&hcomp1);
 
     uint8_t emulation_data[64];
     prepare_data(4378151, 01, emulation_data);
