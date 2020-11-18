@@ -3,11 +3,17 @@
 typedef enum {
     EventTypeTick,
     EventTypeKey,
+    EventTypeRx
 } EventType;
+
+typedef struct {
+    bool value;
+} RxEvent;
 
 typedef struct {
     union {
         InputEvent input;
+        RxEvent rx;
     } value;
     EventType type;
 } AppEvent;
@@ -50,13 +56,24 @@ void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
 GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
 GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
+extern COMP_HandleTypeDef hcomp1;
+
+void* comp_ctx = NULL;
+
 void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp) {
+    if(hcomp != &hcomp1) return;
+
     gpio_write(&debug_0, true);
-    delay_us(5.);
+
+    osMessageQueueId_t event_queue = (QueueHandle_t)comp_ctx;
+
+    AppEvent event;
+    event.type = EventTypeRx;
+    event.value.rx.value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_HIGH);
+    osMessageQueuePut(event_queue, &event, 0, 0);
+
     gpio_write(&debug_0, false);
 }
-
-extern COMP_HandleTypeDef hcomp1;
 
 void lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(1, sizeof(AppEvent), NULL);
@@ -69,12 +86,14 @@ void lf_rfid_workaround(void* p) {
     gpio_init(pull_pin_record, GpioModeOutputPushPull);
 
     gpio_init(&debug_0, GpioModeOutputPushPull);
-    gpio_init(&debug_0, GpioModeOutputPushPull);
+    gpio_init(&debug_1, GpioModeOutputPushPull);
 
     // pulldown iBtn pin to prevent interference from ibutton
     gpio_init((GpioPin*)&ibutton_gpio, GpioModeOutputOpenDrain);
     gpio_write((GpioPin*)&ibutton_gpio, false);
 
+    // init ctx
+    comp_ctx = (void*)event_queue;
     // start comp
     HAL_COMP_Start(&hcomp1);
 
@@ -105,57 +124,63 @@ void lf_rfid_workaround(void* p) {
     gui->add_widget(gui, widget, GuiLayerFullscreen);
 
     AppEvent event;
+
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
-        State* state = (State*)acquire_mutex_block(&state_mutex);
 
-        if(event_status == osOK) {
-            if(event.type == EventTypeKey) {
-                // press events
-                if(event.value.input.state && event.value.input.input == InputBack) {
-                    hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
-                    gpio_init(pull_pin_record, GpioModeInput);
-                    gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
+        if(event.type == EventTypeRx && event_status == osOK) {
+            gpio_write(&debug_1, event.value.rx.value);
+        } else {
+            State* state = (State*)acquire_mutex_block(&state_mutex);
 
-                    // TODO remove all widgets create by app
-                    widget_enabled_set(widget, false);
-                    furiac_exit(NULL);
+            if(event_status == osOK) {
+                if(event.type == EventTypeKey) {
+                    // press events
+                    if(event.value.input.state && event.value.input.input == InputBack) {
+                        hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
+                        gpio_init(pull_pin_record, GpioModeInput);
+                        gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
+
+                        // TODO remove all widgets create by app
+                        widget_enabled_set(widget, false);
+                        furiac_exit(NULL);
+                    }
+
+                    if(event.value.input.state && event.value.input.input == InputUp) {
+                        state->freq_khz += 10;
+                    }
+
+                    if(event.value.input.state && event.value.input.input == InputDown) {
+                        state->freq_khz -= 10;
+                    }
+
+                    if(event.value.input.state && event.value.input.input == InputLeft) {
+                    }
+
+                    if(event.value.input.state && event.value.input.input == InputRight) {
+                    }
+
+                    if(event.value.input.state && event.value.input.input == InputOk) {
+                        state->on = !state->on;
+                    }
                 }
-
-                if(event.value.input.state && event.value.input.input == InputUp) {
-                    state->freq_khz += 10;
-                }
-
-                if(event.value.input.state && event.value.input.input == InputDown) {
-                    state->freq_khz -= 10;
-                }
-
-                if(event.value.input.state && event.value.input.input == InputLeft) {
-                }
-
-                if(event.value.input.state && event.value.input.input == InputRight) {
-                }
-
-                if(event.value.input.state && event.value.input.input == InputOk) {
-                    state->on = !state->on;
-                }
+            } else {
+                // event timeout
             }
-        } else {
-            // event timeout
+
+            hal_pwmn_set(
+                state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
+
+            if(!state->on) {
+                em4100_emulation(emulation_data, pull_pin_record);
+            } else {
+                gpio_write(pull_pin_record, false);
+            }
+
+            // common code, for example, force update UI
+            widget_update(widget);
+
+            release_mutex(&state_mutex, state);
         }
-
-        hal_pwmn_set(
-            state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
-
-        if(!state->on) {
-            em4100_emulation(emulation_data, pull_pin_record);
-        } else {
-            gpio_write(pull_pin_record, false);
-        }
-
-        // common code, for example, force update UI
-        widget_update(widget);
-
-        release_mutex(&state_mutex, state);
     }
 }
