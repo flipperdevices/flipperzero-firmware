@@ -35,6 +35,7 @@ void power_task(void* p);
 void sd_card_test(void* p);
 void application_vibro(void* p);
 void app_gpio_test(void* p);
+void app_ibutton(void* p);
 void cli_task(void* p);
 void music_player(void* p);
 void floopper_bloopper(void* p);
@@ -67,7 +68,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_MENU
     {.app = menu_task, .name = "menu_task", .libs = {1, FURI_LIB{"gui_task"}}},
-    {.app = app_loader, .name = "app_loader", .libs = {1, FURI_LIB{"menu_task"}}},
+    {.app = app_loader, .name = "app_loader", .libs = {2, FURI_LIB{"menu_task", "cli_task"}}},
 #endif
 
 #ifdef APP_IRUKAGOTCHI
@@ -127,17 +128,18 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
     {.app = music_player, .name = "music player", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 
+#ifdef APP_IBUTTON
+    {.app = app_ibutton, .name = "ibutton", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
 #ifdef APP_GPIO_DEMO
-    {
-        .app = app_gpio_test,
-        .name = "gpio test",
-        .libs = {1, FURI_LIB{"gui_task"}},
+    {.app = app_gpio_test, .name = "gpio test", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 
 #ifdef APP_FLOOPPER_BLOOPPER
-        {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
+    {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
-    };
+};
 
 const FlipperStartupApp FLIPPER_APPS[] = {
 #ifdef BUILD_EXAMPLE_BLINK
@@ -178,6 +180,10 @@ const FlipperStartupApp FLIPPER_APPS[] = {
 
 #ifdef BUILD_GPIO_DEMO
     {.app = app_gpio_test, .name = "gpio test", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
+#ifdef BUILD_IBUTTON
+    {.app = app_ibutton, .name = "ibutton", .libs = {1, FURI_LIB{"gui_task"}}},
 #endif
 
 #ifdef BUILD_MUSIC_PLAYER

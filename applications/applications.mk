@@ -25,6 +25,7 @@ BUILD_SD_TEST = 1
 BUILD_GPIO_DEMO = 1
 BUILD_MUSIC_PLAYER = 1
 BUILD_FLOOPPER_BLOOPPER = 1
+BUILD_IBUTTON = 1
 endif
 
 APP_NFC ?= 0
@@ -268,6 +269,17 @@ BUILD_FLOOPPER_BLOOPPER ?= 0
 ifeq ($(BUILD_FLOOPPER_BLOOPPER), 1)
 CFLAGS		+= -DBUILD_FLOOPPER_BLOOPPER
 C_SOURCES	+= $(wildcard $(APP_DIR)/floopper-bloopper/*.c)
+endif
+
+APP_IBUTTON ?= 0
+ifeq ($(APP_IBUTTON), 1)
+CFLAGS		+= -DAPP_IBUTTON
+BUILD_IBUTTON = 1
+endif
+BUILD_IBUTTON ?= 0
+ifeq ($(BUILD_IBUTTON), 1)
+CFLAGS		+= -DBUILD_IBUTTON
+CPP_SOURCES	+= $(wildcard $(APP_DIR)/ibutton/ibutton.cpp)
 endif
 
 # device drivers
