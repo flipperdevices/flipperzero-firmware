@@ -57,6 +57,10 @@ void lf_rfid_workaround(void* p) {
 
     gpio_init(pull_pin_record, GpioModeOutputPushPull);
 
+    // pulldown iBtn pin to prevent interference from ibutton
+    gpio_init((GpioPin*)&ibutton_gpio, GpioModeOutputOpenDrain);
+    gpio_write((GpioPin*)&ibutton_gpio, false);
+
     uint8_t emulation_data[64];
     prepare_data(4378151, 01, emulation_data);
 
@@ -94,6 +98,8 @@ void lf_rfid_workaround(void* p) {
                 if(event.value.input.state && event.value.input.input == InputBack) {
                     hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
                     gpio_init(pull_pin_record, GpioModeInput);
+                    gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
+
                     // TODO remove all widgets create by app
                     widget_enabled_set(widget, false);
                     furiac_exit(NULL);
