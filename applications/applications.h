@@ -38,6 +38,7 @@ void app_gpio_test(void* p);
 void app_ibutton(void* p);
 void cli_task(void* p);
 void music_player(void* p);
+void floopper_bloopper(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -182,6 +183,10 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
      .libs = {1, FURI_LIB{"gui_task"}},
      .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_FLOOPPER_BLOOPPER
+    {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
 };
 
 // Main menu APP
@@ -258,4 +263,9 @@ const FlipperStartupApp FLIPPER_PLUGINS[] = {
      .libs = {1, FURI_LIB{"gui_task"}},
      .icon = A_Plugins_14},
 #endif
+
+#ifdef BUILD_FLOOPPER_BLOOPPER
+    {.app = floopper_bloopper, .name = "Floopper Bloopper", .libs = {1, FURI_LIB{"gui_task"}}},
+#endif
+
 };
