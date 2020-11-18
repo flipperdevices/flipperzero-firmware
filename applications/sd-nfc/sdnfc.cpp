@@ -54,7 +54,14 @@ public:
     void render(CanvasApi* canvas);
     void set_error(const char* text);
     void set_text(const char* text);
+    void light_red();
+    void light_green();
+    void blink_red();
+    void blink_green();
 };
+
+FATFS sd_fat_fs;
+char sd_path[6] = "";
 
 // start app
 void AppSdNFC::run() {
@@ -72,22 +79,23 @@ void AppSdNFC::run() {
 
     uint8_t rfal_result = rfalNfcInitialize();
     if(rfal_result) {
-        set_error("rfal init fail");
+        set_text("rfal init fail");
+        blink_red();
     }
-
-    rfal_result = rfalLowPowerModeStart();
-    if(rfal_result) {
-        set_error("rfal low p fail");
-    }
-
-    delay(100);
 
     uint8_t bsp_result = BSP_SD_Init();
     if(bsp_result) {
         set_error("sd init fail");
     }
 
-    gpio_write(green_led_record, false);
+    FRESULT result;
+
+    result = f_mount(&sd_fat_fs, sd_path, 1);
+    if(result) {
+        set_error("sd mount fail");
+    }
+
+    light_green();
     set_text("all good");
 
     AppSdNFCEvent event;
@@ -96,13 +104,7 @@ void AppSdNFC::run() {
             if(event.type == AppSdNFCEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
-                    printf("bye!\n");
                     exit();
-                }
-
-                if(event.value.input.state && event.value.input.input == InputUp) {
-                    // to read or write state you need to execute
-                    // acquire modify release state
                 }
             }
         }
@@ -120,7 +122,7 @@ void AppSdNFC::render(CanvasApi* canvas) {
 }
 
 void AppSdNFC::set_error(const char* text) {
-    gpio_write(red_led_record, false);
+    light_red();
     set_text(text);
     update_gui();
     while(1)
@@ -131,6 +133,32 @@ void AppSdNFC::set_text(const char* text) {
     acquire_state();
     state.name = text;
     release_state();
+}
+
+void AppSdNFC::light_red() 
+{
+    gpio_write(red_led_record, false);
+}
+
+void AppSdNFC::light_green() 
+{
+    gpio_write(green_led_record, false);
+}
+
+void AppSdNFC::blink_red() 
+{
+    gpio_write(red_led_record, false);
+    delay(500);
+    gpio_write(red_led_record, true);
+    delay(500);
+}
+
+void AppSdNFC::blink_green() 
+{
+    gpio_write(green_led_record, false);
+    delay(500);
+    gpio_write(green_led_record, true);
+    delay(500);
 }
 
 // app enter function
