@@ -1,10 +1,6 @@
 #include "flipper_v2.h"
 
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-    EventTypeRx
-} EventType;
+typedef enum { EventTypeTick, EventTypeKey, EventTypeRx } EventType;
 
 typedef struct {
     bool value;
@@ -68,7 +64,7 @@ extern COMP_HandleTypeDef hcomp1;
 
 void* comp_ctx = NULL;
 
-void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp) {
+void HAL_COMP_TriggerCallback(COMP_HandleTypeDef* hcomp) {
     if(hcomp != &hcomp1) return;
 
     // gpio_write(&debug_0, true);
@@ -103,7 +99,11 @@ static bool even_check(uint8_t* buf) {
             printf("%d ", buf[line * (ROW_SIZE + 1) + col]);
         }
         if((1 & parity_sum) != buf[line * (ROW_SIZE + 1) + ROW_SIZE]) {
-            printf("line parity fail at %d (%d : %d)\n", line, parity_sum, buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
+            printf(
+                "line parity fail at %d (%d : %d)\n",
+                line,
+                parity_sum,
+                buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
             return false;
         }
         printf("\n");
@@ -111,7 +111,11 @@ static bool even_check(uint8_t* buf) {
 
     for(uint8_t col = 0; col < ROW_SIZE; col++) {
         if((1 & col_parity_sum[col]) != buf[LINE_SIZE * (ROW_SIZE + 1) + col]) {
-            printf("col parity fail at %d (%d : %d)\n", col, col_parity_sum[col], buf[LINE_SIZE * (ROW_SIZE + 1) + col]);
+            printf(
+                "col parity fail at %d (%d : %d)\n",
+                col,
+                col_parity_sum[col],
+                buf[LINE_SIZE * (ROW_SIZE + 1) + col]);
             return false;
         }
     }
@@ -218,7 +222,6 @@ void lf_rfid_workaround(void* p) {
     for(size_t i = 0; i < 64; i++) {
         buf[i] = 0;
     }
-
 
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
