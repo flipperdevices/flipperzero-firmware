@@ -8,6 +8,7 @@ typedef enum {
 
 typedef struct {
     bool value;
+    uint32_t dwt_value;
 } RxEvent;
 
 typedef struct {
@@ -63,16 +64,36 @@ void* comp_ctx = NULL;
 void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp) {
     if(hcomp != &hcomp1) return;
 
-    gpio_write(&debug_0, true);
+    // gpio_write(&debug_0, true);
 
     osMessageQueueId_t event_queue = (QueueHandle_t)comp_ctx;
 
     AppEvent event;
     event.type = EventTypeRx;
     event.value.rx.value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_HIGH);
+    event.value.rx.dwt_value = DWT->CYCCNT;
     osMessageQueuePut(event_queue, &event, 0, 0);
 
-    gpio_write(&debug_0, false);
+    // gpio_write(&debug_0, false);
+}
+
+const uint8_t ROW_SIZE = 5;
+const uint8_t LINE_SIZE = 10;
+
+bool even_check(uint8_t* buf) {
+    // line parity
+    for(uint8_t line = 0; line < LINE_SIZE; line++) {
+        uint8_t parity_sum = 0;
+        for(uint8_t row = 0; row < (ROW_SIZE - 1); row++) {
+            parity_sum += buf[line * ROW_SIZE + row];
+        }
+        if((1 & parity_sum) != buf[line * ROW_SIZE + (ROW_SIZE - 1)]) {
+            printf("line parity fail at %d\n", line);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void lf_rfid_workaround(void* p) {
@@ -124,12 +145,74 @@ void lf_rfid_workaround(void* p) {
     gui->add_widget(gui, widget, GuiLayerFullscreen);
 
     AppEvent event;
+    uint32_t prev_dwt;
+    int8_t symbol = -1; // init state
+    bool center = false;
+    size_t symbol_cnt = 0;
+
+    uint32_t buf[64];
+    for(size_t i = 0; i < 64; i++) {
+        buf[i] = 0;
+    }
+
 
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
 
         if(event.type == EventTypeRx && event_status == osOK) {
-            gpio_write(&debug_1, event.value.rx.value);
+            uint32_t dt = (event.value.rx.dwt_value - prev_dwt) / (SystemCoreClock / 1000000.0f);
+            prev_dwt = event.value.rx.dwt_value;
+
+            if(dt > 384) {
+                // change symbol 0->1 or 1->0
+                symbol = event.value.rx.value;
+                center = true;
+            } else {
+                // same symbol as prev or center
+                center = !center;
+            }
+
+            gpio_write(&debug_1, true);
+            delay_us(center ? 10 : 30);
+            gpio_write(&debug_1, false);
+
+            if(center && symbol != -1) {
+                gpio_write(&debug_0, true);
+                delay_us(symbol ? 10 : 30);
+                gpio_write(&debug_0, false);
+
+                buf[symbol_cnt] = symbol;
+                symbol_cnt++;
+            }
+
+            // check preamble
+            if(symbol_cnt <= 9 && symbol == 0) {
+                symbol_cnt = 0;
+                symbol = -1;
+            }
+
+            // check stop bit
+            if(symbol_cnt == 64 && symbol == 1) {
+                symbol_cnt = 0;
+                symbol = -1;
+            }
+
+            if(symbol_cnt == 64) {
+                printf("\n\nbuf: ");
+                for(size_t i = 9; i < 64; i++) {
+                    if((i - 9) % 5 == 0) {
+                        printf("\n");
+                    }
+                    printf("%d ", buf[i]);
+                }
+                printf("\n");
+
+                even_check(&buf[9]);
+
+                osDelay(100);
+
+                symbol_cnt = 0;
+            }
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
