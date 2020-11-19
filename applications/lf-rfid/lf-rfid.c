@@ -22,6 +22,8 @@ typedef struct {
 typedef struct {
     uint32_t freq_khz;
     bool on;
+    uint8_t customer_id;
+    uint32_t em_data;
 } State;
 
 static void render_callback(CanvasApi* canvas, void* ctx) {
@@ -33,10 +35,15 @@ static void render_callback(CanvasApi* canvas, void* ctx) {
     canvas->set_font(canvas, FontPrimary);
     canvas->draw_str(canvas, 2, 12, "LF RFID");
 
-    canvas->draw_str(canvas, 2, 24, state->on ? "ON" : "OFF");
-    char buf[12];
+    canvas->draw_str(canvas, 2, 24, state->on ? "Reading" : "Emulating");
+
+    char buf[14];
+
     sprintf(buf, "%d kHz", (int)state->freq_khz);
     canvas->draw_str(canvas, 2, 36, buf);
+
+    sprintf(buf, "%02d:%010ld", state->customer_id, state->em_data);
+    canvas->draw_str(canvas, 2, 45, buf);
 
     release_mutex((ValueMutex*)ctx, state);
 }
@@ -172,11 +179,12 @@ void lf_rfid_workaround(void* p) {
     HAL_COMP_Start(&hcomp1);
 
     uint8_t emulation_data[64];
-    prepare_data(4378151, 01, emulation_data);
 
     State _state;
     _state.freq_khz = 125;
     _state.on = false;
+    _state.customer_id = 01;
+    _state.em_data = 4378151;
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -255,11 +263,11 @@ void lf_rfid_workaround(void* p) {
             }
 
             if(symbol_cnt == 64) {
-                uint8_t customer = 0;
-                uint32_t data = 0;
                 if(even_check(&buf[9])) {
-                    extract_data(&buf[9], &customer, &data);
-                    printf("customer: %d, data: %lu (%X)\n", customer, data, data);
+                    State* state = (State*)acquire_mutex_block(&state_mutex);
+                    extract_data(&buf[9], &state->customer_id, &state->em_data);
+                    printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+                    release_mutex(&state_mutex, state);
                     osDelay(100);
                 }
 
@@ -297,6 +305,10 @@ void lf_rfid_workaround(void* p) {
 
                     if(event.value.input.state && event.value.input.input == InputOk) {
                         state->on = !state->on;
+
+                        if(!state->on) {
+                            prepare_data(state->em_data, state->customer_id, emulation_data);
+                        }
                     }
                 }
             } else {
