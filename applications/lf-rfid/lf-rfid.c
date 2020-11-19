@@ -77,23 +77,76 @@ void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp) {
     // gpio_write(&debug_0, false);
 }
 
-const uint8_t ROW_SIZE = 5;
+const uint8_t ROW_SIZE = 4;
 const uint8_t LINE_SIZE = 10;
 
-bool even_check(uint8_t* buf) {
+static bool even_check(uint8_t* buf) {
+    uint8_t col_parity_sum[ROW_SIZE];
+    for(uint8_t col = 0; col < ROW_SIZE; col++) {
+        col_parity_sum[col] = 0;
+    }
+
     // line parity
     for(uint8_t line = 0; line < LINE_SIZE; line++) {
+        printf("%d: ", line);
         uint8_t parity_sum = 0;
-        for(uint8_t row = 0; row < (ROW_SIZE - 1); row++) {
-            parity_sum += buf[line * ROW_SIZE + row];
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            parity_sum += buf[line * (ROW_SIZE + 1) + col];
+            col_parity_sum[col] += buf[line * (ROW_SIZE + 1) + col];
+            printf("%d ", buf[line * (ROW_SIZE + 1) + col]);
         }
-        if((1 & parity_sum) != buf[line * ROW_SIZE + (ROW_SIZE - 1)]) {
-            printf("line parity fail at %d\n", line);
+        if((1 & parity_sum) != buf[line * (ROW_SIZE + 1) + ROW_SIZE]) {
+            printf("line parity fail at %d (%d : %d)\n", line, parity_sum, buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
+            return false;
+        }
+        printf("\n");
+    }
+
+    for(uint8_t col = 0; col < ROW_SIZE; col++) {
+        if((1 & col_parity_sum[col]) != buf[LINE_SIZE * (ROW_SIZE + 1) + col]) {
+            printf("col parity fail at %d (%d : %d)\n", col, col_parity_sum[col], buf[LINE_SIZE * (ROW_SIZE + 1) + col]);
             return false;
         }
     }
 
     return true;
+}
+
+static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
+    uint32_t data = 0;
+    uint8_t offset = 0;
+
+    printf("customer: ");
+    for(uint8_t line = 0; line < 2; line++) {
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
+
+            data |= bit << (7 - offset);
+            printf("%d ", bit);
+
+            offset++;
+        }
+    }
+    printf("\n");
+
+    *customer = data;
+
+    data = 0;
+    offset = 0;
+    printf("data: ");
+    for(uint8_t line = 2; line < LINE_SIZE; line++) {
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
+
+            data |= bit << (31 - offset);
+            printf("%d ", bit);
+
+            offset++;
+        }
+    }
+    printf("\n");
+
+    *em_data = data;
 }
 
 void lf_rfid_workaround(void* p) {
@@ -150,7 +203,7 @@ void lf_rfid_workaround(void* p) {
     bool center = false;
     size_t symbol_cnt = 0;
 
-    uint32_t buf[64];
+    uint8_t buf[64];
     for(size_t i = 0; i < 64; i++) {
         buf[i] = 0;
     }
@@ -172,14 +225,18 @@ void lf_rfid_workaround(void* p) {
                 center = !center;
             }
 
+            /*
             gpio_write(&debug_1, true);
             delay_us(center ? 10 : 30);
             gpio_write(&debug_1, false);
+            */
 
             if(center && symbol != -1) {
+                /*
                 gpio_write(&debug_0, true);
                 delay_us(symbol ? 10 : 30);
                 gpio_write(&debug_0, false);
+                */
 
                 buf[symbol_cnt] = symbol;
                 symbol_cnt++;
@@ -198,18 +255,13 @@ void lf_rfid_workaround(void* p) {
             }
 
             if(symbol_cnt == 64) {
-                printf("\n\nbuf: ");
-                for(size_t i = 9; i < 64; i++) {
-                    if((i - 9) % 5 == 0) {
-                        printf("\n");
-                    }
-                    printf("%d ", buf[i]);
+                uint8_t customer = 0;
+                uint32_t data = 0;
+                if(even_check(&buf[9])) {
+                    extract_data(&buf[9], &customer, &data);
+                    printf("customer: %d, data: %lu (%X)\n", customer, data, data);
+                    osDelay(100);
                 }
-                printf("\n");
-
-                even_check(&buf[9]);
-
-                osDelay(100);
 
                 symbol_cnt = 0;
             }
