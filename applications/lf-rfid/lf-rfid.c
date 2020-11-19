@@ -211,6 +211,9 @@ void lf_rfid_workaround(void* p) {
     bool center = false;
     size_t symbol_cnt = 0;
 
+    GpioPin* led_record = (GpioPin*)&led_gpio[1];
+    gpio_init(led_record, GpioModeOutputOpenDrain);
+
     uint8_t buf[64];
     for(size_t i = 0; i < 64; i++) {
         buf[i] = 0;
@@ -268,7 +271,9 @@ void lf_rfid_workaround(void* p) {
                     extract_data(&buf[9], &state->customer_id, &state->em_data);
                     printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
                     release_mutex(&state_mutex, state);
+                    gpio_write(led_record, false);
                     osDelay(100);
+                    gpio_write(led_record, true);
                 }
 
                 symbol_cnt = 0;
