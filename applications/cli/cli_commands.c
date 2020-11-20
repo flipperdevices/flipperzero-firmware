@@ -53,7 +53,7 @@ void cli_command_date(string_t args, void* context) {
     // READ ORDER MATTERS! Time then date.
     HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
- 
+
     string_t datetime_str;
     string_init(datetime_str);
 
