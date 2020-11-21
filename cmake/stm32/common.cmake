@@ -61,11 +61,17 @@ function(stm32_get_chip_info CHIP)
     
     set(STM32_FAMILY ${CMAKE_MATCH_1})
     set(STM32_DEVICE "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
-    
-    list(FIND STM32_SUPPORTED_FAMILIES ${STM32_FAMILY} STM32_FAMILY_INDEX)
-    if (STM32_FAMILY_INDEX EQUAL -1)
+
+    foreach(FAMILY_CANDIDATE ${STM32_SUPPORTED_FAMILIES})
+        string(REGEX MATCH "^([A-Z][0-9])_?(M[47])?" FAMILY_CANDIDATE ${FAMILY})
+        if(${STM32_FAMILY} EQUAL ${CMAKE_MATCH_1})
+            set(IS_VALID_FAMILY TRUE)
+        endif()
+    endforeach()
+    if (NOT IS_VALID_FAMILY)
         message(FATAL_ERROR "Unsupported family ${STM32_FAMILY} for device ${CHIP}")
     endif()
+    unset(IS_VALID_FAMILY)
 
     stm32_get_chip_type(${STM32_FAMILY} ${STM32_DEVICE} STM32_TYPE)
     
