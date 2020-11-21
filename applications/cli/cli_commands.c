@@ -49,7 +49,8 @@ void cli_command_uuid(string_t args, void* context) {
 void cli_command_date(string_t args, void* context) {
     RTC_DateTypeDef date;
     RTC_TimeTypeDef time;
-
+    
+    // TODO add get_datetime to core, not use HAL here
     // READ ORDER MATTERS! Time then date.
     HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
     HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
