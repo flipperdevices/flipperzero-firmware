@@ -2,7 +2,7 @@
 #include "one_wire_device.h"
 #include "one_wire_device_ds_1990.h"
 
-auto key = DS1990(1, 2, 3, 4, 5, 6, 7);
+static uint32_t __instructions_per_us = 0;
 
 OneWireGpioSlave::OneWireGpioSlave(const GpioPin* one_wire_gpio) {
     gpio = one_wire_gpio;
@@ -14,7 +14,7 @@ OneWireGpioSlave::OneWireGpioSlave(const GpioPin* one_wire_gpio) {
         devices[i] = nullptr;
     }
 
-    attach(key);
+    __instructions_per_us = (SystemCoreClock / 1000000.0f);
 }
 
 OneWireGpioSlave::~OneWireGpioSlave() {
@@ -29,115 +29,55 @@ void OneWireGpioSlave::stop(void) {
     gpio_init(gpio, GpioModeAnalog);
 }
 
-bool OneWireGpioSlave::emulate(uint8_t* buffer, uint8_t length) {
-    if(!check_reset()) {
-        printf("reset error\n");
-        return false;
-    }
+bool OneWireGpioSlave::emulate() {
+    error = OneWireGpioSlaveError::NO_ERROR;
 
-    if(!show_presence()) {
-        printf("presence error\n");
-        return false;
-    }
+    while(1) {
+        if(devices_count == 0) return false;
 
-    if(!receive_and_process_cmd()) {
-        printf("receive_and_process_cmd error\n");
-        return false;
-    }
+        if(!check_reset()) {
+            return false;
+        } else {
+        }
 
-    printf("ok\n");
-    return true;
+        // OK, we receive reset
+        osKernelLock();
+
+        if(!show_presence()) {
+            return false;
+        } else {
+        }
+
+        // and we succefully show our presence on bus
+        __disable_irq();
+
+        if(!receive_and_process_cmd()) {
+            __enable_irq();
+            osKernelUnlock();
+            return false;
+        } else {
+            __enable_irq();
+            osKernelUnlock();
+            return (error == OneWireGpioSlaveError::NO_ERROR);
+        }
+    }
 }
-
-static uint32_t __test = 0;
 
 OneWiteTimeType OneWireGpioSlave::wait_while_gpio_is(OneWiteTimeType time, const bool pin_value) {
     uint32_t start = DWT->CYCCNT;
-    uint32_t time_ticks = time * __test;
+    uint32_t time_ticks = time * __instructions_per_us;
     uint32_t time_captured;
 
     do {
         time_captured = DWT->CYCCNT;
         if(gpio_read(gpio) != pin_value) {
             OneWiteTimeType remaining_time = time_ticks - (time_captured - start);
-            remaining_time /= __test;
+            remaining_time /= __instructions_per_us;
             return remaining_time;
         }
     } while((time_captured - start) < time_ticks);
 
     return 0;
-}
-
-OneWiteTimeType
-OneWireGpioSlave::old_wait_while_gpio_is(OneWiteTimeType time, const bool pin_value) {
-    uint32_t start = DWT->CYCCNT;
-    uint32_t time_ticks = time * __test;
-    uint32_t time_captured;
-
-    do {
-        time_captured = DWT->CYCCNT;
-    } while((gpio_read(gpio) == pin_value) && ((time_captured - start) < time_ticks));
-
-    time = time_captured - start;
-    time /= __test;
-    return time;
-}
-
-void OneWireGpioSlave::test(void) {
-    __test = (SystemCoreClock / 1000000.0f);
-
-    OneWiteTimeType time;
-    GpioPin test_pin = {.port = GPIOC, .pin = GPIO_PIN_3};
-    test_record = &test_pin;
-    gpio_init(test_record, GpioModeOutputPushPull);
-
-    gpio_init(gpio, GpioModeOutputOpenDrain);
-    pin_set_float();
-
-    //osKernelLock();
-
-    while(1) {
-        error = OneWireGpioSlaveError::NO_ERROR;
-
-        if(!check_reset()) {
-            printf("err:R: %s\n", decode_error());
-            continue;
-        } else {
-            //pin_debug();
-        }
-
-        if(!show_presence()) {
-            printf("err:P: %s\n", decode_error());
-            continue;
-        } else {
-            //pin_debug();
-        }
-
-
-        osKernelLock();
-        __disable_irq();
-    
-        if(!receive_and_process_cmd()) {
-            __enable_irq();
-            osKernelUnlock();
-            printf("err:C: %s\n", decode_error());
-            continue;
-        } else {
-            __enable_irq();
-            osKernelUnlock();
-            printf("cmd: %x\n", cmd);
-            if(error != OneWireGpioSlaveError::NO_ERROR){
-                printf("err:C: %s in %s\n", decode_error(), error_place == 1 ? "receive" : "send");
-            }
-            //pin_debug();
-        }
-    }
-}
-
-void OneWireGpioSlave::pin_debug_error(void) {
-    gpio_write(test_record, true);
-    delay_us(10);
-    gpio_write(test_record, false);
 }
 
 void OneWireGpioSlave::pin_set_float() {
@@ -351,12 +291,6 @@ void OneWireGpioSlave::cmd_search_rom(void) {
     device_selected = devices[active_slave];
 }
 
-void OneWireGpioSlave::pin_debug(void) {
-    gpio_write(test_record, true);
-    delay_us(0);
-    gpio_write(test_record, false);
-}
-
 bool OneWireGpioSlave::check_reset(void) {
     pin_set_float();
 
@@ -383,7 +317,7 @@ bool OneWireGpioSlave::check_reset(void) {
     if(gpio_read(gpio) == 0) return false;
 
     // wait while gpio is high
-    if(wait_while_gpio_is(OWET::RESET_TIMEOUT * 20, true) == 0) {
+    if(wait_while_gpio_is(OWET::RESET_TIMEOUT, true) == 0) {
         return false;
     }
 
@@ -481,7 +415,7 @@ bool OneWireGpioSlave::receive_bit(void) {
 
 bool OneWireGpioSlave::send_bit(bool value) {
     const bool write_zero = !value;
-    pin_debug();
+
     // wait while bus is low
     OneWiteTimeType time = OWET::SLOT_MAX[overdrive_mode];
     time = wait_while_gpio_is(time, false);
@@ -489,12 +423,11 @@ bool OneWireGpioSlave::send_bit(bool value) {
         error = OneWireGpioSlaveError::RESET_IN_PROGRESS;
         return false;
     }
-    pin_debug();
+
     // wait while bus is high
     time = OWET::MSG_HIGH_TIMEOUT;
     time = wait_while_gpio_is(time, true);
     if(time == 0) {
-        pin_debug_error();
         error = OneWireGpioSlaveError::AWAIT_TIMESLOT_TIMEOUT_HIGH;
         error_place = 2;
         return false;
@@ -522,13 +455,13 @@ bool OneWireGpioSlave::send(const uint8_t* address, const uint8_t data_length) {
 
     // bytes loop
     for(; bytes_sent < data_length; ++bytes_sent) {
-        const uint8_t dataByte = address[bytes_sent];
+        const uint8_t data_byte = address[bytes_sent];
 
         // bit loop
-        for(uint8_t bitMask = 0x01; bitMask != 0; bitMask <<= 1) {
-            if(!send_bit(static_cast<bool>(bitMask & dataByte))) {
+        for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
+            if(!send_bit(static_cast<bool>(bit_mask & data_byte))) {
                 // if we cannot send first bit
-                if((bitMask == 0x01) &&
+                if((bit_mask == 0x01) &&
                    (error == OneWireGpioSlaveError::AWAIT_TIMESLOT_TIMEOUT_HIGH))
                     error = OneWireGpioSlaveError::FIRST_BIT_OF_BYTE_TIMEOUT;
                 return false;
@@ -546,8 +479,8 @@ bool OneWireGpioSlave::receive(uint8_t* data, const uint8_t data_length) {
     for(; bytes_received < data_length; ++bytes_received) {
         uint8_t value = 0;
 
-        for(uint8_t bitMask = 0x01; bitMask != 0; bitMask <<= 1) {
-            if(receive_bit()) value |= bitMask;
+        for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
+            if(receive_bit()) value |= bit_mask;
         }
 
         data[bytes_received] = value;

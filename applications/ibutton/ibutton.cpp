@@ -21,7 +21,7 @@ void AppiButton::run() {
 
     AppiButtonEvent event;
     while(1) {
-        if(get_event(&event, 100)) {
+        if(get_event(&event, 20)) {
             if(event.type == AppiButtonEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
@@ -37,6 +37,14 @@ void AppiButton::run() {
 
                 if(event.value.input.state && event.value.input.input == InputRight) {
                     increase_mode();
+                }
+
+                if(event.value.input.state && event.value.input.input == InputUp) {
+                    decrease_address();
+                }
+
+                if(event.value.input.state && event.value.input.input == InputDown) {
+                    increase_address();
                 }
             }
         } else {
@@ -88,6 +96,22 @@ void AppiButton::decrease_mode() {
         mode[state.mode_index]->release();
         state.mode_index--;
         mode[state.mode_index]->acquire();
+    }
+    release_state();
+}
+
+void AppiButton::increase_address() {
+    acquire_state();
+    if(state.dallas_address_index < (state.dallas_address_count - 1)) {
+        state.dallas_address_index++;
+    }
+    release_state();
+}
+
+void AppiButton::decrease_address() {
+    acquire_state();
+    if(state.dallas_address_index > 0) {
+        state.dallas_address_index--;
     }
     release_state();
 }

@@ -51,7 +51,7 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
 
             if(maxim_crc8(address, 8) == 0) {
                 printf("CRC valid\n");
-                memcpy(app->state.dallas_address, address, 8);
+                memcpy(app->state.dallas_address[app->state.dallas_address_index], address, 8);
                 app->blink_green();
             } else {
                 printf("CRC invalid\n");
@@ -63,24 +63,26 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
 
 void AppiButtonModeDallasRead::render(CanvasApi* canvas, AppiButtonState* state) {
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 2, 25, "dallas read >");
-    canvas->draw_str(canvas, 2, 37, "touch me, iButton");
-    {
-        const uint8_t buffer_size = 32;
-        char buf[buffer_size];
+    canvas->draw_str(canvas, 2, 25, "Dallas read >");
+
+    const uint8_t buffer_size = 50;
+    char buf[buffer_size];
+    for(uint8_t i = 0; i < state->dallas_address_count; i++) {
         snprintf(
             buf,
             buffer_size,
-            "%x:%x:%x:%x:%x:%x:%x:%x",
-            state->dallas_address[0],
-            state->dallas_address[1],
-            state->dallas_address[2],
-            state->dallas_address[3],
-            state->dallas_address[4],
-            state->dallas_address[5],
-            state->dallas_address[6],
-            state->dallas_address[7]);
-        canvas->draw_str(canvas, 2, 50, buf);
+            "%s[%u] %x:%x:%x:%x:%x:%x:%x:%x",
+            (i == state->dallas_address_index) ? "> " : "",
+            i+1,
+            state->dallas_address[i][0],
+            state->dallas_address[i][1],
+            state->dallas_address[i][2],
+            state->dallas_address[i][3],
+            state->dallas_address[i][4],
+            state->dallas_address[i][5],
+            state->dallas_address[i][6],
+            state->dallas_address[i][7]);
+        canvas->draw_str(canvas, 2, 37 + i * 12, buf);
     }
 }
 

@@ -8,13 +8,18 @@ typedef uint8_t event_t;
 class AppiButtonState {
 public:
     // state data
-    // test key = {0x01, 0xFD, 0x0E, 0x84, 0x01, 0x00, 0x00, 0xDB};
-    uint8_t dallas_address[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    static const uint8_t dallas_address_count = 3;
+    uint8_t dallas_address[dallas_address_count][8] = {
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x01, 0x41, 0xCE, 0x67, 0x0F, 0x00, 0x00, 0xB6},
+        {0x01, 0xFD, 0x0E, 0x84, 0x01, 0x00, 0x00, 0xDB}};
     uint8_t mode_index;
+    uint8_t dallas_address_index;
 
     // state initializer
     AppiButtonState() {
         mode_index = 0;
+        dallas_address_index = 0;
     }
 };
 
@@ -52,5 +57,7 @@ public:
 
     void increase_mode();
     void decrease_mode();
+    void increase_address();
+    void decrease_address();
     void switch_to_mode(uint8_t mode_index);
 };

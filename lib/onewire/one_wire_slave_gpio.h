@@ -54,7 +54,7 @@ public:
 
     void start(void);
     void stop(void);
-    bool emulate(uint8_t* buffer, uint8_t length);
+    bool emulate();
     bool check_reset(void);
     bool show_presence(void);
     bool receive_and_process_cmd(void);
@@ -64,7 +64,6 @@ public:
     bool send(const uint8_t* address, const uint8_t data_length = 1);
 
     OneWiteTimeType wait_while_gpio_is(volatile OneWiteTimeType retries, const bool pin_value);
-    OneWiteTimeType old_wait_while_gpio_is(volatile OneWiteTimeType retries, const bool pin_value);
 
     // set pin state
     inline void pin_set_float();
@@ -84,12 +83,6 @@ public:
 
     uint8_t get_first_bit_set_position(uint32_t mask) const;
     uint8_t get_first_id_tree_el_position(void) const;
-
-    // debug
-    void test(void);
-    const GpioPin* test_record;
-    void pin_debug(void);
-    void pin_debug_error(void);
 
     // commands
     void cmd_search_rom(void);
