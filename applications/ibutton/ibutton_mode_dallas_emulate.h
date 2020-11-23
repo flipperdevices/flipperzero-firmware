@@ -34,34 +34,23 @@ void AppiButtonModeDallasEmulate::event(AppiButtonEvent* event, AppiButtonState*
 
         if(onewire_slave->emulate()) {
             app->blink_green();
-        } else {
+        }
+    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+        if(event->value.input.state && event->value.input.input == InputUp) {
+            app->decrease_dallas_address();
+        }
+
+        if(event->value.input.state && event->value.input.input == InputDown) {
+            app->increase_dallas_address();
         }
     }
 }
 
 void AppiButtonModeDallasEmulate::render(CanvasApi* canvas, AppiButtonState* state) {
     canvas->set_font(canvas, FontSecondary);
-    canvas->draw_str(canvas, 2, 25, "< Dallas emulate");
+    canvas->draw_str(canvas, 2, 25, "< Dallas emulate >");
 
-    const uint8_t buffer_size = 50;
-    char buf[buffer_size];
-    for(uint8_t i = 0; i < state->dallas_address_count; i++) {
-        snprintf(
-            buf,
-            buffer_size,
-            "%s[%u] %x:%x:%x:%x:%x:%x:%x:%x",
-            (i == state->dallas_address_index) ? "> " : "",
-            i + 1,
-            state->dallas_address[i][0],
-            state->dallas_address[i][1],
-            state->dallas_address[i][2],
-            state->dallas_address[i][3],
-            state->dallas_address[i][4],
-            state->dallas_address[i][5],
-            state->dallas_address[i][6],
-            state->dallas_address[i][7]);
-        canvas->draw_str(canvas, 2, 37 + i * 12, buf);
-    }
+    app->render_dallas_list(canvas, state);
 }
 
 void AppiButtonModeDallasEmulate::acquire() {
