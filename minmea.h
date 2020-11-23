@@ -28,12 +28,13 @@ extern "C" {
 enum minmea_sentence_id {
     MINMEA_INVALID = -1,
     MINMEA_UNKNOWN = 0,
-    MINMEA_SENTENCE_RMC,
+    MINMEA_SENTENCE_GBS,
     MINMEA_SENTENCE_GGA,
-    MINMEA_SENTENCE_GSA,
     MINMEA_SENTENCE_GLL,
+    MINMEA_SENTENCE_GSA,
     MINMEA_SENTENCE_GST,
     MINMEA_SENTENCE_GSV,
+    MINMEA_SENTENCE_RMC,
     MINMEA_SENTENCE_VTG,
     MINMEA_SENTENCE_ZDA,
 };
@@ -54,6 +55,17 @@ struct minmea_time {
     int minutes;
     int seconds;
     int microseconds;
+};
+
+struct minmea_sentence_gbs {
+    struct minmea_time time;
+    struct minmea_float err_latitude;
+    struct minmea_float err_longitude;
+    struct minmea_float err_altitude;
+    int svid;
+    struct minmea_float prob;
+    struct minmea_float bias;
+    struct minmea_float stddev;
 };
 
 struct minmea_sentence_rmc {
@@ -199,6 +211,7 @@ bool minmea_scan(const char *sentence, const char *format, ...);
 /*
  * Parse a specific type of sentence. Return true on success.
  */
+bool minmea_parse_gbs(struct minmea_sentence_gbs *frame, const char *sentence);
 bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence);
 bool minmea_parse_gga(struct minmea_sentence_gga *frame, const char *sentence);
 bool minmea_parse_gsa(struct minmea_sentence_gsa *frame, const char *sentence);

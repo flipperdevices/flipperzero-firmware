@@ -358,24 +358,48 @@ enum minmea_sentence_id minmea_sentence_id(const char *sentence, bool strict)
     if (!minmea_scan(sentence, "t", type))
         return MINMEA_INVALID;
 
-    if (!strcmp(type+2, "RMC"))
-        return MINMEA_SENTENCE_RMC;
+    if (!strcmp(type+2, "GBS"))
+        return MINMEA_SENTENCE_GBS;
     if (!strcmp(type+2, "GGA"))
         return MINMEA_SENTENCE_GGA;
-    if (!strcmp(type+2, "GSA"))
-        return MINMEA_SENTENCE_GSA;
     if (!strcmp(type+2, "GLL"))
         return MINMEA_SENTENCE_GLL;
+    if (!strcmp(type+2, "GSA"))
+        return MINMEA_SENTENCE_GSA;
     if (!strcmp(type+2, "GST"))
         return MINMEA_SENTENCE_GST;
     if (!strcmp(type+2, "GSV"))
         return MINMEA_SENTENCE_GSV;
+    if (!strcmp(type+2, "RMC"))
+        return MINMEA_SENTENCE_RMC;
     if (!strcmp(type+2, "VTG"))
         return MINMEA_SENTENCE_VTG;
     if (!strcmp(type+2, "ZDA"))
         return MINMEA_SENTENCE_ZDA;
 
     return MINMEA_UNKNOWN;
+}
+
+bool minmea_parse_gbs(struct minmea_sentence_gbs *frame, const char *sentence)
+{
+    // $GNGBS,170556.00,3.0,2.9,8.3,,,,*5C
+    char type[6];
+    if (!minmea_scan(sentence, "tTfffdfff",
+            type,
+            &frame->time,
+            &frame->err_latitude,
+            &frame->err_longitude,
+            &frame->err_altitude,
+            &frame->svid,
+            &frame->prob,
+            &frame->bias,
+            &frame->stddev
+            ))
+        return false;
+    if (strcmp(type+2, "GBS"))
+        return false;
+
+    return true;
 }
 
 bool minmea_parse_rmc(struct minmea_sentence_rmc *frame, const char *sentence)
