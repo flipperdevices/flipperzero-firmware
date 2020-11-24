@@ -1,5 +1,8 @@
 #include "one_wire_device.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 OneWireDevice::OneWireDevice(
     uint8_t id_1,
     uint8_t id_2,

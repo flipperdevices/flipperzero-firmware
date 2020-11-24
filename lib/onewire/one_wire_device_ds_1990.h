@@ -1,6 +1,9 @@
 #pragma once
 #include "one_wire_device.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 class DS1990 : public OneWireDevice {
 public:
     static constexpr uint8_t family_code{0x01};

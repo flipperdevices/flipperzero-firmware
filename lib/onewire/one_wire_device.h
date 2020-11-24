@@ -3,6 +3,9 @@
 #include "maxim_crc.h"
 #include "one_wire_slave_gpio.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 class OneWireDevice {
 public:
     OneWireDevice(

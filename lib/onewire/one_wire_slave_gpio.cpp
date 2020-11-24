@@ -2,6 +2,9 @@
 #include "one_wire_device.h"
 #include "one_wire_device_ds_1990.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 static uint32_t __instructions_per_us = 0;
 
 OneWireGpioSlave::OneWireGpioSlave(const GpioPin* one_wire_gpio) {
@@ -156,6 +159,13 @@ bool OneWireGpioSlave::detach(uint8_t device_number) {
     build_id_tree();
 
     return true;
+}
+
+uint8_t OneWireGpioSlave::get_next_device_index(const uint8_t index_start) const {
+    for(uint8_t i = index_start; i < ONE_WIRE_MAX_DEVICES; ++i) {
+        if(devices[i] != nullptr) return i;
+    }
+    return 0;
 }
 
 uint8_t OneWireGpioSlave::build_id_tree(void) {
@@ -372,12 +382,24 @@ bool OneWireGpioSlave::receive_and_process_cmd(void) {
 
     switch(cmd) {
     case 0xF0:
-        // Search rom
+        // SEARCH ROM
         device_selected = nullptr;
         cmd_search_rom();
 
         // trigger reinit
         return true;
+
+    case 0x33: 
+        // READ ROM
+
+        // work only when one slave on the bus
+        if((device_selected == nullptr) && (devices_count == 1)) {
+            device_selected = devices[get_next_device_index()];
+        }
+        if(device_selected != nullptr) {
+            device_selected->send_id(this);
+        }
+        return false;
 
     default: // Unknown command
         error = OneWireGpioSlaveError::INCORRECT_ONEWIRE_CMD;

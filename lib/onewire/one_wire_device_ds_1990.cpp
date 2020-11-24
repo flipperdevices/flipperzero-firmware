@@ -1,5 +1,8 @@
 #include "one_wire_device_ds_1990.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 DS1990::DS1990(
     uint8_t ID1,
     uint8_t ID2,

@@ -55,3 +55,13 @@ CFLAGS			+= -I$(LIB_DIR)/app-template
 # fnv1a hash library
 CFLAGS			+= -I$(LIB_DIR)/fnv1a-hash
 C_SOURCES		+= $(LIB_DIR)/fnv1a-hash/fnv1a-hash.c
+
+# onewire library
+ONEWIRE_DIR		= $(LIB_DIR)/onewire
+CFLAGS			+= -I$(ONEWIRE_DIR)
+CPP_SOURCES		+= $(wildcard $(ONEWIRE_DIR)/*.cpp)
+
+# cyfral library
+CYFRAL_DIR		= $(LIB_DIR)/cyfral
+CFLAGS			+= -I$(CYFRAL_DIR)
+CPP_SOURCES		+= $(wildcard $(CYFRAL_DIR)/*.cpp)

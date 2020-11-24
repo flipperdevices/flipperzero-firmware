@@ -3,6 +3,9 @@
 #include "flipper_v2.h"
 #include "one_wire_timings.h"
 
+// TODO fix GPL compability
+// currently we use rework of OneWireHub
+
 #define ONE_WIRE_MAX_DEVICES 1
 #define ONE_WIRE_TREE_SIZE ((2 * ONE_WIRE_MAX_DEVICES) - 1)
 
@@ -76,6 +79,7 @@ public:
     uint8_t attach(OneWireDevice& device);
     bool detach(const OneWireDevice& device);
     bool detach(uint8_t device_number);
+    uint8_t get_next_device_index(const uint8_t index_start = 0) const;
 
     // id tree managment
     uint8_t build_id_tree(void);
