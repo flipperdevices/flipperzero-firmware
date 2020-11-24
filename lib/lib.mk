@@ -56,7 +56,18 @@ CFLAGS			+= -I$(LIB_DIR)/app-template
 CFLAGS			+= -I$(LIB_DIR)/fnv1a-hash
 C_SOURCES		+= $(LIB_DIR)/fnv1a-hash/fnv1a-hash.c
 
+# build onewire/cyfral library only if
+# we build iButton application
+BUILD_ONEWIRE_LIBS = 0
+ifeq ($(GCC_MINOR), 4)
+    BUILD_ONEWIRE_LIBS = 1
+endif
+ifeq ($(GCC_MINOR), 5)
+    BUILD_ONEWIRE_LIBS = 1
+endif
+
 # onewire library
+ifeq ($(BUILD_ONEWIRE_LIBS), 1)
 ONEWIRE_DIR		= $(LIB_DIR)/onewire
 CFLAGS			+= -I$(ONEWIRE_DIR)
 CPP_SOURCES		+= $(wildcard $(ONEWIRE_DIR)/*.cpp)
@@ -65,3 +76,4 @@ CPP_SOURCES		+= $(wildcard $(ONEWIRE_DIR)/*.cpp)
 CYFRAL_DIR		= $(LIB_DIR)/cyfral
 CFLAGS			+= -I$(CYFRAL_DIR)
 CPP_SOURCES		+= $(wildcard $(CYFRAL_DIR)/*.cpp)
+endif
