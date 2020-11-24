@@ -120,7 +120,7 @@ uint32_t CyfralReader::search_array_in_array(
     const uint32_t haystack_size,
     const bool* needle,
     const uint32_t needle_size) {
-    int haystack_index = 0, needle_index = 0;
+    uint32_t haystack_index = 0, needle_index = 0;
 
     while(haystack_index < haystack_size && needle_index < needle_size) {
         if(haystack[haystack_index] == needle[needle_index]) {
