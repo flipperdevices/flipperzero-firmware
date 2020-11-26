@@ -57,11 +57,11 @@ bool OneWireGpioSlave::emulate() {
         if(!receive_and_process_cmd()) {
             __enable_irq();
             osKernelUnlock();
-            return false;
+            //return false;
         } else {
             __enable_irq();
             osKernelUnlock();
-            return (error == OneWireGpioSlaveError::NO_ERROR);
+            //return (error == OneWireGpioSlaveError::NO_ERROR);
         }
     }
 }
