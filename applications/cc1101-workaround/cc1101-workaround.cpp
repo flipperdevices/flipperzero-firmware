@@ -4,7 +4,6 @@
 
 #define RSSI_DELAY 5000 //rssi delay in micro second
 #define CHAN_SPA 0.05 // channel spacing
-#define F_OSC 26e6
 
 int16_t rssi_to_dbm(uint8_t rssi_dec, uint8_t rssiOffset) {
     int16_t rssi;
@@ -33,12 +32,12 @@ typedef struct {
 
 void setup_freq(CC1101* cc1101, const FreqConfig* config) {
     // cc1101->SpiWriteReg(CC1101_MCSM0, 0x08); // disalbe FS_AUTOCAL
-    cc1101->SpiWriteReg(CC1101_AGCCTRL2, 0x43 | 0x0C); // MAX_DVGA_GAIN to 11 for fast rssi
-    cc1101->SpiWriteReg(CC1101_AGCCTRL0, 0xB0); // max AGC WAIT_TIME; 0 filter_length
-    cc1101->SetMod(GFSK); // set to GFSK for fast rssi measurement | +8 is dcfilter off
+    // cc1101->SpiWriteReg(CC1101_AGCCTRL2, 0x43 | 0x0C); // MAX_DVGA_GAIN to 11 for fast rssi
+    // cc1101->SpiWriteReg(CC1101_AGCCTRL0, 0xB0); // max AGC WAIT_TIME; 0 filter_length
+    // cc1101->SetMod(GFSK); // set to GFSK for fast rssi measurement | +8 is dcfilter off
 
     uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC / 65536);
-    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg)&0xFF);
+    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg) & 0xFF);
     cc1101->SetChannel(config->channel);
 
     /*
@@ -99,7 +98,7 @@ const Band bands[] = {
     {315., {0x00, 0x00, 0x00}, 0, 255, 74},
     {348., {0x00, 0x00, 0x00}, 0, 255, 74},
     {387., {0x00, 0x00, 0x00}, 0, 255, 74},
-    {433., {0x00, 0x00, 0x00}, 0, 255, 74},
+    {433.92, {0x00, 0x00, 0x00}, 0, 255, 74},
     {464., {0x00, 0x00, 0x00}, 0, 255, 74},
     {779., {0x00, 0x00, 0x00}, 0, 255, 74},
     {868., {0x00, 0x00, 0x00}, 0, 255, 74},
@@ -156,6 +155,8 @@ typedef struct {
 
 static void render_callback(CanvasApi* canvas, void* ctx) {
     State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
+
+    if(!state) return;
 
     canvas->clear(canvas);
     canvas->set_color(canvas, ColorBlack);
@@ -222,7 +223,7 @@ extern "C" void cc1101_workaround(void* p) {
 
     State _state;
     _state.mode = ModeRx;
-    _state.active_freq = 0;
+    _state.active_freq = 4;
     _state.need_cc1101_conf = true;
     _state.last_rssi = 0;
     _state.tx_level = 0;
@@ -262,14 +263,52 @@ extern "C" void cc1101_workaround(void* p) {
         furiac_exit(NULL);
     }
 
-    // RX filter bandwidth 58.035714(0xFD) 100k(0xCD) 200k(0x8D)
-    cc1101.SpiWriteReg(CC1101_MDMCFG4, 0xCD);
-    // datarate config 250kBaud  for the purpose of fast rssi measurement
-    cc1101.SpiWriteReg(CC1101_MDMCFG3, 0x3B);
-    // FEC preamble etc. last 2 bits for channel spacing
-    cc1101.SpiWriteReg(CC1101_MDMCFG1, 0x20);
-    // 50khz channel spacing
-    cc1101.SpiWriteReg(CC1101_MDMCFG0, 0xF8);
+    // === Transparent mode ===
+
+    cc1101.SpiStrobe(CC1101_SIDLE);
+
+    printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
+
+    // FIFOTHR.ADC_RETENTION = 1
+    cc1101.SpiSetRegValue(CC1101_FIFOTHR, 1, 6, 6);
+
+    // PKTCTRL1.APPEND_STATUS = 0
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
+    
+    // PKTCTRL0.WHITE_DATA = 0
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
+
+    // PKTCTRL0.LENGTH_CONFIG = 2 // Infinite packet length mode
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 2, 1, 0);
+
+    // PKTCTRL0.CRC_EN = 0
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 2, 2);
+
+    // bandwidth 50-100 kHz
+    if(!cc1101.setRxBandwidth(67.0)) {
+        printf("wrong rx bw\n");
+    }
+
+    // datarate ~30 kbps
+    if(!cc1101.setBitRate(30.)) {
+        printf("wrong bitrate\n");
+    }
+
+    // MCSM0.FS_AUTOCAL[1:0] = 1
+    cc1101.SpiSetRegValue(CC1101_MCSM0, 1, 5, 4);
+
+    printf("init ok\n");
+    printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
+
+    // mod
+    // MDMCFG2.MOD_FORMAT = 3 (3: OOK, 0: 2-FSK)
+    cc1101.SpiSetRegValue(CC1101_MDMCFG2, 3, 6, 4);
+    // MDMCFG2.SYNC_MODE = 0
+    cc1101.SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
+
+    printf("init ok\n");
+
+    // === Transparent mode ===
 
     // TODO open record
     GpioPin* led_record = (GpioPin*)&led_gpio[1];
@@ -278,6 +317,10 @@ extern "C" void cc1101_workaround(void* p) {
     gpio_init(led_record, GpioModeOutputOpenDrain);
 
     const int16_t RSSI_THRESHOLD = -89;
+
+    setup_freq(&cc1101, &FREQ_LIST[1]);
+
+    cc1101.SetReceive();
 
     AppEvent event;
     while(1) {
@@ -324,10 +367,11 @@ extern "C" void cc1101_workaround(void* p) {
             }
         } else {
             if(!state->need_cc1101_conf && state->mode == ModeRx) {
-                state->last_rssi = rx_rssi(&cc1101, &FREQ_LIST[state->active_freq]);
+                // state->last_rssi = rx_rssi(&cc1101, &FREQ_LIST[state->active_freq]);
             }
         }
 
+        /*
         if(state->need_cc1101_conf) {
             if(state->mode == ModeRx) {
                 setup_freq(&cc1101, &FREQ_LIST[state->active_freq]);
@@ -338,11 +382,32 @@ extern "C" void cc1101_workaround(void* p) {
             }
 
             state->need_cc1101_conf = false;
-        }
+        } */
 
+        printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
+        
+        cc1101.SpiStrobe(CC1101_SFRX);
+        cc1101.SetReceive();
+        printf("clear fifo\n");
+        printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
+        
+        // get FIFO size
+        uint8_t begin_size = cc1101.SpiReadStatus(CC1101_RXBYTES);
+
+        osDelay(50);
+
+        printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
+        
+        // get FIFO size again
+        uint8_t end_size = cc1101.SpiReadStatus(CC1101_RXBYTES);
+
+        printf("begin: %d, end: %d\n", begin_size, end_size);
+
+        /*
         gpio_write(
             led_record,
             (state->last_rssi > RSSI_THRESHOLD && !state->need_cc1101_conf) ? false : true);
+        */
 
         release_mutex(&state_mutex, state);
         widget_update(widget);
