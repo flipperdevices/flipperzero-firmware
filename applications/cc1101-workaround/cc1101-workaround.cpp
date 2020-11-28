@@ -53,6 +53,8 @@ void setup_freq(CC1101* cc1101, const FreqConfig* config) {
     */
 }
 
+ GpioPin debug_0 = {GPIOB, GPIO_PIN_2};
+
 int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     cc1101->SpiStrobe(CC1101_SFRX);
     cc1101->SetReceive();
@@ -81,11 +83,10 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     sprintf(buf, "begin: %d, end: %d\n", begin_size, end_size);
     cli_print(buf);
 
-    /*
     uint8_t rx_data[64];
     uint8_t fifo_length = end_size - begin_size;
     if(fifo_length < 64) {
-        cc1101.SpiReadBurstReg(CC1101_RXFIFO, rx_data, fifo_length);
+        cc1101->SpiReadBurstReg(CC1101_RXFIFO, rx_data, fifo_length);
 
         /*
         printf("FIFO:");
@@ -96,18 +97,17 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
             printf(" ");
         }
         printf("\n");
-        *
+        */
 
         for(uint8_t i = 0; i < fifo_length; i++) {
             for(uint8_t bit = 0; bit < 8; bit++) {
-                gpio_write((GpioPin*)&debug_0, (rx_data[i] & (1 << (7 - bit))) > 0);
+                gpio_write((GpioPin*)&debug_0, (rx_data[i] & (1 << bit)) > 0);
                 delay_us(10);
             }
         }
     } else {
-        printf("fifo size over\n");
+        cli_print("fifo size over\n");
     }
-    */
 
     return rssi_dBm;
 }
@@ -283,8 +283,7 @@ extern "C" void cc1101_workaround(void* p) {
         furiac_exit(NULL);
     }
     gui->add_widget(gui, widget, GuiLayerFullscreen);
-
-    GpioPin debug_0 = {GPIOB, GPIO_PIN_2};
+    
     gpio_init(&debug_0, GpioModeOutputPushPull);
     gpio_write((GpioPin*)&debug_0, false);
 
