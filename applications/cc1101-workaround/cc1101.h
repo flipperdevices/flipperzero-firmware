@@ -151,7 +151,6 @@ private:
     void Reset(void);
     void SpiWriteBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num);
     uint8_t SpiReadReg(uint8_t addr);
-    void SpiReadBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num);
     void RegConfigSettings(void);
 
 public:
@@ -159,6 +158,7 @@ public:
 
     void SpiWriteReg(uint8_t addr, uint8_t value);
     bool SpiSetRegValue(uint8_t reg, uint8_t value, uint8_t msb, uint8_t lsb);
+    void SpiReadBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num);
     void SpiInit(void);
     void SpiEnd(void);
     void SetMod(uint8_t mode);
