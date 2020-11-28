@@ -311,12 +311,15 @@ extern "C" void cc1101_workaround(void* p) {
 
     // cc1101.SpiWriteReg(CC1101_MDMCFG4, 0xCC); // RX filter bandwidth 100k(0xcc)
     // cc1101.SpiWriteReg(CC1101_MDMCFG3, 0x43); //datarate config 512kBaud  for the purpose of fast rssi measurement
-    cc1101.SpiWriteReg(CC1101_MDMCFG1, 0x21); //FEC preamble etc. last 2 bits for channel spacing
-    cc1101.SpiWriteReg(CC1101_MDMCFG0, 0xF8); //100khz channel spacing
-    //CC1101_CHANNR moved to SetChannel func
+    // cc1101.SpiWriteReg(CC1101_MDMCFG1, 0x21); //FEC preamble etc. last 2 bits for channel spacing
+    // cc1101.SpiWriteReg(CC1101_MDMCFG0, 0xF8); //100khz channel spacing
+    // CC1101_CHANNR moved to SetChannel func
 
     cc1101.SpiWriteReg(CC1101_MCSM0, 0x18); // calibrate when going from IDLE to RX or TX ; 149 - 155 μs timeout
-    cc1101.SpiWriteReg(CC1101_FOCCFG, 0x16); //frequency compensation
+    // MCSM0.FS_AUTOCAL[1:0] = 1
+    // cc1101.SpiSetRegValue(CC1101_MCSM0, 1, 5, 4); // this not work
+
+    // cc1101.SpiWriteReg(CC1101_FOCCFG, 0x16); //frequency compensation
     cc1101.SpiWriteReg(CC1101_AGCCTRL2, 0x43);
     cc1101.SpiWriteReg(CC1101_AGCCTRL1, 0x49);
     cc1101.SpiWriteReg(CC1101_AGCCTRL0, 0x91);
@@ -326,33 +329,33 @@ extern "C" void cc1101_workaround(void* p) {
     cc1101.SpiWriteReg(CC1101_FSCAL2, 0x2A);
     cc1101.SpiWriteReg(CC1101_FSCAL1, 0x00);
     cc1101.SpiWriteReg(CC1101_FSCAL0, 0x1F);
-    cc1101.SpiWriteReg(CC1101_TEST2, 0x81);
-    cc1101.SpiWriteReg(CC1101_TEST1, 0x35);
-    cc1101.SpiWriteReg(CC1101_TEST0, 0x0B); //should be 0x0B for lower than 430.6MHz and 0x09 for higher
+    // cc1101.SpiWriteReg(CC1101_TEST2, 0x81);
+    // cc1101.SpiWriteReg(CC1101_TEST1, 0x35);
+    // cc1101.SpiWriteReg(CC1101_TEST0, 0x0B); //should be 0x0B for lower than 430.6MHz and 0x09 for higher
 
-    cc1101.SpiWriteReg(CC1101_IOCFG2, 0x0D); //data output pin for asynchronous mode
-    cc1101.SpiWriteReg(CC1101_IOCFG0, 0x2E); //High impedance (3-state), GDO0 configed as data input for asynchronous mode
-    cc1101.SpiWriteReg(CC1101_PKTCTRL0, 0x33); //whitening off; asynchronous serial mode; CRC diable；reserved
-    cc1101.SpiWriteReg(CC1101_FIFOTHR, 0x47); //Adc_retention enabled for RX filter bandwidth less than 325KHz; defalut fifo threthold.
+    // cc1101.SpiWriteReg(CC1101_IOCFG2, 0x0D); //data output pin for asynchronous mode
+    // cc1101.SpiWriteReg(CC1101_IOCFG0, 0x2E); //High impedance (3-state), GDO0 configed as data input for asynchronous mode
+    // cc1101.SpiWriteReg(CC1101_PKTCTRL0, 0x33); //whitening off; asynchronous serial mode; CRC diable；reserved
+    // cc1101.SpiWriteReg(CC1101_FIFOTHR, 0x47); //Adc_retention enabled for RX filter bandwidth less than 325KHz; defalut fifo threthold.
 
     // === Transparent mode ===
 
     printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
 
     // FIFOTHR.ADC_RETENTION = 1
-    // cc1101.SpiSetRegValue(CC1101_FIFOTHR, 1, 6, 6);
+    cc1101.SpiSetRegValue(CC1101_FIFOTHR, 1, 6, 6);
 
     // PKTCTRL1.APPEND_STATUS = 0
-    // cc1101.SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
     
     // PKTCTRL0.WHITE_DATA = 0
-    // cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
 
     // PKTCTRL0.LENGTH_CONFIG = 2 // Infinite packet length mode
-    // cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 2, 1, 0);
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 2, 1, 0);
 
     // PKTCTRL0.CRC_EN = 0
-    // cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 2, 2);
+    cc1101.SpiSetRegValue(CC1101_PKTCTRL0, 0, 2, 2);
 
     // bandwidth 50-100 kHz
     if(!cc1101.setRxBandwidth(200.0)) {
@@ -364,17 +367,14 @@ extern "C" void cc1101_workaround(void* p) {
         printf("wrong bitrate\n");
     }
 
-    // MCSM0.FS_AUTOCAL[1:0] = 1
-    // cc1101.SpiSetRegValue(CC1101_MCSM0, 1, 5, 4);
-
     printf("init ok\n");
     printf("status: %d\n", cc1101.SpiReadStatus(CC1101_MARCSTATE));
 
     // mod
     // MDMCFG2.MOD_FORMAT = 3 (3: OOK, 0: 2-FSK)
-    // cc1101.SpiSetRegValue(CC1101_MDMCFG2, 3, 6, 4);
+    cc1101.SpiSetRegValue(CC1101_MDMCFG2, 3, 6, 4);
     // MDMCFG2.SYNC_MODE = 0
-    // cc1101.SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
+    cc1101.SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
 
     printf("init ok\n");
 
