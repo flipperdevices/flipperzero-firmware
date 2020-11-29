@@ -33,7 +33,7 @@ typedef struct {
     list_app_t open_by_apps;
 } FuriRecordItem;
 
-LIST_DEF(list_fury_record, FuriRecordItem, M_POD_OPLIST);
+LIST_DEF(list_furi_record, FuriRecordItem, M_POD_OPLIST);
 
 bool new_furi_init();
 
