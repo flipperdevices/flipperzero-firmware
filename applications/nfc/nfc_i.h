@@ -1,11 +1,16 @@
 #pragma once
 
+#include "nfc.h"
+
 #include <flipper_v2.h>
 
 #include <rfal_analogConfig.h>
 #include <rfal_rf.h>
 #include <rfal_nfc.h>
 #include <rfal_nfca.h>
+#include <rfal_nfcb.h>
+#include <rfal_nfcf.h>
+#include <rfal_nfcv.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
 
@@ -18,6 +23,24 @@
 #include <menu/menu_item.h>
 
 #include "dispatcher.h"
+
+typedef enum {
+    NfcDeviceTypeNfca,
+    NfcDeviceTypeNfcb,
+    NfcDeviceTypeNfcf,
+    NfcDeviceTypeNfcv,
+    NfcDeviceTypeNfcMifare
+} NfcDeviceType;
+
+typedef struct {
+    NfcDeviceType type;
+    union {
+        rfalNfcaListenDevice nfca;
+        rfalNfcbListenDevice nfcb;
+        rfalNfcfListenDevice nfcf;
+        rfalNfcvListenDevice nfcv;
+    };
+} NfcDevice;
 
 typedef enum {
     MessageTypeBase,
@@ -34,7 +57,6 @@ struct Nfc {
     Widget* widget;
     ValueMutex* menu_vm;
     MenuItem* menu;
-    rfalNfcDiscoverParam* disParams;
 
     osThreadAttr_t worker_attr;
     osThreadId_t worker;
