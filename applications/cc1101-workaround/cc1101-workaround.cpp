@@ -211,13 +211,42 @@ void async_config(CC1101* cc1101) {
     // PKTCTRL1.APPEND_STATUS = 0
     cc1101->SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
 
-    cc1101->SpiWriteReg(CC1101_PKTCTRL0,0x32);//Packet Automation Control
-
-    cc1101->SpiWriteReg(CC1101_FSCTRL1,0x06); //Frequency Synthesizer Control
+    cc1101->SpiWriteReg(CC1101_PKTCTRL0, 0x32); // Packet Automation Control
+    /*
+    FIXME: this sequence not work
+    // PKTCTRL0.PKT_FORMAT = 3
+    cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 3, 5, 4);
+    // PKTCTRL0.LENGTH_CONFIG = 2 // Infinite packet length mode
+    cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 2, 1, 0);
+    // PKTCTRL0.CRC_EN = 0
+    cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 0, 2, 2);
+    // PKTCTRL0.WHITE_DATA = 0
+    cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
+    */
 
     cc1101->SpiWriteReg(CC1101_MDMCFG4,0xD6); //Modem Configuration
     cc1101->SpiWriteReg(CC1101_MDMCFG3,0xE4); //Modem Configuration
+    /*
+    FIXME: not work
+    // bandwidth 50-100 kHz
+    if(!cc1101->setRxBandwidth(75.0)) {
+        printf("wrong rx bw\n");
+    }
+
+    // datarate ~30 kbps
+    if(!cc1101->setBitRate(100.)) {
+        printf("wrong bitrate\n");
+    }
+    */
+   
     cc1101->SpiWriteReg(CC1101_MDMCFG2,0x30); //Modem Configuration
+    /*
+    FIXME: not work
+    // MDMCFG2.MOD_FORMAT = 3 (3: OOK, 0: 2-FSK)
+    cc1101->SpiSetRegValue(CC1101_MDMCFG2, 3, 6, 4);
+    // MDMCFG2.SYNC_MODE = 0
+    cc1101->SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
+    */
 
     cc1101->SpiWriteReg(CC1101_MCSM0,0x18);   //Main Radio Control State Machine Configuration
 
