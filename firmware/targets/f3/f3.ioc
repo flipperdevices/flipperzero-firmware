@@ -126,7 +126,6 @@ PC2.GPIO_ModeDefaultEXTI=GPIO_MODE_IT_RISING_FALLING
 PA6.GPIOParameters=GPIO_Label
 SH.GPXTI10.0=GPIO_EXTI10
 PCC.Ble.Mode=NOT_SELECTED
-NVIC.EXTI4_IRQn=true\:0\:0\:false\:false\:true\:false\:true\:true
 PC4.GPIO_ModeDefaultEXTI=GPIO_MODE_IT_RISING_FALLING
 RCC.PLLQoutputFreq_Value=64000000
 ProjectManager.ProjectFileName=f3.ioc
