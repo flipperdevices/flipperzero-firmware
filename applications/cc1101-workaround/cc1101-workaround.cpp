@@ -203,10 +203,13 @@ void flp_config(CC1101* cc1101) {
 }
 
 void async_config(CC1101* cc1101) {
-    cc1101->SpiWriteReg(CC1101_IOCFG0,0x0D);  //GDO0 Output Pin Configuration
+    cc1101->SpiSetRegValue(CC1101_IOCFG0, 13, 5, 0);  // GDO0 Output Pin Configuration
 
     // FIFOTHR.ADC_RETENTION = 1
     cc1101->SpiSetRegValue(CC1101_FIFOTHR, 1, 6, 6);
+
+    // PKTCTRL1.APPEND_STATUS = 0
+    cc1101->SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
 
     cc1101->SpiWriteReg(CC1101_PKTCTRL0,0x32);//Packet Automation Control
 
