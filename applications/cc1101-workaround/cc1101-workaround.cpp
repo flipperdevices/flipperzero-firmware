@@ -447,6 +447,7 @@ extern "C" void cc1101_workaround(void* p) {
     // flp_config(&cc1101);
     async_config(&cc1101);
     setup_freq(&cc1101, &FREQ_LIST[4]);
+    enable_cc1101_irq();
 
     printf("init ok\n");
 
