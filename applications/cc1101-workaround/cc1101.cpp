@@ -96,7 +96,8 @@ uint8_t last_status;
 ****************************************************************/
 void CC1101::SpiWriteReg(uint8_t addr, uint8_t value) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
 
     last_status = SpiTransfer(addr);
     last_status = SpiTransfer(value);
@@ -111,7 +112,8 @@ void CC1101::SpiWriteReg(uint8_t addr, uint8_t value) {
 ****************************************************************/
 void CC1101::SpiWriteBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(addr | WRITE_BURST);
     for(uint8_t i = 0; i < num; i++) {
         last_status = SpiTransfer(buffer[i]);
@@ -127,7 +129,8 @@ void CC1101::SpiWriteBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num) {
 ****************************************************************/
 void CC1101::SpiStrobe(uint8_t strobe) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(strobe);
     gpio_write(ss_pin, true);
 }
@@ -140,7 +143,8 @@ void CC1101::SpiStrobe(uint8_t strobe) {
 ****************************************************************/
 uint8_t CC1101::SpiReadReg(uint8_t addr) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(addr | READ_SINGLE);
     uint8_t value = SpiTransfer(0);
     gpio_write(ss_pin, true);
@@ -156,7 +160,8 @@ uint8_t CC1101::SpiReadReg(uint8_t addr) {
 ****************************************************************/
 void CC1101::SpiReadBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(addr | READ_BURST);
     for(uint8_t i = 0; i < num; i++) {
         buffer[i] = SpiTransfer(0);
@@ -172,7 +177,8 @@ void CC1101::SpiReadBurstReg(uint8_t addr, uint8_t* buffer, uint8_t num) {
 ****************************************************************/
 uint8_t CC1101::SpiReadStatus(uint8_t addr) {
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(addr | READ_BURST);
     uint8_t value = SpiTransfer(0);
     gpio_write(ss_pin, true);
@@ -192,9 +198,11 @@ void CC1101::Reset(void) {
     gpio_write(ss_pin, true);
     delay(1);
     gpio_write(ss_pin, false);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     last_status = SpiTransfer(CC1101_SRES);
-    while(gpio_read(this->miso_pin_record));
+    while(gpio_read(this->miso_pin_record))
+        ;
     gpio_write(ss_pin, true);
 }
 
@@ -404,14 +412,14 @@ void CC1101::SetTransmit(void) {
 
 bool CC1101::setRxBandwidth(float bandwidth) {
     if(bandwidth < 58.0 || bandwidth > 821.0) return false;
-    
+
     // set mode to standby
     SpiStrobe(CC1101_SIDLE);
 
     // calculate exponent and mantissa values
     for(int8_t e = 3; e >= 0; e--) {
         for(int8_t m = 3; m >= 0; m--) {
-            float point = (F_OSC)/(8 * (m + 4) * ((uint32_t)1 << e));
+            float point = (F_OSC) / (8 * (m + 4) * ((uint32_t)1 << e));
             if(fabs((bandwidth * 1000.0) - point) <= 1000) {
                 // set Rx channel filter bandwidth
                 SpiSetRegValue(CC1101_MDMCFG4, (e << 6) | (m << 4), 7, 4);
@@ -424,9 +432,15 @@ bool CC1101::setRxBandwidth(float bandwidth) {
     return false;
 }
 
-static void getExpMant(float target, uint16_t mantOffset, uint8_t divExp, uint8_t expMax, uint8_t& exp, uint8_t& mant) {
+static void getExpMant(
+    float target,
+    uint16_t mantOffset,
+    uint8_t divExp,
+    uint8_t expMax,
+    uint8_t& exp,
+    uint8_t& mant) {
     // get table origin point (exp = 0, mant = 0)
-    float origin = (mantOffset * F_OSC)/((uint32_t)1 << divExp);
+    float origin = (mantOffset * F_OSC) / ((uint32_t)1 << divExp);
 
     // iterate over possible exponent values
     for(int8_t e = expMax; e >= 0; e--) {
@@ -439,7 +453,7 @@ static void getExpMant(float target, uint16_t mantOffset, uint8_t divExp, uint8_
             exp = e;
 
             // calculate size of step between table rows
-            float stepSize = intervalStart/(float)mantOffset;
+            float stepSize = intervalStart / (float)mantOffset;
 
             // get target point position (exp = e, mant = m)
             mant = ((target - intervalStart) / stepSize);
@@ -452,15 +466,15 @@ static void getExpMant(float target, uint16_t mantOffset, uint8_t divExp, uint8_
 
 bool CC1101::setBitRate(float bitrate) {
     if(bitrate < 0.6 || bitrate > 500.0) return false;
-    
+
     // set mode to standby
     SpiStrobe(CC1101_SIDLE);
-    
+
     // calculate exponent and mantissa values
     uint8_t e = 0;
     uint8_t m = 0;
     getExpMant(bitrate * 1000.0, 256, 28, 14, e, m);
-    
+
     // set bit rate value
     SpiSetRegValue(CC1101_MDMCFG4, e, 3, 0);
     SpiSetRegValue(CC1101_MDMCFG3, m, 7, 0);

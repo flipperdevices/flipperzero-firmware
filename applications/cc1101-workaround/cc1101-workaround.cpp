@@ -39,7 +39,7 @@ void setup_freq(CC1101* cc1101, const FreqConfig* config) {
     // cc1101->SetMod(GFSK); // set to GFSK for fast rssi measurement | +8 is dcfilter off
 
     uint32_t freq_reg = config->band->base_freq * 1e6 / (F_OSC / 65536);
-    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg) & 0xFF);
+    cc1101->SetFreq((freq_reg >> 16) & 0xFF, (freq_reg >> 8) & 0xFF, (freq_reg)&0xFF);
     cc1101->SetChannel(config->channel);
 
     /*
@@ -137,7 +137,8 @@ void flp_config(CC1101* cc1101) {
     // cc1101->SpiWriteReg(CC1101_MDMCFG0, 0xF8); //100khz channel spacing
     // CC1101_CHANNR moved to SetChannel func
 
-    cc1101->SpiWriteReg(CC1101_MCSM0, 0x18); // calibrate when going from IDLE to RX or TX ; 149 - 155 μs timeout
+    cc1101->SpiWriteReg(
+        CC1101_MCSM0, 0x18); // calibrate when going from IDLE to RX or TX ; 149 - 155 μs timeout
     // MCSM0.FS_AUTOCAL[1:0] = 1
     // cc1101->SpiSetRegValue(CC1101_MCSM0, 1, 5, 4); // this not work
 
@@ -170,7 +171,7 @@ void flp_config(CC1101* cc1101) {
 
     // PKTCTRL1.APPEND_STATUS = 0
     cc1101->SpiSetRegValue(CC1101_PKTCTRL1, 0, 2, 2);
-    
+
     // PKTCTRL0.WHITE_DATA = 0
     cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
 
@@ -203,7 +204,7 @@ void flp_config(CC1101* cc1101) {
 }
 
 void async_config(CC1101* cc1101) {
-    cc1101->SpiSetRegValue(CC1101_IOCFG0, 13, 5, 0);  // GDO0 Output Pin Configuration
+    cc1101->SpiSetRegValue(CC1101_IOCFG0, 13, 5, 0); // GDO0 Output Pin Configuration
 
     // FIFOTHR.ADC_RETENTION = 1
     cc1101->SpiSetRegValue(CC1101_FIFOTHR, 1, 6, 6);
@@ -224,8 +225,8 @@ void async_config(CC1101* cc1101) {
     cc1101->SpiSetRegValue(CC1101_PKTCTRL0, 0, 6, 6);
     */
 
-    cc1101->SpiWriteReg(CC1101_MDMCFG4,0xD6); //Modem Configuration
-    cc1101->SpiWriteReg(CC1101_MDMCFG3,0xE4); //Modem Configuration
+    cc1101->SpiWriteReg(CC1101_MDMCFG4, 0xD6); //Modem Configuration
+    cc1101->SpiWriteReg(CC1101_MDMCFG3, 0xE4); //Modem Configuration
     /*
     FIXME: not work
     // bandwidth 50-100 kHz
@@ -238,8 +239,8 @@ void async_config(CC1101* cc1101) {
         printf("wrong bitrate\n");
     }
     */
-   
-    cc1101->SpiWriteReg(CC1101_MDMCFG2,0x30); //Modem Configuration
+
+    cc1101->SpiWriteReg(CC1101_MDMCFG2, 0x30); //Modem Configuration
     /*
     FIXME: not work
     // MDMCFG2.MOD_FORMAT = 3 (3: OOK, 0: 2-FSK)
@@ -248,12 +249,12 @@ void async_config(CC1101* cc1101) {
     cc1101->SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
     */
 
-    cc1101->SpiWriteReg(CC1101_MCSM0,0x18);   //Main Radio Control State Machine Configuration
+    cc1101->SpiWriteReg(CC1101_MCSM0, 0x18); //Main Radio Control State Machine Configuration
 
-    cc1101->SpiWriteReg(CC1101_FSCAL3,0xE9);  //Frequency Synthesizer Calibration
-    cc1101->SpiWriteReg(CC1101_FSCAL2,0x2A);  //Frequency Synthesizer Calibration
-    cc1101->SpiWriteReg(CC1101_FSCAL1,0x00);  //Frequency Synthesizer Calibration
-    cc1101->SpiWriteReg(CC1101_FSCAL0,0x1F);  //Frequency Synthesizer Calibration
+    cc1101->SpiWriteReg(CC1101_FSCAL3, 0xE9); //Frequency Synthesizer Calibration
+    cc1101->SpiWriteReg(CC1101_FSCAL2, 0x2A); //Frequency Synthesizer Calibration
+    cc1101->SpiWriteReg(CC1101_FSCAL1, 0x00); //Frequency Synthesizer Calibration
+    cc1101->SpiWriteReg(CC1101_FSCAL0, 0x1F); //Frequency Synthesizer Calibration
 }
 
 // f = (f_osc/65536) * (FREQ + CHAN * (256 + CH_SP_M) * 2^(CH_SP_E - 2))
@@ -415,7 +416,7 @@ extern "C" void cc1101_workaround(void* p) {
         furiac_exit(NULL);
     }
     gui->add_widget(gui, widget, GuiLayerFullscreen);
-    
+
     gpio_init(&debug_0, GpioModeOutputPushPull);
     gpio_write((GpioPin*)&debug_0, false);
 
@@ -439,7 +440,7 @@ extern "C" void cc1101_workaround(void* p) {
 
     // flp_config(&cc1101);
     async_config(&cc1101);
-    setup_freq(&cc1101,  &FREQ_LIST[4]);
+    setup_freq(&cc1101, &FREQ_LIST[4]);
 
     printf("init ok\n");
 
