@@ -59,13 +59,13 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     // cc1101->SpiStrobe(CC1101_SFRX);
     // cc1101->SetReceive();
 
-    uint8_t begin_size = cc1101->SpiReadStatus(CC1101_RXBYTES);
-    uint8_t rx_status = cc1101->SpiReadStatus(CC1101_MARCSTATE);
+    // uint8_t begin_size = cc1101->SpiReadStatus(CC1101_RXBYTES);
+    // uint8_t rx_status = cc1101->SpiReadStatus(CC1101_MARCSTATE);
 
     // delay_us(RSSI_DELAY);
     // osDelay(15);
 
-    uint8_t end_size = cc1101->SpiReadStatus(CC1101_RXBYTES);
+    // uint8_t end_size = cc1101->SpiReadStatus(CC1101_RXBYTES);
 
     // 1.4.8) read PKTSTATUS register while the radio is in RX state
     /*uint8_t _pkt_status = */ // cc1101->SpiReadStatus(CC1101_PKTSTATUS);
@@ -85,14 +85,14 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     cli_print(buf);
     */
 
-    uint8_t rx_data[64];
-    uint8_t fifo_length = end_size - begin_size;
+    // uint8_t rx_data[64];
+    // uint8_t fifo_length = end_size - begin_size;
 
     /*
     if(fifo_length < 64) {
         // cc1101->SpiReadBurstReg(CC1101_RXFIFO, rx_data, fifo_length);
 
-        /*
+        *
         printf("FIFO:");
         for(uint8_t i = 0; i < fifo_length; i++) {
             for(uint8_t bit = 0; bit < 8; bit++) {
