@@ -63,7 +63,7 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     uint8_t rx_status = cc1101->SpiReadStatus(CC1101_MARCSTATE);
 
     // delay_us(RSSI_DELAY);
-    osDelay(15);
+    // osDelay(15);
 
     uint8_t end_size = cc1101->SpiReadStatus(CC1101_RXBYTES);
 
@@ -88,6 +88,7 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     uint8_t rx_data[64];
     uint8_t fifo_length = end_size - begin_size;
 
+    /*
     if(fifo_length < 64) {
         // cc1101->SpiReadBurstReg(CC1101_RXFIFO, rx_data, fifo_length);
 
@@ -100,7 +101,7 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
             printf(" ");
         }
         printf("\n");
-        */
+        *
 
         for(uint8_t i = 0; i < fifo_length; i++) {
             for(uint8_t bit = 0; bit < 8; bit++) {
@@ -111,6 +112,7 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     } else {
         cli_print("fifo size over\n");
     }
+    */
 
     return rssi_dBm;
 }
@@ -288,6 +290,10 @@ const FreqConfig FREQ_LIST[] = {
     {&bands[8], 0},
     {&bands[9], 0},
 };
+
+extern "C" void cc1101_isr() {
+    gpio_write((GpioPin*)&debug_0, gpio_read(&cc1101_g0_gpio));
+}
 
 typedef enum {
     EventTypeTick,

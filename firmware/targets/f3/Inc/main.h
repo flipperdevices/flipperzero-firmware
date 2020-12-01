@@ -103,6 +103,7 @@ void Error_Handler(void);
 #define I2C_SCL_GPIO_Port GPIOA
 #define CC1101_G0_Pin GPIO_PIN_4
 #define CC1101_G0_GPIO_Port GPIOC
+#define CC1101_G0_EXTI_IRQn EXTI4_IRQn
 #define RFID_RF_IN_Pin GPIO_PIN_5
 #define RFID_RF_IN_GPIO_Port GPIOC
 #define PB2_Pin GPIO_PIN_2
