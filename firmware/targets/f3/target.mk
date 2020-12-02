@@ -27,10 +27,10 @@ LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group
 
 ifeq ($(TARGET), f4)
 MXPROJECT_DIR = $(TARGET_DIR)/f3-1
-API_HAL_DIR = TARGET_DIR
+API_HAL_DIR = $(TARGET_DIR)
 else
-MXPROJECT_DIR = TARGET_DIR
-API_HAL_DIR = TARGET_DIR
+MXPROJECT_DIR = $(TARGET_DIR)
+API_HAL_DIR = $(TARGET_DIR)
 endif
 
 CUBE_DIR		= ../lib/STM32CubeWB
