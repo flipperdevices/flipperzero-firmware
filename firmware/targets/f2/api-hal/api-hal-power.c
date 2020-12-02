@@ -59,3 +59,6 @@ float api_hal_power_get_battery_current() {
     return NAN;
 }
 
+void api_hal_power_dump_state(string_t buffer) {
+    string_cat_printf(buffer, "Not supported");
+}
