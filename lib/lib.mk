@@ -69,3 +69,7 @@ CYFRAL_DIR		= $(LIB_DIR)/cyfral
 CFLAGS			+= -I$(CYFRAL_DIR)
 CPP_SOURCES		+= $(wildcard $(CYFRAL_DIR)/*.cpp)
 endif
+
+# drivers
+CFLAGS			+= -I$(LIB_DIR)/drivers
+C_SOURCES		+= $(wildcard $(LIB_DIR)/drivers/*.c)
