@@ -71,5 +71,7 @@ CPP_SOURCES		+= $(wildcard $(CYFRAL_DIR)/*.cpp)
 endif
 
 # drivers
+ifneq ($(TARGET), local)
 CFLAGS			+= -I$(LIB_DIR)/drivers
 C_SOURCES		+= $(wildcard $(LIB_DIR)/drivers/*.c)
+endif
