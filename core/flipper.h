@@ -13,7 +13,6 @@ extern "C" {
 #include "log.h"
 #include "input/input.h"
 
-
 #include <stdio.h>
 
 void set_exitcode(uint32_t _exitcode);
