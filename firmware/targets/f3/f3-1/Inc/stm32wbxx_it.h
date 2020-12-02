@@ -54,7 +54,7 @@ void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void DebugMon_Handler(void);
 void EXTI1_IRQHandler(void);
-void EXTI2_IRQHandler(void);
+void EXTI3_IRQHandler(void);
 void ADC1_IRQHandler(void);
 void USB_LP_IRQHandler(void);
 void COMP_IRQHandler(void);
