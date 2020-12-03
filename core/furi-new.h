@@ -27,7 +27,7 @@
 LIST_DEF(list_app, osThreadId_t, M_POD_OPLIST);
 
 typedef struct {
-    osThreadId_t app;
+    osThreadId_t app_id;
     char* name;
     void* payload;
     list_app_t open_by_apps;
@@ -46,3 +46,12 @@ void* new_furi_open_block(const char* name);
 
 // delete record from registry
 bool new_furi_delete(const char* name);
+
+
+/* flappity-flapp */
+
+typedef struct {
+    osThreadId_t app_id;
+    char* name;
+    list_app_t threads;
+};

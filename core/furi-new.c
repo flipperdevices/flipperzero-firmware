@@ -37,7 +37,7 @@ bool remove_record_by_name(const char* name) {
     return false;
 }
 
-FuriRecordItem* find_record_by_app_id(osThreadId_t app) {
+FuriRecordItem* find_record_by_app_id(osThreadId_t app_id) {
     // iterate over items
     list_furi_record_it_t it;
     for(list_furi_record_it(it, furi_registry); !list_furi_record_end_p(it);
@@ -45,7 +45,7 @@ FuriRecordItem* find_record_by_app_id(osThreadId_t app) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
-        if(item->app == app) {
+        if(item->app_id == app_id) {
             return item;
         }
     }
@@ -53,7 +53,7 @@ FuriRecordItem* find_record_by_app_id(osThreadId_t app) {
     return NULL;
 }
 
-bool remove_record_by_app_id(osThreadId_t app) {
+bool remove_record_by_app_id(osThreadId_t app_id) {
     // iterate over items
     list_furi_record_it_t it;
     for(list_furi_record_it(it, furi_registry); !list_furi_record_end_p(it);
@@ -61,7 +61,7 @@ bool remove_record_by_app_id(osThreadId_t app) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
-        if(item->app == app) {
+        if(item->app_id == app_id) {
             list_furi_record_remove(furi_registry, it);
             return true;
         }
@@ -87,7 +87,7 @@ void* new_furi_open_internal(const char* name) {
     if(osMutexAcquire(furi_record_mutex, osWaitForever) == osOK) {
         FuriRecordItem* item = find_record_by_name(name);
         if(item) {
-            if(item->app != osThreadGetId()) {
+            if(item->app_id != osThreadGetId()) {
                 list_app_push_move(item->open_by_apps, osThreadGetId());
             }
         }
@@ -130,7 +130,7 @@ bool new_furi_create(const char* name, void* ptr) {
         FuriRecordItem* item = list_furi_record_push_raw(furi_registry);
 
         // initialize item
-        item->app = osThreadGetId();
+        item->app_id = osThreadGetId();
         item->payload = ptr;
         item->name = strdup(name);
 
@@ -161,7 +161,7 @@ bool furi_new_delete(const char* name) {
 
                 
                 // TODO: close app
-                // furiac_close(app);
+                // furiac_close(item->app_id);
             }
 
             // remove record
@@ -174,3 +174,6 @@ bool furi_new_delete(const char* name) {
     }
     return false;
 }
+
+/* flappity-flapp */
+
