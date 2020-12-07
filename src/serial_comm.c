@@ -18,15 +18,14 @@
 #include "serial_io.h"
 #include <stddef.h>
 #include <string.h>
-// #include <stdio.h>
 
 #define CMD_SIZE(cmd) ( sizeof(cmd) - sizeof(command_common_t) )
 
 static uint32_t s_sequence_number = 0;
 
-static const uint8_t DELIMITER = 0xc0;
-static const uint8_t C0_REPLACEMENT[2] = {0xdb, 0xdc};
-static const uint8_t BD_REPLACEMENT[2] = {0xdb, 0xdd};
+static const uint8_t DELIMITER = 0xC0;
+static const uint8_t C0_REPLACEMENT[2] = {0xDB, 0xDC};
+static const uint8_t DB_REPLACEMENT[2] = {0xDB, 0xDD};
 
 static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, void* resp, uint32_t resp_size);
 
@@ -59,12 +58,12 @@ static esp_loader_error_t SLIP_receive_data(uint8_t *buff, uint32_t size)
     for (int i = 0; i < size; i++) {
         RETURN_ON_ERROR( serial_read(&ch, 1)) ;
 
-        if (ch == 0xdb) {
+        if (ch == 0xDB) {
             RETURN_ON_ERROR( serial_read(&ch, 1) );
-            if (ch == 0xdc) {
-                buff[i] = 0xc0;
-            } else if (ch == 0xdd) {
-                buff[i] = 0xbd;
+            if (ch == 0xDC) {
+                buff[i] = 0xC0;
+            } else if (ch == 0xDD) {
+                buff[i] = 0xDB;
             } else {
                 return ESP_LOADER_ERROR_INVALID_RESPONSE;
             }
@@ -86,7 +85,7 @@ static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t size)
         RETURN_ON_ERROR( serial_read(&ch, 1) );
     } while (ch != DELIMITER);
 
-    // Workaround: bootloader sends two dummy(0xc0) bytes after response when baud rate is changed.
+    // Workaround: bootloader sends two dummy(0xC0) bytes after response when baud rate is changed.
     do {
         RETURN_ON_ERROR( serial_read(&ch, 1) );
     } while (ch == DELIMITER);
@@ -111,7 +110,7 @@ static esp_loader_error_t SLIP_send(const uint8_t *data, uint32_t size)
     uint32_t written = 0;
 
     for (int i = 0; i < size; i++) {
-        if (data[i] != 0xc0 && data[i] != 0xdb) {
+        if (data[i] != 0xC0 && data[i] != 0xDB) {
             to_write++;
             continue;
         }
@@ -120,10 +119,10 @@ static esp_loader_error_t SLIP_send(const uint8_t *data, uint32_t size)
             RETURN_ON_ERROR( serial_write(&data[written], to_write) );
         }
 
-        if (data[i] == 0xc0) {
+        if (data[i] == 0xC0) {
             RETURN_ON_ERROR( serial_write(C0_REPLACEMENT, 2) );
         } else {
-            RETURN_ON_ERROR( serial_write(BD_REPLACEMENT, 2) );
+            RETURN_ON_ERROR( serial_write(DB_REPLACEMENT, 2) );
         }
 
         written = i + 1;

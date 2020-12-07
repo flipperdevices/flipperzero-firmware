@@ -69,9 +69,9 @@ typedef struct
 } esp_loader_connect_args_t;
 
 #define ESP_LOADER_CONNECT_DEFAULT() { \
-  .spi_pin_config.val = 0,  \
   .sync_timeout = 100,  \
-  .trials = 10  \
+  .trials = 10,  \
+  .spi_pin_config = { .val = 0 },  \
 }
 
 #define ESP_LOADER_SPI_CONFIG_ESP32PICOD4() (esp_loader_spi_config_t) { \
