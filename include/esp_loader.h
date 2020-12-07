@@ -17,7 +17,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "loader_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,8 +25,7 @@ extern "C" {
 /**
  * @brief Error codes
  */
-typedef enum
-{
+typedef enum {
     ESP_LOADER_SUCCESS,                /*!< Success */
     ESP_LOADER_ERROR_FAIL,             /*!< Unspecified error */
     ESP_LOADER_ERROR_TIMEOUT,          /*!< Timeout elapsed */
@@ -36,8 +34,20 @@ typedef enum
     ESP_LOADER_ERROR_INVALID_PARAM,    /*!< Invalid parameter passed to function */
     ESP_LOADER_ERROR_INVALID_TARGET,   /*!< Connected target is invalid */
     ESP_LOADER_ERROR_UNSUPPORTED_CHIP, /*!< Attached chip is not supported */
+    ESP_LOADER_ERROR_UNSUPPORTED_FUNC, /*!< Function is not supported on attached target */
     ESP_LOADER_ERROR_INVALID_RESPONSE  /*!< Internal error */
 } esp_loader_error_t;
+
+/**
+ * @brief Supported targets
+ */
+typedef enum {
+    ESP8266_CHIP = 0,
+    ESP32_CHIP   = 1,
+    ESP32S2_CHIP = 2,
+    ESP_MAX_CHIP = 3,
+    ESP_UNKNOWN_CHIP = 3 
+} target_chip_t;
 
 /**
  * @brief SPI pin configuration arguments
@@ -57,21 +67,20 @@ typedef union {
 /**
  * @brief Connection arguments
  */
-typedef struct 
-{
-  uint32_t sync_timeout;  /*!< Maximum time to wait for response from serial interface. */
-  int32_t trials;         /*!< Number of trials to connect to target. If greater than 1,
+typedef struct {
+    uint32_t sync_timeout;  /*!< Maximum time to wait for response from serial interface. */
+    int32_t trials;         /*!< Number of trials to connect to target. If greater than 1,
                                100 millisecond delay is inserted after each try. */
-  esp_loader_spi_config_t spi_pin_config;  /*!< Determine which SPI peripheral and pins should be used to
-                                                connect to SPI flash. By setting spi_pin_config.val to zero, 
-                                                default configuration will be used. For more detailed 
+    esp_loader_spi_config_t spi_pin_config;  /*!< Determine which SPI peripheral and pins should be used to
+                                                connect to SPI flash. By setting spi_pin_config.val to zero,
+                                                default configuration will be used. For more detailed
                                                 information refer to serial protocol of esptool */
 } esp_loader_connect_args_t;
 
 #define ESP_LOADER_CONNECT_DEFAULT() { \
-  .sync_timeout = 100,  \
-  .trials = 10,  \
-  .spi_pin_config = { .val = 0 },  \
+  .sync_timeout = 100, \
+  .trials = 10, \
+  .spi_pin_config = { .val = 0 } \
 }
 
 #define ESP_LOADER_SPI_CONFIG_ESP32PICOD4() (esp_loader_spi_config_t) { \
@@ -96,13 +105,23 @@ typedef struct
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args);
 
 /**
+  * @brief   Returns attached target chip.
+  *
+  * @warning This function can only be called after connection with target 
+  *          has been successfully established by calling esp_loader_connect().
+  *
+  * @return  One of target_chip_t
+  */
+target_chip_t esp_loader_get_target(void);
+
+/**
   * @brief Initiates flash operation
   *
   * @param offset[in]       Address from which flash operation will be performed.
   * @param image_size[in]   Size of the whole binary to be loaded into flash.
   * @param block_size[in]   Size of buffer used in subsequent calls to esp_loader_flash_write.
   *
-  * @note  image_size is size of the whole image, whereas, block_size is chunk of data sent 
+  * @note  image_size is size of the whole image, whereas, block_size is chunk of data sent
   *        to the target, each time esp_loader_flash_write function is called.
   *
   * @return
@@ -119,7 +138,7 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
   * @param size[in]         Size of payload in bytes.
   *
   * @note  size must not be greater that block_size supplied to previously called
-  *        esp_loader_flash_start function. If size is less than block_size, 
+  *        esp_loader_flash_start function. If size is less than block_size,
   *        remaining bytes of payload buffer will be padded with 0xff.
   *        Therefore, size of payload buffer has to be equal or greater than block_size.
   *
@@ -180,16 +199,15 @@ esp_loader_error_t esp_loader_read_register(uint32_t address, uint32_t *reg_valu
   *     - ESP_LOADER_SUCCESS Success
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  *     - ESP_LOADER_ERROR_UNSUPPORTED_FUNC Unsupported on the target
   */
-#ifndef TARGET_ESP8266
 esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate);
-#endif
 
 /**
   * @brief Verify target's flash integrity by checking MD5.
   *        MD5 checksum is computed from data pushed to target's memory by calling
   *        esp_loader_flash_write() function and compared against target's MD5.
-  *        Target computes checksum based on offset and image_size passed to 
+  *        Target computes checksum based on offset and image_size passed to
   *        esp_loader_flash_start() function.
   *
   * @note  This function is only available if MD5_ENABLED is set.
@@ -199,9 +217,11 @@ esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate);
   *     - ESP_LOADER_ERROR_INVALID_MD5 MD5 does not match
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  *     - ESP_LOADER_ERROR_UNSUPPORTED_FUNC Unsupported on the target
   */
+#if MD5_ENABLED
 esp_loader_error_t esp_loader_flash_verify(void);
-
+#endif
 /**
   * @brief Toggles reset pin.
   */

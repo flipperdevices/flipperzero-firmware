@@ -45,7 +45,7 @@ Run cmake (with appropriate parameters) and build:
 cmake -DTOOLCHAIN_PREFIX="/path_to_toolchain" -DSTM32Cube_DIR="path_to_stm32Cube" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
 ```
 
-Binaries to be flashed are placed in separate folder for each target and converted to C-array for any given SoC based on `TARGET_SOC` configuration option passed to command line. By default, example is compiled for ESP32 target with MD5 check enabled.
+Binaries to be flashed are placed in separate folder (binaries.c) for each possible target and converted to C-array. Without explicitly enabling MD5 check, flash integrity verification is disabled by default.
 
 For more details regarding to esp_serial_flasher configuration and STM32 support, please refer to top level [README.md](../../README.md).
 

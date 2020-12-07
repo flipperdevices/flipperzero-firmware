@@ -15,21 +15,18 @@
 
 #pragma once
 
-#ifndef TARGET_ESP8266
-    #define BOOTLOADER_ADDRESS 0x1000
-#else
-    #define BOOTLOADER_ADDRESS 0x0
-#endif
+typedef struct {
+    const uint8_t *data;
+    uint32_t size;
+    uint32_t addr;
+} partition_attr_t;
 
-#define PARTITION_ADDRESS   0x8000
-#define APPLICATION_ADDRESS 0x10000
+typedef struct {
+    partition_attr_t boot;
+    partition_attr_t part;
+    partition_attr_t app;
+} example_binaries_t;
 
-extern const unsigned char bootloader_bin[];
-extern const unsigned bootloader_bin_size;
-extern const unsigned char hello_world_bin[];
-extern const unsigned hello_world_bin_size;
-extern const unsigned char partition_table_bin[];
-extern const unsigned partition_table_bin_size;
-
+void get_example_binaries(target_chip_t target, example_binaries_t *binaries);
 esp_loader_error_t connect_to_target(uint32_t higrer_baudrate);
-esp_loader_error_t flash_binary(const unsigned char *bin, size_t size, size_t address);
+esp_loader_error_t flash_binary(const uint8_t *bin, size_t size, size_t address);

@@ -17,7 +17,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "loader_config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,9 +78,7 @@ typedef struct __attribute__((packed))
     uint32_t packet_count;
     uint32_t packet_size;
     uint32_t offset;
-#ifdef TARGET_ESP32_S2
     uint32_t encrypted;
-#endif
 } begin_command_t;
 
 typedef struct __attribute__((packed))
@@ -162,10 +159,6 @@ typedef struct __attribute__((packed))
 {
     uint8_t failed;
     uint8_t error;
-#ifndef TARGET_ESP8266
-    uint8_t reserved_0;
-    uint8_t reserved_1;
-#endif
 } response_status_t;
 
 typedef struct __attribute__((packed))

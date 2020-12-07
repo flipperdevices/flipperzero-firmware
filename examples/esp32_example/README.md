@@ -57,9 +57,9 @@ For details about available configuration option, please refer to top level [REA
 Compile definitions can be specified on command line when running `idf.py`, for example:
 
 ```
-idf.py build -DTARGET_SOC=ESP32_S2 -DMD5_ENABLED=1
+idf.py build -DMD5_ENABLED=1
 ```
-Binaries to be flashed are placed in separate folder for each target and converted to C-array for any given SoC based on `TARGET_SOC` configuration option passed to command line. By default, example is compiled for ESP32 target with MD5 check enabled.
+Binaries to be flashed are placed in separate folder (binaries.c) for each possible target and converted to C-array. Without explicitly enabling MD5 check, flash integrity verification is disabled by default.
 
 ## Example output
 

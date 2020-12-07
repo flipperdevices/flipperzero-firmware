@@ -94,11 +94,10 @@ static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t size)
 
     RETURN_ON_ERROR( SLIP_receive_data(&buff[1], size - 1) );
 
-    // Delimiter
-    RETURN_ON_ERROR( serial_read(&ch, 1) );
-    if (ch != DELIMITER) {
-        return ESP_LOADER_ERROR_INVALID_RESPONSE;
-    }
+    // Wait for delimiter
+    do {
+        RETURN_ON_ERROR( serial_read(&ch, 1) );
+    } while (ch != DELIMITER);
 
     return ESP_LOADER_SUCCESS;
 }
@@ -237,24 +236,29 @@ static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, voi
 esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t erase_size,
                                           uint32_t block_size,
-                                          uint32_t blocks_to_write)
+                                          uint32_t blocks_to_write,
+                                          target_chip_t target)
 {
+    size_t encription = target == ESP32S2_CHIP ? 0 : sizeof(uint32_t);
+
     begin_command_t begin_cmd = {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = CMD_SIZE(begin_cmd),
+            .size = CMD_SIZE(begin_cmd) - encription,
             .checksum = 0
         },
         .erase_size = erase_size,
         .packet_count = blocks_to_write,
         .packet_size = block_size,
-        .offset = offset
+        .offset = offset,
+        .encrypted = 0
     };
 
     s_sequence_number = 0;
 
-    return send_cmd(&begin_cmd, sizeof(begin_cmd), NULL);
+
+    return send_cmd(&begin_cmd, sizeof(begin_cmd) - encription, NULL);
 }
 
 

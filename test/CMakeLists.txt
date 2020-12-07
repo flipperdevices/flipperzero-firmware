@@ -14,3 +14,7 @@ if( QEMU_TEST )
 else()
     target_sources(${PROJECT_NAME} PRIVATE serial_io_mock.cpp test.cpp)
 endif()
+
+if(DEFINED MD5_ENABLED)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DMD5_ENABLED=${MD5_ENABLED})
+endif()

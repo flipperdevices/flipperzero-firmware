@@ -33,15 +33,25 @@ using namespace std;
 #define SLIP_ENCODED_PACKET 0xdb, 0xdd, 'a', 'b', 'c', 0xdb, 0xdc, 0xdb, \
                             0xdd, 'd', 'e', 0xdb, 0xdc, 'f', 0xdb, 0xdd
 
+#define REQUIRE_SUCCESS(exp) REQUIRE( (exp) == ESP_LOADER_SUCCESS )
 
-// Helper function for debugging.  
+// Helper function for debugging.
 __attribute__((unused))
-static void arrays_match(int8_t *array_1, int8_t *array_2, size_t size)
+static void arrays_match(void *array_1, void *array_2, size_t size)
 {
+    int8_t *arr_1 = (int8_t *)array_1;
+    int8_t *arr_2 = (int8_t *)array_2;
+
     for (size_t i = 0; i < size; i++) {
-        if (array_1[i] != array_2[i]) {
-            printf("\nArrays do NOT match on index: %lu, with values %0x, %0x \n",
-                   i, array_1[i], array_2[i]);
+        if (arr_1[i] != arr_2[i]) {
+            printf("\nArrays do NOT match on index: %lu, with values %02hhx, %02hhx \n",
+                   i, arr_1[i], arr_2[i]);
+
+            printf("\nExpected: ");
+            for (uint32_t j = 0; j < size; j++) { printf("%02hhx ", arr_1[j]); }
+            printf("\nActual:   ");
+            for (uint32_t j = 0; j < size; j++) { printf("%02hhx ", arr_2[j]); }
+
             return;
         }
     }
@@ -59,8 +69,6 @@ struct __attribute__((packed)) expected_response {
         data.common.value = 0;
         data.status.failed = STATUS_SUCCESS;
         data.status.error = 0;
-        data.status.reserved_0 = 0;
-        data.status.reserved_1 = 0;
     }
 
     response_t data;
@@ -81,106 +89,6 @@ expected_response write_reg_response(WRITE_REG);
 expected_response read_reg_response(READ_REG);
 expected_response attach_response(SPI_ATTACH);
 expected_response sync_response(SYNC);
-
-
-struct __attribute__((packed)) flash_start_frame {
-    
-    uint8_t delimiter_1 = 0xc0;
-    write_spi_command_t write_spi_command = {
-        .common = {
-            .direction = WRITE_DIRECTION,
-            .command = SPI_SET_PARAMS,
-            .size = 24,
-            .checksum = 0
-        },
-        .id = 0,
-        .total_size = 0x00400000, // Assume 4MB flash size
-        .block_size = 64 * 1024,
-        .sector_size = 4 * 1024,
-        .page_size = 0x100,
-        .status_mask = 0xFFFF,
-    };
-    uint8_t delimiter_2 = 0xc0;
-
-    uint8_t delimiter_3 = 0xc0;
-    begin_command_t begin_cmd  = {
-        .common = {
-            .direction = WRITE_DIRECTION,
-            .command = FLASH_BEGIN,
-            .size = 16,
-            .checksum = 0,
-        },
-        .erase_size = 0,
-        .packet_count = 0,
-        .packet_size = 0,
-        .offset = 0,
-    };
-    uint8_t delimiter_4 = 0xc0;
-
-    flash_start_frame(uint32_t offset, uint32_t image_size, uint32_t block_size)
-    {
-        uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
-
-        begin_cmd.packet_count = blocks_to_write;
-        begin_cmd.erase_size = blocks_to_write * block_size;
-        begin_cmd.packet_size = block_size;
-        begin_cmd.offset = offset;
-    }
-};
-
-
-struct __attribute__((packed)) flash_finish_frame {
-    uint8_t delimiter_1 = 0xc0;
-    flash_end_command_t end_cmd = {
-        .common = {
-            .direction = WRITE_DIRECTION,
-            .command = FLASH_END,
-            .size = 4,
-            .checksum = 0,
-        },
-        .stay_in_loader = 1,
-    };
-    uint8_t delimiter_2 = 0xc0;
-};
-
-
-template<size_t PAYLOAD_SIZE>
-struct __attribute__((packed)) flash_write_frame {
-    uint8_t delimiter_1 = 0xc0;
-    data_command_t data_cmd = {
-        .common = {
-            .direction = WRITE_DIRECTION,
-            .command = FLASH_DATA,
-            .size = 16 + PAYLOAD_SIZE,
-            .checksum = 0xef,
-        },
-        .data_size = PAYLOAD_SIZE,
-        .sequence_number = 0,
-        .zero_0 = 0,
-        .zero_1 = 0,
-    };
-    array<uint8_t, PAYLOAD_SIZE> payload;
-    uint8_t delimiter_2 = 0xc0;
-
-    flash_write_frame()
-    {
-        payload.fill(0xFF);
-        data_cmd.sequence_number = seq_num++;
-    }
-
-    ~flash_write_frame()
-    {
-        seq_num--;
-    }
-
-    void fill(uint8_t data, size_t size = PAYLOAD_SIZE)
-    {
-        fill_n(payload.data(), size, data);
-    }
-
-    static uint32_t seq_num;
-};
-
 
 const uint32_t reg_address = 0x1000;
 const uint32_t reg_value = 55;
@@ -203,87 +111,32 @@ struct __attribute__((packed)) write_reg_cmd_response {
 };
 
 
-template<size_t PAYLOAD_SIZE>
-uint32_t flash_write_frame<PAYLOAD_SIZE>::seq_num = 0;
-
-
-size_t queue_responses_to_ignore()
-{
-    auto flash_id_response = read_reg_response;
-    flash_id_response.data.common.value = 0x16 << 16; // emulate 4MB flash
-
-    queue_response(read_reg_response);  // Save SPI_USR_REG 
-    queue_response(read_reg_response);  // Save SPI_USR2_REG
-    queue_response(write_reg_response); // SPI_MISO_DLEN_REG
-    queue_response(write_reg_response); // Set new SPI_USR_REG
-    queue_response(write_reg_response); // Set new SPI_USR2_REG
-    queue_response(write_reg_response); // Zero out SPI_W0_REG
-    queue_response(write_reg_response); // SPI_CMD_REG Start transaction
-    queue_response(read_reg_response);  // SPI_CMD_REG Transaction done
-    queue_response(flash_id_response);  // SPI_W0_REG Read data
-    queue_response(write_reg_response); // Restore SPI_USR_REG
-    queue_response(write_reg_response); // Restore SPI_USR2_REG
- 
-    // Delimiters are added manually to every packet (+2).
-    size_t bytes_to_ignore = (sizeof(write_reg_command_t) + 2) * 7 + (sizeof(read_reg_command_t) + 2) * 4 ;
-
-    return bytes_to_ignore;
-}
-
-TEST_CASE( "Large payload that does not fit BLOCK_SIZE is split into \
-            multiple data frames. Last data frame is padded with 0xFF" )
-{
-    const uint32_t BLOCK_SIZE = 1024;
-
-    uint8_t data[BLOCK_SIZE];
-    memset(data, 0x11, BLOCK_SIZE);
-
-    flash_write_frame<BLOCK_SIZE> expected_data[3];
-    expected_data[0].fill(0x11);
-    expected_data[1].fill(0x11);
-    expected_data[2].fill(0x11, 200);
-
-    flash_start_frame expected_start(0, sizeof(data) * 3, BLOCK_SIZE);
-
-    // Check flash start operation 
-    clear_buffers();
-    size_t bytes_to_ignore = queue_responses_to_ignore();
-
-    queue_response(set_params_response);
-    queue_response(flash_begin_response);
-
-    REQUIRE ( esp_loader_flash_start(0, sizeof(data) * 3, BLOCK_SIZE) == ESP_LOADER_SUCCESS );
-    // Ignore read/write register commands in this test.
-    REQUIRE( memcmp(write_buffer_data() + bytes_to_ignore, &expected_start, sizeof(expected_start)) == 0 );
-
-
-    // Check flash write operation 
-    clear_buffers();
-    queue_response(flash_data_response);
-    queue_response(flash_data_response);
-    queue_response(flash_data_response);
-
-    REQUIRE( esp_loader_flash_write(data, sizeof(data)) == ESP_LOADER_SUCCESS );
-    REQUIRE( esp_loader_flash_write(data, sizeof(data)) == ESP_LOADER_SUCCESS );
-    REQUIRE( esp_loader_flash_write(data, 200) == ESP_LOADER_SUCCESS );
-
-    REQUIRE( memcmp(write_buffer_data(), &expected_data, sizeof(expected_data)) == 0 );
-}
-
-
-TEST_CASE( "Can connect within specified time " )
+void queue_connect_response(uint32_t date_reg_1 = 0x15122500,
+                            uint32_t date_reg_2 = 0, 
+                            target_chip_t target = ESP32_CHIP)
 {
     // Set date registers used for detection of attached chip
     auto uart_date_reg_1 = read_reg_response;
     auto uart_date_reg_2 = read_reg_response;
-    uart_date_reg_1.data.common.value = 0x15122500;
-    uart_date_reg_2.data.common.value = 0;
+    uart_date_reg_1.data.common.value = date_reg_1;
+    uart_date_reg_2.data.common.value = date_reg_2;
 
     clear_buffers();
     queue_response(sync_response);
     queue_response(uart_date_reg_1);
     queue_response(uart_date_reg_2);
-    queue_response(attach_response);
+
+    if (target == ESP8266_CHIP) {
+        queue_response(flash_begin_response);
+    } else {
+        queue_response(attach_response);
+    }
+
+}
+
+TEST_CASE( "Can connect within specified time " )
+{
+    queue_connect_response();
 
     esp_loader_connect_args_t connect_config = {
         .sync_timeout = 10,
@@ -292,7 +145,7 @@ TEST_CASE( "Can connect within specified time " )
 
     SECTION( "Can connect" ) {
         serial_set_time_delay(5);
-        REQUIRE ( esp_loader_connect(&connect_config) == ESP_LOADER_SUCCESS );
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
     }
 
     SECTION( "Timeout error is returned when timeout expires" ) {
@@ -303,13 +156,42 @@ TEST_CASE( "Can connect within specified time " )
     SECTION( "Can connect after several trials within specified time" ) {
         connect_config.trials = 5;
         serial_set_time_delay(40);
-        REQUIRE ( esp_loader_connect(&connect_config) == ESP_LOADER_SUCCESS );
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
 
         serial_set_time_delay(60);
-        REQUIRE ( esp_loader_connect(&connect_config) == ESP_LOADER_ERROR_TIMEOUT );
+        REQUIRE( esp_loader_connect(&connect_config) == ESP_LOADER_ERROR_TIMEOUT );
     }
 
     serial_set_time_delay(0);
+}
+
+
+TEST_CASE( "Can detect attached target" )
+{
+    esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
+
+    SECTION( "Can detect ESP32" ) {
+        queue_connect_response(0x15122500, 0);
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
+        REQUIRE( esp_loader_get_target() == ESP32_CHIP );
+    }
+
+    SECTION( "Can detect ESP32S2" ) {
+        queue_connect_response(0x00000500, 0x19031400);
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
+        REQUIRE( esp_loader_get_target() == ESP32S2_CHIP );
+    }
+
+    SECTION( "Can detect ESP8266" ) {
+        queue_connect_response(0x00062000, 0, ESP8266_CHIP);
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
+        REQUIRE( esp_loader_get_target() == ESP8266_CHIP );
+    }
+
+    SECTION( "Can detect unknown chip" ) {
+        queue_connect_response(0xaa, 0xbb);
+        REQUIRE( esp_loader_connect(&connect_config) == ESP_LOADER_ERROR_INVALID_TARGET);
+    }
 }
 
 TEST_CASE( "Register can be read correctly" )
@@ -320,7 +202,7 @@ TEST_CASE( "Register can be read correctly" )
 
     queue_response(read_reg_response);
 
-    REQUIRE( esp_loader_read_register(0, &reg_value) == ESP_LOADER_SUCCESS );
+    REQUIRE_SUCCESS( esp_loader_read_register(0, &reg_value) );
 
     REQUIRE( reg_value == 55 );
 }
@@ -334,7 +216,7 @@ TEST_CASE( "Register can be written correctly" )
     clear_buffers();
     queue_response(write_reg_response);
 
-    REQUIRE( esp_loader_write_register(reg_address, reg_value) == ESP_LOADER_SUCCESS );
+    REQUIRE_SUCCESS( esp_loader_write_register(reg_address, reg_value) );
 
     REQUIRE( memcmp(write_buffer_data(), &expected, sizeof(expected)) == 0 );
 }
@@ -343,7 +225,7 @@ TEST_CASE( "Register can be written correctly" )
 
 TEST_CASE ( "SLIP is encoded correctly" )
 {
-    loader_flash_begin_cmd(0, 0, 0, 0); // To reset sequence number counter
+    loader_flash_begin_cmd(0, 0, 0, 0, ESP32_CHIP); // To reset sequence number counter
 
     uint8_t data[] = { TEST_SLIP_PACKET };
 
@@ -367,7 +249,7 @@ TEST_CASE ( "SLIP is encoded correctly" )
     clear_buffers();
     queue_response(flash_data_response);
 
-    REQUIRE( loader_flash_data_cmd(data, sizeof(data)) == ESP_LOADER_SUCCESS );
+    REQUIRE_SUCCESS( loader_flash_data_cmd(data, sizeof(data)) );
 
     REQUIRE( memcmp(write_buffer_data(), expected, sizeof(expected)) == 0 );
 }
@@ -392,7 +274,7 @@ TEST_CASE( "Sync command is constructed correctly" )
     clear_buffers();
     queue_response(sync_response);
 
-    REQUIRE( loader_sync_cmd() == ESP_LOADER_SUCCESS );
+    REQUIRE_SUCCESS( loader_sync_cmd() );
 
     REQUIRE( memcmp(write_buffer_data(), expected, sizeof(expected)) == 0 );
 }
@@ -412,7 +294,7 @@ TEST_CASE( "Register can be read and decoded correctly" )
 TEST_CASE( "Received response (in SLIP format) is decoded correctly" )
 {
     clear_buffers();
-    read_reg_response.data.common.value = 0xC0BD; // C0, BD has to be replaced 
+    read_reg_response.data.common.value = 0xC0BD; // C0, BD has to be replaced
     queue_response(read_reg_response);
 
     uint32_t reg_value = 0;

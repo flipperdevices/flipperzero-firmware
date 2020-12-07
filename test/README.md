@@ -28,12 +28,12 @@ sh run_qemu.sh
 
 Run qemu test
 ```
-cmake .. -DQEMU_TEST=True && make && ./serial_flasher_test
+cmake .. -DQEMU_TEST=True && cmake --build . && ./serial_flasher_test
 ```
 
 ### Host test
 
 Run host test
 ```
-cmake .. -DQEMU_TEST=False && make && ./serial_flasher_test
+cmake .. -DQEMU_TEST=False && cmake --build . && ./serial_flasher_test
 ```
