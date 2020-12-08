@@ -103,10 +103,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #endif
 
 #ifdef APP_BT
-    {.app = bt_task,
-     .name = "bt_task",
-     .libs = {1, FURI_LIB{"cli_task"}},
-     .icon = A_Plugins_14},
+    {.app = bt_task, .name = "bt_task", .libs = {1, FURI_LIB{"cli_task"}}, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_CC1101
