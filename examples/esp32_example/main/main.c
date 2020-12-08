@@ -13,7 +13,7 @@
 #include "esp_log.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
-#include "serial_io.h"
+#include "esp32_port.h"
 #include "esp_loader.h"
 #include "example_common.h"
 
@@ -23,7 +23,7 @@ void app_main(void)
 {
     example_binaries_t bin;
 
-    const loader_serial_config_t config = {
+    const loader_esp32_config_t config = {
         .baud_rate = 115200,
         .uart_port = UART_NUM_1,
         .uart_rx_pin = GPIO_NUM_5,
@@ -32,7 +32,7 @@ void app_main(void)
         .gpio0_trigger_pin = GPIO_NUM_26,
     };
 
-    if ( loader_port_serial_init(&config) != ESP_LOADER_SUCCESS) {
+    if ( loader_port_esp32_init(&config) != ESP_LOADER_SUCCESS) {
         ESP_LOGE("example", "serial initialization failed.");
         return;
     }

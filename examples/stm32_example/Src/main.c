@@ -21,7 +21,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <sys/param.h>
-#include "serial_io.h"
+#include "stm32_port.h"
 #include "esp_loader.h"
 #include "example_common.h"
 
@@ -33,14 +33,9 @@ static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 
-void loader_port_stm32_init(UART_HandleTypeDef *huart,
-                            GPIO_TypeDef *port_io0,
-                            uint16_t pin_num_io0,
-                            GPIO_TypeDef *port_rst,
-                            uint16_t pin_num_rst);
-
-
 #define HIGHER_BAUDRATE 230400
+
+
 
 int main(void)
 {
@@ -52,7 +47,15 @@ int main(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
 
-    loader_port_stm32_init(&huart1, GPIOB, TARGET_IO0_Pin, GPIOB, TARGET_RST_Pin);
+    loader_stm32_config_t config = {
+        .huart = &huart1,
+        .port_io0 = GPIOB,
+        .pin_num_io0 = TARGET_IO0_Pin,
+        .port_rst = GPIOB,
+        .pin_num_rst = TARGET_RST_Pin,
+    };
+
+    loader_port_stm32_init(&config);
     
     if (connect_to_target(HIGHER_BAUDRATE) == ESP_LOADER_SUCCESS) {
         

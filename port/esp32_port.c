@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "serial_io.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include "esp32_port.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include "esp_timer.h"
@@ -65,7 +63,7 @@ static int32_t s_uart_port;
 static int32_t s_reset_trigger_pin;
 static int32_t s_gpio0_trigger_pin;
 
-esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
+esp_loader_error_t loader_port_esp32_init(const loader_esp32_config_t *config)
 {
     s_uart_port = config->uart_port;
     s_reset_trigger_pin = config->reset_trigger_pin;
@@ -80,8 +78,10 @@ esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
 
-    const int rx_buffer_size = 2 * 200;
-    const int tx_buffer_size = 2 * 200;
+    int rx_buffer_size = config->rx_buffer_size ? config->rx_buffer_size : 400;
+    int tx_buffer_size = config->tx_buffer_size ? config->tx_buffer_size : 400;
+    QueueHandle_t *uart_queue = config->uart_queue ? config->uart_queue : NULL;
+    int queue_size = config->queue_size ? config->queue_size : 0;
 
     if ( uart_param_config(s_uart_port, &uart_config) != ESP_OK ) {
         return ESP_LOADER_ERROR_FAIL;
@@ -89,7 +89,7 @@ esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
     if ( uart_set_pin(s_uart_port, config->uart_tx_pin, config->uart_rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK ) {
         return ESP_LOADER_ERROR_FAIL;
     }
-    if ( uart_driver_install(s_uart_port, rx_buffer_size, tx_buffer_size, 0, NULL, 0) != ESP_OK ) {
+    if ( uart_driver_install(s_uart_port, rx_buffer_size, tx_buffer_size, queue_size, uart_queue, 0) != ESP_OK ) {
         return ESP_LOADER_ERROR_FAIL;
     }
 
@@ -103,6 +103,11 @@ esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
     gpio_set_direction(s_gpio0_trigger_pin, GPIO_MODE_OUTPUT);
 
     return ESP_LOADER_SUCCESS;
+}
+
+void loader_port_esp32_deinit(void)
+{
+    uart_driver_delete(s_uart_port);
 }
 
 

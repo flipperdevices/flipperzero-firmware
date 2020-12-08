@@ -207,15 +207,12 @@ static esp_loader_error_t read_data(char *buffer, uint32_t size)
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_raspberry_init(const char *device,
-                                              uint32_t baudrate,
-                                              uint32_t reset_trigger_pin,
-                                              uint32_t gpio0_trigger_pin)
+esp_loader_error_t loader_port_raspberry_init(loader_raspberry_config_t *config)
 {
-    s_reset_trigger_pin = reset_trigger_pin;
-    s_gpio0_trigger_pin = gpio0_trigger_pin;
+    s_reset_trigger_pin = config->reset_trigger_pin;
+    s_gpio0_trigger_pin = config->gpio0_trigger_pin;
 
-    serial = serialOpen(device, baudrate);
+    serial = serialOpen(config->device, config->baudrate);
     if (serial < 0) {
         printf("Serial port could not be opened!\n");
         return ESP_LOADER_ERROR_FAIL;
@@ -226,8 +223,8 @@ esp_loader_error_t loader_port_raspberry_init(const char *device,
         return ESP_LOADER_ERROR_FAIL;
     }
 
-    gpioSetMode(reset_trigger_pin, PI_OUTPUT);
-    gpioSetMode(gpio0_trigger_pin, PI_OUTPUT);
+    gpioSetMode(config->reset_trigger_pin, PI_OUTPUT);
+    gpioSetMode(config->gpio0_trigger_pin, PI_OUTPUT);
 
     return ESP_LOADER_SUCCESS;
 }

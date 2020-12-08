@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "esp_loader.h"
 
 void clear_buffers();
 
@@ -27,3 +28,11 @@ int8_t* write_buffer_data();
 void set_read_buffer(const void *data, size_t size);
 void print_array(int8_t *data, uint32_t size);
 void serial_set_time_delay(uint32_t miliseconds);
+
+
+typedef struct {
+    uint32_t dummy;
+} loader_serial_config_t;
+
+esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config);
+void loader_port_serial_deinit();
