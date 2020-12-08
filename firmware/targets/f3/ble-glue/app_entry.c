@@ -22,6 +22,8 @@ osMutexId_t MtxShciId;
 osSemaphoreId_t SemShciId;
 osThreadId_t ShciUserEvtProcessId;
 
+volatile static BleGlueStatus ble_glue_status = BleGlueStatusUninitialized;
+
 const osThreadAttr_t ShciUserEvtProcess_attr = {
     .name = CFG_SHCI_USER_EVT_PROCESS_NAME,
     .attr_bits = CFG_SHCI_USER_EVT_PROCESS_ATTR_BITS,
@@ -38,20 +40,18 @@ static void appe_Tl_Init( void );
 static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status );
 static void APPE_SysUserEvtRx( void * pPayload );
 
+BleGlueStatus APPE_Status() {
+  return ble_glue_status;
+}
+
 void APPE_Init() {
+  ble_glue_status = BleGlueStatusStartup;
   SystemPower_Config(); /**< Configure the system Power Mode */
 
   HW_TS_Init(hw_ts_InitMode_Full, &hrtc); /**< Initialize the TimerServer */
 
   // APPD_Init();
 
-  /**
-   * The Standby mode should not be entered before the initialization is over
-   * The default state of the Low Power Manager is to allow the Standby Mode so an request is needed here
-   */
-  UTIL_LPM_SetOffMode(1 << CFG_LPM_APP, UTIL_LPM_DISABLE);
-
-  /* USER CODE END APPE_Init_1 */
   appe_Tl_Init();	/* Initialize all transport layers */
 
   /**
@@ -76,22 +76,11 @@ void APPE_Init() {
  * @retval None
  */
 static void SystemPower_Config(void) {
-  /**
-   * Select HSI as system clock source after Wake Up from Stop mode
-   */
+  // Select HSI as system clock source after Wake Up from Stop mode
   LL_RCC_SetClkAfterWakeFromStop(LL_RCC_STOP_WAKEUPCLOCK_HSI);
 
-  /* Initialize low power manager */
-  UTIL_LPM_Init();
   /* Initialize the CPU2 reset value before starting CPU2 with C2BOOT */
   LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
-
-#if (CFG_USB_INTERFACE_ENABLE != 0)
-  /**
-   *  Enable USB power
-   */
-  HAL_PWREx_EnableVddUSB();
-#endif
 }
 
 static void appe_Tl_Init( void ) {
@@ -147,9 +136,8 @@ static void APPE_SysUserEvtRx( void * pPayload ) {
   UNUSED(pPayload);
   /* Traces channel initialization */
   // APPD_EnableCPU2( );
-
+  ble_glue_status = BleGlueStatusStarted;
   APP_BLE_Init( );
-  UTIL_LPM_SetOffMode(1U << CFG_LPM_APP, UTIL_LPM_ENABLE);
 }
 
 /*************************************************************

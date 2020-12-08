@@ -154,15 +154,12 @@ void APP_BLE_Init() {
 
   // Initialize Ble Transport Layer
   Ble_Tl_Init( );
-  // Do not allow standby in the application
-  UTIL_LPM_SetOffMode(1 << CFG_LPM_APP_BLE, UTIL_LPM_DISABLE);
   // Register the hci transport layer to handle BLE User Asynchronous Events
   HciUserEvtProcessId = osThreadNew(HciUserEvtProcess, NULL, &HciUserEvtProcess_attr);
   // Starts the BLE Stack on CPU2
   if (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) != SHCI_Success) {
     Error_Handler();
   }
-
   // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
   // Initialization of the BLE Services
@@ -206,10 +203,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
   tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
 
   event_pckt = (hci_event_pckt*) ((hci_uart_pckt *) pckt)->data;
-
-  /* USER CODE BEGIN SVCCTL_App_Notification */
-
-  /* USER CODE END SVCCTL_App_Notification */
 
   switch (event_pckt->evt) {
     case EVT_DISCONN_COMPLETE:
@@ -269,9 +262,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
           {
             APP_DBG_MSG("Read conf not succeess \n");
           }
-          /* USER CODE BEGIN EVT_LE_PHY_UPDATE_COMPLETE */
-
-          /* USER CODE END EVT_LE_PHY_UPDATE_COMPLETE */
           break;
         case EVT_LE_CONN_COMPLETE:
         {
@@ -296,20 +286,9 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_SERVER;
           }
           BleApplicationContext.BleApplicationContext_legacy.connectionHandle = connection_complete_event->Connection_Handle;
-          /* USER CODE BEGIN HCI_EVT_LE_CONN_COMPLETE */
-
-          /* USER CODE END HCI_EVT_LE_CONN_COMPLETE */
         }
         break; /* HCI_EVT_LE_CONN_COMPLETE */
-
-        /* USER CODE BEGIN META_EVT */
-
-        /* USER CODE END META_EVT */
-
         default:
-          /* USER CODE BEGIN SUBEVENT_DEFAULT */
-
-          /* USER CODE END SUBEVENT_DEFAULT */
           break;
       }
     }
@@ -317,12 +296,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 
     case EVT_VENDOR:
       blue_evt = (evt_blue_aci*) event_pckt->data;
-      /* USER CODE BEGIN EVT_VENDOR */
-
-      /* USER CODE END EVT_VENDOR */
-      switch (blue_evt->ecode)
-      {
-      /* USER CODE BEGIN ecode */
+      switch (blue_evt->ecode) {
         aci_gap_pairing_complete_event_rp0 *pairing_complete;
 
       case EVT_BLUE_GAP_LIMITED_DISCOVERABLE: 
@@ -375,58 +349,38 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
           APP_DBG_MSG("\r\n\r** aci_gap_numeric_comparison_value_confirm_yesno-->YES \n");
           break;
 
-          case (EVT_BLUE_GAP_PAIRING_CMPLT):
+        case (EVT_BLUE_GAP_PAIRING_CMPLT):
           {
             pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
 
             APP_DBG_MSG("BLE_CTRL_App_Notification: EVT_BLUE_GAP_PAIRING_CMPLT, pairing_complete->Status = %d\n",pairing_complete->Status);
-            if (pairing_complete->Status == 0)
-            {
+            if (pairing_complete->Status == 0) {
               APP_DBG_MSG("\r\n\r** Pairing OK \n");
-            }
-            else
-            {
+            } else {
               APP_DBG_MSG("\r\n\r** Pairing KO \n");
             }
           }
-           break;    
+          break;
 
       /* USER CODE END ecode */
         case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_PROCEDURE_COMPLETE \n");
-        /* USER CODE BEGIN EVT_BLUE_GAP_PROCEDURE_COMPLETE */
-
-        /* USER CODE END EVT_BLUE_GAP_PROCEDURE_COMPLETE */
-          break; /* EVT_BLUE_GAP_PROCEDURE_COMPLETE */
-
-      /* USER CODE BEGIN BLUE_EVT */
-
-      /* USER CODE END BLUE_EVT */
+          APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_PROCEDURE_COMPLETE \n");
+          break;
       }
       break; /* EVT_VENDOR */
-
-      /* USER CODE BEGIN EVENT_PCKT */
-
-      /* USER CODE END EVENT_PCKT */
-
       default:
-      /* USER CODE BEGIN ECODE_DEFAULT*/
-
-      /* USER CODE END ECODE_DEFAULT*/
         break;
   }
 
   return (SVCCTL_UserEvtFlowEnable);
 }
 
-APP_BLE_ConnStatus_t APP_BLE_Get_Server_Connection_Status()
-{
+APP_BLE_ConnStatus_t APP_BLE_Get_Server_Connection_Status() {
     return BleApplicationContext.Device_Connection_Status;
 }
 
 /* USER CODE BEGIN FD*/
-void APP_BLE_Key_Button1_Action()
-{
+void APP_BLE_Key_Button1_Action() {
   tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
   ret = aci_gap_clear_security_db();
   if (ret == BLE_STATUS_SUCCESS) {
@@ -436,8 +390,7 @@ void APP_BLE_Key_Button1_Action()
   }
 }
 
-void APP_BLE_Key_Button2_Action()
-{
+void APP_BLE_Key_Button2_Action() {
   tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
   ret = aci_gap_slave_security_req(BleApplicationContext.BleApplicationContext_legacy.connectionHandle); 
   if (ret == BLE_STATUS_SUCCESS) {
@@ -447,8 +400,7 @@ void APP_BLE_Key_Button2_Action()
   }
 }
   
-void APP_BLE_Key_Button3_Action()
-{
+void APP_BLE_Key_Button3_Action() {
   uint8_t TX_PHY, RX_PHY;
   tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
   ret = hci_le_read_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,&TX_PHY,&RX_PHY);
@@ -473,8 +425,7 @@ void APP_BLE_Key_Button3_Action()
   }
 }
 
-static void Ble_Tl_Init( void )
-{
+static void Ble_Tl_Init( void ) {
   HCI_TL_HciInitConf_t Hci_Tl_Init_Conf;
 
   MtxHciId = osMutexNew( NULL );
@@ -485,23 +436,19 @@ static void Ble_Tl_Init( void )
   hci_init(BLE_UserEvtRx, (void*) &Hci_Tl_Init_Conf);
 }
 
-static void Ble_Hci_Gap_Gatt_Init(){
+static void Ble_Hci_Gap_Gatt_Init() {
   uint8_t role;
   uint16_t gap_service_handle, gap_dev_name_char_handle, gap_appearance_char_handle;
   const uint8_t *bd_addr;
   uint32_t srd_bd_addr[2];
   uint16_t appearance[1] = { BLE_CFG_GAP_APPEARANCE };
 
-  /**
-   * Initialize HCI layer
-   */
   /*HCI Reset to synchronise BLE Stack*/
   hci_reset();
 
   /**
    * Write the BD Address
    */
-
   bd_addr = BleGetBdAddress();
   aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET,
                             CONFIG_DATA_PUBADDR_LEN,

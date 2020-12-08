@@ -4,7 +4,15 @@
 extern "C" {
 #endif
 
-void APPE_Init( void );
+typedef enum {
+    BleGlueStatusUninitialized,
+    BleGlueStatusStartup,
+    BleGlueStatusStarted
+} BleGlueStatus;
+
+void APPE_Init();
+
+BleGlueStatus APPE_Status();
 
 #ifdef __cplusplus
 } /* extern "C" */

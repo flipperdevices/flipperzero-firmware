@@ -131,7 +131,6 @@ CFLAGS += -I$(MXPROJECT_DIR)/ble-glue \
 
 C_SOURCES		+= \
 	$(wildcard $(TARGET_DIR)/ble-glue/*.c) \
-	$(CUBE_DIR)/Utilities/lpm/tiny_lpm/stm32_lpm.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/otp.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/stm_list.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/dbg_trace.c \
