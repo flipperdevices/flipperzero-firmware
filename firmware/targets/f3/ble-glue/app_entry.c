@@ -1,24 +1,3 @@
-/* USER CODE BEGIN Header */
-/**
- ******************************************************************************
-  * File Name          : app_entry.c
-  * Description        : Entry application source file for STM32WPAN Middleware
- ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
- ******************************************************************************
- */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
 #include "main.h"
 #include "app_entry.h"
@@ -30,40 +9,15 @@
 #include "stm32_lpm.h"
 #include "app_debug.h"
 
-/* Private includes -----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
 extern RTC_HandleTypeDef hrtc;
-/* USER CODE BEGIN PTD */
 
-/* USER CODE END PTD */
-
-/* Private defines -----------------------------------------------------------*/
 #define POOL_SIZE (CFG_TLBLE_EVT_QUEUE_LENGTH*4U*DIVC(( sizeof(TL_PacketHeader_t) + TL_BLE_EVENT_FRAME_SIZE ), 4U))
 
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macros ------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t EvtPool[POOL_SIZE];
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static TL_CmdPacket_t SystemCmdBuffer;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t SystemSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255U];
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t BleSpareEvtBuffer[sizeof(TL_PacketHeader_t) + TL_EVT_HDR_SIZE + 255];
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Global variables ----------------------------------------------------------*/
 osMutexId_t MtxShciId;
 osSemaphoreId_t SemShciId;
 osThreadId_t ShciUserEvtProcessId;
@@ -78,24 +32,17 @@ const osThreadAttr_t ShciUserEvtProcess_attr = {
     .stack_size = CFG_SHCI_USER_EVT_PROCESS_STACK_SIZE
 };
 
-/* Private functions prototypes-----------------------------------------------*/
 static void ShciUserEvtProcess(void *argument);
 static void SystemPower_Config( void );
 static void appe_Tl_Init( void );
 static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status );
 static void APPE_SysUserEvtRx( void * pPayload );
 
-/* USER CODE BEGIN PFP */
-/* USER CODE END PFP */
-
-/* Functions Definition ------------------------------------------------------*/
-void APPE_Init( void )
-{
+void APPE_Init() {
   SystemPower_Config(); /**< Configure the system Power Mode */
 
   HW_TS_Init(hw_ts_InitMode_Full, &hrtc); /**< Initialize the TimerServer */
 
-/* USER CODE BEGIN APPE_Init_1 */
   // APPD_Init();
 
   /**
@@ -104,7 +51,7 @@ void APPE_Init( void )
    */
   UTIL_LPM_SetOffMode(1 << CFG_LPM_APP, UTIL_LPM_DISABLE);
 
-/* USER CODE END APPE_Init_1 */
+  /* USER CODE END APPE_Init_1 */
   appe_Tl_Init();	/* Initialize all transport layers */
 
   /**
@@ -112,14 +59,7 @@ void APPE_Init( void )
    * received on the system channel before starting the Stack
    * This system event is received with APPE_SysUserEvtRx()
    */
-/* USER CODE BEGIN APPE_Init_2 */
-
-/* USER CODE END APPE_Init_2 */
-   return;
 }
-/* USER CODE BEGIN FD */
-
-/* USER CODE END FD */
 
 /*************************************************************
  *
@@ -135,8 +75,7 @@ void APPE_Init( void )
  * @param  None
  * @retval None
  */
-static void SystemPower_Config(void)
-{
+static void SystemPower_Config(void) {
   /**
    * Select HSI as system clock source after Wake Up from Stop mode
    */
@@ -153,12 +92,9 @@ static void SystemPower_Config(void)
    */
   HAL_PWREx_EnableVddUSB();
 #endif
-
-  return;
 }
 
-static void appe_Tl_Init( void )
-{
+static void appe_Tl_Init( void ) {
   TL_MM_Config_t tl_mm_config;
   SHCI_TL_HciInitConf_t SHci_Tl_Init_Conf;
   /**< Reference table initialization */
@@ -183,26 +119,19 @@ static void appe_Tl_Init( void )
   TL_MM_Init( &tl_mm_config );
 
   TL_Enable();
-
-  return;
 }
 
-static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status )
-{
-  switch (status)
-  {
+static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status ) {
+  switch (status) {
     case SHCI_TL_CmdBusy:
       osMutexAcquire( MtxShciId, osWaitForever );
       break;
-
     case SHCI_TL_CmdAvailable:
       osMutexRelease( MtxShciId );
       break;
-
     default:
       break;
   }
-  return;
 }
 
 /**
@@ -214,15 +143,13 @@ static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status )
  * ( eg ((tSHCI_UserEvtRxParam*)pPayload)->status shall be set to SHCI_TL_UserEventFlow_Disable )
  * When the status is not filled, the buffer is released by default
  */
-static void APPE_SysUserEvtRx( void * pPayload )
-{
+static void APPE_SysUserEvtRx( void * pPayload ) {
   UNUSED(pPayload);
   /* Traces channel initialization */
   // APPD_EnableCPU2( );
 
   APP_BLE_Init( );
   UTIL_LPM_SetOffMode(1U << CFG_LPM_APP, UTIL_LPM_ENABLE);
-  return;
 }
 
 /*************************************************************
@@ -230,49 +157,30 @@ static void APPE_SysUserEvtRx( void * pPayload )
  * FREERTOS WRAPPER FUNCTIONS
  *
 *************************************************************/
-static void ShciUserEvtProcess(void *argument)
-{
+static void ShciUserEvtProcess(void *argument) {
   UNUSED(argument);
-  for(;;)
-  {
-    /* USER CODE BEGIN SHCI_USER_EVT_PROCESS_1 */
-
-    /* USER CODE END SHCI_USER_EVT_PROCESS_1 */
-     osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
-     shci_user_evt_proc();
-    /* USER CODE BEGIN SHCI_USER_EVT_PROCESS_2 */
-
-    /* USER CODE END SHCI_USER_EVT_PROCESS_2 */
-    }
+  for(;;) {
+    osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+    shci_user_evt_proc();
+  }
 }
-
-
-/* USER CODE END FD_LOCAL_FUNCTIONS */
 
 /*************************************************************
  *
  * WRAP FUNCTIONS
  *
  *************************************************************/
-
-void shci_notify_asynch_evt(void* pdata)
-{
+void shci_notify_asynch_evt(void* pdata) {
   UNUSED(pdata);
   osThreadFlagsSet( ShciUserEvtProcessId, 1 );
-  return;
 }
 
-void shci_cmd_resp_release(uint32_t flag)
-{
+void shci_cmd_resp_release(uint32_t flag) {
   UNUSED(flag);
   osSemaphoreRelease( SemShciId );
-  return;
 }
 
-void shci_cmd_resp_wait(uint32_t timeout)
-{
+void shci_cmd_resp_wait(uint32_t timeout) {
   UNUSED(timeout);
   osSemaphoreAcquire( SemShciId, osWaitForever );
-  return;
 }
-

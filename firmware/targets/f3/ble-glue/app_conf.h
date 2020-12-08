@@ -435,10 +435,8 @@ typedef enum
 #define DBG_TRACE_MSG_QUEUE_SIZE 4096
 #define MAX_DBG_TRACE_MSG_SIZE 1024
 
-/* USER CODE BEGIN Defines */
 #define CFG_LED_SUPPORTED         0
 #define CFG_BUTTON_SUPPORTED      0
-/* USER CODE END Defines */
 
 /******************************************************************************
  * FreeRTOS
@@ -467,7 +465,7 @@ typedef enum
 #define CFG_ADV_UPDATE_PROCESS_PRIORITY       osPriorityNone
 #define CFG_ADV_UPDATE_PROCESS_STACK_SIZE     (128 * 6)
 
-#define CFG_HRS_PROCESS_NAME                  "HRS_PROCESS"
+#define CFG_HRS_PROCESS_NAME                  "hrs"
 #define CFG_HRS_PROCESS_ATTR_BITS             (0)
 #define CFG_HRS_PROCESS_CB_MEM                (0)
 #define CFG_HRS_PROCESS_CB_SIZE               (0)
