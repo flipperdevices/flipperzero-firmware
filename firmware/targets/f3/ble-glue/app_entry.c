@@ -96,7 +96,7 @@ void APPE_Init( void )
   HW_TS_Init(hw_ts_InitMode_Full, &hrtc); /**< Initialize the TimerServer */
 
 /* USER CODE BEGIN APPE_Init_1 */
-  APPD_Init();
+  // APPD_Init();
 
   /**
    * The Standby mode should not be entered before the initialization is over
@@ -218,7 +218,7 @@ static void APPE_SysUserEvtRx( void * pPayload )
 {
   UNUSED(pPayload);
   /* Traces channel initialization */
-  APPD_EnableCPU2( );
+  // APPD_EnableCPU2( );
 
   APP_BLE_Init( );
   UTIL_LPM_SetOffMode(1U << CFG_LPM_APP, UTIL_LPM_ENABLE);

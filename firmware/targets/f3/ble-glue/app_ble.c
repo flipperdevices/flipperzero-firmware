@@ -1,25 +1,3 @@
-/* USER CODE BEGIN Header */
-/**
- ******************************************************************************
- * @file    app_ble.c
- * @author  MCD Application Team
- * @brief   BLE Application
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
- * All rights reserved.</center></h2>
- *
- * This software component is licensed by ST under Ultimate Liberty license
- * SLA0044, the "License"; You may not use this file except in compliance with
- * the License. You may obtain a copy of the License at:
- *                             www.st.com/SLA0044
- *
- ******************************************************************************
- */
-/* USER CODE END Header */
-
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 #include "app_common.h"
@@ -36,150 +14,41 @@
 #include "dis_app.h"
 #include "hrs_app.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-
-/**
- * security parameters structure
- */
-typedef struct _tSecurityParams
-{
-  /**
-   * IO capability of the device
-   */
+typedef struct _tSecurityParams {
   uint8_t ioCapability;
-
-  /**
-   * Authentication requirement of the device
-   * Man In the Middle protection required?
-   */
   uint8_t mitm_mode;
-
-  /**
-   * bonding mode of the device
-   */
   uint8_t bonding_mode;
-
-  /**
-   * this variable indicates whether to use a fixed pin
-   * during the pairing process or a passkey has to be
-   * requested to the application during the pairing process
-   * 0 implies use fixed pin and 1 implies request for passkey
-   */
   uint8_t Use_Fixed_Pin;
-
-  /**
-   * minimum encryption key size requirement
-   */
   uint8_t encryptionKeySizeMin;
-
-  /**
-   * maximum encryption key size requirement
-   */
   uint8_t encryptionKeySizeMax;
-
-  /**
-   * fixed pin to be used in the pairing process if
-   * Use_Fixed_Pin is set to 1
-   */
   uint32_t Fixed_Pin;
-
-  /**
-   * this flag indicates whether the host has to initiate
-   * the security, wait for pairing or does not have any security
-   * requirements.\n
-   * 0x00 : no security required
-   * 0x01 : host should initiate security by sending the slave security
-   *        request command
-   * 0x02 : host need not send the clave security request but it
-   * has to wait for paiirng to complete before doing any other
-   * processing
-   */
   uint8_t initiateSecurity;
-}tSecurityParams;
+} tSecurityParams;
 
-/**
- * global context
- * contains the variables common to all
- * services
- */
-typedef struct _tBLEProfileGlobalContext
-{
-
-  /**
-   * security requirements of the host
-   */
+typedef struct _tBLEProfileGlobalContext {
   tSecurityParams bleSecurityParam;
-
-  /**
-   * gap service handle
-   */
   uint16_t gapServiceHandle;
-
-  /**
-   * device name characteristic handle
-   */
   uint16_t devNameCharHandle;
-
-  /**
-   * appearance characteristic handle
-   */
   uint16_t appearanceCharHandle;
-
-  /**
-   * connection handle of the current active connection
-   * When not in connection, the handle is set to 0xFFFF
-   */
   uint16_t connectionHandle;
-
-  /**
-   * length of the UUID list to be used while advertising
-   */
   uint8_t advtServUUIDlen;
-
-  /**
-   * the UUID list to be used while advertising
-   */
   uint8_t advtServUUID[100];
+} BleGlobalContext_t;
 
-}BleGlobalContext_t;
-
-typedef struct
-{
+typedef struct {
   BleGlobalContext_t BleApplicationContext_legacy;
   APP_BLE_ConnStatus_t Device_Connection_Status;
-
-  /**
-   * ID of the Advertising Timeout
-   */
   uint8_t Advertising_mgr_timer_Id;
+} BleApplicationContext_t;
 
-}BleApplicationContext_t;
-/* USER CODE BEGIN PTD */
-  
-/* USER CODE END PTD */
-
-/* Private defines -----------------------------------------------------------*/
 #define APPBLE_GAP_DEVICE_NAME_LENGTH 7
 #define FAST_ADV_TIMEOUT               (30*1000*1000/CFG_TS_TICK_VAL) /**< 30s */
 #define INITIAL_ADV_TIMEOUT            (60*1000*1000/CFG_TS_TICK_VAL) /**< 60s */
 
 #define BD_ADDR_SIZE_LOCAL    6
 
-/* USER CODE BEGIN PD */
 #define LED_ON_TIMEOUT                 (0.005*1000*1000/CFG_TS_TICK_VAL) /**< 5ms */
-/* USER CODE END PD */
 
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t BleCmdBuffer;
 
 static const uint8_t M_bd_addr[BD_ADDR_SIZE_LOCAL] =
@@ -194,21 +63,9 @@ static const uint8_t M_bd_addr[BD_ADDR_SIZE_LOCAL] =
 
 static uint8_t bd_addr_udn[BD_ADDR_SIZE_LOCAL];
 
-/**
-*   Identity root key used to derive LTK and CSRK
-*/
 static const uint8_t BLE_CFG_IR_VALUE[16] = CFG_BLE_IRK;
-
-/**
-* Encryption root key used to derive LTK and CSRK
-*/
 static const uint8_t BLE_CFG_ER_VALUE[16] = CFG_BLE_ERK;
 
-/**
- * These are the two tags used to manage a power failure during OTA
- * The MagicKeywordAdress shall be mapped @0x140 from start of the binary image
- * The MagicKeywordvalue is checked in the ble_ota application
- */
 PLACE_IN_SECTION("TAG_OTA_END") const uint32_t MagicKeywordValue = 0x94448A29 ;
 PLACE_IN_SECTION("TAG_OTA_START") const uint32_t MagicKeywordAddress = (uint32_t)&MagicKeywordValue;
 
@@ -233,11 +90,6 @@ uint8_t  manuf_data[14] = {
 
 };
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Global variables ----------------------------------------------------------*/
 osMutexId_t MtxHciId;
 osSemaphoreId_t SemHciId;
 osThreadId_t AdvUpdateProcessId;
@@ -276,21 +128,12 @@ static void Adv_Mgr( void );
 static void AdvUpdateProcess(void *argument);
 static void Adv_Update( void );
 
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
-
-/* Functions Definition ------------------------------------------------------*/
-void APP_BLE_Init( void )
-{
-/* USER CODE BEGIN APP_BLE_Init_1 */
-
-/* USER CODE END APP_BLE_Init_1 */
-  SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet =
-  {
-    {{0,0,0}},                          /**< Header unused */
-    {0,                                 /** pBleBufferAddress not used */
-    0,                                  /** BleBufferSize not used */
+void APP_BLE_Init() {
+  SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
+    {{0,0,0}},                  /**< Header unused */
+    {0,                         /** pBleBufferAddress not used */
+    0,                          /** BleBufferSize not used */
     CFG_BLE_NUM_GATT_ATTRIBUTES,
     CFG_BLE_NUM_GATT_SERVICES,
     CFG_BLE_ATT_VALUE_ARRAY_SIZE,
@@ -309,74 +152,40 @@ void APP_BLE_Init( void )
     0}
   };
 
-  /**
-   * Initialize Ble Transport Layer
-   */
+  // Initialize Ble Transport Layer
   Ble_Tl_Init( );
-
-  /**
-   * Do not allow standby in the application
-   */
+  // Do not allow standby in the application
   UTIL_LPM_SetOffMode(1 << CFG_LPM_APP_BLE, UTIL_LPM_DISABLE);
-
-  /**
-   * Register the hci transport layer to handle BLE User Asynchronous Events
-   */
+  // Register the hci transport layer to handle BLE User Asynchronous Events
   HciUserEvtProcessId = osThreadNew(HciUserEvtProcess, NULL, &HciUserEvtProcess_attr);
-
-  /**
-   * Starts the BLE Stack on CPU2
-   */
-  if (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) != SHCI_Success)
-  {
+  // Starts the BLE Stack on CPU2
+  if (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) != SHCI_Success) {
     Error_Handler();
   }
 
-  /**
-   * Initialization of HCI & GATT & GAP layer
-   */
+  // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
-
-  /**
-   * Initialization of the BLE Services
-   */
+  // Initialization of the BLE Services
   SVCCTL_Init();
-
-  /**
-   * Initialization of the BLE App Context
-   */
+  // Initialization of the BLE App Context
   BleApplicationContext.Device_Connection_Status = APP_BLE_IDLE;
   BleApplicationContext.BleApplicationContext_legacy.connectionHandle = 0xFFFF;
-  /**
-   * From here, all initialization are BLE application specific
-   */
+  // From here, all initialization are BLE application specific
   AdvUpdateProcessId = osThreadNew(AdvUpdateProcess, NULL, &AdvUpdateProcess_attr);
 
-  /**
-   * Initialization of ADV - Ad Manufacturer Element - Support OTA Bit Mask
-   */
+  // Initialization of ADV - Ad Manufacturer Element - Support OTA Bit Masks
 #if(BLE_CFG_OTA_REBOOT_CHAR != 0)
   manuf_data[sizeof(manuf_data)-8] = CFG_FEATURE_OTA_REBOOT;
 #endif
-  /**
-   * Initialize DIS Application
-   */
+
+  // Initialize DIS Application
   DISAPP_Init();
-
-  /**
-   * Initialize HRS Application
-   */
+  // Initialize HRS Application
   HRSAPP_Init();
-
-  /**
-   * Create timer to handle the connection state machine
-   */
-
+  // Create timer to handle the connection state machine
   HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
 
-  /**
-   * Make device discoverable
-   */
+  // Make device discoverable
   BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_16_BIT_SERV_UUID;
   BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen = 1;
   Add_Advertisment_Service_UUID(HEART_RATE_SERVICE_UUID);
@@ -384,14 +193,7 @@ void APP_BLE_Init( void )
   AdvIntervalMin = CFG_FAST_CONN_ADV_INTERVAL_MIN;
   AdvIntervalMax = CFG_FAST_CONN_ADV_INTERVAL_MAX;
 
-  /**
-  * Start to Advertise to be connected by Collector
-   */
-   Adv_Request(APP_BLE_FAST_ADV);
-
-/* USER CODE BEGIN APP_BLE_Init_2 */
-
-/* USER CODE END APP_BLE_Init_2 */
+  Adv_Request(APP_BLE_FAST_ADV);
   return;
 }
 
@@ -818,7 +620,7 @@ static void Ble_Hci_Gap_Gatt_Init(void){
 
   if (role > 0)
   {
-    const char *name = "HRSTM";
+    const char *name = "Flipper";
     aci_gap_init(role, 0,
                  APPBLE_GAP_DEVICE_NAME_LENGTH,
                  &gap_service_handle, &gap_dev_name_char_handle, &gap_appearance_char_handle);
@@ -1136,8 +938,3 @@ void SVCCTL_ResumeUserEventFlow( void )
   hci_resume_flow();
   return;
 }
-
-/* USER CODE BEGIN FD_WRAP_FUNCTIONS */
-
-/* USER CODE END FD_WRAP_FUNCTIONS */
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

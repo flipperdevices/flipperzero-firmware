@@ -1,41 +1,10 @@
-/* USER CODE BEGIN Header */
-/**
- ******************************************************************************
-  * File Name          : app_conf.h
-  * Description        : Application configuration file for STM32WPAN Middleware.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef APP_CONF_H
-#define APP_CONF_H
+#pragma once
 
 #include "hw.h"
 #include "hw_conf.h"
 #include "hw_if.h"
 #include "ble_bufsize.h"
 
-/******************************************************************************
- * Application Config
- ******************************************************************************/
-
-/**< generic parameters ******************************************************/
-
-/**
- * Define Tx Power
- */
 #define CFG_TX_POWER                      (0x18) /* -0.15dBm */
 
 /**
@@ -474,7 +443,7 @@ typedef enum
 /******************************************************************************
  * FreeRTOS
  ******************************************************************************/
-#define CFG_SHCI_USER_EVT_PROCESS_NAME        "SHCI_USER_EVT_PROCESS"
+#define CFG_SHCI_USER_EVT_PROCESS_NAME        "ble_shci_evt"
 #define CFG_SHCI_USER_EVT_PROCESS_ATTR_BITS   (0)
 #define CFG_SHCI_USER_EVT_PROCESS_CB_MEM      (0)
 #define CFG_SHCI_USER_EVT_PROCESS_CB_SIZE     (0)
@@ -482,7 +451,7 @@ typedef enum
 #define CFG_SHCI_USER_EVT_PROCESS_PRIORITY    osPriorityNone
 #define CFG_SHCI_USER_EVT_PROCESS_STACK_SIZE  (128 * 7)
 
-#define CFG_HCI_USER_EVT_PROCESS_NAME         "HCI_USER_EVT_PROCESS"
+#define CFG_HCI_USER_EVT_PROCESS_NAME         "ble_hci_evt"
 #define CFG_HCI_USER_EVT_PROCESS_ATTR_BITS    (0)
 #define CFG_HCI_USER_EVT_PROCESS_CB_MEM       (0)
 #define CFG_HCI_USER_EVT_PROCESS_CB_SIZE      (0)
@@ -490,7 +459,7 @@ typedef enum
 #define CFG_HCI_USER_EVT_PROCESS_PRIORITY     osPriorityNone
 #define CFG_HCI_USER_EVT_PROCESS_STACK_SIZE   (128 * 8)
 
-#define CFG_ADV_UPDATE_PROCESS_NAME           "ADV_UPDATE_PROCESS"
+#define CFG_ADV_UPDATE_PROCESS_NAME           "ble_adv_upd"
 #define CFG_ADV_UPDATE_PROCESS_ATTR_BITS      (0)
 #define CFG_ADV_UPDATE_PROCESS_CB_MEM         (0)
 #define CFG_ADV_UPDATE_PROCESS_CB_SIZE        (0)
@@ -506,35 +475,10 @@ typedef enum
 #define CFG_HRS_PROCESS_PRIORITY              osPriorityNone
 #define CFG_HRS_PROCESS_STACK_SIZE            (128 * 5)
 
-/* USER CODE BEGIN FreeRTOS_Defines */
-#define PUSH_BUTTON_SW1_EXTI_IRQHandler     EXTI4_IRQHandler
-#define PUSH_BUTTON_SW2_EXTI_IRQHandler     EXTI0_IRQHandler
-#define PUSH_BUTTON_SW3_EXTI_IRQHandler     EXTI1_IRQHandler
-/* USER CODE END FreeRTOS_Defines */
-
-/******************************************************************************
- * LOW POWER
- ******************************************************************************/
-/**
- * Supported requester to the MCU Low Power Manager - can be increased up  to 32
- * It lits a bit mapping of all user of the Low Power Manager
- */
-typedef enum
-{
+typedef enum {
     CFG_LPM_APP,
     CFG_LPM_APP_BLE,
-  /* USER CODE BEGIN CFG_LPM_Id_t */
-
-  /* USER CODE END CFG_LPM_Id_t */
 } CFG_LPM_Id_t;
 
-/******************************************************************************
- * OTP manager
- ******************************************************************************/
 #define CFG_OTP_BASE_ADDRESS    OTP_AREA_BASE
-
 #define CFG_OTP_END_ADRESS      OTP_AREA_END_ADDR
-
-#endif /*APP_CONF_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
