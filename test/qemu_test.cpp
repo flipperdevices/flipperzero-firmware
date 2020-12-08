@@ -91,7 +91,7 @@ TEST_CASE( "Can write application to flash" )
     ifstream qemu_image;
 
     new_image.open ("../hello-world.bin", ios::binary | ios::in);
-    qemu_image.open ("../empty_file.bin", ios::binary | ios::in);
+    qemu_image.open ("empty_file.bin", ios::binary | ios::in);
 
     REQUIRE ( new_image.is_open() );
     REQUIRE ( qemu_image.is_open() );

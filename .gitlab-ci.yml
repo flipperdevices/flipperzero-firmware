@@ -56,20 +56,6 @@ run_tests:
     - internet
   script:
     - cd $CI_PROJECT_DIR/test
-    - dd if=/dev/zero bs=1024 count=4096 of="empty_file.bin"
-
-    # Run QEMU in backround (deamonized)
-    - ${QEMU_PATH}
-      -daemonize
-      -machine esp32
-      -drive file=empty_file.bin,if=mtd,format=raw
-      -global driver=esp32.gpio,property=strap_mode,value=0x0f
-      -serial tcp::5555,server,nowait
-
-    - cd $CI_PROJECT_DIR/test && mkdir build && cd build
-
-    # Compile and run qemu tests
-    - cmake .. -DQEMU_TEST=True && make && ./serial_flasher_test
-
-    # Compile and run host tests
-    - cmake .. -DQEMU_TEST=False && make && ./serial_flasher_test
+    - export QEMU_PATH=/opt/qemu/bin/qemu-system-xtensa
+    - ./run_test.sh qemu
+    - ./run_test.sh host
