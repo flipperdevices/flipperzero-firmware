@@ -6,7 +6,7 @@ Bt* bt_alloc() {
 
     bt->statusbar_icon = assets_icons_get(I_Bluetooth_5x8);
     bt->statusbar_widget = widget_alloc();
-    widget_set_width(bt->statusbar_widget, icon_get_width(bt->statusbar_icon)+2);
+    widget_set_width(bt->statusbar_widget, icon_get_width(bt->statusbar_icon) + 2);
     widget_draw_callback_set(bt->statusbar_widget, bt_draw_statusbar_callback, bt);
     widget_enabled_set(bt->statusbar_widget, false);
 

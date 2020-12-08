@@ -8,7 +8,6 @@
 #include <gui/gui.h>
 #include <gui/widget.h>
 
-
 typedef struct {
     Cli* cli;
     Icon* statusbar_icon;
