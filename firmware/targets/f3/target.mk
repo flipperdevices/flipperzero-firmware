@@ -118,7 +118,7 @@ CFLAGS += \
 	-I$(API_HAL_DIR)/api-hal \
 
 # Ble glue 
-CFLAGS += -I$(MXPROJECT_DIR)/ble-glue \
+CFLAGS += -I$(TARGET_DIR)/ble-glue \
 	-I$(CUBE_DIR)/Utilities/lpm/tiny_lpm \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/ble \
