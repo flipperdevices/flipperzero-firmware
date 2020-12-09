@@ -33,7 +33,7 @@ void bt_task() {
     if(bt->cli) {
         cli_add_command(bt->cli, "bt_info", bt_cli_info, bt);
     }
-    
+
     // TODO: add ValueMutex(bt) to "bt" record
     if(!furi_create("bt", bt)) {
         printf("[bt_task] unable to create bt record\n");
