@@ -559,6 +559,7 @@ extern "C" void cc1101_workaround(void* p) {
                 gpio_write(&cc1101_g0_gpio, (data & (1 << i)) > 0);
                 osDelay(1);
             }
+            gpio_write(&cc1101_g0_gpio, false);
         }
 
         release_mutex(&state_mutex, state);
