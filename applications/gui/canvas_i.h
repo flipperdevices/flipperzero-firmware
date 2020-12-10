@@ -1,15 +1,17 @@
 #pragma once
 
-CanvasApi* canvas_api_init();
+#include "canvas.h"
 
-void canvas_api_free(CanvasApi* api);
+Canvas* canvas_init();
 
-void canvas_reset(CanvasApi* api);
+void canvas_free(Canvas* canvas);
 
-void canvas_commit(CanvasApi* api);
+void canvas_reset(Canvas* canvas);
+
+void canvas_commit(Canvas* canvas);
 
 void canvas_frame_set(
-    CanvasApi* api,
+    Canvas* canvas,
     uint8_t offset_x,
     uint8_t offset_y,
     uint8_t width,

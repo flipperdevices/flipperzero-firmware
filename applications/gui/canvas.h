@@ -9,30 +9,40 @@ typedef enum {
     ColorBlack = 0x01,
 } Color;
 
-typedef enum { FontPrimary = 0x00, FontSecondary = 0x01, FontGlyph = 0x02 } Font;
+typedef enum {
+    FontPrimary = 0x00,
+    FontSecondary = 0x01,
+    FontGlyph = 0x02 
+} Font;
 
-typedef struct CanvasApi CanvasApi;
-struct CanvasApi {
-    uint8_t (*width)(CanvasApi* canvas);
-    uint8_t (*height)(CanvasApi* canvas);
+typedef struct Canvas Canvas;
 
-    void (*clear)(CanvasApi* canvas);
+uint8_t canvas_width(Canvas* canvas);
 
-    void (*set_color)(CanvasApi* canvas, Color color);
-    void (*set_font)(CanvasApi* canvas, Font font);
+uint8_t canvas_height(Canvas* canvas);
 
-    void (*draw_str)(CanvasApi* canvas, uint8_t x, uint8_t y, const char* str);
-    void (*draw_icon)(CanvasApi* canvas, uint8_t x, uint8_t y, Icon* icon);
-    void (*draw_xbm)(
-        CanvasApi* canvas,
-        uint8_t x,
-        uint8_t y,
-        uint8_t w,
-        uint8_t h,
-        const uint8_t* bitmap);
-    void (*draw_dot)(CanvasApi* canvas, uint8_t x, uint8_t y);
-    void (*draw_box)(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-    void (*draw_frame)(CanvasApi* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-    void (*draw_line)(CanvasApi* canvas, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
-    void (*draw_glyph)(CanvasApi* canvas, uint8_t x, uint8_t y, uint16_t ch);
-};
+void canvas_clear(Canvas* canvas);
+
+void canvas_set_color(Canvas* canvas, Color color);
+
+void canvas_set_font(Canvas* canvas, Font font);
+
+void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str);
+
+void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, Icon* icon);
+
+void canvas_draw_xbm(Canvas* canvas,
+    uint8_t x, uint8_t y,
+    uint8_t w, uint8_t h,
+    const uint8_t* bitmap);
+
+void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y);
+
+void canvas_draw_box(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+
+void canvas_draw_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
+
+void canvas_draw_line(Canvas* canvas, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+
+void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch);
+

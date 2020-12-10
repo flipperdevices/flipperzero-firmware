@@ -21,9 +21,9 @@ void widget_gui_set(Widget* widget, Gui* gui);
 
 /*
  * Process draw call. Calls draw callback.
- * @param canvas_api - canvas to draw at.
+ * @param canvas - canvas to draw at.
  */
-void widget_draw(Widget* widget, CanvasApi* canvas_api);
+void widget_draw(Widget* widget, Canvas* canvas);
 
 /*
  * Process input. Calls input callback.

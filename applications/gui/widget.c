@@ -78,13 +78,13 @@ void widget_gui_set(Widget* widget, Gui* gui) {
     widget->gui = gui;
 }
 
-void widget_draw(Widget* widget, CanvasApi* canvas_api) {
+void widget_draw(Widget* widget, Canvas* canvas) {
     furi_assert(widget);
-    furi_assert(canvas_api);
+    furi_assert(canvas);
 
     furi_check(widget->gui);
     if(widget->draw_callback) {
-        widget->draw_callback(canvas_api, widget->draw_callback_context);
+        widget->draw_callback(canvas, widget->draw_callback_context);
     }
 }
 

@@ -16,4 +16,4 @@ typedef struct {
 
 Bt* bt_alloc();
 
-void bt_draw_statusbar_callback(CanvasApi* canvas, void* context);
+void bt_draw_statusbar_callback(Canvas* canvas, void* context);

@@ -13,10 +13,10 @@ Bt* bt_alloc() {
     return bt;
 }
 
-void bt_draw_statusbar_callback(CanvasApi* canvas, void* context) {
+void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     assert(context);
     Bt* bt = context;
-    canvas->draw_icon(canvas, 0, 0, bt->statusbar_icon);
+    canvas_draw_icon(canvas, 0, 0, bt->statusbar_icon);
 }
 
 void bt_cli_info(string_t args, void* context) {
@@ -42,9 +42,9 @@ void bt_task() {
 
     FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
     furi_assert(gui_record);
-    GuiApi* gui = furi_take(gui_record);
+    Gui* gui = furi_take(gui_record);
     furi_assert(gui);
-    gui->add_widget(gui, bt->statusbar_widget, GuiLayerStatusBarLeft);
+    gui_add_widget(gui, bt->statusbar_widget, GuiLayerStatusBarLeft);
     furi_commit(gui_record);
 
     furiac_ready();
