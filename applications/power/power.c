@@ -134,13 +134,9 @@ void power_task(void* p) {
         cli_add_command(power->cli, "power_otg_off", power_cli_otg_off, power);
     }
 
-    FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
-    assert(gui_record);
-    Gui* gui = furi_take(gui_record);
-    assert(gui);
+    Gui* gui = furi_open("gui");
     gui_add_widget(gui, power->usb_widget, GuiLayerStatusBarLeft);
     gui_add_widget(gui, power->battery_widget, GuiLayerStatusBarRight);
-    furi_commit(gui_record);
 
     with_value_mutex(
         power->menu_vm, (Menu * menu) { menu_item_add(menu, power->menu); });

@@ -56,12 +56,8 @@ Irukagotchi* irukagotchi_alloc() {
 void irukagotchi_task() {
     Irukagotchi* irukagotchi = irukagotchi_alloc();
 
-    FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
-    furi_check(gui_record);
-    Gui* gui = furi_take(gui_record);
-    furi_check(gui);
+    Gui* gui = furi_open("gui");
     gui_add_widget(gui, irukagotchi->widget, GuiLayerNone);
-    furi_commit(gui_record);
 
     furiac_ready();
 

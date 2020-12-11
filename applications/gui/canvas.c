@@ -38,7 +38,7 @@ void canvas_free(Canvas* canvas) {
 }
 
 void canvas_reset(Canvas* canvas) {
-    assert(canvas);
+    furi_assert(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
 }

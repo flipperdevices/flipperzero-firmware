@@ -29,6 +29,14 @@ typedef enum {
 
 typedef struct Gui Gui;
 
+/*
+ * Add widget to widget tree
+ * @remarks thread safe
+ */
 void gui_add_widget(Gui* gui, Widget* widget, GuiLayer layer);
 
+/*
+ * Remove widget from rendering tree
+ * @remarks thread safe
+ */
 void gui_remove_widget(Gui* gui, Widget* widget);

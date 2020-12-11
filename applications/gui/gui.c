@@ -66,7 +66,7 @@ void gui_redraw_status_bar(Gui* gui) {
             width = widget_get_width(widget);
             if(!width) width = 8;
             x_used += width;
-            x -= width;
+            x -= (width + 2);
             canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
             widget_draw(widget, gui->canvas);
         }
@@ -84,7 +84,7 @@ void gui_redraw_status_bar(Gui* gui) {
             x_used += width;
             canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
             widget_draw(widget, gui->canvas);
-            x += width;
+            x += (width + 2);
         }
         WidgetArray_next(it);
     }

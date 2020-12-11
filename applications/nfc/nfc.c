@@ -166,13 +166,9 @@ Nfc* nfc_alloc() {
 void nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
 
-    FuriRecordSubscriber* gui_record = furi_open_deprecated("gui", false, false, NULL, NULL, NULL);
-    furi_check(gui_record);
-    Gui* gui = furi_take(gui_record);
-    furi_check(gui);
+    Gui* gui = furi_open("gui");
     widget_enabled_set(nfc->widget, false);
     gui_add_widget(gui, nfc->widget, GuiLayerFullscreen);
-    furi_commit(gui_record);
 
     with_value_mutex(
         nfc->menu_vm, (Menu * menu) { menu_item_add(menu, nfc->menu); });
