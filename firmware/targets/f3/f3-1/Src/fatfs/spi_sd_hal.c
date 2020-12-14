@@ -1,4 +1,5 @@
 #include "main.h"
+#include "api-hal-spi.h"
 
 #define SD_DUMMY_BYTE 0xFF
 #define SD_CS_LOW() HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_RESET)
@@ -93,7 +94,13 @@ void SD_IO_Init(void) {
 void SD_IO_CSState(uint8_t val) {
     if(val == 1) {
         SD_CS_HIGH();
+
+        // TODO: SPI manager
+        api_hal_spi_unlock(&SPI_SD_HANDLE);
     } else {
+        // TODO: SPI manager
+        api_hal_spi_lock(&SPI_SD_HANDLE);
+
         SD_CS_LOW();
     }
 }

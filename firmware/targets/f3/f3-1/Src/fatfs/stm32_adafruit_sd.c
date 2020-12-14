@@ -92,6 +92,7 @@
 #include "string.h"
 #include "stdio.h"
 #include "spi.h"
+#include "api-hal-spi.h"
 
 /** @addtogroup BSP
   * @{
@@ -290,18 +291,30 @@ static uint8_t SD_ReadData(void);
   *         - MSD_OK: Sequence succeed
   */
 uint8_t BSP_SD_Init(void) {
+    // TODO: SPI manager
+    api_hal_spi_lock(&SPI_SD_HANDLE);
+
     /* Init to maximum slow speed */
     SD_SPI_Reconfigure_Slow();
 
     /* Configure IO functionalities for SD pin */
     SD_IO_Init();
 
+    // TODO: SPI manager
+    api_hal_spi_unlock(&SPI_SD_HANDLE);
+
     /* SD detection pin is not physically mapped on the Adafruit shield */
     SdStatus = SD_PRESENT;
     uint8_t res = SD_GoIdleState();
 
+    // TODO: SPI manager
+    api_hal_spi_lock(&SPI_SD_HANDLE);
+
     /* Init to maximum fastest speed */
     SD_SPI_Reconfigure_Fast();
+
+    // TODO: SPI manager
+    api_hal_spi_unlock(&SPI_SD_HANDLE);
 
     /* SD initialized and set to SPI mode properly */
     return res;
@@ -323,8 +336,8 @@ uint8_t BSP_SD_GetCardInfo(SD_CardInfo* pCardInfo) {
     if(flag_SDHC == 1) {
         pCardInfo->LogBlockSize = 512;
         pCardInfo->CardBlockSize = 512;
-        pCardInfo->CardCapacity =
-            ((uint64_t)pCardInfo->Csd.version.v2.DeviceSize + 1UL) * 1024UL * (uint64_t)pCardInfo->LogBlockSize;
+        pCardInfo->CardCapacity = ((uint64_t)pCardInfo->Csd.version.v2.DeviceSize + 1UL) * 1024UL *
+                                  (uint64_t)pCardInfo->LogBlockSize;
         pCardInfo->LogBlockNbr = (pCardInfo->CardCapacity) / (pCardInfo->LogBlockSize);
     } else {
         pCardInfo->CardCapacity = (pCardInfo->Csd.version.v1.DeviceSize + 1);
