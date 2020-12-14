@@ -55,22 +55,6 @@ jobs:
         with:
           run: make -C firmware TARGET=local APP_TEST=1 run
 
-      - name: Build F2 firmware in docker
-        uses: ./.github/actions/docker
-        with:
-          run: make -C firmware TARGET=f2 APP_RELEASE=1
-
-      - name: Publish F2 firmware artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: firmware_f2
-          path: |
-            firmware/.obj/f2/firmware.elf
-            firmware/.obj/f2/firmware.bin
-            firmware/.obj/f2/firmware.hex
-          if-no-files-found: error
-          retention-days: 7
-
       - name: Build F3 bootloader in docker
         uses: ./.github/actions/docker
         with:
@@ -87,19 +71,19 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      - name: Build F3 firmware in docker
+      - name: Build F4 firmware in docker
         uses: ./.github/actions/docker
         with:
-          run: make -C firmware TARGET=f3 APP_RELEASE=1
+          run: make -C firmware TARGET=f4 APP_RELEASE=1
 
-      - name: Publish F3 firmware artifacts
+      - name: Publish F4 firmware artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: firmware_f3
+          name: firmware_f4
           path: |
-            firmware/.obj/f3/firmware.elf
-            firmware/.obj/f3/firmware.bin
-            firmware/.obj/f3/firmware.hex
+            firmware/.obj/f4/firmware.elf
+            firmware/.obj/f4/firmware.bin
+            firmware/.obj/f4/firmware.hex
           if-no-files-found: error
           retention-days: 7
 
@@ -116,7 +100,7 @@ jobs:
       - name: Get firmware
         uses: actions/download-artifact@v2
         with:
-          name: firmware_f3
+          name: firmware_f4
           path: firmware
       - name: Upload bootloader
         uses: burnett01/rsync-deployments@4.1
@@ -153,7 +137,7 @@ jobs:
       - name: Get firmware
         uses: actions/download-artifact@v2
         with:
-          name: firmware_f3
+          name: firmware_f4
           path: firmware 
       - name: cp 
         run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
