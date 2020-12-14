@@ -247,33 +247,33 @@ void async_config(CC1101* cc1101) {
     cc1101->SpiWriteReg(CC1101_FSCAL0, 0x1F); //Frequency Synthesizer Calibration
 }
 
-/*
 void tx_config(CC1101* cc1101) {
     // cc1101->SpiWriteReg(CC1101_IOCFG2,0x0B);  //GDO2 Output Pin Configuration
-    cc1101->SpiWriteReg(CC1101_IOCFG0,0x0C);  //GDO0 Output Pin Configuration
+    // cc1101->SpiWriteReg(CC1101_IOCFG0,0x0C);  //GDO0 Output Pin Configuration
+    cc1101->SpiSetRegValue(CC1101_IOCFG0, 13, 5, 0); // GDO0 Output Pin Configuration
+
     cc1101->SpiWriteReg(CC1101_FIFOTHR,0x47); //RX FIFO and TX FIFO Thresholds
-    cc1101->SpiWriteReg(CC1101_PKTCTRL0,0x32); //Packet Automation Control
+    cc1101->SpiWriteReg(CC1101_PKTCTRL0,0x32);//Packet Automation Control
     cc1101->SpiWriteReg(CC1101_FSCTRL1,0x06); //Frequency Synthesizer Control
-    // cc1101->SpiWriteReg(CC1101_FREQ2,0x10);   //Frequency Control Word, High Byte
-    // cc1101->SpiWriteReg(CC1101_FREQ1,0xB0);   //Frequency Control Word, Middle Byte
-    // cc1101->SpiWriteReg(CC1101_FREQ0,0x71);   //Frequency Control Word, Low Byte
-    cc1101->SpiWriteReg(CC1101_MDMCFG4,0xFA); //Modem Configuration
+    cc1101->SpiWriteReg(CC1101_FREQ2,0x10);   //Frequency Control Word, High Byte
+    cc1101->SpiWriteReg(CC1101_FREQ1,0xB0);   //Frequency Control Word, Middle Byte
+    cc1101->SpiWriteReg(CC1101_FREQ0,0x71);   //Frequency Control Word, Low Byte
+    cc1101->SpiWriteReg(CC1101_MDMCFG4,0x6A); //Modem Configuration
     cc1101->SpiWriteReg(CC1101_MDMCFG3,0x2E); //Modem Configuration
     cc1101->SpiWriteReg(CC1101_MDMCFG2,0x30); //Modem Configuration
-    // cc1101->SpiWriteReg(CC1101_DEVIATN,0x15); //Modem Deviation Setting
+    cc1101->SpiWriteReg(CC1101_DEVIATN,0x15); //Modem Deviation Setting
     cc1101->SpiWriteReg(CC1101_MCSM0,0x18);   //Main Radio Control State Machine Configuration
     cc1101->SpiWriteReg(CC1101_FOCCFG,0x16);  //Frequency Offset Compensation Configuration
     cc1101->SpiWriteReg(CC1101_WORCTRL,0xFB); //Wake On Radio Control
-    // cc1101->SpiWriteReg(CC1101_FREND0,0x11);  //Front End TX Configuration
+    cc1101->SpiWriteReg(CC1101_FREND0,0x11);  //Front End TX Configuration
     cc1101->SpiWriteReg(CC1101_FSCAL3,0xE9);  //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL2,0x2A);  //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL1,0x00);  //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL0,0x1F);  //Frequency Synthesizer Calibration
-    // cc1101->SpiWriteReg(CC1101_TEST2,0x81);   //Various Test Settings
-    // cc1101->SpiWriteReg(CC1101_TEST1,0x35);   //Various Test Settings
-    // cc1101->SpiWriteReg(CC1101_TEST0,0x09);   //Various Test Settings
+    cc1101->SpiWriteReg(CC1101_TEST2,0x81);   //Various Test Settings
+    cc1101->SpiWriteReg(CC1101_TEST1,0x35);   //Various Test Settings
+    cc1101->SpiWriteReg(CC1101_TEST0,0x09);   //Various Test Settings
 }
-*/
 
 // f = (f_osc/65536) * (FREQ + CHAN * (256 + CH_SP_M) * 2^(CH_SP_E - 2))
 // FREQ = f / (f_osc/65536)
@@ -463,8 +463,9 @@ extern "C" void cc1101_workaround(void* p) {
     cc1101.SpiStrobe(CC1101_SIDLE);
 
     // flp_config(&cc1101);
-    async_config(&cc1101);
-    setup_freq(&cc1101, &FREQ_LIST[4]);
+    // async_config(&cc1101);
+    tx_config(&cc1101);
+    // setup_freq(&cc1101, &FREQ_LIST[4]);
     // enable_cc1101_irq();
 
     printf("init ok\n");
@@ -475,7 +476,7 @@ extern "C" void cc1101_workaround(void* p) {
     // configure pin
     gpio_init(led_record, GpioModeOutputOpenDrain);
 
-    const int16_t RSSI_THRESHOLD = -89;
+    const int16_t RSSI_THRESHOLD = -60;
 
     // setup_freq(&cc1101, &FREQ_LIST[1]);
 
@@ -553,6 +554,7 @@ extern "C" void cc1101_workaround(void* p) {
 
             gpio_write(led_record, state->last_rssi < RSSI_THRESHOLD);
         } else if(!state->need_cc1101_conf && state->mode == ModeTx) {
+            /*
             const uint8_t data = 0xA5;
 
             for(uint8_t i = 0; i < 8; i++) {
@@ -560,6 +562,26 @@ extern "C" void cc1101_workaround(void* p) {
                 osDelay(1);
             }
             gpio_write(&cc1101_g0_gpio, false);
+            */
+
+            const uint16_t HALF_PERIOD = 500;
+
+            for(uint8_t n = 0; n < 4; n++) {
+                for(uint8_t i = 0; i < 4; i++) {
+                    gpio_write(&cc1101_g0_gpio, true);
+                    delay_us(3 * HALF_PERIOD);
+                    gpio_write(&cc1101_g0_gpio, false);
+                    delay_us(HALF_PERIOD);
+                }
+
+                for(uint8_t i = 0; i < 40; i++) {
+                    gpio_write(&cc1101_g0_gpio, true);
+                    delay_us(HALF_PERIOD);
+                    gpio_write(&cc1101_g0_gpio, false);
+                    delay_us(HALF_PERIOD);
+                }
+            }
+            
         }
 
         release_mutex(&state_mutex, state);
