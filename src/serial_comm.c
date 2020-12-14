@@ -218,7 +218,7 @@ static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, voi
         }
     } while ((response->direction != READ_DIRECTION) || (response->command != cmd));
 
-    response_status_t *status = (response_status_t *)(resp + resp_size - sizeof(response_status_t));
+    response_status_t *status = (response_status_t *)((uint8_t *)resp + resp_size - sizeof(response_status_t));
 
     if (status->failed) {
         log_loader_internal_error(status->error);
