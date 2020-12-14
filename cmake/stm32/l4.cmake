@@ -15,17 +15,19 @@ set(STM32_L4_TYPE_MATCH
 
 set(STM32_L4_RAM_SIZES 
      40K  40K  64K  64K  64K  64K
-     64K 160K 160K 160K 128K 128K
-    128K 128K 128K 320K 320K 320K 
+     64K 160K 160K 160K  96K  96K
+     96K  96K  96K 320K 320K 320K 
     320K 640K 640K 640K 640K 640K
     640K
 )
+# on devices where CCRAM is remapped to be contiguous with RAM it is included into RAM section
+# If you want to have dedicated section then you will need to use custom linker script
 set(STM32_L4_CCRAM_SIZES 
-      8K   8K  16K  16K  16K  16K
-     16K  32K  32K  32K  32K  32K
-     32K  32K  32K  64K  64K  64K
-     64K  64K  64K  64K  64K  64K
-     64K
+      0K   0K   0K   0K   0K   0K
+      0K   0K   0K   0K  32K  32K
+     32K  32K  32K   0K   0K   0K
+      0K   0K   0K   0K   0K   0K
+      0K
 )
 
 stm32_util_create_family_targets(L4)
