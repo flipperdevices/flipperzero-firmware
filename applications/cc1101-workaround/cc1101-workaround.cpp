@@ -534,7 +534,7 @@ extern "C" void cc1101_workaround(void* p) {
 
                 setup_freq(&cc1101, &FREQ_LIST[state->active_freq]);
                 cc1101.SetReceive();
-                
+
                 state->last_rssi = rx_rssi(&cc1101, &FREQ_LIST[state->active_freq]);
             } else if(state->mode == ModeTx) {
                 cc1101.SpiStrobe(CC1101_SIDLE);
