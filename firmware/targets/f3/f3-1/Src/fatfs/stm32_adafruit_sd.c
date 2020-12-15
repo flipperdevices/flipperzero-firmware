@@ -300,15 +300,9 @@ uint8_t BSP_SD_Init(void) {
     /* Configure IO functionalities for SD pin */
     SD_IO_Init();
 
-    // TODO: SPI manager
-    api_hal_spi_unlock(&SPI_SD_HANDLE);
-
     /* SD detection pin is not physically mapped on the Adafruit shield */
     SdStatus = SD_PRESENT;
     uint8_t res = SD_GoIdleState();
-
-    // TODO: SPI manager
-    api_hal_spi_lock(&SPI_SD_HANDLE);
 
     /* Init to maximum fastest speed */
     SD_SPI_Reconfigure_Fast();
