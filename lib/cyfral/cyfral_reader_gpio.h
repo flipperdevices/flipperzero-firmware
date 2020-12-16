@@ -103,10 +103,10 @@ void CyfralReader::capture_data(
 
             // check transition time
             if(end - start < time_threshold) {
-                data[capture_position] = 1;
+                data[capture_position] = 0;
                 capture_position++;
             } else {
-                data[capture_position] = 0;
+                data[capture_position] = 1;
                 capture_position++;
             }
         }
@@ -267,10 +267,10 @@ bool CyfralReader::read(uint8_t* data, uint8_t count) {
 
     // TODO think about other detection method
     // key not on line
-    if(line_level_max > 2000) {
+    /*if(line_level_max > 2000) {
         error = CyfralReaderError::UNABLE_TO_DETECT;
         return false;
-    }
+    }*/
 
     // capturing raw data consisting of bits
     capture_data(raw_data, capture_size, line_level_min, line_level_max);
