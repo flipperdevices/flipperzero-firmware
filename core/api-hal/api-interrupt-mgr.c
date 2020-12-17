@@ -31,8 +31,6 @@ void api_interrupt_add(InterruptCallback callback, InterruptType type, void* con
 
 void api_interrupt_remove(InterruptCallback callback) {
     if(osMutexAcquire(interrupt_list_mutex, osWaitForever) == osOK) {
-        bool result = false;
-
         // iterate over items
         list_interrupt_it_t it;
         for(list_interrupt_it(it, interrupts); !list_interrupt_end_p(it);
@@ -64,9 +62,4 @@ void api_interrupt_call(InterruptType type, void* hw) {
             item->callback(hw, item->context);
         }
     }
-}
-
-/* interrupts */
-void HAL_COMP_TriggerCallback(COMP_HandleTypeDef* hcomp) {
-    api_interrupt_call(InterruptTypeComparatorTrigger, hcomp);
 }
