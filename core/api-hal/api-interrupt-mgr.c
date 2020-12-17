@@ -66,7 +66,6 @@ void api_interrupt_call(InterruptType type, void* hw) {
     }
 }
 
-
 /* interrupts */
 void HAL_COMP_TriggerCallback(COMP_HandleTypeDef* hcomp) {
     api_interrupt_call(InterruptTypeComparatorTrigger, hcomp);
