@@ -60,7 +60,7 @@ void api_interrupt_call(InterruptType type, void* hw) {
         const InterruptCallbackItem* item = list_interrupt_cref(it);
 
         // if the iterator is equal to our element
-        if(item->type == type) {
+        if(item->type == type && item->ready) {
             item->callback(hw, item->context);
         }
     }
