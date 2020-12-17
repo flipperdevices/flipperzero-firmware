@@ -5,11 +5,11 @@ void dolphin_draw_callback(Canvas* canvas, void* context) {
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    if (dolphin->screen == DolphinScreenIdle) {
+    if(dolphin->screen == DolphinScreenIdle) {
         dolphin_draw_idle(canvas, dolphin);
-    } else if (dolphin->screen == DolphinScreenDebug) {
+    } else if(dolphin->screen == DolphinScreenDebug) {
         dolphin_draw_debug(canvas, dolphin);
-    } else if (dolphin->screen == DolphinScreenStats) {
+    } else if(dolphin->screen == DolphinScreenStats) {
         dolphin_draw_stats(canvas, dolphin);
     }
 }
@@ -49,18 +49,18 @@ void dolphin_input_callback(InputEvent* event, void* context) {
 
     if(!event->state) return;
 
-    if (event->input == InputOk) {
+    if(event->input == InputOk) {
         with_value_mutex(
-        dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
-    } else if (event->input == InputUp) {
-        if (dolphin->screen != DolphinScreenStats) {
-            dolphin->screen ++;
+            dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
+    } else if(event->input == InputUp) {
+        if(dolphin->screen != DolphinScreenStats) {
+            dolphin->screen++;
         }
-    } else if (event->input == InputDown) {
-        if (dolphin->screen != DolphinScreenDebug) {
-            dolphin->screen --;
+    } else if(event->input == InputDown) {
+        if(dolphin->screen != DolphinScreenDebug) {
+            dolphin->screen--;
         }
-    } else if (event->input == InputBack) {
+    } else if(event->input == InputBack) {
         dolphin->screen = DolphinScreenIdle;
     }
 
@@ -76,7 +76,7 @@ Dolphin* dolphin_alloc() {
     dolphin->widget = widget_alloc();
     widget_draw_callback_set(dolphin->widget, dolphin_draw_callback, dolphin);
     widget_input_callback_set(dolphin->widget, dolphin_input_callback, dolphin);
-    
+
     dolphin->menu_vm = furi_open("menu");
     furi_check(dolphin->menu_vm);
 
@@ -112,7 +112,7 @@ void dolphin_task() {
     DolphinEvent event;
     while(1) {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
-        if (event.type == DolphinEventTypeDeed) {
+        if(event.type == DolphinEventTypeDeed) {
             dolphin_state_on_deed(dolphin->state, event.deed);
         }
     }

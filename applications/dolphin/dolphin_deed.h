@@ -13,9 +13,9 @@ typedef enum {
 } DolphinDeed;
 
 typedef struct {
-    int32_t     icounter;
-    uint32_t    limit_value;
-    uint32_t    limit_interval;
+    int32_t icounter;
+    uint32_t limit_value;
+    uint32_t limit_interval;
 } DolphinDeedWeight;
 
 const DolphinDeedWeight* dolphin_deed_weight(DolphinDeed deed);

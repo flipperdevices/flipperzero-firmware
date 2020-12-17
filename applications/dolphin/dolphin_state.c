@@ -25,11 +25,9 @@ void dolphin_state_release(DolphinState* dolphin_state) {
 }
 
 void dolphin_state_save(DolphinState* dolphin_state) {
-
 }
 
 void dolphin_state_load(DolphinState* dolphin_state) {
-
 }
 
 void dolphin_state_clear(DolphinState* dolphin_state) {
