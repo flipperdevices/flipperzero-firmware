@@ -107,6 +107,8 @@ bool CyfralReaderComp::capture_data(bool* data, uint16_t capture_size) {
             return false;
         }
     }
+
+    osMessageQueueReset(comp_event_queue);
 }
 
 uint32_t CyfralReaderComp::search_array_in_array(
