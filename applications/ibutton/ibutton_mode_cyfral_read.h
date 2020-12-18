@@ -1,12 +1,12 @@
 #pragma once
 #include "ibutton.h"
-#include "cyfral_reader.h"
+#include "cyfral_reader_comp.h"
 
 class AppiButtonModeCyfralRead : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
 public:
     const char* name = "cyfral read";
     AppiButton* app;
-    CyfralReader* reader;
+    CyfralReaderComp* reader;
 
     void event(AppiButtonEvent* event, AppiButtonState* state);
     void render(Canvas* canvas, AppiButtonState* state);
@@ -15,7 +15,10 @@ public:
 
     AppiButtonModeCyfralRead(AppiButton* parent_app) {
         app = parent_app;
-        reader = new CyfralReader(ADC1, ADC_CHANNEL_14);
+
+        // TODO open record
+        const GpioPin* one_wire_pin_record = &ibutton_gpio;
+        reader = new CyfralReaderComp(one_wire_pin_record);
     };
 };
 
