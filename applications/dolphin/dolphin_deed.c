@@ -4,6 +4,7 @@ static const DolphinDeedWeight dolphin_deed_weights[DolphinDeedMax] = {
     {1, 2, 60},
     {1, 2, 60},
     {1, 2, 60},
+    {-1, 2, 60},
 };
 
 const DolphinDeedWeight* dolphin_deed_weight(DolphinDeed deed) {

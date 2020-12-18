@@ -42,6 +42,7 @@ void dolphin_draw_stats(Canvas* canvas, Dolphin* dolphin) {
     canvas_draw_str(canvas, 5, 22, buffer);
     snprintf(buffer, 64, "Butthurt: %ld", dolphin_state_get_butthurt(dolphin->state));
     canvas_draw_str(canvas, 5, 32, buffer);
+    canvas_draw_str(canvas, 5, 40, "< > change icounter");
 }
 
 void dolphin_input_callback(InputEvent* event, void* context) {
@@ -62,6 +63,10 @@ void dolphin_input_callback(InputEvent* event, void* context) {
         }
     } else if(event->input == InputBack) {
         dolphin->screen = DolphinScreenIdle;
+    } else if(event->input == InputLeft) {
+        dolphin_deed(dolphin, DolphinDeedIButtonEmulate);
+    } else if(event->input == InputRight) {
+        dolphin_deed(dolphin, DolphinDeedWrong);
     }
 
     widget_update(dolphin->widget);

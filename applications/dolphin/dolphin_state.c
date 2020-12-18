@@ -36,7 +36,11 @@ void dolphin_state_clear(DolphinState* dolphin_state) {
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     const DolphinDeedWeight* deed_weight = dolphin_deed_weight(deed);
-    dolphin_state->icounter += deed_weight->icounter;
+    int32_t icounter = dolphin_state->icounter + deed_weight->icounter;
+
+    if(icounter >= 0) {
+        dolphin_state->icounter = icounter;
+    }
 }
 
 uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
