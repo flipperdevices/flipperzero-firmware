@@ -3,7 +3,7 @@ set(STM32_G0_TYPES
     G0C1xx
 )
 set(STM32_G0_TYPE_MATCH 
-    "G030.." "G031.." "G041.." "G070.." "G071.." "G081.."
+       "G030.." "G031.." "G041.." "G070.." "G071.." "G081.."
     "G0[BC]1.."
 )
 set(STM32_G0_RAM_SIZES 
