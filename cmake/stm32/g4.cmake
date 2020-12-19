@@ -8,7 +8,7 @@ set(STM32_G4_RAM_SIZES
      32K  32K 128K 128K 128K 128K 128K
 )
 set(STM32_G4_CCRAM_SIZES 
-     10K  10K  32K  32K  32K  32K  32K
+      0K   0K   0K   0K   0K   0K   0K
 )
 
 stm32_util_create_family_targets(G4)
