@@ -15,6 +15,8 @@
 #include "assets_icons.h"
 #include "furi-deprecated.h"
 
+#define CORE_ERROR UINT32_MAX
+
 typedef osThreadId_t FuriAppId;
 
 LIST_DEF(list_app, FuriAppId);
@@ -76,3 +78,9 @@ bool new_flapp_app_exit(void);
 FuriAppId new_flapp_thread_start(FuriAppFn app, uint32_t stack_size, void* param);
 bool new_flapp_thread_stop(FuriAppId app_id);
 bool new_flapp_thread_exit(void);
+
+FuriAppId new_flapp_get_app_id(FuriAppId app_or_thread_id);
+uint32_t new_flapp_created_records_count(FuriAppId app_id);
+uint32_t new_flapp_opened_records_count(FuriAppId app_id);
+uint32_t new_flapp_threads_count(FuriAppId app_id);
+uint32_t new_flapp_apps_count();

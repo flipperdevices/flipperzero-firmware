@@ -1,6 +1,11 @@
 #include "furi-new.h"
 #include "api-basic/check.h"
 
+#define MF_EACH(it, list, list_type) \
+    list_type##_it(it, list);        \
+    !list_type##_end_p(it);          \
+    list_type##_next(it)
+
 osMutexId_t furi_core_mutex;
 osSemaphoreId_t furi_new_record_available;
 list_furi_record_t furi_record_list;
@@ -9,8 +14,8 @@ list_furi_app_t furi_app_list;
 FuriRecordItem* find_record_by_name(const char* name) {
     // iterate over items
     list_furi_record_it_t it;
-    for(list_furi_record_it(it, furi_record_list); !list_furi_record_end_p(it);
-        list_furi_record_next(it)) {
+    
+    for(MF_EACH(it, furi_record_list, list_furi_record)) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
@@ -25,8 +30,7 @@ FuriRecordItem* find_record_by_name(const char* name) {
 bool remove_record_by_name(const char* name) {
     // iterate over items
     list_furi_record_it_t it;
-    for(list_furi_record_it(it, furi_record_list); !list_furi_record_end_p(it);
-        list_furi_record_next(it)) {
+    for(MF_EACH(it, furi_record_list, list_furi_record)) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
@@ -47,8 +51,7 @@ bool remove_record_by_name(const char* name) {
 FuriRecordItem* find_record_by_app_id(FuriAppId app_id) {
     // iterate over items
     list_furi_record_it_t it;
-    for(list_furi_record_it(it, furi_record_list); !list_furi_record_end_p(it);
-        list_furi_record_next(it)) {
+    for(MF_EACH(it, furi_record_list, list_furi_record)) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
@@ -63,8 +66,7 @@ FuriRecordItem* find_record_by_app_id(FuriAppId app_id) {
 bool remove_record_by_app_id(FuriAppId app_id) {
     // iterate over items
     list_furi_record_it_t it;
-    for(list_furi_record_it(it, furi_record_list); !list_furi_record_end_p(it);
-        list_furi_record_next(it)) {
+    for(MF_EACH(it, furi_record_list, list_furi_record)) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
         // if the iterator is equal to our element
@@ -82,7 +84,7 @@ bool remove_app_from_list(list_app_t app_list, FuriAppId app_id) {
     bool removed = false;
 
     // iterate over items
-    for(list_app_it(it, app_list); !list_app_end_p(it); list_app_next(it)) {
+    for(MF_EACH(it, app_list, list_app)) {
         FuriAppId item = *list_app_ref(it);
 
         // if the iterator is equal to our element
@@ -95,9 +97,17 @@ bool remove_app_from_list(list_app_t app_list, FuriAppId app_id) {
     return removed;
 }
 
+bool lock_core(void) {
+    return (osMutexAcquire(furi_core_mutex, osWaitForever) == osOK);
+}
+
+void unlock_core(void) {
+    osMutexRelease(furi_core_mutex);
+}
+
 void* new_furi_open_internal(const char* name) {
     FuriRecordItem* item = NULL;
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         item = find_record_by_name(name);
         if(item) {
             FuriAppId app_id = flapp_current_app_id();
@@ -117,7 +127,7 @@ void* new_furi_open_internal(const char* name) {
                 list_app_push_back(item->open_by_apps, app_id);
             }
         }
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
     }
     return item;
 }
@@ -172,12 +182,12 @@ bool new_furi_close(const char* name) {
     FuriRecordItem* item = NULL;
     bool result = false;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         item = find_record_by_name(name);
         if(item) {
             result = remove_app_from_list(item->open_by_apps, flapp_current_app_id());
         }
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
     }
 
     return result;
@@ -185,7 +195,7 @@ bool new_furi_close(const char* name) {
 
 // create record
 bool new_furi_create(const char* name, void* ptr) {
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         // put uninitialized item to the list
         FuriRecordItem* item = list_furi_record_push_raw(furi_record_list);
         FuriAppId app_id = flapp_current_app_id();
@@ -209,7 +219,7 @@ bool new_furi_create(const char* name, void* ptr) {
         // construct list that hold apps, who open that record
         list_app_init(item->open_by_apps);
 
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
 
         // TODO: signal that new record available
         // in case if anybody wait for record
@@ -221,13 +231,13 @@ bool new_furi_create(const char* name, void* ptr) {
 
 // delete record
 bool furi_new_delete(const char* name) {
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         FuriRecordItem* item = find_record_by_name(name);
 
         if(item) {
             // close apps that use this record
             list_app_it_t it;
-            for(list_app_it(it, item->open_by_apps); !list_app_end_p(it); list_app_next(it)) {
+            for(MF_EACH(it, item->open_by_apps, list_app)) {
                 FuriAppId app_id = list_app_ref(it);
 
                 // TODO: close app
@@ -236,7 +246,7 @@ bool furi_new_delete(const char* name) {
 
             // remove record
             remove_record_by_name(name);
-            osMutexRelease(furi_core_mutex);
+            unlock_core();
             return true;
         } else {
             return false;
@@ -249,7 +259,8 @@ bool furi_new_delete(const char* name) {
 FuriAppItem* find_app_by_app_id(FuriAppId app_id) {
     // iterate over items
     list_furi_app_it_t it;
-    for(list_furi_app_it(it, furi_app_list); !list_furi_app_end_p(it); list_furi_app_next(it)) {
+
+    for(MF_EACH(it, furi_app_list, list_furi_app)) {
         FuriAppItem* item = list_furi_app_ref(it);
 
         // if the iterator is equal to our element
@@ -266,7 +277,7 @@ bool remove_app_by_app_id(FuriAppId app_id) {
     list_furi_app_it_t it;
     bool result = false;
 
-    for(list_furi_app_it(it, furi_app_list); !list_furi_app_end_p(it); list_furi_app_next(it)) {
+    for(MF_EACH(it, furi_app_list, list_furi_app)) {
         FuriAppItem* application = list_furi_app_ref(it);
 
         // if the iterator is equal to our element
@@ -292,7 +303,8 @@ FuriAppItem* find_app_by_thread_id(FuriAppId thread_id) {
         FuriAppItem* application = list_furi_app_ref(it);
 
         list_app_it_t it;
-        for(list_app_it(it, application->threads); !list_app_end_p(it); list_app_next(it)) {
+
+        for(MF_EACH(it, application->threads, list_app)) {
             FuriAppId app_thread_id = *list_app_ref(it);
 
             if(app_thread_id == thread_id) {
@@ -311,7 +323,7 @@ FuriAppId flapp_current_app_id(void) {
 bool new_flapp_on_exit(FuriOnExitCallback callback, void* context) {
     bool result = false;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         FuriAppItem* application = find_app_by_app_id(flapp_current_app_id());
 
         if(application != NULL) {
@@ -323,7 +335,7 @@ bool new_flapp_on_exit(FuriOnExitCallback callback, void* context) {
             result = true;
         }
 
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
     }
 
     return result;
@@ -332,7 +344,7 @@ bool new_flapp_on_exit(FuriOnExitCallback callback, void* context) {
 FuriAppId new_flapp_app_start(FuriAppFn app, char* name, uint32_t stack_size, void* param) {
     osThreadId_t app_id = NULL;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         osThreadAttr_t app_attr = {.name = name, .stack_size = stack_size};
         app_id = osThreadNew(app, param, &app_attr);
 
@@ -351,7 +363,7 @@ FuriAppId new_flapp_app_start(FuriAppFn app, char* name, uint32_t stack_size, vo
             list_furi_exit_callback_init(item->exit_callbacks);
         }
 
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
     }
     return app_id;
 }
@@ -360,16 +372,15 @@ bool new_flapp_app_stop(FuriAppId app_id) {
     bool result = false;
     FuriAppItem* application = NULL;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         application = find_app_by_app_id(app_id);
 
         if(application != NULL) {
             // do callbacks
             {
                 list_furi_exit_callback_it_t it;
-                for(list_furi_exit_callback_it(it, application->exit_callbacks);
-                    !list_furi_exit_callback_end_p(it);
-                    list_furi_exit_callback_next(it)) {
+
+                for(MF_EACH(it, application->exit_callbacks, list_furi_exit_callback)) {
                     FuriExitCbData* cb = list_furi_exit_callback_ref(it);
                     cb->callback(cb->context);
 
@@ -389,8 +400,8 @@ bool new_flapp_app_stop(FuriAppId app_id) {
             // stop threads
             {
                 list_app_it_t it;
-                for(list_app_it(it, application->threads); !list_app_end_p(it);
-                    list_app_next(it)) {
+
+                for(MF_EACH(it, application->threads, list_app)) {
                     FuriAppId thread_id = *list_app_ref(it);
 
                     new_flapp_thread_stop(thread_id);
@@ -401,7 +412,7 @@ bool new_flapp_app_stop(FuriAppId app_id) {
             remove_app_by_app_id(application->app_id);
 
             // we end critical core context
-            osMutexRelease(furi_core_mutex);
+            unlock_core();
 
             // stop app
             osThreadTerminate(app_id);
@@ -421,7 +432,7 @@ FuriAppId new_flapp_thread_start(FuriAppFn app, uint32_t stack_size, void* param
     osThreadId_t app_id = flapp_current_app_id();
     osThreadId_t thread_app_id = NULL;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         osThreadAttr_t app_attr = {.stack_size = stack_size};
         thread_app_id = osThreadNew(app, param, &app_attr);
 
@@ -430,7 +441,7 @@ FuriAppId new_flapp_thread_start(FuriAppFn app, uint32_t stack_size, void* param
             list_app_push_back(item->threads, thread_app_id);
         }
 
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
     }
 
     return thread_app_id;
@@ -439,7 +450,7 @@ FuriAppId new_flapp_thread_start(FuriAppFn app, uint32_t stack_size, void* param
 bool new_flapp_thread_stop(FuriAppId thread_id) {
     bool result = false;
 
-    if(osMutexAcquire(furi_core_mutex, osWaitForever) == osOK) {
+    if(lock_core()) {
         FuriAppItem* application = find_app_by_thread_id(thread_id);
 
         if(application != NULL) {
@@ -447,7 +458,7 @@ bool new_flapp_thread_stop(FuriAppId thread_id) {
         }
 
         // we end critical core context
-        osMutexRelease(furi_core_mutex);
+        unlock_core();
 
         if(result) {
             osThreadTerminate(thread_id);
@@ -458,4 +469,115 @@ bool new_flapp_thread_stop(FuriAppId thread_id) {
 
 bool new_flapp_thread_exit(void) {
     return new_flapp_thread_stop(flapp_current_app_id());
+}
+
+FuriAppId new_flapp_get_app_id(FuriAppId app_or_thread_id) {
+    FuriAppItem* app = NULL;
+    if(lock_core()) {
+        // look, it is app?
+        app = find_app_by_app_id(app_or_thread_id);
+
+        if(app == NULL) {
+            // if it is not a app, it should be thread
+            app = find_app_by_thread_id(app_or_thread_id);
+        }
+
+        unlock_core();
+    }
+
+    if(app == NULL) {
+        return NULL;
+    } else {
+        return app->app_id;
+    }
+}
+
+// how many records were created by app
+uint32_t new_flapp_created_records_count(FuriAppId app_id) {
+    uint32_t count = CORE_ERROR;
+
+    if(lock_core()) {
+        FuriAppItem* app = new_flapp_get_app_id(app_id);
+
+        if(app != NULL) {
+            count = 0;
+
+            // iterate over records to get count
+            list_furi_record_it_t it;
+            for(MF_EACH(it, furi_record_list, list_furi_record)) {
+                FuriRecordItem* item = list_furi_record_ref(it);
+
+                // if the iterator is equal to our element
+                if(item->app_id == app_id) {
+                    count++;
+                }
+            }
+        }
+
+        unlock_core();
+    }
+
+    return count;
+}
+
+// how many records were opened by app
+uint32_t new_flapp_opened_records_count(FuriAppId app_id) {
+    uint32_t count = CORE_ERROR;
+
+    if(lock_core()) {
+        FuriAppItem* app = new_flapp_get_app_id(app_id);
+
+        if(app != NULL) {
+            count = 0;
+
+            // iterate over records to get count
+            list_furi_record_it_t it;
+            for(MF_EACH(it, furi_record_list, list_furi_record)) {
+                FuriRecordItem* item = list_furi_record_ref(it);
+
+                // iterate over items
+                list_app_it_t app_it;
+                for(MF_EACH(app_it, item->open_by_apps, list_app)) {
+                    FuriAppId item = *list_app_ref(app_it);
+
+                    // if the iterator is equal to our element
+                    if(item == app_id) {
+                        count++;
+                    }
+                }
+            }
+        }
+
+        unlock_core();
+    }
+
+    return count;
+}
+
+uint32_t new_flapp_threads_count(FuriAppId app_id) {
+    uint32_t count = CORE_ERROR;
+
+    if(lock_core()) {
+        FuriAppItem* app = new_flapp_get_app_id(app_id);
+
+        if(app != NULL) {
+            count = list_app_size(app->threads);
+        }
+
+        unlock_core();
+    }
+
+    return count;
+}
+
+uint32_t new_flapp_apps_count() {
+    uint32_t count = CORE_ERROR;
+
+    if(lock_core()) {
+        count = list_furi_app_size(furi_app_list);
+
+        unlock_core();
+    }
+
+    return count;
 }
