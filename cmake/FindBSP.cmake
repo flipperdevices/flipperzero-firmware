@@ -218,6 +218,18 @@ set(BSP_L4_DEVICE_STM32L476G_EVAL L476ZG)
 set(BSP_L4_DEVICE_STM32L476G_Discovery L476VG)
 set(BSP_L4_DEVICE_STM32L496G_Discovery L496AG)
 
+set(BSP_L5_BOARDS 
+    STM32L552E_EVAL STM32L562E-Discovery STM32L5xx_Nucleo_144
+)
+set(BSP_L5_COMPONENTS
+    cs42l51 ft6x06 hx8347i iss66wvh8m8 lsm6dso mfxstm32l152 mx25lm51245g
+    st7789h2 stmpe811
+)
+set(BSP_L5_SOURCES_STM32L562E_Discovery audio bus idd lcd motion_sensor ospi sd ts usbpd_pwr)
+set(BSP_L5_SOURCES_STM32L552E_EVAL audio bus idd io lcd ospi sd sram ts usbpd_pwr)
+set(BSP_L5_DEVICE_STM32L562E_Discovery L562QE)
+set(BSP_L5_DEVICE_STM32L552E_EVAL L552ZE)
+
 if(NOT BSP_FIND_COMPONENTS)
     set(BSP_FIND_COMPONENTS ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endif()

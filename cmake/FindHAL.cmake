@@ -157,6 +157,22 @@ set(HAL_LL_DRIVERS_L4
     rcc rng rtc sdmmc spi swpmi tim usart usb utils
 )
 
+set(HAL_DRIVERS_L5
+    adc comp cortex crc cryp dac def dfsdm dma exti fdcan flash flash_ramfunc
+    gpio gtzc hash i2c icache irda iwdg lptim mmc nand nor opamp ospi otfdef
+    pcd pka pwr rcc rng rtc sai sd smartcard smbus spi sram tim tsc uart usart
+    wwdg
+)
+set(HAL_EX_DRIVERS_L5
+    adc crc cryp dac dfsdm dma flash gpio hash i2c irda mmc opamp pcd pwr rcc
+    rng rtc sai sd smartcard spi tim uart usart
+)
+set(HAL_LL_DRIVERS_L5
+    adc bus comp cortex crc crs dac dma dmmux exti fmc gpio i2c iwdg lptim
+    lpuart opamp pka pwr rcc rng rtc sdmmc spi system tim ucpd usart usb utils
+    wwdg
+)
+
 foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
     list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY_SUFFIX}})
     list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY_SUFFIX}})
