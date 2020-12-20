@@ -13,5 +13,5 @@ set(PROJECT_SOURCES
     main.c
 )
 
-add_executable(stm32-template.elf ${PROJECT_SOURCES})
-target_link_libraries(stm32-template.elf CMSIS::STM32::F407VG STM32::NoSys)
+add_executable(stm32-template ${PROJECT_SOURCES})
+target_link_libraries(stm32-template CMSIS::STM32::F407VG STM32::NoSys)

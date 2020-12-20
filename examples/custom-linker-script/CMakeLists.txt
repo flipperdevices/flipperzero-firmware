@@ -9,6 +9,6 @@ set(PROJECT_SOURCES
     main.c
 )
 
-add_executable(stm32-custom-linker-script.elf ${PROJECT_SOURCES})
-target_link_libraries(stm32-custom-linker-script.elf CMSIS::STM32::F407xx STM32::NoSys)
-stm32_add_linker_script(stm32-custom-linker-script.elf PRIVATE F407VG.ld)
+add_executable(stm32-custom-linker-script ${PROJECT_SOURCES})
+target_link_libraries(stm32-custom-linker-script CMSIS::STM32::F407xx STM32::NoSys)
+stm32_add_linker_script(stm32-custom-linker-script PRIVATE F407VG.ld)
