@@ -173,7 +173,7 @@ void lf_rfid_workaround(void* p) {
 
     // pulldown iBtn pin to prevent interference from ibutton
     gpio_init((GpioPin*)&ibutton_gpio, GpioModeOutputOpenDrain);
-    gpio_write((GpioPin*)&ibutton_gpio, false);
+    gpio_write((GpioPin*)&ibutton_gpio, true);
 
     // init ctx
     void* comp_ctx = (void*)event_queue;
