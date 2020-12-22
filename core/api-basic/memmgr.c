@@ -42,6 +42,23 @@ void* calloc(size_t count, size_t size) {
     return ptr;
 }
 
+char* strdup(const char* s) {
+    if(s == NULL) {
+        return NULL;
+    }
+
+    size_t siz = strlen(s) + 1;
+    char* y = malloc(siz);
+
+    if(y != NULL) {
+        memcpy(y, s, siz);
+    } else {
+        return NULL;
+    }
+
+    return y;
+}
+
 size_t memmgr_get_free_heap(void) {
     return xPortGetFreeHeapSize();
 }
