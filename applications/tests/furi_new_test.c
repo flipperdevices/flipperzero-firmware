@@ -7,23 +7,63 @@
 
 const int int_value_init = 0x1234;
 const int int_value_changed = 0x5678;
+osMessageQueueId_t test_messages;
 
-osSemaphoreId_t new_record_available;
-void another_app(void* p) {
-    int another_test_value = int_value_init;
-    new_furi_create("test/another_app_record", &another_test_value);
-    osSemaphoreRelease(new_record_available);
-    while(1) {
-        osDelay(100);
+typedef struct {
+    char text[256];
+    bool result;
+} test_message;
+
+#define SEND_MESSAGE(value, data)                                           \
+    {                                                                        \
+        message.result = value;                                             \
+        snprintf(message.text, 256, "Error at line %d, %s", __LINE__, data); \
+        osMessageQueuePut(test_messages, &message, 0U, 0U);                  \
     }
+
+void _furi_new_wait() {
+    osThreadFlagsWait(0x0001U, osFlagsWaitAny, osWaitForever);
+}
+
+void _furi_new_continue(FuriAppId thread_id) {
+    osThreadFlagsSet(thread_id, 0x0001U);
+}
+
+void _furi_new_main_app(void* p) {
+    test_message message;
+
+    _furi_new_wait();
+
+    int another_test_value = int_value_init;
+    bool result = new_furi_create("test/another_app_record", &another_test_value);
+
+    SEND_MESSAGE(false, "dummy text");
+
+    new_flapp_app_exit();
 }
 
 void test_furi_new() {
-    int test_value = int_value_init;
+    test_message message;
+    test_messages = osMessageQueueNew(1, sizeof(test_message), NULL);
 
     // init core
     new_furi_init();
 
+    // launch test thread
+    FuriAppId main_app = new_flapp_app_start(_furi_new_main_app, "main_app", 512, NULL);
+    _furi_new_continue(main_app);
+    
+    while(1) {
+        if(osMessageQueueGet(test_messages, &message, NULL, osWaitForever) == osOK) {
+            if(message.result == true) {
+                break;
+            } else {
+                mu_assert(false, message.text);
+            }
+        }
+    };
+
+    /*
     // test that "create" wont affect pointer value
     new_furi_create("test/record", &test_value);
     mu_assert_int_eq(test_value, int_value_init);
@@ -54,4 +94,5 @@ void test_furi_new() {
     // test that we can close, (unsubscribe) from record
     bool close_result = new_furi_close("test/another_app_record");
     mu_assert(close_result, "cannot close record");
+    */
 }
