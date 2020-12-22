@@ -14,7 +14,7 @@ list_furi_app_t furi_app_list;
 FuriRecordItem* find_record_by_name(const char* name) {
     // iterate over items
     list_furi_record_it_t it;
-    
+
     for(MF_EACH(it, furi_record_list, list_furi_record)) {
         FuriRecordItem* item = list_furi_record_ref(it);
 
@@ -144,6 +144,7 @@ bool new_furi_init(void) {
     // construct registry list
     list_furi_record_init(furi_record_list);
     list_furi_app_init(furi_app_list);
+    return true;
 }
 
 // open record with timeout
@@ -415,7 +416,11 @@ bool new_flapp_app_stop(FuriAppId app_id) {
             unlock_core();
 
             // stop app
-            osThreadTerminate(app_id);
+            if(app_id == flapp_current_app_id()) {
+                osThreadExit();
+            } else {
+                osThreadTerminate(app_id);
+            }
 
             result = true;
         }
@@ -461,7 +466,11 @@ bool new_flapp_thread_stop(FuriAppId thread_id) {
         unlock_core();
 
         if(result) {
-            osThreadTerminate(thread_id);
+            if(thread_id == flapp_current_app_id()) {
+                osThreadExit();
+            } else {
+                osThreadTerminate(thread_id);
+            }
         }
     }
     return false;
