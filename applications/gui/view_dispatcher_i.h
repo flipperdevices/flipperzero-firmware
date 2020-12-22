@@ -1,0 +1,18 @@
+#pragma once
+
+#include "view_dispatcher.h"
+#include <flipper_v2.h>
+#include <m-dict.h>
+
+DICT_DEF2(ViewDict, uint32_t, M_DEFAULT_OPLIST, View*, M_PTR_OPLIST)
+
+struct ViewDispatcher {
+    Widget* widget;
+    ViewDict_t views;
+    View* current_view;
+    View* default_view;
+};
+
+void view_dispatcher_draw_callback(Canvas* canvas, void* context);
+
+void view_dispatcher_input_callback(InputEvent* event, void* context);
