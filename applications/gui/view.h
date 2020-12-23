@@ -110,7 +110,7 @@ void view_commit_model(View* view);
  */
 #define with_view_model(view, function_body)        \
     {                                               \
-        void* p = view_get_model(view);         \
+        void* p = view_get_model(view);             \
         ({ void __fn__ function_body __fn__; })(p); \
         view_commit_model(view);                    \
     }

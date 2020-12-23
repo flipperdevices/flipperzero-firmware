@@ -49,9 +49,9 @@ void view_allocate_model(View* view, ViewModelType type, size_t size) {
     furi_assert(view);
     furi_assert(size > 0);
     furi_assert(view->model == NULL);
-    if (type == ViewModelTypeLockFree) {
+    if(type == ViewModelTypeLockFree) {
         view->model = furi_alloc(size);
-    } else if (type == ViewModelTypeLocking) {
+    } else if(type == ViewModelTypeLocking) {
         ViewModelLocking* model = furi_alloc(sizeof(ViewModelLocking));
         model->mutex = osMutexNew(NULL);
         furi_check(model->mutex);
@@ -66,7 +66,7 @@ void view_allocate_model(View* view, ViewModelType type, size_t size) {
 void* view_get_model(View* view) {
     furi_assert(view);
     furi_assert(view->model);
-    if (view->model_type == ViewModelTypeLocking) {
+    if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
         furi_check(osMutexAcquire(model->mutex, osWaitForever) == osOK);
         return model->data;
@@ -77,16 +77,16 @@ void* view_get_model(View* view) {
 void view_commit_model(View* view) {
     furi_assert(view);
     furi_assert(view->model);
-    if (view->model_type == ViewModelTypeLocking) {
+    if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
         furi_check(osMutexRelease(model->mutex) == osOK);
     }
-    // Update 
+    // Update
 }
 
 void view_draw(View* view, Canvas* canvas) {
     furi_assert(view);
-    if (view->draw_callback) {
+    if(view->draw_callback) {
         void* data = view_get_model(view);
         view->draw_callback(canvas, data);
         view_commit_model(view);
@@ -95,7 +95,7 @@ void view_draw(View* view, Canvas* canvas) {
 
 bool view_input(View* view, InputEvent* event) {
     furi_assert(view);
-    if (view->input_callback) {
+    if(view->input_callback) {
         return view->input_callback(event, view->context);
     } else {
         return false;
@@ -104,7 +104,7 @@ bool view_input(View* view, InputEvent* event) {
 
 uint32_t view_previous(View* view) {
     furi_assert(view);
-    if (view->previous_callback) {
+    if(view->previous_callback) {
         return view->previous_callback(view->context);
     } else {
         return VIEW_NONE;
@@ -113,7 +113,7 @@ uint32_t view_previous(View* view) {
 
 uint32_t view_next(View* view) {
     furi_assert(view);
-    if (view->next_callback) {
+    if(view->next_callback) {
         return view->next_callback(view->context);
     } else {
         return VIEW_NONE;
