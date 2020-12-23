@@ -1,6 +1,7 @@
 #pragma once
 
 #include "view_dispatcher.h"
+#include "view_i.h"
 #include <flipper_v2.h>
 #include <m-dict.h>
 
@@ -13,6 +14,8 @@ struct ViewDispatcher {
     View* default_view;
 };
 
+/* Draw Callback for widget */
 void view_dispatcher_draw_callback(Canvas* canvas, void* context);
 
+/* Input Callback for widget */
 void view_dispatcher_input_callback(InputEvent* event, void* context);
