@@ -175,7 +175,9 @@ class Assets:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
         icons_h.write(ICONS_TEMPLATE_H_FOOTER)
         # Create Private Header
-        icons_h_i = open(os.path.join(self.args.output_directory, "assets_icons_i.h"), "w")
+        icons_h_i = open(
+            os.path.join(self.args.output_directory, "assets_icons_i.h"), "w"
+        )
         icons_h_i.write(ICONS_TEMPLATE_H_I)
         self.logger.debug(f"Done")
 
