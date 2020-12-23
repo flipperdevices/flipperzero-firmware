@@ -1,7 +1,12 @@
 #pragma once
 
 #include "view.h"
-#include "widget.h"
+#include "gui.h"
+
+typedef enum {
+    ViewDispatcherTypeFullscreen,
+    ViewDispatcherTypeWindow
+} ViewDispatcherType;
 
 typedef struct ViewDispatcher ViewDispatcher;
 
@@ -25,8 +30,8 @@ void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id,
  */
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
-/* Attach View Dispatcher to Widget
+/* Attach View Dispatcher to GUI
  * @param view_dispatcher, View Dispatcher instance
- * @param widget, Widget instance to attach to
+ * @param gui, GUI instance to attach to
  */
-void view_dispatcher_attach_to_widget(ViewDispatcher* view_dispatcher, Widget* widget);
+void view_dispatcher_attach_to_gui(ViewDispatcher* view_dispatcher, Gui* gui, ViewDispatcherType type);
