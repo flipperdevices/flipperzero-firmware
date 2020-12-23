@@ -15,9 +15,7 @@
 #include <api-hal-power.h>
 #include <cli/cli.h>
 
-typedef enum {
-    PowerViewInfo
-} PowerView;
+typedef enum { PowerViewInfo } PowerView;
 
 struct Power {
     ViewDispatcher* view_dispatcher;
@@ -45,9 +43,10 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     Power* power = context;
 
     canvas_draw_icon(canvas, 0, 0, power->battery_icon);
-    with_view_model(power->info_view, (PowerInfoModel* model) {
-        canvas_draw_box(canvas, 2, 2, (float)model->charge / 100 * 14, 4);
-    });
+    with_view_model(
+        power->info_view, (PowerInfoModel * model) {
+            canvas_draw_box(canvas, 2, 2, (float)model->charge / 100 * 14, 4);
+        });
 }
 
 void power_menu_off_callback(void* context) {
@@ -183,18 +182,21 @@ void power_task(void* p) {
     furiac_ready();
 
     while(1) {
-        with_view_model(power->info_view, (PowerInfoModel *model) {
-            model->charge = api_hal_power_get_pct();
-            model->capacity_remaining = api_hal_power_get_battery_remaining_capacity();
-            model->capacity_full = api_hal_power_get_battery_full_capacity();
-            model->current_charger = api_hal_power_get_battery_current(ApiHalPowerICCharger);
-            model->current_gauge = api_hal_power_get_battery_current(ApiHalPowerICFuelGauge);
-            model->voltage_charger = api_hal_power_get_battery_voltage(ApiHalPowerICCharger);
-            model->voltage_gauge = api_hal_power_get_battery_voltage(ApiHalPowerICFuelGauge);
-            model->temperature_charger = api_hal_power_get_battery_temperature(ApiHalPowerICCharger);
-            model->temperature_gauge = api_hal_power_get_battery_temperature(ApiHalPowerICFuelGauge);
-        });
-        
+        with_view_model(
+            power->info_view, (PowerInfoModel * model) {
+                model->charge = api_hal_power_get_pct();
+                model->capacity_remaining = api_hal_power_get_battery_remaining_capacity();
+                model->capacity_full = api_hal_power_get_battery_full_capacity();
+                model->current_charger = api_hal_power_get_battery_current(ApiHalPowerICCharger);
+                model->current_gauge = api_hal_power_get_battery_current(ApiHalPowerICFuelGauge);
+                model->voltage_charger = api_hal_power_get_battery_voltage(ApiHalPowerICCharger);
+                model->voltage_gauge = api_hal_power_get_battery_voltage(ApiHalPowerICFuelGauge);
+                model->temperature_charger =
+                    api_hal_power_get_battery_temperature(ApiHalPowerICCharger);
+                model->temperature_gauge =
+                    api_hal_power_get_battery_temperature(ApiHalPowerICFuelGauge);
+            });
+
         widget_update(power->battery_widget);
         widget_enabled_set(power->usb_widget, api_hal_power_is_charging());
         osDelay(1000);

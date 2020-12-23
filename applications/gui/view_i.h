@@ -5,12 +5,12 @@
 #include <flipper_v2.h>
 
 typedef struct {
-    void *data;
+    void* data;
     osMutexId_t mutex;
 } ViewModelLocking;
 
 struct View {
-    ViewDispatcher *dispatcher;
+    ViewDispatcher* dispatcher;
     ViewDrawCallback draw_callback;
     ViewInputCallback input_callback;
     ViewModelType model_type;

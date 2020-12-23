@@ -3,10 +3,7 @@
 #include "view.h"
 #include "gui.h"
 
-typedef enum {
-    ViewDispatcherTypeFullscreen,
-    ViewDispatcherTypeWindow
-} ViewDispatcherType;
+typedef enum { ViewDispatcherTypeFullscreen, ViewDispatcherTypeWindow } ViewDispatcherType;
 
 typedef struct ViewDispatcher ViewDispatcher;
 
@@ -34,4 +31,7 @@ void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t vi
  * @param view_dispatcher, View Dispatcher instance
  * @param gui, GUI instance to attach to
  */
-void view_dispatcher_attach_to_gui(ViewDispatcher* view_dispatcher, Gui* gui, ViewDispatcherType type);
+void view_dispatcher_attach_to_gui(
+    ViewDispatcher* view_dispatcher,
+    Gui* gui,
+    ViewDispatcherType type);
