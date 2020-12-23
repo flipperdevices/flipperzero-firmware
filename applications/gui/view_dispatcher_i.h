@@ -14,8 +14,8 @@ struct ViewDispatcher {
     View* default_view;
 };
 
-/* Draw Callback for widget */
+/* Widget Draw Callback */
 void view_dispatcher_draw_callback(Canvas* canvas, void* context);
 
-/* Input Callback for widget */
+/* Widget Input Callback */
 void view_dispatcher_input_callback(InputEvent* event, void* context);

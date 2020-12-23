@@ -4,6 +4,7 @@
 #include "canvas.h"
 
 #define VIEW_NONE 0xFFFFFFFF
+#define VIEW_IGNORE 0xFFFFFFFE
 
 /* View Draw callback
  * @param canvas, pointer to canvas
@@ -15,17 +16,20 @@ typedef void (*ViewDrawCallback)(Canvas* canvas, void* view_model);
 /* View Input callback
  * @param event, pointer to input event data
  * @param context, pointer to context
- * @return - bool, true if event handled, false if event ignored
+ * @return true if event handled, false if event ignored
  * @warning called from GUI thread
  */
 typedef bool (*ViewInputCallback)(InputEvent* event, void* context);
 
+/* View navigation callback
+ * @param context, pointer to context
+ * @return next view id
+ * @warning called from GUI thread
+ */
+typedef uint32_t (*ViewNavigationCallback)(void* context);
+
 /* View model types */
 typedef enum {
-    /* Model is not used.
-     * Lock free.
-     */
-    ViewModelTypeNone,
     /* Model consist of atomic types and/or partial update is not critical for rendering.
      * Lock free.
      */
@@ -60,6 +64,18 @@ void view_set_draw_callback(View* view, ViewDrawCallback callback);
  */
 void view_set_input_callback(View* view, ViewInputCallback callback);
 
+/* Set Navigation Previous callback
+ * @param view, pointer to View
+ * @param callback, input callback
+ */
+void view_set_previous_callback(View* view, ViewNavigationCallback callback);
+
+/* Set Navigation Next callback
+ * @param view, pointer to View
+ * @param callback, input callback
+ */
+void view_set_next_callback(View* view, ViewNavigationCallback callback);
+
 /* Set View Draw callback
  * @param view, pointer to View
  * @param context, context for callbacks
@@ -68,11 +84,11 @@ void view_set_context(View* view, void* context);
 
 /* Set view model data.
  * @param view, pointer to View
- * @param model_type, View Model Type
- * @param model_size, modelsize
+ * @param type, View Model Type
+ * @param size, size
  * @warning after this operation you do not own data.
  */
-void view_set_model(View* view, ViewModelType model_type, void* data);
+void view_allocate_model(View* view, ViewModelType type, size_t size);
 
 /* Get view model data
  * @param view, pointer to View
@@ -94,7 +110,7 @@ void view_commit_model(View* view);
  */
 #define with_view_model(view, function_body)        \
     {                                               \
-        void* p = view_acquire_model(view);         \
+        void* p = view_get_model(view);         \
         ({ void __fn__ function_body __fn__; })(p); \
         view_commit_model(view);                    \
     }
