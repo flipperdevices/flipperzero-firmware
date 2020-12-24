@@ -15,8 +15,6 @@
 #include <api-hal-power.h>
 #include <cli/cli.h>
 
-typedef enum { PowerViewInfo } PowerView;
-
 struct Power {
     ViewDispatcher* view_dispatcher;
     View* info_view;
