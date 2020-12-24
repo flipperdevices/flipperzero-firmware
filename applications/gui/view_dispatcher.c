@@ -16,6 +16,20 @@ ViewDispatcher* view_dispatcher_alloc() {
 }
 
 void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
+    // Detach from gui
+    if (view_dispatcher->gui) {
+        gui_remove_widget(view_dispatcher->gui, view_dispatcher->widget);
+    }
+    // Free views
+    ViewDict_it_t it;
+    ViewDict_it(it, view_dispatcher->views);
+    while(!ViewDict_end_p(it)) {
+        ViewDict_itref_t* ref = ViewDict_ref(it);
+        view_free(ref->value);
+        ViewDict_next(it);
+    }
+    ViewDict_clear(view_dispatcher->views);
+    // Free dispatcher
     free(view_dispatcher);
 }
 
@@ -34,6 +48,8 @@ void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t vi
         view_dispatcher->current_view = NULL;
         widget_enabled_set(view_dispatcher->widget, false);
     } else if(view_id == VIEW_IGNORE) {
+    } else if(view_id == VIEW_DESTROY) {
+        view_dispatcher_free(view_dispatcher);
     } else {
         View** view_pp = ViewDict_get(view_dispatcher->views, view_id);
         furi_check(view_pp != NULL);
@@ -48,15 +64,19 @@ void view_dispatcher_attach_to_gui(
     Gui* gui,
     ViewDispatcherType type) {
     furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->gui == NULL);
     furi_assert(gui);
 
-    if(type == ViewDispatcherTypeFullscreen) {
+    if (type == ViewDispatcherTypeNone) {
+        gui_add_widget(gui, view_dispatcher->widget, GuiLayerNone);
+    } else if(type == ViewDispatcherTypeFullscreen) {
         gui_add_widget(gui, view_dispatcher->widget, GuiLayerFullscreen);
     } else if(type == ViewDispatcherTypeWindow) {
         gui_add_widget(gui, view_dispatcher->widget, GuiLayerMain);
     } else {
         furi_check(NULL);
     }
+    view_dispatcher->gui = gui;
 }
 
 void view_dispatcher_draw_callback(Canvas* canvas, void* context) {
@@ -80,5 +100,14 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
             view_id = view_next(view_dispatcher->current_view);
         }
         view_dispatcher_switch_to_view(view_dispatcher, view_id);
+    }
+}
+
+void view_dispatcher_update(ViewDispatcher* view_dispatcher, View *view) {
+    furi_assert(view_dispatcher);
+    furi_assert(view);
+
+    if (view_dispatcher->current_view == view) {
+        widget_update(view_dispatcher->widget);
     }
 }

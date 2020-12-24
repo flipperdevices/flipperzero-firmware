@@ -3,15 +3,22 @@
 #include <input/input.h>
 #include "canvas.h"
 
+/* Hides drawing widget */
 #define VIEW_NONE 0xFFFFFFFF
+/* Ignore navigation event */
 #define VIEW_IGNORE 0xFFFFFFFE
+/* Deatch from gui, deallocate Views and ViewDispatcher
+ * BE SUPER CAREFUL, deallocation happens automatically on GUI thread
+ * You ARE NOT owning ViewDispatcher and Views instances
+ */
+#define VIEW_DESTROY 0xFFFFFFFA
 
 /* View Draw callback
  * @param canvas, pointer to canvas
  * @param view_model, pointer to context
  * @warning called from GUI thread
  */
-typedef void (*ViewDrawCallback)(Canvas* canvas, void* view_model);
+typedef void (*ViewDrawCallback)(Canvas* canvas, void* model);
 
 /* View Input callback
  * @param event, pointer to input event data
@@ -30,6 +37,8 @@ typedef uint32_t (*ViewNavigationCallback)(void* context);
 
 /* View model types */
 typedef enum {
+    /* Model is not allocated */
+    ViewModelTypeNone,
     /* Model consist of atomic types and/or partial update is not critical for rendering.
      * Lock free.
      */
@@ -82,13 +91,17 @@ void view_set_next_callback(View* view, ViewNavigationCallback callback);
  */
 void view_set_context(View* view, void* context);
 
-/* Set view model data.
+/* Allocate view model.
  * @param view, pointer to View
  * @param type, View Model Type
  * @param size, size
- * @warning after this operation you do not own data.
  */
 void view_allocate_model(View* view, ViewModelType type, size_t size);
+
+/* Free view model data memory.
+ * @param view, pointer to View
+ */
+void view_free_model(View* view);
 
 /* Get view model data
  * @param view, pointer to View
@@ -114,3 +127,8 @@ void view_commit_model(View* view);
         ({ void __fn__ function_body __fn__; })(p); \
         view_commit_model(view);                    \
     }
+
+/* View navigation helper
+ * Just use View ID as a context, it will return it as is
+ */
+uint32_t view_navigate_simple(void* context);

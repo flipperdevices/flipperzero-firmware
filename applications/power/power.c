@@ -94,6 +94,7 @@ Power* power_alloc() {
     power->info_view = view_alloc();
     view_allocate_model(power->info_view, ViewModelTypeLockFree, sizeof(PowerInfoModel));
     view_set_draw_callback(power->info_view, power_info_draw_callback);
+    view_set_previous_callback(power->info_view, power_info_back_callback);
     view_dispatcher_add_view(power->view_dispatcher, PowerViewInfo, power->info_view);
 
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);

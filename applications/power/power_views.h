@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gui/canvas.h>
 #include <flipper_v2.h>
+#include <gui/view.h>
 
 typedef enum { PowerViewInfo } PowerView;
 
@@ -22,5 +23,9 @@ typedef struct {
 
     uint8_t charge;
 } PowerInfoModel;
+
+static uint32_t power_info_back_callback(void* context) {
+    return VIEW_NONE;
+}
 
 void power_info_draw_callback(Canvas* canvas, void* context);

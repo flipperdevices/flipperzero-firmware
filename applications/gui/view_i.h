@@ -1,7 +1,7 @@
 #pragma once
 
 #include "view.h"
-#include "view_dispatcher.h"
+#include "view_dispatcher_i.h"
 #include <flipper_v2.h>
 
 typedef struct {
