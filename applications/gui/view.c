@@ -7,6 +7,7 @@ View* view_alloc() {
 
 void view_free(View* view) {
     furi_assert(view);
+    view_free_model(view);
     free(view);
 }
 
@@ -48,10 +49,12 @@ void view_set_context(View* view, void* context) {
 void view_allocate_model(View* view, ViewModelType type, size_t size) {
     furi_assert(view);
     furi_assert(size > 0);
+    furi_assert(view->model_type == ViewModelTypeNone);
     furi_assert(view->model == NULL);
-    if(type == ViewModelTypeLockFree) {
+    view->model_type = type;
+    if(view->model_type == ViewModelTypeLockFree) {
         view->model = furi_alloc(size);
-    } else if(type == ViewModelTypeLocking) {
+    } else if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = furi_alloc(sizeof(ViewModelLocking));
         model->mutex = osMutexNew(NULL);
         furi_check(model->mutex);
@@ -60,12 +63,27 @@ void view_allocate_model(View* view, ViewModelType type, size_t size) {
     } else {
         furi_assert(false);
     }
-    view->model_type = type;
+}
+
+void view_free_model(View* view) {
+    furi_assert(view);
+    if (view->model_type == ViewModelTypeNone) {
+        return;
+    } else if(view->model_type == ViewModelTypeLockFree) {
+        free(view->model);
+    } else if(view->model_type == ViewModelTypeLocking) {
+        ViewModelLocking* model = view->model;
+        furi_check(osMutexDelete(model->mutex) == osOK);
+        free(model->data);
+        free(model);
+        view->model = NULL;
+    } else {
+        furi_assert(false);
+    }
 }
 
 void* view_get_model(View* view) {
     furi_assert(view);
-    furi_assert(view->model);
     if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
         furi_check(osMutexAcquire(model->mutex, osWaitForever) == osOK);
@@ -76,12 +94,11 @@ void* view_get_model(View* view) {
 
 void view_commit_model(View* view) {
     furi_assert(view);
-    furi_assert(view->model);
     if(view->model_type == ViewModelTypeLocking) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
         furi_check(osMutexRelease(model->mutex) == osOK);
     }
-    // Update
+    view_dispatcher_update(view->dispatcher, view);
 }
 
 void view_draw(View* view, Canvas* canvas) {
@@ -107,7 +124,7 @@ uint32_t view_previous(View* view) {
     if(view->previous_callback) {
         return view->previous_callback(view->context);
     } else {
-        return VIEW_NONE;
+        return VIEW_IGNORE;
     }
 }
 
@@ -116,6 +133,6 @@ uint32_t view_next(View* view) {
     if(view->next_callback) {
         return view->next_callback(view->context);
     } else {
-        return VIEW_NONE;
+        return VIEW_IGNORE;
     }
 }
