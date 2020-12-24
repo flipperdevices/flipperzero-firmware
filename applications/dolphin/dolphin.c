@@ -13,7 +13,21 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDebug);
         }
     }
+    // All events consumed
     return true;
+}
+
+bool dolphin_view_idle_stats_input(InputEvent* event, void* context) {
+    Dolphin* dolphin = context;
+
+    if(event->state) {
+        if(event->input == InputLeft) {
+            dolphin_deed(dolphin, DolphinDeedWrong);
+        } else if(event->input == InputRight) {
+            dolphin_deed(dolphin, DolphinDeedIButtonRead);
+        }
+    }
+    return false;
 }
 
 Dolphin* dolphin_alloc() {
@@ -33,18 +47,24 @@ Dolphin* dolphin_alloc() {
     view_set_context(dolphin->idle_view_main, dolphin);
     view_set_draw_callback(dolphin->idle_view_main, dolphin_view_idle_main_draw);
     view_set_input_callback(dolphin->idle_view_main, dolphin_view_idle_main_input);
-    view_dispatcher_add_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
+    view_dispatcher_add_view(
+        dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
 
     dolphin->idle_view_stats = view_alloc();
-    view_allocate_model(dolphin->idle_view_stats, ViewModelTypeLockFree, sizeof(DolphinViewIdleStatsModel));
+    view_set_context(dolphin->idle_view_stats, dolphin);
+    view_allocate_model(
+        dolphin->idle_view_stats, ViewModelTypeLockFree, sizeof(DolphinViewIdleStatsModel));
     view_set_draw_callback(dolphin->idle_view_stats, dolphin_view_idle_stats_draw);
+    view_set_input_callback(dolphin->idle_view_stats, dolphin_view_idle_stats_input);
     view_set_previous_callback(dolphin->idle_view_stats, dolphin_view_idle_back);
-    view_dispatcher_add_view(dolphin->idle_view_dispatcher, DolphinViewIdleStats, dolphin->idle_view_stats);
+    view_dispatcher_add_view(
+        dolphin->idle_view_dispatcher, DolphinViewIdleStats, dolphin->idle_view_stats);
 
     dolphin->idle_view_debug = view_alloc();
     view_set_draw_callback(dolphin->idle_view_debug, dolphin_view_idle_debug_draw);
     view_set_previous_callback(dolphin->idle_view_debug, dolphin_view_idle_back);
-    view_dispatcher_add_view(dolphin->idle_view_dispatcher, DolphinViewIdleDebug, dolphin->idle_view_debug);
+    view_dispatcher_add_view(
+        dolphin->idle_view_dispatcher, DolphinViewIdleDebug, dolphin->idle_view_debug);
 
     dolphin->main_view_dispatcher = view_dispatcher_alloc();
 
@@ -78,6 +98,11 @@ void dolphin_task() {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
         if(event.type == DolphinEventTypeDeed) {
             dolphin_state_on_deed(dolphin->state, event.deed);
+            with_view_model(
+                dolphin->idle_view_stats, (DolphinViewIdleStatsModel * model) {
+                    model->icounter = dolphin_state_get_icounter(dolphin->state);
+                    model->butthurt = dolphin_state_get_butthurt(dolphin->state);
+                });
         }
     }
 }

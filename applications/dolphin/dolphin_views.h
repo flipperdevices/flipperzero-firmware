@@ -51,4 +51,3 @@ typedef enum {
 
 void dolphin_view_profile_main_draw(Canvas* canvas, void* model);
 void dolphin_view_profile_details_draw(Canvas* canvas, void* model);
-

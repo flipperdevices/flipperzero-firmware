@@ -67,7 +67,7 @@ void view_allocate_model(View* view, ViewModelType type, size_t size) {
 
 void view_free_model(View* view) {
     furi_assert(view);
-    if (view->model_type == ViewModelTypeNone) {
+    if(view->model_type == ViewModelTypeNone) {
         return;
     } else if(view->model_type == ViewModelTypeLockFree) {
         free(view->model);

@@ -38,8 +38,6 @@ struct Dolphin {
     View* idle_view_stats;
     View* idle_view_debug;
     ViewDispatcher* main_view_dispatcher;
-    
 };
 
 Dolphin* dolphin_alloc();
-

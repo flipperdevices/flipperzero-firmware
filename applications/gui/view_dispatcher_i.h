@@ -21,4 +21,4 @@ void view_dispatcher_draw_callback(Canvas* canvas, void* context);
 void view_dispatcher_input_callback(InputEvent* event, void* context);
 
 /* View to ViewDispatcher update event */
-void view_dispatcher_update(ViewDispatcher* view_dispatcher, View *view);
+void view_dispatcher_update(ViewDispatcher* view_dispatcher, View* view);
