@@ -43,9 +43,8 @@ uint32_t dolphin_view_idle_back(void* context) {
     return DolphinViewIdleMain;
 }
 
-// First 
+// First
 void dolphin_view_first_start_first_draw(Canvas* canvas, void* model) {
-
 }
 
 uint32_t dolphin_view_first_start_first_next(void* context) {
@@ -66,18 +65,16 @@ uint32_t dolphin_view_first_start_second_next(void* context) {
 
 // Third
 void dolphin_view_first_start_third_draw(Canvas* canvas, void* model) {
-
 }
 uint32_t dolphin_view_first_start_third_previous(void* context) {
     return DolphinViewFirstStartSecond;
 }
-uint32_t dolphin_view_first_start_third_next(void* context){
+uint32_t dolphin_view_first_start_third_next(void* context) {
     return DolphinViewFirstStartFourth;
 }
 
 // Fourth
 void dolphin_view_first_start_fourth_draw(Canvas* canvas, void* model) {
-
 }
 uint32_t dolphin_view_first_start_fourth_previous(void* context) {
     return DolphinViewFirstStartThird;

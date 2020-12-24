@@ -17,7 +17,7 @@ ViewDispatcher* view_dispatcher_alloc() {
 
 void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     // Detach from gui
-    if (view_dispatcher->gui) {
+    if(view_dispatcher->gui) {
         gui_remove_widget(view_dispatcher->gui, view_dispatcher->widget);
     }
     // Free views
@@ -67,7 +67,7 @@ void view_dispatcher_attach_to_gui(
     furi_assert(view_dispatcher->gui == NULL);
     furi_assert(gui);
 
-    if (type == ViewDispatcherTypeNone) {
+    if(type == ViewDispatcherTypeNone) {
         gui_add_widget(gui, view_dispatcher->widget, GuiLayerNone);
     } else if(type == ViewDispatcherTypeFullscreen) {
         gui_add_widget(gui, view_dispatcher->widget, GuiLayerFullscreen);
@@ -103,11 +103,11 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
     }
 }
 
-void view_dispatcher_update(ViewDispatcher* view_dispatcher, View *view) {
+void view_dispatcher_update(ViewDispatcher* view_dispatcher, View* view) {
     furi_assert(view_dispatcher);
     furi_assert(view);
 
-    if (view_dispatcher->current_view == view) {
+    if(view_dispatcher->current_view == view) {
         widget_update(view_dispatcher->widget);
     }
 }

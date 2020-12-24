@@ -127,8 +127,3 @@ void view_commit_model(View* view);
         ({ void __fn__ function_body __fn__; })(p); \
         view_commit_model(view);                    \
     }
-
-/* View navigation helper
- * Just use View ID as a context, it will return it as is
- */
-uint32_t view_navigate_simple(void* context);
