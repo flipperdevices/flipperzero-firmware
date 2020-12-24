@@ -5,6 +5,8 @@
 #include <gui/canvas.h>
 #include <flipper_v2.h>
 
+typedef enum { PowerViewInfo } PowerView;
+
 typedef struct {
     float current_charger;
     float current_gauge;
