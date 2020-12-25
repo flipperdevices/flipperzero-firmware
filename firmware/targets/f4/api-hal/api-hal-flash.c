@@ -2,6 +2,17 @@
 #include <api-hal-bt.h>
 #include <stm32wbxx.h>
 
+void api_hal_flash_erase(uint8_t page, uint8_t count) {
+    api_hal_bt_lock_flash();
+    FLASH_EraseInitTypeDef erase;
+    erase.TypeErase = FLASH_TYPEERASE_PAGES;
+    erase.Page = page;
+    erase.NbPages = count;
+    uint32_t error;
+    HAL_FLASHEx_Erase(&erase, &error);
+    api_hal_bt_unlock_flash();
+}
+
 void api_hal_flash_write_dword(size_t address, uint64_t data) {
     api_hal_bt_lock_flash();
     HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, address, data);

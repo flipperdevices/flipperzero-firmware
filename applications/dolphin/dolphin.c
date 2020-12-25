@@ -1,6 +1,8 @@
 #include "dolphin_i.h"
 
 bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
     Dolphin* dolphin = context;
 
     if(event->state) {
@@ -18,16 +20,23 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
 }
 
 bool dolphin_view_idle_stats_input(InputEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
     Dolphin* dolphin = context;
 
-    if(event->state) {
-        if(event->input == InputLeft) {
-            dolphin_deed(dolphin, DolphinDeedWrong);
-        } else if(event->input == InputRight) {
-            dolphin_deed(dolphin, DolphinDeedIButtonRead);
-        }
+    if(!event->state) return false;
+
+    if(event->input == InputLeft) {
+        dolphin_deed(dolphin, DolphinDeedWrong);
+    } else if(event->input == InputRight) {
+        dolphin_deed(dolphin, DolphinDeedIButtonRead);
+    } else if(event->input == InputOk) {
+        dolphin_state_save(dolphin->state);
+    } else {
+        return false;
     }
-    return false;
+
+    return true;
 }
 
 Dolphin* dolphin_alloc() {
@@ -37,6 +46,7 @@ Dolphin* dolphin_alloc() {
     furi_check(dolphin->event_queue);
     // State
     dolphin->state = dolphin_state_alloc();
+    dolphin_state_load(dolphin->state);
     // Menu
     dolphin->menu_vm = furi_open("menu");
     furi_check(dolphin->menu_vm);
@@ -54,6 +64,12 @@ Dolphin* dolphin_alloc() {
     view_set_context(dolphin->idle_view_stats, dolphin);
     view_allocate_model(
         dolphin->idle_view_stats, ViewModelTypeLockFree, sizeof(DolphinViewIdleStatsModel));
+    with_view_model(
+        dolphin->idle_view_stats, (DolphinViewIdleStatsModel * model) {
+            model->icounter = dolphin_state_get_icounter(dolphin->state);
+            model->butthurt = dolphin_state_get_butthurt(dolphin->state);
+        });
+
     view_set_draw_callback(dolphin->idle_view_stats, dolphin_view_idle_stats_draw);
     view_set_input_callback(dolphin->idle_view_stats, dolphin_view_idle_stats_input);
     view_set_previous_callback(dolphin->idle_view_stats, dolphin_view_idle_back);
@@ -72,6 +88,7 @@ Dolphin* dolphin_alloc() {
 }
 
 void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
+    furi_assert(dolphin);
     DolphinEvent event;
     event.type = DolphinEventTypeDeed;
     event.deed = deed;
