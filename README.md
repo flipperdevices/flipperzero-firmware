@@ -39,7 +39,7 @@ You can do this by passing values through command line during cmake run or by se
 
 ## Configuration
 
-* `TOOLCHAIN_PREFIX` - where toolchain is located, **default**: `/usr`
+* `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
 
