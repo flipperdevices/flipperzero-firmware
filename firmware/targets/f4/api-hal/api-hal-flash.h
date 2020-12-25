@@ -4,6 +4,14 @@
 #include <stddef.h>
 
 /*
+ * Erase Flash
+ * Locking operation, uses HSEM to manage shared access.
+ * @param page, page number
+ * @param count, page count to erase
+ */
+void api_hal_flash_erase(uint8_t page, uint8_t count);
+
+/*
  * Write double word (64 bits)
  * Locking operation, uses HSEM to manage shared access.
  * @param address - destination address, must be double word aligned.
