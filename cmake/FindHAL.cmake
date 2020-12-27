@@ -249,7 +249,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
     find_file(PACKAGE_FILE NAMES package.xml PATHS ${STM32_CUBE_${FAMILY}_PATH})
     if(PACKAGE_FILE)
         file(READ ${PACKAGE_FILE} PACKAGE_FILE_CONTENT)
-        string(REGEX MATCH "PackDescription Release=\"FW.${FAMILY}.([0-9.])+\"( Patch=\"FW.${FAMILY}.([0-9.]+)\")?" VERSION_INFO ${PACKAGE_FILE_CONTENT})
+        string(REGEX MATCH "PackDescription Release=\"FW.${FAMILY}.([0-9.]+)\"( Patch=\"FW.${FAMILY}.([0-9.]+)\")?" VERSION_INFO ${PACKAGE_FILE_CONTENT})
         if(CMAKE_MATCH_3) # This is the "Patch" revision
             set(HAL_${COMP}_VERSION ${CMAKE_MATCH_3})
             set(HAL_VERSION ${CMAKE_MATCH_3})
@@ -383,4 +383,3 @@ find_package_handle_standard_args(HAL
     FOUND_VAR HAL_FOUND
     HANDLE_COMPONENTS
 )
-
