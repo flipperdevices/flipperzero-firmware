@@ -47,9 +47,11 @@ You can do this by passing values through command line during cmake run or by se
 
 First thing that you need to do after toolchain configration in your `CMakeLists.txt` script is to find CMSIS package:
 ```
-find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
+find_package(CMSIS [CMSIS_version] COMPONENTS STM32F4 REQUIRED)
 ```
 You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit `COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and ALL chips (you'll need ALL STM32Cube packages somewhere).
+
+[CMSIS_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiples STM32 families are requested.
 
 Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`.
 
@@ -87,10 +89,12 @@ Also, there is special library `STM32::NoSys` which adds `--specs=nosys.specs` t
 
 STM32 HAL can be used similar to CMSIS.
 ```
-find_package(HAL COMPONENTS STM32F4 REQUIRED)
+find_package(HAL [HAL_version] COMPONENTS STM32F4 REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 ```
 *`CMAKE_INCLUDE_CURRENT_DIR` here because HAL requires `stm32<family>xx_hal_conf.h` file being in include headers path.*
+
+[HAL_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiples STM32 families are requested.
 
 HAL module will search all drivers supported by family and create following targets:
 
