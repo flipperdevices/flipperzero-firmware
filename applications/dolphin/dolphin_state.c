@@ -42,7 +42,7 @@ void dolphin_state_release(DolphinState* dolphin_state) {
 }
 
 bool dolphin_state_save(DolphinState* dolphin_state) {
-    if (!api_hal_flash_erase(DOLPHIN_DATA_PAGE, 1)) {
+    if(!api_hal_flash_erase(DOLPHIN_DATA_PAGE, 1)) {
         return false;
     }
 
@@ -57,7 +57,7 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     header.checksum = checksum;
     header.flags = 0;
     header.timestamp = 0;
-    if (!api_hal_flash_write_dword(DOLPHIN_DATA_HEADER_ADDRESS, *(uint64_t*)&header)) {
+    if(!api_hal_flash_write_dword(DOLPHIN_DATA_HEADER_ADDRESS, *(uint64_t*)&header)) {
         return false;
     }
 
@@ -73,8 +73,8 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
             }
             offset++;
         }
-        if (!api_hal_flash_write_dword(
-            DOLPHIN_DATA_DATA_ADDRESS + i * sizeof(uint64_t), *(uint64_t*)destination) ) {
+        if(!api_hal_flash_write_dword(
+               DOLPHIN_DATA_DATA_ADDRESS + i * sizeof(uint64_t), *(uint64_t*)destination)) {
             return false;
         }
     }
@@ -91,7 +91,8 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
             checksum += source[i];
         }
         if(header->checksum == checksum) {
-            memcpy(&dolphin_state->data, (const void*)DOLPHIN_DATA_DATA_ADDRESS, sizeof(DolphinData));
+            memcpy(
+                &dolphin_state->data, (const void*)DOLPHIN_DATA_DATA_ADDRESS, sizeof(DolphinData));
             return true;
         }
     }

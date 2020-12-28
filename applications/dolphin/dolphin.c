@@ -8,10 +8,9 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
         if(event->input == InputRight) {
             uint32_t page;
             with_view_model(
-                dolphin->idle_view_first_start, (DolphinViewFirstStartModel * model) {
-                    page = ++model->page;
-                });
-            if (page > 8) {
+                dolphin->idle_view_first_start,
+                (DolphinViewFirstStartModel * model) { page = ++model->page; });
+            if(page > 8) {
                 dolphin_save(dolphin);
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
             }
@@ -133,7 +132,7 @@ void dolphin_task() {
 
     Gui* gui = furi_open("gui");
     view_dispatcher_attach_to_gui(dolphin->idle_view_dispatcher, gui, ViewDispatcherTypeWindow);
-    if (dolphin_state_load(dolphin->state)) {
+    if(dolphin_state_load(dolphin->state)) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
     } else {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewFirstStart);
