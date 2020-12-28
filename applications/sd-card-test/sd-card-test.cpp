@@ -275,10 +275,15 @@ void SdTest::get_sd_card_info() {
     total_sectors = (fs->n_fatent - 2) * fs->csize;
     free_sectors = free_clusters * fs->csize;
 
+    uint16_t sector_size = 512;
+#if _MAX_SS != _MIN_SS
+    sector_size = fs->ssize;
+#endif
+
     snprintf(str_buffer[0], str_buffer_size, "Cluster: %d sectors", fs->csize);
-    snprintf(str_buffer[1], str_buffer_size, "Sector: %d bytes", fs->ssize);
-    snprintf(str_buffer[2], str_buffer_size, "%lu KB total", total_sectors / 1024 * fs->ssize);
-    snprintf(str_buffer[3], str_buffer_size, "%lu KB free", free_sectors / 1024 * fs->ssize);
+    snprintf(str_buffer[1], str_buffer_size, "Sector: %d bytes", sector_size);
+    snprintf(str_buffer[2], str_buffer_size, "%lu KB total", total_sectors / 1024 * sector_size);
+    snprintf(str_buffer[3], str_buffer_size, "%lu KB free", free_sectors / 1024 * sector_size);
 
     set_text(
         {static_cast<const char*>(str_buffer[0]),
