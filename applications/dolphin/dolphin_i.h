@@ -16,6 +16,7 @@
 
 typedef enum {
     DolphinEventTypeDeed,
+    DolphinEventTypeSave,
 } DolphinEventType;
 
 typedef struct {
@@ -34,10 +35,15 @@ struct Dolphin {
     ValueMutex* menu_vm;
     // GUI
     ViewDispatcher* idle_view_dispatcher;
+    View* idle_view_first_start;
     View* idle_view_main;
     View* idle_view_stats;
     View* idle_view_debug;
-    ViewDispatcher* main_view_dispatcher;
 };
 
 Dolphin* dolphin_alloc();
+
+/* Save Dolphin state (write to permanent memory)
+ * Thread safe
+ */
+void dolphin_save(Dolphin* dolphin);

@@ -1,6 +1,31 @@
 #include "dolphin_views.h"
 #include <gui/view.h>
 
+void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
+    DolphinViewFirstStartModel* m = model;
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    if (m->page == 0) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart0_128x54);
+    } else if (m->page == 1) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart1_128x54);
+    } else if (m->page == 2) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart2_128x54);
+    } else if (m->page == 3) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart3_128x54);
+    } else if (m->page == 4) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart4_128x54);
+    } else if (m->page == 5) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart5_128x54);
+    } else if (m->page == 6) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart6_128x54);
+    } else if (m->page == 7) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart7_128x54);
+    } else if (m->page == 8) {
+        canvas_draw_icon_name(canvas, 0, 1, I_DolphinFirstStart8_128x54);
+    } 
+}
+
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -41,44 +66,4 @@ void dolphin_view_idle_debug_draw(Canvas* canvas, void* model) {
 
 uint32_t dolphin_view_idle_back(void* context) {
     return DolphinViewIdleMain;
-}
-
-// First
-void dolphin_view_first_start_first_draw(Canvas* canvas, void* model) {
-}
-
-uint32_t dolphin_view_first_start_first_next(void* context) {
-    return DolphinViewFirstStartSecond;
-}
-
-// Second
-void dolphin_view_first_start_second_draw(Canvas* canvas, void* model) {
-}
-
-uint32_t dolphin_view_first_start_second_previous(void* context) {
-    return DolphinViewFirstStartFirst;
-}
-
-uint32_t dolphin_view_first_start_second_next(void* context) {
-    return DolphinViewFirstStartThird;
-}
-
-// Third
-void dolphin_view_first_start_third_draw(Canvas* canvas, void* model) {
-}
-uint32_t dolphin_view_first_start_third_previous(void* context) {
-    return DolphinViewFirstStartSecond;
-}
-uint32_t dolphin_view_first_start_third_next(void* context) {
-    return DolphinViewFirstStartFourth;
-}
-
-// Fourth
-void dolphin_view_first_start_fourth_draw(Canvas* canvas, void* model) {
-}
-uint32_t dolphin_view_first_start_fourth_previous(void* context) {
-    return DolphinViewFirstStartThird;
-}
-uint32_t dolphin_view_first_start_fourth_next(void* context) {
-    return VIEW_DESTROY;
 }
