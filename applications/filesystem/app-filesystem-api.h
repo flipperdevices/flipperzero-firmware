@@ -37,6 +37,7 @@ typedef enum {
     FSE_DENIED,
     FSE_INVALID_NAME,
     FSE_INTERNAL,
+    FSE_NOT_IMPLEMENTED,
 } FS_Error;
 
 /* FS fileinfo flags*/
@@ -50,8 +51,11 @@ typedef enum {
 
 /* file/dir data */
 typedef struct {
+    /* file ID for internal references */
     uint32_t file_id;
+    /* standart API error from FS_Error list */
     FS_Error error_id;
+    /* internal API error */
     uint32_t internal_error_id;
 } File;
 
@@ -86,12 +90,31 @@ typedef struct {
 
 /* common api */
 typedef struct {
-    char* (*get_error_desc)(File* file);
+    FS_Error (*info)(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length);
+    FS_Error (*delete)(const char* path);
+    FS_Error (*rename)(const char* old_path, const char* new_path);
+    FS_Error (*set_attr)(const char* path, uint8_t attr, uint8_t mask);
+    FS_Error (*mkdir)(const char* path);
+    FS_Error (*set_time)(
+        const char* path,
+        uint16_t year,
+        uint8_t month,
+        uint8_t month_day,
+        uint8_t hour,
+        uint8_t minute,
+        uint8_t second);
 } FS_Common_Api;
+
+/* errors api */
+typedef struct {
+    const char* (*get_desc)(FS_Error error_id);
+    const char* (*get_internal_desc)(uint32_t internal_error_id);
+} FS_Error_Api;
 
 /* full api set */
 typedef struct {
     FS_File_Api file;
     FS_Dir_Api dir;
     FS_Common_Api common;
+    FS_Error_Api error;
 } FS_Api;

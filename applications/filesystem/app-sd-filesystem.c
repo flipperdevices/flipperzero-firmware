@@ -245,7 +245,7 @@ bool fs_file_open(File* file, const char* path, FS_Flags mode) {
     _fs_unlock();
 
     if(sd_file == NULL) {
-        file->error_id = SD_TOO_MANY_OPEN_FILES;
+        file->internal_error_id = SD_TOO_MANY_OPEN_FILES;
     } else {
         uint8_t _mode = 0;
 
@@ -257,29 +257,32 @@ bool fs_file_open(File* file, const char* path, FS_Flags mode) {
         if(mode & FSM_CREATE_NEW) _mode |= FA_CREATE_NEW;
         if(mode & FSM_CREATE_ALWAYS) _mode |= FA_CREATE_ALWAYS;
 
-        if(file->error_id == SD_OK) file->error_id = f_open(sd_file, path, _mode);
+        if(file->internal_error_id == SD_OK)
+            file->internal_error_id = f_open(sd_file, path, _mode);
     }
 
     // TODO on exit
     //furiac_onexit(_fs_on_client_app_exit, NULL);
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Close an opened file
 bool fs_file_close(File* file) {
     FileData* filedata = NULL;
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_close(&filedata->data.file);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_close(&filedata->data.file);
 
         _fs_lock();
         filedata->thread_id = NULL;
         _fs_unlock();
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Read data from the file
@@ -287,12 +290,13 @@ uint16_t fs_file_read(File* file, void* buff, uint16_t const bytes_to_read) {
     FileData* filedata = NULL;
     uint16_t bytes_readed = 0;
 
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_read(&filedata->data.file, buff, bytes_to_read, &bytes_readed);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_read(&filedata->data.file, buff, bytes_to_read, &bytes_readed);
     }
 
+    file->error_id = _fs_parse_error(file->internal_error_id);
     return bytes_readed;
 }
 
@@ -301,12 +305,14 @@ uint16_t fs_file_write(File* file, void* buff, uint16_t const bytes_to_write) {
     FileData* filedata = NULL;
     uint16_t bytes_written = 0;
 
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_write(&filedata->data.file, buff, bytes_to_write, &bytes_written);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id =
+            f_write(&filedata->data.file, buff, bytes_to_write, &bytes_written);
     }
 
+    file->error_id = _fs_parse_error(file->internal_error_id);
     return bytes_written;
 }
 
@@ -314,30 +320,32 @@ uint16_t fs_file_write(File* file, void* buff, uint16_t const bytes_to_write) {
 bool fs_file_seek(File* file, const uint32_t offset, const bool from_start) {
     FileData* filedata = NULL;
 
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
+    if(file->internal_error_id == SD_OK) {
         if(from_start) {
-            file->error_id = f_lseek(&filedata->data.file, offset);
+            file->internal_error_id = f_lseek(&filedata->data.file, offset);
         } else {
             uint64_t position = f_tell(&filedata->data.file);
             position += offset;
-            file->error_id = f_lseek(&filedata->data.file, position);
+            file->internal_error_id = f_lseek(&filedata->data.file, position);
         }
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 uint64_t fs_file_tell(File* file) {
     FileData* filedata = NULL;
     uint64_t position = 0;
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
+    if(file->internal_error_id == SD_OK) {
         position = f_tell(&filedata->data.file);
     }
 
+    file->error_id = _fs_parse_error(file->internal_error_id);
     return position;
 }
 
@@ -346,38 +354,41 @@ bool fs_file_truncate(File* file) {
     FileData* filedata = NULL;
     uint64_t position = 0;
 
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_truncate(&filedata->data.file);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_truncate(&filedata->data.file);
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Flush cached data
 bool fs_file_sync(File* file) {
     FileData* filedata = NULL;
 
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_sync(&filedata->data.file);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_sync(&filedata->data.file);
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Get size
 uint64_t fs_file_size(File* file) {
     FileData* filedata = NULL;
     uint64_t size = 0;
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
+    if(file->internal_error_id == SD_OK) {
         size = f_size(&filedata->data.file);
     }
 
+    file->error_id = _fs_parse_error(file->internal_error_id);
     return size;
 }
 
@@ -385,12 +396,13 @@ uint64_t fs_file_size(File* file) {
 bool fs_file_eof(File* file) {
     FileData* filedata = NULL;
     bool eof = true;
-    file->error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(file, filedata);
 
-    if(file->error_id == SD_OK) {
+    if(file->internal_error_id == SD_OK) {
         eof = f_eof(&filedata->data.file);
     }
 
+    file->error_id = _fs_parse_error(file->internal_error_id);
     return eof;
 }
 
@@ -414,41 +426,43 @@ bool fs_dir_open(File* file, const char* path) {
     _fs_unlock();
 
     if(sd_dir == NULL) {
-        file->error_id = SD_TOO_MANY_OPEN_FILES;
+        file->internal_error_id = SD_TOO_MANY_OPEN_FILES;
     } else {
-        if(file->error_id == SD_OK) file->error_id = f_opendir(sd_dir, path);
+        if(file->internal_error_id == SD_OK) file->internal_error_id = f_opendir(sd_dir, path);
     }
 
     // TODO on exit
     //furiac_onexit(_fs_on_client_app_exit, NULL);
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Close directory
 bool fs_dir_close(File* file) {
     FileData* filedata = NULL;
-    file->error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_closedir(&filedata->data.dir);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_closedir(&filedata->data.dir);
 
         _fs_lock();
         filedata->thread_id = NULL;
         _fs_unlock();
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 // Read next file info and name from directory
 bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name_length) {
     FileData* filedata = NULL;
-    file->error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(file, filedata);
 
-    if(file->error_id == SD_OK) {
+    if(file->internal_error_id == SD_OK) {
         SDFileInfo _fileinfo;
-        file->error_id = f_readdir(&filedata->data.dir, &_fileinfo);
+        file->internal_error_id = f_readdir(&filedata->data.dir, &_fileinfo);
 
         if(fileinfo != NULL) {
             fileinfo->date = _fileinfo.fdate;
@@ -468,18 +482,20 @@ bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name
         }
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 bool fs_dir_rewind(File* file) {
     FileData* filedata = NULL;
-    file->error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(file, filedata);
 
-    if(file->error_id == SD_OK) {
-        file->error_id = f_readdir(&filedata->data.dir, NULL);
+    if(file->internal_error_id == SD_OK) {
+        file->internal_error_id = f_readdir(&filedata->data.dir, NULL);
     }
 
-    return (file->error_id == SD_OK);
+    file->error_id = _fs_parse_error(file->internal_error_id);
+    return (file->internal_error_id == SD_OK);
 }
 
 /******************* Common FS Functions *******************/
@@ -576,6 +592,125 @@ FS_Error fs_common_mkdir(const char* path) {
     return _fs_parse_error(fresult);
 }
 
+/******************* Error Reporting Functions *******************/
+
+// Get common error description
+const char* fs_error_get_desc(FS_Error error_id) {
+    const char* result;
+    switch(error_id) {
+    case(FSE_OK):
+        result = "OK";
+        break;
+    case(FSE_NOT_READY):
+        result = "filesystem not ready";
+        break;
+    case(FSE_EXIST):
+        result = "file/dir already exist";
+        break;
+    case(FSE_NOT_EXIST):
+        result = "file/dir not exist";
+        break;
+    case(FSE_INVALID_PARAMETER):
+        result = "invalid parameter";
+        break;
+    case(FSE_DENIED):
+        result = "access denied";
+        break;
+    case(FSE_INVALID_NAME):
+        result = "invalid name/path";
+        break;
+    case(FSE_INTERNAL):
+        result = "internal error";
+        break;
+    case(FSE_NOT_IMPLEMENTED):
+        result = "function not implemented";
+        break;
+    default:
+        result = "unknown error";
+        break;
+    }
+    return result;
+}
+
+// Get internal error description
+const char* fs_error_get_internal_desc(uint32_t internal_error_id) {
+    const char* result;
+    switch(internal_error_id) {
+    case(SD_OK):
+        result = "OK";
+        break;
+    case(SD_INT_ERR):
+        result = "internal error";
+        break;
+    case(SD_NO_FILE):
+        result = "no file";
+        break;
+    case(SD_NO_PATH):
+        result = "no path";
+        break;
+    case(SD_INVALID_NAME):
+        result = "invalid name";
+        break;
+    case(SD_DENIED):
+        result = "access denied";
+        break;
+    case(SD_EXIST):
+        result = "file/dir exist";
+        break;
+    case(SD_INVALID_OBJECT):
+        result = "invalid object";
+        break;
+    case(SD_WRITE_PROTECTED):
+        result = "write protected";
+        break;
+    case(SD_INVALID_DRIVE):
+        result = "invalid drive";
+        break;
+    case(SD_NOT_ENABLED):
+        result = "not enabled";
+        break;
+    case(SD_NO_FILESYSTEM):
+        result = "no filesystem";
+        break;
+    case(SD_MKFS_ABORTED):
+        result = "aborted";
+        break;
+    case(SD_TIMEOUT):
+        result = "timeout";
+        break;
+    case(SD_LOCKED):
+        result = "file locked";
+        break;
+    case(SD_NOT_ENOUGH_CORE):
+        result = "not enough memory";
+        break;
+    case(SD_TOO_MANY_OPEN_FILES):
+        result = "too many open files";
+        break;
+    case(SD_INVALID_PARAMETER):
+        result = "invalid parameter";
+        break;
+    case(SD_NO_CARD):
+        result = "no SD Card";
+        break;
+    case(SD_NOT_A_FILE):
+        result = "not a file";
+        break;
+    case(SD_NOT_A_DIR):
+        result = "not a directory";
+        break;
+    case(SD_OTHER_APP):
+        result = "opened by other app";
+        break;
+    default:
+        result = "unknown error";
+        break;
+    }
+    return result;
+}
+
+/******************* Application *******************/
+
 void app_filesystem(void* p) {
     FS_Api fs_api;
 
@@ -600,4 +735,16 @@ void app_filesystem(void* p) {
     fs_api.dir.close = fs_dir_close;
     fs_api.dir.read = fs_dir_read;
     fs_api.dir.rewind = fs_dir_rewind;
+
+    // fill common api
+    fs_api.common.info = fs_common_info;
+    fs_api.common.delete = fs_common_delete;
+    fs_api.common.rename = fs_common_rename;
+    fs_api.common.set_attr = fs_common_set_attr;
+    fs_api.common.mkdir = fs_common_mkdir;
+    fs_api.common.set_time = fs_common_set_time;
+
+    // fill errors api
+    fs_api.error.get_desc = fs_error_get_desc;
+    fs_api.error.get_internal_desc = fs_error_get_internal_desc;
 }
