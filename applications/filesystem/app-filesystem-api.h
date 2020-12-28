@@ -37,7 +37,7 @@ typedef enum {
     FSE_DENIED,
     FSE_INVALID_NAME,
     FSE_INTERNAL,
-} FS_Errors;
+} FS_Error;
 
 /* FS fileinfo flags*/
 typedef enum {
@@ -51,7 +51,8 @@ typedef enum {
 /* file/dir data */
 typedef struct {
     uint32_t file_id;
-    uint32_t error_id;
+    FS_Error error_id;
+    uint32_t internal_error_id;
 } File;
 
 typedef struct {
@@ -85,7 +86,6 @@ typedef struct {
 
 /* common api */
 typedef struct {
-    FS_Errors (*get_error)(File* file);
     char* (*get_error_desc)(File* file);
 } FS_Common_Api;
 

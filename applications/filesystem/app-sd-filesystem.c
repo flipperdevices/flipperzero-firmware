@@ -147,8 +147,8 @@ void _fs_on_client_app_exit(void* none) {
     _fs_unlock();
 }
 
-FS_Errors _fs_parse_error(SDErrors error) {
-    FS_Errors result;
+FS_Error _fs_parse_error(SDErrors error) {
+    FS_Error result;
     switch(error) {
     case SD_OK:
         result = FSE_OK;
@@ -484,17 +484,13 @@ bool fs_dir_rewind(File* file) {
 
 /******************* Common FS Functions *******************/
 
-// get info about file/dir
-FS_Errors
+// Get info about file/dir
+FS_Error
 fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length) {
     SDFileInfo _fileinfo;
     FRESULT fresult = f_stat(path, &_fileinfo);
-    FS_Errors result;
 
-    switch(fresult) {
-    case FR_OK:
-        result = FSE_OK;
-
+    if(fresult == FR_OK) {
         if(fileinfo != NULL) {
             fileinfo->date = _fileinfo.fdate;
             fileinfo->time = _fileinfo.ftime;
@@ -511,37 +507,73 @@ fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t 
         if(name != NULL && name_length > 0) {
             strncpy(name, _fileinfo.fname, name_length);
         }
-        break;
-
-    case FR_NO_FILE:
-        result = FSE_NOT_EXIST;
-        break;
-
-    default:
-        result = FSE_INTERNAL;
     }
 
-    return result;
+    return _fs_parse_error(fresult);
 }
 
-// delete file/dir
-FS_Errors fs_common_delete(const char* path) {
+// Delete file/dir
+// File/dir must not have read-only attribute.
+// File/dir must be empty.
+// File/dir must not be opened, or the FAT volume can be collapsed. FF_FS_LOCK fix that.
+FS_Error fs_common_delete(const char* path) {
+    FRESULT fresult = f_unlink(path);
+    return _fs_parse_error(fresult);
 }
 
-// rename file/dir
-FS_Errors fs_common_rename(const char* old_path, const char* new_path) {
+// Rename file/dir
+// File/dir must not be opened, or the FAT volume can be collapsed. FF_FS_LOCK fix that.
+FS_Error fs_common_rename(const char* old_path, const char* new_path) {
+    FRESULT fresult = f_rename(old_path, new_path);
+    return _fs_parse_error(fresult);
 }
 
-// set attributes of file/dir
-FS_Errors fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask) {
+// Set attributes of file/dir
+// For example:
+// set "read only" flag and remove "hidden" flag
+// fs_common_set_attr("file.txt", FSF_READ_ONLY, FSF_READ_ONLY | FSF_HIDDEN);
+FS_Error fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask) {
+    uint8_t _mask = 0;
+    uint8_t _attr = 0;
+
+    if(mask & FSF_READ_ONLY) _mask |= AM_RDO;
+    if(mask & FSF_HIDDEN) _mask |= AM_HID;
+    if(mask & FSF_SYSTEM) _mask |= AM_SYS;
+    if(mask & FSF_DIRECTORY) _mask |= AM_DIR;
+    if(mask & FSF_ARCHIVE) _mask |= AM_ARC;
+
+    if(attr & FSF_READ_ONLY) _attr |= AM_RDO;
+    if(attr & FSF_HIDDEN) _attr |= AM_HID;
+    if(attr & FSF_SYSTEM) _attr |= AM_SYS;
+    if(attr & FSF_DIRECTORY) _attr |= AM_DIR;
+    if(attr & FSF_ARCHIVE) _attr |= AM_ARC;
+
+    FRESULT fresult = f_chmod(path, attr, mask);
+    return _fs_parse_error(fresult);
 }
 
-// set time of file/dir
-FS_Errors fs_common_set_time(const char* path, const FileInfo* fileinfo) {
+// Set time of file/dir
+FS_Error fs_common_set_time(
+    const char* path,
+    uint16_t year,
+    uint8_t month,
+    uint8_t month_day,
+    uint8_t hour,
+    uint8_t minute,
+    uint8_t second) {
+    SDFileInfo _fileinfo;
+
+    _fileinfo.fdate = (WORD)(((year - 1980) * 512U) | month * 32U | month_day);
+    _fileinfo.ftime = (WORD)(hour * 2048U | minute * 32U | second / 2U);
+
+    FRESULT fresult = f_utime(path, &_fileinfo);
+    return _fs_parse_error(fresult);
 }
 
-// create new directory
-FS_Errors fs_common_mkdir(const char* path) {
+// Create new directory
+FS_Error fs_common_mkdir(const char* path) {
+    FRESULT fresult = f_mkdir(path);
+    return _fs_parse_error(fresult);
 }
 
 void app_filesystem(void* p) {
