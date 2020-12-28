@@ -98,7 +98,7 @@ void view_commit_model(View* view) {
         ViewModelLocking* model = (ViewModelLocking*)(view->model);
         furi_check(osMutexRelease(model->mutex) == osOK);
     }
-    if (view->dispatcher) {
+    if(view->dispatcher) {
         view_dispatcher_update(view->dispatcher, view);
     }
 }
