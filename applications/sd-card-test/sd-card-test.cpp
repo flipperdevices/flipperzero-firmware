@@ -275,7 +275,7 @@ void SdTest::get_sd_card_info() {
     total_sectors = (fs->n_fatent - 2) * fs->csize;
     free_sectors = free_clusters * fs->csize;
 
-    uint16_t sector_size = 512;
+    uint16_t sector_size = _MAX_SS;
 #if _MAX_SS != _MIN_SS
     sector_size = fs->ssize;
 #endif
