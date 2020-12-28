@@ -1,3 +1,97 @@
 #pragma once
 #include "flipper.h"
 #include "flipper_v2.h"
+
+/*
+Open mode & Access flags
+
+Flag                Meaning
+FS_READ             Read access.
+FS_WRITE            Write access.
+FS_READ_WRITE       Read and write access.
+FS_OPEN_EXISTING    Open file, fail if file doesn't exist.
+FS_OPEN_ALWAYS      Open file. If file not exist, a new file will be created. 
+FS_OPEN_APPEND      Open file. If file not exist, a new file will be created. File pointer will be set to the end of file.
+FS_CREATE_NEW       Creates a new file. Fails if the file is exist.
+FS_CREATE_ALWAYS    Creates a new file. If the file is exist, it will be truncated to zero size.
+*/
+
+typedef enum {
+    FSM_READ = (1 << 0),
+    FSM_WRITE = (1 << 1),
+    FSM_READ_WRITE = (1 << 2),
+    FSM_OPEN_EXISTING = (1 << 3),
+    FSM_OPEN_ALWAYS = (1 << 4),
+    FSM_OPEN_APPEND = (1 << 5),
+    FSM_CREATE_NEW = (1 << 6),
+    FSM_CREATE_ALWAYS = (1 << 7),
+} FS_Mode;
+
+/* fs api errors */
+typedef enum {
+    FSE_OK,
+    FSE_NOT_READY,
+    FSE_EXIST,
+    FSE_NOT_EXIST,
+    FSE_INVALID_PARAMETER,
+    FSE_DENIED,
+    FSE_INVALID_NAME,
+    FSE_INTERNAL,
+} FS_Errors;
+
+/* FS fileinfo flags*/
+typedef enum {
+    FSF_READ_ONLY = (1 << 0),
+    FSF_HIDDEN = (1 << 1),
+    FSF_SYSTEM = (1 << 2),
+    FSF_DIRECTORY = (1 << 3),
+    FSF_ARCHIVE = (1 << 4),
+} FS_Flags;
+
+/* file/dir data */
+typedef struct {
+    uint32_t file_id;
+    uint32_t error_id;
+} File;
+
+typedef struct {
+    uint8_t flags;
+    uint64_t size;
+    uint16_t date;
+    uint16_t time;
+} FileInfo;
+
+/* file api */
+typedef struct {
+    bool (*open)(File* file, const char* path, FS_Flags mode);
+    bool (*close)(File* file);
+    uint16_t (*read)(File* file, void* buff, uint16_t bytes_to_read);
+    uint16_t (*write)(File* file, void* buff, uint16_t bytes_to_write);
+    bool (*seek)(File* file, uint32_t offset, bool from_start);
+    uint64_t (*tell)(File* file);
+    bool (*truncate)(File* file);
+    uint64_t (*size)(File* file);
+    bool (*sync)(File* file);
+    bool (*eof)(File* file);
+} FS_File_Api;
+
+/* dir api */
+typedef struct {
+    bool (*open)(File* file, const char* path);
+    bool (*close)(File* file);
+    bool (*read)(File* file, FileInfo* fileinfo, char* name, uint16_t name_length);
+    bool (*rewind)(File* file);
+} FS_Dir_Api;
+
+/* common api */
+typedef struct {
+    FS_Errors (*get_error)(File* file);
+    char* (*get_error_desc)(File* file);
+} FS_Common_Api;
+
+/* full api set */
+typedef struct {
+    FS_File_Api file;
+    FS_Dir_Api dir;
+    FS_Common_Api common;
+} FS_Api;
