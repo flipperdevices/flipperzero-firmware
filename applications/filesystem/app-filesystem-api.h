@@ -6,25 +6,22 @@
 Open mode & Access flags
 
 Flag                Meaning
-FS_READ             Read access.
-FS_WRITE            Write access.
-FS_READ_WRITE       Read and write access.
-FS_OPEN_EXISTING    Open file, fail if file doesn't exist.
-FS_OPEN_ALWAYS      Open file. If file not exist, a new file will be created. 
-FS_OPEN_APPEND      Open file. If file not exist, a new file will be created. File pointer will be set to the end of file.
-FS_CREATE_NEW       Creates a new file. Fails if the file is exist.
-FS_CREATE_ALWAYS    Creates a new file. If the file is exist, it will be truncated to zero size.
+FSM_READ             Read access.
+FSM_WRITE            Write access.
+FSM_OPEN_EXISTING    Open file, fail if file doesn't exist.
+FSM_OPEN_ALWAYS      Open file. If file not exist, a new file will be created. 
+FSM_OPEN_APPEND      Open file. If file not exist, a new file will be created. File pointer will be set to the end of file.
+FSM_CREATE_NEW       Creates a new file. Fails if the file is exist.
+FSM_CREATE_ALWAYS    Creates a new file. If the file is exist, it will be truncated to zero size.
 */
-
 typedef enum {
     FSM_READ = (1 << 0),
     FSM_WRITE = (1 << 1),
-    FSM_READ_WRITE = (1 << 2),
-    FSM_OPEN_EXISTING = (1 << 3),
-    FSM_OPEN_ALWAYS = (1 << 4),
-    FSM_OPEN_APPEND = (1 << 5),
-    FSM_CREATE_NEW = (1 << 6),
-    FSM_CREATE_ALWAYS = (1 << 7),
+    FSM_OPEN_EXISTING = (1 << 2),
+    FSM_OPEN_ALWAYS = (1 << 3),
+    FSM_OPEN_APPEND = (1 << 4),
+    FSM_CREATE_NEW = (1 << 5),
+    FSM_CREATE_ALWAYS = (1 << 6),
 } FS_Mode;
 
 /* fs api errors */

@@ -30,7 +30,7 @@ typedef enum {
     SD_NOT_A_FILE,
     SD_NOT_A_DIR,
     SD_OTHER_APP,
-} SDErrors;
+} SDError;
 
 typedef enum {
     FDF_DIR,
@@ -49,13 +49,13 @@ typedef struct {
 
 osMutexId_t sd_fs_mutex;
 FileData sd_fs_files[SD_FS_MAX_FILES];
-bool sd_fs_status = false;
+SDError sd_fs_status;
 
 /******************* Core Functions *******************/
 
 bool _fs_init() {
     bool result = true;
-    sd_fs_mutex = osMutexCreate(NULL);
+    sd_fs_mutex = osMutexNew(NULL);
     if(sd_fs_mutex == NULL) result = false;
 
     for(uint8_t i = 0; i < SD_FS_MAX_FILES; i++) {
@@ -72,11 +72,11 @@ bool _fs_unlock() {
     return (osMutexRelease(sd_fs_mutex) == osOK);
 }
 
-SDErrors _get_filedata(File* file, FileData* filedata, FiledataFilter filter) {
+SDError _get_filedata(File* file, FileData* filedata, FiledataFilter filter) {
+    SDError error;
     _fs_lock();
-    SDErrors error;
 
-    if(sd_fs_status) {
+    if(sd_fs_status == SD_OK) {
         if(file == NULL || file->file_id >= SD_FS_MAX_FILES) {
             if(sd_fs_files[file->file_id].thread_id == osThreadGetId()) {
                 if(filter == FDF_ANY) {
@@ -111,15 +111,15 @@ SDErrors _get_filedata(File* file, FileData* filedata, FiledataFilter filter) {
     return error;
 }
 
-SDErrors _get_file(File* file, FileData* filedata) {
+SDError _get_file(File* file, FileData* filedata) {
     return _get_filedata(file, filedata, FDF_FILE);
 }
 
-SDErrors _get_dir(File* file, FileData* filedata) {
+SDError _get_dir(File* file, FileData* filedata) {
     return _get_filedata(file, filedata, FDF_DIR);
 }
 
-SDErrors _get_any(File* file, FileData* filedata) {
+SDError _get_any(File* file, FileData* filedata) {
     return _get_filedata(file, filedata, FDF_ANY);
 }
 
@@ -127,7 +127,7 @@ bool _fs_status(void) {
     bool result;
 
     _fs_lock();
-    result = sd_fs_status;
+    result = (sd_fs_status == SD_OK);
     _fs_unlock();
 
     return result;
@@ -147,7 +147,7 @@ void _fs_on_client_app_exit(void* none) {
     _fs_unlock();
 }
 
-FS_Error _fs_parse_error(SDErrors error) {
+FS_Error _fs_parse_error(SDError error) {
     FS_Error result;
     switch(error) {
     case SD_OK:
@@ -711,40 +711,80 @@ const char* fs_error_get_internal_desc(uint32_t internal_error_id) {
 
 /******************* Application *******************/
 
-void app_filesystem(void* p) {
+void fill_fs_api(FS_Api* fs_api) {
+    // fill file api
+    fs_api->file.open = fs_file_open;
+    fs_api->file.close = fs_file_close;
+    fs_api->file.read = fs_file_read;
+    fs_api->file.write = fs_file_write;
+    fs_api->file.seek = fs_file_seek;
+    fs_api->file.tell = fs_file_tell;
+    fs_api->file.truncate = fs_file_truncate;
+    fs_api->file.size = fs_file_size;
+    fs_api->file.sync = fs_file_sync;
+    fs_api->file.eof = fs_file_eof;
+
+    // fill dir api
+    fs_api->dir.open = fs_dir_open;
+    fs_api->dir.close = fs_dir_close;
+    fs_api->dir.read = fs_dir_read;
+    fs_api->dir.rewind = fs_dir_rewind;
+
+    // fill common api
+    fs_api->common.info = fs_common_info;
+    fs_api->common.delete = fs_common_delete;
+    fs_api->common.rename = fs_common_rename;
+    fs_api->common.set_attr = fs_common_set_attr;
+    fs_api->common.mkdir = fs_common_mkdir;
+    fs_api->common.set_time = fs_common_set_time;
+
+    // fill errors api
+    fs_api->error.get_desc = fs_error_get_desc;
+    fs_api->error.get_internal_desc = fs_error_get_internal_desc;
+}
+
+typedef struct {
+    Widget* widget;
+    Icon* icon_sd_on;
+    Icon* icon_sd_off;
+} SdInfo;
+
+void sd_draw_callback(Canvas* canvas, void* context) {
+    assert(context);
+    SdInfo* sd_info = context;
+
+    if(sd_fs_status == SD_NO_CARD) {
+        // do nothing
+    } else if(sd_fs_status == SD_OK) {
+        // sd card present and mounted
+        canvas_draw_icon(canvas, 0, 0, sd_info->icon_sd_on);
+    } else {
+        // any sd card error
+        canvas_draw_icon(canvas, 0, 0, sd_info->icon_sd_off);
+    }
+}
+
+void app_sd_filesystem(void* p) {
     FS_Api fs_api;
 
     if(!_fs_init()) {
         // TODO stop app
+        furiac_exit(NULL);
     }
 
-    // fill file api
-    fs_api.file.open = fs_file_open;
-    fs_api.file.close = fs_file_close;
-    fs_api.file.read = fs_file_read;
-    fs_api.file.write = fs_file_write;
-    fs_api.file.seek = fs_file_seek;
-    fs_api.file.tell = fs_file_tell;
-    fs_api.file.truncate = fs_file_truncate;
-    fs_api.file.size = fs_file_size;
-    fs_api.file.sync = fs_file_sync;
-    fs_api.file.eof = fs_file_eof;
+    sd_fs_status = SD_OTHER_APP;
 
-    // fill dir api
-    fs_api.dir.open = fs_dir_open;
-    fs_api.dir.close = fs_dir_close;
-    fs_api.dir.read = fs_dir_read;
-    fs_api.dir.rewind = fs_dir_rewind;
+    SdInfo* sd_info = furi_alloc(sizeof(SdInfo));
+    sd_info->widget = widget_alloc();
+    sd_info->icon_sd_on = assets_icons_get(I_SDcardMounted_11x8);
+    sd_info->icon_sd_off = assets_icons_get(I_SDcardFail_11x8);
+    widget_set_width(sd_info->widget, icon_get_width(sd_info->icon_sd_on));
+    widget_draw_callback_set(sd_info->widget, sd_draw_callback, sd_info);
 
-    // fill common api
-    fs_api.common.info = fs_common_info;
-    fs_api.common.delete = fs_common_delete;
-    fs_api.common.rename = fs_common_rename;
-    fs_api.common.set_attr = fs_common_set_attr;
-    fs_api.common.mkdir = fs_common_mkdir;
-    fs_api.common.set_time = fs_common_set_time;
+    Gui* gui = furi_open("gui");
+    gui_add_widget(gui, sd_info->widget, GuiLayerStatusBarLeft);
 
-    // fill errors api
-    fs_api.error.get_desc = fs_error_get_desc;
-    fs_api.error.get_internal_desc = fs_error_get_internal_desc;
+    while(true) {
+        delay(1000);
+    }
 }
