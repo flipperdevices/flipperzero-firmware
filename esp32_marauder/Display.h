@@ -16,6 +16,16 @@
 
 #include <TFT_eSPI.h>
 
+#define TFT_MISO 19
+#define TFT_MOSI 23
+#define TFT_SCLK 18
+#define TFT_CS 27
+#define TFT_DC 26
+#define TFT_RST 5
+#define TFT_BL 32
+#define TOUCH_CS 21
+#define SD_CS 4
+
 // WiFi stuff
 #define OTA_UPDATE 100
 #define SHOW_INFO 101
