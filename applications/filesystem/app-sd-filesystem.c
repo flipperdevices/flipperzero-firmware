@@ -30,6 +30,7 @@ typedef enum {
     SD_NOT_A_FILE,
     SD_NOT_A_DIR,
     SD_OTHER_APP,
+    SD_LOW_LEVEL_ERR,
 } SDError;
 
 typedef enum {
@@ -47,52 +48,79 @@ typedef struct {
     } data;
 } FileData;
 
-osMutexId_t sd_fs_mutex;
-FileData sd_fs_files[SD_FS_MAX_FILES];
-SDError sd_fs_status;
+/* application data */
+typedef struct {
+    Widget* widget;
+    Icon* mounted;
+    Icon* fail;
+} SdFsIcon;
+
+typedef struct {
+    osMutexId_t mutex;
+    FileData files[SD_FS_MAX_FILES];
+    SDError status;
+    char* path;
+    FATFS fat_fs;
+} SdFsInfo;
+
+typedef struct {
+    SdFsInfo info;
+    SdFsIcon icon;
+} SdApp;
+
+/******************* Global vars for api *******************/
+
+static SdFsInfo* fs_info;
 
 /******************* Core Functions *******************/
 
-bool _fs_init() {
+bool _fs_init(SdFsInfo* _fs_info) {
     bool result = true;
-    sd_fs_mutex = osMutexNew(NULL);
-    if(sd_fs_mutex == NULL) result = false;
+    _fs_info->mutex = osMutexNew(NULL);
+    if(_fs_info->mutex == NULL) result = false;
 
     for(uint8_t i = 0; i < SD_FS_MAX_FILES; i++) {
-        sd_fs_files[i].thread_id = NULL;
+        _fs_info->files[i].thread_id = NULL;
     }
+
+    _fs_info->path = "0:/";
+    _fs_info->status = SD_OTHER_APP;
+
+    // store pointer for api fns
+    fs_info = _fs_info;
 
     return result;
 }
-bool _fs_lock() {
-    return (osMutexAcquire(sd_fs_mutex, osWaitForever) == osOK);
+
+bool _fs_lock(SdFsInfo* fs_info) {
+    return (osMutexAcquire(fs_info->mutex, osWaitForever) == osOK);
 }
 
-bool _fs_unlock() {
-    return (osMutexRelease(sd_fs_mutex) == osOK);
+bool _fs_unlock(SdFsInfo* fs_info) {
+    return (osMutexRelease(fs_info->mutex) == osOK);
 }
 
-SDError _get_filedata(File* file, FileData* filedata, FiledataFilter filter) {
+SDError _get_filedata(SdFsInfo* fs_info, File* file, FileData* filedata, FiledataFilter filter) {
     SDError error;
-    _fs_lock();
+    _fs_lock(fs_info);
 
-    if(sd_fs_status == SD_OK) {
+    if(fs_info->status == SD_OK) {
         if(file == NULL || file->file_id >= SD_FS_MAX_FILES) {
-            if(sd_fs_files[file->file_id].thread_id == osThreadGetId()) {
+            if(fs_info->files[file->file_id].thread_id == osThreadGetId()) {
                 if(filter == FDF_ANY) {
                     // any type
-                    filedata = &sd_fs_files[file->file_id];
+                    filedata = &fs_info->files[file->file_id];
                 } else if(filter == FDF_FILE) {
                     // file type
-                    if(!sd_fs_files[file->file_id].is_dir) {
-                        filedata = &sd_fs_files[file->file_id];
+                    if(!fs_info->files[file->file_id].is_dir) {
+                        filedata = &fs_info->files[file->file_id];
                     } else {
                         error = SD_NOT_A_FILE;
                     }
                 } else if(filter == FDF_DIR) {
                     // dir type
-                    if(sd_fs_files[file->file_id].is_dir) {
-                        filedata = &sd_fs_files[file->file_id];
+                    if(fs_info->files[file->file_id].is_dir) {
+                        filedata = &fs_info->files[file->file_id];
                     } else {
                         error = SD_NOT_A_DIR;
                     }
@@ -107,44 +135,44 @@ SDError _get_filedata(File* file, FileData* filedata, FiledataFilter filter) {
         error = SD_NO_CARD;
     }
 
-    _fs_unlock();
+    _fs_unlock(fs_info);
     return error;
 }
 
-SDError _get_file(File* file, FileData* filedata) {
-    return _get_filedata(file, filedata, FDF_FILE);
+SDError _get_file(SdFsInfo* fs_info, File* file, FileData* filedata) {
+    return _get_filedata(fs_info, file, filedata, FDF_FILE);
 }
 
-SDError _get_dir(File* file, FileData* filedata) {
-    return _get_filedata(file, filedata, FDF_DIR);
+SDError _get_dir(SdFsInfo* fs_info, File* file, FileData* filedata) {
+    return _get_filedata(fs_info, file, filedata, FDF_DIR);
 }
 
-SDError _get_any(File* file, FileData* filedata) {
-    return _get_filedata(file, filedata, FDF_ANY);
+SDError _get_any(SdFsInfo* fs_info, File* file, FileData* filedata) {
+    return _get_filedata(fs_info, file, filedata, FDF_ANY);
 }
 
-bool _fs_status(void) {
-    bool result;
+SDError _fs_status(SdFsInfo* fs_info) {
+    SDError result;
 
-    _fs_lock();
-    result = (sd_fs_status == SD_OK);
-    _fs_unlock();
+    _fs_lock(fs_info);
+    result = fs_info->status;
+    _fs_unlock(fs_info);
 
     return result;
 }
 
-void _fs_on_client_app_exit(void* none) {
-    _fs_lock();
+void _fs_on_client_app_exit(SdFsInfo* fs_info) {
+    _fs_lock(fs_info);
     for(uint8_t i = 0; i < SD_FS_MAX_FILES; i++) {
-        if(sd_fs_files[i].thread_id == osThreadGetId()) {
-            if(sd_fs_files[i].is_dir) {
+        if(fs_info->files[i].thread_id == osThreadGetId()) {
+            if(fs_info->files[i].is_dir) {
                 // TODO close dir
             } else {
                 // TODO close file
             }
         }
     }
-    _fs_unlock();
+    _fs_unlock(fs_info);
 }
 
 FS_Error _fs_parse_error(SDError error) {
@@ -231,18 +259,20 @@ FS_Error _fs_parse_error(SDError error) {
 bool fs_file_open(File* file, const char* path, FS_Flags mode) {
     SDFile* sd_file = NULL;
 
-    _fs_lock();
+    _fs_lock(fs_info);
     for(uint8_t index = 0; index < SD_FS_MAX_FILES; index++) {
-        if(sd_fs_files[index].thread_id == NULL) {
-            memset(&(sd_fs_files[index].data), 0, sizeof(sd_fs_files[index].data));
-            sd_fs_files[index].thread_id = osThreadGetId();
-            sd_fs_files[index].is_dir = false;
-            sd_file = &(sd_fs_files[index].data.file);
+        FileData* filedata = &fs_info->files[index];
+
+        if(filedata->thread_id == NULL) {
+            memset(&(filedata->data), 0, sizeof(filedata->data));
+            filedata->thread_id = osThreadGetId();
+            filedata->is_dir = false;
+            sd_file = &(filedata->data.file);
 
             break;
         }
     }
-    _fs_unlock();
+    _fs_unlock(fs_info);
 
     if(sd_file == NULL) {
         file->internal_error_id = SD_TOO_MANY_OPEN_FILES;
@@ -257,12 +287,11 @@ bool fs_file_open(File* file, const char* path, FS_Flags mode) {
         if(mode & FSM_CREATE_NEW) _mode |= FA_CREATE_NEW;
         if(mode & FSM_CREATE_ALWAYS) _mode |= FA_CREATE_ALWAYS;
 
-        if(file->internal_error_id == SD_OK)
-            file->internal_error_id = f_open(sd_file, path, _mode);
+        file->internal_error_id = f_open(sd_file, path, _mode);
     }
 
     // TODO on exit
-    //furiac_onexit(_fs_on_client_app_exit, NULL);
+    //furiac_onexit(_fs_on_client_app_exit, fs_info);
 
     file->error_id = _fs_parse_error(file->internal_error_id);
     return (file->internal_error_id == SD_OK);
@@ -271,14 +300,14 @@ bool fs_file_open(File* file, const char* path, FS_Flags mode) {
 // Close an opened file
 bool fs_file_close(File* file) {
     FileData* filedata = NULL;
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_close(&filedata->data.file);
 
-        _fs_lock();
+        _fs_lock(fs_info);
         filedata->thread_id = NULL;
-        _fs_unlock();
+        _fs_unlock(fs_info);
     }
 
     file->error_id = _fs_parse_error(file->internal_error_id);
@@ -290,7 +319,7 @@ uint16_t fs_file_read(File* file, void* buff, uint16_t const bytes_to_read) {
     FileData* filedata = NULL;
     uint16_t bytes_readed = 0;
 
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_read(&filedata->data.file, buff, bytes_to_read, &bytes_readed);
@@ -305,7 +334,7 @@ uint16_t fs_file_write(File* file, void* buff, uint16_t const bytes_to_write) {
     FileData* filedata = NULL;
     uint16_t bytes_written = 0;
 
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id =
@@ -320,7 +349,7 @@ uint16_t fs_file_write(File* file, void* buff, uint16_t const bytes_to_write) {
 bool fs_file_seek(File* file, const uint32_t offset, const bool from_start) {
     FileData* filedata = NULL;
 
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         if(from_start) {
@@ -339,7 +368,7 @@ bool fs_file_seek(File* file, const uint32_t offset, const bool from_start) {
 uint64_t fs_file_tell(File* file) {
     FileData* filedata = NULL;
     uint64_t position = 0;
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         position = f_tell(&filedata->data.file);
@@ -354,7 +383,7 @@ bool fs_file_truncate(File* file) {
     FileData* filedata = NULL;
     uint64_t position = 0;
 
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_truncate(&filedata->data.file);
@@ -368,7 +397,7 @@ bool fs_file_truncate(File* file) {
 bool fs_file_sync(File* file) {
     FileData* filedata = NULL;
 
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_sync(&filedata->data.file);
@@ -382,7 +411,7 @@ bool fs_file_sync(File* file) {
 uint64_t fs_file_size(File* file) {
     FileData* filedata = NULL;
     uint64_t size = 0;
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         size = f_size(&filedata->data.file);
@@ -396,7 +425,7 @@ uint64_t fs_file_size(File* file) {
 bool fs_file_eof(File* file) {
     FileData* filedata = NULL;
     bool eof = true;
-    file->internal_error_id = _get_file(file, filedata);
+    file->internal_error_id = _get_file(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         eof = f_eof(&filedata->data.file);
@@ -412,18 +441,20 @@ bool fs_file_eof(File* file) {
 bool fs_dir_open(File* file, const char* path) {
     SDDir* sd_dir = NULL;
 
-    _fs_lock();
+    _fs_lock(fs_info);
     for(uint8_t index = 0; index < SD_FS_MAX_FILES; index++) {
-        if(sd_fs_files[index].thread_id == NULL) {
-            memset(&(sd_fs_files[index].data), 0, sizeof(sd_fs_files[index].data));
-            sd_fs_files[index].thread_id = osThreadGetId();
-            sd_fs_files[index].is_dir = true;
-            sd_dir = &(sd_fs_files[index].data.dir);
+        FileData* filedata = &fs_info->files[index];
+
+        if(filedata->thread_id == NULL) {
+            memset(&(filedata->data), 0, sizeof(filedata->data));
+            filedata->thread_id = osThreadGetId();
+            filedata->is_dir = true;
+            sd_dir = &(filedata->data.dir);
 
             break;
         }
     }
-    _fs_unlock();
+    _fs_unlock(fs_info);
 
     if(sd_dir == NULL) {
         file->internal_error_id = SD_TOO_MANY_OPEN_FILES;
@@ -432,7 +463,7 @@ bool fs_dir_open(File* file, const char* path) {
     }
 
     // TODO on exit
-    //furiac_onexit(_fs_on_client_app_exit, NULL);
+    //furiac_onexit(_fs_on_client_app_exit, fs_info);
 
     file->error_id = _fs_parse_error(file->internal_error_id);
     return (file->internal_error_id == SD_OK);
@@ -441,14 +472,14 @@ bool fs_dir_open(File* file, const char* path) {
 // Close directory
 bool fs_dir_close(File* file) {
     FileData* filedata = NULL;
-    file->internal_error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_closedir(&filedata->data.dir);
 
-        _fs_lock();
+        _fs_lock(fs_info);
         filedata->thread_id = NULL;
-        _fs_unlock();
+        _fs_unlock(fs_info);
     }
 
     file->error_id = _fs_parse_error(file->internal_error_id);
@@ -458,7 +489,7 @@ bool fs_dir_close(File* file) {
 // Read next file info and name from directory
 bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name_length) {
     FileData* filedata = NULL;
-    file->internal_error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         SDFileInfo _fileinfo;
@@ -488,7 +519,7 @@ bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name
 
 bool fs_dir_rewind(File* file) {
     FileData* filedata = NULL;
-    file->internal_error_id = _get_dir(file, filedata);
+    file->internal_error_id = _get_dir(fs_info, file, filedata);
 
     if(file->internal_error_id == SD_OK) {
         file->internal_error_id = f_readdir(&filedata->data.dir, NULL);
@@ -504,24 +535,27 @@ bool fs_dir_rewind(File* file) {
 FS_Error
 fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length) {
     SDFileInfo _fileinfo;
-    FRESULT fresult = f_stat(path, &_fileinfo);
+    SDError fresult = _fs_status(fs_info);
 
-    if(fresult == FR_OK) {
-        if(fileinfo != NULL) {
-            fileinfo->date = _fileinfo.fdate;
-            fileinfo->time = _fileinfo.ftime;
-            fileinfo->size = _fileinfo.fsize;
-            fileinfo->flags = 0;
+    if(fresult == SD_OK) {
+        fresult = f_stat(path, &_fileinfo);
+        if(fresult == FR_OK) {
+            if(fileinfo != NULL) {
+                fileinfo->date = _fileinfo.fdate;
+                fileinfo->time = _fileinfo.ftime;
+                fileinfo->size = _fileinfo.fsize;
+                fileinfo->flags = 0;
 
-            if(_fileinfo.fattrib & AM_RDO) fileinfo->flags |= FSF_READ_ONLY;
-            if(_fileinfo.fattrib & AM_HID) fileinfo->flags |= FSF_HIDDEN;
-            if(_fileinfo.fattrib & AM_SYS) fileinfo->flags |= FSF_SYSTEM;
-            if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
-            if(_fileinfo.fattrib & AM_ARC) fileinfo->flags |= FSF_ARCHIVE;
-        }
+                if(_fileinfo.fattrib & AM_RDO) fileinfo->flags |= FSF_READ_ONLY;
+                if(_fileinfo.fattrib & AM_HID) fileinfo->flags |= FSF_HIDDEN;
+                if(_fileinfo.fattrib & AM_SYS) fileinfo->flags |= FSF_SYSTEM;
+                if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
+                if(_fileinfo.fattrib & AM_ARC) fileinfo->flags |= FSF_ARCHIVE;
+            }
 
-        if(name != NULL && name_length > 0) {
-            strncpy(name, _fileinfo.fname, name_length);
+            if(name != NULL && name_length > 0) {
+                strncpy(name, _fileinfo.fname, name_length);
+            }
         }
     }
 
@@ -533,14 +567,24 @@ fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t 
 // File/dir must be empty.
 // File/dir must not be opened, or the FAT volume can be collapsed. FF_FS_LOCK fix that.
 FS_Error fs_common_delete(const char* path) {
-    FRESULT fresult = f_unlink(path);
+    SDError fresult = _fs_status(fs_info);
+
+    if(fresult == SD_OK) {
+        fresult = f_unlink(path);
+    }
+
     return _fs_parse_error(fresult);
 }
 
 // Rename file/dir
 // File/dir must not be opened, or the FAT volume can be collapsed. FF_FS_LOCK fix that.
 FS_Error fs_common_rename(const char* old_path, const char* new_path) {
-    FRESULT fresult = f_rename(old_path, new_path);
+    SDError fresult = _fs_status(fs_info);
+
+    if(fresult == SD_OK) {
+        fresult = f_rename(old_path, new_path);
+    }
+
     return _fs_parse_error(fresult);
 }
 
@@ -549,22 +593,27 @@ FS_Error fs_common_rename(const char* old_path, const char* new_path) {
 // set "read only" flag and remove "hidden" flag
 // fs_common_set_attr("file.txt", FSF_READ_ONLY, FSF_READ_ONLY | FSF_HIDDEN);
 FS_Error fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask) {
-    uint8_t _mask = 0;
-    uint8_t _attr = 0;
+    SDError fresult = _fs_status(fs_info);
 
-    if(mask & FSF_READ_ONLY) _mask |= AM_RDO;
-    if(mask & FSF_HIDDEN) _mask |= AM_HID;
-    if(mask & FSF_SYSTEM) _mask |= AM_SYS;
-    if(mask & FSF_DIRECTORY) _mask |= AM_DIR;
-    if(mask & FSF_ARCHIVE) _mask |= AM_ARC;
+    if(fresult == SD_OK) {
+        uint8_t _mask = 0;
+        uint8_t _attr = 0;
 
-    if(attr & FSF_READ_ONLY) _attr |= AM_RDO;
-    if(attr & FSF_HIDDEN) _attr |= AM_HID;
-    if(attr & FSF_SYSTEM) _attr |= AM_SYS;
-    if(attr & FSF_DIRECTORY) _attr |= AM_DIR;
-    if(attr & FSF_ARCHIVE) _attr |= AM_ARC;
+        if(mask & FSF_READ_ONLY) _mask |= AM_RDO;
+        if(mask & FSF_HIDDEN) _mask |= AM_HID;
+        if(mask & FSF_SYSTEM) _mask |= AM_SYS;
+        if(mask & FSF_DIRECTORY) _mask |= AM_DIR;
+        if(mask & FSF_ARCHIVE) _mask |= AM_ARC;
 
-    FRESULT fresult = f_chmod(path, attr, mask);
+        if(attr & FSF_READ_ONLY) _attr |= AM_RDO;
+        if(attr & FSF_HIDDEN) _attr |= AM_HID;
+        if(attr & FSF_SYSTEM) _attr |= AM_SYS;
+        if(attr & FSF_DIRECTORY) _attr |= AM_DIR;
+        if(attr & FSF_ARCHIVE) _attr |= AM_ARC;
+
+        fresult = f_chmod(path, attr, mask);
+    }
+
     return _fs_parse_error(fresult);
 }
 
@@ -577,18 +626,59 @@ FS_Error fs_common_set_time(
     uint8_t hour,
     uint8_t minute,
     uint8_t second) {
-    SDFileInfo _fileinfo;
+    SDError fresult = _fs_status(fs_info);
 
-    _fileinfo.fdate = (WORD)(((year - 1980) * 512U) | month * 32U | month_day);
-    _fileinfo.ftime = (WORD)(hour * 2048U | minute * 32U | second / 2U);
+    if(fresult == SD_OK) {
+        SDFileInfo _fileinfo;
 
-    FRESULT fresult = f_utime(path, &_fileinfo);
+        _fileinfo.fdate = (WORD)(((year - 1980) * 512U) | month * 32U | month_day);
+        _fileinfo.ftime = (WORD)(hour * 2048U | minute * 32U | second / 2U);
+
+        fresult = f_utime(path, &_fileinfo);
+    }
+
     return _fs_parse_error(fresult);
 }
 
 // Create new directory
 FS_Error fs_common_mkdir(const char* path) {
-    FRESULT fresult = f_mkdir(path);
+    SDError fresult = _fs_status(fs_info);
+
+    if(fresult == SD_OK) {
+        fresult = f_mkdir(path);
+    }
+
+    return _fs_parse_error(fresult);
+}
+
+// Get common info about FS
+FS_Error fs_get_fs_info(uint64_t* total_space, uint64_t* free_space) {
+    SDError fresult = _fs_status(fs_info);
+
+    if(fresult == SD_OK) {
+        DWORD free_clusters;
+        FATFS* fs;
+
+        fresult = f_getfree("0:/", &free_clusters, &fs);
+        if(fresult == FR_OK) {
+            uint32_t total_sectors = (fs->n_fatent - 2) * fs->csize;
+            uint32_t free_sectors = free_clusters * fs->csize;
+
+            uint16_t sector_size = _MAX_SS;
+#if _MAX_SS != _MIN_SS
+            sector_size = fs->ssize;
+#endif
+
+            if(total_space != NULL) {
+                *total_space = total_sectors / 1024 * sector_size;
+            }
+
+            if(free_space != NULL) {
+                *free_space = free_sectors / 1024 * sector_size;
+            }
+        }
+    }
+
     return _fs_parse_error(fresult);
 }
 
@@ -711,7 +801,9 @@ const char* fs_error_get_internal_desc(uint32_t internal_error_id) {
 
 /******************* Application *******************/
 
-void fill_fs_api(FS_Api* fs_api) {
+FS_Api* fs_api_alloc() {
+    FS_Api* fs_api = furi_alloc(sizeof(FS_Api));
+
     // fill file api
     fs_api->file.open = fs_file_open;
     fs_api->file.close = fs_file_close;
@@ -737,54 +829,79 @@ void fill_fs_api(FS_Api* fs_api) {
     fs_api->common.set_attr = fs_common_set_attr;
     fs_api->common.mkdir = fs_common_mkdir;
     fs_api->common.set_time = fs_common_set_time;
+    fs_api->common.get_fs_info = fs_get_fs_info;
 
     // fill errors api
     fs_api->error.get_desc = fs_error_get_desc;
     fs_api->error.get_internal_desc = fs_error_get_internal_desc;
-}
 
-typedef struct {
-    Widget* widget;
-    Icon* icon_sd_on;
-    Icon* icon_sd_off;
-} SdInfo;
+    return fs_api;
+}
 
 void sd_draw_callback(Canvas* canvas, void* context) {
     assert(context);
-    SdInfo* sd_info = context;
+    SdApp* sd_app = context;
 
-    if(sd_fs_status == SD_NO_CARD) {
-        // do nothing
-    } else if(sd_fs_status == SD_OK) {
-        // sd card present and mounted
-        canvas_draw_icon(canvas, 0, 0, sd_info->icon_sd_on);
-    } else {
-        // any sd card error
-        canvas_draw_icon(canvas, 0, 0, sd_info->icon_sd_off);
+    switch(sd_app->info.status) {
+    case SD_NO_CARD:
+        break;
+    case SD_OK:
+        canvas_draw_icon(canvas, 0, 0, sd_app->icon.mounted);
+        break;
+    default:
+        canvas_draw_icon(canvas, 0, 0, sd_app->icon.fail);
+        break;
     }
 }
 
-void app_sd_filesystem(void* p) {
-    FS_Api fs_api;
+SdApp* sd_app_alloc() {
+    SdApp* sd_app = furi_alloc(sizeof(SdApp));
 
-    if(!_fs_init()) {
-        // TODO stop app
+    // init inner fs data
+    if(!_fs_init(&sd_app->info)) {
         furiac_exit(NULL);
     }
 
-    sd_fs_status = SD_OTHER_APP;
+    // init widget
+    sd_app->icon.widget = widget_alloc();
+    sd_app->icon.mounted = assets_icons_get(I_SDcardMounted_11x8);
+    sd_app->icon.fail = assets_icons_get(I_SDcardFail_11x8);
+    widget_set_width(sd_app->icon.widget, icon_get_width(sd_app->icon.mounted));
+    widget_draw_callback_set(sd_app->icon.widget, sd_draw_callback, sd_app);
 
-    SdInfo* sd_info = furi_alloc(sizeof(SdInfo));
-    sd_info->widget = widget_alloc();
-    sd_info->icon_sd_on = assets_icons_get(I_SDcardMounted_11x8);
-    sd_info->icon_sd_off = assets_icons_get(I_SDcardFail_11x8);
-    widget_set_width(sd_info->widget, icon_get_width(sd_info->icon_sd_on));
-    widget_draw_callback_set(sd_info->widget, sd_draw_callback, sd_info);
+    // disable widget
+    widget_enabled_set(sd_app->icon.widget, false);
+
+    return sd_app;
+}
+
+void app_sd_filesystem(void* p) {
+    SdApp* sd_app = sd_app_alloc();
+    FS_Api* fs_api = fs_api_alloc();
 
     Gui* gui = furi_open("gui");
-    gui_add_widget(gui, sd_info->widget, GuiLayerStatusBarLeft);
+    gui_add_widget(gui, sd_app->icon.widget, GuiLayerStatusBarLeft);
+
+    // try to init sd card
+    while(true) {
+        if(hal_gpio_read_sd_detect()) {
+            uint8_t bsp_result = BSP_SD_Init();
+
+            if(bsp_result) {
+                sd_app->info.status = SD_LOW_LEVEL_ERR;
+            } else {
+                sd_app->info.status = f_mount(&sd_app->info.fat_fs, sd_app->info.path, 1);
+            }
+
+            widget_enabled_set(sd_app->icon.widget, true);
+        } else {
+            widget_enabled_set(sd_app->icon.widget, false);
+        }
+
+        delay(1000);
+    }
 
     while(true) {
-        delay(1000);
+        delay(10000);
     }
 }
