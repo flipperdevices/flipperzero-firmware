@@ -100,6 +100,7 @@ typedef struct {
         uint8_t hour,
         uint8_t minute,
         uint8_t second);
+    FS_Error (*get_fs_info)(uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
 /* errors api */
