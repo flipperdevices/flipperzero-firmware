@@ -228,12 +228,20 @@ if(NOT (TARGET STM32::NoSys))
     add_library(STM32::NoSys INTERFACE IMPORTED)
     target_compile_options(STM32::NoSys INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nosys.specs>)
     target_link_options(STM32::NoSys INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nosys.specs>)
+    #This custom property is used to check that specs is not set yet on a target linking to this one
+    set_property(TARGET STM32::NoSys PROPERTY INTERFACE_CUSTOM_GCC_SPECS "NOSYS")
+    set_property(TARGET STM32::NoSys APPEND PROPERTY
+        COMPATIBLE_INTERFACE_STRING CUSTOM_GCC_SPECS)
 endif()
 
 if(NOT (TARGET STM32::Nano))
     add_library(STM32::Nano INTERFACE IMPORTED)
     target_compile_options(STM32::Nano INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nano.specs>)
     target_link_options(STM32::Nano INTERFACE $<$<C_COMPILER_ID:GNU>:--specs=nano.specs>)
+    #This custom property is used to check that specs is not set yet on a target linking to this one
+    set_property(TARGET STM32::Nano PROPERTY INTERFACE_CUSTOM_GCC_SPECS "NANO")
+    set_property(TARGET STM32::Nano APPEND PROPERTY
+        COMPATIBLE_INTERFACE_STRING CUSTOM_GCC_SPECS)
 endif()
 
 include(stm32/utilities)
