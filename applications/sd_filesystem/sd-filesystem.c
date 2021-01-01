@@ -1171,7 +1171,7 @@ void app_sd_eject_callback(void* context) {
     widget_enabled_set(sd_app->widget, false);
 }
 
-void app_sd_filesystem(void* p) {
+void sd_filesystem(void* p) {
     SdApp* sd_app = sd_app_alloc();
     FS_Api* fs_api = fs_api_alloc();
 

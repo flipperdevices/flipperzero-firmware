@@ -41,7 +41,7 @@ void cli_task(void* p);
 void music_player(void* p);
 void sdnfc(void* p);
 void floopper_bloopper(void* p);
-void app_sd_filesystem(void* p);
+void sd_filesystem(void* p);
 
 const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_DISPLAY
@@ -76,6 +76,13 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
      .libs = {1, FURI_LIB{"input_task"}},
      .icon = A_Plugins_14},
     {.app = gui_task, .name = "gui_task", .libs = {0}, .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_SD_FILESYSTEM
+    {.app = sd_filesystem,
+     .name = "sd_filesystem",
+     .libs = {1, FURI_LIB{"gui_task"}},
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_MENU
@@ -166,7 +173,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_SD_TEST
     {.app = sd_card_test,
      .name = "sd_card_test",
-     .libs = {1, FURI_LIB{"gui_task"}},
+     .libs = {2, FURI_LIB{"gui_task", "sd_filesystem"}},
      .icon = A_Plugins_14},
 #endif
 
@@ -200,10 +207,6 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 
 #ifdef APP_SDNFC
     {.app = sdnfc, .name = "sdnfc", .libs = {1, FURI_LIB{"gui_task"}}, .icon = A_Plugins_14},
-#endif
-
-#ifdef APP_SD_FILESYSTEM
-    {.app = app_sd_filesystem, .name = "sd_filesystem", .libs = {1, FURI_LIB{"gui_task"}}, .icon = A_Plugins_14},
 #endif
 };
 
@@ -262,7 +265,7 @@ const FlipperStartupApp FLIPPER_PLUGINS[] = {
 #ifdef BUILD_SD_TEST
     {.app = sd_card_test,
      .name = "sd_card_test",
-     .libs = {1, FURI_LIB{"gui_task"}},
+     .libs = {2, FURI_LIB{"gui_task", "sd_filesystem"}},
      .icon = A_Plugins_14},
 #endif
 
