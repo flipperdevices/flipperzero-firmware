@@ -964,16 +964,18 @@ void app_sd_filesystem(void* p) {
 
     while(true) {
         if(sd_was_present) {
-            uint8_t bsp_result = BSP_SD_Init();
+            if(hal_gpio_read_sd_detect()) {
+                uint8_t bsp_result = BSP_SD_Init();
 
-            if(bsp_result) {
-                sd_app->info.status = SD_LOW_LEVEL_ERR;
-            } else {
-                sd_app->info.status = f_mount(&sd_app->info.fat_fs, sd_app->info.path, 1);
+                if(bsp_result) {
+                    sd_app->info.status = SD_LOW_LEVEL_ERR;
+                } else {
+                    sd_app->info.status = f_mount(&sd_app->info.fat_fs, sd_app->info.path, 1);
+                }
+
+                widget_enabled_set(sd_app->icon.widget, true);
+                sd_was_present = false;
             }
-
-            widget_enabled_set(sd_app->icon.widget, true);
-            sd_was_present = false;
         } else {
             if(!hal_gpio_read_sd_detect()) {
                 widget_enabled_set(sd_app->icon.widget, false);
