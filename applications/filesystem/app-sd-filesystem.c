@@ -96,7 +96,7 @@ bool _fs_init(SdFsInfo* _fs_info) {
     }
 
     _fs_info->path = "0:/";
-    _fs_info->status = SD_OTHER_APP;
+    _fs_info->status = SD_NO_CARD;
 
     // store pointer for api fns
     fs_info = _fs_info;
@@ -1042,12 +1042,18 @@ void app_sd_info_callback(void* context) {
             snprintf(
                 str_buffer[5], str_buffer_size, "%lu KB free", free_sectors / 1024 * sector_size);
         } else {
-            snprintf(str_buffer[0], str_buffer_size, "Label error:");
+            snprintf(str_buffer[0], str_buffer_size, "SD status error:");
             snprintf(
-                str_buffer[1], str_buffer_size, "%s", fs_error_get_internal_desc(get_label_result));
-            snprintf(str_buffer[2], str_buffer_size, "Get free error:");
+                str_buffer[1],
+                str_buffer_size,
+                "%s",
+                fs_error_get_internal_desc(_fs_status(&sd_app->info)));
+            snprintf(str_buffer[2], str_buffer_size, "Label error:");
             snprintf(
-                str_buffer[3], str_buffer_size, "%s", fs_error_get_internal_desc(get_free_result));
+                str_buffer[3], str_buffer_size, "%s", fs_error_get_internal_desc(get_label_result));
+            snprintf(str_buffer[4], str_buffer_size, "Get free error:");
+            snprintf(
+                str_buffer[5], str_buffer_size, "%s", fs_error_get_internal_desc(get_free_result));
         }
 
         // dynamic strings to screen
@@ -1121,13 +1127,7 @@ void app_sd_format_callback(void* context) {
     widget_enabled_set(sd_app->widget, false);
 }
 
-void app_sd_eject_callback(void* context) {
-    furi_assert(context);
-    SdApp* sd_app = context;
-
-    sd_set_lines(sd_app, 1, "ejecting SD card");
-    widget_enabled_set(sd_app->widget, true);
-
+void app_sd_unmount_card(SdApp* sd_app) {
     _fs_lock(&sd_app->info);
 
     // set status
@@ -1152,6 +1152,16 @@ void app_sd_eject_callback(void* context) {
     f_mount(0, sd_app->info.path, 0);
 
     _fs_unlock(&sd_app->info);
+}
+
+void app_sd_eject_callback(void* context) {
+    furi_assert(context);
+    SdApp* sd_app = context;
+
+    sd_set_lines(sd_app, 1, "ejecting SD card");
+    widget_enabled_set(sd_app->widget, true);
+
+    app_sd_unmount_card(sd_app);
 
     sd_set_lines(sd_app, 1, "SD card can be pulled out");
 
@@ -1212,6 +1222,7 @@ void app_sd_filesystem(void* p) {
         } else {
             if(!hal_gpio_read_sd_detect()) {
                 widget_enabled_set(sd_app->icon.widget, false);
+                app_sd_unmount_card(sd_app);
                 sd_was_present = true;
             }
         }
