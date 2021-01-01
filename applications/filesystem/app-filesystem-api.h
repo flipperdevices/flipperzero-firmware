@@ -14,15 +14,19 @@ FSM_OPEN_APPEND      Open file. If file not exist, a new file will be created. F
 FSM_CREATE_NEW       Creates a new file. Fails if the file is exist.
 FSM_CREATE_ALWAYS    Creates a new file. If the file is exist, it will be truncated to zero size.
 */
+
 typedef enum {
-    FSM_READ = (1 << 0),
-    FSM_WRITE = (1 << 1),
-    FSM_OPEN_EXISTING = (1 << 2),
-    FSM_OPEN_ALWAYS = (1 << 3),
-    FSM_OPEN_APPEND = (1 << 4),
-    FSM_CREATE_NEW = (1 << 5),
-    FSM_CREATE_ALWAYS = (1 << 6),
-} FS_Mode;
+    FSAM_READ = (1 << 0),
+    FSAM_WRITE = (1 << 1),
+} FS_AccessMode;
+
+typedef enum {
+    FSOM_OPEN_EXISTING = (1 << 0),
+    FSOM_OPEN_ALWAYS = (1 << 1),
+    FSOM_OPEN_APPEND = (1 << 2),
+    FSOM_CREATE_NEW = (1 << 3),
+    FSOM_CREATE_ALWAYS = (1 << 4),
+} FS_OpenMode;
 
 /* fs api errors */
 typedef enum {
@@ -65,7 +69,7 @@ typedef struct {
 
 /* file api */
 typedef struct {
-    bool (*open)(File* file, const char* path, FS_Flags mode);
+    bool (*open)(File* file, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode);
     bool (*close)(File* file);
     uint16_t (*read)(File* file, void* buff, uint16_t bytes_to_read);
     uint16_t (*write)(File* file, void* buff, uint16_t bytes_to_write);

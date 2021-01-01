@@ -268,7 +268,7 @@ FS_Error _fs_parse_error(SDError error) {
 /******************* File Functions *******************/
 
 // Open/Create a file
-bool fs_file_open(File* file, const char* path, FS_Flags mode) {
+bool fs_file_open(File* file, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode) {
     SDFile* sd_file = NULL;
 
     _fs_lock(fs_info);
@@ -291,13 +291,13 @@ bool fs_file_open(File* file, const char* path, FS_Flags mode) {
     } else {
         uint8_t _mode = 0;
 
-        if(mode & FSM_READ) _mode |= FA_READ;
-        if(mode & FSM_WRITE) _mode |= FA_WRITE;
-        if(mode & FSM_OPEN_EXISTING) _mode |= FA_OPEN_EXISTING;
-        if(mode & FSM_OPEN_ALWAYS) _mode |= FA_OPEN_ALWAYS;
-        if(mode & FSM_OPEN_APPEND) _mode |= FA_OPEN_APPEND;
-        if(mode & FSM_CREATE_NEW) _mode |= FA_CREATE_NEW;
-        if(mode & FSM_CREATE_ALWAYS) _mode |= FA_CREATE_ALWAYS;
+        if(access_mode & FSAM_READ) _mode |= FA_READ;
+        if(access_mode & FSAM_WRITE) _mode |= FA_WRITE;
+        if(open_mode & FSOM_OPEN_EXISTING) _mode |= FA_OPEN_EXISTING;
+        if(open_mode & FSOM_OPEN_ALWAYS) _mode |= FA_OPEN_ALWAYS;
+        if(open_mode & FSOM_OPEN_APPEND) _mode |= FA_OPEN_APPEND;
+        if(open_mode & FSOM_CREATE_NEW) _mode |= FA_CREATE_NEW;
+        if(open_mode & FSOM_CREATE_ALWAYS) _mode |= FA_CREATE_ALWAYS;
 
         file->internal_error_id = f_open(sd_file, path, _mode);
     }
