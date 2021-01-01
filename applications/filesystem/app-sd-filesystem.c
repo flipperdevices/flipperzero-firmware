@@ -1,5 +1,7 @@
 #include "fatfs.h"
 #include "app-filesystem-api.h"
+#include "menu/menu.h"
+#include "menu/menu_item.h"
 
 #define SD_FS_MAX_FILES _FS_LOCK
 
@@ -66,6 +68,8 @@ typedef struct {
 typedef struct {
     SdFsInfo info;
     SdFsIcon icon;
+
+    Widget* widget;
 } SdApp;
 
 /******************* Global vars for api *******************/
@@ -839,7 +843,8 @@ FS_Api* fs_api_alloc() {
 }
 
 void sd_draw_callback(Canvas* canvas, void* context) {
-    assert(context);
+    furi_assert(canvas);
+    furi_assert(context);
     SdApp* sd_app = context;
 
     switch(sd_app->info.status) {
@@ -854,6 +859,12 @@ void sd_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
+void sd_draw_app_callback(Canvas* canvas, void* context) {
+    furi_assert(canvas);
+    furi_assert(context);
+    SdApp* sd_app = context;
+}
+
 SdApp* sd_app_alloc() {
     SdApp* sd_app = furi_alloc(sizeof(SdApp));
 
@@ -863,16 +874,59 @@ SdApp* sd_app_alloc() {
     }
 
     // init widget
+    sd_app->widget = widget_alloc();
+    widget_draw_callback_set(sd_app->widget, sd_draw_app_callback, sd_app);
+    widget_enabled_set(sd_app->widget, false);
+
+    // init icon widget
     sd_app->icon.widget = widget_alloc();
     sd_app->icon.mounted = assets_icons_get(I_SDcardMounted_11x8);
     sd_app->icon.fail = assets_icons_get(I_SDcardFail_11x8);
     widget_set_width(sd_app->icon.widget, icon_get_width(sd_app->icon.mounted));
     widget_draw_callback_set(sd_app->icon.widget, sd_draw_callback, sd_app);
-
-    // disable widget
     widget_enabled_set(sd_app->icon.widget, false);
 
     return sd_app;
+}
+
+void app_sd_info_callback(void* context) {
+    furi_assert(context);
+    SdApp* sd_app = context;
+}
+
+void app_sd_format_callback(void* context) {
+    furi_assert(context);
+    SdApp* sd_app = context;
+}
+
+void app_sd_eject_callback(void* context) {
+    furi_assert(context);
+    SdApp* sd_app = context;
+
+    _fs_lock(&sd_app->info);
+
+    // set status
+    sd_app->info.status = SD_NO_CARD;
+    widget_enabled_set(sd_app->icon.widget, false);
+
+    // close files
+    for(uint8_t index = 0; index < SD_FS_MAX_FILES; index++) {
+        FileData* filedata = &fs_info->files[index];
+
+        if(filedata->thread_id != NULL) {
+            if(filedata->is_dir) {
+                f_closedir(&filedata->data.dir);
+            } else {
+                f_close(&filedata->data.file);
+            }
+            filedata->thread_id = NULL;
+        }
+    }
+
+    // unmount volume
+    f_mount(0, sd_app->info.path, 0);
+
+    _fs_unlock(&sd_app->info);
 }
 
 void app_sd_filesystem(void* p) {
@@ -882,9 +936,34 @@ void app_sd_filesystem(void* p) {
     Gui* gui = furi_open("gui");
     gui_add_widget(gui, sd_app->icon.widget, GuiLayerStatusBarLeft);
 
-    // try to init sd card
+    // add api record
+    if(!furi_create("sdcard", fs_api)) {
+        furiac_exit(NULL);
+    }
+
+    // init menu
+    // TODO menu icon
+    MenuItem* menu_item;
+    menu_item = menu_item_alloc_menu("SD Card", assets_icons_get(I_SDcardMounted_11x8));
+
+    menu_item_subitem_add(
+        menu_item, menu_item_alloc_function("Info", NULL, app_sd_info_callback, sd_app));
+    menu_item_subitem_add(
+        menu_item, menu_item_alloc_function("Format", NULL, app_sd_format_callback, sd_app));
+    menu_item_subitem_add(
+        menu_item, menu_item_alloc_function("Eject", NULL, app_sd_eject_callback, sd_app));
+
+    // add item to menu
+    ValueMutex* menu_vm = furi_open("menu");
+    furi_check(menu_vm);
+    with_value_mutex(
+        menu_vm, (Menu * menu) { menu_item_add(menu, menu_item); });
+
+    // sd card cycle
+    bool sd_was_present = true;
+
     while(true) {
-        if(hal_gpio_read_sd_detect()) {
+        if(sd_was_present) {
             uint8_t bsp_result = BSP_SD_Init();
 
             if(bsp_result) {
@@ -894,14 +973,14 @@ void app_sd_filesystem(void* p) {
             }
 
             widget_enabled_set(sd_app->icon.widget, true);
+            sd_was_present = false;
         } else {
-            widget_enabled_set(sd_app->icon.widget, false);
+            if(!hal_gpio_read_sd_detect()) {
+                widget_enabled_set(sd_app->icon.widget, false);
+                sd_was_present = true;
+            }
         }
 
         delay(1000);
-    }
-
-    while(true) {
-        delay(10000);
     }
 }
