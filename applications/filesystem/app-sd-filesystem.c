@@ -4,6 +4,11 @@
 #include "menu/menu_item.h"
 
 #define SD_FS_MAX_FILES _FS_LOCK
+#define SD_STATE_LINES_COUNT 6
+
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 typedef FIL SDFile;
 typedef DIR SDDir;
@@ -70,6 +75,7 @@ typedef struct {
     SdFsIcon icon;
 
     Widget* widget;
+    const char* line[SD_STATE_LINES_COUNT];
 } SdApp;
 
 /******************* Global vars for api *******************/
@@ -842,6 +848,23 @@ FS_Api* fs_api_alloc() {
     return fs_api;
 }
 
+void sd_set_lines(SdApp* sd_app, uint8_t count, ...) {
+    va_list argptr;
+    count = min(count, SD_STATE_LINES_COUNT);
+
+    for(uint8_t i = 0; i < SD_STATE_LINES_COUNT; i++) {
+        sd_app->line[i] = "";
+    }
+
+    va_start(argptr, count);
+
+    for(uint8_t i = 0; i < count; i++) {
+        sd_app->line[i] = va_arg(argptr, char*);
+    }
+
+    va_end(argptr);
+}
+
 void sd_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
@@ -859,10 +882,27 @@ void sd_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
-void sd_draw_app_callback(Canvas* canvas, void* context) {
+void sd_app_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
     SdApp* sd_app = context;
+
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
+
+    for(uint8_t i = 0; i < SD_STATE_LINES_COUNT; i++) {
+        canvas_draw_str(canvas, 0, (i + 1) * 10, sd_app->line[i]);
+    }
+}
+
+void sd_app_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
+    SdApp* sd_app = context;
+
+    if(!event->state || event->input != InputBack) return;
+
+    widget_enabled_set(sd_app->widget, false);
 }
 
 SdApp* sd_app_alloc() {
@@ -875,8 +915,12 @@ SdApp* sd_app_alloc() {
 
     // init widget
     sd_app->widget = widget_alloc();
-    widget_draw_callback_set(sd_app->widget, sd_draw_app_callback, sd_app);
+    widget_draw_callback_set(sd_app->widget, sd_app_draw_callback, sd_app);
+    widget_input_callback_set(sd_app->widget, sd_app_input_callback, sd_app);
     widget_enabled_set(sd_app->widget, false);
+
+    // init lines
+    sd_set_lines(sd_app, 0);
 
     // init icon widget
     sd_app->icon.widget = widget_alloc();
@@ -892,16 +936,49 @@ SdApp* sd_app_alloc() {
 void app_sd_info_callback(void* context) {
     furi_assert(context);
     SdApp* sd_app = context;
+    widget_enabled_set(sd_app->widget, true);
 }
 
 void app_sd_format_callback(void* context) {
     furi_assert(context);
     SdApp* sd_app = context;
+    uint8_t* work_area;
+
+    sd_set_lines(sd_app, 3, "formatting SD card", "procedure can be lengthy", "please wait");
+    widget_enabled_set(sd_app->widget, true);
+    delay(100);
+
+    _fs_lock(&sd_app->info);
+
+    work_area = malloc(_MAX_SS);
+    if(work_area == NULL) {
+        sd_app->info.status = SD_NOT_ENOUGH_CORE;
+    } else {
+        sd_app->info.status = f_mkfs(sd_app->info.path, FM_ANY, 0, work_area, _MAX_SS);
+        free(work_area);
+
+        if(sd_app->info.status == SD_OK) {
+            f_setlabel("Flipper SD");
+            sd_app->info.status = f_mount(&sd_app->info.fat_fs, sd_app->info.path, 1);
+        }
+    }
+
+    if(sd_app->info.status != SD_OK) {
+        sd_set_lines(
+            sd_app, 2, "SD card format error", fs_error_get_internal_desc(sd_app->info.status));
+    } else {
+        sd_set_lines(sd_app, 1, "SD card formatted");
+    }
+
+    _fs_unlock(&sd_app->info);
 }
 
 void app_sd_eject_callback(void* context) {
     furi_assert(context);
     SdApp* sd_app = context;
+
+    sd_set_lines(sd_app, 1, "ejecting SD card");
+    widget_enabled_set(sd_app->widget, true);
 
     _fs_lock(&sd_app->info);
 
@@ -927,6 +1004,8 @@ void app_sd_eject_callback(void* context) {
     f_mount(0, sd_app->info.path, 0);
 
     _fs_unlock(&sd_app->info);
+
+    sd_set_lines(sd_app, 1, "SD card can be pulled out");
 }
 
 void app_sd_filesystem(void* p) {
@@ -934,6 +1013,7 @@ void app_sd_filesystem(void* p) {
     FS_Api* fs_api = fs_api_alloc();
 
     Gui* gui = furi_open("gui");
+    gui_add_widget(gui, sd_app->widget, GuiLayerFullscreen);
     gui_add_widget(gui, sd_app->icon.widget, GuiLayerStatusBarLeft);
 
     // add api record
