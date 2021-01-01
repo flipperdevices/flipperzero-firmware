@@ -2,6 +2,10 @@
 #include "flipper.h"
 #include "flipper_v2.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 Open mode & Access flags
 
@@ -92,7 +96,7 @@ typedef struct {
 /* common api */
 typedef struct {
     FS_Error (*info)(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length);
-    FS_Error (*delete)(const char* path);
+    FS_Error (*remove)(const char* path);
     FS_Error (*rename)(const char* old_path, const char* new_path);
     FS_Error (*set_attr)(const char* path, uint8_t attr, uint8_t mask);
     FS_Error (*mkdir)(const char* path);
@@ -120,3 +124,7 @@ typedef struct {
     FS_Common_Api common;
     FS_Error_Api error;
 } FS_Api;
+
+#ifdef __cplusplus
+}
+#endif
