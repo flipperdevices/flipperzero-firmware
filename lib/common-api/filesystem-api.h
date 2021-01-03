@@ -6,74 +6,112 @@
 extern "C" {
 #endif
 
-/*
-Open mode & Access flags
-
-Flag                Meaning
-FSM_READ             Read access.
-FSM_WRITE            Write access.
-FSM_OPEN_EXISTING    Open file, fail if file doesn't exist.
-FSM_OPEN_ALWAYS      Open file. If file not exist, a new file will be created. 
-FSM_OPEN_APPEND      Open file. If file not exist, a new file will be created. File pointer will be set to the end of file.
-FSM_CREATE_NEW       Creates a new file. Fails if the file is exist.
-FSM_CREATE_ALWAYS    Creates a new file. If the file is exist, it will be truncated to zero size.
-*/
-
+/**
+ * Access mode flags
+ */
 typedef enum {
-    FSAM_READ = (1 << 0),
-    FSAM_WRITE = (1 << 1),
+    FSAM_READ = (1 << 0), /**< Read access */
+    FSAM_WRITE = (1 << 1), /**< Write access */
 } FS_AccessMode;
 
+/**
+ * Open mode flags
+ */
 typedef enum {
-    FSOM_OPEN_EXISTING = (1 << 0),
-    FSOM_OPEN_ALWAYS = (1 << 1),
-    FSOM_OPEN_APPEND = (1 << 2),
-    FSOM_CREATE_NEW = (1 << 3),
-    FSOM_CREATE_ALWAYS = (1 << 4),
+    FSOM_OPEN_EXISTING = 1, /**< Open file, fail if file doesn't exist */
+    FSOM_OPEN_ALWAYS = 2, /**< Open file. Create new file if not exist */
+    FSOM_OPEN_APPEND = 4, /**< Open file. Create new file if not exist. Set R/W pointer to EOF */
+    FSOM_CREATE_NEW = 8, /**< Creates a new file. Fails if the file is exist */
+    FSOM_CREATE_ALWAYS = 16, /**< Creates a new file. If file exist, truncate to zero size */
 } FS_OpenMode;
 
-/* fs api errors */
+/**
+ * API errors enumeration
+ */
 typedef enum {
-    FSE_OK,
-    FSE_NOT_READY,
-    FSE_EXIST,
-    FSE_NOT_EXIST,
-    FSE_INVALID_PARAMETER,
-    FSE_DENIED,
-    FSE_INVALID_NAME,
-    FSE_INTERNAL,
-    FSE_NOT_IMPLEMENTED,
+    FSE_OK, /**< No error */
+    FSE_NOT_READY, /**< FS not ready */
+    FSE_EXIST, /**< File/Dir alrady exist */
+    FSE_NOT_EXIST, /**< File/Dir does not exist */
+    FSE_INVALID_PARAMETER, /**< Invalid API parameter */
+    FSE_DENIED, /**< Access denied */
+    FSE_INVALID_NAME, /**< Invalid name/path */
+    FSE_INTERNAL, /**< Internal error */
+    FSE_NOT_IMPLEMENTED, /**< Functon not implemented */
 } FS_Error;
 
-/* FS fileinfo flags*/
+/**
+ * FileInfo flags
+ */
 typedef enum {
-    FSF_READ_ONLY = (1 << 0),
-    FSF_HIDDEN = (1 << 1),
-    FSF_SYSTEM = (1 << 2),
-    FSF_DIRECTORY = (1 << 3),
-    FSF_ARCHIVE = (1 << 4),
+    FSF_READ_ONLY = (1 << 0), /**< Readonly */
+    FSF_HIDDEN = (1 << 1), /**< Hidden */
+    FSF_SYSTEM = (1 << 2), /**< System */
+    FSF_DIRECTORY = (1 << 3), /**< Directory */
+    FSF_ARCHIVE = (1 << 4), /**< Archive */
 } FS_Flags;
 
-/* file/dir data */
+/** 
+ *  Structure that hold file index and returned api errors 
+ */
 typedef struct {
-    /* file ID for internal references */
-    uint32_t file_id;
-    /* standart API error from FS_Error list */
-    FS_Error error_id;
-    /* internal API error */
-    uint32_t internal_error_id;
+    uint32_t file_id; /**< File ID for internal references */
+    FS_Error error_id; /**< Standart API error from FS_Error enum */
+    uint32_t internal_error_id; /**< Internal API error value */
 } File;
 
+// TODO: solve year 2107 problem
+/** 
+ *  Structure that hold packed date values 
+ */
+typedef struct __attribute__((packed)) {
+    uint16_t month_day : 5; /**< month day */
+    uint16_t month : 4; /**< month index */
+    uint16_t year : 7; /**< year, year + 1980 to get actual value */
+} FileDate;
+
+/** 
+ *  Structure that hold packed time values 
+ */
+typedef struct __attribute__((packed)) {
+    uint16_t second : 5; /**< second, second * 2 to get actual value  */
+    uint16_t minute : 6; /**< minute */
+    uint16_t hour : 5; /**< hour */
+} FileTime;
+
+/** 
+ *  Union of simple date and real value 
+ */
+typedef union {
+    FileDate simple; /**< simple access to date */
+    uint16_t value; /**< real date value */
+} FileDateUnion;
+
+/** 
+ *  Union of simple time and real value 
+ */
+typedef union {
+    FileTime simple; /**< simple access to time */
+    uint16_t value; /**< real time value */
+} FileTimeUnion;
+
+/** 
+ *  Structure that hold file info
+ */
 typedef struct {
-    uint8_t flags;
-    uint64_t size;
-    uint16_t date;
-    uint16_t time;
+    uint8_t flags; /**< flags from FS_Flags enum */
+    uint64_t size; /**< file size */
+    FileDateUnion date; /**< file date */
+    FileTimeUnion time; /**< file time */
 } FileInfo;
 
-/* file api */
+/* File api */
 typedef struct {
-    bool (*open)(File* file, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode);
+    bool (*open)(
+        File* file,
+        const char* path,
+        FS_AccessMode access_mode,
+        FS_OpenMode open_mode);
     bool (*close)(File* file);
     uint16_t (*read)(File* file, void* buff, uint16_t bytes_to_read);
     uint16_t (*write)(File* file, void* buff, uint16_t bytes_to_write);
@@ -85,7 +123,7 @@ typedef struct {
     bool (*eof)(File* file);
 } FS_File_Api;
 
-/* dir api */
+/* Dir api */
 typedef struct {
     bool (*open)(File* file, const char* path);
     bool (*close)(File* file);
@@ -93,25 +131,18 @@ typedef struct {
     bool (*rewind)(File* file);
 } FS_Dir_Api;
 
-/* common api */
+/* Common api */
 typedef struct {
     FS_Error (*info)(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length);
     FS_Error (*remove)(const char* path);
     FS_Error (*rename)(const char* old_path, const char* new_path);
     FS_Error (*set_attr)(const char* path, uint8_t attr, uint8_t mask);
     FS_Error (*mkdir)(const char* path);
-    FS_Error (*set_time)(
-        const char* path,
-        uint16_t year,
-        uint8_t month,
-        uint8_t month_day,
-        uint8_t hour,
-        uint8_t minute,
-        uint8_t second);
+    FS_Error (*set_time)(const char* path, FileDateUnion date, FileTimeUnion time);
     FS_Error (*get_fs_info)(uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
-/* errors api */
+/* Errors api */
 typedef struct {
     const char* (*get_desc)(FS_Error error_id);
     const char* (*get_internal_desc)(uint32_t internal_error_id);

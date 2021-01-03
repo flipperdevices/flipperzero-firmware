@@ -435,8 +435,8 @@ bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name
         file->internal_error_id = f_readdir(&filedata->data.dir, &_fileinfo);
 
         if(fileinfo != NULL) {
-            fileinfo->date = _fileinfo.fdate;
-            fileinfo->time = _fileinfo.ftime;
+            fileinfo->date.value = _fileinfo.fdate;
+            fileinfo->time.value = _fileinfo.ftime;
             fileinfo->size = _fileinfo.fsize;
             fileinfo->flags = 0;
 
@@ -480,8 +480,8 @@ fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t 
         fresult = f_stat(path, &_fileinfo);
         if(fresult == FR_OK) {
             if(fileinfo != NULL) {
-                fileinfo->date = _fileinfo.fdate;
-                fileinfo->time = _fileinfo.ftime;
+                fileinfo->date.value = _fileinfo.fdate;
+                fileinfo->time.value = _fileinfo.ftime;
                 fileinfo->size = _fileinfo.fsize;
                 fileinfo->flags = 0;
 
@@ -557,21 +557,14 @@ FS_Error fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask) {
 }
 
 // Set time of file/dir
-FS_Error fs_common_set_time(
-    const char* path,
-    uint16_t year,
-    uint8_t month,
-    uint8_t month_day,
-    uint8_t hour,
-    uint8_t minute,
-    uint8_t second) {
+FS_Error fs_common_set_time(const char* path, FileDateUnion date, FileTimeUnion time) {
     SDError fresult = _fs_status(fs_info);
 
     if(fresult == SD_OK) {
         SDFileInfo _fileinfo;
 
-        _fileinfo.fdate = (uint16_t)(((year - 1980) * 512U) | month * 32U | month_day);
-        _fileinfo.ftime = (uint16_t)(hour * 2048U | minute * 32U | second / 2U);
+        _fileinfo.fdate = date.value;
+        _fileinfo.ftime = time.value;
 
         fresult = f_utime(path, &_fileinfo);
     }

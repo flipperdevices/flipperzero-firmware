@@ -114,14 +114,7 @@ FS_Error fs_common_remove(const char* path);
 FS_Error fs_common_rename(const char* old_path, const char* new_path);
 FS_Error fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask);
 FS_Error fs_common_mkdir(const char* path);
-FS_Error fs_common_set_time(
-    const char* path,
-    uint16_t year,
-    uint8_t month,
-    uint8_t month_day,
-    uint8_t hour,
-    uint8_t minute,
-    uint8_t second);
+FS_Error fs_common_set_time(const char* path, FileDateUnion date, FileTimeUnion time);
 FS_Error fs_get_fs_info(uint64_t* total_space, uint64_t* free_space);
 
 /* errors api */
