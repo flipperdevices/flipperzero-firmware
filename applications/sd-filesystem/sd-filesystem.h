@@ -14,6 +14,12 @@ typedef FIL SDFile;
 typedef DIR SDDir;
 typedef FILINFO SDFileInfo;
 
+/* storage for file/directory objects*/
+typedef union {
+    SDFile file;
+    SDDir dir;
+} SDFileDirStorage;
+
 typedef enum {
     SD_OK = FR_OK,
     SD_DISK_ERR = FR_DISK_ERR,
@@ -50,10 +56,7 @@ typedef enum {
 typedef struct {
     osThreadId_t thread_id;
     bool is_dir;
-    union {
-        SDFile file;
-        SDDir dir;
-    } data;
+    SDFileDirStorage data;
 } FileData;
 
 /* application data */

@@ -200,7 +200,7 @@ bool fs_file_open(File* file, const char* path, FS_AccessMode access_mode, FS_Op
         if(filedata->thread_id == NULL) {
             file->file_id = index;
 
-            memset(&(filedata->data), 0, sizeof(filedata->data));
+            memset(&(filedata->data), 0, sizeof(SDFileDirStorage));
             filedata->thread_id = osThreadGetId();
             filedata->is_dir = false;
             sd_file = &(filedata->data.file);
@@ -385,7 +385,7 @@ bool fs_dir_open(File* file, const char* path) {
         if(filedata->thread_id == NULL) {
             file->file_id = index;
 
-            memset(&(filedata->data), 0, sizeof(filedata->data));
+            memset(&(filedata->data), 0, sizeof(SDFileDirStorage));
             filedata->thread_id = osThreadGetId();
             filedata->is_dir = true;
             sd_dir = &(filedata->data.dir);
