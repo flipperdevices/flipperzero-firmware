@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 /**
- * Access mode flags
+ *  @brief Access mode flags
  */
 typedef enum {
     FSAM_READ = (1 << 0), /**< Read access */
@@ -15,7 +15,7 @@ typedef enum {
 } FS_AccessMode;
 
 /**
- * Open mode flags
+ *  @brief Open mode flags
  */
 typedef enum {
     FSOM_OPEN_EXISTING = 1, /**< Open file, fail if file doesn't exist */
@@ -26,7 +26,7 @@ typedef enum {
 } FS_OpenMode;
 
 /**
- * API errors enumeration
+ *  @brief API errors enumeration
  */
 typedef enum {
     FSE_OK, /**< No error */
@@ -41,7 +41,7 @@ typedef enum {
 } FS_Error;
 
 /**
- * FileInfo flags
+ *  @brief FileInfo flags
  */
 typedef enum {
     FSF_READ_ONLY = (1 << 0), /**< Readonly */
@@ -52,7 +52,7 @@ typedef enum {
 } FS_Flags;
 
 /** 
- *  Structure that hold file index and returned api errors 
+ *  @brief Structure that hold file index and returned api errors 
  */
 typedef struct {
     uint32_t file_id; /**< File ID for internal references */
@@ -62,7 +62,7 @@ typedef struct {
 
 // TODO: solve year 2107 problem
 /** 
- *  Structure that hold packed date values 
+ *  @brief Structure that hold packed date values 
  */
 typedef struct __attribute__((packed)) {
     uint16_t month_day : 5; /**< month day */
@@ -71,7 +71,7 @@ typedef struct __attribute__((packed)) {
 } FileDate;
 
 /** 
- *  Structure that hold packed time values 
+ *  @brief Structure that hold packed time values 
  */
 typedef struct __attribute__((packed)) {
     uint16_t second : 5; /**< second, second * 2 to get actual value  */
@@ -80,7 +80,7 @@ typedef struct __attribute__((packed)) {
 } FileTime;
 
 /** 
- *  Union of simple date and real value 
+ *  @brief Union of simple date and real value 
  */
 typedef union {
     FileDate simple; /**< simple access to date */
@@ -88,7 +88,7 @@ typedef union {
 } FileDateUnion;
 
 /** 
- *  Union of simple time and real value 
+ *  @brief Union of simple time and real value 
  */
 typedef union {
     FileTime simple; /**< simple access to time */
@@ -96,7 +96,7 @@ typedef union {
 } FileTimeUnion;
 
 /** 
- *  Structure that hold file info
+ *  @brief Structure that hold file info
  */
 typedef struct {
     uint8_t flags; /**< flags from FS_Flags enum */
@@ -105,13 +105,74 @@ typedef struct {
     FileTimeUnion time; /**< file time */
 } FileInfo;
 
-/* File api */
+/** @struct FS_File_Api
+ *  @brief File api structure
+ * 
+ *  @var FS_File_Api::open
+ *      @brief Open file
+ *      @param file pointer to file object, filled by api
+ *      @param path path to file 
+ *      @param access_mode access mode from FS_AccessMode 
+ *      @param open_mode open mode from FS_OpenMode 
+ *      @return success flag
+ * 
+ *  @var FS_File_Api::close 
+ *      @brief Close file
+ *      @param file pointer to file object
+ *      @return success flag
+ * 
+ *  @var FS_File_Api::read
+ *      @brief Read bytes from file to buffer
+ *      @param file pointer to file object
+ *      @param buff pointer to buffer for reading
+ *      @param bytes_to_read how many bytes to read, must be smaller or equal to buffer size 
+ *      @return how many bytes actually has been readed
+ * 
+ *  @var FS_File_Api::write
+ *      @brief Write bytes from buffer to file
+ *      @param file pointer to file object
+ *      @param buff pointer to buffer for writing
+ *      @param bytes_to_read how many bytes to write, must be smaller or equal to buffer size 
+ *      @return how many bytes actually has been writed
+ * 
+ *  @var FS_File_Api::seek
+ *      @brief Move r/w pointer 
+ *      @param file pointer to file object
+ *      @param offset offset to move r/w pointer
+ *      @param from_start set offset from start, or from current position
+ *      @return success flag
+ * 
+ *  @var FS_File_Api::tell
+ *      @brief Get r/w pointer position
+ *      @param file pointer to file object
+ *      @return current r/w pointer position
+ * 
+ *  @var FS_File_Api::truncate
+ *      @brief Truncate file size to current r/w pointer position
+ *      @param file pointer to file object
+ *      @return success flag
+ * 
+ *  @var FS_File_Api::size
+ *      @brief Fet file size
+ *      @param file pointer to file object
+ *      @return file size
+ * 
+ *  @var FS_File_Api::sync
+ *      @brief Write file cache to storage
+ *      @param file pointer to file object
+ *      @return success flag
+ * 
+ *  @var FS_File_Api::eof
+ *      @brief Checks that the r/w pointer is at the end of the file
+ *      @param file pointer to file object
+ *      @return end of file flag
+ */
+
+/**
+ * @brief File api structure
+ */
 typedef struct {
-    bool (*open)(
-        File* file,
-        const char* path,
-        FS_AccessMode access_mode,
-        FS_OpenMode open_mode);
+    bool (*open)(File* file, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode);
     bool (*close)(File* file);
     uint16_t (*read)(File* file, void* buff, uint16_t bytes_to_read);
     uint16_t (*write)(File* file, void* buff, uint16_t bytes_to_write);
@@ -123,7 +184,37 @@ typedef struct {
     bool (*eof)(File* file);
 } FS_File_Api;
 
-/* Dir api */
+/** @struct FS_Dir_Api
+ *  @brief Dir api structure
+ * 
+ *  @var FS_Dir_Api::open
+ *      @brief Open directory to get objects from
+ *      @param file pointer to file object, filled by api
+ *      @param path path to directory 
+ *      @return success flag
+ * 
+ *  @var FS_Dir_Api::close 
+ *      @brief Close directory
+ *      @param file pointer to file object
+ *      @return success flag
+ * 
+ *  @var FS_Dir_Api::read
+ *      @brief Read next object info in directory
+ *      @param file pointer to file object
+ *      @param fileinfo pointer to readed FileInfo, can be NULL
+ *      @param name pointer to name buffer, can be NULL
+ *      @param name_length name buffer length
+ *      @return success flag (if next object not exist also returns false and set error_id to FSE_NOT_EXIST)
+ * 
+ *  @var FS_Dir_Api::rewind
+ *      @brief Rewind to first object info in directory
+ *      @param file pointer to file object
+ *      @return success flag
+ */
+
+/**
+ * @brief Dir api structure
+ */
 typedef struct {
     bool (*open)(File* file, const char* path);
     bool (*close)(File* file);
@@ -131,7 +222,67 @@ typedef struct {
     bool (*rewind)(File* file);
 } FS_Dir_Api;
 
-/* Common api */
+/** @struct FS_Common_Api
+ *  @brief Common api structure
+ * 
+ *  @var FS_Common_Api::info
+ *      @brief Open directory to get objects from
+ *      @param path path to file/directory
+ *      @param fileinfo pointer to readed FileInfo, can be NULL
+ *      @param name pointer to name buffer, can be NULL
+ *      @param name_length name buffer length
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::remove
+ *      @brief Remove file/directory from storage, 
+ *          directory must be empty,
+ *          file/directory must not be opened,
+ *          file/directory must not have FSF_READ_ONLY flag
+ *      @param path path to file/directory
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::rename
+ *      @brief Rename file/directory,
+ *          file/directory must not be opened
+ *      @param path path to file/directory
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::set_attr
+ *      @brief Set attributes of file/directory, 
+ *          for example:
+ *          @code
+ *          set "read only" flag and remove "hidden" flag
+ *          set_attr("file.txt", FSF_READ_ONLY, FSF_READ_ONLY | FSF_HIDDEN);
+ *          @endcode
+ *      @param path path to file/directory
+ *      @param attr attribute values consist of FS_Flags
+ *      @param mask attribute mask consist of FS_Flags
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::mkdir
+ *      @brief Create new directory
+ *      @param path path to new directory
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::set_time
+ *      @brief Set file/directory modification time
+ *      @param path path to file/directory
+ *      @param date modification date 
+ *      @param time modification time
+ *      @see FileDateUnion
+ *      @see FileTimeUnion
+ *      @return FS_Error error info
+ * 
+ *  @var FS_Common_Api::get_fs_info
+ *      @brief Get total and free space storage values
+ *      @param total_space pointer to total space value
+ *      @param free_space pointer to free space value
+ *      @return FS_Error error info
+ */
+
+/**
+ * @brief Common api structure
+ */
 typedef struct {
     FS_Error (*info)(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length);
     FS_Error (*remove)(const char* path);
@@ -142,13 +293,31 @@ typedef struct {
     FS_Error (*get_fs_info)(uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
-/* Errors api */
+/** @struct FS_Error_Api
+ *  @brief Errors api structure
+ * 
+ *  @var FS_Error_Api::get_desc
+ *      @brief Get error description text
+ *      @param error_id FS_Error error id (for fire/dir functions result can be obtained from File.error_id)
+ *      @return pointer to description text
+ * 
+ *  @var FS_Error_Api::get_internal_desc
+ *      @brief Get internal error description text
+ *      @param internal_error_id error id (for fire/dir functions result can be obtained from File.internal_error_id)
+ *      @return pointer to description text
+ */
+
+/**
+ * @brief Errors api structure
+ */
 typedef struct {
     const char* (*get_desc)(FS_Error error_id);
     const char* (*get_internal_desc)(uint32_t internal_error_id);
 } FS_Error_Api;
 
-/* full api set */
+/**
+ * @brief Full filesystem api structure
+ */
 typedef struct {
     FS_File_Api file;
     FS_Dir_Api dir;
