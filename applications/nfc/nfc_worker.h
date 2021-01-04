@@ -1,41 +1,15 @@
 #pragma once
 
-#include <cmsis_os2.h>
-#include <stdbool.h>
-#include "nfc_i.h"
+typedef struct NfcWorker NfcWorker;
 
-typedef enum {
-    NfcWorkerCommandTypePoll,
-    NfcWorkerCommandTypeExit,
-} NfcWorkerCommandType;
+NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue);
 
-typedef struct {
-    NfcWorkerCommandType type;
-} NfcWorkerCommand;
+void nfc_worker_free(NfcWorker* nfc_worker);
 
+void nfc_worker_poll_start(NfcWorker* nfc_worker);
 
-typedef enum {
-    NfcWorkerResponseTypeDeviceFound,
-    NfcWorkerResponseTypeDeviceError,
-} NfcWorkerResponseType;
+void nfc_worker_poll_stop(NfcWorker* nfc_worker);
 
-typedef struct {
-    NfcWorkerResponseType type;
-    union {
-        NfcDevice device;
-    };
-} NfcWorkerResponse;
+void nfc_worker_field_on(NfcWorker* nfc_worker);
 
-
-typedef struct {
-    osMessageQueueId_t command_queue;
-    osMessageQueueId_t response_queue;
-} NfcWorkerContext;
-
-void nfc_worker_task(NfcWorkerContext* context);
-void nfc_worker_poll(NfcWorkerContext* context);
-
-ReturnCode nfc_worker_nfca_poll(NfcWorkerContext* context);
-ReturnCode nfc_worker_nfcb_poll(NfcWorkerContext* context);
-ReturnCode nfc_worker_nfcf_poll(NfcWorkerContext* context);
-ReturnCode nfc_worker_nfcv_poll(NfcWorkerContext* context);
+void nfc_worker_field_off(NfcWorker* nfc_worker);

@@ -1,0 +1,95 @@
+#include "nfc_views.h"
+
+void nfc_view_read_draw(Canvas* canvas, void* model) {
+    NfcViewReadModel* m = model;
+    char buffer[32];
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+
+    if(m->status == NfcViewReadModelStatusInitializing) {
+        canvas_draw_str(canvas, 0, 12, "Initializing");
+    } else if(m->status == NfcViewReadModelStatusReady) {
+        canvas_draw_str(canvas, 0, 12, "Ready");
+    } else if(m->status == NfcViewReadModelStatusError) {
+        snprintf(buffer, sizeof(buffer), "Error: %d", m->error);
+        canvas_draw_str(canvas, 0, 12, buffer);
+        canvas_set_font(canvas, FontSecondary);
+        if(m->error == ERR_WRONG_STATE) {
+            canvas_draw_str(canvas, 2, 22, "Wrong State");
+        } else if(m->error == ERR_PARAM) {
+            canvas_draw_str(canvas, 2, 22, "Wrong Param");
+        } else if(m->error == ERR_IO) {
+            canvas_draw_str(canvas, 2, 22, "IO Error");
+        } else {
+            canvas_draw_str(canvas, 2, 22, "Details in sterrno.h");
+        }
+    } else if(m->status == NfcViewReadModelStatusSearching) {
+        canvas_draw_str(canvas, 0, 12, "Searching");
+    } else if(m->status == NfcViewReadModelStatusFound) {
+        if (m->device.type == NfcDeviceTypeNfca) {
+            nfc_view_read_nfca_draw(canvas, m);
+        } else if (m->device.type == NfcDeviceTypeNfcb) {
+            nfc_view_read_nfcb_draw(canvas, m);
+        } else if (m->device.type == NfcDeviceTypeNfcv) {
+            nfc_view_read_nfcv_draw(canvas, m);
+        } else if (m->device.type == NfcDeviceTypeNfcf) {
+            nfc_view_read_nfcf_draw(canvas, m);
+        }
+    }
+}
+
+void nfc_view_read_nfca_draw(Canvas* canvas, NfcViewReadModel* model) {
+    char buffer[32];
+    canvas_draw_str(canvas, 0, 12, "Found NFC-A");
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(buffer, sizeof(buffer), "Type: %s", nfc_get_nfca_type(model->device.nfca.type));
+    canvas_draw_str(canvas, 2, 22, buffer);
+    snprintf(buffer, sizeof(buffer), "UID length: %d", model->device.nfca.nfcId1Len);
+    canvas_draw_str(canvas, 2, 32, buffer);
+
+    canvas_draw_str(canvas, 2, 42, "UID:");
+    for (uint8_t i=0; i<model->device.nfca.nfcId1Len; i++) {
+        snprintf(buffer+(i*2), sizeof(buffer)-(i*2), "%02X", model->device.nfca.nfcId1[i]);
+    }
+    buffer[model->device.nfca.nfcId1Len*2] = 0;
+    canvas_draw_str(canvas, 18, 42, buffer);
+
+    snprintf(buffer, sizeof(buffer), "SAK: %02X ATQA: %02X/%02X",
+        model->device.nfca.selRes.sak,
+        model->device.nfca.sensRes.anticollisionInfo,
+        model->device.nfca.sensRes.platformInfo);
+    canvas_draw_str(canvas, 2, 52, buffer);
+}
+
+void nfc_view_read_nfcb_draw(Canvas* canvas, NfcViewReadModel* model) {
+    char buffer[32];
+    canvas_draw_str(canvas, 0, 12, "Found NFC-B");
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_draw_str(canvas, 2, 42, "UID:");
+    for (uint8_t i=0; i<RFAL_NFCB_NFCID0_LEN; i++) {
+        snprintf(buffer+(i*2), sizeof(buffer)-(i*2), "%02X", model->device.nfcb.sensbRes.nfcid0[i]);
+    }
+    buffer[RFAL_NFCB_NFCID0_LEN*2] = 0;
+    canvas_draw_str(canvas, 18, 42, buffer);
+}
+
+void nfc_view_read_nfcf_draw(Canvas* canvas, NfcViewReadModel* model) {
+    char buffer[32];
+    canvas_draw_str(canvas, 0, 12, "Found NFC-F");
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_draw_str(canvas, 2, 42, "UID:");
+    for (uint8_t i=0; i<RFAL_NFCF_NFCID2_LEN; i++) {
+        snprintf(buffer+(i*2), sizeof(buffer)-(i*2), "%02X", model->device.nfcf.sensfRes.NFCID2[i]);
+    }
+    buffer[RFAL_NFCF_NFCID2_LEN*2] = 0;
+    canvas_draw_str(canvas, 18, 42, buffer);
+}
+
+void nfc_view_read_nfcv_draw(Canvas* canvas, NfcViewReadModel* model) {
+    char buffer[32];
+    canvas_draw_str(canvas, 0, 12, "Found NFC-V");
+    canvas_set_font(canvas, FontSecondary);
+}
