@@ -209,14 +209,16 @@ void input_samsung(AppEvent* event, State* state) {
 static void render_callback(Canvas* canvas, void* ctx) {
     State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
 
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 12, "irda test");
+    if(state != NULL) {
+        canvas_clear(canvas);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 2, 12, "irda test");
 
-    modes[state->mode_id].render(canvas, state);
+        modes[state->mode_id].render(canvas, state);
 
-    release_mutex((ValueMutex*)ctx, state);
+        release_mutex((ValueMutex*)ctx, state);
+    }
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
