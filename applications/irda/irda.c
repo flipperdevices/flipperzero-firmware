@@ -230,11 +230,30 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
-osMessageQueueId_t irda_event_queue;
+void irda_timer_capture_callback(void* htim, void* comp_ctx) {
+    TIM_HandleTypeDef* _htim = (TIM_HandleTypeDef*)htim;
+    osMessageQueueId_t event_queue = (osMessageQueueId_t)comp_ctx;
+
+    if(_htim->Instance == TIM2) {
+        if(_htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
+            // falling event
+            AppEvent event;
+            event.type = EventTypeRX;
+            event.value.rx_edge = false;
+            osMessageQueuePut(event_queue, &event, 0, 0);
+        } else if(_htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
+            // rising event
+            //uint32_t period_in_us = HAL_TIM_ReadCapturedValue();
+            AppEvent event;
+            event.type = EventTypeRX;
+            event.value.rx_edge = true;
+            osMessageQueuePut(event_queue, &event, 0, 0);
+        }
+    }
+}
 
 void irda(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(AppEvent), NULL);
-    irda_event_queue = event_queue;
 
     State _state;
     uint8_t mode_count = sizeof(modes) / sizeof(modes[0]);
@@ -275,6 +294,9 @@ void irda(void* p) {
     // setup irda rx timer
     tim_irda_rx_init();
 
+    // add timer capture interrupt
+    api_interrupt_add(irda_timer_capture_callback, InterruptTypeTimerCapture, event_queue);
+
     AppEvent event;
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
@@ -313,24 +335,5 @@ void irda(void* p) {
 
         release_mutex(&state_mutex, state);
         widget_update(widget);
-    }
-}
-
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim) {
-    if(htim->Instance == TIM2) {
-        if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
-            // falling event
-            AppEvent event;
-            event.type = EventTypeRX;
-            event.value.rx_edge = false;
-            osMessageQueuePut(irda_event_queue, &event, 0, 0);
-        } else if(htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
-            // rising event
-            //uint32_t period_in_us = HAL_TIM_ReadCapturedValue();
-            AppEvent event;
-            event.type = EventTypeRX;
-            event.value.rx_edge = true;
-            osMessageQueuePut(irda_event_queue, &event, 0, 0);
-        }
     }
 }
