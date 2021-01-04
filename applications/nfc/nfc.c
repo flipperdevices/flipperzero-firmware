@@ -5,8 +5,6 @@ bool nfc_view_read_input(InputEvent* event, void* context) {
     furi_assert(context);
     Nfc* nfc = context;
 
-
-
     return true;
 }
 
@@ -46,7 +44,6 @@ void nfc_menu_read_callback(void* context) {
     message.type = NfcMessageTypeRead;
     furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
 }
-
 
 void nfc_menu_field_on_callback(void* context) {
     furi_assert(context);
@@ -95,23 +92,23 @@ void nfc_task(void* p) {
         } else if(message.type == NfcMessageTypeFieldOff) {
             nfc_worker_field_off(nfc->worker);
         } else if(message.type == NfcMessageTypeDeviceFound) {
-            with_view_model(nfc->view_read, (NfcViewReadModel* model) {
-                model->status = NfcViewReadModelStatusFound;
-                model->device = message.device;
-            });
+            with_view_model(
+                nfc->view_read, (NfcViewReadModel * model) {
+                    model->status = NfcViewReadModelStatusFound;
+                    model->device = message.device;
+                });
         } else if(message.type == NfcMessageTypeWorkerStateChange) {
             NfcViewReadModelStatus status;
-            if (message.worker_state == NfcWorkerStateBroken) {
+            if(message.worker_state == NfcWorkerStateBroken) {
                 status = NfcViewReadModelStatusError;
-            } else if (message.worker_state == NfcWorkerStateReady) {
+            } else if(message.worker_state == NfcWorkerStateReady) {
                 status = NfcViewReadModelStatusReady;
-            } else if (message.worker_state == NfcWorkerStatePolling) {
+            } else if(message.worker_state == NfcWorkerStatePolling) {
                 status = NfcViewReadModelStatusSearching;
             }
 
-            with_view_model(nfc->view_read, (NfcViewReadModel* model) {
-                model->status = status;
-            });
+            with_view_model(
+                nfc->view_read, (NfcViewReadModel * model) { model->status = status; });
         }
     }
 }
