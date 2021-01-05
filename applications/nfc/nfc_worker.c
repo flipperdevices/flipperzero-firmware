@@ -1,23 +1,12 @@
 #include "nfc_worker_i.h"
 
-// TODO replace with pubsub
-static volatile bool isr_enabled = false;
-
-void nfc_isr() {
-    if(isr_enabled) {
-        st25r3916Isr();
-    }
-}
-
 NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue) {
     NfcWorker* nfc_worker = furi_alloc(sizeof(NfcWorker));
     nfc_worker->message_queue = message_queue;
     // Worker thread attributes
     nfc_worker->thread_attr.name = "nfc_worker";
-    // nfc_worker->thread_attr.attr_bits = osThreadJoinable;
-    nfc_worker->thread_attr.stack_size = 4096;
+    nfc_worker->thread_attr.stack_size = 2048;
     // Initialize rfal
-    isr_enabled = true;
     rfalAnalogConfigInitialize();
     nfc_worker->error_code = rfalNfcInitialize();
     if(nfc_worker->error_code == ERR_NONE) {
@@ -84,7 +73,7 @@ void nfc_worker_task(void* context) {
         ret = nfc_worker_nfcf_poll(nfc_worker);
         ret = nfc_worker_nfcv_poll(nfc_worker);
         rfalFieldOff();
-        platformDelay(500);
+        platformDelay(333);
     }
 
     rfalLowPowerModeStart();
@@ -209,6 +198,7 @@ ReturnCode nfc_worker_nfcv_poll(NfcWorker* nfc_worker) {
     }
 
     if(dev_cnt) {
+        rfalNfcvPollerSleep(RFAL_NFCV_REQ_FLAG_DEFAULT, device.InvRes.UID);
         NfcMessage message;
         message.type = NfcMessageTypeDeviceFound;
         message.device.type = NfcDeviceTypeNfcv;
