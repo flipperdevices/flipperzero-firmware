@@ -7,6 +7,7 @@
 #include <stm32wbxx_ll_rtc.h>
 #include <stm32wbxx_ll_pwr.h>
 #include <stm32wbxx_ll_gpio.h>
+#include <stm32wbxx_hal_flash.h>
 
 // Boot request enum
 #define BOOT_REQUEST_NONE 0x00000000
@@ -136,6 +137,9 @@ void target_init() {
     gpio_init();
     rtc_init();
     usb_wire_reset();
+
+    // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 }
 
 int target_is_dfu_requested() {
