@@ -3,6 +3,7 @@
 #include "irda_nec.h"
 #include "irda_samsung.h"
 #include "irda_protocols.h"
+#include "irda-decoder/irda-decoder.h"
 
 typedef enum {
     EventTypeTick,
@@ -11,9 +12,14 @@ typedef enum {
 } EventType;
 
 typedef struct {
+    bool edge;
+    uint32_t lasted;
+} RXValue;
+
+typedef struct {
     union {
         InputEvent input;
-        bool rx_edge;
+        RXValue rx;
     } value;
     EventType type;
 } AppEvent;
@@ -235,20 +241,27 @@ void irda_timer_capture_callback(void* htim, void* comp_ctx) {
     osMessageQueueId_t event_queue = (osMessageQueueId_t)comp_ctx;
 
     if(_htim->Instance == TIM2) {
+        AppEvent event;
+        event.type = EventTypeRX;
+        uint32_t channel;
+
         if(_htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
             // falling event
-            AppEvent event;
-            event.type = EventTypeRX;
-            event.value.rx_edge = false;
-            osMessageQueuePut(event_queue, &event, 0, 0);
+            event.value.rx.edge = false;
+            channel = TIM_CHANNEL_1;
         } else if(_htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
             // rising event
-            //uint32_t period_in_us = HAL_TIM_ReadCapturedValue();
-            AppEvent event;
-            event.type = EventTypeRX;
-            event.value.rx_edge = true;
-            osMessageQueuePut(event_queue, &event, 0, 0);
+            event.value.rx.edge = true;
+            channel = TIM_CHANNEL_2;
+        } else {
+            // not our event
+            return;
         }
+
+        event.value.rx.lasted = HAL_TIM_ReadCapturedValue(_htim, channel);
+        __HAL_TIM_SET_COUNTER(_htim, 0);
+
+        osMessageQueuePut(event_queue, &event, 0, 0);
     }
 }
 
@@ -297,9 +310,17 @@ void irda(void* p) {
     // add timer capture interrupt
     api_interrupt_add(irda_timer_capture_callback, InterruptTypeTimerCapture, event_queue);
 
+    // receive array
+    const uint8_t arr_size = 128;
+    uint32_t* arr = malloc(arr_size * sizeof(uint32_t));
+    uint8_t arr_index = 0;
+    bool start_from = false;
+
+    IrDADecoder* decoder = alloc_decoder();
+
     AppEvent event;
     while(1) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
+        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 500);
         State* state = (State*)acquire_mutex_block(&state_mutex);
 
         if(event_status == osOK) {
@@ -326,11 +347,36 @@ void irda(void* p) {
 
                 modes[state->mode_id].input(&event, state);
             } else if(event.type == EventTypeRX) {
-                gpio_write(led_record, event.value.rx_edge);
+                
+                gpio_write(led_record, event.value.rx.edge);
+
+                if(arr_index < arr_size) {
+                    if(arr_index == 0) {
+                        start_from = event.value.rx.edge;
+                    }
+                    arr[arr_index] = event.value.rx.lasted;
+                    arr_index++;
+                } else {
+                    // dump array
+                    process_decoder(decoder, start_from, arr, arr_size);
+
+                    if(start_from) {
+                        printf(" true: ");
+                    } else {
+                        printf("false: ");
+                    }
+
+                    for(uint8_t i = 0; i < arr_size; i++) {
+                        printf("%d, ", arr[i]);
+                    }
+                    printf("\r\n");
+                    arr_index = 0;
+                }
             }
 
         } else {
             // event timeout
+            arr_index = 0;
         }
 
         release_mutex(&state_mutex, state);
