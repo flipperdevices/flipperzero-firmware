@@ -39,11 +39,16 @@ bool api_hal_bt_is_alive() {
 }
 
 bool api_hal_bt_wait_transition() {
+    uint8_t counter = 0;
+    while (APPE_Status() == BleGlueStatusStartup) {
+        osDelay(10);
+        counter++;
+        if (counter > 1000) {
+            return false;
+        }
+    }
     if (APPE_Status() == BleGlueStatusUninitialized) {
         return false;
-    }
-    while (APPE_Status() != BleGlueStatusStarted) {
-        osDelay(1);
     }
     return true;
 }
