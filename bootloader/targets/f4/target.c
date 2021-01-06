@@ -30,36 +30,36 @@
 #define BOOT_USB_DP_PIN LL_GPIO_PIN_12
 #define BOOT_USB_PIN (BOOT_USB_DM_PIN | BOOT_USB_DP_PIN)
 
-void targer_led_control(char *c) {
+void targer_led_control(char* c) {
     LL_GPIO_SetOutputPin(LED_RED_PORT, LED_RED_PIN);
     LL_GPIO_SetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
     LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
     do {
-        if (*c=='R') {
+        if(*c == 'R') {
             LL_GPIO_ResetOutputPin(LED_RED_PORT, LED_RED_PIN);
-        } else if (*c=='G') {
+        } else if(*c == 'G') {
             LL_GPIO_ResetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
-        } else if (*c=='B') {
+        } else if(*c == 'B') {
             LL_GPIO_ResetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
-        } else if (*c=='.') {
+        } else if(*c == '.') {
             LL_mDelay(125);
             LL_GPIO_SetOutputPin(LED_RED_PORT, LED_RED_PIN);
             LL_GPIO_SetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
             LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
             LL_mDelay(125);
-        } else if (*c=='-') {
+        } else if(*c == '-') {
             LL_mDelay(250);
             LL_GPIO_SetOutputPin(LED_RED_PORT, LED_RED_PIN);
             LL_GPIO_SetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
             LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
             LL_mDelay(250);
-        } else if (*c=='|') {
+        } else if(*c == '|') {
             LL_GPIO_SetOutputPin(LED_RED_PORT, LED_RED_PIN);
             LL_GPIO_SetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
             LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
         }
         c++;
-    } while(*c!=0);
+    } while(*c != 0);
 }
 
 void clock_init() {
@@ -95,19 +95,19 @@ void gpio_init() {
 }
 
 void rtc_init() {
-    // LSE and RTC 
+    // LSE and RTC
     LL_PWR_EnableBkUpAccess();
-    if (!LL_RCC_LSE_IsReady()) {
+    if(!LL_RCC_LSE_IsReady()) {
         // Try to start LSE normal way
         LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_MEDIUMLOW);
         LL_RCC_LSE_Enable();
-        uint32_t c=0;
+        uint32_t c = 0;
         while(!LL_RCC_LSE_IsReady() && c < 200) {
             LL_mDelay(10);
             c++;
         }
         // Plan B: reset backup domain
-        if (!LL_RCC_LSE_IsReady()) {
+        if(!LL_RCC_LSE_IsReady()) {
             targer_led_control("-R.R.R.");
             LL_RCC_ForceBackupDomainReset();
             LL_RCC_ReleaseBackupDomainReset();
