@@ -322,8 +322,10 @@ void irda(void* p) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
                     printf("[irda] bye!\n");
+
                     // TODO remove all widgets create by app
                     widget_enabled_set(widget, false);
+                    gui_remove_widget(gui, widget);
                     furiac_exit(NULL);
                 }
 
@@ -363,7 +365,6 @@ void irda(void* p) {
                     } else {
                         printf("Unknown protocol\r\n");
                     }
-
 
                     gpio_write(led_record, false);
                     delay(10);
