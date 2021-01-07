@@ -134,9 +134,9 @@ void dolphin_task() {
     }
     with_view_model(
         dolphin->idle_view_stats, (DolphinViewIdleStatsModel * model) {
-        model->icounter = dolphin_state_get_icounter(dolphin->state);
-        model->butthurt = dolphin_state_get_butthurt(dolphin->state);
-    });
+            model->icounter = dolphin_state_get_icounter(dolphin->state);
+            model->butthurt = dolphin_state_get_butthurt(dolphin->state);
+        });
 
     if(!furi_create("dolphin", dolphin)) {
         printf("[dolphin_task] cannot create the dolphin record\n");

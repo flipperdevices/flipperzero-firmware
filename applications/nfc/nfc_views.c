@@ -116,10 +116,7 @@ void nfc_view_read_nfcv_draw(Canvas* canvas, NfcViewReadModel* model) {
     canvas_draw_str(canvas, 2, 42, "UID:");
     for(uint8_t i = 0; i < RFAL_NFCV_UID_LEN; i++) {
         snprintf(
-            buffer + (i * 2),
-            sizeof(buffer) - (i * 2),
-            "%02X",
-            model->device.nfcv.InvRes.UID[i]);
+            buffer + (i * 2), sizeof(buffer) - (i * 2), "%02X", model->device.nfcv.InvRes.UID[i]);
     }
     buffer[RFAL_NFCV_UID_LEN * 2] = 0;
     canvas_draw_str(canvas, 18, 42, buffer);
