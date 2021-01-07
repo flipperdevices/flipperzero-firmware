@@ -310,12 +310,6 @@ void irda(void* p) {
     // add timer capture interrupt
     api_interrupt_add(irda_timer_capture_callback, InterruptTypeTimerCapture, event_queue);
 
-    // receive array
-    const uint8_t arr_size = 128;
-    uint32_t* arr = malloc(arr_size * sizeof(uint32_t));
-    uint8_t arr_index = 0;
-    bool start_from = false;
-
     IrDADecoder* decoder = alloc_decoder();
 
     AppEvent event;
@@ -347,36 +341,38 @@ void irda(void* p) {
 
                 modes[state->mode_id].input(&event, state);
             } else if(event.type == EventTypeRX) {
-                
-                gpio_write(led_record, event.value.rx.edge);
+                IrDADecoderOutputData out;
+                const uint8_t out_data_length = 4;
+                uint8_t out_data[out_data_length];
 
-                if(arr_index < arr_size) {
-                    if(arr_index == 0) {
-                        start_from = event.value.rx.edge;
-                    }
-                    arr[arr_index] = event.value.rx.lasted;
-                    arr_index++;
-                } else {
-                    // dump array
-                    process_decoder(decoder, start_from, arr, arr_size);
+                out.data_length = out_data_length;
+                out.data = out_data;
 
-                    if(start_from) {
-                        printf(" true: ");
+                bool decoded =
+                    process_decoder(decoder, event.value.rx.edge, &event.value.rx.lasted, 1, &out);
+
+                if(decoded) {
+                    if(out.protocol == IRDA_NEC) {
+                        printf("P=NEC ");
+                        printf("A=0x%02X%02X ", out_data[1], out_data[0]);
+                        printf("C=0x%02X ", out_data[2]);
+                        if(out.flags & IRDA_REPEAT) {
+                            printf("R");
+                        }
+                        printf("\r\n");
                     } else {
-                        printf("false: ");
+                        printf("Unknown protocol\r\n");
                     }
 
-                    for(uint8_t i = 0; i < arr_size; i++) {
-                        printf("%d, ", arr[i]);
-                    }
-                    printf("\r\n");
-                    arr_index = 0;
+
+                    gpio_write(led_record, false);
+                    delay(10);
+                    gpio_write(led_record, true);
                 }
             }
 
         } else {
             // event timeout
-            arr_index = 0;
         }
 
         release_mutex(&state_mutex, state);

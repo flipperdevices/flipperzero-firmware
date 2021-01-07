@@ -2,8 +2,7 @@
 #include "flipper.h"
 #include "flipper_v2.h"
 #include "irda-decoder-nec.h"
-
-typedef enum { IRDA_NEC, IRDA_SAMSUNG } IrDAProtocolType;
+#include "irda-decoder-types.h"
 
 typedef struct {
     IrDANecDecoder nec;
@@ -15,4 +14,5 @@ bool process_decoder(
     IrDADecoder* decoder,
     bool start_polarity,
     uint32_t* timings,
-    uint32_t timings_length);
+    uint32_t timings_length,
+    IrDADecoderOutputData* out);
