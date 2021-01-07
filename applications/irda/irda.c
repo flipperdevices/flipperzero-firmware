@@ -25,11 +25,20 @@ typedef struct {
 } AppEvent;
 
 typedef struct {
+    IrDAProtocolType protocol;
+    uint32_t address;
+    uint32_t command;
+} IrDAPacket;
+
+#define IRDA_PACKET_COUNT 8
+
+typedef struct {
     uint8_t mode_id;
     uint16_t carrier_freq;
     uint8_t carrier_duty_cycle_id;
-    uint8_t nec_packet_id;
-    uint8_t samsung_packet_id;
+
+    uint8_t packet_id;
+    IrDAPacket packets[IRDA_PACKET_COUNT];
 } State;
 
 typedef void (*ModeInput)(AppEvent*, State*);
@@ -37,47 +46,17 @@ typedef void (*ModeRender)(Canvas*, State*);
 
 void input_carrier(AppEvent* event, State* state);
 void render_carrier(Canvas* canvas, State* state);
-void input_nec(AppEvent* event, State* state);
-void render_nec(Canvas* canvas, State* state);
-void render_carrier(Canvas* canvas, State* state);
-void input_samsung(AppEvent* event, State* state);
-void render_samsung(Canvas* canvas, State* state);
+void input_packet(AppEvent* event, State* state);
+void render_packet(Canvas* canvas, State* state);
 
 typedef struct {
     ModeRender render;
     ModeInput input;
 } Mode;
 
-typedef struct {
-    uint8_t addr;
-    uint8_t data;
-} NecPacket;
-
-typedef struct {
-    uint16_t addr;
-    uint16_t data;
-} SamsungPacket;
-
 const Mode modes[] = {
     {.render = render_carrier, .input = input_carrier},
-    {.render = render_nec, .input = input_nec},
-    {.render = render_samsung, .input = input_samsung},
-};
-
-const NecPacket nec_packets[] = {
-    {.addr = 0xFF, .data = 0x11},
-    {.addr = 0xF7, .data = 0x59},
-    {.addr = 0xFF, .data = 0x01},
-    {.addr = 0xFF, .data = 0x10},
-    {.addr = 0xFF, .data = 0x15},
-    {.addr = 0xFF, .data = 0x25},
-    {.addr = 0xFF, .data = 0xF0},
-};
-
-const SamsungPacket samsung_packets[] = {
-    {.addr = 0xE0E, .data = 0xF30C},
-    {.addr = 0xE0E, .data = 0xF40D},
-    {.addr = 0xE0E, .data = 0xF50E},
+    {.render = render_packet, .input = input_packet},
 };
 
 const float duty_cycles[] = {0.1, 0.25, 0.333, 0.5, 1.0};
@@ -93,36 +72,6 @@ void render_carrier(Canvas* canvas, State* state) {
         sprintf(
             buf, "duty cycle: %d/1000", (int)(duty_cycles[state->carrier_duty_cycle_id] * 1000));
         canvas_draw_str(canvas, 2, 62, buf);
-    }
-}
-
-void render_nec(Canvas* canvas, State* state) {
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 25, "< nec mode >");
-    canvas_draw_str(canvas, 2, 37, "? /\\ \\/ packet");
-    {
-        char buf[24];
-        sprintf(
-            buf,
-            "packet: %02X %02X",
-            nec_packets[state->nec_packet_id].addr,
-            nec_packets[state->nec_packet_id].data);
-        canvas_draw_str(canvas, 2, 50, buf);
-    }
-}
-
-void render_samsung(Canvas* canvas, State* state) {
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 25, "< samsung32 mode");
-    canvas_draw_str(canvas, 2, 37, "? /\\ \\/ packet");
-    {
-        char buf[24];
-        sprintf(
-            buf,
-            "packet: %02X %02X",
-            samsung_packets[state->samsung_packet_id].addr,
-            samsung_packets[state->samsung_packet_id].data);
-        canvas_draw_str(canvas, 2, 50, buf);
     }
 }
 
@@ -153,62 +102,70 @@ void input_carrier(AppEvent* event, State* state) {
     }
 }
 
-void input_nec(AppEvent* event, State* state) {
-    uint8_t packets_count = sizeof(nec_packets) / sizeof(nec_packets[0]);
+void render_packet(Canvas* canvas, State* state) {
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 25, "< packet mode");
+    canvas_draw_str(canvas, 2, 37, "? /\\ \\/ packet");
+    {
+        const char* protocol;
 
-    if(event->value.input.input == InputOk) {
-        if(event->value.input.state) {
-            vTaskSuspendAll();
-            ir_nec_send(
-                nec_packets[state->nec_packet_id].addr, nec_packets[state->nec_packet_id].data);
-            xTaskResumeAll();
+        switch(state->packets[state->packet_id].protocol) {
+        case IRDA_NEC:
+            protocol = "NEC";
+            break;
+        case IRDA_SAMSUNG:
+            protocol = "SAMS";
+            break;
+        case IRDA_UNKNOWN:
+        default:
+            protocol = "UNK";
+            break;
         }
-    }
 
-    if(event->value.input.state && event->value.input.input == InputUp) {
-        if(state->nec_packet_id < (packets_count - 1)) {
-            state->nec_packet_id++;
-        } else {
-            state->nec_packet_id = 0;
-        }
-    }
-
-    if(event->value.input.state && event->value.input.input == InputDown) {
-        if(state->nec_packet_id > 0) {
-            state->nec_packet_id--;
-        } else {
-            state->nec_packet_id = packets_count - 1;
-        }
+        char buf[24];
+        sprintf(
+            buf,
+            "P[%d]: %s 0x%X 0x%X",
+            state->packet_id,
+            protocol,
+            state->packets[state->packet_id].address,
+            state->packets[state->packet_id].command);
+        canvas_draw_str(canvas, 2, 50, buf);
     }
 }
 
-void input_samsung(AppEvent* event, State* state) {
-    uint8_t packets_count = sizeof(samsung_packets) / sizeof(samsung_packets[0]);
-
+void input_packet(AppEvent* event, State* state) {
     if(event->value.input.input == InputOk) {
         if(event->value.input.state) {
             vTaskSuspendAll();
-            ir_samsung_send(
-                samsung_packets[state->samsung_packet_id].addr,
-                samsung_packets[state->samsung_packet_id].data);
+            switch(state->packets[state->packet_id].protocol) {
+            case IRDA_NEC:
+                ir_nec_send(
+                    state->packets[state->packet_id].address,
+                    state->packets[state->packet_id].command);
+                break;
+            case IRDA_SAMSUNG:
+                ir_samsung_send(
+                    state->packets[state->packet_id].address,
+                    state->packets[state->packet_id].command);
+                break;
+            default:
+                break;
+            }
             xTaskResumeAll();
         }
     }
 
-    if(event->value.input.state && event->value.input.input == InputUp) {
-        if(state->samsung_packet_id < (packets_count - 1)) {
-            state->samsung_packet_id++;
-        } else {
-            state->samsung_packet_id = 0;
-        }
+    if(event->value.input.state && event->value.input.input == InputDown) {
+        if(state->packet_id < (IRDA_PACKET_COUNT - 1)) {
+            state->packet_id++;
+        };
     }
 
-    if(event->value.input.state && event->value.input.input == InputDown) {
-        if(state->samsung_packet_id > 0) {
-            state->samsung_packet_id--;
-        } else {
-            state->samsung_packet_id = packets_count - 1;
-        }
+    if(event->value.input.state && event->value.input.input == InputUp) {
+        if(state->packet_id > 0) {
+            state->packet_id--;
+        };
     }
 }
 
@@ -275,8 +232,40 @@ void irda(void* p) {
     _state.carrier_duty_cycle_id = duty_cycles_count - 2;
     _state.carrier_freq = 36000;
     _state.mode_id = 0;
-    _state.nec_packet_id = 0;
-    _state.samsung_packet_id = 0;
+    _state.packet_id = 0;
+
+    for(uint8_t i = 0; i < IRDA_PACKET_COUNT; i++) {
+        _state.packets[i].protocol = IRDA_UNKNOWN;
+        _state.packets[i].address = 0;
+        _state.packets[i].command = 0;
+    }
+
+    _state.packets[0].protocol = IRDA_NEC;
+    _state.packets[0].address = 0xFF;
+    _state.packets[0].command = 0x11;
+
+    _state.packets[1].protocol = IRDA_SAMSUNG;
+    _state.packets[1].address = 0xE0E;
+    _state.packets[1].command = 0xF30C;
+
+    /*
+// some of old packet data
+const NecPacket nec_packets[] = {
+    {.addr = 0xFF, .data = 0x11},
+    {.addr = 0xF7, .data = 0x59},
+    {.addr = 0xFF, .data = 0x01},
+    {.addr = 0xFF, .data = 0x10},
+    {.addr = 0xFF, .data = 0x15},
+    {.addr = 0xFF, .data = 0x25},
+    {.addr = 0xFF, .data = 0xF0},
+};
+
+const SamsungPacket samsung_packets[] = {
+    {.addr = 0xE0E, .data = 0xF30C},
+    {.addr = 0xE0E, .data = 0xF40D},
+    {.addr = 0xE0E, .data = 0xF50E},
+};
+*/
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -362,6 +351,10 @@ void irda(void* p) {
                             printf("R");
                         }
                         printf("\r\n");
+
+                        state->packets[state->packet_id].protocol = IRDA_NEC;
+                        state->packets[state->packet_id].address = out_data[1] << 8 | out_data[0];
+                        state->packets[state->packet_id].command = out_data[2];
                     } else {
                         printf("Unknown protocol\r\n");
                     }

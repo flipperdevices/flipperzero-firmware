@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-typedef enum { IRDA_UNKNOWN, IRDA_NEC } IrDAProtocolType;
+typedef enum { IRDA_UNKNOWN, IRDA_NEC, IRDA_SAMSUNG } IrDAProtocolType;
 typedef enum { IRDA_REPEAT = (1 << 0), IRDA_TOO_SHORT_BUFFER = (1 << 1) } IrDAProtocolFlags;
 
 typedef struct {
