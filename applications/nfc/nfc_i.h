@@ -30,12 +30,14 @@ struct Nfc {
 
 Nfc* nfc_alloc();
 
-void nfc_menu_read_callback(void* context);
+void nfc_menu_detect_callback(void* context);
 
 void nfc_menu_field_on_callback(void* context);
 
 void nfc_menu_field_off_callback(void* context);
 
-void nfc_read(Nfc* nfc);
+void nfc_detect(Nfc* nfc);
+
+void nfc_detect_exit(Nfc* nfc);
 
 void nfc_task(void* p);

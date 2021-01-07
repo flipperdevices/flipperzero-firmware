@@ -1,11 +1,12 @@
 #include "nfc_i.h"
 
-bool nfc_view_read_input(InputEvent* event, void* context) {
-    furi_assert(event);
+uint32_t nfc_view_read_exit(void* context) {
     furi_assert(context);
     Nfc* nfc = context;
-
-    return true;
+    NfcMessage message;
+    message.type = NfcMessageTypeDetectExit;
+    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
+    return VIEW_NONE;
 }
 
 Nfc* nfc_alloc() {
@@ -20,7 +21,7 @@ Nfc* nfc_alloc() {
 
     nfc->menu = menu_item_alloc_menu("NFC", nfc->icon);
     menu_item_subitem_add(
-        nfc->menu, menu_item_alloc_function("Read", NULL, nfc_menu_read_callback, nfc));
+        nfc->menu, menu_item_alloc_function("Detect", NULL, nfc_menu_detect_callback, nfc));
     menu_item_subitem_add(
         nfc->menu, menu_item_alloc_function("Field On", NULL, nfc_menu_field_on_callback, nfc));
     menu_item_subitem_add(
@@ -29,7 +30,7 @@ Nfc* nfc_alloc() {
     nfc->view_read = view_alloc();
     view_set_context(nfc->view_read, nfc);
     view_set_draw_callback(nfc->view_read, nfc_view_read_draw);
-    view_set_input_callback(nfc->view_read, nfc_view_read_input);
+    view_set_previous_callback(nfc->view_read, nfc_view_read_exit);
     view_allocate_model(nfc->view_read, ViewModelTypeLocking, sizeof(NfcViewReadModel));
     nfc->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewRead, nfc->view_read);
@@ -37,11 +38,11 @@ Nfc* nfc_alloc() {
     return nfc;
 }
 
-void nfc_menu_read_callback(void* context) {
+void nfc_menu_detect_callback(void* context) {
     furi_assert(context);
     Nfc* nfc = context;
     NfcMessage message;
-    message.type = NfcMessageTypeRead;
+    message.type = NfcMessageTypeDetect;
     furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
 }
 
@@ -53,9 +54,13 @@ void nfc_menu_field_on_callback(void* context) {
     furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
 }
 
-void nfc_read(Nfc* nfc) {
+void nfc_detect(Nfc* nfc) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewRead);
     nfc_worker_poll_start(nfc->worker);
+}
+
+void nfc_detect_exit(Nfc* nfc) {
+    nfc_worker_poll_stop(nfc->worker);
 }
 
 void nfc_menu_field_off_callback(void* context) {
@@ -85,8 +90,10 @@ void nfc_task(void* p) {
     NfcMessage message;
     while(1) {
         furi_check(osMessageQueueGet(nfc->message_queue, &message, NULL, osWaitForever) == osOK);
-        if(message.type == NfcMessageTypeRead) {
-            nfc_read(nfc);
+        if(message.type == NfcMessageTypeDetect) {
+            nfc_detect(nfc);
+        } else if(message.type == NfcMessageTypeDetectExit) {
+            nfc_detect_exit(nfc);
         } else if(message.type == NfcMessageTypeFieldOn) {
             nfc_worker_field_on(nfc->worker);
         } else if(message.type == NfcMessageTypeFieldOff) {

@@ -30,4 +30,4 @@ void nfc_view_read_nfca_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcb_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcf_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcv_draw(Canvas* canvas, NfcViewReadModel* model);
-bool nfc_view_read_input(InputEvent* event, void* context);
+uint32_t nfc_view_read_exit(void* context);

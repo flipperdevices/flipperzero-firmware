@@ -32,6 +32,7 @@ void nfc_worker_poll_start(NfcWorker* nfc_worker) {
 void nfc_worker_poll_stop(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->state == NfcWorkerStatePolling);
+    nfc_worker_change_state(nfc_worker, NfcWorkerStateSwitch);
 }
 
 void nfc_worker_field_on(NfcWorker* nfc_worker) {
@@ -66,7 +67,7 @@ void nfc_worker_task(void* context) {
 
     rfalLowPowerModeStop();
 
-    while(1) {
+    while(nfc_worker->state == NfcWorkerStatePolling) {
         rfalWorker();
         ret = nfc_worker_nfca_poll(nfc_worker);
         ret = nfc_worker_nfcb_poll(nfc_worker);
