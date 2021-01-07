@@ -89,7 +89,7 @@ jobs:
       - name: Upload bootloader
         uses: burnett01/rsync-deployments@4.1
         with:
-          switches: -avzp --delete
+          switches: -avzp --delete --include='bootloader/.obj/f4/bootloader.elf' --include='bootloader/.obj/f4/bootloader.bin' --include='bootloader/.obj/f4/bootloader.hex' --exclude='*'            
           path: bootloader
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
@@ -99,7 +99,7 @@ jobs:
       - name: Upload firmware
         uses: burnett01/rsync-deployments@4.1
         with:
-          switches: -avzp --delete
+          switches: -avzp --delete --include='firmware/.obj/f4/firmware.elf' --include='firmware/.obj/f4/firmware.bin' --include='firmware/.obj/f4/firmware.hex' --exclude='*'
           path: firmware
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
