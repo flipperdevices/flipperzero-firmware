@@ -47,31 +47,32 @@ bool api_hal_bt_wait_transition() {
             return false;
         }
     }
-    if (APPE_Status() == BleGlueStatusUninitialized) {
+    return true;
+}
+
+bool api_hal_bt_lock_flash() {
+    if (!api_hal_bt_wait_transition()) {
         return false;
+    }
+    if (APPE_Status() == BleGlueStatusUninitialized) {
+        HAL_FLASH_Unlock();
+    } else {
+        while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
+            osDelay(1);
+        }
+        SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
+        HAL_FLASH_Unlock();
+        while(LL_FLASH_IsOperationSuspended()) {};
     }
     return true;
 }
 
-void api_hal_bt_lock_flash() {
-    if (!api_hal_bt_wait_transition()) {
-        HAL_FLASH_Unlock();
-        return;
-    }
-    while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
-        osDelay(1);
-    }
-    SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
-    HAL_FLASH_Unlock();
-    while(LL_FLASH_IsOperationSuspended()) {};
-}
-
 void api_hal_bt_unlock_flash() {
-    if (!api_hal_bt_wait_transition()) {
+    if (APPE_Status() == BleGlueStatusUninitialized) {
         HAL_FLASH_Lock();
-        return;
+    } else {
+        SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
+        HAL_FLASH_Lock();
+        HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
     }
-    SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
-    HAL_FLASH_Lock();
-    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
 }
