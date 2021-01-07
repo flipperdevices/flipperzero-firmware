@@ -222,6 +222,18 @@ void irda_timer_capture_callback(void* htim, void* comp_ctx) {
     }
 }
 
+void init_packet(
+    State* state,
+    uint8_t index,
+    IrDAProtocolType protocol,
+    uint32_t address,
+    uint32_t command) {
+    if(index >= IRDA_PACKET_COUNT) return;
+    state->packets[index].protocol = protocol;
+    state->packets[index].address = address;
+    state->packets[index].command = command;
+}
+
 void irda(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(AppEvent), NULL);
 
@@ -235,37 +247,17 @@ void irda(void* p) {
     _state.packet_id = 0;
 
     for(uint8_t i = 0; i < IRDA_PACKET_COUNT; i++) {
-        _state.packets[i].protocol = IRDA_UNKNOWN;
-        _state.packets[i].address = 0;
-        _state.packets[i].command = 0;
+        init_packet(&_state, i, IRDA_UNKNOWN, 0, 0);
     }
 
-    _state.packets[0].protocol = IRDA_NEC;
-    _state.packets[0].address = 0xFF;
-    _state.packets[0].command = 0x11;
-
-    _state.packets[1].protocol = IRDA_SAMSUNG;
-    _state.packets[1].address = 0xE0E;
-    _state.packets[1].command = 0xF30C;
-
-    /*
-// some of old packet data
-const NecPacket nec_packets[] = {
-    {.addr = 0xFF, .data = 0x11},
-    {.addr = 0xF7, .data = 0x59},
-    {.addr = 0xFF, .data = 0x01},
-    {.addr = 0xFF, .data = 0x10},
-    {.addr = 0xFF, .data = 0x15},
-    {.addr = 0xFF, .data = 0x25},
-    {.addr = 0xFF, .data = 0xF0},
-};
-
-const SamsungPacket samsung_packets[] = {
-    {.addr = 0xE0E, .data = 0xF30C},
-    {.addr = 0xE0E, .data = 0xF40D},
-    {.addr = 0xE0E, .data = 0xF50E},
-};
-*/
+    init_packet(&_state, 0, IRDA_NEC, 0xFF00, 0x11);
+    init_packet(&_state, 1, IRDA_NEC, 0xF708, 0x59);
+    init_packet(&_state, 2, IRDA_NEC, 0xFF00, 0x10);
+    init_packet(&_state, 3, IRDA_NEC, 0xFF00, 0x15);
+    init_packet(&_state, 4, IRDA_NEC, 0xFF00, 0x25);
+    init_packet(&_state, 5, IRDA_SAMSUNG, 0xE0E, 0xF30C);
+    init_packet(&_state, 6, IRDA_SAMSUNG, 0xE0E, 0xF40D);
+    init_packet(&_state, 7, IRDA_SAMSUNG, 0xE0E, 0xF50E);
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -288,10 +280,12 @@ const SamsungPacket samsung_packets[] = {
 
     // Red LED
     // TODO open record
-    const GpioPin* led_record = &led_gpio[0];
+    const GpioPin* red_led_record = &led_gpio[0];
+    const GpioPin* green_led_record = &led_gpio[1];
 
     // configure pin
-    gpio_init(led_record, GpioModeOutputOpenDrain);
+    gpio_init(red_led_record, GpioModeOutputOpenDrain);
+    gpio_init(green_led_record, GpioModeOutputOpenDrain);
 
     // setup irda rx timer
     tim_irda_rx_init();
@@ -310,11 +304,14 @@ const SamsungPacket samsung_packets[] = {
             if(event.type == EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
-                    printf("[irda] bye!\n");
-
-                    // TODO remove all widgets create by app
+                    // remove all widgets create by app
                     widget_enabled_set(widget, false);
                     gui_remove_widget(gui, widget);
+
+                    // free decoder
+                    free_decoder(decoder);
+
+                    // exit
                     furiac_exit(NULL);
                 }
 
@@ -339,29 +336,36 @@ const SamsungPacket samsung_packets[] = {
                 out.data_length = out_data_length;
                 out.data = out_data;
 
+                gpio_write(red_led_record, event.value.rx.edge);
+
                 bool decoded =
                     process_decoder(decoder, event.value.rx.edge, &event.value.rx.lasted, 1, &out);
 
                 if(decoded) {
-                    if(out.protocol == IRDA_NEC) {
-                        printf("P=NEC ");
-                        printf("A=0x%02X%02X ", out_data[1], out_data[0]);
-                        printf("C=0x%02X ", out_data[2]);
-                        if(out.flags & IRDA_REPEAT) {
-                            printf("R");
-                        }
-                        printf("\r\n");
+                    // save only if we in packet mode
+                    if(state->mode_id == 1) {
+                        if(out.protocol == IRDA_NEC) {
+                            printf("P=NEC ");
+                            printf("A=0x%02X%02X ", out_data[1], out_data[0]);
+                            printf("C=0x%02X ", out_data[2]);
+                            if(out.flags & IRDA_REPEAT) {
+                                printf("R");
+                            }
+                            printf("\r\n");
 
-                        state->packets[state->packet_id].protocol = IRDA_NEC;
-                        state->packets[state->packet_id].address = out_data[1] << 8 | out_data[0];
-                        state->packets[state->packet_id].command = out_data[2];
-                    } else {
-                        printf("Unknown protocol\r\n");
+                            state->packets[state->packet_id].protocol = IRDA_NEC;
+                            state->packets[state->packet_id].address = out_data[1] << 8 |
+                                                                       out_data[0];
+                            state->packets[state->packet_id].command = out_data[2];
+                        } else {
+                            printf("Unknown protocol\r\n");
+                        }
                     }
 
-                    gpio_write(led_record, false);
+                    // blink anyway
+                    gpio_write(green_led_record, false);
                     delay(10);
-                    gpio_write(led_record, true);
+                    gpio_write(green_led_record, true);
                 }
             }
 
