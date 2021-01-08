@@ -119,6 +119,10 @@ void nfc_task(void* p) {
     while(1) {
         furi_check(osMessageQueueGet(nfc->message_queue, &message, NULL, osWaitForever) == osOK);
         if(message.type == NfcMessageTypeDetect) {
+            with_view_model(
+                nfc->view_detect, (NfcViewReadModel * model) {
+                    model->found = false;
+                });
             nfc_start(nfc, NfcViewRead, NfcWorkerStatePoll);
         } else if(message.type == NfcMessageTypeEmulate) {
             nfc_start(nfc, NfcViewEmulate, NfcWorkerStateEmulate);
