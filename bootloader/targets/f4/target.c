@@ -31,7 +31,7 @@
 #define BOOT_USB_DP_PIN LL_GPIO_PIN_12
 #define BOOT_USB_PIN (BOOT_USB_DM_PIN | BOOT_USB_DP_PIN)
 
-void targer_led_control(char* c) {
+void target_led_control(char* c) {
     LL_GPIO_SetOutputPin(LED_RED_PORT, LED_RED_PIN);
     LL_GPIO_SetOutputPin(LED_GREEN_PORT, LED_GREEN_PIN);
     LL_GPIO_SetOutputPin(LED_BLUE_PORT, LED_BLUE_PIN);
@@ -109,7 +109,7 @@ void rtc_init() {
         }
         // Plan B: reset backup domain
         if(!LL_RCC_LSE_IsReady()) {
-            targer_led_control("-R.R.R.");
+            target_led_control("-R.R.R.");
             LL_RCC_ForceBackupDomainReset();
             LL_RCC_ReleaseBackupDomainReset();
             NVIC_SystemReset();
@@ -166,14 +166,14 @@ void target_switch(void* offset) {
 }
 
 void target_switch2dfu() {
-    targer_led_control("B");
+    target_led_control("B");
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     target_switch(0x0);
 }
 
 void target_switch2os() {
-    targer_led_control("G");
+    target_led_control("G");
     SCB->VTOR = BOOT_ADDRESS + OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
