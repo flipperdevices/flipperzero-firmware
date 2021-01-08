@@ -121,3 +121,14 @@ void nfc_view_read_nfcv_draw(Canvas* canvas, NfcViewReadModel* model) {
     buffer[RFAL_NFCV_UID_LEN * 2] = 0;
     canvas_draw_str(canvas, 18, 42, buffer);
 }
+
+void nfc_view_emulate_draw(Canvas* canvas, void* model) {
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 0, 12, "Emulating NFC-A");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 22, "Type: T2T");
+    canvas_draw_str(canvas, 2, 32, "UID length: 7");
+    canvas_draw_str(canvas, 2, 42, "UID: 00010203040506");
+    canvas_draw_str(canvas, 2, 52, "SAK: 00 ATQA: 44/00");
+}

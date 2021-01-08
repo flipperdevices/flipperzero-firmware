@@ -41,16 +41,19 @@ typedef enum {
     NfcWorkerStateNone,
     NfcWorkerStateBroken,
     NfcWorkerStateReady,
-    NfcWorkerStateSwitch,
-    NfcWorkerStatePolling,
+    NfcWorkerStateStop,
+    NfcWorkerStatePoll,
+    NfcWorkerStateEmulate,
 } NfcWorkerState;
 
 typedef enum {
     NfcMessageTypeDetect,
-    NfcMessageTypeDetectExit,
+    NfcMessageTypeEmulate,
     NfcMessageTypeFieldOn,
     NfcMessageTypeFieldOff,
     NfcMessageTypeDeviceFound,
+    // Worker related
+    NfcMessageTypeWorkerStop,
     NfcMessageTypeWorkerStateChange,
 } NfcMessageType;
 

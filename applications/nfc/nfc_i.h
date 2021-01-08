@@ -25,6 +25,7 @@ struct Nfc {
     Icon* icon;
 
     View* view_read;
+    View* view_emulate;
     ViewDispatcher* view_dispatcher;
 };
 
@@ -32,12 +33,10 @@ Nfc* nfc_alloc();
 
 void nfc_menu_detect_callback(void* context);
 
+void nfc_menu_emulate_callback(void* context);
+
 void nfc_menu_field_on_callback(void* context);
 
 void nfc_menu_field_off_callback(void* context);
-
-void nfc_detect(Nfc* nfc);
-
-void nfc_detect_exit(Nfc* nfc);
 
 void nfc_task(void* p);

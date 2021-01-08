@@ -9,6 +9,7 @@
 
 typedef enum {
     NfcViewRead,
+    NfcViewEmulate,
 } NfcView;
 
 typedef enum {
@@ -30,4 +31,5 @@ void nfc_view_read_nfca_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcb_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcf_draw(Canvas* canvas, NfcViewReadModel* model);
 void nfc_view_read_nfcv_draw(Canvas* canvas, NfcViewReadModel* model);
-uint32_t nfc_view_read_exit(void* context);
+
+void nfc_view_emulate_draw(Canvas* canvas, void* model);
