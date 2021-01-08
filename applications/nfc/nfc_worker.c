@@ -63,9 +63,9 @@ void nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
     rfalLowPowerModeStop();
-    if (nfc_worker->state == NfcWorkerStatePoll) {
+    if(nfc_worker->state == NfcWorkerStatePoll) {
         nfc_worker_poll(nfc_worker);
-    } else if (nfc_worker->state == NfcWorkerStateEmulate) {
+    } else if(nfc_worker->state == NfcWorkerStateEmulate) {
         nfc_worker_emulate(nfc_worker);
     }
     rfalLowPowerModeStart();
@@ -87,53 +87,55 @@ void nfc_worker_poll(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_state_callback(rfalNfcState st) {
-    (void) st;
+    (void)st;
 }
 
-ReturnCode nfc_worker_trx( uint8_t *txBuf, uint16_t txBufSize, uint8_t **rxData, uint16_t **rcvLen, uint32_t fwt )
-{
+ReturnCode nfc_worker_trx(
+    uint8_t* txBuf,
+    uint16_t txBufSize,
+    uint8_t** rxData,
+    uint16_t** rcvLen,
+    uint32_t fwt) {
     ReturnCode err;
-    
-    err = rfalNfcDataExchangeStart( txBuf, txBufSize, rxData, rcvLen, fwt );
-    if( err == ERR_NONE )
-    {
-        do{
+
+    err = rfalNfcDataExchangeStart(txBuf, txBufSize, rxData, rcvLen, fwt);
+    if(err == ERR_NONE) {
+        do {
             rfalNfcWorker();
             err = rfalNfcDataExchangeGetStatus();
-        }
-        while( err == ERR_BUSY );
+        } while(err == ERR_BUSY);
     }
     return err;
 }
 
 void nfc_worker_exchange(NfcWorker* nfc_worker, rfalNfcDevice* nfc_device) {
     ReturnCode err;
-    uint8_t *rxData;
-    uint16_t *rcvLen;
-    uint8_t  txBuf[100];
+    uint8_t* rxData;
+    uint16_t* rcvLen;
+    uint8_t txBuf[100];
     uint16_t txLen;
 
     do {
         rfalNfcWorker();
-        switch( rfalNfcGetState()) {
-            case RFAL_NFC_STATE_ACTIVATED:
-                err = nfc_worker_trx( NULL, 0, &rxData, &rcvLen, 0);
-                break;
-            case RFAL_NFC_STATE_DATAEXCHANGE:
-            case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
-                // Not supported
-                txBuf[0] = ((char)0x68);
-                txBuf[1] = ((char)0x00);
-                txLen = 2;
-                err   = nfc_worker_trx( txBuf, txLen, &rxData, &rcvLen, RFAL_FWT_NONE );
-                break;
-            case RFAL_NFC_STATE_START_DISCOVERY:
-                return;
-            case RFAL_NFC_STATE_LISTEN_SLEEP:
-            default:
-                break;
+        switch(rfalNfcGetState()) {
+        case RFAL_NFC_STATE_ACTIVATED:
+            err = nfc_worker_trx(NULL, 0, &rxData, &rcvLen, 0);
+            break;
+        case RFAL_NFC_STATE_DATAEXCHANGE:
+        case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
+            // Not supported
+            txBuf[0] = ((char)0x68);
+            txBuf[1] = ((char)0x00);
+            txLen = 2;
+            err = nfc_worker_trx(txBuf, txLen, &rxData, &rcvLen, RFAL_FWT_NONE);
+            break;
+        case RFAL_NFC_STATE_START_DISCOVERY:
+            return;
+        case RFAL_NFC_STATE_LISTEN_SLEEP:
+        default:
+            break;
         }
-    } while( (err == ERR_NONE) || (err == ERR_SLEEP_REQ) );
+    } while((err == ERR_NONE) || (err == ERR_SLEEP_REQ));
 }
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
@@ -143,7 +145,7 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
     params.totalDuration = 1000U;
     params.devLimit = 1;
     params.wakeupEnabled = false;
-    params.wakeupConfigDefault  = true;
+    params.wakeupConfigDefault = true;
     params.nfcfBR = RFAL_BR_212;
     params.ap2pBR = RFAL_BR_424;
     params.maxBR = RFAL_BR_KEEP;
@@ -164,16 +166,16 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
 
     ReturnCode ret;
     ret = rfalNfcDiscover(&params);
-    if (ret != ERR_NONE) {
+    if(ret != ERR_NONE) {
         asm("bkpt 1");
         return;
     }
 
-    rfalNfcDevice *nfc_device;
+    rfalNfcDevice* nfc_device;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
         rfalNfcWorker();
-        if (rfalNfcIsDevActivated( rfalNfcGetState() )) {
-            rfalNfcGetActiveDevice( &nfc_device );
+        if(rfalNfcIsDevActivated(rfalNfcGetState())) {
+            rfalNfcGetActiveDevice(&nfc_device);
             nfc_worker_exchange(nfc_worker, nfc_device);
         }
         osDelay(10);
