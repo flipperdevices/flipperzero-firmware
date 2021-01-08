@@ -3,7 +3,7 @@
 #include <main.h>
 #include <api-hal-spi.h>
 
-static volatile osThreadAttr_t platform_irq_thread_attr;
+static osThreadAttr_t platform_irq_thread_attr;
 static volatile osThreadId_t platform_irq_thread_id = NULL;
 static volatile PlatformIrqCallback platform_irq_callback = NULL;
 
