@@ -23,7 +23,7 @@ struct NfcWorker {
     osThreadId_t thread;
 
     NfcWorkerState state;
-    ReturnCode error_code;
+    ReturnCode error;
 };
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
@@ -31,8 +31,11 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
 void nfc_worker_task(void* context);
 
 void nfc_worker_poll(NfcWorker* nfc_worker);
-void nfc_worker_emulate(NfcWorker* nfc_worker);
 void nfc_worker_nfca_poll(NfcWorker* nfc_worker);
 void nfc_worker_nfcb_poll(NfcWorker* nfc_worker);
 void nfc_worker_nfcf_poll(NfcWorker* nfc_worker);
 void nfc_worker_nfcv_poll(NfcWorker* nfc_worker);
+
+void nfc_worker_emulate(NfcWorker* nfc_worker);
+
+void nfc_worker_field(NfcWorker* nfc_worker);

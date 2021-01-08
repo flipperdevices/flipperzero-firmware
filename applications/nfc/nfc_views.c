@@ -2,31 +2,9 @@
 
 void nfc_view_read_draw(Canvas* canvas, void* model) {
     NfcViewReadModel* m = model;
-    char buffer[32];
-
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-
-    if(m->status == NfcViewReadModelStatusInitializing) {
-        canvas_draw_str(canvas, 0, 12, "Initializing");
-    } else if(m->status == NfcViewReadModelStatusReady) {
-        canvas_draw_str(canvas, 0, 12, "Ready");
-    } else if(m->status == NfcViewReadModelStatusError) {
-        snprintf(buffer, sizeof(buffer), "Error: %d", m->error);
-        canvas_draw_str(canvas, 0, 12, buffer);
-        canvas_set_font(canvas, FontSecondary);
-        if(m->error == ERR_WRONG_STATE) {
-            canvas_draw_str(canvas, 2, 22, "Wrong State");
-        } else if(m->error == ERR_PARAM) {
-            canvas_draw_str(canvas, 2, 22, "Wrong Param");
-        } else if(m->error == ERR_IO) {
-            canvas_draw_str(canvas, 2, 22, "IO Error");
-        } else {
-            canvas_draw_str(canvas, 2, 22, "Details in sterrno.h");
-        }
-    } else if(m->status == NfcViewReadModelStatusSearching) {
-        canvas_draw_str(canvas, 0, 12, "Searching");
-    } else if(m->status == NfcViewReadModelStatusFound) {
+    if(m->found) {
         if(m->device.type == NfcDeviceTypeNfca) {
             nfc_view_read_nfca_draw(canvas, m);
         } else if(m->device.type == NfcDeviceTypeNfcb) {
@@ -36,6 +14,10 @@ void nfc_view_read_draw(Canvas* canvas, void* model) {
         } else if(m->device.type == NfcDeviceTypeNfcf) {
             nfc_view_read_nfcf_draw(canvas, m);
         }
+    } else {
+        canvas_draw_str(canvas, 0, 12, "Searching");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 2, 22, "Place card to the back");
     }
 }
 
@@ -131,4 +113,35 @@ void nfc_view_emulate_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 2, 32, "UID length: 7");
     canvas_draw_str(canvas, 2, 42, "UID: 00010203040506");
     canvas_draw_str(canvas, 2, 52, "SAK: 00 ATQA: 44/00");
+}
+
+void nfc_view_field_draw(Canvas* canvas, void* model) {
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 0, 12, "Field ON");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 22, "TX/RX is disabled");
+}
+
+void nfc_view_error_draw(Canvas* canvas, void* model) {
+    NfcViewErrorModel* m = model;
+    char buffer[32];
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    snprintf(buffer, sizeof(buffer), "Error: %d", m->error);
+    canvas_draw_str(canvas, 0, 12, buffer);
+
+    canvas_set_font(canvas, FontSecondary);
+    if(m->error == ERR_WRONG_STATE) {
+        canvas_draw_str(canvas, 2, 22, "Wrong State");
+    } else if(m->error == ERR_PARAM) {
+        canvas_draw_str(canvas, 2, 22, "Wrong Param");
+    } else if(m->error == ERR_HW_MISMATCH) {
+        canvas_draw_str(canvas, 2, 22, "HW mismatch");
+    } else if(m->error == ERR_IO) {
+        canvas_draw_str(canvas, 2, 22, "IO Error");
+    } else {
+        canvas_draw_str(canvas, 2, 22, "Details in st_errno.h");
+    }
 }

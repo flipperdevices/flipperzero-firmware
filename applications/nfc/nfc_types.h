@@ -38,29 +38,30 @@ typedef struct {
 } NfcDevice;
 
 typedef enum {
+    // Init states
     NfcWorkerStateNone,
     NfcWorkerStateBroken,
     NfcWorkerStateReady,
-    NfcWorkerStateStop,
+    // Main worker states
     NfcWorkerStatePoll,
     NfcWorkerStateEmulate,
+    NfcWorkerStateField,
+    // Transition
+    NfcWorkerStateStop,
 } NfcWorkerState;
 
 typedef enum {
     NfcMessageTypeDetect,
     NfcMessageTypeEmulate,
-    NfcMessageTypeFieldOn,
-    NfcMessageTypeFieldOff,
+    NfcMessageTypeField,
+    NfcMessageTypeStop,
+    // From Worker
     NfcMessageTypeDeviceFound,
-    // Worker related
-    NfcMessageTypeWorkerStop,
-    NfcMessageTypeWorkerStateChange,
 } NfcMessageType;
 
 typedef struct {
     NfcMessageType type;
     union {
         NfcDevice device;
-        NfcWorkerState worker_state;
     };
 } NfcMessage;

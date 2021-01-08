@@ -24,8 +24,10 @@ struct Nfc {
     MenuItem* menu;
     Icon* icon;
 
-    View* view_read;
+    View* view_detect;
     View* view_emulate;
+    View* view_field;
+    View* view_error;
     ViewDispatcher* view_dispatcher;
 };
 
@@ -35,8 +37,8 @@ void nfc_menu_detect_callback(void* context);
 
 void nfc_menu_emulate_callback(void* context);
 
-void nfc_menu_field_on_callback(void* context);
+void nfc_menu_field_callback(void* context);
 
-void nfc_menu_field_off_callback(void* context);
+void nfc_start(Nfc *nfc, NfcView view_id, NfcWorkerState worker_state);
 
 void nfc_task(void* p);
