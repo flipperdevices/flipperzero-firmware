@@ -40,7 +40,7 @@ void nfc_worker_start(NfcWorker* nfc_worker, NfcWorkerState state) {
 
 void nfc_worker_stop(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
-    if (nfc_worker->state == NfcWorkerStateBroken) {
+    if(nfc_worker->state == NfcWorkerStateBroken) {
         return;
     }
 

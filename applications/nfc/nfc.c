@@ -86,15 +86,14 @@ void nfc_menu_field_off_callback(void* context) {
     furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
 }
 
-void nfc_start(Nfc *nfc, NfcView view_id, NfcWorkerState worker_state) {
+void nfc_start(Nfc* nfc, NfcView view_id, NfcWorkerState worker_state) {
     NfcWorkerState state = nfc_worker_get_state(nfc->worker);
-    if (state == NfcWorkerStateBroken) {
+    if(state == NfcWorkerStateBroken) {
         with_view_model(
-            nfc->view_error, (NfcViewErrorModel * model) {
-                model->error = nfc_worker_get_error(nfc->worker);
-            });
+            nfc->view_error,
+            (NfcViewErrorModel * model) { model->error = nfc_worker_get_error(nfc->worker); });
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewError);
-    } else if (state == NfcWorkerStateReady) {
+    } else if(state == NfcWorkerStateReady) {
         view_dispatcher_switch_to_view(nfc->view_dispatcher, view_id);
         nfc_worker_start(nfc->worker, worker_state);
     }
