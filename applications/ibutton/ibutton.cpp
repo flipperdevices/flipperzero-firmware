@@ -1,6 +1,7 @@
 #include "ibutton.h"
 #include "ibutton_mode_dallas_read.h"
 #include "ibutton_mode_dallas_emulate.h"
+#include "ibutton_mode_dallas_write.h"
 #include "ibutton_mode_cyfral_read.h"
 #include "ibutton_mode_cyfral_emulate.h"
 
@@ -8,8 +9,9 @@
 void AppiButton::run() {
     mode[0] = new AppiButtonModeDallasRead(this);
     mode[1] = new AppiButtonModeDallasEmulate(this);
-    mode[2] = new AppiButtonModeCyfralRead(this);
-    mode[3] = new AppiButtonModeCyfralEmulate(this);
+    mode[2] = new AppiButtonModeDallasWrite(this);
+    mode[3] = new AppiButtonModeCyfralRead(this);
+    mode[4] = new AppiButtonModeCyfralEmulate(this);
 
     switch_to_mode(0);
 
@@ -30,8 +32,10 @@ void AppiButton::run() {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
                     printf("[ibutton] bye!\n");
-                    // TODO remove all widgets create by app
+
                     widget_enabled_set(widget, false);
+                    gui_remove_widget(gui, widget);
+
                     furiac_exit(NULL);
                 }
 
