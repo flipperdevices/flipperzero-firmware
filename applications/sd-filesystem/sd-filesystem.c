@@ -389,18 +389,30 @@ void sd_filesystem(void* p) {
 
     furiac_ready();
 
+    printf("[sd_filesystem] start\n");
+
     // sd card cycle
     bool sd_was_present = true;
 
     while(true) {
         if(sd_was_present) {
             if(hal_gpio_read_sd_detect()) {
+                printf("[sd_filesystem] card detected\n");
+
                 uint8_t bsp_result = BSP_SD_Init();
 
                 if(bsp_result) {
                     sd_app->info.status = SD_LOW_LEVEL_ERR;
+                    printf("[sd_filesystem] bsp error: %x\n", bsp_result);
                 } else {
+                    printf("[sd_filesystem] bsp ok\n");
                     sd_app->info.status = f_mount(&sd_app->info.fat_fs, sd_app->info.path, 1);
+
+                    if(sd_app->info.status != SD_OK) {
+                        printf("[sd_filesystem] mount error: %d\n", sd_app->info.status);
+                    } else {
+                        printf("[sd_filesystem] mount ok\n");
+                    }
                 }
 
                 widget_enabled_set(sd_app->icon.widget, true);
@@ -408,6 +420,8 @@ void sd_filesystem(void* p) {
             }
         } else {
             if(!hal_gpio_read_sd_detect()) {
+                printf("[sd_filesystem] card removed\n");
+
                 widget_enabled_set(sd_app->icon.widget, false);
                 app_sd_unmount_card(sd_app);
                 sd_was_present = true;
