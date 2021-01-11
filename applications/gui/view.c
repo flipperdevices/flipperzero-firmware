@@ -94,7 +94,7 @@ void* view_get_model(View* view) {
 
 void view_commit_model(View* view) {
     furi_assert(view);
-    void view_unlock_model(View* view);
+    view_unlock_model(view);
     if(view->dispatcher) {
         view_dispatcher_update(view->dispatcher, view);
     }
