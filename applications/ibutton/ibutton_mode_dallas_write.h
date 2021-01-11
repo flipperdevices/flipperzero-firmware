@@ -3,14 +3,6 @@
 #include "blanks_writer.h"
 #include "maxim_crc.h"
 
-typedef enum {
-    BLANK_UNKNOWN, /**< unknown blank type */
-    BLANK_TM01, /**< ТМ-01 */
-    BLANK_RW1990_1, /**< RW1990.1 */
-    BLANK_RW1990_2, /**< RW1990.2 */
-    BLANK_TM2004, /**< ТМ2004 */
-} BlankType;
-
 class AppiButtonModeDallasWrite : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
 public:
     const char* name = "dallas read";
@@ -36,7 +28,7 @@ public:
 void AppiButtonModeDallasWrite::event(AppiButtonEvent* event, AppiButtonState* state) {
     if(event->type == AppiButtonEvent::EventTypeTick) {
         bool result;
-        result = writer->write(state->dallas_address[state->dallas_address_index], 8);
+        result = writer->write(KEY_DS1990, state->dallas_address[state->dallas_address_index], 8);
 
         if(result) {
             app->blink_green();
