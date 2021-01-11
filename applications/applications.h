@@ -81,7 +81,7 @@ const FlipperStartupApp FLIPPER_STARTUP[] = {
 #ifdef APP_SD_FILESYSTEM
     {.app = sd_filesystem,
      .name = "sd_filesystem",
-     .libs = {1, FURI_LIB{"gui_task"}},
+     .libs = {1, FURI_LIB{"menu_task"}},
      .icon = A_Plugins_14},
 #endif
 
