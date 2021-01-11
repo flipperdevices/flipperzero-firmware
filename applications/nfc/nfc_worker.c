@@ -71,16 +71,23 @@ void nfc_worker_task(void* context) {
 
 void nfc_worker_poll(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStatePoll) {
-        nfc_worker_nfca_poll(nfc_worker);
-        nfc_worker_nfcb_poll(nfc_worker);
-        nfc_worker_nfcf_poll(nfc_worker);
-        nfc_worker_nfcv_poll(nfc_worker);
+        bool is_found = false;
+        is_found |= nfc_worker_nfca_poll(nfc_worker);
+        is_found |= nfc_worker_nfcb_poll(nfc_worker);
+        is_found |= nfc_worker_nfcf_poll(nfc_worker);
+        is_found |= nfc_worker_nfcv_poll(nfc_worker);
         rfalFieldOff();
+        if(!is_found) {
+            NfcMessage message;
+            message.type = NfcMessageTypeDeviceNotFound;
+            furi_check(
+                osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        }
         platformDelay(333);
     }
 }
 
-void nfc_worker_nfca_poll(NfcWorker* nfc_worker) {
+bool nfc_worker_nfca_poll(NfcWorker* nfc_worker) {
     ReturnCode ret;
     rfalNfcaSensRes sense_res;
 
@@ -88,14 +95,14 @@ void nfc_worker_nfca_poll(NfcWorker* nfc_worker) {
     rfalFieldOnAndStartGT();
     ret = rfalNfcaPollerTechnologyDetection(RFAL_COMPLIANCE_MODE_NFC, &sense_res);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     uint8_t dev_cnt;
     rfalNfcaListenDevice device;
     ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &device, &dev_cnt);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     if(dev_cnt) {
@@ -106,10 +113,12 @@ void nfc_worker_nfca_poll(NfcWorker* nfc_worker) {
         message.device.nfca = device;
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        return true;
     }
+    return false;
 }
 
-void nfc_worker_nfcb_poll(NfcWorker* nfc_worker) {
+bool nfc_worker_nfcb_poll(NfcWorker* nfc_worker) {
     ReturnCode ret;
 
     rfalNfcbPollerInitialize();
@@ -119,14 +128,14 @@ void nfc_worker_nfcb_poll(NfcWorker* nfc_worker) {
     uint8_t sensb_res_len;
     ret = rfalNfcbPollerTechnologyDetection(RFAL_COMPLIANCE_MODE_NFC, &sensb_res, &sensb_res_len);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     uint8_t dev_cnt;
     rfalNfcbListenDevice device;
     ret = rfalNfcbPollerCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &device, &dev_cnt);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     if(dev_cnt) {
@@ -137,10 +146,12 @@ void nfc_worker_nfcb_poll(NfcWorker* nfc_worker) {
         message.device.nfcb = device;
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        return true;
     }
+    return false;
 }
 
-void nfc_worker_nfcf_poll(NfcWorker* nfc_worker) {
+bool nfc_worker_nfcf_poll(NfcWorker* nfc_worker) {
     ReturnCode ret;
 
     rfalNfcfPollerInitialize(RFAL_BR_212);
@@ -148,14 +159,14 @@ void nfc_worker_nfcf_poll(NfcWorker* nfc_worker) {
 
     ret = rfalNfcfPollerCheckPresence();
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     uint8_t dev_cnt;
     rfalNfcfListenDevice device;
     ret = rfalNfcfPollerCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &device, &dev_cnt);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     if(dev_cnt) {
@@ -165,10 +176,12 @@ void nfc_worker_nfcf_poll(NfcWorker* nfc_worker) {
         message.device.nfcf = device;
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        return true;
     }
+    return false;
 }
 
-void nfc_worker_nfcv_poll(NfcWorker* nfc_worker) {
+bool nfc_worker_nfcv_poll(NfcWorker* nfc_worker) {
     ReturnCode ret;
     rfalNfcvInventoryRes invRes;
 
@@ -177,14 +190,14 @@ void nfc_worker_nfcv_poll(NfcWorker* nfc_worker) {
 
     ret = rfalNfcvPollerCheckPresence(&invRes);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     uint8_t dev_cnt;
     rfalNfcvListenDevice device;
     ret = rfalNfcvPollerCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &device, &dev_cnt);
     if(ret != ERR_NONE) {
-        return;
+        return false;
     }
 
     if(dev_cnt) {
@@ -195,7 +208,9 @@ void nfc_worker_nfcv_poll(NfcWorker* nfc_worker) {
         message.device.nfcv = device;
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        return true;
     }
+    return false;
 }
 
 void nfc_worker_state_callback(rfalNfcState st) {

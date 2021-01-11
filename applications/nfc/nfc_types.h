@@ -57,6 +57,7 @@ typedef enum {
     NfcMessageTypeStop,
     // From Worker
     NfcMessageTypeDeviceFound,
+    NfcMessageTypeDeviceNotFound,
 } NfcMessageType;
 
 typedef struct {

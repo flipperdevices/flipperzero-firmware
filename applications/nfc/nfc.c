@@ -134,6 +134,9 @@ void nfc_task(void* p) {
                     model->found = true;
                     model->device = message.device;
                 });
+        } else if(message.type == NfcMessageTypeDeviceNotFound) {
+            with_view_model(
+                nfc->view_detect, (NfcViewReadModel * model) { model->found = false; });
         }
     }
 }
