@@ -65,6 +65,7 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void EXTI15_10_IRQHandler(void);
 void HSEM_IRQHandler(void);
+void LPTIM1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */

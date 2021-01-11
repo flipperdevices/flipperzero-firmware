@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    rf.h
+  * @file    lptim.h
   * @brief   This file contains all the function prototypes for
-  *          the rf.c file
+  *          the lptim.c file
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __RF_H__
-#define __RF_H__
+#ifndef __LPTIM_H__
+#define __LPTIM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +35,7 @@ extern "C" {
 
 /* USER CODE END Private defines */
 
-void MX_RF_Init(void);
+void MX_LPTIM1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
@@ -45,6 +45,6 @@ void MX_RF_Init(void);
 }
 #endif
 
-#endif /* __RF_H__ */
+#endif /* __LPTIM_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

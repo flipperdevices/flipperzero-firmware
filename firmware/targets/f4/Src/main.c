@@ -25,6 +25,7 @@
 #include "comp.h"
 #include "crc.h"
 #include "i2c.h"
+#include "lptim.h"
 #include "pka.h"
 #include "rf.h"
 #include "rng.h"
@@ -117,6 +118,7 @@ int main(void)
   MX_AES1_Init();
   MX_AES2_Init();
   MX_CRC_Init();
+  MX_LPTIM1_Init();
   /* USER CODE BEGIN 2 */
   MX_FATFS_Init();
   delay_us_init_DWT();
@@ -201,9 +203,9 @@ void SystemClock_Config(void)
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RFWAKEUP
                               |RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
-                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_CLK48SEL
-                              |RCC_PERIPHCLK_USB|RCC_PERIPHCLK_RNG
-                              |RCC_PERIPHCLK_ADC;
+                              |RCC_PERIPHCLK_LPTIM1|RCC_PERIPHCLK_I2C1
+                              |RCC_PERIPHCLK_CLK48SEL|RCC_PERIPHCLK_USB
+                              |RCC_PERIPHCLK_RNG|RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLLSAI1.PLLN = 6;
   PeriphClkInitStruct.PLLSAI1.PLLP = RCC_PLLP_DIV2;
   PeriphClkInitStruct.PLLSAI1.PLLQ = RCC_PLLQ_DIV2;
@@ -211,6 +213,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_USBCLK|RCC_PLLSAI1_ADCCLK;
   PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInitStruct.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
+  PeriphClkInitStruct.Lptim1ClockSelection = RCC_LPTIM1CLKSOURCE_LSE;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
   PeriphClkInitStruct.RngClockSelection = RCC_RNGCLKSOURCE_CLK48;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
