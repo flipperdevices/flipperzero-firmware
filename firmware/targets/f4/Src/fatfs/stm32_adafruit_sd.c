@@ -291,12 +291,9 @@ static uint8_t SD_ReadData(void);
   *         - MSD_OK: Sequence succeed
   */
 uint8_t BSP_SD_Init(void) {
-    // TODO: SPI manager
-    api_hal_spi_lock(&SPI_SD_HANDLE);
-
     /* Init to maximum slow speed */
-    //SD_SPI_Reconfigure_Slow();
-    api_hal_spi_config_device(SPI_SD_CARD_INIT);
+    // TODO: SPI manager
+    api_hal_spi_lock_device(&sd_slow_spi);
 
     /* Configure IO functionalities for SD pin */
     SD_IO_Init();
@@ -305,11 +302,8 @@ uint8_t BSP_SD_Init(void) {
     SdStatus = SD_PRESENT;
     uint8_t res = SD_GoIdleState();
 
-    /* Init to maximum fastest speed */
-    api_hal_spi_config_device(SPI_SD_CARD);
-
     // TODO: SPI manager
-    api_hal_spi_unlock(&SPI_SD_HANDLE);
+    api_hal_spi_unlock_device(&sd_slow_spi);
 
     /* SD initialized and set to SPI mode properly */
     return res;

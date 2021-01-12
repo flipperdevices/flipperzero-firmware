@@ -26,8 +26,7 @@ bool hal_gpio_read_sd_detect(void) {
     const GpioPin* sd_cs_record = &sd_cs_gpio;
 
     // TODO: SPI manager
-    api_hal_spi_lock(&SPI_SD_HANDLE);
-    api_hal_spi_config_device(SPI_DISPLAY);
+    api_hal_spi_lock(sd_fast_spi.spi);
 
     // configure pin as input
     gpio_init_ex(sd_cs_record, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
@@ -42,7 +41,7 @@ bool hal_gpio_read_sd_detect(void) {
     delay(1);
 
     // TODO: SPI manager
-    api_hal_spi_unlock(&SPI_SD_HANDLE);
+    api_hal_spi_unlock(sd_fast_spi.spi);
 
     return result;
 }
