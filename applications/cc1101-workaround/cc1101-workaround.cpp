@@ -196,7 +196,7 @@ void tx_config(CC1101* cc1101) {
     cc1101->SpiWriteReg(CC1101_FSCAL2, 0x2A); //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL1, 0x00); //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL0, 0x1F); //Frequency Synthesizer Calibration
-    
+
     /*
     cc1101->SpiWriteReg(CC1101_TEST2, 0x81); //Various Test Settings
     cc1101->SpiWriteReg(CC1101_TEST1, 0x35); //Various Test Settings
