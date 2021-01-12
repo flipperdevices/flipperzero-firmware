@@ -117,6 +117,7 @@ int16_t rx_rssi(CC1101* cc1101, const FreqConfig* config) {
     return rssi_dBm;
 }
 
+/*
 void flp_config(CC1101* cc1101) {
     cc1101->SpiWriteReg(
         CC1101_MCSM0, 0x18); // calibrate when going from IDLE to RX or TX ; 149 - 155 μs timeout
@@ -170,6 +171,7 @@ void flp_config(CC1101* cc1101) {
     // MDMCFG2.SYNC_MODE = 0
     cc1101->SpiSetRegValue(CC1101_MDMCFG2, 0, 2, 0);
 }
+*/
 
 void tx_config(CC1101* cc1101) {
     // cc1101->SpiWriteReg(CC1101_IOCFG2,0x0B);  //GDO2 Output Pin Configuration
@@ -194,9 +196,12 @@ void tx_config(CC1101* cc1101) {
     cc1101->SpiWriteReg(CC1101_FSCAL2, 0x2A); //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL1, 0x00); //Frequency Synthesizer Calibration
     cc1101->SpiWriteReg(CC1101_FSCAL0, 0x1F); //Frequency Synthesizer Calibration
+    
+    /*
     cc1101->SpiWriteReg(CC1101_TEST2, 0x81); //Various Test Settings
     cc1101->SpiWriteReg(CC1101_TEST1, 0x35); //Various Test Settings
     cc1101->SpiWriteReg(CC1101_TEST0, 0x09); //Various Test Settings
+    */
 }
 
 // f = (f_osc/65536) * (FREQ + CHAN * (256 + CH_SP_M) * 2^(CH_SP_E - 2))
@@ -206,7 +211,7 @@ void tx_config(CC1101* cc1101) {
 // TODO: reg values not affetcts
 
 const Band bands[] = {
-    {301., {0x00, 0x00, 0x00}, 0, 255, 74},
+    {300., {0x00, 0x00, 0x00}, 0, 255, 74},
     {315., {0x00, 0x00, 0x00}, 0, 255, 74},
     {348., {0x00, 0x00, 0x00}, 0, 255, 74},
     {386., {0x00, 0x00, 0x00}, 0, 255, 74},
@@ -459,7 +464,7 @@ extern "C" void cc1101_workaround(void* p) {
                     }
                     */
 
-                    state->active_freq += 1.0;
+                    state->active_freq += 0.25;
                     state->need_cc1101_conf = true;
                 }
 
@@ -472,7 +477,7 @@ extern "C" void cc1101_workaround(void* p) {
                     }
                     */
 
-                    state->active_freq -= 1.0;
+                    state->active_freq -= 0.25;
                     state->need_cc1101_conf = true;
                 }
 
