@@ -295,7 +295,8 @@ uint8_t BSP_SD_Init(void) {
     api_hal_spi_lock(&SPI_SD_HANDLE);
 
     /* Init to maximum slow speed */
-    SD_SPI_Reconfigure_Slow();
+    //SD_SPI_Reconfigure_Slow();
+    api_hal_spi_config_device(SPI_SD_CARD_INIT);
 
     /* Configure IO functionalities for SD pin */
     SD_IO_Init();
@@ -305,7 +306,7 @@ uint8_t BSP_SD_Init(void) {
     uint8_t res = SD_GoIdleState();
 
     /* Init to maximum fastest speed */
-    SD_SPI_Reconfigure_Fast();
+    api_hal_spi_config_device(SPI_SD_CARD);
 
     // TODO: SPI manager
     api_hal_spi_unlock(&SPI_SD_HANDLE);

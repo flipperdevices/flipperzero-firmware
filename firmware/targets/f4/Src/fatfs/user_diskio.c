@@ -88,6 +88,7 @@ DSTATUS USER_initialize(BYTE pdrv) {
     /* USER CODE BEGIN INIT */
     // TODO: SPI manager
     api_hal_spi_lock(&SPI_SD_HANDLE);
+    api_hal_spi_config_device(SPI_SD_CARD);
 
     DSTATUS status = User_CheckStatus(pdrv);
 
@@ -123,6 +124,7 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
 
     // TODO: SPI manager
     api_hal_spi_lock(&SPI_SD_HANDLE);
+    api_hal_spi_config_device(SPI_SD_CARD);
 
     if(BSP_SD_ReadBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the read operation is finished */
@@ -154,6 +156,7 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
 
     // TODO: SPI manager
     api_hal_spi_lock(&SPI_SD_HANDLE);
+    api_hal_spi_config_device(SPI_SD_CARD);
 
     if(BSP_SD_WriteBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the Write operation is finished */
@@ -187,6 +190,7 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
 
     // TODO: SPI manager
     api_hal_spi_lock(&SPI_SD_HANDLE);
+    api_hal_spi_config_device(SPI_SD_CARD);
 
     switch(cmd) {
     /* Make sure that no pending write process */

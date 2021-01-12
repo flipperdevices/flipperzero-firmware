@@ -27,6 +27,7 @@ bool hal_gpio_read_sd_detect(void) {
 
     // TODO: SPI manager
     api_hal_spi_lock(&SPI_SD_HANDLE);
+    api_hal_spi_config_device(SPI_DISPLAY);
 
     // configure pin as input
     gpio_init_ex(sd_cs_record, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
