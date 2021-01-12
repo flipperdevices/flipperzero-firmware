@@ -53,6 +53,7 @@ void MemManage_Handler(void);
 void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void DebugMon_Handler(void);
+void SysTick_Handler(void);
 void TAMP_STAMP_LSECSS_IRQHandler(void);
 void RCC_IRQHandler(void);
 void EXTI1_IRQHandler(void);
@@ -65,7 +66,6 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void);
 void TIM2_IRQHandler(void);
 void EXTI15_10_IRQHandler(void);
 void HSEM_IRQHandler(void);
-void LPTIM1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 
 /* USER CODE END EFP */
