@@ -401,9 +401,7 @@ extern "C" void cc1101_workaround(void* p) {
     cc1101.SpiStrobe(CC1101_SIDLE);
 
     // flp_config(&cc1101);
-    tx_2_config(&cc1101);
-    // async_config(&cc1101);
-    // tx_config(&cc1101);
+    tx_config(&cc1101);
     // setup_freq(&cc1101, &FREQ_LIST[4]);
     // enable_cc1101_irq();
 
