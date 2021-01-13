@@ -11,7 +11,7 @@
     LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPTIM2); \
 } \
 
-static inline api_hal_timebase_timer_init() {
+static inline void api_hal_timebase_timer_init() {
     API_HAL_TIMEBASE_TIMER_CLOCK_INIT();
 
     LL_LPTIM_SetClockSource(API_HAL_TIMEBASE_TIMER, LL_LPTIM_CLK_SOURCE_INTERNAL);

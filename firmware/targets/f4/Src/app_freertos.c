@@ -108,25 +108,6 @@ __weak void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTas
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN VPORT_SUPPORT_TICKS_AND_SLEEP */
-__weak void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime )
-{
-  HAL_SuspendTick();
-
-  __disable_irq();
-
-  LL_LPTIM_Enable(LPTIM1);
-  LL_LPTIM_ResetCounter(LPTIM1);
-  LL_LPTIM_SetAutoReload(LPTIM1, xExpectedIdleTime);
-  LL_LPTIM_StartCounter(LPTIM1, LL_LPTIM_OPERATING_MODE_ONESHOT);
-
-  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-
-  uint32_t counter = LL_LPTIM_GetCounter(LPTIM1);
-  vTaskStepTick(counter > xExpectedIdleTime ? xExpectedIdleTime : counter);
-
-  __enable_irq();
-  HAL_ResumeTick();
-}
 /* USER CODE END VPORT_SUPPORT_TICKS_AND_SLEEP */
 
 /**

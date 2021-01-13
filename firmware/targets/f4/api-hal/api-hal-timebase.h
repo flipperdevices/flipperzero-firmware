@@ -2,6 +2,11 @@
 
 #include <stdint.h>
 
+/* Initialize timebase
+ * Configure and start tick timer
+ */
+void api_hal_timebase_init();
+
 /* Get current insomnia level
  * @return insomnia level: 0 - no insomnia, >0 - insomnia, bearer count.
  */
