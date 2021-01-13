@@ -734,7 +734,7 @@ void SdTest::cli_write_benchmark(string_t args, void* _ctx) {
     cli_print("write speed test, procedure can be lengthy, please wait\r\n");
 
     // 1b test
-    benchmark_bps = write_benchmark_internal(b1_size, benchmark_data_size / b1_size, true);
+    benchmark_bps = _this->write_benchmark_internal(b1_size, benchmark_data_size / b1_size, true);
     if(benchmark_bps == BENCHMARK_ERROR) {
         cli_print("error: in 1-byte write test\r\n");
     } else {
@@ -743,7 +743,7 @@ void SdTest::cli_write_benchmark(string_t args, void* _ctx) {
     }
 
     // 8b test
-    benchmark_bps = write_benchmark_internal(b8_size, benchmark_data_size / b8_size, true);
+    benchmark_bps = _this->write_benchmark_internal(b8_size, benchmark_data_size / b8_size, true);
     if(benchmark_bps == BENCHMARK_ERROR) {
         cli_print("error: in 8-byte write test\r\n");
     } else {
@@ -752,7 +752,8 @@ void SdTest::cli_write_benchmark(string_t args, void* _ctx) {
     }
 
     // 32b test
-    benchmark_bps = write_benchmark_internal(b32_size, benchmark_data_size / b32_size, true);
+    benchmark_bps =
+        _this->write_benchmark_internal(b32_size, benchmark_data_size / b32_size, true);
     if(benchmark_bps == BENCHMARK_ERROR) {
         cli_print("error: in 32-byte write test\r\n");
     } else {
@@ -761,7 +762,8 @@ void SdTest::cli_write_benchmark(string_t args, void* _ctx) {
     }
 
     // 256b test
-    benchmark_bps = write_benchmark_internal(b256_size, benchmark_data_size / b256_size, true);
+    benchmark_bps =
+        _this->write_benchmark_internal(b256_size, benchmark_data_size / b256_size, true);
     if(benchmark_bps == BENCHMARK_ERROR) {
         cli_print("error: in 256-byte write test\r\n");
     } else {
@@ -770,7 +772,8 @@ void SdTest::cli_write_benchmark(string_t args, void* _ctx) {
     }
 
     // 4096b test
-    benchmark_bps = write_benchmark_internal(b4096_size, benchmark_data_size / b4096_size, true);
+    benchmark_bps =
+        _this->write_benchmark_internal(b4096_size, benchmark_data_size / b4096_size, true);
     if(benchmark_bps == BENCHMARK_ERROR) {
         cli_print("error: in 4096-byte write test\r\n");
     } else {
