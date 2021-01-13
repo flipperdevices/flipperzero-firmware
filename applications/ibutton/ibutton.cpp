@@ -13,7 +13,7 @@ void AppiButton::run() {
     mode[3] = new AppiButtonModeCyfralRead(this);
     mode[4] = new AppiButtonModeCyfralEmulate(this);
 
-    switch_to_mode(2);
+    switch_to_mode(1);
 
     // TODO open record
     red_led_record = &led_gpio[0];
