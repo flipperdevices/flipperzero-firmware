@@ -5,6 +5,12 @@
 
 class OneWireAsyncSlave {
 private:
+    enum OWState {
+        OW_WAIT_RESET_FALL,
+        OW_WAIT_RESET_RISE,
+        OW_SEND_PRESENCE,
+    };
+
 public:
     void start(void);
     void stop(void);
