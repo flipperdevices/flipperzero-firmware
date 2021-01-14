@@ -18,6 +18,8 @@ static InputState input_state = {
     false,
 };
 
+static void exti_input_callback(void* _pin, void* _ctx);
+
 void input_task(void* p) {
     uint32_t state_bits = 0;
     uint8_t debounce_counters[INPUT_COUNT];
@@ -44,6 +46,8 @@ void input_task(void* p) {
         printf("[input_task] cannot create the input_events record\n");
         furiac_exit(NULL);
     }
+
+    api_interrupt_add(exti_input_callback, InterruptTypeExternalInterrupt, NULL);
 
     // we ready to work
     furiac_ready();
@@ -111,7 +115,10 @@ void input_task(void* p) {
     }
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t pin) {
+static void exti_input_callback(void* _pin, void* _ctx) {
+    // interrupt manager get us pin constant, so...
+    uint32_t pin = (uint32_t)_pin;
+
 #ifdef APP_NFC
     if(pin == NFC_IRQ_Pin) {
         nfc_isr();
