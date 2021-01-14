@@ -8,6 +8,7 @@ typedef enum {
     InterruptTypeTimerCapture,
     InterruptTypeTimerOutputCompare,
     InterruptTypeTimerUpdate,
+    InterruptTypeExternalInterrupt,
 } InterruptType;
 
 typedef struct {
