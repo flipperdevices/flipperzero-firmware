@@ -6,6 +6,8 @@ typedef void (*InterruptCallback)(void*, void*);
 typedef enum {
     InterruptTypeComparatorTrigger,
     InterruptTypeTimerCapture,
+    InterruptTypeTimerOutputCompare,
+    InterruptTypeTimerUpdate,
 } InterruptType;
 
 typedef struct {
