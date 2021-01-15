@@ -6,9 +6,6 @@
 #include <FreeRTOS.h>
 #include <cmsis_os.h>
 
-#define API_HAL_TIMEBASE_LED_PORT GPIOA
-#define API_HAL_TIMEBASE_LED_PIN LL_GPIO_PIN_2
-
 #define API_HAL_TIMEBASE_CLK_FREQUENCY 32768
 #define API_HAL_TIMEBASE_TICK_PER_SECOND 1024
 #define API_HAL_TIMEBASE_CLK_PER_TICK (API_HAL_TIMEBASE_CLK_FREQUENCY / API_HAL_TIMEBASE_TICK_PER_SECOND)
@@ -18,16 +15,16 @@
 typedef struct {
     // Sleep control
     volatile uint16_t insomnia;
-    // Counters
+    // Tick counters
     volatile uint32_t in_sleep;
     volatile uint32_t in_awake;
+    // Error counters
     volatile uint32_t sleep_error;
     volatile uint32_t awake_error;
 } ApiHalTimbase;
 
 ApiHalTimbase api_hal_timebase = {
     .insomnia = 0,
-
     .in_sleep = 0,
     .in_awake = 0,
     .sleep_error = 0,
@@ -67,19 +64,23 @@ void LPTIM2_IRQHandler(void) {
     }
     if(LL_LPTIM_IsActiveFlag_CMPM(API_HAL_TIMEBASE_TIMER)) {
         LL_LPTIM_ClearFLAG_CMPM(API_HAL_TIMEBASE_TIMER);
-        // Calculate and set next stop
+
+        // Store important value
         uint16_t cnt = api_hal_timebase_timer_get_cnt();
         uint16_t cmp = api_hal_timebase_timer_get_cmp();
         uint16_t current_tick = cnt / API_HAL_TIMEBASE_CLK_PER_TICK;
         uint16_t compare_tick = cmp / API_HAL_TIMEBASE_CLK_PER_TICK;
-        int32_t error = arrm_flag ? (int32_t)current_tick - compare_tick : (int32_t)compare_tick - current_tick;
-        assert(error >= 0);
-        api_hal_timebase.awake_error += error;
-        
+
+        // Calculate error
+        // happens when HAL or other high priority IRQ takes our time
+        int32_t error = (int32_t)compare_tick - current_tick;
+        api_hal_timebase.awake_error += ((error>0) ? error : -error);
+
+        // Calculate and set next tick 
         uint16_t next_tick = current_tick + 1;
         api_hal_timebase_timer_set_cmp(next_tick * API_HAL_TIMEBASE_CLK_PER_TICK);
 
-        // Propogate tick
+        // Notify OS
         api_hal_timebase.in_awake ++;
         if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
             xPortSysTickHandler();
@@ -87,59 +88,72 @@ void LPTIM2_IRQHandler(void) {
     }
 }
 
-
 void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
+    // Limit mount of ticks to maximum that timer can count
     if (expected_idle_ticks > API_HAL_TIMEBASE_MAX_SLEEP) {
         expected_idle_ticks = API_HAL_TIMEBASE_MAX_SLEEP;
     }
-
+    // Prevent sleep if requested
     if (api_hal_timebase.insomnia) {
         return;
     }
 
+    // Stop IRQ handling, no one should disturb us till we finish 
     __disable_irq();
 
+    // Confirm OS that sleep is still possible
+    // And check if timer is in safe zone
+    // (8 clocks till any IRQ event or ongoing synchronization)
     if (eTaskConfirmSleepModeStatus() == eAbortSleep
         || !api_hal_timebase_timer_is_safe()) {
         __enable_irq();
         return;
     }
 
+    // Store important value before going to sleep
     const uint16_t before_cnt = api_hal_timebase_timer_get_cnt();
     const uint16_t before_tick = before_cnt / API_HAL_TIMEBASE_CLK_PER_TICK;
-    
+
+    // Calculate and set next wakeup compare value
     const uint16_t expected_cnt = (before_tick + expected_idle_ticks - 2) * API_HAL_TIMEBASE_CLK_PER_TICK;
     api_hal_timebase_timer_set_cmp(expected_cnt);
 
-    // Sleep
-    LL_GPIO_SetOutputPin(API_HAL_TIMEBASE_LED_PORT, API_HAL_TIMEBASE_LED_PIN);
+    // Go to stop2 mode
     HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-    LL_GPIO_ResetOutputPin(API_HAL_TIMEBASE_LED_PORT, API_HAL_TIMEBASE_LED_PIN);
 
+    // Spin till we are in timer safe zone
     while(!api_hal_timebase_timer_is_safe()) {}
 
+    // Store current counter value, calculate current tick
     const uint16_t after_cnt = api_hal_timebase_timer_get_cnt();
     const uint16_t after_tick = after_cnt / API_HAL_TIMEBASE_CLK_PER_TICK;
-    
+
+    // Store and clear interrupt flags
+    // we don't want handler to be called after renabling IRQ
     bool cmpm_flag = LL_LPTIM_IsActiveFlag_CMPM(API_HAL_TIMEBASE_TIMER);
     if (cmpm_flag) LL_LPTIM_ClearFLAG_CMPM(API_HAL_TIMEBASE_TIMER);
     bool arrm_flag = LL_LPTIM_IsActiveFlag_ARRM(API_HAL_TIMEBASE_TIMER);
     if (arrm_flag) LL_LPTIM_ClearFLAG_ARRM(API_HAL_TIMEBASE_TIMER);
-    
+
+    // Calculate and set next wakeup compare value
     const uint16_t next_cmp = (after_tick + 1) * API_HAL_TIMEBASE_CLK_PER_TICK;
     api_hal_timebase_timer_set_cmp(next_cmp);
 
+    // Calculate ticks count spent in sleep and perform sanity checks
+    int32_t completed_ticks = arrm_flag ? (int32_t)before_tick - after_tick : (int32_t)after_tick - before_tick;
+    assert(completed_ticks >= 0);
+
+    // Reenable IRQ
     __enable_irq();
 
-    int32_t completed_ticks = arrm_flag ? (int32_t)before_tick - after_tick : (int32_t)after_tick - before_tick;
-
-    assert(completed_ticks >= 0);
+    // Notify system about time spent in sleep
     if (completed_ticks > 0) {
         api_hal_timebase.in_sleep += completed_ticks;
         if (completed_ticks > expected_idle_ticks) {
             // We are late, count error
             api_hal_timebase.sleep_error += (completed_ticks - expected_idle_ticks);
-             // Step expected_idle_ticks because freertos asserts this value
+            // Freertos is not happy when we overleep
+            // But we are not going to tell her
             vTaskStepTick(expected_idle_ticks);
         } else {
             vTaskStepTick(completed_ticks);
