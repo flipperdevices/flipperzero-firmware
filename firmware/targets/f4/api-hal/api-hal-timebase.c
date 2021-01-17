@@ -88,28 +88,12 @@ void LPTIM2_IRQHandler(void) {
     }
 }
 
-void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
-    // Limit mount of ticks to maximum that timer can count
-    if (expected_idle_ticks > API_HAL_TIMEBASE_MAX_SLEEP) {
-        expected_idle_ticks = API_HAL_TIMEBASE_MAX_SLEEP;
-    }
-    // Prevent sleep if requested
-    if (api_hal_timebase.insomnia) {
-        return;
-    }
+static inline uint32_t api_hal_timebase_nap(TickType_t expected_idle_ticks) {
+    __WFI();
+    return 0;
+}
 
-    // Stop IRQ handling, no one should disturb us till we finish 
-    __disable_irq();
-
-    // Confirm OS that sleep is still possible
-    // And check if timer is in safe zone
-    // (8 clocks till any IRQ event or ongoing synchronization)
-    if (eTaskConfirmSleepModeStatus() == eAbortSleep
-        || !api_hal_timebase_timer_is_safe()) {
-        __enable_irq();
-        return;
-    }
-
+static inline uint32_t api_hal_timebase_sleep(TickType_t expected_idle_ticks) {
     // Store important value before going to sleep
     const uint16_t before_cnt = api_hal_timebase_timer_get_cnt();
     const uint16_t before_tick = before_cnt / API_HAL_TIMEBASE_CLK_PER_TICK;
@@ -141,6 +125,34 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
 
     // Calculate ticks count spent in sleep and perform sanity checks
     int32_t completed_ticks = arrm_flag ? (int32_t)before_tick - after_tick : (int32_t)after_tick - before_tick;
+
+    return completed_ticks;
+}
+
+void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
+    // Limit mount of ticks to maximum that timer can count
+    if (expected_idle_ticks > API_HAL_TIMEBASE_MAX_SLEEP) {
+        expected_idle_ticks = API_HAL_TIMEBASE_MAX_SLEEP;
+    }
+    
+    // Stop IRQ handling, no one should disturb us till we finish 
+    __disable_irq();
+
+    // Confirm OS that sleep is still possible
+    // And check if timer is in safe zone
+    // (8 clocks till any IRQ event or ongoing synchronization)
+    if (eTaskConfirmSleepModeStatus() == eAbortSleep
+        || !api_hal_timebase_timer_is_safe()) {
+        __enable_irq();
+        return;
+    }
+
+    uint32_t completed_ticks;
+    if (api_hal_timebase.insomnia) {
+        completed_ticks = api_hal_timebase_nap(expected_idle_ticks);
+    } else {
+        completed_ticks = api_hal_timebase_sleep(expected_idle_ticks);
+    }
     assert(completed_ticks >= 0);
 
     // Reenable IRQ
