@@ -2,10 +2,9 @@
 
 #include "bt.h"
 
-#include <cli/cli.h>
+#include <furi.h>
 
-#include <flipper.h>
-#include <flipper_v2.h>
+#include <cli/cli.h>
 
 #include <gui/gui.h>
 #include <gui/widget.h>

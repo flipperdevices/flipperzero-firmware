@@ -70,7 +70,7 @@ APP_INPUT	= 1
 APP_GUI		= 1
 CFLAGS		+= -DBUILD_MENU
 C_SOURCES	+= $(wildcard $(APP_DIR)/menu/*.c)
-C_SOURCES	+= $(wildcard $(APP_DIR)/app-loader/*.c)
+# C_SOURCES	+= $(wildcard $(APP_DIR)/app-loader/*.c)
 endif
 
 APP_TEST	?= 0

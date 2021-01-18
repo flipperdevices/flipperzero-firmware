@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "flipper.h"
-#include "flipper_v2.h"
-#include "log.h"
+#include <furi.h>
 #include "minunit.h"
 
 void test_furi_create_open() {

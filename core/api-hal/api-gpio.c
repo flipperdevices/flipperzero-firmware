@@ -1,4 +1,6 @@
 #include "api-gpio.h"
+#include <cmsis_os2.h>
+#include <furi/record.h>
 
 osMutexId_t gpioInitMutex;
 
@@ -48,6 +50,6 @@ ValueMutex* gpio_open_mutex(const char* name) {
 // get GPIO record and acquire mutex
 GpioPin* gpio_open(const char* name) {
     ValueMutex* gpio_mutex = gpio_open_mutex(name);
-    GpioPin* gpio_pin = acquire_mutex(gpio_mutex, FLIPPER_HELPER_TIMEOUT);
+    GpioPin* gpio_pin = acquire_mutex(gpio_mutex, osWaitForever);
     return gpio_pin;
 }

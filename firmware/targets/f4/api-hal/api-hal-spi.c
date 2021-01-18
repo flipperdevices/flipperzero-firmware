@@ -1,4 +1,5 @@
 #include "api-hal-spi.h"
+#include <cmsis_os2.h>
 
 osMutexId_t spi_mutex_r;
 osMutexId_t spi_mutex_d;

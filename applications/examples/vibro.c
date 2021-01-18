@@ -1,4 +1,5 @@
-#include "flipper_v2.h"
+#include <furi.h>
+#include <input/input.h>
 
 typedef struct {
     GpioPin* led;

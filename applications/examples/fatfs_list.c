@@ -1,6 +1,6 @@
 #include "u8g2/u8g2.h"
 #include "fatfs/ff.h"
-#include "flipper_v2.h"
+#include <furi.h>
 #include <stdio.h>
 
 extern uint8_t BSP_SD_Init();
@@ -49,45 +49,44 @@ void fatfs_list(void* p) {
 
     QueueHandle_t event_queue = xQueueCreate(2, sizeof(AppEvent));
 
-    furi_log = get_default_log();
-    fuprintf(furi_log, "[fatfs_list] app start\n");
-    fuprintf(furi_log, "[fatfs_list] wait for sd insert\n");
+    printf("[fatfs_list] app start\n");
+    printf("[fatfs_list] wait for sd insert\n");
 
     while(!hal_gpio_read_sd_detect()) {
         delay(100);
     }
 
-    fuprintf(furi_log, "[fatfs_list] sd inserted\n");
+    printf("[fatfs_list] sd inserted\n");
 
     FuriRecordSubscriber* fb_record =
         furi_open_deprecated("u8g2_fb", false, false, NULL, NULL, NULL);
     if(fb_record == NULL) {
-        fuprintf(furi_log, "[fatfs_list] cannot create fb record\n");
+        printf("[fatfs_list] cannot create fb record\n");
         furiac_exit(NULL);
     }
 
     PubSub* event_record = furi_open("input_events");
     if(event_record == NULL) {
-        fuprintf(furi_log, "[fatfs_list] cannot open input_events record\n");
+        printf("[fatfs_list] cannot open input_events record\n");
         furiac_exit(NULL);
     }
     PubSubItem* subscription = subscribe_pubsub(event_record, event_cb, event_queue);
     if(subscription == NULL) {
-        fuprintf(furi_log, "[fatfs_list] cannot register input_events callback\n");
+        printf("[fatfs_list] cannot register input_events callback\n");
         furiac_exit(NULL);
     }
 
     bsp_result = BSP_SD_Init();
 
     if(bsp_result != 0) {
-        fuprintf(furi_log, "[fatfs_list] SD card init error\n");
+        printf("[fatfs_list] SD card init error\n");
         furiac_exit(NULL);
     }
 
     result = f_mount(&SD_FatFs, (TCHAR const*)SD_Path, 1);
 
     if(result != FR_OK) {
-        fuprintf(furi_log, "[fatfs_list] SD card mount error\n");
+        printf("[fatfs_list] SD card mount error\n");
         furiac_exit(NULL);
     }
 
@@ -139,7 +138,7 @@ void fatfs_list(void* p) {
                     } else {
                         snprintf(str_buffer, STR_BUFFER_SIZE, "FIL %s\n", fno.fname);
                     }
-                    fuprintf(furi_log, str_buffer);
+                    printf(str_buffer);
                 }
 
                 line_current++;

@@ -1,4 +1,4 @@
-#include "flipper_v2.h"
+#include <furi.h>
 #include "minunit.h"
 
 static void furi_concurent_app(void* p) {

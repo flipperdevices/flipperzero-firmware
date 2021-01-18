@@ -1,4 +1,4 @@
-#include "flipper_v2.h"
+#include <furi.h>
 
 /*
 struct used for handling SPI info.

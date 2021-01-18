@@ -1,10 +1,9 @@
 #pragma once
 
-#include "flipper.h"
 #include "valuemutex.h"
 #include "pubsub.h"
 #include "event.h"
-#include "m-list.h"
+#include <m-list.h>
 
 /*
 == Value composer ==

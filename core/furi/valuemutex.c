@@ -1,4 +1,5 @@
 #include "valuemutex.h"
+
 #include <string.h>
 
 bool init_mutex(ValueMutex* valuemutex, void* value, size_t size) {

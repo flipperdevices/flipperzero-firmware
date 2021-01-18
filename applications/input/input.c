@@ -1,6 +1,6 @@
 #include <input/input.h>
 #include <stdio.h>
-#include <flipper_v2.h>
+#include <furi.h>
 
 #ifdef APP_NFC
 void nfc_isr(void);

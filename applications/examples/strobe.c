@@ -1,4 +1,4 @@
-#include "flipper_v2.h"
+#include <furi.h>
 
 static void event_cb(const void* value, void* ctx) {
     const InputEvent* event = value;

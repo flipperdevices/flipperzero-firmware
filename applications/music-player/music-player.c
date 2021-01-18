@@ -1,4 +1,6 @@
-#include "flipper_v2.h"
+#include <furi.h>
+#include <gui/gui.h>
+#include <input/input.h>
 
 // TODO float note freq
 typedef enum {
@@ -302,7 +304,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
-    osMessageQueueId_t event_queue = (QueueHandle_t)ctx;
+    osMessageQueueId_t event_queue = ctx;
 
     MusicDemoEvent event;
     event.type = EventTypeKey;

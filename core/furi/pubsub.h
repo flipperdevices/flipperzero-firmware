@@ -3,6 +3,10 @@
 #include "cmsis_os.h"
 #include "m-list.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 == PubSub ==
 
@@ -52,6 +56,10 @@ bool unsubscribe_pubsub(PubSubItem* pubsub_id);
 Use `notify_pubsub` to notify subscribers.
 */
 bool notify_pubsub(PubSub* pubsub, void* arg);
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
 

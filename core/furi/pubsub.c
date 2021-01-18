@@ -1,5 +1,5 @@
 #include "pubsub.h"
-#include "flipper_v2.h"
+#include <furi.h>
 
 bool init_pubsub(PubSub* pubsub) {
     // mutex without name,

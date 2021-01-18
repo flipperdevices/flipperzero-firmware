@@ -1,5 +1,6 @@
 #include "check.h"
 #include "api-hal-task.h"
+#include <stdio.h>
 
 void __furi_abort(void);
 
@@ -22,20 +23,20 @@ void __furi_check_debug(const char* file, int line, const char* function, const 
     if(task_is_isr_context()) {
         printf(" in [ISR] context");
     } else {
-        FuriApp* app = find_task(xTaskGetCurrentTaskHandle());
+        // FuriApp* app = find_task(xTaskGetCurrentTaskHandle());
 
-        if(app == NULL) {
-            printf(", in [main] context");
-        } else {
-            printf(", in [%s] app context", app->name);
-        }
+        // if(app == NULL) {
+        //     printf(", in [main] context");
+        // } else {
+        //     printf(", in [%s] app context", app->name);
+        // }
     }
 
     __furi_abort();
 }
 
 void __furi_abort(void) {
-    taskDISABLE_INTERRUPTS();
-    while(1) {
-    }
+    __disable_irq();
+    asm("bkpt 1");
+    while(1){}
 }

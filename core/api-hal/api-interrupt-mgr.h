@@ -1,5 +1,6 @@
 #pragma once
-#include "flipper_v2.h"
+
+#include <stdbool.h>
 
 typedef void (*InterruptCallback)(void*, void*);
 

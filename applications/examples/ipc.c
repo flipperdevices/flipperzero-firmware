@@ -1,4 +1,4 @@
-#include "flipper.h"
+#include <furi.h>
 #include <string.h>
 
 #define FB_WIDTH 10
@@ -8,13 +8,12 @@
 // context structure used for pass some object from app thread to callback
 typedef struct {
     SemaphoreHandle_t events; // queue to pass events from callback to app thread
-    FuriRecordSubscriber* log; // app logger
 } IpcCtx;
 
 static void handle_fb_change(const void* fb, size_t fb_size, void* raw_ctx) {
     IpcCtx* ctx = (IpcCtx*)raw_ctx; // make right type
 
-    fuprintf(ctx->log, "[cb] framebuffer updated\n");
+    printf("[cb] framebuffer updated\n");
 
     // send event to app thread
     xSemaphoreGive(ctx->events);
@@ -38,18 +37,15 @@ static void print_fb(char* fb, FuriRecordSubscriber* log) {
     row_buffer[FB_WIDTH] = '\0';
 
     // FB layout is hardcoded here
-    fuprintf(log, "+==========+\n");
+    printf("+==========+\n");
     for(uint8_t i = 0; i < FB_HEIGHT; i++) {
         strncpy(row_buffer, &fb[FB_WIDTH * i], FB_WIDTH);
-        fuprintf(log, "|%s|\n", row_buffer);
+        printf("|%s|\n", row_buffer);
     }
-    fuprintf(log, "+==========+\n");
+    printf("+==========+\n");
 }
 
 void application_ipc_display(void* p) {
-    // get logger
-    FuriRecordSubscriber* log = get_default_log();
-
     // create ASCII "framebuffer"
     // FB_WIDTH x FB_HEIGHT char buffer
     char _framebuffer[FB_SIZE];
@@ -61,7 +57,7 @@ void application_ipc_display(void* p) {
 
     // create record
     if(!furi_create_deprecated("test_fb", (void*)_framebuffer, FB_SIZE)) {
-        fuprintf(log, "[display] cannot create fb record\n");
+        printf("[display] cannot create fb record\n");
         furiac_exit(NULL);
     }
 
@@ -70,7 +66,7 @@ void application_ipc_display(void* p) {
     SemaphoreHandle_t events = xSemaphoreCreateCountingStatic(255, 0, &event_descriptor);
 
     if(events == NULL) {
-        fuprintf(log, "[display] cannot create event semaphore\n");
+        printf("[display] cannot create event semaphore\n");
         furiac_exit(NULL);
     }
 
@@ -82,7 +78,7 @@ void application_ipc_display(void* p) {
         furi_open_deprecated("test_fb", false, false, handle_fb_change, NULL, &ctx);
 
     if(fb_record == NULL) {
-        fuprintf(log, "[display] cannot open fb record\n");
+        printf("[display] cannot open fb record\n");
         furiac_exit(NULL);
     }
 
@@ -103,7 +99,7 @@ void application_ipc_display(void* p) {
     while(1) {
         // wait for event
         if(xSemaphoreTake(events, portMAX_DELAY) == pdTRUE) {
-            fuprintf(log, "[display] get fb update\n\n");
+            printf("[display] get fb update\n\n");
 
 #ifdef HW_DISPLAY
 // on Flipper target draw the screen
@@ -121,14 +117,12 @@ void application_ipc_display(void* p) {
 
 // Widget application
 void application_ipc_widget(void* p) {
-    FuriRecordSubscriber* log = get_default_log();
-
     // open record
     FuriRecordSubscriber* fb_record =
         furi_open_deprecated("test_fb", false, false, NULL, NULL, NULL);
 
     if(fb_record == NULL) {
-        fuprintf(log, "[widget] cannot create fb record\n");
+        printf("[widget] cannot create fb record\n");
         furiac_exit(NULL);
     }
 

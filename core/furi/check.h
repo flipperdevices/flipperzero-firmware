@@ -1,6 +1,8 @@
 #pragma once
 
-#include "flipper.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Find how to how get function's pretty name
 #ifndef __FURI_CHECK_FUNC
@@ -39,3 +41,7 @@
 
 void __furi_check(void);
 void __furi_check_debug(const char* file, int line, const char* function, const char* condition);
+
+#ifdef __cplusplus
+}
+#endif

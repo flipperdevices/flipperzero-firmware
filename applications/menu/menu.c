@@ -1,9 +1,8 @@
 #include "menu.h"
-#include <cmsis_os.h>
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <flipper_v2.h>
+#include <furi.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 

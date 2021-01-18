@@ -1,8 +1,6 @@
 #include "cli_i.h"
 #include "cli_commands.h"
 
-#include <api-hal-vcp.h>
-
 Cli* cli_alloc() {
     Cli* cli = furi_alloc(sizeof(Cli));
     CliCommandDict_init(cli->commands);

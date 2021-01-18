@@ -1,7 +1,8 @@
 #pragma once
 #include "callback-connector.h"
-#include "flipper.h"
-#include "flipper_v2.h"
+#include <furi.h>
+#include <gui/gui.h>
+#include <input/input.h>
 
 // simple app class with template variables <state, events>
 template <class TState, class TEvent> class AppTemplate {

@@ -1,8 +1,6 @@
 #include "widget_i.h"
 
-#include <cmsis_os.h>
-#include <flipper.h>
-#include <flipper_v2.h>
+#include <furi.h>
 
 #include "gui.h"
 #include "gui_i.h"

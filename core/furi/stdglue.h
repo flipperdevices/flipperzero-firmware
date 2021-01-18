@@ -2,4 +2,4 @@
 
 #include <stdbool.h>
 
-bool register_tty_uart();
+bool furi_stdglue_init();

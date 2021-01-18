@@ -1,5 +1,6 @@
-#include "flipper_v2.h"
+#include <furi.h>
 #include <stdio.h>
+#include <input/input.h>
 
 typedef union {
     unsigned int packed;

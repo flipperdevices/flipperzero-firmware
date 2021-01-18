@@ -1,7 +1,7 @@
 #include "power.h"
 #include "power_views.h"
 
-#include <flipper_v2.h>
+#include <furi.h>
 
 #include <menu/menu.h>
 #include <menu/menu_item.h>
@@ -12,8 +12,8 @@
 #include <gui/view_dispatcher.h>
 
 #include <assets_icons.h>
-#include <api-hal-power.h>
 #include <cli/cli.h>
+#include <stm32wbxx.h>
 
 struct Power {
     ViewDispatcher* view_dispatcher;
@@ -45,6 +45,10 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         power->info_view, (PowerInfoModel * model) {
             canvas_draw_box(canvas, 2, 2, (float)model->charge / 100 * 14, 4);
         });
+}
+
+uint32_t power_info_back_callback(void* context) {
+    return VIEW_NONE;
 }
 
 void power_menu_off_callback(void* context) {

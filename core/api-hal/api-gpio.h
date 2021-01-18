@@ -1,7 +1,7 @@
 #pragma once
-#include "flipper.h"
-#include "flipper_v2.h"
+
 #include "api-hal-gpio.h"
+#include <furi/valuemutex.h>
 
 typedef struct {
     ValueMutex* gpio_mutex;

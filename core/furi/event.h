@@ -2,7 +2,12 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "cmsis_os.h"
+#include <cmsis_os2.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 typedef struct {
     osSemaphoreId_t semaphore_id;
@@ -34,3 +39,7 @@ void wait_event(Event* event);
 Waits with a timeout until the event is signalled.
 */
 bool wait_event_with_timeout(Event* event, uint32_t timeout_ms);
+
+#ifdef __cplusplus
+}
+#endif

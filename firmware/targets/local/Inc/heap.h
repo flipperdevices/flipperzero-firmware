@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <cmsis_os.h>
+#include <cmsis_osw.h>
 
 #define configTOTAL_HEAP_SIZE ((size_t)(8192 * 16))
 #define configAPPLICATION_ALLOCATED_HEAP 0

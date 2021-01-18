@@ -1,6 +1,6 @@
 #include "gui_event.h"
 
-#include <flipper_v2.h>
+#include <furi.h>
 
 #define GUI_EVENT_MQUEUE_SIZE 8
 

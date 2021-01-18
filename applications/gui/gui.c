@@ -1,8 +1,7 @@
 #include "gui.h"
 #include "gui_i.h"
 
-#include <flipper.h>
-#include <flipper_v2.h>
+#include <furi.h>
 #include <m-array.h>
 #include <stdio.h>
 

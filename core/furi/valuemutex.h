@@ -1,6 +1,11 @@
 #pragma once
 
-#include "flipper.h"
+#include <cmsis_os2.h>
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
 == ValueMutex ==
@@ -75,6 +80,10 @@ inline static bool write_mutex_block(ValueMutex* valuemutex, void* data, size_t 
 inline static bool read_mutex_block(ValueMutex* valuemutex, void* data, size_t len) {
     return read_mutex(valuemutex, data, len, osWaitForever);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
 
