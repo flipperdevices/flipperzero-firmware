@@ -484,18 +484,14 @@ void sd_filesystem(void* p) {
     gui_add_widget(gui, sd_app->widget, GuiLayerFullscreen);
     gui_add_widget(gui, sd_app->icon.widget, GuiLayerStatusBarLeft);
 
-    Cli* cli = furi_open("cli");
+    Cli* cli = furi_record_open("cli");
 
-    if(cli != NULL) {
-        cli_add_command(cli, "sd_status", cli_sd_status, sd_app);
-        cli_add_command(cli, "sd_format", cli_sd_format, sd_app);
-        cli_add_command(cli, "sd_info", cli_sd_info, sd_app);
-    }
+    cli_add_command(cli, "sd_status", cli_sd_status, sd_app);
+    cli_add_command(cli, "sd_format", cli_sd_format, sd_app);
+    cli_add_command(cli, "sd_info", cli_sd_info, sd_app);
 
     // add api record
-    if(!furi_create("sdcard", fs_api)) {
-        furiac_exit(NULL);
-    }
+    furi_record_create("sdcard", fs_api);
 
     // init menu
     // TODO menu icon

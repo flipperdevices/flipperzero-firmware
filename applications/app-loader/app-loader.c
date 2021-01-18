@@ -108,7 +108,6 @@ void app_loader(void* p) {
 
     gui_add_widget(gui, state.widget, GuiLayerFullscreen);
 
-
     // Main menu
     with_value_mutex(
         menu_mutex, (Menu * menu) {

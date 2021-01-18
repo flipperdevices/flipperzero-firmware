@@ -111,16 +111,14 @@ void SdTest::run() {
         exit();
     }
 
-    Cli* cli = static_cast<Cli*>(furi_open("cli"));
+    Cli* cli = static_cast<Cli*>(furi_record_open("cli"));
 
-    if(cli != NULL) {
-        // read_benchmark and write_benchmark signatures are same. so we must use tags
-        auto cli_read_cb = cbc::obtain_connector<0>(this, &SdTest::cli_read_benchmark);
-        cli_add_command(cli, "sd_read_test", cli_read_cb, this);
+    // read_benchmark and write_benchmark signatures are same. so we must use tags
+    auto cli_read_cb = cbc::obtain_connector<0>(this, &SdTest::cli_read_benchmark);
+    cli_add_command(cli, "sd_read_test", cli_read_cb, this);
 
-        auto cli_write_cb = cbc::obtain_connector<1>(this, &SdTest::cli_write_benchmark);
-        cli_add_command(cli, "sd_write_test", cli_write_cb, this);
-    }
+    auto cli_write_cb = cbc::obtain_connector<1>(this, &SdTest::cli_write_benchmark);
+    cli_add_command(cli, "sd_write_test", cli_write_cb, this);
 
     detect_sd_card();
     get_sd_card_info();

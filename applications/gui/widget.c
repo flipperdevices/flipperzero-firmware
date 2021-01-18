@@ -71,8 +71,6 @@ void widget_update(Widget* widget) {
 
 void widget_gui_set(Widget* widget, Gui* gui) {
     furi_assert(widget);
-    furi_assert(gui);
-
     widget->gui = gui;
 }
 
