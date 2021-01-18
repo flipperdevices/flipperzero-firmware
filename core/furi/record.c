@@ -57,7 +57,7 @@ void furi_record_create(const char* name, void* data) {
     // For each holder set event flag
     osThreadIdSet_it_t it;
     for(osThreadIdSet_it(it, record->holders); !osThreadIdSet_end_p(it); osThreadIdSet_next(it)) {
-        osThreadFlagsSet(*osThreadIdSet_ref(it), FURI_RECORD_FLAG_UPDATED);
+        osThreadFlagsSet((osThreadId_t)*osThreadIdSet_ref(it), FURI_RECORD_FLAG_UPDATED);
     }
     // Release mutex
     furi_check(osMutexRelease(furi_record_data.records_mutex) == osOK);
