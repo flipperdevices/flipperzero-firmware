@@ -1,5 +1,9 @@
 #include <furi.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 struct used for handling SPI info.
 */
@@ -134,3 +138,7 @@ void cc1101_example() {
 }
 ```
 */
+
+#ifdef __cplusplus
+}
+#endif

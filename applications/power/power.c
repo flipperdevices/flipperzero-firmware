@@ -75,10 +75,9 @@ void power_menu_info_callback(void* context) {
 Power* power_alloc() {
     Power* power = furi_alloc(sizeof(Power));
 
-    power->menu_vm = furi_open("menu");
-    furi_check(power->menu_vm);
+    power->menu_vm = furi_record_open("menu");
 
-    power->cli = furi_open("cli");
+    power->cli = furi_record_open("cli");
 
     power->menu = menu_item_alloc_menu("Power", NULL);
     menu_item_subitem_add(
@@ -167,7 +166,7 @@ void power_task(void* p) {
         cli_add_command(power->cli, "power_otg_off", power_cli_otg_off, power);
     }
 
-    Gui* gui = furi_open("gui");
+    Gui* gui = furi_record_open("gui");
     gui_add_widget(gui, power->usb_widget, GuiLayerStatusBarLeft);
     gui_add_widget(gui, power->battery_widget, GuiLayerStatusBarRight);
     view_dispatcher_attach_to_gui(power->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -175,14 +174,9 @@ void power_task(void* p) {
     with_value_mutex(
         power->menu_vm, (Menu * menu) { menu_item_add(menu, power->menu); });
 
-    if(!furi_create("power", power)) {
-        printf("[power_task] unable to create power record\n");
-        furiac_exit(NULL);
-    }
-
     api_hal_power_init();
 
-    furiac_ready();
+    furi_record_create("power", power);
 
     while(1) {
         with_view_model(

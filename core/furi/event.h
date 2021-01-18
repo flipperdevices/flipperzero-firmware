@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-
 typedef struct {
     osSemaphoreId_t semaphore_id;
 } Event;

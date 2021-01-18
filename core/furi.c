@@ -9,6 +9,8 @@ void set_exitcode(uint32_t _exitcode) {
 }
 
 void furi_init() {
+    gpio_api_init();
+    api_interrupt_init();
     furi_record_init();
     furi_stdglue_init();
 }
@@ -17,10 +19,7 @@ int systemd() {
     furi_init();
 
     // FURI startup
-    const size_t flipper_app_count = sizeof(FLIPPER_SERVICES) / sizeof(FLIPPER_SERVICES[0]);
-
-    for(size_t i = 0; i < flipper_app_count; i++) {
-        // furi_application_start(FLIPPER_SERVICES[i].app, FLIPPER_SERVICES[i].name, NULL);
+    for(size_t i = 0; i < FLIPPER_SERVICES_size(); i++) {
         osThreadAttr_t* attr = furi_alloc(sizeof(osThreadAttr_t));
         attr->name = FLIPPER_SERVICES[i].name;
         attr->stack_size = 1024;

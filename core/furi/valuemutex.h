@@ -104,10 +104,7 @@ void provider_app(void* _p) {
         flapp_exit(NULL);
     }
 
-    if(furi_create("provider/example", (void*)&example_mutex)) {
-        printf("critical error\n");
-        flapp_exit(NULL);
-    }
+    furi_record_create("provider/example", (void*)&example_mutex);
 
     // we are ready to provide record to other apps
     flapp_ready();
@@ -132,7 +129,7 @@ void consumer_app(void* _p) {
     // this app run after flapp_ready call in all requirements app
 
     // open mutex value
-    ValueMutex* counter_mutex = furi_open("provider/example");
+    ValueMutex* counter_mutex = furi_record_open("provider/example");
     if(counter_mutex == NULL) {
         printf("critical error\n");
         flapp_exit(NULL);

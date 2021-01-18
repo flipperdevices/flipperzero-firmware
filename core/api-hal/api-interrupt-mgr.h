@@ -2,6 +2,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*InterruptCallback)(void*, void*);
 
 typedef enum {
@@ -19,3 +23,7 @@ typedef struct {
 bool api_interrupt_init();
 void api_interrupt_add(InterruptCallback callback, InterruptType type, void* context);
 void api_interrupt_remove(InterruptCallback callback);
+
+#ifdef __cplusplus
+}
+#endif

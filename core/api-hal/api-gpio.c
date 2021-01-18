@@ -39,7 +39,7 @@ void gpio_disable(GpioDisableRecord* gpio_record) {
 
 // get GPIO record
 ValueMutex* gpio_open_mutex(const char* name) {
-    ValueMutex* gpio_mutex = (ValueMutex*)furi_open(name);
+    ValueMutex* gpio_mutex = (ValueMutex*)furi_record_open(name);
 
     // TODO disable gpio on app exit
     //if(gpio_mutex != NULL) flapp_on_exit(gpio_disable, gpio_mutex);

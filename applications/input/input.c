@@ -35,18 +35,10 @@ void input_task(void* p) {
         furiac_exit(NULL);
     }
 
-    if(!furi_create("input_state", &input_state_record)) {
-        printf("[input_task] cannot create the input_state record\n");
-        furiac_exit(NULL);
-    }
-
-    if(!furi_create("input_events", &input_events_record)) {
-        printf("[input_task] cannot create the input_events record\n");
-        furiac_exit(NULL);
-    }
+    furi_record_create("input_state", &input_state_record);
+    furi_record_create("input_events", &input_events_record);
 
     // we ready to work
-    furiac_ready();
     initialized = true;
 
     // Force state update

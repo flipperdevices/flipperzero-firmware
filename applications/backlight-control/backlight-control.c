@@ -1,7 +1,7 @@
 #include <furi.h>
 
-#define  BACKLIGHT_TIME 10000
-#define  BACKLIGHT_FLAG_ACTIVITY 0x00000001U
+#define BACKLIGHT_TIME 10000
+#define BACKLIGHT_FLAG_ACTIVITY 0x00000001U
 
 static void event_cb(const void* value, void* ctx) {
     osThreadFlagsSet((osThreadId_t)ctx, BACKLIGHT_FLAG_ACTIVITY);
@@ -16,16 +16,13 @@ void backlight_control(void* p) {
     gpio_write(backlight_record, true);
 
     // open record
-    PubSub* event_record = furi_open("input_events");
-    furi_check(event_record);
+    PubSub* event_record = furi_record_open("input_events");
     subscribe_pubsub(event_record, event_cb, (void*)osThreadGetId());
-
-    // we ready to work
-    furiac_ready();
 
     while(1) {
         // wait for event
-        if(osThreadFlagsWait(BACKLIGHT_FLAG_ACTIVITY, osFlagsWaitAny, BACKLIGHT_TIME) == BACKLIGHT_FLAG_ACTIVITY) {
+        if(osThreadFlagsWait(BACKLIGHT_FLAG_ACTIVITY, osFlagsWaitAny, BACKLIGHT_TIME) ==
+           BACKLIGHT_FLAG_ACTIVITY) {
             gpio_write(backlight_record, true);
         } else {
             gpio_write(backlight_record, false);

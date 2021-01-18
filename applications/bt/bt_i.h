@@ -14,6 +14,8 @@
 
 typedef struct {
     Cli* cli;
+    Gui* gui;
+    ValueMutex* menu;
     // Status bar
     Icon* statusbar_icon;
     Widget* statusbar_widget;
@@ -23,5 +25,9 @@ typedef struct {
 } Bt;
 
 Bt* bt_alloc();
+
+void bt_draw_statusbar_callback(Canvas* canvas, void* context);
+
+void bt_cli_info(string_t args, void* context);
 
 void bt_draw_statusbar_callback(Canvas* canvas, void* context);

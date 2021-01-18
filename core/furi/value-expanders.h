@@ -5,6 +5,10 @@
 #include "event.h"
 #include <m-list.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
 == Value composer ==
 */
@@ -105,3 +109,7 @@ bool write_managed(ValueManager* managed, void* data, size_t len, uint32_t timeo
 commit_managed works as `release_mutex` but send notify with current value.
 */
 bool commit_managed(ValueManager* managed, void* value);
+
+#ifdef __cplusplus
+}
+#endif

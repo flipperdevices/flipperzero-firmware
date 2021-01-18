@@ -31,7 +31,7 @@ void furi_record_init() {
 
 FuriRecord* furi_record_get_or_create(string_t name_str) {
     FuriRecord* record = FuriRecordDict_get(furi_record_data.records, name_str);
-    if (!record) {
+    if(!record) {
         FuriRecord new_record;
         new_record.data = NULL;
         new_record.owner = NULL;
@@ -74,9 +74,7 @@ bool furi_record_destroy(const char* name) {
     bool destroyed = false;
     furi_check(osMutexAcquire(furi_record_data.records_mutex, osWaitForever) == osOK);
     FuriRecord* record = FuriRecordDict_get(furi_record_data.records, name_str);
-    if (record
-        && record->owner == thread_id
-        && osThreadIdSet_size(record->holders) == 0) {
+    if(record && record->owner == thread_id && osThreadIdSet_size(record->holders) == 0) {
         osThreadIdSet_clear(record->holders);
         FuriRecordDict_erase(furi_record_data.records, name_str);
     }
@@ -98,8 +96,8 @@ void* furi_record_open(const char* name) {
         record = furi_record_get_or_create(name_str);
         osThreadIdSet_push(record->holders, (uint32_t)thread_id);
         furi_check(osMutexRelease(furi_record_data.records_mutex) == osOK);
-        // Check if owner is already arrived 
-        if (record->owner) {
+        // Check if owner is already arrived
+        if(record->owner) {
             break;
         }
         // Wait for thread flag to appear

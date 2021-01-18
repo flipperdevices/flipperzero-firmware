@@ -90,7 +90,7 @@ void SdTest::run() {
 
     app_ready();
 
-    fs_api = static_cast<FS_Api*>(furi_open("sdcard"));
+    fs_api = static_cast<FS_Api*>(furi_record_open("sdcard"));
 
     if(fs_api == NULL) {
         set_error({"cannot get sdcard api"});

@@ -13,9 +13,9 @@ typedef struct {
     bool result;
 } test_message;
 
-#define SEND_MESSAGE(value, data)                                           \
+#define SEND_MESSAGE(value, data)                                            \
     {                                                                        \
-        message.result = value;                                             \
+        message.result = value;                                              \
         snprintf(message.text, 256, "Error at line %d, %s", __LINE__, data); \
         osMessageQueuePut(test_messages, &message, 0U, 0U);                  \
     }
@@ -34,7 +34,7 @@ void _furi_new_main_app(void* p) {
     _furi_new_wait();
 
     int another_test_value = int_value_init;
-    bool result = new_furi_create("test/another_app_record", &another_test_value);
+    furi_record_create("test/another_app_record", &another_test_value);
 
     SEND_MESSAGE(false, "dummy text");
 
@@ -51,7 +51,7 @@ void test_furi_new() {
     // launch test thread
     FuriAppId main_app = new_flapp_app_start(_furi_new_main_app, "main_app", 512, NULL);
     _furi_new_continue(main_app);
-    
+
     while(1) {
         if(osMessageQueueGet(test_messages, &message, NULL, osWaitForever) == osOK) {
             if(message.result == true) {
@@ -64,11 +64,11 @@ void test_furi_new() {
 
     /*
     // test that "create" wont affect pointer value
-    new_furi_create("test/record", &test_value);
+    furi_record_create("test/record", &test_value);
     mu_assert_int_eq(test_value, int_value_init);
 
     // test that we get correct pointer
-    int* test_value_pointer = new_furi_open_block("test/record");
+    int* test_value_pointer = furi_record_open("test/record");
     mu_assert_pointers_not_eq(test_value_pointer, NULL);
     mu_assert_pointers_eq(test_value_pointer, &test_value);
 
@@ -86,7 +86,7 @@ void test_furi_new() {
     osSemaphoreAcquire(new_record_available, osWaitForever);
 
     // open record, test that record pointed to int_value_init
-    test_value_pointer = new_furi_open_block("test/another_app_record");
+    test_value_pointer = furi_record_open("test/another_app_record");
     mu_assert_pointers_not_eq(test_value_pointer, NULL);
     mu_assert_int_eq(*test_value_pointer, int_value_init);
 

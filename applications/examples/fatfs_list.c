@@ -58,18 +58,9 @@ void fatfs_list(void* p) {
 
     printf("[fatfs_list] sd inserted\n");
 
-    FuriRecordSubscriber* fb_record =
-        furi_open_deprecated("u8g2_fb", false, false, NULL, NULL, NULL);
-    if(fb_record == NULL) {
-        printf("[fatfs_list] cannot create fb record\n");
-        furiac_exit(NULL);
-    }
+    FuriRecordSubscriber* fb_record = furi_record_open("u8g2_fb");
+    PubSub* event_record = furi_record_open("input_events");
 
-    PubSub* event_record = furi_open("input_events");
-    if(event_record == NULL) {
-        printf("[fatfs_list] cannot open input_events record\n");
-        furiac_exit(NULL);
-    }
     PubSubItem* subscription = subscribe_pubsub(event_record, event_cb, event_queue);
     if(subscription == NULL) {
         printf("[fatfs_list] cannot register input_events callback\n");

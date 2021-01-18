@@ -38,5 +38,6 @@ void __furi_check_debug(const char* file, int line, const char* function, const 
 void __furi_abort(void) {
     __disable_irq();
     asm("bkpt 1");
-    while(1){}
+    while(1) {
+    }
 }

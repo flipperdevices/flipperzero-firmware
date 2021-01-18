@@ -173,12 +173,7 @@ void cli_task(void* p) {
     // Init basic cli commands
     cli_commands_init(cli);
 
-    if(!furi_create("cli", cli)) {
-        printf("[cli_task] cannot create the cli record\n");
-        furiac_exit(NULL);
-    }
-
-    furiac_ready();
+    furi_record_create("cli", cli);
 
     while(1) {
         cli_process_input(cli);
