@@ -49,6 +49,9 @@ static void handle_menu(void* _ctx) {
     if(ctx->app->app == NULL) return;
 
     widget_enabled_set(ctx->state->widget, true);
+
+    // TODO how to call this?
+    // furiac_wait_libs(&FLIPPER_STARTUP[i].libs);
     api_hal_timebase_insomnia_enter();
 
     ctx->state->current_app = ctx->app;

@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_gpio.h>
 
 #include <FreeRTOS.h>
-#include <task.h>
+#include <cmsis_os.h>
 
 #define API_HAL_TIMEBASE_CLK_FREQUENCY 32768
 #define API_HAL_TIMEBASE_TICK_PER_SECOND 1024
