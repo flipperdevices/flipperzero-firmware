@@ -1,5 +1,4 @@
 #include "stdglue.h"
-#include <api-hal-timebase.h>
 #include <main.h>
 
 #include <stdio.h>
@@ -17,9 +16,7 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
         return 0;
     }
 
-    api_hal_timebase_insomnia_enter();
     HAL_UART_Transmit(&DEBUG_UART, (uint8_t*)data, (uint16_t)size, HAL_MAX_DELAY);
-    api_hal_timebase_insomnia_exit();
 
     return size;
 }

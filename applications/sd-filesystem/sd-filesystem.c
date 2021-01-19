@@ -481,10 +481,12 @@ void sd_filesystem(void* p) {
     FS_Api* fs_api = fs_api_alloc();
 
     Gui* gui = furi_record_open("gui");
+    Cli* cli = furi_record_open("cli");
+    ValueMutex* menu_vm = furi_record_open("menu");
+
     gui_add_widget(gui, sd_app->widget, GuiLayerFullscreen);
     gui_add_widget(gui, sd_app->icon.widget, GuiLayerStatusBarLeft);
 
-    Cli* cli = furi_record_open("cli");
 
     cli_add_command(cli, "sd_status", cli_sd_status, sd_app);
     cli_add_command(cli, "sd_format", cli_sd_format, sd_app);
@@ -506,7 +508,6 @@ void sd_filesystem(void* p) {
         menu_item, menu_item_alloc_function("Eject", NULL, app_sd_eject_callback, sd_app));
 
     // add item to menu
-    ValueMutex* menu_vm = furi_record_open("menu");
     furi_check(menu_vm);
     with_value_mutex(
         menu_vm, (Menu * menu) { menu_item_add(menu, menu_item); });
