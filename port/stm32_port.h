@@ -1,4 +1,4 @@
-/* Copyright 2018 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,18 @@
  * limitations under the License.
  */
 
-// #define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#pragma once
 
-#include "catch.hpp"
+#include <stdint.h>
 #include "serial_io.h"
-#include "serial_io_mock.h"
+#include "stm32f4xx_hal.h"
 
+typedef struct {
+    UART_HandleTypeDef *huart;
+    GPIO_TypeDef *port_io0;
+    uint16_t pin_num_io0;
+    GPIO_TypeDef *port_rst;
+    uint16_t pin_num_rst;
+} loader_stm32_config_t;
 
-int main( int argc, char* argv[] ) {
-    
-    const loader_serial_config_t dummy_config = { 0 };
-
-    // global setup...
-    if( loader_port_serial_init(&dummy_config) != ESP_LOADER_SUCCESS ) {
-        std::cout << "Serial initialization failed";
-        return 0;
-    }
-
-    int result = Catch::Session().run( argc, argv );
-
-    // global clean-up...
-    loader_port_serial_deinit();
-
-    return result;
-}
+void loader_port_stm32_init(loader_stm32_config_t *config);

@@ -18,8 +18,7 @@
 #include <stdint.h>
 #include <sys/param.h>
 #include <stdio.h>
-#include "serial_io.h"
-#include "stm32f4xx_hal.h"
+#include "stm32_port.h"
 
 // #define SERIAL_DEBUG_ENABLE
 
@@ -98,17 +97,14 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_
     }
 }
 
-void loader_port_stm32_init(UART_HandleTypeDef *huart, 
-                            GPIO_TypeDef* port_io0, 
-                            uint16_t pin_num_io0,
-                            GPIO_TypeDef* port_rst, 
-                            uint16_t pin_num_rst)
+void loader_port_stm32_init(loader_stm32_config_t *config)
+
 {
-    uart = huart;
-    gpio_port_io0 = port_io0; 
-    gpio_port_rst = port_rst;
-    gpio_num_io0 = pin_num_io0;
-    gpio_num_rst = pin_num_rst;
+    uart = config->huart;
+    gpio_port_io0 = config->port_io0; 
+    gpio_port_rst = config->port_rst;
+    gpio_num_io0 = config->pin_num_io0;
+    gpio_num_rst = config->pin_num_rst;
 }
 
 // Set GPIO0 LOW, then

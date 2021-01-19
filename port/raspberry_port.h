@@ -1,4 +1,4 @@
-/* Copyright 2018 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,28 +13,16 @@
  * limitations under the License.
  */
 
-// #define CATCH_CONFIG_MAIN
-#define CATCH_CONFIG_RUNNER
+#pragma once
 
-#include "catch.hpp"
+#include <stdint.h>
 #include "serial_io.h"
-#include "serial_io_mock.h"
 
+typedef struct {
+    const char *device;
+    uint32_t baudrate;
+    uint32_t reset_trigger_pin;
+    uint32_t gpio0_trigger_pin;
+} loader_raspberry_config_t;
 
-int main( int argc, char* argv[] ) {
-    
-    const loader_serial_config_t dummy_config = { 0 };
-
-    // global setup...
-    if( loader_port_serial_init(&dummy_config) != ESP_LOADER_SUCCESS ) {
-        std::cout << "Serial initialization failed";
-        return 0;
-    }
-
-    int result = Catch::Session().run( argc, argv );
-
-    // global clean-up...
-    loader_port_serial_deinit();
-
-    return result;
-}
+esp_loader_error_t loader_port_raspberry_init(const loader_raspberry_config_t *config);

@@ -12,9 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
-#include "serial_io.h"
 #include "esp_loader.h"
 #include "example_common.h"
+#include "raspberry_port.h"
 
 #define TARGET_RST_Pin 2
 #define TARGET_IO0_Pin 3
@@ -24,11 +24,6 @@
 #define SERIAL_DEVICE     "/dev/ttyS0"
 
 #define BINARY_PATH       "../../binaries/ESP32_AT_Firmware/Firmware.bin"
-
-esp_loader_error_t loader_port_raspberry_init(const char *device,
-                                              uint32_t baudrate,
-                                              uint32_t reset_trigger_pin,
-                                              uint32_t gpio0_trigger_pin);
 
 
 static void upload_file(const char *path, size_t address)
@@ -69,7 +64,14 @@ cleanup:
 
 int main(void)
 {
-    loader_port_raspberry_init(SERIAL_DEVICE, DEFAULT_BAUD_RATE, TARGET_RST_Pin, TARGET_IO0_Pin);
+    const loader_raspberry_config_t config = {
+        .device = SERIAL_DEVICE,
+        .baudrate = DEFAULT_BAUD_RATE,
+        .reset_trigger_pin = TARGET_RST_Pin,
+        .gpio0_trigger_pin = TARGET_IO0_Pin,
+    };
+
+    loader_port_raspberry_init(&config);
 
     if (connect_to_target(HIGHER_BAUD_RATE) == ESP_LOADER_SUCCESS) {
         upload_file(BINARY_PATH, 0);

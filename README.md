@@ -17,8 +17,6 @@ In order to support new target, following function has to be implemented by user
 
 Following functions are part of serial_io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library. 
 
-* loader_port_serial_init()
-* loader_port_serial_deinit()
 * loader_port_change_baudrate()
 * loader_port_reset_target()
 * loader_port_debug_print()
