@@ -2,6 +2,9 @@
 #include "qrcode/qrcode.h"
 #include <furi.h>
 
+/*
+TODO: rework with new app api
+
 void u8g2_DrawPixelSize(u8g2_t* u8g2, uint8_t x, uint8_t y, uint8_t size) {
     for(uint8_t px = 0; px < size; px++) {
         for(uint8_t py = 0; py < size; py++) {
@@ -68,3 +71,4 @@ void u8g2_qrcode(void* p) {
         delay(1);
     }
 }
+*/
