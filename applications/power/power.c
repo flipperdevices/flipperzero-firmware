@@ -2,7 +2,6 @@
 #include "power_views.h"
 
 #include <furi.h>
-#include <api-hal.h>
 
 #include <menu/menu.h>
 #include <menu/menu_item.h>

@@ -87,6 +87,8 @@ void furi_concurent_app(void* p) {
 }
 
 void test_furi_concurrent_access() {
+    mu_assert(false, "please reimplement or delete test");
+    /*
     // 1. Create holding record
     ConcurrentValue value = {.a = 0, .b = 0};
     ValueMutex mutex;
@@ -122,4 +124,5 @@ void test_furi_concurrent_access() {
     mu_assert_int_eq(value.a, value.b);
 
     mu_check(delete_mutex(&mutex));
+    */
 }

@@ -891,6 +891,7 @@ template <class T> void SdTest::set_text(std::initializer_list<T> list) {
 
     printf("------------------------\n");
     release_state();
+    update_gui();
 }
 
 // render app

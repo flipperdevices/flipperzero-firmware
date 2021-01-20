@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <input.h>
 
 static void event_cb(const void* value, void* ctx) {
     const InputEvent* event = value;
