@@ -11,7 +11,7 @@ static void furi_concurent_app(void* p) {
 
 void test_furi_event() {
     mu_assert(false, "please reimplement or delete test");
-    
+
     /*Event event;
 
     mu_check(init_event(&event));
