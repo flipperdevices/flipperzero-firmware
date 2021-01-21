@@ -33,7 +33,7 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
         osKernelUnlock();
 
         if(result) {
-            printf("device on line\n");
+            printf("device on line\r\n");
 
             delay(50);
             osKernelLock();
@@ -45,16 +45,16 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
             for(uint8_t i = 1; i < 8; i++) {
                 printf(":%x", address[i]);
             }
-            printf("\n");
+            printf("\r\n");
 
             printf("crc8: %x\n", maxim_crc8(address, 7));
 
             if(maxim_crc8(address, 8) == 0) {
-                printf("CRC valid\n");
+                printf("CRC valid\r\n");
                 memcpy(app->state.dallas_address[app->state.dallas_address_index], address, 8);
                 app->blink_green();
             } else {
-                printf("CRC invalid\n");
+                printf("CRC invalid\r\n");
             }
         } else {
         }

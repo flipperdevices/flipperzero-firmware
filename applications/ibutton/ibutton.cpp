@@ -29,7 +29,7 @@ void AppiButton::run() {
             if(event.type == AppiButtonEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
-                    printf("[ibutton] bye!\n");
+                    printf("[ibutton] bye!\r\n");
                     // TODO remove all widgets create by app
                     widget_enabled_set(widget, false);
                     osThreadExit();

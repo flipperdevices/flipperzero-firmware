@@ -77,6 +77,7 @@ bool furi_record_destroy(const char* name) {
     if(record && record->owner == thread_id && osThreadIdSet_size(record->holders) == 0) {
         osThreadIdSet_clear(record->holders);
         FuriRecordDict_erase(furi_record_data.records, name_str);
+        destroyed = true;
     }
     furi_check(osMutexRelease(furi_record_data.records_mutex) == osOK);
 

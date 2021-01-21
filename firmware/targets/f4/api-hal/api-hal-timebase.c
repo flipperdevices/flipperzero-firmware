@@ -124,13 +124,14 @@ static inline uint32_t api_hal_timebase_sleep(TickType_t expected_idle_ticks) {
 }
 
 void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
+    if (!api_hal_power_deep_available() || api_hal_timebase.insomnia) {
+        return;
+    }
+
     // Limit mount of ticks to maximum that timer can count
     if (expected_idle_ticks > API_HAL_TIMEBASE_MAX_SLEEP) {
         expected_idle_ticks = API_HAL_TIMEBASE_MAX_SLEEP;
     }
-
-    if (api_hal_timebase.insomnia) 
-        return;
     
     // Stop IRQ handling, no one should disturb us till we finish 
     __disable_irq();

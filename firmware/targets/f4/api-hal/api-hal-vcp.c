@@ -72,7 +72,7 @@ size_t api_hal_vcp_rx(uint8_t* buffer, size_t size) {
     return xStreamBufferReceive(api_hal_vcp.rx_stream, buffer, size, portMAX_DELAY);
 }
 
-void api_hal_vcp_tx(uint8_t* buffer, size_t size) {
+void api_hal_vcp_tx(const uint8_t* buffer, size_t size) {
     while (size > 0 && api_hal_vcp.alive) {
         furi_check(osSemaphoreAcquire(api_hal_vcp.tx_semaphore, osWaitForever) == osOK);
 
@@ -81,7 +81,7 @@ void api_hal_vcp_tx(uint8_t* buffer, size_t size) {
             batch_size = APP_TX_DATA_SIZE;
         }
 
-        if (CDC_Transmit_FS(buffer, batch_size) == USBD_OK) {
+        if (CDC_Transmit_FS((uint8_t*)buffer, batch_size) == USBD_OK) {
             size -= batch_size;
             buffer += batch_size;
         } else {

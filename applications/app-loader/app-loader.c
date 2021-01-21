@@ -72,7 +72,7 @@ static void handle_cli(string_t args, void* _ctx) {
 
     if(ctx->app->app == NULL) return;
 
-    cli_print("Starting furi application\r\n");
+    printf("Starting furi application\r\n");
 
     ctx->state->current_app = ctx->app;
     ctx->state->app_thread_attr.name = ctx->app->name;
@@ -86,7 +86,7 @@ static void handle_cli(string_t args, void* _ctx) {
     ctx->state->app_thread_attr.reserved = 0;
     ctx->state->app_thread_id = osThreadNew(ctx->app->app, NULL, &ctx->state->app_thread_attr);
 
-    cli_print("Press any key to kill application");
+    printf("Press any key to kill application");
 
     char c;
     cli_read(&c, 1);
@@ -184,7 +184,7 @@ void app_loader(void* p) {
             menu_item_add(menu, menu_plugins);
         });
 
-    printf("[app loader] start\n");
+    printf("[app loader] start\r\n");
 
     osThreadSuspend(self_id);
 }

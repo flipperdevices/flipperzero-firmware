@@ -28,7 +28,7 @@ void application_input_dump(void* p) {
     PubSub* event_record = furi_record_open("input_events");
     subscribe_pubsub(event_record, event_cb, NULL);
 
-    printf("Example app [input dump]\n");
+    printf("Example app [input dump]\r\n");
 
     for(;;) {
         delay(100);

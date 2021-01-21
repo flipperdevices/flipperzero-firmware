@@ -105,7 +105,7 @@ static bool even_check(uint8_t* buf) {
                 buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
             return false;
         }
-        printf("\n");
+        printf("\r\n");
     }
 
     for(uint8_t col = 0; col < ROW_SIZE; col++) {
@@ -137,7 +137,7 @@ static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
             offset++;
         }
     }
-    printf("\n");
+    printf("\r\n");
 
     *customer = data;
 
@@ -154,7 +154,7 @@ static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
             offset++;
         }
     }
-    printf("\n");
+    printf("\r\n");
 
     *em_data = data;
 }
@@ -193,7 +193,7 @@ void lf_rfid_workaround(void* p) {
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
-        printf("cannot create mutex\n");
+        printf("cannot create mutex\r\n");
         furiac_exit(NULL);
     }
 
