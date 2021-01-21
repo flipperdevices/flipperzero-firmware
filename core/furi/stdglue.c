@@ -66,6 +66,7 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
 void furi_stdglue_init() {
     // Init outputs structures
     furi_stdglue.mutex = osMutexNew(NULL);
+    furi_check(furi_stdglue.mutex);
     FuriStdglueCallbackDict_init(furi_stdglue.global_outputs);
     FuriStdglueCallbackDict_init(furi_stdglue.thread_outputs);
     // Prepare and set stdout descriptor

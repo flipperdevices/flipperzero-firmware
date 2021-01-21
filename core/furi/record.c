@@ -26,6 +26,7 @@ FuriRecordData furi_record_data;
 
 void furi_record_init() {
     furi_record_data.records_mutex = osMutexNew(NULL);
+    furi_check(furi_record_data.records_mutex);
     FuriRecordDict_init(furi_record_data.records);
 }
 
