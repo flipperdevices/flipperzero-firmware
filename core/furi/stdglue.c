@@ -1,5 +1,6 @@
 #include "stdglue.h"
 #include "check.h"
+#include "memmgr.h"
 
 #include <main.h>
 #include <cmsis_os2.h>
@@ -22,16 +23,16 @@ typedef struct {
     FuriStdglueCallbackDict_t thread_outputs;
 } FuriStdglue;
 
-FuriStdglue furi_stdglue;
+static FuriStdglue* furi_stdglue = NULL;
 
 static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
+    assert(furi_stdglue);
     osThreadId_t thread_id = osThreadGetId();
-    if(thread_id) {
-        osMutexAcquire(furi_stdglue.mutex, osWaitForever);
+    if(thread_id && osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK) {
         // We are in the thread context
         // Handle global callbacks
         FuriStdglueCallbackDict_it_t it;
-        for(FuriStdglueCallbackDict_it(it, furi_stdglue.global_outputs);
+        for(FuriStdglueCallbackDict_it(it, furi_stdglue->global_outputs);
             !FuriStdglueCallbackDict_end_p(it);
             FuriStdglueCallbackDict_next(it)) {
             osThreadId_t it_thread = (osThreadId_t)FuriStdglueCallbackDict_ref(it)->key;
@@ -42,11 +43,11 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
         }
         // Handle thread callbacks
         FuriStdglueWriteCallback* callback_ptr =
-            FuriStdglueCallbackDict_get(furi_stdglue.thread_outputs, (uint32_t)thread_id);
+            FuriStdglueCallbackDict_get(furi_stdglue->thread_outputs, (uint32_t)thread_id);
         if(callback_ptr) {
             (*callback_ptr)(_cookie, data, size);
         }
-        osMutexRelease(furi_stdglue.mutex);
+        furi_check(osMutexRelease(furi_stdglue->mutex) == osOK);
     }
     // Flush
     if(data == 0) {
@@ -64,11 +65,12 @@ static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
 }
 
 void furi_stdglue_init() {
+    furi_stdglue = furi_alloc(sizeof(FuriStdglue));
     // Init outputs structures
-    furi_stdglue.mutex = osMutexNew(NULL);
-    furi_check(furi_stdglue.mutex);
-    FuriStdglueCallbackDict_init(furi_stdglue.global_outputs);
-    FuriStdglueCallbackDict_init(furi_stdglue.thread_outputs);
+    furi_stdglue->mutex = osMutexNew(NULL);
+    furi_check(furi_stdglue->mutex);
+    FuriStdglueCallbackDict_init(furi_stdglue->global_outputs);
+    FuriStdglueCallbackDict_init(furi_stdglue->thread_outputs);
     // Prepare and set stdout descriptor
     FILE* fp = fopencookie(
         NULL,
@@ -79,21 +81,22 @@ void furi_stdglue_init() {
             .seek = NULL,
             .close = NULL,
         });
-    setvbuf(fp, NULL, _IONBF, 0);
+    setvbuf(fp, NULL, _IOLBF, 0);
     stdout = fp;
 }
 
 bool furi_stdglue_set_global_stdout_callback(FuriStdglueWriteCallback callback) {
+    assert(furi_stdglue);
     osThreadId_t thread_id = osThreadGetId();
     if(thread_id) {
-        osMutexAcquire(furi_stdglue.mutex, osWaitForever);
+        furi_check(osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK);
         if(callback) {
             FuriStdglueCallbackDict_set_at(
-                furi_stdglue.global_outputs, (uint32_t)thread_id, callback);
+                furi_stdglue->global_outputs, (uint32_t)thread_id, callback);
         } else {
-            FuriStdglueCallbackDict_erase(furi_stdglue.global_outputs, (uint32_t)thread_id);
+            FuriStdglueCallbackDict_erase(furi_stdglue->global_outputs, (uint32_t)thread_id);
         }
-        osMutexRelease(furi_stdglue.mutex);
+        furi_check(osMutexRelease(furi_stdglue->mutex) == osOK);
         return true;
     } else {
         return false;
@@ -101,16 +104,17 @@ bool furi_stdglue_set_global_stdout_callback(FuriStdglueWriteCallback callback) 
 }
 
 bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) {
+    assert(furi_stdglue);
     osThreadId_t thread_id = osThreadGetId();
     if(thread_id) {
-        osMutexAcquire(furi_stdglue.mutex, osWaitForever);
+        furi_check(osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK);
         if(callback) {
             FuriStdglueCallbackDict_set_at(
-                furi_stdglue.thread_outputs, (uint32_t)thread_id, callback);
+                furi_stdglue->thread_outputs, (uint32_t)thread_id, callback);
         } else {
-            FuriStdglueCallbackDict_erase(furi_stdglue.thread_outputs, (uint32_t)thread_id);
+            FuriStdglueCallbackDict_erase(furi_stdglue->thread_outputs, (uint32_t)thread_id);
         }
-        osMutexRelease(furi_stdglue.mutex);
+        furi_check(osMutexRelease(furi_stdglue->mutex) == osOK);
         return true;
     } else {
         return false;

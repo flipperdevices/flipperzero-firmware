@@ -62,6 +62,7 @@ void cli_nl() {
 
 void cli_prompt() {
     printf("\r\n>: ");
+    fflush(stdout);
 }
 
 void cli_backspace(Cli* cli) {
