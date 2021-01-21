@@ -3,11 +3,13 @@
 #include <m-list.h>
 #include <cmsis_os2.h>
 
-LIST_DEF(list_interrupt, InterruptCallbackItem, M_POD_OPLIST);
+LIST_DEF(list_interrupt, InterruptCallbackItem, M_POD_OPLIST)
+
 list_interrupt_t interrupts;
 osMutexId_t interrupt_list_mutex;
 
 bool api_interrupt_init() {
+    list_interrupt_init(interrupts);
     interrupt_list_mutex = osMutexNew(NULL);
     return (interrupt_list_mutex != NULL);
 }
