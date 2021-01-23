@@ -83,6 +83,7 @@
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  0
 #define configUSE_TICKLESS_IDLE                  2
 #define configRECORD_STACK_HIGH_ADDRESS          1
+#define configUSE_NEWLIB_REENTRANT               1
 /* USER CODE BEGIN MESSAGE_BUFFER_LENGTH_TYPE */
 /* Defaults to size_t for backward compatibility, but can be changed
    if lengths will always be less than the number of bytes in a size_t. */
