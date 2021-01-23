@@ -59,7 +59,7 @@ $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 	touch $@
 
 $(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
-	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS) -S $(DFU_SERIAL)
+	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS)
 	touch $@
 
 $(ASSETS): $(ASSETS_SOURCES) $(ASSETS_COMPILLER)
@@ -72,13 +72,16 @@ upload: $(OBJ_DIR)/upload
 
 debug: flash
 	arm-none-eabi-gdb \
-		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
+		-ex 'target extended-remote | openocd -p -c "gdb_port pipe" $(OPENOCD_OPTS)' \
 		-ex "set confirm off" \
 		-ex "source ../debug/FreeRTOS/FreeRTOS.py" \
 		-ex "source ../debug/PyCortexMDebug/scripts/gdb.py" \
 		-ex "svd_load $(SVD_FILE)" \
 		-ex "compare-sections" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
+
+openocd:
+	openocd $(OPENOCD_OPTS)
 
 bm_debug: flash
 	set -m; blackmagic & echo $$! > $(OBJ_DIR)/agent.PID
