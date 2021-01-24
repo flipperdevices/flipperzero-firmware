@@ -7,7 +7,7 @@ osThreadId_t systemdHandle;
 const osThreadAttr_t systemd_attributes = {
     .name = "systemd",
     .priority = (osPriority_t) osPriorityNormal,
-    .stack_size = 1024 * 4
+    .stack_size = 1024
 };
 
 void systemd(void *argument);
