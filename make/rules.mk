@@ -72,7 +72,7 @@ upload: $(OBJ_DIR)/upload
 
 debug: flash
 	arm-none-eabi-gdb \
-		-ex 'target extended-remote | openocd -p -c "gdb_port pipe" $(OPENOCD_OPTS)' \
+		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
 		-ex "set confirm off" \
 		-ex "source ../debug/FreeRTOS/FreeRTOS.py" \
 		-ex "source ../debug/PyCortexMDebug/scripts/gdb.py" \
