@@ -218,6 +218,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
       }
       /* restart advertising */
       Adv_Request(APP_BLE_FAST_ADV);
+      api_hal_timebase_insomnia_exit();
     }
     break; /* EVT_DISCONN_COMPLETE */
 
@@ -266,6 +267,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
           break;
         case EVT_LE_CONN_COMPLETE:
         {
+          api_hal_timebase_insomnia_enter();
           hci_le_connection_complete_event_rp0 *connection_complete_event;
 
           /**
