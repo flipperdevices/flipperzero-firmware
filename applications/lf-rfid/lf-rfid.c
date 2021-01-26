@@ -179,7 +179,6 @@ void lf_rfid_workaround(void* p) {
 
     // init ctx
     void* comp_ctx = (void*)event_queue;
-    api_interrupt_add(comparator_trigger_callback, InterruptTypeComparatorTrigger, comp_ctx);
 
     // start comp
     HAL_COMP_Start(&hcomp1);
@@ -328,6 +327,9 @@ void lf_rfid_workaround(void* p) {
 
                 if(state->on) {
                     gpio_write(pull_pin_record, false);
+                    api_interrupt_add(comparator_trigger_callback, InterruptTypeComparatorTrigger, comp_ctx);
+                } else {
+                    api_interrupt_remove(comparator_trigger_callback);
                 }
 
                 hal_pwmn_set(
