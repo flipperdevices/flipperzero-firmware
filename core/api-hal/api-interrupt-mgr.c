@@ -50,12 +50,47 @@ void api_interrupt_remove(InterruptCallback callback, InterruptType type) {
             // iterate over items
             list_interrupt_it_t it;
             for(list_interrupt_it(it, *list); !list_interrupt_end_p(it); list_interrupt_next(it)) {
-                const InterruptCallbackItem* item = list_interrupt_cref(it);
-
                 // if the iterator is equal to our element
-                if(item->callback == callback) {
+                if(it->current->data.callback == callback) {
                     list_interrupt_remove(*list, it);
-                    break;
+                }
+            }
+        }
+
+        osMutexRelease(interrupt_mutex);
+    }
+}
+
+void api_interrupt_enable(InterruptCallback callback, InterruptType type) {
+    if(osMutexAcquire(interrupt_mutex, osWaitForever) == osOK) {
+        list_interrupt_t* list = dict_interrupt_get(interrupts_dict, (uint32_t)type);
+
+        if(list != NULL) {
+            // iterate over items
+            list_interrupt_it_t it;
+            for(list_interrupt_it(it, *list); !list_interrupt_end_p(it); list_interrupt_next(it)) {
+                // if the iterator is equal to our element
+                if(it->current->data.callback == callback) {
+                    it->current->data.ready = true;
+                }
+            }
+        }
+
+        osMutexRelease(interrupt_mutex);
+    }
+}
+
+void api_interrupt_disable(InterruptCallback callback, InterruptType type) {
+    if(osMutexAcquire(interrupt_mutex, osWaitForever) == osOK) {
+        list_interrupt_t* list = dict_interrupt_get(interrupts_dict, (uint32_t)type);
+
+        if(list != NULL) {
+            // iterate over items
+            list_interrupt_it_t it;
+            for(list_interrupt_it(it, *list); !list_interrupt_end_p(it); list_interrupt_next(it)) {
+                // if the iterator is equal to our element
+                if(it->current->data.callback == callback) {
+                    it->current->data.ready = false;
                 }
             }
         }
@@ -74,11 +109,9 @@ void api_interrupt_call(InterruptType type, void* hw) {
         // iterate over items
         list_interrupt_it_t it;
         for(list_interrupt_it(it, *list); !list_interrupt_end_p(it); list_interrupt_next(it)) {
-            const InterruptCallbackItem* item = list_interrupt_cref(it);
-
             // if the iterator is equal to our element
-            if(item->ready) {
-                item->callback(hw, item->context);
+            if(it->current->data.ready) {
+                it->current->data.callback(hw, it->current->data.context);
             }
         }
     }
