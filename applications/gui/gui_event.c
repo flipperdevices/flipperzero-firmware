@@ -1,6 +1,6 @@
 #include "gui_event.h"
 
-#include <flipper_v2.h>
+#include <furi.h>
 
 #define GUI_EVENT_MQUEUE_SIZE 8
 
@@ -42,10 +42,10 @@ GuiEvent* gui_event_alloc() {
 
     gui_event->timer = osTimerNew(gui_event_timer_callback, osTimerPeriodic, gui_event, NULL);
     assert(gui_event->timer);
-    osTimerStart(gui_event->timer, 1000 / 10);
+    // osTimerStart(gui_event->timer, 1024 / 4);
 
     // Input
-    gui_event->input_event_record = furi_open("input_events");
+    gui_event->input_event_record = furi_record_open("input_events");
     furi_check(gui_event->input_event_record != NULL);
     subscribe_pubsub(gui_event->input_event_record, gui_event_input_events_callback, gui_event);
 

@@ -118,10 +118,9 @@ int main(void)
   MX_AES2_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+  api_hal_init();
   MX_FATFS_Init();
   delay_us_init_DWT();
-  api_hal_vcp_init();
-  api_hal_spi_init();
   // Errata 2.2.9, Flash OPTVERR flag is always set after system reset
   __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
   /* USER CODE END 2 */

@@ -1,6 +1,9 @@
 #include "api-interrupt-mgr.h"
 #include "mlib/m-dict.h"
 
+#include <m-list.h>
+#include <cmsis_os2.h>
+
 LIST_DEF(list_interrupt, InterruptCallbackItem, M_POD_OPLIST);
 DICT_DEF2(dict_interrupt, uint32_t, M_DEFAULT_OPLIST, list_interrupt_t, M_A1_OPLIST);
 

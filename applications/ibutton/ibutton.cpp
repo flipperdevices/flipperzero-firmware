@@ -36,7 +36,7 @@ void AppiButton::run() {
                     widget_enabled_set(widget, false);
                     gui_remove_widget(gui, widget);
 
-                    furiac_exit(NULL);
+                    osThreadExit();
                 }
 
                 if(event.value.input.state && event.value.input.input == InputLeft) {

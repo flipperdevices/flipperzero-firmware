@@ -1,3 +1,4 @@
+#pragma once
 #include "one_wire_master.h"
 #include "one_wire_timings.h"
 

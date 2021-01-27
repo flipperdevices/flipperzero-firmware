@@ -1,5 +1,10 @@
 #pragma once
-#include "flipper_v2.h"
+
+#include <stdbool.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef void (*InterruptCallback)(void*, void*);
 
@@ -24,3 +29,7 @@ void api_interrupt_remove(InterruptCallback callback, InterruptType type);
 void api_interrupt_enable(InterruptCallback callback, InterruptType type);
 void api_interrupt_disable(InterruptCallback callback, InterruptType type);
 void api_interrupt_call(InterruptType type, void* hw);
+
+#ifdef __cplusplus
+}
+#endif

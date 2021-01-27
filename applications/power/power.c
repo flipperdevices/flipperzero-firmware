@@ -1,7 +1,7 @@
 #include "power.h"
 #include "power_views.h"
 
-#include <flipper_v2.h>
+#include <furi.h>
 
 #include <menu/menu.h>
 #include <menu/menu_item.h>
@@ -10,10 +10,10 @@
 #include <gui/widget.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
-
+#include <gui/modules/dialog.h>
 #include <assets_icons.h>
-#include <api-hal-power.h>
 #include <cli/cli.h>
+#include <stm32wbxx.h>
 
 struct Power {
     ViewDispatcher* view_dispatcher;
@@ -24,6 +24,8 @@ struct Power {
 
     Icon* battery_icon;
     Widget* battery_widget;
+
+    Dialog* dialog;
 
     ValueMutex* menu_vm;
     Cli* cli;
@@ -47,12 +49,32 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         });
 }
 
+uint32_t power_info_back_callback(void* context) {
+    return VIEW_NONE;
+}
+
 void power_menu_off_callback(void* context) {
     api_hal_power_off();
 }
 
+void power_menu_reset_dialog_result(DialogResult result, void* context) {
+    if(result == DialogResultLeft) {
+        api_hal_boot_set_mode(ApiHalBootModeDFU);
+        NVIC_SystemReset();
+    } else if(result == DialogResultRight) {
+        api_hal_boot_set_mode(ApiHalBootModeNormal);
+        NVIC_SystemReset();
+    }
+}
+
 void power_menu_reset_callback(void* context) {
-    NVIC_SystemReset();
+    Power* power = context;
+    dialog_set_result_callback(power->dialog, power_menu_reset_dialog_result);
+    dialog_set_header_text(power->dialog, "Reset type");
+    dialog_set_text(power->dialog, "Reboot where?");
+    dialog_set_left_button_text(power->dialog, "DFU");
+    dialog_set_right_button_text(power->dialog, "OS");
+    view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewDialog);
 }
 
 void power_menu_enable_otg_callback(void* context) {
@@ -71,10 +93,9 @@ void power_menu_info_callback(void* context) {
 Power* power_alloc() {
     Power* power = furi_alloc(sizeof(Power));
 
-    power->menu_vm = furi_open("menu");
-    furi_check(power->menu_vm);
+    power->menu_vm = furi_record_open("menu");
 
-    power->cli = furi_open("cli");
+    power->cli = furi_record_open("cli");
 
     power->menu = menu_item_alloc_menu("Power", NULL);
     menu_item_subitem_add(
@@ -96,6 +117,11 @@ Power* power_alloc() {
     view_set_draw_callback(power->info_view, power_info_draw_callback);
     view_set_previous_callback(power->info_view, power_info_back_callback);
     view_dispatcher_add_view(power->view_dispatcher, PowerViewInfo, power->info_view);
+
+    power->dialog = dialog_alloc();
+    dialog_set_context(power->dialog, power);
+    view_dispatcher_add_view(
+        power->view_dispatcher, PowerViewDialog, dialog_get_view(power->dialog));
 
     power->usb_icon = assets_icons_get(I_USBConnected_15x8);
     power->usb_widget = widget_alloc();
@@ -163,7 +189,7 @@ void power_task(void* p) {
         cli_add_command(power->cli, "power_otg_off", power_cli_otg_off, power);
     }
 
-    Gui* gui = furi_open("gui");
+    Gui* gui = furi_record_open("gui");
     gui_add_widget(gui, power->usb_widget, GuiLayerStatusBarLeft);
     gui_add_widget(gui, power->battery_widget, GuiLayerStatusBarRight);
     view_dispatcher_attach_to_gui(power->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -171,14 +197,9 @@ void power_task(void* p) {
     with_value_mutex(
         power->menu_vm, (Menu * menu) { menu_item_add(menu, power->menu); });
 
-    if(!furi_create("power", power)) {
-        printf("[power_task] unable to create power record\n");
-        furiac_exit(NULL);
-    }
-
     api_hal_power_init();
 
-    furiac_ready();
+    furi_record_create("power", power);
 
     while(1) {
         with_view_model(
