@@ -8,6 +8,12 @@ typedef enum {
     KEY_METAKOM, /**< METAKOM */
 } KeyType;
 
+typedef enum {
+    WR_OK,
+    WR_SAME_KEY,
+    WR_ERROR,
+} WriterResult;
+
 class BlanksWriter {
 private:
     const GpioPin* gpio;
@@ -28,7 +34,7 @@ public:
     BlanksWriter(const GpioPin* one_wire_gpio);
     ~BlanksWriter();
 
-    bool write(KeyType type, const uint8_t* key, uint8_t key_length);
+    WriterResult write(KeyType type, const uint8_t* key, uint8_t key_length);
     void start();
     void stop();
 };

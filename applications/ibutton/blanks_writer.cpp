@@ -60,8 +60,10 @@ BlanksWriter::~BlanksWriter() {
     free(onewire);
 }
 
-bool BlanksWriter::write(KeyType type, const uint8_t* key, uint8_t key_length) {
+WriterResult BlanksWriter::write(KeyType type, const uint8_t* key, uint8_t key_length) {
     uint8_t write_result = -1;
+    WriterResult result = WR_ERROR;
+
     bool same_key = false;
 
     osKernelLock();
@@ -69,8 +71,6 @@ bool BlanksWriter::write(KeyType type, const uint8_t* key, uint8_t key_length) {
     osKernelUnlock();
 
     if(presence) {
-        delay(100);
-
         switch(type) {
         case KeyType::KEY_DS1990:
             same_key = compare_key_ds1990(key, key_length);
@@ -91,13 +91,13 @@ bool BlanksWriter::write(KeyType type, const uint8_t* key, uint8_t key_length) {
                 }
 
                 if(write_result == 1) {
-                    printf("key writed\r\n");
+                    result = WR_OK;
                 } else if(write_result == 0) {
-                    printf("cannot write key\r\n");
+                    result = WR_ERROR;
                 }
             } else {
-                printf("key are same\r\n");
                 write_result = 0;
+                result = WR_SAME_KEY;
             }
             break;
 
@@ -106,7 +106,7 @@ bool BlanksWriter::write(KeyType type, const uint8_t* key, uint8_t key_length) {
         }
     }
 
-    return (write_result == 1);
+    return result;
 }
 
 bool BlanksWriter::write_TM2004(const uint8_t* key, uint8_t key_length) {
@@ -176,12 +176,12 @@ bool BlanksWriter::write_1990_1(const uint8_t* key, uint8_t key_length) {
     onewire->write(RW1990_1::CMD_WRITE_RECORD_FLAG);
     onewire_write_one_bit(1);
 
+    __enable_irq();
+    osKernelUnlock();
+
     if(!compare_key_ds1990(key, key_length)) {
         result = false;
     }
-
-    __enable_irq();
-    osKernelUnlock();
 
     return result;
 }
@@ -210,12 +210,12 @@ bool BlanksWriter::write_1990_2(const uint8_t* key, uint8_t key_length) {
     onewire->write(RW1990_2::CMD_WRITE_RECORD_FLAG);
     onewire_write_one_bit(0);
 
+    __enable_irq();
+    osKernelUnlock();
+
     if(!compare_key_ds1990(key, key_length)) {
         result = false;
     }
-
-    __enable_irq();
-    osKernelUnlock();
 
     return result;
 }
@@ -249,9 +249,15 @@ bool BlanksWriter::write_TM01(KeyType type, const uint8_t* key, uint8_t key_leng
     onewire->write(TM01::CMD_WRITE_RECORD_FLAG);
     onewire_write_one_bit(0, 10000);
 
+    __enable_irq();
+    osKernelUnlock();
+
     if(!compare_key_ds1990(key, key_length)) {
         result = false;
     }
+
+    osKernelLock();
+    __disable_irq();
 
     if(type == KEY_METAKOM || type == KEY_CYFRAL) {
         onewire->reset();
@@ -293,7 +299,7 @@ bool BlanksWriter::compare_key_ds1990(const uint8_t* key, uint8_t key_length) {
         __enable_irq();
         osKernelUnlock();
 
-        bool result = true;
+        result = true;
         for(uint8_t i = 0; i < 8; i++) {
             if(key[i] != buff[i]) {
                 result = false;

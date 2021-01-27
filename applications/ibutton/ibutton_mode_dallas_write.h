@@ -27,11 +27,15 @@ public:
 
 void AppiButtonModeDallasWrite::event(AppiButtonEvent* event, AppiButtonState* state) {
     if(event->type == AppiButtonEvent::EventTypeTick) {
-        bool result;
-        result = writer->write(KEY_DS1990, state->dallas_address[state->dallas_address_index], 8);
+        WriterResult result =
+            writer->write(KEY_DS1990, state->dallas_address[state->dallas_address_index], 8);
 
-        if(result) {
+        if(result == WR_SAME_KEY) {
             app->blink_green();
+        }
+
+        if(result == WR_OK) {
+            app->blink_red();
         }
 
     } else if(event->type == AppiButtonEvent::EventTypeKey) {

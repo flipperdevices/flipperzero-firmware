@@ -23,6 +23,7 @@ void AppiButton::run() {
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
     gpio_init(green_led_record, GpioModeOutputOpenDrain);
 
+    api_hal_timebase_insomnia_enter();
     app_ready();
 
     AppiButtonEvent event;
@@ -31,10 +32,9 @@ void AppiButton::run() {
             if(event.type == AppiButtonEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
-                    printf("[ibutton] bye!\n");
-
                     widget_enabled_set(widget, false);
                     gui_remove_widget(gui, widget);
+                    api_hal_timebase_insomnia_exit();
 
                     osThreadExit();
                 }
