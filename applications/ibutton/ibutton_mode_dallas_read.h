@@ -40,23 +40,10 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
             __enable_irq();
             osKernelUnlock();
 
-            printf("address: %x", address[0]);
-            for(uint8_t i = 1; i < 8; i++) {
-                printf(":%x", address[i]);
-            }
-            printf("\n");
-
-            printf("crc8: %x\n", maxim_crc8(address, 7));
-
             if(maxim_crc8(address, 8) == 0) {
-                printf("CRC valid\n");
                 memcpy(app->state.dallas_address[app->state.dallas_address_index], address, 8);
                 app->blink_green();
-            } else {
-                printf("CRC invalid\n");
             }
-        } else {
-            printf("no device on line\n");
         }
     } else if(event->type == AppiButtonEvent::EventTypeKey) {
         if(event->value.input.state && event->value.input.input == InputUp) {
