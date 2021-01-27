@@ -1,13 +1,13 @@
 #pragma once
 #include "ibutton.h"
-#include "one_wire_gpio.h"
+#include "one_wire_master.h"
 #include "maxim_crc.h"
 
 class AppiButtonModeDallasRead : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
 public:
     const char* name = "dallas read";
     AppiButton* app;
-    OneWireGpio* onewire;
+    OneWireMaster* onewire;
 
     void event(AppiButtonEvent* event, AppiButtonState* state);
     void render(Canvas* canvas, AppiButtonState* state);
@@ -19,7 +19,7 @@ public:
 
         // TODO open record
         const GpioPin* one_wire_pin_record = &ibutton_gpio;
-        onewire = new OneWireGpio(one_wire_pin_record);
+        onewire = new OneWireMaster(one_wire_pin_record);
     };
 };
 
@@ -33,12 +33,11 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
         osKernelUnlock();
 
         if(result) {
-            printf("device on line\n");
-
-            delay(50);
             osKernelLock();
+            __disable_irq();
             onewire->write(0x33);
             onewire->read_bytes(address, 8);
+            __enable_irq();
             osKernelUnlock();
 
             printf("address: %x", address[0]);
@@ -57,6 +56,7 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
                 printf("CRC invalid\n");
             }
         } else {
+            printf("no device on line\n");
         }
     } else if(event->type == AppiButtonEvent::EventTypeKey) {
         if(event->value.input.state && event->value.input.input == InputUp) {
