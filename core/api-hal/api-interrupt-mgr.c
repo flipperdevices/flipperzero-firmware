@@ -49,10 +49,12 @@ void api_interrupt_remove(InterruptCallback callback, InterruptType type) {
         if(list != NULL) {
             // iterate over items
             list_interrupt_it_t it;
-            for(list_interrupt_it(it, *list); !list_interrupt_end_p(it); list_interrupt_next(it)) {
-                // if the iterator is equal to our element
+            list_interrupt_it(it, *list);
+            while(!list_interrupt_end_p(it)) {
                 if(it->current->data.callback == callback) {
                     list_interrupt_remove(*list, it);
+                } else {
+                    list_interrupt_next(it);
                 }
             }
         }
