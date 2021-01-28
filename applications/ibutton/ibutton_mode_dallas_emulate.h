@@ -20,7 +20,7 @@ public:
     void acquire();
     void release();
 
-    std::atomic<bool> emulated_result = false;
+    std::atomic<bool> emulated_result{false};
 
     AppiButtonModeDallasEmulate(AppiButton* parent_app)
         : key(1, 2, 3, 4, 5, 6, 7) {
