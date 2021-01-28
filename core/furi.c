@@ -23,7 +23,7 @@ int systemd() {
         printf("[systemd] starting service %s\r\n", FLIPPER_SERVICES[i].name);
         osThreadAttr_t* attr = furi_alloc(sizeof(osThreadAttr_t));
         attr->name = FLIPPER_SERVICES[i].name;
-        attr->stack_size = 1024;
+        attr->stack_size = FLIPPER_SERVICES[i].stack_size;
         osThreadNew(FLIPPER_SERVICES[i].app, NULL, attr);
     }
     printf("[systemd] all services started\r\n");

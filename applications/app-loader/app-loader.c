@@ -60,7 +60,7 @@ static void handle_menu(void* _ctx) {
     ctx->state->app_thread_attr.cb_mem = NULL;
     ctx->state->app_thread_attr.cb_size = 0;
     ctx->state->app_thread_attr.stack_mem = NULL;
-    ctx->state->app_thread_attr.stack_size = 1024;
+    ctx->state->app_thread_attr.stack_size = ctx->app->stack_size;
     ctx->state->app_thread_attr.priority = osPriorityNormal;
     ctx->state->app_thread_attr.tz_module = 0;
     ctx->state->app_thread_attr.reserved = 0;
@@ -80,7 +80,7 @@ static void handle_cli(string_t args, void* _ctx) {
     ctx->state->app_thread_attr.cb_mem = NULL;
     ctx->state->app_thread_attr.cb_size = 0;
     ctx->state->app_thread_attr.stack_mem = NULL;
-    ctx->state->app_thread_attr.stack_size = 1024;
+    ctx->state->app_thread_attr.stack_size = ctx->app->stack_size;
     ctx->state->app_thread_attr.priority = osPriorityNormal;
     ctx->state->app_thread_attr.tz_module = 0;
     ctx->state->app_thread_attr.reserved = 0;
