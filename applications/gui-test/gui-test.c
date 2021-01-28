@@ -32,10 +32,10 @@ void gui_test(void* param) {
     view_dispatcher_attach_to_gui(gui_tester->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
     //dialog_set_result_callback(gui_tester->dialog, power_menu_reset_dialog_result);
-    dialog_set_header_text(gui_tester->dialog, "Reset type");
-    dialog_set_text(gui_tester->dialog, "Reboot where?");
-    dialog_set_left_button_text(gui_tester->dialog, "DFU");
-    dialog_set_right_button_text(gui_tester->dialog, "OS");
+    dialog_set_header_text(gui_tester->dialog, "Delete Abc123?");
+    dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04");
+    dialog_set_left_button_text(gui_tester->dialog, "< More");
+    dialog_set_right_button_text(gui_tester->dialog, "Save >");
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, GuiTesterViewDialog);
 
     while(1) {
