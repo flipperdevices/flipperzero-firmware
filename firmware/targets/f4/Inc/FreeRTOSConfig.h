@@ -163,14 +163,4 @@ standard names. */
 
 /* #define xPortSysTickHandler SysTick_Handler */
 
-/* USER CODE BEGIN 2 */
-/* Definitions needed when configGENERATE_RUN_TIME_STATS is on */
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS configureTimerForRunTimeStats
-#define portGET_RUN_TIME_COUNTER_VALUE getRunTimeCounterValue
-/* USER CODE END 2 */
-
-/* USER CODE BEGIN Defines */
-/* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
-/* USER CODE END Defines */
-
 #endif /* FREERTOS_CONFIG_H */
