@@ -58,7 +58,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_GUI
-    {.app = backlight_control, .name = "backlight_control", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = backlight_control,
+     .name = "backlight_control",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
     {.app = gui_task, .name = "gui_task", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
@@ -84,11 +87,17 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_CC1101
-    {.app = cc1101_workaround, .name = "cc1101 workaround", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = cc1101_workaround,
+     .name = "cc1101 workaround",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_LF_RFID
-    {.app = lf_rfid_workaround, .name = "lf rfid workaround", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = lf_rfid_workaround,
+     .name = "lf rfid workaround",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_IRDA
@@ -104,7 +113,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_EXAMPLE_IPC
-    {.app = application_ipc_display, .name = "ipc display", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = application_ipc_display,
+     .name = "ipc display",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
     {.app = application_ipc_widget, .name = "ipc widget", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
@@ -121,7 +133,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_SPEAKER_DEMO
-    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = coreglitch_demo_0,
+     .name = "coreglitch_demo_0",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_SD_TEST
@@ -191,7 +206,10 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 #endif
 
 #ifdef BUILD_SPEAKER_DEMO
-    {.app = coreglitch_demo_0, .name = "coreglitch_demo_0", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = coreglitch_demo_0,
+     .name = "coreglitch_demo_0",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef BUILD_SD_TEST
@@ -199,7 +217,10 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 #endif
 
 #ifdef BUILD_VIBRO_DEMO
-    {.app = application_vibro, .name = "application_vibro", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = application_vibro,
+     .name = "application_vibro",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef BUILD_MUSIC_PLAYER

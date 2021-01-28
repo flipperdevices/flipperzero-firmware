@@ -174,7 +174,7 @@ void app_sd_info_callback(void* context) {
         if(str_buffer[i] == NULL) {
             memory_error = true;
         } else {
-            snprintf(str_buffer[i], str_buffer_size, "");
+            str_buffer[i][0] = 0;
         }
     }
 

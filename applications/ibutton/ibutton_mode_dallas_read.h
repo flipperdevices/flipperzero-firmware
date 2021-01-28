@@ -39,7 +39,7 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
             onewire->read_bytes(address, 8);
             __enable_irq();
             osKernelUnlock();
-          
+
             if(maxim_crc8(address, 8) == 0) {
                 memcpy(app->state.dallas_address[app->state.dallas_address_index], address, 8);
                 app->blink_green();
