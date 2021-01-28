@@ -36,6 +36,8 @@ void sdnfc(void* p);
 void floopper_bloopper(void* p);
 void sd_filesystem(void* p);
 
+void gui_test(void* p);
+
 const FuriApplication FLIPPER_SERVICES[] = {
 #ifdef APP_DISPLAY
     {.app = display_u8g2, .name = "display_u8g2", .icon = A_Plugins_14},
@@ -147,6 +149,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #ifdef APP_SDNFC
     {.app = sdnfc, .name = "sdnfc", .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_GUI_TEST
+    {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
+#endif
 };
 
 size_t FLIPPER_SERVICES_size() {
@@ -212,6 +218,10 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 
 #ifdef BUILD_SDNFC
     {.app = sdnfc, .name = "sdnfc", .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_GUI_TEST
+    {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
 #endif
 };
 
