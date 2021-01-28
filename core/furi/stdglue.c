@@ -27,8 +27,11 @@ static FuriStdglue* furi_stdglue = NULL;
 
 static ssize_t stdout_write(void* _cookie, const char* data, size_t size) {
     assert(furi_stdglue);
+    osKernelState_t state = osKernelGetState();
     osThreadId_t thread_id = osThreadGetId();
-    if(thread_id && osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK) {
+    if(state == osKernelRunning 
+        && thread_id 
+        && osMutexAcquire(furi_stdglue->mutex, osWaitForever) == osOK) {
         // We are in the thread context
         // Handle global callbacks
         FuriStdglueCallbackDict_it_t it;
