@@ -102,6 +102,49 @@ void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
+void canvas_draw_str_aligned(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    const char* str) {
+    furi_assert(canvas);
+    if(!str) return;
+    x += canvas->offset_x;
+    y += canvas->offset_y;
+
+    switch(horizontal) {
+    case AlignLeft:
+        break;
+    case AlignRight:
+        x -= u8g2_GetStrWidth(&canvas->fb, str);
+        break;
+    case AlignCenter:
+        x -= (u8g2_GetStrWidth(&canvas->fb, str) / 2);
+        break;
+    default:
+        furi_assert(0);
+        break;
+    }
+
+    switch(vertical) {
+    case AlignTop:
+        y -= u8g2_GetAscent(&canvas->fb) / 2;
+        break;
+    case AlignBottom:
+        break;
+    case AlignCenter:
+        y -= (u8g2_GetAscent(&canvas->fb) / 2);
+        break;
+    default:
+        furi_assert(0);
+        break;
+    }
+
+    u8g2_DrawStr(&canvas->fb, x, y, str);
+}
+
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, Icon* icon) {
     furi_assert(canvas);
     if(!icon) return;

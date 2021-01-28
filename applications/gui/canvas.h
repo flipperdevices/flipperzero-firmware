@@ -16,6 +16,14 @@ typedef enum {
 
 typedef enum { FontPrimary = 0x00, FontSecondary = 0x01, FontGlyph = 0x02 } Font;
 
+typedef enum {
+    AlignLeft,
+    AlignRight,
+    AlignTop,
+    AlignBottom,
+    AlignCenter,
+} Align;
+
 typedef struct Canvas Canvas;
 
 /*
@@ -49,6 +57,18 @@ void canvas_set_font(Canvas* canvas, Font font);
  * Draw string at position of baseline defined by x, y.
  */
 void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str);
+
+/*
+ * Draw aligned string defined by x, y.
+ * Align calculated from position of baseline, string width and ascent (height of the glyphs above the baseline)
+ */
+void canvas_draw_str_aligned(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    const char* str);
 
 /*
  * Draw stateful icon at position defined by x,y.
