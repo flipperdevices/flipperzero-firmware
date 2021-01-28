@@ -289,6 +289,17 @@ CFLAGS		+= -DBUILD_IBUTTON
 CPP_SOURCES	+= $(wildcard $(APP_DIR)/ibutton/*.cpp)
 endif
 
+APP_GUI_TEST ?= 0
+ifeq ($(APP_GUI_TEST), 1)
+CFLAGS		+= -DAPP_GUI_TEST
+BUILD_GUI_TEST = 1
+endif
+BUILD_GUI_TEST ?= 0
+ifeq ($(BUILD_GUI_TEST), 1)
+CFLAGS		+= -DBUILD_GUI_TEST
+CPP_SOURCES	+= $(wildcard $(APP_DIR)/gui-test/*.c)
+endif
+
 APP_SDNFC ?= 0
 ifeq ($(APP_SDNFC), 1)
 CFLAGS		+= -DAPP_SDNFC
