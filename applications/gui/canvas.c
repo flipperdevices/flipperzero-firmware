@@ -80,6 +80,10 @@ void canvas_set_color(Canvas* canvas, Color color) {
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
+void canvas_invert_color(Canvas* canvas) {
+    canvas->fb.draw_color = !canvas->fb.draw_color;
+}
+
 void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
@@ -130,12 +134,12 @@ void canvas_draw_str_aligned(
 
     switch(vertical) {
     case AlignTop:
-        y -= u8g2_GetAscent(&canvas->fb) / 2;
+        y += u8g2_GetAscent(&canvas->fb);
         break;
     case AlignBottom:
         break;
     case AlignCenter:
-        y -= (u8g2_GetAscent(&canvas->fb) / 2);
+        y += (u8g2_GetAscent(&canvas->fb) / 2);
         break;
     default:
         furi_assert(0);
@@ -210,4 +214,53 @@ void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawGlyph(&canvas->fb, x, y, ch);
+}
+
+void canvas_draw_button_left(Canvas* canvas, const char* str) {
+    furi_assert(canvas);
+    if(!str) return;
+
+    const uint8_t button_height = 12;
+    const uint8_t vertical_bottom_offset = 3;
+    const uint8_t horizontal_offset = 3;
+    const uint8_t horizontal_rounded_size = 3;
+    const uint8_t string_width = u8g2_GetStrWidth(&canvas->fb, str);
+    const uint8_t button_width = string_width + horizontal_offset * 2;
+
+    const uint8_t x = canvas->offset_x;
+    const uint8_t y = canvas->height + canvas->offset_y;
+
+    u8g2_DrawBox(&canvas->fb, x, y - button_height, button_width, button_height);
+    u8g2_DrawHVLine(&canvas->fb, x + button_width + 0, y, button_height - 0, 3);
+    u8g2_DrawHVLine(&canvas->fb, x + button_width + 1, y, button_height - 1, 3);
+    u8g2_DrawHVLine(&canvas->fb, x + button_width + 2, y, button_height - 2, 3);
+
+    canvas_invert_color(canvas);
+    canvas_draw_str(canvas, x + horizontal_offset, y - vertical_bottom_offset, str);
+    canvas_invert_color(canvas);
+}
+
+void canvas_draw_button_right(Canvas* canvas, const char* str) {
+    furi_assert(canvas);
+    if(!str) return;
+
+    const uint8_t button_height = 12;
+    const uint8_t vertical_bottom_offset = 3;
+    const uint8_t horizontal_offset = 3;
+    const uint8_t horizontal_rounded_size = 3;
+    const uint8_t string_width = u8g2_GetStrWidth(&canvas->fb, str);
+    const uint8_t button_width = string_width + horizontal_offset * 2;
+
+    const uint8_t x = canvas->width + canvas->offset_x;
+    const uint8_t y = canvas->height + canvas->offset_y;
+
+    u8g2_DrawBox(&canvas->fb, x - button_width, y - button_height, button_width, button_height);
+    u8g2_DrawHVLine(&canvas->fb, x - button_width - 1, y, button_height - 0, 3);
+    u8g2_DrawHVLine(&canvas->fb, x - button_width - 2, y, button_height - 1, 3);
+    u8g2_DrawHVLine(&canvas->fb, x - button_width - 3, y, button_height - 2, 3);
+
+    canvas_invert_color(canvas);
+    canvas_draw_str_aligned(
+        canvas, x - horizontal_offset, y - vertical_bottom_offset, AlignRight, AlignBottom, str);
+    canvas_invert_color(canvas);
 }
