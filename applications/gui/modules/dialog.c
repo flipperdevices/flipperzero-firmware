@@ -16,20 +16,19 @@ typedef struct {
 
 static void dialog_view_draw_callback(Canvas* canvas, void* _model) {
     DialogModel* model = _model;
+    uint8_t canvas_center = canvas_width(canvas) / 2;
     // Prepare canvas
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     // Draw header
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, model->header_text);
+    canvas_draw_str_aligned(canvas, canvas_center, 10, AlignCenter, AlignTop, model->header_text);
     // Draw text
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 22, model->text);
+    canvas_draw_str_aligned(canvas, canvas_center, 25, AlignCenter, AlignTop, model->text);
     // Draw buttons
-    uint8_t bottom_base_line = canvas_height(canvas) - 2;
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 5, bottom_base_line, model->left_text);
-    canvas_draw_str(canvas, 69, bottom_base_line, model->right_text);
+    canvas_draw_button_left(canvas, model->left_text);
+    canvas_draw_button_right(canvas, model->right_text);
 }
 
 static bool dialog_view_input_callback(InputEvent* event, void* context) {
