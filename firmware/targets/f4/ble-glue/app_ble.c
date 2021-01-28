@@ -1,7 +1,6 @@
 #include "main.h"
 
 #include "app_common.h"
-
 #include "dbg_trace.h"
 #include "ble.h"
 #include "tl.h"
@@ -13,6 +12,8 @@
 #include "otp.h"
 #include "dis_app.h"
 #include "hrs_app.h"
+
+#include <api-hal.h>
 
 typedef struct _tSecurityParams {
   uint8_t ioCapability;
