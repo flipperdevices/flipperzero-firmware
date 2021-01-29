@@ -58,7 +58,10 @@ void view_port_draw_callback_set(ViewPort* view_port, ViewPortDrawCallback callb
     view_port->draw_callback_context = context;
 }
 
-void view_port_input_callback_set(ViewPort* view_port, ViewPortInputCallback callback, void* context) {
+void view_port_input_callback_set(
+    ViewPort* view_port,
+    ViewPortInputCallback callback,
+    void* context) {
     furi_assert(view_port);
     view_port->input_callback = callback;
     view_port->input_callback_context = context;

@@ -62,7 +62,10 @@ bool view_port_is_enabled(ViewPort* view_port);
  * @param context - context to pass to callback
  */
 void view_port_draw_callback_set(ViewPort* view_port, ViewPortDrawCallback callback, void* context);
-void view_port_input_callback_set(ViewPort* view_port, ViewPortInputCallback callback, void* context);
+void view_port_input_callback_set(
+    ViewPort* view_port,
+    ViewPortInputCallback callback,
+    void* context);
 
 /*
  * Emit update signal to GUI system.
