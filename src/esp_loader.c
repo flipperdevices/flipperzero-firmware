@@ -147,13 +147,9 @@ static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bit
 
 static esp_loader_error_t spi_set_data_lengths_8266(size_t mosi_bits, size_t miso_bits)
 {
-    uint32_t mosi_bitlen_shift = 17;
-    uint32_t miso_bitlen_shift = 8;
     uint32_t mosi_mask = (mosi_bits == 0) ? 0 : mosi_bits - 1;
     uint32_t miso_mask = (miso_bits == 0) ? 0 : miso_bits - 1;
-    uint32_t usr_reg = (miso_mask << miso_bitlen_shift) | (mosi_mask << mosi_bitlen_shift);
-
-    return esp_loader_write_register(s_reg->usr1, usr_reg);
+    return esp_loader_write_register(s_reg->usr1, (miso_mask << 8) | (mosi_mask << 17));
 }
 
 static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, size_t tx_size, void *data_rx, size_t rx_size)
@@ -251,8 +247,8 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
     uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
     uint32_t erase_size = block_size * blocks_to_write;
     s_flash_write_size = block_size;
-    size_t flash_size = 0;
 
+    size_t flash_size = 0;
     if (detect_flash_size(&flash_size) == ESP_LOADER_SUCCESS) {
         if (image_size > flash_size) {
             return ESP_LOADER_ERROR_IMAGE_SIZE;
@@ -326,18 +322,13 @@ esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
 
 static void hexify(const uint8_t raw_md5[16], uint8_t hex_md5_out[32])
 {
-    uint8_t high_nibble, low_nibble;
-
     static const uint8_t dec_to_hex[] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
     };
-
     for (int i = 0; i < 16; i++) {
-        high_nibble = (raw_md5[i] / 16);
-        low_nibble = (raw_md5[i] - (high_nibble * 16));
-        *hex_md5_out++ = dec_to_hex[high_nibble];
-        *hex_md5_out++ = dec_to_hex[low_nibble];
+        *hex_md5_out++ = dec_to_hex[raw_md5[i] >> 4];
+        *hex_md5_out++ = dec_to_hex[raw_md5[i] & 0xF];
     }
 }
 
