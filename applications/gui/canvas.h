@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <u8g2.h>
 #include <gui/icon.h>
 #include <assets_icons_i.h>
 
