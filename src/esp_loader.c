@@ -35,18 +35,6 @@ static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most fl
 static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 10000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
 
-#define MEGABYTE  1024 * 1024
-
-size_t size_id_to_flash_size[] = {
-    MEGABYTE / 4,  // 256KB,
-    MEGABYTE / 2,  // 512KB,
-    1 * MEGABYTE,  // 1MB,
-    2 * MEGABYTE,  // 2MB,
-    4 * MEGABYTE,  // 4MB,
-    8 * MEGABYTE,  // 8MB,
-    16 * MEGABYTE  // 16MB
-};
-
 typedef enum {
     SPI_FLASH_READ_ID = 0x9F
 } spi_flash_cmd_t;
@@ -237,7 +225,7 @@ static esp_loader_error_t detect_flash_size(size_t *flash_size)
         return ESP_LOADER_ERROR_UNSUPPORTED_CHIP;
     }
 
-    *flash_size = size_id_to_flash_size[size_id - 0x12];
+    *flash_size = 1 << size_id;
 
     return ESP_LOADER_SUCCESS;
 }
