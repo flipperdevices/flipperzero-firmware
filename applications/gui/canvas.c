@@ -223,7 +223,6 @@ void canvas_draw_button_left(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_bottom_offset = 3;
     const uint8_t horizontal_offset = 3;
-    const uint8_t horizontal_rounded_size = 3;
     const uint8_t string_width = u8g2_GetStrWidth(&canvas->fb, str);
     const uint8_t button_width = string_width + horizontal_offset * 2;
 
@@ -247,7 +246,6 @@ void canvas_draw_button_right(Canvas* canvas, const char* str) {
     const uint8_t button_height = 12;
     const uint8_t vertical_bottom_offset = 3;
     const uint8_t horizontal_offset = 3;
-    const uint8_t horizontal_rounded_size = 3;
     const uint8_t string_width = u8g2_GetStrWidth(&canvas->fb, str);
     const uint8_t button_width = string_width + horizontal_offset * 2;
 
