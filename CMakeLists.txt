@@ -41,4 +41,6 @@ else()
 
 endif()
 
-target_compile_definitions(${target} PUBLIC -DMD5_ENABLED=1)
+if(DEFINED MD5_ENABLED)
+    target_compile_definitions(${target} PRIVATE -DMD5_ENABLED=${MD5_ENABLED})
+endif()
