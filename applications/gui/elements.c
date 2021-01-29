@@ -51,13 +51,13 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
     char* end;
     do {
         end = strchr(start, '\n');
-        if (end) {
-            string_set_strn(str, start, end-start);
+        if(end) {
+            string_set_strn(str, start, end - start);
         } else {
             string_set_str(str, start);
         }
         canvas_draw_str(canvas, x, y, string_get_cstr(str));
-        start = end+1;
+        start = end + 1;
         y += font_height;
     } while(end);
     string_clear(str);
