@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 project(serial_flasher_test)
 
-add_executable( ${PROJECT_NAME} test_main.cpp ../src/serial_comm.c ../src/esp_loader.c ../src/md5_hash.c )
+add_executable( ${PROJECT_NAME}
+	test_main.cpp
+	../src/serial_comm.c
+	../src/esp_loader.c
+	../src/md5_hash.c
+	../src/esp_targets.c )
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include ../private_include ../test ../port)
 

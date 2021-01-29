@@ -23,6 +23,17 @@ extern "C" {
 #endif
 
 /**
+ * Macro which can be used to check the error code,
+ * and return in case the code is not ESP_LOADER_SUCCESS.
+ */
+#define RETURN_ON_ERROR(x) do {         \
+    esp_loader_error_t _err_ = (x);     \
+    if (_err_ != ESP_LOADER_SUCCESS) {  \
+        return _err_;                   \
+    }                                   \
+} while(0)
+
+/**
  * @brief Error codes
  */
 typedef enum {
@@ -71,25 +82,11 @@ typedef struct {
     uint32_t sync_timeout;  /*!< Maximum time to wait for response from serial interface. */
     int32_t trials;         /*!< Number of trials to connect to target. If greater than 1,
                                100 millisecond delay is inserted after each try. */
-    esp_loader_spi_config_t spi_pin_config;  /*!< Determine which SPI peripheral and pins should be used to
-                                                connect to SPI flash. By setting spi_pin_config.val to zero,
-                                                default configuration will be used. For more detailed
-                                                information refer to serial protocol of esptool */
 } esp_loader_connect_args_t;
 
 #define ESP_LOADER_CONNECT_DEFAULT() { \
   .sync_timeout = 100, \
   .trials = 10, \
-  .spi_pin_config = { .val = 0 } \
-}
-
-#define ESP_LOADER_SPI_CONFIG_ESP32PICOD4() (esp_loader_spi_config_t) { \
-  .pin_hd = 11, \
-  .pin_cs = 16, \
-  .pin_d = 8,   \
-  .pin_q = 17,  \
-  .pin_clk = 6, \
-  .zero = 0     \
 }
 
 /**

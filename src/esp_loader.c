@@ -17,6 +17,7 @@
 #include "serial_comm.h"
 #include "serial_io.h"
 #include "esp_loader.h"
+#include "esp_targets.h"
 #include "md5_hash.h"
 #include <string.h>
 #include <assert.h>
@@ -50,83 +51,9 @@ typedef enum {
     SPI_FLASH_READ_ID = 0x9F
 } spi_flash_cmd_t;
 
-typedef struct {
-    uint32_t cmd;
-    uint32_t usr;
-    uint32_t usr1;
-    uint32_t usr2;
-    uint32_t w0;
-    uint32_t mosi_dlen;
-    uint32_t miso_dlen;
-} target_registers_t;
-
-typedef struct {
-    uint32_t reg_1;
-    uint32_t reg_2;
-} date_registers_t;
-
-
-static const uint32_t UART_DATE_REG_ADDR  = 0x60000078;   // used to differentiate ESP8266 vs ESP32*
-static const uint32_t UART_DATE_REG2_ADDR = 0x3f400074;   // used to differentiate ESP32-S2 vs other models
-
-#define ESP8266_SPI_REG_BASE 0x60000200
-#define ESP32S2_SPI_REG_BASE 0x3f402000
-#define ESP32_SPI_REG_BASE   0x60002000
-
-static const target_registers_t registers[ESP_MAX_CHIP] = {
-    // ESP8266
-    {
-        .cmd  = ESP8266_SPI_REG_BASE + 0x00,
-        .usr  = ESP8266_SPI_REG_BASE + 0x1c,
-        .usr1 = ESP8266_SPI_REG_BASE + 0x20,
-        .usr2 = ESP8266_SPI_REG_BASE + 0x24,
-        .w0   = ESP8266_SPI_REG_BASE + 0x40,
-        .mosi_dlen = 0,
-        .miso_dlen = 0,
-    },
-    // ESP32
-    {
-        .cmd  = ESP32_SPI_REG_BASE + 0x00,
-        .usr  = ESP32_SPI_REG_BASE + 0x1c,
-        .usr1 = ESP32_SPI_REG_BASE + 0x20,
-        .usr2 = ESP32_SPI_REG_BASE + 0x24,
-        .w0   = ESP32_SPI_REG_BASE + 0x80,
-        .mosi_dlen = ESP32_SPI_REG_BASE + 0x28,
-        .miso_dlen = ESP32_SPI_REG_BASE + 0x2c,
-    },
-    // ESP32S2
-    {
-        .cmd  = ESP32S2_SPI_REG_BASE + 0x00,
-        .usr  = ESP32S2_SPI_REG_BASE + 0x18,
-        .usr1 = ESP32S2_SPI_REG_BASE + 0x1c,
-        .usr2 = ESP32S2_SPI_REG_BASE + 0x20,
-        .w0   = ESP32S2_SPI_REG_BASE + 0x58,
-        .mosi_dlen = ESP32S2_SPI_REG_BASE + 0x24,
-        .miso_dlen = ESP32S2_SPI_REG_BASE + 0x28,
-    }
-};
-
 static uint32_t s_flash_write_size = 0;
+static const target_registers_t *s_reg = NULL;
 static target_chip_t s_target = ESP_UNKNOWN_CHIP;
-static const target_registers_t *s_reg = &registers[ESP32S2_CHIP];
-
-static const date_registers_t s_date_regs[ESP_MAX_CHIP] = {
-    // ESP8266
-    {
-        .reg_1 = 0x00062000,
-        .reg_2 = 0,
-    },
-    // ESP32
-    {
-        .reg_1 = 0x15122500,
-        .reg_2 = 0,
-    },
-    // ESP32S2
-    {
-        .reg_1 = 0x00000500,
-        .reg_2 = 0x19031400,
-    }
-};
 
 #if MD5_ENABLED
 
@@ -167,27 +94,9 @@ static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
     return MAX(timeout, DEFAULT_FLASH_TIMEOUT);
 }
 
-static esp_loader_error_t detect_chip(target_chip_t *target)
-{
-    uint32_t reg_1, reg_2;
-
-    RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG_ADDR,  &reg_1) );
-    RETURN_ON_ERROR( esp_loader_read_register(UART_DATE_REG2_ADDR, &reg_2) );
-
-    for (int chip = 0; chip < ESP_MAX_CHIP; chip++) {
-        const date_registers_t *r = &s_date_regs[chip];
-        if (r->reg_1 == reg_1 && (r->reg_2 == 0 || r->reg_2 == reg_2)) {
-            *target = (target_chip_t)chip;
-            return ESP_LOADER_SUCCESS;
-        }
-    }
-
-    return ESP_LOADER_ERROR_INVALID_TARGET;
-}
-
-
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 {
+    uint32_t spi_config;
     esp_loader_error_t err;
     int32_t trials = connect_args->trials;
 
@@ -206,15 +115,14 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
         }
     } while (err != ESP_LOADER_SUCCESS);
 
-    RETURN_ON_ERROR( detect_chip(&s_target) );
-
-    s_reg = &registers[s_target];
+    RETURN_ON_ERROR( loader_detect_chip(&s_target, &s_reg) );
 
     if (s_target == ESP8266_CHIP) {
         err = loader_flash_begin_cmd(0, 0, 0, 0, s_target);
     } else {
+        RETURN_ON_ERROR( loader_read_spi_config(s_target, &spi_config) );
         loader_port_start_timer(DEFAULT_TIMEOUT);
-        err = loader_spi_attach_cmd(connect_args->spi_pin_config.val);
+        err = loader_spi_attach_cmd(spi_config);
     }
 
     return err;
