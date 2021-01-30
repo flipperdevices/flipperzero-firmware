@@ -1,4 +1,5 @@
 #include "dialog.h"
+#include <gui\elements.h>
 #include <furi.h>
 
 struct Dialog {
@@ -27,8 +28,8 @@ static void dialog_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, canvas_center, 25, AlignCenter, AlignTop, model->text);
     // Draw buttons
-    canvas_draw_button_left(canvas, model->left_text);
-    canvas_draw_button_right(canvas, model->right_text);
+    elements_button_left(canvas, model->left_text);
+    elements_button_right(canvas, model->right_text);
 }
 
 static bool dialog_view_input_callback(InputEvent* event, void* context) {

@@ -76,6 +76,12 @@ void canvas_draw_str_aligned(
     const char* str);
 
 /*
+ * String width
+ * @return width in pixels.
+ */
+uint8_t canvas_string_width(Canvas* canvas, const char* str);
+
+/*
  * Draw stateful icon at position defined by x,y.
  */
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, Icon* icon);
@@ -120,16 +126,6 @@ void canvas_draw_line(Canvas* canvas, uint8_t x1, uint8_t y1, uint8_t x2, uint8_
  * Draw glyph
  */
 void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch);
-
-/*
- * Draw button in left corner
- */
-void canvas_draw_button_left(Canvas* canvas, const char* str);
-
-/*
- * Draw button in right corner
- */
-void canvas_draw_button_right(Canvas* canvas, const char* str);
 
 #ifdef __cplusplus
 }
