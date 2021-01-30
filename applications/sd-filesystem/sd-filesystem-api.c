@@ -318,7 +318,6 @@ uint64_t fs_file_tell(File* file) {
 // Truncate file size to current pointer value
 bool fs_file_truncate(File* file) {
     FileData* filedata = NULL;
-    uint64_t position = 0;
 
     file->internal_error_id = _get_file(fs_info, file, &filedata);
 
