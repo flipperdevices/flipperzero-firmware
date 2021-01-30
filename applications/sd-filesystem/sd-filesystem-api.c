@@ -477,7 +477,7 @@ fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t 
 
     if(fresult == SD_OK) {
         fresult = f_stat(path, &_fileinfo);
-        if(fresult == FR_OK) {
+        if((FRESULT)fresult == FR_OK) {
             if(fileinfo != NULL) {
                 fileinfo->date.value = _fileinfo.fdate;
                 fileinfo->time.value = _fileinfo.ftime;
@@ -591,7 +591,7 @@ FS_Error fs_get_fs_info(uint64_t* total_space, uint64_t* free_space) {
         FATFS* fs;
 
         fresult = f_getfree("0:/", &free_clusters, &fs);
-        if(fresult == FR_OK) {
+        if((FRESULT)fresult == FR_OK) {
             uint32_t total_sectors = (fs->n_fatent - 2) * fs->csize;
             uint32_t free_sectors = free_clusters * fs->csize;
 
