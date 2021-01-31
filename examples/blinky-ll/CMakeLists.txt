@@ -8,8 +8,8 @@ find_package(CMSIS COMPONENTS STM32L0 STM32F1 STM32F4 REQUIRED)
 find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 LL_RCC LL_GPIO REQUIRED)
 
 # STM32F4-Discovery
-add_executable(stm32-blinky-f4.elf blinky.c)
-target_link_libraries(stm32-blinky-f4.elf
+add_executable(stm32-blinky-f4 blinky.c)
+target_link_libraries(stm32-blinky-f4
     HAL::STM32::F4::LL_RCC
     HAL::STM32::F4::LL_GPIO
     CMSIS::STM32::F407VG
@@ -17,8 +17,8 @@ target_link_libraries(stm32-blinky-f4.elf
 )
 
 # STM32VL-Discovery
-add_executable(stm32-blinky-f1.elf blinky.c)
-target_link_libraries(stm32-blinky-f1.elf
+add_executable(stm32-blinky-f1 blinky.c)
+target_link_libraries(stm32-blinky-f1
     HAL::STM32::F1::LL_RCC
     HAL::STM32::F1::LL_GPIO
     CMSIS::STM32::F100RB
@@ -26,8 +26,8 @@ target_link_libraries(stm32-blinky-f1.elf
 )
 
 # STM32L0538-Discovery
-add_executable(stm32-blinky-l0.elf blinky.c)
-target_link_libraries(stm32-blinky-l0.elf
+add_executable(stm32-blinky-l0 blinky.c)
+target_link_libraries(stm32-blinky-l0
     HAL::STM32::L0::LL_RCC
     HAL::STM32::L0::LL_GPIO
     CMSIS::STM32::L053C8

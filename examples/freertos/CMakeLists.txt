@@ -13,8 +13,8 @@ set(PROJECT_SOURCES
     FreeRTOSConfig.h
 )
 
-add_executable(stm32-freertos.elf ${PROJECT_SOURCES} stm32f4xx_hal_conf.h)
-target_link_libraries(stm32-freertos.elf PRIVATE
+add_executable(stm32-freertos ${PROJECT_SOURCES} stm32f4xx_hal_conf.h)
+target_link_libraries(stm32-freertos PRIVATE
     FreeRTOS::Timers
     FreeRTOS::Heap::1
     FreeRTOS::ARM_CM4F 

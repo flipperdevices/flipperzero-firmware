@@ -16,8 +16,8 @@ find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 RCC GPIO CORTEX REQUIRED)
 #find_package(HAL REQUIRED)
 
 # STM32F4-Discovery
-add_executable(stm32-blinky-f4.elf blinky.c stm32f4xx_hal_conf.h)
-target_link_libraries(stm32-blinky-f4.elf 
+add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
+target_link_libraries(stm32-blinky-f4 
     HAL::STM32::F4::RCC
     HAL::STM32::F4::GPIO
     HAL::STM32::F4::CORTEX
@@ -26,8 +26,8 @@ target_link_libraries(stm32-blinky-f4.elf
 )
 
 # STM32VL-Discovery
-add_executable(stm32-blinky-f1.elf blinky.c stm32f1xx_hal_conf.h)
-target_link_libraries(stm32-blinky-f1.elf 
+add_executable(stm32-blinky-f1 blinky.c stm32f1xx_hal_conf.h)
+target_link_libraries(stm32-blinky-f1 
     HAL::STM32::F1::RCC
     HAL::STM32::F1::GPIO
     HAL::STM32::F1::CORTEX
@@ -36,8 +36,8 @@ target_link_libraries(stm32-blinky-f1.elf
 )
 
 # STM32L0538-Discovery
-add_executable(stm32-blinky-l0.elf blinky.c stm32l0xx_hal_conf.h)
-target_link_libraries(stm32-blinky-l0.elf
+add_executable(stm32-blinky-l0 blinky.c stm32l0xx_hal_conf.h)
+target_link_libraries(stm32-blinky-l0
     HAL::STM32::L0::RCC
     HAL::STM32::L0::GPIO
     HAL::STM32::L0::CORTEX
