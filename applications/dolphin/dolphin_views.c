@@ -49,7 +49,10 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon_name(
-        canvas, GUI_MAIN_WIDTH - 61, GUI_MAIN_HEIGHT - 51, I_DolphinFirstStart7_61x51);
+        canvas,
+        GUI_MAIN_WIDTH - 80,
+        GUI_MAIN_HEIGHT - 60 + GUI_STATUS_BAR_HEIGHT,
+        I_Flipper_young_80x60);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 10, "/\\: Stats");
     canvas_draw_str(canvas, 5, 32, "OK: Menu");
