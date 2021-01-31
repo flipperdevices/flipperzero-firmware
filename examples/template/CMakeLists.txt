@@ -15,3 +15,4 @@ set(PROJECT_SOURCES
 
 add_executable(stm32-template ${PROJECT_SOURCES})
 target_link_libraries(stm32-template CMSIS::STM32::F407VG STM32::NoSys)
+stm32_print_size_of_target(stm32-template)
