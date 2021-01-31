@@ -10,11 +10,17 @@ foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
 
-if(NOT STM32_TOOLCHAIN_PATH)
-     set(STM32_TOOLCHAIN_PATH "/usr")
-     message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
+if(NOT STM32_TOOLCHAIN_PATH AND NOT CMAKE_C_COMPILER)
+    set(STM32_TOOLCHAIN_PATH "/usr")
+    message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
 else()
-     file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
+    if(NOT STM32_TOOLCHAIN_PATH)
+        # keep only directory of compiler
+        get_filename_component(STM32_TOOLCHAIN_PATH ${CMAKE_C_COMPILER} DIRECTORY)
+        # remove the last /bin directory
+        get_filename_component(STM32_TOOLCHAIN_PATH ${STM32_TOOLCHAIN_PATH} DIRECTORY)
+    endif()
+    file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
 endif()
 
 if(NOT STM32_TARGET_TRIPLET)
