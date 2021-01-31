@@ -83,7 +83,9 @@ So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` li
 ***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
-Also, there is special library `STM32::NoSys` which adds `--specs=nosys.specs` to compiler flags.
+The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`. This will add the `--specs=nosys.specs` to compiler and linker flags.
+If you want to use C++ on MCUs with little flash, you might instead want to link the newlib-nano to reduce the code size. You can do so by linking `STM32::Nano`, which will add the `--specs=nano.specs` flags to both compiler and linker.
+Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls, and you have to provide implementations for several OS interfacing functions (_sbrk, _close, _fstat, and others).
 
 ## HAL
 
