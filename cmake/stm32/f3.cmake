@@ -4,19 +4,19 @@ set(STM32_F3_TYPES
     F378xx F398xx 
 )
 set(STM32_F3_TYPE_MATCH 
-    "301.[68]" "302.[68]" "302.[BC]" "302.[ED]" "303.[68]" "303.[BC]" 
-    "303.[ED]" "318.." "328.." "334.[468]" "358.." "373.[8BC]"
+    "301.[68]" "302.[68]" "302.[BC]"  "302.[DE]" "303.[68]"  "303.[BC]" 
+    "303.[DE]"    "318.."    "328.." "334.[468]"    "358.." "373.[8BC]"
     "378.." "398.."    
 )
 set(STM32_F3_RAM_SIZES 
-     16K  16K   0K  64K  16K   0K  
-     80K  16K  16K  16K  48K   0K
-     32K  80K
+     16K  16K   0K  64K  12K   0K  
+     64K  16K  12K  12K  40K   0K
+     32K  64K
 )
 set(STM32_F3_CCRAM_SIZES 
-      0K   0K   0K   0K   0K   0K  
-      0K   0K   0K   0K   0K   0K
-      0K   0K
+      0K   0K   0K   0K   4K   8K  
+     16K   0K   4K   4K   8K   0K
+      0K  16K
 )
 
 stm32_util_create_family_targets(F3)
@@ -39,9 +39,9 @@ function(stm32f3_get_memory_info DEVICE TYPE FLASH_SIZE RAM_SIZE)
         endif()
     elseif(TYPE STREQUAL "F303xC")
         if(SIZE_CODE STREQUAL "C")
-            set(RAM "48K")
-        else()
             set(RAM "40K")
+        else()
+            set(RAM "32K")
         endif()
     elseif(TYPE STREQUAL "F373xC")
         if(SIZE_CODE STREQUAL "B")
