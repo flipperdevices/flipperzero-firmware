@@ -158,19 +158,17 @@ set(HAL_LL_DRIVERS_L4
 )
 
 set(HAL_DRIVERS_L5
-    adc comp cortex crc cryp dac def dfsdm dma exti fdcan flash flash_ramfunc
-    gpio gtzc hash i2c icache irda iwdg lptim mmc nand nor opamp ospi otfdef
-    pcd pka pwr rcc rng rtc sai sd smartcard smbus spi sram tim tsc uart usart
-    wwdg
+    adc comp cortex crc cryp dac dfsdm dma exti fdcan flash flash_ramfunc gpio 
+    gtzc hash i2c icache irda iwdg lptim mmc nand nor opamp ospi pcd pka pwr rcc 
+    rng rtc sai sd smartcard smbus spi sram tim tsc uart usart wwdg
 )
 set(HAL_EX_DRIVERS_L5
-    adc crc cryp dac dfsdm dma flash gpio hash i2c irda mmc opamp pcd pwr rcc
+    adc crc cryp dac dfsdm dma flash hash i2c mmc opamp pcd pwr rcc
     rng rtc sai sd smartcard spi tim uart usart
 )
 set(HAL_LL_DRIVERS_L5
-    adc bus comp cortex crc crs dac dma dmmux exti fmc gpio i2c iwdg lptim
-    lpuart opamp pka pwr rcc rng rtc sdmmc spi system tim ucpd usart usb utils
-    wwdg
+    adc comp crc crs dac dma exti fmc gpio i2c lptim lpuart opamp pka pwr rcc 
+    rng rtc sdmmc spi tim ucpd usart usb utils
 )
 
 foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
@@ -309,7 +307,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
         )
         list(APPEND HAL_${FAMILY}${CORE_U}_SOURCES "${HAL_${FAMILY}_${DRV}_SOURCE}")
         if(NOT HAL_${FAMILY}${CORE_U}_${DRV}_SOURCE)
-            message(WARNING "Cannot find ${DRV} driver for ${${FAMILY}${CORE_U}}")
+            message(WARNING "Cannot find ${DRV} driver for ${FAMILY}${CORE_U}")
             set(HAL_${DRV_COMP}_FOUND FALSE)
             continue()
         endif()
@@ -329,7 +327,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
             )
             list(APPEND HAL_${FAMILY}${CORE_U}_SOURCES "${HAL_${FAMILY}${CORE_U}_${DRV}_EX_SOURCE}")
             if(NOT HAL_${FAMILY}${CORE_U}_${DRV}_EX_SOURCE)
-                message(WARNING "Cannot find ${DRV}Ex driver for ${${FAMILY}${CORE_U}}")
+                message(WARNING "Cannot find ${DRV}Ex driver for ${FAMILY}${CORE_U}")
             endif()
                         
             if((TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}) AND (NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex)))
@@ -356,7 +354,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
         )
         list(APPEND HAL_${FAMILY}${CORE_U}_SOURCES "${HAL_${FAMILY}_${DRV}_LL_SOURCE}")
         if(NOT HAL_${FAMILY}${CORE_U}_${DRV}_LL_SOURCE)
-            message(WARNING "Cannot find LL_${DRV} driver for ${${FAMILY}${CORE_U}}")
+            message(WARNING "Cannot find LL_${DRV} driver for ${FAMILY}${CORE_U}")
             set(HAL_${DRV_COMP}_FOUND FALSE)
             continue()
         endif()
