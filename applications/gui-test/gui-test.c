@@ -4,24 +4,51 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog.h>
+#include <gui/modules/submenu.h>
 
-typedef enum { GuiTesterViewDialog } GuiTesterView;
+typedef enum { GuiTesterViewSubmenu = 0, GuiTesterViewDialog, GuiTesterViewLast } GuiTesterView;
 
 typedef struct {
     ViewDispatcher* view_dispatcher;
     Dialog* dialog;
+    Submenu* submenu;
+    GuiTesterView view_index;
 } GuiTester;
 
 GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
+    gui_tester->view_index = GuiTesterViewSubmenu;
 
     gui_tester->dialog = dialog_alloc();
-    dialog_set_context(gui_tester->dialog, gui_tester);
     view_dispatcher_add_view(
         gui_tester->view_dispatcher, GuiTesterViewDialog, dialog_get_view(gui_tester->dialog));
 
+    gui_tester->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher, GuiTesterViewSubmenu, submenu_get_view(gui_tester->submenu));
+
     return gui_tester;
+}
+
+void next_view(void* context) {
+    furi_assert(context);
+    GuiTester* gui_tester = context;
+    
+    gui_tester->view_index++;
+    if(gui_tester->view_index >= GuiTesterViewLast) {
+        gui_tester->view_index = 0;
+    }
+
+    view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
+}
+
+void submenu_callback(void* context) {
+    next_view(context);
+}
+
+void dialog_callback(DialogResult result, void* context) {
+    next_view(context);
 }
 
 void gui_test(void* param) {
@@ -31,12 +58,24 @@ void gui_test(void* param) {
     Gui* gui = furi_record_open("gui");
     view_dispatcher_attach_to_gui(gui_tester->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
-    //dialog_set_result_callback(gui_tester->dialog, power_menu_reset_dialog_result);
+    submenu_add_item(gui_tester->submenu, "Read", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Saved", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Emulate", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Enter manually", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Blah blah", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Set time", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Gender-bender", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Hack American Elections", submenu_callback, gui_tester);
+    submenu_add_item(gui_tester->submenu, "Hack the White House", submenu_callback, gui_tester);
+
+    dialog_set_result_callback(gui_tester->dialog, dialog_callback);
+    dialog_set_context(gui_tester->dialog, gui_tester);
     dialog_set_header_text(gui_tester->dialog, "Delete Abc123?");
     dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04");
     dialog_set_left_button_text(gui_tester->dialog, "< More");
     dialog_set_right_button_text(gui_tester->dialog, "Save >");
-    view_dispatcher_switch_to_view(gui_tester->view_dispatcher, GuiTesterViewDialog);
+
+    view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 
     while(1) {
         osDelay(1000);
