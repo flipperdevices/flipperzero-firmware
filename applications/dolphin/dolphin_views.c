@@ -51,7 +51,7 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_draw_icon_name(
         canvas,
         GUI_MAIN_WIDTH - 80,
-        GUI_MAIN_HEIGHT - 60 + GUI_STATUS_BAR_HEIGHT,
+        GUI_MAIN_HEIGHT - 60 + 6,
         I_Flipper_young_80x60);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 10, "/\\: Stats");
