@@ -241,7 +241,7 @@ const FuriApplication FLIPPER_PLUGINS[] = {
     {.app = sdnfc, .name = "sdnfc", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_GUI_TEST
+#ifdef BUILD_GUI_TEST
     {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
 #endif
 };
