@@ -151,7 +151,7 @@ void canvas_draw_str_aligned(
     u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
-uint8_t canvas_string_width(Canvas* canvas, const char* str) {
+uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     furi_assert(canvas);
     if(!str) return 0;
     return u8g2_GetStrWidth(&canvas->fb, str);

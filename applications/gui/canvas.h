@@ -84,7 +84,7 @@ void canvas_draw_str_aligned(
  * String width
  * @return width in pixels.
  */
-uint8_t canvas_string_width(Canvas* canvas, const char* str);
+uint16_t canvas_string_width(Canvas* canvas, const char* str);
 
 /*
  * Draw stateful icon at position defined by x,y.
