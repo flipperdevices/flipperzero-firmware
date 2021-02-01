@@ -26,7 +26,7 @@ static void dialog_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str_aligned(canvas, canvas_center, 10, AlignCenter, AlignTop, model->header_text);
     // Draw text
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, canvas_center, 25, AlignCenter, AlignTop, model->text);
+    elements_multiline_text_aligned(canvas, canvas_center, 25, AlignCenter, AlignTop, model->text);
     // Draw buttons
     elements_button_left(canvas, model->left_text);
     elements_button_right(canvas, model->right_text);
