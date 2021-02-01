@@ -14,7 +14,12 @@ typedef enum {
     ColorBlack = 0x01,
 } Color;
 
-typedef enum { FontPrimary = 0x00, FontSecondary = 0x01, FontGlyph = 0x02 } Font;
+typedef enum {
+    FontPrimary = 0x00,
+    FontSecondary = 0x01,
+    FontGlyph = 0x02,
+    FontKeyboard = 0x03
+} Font;
 
 typedef enum {
     AlignLeft,
