@@ -81,10 +81,16 @@ void canvas_draw_str_aligned(
     const char* str);
 
 /*
- * String width
+ * Get string width
  * @return width in pixels.
  */
 uint16_t canvas_string_width(Canvas* canvas, const char* str);
+
+/*
+ * Get maximum font height
+ * @return height in pixels.
+ */
+uint8_t canvas_font_max_height(Canvas* canvas);
 
 /*
  * Draw stateful icon at position defined by x,y.
