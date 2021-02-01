@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
-#include <gui/widget.h>
+#include <gui/view_port.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog.h>
@@ -92,7 +92,7 @@ void gui_test(void* param) {
     dialog_set_left_button_text(gui_tester->dialog, "< More");
     dialog_set_right_button_text(gui_tester->dialog, "Save >");
 
-    const uint8_t text_input_text_len = 40;
+    const uint8_t text_input_text_len = 64;
     char* text_input_text = calloc(text_input_text_len + 1, 1);
     memcpy(text_input_text, "New_ke", strlen("New_ke"));
 
