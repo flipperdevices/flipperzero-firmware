@@ -1,6 +1,8 @@
 #include "elements.h"
 #include <assets_icons.h>
 #include <gui/icon_i.h>
+#include <m-string.h>
+#include <furi.h>
 
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
     uint8_t width = canvas_width(canvas);
@@ -115,4 +117,51 @@ void elements_button_center(Canvas* canvas, const char* str) {
     canvas_draw_str(
         canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
     canvas_invert_color(canvas);
+}
+
+void elements_multiline_text_aligned(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    char* text) {
+    furi_assert(canvas);
+    furi_assert(text);
+
+    uint8_t font_height = canvas_font_max_height(canvas);
+    string_t str;
+    string_init(str);
+    char* start = text;
+    char* end;
+
+    // get lines count
+    uint8_t i, lines_count;
+    for(i = 0, lines_count = 0; text[i]; i++) lines_count += (text[i] == '\n');
+
+    switch(vertical) {
+    case AlignTop:
+        break;
+    case AlignBottom:
+        y -= font_height * lines_count;
+        break;
+    case AlignCenter:
+        y -= (font_height * lines_count) / 2;
+        break;
+    default:
+        break;
+    }
+
+    do {
+        end = strchr(start, '\n');
+        if(end) {
+            string_set_strn(str, start, end - start);
+        } else {
+            string_set_str(str, start);
+        }
+        canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(str));
+        start = end + 1;
+        y += font_height;
+    } while(end);
+    string_clear(str);
 }

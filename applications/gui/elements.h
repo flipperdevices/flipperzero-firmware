@@ -40,6 +40,20 @@ void elements_button_right(Canvas* canvas, const char* str);
  */
 void elements_button_center(Canvas* canvas, const char* str);
 
+/*
+ * Draw aligned multiline text
+ * @param x, y - coordinates based on align param
+ * @param horizontal, vertical - aligment of multiline text
+ * @param text - string (possible multiline)
+ */
+void elements_multiline_text_aligned(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    char* text);
+
 #ifdef __cplusplus
 }
 #endif
