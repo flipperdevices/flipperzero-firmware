@@ -145,15 +145,6 @@ ifeq ($(BUILD_EXAMPLE_QRCODE), 1)
 CFLAGS		+= -DBUILD_EXAMPLE_QRCODE
 C_SOURCES	+= $(APP_DIR)/examples/u8g2_qrcode.c
 C_SOURCES	+= $(LIB_DIR)/qrcode/qrcode.c
-APP_DISPLAY = 1
-endif
-
-# deprecated
-APP_EXAMPLE_DISPLAY ?= 0
-ifeq ($(APP_EXAMPLE_DISPLAY), 1)
-CFLAGS		+= -DAPP_EXAMPLE_DISPLAY
-C_SOURCES	+= $(APP_DIR)/examples/u8g2_example.c
-APP_DISPLAY = 1
 endif
 
 APP_EXAMPLE_FATFS ?= 0
@@ -166,7 +157,6 @@ ifeq ($(BUILD_EXAMPLE_FATFS), 1)
 CFLAGS		+= -DBUILD_EXAMPLE_FATFS
 C_SOURCES	+= $(APP_DIR)/examples/fatfs_list.c
 APP_INPUT = 1
-APP_DISPLAY = 1
 endif
 
 APP_CC1101 ?= 0
@@ -325,12 +315,6 @@ APP_SD_FILESYSTEM	?= 0
 ifeq ($(APP_SD_FILESYSTEM), 1)
 CFLAGS		+= -DAPP_SD_FILESYSTEM
 C_SOURCES	+= $(wildcard $(APP_DIR)/sd-filesystem/*.c)
-endif
-
-# deprecated
-ifeq ($(APP_DISPLAY), 1)
-CFLAGS		+= -DAPP_DISPLAY
-C_SOURCES	+= $(APP_DIR)/display-u8g2/display-u8g2.c
 endif
 
 APP_INPUT	?= 0

@@ -7,7 +7,6 @@ void flipper_test_app(void* p);
 void application_blink(void* p);
 void application_uart_write(void* p);
 void application_input_dump(void* p);
-void display_u8g2(void* p);
 void u8g2_example(void* p);
 void input_task(void* p);
 void menu_task(void* p);
@@ -37,10 +36,6 @@ void sd_filesystem(void* p);
 void gui_test(void* p);
 
 const FuriApplication FLIPPER_SERVICES[] = {
-#ifdef APP_DISPLAY
-    {.app = display_u8g2, .name = "display_u8g2", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
 #ifdef APP_CLI
     {.app = cli_task, .name = "cli_task", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
