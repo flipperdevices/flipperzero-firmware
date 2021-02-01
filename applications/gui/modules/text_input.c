@@ -129,6 +129,8 @@ static const char char_uppercase(const char letter) {
 static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     TextInputModel* model = _model;
     uint8_t text_length = strlen(model->text);
+    uint8_t needed_string_width = canvas_width(canvas) - 4 - 7 - 4;
+    char* text = model->text;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -139,8 +141,12 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_line(canvas, canvas_width(canvas) - 6, 13, canvas_width(canvas) - 6, 25);
     canvas_draw_line(canvas, 2, 26, canvas_width(canvas) - 7, 26);
 
-    canvas_draw_str(canvas, 4, 22, model->text);
-    canvas_draw_str(canvas, 4 + canvas_string_width(canvas, model->text) + 1, 22, "|");
+    while(text != 0 && canvas_string_width(canvas, text) > needed_string_width) {
+        text++;
+    }
+
+    canvas_draw_str(canvas, 4, 22, text);
+    canvas_draw_str(canvas, 4 + canvas_string_width(canvas, text) + 1, 22, "|");
 
     canvas_set_font(canvas, FontKeyboard);
 
