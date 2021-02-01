@@ -132,16 +132,19 @@ SubmenuItem* submenu_add_item(
     const char* label,
     SubmenuItemCallback callback,
     void* callback_context) {
+    SubmenuItem* item = NULL;
     furi_assert(label);
     furi_assert(submenu);
 
     with_view_model(
         submenu->view, (SubmenuModel * model) {
-            SubmenuItem* item = SubmenuItemArray_push_new(model->items);
+            item = SubmenuItemArray_push_new(model->items);
             item->label = label;
             item->callback = callback;
             item->callback_context = callback_context;
         });
+
+    return item;
 }
 
 void submenu_process_up(Submenu* submenu) {

@@ -211,7 +211,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     }
 }
 
-static bool text_input_handle_up(TextInput* text_input) {
+static void text_input_handle_up(TextInput* text_input) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             if(model->selected_row > 0) {
@@ -220,7 +220,7 @@ static bool text_input_handle_up(TextInput* text_input) {
         });
 }
 
-static bool text_input_handle_down(TextInput* text_input) {
+static void text_input_handle_down(TextInput* text_input) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             if(model->selected_row < keyboard_row_count - 1) {
@@ -232,7 +232,7 @@ static bool text_input_handle_down(TextInput* text_input) {
         });
 }
 
-static bool text_input_handle_left(TextInput* text_input) {
+static void text_input_handle_left(TextInput* text_input) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             if(model->selected_column > 0) {
@@ -243,7 +243,7 @@ static bool text_input_handle_left(TextInput* text_input) {
         });
 }
 
-static bool text_input_handle_right(TextInput* text_input) {
+static void text_input_handle_right(TextInput* text_input) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             if(model->selected_column < get_row_size(model->selected_row) - 1) {
@@ -254,7 +254,7 @@ static bool text_input_handle_right(TextInput* text_input) {
         });
 }
 
-static bool text_input_handle_ok(TextInput* text_input) {
+static void text_input_handle_ok(TextInput* text_input) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             char selected = get_selected_char(model);
