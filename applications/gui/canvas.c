@@ -62,6 +62,11 @@ uint8_t canvas_height(Canvas* canvas) {
     return canvas->height;
 }
 
+uint8_t canvas_current_font_height(Canvas* canvas) {
+    furi_assert(canvas);
+    return u8g2_GetMaxCharHeight(&canvas->fb);
+}
+
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
     u8g2_ClearBuffer(&canvas->fb);

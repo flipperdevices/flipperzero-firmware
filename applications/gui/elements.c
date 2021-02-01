@@ -44,7 +44,7 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
     furi_assert(canvas);
     furi_assert(text);
 
-    uint8_t font_height = canvas->fb.font_info.max_char_height;
+    uint8_t font_height = canvas_current_font_height(canvas);
     string_t str;
     string_init(str);
     char* start = text;

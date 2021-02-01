@@ -30,6 +30,12 @@ uint8_t canvas_width(Canvas* canvas);
 uint8_t canvas_height(Canvas* canvas);
 
 /*
+ * Get current font height
+ * @return height in pixels.
+ */
+uint8_t canvas_current_font_height(Canvas* canvas);
+
+/*
  * Clear canvas, clear rendering buffer
  */
 void canvas_clear(Canvas* canvas);
