@@ -1,5 +1,5 @@
 #include "dialog.h"
-#include <gui\elements.h>
+#include <gui/elements.h>
 #include <furi.h>
 
 struct Dialog {

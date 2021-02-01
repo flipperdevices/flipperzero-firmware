@@ -1,7 +1,7 @@
 #include "submenu.h"
 #include <m-array.h>
 #include <furi.h>
-#include <gui\elements.h>
+#include <gui/elements.h>
 
 struct SubmenuItem {
     const char* label;
