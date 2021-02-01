@@ -298,7 +298,7 @@ endif
 BUILD_GUI_TEST ?= 0
 ifeq ($(BUILD_GUI_TEST), 1)
 CFLAGS		+= -DBUILD_GUI_TEST
-CPP_SOURCES	+= $(wildcard $(APP_DIR)/gui-test/*.c)
+C_SOURCES	+= $(wildcard $(APP_DIR)/gui-test/*.c)
 endif
 
 APP_SDNFC ?= 0
