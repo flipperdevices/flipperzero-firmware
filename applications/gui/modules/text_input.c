@@ -305,6 +305,8 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             text_input_handle_ok(text_input);
             consumed = true;
             break;
+        default:
+            break;
         }
     }
 
