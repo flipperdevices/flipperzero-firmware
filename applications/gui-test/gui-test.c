@@ -88,7 +88,7 @@ void gui_test(void* param) {
     dialog_set_result_callback(gui_tester->dialog, dialog_callback);
     dialog_set_context(gui_tester->dialog, gui_tester);
     dialog_set_header_text(gui_tester->dialog, "Delete Abc123?");
-    dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04");
+    dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04\nAre you shure?");
     dialog_set_left_button_text(gui_tester->dialog, "< More");
     dialog_set_right_button_text(gui_tester->dialog, "Save >");
 

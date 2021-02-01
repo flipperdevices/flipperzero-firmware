@@ -125,14 +125,14 @@ void elements_multiline_text_aligned(
     uint8_t y,
     Align horizontal,
     Align vertical,
-    char* text) {
+    const char* text) {
     furi_assert(canvas);
     furi_assert(text);
 
     uint8_t font_height = canvas_font_max_height(canvas);
     string_t str;
     string_init(str);
-    char* start = text;
+    const char* start = text;
     char* end;
 
     // get lines count

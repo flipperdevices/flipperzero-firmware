@@ -52,7 +52,7 @@ void elements_multiline_text_aligned(
     uint8_t y,
     Align horizontal,
     Align vertical,
-    char* text);
+    const char* text);
 
 #ifdef __cplusplus
 }
