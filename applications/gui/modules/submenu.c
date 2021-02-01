@@ -88,6 +88,8 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
             submenu_process_ok(submenu);
             break;
+        default:
+            break;
         }
     }
 
@@ -150,6 +152,9 @@ void submenu_process_up(Submenu* submenu) {
                 if((model->position - model->window_position) < 1 && model->window_position > 0) {
                     model->window_position--;
                 }
+            } else {
+                model->position = SubmenuItemArray_size(model->items) - 1;
+                model->window_position = model->position - 3;
             }
         });
 }
@@ -163,6 +168,9 @@ void submenu_process_down(Submenu* submenu) {
                    model->window_position < (SubmenuItemArray_size(model->items) - 4)) {
                     model->window_position++;
                 }
+            } else {
+                model->position = 0;
+                model->window_position = 0;
             }
         });
 }
@@ -172,7 +180,7 @@ void submenu_process_ok(Submenu* submenu) {
 
     with_view_model(
         submenu->view, (SubmenuModel * model) {
-            if(model->position < (SubmenuItemArray_size(model->items) - 1)) {
+            if(model->position < (SubmenuItemArray_size(model->items))) {
                 item = SubmenuItemArray_get(model->items, model->position);
             }
         });
