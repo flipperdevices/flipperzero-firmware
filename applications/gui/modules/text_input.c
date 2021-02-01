@@ -48,18 +48,18 @@ static const TextInputKey keyboard_keys_row_1[] = {
 };
 
 static const TextInputKey keyboard_keys_row_2[] = {
-    {'o', 1, 19},
-    {'p', 10, 19},
-    {'q', 19, 19},
-    {'r', 28, 19},
-    {'s', 37, 19},
-    {'t', 46, 19},
-    {'u', 55, 19},
-    {'v', 64, 19},
-    {'w', 73, 19},
-    {'x', 82, 19},
-    {'y', 91, 19},
-    {'z', 100, 19},
+    {'o', 1, 20},
+    {'p', 10, 20},
+    {'q', 19, 20},
+    {'r', 28, 20},
+    {'s', 37, 20},
+    {'t', 46, 20},
+    {'u', 55, 20},
+    {'v', 64, 20},
+    {'w', 73, 20},
+    {'x', 82, 20},
+    {'y', 91, 20},
+    {'z', 100, 20},
     {BACKSPACE_KEY, 110, 12},
 };
 
@@ -122,7 +122,7 @@ static const bool char_is_lowercase(char letter) {
     return (letter >= 0x61 && letter <= 0x7A);
 }
 
-static const char char_uppercase(const char letter) {
+static const char char_to_uppercase(const char letter) {
     return (letter - 0x20);
 }
 
@@ -204,7 +204,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
                         canvas,
                         keyboard_origin_x + keys[column].x,
                         keyboard_origin_y + keys[column].y,
-                        char_uppercase(keys[column].text));
+                        char_to_uppercase(keys[column].text));
                 } else {
                     canvas_draw_glyph(
                         canvas,
@@ -276,7 +276,7 @@ static void text_input_handle_ok(TextInput* text_input) {
                 }
             } else if(text_length < model->max_text_length) {
                 if(text_length == 0 && char_is_lowercase(selected)) {
-                    selected = char_uppercase(selected);
+                    selected = char_to_uppercase(selected);
                 }
                 model->text[text_length] = selected;
                 model->text[text_length + 1] = 0;
