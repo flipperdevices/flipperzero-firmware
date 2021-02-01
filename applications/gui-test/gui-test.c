@@ -5,20 +5,27 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/text_input.h>
 
-typedef enum { GuiTesterViewSubmenu = 0, GuiTesterViewDialog, GuiTesterViewLast } GuiTesterView;
+typedef enum {
+    GuiTesterViewTextInput = 0,
+    GuiTesterViewSubmenu,
+    GuiTesterViewDialog,
+    GuiTesterViewLast
+} GuiTesterView;
 
 typedef struct {
     ViewDispatcher* view_dispatcher;
     Dialog* dialog;
     Submenu* submenu;
+    TextInput* text_input;
     GuiTesterView view_index;
 } GuiTester;
 
 GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
-    gui_tester->view_index = GuiTesterViewSubmenu;
+    gui_tester->view_index = GuiTesterViewTextInput;
 
     gui_tester->dialog = dialog_alloc();
     view_dispatcher_add_view(
@@ -28,13 +35,19 @@ GuiTester* gui_test_alloc(void) {
     view_dispatcher_add_view(
         gui_tester->view_dispatcher, GuiTesterViewSubmenu, submenu_get_view(gui_tester->submenu));
 
+    gui_tester->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher,
+        GuiTesterViewTextInput,
+        text_input_get_view(gui_tester->text_input));
+
     return gui_tester;
 }
 
 void next_view(void* context) {
     furi_assert(context);
     GuiTester* gui_tester = context;
-    
+
     gui_tester->view_index++;
     if(gui_tester->view_index >= GuiTesterViewLast) {
         gui_tester->view_index = 0;
@@ -48,6 +61,10 @@ void submenu_callback(void* context) {
 }
 
 void dialog_callback(DialogResult result, void* context) {
+    next_view(context);
+}
+
+void text_input_callback(void* context, char* text) {
     next_view(context);
 }
 
@@ -74,6 +91,18 @@ void gui_test(void* param) {
     dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04");
     dialog_set_left_button_text(gui_tester->dialog, "< More");
     dialog_set_right_button_text(gui_tester->dialog, "Save >");
+
+    const uint8_t text_input_text_len = 19;
+    char* text_input_text = calloc(text_input_text_len + 1, 1);
+    memcpy(text_input_text, "New_ke", strlen("New_ke"));
+
+    text_input_set_result_callback(
+        gui_tester->text_input,
+        text_input_callback,
+        gui_tester,
+        text_input_text,
+        text_input_text_len);
+    text_input_set_header_text(gui_tester->text_input, "Name the key");
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 
