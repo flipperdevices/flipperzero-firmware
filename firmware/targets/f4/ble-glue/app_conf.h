@@ -5,7 +5,7 @@
 #include "hw_if.h"
 #include "ble_bufsize.h"
 
-#define CFG_TX_POWER                      (0x19) /* +6dBm */
+#define CFG_TX_POWER                      (0x19) /* +0dBm */
 
 /**
  * Define Advertising parameters
