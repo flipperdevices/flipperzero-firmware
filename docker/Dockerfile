@@ -31,7 +31,7 @@ RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && add-a
 RUN apt update && \
     apt install -y --no-install-recommends \
         libclang-12-dev \
-        clang-format-12  \
+        clang-format-12 \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal --target thumbv7em-none-eabi thumbv7em-none-eabihf && \
