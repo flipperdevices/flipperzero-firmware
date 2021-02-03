@@ -39,7 +39,7 @@ View* dialog_ex_get_view(DialogEx* dialog_ex);
  */
 void dialog_ex_set_result_callback(DialogEx* dialog_ex, DialogExResultCallback callback);
 
-/* Set dialog context text
+/* Set dialog context
  * @param dialog_ex - DialogEx instance
  * @param context - context pointer, will be passed to result callback
  */
