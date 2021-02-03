@@ -52,7 +52,7 @@ static bool dialog_view_input_callback(InputEvent* event, void* context) {
             consumed = true;
         }
     }
-    // All input events consumed
+
     return consumed;
 }
 
