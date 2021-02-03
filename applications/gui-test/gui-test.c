@@ -7,12 +7,14 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/popup.h>
 
 typedef enum {
     GuiTesterViewTextInput = 0,
     GuiTesterViewSubmenu,
     GuiTesterViewDialog,
     GuiTesterViewDialogEx,
+    GuiTesterViewPopup,
     GuiTesterViewLast
 } GuiTesterView;
 
@@ -22,6 +24,7 @@ typedef struct {
     DialogEx* dialog_ex;
     Submenu* submenu;
     TextInput* text_input;
+    Popup* popup;
     GuiTesterView view_index;
 } GuiTester;
 
@@ -50,6 +53,10 @@ GuiTester* gui_test_alloc(void) {
         GuiTesterViewTextInput,
         text_input_get_view(gui_tester->text_input));
 
+    gui_tester->popup = popup_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher, GuiTesterViewPopup, popup_get_view(gui_tester->popup));
+
     return gui_tester;
 }
 
@@ -63,6 +70,16 @@ void next_view(void* context) {
     }
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
+
+    if(gui_tester->view_index == GuiTesterViewPopup) {
+        popup_start_timer(gui_tester->popup);
+    } else {
+        popup_stop_timer(gui_tester->popup);
+    }
+}
+
+void popup_callback(void* context) {
+    next_view(context);
 }
 
 void submenu_callback(void* context) {
@@ -88,6 +105,7 @@ void gui_test(void* param) {
     Gui* gui = furi_record_open("gui");
     view_dispatcher_attach_to_gui(gui_tester->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
+    // Submenu
     submenu_add_item(gui_tester->submenu, "Read", submenu_callback, gui_tester);
     submenu_add_item(gui_tester->submenu, "Saved", submenu_callback, gui_tester);
     submenu_add_item(gui_tester->submenu, "Emulate", submenu_callback, gui_tester);
@@ -98,6 +116,7 @@ void gui_test(void* param) {
     submenu_add_item(gui_tester->submenu, "Hack American Elections", submenu_callback, gui_tester);
     submenu_add_item(gui_tester->submenu, "Hack the White House", submenu_callback, gui_tester);
 
+    // Dialog
     dialog_set_result_callback(gui_tester->dialog, dialog_callback);
     dialog_set_context(gui_tester->dialog, gui_tester);
     dialog_set_header_text(gui_tester->dialog, "Delete Abc123?");
@@ -105,6 +124,7 @@ void gui_test(void* param) {
     dialog_set_left_button_text(gui_tester->dialog, "< Yes");
     dialog_set_right_button_text(gui_tester->dialog, "No >");
 
+    // Dialog extended
     dialog_ex_set_result_callback(gui_tester->dialog_ex, dialog_ex_callback);
     dialog_ex_set_context(gui_tester->dialog_ex, gui_tester);
     dialog_ex_set_header(gui_tester->dialog_ex, "Dallas", 95, 12, AlignCenter, AlignCenter);
@@ -114,6 +134,14 @@ void gui_test(void* param) {
     dialog_ex_set_left_button_text(gui_tester->dialog_ex, "< More");
     dialog_ex_set_right_button_text(gui_tester->dialog_ex, "Save >");
 
+    // Popup
+    popup_set_callback(gui_tester->popup, popup_callback);
+    popup_set_context(gui_tester->popup, gui_tester);
+    popup_set_icon(gui_tester->popup, 0, 2, I_DolphinMafia_115x62);
+    popup_set_text(gui_tester->popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
+    popup_set_timeout(gui_tester->popup, 5000);
+
+    // Text input
     const uint8_t text_input_text_len = 64;
     char* text_input_text = calloc(text_input_text_len + 1, 1);
     memcpy(text_input_text, "New_ke", strlen("New_ke"));
