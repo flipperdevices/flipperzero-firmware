@@ -33,14 +33,14 @@ void dialog_ex_free(DialogEx* dialog_ex);
  */
 View* dialog_ex_get_view(DialogEx* dialog_ex);
 
-/* Set dialog header text
- * @param dialog - DialogEx instance
- * @param text - text to be shown
+/* Set dialog result callback
+ * @param dialog_ex - DialogEx instance
+ * @param callback - result callback function
  */
 void dialog_ex_set_result_callback(DialogEx* dialog_ex, DialogExResultCallback callback);
 
-/* Set dialog header text
- * @param dialog - DialogEx instance
+/* Set dialog context text
+ * @param dialog_ex - DialogEx instance
  * @param context - context pointer, will be passed to result callback
  */
 void dialog_ex_set_context(DialogEx* dialog_ex, void* context);
