@@ -4,6 +4,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog.h>
+#include <gui/modules/dialog_ex.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 
@@ -11,12 +12,14 @@ typedef enum {
     GuiTesterViewTextInput = 0,
     GuiTesterViewSubmenu,
     GuiTesterViewDialog,
+    GuiTesterViewDialogEx,
     GuiTesterViewLast
 } GuiTesterView;
 
 typedef struct {
     ViewDispatcher* view_dispatcher;
     Dialog* dialog;
+    DialogEx* dialog_ex;
     Submenu* submenu;
     TextInput* text_input;
     GuiTesterView view_index;
@@ -25,11 +28,17 @@ typedef struct {
 GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
-    gui_tester->view_index = GuiTesterViewTextInput;
+    gui_tester->view_index = GuiTesterViewDialogEx;
 
     gui_tester->dialog = dialog_alloc();
     view_dispatcher_add_view(
         gui_tester->view_dispatcher, GuiTesterViewDialog, dialog_get_view(gui_tester->dialog));
+
+    gui_tester->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher,
+        GuiTesterViewDialogEx,
+        dialog_ex_get_view(gui_tester->dialog_ex));
 
     gui_tester->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -64,6 +73,10 @@ void dialog_callback(DialogResult result, void* context) {
     next_view(context);
 }
 
+void dialog_ex_callback(DialogExResult result, void* context) {
+    next_view(context);
+}
+
 void text_input_callback(void* context, char* text) {
     next_view(context);
 }
@@ -89,8 +102,17 @@ void gui_test(void* param) {
     dialog_set_context(gui_tester->dialog, gui_tester);
     dialog_set_header_text(gui_tester->dialog, "Delete Abc123?");
     dialog_set_text(gui_tester->dialog, "ID: F0 00 01 02 03 04\nAre you shure?");
-    dialog_set_left_button_text(gui_tester->dialog, "< More");
-    dialog_set_right_button_text(gui_tester->dialog, "Save >");
+    dialog_set_left_button_text(gui_tester->dialog, "< Yes");
+    dialog_set_right_button_text(gui_tester->dialog, "No >");
+
+    dialog_ex_set_result_callback(gui_tester->dialog_ex, dialog_ex_callback);
+    dialog_ex_set_context(gui_tester->dialog_ex, gui_tester);
+    dialog_ex_set_header(gui_tester->dialog_ex, "Dallas", 95, 12, AlignCenter, AlignCenter);
+    dialog_ex_set_text(
+        gui_tester->dialog_ex, "F6 E5 D4\nC3 B2 A1", 95, 32, AlignCenter, AlignCenter);
+    dialog_ex_set_icon(gui_tester->dialog_ex, 0, 1, I_DolphinExcited_64x63);
+    dialog_ex_set_left_button_text(gui_tester->dialog_ex, "< More");
+    dialog_ex_set_right_button_text(gui_tester->dialog_ex, "Save >");
 
     const uint8_t text_input_text_len = 64;
     char* text_input_text = calloc(text_input_text_len + 1, 1);
