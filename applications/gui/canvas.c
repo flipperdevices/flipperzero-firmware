@@ -127,7 +127,7 @@ void canvas_draw_str_aligned(
         x -= (u8g2_GetStrWidth(&canvas->fb, str) / 2);
         break;
     default:
-        furi_assert(0);
+        furi_check(0);
         break;
     }
 
@@ -141,7 +141,7 @@ void canvas_draw_str_aligned(
         y += (u8g2_GetAscent(&canvas->fb) / 2);
         break;
     default:
-        furi_assert(0);
+        furi_check(0);
         break;
     }
 
