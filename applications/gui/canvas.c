@@ -154,11 +154,6 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
-uint8_t canvas_font_max_height(Canvas* canvas) {
-    furi_assert(canvas);
-    return canvas->fb.font_info.max_char_height;
-}
-
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, Icon* icon) {
     furi_assert(canvas);
     if(!icon) return;
