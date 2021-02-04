@@ -69,7 +69,6 @@ void popup_set_text(
     Align vertical);
 
 /* Set popup icon
- * If x or y is negative, popup icon will not be rendered
  * @param popup - Popup instance
  * @param x, y - icon position
  * @param name - icon to be shown
@@ -77,19 +76,17 @@ void popup_set_text(
 void popup_set_icon(Popup* popup, int8_t x, int8_t y, IconName name);
 
 /* Set popup timeout
- * If x or y is negative, popup icon will not be rendered
  * @param popup - Popup instance
  * @param timeout_in_ms - popup timeout value in milliseconds
  */
 void popup_set_timeout(Popup* popup, uint32_t timeout_in_ms);
 
-/* Start popup timer
- * Timeout will be counted from that moment
+/* Enable popup timeout
  * @param popup - Popup instance
  */
-void popup_start_timer(Popup* popup);
+void popup_enable_timeout(Popup* popup);
 
-/* Stop popup timer
+/* Disable popup timeout
  * @param popup - Popup instance
  */
-void popup_stop_timer(Popup* popup);
+void popup_disable_timeout(Popup* popup);

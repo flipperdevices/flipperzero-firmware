@@ -70,12 +70,6 @@ void next_view(void* context) {
     }
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
-
-    if(gui_tester->view_index == GuiTesterViewPopup) {
-        popup_start_timer(gui_tester->popup);
-    } else {
-        popup_stop_timer(gui_tester->popup);
-    }
 }
 
 void popup_callback(void* context) {
@@ -140,6 +134,7 @@ void gui_test(void* param) {
     popup_set_icon(gui_tester->popup, 0, 2, I_DolphinMafia_115x62);
     popup_set_text(gui_tester->popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
     popup_set_timeout(gui_tester->popup, 5000);
+    popup_enable_timeout(gui_tester->popup);
 
     // Text input
     const uint8_t text_input_text_len = 64;

@@ -6,8 +6,10 @@ struct Popup {
     View* view;
     void* context;
     PopupCallback callback;
+
     osTimerId_t timer;
     uint32_t timer_period_in_ms;
+    bool timer_enabled;
 };
 
 typedef struct {
@@ -89,16 +91,38 @@ static bool popup_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+void popup_start_timer(void* context) {
+    Popup* popup = context;
+    if(popup->timer_enabled) {
+        uint32_t timer_period = popup->timer_period_in_ms / (1000.0f / osKernelGetTickFreq());
+        if(timer_period == 0) timer_period = 1;
+
+        if(osTimerStart(popup->timer, timer_period) != osOK) {
+            furi_assert(0);
+        };
+    }
+}
+
+void popup_stop_timer(void* context) {
+    Popup* popup = context;
+    osTimerStop(popup->timer);
+}
+
 Popup* popup_alloc() {
     Popup* popup = furi_alloc(sizeof(Popup));
     popup->view = view_alloc();
     popup->timer = osTimerNew(popup_timer_callback, osTimerOnce, popup, NULL);
     furi_assert(popup->timer);
+    popup->timer_period_in_ms = 1000;
+    popup->timer_enabled = false;
 
     view_set_context(popup->view, popup);
     view_allocate_model(popup->view, ViewModelTypeLockFree, sizeof(PopupModel));
     view_set_draw_callback(popup->view, popup_view_draw_callback);
     view_set_input_callback(popup->view, popup_view_input_callback);
+    view_set_enter_callback(popup->view, popup_start_timer);
+    view_set_exit_callback(popup->view, popup_stop_timer);
+
     with_view_model(
         popup->view, (PopupModel * model) {
             model->header.text = NULL;
@@ -194,15 +218,10 @@ void popup_set_timeout(Popup* popup, uint32_t timeout_in_ms) {
     popup->timer_period_in_ms = timeout_in_ms;
 }
 
-void popup_start_timer(Popup* popup) {
-    uint32_t timer_period = popup->timer_period_in_ms / (1000.0f / osKernelGetTickFreq());
-    if(timer_period == 0) timer_period = 1;
-
-    if(osTimerStart(popup->timer, timer_period) != osOK) {
-        furi_assert(0);
-    };
+void popup_enable_timeout(Popup* popup) {
+    popup->timer_enabled = true;
 }
 
-void popup_stop_timer(Popup* popup) {
-    osTimerStop(popup->timer);
+void popup_disable_timeout(Popup* popup) {
+    popup->timer_enabled = false;
 }
