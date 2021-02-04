@@ -32,6 +32,7 @@ void cli_task(void* p);
 void music_player(void* p);
 void sdnfc(void* p);
 void floopper_bloopper(void* p);
+void game_of_life(void* p);
 void sd_filesystem(void* p);
 
 const FuriApplication FLIPPER_SERVICES[] = {
@@ -219,6 +220,10 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 
 #ifdef BUILD_FLOOPPER_BLOOPPER
     {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
+#endif
+
+#ifdef BUILD_GAME_OF_LIFE
+    {.app = game_of_life, .name = "Game of Life", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
 #ifdef BUILD_SDNFC
