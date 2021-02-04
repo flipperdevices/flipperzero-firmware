@@ -3,6 +3,9 @@
 #include <input/input.h>
 #include "canvas.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,6 +41,12 @@ typedef bool (*ViewInputCallback)(InputEvent* event, void* context);
  * @warning called from GUI thread
  */
 typedef uint32_t (*ViewNavigationCallback)(void* context);
+
+/* View callback
+ * @param context, pointer to context
+ * @warning called from GUI thread
+ */
+typedef void (*ViewCallback)(void* context);
 
 /* View model types */
 typedef enum {
@@ -88,6 +97,18 @@ void view_set_previous_callback(View* view, ViewNavigationCallback callback);
  * @param callback, input callback
  */
 void view_set_next_callback(View* view, ViewNavigationCallback callback);
+
+/* Set Enter callback
+ * @param view, pointer to View
+ * @param callback, callback
+ */
+void view_set_enter_callback(View* view, ViewCallback callback);
+
+/* Set Exit callback
+ * @param view, pointer to View
+ * @param callback, callback
+ */
+void view_set_exit_callback(View* view, ViewCallback callback);
 
 /* Set View Draw callback
  * @param view, pointer to View

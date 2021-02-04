@@ -3,8 +3,12 @@
 #include <gui/icon_i.h>
 #include <m-string.h>
 #include <furi.h>
+#include "canvas_i.h"
+#include <string.h>
 
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
+    furi_assert(canvas);
+
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
     // prevent overflows
@@ -23,6 +27,8 @@ void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
 }
 
 void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    furi_assert(canvas);
+
     canvas_draw_line(canvas, x + 2, y, x + width - 2, y);
     canvas_draw_line(canvas, x + 1, y + height - 1, x + width, y + height - 1);
     canvas_draw_line(canvas, x + 2, y + height, x + width - 1, y + height);

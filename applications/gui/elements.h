@@ -54,6 +54,13 @@ void elements_multiline_text_aligned(
     Align vertical,
     const char* text);
 
+/*
+ * Draw multiline text
+ * @param x, y - top left corner coordinates
+ * @param text - string (possible multiline)
+ */
+void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text);
+
 #ifdef __cplusplus
 }
 #endif
