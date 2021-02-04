@@ -146,14 +146,13 @@ void elements_multiline_text_aligned(
     for(i = 0, lines_count = 0; text[i]; i++) lines_count += (text[i] == '\n');
 
     switch(vertical) {
-    case AlignTop:
-        break;
     case AlignBottom:
         y -= font_height * lines_count;
         break;
     case AlignCenter:
         y -= (font_height * lines_count) / 2;
         break;
+    case AlignTop:
     default:
         break;
     }
