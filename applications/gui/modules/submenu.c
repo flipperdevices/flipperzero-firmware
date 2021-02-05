@@ -5,6 +5,7 @@
 
 struct SubmenuItem {
     const char* label;
+    uint32_t index;
     SubmenuItemCallback callback;
     void* callback_context;
 };
@@ -131,6 +132,7 @@ View* submenu_get_view(Submenu* submenu) {
 SubmenuItem* submenu_add_item(
     Submenu* submenu,
     const char* label,
+    uint32_t index,
     SubmenuItemCallback callback,
     void* callback_context) {
     SubmenuItem* item = NULL;
@@ -141,6 +143,7 @@ SubmenuItem* submenu_add_item(
         submenu->view, (SubmenuModel * model) {
             item = SubmenuItemArray_push_new(model->items);
             item->label = label;
+            item->index = index;
             item->callback = callback;
             item->callback_context = callback_context;
         });
@@ -153,7 +156,7 @@ SubmenuItem* submenu_clean(Submenu* submenu) {
 
     with_view_model(
         submenu->view, (SubmenuModel * model) {
-            item = SubmenuItemArray_clean(model->items);
+            SubmenuItemArray_clean(model->items);
             model->position = 0;
             model->window_position = 0;
         });
@@ -201,6 +204,6 @@ void submenu_process_ok(Submenu* submenu) {
         });
 
     if(item && item->callback) {
-        item->callback(item->callback_context);
+        item->callback(item->callback_context, item->index);
     }
 }

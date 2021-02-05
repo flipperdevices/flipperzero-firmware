@@ -4,7 +4,7 @@
 /* Submenu anonymous structure */
 typedef struct Submenu Submenu;
 typedef struct SubmenuItem SubmenuItem;
-typedef void (*SubmenuItemCallback)(void* context);
+typedef void (*SubmenuItemCallback)(void* context, uint32_t index);
 
 /* Allocate and initialize submenu
  * This submenu is used to select one option
@@ -25,6 +25,7 @@ View* submenu_get_view(Submenu* submenu);
 /* Add item to submenu
  * @param submenu - Submenu instance
  * @param label - menu item label
+ * @param index - menu item index, used for callback, may be the same with other items
  * @param callback - menu item callback
  * @param callback_context - menu item callback context
  * @return SubmenuItem instance that can be used to modify or delete that item
@@ -32,6 +33,7 @@ View* submenu_get_view(Submenu* submenu);
 SubmenuItem* submenu_add_item(
     Submenu* submenu,
     const char* label,
+    uint32_t index,
     SubmenuItemCallback callback,
     void* callback_context);
 
