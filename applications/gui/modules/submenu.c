@@ -108,6 +108,7 @@ Submenu* submenu_alloc() {
         submenu->view, (SubmenuModel * model) {
             SubmenuItemArray_init(model->items);
             model->position = 0;
+            model->window_position = 0;
         });
 
     return submenu;
@@ -145,6 +146,17 @@ SubmenuItem* submenu_add_item(
         });
 
     return item;
+}
+
+SubmenuItem* submenu_clean(Submenu* submenu) {
+    furi_assert(submenu);
+
+    with_view_model(
+        submenu->view, (SubmenuModel * model) {
+            item = SubmenuItemArray_clean(model->items);
+            model->position = 0;
+            model->window_position = 0;
+        });
 }
 
 void submenu_process_up(Submenu* submenu) {

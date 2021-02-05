@@ -34,3 +34,8 @@ SubmenuItem* submenu_add_item(
     const char* label,
     SubmenuItemCallback callback,
     void* callback_context);
+
+/* Remove all items from submenu
+ * @param submenu - Submenu instance
+ */
+SubmenuItem* submenu_clean(Submenu* submenu);
