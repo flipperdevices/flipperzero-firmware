@@ -47,7 +47,7 @@ void ir_nec_send(uint16_t addr, uint8_t data) {
     ir_nec_send_byte(nec_packet[2]);
     ir_nec_send_byte(nec_packet[3]);
     ir_nec_send_bit(1);
-    
+
     __enable_irq();
     osKernelUnlock();
 }
