@@ -1,5 +1,5 @@
 #pragma once
-#include "ibutton.h"
+#include "ibutton-test.h"
 #include "cyfral_reader_comp.h"
 
 class AppiButtonTestModeCyfralRead

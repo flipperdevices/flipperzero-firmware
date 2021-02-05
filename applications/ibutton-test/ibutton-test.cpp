@@ -1,9 +1,9 @@
-#include "ibutton.h"
-#include "ibutton_mode_dallas_read.h"
-#include "ibutton_mode_dallas_emulate.h"
-#include "ibutton_mode_dallas_write.h"
-#include "ibutton_mode_cyfral_read.h"
-#include "ibutton_mode_cyfral_emulate.h"
+#include "ibutton-test.h"
+#include "ibutton-test-mode-dallas-read.h"
+#include "ibutton-test-mode-dallas-emulate.h"
+#include "ibutton-test-mode-dallas-write.h"
+#include "ibutton-test-mode-cyfral-read.h"
+#include "ibutton-test-mode-cyfral-emulate.h"
 
 // start app
 void AppiButtonTest::run() {

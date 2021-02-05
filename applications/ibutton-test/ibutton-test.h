@@ -1,6 +1,6 @@
 #pragma once
 #include "app-template.h"
-#include "ibutton_mode_template.h"
+#include "ibutton-test-mode-template.h"
 
 // event enumeration type
 typedef uint8_t event_t;
