@@ -5,7 +5,7 @@
 // event enumeration type
 typedef uint8_t event_t;
 
-class AppiButtonState {
+class AppiButtonTestState {
 public:
     // state data
     static const uint8_t dallas_address_count = 3;
@@ -26,7 +26,7 @@ public:
     uint8_t mode_index;
 
     // state initializer
-    AppiButtonState() {
+    AppiButtonTestState() {
         mode_index = 0;
         dallas_address_index = 0;
         cyfral_address_index = 0;
@@ -34,7 +34,7 @@ public:
 };
 
 // events class
-class AppiButtonEvent {
+class AppiButtonTestEvent {
 public:
     // events enum
     static const event_t EventTypeTick = 0;
@@ -51,18 +51,18 @@ public:
 
 // our app derived from base AppTemplate class
 // with template variables <state, events>
-class AppiButton : public AppTemplate<AppiButtonState, AppiButtonEvent> {
+class AppiButtonTest : public AppTemplate<AppiButtonTestState, AppiButtonTestEvent> {
 public:
     const GpioPin* red_led_record;
     const GpioPin* green_led_record;
 
     static const uint8_t modes_count = 5;
-    AppTemplateMode<AppiButtonState, AppiButtonEvent>* mode[modes_count];
+    AppTemplateMode<AppiButtonTestState, AppiButtonTestEvent>* mode[modes_count];
 
     void run();
     void render(Canvas* canvas);
-    void render_dallas_list(Canvas* canvas, AppiButtonState* state);
-    void render_cyfral_list(Canvas* canvas, AppiButtonState* state);
+    void render_dallas_list(Canvas* canvas, AppiButtonTestState* state);
+    void render_cyfral_list(Canvas* canvas, AppiButtonTestState* state);
 
     void blink_red();
     void blink_green();

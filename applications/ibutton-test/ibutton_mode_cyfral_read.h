@@ -2,18 +2,19 @@
 #include "ibutton.h"
 #include "cyfral_reader_comp.h"
 
-class AppiButtonModeCyfralRead : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
+class AppiButtonTestModeCyfralRead
+    : public AppTemplateMode<AppiButtonTestState, AppiButtonTestEvent> {
 public:
     const char* name = "cyfral read";
-    AppiButton* app;
+    AppiButtonTest* app;
     CyfralReaderComp* reader;
 
-    void event(AppiButtonEvent* event, AppiButtonState* state);
-    void render(Canvas* canvas, AppiButtonState* state);
+    void event(AppiButtonTestEvent* event, AppiButtonTestState* state);
+    void render(Canvas* canvas, AppiButtonTestState* state);
     void acquire();
     void release();
 
-    AppiButtonModeCyfralRead(AppiButton* parent_app) {
+    AppiButtonTestModeCyfralRead(AppiButtonTest* parent_app) {
         app = parent_app;
 
         // TODO open record
@@ -27,8 +28,8 @@ public:
     uint8_t keys[num_keys_to_check][4];
 };
 
-void AppiButtonModeCyfralRead::event(AppiButtonEvent* event, AppiButtonState* state) {
-    if(event->type == AppiButtonEvent::EventTypeTick) {
+void AppiButtonTestModeCyfralRead::event(AppiButtonTestEvent* event, AppiButtonTestState* state) {
+    if(event->type == AppiButtonTestEvent::EventTypeTick) {
         // if we read a key
         if(reader->read(keys[key_index], key_length)) {
             // read next key
@@ -58,7 +59,7 @@ void AppiButtonModeCyfralRead::event(AppiButtonEvent* event, AppiButtonState* st
                 }
             }
         }
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.state && event->value.input.input == InputUp) {
             app->decrease_cyfral_address();
         }
@@ -69,17 +70,17 @@ void AppiButtonModeCyfralRead::event(AppiButtonEvent* event, AppiButtonState* st
     }
 }
 
-void AppiButtonModeCyfralRead::render(Canvas* canvas, AppiButtonState* state) {
+void AppiButtonTestModeCyfralRead::render(Canvas* canvas, AppiButtonTestState* state) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 25, "< Cyfral read >");
 
     app->render_cyfral_list(canvas, state);
 }
 
-void AppiButtonModeCyfralRead::acquire() {
+void AppiButtonTestModeCyfralRead::acquire() {
     reader->start();
 }
 
-void AppiButtonModeCyfralRead::release() {
+void AppiButtonTestModeCyfralRead::release() {
     reader->stop();
 }

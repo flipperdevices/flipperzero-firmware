@@ -3,18 +3,19 @@
 #include "one_wire_master.h"
 #include "maxim_crc.h"
 
-class AppiButtonModeDallasRead : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
+class AppiButtonTestModeDallasRead
+    : public AppTemplateMode<AppiButtonTestState, AppiButtonTestEvent> {
 public:
     const char* name = "dallas read";
-    AppiButton* app;
+    AppiButtonTest* app;
     OneWireMaster* onewire;
 
-    void event(AppiButtonEvent* event, AppiButtonState* state);
-    void render(Canvas* canvas, AppiButtonState* state);
+    void event(AppiButtonTestEvent* event, AppiButtonTestState* state);
+    void render(Canvas* canvas, AppiButtonTestState* state);
     void acquire();
     void release();
 
-    AppiButtonModeDallasRead(AppiButton* parent_app) {
+    AppiButtonTestModeDallasRead(AppiButtonTest* parent_app) {
         app = parent_app;
 
         // TODO open record
@@ -23,8 +24,8 @@ public:
     };
 };
 
-void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* state) {
-    if(event->type == AppiButtonEvent::EventTypeTick) {
+void AppiButtonTestModeDallasRead::event(AppiButtonTestEvent* event, AppiButtonTestState* state) {
+    if(event->type == AppiButtonTestEvent::EventTypeTick) {
         bool result = 0;
         uint8_t address[8];
 
@@ -45,7 +46,7 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
                 app->blink_green();
             }
         }
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.state && event->value.input.input == InputUp) {
             app->decrease_dallas_address();
         }
@@ -56,16 +57,16 @@ void AppiButtonModeDallasRead::event(AppiButtonEvent* event, AppiButtonState* st
     }
 }
 
-void AppiButtonModeDallasRead::render(Canvas* canvas, AppiButtonState* state) {
+void AppiButtonTestModeDallasRead::render(Canvas* canvas, AppiButtonTestState* state) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 25, "Dallas read >");
     app->render_dallas_list(canvas, state);
 }
 
-void AppiButtonModeDallasRead::acquire() {
+void AppiButtonTestModeDallasRead::acquire() {
     onewire->start();
 }
 
-void AppiButtonModeDallasRead::release() {
+void AppiButtonTestModeDallasRead::release() {
     onewire->stop();
 }

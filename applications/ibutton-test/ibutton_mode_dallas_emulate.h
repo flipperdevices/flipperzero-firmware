@@ -5,24 +5,25 @@
 #include "callback-connector.h"
 #include <atomic>
 
-class AppiButtonModeDallasEmulate : public AppTemplateMode<AppiButtonState, AppiButtonEvent> {
+class AppiButtonTestModeDallasEmulate
+    : public AppTemplateMode<AppiButtonTestState, AppiButtonTestEvent> {
 private:
     void result_callback(bool success, void* ctx);
 
 public:
     const char* name = "dallas emulate";
-    AppiButton* app;
+    AppiButtonTest* app;
     DS1990 key;
     OneWireSlave* onewire_slave;
 
-    void event(AppiButtonEvent* event, AppiButtonState* state);
-    void render(Canvas* canvas, AppiButtonState* state);
+    void event(AppiButtonTestEvent* event, AppiButtonTestState* state);
+    void render(Canvas* canvas, AppiButtonTestState* state);
     void acquire();
     void release();
 
     std::atomic<bool> emulated_result{false};
 
-    AppiButtonModeDallasEmulate(AppiButton* parent_app)
+    AppiButtonTestModeDallasEmulate(AppiButtonTest* parent_app)
         : key(1, 2, 3, 4, 5, 6, 7) {
         app = parent_app;
 
@@ -31,23 +32,23 @@ public:
         onewire_slave = new OneWireSlave(one_wire_pin_record);
         onewire_slave->attach(&key);
 
-        auto cb = cbc::obtain_connector(this, &AppiButtonModeDallasEmulate::result_callback);
+        auto cb = cbc::obtain_connector(this, &AppiButtonTestModeDallasEmulate::result_callback);
         onewire_slave->set_result_callback(cb, this);
     };
 };
 
-void AppiButtonModeDallasEmulate::result_callback(bool success, void* ctx) {
-    AppiButtonModeDallasEmulate* _this = static_cast<AppiButtonModeDallasEmulate*>(ctx);
+void AppiButtonTestModeDallasEmulate::result_callback(bool success, void* ctx) {
+    AppiButtonTestModeDallasEmulate* _this = static_cast<AppiButtonTestModeDallasEmulate*>(ctx);
     _this->emulated_result = success;
 }
 
-void AppiButtonModeDallasEmulate::event(AppiButtonEvent* event, AppiButtonState* state) {
-    if(event->type == AppiButtonEvent::EventTypeTick) {
+void AppiButtonTestModeDallasEmulate::event(AppiButtonTestEvent* event, AppiButtonTestState* state) {
+    if(event->type == AppiButtonTestEvent::EventTypeTick) {
         if(emulated_result) {
             emulated_result = false;
             app->blink_green();
         }
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.state && event->value.input.input == InputUp) {
             app->decrease_dallas_address();
         }
@@ -62,17 +63,17 @@ void AppiButtonModeDallasEmulate::event(AppiButtonEvent* event, AppiButtonState*
     onewire_slave->attach(&key);
 }
 
-void AppiButtonModeDallasEmulate::render(Canvas* canvas, AppiButtonState* state) {
+void AppiButtonTestModeDallasEmulate::render(Canvas* canvas, AppiButtonTestState* state) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 25, "< Dallas emulate >");
 
     app->render_dallas_list(canvas, state);
 }
 
-void AppiButtonModeDallasEmulate::acquire() {
+void AppiButtonTestModeDallasEmulate::acquire() {
     onewire_slave->start();
 }
 
-void AppiButtonModeDallasEmulate::release() {
+void AppiButtonTestModeDallasEmulate::release() {
     onewire_slave->stop();
 }

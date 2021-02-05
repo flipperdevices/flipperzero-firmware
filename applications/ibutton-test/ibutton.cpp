@@ -6,12 +6,12 @@
 #include "ibutton_mode_cyfral_emulate.h"
 
 // start app
-void AppiButton::run() {
-    mode[0] = new AppiButtonModeDallasRead(this);
-    mode[1] = new AppiButtonModeDallasEmulate(this);
-    mode[2] = new AppiButtonModeDallasWrite(this);
-    mode[3] = new AppiButtonModeCyfralRead(this);
-    mode[4] = new AppiButtonModeCyfralEmulate(this);
+void AppiButtonTest::run() {
+    mode[0] = new AppiButtonTestModeDallasRead(this);
+    mode[1] = new AppiButtonTestModeDallasEmulate(this);
+    mode[2] = new AppiButtonTestModeDallasWrite(this);
+    mode[3] = new AppiButtonTestModeCyfralRead(this);
+    mode[4] = new AppiButtonTestModeCyfralEmulate(this);
 
     switch_to_mode(0);
 
@@ -26,10 +26,10 @@ void AppiButton::run() {
     api_hal_timebase_insomnia_enter();
     app_ready();
 
-    AppiButtonEvent event;
+    AppiButtonTestEvent event;
     while(1) {
         if(get_event(&event, 20)) {
-            if(event.type == AppiButtonEvent::EventTypeKey) {
+            if(event.type == AppiButtonTestEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.state && event.value.input.input == InputBack) {
                     view_port_enabled_set(view_port, false);
@@ -48,7 +48,7 @@ void AppiButton::run() {
                 }
             }
         } else {
-            event.type = AppiButtonEvent::EventTypeTick;
+            event.type = AppiButtonTestEvent::EventTypeTick;
         }
 
         acquire_state();
@@ -60,7 +60,7 @@ void AppiButton::run() {
 }
 
 // render app
-void AppiButton::render(Canvas* canvas) {
+void AppiButtonTest::render(Canvas* canvas) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 12, "iButton");
@@ -68,7 +68,7 @@ void AppiButton::render(Canvas* canvas) {
     mode[state.mode_index]->render(canvas, &state);
 }
 
-void AppiButton::render_dallas_list(Canvas* canvas, AppiButtonState* state) {
+void AppiButtonTest::render_dallas_list(Canvas* canvas, AppiButtonTestState* state) {
     const uint8_t buffer_size = 50;
     char buf[buffer_size];
     for(uint8_t i = 0; i < state->dallas_address_count; i++) {
@@ -90,7 +90,7 @@ void AppiButton::render_dallas_list(Canvas* canvas, AppiButtonState* state) {
     }
 }
 
-void AppiButton::render_cyfral_list(Canvas* canvas, AppiButtonState* state) {
+void AppiButtonTest::render_cyfral_list(Canvas* canvas, AppiButtonTestState* state) {
     const uint8_t buffer_size = 50;
     char buf[buffer_size];
     for(uint8_t i = 0; i < state->cyfral_address_count; i++) {
@@ -108,19 +108,19 @@ void AppiButton::render_cyfral_list(Canvas* canvas, AppiButtonState* state) {
     }
 }
 
-void AppiButton::blink_red() {
+void AppiButtonTest::blink_red() {
     gpio_write(red_led_record, 0);
     delay(10);
     gpio_write(red_led_record, 1);
 }
 
-void AppiButton::blink_green() {
+void AppiButtonTest::blink_green() {
     gpio_write(green_led_record, 0);
     delay(10);
     gpio_write(green_led_record, 1);
 }
 
-void AppiButton::increase_mode() {
+void AppiButtonTest::increase_mode() {
     acquire_state();
     if(state.mode_index < (modes_count - 1)) {
         mode[state.mode_index]->release();
@@ -130,7 +130,7 @@ void AppiButton::increase_mode() {
     release_state();
 }
 
-void AppiButton::decrease_mode() {
+void AppiButtonTest::decrease_mode() {
     acquire_state();
     if(state.mode_index > 0) {
         mode[state.mode_index]->release();
@@ -140,38 +140,38 @@ void AppiButton::decrease_mode() {
     release_state();
 }
 
-void AppiButton::increase_dallas_address() {
+void AppiButtonTest::increase_dallas_address() {
     if(state.dallas_address_index < (state.dallas_address_count - 1)) {
         state.dallas_address_index++;
     }
 }
 
-void AppiButton::decrease_dallas_address() {
+void AppiButtonTest::decrease_dallas_address() {
     if(state.dallas_address_index > 0) {
         state.dallas_address_index--;
     }
 }
 
-void AppiButton::increase_cyfral_address() {
+void AppiButtonTest::increase_cyfral_address() {
     if(state.cyfral_address_index < (state.cyfral_address_count - 1)) {
         state.cyfral_address_index++;
     }
 }
 
-void AppiButton::decrease_cyfral_address() {
+void AppiButtonTest::decrease_cyfral_address() {
     if(state.cyfral_address_index > 0) {
         state.cyfral_address_index--;
     }
 }
 
-void AppiButton::switch_to_mode(uint8_t mode_index) {
+void AppiButtonTest::switch_to_mode(uint8_t mode_index) {
     mode[state.mode_index]->release();
     state.mode_index = mode_index;
     mode[state.mode_index]->acquire();
 }
 
 // app enter function
-extern "C" void app_ibutton(void* p) {
-    AppiButton* app = new AppiButton();
+extern "C" void app_ibutton_test(void* p) {
+    AppiButtonTest* app = new AppiButtonTest();
     app->run();
 }
