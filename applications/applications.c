@@ -26,6 +26,7 @@ void bt_task(void* p);
 void sd_card_test(void* p);
 void application_vibro(void* p);
 void app_gpio_test(void* p);
+void app_ibutton(void* p);
 void app_ibutton_test(void* p);
 void cli_task(void* p);
 void music_player(void* p);
@@ -134,6 +135,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
     {.app = music_player, .name = "music player", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
+#ifdef APP_IBUTTON
+    {.app = app_ibutton, .name = "ibutton", .stack_size = 4096, .icon = A_Plugins_14},
+#endif
+
 #ifdef APP_IBUTTON_TEST
     {.app = app_ibutton_test, .name = "ibutton_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -174,7 +179,7 @@ const FuriApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef BUILD_IBUTTON
-/*{.app = app_ibutton, .name = "iButton", .stack_size = 1024, .icon = A_iButton_14},*/
+    {.app = app_ibutton, .name = "iButton", .stack_size = 1024, .icon = A_iButton_14},
 #endif
 
 #ifdef BUILD_GPIO_DEMO
