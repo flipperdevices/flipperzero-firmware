@@ -1,0 +1,41 @@
+#pragma once
+#include <furi.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/dialog_ex.h>
+#include <gui/modules/submenu.h>
+#include <gui/modules/text_input.h>
+#include <gui/modules/popup.h>
+#include "ibutton-event.h"
+
+class iButtonAppView {
+public:
+    enum class Type : uint8_t {
+        iButtonAppViewTextInput,
+        iButtonAppViewSubmenu,
+        iButtonAppViewDialogEx,
+        iButtonAppViewPopup,
+    };
+
+    osMessageQueueId_t event_queue;
+
+    iButtonAppView();
+    ~iButtonAppView();
+
+    void switch_to(Type type);
+
+    Submenu* get_submenu();
+    Popup* get_popup();
+
+    void receive_event(iButtonEvent* event);
+    void send_event(iButtonEvent* event);
+
+private:
+    ViewDispatcher* view_dispatcher;
+    DialogEx* dialog_ex;
+    Submenu* submenu;
+    TextInput* text_input;
+    Popup* popup;
+    Gui* gui;
+
+    uint32_t prevous_view_callback(void* context);
+};
