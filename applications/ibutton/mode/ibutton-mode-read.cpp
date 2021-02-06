@@ -18,13 +18,47 @@ void iButtonModeRead::on_enter(iButtonApp* app) {
     popup_set_icon(popup, 0, 5, I_DolphinWait_61x59);
 
     view->switch_to(iButtonAppView::Type::iButtonAppViewPopup);
+    app->get_onewire_master()->start();
 }
 
 bool iButtonModeRead::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
+    if(event->type == iButtonEvent::Type::EventTypeTick) {
+        consumed = true;
+        app->notify_red_blink();
+
+        bool result = 0;
+        uint8_t address[8];
+        OneWireMaster* onewire = app->get_onewire_master();
+
+        osKernelLock();
+        result = onewire->reset();
+        osKernelUnlock();
+
+        if(result) {
+            osKernelLock();
+            __disable_irq();
+            onewire->write(0x33);
+            onewire->read_bytes(address, 8);
+            __enable_irq();
+            osKernelUnlock();
+
+            if(maxim_crc8(address, 8) == 0) {
+                app->notify_green_on();
+            }
+        }
+    }
+
     return consumed;
 }
 
 void iButtonModeRead::on_exit(iButtonApp* app) {
+    Popup* popup = app->get_view()->get_popup();
+
+    popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
+    popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
+    popup_set_icon(popup, -1, -1, I_DolphinWait_61x59);
+
+    app->get_onewire_master()->stop();
 }
