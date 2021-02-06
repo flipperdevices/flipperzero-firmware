@@ -44,7 +44,7 @@ SubmenuItem* submenu_add_item(
 /* Remove all items from submenu
  * @param submenu - Submenu instance
  */
-SubmenuItem* submenu_clean(Submenu* submenu);
+void submenu_clean(Submenu* submenu);
 
 #ifdef __cplusplus
 }

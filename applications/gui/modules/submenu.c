@@ -151,7 +151,7 @@ SubmenuItem* submenu_add_item(
     return item;
 }
 
-SubmenuItem* submenu_clean(Submenu* submenu) {
+void submenu_clean(Submenu* submenu) {
     furi_assert(submenu);
 
     with_view_model(
