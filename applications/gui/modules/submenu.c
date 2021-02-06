@@ -172,7 +172,9 @@ void submenu_process_up(Submenu* submenu) {
                 }
             } else {
                 model->position = SubmenuItemArray_size(model->items) - 1;
-                model->window_position = model->position - 3;
+                if(model->position > 3) {
+                    model->window_position = model->position - 3;
+                }
             }
         });
 }
