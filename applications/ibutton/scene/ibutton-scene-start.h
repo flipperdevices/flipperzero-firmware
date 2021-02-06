@@ -1,5 +1,5 @@
 #pragma once
-#include "ibutton-mode-generic.h"
+#include "ibutton-scene-generic.h"
 
 class iButtonSceneStart : public iButtonScene {
 public:

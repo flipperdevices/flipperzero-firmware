@@ -3,9 +3,9 @@
 #include <list>
 
 #include "ibutton-view.h"
-#include "mode/ibutton-mode-generic.h"
-#include "mode/ibutton-mode-start.h"
-#include "mode/ibutton-mode-read.h"
+#include "scene/ibutton-scene-generic.h"
+#include "scene/ibutton-scene-start.h"
+#include "scene/ibutton-scene-read.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
