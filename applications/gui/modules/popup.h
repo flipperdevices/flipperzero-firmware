@@ -72,6 +72,7 @@ void popup_set_text(
     Align vertical);
 
 /* Set popup icon
+ * If icon position is negative, popup icon will not be rendered
  * @param popup - Popup instance
  * @param x, y - icon position
  * @param name - icon to be shown
