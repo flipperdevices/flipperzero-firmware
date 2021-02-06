@@ -1,6 +1,10 @@
 #pragma once
 #include <gui/view.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Submenu anonymous structure */
 typedef struct Submenu Submenu;
 typedef struct SubmenuItem SubmenuItem;
@@ -41,3 +45,7 @@ SubmenuItem* submenu_add_item(
  * @param submenu - Submenu instance
  */
 SubmenuItem* submenu_clean(Submenu* submenu);
+
+#ifdef __cplusplus
+}
+#endif

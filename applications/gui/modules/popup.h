@@ -1,6 +1,9 @@
 #pragma once
-
 #include <gui/view.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Popup anonymous structure */
 typedef struct Popup Popup;
@@ -90,3 +93,7 @@ void popup_enable_timeout(Popup* popup);
  * @param popup - Popup instance
  */
 void popup_disable_timeout(Popup* popup);
+
+#ifdef __cplusplus
+}
+#endif
