@@ -1,6 +1,6 @@
 #include "ibutton-scene-start.h"
 #include "../ibutton-app.h"
-#include "../ibutton-view.h"
+#include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 #include <callback-connector.h>
 
@@ -11,7 +11,7 @@ typedef enum {
 } SubmenuIndex;
 
 void iButtonSceneStart::on_enter(iButtonApp* app) {
-    iButtonAppView* view = app->get_view();
+    iButtonAppViewManager* view = app->get_view();
     Submenu* submenu = view->get_submenu();
     auto callback = cbc::obtain_connector(this, &iButtonSceneStart::submenu_callback);
 
@@ -19,7 +19,7 @@ void iButtonSceneStart::on_enter(iButtonApp* app) {
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, callback, app);
     submenu_add_item(submenu, "Add manually", SubmenuIndexAdd, callback, app);
 
-    view->switch_to(iButtonAppView::Type::iButtonAppViewSubmenu);
+    view->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
 bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -44,7 +44,7 @@ bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
 }
 
 void iButtonSceneStart::on_exit(iButtonApp* app) {
-    iButtonAppView* view = app->get_view();
+    iButtonAppViewManager* view = app->get_view();
     Submenu* submenu = view->get_submenu();
 
     submenu_clean(submenu);

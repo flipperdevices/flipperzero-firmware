@@ -1,35 +1,35 @@
-#include "ibutton-view.h"
+#include "ibutton-view-manager.h"
 #include "ibutton-event.h"
 #include <callback-connector.h>
 
-iButtonAppView::iButtonAppView() {
+iButtonAppViewManager::iButtonAppViewManager() {
     event_queue = osMessageQueueNew(10, sizeof(iButtonEvent), NULL);
 
     view_dispatcher = view_dispatcher_alloc();
-    auto callback = cbc::obtain_connector(this, &iButtonAppView::prevous_view_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonAppViewManager::prevous_view_callback);
 
     dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
         view_dispatcher,
-        static_cast<uint32_t>(iButtonAppView::Type::iButtonAppViewDialogEx),
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewDialogEx),
         dialog_ex_get_view(dialog_ex));
 
     submenu = submenu_alloc();
     view_dispatcher_add_view(
         view_dispatcher,
-        static_cast<uint32_t>(iButtonAppView::Type::iButtonAppViewSubmenu),
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewSubmenu),
         submenu_get_view(submenu));
 
     text_input = text_input_alloc();
     view_dispatcher_add_view(
         view_dispatcher,
-        static_cast<uint32_t>(iButtonAppView::Type::iButtonAppViewTextInput),
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewTextInput),
         text_input_get_view(text_input));
 
     popup = popup_alloc();
     view_dispatcher_add_view(
         view_dispatcher,
-        static_cast<uint32_t>(iButtonAppView::Type::iButtonAppViewPopup),
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewPopup),
         popup_get_view(popup));
 
     gui = static_cast<Gui*>(furi_record_open("gui"));
@@ -42,7 +42,7 @@ iButtonAppView::iButtonAppView() {
     view_set_previous_callback(popup_get_view(popup), callback);
 }
 
-iButtonAppView::~iButtonAppView() {
+iButtonAppViewManager::~iButtonAppViewManager() {
     popup_free(popup);
     text_input_free(text_input);
     submenu_free(submenu);
@@ -53,30 +53,30 @@ iButtonAppView::~iButtonAppView() {
     osMessageQueueDelete(event_queue);
 }
 
-void iButtonAppView::switch_to(Type type) {
+void iButtonAppViewManager::switch_to(Type type) {
     view_dispatcher_switch_to_view(view_dispatcher, static_cast<uint32_t>(type));
 }
 
-Submenu* iButtonAppView::get_submenu() {
+Submenu* iButtonAppViewManager::get_submenu() {
     return submenu;
 }
 
-Popup* iButtonAppView::get_popup() {
+Popup* iButtonAppViewManager::get_popup() {
     return popup;
 }
 
-void iButtonAppView::receive_event(iButtonEvent* event) {
+void iButtonAppViewManager::receive_event(iButtonEvent* event) {
     if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
         event->type = iButtonEvent::Type::EventTypeTick;
     }
 }
 
-void iButtonAppView::send_event(iButtonEvent* event) {
+void iButtonAppViewManager::send_event(iButtonEvent* event) {
     osStatus_t result = osMessageQueuePut(event_queue, event, 0, 0);
     furi_check(result == osOK);
 }
 
-uint32_t iButtonAppView::prevous_view_callback(void* context) {
+uint32_t iButtonAppViewManager::prevous_view_callback(void* context) {
     if(event_queue != NULL) {
         iButtonEvent event;
         event.type = iButtonEvent::Type::EventTypeBack;

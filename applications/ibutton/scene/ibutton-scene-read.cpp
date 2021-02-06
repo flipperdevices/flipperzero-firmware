@@ -1,6 +1,6 @@
 #include "ibutton-scene-start.h"
 #include "../ibutton-app.h"
-#include "../ibutton-view.h"
+#include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 
 typedef enum {
@@ -10,14 +10,14 @@ typedef enum {
 } SubmenuIndex;
 
 void iButtonSceneRead::on_enter(iButtonApp* app) {
-    iButtonAppView* view = app->get_view();
+    iButtonAppViewManager* view = app->get_view();
     Popup* popup = view->get_popup();
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "waiting\nfor key ...", 95, 32, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 5, I_DolphinWait_61x59);
 
-    view->switch_to(iButtonAppView::Type::iButtonAppViewPopup);
+    view->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
     app->get_onewire_master()->start();
 }
 

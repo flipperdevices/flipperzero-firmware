@@ -7,7 +7,7 @@
 #include <gui/modules/popup.h>
 #include "ibutton-event.h"
 
-class iButtonAppView {
+class iButtonAppViewManager {
 public:
     enum class Type : uint8_t {
         iButtonAppViewTextInput,
@@ -18,8 +18,8 @@ public:
 
     osMessageQueueId_t event_queue;
 
-    iButtonAppView();
-    ~iButtonAppView();
+    iButtonAppViewManager();
+    ~iButtonAppViewManager();
 
     void switch_to(Type type);
 

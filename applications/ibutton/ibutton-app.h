@@ -2,7 +2,7 @@
 #include <map>
 #include <list>
 
-#include "ibutton-view.h"
+#include "ibutton-view-manager.h"
 #include "scene/ibutton-scene-generic.h"
 #include "scene/ibutton-scene-start.h"
 #include "scene/ibutton-scene-read.h"
@@ -23,7 +23,7 @@ public:
         iButtonAppSceneRead,
     };
 
-    iButtonAppView* get_view();
+    iButtonAppViewManager* get_view();
     void switch_to_next_scene(Scene index);
     bool switch_to_prevous_scene();
     const GpioPin* get_ibutton_pin();
@@ -40,7 +40,7 @@ public:
 private:
     std::list<Scene> prevous_scene = {Scene::iButtonAppSceneExit};
     Scene current_scene = Scene::iButtonAppSceneStart;
-    iButtonAppView view;
+    iButtonAppViewManager view;
 
     std::map<Scene, iButtonScene*> scenes = {
         {Scene::iButtonAppSceneStart, new iButtonSceneStart()},

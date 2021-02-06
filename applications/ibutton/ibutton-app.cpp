@@ -29,7 +29,7 @@ iButtonApp::~iButtonApp() {
     delete onewire_master;
 }
 
-iButtonAppView* iButtonApp::get_view() {
+iButtonAppViewManager* iButtonApp::get_view() {
     return &view;
 }
 
