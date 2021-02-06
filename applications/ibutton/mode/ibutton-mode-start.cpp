@@ -10,10 +10,10 @@ typedef enum {
     SubmenuIndexAdd,
 } SubmenuIndex;
 
-void iButtonModeStart::on_enter(iButtonApp* app) {
+void iButtonSceneStart::on_enter(iButtonApp* app) {
     iButtonAppView* view = app->get_view();
     Submenu* submenu = view->get_submenu();
-    auto callback = cbc::obtain_connector(this, &iButtonModeStart::submenu_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonSceneStart::submenu_callback);
 
     submenu_add_item(submenu, "Read", SubmenuIndexRead, callback, app);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, callback, app);
@@ -22,13 +22,13 @@ void iButtonModeStart::on_enter(iButtonApp* app) {
     view->switch_to(iButtonAppView::Type::iButtonAppViewSubmenu);
 }
 
-bool iButtonModeStart::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
         switch(event->payload.menu_index) {
         case SubmenuIndexRead:
-            app->switch_to_next(iButtonApp::Mode::iButtonAppModeRead);
+            app->switch_to_next_scene(iButtonApp::Scene::iButtonAppSceneRead);
             break;
         case SubmenuIndexSaved:
             break;
@@ -43,14 +43,14 @@ bool iButtonModeStart::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonModeStart::on_exit(iButtonApp* app) {
+void iButtonSceneStart::on_exit(iButtonApp* app) {
     iButtonAppView* view = app->get_view();
     Submenu* submenu = view->get_submenu();
 
     submenu_clean(submenu);
 }
 
-void iButtonModeStart::submenu_callback(void* context, uint32_t index) {
+void iButtonSceneStart::submenu_callback(void* context, uint32_t index) {
     iButtonApp* app = static_cast<iButtonApp*>(context);
     iButtonEvent event;
 

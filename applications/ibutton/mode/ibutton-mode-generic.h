@@ -3,7 +3,7 @@
 
 class iButtonApp;
 
-class iButtonMode {
+class iButtonScene {
 public:
     virtual void on_enter(iButtonApp* app);
     virtual bool on_event(iButtonApp* app, iButtonEvent* event);

@@ -9,7 +9,7 @@ typedef enum {
     SubmenuIndexAdd,
 } SubmenuIndex;
 
-void iButtonModeRead::on_enter(iButtonApp* app) {
+void iButtonSceneRead::on_enter(iButtonApp* app) {
     iButtonAppView* view = app->get_view();
     Popup* popup = view->get_popup();
 
@@ -21,7 +21,7 @@ void iButtonModeRead::on_enter(iButtonApp* app) {
     app->get_onewire_master()->start();
 }
 
-bool iButtonModeRead::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
@@ -53,7 +53,7 @@ bool iButtonModeRead::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonModeRead::on_exit(iButtonApp* app) {
+void iButtonSceneRead::on_exit(iButtonApp* app) {
     Popup* popup = app->get_view()->get_popup();
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);

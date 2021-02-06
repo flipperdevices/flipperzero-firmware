@@ -17,15 +17,15 @@ public:
     iButtonApp();
     ~iButtonApp();
 
-    enum class Mode : uint8_t {
-        iButtonAppModeExit,
-        iButtonAppModeStart,
-        iButtonAppModeRead,
+    enum class Scene : uint8_t {
+        iButtonAppSceneExit,
+        iButtonAppSceneStart,
+        iButtonAppSceneRead,
     };
 
     iButtonAppView* get_view();
-    void switch_to_next(Mode mode);
-    bool switch_to_prevous();
+    void switch_to_next_scene(Scene index);
+    bool switch_to_prevous_scene();
     const GpioPin* get_ibutton_pin();
     OneWireMaster* get_onewire_master();
 
@@ -38,13 +38,13 @@ public:
     void notify_red_off();
 
 private:
-    std::list<Mode> prevous_mode = {Mode::iButtonAppModeExit};
-    Mode current_mode = Mode::iButtonAppModeStart;
+    std::list<Scene> prevous_scene = {Scene::iButtonAppSceneExit};
+    Scene current_scene = Scene::iButtonAppSceneStart;
     iButtonAppView view;
 
-    std::map<Mode, iButtonMode*> mode_data = {
-        {Mode::iButtonAppModeStart, new iButtonModeStart()},
-        {Mode::iButtonAppModeRead, new iButtonModeRead()}};
+    std::map<Scene, iButtonScene*> scenes = {
+        {Scene::iButtonAppSceneStart, new iButtonSceneStart()},
+        {Scene::iButtonAppSceneRead, new iButtonSceneRead()}};
 
     OneWireMaster* onewire_master;
 

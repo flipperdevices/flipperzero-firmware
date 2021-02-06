@@ -1,7 +1,7 @@
 #pragma once
 #include "ibutton-mode-generic.h"
 
-class iButtonModeStart : public iButtonMode {
+class iButtonSceneStart : public iButtonScene {
 public:
     void on_enter(iButtonApp* app) final;
     bool on_event(iButtonApp* app, iButtonEvent* event) final;

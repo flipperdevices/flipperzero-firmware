@@ -5,16 +5,16 @@ void iButtonApp::run(void) {
     bool consumed;
     bool exit = false;
 
-    mode_data[current_mode]->on_enter(this);
+    scenes[current_scene]->on_enter(this);
 
     while(!exit) {
         view.receive_event(&event);
 
-        consumed = mode_data[current_mode]->on_event(this, &event);
+        consumed = scenes[current_scene]->on_event(this, &event);
 
         if(!consumed) {
             if(event.type == iButtonEvent::Type::EventTypeBack) {
-                exit = switch_to_prevous();
+                exit = switch_to_prevous_scene();
             }
         }
     };
@@ -33,26 +33,26 @@ iButtonAppView* iButtonApp::get_view() {
     return &view;
 }
 
-void iButtonApp::switch_to_next(Mode mode) {
-    prevous_mode.push_front(current_mode);
+void iButtonApp::switch_to_next_scene(Scene mode) {
+    prevous_scene.push_front(current_scene);
 
-    if(mode != Mode::iButtonAppModeExit) {
-        mode_data[current_mode]->on_exit(this);
-        current_mode = mode;
-        mode_data[current_mode]->on_enter(this);
+    if(mode != Scene::iButtonAppSceneExit) {
+        scenes[current_scene]->on_exit(this);
+        current_scene = mode;
+        scenes[current_scene]->on_enter(this);
     }
 }
 
-bool iButtonApp::switch_to_prevous() {
-    Mode mode = prevous_mode.front();
-    prevous_mode.pop_front();
+bool iButtonApp::switch_to_prevous_scene() {
+    Scene mode = prevous_scene.front();
+    prevous_scene.pop_front();
 
-    if(mode == Mode::iButtonAppModeExit) {
+    if(mode == Scene::iButtonAppSceneExit) {
         return true;
     } else {
-        mode_data[current_mode]->on_exit(this);
-        current_mode = mode;
-        mode_data[current_mode]->on_enter(this);
+        scenes[current_scene]->on_exit(this);
+        current_scene = mode;
+        scenes[current_scene]->on_enter(this);
         return false;
     }
 }
