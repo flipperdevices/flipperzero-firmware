@@ -23,7 +23,7 @@ public:
         iButtonAppSceneRead,
     };
 
-    iButtonAppViewManager* get_view();
+    iButtonAppViewManager* get_view_manager();
     void switch_to_next_scene(Scene index);
     bool switch_to_prevous_scene();
     const GpioPin* get_ibutton_pin();

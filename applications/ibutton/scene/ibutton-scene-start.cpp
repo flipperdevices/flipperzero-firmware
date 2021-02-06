@@ -11,15 +11,15 @@ typedef enum {
 } SubmenuIndex;
 
 void iButtonSceneStart::on_enter(iButtonApp* app) {
-    iButtonAppViewManager* view = app->get_view();
-    Submenu* submenu = view->get_submenu();
+    iButtonAppViewManager* view_manager = app->get_view_manager();
+    Submenu* submenu = view_manager->get_submenu();
     auto callback = cbc::obtain_connector(this, &iButtonSceneStart::submenu_callback);
 
     submenu_add_item(submenu, "Read", SubmenuIndexRead, callback, app);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, callback, app);
     submenu_add_item(submenu, "Add manually", SubmenuIndexAdd, callback, app);
 
-    view->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
+    view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
 bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -44,7 +44,7 @@ bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
 }
 
 void iButtonSceneStart::on_exit(iButtonApp* app) {
-    iButtonAppViewManager* view = app->get_view();
+    iButtonAppViewManager* view = app->get_view_manager();
     Submenu* submenu = view->get_submenu();
 
     submenu_clean(submenu);
@@ -57,5 +57,5 @@ void iButtonSceneStart::submenu_callback(void* context, uint32_t index) {
     event.type = iButtonEvent::Type::EventTypeMenuSelected;
     event.payload.menu_index = index;
 
-    app->get_view()->send_event(&event);
+    app->get_view_manager()->send_event(&event);
 }

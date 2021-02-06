@@ -10,14 +10,14 @@ typedef enum {
 } SubmenuIndex;
 
 void iButtonSceneRead::on_enter(iButtonApp* app) {
-    iButtonAppViewManager* view = app->get_view();
-    Popup* popup = view->get_popup();
+    iButtonAppViewManager* view_manager = app->get_view_manager();
+    Popup* popup = view_manager->get_popup();
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "waiting\nfor key ...", 95, 32, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 5, I_DolphinWait_61x59);
 
-    view->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
+    view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
     app->get_onewire_master()->start();
 }
 
@@ -54,7 +54,7 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
 }
 
 void iButtonSceneRead::on_exit(iButtonApp* app) {
-    Popup* popup = app->get_view()->get_popup();
+    Popup* popup = app->get_view_manager()->get_popup();
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
