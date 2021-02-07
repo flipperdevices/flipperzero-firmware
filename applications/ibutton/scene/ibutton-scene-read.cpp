@@ -55,7 +55,7 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
             } else {
                 // read twice, if keys are same - we get crc error
                 delay(100);
-                
+
                 osKernelLock();
                 result = onewire->reset();
                 osKernelUnlock();

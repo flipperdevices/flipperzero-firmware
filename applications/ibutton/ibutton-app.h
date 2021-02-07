@@ -45,7 +45,6 @@ public:
     void notify_error();
     void notify_success();
 
-
 private:
     std::list<Scene> prevous_scene = {Scene::SceneExit};
     Scene current_scene = Scene::SceneStart;
