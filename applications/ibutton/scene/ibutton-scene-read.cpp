@@ -25,12 +25,13 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
-        consumed = true;
-        app->notify_red_blink();
-
         bool result = 0;
         uint8_t address[8];
+        uint8_t address_second[8];
         OneWireMaster* onewire = app->get_onewire_master();
+
+        consumed = true;
+        app->notify_red_blink();
 
         osKernelLock();
         result = onewire->reset();
@@ -45,7 +46,33 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
             osKernelUnlock();
 
             if(maxim_crc8(address, 8) == 0) {
-                app->notify_green_on();
+                if(address[0] == 0x01) {
+                    app->notify_success();
+                } else {
+                    // not are key error
+                    app->notify_error();
+                }
+            } else {
+                // read twice, if keys are same - we get crc error
+                delay(100);
+                
+                osKernelLock();
+                result = onewire->reset();
+                osKernelUnlock();
+
+                if(result) {
+                    osKernelLock();
+                    __disable_irq();
+                    onewire->write(0x33);
+                    onewire->read_bytes(address_second, 8);
+                    __enable_irq();
+                    osKernelUnlock();
+
+                    if(memcmp(address, address_second, 8) == 0) {
+                        // crc error
+                        app->notify_error();
+                    }
+                }
             }
         }
     }

@@ -23,10 +23,12 @@ void iButtonApp::run(void) {
 iButtonApp::iButtonApp() {
     onewire_master = new OneWireMaster(get_ibutton_pin());
     notify_init();
+    api_hal_timebase_insomnia_enter();
 }
 
 iButtonApp::~iButtonApp() {
     delete onewire_master;
+    api_hal_timebase_insomnia_exit();
 }
 
 iButtonAppViewManager* iButtonApp::get_view_manager() {
@@ -36,7 +38,7 @@ iButtonAppViewManager* iButtonApp::get_view_manager() {
 void iButtonApp::switch_to_next_scene(Scene mode) {
     prevous_scene.push_front(current_scene);
 
-    if(mode != Scene::iButtonAppSceneExit) {
+    if(mode != Scene::SceneExit) {
         scenes[current_scene]->on_exit(this);
         current_scene = mode;
         scenes[current_scene]->on_enter(this);
@@ -47,7 +49,7 @@ bool iButtonApp::switch_to_prevous_scene() {
     Scene mode = prevous_scene.front();
     prevous_scene.pop_front();
 
-    if(mode == Scene::iButtonAppSceneExit) {
+    if(mode == Scene::SceneExit) {
         return true;
     } else {
         scenes[current_scene]->on_exit(this);
@@ -66,15 +68,23 @@ OneWireMaster* iButtonApp::get_onewire_master() {
     return onewire_master;
 }
 
+iButtonKey* iButtonApp::get_key() {
+    return &key;
+}
+
 void iButtonApp::notify_init() {
     // TODO open record
     const GpioPin* led_r_record = &led_gpio[0];
     const GpioPin* led_g_record = &led_gpio[1];
+    const GpioPin* vibro_record = &vibro_gpio;
 
+    gpio_init(vibro_record, GpioModeOutputPushPull);
     gpio_init(led_r_record, GpioModeOutputOpenDrain);
     gpio_init(led_g_record, GpioModeOutputOpenDrain);
+
     gpio_write(led_r_record, true);
     gpio_write(led_g_record, true);
+    gpio_write(vibro_record, false);
 }
 
 void iButtonApp::notify_green_blink() {
@@ -107,4 +117,27 @@ void iButtonApp::notify_red_on() {
 void iButtonApp::notify_red_off() {
     const GpioPin* led_r_record = &led_gpio[0];
     gpio_write(led_r_record, true);
+}
+
+void iButtonApp::notify_error() {
+    const GpioPin* vibro_record = &vibro_gpio;
+    gpio_write(vibro_record, true);
+    delay(50);
+    gpio_write(vibro_record, false);
+    delay(50);
+    gpio_write(vibro_record, true);
+    delay(50);
+    gpio_write(vibro_record, false);
+    delay(100);
+}
+
+void iButtonApp::notify_success() {
+    const GpioPin* vibro_record = &vibro_gpio;
+
+    gpio_write(vibro_record, true);
+    hal_pwm_set(0.5, 880, &SPEAKER_TIM, SPEAKER_CH);
+    delay(50);
+    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+    gpio_write(vibro_record, false);
+    delay(100);
 }

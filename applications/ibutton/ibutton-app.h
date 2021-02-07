@@ -9,6 +9,7 @@
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
+#include "ibutton-key.h"
 
 class iButtonApp {
 public:
@@ -18,9 +19,12 @@ public:
     ~iButtonApp();
 
     enum class Scene : uint8_t {
-        iButtonAppSceneExit,
-        iButtonAppSceneStart,
-        iButtonAppSceneRead,
+        SceneExit,
+        SceneStart,
+        SceneRead,
+        SceneReadNotKeyError,
+        SceneReadCRCError,
+        SceneReadSuccess,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -28,6 +32,7 @@ public:
     bool switch_to_prevous_scene();
     const GpioPin* get_ibutton_pin();
     OneWireMaster* get_onewire_master();
+    iButtonKey* get_key();
 
     void notify_green_blink();
     void notify_red_blink();
@@ -37,16 +42,21 @@ public:
     void notify_red_on();
     void notify_red_off();
 
+    void notify_error();
+    void notify_success();
+
+
 private:
-    std::list<Scene> prevous_scene = {Scene::iButtonAppSceneExit};
-    Scene current_scene = Scene::iButtonAppSceneStart;
+    std::list<Scene> prevous_scene = {Scene::SceneExit};
+    Scene current_scene = Scene::SceneStart;
     iButtonAppViewManager view;
 
     std::map<Scene, iButtonScene*> scenes = {
-        {Scene::iButtonAppSceneStart, new iButtonSceneStart()},
-        {Scene::iButtonAppSceneRead, new iButtonSceneRead()}};
+        {Scene::SceneStart, new iButtonSceneStart()},
+        {Scene::SceneRead, new iButtonSceneRead()}};
 
     OneWireMaster* onewire_master;
+    iButtonKey key;
 
     void notify_init();
 };
