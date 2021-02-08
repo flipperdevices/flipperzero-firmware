@@ -7,6 +7,7 @@
 #include "scene/ibutton-scene-start.h"
 #include "scene/ibutton-scene-read.h"
 #include "scene/ibutton-scene-read-crc-error.h"
+#include "scene/ibutton-scene-read-not-key-error.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -57,7 +58,8 @@ private:
     std::map<Scene, iButtonScene*> scenes = {
         {Scene::SceneStart, new iButtonSceneStart()},
         {Scene::SceneRead, new iButtonSceneRead()},
-        {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()}};
+        {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()},
+        {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()}};
 
     OneWireMaster* onewire_master;
     iButtonKey key;

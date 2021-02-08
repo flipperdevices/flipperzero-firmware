@@ -51,7 +51,8 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
                     app->notify_success();
                 } else {
                     // not are key error
-                    app->notify_error();
+                    app->get_key()->set_data(address, key_size);
+                    app->switch_to_next_scene(iButtonApp::Scene::SceneReadNotKeyError);
                 }
             } else {
                 // read twice, if keys are same - we get crc error

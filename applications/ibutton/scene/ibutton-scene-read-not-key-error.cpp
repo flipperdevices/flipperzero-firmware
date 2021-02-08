@@ -1,19 +1,19 @@
-#include "ibutton-scene-read-crc-error.h"
+#include "ibutton-scene-read-not-key-error.h"
 #include "../ibutton-app.h"
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 #include <callback-connector.h>
 
-void iButtonSceneReadCRCError::on_enter(iButtonApp* app) {
+void iButtonSceneReadNotKeyError::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     DialogEx* dialog_ex = view_manager->get_dialog_ex();
-    auto callback = cbc::obtain_connector(this, &iButtonSceneReadCRCError::dialog_ex_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonSceneReadNotKeyError::dialog_ex_callback);
 
     iButtonKey* key = app->get_key();
     uint8_t* key_data = key->get_data();
 
     app->set_text_store(
-        "%02X %02X %02X %02X %02X %02X %02X %02X\nExpected CRC: %X",
+        "THIS IS NOT A KEY\n%02X %02X %02X %02X %02X %02X %02X %02X",
         key_data[0],
         key_data[1],
         key_data[2],
@@ -24,7 +24,7 @@ void iButtonSceneReadCRCError::on_enter(iButtonApp* app) {
         key_data[7],
         maxim_crc8(key_data, 7));
 
-    dialog_ex_set_header(dialog_ex, "CRC ERROR", 64, 10, AlignCenter, AlignCenter);
+    dialog_ex_set_header(dialog_ex, "ERROR:", 64, 10, AlignCenter, AlignCenter);
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 64, 20, AlignCenter, AlignTop);
     dialog_ex_set_left_button_text(dialog_ex, "Back");
     dialog_ex_set_result_callback(dialog_ex, callback);
@@ -34,7 +34,7 @@ void iButtonSceneReadCRCError::on_enter(iButtonApp* app) {
     app->notify_error();
 }
 
-bool iButtonSceneReadCRCError::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneReadNotKeyError::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeDialogResult) {
@@ -45,7 +45,7 @@ bool iButtonSceneReadCRCError::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneReadCRCError::on_exit(iButtonApp* app) {
+void iButtonSceneReadNotKeyError::on_exit(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     DialogEx* dialog_ex = view_manager->get_dialog_ex();
 
@@ -58,7 +58,7 @@ void iButtonSceneReadCRCError::on_exit(iButtonApp* app) {
     dialog_ex_set_context(dialog_ex, NULL);
 }
 
-void iButtonSceneReadCRCError::dialog_ex_callback(DialogExResult result, void* context) {
+void iButtonSceneReadNotKeyError::dialog_ex_callback(DialogExResult result, void* context) {
     iButtonApp* app = static_cast<iButtonApp*>(context);
     iButtonEvent event;
 
