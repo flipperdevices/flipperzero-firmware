@@ -43,7 +43,12 @@ bool iButtonSceneReadSuccess::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeDialogResult) {
-        app->switch_to_prevous_scene();
+        if(event->payload.dialog_result == DialogExResultRight) {
+            app->switch_to_next_scene(iButtonApp::Scene::SceneReadedKeyMenu);
+        } else {
+            app->switch_to_prevous_scene();
+        }
+
         consumed = true;
     }
 
