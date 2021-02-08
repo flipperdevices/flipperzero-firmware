@@ -47,8 +47,16 @@ void iButtonApp::switch_to_next_scene(Scene mode) {
 }
 
 bool iButtonApp::switch_to_prevous_scene() {
-    Scene mode = prevous_scene.front();
-    prevous_scene.pop_front();
+    return switch_to_prevous_scene(1);
+}
+
+bool iButtonApp::switch_to_prevous_scene(uint8_t count) {
+    Scene mode;
+
+    for(uint8_t i = 0; i < count; i++) {
+        mode = get_prevous_scene();
+        if(mode == Scene::SceneExit) break;
+    }
 
     if(mode == Scene::SceneExit) {
         return true;
@@ -58,6 +66,12 @@ bool iButtonApp::switch_to_prevous_scene() {
         scenes[current_scene]->on_enter(this);
         return false;
     }
+}
+
+iButtonApp::Scene iButtonApp::get_prevous_scene() {
+    Scene scene = prevous_scene.front();
+    prevous_scene.pop_front();
+    return scene;
 }
 
 const GpioPin* iButtonApp::get_ibutton_pin() {
@@ -122,6 +136,7 @@ void iButtonApp::notify_red_off() {
 
 void iButtonApp::notify_error() {
     const GpioPin* vibro_record = &vibro_gpio;
+
     gpio_write(vibro_record, true);
     delay(50);
     gpio_write(vibro_record, false);
@@ -136,7 +151,7 @@ void iButtonApp::notify_success() {
     const GpioPin* vibro_record = &vibro_gpio;
 
     gpio_write(vibro_record, true);
-    hal_pwm_set(0.5, 880, &SPEAKER_TIM, SPEAKER_CH);
+    hal_pwm_set(0.5, 1760, &SPEAKER_TIM, SPEAKER_CH);
     delay(50);
     hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
     gpio_write(vibro_record, false);

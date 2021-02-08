@@ -9,6 +9,7 @@
 #include "scene/ibutton-scene-read-crc-error.h"
 #include "scene/ibutton-scene-read-not-key-error.h"
 #include "scene/ibutton-scene-read-success.h"
+#include "scene/ibutton-scene-readed-key-menu.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -28,11 +29,15 @@ public:
         SceneReadNotKeyError,
         SceneReadCRCError,
         SceneReadSuccess,
+        SceneReadedKeyMenu,
     };
 
     iButtonAppViewManager* get_view_manager();
     void switch_to_next_scene(Scene index);
     bool switch_to_prevous_scene();
+    bool switch_to_prevous_scene(uint8_t count);
+    Scene get_prevous_scene();
+
     const GpioPin* get_ibutton_pin();
     OneWireMaster* get_onewire_master();
     iButtonKey* get_key();
@@ -61,7 +66,9 @@ private:
         {Scene::SceneRead, new iButtonSceneRead()},
         {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()},
         {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()},
-        {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()}};
+        {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
+        {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
+    };
 
     OneWireMaster* onewire_master;
     iButtonKey key;
