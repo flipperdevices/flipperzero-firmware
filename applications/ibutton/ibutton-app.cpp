@@ -143,8 +143,7 @@ void iButtonApp::notify_success() {
     delay(100);
 }
 
-void iButtonApp::set_text_store(const char* text...) 
-{
+void iButtonApp::set_text_store(const char* text...) {
     va_list args;
     va_start(args, text);
 
@@ -153,7 +152,6 @@ void iButtonApp::set_text_store(const char* text...)
     va_end(args);
 }
 
-const char* iButtonApp::get_text_store() 
-{
+const char* iButtonApp::get_text_store() {
     return text_store;
 }
