@@ -48,7 +48,8 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
 
             if(maxim_crc8(address, key_size) == 0) {
                 if(address[0] == 0x01) {
-                    app->notify_success();
+                    app->get_key()->set_data(address, key_size);
+                    app->switch_to_next_scene(iButtonApp::Scene::SceneReadSuccess);
                 } else {
                     // not are key error
                     app->get_key()->set_data(address, key_size);

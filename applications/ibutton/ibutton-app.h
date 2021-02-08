@@ -8,6 +8,7 @@
 #include "scene/ibutton-scene-read.h"
 #include "scene/ibutton-scene-read-crc-error.h"
 #include "scene/ibutton-scene-read-not-key-error.h"
+#include "scene/ibutton-scene-read-success.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -59,7 +60,8 @@ private:
         {Scene::SceneStart, new iButtonSceneStart()},
         {Scene::SceneRead, new iButtonSceneRead()},
         {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()},
-        {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()}};
+        {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()},
+        {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()}};
 
     OneWireMaster* onewire_master;
     iButtonKey key;
