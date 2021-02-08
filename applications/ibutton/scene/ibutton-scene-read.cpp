@@ -26,8 +26,9 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         bool result = 0;
-        uint8_t address[8];
-        uint8_t address_second[8];
+        const uint8_t key_size = app->get_key()->get_size();
+        uint8_t address[key_size];
+        uint8_t address_second[key_size];
         OneWireMaster* onewire = app->get_onewire_master();
 
         consumed = true;
@@ -41,11 +42,11 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
             osKernelLock();
             __disable_irq();
             onewire->write(0x33);
-            onewire->read_bytes(address, 8);
+            onewire->read_bytes(address, key_size);
             __enable_irq();
             osKernelUnlock();
 
-            if(maxim_crc8(address, 8) == 0) {
+            if(maxim_crc8(address, key_size) == 0) {
                 if(address[0] == 0x01) {
                     app->notify_success();
                 } else {
@@ -64,13 +65,14 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
                     osKernelLock();
                     __disable_irq();
                     onewire->write(0x33);
-                    onewire->read_bytes(address_second, 8);
+                    onewire->read_bytes(address_second, key_size);
                     __enable_irq();
                     osKernelUnlock();
 
-                    if(memcmp(address, address_second, 8) == 0) {
+                    if(memcmp(address, address_second, key_size) == 0) {
                         // crc error
-                        app->notify_error();
+                        app->get_key()->set_data(address, key_size);
+                        app->switch_to_next_scene(iButtonApp::Scene::SceneReadCRCError);
                     }
                 }
             }

@@ -6,6 +6,7 @@
 #include "scene/ibutton-scene-generic.h"
 #include "scene/ibutton-scene-start.h"
 #include "scene/ibutton-scene-read.h"
+#include "scene/ibutton-scene-read-crc-error.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -45,6 +46,9 @@ public:
     void notify_error();
     void notify_success();
 
+    void set_text_store(const char* text...);
+    const char* get_text_store();
+
 private:
     std::list<Scene> prevous_scene = {Scene::SceneExit};
     Scene current_scene = Scene::SceneStart;
@@ -52,10 +56,14 @@ private:
 
     std::map<Scene, iButtonScene*> scenes = {
         {Scene::SceneStart, new iButtonSceneStart()},
-        {Scene::SceneRead, new iButtonSceneRead()}};
+        {Scene::SceneRead, new iButtonSceneRead()},
+        {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()}};
 
     OneWireMaster* onewire_master;
     iButtonKey key;
+
+    static const uint8_t text_store_size = 64;
+    char text_store[text_store_size + 1];
 
     void notify_init();
 };

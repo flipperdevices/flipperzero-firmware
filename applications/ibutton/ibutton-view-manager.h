@@ -25,6 +25,7 @@ public:
 
     Submenu* get_submenu();
     Popup* get_popup();
+    DialogEx* get_dialog_ex();
 
     void receive_event(iButtonEvent* event);
     void send_event(iButtonEvent* event);

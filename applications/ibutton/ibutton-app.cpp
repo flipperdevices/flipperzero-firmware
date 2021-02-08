@@ -1,4 +1,5 @@
 #include "ibutton-app.h"
+#include <stdarg.h>
 
 void iButtonApp::run(void) {
     iButtonEvent event;
@@ -124,7 +125,7 @@ void iButtonApp::notify_error() {
     gpio_write(vibro_record, true);
     delay(50);
     gpio_write(vibro_record, false);
-    delay(50);
+    delay(100);
     gpio_write(vibro_record, true);
     delay(50);
     gpio_write(vibro_record, false);
@@ -140,4 +141,19 @@ void iButtonApp::notify_success() {
     hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
     gpio_write(vibro_record, false);
     delay(100);
+}
+
+void iButtonApp::set_text_store(const char* text...) 
+{
+    va_list args;
+    va_start(args, text);
+
+    vsnprintf(text_store, text_store_size, text, args);
+
+    va_end(args);
+}
+
+const char* iButtonApp::get_text_store() 
+{
+    return text_store;
 }
