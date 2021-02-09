@@ -199,8 +199,8 @@ void gui_test(void* param) {
         gui_string_set_y(gui_string_6, cos((ang + 150) * rad) * 16 + 32);
         ang += 1;
         if(ang > 360) ang = 0;
-        
-        if(ang % 40 < 20){
+
+        if(ang % 40 < 20) {
             gui_button_set_text(gui_button, "Press OK");
         } else {
             gui_button_set_text(gui_button, "Press --");
