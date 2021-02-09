@@ -33,6 +33,7 @@ ARRAY_DEF(ViewPortArray, ViewPort*, M_PTR_OPLIST);
 struct Gui {
     // Thread and lock
     osThreadId_t thread;
+    osMutexAttr_t mutex_attr;
     osMutexId_t mutex;
     // Layers and Canvas
     ViewPortArray_t layers[GuiLayerMAX];

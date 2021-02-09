@@ -18,8 +18,17 @@ void gui_update(Gui* gui, ViewPort* view_port) {
     furi_assert(gui);
     if(view_port) {
         // Visibility check
+        gui_lock(gui);
+        for(size_t i = 0; i < GuiLayerMAX; i++) {
+            if(gui_view_port_find_enabled(gui->layers[i]) == view_port) {
+                osThreadFlagsSet(gui->thread, GUI_THREAD_FLAG_DRAW);
+                break;
+            }
+        }
+        gui_unlock(gui);
+    } else {
+        osThreadFlagsSet(gui->thread, GUI_THREAD_FLAG_DRAW);
     }
-    osThreadFlagsSet(gui->thread, GUI_THREAD_FLAG_DRAW);
 }
 
 void gui_input_events_callback(const void* value, void* ctx) {
@@ -251,8 +260,10 @@ Gui* gui_alloc() {
     Gui* gui = furi_alloc(sizeof(Gui));
     // Thread ID
     gui->thread = osThreadGetId();
+    gui->mutex_attr.name = "mtx_gui";
+    gui->mutex_attr.attr_bits |= osMutexRecursive;
     // Allocate mutex
-    gui->mutex = osMutexNew(NULL);
+    gui->mutex = osMutexNew(&gui->mutex_attr);
     furi_check(gui->mutex);
     // Layers
     for(size_t i = 0; i < GuiLayerMAX; i++) {

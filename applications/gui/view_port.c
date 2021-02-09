@@ -43,7 +43,7 @@ void view_port_enabled_set(ViewPort* view_port, bool enabled) {
     furi_assert(view_port);
     if(view_port->is_enabled != enabled) {
         view_port->is_enabled = enabled;
-        if(view_port->gui) gui_update(view_port->gui, view_port);
+        if(view_port->gui) gui_update(view_port->gui, NULL);
     }
 }
 
