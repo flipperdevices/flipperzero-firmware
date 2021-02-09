@@ -20,10 +20,8 @@ static void gui_button_render(Canvas* canvas, GuiElement* element) {
     GuiButtonModel* model = element->model;
 
     canvas_set_color(canvas, ColorBlack);
-
     canvas_set_font(canvas, FontSecondary);
 
-    // Draw buttons
     if(model->button_type == ButtonLeft) {
         elements_button_left(canvas, model->text);
     } else if(model->button_type == ButtonRight) {
@@ -37,7 +35,6 @@ static bool gui_button_input(InputEvent* event, GuiElement* element) {
     GuiButtonModel* model = element->model;
     bool consumed = false;
 
-    // Process key presses only
     if(event->state) {
         if(model->callback) {
             if(model->button_type == ButtonLeft && event->input == InputLeft) {
@@ -69,13 +66,13 @@ GuiButton* gui_button_alloc(
     model->context = context;
 
     // allocate and init element
-    GuiButton* gui_string = furi_alloc(sizeof(GuiButton));
-    gui_string->element.parent = NULL;
-    gui_string->element.input = gui_button_input;
-    gui_string->element.render = gui_button_render;
-    gui_string->element.model = model;
+    GuiButton* gui_button = furi_alloc(sizeof(GuiButton));
+    gui_button->element.parent = NULL;
+    gui_button->element.input = gui_button_input;
+    gui_button->element.render = gui_button_render;
+    gui_button->element.model = model;
 
-    return gui_string;
+    return gui_button;
 }
 
 void gui_button_free(GuiButton* gui_button) {
@@ -97,6 +94,7 @@ void gui_button_set_text(GuiButton* gui_button, const char* text) {
     furi_assert(gui_button);
     GuiButtonModel* model = gui_button->element.model;
 
+    // TODO implement with_element_model
     if(gui_button->element.parent == NULL) {
         model->text = text;
     } else {
