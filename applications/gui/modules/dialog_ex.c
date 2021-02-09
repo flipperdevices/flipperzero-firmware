@@ -222,17 +222,26 @@ void dialog_ex_set_icon(DialogEx* dialog_ex, int8_t x, int8_t y, IconName name) 
 void dialog_ex_set_left_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->left_text = text; return true; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->left_text = text;
+            return true;
+        });
 }
 
 void dialog_ex_set_center_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->center_text = text; return true; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->center_text = text;
+            return true;
+        });
 }
 
 void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->right_text = text; return true; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->right_text = text;
+            return true;
+        });
 }

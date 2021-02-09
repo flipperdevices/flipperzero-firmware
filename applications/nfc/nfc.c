@@ -89,8 +89,7 @@ void nfc_start(Nfc* nfc, NfcView view_id, NfcWorkerState worker_state) {
     NfcWorkerState state = nfc_worker_get_state(nfc->worker);
     if(state == NfcWorkerStateBroken) {
         with_view_model(
-            nfc->view_error,
-            (NfcViewErrorModel * model) {
+            nfc->view_error, (NfcViewErrorModel * model) {
                 model->error = nfc_worker_get_error(nfc->worker);
                 return true;
             });

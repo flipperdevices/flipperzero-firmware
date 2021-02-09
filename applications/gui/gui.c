@@ -8,7 +8,7 @@ ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
         ViewPort* view_port = *ViewPortArray_ref(it);
         if(view_port_is_enabled(view_port)) {
             return view_port;
-        } 
+        }
         ViewPortArray_previous(it);
     }
     return NULL;
@@ -277,7 +277,7 @@ void gui_task(void* p) {
     while(1) {
         uint32_t flags = osThreadFlagsWait(GUI_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         // Process and dispatch input
-        if (flags & GUI_THREAD_FLAG_INPUT) {
+        if(flags & GUI_THREAD_FLAG_INPUT) {
             // Process till queue become empty
             InputEvent input_event;
             while(osMessageQueueGet(gui->input_queue, &input_event, NULL, 0) == osOK) {
@@ -285,7 +285,7 @@ void gui_task(void* p) {
             }
         }
         // Process and dispatch draw call
-        if (flags & GUI_THREAD_FLAG_DRAW) {
+        if(flags & GUI_THREAD_FLAG_DRAW) {
             // Clear flags that arrived on input step
             osThreadFlagsClear(GUI_THREAD_FLAG_DRAW);
             gui_redraw(gui);

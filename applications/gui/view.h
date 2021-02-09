@@ -147,11 +147,11 @@ void view_commit_model(View* view, bool update);
  * @param function_body a (){} lambda declaration, executed within you parent function context
  * @return true if you want to emit view update, false otherwise
  */
-#define with_view_model(view, function_body)                        \
-    {                                                               \
-        void* p = view_get_model(view);                             \
-        bool update = ({ bool __fn__ function_body __fn__; })(p);   \
-        view_commit_model(view, update);                            \
+#define with_view_model(view, function_body)                      \
+    {                                                             \
+        void* p = view_get_model(view);                           \
+        bool update = ({ bool __fn__ function_body __fn__; })(p); \
+        view_commit_model(view, update);                          \
     }
 
 #ifdef __cplusplus

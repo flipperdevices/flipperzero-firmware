@@ -14,8 +14,10 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
         } else if(event->key == InputKeyRight) {
             uint32_t page;
             with_view_model(
-                dolphin->idle_view_first_start,
-                (DolphinViewFirstStartModel * model) { page = ++model->page; return true; });
+                dolphin->idle_view_first_start, (DolphinViewFirstStartModel * model) {
+                    page = ++model->page;
+                    return true;
+                });
             if(page > 8) {
                 dolphin_save(dolphin);
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
