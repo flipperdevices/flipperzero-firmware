@@ -11,6 +11,7 @@
 
 #include <gui/unimodule/gui_widget.h>
 #include <gui/unimodule/element_string.h>
+#include <gui/unimodule/element_button.h>
 #include <math.h>
 
 typedef enum {
@@ -104,6 +105,10 @@ void text_input_callback(void* context, char* text) {
     next_view(context);
 }
 
+void gui_widget_button_callback(void* context) {
+    next_view(context);
+}
+
 void gui_test(void* param) {
     (void)param;
     GuiTester* gui_tester = gui_test_alloc();
@@ -168,12 +173,16 @@ void gui_test(void* param) {
     GuiString* gui_string_4 = gui_string_alloc(0, 40, "Custom string 4");
     GuiString* gui_string_5 = gui_string_alloc(0, 50, "Custom string 5");
     GuiString* gui_string_6 = gui_string_alloc(0, 60, "Custom string 6");
+    GuiButton* gui_button =
+        gui_button_alloc(ButtonCenter, "Press OK", gui_widget_button_callback, gui_tester);
+
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_1));
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_2));
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_3));
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_4));
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_5));
     gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_6));
+    gui_widget_add_element(gui_tester->gui_widget, gui_button_get_element(gui_button));
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 
@@ -187,8 +196,15 @@ void gui_test(void* param) {
         gui_string_set_x(gui_string_4, sin((ang + 90) * rad) * 32 + 32);
         gui_string_set_x(gui_string_5, sin((ang + 120) * rad) * 32 + 32);
         gui_string_set_x(gui_string_6, sin((ang + 150) * rad) * 32 + 32);
+        gui_string_set_y(gui_string_6, cos((ang + 150) * rad) * 16 + 32);
         ang += 1;
         if(ang > 360) ang = 0;
+        
+        if(ang % 40 < 20){
+            gui_button_set_text(gui_button, "Press OK");
+        } else {
+            gui_button_set_text(gui_button, "Press --");
+        }
 
         osDelay(10);
     }
