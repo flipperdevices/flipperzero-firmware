@@ -9,12 +9,17 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 
+#include <gui/unimodule/gui_widget.h>
+#include <gui/unimodule/element_string.h>
+#include <math.h>
+
 typedef enum {
     GuiTesterViewTextInput = 0,
     GuiTesterViewSubmenu,
     GuiTesterViewDialog,
     GuiTesterViewDialogEx,
     GuiTesterViewPopup,
+    GuiTesterViewUnimodule,
     GuiTesterViewLast
 } GuiTesterView;
 
@@ -25,13 +30,14 @@ typedef struct {
     Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    GuiWidget* gui_widget;
     GuiTesterView view_index;
 } GuiTester;
 
 GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
-    gui_tester->view_index = GuiTesterViewDialogEx;
+    gui_tester->view_index = GuiTesterViewUnimodule;
 
     gui_tester->dialog = dialog_alloc();
     view_dispatcher_add_view(
@@ -56,6 +62,12 @@ GuiTester* gui_test_alloc(void) {
     gui_tester->popup = popup_alloc();
     view_dispatcher_add_view(
         gui_tester->view_dispatcher, GuiTesterViewPopup, popup_get_view(gui_tester->popup));
+
+    gui_tester->gui_widget = gui_widget_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher,
+        GuiTesterViewUnimodule,
+        gui_widget_get_view(gui_tester->gui_widget));
 
     return gui_tester;
 }
@@ -149,9 +161,35 @@ void gui_test(void* param) {
         text_input_text_len);
     text_input_set_header_text(gui_tester->text_input, "Name the key");
 
+    // Custom widget
+    GuiString* gui_string_1 = gui_string_alloc(0, 10, "Custom string 1");
+    GuiString* gui_string_2 = gui_string_alloc(0, 20, "Custom string 2");
+    GuiString* gui_string_3 = gui_string_alloc(0, 30, "Custom string 3");
+    GuiString* gui_string_4 = gui_string_alloc(0, 40, "Custom string 4");
+    GuiString* gui_string_5 = gui_string_alloc(0, 50, "Custom string 5");
+    GuiString* gui_string_6 = gui_string_alloc(0, 60, "Custom string 6");
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_1));
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_2));
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_3));
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_4));
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_5));
+    gui_widget_add_element(gui_tester->gui_widget, gui_string_get_element(gui_string_6));
+
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 
+    uint16_t ang = 0;
+    const float rad = 3.14159265 / 180;
+
     while(1) {
-        osDelay(1000);
+        gui_string_set_x(gui_string_1, sin(ang * rad) * 32 + 32);
+        gui_string_set_x(gui_string_2, sin((ang + 30) * rad) * 32 + 32);
+        gui_string_set_x(gui_string_3, sin((ang + 60) * rad) * 32 + 32);
+        gui_string_set_x(gui_string_4, sin((ang + 90) * rad) * 32 + 32);
+        gui_string_set_x(gui_string_5, sin((ang + 120) * rad) * 32 + 32);
+        gui_string_set_x(gui_string_6, sin((ang + 150) * rad) * 32 + 32);
+        ang += 1;
+        if(ang > 360) ang = 0;
+
+        osDelay(10);
     }
 }
