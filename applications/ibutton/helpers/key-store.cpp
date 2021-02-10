@@ -55,7 +55,7 @@ KeyStore::~KeyStore() {
 }
 
 iButtonKey* KeyStore::get_key(uint8_t index) {
-    furi_check(index > 0);
+    furi_check(index >= 0);
     furi_check(index < get_key_count());
     return &(*std::next(store.begin(), index));
 }

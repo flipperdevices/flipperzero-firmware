@@ -25,10 +25,6 @@ void iButtonSceneReadSuccess::on_enter(iButtonApp* app) {
             key_data[6],
             key_data[7]);
         break;
-
-    default:
-        app->set_text_store("ERROR");
-        break;
     }
 
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 95, 30, AlignCenter, AlignCenter);

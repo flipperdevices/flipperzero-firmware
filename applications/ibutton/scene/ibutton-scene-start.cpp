@@ -31,10 +31,9 @@ bool iButtonSceneStart::on_event(iButtonApp* app, iButtonEvent* event) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneRead);
             break;
         case SubmenuIndexSaved:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneSaved);
             break;
         case SubmenuIndexAdd:
-            break;
-        default:
             break;
         }
         consumed = true;

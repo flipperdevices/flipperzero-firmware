@@ -23,10 +23,6 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
             key_data[6],
             key_data[7]);
         break;
-
-    default:
-        app->set_text_store("ERROR");
-        break;
     }
 
     popup_set_header(popup, "iButton", 95, 18, AlignCenter, AlignBottom);

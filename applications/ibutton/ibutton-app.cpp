@@ -185,3 +185,15 @@ void iButtonApp::set_text_store(const char* text...) {
 const char* iButtonApp::get_text_store() {
     return text_store;
 }
+
+KeyStore* iButtonApp::get_key_store() {
+    return &store;
+}
+
+uint8_t iButtonApp::get_stored_key_index() {
+    return key_index;
+}
+
+void iButtonApp::set_stored_key_index(uint8_t _index) {
+    key_index = _index;
+}

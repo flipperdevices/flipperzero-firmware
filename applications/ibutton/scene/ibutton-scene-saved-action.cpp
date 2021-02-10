@@ -1,4 +1,4 @@
-#include "ibutton-scene-readed-key-menu.h"
+#include "ibutton-scene-saved-action.h"
 #include "../ibutton-app.h"
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
@@ -7,22 +7,26 @@
 typedef enum {
     SubmenuIndexWrite,
     SubmenuIndexEmulate,
-    SubmenuIndexNameAndSave,
+    SubmenuIndexEdit,
+    SubmenuIndexDelete,
+    SubmenuIndexInfo,
 } SubmenuIndex;
 
-void iButtonSceneReadedKeyMenu::on_enter(iButtonApp* app) {
+void iButtonSceneSavedAction::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
-    auto callback = cbc::obtain_connector(this, &iButtonSceneReadedKeyMenu::submenu_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonSceneSavedAction::submenu_callback);
 
     submenu_add_item(submenu, "Write", SubmenuIndexWrite, callback, app);
     submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, callback, app);
-    submenu_add_item(submenu, "Name and save", SubmenuIndexNameAndSave, callback, app);
+    submenu_add_item(submenu, "Edit", SubmenuIndexEdit, callback, app);
+    submenu_add_item(submenu, "Delete", SubmenuIndexDelete, callback, app);
+    submenu_add_item(submenu, "Info", SubmenuIndexInfo, callback, app);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
-bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneSavedAction::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
@@ -31,27 +35,29 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneWrite);
             break;
         case SubmenuIndexEmulate:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneSaved);
             break;
-        case SubmenuIndexNameAndSave:
+        case SubmenuIndexEdit:
+            break;
+        case SubmenuIndexDelete:
+            break;
+        case SubmenuIndexInfo:
             break;
         }
-        consumed = true;
-    } else if(event->type == iButtonEvent::Type::EventTypeBack) {
-        app->switch_to_prevous_scene(2);
         consumed = true;
     }
 
     return consumed;
 }
 
-void iButtonSceneReadedKeyMenu::on_exit(iButtonApp* app) {
+void iButtonSceneSavedAction::on_exit(iButtonApp* app) {
     iButtonAppViewManager* view = app->get_view_manager();
     Submenu* submenu = view->get_submenu();
 
     submenu_clean(submenu);
 }
 
-void iButtonSceneReadedKeyMenu::submenu_callback(void* context, uint32_t index) {
+void iButtonSceneSavedAction::submenu_callback(void* context, uint32_t index) {
     iButtonApp* app = static_cast<iButtonApp*>(context);
     iButtonEvent event;
 

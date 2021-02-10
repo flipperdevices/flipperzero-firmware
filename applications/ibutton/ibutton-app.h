@@ -11,6 +11,10 @@
 #include "scene/ibutton-scene-read-success.h"
 #include "scene/ibutton-scene-readed-key-menu.h"
 #include "scene/ibutton-scene-write.h"
+#include "scene/ibutton-scene-saved.h"
+#include "scene/ibutton-scene-saved-action.h"
+
+#include "helpers/key-store.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -32,6 +36,8 @@ public:
         SceneReadSuccess,
         SceneReadedKeyMenu,
         SceneWrite,
+        SceneSaved,
+        SceneSavedAction,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -64,6 +70,10 @@ public:
     void set_text_store(const char* text...);
     const char* get_text_store();
 
+    KeyStore* get_key_store();
+    uint8_t get_stored_key_index();
+    void set_stored_key_index(uint8_t index);
+
 private:
     std::list<Scene> prevous_scene = {Scene::SceneExit};
     Scene current_scene = Scene::SceneStart;
@@ -77,13 +87,19 @@ private:
         {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
         {Scene::SceneWrite, new iButtonSceneWrite()},
+        {Scene::SceneSaved, new iButtonSceneSaved()},
+        {Scene::SceneSavedAction, new iButtonSceneSavedAction()},
     };
 
     OneWireMaster* onewire_master;
+
     iButtonKey key;
+    uint8_t key_index = 0;
 
     static const uint8_t text_store_size = 64;
     char text_store[text_store_size + 1];
+
+    KeyStore store;
 
     void notify_init();
 };
