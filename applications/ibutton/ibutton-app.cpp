@@ -158,11 +158,12 @@ void iButtonApp::notify_success() {
 void iButtonApp::notify_vibro_on() {
     const GpioPin* vibro_record = &vibro_gpio;
     //gpio_write(vibro_record, true);
+    gpio_write(vibro_record, false);
 }
 
 void iButtonApp::notify_vibro_off() {
     const GpioPin* vibro_record = &vibro_gpio;
-    //gpio_write(vibro_record, false);
+    gpio_write(vibro_record, false);
 }
 
 void iButtonApp::pause_os() {
