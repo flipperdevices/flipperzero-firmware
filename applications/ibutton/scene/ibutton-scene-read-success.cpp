@@ -24,8 +24,7 @@ void iButtonSceneReadSuccess::on_enter(iButtonApp* app) {
         key_data[4],
         key_data[5],
         key_data[6],
-        key_data[7],
-        maxim_crc8(key_data, 7));
+        key_data[7]);
 
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 95, 30, AlignCenter, AlignCenter);
     dialog_ex_set_left_button_text(dialog_ex, "Back");

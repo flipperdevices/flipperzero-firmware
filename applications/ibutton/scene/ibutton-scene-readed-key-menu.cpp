@@ -28,7 +28,7 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
         switch(event->payload.menu_index) {
         case SubmenuIndexWrite:
-            //app->switch_to_next_scene(iButtonApp::Scene::SceneRead);
+            app->switch_to_next_scene(iButtonApp::Scene::SceneWrite);
             break;
         case SubmenuIndexEmulate:
             break;

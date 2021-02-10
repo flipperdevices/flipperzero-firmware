@@ -10,6 +10,7 @@
 #include "scene/ibutton-scene-read-not-key-error.h"
 #include "scene/ibutton-scene-read-success.h"
 #include "scene/ibutton-scene-readed-key-menu.h"
+#include "scene/ibutton-scene-write.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -30,6 +31,7 @@ public:
         SceneReadCRCError,
         SceneReadSuccess,
         SceneReadedKeyMenu,
+        SceneWrite,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -53,6 +55,9 @@ public:
     void notify_error();
     void notify_success();
 
+    void notify_vibro_on();
+    void notify_vibro_off();
+
     void set_text_store(const char* text...);
     const char* get_text_store();
 
@@ -68,6 +73,7 @@ private:
         {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()},
         {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
+        {Scene::SceneWrite, new iButtonSceneWrite()},
     };
 
     OneWireMaster* onewire_master;

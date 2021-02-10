@@ -135,27 +135,34 @@ void iButtonApp::notify_red_off() {
 }
 
 void iButtonApp::notify_error() {
-    const GpioPin* vibro_record = &vibro_gpio;
-
-    gpio_write(vibro_record, true);
+    notify_vibro_on();
     delay(50);
-    gpio_write(vibro_record, false);
+    notify_vibro_off();
     delay(100);
-    gpio_write(vibro_record, true);
+    notify_vibro_on();
     delay(50);
-    gpio_write(vibro_record, false);
+    notify_vibro_off();
     delay(100);
 }
 
 void iButtonApp::notify_success() {
-    const GpioPin* vibro_record = &vibro_gpio;
-
-    gpio_write(vibro_record, true);
+    notify_vibro_on();
     hal_pwm_set(0.5, 1760, &SPEAKER_TIM, SPEAKER_CH);
     delay(50);
     hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
-    gpio_write(vibro_record, false);
+    notify_vibro_off();
+
     delay(100);
+}
+
+void iButtonApp::notify_vibro_on() {
+    const GpioPin* vibro_record = &vibro_gpio;
+    //gpio_write(vibro_record, true);
+}
+
+void iButtonApp::notify_vibro_off() {
+    const GpioPin* vibro_record = &vibro_gpio;
+    //gpio_write(vibro_record, false);
 }
 
 void iButtonApp::set_text_store(const char* text...) {
