@@ -1,10 +1,10 @@
-#include "ibutton-scene-write.h"
+#include "ibutton-scene-emulate.h"
 #include "../ibutton-app.h"
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 #include "../ibutton-key.h"
 
-void iButtonSceneWrite::on_enter(iButtonApp* app) {
+void iButtonSceneEmulate::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
     iButtonKey* key = app->get_key();
@@ -14,14 +14,14 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
 
     // check that stored key has name
     if(strcmp(key_name, "") != 0) {
-        app->set_text_store("writing\n%s", key_name);
+        app->set_text_store("emulating\n%s", key_name);
         line_count = 2;
     } else {
         // if not, show key data
         switch(key->get_key_type()) {
         case iButtonKeyType::KeyDallas:
             app->set_text_store(
-                "writing\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
+                "emulating\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
                 key_data[0],
                 key_data[1],
                 key_data[2],
@@ -53,7 +53,7 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
     app->get_onewire_master()->start();
 }
 
-bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
@@ -64,7 +64,7 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneWrite::on_exit(iButtonApp* app) {
+void iButtonSceneEmulate::on_exit(iButtonApp* app) {
     Popup* popup = app->get_view_manager()->get_popup();
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);

@@ -15,6 +15,7 @@
 #include "scene/ibutton-scene-saved-action.h"
 #include "scene/ibutton-scene-delete-confirm.h"
 #include "scene/ibutton-scene-delete-confirmed.h"
+#include "scene/ibutton-scene-emulate.h"
 
 #include "helpers/key-store.h"
 
@@ -38,6 +39,7 @@ public:
         SceneReadSuccess,
         SceneReadedKeyMenu,
         SceneWrite,
+        SceneEmulate,
         SceneSaved,
         SceneSavedAction,
         SceneDeleteConfirm,
@@ -91,6 +93,7 @@ private:
         {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
         {Scene::SceneWrite, new iButtonSceneWrite()},
+        {Scene::SceneEmulate, new iButtonSceneEmulate()},
         {Scene::SceneSaved, new iButtonSceneSaved()},
         {Scene::SceneSavedAction, new iButtonSceneSavedAction()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
