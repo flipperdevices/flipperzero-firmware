@@ -75,10 +75,13 @@ public:
 
     void set_text_store(const char* text...);
     const char* get_text_store();
+    uint8_t get_text_store_size();
 
     KeyStore* get_key_store();
     uint8_t get_stored_key_index();
     void set_stored_key_index(uint8_t index);
+
+    void generate_random_name(char* name, uint8_t max_name_size);
 
 private:
     std::list<Scene> prevous_scene = {Scene::SceneExit};
