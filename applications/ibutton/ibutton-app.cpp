@@ -25,6 +25,9 @@ iButtonApp::iButtonApp() {
     onewire_master = new OneWireMaster(get_ibutton_pin());
     notify_init();
     api_hal_timebase_insomnia_enter();
+
+    // we need random
+    srand(DWT->CYCCNT);
 }
 
 iButtonApp::~iButtonApp() {
@@ -183,7 +186,7 @@ void iButtonApp::set_text_store(const char* text...) {
     va_end(args);
 }
 
-const char* iButtonApp::get_text_store() {
+char* iButtonApp::get_text_store() {
     return text_store;
 }
 
@@ -204,7 +207,7 @@ void iButtonApp::set_stored_key_index(uint8_t _index) {
 }
 
 void iButtonApp::generate_random_name(char* name, uint8_t max_name_size) {
-    const uint8_t prefix_size = 8;
+    const uint8_t prefix_size = 9;
     const char* prefix[prefix_size] = {
         "ancient",
         "hollow",
@@ -214,6 +217,7 @@ void iButtonApp::generate_random_name(char* name, uint8_t max_name_size) {
         "unthinkable",
         "unnamable",
         "nameless",
+        "my",
     };
 
     const uint8_t suffix_size = 8;
@@ -228,7 +232,8 @@ void iButtonApp::generate_random_name(char* name, uint8_t max_name_size) {
         "crack",
     };
 
-    srand(DWT->CYCCNT);
     sniprintf(
         name, max_name_size, "%s_%s", prefix[rand() % prefix_size], suffix[rand() % suffix_size]);
+    // to upper
+    name[0] = name[0] - 0x20;
 }

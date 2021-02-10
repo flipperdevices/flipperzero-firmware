@@ -12,6 +12,7 @@ public:
         EventTypeBack,
         EventTypeMenuSelected,
         EventTypeDialogResult,
+        EventTypeTextEditResult,
     };
 
     // payload

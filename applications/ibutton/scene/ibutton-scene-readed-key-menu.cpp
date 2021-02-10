@@ -34,6 +34,7 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneEmulate);
             break;
         case SubmenuIndexNameAndSave:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneSaveName);
             break;
         }
         consumed = true;

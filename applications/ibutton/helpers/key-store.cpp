@@ -17,7 +17,8 @@ void KeyStore::set_key_type(uint8_t index, iButtonKeyType type) {
 
 void KeyStore::set_key_name(uint8_t index, char* name) {
     iButtonKey* key = get_key(index);
-    key->set_name(name);
+    char* orphan = strdup(name);
+    key->set_name(orphan);
 }
 
 void KeyStore::set_key_data(uint8_t index, uint8_t* data, uint8_t data_size) {

@@ -16,6 +16,8 @@
 #include "scene/ibutton-scene-delete-confirm.h"
 #include "scene/ibutton-scene-delete-confirmed.h"
 #include "scene/ibutton-scene-emulate.h"
+#include "scene/ibutton-scene-save-name.h"
+#include "scene/ibutton-scene-save-confirmed.h"
 
 #include "helpers/key-store.h"
 
@@ -44,6 +46,8 @@ public:
         SceneSavedAction,
         SceneDeleteConfirm,
         SceneDeleteConfirmed,
+        SceneSaveName,
+        SceneSaveConfirmed,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -74,7 +78,7 @@ public:
     void resume_os();
 
     void set_text_store(const char* text...);
-    const char* get_text_store();
+    char* get_text_store();
     uint8_t get_text_store_size();
 
     KeyStore* get_key_store();
@@ -101,6 +105,8 @@ private:
         {Scene::SceneSavedAction, new iButtonSceneSavedAction()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
         {Scene::SceneDeleteConfirmed, new iButtonSceneDeleteConfirmed()},
+        {Scene::SceneSaveName, new iButtonSceneSaveName()},
+        {Scene::SceneSaveConfirmed, new iButtonSceneSaveConfirmed()},
     };
 
     OneWireMaster* onewire_master;

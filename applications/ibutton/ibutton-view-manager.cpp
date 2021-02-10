@@ -85,6 +85,10 @@ DialogEx* iButtonAppViewManager::get_dialog_ex() {
     return dialog_ex;
 }
 
+TextInput* iButtonAppViewManager::get_text_input() {
+    return text_input;
+}
+
 void iButtonAppViewManager::receive_event(iButtonEvent* event) {
     if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
         event->type = iButtonEvent::Type::EventTypeTick;
