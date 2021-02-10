@@ -40,6 +40,8 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
+        consumed = true;
+        app->notify_red_blink();
     }
 
     return consumed;

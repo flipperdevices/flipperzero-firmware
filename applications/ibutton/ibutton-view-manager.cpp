@@ -43,13 +43,29 @@ iButtonAppViewManager::iButtonAppViewManager() {
 }
 
 iButtonAppViewManager::~iButtonAppViewManager() {
+    // remove views
+    view_dispatcher_remove_view(
+        view_dispatcher,
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewDialogEx));
+    view_dispatcher_remove_view(
+        view_dispatcher,
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewSubmenu));
+    view_dispatcher_remove_view(
+        view_dispatcher,
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewTextInput));
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewPopup));
+
+    // free view modules
     popup_free(popup);
     text_input_free(text_input);
     submenu_free(submenu);
     dialog_ex_free(dialog_ex);
 
+    // free dispatcher
     view_dispatcher_free(view_dispatcher);
 
+    // free event queue
     osMessageQueueDelete(event_queue);
 }
 

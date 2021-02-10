@@ -36,10 +36,21 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
     furi_assert(view_dispatcher);
     furi_assert(view);
-    // Check if view id is not used and resgister view
+    // Check if view id is not used and register view
     furi_check(ViewDict_get(view_dispatcher->views, view_id) == NULL);
     ViewDict_set_at(view_dispatcher->views, view_id, view);
     view_set_dispatcher(view, view_dispatcher);
+}
+
+void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view);
+    // Disable the view if it is active
+    if(view_dispatcher->current_view == ViewDict_get(view_dispatcher->views, view_id)) {
+        view_dispatcher_set_current_view(view_dispatcher, NULL);
+    }
+    // Remove view
+    ViewDict_erase(view_dispatcher->views, view_id);
 }
 
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
