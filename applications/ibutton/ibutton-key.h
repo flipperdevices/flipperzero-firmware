@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "helpers\key-info.h"
+#include "helpers/key-info.h"
 
 class iButtonKey {
 public:
