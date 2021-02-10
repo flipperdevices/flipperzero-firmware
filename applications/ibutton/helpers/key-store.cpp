@@ -41,7 +41,10 @@ uint8_t* KeyStore::get_key_data(uint8_t index) {
 }
 
 void KeyStore::remove_key(uint8_t index) {
-    iButtonKey* key = get_key(index);
+    furi_check(index >= 0);
+    furi_check(index < get_key_count());
+    auto item = std::next(store.begin(), index);
+    store.erase(item);
 }
 
 KeyStore::KeyStore() {

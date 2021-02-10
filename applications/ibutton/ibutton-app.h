@@ -13,6 +13,8 @@
 #include "scene/ibutton-scene-write.h"
 #include "scene/ibutton-scene-saved.h"
 #include "scene/ibutton-scene-saved-action.h"
+#include "scene/ibutton-scene-delete-confirm.h"
+#include "scene/ibutton-scene-delete-confirmed.h"
 
 #include "helpers/key-store.h"
 
@@ -38,6 +40,8 @@ public:
         SceneWrite,
         SceneSaved,
         SceneSavedAction,
+        SceneDeleteConfirm,
+        SceneDeleteConfirmed,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -89,6 +93,8 @@ private:
         {Scene::SceneWrite, new iButtonSceneWrite()},
         {Scene::SceneSaved, new iButtonSceneSaved()},
         {Scene::SceneSavedAction, new iButtonSceneSavedAction()},
+        {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
+        {Scene::SceneDeleteConfirmed, new iButtonSceneDeleteConfirmed()},
     };
 
     OneWireMaster* onewire_master;
@@ -96,7 +102,7 @@ private:
     iButtonKey key;
     uint8_t key_index = 0;
 
-    static const uint8_t text_store_size = 64;
+    static const uint8_t text_store_size = 128;
     char text_store[text_store_size + 1];
 
     KeyStore store;

@@ -35,11 +35,11 @@ bool iButtonSceneSavedAction::on_event(iButtonApp* app, iButtonEvent* event) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneWrite);
             break;
         case SubmenuIndexEmulate:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneSaved);
             break;
         case SubmenuIndexEdit:
             break;
         case SubmenuIndexDelete:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneDeleteConfirm);
             break;
         case SubmenuIndexInfo:
             break;

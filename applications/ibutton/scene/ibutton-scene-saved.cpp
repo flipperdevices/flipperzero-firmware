@@ -11,8 +11,12 @@ void iButtonSceneSaved::on_enter(iButtonApp* app) {
 
     KeyStore* store = app->get_key_store();
 
-    for(uint8_t i = 0; i < store->get_key_count(); i++) {
-        submenu_add_item(submenu, store->get_key_name(i), i, callback, app);
+    if(store->get_key_count() > 0) {
+        for(uint8_t i = 0; i < store->get_key_count(); i++) {
+            submenu_add_item(submenu, store->get_key_name(i), i, callback, app);
+        }
+    } else {
+        submenu_add_item(submenu, "Empty", 0, NULL, NULL);
     }
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
