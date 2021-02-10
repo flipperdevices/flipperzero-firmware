@@ -38,7 +38,5 @@ void flipper_test_app(void* p) {
         gpio_write(blue_record, true);
     }
 
-    set_exitcode(exitcode);
-
-    furiac_exit(NULL);
+    osThreadExit();
 }

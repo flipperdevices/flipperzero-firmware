@@ -12,11 +12,20 @@ typedef struct {
     const IconName icon;
 } FuriApplication;
 
+/* Services list
+ * Spawned on startup
+ */
 extern const FuriApplication FLIPPER_SERVICES[];
-size_t FLIPPER_SERVICES_size();
+extern const size_t FLIPPER_SERVICES_COUNT;
 
+/* Apps list
+ * Spawned by app-loader
+ */
 extern const FuriApplication FLIPPER_APPS[];
-size_t FLIPPER_APPS_size();
+extern const size_t FLIPPER_APPS_COUNT;
 
+/* Plugins list
+ * Spawned by app-loader
+ */
 extern const FuriApplication FLIPPER_PLUGINS[];
-size_t FLIPPER_PLUGINS_size();
+extern const size_t FLIPPER_PLUGINS_COUNT;

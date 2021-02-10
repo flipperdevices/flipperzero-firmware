@@ -39,7 +39,7 @@ static void input_callback(InputEvent* input_event, void* _ctx) {
     if(input_event->type == InputTypeShort && input_event->key == InputKeyBack) {
         osThreadTerminate(ctx->app_thread_id);
         view_port_enabled_set(ctx->view_port, false);
-        api_hal_timebase_insomnia_exit();
+        api_hal_power_insomnia_exit();
     }
 }
 
@@ -52,7 +52,7 @@ static void handle_menu(void* _ctx) {
 
     // TODO how to call this?
     // furiac_wait_libs(&FLIPPER_STARTUP[i].libs);
-    api_hal_timebase_insomnia_enter();
+    api_hal_power_insomnia_enter();
 
     ctx->state->current_app = ctx->app;
     ctx->state->app_thread_attr.name = ctx->app->name;
@@ -114,7 +114,7 @@ void app_loader(void* p) {
     // Main menu
     with_value_mutex(
         menu_mutex, (Menu * menu) {
-            for(size_t i = 0; i < FLIPPER_APPS_size(); i++) {
+            for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
                 AppLoaderContext* ctx = furi_alloc(sizeof(AppLoaderContext));
                 ctx->state = &state;
                 ctx->app = &FLIPPER_APPS[i];
@@ -160,7 +160,7 @@ void app_loader(void* p) {
             MenuItem* menu_plugins =
                 menu_item_alloc_menu("Plugins", assets_icons_get(A_Plugins_14));
 
-            for(size_t i = 0; i < FLIPPER_PLUGINS_size(); i++) {
+            for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
                 AppLoaderContext* ctx = furi_alloc(sizeof(AppLoaderContext));
                 ctx->state = &state;
                 ctx->app = &FLIPPER_PLUGINS[i];

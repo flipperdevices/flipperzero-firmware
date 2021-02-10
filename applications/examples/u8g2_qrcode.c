@@ -38,7 +38,7 @@ void u8g2_qrcode(void* p) {
 
     if(fb_record == NULL) {
         printf("[view_port] cannot create fb record\r\n");
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     u8g2_t* fb = furi_take(fb_record);
@@ -63,7 +63,7 @@ void u8g2_qrcode(void* p) {
                 }
             }
         } else {
-            furiac_exit(NULL);
+            osThreadExit();
         }
 
         furi_commit(fb_record);

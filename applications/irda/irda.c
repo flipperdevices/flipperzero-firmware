@@ -262,7 +262,7 @@ void irda(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("cannot create mutex\r\n");
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -309,7 +309,7 @@ void irda(void* p) {
                     free_decoder(decoder);
 
                     // exit
-                    furiac_exit(NULL);
+                    osThreadExit();
                 }
 
                 if(event.value.input.type == InputTypeShort &&

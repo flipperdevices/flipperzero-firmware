@@ -10,5 +10,5 @@ void u8g2_example(void* p) {
     u8g2_DrawStr(fb, 2, 12, "hello world!");
     furi_record_close("u8g2_fb");
 
-    furiac_exit(NULL);
+    osThreadExit();
 }

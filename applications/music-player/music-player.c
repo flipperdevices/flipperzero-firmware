@@ -370,7 +370,7 @@ void music_player(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("cannot create mutex\r\n");
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -394,7 +394,7 @@ void music_player(void* p) {
 
     if(player == NULL) {
         printf("cannot create player thread\r\n");
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     MusicDemoEvent event;

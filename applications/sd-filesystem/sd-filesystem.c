@@ -102,7 +102,7 @@ SdApp* sd_app_alloc() {
 
     // init inner fs data
     if(!_fs_init(&sd_app->info)) {
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     sd_app->event_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);

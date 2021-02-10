@@ -67,7 +67,7 @@ void app_gpio_test(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("[gpio-tester] cannot create mutex\r\n");
-        furiac_exit(NULL);
+        osThreadExit();
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -98,7 +98,7 @@ void app_gpio_test(void* p) {
                     printf("[gpio-tester] bye!\r\n");
                     // TODO remove all view_ports create by app
                     view_port_enabled_set(view_port, false);
-                    furiac_exit(NULL);
+                    osThreadExit();
                 }
 
                 if(event.value.input.type == InputTypeShort &&

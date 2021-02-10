@@ -155,9 +155,7 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 };
 
-size_t FLIPPER_SERVICES_size() {
-    return sizeof(FLIPPER_SERVICES) / sizeof(FuriApplication);
-}
+const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FuriApplication);
 
 // Main menu APP
 const FuriApplication FLIPPER_APPS[] = {
@@ -182,9 +180,7 @@ const FuriApplication FLIPPER_APPS[] = {
 #endif
 };
 
-size_t FLIPPER_APPS_size() {
-    return sizeof(FLIPPER_APPS) / sizeof(FuriApplication);
-}
+const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FuriApplication);
 
 // Plugin menu
 const FuriApplication FLIPPER_PLUGINS[] = {
@@ -231,6 +227,4 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 #endif
 };
 
-size_t FLIPPER_PLUGINS_size() {
-    return sizeof(FLIPPER_PLUGINS) / sizeof(FuriApplication);
-}
+const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FuriApplication);
