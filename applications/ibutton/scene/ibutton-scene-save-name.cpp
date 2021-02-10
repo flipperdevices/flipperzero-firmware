@@ -44,7 +44,9 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
 }
 
 void iButtonSceneSaveName::on_exit(iButtonApp* app) {
-    Popup* popup = app->get_view_manager()->get_popup();
+    TextInput* text_input = app->get_view_manager()->get_text_input();
+    text_input_set_header_text(text_input, "");
+    text_input_set_result_callback(text_input, NULL, NULL, NULL, 0);
 }
 
 void iButtonSceneSaveName::text_input_callback(void* context, char* text) {
