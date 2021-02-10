@@ -31,7 +31,8 @@ void AppiButtonTest::run() {
         if(get_event(&event, 20)) {
             if(event.type == AppiButtonTestEvent::EventTypeKey) {
                 // press events
-                if(event.value.input.state && event.value.input.input == InputBack) {
+                if(event.value.input.type == InputTypeShort &&
+                   event.value.input.key == InputKeyBack) {
                     view_port_enabled_set(view_port, false);
                     gui_remove_view_port(gui, view_port);
                     api_hal_timebase_insomnia_exit();
@@ -39,11 +40,13 @@ void AppiButtonTest::run() {
                     osThreadExit();
                 }
 
-                if(event.value.input.state && event.value.input.input == InputLeft) {
+                if(event.value.input.type == InputTypeShort &&
+                   event.value.input.key == InputKeyLeft) {
                     decrease_mode();
                 }
 
-                if(event.value.input.state && event.value.input.input == InputRight) {
+                if(event.value.input.type == InputTypeShort &&
+                   event.value.input.key == InputKeyRight) {
                     increase_mode();
                 }
             }

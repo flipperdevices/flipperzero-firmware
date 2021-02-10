@@ -59,7 +59,7 @@ void AppiButtonTestModeCyfralRead::event(AppiButtonTestEvent* event, AppiButtonT
                 }
             }
         }
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyUp) {
             app->decrease_cyfral_address();
         }

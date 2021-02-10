@@ -48,7 +48,7 @@ void AppiButtonTestModeDallasEmulate::event(AppiButtonTestEvent* event, AppiButt
             emulated_result = false;
             app->blink_green();
         }
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyUp) {
             app->decrease_dallas_address();
         }

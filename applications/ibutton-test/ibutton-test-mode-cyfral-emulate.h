@@ -29,7 +29,7 @@ void AppiButtonTestModeCyfralEmulate::event(AppiButtonTestEvent* event, AppiButt
         cyfral_emulator->send(state->cyfral_address[state->cyfral_address_index], 4, 8);
         app->blink_green();
 
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyUp) {
             app->decrease_cyfral_address();
         }

@@ -39,7 +39,7 @@ void AppiButtonTestModeDallasWrite::event(AppiButtonTestEvent* event, AppiButton
             app->blink_red();
         }
 
-    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
         if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyUp) {
             app->decrease_dallas_address();
         }
