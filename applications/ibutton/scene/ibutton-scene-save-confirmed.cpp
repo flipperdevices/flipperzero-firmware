@@ -8,7 +8,7 @@ void iButtonSceneSaveConfirmed::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
 
-    popup_set_icon(popup, 33, 6, I_DolphinNice_96x59);
+    popup_set_icon(popup, 32, 5, I_DolphinNice_96x59);
     popup_set_text(popup, "Saved", 13, 22, AlignLeft, AlignBottom);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
