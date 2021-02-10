@@ -12,19 +12,24 @@ void iButtonSceneReadSuccess::on_enter(iButtonApp* app) {
     iButtonKey* key = app->get_key();
     uint8_t* key_data = key->get_data();
 
-    if(key->get_key_type() == iButtonKey::KeyType::KeyDallas) {
-    }
+    switch(key->get_key_type()) {
+    case iButtonKeyType::KeyDallas:
+        app->set_text_store(
+            "%02X %02X %02X %02X\n%02X %02X %02X %02X\nDallas",
+            key_data[0],
+            key_data[1],
+            key_data[2],
+            key_data[3],
+            key_data[4],
+            key_data[5],
+            key_data[6],
+            key_data[7]);
+        break;
 
-    app->set_text_store(
-        "%02X %02X %02X %02X\n%02X %02X %02X %02X\nDallas",
-        key_data[0],
-        key_data[1],
-        key_data[2],
-        key_data[3],
-        key_data[4],
-        key_data[5],
-        key_data[6],
-        key_data[7]);
+    default:
+        app->set_text_store("ERROR");
+        break;
+    }
 
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 95, 30, AlignCenter, AlignCenter);
     dialog_ex_set_left_button_text(dialog_ex, "Back");

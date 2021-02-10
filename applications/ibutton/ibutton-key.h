@@ -1,27 +1,38 @@
 #pragma once
 #include <stdint.h>
+#include "helpers\key-info.h"
 
 class iButtonKey {
 public:
-    enum class KeyType : uint8_t {
-        KeyDallas,
-    };
-
     uint8_t get_size();
 
     void set_data(uint8_t* data, uint8_t data_count);
     uint8_t* get_data();
 
-    void set_name(char* name);
-    char* get_name();
+    void set_name(const char* name);
+    const char* get_name();
 
-    void set_type(iButtonKey::KeyType key_type);
-    iButtonKey::KeyType get_key_type();
+    void set_type(iButtonKeyType key_type);
+    iButtonKeyType get_key_type();
+
+    // temporary constructor for KeyStore mockup
+    iButtonKey(
+        iButtonKeyType type,
+        const char* name,
+        uint8_t d0,
+        uint8_t d1,
+        uint8_t d2,
+        uint8_t d3,
+        uint8_t d4,
+        uint8_t d5,
+        uint8_t d6,
+        uint8_t d7);
+
+    iButtonKey();
 
 private:
-    static const uint8_t size = 8;
-    uint8_t data[size] = {0, 0, 0, 0, 0, 0, 0, 0};
-    char* name = {0};
+    uint8_t data[IBUTTON_KEY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
+    const char* name = {0};
 
-    iButtonKey::KeyType type = iButtonKey::KeyType::KeyDallas;
+    iButtonKeyType type = iButtonKeyType::KeyDallas;
 };

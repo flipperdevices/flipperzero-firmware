@@ -11,7 +11,7 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
     uint8_t* key_data = key->get_data();
 
     switch(key->get_key_type()) {
-    case iButtonKey::KeyType::KeyDallas:
+    case iButtonKeyType::KeyDallas:
         app->set_text_store(
             "writing\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
             key_data[0],
@@ -25,6 +25,7 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
         break;
 
     default:
+        app->set_text_store("ERROR");
         break;
     }
 
