@@ -9,20 +9,28 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
     Popup* popup = view_manager->get_popup();
     iButtonKey* key = app->get_key();
     uint8_t* key_data = key->get_data();
+    const char* key_name = key->get_name();
 
-    switch(key->get_key_type()) {
-    case iButtonKeyType::KeyDallas:
-        app->set_text_store(
-            "writing\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
-            key_data[0],
-            key_data[1],
-            key_data[2],
-            key_data[3],
-            key_data[4],
-            key_data[5],
-            key_data[6],
-            key_data[7]);
-        break;
+    // check that stored key has name
+    if(strcmp(key_name, "") != 0) {
+        app->set_text_store("writing\n%s", key_name);
+    } else {
+        // if not, show key data
+        switch(key->get_key_type()) {
+        case iButtonKeyType::KeyDallas:
+            app->set_text_store(
+                "writing\n%02X %02X %02X %02X\n%02X %02X %02X %02X",
+                key_data[0],
+                key_data[1],
+                key_data[2],
+                key_data[3],
+                key_data[4],
+                key_data[5],
+                key_data[6],
+                key_data[7]);
+
+            break;
+        }
     }
 
     popup_set_header(popup, "iButton", 95, 18, AlignCenter, AlignBottom);

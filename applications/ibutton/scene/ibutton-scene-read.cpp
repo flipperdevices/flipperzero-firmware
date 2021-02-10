@@ -13,6 +13,7 @@ void iButtonSceneRead::on_enter(iButtonApp* app) {
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
     app->get_onewire_master()->start();
+    app->get_key()->set_name("");
 }
 
 bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
