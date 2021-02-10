@@ -94,17 +94,18 @@ static bool dialog_ex_view_input_callback(InputEvent* event, void* context) {
             left_text = model->left_text;
             center_text = model->center_text;
             right_text = model->right_text;
+            return true;
         });
 
     // Process key presses only
-    if(event->state && dialog_ex->callback) {
-        if(event->input == InputLeft && left_text != NULL) {
+    if(event->type == InputTypeShort && dialog_ex->callback) {
+        if(event->key == InputKeyLeft && left_text != NULL) {
             dialog_ex->callback(DialogExResultLeft, dialog_ex->context);
             consumed = true;
-        } else if(event->input == InputOk && center_text != NULL) {
+        } else if(event->key == InputKeyOk && center_text != NULL) {
             dialog_ex->callback(DialogExResultCenter, dialog_ex->context);
             consumed = true;
-        } else if(event->input == InputRight && right_text != NULL) {
+        } else if(event->key == InputKeyRight && right_text != NULL) {
             dialog_ex->callback(DialogExResultRight, dialog_ex->context);
             consumed = true;
         }
@@ -142,6 +143,8 @@ DialogEx* dialog_ex_alloc() {
             model->left_text = NULL;
             model->center_text = NULL;
             model->right_text = NULL;
+
+            return true;
         });
     return dialog_ex;
 }
@@ -182,6 +185,7 @@ void dialog_ex_set_header(
             model->header.y = y;
             model->header.horizontal = horizontal;
             model->header.vertical = vertical;
+            return true;
         });
 }
 
@@ -200,6 +204,7 @@ void dialog_ex_set_text(
             model->text.y = y;
             model->text.horizontal = horizontal;
             model->text.vertical = vertical;
+            return true;
         });
 }
 
@@ -210,23 +215,33 @@ void dialog_ex_set_icon(DialogEx* dialog_ex, int8_t x, int8_t y, IconName name) 
             model->icon.x = x;
             model->icon.y = y;
             model->icon.name = name;
+            return true;
         });
 }
 
 void dialog_ex_set_left_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->left_text = text; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->left_text = text;
+            return true;
+        });
 }
 
 void dialog_ex_set_center_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->center_text = text; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->center_text = text;
+            return true;
+        });
 }
 
 void dialog_ex_set_right_button_text(DialogEx* dialog_ex, const char* text) {
     furi_assert(dialog_ex);
     with_view_model(
-        dialog_ex->view, (DialogExModel * model) { model->right_text = text; });
+        dialog_ex->view, (DialogExModel * model) {
+            model->right_text = text;
+            return true;
+        });
 }

@@ -39,12 +39,12 @@ void AppiButtonTestModeDallasWrite::event(AppiButtonTestEvent* event, AppiButton
             app->blink_red();
         }
 
-    } else if(event->type == AppiButtonTestEvent::EventTypeKey) {
-        if(event->value.input.state && event->value.input.input == InputUp) {
+    } else if(event->type == AppiButtonEvent::EventTypeKey) {
+        if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyUp) {
             app->decrease_dallas_address();
         }
 
-        if(event->value.input.state && event->value.input.input == InputDown) {
+        if(event->value.input.type == InputTypeShort && event->value.input.key == InputKeyDown) {
             app->increase_dallas_address();
         }
     }

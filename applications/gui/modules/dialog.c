@@ -43,11 +43,11 @@ static bool dialog_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     // Process key presses only
-    if(event->state && dialog->callback) {
-        if(event->input == InputLeft) {
+    if(event->type == InputTypeShort && dialog->callback) {
+        if(event->key == InputKeyLeft) {
             dialog->callback(DialogResultLeft, dialog->context);
             consumed = true;
-        } else if(event->input == InputRight) {
+        } else if(event->key == InputKeyRight) {
             dialog->callback(DialogResultRight, dialog->context);
             consumed = true;
         }
@@ -91,26 +91,38 @@ void dialog_set_header_text(Dialog* dialog, const char* text) {
     furi_assert(dialog);
     furi_assert(text);
     with_view_model(
-        dialog->view, (DialogModel * model) { model->header_text = text; });
+        dialog->view, (DialogModel * model) {
+            model->header_text = text;
+            return true;
+        });
 }
 
 void dialog_set_text(Dialog* dialog, const char* text) {
     furi_assert(dialog);
     furi_assert(text);
     with_view_model(
-        dialog->view, (DialogModel * model) { model->text = text; });
+        dialog->view, (DialogModel * model) {
+            model->text = text;
+            return true;
+        });
 }
 
 void dialog_set_left_button_text(Dialog* dialog, const char* text) {
     furi_assert(dialog);
     furi_assert(text);
     with_view_model(
-        dialog->view, (DialogModel * model) { model->left_text = text; });
+        dialog->view, (DialogModel * model) {
+            model->left_text = text;
+            return true;
+        });
 }
 
 void dialog_set_right_button_text(Dialog* dialog, const char* text) {
     furi_assert(dialog);
     furi_assert(text);
     with_view_model(
-        dialog->view, (DialogModel * model) { model->right_text = text; });
+        dialog->view, (DialogModel * model) {
+            model->right_text = text;
+            return true;
+        });
 }
