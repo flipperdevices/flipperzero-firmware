@@ -58,6 +58,9 @@ public:
     void notify_vibro_on();
     void notify_vibro_off();
 
+    void pause_os();
+    void resume_os();
+
     void set_text_store(const char* text...);
     const char* get_text_store();
 

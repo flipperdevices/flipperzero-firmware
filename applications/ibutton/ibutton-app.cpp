@@ -165,6 +165,14 @@ void iButtonApp::notify_vibro_off() {
     //gpio_write(vibro_record, false);
 }
 
+void iButtonApp::pause_os() {
+    __disable_irq();
+}
+
+void iButtonApp::resume_os() {
+    __enable_irq();
+}
+
 void iButtonApp::set_text_store(const char* text...) {
     va_list args;
     va_start(args, text);

@@ -28,17 +28,15 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
         consumed = true;
         app->notify_red_blink();
 
-        osKernelLock();
+        app->pause_os();
         result = onewire->reset();
-        osKernelUnlock();
+        app->resume_os();
 
         if(result) {
-            osKernelLock();
-            __disable_irq();
+            app->pause_os();
             onewire->write(0x33);
             onewire->read_bytes(address, key_size);
-            __enable_irq();
-            osKernelUnlock();
+            app->resume_os();
 
             if(maxim_crc8(address, key_size) == 0) {
                 if(address[0] == 0x01) {
@@ -53,17 +51,15 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
                 // read twice, if keys are same - we get crc error
                 delay(100);
 
-                osKernelLock();
+                app->pause_os();
                 result = onewire->reset();
-                osKernelUnlock();
+                app->resume_os();
 
                 if(result) {
-                    osKernelLock();
-                    __disable_irq();
+                    app->pause_os();
                     onewire->write(0x33);
                     onewire->read_bytes(address_second, key_size);
-                    __enable_irq();
-                    osKernelUnlock();
+                    app->resume_os();
 
                     if(memcmp(address, address_second, key_size) == 0) {
                         // crc error
