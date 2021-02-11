@@ -81,7 +81,7 @@ static void app_loader_cli_callback(string_t args, void* _ctx) {
 void app_loader_thread_state_callback(FuriThreadState state, void* context) {
     furi_assert(context);
     AppLoaderState* app_loader_state = context;
-    if (state == FuriThreadStateStopped) {
+    if(state == FuriThreadStateStopped) {
         view_port_enabled_set(app_loader_state->view_port, false);
         api_hal_power_insomnia_exit();
     }

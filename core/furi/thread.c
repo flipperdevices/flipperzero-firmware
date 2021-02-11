@@ -21,7 +21,7 @@ struct FuriThread {
 void furi_thread_set_state(FuriThread* thread, FuriThreadState state) {
     furi_assert(thread);
     thread->state = state;
-    if (thread->state_callback) {
+    if(thread->state_callback) {
         thread->state_callback(state, thread->state_context);
     }
 }
@@ -51,14 +51,14 @@ void furi_thread_free(FuriThread* thread) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
 
-    if (thread->attr.name) free((void*)thread->attr.name);
+    if(thread->attr.name) free((void*)thread->attr.name);
     free(thread);
 }
 
 void furi_thread_set_name(FuriThread* thread, const char* name) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
-    if (thread->attr.name) free((void*)thread->attr.name);
+    if(thread->attr.name) free((void*)thread->attr.name);
     thread->attr.name = strdup(name);
 }
 
@@ -98,7 +98,7 @@ bool furi_thread_start(FuriThread* thread) {
     furi_assert(thread->state == FuriThreadStateStopped);
     furi_thread_set_state(thread, FuriThreadStateStarting);
     thread->id = osThreadNew(furi_thread_body, thread, &thread->attr);
-    if (thread->id) {
+    if(thread->id) {
         return true;
     } else {
         furi_assert(thread->state == FuriThreadStateStarting);
