@@ -7,6 +7,7 @@
 #include <furi/pubsub.h>
 #include <furi/record.h>
 #include <furi/stdglue.h>
+#include <furi/thread.h>
 #include <furi/valuemutex.h>
 
 #include <api-hal/api-gpio.h>
