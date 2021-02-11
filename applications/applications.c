@@ -34,7 +34,7 @@ int32_t sd_filesystem(void* p);
 
 int32_t gui_test(void* p);
 
-const FuriApplication FLIPPER_SERVICES[] = {
+const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
     {.app = cli_task, .name = "cli_task", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -150,10 +150,10 @@ const FuriApplication FLIPPER_SERVICES[] = {
 #endif
 };
 
-const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FuriApplication);
+const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
 
 // Main menu APP
-const FuriApplication FLIPPER_APPS[] = {
+const FlipperApplication FLIPPER_APPS[] = {
 #ifdef BUILD_CC1101
     {.app = cc1101_workaround, .name = "Sub-1 GHz", .stack_size = 1024, .icon = A_Sub1ghz_14},
 #endif
@@ -175,10 +175,10 @@ const FuriApplication FLIPPER_APPS[] = {
 #endif
 };
 
-const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FuriApplication);
+const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
 
 // Plugin menu
-const FuriApplication FLIPPER_PLUGINS[] = {
+const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef BUILD_EXAMPLE_BLINK
     {.app = application_blink, .name = "blink", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -222,4 +222,4 @@ const FuriApplication FLIPPER_PLUGINS[] = {
 #endif
 };
 
-const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FuriApplication);
+const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);

@@ -10,12 +10,12 @@
 typedef struct {
     FuriThread* thread;
     ViewPort* view_port;
-    const FuriApplication* current_app;
+    const FlipperApplication* current_app;
 } AppLoaderState;
 
 typedef struct {
     AppLoaderState* state;
-    const FuriApplication* app;
+    const FlipperApplication* app;
 } AppLoaderContext;
 
 // TODO add mutex for contex
