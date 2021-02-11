@@ -234,7 +234,7 @@ void init_packet(
     state->packets[index].command = command;
 }
 
-void irda(void* p) {
+int32_t irda(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(AppEvent), NULL);
 
     State _state;
@@ -262,7 +262,7 @@ void irda(void* p) {
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("cannot create mutex\r\n");
-        osThreadExit();
+        return 255;
     }
 
     ViewPort* view_port = view_port_alloc();
@@ -309,7 +309,7 @@ void irda(void* p) {
                     free_decoder(decoder);
 
                     // exit
-                    osThreadExit();
+                    return 0;
                 }
 
                 if(event.value.input.type == InputTypeShort &&

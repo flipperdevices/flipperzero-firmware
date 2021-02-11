@@ -34,7 +34,7 @@ template <class TState, class TEvent> AppTemplate<TState, TEvent>::AppTemplate()
     // TODO: use plain os mutex?
     if(!init_mutex(&state_mutex, &state, sizeof(TState))) {
         printf("cannot create mutex\n");
-        osThreadExit();
+        furi_check(0);
     }
 
     // open gui
@@ -100,6 +100,7 @@ template <class TState, class TEvent> void AppTemplate<TState, TEvent>::app_read
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 }
 
+// TODO: reimplement exit
 template <class TState, class TEvent> void AppTemplate<TState, TEvent>::exit(void) {
     // TODO remove all view_ports create by app
     view_port_enabled_set(view_port, false);

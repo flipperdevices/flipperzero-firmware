@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <assets_icons.h>
 
-typedef void (*FlipperApplication)(void*);
+typedef int32_t (*FlipperApplication)(void*);
 
 typedef struct {
     const FlipperApplication app;

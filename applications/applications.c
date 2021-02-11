@@ -1,39 +1,38 @@
 #include "applications.h"
 
 #ifdef APP_TEST
-void flipper_test_app(void* p);
+int32_t flipper_test_app(void* p);
 #endif
 
-void application_blink(void* p);
-void application_uart_write(void* p);
-void application_input_dump(void* p);
-void u8g2_example(void* p);
-void input_task(void* p);
-void menu_task(void* p);
-void coreglitch_demo_0(void* p);
-void u8g2_qrcode(void* p);
-void fatfs_list(void* p);
-void gui_task(void* p);
-void backlight_control(void* p);
-void irda(void* p);
-void app_loader(void* p);
-void cc1101_workaround(void* p);
-void lf_rfid_workaround(void* p);
-void nfc_task(void* p);
-void dolphin_task(void* p);
-void power_task(void* p);
-void bt_task(void* p);
-void sd_card_test(void* p);
-void application_vibro(void* p);
-void app_gpio_test(void* p);
-void app_ibutton(void* p);
-void cli_task(void* p);
-void music_player(void* p);
-void sdnfc(void* p);
-void floopper_bloopper(void* p);
-void sd_filesystem(void* p);
+int32_t application_blink(void* p);
+int32_t application_uart_write(void* p);
+int32_t application_input_dump(void* p);
+int32_t u8g2_example(void* p);
+int32_t input_task(void* p);
+int32_t menu_task(void* p);
+int32_t coreglitch_demo_0(void* p);
+int32_t u8g2_qrcode(void* p);
+int32_t gui_task(void* p);
+int32_t backlight_control(void* p);
+int32_t irda(void* p);
+int32_t app_loader(void* p);
+int32_t cc1101_workaround(void* p);
+int32_t lf_rfid_workaround(void* p);
+int32_t nfc_task(void* p);
+int32_t dolphin_task(void* p);
+int32_t power_task(void* p);
+int32_t bt_task(void* p);
+int32_t sd_card_test(void* p);
+int32_t application_vibro(void* p);
+int32_t app_gpio_test(void* p);
+int32_t app_ibutton(void* p);
+int32_t cli_task(void* p);
+int32_t music_player(void* p);
+int32_t sdnfc(void* p);
+int32_t floopper_bloopper(void* p);
+int32_t sd_filesystem(void* p);
 
-void gui_test(void* p);
+int32_t gui_test(void* p);
 
 const FuriApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
@@ -109,10 +108,6 @@ const FuriApplication FLIPPER_SERVICES[] = {
 
 #ifdef APP_EXAMPLE_QRCODE
     {.app = u8g2_qrcode, .name = "u8g2_qrcode", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
-#ifdef APP_EXAMPLE_FATFS
-    {.app = fatfs_list, .name = "fatfs_list", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_EXAMPLE_DISPLAY
