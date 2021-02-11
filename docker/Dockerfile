@@ -71,10 +71,7 @@ RUN apt update && \
 RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-document=hex2dfu.zip && \
     unzip hex2dfu.zip && \
     cd hex2dfu-master && gcc hex2dfu.c ED25519/*.c -o hex2dfu && \
-    ls -la && \
-    pwd && \
-    cp hex2dfu / && \
-    ls -la /hex2dfu
+    ln -s ${PWD}/hex2dfu /usr/bin/hex2dfu
 
 COPY entrypoint.sh syntax_check.sh /
 
