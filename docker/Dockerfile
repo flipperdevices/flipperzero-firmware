@@ -68,7 +68,7 @@ RUN apt update && \
 
 # install hex2dfu
 
-RUN curl https://github.com/rusdacent/hex2dfu/archive/master.zip --output-document=hex2dfu.zip && \
+RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-document=hex2dfu.zip && \
     unzip hex2dfu.zip && \
     cd hex2dfu-master && make gcc hex2dfu.c ED25519/*.c -o hex2dfu && \
     ln -s ./hex2dfu /usr/bin/hex2dfu
