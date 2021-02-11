@@ -15,6 +15,7 @@ typedef enum {
     FuriThreadStateRunning,
 } FuriThreadState;
 
+/* FuriThread anonymous structure */
 typedef struct FuriThread FuriThread;
 
 /* FuriThreadCallback
@@ -24,6 +25,9 @@ typedef struct FuriThread FuriThread;
 typedef int32_t (*FuriThreadCallback)(void* context);
 
 /* FuriThread state change calback
+ * called upon thread state change
+ * @param state - new thread state
+ * @param context - callback context
  */
 typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
 
@@ -51,19 +55,19 @@ void furi_thread_set_stack_size(FuriThread* thread, size_t stack_size);
 
 /* Set FuriThread callback
  * @param thread - FuriThread instance
- * @param callback - FuriThreadCallback
+ * @param callback - FuriThreadCallback, called upon thread run
  */
 void furi_thread_set_callback(FuriThread* thread, FuriThreadCallback callback);
 
 /* Set FuriThread context
  * @param thread - FuriThread instance
- * @param context - pointer to context
+ * @param context - pointer to context for thread callback
  */
 void furi_thread_set_context(FuriThread* thread, void* context);
 
 /* Set FuriThread state change callback
  * @param thread - FuriThread instance
- * @param callack - FuriThreadStateCallback
+ * @param callack - state change callback
  */
 void furi_thread_set_state_callback(FuriThread* thread, FuriThreadStateCallback callback);
 
