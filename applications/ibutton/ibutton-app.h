@@ -12,12 +12,13 @@
 #include "scene/ibutton-scene-readed-key-menu.h"
 #include "scene/ibutton-scene-write.h"
 #include "scene/ibutton-scene-saved.h"
-#include "scene/ibutton-scene-saved-action.h"
+#include "scene/ibutton-scene-saved-key-menu.h"
 #include "scene/ibutton-scene-delete-confirm.h"
 #include "scene/ibutton-scene-delete-confirmed.h"
 #include "scene/ibutton-scene-emulate.h"
 #include "scene/ibutton-scene-save-name.h"
 #include "scene/ibutton-scene-save-confirmed.h"
+#include "scene/ibutton-scene-info.h"
 
 #include "helpers/key-store.h"
 
@@ -43,11 +44,12 @@ public:
         SceneWrite,
         SceneEmulate,
         SceneSaved,
-        SceneSavedAction,
+        SceneSavedKeyMenu,
         SceneDeleteConfirm,
         SceneDeleteConfirmed,
         SceneSaveName,
         SceneSaveConfirmed,
+        SceneInfo,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -102,11 +104,12 @@ private:
         {Scene::SceneWrite, new iButtonSceneWrite()},
         {Scene::SceneEmulate, new iButtonSceneEmulate()},
         {Scene::SceneSaved, new iButtonSceneSaved()},
-        {Scene::SceneSavedAction, new iButtonSceneSavedAction()},
+        {Scene::SceneSavedKeyMenu, new iButtonSceneSavedKeyMenu()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
         {Scene::SceneDeleteConfirmed, new iButtonSceneDeleteConfirmed()},
         {Scene::SceneSaveName, new iButtonSceneSaveName()},
         {Scene::SceneSaveConfirmed, new iButtonSceneSaveConfirmed()},
+        {Scene::SceneInfo, new iButtonSceneInfo()},
     };
 
     OneWireMaster* onewire_master;

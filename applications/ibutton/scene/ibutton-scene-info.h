@@ -1,12 +1,13 @@
 #pragma once
 #include "ibutton-scene-generic.h"
+#include <gui/modules/dialog_ex.h>
 
-class iButtonSceneSavedAction : public iButtonScene {
+class iButtonSceneInfo : public iButtonScene {
 public:
     void on_enter(iButtonApp* app) final;
     bool on_event(iButtonApp* app, iButtonEvent* event) final;
     void on_exit(iButtonApp* app) final;
 
 private:
-    void submenu_callback(void* context, uint32_t index);
+    void dialog_ex_callback(DialogExResult result, void* context);
 };

@@ -37,7 +37,7 @@ bool iButtonSceneSaved::on_event(iButtonApp* app, iButtonEvent* event) {
         stored_key_data->set_type(store->get_key_type(key_index));
         stored_key_data->set_data(store->get_key_data(key_index), stored_key_data->get_size());
 
-        app->switch_to_next_scene(iButtonApp::Scene::SceneSavedAction);
+        app->switch_to_next_scene(iButtonApp::Scene::SceneSavedKeyMenu);
         consumed = true;
     }
 
