@@ -21,6 +21,7 @@
 #include "scene/ibutton-scene-info.h"
 
 #include "helpers/key-store.h"
+#include "helpers/key-worker.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -59,7 +60,7 @@ public:
     Scene get_prevous_scene();
 
     const GpioPin* get_ibutton_pin();
-    OneWireMaster* get_onewire_master();
+    KeyWorker* get_key_worker();
     iButtonKey* get_key();
 
     void notify_green_blink();
@@ -75,9 +76,6 @@ public:
 
     void notify_vibro_on();
     void notify_vibro_off();
-
-    void pause_os();
-    void resume_os();
 
     void set_text_store(const char* text...);
     char* get_text_store();
@@ -112,7 +110,7 @@ private:
         {Scene::SceneInfo, new iButtonSceneInfo()},
     };
 
-    OneWireMaster* onewire_master;
+    KeyWorker* key_worker;
 
     iButtonKey key;
     uint8_t key_index = 0;

@@ -22,16 +22,16 @@ void iButtonApp::run(void) {
 }
 
 iButtonApp::iButtonApp() {
-    onewire_master = new OneWireMaster(get_ibutton_pin());
     notify_init();
     api_hal_timebase_insomnia_enter();
+
+    key_worker = new KeyWorker(&ibutton_gpio);
 
     // we need random
     srand(DWT->CYCCNT);
 }
 
 iButtonApp::~iButtonApp() {
-    delete onewire_master;
     api_hal_timebase_insomnia_exit();
 }
 
@@ -82,8 +82,8 @@ const GpioPin* iButtonApp::get_ibutton_pin() {
     return &ibutton_gpio;
 }
 
-OneWireMaster* iButtonApp::get_onewire_master() {
-    return onewire_master;
+KeyWorker* iButtonApp::get_key_worker() {
+    return key_worker;
 }
 
 iButtonKey* iButtonApp::get_key() {
@@ -118,23 +118,19 @@ void iButtonApp::notify_red_blink() {
 }
 
 void iButtonApp::notify_green_on() {
-    const GpioPin* led_g_record = &led_gpio[1];
-    gpio_write(led_g_record, false);
+    gpio_write(&led_gpio[1], false);
 }
 
 void iButtonApp::notify_green_off() {
-    const GpioPin* led_g_record = &led_gpio[1];
-    gpio_write(led_g_record, true);
+    gpio_write(&led_gpio[1], true);
 }
 
 void iButtonApp::notify_red_on() {
-    const GpioPin* led_r_record = &led_gpio[0];
-    gpio_write(led_r_record, false);
+    gpio_write(&led_gpio[0], false);
 }
 
 void iButtonApp::notify_red_off() {
-    const GpioPin* led_r_record = &led_gpio[0];
-    gpio_write(led_r_record, true);
+    gpio_write(&led_gpio[0], true);
 }
 
 void iButtonApp::notify_error() {
@@ -159,22 +155,11 @@ void iButtonApp::notify_success() {
 }
 
 void iButtonApp::notify_vibro_on() {
-    const GpioPin* vibro_record = &vibro_gpio;
-    //gpio_write(vibro_record, true);
-    gpio_write(vibro_record, false);
+    //gpio_write(&vibro_gpio, true);
 }
 
 void iButtonApp::notify_vibro_off() {
-    const GpioPin* vibro_record = &vibro_gpio;
-    gpio_write(vibro_record, false);
-}
-
-void iButtonApp::pause_os() {
-    __disable_irq();
-}
-
-void iButtonApp::resume_os() {
-    __enable_irq();
+    gpio_write(&vibro_gpio, false);
 }
 
 void iButtonApp::set_text_store(const char* text...) {
