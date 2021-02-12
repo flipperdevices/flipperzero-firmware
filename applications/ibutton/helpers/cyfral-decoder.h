@@ -28,12 +28,28 @@ private:
     void reset_state();
     bool nibble_valid(uint8_t data);
 
+    // high + low period time
     uint32_t period_time;
+
+    // ready flag, key is readed and valid
     std::atomic<bool> ready;
-    uint8_t data[4];
-    uint8_t sync_data;
+
+    // key data storage
+    uint16_t key_data;
+
+    // temporary nibble storage
+    uint8_t readed_nibble;
+
+    // data valid flag
+    // MUST be checked only in READ_STOP_NIBBLE state
+    bool data_valid;
+
+    // nibble index, we expect 8 nibbles
     uint8_t index;
+
+    // bit index in nibble, 4 bit per nibble
     uint8_t bit_index;
 
-    uint32_t max_cyfral_period;
+    // max period, 230us x clock per us
+    uint32_t max_period;
 };
