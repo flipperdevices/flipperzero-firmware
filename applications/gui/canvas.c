@@ -44,7 +44,6 @@ uint8_t* canvas_get_buffer(Canvas* canvas) {
     return u8g2_GetBufferPtr(&canvas->fb);
 }
 
-
 size_t canvas_get_buffer_size(Canvas* canvas) {
     furi_assert(canvas);
     return u8g2_GetBufferTileWidth(&canvas->fb) * u8g2_GetBufferTileHeight(&canvas->fb) * 8;

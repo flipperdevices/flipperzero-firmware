@@ -127,7 +127,7 @@ void gui_redraw(Gui* gui) {
     }
 
     canvas_commit(gui->canvas);
-    if (gui->canvas_callback) {
+    if(gui->canvas_callback) {
         gui->canvas_callback(
             canvas_get_buffer(gui->canvas),
             canvas_get_buffer_size(gui->canvas),
@@ -171,7 +171,7 @@ void gui_cli_screen_stream_callback(uint8_t* data, size_t size, void* context) {
     furi_assert(context);
 
     Gui* gui = context;
-    uint8_t magic[] = { 0xF0, 0xE1, 0xD2, 0xC3 };
+    uint8_t magic[] = {0xF0, 0xE1, 0xD2, 0xC3};
     cli_write(gui->cli, magic, sizeof(magic));
     cli_write(gui->cli, data, size);
 }

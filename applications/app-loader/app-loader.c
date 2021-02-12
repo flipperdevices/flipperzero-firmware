@@ -125,7 +125,8 @@ int32_t app_loader(void* p) {
                 string_t cli_name;
                 string_init_set_str(cli_name, "app_");
                 string_cat_str(cli_name, FLIPPER_APPS[i].name);
-                cli_add_command(state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
+                cli_add_command(
+                    state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
                 string_clear(cli_name);
             }
         });
@@ -171,7 +172,8 @@ int32_t app_loader(void* p) {
                 string_t cli_name;
                 string_init_set_str(cli_name, "app_");
                 string_cat_str(cli_name, FLIPPER_PLUGINS[i].name);
-                cli_add_command(state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
+                cli_add_command(
+                    state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
                 string_clear(cli_name);
             }
 
