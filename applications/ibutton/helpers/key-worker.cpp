@@ -84,7 +84,6 @@ bool KeyWorker::read_key(iButtonKeyType* key_type, uint8_t* data, uint8_t data_s
 
 bool KeyWorker::verify_key(iButtonKeyType key_type, const uint8_t* const data, uint8_t data_size) {
     bool result = true;
-    uint8_t tmp_data[4];
 
     switch(key_type) {
     case iButtonKeyType::KeyDallas:
