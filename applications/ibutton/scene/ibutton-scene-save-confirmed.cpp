@@ -12,7 +12,6 @@ void iButtonSceneSaveConfirmed::on_enter(iButtonApp* app) {
     popup_set_text(popup, "Saved", 13, 22, AlignLeft, AlignBottom);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
-    app->get_onewire_master()->start();
 }
 
 bool iButtonSceneSaveConfirmed::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -31,6 +30,4 @@ void iButtonSceneSaveConfirmed::on_exit(iButtonApp* app) {
 
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, -1, -1, I_DolphinWait_61x59);
-
-    app->get_onewire_master()->stop();
 }

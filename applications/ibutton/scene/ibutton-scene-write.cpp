@@ -32,6 +32,15 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
                 key_data[7]);
             line_count = 3;
             break;
+        case iButtonKeyType::KeyCyfral:
+            app->set_text_store("writing\n%02X %02X", key_data[0], key_data[1]);
+            line_count = 2;
+            break;
+        case iButtonKeyType::KeyMetakom:
+            app->set_text_store(
+                "writing\n%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
+            line_count = 2;
+            break;
         }
     }
 
@@ -50,7 +59,6 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
     popup_set_icon(popup, 10, 10, I_iButtonKey_49x44);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
-    app->get_onewire_master()->start();
 }
 
 bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -70,6 +78,4 @@ void iButtonSceneWrite::on_exit(iButtonApp* app) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, -1, -1, I_DolphinWait_61x59);
-
-    app->get_onewire_master()->stop();
 }

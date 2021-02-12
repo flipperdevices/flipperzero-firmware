@@ -25,6 +25,13 @@ void iButtonSceneReadSuccess::on_enter(iButtonApp* app) {
             key_data[6],
             key_data[7]);
         break;
+    case iButtonKeyType::KeyCyfral:
+        app->set_text_store("%02X %02X\nCyfral", key_data[0], key_data[1]);
+        break;
+    case iButtonKeyType::KeyMetakom:
+        app->set_text_store(
+            "%02X %02X %02X %02X\nMetakom", key_data[0], key_data[1], key_data[2], key_data[3]);
+        break;
     }
 
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 95, 30, AlignCenter, AlignCenter);

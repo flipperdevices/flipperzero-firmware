@@ -26,6 +26,19 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
             key_data[6],
             key_data[7]);
         break;
+    case iButtonKeyType::KeyCyfral:
+        app->set_text_store(
+            "Delete %s?\nID: %02X %02X\nType: Cyfral", key->get_name(), key_data[0], key_data[1]);
+        break;
+    case iButtonKeyType::KeyMetakom:
+        app->set_text_store(
+            "Delete %s?\nID: %02X %02X %02X %02X\nType: Metakom",
+            key->get_name(),
+            key_data[0],
+            key_data[1],
+            key_data[2],
+            key_data[3]);
+        break;
     }
 
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 64, 26, AlignCenter, AlignCenter);
