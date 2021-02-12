@@ -1,20 +1,9 @@
 #include "cyfral-decoder.h"
 #include <furi.h>
 
-extern UART_HandleTypeDef DEBUG_UART;
-
-void low_level_printf(const char* s, ...) {
-    char buf[129];
-    va_list attr;
-    va_start(attr, s);
-    uint16_t len = vsnprintf(buf, 128, s, attr);
-    HAL_UART_Transmit(&DEBUG_UART, (uint8_t*)buf, len, HAL_MAX_DELAY);
-    va_end(attr);
-}
-
 void CyfralDecoder::reset_state() {
-    state = CyfralDecoder::State::WAIT_START_NIBBLE;
-    bit_state = CyfralDecoder::BitState::WAIT_FRONT_LOW;
+    state = State::WAIT_START_NIBBLE;
+    bit_state = BitState::WAIT_FRONT_LOW;
 
     period_time = 0;
     bit_index = 0;
@@ -57,14 +46,14 @@ void CyfralDecoder::process_front(bool polarity, uint32_t time) {
     if(ready) return;
 
     switch(state) {
-    case CyfralDecoder::State::WAIT_START_NIBBLE:
+    case State::WAIT_START_NIBBLE:
         // wait for start word
         if(process_bit(polarity, time, &readed, &value)) {
             if(readed) {
                 readed_nibble = ((readed_nibble << 1) | value) & 0x0F;
                 if(readed_nibble == 0b0001) {
                     readed_nibble = 0;
-                    state = CyfralDecoder::State::READ_NIBBLE;
+                    state = State::READ_NIBBLE;
                 }
             }
         } else {
@@ -72,7 +61,7 @@ void CyfralDecoder::process_front(bool polarity, uint32_t time) {
         }
 
         break;
-    case CyfralDecoder::State::READ_NIBBLE:
+    case State::READ_NIBBLE:
         // read nibbles
         if(process_bit(polarity, time, &readed, &value)) {
             if(readed) {
@@ -107,14 +96,14 @@ void CyfralDecoder::process_front(bool polarity, uint32_t time) {
 
                 // succefully read 8 nibbles
                 if(index == 8) {
-                    state = CyfralDecoder::State::READ_STOP_NIBBLE;
+                    state = State::READ_STOP_NIBBLE;
                 }
             }
         } else {
             reset_state();
         }
         break;
-    case CyfralDecoder::State::READ_STOP_NIBBLE:
+    case State::READ_STOP_NIBBLE:
         // read stop nibble
         if(process_bit(polarity, time, &readed, &value)) {
             if(readed) {
@@ -157,7 +146,7 @@ bool CyfralDecoder::process_bit(bool polarity, uint32_t time, bool* readed, bool
 
     // bit start from low
     switch(bit_state) {
-    case CyfralDecoder::BitState::WAIT_FRONT_LOW:
+    case BitState::WAIT_FRONT_LOW:
         if(polarity == true) {
             period_time += time;
 
@@ -172,15 +161,15 @@ bool CyfralDecoder::process_bit(bool polarity, uint32_t time, bool* readed, bool
                 result = false;
             }
 
-            bit_state = CyfralDecoder::BitState::WAIT_FRONT_HIGH;
+            bit_state = BitState::WAIT_FRONT_HIGH;
         } else {
             result = false;
         }
         break;
-    case CyfralDecoder::BitState::WAIT_FRONT_HIGH:
+    case BitState::WAIT_FRONT_HIGH:
         if(polarity == false) {
             period_time = time;
-            bit_state = CyfralDecoder::BitState::WAIT_FRONT_LOW;
+            bit_state = BitState::WAIT_FRONT_LOW;
         } else {
             result = false;
         }
