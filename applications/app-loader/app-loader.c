@@ -76,6 +76,7 @@ static void app_loader_cli_callback(string_t args, void* _ctx) {
     printf("Press any key to kill application");
 
     cli_getc(ctx->state->cli);
+
     furi_thread_terminate(ctx->state->thread);
 }
 
