@@ -59,7 +59,7 @@ void gui_redraw_status_bar(Gui* gui) {
     uint8_t width;
     ViewPort* view_port;
     // Right side
-    x = 128;
+    x = GUI_DISPLAY_WIDTH + 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
     while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
         // Render view_port;
