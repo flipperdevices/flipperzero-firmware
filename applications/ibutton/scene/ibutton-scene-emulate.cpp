@@ -38,7 +38,11 @@ void iButtonSceneEmulate::on_enter(iButtonApp* app) {
             break;
         case iButtonKeyType::KeyMetakom:
             app->set_text_store(
-                "emulating\n%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
+                "emulating\n%02X %02X %02X %02X",
+                key_data[0],
+                key_data[1],
+                key_data[2],
+                key_data[3]);
             line_count = 2;
             break;
         }
