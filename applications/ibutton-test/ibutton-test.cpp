@@ -23,7 +23,7 @@ void AppiButtonTest::run() {
     gpio_init(red_led_record, GpioModeOutputOpenDrain);
     gpio_init(green_led_record, GpioModeOutputOpenDrain);
 
-    api_hal_timebase_insomnia_enter();
+    api_hal_power_insomnia_enter();
     app_ready();
 
     AppiButtonTestEvent event;
@@ -35,7 +35,7 @@ void AppiButtonTest::run() {
                    event.value.input.key == InputKeyBack) {
                     view_port_enabled_set(view_port, false);
                     gui_remove_view_port(gui, view_port);
-                    api_hal_timebase_insomnia_exit();
+                    api_hal_power_insomnia_exit();
 
                     osThreadExit();
                 }
@@ -174,7 +174,8 @@ void AppiButtonTest::switch_to_mode(uint8_t mode_index) {
 }
 
 // app enter function
-extern "C" void app_ibutton_test(void* p) {
+extern "C" int32_t app_ibutton_test(void* p) {
     AppiButtonTest* app = new AppiButtonTest();
     app->run();
+    return 0;
 }

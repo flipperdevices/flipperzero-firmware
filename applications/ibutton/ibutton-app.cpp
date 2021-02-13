@@ -23,7 +23,7 @@ void iButtonApp::run(void) {
 
 iButtonApp::iButtonApp() {
     notify_init();
-    api_hal_timebase_insomnia_enter();
+    api_hal_power_insomnia_enter();
 
     key_worker = new KeyWorker(&ibutton_gpio);
 
@@ -32,7 +32,7 @@ iButtonApp::iButtonApp() {
 }
 
 iButtonApp::~iButtonApp() {
-    api_hal_timebase_insomnia_exit();
+    api_hal_power_insomnia_exit();
 }
 
 iButtonAppViewManager* iButtonApp::get_view_manager() {
