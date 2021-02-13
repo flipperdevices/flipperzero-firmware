@@ -87,11 +87,11 @@ jobs:
       #   run: rm -rf artifacts
       # - name: Create directory for artifacts
       #   run: mkdir artifacts
-      # - name: Get bootloader
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: artifacts_f4
-      #     path: artifacts
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts_f4
+          # path: artifacts
 
       - name: Upload artifacts
         uses: burnett01/rsync-deployments@4.1
