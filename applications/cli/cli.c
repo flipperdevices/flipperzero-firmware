@@ -40,8 +40,12 @@ void cli_stdout_callback(void* _cookie, const char* data, size_t size) {
     api_hal_vcp_tx((const uint8_t*)data, size);
 }
 
-void cli_read(char* buffer, size_t size) {
-    api_hal_vcp_rx((uint8_t*)buffer, size);
+void cli_write(Cli* cli, uint8_t* buffer, size_t size) {
+    return api_hal_vcp_tx(buffer, size);
+}
+
+size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
+    return api_hal_vcp_rx(buffer, size);
 }
 
 void cli_print_version() {
@@ -172,7 +176,7 @@ void cli_add_command(Cli* cli, const char* name, CliCallback callback, void* con
     string_clear(name_str);
 }
 
-void cli_task(void* p) {
+int32_t cli_task(void* p) {
     Cli* cli = cli_alloc();
 
     // Init basic cli commands
@@ -184,4 +188,6 @@ void cli_task(void* p) {
     while(1) {
         cli_process_input(cli);
     }
+
+    return 0;
 }
