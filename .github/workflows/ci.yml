@@ -101,7 +101,7 @@ jobs:
 
   genpic:
     name: Generate pic
-    needs: fullfirmware
+    needs: upload
     if: github.ref == 'refs/heads/master'
     runs-on: [self-hosted]
     steps:
