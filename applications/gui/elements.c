@@ -193,3 +193,19 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
     } while(end);
     string_clear(str);
 }
+
+void elements_slightly_rounded_frame(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height) {
+    furi_assert(canvas);
+    canvas_draw_frame(canvas, x, y, width, height);
+    canvas_invert_color(canvas);
+    canvas_draw_dot(canvas, x, y);
+    canvas_draw_dot(canvas, x + width - 1, y + height - 1);
+    canvas_draw_dot(canvas, x + width - 1, y);
+    canvas_draw_dot(canvas, x, y + height - 1);
+    canvas_invert_color(canvas);
+}
