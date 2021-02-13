@@ -61,14 +61,19 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: hex2dfu -i full.hex -o full.dfu
+      
+      - name: Move dfu files
+        uses: ./.github/actions/docker
+        with:
+          run: mv bootloader/.obj/f4/bootloader.dfu bootloader.dfu && mv firmware/.obj/f4/firmware.dfu firmware.dfu
 
       - name: Publish F4 artifacts
         uses: actions/upload-artifact@v2
         with:
           name: artifacts_f4
           path: |
-            bootloader/.obj/f4/bootloader.dfu
-            firmware/.obj/f4/firmware.dfu
+            bootloader.dfu
+            firmware.dfu
             full.dfu
           if-no-files-found: error
           retention-days: 7
@@ -92,7 +97,6 @@ jobs:
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzp --delete
-          path: artifacts
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
