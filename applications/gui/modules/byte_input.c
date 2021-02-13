@@ -53,6 +53,8 @@ static const ByteInputKey keyboard_keys_row_2[] = {
     {ENTER_KEY, 64, 8},
 };
 
+/* currently unused
+
 static uint8_t get_row_size(uint8_t row_index) {
     uint8_t row_size = 0;
 
@@ -82,6 +84,7 @@ static const ByteInputKey* get_row(uint8_t row_index) {
 
     return row;
 }
+*/
 
 static char get_nibble_text(uint8_t byte, bool high_nibble) {
     if(high_nibble) {
