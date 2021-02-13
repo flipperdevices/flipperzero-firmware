@@ -7,6 +7,7 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/popup.h>
 
 typedef enum {
@@ -15,6 +16,7 @@ typedef enum {
     GuiTesterViewDialog,
     GuiTesterViewDialogEx,
     GuiTesterViewPopup,
+    GuiTesterViewByteInput,
     GuiTesterViewLast
 } GuiTesterView;
 
@@ -25,13 +27,14 @@ typedef struct {
     Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    ByteInput* byte_input;
     GuiTesterView view_index;
 } GuiTester;
 
 GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
-    gui_tester->view_index = GuiTesterViewDialogEx;
+    gui_tester->view_index = GuiTesterViewByteInput;
 
     gui_tester->dialog = dialog_alloc();
     view_dispatcher_add_view(
@@ -56,6 +59,12 @@ GuiTester* gui_test_alloc(void) {
     gui_tester->popup = popup_alloc();
     view_dispatcher_add_view(
         gui_tester->view_dispatcher, GuiTesterViewPopup, popup_get_view(gui_tester->popup));
+
+    gui_tester->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        gui_tester->view_dispatcher,
+        GuiTesterViewByteInput,
+        byte_input_get_view(gui_tester->byte_input));
 
     return gui_tester;
 }
@@ -149,6 +158,13 @@ int32_t gui_test(void* param) {
         text_input_text,
         text_input_text_len);
     text_input_set_header_text(gui_tester->text_input, "Name the key");
+
+    const uint8_t byte_input_bytes_len = 6;
+    uint8_t byte_input_bytes[6] = {0xF0, 0xA1, 0xDD, 0x84, 0x3C, 0xFE};
+
+    byte_input_set_result_callback(
+        gui_tester->byte_input, NULL, NULL, gui_tester, byte_input_bytes, byte_input_bytes_len);
+    byte_input_set_header_text(gui_tester->byte_input, "Enter the key");
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 
