@@ -13,9 +13,6 @@ jobs:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
 
-      - name: ls
-        run: ls -la
-
       - name: Checkout code
         uses: actions/checkout@v2
         with:
@@ -81,9 +78,6 @@ jobs:
       - name: Add firmware.bin at full.bin
         run: cat firmware.bin >> full.bin
 
-      - name: ls
-        run: ls -la
-
       - name: Publish F4 artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -103,8 +97,6 @@ jobs:
     needs: build
     runs-on: [self-hosted]
     steps:
-      - name: ls
-        run: ls -la
 
       - name: Make empty dir
         run: mkdir empty
