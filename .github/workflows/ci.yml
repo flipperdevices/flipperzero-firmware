@@ -89,6 +89,9 @@ jobs:
     needs: build
     runs-on: [self-hosted]
     steps:
+      - name: test rm
+        run: rm -rf firmware
+
       - name: ls
         run: ls -la
 
