@@ -73,7 +73,8 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
 
     AppEvent event;
     event.type = EventTypeRx;
-    event.value.rx.value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_HIGH);
+    // TOOD F4 and F5 differ
+    event.value.rx.value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
     event.value.rx.dwt_value = DWT->CYCCNT;
     osMessageQueuePut(event_queue, &event, 0, 0);
 
