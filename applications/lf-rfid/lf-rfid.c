@@ -305,13 +305,12 @@ int32_t lf_rfid_workaround(void* p) {
                 printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
                 release_mutex(&state_mutex, state);
-                // view_port_update(view_port);
 
-                taskENTER_CRITICAL();
+                view_port_update(view_port);
+
                 gpio_write(led_record, false);
-                delay_us(10000);
+                delay(50);
                 gpio_write(led_record, true);
-                taskEXIT_CRITICAL();
             }
             
             /*
