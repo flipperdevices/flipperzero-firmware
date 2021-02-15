@@ -82,7 +82,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     uint32_t dt = (DWT->CYCCNT - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
     ctx->prev_dwt = DWT->CYCCNT;
 
-    if(dt < 16) return; // supress noise
+    if(dt < 150) return; // supress noise
 
     gpio_write(&debug_0, true);
 
@@ -222,7 +222,7 @@ static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
 }
 
 int32_t lf_rfid_workaround(void* p) {
-    osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
+    osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
 
     // create pin
     GpioPin pull_pin = {.pin = RFID_PULL_Pin, .port = RFID_PULL_GPIO_Port};
