@@ -4,8 +4,7 @@
 typedef enum { EventTypeTick, EventTypeKey, EventTypeRx } EventType;
 
 typedef struct {
-    bool value;
-    uint32_t dwt_value;
+    uint8_t dummy;
 } RxEvent;
 
 typedef struct {
@@ -64,21 +63,82 @@ GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
 extern COMP_HandleTypeDef hcomp1;
 
+typedef struct {
+    osMessageQueueId_t event_queue;
+    uint32_t prev_dwt;
+    int8_t symbol;
+    bool center;
+    size_t symbol_cnt;
+    GpioPin* led_record;
+    uint8_t* ext_buf; // TODO interrupt-thread IPC
+    uint8_t* int_buf;
+} ComparatorCtx;
+
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     if((COMP_HandleTypeDef*)hcomp != &hcomp1) return;
 
-    // gpio_write(&debug_0, true);
+    ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
 
-    osMessageQueueId_t event_queue = comp_ctx;
+    uint32_t dt = (DWT->CYCCNT - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
+    ctx->prev_dwt = DWT->CYCCNT;
 
-    AppEvent event;
-    event.type = EventTypeRx;
+    if(dt < 16) return; // supress noise
+
+    gpio_write(&debug_0, true);
+
     // TOOD F4 and F5 differ
-    event.value.rx.value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
-    event.value.rx.dwt_value = DWT->CYCCNT;
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
 
-    // gpio_write(&debug_0, false);
+    if(dt > 384) {
+        // change symbol 0->1 or 1->0
+        ctx->symbol = rx_value;
+        ctx->center = true;
+    } else {
+        // same symbol as prev or center
+        ctx->center = !ctx->center;
+    }
+
+    /*
+    gpio_write(&debug_1, true);
+    delay_us(center ? 10 : 30);
+    gpio_write(&debug_1, false);
+    */
+
+    if(ctx->center && ctx->symbol != -1) {
+        /*
+        gpio_write(&debug_0, true);
+        delay_us(symbol ? 10 : 30);
+        gpio_write(&debug_0, false);
+        */
+
+        ctx->int_buf[ctx->symbol_cnt] = ctx->symbol;
+        ctx->symbol_cnt++;
+    }
+
+    // check preamble
+    if(ctx->symbol_cnt <= 9 && ctx->symbol == 0) {
+        ctx->symbol_cnt = 0;
+        ctx->symbol = -1;
+    }
+
+    // check stop bit
+    if(ctx->symbol_cnt == 64 && ctx->symbol == 1) {
+        ctx->symbol_cnt = 0;
+        ctx->symbol = -1;
+    }
+
+    if(ctx->symbol_cnt == 64) {
+        // TODO add IPC
+        memcpy(ctx->ext_buf, ctx->int_buf, 64);
+
+        AppEvent event;
+        event.type = EventTypeRx;
+        osMessageQueuePut(ctx->event_queue, &event, 0, 0);
+
+        ctx->symbol_cnt = 0;
+    }
+
+    gpio_write(&debug_0, false);
 }
 
 const uint8_t ROW_SIZE = 4;
@@ -179,7 +239,28 @@ int32_t lf_rfid_workaround(void* p) {
     gpio_write((GpioPin*)&ibutton_gpio, false);
 
     // init ctx
-    void* comp_ctx = (void*)event_queue;
+    // internal buffer
+    uint8_t buf[64];
+    for(size_t i = 0; i < 64; i++) {
+        buf[i] = 0;
+    }
+
+    // interop buffer
+    uint8_t ext_buf[64];
+    for(size_t i = 0; i < 64; i++) {
+        buf[i] = 0;
+    }
+
+    ComparatorCtx comp_ctx;
+
+    comp_ctx.prev_dwt = 0;
+    comp_ctx.symbol = -1; // init state
+    comp_ctx.center = false;
+    comp_ctx.symbol_cnt = 0;
+    comp_ctx.led_record = (GpioPin*)&led_gpio[1];
+    comp_ctx.ext_buf = ext_buf;
+    comp_ctx.int_buf = buf;
+    comp_ctx.event_queue = event_queue;
 
     // start comp
     HAL_COMP_Start(&hcomp1);
@@ -209,77 +290,35 @@ int32_t lf_rfid_workaround(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     AppEvent event;
-    uint32_t prev_dwt;
-    int8_t symbol = -1; // init state
-    bool center = false;
-    size_t symbol_cnt = 0;
 
     GpioPin* led_record = (GpioPin*)&led_gpio[1];
     gpio_init(led_record, GpioModeOutputOpenDrain);
-
-    uint8_t buf[64];
-    for(size_t i = 0; i < 64; i++) {
-        buf[i] = 0;
-    }
 
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
         if(event.type == EventTypeRx && event_status == osOK) {
-            uint32_t dt = (event.value.rx.dwt_value - prev_dwt) / (SystemCoreClock / 1000000.0f);
-            prev_dwt = event.value.rx.dwt_value;
+            if(even_check(&ext_buf[9])) {
+                State* state = (State*)acquire_mutex_block(&state_mutex);
+                extract_data(&ext_buf[9], &state->customer_id, &state->em_data);
 
-            if(dt > 384) {
-                // change symbol 0->1 or 1->0
-                symbol = event.value.rx.value;
-                center = true;
-            } else {
-                // same symbol as prev or center
-                center = !center;
+                printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+
+                release_mutex(&state_mutex, state);
+                // view_port_update(view_port);
+
+                taskENTER_CRITICAL();
+                gpio_write(led_record, false);
+                delay_us(10000);
+                gpio_write(led_record, true);
+                taskEXIT_CRITICAL();
             }
-
+            
             /*
-            gpio_write(&debug_1, true);
-            delay_us(center ? 10 : 30);
-            gpio_write(&debug_1, false);
+            gpio_write(led_record, false);
+            osDelay(10);
+            gpio_write(led_record, true);
             */
-
-            if(center && symbol != -1) {
-                /*
-                gpio_write(&debug_0, true);
-                delay_us(symbol ? 10 : 30);
-                gpio_write(&debug_0, false);
-                */
-
-                buf[symbol_cnt] = symbol;
-                symbol_cnt++;
-            }
-
-            // check preamble
-            if(symbol_cnt <= 9 && symbol == 0) {
-                symbol_cnt = 0;
-                symbol = -1;
-            }
-
-            // check stop bit
-            if(symbol_cnt == 64 && symbol == 1) {
-                symbol_cnt = 0;
-                symbol = -1;
-            }
-
-            if(symbol_cnt == 64) {
-                if(even_check(&buf[9])) {
-                    State* state = (State*)acquire_mutex_block(&state_mutex);
-                    extract_data(&buf[9], &state->customer_id, &state->em_data);
-                    printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
-                    release_mutex(&state_mutex, state);
-                    gpio_write(led_record, false);
-                    osDelay(100);
-                    gpio_write(led_record, true);
-                }
-
-                symbol_cnt = 0;
-            }
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
@@ -335,7 +374,7 @@ int32_t lf_rfid_workaround(void* p) {
                 if(state->on) {
                     gpio_write(pull_pin_record, false);
                     api_interrupt_add(
-                        comparator_trigger_callback, InterruptTypeComparatorTrigger, comp_ctx);
+                        comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
                 } else {
                     api_interrupt_remove(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger);
@@ -350,11 +389,8 @@ int32_t lf_rfid_workaround(void* p) {
             if(!state->on) {
                 em4100_emulation(emulation_data, pull_pin_record);
             }
-
-            // common code, for example, force update UI
-            view_port_update(view_port);
-
             release_mutex(&state_mutex, state);
+            view_port_update(view_port);
         }
     }
 
