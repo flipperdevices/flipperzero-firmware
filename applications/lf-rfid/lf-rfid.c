@@ -312,7 +312,7 @@ int32_t lf_rfid_workaround(void* p) {
                 delay(50);
                 gpio_write(led_record, true);
             }
-            
+
             /*
             gpio_write(led_record, false);
             osDelay(10);
