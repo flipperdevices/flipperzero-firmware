@@ -41,13 +41,16 @@ static void render_callback(Canvas* canvas, void* ctx) {
     if(state->mode == ModeEmulating) canvas_draw_str(canvas, 2, 24, "Emulating");
     if(state->mode == ModeReading) canvas_draw_str(canvas, 2, 24, "Reading");
 
+    if(state->protocol == ProtocolHid) canvas_draw_str(canvas, 2, 36, "HID");
+    if(state->protocol == ProtocolEm4100) canvas_draw_str(canvas, 2, 36, "EM4100");
+
     char buf[14];
 
     sprintf(buf, "%d kHz", (int)state->freq_khz);
-    canvas_draw_str(canvas, 2, 36, buf);
+    canvas_draw_str(canvas, 2, 45, buf);
 
     sprintf(buf, "%02d:%010ld", state->customer_id, state->em_data);
-    canvas_draw_str(canvas, 2, 45, buf);
+    canvas_draw_str(canvas, 2, 54, buf);
 
     release_mutex((ValueMutex*)ctx, state);
 }
@@ -215,6 +218,7 @@ int32_t lf_rfid_workaround(void* p) {
     _state.customer_id = 00;
     _state.em_data = 4378151;
     _state.dirty = true;
+    _state.protocol = ProtocolEm4100;
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -301,10 +305,18 @@ int32_t lf_rfid_workaround(void* p) {
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyLeft) {
+                        if(state->protocol == ProtocolEm4100) {
+                            state->protocol = ProtocolHid;
+                            state->dirty = true;
+                        }
                     }
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyRight) {
+                        if(state->protocol == ProtocolHid) {
+                            state->protocol = ProtocolEm4100;
+                            state->dirty = true;
+                        }
                     }
 
                     if(event.value.input.type == InputTypePress &&
