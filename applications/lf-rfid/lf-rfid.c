@@ -255,7 +255,6 @@ int32_t lf_rfid_workaround(void* p) {
         int_bufer[i] = 0;
     }
 
-
     comp_ctx.prev_dwt = 0;
     comp_ctx.symbol = -1; // init state
     comp_ctx.center = false;
@@ -338,7 +337,7 @@ int32_t lf_rfid_workaround(void* p) {
             osDelay(10);
             gpio_write(led_record, true);
             */
-            
+
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
