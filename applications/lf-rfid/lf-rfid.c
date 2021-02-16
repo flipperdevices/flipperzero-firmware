@@ -16,9 +16,14 @@ typedef struct {
     EventType type;
 } AppEvent;
 
+typedef enum { ModeReading, ModeEmulating } Mode;
+
+typedef enum { ProtocolEm4100, ProtocolHid } Protocol;
+
 typedef struct {
     uint32_t freq_khz;
-    bool on;
+    Mode mode;
+    Protocol protocol;
     uint8_t customer_id;
     uint32_t em_data;
     bool dirty;
@@ -33,7 +38,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 12, "LF RFID");
 
-    canvas_draw_str(canvas, 2, 24, state->on ? "Reading" : "Emulating");
+    if(state->mode == ModeEmulating) canvas_draw_str(canvas, 2, 24, "Emulating");
+    if(state->mode == ModeReading) canvas_draw_str(canvas, 2, 24, "Reading");
 
     char buf[14];
 
@@ -57,7 +63,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 
 extern TIM_HandleTypeDef TIM_C;
 void em4100_emulation(uint8_t* data, GpioPin* pin);
-void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
+void em4100_prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
 
 GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
 GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
@@ -152,85 +158,8 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-const uint8_t ROW_SIZE = 4;
-const uint8_t LINE_SIZE = 10;
-
-static bool even_check(uint8_t* buf) {
-    uint8_t col_parity_sum[ROW_SIZE];
-    for(uint8_t col = 0; col < ROW_SIZE; col++) {
-        col_parity_sum[col] = 0;
-    }
-
-    // line parity
-    for(uint8_t line = 0; line < LINE_SIZE; line++) {
-        printf("%d: ", line);
-        uint8_t parity_sum = 0;
-        for(uint8_t col = 0; col < ROW_SIZE; col++) {
-            parity_sum += buf[line * (ROW_SIZE + 1) + col];
-            col_parity_sum[col] += buf[line * (ROW_SIZE + 1) + col];
-            printf("%d ", buf[line * (ROW_SIZE + 1) + col]);
-        }
-        if((1 & parity_sum) != buf[line * (ROW_SIZE + 1) + ROW_SIZE]) {
-            printf(
-                "line parity fail at %d (%d : %d)\n",
-                line,
-                parity_sum,
-                buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
-            return false;
-        }
-        printf("\r\n");
-    }
-
-    for(uint8_t col = 0; col < ROW_SIZE; col++) {
-        if((1 & col_parity_sum[col]) != buf[LINE_SIZE * (ROW_SIZE + 1) + col]) {
-            printf(
-                "col parity fail at %d (%d : %d)\n",
-                col,
-                col_parity_sum[col],
-                buf[LINE_SIZE * (ROW_SIZE + 1) + col]);
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
-    uint32_t data = 0;
-    uint8_t offset = 0;
-
-    printf("customer: ");
-    for(uint8_t line = 0; line < 2; line++) {
-        for(uint8_t col = 0; col < ROW_SIZE; col++) {
-            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
-
-            data |= bit << (7 - offset);
-            printf("%ld ", bit);
-
-            offset++;
-        }
-    }
-    printf("\r\n");
-
-    *customer = data;
-
-    data = 0;
-    offset = 0;
-    printf("data: ");
-    for(uint8_t line = 2; line < LINE_SIZE; line++) {
-        for(uint8_t col = 0; col < ROW_SIZE; col++) {
-            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
-
-            data |= bit << (31 - offset);
-            printf("%ld ", bit);
-
-            offset++;
-        }
-    }
-    printf("\r\n");
-
-    *em_data = data;
-}
+bool em4100_even_check(uint8_t* buf);
+void em4100_extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data);
 
 int32_t lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
@@ -282,7 +211,7 @@ int32_t lf_rfid_workaround(void* p) {
 
     State _state;
     _state.freq_khz = 125;
-    _state.on = false;
+    _state.mode = ModeReading;
     _state.customer_id = 00;
     _state.em_data = 4378151;
     _state.dirty = true;
@@ -314,9 +243,9 @@ int32_t lf_rfid_workaround(void* p) {
             size_t received = xStreamBufferReceive(comp_ctx.stream_buffer, raw_data, 64, 0);
             printf("received: %d\r\n", received);
             if(received == 64) {
-                if(even_check(&raw_data[9])) {
+                if(em4100_even_check(&raw_data[9])) {
                     State* state = (State*)acquire_mutex_block(&state_mutex);
-                    extract_data(&raw_data[9], &state->customer_id, &state->em_data);
+                    em4100_extract_data(&raw_data[9], &state->customer_id, &state->em_data);
 
                     printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
@@ -381,7 +310,11 @@ int32_t lf_rfid_workaround(void* p) {
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyOk) {
                         state->dirty = true;
-                        state->on = !state->on;
+                        if(state->mode == ModeEmulating) {
+                            state->mode = ModeReading;
+                        } else if(state->mode == ModeReading) {
+                            state->mode = ModeEmulating;
+                        }
                     }
                 }
             } else {
@@ -389,26 +322,25 @@ int32_t lf_rfid_workaround(void* p) {
             }
 
             if(state->dirty) {
-                if(!state->on) {
-                    prepare_data(state->em_data, state->customer_id, raw_data);
+                if(state->mode == ModeEmulating) {
+                    api_interrupt_remove(
+                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
+                    hal_pwmn_set(1.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
+
+                    em4100_prepare_data(state->em_data, state->customer_id, raw_data);
                 }
 
-                if(state->on) {
+                if(state->mode == ModeReading) {
                     gpio_write(pull_pin_record, false);
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
-                } else {
-                    api_interrupt_remove(
-                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
+                    hal_pwmn_set(0.5, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
                 }
-
-                hal_pwmn_set(
-                    state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
 
                 state->dirty = false;
             }
 
-            if(!state->on) {
+            if(state->mode == ModeEmulating) {
                 em4100_emulation(raw_data, pull_pin_record);
             }
             release_mutex(&state_mutex, state);

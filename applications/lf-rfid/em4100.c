@@ -1,6 +1,6 @@
 #include <furi.h>
 
-void prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data) {
+void em4100_prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data) {
     uint8_t value[10];
 
     // vendor rows (4 bit in a row)
@@ -67,4 +67,84 @@ void em4100_emulation(uint8_t* data, GpioPin* pin) {
 
     gpio_write(pin, false);
     taskEXIT_CRITICAL();
+}
+
+const uint8_t ROW_SIZE = 4;
+const uint8_t LINE_SIZE = 10;
+
+bool em4100_even_check(uint8_t* buf) {
+    uint8_t col_parity_sum[ROW_SIZE];
+    for(uint8_t col = 0; col < ROW_SIZE; col++) {
+        col_parity_sum[col] = 0;
+    }
+
+    // line parity
+    for(uint8_t line = 0; line < LINE_SIZE; line++) {
+        printf("%d: ", line);
+        uint8_t parity_sum = 0;
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            parity_sum += buf[line * (ROW_SIZE + 1) + col];
+            col_parity_sum[col] += buf[line * (ROW_SIZE + 1) + col];
+            printf("%d ", buf[line * (ROW_SIZE + 1) + col]);
+        }
+        if((1 & parity_sum) != buf[line * (ROW_SIZE + 1) + ROW_SIZE]) {
+            printf(
+                "line parity fail at %d (%d : %d)\n",
+                line,
+                parity_sum,
+                buf[line * (ROW_SIZE + 1) + ROW_SIZE]);
+            return false;
+        }
+        printf("\r\n");
+    }
+
+    for(uint8_t col = 0; col < ROW_SIZE; col++) {
+        if((1 & col_parity_sum[col]) != buf[LINE_SIZE * (ROW_SIZE + 1) + col]) {
+            printf(
+                "col parity fail at %d (%d : %d)\n",
+                col,
+                col_parity_sum[col],
+                buf[LINE_SIZE * (ROW_SIZE + 1) + col]);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void em4100_extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
+    uint32_t data = 0;
+    uint8_t offset = 0;
+
+    printf("customer: ");
+    for(uint8_t line = 0; line < 2; line++) {
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
+
+            data |= bit << (7 - offset);
+            printf("%ld ", bit);
+
+            offset++;
+        }
+    }
+    printf("\r\n");
+
+    *customer = data;
+
+    data = 0;
+    offset = 0;
+    printf("data: ");
+    for(uint8_t line = 2; line < LINE_SIZE; line++) {
+        for(uint8_t col = 0; col < ROW_SIZE; col++) {
+            uint32_t bit = buf[line * (ROW_SIZE + 1) + col];
+
+            data |= bit << (31 - offset);
+            printf("%ld ", bit);
+
+            offset++;
+        }
+    }
+    printf("\r\n");
+
+    *em_data = data;
 }
