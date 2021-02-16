@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
+#include <stream_buffer.h>
 
 typedef enum { EventTypeTick, EventTypeKey, EventTypeRx } EventType;
 
@@ -70,8 +71,8 @@ typedef struct {
     bool center;
     size_t symbol_cnt;
     GpioPin* led_record;
-    uint8_t* ext_buf; // TODO interrupt-thread IPC
-    uint8_t* int_buf;
+    StreamBufferHandle_t stream_buffer;
+    uint8_t* int_buffer;
 } ComparatorCtx;
 
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
@@ -83,6 +84,9 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     ctx->prev_dwt = DWT->CYCCNT;
 
     if(dt < 150) return; // supress noise
+
+    // wait message will be consumed
+    if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
 
     gpio_write(&debug_0, true);
 
@@ -104,6 +108,8 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     gpio_write(&debug_1, false);
     */
 
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
     if(ctx->center && ctx->symbol != -1) {
         /*
         gpio_write(&debug_0, true);
@@ -111,7 +117,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
         gpio_write(&debug_0, false);
         */
 
-        ctx->int_buf[ctx->symbol_cnt] = ctx->symbol;
+        ctx->int_buffer[ctx->symbol_cnt] = ctx->symbol;
         ctx->symbol_cnt++;
     }
 
@@ -128,17 +134,19 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     }
 
     if(ctx->symbol_cnt == 64) {
-        // TODO add IPC
-        memcpy(ctx->ext_buf, ctx->int_buf, 64);
-
-        AppEvent event;
-        event.type = EventTypeRx;
-        osMessageQueuePut(ctx->event_queue, &event, 0, 0);
+        if(xStreamBufferSendFromISR(
+               ctx->stream_buffer, ctx->int_buffer, 64, &xHigherPriorityTaskWoken) == 64) {
+            AppEvent event;
+            event.type = EventTypeRx;
+            osMessageQueuePut(ctx->event_queue, &event, 0, 0);
+        }
 
         ctx->symbol_cnt = 0;
     }
 
     gpio_write(&debug_0, false);
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 const uint8_t ROW_SIZE = 4;
@@ -184,6 +192,7 @@ static bool even_check(uint8_t* buf) {
     return true;
 }
 
+#if 0
 static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
     uint32_t data = 0;
     uint8_t offset = 0;
@@ -220,6 +229,7 @@ static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
 
     *em_data = data;
 }
+#endif
 
 int32_t lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
@@ -239,33 +249,36 @@ int32_t lf_rfid_workaround(void* p) {
     gpio_write((GpioPin*)&ibutton_gpio, false);
 
     // init ctx
-    // internal buffer
-    uint8_t buf[64];
-    for(size_t i = 0; i < 64; i++) {
-        buf[i] = 0;
-    }
-
-    // interop buffer
-    uint8_t ext_buf[64];
-    for(size_t i = 0; i < 64; i++) {
-        buf[i] = 0;
-    }
-
     ComparatorCtx comp_ctx;
+
+    // internal buffer
+    uint8_t int_bufer[64];
+    for(size_t i = 0; i < 64; i++) {
+        int_bufer[i] = 0;
+    }
+
 
     comp_ctx.prev_dwt = 0;
     comp_ctx.symbol = -1; // init state
     comp_ctx.center = false;
     comp_ctx.symbol_cnt = 0;
     comp_ctx.led_record = (GpioPin*)&led_gpio[1];
-    comp_ctx.ext_buf = ext_buf;
-    comp_ctx.int_buf = buf;
+    comp_ctx.stream_buffer = xStreamBufferCreate(64, 64);
+    comp_ctx.int_buffer = int_bufer;
     comp_ctx.event_queue = event_queue;
+
+    if(comp_ctx.stream_buffer == NULL) {
+        printf("cannot create stream buffer\r\n");
+        return 255;
+    }
 
     // start comp
     HAL_COMP_Start(&hcomp1);
 
-    uint8_t emulation_data[64];
+    uint8_t raw_data[64];
+    for(size_t i = 0; i < 64; i++) {
+        raw_data[i] = 0;
+    }
 
     State _state;
     _state.freq_khz = 125;
@@ -298,19 +311,31 @@ int32_t lf_rfid_workaround(void* p) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
         if(event.type == EventTypeRx && event_status == osOK) {
-            if(even_check(&ext_buf[9])) {
-                State* state = (State*)acquire_mutex_block(&state_mutex);
-                extract_data(&ext_buf[9], &state->customer_id, &state->em_data);
+            size_t received = xStreamBufferReceive(comp_ctx.stream_buffer, raw_data, 64, 0);
+            printf("received: %d\r\n", received);
+            if(received == 64) {
+                if(even_check(&raw_data[9])) {
+                    /*
+                    State* state = (State*)acquire_mutex_block(&state_mutex);
+                    extract_data(&ext_buf[9], &state->customer_id, &state->em_data);
 
-                printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+                    printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
-                release_mutex(&state_mutex, state);
+                    release_mutex(&state_mutex, state);
 
-                view_port_update(view_port);
+                    view_port_update(view_port);
+                    */
 
+                    gpio_write(led_record, false);
+                    delay(50);
+                    gpio_write(led_record, true);
+                }
+
+                /*
                 gpio_write(led_record, false);
-                delay(50);
+                osDelay(10);
                 gpio_write(led_record, true);
+                */
             }
 
             /*
@@ -318,6 +343,7 @@ int32_t lf_rfid_workaround(void* p) {
             osDelay(10);
             gpio_write(led_record, true);
             */
+            
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
@@ -367,7 +393,7 @@ int32_t lf_rfid_workaround(void* p) {
 
             if(state->dirty) {
                 if(!state->on) {
-                    prepare_data(state->em_data, state->customer_id, emulation_data);
+                    prepare_data(state->em_data, state->customer_id, raw_data);
                 }
 
                 if(state->on) {
@@ -386,7 +412,7 @@ int32_t lf_rfid_workaround(void* p) {
             }
 
             if(!state->on) {
-                em4100_emulation(emulation_data, pull_pin_record);
+                em4100_emulation(raw_data, pull_pin_record);
             }
             release_mutex(&state_mutex, state);
             view_port_update(view_port);
