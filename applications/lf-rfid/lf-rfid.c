@@ -192,7 +192,6 @@ static bool even_check(uint8_t* buf) {
     return true;
 }
 
-#if 0
 static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
     uint32_t data = 0;
     uint8_t offset = 0;
@@ -229,7 +228,6 @@ static void extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
 
     *em_data = data;
 }
-#endif
 
 int32_t lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
@@ -315,16 +313,13 @@ int32_t lf_rfid_workaround(void* p) {
             printf("received: %d\r\n", received);
             if(received == 64) {
                 if(even_check(&raw_data[9])) {
-                    /*
                     State* state = (State*)acquire_mutex_block(&state_mutex);
-                    extract_data(&ext_buf[9], &state->customer_id, &state->em_data);
+                    extract_data(&raw_data[9], &state->customer_id, &state->em_data);
 
                     printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
                     release_mutex(&state_mutex, state);
-
                     view_port_update(view_port);
-                    */
 
                     gpio_write(led_record, false);
                     delay(50);
