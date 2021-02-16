@@ -133,6 +133,9 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
         ctx->symbol = -1;
     }
 
+    // TODO
+    // write only 9..64 symbols directly to streambuffer
+
     if(ctx->symbol_cnt == 64) {
         if(xStreamBufferSendFromISR(
                ctx->stream_buffer, ctx->int_buffer, 64, &xHigherPriorityTaskWoken) == 64) {
