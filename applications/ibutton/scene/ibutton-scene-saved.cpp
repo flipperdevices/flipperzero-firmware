@@ -4,10 +4,10 @@
 #include "../ibutton-event.h"
 #include <callback-connector.h>
 
-void iButtonSceneSaved::on_enter(iButtonApp* app) {
+void iButtonSceneSavedList::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
-    auto callback = cbc::obtain_connector(this, &iButtonSceneSaved::submenu_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonSceneSavedList::submenu_callback);
 
     KeyStore* store = app->get_key_store();
 
@@ -22,7 +22,7 @@ void iButtonSceneSaved::on_enter(iButtonApp* app) {
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
-bool iButtonSceneSaved::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneSavedList::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
@@ -44,14 +44,14 @@ bool iButtonSceneSaved::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneSaved::on_exit(iButtonApp* app) {
+void iButtonSceneSavedList::on_exit(iButtonApp* app) {
     iButtonAppViewManager* view = app->get_view_manager();
     Submenu* submenu = view->get_submenu();
 
     submenu_clean(submenu);
 }
 
-void iButtonSceneSaved::submenu_callback(void* context, uint32_t index) {
+void iButtonSceneSavedList::submenu_callback(void* context, uint32_t index) {
     iButtonApp* app = static_cast<iButtonApp*>(context);
     iButtonEvent event;
 

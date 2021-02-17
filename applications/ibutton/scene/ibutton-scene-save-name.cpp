@@ -36,7 +36,7 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
         store->set_key_name(key_index, app->get_text_store());
         store->set_key_data(key_index, key->get_data(), key->get_size());
 
-        app->switch_to_next_scene(iButtonApp::Scene::SceneSaveConfirmed);
+        app->switch_to_next_scene(iButtonApp::Scene::SceneSaveSuccess);
         consumed = true;
     }
 

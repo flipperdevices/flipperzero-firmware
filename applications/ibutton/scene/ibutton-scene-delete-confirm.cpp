@@ -58,7 +58,7 @@ bool iButtonSceneDeleteConfirm::on_event(iButtonApp* app, iButtonEvent* event) {
             KeyStore* store = app->get_key_store();
             store->remove_key(app->get_stored_key_index());
 
-            app->switch_to_next_scene(iButtonApp::Scene::SceneDeleteConfirmed);
+            app->switch_to_next_scene(iButtonApp::Scene::SceneDeleteSuccess);
         } else {
             app->switch_to_prevous_scene();
         }
