@@ -90,15 +90,17 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 5, 22, TARGET " " BUILD_DATE);
     canvas_draw_str(canvas, 5, 32, GIT_BRANCH);
-    canvas_draw_str(canvas, 5, 42, GIT_BRANCH_NUM " "GIT_COMMIT);
+    canvas_draw_str(canvas, 5, 42, GIT_BRANCH_NUM " " GIT_COMMIT);
 
     char buffer[64];
-    snprintf(buffer, 64, "HW: %d.F%dB%dC%d",
+    snprintf(
+        buffer,
+        64,
+        "HW: %d.F%dB%dC%d",
         api_hal_version_get_hw_version(),
         api_hal_version_get_hw_target(),
         api_hal_version_get_hw_board(),
-        api_hal_version_get_hw_connect()
-    );
+        api_hal_version_get_hw_connect());
     canvas_draw_str(canvas, 5, 52, buffer);
 }
 
