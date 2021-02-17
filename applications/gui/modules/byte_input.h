@@ -5,33 +5,55 @@
 extern "C" {
 #endif
 
-/* Byte input anonymous structure */
+/**
+ * @brief Byte input anonymous structure 
+ * 
+ */
 typedef struct ByteInput ByteInput;
+
+/**
+ * @brief callback that is executed on save button press
+ * 
+ */
 typedef void (*ByteInputCallback)(void* context, uint8_t* bytes, uint8_t bytes_count);
+
+/**
+ * @brief callback that is executed when byte buffer is changed
+ * 
+ */
 typedef void (*ByteChangedCallback)(void* context, uint8_t* bytes, uint8_t bytes_count);
 
-/* Allocate and initialize byte input
- * This byte input is used to enter bytes
+/** 
+ * @brief Allocate and initialize byte input. This byte input is used to enter bytes.
+ * 
+ * @return ByteInput instance pointer
  */
 ByteInput* byte_input_alloc();
 
-/* Deinitialize and free byte input
- * @param byte_input - Byte input instance
+/** 
+ * @brief Deinitialize and free byte input
+ * 
+ * @param byte_input Byte input instance
  */
 void byte_input_free(ByteInput* byte_input);
 
-/* Get byte input view
- * @param byte_input - byte input instance
+/** 
+ * @brief Get byte input view
+ * 
+ * @param byte_input byte input instance
  * @return View instance that can be used for embedding
  */
 View* byte_input_get_view(ByteInput* byte_input);
 
-/* Deinitialize and free byte input
- * @param byte_input - byte input instance
- * @param callback - callback fn
- * @param callback_context - callback context
- * @param text - text buffer to use
- * @param max_text_length - text buffer length
+/** 
+ * @brief Deinitialize and free byte input
+ * 
+ * @param byte_input byte input instance
+ * @param input_callback input callback fn
+ * @param changed_callback changed callback fn
+ * @param callback_context callback context
+ * @param bytes buffer to use
+ * @param bytes_count buffer length
  */
 void byte_input_set_result_callback(
     ByteInput* byte_input,
@@ -41,9 +63,11 @@ void byte_input_set_result_callback(
     uint8_t* bytes,
     uint8_t bytes_count);
 
-/* Set byte input header text
- * @param byte input - byte input instance
- * @param text - text to be shown
+/**
+ * @brief Set byte input header text
+ * 
+ * @param byte_input byte input instance
+ * @param text text to be shown
  */
 void byte_input_set_header_text(ByteInput* byte_input, const char* text);
 
