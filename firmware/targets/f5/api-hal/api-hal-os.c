@@ -14,7 +14,7 @@
 #ifdef API_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>
 #define LED_GREEN_PORT GPIOA
-#define LED_GREEN_PIN LL_GPIO_PIN_2
+#define LED_GREEN_PIN LL_GPIO_PIN_7
 #endif
 
 typedef struct {

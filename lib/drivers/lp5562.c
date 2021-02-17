@@ -1,31 +1,37 @@
 #include "lp5562.h"
 #include "lp5562_reg.h"
 
-#include <i2c.h>
+#include <api-hal.h>
 #include <stdio.h>
 
 bool lp5562_read(uint8_t address, uint8_t* data, size_t size) {
-    if (HAL_I2C_Master_Transmit(&POWER_I2C, LP5562_ADDRESS, &address, 1, 2000) != HAL_OK) {
-        return false;
-    }
-    if (HAL_I2C_Master_Receive(&POWER_I2C, LP5562_ADDRESS, data, size, 2000) != HAL_OK) {
-        return false;
-    }
-    return true;
+    bool ret;
+    with_api_hal_i2c(bool, &ret, (){
+        if (HAL_I2C_Master_Transmit(&POWER_I2C, LP5562_ADDRESS, &address, 1, 2000) != HAL_OK) {
+            return false;
+        }
+        if (HAL_I2C_Master_Receive(&POWER_I2C, LP5562_ADDRESS, data, size, 2000) != HAL_OK) {
+            return false;
+        }
+        return true;
+    });
+    return ret;
 }
 
 bool lp5562_read_reg(uint8_t address, uint8_t* data) {
-    lp5562_read(address, data, 1);
-    return true;
+    return lp5562_read(address, data, 1);
 }
 
 bool lp5562_write_reg(uint8_t address, uint8_t *data) {
     uint8_t buffer[2] = { address, *data };
-
-    if (HAL_I2C_Master_Transmit(&POWER_I2C, LP5562_ADDRESS, buffer, 2, 2000) != HAL_OK) {
-        return false;
-    }
-    return true;
+    bool ret;
+    with_api_hal_i2c(bool, &ret, (){
+        if (HAL_I2C_Master_Transmit(&POWER_I2C, LP5562_ADDRESS, buffer, 2, 2000) != HAL_OK) {
+            return false;
+        }
+        return true;
+    });
+    return ret;
 }
 
 void lp5562_reset() {
