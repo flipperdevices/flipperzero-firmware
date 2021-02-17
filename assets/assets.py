@@ -101,9 +101,9 @@ class Assets:
             self.args.firmware,
             self.args.board,
             self.args.connect,
-            int(datetime.datetime.now().timestamp())
+            int(datetime.datetime.now().timestamp()),
         )
-        open(self.args.file,"wb").write(data)
+        open(self.args.file, "wb").write(data)
     
     def icons(self):
         self.logger.debug(f"Converting icons")
