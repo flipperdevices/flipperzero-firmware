@@ -8,6 +8,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "api-hal-os.h"
 #include "api-hal-resources.h"
 #include "api-hal-gpio.h"
+#include "api-hal-light.h"
 #include "api-hal-delay.h"
 #include "api-hal-pwm.h"
 #include "api-hal-task.h"

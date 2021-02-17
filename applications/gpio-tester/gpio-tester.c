@@ -1,4 +1,6 @@
 #include <furi.h>
+#include <api-hal.h>
+
 #include <gui/gui.h>
 #include <input/input.h>
 
@@ -84,8 +86,6 @@ int32_t app_gpio_test(void* p) {
         gpio_init((GpioPin*)&GPIO_PINS[i].pin, GpioModeOutputPushPull);
     }
 
-    gpio_init((GpioPin*)&led_gpio[1], GpioModeOutputOpenDrain);
-
     AppEvent event;
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, osWaitForever);
@@ -97,7 +97,7 @@ int32_t app_gpio_test(void* p) {
                    event.value.input.key == InputKeyBack) {
                     printf("[gpio-tester] bye!\r\n");
                     // TODO remove all view_ports create by app
-                    view_port_enabled_set(view_port, false);
+                    api_hal_light_set(LightGreen, 0x00);
                     return 0;
                 }
 
@@ -118,10 +118,10 @@ int32_t app_gpio_test(void* p) {
                 if(event.value.input.key == InputKeyOk) {
                     if(event.value.input.type == InputTypePress) {
                         gpio_write((GpioPin*)&GPIO_PINS[state->gpio_index].pin, true);
-                        gpio_write((GpioPin*)&led_gpio[1], false);
+                        api_hal_light_set(LightGreen, 0xFF);
                     } else if(event.value.input.type == InputTypeRelease) {
                         gpio_write((GpioPin*)&GPIO_PINS[state->gpio_index].pin, false);
-                        gpio_write((GpioPin*)&led_gpio[1], true);
+                        api_hal_light_set(LightGreen, 0x00);
                     }
                 }
             }
