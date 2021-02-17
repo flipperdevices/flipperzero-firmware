@@ -42,7 +42,7 @@ bool iButtonSceneReadCRCError::on_event(iButtonApp* app, iButtonEvent* event) {
         if(event->payload.dialog_result == DialogExResultRight) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneReadedKeyMenu);
         } else {
-            app->switch_to_prevous_scene();
+            app->switch_to_previous_scene();
         }
 
         consumed = true;

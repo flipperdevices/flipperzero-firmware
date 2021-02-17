@@ -39,7 +39,7 @@ bool iButtonSceneReadedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
         }
         consumed = true;
     } else if(event->type == iButtonEvent::Type::EventTypeBack) {
-        app->search_and_switch_to_prevous_scene({iButtonApp::Scene::SceneRead});
+        app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneRead});
         consumed = true;
     }
 

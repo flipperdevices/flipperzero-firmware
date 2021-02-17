@@ -52,7 +52,7 @@ bool iButtonSceneInfo::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeDialogResult) {
-        app->switch_to_prevous_scene();
+        app->switch_to_previous_scene();
         consumed = true;
     }
 

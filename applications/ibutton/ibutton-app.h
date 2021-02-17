@@ -14,11 +14,14 @@
 #include "scene/ibutton-scene-saved.h"
 #include "scene/ibutton-scene-saved-key-menu.h"
 #include "scene/ibutton-scene-delete-confirm.h"
-#include "scene/ibutton-scene-delete-confirmed.h"
+#include "scene/ibutton-scene-delete-success.h"
 #include "scene/ibutton-scene-emulate.h"
 #include "scene/ibutton-scene-save-name.h"
-#include "scene/ibutton-scene-save-confirmed.h"
+#include "scene/ibutton-scene-save-success.h"
 #include "scene/ibutton-scene-info.h"
+#include "scene/ibutton-scene-add-type.h"
+#include "scene/ibutton-scene-add-value.h"
+#include "scene/ibutton-scene-add-name.h"
 
 #include "helpers/key-store.h"
 #include "helpers/key-worker.h"
@@ -44,20 +47,23 @@ public:
         SceneReadedKeyMenu,
         SceneWrite,
         SceneEmulate,
-        SceneSaved,
+        SceneSavedList,
         SceneSavedKeyMenu,
         SceneDeleteConfirm,
-        SceneDeleteConfirmed,
+        SceneDeleteSuccess,
         SceneSaveName,
-        SceneSaveConfirmed,
+        SceneSaveSuccess,
         SceneInfo,
+        SceneAddType,
+        SceneAddValue,
+        SceneAddName,
     };
 
     iButtonAppViewManager* get_view_manager();
     void switch_to_next_scene(Scene index);
-    bool switch_to_prevous_scene();
-    bool switch_to_prevous_scene(uint8_t count);
-    Scene get_prevous_scene();
+    void search_and_switch_to_previous_scene(std::initializer_list<Scene> scenes_list);
+    bool switch_to_previous_scene(uint8_t count = 1);
+    Scene get_previous_scene();
 
     const GpioPin* get_ibutton_pin();
     KeyWorker* get_key_worker();
@@ -88,7 +94,7 @@ public:
     void generate_random_name(char* name, uint8_t max_name_size);
 
 private:
-    std::list<Scene> prevous_scene = {Scene::SceneExit};
+    std::list<Scene> previous_scenes_list = {Scene::SceneExit};
     Scene current_scene = Scene::SceneStart;
     iButtonAppViewManager view;
 
@@ -101,13 +107,16 @@ private:
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
         {Scene::SceneWrite, new iButtonSceneWrite()},
         {Scene::SceneEmulate, new iButtonSceneEmulate()},
-        {Scene::SceneSaved, new iButtonSceneSaved()},
+        {Scene::SceneSavedList, new iButtonSceneSavedList()},
         {Scene::SceneSavedKeyMenu, new iButtonSceneSavedKeyMenu()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
-        {Scene::SceneDeleteConfirmed, new iButtonSceneDeleteConfirmed()},
+        {Scene::SceneDeleteSuccess, new iButtonSceneDeleteSuccess()},
         {Scene::SceneSaveName, new iButtonSceneSaveName()},
-        {Scene::SceneSaveConfirmed, new iButtonSceneSaveConfirmed()},
+        {Scene::SceneSaveSuccess, new iButtonSceneSaveSuccess()},
         {Scene::SceneInfo, new iButtonSceneInfo()},
+        {Scene::SceneAddType, new iButtonSceneAddType()},
+        /*{Scene::SceneAddValue, new iButtonSceneAddValue()},
+        {Scene::SceneAddName, new iButtonSceneAddName()},*/
     };
 
     KeyWorker* key_worker;

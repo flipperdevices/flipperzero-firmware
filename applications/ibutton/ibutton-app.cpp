@@ -15,10 +15,12 @@ void iButtonApp::run(void) {
 
         if(!consumed) {
             if(event.type == iButtonEvent::Type::EventTypeBack) {
-                exit = switch_to_prevous_scene();
+                exit = switch_to_previous_scene();
             }
         }
     };
+
+    scenes[current_scene]->on_exit(this);
 }
 
 iButtonApp::iButtonApp() {
@@ -39,41 +41,56 @@ iButtonAppViewManager* iButtonApp::get_view_manager() {
     return &view;
 }
 
-void iButtonApp::switch_to_next_scene(Scene mode) {
-    prevous_scene.push_front(current_scene);
+void iButtonApp::switch_to_next_scene(Scene next_scene) {
+    previous_scenes_list.push_front(current_scene);
 
-    if(mode != Scene::SceneExit) {
+    if(next_scene != Scene::SceneExit) {
         scenes[current_scene]->on_exit(this);
-        current_scene = mode;
+        current_scene = next_scene;
         scenes[current_scene]->on_enter(this);
     }
 }
 
-bool iButtonApp::switch_to_prevous_scene() {
-    return switch_to_prevous_scene(1);
-}
+void iButtonApp::search_and_switch_to_previous_scene(std::initializer_list<Scene> scenes_list) {
+    Scene previous_scene = Scene::SceneStart;
+    bool scene_found = false;
 
-bool iButtonApp::switch_to_prevous_scene(uint8_t count) {
-    Scene mode;
-
-    for(uint8_t i = 0; i < count; i++) {
-        mode = get_prevous_scene();
-        if(mode == Scene::SceneExit) break;
+    while(!scene_found) {
+        previous_scene = get_previous_scene();
+        for(Scene element : scenes_list) {
+            if(previous_scene == element || previous_scene == Scene::SceneStart) {
+                scene_found = true;
+                break;
+            }
+        }
     }
 
-    if(mode == Scene::SceneExit) {
+    scenes[current_scene]->on_exit(this);
+    current_scene = previous_scene;
+    scenes[current_scene]->on_enter(this);
+}
+
+bool iButtonApp::switch_to_previous_scene(uint8_t count) {
+    Scene previous_scene = Scene::SceneStart;
+
+    for(uint8_t i = 0; i < count; i++) {
+        previous_scene = get_previous_scene();
+        if(previous_scene == Scene::SceneExit) break;
+    }
+
+    if(previous_scene == Scene::SceneExit) {
         return true;
     } else {
         scenes[current_scene]->on_exit(this);
-        current_scene = mode;
+        current_scene = previous_scene;
         scenes[current_scene]->on_enter(this);
         return false;
     }
 }
 
-iButtonApp::Scene iButtonApp::get_prevous_scene() {
-    Scene scene = prevous_scene.front();
-    prevous_scene.pop_front();
+iButtonApp::Scene iButtonApp::get_previous_scene() {
+    Scene scene = previous_scenes_list.front();
+    previous_scenes_list.pop_front();
     return scene;
 }
 

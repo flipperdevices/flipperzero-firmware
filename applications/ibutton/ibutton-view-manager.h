@@ -43,5 +43,5 @@ private:
     Popup* popup;
     Gui* gui;
 
-    uint32_t prevous_view_callback(void* context);
+    uint32_t previous_view_callback(void* context);
 };
