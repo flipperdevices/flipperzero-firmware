@@ -6,7 +6,7 @@ iButtonAppViewManager::iButtonAppViewManager() {
     event_queue = osMessageQueueNew(10, sizeof(iButtonEvent), NULL);
 
     view_dispatcher = view_dispatcher_alloc();
-    auto callback = cbc::obtain_connector(this, &iButtonAppViewManager::prevous_view_callback);
+    auto callback = cbc::obtain_connector(this, &iButtonAppViewManager::previous_view_callback);
 
     dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
@@ -62,6 +62,9 @@ iButtonAppViewManager::~iButtonAppViewManager() {
         static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewTextInput));
     view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewPopup));
+    view_dispatcher_remove_view(
+        view_dispatcher,
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewByteInput));
 
     // free view modules
     popup_free(popup);
@@ -112,7 +115,7 @@ void iButtonAppViewManager::send_event(iButtonEvent* event) {
     furi_check(result == osOK);
 }
 
-uint32_t iButtonAppViewManager::prevous_view_callback(void* context) {
+uint32_t iButtonAppViewManager::previous_view_callback(void* context) {
     if(event_queue != NULL) {
         iButtonEvent event;
         event.type = iButtonEvent::Type::EventTypeBack;
