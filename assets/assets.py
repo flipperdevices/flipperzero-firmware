@@ -69,10 +69,16 @@ class Assets:
         self.parser_otp = self.subparsers.add_parser(
             "otp", help="OTP HW version generator"
         )
-        self.parser_otp.add_argument("--version", type=int, help="Version", required=True)
-        self.parser_otp.add_argument("--firmware", type=int, help="Firmware", required=True)
+        self.parser_otp.add_argument(
+            "--version", type=int, help="Version", required=True
+        )
+        self.parser_otp.add_argument(
+            "--firmware", type=int, help="Firmware", required=True
+        )
         self.parser_otp.add_argument("--board", type=int, help="Board", required=True)
-        self.parser_otp.add_argument("--connect", type=int, help="Connect", required=True)
+        self.parser_otp.add_argument(
+            "--connect", type=int, help="Connect", required=True
+        )
         self.parser_otp.add_argument("file", help="Output file")
         self.parser_otp.set_defaults(func=self.otp)
         # logging
@@ -104,7 +110,7 @@ class Assets:
             int(datetime.datetime.now().timestamp()),
         )
         open(self.args.file, "wb").write(data)
-    
+
     def icons(self):
         self.logger.debug(f"Converting icons")
         icons_c = open(os.path.join(self.args.output_directory, "assets_icons.c"), "w")
