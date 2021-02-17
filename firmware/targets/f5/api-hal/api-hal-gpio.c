@@ -1,7 +1,7 @@
-#include "api-hal-gpio.h"
-#include "api-hal-resources.h"
-#include "spi.h"
-#include <api-hal.h>
+#include <api-hal-gpio.h>
+#include <api-hal-spi.h>
+#include <api-hal-resources.h>
+#include <api-hal-delay.h>
 
 // init GPIO
 void hal_gpio_init(
