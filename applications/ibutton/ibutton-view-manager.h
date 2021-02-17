@@ -4,6 +4,7 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/popup.h>
 #include "ibutton-event.h"
 
@@ -11,6 +12,7 @@ class iButtonAppViewManager {
 public:
     enum class Type : uint8_t {
         iButtonAppViewTextInput,
+        iButtonAppViewByteInput,
         iButtonAppViewSubmenu,
         iButtonAppViewDialogEx,
         iButtonAppViewPopup,
@@ -27,6 +29,7 @@ public:
     Popup* get_popup();
     DialogEx* get_dialog_ex();
     TextInput* get_text_input();
+    ByteInput* get_byte_input();
 
     void receive_event(iButtonEvent* event);
     void send_event(iButtonEvent* event);
@@ -36,6 +39,7 @@ private:
     DialogEx* dialog_ex;
     Submenu* submenu;
     TextInput* text_input;
+    ByteInput* byte_input;
     Popup* popup;
     Gui* gui;
 

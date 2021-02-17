@@ -26,6 +26,12 @@ iButtonAppViewManager::iButtonAppViewManager() {
         static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewTextInput),
         text_input_get_view(text_input));
 
+    byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        static_cast<uint32_t>(iButtonAppViewManager::Type::iButtonAppViewByteInput),
+        byte_input_get_view(byte_input));
+
     popup = popup_alloc();
     view_dispatcher_add_view(
         view_dispatcher,
@@ -39,6 +45,7 @@ iButtonAppViewManager::iButtonAppViewManager() {
     view_set_previous_callback(dialog_ex_get_view(dialog_ex), callback);
     view_set_previous_callback(submenu_get_view(submenu), callback);
     view_set_previous_callback(text_input_get_view(text_input), callback);
+    view_set_previous_callback(byte_input_get_view(byte_input), callback);
     view_set_previous_callback(popup_get_view(popup), callback);
 }
 
@@ -59,6 +66,7 @@ iButtonAppViewManager::~iButtonAppViewManager() {
     // free view modules
     popup_free(popup);
     text_input_free(text_input);
+    byte_input_free(byte_input);
     submenu_free(submenu);
     dialog_ex_free(dialog_ex);
 
@@ -87,6 +95,10 @@ DialogEx* iButtonAppViewManager::get_dialog_ex() {
 
 TextInput* iButtonAppViewManager::get_text_input() {
     return text_input;
+}
+
+ByteInput* iButtonAppViewManager::get_byte_input() {
+    return byte_input;
 }
 
 void iButtonAppViewManager::receive_event(iButtonEvent* event) {
