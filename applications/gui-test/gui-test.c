@@ -31,7 +31,7 @@ typedef struct {
     GuiTesterView view_index;
 } GuiTester;
 
-GuiTester* gui_test_alloc(void) {
+static GuiTester* gui_test_alloc(void) {
     GuiTester* gui_tester = furi_alloc(sizeof(GuiTester));
     gui_tester->view_dispatcher = view_dispatcher_alloc();
     gui_tester->view_index = GuiTesterViewByteInput;
@@ -69,7 +69,7 @@ GuiTester* gui_test_alloc(void) {
     return gui_tester;
 }
 
-void next_view(void* context) {
+static void next_view(void* context) {
     furi_assert(context);
     GuiTester* gui_tester = context;
 
@@ -81,23 +81,27 @@ void next_view(void* context) {
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
 }
 
-void popup_callback(void* context) {
+static void popup_callback(void* context) {
     next_view(context);
 }
 
-void submenu_callback(void* context, uint32_t index) {
+static void submenu_callback(void* context, uint32_t index) {
     next_view(context);
 }
 
-void dialog_callback(DialogResult result, void* context) {
+static void dialog_callback(DialogResult result, void* context) {
     next_view(context);
 }
 
-void dialog_ex_callback(DialogExResult result, void* context) {
+static void dialog_ex_callback(DialogExResult result, void* context) {
     next_view(context);
 }
 
-void text_input_callback(void* context, char* text) {
+static void text_input_callback(void* context, char* text) {
+    next_view(context);
+}
+
+static void byte_input_callback(void* context, uint8_t* bytes, uint8_t bytes_count) {
     next_view(context);
 }
 
@@ -159,11 +163,32 @@ int32_t gui_test(void* param) {
         text_input_text_len);
     text_input_set_header_text(gui_tester->text_input, "Name the key");
 
-    const uint8_t byte_input_bytes_len = 6;
-    uint8_t byte_input_bytes[6] = {0xF0, 0xA1, 0xDD, 0x84, 0x3C, 0xFE};
+    const uint8_t byte_input_bytes_len = 16;
+    uint8_t byte_input_bytes[16] = {
+        0x00,
+        0x01,
+        0x02,
+        0x03,
+        0x04,
+        0x05,
+        0x06,
+        0x07,
+        0x08,
+        0x09,
+        0x0A,
+        0x0B,
+        0x0C,
+        0x0D,
+        0x0E,
+        0x0F};
 
     byte_input_set_result_callback(
-        gui_tester->byte_input, NULL, NULL, gui_tester, byte_input_bytes, byte_input_bytes_len);
+        gui_tester->byte_input,
+        byte_input_callback,
+        NULL,
+        gui_tester,
+        byte_input_bytes,
+        byte_input_bytes_len);
     byte_input_set_header_text(gui_tester->byte_input, "Enter the key");
 
     view_dispatcher_switch_to_view(gui_tester->view_dispatcher, gui_tester->view_index);
