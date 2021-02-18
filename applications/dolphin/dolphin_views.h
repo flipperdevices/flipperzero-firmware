@@ -12,6 +12,7 @@ typedef enum {
     DolphinViewIdleMain,
     DolphinViewIdleUp,
     DolphinViewIdleDown,
+    DolphinViewHwMismatch,
 } DolphinViewIdle;
 
 typedef struct {
@@ -31,5 +32,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context);
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model);
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model);
+
+void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model);
 
 uint32_t dolphin_view_idle_back(void* context);

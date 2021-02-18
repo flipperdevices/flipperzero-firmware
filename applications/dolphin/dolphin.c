@@ -110,6 +110,12 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->idle_view_down, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleDown, dolphin->idle_view_down);
+    // HW Mismatch
+    dolphin->view_hw_mismatch = view_alloc();
+    view_set_draw_callback(dolphin->view_hw_mismatch, dolphin_view_hw_mismatch_draw);
+    view_set_previous_callback(dolphin->view_hw_mismatch, dolphin_view_idle_back);
+    view_dispatcher_add_view(
+        dolphin->idle_view_dispatcher, DolphinViewHwMismatch, dolphin->view_hw_mismatch);
 
     return dolphin;
 }
@@ -147,6 +153,10 @@ int32_t dolphin_task() {
         });
 
     furi_record_create("dolphin", dolphin);
+
+    if (!api_hal_version_do_i_belong_here()) {
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewHwMismatch);
+    }
 
     DolphinEvent event;
     while(1) {

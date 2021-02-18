@@ -9,6 +9,10 @@ typedef struct {
     uint32_t timestamp;
 } ApiHalVersionOTP;
 
+bool api_hal_version_do_i_belong_here() {
+    return api_hal_version_get_hw_target() == 4;
+}
+
 const uint8_t api_hal_version_get_hw_version() {
     return ((ApiHalVersionOTP*)OTP_AREA_BASE)->version;
 }

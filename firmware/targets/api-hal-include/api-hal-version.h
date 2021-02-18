@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+bool api_hal_version_do_i_belong_here();
+
 const uint8_t api_hal_version_get_hw_version();
 
 const uint8_t api_hal_version_get_hw_target();

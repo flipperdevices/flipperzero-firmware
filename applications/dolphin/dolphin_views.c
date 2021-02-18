@@ -104,6 +104,24 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 5, 52, buffer);
 }
 
+void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model) {
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 2, 10, "!!!! HW Mismatch !!!!");
+
+    char buffer[64];
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(
+        buffer,
+        64,
+        "HW target: F%d",
+        api_hal_version_get_hw_target()
+        );
+    canvas_draw_str(canvas, 5, 22, buffer);
+    canvas_draw_str(canvas, 5, 32, "FW target: " TARGET);
+}
+
 uint32_t dolphin_view_idle_back(void* context) {
     return DolphinViewIdleMain;
 }
