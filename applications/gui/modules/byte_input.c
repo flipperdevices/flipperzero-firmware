@@ -469,16 +469,13 @@ static void byte_input_handle_ok(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
         uint8_t value = byte_input_get_row(model->selected_row)[model->selected_column].value;
 
-        switch(value) {
-        case enter_symbol:
+        if(value == enter_symbol) {
             byte_input_call_input_callback(model);
-            break;
-        case backspace_symbol:
+        } else if(value == backspace_symbol) {
             model->bytes[model->selected_byte] = 0;
             byte_input_inc_selected_byte(model);
             byte_input_call_changed_callback(model);
-            break;
-        default:
+        } else {
             byte_input_set_nibble(
                 model->bytes, model->selected_byte, value, model->selected_high_nibble);
             if(model->selected_high_nibble == true) {
@@ -488,9 +485,7 @@ static void byte_input_handle_ok(ByteInputModel* model) {
                 model->selected_high_nibble = true;
             }
             byte_input_call_changed_callback(model);
-            break;
         }
-
     } else {
         byte_input_transition_from_keyboard(model);
     }
