@@ -96,8 +96,13 @@ int32_t app_gpio_test(void* p) {
                 if(event.value.input.type == InputTypeShort &&
                    event.value.input.key == InputKeyBack) {
                     printf("[gpio-tester] bye!\r\n");
-                    // TODO remove all view_ports create by app
+
                     api_hal_light_set(LightGreen, 0x00);
+
+                    view_port_enabled_set(view_port, false);
+                    gui_remove_view_port(gui, view_port);
+                    view_port_free(view_port);
+
                     return 0;
                 }
 
