@@ -525,7 +525,7 @@ extern "C" int32_t cc1101_workaround(void* p) {
             // TOOD what about rssi offset
             state->last_rssi = rx_rssi(&cc1101, &FREQ_LIST[state->active_freq_idx]);
 
-            api_hal_light_set(LightGreen, state->last_rssi > RSSI_THRESHOLD ? 0x00 : 0xFF);
+            api_hal_light_set(LightGreen, state->last_rssi > RSSI_THRESHOLD ? 0xFF : 0x00);
         } else if(!state->need_cc1101_conf && state->mode == ModeTx) {
             /*
             const uint8_t data = 0xA5;
