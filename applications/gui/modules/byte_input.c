@@ -467,7 +467,7 @@ static void byte_input_handle_right(ByteInputModel* model) {
  */
 static void byte_input_handle_ok(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
-        char value = byte_input_get_row(model->selected_row)[model->selected_column].value;
+        uint8_t value = byte_input_get_row(model->selected_row)[model->selected_column].value;
 
         switch(value) {
         case enter_symbol:
