@@ -21,7 +21,6 @@
 #include "scene/ibutton-scene-info.h"
 #include "scene/ibutton-scene-add-type.h"
 #include "scene/ibutton-scene-add-value.h"
-#include "scene/ibutton-scene-add-name.h"
 
 #include "helpers/key-store.h"
 #include "helpers/key-worker.h"
@@ -56,7 +55,6 @@ public:
         SceneInfo,
         SceneAddType,
         SceneAddValue,
-        SceneAddName,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -115,8 +113,7 @@ private:
         {Scene::SceneSaveSuccess, new iButtonSceneSaveSuccess()},
         {Scene::SceneInfo, new iButtonSceneInfo()},
         {Scene::SceneAddType, new iButtonSceneAddType()},
-        /*{Scene::SceneAddValue, new iButtonSceneAddValue()},
-        {Scene::SceneAddName, new iButtonSceneAddName()},*/
+        {Scene::SceneAddValue, new iButtonSceneAddValue()},
     };
 
     KeyWorker* key_worker;

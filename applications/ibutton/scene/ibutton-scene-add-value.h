@@ -8,5 +8,5 @@ public:
     void on_exit(iButtonApp* app) final;
 
 private:
-    void submenu_callback(void* context, uint32_t index);
+    void byte_input_callback(void* context, uint8_t* bytes, uint8_t bytes_count);
 };

@@ -17,6 +17,24 @@ uint8_t* iButtonKey::get_data() {
     return data;
 }
 
+uint8_t iButtonKey::get_type_data_size() {
+    uint8_t size = 0;
+
+    switch(type) {
+    case iButtonKeyType::KeyCyfral:
+        size = 2;
+        break;
+    case iButtonKeyType::KeyMetakom:
+        size = 4;
+        break;
+    case iButtonKeyType::KeyDallas:
+        size = 8;
+        break;
+    }
+
+    return size;
+}
+
 void iButtonKey::set_name(const char* _name) {
     name = _name;
 }

@@ -8,6 +8,7 @@ public:
 
     void set_data(uint8_t* data, uint8_t data_count);
     uint8_t* get_data();
+    uint8_t get_type_data_size();
 
     void set_name(const char* name);
     const char* get_name();

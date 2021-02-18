@@ -13,6 +13,7 @@ public:
         EventTypeMenuSelected,
         EventTypeDialogResult,
         EventTypeTextEditResult,
+        EventTypeByteEditResult,
     };
 
     // payload

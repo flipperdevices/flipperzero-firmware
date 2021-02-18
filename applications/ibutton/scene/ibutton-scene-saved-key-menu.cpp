@@ -38,6 +38,7 @@ bool iButtonSceneSavedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
             app->switch_to_next_scene(iButtonApp::Scene::SceneEmulate);
             break;
         case SubmenuIndexEdit:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneAddValue);
             break;
         case SubmenuIndexDelete:
             app->switch_to_next_scene(iButtonApp::Scene::SceneDeleteConfirm);
