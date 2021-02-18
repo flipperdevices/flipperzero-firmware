@@ -36,7 +36,7 @@ typedef struct {
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
 
-static const uint8_t keyboard_origin_x = 7;
+static const uint8_t keyboard_origin_x = 8;
 static const uint8_t keyboard_origin_y = 32;
 static const uint8_t keyboard_row_count = 2;
 static const uint8_t enter_symbol = '\r';
@@ -45,26 +45,26 @@ static const uint8_t max_drawable_bytes = 8;
 
 static const ByteInputKey keyboard_keys_row_1[] = {
     {'0', 0, 12},
-    {'1', 12, 12},
-    {'2', 24, 12},
-    {'3', 36, 12},
-    {'4', 48, 12},
-    {'5', 60, 12},
-    {'6', 72, 12},
-    {'7', 84, 12},
-    {backspace_symbol, 103, 4},
+    {'1', 11, 12},
+    {'2', 22, 12},
+    {'3', 33, 12},
+    {'4', 44, 12},
+    {'5', 55, 12},
+    {'6', 66, 12},
+    {'7', 77, 12},
+    {backspace_symbol, 101, 4},
 };
 
 static const ByteInputKey keyboard_keys_row_2[] = {
-    {'8', 0, 25},
-    {'9', 12, 25},
-    {'A', 24, 25},
-    {'B', 36, 25},
-    {'C', 48, 25},
-    {'D', 60, 25},
-    {'E', 72, 25},
-    {'F', 84, 25},
-    {enter_symbol, 95, 16},
+    {'8', 0, 26},
+    {'9', 11, 26},
+    {'A', 22, 26},
+    {'B', 33, 26},
+    {'C', 44, 26},
+    {'D', 55, 26},
+    {'E', 66, 26},
+    {'F', 77, 26},
+    {enter_symbol, 93, 17},
 };
 
 /**
@@ -158,8 +158,10 @@ static char byte_input_get_nibble_text(uint8_t byte, bool high_nibble) {
  * @param model 
  */
 static void byte_input_draw_input(Canvas* canvas, ByteInputModel* model) {
-    const uint8_t text_start_x = 2;
-    elements_slightly_rounded_frame(canvas, 1, 15, 126, 15);
+    const uint8_t text_x = 7;
+    const uint8_t text_y = 27;
+
+    elements_slightly_rounded_frame(canvas, 5, 16, 117, 15);
 
     for(uint8_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
@@ -167,62 +169,69 @@ static void byte_input_draw_input(Canvas* canvas, ByteInputModel* model) {
         uint8_t byte_position = i - model->first_visible_byte;
 
         if(i == model->selected_byte) {
-            canvas_draw_frame(canvas, text_start_x + byte_position * 14, 17, 15, 11);
+            canvas_draw_frame(canvas, text_x + byte_position * 14, text_y - 9, 15, 11);
 
             if(model->selected_high_nibble) {
                 canvas_draw_glyph(
                     canvas,
-                    text_start_x + 8 + byte_position * 14,
-                    26,
+                    text_x + 8 + byte_position * 14,
+                    text_y,
                     byte_input_get_nibble_text(model->bytes[i], false));
-                canvas_draw_box(canvas, text_start_x + 1 + byte_position * 14, 18, 7, 9);
+                canvas_draw_box(canvas, text_x + 1 + byte_position * 14, text_y - 8, 7, 9);
                 canvas_invert_color(canvas);
                 canvas_draw_line(
                     canvas,
-                    text_start_x + 14 + byte_position * 14,
-                    20,
-                    16 + byte_position * 14,
-                    24);
+                    text_x + 14 + byte_position * 14,
+                    text_y - 6,
+                    text_x + 14 + byte_position * 14,
+                    text_y - 2);
                 canvas_draw_glyph(
                     canvas,
-                    text_start_x + 2 + byte_position * 14,
-                    26,
+                    text_x + 2 + byte_position * 14,
+                    text_y,
                     byte_input_get_nibble_text(model->bytes[i], true));
                 canvas_invert_color(canvas);
             } else {
-                canvas_draw_box(canvas, text_start_x + 7 + byte_position * 14, 18, 7, 9);
+                canvas_draw_box(canvas, text_x + 7 + byte_position * 14, text_y - 8, 7, 9);
                 canvas_draw_glyph(
                     canvas,
-                    text_start_x + 2 + byte_position * 14,
-                    26,
+                    text_x + 2 + byte_position * 14,
+                    text_y,
                     byte_input_get_nibble_text(model->bytes[i], true));
                 canvas_invert_color(canvas);
                 canvas_draw_line(
-                    canvas, text_start_x + byte_position * 14, 20, 2 + byte_position * 14, 24);
+                    canvas,
+                    text_x + byte_position * 14,
+                    text_y - 6,
+                    text_x + byte_position * 14,
+                    text_y - 2);
                 canvas_draw_glyph(
                     canvas,
-                    text_start_x + 8 + byte_position * 14,
-                    26,
+                    text_x + 8 + byte_position * 14,
+                    text_y,
                     byte_input_get_nibble_text(model->bytes[i], false));
                 canvas_invert_color(canvas);
             }
         } else {
             canvas_draw_glyph(
                 canvas,
-                4 + byte_position * 14,
-                26,
+                text_x + 2 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], true));
             canvas_draw_glyph(
                 canvas,
-                10 + byte_position * 14,
-                26,
+                text_x + 8 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], false));
         }
     }
 
     if(model->bytes_count - model->first_visible_byte > max_drawable_bytes) {
-        uint8_t byte_position = 8;
-        canvas_draw_str(canvas, 4 + byte_position * 14, 26, ">");
+        canvas_draw_icon_name(canvas, 123, 21, I_ButtonRightSmall_3x5);
+    }
+
+    if(model->first_visible_byte > 0) {
+        canvas_draw_icon_name(canvas, 1, 21, I_ButtonLeftSmall_3x5);
     }
 }
 
@@ -233,10 +242,12 @@ static void byte_input_draw_input(Canvas* canvas, ByteInputModel* model) {
  * @param model 
  */
 static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model) {
-    const uint8_t text_start_x = 2;
-    canvas_draw_box(canvas, 0, 13, 128, 19);
+    const uint8_t text_x = 7;
+    const uint8_t text_y = 27;
+
+    canvas_draw_box(canvas, 0, 14, 128, 19);
     canvas_invert_color(canvas);
-    elements_slightly_rounded_frame(canvas, 1, 15, 126, 15);
+    elements_slightly_rounded_frame(canvas, 5, 16, 117, 15);
 
     for(uint8_t i = model->first_visible_byte;
         i < model->first_visible_byte + MIN(model->bytes_count, max_drawable_bytes);
@@ -244,36 +255,39 @@ static void byte_input_draw_input_selected(Canvas* canvas, ByteInputModel* model
         uint8_t byte_position = i - model->first_visible_byte;
 
         if(i == model->selected_byte) {
-            canvas_draw_box(canvas, text_start_x + byte_position * 14, 17, 15, 11);
+            canvas_draw_box(canvas, text_x + byte_position * 14, text_y - 9, 15, 11);
             canvas_invert_color(canvas);
             canvas_draw_glyph(
                 canvas,
-                4 + byte_position * 14,
-                26,
+                text_x + 2 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], true));
             canvas_draw_glyph(
                 canvas,
-                10 + byte_position * 14,
-                26,
+                text_x + 8 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], false));
             canvas_invert_color(canvas);
         } else {
             canvas_draw_glyph(
                 canvas,
-                4 + byte_position * 14,
-                26,
+                text_x + 2 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], true));
             canvas_draw_glyph(
                 canvas,
-                10 + byte_position * 14,
-                26,
+                text_x + 8 + byte_position * 14,
+                text_y,
                 byte_input_get_nibble_text(model->bytes[i], false));
         }
     }
 
     if(model->bytes_count - model->first_visible_byte > max_drawable_bytes) {
-        uint8_t byte_position = 8;
-        canvas_draw_str(canvas, 4 + byte_position * 14, 26, ">");
+        canvas_draw_icon_name(canvas, 123, 21, I_ButtonRightSmall_3x5);
+    }
+
+    if(model->first_visible_byte > 0) {
+        canvas_draw_icon_name(canvas, 1, 21, I_ButtonLeftSmall_3x5);
     }
 
     canvas_invert_color(canvas);
@@ -473,7 +487,8 @@ static void byte_input_handle_ok(ByteInputModel* model) {
             byte_input_call_input_callback(model);
         } else if(value == backspace_symbol) {
             model->bytes[model->selected_byte] = 0;
-            byte_input_inc_selected_byte(model);
+            model->selected_high_nibble = true;
+            byte_input_dec_selected_byte(model);
             byte_input_call_changed_callback(model);
         } else {
             byte_input_set_nibble(
@@ -503,7 +518,7 @@ static void byte_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_draw_str(canvas, 2, 9, model->header);
+    canvas_draw_str(canvas, 5, 10, model->header);
 
     canvas_set_font(canvas, FontKeyboard);
 
@@ -643,6 +658,21 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+/**
+ * @brief Reset all input-related data in model
+ * 
+ * @param model ByteInputModel
+ */
+static void byte_input_reset_model_input_data(ByteInputModel* model) {
+    model->bytes = NULL;
+    model->bytes_count = 0;
+    model->selected_high_nibble = true;
+    model->selected_byte = 0;
+    model->selected_row = 0;
+    model->selected_column = 0;
+    model->first_visible_byte = 0;
+}
+
 /** 
  * @brief Allocate and initialize byte input. This byte input is used to enter bytes.
  * 
@@ -659,13 +689,10 @@ ByteInput* byte_input_alloc() {
     with_view_model(
         byte_input->view, (ByteInputModel * model) {
             model->header = "";
-            model->bytes = NULL;
-            model->bytes_count = 0;
             model->input_callback = NULL;
             model->changed_callback = NULL;
             model->callback_context = NULL;
-            model->selected_high_nibble = true;
-            model->selected_byte = 0;
+            byte_input_reset_model_input_data(model);
             return true;
         });
 
@@ -713,15 +740,12 @@ void byte_input_set_result_callback(
     uint8_t bytes_count) {
     with_view_model(
         byte_input->view, (ByteInputModel * model) {
+            byte_input_reset_model_input_data(model);
             model->input_callback = input_callback;
             model->changed_callback = changed_callback;
             model->callback_context = callback_context;
             model->bytes = bytes;
             model->bytes_count = bytes_count;
-
-            model->first_visible_byte = 0;
-            model->selected_high_nibble = true;
-            model->selected_byte = 0;
             return true;
         });
 }
