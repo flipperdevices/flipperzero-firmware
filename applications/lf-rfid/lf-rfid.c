@@ -68,6 +68,9 @@ extern TIM_HandleTypeDef TIM_C;
 void em4100_emulation(uint8_t* data, GpioPin* pin);
 void em4100_prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
 
+void hid_emulation(uint8_t* data, GpioPin* pin);
+void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data);
+
 GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
 GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
@@ -128,13 +131,22 @@ void hid_push_bit(bool bit) {
 }
 
 uint32_t hid_prev_dwt = 0;
+uint8_t hid_prev_dt = 0;
+
 uint8_t pulse_cnt = 0;
 
 void hid_fsm(uint32_t dwt) {
     uint32_t dt = (dwt - hid_prev_dwt) / (SystemCoreClock / 1000000.0f);
     hid_prev_dwt = dwt;
 
-    
+    if(abs(hid_prev_dt - dt) > 5) {
+        gpio_write(&debug_0, true);
+        delay_us(3);
+        gpio_write(&debug_0, false);
+    }
+    hid_prev_dt = dt;
+
+    /*
     if(hid_symbol_counter > 500) {
         // try to move sampling frame
         pulse_cnt = (pulse_cnt + 2) % 6;
@@ -160,6 +172,7 @@ void hid_fsm(uint32_t dwt) {
 
         pulse_cnt = 0;
     }
+    */
 }
 
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
@@ -173,7 +186,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     // TOOD F4 and F5 differ
     bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
 
-    if(!rx_value) {
+    if(!rx_value && dt < 50 && dt > 20) {
         hid_fsm(DWT->CYCCNT);
     }
 
@@ -289,8 +302,8 @@ int32_t lf_rfid_workaround(void* p) {
     // start comp
     HAL_COMP_Start(&hcomp1);
 
-    uint8_t raw_data[64];
-    for(size_t i = 0; i < 64; i++) {
+    uint8_t raw_data[96];
+    for(size_t i = 0; i < 96; i++) {
         raw_data[i] = 0;
     }
 
@@ -421,7 +434,13 @@ int32_t lf_rfid_workaround(void* p) {
                         comparator_trigger_callback, InterruptTypeComparatorTrigger);
                     hal_pwmn_set(1.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
 
-                    em4100_prepare_data(state->em_data, state->customer_id, raw_data);
+                    if(state->protocol == ProtocolEm4100) {
+                        em4100_prepare_data(state->em_data, state->customer_id, raw_data);
+                    }
+
+                    if(state->protocol == ProtocolHid) {
+                        hid_prepare_data(155, 13710, raw_data);
+                    }
                 }
 
                 if(state->mode == ModeReading) {
@@ -435,8 +454,15 @@ int32_t lf_rfid_workaround(void* p) {
             }
 
             if(state->mode == ModeEmulating) {
-                em4100_emulation(raw_data, pull_pin_record);
+                if(state->protocol == ProtocolEm4100) {
+                    em4100_emulation(raw_data, pull_pin_record);
+                }
+
+                if(state->protocol == ProtocolHid) {
+                    hid_emulation(raw_data, pull_pin_record);
+                }
             }
+
             release_mutex(&state_mutex, state);
             view_port_update(view_port);
         }
