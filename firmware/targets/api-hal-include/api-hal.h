@@ -22,4 +22,21 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "api-hal-spi.h"
 #include "api-hal-flash.h"
 
+typedef enum {
+    RfBandIsolation = 0,
+    RfBand1 = 1,
+    RfBand2 = 2,
+    RfBand3 = 3
+} RfBand;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void api_hal_rf_band_set(RfBand band);
+
+#ifdef __cplusplus
+}
+#endif
+
 void api_hal_init();
