@@ -84,6 +84,84 @@ typedef struct {
     uint8_t* int_buffer;
 } ComparatorCtx;
 
+
+bool preamble_buffer[8];
+uint16_t hid_symbol_counter = 0;
+
+uint8_t HID_PREAMBLE[] = {false, false, false, true, true, true, false, true};
+
+bool is_preamble = true;
+
+void hid_push_bit(bool bit) {
+    if(!is_preamble) {
+        // finding preamble
+
+        preamble_buffer[hid_symbol_counter % 8] = bit;
+
+        is_preamble = true;
+        if(hid_symbol_counter > 8) {
+            for(uint8_t i = 0; i < 8; i++) {
+                if(preamble_buffer[(i + hid_symbol_counter - 7) % 8] != HID_PREAMBLE[i]) {
+                    is_preamble = false;
+                    break;
+                }
+            }
+        } else {
+            is_preamble = false;
+        }
+
+        if(is_preamble) {
+            gpio_write(&debug_0, true);
+            delay_us(5);
+            gpio_write(&debug_0, false);
+
+            hid_symbol_counter = 0;
+        }
+    } else {
+        if(hid_symbol_counter == 88) {
+            hid_symbol_counter = 0;
+            is_preamble = false;
+        }
+    }
+
+    hid_symbol_counter++;
+}
+
+uint32_t hid_prev_dwt = 0;
+uint8_t pulse_cnt = 0;
+
+void hid_fsm(uint32_t dwt) {
+    uint32_t dt = (dwt - hid_prev_dwt) / (SystemCoreClock / 1000000.0f);
+    hid_prev_dwt = dwt;
+
+    
+    if(hid_symbol_counter > 500) {
+        // try to move sampling frame
+        pulse_cnt = (pulse_cnt + 2) % 6;
+        hid_symbol_counter = 0;
+    } else {
+        pulse_cnt++;
+    }
+    
+    if(pulse_cnt == 6) {
+        if(dt < 72 && dt > 40) {
+            gpio_write(&debug_0, true);
+            delay_us(3);
+            gpio_write(&debug_0, false);
+
+            hid_push_bit(false);
+        } else if(dt >= 72 && dt < 100) {
+            gpio_write(&debug_0, true);
+            delay_us(15);
+            gpio_write(&debug_0, false);
+
+            hid_push_bit(true);
+        }
+
+        pulse_cnt = 0;
+    }
+}
+
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     if((COMP_HandleTypeDef*)hcomp != &hcomp1) return;
 
@@ -92,15 +170,19 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     uint32_t dt = (DWT->CYCCNT - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
     ctx->prev_dwt = DWT->CYCCNT;
 
+    // TOOD F4 and F5 differ
+    bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
+
+    if(!rx_value) {
+        hid_fsm(DWT->CYCCNT);
+    }
+
     if(dt < 150) return; // supress noise
 
     // wait message will be consumed
     if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
 
-    gpio_write(&debug_0, true);
-
-    // TOOD F4 and F5 differ
-    bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
+    // gpio_write(&debug_0, true);
 
     if(dt > 384) {
         // change symbol 0->1 or 1->0
@@ -156,7 +238,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
         ctx->symbol_cnt = 0;
     }
 
-    gpio_write(&debug_0, false);
+    // gpio_write(&debug_0, false);
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
