@@ -20,9 +20,6 @@ void api_hal_light_init() {
     lp5562_set_channel_value(LP5562ChannelWhite, 0x00);
 
     lp5562_enable();
-
-    osDelay(1);
-    
     lp5562_configure();
 }
 
