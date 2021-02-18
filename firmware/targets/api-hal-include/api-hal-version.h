@@ -14,7 +14,7 @@ const uint8_t api_hal_version_get_hw_version();
 
 const uint8_t api_hal_version_get_hw_target();
 
-const uint8_t api_hal_version_get_hw_board();
+const uint8_t api_hal_version_get_hw_body();
 
 const uint8_t api_hal_version_get_hw_connect();
 

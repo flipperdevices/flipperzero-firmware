@@ -75,7 +75,7 @@ class Assets:
         self.parser_otp.add_argument(
             "--firmware", type=int, help="Firmware", required=True
         )
-        self.parser_otp.add_argument("--board", type=int, help="Board", required=True)
+        self.parser_otp.add_argument("--body", type=int, help="Body", required=True)
         self.parser_otp.add_argument(
             "--connect", type=int, help="Connect", required=True
         )
@@ -105,7 +105,7 @@ class Assets:
             "<BBBBL",
             self.args.version,
             self.args.firmware,
-            self.args.board,
+            self.args.body,
             self.args.connect,
             int(datetime.datetime.now().timestamp()),
         )

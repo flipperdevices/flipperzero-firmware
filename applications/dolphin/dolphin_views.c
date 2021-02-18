@@ -99,7 +99,7 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
         "HW: %d.F%dB%dC%d",
         api_hal_version_get_hw_version(),
         api_hal_version_get_hw_target(),
-        api_hal_version_get_hw_board(),
+        api_hal_version_get_hw_body(),
         api_hal_version_get_hw_connect());
     canvas_draw_str(canvas, 5, 52, buffer);
 }

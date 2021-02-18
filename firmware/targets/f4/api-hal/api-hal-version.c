@@ -4,7 +4,7 @@
 typedef struct {
     uint8_t version;
     uint8_t target;
-    uint8_t board;
+    uint8_t body;
     uint8_t connect;
     uint32_t timestamp;
 } ApiHalVersionOTP;
@@ -21,8 +21,8 @@ const uint8_t api_hal_version_get_hw_target() {
     return ((ApiHalVersionOTP*)OTP_AREA_BASE)->target;
 }
 
-const uint8_t api_hal_version_get_hw_board() {
-    return ((ApiHalVersionOTP*)OTP_AREA_BASE)->board;
+const uint8_t api_hal_version_get_hw_body() {
+    return ((ApiHalVersionOTP*)OTP_AREA_BASE)->body;
 }
 
 const uint8_t api_hal_version_get_hw_connect() {
