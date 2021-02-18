@@ -7,7 +7,3 @@ void api_hal_init() {
     api_hal_i2c_init();
     api_hal_light_init();
 }
-
-void api_hal_rf_band_set(RfBand band) {
-    
-}
