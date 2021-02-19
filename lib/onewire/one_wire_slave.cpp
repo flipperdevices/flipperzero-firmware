@@ -43,8 +43,10 @@ void OneWireSlave::attach(OneWireDevice* attached_device) {
 }
 
 void OneWireSlave::deattach(void) {
+    if(device != nullptr) {
+        device->deattach();
+    }
     device = nullptr;
-    device->deattach();
 }
 
 void OneWireSlave::set_result_callback(OneWireSlaveResultCallback result_cb, void* ctx) {
