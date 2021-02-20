@@ -1,8 +1,13 @@
 #include <furi.h>
 
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
+    for(size_t i = 0; i < 96; i++) {
+        data[i] = 0;
+    }
+
+
+    uint64_t card_format = 1;
     uint8_t oem_code = 1;
-    uint16_t card_format = 1;
 
     uint16_t op_bits = card_no & 0b111111111111;
     uint16_t ep_bits = (card_no >> 12 & 0b1111) | (uint16_t)facility_code << 4;
@@ -31,19 +36,26 @@ void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
     data[5] = 1;
     data[7] = 1;
 
+    // oem code
+    // data[37] = 1;
+
     size_t out_idx = 8;
 
+    printf("HID data: [");
     for(uint8_t i = 0; i < 44; i++) {
-        if(result & (1 << (43 - i))) {
+        if(result & ((uint64_t)1 << (43 - i))) {
+            printf("1");
             data[out_idx] = 1;
             data[out_idx + 1] = 0;
             out_idx += 2;
         } else {
+            printf("0");
             data[out_idx] = 0;
             data[out_idx + 1] = 1;
             out_idx += 2;
         }
     }
+    printf("]\n\r");
 }
 
 void hid_emulation(uint8_t* data, GpioPin* pin) {
@@ -55,9 +67,9 @@ void hid_emulation(uint8_t* data, GpioPin* pin) {
             uint8_t time = data[j] ? 40 : 32;
 
             for(uint8_t k = 0; k < 6; k++) {
-                delay_us(time + 5);
+                delay_us(time + i/2);
                 gpio_write(pin, true);
-                delay_us(time - 5);
+                delay_us(time - i/2);
                 gpio_write(pin, false);
             }
         }
