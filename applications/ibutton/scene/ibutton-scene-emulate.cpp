@@ -3,6 +3,7 @@
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 #include "../ibutton-key.h"
+#include <callback-connector.h>
 
 void iButtonSceneEmulate::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
@@ -63,6 +64,7 @@ void iButtonSceneEmulate::on_enter(iButtonApp* app) {
     popup_set_icon(popup, 10, 10, I_iButtonKey_49x44);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
+    app->get_key_worker()->start_emulate(app->get_key());
 }
 
 bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -70,13 +72,19 @@ bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         consumed = true;
-        app->notify_red_blink();
+        if(app->get_key_worker()->emulated()) {
+            app->notify_green_blink();
+        } else {
+            app->notify_red_blink();
+        }
     }
 
     return consumed;
 }
 
 void iButtonSceneEmulate::on_exit(iButtonApp* app) {
+    app->get_key_worker()->stop_emulate();
+
     Popup* popup = app->get_view_manager()->get_popup();
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);

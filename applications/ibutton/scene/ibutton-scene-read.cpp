@@ -13,6 +13,8 @@ void iButtonSceneRead::on_enter(iButtonApp* app) {
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
     app->get_key()->set_name("");
+
+    app->get_key_worker()->start_read();
 }
 
 bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -41,6 +43,8 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
 }
 
 void iButtonSceneRead::on_exit(iButtonApp* app) {
+    app->get_key_worker()->stop_read();
+
     Popup* popup = app->get_view_manager()->get_popup();
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
