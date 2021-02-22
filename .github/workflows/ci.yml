@@ -35,7 +35,7 @@ jobs:
         with:
           run: /syntax_check.sh
 
-      - name: Build ${TARGET_VERSION} bootloader in docker
+      - name: Build bootloader in docker
         uses: ./.github/actions/docker
         with:
           run: make -C bootloader TARGET=${TARGET_VERSION}
@@ -45,7 +45,7 @@ jobs:
         with:
           run: hex2dfu -i bootloader/.obj/${TARGET_VERSION}/bootloader.hex -o bootloader/.obj/${TARGET_VERSION}/bootloader.dfu
 
-      - name: Build ${TARGET_VERSION} firmware in docker
+      - name: Build firmware in docker
         uses: ./.github/actions/docker
         with:
           run: make -C firmware TARGET=${TARGET_VERSION} APP_RELEASE=1
@@ -81,7 +81,7 @@ jobs:
       - name: Add firmware.bin at full.bin
         run: cat firmware.bin >> full.bin
 
-      - name: Publish ${TARGET_VERSION} artifacts
+      - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
           name: artifacts_${TARGET_VERSION}
