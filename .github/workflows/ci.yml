@@ -6,6 +6,9 @@ on:
       - 'wiki/**'
       - 'wiki_static/**'
 
+env:
+  TARGET_VERSION: f5
+
 jobs:
   build:
     runs-on: [self-hosted]
@@ -32,39 +35,39 @@ jobs:
         with:
           run: /syntax_check.sh
 
-      - name: Build F5 bootloader in docker
+      - name: Build ${TARGET_VERSION} bootloader in docker
         uses: ./.github/actions/docker
         with:
-          run: make -C bootloader TARGET=f5
+          run: make -C bootloader TARGET=${TARGET_VERSION}
 
       - name: Generate dfu file for bootloader
         uses: ./.github/actions/docker
         with:
-          run: hex2dfu -i bootloader/.obj/f5/bootloader.hex -o bootloader/.obj/f5/bootloader.dfu
+          run: hex2dfu -i bootloader/.obj/${TARGET_VERSION}/bootloader.hex -o bootloader/.obj/${TARGET_VERSION}/bootloader.dfu
 
-      - name: Build F5 firmware in docker
+      - name: Build ${TARGET_VERSION} firmware in docker
         uses: ./.github/actions/docker
         with:
-          run: make -C firmware TARGET=f5 APP_RELEASE=1
+          run: make -C firmware TARGET=${TARGET_VERSION} APP_RELEASE=1
 
       - name: Generate dfu file for firmware
         uses: ./.github/actions/docker
         with:
-          run: hex2dfu -i firmware/.obj/f5/firmware.hex -o firmware/.obj/f5/firmware.dfu
+          run: hex2dfu -i firmware/.obj/${TARGET_VERSION}/firmware.hex -o firmware/.obj/${TARGET_VERSION}/firmware.dfu
 
       - name: Generate full hex file
         uses: ./.github/actions/docker
         with:
-          run: srec_cat bootloader/.obj/f5/bootloader.hex -Intel firmware/.obj/f5/firmware.hex -Intel -o full.hex -Intel
+          run: srec_cat bootloader/.obj/${TARGET_VERSION}/bootloader.hex -Intel firmware/.obj/${TARGET_VERSION}/firmware.hex -Intel -o full.hex -Intel
 
       - name: Move upload files
         uses: ./.github/actions/docker
         with:
           run: |
-            mv bootloader/.obj/f5/bootloader.dfu bootloader.dfu
-            mv bootloader/.obj/f5/bootloader.bin bootloader.bin
-            mv firmware/.obj/f5/firmware.dfu firmware.dfu
-            mv firmware/.obj/f5/firmware.bin firmware.bin
+            mv bootloader/.obj/${TARGET_VERSION}/bootloader.dfu bootloader.dfu
+            mv bootloader/.obj/${TARGET_VERSION}/bootloader.bin bootloader.bin
+            mv firmware/.obj/${TARGET_VERSION}/firmware.dfu firmware.dfu
+            mv firmware/.obj/${TARGET_VERSION}/firmware.bin firmware.bin
 
       - name: Generate full dfu file
         uses: ./.github/actions/docker
@@ -78,10 +81,10 @@ jobs:
       - name: Add firmware.bin at full.bin
         run: cat firmware.bin >> full.bin
 
-      - name: Publish F5 artifacts
+      - name: Publish ${TARGET_VERSION} artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: artifacts_f5
+          name: artifacts_${TARGET_VERSION}
           path: |
             bootloader.dfu
             bootloader.bin
