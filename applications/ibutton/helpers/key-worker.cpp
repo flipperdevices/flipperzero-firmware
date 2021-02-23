@@ -4,25 +4,8 @@
 
 extern COMP_HandleTypeDef hcomp1;
 
-KeyWorker::Error KeyWorker::read(iButtonKey* key) {
-    KeyWorker::Error result = KeyWorker::Error::EMPTY;
-
-    KeyReader::Error key_reader_result = key_reader.read(key);
-
-    switch(key_reader_result) {
-    case KeyReader::Error::EMPTY:
-        result = KeyWorker::Error::EMPTY;
-        break;
-    case KeyReader::Error::CRC_ERROR:
-        result = KeyWorker::Error::CRC_ERROR;
-        break;
-    case KeyReader::Error::NOT_ARE_KEY:
-        result = KeyWorker::Error::NOT_ARE_KEY;
-        break;
-    case KeyReader::Error::OK:
-        result = KeyWorker::Error::OK;
-        break;
-    }
+KeyReader::Error KeyWorker::read(iButtonKey* key) {
+    KeyReader::Error result = key_reader.read(key);
 
     return result;
 }

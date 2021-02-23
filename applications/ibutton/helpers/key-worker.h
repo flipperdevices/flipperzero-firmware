@@ -9,14 +9,7 @@
 
 class KeyWorker {
 public:
-    enum class Error : uint8_t {
-        EMPTY,
-        CRC_ERROR,
-        NOT_ARE_KEY,
-        OK,
-    };
-
-    KeyWorker::Error read(iButtonKey* key);
+    KeyReader::Error read(iButtonKey* key);
     void start_read();
     void stop_read();
 
