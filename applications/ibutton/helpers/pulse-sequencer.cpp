@@ -12,8 +12,6 @@ void PulseSequencer::set_periods(
 }
 
 void PulseSequencer::start() {
-    api_hal_power_insomnia_enter();
-
     callback_pointer = cbc::obtain_connector(this, &PulseSequencer::timer_elapsed_callback);
     api_interrupt_add(callback_pointer, InterruptTypeTimerUpdate, this);
 
@@ -31,7 +29,6 @@ void PulseSequencer::stop() {
 
     api_interrupt_remove(callback_pointer, InterruptTypeTimerUpdate);
     deinit_timer();
-    api_hal_power_insomnia_exit();
 }
 
 PulseSequencer::~PulseSequencer() {
