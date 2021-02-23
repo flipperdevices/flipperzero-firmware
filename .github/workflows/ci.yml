@@ -84,7 +84,7 @@ jobs:
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: artifacts_${TARGET_VERSION}
+          name: artifacts
           path: |
             bootloader.dfu
             bootloader.bin
