@@ -25,15 +25,15 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
         app->notify_red_blink();
 
         switch(app->get_key_worker()->read(app->get_key())) {
-        case KeyWorker::Error::EMPTY:
+        case KeyReader::Error::EMPTY:
             break;
-        case KeyWorker::Error::OK:
+        case KeyReader::Error::OK:
             app->switch_to_next_scene(iButtonApp::Scene::SceneReadSuccess);
             break;
-        case KeyWorker::Error::CRC_ERROR:
+        case KeyReader::Error::CRC_ERROR:
             app->switch_to_next_scene(iButtonApp::Scene::SceneReadCRCError);
             break;
-        case KeyWorker::Error::NOT_ARE_KEY:
+        case KeyReader::Error::NOT_ARE_KEY:
             app->switch_to_next_scene(iButtonApp::Scene::SceneReadNotKeyError);
             break;
         }
