@@ -29,6 +29,8 @@ private:
 
     // cyfral and metakom readers data
     void comparator_trigger_callback(void* hcomp, void* comp_ctx);
+    void (*comparator_callback_pointer)(void* hcomp, void* comp_ctx);
+
     void start_comaparator(void);
     void stop_comaparator(void);
     uint32_t last_dwt_value;

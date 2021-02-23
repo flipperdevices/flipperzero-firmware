@@ -52,7 +52,7 @@ KeyReader::KeyReader(OneWireMaster* _onewire_master) {
 }
 
 KeyReader::~KeyReader() {
-    stop_comaparator();
+    stop();
 }
 
 bool KeyReader::read_key(iButtonKeyType* key_type, uint8_t* data, uint8_t data_size) {
@@ -123,16 +123,16 @@ void KeyReader::start_comaparator(void) {
     gpio_init(&rfid_out_pin, GpioModeOutputOpenDrain);
     gpio_write(&rfid_out_pin, false);
 
-    auto cmp_cb = cbc::obtain_connector(this, &KeyReader::comparator_trigger_callback);
-    api_interrupt_add(cmp_cb, InterruptTypeComparatorTrigger, this);
+    comparator_callback_pointer =
+        cbc::obtain_connector(this, &KeyReader::comparator_trigger_callback);
+    api_interrupt_add(comparator_callback_pointer, InterruptTypeComparatorTrigger, this);
     last_dwt_value = DWT->CYCCNT;
     HAL_COMP_Start(&hcomp1);
 }
 
 void KeyReader::stop_comaparator(void) {
     HAL_COMP_Stop(&hcomp1);
-    auto cmp_cb = cbc::obtain_connector(this, &KeyReader::comparator_trigger_callback);
-    api_interrupt_remove(cmp_cb, InterruptTypeComparatorTrigger);
+    api_interrupt_remove(comparator_callback_pointer, InterruptTypeComparatorTrigger);
 }
 
 void KeyReader::comparator_trigger_callback(void* hcomp, void* comp_ctx) {
