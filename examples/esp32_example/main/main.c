@@ -32,7 +32,7 @@ void app_main(void)
         .gpio0_trigger_pin = GPIO_NUM_26,
     };
 
-    if ( loader_port_esp32_init(&config) != ESP_LOADER_SUCCESS) {
+    if (loader_port_esp32_init(&config) != ESP_LOADER_SUCCESS) {
         ESP_LOGE("example", "serial initialization failed.");
         return;
     }

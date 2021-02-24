@@ -85,7 +85,7 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
 
 #endif
 
-esp_loader_error_t connect_to_target(uint32_t higrer_baudrate)
+esp_loader_error_t connect_to_target(uint32_t higher_baudrate)
 {
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
@@ -96,8 +96,8 @@ esp_loader_error_t connect_to_target(uint32_t higrer_baudrate)
     }
     printf("Connected to target\n");
 
-    if (higrer_baudrate && esp_loader_get_target() != ESP8266_CHIP) {
-        err = esp_loader_change_baudrate(higrer_baudrate);
+    if (higher_baudrate && esp_loader_get_target() != ESP8266_CHIP) {
+        err = esp_loader_change_baudrate(higher_baudrate);
         if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC) {
             printf("ESP8266 does not support change baudrate command.");
             return err;
@@ -105,7 +105,7 @@ esp_loader_error_t connect_to_target(uint32_t higrer_baudrate)
             printf("Unable to change baud rate on target.");
             return err;
         } else {
-            err = loader_port_change_baudrate(higrer_baudrate);
+            err = loader_port_change_baudrate(higher_baudrate);
             if (err != ESP_LOADER_SUCCESS) {
                 printf("Unable to change baud rate.");
                 return err;

@@ -56,7 +56,7 @@ static esp_loader_error_t SLIP_receive_data(uint8_t *buff, uint32_t size)
     uint8_t ch;
 
     for (int i = 0; i < size; i++) {
-        RETURN_ON_ERROR( serial_read(&ch, 1)) ;
+        RETURN_ON_ERROR( serial_read(&ch, 1) );
 
         if (ch == 0xDB) {
             RETURN_ON_ERROR( serial_read(&ch, 1) );
