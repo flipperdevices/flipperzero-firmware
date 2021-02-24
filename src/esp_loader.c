@@ -78,7 +78,7 @@ static inline void md5_final(uint8_t digets[16]) { }
 
 static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
 {
-    uint32_t timeout = ERASE_REGION_TIMEOUT_PER_MB * (size_bytes / 1e6);
+    uint32_t timeout = time_per_mb * (size_bytes / 1e6);
     return MAX(timeout, DEFAULT_FLASH_TIMEOUT);
 }
 
