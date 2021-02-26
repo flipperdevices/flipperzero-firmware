@@ -1,6 +1,7 @@
 #include "pulse-sequencer.h"
 #include <furi.h>
 #include <callback-connector.h>
+#include <api-hal-resources.h>
 
 void PulseSequencer::set_periods(
     uint32_t* _periods,

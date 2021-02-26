@@ -109,16 +109,8 @@ iButtonKey* iButtonApp::get_key() {
 
 void iButtonApp::notify_init() {
     // TODO open record
-    const GpioPin* led_r_record = &led_gpio[0];
-    const GpioPin* led_g_record = &led_gpio[1];
     const GpioPin* vibro_record = &vibro_gpio;
-
     gpio_init(vibro_record, GpioModeOutputPushPull);
-    gpio_init(led_r_record, GpioModeOutputOpenDrain);
-    gpio_init(led_g_record, GpioModeOutputOpenDrain);
-
-    gpio_write(led_r_record, true);
-    gpio_write(led_g_record, true);
     gpio_write(vibro_record, false);
 }
 
@@ -135,19 +127,19 @@ void iButtonApp::notify_red_blink() {
 }
 
 void iButtonApp::notify_green_on() {
-    gpio_write(&led_gpio[1], false);
+    api_hal_light_set(LightGreen, 0xFF);
 }
 
 void iButtonApp::notify_green_off() {
-    gpio_write(&led_gpio[1], true);
+    api_hal_light_set(LightGreen, 0x00);
 }
 
 void iButtonApp::notify_red_on() {
-    gpio_write(&led_gpio[0], false);
+    api_hal_light_set(LightRed, 0xFF);
 }
 
 void iButtonApp::notify_red_off() {
-    gpio_write(&led_gpio[0], true);
+    api_hal_light_set(LightRed, 0x00);
 }
 
 void iButtonApp::notify_error() {
