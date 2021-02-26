@@ -15,20 +15,12 @@ void AppiButtonTest::run() {
 
     switch_to_mode(0);
 
-    // TODO open record
-    red_led_record = &led_gpio[0];
-    green_led_record = &led_gpio[1];
-
-    // configure pin
-    gpio_init(red_led_record, GpioModeOutputOpenDrain);
-    gpio_init(green_led_record, GpioModeOutputOpenDrain);
-
     api_hal_power_insomnia_enter();
     app_ready();
 
     AppiButtonTestEvent event;
     while(1) {
-        if(get_event(&event, 20)) {
+        if(get_event(&event, 1024 / 8)) {
             if(event.type == AppiButtonTestEvent::EventTypeKey) {
                 // press events
                 if(event.value.input.type == InputTypeShort &&
@@ -37,7 +29,7 @@ void AppiButtonTest::run() {
                     gui_remove_view_port(gui, view_port);
                     api_hal_power_insomnia_exit();
 
-                    osThreadExit();
+                    return;
                 }
 
                 if(event.value.input.type == InputTypeShort &&
@@ -112,15 +104,15 @@ void AppiButtonTest::render_cyfral_list(Canvas* canvas, AppiButtonTestState* sta
 }
 
 void AppiButtonTest::blink_red() {
-    gpio_write(red_led_record, 0);
+    api_hal_light_set(LightRed, 0xFF);
     delay(10);
-    gpio_write(red_led_record, 1);
+    api_hal_light_set(LightRed, 0x00);
 }
 
 void AppiButtonTest::blink_green() {
-    gpio_write(green_led_record, 0);
+    api_hal_light_set(LightGreen, 0xFF);
     delay(10);
-    gpio_write(green_led_record, 1);
+    api_hal_light_set(LightGreen, 0x00);
 }
 
 void AppiButtonTest::increase_mode() {
@@ -173,7 +165,6 @@ void AppiButtonTest::switch_to_mode(uint8_t mode_index) {
     mode[state.mode_index]->acquire();
 }
 
-// app enter function
 extern "C" int32_t app_ibutton_test(void* p) {
     AppiButtonTest* app = new AppiButtonTest();
     app->run();
