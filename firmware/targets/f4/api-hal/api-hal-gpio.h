@@ -72,8 +72,6 @@ bool hal_gpio_read_sd_detect(void);
 
 void enable_cc1101_irq();
 
-bool get_rfid_in_level();
-
 #ifdef __cplusplus
 }
 #endif
