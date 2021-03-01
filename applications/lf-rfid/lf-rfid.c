@@ -76,6 +76,18 @@ typedef struct {
     uint8_t* int_buffer;
 } ComparatorCtx;
 
+void init_comp_ctx(ComparatorCtx* ctx) {
+    ctx->prev_dwt = 0;
+    ctx->symbol = -1; // init state
+    ctx->center = false;
+    ctx->symbol_cnt = 0;
+    xStreamBufferReset(ctx->stream_buffer);
+
+    for(size_t i = 0; i < 64; i++) {
+        ctx->int_buffer[i] = 0;
+    }
+}
+
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
 
@@ -253,17 +265,11 @@ int32_t lf_rfid_workaround(void* p) {
 
     // internal buffer
     uint8_t int_bufer[64];
-    for(size_t i = 0; i < 64; i++) {
-        int_bufer[i] = 0;
-    }
 
-    comp_ctx.prev_dwt = 0;
-    comp_ctx.symbol = -1; // init state
-    comp_ctx.center = false;
-    comp_ctx.symbol_cnt = 0;
     comp_ctx.stream_buffer = xStreamBufferCreate(64, 64);
     comp_ctx.int_buffer = int_bufer;
     comp_ctx.event_queue = event_queue;
+    init_comp_ctx(&comp_ctx);
 
     if(comp_ctx.stream_buffer == NULL) {
         printf("cannot create stream buffer\r\n");
@@ -377,6 +383,7 @@ int32_t lf_rfid_workaround(void* p) {
             if(state->dirty) {
                 if(state->on) {
                     gpio_write(pull_pin_record, false);
+                    init_comp_ctx(&comp_ctx);
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
                 } else {
