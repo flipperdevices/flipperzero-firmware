@@ -23,6 +23,7 @@ typedef struct {
     uint8_t customer_id;
     uint32_t em_data;
     bool dirty;
+    bool dirty_freq;
 } State;
 
 static void render_callback(Canvas* canvas, void* ctx) {
@@ -89,7 +90,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     gpio_write(&debug_0, true);
 
     // TOOD F4 and F5 differ
-    bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
+    bool rx_value = get_rfid_in_level();
 
     if(dt > 384) {
         // change symbol 0->1 or 1->0
@@ -283,6 +284,7 @@ int32_t lf_rfid_workaround(void* p) {
     _state.customer_id = 00;
     _state.em_data = 4378151;
     _state.dirty = true;
+    _state.dirty_freq = true;
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -322,20 +324,7 @@ int32_t lf_rfid_workaround(void* p) {
                     osDelay(50);
                     api_hal_light_set(LightGreen, 0x00);
                 }
-
-                /*
-                gpio_write(led_record, false);
-                osDelay(10);
-                gpio_write(led_record, true);
-                */
             }
-
-            /*
-            gpio_write(led_record, false);
-            osDelay(10);
-            gpio_write(led_record, true);
-            */
-
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
@@ -345,6 +334,8 @@ int32_t lf_rfid_workaround(void* p) {
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyBack) {
                         hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
+                        api_interrupt_remove(
+                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
                         gpio_init(pull_pin_record, GpioModeInput);
                         gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
 
@@ -355,13 +346,13 @@ int32_t lf_rfid_workaround(void* p) {
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyUp) {
-                        state->dirty = true;
+                        state->dirty_freq = true;
                         state->freq_khz += 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyDown) {
-                        state->dirty = true;
+                        state->dirty_freq = true;
                         state->freq_khz -= 10;
                     }
 
@@ -384,23 +375,26 @@ int32_t lf_rfid_workaround(void* p) {
             }
 
             if(state->dirty) {
-                if(!state->on) {
-                    prepare_data(state->em_data, state->customer_id, raw_data);
-                }
-
                 if(state->on) {
                     gpio_write(pull_pin_record, false);
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
                 } else {
+                    prepare_data(state->em_data, state->customer_id, raw_data);
                     api_interrupt_remove(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger);
                 }
 
+                state->dirty_freq = true; // config new PWM next
+
+                state->dirty = false;
+            }
+
+            if(state->dirty_freq) {
                 hal_pwmn_set(
                     state->on ? 0.5 : 0.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
 
-                state->dirty = false;
+                state->dirty_freq = false;
             }
 
             if(!state->on) {
