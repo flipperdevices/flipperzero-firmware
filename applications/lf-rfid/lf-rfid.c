@@ -335,7 +335,7 @@ int32_t lf_rfid_workaround(void* p) {
                        event.value.input.key == InputKeyBack) {
                         hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
                         api_interrupt_remove(
-                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
+                            comparator_trigger_callback, InterruptTypeComparatorTrigger);
                         gpio_init(pull_pin_record, GpioModeInput);
                         gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
 
