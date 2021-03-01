@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <api-hal.h>
 #include <gui/gui.h>
 #include <stream_buffer.h>
 
@@ -70,14 +71,11 @@ typedef struct {
     int8_t symbol;
     bool center;
     size_t symbol_cnt;
-    GpioPin* led_record;
     StreamBufferHandle_t stream_buffer;
     uint8_t* int_buffer;
 } ComparatorCtx;
 
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
-    if((COMP_HandleTypeDef*)hcomp != &hcomp1) return;
-
     ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
 
     uint32_t dt = (DWT->CYCCNT - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
@@ -262,7 +260,6 @@ int32_t lf_rfid_workaround(void* p) {
     comp_ctx.symbol = -1; // init state
     comp_ctx.center = false;
     comp_ctx.symbol_cnt = 0;
-    comp_ctx.led_record = (GpioPin*)&led_gpio[1];
     comp_ctx.stream_buffer = xStreamBufferCreate(64, 64);
     comp_ctx.int_buffer = int_bufer;
     comp_ctx.event_queue = event_queue;
@@ -304,9 +301,6 @@ int32_t lf_rfid_workaround(void* p) {
 
     AppEvent event;
 
-    GpioPin* led_record = (GpioPin*)&led_gpio[1];
-    gpio_init(led_record, GpioModeOutputOpenDrain);
-
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
@@ -321,11 +315,12 @@ int32_t lf_rfid_workaround(void* p) {
                     printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
                     release_mutex(&state_mutex, state);
+
                     view_port_update(view_port);
 
-                    gpio_write(led_record, false);
-                    delay(50);
-                    gpio_write(led_record, true);
+                    api_hal_light_set(LightGreen, 0xFF);
+                    osDelay(50);
+                    api_hal_light_set(LightGreen, 0x00);
                 }
 
                 /*
