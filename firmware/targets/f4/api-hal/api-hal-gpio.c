@@ -55,5 +55,9 @@ void enable_cc1101_irq() {
 extern COMP_HandleTypeDef hcomp1;
 
 bool get_rfid_in_level() {
-    return (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
+    #ifdef INVERT_RFID_IN
+        return (HAL_COMP_GetOutputLevel(&hcomp1) == COMP_OUTPUT_LEVEL_LOW);
+    #else
+        return (HAL_COMP_GetOutputLevel(&hcomp1) == COMP_OUTPUT_LEVEL_HIGH);
+    #endif
 }
