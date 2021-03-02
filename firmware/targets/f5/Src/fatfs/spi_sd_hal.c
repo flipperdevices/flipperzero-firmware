@@ -77,6 +77,11 @@ void SD_IO_Init(void) {
     /* SD chip select high */
     SD_CS_HIGH();
 
+    api_hal_power_disable_external_3_3v();
+    delay_us(10000);
+    api_hal_power_enable_external_3_3v();
+    delay_us(10000);
+
     /* Send dummy byte 0xFF, 10 times with CS high */
     /* Rise CS and MOSI for 80 clocks cycles */
     for(counter = 0; counter <= 200; counter++) {
