@@ -6,15 +6,19 @@
 #include <stream_buffer.h>
 
 typedef struct {
-    bool preamble_buffer[8];
-    uint16_t symbol_counter;
-    bool is_preamble;
-    uint32_t prev_dwt;
-    uint8_t prev_dt;
-    uint8_t pulse_cnt;
+    uint32_t prev_t;
+    uint32_t dt;
+    uint8_t pulse_counter;
+    uint8_t last_pulse;
+    uint8_t preamble_buffer[8];
+    uint8_t symbol_counter;
+    bool is_packet;
+    uint8_t last_symbol;
+    uint8_t payload_counter;
+    // "payload": [0] * 44,
 } HidCtx;
 
 void hid_emulation(uint8_t* data, GpioPin* pin);
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data);
-void hid_fsm(HidCtx* ctx, uint32_t dwt);
+void hid_fsm(HidCtx* ctx, uint32_t t);
 void hid_init(HidCtx* ctx);

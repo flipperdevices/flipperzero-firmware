@@ -77,7 +77,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
 
     bool rx_value = get_rfid_in_level();
 
-    if(!rx_value && dt < 50 && dt > 20) {
+    if(!rx_value && dt < 80 && dt > 10) {
         hid_fsm(ctx->hid_ctx, DWT->CYCCNT);
     }
 
@@ -243,6 +243,7 @@ int32_t lf_rfid_workaround(void* p) {
                 }
             } else {
                 // event timeout
+                printf("dt: %ld\r\n", comp_ctx.hid_ctx->dt);
             }
 
             if(state->dirty) {

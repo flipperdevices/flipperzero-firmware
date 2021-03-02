@@ -88,89 +88,99 @@ uint8_t HID_PREAMBLE[] = {false, false, false, true, true, true, false, true};
 static GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
 // static GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
-void hid_push_bit(HidCtx* ctx, bool bit) {
-    if(!ctx->is_preamble) {
+void hid_push_symbol(HidCtx* ctx, bool symbol) {
+    if(!ctx->is_packet) {
         // finding preamble
 
-        ctx->preamble_buffer[ctx->symbol_counter % 8] = bit;
+        ctx->preamble_buffer[ctx->symbol_counter % 8] = symbol;
 
-        ctx->is_preamble = true;
+        ctx->is_packet = true;
+
         if(ctx->symbol_counter > 8) {
             for(uint8_t i = 0; i < 8; i++) {
                 if(ctx->preamble_buffer[(i + ctx->symbol_counter - 7) % 8] != HID_PREAMBLE[i]) {
-                    ctx->is_preamble = false;
+                    ctx->is_packet = false;
                     break;
                 }
             }
         } else {
-            ctx->is_preamble = false;
+            ctx->is_packet = false;
         }
 
-        if(ctx->is_preamble) {
-            gpio_write(&debug_0, true);
-            delay_us(5);
-            gpio_write(&debug_0, false);
-
+        if(ctx->is_packet) {
+            ctx->payload_counter = 0;
             ctx->symbol_counter = 0;
-        }
+            ctx->last_symbol = symbol;
+        }   
     } else {
+        // collecting bits
+        if(ctx->symbol_counter % 2 == 0) {
+            if(ctx->last_symbol == 0 && symbol == 1) {
+                // ctx->payload[ctx->payload_counter] = 0;
+            } else if(ctx->last_symbol == 1 && symbol == 0) {
+                // ctx->payload[ctx->payload_counter] = 1;
+            } else {
+                // manchester fails
+                ctx->is_packet = false;
+            }
+            
+            ctx->payload_counter++;
+        } else {
+            ctx->last_symbol = symbol;
+        }
+        
         if(ctx->symbol_counter == 88) {
-            ctx->symbol_counter = 0;
-            ctx->is_preamble = false;
+            // print "payload", "".join([str(x) for x in ctx.payload])
+            ctx->symbol_counter = 8;
+            ctx->is_packet = false;
         }
     }
 
     ctx->symbol_counter++;
+    if(ctx->symbol_counter > 250) {
+        ctx->symbol_counter = 0;
+    }
 }
 
-void hid_fsm(HidCtx* ctx, uint32_t dwt) {
-    uint32_t dt = (dwt - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
-    ctx->prev_dwt = dwt;
+/*
+gpio_write(&debug_0, true);
+delay_us(15);
+gpio_write(&debug_0, false);
+*/
 
-    if(abs(ctx->prev_dt - dt) > 5) {
-        gpio_write(&debug_0, true);
-        delay_us(3);
-        gpio_write(&debug_0, false);
-    }
-    ctx->prev_dt = dt;
+void hid_fsm(HidCtx* ctx, uint32_t t) {
+    ctx->dt = (t - ctx->prev_t) / (SystemCoreClock / 1000000.0f);
+    ctx->prev_t = t;
 
-    /*
-    if(hid_symbol_counter > 500) {
-        // try to move sampling frame
-        pulse_cnt = (pulse_cnt + 2) % 6;
-        hid_symbol_counter = 0;
-    } else {
-        pulse_cnt++;
-    }
-    
-    if(pulse_cnt == 6) {
-        if(dt < 72 && dt > 40) {
-            gpio_write(&debug_0, true);
-            delay_us(3);
-            gpio_write(&debug_0, false);
+    uint8_t pulse = ctx->dt > 72 ? 1 : 0;
 
-            hid_push_bit(false);
-        } else if(dt >= 72 && dt < 100) {
-            gpio_write(&debug_0, true);
-            delay_us(15);
-            gpio_write(&debug_0, false);
-
-            hid_push_bit(true);
+    if(ctx->last_pulse == pulse) {
+        if(ctx->pulse_counter == 1) {
+            // sample bit
+            hid_push_symbol(ctx, pulse);
         }
 
-        pulse_cnt = 0;
+        ctx->pulse_counter++;
+        if(ctx->pulse_counter == 6) {
+            ctx->pulse_counter = 0;
+        }
+    } else {
+        ctx->pulse_counter = 0;
     }
-    */
+    
+    ctx->last_pulse = pulse;
+    gpio_write(&debug_0, ctx->is_packet);
 }
 
 void hid_init(HidCtx* ctx) {
     // TOOD: init preamble_buffer?
-
+    ctx->dt = 0;
+    ctx->prev_t = 0;
+    ctx->pulse_counter = 0;
+    ctx->last_pulse = 0;
     ctx->symbol_counter = 0;
-    ctx->is_preamble = true;
-
-    ctx->prev_dwt = 0;
-    ctx->prev_dt = 0;
-
-    ctx->pulse_cnt = 0;
+    ctx->is_packet = false;
+    ctx->last_symbol = 0;
+    ctx->payload_counter = 0;
+    // ctx->payload": [0] * 44,
 }
