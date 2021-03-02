@@ -1,6 +1,9 @@
 #include <furi.h>
 #include <api-hal.h>
 
+#include "lf-rfid.h"
+#include "hid.h"
+
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
     for(size_t i = 0; i < 96; i++) {
         data[i] = 0;
@@ -78,4 +81,96 @@ void hid_emulation(uint8_t* data, GpioPin* pin) {
 
     gpio_write(pin, false);
     taskEXIT_CRITICAL();
+}
+
+uint8_t HID_PREAMBLE[] = {false, false, false, true, true, true, false, true};
+
+static GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
+// static GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
+
+void hid_push_bit(HidCtx* ctx, bool bit) {
+    if(!ctx->is_preamble) {
+        // finding preamble
+
+        ctx->preamble_buffer[ctx->symbol_counter % 8] = bit;
+
+        ctx->is_preamble = true;
+        if(ctx->symbol_counter > 8) {
+            for(uint8_t i = 0; i < 8; i++) {
+                if(ctx->preamble_buffer[(i + ctx->symbol_counter - 7) % 8] != HID_PREAMBLE[i]) {
+                    ctx->is_preamble = false;
+                    break;
+                }
+            }
+        } else {
+            ctx->is_preamble = false;
+        }
+
+        if(ctx->is_preamble) {
+            gpio_write(&debug_0, true);
+            delay_us(5);
+            gpio_write(&debug_0, false);
+
+            ctx->symbol_counter = 0;
+        }
+    } else {
+        if(ctx->symbol_counter == 88) {
+            ctx->symbol_counter = 0;
+            ctx->is_preamble = false;
+        }
+    }
+
+    ctx->symbol_counter++;
+}
+
+void hid_fsm(HidCtx* ctx, uint32_t dwt) {
+    uint32_t dt = (dwt - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
+    ctx->prev_dwt = dwt;
+
+    if(abs(ctx->prev_dt - dt) > 5) {
+        gpio_write(&debug_0, true);
+        delay_us(3);
+        gpio_write(&debug_0, false);
+    }
+    ctx->prev_dt = dt;
+
+    /*
+    if(hid_symbol_counter > 500) {
+        // try to move sampling frame
+        pulse_cnt = (pulse_cnt + 2) % 6;
+        hid_symbol_counter = 0;
+    } else {
+        pulse_cnt++;
+    }
+    
+    if(pulse_cnt == 6) {
+        if(dt < 72 && dt > 40) {
+            gpio_write(&debug_0, true);
+            delay_us(3);
+            gpio_write(&debug_0, false);
+
+            hid_push_bit(false);
+        } else if(dt >= 72 && dt < 100) {
+            gpio_write(&debug_0, true);
+            delay_us(15);
+            gpio_write(&debug_0, false);
+
+            hid_push_bit(true);
+        }
+
+        pulse_cnt = 0;
+    }
+    */
+}
+
+void hid_init(HidCtx* ctx) {
+    // TOOD: init preamble_buffer?
+
+    ctx->symbol_counter = 0;
+    ctx->is_preamble = true;
+
+    ctx->prev_dwt = 0;
+    ctx->prev_dt = 0;
+
+    ctx->pulse_cnt = 0;
 }

@@ -5,6 +5,7 @@
 
 #include "lf-rfid.h"
 #include "em4100.h"
+#include "hid.h"
 
 typedef enum { ModeReading, ModeEmulating } Mode;
 
@@ -57,105 +58,16 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 
 extern TIM_HandleTypeDef TIM_C;
 
-void hid_emulation(uint8_t* data, GpioPin* pin);
-void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data);
-
-GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
-GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
+static GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
+static GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
 extern COMP_HandleTypeDef hcomp1;
 
 typedef struct {
     Em4100Ctx* em4100_ctx;
+    HidCtx* hid_ctx;
     uint32_t prev_dwt;
 } ComparatorCtx;
-
-bool preamble_buffer[8];
-uint16_t hid_symbol_counter = 0;
-
-uint8_t HID_PREAMBLE[] = {false, false, false, true, true, true, false, true};
-
-bool is_preamble = true;
-
-void hid_push_bit(bool bit) {
-    if(!is_preamble) {
-        // finding preamble
-
-        preamble_buffer[hid_symbol_counter % 8] = bit;
-
-        is_preamble = true;
-        if(hid_symbol_counter > 8) {
-            for(uint8_t i = 0; i < 8; i++) {
-                if(preamble_buffer[(i + hid_symbol_counter - 7) % 8] != HID_PREAMBLE[i]) {
-                    is_preamble = false;
-                    break;
-                }
-            }
-        } else {
-            is_preamble = false;
-        }
-
-        if(is_preamble) {
-            gpio_write(&debug_0, true);
-            delay_us(5);
-            gpio_write(&debug_0, false);
-
-            hid_symbol_counter = 0;
-        }
-    } else {
-        if(hid_symbol_counter == 88) {
-            hid_symbol_counter = 0;
-            is_preamble = false;
-        }
-    }
-
-    hid_symbol_counter++;
-}
-
-uint32_t hid_prev_dwt = 0;
-uint8_t hid_prev_dt = 0;
-
-uint8_t pulse_cnt = 0;
-
-void hid_fsm(uint32_t dwt) {
-    uint32_t dt = (dwt - hid_prev_dwt) / (SystemCoreClock / 1000000.0f);
-    hid_prev_dwt = dwt;
-
-    if(abs(hid_prev_dt - dt) > 5) {
-        gpio_write(&debug_0, true);
-        delay_us(3);
-        gpio_write(&debug_0, false);
-    }
-    hid_prev_dt = dt;
-
-    /*
-    if(hid_symbol_counter > 500) {
-        // try to move sampling frame
-        pulse_cnt = (pulse_cnt + 2) % 6;
-        hid_symbol_counter = 0;
-    } else {
-        pulse_cnt++;
-    }
-    
-    if(pulse_cnt == 6) {
-        if(dt < 72 && dt > 40) {
-            gpio_write(&debug_0, true);
-            delay_us(3);
-            gpio_write(&debug_0, false);
-
-            hid_push_bit(false);
-        } else if(dt >= 72 && dt < 100) {
-            gpio_write(&debug_0, true);
-            delay_us(15);
-            gpio_write(&debug_0, false);
-
-            hid_push_bit(true);
-        }
-
-        pulse_cnt = 0;
-    }
-    */
-}
 
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
@@ -166,16 +78,13 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     bool rx_value = get_rfid_in_level();
 
     if(!rx_value && dt < 50 && dt > 20) {
-        hid_fsm(DWT->CYCCNT);
+        hid_fsm(ctx->hid_ctx, DWT->CYCCNT);
     }
 
     if(dt > 150) {
         em4100_fsm(ctx->em4100_ctx, rx_value, dt);
     }
 }
-
-bool em4100_even_check(uint8_t* buf);
-void em4100_extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data);
 
 int32_t lf_rfid_workaround(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
@@ -201,6 +110,7 @@ int32_t lf_rfid_workaround(void* p) {
     ComparatorCtx comp_ctx;
 
     Em4100Ctx em4100_ctx;
+    HidCtx hid_ctx;
 
     em4100_ctx.stream_buffer = xStreamBufferCreate(64, 64);
     if(em4100_ctx.stream_buffer == NULL) {
@@ -212,7 +122,10 @@ int32_t lf_rfid_workaround(void* p) {
     em4100_ctx.event_queue = event_queue;
     em4100_init(&em4100_ctx);
 
+    hid_init(&hid_ctx);
+
     comp_ctx.em4100_ctx = &em4100_ctx;
+    comp_ctx.hid_ctx = &hid_ctx;
     comp_ctx.prev_dwt = 0;
 
     // start comp
@@ -349,9 +262,8 @@ int32_t lf_rfid_workaround(void* p) {
                 if(state->mode == ModeReading) {
                     gpio_write(pull_pin_record, false);
 
-                    if(state->protocol == ProtocolEm4100) {
-                        em4100_init(comp_ctx.em4100_ctx);
-                    }
+                    em4100_init(comp_ctx.em4100_ctx);
+                    hid_init(comp_ctx.hid_ctx);
 
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
