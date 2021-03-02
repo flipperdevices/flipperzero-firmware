@@ -1,4 +1,6 @@
 #include "main.h"
+#include <api-hal-power.h>
+#include <api-hal-delay.h>
 
 #define SD_DUMMY_BYTE 0xFF
 #define SD_CS_LOW() HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_RESET)
