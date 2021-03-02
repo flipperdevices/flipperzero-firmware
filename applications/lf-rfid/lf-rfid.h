@@ -6,8 +6,11 @@
 
 typedef enum { EventTypeTick, EventTypeKey, EventTypeRx } EventType;
 
+typedef enum { ProtocolEm4100, ProtocolHid } Protocol;
+
 typedef struct {
     uint8_t dummy;
+    Protocol protocol;
 } RxEvent;
 
 typedef struct {

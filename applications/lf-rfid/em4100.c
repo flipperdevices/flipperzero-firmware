@@ -167,7 +167,6 @@ void em4100_init(Em4100Ctx* ctx) {
 }
 
 void em4100_fsm(Em4100Ctx* ctx, bool rx_value, uint32_t dt) {
-
     // wait message will be consumed
     if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
 
@@ -221,6 +220,7 @@ void em4100_fsm(Em4100Ctx* ctx, bool rx_value, uint32_t dt) {
                ctx->stream_buffer, ctx->int_buffer, 64, &xHigherPriorityTaskWoken) == 64) {
             AppEvent event;
             event.type = EventTypeRx;
+            event.value.rx.protocol = ProtocolEm4100;
             osMessageQueuePut(ctx->event_queue, &event, 0, 0);
         }
 

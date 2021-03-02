@@ -9,7 +9,6 @@ void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
         data[i] = 0;
     }
 
-
     uint64_t card_format = 1;
     uint8_t oem_code = 1;
 
@@ -71,9 +70,9 @@ void hid_emulation(uint8_t* data, GpioPin* pin) {
             uint8_t time = data[j] ? 40 : 32;
 
             for(uint8_t k = 0; k < 6; k++) {
-                delay_us(time + i/2);
+                delay_us(time + i / 2);
                 gpio_write(pin, true);
-                delay_us(time - i/2);
+                delay_us(time - i / 2);
                 gpio_write(pin, false);
             }
         }
@@ -89,6 +88,8 @@ static GpioPin debug_0 = {.pin = GPIO_PIN_2, .port = GPIOB};
 // static GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 
 void hid_push_symbol(HidCtx* ctx, bool symbol) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
     if(!ctx->is_packet) {
         // finding preamble
 
@@ -111,26 +112,34 @@ void hid_push_symbol(HidCtx* ctx, bool symbol) {
             ctx->payload_counter = 0;
             ctx->symbol_counter = 0;
             ctx->last_symbol = symbol;
-        }   
+        }
     } else {
         // collecting bits
         if(ctx->symbol_counter % 2 == 0) {
             if(ctx->last_symbol == 0 && symbol == 1) {
-                // ctx->payload[ctx->payload_counter] = 0;
+                ctx->payload[ctx->payload_counter] = 0;
             } else if(ctx->last_symbol == 1 && symbol == 0) {
-                // ctx->payload[ctx->payload_counter] = 1;
+                ctx->payload[ctx->payload_counter] = 1;
             } else {
                 // manchester fails
                 ctx->is_packet = false;
             }
-            
+
             ctx->payload_counter++;
         } else {
             ctx->last_symbol = symbol;
         }
-        
-        if(ctx->symbol_counter == 88) {
-            // print "payload", "".join([str(x) for x in ctx.payload])
+
+        if(ctx->symbol_counter == HID_SIZE * 2) {
+            if(xStreamBufferSendFromISR(
+                   ctx->stream_buffer, ctx->payload, HID_SIZE, &xHigherPriorityTaskWoken) ==
+               HID_SIZE) {
+                AppEvent event;
+                event.type = EventTypeRx;
+                event.value.rx.protocol = ProtocolHid;
+                osMessageQueuePut(ctx->event_queue, &event, 0, 0);
+            }
+
             ctx->symbol_counter = 8;
             ctx->is_packet = false;
         }
@@ -140,6 +149,8 @@ void hid_push_symbol(HidCtx* ctx, bool symbol) {
     if(ctx->symbol_counter > 250) {
         ctx->symbol_counter = 0;
     }
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /*
@@ -149,6 +160,9 @@ gpio_write(&debug_0, false);
 */
 
 void hid_fsm(HidCtx* ctx, uint32_t t) {
+    // wait message will be consumed
+    if(xStreamBufferBytesAvailable(ctx->stream_buffer) == HID_SIZE) return;
+
     ctx->dt = (t - ctx->prev_t) / (SystemCoreClock / 1000000.0f);
     ctx->prev_t = t;
 
@@ -167,13 +181,12 @@ void hid_fsm(HidCtx* ctx, uint32_t t) {
     } else {
         ctx->pulse_counter = 0;
     }
-    
+
     ctx->last_pulse = pulse;
     gpio_write(&debug_0, ctx->is_packet);
 }
 
 void hid_init(HidCtx* ctx) {
-    // TOOD: init preamble_buffer?
     ctx->dt = 0;
     ctx->prev_t = 0;
     ctx->pulse_counter = 0;
@@ -182,5 +195,5 @@ void hid_init(HidCtx* ctx) {
     ctx->is_packet = false;
     ctx->last_symbol = 0;
     ctx->payload_counter = 0;
-    // ctx->payload": [0] * 44,
+    xStreamBufferReset(ctx->stream_buffer);
 }

@@ -9,8 +9,6 @@
 
 typedef enum { ModeReading, ModeEmulating } Mode;
 
-typedef enum { ProtocolEm4100, ProtocolHid } Protocol;
-
 typedef struct {
     uint32_t freq_khz;
     Mode mode;
@@ -112,7 +110,9 @@ int32_t lf_rfid_workaround(void* p) {
     Em4100Ctx em4100_ctx;
     HidCtx hid_ctx;
 
-    em4100_ctx.stream_buffer = xStreamBufferCreate(64, 64);
+    StreamBufferHandle_t stream_buffer = xStreamBufferCreate(64, 64);
+
+    em4100_ctx.stream_buffer = stream_buffer;
     if(em4100_ctx.stream_buffer == NULL) {
         printf("cannot create stream buffer\r\n");
         return 255;
@@ -122,6 +122,9 @@ int32_t lf_rfid_workaround(void* p) {
     em4100_ctx.event_queue = event_queue;
     em4100_init(&em4100_ctx);
 
+    hid_ctx.event_queue = event_queue;
+    hid_ctx.stream_buffer = stream_buffer;
+    hid_ctx.payload = int_bufer;
     hid_init(&hid_ctx);
 
     comp_ctx.em4100_ctx = &em4100_ctx;
@@ -166,14 +169,44 @@ int32_t lf_rfid_workaround(void* p) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
         if(event.type == EventTypeRx && event_status == osOK) {
-            size_t received = xStreamBufferReceive(comp_ctx.em4100_ctx->stream_buffer, raw_data, 64, 0);
-            printf("received: %d\r\n", received);
-            if(received == 64) {
-                if(em4100_even_check(&raw_data[9])) {
-                    State* state = (State*)acquire_mutex_block(&state_mutex);
-                    em4100_extract_data(&raw_data[9], &state->customer_id, &state->em_data);
+            if(event.value.rx.protocol == ProtocolEm4100) {
+                size_t received =
+                    xStreamBufferReceive(comp_ctx.em4100_ctx->stream_buffer, raw_data, 64, 0);
+                printf("EM41000 received: %d\r\n", received);
+                if(received == 64) {
+                    if(em4100_even_check(&raw_data[9])) {
+                        State* state = (State*)acquire_mutex_block(&state_mutex);
 
-                    printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+                        state->protocol = ProtocolEm4100;
+
+                        em4100_extract_data(&raw_data[9], &state->customer_id, &state->em_data);
+
+                        printf(
+                            "customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+
+                        release_mutex(&state_mutex, state);
+
+                        view_port_update(view_port);
+
+                        api_hal_light_set(LightGreen, 0xFF);
+                        osDelay(50);
+                        api_hal_light_set(LightGreen, 0x00);
+                    }
+                }
+            }
+
+            if(event.value.rx.protocol == ProtocolHid) {
+                size_t received = xStreamBufferReceive(
+                    comp_ctx.em4100_ctx->stream_buffer, raw_data, HID_SIZE, 0);
+                printf("HID received: %d\r\n", received);
+                if(received == HID_SIZE) {
+                    /*if(em4100_even_check(&raw_data[9])) {*/
+                    State* state = (State*)acquire_mutex_block(&state_mutex);
+
+                    state->protocol = ProtocolHid;
+                    /*em4100_extract_data(&raw_data[9], &state->customer_id, &state->em_data);*/
+
+                    // printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
                     release_mutex(&state_mutex, state);
 
@@ -191,7 +224,7 @@ int32_t lf_rfid_workaround(void* p) {
                 if(event.type == EventTypeKey) {
                     // press events
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyBack) {
+                    event.value.input.key == InputKeyBack) {
                         hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
                         api_interrupt_remove(
                             comparator_trigger_callback, InterruptTypeComparatorTrigger);
@@ -204,19 +237,19 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyUp) {
+                    event.value.input.key == InputKeyUp) {
                         state->dirty_freq = true;
                         state->freq_khz += 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyDown) {
+                    event.value.input.key == InputKeyDown) {
                         state->dirty_freq = true;
                         state->freq_khz -= 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyLeft) {
+                    event.value.input.key == InputKeyLeft) {
                         if(state->protocol == ProtocolEm4100) {
                             state->protocol = ProtocolHid;
                             state->dirty = true;
@@ -224,7 +257,7 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyRight) {
+                    event.value.input.key == InputKeyRight) {
                         if(state->protocol == ProtocolHid) {
                             state->protocol = ProtocolEm4100;
                             state->dirty = true;
@@ -232,7 +265,7 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                       event.value.input.key == InputKeyOk) {
+                    event.value.input.key == InputKeyOk) {
                         state->dirty = true;
                         if(state->mode == ModeEmulating) {
                             state->mode = ModeReading;
@@ -243,13 +276,11 @@ int32_t lf_rfid_workaround(void* p) {
                 }
             } else {
                 // event timeout
-                printf("dt: %ld\r\n", comp_ctx.hid_ctx->dt);
             }
 
             if(state->dirty) {
                 if(state->mode == ModeEmulating) {
-                    api_interrupt_remove(
-                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
+                    api_interrupt_remove(comparator_trigger_callback, InterruptTypeComparatorTrigger);
 
                     if(state->protocol == ProtocolEm4100) {
                         em4100_prepare_data(state->em_data, state->customer_id, raw_data);
@@ -301,6 +332,6 @@ int32_t lf_rfid_workaround(void* p) {
             view_port_update(view_port);
         }
     }
-
+    
     return 0;
 }

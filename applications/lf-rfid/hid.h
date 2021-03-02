@@ -15,8 +15,12 @@ typedef struct {
     bool is_packet;
     uint8_t last_symbol;
     uint8_t payload_counter;
-    // "payload": [0] * 44,
+    uint8_t* payload;
+    StreamBufferHandle_t stream_buffer;
+    osMessageQueueId_t event_queue;
 } HidCtx;
+
+#define HID_SIZE 44
 
 void hid_emulation(uint8_t* data, GpioPin* pin);
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data);
