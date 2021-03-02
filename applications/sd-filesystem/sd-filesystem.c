@@ -4,6 +4,7 @@
 #include "menu/menu.h"
 #include "menu/menu_item.h"
 #include "cli/cli.h"
+#include "api-hal-sd.h"
 
 FS_Api* fs_api_alloc() {
     FS_Api* fs_api = furi_alloc(sizeof(FS_Api));
@@ -517,9 +518,12 @@ int32_t sd_filesystem(void* p) {
     // sd card cycle
     bool sd_was_present = true;
 
+    // init detect pins
+    hal_sd_detect_init();
+
     while(true) {
         if(sd_was_present) {
-            if(hal_gpio_read_sd_detect()) {
+            if(hal_sd_detect()) {
                 printf("[sd_filesystem] card detected\r\n");
 
                 uint8_t bsp_result = BSP_SD_Init();
@@ -542,7 +546,7 @@ int32_t sd_filesystem(void* p) {
                 sd_was_present = false;
             }
         } else {
-            if(!hal_gpio_read_sd_detect()) {
+            if(!hal_sd_detect()) {
                 printf("[sd_filesystem] card removed\r\n");
 
                 view_port_enabled_set(sd_app->icon.view_port, false);
