@@ -1,5 +1,9 @@
 #include <furi.h>
 #include <api-hal.h>
+#include <stream_buffer.h>
+
+#include "lf-rfid.h"
+#include "em4100.h"
 
 void em4100_prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data) {
     uint8_t value[10];
@@ -148,4 +152,82 @@ void em4100_extract_data(uint8_t* buf, uint8_t* customer, uint32_t* em_data) {
     printf("\r\n");
 
     *em_data = data;
+}
+
+void em4100_init(Em4100Ctx* ctx) {
+    ctx->prev_dwt = 0;
+    ctx->symbol = -1; // init state
+    ctx->center = false;
+    ctx->symbol_cnt = 0;
+    xStreamBufferReset(ctx->stream_buffer);
+
+    for(size_t i = 0; i < 64; i++) {
+        ctx->int_buffer[i] = 0;
+    }
+}
+
+void em4100_fsm(Em4100Ctx* ctx, bool rx_value, uint32_t dt) {
+
+    // wait message will be consumed
+    if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
+
+    // gpio_write(&debug_0, true);
+
+    if(dt > 384) {
+        // change symbol 0->1 or 1->0
+        ctx->symbol = rx_value;
+        ctx->center = true;
+    } else {
+        // same symbol as prev or center
+        ctx->center = !ctx->center;
+    }
+
+    /*
+    gpio_write(&debug_1, true);
+    delay_us(center ? 10 : 30);
+    gpio_write(&debug_1, false);
+    */
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if(ctx->center && ctx->symbol != -1) {
+        /*
+        gpio_write(&debug_0, true);
+        delay_us(symbol ? 10 : 30);
+        gpio_write(&debug_0, false);
+        */
+
+        ctx->int_buffer[ctx->symbol_cnt] = ctx->symbol;
+        ctx->symbol_cnt++;
+    }
+
+    // check preamble
+    if(ctx->symbol_cnt <= 9 && ctx->symbol == 0) {
+        ctx->symbol_cnt = 0;
+        ctx->symbol = -1;
+    }
+
+    // check stop bit
+    if(ctx->symbol_cnt == 64 && ctx->symbol == 1) {
+        ctx->symbol_cnt = 0;
+        ctx->symbol = -1;
+    }
+
+    // TODO
+    // write only 9..64 symbols directly to streambuffer
+
+    if(ctx->symbol_cnt == 64) {
+        if(xStreamBufferSendFromISR(
+               ctx->stream_buffer, ctx->int_buffer, 64, &xHigherPriorityTaskWoken) == 64) {
+            AppEvent event;
+            event.type = EventTypeRx;
+            osMessageQueuePut(ctx->event_queue, &event, 0, 0);
+        }
+
+        ctx->symbol_cnt = 0;
+    }
+
+    // gpio_write(&debug_0, false);
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }

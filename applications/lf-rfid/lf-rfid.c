@@ -3,19 +3,8 @@
 #include <gui/gui.h>
 #include <stream_buffer.h>
 
-typedef enum { EventTypeTick, EventTypeKey, EventTypeRx } EventType;
-
-typedef struct {
-    uint8_t dummy;
-} RxEvent;
-
-typedef struct {
-    union {
-        InputEvent input;
-        RxEvent rx;
-    } value;
-    EventType type;
-} AppEvent;
+#include "lf-rfid.h"
+#include "em4100.h"
 
 typedef enum { ModeReading, ModeEmulating } Mode;
 
@@ -67,8 +56,6 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 }
 
 extern TIM_HandleTypeDef TIM_C;
-void em4100_emulation(uint8_t* data, GpioPin* pin);
-void em4100_prepare_data(uint32_t ID, uint32_t VENDOR, uint8_t* data);
 
 void hid_emulation(uint8_t* data, GpioPin* pin);
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data);
@@ -79,13 +66,8 @@ GpioPin debug_1 = {.pin = GPIO_PIN_3, .port = GPIOC};
 extern COMP_HandleTypeDef hcomp1;
 
 typedef struct {
-    osMessageQueueId_t event_queue;
+    Em4100Ctx* em4100_ctx;
     uint32_t prev_dwt;
-    int8_t symbol;
-    bool center;
-    size_t symbol_cnt;
-    StreamBufferHandle_t stream_buffer;
-    uint8_t* int_buffer;
 } ComparatorCtx;
 
 bool preamble_buffer[8];
@@ -175,19 +157,6 @@ void hid_fsm(uint32_t dwt) {
     */
 }
 
-
-void init_comp_ctx(ComparatorCtx* ctx) {
-    ctx->prev_dwt = 0;
-    ctx->symbol = -1; // init state
-    ctx->center = false;
-    ctx->symbol_cnt = 0;
-    xStreamBufferReset(ctx->stream_buffer);
-
-    for(size_t i = 0; i < 64; i++) {
-        ctx->int_buffer[i] = 0;
-    }
-}
-
 void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
 
@@ -200,70 +169,9 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
         hid_fsm(DWT->CYCCNT);
     }
 
-    if(dt < 150) return; // supress noise
-
-    // wait message will be consumed
-    if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
-
-    gpio_write(&debug_0, true);
-
-    if(dt > 384) {
-        // change symbol 0->1 or 1->0
-        ctx->symbol = rx_value;
-        ctx->center = true;
-    } else {
-        // same symbol as prev or center
-        ctx->center = !ctx->center;
+    if(dt > 150) {
+        em4100_fsm(ctx->em4100_ctx, rx_value, dt);
     }
-
-    /*
-    gpio_write(&debug_1, true);
-    delay_us(center ? 10 : 30);
-    gpio_write(&debug_1, false);
-    */
-
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    if(ctx->center && ctx->symbol != -1) {
-        /*
-        gpio_write(&debug_0, true);
-        delay_us(symbol ? 10 : 30);
-        gpio_write(&debug_0, false);
-        */
-
-        ctx->int_buffer[ctx->symbol_cnt] = ctx->symbol;
-        ctx->symbol_cnt++;
-    }
-
-    // check preamble
-    if(ctx->symbol_cnt <= 9 && ctx->symbol == 0) {
-        ctx->symbol_cnt = 0;
-        ctx->symbol = -1;
-    }
-
-    // check stop bit
-    if(ctx->symbol_cnt == 64 && ctx->symbol == 1) {
-        ctx->symbol_cnt = 0;
-        ctx->symbol = -1;
-    }
-
-    // TODO
-    // write only 9..64 symbols directly to streambuffer
-
-    if(ctx->symbol_cnt == 64) {
-        if(xStreamBufferSendFromISR(
-               ctx->stream_buffer, ctx->int_buffer, 64, &xHigherPriorityTaskWoken) == 64) {
-            AppEvent event;
-            event.type = EventTypeRx;
-            osMessageQueuePut(ctx->event_queue, &event, 0, 0);
-        }
-
-        ctx->symbol_cnt = 0;
-    }
-
-    // gpio_write(&debug_0, false);
-
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 bool em4100_even_check(uint8_t* buf);
@@ -286,21 +194,26 @@ int32_t lf_rfid_workaround(void* p) {
     gpio_init((GpioPin*)&ibutton_gpio, GpioModeOutputOpenDrain);
     gpio_write((GpioPin*)&ibutton_gpio, false);
 
-    // init ctx
-    ComparatorCtx comp_ctx;
-
     // internal buffer
     uint8_t int_bufer[64];
 
-    comp_ctx.stream_buffer = xStreamBufferCreate(64, 64);
-    comp_ctx.int_buffer = int_bufer;
-    comp_ctx.event_queue = event_queue;
-    init_comp_ctx(&comp_ctx);
+    // init ctx
+    ComparatorCtx comp_ctx;
 
-    if(comp_ctx.stream_buffer == NULL) {
+    Em4100Ctx em4100_ctx;
+
+    em4100_ctx.stream_buffer = xStreamBufferCreate(64, 64);
+    if(em4100_ctx.stream_buffer == NULL) {
         printf("cannot create stream buffer\r\n");
         return 255;
     }
+
+    em4100_ctx.int_buffer = int_bufer;
+    em4100_ctx.event_queue = event_queue;
+    em4100_init(&em4100_ctx);
+
+    comp_ctx.em4100_ctx = &em4100_ctx;
+    comp_ctx.prev_dwt = 0;
 
     // start comp
     HAL_COMP_Start(&hcomp1);
@@ -340,7 +253,7 @@ int32_t lf_rfid_workaround(void* p) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
         if(event.type == EventTypeRx && event_status == osOK) {
-            size_t received = xStreamBufferReceive(comp_ctx.stream_buffer, raw_data, 64, 0);
+            size_t received = xStreamBufferReceive(comp_ctx.em4100_ctx->stream_buffer, raw_data, 64, 0);
             printf("received: %d\r\n", received);
             if(received == 64) {
                 if(em4100_even_check(&raw_data[9])) {
@@ -435,7 +348,11 @@ int32_t lf_rfid_workaround(void* p) {
 
                 if(state->mode == ModeReading) {
                     gpio_write(pull_pin_record, false);
-                    init_comp_ctx(&comp_ctx);
+
+                    if(state->protocol == ProtocolEm4100) {
+                        em4100_init(comp_ctx.em4100_ctx);
+                    }
+
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
                     hal_pwmn_set(0.5, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
