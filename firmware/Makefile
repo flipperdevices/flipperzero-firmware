@@ -8,10 +8,10 @@ include			$(PROJECT_ROOT)/make/git.mk
 include 		$(PROJECT_ROOT)/applications/applications.mk
 include			$(PROJECT_ROOT)/lib/lib.mk
 
-CFLAGS += -Werror
+CFLAGS += -Werror -Wno-address-of-packed-member
 CPPFLAGS += -Werror
 
-TARGET			?= f4
+TARGET			?= f5
 
 TARGET_DIR		= targets/$(TARGET)
 

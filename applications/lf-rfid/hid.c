@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <api-hal.h>
 
 void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
     for(size_t i = 0; i < 96; i++) {

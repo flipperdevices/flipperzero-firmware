@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <api-hal.h>
 #include <gui/gui.h>
 #include <stream_buffer.h>
 
@@ -27,6 +28,7 @@ typedef struct {
     uint8_t customer_id;
     uint32_t em_data;
     bool dirty;
+    bool dirty_freq;
 } State;
 
 static void render_callback(Canvas* canvas, void* ctx) {
@@ -82,11 +84,9 @@ typedef struct {
     int8_t symbol;
     bool center;
     size_t symbol_cnt;
-    GpioPin* led_record;
     StreamBufferHandle_t stream_buffer;
     uint8_t* int_buffer;
 } ComparatorCtx;
-
 
 bool preamble_buffer[8];
 uint16_t hid_symbol_counter = 0;
@@ -175,16 +175,26 @@ void hid_fsm(uint32_t dwt) {
     */
 }
 
-void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
-    if((COMP_HandleTypeDef*)hcomp != &hcomp1) return;
 
+void init_comp_ctx(ComparatorCtx* ctx) {
+    ctx->prev_dwt = 0;
+    ctx->symbol = -1; // init state
+    ctx->center = false;
+    ctx->symbol_cnt = 0;
+    xStreamBufferReset(ctx->stream_buffer);
+
+    for(size_t i = 0; i < 64; i++) {
+        ctx->int_buffer[i] = 0;
+    }
+}
+
+void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     ComparatorCtx* ctx = (ComparatorCtx*)comp_ctx;
 
     uint32_t dt = (DWT->CYCCNT - ctx->prev_dwt) / (SystemCoreClock / 1000000.0f);
     ctx->prev_dwt = DWT->CYCCNT;
 
-    // TOOD F4 and F5 differ
-    bool rx_value = (HAL_COMP_GetOutputLevel(hcomp) == COMP_OUTPUT_LEVEL_LOW);
+    bool rx_value = get_rfid_in_level();
 
     if(!rx_value && dt < 50 && dt > 20) {
         hid_fsm(DWT->CYCCNT);
@@ -195,7 +205,7 @@ void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     // wait message will be consumed
     if(xStreamBufferBytesAvailable(ctx->stream_buffer) == 64) return;
 
-    // gpio_write(&debug_0, true);
+    gpio_write(&debug_0, true);
 
     if(dt > 384) {
         // change symbol 0->1 or 1->0
@@ -281,18 +291,11 @@ int32_t lf_rfid_workaround(void* p) {
 
     // internal buffer
     uint8_t int_bufer[64];
-    for(size_t i = 0; i < 64; i++) {
-        int_bufer[i] = 0;
-    }
 
-    comp_ctx.prev_dwt = 0;
-    comp_ctx.symbol = -1; // init state
-    comp_ctx.center = false;
-    comp_ctx.symbol_cnt = 0;
-    comp_ctx.led_record = (GpioPin*)&led_gpio[1];
     comp_ctx.stream_buffer = xStreamBufferCreate(64, 64);
     comp_ctx.int_buffer = int_bufer;
     comp_ctx.event_queue = event_queue;
+    init_comp_ctx(&comp_ctx);
 
     if(comp_ctx.stream_buffer == NULL) {
         printf("cannot create stream buffer\r\n");
@@ -314,6 +317,7 @@ int32_t lf_rfid_workaround(void* p) {
     _state.em_data = 4378151;
     _state.dirty = true;
     _state.protocol = ProtocolEm4100;
+    _state.dirty_freq = true;
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
@@ -332,9 +336,6 @@ int32_t lf_rfid_workaround(void* p) {
 
     AppEvent event;
 
-    GpioPin* led_record = (GpioPin*)&led_gpio[1];
-    gpio_init(led_record, GpioModeOutputOpenDrain);
-
     while(1) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 1024 / 8);
 
@@ -349,26 +350,14 @@ int32_t lf_rfid_workaround(void* p) {
                     printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
 
                     release_mutex(&state_mutex, state);
+
                     view_port_update(view_port);
 
-                    gpio_write(led_record, false);
-                    delay(50);
-                    gpio_write(led_record, true);
+                    api_hal_light_set(LightGreen, 0xFF);
+                    osDelay(50);
+                    api_hal_light_set(LightGreen, 0x00);
                 }
-
-                /*
-                gpio_write(led_record, false);
-                osDelay(10);
-                gpio_write(led_record, true);
-                */
             }
-
-            /*
-            gpio_write(led_record, false);
-            osDelay(10);
-            gpio_write(led_record, true);
-            */
-
         } else {
             State* state = (State*)acquire_mutex_block(&state_mutex);
 
@@ -378,6 +367,8 @@ int32_t lf_rfid_workaround(void* p) {
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyBack) {
                         hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
+                        api_interrupt_remove(
+                            comparator_trigger_callback, InterruptTypeComparatorTrigger);
                         gpio_init(pull_pin_record, GpioModeInput);
                         gpio_init((GpioPin*)&ibutton_gpio, GpioModeInput);
 
@@ -388,13 +379,13 @@ int32_t lf_rfid_workaround(void* p) {
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyUp) {
-                        state->dirty = true;
+                        state->dirty_freq = true;
                         state->freq_khz += 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
                        event.value.input.key == InputKeyDown) {
-                        state->dirty = true;
+                        state->dirty_freq = true;
                         state->freq_khz -= 10;
                     }
 
@@ -432,7 +423,6 @@ int32_t lf_rfid_workaround(void* p) {
                 if(state->mode == ModeEmulating) {
                     api_interrupt_remove(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger);
-                    hal_pwmn_set(1.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
 
                     if(state->protocol == ProtocolEm4100) {
                         em4100_prepare_data(state->em_data, state->customer_id, raw_data);
@@ -445,12 +435,26 @@ int32_t lf_rfid_workaround(void* p) {
 
                 if(state->mode == ModeReading) {
                     gpio_write(pull_pin_record, false);
+                    init_comp_ctx(&comp_ctx);
                     api_interrupt_add(
                         comparator_trigger_callback, InterruptTypeComparatorTrigger, &comp_ctx);
                     hal_pwmn_set(0.5, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
                 }
 
+                state->dirty_freq = true; // config new PWM next
+
                 state->dirty = false;
+            }
+
+            if(state->dirty_freq) {
+                if(state->mode == ModeReading) {
+                    hal_pwmn_set(0.5, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
+                }
+                if(state->mode == ModeEmulating) {
+                    hal_pwmn_set(1.0, (float)(state->freq_khz * 1000), &LFRFID_TIM, LFRFID_CH);
+                }
+
+                state->dirty_freq = false;
             }
 
             if(state->mode == ModeEmulating) {
