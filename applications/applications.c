@@ -33,6 +33,7 @@ int32_t floopper_bloopper(void* p);
 int32_t sd_filesystem(void* p);
 
 int32_t gui_test(void* p);
+int32_t keypad_test(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
@@ -148,6 +149,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_GUI_TEST
     {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_KEYPAD_TEST
+    {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
+#endif
 };
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
@@ -220,6 +225,11 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef BUILD_GUI_TEST
     {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
 #endif
+
+#ifdef BUILD_KEYPAD_TEST
+    {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
+#endif
+
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
