@@ -286,6 +286,7 @@ BUILD_SUBGHZ ?= 0
 ifeq ($(BUILD_SUBGHZ), 1)
 CFLAGS		+= -DBUILD_SUBGHZ
 CPP_SOURCES	+= $(wildcard $(APP_DIR)/subghz/*.cpp)
+CPP_SOURCES	+= $(wildcard $(APP_DIR)/subghz/*/*.cpp)
 endif
 
 APP_SDNFC ?= 0

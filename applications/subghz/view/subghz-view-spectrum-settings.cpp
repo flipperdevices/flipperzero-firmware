@@ -1,0 +1,1 @@
+#include "subghz-view-spectrum-settings.h"
