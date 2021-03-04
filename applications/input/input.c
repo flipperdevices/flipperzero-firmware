@@ -21,8 +21,7 @@ void input_isr(void* _pin, void* _ctx) {
 
 void input_cli_send(string_t args, void* context) {
     InputEvent event;
-    // Normalize input
-    string_strim(args);
+
     // Get first word as key name
     string_t key_name;
     string_init(key_name);
@@ -60,13 +59,15 @@ void input_cli_send(string_t args, void* context) {
         event.type = InputTypePress;
     } else if(!string_cmp(args, "release")) {
         event.type = InputTypeRelease;
+    } else if(!string_cmp(args, "short")) {
+        event.type = InputTypeShort;
+    } else if(!string_cmp(args, "long")) {
+        event.type = InputTypeLong;
     } else {
         printf("Wrong argument");
         return;
     }
     // Publish input event
-    notify_pubsub(&input->event_pubsub, &event);
-    event.type = InputTypeShort;
     notify_pubsub(&input->event_pubsub, &event);
 }
 
