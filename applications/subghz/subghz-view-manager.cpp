@@ -41,8 +41,7 @@ void SubghzAppViewManager::switch_to(ViewType type) {
     view_dispatcher_switch_to_view(view_dispatcher, static_cast<uint32_t>(type));
 }
 
-Submenu* SubghzAppViewManager::get_submenu() 
-{
+Submenu* SubghzAppViewManager::get_submenu() {
     return submenu;
 }
 
