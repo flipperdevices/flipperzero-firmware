@@ -4,6 +4,7 @@
 #include "subghz-view-manager.h"
 
 #include "scene/subghz-scene-start.h"
+#include "scene/subghz-scene-spectrum-settings.h"
 
 class SubghzApp {
 public:
@@ -15,6 +16,7 @@ public:
     enum class Scene : uint8_t {
         SceneExit,
         SceneStart,
+        SceneSpectrumSettings,
     };
 
     SubghzAppViewManager* get_view_manager();
@@ -30,5 +32,6 @@ private:
 
     std::map<Scene, SubghzScene*> scenes = {
         {Scene::SceneStart, new SubghzSceneStart()},
+        {Scene::SceneSpectrumSettings, new SubghzSceneSpectrumSettings()},
     };
 };

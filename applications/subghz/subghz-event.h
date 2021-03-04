@@ -8,6 +8,7 @@ public:
         Tick,
         Back,
         MenuSelected,
+        NextScene,
     };
 
     // payload

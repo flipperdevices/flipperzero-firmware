@@ -32,7 +32,7 @@ bool SubghzSceneStart::on_event(SubghzApp* app, SubghzEvent* event) {
     if(event->type == SubghzEvent::Type::MenuSelected) {
         switch(event->payload.menu_index) {
         case SubmenuIndexSpectrumAnalyzer:
-            //app->switch_to_next_scene(SubghzApp::Scene::SceneRead);
+            app->switch_to_next_scene(SubghzApp::Scene::SceneSpectrumSettings);
             break;
         case SubmenuIndexFrequencyScanner:
             break;
@@ -50,8 +50,8 @@ bool SubghzSceneStart::on_event(SubghzApp* app, SubghzEvent* event) {
 }
 
 void SubghzSceneStart::on_exit(SubghzApp* app) {
-    SubghzAppViewManager* view = app->get_view_manager();
-    Submenu* submenu = view->get_submenu();
+    SubghzAppViewManager* view_manager = app->get_view_manager();
+    Submenu* submenu = view_manager->get_submenu();
 
     submenu_clean(submenu);
 }
