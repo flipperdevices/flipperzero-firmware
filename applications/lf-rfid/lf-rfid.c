@@ -229,7 +229,7 @@ int32_t lf_rfid_workaround(void* p) {
                 if(event.type == EventTypeKey) {
                     // press events
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyBack) {
+                       event.value.input.key == InputKeyBack) {
                         hal_pwmn_stop(&TIM_C, TIM_CHANNEL_1); // TODO: move to furiac_onexit
                         api_interrupt_remove(
                             comparator_trigger_callback, InterruptTypeComparatorTrigger);
@@ -242,19 +242,19 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyUp) {
+                       event.value.input.key == InputKeyUp) {
                         state->dirty_freq = true;
                         state->freq_khz += 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyDown) {
+                       event.value.input.key == InputKeyDown) {
                         state->dirty_freq = true;
                         state->freq_khz -= 10;
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyLeft) {
+                       event.value.input.key == InputKeyLeft) {
                         if(state->protocol == ProtocolEm4100) {
                             state->protocol = ProtocolHid;
                             state->dirty = true;
@@ -262,7 +262,7 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyRight) {
+                       event.value.input.key == InputKeyRight) {
                         if(state->protocol == ProtocolHid) {
                             state->protocol = ProtocolEm4100;
                             state->dirty = true;
@@ -270,7 +270,7 @@ int32_t lf_rfid_workaround(void* p) {
                     }
 
                     if(event.value.input.type == InputTypePress &&
-                    event.value.input.key == InputKeyOk) {
+                       event.value.input.key == InputKeyOk) {
                         state->dirty = true;
                         if(state->mode == ModeEmulating) {
                             state->mode = ModeReading;
@@ -285,7 +285,8 @@ int32_t lf_rfid_workaround(void* p) {
 
             if(state->dirty) {
                 if(state->mode == ModeEmulating) {
-                    api_interrupt_remove(comparator_trigger_callback, InterruptTypeComparatorTrigger);
+                    api_interrupt_remove(
+                        comparator_trigger_callback, InterruptTypeComparatorTrigger);
 
                     if(state->protocol == ProtocolEm4100) {
                         em4100_prepare_data(state->em_data, state->customer_id, raw_data);
@@ -337,6 +338,6 @@ int32_t lf_rfid_workaround(void* p) {
             view_port_update(view_port);
         }
     }
-    
+
     return 0;
 }

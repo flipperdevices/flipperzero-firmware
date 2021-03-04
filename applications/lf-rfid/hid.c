@@ -62,7 +62,6 @@ void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
 }
 
 void hid_emulation(uint8_t* data, GpioPin* pin) {
-    
     gpio_write(pin, false);
 
     for(uint8_t i = 0; i < 32; i++) {
