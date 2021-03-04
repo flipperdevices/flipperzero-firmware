@@ -65,14 +65,14 @@ void hid_emulation(uint8_t* data, GpioPin* pin) {
     taskENTER_CRITICAL();
     gpio_write(pin, false);
 
-    for(uint8_t i = 0; i < 8; i++) {
+    for(uint8_t i = 0; i < 32; i++) {
         for(uint8_t j = 0; j < 96; j++) {
             uint8_t time = data[j] ? 40 : 32;
 
             for(uint8_t k = 0; k < 6; k++) {
-                delay_us(time + i / 2);
+                delay_us(time + i / 8);
                 gpio_write(pin, true);
-                delay_us(time - i / 2);
+                delay_us(time - i / 8);
                 gpio_write(pin, false);
             }
         }
@@ -167,6 +167,14 @@ void hid_fsm(HidCtx* ctx, uint32_t t) {
     ctx->prev_t = t;
 
     uint8_t pulse = ctx->dt > 72 ? 1 : 0;
+
+    /*
+    if(pulse == 1) {
+        gpio_write(&debug_0, true);
+        delay_us(5);
+        gpio_write(&debug_0, false);
+    }
+    */
 
     if(ctx->last_pulse == pulse) {
         if(ctx->pulse_counter == 1) {

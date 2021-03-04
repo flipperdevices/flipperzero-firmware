@@ -141,11 +141,11 @@ int32_t lf_rfid_workaround(void* p) {
 
     State _state;
     _state.freq_khz = 125;
-    _state.mode = ModeReading;
+    _state.mode = ModeEmulating;
     _state.customer_id = 00;
     _state.em_data = 4378151;
     _state.dirty = true;
-    _state.protocol = ProtocolEm4100;
+    _state.protocol = ProtocolHid;
     _state.dirty_freq = true;
 
     ValueMutex state_mutex;
@@ -207,6 +207,11 @@ int32_t lf_rfid_workaround(void* p) {
                     /*em4100_extract_data(&raw_data[9], &state->customer_id, &state->em_data);*/
 
                     // printf("customer: %02d, data: %010lu\n", state->customer_id, state->em_data);
+
+                    for(uint8_t i = 0; i < HID_SIZE; i++) {
+                        printf("%d", raw_data[i]);
+                    }
+                    printf("\r\n");
 
                     release_mutex(&state_mutex, state);
 
