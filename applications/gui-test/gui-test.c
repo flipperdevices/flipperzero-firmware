@@ -76,7 +76,7 @@ void popup_callback(void* context) {
     next_view(context);
 }
 
-void submenu_callback(void* context) {
+void submenu_callback(void* context, uint32_t index) {
     next_view(context);
 }
 
