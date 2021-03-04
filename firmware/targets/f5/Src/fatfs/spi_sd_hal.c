@@ -1,6 +1,4 @@
 #include "main.h"
-#include <api-hal-power.h>
-#include <api-hal-delay.h>
 
 #define SD_DUMMY_BYTE 0xFF
 #define SD_CS_LOW() HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_RESET)
@@ -78,11 +76,6 @@ void SD_IO_Init(void) {
 
     /* SD chip select high */
     SD_CS_HIGH();
-
-    api_hal_power_disable_external_3_3v();
-    delay_us(10000);
-    api_hal_power_enable_external_3_3v();
-    delay_us(10000);
 
     /* Send dummy byte 0xFF, 10 times with CS high */
     /* Rise CS and MOSI for 80 clocks cycles */
