@@ -62,12 +62,13 @@ void hid_prepare_data(uint8_t facility_code, uint16_t card_no, uint8_t* data) {
 }
 
 void hid_emulation(uint8_t* data, GpioPin* pin) {
-    taskENTER_CRITICAL();
+    
     gpio_write(pin, false);
 
     for(uint8_t i = 0; i < 32; i++) {
+        taskENTER_CRITICAL();
         for(uint8_t j = 0; j < 96; j++) {
-            uint8_t time = data[j] ? 40 : 32;
+            uint8_t time = data[j] ? 38 : 30;
 
             for(uint8_t k = 0; k < 6; k++) {
                 delay_us(time + i / 8);
@@ -76,10 +77,10 @@ void hid_emulation(uint8_t* data, GpioPin* pin) {
                 gpio_write(pin, false);
             }
         }
+        taskEXIT_CRITICAL();
     }
 
     gpio_write(pin, false);
-    taskEXIT_CRITICAL();
 }
 
 uint8_t HID_PREAMBLE[] = {false, false, false, true, true, true, false, true};
