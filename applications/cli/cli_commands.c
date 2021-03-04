@@ -74,6 +74,16 @@ void cli_command_log(string_t args, void* context) {
     furi_stdglue_set_global_stdout_callback(NULL);
 }
 
+void cli_command_vibro(string_t args, void* context) {
+    if(!string_cmp(args, "0")) {
+        api_hal_vibro_on(false);
+    } else if(!string_cmp(args, "1")) {
+        api_hal_vibro_on(true);
+    } else {
+        printf("Wrong input");
+    }
+}
+
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "help", cli_command_help, cli);
     cli_add_command(cli, "?", cli_command_help, cli);
@@ -82,4 +92,5 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "uid", cli_command_uuid, cli);
     cli_add_command(cli, "date", cli_command_date, cli);
     cli_add_command(cli, "log", cli_command_log, cli);
+    cli_add_command(cli, "vibro", cli_command_vibro, cli);
 }
