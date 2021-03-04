@@ -15,20 +15,30 @@ SubghzAppViewManager::SubghzAppViewManager() {
         static_cast<uint32_t>(SubghzAppViewManager::ViewType::Submenu),
         submenu_get_view(submenu));
 
+    spectrum_settings = new SubghzViewSpectrumSettings();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        static_cast<uint32_t>(SubghzAppViewManager::ViewType::SpectrumSettings),
+        spectrum_settings->get_view());
+
     gui = static_cast<Gui*>(furi_record_open("gui"));
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
-    //TODO think about that method, seems unsafe and over-engineered
+    // set previous view callback for all views
     view_set_previous_callback(submenu_get_view(submenu), callback);
+    view_set_previous_callback(spectrum_settings->get_view(), callback);
 }
 
 SubghzAppViewManager::~SubghzAppViewManager() {
     // remove views
     view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(SubghzAppViewManager::ViewType::Submenu));
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(SubghzAppViewManager::ViewType::SpectrumSettings));
 
     // free view modules
     submenu_free(submenu);
+    free(spectrum_settings);
 
     // free dispatcher
     view_dispatcher_free(view_dispatcher);
@@ -43,6 +53,10 @@ void SubghzAppViewManager::switch_to(ViewType type) {
 
 Submenu* SubghzAppViewManager::get_submenu() {
     return submenu;
+}
+
+SubghzViewSpectrumSettings* SubghzAppViewManager::get_spectrum_settings() {
+    return spectrum_settings;
 }
 
 void SubghzAppViewManager::receive_event(SubghzEvent* event) {

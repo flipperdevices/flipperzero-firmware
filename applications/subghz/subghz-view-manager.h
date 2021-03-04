@@ -3,11 +3,13 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include "subghz-event.h"
+#include "view/subghz-view-spectrum-settings.h"
 
 class SubghzAppViewManager {
 public:
     enum class ViewType : uint8_t {
         Submenu,
+        SpectrumSettings,
     };
 
     osMessageQueueId_t event_queue;
@@ -17,10 +19,11 @@ public:
 
     void switch_to(ViewType type);
 
-    Submenu* get_submenu();
-
     void receive_event(SubghzEvent* event);
     void send_event(SubghzEvent* event);
+
+    Submenu* get_submenu();
+    SubghzViewSpectrumSettings* get_spectrum_settings();
 
 private:
     ViewDispatcher* view_dispatcher;
@@ -30,4 +33,5 @@ private:
 
     // view elements
     Submenu* submenu;
+    SubghzViewSpectrumSettings* spectrum_settings;
 };
