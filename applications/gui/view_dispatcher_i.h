@@ -12,6 +12,7 @@ struct ViewDispatcher {
     ViewPort* view_port;
     ViewDict_t views;
     View* current_view;
+    osMutexId_t mutex;
 };
 
 /* ViewPort Draw Callback */
@@ -25,3 +26,17 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
 
 /* View to ViewDispatcher update event */
 void view_dispatcher_update(ViewDispatcher* view_dispatcher, View* view);
+
+/**
+ * @brief Lock view dispatcher dictionary
+ * 
+ * @param view_dispatcher instance
+ */
+void view_dispatcher_lock(ViewDispatcher* view_dispatcher);
+
+/**
+ * @brief Unock view dispatcher dictionary
+ * 
+ * @param view_dispatcher instance
+ */
+void view_dispatcher_unlock(ViewDispatcher* view_dispatcher);
