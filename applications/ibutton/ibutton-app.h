@@ -68,6 +68,7 @@ public:
     iButtonKey* get_key();
 
     void notify_green_blink();
+    void notify_yellow_blink();
     void notify_red_blink();
 
     void notify_green_on();

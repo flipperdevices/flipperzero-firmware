@@ -120,6 +120,14 @@ void iButtonApp::notify_green_blink() {
     notify_green_off();
 }
 
+void iButtonApp::notify_yellow_blink() {
+    notify_red_on();
+    notify_green_on();
+    delay(10);
+    notify_green_off();
+    notify_red_off();
+}
+
 void iButtonApp::notify_red_blink() {
     notify_red_on();
     delay(10);
@@ -150,7 +158,6 @@ void iButtonApp::notify_error() {
     notify_vibro_on();
     delay(50);
     notify_vibro_off();
-    delay(100);
 }
 
 void iButtonApp::notify_success() {
@@ -159,12 +166,10 @@ void iButtonApp::notify_success() {
     delay(50);
     hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
     notify_vibro_off();
-
-    delay(100);
 }
 
 void iButtonApp::notify_vibro_on() {
-    //gpio_write(&vibro_gpio, true);
+    gpio_write(&vibro_gpio, true);
 }
 
 void iButtonApp::notify_vibro_off() {
