@@ -19,6 +19,8 @@ void iButtonSceneWriteSuccess::on_enter(iButtonApp* app) {
     popup_enable_timeout(popup);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
+    app->notify_green_on();
+    app->notify_success();
 }
 
 bool iButtonSceneWriteSuccess::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -42,6 +44,7 @@ void iButtonSceneWriteSuccess::on_exit(iButtonApp* app) {
     popup_disable_timeout(popup);
     popup_set_context(popup, NULL);
     popup_set_callback(popup, NULL);
+    app->notify_green_off();
 }
 
 void iButtonSceneWriteSuccess::popup_callback(void* context) {
