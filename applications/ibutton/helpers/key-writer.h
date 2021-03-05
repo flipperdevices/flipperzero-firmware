@@ -29,7 +29,6 @@ private:
     bool write_1990_2(iButtonKey* key);
     bool write_TM2004(iButtonKey* key);
     bool write_TM01(iButtonKey* key);
-    
 
     void onewire_write_one_bit(bool value, uint32_t delay = 10000);
     void write_byte_ds1990(uint8_t data);
