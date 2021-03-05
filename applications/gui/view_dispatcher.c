@@ -1,4 +1,5 @@
 #include "view_dispatcher_i.h"
+#include "gui_i.h"
 
 ViewDispatcher* view_dispatcher_alloc() {
     ViewDispatcher* view_dispatcher = furi_alloc(sizeof(ViewDispatcher));
