@@ -59,6 +59,8 @@ void iButtonSceneWrite::on_enter(iButtonApp* app) {
     popup_set_icon(popup, 10, 10, I_iButtonKey_49x44);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
+
+    app->get_key_worker()->start_write();
 }
 
 bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -66,7 +68,21 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         consumed = true;
-        app->notify_red_blink();
+        KeyWriter::Error result = app->get_key_worker()->write(app->get_key());
+
+        switch(result) {
+        case KeyWriter::Error::SAME_KEY:
+        case KeyWriter::Error::OK:
+            app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
+            app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
+            break;
+        case KeyWriter::Error::NO_DETECT:
+            app->notify_red_blink();
+            break;
+        case KeyWriter::Error::CANNOT_WRITE:
+            app->notify_yellow_blink();
+            break;
+        }
     }
 
     return consumed;
@@ -78,4 +94,6 @@ void iButtonSceneWrite::on_exit(iButtonApp* app) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, -1, -1, I_DolphinWait_61x59);
+
+    app->get_key_worker()->stop_write();
 }

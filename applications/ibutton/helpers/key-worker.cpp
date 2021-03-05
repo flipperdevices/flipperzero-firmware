@@ -30,9 +30,22 @@ void KeyWorker::stop_emulate() {
     key_emulator.stop();
 }
 
+KeyWriter::Error KeyWorker::write(iButtonKey* key) {
+    return key_writer.write(key);
+}
+
+void KeyWorker::start_write() {
+    key_writer.start();
+}
+
+void KeyWorker::stop_write() {
+    key_writer.stop();
+}
+
 KeyWorker::KeyWorker(const GpioPin* one_wire_gpio)
     : onewire_master{one_wire_gpio}
     , onewire_slave{one_wire_gpio}
     , key_reader{&onewire_master}
-    , key_emulator{&onewire_slave} {
+    , key_emulator{&onewire_slave}
+    , key_writer{&onewire_master} {
 }
