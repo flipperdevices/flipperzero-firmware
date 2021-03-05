@@ -161,6 +161,10 @@ bool APP_BLE_Init() {
   if (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) != SHCI_Success) {
     return false;
   }
+  return true;
+}
+
+bool APP_BLE_Start() {
   // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
   // Initialization of the BLE Services
