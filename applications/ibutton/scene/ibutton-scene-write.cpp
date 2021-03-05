@@ -74,7 +74,6 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
         case KeyWriter::Error::SAME_KEY:
         case KeyWriter::Error::OK:
             app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
-            app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
             break;
         case KeyWriter::Error::NO_DETECT:
             app->notify_red_blink();
