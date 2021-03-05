@@ -1,4 +1,5 @@
 #include "key-reader.h"
+#include "key-commands.h"
 #include <callback-connector.h>
 #include <maxim_crc.h>
 
@@ -90,7 +91,7 @@ bool KeyReader::verify_key(iButtonKeyType key_type, const uint8_t* const data, u
         switch_to(ReadMode::DALLAS);
 
         if(onewire_master->reset()) {
-            onewire_master->write(0x33);
+            onewire_master->write(DS1990::CMD_READ_ROM);
             for(uint8_t i = 0; i < data_size; i++) {
                 if(onewire_master->read() != data[i]) {
                     result = false;
