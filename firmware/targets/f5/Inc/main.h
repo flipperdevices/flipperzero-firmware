@@ -76,14 +76,16 @@ void Error_Handler(void);
 #define PC0_GPIO_Port GPIOC
 #define PC1_Pin GPIO_PIN_1
 #define PC1_GPIO_Port GPIOC
+#define SPI_D_MISO_Pin GPIO_PIN_2
+#define SPI_D_MISO_GPIO_Port GPIOC
 #define PC3_Pin GPIO_PIN_3
 #define PC3_GPIO_Port GPIOC
 #define IR_RX_Pin GPIO_PIN_0
 #define IR_RX_GPIO_Port GPIOA
-#define PA_SW_0_Pin GPIO_PIN_1
-#define PA_SW_0_GPIO_Port GPIOA
-#define PA_SW_1_Pin GPIO_PIN_2
-#define PA_SW_1_GPIO_Port GPIOA
+#define RF_SW_0_Pin GPIO_PIN_1
+#define RF_SW_0_GPIO_Port GPIOA
+#define RF_SW_1_Pin GPIO_PIN_2
+#define RF_SW_1_GPIO_Port GPIOA
 #define PERIPH_POWER_Pin GPIO_PIN_3
 #define PERIPH_POWER_GPIO_Port GPIOA
 #define PA4_Pin GPIO_PIN_4
@@ -97,8 +99,6 @@ void Error_Handler(void);
 #define RFID_PULL_Pin GPIO_PIN_8
 #define RFID_PULL_GPIO_Port GPIOA
 #define RFID_PULL_EXTI_IRQn EXTI9_5_IRQn
-#define I2C_SCL_Pin GPIO_PIN_9
-#define I2C_SCL_GPIO_Port GPIOA
 #define CC1101_G0_Pin GPIO_PIN_4
 #define CC1101_G0_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
@@ -129,12 +129,10 @@ void Error_Handler(void);
 #define SPI_D_MOSI_GPIO_Port GPIOB
 #define DISPLAY_DI_Pin GPIO_PIN_6
 #define DISPLAY_DI_GPIO_Port GPIOC
-#define I2C_SDA_Pin GPIO_PIN_10
-#define I2C_SDA_GPIO_Port GPIOA
 #define SD_CD_Pin GPIO_PIN_15
 #define SD_CD_GPIO_Port GPIOA
-#define PC10_Pin GPIO_PIN_10
-#define PC10_GPIO_Port GPIOC
+#define VIBRO_Pin GPIO_PIN_10
+#define VIBRO_GPIO_Port GPIOC
 #define DISPLAY_CS_Pin GPIO_PIN_11
 #define DISPLAY_CS_GPIO_Port GPIOC
 #define SD_CS_Pin GPIO_PIN_12
@@ -183,9 +181,6 @@ extern TIM_HandleTypeDef htim16;
 
 #define NFC_IRQ_Pin RFID_PULL_Pin
 #define NFC_IRQ_GPIO_Port RFID_PULL_GPIO_Port
-
-#define VIBRO_Pin GPIO_PIN_10
-#define VIBRO_GPIO_Port GPIOC
 
 /* USER CODE END Private defines */
 

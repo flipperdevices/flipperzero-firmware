@@ -19,6 +19,10 @@ ifeq ($(API_HAL_OS_DEBUG), 1)
 CFLAGS			+= -DAPI_HAL_OS_DEBUG
 endif
 
+ifeq ($(INVERT_RFID_IN), 1)
+CFLAGS += -DINVERT_RFID_IN
+endif
+
 OPENOCD_OPTS	= -f interface/stlink.cfg -c "transport select hla_swd" -f ../debug/stm32wbx.cfg -c "stm32wbx.cpu configure -rtos auto" -c "init"
 BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DFW_ADDRESS=$(FW_ADDRESS) -DOS_OFFSET=$(OS_OFFSET)
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
@@ -49,8 +53,6 @@ C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_gpio.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_hsem.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_i2c_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_ipcc.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pcd.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pcd_ex.c \
@@ -70,6 +72,8 @@ C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_uart_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_lptim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_adc.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_gpio.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_i2c.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usb.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
@@ -93,6 +97,7 @@ ASM_SOURCES += $(MXPROJECT_DIR)/startup_stm32wb55xx_cm4.s
 
 # Common
 CFLAGS			+= \
+	-DUSE_FULL_LL_DRIVER \
 	-DUSE_HAL_DRIVER \
 	-DHAVE_FREERTOS \
 	-DDEBUG_UART=huart1

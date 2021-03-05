@@ -5,7 +5,6 @@
 #include "aes.h"
 #include "comp.h"
 #include "crc.h"
-#include "i2c.h"
 #include "pka.h"
 #include "rf.h"
 #include "rng.h"
@@ -31,7 +30,6 @@ int main(void)
 
     MX_GPIO_Init();
     MX_ADC1_Init();
-    MX_I2C1_Init();
     MX_RTC_Init();
     MX_SPI1_Init();
     MX_SPI2_Init();
@@ -73,6 +71,7 @@ void SystemClock_Config(void)
 
     __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_MEDIUMLOW);
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    LL_RCC_HSE_SetCapacitorTuning(0x18);
 
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE
                                                             |RCC_OSCILLATORTYPE_LSE;
