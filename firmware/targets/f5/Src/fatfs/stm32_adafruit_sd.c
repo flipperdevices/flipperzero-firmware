@@ -95,6 +95,7 @@
 #include <api-hal-spi.h>
 #include <api-hal-power.h>
 #include <api-hal-delay.h>
+#include <api-hal-sd.h>
 
 /** @addtogroup BSP
   * @{
@@ -300,8 +301,15 @@ uint8_t BSP_SD_Init(bool reset_card) {
 
     /* We must reset card in spi_lock context */
     if(reset_card) {
+        /* disable power and set low on all bus pins */
         api_hal_power_disable_external_3_3v();
-        delay(100);
+        SD_SPI_Bus_To_Down_State();
+        hal_sd_detect_set_low();
+        delay(250);
+
+        /* reinit bus and enable power */
+        SD_SPI_Bus_To_Normal_State();
+        hal_sd_detect_init();
         api_hal_power_enable_external_3_3v();
         delay(100);
     }
