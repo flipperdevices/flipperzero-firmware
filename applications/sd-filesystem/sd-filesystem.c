@@ -362,7 +362,7 @@ bool app_sd_mount_card(SdApp* sd_app) {
 
     _fs_lock(&sd_app->info);
 
-    while(result == false && counter > 0) {
+    while(result == false && counter > 0 && hal_sd_detect()) {
         app_sd_notify_wait_on();
 
         if((counter % 10) == 0) {
@@ -628,6 +628,14 @@ int32_t sd_filesystem(void* p) {
 
                 view_port_enabled_set(sd_app->icon.view_port, true);
                 sd_was_present = false;
+
+                if(!hal_sd_detect()) {
+                    printf("[sd_filesystem] card removed\r\n");
+
+                    view_port_enabled_set(sd_app->icon.view_port, false);
+                    app_sd_unmount_card(sd_app);
+                    sd_was_present = true;
+                }
             }
         } else {
             if(!hal_sd_detect()) {
