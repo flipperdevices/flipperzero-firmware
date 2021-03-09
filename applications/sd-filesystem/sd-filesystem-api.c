@@ -447,7 +447,7 @@ bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name
         }
 
         if(name != NULL && name_length > 0) {
-            strncpy(name, _fileinfo.fname, name_length);
+            strlcpy(name, _fileinfo.fname, name_length);
         }
     }
 
@@ -492,7 +492,7 @@ fs_common_info(const char* path, FileInfo* fileinfo, char* name, const uint16_t 
             }
 
             if(name != NULL && name_length > 0) {
-                strncpy(name, _fileinfo.fname, name_length);
+                strlcpy(name, _fileinfo.fname, name_length);
             }
         }
     }
