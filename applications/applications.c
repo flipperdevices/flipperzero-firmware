@@ -151,11 +151,11 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_GUI_TEST
-    {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
+    {.app = gui_test, .name = "gui_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_SUBGHZ
-    {.app = app_subghz, .name = "app_subghz", .icon = A_Plugins_14},
+    {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 };
 
@@ -227,7 +227,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #endif
 
 #ifdef BUILD_GUI_TEST
-    {.app = gui_test, .name = "gui_test", .icon = A_Plugins_14},
+    {.app = gui_test, .name = "gui_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef BUILD_IBUTTON_TEST
@@ -235,7 +235,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #endif
 
 #ifdef BUILD_SUBGHZ
-    {.app = app_subghz, .name = "app_subghz", .icon = A_Plugins_14},
+    {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 };
 

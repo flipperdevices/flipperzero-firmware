@@ -8,6 +8,10 @@ void hal_sd_detect_init(void) {
     // nothing to do
 }
 
+void hal_sd_detect_set_low(void) {
+    // nothing to do
+}
+
 bool hal_sd_detect(void) {
     bool result = false;
 
