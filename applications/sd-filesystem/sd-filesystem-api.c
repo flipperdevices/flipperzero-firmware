@@ -397,7 +397,7 @@ bool fs_dir_open(File* file, const char* path) {
     if(sd_dir == NULL) {
         file->internal_error_id = SD_TOO_MANY_OPEN_FILES;
     } else {
-        if(file->internal_error_id == SD_OK) file->internal_error_id = f_opendir(sd_dir, path);
+        file->internal_error_id = f_opendir(sd_dir, path);
     }
 
     // TODO on exit
