@@ -23,6 +23,8 @@ static void file_select_draw_callback(Canvas* canvas, void* _model) {
 }
 
 static bool file_select_input_callback(InputEvent* event, void* context) {
+    bool consumed = false;
+    return consumed;
 }
 
 FileSelect* file_select_alloc() {
