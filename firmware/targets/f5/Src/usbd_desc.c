@@ -65,7 +65,7 @@
 
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "Flipper"
+#define USBD_MANUFACTURER_STRING     "Flipper Devices Inc."
 #define USBD_PID     22336
 #define USBD_PRODUCT_STRING     "Flipper Control Virtual ComPort"
 #define USBD_CONFIGURATION_STRING     "CDC Config"
@@ -288,7 +288,9 @@ uint8_t * USBD_CDC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
   if(*(uint8_t*) USBD_NAME_STRING_ADDR == 0xFFU){
     Get_SerialNum();
   } else {
-    USBD_GetString((uint8_t *) USBD_NAME_STRING_ADDR, USBD_StringSerial, length);
+    char buffer[13] = "flip_";
+    strncat(buffer, (char *) USBD_NAME_STRING_ADDR, 8);
+    USBD_GetString((uint8_t*) buffer, USBD_StringSerial, length);
   }
   /* USER CODE BEGIN USBD_CDC_SerialStrDescriptor */
 
