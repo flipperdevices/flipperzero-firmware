@@ -285,7 +285,11 @@ uint8_t * USBD_CDC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
 
   /* Update the serial number string descriptor with the data from the unique
    * ID */
-  Get_SerialNum();
+  if(*(uint8_t*) (0x1FFF7040UL) == 0xFFU){
+    Get_SerialNum();
+  } else {
+    USBD_GetString((uint8_t *) (0x1FFF7040UL), USBD_StringSerial, length);
+  }
 
   /* USER CODE BEGIN USBD_CDC_SerialStrDescriptor */
 
