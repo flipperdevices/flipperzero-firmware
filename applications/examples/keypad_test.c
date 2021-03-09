@@ -75,11 +75,16 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
+void free_state(State* state) {
+    free(state);
+}
+
 int32_t keypad_test(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
     furi_check(event_queue);
 
     State _state = {{false, false, false, false, false}, 0, 0, 0, 0, 0};
+    
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("[keypad_test] cannot create mutex\r\n");
@@ -104,10 +109,8 @@ int32_t keypad_test(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.value.input.type == InputTypeLong &&
                    event.value.input.key == InputKeyBack) {
-                    printf("[flipseq] bye!\r\n");
-                    // TODO remove all view_ports create by app
-                    view_port_enabled_set(view_port, false);
-                    return 0;
+                    printf("[keypad test] bye!\r\n");
+                    break;
                 }
 
                 if(event.value.input.type == InputTypeShort &&
@@ -175,9 +178,17 @@ int32_t keypad_test(void* p) {
                     }
                 }
             }
-        }
 
+        }
         release_mutex(&state_mutex, state);
         view_port_update(view_port);
     }
+    // remove & free all stuff created by app
+    gui_remove_view_port(gui, view_port);
+    view_port_free(view_port);
+    osMessageQueueDelete(event_queue);
+    delete_mutex(&state_mutex);
+    free_state(&_state);
+
+    return 0;
 }
