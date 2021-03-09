@@ -75,10 +75,6 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
-void free_state(State* state) {
-    free(state);
-}
-
 int32_t keypad_test(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
     furi_check(event_queue);
@@ -110,6 +106,7 @@ int32_t keypad_test(void* p) {
                 if(event.value.input.type == InputTypeLong &&
                    event.value.input.key == InputKeyBack) {
                     printf("[keypad test] bye!\r\n");
+                    release_mutex(&state_mutex, state);
                     break;
                 }
 
@@ -180,15 +177,14 @@ int32_t keypad_test(void* p) {
             }
 
         }
-        release_mutex(&state_mutex, state);
         view_port_update(view_port);
+        release_mutex(&state_mutex, state);
     }
     // remove & free all stuff created by app
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);
     delete_mutex(&state_mutex);
-    free_state(&_state);
 
     return 0;
 }
