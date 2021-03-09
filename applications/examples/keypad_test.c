@@ -80,7 +80,7 @@ int32_t keypad_test(void* p) {
     furi_check(event_queue);
 
     State _state = {{false, false, false, false, false}, 0, 0, 0, 0, 0};
-    
+
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, &_state, sizeof(State))) {
         printf("[keypad_test] cannot create mutex\r\n");
@@ -175,7 +175,6 @@ int32_t keypad_test(void* p) {
                     }
                 }
             }
-
         }
         view_port_update(view_port);
         release_mutex(&state_mutex, state);
