@@ -1,7 +1,7 @@
 #pragma once
 
 typedef enum {
-    BtMessageTypeSrartTestToneTx,
+    BtMessageTypeStartTestToneTx,
     BtMessageTypeHoppingTx,
     BtMessageTypeStopTestToneTx,
     BtMessageTypeSetupTestPacketTx,
@@ -24,27 +24,27 @@ typedef enum {
 } BtStateType;
 
 typedef enum {
-    BtTestChannel2402 = 0,
-    BtTestChannel2440 = 19,
-    BtTestChannel2480 = 39,
+    BtChannel2402 = 0,
+    BtChannel2440 = 19,
+    BtChannel2480 = 39,
 } BtTestChannel;
 
 typedef enum {
-    BtTestPower0dB = 25,
-    BtTestPower2dB = 27,
-    BtTestPower4dB = 29,
-    BtTestPower6dB = 31,
+    BtPower0dB = 0x19,
+    BtPower2dB = 0x1B,
+    BtPower4dB = 0x1D,
+    BtPower6dB = 0x1F,
 } BtTestPower;
 
 typedef enum {
-    BtTestDateRate1M = 1,
-    BtTestDateRate2M = 2,
-} BtTestDateRate;
+    BtDateRate1M = 1,
+    BtDateRate2M = 2,
+} BtTestDataRate;
 
 typedef struct {
     BtTestChannel channel;
     BtTestPower power;
-    BtTestDateRate daterate;
+    BtTestDataRate datarate;
 } BtTestParam;
 
 typedef struct {

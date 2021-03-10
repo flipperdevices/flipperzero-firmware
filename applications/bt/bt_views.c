@@ -13,7 +13,7 @@ void bt_view_test_tone_tx_draw(Canvas* canvas, void* model) {
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 36, buffer);
-    snprintf(buffer, sizeof(buffer), "Power:%d dB", m->power - BtTestPower0dB);
+    snprintf(buffer, sizeof(buffer), "Power:%d dB", m->power - BtPower0dB);
     canvas_draw_str(canvas, 0, 48, buffer);
 }
 
@@ -42,7 +42,7 @@ void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 48, buffer);
-    snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->daterate);
+    snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->datarate);
     canvas_draw_str(canvas, 0, 60, buffer);
 }
 
@@ -52,25 +52,25 @@ void bt_view_app_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 0, 12, "Start BLE app");
 }
 
-BtTestChannel bt_switch_channel(InputEvent* event, BtTestChannel inst_chan) {
-    if(event->key == InputKeyRight) {
-        if(inst_chan == BtTestChannel2402) {
-            return BtTestChannel2440;
-        } else if(inst_chan == BtTestChannel2440) {
-            return BtTestChannel2480;
-        } else {
-            return BtTestChannel2402;
-        }
-    } else if(event->key == InputKeyLeft) {
-        if(inst_chan == BtTestChannel2402) {
-            return BtTestChannel2480;
-        } else if(inst_chan == BtTestChannel2480) {
-            return BtTestChannel2440;
-        } else {
-            return BtTestChannel2402;
+BtTestChannel bt_switch_channel(InputKey key, BtTestChannel inst_chan) {
+    uint8_t pos = 0;
+    BtTestChannel arr[] = {BtChannel2402, BtChannel2440, BtChannel2480};
+    for(pos = 0; pos < sizeof(arr); pos++) {
+        if(arr[pos] == inst_chan) {
+            break;
         }
     }
-    return BtTestChannel2402;
+    if(key == InputKeyRight) {
+        pos = (pos + 1) % sizeof(arr);
+        return arr[pos];
+    } else if(key == InputKeyLeft) {
+        if(pos) {
+            return arr[pos - 1];
+        } else {
+            return arr[sizeof(arr) - 1];
+        }
+    }
+    return arr[0];
 }
 
 bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
@@ -83,17 +83,18 @@ bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
                 osTimerStop(bt->hopping_mode_timer);
             }
             BtMessage m = {.type = BtMessageTypeStopTestToneTx};
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
-            return false;
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
+            return true;
         } else {
             if(event->key == InputKeyRight || event->key == InputKeyLeft) {
-                bt->state.param.channel = bt_switch_channel(event, bt->state.param.channel);
+                bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
             } else if(event->key == InputKeyUp) {
-                if(bt->state.param.power < BtTestPower6dB) {
+                if(bt->state.param.power < BtPower6dB) {
                     bt->state.param.power += 2;
                 }
             } else if(event->key == InputKeyDown) {
-                if(bt->state.param.power > BtTestPower0dB) {
+                if(bt->state.param.power > BtPower0dB) {
                     bt->state.param.power -= 2;
                 }
             } else if(event->key == InputKeyOk) {
@@ -106,10 +107,10 @@ bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
                 }
             }
             BtMessage m = {
-                .type = BtMessageTypeSrartTestToneTx,
+                .type = BtMessageTypeStartTestToneTx,
                 .param.channel = bt->state.param.channel,
                 .param.power = bt->state.param.power};
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         }
     }
@@ -122,15 +123,16 @@ bool bt_view_test_tone_rx_input(InputEvent* event, void* context) {
     Bt* bt = context;
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyRight || event->key == InputKeyLeft) {
-            bt->state.param.channel = bt_switch_channel(event, bt->state.param.channel);
+            bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
             BtMessage m = {
                 .type = BtMessageTypeStartTestRx, .param.channel = bt->state.param.channel};
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyBack) {
             BtMessage m = {.type = BtMessageTypeStopTestRx};
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
-            return false;
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
+            return true;
         } else {
             return false;
         }
@@ -146,39 +148,40 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
         if(event->key < InputKeyOk) {
             // Process InputKeyUp, InputKeyDown, InputKeyLeft, InputKeyRight
             if(event->key == InputKeyRight || event->key == InputKeyLeft) {
-                bt->state.param.channel = bt_switch_channel(event, bt->state.param.channel);
+                bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
             } else if(event->key == InputKeyUp) {
-                if(bt->state.param.daterate < BtTestDateRate2M) {
-                    bt->state.param.daterate += 1;
+                if(bt->state.param.datarate < BtDateRate2M) {
+                    bt->state.param.datarate += 1;
                 }
             } else if(event->key == InputKeyDown) {
-                if(bt->state.param.daterate > BtTestDateRate1M) {
-                    bt->state.param.daterate -= 1;
+                if(bt->state.param.datarate > BtDateRate1M) {
+                    bt->state.param.datarate -= 1;
                 }
             }
             bt->state.type = BtStatusPacketSetup;
             BtMessage m = {
                 .type = BtMessageTypeSetupTestPacketTx,
                 .param.channel = bt->state.param.channel,
-                .param.daterate = bt->state.param.daterate,
+                .param.datarate = bt->state.param.datarate,
             };
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyOk) {
             bt->state.type = BtStatusPacketTx;
             BtMessage m = {
                 .type = BtMessageTypeStartTestPacketTx,
                 .param.channel = bt->state.param.channel,
-                .param.daterate = bt->state.param.daterate,
+                .param.datarate = bt->state.param.datarate,
             };
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyBack) {
             BtMessage m = {
                 .type = BtMessageTypeStopTestPacketTx,
             };
-            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
-            return false;
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
+            return true;
         }
     }
     return false;

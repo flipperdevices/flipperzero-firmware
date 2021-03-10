@@ -26,7 +26,7 @@ typedef struct {
 typedef struct {
     BtStateType type;
     BtTestChannel channel;
-    BtTestDateRate daterate;
+    BtTestDataRate datarate;
 } BtViewTestPacketTxModel;
 
 typedef struct {
