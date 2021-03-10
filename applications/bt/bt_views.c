@@ -1,5 +1,4 @@
 #include "bt_views.h"
-#include "m-string.h"
 
 void bt_view_test_tone_tx_draw(Canvas* canvas, void* model) {
     BtViewTestToneTxModel* m = model;
@@ -128,6 +127,10 @@ bool bt_view_test_tone_rx_input(InputEvent* event, void* context) {
                 .type = BtMessageTypeStartTestRx, .param.channel = bt->state.param.channel};
             osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
             return true;
+        } else if(event->key == InputKeyBack) {
+            BtMessage m = {.type = BtMessageTypeStopTestRx};
+            osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever);
+            return false;
         } else {
             return false;
         }
