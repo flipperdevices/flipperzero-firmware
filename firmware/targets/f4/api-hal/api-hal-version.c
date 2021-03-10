@@ -32,3 +32,7 @@ const uint8_t api_hal_version_get_hw_connect() {
 const uint32_t api_hal_version_get_hw_timestamp() {
     return ((ApiHalVersionOTP*)OTP_AREA_BASE)->timestamp;
 }
+
+const uint8_t * api_hal_version_get_name_ptr(){
+    return (uint8_t*) (OTP_AREA_BASE + sizeof(ApiHalVersionOTP) * 8);
+}
