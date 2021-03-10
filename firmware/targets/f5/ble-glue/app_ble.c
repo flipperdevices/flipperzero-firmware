@@ -1,5 +1,6 @@
 #include "main.h"
 
+#include "app_entry.h"
 #include "app_common.h"
 #include "dbg_trace.h"
 #include "ble.h"
@@ -158,13 +159,13 @@ bool APP_BLE_Init() {
   // Register the hci transport layer to handle BLE User Asynchronous Events
   HciUserEvtProcessId = osThreadNew(HciUserEvtProcess, NULL, &HciUserEvtProcess_attr);
   // Starts the BLE Stack on CPU2
-  if (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) != SHCI_Success) {
-    return false;
-  }
-  return true;
+  return (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) == SHCI_Success);
 }
 
 bool APP_BLE_Start() {
+  if (APPE_Status() != BleGlueStatusStarted) {
+    return false;
+  }
   // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
   // Initialization of the BLE Services

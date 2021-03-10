@@ -11,7 +11,7 @@ extern "C" {
 void api_hal_bt_init();
 
 /* Start BLE app */
-void api_hal_bt_start_app();
+bool api_hal_bt_start_app();
 
 /* Get BT/BLE system component state */
 void api_hal_bt_dump_state(string_t buffer);
@@ -33,8 +33,8 @@ void api_hal_bt_start_tone_tx(uint8_t tx_channel, uint8_t power);
 /* Stop ble tone tx */
 void api_hal_bt_stop_tone_tx();
 
-/* Start sending ble packets at a given frequency and daterate */
-void api_hal_bt_start_packet_tx(uint8_t frequency, uint8_t daterate);
+/* Start sending ble packets at a given frequency and datarate */
+void api_hal_bt_start_packet_tx(uint8_t frequency, uint8_t datarate);
 
 /* Stop sending ble packets */
 void api_hal_bt_stop_packet_tx();

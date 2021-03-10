@@ -13,8 +13,8 @@ void api_hal_bt_init() {
     APPE_Init();
 }
 
-void api_hal_bt_start_app() {
-    APP_BLE_Start();
+bool api_hal_bt_start_app() {
+    return APP_BLE_Start();
 }
 
 void api_hal_bt_dump_state(string_t buffer) {
@@ -83,7 +83,7 @@ void api_hal_bt_unlock_flash() {
 }
 
 void api_hal_bt_start_tone_tx(uint8_t tx_channel, uint8_t power) {
-    aci_hal_set_tx_power_level(1, power);
+    aci_hal_set_tx_power_level(0, power);
     aci_hal_tone_start(tx_channel, 0);
 }
 
@@ -91,8 +91,8 @@ void api_hal_bt_stop_tone_tx() {
     aci_hal_tone_stop();
 }
 
-void api_hal_bt_start_packet_tx(uint8_t frequency, uint8_t daterate) {
-    hci_le_enhanced_transmitter_test(frequency, 2, 2, daterate);
+void api_hal_bt_start_packet_tx(uint8_t frequency, uint8_t datarate) {
+    hci_le_enhanced_transmitter_test(frequency, 0x25, 2, datarate);
 }
 
 void api_hal_bt_stop_packet_tx() {
