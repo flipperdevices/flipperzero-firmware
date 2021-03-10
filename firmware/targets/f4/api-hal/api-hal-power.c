@@ -15,8 +15,7 @@
 volatile uint32_t api_hal_power_insomnia = 1;
 
 void HAL_RCC_CSSCallback(void) {
-    LL_RCC_ForceBackupDomainReset();
-    LL_RCC_ReleaseBackupDomainReset();
+    // TODO: notify user about issue with HSE
     NVIC_SystemReset();
 }
 
@@ -195,4 +194,12 @@ void api_hal_power_dump_state(string_t buffer) {
         bq25896_get_vbat_voltage(), bq25896_get_vbat_current(),
         bq25896_get_ntc_mpct()
     );
+}
+
+void api_hal_power_enable_external_3_3v(){
+    // nothing to do
+}
+
+void api_hal_power_disable_external_3_3v(){
+    // nothing to do
 }
