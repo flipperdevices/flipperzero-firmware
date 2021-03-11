@@ -6,6 +6,7 @@ import subprocess
 import io
 import os
 import sys
+import re
 import struct
 import datetime
 
@@ -79,7 +80,7 @@ class Assets:
         self.parser_otp.add_argument(
             "--connect", type=int, help="Connect", required=True
         )
-        self.parser_otp.add_argument("--name", type=str, help="Name")
+        self.parser_otp.add_argument("--name", type=str, help="Name", required=True)
         self.parser_otp.add_argument("file", help="Output file")
         self.parser_otp.set_defaults(func=self.otp)
         # logging
@@ -113,6 +114,8 @@ class Assets:
             while len(name) < 8:
                 name.append("0")
 
+            n1,n2,n3,n4,n5,n6,n7,n8 = map(int, name);
+
         data = struct.pack(
             "<BBBBLBBBBBBBB",
             self.args.version,
@@ -120,7 +123,14 @@ class Assets:
             self.args.body,
             self.args.connect,
             int(datetime.datetime.now().timestamp()),
-            name,
+            n1,
+            n2,
+            n3,
+            n4,
+            n5,
+            n6,
+            n7,
+            n8
         )
         open(self.args.file, "wb").write(data)
 
