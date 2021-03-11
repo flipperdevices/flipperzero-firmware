@@ -284,15 +284,13 @@ uint8_t * USBD_CDC_SerialStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
 
   /* Update the serial number string descriptor with the data from the unique
    * ID */
-  if(*(api_hal_version_get_name_ptr()) == 0xFFU){
-    Get_SerialNum();
-  } else {
+  if(api_hal_version_get_name_ptr()){
     char buffer[14] = "flip_";
-    strncat(buffer, (char*)(api_hal_version_get_name_ptr()), 8);
-
+    strncat(buffer, api_hal_version_get_name_ptr(), 8);
     USBD_GetString((uint8_t*) buffer, USBD_StringSerial, length);
+  } else {
+    Get_SerialNum();
   }
-
   /* USER CODE BEGIN USBD_CDC_SerialStrDescriptor */
 
   /* USER CODE END USBD_CDC_SerialStrDescriptor */
