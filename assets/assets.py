@@ -104,10 +104,14 @@ class Assets:
         self.logger.debug(f"Generating OTP")
 
         if self.args.name:
-            name = re.sub('[^a-zA-Z0-9.]', '', self.args.name) # Filter all special characters
-            name = list(map(str, map(ord, name[0:8]))) # Strip to 8 chars and map to ascii codes
-            while len(name) < 8: 
-                name.append('0')
+            name = re.sub(
+                "[^a-zA-Z0-9.]", "", self.args.name
+            )  # Filter all special characters
+            name = list(
+                map(str, map(ord, name[0:8]))
+            )  # Strip to 8 chars and map to ascii codes
+            while len(name) < 8:
+                name.append("0")
 
         data = struct.pack(
             "<BBBBLBBBBBBBB",
