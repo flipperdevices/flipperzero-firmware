@@ -114,7 +114,7 @@ class Assets:
             while len(name) < 8:
                 name.append("0")
 
-            n1,n2,n3,n4,n5,n6,n7,n8 = map(int, name);
+            n1, n2, n3, n4, n5, n6, n7, n8 = map(int, name)
 
         data = struct.pack(
             "<BBBBLBBBBBBBB",
@@ -130,7 +130,7 @@ class Assets:
             n5,
             n6,
             n7,
-            n8
+            n8,
         )
         open(self.args.file, "wb").write(data)
 
