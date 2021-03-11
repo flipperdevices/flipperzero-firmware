@@ -57,7 +57,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "backlight_control",
      .stack_size = 1024,
      .icon = A_Plugins_14},
-    {.app = gui_task, .name = "gui_task", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = gui_task, .name = "gui_task", .stack_size = 8192, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_MENU
