@@ -34,6 +34,7 @@ int32_t sd_filesystem(void* p);
 int32_t app_subghz(void* p);
 int32_t gui_test(void* p);
 int32_t app_ibutton_test(void* p);
+int32_t keypad_test(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
@@ -57,6 +58,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
      .name = "backlight_control",
      .stack_size = 1024,
      .icon = A_Plugins_14},
+    // TODO: fix stack size when sd api will be in separate thread
     {.app = gui_task, .name = "gui_task", .stack_size = 8192, .icon = A_Plugins_14},
 #endif
 
@@ -157,6 +159,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_SUBGHZ
     {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_KEYPAD_TEST
+    {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
+#endif
 };
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
@@ -237,6 +243,11 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef BUILD_SUBGHZ
     {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
+
+#ifdef BUILD_KEYPAD_TEST
+    {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
+#endif
+
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
