@@ -64,6 +64,11 @@ static void app_loader_cli_callback(string_t args, void* _ctx) {
 
     if(ctx->app->app == NULL) return;
 
+    if(!(furi_thread_get_state(ctx->state->thread) == FuriThreadStateStopped)) {
+        printf("Application is already started");
+        return;
+    }
+
     printf("Starting furi application\r\n");
 
     api_hal_power_insomnia_enter();
