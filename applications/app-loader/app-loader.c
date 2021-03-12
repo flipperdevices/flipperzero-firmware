@@ -72,12 +72,6 @@ static void app_loader_cli_callback(string_t args, void* _ctx) {
     furi_thread_set_stack_size(ctx->state->thread, ctx->app->stack_size);
     furi_thread_set_callback(ctx->state->thread, ctx->app->app);
     furi_thread_start(ctx->state->thread);
-
-    printf("Press any key to kill application");
-
-    cli_getc(ctx->state->cli);
-
-    furi_thread_terminate(ctx->state->thread);
 }
 
 void app_loader_thread_state_callback(FuriThreadState state, void* context) {
