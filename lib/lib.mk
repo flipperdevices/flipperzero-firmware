@@ -62,10 +62,6 @@ ifeq ($(BUILD_IBUTTON), 1)
 # onewire library
 BUILD_ONEWIRE	= 1
 endif
-ifeq ($(BUILD_IBUTTON_TEST), 1)
-# onewire library
-BUILD_ONEWIRE	= 1
-endif
 
 BUILD_ONEWIRE ?= 0
 ifeq ($(BUILD_ONEWIRE), 1)

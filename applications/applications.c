@@ -33,7 +33,6 @@ int32_t floopper_bloopper(void* p);
 int32_t sd_filesystem(void* p);
 int32_t app_subghz(void* p);
 int32_t gui_test(void* p);
-int32_t app_ibutton_test(void* p);
 int32_t keypad_test(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
@@ -136,10 +135,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = app_ibutton, .name = "ibutton", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_IBUTTON_TEST
-    {.app = app_ibutton_test, .name = "ibutton_test", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
 #ifdef APP_GPIO_DEMO
     {.app = app_gpio_test, .name = "gpio test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -234,10 +229,6 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef BUILD_GUI_TEST
     {.app = gui_test, .name = "gui_test", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
-#ifdef BUILD_IBUTTON_TEST
-    {.app = app_ibutton_test, .name = "ibutton_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef BUILD_SUBGHZ
