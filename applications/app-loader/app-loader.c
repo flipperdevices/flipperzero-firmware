@@ -1,6 +1,5 @@
 #include <furi.h>
 #include <cli/cli.h>
-#include <gui/gui.h>
 #include "menu/menu.h"
 #include "menu/menu_item.h"
 #include "applications.h"
@@ -9,10 +8,8 @@
 
 typedef struct {
     FuriThread* thread;
-    ViewPort* view_port;
     const FlipperApplication* current_app;
     Cli* cli;
-    Gui* gui;
 } AppLoaderState;
 
 typedef struct {
@@ -22,33 +19,12 @@ typedef struct {
 
 // TODO add mutex for contex
 
-static void app_loader_render_callback(Canvas* canvas, void* _ctx) {
-    AppLoaderState* ctx = (AppLoaderState*)_ctx;
-
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 32, ctx->current_app->name);
-
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 44, "press back to exit");
-}
-
-static void app_loader_input_callback(InputEvent* input_event, void* _ctx) {
-    AppLoaderState* ctx = (AppLoaderState*)_ctx;
-
-    if(input_event->type == InputTypeShort && input_event->key == InputKeyBack) {
-        furi_thread_terminate(ctx->thread);
-    }
-}
-
 static void app_loader_menu_callback(void* _ctx) {
+    furi_assert(_ctx);
     AppLoaderContext* ctx = (AppLoaderContext*)_ctx;
-
-    if(ctx->app->app == NULL) return;
-
-    view_port_enabled_set(ctx->state->view_port, true);
-
+    furi_assert(ctx->app);
+    furi_assert(ctx->app->app);
+    furi_assert(ctx->app->name);
     api_hal_power_insomnia_enter();
 
     ctx->state->current_app = ctx->app;
@@ -60,19 +36,19 @@ static void app_loader_menu_callback(void* _ctx) {
 }
 
 static void app_loader_cli_callback(string_t args, void* _ctx) {
+    furi_assert(_ctx);
     AppLoaderContext* ctx = (AppLoaderContext*)_ctx;
-
-    if(ctx->app->app == NULL) return;
+    furi_assert(ctx->app);
+    furi_assert(ctx->app->app);
+    furi_assert(ctx->app->name);
 
     if(!(furi_thread_get_state(ctx->state->thread) == FuriThreadStateStopped)) {
-        printf("Application is already started");
+        printf("Can't start, furi application is running");
         return;
     }
 
-    printf("Starting furi application\r\n");
-
+    printf("Starting furi application %s", ctx->app->name);
     api_hal_power_insomnia_enter();
-
     furi_thread_set_name(ctx->state->thread, ctx->app->name);
     furi_thread_set_stack_size(ctx->state->thread, ctx->app->stack_size);
     furi_thread_set_callback(ctx->state->thread, ctx->app->app);
@@ -81,9 +57,7 @@ static void app_loader_cli_callback(string_t args, void* _ctx) {
 
 void app_loader_thread_state_callback(FuriThreadState state, void* context) {
     furi_assert(context);
-    AppLoaderState* app_loader_state = context;
     if(state == FuriThreadStateStopped) {
-        view_port_enabled_set(app_loader_state->view_port, false);
         api_hal_power_insomnia_exit();
     }
 }
@@ -94,16 +68,8 @@ int32_t app_loader(void* p) {
     furi_thread_set_state_context(state.thread, &state);
     furi_thread_set_state_callback(state.thread, app_loader_thread_state_callback);
 
-    state.view_port = view_port_alloc();
-    view_port_enabled_set(state.view_port, false);
-    view_port_draw_callback_set(state.view_port, app_loader_render_callback, &state);
-    view_port_input_callback_set(state.view_port, app_loader_input_callback, &state);
-
     ValueMutex* menu_mutex = furi_record_open("menu");
     state.cli = furi_record_open("cli");
-    state.gui = furi_record_open("gui");
-
-    gui_add_view_port(state.gui, state.view_port, GuiLayerFullscreen);
 
     // Main menu
     with_value_mutex(
