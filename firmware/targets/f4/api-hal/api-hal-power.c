@@ -12,7 +12,7 @@
 #include <bq27220.h>
 #include <bq25896.h>
 
-volatile uint32_t api_hal_power_insomnia = 1;
+volatile uint32_t api_hal_power_insomnia = 0;
 
 void HAL_RCC_CSSCallback(void) {
     // TODO: notify user about issue with HSE
