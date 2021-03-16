@@ -12,47 +12,42 @@ typedef struct {
     Cli* cli;
 } AppLoaderState;
 
-typedef struct {
-    AppLoaderState* state;
-    const FlipperApplication* app;
-} AppLoaderContext;
+static AppLoaderState state;
 
 // TODO add mutex for contex
 
 static void app_loader_menu_callback(void* _ctx) {
     furi_assert(_ctx);
-    AppLoaderContext* ctx = (AppLoaderContext*)_ctx;
-    furi_assert(ctx->app);
-    furi_assert(ctx->app->app);
-    furi_assert(ctx->app->name);
+    const FlipperApplication* flipper_app = (FlipperApplication*)_ctx;
+    furi_assert(flipper_app->app);
+    furi_assert(flipper_app->name);
     api_hal_power_insomnia_enter();
 
-    ctx->state->current_app = ctx->app;
+    state.current_app = flipper_app;
 
-    furi_thread_set_name(ctx->state->thread, ctx->app->name);
-    furi_thread_set_stack_size(ctx->state->thread, ctx->app->stack_size);
-    furi_thread_set_callback(ctx->state->thread, ctx->app->app);
-    furi_thread_start(ctx->state->thread);
+    furi_thread_set_name(state.thread, flipper_app->name);
+    furi_thread_set_stack_size(state.thread, flipper_app->stack_size);
+    furi_thread_set_callback(state.thread, flipper_app->app);
+    furi_thread_start(state.thread);
 }
 
 static void app_loader_cli_callback(string_t args, void* _ctx) {
     furi_assert(_ctx);
-    AppLoaderContext* ctx = (AppLoaderContext*)_ctx;
-    furi_assert(ctx->app);
-    furi_assert(ctx->app->app);
-    furi_assert(ctx->app->name);
+    const FlipperApplication* flipper_app = (FlipperApplication*)_ctx;
+    furi_assert(flipper_app->app);
+    furi_assert(flipper_app->name);
 
-    if(!(furi_thread_get_state(ctx->state->thread) == FuriThreadStateStopped)) {
+    if(!(furi_thread_get_state(state.thread) == FuriThreadStateStopped)) {
         printf("Can't start, furi application is running");
         return;
     }
 
-    printf("Starting furi application %s", ctx->app->name);
+    printf("Starting furi application %s", flipper_app->name);
     api_hal_power_insomnia_enter();
-    furi_thread_set_name(ctx->state->thread, ctx->app->name);
-    furi_thread_set_stack_size(ctx->state->thread, ctx->app->stack_size);
-    furi_thread_set_callback(ctx->state->thread, ctx->app->app);
-    furi_thread_start(ctx->state->thread);
+    furi_thread_set_name(state.thread, flipper_app->name);
+    furi_thread_set_stack_size(state.thread, flipper_app->stack_size);
+    furi_thread_set_callback(state.thread, flipper_app->app);
+    furi_thread_start(state.thread);
 }
 
 void app_loader_thread_state_callback(FuriThreadState state, void* context) {
@@ -63,7 +58,6 @@ void app_loader_thread_state_callback(FuriThreadState state, void* context) {
 }
 
 int32_t app_loader(void* p) {
-    AppLoaderState state;
     state.thread = furi_thread_alloc();
     furi_thread_set_state_context(state.thread, &state);
     furi_thread_set_state_callback(state.thread, app_loader_thread_state_callback);
@@ -75,24 +69,24 @@ int32_t app_loader(void* p) {
     with_value_mutex(
         menu_mutex, (Menu * menu) {
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-                AppLoaderContext* ctx = furi_alloc(sizeof(AppLoaderContext));
-                ctx->state = &state;
-                ctx->app = &FLIPPER_APPS[i];
-
+                // Add menu item
                 menu_item_add(
                     menu,
                     menu_item_alloc_function(
                         FLIPPER_APPS[i].name,
                         assets_icons_get(FLIPPER_APPS[i].icon),
                         app_loader_menu_callback,
-                        ctx));
+                        (void*)&FLIPPER_APPS[i]));
 
                 // Add cli command
                 string_t cli_name;
                 string_init_set_str(cli_name, "app_");
                 string_cat_str(cli_name, FLIPPER_APPS[i].name);
                 cli_add_command(
-                    state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
+                    state.cli,
+                    string_get_cstr(cli_name),
+                    app_loader_cli_callback,
+                    (void*)&FLIPPER_APPS[i]);
                 string_clear(cli_name);
             }
         });
@@ -122,24 +116,24 @@ int32_t app_loader(void* p) {
                 menu_item_alloc_menu("Plugins", assets_icons_get(A_Plugins_14));
 
             for(size_t i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
-                AppLoaderContext* ctx = furi_alloc(sizeof(AppLoaderContext));
-                ctx->state = &state;
-                ctx->app = &FLIPPER_PLUGINS[i];
-
+                // Add menu item
                 menu_item_subitem_add(
                     menu_plugins,
                     menu_item_alloc_function(
                         FLIPPER_PLUGINS[i].name,
                         assets_icons_get(FLIPPER_PLUGINS[i].icon),
                         app_loader_menu_callback,
-                        ctx));
+                        (void*)&FLIPPER_PLUGINS[i]));
 
                 // Add cli command
                 string_t cli_name;
                 string_init_set_str(cli_name, "app_");
                 string_cat_str(cli_name, FLIPPER_PLUGINS[i].name);
                 cli_add_command(
-                    state.cli, string_get_cstr(cli_name), app_loader_cli_callback, ctx);
+                    state.cli,
+                    string_get_cstr(cli_name),
+                    app_loader_cli_callback,
+                    (void*)&FLIPPER_PLUGINS[i]);
                 string_clear(cli_name);
             }
 
