@@ -46,6 +46,8 @@ void gui_redraw_status_bar(Gui* gui) {
     uint8_t x_used = 0;
     uint8_t width;
     ViewPort* view_port;
+    canvas_frame_set(gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
+    canvas_draw_icon_name(gui->canvas, 0, 0, I_StatusBar_128x13);
     // Right side
     x = GUI_DISPLAY_WIDTH + 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
@@ -63,7 +65,7 @@ void gui_redraw_status_bar(Gui* gui) {
         ViewPortArray_next(it);
     }
     // Left side
-    x = 0;
+    x = 3;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarLeft]);
     while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
         // Render view_port;
@@ -72,8 +74,18 @@ void gui_redraw_status_bar(Gui* gui) {
             width = view_port_get_width(view_port);
             if(!width) width = 8;
             x_used += width;
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_box(gui->canvas, 0, -2, width + 2, 13);
+            canvas_set_color(gui->canvas, ColorBlack);
+            canvas_draw_box(gui->canvas, 0, 9, width + 2, 2);
+            canvas_draw_box(gui->canvas, 0, -2, width + 2, 1);
+            canvas_draw_box(gui->canvas, width + 2, -2, 1, 12);
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_dot(gui->canvas, width + 2, -2);
+            canvas_set_color(gui->canvas, ColorBlack);
             view_port_draw(view_port, gui->canvas);
+            
             x += (width + 2);
         }
         ViewPortArray_next(it);

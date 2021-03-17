@@ -59,11 +59,11 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon_name(
-        canvas, canvas_width(canvas) - 80, canvas_height(canvas) - 60 + 6, I_Flipper_young_80x60);
+        canvas, canvas_width(canvas) - 70, canvas_height(canvas) - 50, I_Flipper_young_80x60);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 10, "/\\: Stats");
+    canvas_draw_str(canvas, 2, 15, "/\\: Stats");
     canvas_draw_str(canvas, 5, 32, "OK: Menu");
-    canvas_draw_str(canvas, 2, 52, "\\/: Version");
+    canvas_draw_str(canvas, 2, 47, "\\/: Version");
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
@@ -71,26 +71,26 @@ void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "Dolphin stats:");
+    canvas_draw_str(canvas, 2, 15, "Dolphin stats:");
 
     char buffer[64];
     canvas_set_font(canvas, FontSecondary);
     snprintf(buffer, 64, "Icounter: %ld", m->icounter);
-    canvas_draw_str(canvas, 5, 22, buffer);
+    canvas_draw_str(canvas, 5, 30, buffer);
     snprintf(buffer, 64, "Butthurt: %ld", m->butthurt);
-    canvas_draw_str(canvas, 5, 32, buffer);
-    canvas_draw_str(canvas, 5, 40, "< > change icounter");
+    canvas_draw_str(canvas, 5, 40, buffer);
+    canvas_draw_str(canvas, 15, 55, "< > change icounter");
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "Version info:");
+    canvas_draw_str(canvas, 2, 15, "Version info:");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 22, TARGET " " BUILD_DATE);
-    canvas_draw_str(canvas, 5, 32, GIT_BRANCH);
-    canvas_draw_str(canvas, 5, 42, GIT_BRANCH_NUM " " GIT_COMMIT);
+    canvas_draw_str(canvas, 5, 25, TARGET " " BUILD_DATE);
+    canvas_draw_str(canvas, 5, 35, GIT_BRANCH);
+    canvas_draw_str(canvas, 5, 45, GIT_BRANCH_NUM " " GIT_COMMIT);
 
     char buffer[64];
     snprintf(
@@ -101,7 +101,7 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
         api_hal_version_get_hw_target(),
         api_hal_version_get_hw_body(),
         api_hal_version_get_hw_connect());
-    canvas_draw_str(canvas, 5, 52, buffer);
+    canvas_draw_str(canvas, 5, 55, buffer);
 }
 
 void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model) {
