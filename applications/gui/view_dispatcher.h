@@ -33,29 +33,29 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher);
 /**
  * @brief Add view to ViewDispatcher
  * @param view_dispatcher, ViewDispatcher instance
- * @param view_id, View id to register
- * @param view, View instance
+ * @param view_id View id to register
+ * @param view View instance
  */
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view);
 
 /**
  * @brief Remove view from ViewDispatcher
- * @param view_dispatcher, ViewDispatcher instance
- * @param view_id, View id to remove
+ * @param view_dispatcher ViewDispatcher instance
+ * @param view_id View id to remove
  */
 void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
 /**
  * @brief Switch to View
- * @param view_dispatcher, ViewDispatcher instance
- * @param view_id, View id to register
+ * @param view_dispatcher ViewDispatcher instance
+ * @param view_id View id to register
  */
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
 /**
  * @brief Attach ViewDispatcher to GUI
- * @param view_dispatcher, ViewDispatcher instance
- * @param gui, GUI instance to attach to
+ * @param view_dispatcher ViewDispatcher instance
+ * @param gui GUI instance to attach to
  */
 void view_dispatcher_attach_to_gui(
     ViewDispatcher* view_dispatcher,
