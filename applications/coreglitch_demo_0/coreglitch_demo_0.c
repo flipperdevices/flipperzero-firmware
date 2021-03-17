@@ -12,7 +12,7 @@ bool exit_app;
 static void event_cb(const void* value, void* ctx) {
     furi_assert(value);
     const InputEvent* event = value;
-    if(event->key == InputKeyBack && event->type == InputTypePress) {
+    if(event->key == InputKeyBack && event->type == InputTypeShort) {
         exit_app = true;
     }
 }
