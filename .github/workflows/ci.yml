@@ -18,10 +18,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
-        continue-on-error: true
         with:
           fetch-depth: 0
-#          submodules: true
       - name: Checkout submodules
         run: git submodule update --init --recursive
 
