@@ -21,6 +21,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+      - run: git submodule sync
+
       - uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
         with:
