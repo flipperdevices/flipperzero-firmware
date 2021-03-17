@@ -26,7 +26,7 @@ ViewDispatcher* view_dispatcher_alloc();
 
 /**
  * @brief Free ViewDispatcher
- * @param pointer to ViewDispatcher
+ * @param view_dispatcher pointer to ViewDispatcher
  */
 void view_dispatcher_free(ViewDispatcher* view_dispatcher);
 
