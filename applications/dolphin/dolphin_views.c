@@ -79,7 +79,7 @@ void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 5, 30, buffer);
     snprintf(buffer, 64, "Butthurt: %ld", m->butthurt);
     canvas_draw_str(canvas, 5, 40, buffer);
-    canvas_draw_str(canvas, 15, 55, "< > change icounter");
+    canvas_draw_str(canvas, 0, 53, "[< >] icounter value   [ok] save");
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
