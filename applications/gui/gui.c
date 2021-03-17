@@ -46,7 +46,8 @@ void gui_redraw_status_bar(Gui* gui) {
     uint8_t x_used = 0;
     uint8_t width;
     ViewPort* view_port;
-    canvas_frame_set(gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
+    canvas_frame_set(
+        gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
     canvas_draw_icon_name(gui->canvas, 0, 0, I_StatusBar_128x13);
     // Right side
     x = GUI_DISPLAY_WIDTH + 2;
@@ -85,7 +86,7 @@ void gui_redraw_status_bar(Gui* gui) {
             canvas_draw_dot(gui->canvas, width + 2, -2);
             canvas_set_color(gui->canvas, ColorBlack);
             view_port_draw(view_port, gui->canvas);
-            
+
             x += (width + 2);
         }
         ViewPortArray_next(it);
