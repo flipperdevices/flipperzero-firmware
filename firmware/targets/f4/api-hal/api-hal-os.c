@@ -1,6 +1,7 @@
 #include <api-hal-os.h>
 #include <api-hal-os-timer.h>
 #include <api-hal-power.h>
+#include <stm32wbxx_ll_cortex.h>
 
 #include <FreeRTOS.h>
 #include <cmsis_os.h>
@@ -62,7 +63,7 @@ void LPTIM2_IRQHandler(void) {
 static inline uint32_t api_hal_os_sleep(TickType_t expected_idle_ticks) {
     // Stop ticks
     api_hal_os_timer_reset();
-    HAL_SuspendTick();
+    LL_SYSTICK_DisableIT();
 
     // Start wakeup timer
     api_hal_os_timer_single(expected_idle_ticks * API_HAL_OS_CLK_PER_TICK);
@@ -71,8 +72,8 @@ static inline uint32_t api_hal_os_sleep(TickType_t expected_idle_ticks) {
     LL_GPIO_ResetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
 #endif
 
-    // Go to stop2 mode
-    api_hal_power_deep_sleep();
+    // Go to sleep mode
+    api_hal_power_sleep();
 
 #ifdef API_HAL_OS_DEBUG
     LL_GPIO_SetOutputPin(LED_SLEEP_PORT, LED_SLEEP_PIN);
@@ -91,18 +92,13 @@ static inline uint32_t api_hal_os_sleep(TickType_t expected_idle_ticks) {
     api_hal_os_timer_reset();
 
     // Resume ticks
-    HAL_ResumeTick();
+    LL_SYSTICK_EnableIT();
     api_hal_os_timer_continuous(API_HAL_OS_CLK_PER_TICK);
 
     return after_tick;
 }
 
 void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
-    // Check if sleep is available now
-    if (!api_hal_power_deep_available()) {
-        return;
-    }
-
     // Limit mount of ticks to maximum that timer can count
     if (expected_idle_ticks > API_HAL_OS_MAX_SLEEP) {
         expected_idle_ticks = API_HAL_OS_MAX_SLEEP;
@@ -112,8 +108,6 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     __disable_irq();
 
     // Confirm OS that sleep is still possible
-    // And check if timer is in safe zone
-    // (8 clocks till any IRQ event or ongoing synchronization)
     if (eTaskConfirmSleepModeStatus() == eAbortSleep) {
         __enable_irq();
         return;

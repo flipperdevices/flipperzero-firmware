@@ -12,7 +12,7 @@
 #include <bq27220.h>
 #include <bq25896.h>
 
-volatile uint32_t api_hal_power_insomnia = 0;
+volatile uint32_t api_hal_power_insomnia = 1;
 
 void HAL_RCC_CSSCallback(void) {
     // TODO: notify user about issue with HSE
@@ -39,6 +39,10 @@ void api_hal_power_insomnia_exit() {
 
 bool api_hal_power_deep_available() {
     return api_hal_bt_is_alive() && api_hal_power_insomnia == 0;
+}
+
+void api_hal_power_light_sleep() {
+    __WFI();
 }
 
 void api_hal_power_deep_sleep() {
@@ -84,6 +88,15 @@ void api_hal_power_deep_sleep() {
 
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
+
+void api_hal_power_sleep() {
+    if(api_hal_power_deep_available()) {
+        api_hal_power_deep_sleep();
+    } else {
+        api_hal_power_light_sleep();
+    }
+}
+
 
 uint8_t api_hal_power_get_pct() {
     return bq27220_get_state_of_charge();
@@ -197,9 +210,7 @@ void api_hal_power_dump_state(string_t buffer) {
 }
 
 void api_hal_power_enable_external_3_3v(){
-    // nothing to do
 }
 
 void api_hal_power_disable_external_3_3v(){
-    // nothing to do
 }
