@@ -153,8 +153,8 @@ jobs:
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzp --delete
-          path: fix-genpic/latest-firmware-banner.png
-          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
+          path: latest-firmware-banner.png
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/fix-genpic/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
