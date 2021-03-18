@@ -176,10 +176,21 @@ Dolphin* dolphin_alloc() {
     // Main Idle View
     dolphin->idle_view_main = view_alloc();
     view_set_context(dolphin->idle_view_main, dolphin);
+    view_allocate_model(
+        dolphin->idle_view_main, ViewModelTypeLockFree, sizeof(DolphinViewIdleUpModel));
+
     view_set_draw_callback(dolphin->idle_view_main, dolphin_view_idle_main_draw);
     view_set_input_callback(dolphin->idle_view_main, dolphin_view_idle_main_input);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
+
+    with_view_model(
+    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+        model->animation = assets_icons_get(A_Swimming_128x64);
+        icon_start_animation(model->animation);
+        return true;
+    });
+
     // Stats Idle View
     dolphin->idle_view_up = view_alloc();
     view_set_context(dolphin->idle_view_up, dolphin);
@@ -219,7 +230,7 @@ Dolphin* dolphin_alloc() {
     view_port_set_width(dolphin->lock_viewport, icon_get_width(dolphin->lock_icon));
     view_port_draw_callback_set(dolphin->lock_viewport, lock_icon_callback, dolphin);
     view_port_enabled_set(dolphin->lock_viewport, false);
-
+    
     return dolphin;
 }
 
@@ -277,6 +288,7 @@ int32_t dolphin_task() {
         } else if(event.type == DolphinEventTypeSave) {
             dolphin_state_save(dolphin->state);
         }
+
     }
 
     return 0;

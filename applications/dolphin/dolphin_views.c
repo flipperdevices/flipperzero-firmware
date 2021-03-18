@@ -63,6 +63,11 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
+    DolphinViewMainModel* m = model;
+
+    canvas_draw_icon(canvas, 0, 0, m->animation);
+
+    /*
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon_name(
         canvas, canvas_width(canvas) - 70, canvas_height(canvas) - 50, I_Flipper_young_80x60);
@@ -70,6 +75,7 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 2, 15, "/\\: Stats");
     canvas_draw_str(canvas, 5, 32, "OK: Menu");
     canvas_draw_str(canvas, 2, 47, "\\/: Version");
+    */
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {

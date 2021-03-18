@@ -32,6 +32,10 @@ typedef struct {
     uint8_t idx;
 } DolphinViewLockMenuModel;
 
+typedef struct {
+    Icon* animation;
+} DolphinViewMainModel;
+
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
 bool dolphin_view_idle_main_input(InputEvent* event, void* context);
 

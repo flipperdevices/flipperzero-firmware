@@ -44,7 +44,6 @@ struct Dolphin {
 
     ViewPort* lock_viewport;
     Icon* lock_icon;
-
     bool locked;
     uint8_t lock_count;
 };
