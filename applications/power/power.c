@@ -46,7 +46,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
 
     with_view_model(
         power->info_view, (PowerInfoModel * model) {
-            canvas_draw_box(canvas, 0, 4, (float)model->charge / 100 * 20, 4);
+            canvas_draw_box(canvas, 1, 4, (float)model->charge / 100 * 20, 4);
             return false;
         });
 }
