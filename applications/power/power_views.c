@@ -73,7 +73,6 @@ void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
     canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
     canvas_draw_str_aligned(canvas, 92, y + 15, AlignCenter, AlignCenter, header);
     canvas_draw_str_aligned(canvas, 92, y + 27, AlignCenter, AlignCenter, value);
-
 };
 
 void power_info_draw_callback(Canvas* canvas, void* context) {
