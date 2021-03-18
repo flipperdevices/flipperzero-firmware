@@ -41,7 +41,9 @@ struct Dolphin {
     View* idle_view_down;
     View* view_hw_mismatch;
     View* view_lockmenu;
-    View* view_locked;
+
+    ViewPort* lock_viewport;
+    Icon* lock_icon;
 
     bool locked;
     uint8_t lock_count;

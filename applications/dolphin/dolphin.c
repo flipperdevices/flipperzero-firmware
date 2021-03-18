@@ -36,9 +36,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     if(event->type == InputTypeLong) {
         if(event->key == InputKeyBack) {
             dolphin->locked = !dolphin->locked;
-            view_dispatcher_switch_to_view(
-                dolphin->idle_view_dispatcher,
-                dolphin->locked ? DolphinViewLocked : DolphinViewIdleMain);
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         }
     }
 
@@ -66,6 +64,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                     dolphin->lock_count = 0;
                     view_dispatcher_switch_to_view(
                         dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+                    view_port_enabled_set(dolphin->lock_viewport, false);
                 }
             }
         }
@@ -100,12 +99,19 @@ static void lock_menu_callback(void* context, uint8_t index) {
     switch(index) {
     case 0:
         dolphin->locked = true;
-        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLocked);
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+        view_port_enabled_set(dolphin->lock_viewport, true);
         break;
 
     default:
         break;
     }
+}
+
+void lock_icon_callback(Canvas* canvas, void* context) {
+    assert(context);
+    Dolphin* dolphin = context;
+    canvas_draw_icon(canvas, 0, 0, dolphin->lock_icon);
 }
 
 bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
@@ -184,13 +190,6 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->idle_view_up, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleUp, dolphin->idle_view_up);
-    // Locked Screen View
-    dolphin->view_locked = view_alloc();
-    view_set_context(dolphin->view_locked, dolphin);
-    view_set_draw_callback(dolphin->view_locked, dolphin_view_locked_draw);
-    view_set_input_callback(dolphin->view_locked, dolphin_view_idle_main_input);
-    view_dispatcher_add_view(
-        dolphin->idle_view_dispatcher, DolphinViewLocked, dolphin->view_locked);
     // Lock Menu View
     dolphin->view_lockmenu = view_alloc();
     view_set_context(dolphin->view_lockmenu, dolphin);
@@ -213,6 +212,13 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->view_hw_mismatch, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewHwMismatch, dolphin->view_hw_mismatch);
+
+    // Lock icon
+    dolphin->lock_icon = assets_icons_get(I_Lock_8x8);
+    dolphin->lock_viewport = view_port_alloc();
+    view_port_set_width(dolphin->lock_viewport, icon_get_width(dolphin->lock_icon));
+    view_port_draw_callback_set(dolphin->lock_viewport, lock_icon_callback, dolphin);
+    view_port_enabled_set(dolphin->lock_viewport, false);
 
     return dolphin;
 }
@@ -237,6 +243,8 @@ int32_t dolphin_task() {
 
     Gui* gui = furi_record_open("gui");
     view_dispatcher_attach_to_gui(dolphin->idle_view_dispatcher, gui, ViewDispatcherTypeWindow);
+    gui_add_view_port(gui, dolphin->lock_viewport, GuiLayerStatusBarLeft);
+
     if(dolphin_state_load(dolphin->state)) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
     } else {
