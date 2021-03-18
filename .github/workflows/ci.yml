@@ -131,7 +131,7 @@ jobs:
   genpic:
     name: Generate pic
     needs: upload
-    if: github.ref == 'refs/heads/master'
+    # if: github.ref == 'refs/heads/master'
     runs-on: [self-hosted]
     steps:
       - name: Set test env
@@ -153,7 +153,7 @@ jobs:
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzp --delete
-          path: latest-firmware-banner.png
+          path: fix-genpic/latest-firmware-banner.png
           remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
           remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
           remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
