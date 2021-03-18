@@ -5,6 +5,12 @@
 
 #include <api-hal.h>
 
+static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
+/*
+    D U M B mode
+    dynamic universal military bypass
+*/
+
 void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     DolphinViewFirstStartModel* m = model;
     canvas_clear(canvas);
@@ -80,6 +86,29 @@ void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
     snprintf(buffer, 64, "Butthurt: %ld", m->butthurt);
     canvas_draw_str(canvas, 5, 40, buffer);
     canvas_draw_str(canvas, 0, 53, "[< >] icounter value   [ok] save");
+}
+
+void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
+    DolphinViewLockMenuModel* m = model;
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_icon_name(canvas, 5, 0, I_DoorLeft_8x56);
+    canvas_draw_icon_name(canvas, 115, 0, I_DoorRight_8x56);
+    canvas_set_font(canvas, FontSecondary);
+    for(uint8_t i = 0; i < 3; ++i) {
+        canvas_draw_str_aligned(
+            canvas, 64, 13 + (i * 17), AlignCenter, AlignCenter, Lockmenu_Items[i]);
+        if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
+    }
+}
+
+void dolphin_view_locked_draw(Canvas* canvas, void* model) {
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_icon_name(
+        canvas, canvas_width(canvas) - 70, canvas_height(canvas) - 50, I_Flipper_young_80x60);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 5, 32, "LOCKED");
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {

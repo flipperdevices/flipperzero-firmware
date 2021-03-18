@@ -40,6 +40,11 @@ struct Dolphin {
     View* idle_view_up;
     View* idle_view_down;
     View* view_hw_mismatch;
+    View* view_lockmenu;
+    View* view_locked;
+
+    bool locked;
+    uint8_t lock_count;
 };
 
 Dolphin* dolphin_alloc();
