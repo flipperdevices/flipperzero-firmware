@@ -1,6 +1,6 @@
 #include "power_views.h"
 
-void draw_stat(Canvas* canvas, int x, int y, IconName icon, char* val) {
+static void draw_stat(Canvas* canvas, int x, int y, IconName icon, char* val) {
     canvas_draw_frame(canvas, x - 7, y + 7, 30, 13);
     canvas_draw_icon_name(canvas, x, y, icon);
     canvas_set_color(canvas, ColorWhite);
@@ -9,8 +9,10 @@ void draw_stat(Canvas* canvas, int x, int y, IconName icon, char* val) {
     canvas_draw_str_aligned(canvas, x + 8, y + 22, AlignCenter, AlignBottom, val);
 };
 
-void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
-    char emote[20], header[20], value[20];
+static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
+    char emote[20]; 
+    char header[20];
+    char value[20];
 
     int32_t drain_current = -data->current_gauge * 1000;
     uint32_t charge_current = data->current_charger * 1000;
@@ -57,15 +59,15 @@ void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
             charge_current,
             "mA");
     } else if(drain_current > 0) {
-        sprintf(emote, "%s", drain_current > 100 ? "Oh no!" : "Om-nom-nom!");
-        sprintf(header, "%s", "Consumption is");
-        snprintf(value, 32, "%ld %s", drain_current, drain_current > 100 ? "mA!" : "mA");
+        snprintf(emote, 20, "%s", drain_current > 100 ? "Oh no!" : "Om-nom-nom!");
+        snprintf(header, 20, "%s", "Consumption is");
+        snprintf(value, 20, "%ld %s", drain_current, drain_current > 100 ? "mA!" : "mA");
     } else if(charge_current != 0 || drain_current != 0) {
-        sprintf(header, "%s", "...");
+        snprintf(header, 20, "%s", "...");
         memset(value, 0, strlen(value));
         memset(emote, 0, strlen(emote));
     } else {
-        sprintf(header, "%s", "Charged!");
+        snprintf(header, 20, "%s", "Charged!");
         memset(value, 0, strlen(value));
         memset(emote, 0, strlen(emote));
     }
