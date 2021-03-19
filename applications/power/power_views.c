@@ -51,12 +51,10 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
         snprintf(
             value,
             sizeof(value),
-            "%d.%d%s   %ld%s",
-            data->vbus / 1000,
-            (data->vbus / 100) % 10,
-            "V",
-            charge_current,
-            "mA");
+            "%ld.%ldV   %ldmA",
+            (uint32_t)(data->voltage_vbus),
+            (uint32_t)(data->voltage_vbus * 10) % 10,
+            charge_current);
     } else if(drain_current > 0) {
         snprintf(emote, sizeof(emote), "%s", drain_current > 100 ? "Oh no!" : "Om-nom-nom!");
         snprintf(header, sizeof(header), "%s", "Consumption is");

@@ -162,8 +162,8 @@ float api_hal_power_get_battery_temperature(ApiHalPowerIC ic) {
     
 }
 
-uint16_t api_hal_power_get_usb_voltage(){
-    return bq25896_get_vbus_voltage();
+float api_hal_power_get_usb_voltage(){
+    return (float)bq25896_get_vbus_voltage() / 1000.0f;
 }
 
 void api_hal_power_dump_state(string_t buffer) {

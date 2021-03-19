@@ -14,6 +14,7 @@ typedef struct {
 
     float voltage_charger;
     float voltage_gauge;
+    float voltage_vbus;
 
     uint32_t capacity_remaining;
     uint32_t capacity_full;
@@ -23,8 +24,6 @@ typedef struct {
 
     uint8_t charge;
     uint8_t health;
-    uint16_t vbus;
-
 } PowerInfoModel;
 
 void power_info_draw_callback(Canvas* canvas, void* context);

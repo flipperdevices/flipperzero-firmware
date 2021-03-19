@@ -78,7 +78,7 @@ float api_hal_power_get_battery_temperature(ApiHalPowerIC ic);
 float api_hal_power_get_system_voltage();
 
 /* Get USB voltage in V */
-uint16_t api_hal_power_get_usb_voltage();
+float api_hal_power_get_usb_voltage();
 
 /* Get power system component state */
 void api_hal_power_dump_state(string_t buffer);
