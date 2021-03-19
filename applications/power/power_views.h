@@ -23,6 +23,8 @@ typedef struct {
 
     uint8_t charge;
     uint8_t health;
+    uint16_t vbus;
+
 } PowerInfoModel;
 
 void power_info_draw_callback(Canvas* canvas, void* context);

@@ -16,7 +16,6 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
 
     int32_t drain_current = -data->current_gauge * 1000;
     uint32_t charge_current = data->current_gauge * 1000;
-    uint32_t charge_voltage = data->voltage_gauge;
 
     // battery
     canvas_draw_icon_name(canvas, x, y, I_BatteryBody_52x28);
@@ -53,9 +52,9 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
         snprintf(
             value,
             sizeof(value),
-            "%ld.%01ld%s   %ld%s",
-            charge_voltage,
-            (charge_voltage * 10) % 10,
+            "%d.%01d%s   %ld%s",
+            data->vbus / 1000,
+            data->vbus % 10,
             "V",
             charge_current,
             "mA");

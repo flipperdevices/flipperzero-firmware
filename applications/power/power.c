@@ -210,6 +210,8 @@ int32_t power_task(void* p) {
                     api_hal_power_get_battery_temperature(ApiHalPowerICCharger);
                 model->temperature_gauge =
                     api_hal_power_get_battery_temperature(ApiHalPowerICFuelGauge);
+                model->vbus = api_hal_power_get_usb_voltage();
+
                 return true;
             });
 
