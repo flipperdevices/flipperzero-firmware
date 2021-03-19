@@ -53,7 +53,7 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
             sizeof(value),
             "%d.%d%s   %ld%s",
             data->vbus / 1000,
-            (data->vbus / 1000) % 10,
+            (data->vbus / 100) % 10,
             "V",
             charge_current,
             "mA");
