@@ -64,12 +64,12 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
             value, sizeof(value), "%ld %s", drain_current, drain_current > 100 ? "mA!" : "mA");
     } else if(charge_current != 0 || drain_current != 0) {
         snprintf(header, 20, "%s", "...");
-        memset(value, 0, strlen(value));
-        memset(emote, 0, strlen(emote));
+        memset(value, 0, sizeof(value));
+        memset(emote, 0, sizeof(emote));
     } else {
         snprintf(header, sizeof(header), "%s", "Charged!");
-        memset(value, 0, strlen(value));
-        memset(emote, 0, strlen(emote));
+        memset(value, 0, sizeof(value));
+        memset(emote, 0, sizeof(emote));
     }
 
     canvas_draw_str_aligned(canvas, 92, y + 3, AlignCenter, AlignCenter, emote);
