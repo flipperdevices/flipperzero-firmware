@@ -48,10 +48,11 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
 
     // text
     if(charge_current > 0) {
-        sprintf(emote, "%s", "Yummy!");
-        sprintf(header, "%s", "Charging at");
-        sprintf(
+        snprintf(emote, sizeof(emote), "%s", "Yummy!");
+        snprintf(header, sizeof(header), "%s", "Charging at");
+        snprintf(
             value,
+            sizeof(value),
             "%ld.%01ld%s   %ld%s",
             charger_voltage,
             (charger_voltage * 10) % 10,
@@ -59,15 +60,16 @@ static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
             charge_current,
             "mA");
     } else if(drain_current > 0) {
-        snprintf(emote, 20, "%s", drain_current > 100 ? "Oh no!" : "Om-nom-nom!");
-        snprintf(header, 20, "%s", "Consumption is");
-        snprintf(value, 20, "%ld %s", drain_current, drain_current > 100 ? "mA!" : "mA");
+        snprintf(emote, sizeof(emote), "%s", drain_current > 100 ? "Oh no!" : "Om-nom-nom!");
+        snprintf(header, sizeof(header), "%s", "Consumption is");
+        snprintf(
+            value, sizeof(value), "%ld %s", drain_current, drain_current > 100 ? "mA!" : "mA");
     } else if(charge_current != 0 || drain_current != 0) {
         snprintf(header, 20, "%s", "...");
         memset(value, 0, strlen(value));
         memset(emote, 0, strlen(emote));
     } else {
-        snprintf(header, 20, "%s", "Charged!");
+        snprintf(header, sizeof(header), "%s", "Charged!");
         memset(value, 0, strlen(value));
         memset(emote, 0, strlen(emote));
     }
@@ -89,14 +91,15 @@ void power_info_draw_callback(Canvas* canvas, void* context) {
     char voltage[10];
     char health[10];
 
-    sprintf(batt_level, "%ld%s", (uint32_t)data->charge, "%");
-    sprintf(temperature, "%ld %s", (uint32_t)data->temperature_gauge, "C");
-    sprintf(
+    snprintf(batt_level, sizeof(batt_level), "%ld%s", (uint32_t)data->charge, "%");
+    snprintf(temperature, sizeof(temperature), "%ld %s", (uint32_t)data->temperature_gauge, "C");
+    snprintf(
         voltage,
+        sizeof(voltage),
         "%ld.%01ld V",
         (uint32_t)data->voltage_gauge,
         (uint32_t)(data->voltage_gauge * 10) % 10);
-    sprintf(health, "%d%s", data->health, "%");
+    snprintf(health, sizeof(health), "%d%s", data->health, "%");
 
     draw_stat(canvas, 8, 42, I_Battery_16x16, batt_level);
     draw_stat(canvas, 40, 42, I_Temperature_16x16, temperature);
