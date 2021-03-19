@@ -10,7 +10,7 @@ static void draw_stat(Canvas* canvas, int x, int y, IconName icon, char* val) {
 };
 
 static void draw_battery(Canvas* canvas, PowerInfoModel* data, int x, int y) {
-    char emote[20]; 
+    char emote[20];
     char header[20];
     char value[20];
 
