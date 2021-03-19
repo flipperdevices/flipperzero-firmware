@@ -48,7 +48,7 @@ void gui_redraw_status_bar(Gui* gui) {
     ViewPort* view_port;
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
-    canvas_draw_icon_name(gui->canvas, 0, 0, I_StatusBar_128x13);
+    canvas_draw_icon_name(gui->canvas, 0, 0, I_Background_128x11);
     // Right side
     x = GUI_DISPLAY_WIDTH + 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
@@ -60,7 +60,24 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             x -= (width + 2);
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
+
+            canvas_set_color(gui->canvas, ColorWhite); 
+            canvas_draw_box(gui->canvas, -4, -2, width + 4, 13);
+
+            canvas_set_color(gui->canvas, ColorBlack);
+            
+            canvas_draw_box(gui->canvas, -4, -2, 1, 12);
+            canvas_draw_box(gui->canvas, -5, -1, 1, 11);
+
+            canvas_draw_box(gui->canvas, -4, 9, width + 3, 2);
+            canvas_draw_box(gui->canvas, -4, -2, width + 3, 1);
+            canvas_draw_box(gui->canvas, width - 1, -1, 1, 11);
+
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_dot(gui->canvas, width + 2, -2);
+
+            canvas_set_color(gui->canvas, ColorBlack);
             view_port_draw(view_port, gui->canvas);
         }
         ViewPortArray_next(it);
@@ -76,14 +93,24 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
-            canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 0, -2, width + 2, 13);
+            
+            canvas_set_color(gui->canvas, ColorWhite); 
+            canvas_draw_box(gui->canvas, -2, -2, width + 4, 13);
+
             canvas_set_color(gui->canvas, ColorBlack);
-            canvas_draw_box(gui->canvas, 0, 9, width + 2, 2);
-            canvas_draw_box(gui->canvas, 0, -2, width + 2, 1);
+            
+            if(x==3){ // Frame start
+                canvas_draw_box(gui->canvas, -2, -2, 1, 12);
+                canvas_draw_box(gui->canvas, -3, -1, 1, 11);
+            }
+
+            canvas_draw_box(gui->canvas, -2, 9, width + 4, 2);
+            canvas_draw_box(gui->canvas, -2, -2, width + 4, 1);
             canvas_draw_box(gui->canvas, width + 2, -2, 1, 12);
+
             canvas_set_color(gui->canvas, ColorWhite);
             canvas_draw_dot(gui->canvas, width + 2, -2);
+
             canvas_set_color(gui->canvas, ColorBlack);
             view_port_draw(view_port, gui->canvas);
 
