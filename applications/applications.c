@@ -17,7 +17,7 @@ int32_t backlight_control(void* p);
 int32_t irda(void* p);
 int32_t app_loader(void* p);
 int32_t cc1101_workaround(void* p);
-int32_t lf_rfid_workaround(void* p);
+int32_t app_lfrfid(void* p);
 int32_t nfc_task(void* p);
 int32_t dolphin_task(void* p);
 int32_t power_task(void* p);
@@ -90,10 +90,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_LF_RFID
-    {.app = lf_rfid_workaround,
-     .name = "lf rfid workaround",
-     .stack_size = 1024,
-     .icon = A_Plugins_14},
+    {.app = app_lfrfid, .name = "lf rfid workaround", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_IRDA
@@ -169,7 +166,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef BUILD_LF_RFID
-    {.app = lf_rfid_workaround, .name = "125 kHz RFID", .stack_size = 1024, .icon = A_125khz_14},
+    {.app = app_lfrfid, .name = "125 kHz RFID", .stack_size = 1024, .icon = A_125khz_14},
 #endif
 
 #ifdef BUILD_IRDA
