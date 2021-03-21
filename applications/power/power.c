@@ -16,8 +16,6 @@
 #include <cli/cli.h>
 #include <stm32wbxx.h>
 
-#define BATT_WIDTH 26
-
 struct Power {
     ViewDispatcher* view_dispatcher;
     View* info_view;
@@ -25,6 +23,7 @@ struct Power {
     Icon* usb_icon;
     ViewPort* usb_view_port;
 
+    Icon* battery_icon;
     ViewPort* battery_view_port;
 
     Dialog* dialog;
@@ -44,10 +43,10 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     assert(context);
     Power* power = context;
 
+    canvas_draw_icon(canvas, -2, 0, power->battery_icon); // fix me
     with_view_model(
         power->info_view, (PowerInfoModel * model) {
-            canvas_draw_icon_name(canvas, -2, 0, I_Battery_26x8);
-            canvas_draw_box(canvas, 0, 2, (float)model->charge / 100 * 20, 4);
+            canvas_draw_box(canvas, 0, 2, (float)model->charge / 100 * 14, 4);
             return false;
         });
 }
@@ -131,8 +130,9 @@ Power* power_alloc() {
     view_port_set_width(power->usb_view_port, icon_get_width(power->usb_icon));
     view_port_draw_callback_set(power->usb_view_port, power_draw_usb_callback, power);
 
+    power->battery_icon = assets_icons_get(I_Battery_19x8);
     power->battery_view_port = view_port_alloc();
-    view_port_set_width(power->battery_view_port, BATT_WIDTH);
+    view_port_set_width(power->battery_view_port, icon_get_width(power->battery_icon));
     view_port_draw_callback_set(power->battery_view_port, power_draw_battery_callback, power);
 
     return power;
@@ -215,7 +215,7 @@ int32_t power_task(void* p) {
 
         view_port_update(power->battery_view_port);
         view_port_enabled_set(power->usb_view_port, api_hal_power_is_charging());
-        osDelay(256);
+        osDelay(1024);
     }
 
     return 0;

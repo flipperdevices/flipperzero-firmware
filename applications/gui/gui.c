@@ -49,6 +49,7 @@ void gui_redraw_status_bar(Gui* gui) {
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
     canvas_draw_icon_name(gui->canvas, 0, 0, I_Background_128x11);
+    u8g2_SetBitmapMode(&gui->canvas->fb, 1);
     // Right side
     x = GUI_DISPLAY_WIDTH + 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
@@ -60,30 +61,34 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             x -= (width + 2);
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
-
-            canvas_set_color(gui->canvas, ColorWhite); 
-            canvas_draw_box(gui->canvas, -4, -2, width + 4, 13);
-
-            canvas_set_color(gui->canvas, ColorBlack);
-            
-            canvas_draw_box(gui->canvas, -4, -2, 1, 12);
-            canvas_draw_box(gui->canvas, -5, -1, 1, 11);
-
-            canvas_draw_box(gui->canvas, -4, 9, width + 3, 2);
-            canvas_draw_box(gui->canvas, -4, -2, width + 3, 1);
-            canvas_draw_box(gui->canvas, width - 1, -1, 1, 11);
+            canvas_frame_set(gui->canvas, x - 5, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_dot(gui->canvas, width + 2, -2);
+            canvas_draw_box(gui->canvas, 1, 1, width + 3, 11);
 
             canvas_set_color(gui->canvas, ColorBlack);
+
+            canvas_draw_box(gui->canvas, 1, 0, 1, 12);
+            canvas_draw_box(gui->canvas, 0, 1, 1, 11);
+
+            canvas_draw_box(gui->canvas, 1, 11, width + 4, 2);
+            canvas_draw_box(gui->canvas, 1, 0, width + 4, 1);
+            canvas_draw_box(gui->canvas, width + 4, 1, 1, 11);
+
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_dot(gui->canvas, width + 4, 0);
+            canvas_draw_dot(gui->canvas, width + 4, 12);
+
+            canvas_set_color(gui->canvas, ColorBlack);
+
+            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
+
             view_port_draw(view_port, gui->canvas);
         }
         ViewPortArray_next(it);
     }
     // Left side
-    x = 3;
+    x = 0;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarLeft]);
     while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
         // Render view_port;
@@ -92,26 +97,30 @@ void gui_redraw_status_bar(Gui* gui) {
             width = view_port_get_width(view_port);
             if(!width) width = 8;
             x_used += width;
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
-            
-            canvas_set_color(gui->canvas, ColorWhite); 
-            canvas_draw_box(gui->canvas, -2, -2, width + 4, 13);
-
-            canvas_set_color(gui->canvas, ColorBlack);
-            
-            if(x==3){ // Frame start
-                canvas_draw_box(gui->canvas, -2, -2, 1, 12);
-                canvas_draw_box(gui->canvas, -3, -1, 1, 11);
-            }
-
-            canvas_draw_box(gui->canvas, -2, 9, width + 4, 2);
-            canvas_draw_box(gui->canvas, -2, -2, width + 4, 1);
-            canvas_draw_box(gui->canvas, width + 2, -2, 1, 12);
+            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_dot(gui->canvas, width + 2, -2);
+            canvas_draw_box(gui->canvas, 1, 1, width + 3, 11);
 
             canvas_set_color(gui->canvas, ColorBlack);
+
+            if(x == 0) { // Frame start
+                canvas_draw_box(gui->canvas, 1, 0, 1, 12);
+                canvas_draw_box(gui->canvas, 0, 1, 1, 11);
+            }
+
+            canvas_draw_box(gui->canvas, 1, 11, width + 4, 2);
+            canvas_draw_box(gui->canvas, 1, 0, width + 4, 1);
+            canvas_draw_box(gui->canvas, width + 4, 0, 1, 12);
+
+            canvas_set_color(gui->canvas, ColorWhite);
+            canvas_draw_dot(gui->canvas, width + 4, 0);
+            canvas_draw_dot(gui->canvas, width + 4, 12);
+
+            canvas_set_color(gui->canvas, ColorBlack);
+
+            canvas_frame_set(
+                gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
             view_port_draw(view_port, gui->canvas);
 
             x += (width + 2);

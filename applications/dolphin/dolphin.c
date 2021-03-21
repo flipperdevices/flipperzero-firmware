@@ -49,6 +49,8 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
             } else if(event->key == InputKeyLeft) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleUp);
+            } else if(event->key == InputKeyRight) {
+                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMeta);
             } else if(event->key == InputKeyDown) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDown);
             }
@@ -108,10 +110,65 @@ static void lock_menu_callback(void* context, uint8_t index) {
     }
 }
 
-void lock_icon_callback(Canvas* canvas, void* context) {
+static void meta_menu_callback(void* context, uint8_t index) {
+    Dolphin* dolphin = context;
+    switch(index) {
+    case 0:
+        view_port_enabled_set(dolphin->passport, true);
+        break;
+
+    default:
+        break;
+    }
+}
+
+static void lock_icon_callback(Canvas* canvas, void* context) {
     assert(context);
     Dolphin* dolphin = context;
     canvas_draw_icon(canvas, 0, 0, dolphin->lock_icon);
+}
+
+static void draw_passport_callback(Canvas* canvas, void* context) {
+    assert(context);
+    canvas_clear(canvas);
+
+    // multipass
+    canvas_draw_icon_name(canvas, 0, 0, I_PassportLeft_6x47);
+    canvas_draw_icon_name(canvas, 0, 47, I_PassportBottom_128x17);
+    canvas_draw_line(canvas, 6, 0, 125, 0);
+    canvas_draw_line(canvas, 127, 2, 127, 47);
+    canvas_draw_dot(canvas, 126, 1);
+
+    //portrait frame
+    canvas_draw_line(canvas, 9, 6, 9, 53);
+    canvas_draw_line(canvas, 10, 5, 52, 5);
+    canvas_draw_line(canvas, 55, 8, 55, 53);
+    canvas_draw_line(canvas, 10, 54, 54, 54);
+    canvas_draw_line(canvas, 53, 5, 55, 7);
+
+    // portrait
+    //canvas_draw_xbm(canvas, 12, 10, 41, 44, ??);
+    canvas_draw_line(canvas, 59, 18, 124, 18);
+    canvas_draw_line(canvas, 59, 31, 124, 31);
+    canvas_draw_line(canvas, 59, 44, 124, 44);
+
+    canvas_draw_str(canvas, 59, 15, api_hal_version_get_name_ptr());
+    canvas_draw_str(canvas, 59, 28, "Mood: Angry");
+    canvas_draw_str(canvas, 59, 41, "Level: 14");
+    // exp bar
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 90, 48, 34, 6);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_line(canvas, 90, 48, 90, 54);
+}
+
+static void passport_input_callback(InputEvent* event, void* context) {
+    Dolphin* dolphin = context;
+    if(event->type == InputTypeShort) {
+        if(event->key == InputKeyBack) {
+            view_port_enabled_set(dolphin->passport, false);
+        }
+    }
 }
 
 bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
@@ -145,12 +202,68 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
                 lock_menu_callback(context, model->idx);
                 return true;
             });
-
-    } else {
-        return false;
+    } else if(event->key == InputKeyBack) {
+        with_view_model(
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                model->idx = 0;
+                return true;
+            });
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
     }
 
     return true;
+}
+
+bool dolphin_view_idle_meta_input(InputEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Dolphin* dolphin = context;
+
+    if(event->type != InputTypeShort) return false;
+
+    if(event->key == InputKeyLeft) {
+        with_view_model(
+            dolphin->idle_view_meta, (DolphinViewIdleMetaModel * model) {
+                if(model->idx <= 0)
+                    model->idx = 0;
+                else
+                    --model->idx;
+                return true;
+            });
+    } else if(event->key == InputKeyRight) {
+        with_view_model(
+            dolphin->idle_view_meta, (DolphinViewIdleMetaModel * model) {
+                if(model->idx >= 2)
+                    model->idx = 2;
+                else
+                    ++model->idx;
+                return true;
+            });
+    } else if(event->key == InputKeyOk) {
+        with_view_model(
+            dolphin->idle_view_meta, (DolphinViewIdleMetaModel * model) {
+                meta_menu_callback(context, model->idx);
+                return true;
+            });
+    } else if(event->key == InputKeyBack) {
+        with_view_model(
+            dolphin->idle_view_meta, (DolphinViewIdleMetaModel * model) {
+                model->idx = 0;
+                return true;
+            });
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+    }
+
+    return true;
+}
+
+void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            model->animation = assets_icons_get(icon);
+            icon_start_animation(model->animation);
+            return true;
+        });
 }
 
 Dolphin* dolphin_alloc() {
@@ -183,17 +296,10 @@ Dolphin* dolphin_alloc() {
     view_set_input_callback(dolphin->idle_view_main, dolphin_view_idle_main_input);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
-
-    with_view_model(
-    dolphin->idle_view_main, (DolphinViewMainModel * model) {
-        model->animation = assets_icons_get(A_Swimming_128x64);
-        icon_start_animation(model->animation);
-        return true;
-    });
-
     // Stats Idle View
     dolphin->idle_view_up = view_alloc();
     view_set_context(dolphin->idle_view_up, dolphin);
+
     view_allocate_model(
         dolphin->idle_view_up, ViewModelTypeLockFree, sizeof(DolphinViewIdleUpModel));
     view_set_draw_callback(dolphin->idle_view_up, dolphin_view_idle_up_draw);
@@ -211,6 +317,16 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->view_lockmenu, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
+    // Meta View
+    dolphin->idle_view_meta = view_alloc();
+    view_set_context(dolphin->idle_view_meta, dolphin);
+    view_allocate_model(
+        dolphin->idle_view_meta, ViewModelTypeLockFree, sizeof(DolphinViewIdleMetaModel));
+    view_set_draw_callback(dolphin->idle_view_meta, dolphin_view_idle_meta_draw);
+    view_set_input_callback(dolphin->idle_view_meta, dolphin_view_idle_meta_input);
+    view_set_previous_callback(dolphin->idle_view_meta, dolphin_view_idle_back);
+    view_dispatcher_add_view(
+        dolphin->idle_view_dispatcher, DolphinViewIdleMeta, dolphin->idle_view_meta);
     // Down Idle View
     dolphin->idle_view_down = view_alloc();
     view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);
@@ -230,7 +346,16 @@ Dolphin* dolphin_alloc() {
     view_port_set_width(dolphin->lock_viewport, icon_get_width(dolphin->lock_icon));
     view_port_draw_callback_set(dolphin->lock_viewport, lock_icon_callback, dolphin);
     view_port_enabled_set(dolphin->lock_viewport, false);
-    
+
+    // Passport
+    dolphin->passport = view_port_alloc();
+    view_port_draw_callback_set(dolphin->passport, draw_passport_callback, dolphin);
+    view_port_input_callback_set(dolphin->passport, passport_input_callback, dolphin);
+    view_port_enabled_set(dolphin->passport, false);
+
+    // Main screen animation
+    dolphin_scene_handler_set_scene(dolphin, A_Swimming_128x64);
+
     return dolphin;
 }
 
@@ -253,8 +378,11 @@ int32_t dolphin_task() {
     Dolphin* dolphin = dolphin_alloc();
 
     Gui* gui = furi_record_open("gui");
+
     view_dispatcher_attach_to_gui(dolphin->idle_view_dispatcher, gui, ViewDispatcherTypeWindow);
     gui_add_view_port(gui, dolphin->lock_viewport, GuiLayerStatusBarLeft);
+
+    gui_add_view_port(gui, dolphin->passport, GuiLayerFullscreen);
 
     if(dolphin_state_load(dolphin->state)) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
@@ -288,8 +416,6 @@ int32_t dolphin_task() {
         } else if(event.type == DolphinEventTypeSave) {
             dolphin_state_save(dolphin->state);
         }
-
     }
-
     return 0;
 }

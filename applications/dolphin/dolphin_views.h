@@ -14,6 +14,7 @@ typedef enum {
     DolphinViewIdleDown,
     DolphinViewHwMismatch,
     DolphinViewLockMenu,
+    DolphinViewIdleMeta,
 } DolphinViewIdle;
 
 typedef struct {
@@ -33,6 +34,10 @@ typedef struct {
 } DolphinViewLockMenuModel;
 
 typedef struct {
+    uint8_t idx;
+} DolphinViewIdleMetaModel;
+
+typedef struct {
     Icon* animation;
 } DolphinViewMainModel;
 
@@ -44,6 +49,8 @@ void dolphin_view_idle_up_draw(Canvas* canvas, void* model);
 void dolphin_view_lockmenu_draw(Canvas* canvas, void* model);
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model);
+
+void dolphin_view_idle_meta_draw(Canvas* canvas, void* model);
 
 void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model);
 

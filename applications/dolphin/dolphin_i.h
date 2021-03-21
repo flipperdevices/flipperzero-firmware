@@ -39,9 +39,10 @@ struct Dolphin {
     View* idle_view_main;
     View* idle_view_up;
     View* idle_view_down;
+    View* idle_view_meta;
     View* view_hw_mismatch;
     View* view_lockmenu;
-
+    ViewPort* passport;
     ViewPort* lock_viewport;
     Icon* lock_icon;
     bool locked;

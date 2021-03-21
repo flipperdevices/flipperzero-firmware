@@ -2,14 +2,10 @@
 #include <gui/view.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
-
 #include <api-hal.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
-/*
-    D U M B mode
-    dynamic universal military bypass
-*/
+static char* Meta_Items[3] = {"Passport", "Games", "???"};
 
 void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     DolphinViewFirstStartModel* m = model;
@@ -64,23 +60,13 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinViewMainModel* m = model;
-
     canvas_draw_icon(canvas, 0, 0, m->animation);
-
-    /*
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon_name(
-        canvas, canvas_width(canvas) - 70, canvas_height(canvas) - 50, I_Flipper_young_80x60);
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 15, "/\\: Stats");
-    canvas_draw_str(canvas, 5, 32, "OK: Menu");
-    canvas_draw_str(canvas, 2, 47, "\\/: Version");
-    */
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
     DolphinViewIdleUpModel* m = model;
     canvas_clear(canvas);
+
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 15, "Dolphin stats:");
@@ -106,6 +92,29 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
             canvas, 64, 13 + (i * 17), AlignCenter, AlignCenter, Lockmenu_Items[i]);
         if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
     }
+}
+
+void dolphin_view_idle_meta_draw(Canvas* canvas, void* model) {
+    DolphinViewLockMenuModel* m = model;
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+
+    canvas_draw_icon_name(canvas, 20, 23, I_BigProfile_24x24);
+    canvas_draw_icon_name(canvas, 55, 23, I_BigGames_24x24);
+    canvas_draw_icon_name(canvas, 90, 23, I_BigBurger_24x24);
+
+    canvas_draw_str_aligned(canvas, 66, 12, AlignCenter, AlignCenter, Meta_Items[m->idx]);
+
+    canvas_draw_frame(canvas, 17 + (35 * m->idx), 20, 30, 30);
+    canvas_set_color(canvas, ColorWhite);
+
+    canvas_draw_dot(canvas, 17 + (35 * m->idx), 20);
+    canvas_draw_dot(canvas, 17 + (35 * m->idx), 49);
+    canvas_draw_dot(canvas, 46 + (35 * m->idx), 20);
+    canvas_draw_dot(canvas, 46 + (35 * m->idx), 49);
+
+    canvas_set_color(canvas, ColorBlack);
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
