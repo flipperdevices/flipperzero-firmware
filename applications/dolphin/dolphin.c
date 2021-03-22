@@ -130,6 +130,13 @@ static void lock_icon_callback(Canvas* canvas, void* context) {
 
 static void draw_passport_callback(Canvas* canvas, void* context) {
     assert(context);
+    Dolphin* dolphin = context;
+
+    char level[20];
+
+    uint32_t exp = (dolphin_state_xp_to_levelup(dolphin->state, true) * 63) /
+                   dolphin_state_xp_to_levelup(dolphin->state, false);
+
     canvas_clear(canvas);
 
     // multipass
@@ -154,12 +161,14 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
 
     canvas_draw_str(canvas, 59, 15, api_hal_version_get_name_ptr());
     canvas_draw_str(canvas, 59, 28, "Mood: Angry");
-    canvas_draw_str(canvas, 59, 41, "Level: 14");
-    // exp bar
+
+    snprintf(level, 20, "Level: %ld", dolphin_state_get_level(dolphin->state));
+    canvas_draw_str(canvas, 59, 41, level);
+
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 90, 48, 34, 6);
+    canvas_draw_box(canvas, 123 - exp, 48, exp + 1, 6);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_line(canvas, 90, 48, 90, 54);
+    canvas_draw_line(canvas, 123 - exp, 48, 123 - exp, 54);
 }
 
 static void passport_input_callback(InputEvent* event, void* context) {

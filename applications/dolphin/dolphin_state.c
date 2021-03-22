@@ -1,6 +1,7 @@
 #include "dolphin_state.h"
 #include <furi.h>
 #include <api-hal.h>
+#include <math.h>
 
 typedef struct {
     uint8_t magic;
@@ -16,6 +17,9 @@ typedef struct {
 
 #define DOLPHIN_DATA_HEADER_MAGIC 0xD0
 #define DOLPHIN_DATA_HEADER_VERSION 0x01
+#define DOLPHIN_MAX_LEVEL 80
+#define DOLPHIN_XP_FIRST 100
+#define DOLPHIN_XP_LAST 1000000
 
 typedef struct {
     uint32_t limit_ibutton;
@@ -26,6 +30,7 @@ typedef struct {
     uint32_t flags;
     uint32_t icounter;
     uint32_t butthurt;
+    uint8_t level;
 } DolphinData;
 
 struct DolphinState {
@@ -110,6 +115,10 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     if(icounter >= 0) {
         dolphin_state->data.icounter = icounter;
     }
+
+    if(dolphin_state_xp_to_levelup(dolphin_state, true) <= 0) {
+        dolphin_state->data.level++;
+    }
 }
 
 uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
@@ -118,4 +127,13 @@ uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
 
 uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
     return dolphin_state->data.butthurt;
+}
+
+uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
+    return dolphin_state->data.level;
+}
+
+uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, bool remaining) {
+    return (dolphin_state->data.level * (dolphin_state->data.level - 1) * 250) -
+           (remaining ? dolphin_state->data.icounter : 0); // D&D Style
 }
