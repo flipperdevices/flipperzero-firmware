@@ -39,6 +39,7 @@ struct DolphinState {
 
 DolphinState* dolphin_state_alloc() {
     DolphinState* dolphin_state = furi_alloc(sizeof(DolphinState));
+    dolphin_state->data.level = 1; // Fix me? Level cant be zero
     return dolphin_state;
 }
 
