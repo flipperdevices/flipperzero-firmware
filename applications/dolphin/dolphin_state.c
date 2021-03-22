@@ -131,10 +131,11 @@ uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
 }
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
-    return dolphin_state->data.level;
+    return dolphin_state->data.level + 1;
 }
 
 uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, bool remaining) {
-    return (dolphin_state->data.level * (dolphin_state->data.level - 1) * 250) -
+    return (dolphin_state->data.level *
+            ((dolphin_state->data.level == 1 ? 2 : dolphin_state->data.level) - 1) * 250) -
            (remaining ? dolphin_state->data.icounter : 0); // D&D Style
 }
