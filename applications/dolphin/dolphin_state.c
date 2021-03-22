@@ -131,7 +131,7 @@ uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
 }
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
-    return dolphin_state->data.level + 1;
+    return dolphin_state->data.level;
 }
 
 uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, bool remaining) {
