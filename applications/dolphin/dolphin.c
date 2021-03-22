@@ -155,6 +155,7 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
 
     // portrait
     //canvas_draw_xbm(canvas, 12, 10, 41, 44, ??);
+    canvas_draw_icon_name(canvas, 14, 11, I_DolphinOkay_41x43);
     canvas_draw_line(canvas, 59, 18, 124, 18);
     canvas_draw_line(canvas, 59, 31, 124, 31);
     canvas_draw_line(canvas, 59, 44, 124, 44);
