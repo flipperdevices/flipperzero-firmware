@@ -1,4 +1,28 @@
 #include "dolphin_i.h"
+#include <stdlib.h>
+
+IconName scenes[] = {A_Swimming_128x64, A_WatchingTV_128x64, A_Mad_128x64, A_Wink_128x64};
+
+void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            model->animation = assets_icons_get(icon);
+            icon_start_animation(model->animation);
+            return true;
+        });
+}
+
+void dolphin_scene_handler_switch_scene(Dolphin* dolphin) {
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            if(icon_is_last_frame(model->animation)) {
+                model->animation = assets_icons_get(scenes[model->scene_num]);
+                icon_start_animation(model->animation);
+                model->scene_num = (model->scene_num + 1) % 4;
+            }
+            return true;
+        });
+}
 
 bool dolphin_view_first_start_input(InputEvent* event, void* context) {
     furi_assert(event);
@@ -70,6 +94,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                 }
             }
         }
+        dolphin_scene_handler_switch_scene(dolphin);
     }
 
     // All events consumed
@@ -161,7 +186,7 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
     canvas_draw_line(canvas, 59, 44, 124, 44);
 
     canvas_draw_str(canvas, 59, 15, api_hal_version_get_name_ptr());
-    canvas_draw_str(canvas, 59, 28, "Mood: Angry");
+    canvas_draw_str(canvas, 59, 28, "Mood: OK");
 
     snprintf(level, 20, "Level: %ld", dolphin_state_get_level(dolphin->state));
     canvas_draw_str(canvas, 59, 41, level);
@@ -265,15 +290,6 @@ bool dolphin_view_idle_meta_input(InputEvent* event, void* context) {
     }
 
     return true;
-}
-
-void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
-    with_view_model(
-        dolphin->idle_view_main, (DolphinViewMainModel * model) {
-            model->animation = assets_icons_get(icon);
-            icon_start_animation(model->animation);
-            return true;
-        });
 }
 
 Dolphin* dolphin_alloc() {
@@ -411,7 +427,6 @@ int32_t dolphin_task() {
     if(!api_hal_version_do_i_belong_here()) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewHwMismatch);
     }
-
     DolphinEvent event;
     while(1) {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);

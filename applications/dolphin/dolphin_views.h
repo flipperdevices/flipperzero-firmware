@@ -39,6 +39,8 @@ typedef struct {
 
 typedef struct {
     Icon* animation;
+    uint8_t scene_num;
+
 } DolphinViewMainModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
