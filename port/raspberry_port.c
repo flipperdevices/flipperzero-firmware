@@ -16,6 +16,7 @@
 #include "serial_io.h"
 #include "serial_comm.h"
 #include <pigpio.h>
+#include "raspberry_port.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -207,7 +208,7 @@ static esp_loader_error_t read_data(char *buffer, uint32_t size)
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_raspberry_init(loader_raspberry_config_t *config)
+esp_loader_error_t loader_port_raspberry_init(const loader_raspberry_config_t *config)
 {
     s_reset_trigger_pin = config->reset_trigger_pin;
     s_gpio0_trigger_pin = config->gpio0_trigger_pin;
