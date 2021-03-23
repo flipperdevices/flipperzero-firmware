@@ -35,18 +35,6 @@ static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most fl
 static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 10000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
 
-#define MEGABYTE  1024 * 1024
-
-size_t size_id_to_flash_size[] = {
-    MEGABYTE / 4,  // 256KB,
-    MEGABYTE / 2,  // 512KB,
-    1 * MEGABYTE,  // 1MB,
-    2 * MEGABYTE,  // 2MB,
-    4 * MEGABYTE,  // 4MB,
-    8 * MEGABYTE,  // 8MB,
-    16 * MEGABYTE  // 16MB
-};
-
 typedef enum {
     SPI_FLASH_READ_ID = 0x9F
 } spi_flash_cmd_t;
@@ -90,7 +78,7 @@ static inline void md5_final(uint8_t digets[16]) { }
 
 static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
 {
-    uint32_t timeout = ERASE_REGION_TIMEOUT_PER_MB * (size_bytes / 1e6);
+    uint32_t timeout = time_per_mb * (size_bytes / 1e6);
     return MAX(timeout, DEFAULT_FLASH_TIMEOUT);
 }
 
@@ -147,13 +135,9 @@ static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bit
 
 static esp_loader_error_t spi_set_data_lengths_8266(size_t mosi_bits, size_t miso_bits)
 {
-    uint32_t mosi_bitlen_shift = 17;
-    uint32_t miso_bitlen_shift = 8;
     uint32_t mosi_mask = (mosi_bits == 0) ? 0 : mosi_bits - 1;
     uint32_t miso_mask = (miso_bits == 0) ? 0 : miso_bits - 1;
-    uint32_t usr_reg = (miso_mask << miso_bitlen_shift) | (mosi_mask << mosi_bitlen_shift);
-
-    return esp_loader_write_register(s_reg->usr1, usr_reg);
+    return esp_loader_write_register(s_reg->usr1, (miso_mask << 8) | (mosi_mask << 17));
 }
 
 static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, size_t tx_size, void *data_rx, size_t rx_size)
@@ -196,7 +180,7 @@ static esp_loader_error_t spi_flash_command(spi_flash_cmd_t cmd, void *data_tx, 
         RETURN_ON_ERROR( esp_loader_write_register(s_reg->w0, 0) );
     } else {
         uint32_t *data = (uint32_t *)data_tx;
-        uint32_t words_to_write = MIN((tx_size + 31) / 8 * 4, 1);
+        uint32_t words_to_write = (tx_size + 31) / (8 * 4);
         uint32_t data_reg_addr = s_reg->w0;
 
         while (words_to_write--) {
@@ -241,7 +225,7 @@ static esp_loader_error_t detect_flash_size(size_t *flash_size)
         return ESP_LOADER_ERROR_UNSUPPORTED_CHIP;
     }
 
-    *flash_size = size_id_to_flash_size[size_id - 0x12];
+    *flash_size = 1 << size_id;
 
     return ESP_LOADER_SUCCESS;
 }
@@ -251,8 +235,8 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
     uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
     uint32_t erase_size = block_size * blocks_to_write;
     s_flash_write_size = block_size;
-    size_t flash_size = 0;
 
+    size_t flash_size = 0;
     if (detect_flash_size(&flash_size) == ESP_LOADER_SUCCESS) {
         if (image_size > flash_size) {
             return ESP_LOADER_ERROR_IMAGE_SIZE;
@@ -326,18 +310,13 @@ esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
 
 static void hexify(const uint8_t raw_md5[16], uint8_t hex_md5_out[32])
 {
-    uint8_t high_nibble, low_nibble;
-
     static const uint8_t dec_to_hex[] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
     };
-
     for (int i = 0; i < 16; i++) {
-        high_nibble = (raw_md5[i] / 16);
-        low_nibble = (raw_md5[i] - (high_nibble * 16));
-        *hex_md5_out++ = dec_to_hex[high_nibble];
-        *hex_md5_out++ = dec_to_hex[low_nibble];
+        *hex_md5_out++ = dec_to_hex[raw_md5[i] >> 4];
+        *hex_md5_out++ = dec_to_hex[raw_md5[i] & 0xF];
     }
 }
 

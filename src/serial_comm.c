@@ -56,7 +56,7 @@ static esp_loader_error_t SLIP_receive_data(uint8_t *buff, uint32_t size)
     uint8_t ch;
 
     for (int i = 0; i < size; i++) {
-        RETURN_ON_ERROR( serial_read(&ch, 1)) ;
+        RETURN_ON_ERROR( serial_read(&ch, 1) );
 
         if (ch == 0xDB) {
             RETURN_ON_ERROR( serial_read(&ch, 1) );
@@ -105,29 +105,33 @@ static esp_loader_error_t SLIP_receive_packet(uint8_t *buff, uint32_t size)
 
 static esp_loader_error_t SLIP_send(const uint8_t *data, uint32_t size)
 {
-    uint32_t to_write = 0;
-    uint32_t written = 0;
+    uint32_t to_write = 0;  // Bytes ready to write as they are
+    uint32_t written = 0;   // Bytes already written
 
     for (int i = 0; i < size; i++) {
         if (data[i] != 0xC0 && data[i] != 0xDB) {
-            to_write++;
+            to_write++; // Queue this byte for writing
             continue;
         }
 
+        // We have a byte that needs encoding, write the queue first
         if (to_write > 0) {
             RETURN_ON_ERROR( serial_write(&data[written], to_write) );
         }
 
+        // Write the encoded byte
         if (data[i] == 0xC0) {
             RETURN_ON_ERROR( serial_write(C0_REPLACEMENT, 2) );
         } else {
             RETURN_ON_ERROR( serial_write(DB_REPLACEMENT, 2) );
         }
 
+        // Update to start again after the encoded byte
         written = i + 1;
         to_write = 0;
     }
 
+    // Write the rest of the bytes that didn't need encoding
     if (to_write > 0) {
         RETURN_ON_ERROR( serial_write(&data[written], to_write) );
     }
@@ -239,13 +243,13 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t blocks_to_write,
                                           target_chip_t target)
 {
-    size_t encription = target == ESP32S2_CHIP ? 0 : sizeof(uint32_t);
+    size_t removeEncryption = target == ESP32S2_CHIP ? 0 : sizeof(uint32_t);
 
     begin_command_t begin_cmd = {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = CMD_SIZE(begin_cmd) - encription,
+            .size = CMD_SIZE(begin_cmd) - removeEncryption,
             .checksum = 0
         },
         .erase_size = erase_size,
@@ -257,8 +261,7 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
 
     s_sequence_number = 0;
 
-
-    return send_cmd(&begin_cmd, sizeof(begin_cmd) - encription, NULL);
+    return send_cmd(&begin_cmd.common, sizeof(begin_cmd) - removeEncryption, NULL);
 }
 
 

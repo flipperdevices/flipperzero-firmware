@@ -183,7 +183,7 @@ typedef struct __attribute__((packed))
     uint32_t sector_size;
     uint32_t page_size;
     uint32_t status_mask;
-} write_spi_command_t;  
+} write_spi_command_t;
 
 
 #ifdef __cplusplus
