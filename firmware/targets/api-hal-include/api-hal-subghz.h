@@ -1,10 +1,12 @@
 #pragma once
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Sub-GHz band type */
 typedef enum {
     RfBandIsolation = 0,
     RfBand1 = 1,
@@ -12,11 +14,9 @@ typedef enum {
     RfBand3 = 3
 } RfBand;
 
-/**
- * Set Sub-GHz band
- * @param band RfBand
- */
-void api_hal_rf_band_set(RfBand band);
+void api_hal_subghz_init();
+
+void api_hal_subghz_band_set(RfBand band);
 
 #ifdef __cplusplus
 }

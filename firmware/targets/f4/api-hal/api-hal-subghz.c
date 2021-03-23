@@ -1,5 +1,3 @@
 #include "api-hal-subghz.h"
 
-void api_hal_rf_band_set(RfBand band) {
-    
-}
+void api_hal_subghz_band_set(RfBand band) {}
