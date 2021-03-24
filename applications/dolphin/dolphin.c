@@ -1,8 +1,6 @@
 #include "dolphin_i.h"
 #include <stdlib.h>
 
-IconName scenes[] = {A_Swimming_128x64, A_WatchingTV_128x64, A_Mad_128x64, A_Wink_128x64};
-
 void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
@@ -18,7 +16,7 @@ void dolphin_scene_handler_switch_scene(Dolphin* dolphin) {
             if(icon_is_last_frame(model->animation)) {
                 model->animation = assets_icons_get(scenes[model->scene_num]);
                 icon_start_animation(model->animation);
-                model->scene_num = (model->scene_num + 1) % 4;
+                model->scene_num = random() % sizeof(scenes);
             }
             return true;
         });
@@ -380,7 +378,7 @@ Dolphin* dolphin_alloc() {
     view_port_enabled_set(dolphin->passport, false);
 
     // Main screen animation
-    dolphin_scene_handler_set_scene(dolphin, A_Swimming_128x64);
+    dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
 
     return dolphin;
 }

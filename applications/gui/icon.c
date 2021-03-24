@@ -66,5 +66,5 @@ uint8_t icon_get_current_frame(Icon* icon) {
 
 bool icon_is_last_frame(Icon* icon) {
     furi_assert(icon);
-    return icon->data->frame_count - icon->frame <= 2;
+    return icon->data->frame_count - icon->frame <= 1;
 }

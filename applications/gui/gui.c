@@ -49,7 +49,7 @@ void gui_redraw_status_bar(Gui* gui) {
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
     canvas_draw_icon_name(gui->canvas, 0, 0, I_Background_128x11);
-    u8g2_SetBitmapMode(&gui->canvas->fb, 1);
+
     // Right side
     x = GUI_DISPLAY_WIDTH + 2;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);

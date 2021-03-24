@@ -45,9 +45,13 @@ struct Dolphin {
     ViewPort* passport;
     ViewPort* lock_viewport;
     Icon* lock_icon;
+
     bool locked;
     uint8_t lock_count;
 };
+
+const IconName scenes[] = {A_Swimming_128x64, A_WatchingTV_128x64, A_Mad_128x64, A_Wink_128x64};
+
 
 Dolphin* dolphin_alloc();
 
