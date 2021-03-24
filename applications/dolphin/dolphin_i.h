@@ -52,7 +52,6 @@ struct Dolphin {
 
 const IconName scenes[] = {A_Swimming_128x64, A_WatchingTV_128x64, A_Mad_128x64, A_Wink_128x64};
 
-
 Dolphin* dolphin_alloc();
 
 /* Save Dolphin state (write to permanent memory)

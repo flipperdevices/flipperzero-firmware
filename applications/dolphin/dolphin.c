@@ -55,13 +55,6 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     furi_assert(context);
     Dolphin* dolphin = context;
 
-    if(event->type == InputTypeLong) {
-        if(event->key == InputKeyBack) {
-            dolphin->locked = !dolphin->locked;
-            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-        }
-    }
-
     if(event->type == InputTypeShort) {
         if(!dolphin->locked) {
             if(event->key == InputKeyOk) {
@@ -242,6 +235,9 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
                 return true;
             });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+
+        if(random() % 100 > 50)
+            dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
     }
 
     return true;
@@ -285,6 +281,8 @@ bool dolphin_view_idle_meta_input(InputEvent* event, void* context) {
                 return true;
             });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+        if(random() % 100 > 50)
+            dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
     }
 
     return true;
