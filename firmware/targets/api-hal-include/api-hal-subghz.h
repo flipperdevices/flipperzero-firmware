@@ -16,7 +16,9 @@ typedef enum {
 
 void api_hal_subghz_init();
 
-void api_hal_subghz_band_set(RfBand band);
+void api_hal_subghz_sleep();
+
+void api_hal_subghz_set_frequency();
 
 #ifdef __cplusplus
 }
