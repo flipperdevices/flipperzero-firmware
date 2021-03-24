@@ -1,6 +1,6 @@
 #pragma once
 #include "lf-rfid-scene-generic.h"
-
+#include "../helpers/rfid-reader.h"
 class LfrfidSceneStart : public LfrfidScene {
 public:
     void on_enter(LfrfidApp* app) final;
@@ -9,4 +9,5 @@ public:
 
 private:
     void submenu_callback(void* context, uint32_t index);
+    RfidReader reader;
 };

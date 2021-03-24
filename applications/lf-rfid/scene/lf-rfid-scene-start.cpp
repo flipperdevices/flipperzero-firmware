@@ -16,6 +16,8 @@ void LfrfidSceneStart::on_enter(LfrfidApp* app) {
     submenu_add_item(submenu, "Test", SubmenuIndexTest, callback, app);
 
     view_manager->switch_to(LfrfidAppViewManager::ViewType::Submenu);
+
+    reader.start();
 }
 
 bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
@@ -32,6 +34,10 @@ bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
             break;
         }
         consumed = true;
+    }
+
+    if(event->type == LfrfidEvent::Type::Tick) {
+        reader.read();
     }
 
     return consumed;
