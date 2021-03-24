@@ -88,6 +88,7 @@ typedef enum {
     SdAppStateInfo,
     SdAppStateEject,
     SdAppStateEjected,
+    SdAppStateFileSelect,
 } SdAppState;
 
 struct SdApp {
@@ -98,7 +99,7 @@ struct SdApp {
     SdAppState sd_app_state;
 
     ViewHolder* view_holder;
-    void* result_receiver;
+    osMessageQueueId_t result_receiver;
 
     osMessageQueueId_t event_queue;
     string_t text_holder;
