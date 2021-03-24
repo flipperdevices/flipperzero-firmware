@@ -31,11 +31,7 @@ typedef struct {
 
 typedef struct {
     uint8_t idx;
-} DolphinViewLockMenuModel;
-
-typedef struct {
-    uint8_t idx;
-} DolphinViewIdleMetaModel;
+} DolphinViewMenuModel;
 
 typedef struct {
     Icon* animation;

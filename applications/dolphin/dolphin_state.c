@@ -17,9 +17,8 @@ typedef struct {
 
 #define DOLPHIN_DATA_HEADER_MAGIC 0xD0
 #define DOLPHIN_DATA_HEADER_VERSION 0x01
-#define DOLPHIN_MAX_LEVEL 80
-#define DOLPHIN_XP_FIRST 100
-#define DOLPHIN_XP_LAST 1000000
+
+#define DOLPHIN_LVL_THRESHOLD 100
 
 typedef struct {
     uint32_t limit_ibutton;
@@ -131,11 +130,11 @@ uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
 }
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
-    return dolphin_state->data.level;
+    return floor(0.5 + sqrt(1 + 8 * (dolphin_state->data.icounter) / (DOLPHIN_LVL_THRESHOLD)) / 2);
 }
 
 uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, bool remaining) {
-    return (dolphin_state->data.level *
-            ((dolphin_state->data.level == 1 ? 2 : dolphin_state->data.level) - 1) * 250) -
-           (remaining ? dolphin_state->data.icounter : 0); // D&D Style
+    uint32_t level = dolphin_state_get_level(dolphin_state);
+    return (level * ((level == 1 ? 2 : level) - 1) * DOLPHIN_LVL_THRESHOLD) -
+           (remaining ? dolphin_state->data.icounter : 0);
 }

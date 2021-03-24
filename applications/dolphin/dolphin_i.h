@@ -50,8 +50,8 @@ struct Dolphin {
     uint8_t lock_count;
 };
 
-const IconName idle_scenes[] = {A_Swimming_128x64, A_WatchingTV_128x64, A_Wink_128x64};
-const IconName emote_scenes[] = {A_Mad_128x64};
+// Temporary
+const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
 
 Dolphin* dolphin_alloc();
 

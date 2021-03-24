@@ -51,7 +51,7 @@ void gui_redraw_status_bar(Gui* gui) {
     canvas_draw_icon_name(gui->canvas, 0, 0, I_Background_128x11);
 
     // Right side
-    x = GUI_DISPLAY_WIDTH + 2;
+    x = GUI_DISPLAY_WIDTH;
     ViewPortArray_it(it, gui->layers[GuiLayerStatusBarRight]);
     while(!ViewPortArray_end_p(it) && x_used < GUI_STATUS_BAR_WIDTH) {
         // Render view_port;
@@ -61,7 +61,7 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             x -= (width + 2);
-            canvas_frame_set(gui->canvas, x - 5, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(gui->canvas, x - 3, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
             canvas_draw_box(gui->canvas, 1, 1, width + 3, 11);

@@ -81,7 +81,7 @@ void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
 }
 
 void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
-    DolphinViewLockMenuModel* m = model;
+    DolphinViewMenuModel* m = model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon_name(canvas, 5, 0, I_DoorLeft_8x56);
@@ -95,7 +95,7 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
 }
 
 void dolphin_view_idle_meta_draw(Canvas* canvas, void* model) {
-    DolphinViewLockMenuModel* m = model;
+    DolphinViewMenuModel* m = model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
