@@ -28,3 +28,13 @@ const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 const GpioPin vibro_gpio = {VIBRO_GPIO_Port, VIBRO_Pin};
 const GpioPin ibutton_gpio = {iBTN_GPIO_Port, iBTN_Pin};
 const GpioPin cc1101_g0_gpio = {CC1101_G0_GPIO_Port, CC1101_G0_Pin};
+
+// external gpio's
+const GpioPin ext_pc0_gpio = {GPIOC, GPIO_PIN_0};
+const GpioPin ext_pc1_gpio = {GPIOC, GPIO_PIN_1};
+const GpioPin ext_pc3_gpio = {GPIOC, GPIO_PIN_3};
+const GpioPin ext_pb2_gpio = {GPIOB, GPIO_PIN_2};
+const GpioPin ext_pb3_gpio = {GPIOB, GPIO_PIN_3};
+const GpioPin ext_pa4_gpio = {GPIOA, GPIO_PIN_4};
+const GpioPin ext_pa6_gpio = {GPIOA, GPIO_PIN_6};
+const GpioPin ext_pa7_gpio = {GPIOA, GPIO_PIN_7};
