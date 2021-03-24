@@ -14,9 +14,9 @@ void dolphin_scene_handler_switch_scene(Dolphin* dolphin) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
             if(icon_is_last_frame(model->animation)) {
-                model->animation = assets_icons_get(scenes[model->scene_num]);
+                model->animation = assets_icons_get(idle_scenes[model->scene_num]);
                 icon_start_animation(model->animation);
-                model->scene_num = random() % sizeof(scenes);
+                model->scene_num = random() % sizeof(idle_scenes);
             }
             return true;
         });
@@ -237,7 +237,7 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
 
         if(random() % 100 > 50)
-            dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
+            dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
     }
 
     return true;
@@ -282,7 +282,7 @@ bool dolphin_view_idle_meta_input(InputEvent* event, void* context) {
             });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         if(random() % 100 > 50)
-            dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
+            dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
     }
 
     return true;
@@ -376,7 +376,7 @@ Dolphin* dolphin_alloc() {
     view_port_enabled_set(dolphin->passport, false);
 
     // Main screen animation
-    dolphin_scene_handler_set_scene(dolphin, scenes[random() % sizeof(scenes)]);
+    dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
 
     return dolphin;
 }
