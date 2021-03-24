@@ -42,6 +42,10 @@ bool api_hal_power_deep_available() {
     return api_hal_bt_is_alive() && api_hal_power_insomnia == 0;
 }
 
+void api_hal_power_light_sleep() {
+    __WFI();
+}
+
 void api_hal_power_deep_sleep() {
   while( LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID));
 
@@ -85,6 +89,15 @@ void api_hal_power_deep_sleep() {
 
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 }
+
+void api_hal_power_sleep() {
+    if(api_hal_power_deep_available()) {
+        api_hal_power_deep_sleep();
+    } else {
+        api_hal_power_light_sleep();
+    }
+}
+
 
 uint8_t api_hal_power_get_pct() {
     return bq27220_get_state_of_charge();
@@ -148,6 +161,10 @@ float api_hal_power_get_battery_temperature(ApiHalPowerIC ic) {
         return 0.0f;
     }
     
+}
+
+float api_hal_power_get_usb_voltage(){
+    return (float)bq25896_get_vbus_voltage() / 1000.0f;;
 }
 
 void api_hal_power_dump_state(string_t buffer) {
