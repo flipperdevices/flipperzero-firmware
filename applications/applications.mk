@@ -170,7 +170,9 @@ BUILD_LF_RFID ?= 0
 ifeq ($(BUILD_LF_RFID), 1)
 CFLAGS		+= -DBUILD_LF_RFID
 CPP_SOURCES	+= $(wildcard $(APP_DIR)/lf-rfid/*.cpp)
+C_SOURCES	+= $(wildcard $(APP_DIR)/lf-rfid/*.c)
 CPP_SOURCES	+= $(wildcard $(APP_DIR)/lf-rfid/*/*.cpp)
+C_SOURCES	+= $(wildcard $(APP_DIR)/lf-rfid/*/*.c)
 APP_INPUT = 1
 APP_GUI = 1
 endif
