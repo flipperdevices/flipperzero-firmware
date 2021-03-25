@@ -64,6 +64,9 @@ uint16_t bq27220_get_temperature();
 /** Get compensated full charge capacity in in mAh */
 uint16_t bq27220_get_full_charge_capacity();
 
+/** Get design capacity in mAh */
+uint16_t bq27220_get_design_capacity();
+
 /** Get remaining capacity in in mAh */
 uint16_t bq27220_get_remaining_capacity();
 

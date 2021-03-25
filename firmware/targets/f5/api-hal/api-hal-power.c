@@ -196,8 +196,8 @@ void api_hal_power_dump_state(string_t buffer) {
         );
         // Voltage and current info
         string_cat_printf(buffer,
-            "bq27220: Full capacity: %dmAh, Remaining capacity: %dmAh, State of Charge: %d%%, State of health: %d%%\r\n",
-            bq27220_get_full_charge_capacity(), bq27220_get_remaining_capacity(),
+            "bq27220: Full capacity: %dmAh, Design capacity: %dmAh, Remaining capacity: %dmAh, State of Charge: %d%%, State of health: %d%%\r\n",
+            bq27220_get_full_charge_capacity(), bq27220_get_design_capacity(), bq27220_get_remaining_capacity(),
             bq27220_get_state_of_charge(), bq27220_get_state_of_health()
         );
         string_cat_printf(buffer,

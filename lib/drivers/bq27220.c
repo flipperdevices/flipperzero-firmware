@@ -74,6 +74,10 @@ uint16_t bq27220_get_full_charge_capacity() {
     return bq27220_read_word(CommandFullChargeCapacity);
 }
 
+uint16_t bq27220_get_design_capacity() {
+    return bq27220_read_word(CommandDesignCapacity);
+}
+
 uint16_t bq27220_get_remaining_capacity() {
     return bq27220_read_word(CommandRemainingCapacity);
 }
