@@ -18,7 +18,7 @@ typedef struct {
 #define DOLPHIN_DATA_HEADER_MAGIC 0xD0
 #define DOLPHIN_DATA_HEADER_VERSION 0x01
 
-#define DOLPHIN_LVL_THRESHOLD 100
+#define DOLPHIN_LVL_THRESHOLD 20.0f
 
 typedef struct {
     uint32_t limit_ibutton;
@@ -29,7 +29,6 @@ typedef struct {
     uint32_t flags;
     uint32_t icounter;
     uint32_t butthurt;
-    uint8_t level;
 } DolphinData;
 
 struct DolphinState {
@@ -38,7 +37,6 @@ struct DolphinState {
 
 DolphinState* dolphin_state_alloc() {
     DolphinState* dolphin_state = furi_alloc(sizeof(DolphinState));
-    dolphin_state->data.level = 1; // Fix me? Level cant be zero
     return dolphin_state;
 }
 
@@ -115,10 +113,6 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     if(icounter >= 0) {
         dolphin_state->data.icounter = icounter;
     }
-
-    if(dolphin_state_xp_to_levelup(dolphin_state, true) <= 0) {
-        dolphin_state->data.level++;
-    }
 }
 
 uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
@@ -130,11 +124,12 @@ uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
 }
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
-    return floor(0.5 + sqrt(1 + 8 * (dolphin_state->data.icounter) / (DOLPHIN_LVL_THRESHOLD)) / 2);
+    return 0.5f +
+           sqrtf(1.0f + 8.0f * ((float)dolphin_state->data.icounter / DOLPHIN_LVL_THRESHOLD)) /
+               2.0f;
 }
 
-uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, bool remaining) {
-    uint32_t level = dolphin_state_get_level(dolphin_state);
-    return (level * ((level == 1 ? 2 : level) - 1) * DOLPHIN_LVL_THRESHOLD) -
+uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, uint32_t level, bool remaining) {
+    return (DOLPHIN_LVL_THRESHOLD * level * (level + 1) / 2) -
            (remaining ? dolphin_state->data.icounter : 0);
 }

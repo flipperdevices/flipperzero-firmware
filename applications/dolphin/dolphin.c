@@ -149,9 +149,10 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
     Dolphin* dolphin = context;
 
     char level[20];
-
-    uint32_t exp = (dolphin_state_xp_to_levelup(dolphin->state, true) * 128) /
-                   dolphin_state_xp_to_levelup(dolphin->state, false);
+    uint32_t current_level = dolphin_state_get_level(dolphin->state);
+    uint32_t prev_cap = dolphin_state_xp_to_levelup(dolphin->state, current_level - 1, false);
+    uint32_t exp = (dolphin_state_xp_to_levelup(dolphin->state, current_level, true) * 63) /
+                   (dolphin_state_xp_to_levelup(dolphin->state, current_level, false) - prev_cap);
 
     canvas_clear(canvas);
 
@@ -178,9 +179,9 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 59, 15, api_hal_version_get_name_ptr());
     canvas_draw_str(canvas, 59, 28, "Mood: OK");
 
-    snprintf(level, 20, "Level: %ld", dolphin_state_get_level(dolphin->state));
-    canvas_draw_str(canvas, 59, 41, level);
+    snprintf(level, 20, "Level: %ld", current_level);
 
+    canvas_draw_str(canvas, 59, 41, level);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - exp, 48, exp + 1, 6);
     canvas_set_color(canvas, ColorBlack);
