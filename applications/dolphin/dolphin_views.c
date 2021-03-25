@@ -60,7 +60,7 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinViewMainModel* m = model;
-    canvas_draw_icon(canvas, 0, 0, m->animation);
+    if(m->animation) canvas_draw_icon(canvas, 0, 0, m->animation);
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {

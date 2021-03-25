@@ -3,7 +3,6 @@
 
 // temporary main screen animation managment
 void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
-    furi_assert(icon);
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
             model->animation = assets_icons_get(icon);
