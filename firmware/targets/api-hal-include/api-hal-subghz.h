@@ -8,17 +8,19 @@ extern "C" {
 #endif
 
 typedef enum {
-    RfBandIsolation = 0,
-    RfBand1 = 1,
-    RfBand2 = 2,
-    RfBand3 = 3
-} RfBand;
+    ApiHalSubGhzPathIsolation,
+    ApiHalSubGhzPath1,
+    ApiHalSubGhzPath2,
+    ApiHalSubGhzPath3,
+} ApiHalSubGhzPath;
 
 void api_hal_subghz_init();
 
 void api_hal_subghz_sleep();
 
-void api_hal_subghz_set_frequency();
+void api_hal_subghz_set_frequency(uint32_t value);
+
+void api_hal_subghz_set_path(ApiHalSubGhzPath path);
 
 #ifdef __cplusplus
 }
