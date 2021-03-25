@@ -2,6 +2,7 @@
 #include "bq27220_reg.h"
 
 #include <api-hal-i2c.h>
+#include <api-hal-delay.h>
 #include <stdbool.h>
 
 uint16_t bq27220_read_word(uint8_t address) {
@@ -25,15 +26,20 @@ bool bq27220_control(uint16_t control) {
         bool, &ret, () {
             uint8_t buffer[3];
             buffer[0] = CommandControl;
-            buffer[1] = (control >> 8) & 0xFF;
-            buffer[2] = control & 0xFF;
+            buffer[1] = control & 0xFF;
+            buffer[2] = (control >> 8) & 0xFF;
             return api_hal_i2c_tx(POWER_I2C, BQ27220_ADDRESS, buffer, 3, BQ27220_I2C_TIMEOUT);
         });
     return ret;
 }
 
 void bq27220_init() {
+    uint32_t timeout = 100000;
+    OperationStatus status = {};
     bq27220_control(Control_ENTER_CFG_UPDATE);
+    while((status.CFGUPDATE != 1) && (timeout-- > 0)) {
+        bq27220_get_operation_status(&status);
+    }
     bq27220_control(Control_SET_PROFILE_2);
     bq27220_control(Control_EXIT_CFG_UPDATE);
 }
