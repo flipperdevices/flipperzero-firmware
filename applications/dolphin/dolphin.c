@@ -1,6 +1,7 @@
 #include "dolphin_i.h"
 #include <stdlib.h>
 
+// temporary main screen animation managment
 void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
@@ -323,7 +324,7 @@ Dolphin* dolphin_alloc() {
     view_set_context(dolphin->idle_view_up, dolphin);
 
     view_allocate_model(
-        dolphin->idle_view_up, ViewModelTypeLockFree, sizeof(DolphinViewIdleUpModel));
+        dolphin->idle_view_up, ViewModelTypeLockFree, sizeof(DolphinViewMainModel));
     view_set_draw_callback(dolphin->idle_view_up, dolphin_view_idle_up_draw);
     view_set_input_callback(dolphin->idle_view_up, dolphin_view_idle_up_input);
     view_set_previous_callback(dolphin->idle_view_up, dolphin_view_idle_back);
