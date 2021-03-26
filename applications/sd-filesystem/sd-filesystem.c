@@ -393,7 +393,7 @@ bool sd_api_file_select(
     SdAppFileSelectResultEvent event;
     while(1) {
         osStatus_t event_status =
-            osMessageQueueGet(sd_app->event_queue, &event, NULL, osWaitForever);
+            osMessageQueueGet(return_event_queue, &event, NULL, osWaitForever);
         if(event_status == osOK) {
             retval = event.result;
             break;
@@ -697,7 +697,7 @@ int32_t sd_filesystem(void* p) {
                 case SdAppStateFileSelect: {
                     SdAppFileSelectResultEvent retval = {.result = true};
                     furi_check(
-                        osMessageQueuePut(event.result_receiver, &retval, 0, osWaitForever) ==
+                        osMessageQueuePut(sd_app->result_receiver, &retval, 0, osWaitForever) ==
                         osOK);
                     app_reset_state(sd_app);
                 }; break;
@@ -712,7 +712,7 @@ int32_t sd_filesystem(void* p) {
                 case SdAppStateFileSelect: {
                     SdAppFileSelectResultEvent retval = {.result = false};
                     furi_check(
-                        osMessageQueuePut(event.result_receiver, &retval, 0, osWaitForever) ==
+                        osMessageQueuePut(sd_app->result_receiver, &retval, 0, osWaitForever) ==
                         osOK);
                     app_reset_state(sd_app);
                 }; break;
