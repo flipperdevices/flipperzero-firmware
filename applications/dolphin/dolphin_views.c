@@ -1,11 +1,12 @@
 #include "dolphin_views.h"
+
 #include <gui/view.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <api-hal.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
-static char* Meta_Items[3] = {"Passport", "Games", "???"};
+static char* Meta_Items[3] = {"Passport", "Games", "Mindcontrol"};
 
 void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     DolphinViewFirstStartModel* m = model;
@@ -57,10 +58,82 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     }
 }
 
+void draw_dolphin(Canvas* canvas, DolphinViewMainModel* model) {
+    if(model->animation) {
+        canvas_set_bitmap_mode(canvas, true);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_icon_name(canvas, model->position, 18, I_Sillhouette_32x32);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_icon(canvas, model->position, 18, model->animation);
+        canvas_set_bitmap_mode(canvas, false);
+    }
+}
+
+void home_scene(Canvas* canvas, DolphinViewMainModel* model) {
+    // Sofa
+    canvas_draw_line(canvas, 0, 42, 128, 42);
+    canvas_draw_icon_name(canvas, 84, 34, I_Sofa_40x13);
+
+    // Our protagonist
+    draw_dolphin(canvas, model);
+
+    // TV
+    canvas_draw_icon_name(canvas, 9, 34, I_TV_20x20);
+    canvas_draw_line(canvas, 15, 31, 20, 36);
+    canvas_draw_line(canvas, 25, 31, 20, 36);
+}
+
+typedef struct {
+    void (*callback)(Canvas* canvas, DolphinViewMainModel* model);
+} Scene;
+
+const Scene scenes_list[] = {
+    {home_scene},
+};
+
+char* emotes_list[] = {
+    "Cmon dude,\nhack smth\nalready! :>",
+    "Feeling like\nhacking the\nworld! :O",
+    "Are you in,\nor are you\nout?",
+    "Oooh, man\ni don't have\nages.."};
+
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinViewMainModel* m = model;
-    if(m->animation) canvas_draw_icon(canvas, 0, 0, m->animation);
+    bool moving = true;
+    uint8_t emote_id = 0;
+
+    if(!m->mindcontrol) {
+        if(random() % 100 >= 90) {
+            moving = !moving;
+        }
+        if(random() % 100 >= 90 && m->emote == false && !m->mindcontrol) {
+            m->emote = true;
+            emote_id = random() % 4;
+        }
+
+        while(moving) {
+            if(random() % 100 > 60 && m->position < (m->emote ? 40 : 55)) {
+                m->position += 4;
+            } else if(random() % 100 < 40 && m->position > 32) {
+                m->position -= 4;
+            }
+            break;
+        }
+    }
+
+    scenes_list[0].callback(canvas, model);
+
+    if(m->emote && m->position < 40) {
+        uint8_t font_height = canvas_current_font_height(canvas);
+        if(emotes_list[emote_id]) {
+            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_box(canvas, m->position + 32, 15 - font_height, 55, font_height * 3 + 4);
+            canvas_set_color(canvas, ColorBlack);
+            elements_multiline_text(canvas, m->position + 36, 15, emotes_list[emote_id]);
+            elements_frame(canvas, m->position + 32, 15 - font_height, 55, font_height * 3 + 4);
+        }
+    }
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {

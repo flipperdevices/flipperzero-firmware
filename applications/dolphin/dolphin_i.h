@@ -51,7 +51,7 @@ struct Dolphin {
 };
 
 // Temporary
-const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
+const IconName idle_scenes[] = {A_TestDolphin_32x32}; //, A_WatchingTV_128x64};
 
 Dolphin* dolphin_alloc();
 

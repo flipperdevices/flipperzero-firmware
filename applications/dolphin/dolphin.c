@@ -56,34 +56,93 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     furi_assert(context);
     Dolphin* dolphin = context;
 
-    if(event->type == InputTypeShort) {
-        if(!dolphin->locked) {
-            if(event->key == InputKeyOk) {
-                with_value_mutex(
-                    dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
-            } else if(event->key == InputKeyUp) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
-            } else if(event->key == InputKeyLeft) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleUp);
-            } else if(event->key == InputKeyRight) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMeta);
-            } else if(event->key == InputKeyDown) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDown);
-            }
+    bool mindcontrol = false;
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            mindcontrol = model->mindcontrol;
+            return true;
+        });
 
-            if(event->key == InputKeyBack) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-            }
-        } else {
-            if(event->key == InputKeyBack) {
-                dolphin->lock_count++;
-                if(dolphin->lock_count == 3) {
-                    dolphin->locked = false;
-                    dolphin->lock_count = 0;
+    if(event->type == InputTypeShort) {
+        if(!mindcontrol) {
+            if(!dolphin->locked) {
+                if(event->key == InputKeyOk) {
+                    bool emote = false;
+
+                    with_view_model(
+                        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                            emote = model->emote;
+                            return true;
+                        });
+
+                    if(emote) {
+                        with_view_model(
+                            dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                                model->emote = false;
+                                return true;
+                            });
+                    } else {
+                        with_value_mutex(
+                            dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
+                    }
+
+                } else if(event->key == InputKeyUp) {
+                    view_dispatcher_switch_to_view(
+                        dolphin->idle_view_dispatcher, DolphinViewLockMenu);
+                } else if(event->key == InputKeyLeft) {
+                    view_dispatcher_switch_to_view(
+                        dolphin->idle_view_dispatcher, DolphinViewIdleUp);
+                } else if(event->key == InputKeyRight) {
+                    view_dispatcher_switch_to_view(
+                        dolphin->idle_view_dispatcher, DolphinViewIdleMeta);
+                } else if(event->key == InputKeyDown) {
+                    view_dispatcher_switch_to_view(
+                        dolphin->idle_view_dispatcher, DolphinViewIdleDown);
+                }
+
+                if(event->key == InputKeyBack) {
                     view_dispatcher_switch_to_view(
                         dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-                    view_port_enabled_set(dolphin->lock_viewport, false);
                 }
+            } else {
+                if(event->key == InputKeyBack) {
+                    dolphin->lock_count++;
+                    if(dolphin->lock_count == 3) {
+                        dolphin->locked = false;
+                        dolphin->lock_count = 0;
+                        view_dispatcher_switch_to_view(
+                            dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+                        view_port_enabled_set(dolphin->lock_viewport, false);
+                    }
+                }
+            }
+        } else {
+            if(event->key == InputKeyLeft) {
+                with_view_model(
+                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->position -= 4;
+                        return true;
+                    });
+
+            } else if(event->key == InputKeyRight) {
+                with_view_model(
+                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->position += 4;
+                        return true;
+                    });
+
+            } else if(event->key == InputKeyBack) {
+                with_view_model(
+                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->mindcontrol = false;
+                        return true;
+                    });
+            } else if(event->key == InputKeyOk) {
+                with_view_model(
+                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->emote = false;
+                        return true;
+                    });
             }
         }
         dolphin_scene_handler_switch_scene(dolphin);
@@ -133,7 +192,13 @@ static void meta_menu_callback(void* context, uint8_t index) {
     case 0:
         view_port_enabled_set(dolphin->passport, true);
         break;
-
+    case 2:
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+        with_view_model(
+            dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                model->mindcontrol = true;
+                return true;
+            });
     default:
         break;
     }
