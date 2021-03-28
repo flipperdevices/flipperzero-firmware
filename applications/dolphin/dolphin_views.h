@@ -35,10 +35,15 @@ typedef struct {
 
 typedef struct {
     Icon* animation;
+    Icon* back;
     uint8_t scene_num;
     uint8_t position;
-    bool mindcontrol;
-    bool emote;
+    uint8_t action;
+    uint8_t next;
+    uint8_t previous;
+    uint8_t poi;
+    bool locked; //todo
+    uint8_t dialog_id;
 } DolphinViewMainModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);

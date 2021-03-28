@@ -50,8 +50,7 @@ struct Dolphin {
     uint8_t lock_count;
 };
 
-// Temporary
-const IconName idle_scenes[] = {A_TestDolphin_32x32}; //, A_WatchingTV_128x64};
+enum Actions { SLEEP = 0, IDLE, WALK_L, WALK_R, TALK, EMOTE, MINDCONTROL };
 
 Dolphin* dolphin_alloc();
 
