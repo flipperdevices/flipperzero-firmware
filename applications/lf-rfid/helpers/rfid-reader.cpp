@@ -8,32 +8,27 @@ extern COMP_HandleTypeDef hcomp1;
  * @brief private violation assistant for RfidReader
  */
 struct RfidReaderAccessor {
-    static void set_last_dwt_value(RfidReader& rfid_reader) {
-        rfid_reader.last_dwt_value = DWT->CYCCNT;
-    }
-
-    static uint32_t get_last_dwt_value(RfidReader& rfid_reader) {
-        return rfid_reader.last_dwt_value;
-    }
-
-    static void do_em_decode(RfidReader& rfid_reader, bool polarity, uint32_t time) {
-        rfid_reader.decoder_em.process_front(polarity, time);
+    static void decode(RfidReader& rfid_reader, bool polarity) {
+        rfid_reader.decode(polarity);
     }
 };
+
+void RfidReader::decode(bool polarity) {
+    uint32_t current_dwt_value = DWT->CYCCNT;
+
+    decoder_em.process_front(polarity, current_dwt_value - last_dwt_value);
+    decoder_hid26.process_front(polarity, current_dwt_value - last_dwt_value);
+
+    last_dwt_value = current_dwt_value;
+}
 
 static void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
     COMP_HandleTypeDef* _hcomp = static_cast<COMP_HandleTypeDef*>(hcomp);
     RfidReader* _this = static_cast<RfidReader*>(comp_ctx);
 
     if(hcomp == &hcomp1) {
-        uint32_t current_dwt_value = DWT->CYCCNT;
-
-        RfidReaderAccessor::do_em_decode(
-            *_this,
-            (HAL_COMP_GetOutputLevel(_hcomp) == COMP_OUTPUT_LEVEL_HIGH),
-            current_dwt_value - RfidReaderAccessor::get_last_dwt_value(*_this));
-
-        RfidReaderAccessor::set_last_dwt_value(*_this);
+        RfidReaderAccessor::decode(
+            *_this, (HAL_COMP_GetOutputLevel(_hcomp) == COMP_OUTPUT_LEVEL_HIGH));
     }
 }
 
@@ -48,6 +43,8 @@ void RfidReader::start() {
     GpioPin* pull_pin_record = &pull_pin;
 
     gpio_init(&ext_pa7_gpio, GpioModeOutputPushPull);
+    gpio_init(&ext_pa6_gpio, GpioModeOutputPushPull);
+
     gpio_init(pull_pin_record, GpioModeOutputPushPull);
 
     // pulldown iBtn pin to prevent interference from ibutton
@@ -159,6 +156,7 @@ void RfidReader::stop() {
 
 bool RfidReader::read() {
     decoder_em.read(NULL, 0);
+    decoder_hid26.read(NULL, 0);
     return false;
 }
 
