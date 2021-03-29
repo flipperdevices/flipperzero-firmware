@@ -1,7 +1,6 @@
 #include "dolphin_i.h"
 #include <stdlib.h>
 
-// temporary main screen animation managment
 void dolphin_scene_handler_set_dolphin(Dolphin* dolphin, IconName icon, bool right) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
@@ -57,25 +56,8 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
         if(!mindcontrol) {
             if(!dolphin->locked) {
                 if(event->key == InputKeyOk) {
-                    bool emote = false;
-
-                    with_view_model(
-                        dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                            emote = model->action == TALK ? true : false;
-                            return true;
-                        });
-
-                    if(emote) {
-                        with_view_model(
-                            dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                                model->action = IDLE;
-                                return true;
-                            });
-                    } else {
-                        with_value_mutex(
-                            dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
-                    }
-
+                    with_value_mutex(
+                        dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
                 } else if(event->key == InputKeyUp) {
                     view_dispatcher_switch_to_view(
                         dolphin->idle_view_dispatcher, DolphinViewLockMenu);
@@ -109,17 +91,28 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             }
         } else {
             if(event->key == InputKeyLeft) {
-                dolphin_scene_handler_set_dolphin(dolphin, A_MDWL_32x32, false);
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->animation = assets_icons_get(A_MDWL_32x32);
+                        model->back = assets_icons_get(A_MDWLB_32x32);
+                        if(!icon_is_animating(model->animation)) {
+                            icon_start_animation(model->back);
+                            icon_start_animation(model->animation);
+                        }
                         model->position -= 5;
                         return true;
                     });
 
             } else if(event->key == InputKeyRight) {
-                dolphin_scene_handler_set_dolphin(dolphin, A_MDWR_32x32, true);
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->animation = assets_icons_get(A_MDWR_32x32);
+                        model->back = assets_icons_get(A_MDWRB_32x32);
+                        if(!icon_is_animating(model->animation)) {
+                            icon_start_animation(model->back);
+                            icon_start_animation(model->animation);
+                        }
+
                         model->position += 5;
                         return true;
                     });

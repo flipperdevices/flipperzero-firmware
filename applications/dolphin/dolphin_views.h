@@ -39,11 +39,14 @@ typedef struct {
     uint8_t scene_num;
     uint8_t position;
     uint8_t action;
-    uint8_t next;
-    uint8_t previous;
+    uint8_t next_action;
+    uint8_t previous_action;
     uint8_t poi;
-    bool locked; //todo
-    uint8_t dialog_id;
+    bool locked;
+    uint8_t emote_id;
+    uint8_t previous_emote;
+    uint8_t action_timeout;
+    uint8_t active_scene;
 } DolphinViewMainModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
