@@ -3,9 +3,9 @@
 #include <gui/elements.h>
 
 /// Items
-Item TV = {2, 20, 34, I_TV_20x20, "Watch", draw_tv};
-Item Painting = {0, 45, 10, I_Home_painting_17x20, "Use", NULL};
-Item Sofa = {0, 70, 34, I_Sofa_40x13, "Sit", draw_sofa};
+Item TV = {2, 20, 34, I_TV_20x20, "Watch", draw_tv, smash_tv};
+Item Painting = {0, 45, 10, I_Home_painting_17x20, "Use", NULL, inspect_painting};
+Item Sofa = {0, 70, 34, I_Sofa_40x13, "Sit", NULL, sofa_sit};
 Item* Home[] = {&TV, &Sofa, &Painting};
 Item** Scenes[] = {*&Home};
 
@@ -23,19 +23,43 @@ const Item* is_nearby(void* model) {
     return found ? Scenes[m->active_scene][item] : NULL;
 }
 
+void smash_tv(Canvas* canvas, void* model) {
+    canvas_set_bitmap_mode(canvas, true);
+    canvas_draw_icon_name(canvas, TV.x - 4, TV.y - 6, I_FX_Bang_32x6);
+    canvas_set_bitmap_mode(canvas, false);
+    dolphin_draw_emote_bubble(canvas, model, "Bang!");
+}
+
+void sofa_sit(Canvas* canvas, void* model) {
+    DolphinViewMainModel* m = model;
+    m->animation = assets_icons_get(A_FX_Sitting_40x27);
+    m->back = assets_icons_get(I_FX_SittingB_40x27);
+    icon_start_animation(m->back);
+}
+
 void draw_tv(Canvas* canvas, void* model) {
     canvas_draw_line(canvas, TV.x + 6, TV.y - 3, TV.x + 11, TV.y + 2);
     canvas_draw_line(canvas, TV.x + 16, TV.y - 3, TV.x + 11, TV.y + 2);
 }
 
-void draw_sofa(Canvas* canvas, void* model) {
-    canvas_draw_line(canvas, 0, 42, 128, 42);
+void inspect_painting(Canvas* canvas, void* model) {
+    DolphinViewMainModel* m = model;
+    dolphin_draw_emote_bubble(canvas, model, (char*)emotes_list[m->emote_id]);
 }
 
-void dolphin_draw_emote_bubble(Canvas* canvas, void* model) {
+void dolphin_use_item(Canvas* canvas, void* model) {
+    const Item* near = is_nearby(model);
+    if(near != NULL) {
+        if(near->callback) near->callback(canvas, model);
+        DolphinViewMainModel* m = model;
+        m->action_timeout = 2;
+    }
+}
+
+void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom) {
     DolphinViewMainModel* m = model;
     uint8_t font_y = canvas_current_font_height(canvas);
-    uint8_t str_width = canvas_string_width(canvas, emotes_list[m->emote_id]);
+    uint8_t str_width = canvas_string_width(canvas, custom ? custom : emotes_list[m->emote_id]);
     uint8_t offset = icon_get_width(m->animation) - 5;
     if(emotes_list[m->emote_id]) {
         canvas_set_color(canvas, ColorWhite);
@@ -50,17 +74,19 @@ void dolphin_draw_emote_bubble(Canvas* canvas, void* model) {
             canvas,
             m->position + (m->position < 50 ? offset + 4 : -(str_width + 5) + 4),
             20,
-            (char*)emotes_list[m->emote_id]);
+            custom ? custom : (char*)emotes_list[m->emote_id]);
         elements_frame(
             canvas,
             m->position + (m->position < 50 ? offset : -(str_width + 5)),
             18 - font_y,
             str_width + 8,
             font_y + 6);
+        if(!custom) {
+            m->previous_action = m->action;
 
-        m->previous_action = m->action;
-        if(m->action_timeout == 0) {
-            m->action = IDLE;
+            if(m->action_timeout == 0) {
+                m->action = IDLE;
+            }
         }
     }
 }
@@ -90,7 +116,7 @@ void set_dolphin_graphics(void* model) {
 void draw_scene(Canvas* canvas, void* model) {
     DolphinViewMainModel* m = model;
 
-    if(m->action == MINDCONTROL) {
+    if(m->action == MINDCONTROL && !m->use_item) {
         const Item* near = is_nearby(model);
         if(near != NULL) {
             uint16_t y_offset = near->y < 20 ? -10 : 10;
@@ -106,14 +132,17 @@ void draw_scene(Canvas* canvas, void* model) {
         uint8_t active = m->active_scene;
         for(uint8_t i = 0; i < ITEMS_NUM; i++) {
             if(l == Scenes[active][i]->layer) {
-                if(Scenes[active][i]->draw) {
-                    Scenes[active][i]->draw(canvas, model);
-                }
                 canvas_draw_icon_name(
                     canvas, Scenes[active][i]->x, Scenes[active][i]->y, Scenes[active][i]->icon);
             }
+
+            if(Scenes[active][i]->draw) {
+                Scenes[active][i]->draw(canvas, model);
+            }
         }
         if(l == DOLPHIN_LAYER) draw_dolphin(canvas, model);
+
+        if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
     }
 }
 
@@ -168,12 +197,22 @@ void dolphin_actions_update(Canvas* canvas, void* model) {
         }
     }
 
+    if(m->use_item) {
+        dolphin_use_item(canvas, model);
+        m->use_item = false;
+    }
+
+    if(m->action != MINDCONTROL && m->position == m->poi && random() % 100 > 50) {
+        dolphin_use_item(canvas, model);
+    }
+
     switch(m->action) {
     case WALK_L:
-        m->action_timeout = 5;
+        if(m->action_timeout == 0) m->action_timeout = 5;
         dolphin_update_position(model);
         break;
     case WALK_R:
+        if(m->action_timeout == 0) m->action_timeout = 5;
         m->action_timeout = 5;
         dolphin_update_position(model);
         break;
@@ -182,7 +221,7 @@ void dolphin_actions_update(Canvas* canvas, void* model) {
             m->action_timeout = 5;
             m->emote_id = roll_new(m->previous_emote, ARRSIZE(emotes_list));
         } else {
-            dolphin_draw_emote_bubble(canvas, model);
+            dolphin_draw_emote_bubble(canvas, model, NULL);
         }
         break;
     case MINDCONTROL:

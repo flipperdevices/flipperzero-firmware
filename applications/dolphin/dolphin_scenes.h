@@ -16,8 +16,10 @@ typedef struct {
     void (*callback)(Canvas* canvas, void* model);
 } Item;
 
+void smash_tv(Canvas* canvas, void* model);
 void draw_tv(Canvas* canvas, void* model);
-void draw_sofa(Canvas* canvas, void* model);
+void sofa_sit(Canvas* canvas, void* model);
+void inspect_painting(Canvas* canvas, void* model);
 
 typedef struct {
     uint16_t location;
@@ -26,7 +28,9 @@ typedef struct {
     void (*callback)(Canvas* canvas, DolphinViewMainModel* model);
 } Action;
 
-void dolphin_draw_emote_bubble(Canvas* canvas, void* model);
+void dolphin_use_item(Canvas* canvas, void* model);
+
+void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom);
 
 void draw_dolphin(Canvas* canvas, void* m);
 
@@ -39,3 +43,5 @@ void dolphin_update_position(void* model);
 void dolphin_actions_update(Canvas* canvas, void* model);
 
 void dolphin_update_scene(Canvas* canvas, void* model);
+
+void dolphin_use_item(Canvas* canvas, void* model);

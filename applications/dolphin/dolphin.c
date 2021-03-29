@@ -90,7 +90,14 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                 }
             }
         } else {
-            if(event->key == InputKeyLeft) {
+            if(event->key == InputKeyOk) {
+                with_view_model(
+                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                        model->use_item = true;
+                        return true;
+                    });
+
+            } else if(event->key == InputKeyLeft) {
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {
                         model->animation = assets_icons_get(A_MDWL_32x32);

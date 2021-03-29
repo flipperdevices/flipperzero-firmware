@@ -47,6 +47,7 @@ typedef struct {
     uint8_t previous_emote;
     uint8_t action_timeout;
     uint8_t active_scene;
+    bool use_item;
 } DolphinViewMainModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
