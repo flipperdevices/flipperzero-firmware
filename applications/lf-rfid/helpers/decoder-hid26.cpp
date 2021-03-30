@@ -11,12 +11,6 @@ constexpr uint32_t min_time = (min_time_us - jitter_time_us) * clocks_in_us;
 constexpr uint32_t mid_time = ((max_time_us - min_time_us) / 2 + min_time_us) * clocks_in_us;
 constexpr uint32_t max_time = (max_time_us + jitter_time_us) * clocks_in_us;
 
-void debug_pin_toggle(float us) {
-    gpio_write(&ext_pa6_gpio, 1);
-    delay_us(us);
-    gpio_write(&ext_pa6_gpio, 0);
-}
-
 bool DecoderHID26::read(uint8_t* data, uint8_t data_size) {
     bool result = false;
 
@@ -25,11 +19,6 @@ bool DecoderHID26::read(uint8_t* data, uint8_t data_size) {
         printf("HID %02X %02X %02X\r\n", facility, (uint8_t)(number >> 8), (uint8_t)number);
         ready = false;
     }
-
-    /*if(ready) {
-        result = true;
-        ready = false;
-    }*/
 
     return result;
 }
@@ -51,12 +40,6 @@ void DecoderHID26::process_front(bool polarity, uint32_t time) {
             } else {
                 // 5 pulses
                 pulse = true;
-            }
-
-            if(pulse) {
-                gpio_write(&ext_pa7_gpio, 1);
-            } else {
-                gpio_write(&ext_pa7_gpio, 0);
             }
 
             if(last_pulse == pulse) {
@@ -186,7 +169,6 @@ void DecoderHID26::validate_stored_data() {
         return;
     }
 
-    debug_pin_toggle(10);
     ready = true;
 }
 
