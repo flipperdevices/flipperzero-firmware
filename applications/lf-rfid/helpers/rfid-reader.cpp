@@ -1,6 +1,7 @@
 #include "rfid-reader.h"
 #include <furi.h>
 #include <api-hal.h>
+#include <stm32wbxx_ll_cortex.h>
 
 extern COMP_HandleTypeDef hcomp1;
 
@@ -18,6 +19,8 @@ void RfidReader::decode(bool polarity) {
 
     decoder_em.process_front(polarity, current_dwt_value - last_dwt_value);
     decoder_hid26.process_front(polarity, current_dwt_value - last_dwt_value);
+    decoder_indala.process_front(polarity, current_dwt_value - last_dwt_value);
+    //decoder_analyzer.process_front(polarity, current_dwt_value - last_dwt_value);
 
     last_dwt_value = current_dwt_value;
 }
@@ -135,7 +138,8 @@ void RfidReader::start() {
         Error_Handler();
     }
 
-    //hal_pwm_set(0.65, 125000 / 2, &IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    hal_pwm_set(0.65, 125000 / 2, &IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    HAL_TIM_PWM_Stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
     hal_pwmn_set(0.5, 125000, &LFRFID_TIM, LFRFID_CH);
 
     IRDA_RX_TIM.Instance->ARR = 1023;
@@ -155,8 +159,23 @@ void RfidReader::stop() {
 }
 
 bool RfidReader::read() {
+    static uint8_t i = 0;
+    i++;
+
+    if(i == 5) {
+        HAL_TIM_PWM_Start(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    }
+
+    if(i == 10) {
+        i = 0;
+        HAL_TIM_PWM_Stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    }
+
     decoder_em.read(NULL, 0);
     decoder_hid26.read(NULL, 0);
+    decoder_indala.read(NULL, 0);
+    //decoder_analyzer.read(NULL, 0);
+
     return false;
 }
 
