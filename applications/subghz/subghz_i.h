@@ -26,8 +26,6 @@ static const uint32_t subghz_frequencies[] = {
 static const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
 
 struct SubGhz {
-    osThreadId thread_id;
-
     Gui* gui;
 
     ViewDispatcher* view_dispatcher;

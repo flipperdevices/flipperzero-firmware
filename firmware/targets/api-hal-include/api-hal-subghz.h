@@ -9,40 +9,65 @@ extern "C" {
 
 /** Radio Presets */
 typedef enum {
-    ApiHalSubGhzPresetTestToneRx,
-    ApiHalSubGhzPresetTestToneTx,
-    ApiHalSubGhzPresetTestPacket,
+    ApiHalSubGhzPresetOokAsync,     /** OOK, asynchronous */
+    ApiHalSubGhzPreset2FskPacket,   /** 2FSK, 115kBaud, variable packet length */
 } ApiHalSubGhzPreset;
 
 /**  Switchable Radio Paths */
 typedef enum {
-    ApiHalSubGhzPathIsolate,    /** Isolate Radio from antenna */
-    ApiHalSubGhzPath1,          /** Path 1: SW1RF1-SW2RF2, LCLCL */
-    ApiHalSubGhzPath2,          /** Path 2: SW1RF2-SW2RF1, LCLCLCL */
-    ApiHalSubGhzPath3,          /** Path 3: SW1RF3-SW2RF3, LCLC */
+    ApiHalSubGhzPathIsolate,        /** Isolate Radio from antenna */
+    ApiHalSubGhzPath1,              /** Path 1: SW1RF1-SW2RF2, LCLCL */
+    ApiHalSubGhzPath2,              /** Path 2: SW1RF2-SW2RF1, LCLCLCL */
+    ApiHalSubGhzPath3,              /** Path 3: SW1RF3-SW2RF3, LCLC */
 } ApiHalSubGhzPath;
 
-/** Initialize IC and switch to power save mode */
+/** Initialize and switch to power save mode
+ * Used by internal API-HAL initalization routine
+ * Can be used to reinitialize device to safe state and send it to sleep
+ */
 void api_hal_subghz_init();
 
-/** Load IC registers from preset by preset name 
+/** Dump info to stdout */
+void api_hal_subghz_dump_state();
+
+/** Load registers from preset by preset name 
  * @param preset to load
  */
 void api_hal_subghz_load_preset(ApiHalSubGhzPreset preset);
 
-/** Load IC registers from preset data array
+/** Load registers
  * @param register-value pairs array, terminated with {0,0}
  */
-void api_hal_subghz_load_preset_data(const uint8_t data[][2]);
+void api_hal_subghz_load_registers(const uint8_t data[][2]);
 
-/** Dump IC info to stdout */
-void api_hal_subghz_dump_state();
+/** Load PATABLE
+ * @param data, 8 uint8_t values
+ */
+void api_hal_subghz_load_patable(const uint8_t data[8]);
 
-/** Switch to power save mode */
-void api_hal_subghz_sleep();
+/** Write packet to FIFO
+ * @param data, bytes array
+ * @param size, size
+ */
+void api_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
 
-/** Wakeup IC */
-void api_hal_subghz_wakeup();
+/** Read packet from FIFO
+ * @param data, pointer
+ * @param size, size
+ */
+void api_hal_subghz_read_packet(uint8_t* data, uint8_t size);
+
+/** Shutdown
+ * Issue spwd command
+ * @warning registers content will be lost
+ */
+void api_hal_subghz_shutdown();
+
+/** Reset
+ * Issue reset command
+ * @warning registers content will be lost
+ */
+void api_hal_subghz_reset();
 
 /** Switch to Idle */
 void api_hal_subghz_idle();
@@ -66,6 +91,7 @@ uint32_t api_hal_subghz_set_frequency(uint32_t value);
  * @param radio path to use
  */
 void api_hal_subghz_set_path(ApiHalSubGhzPath path);
+
 
 #ifdef __cplusplus
 }

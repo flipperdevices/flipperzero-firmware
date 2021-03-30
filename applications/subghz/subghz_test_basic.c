@@ -71,6 +71,10 @@ bool subghz_test_basic_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubghzTestBasic* subghz_test_basic = context;
 
+    if(event->key == InputKeyBack) {
+        return false;
+    }
+
     with_view_model(
         subghz_test_basic->view, (SubghzTestBasicModel * model) {
             osTimerStop(subghz_test_basic->timer);
@@ -120,8 +124,8 @@ void subghz_test_basic_enter(void* context) {
     furi_assert(context);
     SubghzTestBasic* subghz_test_basic = context;
 
-    api_hal_subghz_wakeup();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetTestToneTx);
+    api_hal_subghz_reset();
+    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
 
     gpio_init(&cc1101_g0_gpio, GpioModeInput);
 
@@ -147,7 +151,8 @@ void subghz_test_basic_exit(void* context) {
 
     osTimerStop(subghz_test_basic->timer);
 
-    api_hal_subghz_sleep();
+    // Reinitialize IC to default state
+    api_hal_subghz_init();
 }
 
 void subghz_test_basic_rssi_timer_callback(void* context) {
@@ -159,6 +164,10 @@ void subghz_test_basic_rssi_timer_callback(void* context) {
             model->rssi = api_hal_subghz_get_rssi();
             return true;
         });
+}
+
+uint32_t subghz_test_basic_back(void* context) {
+    return SubGhzViewMenu;
 }
 
 SubghzTestBasic* subghz_test_basic_alloc() {
@@ -173,6 +182,7 @@ SubghzTestBasic* subghz_test_basic_alloc() {
     view_set_input_callback(subghz_test_basic->view, subghz_test_basic_input);
     view_set_enter_callback(subghz_test_basic->view, subghz_test_basic_enter);
     view_set_exit_callback(subghz_test_basic->view, subghz_test_basic_exit);
+    view_set_previous_callback(subghz_test_basic->view, subghz_test_basic_back);
 
     subghz_test_basic->timer = osTimerNew(
         subghz_test_basic_rssi_timer_callback, osTimerPeriodic, subghz_test_basic, NULL);
@@ -182,6 +192,7 @@ SubghzTestBasic* subghz_test_basic_alloc() {
 
 void subghz_test_basic_free(SubghzTestBasic* subghz_test_basic) {
     furi_assert(subghz_test_basic);
+    osTimerDelete(subghz_test_basic->timer);
     view_free(subghz_test_basic->view);
     free(subghz_test_basic);
 }

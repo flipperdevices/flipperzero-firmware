@@ -9,6 +9,8 @@ extern "C" {
 
 #define CC1101_QUARTZ                   26000000
 
+#define CC1101_TIMEOUT                  500
+
 #define CC1101_READ                     (1<<7)  /** Read Bit */
 #define CC1101_BURST                    (1<<6)  /** Burst Bit */
 

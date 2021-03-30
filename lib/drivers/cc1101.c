@@ -2,6 +2,7 @@
 #include <cmsis_os2.h>
 #include <api-hal-delay.h>
 #include <assert.h>
+#include <string.h>
 
 CC1101Status cc1101_strobe(const ApiHalSpiDevice* device, uint8_t strobe) {
     uint8_t tx[1] = { strobe };
@@ -9,7 +10,7 @@ CC1101Status cc1101_strobe(const ApiHalSpiDevice* device, uint8_t strobe) {
 
     hal_gpio_write(device->chip_select, false);
     while(hal_gpio_read(device->bus->miso));
-    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 1, osWaitForever);
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 1, CC1101_TIMEOUT);
     hal_gpio_write(device->chip_select, true);
 
     assert(rx[0].CHIP_RDYn == 0);
@@ -22,7 +23,7 @@ CC1101Status cc1101_write_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_
 
     hal_gpio_write(device->chip_select, false);
     while(hal_gpio_read(device->bus->miso));
-    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, osWaitForever);
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, CC1101_TIMEOUT);
     hal_gpio_write(device->chip_select, true);
 
     assert((rx[0].CHIP_RDYn|rx[1].CHIP_RDYn) == 0);
@@ -36,7 +37,7 @@ CC1101Status cc1101_read_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_t
 
     hal_gpio_write(device->chip_select, false);
     while(hal_gpio_read(device->bus->miso));
-    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, osWaitForever);
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, CC1101_TIMEOUT);
     hal_gpio_write(device->chip_select, true);
 
     assert((rx[0].CHIP_RDYn) == 0);
@@ -90,6 +91,14 @@ void cc1101_switch_to_tx(const ApiHalSpiDevice* device) {
     cc1101_strobe(device, CC1101_STROBE_STX);
 }
 
+void cc1101_flush_rx(const ApiHalSpiDevice* device) {
+    cc1101_strobe(device, CC1101_STROBE_SFRX);
+}
+
+void cc1101_flush_tx(const ApiHalSpiDevice* device) {
+    cc1101_strobe(device, CC1101_STROBE_SFTX);
+}
+
 uint32_t cc1101_set_frequency(const ApiHalSpiDevice* device, uint32_t value) {
     uint64_t real_value = (uint64_t)value * 0xFFFF / CC1101_QUARTZ;
 
@@ -124,10 +133,39 @@ uint32_t cc1101_get_frequency_offset_step(const ApiHalSpiDevice* device) {
     return CC1101_QUARTZ / 0x4000;
 }
 
-void cc1101_set_pa_single(const ApiHalSpiDevice* device, uint8_t value) {
+void cc1101_set_pa_table(const ApiHalSpiDevice* device, const uint8_t value[8]) {
+    uint8_t tx[9] = { CC1101_PATABLE | CC1101_BURST };
+    CC1101Status rx[9] = { 0 };
 
+    memcpy(&tx[1], &value[0], 8);
+
+    hal_gpio_write(device->chip_select, false);
+    while(hal_gpio_read(device->bus->miso));
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, CC1101_TIMEOUT);
+    hal_gpio_write(device->chip_select, true);
+
+    assert((rx[0].CHIP_RDYn|rx[8].CHIP_RDYn) == 0);
 }
 
-void cc1101_set_pa_table(const ApiHalSpiDevice* device, uint8_t value[8]) {
+uint8_t cc1101_write_fifo(const ApiHalSpiDevice* device, const uint8_t* data, uint8_t size) {
+    uint8_t tx = CC1101_FIFO | CC1101_BURST;
+    CC1101Status rx = { 0 };
 
+    // Start transaction
+    hal_gpio_write(device->chip_select, false);
+    // Wait IC to become ready
+    while(hal_gpio_read(device->bus->miso));
+    // Tell IC what we want
+    api_hal_spi_bus_trx(device->bus, &tx, (uint8_t*)&rx, 1, CC1101_TIMEOUT);
+    assert((rx.CHIP_RDYn) == 0);
+    // Transmit data
+    api_hal_spi_bus_tx(device->bus, (uint8_t*)data, size, CC1101_TIMEOUT);
+    // Finish transaction
+    hal_gpio_write(device->chip_select, true);
+
+    return size;
+}
+
+uint8_t cc1101_read_fifo(const ApiHalSpiDevice* device, uint8_t* data, uint8_t size) {
+    return size;
 }

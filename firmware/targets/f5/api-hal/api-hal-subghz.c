@@ -6,52 +6,34 @@
 #include <stdio.h>
 #include "main.h"
 
-static const uint8_t api_hal_subghz_preset_tone_rx[][2] = {
-    {CC1101_FSCTRL1,    0x06},  // IF frequency
-    {CC1101_FSCTRL0,    0x00},  // frequency offset before synthesizer
-    {CC1101_MDMCFG4,    0xCC},  // RX filter bandwidth 100k(0xcc)
-    {CC1101_MDMCFG3,    0x43},  // datarate config 512kBaud  for the purpose of fast rssi measurement
-    {CC1101_MDMCFG1,    0x21},  // FEC preamble etc. last 2 bits for channel spacing
-    {CC1101_MDMCFG0,    0xF8},  // 100khz channel spacing
-    {CC1101_MCSM0,      0x18},  // calibrate when going from IDLE to RX or TX ; 149 - 155 μs timeout
-    {CC1101_FOCCFG,     0x16},  // frequency compensation
-    {CC1101_AGCTRL2,    0x43},  
-    {CC1101_AGCTRL1,    0x49},  
-    {CC1101_AGCTRL0,    0x91},  
-    {CC1101_FSCAL3,     0xEA},  
-    {CC1101_FSCAL2,     0x2A},  
-    {CC1101_FSCAL1,     0x00},  
-    {CC1101_FSCAL0,     0x1F},  
-    {CC1101_TEST2,      0x81},  
-    {CC1101_TEST1,      0x35},  
-    {CC1101_TEST0,      0x0B},  // should be 0x0B for lower than 430.6MHz and 0x09 for higher
-    {CC1101_IOCFG2,     0x0D},  // data output pin for asynchronous mode
-    {CC1101_IOCFG0,     0x2E},  // High impedance (3-state), GDO0 configed as data input for asynchronous mode
-    {CC1101_PKTCTRL0,   0x33},  // whitening off; asynchronous serial mode; CRC diable；reserved
-    {CC1101_FIFOTHR,    0x47},  // Adc_retention enabled for RX filter bandwidth less than 325KHz; defalut fifo threthold.
+static const uint8_t api_hal_subghz_preset_ook_async_regs[][2] = {
+    /* Base setting */
+    { CC1101_IOCFG0,    0x0D }, // GD0 as async serial data output/input
+    { CC1101_FSCTRL1,   0x06 }, // Set IF 26m/2^10*2=2.2MHz
+    { CC1101_MCSM0,     0x18 }, // Autocalibrate on idle to TRX, ~150us OSC guard time
+    /* Async OOK Specific things  */
+    { CC1101_MDMCFG2,   0x30 }, // ASK/OOK, No preamble/sync
+    { CC1101_PKTCTRL0,  0x32 }, // Async, no CRC, Infinite
+    { CC1101_FREND0,    0x01 }, // OOK/ASK PATABLE
+    /* End  */
     { 0, 0 },
 };
 
-static const uint8_t api_hal_subghz_preset_tone_tx[][2] = {
-    { CC1101_FIFOTHR,   0x47 }, // 
-    { CC1101_PKTCTRL0,  0x32 }, // 
-    { CC1101_FSCTRL1,   0x06 }, // 
-    { CC1101_FREQ2,     0x10 }, // 
-    { CC1101_FREQ1,     0xB0 }, // 
-    { CC1101_FREQ0,     0x71 }, // 
-    { CC1101_MDMCFG4,   0x6A }, // 
-    { CC1101_MDMCFG3,   0x2E }, // 
-    { CC1101_MDMCFG2,   0x30 }, // 
-    { CC1101_DEVIATN,   0x15 }, // 
-    { CC1101_MCSM0,     0x18 }, // 
-    { CC1101_FOCCFG,    0x16 }, // 
-    { CC1101_WORCTRL,   0xFB }, // 
-    { CC1101_FREND0,    0x11 }, // 
-    { CC1101_FSCAL3,    0xE9 }, // 
-    { CC1101_FSCAL2,    0x2A }, // 
-    { CC1101_FSCAL1,    0x00 }, // 
-    { CC1101_FSCAL0,    0x1F }, // 
+static const uint8_t api_hal_subghz_preset_ook_async_patable[8] = {
+    0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+static const uint8_t api_hal_subghz_preset_2fsk_packet_regs[][2] = {
+    /* Base setting */
+    { CC1101_IOCFG0,    0x06 }, // GD0 as async serial data output/input
+    { CC1101_FSCTRL1,   0x06 }, // Set IF 26m/2^10*2=2.2MHz
+    { CC1101_MCSM0,     0x18 }, // Autocalibrate on idle to TRX, ~150us OSC guard time
+    /* End */
     { 0, 0 },
+};
+
+static const uint8_t api_hal_subghz_preset_2fsk_packet_patable[8] = {
+    0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 void api_hal_subghz_init() {
@@ -65,26 +47,8 @@ void api_hal_subghz_init() {
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
     // Reset and shutdown
     cc1101_reset(device);
-    cc1101_write_reg(device, CC1101_IOCFG0, 0b00001101);
+    cc1101_write_reg(device, CC1101_IOCFG0, 0x2E); // High impedance 3-state
     cc1101_shutdown(device);
-    api_hal_spi_device_return(device);
-}
-
-void api_hal_subghz_load_preset(ApiHalSubGhzPreset preset) {
-    if(preset == ApiHalSubGhzPresetTestToneRx) {
-        api_hal_subghz_load_preset_data(api_hal_subghz_preset_tone_rx);
-    } else if(preset == ApiHalSubGhzPresetTestToneTx) {
-        api_hal_subghz_load_preset_data(api_hal_subghz_preset_tone_tx);
-    }
-}
-
-void api_hal_subghz_load_preset_data(const uint8_t data[][2]) {
-    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
-    uint32_t i = 0;
-    while (data[i][0]) {
-        cc1101_write_reg(device, data[i][0], data[i][1]);
-        i++;
-    }
     api_hal_spi_device_return(device);
 }
 
@@ -98,14 +62,52 @@ void api_hal_subghz_dump_state() {
     api_hal_spi_device_return(device);
 }
 
-void api_hal_subghz_sleep() {
+void api_hal_subghz_load_preset(ApiHalSubGhzPreset preset) {
+    if(preset == ApiHalSubGhzPresetOokAsync) {
+        api_hal_subghz_load_registers(api_hal_subghz_preset_ook_async_regs);
+        api_hal_subghz_load_patable(api_hal_subghz_preset_ook_async_patable);
+    } else if(preset == ApiHalSubGhzPreset2FskPacket) {
+        api_hal_subghz_load_registers(api_hal_subghz_preset_2fsk_packet_regs);
+        api_hal_subghz_load_patable(api_hal_subghz_preset_2fsk_packet_patable);
+    }
+}
+
+void api_hal_subghz_load_registers(const uint8_t data[][2]) {
+    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
+    cc1101_reset(device);
+    uint32_t i = 0;
+    while (data[i][0]) {
+        cc1101_write_reg(device, data[i][0], data[i][1]);
+        i++;
+    }
+    api_hal_spi_device_return(device);
+}
+
+void api_hal_subghz_load_patable(const uint8_t data[8]) {
+    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
+    cc1101_set_pa_table(device, data);
+    api_hal_spi_device_return(device);
+}
+
+void api_hal_subghz_write_packet(const uint8_t* data, uint8_t size) {
+    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
+    cc1101_flush_tx(device);
+    cc1101_write_fifo(device, data, size);
+    api_hal_spi_device_return(device);
+}
+
+void api_hal_subghz_read_packet(uint8_t* data, uint8_t size) {
+
+}
+
+void api_hal_subghz_shutdown() {
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
     // Reset and shutdown
     cc1101_shutdown(device);
     api_hal_spi_device_return(device);
 }
 
-void api_hal_subghz_wakeup() {
+void api_hal_subghz_reset() {
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
     cc1101_reset(device);
     api_hal_spi_device_return(device);
