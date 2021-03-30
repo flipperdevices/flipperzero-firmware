@@ -10,7 +10,34 @@
 extern "C" {
 #endif
 
-/** Reset CC1101
+/* Low level API */
+
+/** Strobe command to the device
+ * @param device - pointer to ApiHalSpiDevice
+ * @param strobe - command to execute
+ * @return device status
+ */
+CC1101Status cc1101_strobe(const ApiHalSpiDevice* device, uint8_t strobe);
+
+/** Write device register
+ * @param device - pointer to ApiHalSpiDevice
+ * @param reg - register
+ * @param data - data to write
+ * @return device status
+ */
+CC1101Status cc1101_write_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_t data);
+
+/** Read device register
+ * @param device - pointer to ApiHalSpiDevice
+ * @param reg - register
+ * @param[out] data - pointer to data
+ * @return device status
+ */
+CC1101Status cc1101_read_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_t* data);
+
+/* High level API */
+
+/** Reset
  * @param device - pointer to ApiHalSpiDevice
  */
 void cc1101_reset(const ApiHalSpiDevice* device);
@@ -19,6 +46,21 @@ void cc1101_reset(const ApiHalSpiDevice* device);
  * @param device - pointer to ApiHalSpiDevice
  */
 void cc1101_shutdown(const ApiHalSpiDevice* device);
+
+/** Get Partnumber
+ * @param device - pointer to ApiHalSpiDevice
+ */
+uint8_t cc1101_get_partnumber(const ApiHalSpiDevice* device);
+
+/** Get Version
+ * @param device - pointer to ApiHalSpiDevice
+ */
+uint8_t cc1101_get_version(const ApiHalSpiDevice* device);
+
+/** Get raw RSSI value
+ * @param device - pointer to ApiHalSpiDevice
+ */
+uint8_t cc1101_get_rssi(const ApiHalSpiDevice* device);
 
 /** Calibrate oscillator
  * @param device - pointer to ApiHalSpiDevice
@@ -48,6 +90,12 @@ void cc1101_switch_to_tx(const ApiHalSpiDevice* device);
  */
 uint32_t cc1101_set_frequency(const ApiHalSpiDevice* device, uint32_t value);
 
+/** Get Frequency Step
+ * @param device - pointer to ApiHalSpiDevice
+ * @return frequency step
+ */
+uint32_t cc1101_get_frequency_step(const ApiHalSpiDevice* device);
+
 /** Set Frequency Offset
  * Is not 100% precise, depends on quartz used
  * @param device - pointer to ApiHalSpiDevice
@@ -55,6 +103,12 @@ uint32_t cc1101_set_frequency(const ApiHalSpiDevice* device, uint32_t value);
  * @return real frequency that were set
  */
 uint32_t cc1101_set_frequency_offset(const ApiHalSpiDevice* device, uint32_t value);
+
+/** Get Frequency Offset Step
+ * @param device - pointer to ApiHalSpiDevice
+ * @return frequency offset step
+ */
+uint32_t cc1101_get_frequency_offset_step(const ApiHalSpiDevice* device);
 
 /** Set Power Amplifier level, no ramp
  * @param device - pointer to ApiHalSpiDevice

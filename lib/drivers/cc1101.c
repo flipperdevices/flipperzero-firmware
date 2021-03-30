@@ -16,21 +16,8 @@ CC1101Status cc1101_strobe(const ApiHalSpiDevice* device, uint8_t strobe) {
     return rx[0];
 }
 
-CC1101Status cc1101_status(const ApiHalSpiDevice* device, uint8_t status) {
-    uint8_t tx[1] = { status | CC1101_BURST };
-    CC1101Status rx[1] = { 0 };
-
-    hal_gpio_write(device->chip_select, false);
-    while(hal_gpio_read(device->bus->miso));
-    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 1, osWaitForever);
-    hal_gpio_write(device->chip_select, true);
-
-    assert(rx[0].CHIP_RDYn == 0);
-    return rx[0];
-}
-
 CC1101Status cc1101_write_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_t data) {
-    uint8_t tx[2] = { reg | CC1101_WRITE, data };
+    uint8_t tx[2] = { reg, data };
     CC1101Status rx[2] = { 0 };
 
     hal_gpio_write(device->chip_select, false);
@@ -40,6 +27,39 @@ CC1101Status cc1101_write_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_
 
     assert((rx[0].CHIP_RDYn|rx[1].CHIP_RDYn) == 0);
     return rx[1];
+}
+
+CC1101Status cc1101_read_reg(const ApiHalSpiDevice* device, uint8_t reg, uint8_t* data) {
+    assert(sizeof(CC1101Status) == 1);
+    uint8_t tx[2] = { reg|CC1101_READ, 0};
+    CC1101Status rx[2] = { 0 };
+
+    hal_gpio_write(device->chip_select, false);
+    while(hal_gpio_read(device->bus->miso));
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, osWaitForever);
+    hal_gpio_write(device->chip_select, true);
+
+    assert((rx[0].CHIP_RDYn) == 0);
+    *data = *(uint8_t*)&rx[1];
+    return rx[0];
+}
+
+uint8_t cc1101_get_partnumber(const ApiHalSpiDevice* device) {
+    uint8_t partnumber=0;
+    cc1101_read_reg(device, CC1101_STATUS_PARTNUM|CC1101_BURST, &partnumber);
+    return partnumber;
+}
+
+uint8_t cc1101_get_version(const ApiHalSpiDevice* device) {
+    uint8_t version=0;
+    cc1101_read_reg(device, CC1101_STATUS_VERSION|CC1101_BURST, &version);
+    return version;
+}
+
+uint8_t cc1101_get_rssi(const ApiHalSpiDevice* device) {
+    uint8_t rssi=0;
+    cc1101_read_reg(device, CC1101_STATUS_RSSI|CC1101_BURST, &rssi);
+    return rssi;
 }
 
 void cc1101_reset(const ApiHalSpiDevice* device) {
@@ -85,10 +105,12 @@ uint32_t cc1101_set_frequency(const ApiHalSpiDevice* device, uint32_t value) {
     return (uint32_t)real_frequency;
 }
 
+uint32_t cc1101_get_frequency_step(const ApiHalSpiDevice* device) {
+    return CC1101_QUARTZ / 0xFFFF;
+}
+
 uint32_t cc1101_set_frequency_offset(const ApiHalSpiDevice* device, uint32_t value) {
     uint64_t real_value = value * 0x4000 / CC1101_QUARTZ;
-
-    // Sanity check
     assert((real_value & 0xFF) == real_value);
 
     cc1101_write_reg(device, CC1101_FSCTRL0, (real_value >> 0 ) & 0xFF);
@@ -96,4 +118,16 @@ uint32_t cc1101_set_frequency_offset(const ApiHalSpiDevice* device, uint32_t val
     uint64_t real_frequency = real_value * CC1101_QUARTZ / 0x4000;
 
     return (uint32_t)real_frequency;
+}
+
+uint32_t cc1101_get_frequency_offset_step(const ApiHalSpiDevice* device) {
+    return CC1101_QUARTZ / 0x4000;
+}
+
+void cc1101_set_pa_single(const ApiHalSpiDevice* device, uint8_t value) {
+
+}
+
+void cc1101_set_pa_table(const ApiHalSpiDevice* device, uint8_t value[8]) {
+
 }

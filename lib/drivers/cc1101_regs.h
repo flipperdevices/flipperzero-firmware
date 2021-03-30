@@ -9,7 +9,7 @@ extern "C" {
 
 #define CC1101_QUARTZ                   26000000
 
-#define CC1101_WRITE                    (1<<7)  /** Write Bit */
+#define CC1101_READ                     (1<<7)  /** Read Bit */
 #define CC1101_BURST                    (1<<6)  /** Burst Bit */
 
 /* Common registers, CC1101_BURST and CC1101_WRITE behaves as expected  */
@@ -113,6 +113,16 @@ typedef struct {
     CC1101State STATE:3;
     bool CHIP_RDYn:1;
 } CC1101Status;
+
+typedef struct {
+    uint8_t NUM_TXBYTES:7;
+    bool TXFIFO_UNDERFLOW:1;
+} CC1101TxBytes;
+
+typedef struct {
+    uint8_t NUM_RXBYTES:7;
+    bool RXFIFO_OVERFLOW:1;
+} CC1101RxBytes;
 
 #ifdef __cplusplus
 }
