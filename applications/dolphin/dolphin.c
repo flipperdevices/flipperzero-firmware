@@ -40,6 +40,50 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
     return true;
 }
 
+void dolphin_move_right(void* context) {
+    Dolphin* dolphin = context;
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            model->animation = assets_icons_get(A_MDWR_32x32);
+            model->back = assets_icons_get(A_MDWRB_32x32);
+            if(!icon_is_animating(model->animation)) {
+                icon_start_animation(model->back);
+                icon_start_animation(model->animation);
+            }
+            if(model->position < 255) {
+                model->position += 5;
+                if(model->position > 60) model->scene_offset += 5;
+            } else if(model->position > 255) {
+                model->position = 255;
+            }
+
+            return true;
+        });
+}
+
+void dolphin_move_left(void* context) {
+    Dolphin* dolphin = context;
+    with_view_model(
+        dolphin->idle_view_main, (DolphinViewMainModel * model) {
+            model->animation = assets_icons_get(A_MDWL_32x32);
+            model->back = assets_icons_get(A_MDWLB_32x32);
+            if(!icon_is_animating(model->animation)) {
+                icon_start_animation(model->back);
+                icon_start_animation(model->animation);
+            }
+            if(model->position > 0) {
+                model->position -= 5;
+                if(model->position > 60) model->scene_offset -= 5;
+                if(model->position <= 60) model->scene_offset = 0;
+
+            } else if(model->position < 0) {
+                model->position = 0;
+            }
+
+            return true;
+        });
+}
+
 bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
@@ -93,36 +137,14 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        model->use_item = true;
+                        if(!model->use_item) model->use_item = true;
                         return true;
                     });
 
             } else if(event->key == InputKeyLeft) {
-                with_view_model(
-                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        model->animation = assets_icons_get(A_MDWL_32x32);
-                        model->back = assets_icons_get(A_MDWLB_32x32);
-                        if(!icon_is_animating(model->animation)) {
-                            icon_start_animation(model->back);
-                            icon_start_animation(model->animation);
-                        }
-                        model->position -= 5;
-                        return true;
-                    });
-
+                dolphin_move_left(context);
             } else if(event->key == InputKeyRight) {
-                with_view_model(
-                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        model->animation = assets_icons_get(A_MDWR_32x32);
-                        model->back = assets_icons_get(A_MDWRB_32x32);
-                        if(!icon_is_animating(model->animation)) {
-                            icon_start_animation(model->back);
-                            icon_start_animation(model->animation);
-                        }
-
-                        model->position += 5;
-                        return true;
-                    });
+                dolphin_move_right(context);
             } else if(event->key == InputKeyBack) {
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {

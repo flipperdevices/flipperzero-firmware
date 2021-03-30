@@ -50,23 +50,8 @@ struct Dolphin {
     uint8_t lock_count;
 };
 
-typedef struct {
-    IconName main;
-    IconName back;
-} DolphinIcon;
-
 #define ACTION_N 5 // no random mind control
 enum Actions { SLEEP = 0, IDLE, WALK_L, WALK_R, EMOTE, USE, MINDCONTROL };
-
-static const DolphinIcon ActionAssets[ACTION_N + 2] = {
-    [0] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    {.main = A_MDWL_32x32, .back = A_MDWLB_32x32},
-    {.main = A_MDWR_32x32, .back = A_MDWRB_32x32},
-    {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-};
 
 Dolphin* dolphin_alloc();
 

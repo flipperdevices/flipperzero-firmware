@@ -2,7 +2,7 @@
 #include "dolphin_i.h"
 #include <math.h>
 #define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
-#define ITEMS_NUM 3
+#define ITEMS_NUM 4
 #define LAYERS 3
 #define DOLPHIN_LAYER 1
 
@@ -20,13 +20,7 @@ void smash_tv(Canvas* canvas, void* model);
 void draw_tv(Canvas* canvas, void* model);
 void sofa_sit(Canvas* canvas, void* model);
 void inspect_painting(Canvas* canvas, void* model);
-
-typedef struct {
-    uint16_t location;
-    uint16_t last;
-    enum Actions type;
-    void (*callback)(Canvas* canvas, DolphinViewMainModel* model);
-} Action;
+void pc_callback(Canvas* canvas, void* model);
 
 void dolphin_use_item(Canvas* canvas, void* model);
 
