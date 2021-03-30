@@ -28,12 +28,16 @@ iButtonApp::iButtonApp() {
     api_hal_power_insomnia_enter();
 
     key_worker = new KeyWorker(&ibutton_gpio);
+    sd_ex_api = static_cast<SdCard_Api*>(furi_record_open("sdcard-ex"));
+    fs_api = static_cast<FS_Api*>(furi_record_open("sdcard"));
 
     // we need random
     srand(DWT->CYCCNT);
 }
 
 iButtonApp::~iButtonApp() {
+    furi_record_close("sdcard-ex");
+    furi_record_close("sdcard");
     api_hal_power_insomnia_exit();
 }
 
@@ -105,6 +109,22 @@ KeyWorker* iButtonApp::get_key_worker() {
 
 iButtonKey* iButtonApp::get_key() {
     return &key;
+}
+
+SdCard_Api* iButtonApp::get_sd_ex_api() {
+    return sd_ex_api;
+}
+
+FS_Api* iButtonApp::get_fs_api() {
+    return fs_api;
+}
+
+char* iButtonApp::get_file_name() {
+    return file_name;
+}
+
+uint8_t iButtonApp::get_file_name_size() {
+    return file_name_size;
 }
 
 void iButtonApp::notify_init() {

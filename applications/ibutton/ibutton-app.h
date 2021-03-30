@@ -26,6 +26,9 @@
 #include "helpers/key-store.h"
 #include "helpers/key-worker.h"
 
+#include <sd-card-api.h>
+#include <filesystem-api.h>
+
 #include "one_wire_master.h"
 #include "maxim_crc.h"
 #include "ibutton-key.h"
@@ -92,6 +95,11 @@ public:
     uint8_t get_stored_key_index();
     void set_stored_key_index(uint8_t index);
 
+    SdCard_Api* get_sd_ex_api();
+    FS_Api* get_fs_api();
+    char* get_file_name();
+    uint8_t get_file_name_size();
+
     void generate_random_name(char* name, uint8_t max_name_size);
 
 private:
@@ -124,6 +132,11 @@ private:
 
     iButtonKey key;
     uint8_t key_index = 0;
+
+    SdCard_Api* sd_ex_api;
+    FS_Api* fs_api;
+    static const uint8_t file_name_size = 100;
+    char file_name[file_name_size];
 
     static const uint8_t text_store_size = 128;
     char text_store[text_store_size + 1];
