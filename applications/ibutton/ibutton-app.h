@@ -12,7 +12,6 @@
 #include "scene/ibutton-scene-readed-key-menu.h"
 #include "scene/ibutton-scene-write.h"
 #include "scene/ibutton-scene-write-success.h"
-#include "scene/ibutton-scene-saved.h"
 #include "scene/ibutton-scene-saved-key-menu.h"
 #include "scene/ibutton-scene-delete-confirm.h"
 #include "scene/ibutton-scene-delete-success.h"
@@ -23,7 +22,6 @@
 #include "scene/ibutton-scene-add-type.h"
 #include "scene/ibutton-scene-add-value.h"
 
-#include "helpers/key-store.h"
 #include "helpers/key-worker.h"
 
 #include <sd-card-api.h>
@@ -51,7 +49,6 @@ public:
         SceneWrite,
         SceneWriteSuccess,
         SceneEmulate,
-        SceneSavedList,
         SceneSavedKeyMenu,
         SceneDeleteConfirm,
         SceneDeleteSuccess,
@@ -91,10 +88,6 @@ public:
     char* get_text_store();
     uint8_t get_text_store_size();
 
-    KeyStore* get_key_store();
-    uint8_t get_stored_key_index();
-    void set_stored_key_index(uint8_t index);
-
     SdCard_Api* get_sd_ex_api();
     FS_Api* get_fs_api();
     char* get_file_name();
@@ -117,7 +110,6 @@ private:
         {Scene::SceneWrite, new iButtonSceneWrite()},
         {Scene::SceneWriteSuccess, new iButtonSceneWriteSuccess()},
         {Scene::SceneEmulate, new iButtonSceneEmulate()},
-        {Scene::SceneSavedList, new iButtonSceneSavedList()},
         {Scene::SceneSavedKeyMenu, new iButtonSceneSavedKeyMenu()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
         {Scene::SceneDeleteSuccess, new iButtonSceneDeleteSuccess()},
@@ -131,7 +123,6 @@ private:
     KeyWorker* key_worker;
 
     iButtonKey key;
-    uint8_t key_index = 0;
 
     SdCard_Api* sd_ex_api;
     FS_Api* fs_api;
@@ -140,8 +131,6 @@ private:
 
     static const uint8_t text_store_size = 128;
     char text_store[text_store_size + 1];
-
-    KeyStore store;
 
     void notify_init();
 };

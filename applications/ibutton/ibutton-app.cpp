@@ -213,18 +213,6 @@ uint8_t iButtonApp::get_text_store_size() {
     return text_store_size;
 }
 
-KeyStore* iButtonApp::get_key_store() {
-    return &store;
-}
-
-uint8_t iButtonApp::get_stored_key_index() {
-    return key_index;
-}
-
-void iButtonApp::set_stored_key_index(uint8_t _index) {
-    key_index = _index;
-}
-
 void iButtonApp::generate_random_name(char* name, uint8_t max_name_size) {
     const uint8_t prefix_size = 9;
     const char* prefix[prefix_size] = {
