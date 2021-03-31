@@ -62,6 +62,7 @@ bool sd_api_file_select(
     const char* extension,
     char* result,
     uint8_t result_size);
+void sd_api_check_error(SdApp* sd_app);
 
 /******************* Allocators *******************/
 
@@ -121,6 +122,7 @@ SdApp* sd_app_alloc() {
     // init sd card api
     sd_app->sd_card_api.context = sd_app;
     sd_app->sd_card_api.file_select = sd_api_file_select;
+    sd_app->sd_card_api.check_error = sd_api_check_error;
     sd_app->sd_app_state = SdAppStateBackground;
     string_init(sd_app->text_holder);
 
@@ -409,6 +411,11 @@ bool sd_api_file_select(
     }
 
     return retval;
+}
+
+void sd_api_check_error(SdApp* sd_app) {
+    SdAppEvent message = {.type = SdAppEventTypeCheckError};
+    furi_check(osMessageQueuePut(sd_app->event_queue, &message, 0, osWaitForever) == osOK);
 }
 
 /******************* View callbacks *******************/
@@ -843,6 +850,23 @@ int32_t sd_filesystem(void* p) {
                 }
                 break;
             case SdAppEventTypeCheckError:
+                if(sd_app->info.status != SD_OK) {
+                    if(try_to_alloc_view_holder(sd_app, gui)) {
+                        DialogEx* dialog = alloc_and_attach_dialog(sd_app);
+                        dialog_ex_set_left_button_text(dialog, "Back");
+                        if(sd_app->info.status == SD_NO_CARD) {
+                            dialog_ex_set_text(
+                                dialog, "SD card\nnot found", 64, y_1_line, AlignLeft, AlignCenter);
+                            dialog_ex_set_icon(dialog, 5, 6, I_SDQuestion_35x43);
+                        } else {
+                            dialog_ex_set_text(
+                                dialog, "SD card\nerror", 64, y_1_line, AlignLeft, AlignCenter);
+                            dialog_ex_set_icon(dialog, 5, 10, I_SDError_43x35);
+                        }
+                        sd_app->sd_app_state = SdAppStateCheckError;
+                        view_holder_start(sd_app->view_holder);
+                    }
+                }
                 break;
             }
         }
