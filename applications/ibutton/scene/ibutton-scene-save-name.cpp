@@ -37,7 +37,8 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
         uint8_t key_data[IBUTTON_KEY_SIZE + 1];
         key_data[0] = static_cast<uint8_t>(key->get_key_type());
         memcpy(key_data + 1, key->get_data(), IBUTTON_KEY_SIZE);
-
+        // Create ibutton directory if necessary
+        app->get_fs_api()->common.mkdir("ibutton");
         bool res = app->get_fs_api()->file.open(
             &key_file, string_get_cstr(key_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS);
         if(res) {
