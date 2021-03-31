@@ -137,7 +137,10 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 with_view_model(
                     dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        if(!model->use_item) model->use_item = true;
+                        if(!model->use_item) {
+                            model->action_timeout = 100;
+                            model->use_item = true;
+                        }
                         return true;
                     });
 

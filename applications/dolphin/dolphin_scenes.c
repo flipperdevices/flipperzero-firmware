@@ -15,47 +15,31 @@ void dolphin_use_item(Canvas* canvas, void* model) {
 void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom) {
     DolphinViewMainModel* m = model;
     uint8_t font_y = canvas_current_font_height(canvas);
-    uint8_t offset = icon_get_width(m->animation) - 5;
 
-    char buf[16];
-    snprintf(buf, 16, custom ? custom : emotes_list[m->emote_id]);
-
+    char buf[32];
+    snprintf(buf, 32, custom ? custom : emotes_list[m->emote_id]);
+    uint8_t lines = 1;
+    uint16_t str_width = canvas_string_width(canvas, buf);
     // count \n's
     if(buf != NULL) {
-        uint8_t lines = 1;
-        uint8_t len = 1;
         for(int i = 0; buf[i] != '\0'; i++) {
             if(buf[i] == '\n') {
-                len = i * 2;
                 lines++;
+                uint16_t temp_width = canvas_string_width(canvas, buf + (i + 1));
+                str_width = temp_width > str_width ? temp_width : str_width;
             }
         }
 
-        uint8_t str_width =
-            canvas_string_width(canvas, custom ? custom : emotes_list[m->emote_id]) + len;
+        uint8_t pos = 70;
 
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(
-            canvas,
-            m->position + (m->position < 50 ? offset : -(str_width + 5)),
-            18 - font_y,
-            str_width + 8,
-            font_y * lines + 6);
+        canvas_draw_box(canvas, pos, 18 - font_y, str_width + 8, font_y * lines + 6);
         canvas_set_color(canvas, ColorBlack);
-        elements_multiline_text(
-            canvas,
-            m->position + (m->position < 50 ? offset + 4 : -(str_width + 5) + 4),
-            20,
-            custom ? custom : (char*)emotes_list[m->emote_id]);
-        elements_frame(
-            canvas,
-            m->position + (m->position < 50 ? offset : -(str_width + 5)),
-            18 - font_y,
-            str_width + 8,
-            font_y * lines + 6);
+        elements_multiline_text(canvas, pos + 4, 20, buf);
+        elements_frame(canvas, pos, 18 - font_y, str_width + 8, font_y * lines + 6);
+
         if(!custom) {
             m->previous_action = m->action;
-
             if(m->action_timeout == 0) {
                 m->action = IDLE;
             }
@@ -200,15 +184,16 @@ void dolphin_actions_update(Canvas* canvas, void* model) {
 
     case EMOTE:
         if(m->action_timeout == 0 && m->previous_action != EMOTE) {
-            m->action_timeout = 5;
+            m->action_timeout = 50;
             m->emote_id = roll_new(m->previous_emote, ARRSIZE(emotes_list));
-        } else {
-            if(m->previous_action != m->action) {
-                dolphin_draw_emote_bubble(canvas, model, NULL);
-            } else {
-                m->action = IDLE;
-            }
         }
+
+        if(m->previous_action != m->action) {
+            dolphin_draw_emote_bubble(canvas, model, NULL);
+        }else{
+            m->action = IDLE;
+        }
+
         break;
 
     case MINDCONTROL:
@@ -225,6 +210,7 @@ void dolphin_actions_update(Canvas* canvas, void* model) {
         m->action = m->next_action;
         break;
     }
+    
 }
 void dolphin_update_scene(Canvas* canvas, void* model) {
     draw_scene(canvas, model);

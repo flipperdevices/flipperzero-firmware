@@ -2,7 +2,7 @@
 #include "dolphin_i.h"
 
 /// Items
-Item TV = {
+const Item TV = {
     .layer = 2,
     .x = 20,
     .y = 34,
@@ -11,7 +11,7 @@ Item TV = {
     .draw = draw_tv,
     .callback = smash_tv};
 
-Item Painting = {
+const Item Painting = {
     .layer = 0,
     .x = 45,
     .y = 10,
@@ -20,7 +20,7 @@ Item Painting = {
     .draw = NULL,
     .callback = inspect_painting};
 
-Item Sofa = {
+const Item Sofa = {
     .layer = 0,
     .x = 70,
     .y = 34,
@@ -29,7 +29,7 @@ Item Sofa = {
     .draw = NULL,
     .callback = sofa_sit};
 
-Item PC = {
+const Item PC = {
     .layer = 0,
     .x = 150,
     .y = 10,
@@ -38,8 +38,8 @@ Item PC = {
     .draw = NULL,
     .callback = pc_callback};
 
-Item* Home[] = {&TV, &Sofa, &Painting, &PC};
-Item** Scenes[] = {*&Home};
+const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
+const Item** Scenes[] = {*&Home};
 
 // Models
 
@@ -111,7 +111,7 @@ void inspect_painting(Canvas* canvas, void* model) {
         "Debian?\nIt's a joke?",
         "Debian!\nIt's a joke!",
         "Debian...\nbut.. why?",
-        "I like alpine\nlinux better"};
+        "Alpine\nlinux\nbetter!"};
 
     dolphin_draw_emote_bubble(canvas, model, emotes[random() % 5]);
 }
