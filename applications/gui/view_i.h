@@ -25,7 +25,6 @@ struct View {
     void* context;
 };
 
-
 /* Unlock model */
 void view_unlock_model(View* view);
 
