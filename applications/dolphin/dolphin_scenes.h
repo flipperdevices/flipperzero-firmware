@@ -1,6 +1,6 @@
 #pragma once
 #include "dolphin_i.h"
-#include <math.h>
+
 #define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 #define ITEMS_NUM 4
 #define LAYERS 8
@@ -18,28 +18,20 @@ typedef struct {
     void (*callback)(Canvas* canvas, void* model);
 } Item;
 
+// item callbacks and draw helpers
 void smash_tv(Canvas* canvas, void* model);
+
 void draw_tv(Canvas* canvas, void* model);
+
 void sofa_sit(Canvas* canvas, void* model);
+
 void inspect_painting(Canvas* canvas, void* model);
+
 void pc_callback(Canvas* canvas, void* model);
 
-void dolphin_use_item(Canvas* canvas, void* model);
-
+// ext
 void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom);
 
-void draw_dolphin(Canvas* canvas, void* m);
-
-void set_dolphin_graphics(void* model);
-
-const Item* is_nearby(void* model);
-
-void dolphin_update_position(void* model);
-
-void dolphin_actions_update(Canvas* canvas, void* model);
+void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model);
 
 void dolphin_update_scene(Canvas* canvas, void* model);
-
-void dolphin_use_item(Canvas* canvas, void* model);
-
-void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model);

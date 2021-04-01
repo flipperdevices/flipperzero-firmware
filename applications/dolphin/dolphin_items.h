@@ -41,24 +41,8 @@ const Item PC = {
 const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
 const Item** Scenes[] = {*&Home};
 
-// Models
-
-typedef struct {
-    IconName main;
-    IconName back;
-} DolphinGfx;
-
-static const DolphinGfx action_gfx[] = {
-    [SLEEP] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    [IDLE] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    [WALK_L] = {.main = A_MDWL_32x32, .back = A_MDWLB_32x32},
-    [WALK_R] = {.main = A_MDWR_32x32, .back = A_MDWRB_32x32},
-    [EMOTE] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    [USE] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-    [MINDCONTROL] = {.main = A_MDI_32x32, .back = A_MDIB_32x32},
-};
-
 const Item* is_nearby(void* model) {
+    furi_assert(model);
     DolphinViewMainModel* m = model;
     uint8_t item = 0;
     bool found = false;
@@ -75,6 +59,7 @@ const Item* is_nearby(void* model) {
 }
 
 void draw_tv(Canvas* canvas, void* model) {
+    furi_assert(model);
     DolphinViewMainModel* m = model;
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, (TV.x + 5 - m->scene_offset) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
@@ -83,6 +68,7 @@ void draw_tv(Canvas* canvas, void* model) {
 }
 
 void smash_tv(Canvas* canvas, void* model) {
+    furi_assert(model);
     DolphinViewMainModel* m = model;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
@@ -92,29 +78,20 @@ void smash_tv(Canvas* canvas, void* model) {
 }
 
 void sofa_sit(Canvas* canvas, void* model) {
+    furi_assert(model);
     DolphinViewMainModel* m = model;
-    m->position = Sofa.x;
+
     m->animation = assets_icons_get(A_FX_Sitting_40x27);
     m->back = assets_icons_get(I_FX_SittingB_40x27);
     icon_start_animation(m->back);
 }
 
 void inspect_painting(Canvas* canvas, void* model) {
-    char* emotes[5] = {
-        "Debian?\nIt's a joke?",
-        "Debian!\nIt's a joke!",
-        "Debian...\nbut.. why?",
-        "Alpine\nlinux\nbetter!"};
-
-    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 4]);
+    furi_assert(model);
+    dolphin_draw_emote_bubble(canvas, model, NULL);
 }
 
 void pc_callback(Canvas* canvas, void* model) {
-    char* emotes[5] = {
-        "Loading...",
-        "Welcome to\nSeaOS..",
-        "Press any\nkey...",
-    };
-
-    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 3]);
+    furi_assert(model);
+    dolphin_draw_emote_bubble(canvas, model, NULL);
 }
