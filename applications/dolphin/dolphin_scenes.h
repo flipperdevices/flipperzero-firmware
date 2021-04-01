@@ -3,8 +3,10 @@
 #include <math.h>
 #define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 #define ITEMS_NUM 4
-#define LAYERS 3
-#define DOLPHIN_LAYER 1
+#define LAYERS 8
+#define DOLPHIN_LAYER 6
+#define PARALLAX_MOD 7
+#define PARALLAX(layer) layer / PARALLAX_MOD - layer
 
 typedef struct {
     uint8_t layer;
@@ -39,3 +41,5 @@ void dolphin_actions_update(Canvas* canvas, void* model);
 void dolphin_update_scene(Canvas* canvas, void* model);
 
 void dolphin_use_item(Canvas* canvas, void* model);
+
+void dolphin_handle_keys(InputEvent* event,DolphinViewMainModel * model);

@@ -1,17 +1,6 @@
 #include "dolphin_i.h"
 #include <stdlib.h>
 
-void dolphin_scene_handler_set_dolphin(Dolphin* dolphin, IconName icon, bool right) {
-    with_view_model(
-        dolphin->idle_view_main, (DolphinViewMainModel * model) {
-            model->animation = assets_icons_get(icon);
-            model->back = assets_icons_get(right ? A_MDWRB_32x32 : A_MDWLB_32x32);
-            icon_start_animation(model->back);
-            icon_start_animation(model->animation);
-            return true;
-        });
-}
-
 bool dolphin_view_first_start_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
@@ -40,50 +29,6 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
     return true;
 }
 
-void dolphin_move_right(void* context) {
-    Dolphin* dolphin = context;
-    with_view_model(
-        dolphin->idle_view_main, (DolphinViewMainModel * model) {
-            model->animation = assets_icons_get(A_MDWR_32x32);
-            model->back = assets_icons_get(A_MDWRB_32x32);
-            if(!icon_is_animating(model->animation)) {
-                icon_start_animation(model->back);
-                icon_start_animation(model->animation);
-            }
-            if(model->position < 255) {
-                model->position += 5;
-                if(model->position > 60) model->scene_offset += 5;
-            } else if(model->position > 255) {
-                model->position = 255;
-            }
-
-            return true;
-        });
-}
-
-void dolphin_move_left(void* context) {
-    Dolphin* dolphin = context;
-    with_view_model(
-        dolphin->idle_view_main, (DolphinViewMainModel * model) {
-            model->animation = assets_icons_get(A_MDWL_32x32);
-            model->back = assets_icons_get(A_MDWLB_32x32);
-            if(!icon_is_animating(model->animation)) {
-                icon_start_animation(model->back);
-                icon_start_animation(model->animation);
-            }
-            if(model->position > 0) {
-                model->position -= 5;
-                if(model->position > 60) model->scene_offset -= 5;
-                if(model->position <= 60) model->scene_offset = 0;
-
-            } else if(model->position < 0) {
-                model->position = 0;
-            }
-
-            return true;
-        });
-}
-
 bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
@@ -93,6 +38,10 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
             mindcontrol = model->action == MINDCONTROL ? true : false;
+            while(mindcontrol){ 
+                dolphin_handle_keys(event, model);
+                break;
+            }
             return true;
         });
 
@@ -133,29 +82,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                     }
                 }
             }
-        } else {
-            if(event->key == InputKeyOk) {
-                with_view_model(
-                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        if(!model->use_item) {
-                            model->action_timeout = 100;
-                            model->use_item = true;
-                        }
-                        return true;
-                    });
-
-            } else if(event->key == InputKeyLeft) {
-                dolphin_move_left(context);
-            } else if(event->key == InputKeyRight) {
-                dolphin_move_right(context);
-            } else if(event->key == InputKeyBack) {
-                with_view_model(
-                    dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                        model->action = IDLE;
-                        return true;
-                    });
-            }
-        }
+        } 
     }
 
     // All events consumed
@@ -183,6 +110,7 @@ bool dolphin_view_idle_up_input(InputEvent* event, void* context) {
 }
 
 static void lock_menu_callback(void* context, uint8_t index) {
+    furi_assert(context);
     Dolphin* dolphin = context;
     switch(index) {
     case 0:
@@ -202,6 +130,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
 }
 
 static void meta_menu_callback(void* context, uint8_t index) {
+    furi_assert(context);
     Dolphin* dolphin = context;
     switch(index) {
     case 0:
@@ -270,6 +199,7 @@ static void draw_passport_callback(Canvas* canvas, void* context) {
 }
 
 static void passport_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
     Dolphin* dolphin = context;
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyBack) {

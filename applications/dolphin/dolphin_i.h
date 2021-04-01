@@ -3,6 +3,7 @@
 #include "dolphin.h"
 #include "dolphin_state.h"
 #include "dolphin_views.h"
+#include "dolphin_scenes.h"
 
 #include <furi.h>
 #include <api-hal.h>

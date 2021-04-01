@@ -3,26 +3,26 @@
 
 /// Items
 const Item TV = {
-    .layer = 2,
-    .x = 20,
+    .layer = 7,
+    .x = 40,
     .y = 34,
-    .icon = I_TV_20x20,
-    .action_name = "Watch",
+    .icon = I_TV_20x24,
+    .action_name = "Use",
     .draw = draw_tv,
     .callback = smash_tv};
 
 const Item Painting = {
-    .layer = 0,
-    .x = 45,
+    .layer = 3,
+    .x = 65,
     .y = 10,
     .icon = I_Home_painting_17x20,
-    .action_name = "Use",
+    .action_name = "Inspect",
     .draw = NULL,
     .callback = inspect_painting};
 
 const Item Sofa = {
-    .layer = 0,
-    .x = 70,
+    .layer = 5,
+    .x = 100,
     .y = 34,
     .icon = I_Sofa_40x13,
     .action_name = "Sit",
@@ -30,8 +30,8 @@ const Item Sofa = {
     .callback = sofa_sit};
 
 const Item PC = {
-    .layer = 0,
-    .x = 150,
+    .layer = 5,
+    .x = 200,
     .y = 10,
     .icon = I_PC_22x29,
     .action_name = "Use",
@@ -63,7 +63,9 @@ const Item* is_nearby(void* model) {
     uint8_t item = 0;
     bool found = false;
     while(item < ITEMS_NUM) {
-        if(abs(Scenes[m->active_scene][item]->x - m->position) < 15) {
+        const Item* current = Scenes[m->active_scene][item];
+
+        if(abs(current->x - m->position) < 20) {
             found = !found;
             break;
         }
@@ -72,38 +74,37 @@ const Item* is_nearby(void* model) {
     return found ? Scenes[m->active_scene][item] : NULL;
 }
 
+void draw_tv(Canvas* canvas, void* model) {
+    DolphinViewMainModel* m = model;
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(
+        canvas,
+        (TV.x + 5 - m->scene_offset) * PARALLAX(TV.layer),
+        TV.y + 4,
+        14,
+        20);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_bitmap_mode(canvas, true);
+}
+
 void smash_tv(Canvas* canvas, void* model) {
     DolphinViewMainModel* m = model;
     canvas_set_bitmap_mode(canvas, true);
-    canvas_draw_icon_name(canvas, (TV.x - 4) - m->scene_offset, TV.y - 6, I_FX_Bang_32x6);
+    canvas_draw_icon_name(
+        canvas,
+        ((TV.x - 8) - m->scene_offset) * PARALLAX(TV.layer),
+        TV.y - 6,
+        I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
     dolphin_draw_emote_bubble(canvas, model, "Bang!");
 }
 
 void sofa_sit(Canvas* canvas, void* model) {
     DolphinViewMainModel* m = model;
-
+    m->position = Sofa.x;
     m->animation = assets_icons_get(A_FX_Sitting_40x27);
     m->back = assets_icons_get(I_FX_SittingB_40x27);
     icon_start_animation(m->back);
-}
-
-void draw_tv(Canvas* canvas, void* model) {
-    DolphinViewMainModel* m = model;
-    if(m->scene_offset < 10) {
-        canvas_draw_line(
-            canvas,
-            (TV.x + 6) - m->scene_offset,
-            TV.y - 3,
-            (TV.x + 11) - m->scene_offset,
-            TV.y + 2);
-        canvas_draw_line(
-            canvas,
-            (TV.x + 16) - m->scene_offset,
-            TV.y - 3,
-            (TV.x + 11) - m->scene_offset,
-            TV.y + 2);
-    }
 }
 
 void inspect_painting(Canvas* canvas, void* model) {
@@ -113,15 +114,15 @@ void inspect_painting(Canvas* canvas, void* model) {
         "Debian...\nbut.. why?",
         "Alpine\nlinux\nbetter!"};
 
-    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 5]);
+    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 4]);
 }
 
 void pc_callback(Canvas* canvas, void* model) {
     char* emotes[5] = {
         "Loading...",
-        "Welcome to\nSeaOS",
-        "Press any key",
+        "Welcome to\nSeaOS..",
+        "Press any\nkey...",
     };
 
-    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 5]);
+    dolphin_draw_emote_bubble(canvas, model, emotes[random() % 3]);
 }

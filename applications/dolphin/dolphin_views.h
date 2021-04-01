@@ -36,7 +36,7 @@ typedef struct {
 typedef struct {
     Icon* animation;
     Icon* back;
-    uint8_t scene_offset;
+    int16_t scene_offset;
     uint8_t position;
     uint8_t action;
     uint8_t next_action;
