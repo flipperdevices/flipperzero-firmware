@@ -18,7 +18,7 @@ typedef struct {
     const InputPin* pin;
     // State
     volatile bool state;
-    volatile bool repeate_event;
+    volatile bool repeat_event;
     volatile uint8_t debounce;
     volatile osTimerId_t press_timer;
 } InputPinState;
