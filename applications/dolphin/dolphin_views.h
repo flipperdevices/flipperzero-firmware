@@ -35,6 +35,11 @@ typedef struct {
 
 typedef struct {
     Icon* animation;
+    uint8_t scene_num;
+} DolphinViewMainModel;
+
+typedef struct {
+    Icon* animation;
     Icon* back;
     int16_t scene_offset;
     uint8_t position;
@@ -48,8 +53,7 @@ typedef struct {
     uint8_t active_scene;
     bool use_item;
     bool locked;
-
-} DolphinViewMainModel;
+} DolphinViewMetaModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
 bool dolphin_view_idle_main_input(InputEvent* event, void* context);

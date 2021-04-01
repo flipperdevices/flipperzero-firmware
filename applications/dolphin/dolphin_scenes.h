@@ -32,6 +32,6 @@ void pc_callback(Canvas* canvas, void* model);
 // ext
 void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom);
 
-void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model);
+void dolphin_handle_keys(InputEvent* event, DolphinViewMetaModel* model);
 
 void dolphin_update_scene(Canvas* canvas, void* model);

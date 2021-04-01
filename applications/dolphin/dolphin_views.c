@@ -7,7 +7,6 @@
 #include <dolphin/dolphin_scenes.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
-static char* Meta_Items[3] = {"Passport", "Games", "Mindcontrol"};
 
 void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     DolphinViewFirstStartModel* m = model;
@@ -59,9 +58,8 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     }
 }
 
-void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
+void dolphin_view_idle_meta_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
-
     dolphin_update_scene(canvas, model);
 }
 
@@ -96,27 +94,10 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
     }
 }
 
-void dolphin_view_idle_meta_draw(Canvas* canvas, void* model) {
-    DolphinViewMenuModel* m = model;
+void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
-
-    canvas_draw_icon_name(canvas, 20, 23, I_BigProfile_24x24);
-    canvas_draw_icon_name(canvas, 55, 23, I_BigGames_24x24);
-    canvas_draw_icon_name(canvas, 90, 23, I_BigBurger_24x24);
-
-    canvas_draw_str_aligned(canvas, 66, 12, AlignCenter, AlignCenter, Meta_Items[m->idx]);
-
-    canvas_draw_frame(canvas, 17 + (35 * m->idx), 20, 30, 30);
-    canvas_set_color(canvas, ColorWhite);
-
-    canvas_draw_dot(canvas, 17 + (35 * m->idx), 20);
-    canvas_draw_dot(canvas, 17 + (35 * m->idx), 49);
-    canvas_draw_dot(canvas, 46 + (35 * m->idx), 20);
-    canvas_draw_dot(canvas, 46 + (35 * m->idx), 49);
-
-    canvas_set_color(canvas, ColorBlack);
+    DolphinViewMainModel* m = model;
+    if(m->animation) canvas_draw_icon(canvas, 0, 0, m->animation);
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {

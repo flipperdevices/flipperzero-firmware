@@ -43,7 +43,7 @@ const Item** Scenes[] = {*&Home};
 
 const Item* is_nearby(void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     uint8_t item = 0;
     bool found = false;
     while(item < ITEMS_NUM) {
@@ -60,7 +60,7 @@ const Item* is_nearby(void* model) {
 
 void draw_tv(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, (TV.x + 5 - m->scene_offset) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
     canvas_set_color(canvas, ColorBlack);
@@ -69,7 +69,7 @@ void draw_tv(Canvas* canvas, void* model) {
 
 void smash_tv(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
         canvas, ((TV.x - 8) - m->scene_offset) * PARALLAX(TV.layer), TV.y - 6, I_FX_Bang_32x6);
@@ -79,7 +79,7 @@ void smash_tv(Canvas* canvas, void* model) {
 
 void sofa_sit(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
 
     m->animation = assets_icons_get(A_FX_Sitting_40x27);
     m->back = assets_icons_get(I_FX_SittingB_40x27);

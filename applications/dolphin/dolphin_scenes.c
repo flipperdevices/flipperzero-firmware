@@ -8,7 +8,7 @@ static void dolphin_use_item(Canvas* canvas, void* model) {
     const Item* near = is_nearby(model);
     if(near != NULL) {
         if(near->callback) near->callback(canvas, model);
-        DolphinViewMainModel* m = model;
+        DolphinViewMetaModel* m = model;
         m->action_timeout = 20;
     }
 }
@@ -16,7 +16,7 @@ static void dolphin_use_item(Canvas* canvas, void* model) {
 void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom) {
     furi_assert(model);
 
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     uint8_t font_y = canvas_current_font_height(canvas);
 
     char buf[32];
@@ -51,7 +51,7 @@ void dolphin_draw_emote_bubble(Canvas* canvas, void* model, char* custom) {
 
 static void draw_dolphin(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
 
     if(m->animation && m->back) {
         canvas_set_bitmap_mode(canvas, true);
@@ -67,7 +67,7 @@ static void draw_dolphin(Canvas* canvas, void* model) {
 
 static void draw_hint(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     const Item* near = is_nearby(model);
     if(near != NULL) {
         uint16_t offset = near->y < 20 ? -10 : 10;
@@ -79,7 +79,7 @@ static void draw_hint(Canvas* canvas, void* model) {
 
 static void draw_scene(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
 
     if(m->action == MINDCONTROL && !m->use_item && m->action_timeout == 0) {
         draw_hint(canvas, model);
@@ -109,7 +109,7 @@ static void draw_scene(Canvas* canvas, void* model) {
 
 static void dolphin_update_position(void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
     while(m->position != m->poi) {
         if(m->position <= m->poi) {
             if(m->action_timeout == 0) m->action_timeout = 15;
@@ -160,7 +160,7 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
 
 static void dolphin_actions_update(Canvas* canvas, void* model) {
     furi_assert(model);
-    DolphinViewMainModel* m = model;
+    DolphinViewMetaModel* m = model;
 
     if(m->action_timeout > 0) {
         m->action_timeout--;
@@ -223,7 +223,7 @@ static void dolphin_actions_update(Canvas* canvas, void* model) {
     }
 }
 
-void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model) {
+void dolphin_handle_keys(InputEvent* event, DolphinViewMetaModel* model) {
     furi_assert(model);
     furi_assert(event);
 
@@ -255,15 +255,6 @@ void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model) {
         }
         model->scene_offset = model->position - 50;
 
-    } else if(event->type == InputTypeRelease) {
-        if(event->key == InputKeyRight || event->key == InputKeyLeft) {
-            model->animation = assets_icons_get(A_MDI_32x32);
-            model->back = assets_icons_get(A_MDIB_32x32);
-            if(!icon_is_animating(model->animation)) {
-                icon_start_animation(model->back);
-                icon_start_animation(model->animation);
-            }
-        }
     } else if(event->type == InputTypeShort) {
         if(event->key == InputKeyOk) {
             if(!model->use_item) {
