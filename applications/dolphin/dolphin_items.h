@@ -77,12 +77,7 @@ const Item* is_nearby(void* model) {
 void draw_tv(Canvas* canvas, void* model) {
     DolphinViewMainModel* m = model;
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(
-        canvas,
-        (TV.x + 5 - m->scene_offset) * PARALLAX(TV.layer),
-        TV.y + 4,
-        14,
-        20);
+    canvas_draw_box(canvas, (TV.x + 5 - m->scene_offset) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_bitmap_mode(canvas, true);
 }
@@ -91,10 +86,7 @@ void smash_tv(Canvas* canvas, void* model) {
     DolphinViewMainModel* m = model;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
-        canvas,
-        ((TV.x - 8) - m->scene_offset) * PARALLAX(TV.layer),
-        TV.y - 6,
-        I_FX_Bang_32x6);
+        canvas, ((TV.x - 8) - m->scene_offset) * PARALLAX(TV.layer), TV.y - 6, I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
     dolphin_draw_emote_bubble(canvas, model, "Bang!");
 }

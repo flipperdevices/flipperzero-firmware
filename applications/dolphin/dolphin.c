@@ -38,7 +38,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
             mindcontrol = model->action == MINDCONTROL ? true : false;
-            while(mindcontrol){ 
+            while(mindcontrol) {
                 dolphin_handle_keys(event, model);
                 break;
             }
@@ -82,7 +82,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
                     }
                 }
             }
-        } 
+        }
     }
 
     // All events consumed

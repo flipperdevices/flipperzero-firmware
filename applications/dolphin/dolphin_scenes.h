@@ -42,4 +42,4 @@ void dolphin_update_scene(Canvas* canvas, void* model);
 
 void dolphin_use_item(Canvas* canvas, void* model);
 
-void dolphin_handle_keys(InputEvent* event,DolphinViewMainModel * model);
+void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model);

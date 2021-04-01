@@ -54,16 +54,10 @@ void draw_dolphin(Canvas* canvas, void* model) {
         canvas_set_bitmap_mode(canvas, true);
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_icon(
-            canvas,
-            (m->position - m->scene_offset) * PARALLAX(DOLPHIN_LAYER),
-            18,
-            m->back);
+            canvas, (m->position - m->scene_offset) * PARALLAX(DOLPHIN_LAYER), 18, m->back);
         canvas_set_color(canvas, ColorBlack);
         canvas_draw_icon(
-            canvas,
-            (m->position - m->scene_offset) * PARALLAX(DOLPHIN_LAYER),
-            18,
-            m->animation);
+            canvas, (m->position - m->scene_offset) * PARALLAX(DOLPHIN_LAYER), 18, m->animation);
         canvas_set_bitmap_mode(canvas, false);
     }
 }
@@ -119,7 +113,6 @@ void draw_scene(Canvas* canvas, void* model) {
         if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
     }
 }
-
 
 void dolphin_update_position(void* model) {
     DolphinViewMainModel* m = model;
@@ -231,8 +224,7 @@ void dolphin_update_scene(Canvas* canvas, void* model) {
     dolphin_actions_update(canvas, model);
 }
 
-
-void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel * model){
+void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel* model) {
     furi_assert(model);
     furi_assert(event);
 
@@ -259,9 +251,8 @@ void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel * model){
             }
             if(model->position > 0) {
                 model->position -= 5;
-                
-                model->scene_offset -= 5;
 
+                model->scene_offset -= 5;
 
             } else if(model->position < 0) {
                 model->position = 0;
@@ -271,7 +262,7 @@ void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel * model){
         if(event->key == InputKeyRight || event->key == InputKeyLeft) {
             //state->player_v.x = 0;
         }
-    }else if (event->type == InputTypeShort){
+    } else if(event->type == InputTypeShort) {
         if(event->key == InputKeyOk) {
             if(!model->use_item) {
                 //model->action_timeout = 100;
@@ -281,7 +272,5 @@ void dolphin_handle_keys(InputEvent* event, DolphinViewMainModel * model){
         } else if(event->key == InputKeyBack) {
             model->action = IDLE;
         }
-
-    } 
-
+    }
 }
