@@ -5,6 +5,7 @@ void dolphin_main_animation_set(Dolphin* dolphin, IconName name) {
     with_view_model(
         dolphin->idle_view_main, (DolphinViewMainModel * model) {
             model->animation = assets_icons_get(name);
+            icon_start_animation(model->animation);
             return true;
         });
 }
