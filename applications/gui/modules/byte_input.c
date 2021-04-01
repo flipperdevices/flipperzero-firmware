@@ -608,7 +608,7 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
     furi_assert(byte_input);
     bool consumed = false;
 
-    if(event->type == InputTypeShort) {
+    if(event->type == InputTypeShort || event->type == InputTypeRepeate) {
         switch(event->key) {
         case InputKeyLeft:
             with_view_model(
