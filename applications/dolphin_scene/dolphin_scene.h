@@ -27,6 +27,8 @@ typedef struct {
     ViewPort* view_port;
     ValueMutex* vm;
     AppEvent* event;
+    FuriThread* thread;
+
     bool enabled;
 
     Vec2 player;

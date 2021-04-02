@@ -38,7 +38,6 @@ ValueMutex* scene_init() {
 
     scene->screen.x = scene->player_global.x - scene->player.x;
     scene->screen.y = scene->player_global.y - scene->player.y;
-    
 
     ValueMutex* scene_mutex = furi_alloc(sizeof(ValueMutex));
     if(scene_mutex == NULL || !init_mutex(scene_mutex, scene, sizeof(SceneState))) {
@@ -65,20 +64,19 @@ ValueMutex* scene_init() {
 int32_t dolphin_scene(void* p) {
     ValueMutex* state_mutex = scene_init();
 
+    furi_record_create("scene", state_mutex);
+
     SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
 
     osTimerId_t id1 = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, _state->event, NULL);
     osTimerStart(id1, 20);
 
-    furi_record_create("scene", state_mutex);
-
     uint32_t t = xTaskGetTickCount();
     uint32_t prev_t = 0;
 
     while(1) {
-        if(osMessageQueueGet(_state->event, (void*)&_state->event, 0, osWaitForever) == osOK) {
-            //SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
-
+        SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
+        if(osMessageQueueGet(_state->event, (void*)_state->event, 0, osWaitForever) == osOK) {
             if(_state->event->type == EventTypeTick) {
                 t = xTaskGetTickCount();
                 tick_handler(_state, t, (t - prev_t) % 1024);

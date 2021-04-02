@@ -13,11 +13,15 @@ void scene_show(SceneState* state) {
         return;
     }
     return;
-    //gui_send_view_port_back(menu->gui, menu->view_port);
+    gui_send_view_port_back(state->gui, state->view_port);
 }
 
 void scene_redraw(Canvas* canvas, void* ctx) {
+    furi_assert(canvas);
+    furi_assert(ctx);
+
     SceneState* state = (SceneState*)acquire_mutex((ValueMutex*)ctx, 25);
+    if(state == NULL) return; // redraw fail
     uint32_t t = xTaskGetTickCount();
 
     canvas_clear(canvas);

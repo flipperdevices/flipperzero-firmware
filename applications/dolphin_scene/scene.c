@@ -6,7 +6,6 @@ static const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
 static const Item** Scenes[] = {*&Home};
 
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
-
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
 
@@ -34,5 +33,4 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
 
         if(l == 0) canvas_draw_line(canvas, 0, 50, 128, 50);
     }
-
 }
