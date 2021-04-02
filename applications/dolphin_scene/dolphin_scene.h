@@ -14,7 +14,6 @@ typedef struct {
         InputEvent input;
     } value;
     EventType type;
-    osMessageQueueId_t mqueue;
 } AppEvent;
 
 typedef struct {
@@ -26,11 +25,12 @@ typedef struct {
     Gui* gui;
     ViewPort* view_port;
     ValueMutex* vm;
-    AppEvent* event;
-    FuriThread* thread;
     osTimerId_t* timer;
+    osMessageQueueId_t mqueue;
+
     bool enabled;
 
+    ///
     Vec2 player;
     Vec2 player_global;
     Vec2 player_v;

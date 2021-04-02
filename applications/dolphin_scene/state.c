@@ -13,7 +13,7 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
 }
 
 void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
-    int32_t global_x = (state->player_global.x / SCALE) % WORLD_WIDTH;
+    //int32_t global_x = (state->player_global.x / SCALE) % WORLD_WIDTH;
 
     if(state->action_timeout > 0) {
         state->action_timeout--;
@@ -35,6 +35,7 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
     //    dolphin_use_item(canvas, model);
     //     state->use_item = false;
     //}
+    /*
     switch(state->action) {
     case WALK:
         if(global_x < (state->poi / SCALE) % WORLD_WIDTH) {
@@ -47,7 +48,7 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         break;
 
     case EMOTE:
-        /*if( state->action_timeout == 0 &&  state->previous_action != EMOTE) {
+        if( state->action_timeout == 0 &&  state->previous_action != EMOTE) {
              state->action_timeout = 50;
              state->emote_id = roll_new( state->previous_emote, ARRSIZE(emotes_list));
         }
@@ -59,7 +60,6 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         }
 
         break;
-        */
     case MINDCONTROL:
         break;
 
@@ -69,6 +69,7 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         state->action = state->next_action;
         break;
     }
+    */
 }
 
 void render_dolphin_state(SceneState* state, Canvas* canvas) {

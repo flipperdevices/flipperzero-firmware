@@ -13,7 +13,6 @@ void scene_show(SceneState* state) {
         return;
     }
     return;
-    //gui_send_view_port_back(state->gui, state->view_port);
 }
 
 void scene_redraw(Canvas* canvas, void* ctx) {
