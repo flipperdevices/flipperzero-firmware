@@ -49,7 +49,6 @@ typedef struct {
 
 typedef struct {
     SdAppEventType type;
-    osMessageQueueId_t result_receiver;
     union {
         SdAppFileSelectData file_select_data;
     } payload;
@@ -110,6 +109,7 @@ SdApp* sd_app_alloc() {
     furi_check(_fs_init(&sd_app->info));
 
     sd_app->event_queue = osMessageQueueNew(8, sizeof(SdAppEvent), NULL);
+    sd_app->result_receiver = osMessageQueueNew(1, sizeof(SdAppFileSelectResultEvent), NULL);
 
     // init icon view_port
     sd_app->icon.view_port = view_port_alloc();
@@ -385,12 +385,8 @@ bool sd_api_file_select(
     uint8_t result_size) {
     bool retval = false;
 
-    osMessageQueueId_t return_event_queue =
-        osMessageQueueNew(1, sizeof(SdAppFileSelectResultEvent), NULL);
-
     SdAppEvent message = {
         .type = SdAppEventTypeFileSelect,
-        .result_receiver = return_event_queue,
         .payload = {
             .file_select_data = {
                 .path = path,
@@ -403,11 +399,14 @@ bool sd_api_file_select(
     SdAppFileSelectResultEvent event;
     while(1) {
         osStatus_t event_status =
-            osMessageQueueGet(return_event_queue, &event, NULL, osWaitForever);
+            osMessageQueueGet(sd_app->result_receiver, &event, NULL, osWaitForever);
         if(event_status == osOK) {
             retval = event.result;
             break;
         }
+    }
+    if(!retval) {
+        sd_api_check_error(sd_app);
     }
 
     return retval;
@@ -818,10 +817,9 @@ int32_t sd_filesystem(void* p) {
                     furi_check(
                         osMessageQueuePut(sd_app->result_receiver, &retval, 0, osWaitForever) ==
                         osOK);
-                    app_reset_state(sd_app);
+                    break;
                 }
                 if(try_to_alloc_view_holder(sd_app, gui)) {
-                    sd_app->result_receiver = event.result_receiver;
                     FileSelect* file_select = alloc_and_attach_file_select(sd_app);
                     file_select_set_api(file_select, fs_api);
                     file_select_set_filter(
@@ -845,7 +843,7 @@ int32_t sd_filesystem(void* p) {
                 } else {
                     SdAppFileSelectResultEvent retval = {.result = false};
                     furi_check(
-                        osMessageQueuePut(event.result_receiver, &retval, 0, osWaitForever) ==
+                        osMessageQueuePut(sd_app->result_receiver, &retval, 0, osWaitForever) ==
                         osOK);
                 }
                 break;
