@@ -29,36 +29,16 @@ ValueMutex* scene_init() {
     SceneState* scene = furi_alloc(sizeof(SceneState));
 
     scene->event = scene_event_alloc();
-    /*SceneState state = {
-        .player =
-            {
-                .x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE,
-                .y = (SCREEN_HEIGHT / 2) * SCALE,
-            },
-        .player_global =
-            {
-                .x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE,
-                .y = (SCREEN_HEIGHT / 2) * SCALE,
-            },
-        .player_v =
-            {
-                .x = 0,
-                .y = 0,
-            },
+    scene->player.x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE;
+    scene->player.y = (SCREEN_HEIGHT / 2) * SCALE;
+    scene->player_global.x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE;
+    scene->player_global.y = (SCREEN_HEIGHT / 2) * SCALE;
+    scene->player_v.x = 0;
+    scene->player_v.y = 0;
 
-        .in_boundaries = false,
-
-        .player_anim = 0,
-
-        .glitch_level = 0,
-        .glitch_t = 0,
-        .poi = 94,
-        .action = 1,
-
-    };
-    state.screen.x = state.player_global.x - state.player.x;
-    state.screen.y = state.player_global.y - state.player.y;
-    */
+    scene->screen.x = scene->player_global.x - scene->player.x;
+    scene->screen.y = scene->player_global.y - scene->player.y;
+    
 
     ValueMutex* scene_mutex = furi_alloc(sizeof(ValueMutex));
     if(scene_mutex == NULL || !init_mutex(scene_mutex, scene, sizeof(SceneState))) {
@@ -75,7 +55,7 @@ ValueMutex* scene_init() {
     // Open GUI and register fullscreen view_port
     gui_add_view_port(scene->gui, scene->view_port, GuiLayerFullscreen);
 
-    view_port_draw_callback_set(scene->view_port, scene_redraw, &scene_mutex);
+    view_port_draw_callback_set(scene->view_port, scene_redraw, scene_mutex);
     view_port_input_callback_set(scene->view_port, dolphin_engine_event_cb, scene->event);
     view_port_enabled_set(scene->view_port, false);
 
@@ -97,7 +77,7 @@ int32_t dolphin_scene(void* p) {
 
     while(1) {
         if(osMessageQueueGet(_state->event, (void*)&_state->event, 0, osWaitForever) == osOK) {
-            SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
+            //SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
 
             if(_state->event->type == EventTypeTick) {
                 t = xTaskGetTickCount();
