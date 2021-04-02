@@ -12,7 +12,6 @@ void scene_show(SceneState* state) {
         view_port_enabled_set(state->view_port, true);
         return;
     }
-    return;
 }
 
 void scene_redraw(Canvas* canvas, void* ctx) {

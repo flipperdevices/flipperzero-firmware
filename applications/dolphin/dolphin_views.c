@@ -5,55 +5,45 @@
 #include <api-hal.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
-static char* Meta_Items[3] = {"Passport", "Games", "???"};
 
 void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     DolphinViewFirstStartModel* m = model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    uint8_t font_height = canvas_current_font_height(canvas);
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
     if(m->page == 0) {
-        canvas_draw_icon_name(canvas, 0, height - 53, I_DolphinFirstStart0_70x53);
-        elements_multiline_text(canvas, 75, 20, "Hey m8,\npress > to\ncontinue");
-        elements_frame(canvas, 72, 20 - font_height, width - 70 - 4, font_height * 3 + 4);
+        canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart0_70x53);
+        elements_multiline_text_framed(canvas, 75, 20, "Hey m8,\npress > to\ncontinue");
     } else if(m->page == 1) {
-        canvas_draw_icon_name(canvas, 0, height - 53, I_DolphinFirstStart1_59x53);
-        elements_multiline_text(canvas, 64, 20, "First Of All,\n...      >");
-        elements_frame(canvas, 61, 20 - font_height, width - 59 - 4, font_height * 2 + 4);
+        canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart1_59x53);
+        elements_multiline_text_framed(canvas, 64, 20, "First Of All,\n...      >");
     } else if(m->page == 2) {
-        canvas_draw_icon_name(canvas, 0, height - 51, I_DolphinFirstStart2_59x51);
-        elements_multiline_text(canvas, 64, 20, "Thank you\nfor your\nsupport! >");
-        elements_frame(canvas, 61, 20 - font_height, width - 59 - 4, font_height * 3 + 4);
+        canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart2_59x51);
+        elements_multiline_text_framed(canvas, 64, 20, "Thank you\nfor your\nsupport! >");
     } else if(m->page == 3) {
         canvas_draw_icon_name(canvas, width - 57, height - 48, I_DolphinFirstStart3_57x48);
-        elements_multiline_text(canvas, 5, 20, "Kickstarter\ncampaign\nwas INSANE! >");
-        elements_frame(canvas, 2, 20 - font_height, width - 57 - 4, font_height * 3 + 4);
+        elements_multiline_text_framed(canvas, 5, 20, "Kickstarter\ncampaign\nwas INSANE! >");
     } else if(m->page == 4) {
         canvas_draw_icon_name(canvas, width - 67, height - 53, I_DolphinFirstStart4_67x53);
-        elements_multiline_text(canvas, 5, 10, "Now\nallow me\nto introduce\nmyself >");
-        elements_frame(canvas, 2, 10 - font_height, width - 67 - 4, font_height * 4 + 4);
+        elements_multiline_text_framed(canvas, 5, 15, "Now\nallow me\nto introduce\nmyself >");
     } else if(m->page == 5) {
-        canvas_draw_icon_name(canvas, 0, height - 53, I_DolphinFirstStart5_45x53);
-        elements_multiline_text(
-            canvas, 50, 20, "I am Flipper,\ncyberdolphin\nliving in your\npocket >");
-        elements_frame(canvas, 47, 20 - font_height, width - 45 - 4, font_height * 4 + 4);
+        canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart5_45x53);
+        elements_multiline_text_framed(
+            canvas, 60, 15, "I am Flipper,\ncyberdolphin\nliving in your\npocket >");
     } else if(m->page == 6) {
-        canvas_draw_icon_name(canvas, 0, height - 54, I_DolphinFirstStart6_58x54);
-        elements_multiline_text(
-            canvas, 63, 20, "I can grow\n smart'n'cool\nif you use me\noften >");
-        elements_frame(canvas, 60, 20 - font_height, width - 58 - 4, font_height * 4 + 4);
+        canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart6_58x54);
+        elements_multiline_text_framed(
+            canvas, 63, 15, "I can grow\n smart'n'cool\nif you use me\noften >");
     } else if(m->page == 7) {
-        canvas_draw_icon_name(canvas, width - 61, height - 51, I_DolphinFirstStart7_61x51);
-        elements_multiline_text(canvas, 5, 10, "As long as\nyou read, write\nand emulate >");
-        elements_frame(canvas, 2, 10 - font_height, width - 54 - 4, font_height * 3 + 4);
+        canvas_draw_icon_name(canvas, width - 61, height - 48, I_DolphinFirstStart7_61x51);
+        elements_multiline_text_framed(
+            canvas, 5, 15, "As long as\nyou read, write\nand emulate >");
     } else if(m->page == 8) {
-        canvas_draw_icon_name(canvas, width - 56, height - 51, I_DolphinFirstStart8_56x51);
-        elements_multiline_text(
-            canvas, 5, 10, "You can check\nmy level and\nmood in the\nPassport menu");
-        elements_frame(canvas, 2, 10 - font_height, width - 56 - 4, font_height * 4 + 4);
+        canvas_draw_icon_name(canvas, width - 56, height - 48, I_DolphinFirstStart8_56x51);
+        elements_multiline_text_framed(
+            canvas, 5, 15, "You can check\nmy level and\nmood in the\nPassport menu");
     }
 }
 
@@ -92,29 +82,6 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
             canvas, 64, 13 + (i * 17), AlignCenter, AlignCenter, Lockmenu_Items[i]);
         if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
     }
-}
-
-void dolphin_view_idle_meta_draw(Canvas* canvas, void* model) {
-    DolphinViewMenuModel* m = model;
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
-
-    canvas_draw_icon_name(canvas, 20, 23, I_BigProfile_24x24);
-    canvas_draw_icon_name(canvas, 55, 23, I_BigGames_24x24);
-    canvas_draw_icon_name(canvas, 90, 23, I_BigBurger_24x24);
-
-    canvas_draw_str_aligned(canvas, 66, 12, AlignCenter, AlignCenter, Meta_Items[m->idx]);
-
-    canvas_draw_frame(canvas, 17 + (35 * m->idx), 20, 30, 30);
-    canvas_set_color(canvas, ColorWhite);
-
-    canvas_draw_dot(canvas, 17 + (35 * m->idx), 20);
-    canvas_draw_dot(canvas, 17 + (35 * m->idx), 49);
-    canvas_draw_dot(canvas, 46 + (35 * m->idx), 20);
-    canvas_draw_dot(canvas, 46 + (35 * m->idx), 49);
-
-    canvas_set_color(canvas, ColorBlack);
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {

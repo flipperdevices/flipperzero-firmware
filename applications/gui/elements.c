@@ -5,6 +5,7 @@
 #include <furi.h>
 #include "canvas_i.h"
 #include <string.h>
+#include <stdint.h>
 
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
     furi_assert(canvas);
@@ -192,6 +193,30 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
         y += font_height;
     } while(end);
     string_clear(str);
+}
+
+void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
+    furi_assert(canvas);
+    furi_assert(text);
+
+    uint8_t font_y = canvas_current_font_height(canvas);
+
+    uint8_t lines = 1;
+    uint16_t str_width = canvas_string_width(canvas, text);
+    // count \n's
+    for(int i = 0; text[i] != '\0'; i++) {
+        if(text[i] == '\n') {
+            lines++;
+            uint16_t temp_width = canvas_string_width(canvas, text + (i + 1));
+            str_width = temp_width > str_width ? temp_width : str_width;
+        }
+    }
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
+    canvas_set_color(canvas, ColorBlack);
+    elements_multiline_text(canvas, x + 4, y, text);
+    elements_frame(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
 }
 
 void elements_slightly_rounded_frame(

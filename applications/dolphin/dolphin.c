@@ -71,7 +71,6 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyDown) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDown);
             }
-
             if(event->key == InputKeyBack) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
             }
@@ -122,19 +121,8 @@ static void lock_menu_callback(void* context, uint8_t index) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         view_port_enabled_set(dolphin->lock_viewport, true);
         break;
-
-    default:
-        break;
-    }
-}
-
-static void meta_menu_callback(void* context, uint8_t index) {
-    Dolphin* dolphin = context;
-    switch(index) {
-    case 0:
-        view_port_enabled_set(dolphin->passport, true);
-        break;
-
+    case 2:
+        view_port_enabled_set(dolphin->passport, true); // its temporary here, nvm
     default:
         break;
     }
@@ -245,51 +233,6 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     return true;
 }
 
-bool dolphin_view_idle_meta_input(InputEvent* event, void* context) {
-    furi_assert(event);
-    furi_assert(context);
-    Dolphin* dolphin = context;
-
-    if(event->type != InputTypeShort) return false;
-
-    if(event->key == InputKeyLeft) {
-        with_view_model(
-            dolphin->idle_view_meta, (DolphinViewMenuModel * model) {
-                if(model->idx <= 0)
-                    model->idx = 0;
-                else
-                    --model->idx;
-                return true;
-            });
-    } else if(event->key == InputKeyRight) {
-        with_view_model(
-            dolphin->idle_view_meta, (DolphinViewMenuModel * model) {
-                if(model->idx >= 2)
-                    model->idx = 2;
-                else
-                    ++model->idx;
-                return true;
-            });
-    } else if(event->key == InputKeyOk) {
-        with_view_model(
-            dolphin->idle_view_meta, (DolphinViewMenuModel * model) {
-                meta_menu_callback(context, model->idx);
-                return true;
-            });
-    } else if(event->key == InputKeyBack) {
-        with_view_model(
-            dolphin->idle_view_meta, (DolphinViewMenuModel * model) {
-                model->idx = 0;
-                return true;
-            });
-        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-        if(random() % 100 > 50)
-            dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
-    }
-
-    return true;
-}
-
 Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
     // Message queue
@@ -343,16 +286,6 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->view_lockmenu, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
-    // Meta View
-    dolphin->idle_view_meta = view_alloc();
-    view_set_context(dolphin->idle_view_meta, dolphin);
-    view_allocate_model(
-        dolphin->idle_view_meta, ViewModelTypeLockFree, sizeof(DolphinViewMenuModel));
-    view_set_draw_callback(dolphin->idle_view_meta, dolphin_view_idle_meta_draw);
-    view_set_input_callback(dolphin->idle_view_meta, dolphin_view_idle_meta_input);
-    view_set_previous_callback(dolphin->idle_view_meta, dolphin_view_idle_back);
-    view_dispatcher_add_view(
-        dolphin->idle_view_dispatcher, DolphinViewIdleMeta, dolphin->idle_view_meta);
     // Down Idle View
     dolphin->idle_view_down = view_alloc();
     view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);

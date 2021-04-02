@@ -82,8 +82,6 @@ void update_dolphin_coordinates(SceneState* state, uint32_t dt) {
         state->player_global.x += state->player_v.x * dt;
     }
 
-    // gravity + floor
-
     // global
     state->screen.x = state->player_global.x - state->player.x;
 
