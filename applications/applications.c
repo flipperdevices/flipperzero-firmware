@@ -154,7 +154,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 
 };
 
-
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
 
 // Main menu APP
@@ -215,7 +214,6 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
-
 #ifdef BUILD_SDNFC
     {.app = sdnfc, .name = "sdnfc", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -231,8 +229,6 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef BUILD_DOLPHIN_SCENES
     {.app = dolphin_scenes, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
 #endif
-
-
 
 };
 
