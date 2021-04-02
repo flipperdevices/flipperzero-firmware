@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "dolphin_scenes/dolphin_scenes.h"
+#include "dolphin_scene/dolphin_scene.h"
 #define ACTION_N 4 // no random mind control
 enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, USE, MINDCONTROL };
 

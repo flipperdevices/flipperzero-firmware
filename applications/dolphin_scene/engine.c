@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "dolphin_scenes/dolphin_scenes.h"
+#include "dolphin_scene/dolphin_scene.h"
 
 AppEvent* scene_event_alloc() {
     AppEvent* scene_event = furi_alloc(sizeof(AppEvent));
@@ -82,7 +82,7 @@ ValueMutex* scene_init() {
     return scene_mutex;
 }
 
-int32_t dolphin_scenes(void* p) {
+int32_t dolphin_scene(void* p) {
     ValueMutex* state_mutex = scene_init();
 
     SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);

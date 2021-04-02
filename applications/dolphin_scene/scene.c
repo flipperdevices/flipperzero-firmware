@@ -1,6 +1,6 @@
 #include <furi.h>
-#include "dolphin_scenes/dolphin_scenes.h"
-#include "dolphin_scenes/items.h"
+#include "dolphin_scene/dolphin_scene.h"
+#include "dolphin_scene/items.h"
 
 static const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
 static const Item** Scenes[] = {*&Home};

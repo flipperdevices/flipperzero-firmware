@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "dolphin_scenes/dolphin_scenes.h"
+#include "dolphin_scene/dolphin_scene.h"
 
 #include <stdio.h>
 #include <string.h>

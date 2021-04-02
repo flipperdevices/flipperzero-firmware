@@ -10,7 +10,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/canvas.h>
 #include <menu/menu.h>
-#include <dolphin_scenes/dolphin_scenes.h>
+#include <dolphin_scene/dolphin_scene.h>
 
 #include <assets_icons.h>
 #include <stdint.h>
