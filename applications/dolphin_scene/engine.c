@@ -3,7 +3,7 @@
 
 AppEvent* scene_event_alloc() {
     AppEvent* scene_event = furi_alloc(sizeof(AppEvent));
-    scene_event->mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+    scene_event->mqueue = osMessageQueueNew(4, sizeof(AppEvent), NULL);
     furi_check(scene_event->mqueue);
 
     return scene_event;
@@ -13,7 +13,7 @@ void dolphin_engine_tick_cb(void* p) {
     osMessageQueueId_t event_queue = p;
     AppEvent tick_event;
     tick_event.type = EventTypeTick;
-    osMessageQueuePut(event_queue, (void*)&tick_event, 0, osWaitForever);
+    osMessageQueuePut(event_queue, (void*)&tick_event, 0, 0);
 }
 
 static void dolphin_engine_event_cb(InputEvent* input_event, void* ctx) {
@@ -58,6 +58,8 @@ ValueMutex* scene_init() {
     view_port_input_callback_set(scene->view_port, dolphin_engine_event_cb, scene->event);
     view_port_enabled_set(scene->view_port, false);
 
+    scene->timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene->event->mqueue, NULL);
+
     return scene_mutex;
 }
 
@@ -68,15 +70,17 @@ int32_t dolphin_scene(void* p) {
 
     SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
 
-    osTimerId_t id1 = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, _state->event, NULL);
-    osTimerStart(id1, 20);
+    osTimerStart(_state->timer, 20);
 
     uint32_t t = xTaskGetTickCount();
     uint32_t prev_t = 0;
 
+    //release_mutex(state_mutex, _state);
+
+    
     while(1) {
         SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
-        if(osMessageQueueGet(_state->event, (void*)_state->event, 0, osWaitForever) == osOK) {
+        if(osMessageQueueGet(_state->event->mqueue, _state->event, 0, osWaitForever) == osOK) {
             if(_state->event->type == EventTypeTick) {
                 t = xTaskGetTickCount();
                 tick_handler(_state, t, (t - prev_t) % 1024);
@@ -88,7 +92,7 @@ int32_t dolphin_scene(void* p) {
                     gui_remove_view_port(_state->gui, _state->view_port);
                     view_port_free(_state->view_port);
                     osMessageQueueDelete(_state->event);
-                    osTimerDelete(id1);
+                    osTimerDelete(_state->timer);
 
                     return 0;
                 } else {
@@ -96,9 +100,10 @@ int32_t dolphin_scene(void* p) {
                 }
             }
 
-            release_mutex(state_mutex, _state);
+            //release_mutex(state_mutex, _state);
             view_port_update(_state->view_port);
         }
+        release_mutex(state_mutex, _state);
     }
 
     return 0;

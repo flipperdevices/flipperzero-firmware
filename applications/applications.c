@@ -148,7 +148,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_DOLPHIN_SCENES
+#ifdef APP_DOLPHIN_SCENE
     {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
 #endif
 

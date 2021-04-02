@@ -28,7 +28,7 @@ typedef struct {
     ValueMutex* vm;
     AppEvent* event;
     FuriThread* thread;
-
+    osTimerId_t* timer;
     bool enabled;
 
     Vec2 player;
