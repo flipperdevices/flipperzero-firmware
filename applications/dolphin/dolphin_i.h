@@ -3,7 +3,6 @@
 #include "dolphin.h"
 #include "dolphin_state.h"
 #include "dolphin_views.h"
-#include "dolphin_scenes.h"
 
 #include <furi.h>
 #include <api-hal.h>
@@ -11,6 +10,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/canvas.h>
 #include <menu/menu.h>
+#include <dolphin_scenes/dolphin_scenes.h>
 
 #include <assets_icons.h>
 #include <stdint.h>
@@ -34,6 +34,8 @@ struct Dolphin {
     DolphinState* state;
     // Menu
     ValueMutex* menu_vm;
+    // Scene
+    ValueMutex* scene_vm;
     // GUI
     ViewDispatcher* idle_view_dispatcher;
     View* idle_view_first_start;
@@ -51,8 +53,8 @@ struct Dolphin {
     uint8_t lock_count;
 };
 
-#define ACTION_N 5 // no random mind control
-enum Actions { SLEEP = 0, IDLE, WALK_L, WALK_R, EMOTE, USE, MINDCONTROL };
+// Temporary
+const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
 
 Dolphin* dolphin_alloc();
 

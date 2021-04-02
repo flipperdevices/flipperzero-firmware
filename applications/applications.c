@@ -33,6 +33,7 @@ int32_t sd_filesystem(void* p);
 int32_t subghz_app(void* p);
 int32_t gui_test(void* p);
 int32_t keypad_test(void* p);
+int32_t dolphin_scenes(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
@@ -146,7 +147,13 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_KEYPAD_TEST
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_DOLPHIN_SCENES
+    {.app = dolphin_scenes, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
+#endif
+
 };
+
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
 
@@ -208,6 +215,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
+
 #ifdef BUILD_SDNFC
     {.app = sdnfc, .name = "sdnfc", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -219,6 +227,12 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef BUILD_KEYPAD_TEST
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
+
+#ifdef BUILD_DOLPHIN_SCENES
+    {.app = dolphin_scenes, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
+#endif
+
+
 
 };
 
