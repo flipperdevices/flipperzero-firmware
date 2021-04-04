@@ -4,7 +4,7 @@
 
 static const Item TV = {
     .layer = 7,
-    .x = 40,
+    .x = 240,
     .y = 34,
     .icon = I_TV_20x24,
     .action_name = "Use",
@@ -13,7 +13,7 @@ static const Item TV = {
 
 static const Item Painting = {
     .layer = 3,
-    .x = 65,
+    .x = 265,
     .y = 10,
     .icon = I_Home_painting_17x20,
     .action_name = "Inspect",
@@ -21,8 +21,8 @@ static const Item Painting = {
     .callback = NULL};
 
 static const Item Sofa = {
-    .layer = 3,
-    .x = 150,
+    .layer = 4,
+    .x = 350,
     .y = 34,
     .icon = I_Sofa_40x13,
     .action_name = "Sit",
@@ -30,8 +30,8 @@ static const Item Sofa = {
     .callback = NULL};
 
 static const Item PC = {
-    .layer = 3,
-    .x = 300,
+    .layer = 4,
+    .x = 500,
     .y = 10,
     .icon = I_PC_22x29,
     .action_name = "Use",
@@ -39,22 +39,6 @@ static const Item PC = {
     .callback = NULL};
 
 /*
-const Item* is_nearby(void* model) {};
-    //furi_assert(model);
-    //DolphinViewMetaModel* m = model;
-    //uint8_t item = 0;
-    //bool found = false;
-    //while(item < ITEMS_NUM) {
-    //    const Item* current = Scenes[m->active_scene][item];
-
-    //    if(abs(current->x - m->position) < 20) {
-    //        found = !found;
-    //        break;
-    //    }
-     //   ++item;
-    //}
-    //return found ? Scenes[m->active_scene][item] : NULL;
-//}
 
 void draw_tv(Canvas* canvas, void* model) {
     furi_assert(model);

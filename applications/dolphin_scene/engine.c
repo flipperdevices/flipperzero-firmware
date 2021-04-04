@@ -19,18 +19,13 @@ static void dolphin_engine_event_cb(InputEvent* input_event, void* ctx) {
 
 ValueMutex* scene_init() {
     SceneState* scene = furi_alloc(sizeof(SceneState));
+    scene->player.y = DOLPHIN_DEFAULT_Y;
+    scene->player.x = DOLPHIN_CENTER;
 
-    scene->player.x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE;
-    scene->player.y = (SCREEN_HEIGHT / 2) * SCALE;
-    scene->player_global.x = (SCREEN_WIDTH / 2 - PLAYER_WIDTH / 2) * SCALE;
-    scene->player_global.y = (SCREEN_HEIGHT / 2) * SCALE;
-    scene->player_v.x = 0;
-    scene->player_v.y = 0;
+    scene->screen.x = scene->player.x;
+    scene->screen.y = scene->player.y;
 
-    scene->screen.x = scene->player_global.x - scene->player.x;
-    scene->screen.y = scene->player_global.y - scene->player.y;
-
-    scene->mqueue = osMessageQueueNew(4, sizeof(AppEvent), NULL);
+    scene->ui.mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
 
     ValueMutex* scene_mutex = furi_alloc(sizeof(ValueMutex));
     if(scene_mutex == NULL || !init_mutex(scene_mutex, scene, sizeof(SceneState))) {
@@ -39,19 +34,19 @@ ValueMutex* scene_init() {
     }
 
     // Open GUI and register view_port
-    scene->gui = furi_record_open("gui");
+    scene->ui.gui = furi_record_open("gui");
 
     // Allocate and configure view_port
-    scene->view_port = view_port_alloc();
+    scene->ui.view_port = view_port_alloc();
 
     // Open GUI and register fullscreen view_port
-    gui_add_view_port(scene->gui, scene->view_port, GuiLayerFullscreen);
+    gui_add_view_port(scene->ui.gui, scene->ui.view_port, GuiLayerFullscreen);
 
-    view_port_draw_callback_set(scene->view_port, scene_redraw, scene_mutex);
-    view_port_input_callback_set(scene->view_port, dolphin_engine_event_cb, scene->mqueue);
-    view_port_enabled_set(scene->view_port, false);
+    view_port_draw_callback_set(scene->ui.view_port, scene_redraw, scene_mutex);
+    view_port_input_callback_set(scene->ui.view_port, dolphin_engine_event_cb, scene->ui.mqueue);
+    view_port_enabled_set(scene->ui.view_port, false);
 
-    scene->timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene->mqueue, NULL);
+    scene->ui.timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene->ui.mqueue, NULL);
 
     return scene_mutex;
 }
@@ -63,12 +58,12 @@ int32_t dolphin_scene(void* p) {
 
     SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
 
-    osTimerStart(_state->timer, 20);
+    osTimerStart(_state->ui.timer, 40);
 
     uint32_t t = xTaskGetTickCount();
     uint32_t prev_t = 0;
 
-    osMessageQueueId_t q = _state->mqueue;
+    osMessageQueueId_t q = _state->ui.mqueue;
     release_mutex(state_mutex, _state);
     while(1) {
         AppEvent event;
@@ -81,13 +76,13 @@ int32_t dolphin_scene(void* p) {
             } else if(event.type == EventTypeKey) {
                 if(event.value.input.key == InputKeyBack &&
                    event.value.input.type == InputTypeShort) {
-                    view_port_enabled_set(_state->view_port, false);
+                    view_port_enabled_set(_state->ui.view_port, false);
                 } else {
                     handle_input(_state, &event.value.input);
                 }
             }
             release_mutex(state_mutex, _state);
-            view_port_update(_state->view_port);
+            view_port_update(_state->ui.view_port);
         }
     }
     /*

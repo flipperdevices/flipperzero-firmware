@@ -4,6 +4,50 @@
 #include <gui/gui.h>
 #include <u8g2/u8g2.h>
 
+#ifndef ARRSIZE
+#define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+#endif
+
+#ifndef MAX
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#endif
+
+#ifndef MIN
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#endif
+
+#ifndef CLAMP
+#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
+#endif
+
+// global
+#define SCALE 32
+// screen
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define BONDARIES_X_LEFT 40
+#define BONDARIES_X_RIGHT 88
+
+// player
+#define DOLPHIN_WIDTH 32
+#define DOLPHIN_HEIGHT 32
+#define DOLPHIN_CENTER (SCREEN_WIDTH / 2 - DOLPHIN_WIDTH / 2)
+#define SPEED_X 2
+#define ACTIONS_NUM 5
+#define DOLPHIN_DEFAULT_Y 28
+// world
+#define WORLD_WIDTH 2048
+#define WORLD_HEIGHT 64
+
+#define LAYERS 8
+#define SCENE_ZOOM 9
+#define DOLPHIN_LAYER 6
+#define PARALLAX_MOD 7
+#define PARALLAX(layer) layer / PARALLAX_MOD - layer
+#define ITEMS_NUM 4
+
+enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, USE, MINDCONTROL };
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -29,67 +73,44 @@ typedef struct {
     osMessageQueueId_t mqueue;
 
     bool enabled;
-
-    ///
-    Vec2 player;
-    Vec2 player_global;
-    Vec2 player_v;
-
-    Vec2 screen;
-
-    bool in_boundaries;
-    uint8_t player_anim;
-
-    size_t label_id;
-    uint8_t glitch_level;
-    uint32_t glitch_t;
-
-    uint32_t action_timeout;
-    uint8_t action;
-    uint8_t next_action;
-    uint8_t previous_action;
-    uint8_t poi;
-
-} SceneState;
+} SceneAppGui;
 
 typedef struct {
     uint8_t layer;
-    uint16_t x;
-    uint16_t y;
+    int32_t x;
+    int32_t y;
     IconName icon;
     char action_name[16];
     void (*draw)(Canvas* canvas, void* model);
     void (*callback)(Canvas* canvas, void* model);
 } Item;
 
-// global
-#define SCALE 1024
+typedef struct {
+    SceneAppGui ui;
+    ///
+    Vec2 player;
+    Vec2 player_global;
+    Vec2 player_v;
+    Vec2 screen;
 
-// screen
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define BONDARIES_X_LEFT 40
-#define BONDARIES_X_RIGHT 88
+    bool player_flipped;
 
-// player
-#define PLAYER_WIDTH 32
-#define PLAYER_HEIGHT 32
-#define SPEED_X 40
+    uint8_t player_anim;
+    uint8_t scene_id;
 
-// world
-#define WORLD_WIDTH 2048
-#define WORLD_HEIGHT 64
+    uint8_t emote_id;
+    uint8_t previous_emote;
+    uint8_t glitch_level;
+    uint32_t glitch_t;
 
-#define LABEL_X 30 * SCALE
-#define LABEL_Y 12 * SCALE
-#define LABEL_HEIGHT 8 * SCALE
-
-#define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
-#define ITEMS_NUM 4
-#define LAYERS 8
-#define DOLPHIN_LAYER 6
-#define PARALLAX_MOD 7
-#define PARALLAX(layer) layer / PARALLAX_MOD - layer
+    uint32_t action_timeout;
+    uint8_t action;
+    uint8_t next_action;
+    uint8_t prev_action;
+    uint8_t poi;
+    int8_t zoom_v;
+    uint8_t scene_zoom;
+} SceneState;
 
 void scene_show(SceneState* state);
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t);

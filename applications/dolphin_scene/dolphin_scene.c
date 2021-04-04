@@ -1,15 +1,11 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 void scene_show(SceneState* state) {
     furi_assert(state);
 
-    if(!state->enabled) {
-        view_port_enabled_set(state->view_port, true);
+    if(!state->ui.enabled) {
+        view_port_enabled_set(state->ui.view_port, true);
         return;
     }
 }
@@ -25,7 +21,7 @@ void scene_redraw(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
 
     render_scene(state, canvas, t);
-    //render_player(state, canvas);
+
     render_dolphin_state(state, canvas);
 
     release_mutex((ValueMutex*)ctx, state);
