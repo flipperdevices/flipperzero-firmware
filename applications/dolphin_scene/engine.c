@@ -85,12 +85,12 @@ int32_t dolphin_scene(void* p) {
             view_port_update(_state->ui.view_port);
         }
     }
-    /*
-    view_port_enabled_set(_state->view_port, false);
-    gui_remove_view_port(_state->gui, _state->view_port);
-    view_port_free(_state->view_port);
-    osMessageQueueDelete(_state->mqueue);
-    osTimerDelete(_state->timer);
-    */
+
+    view_port_enabled_set(_state->ui.view_port, false);
+    gui_remove_view_port(_state->ui.gui, _state->ui.view_port);
+    view_port_free(_state->ui.view_port);
+    osMessageQueueDelete(_state->ui.mqueue);
+    osTimerDelete(_state->ui.timer);
+
     return 0;
 }

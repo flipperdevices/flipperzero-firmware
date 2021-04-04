@@ -32,13 +32,9 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-
     canvas_draw_icon_name(canvas, state->player.x, state->player.y, player_background);
-
     canvas_set_color(canvas, ColorBlack);
-
     canvas_draw_icon_name(canvas, state->player.x, state->player.y, player_sprite);
-
     canvas_set_bitmap_mode(canvas, false);
 }
 

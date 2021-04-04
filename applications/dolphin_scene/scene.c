@@ -2,26 +2,6 @@
 #include "dolphin_scene/dolphin_scene.h"
 #include "dolphin_scene/items.h"
 
-const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
-const Item** Scenes[] = {*&Home};
-
-const Item* is_nearby(SceneState* state) {
-    furi_assert(state);
-    uint8_t item = 0;
-    bool found = false;
-    while(item < ITEMS_NUM) {
-        const Item* current = Scenes[state->scene_id][item];
-        int32_t rel =
-            (SCREEN_WIDTH / 2 - (current->x - state->player_global.x) * PARALLAX(current->layer));
-        if(abs(rel) <= DOLPHIN_WIDTH / 2) {
-            found = !found;
-            break;
-        }
-        ++item;
-    }
-    return found ? Scenes[state->scene_id][item] : NULL;
-}
-
 static bool item_screen_bounds(int32_t pos) {
     return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
 }

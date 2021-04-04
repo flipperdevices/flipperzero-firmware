@@ -1,6 +1,5 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
-#include "dolphin_scene/items.h"
 #include "dolphin_scene/dolphin_emotions.h"
 #include <gui/elements.h>
 
