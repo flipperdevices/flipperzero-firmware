@@ -12,16 +12,18 @@ static bool item_screen_bounds(int32_t pos) {
 static void draw_hint(SceneState* state, Canvas* canvas) {
     const Item* near = is_nearby(state);
     if(near) {
-        canvas_draw_str(
-            canvas, 127 - canvas_string_width(canvas, near->action_name), 8, near->action_name);
+        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 20;
+        int8_t hint_pos_y = near->y < 15 ? near->y + 8 : near->y - 12;
+        canvas_draw_str(canvas, hint_pos_x, hint_pos_y, near->action_name);
     }
 }
 
-void activate_item_callback(SceneState* state, Canvas* canvas){
+void activate_item_callback(SceneState* state, Canvas* canvas) {
     const Item* near = is_nearby(state);
-    if(near){
+    if(near) {
         state->action = INTERACT;
         near->callback(canvas, state);
+        state->use_pending = false;
     }
 }
 

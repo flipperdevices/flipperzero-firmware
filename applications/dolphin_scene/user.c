@@ -4,8 +4,7 @@
 #include "dolphin_scene/dolphin_emotes.h"
 
 void render_dolphin(SceneState* state, Canvas* canvas) {
-
-    if(state->action != INTERACT){
+    if(state->action != INTERACT) {
         if(state->player_v.x < 0 || state->player_flipped) {
             if(state->player_anim == 0) {
                 state->dolphin_gfx = I_WalkL1_32x32;
@@ -27,12 +26,16 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
         }
     }
 
+    if(state->action == SLEEP && state->player_v.x == 0) {
+        state->dolphin_gfx = A_FX_Sitting_40x27;
+        state->dolphin_gfx_b = I_FX_SittingB_40x27;
+    }
     // zoom handlers
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
     }
 
-    if(state->action == EMOTE){
+    if(state->action == EMOTE) {
         elements_multiline_text_framed(canvas, 80, 24, (char*)emotes_list[state->emote_id]);
     }
 
@@ -45,9 +48,8 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
 }
 
 void handle_user_input(SceneState* state, InputEvent* input) {
-
-    if(input->type == InputTypePress){
-        if( input->key == InputKeyLeft || input->key == InputKeyRight)  {
+    if(input->type == InputTypePress) {
+        if(input->key == InputKeyLeft || input->key == InputKeyRight) {
             state->action = MINDCONTROL;
         }
     }
@@ -60,10 +62,10 @@ void handle_user_input(SceneState* state, InputEvent* input) {
     } else if(input->type == InputTypeRelease) {
         if(input->key == InputKeyDown) {
             state->zoom_v = -SPEED_X * 2;
-        } 
+        }
     }
 
-    if(state->action == MINDCONTROL){
+    if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
                 state->player_flipped = false;
@@ -75,8 +77,8 @@ void handle_user_input(SceneState* state, InputEvent* input) {
         } else if(input->type == InputTypeRelease) {
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
                 state->player_v.x = 0;
-            } 
-        } else if (input->type == InputTypeShort){
+            }
+        } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {
                 state->prev_action = MINDCONTROL;
                 state->action = INTERACT;
@@ -87,8 +89,6 @@ void handle_user_input(SceneState* state, InputEvent* input) {
 }
 
 void update_dolphin_coordinates(SceneState* state, uint32_t dt) {
-
-
     // global pos
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
 

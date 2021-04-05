@@ -5,6 +5,8 @@
 
 #include <gui/elements.h>
 
+const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
+const Item** Scenes[1] = {*&Home};
 
 const Item* is_nearby(SceneState* state) {
     furi_assert(state);
@@ -38,7 +40,7 @@ void smash_tv(Canvas* canvas, void* model) {
     SceneState* m = model;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
-         canvas, ((TV.x - 8) - m->player_global.x) * PARALLAX(TV.layer), TV.y, I_FX_Bang_32x6);
+        canvas, ((TV.x - 8) - m->player_global.x) * PARALLAX(TV.layer), TV.y, I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
     elements_multiline_text_framed(canvas, 80, 24, "Bang!");
 }
@@ -46,9 +48,15 @@ void smash_tv(Canvas* canvas, void* model) {
 void sofa_sit(Canvas* canvas, void* model) {
     furi_assert(model);
     SceneState* m = model;
+    // temp fix pos
+    if(m->player_global.x < 154) {
+        m->player_global.x++;
+    } else if(m->player_global.x > 154) {
+        m->player_global.x--;
+    }
+
     m->dolphin_gfx = A_FX_Sitting_40x27;
     m->dolphin_gfx_b = I_FX_SittingB_40x27;
-
 }
 
 void inspect_painting(Canvas* canvas, void* model) {

@@ -1,4 +1,8 @@
 #pragma once
+
+#ifndef ITEMS_H_INCLUDED
+#define ITEMS_H_INCLUDED
+
 #include <gui/gui.h>
 #include "dolphin_scene/dolphin_scene.h"
 
@@ -48,6 +52,9 @@ static const Item PC = {
     .draw = NULL,
     .callback = pc_callback};
 
-static const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
-static const Item** Scenes[] = {*&Home};
+const Item* Home[ITEMS_NUM];
+const Item** Scenes[1];
+
 const Item* is_nearby(SceneState* state);
+
+#endif

@@ -1,6 +1,7 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 #include "dolphin_scene/dolphin_emotes.h"
+#include "dolphin_scene/items.h"
 
 static uint16_t roll_new(uint16_t prev, uint16_t max) {
     uint16_t val = 999;
@@ -11,15 +12,14 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
     return val;
 }
 
-
-static void dolphin_actions_proceed(SceneState* state){
-    state->prev_action = state->action != state->next_action ? state->action :
-                                                            state->next_action;
-    state->action = state->next_action;
+static void dolphin_actions_proceed(SceneState* state) {
+    state->prev_action = state->action;
+    state->action = state->prev_action != state->next_action ?
+                        state->next_action :
+                        roll_new(state->next_action, ACTIONS_NUM);
 }
 
-
-static void dolphin_go_to_poi(SceneState* state){
+static void dolphin_go_to_poi(SceneState* state) {
     if(state->player_global.x < state->poi) {
         state->player_flipped = false;
         state->player_v.x = SPEED_X / 2;
@@ -29,32 +29,25 @@ static void dolphin_go_to_poi(SceneState* state){
     }
 }
 
-
-
 void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
-
     if(state->action == MINDCONTROL && state->player_v.x != 0) {
         state->action_timeout = default_timeout[state->action];
     }
 
-
-
     if(state->action_timeout > 0) {
         state->action_timeout--;
-    }else {
+    } else {
         state->action_timeout = default_timeout[state->action];
 
         if(random() % 1000 > 500) {
-            state->next_action =
-                roll_new(state->prev_action, ACTIONS_NUM);
+            state->next_action = roll_new(state->prev_action, ACTIONS_NUM);
+            state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
         }
     }
 
     switch(state->action) {
-
     case WALK:
-        if(state->player_global.x == state->poi){
-            state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
+        if(state->player_global.x == state->poi) {
             state->player_v.x = 0;
             dolphin_actions_proceed(state);
         } else {
@@ -63,30 +56,42 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         break;
     case EMOTE:
         state->player_flipped = false;
-        if(state->action_timeout == 0){
-            state->emote_id = roll_new(state->previous_emote, ARRSIZE(emotes_list));
-        }else{
+        if(state->action_timeout == 0) {
             dolphin_actions_proceed(state);
+            state->emote_id = roll_new(state->previous_emote, ARRSIZE(emotes_list));
+            break;
         }
-        break;
     case INTERACT:
         if(state->action_timeout == 0) {
-            if(state->prev_action == MINDCONTROL){
+            if(state->prev_action == MINDCONTROL) {
                 state->action = MINDCONTROL;
-            }else{
+            } else {
                 dolphin_actions_proceed(state);
+            }
+        } else {
+            const Item* near = is_nearby(state);
+            if(near || state->prev_action != SLEEP) {
+                state->use_pending = true;
             }
         }
         break;
-    //case SLEEP:
-    //    if(state->player_global.x != )
+    case SLEEP:
+        if(state->poi != 154) { // temp
+            state->poi = 154;
+        } else if(state->player_global.x != state->poi) {
+            dolphin_go_to_poi(state);
+        } else {
+            state->player_v.x = 0;
+            if(state->action_timeout == 0) {
+                dolphin_actions_proceed(state);
+            }
+
+            break;
+        }
     default:
         if(state->action_timeout == 0) {
             dolphin_actions_proceed(state);
         }
         break;
     }
-
-
 }
-

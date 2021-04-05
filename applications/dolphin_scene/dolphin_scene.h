@@ -48,15 +48,8 @@
 
 enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, INTERACT, MINDCONTROL };
 
-static const uint16_t default_timeout[] = 
-{
-    [SLEEP] = 300,
-    [IDLE] = 100,
-    [WALK] = 100,
-    [EMOTE] = 50,
-    [INTERACT] = 10,
-    [MINDCONTROL] = 50
-};
+static const uint16_t default_timeout[] =
+    {[SLEEP] = 300, [IDLE] = 100, [WALK] = 100, [EMOTE] = 50, [INTERACT] = 10, [MINDCONTROL] = 50};
 
 typedef enum {
     EventTypeTick,
@@ -104,11 +97,11 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
-
     IconName dolphin_gfx;
     IconName dolphin_gfx_b; // temp
 
     bool player_flipped;
+    bool use_pending;
 
     uint8_t player_anim;
     uint8_t scene_id;
