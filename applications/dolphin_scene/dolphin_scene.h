@@ -46,7 +46,17 @@
 #define PARALLAX(layer) layer / PARALLAX_MOD - layer
 #define ITEMS_NUM 4
 
-enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, USE, MINDCONTROL };
+enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, INTERACT, MINDCONTROL };
+
+static const uint16_t default_timeout[] = 
+{
+    [SLEEP] = 300,
+    [IDLE] = 100,
+    [WALK] = 100,
+    [EMOTE] = 50,
+    [INTERACT] = 10,
+    [MINDCONTROL] = 50
+};
 
 typedef enum {
     EventTypeTick,
@@ -77,6 +87,7 @@ typedef struct {
 
 typedef struct {
     uint8_t layer;
+    uint16_t timeout;
     int32_t x;
     int32_t y;
     IconName icon;
@@ -93,6 +104,10 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
+
+    IconName dolphin_gfx;
+    IconName dolphin_gfx_b; // temp
+
     bool player_flipped;
 
     uint8_t player_anim;
@@ -100,14 +115,17 @@ typedef struct {
 
     uint8_t emote_id;
     uint8_t previous_emote;
+
     uint8_t glitch_level;
     uint32_t glitch_t;
 
     uint32_t action_timeout;
+    uint8_t poi;
+
     uint8_t action;
     uint8_t next_action;
     uint8_t prev_action;
-    uint8_t poi;
+
     int8_t zoom_v;
     uint8_t scene_zoom;
 } SceneState;

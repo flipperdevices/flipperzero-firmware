@@ -1,9 +1,6 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
-#include "dolphin_scene/dolphin_emotions.h"
-#include <gui/elements.h>
-
-const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "Mindcontrol"};
+#include "dolphin_scene/dolphin_emotes.h"
 
 static uint16_t roll_new(uint16_t prev, uint16_t max) {
     uint16_t val = 999;
@@ -14,63 +11,82 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
     return val;
 }
 
+
+static void dolphin_actions_proceed(SceneState* state){
+    state->prev_action = state->action != state->next_action ? state->action :
+                                                            state->next_action;
+    state->action = state->next_action;
+}
+
+
+static void dolphin_go_to_poi(SceneState* state){
+    if(state->player_global.x < state->poi) {
+        state->player_flipped = false;
+        state->player_v.x = SPEED_X / 2;
+    } else if(state->player_global.x > state->poi) {
+        state->player_flipped = true;
+        state->player_v.x = -SPEED_X / 2;
+    }
+}
+
+
+
 void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
-    int32_t global_x = state->player_global.x;
+
+    if(state->action == MINDCONTROL && state->player_v.x != 0) {
+        state->action_timeout = default_timeout[state->action];
+    }
+
+
 
     if(state->action_timeout > 0) {
         state->action_timeout--;
-    } else {
-        if(state->action != MINDCONTROL && random() % 1000 > 500) {
-            state->action_timeout = 100;
+    }else {
+        state->action_timeout = default_timeout[state->action];
+
+        if(random() % 1000 > 500) {
             state->next_action =
-                roll_new(state->prev_action, ACTIONS_NUM - 1); // no random mind control
+                roll_new(state->prev_action, ACTIONS_NUM);
         }
     }
 
     switch(state->action) {
+
     case WALK:
-        if(global_x < state->poi) {
-            state->player_flipped = false;
-            state->player_v.x = SPEED_X / 2;
-        } else if(global_x > state->poi) {
-            state->player_flipped = true;
-            state->player_v.x = -SPEED_X / 2;
-        } else {
+        if(state->player_global.x == state->poi){
+            state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
             state->player_v.x = 0;
-            state->poi = roll_new(state->player_global.x, WORLD_WIDTH);
-            state->prev_action = WALK;
-            state->action = IDLE;
+            dolphin_actions_proceed(state);
+        } else {
+            dolphin_go_to_poi(state);
         }
         break;
-
-    case MINDCONTROL:
+    case EMOTE:
+        state->player_flipped = false;
+        if(state->action_timeout == 0){
+            state->emote_id = roll_new(state->previous_emote, ARRSIZE(emotes_list));
+        }else{
+            dolphin_actions_proceed(state);
+        }
         break;
-
+    case INTERACT:
+        if(state->action_timeout == 0) {
+            if(state->prev_action == MINDCONTROL){
+                state->action = MINDCONTROL;
+            }else{
+                dolphin_actions_proceed(state);
+            }
+        }
+        break;
+    //case SLEEP:
+    //    if(state->player_global.x != )
     default:
-
-        state->prev_action = state->action != state->next_action ? state->action :
-                                                                   state->next_action;
-        state->action = state->next_action;
+        if(state->action_timeout == 0) {
+            dolphin_actions_proceed(state);
+        }
         break;
     }
+
+
 }
 
-void render_dolphin_state(SceneState* state, Canvas* canvas) {
-    char buf[64];
-
-    canvas_set_font(canvas, FontSecondary);
-    canvas_set_color(canvas, ColorBlack);
-    sprintf(
-        buf,
-        "x:%ld>%d %ld %s",
-        state->player_global.x,
-        state->poi,
-        state->action_timeout,
-        action_str[state->action]);
-    //sprintf(buf, "x:%ld s:%ld p:%ld %d %s", state->player_global.x, state->screen.x, state->player.x, state->scene_zoom, action_str[state->action]);
-    canvas_draw_str(canvas, 0, 8, buf);
-
-    if(state->scene_zoom == SCENE_ZOOM) {
-        elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
-    }
-}

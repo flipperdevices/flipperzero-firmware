@@ -10,7 +10,8 @@ void pc_callback(Canvas* canvas, void* model);
 
 static const Item TV = {
     .layer = 7,
-    .x = 240,
+    .timeout = 10,
+    .x = 140,
     .y = 34,
     .icon = I_TV_20x24,
     .action_name = "Use",
@@ -19,7 +20,8 @@ static const Item TV = {
 
 static const Item Painting = {
     .layer = 3,
-    .x = 265,
+    .timeout = 20,
+    .x = 165,
     .y = 10,
     .icon = I_Home_painting_17x20,
     .action_name = "Inspect",
@@ -28,7 +30,8 @@ static const Item Painting = {
 
 static const Item Sofa = {
     .layer = 4,
-    .x = 350,
+    .timeout = 300,
+    .x = 250,
     .y = 34,
     .icon = I_Sofa_40x13,
     .action_name = "Sit",
@@ -37,13 +40,14 @@ static const Item Sofa = {
 
 static const Item PC = {
     .layer = 4,
-    .x = 500,
+    .timeout = 100,
+    .x = 400,
     .y = 10,
     .icon = I_PC_22x29,
     .action_name = "Use",
     .draw = NULL,
     .callback = pc_callback};
 
-static const Item* Home[] = {&TV, &Sofa, &Painting, &PC};
+static const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
 static const Item** Scenes[] = {*&Home};
 const Item* is_nearby(SceneState* state);

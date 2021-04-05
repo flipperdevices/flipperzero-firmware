@@ -2,7 +2,9 @@
 
 #include "dolphin_scene/dolphin_scene.h"
 #include "dolphin_scene/items.h"
-#include <gui/gui.h>
+
+#include <gui/elements.h>
+
 
 const Item* is_nearby(SceneState* state) {
     furi_assert(state);
@@ -33,21 +35,20 @@ void draw_tv(Canvas* canvas, void* model) {
 
 void smash_tv(Canvas* canvas, void* model) {
     furi_assert(model);
-    // DolphinViewMetaModel* m = model;
+    SceneState* m = model;
     canvas_set_bitmap_mode(canvas, true);
-    // canvas_draw_icon_name(
-    //     canvas, ((TV.x - 8) - m->scene_offset) * PARALLAX(TV.layer), TV.y - 6, I_FX_Bang_32x6);
+    canvas_draw_icon_name(
+         canvas, ((TV.x - 8) - m->player_global.x) * PARALLAX(TV.layer), TV.y, I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
-    // dolphin_draw_emote_bubble(canvas, model, "Bang!");
+    elements_multiline_text_framed(canvas, 80, 24, "Bang!");
 }
 
 void sofa_sit(Canvas* canvas, void* model) {
     furi_assert(model);
-    /// DolphinViewMetaModel* m = model;
+    SceneState* m = model;
+    m->dolphin_gfx = A_FX_Sitting_40x27;
+    m->dolphin_gfx_b = I_FX_SittingB_40x27;
 
-    //m->animation = assets_icons_get(A_FX_Sitting_40x27);
-    //m->back = assets_icons_get(I_FX_SittingB_40x27);
-    //icon_start_animation(m->back);
 }
 
 void inspect_painting(Canvas* canvas, void* model) {
