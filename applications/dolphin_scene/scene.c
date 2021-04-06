@@ -1,7 +1,7 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 #include "dolphin_scene/dolphin_emotes.h"
-#include "dolphin_scene/items.h"
+#include "dolphin_scene/items_i.h"
 #include <gui/elements.h>
 
 const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "MC"};

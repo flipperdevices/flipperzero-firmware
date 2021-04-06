@@ -1,7 +1,47 @@
 
 
-#include "dolphin_scene/items.h"
+#include "dolphin_scene/items_i.h"
 #include <gui/elements.h>
+
+const Item TV = {
+    .layer = 7,
+    .timeout = 10,
+    .x = 160,
+    .y = 34,
+    .icon = I_TV_20x24,
+    .action_name = "Use",
+    .draw = NULL,
+    .callback = smash_tv};
+
+const Item Painting = {
+    .layer = 3,
+    .timeout = 20,
+    .x = 160,
+    .y = 10,
+    .icon = I_Home_painting_17x20,
+    .action_name = "Inspect",
+    .draw = NULL,
+    .callback = inspect_painting};
+
+const Item Sofa = {
+    .layer = 4,
+    .timeout = 100,
+    .x = 250,
+    .y = 34,
+    .icon = I_Sofa_40x13,
+    .action_name = "Sit",
+    .draw = NULL,
+    .callback = sofa_sit};
+
+const Item PC = {
+    .layer = 4,
+    .timeout = 100,
+    .x = 400,
+    .y = 10,
+    .icon = I_PC_22x29,
+    .action_name = "Use",
+    .draw = NULL,
+    .callback = pc_callback};
 
 const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
 const Item** Scenes[1] = {*&Home};
