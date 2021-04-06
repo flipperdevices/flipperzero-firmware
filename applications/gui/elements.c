@@ -172,14 +172,14 @@ void elements_multiline_text_aligned(
     string_clear(str);
 }
 
-void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
+void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
     furi_assert(canvas);
     furi_assert(text);
 
     uint8_t font_height = canvas_current_font_height(canvas);
     string_t str;
     string_init(str);
-    char* start = text;
+    const char* start = text;
     char* end;
     do {
         end = strchr(start, '\n');
@@ -195,23 +195,24 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
     string_clear(str);
 }
 
-void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, char* text) {
+void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const char* text) {
     furi_assert(canvas);
     furi_assert(text);
 
     uint8_t font_y = canvas_current_font_height(canvas);
-
-    uint8_t lines = 1;
     uint16_t str_width = canvas_string_width(canvas, text);
     // count \n's
-    for(int i = 0; text[i] != '\0'; i++) {
-        if(text[i] == '\n') {
+    uint8_t lines = 1;
+    const char* t = text;
+    while(*t != '\0') {
+        if(*t == '\n') {
             lines++;
-            uint16_t temp_width = canvas_string_width(canvas, text + (i + 1));
+            uint16_t temp_width = canvas_string_width(canvas, t + 1);
             str_width = temp_width > str_width ? temp_width : str_width;
         }
+        t++;
     }
-
+  
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
     canvas_set_color(canvas, ColorBlack);
