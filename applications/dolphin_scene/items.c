@@ -52,18 +52,18 @@ const Item* is_nearby(SceneState* state) {
     furi_assert(state);
     uint8_t item = 0;
     bool found = false;
+    const Item** current = get_scene(state);
     while(item < ITEMS_NUM) {
-        const Item* current = Scenes[state->scene_id][item];
         int32_t rel =
             (DOLPHIN_CENTER + DOLPHIN_WIDTH / 2 -
-             (current->x - state->player_global.x) * PARALLAX(current->layer));
+             (current[item]->x - state->player_global.x) * PARALLAX(current[item]->layer));
         if(abs(rel) <= DOLPHIN_WIDTH / 2) {
             found = !found;
             break;
         }
         ++item;
     }
-    return found ? Scenes[state->scene_id][item] : NULL;
+    return found ? current[item] : NULL;
 }
 
 void draw_tv(Canvas* canvas, void* model) {
