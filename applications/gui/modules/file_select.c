@@ -42,24 +42,27 @@ static void file_select_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
 
-    for(uint8_t i = 0; i < FILENAME_COUNT; i++) {
-        if(i == model->position) {
-            canvas_set_color(canvas, ColorBlack);
-            canvas_draw_box(canvas, 0, (i * item_height) + 1, item_width, item_height - 2);
+    if(model->file_count) {
+        for(uint8_t i = 0; i < FILENAME_COUNT; i++) {
+            if(i == model->position) {
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_box(canvas, 0, (i * item_height) + 1, item_width, item_height - 2);
 
-            canvas_set_color(canvas, ColorWhite);
-            canvas_draw_dot(canvas, 0, (i * item_height) + 1);
-            canvas_draw_dot(canvas, 0, (i * item_height) + item_height - 2);
-            canvas_draw_dot(canvas, item_width - 1, (i * item_height) + 1);
-            canvas_draw_dot(canvas, item_width - 1, (i * item_height) + item_height - 2);
-        } else {
-            canvas_set_color(canvas, ColorBlack);
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_dot(canvas, 0, (i * item_height) + 1);
+                canvas_draw_dot(canvas, 0, (i * item_height) + item_height - 2);
+                canvas_draw_dot(canvas, item_width - 1, (i * item_height) + 1);
+                canvas_draw_dot(canvas, item_width - 1, (i * item_height) + item_height - 2);
+            } else {
+                canvas_set_color(canvas, ColorBlack);
+            }
+
+            canvas_draw_str(
+                canvas, 6, (i * item_height) + item_height - 4, string_get_cstr(model->filename[i]));
         }
-
-        canvas_draw_str(
-            canvas, 6, (i * item_height) + item_height - 4, string_get_cstr(model->filename[i]));
+    } else {
+        canvas_draw_str(canvas, 6, item_height, "Empty folder");
     }
-
     elements_scrollbar(canvas, model->first_file_index + model->position, model->file_count);
 }
 
