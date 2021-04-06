@@ -204,12 +204,12 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
     uint8_t lines = 1;
     const char* t = text;
     while(*t != '\0') {
-        t++;
         if(*t == '\n') {
             lines++;
             uint16_t temp_width = canvas_string_width(canvas, t + 1);
             str_width = temp_width > str_width ? temp_width : str_width;
         }
+        t++;
     }
 
     canvas_set_color(canvas, ColorWhite);
