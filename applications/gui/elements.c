@@ -199,11 +199,11 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
     furi_assert(text);
 
     uint8_t font_y = canvas_current_font_height(canvas);
-    const char* t = text;
-    uint8_t lines = 1;
     uint16_t str_width = canvas_string_width(canvas, text);
     // count \n's
-    while(*t != '\0'){
+    uint8_t lines = 1;
+    const char* t = text;
+    while(*t != '\0') {
         t++;
         if(*t == '\n') {
             lines++;
