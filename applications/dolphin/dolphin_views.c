@@ -24,33 +24,34 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
         elements_multiline_text_framed(canvas, 64, 20, "Thank you\nfor your\nsupport! >");
     } else if(m->page == 3) {
         canvas_draw_icon_name(canvas, width - 57, height - 48, I_DolphinFirstStart3_57x48);
-        elements_multiline_text_framed(canvas, 5, 20, "Kickstarter\ncampaign\nwas INSANE! >");
+        elements_multiline_text_framed(canvas, 0, 20, "Kickstarter\ncampaign\nwas INSANE! >");
     } else if(m->page == 4) {
-        canvas_draw_icon_name(canvas, width - 67, height - 53, I_DolphinFirstStart4_67x53);
-        elements_multiline_text_framed(canvas, 5, 15, "Now\nallow me\nto introduce\nmyself >");
+        canvas_draw_icon_name(canvas, width - 67, height - 50, I_DolphinFirstStart4_67x53);
+        elements_multiline_text_framed(canvas, 0, 17, "Now\nallow me\nto introduce\nmyself >");
     } else if(m->page == 5) {
+        char buf[64];
+        snprintf(buf, 64, "%s %s%s", "I am", api_hal_version_get_name_ptr(), ",\ncyberdolphin\nliving in your\npocket >");
         canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart5_45x53);
-        elements_multiline_text_framed(
-            canvas, 60, 15, "I am Flipper,\ncyberdolphin\nliving in your\npocket >");
+        elements_multiline_text_framed(canvas, 60, 17, buf);
     } else if(m->page == 6) {
         canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart6_58x54);
         elements_multiline_text_framed(
-            canvas, 63, 15, "I can grow\n smart'n'cool\nif you use me\noften >");
+            canvas, 63, 17, "I can grow\nsmart'n'cool\nif you use me\noften >");
     } else if(m->page == 7) {
         canvas_draw_icon_name(canvas, width - 61, height - 48, I_DolphinFirstStart7_61x51);
         elements_multiline_text_framed(
-            canvas, 5, 15, "As long as\nyou read, write\nand emulate >");
+            canvas, 0, 17, "As long as\nyou read, write\nand emulate >");
     } else if(m->page == 8) {
         canvas_draw_icon_name(canvas, width - 56, height - 48, I_DolphinFirstStart8_56x51);
         elements_multiline_text_framed(
-            canvas, 5, 15, "You can check\nmy level and\nmood in the\nPassport menu");
+            canvas, 0, 17, "You can check\nmy level and\nmood in the\nPassport menu");
     }
 }
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinViewMainModel* m = model;
-    if(m->animation) canvas_draw_icon(canvas, 0, 0, m->animation);
+    if(m->animation) canvas_draw_icon(canvas, 0, -3, m->animation);
 }
 
 void dolphin_view_idle_up_draw(Canvas* canvas, void* model) {
@@ -110,13 +111,13 @@ void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "!!!! HW Mismatch !!!!");
+    canvas_draw_str(canvas, 2, 15, "!!!! HW Mismatch !!!!");
 
     char buffer[64];
     canvas_set_font(canvas, FontSecondary);
     snprintf(buffer, 64, "HW target: F%d", api_hal_version_get_hw_target());
-    canvas_draw_str(canvas, 5, 22, buffer);
-    canvas_draw_str(canvas, 5, 32, "FW target: " TARGET);
+    canvas_draw_str(canvas, 5, 27, buffer);
+    canvas_draw_str(canvas, 5, 37, "FW target: " TARGET);
 }
 
 uint32_t dolphin_view_idle_back(void* context) {

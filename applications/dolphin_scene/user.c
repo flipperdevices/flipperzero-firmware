@@ -25,7 +25,7 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
         }
     }
 
-    if(state->action == SLEEP && state->player_v.x == 0) {
+    if(state->action == SLEEP && state->player_global.x == 154) {
         state->dolphin_gfx = A_FX_Sitting_40x27;
         state->dolphin_gfx_b = I_FX_SittingB_40x27;
     }
