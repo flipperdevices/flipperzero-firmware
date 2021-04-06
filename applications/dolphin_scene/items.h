@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef ITEMS_H_INCLUDED
-#define ITEMS_H_INCLUDED
-
 #include <gui/gui.h>
 #include "dolphin_scene/dolphin_scene.h"
 
@@ -57,4 +54,3 @@ const Item** Scenes[1];
 
 const Item* is_nearby(SceneState* state);
 
-#endif
