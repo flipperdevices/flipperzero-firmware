@@ -30,7 +30,13 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
         elements_multiline_text_framed(canvas, 0, 17, "Now\nallow me\nto introduce\nmyself >");
     } else if(m->page == 5) {
         char buf[64];
-        snprintf(buf, 64, "%s %s%s", "I am", api_hal_version_get_name_ptr(), ",\ncyberdolphin\nliving in your\npocket >");
+        snprintf(
+            buf,
+            64,
+            "%s %s%s",
+            "I am",
+            api_hal_version_get_name_ptr(),
+            ",\ncyberdolphin\nliving in your\npocket >");
         canvas_draw_icon_name(canvas, 0, height - 48, I_DolphinFirstStart5_45x53);
         elements_multiline_text_framed(canvas, 60, 17, buf);
     } else if(m->page == 6) {
