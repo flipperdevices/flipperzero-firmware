@@ -50,7 +50,6 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
     const Item** current_scene = get_scene(state);
 
     for(uint8_t l = 0; l < LAYERS; l++) {
-        //uint8_t active = 0;
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ITEMS_NUM; i++) {
                 int32_t item_pos = (current_scene[i]->x - state->player_global.x);
