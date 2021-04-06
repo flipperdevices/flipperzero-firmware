@@ -1,5 +1,6 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
+#include "dolphin_scene/dolphin_emotes.h"
 #include "dolphin_scene/items.h"
 #include <gui/elements.h>
 
@@ -18,12 +19,28 @@ static void draw_hint(SceneState* state, Canvas* canvas) {
     }
 }
 
+static void draw_current_emote(SceneState* state, Canvas* canvas) {
+    elements_multiline_text_framed(canvas, 80, 24, (char*)emotes_list[state->emote_id]);
+}
+
+static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
+    if(state->player_global.x == 154 && state->action_timeout % 100 < 40) {
+        elements_multiline_text_framed(canvas, 80, 24, "zZzZ..");
+    }
+}
+
+static void draw_dialog(SceneState* state, Canvas* canvas) {
+    elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
+}
+
 void activate_item_callback(SceneState* state, Canvas* canvas) {
     const Item* near = is_nearby(state);
-    if(near) {
-        state->action = INTERACT;
+    if(near && state->use_pending == true) {
+        state->action_timeout = near->timeout;
         near->callback(canvas, state);
         state->use_pending = false;
+    } else if(near) {
+        near->callback(canvas, state);
     }
 }
 
@@ -56,10 +73,6 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
 
         if(l == DOLPHIN_LAYER) render_dolphin(state, canvas);
     }
-
-    if(state->action == INTERACT) activate_item_callback(state, canvas);
-
-    if(state->action == MINDCONTROL) draw_hint(state, canvas);
 }
 
 void render_dolphin_state(SceneState* state, Canvas* canvas) {
@@ -77,7 +90,14 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
     //sprintf(buf, "x:%ld s:%ld p:%ld %d %s", state->player_global.x, state->screen.x, state->player.x, state->scene_zoom, action_str[state->action]);
     canvas_draw_str(canvas, 0, 8, buf);
 
-    if(state->scene_zoom == SCENE_ZOOM) {
-        elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
-    }
+    if(state->scene_zoom == SCENE_ZOOM)
+        draw_dialog(state, canvas);
+    else if(state->action == EMOTE)
+        draw_current_emote(state, canvas);
+    else if(state->action == MINDCONTROL)
+        draw_hint(state, canvas);
+    else if(state->action == INTERACT)
+        activate_item_callback(state, canvas);
+    else if(state->action == SLEEP)
+        draw_sleep_emote(state, canvas);
 }

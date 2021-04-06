@@ -69,10 +69,7 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
                 dolphin_actions_proceed(state);
             }
         } else {
-            const Item* near = is_nearby(state);
-            if(near || state->prev_action != SLEEP) {
-                state->use_pending = true;
-            }
+            break;
         }
         break;
     case SLEEP:
@@ -83,9 +80,9 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         } else {
             state->player_v.x = 0;
             if(state->action_timeout == 0) {
+                state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
                 dolphin_actions_proceed(state);
             }
-
             break;
         }
     default:

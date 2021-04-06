@@ -15,7 +15,7 @@ void pc_callback(Canvas* canvas, void* model);
 static const Item TV = {
     .layer = 7,
     .timeout = 10,
-    .x = 140,
+    .x = 160,
     .y = 34,
     .icon = I_TV_20x24,
     .action_name = "Use",
@@ -25,7 +25,7 @@ static const Item TV = {
 static const Item Painting = {
     .layer = 3,
     .timeout = 20,
-    .x = 165,
+    .x = 160,
     .y = 10,
     .icon = I_Home_painting_17x20,
     .action_name = "Inspect",
@@ -34,7 +34,7 @@ static const Item Painting = {
 
 static const Item Sofa = {
     .layer = 4,
-    .timeout = 300,
+    .timeout = 100,
     .x = 250,
     .y = 34,
     .icon = I_Sofa_40x13,

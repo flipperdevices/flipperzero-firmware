@@ -1,7 +1,6 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include "dolphin_scene/dolphin_scene.h"
-#include "dolphin_scene/dolphin_emotes.h"
 
 void render_dolphin(SceneState* state, Canvas* canvas) {
     if(state->action != INTERACT) {
@@ -33,10 +32,6 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
     // zoom handlers
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
-    }
-
-    if(state->action == EMOTE) {
-        elements_multiline_text_framed(canvas, 80, 24, (char*)emotes_list[state->emote_id]);
     }
 
     canvas_set_bitmap_mode(canvas, true);
@@ -82,6 +77,7 @@ void handle_user_input(SceneState* state, InputEvent* input) {
             if(input->key == InputKeyOk) {
                 state->prev_action = MINDCONTROL;
                 state->action = INTERACT;
+                state->use_pending = true;
                 state->action_timeout = 0;
             }
         }
