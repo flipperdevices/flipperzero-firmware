@@ -1,5 +1,3 @@
-
-
 #include "dolphin_scene/items_i.h"
 #include <gui/elements.h>
 
@@ -45,6 +43,10 @@ const Item PC = {
 
 const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
 const Item** Scenes[1] = {*&Home};
+
+const Item** get_scene(SceneState* state) {
+    return Scenes[state->scene_id];
+}
 
 const Item* is_nearby(SceneState* state) {
     furi_assert(state);

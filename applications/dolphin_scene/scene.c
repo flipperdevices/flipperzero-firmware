@@ -1,7 +1,7 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 #include "dolphin_scene/dolphin_emotes.h"
-#include "dolphin_scene/items_i.h"
+#include "dolphin_scene/items.h"
 #include <gui/elements.h>
 
 const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "MC"};
@@ -47,22 +47,22 @@ void activate_item_callback(SceneState* state, Canvas* canvas) {
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
+    const Item** current_scene = get_scene(state);
 
     for(uint8_t l = 0; l < LAYERS; l++) {
-        uint8_t active = 0;
+        //uint8_t active = 0;
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ITEMS_NUM; i++) {
-                const Item* current = Scenes[active][i];
-                int32_t item_pos = (current->x - state->player_global.x);
-
+                int32_t item_pos = (current_scene[i]->x - state->player_global.x);
                 if(item_screen_bounds(item_pos)) {
-                    if(current->draw) {
-                        current->draw(canvas, state);
-                    }
+                    if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
 
-                    if(l == current->layer) {
+                    if(l == current_scene[i]->layer) {
                         canvas_draw_icon_name(
-                            canvas, item_pos * PARALLAX(l), current->y + 8, current->icon);
+                            canvas,
+                            item_pos * PARALLAX(l),
+                            current_scene[i]->y + 8,
+                            current_scene[i]->icon);
                         canvas_set_bitmap_mode(canvas, false);
                     }
                 }
