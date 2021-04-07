@@ -123,7 +123,6 @@ typedef struct {
     uint8_t scene_zoom;
 } SceneState;
 
-void scene_show(SceneState* state);
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t);
 
 void render_dolphin(SceneState* state, Canvas* canvas);

@@ -1,15 +1,6 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 
-void scene_show(SceneState* state) {
-    furi_assert(state);
-
-    if(!state->ui.enabled) {
-        view_port_enabled_set(state->ui.view_port, true);
-        return;
-    }
-}
-
 void scene_redraw(Canvas* canvas, void* ctx) {
     furi_assert(canvas);
     furi_assert(ctx);

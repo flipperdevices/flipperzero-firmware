@@ -212,7 +212,7 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
         }
         t++;
     }
-  
+
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
     canvas_set_color(canvas, ColorBlack);
