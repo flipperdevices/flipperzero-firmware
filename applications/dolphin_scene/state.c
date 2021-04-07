@@ -12,6 +12,7 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
 }
 
 static void dolphin_actions_proceed(SceneState* state) {
+    furi_assert(state);
     state->prev_action = state->action;
     state->action = state->prev_action != state->next_action ?
                         state->next_action :
@@ -19,6 +20,7 @@ static void dolphin_actions_proceed(SceneState* state) {
 }
 
 static void dolphin_go_to_poi(SceneState* state) {
+    furi_assert(state);
     if(state->player_global.x < state->poi) {
         state->player_flipped = false;
         state->player_v.x = SPEED_X / 2;
@@ -29,6 +31,7 @@ static void dolphin_go_to_poi(SceneState* state) {
 }
 
 void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
+    furi_assert(state);
     if(state->action == MINDCONTROL && state->player_v.x != 0) {
         state->action_timeout = default_timeout[state->action];
     }
@@ -67,8 +70,6 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
             } else {
                 dolphin_actions_proceed(state);
             }
-        } else {
-            break;
         }
         break;
     case SLEEP:

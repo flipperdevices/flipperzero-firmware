@@ -3,7 +3,15 @@
 #include "dolphin_scene/dolphin_scene.h"
 
 void render_dolphin(SceneState* state, Canvas* canvas) {
-    if(state->action != INTERACT) {
+    furi_assert(state);
+    furi_assert(canvas);
+
+    if(state->scene_zoom == SCENE_ZOOM) {
+        state->dolphin_gfx = I_DolphinExcited_64x63;
+    } else if(state->action == SLEEP && state->player_global.x == 154) {
+        state->dolphin_gfx = A_FX_Sitting_40x27;
+        state->dolphin_gfx_b = I_FX_SittingB_40x27;
+    } else if(state->action != INTERACT) {
         if(state->player_v.x < 0 || state->player_flipped) {
             if(state->player_anim == 0) {
                 state->dolphin_gfx = I_WalkL1_32x32;
@@ -25,15 +33,7 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
         }
     }
 
-    if(state->action == SLEEP && state->player_global.x == 154) {
-        state->dolphin_gfx = A_FX_Sitting_40x27;
-        state->dolphin_gfx_b = I_FX_SittingB_40x27;
-    }
     // zoom handlers
-    if(state->scene_zoom == SCENE_ZOOM) {
-        state->dolphin_gfx = I_DolphinExcited_64x63;
-    }
-
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx_b);
@@ -43,13 +43,16 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
 }
 
 void handle_user_input(SceneState* state, InputEvent* input) {
+    furi_assert(state);
+    furi_assert(input);
+
+    // toggle mind control on any user interaction
     if(input->type == InputTypePress) {
-        if(input->key == InputKeyLeft || input->key == InputKeyRight) {
+        if(input->key == InputKeyLeft || input->key == InputKeyRight || input->key == InputKeyOk) {
             state->action = MINDCONTROL;
         }
     }
-
-    // zoom tests
+    // zoom poc for tests
     if(input->type == InputTypePress) {
         if(input->key == InputKeyDown) {
             state->zoom_v = SPEED_X;
@@ -59,7 +62,7 @@ void handle_user_input(SceneState* state, InputEvent* input) {
             state->zoom_v = -SPEED_X * 2;
         }
     }
-
+    // mind control
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
@@ -70,8 +73,8 @@ void handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_v.x = -SPEED_X;
             }
         } else if(input->type == InputTypeRelease) {
+            state->player_v.x = 0;
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
-                state->player_v.x = 0;
             }
         } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {
@@ -85,6 +88,8 @@ void handle_user_input(SceneState* state, InputEvent* input) {
 }
 
 void update_dolphin_coordinates(SceneState* state, uint32_t dt) {
+    furi_assert(state);
+
     // global pos
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
 

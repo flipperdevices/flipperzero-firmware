@@ -66,36 +66,36 @@ const Item* is_nearby(SceneState* state) {
     return found ? current[item] : NULL;
 }
 
-void draw_tv(Canvas* canvas, void* model) {
-    furi_assert(model);
-    SceneState* m = model;
+void draw_tv(Canvas* canvas, void* state) {
+    furi_assert(state);
+    SceneState* s = state;
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(
-        canvas, (TV.x + 5 - m->player_global.x) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
+        canvas, (TV.x + 5 - s->player_global.x) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_bitmap_mode(canvas, true);
 }
 
-void smash_tv(Canvas* canvas, void* model) {
-    furi_assert(model);
-    SceneState* m = model;
-    m->player_flipped = true;
+void smash_tv(Canvas* canvas, void* state) {
+    furi_assert(state);
+    SceneState* s = state;
+    s->player_flipped = true;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
-        canvas, ((TV.x - 5) - m->player_global.x) * PARALLAX(TV.layer), TV.y + 4, I_FX_Bang_32x6);
+        canvas, ((TV.x - 5) - s->player_global.x) * PARALLAX(TV.layer), TV.y + 4, I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
-    if(m->action_timeout < TV.timeout - 2) {
+    if(s->action_timeout < TV.timeout - 2) {
         elements_multiline_text_framed(canvas, 80, 24, "Bang!");
     }
 }
 
-void sofa_sit(Canvas* canvas, void* model) {
-    furi_assert(model);
-    SceneState* m = model;
+void sofa_sit(Canvas* canvas, void* state) {
+    furi_assert(state);
+    SceneState* s = state;
     // temp fix pos
-    m->player_global.x = 154;
-    m->dolphin_gfx = A_FX_Sitting_40x27;
-    m->dolphin_gfx_b = I_FX_SittingB_40x27;
+    s->player_global.x = 154;
+    s->dolphin_gfx = A_FX_Sitting_40x27;
+    s->dolphin_gfx_b = I_FX_SittingB_40x27;
 }
 
 void inspect_painting(Canvas* canvas, void* model) {

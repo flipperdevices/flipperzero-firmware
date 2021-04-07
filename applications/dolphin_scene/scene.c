@@ -11,6 +11,9 @@ static bool item_screen_bounds(int32_t pos) {
 }
 
 static void draw_hint(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     const Item* near = is_nearby(state);
     if(near) {
         int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 20;
@@ -20,20 +23,31 @@ static void draw_hint(SceneState* state, Canvas* canvas) {
 }
 
 static void draw_current_emote(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
     elements_multiline_text_framed(canvas, 80, 24, (char*)emotes_list[state->emote_id]);
 }
 
 static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     if(state->player_global.x == 154 && state->action_timeout % 100 < 40) {
         elements_multiline_text_framed(canvas, 80, 24, "zZzZ..");
     }
 }
 
 static void draw_dialog(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
 }
 
 void activate_item_callback(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     const Item* near = is_nearby(state);
     if(near && state->use_pending == true) {
         state->action_timeout = near->timeout;
@@ -45,6 +59,9 @@ void activate_item_callback(SceneState* state, Canvas* canvas) {
 }
 
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
     const Item** current_scene = get_scene(state);
@@ -75,6 +92,9 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
 }
 
 void render_dolphin_state(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+
     char buf[64];
 
     canvas_set_font(canvas, FontSecondary);
