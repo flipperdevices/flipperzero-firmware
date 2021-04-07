@@ -74,7 +74,7 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
  * @param text - string (possible multiline)
  */
 
-void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, char* text);
+void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const char* text);
 
 /*
  * Draw slightly rounded frame

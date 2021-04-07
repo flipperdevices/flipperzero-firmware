@@ -27,3 +27,8 @@ extern const size_t FLIPPER_APPS_COUNT;
  */
 extern const FlipperApplication FLIPPER_PLUGINS[];
 extern const size_t FLIPPER_PLUGINS_COUNT;
+
+/* Seperate scene app holder
+ * Spawned by app-loader
+ */
+extern const FlipperApplication FLIPPER_SCENES;

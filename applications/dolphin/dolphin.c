@@ -1,5 +1,22 @@
 #include "dolphin_i.h"
 #include <stdlib.h>
+#include "applications.h"
+
+static void
+dolphin_switch_to_interactive_scene(Dolphin* dolphin, const FlipperApplication* flipper_app) {
+    furi_assert(dolphin);
+    furi_assert(flipper_app);
+
+    dolphin->scene_thread = furi_thread_alloc();
+
+    furi_assert(flipper_app->app);
+    furi_assert(flipper_app->name);
+
+    furi_thread_set_name(dolphin->scene_thread, flipper_app->name);
+    furi_thread_set_stack_size(dolphin->scene_thread, flipper_app->stack_size);
+    furi_thread_set_callback(dolphin->scene_thread, flipper_app->app);
+    furi_thread_start(dolphin->scene_thread);
+}
 
 // temporary main screen animation managment
 void dolphin_scene_handler_set_scene(Dolphin* dolphin, IconName icon) {
@@ -66,8 +83,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyLeft) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleUp);
             } else if(event->key == InputKeyRight) {
-                with_value_mutex(
-                    dolphin->scene_vm, (SceneState * scene) { scene_show(scene); });
+                dolphin_switch_to_interactive_scene(dolphin, &FLIPPER_SCENES);
             } else if(event->key == InputKeyDown) {
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDown);
             }
@@ -242,8 +258,6 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     // Menu
     dolphin->menu_vm = furi_record_open("menu");
-    // Scene
-    dolphin->scene_vm = furi_record_open("scene");
     // GUI
     dolphin->idle_view_dispatcher = view_dispatcher_alloc();
     // First start View

@@ -22,6 +22,9 @@ ValueMutex* scene_init() {
     scene->player.y = DOLPHIN_DEFAULT_Y;
     scene->player.x = DOLPHIN_CENTER;
 
+    //randomize position
+    scene->player_global.x = random() % WORLD_WIDTH / 4;
+
     scene->screen.x = scene->player.x;
     scene->screen.y = scene->player.y;
 
@@ -44,7 +47,7 @@ ValueMutex* scene_init() {
 
     view_port_draw_callback_set(scene->ui.view_port, scene_redraw, scene_mutex);
     view_port_input_callback_set(scene->ui.view_port, dolphin_engine_event_cb, scene->ui.mqueue);
-    view_port_enabled_set(scene->ui.view_port, false);
+    view_port_enabled_set(scene->ui.view_port, true);
 
     scene->ui.timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene->ui.mqueue, NULL);
 
@@ -91,6 +94,7 @@ int32_t dolphin_scene(void* p) {
     view_port_free(_state->ui.view_port);
     osMessageQueueDelete(_state->ui.mqueue);
     osTimerDelete(_state->ui.timer);
+    osThreadExit();
 
     return 0;
 }

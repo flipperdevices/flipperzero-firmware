@@ -35,7 +35,7 @@ struct Dolphin {
     // Menu
     ValueMutex* menu_vm;
     // Scene
-    ValueMutex* scene_vm;
+    FuriThread* scene_thread;
     // GUI
     ViewDispatcher* idle_view_dispatcher;
     View* idle_view_first_start;
