@@ -10,15 +10,27 @@ static bool item_screen_bounds(int32_t pos) {
     return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
 }
 
-static void draw_hint(SceneState* state, Canvas* canvas) {
+static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
     furi_assert(state);
     furi_assert(canvas);
+    char buf[32];
 
     const Item* near = is_nearby(state);
     if(near) {
         int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 20;
         int8_t hint_pos_y = near->y < 15 ? near->y + 8 : near->y - 12;
-        canvas_draw_str(canvas, hint_pos_x, hint_pos_y, near->action_name);
+
+        // coreglitch <3
+        strcpy(buf, near->action_name);
+        if(glitching) {
+            for(size_t g = 0; g != state->action_timeout; g++) {
+                if(state->action_timeout > 40) {
+                    buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
+                }
+            }
+        }
+
+        canvas_draw_str(canvas, hint_pos_x, hint_pos_y, buf);
     }
 }
 
@@ -44,7 +56,7 @@ static void draw_dialog(SceneState* state, Canvas* canvas) {
     elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
 }
 
-void activate_item_callback(SceneState* state, Canvas* canvas) {
+static void activate_item_callback(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
@@ -114,7 +126,7 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
     else if(state->action == EMOTE)
         draw_current_emote(state, canvas);
     else if(state->action == MINDCONTROL)
-        draw_hint(state, canvas);
+        draw_hint(state, canvas, true);
     else if(state->action == INTERACT)
         activate_item_callback(state, canvas);
     else if(state->action == SLEEP)

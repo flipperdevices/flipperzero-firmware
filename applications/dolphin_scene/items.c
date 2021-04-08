@@ -8,7 +8,7 @@ const Item TV = {
     .y = 34,
     .icon = I_TV_20x24,
     .action_name = "Use",
-    .draw = NULL,
+    .draw = draw_tv,
     .callback = smash_tv};
 
 const Item Painting = {
@@ -71,7 +71,7 @@ void draw_tv(Canvas* canvas, void* state) {
     SceneState* s = state;
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(
-        canvas, (TV.x + 5 - s->player_global.x) * PARALLAX(TV.layer), TV.y + 4, 14, 20);
+        canvas, (TV.x + 3 - s->player_global.x) * PARALLAX(TV.layer), TV.y + 12, 16, 20);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_bitmap_mode(canvas, true);
 }
