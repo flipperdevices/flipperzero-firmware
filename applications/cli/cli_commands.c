@@ -183,6 +183,19 @@ void cli_command_gpio_set(string_t args, void* context) {
     return;
 }
 
+void cli_command_os_info(string_t args, void* context) {
+    const uint8_t threads_num_max = 32;
+    osThreadId_t threads_id[threads_num_max];
+    uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
+    printf("%d threads in total:\r\n", thread_num);
+    printf("%-20s %s\r\n", "Name", "Stack free space");
+    for(uint8_t i = 0; i < thread_num; i++) {
+        printf(
+            "%-20s %ld\r\n", osThreadGetName(threads_id[i]), osThreadGetStackSpace(threads_id[i]));
+    }
+    return;
+}
+
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "help", cli_command_help, cli);
     cli_add_command(cli, "?", cli_command_help, cli);
@@ -194,4 +207,5 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "vibro", cli_command_vibro, cli);
     cli_add_command(cli, "led", cli_command_led, cli);
     cli_add_command(cli, "gpio_set", cli_command_gpio_set, cli);
+    cli_add_command(cli, "os_info", cli_command_os_info, cli);
 }
