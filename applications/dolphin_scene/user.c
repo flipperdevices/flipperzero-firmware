@@ -60,6 +60,7 @@ void handle_user_input(SceneState* state, InputEvent* input) {
     } else if(input->type == InputTypeRelease) {
         if(input->key == InputKeyDown) {
             state->zoom_v = -SPEED_X * 2;
+            state->dialog_progress = 0;
         }
     }
     // mind control

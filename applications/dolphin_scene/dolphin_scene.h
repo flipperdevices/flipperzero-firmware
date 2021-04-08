@@ -46,6 +46,8 @@
 #define PARALLAX(layer) layer / PARALLAX_MOD - layer
 #define ITEMS_NUM 4
 
+#define DIALOG_PROGRESS 250
+
 enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, INTERACT, MINDCONTROL };
 
 static const uint16_t default_timeout[] =
@@ -121,6 +123,7 @@ typedef struct {
 
     int8_t zoom_v;
     uint8_t scene_zoom;
+    uint8_t dialog_progress;
 } SceneState;
 
 void render_scene(SceneState* state, Canvas* canvas, uint32_t t);

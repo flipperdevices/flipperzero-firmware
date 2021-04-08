@@ -24,9 +24,7 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
         strcpy(buf, near->action_name);
         if(glitching) {
             for(size_t g = 0; g != state->action_timeout; g++) {
-                if(state->action_timeout > 40) {
-                    buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
-                }
+                buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
             }
         }
 
@@ -52,8 +50,18 @@ static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
 static void draw_dialog(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
+    char dialog_str[] = "Let's hack!\n\nbla bla bla\nbla bla.."; // temp
+    char buf[64];
 
-    elements_multiline_text_framed(canvas, 68, 25, "Let's hack!\n\nbla bla bla\nbla bla..");
+    if(state->dialog_progress <= strlen(dialog_str)) {
+        state->dialog_progress++;
+        dialog_str[state->dialog_progress] = '\0';
+        snprintf(buf, state->dialog_progress, (dialog_str));
+    } else {
+        snprintf(buf, 64, dialog_str);
+    }
+
+    elements_multiline_text_framed(canvas, 68, 25, buf);
 }
 
 static void activate_item_callback(SceneState* state, Canvas* canvas) {
@@ -126,7 +134,7 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
     else if(state->action == EMOTE)
         draw_current_emote(state, canvas);
     else if(state->action == MINDCONTROL)
-        draw_hint(state, canvas, true);
+        draw_hint(state, canvas, state->action_timeout > 45);
     else if(state->action == INTERACT)
         activate_item_callback(state, canvas);
     else if(state->action == SLEEP)
