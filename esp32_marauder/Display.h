@@ -108,7 +108,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    const String PROGMEM version_number = "v0.8.0";
+    const String PROGMEM version_number = "v0.9.0";
 
     bool printing = false;
     bool loading = false;

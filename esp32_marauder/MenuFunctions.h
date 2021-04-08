@@ -8,6 +8,7 @@
 #include "BatteryInterface.h"
 #include "SDInterface.h"
 #include "Web.h"
+#include "esp_interface.h"
 
 
 extern Display display_obj;
@@ -15,6 +16,7 @@ extern WiFiScan wifi_scan_obj;
 extern Web web_obj;
 extern SDInterface sd_obj;
 extern BatteryInterface battery_obj;
+extern EspInterface esp_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -70,6 +72,7 @@ extern BatteryInterface battery_obj;
 #define CLEAR_ICO 29
 #define KEYBOARD_ICO 30
 #define JOIN_WIFI 31
+#define ESP_UPDATE_ICO 32
 
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
@@ -127,6 +130,7 @@ class MenuFunctions
     Menu whichUpdateMenu;
     Menu failedUpdateMenu;
     Menu confirmMenu;
+    Menu espUpdateMenu;
     Menu updateMenu;
     Menu infoMenu;
 

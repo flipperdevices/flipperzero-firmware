@@ -28,6 +28,7 @@
 
 #define OTA_UPDATE 100
 #define SHOW_INFO 101
+#define ESP_UPDATE 102
 #define WIFI_SCAN_OFF 0
 #define WIFI_SCAN_PROBE 1
 #define WIFI_SCAN_AP 2

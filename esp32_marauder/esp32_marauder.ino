@@ -26,6 +26,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"
 #include "LedInterface.h"
+#include "esp_interface.h"
 //#include "icons.h"
 
 /*
@@ -48,6 +49,7 @@ Buffer buffer_obj;
 BatteryInterface battery_obj;
 TemperatureInterface temp_obj;
 LedInterface led_obj;
+EspInterface esp_obj;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -70,6 +72,8 @@ void setup()
   Serial.begin(115200);
   
   Serial.begin(115200);
+
+  esp_obj.begin();
   
   display_obj.RunSetup();
   display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
@@ -173,13 +177,14 @@ void loop()
   // Update all of our objects
   //if ((!display_obj.draw_tft) &&
   //    (wifi_scan_obj.currentScanMode != OTA_UPDATE))
-  if (!display_obj.draw_tft)
+  if ((!display_obj.draw_tft) && (wifi_scan_obj.currentScanMode != ESP_UPDATE))
   {
-    display_obj.main(wifi_scan_obj.currentScanMode); 
+    display_obj.main(wifi_scan_obj.currentScanMode);
     wifi_scan_obj.main(currentTime);
     sd_obj.main();
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
+    esp_obj.main(currentTime);
     //led_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
@@ -193,6 +198,12 @@ void loop()
            (wifi_scan_obj.currentScanMode != OTA_UPDATE))
   {
     display_obj.drawStylus();
+  }
+  else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {
+    display_obj.main(wifi_scan_obj.currentScanMode);
+    menu_function_obj.main(currentTime);
+    esp_obj.program();
+    delay(1);
   }
   //else
   //{

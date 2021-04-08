@@ -276,6 +276,7 @@ void MenuFunctions::main(uint32_t currentTime)
   }
   if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
       (wifi_scan_obj.currentScanMode == OTA_UPDATE) ||
+      (wifi_scan_obj.currentScanMode == ESP_UPDATE) ||
       (wifi_scan_obj.currentScanMode == SHOW_INFO)) {
     if (wifi_scan_obj.orient_display) {
       this->orientDisplay();
@@ -334,6 +335,7 @@ void MenuFunctions::main(uint32_t currentTime)
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF) &&
       (pressed) &&
       (wifi_scan_obj.currentScanMode != OTA_UPDATE) &&
+      (wifi_scan_obj.currentScanMode != ESP_UPDATE) &&
       (wifi_scan_obj.currentScanMode != SHOW_INFO))
   {
     // Stop the current scan
@@ -691,6 +693,7 @@ void MenuFunctions::RunSetup()
   failedUpdateMenu.list = new LinkedList<MenuNode>();
   whichUpdateMenu.list = new LinkedList<MenuNode>();
   confirmMenu.list = new LinkedList<MenuNode>();
+  espUpdateMenu.list = new LinkedList<MenuNode>();
   updateMenu.list = new LinkedList<MenuNode>();
   infoMenu.list = new LinkedList<MenuNode>();
 
@@ -719,6 +722,7 @@ void MenuFunctions::RunSetup()
   failedUpdateMenu.name = " Updating... ";
   whichUpdateMenu.name = "Select Method ";
   confirmMenu.name = " Confirm Update ";
+  espUpdateMenu.name = " ESP8266 Update ";
   updateMenu.name = " Update Firmware ";
   infoMenu.name = " Device Info ";
   bluetoothMenu.name = " Bluetooth ";
@@ -978,6 +982,19 @@ void MenuFunctions::RunSetup()
   if (sd_obj.supported) addNodes(&whichUpdateMenu, "SD Update", TFT_MAGENTA, NULL, SD_UPDATE, [this]() {
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&confirmMenu);
+  });
+  addNodes(&whichUpdateMenu, "ESP8266 Update", TFT_RED, NULL, ESP_UPDATE_ICO, [this]() {
+    wifi_scan_obj.currentScanMode = ESP_UPDATE;
+    changeMenu(&espUpdateMenu);
+    esp_obj.RunUpdate();
+  });
+
+  // ESP Update Menu
+  espUpdateMenu.parentMenu = &whichUpdateMenu;
+  addNodes(&espUpdateMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
+    esp_obj.bootRunMode();
+    changeMenu(espUpdateMenu.parentMenu);
   });
 
   // Confirm SD update menu
