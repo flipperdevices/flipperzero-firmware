@@ -26,6 +26,7 @@
 
 #include <sd-card-api.h>
 #include <filesystem-api.h>
+#include "../cli/cli.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -57,6 +58,15 @@ public:
         SceneInfo,
         SceneAddType,
         SceneAddValue,
+    };
+
+    enum class CliEvent : uint8_t {
+        CliReadSuccess,
+        CliReadCRCError,
+        CliReadNotKeyError,
+        CliWriteSuccess,
+        CliWriteFail,
+        CliInterrupt,
     };
 
     iButtonAppViewManager* get_view_manager();
@@ -93,12 +103,18 @@ public:
     char* get_file_name();
     uint8_t get_file_name_size();
 
+    void cli_cmd_callback(string_t args, void* context);
+    void cli_send_event(CliEvent scene);
+    bool cli_cmd_is_running();
+
     void generate_random_name(char* name, uint8_t max_name_size);
 
 private:
     std::list<Scene> previous_scenes_list = {Scene::SceneExit};
     Scene current_scene = Scene::SceneStart;
     iButtonAppViewManager view;
+    osMessageQueueId_t cli_event_result;
+    bool cli_cmd;
 
     std::map<Scene, iButtonScene*> scenes = {
         {Scene::SceneStart, new iButtonSceneStart()},
@@ -126,6 +142,7 @@ private:
 
     SdCard_Api* sd_ex_api;
     FS_Api* fs_api;
+    Cli* cli;
     static const uint8_t file_name_size = 100;
     char file_name[file_name_size];
 
