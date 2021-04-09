@@ -1,5 +1,6 @@
 #include "dolphin_scene/items_i.h"
 #include <gui/elements.h>
+#include "applications.h"
 
 const Item TV = {
     .layer = 7,
@@ -46,6 +47,21 @@ const Item** Scenes[1] = {*&Home};
 
 const Item** get_scene(SceneState* state) {
     return Scenes[state->scene_id];
+}
+
+static void dolphin_scene_start_app(SceneState* state, const FlipperApplication* flipper_app) {
+    furi_assert(state);
+    furi_assert(flipper_app);
+
+    state->ui.scene_app_thread = furi_thread_alloc();
+
+    furi_assert(flipper_app->app);
+    furi_assert(flipper_app->name);
+
+    furi_thread_set_name(state->ui.scene_app_thread, flipper_app->name);
+    furi_thread_set_stack_size(state->ui.scene_app_thread, flipper_app->stack_size);
+    furi_thread_set_callback(state->ui.scene_app_thread, flipper_app->app);
+    furi_thread_start(state->ui.scene_app_thread);
 }
 
 const Item* is_nearby(SceneState* state) {
@@ -98,12 +114,18 @@ void sofa_sit(Canvas* canvas, void* state) {
     s->dolphin_gfx_b = I_FX_SittingB_40x27;
 }
 
-void inspect_painting(Canvas* canvas, void* model) {
-    furi_assert(model);
-    // dolphin_draw_emote_bubble(canvas, model, NULL);
+void inspect_painting(Canvas* canvas, void* state) {
+    furi_assert(state);
+    SceneState* s = state;
+    if(s->use_pending) {
+        dolphin_scene_start_app(s, &FLIPPER_SCENE_APPS[0]);
+    }
 }
 
-void pc_callback(Canvas* canvas, void* model) {
-    furi_assert(model);
-    //dolphin_draw_emote_bubble(canvas, model, NULL);
+void pc_callback(Canvas* canvas, void* state) {
+    furi_assert(state);
+    SceneState* s = state;
+    if(s->use_pending) {
+        dolphin_scene_start_app(s, &FLIPPER_SCENE_APPS[1]);
+    }
 }

@@ -270,6 +270,7 @@ BUILD_DOLPHIN_SCENE ?= 0
 ifeq ($(BUILD_DOLPHIN_SCENE), 1)
 CFLAGS		+= -DBUILD_DOLPHIN_SCENE
 C_SOURCES	+= $(wildcard $(APP_DIR)/dolphin_scene/*.c)
+C_SOURCES	+= $(wildcard $(APP_DIR)/passport/*.c)
 endif
 
 APP_IBUTTON ?= 0

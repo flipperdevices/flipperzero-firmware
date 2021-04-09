@@ -74,8 +74,8 @@ void handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_v.x = -SPEED_X;
             }
         } else if(input->type == InputTypeRelease) {
-            state->player_v.x = 0;
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
+                state->player_v.x = 0;
             }
         } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {

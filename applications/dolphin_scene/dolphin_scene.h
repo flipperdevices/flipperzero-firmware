@@ -76,8 +76,8 @@ typedef struct {
     ValueMutex* vm;
     osTimerId_t* timer;
     osMessageQueueId_t mqueue;
+    FuriThread* scene_app_thread;
 
-    bool enabled;
 } SceneAppGui;
 
 typedef struct {
@@ -111,8 +111,8 @@ typedef struct {
     uint8_t emote_id;
     uint8_t previous_emote;
 
-    uint8_t glitch_level;
-    uint32_t glitch_t;
+    uint8_t dialogue_id;
+    uint8_t previous_dialogue;
 
     uint32_t action_timeout;
     uint8_t poi;

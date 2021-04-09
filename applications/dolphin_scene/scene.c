@@ -20,7 +20,6 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
         int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 20;
         int8_t hint_pos_y = near->y < 15 ? near->y + 8 : near->y - 12;
 
-        // coreglitch <3
         strcpy(buf, near->action_name);
         if(glitching) {
             for(size_t g = 0; g != state->action_timeout; g++) {
@@ -50,13 +49,16 @@ static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
 static void draw_dialog(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
-    char dialog_str[] = "Let's hack!\n\nbla bla bla\nbla bla.."; // temp
+
+    char dialog_str[64];
     char buf[64];
 
+    strcpy(dialog_str, (char*)dialogues_list[state->dialogue_id]);
+
     if(state->dialog_progress <= strlen(dialog_str)) {
-        state->dialog_progress++;
+        if(state->action_timeout % 2 == 0) state->dialog_progress++;
         dialog_str[state->dialog_progress] = '\0';
-        snprintf(buf, state->dialog_progress, (dialog_str));
+        snprintf(buf, state->dialog_progress, dialog_str);
     } else {
         snprintf(buf, 64, dialog_str);
     }

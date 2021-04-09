@@ -13,10 +13,12 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
 
 static void dolphin_actions_proceed(SceneState* state) {
     furi_assert(state);
+
     state->prev_action = state->action;
     state->action = state->prev_action != state->next_action ?
                         state->next_action :
                         roll_new(state->next_action, ACTIONS_NUM);
+    state->action_timeout = default_timeout[state->action];
 }
 
 static void dolphin_go_to_poi(SceneState* state) {
@@ -30,7 +32,7 @@ static void dolphin_go_to_poi(SceneState* state) {
     }
 }
 
-void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
+static void action_handler(SceneState* state) {
     furi_assert(state);
     if(state->action == MINDCONTROL && state->player_v.x != 0) {
         state->action_timeout = default_timeout[state->action];
@@ -39,13 +41,17 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
     if(state->action_timeout > 0) {
         state->action_timeout--;
     } else {
-        state->action_timeout = default_timeout[state->action];
-
         if(random() % 1000 > 500) {
             state->next_action = roll_new(state->prev_action, ACTIONS_NUM);
             state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
         }
     }
+}
+
+void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
+    furi_assert(state);
+    action_handler(state);
+    UNUSED(dialogues_list); // for now
 
     switch(state->action) {
     case WALK:
