@@ -18,6 +18,7 @@ class A32u4Interface {
 
     void main(uint32_t current_time);
     void test();
+    void runScript(String script);
 };
 
 #endif

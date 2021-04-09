@@ -87,6 +87,7 @@ PROGMEM static lv_color_t buf[LV_HOR_RES_MAX * 10];
 PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
 PROGMEM static void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+PROGMEM static void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
@@ -181,6 +182,7 @@ class MenuFunctions
     void deinitLVGL();
     void joinWiFiGFX();
     void addSSIDGFX();
+    void writeBadUSB();
 
     void buildButtons(Menu* menu);
     void changeMenu(Menu* menu);

@@ -10,6 +10,10 @@ void A32u4Interface::begin() {
   this->initTime = millis();
 }
 
+void A32u4Interface::runScript(String script) {
+  MySerial_two.println(script);
+}
+
 void A32u4Interface::test() {
   MySerial_two.println("STRING Hello, World!");
 }

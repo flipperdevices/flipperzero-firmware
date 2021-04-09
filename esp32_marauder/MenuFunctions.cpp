@@ -108,6 +108,45 @@ void MenuFunctions::deinitLVGL() {
   //lv_deinit();
 }
 
+void MenuFunctions::writeBadUSB(){
+  // Create a keyboard and apply the styles
+  kb = lv_keyboard_create(lv_scr_act(), NULL);
+  lv_obj_set_size(kb, LV_HOR_RES, LV_VER_RES / 2);
+  lv_obj_set_event_cb(kb, write_bad_usb_keyboard_event_cb);
+
+  // Create one text area
+  // Store all SSIDs
+  ta1 = lv_textarea_create(lv_scr_act(), NULL);
+  lv_textarea_set_cursor_hidden(ta1, false);
+  lv_textarea_set_one_line(ta1, false);
+  lv_obj_set_width(ta1, LV_HOR_RES);
+  lv_obj_set_height(ta1, (LV_VER_RES / 2) - 35);
+  lv_obj_set_pos(ta1, 5, 20);
+  lv_textarea_set_cursor_hidden(ta1, true);
+  lv_obj_align(ta1, NULL, LV_ALIGN_IN_TOP_MID, NULL, NULL);
+  lv_textarea_set_text(ta1, "");
+  lv_textarea_set_placeholder_text(ta1, "Ducky script");
+
+  // Create second text area
+  // Add SSIDs
+  //ta2 = lv_textarea_create(lv_scr_act(), ta1);
+  //lv_textarea_set_cursor_hidden(ta2, false);
+  //lv_textarea_set_one_line(ta2, true);
+  //lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
+  //lv_textarea_set_text(ta2, "");
+  //lv_textarea_set_placeholder_text(ta2, "Add SSIDs");
+
+  // After generating text areas, add text to first text box
+  //for (int i = 0; i < ssids->size(); i++)
+  //  display_string.concat((String)ssids->get(i).essid + "\n");
+    
+  //lv_textarea_set_text(ta1, display_string.c_str());
+
+  // Focus it on one of the text areas to start
+  lv_keyboard_set_textarea(kb, ta1);
+  lv_keyboard_set_cursor_manage(kb, true);
+}
+
 void MenuFunctions::addSSIDGFX(){
   extern LinkedList<ssid>* ssids;
   
@@ -186,6 +225,31 @@ void MenuFunctions::joinWiFiGFX(){
   lv_keyboard_set_textarea(kb, ta1);
   lv_keyboard_set_cursor_manage(kb, true);
   
+}
+
+void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
+  extern Display display_obj;
+  extern MenuFunctions menu_function_obj;
+  extern A32u4Interface a32u4_obj;
+  extern WiFiScan wifi_scan_obj;
+  
+  lv_keyboard_def_event_cb(kb, event);
+  if(event == LV_EVENT_APPLY){
+      String display_string = "";
+      printf("LV_EVENT_APPLY\n");
+
+    String ta1_text = lv_textarea_get_text(ta1);
+  
+    Serial.println(ta1_text);
+  
+    a32u4_obj.runScript(ta1_text);
+  }
+  else if(event == LV_EVENT_CANCEL) {
+    printf("LV_EVENT_CANCEL\n");
+    menu_function_obj.deinitLVGL();
+    wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+    display_obj.exit_draw = true; // set everything back to normal
+  }
 }
 
 // Keyboard callback dedicated to joining wifi
@@ -943,6 +1007,12 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&badusbMenu, "Test BadUSB", TFT_PURPLE, NULL, TEST_BAD_USB_ICO, [this]() {
     a32u4_obj.test();
+  });
+  addNodes(&badusbMenu, "Run Ducky Script", TFT_RED, NULL, BAD_USB_ICO, [this](){
+    display_obj.clearScreen(); 
+    wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED); 
+    writeBadUSB();
   });
 
   // General apps menu
