@@ -12,7 +12,9 @@ void EspInterface::begin() {
 
   MySerial.begin(BAUD, SERIAL_8N1, 27, 26);
 
-  this->bootRunMode();
+  //this->bootRunMode();
+
+  this->initTime = millis();
 }
 
 void EspInterface::RunUpdate() {
@@ -71,6 +73,11 @@ void EspInterface::program() {
 }
 
 void EspInterface::main(uint32_t current_time) {
+  if (current_time - this->initTime >= 1000) {
+    this->initTime = millis();
+    MySerial.write("PING");
+  }
+  
   if (MySerial.available()) {
     Serial.write((uint8_t)MySerial.read());
   }

@@ -14,6 +14,8 @@ class EspInterface {
   public:
     bool supported = false;
 
+    uint32_t initTime;
+
     void RunUpdate();
     void bootProgramMode();
     void bootRunMode();

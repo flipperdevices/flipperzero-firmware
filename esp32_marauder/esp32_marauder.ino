@@ -27,6 +27,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "TemperatureInterface.h"
 #include "LedInterface.h"
 #include "esp_interface.h"
+#include "a32u4_interface.h"
 //#include "icons.h"
 
 /*
@@ -50,6 +51,7 @@ BatteryInterface battery_obj;
 TemperatureInterface temp_obj;
 LedInterface led_obj;
 EspInterface esp_obj;
+A32u4Interface a32u4_obj;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -71,9 +73,11 @@ void setup()
 
   Serial.begin(115200);
   
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   esp_obj.begin();
+
+  a32u4_obj.begin();
   
   display_obj.RunSetup();
   display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
@@ -185,6 +189,7 @@ void loop()
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
     esp_obj.main(currentTime);
+    a32u4_obj.main(currentTime);
     //led_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&

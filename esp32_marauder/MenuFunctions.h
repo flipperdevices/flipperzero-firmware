@@ -9,6 +9,7 @@
 #include "SDInterface.h"
 #include "Web.h"
 #include "esp_interface.h"
+#include "a32u4_interface.h"
 
 
 extern Display display_obj;
@@ -17,6 +18,7 @@ extern Web web_obj;
 extern SDInterface sd_obj;
 extern BatteryInterface battery_obj;
 extern EspInterface esp_obj;
+extern A32u4Interface a32u4_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -73,6 +75,8 @@ extern EspInterface esp_obj;
 #define KEYBOARD_ICO 30
 #define JOIN_WIFI 31
 #define ESP_UPDATE_ICO 32
+#define BAD_USB_ICO 33
+#define TEST_BAD_USB_ICO 34
 
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 PROGMEM bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data);
@@ -123,6 +127,7 @@ class MenuFunctions
 
     Menu wifiMenu;
     Menu bluetoothMenu;
+    Menu badusbMenu;
     Menu generalMenu;
     Menu deviceMenu;
 
@@ -136,13 +141,11 @@ class MenuFunctions
 
     // WiFi menu stuff
     Menu wifiSnifferMenu;
-    Menu wifiScannerMenu;
     Menu wifiAttackMenu;
     Menu wifiGeneralMenu;
 
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
-    Menu bluetoothScannerMenu;
     Menu bluetoothGeneralMenu;
 
     // Settings things menus

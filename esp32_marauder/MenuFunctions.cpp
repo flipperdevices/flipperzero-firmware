@@ -686,6 +686,7 @@ void MenuFunctions::RunSetup()
   // Main menu stuff
   wifiMenu.list = new LinkedList<MenuNode>(); // Get list in second menu ready
   bluetoothMenu.list = new LinkedList<MenuNode>(); // Get list in third menu ready
+  badusbMenu.list = new LinkedList<MenuNode>();
   generalMenu.list = new LinkedList<MenuNode>();
   deviceMenu.list = new LinkedList<MenuNode>();
 
@@ -699,13 +700,11 @@ void MenuFunctions::RunSetup()
 
   // WiFi menu stuff
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
-  wifiScannerMenu.list = new LinkedList<MenuNode>();
   wifiAttackMenu.list = new LinkedList<MenuNode>();
   wifiGeneralMenu.list = new LinkedList<MenuNode>();
 
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
-  bluetoothScannerMenu.list = new LinkedList<MenuNode>();
   bluetoothGeneralMenu.list = new LinkedList<MenuNode>();
 
   // Settings stuff
@@ -717,6 +716,7 @@ void MenuFunctions::RunSetup()
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
   wifiMenu.name = " WiFi ";
+  badusbMenu.name = " Bad USB ";
   deviceMenu.name = " Device ";
   generalMenu.name = " General Apps ";
   failedUpdateMenu.name = " Updating... ";
@@ -727,11 +727,9 @@ void MenuFunctions::RunSetup()
   infoMenu.name = " Device Info ";
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
-  wifiScannerMenu.name = " WiFi Scanners";
   wifiAttackMenu.name = " WiFi Attacks ";
   wifiGeneralMenu.name = " WiFi General ";
   bluetoothSnifferMenu.name = " Bluetooth Sniffers ";
-  bluetoothScannerMenu.name = " Bluetooth Scanners ";
   bluetoothGeneralMenu.name = " Bluetooth General ";
   shutdownWiFiMenu.name = " Shutdown WiFi ";
   shutdownBLEMenu.name = " Shutdown BLE ";
@@ -746,6 +744,9 @@ void MenuFunctions::RunSetup()
   });
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, BLUETOOTH, [this]() {
     changeMenu(&bluetoothMenu);
+  });
+  addNodes(&mainMenu, "Bad USB", TFT_RED, NULL, BAD_USB_ICO, [this]() {
+    changeMenu(&badusbMenu);
   });
   addNodes(&mainMenu, "General Apps", TFT_MAGENTA, NULL, GENERAL_APPS, [this]() {
     changeMenu(&generalMenu);
@@ -765,9 +766,9 @@ void MenuFunctions::RunSetup()
   addNodes(&wifiMenu, "Sniffers", TFT_YELLOW, NULL, SNIFFERS, [this]() {
     changeMenu(&wifiSnifferMenu);
   });
-  addNodes(&wifiMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
-    changeMenu(&wifiScannerMenu);
-  });
+  //addNodes(&wifiMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
+  //  changeMenu(&wifiScannerMenu);
+  //});
   addNodes(&wifiMenu, "Attacks", TFT_RED, NULL, ATTACKS, [this]() {
     changeMenu(&wifiAttackMenu);
   });
@@ -795,24 +796,18 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
   });
-
-  // Build WiFi scanner Menu
-  wifiScannerMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
-  addNodes(&wifiScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
-    changeMenu(wifiScannerMenu.parentMenu);
-  });
-  addNodes(&wifiScannerMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
+  addNodes(&wifiSnifferMenu, "Packet Monitor", TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
     wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
   });
-  addNodes(&wifiScannerMenu, "EAPOL/PMKID Scan", TFT_VIOLET, NULL, EAPOL, [this]() {
+  addNodes(&wifiSnifferMenu, "EAPOL/PMKID Scan", TFT_VIOLET, NULL, EAPOL, [this]() {
     wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
   });
-  addNodes(&wifiScannerMenu, "Detect Pwnagotchi", TFT_RED, NULL, PWNAGOTCHI, [this]() {
+  addNodes(&wifiSnifferMenu, "Detect Pwnagotchi", TFT_RED, NULL, PWNAGOTCHI, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_RED);
   });
-  addNodes(&wifiScannerMenu, "Detect Espressif", TFT_ORANGE, NULL, ESPRESSIF, [this]() {
+  addNodes(&wifiSnifferMenu, "Detect Espressif", TFT_ORANGE, NULL, ESPRESSIF, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_ORANGE);
@@ -896,9 +891,9 @@ void MenuFunctions::RunSetup()
   addNodes(&bluetoothMenu, "Sniffers", TFT_YELLOW, NULL, SNIFFERS, [this]() {
     changeMenu(&bluetoothSnifferMenu);
   });
-  addNodes(&bluetoothMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
-    changeMenu(&bluetoothScannerMenu);
-  });
+  //addNodes(&bluetoothMenu, "Scanners", TFT_ORANGE, NULL, SCANNERS, [this]() {
+  //  changeMenu(&bluetoothScannerMenu);
+  //});
   addNodes(&bluetoothMenu, "General", TFT_PURPLE, NULL, GENERAL_APPS, [this]() {
     changeMenu(&bluetoothGeneralMenu);
   });
@@ -913,17 +908,17 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);
   });
-
-  // Build bluetooth scanner Menu
-  bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
-  addNodes(&bluetoothScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
-    changeMenu(bluetoothScannerMenu.parentMenu);
-  });
-  addNodes(&bluetoothScannerMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, CC_SKIMMERS, [this]() {
+  addNodes(&bluetoothSnifferMenu, "Detect Card Skimmers", TFT_MAGENTA, NULL, CC_SKIMMERS, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);
   });
+
+  // Build bluetooth scanner Menu
+  //bluetoothScannerMenu.parentMenu = &bluetoothMenu; // Second Menu is third menu parent
+  //addNodes(&bluetoothScannerMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+  //  changeMenu(bluetoothScannerMenu.parentMenu);
+  //});
 
   // Build bluetooth general menu
   bluetoothGeneralMenu.parentMenu = &bluetoothMenu;
@@ -939,6 +934,15 @@ void MenuFunctions::RunSetup()
   shutdownBLEMenu.parentMenu = &bluetoothGeneralMenu;
   addNodes(&shutdownBLEMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(shutdownBLEMenu.parentMenu);
+  });
+
+  // Bad USB Menu
+  badusbMenu.parentMenu = &mainMenu;
+  addNodes(&badusbMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(badusbMenu.parentMenu);
+  });
+  addNodes(&badusbMenu, "Test BadUSB", TFT_PURPLE, NULL, TEST_BAD_USB_ICO, [this]() {
+    a32u4_obj.test();
   });
 
   // General apps menu
