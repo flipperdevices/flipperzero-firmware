@@ -17,8 +17,8 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
 
     const Item* near = is_nearby(state);
     if(near) {
-        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 20;
-        int8_t hint_pos_y = near->y < 15 ? near->y + 8 : near->y - 12;
+        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 22;
+        int8_t hint_pos_y = near->y < 15 ? near->y + 4 : near->y - 16;
 
         strcpy(buf, near->action_name);
         if(glitching) {
@@ -42,7 +42,7 @@ static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
     furi_assert(canvas);
 
     if(state->player_global.x == 154 && state->action_timeout % 100 < 40) {
-        elements_multiline_text_framed(canvas, 80, 24, "zZzZ..");
+        elements_multiline_text_framed(canvas, 80, 20, "zZzZ..");
     }
 }
 
@@ -63,7 +63,7 @@ static void draw_dialog(SceneState* state, Canvas* canvas) {
         snprintf(buf, 64, dialog_str);
     }
 
-    elements_multiline_text_framed(canvas, 68, 25, buf);
+    elements_multiline_text_framed(canvas, 68, 16, buf);
 }
 
 static void activate_item_callback(SceneState* state, Canvas* canvas) {
@@ -99,14 +99,14 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
                         canvas_draw_icon_name(
                             canvas,
                             item_pos * PARALLAX(l),
-                            current_scene[i]->y + 8,
+                            current_scene[i]->y,
                             current_scene[i]->icon);
                         canvas_set_bitmap_mode(canvas, false);
                     }
                 }
             }
 
-            if(l == 0) canvas_draw_line(canvas, 0, 50, 128, 50);
+            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
         }
 
         if(l == DOLPHIN_LAYER) render_dolphin(state, canvas);
@@ -121,15 +121,19 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
 
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
-    sprintf(
-        buf,
-        "x:%ld>%d %ld %s",
-        state->player_global.x,
-        state->poi,
-        state->action_timeout,
-        action_str[state->action]);
-    //sprintf(buf, "x:%ld s:%ld p:%ld %d %s", state->player_global.x, state->screen.x, state->player.x, state->scene_zoom, action_str[state->action]);
-    canvas_draw_str(canvas, 0, 8, buf);
+
+    // dolphin_scene_debug
+    if(state->debug) {
+        sprintf(
+            buf,
+            "x:%ld>%d %ld %s",
+            state->player_global.x,
+            state->poi,
+            state->action_timeout,
+            action_str[state->action]);
+        //sprintf(buf, "x:%ld s:%ld p:%ld %d %s", state->player_global.x, state->screen.x, state->player.x, state->scene_zoom, action_str[state->action]);
+        canvas_draw_str(canvas, 0, 13, buf);
+    }
 
     if(state->scene_zoom == SCENE_ZOOM)
         draw_dialog(state, canvas);

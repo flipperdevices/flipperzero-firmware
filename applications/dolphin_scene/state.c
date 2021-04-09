@@ -51,7 +51,6 @@ static void action_handler(SceneState* state) {
 void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
     furi_assert(state);
     action_handler(state);
-    UNUSED(dialogues_list); // for now
 
     switch(state->action) {
     case WALK:
@@ -97,4 +96,6 @@ void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
         }
         break;
     }
+
+    UNUSED(dialogues_list);
 }

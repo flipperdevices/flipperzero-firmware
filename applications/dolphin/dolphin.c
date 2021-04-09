@@ -137,8 +137,6 @@ static void lock_menu_callback(void* context, uint8_t index) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         view_port_enabled_set(dolphin->lock_viewport, true);
         break;
-    case 2:
-        view_port_enabled_set(dolphin->passport, true); // its temporary here, nvm
     default:
         break;
     }
@@ -148,59 +146,6 @@ static void lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Dolphin* dolphin = context;
     canvas_draw_icon(canvas, 0, 0, dolphin->lock_icon);
-}
-
-static void draw_passport_callback(Canvas* canvas, void* context) {
-    furi_assert(context);
-    Dolphin* dolphin = context;
-
-    char level[20];
-    uint32_t current_level = dolphin_state_get_level(dolphin->state);
-    uint32_t prev_cap = dolphin_state_xp_to_levelup(dolphin->state, current_level - 1, false);
-    uint32_t exp = (dolphin_state_xp_to_levelup(dolphin->state, current_level, true) * 63) /
-                   (dolphin_state_xp_to_levelup(dolphin->state, current_level, false) - prev_cap);
-
-    canvas_clear(canvas);
-
-    // multipass
-    canvas_draw_icon_name(canvas, 0, 0, I_PassportLeft_6x47);
-    canvas_draw_icon_name(canvas, 0, 47, I_PassportBottom_128x17);
-    canvas_draw_line(canvas, 6, 0, 125, 0);
-    canvas_draw_line(canvas, 127, 2, 127, 47);
-    canvas_draw_dot(canvas, 126, 1);
-
-    //portrait frame
-    canvas_draw_line(canvas, 9, 6, 9, 53);
-    canvas_draw_line(canvas, 10, 5, 52, 5);
-    canvas_draw_line(canvas, 55, 8, 55, 53);
-    canvas_draw_line(canvas, 10, 54, 54, 54);
-    canvas_draw_line(canvas, 53, 5, 55, 7);
-
-    // portrait
-    canvas_draw_icon_name(canvas, 14, 11, I_DolphinOkay_41x43);
-    canvas_draw_line(canvas, 59, 18, 124, 18);
-    canvas_draw_line(canvas, 59, 31, 124, 31);
-    canvas_draw_line(canvas, 59, 44, 124, 44);
-
-    canvas_draw_str(canvas, 59, 15, api_hal_version_get_name_ptr());
-    canvas_draw_str(canvas, 59, 28, "Mood: OK");
-
-    snprintf(level, 20, "Level: %ld", current_level);
-
-    canvas_draw_str(canvas, 59, 41, level);
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 123 - exp, 48, exp + 1, 6);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_line(canvas, 123 - exp, 48, 123 - exp, 54);
-}
-
-static void passport_input_callback(InputEvent* event, void* context) {
-    Dolphin* dolphin = context;
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyBack) {
-            view_port_enabled_set(dolphin->passport, false);
-        }
-    }
 }
 
 bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
@@ -320,12 +265,6 @@ Dolphin* dolphin_alloc() {
     view_port_draw_callback_set(dolphin->lock_viewport, lock_icon_callback, dolphin);
     view_port_enabled_set(dolphin->lock_viewport, false);
 
-    // Passport
-    dolphin->passport = view_port_alloc();
-    view_port_draw_callback_set(dolphin->passport, draw_passport_callback, dolphin);
-    view_port_input_callback_set(dolphin->passport, passport_input_callback, dolphin);
-    view_port_enabled_set(dolphin->passport, false);
-
     // Main screen animation
     dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
 
@@ -354,8 +293,6 @@ int32_t dolphin_task() {
 
     view_dispatcher_attach_to_gui(dolphin->idle_view_dispatcher, gui, ViewDispatcherTypeWindow);
     gui_add_view_port(gui, dolphin->lock_viewport, GuiLayerStatusBarLeft);
-
-    gui_add_view_port(gui, dolphin->passport, GuiLayerFullscreen);
 
     if(dolphin_state_load(dolphin->state)) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);

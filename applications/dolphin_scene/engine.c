@@ -43,8 +43,7 @@ ValueMutex* scene_init() {
     scene->ui.view_port = view_port_alloc();
 
     // Open GUI and register fullscreen view_port
-    gui_add_view_port(scene->ui.gui, scene->ui.view_port, GuiLayerFullscreen);
-
+    gui_add_view_port(scene->ui.gui, scene->ui.view_port, GuiLayerMain);
     view_port_draw_callback_set(scene->ui.view_port, scene_redraw, scene_mutex);
     view_port_input_callback_set(scene->ui.view_port, dolphin_engine_event_cb, scene->ui.mqueue);
     view_port_enabled_set(scene->ui.view_port, true);

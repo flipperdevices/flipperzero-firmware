@@ -34,7 +34,7 @@
 #define DOLPHIN_CENTER (SCREEN_WIDTH / 2 - DOLPHIN_WIDTH / 2)
 #define SPEED_X 2
 #define ACTIONS_NUM 5
-#define DOLPHIN_DEFAULT_Y 28
+#define DOLPHIN_DEFAULT_Y 20
 // world
 #define WORLD_WIDTH 2048
 #define WORLD_HEIGHT 64
@@ -104,6 +104,8 @@ typedef struct {
 
     bool player_flipped;
     bool use_pending;
+    // dolphin_scene_debug
+    bool debug;
 
     uint8_t player_anim;
     uint8_t scene_id;
