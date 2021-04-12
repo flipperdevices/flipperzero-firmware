@@ -2,6 +2,7 @@
 #include <api-hal.h>
 #include <api-hal-gpio.h>
 #include <rtc.h>
+#include <task-control-block.h>
 
 void cli_command_help(string_t args, void* context) {
     (void)args;
@@ -187,16 +188,19 @@ void cli_command_os_info(string_t args, void* context) {
     const uint8_t threads_num_max = 32;
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
-    printf(
-        "Free HEAP size: %d, minimum ever heap size: %d\r\n",
-        xPortGetFreeHeapSize(),
-        xPortGetMinimumEverFreeHeapSize());
 
+    printf("Free HEAP size: %d\r\n", xPortGetFreeHeapSize());
+    printf("Minimum heap size: %d\r\n", xPortGetMinimumEverFreeHeapSize());
     printf("%d threads in total:\r\n", thread_num);
-    printf("%-20s %s\r\n", "Name", "Stack free space");
+    printf("%-20s %-14s %-14s %s\r\n", "Name", "Stack start", "Stack alloc", "Stack free");
     for(uint8_t i = 0; i < thread_num; i++) {
+        TaskControlBlock* tcb = (TaskControlBlock*)threads_id[i];
         printf(
-            "%-20s %ld\r\n", osThreadGetName(threads_id[i]), osThreadGetStackSpace(threads_id[i]));
+            "%-20s 0x%-12lx %-14ld %ld\r\n",
+            osThreadGetName(threads_id[i]),
+            (uint32_t)tcb->pxStack,
+            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(uint32_t),
+            osThreadGetStackSpace(threads_id[i]));
     }
     return;
 }
