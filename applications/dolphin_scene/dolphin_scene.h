@@ -4,7 +4,6 @@
 #include <gui/gui.h>
 #include <u8g2/u8g2.h>
 
-
 #ifndef ARRSIZE
 #define ARRSIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 #endif
