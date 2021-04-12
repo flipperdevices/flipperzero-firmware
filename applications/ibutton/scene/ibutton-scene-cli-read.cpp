@@ -1,9 +1,9 @@
-#include "ibutton-scene-read.h"
+#include "ibutton-scene-cli-read.h"
 #include "../ibutton-app.h"
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 
-void iButtonSceneRead::on_enter(iButtonApp* app) {
+void iButtonSceneCliRead::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
 
@@ -17,7 +17,7 @@ void iButtonSceneRead::on_enter(iButtonApp* app) {
     app->get_key_worker()->start_read();
 }
 
-bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneCliRead::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
@@ -28,13 +28,16 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
         case KeyReader::Error::EMPTY:
             break;
         case KeyReader::Error::OK:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadSuccess);
+            app->cli_send_event(iButtonApp::CliEvent::CliReadSuccess);
+            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
             break;
         case KeyReader::Error::CRC_ERROR:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadCRCError);
+            app->cli_send_event(iButtonApp::CliEvent::CliReadCRCError);
+            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
             break;
         case KeyReader::Error::NOT_ARE_KEY:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadNotKeyError);
+            app->cli_send_event(iButtonApp::CliEvent::CliReadNotKeyError);
+            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
             break;
         }
     }
@@ -42,8 +45,9 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneRead::on_exit(iButtonApp* app) {
+void iButtonSceneCliRead::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_read();
+    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     Popup* popup = app->get_view_manager()->get_popup();
 

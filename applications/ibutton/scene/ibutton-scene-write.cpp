@@ -73,23 +73,13 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
         switch(result) {
         case KeyWriter::Error::SAME_KEY:
         case KeyWriter::Error::OK:
-            if(app->cli_cmd_is_running()) {
-                app->cli_send_event(iButtonApp::CliEvent::CliWriteSuccess);
-                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            } else {
-                app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
-            }
+            app->switch_to_next_scene(iButtonApp::Scene::SceneWriteSuccess);
             break;
         case KeyWriter::Error::NO_DETECT:
             app->notify_red_blink();
             break;
         case KeyWriter::Error::CANNOT_WRITE:
-            if(app->cli_cmd_is_running()) {
-                app->cli_send_event(iButtonApp::CliEvent::CliWriteFail);
-                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            } else {
-                app->notify_yellow_blink();
-            }
+            app->notify_yellow_blink();
             break;
         }
     }
@@ -99,9 +89,7 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneWrite::on_exit(iButtonApp* app) {
     Popup* popup = app->get_view_manager()->get_popup();
-    if(app->cli_cmd_is_running()) {
-        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
-    }
+    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);

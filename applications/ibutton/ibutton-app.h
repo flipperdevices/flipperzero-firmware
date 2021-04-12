@@ -6,16 +6,19 @@
 #include "scene/ibutton-scene-generic.h"
 #include "scene/ibutton-scene-start.h"
 #include "scene/ibutton-scene-read.h"
+#include "scene/ibutton-scene-cli-read.h"
 #include "scene/ibutton-scene-read-crc-error.h"
 #include "scene/ibutton-scene-read-not-key-error.h"
 #include "scene/ibutton-scene-read-success.h"
 #include "scene/ibutton-scene-readed-key-menu.h"
 #include "scene/ibutton-scene-write.h"
+#include "scene/ibutton-scene-cli-write.h"
 #include "scene/ibutton-scene-write-success.h"
 #include "scene/ibutton-scene-saved-key-menu.h"
 #include "scene/ibutton-scene-delete-confirm.h"
 #include "scene/ibutton-scene-delete-success.h"
 #include "scene/ibutton-scene-emulate.h"
+#include "scene/ibutton-scene-cli-emulate.h"
 #include "scene/ibutton-scene-save-name.h"
 #include "scene/ibutton-scene-save-success.h"
 #include "scene/ibutton-scene-info.h"
@@ -43,13 +46,16 @@ public:
         SceneExit,
         SceneStart,
         SceneRead,
+        SceneCliRead,
         SceneReadNotKeyError,
         SceneReadCRCError,
         SceneReadSuccess,
         SceneReadedKeyMenu,
         SceneWrite,
+        SceneCliWrite,
         SceneWriteSuccess,
         SceneEmulate,
+        SceneCliEmulate,
         SceneSavedKeyMenu,
         SceneDeleteConfirm,
         SceneDeleteSuccess,
@@ -105,7 +111,6 @@ public:
 
     void cli_cmd_callback(string_t args, void* context);
     void cli_send_event(CliEvent scene);
-    bool cli_cmd_is_running();
 
     void generate_random_name(char* name, uint8_t max_name_size);
 
@@ -114,18 +119,20 @@ private:
     Scene current_scene = Scene::SceneStart;
     iButtonAppViewManager view;
     osMessageQueueId_t cli_event_result;
-    bool cli_cmd;
 
     std::map<Scene, iButtonScene*> scenes = {
         {Scene::SceneStart, new iButtonSceneStart()},
         {Scene::SceneRead, new iButtonSceneRead()},
+        {Scene::SceneCliRead, new iButtonSceneCliRead()},
         {Scene::SceneReadCRCError, new iButtonSceneReadCRCError()},
         {Scene::SceneReadNotKeyError, new iButtonSceneReadNotKeyError()},
         {Scene::SceneReadSuccess, new iButtonSceneReadSuccess()},
         {Scene::SceneReadedKeyMenu, new iButtonSceneReadedKeyMenu()},
         {Scene::SceneWrite, new iButtonSceneWrite()},
+        {Scene::SceneCliWrite, new iButtonSceneCliWrite()},
         {Scene::SceneWriteSuccess, new iButtonSceneWriteSuccess()},
         {Scene::SceneEmulate, new iButtonSceneEmulate()},
+        {Scene::SceneCliEmulate, new iButtonSceneCliEmulate()},
         {Scene::SceneSavedKeyMenu, new iButtonSceneSavedKeyMenu()},
         {Scene::SceneDeleteConfirm, new iButtonSceneDeleteConfirm()},
         {Scene::SceneDeleteSuccess, new iButtonSceneDeleteSuccess()},

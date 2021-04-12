@@ -27,11 +27,10 @@ void iButtonApp::run(void) {
 
 void iButtonApp::cli_cmd_callback(string_t args, void* context) {
     iButtonApp::Scene scene;
-    cli_cmd = true;
     string_t cmd;
     string_init(cmd);
     if(!string_cmp_str(args, "read")) {
-        scene = iButtonApp::Scene::SceneRead;
+        scene = iButtonApp::Scene::SceneCliRead;
         printf("Reading key ...\r\n");
     } else {
         // Parse write / emulate commands
@@ -46,10 +45,10 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
             string_strim(args);
         }
         if(!string_cmp_str(cmd, "write")) {
-            scene = iButtonApp::Scene::SceneWrite;
+            scene = iButtonApp::Scene::SceneCliWrite;
             printf("Writing key \r\n");
         } else if(!string_cmp_str(cmd, "emulate")) {
-            scene = iButtonApp::Scene::SceneEmulate;
+            scene = iButtonApp::Scene::SceneCliEmulate;
             printf("Emulating key \r\n");
         } else {
             printf("Incorrect input. Try tm <read | write | emulate> [key_type] [key_data]\r\n");
@@ -135,7 +134,6 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
     default:
         break;
     }
-    cli_cmd = false;
     return;
 }
 
@@ -143,16 +141,11 @@ void iButtonApp::cli_send_event(iButtonApp::CliEvent scene) {
     osMessageQueuePut(cli_event_result, &scene, 0, osWaitForever);
 }
 
-bool iButtonApp::cli_cmd_is_running() {
-    return cli_cmd;
-}
-
 iButtonApp::iButtonApp() {
     notify_init();
     api_hal_power_insomnia_enter();
 
     cli_event_result = osMessageQueueNew(1, sizeof(iButtonApp::Scene), NULL);
-    cli_cmd = false;
     key_worker = new KeyWorker(&ibutton_gpio);
     sd_ex_api = static_cast<SdCard_Api*>(furi_record_open("sdcard-ex"));
     fs_api = static_cast<FS_Api*>(furi_record_open("sdcard"));

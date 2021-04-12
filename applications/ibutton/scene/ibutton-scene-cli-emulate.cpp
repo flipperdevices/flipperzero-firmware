@@ -1,11 +1,11 @@
-#include "ibutton-scene-emulate.h"
+#include "ibutton-scene-cli-emulate.h"
 #include "../ibutton-app.h"
 #include "../ibutton-view-manager.h"
 #include "../ibutton-event.h"
 #include "../ibutton-key.h"
 #include <callback-connector.h>
 
-void iButtonSceneEmulate::on_enter(iButtonApp* app) {
+void iButtonSceneCliEmulate::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
     iButtonKey* key = app->get_key();
@@ -67,7 +67,7 @@ void iButtonSceneEmulate::on_enter(iButtonApp* app) {
     app->get_key_worker()->start_emulate(app->get_key());
 }
 
-bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
+bool iButtonSceneCliEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
@@ -82,8 +82,9 @@ bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
     return consumed;
 }
 
-void iButtonSceneEmulate::on_exit(iButtonApp* app) {
+void iButtonSceneCliEmulate::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_emulate();
+    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     Popup* popup = app->get_view_manager()->get_popup();
 
