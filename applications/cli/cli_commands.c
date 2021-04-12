@@ -187,6 +187,11 @@ void cli_command_os_info(string_t args, void* context) {
     const uint8_t threads_num_max = 32;
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
+    printf(
+        "Free HEAP size: %d, minimum ever heap size: %d\r\n",
+        xPortGetFreeHeapSize(),
+        xPortGetMinimumEverFreeHeapSize());
+
     printf("%d threads in total:\r\n", thread_num);
     printf("%-20s %s\r\n", "Name", "Stack free space");
     for(uint8_t i = 0; i < thread_num; i++) {
