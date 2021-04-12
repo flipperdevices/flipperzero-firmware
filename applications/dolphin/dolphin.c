@@ -6,9 +6,6 @@ static void
 dolphin_switch_to_interactive_scene(Dolphin* dolphin, const FlipperApplication* flipper_app) {
     furi_assert(dolphin);
     furi_assert(flipper_app);
-
-    dolphin->scene_thread = furi_thread_alloc();
-
     furi_assert(flipper_app->app);
     furi_assert(flipper_app->name);
 
@@ -194,6 +191,31 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     return true;
 }
 
+Dolphin* dolphin_free(Dolphin* dolphin) {
+    furi_assert(dolphin);
+    // free everything, just in case
+    Gui* gui = furi_record_open("gui");
+    dolphin_state_release(dolphin->state);
+    furi_thread_free(dolphin->scene_thread);
+
+    view_dispatcher_free(dolphin->idle_view_dispatcher);
+
+    view_free(dolphin->idle_view_first_start);
+    view_free(dolphin->idle_view_main);
+    view_free(dolphin->idle_view_meta);
+    view_free(dolphin->idle_view_up);
+    view_free(dolphin->idle_view_down);
+    view_free(dolphin->view_hw_mismatch);
+    view_free(dolphin->view_lockmenu);
+
+    view_port_free(dolphin->lock_viewport);
+    view_port_enabled_set(dolphin->lock_viewport, false);
+    icon_free(dolphin->lock_icon);
+    gui_remove_view_port(gui, dolphin->lock_viewport);
+    osMessageQueueDelete(dolphin->event_queue);
+    free(dolphin);
+}
+
 Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
     // Message queue
@@ -203,6 +225,8 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     // Menu
     dolphin->menu_vm = furi_record_open("menu");
+    // Scene thread
+    dolphin->scene_thread = furi_thread_alloc();
     // GUI
     dolphin->idle_view_dispatcher = view_dispatcher_alloc();
     // First start View
@@ -326,5 +350,6 @@ int32_t dolphin_task() {
             dolphin_state_save(dolphin->state);
         }
     }
+    dolphin_free(dolphin);
     return 0;
 }

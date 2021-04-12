@@ -55,6 +55,8 @@ struct Dolphin {
 // Temporary
 const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
 
+Dolphin* dolphin_free();
+
 Dolphin* dolphin_alloc();
 
 /* Save Dolphin state (write to permanent memory)

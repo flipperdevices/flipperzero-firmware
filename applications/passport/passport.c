@@ -101,7 +101,7 @@ int32_t passport(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.value.input.type == InputTypeRelease) {
                     // TODO remove all view_ports create by app
-                    view_port_enabled_set(view_port, false);
+
                     return 0;
                 }
             }
@@ -110,4 +110,10 @@ int32_t passport(void* p) {
         view_port_update(view_port);
         release_mutex(&state_mutex, state);
     }
+
+    free(&_state);
+    view_port_enabled_set(view_port, false);
+    view_port_free(view_port);
+    osMessageQueueDelete(event_queue);
+    gui_remove_view_port(gui, view_port);
 }

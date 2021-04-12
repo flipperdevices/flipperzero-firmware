@@ -2,7 +2,7 @@
 #include <gui/elements.h>
 #include "dolphin_scene/dolphin_scene.h"
 
-void render_dolphin(SceneState* state, Canvas* canvas) {
+void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
@@ -42,7 +42,7 @@ void render_dolphin(SceneState* state, Canvas* canvas) {
     canvas_set_bitmap_mode(canvas, false);
 }
 
-void handle_user_input(SceneState* state, InputEvent* input) {
+void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     furi_assert(state);
     furi_assert(input);
 
@@ -94,7 +94,7 @@ void handle_user_input(SceneState* state, InputEvent* input) {
     }
 }
 
-void update_dolphin_coordinates(SceneState* state, uint32_t dt) {
+void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     furi_assert(state);
 
     // global pos

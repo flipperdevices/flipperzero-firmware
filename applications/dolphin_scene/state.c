@@ -15,7 +15,7 @@ static void dolphin_actions_proceed(SceneState* state) {
     furi_assert(state);
 
     state->prev_action = state->action;
-    state->action = state->prev_action != state->next_action ?
+    state->action = (state->prev_action != state->next_action) ?
                         state->next_action :
                         roll_new(state->next_action, ACTIONS_NUM);
     state->action_timeout = default_timeout[state->action];
@@ -48,7 +48,7 @@ static void action_handler(SceneState* state) {
     }
 }
 
-void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
+void dolphin_scene_update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt) {
     furi_assert(state);
     action_handler(state);
 

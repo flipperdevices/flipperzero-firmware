@@ -1,7 +1,7 @@
 #include <furi.h>
 #include "dolphin_scene/dolphin_scene.h"
 
-void scene_redraw(Canvas* canvas, void* ctx) {
+void dolphin_scene_redraw(Canvas* canvas, void* ctx) {
     furi_assert(canvas);
     furi_assert(ctx);
 
@@ -11,21 +11,21 @@ void scene_redraw(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
 
-    render_scene(state, canvas, t);
+    dolphin_scene_render(state, canvas, t);
 
-    render_dolphin_state(state, canvas);
+    dolphin_scene_render_dolphin_state(state, canvas);
 
     release_mutex((ValueMutex*)ctx, state);
 }
 
-void handle_input(SceneState* state, InputEvent* input) {
+void dolphin_scene_handle_input(SceneState* state, InputEvent* input) {
     // printf("[kb] event: %02x %s\n", input->key, input->state ? "pressed" : "released");
-    handle_user_input(state, input);
+    dolphin_scene_handle_user_input(state, input);
 }
 
-void tick_handler(SceneState* state, uint32_t t, uint32_t dt) {
+void dolphin_scene_tick_handler(SceneState* state, uint32_t t, uint32_t dt) {
     // printf("t: %d, dt: %d\n", t, dt);
 
-    update_dolphin_coordinates(state, dt);
-    update_dolphin_state(state, t, dt);
+    dolphin_scene_coordinates(state, dt);
+    dolphin_scene_update_dolphin_state(state, t, dt);
 }

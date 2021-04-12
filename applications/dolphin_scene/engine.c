@@ -19,6 +19,8 @@ static void dolphin_engine_event_cb(InputEvent* input_event, void* ctx) {
 
 ValueMutex* scene_init() {
     SceneState* scene = furi_alloc(sizeof(SceneState));
+    scene->ui.mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+
     scene->player.y = DOLPHIN_DEFAULT_Y;
     scene->player.x = DOLPHIN_CENTER;
 
@@ -27,8 +29,6 @@ ValueMutex* scene_init() {
 
     scene->screen.x = scene->player.x;
     scene->screen.y = scene->player.y;
-
-    scene->ui.mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
 
     ValueMutex* scene_mutex = furi_alloc(sizeof(ValueMutex));
     if(scene_mutex == NULL || !init_mutex(scene_mutex, scene, sizeof(SceneState))) {
@@ -44,13 +44,23 @@ ValueMutex* scene_init() {
 
     // Open GUI and register fullscreen view_port
     gui_add_view_port(scene->ui.gui, scene->ui.view_port, GuiLayerMain);
-    view_port_draw_callback_set(scene->ui.view_port, scene_redraw, scene_mutex);
+    view_port_draw_callback_set(scene->ui.view_port, dolphin_scene_redraw, scene_mutex);
     view_port_input_callback_set(scene->ui.view_port, dolphin_engine_event_cb, scene->ui.mqueue);
     view_port_enabled_set(scene->ui.view_port, true);
 
     scene->ui.timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene->ui.mqueue, NULL);
 
     return scene_mutex;
+}
+
+void scene_free(SceneState* state) {
+    furi_assert(state);
+
+    view_port_enabled_set(state->ui.view_port, false);
+    gui_remove_view_port(state->ui.gui, state->ui.view_port);
+    view_port_free(state->ui.view_port);
+
+    free(state);
 }
 
 int32_t dolphin_scene(void* p) {
@@ -73,14 +83,15 @@ int32_t dolphin_scene(void* p) {
             SceneState* _state = (SceneState*)acquire_mutex_block(state_mutex);
             if(event.type == EventTypeTick) {
                 t = xTaskGetTickCount();
-                tick_handler(_state, t, (t - prev_t) % 1024);
+                dolphin_scene_tick_handler(_state, t, (t - prev_t) % 1024);
                 prev_t = t;
             } else if(event.type == EventTypeKey) {
                 if(event.value.input.key == InputKeyBack &&
                    event.value.input.type == InputTypeShort) {
-                    view_port_enabled_set(_state->ui.view_port, false);
+                    break;
+
                 } else {
-                    handle_input(_state, &event.value.input);
+                    dolphin_scene_handle_input(_state, &event.value.input);
                 }
             }
             release_mutex(state_mutex, _state);
@@ -88,12 +99,6 @@ int32_t dolphin_scene(void* p) {
         }
     }
 
-    view_port_enabled_set(_state->ui.view_port, false);
-    gui_remove_view_port(_state->ui.gui, _state->ui.view_port);
-    view_port_free(_state->ui.view_port);
-    osMessageQueueDelete(_state->ui.mqueue);
-    osTimerDelete(_state->ui.timer);
-    osThreadExit();
-
+    scene_free(_state);
     return 0;
 }

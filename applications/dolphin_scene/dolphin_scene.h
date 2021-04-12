@@ -128,15 +128,14 @@ typedef struct {
     uint8_t dialog_progress;
 } SceneState;
 
-void render_scene(SceneState* state, Canvas* canvas, uint32_t t);
+void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t);
+void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas);
+void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input);
+void dolphin_scene_coordinates(SceneState* state, uint32_t dt);
 
-void render_dolphin(SceneState* state, Canvas* canvas);
-void handle_user_input(SceneState* state, InputEvent* input);
-void update_dolphin_coordinates(SceneState* state, uint32_t dt);
+void dolphin_scene_render_dolphin_state(SceneState* state, Canvas* canvas);
+void dolphin_scene_update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt);
 
-void render_dolphin_state(SceneState* state, Canvas* canvas);
-void update_dolphin_state(SceneState* state, uint32_t t, uint32_t dt);
-
-void scene_redraw(Canvas* canvas, void* ctx);
-void tick_handler(SceneState* state, uint32_t t, uint32_t dt);
-void handle_input(SceneState* state, InputEvent* input);
+void dolphin_scene_redraw(Canvas* canvas, void* ctx);
+void dolphin_scene_tick_handler(SceneState* state, uint32_t t, uint32_t dt);
+void dolphin_scene_handle_input(SceneState* state, InputEvent* input);
