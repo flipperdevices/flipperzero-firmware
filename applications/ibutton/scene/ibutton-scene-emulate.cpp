@@ -84,6 +84,9 @@ bool iButtonSceneEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneEmulate::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_emulate();
+    if(app->cli_cmd_is_running()) {
+        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
+    }
 
     Popup* popup = app->get_view_manager()->get_popup();
 

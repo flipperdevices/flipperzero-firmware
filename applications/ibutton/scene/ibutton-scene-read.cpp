@@ -28,13 +28,28 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
         case KeyReader::Error::EMPTY:
             break;
         case KeyReader::Error::OK:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadSuccess);
+            if(app->cli_cmd_is_running()) {
+                app->cli_send_event(iButtonApp::CliEvent::CliReadSuccess);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+            } else {
+                app->switch_to_next_scene(iButtonApp::Scene::SceneReadSuccess);
+            }
             break;
         case KeyReader::Error::CRC_ERROR:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadCRCError);
+            if(app->cli_cmd_is_running()) {
+                app->cli_send_event(iButtonApp::CliEvent::CliReadCRCError);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+            } else {
+                app->switch_to_next_scene(iButtonApp::Scene::SceneReadCRCError);
+            }
             break;
         case KeyReader::Error::NOT_ARE_KEY:
-            app->switch_to_next_scene(iButtonApp::Scene::SceneReadNotKeyError);
+            if(app->cli_cmd_is_running()) {
+                app->cli_send_event(iButtonApp::CliEvent::CliReadNotKeyError);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+            } else {
+                app->switch_to_next_scene(iButtonApp::Scene::SceneReadNotKeyError);
+            }
             break;
         }
     }
@@ -44,6 +59,9 @@ bool iButtonSceneRead::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneRead::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_read();
+    if(app->cli_cmd_is_running()) {
+        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
+    }
 
     Popup* popup = app->get_view_manager()->get_popup();
 
