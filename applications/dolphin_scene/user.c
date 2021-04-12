@@ -52,14 +52,12 @@ void handle_user_input(SceneState* state, InputEvent* input) {
             state->debug = !state->debug;
         }
     }
-
     // toggle mind control on any user interaction
     if(input->type == InputTypePress) {
         if(input->key == InputKeyLeft || input->key == InputKeyRight || input->key == InputKeyOk) {
             state->action = MINDCONTROL;
         }
     }
-
     // zoom poc for tests
     if(input->type == InputTypePress) {
         if(input->key == InputKeyDown) {
@@ -105,7 +103,7 @@ void update_dolphin_coordinates(SceneState* state, uint32_t dt) {
     // zoom handlers
     state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);
     state->player.x = CLAMP(state->player.x - (state->zoom_v * (SPEED_X * 2)), DOLPHIN_CENTER, 0);
-    state->player.y = CLAMP(state->player.y - (state->zoom_v * SPEED_X / 2), DOLPHIN_DEFAULT_Y, 0);
+    state->player.y = CLAMP(state->player.y - (state->zoom_v * SPEED_X / 2), DOLPHIN_DEFAULT_Y, 3);
 
     //center screen
     state->screen.x = state->player_global.x - state->player.x;

@@ -17,7 +17,7 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
 
     const Item* near = is_nearby(state);
     if(near) {
-        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 22;
+        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 25;
         int8_t hint_pos_y = near->y < 15 ? near->y + 4 : near->y - 16;
 
         strcpy(buf, near->action_name);
@@ -34,7 +34,7 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
 static void draw_current_emote(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
-    elements_multiline_text_framed(canvas, 80, 24, (char*)emotes_list[state->emote_id]);
+    elements_multiline_text_framed(canvas, 80, 20, (char*)emotes_list[state->emote_id]);
 }
 
 static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
@@ -65,6 +65,14 @@ static void draw_dialog(SceneState* state, Canvas* canvas) {
 
     elements_multiline_text_framed(canvas, 68, 16, buf);
 }
+
+/*
+static void draw_idle_emote(SceneState* state, Canvas* canvas){
+    if(state->action_timeout % 50 < 40 && state->prev_action == MINDCONTROL){
+        elements_multiline_text_framed(canvas, 68, 16, "WUT?!");
+    }
+}
+*/
 
 static void activate_item_callback(SceneState* state, Canvas* canvas) {
     furi_assert(state);
@@ -131,7 +139,6 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
             state->poi,
             state->action_timeout,
             action_str[state->action]);
-        //sprintf(buf, "x:%ld s:%ld p:%ld %d %s", state->player_global.x, state->screen.x, state->player.x, state->scene_zoom, action_str[state->action]);
         canvas_draw_str(canvas, 0, 13, buf);
     }
 
@@ -145,4 +152,8 @@ void render_dolphin_state(SceneState* state, Canvas* canvas) {
         activate_item_callback(state, canvas);
     else if(state->action == SLEEP)
         draw_sleep_emote(state, canvas);
+    /*
+    else if(state->action == IDLE)
+        draw_idle_emote(state, canvas);
+    */
 }
