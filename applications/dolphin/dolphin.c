@@ -191,31 +191,6 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     return true;
 }
 
-Dolphin* dolphin_free(Dolphin* dolphin) {
-    furi_assert(dolphin);
-    // free everything, just in case
-    Gui* gui = furi_record_open("gui");
-    dolphin_state_release(dolphin->state);
-    furi_thread_free(dolphin->scene_thread);
-
-    view_dispatcher_free(dolphin->idle_view_dispatcher);
-
-    view_free(dolphin->idle_view_first_start);
-    view_free(dolphin->idle_view_main);
-    view_free(dolphin->idle_view_meta);
-    view_free(dolphin->idle_view_up);
-    view_free(dolphin->idle_view_down);
-    view_free(dolphin->view_hw_mismatch);
-    view_free(dolphin->view_lockmenu);
-
-    view_port_free(dolphin->lock_viewport);
-    view_port_enabled_set(dolphin->lock_viewport, false);
-    icon_free(dolphin->lock_icon);
-    gui_remove_view_port(gui, dolphin->lock_viewport);
-    osMessageQueueDelete(dolphin->event_queue);
-    free(dolphin);
-}
-
 Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
     // Message queue
@@ -227,8 +202,13 @@ Dolphin* dolphin_alloc() {
     dolphin->menu_vm = furi_record_open("menu");
     // Scene thread
     dolphin->scene_thread = furi_thread_alloc();
+
     // GUI
+    dolphin->gui = furi_record_open("gui");
+
+    // Dispatcher
     dolphin->idle_view_dispatcher = view_dispatcher_alloc();
+
     // First start View
     dolphin->idle_view_first_start = view_alloc();
     view_allocate_model(
@@ -238,6 +218,7 @@ Dolphin* dolphin_alloc() {
     view_set_input_callback(dolphin->idle_view_first_start, dolphin_view_first_start_input);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewFirstStart, dolphin->idle_view_first_start);
+
     // Main Idle View
     dolphin->idle_view_main = view_alloc();
     view_set_context(dolphin->idle_view_main, dolphin);
@@ -248,6 +229,7 @@ Dolphin* dolphin_alloc() {
     view_set_input_callback(dolphin->idle_view_main, dolphin_view_idle_main_input);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
+
     // Stats Idle View
     dolphin->idle_view_up = view_alloc();
     view_set_context(dolphin->idle_view_up, dolphin);
@@ -259,6 +241,7 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->idle_view_up, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleUp, dolphin->idle_view_up);
+
     // Lock Menu View
     dolphin->view_lockmenu = view_alloc();
     view_set_context(dolphin->view_lockmenu, dolphin);
@@ -269,12 +252,14 @@ Dolphin* dolphin_alloc() {
     view_set_previous_callback(dolphin->view_lockmenu, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
+
     // Down Idle View
     dolphin->idle_view_down = view_alloc();
     view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);
     view_set_previous_callback(dolphin->idle_view_down, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleDown, dolphin->idle_view_down);
+
     // HW Mismatch
     dolphin->view_hw_mismatch = view_alloc();
     view_set_draw_callback(dolphin->view_hw_mismatch, dolphin_view_hw_mismatch_draw);
@@ -292,7 +277,37 @@ Dolphin* dolphin_alloc() {
     // Main screen animation
     dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
 
+    view_dispatcher_attach_to_gui(
+        dolphin->idle_view_dispatcher, dolphin->gui, ViewDispatcherTypeWindow);
+    gui_add_view_port(dolphin->gui, dolphin->lock_viewport, GuiLayerStatusBarLeft);
+
     return dolphin;
+}
+
+void dolphin_free(Dolphin* dolphin) {
+    furi_assert(dolphin);
+
+    view_dispatcher_attach_to_gui(
+        dolphin->idle_view_dispatcher, dolphin->gui, ViewDispatcherTypeWindow);
+    gui_remove_view_port(dolphin->gui, dolphin->lock_viewport);
+    view_port_free(dolphin->lock_viewport);
+    icon_free(dolphin->lock_icon);
+
+    view_dispatcher_free(dolphin->idle_view_dispatcher);
+
+    furi_record_close("gui");
+    dolphin->gui = NULL;
+
+    furi_thread_free(dolphin->scene_thread);
+
+    furi_record_close("menu");
+    dolphin->menu_vm = NULL;
+
+    dolphin_state_free(dolphin->state);
+
+    osMessageQueueDelete(dolphin->event_queue);
+
+    free(dolphin);
 }
 
 void dolphin_save(Dolphin* dolphin) {
@@ -312,11 +327,6 @@ void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
 
 int32_t dolphin_task() {
     Dolphin* dolphin = dolphin_alloc();
-
-    Gui* gui = furi_record_open("gui");
-
-    view_dispatcher_attach_to_gui(dolphin->idle_view_dispatcher, gui, ViewDispatcherTypeWindow);
-    gui_add_view_port(gui, dolphin->lock_viewport, GuiLayerStatusBarLeft);
 
     if(dolphin_state_load(dolphin->state)) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);

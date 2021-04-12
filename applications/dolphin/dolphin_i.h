@@ -37,6 +37,7 @@ struct Dolphin {
     // Scene
     FuriThread* scene_thread;
     // GUI
+    Gui* gui;
     ViewDispatcher* idle_view_dispatcher;
     View* idle_view_first_start;
     View* idle_view_main;
@@ -55,9 +56,9 @@ struct Dolphin {
 // Temporary
 const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
 
-Dolphin* dolphin_free();
-
 Dolphin* dolphin_alloc();
+
+void dolphin_free(Dolphin* dolphin);
 
 /* Save Dolphin state (write to permanent memory)
  * Thread safe

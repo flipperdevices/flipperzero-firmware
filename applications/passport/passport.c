@@ -98,12 +98,9 @@ int32_t passport(void* p) {
         State* state = (State*)acquire_mutex_block(&state_mutex);
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 25);
         if(event_status == osOK) {
-            if(event.type == EventTypeKey) {
-                if(event.value.input.type == InputTypeRelease) {
-                    // TODO remove all view_ports create by app
-
-                    return 0;
-                }
+            if(event.type == EventTypeKey && event.value.input.type == InputTypeShort) {
+                release_mutex(&state_mutex, state);
+                break;
             }
         }
 
@@ -111,9 +108,15 @@ int32_t passport(void* p) {
         release_mutex(&state_mutex, state);
     }
 
-    free(&_state);
-    view_port_enabled_set(view_port, false);
-    view_port_free(view_port);
-    osMessageQueueDelete(event_queue);
     gui_remove_view_port(gui, view_port);
+
+    view_port_free(view_port);
+
+    furi_record_close("gui");
+
+    delete_mutex(&state_mutex);
+
+    osMessageQueueDelete(event_queue);
+
+    return 0;
 }
