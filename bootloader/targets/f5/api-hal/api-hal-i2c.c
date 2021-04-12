@@ -47,7 +47,8 @@ bool api_hal_i2c_tx(
     uint32_t time_left = timeout;
     bool ret = true;
 
-    while(LL_I2C_IsActiveFlag_BUSY(instance));
+    while(LL_I2C_IsActiveFlag_BUSY(instance))
+        ;
 
     LL_I2C_HandleTransfer(
         instance,
@@ -87,7 +88,8 @@ bool api_hal_i2c_rx(
     uint32_t time_left = timeout;
     bool ret = true;
 
-    while(LL_I2C_IsActiveFlag_BUSY(instance)) {};
+    while(LL_I2C_IsActiveFlag_BUSY(instance))
+        ;
 
     LL_I2C_HandleTransfer(
         instance,
