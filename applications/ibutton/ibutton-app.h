@@ -72,6 +72,7 @@ public:
         CliReadNotKeyError,
         CliWriteSuccess,
         CliWriteFail,
+        CliTimeout,
         CliInterrupt,
     };
 
@@ -157,4 +158,6 @@ private:
     char text_store[text_store_size + 1];
 
     void notify_init();
+    bool read_hex_byte(string_t arg, uint8_t* byte);
+    void print_key_data(void);
 };
