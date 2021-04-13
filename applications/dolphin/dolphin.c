@@ -287,8 +287,6 @@ Dolphin* dolphin_alloc() {
 void dolphin_free(Dolphin* dolphin) {
     furi_assert(dolphin);
 
-    view_dispatcher_attach_to_gui(
-        dolphin->idle_view_dispatcher, dolphin->gui, ViewDispatcherTypeWindow);
     gui_remove_view_port(dolphin->gui, dolphin->lock_viewport);
     view_port_free(dolphin->lock_viewport);
     icon_free(dolphin->lock_icon);
