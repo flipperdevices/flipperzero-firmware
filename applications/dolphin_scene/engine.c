@@ -31,7 +31,8 @@ ValueMutex* scene_init() {
     scene_state->screen.y = scene_state->player.y;
 
     ValueMutex* scene_state_mutex = furi_alloc(sizeof(ValueMutex));
-    if(scene_state_mutex == NULL || !init_mutex(scene_state_mutex, scene_state, sizeof(SceneState))) {
+    if(scene_state_mutex == NULL ||
+       !init_mutex(scene_state_mutex, scene_state, sizeof(SceneState))) {
         printf("[menu_task] cannot create menu mutex\r\n");
         furi_check(0);
     }
@@ -44,11 +45,14 @@ ValueMutex* scene_init() {
 
     // Open GUI and register fullscreen view_port
     gui_add_view_port(scene_state->ui.gui, scene_state->ui.view_port, GuiLayerMain);
-    view_port_draw_callback_set(scene_state->ui.view_port, dolphin_scene_redraw, scene_state_mutex);
-    view_port_input_callback_set(scene_state->ui.view_port, dolphin_engine_event_cb, scene_state->ui.mqueue);
+    view_port_draw_callback_set(
+        scene_state->ui.view_port, dolphin_scene_redraw, scene_state_mutex);
+    view_port_input_callback_set(
+        scene_state->ui.view_port, dolphin_engine_event_cb, scene_state->ui.mqueue);
     view_port_enabled_set(scene_state->ui.view_port, true);
 
-    scene_state->ui.timer = osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene_state->ui.mqueue, NULL);
+    scene_state->ui.timer =
+        osTimerNew(dolphin_engine_tick_cb, osTimerPeriodic, scene_state->ui.mqueue, NULL);
 
     return scene_state_mutex;
 }
