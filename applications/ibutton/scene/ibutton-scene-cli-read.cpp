@@ -6,6 +6,7 @@
 void iButtonSceneCliRead::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
+    timeout = 50; // 5s timeout
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "waiting\nfor key ...", 95, 30, AlignCenter, AlignTop);
@@ -23,23 +24,31 @@ bool iButtonSceneCliRead::on_event(iButtonApp* app, iButtonEvent* event) {
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         consumed = true;
         app->notify_red_blink();
-
-        switch(app->get_key_worker()->read(app->get_key())) {
-        case KeyReader::Error::EMPTY:
-            break;
-        case KeyReader::Error::OK:
-            app->cli_send_event(iButtonApp::CliEvent::CliReadSuccess);
+        if(!timeout--) {
+            app->cli_send_event(iButtonApp::CliEvent::CliTimeout);
             app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            break;
-        case KeyReader::Error::CRC_ERROR:
-            app->cli_send_event(iButtonApp::CliEvent::CliReadCRCError);
-            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            break;
-        case KeyReader::Error::NOT_ARE_KEY:
-            app->cli_send_event(iButtonApp::CliEvent::CliReadNotKeyError);
-            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            break;
+            return consumed;
+        } else {
+            switch(app->get_key_worker()->read(app->get_key())) {
+            case KeyReader::Error::EMPTY:
+                break;
+            case KeyReader::Error::OK:
+                app->cli_send_event(iButtonApp::CliEvent::CliReadSuccess);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+                break;
+            case KeyReader::Error::CRC_ERROR:
+                app->cli_send_event(iButtonApp::CliEvent::CliReadCRCError);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+                break;
+            case KeyReader::Error::NOT_ARE_KEY:
+                app->cli_send_event(iButtonApp::CliEvent::CliReadNotKeyError);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+                break;
+            }
         }
+    } else if(event->type == iButtonEvent::Type::EventTypeBack) {
+        consumed = false;
+        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
     }
 
     return consumed;
@@ -47,7 +56,6 @@ bool iButtonSceneCliRead::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneCliRead::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_read();
-    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     Popup* popup = app->get_view_manager()->get_popup();
 

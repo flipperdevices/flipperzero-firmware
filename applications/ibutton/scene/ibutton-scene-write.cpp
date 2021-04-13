@@ -89,7 +89,6 @@ bool iButtonSceneWrite::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneWrite::on_exit(iButtonApp* app) {
     Popup* popup = app->get_view_manager()->get_popup();
-    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);

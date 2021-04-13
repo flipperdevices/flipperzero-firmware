@@ -11,6 +11,7 @@ void iButtonSceneCliWrite::on_enter(iButtonApp* app) {
     uint8_t* key_data = key->get_data();
     const char* key_name = key->get_name();
     uint8_t line_count = 2;
+    timeout = 50; // 5s timeout
 
     // check that stored key has name
     if(strcmp(key_name, "") != 0) {
@@ -68,22 +69,30 @@ bool iButtonSceneCliWrite::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         consumed = true;
-        KeyWriter::Error result = app->get_key_worker()->write(app->get_key());
+        if(!timeout--) {
+            app->cli_send_event(iButtonApp::CliEvent::CliTimeout);
+            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+        } else {
+            KeyWriter::Error result = app->get_key_worker()->write(app->get_key());
 
-        switch(result) {
-        case KeyWriter::Error::SAME_KEY:
-        case KeyWriter::Error::OK:
-            app->cli_send_event(iButtonApp::CliEvent::CliWriteSuccess);
-            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            break;
-        case KeyWriter::Error::NO_DETECT:
-            app->notify_red_blink();
-            break;
-        case KeyWriter::Error::CANNOT_WRITE:
-            app->cli_send_event(iButtonApp::CliEvent::CliWriteFail);
-            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
-            break;
+            switch(result) {
+            case KeyWriter::Error::SAME_KEY:
+            case KeyWriter::Error::OK:
+                app->cli_send_event(iButtonApp::CliEvent::CliWriteSuccess);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+                break;
+            case KeyWriter::Error::NO_DETECT:
+                app->notify_red_blink();
+                break;
+            case KeyWriter::Error::CANNOT_WRITE:
+                app->cli_send_event(iButtonApp::CliEvent::CliWriteFail);
+                app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
+                break;
+            }
         }
+    } else if(event->type == iButtonEvent::Type::EventTypeBack) {
+        consumed = false;
+        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
     }
 
     return consumed;
@@ -91,7 +100,6 @@ bool iButtonSceneCliWrite::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneCliWrite::on_exit(iButtonApp* app) {
     Popup* popup = app->get_view_manager()->get_popup();
-    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);

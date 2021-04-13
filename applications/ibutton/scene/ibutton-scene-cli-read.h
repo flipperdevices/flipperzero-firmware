@@ -8,4 +8,5 @@ public:
     void on_exit(iButtonApp* app) final;
 
 private:
+    uint16_t timeout;
 };

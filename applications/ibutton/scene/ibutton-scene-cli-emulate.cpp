@@ -12,6 +12,7 @@ void iButtonSceneCliEmulate::on_enter(iButtonApp* app) {
     uint8_t* key_data = key->get_data();
     const char* key_name = key->get_name();
     uint8_t line_count = 2;
+    timeout = 50; // 5s timeout
 
     // check that stored key has name
     if(strcmp(key_name, "") != 0) {
@@ -72,11 +73,19 @@ bool iButtonSceneCliEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
 
     if(event->type == iButtonEvent::Type::EventTypeTick) {
         consumed = true;
-        if(app->get_key_worker()->emulated()) {
-            app->notify_yellow_blink();
+        if(!timeout--) {
+            app->cli_send_event(iButtonApp::CliEvent::CliTimeout);
+            app->search_and_switch_to_previous_scene({iButtonApp::Scene::SceneStart});
         } else {
-            app->notify_red_blink();
+            if(app->get_key_worker()->emulated()) {
+                app->notify_yellow_blink();
+            } else {
+                app->notify_red_blink();
+            }
         }
+    } else if(event->type == iButtonEvent::Type::EventTypeBack) {
+        consumed = false;
+        app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
     }
 
     return consumed;
@@ -84,7 +93,6 @@ bool iButtonSceneCliEmulate::on_event(iButtonApp* app, iButtonEvent* event) {
 
 void iButtonSceneCliEmulate::on_exit(iButtonApp* app) {
     app->get_key_worker()->stop_emulate();
-    app->cli_send_event(iButtonApp::CliEvent::CliInterrupt);
 
     Popup* popup = app->get_view_manager()->get_popup();
 
