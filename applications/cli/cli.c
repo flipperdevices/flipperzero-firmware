@@ -1,5 +1,7 @@
 #include "cli_i.h"
 #include "cli_commands.h"
+#include <version.h>
+#include <api-hal-boot.h>
 
 Cli* cli_alloc() {
     Cli* cli = furi_alloc(sizeof(Cli));
@@ -49,10 +51,22 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
 }
 
 void cli_print_version() {
-    printf("Build date:" BUILD_DATE ". "
-           "Git Commit:" GIT_COMMIT ". "
-           "Git Branch:" GIT_BRANCH ". "
-           "Commit Number:" GIT_BRANCH_NUM ".");
+#if NO_BOOTLOADER
+    printf("[boot] No version info\n");
+#else
+    const Version *boot_version_adr = api_hal_boot_version_address_get();
+    printf("[boot] Version: %s\n", version_get_version(boot_version_adr));
+    printf("       Build date: %s\n", version_get_builddate(boot_version_adr));
+    printf("       Git Commit: %s\n", version_get_githash(boot_version_adr));
+    printf("       Git Branch: %s\n", version_get_gitbranch(boot_version_adr));
+    printf("       Commit Number: %s\n", version_get_gitbranchnum(boot_version_adr));
+#endif
+
+    printf("[flipper] Version: %s\n", version_get_version(0));
+    printf("          Build date: %s\n", version_get_builddate(0));
+    printf("          Git Commit: %s\n", version_get_githash(0));
+    printf("          Git Branch: %s\n", version_get_gitbranch(0));
+    printf("          Commit Number: %s\n", version_get_gitbranchnum(0));
 }
 
 void cli_motd() {
