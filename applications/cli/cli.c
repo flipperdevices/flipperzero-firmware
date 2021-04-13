@@ -189,6 +189,8 @@ void cli_delete_command(Cli* cli, const char* name) {
     furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
     CliCommandDict_erase(cli->commands, name_str);
     furi_check(osMutexRelease(cli->mutex) == osOK);
+
+    string_clear(name_str);
 }
 
 int32_t cli_task(void* p) {
