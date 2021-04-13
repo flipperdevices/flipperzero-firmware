@@ -200,7 +200,7 @@ void cli_command_os_info(string_t args, void* context) {
             osThreadGetName(threads_id[i]),
             (uint32_t)tcb->pxStack,
             (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(uint32_t),
-            osThreadGetStackSpace(threads_id[i]));
+            osThreadGetStackSpace(threads_id[i]) * sizeof(uint32_t));
     }
     return;
 }
