@@ -26,7 +26,6 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
                 buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
             }
         }
-
         canvas_draw_str(canvas, hint_pos_x, hint_pos_y, buf);
     }
 }
@@ -41,8 +40,21 @@ static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
-    if(state->player_global.x == 154 && state->action_timeout % 100 < 40) {
-        elements_multiline_text_framed(canvas, 80, 20, "zZzZ..");
+    char dialog_str[] = "zZzZ...";
+    char buf[64];
+
+    if(state->player_global.x == 154 && state->action_timeout % 100 < 30) {
+        if(state->dialog_progress < strlen(dialog_str)) {
+            if(state->action_timeout % 5 == 0) state->dialog_progress++;
+            dialog_str[state->dialog_progress] = '\0';
+            snprintf(buf, state->dialog_progress, dialog_str);
+            // bubble vs just text?
+            //elements_multiline_text_framed(canvas, 80, 20, buf);
+            canvas_draw_str(canvas, 80, 20, buf);
+        }
+
+    } else {
+        state->dialog_progress = 0;
     }
 }
 
@@ -88,7 +100,7 @@ static void activate_item_callback(SceneState* state, Canvas* canvas) {
     }
 }
 
-void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
+void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
     furi_assert(state);
     furi_assert(canvas);
 
@@ -117,11 +129,11 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
             if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
         }
 
-        if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);
+        if(l == DOLPHIN_LAYER) render_dolphin(state, canvas);
     }
 }
 
-void dolphin_scene_render_dolphin_state(SceneState* state, Canvas* canvas) {
+void render_dolphin_state(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
