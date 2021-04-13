@@ -26,6 +26,7 @@ static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
                 buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
             }
         }
+
         canvas_draw_str(canvas, hint_pos_x, hint_pos_y, buf);
     }
 }
@@ -100,7 +101,7 @@ static void activate_item_callback(SceneState* state, Canvas* canvas) {
     }
 }
 
-void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
+void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
     furi_assert(state);
     furi_assert(canvas);
 
@@ -129,11 +130,11 @@ void render_scene(SceneState* state, Canvas* canvas, uint32_t t) {
             if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
         }
 
-        if(l == DOLPHIN_LAYER) render_dolphin(state, canvas);
+        if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);
     }
 }
 
-void render_dolphin_state(SceneState* state, Canvas* canvas) {
+void dolphin_scene_render_dolphin_state(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
