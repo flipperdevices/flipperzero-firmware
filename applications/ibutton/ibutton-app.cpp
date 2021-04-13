@@ -194,6 +194,7 @@ iButtonApp::iButtonApp() {
 iButtonApp::~iButtonApp() {
     furi_record_close("sdcard-ex");
     furi_record_close("sdcard");
+    cli_delete_command(cli, "tm");
     furi_record_close("cli");
     osMessageQueueDelete(cli_event_result);
     api_hal_power_insomnia_exit();
