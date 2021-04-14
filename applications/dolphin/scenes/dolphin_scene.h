@@ -44,7 +44,6 @@
 #define DOLPHIN_LAYER 6
 #define PARALLAX_MOD 7
 #define PARALLAX(layer) layer / PARALLAX_MOD - layer
-#define ITEMS_NUM 4
 
 #define DIALOG_PROGRESS 250
 

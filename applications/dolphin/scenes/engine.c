@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "dolphin_scene/dolphin_scene.h"
+#include "dolphin_scene.h"
 
 void dolphin_engine_tick_cb(void* p) {
     osMessageQueueId_t event_queue = p;
@@ -67,11 +67,11 @@ void scene_free(ValueMutex* scene_state_mutex) {
     view_port_free(scene_state->ui.view_port);
     furi_record_close("gui");
     osMessageQueueDelete(scene_state->ui.mqueue);
-    free(scene_state);
 
     release_mutex(scene_state_mutex, scene_state);
     delete_mutex(scene_state_mutex);
-    free(scene_state_mutex);
+    ///free(scene_state_mutex);
+    // free(scene_state);
 }
 
 int32_t dolphin_scene(void* p) {
@@ -82,7 +82,7 @@ int32_t dolphin_scene(void* p) {
     SceneState* _state = (SceneState*)acquire_mutex_block(scene_state_mutex);
     osTimerStart(_state->ui.timer, 40);
     uint32_t t = xTaskGetTickCount();
-    uint32_t prev_t = 0;
+
     osMessageQueueId_t q = _state->ui.mqueue;
     release_mutex(scene_state_mutex, _state);
 
@@ -92,8 +92,7 @@ int32_t dolphin_scene(void* p) {
             SceneState* _state = (SceneState*)acquire_mutex_block(scene_state_mutex);
             if(event.type == EventTypeTick) {
                 t = xTaskGetTickCount();
-                dolphin_scene_tick_handler(_state, t, (t - prev_t) % 1024);
-                prev_t = t;
+                dolphin_scene_tick_handler(_state, t, t % 1024);
             } else if(event.type == EventTypeKey) {
                 if(event.value.input.key == InputKeyBack &&
                    event.value.input.type == InputTypeShort) {

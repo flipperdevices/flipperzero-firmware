@@ -1,6 +1,6 @@
 #include <furi.h>
-#include "dolphin_scene/dolphin_scene.h"
-#include "dolphin_scene/dolphin_emotes.h"
+#include "dolphin_scene.h"
+#include "dolphin_emotes.h"
 
 static uint16_t roll_new(uint16_t prev, uint16_t max) {
     uint16_t val = 999;

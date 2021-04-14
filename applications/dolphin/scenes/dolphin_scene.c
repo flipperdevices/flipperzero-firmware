@@ -1,5 +1,5 @@
 #include <furi.h>
-#include "dolphin_scene/dolphin_scene.h"
+#include "dolphin_scene.h"
 
 void dolphin_scene_redraw(Canvas* canvas, void* ctx) {
     furi_assert(canvas);

@@ -1,14 +1,10 @@
 #include <furi.h>
-#include "dolphin_scene/dolphin_scene.h"
-#include "dolphin_scene/dolphin_emotes.h"
-#include "dolphin_scene/items.h"
+#include "dolphin_scene.h"
+#include "dolphin_emotes.h"
+#include "items.h"
 #include <gui/elements.h>
 
 const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "MC"};
-
-static bool item_screen_bounds(int32_t pos) {
-    return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
-}
 
 static void draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
     furi_assert(state);
@@ -43,7 +39,7 @@ static void draw_sleep_emote(SceneState* state, Canvas* canvas) {
 
     char dialog_str[] = "zZzZ...";
     char buf[64];
-
+    // 2do - sofa x pos getter
     if(state->player_global.x == 154 && state->action_timeout % 100 < 30) {
         if(state->dialog_progress < strlen(dialog_str)) {
             if(state->action_timeout % 5 == 0) state->dialog_progress++;
@@ -87,18 +83,49 @@ static void draw_idle_emote(SceneState* state, Canvas* canvas){
 }
 */
 
-static void activate_item_callback(SceneState* state, Canvas* canvas) {
+
+void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
-    const Item* near = is_nearby(state);
-    if(near && state->use_pending == true) {
-        state->action_timeout = near->timeout;
-        near->callback(canvas, state);
-        state->use_pending = false;
-    } else if(near) {
-        near->callback(canvas, state);
+    if(state->scene_zoom == SCENE_ZOOM) {
+        state->dolphin_gfx = I_DolphinExcited_64x63;
+    } else if(state->action == SLEEP && state->player_global.x == 154) {  // 2do - sofa x pos getter
+        state->dolphin_gfx = A_FX_Sitting_40x27;
+        state->dolphin_gfx_b = I_FX_SittingB_40x27;
+    } else if(state->action != INTERACT) {
+        if(state->player_v.x < 0 || state->player_flipped) {
+            if(state->player_anim == 0) {
+                state->dolphin_gfx = I_WalkL1_32x32;
+                state->dolphin_gfx_b = I_WalkLB1_32x32;
+
+            } else {
+                state->dolphin_gfx = I_WalkL2_32x32;
+                state->dolphin_gfx_b = I_WalkLB2_32x32;
+            }
+        } else if(state->player_v.x > 0 || !state->player_flipped) {
+            if(state->player_anim == 0) {
+                state->dolphin_gfx = I_WalkR1_32x32;
+                state->dolphin_gfx_b = I_WalkRB1_32x32;
+
+            } else {
+                state->dolphin_gfx = I_WalkR2_32x32;
+                state->dolphin_gfx_b = I_WalkRB2_32x32;
+            }
+        }
     }
+
+    canvas_set_bitmap_mode(canvas, true);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx_b);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx);
+    canvas_set_bitmap_mode(canvas, false);
+}
+
+
+static bool item_screen_bounds(int32_t pos) {
+    return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
 }
 
 void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
@@ -127,7 +154,7 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                 }
             }
 
-            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
+            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42); 
         }
 
         if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);
