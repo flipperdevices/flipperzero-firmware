@@ -1057,7 +1057,7 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = OTA_UPDATE;
     changeMenu(&confirmMenu);
   });
-  addNodes(&whichUpdateMenu, "ESP8266 Update", TFT_RED, NULL, ESP_UPDATE_ICO, [this]() {
+  if (esp_obj.supported) addNodes(&whichUpdateMenu, "ESP8266 Update", TFT_RED, NULL, ESP_UPDATE_ICO, [this]() {
     wifi_scan_obj.currentScanMode = ESP_UPDATE;
     changeMenu(&espUpdateMenu);
     esp_obj.RunUpdate();

@@ -76,8 +76,27 @@ void setup()
   //Serial.begin(115200);
   
   display_obj.RunSetup();
+  display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+  digitalWrite(TFT_BL, LOW);
+
+  // Draw the title screen
+  display_obj.drawJpeg("/marauder3L.jpg", 0 , 0);     // 240 x 320 image
+
+  //showCenterText(version_number, 250);
+  display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
+
+  digitalWrite(TFT_BL, HIGH); // Need this
+
+  delay(2000);
+
+  display_obj.clearScreen();
+
   display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
-  digitalWrite(TFT_BL, HIGH);
+
+  display_obj.tft.println("Giving room for HardwareSerial...");
+
+  delay(2000);
 
   display_obj.tft.println("Marauder " + display_obj.version_number + "\n");
 
@@ -146,12 +165,14 @@ void setup()
 
   display_obj.tft.println(F("Initialized LED Interface"));
 
-  display_obj.tft.println(F("Starting..."));
+  //display_obj.tft.println(F("Starting..."));
 
   delay(500);
 
-  display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  //display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
+  // OG Logo Section
+  /*
   digitalWrite(TFT_BL, LOW);
 
   // Draw the title screen
@@ -161,10 +182,15 @@ void setup()
   display_obj.tft.drawCentreString(display_obj.version_number, 120, 250, 2);
 
   digitalWrite(TFT_BL, HIGH);
+  */
 
   esp_obj.begin();
   
   a32u4_obj.begin(); // This goes last to make sure nothing is messed up when reading serial
+
+  display_obj.tft.println(F("Starting..."));
+
+  display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
   delay(2000);
 
