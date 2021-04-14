@@ -51,6 +51,14 @@ bool SDInterface::initSD() {
 
     //if (this->supported)
     //  buffer_obj.open(&SD);
+
+    // Check for SCRIPTS folder
+    if (!SD.exists("/SCRIPTS")) {
+      Serial.println("/SCRIPTS does not exist. Creating...");
+
+      SD.mkdir("/SCRIPTS");
+      Serial.println("/SCRIPTS created");
+    }
     
     return true;
   }

@@ -9,6 +9,10 @@ void A32u4Interface::begin() {
 
   Serial.println("Setup A32U4 Serial Interface");
 
+  MySerial_two.println("DELAY 1");
+
+  delay(1000);
+
   uint8_t a32u4_rep = 0;
 
   if (MySerial_two.available()) {
