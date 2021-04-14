@@ -43,6 +43,9 @@ typedef struct {
 
     uint8_t packet_id;
     IrDAPacket packets[IRDA_PACKET_COUNT];
+    Cli* cli;
+    osMessageQueueId_t cli_ir_rx_queue;
+    bool cli_rx_is_active;
 } State;
 
 typedef void (*ModeInput)(AppEvent*, State*);
@@ -237,8 +240,34 @@ void init_packet(
 }
 
 void irda_cli_cmd_rx(string_t args, void* context) {
-    printf("Reading income packets...\r\n");
+    furi_assert(context);
+    ValueMutex* state_mutex = context;
+    IrDAPacket packet;
+    bool exit = false;
 
+    printf("Reading income packets...\r\nPress Ctrl+C to abort\r\n");
+    while(!exit) {
+        State* state = (State*)acquire_mutex(state_mutex, 25);
+        if(state != NULL) {
+            exit = cli_cmd_interrupt_received(state->cli);
+            osStatus status = osMessageQueueGet(state->cli_ir_rx_queue, &packet, 0, 10);
+            if(status == osOK) {
+                printf("Received packet:\r\n");
+                if(packet.protocol == IRDA_NEC) {
+                    printf("NEC ");
+                } else if(packet.protocol == IRDA_SAMSUNG) {
+                    printf("SAMSUNG ");
+                }
+                printf(
+                    "Address:0x%02X%02X Command: 0x%02X",
+                    (uint8_t)(packet.address >> 8),
+                    (uint8_t)packet.address,
+                    (uint8_t)packet.command);
+            }
+            release_mutex(state_mutex, state);
+        }
+    }
+    printf("Interrupt command received\r\n");
     return;
 }
 
@@ -306,6 +335,9 @@ int32_t irda(void* p) {
     _state.carrier_freq = 36000;
     _state.mode_id = 0;
     _state.packet_id = 0;
+    _state.cli = furi_record_open("cli");
+    _state.cli_rx_is_active = false;
+    _state.cli_ir_rx_queue = osMessageQueueNew(1, sizeof(IrDAPacket), NULL);
 
     for(uint8_t i = 0; i < IRDA_PACKET_COUNT; i++) {
         init_packet(&_state, i, IRDA_UNKNOWN, 0, 0);
@@ -331,9 +363,8 @@ int32_t irda(void* p) {
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
-    Cli* cli = furi_record_open("cli");
-    cli_add_command(cli, "ir_rx", irda_cli_cmd_rx, &state_mutex);
-    cli_add_command(cli, "ir_tx", irda_cli_cmd_tx, &state_mutex);
+    cli_add_command(_state.cli, "ir_rx", irda_cli_cmd_rx, &state_mutex);
+    cli_add_command(_state.cli, "ir_tx", irda_cli_cmd_tx, &state_mutex);
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
@@ -370,8 +401,8 @@ int32_t irda(void* p) {
 
                     delete_mutex(&state_mutex);
                     osMessageQueueDelete(event_queue);
-                    cli_delete_command(cli, "ir_rx");
-                    cli_delete_command(cli, "ir_tx");
+                    cli_delete_command(state->cli, "ir_rx");
+                    cli_delete_command(state->cli, "ir_tx");
                     furi_record_close("cli");
 
                     // exit
@@ -413,6 +444,7 @@ int32_t irda(void* p) {
                 if(decoded) {
                     // save only if we in packet mode
                     State* state = (State*)acquire_mutex_block(&state_mutex);
+                    IrDAPacket packet;
 
                     if(state->mode_id == 1) {
                         if(out.protocol == IRDA_NEC) {
@@ -423,13 +455,17 @@ int32_t irda(void* p) {
                                 printf("R");
                             }
                             printf("\r\n");
-
-                            state->packets[state->packet_id].protocol = IRDA_NEC;
-                            state->packets[state->packet_id].address = out_data[1] << 8 |
-                                                                       out_data[0];
-                            state->packets[state->packet_id].command = out_data[2];
+                            packet.protocol = IRDA_NEC;
+                            packet.address = out_data[1] << 8 | out_data[0];
+                            packet.command = out_data[2];
+                            // Save packet to state
+                            memcpy(
+                                &(state->packets[state->packet_id]), &packet, sizeof(IrDAPacket));
                         } else {
                             printf("Unknown protocol\r\n");
+                        }
+                        if(state->cli_rx_is_active) {
+                            osMessageQueuePut(state->cli_ir_rx_queue, &packet, 0, 0);
                         }
                     }
 
