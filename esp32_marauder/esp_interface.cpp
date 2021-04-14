@@ -40,9 +40,16 @@ void EspInterface::begin() {
   Serial.println("\nDisplay string: " + (String)display_string);
   
   if (display_string == "ESP8266 Pong") {
+    display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
     display_obj.tft.println("ESP8266 Found!");
+    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
     Serial.println("ESP8266 Found!");
     this->supported = true;
+  }
+  else {
+    display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+    display_obj.tft.println("ESP8266 Not Found");
+    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
   }
 
   this->initTime = millis();

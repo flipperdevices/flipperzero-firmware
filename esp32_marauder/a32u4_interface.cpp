@@ -5,7 +5,33 @@ HardwareSerial MySerial_two(2);
 void A32u4Interface::begin() {
   MySerial_two.begin(BAUD32U4, SERIAL_8N1, 25, 4);
 
+  delay(2000);
+
   Serial.println("Setup A32U4 Serial Interface");
+
+  uint8_t a32u4_rep = 0;
+
+  if (MySerial_two.available()) {
+    a32u4_rep = (uint8_t)MySerial_two.read();
+  }
+
+  //display_string.trim();
+
+  //Serial.println("\nDisplay string: " + (String)display_string);
+
+  if (a32u4_rep != 0) {
+    this->supported = true;
+    display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+    display_obj.tft.println("ATmega32U4 Found!");
+    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+  }
+  else {
+    display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+    display_obj.tft.println("ATmega32U4 Not Found");
+    display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    Serial.print("A32U4 Said: ");
+    Serial.println(a32u4_rep);
+  }
 
   this->initTime = millis();
 }

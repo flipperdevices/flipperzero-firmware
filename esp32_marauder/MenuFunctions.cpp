@@ -809,7 +809,7 @@ void MenuFunctions::RunSetup()
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, BLUETOOTH, [this]() {
     changeMenu(&bluetoothMenu);
   });
-  addNodes(&mainMenu, "Bad USB", TFT_RED, NULL, BAD_USB_ICO, [this]() {
+  if (a32u4_obj.supported) addNodes(&mainMenu, "Bad USB", TFT_RED, NULL, BAD_USB_ICO, [this]() {
     changeMenu(&badusbMenu);
   });
   addNodes(&mainMenu, "General Apps", TFT_MAGENTA, NULL, GENERAL_APPS, [this]() {
