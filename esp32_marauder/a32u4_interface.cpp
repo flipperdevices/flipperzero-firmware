@@ -19,16 +19,16 @@ void A32u4Interface::test() {
 }
 
 void A32u4Interface::main(uint32_t current_time) {
-/*
+
   if (current_time - this->initTime >= 1000) {
     this->initTime = millis();
-    MySerial_two.write("PING");
+    //MySerial_two.write("PING");
 
-    delay(1);
+    //delay(1);
     
     if (MySerial_two.available()) {
       Serial.println("Got A32U4 Serial data");
-      Serial.println(MySerial_two.readString());
+      Serial.println(MySerial_two.read());
     }
   }
 

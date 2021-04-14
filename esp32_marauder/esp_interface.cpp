@@ -10,9 +10,40 @@ void EspInterface::begin() {
 
   digitalWrite(ESP_ZERO, HIGH);
 
+  Serial.println("Checking for ESP8266...");
+
   MySerial.begin(BAUD, SERIAL_8N1, 27, 26);
 
-  //this->bootRunMode();
+  delay(100);
+
+  //display_obj.tft.println("Checking for ESP8266...");
+
+  this->bootRunMode();
+
+  delay(500);
+
+  while (MySerial.available())
+    MySerial.read();
+
+  MySerial.write("PING");
+
+  delay(2000);
+
+  String display_string = "";
+
+  while (MySerial.available()) {
+    display_string.concat((char)MySerial.read());
+  }
+
+  display_string.trim();
+
+  Serial.println("\nDisplay string: " + (String)display_string);
+  
+  if (display_string == "ESP8266 Pong") {
+    //display_obj.tft.println("ESP8266 Found!");
+    Serial.println("ESP8266 Found!");
+    this->supported = true;
+  }
 
   this->initTime = millis();
 }
@@ -42,7 +73,7 @@ void EspInterface::bootProgramMode() {
   digitalWrite(ESP_ZERO, HIGH);
   Serial.println("[!] Complete");
   Serial.end();
-  Serial.begin(BAUD);
+  Serial.begin(57600);
 }
 
 void EspInterface::bootRunMode() {
@@ -75,11 +106,11 @@ void EspInterface::program() {
 void EspInterface::main(uint32_t current_time) {
   if (current_time - this->initTime >= 1000) {
     this->initTime = millis();
-    MySerial.write("PING");
+    //MySerial.write("PING");
   }
   
-  if (MySerial.available()) {
-    Serial.write((uint8_t)MySerial.read());
+  while (MySerial.available()) {
+    Serial.print((char)MySerial.read());
   }
 
   if (Serial.available()) {

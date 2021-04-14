@@ -74,10 +74,6 @@ void setup()
   Serial.begin(115200);
   
   //Serial.begin(115200);
-
-  esp_obj.begin();
-
-  a32u4_obj.begin();
   
   display_obj.RunSetup();
   display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
@@ -152,7 +148,7 @@ void setup()
 
   display_obj.tft.println(F("Starting..."));
 
-  delay(1000);
+  delay(500);
 
   display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
 
@@ -166,7 +162,11 @@ void setup()
 
   digitalWrite(TFT_BL, HIGH);
 
-  delay(5000);
+  esp_obj.begin();
+  
+  a32u4_obj.begin(); // This goes last to make sure nothing is messed up when reading serial
+
+  delay(2000);
 
   menu_function_obj.RunSetup();
 }
