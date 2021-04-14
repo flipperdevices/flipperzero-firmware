@@ -2,6 +2,7 @@
 #include <api-hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <cli/cli.h>
 
 #include "irda_nec.h"
 #include "irda_samsung.h"
@@ -235,6 +236,65 @@ void init_packet(
     state->packets[index].command = command;
 }
 
+void irda_cli_cmd_rx(string_t args, void* context) {
+    printf("Reading income packets...\r\n");
+
+    return;
+}
+
+void irda_cli_cmd_tx(string_t args, void* context) {
+    furi_assert(context);
+    ValueMutex* state_mutex = context;
+    // Read protocol name
+    IrDAProtocolType protocol;
+    string_t protocol_str;
+    string_init(protocol_str);
+    size_t ws = string_search_char(args, ' ');
+    if(ws == STRING_FAILURE) {
+        printf("Incorrect input. Try ir_tx <protocol> <address> <data>\r\n");
+        string_clear(protocol_str);
+        return;
+    } else {
+        string_set_n(protocol_str, args, 0, ws);
+        string_right(args, ws);
+        string_strim(args);
+    }
+    if(!string_cmp_str(protocol_str, "NEC")) {
+        protocol = IRDA_NEC;
+    } else if(!string_cmp_str(protocol_str, "SAMSUNG")) {
+        protocol = IRDA_SAMSUNG;
+    } else {
+        printf("Incorrect input. Try tm <NEC | SAMSUNG> <address> <data>\r\n");
+        string_clear(protocol_str);
+        return;
+    }
+    string_clear(protocol_str);
+    // Read address
+    uint16_t address = strtoul(string_get_cstr(args), NULL, 16);
+    ws = string_search_char(args, ' ');
+    if(ws != 4) {
+        printf("Incorrect input\r\n");
+        return;
+    }
+    string_right(args, ws);
+    string_strim(args);
+    // Read data
+    uint16_t data = strtoul(string_get_cstr(args), NULL, 16);
+
+    State* state = (State*)acquire_mutex(state_mutex, 25);
+    if(state == NULL) {
+        printf("IRDA resources busy\r\n");
+        return;
+    }
+    if(protocol == IRDA_NEC) {
+        ir_nec_send(address, data);
+    } else if(protocol == IRDA_SAMSUNG) {
+        ir_samsung_send(address, data);
+    }
+    release_mutex(state_mutex, state);
+    return;
+}
+
 int32_t irda(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(AppEvent), NULL);
 
@@ -271,6 +331,10 @@ int32_t irda(void* p) {
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
+    Cli* cli = furi_record_open("cli");
+    cli_add_command(cli, "ir_rx", irda_cli_cmd_rx, &state_mutex);
+    cli_add_command(cli, "ir_tx", irda_cli_cmd_tx, &state_mutex);
+
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -306,6 +370,9 @@ int32_t irda(void* p) {
 
                     delete_mutex(&state_mutex);
                     osMessageQueueDelete(event_queue);
+                    cli_delete_command(cli, "ir_rx");
+                    cli_delete_command(cli, "ir_tx");
+                    furi_record_close("cli");
 
                     // exit
                     return 0;
