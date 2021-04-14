@@ -83,14 +83,13 @@ static void draw_idle_emote(SceneState* state, Canvas* canvas){
 }
 */
 
-
 void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
-    } else if(state->action == SLEEP && state->player_global.x == 154) {  // 2do - sofa x pos getter
+    } else if(state->action == SLEEP && state->player_global.x == 154) { // 2do - sofa x pos getter
         state->dolphin_gfx = A_FX_Sitting_40x27;
         state->dolphin_gfx_b = I_FX_SittingB_40x27;
     } else if(state->action != INTERACT) {
@@ -123,7 +122,6 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     canvas_set_bitmap_mode(canvas, false);
 }
 
-
 static bool item_screen_bounds(int32_t pos) {
     return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
 }
@@ -154,7 +152,7 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                 }
             }
 
-            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42); 
+            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
         }
 
         if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);

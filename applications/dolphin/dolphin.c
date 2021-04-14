@@ -13,7 +13,6 @@ dolphin_switch_to_interactive_scene(Dolphin* dolphin, const FlipperApplication* 
     furi_thread_set_stack_size(dolphin->scene_thread, flipper_app->stack_size);
     furi_thread_set_callback(dolphin->scene_thread, flipper_app->app);
     furi_thread_start(dolphin->scene_thread);
-
 }
 
 // temporary main screen animation managment

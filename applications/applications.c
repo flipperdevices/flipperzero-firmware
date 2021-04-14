@@ -237,4 +237,3 @@ const FlipperApplication FLIPPER_SCENE_APPS[] = {
 };
 
 const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);
-
