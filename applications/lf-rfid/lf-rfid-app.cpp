@@ -1,5 +1,6 @@
 #include "lf-rfid-app.h"
-#include <api-hal-power.h>
+#include <furi.h>
+#include <api-hal.h>
 #include <stdarg.h>
 
 void LfrfidApp::run(void) {
@@ -87,4 +88,38 @@ LfrfidApp::Scene LfrfidApp::get_previous_scene() {
     Scene scene = previous_scenes_list.front();
     previous_scenes_list.pop_front();
     return scene;
+}
+
+/***************************** NOTIFY *******************************/
+
+void LfrfidApp::notify_init() {
+    // TODO open record
+    const GpioPin* vibro_record = &vibro_gpio;
+    gpio_init(vibro_record, GpioModeOutputPushPull);
+    gpio_write(vibro_record, false);
+}
+
+void LfrfidApp::notify_green_blink() {
+    api_hal_light_set(LightGreen, 0xFF);
+    delay(10);
+    api_hal_light_set(LightGreen, 0x00);
+}
+
+/*************************** TEXT STORE *****************************/
+
+char* LfrfidApp::get_text_store() {
+    return text_store;
+}
+
+uint8_t LfrfidApp::get_text_store_size() {
+    return text_store_size;
+}
+
+void LfrfidApp::set_text_store(const char* text...) {
+    va_list args;
+    va_start(args, text);
+
+    vsnprintf(text_store, text_store_size, text, args);
+
+    va_end(args);
 }

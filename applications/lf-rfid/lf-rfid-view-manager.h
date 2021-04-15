@@ -2,12 +2,14 @@
 #include <furi.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/popup.h>
 #include "lf-rfid-event.h"
 
 class LfrfidAppViewManager {
 public:
     enum class ViewType : uint8_t {
         Submenu,
+        Popup,
     };
 
     osMessageQueueId_t event_queue;
@@ -21,6 +23,7 @@ public:
     void send_event(LfrfidEvent* event);
 
     Submenu* get_submenu();
+    Popup* get_popup();
 
 private:
     ViewDispatcher* view_dispatcher;
@@ -30,4 +33,5 @@ private:
 
     // view elements
     Submenu* submenu;
+    Popup* popup;
 };

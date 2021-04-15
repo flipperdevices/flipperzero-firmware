@@ -63,12 +63,41 @@ void printEM_data(uint64_t data) {
     printf("\r\n");
 }
 
+void copyEM_data(uint64_t data, uint8_t* result, uint8_t result_size) {
+    furi_assert(result_size >= 5);
+    uint8_t result_index = 0;
+
+    // clean result
+    memset(result, 0, result_size);
+
+    // header
+    for(uint8_t i = 0; i < 9; i++) {
+        data = data << 1;
+    }
+
+    // nibbles
+    uint8_t value = 0;
+    for(uint8_t r = 0; r < EM_ROW_COUNT; r++) {
+        uint8_t nibble = 0;
+        for(uint8_t i = 0; i < 5; i++) {
+            if(i < 4) nibble = (nibble << 1) | (data & (1LLU << 63) ? 1 : 0);
+            data = data << 1;
+        }
+        value = (value << 4) | nibble;
+        if(r % 2) {
+            result[result_index] |= value;
+            result_index++;
+            value = 0;
+        }
+    }
+}
+
 bool DecoderEMMarine::read(uint8_t* data, uint8_t data_size) {
     bool result = false;
-    
+
     if(ready) {
         result = true;
-        printEM_data(readed_data);
+        copyEM_data(readed_data, data, data_size);
         ready = false;
     }
 

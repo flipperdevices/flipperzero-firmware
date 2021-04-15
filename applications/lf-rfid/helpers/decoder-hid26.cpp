@@ -13,10 +13,15 @@ constexpr uint32_t max_time = (max_time_us + jitter_time_us) * clocks_in_us;
 
 bool DecoderHID26::read(uint8_t* data, uint8_t data_size) {
     bool result = false;
+    furi_assert(data_size >= 3);
 
     if(ready) {
         result = true;
-        printf("HID %02X %02X %02X\r\n", facility, (uint8_t)(number >> 8), (uint8_t)number);
+        data[0] = facility;
+        data[1] = (uint8_t)(number >> 8);
+        data[2] = (uint8_t)number;
+
+        //printf("HID %02X %02X %02X\r\n", facility, (uint8_t)(number >> 8), (uint8_t)number);
         ready = false;
     }
 

@@ -15,20 +15,30 @@ LfrfidAppViewManager::LfrfidAppViewManager() {
         static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Submenu),
         submenu_get_view(submenu));
 
+    popup = popup_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Popup),
+        popup_get_view(popup));
+
     gui = static_cast<Gui*>(furi_record_open("gui"));
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
     // set previous view callback for all views
     view_set_previous_callback(submenu_get_view(submenu), callback);
+    view_set_previous_callback(popup_get_view(popup), callback);
 }
 
 LfrfidAppViewManager::~LfrfidAppViewManager() {
     // remove views
     view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Submenu));
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Popup));
 
     // free view modules
     submenu_free(submenu);
+    popup_free(popup);
 
     // free dispatcher
     view_dispatcher_free(view_dispatcher);
@@ -43,6 +53,10 @@ void LfrfidAppViewManager::switch_to(ViewType type) {
 
 Submenu* LfrfidAppViewManager::get_submenu() {
     return submenu;
+}
+
+Popup* LfrfidAppViewManager::get_popup() {
+    return popup;
 }
 
 void LfrfidAppViewManager::receive_event(LfrfidEvent* event) {

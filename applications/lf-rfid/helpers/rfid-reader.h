@@ -3,13 +3,14 @@
 #include "decoder-emmarine.h"
 #include "decoder-hid26.h"
 #include "decoder-indala.h"
+#include "key-info.h"
 
 class RfidReader {
 public:
     RfidReader();
     void start();
     void stop();
-    bool read();
+    bool read(LfrfidKeyType* type, uint8_t* data, uint8_t data_size);
 
 private:
     friend struct RfidReaderAccessor;
@@ -22,5 +23,11 @@ private:
     uint32_t last_dwt_value;
 
     void start_comparator(void);
+    void start_timer(void);
+    void start_gpio(void);
+    void stop_comparator(void);
+    void stop_timer(void);
+    void stop_gpio(void);
+
     void decode(bool polarity);
 };

@@ -2,6 +2,7 @@
 #include <furi.h>
 #include <api-hal.h>
 #include <stm32wbxx_ll_cortex.h>
+#include <tim.h>
 
 extern COMP_HandleTypeDef hcomp1;
 
@@ -19,7 +20,7 @@ void RfidReader::decode(bool polarity) {
 
     decoder_em.process_front(polarity, current_dwt_value - last_dwt_value);
     decoder_hid26.process_front(polarity, current_dwt_value - last_dwt_value);
-    decoder_indala.process_front(polarity, current_dwt_value - last_dwt_value);
+    //decoder_indala.process_front(polarity, current_dwt_value - last_dwt_value);
     //decoder_analyzer.process_front(polarity, current_dwt_value - last_dwt_value);
 
     last_dwt_value = current_dwt_value;
@@ -39,30 +40,58 @@ RfidReader::RfidReader() {
 }
 
 void RfidReader::start() {
-    // create pin
-    GpioPin pull_pin = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
+    start_gpio();
+    start_timer();
+    start_comparator();
+}
 
-    // TODO open record
-    GpioPin* pull_pin_record = &pull_pin;
+void RfidReader::stop() {
+    stop_gpio();
+    stop_timer();
+    stop_comparator();
+}
 
-    gpio_init(&ext_pa7_gpio, GpioModeOutputPushPull);
-    gpio_init(&ext_pa6_gpio, GpioModeOutputPushPull);
+bool RfidReader::read(LfrfidKeyType* type, uint8_t* data, uint8_t data_size) {
+    bool result = false;
 
-    gpio_init(pull_pin_record, GpioModeOutputPushPull);
+    if(decoder_em.read(data, data_size)) {
+        *type = LfrfidKeyType::KeyEmarine;
+        result = true;
+    }
 
-    // pulldown iBtn pin to prevent interference from ibutton
-    gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain);
-    gpio_write(&ibutton_gpio, false);
+    if(decoder_hid26.read(data, data_size)) {
+        *type = LfrfidKeyType::KeyHID;
+        result = true;
+    }
 
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = IR_RX_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-    HAL_GPIO_Init(IR_RX_GPIO_Port, &GPIO_InitStruct);
+    //decoder_indala.read(NULL, 0);
+    //decoder_analyzer.read(NULL, 0);
 
-    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+    return result;
+}
+
+void RfidReader::start_comparator(void) {
+    api_interrupt_add(comparator_trigger_callback, InterruptTypeComparatorTrigger, this);
+    last_dwt_value = DWT->CYCCNT;
+
+    hcomp1.Init.InputMinus = COMP_INPUT_MINUS_VREFINT;
+    hcomp1.Init.InputPlus = COMP_INPUT_PLUS_IO1;
+    hcomp1.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
+    hcomp1.Init.Hysteresis = COMP_HYSTERESIS_LOW;
+    hcomp1.Init.BlankingSrce = COMP_BLANKINGSRC_NONE;
+    hcomp1.Init.Mode = COMP_POWERMODE_MEDIUMSPEED;
+    hcomp1.Init.WindowMode = COMP_WINDOWMODE_DISABLE;
+    hcomp1.Init.TriggerMode = COMP_TRIGGERMODE_IT_RISING_FALLING;
+    if(HAL_COMP_Init(&hcomp1) != HAL_OK) {
+        Error_Handler();
+    }
+
+    HAL_COMP_Start(&hcomp1);
+}
+
+void RfidReader::start_timer(void) {
+    // currently we dont use subcarrier timer and gpio
+    /*TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     TIM_OC_InitTypeDef sConfigOC = {0};
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
@@ -138,49 +167,71 @@ void RfidReader::start() {
         Error_Handler();
     }
 
-    hal_pwm_set(0.65, 125000 / 2, &IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    hal_pwm_set(0.5, 125000 / 2, &IRDA_RX_TIM, IRDA_RX_FALLING_CH);
     HAL_TIM_PWM_Stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
-    hal_pwmn_set(0.5, 125000, &LFRFID_TIM, LFRFID_CH);
-
     IRDA_RX_TIM.Instance->ARR = 1023;
-    LFRFID_TIM.Instance->ARR = 511;
+    */
 
-    /**/
-    for(uint8_t irq = WWDG_IRQn; irq <= DMAMUX1_OVR_IRQn; irq++) {
-        HAL_NVIC_SetPriority(static_cast<IRQn_Type>(irq), 10, 0);
-    }
-
-    HAL_NVIC_SetPriority(COMP_IRQn, 5, 0);
-
-    start_comparator();
+    hal_pwmn_set(0.5, 125000, &LFRFID_TIM, LFRFID_CH);
+    //LFRFID_TIM.Instance->ARR = 511;
 }
 
-void RfidReader::stop() {
+void RfidReader::start_gpio(void) {
+    // TODO open record
+    GpioPin pull_pin = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
+    GpioPin* pull_pin_record = &pull_pin;
+    gpio_init(pull_pin_record, GpioModeOutputPushPull);
+
+    // debug gpio's
+    //gpio_init(&ext_pa7_gpio, GpioModeOutputPushPull);
+    //gpio_init(&ext_pa6_gpio, GpioModeOutputPushPull);
+
+    // pulldown ibutton_gpio to prevent interference from ibutton
+    gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain);
+    gpio_write(&ibutton_gpio, false);
+
+    /*
+    // currently we dont use subcarrier timer and gpio
+    // TODO move to HAL
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = IR_RX_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+    HAL_GPIO_Init(IR_RX_GPIO_Port, &GPIO_InitStruct);
+    */
 }
 
-bool RfidReader::read() {
-    static uint8_t i = 0;
-    i++;
-
-    if(i == 5) {
-        HAL_TIM_PWM_Start(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
-    }
-
-    if(i == 10) {
-        i = 0;
-        HAL_TIM_PWM_Stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
-    }
-
-    decoder_em.read(NULL, 0);
-    decoder_hid26.read(NULL, 0);
-    decoder_indala.read(NULL, 0);
-    //decoder_analyzer.read(NULL, 0);
-
-    return false;
+void RfidReader::stop_comparator(void) {
+    HAL_COMP_Stop(&hcomp1);
+    api_interrupt_remove(comparator_trigger_callback, InterruptTypeComparatorTrigger);
 }
 
-void RfidReader::start_comparator(void) {
-    api_interrupt_add(comparator_trigger_callback, InterruptTypeComparatorTrigger, this);
-    last_dwt_value = DWT->CYCCNT;
-    HAL_COMP_Start(&hcomp1);
+void RfidReader::stop_timer(void) {
+    // reset IRDA timer
+    hal_pwm_stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    MX_TIM2_Init();
+
+    hal_pwmn_stop(&LFRFID_TIM, LFRFID_CH);
+}
+
+void RfidReader::stop_gpio(void) {
+    // TODO open record
+    GpioPin pull_pin = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
+    GpioPin* pull_pin_record = &pull_pin;
+    gpio_init(pull_pin_record, GpioModeInterruptRise);
+    gpio_init(&ibutton_gpio, GpioModeAnalog);
+
+    /*
+    // currently we dont use subcarrier timer and gpio
+    // TODO move to HAL
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin = IR_RX_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
+    HAL_GPIO_Init(IR_RX_GPIO_Port, &GPIO_InitStruct);
+    */
 }
