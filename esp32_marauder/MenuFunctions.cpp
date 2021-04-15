@@ -127,21 +127,16 @@ void MenuFunctions::writeBadUSB(){
   lv_textarea_set_text(ta1, "");
   lv_textarea_set_placeholder_text(ta1, "Ducky script");
 
-  // Create second text area
-  // Add SSIDs
-  //ta2 = lv_textarea_create(lv_scr_act(), ta1);
-  //lv_textarea_set_cursor_hidden(ta2, false);
-  //lv_textarea_set_one_line(ta2, true);
-  //lv_obj_align(ta2, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
-  //lv_textarea_set_text(ta2, "");
-  //lv_textarea_set_placeholder_text(ta2, "Add SSIDs");
-
-  // After generating text areas, add text to first text box
-  //for (int i = 0; i < ssids->size(); i++)
-  //  display_string.concat((String)ssids->get(i).essid + "\n");
-    
-  //lv_textarea_set_text(ta1, display_string.c_str());
-
+  // Create load button
+  lv_obj_t * label;
+  lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
+  lv_obj_set_event_cb(load_btn, load_btn_cb);
+  lv_obj_set_height(load_btn, 35);
+  lv_obj_set_width(load_btn, LV_HOR_RES / 3);
+  lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+  label = lv_label_create(load_btn, NULL);
+  lv_label_set_text(label, "Load");
+  
   // Focus it on one of the text areas to start
   lv_keyboard_set_textarea(kb, ta1);
   lv_keyboard_set_cursor_manage(kb, true);
@@ -225,6 +220,107 @@ void MenuFunctions::joinWiFiGFX(){
   lv_keyboard_set_textarea(kb, ta1);
   lv_keyboard_set_cursor_manage(kb, true);
   
+}
+
+void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
+  if (event == LV_EVENT_CLICKED) {
+    String btn_text = lv_list_get_btn_text(btn);
+    String display_string = "";
+    //printf("Clicked: %s\n", btn_text);
+    Serial.print("Clicked: ");
+    Serial.println(btn_text);
+
+    // Get file content and send to text area
+    if (btn_text != "Cancel") {
+      File script = SD.open(btn_text);
+
+      if (script) {
+        while (script.available()) {
+          display_string.concat((char)script.read());
+        }
+        script.close();
+
+        Serial.println(display_string);
+
+        char buf[display_string.length() + 1] = {};
+        display_string.toCharArray(buf, display_string.length() + 1);
+        
+        lv_textarea_set_text(ta1, buf);
+      }
+    }
+
+    lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+  }
+}
+
+void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
+  extern SDInterface sd_obj;
+  
+  if (event == LV_EVENT_CLICKED)
+    Serial.println("Load button pressed");
+  else if (event == LV_EVENT_RELEASED) {
+    Serial.println("Load button released");
+    /*Create a list*/
+    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+    lv_obj_set_size(list1, 160, 200);
+    lv_obj_set_width(list1, LV_HOR_RES);
+    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+    //lv_list_set_anim_time(list1, 0);
+
+    // Load file names into buttons
+    File scripts = SD.open("/SCRIPTS");
+
+    /*Add buttons to the list*/
+    lv_obj_t * list_btn;
+
+    while (true) {
+      File entity = scripts.openNextFile();
+
+      if (!entity)
+        break;
+
+      if (!entity.isDirectory()) {
+        String file_name = entity.name();
+
+        // Fancy button text time
+        char buf[file_name.length() + 1] = {};
+        file_name.toCharArray(buf, file_name.length() + 1);
+        
+        list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
+        lv_obj_set_event_cb(list_btn, test_btn_cb);
+      }
+
+      entity.close();
+    }
+
+    scripts.close();
+
+    /*
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, "New");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_DIRECTORY, "Open");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Delete");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_EDIT, "Edit");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_SAVE, "Save");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_BELL, "Notify");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_BATTERY_FULL, "Battery");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+    */
+
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
+    lv_obj_set_event_cb(list_btn, test_btn_cb);
+  }
 }
 
 void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {

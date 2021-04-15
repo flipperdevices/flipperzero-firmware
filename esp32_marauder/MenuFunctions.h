@@ -88,6 +88,8 @@ PROGMEM static void ta_event_cb(lv_obj_t * ta, lv_event_t event);
 PROGMEM static void join_wifi_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
+PROGMEM static void load_btn_cb(lv_obj_t * load_btn, lv_event_t event);
+PROGMEM static void test_btn_cb(lv_obj_t * load_btn, lv_event_t event);
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
