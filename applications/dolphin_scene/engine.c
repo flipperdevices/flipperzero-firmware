@@ -33,7 +33,7 @@ void scene_alloc() {
     scene_app_gui->timer =
         osTimerNew(dolphin_engine_tick_callback, osTimerPeriodic, scene_app_gui->mqueue, NULL);
     printf("scene_alloc: timer %p\r\n", scene_app_gui->timer);
-    // Scene State 
+    // Scene State
     SceneState* scene_state = furi_alloc(sizeof(SceneState));
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
@@ -45,8 +45,7 @@ void scene_alloc() {
     furi_check(init_mutex(scene_state_mutex, scene_state, sizeof(SceneState)));
 
     // Open GUI and register fullscreen view_port
-    view_port_draw_callback_set(
-        scene_app_gui->view_port, dolphin_scene_redraw, scene_state_mutex);
+    view_port_draw_callback_set(scene_app_gui->view_port, dolphin_scene_redraw, scene_state_mutex);
     view_port_input_callback_set(
         scene_app_gui->view_port, dolphin_engine_input_callback, scene_app_gui->mqueue);
     gui_add_view_port(scene_app_gui->gui, scene_app_gui->view_port, GuiLayerMain);
@@ -64,13 +63,15 @@ void scene_free() {
     free(scene_state);
     release_mutex(scene_state_mutex, scene_state);
     delete_mutex(scene_state_mutex);
-    free(scene_state_mutex); scene_state_mutex = NULL;
+    free(scene_state_mutex);
+    scene_state_mutex = NULL;
 
     furi_check(osTimerDelete(scene_app_gui->timer) == osOK);
     furi_record_close("gui");
     view_port_free(scene_app_gui->view_port);
     furi_check(osMessageQueueDelete(scene_app_gui->mqueue) == osOK);
-    free(scene_app_gui); scene_app_gui = NULL;
+    free(scene_app_gui);
+    scene_app_gui = NULL;
     printf("scene_free: complete\r\n");
 }
 
