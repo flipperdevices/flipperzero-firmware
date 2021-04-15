@@ -34,6 +34,7 @@ void canvas_free(Canvas* canvas) {
 
 void canvas_reset(Canvas* canvas) {
     furi_assert(canvas);
+    canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
 }
@@ -248,4 +249,8 @@ void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawGlyph(&canvas->fb, x, y, ch);
+}
+
+void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {
+    u8g2_SetBitmapMode(&canvas->fb, alpha ? 1 : 0);
 }

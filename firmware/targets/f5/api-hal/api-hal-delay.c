@@ -1,10 +1,11 @@
 #include "api-hal-delay.h"
-#include "assert.h"
-#include "cmsis_os2.h"
+
+#include <furi.h>
+#include <cmsis_os2.h>
 
 static uint32_t clk_per_microsecond;
 
-void delay_us_init_DWT(void) {
+void api_hal_delay_init(void) {
     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
     DWT->CYCCNT = 0U;
@@ -23,5 +24,6 @@ void delay_us(float microseconds) {
 void delay(float milliseconds) {
     uint32_t ticks = milliseconds / (1000.0f / osKernelGetTickFreq());
     osStatus_t result = osDelay(ticks);
-    assert(result == osOK);
+    (void)result;
+    furi_assert(result == osOK);
 }

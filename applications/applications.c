@@ -16,7 +16,6 @@ int32_t gui_task(void* p);
 int32_t backlight_control(void* p);
 int32_t irda(void* p);
 int32_t app_loader(void* p);
-int32_t cc1101_workaround(void* p);
 int32_t app_lfrfid(void* p);
 int32_t nfc_task(void* p);
 int32_t dolphin_task(void* p);
@@ -31,13 +30,15 @@ int32_t music_player(void* p);
 int32_t sdnfc(void* p);
 int32_t floopper_bloopper(void* p);
 int32_t sd_filesystem(void* p);
-int32_t app_subghz(void* p);
+int32_t subghz_app(void* p);
 int32_t gui_test(void* p);
 int32_t keypad_test(void* p);
+int32_t dolphin_scene(void* p);
+int32_t passport(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
-    {.app = cli_task, .name = "cli_task", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = cli_task, .name = "cli_task", .stack_size = 2048, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_EXAMPLE_BLINK
@@ -67,7 +68,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef APP_SD_FILESYSTEM
-    {.app = sd_filesystem, .name = "sd_filesystem", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = sd_filesystem, .name = "sd_filesystem", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_DOLPHIN
@@ -82,15 +83,8 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = bt_task, .name = "bt_task", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_CC1101
-    {.app = cc1101_workaround,
-     .name = "cc1101 workaround",
-     .stack_size = 1024,
-     .icon = A_Plugins_14},
-#endif
-
 #ifdef APP_LF_RFID
-    {.app = app_lfrfid, .name = "lf rfid workaround", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = app_lfrfid, .name = "lf rfid", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
 #ifdef APP_IRDA
@@ -148,21 +142,22 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = gui_test, .name = "gui_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_SUBGHZ
-    {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
 #ifdef APP_KEYPAD_TEST
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_DOLPHIN_SCENE
+    {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
+#endif
+
 };
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
 
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
-#ifdef BUILD_CC1101
-    {.app = cc1101_workaround, .name = "Sub-1 GHz", .stack_size = 1024, .icon = A_Sub1ghz_14},
+#ifdef BUILD_SUBGHZ
+    {.app = subghz_app, .name = "Sub-1 GHz", .stack_size = 1024, .icon = A_Sub1ghz_14},
 #endif
 
 #ifdef BUILD_LF_RFID
@@ -174,7 +169,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef BUILD_IBUTTON
-    {.app = app_ibutton, .name = "iButton", .stack_size = 1024, .icon = A_iButton_14},
+    {.app = app_ibutton, .name = "iButton", .stack_size = 4096, .icon = A_iButton_14},
 #endif
 
 #ifdef BUILD_GPIO_DEMO
@@ -225,10 +220,6 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = gui_test, .name = "gui_test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef BUILD_SUBGHZ
-    {.app = app_subghz, .name = "app_subghz", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
 #ifdef BUILD_KEYPAD_TEST
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
@@ -236,3 +227,17 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
+
+#ifdef BUILD_DOLPHIN_SCENE
+const FlipperApplication FLIPPER_SCENES =
+    {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14};
+
+const FlipperApplication FLIPPER_SCENE_APPS[] = {
+    {.app = passport, .name = "Passport", .stack_size = 1024, .icon = A_Games_14},
+    {.app = music_player, .name = "Music player", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
+};
+
+const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);
+
+#endif

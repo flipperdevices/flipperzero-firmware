@@ -23,11 +23,13 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 
-int main(void)
-{
+int main(void) {
+    // Initialize FURI layer
+    furi_init();
+
+    // Initialize ST HAL hardware
     HAL_Init();
     SystemClock_Config();
-
     MX_GPIO_Init();
     MX_ADC1_Init();
     MX_RTC_Init();
@@ -46,11 +48,12 @@ int main(void)
     MX_AES2_Init();
     MX_CRC_Init();
 
+    // Flipper API HAL
     api_hal_init();
-    MX_FATFS_Init();
-    delay_us_init_DWT();
 
-    furi_init();
+    // 3rd party
+    MX_FATFS_Init();
+
     // CMSIS initialization
     osKernelInitialize();
     // Init flipper

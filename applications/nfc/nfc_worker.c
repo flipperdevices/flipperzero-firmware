@@ -84,7 +84,7 @@ void nfc_worker_poll(NfcWorker* nfc_worker, uint8_t cycles) {
         is_found |= nfc_worker_nfcf_poll(nfc_worker);
         is_found |= nfc_worker_nfcv_poll(nfc_worker);
         rfalFieldOff();
-        cycles--;
+        if(cycles > 0) cycles--;
         if((!is_found) && (!cycles)) {
             NfcMessage message;
             message.type = NfcMessageTypeDeviceNotFound;
@@ -244,7 +244,7 @@ ReturnCode nfc_worker_trx(
 }
 
 void nfc_worker_exchange(NfcWorker* nfc_worker, rfalNfcDevice* nfc_device) {
-    ReturnCode err;
+    ReturnCode err = ERR_NONE;
     uint8_t* rxData;
     uint16_t* rcvLen;
     uint8_t txBuf[100];

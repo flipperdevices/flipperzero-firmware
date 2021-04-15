@@ -37,6 +37,11 @@ uint8_t icon_get_height(Icon* icon);
 bool icon_is_animated(Icon* icon);
 
 /*
+ * Check if icon animation is active
+ */
+bool icon_is_animating(Icon* icon);
+
+/*
  * Start icon animation
  */
 void icon_start_animation(Icon* icon);
@@ -45,6 +50,16 @@ void icon_start_animation(Icon* icon);
  * Stop icon animation
  */
 void icon_stop_animation(Icon* icon);
+
+/*
+ * Get current frame
+ */
+uint8_t icon_get_current_frame(Icon* icon);
+
+/*
+ * Returns true if current frame is a last one
+ */
+bool icon_is_last_frame(Icon* icon);
 
 #ifdef __cplusplus
 }

@@ -34,19 +34,18 @@ struct Power {
 };
 
 void power_draw_usb_callback(Canvas* canvas, void* context) {
-    assert(context);
+    furi_assert(context);
     Power* power = context;
     canvas_draw_icon(canvas, 0, 0, power->usb_icon);
 }
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
-    assert(context);
+    furi_assert(context);
     Power* power = context;
-
     canvas_draw_icon(canvas, 0, 0, power->battery_icon);
     with_view_model(
         power->info_view, (PowerInfoModel * model) {
-            canvas_draw_box(canvas, 2, 2, (float)model->charge / 100 * 14, 4);
+            canvas_draw_box(canvas, 2, 2, (float)model->charge / 100 * 20, 4);
             return false;
         });
 }
@@ -130,16 +129,16 @@ Power* power_alloc() {
     view_port_set_width(power->usb_view_port, icon_get_width(power->usb_icon));
     view_port_draw_callback_set(power->usb_view_port, power_draw_usb_callback, power);
 
-    power->battery_icon = assets_icons_get(I_Battery_19x8);
+    power->battery_icon = assets_icons_get(I_Battery_26x8);
     power->battery_view_port = view_port_alloc();
+
     view_port_set_width(power->battery_view_port, icon_get_width(power->battery_icon));
     view_port_draw_callback_set(power->battery_view_port, power_draw_battery_callback, power);
-
     return power;
 }
 
 void power_free(Power* power) {
-    assert(power);
+    furi_assert(power);
     free(power);
 }
 
@@ -157,11 +156,7 @@ void power_cli_dfu(string_t args, void* context) {
 }
 
 void power_cli_test(string_t args, void* context) {
-    string_t buffer;
-    string_init(buffer);
-    api_hal_power_dump_state(buffer);
-    printf(string_get_cstr(buffer));
-    string_clear(buffer);
+    api_hal_power_dump_state();
 }
 
 void power_cli_otg_on(string_t args, void* context) {

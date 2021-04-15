@@ -33,16 +33,31 @@ struct Dolphin {
     DolphinState* state;
     // Menu
     ValueMutex* menu_vm;
+    // Scene
+    FuriThread* scene_thread;
     // GUI
+    Gui* gui;
     ViewDispatcher* idle_view_dispatcher;
     View* idle_view_first_start;
     View* idle_view_main;
     View* idle_view_up;
     View* idle_view_down;
+    View* idle_view_meta;
     View* view_hw_mismatch;
+    View* view_lockmenu;
+    ViewPort* lock_viewport;
+    Icon* lock_icon;
+
+    bool locked;
+    uint8_t lock_count;
 };
 
+// Temporary
+const IconName idle_scenes[] = {A_Wink_128x64, A_WatchingTV_128x64};
+
 Dolphin* dolphin_alloc();
+
+void dolphin_free(Dolphin* dolphin);
 
 /* Save Dolphin state (write to permanent memory)
  * Thread safe
