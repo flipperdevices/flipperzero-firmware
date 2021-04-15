@@ -65,7 +65,7 @@ void printEM_data(uint64_t data) {
 
 bool DecoderEMMarine::read(uint8_t* data, uint8_t data_size) {
     bool result = false;
-
+    
     if(ready) {
         result = true;
         printEM_data(readed_data);
