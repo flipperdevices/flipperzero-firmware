@@ -3,7 +3,7 @@
 
 constexpr uint32_t clocks_in_us = 64;
 
-constexpr uint32_t jitter_time_us = 10;
+constexpr uint32_t jitter_time_us = 20;
 constexpr uint32_t min_time_us = 64;
 constexpr uint32_t max_time_us = 80;
 
@@ -58,11 +58,11 @@ void DecoderHID26::process_front(bool polarity, uint32_t time) {
                 }
             } else {
                 if(last_pulse) {
-                    if(pulse_count > 3) {
+                    if(pulse_count > 2) {
                         store_data(1);
                     }
                 } else {
-                    if(pulse_count > 4) {
+                    if(pulse_count > 3) {
                         store_data(0);
                     }
                 }
