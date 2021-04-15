@@ -70,13 +70,10 @@ typedef struct {
 } Vec2;
 
 typedef struct {
+    osMessageQueueId_t mqueue;
     Gui* gui;
     ViewPort* view_port;
-    ValueMutex* vm;
     osTimerId_t* timer;
-    osMessageQueueId_t mqueue;
-    FuriThread* scene_app_thread;
-
 } SceneAppGui;
 
 typedef struct {
@@ -91,7 +88,6 @@ typedef struct {
 } Item;
 
 typedef struct {
-    SceneAppGui ui;
     ///
     Vec2 player;
     Vec2 player_global;
@@ -125,6 +121,8 @@ typedef struct {
     int8_t zoom_v;
     uint8_t scene_zoom;
     uint8_t dialog_progress;
+
+    FuriThread* scene_app_thread;
 } SceneState;
 
 void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t);

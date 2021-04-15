@@ -1,4 +1,4 @@
-#include "items_i.h"
+#include "dolphin_scene/items_i.h"
 #include <gui/elements.h>
 #include "applications.h"
 
@@ -43,7 +43,6 @@ const Item PC = {
     .callback = pc_callback};
 
 const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
-
 const Item** Scenes[1] = {*&Home};
 
 const Item** get_scene(SceneState* state) {
@@ -54,15 +53,15 @@ static void dolphin_scene_start_app(SceneState* state, const FlipperApplication*
     furi_assert(state);
     furi_assert(flipper_app);
 
-    state->ui.scene_app_thread = furi_thread_alloc();
+    state->scene_app_thread = furi_thread_alloc();
 
     furi_assert(flipper_app->app);
     furi_assert(flipper_app->name);
 
-    furi_thread_set_name(state->ui.scene_app_thread, flipper_app->name);
-    furi_thread_set_stack_size(state->ui.scene_app_thread, flipper_app->stack_size);
-    furi_thread_set_callback(state->ui.scene_app_thread, flipper_app->app);
-    furi_thread_start(state->ui.scene_app_thread);
+    furi_thread_set_name(state->scene_app_thread, flipper_app->name);
+    furi_thread_set_stack_size(state->scene_app_thread, flipper_app->stack_size);
+    furi_thread_set_callback(state->scene_app_thread, flipper_app->app);
+    furi_thread_start(state->scene_app_thread);
 }
 
 const void activate_item_callback(SceneState* state, Canvas* canvas) {
@@ -110,7 +109,7 @@ void draw_tv(Canvas* canvas, void* state) {
 void smash_tv(Canvas* canvas, void* state) {
     furi_assert(state);
     SceneState* s = state;
-    s->player_flipped = !s->player_flipped;
+    s->player_flipped = true;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
         canvas, ((TV.x - 5) - s->player_global.x) * PARALLAX(TV.layer), TV.y - 2, I_FX_Bang_32x6);
