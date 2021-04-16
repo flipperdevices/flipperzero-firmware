@@ -94,6 +94,7 @@ PROGMEM static void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t ev
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
+PROGMEM static lv_obj_t * save_as_kb;
 
 struct Menu;
 

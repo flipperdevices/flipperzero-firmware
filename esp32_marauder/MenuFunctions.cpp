@@ -235,9 +235,54 @@ void MenuFunctions::joinWiFiGFX(){
 
 // Function to create keyboard for saving file name
 void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
-  if(event == LV_EVENT_APPLY){
+  extern MenuFunctions menu_function_obj;
+
+  lv_keyboard_def_event_cb(save_as_kb, event);
+
+  // User canceled so we will get rid of the keyboard and text box
+  if (event == LV_EVENT_CANCEL) {
+    lv_obj_del_async(save_as_kb);
+    lv_obj_del_async(save_name);
+  }
+
+  // Save content from ta1 to file name in save_name
+  else if(event == LV_EVENT_APPLY){
       String display_string = "";
       printf("LV_EVENT_APPLY\n");
+
+      // Get ducky script
+      String content = lv_textarea_get_text(ta1);
+
+      String target_file_name = "/SCRIPTS/" + (String)lv_textarea_get_text(save_name);
+
+      Serial.println("Writing to target file: " + (String)target_file_name);
+
+      // Open file with the given name
+      File script = SD.open(target_file_name, FILE_WRITE);
+
+      if (script) {
+        menu_function_obj.loaded_file = target_file_name;
+
+        Serial.println("Writing content: ");
+        Serial.println(content);
+
+        script.print(content);
+
+        script.close();
+      }
+
+      lv_obj_del_async(save_as_kb);
+      lv_obj_del_async(save_name);
+
+      // Create Save button
+      lv_obj_t * save_label;
+      lv_obj_t * save_btn = lv_btn_create(lv_scr_act(), NULL);
+      lv_obj_set_event_cb(save_btn, load_btn_cb);
+      lv_obj_set_height(save_btn, 35);
+      lv_obj_set_width(save_btn, LV_HOR_RES / 3);
+      lv_obj_align(save_btn, ta1, LV_ALIGN_IN_TOP_LEFT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+      save_label = lv_label_create(save_btn, NULL);
+      lv_label_set_text(save_label, "Save");
   }
 }
 
@@ -353,7 +398,7 @@ void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
       lv_textarea_set_placeholder_text(save_name, "File Name");
 
       // Create a keyboard and apply the styles
-      lv_obj_t * save_as_kb = lv_keyboard_create(lv_scr_act(), NULL);
+      save_as_kb = lv_keyboard_create(lv_scr_act(), NULL);
       lv_obj_set_size(save_as_kb, LV_HOR_RES, LV_VER_RES / 2);
       lv_obj_set_event_cb(save_as_kb, save_as_keyboard_event_cb);
 
