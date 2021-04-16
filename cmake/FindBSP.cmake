@@ -263,6 +263,10 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
     string(TOLOWER ${FAMILY} FAMILY_L)
     
     if(NOT STM32_CUBE_${FAMILY}_PATH)
+        set(STM32_CUBE_${FAMILY}_PATH $ENV{STM32_CUBE_${FAMILY}_PATH} CACHE PATH "Path to STM32Cube${FAMILY}")
+    endif()
+
+    if(NOT STM32_CUBE_${FAMILY}_PATH)
         set(STM32_CUBE_${FAMILY}_PATH /opt/STM32Cube${FAMILY} CACHE PATH "Path to STM32Cube${FAMILY}")
         message(STATUS "No STM32_CUBE_${FAMILY}_PATH specified using default: ${STM32_CUBE_${FAMILY}_PATH}")
     endif()
