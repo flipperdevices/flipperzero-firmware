@@ -1,3 +1,5 @@
+set(CMSIS_RTOS RTOS RTOS_V2)
+
 if(NOT CMSIS_FIND_COMPONENTS)
     set(CMSIS_FIND_COMPONENTS ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endif()
@@ -6,6 +8,32 @@ if(STM32H7 IN_LIST CMSIS_FIND_COMPONENTS)
     list(APPEND CMSIS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
 endif()
 list(REMOVE_DUPLICATES CMSIS_FIND_COMPONENTS)
+
+foreach(COMP ${CMSIS_FIND_COMPONENTS})
+    string(TOLOWER ${COMP} COMP_L)
+    string(TOUPPER ${COMP} COMP)
+
+    if(${COMP} IN_LIST CMSIS_RTOS)
+        list(APPEND CMSIS_FIND_COMPONENTS_RTOS ${COMP})
+        continue()
+    endif()
+
+    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
+    if(CMAKE_MATCH_1)
+        list(APPEND CMSIS_FIND_COMPONENTS_FAMILIES ${COMP})
+    endif()
+endforeach()
+
+if(NOT CMSIS_FIND_COMPONENTS_FAMILIES)
+    set(CMSIS_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
+endif()
+
+if(NOT CMSIS_FIND_COMPONENTS_RTOS)
+    set(CMSIS_FIND_COMPONENTS_RTOS ${CMSIS_RTOS})
+endif()
+
+message(STATUS "Search for CMSIS families: ${CMSIS_FIND_COMPONENTS_FAMILIES}")
+message(STATUS "Search for CMSIS RTOS: ${CMSIS_FIND_COMPONENTS_RTOS}")
 
 include(stm32/devices)
 
@@ -41,7 +69,7 @@ function(cmsis_generate_default_linker_script FAMILY DEVICE CORE)
     stm32_add_linker_script(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE "${OUTPUT_LD_FILE}")
 endfunction() 
 
-foreach(COMP ${CMSIS_FIND_COMPONENTS})
+foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP)
     
@@ -176,6 +204,44 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     else()
        set(CMSIS_${COMP}_FOUND FALSE)
     endif()
+
+    foreach(RTOS_COMP ${CMSIS_FIND_COMPONENTS_RTOS})
+        if (${RTOS_COMP} STREQUAL "RTOS_V2")
+            set(RTOS_COMP_VERSION "2")
+        else()
+            unset(RTOS_COMP_VERSION)
+        endif()
+
+        find_path(CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_PATH
+            NAMES "cmsis_os${RTOS_COMP_VERSION}.h"
+            PATHS "${STM32_CUBE_${FAMILY}_PATH}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_${RTOS_COMP}"
+            NO_DEFAULT_PATH
+        )
+        if (NOT CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_PATH)
+            continue()
+        endif()
+
+        find_file(CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_SOURCE
+            NAMES "cmsis_os${RTOS_COMP_VERSION}.c"
+            PATHS "${STM32_CUBE_${FAMILY}_PATH}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_${RTOS_COMP}"
+            NO_DEFAULT_PATH
+        )
+        if (NOT CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_SOURCE)
+            continue()
+        endif()
+
+        if(NOT (TARGET CMSIS::STM32::${FAMILY}${CORE_C}::${RTOS_COMP}))
+            add_library(CMSIS::STM32::${FAMILY}${CORE_C}::${RTOS_COMP} INTERFACE IMPORTED)
+            target_link_libraries(CMSIS::STM32::${FAMILY}${CORE_C}::${RTOS_COMP} INTERFACE CMSIS::STM32::${FAMILY}${CORE_C})
+            target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C}::${RTOS_COMP} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_PATH}")
+            target_sources(CMSIS::STM32::${FAMILY}${CORE_C}::${RTOS_COMP} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_SOURCE}")
+        endif()
+
+        list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_SOURCE}")
+        list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_${RTOS_COMP}_PATH}")
+        set(CMSIS_${RTOS_COMP}_FOUND TRUE)
+    endforeach()
+
     list(REMOVE_DUPLICATES CMSIS_INCLUDE_DIRS)
     list(REMOVE_DUPLICATES CMSIS_SOURCES)
 endforeach()
