@@ -90,6 +90,7 @@ PROGMEM static void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t e
 PROGMEM static void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void load_btn_cb(lv_obj_t * load_btn, lv_event_t event);
 PROGMEM static void test_btn_cb(lv_obj_t * load_btn, lv_event_t event);
+PROGMEM static void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
 PROGMEM static lv_obj_t *kb;
@@ -179,6 +180,8 @@ class MenuFunctions
 
     uint16_t x = -1, y = -1;
     boolean pressed = false;
+
+    String loaded_file = "";
 
     void initLVGL();
     void deinitLVGL();

@@ -5,6 +5,7 @@ extern const unsigned char menu_icons[][66];
 PROGMEM lv_obj_t * slider_label;
 PROGMEM lv_obj_t * ta1;
 PROGMEM lv_obj_t * ta2;
+PROGMEM lv_obj_t * save_name;
 
 MenuFunctions::MenuFunctions()
 {
@@ -136,6 +137,16 @@ void MenuFunctions::writeBadUSB(){
   lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
   label = lv_label_create(load_btn, NULL);
   lv_label_set_text(label, "Load");
+
+  // Create Save As button
+  lv_obj_t * label2;
+  lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
+  lv_obj_set_event_cb(save_as_btn, load_btn_cb);
+  lv_obj_set_height(save_as_btn, 35);
+  lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
+  lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
+  label2 = lv_label_create(save_as_btn, NULL);
+  lv_label_set_text(label2, "Save As");
   
   // Focus it on one of the text areas to start
   lv_keyboard_set_textarea(kb, ta1);
@@ -222,7 +233,18 @@ void MenuFunctions::joinWiFiGFX(){
   
 }
 
+// Function to create keyboard for saving file name
+void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event) {
+  if(event == LV_EVENT_APPLY){
+      String display_string = "";
+      printf("LV_EVENT_APPLY\n");
+  }
+}
+
+
 void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
+  extern MenuFunctions menu_function_obj;
+  
   if (event == LV_EVENT_CLICKED) {
     String btn_text = lv_list_get_btn_text(btn);
     String display_string = "";
@@ -249,77 +271,119 @@ void test_btn_cb(lv_obj_t * btn, lv_event_t event) {
       }
     }
 
+    // Delete the file list obj
     lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+    menu_function_obj.loaded_file = btn_text;
+
+    // Create Save button
+    lv_obj_t * save_label;
+    lv_obj_t * save_btn = lv_btn_create(lv_scr_act(), NULL);
+    lv_obj_set_event_cb(save_btn, load_btn_cb);
+    lv_obj_set_height(save_btn, 35);
+    lv_obj_set_width(save_btn, LV_HOR_RES / 3);
+    lv_obj_align(save_btn, ta1, LV_ALIGN_IN_TOP_LEFT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+    save_label = lv_label_create(save_btn, NULL);
+    lv_label_set_text(save_label, "Save");
   }
 }
 
 void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
   extern SDInterface sd_obj;
+  extern MenuFunctions menu_function_obj;
+
+  String btn_text = lv_list_get_btn_text(load_btn);
+
+  if (btn_text == "Load") {
+    if (event == LV_EVENT_CLICKED)
+      Serial.println("Load button pressed");
+    else if (event == LV_EVENT_RELEASED) {
+      Serial.println("Load button released");
+      /*Create a list*/
+      lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+      lv_obj_set_size(list1, 160, 200);
+      lv_obj_set_width(list1, LV_HOR_RES);
+      lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+      //lv_list_set_anim_time(list1, 0);
   
-  if (event == LV_EVENT_CLICKED)
-    Serial.println("Load button pressed");
-  else if (event == LV_EVENT_RELEASED) {
-    Serial.println("Load button released");
-    /*Create a list*/
-    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
-    lv_obj_set_size(list1, 160, 200);
-    lv_obj_set_width(list1, LV_HOR_RES);
-    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
-    //lv_list_set_anim_time(list1, 0);
-
-    // Load file names into buttons
-    File scripts = SD.open("/SCRIPTS");
-
-    /*Add buttons to the list*/
-    lv_obj_t * list_btn;
-
-    while (true) {
-      File entity = scripts.openNextFile();
-
-      if (!entity)
-        break;
-
-      if (!entity.isDirectory()) {
-        String file_name = entity.name();
-
-        // Fancy button text time
-        char buf[file_name.length() + 1] = {};
-        file_name.toCharArray(buf, file_name.length() + 1);
-        
-        list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
-        lv_obj_set_event_cb(list_btn, test_btn_cb);
+      // Load file names into buttons
+      File scripts = SD.open("/SCRIPTS");
+  
+      // Build list of files from the SD card
+      lv_obj_t * list_btn;
+  
+      while (true) {
+        File entity = scripts.openNextFile();
+  
+        if (!entity)
+          break;
+  
+        if (!entity.isDirectory()) {
+          String file_name = entity.name();
+  
+          // Fancy button text time
+          char buf[file_name.length() + 1] = {};
+          file_name.toCharArray(buf, file_name.length() + 1);
+          
+          list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, buf);
+          lv_obj_set_event_cb(list_btn, test_btn_cb);
+        }
+  
+        entity.close();
       }
-
-      entity.close();
+  
+      scripts.close();
+  
+      list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
+      lv_obj_set_event_cb(list_btn, test_btn_cb);
     }
+  }
 
-    scripts.close();
+  // Save current text bod content to new file
+  else if (btn_text == "Save As") {
+    if (event == LV_EVENT_CLICKED)
+      Serial.println("Save button pressed");
+    else if (event == LV_EVENT_RELEASED) {
+      Serial.println("Save button released");
 
-    /*
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_FILE, "New");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+      save_name = lv_textarea_create(lv_scr_act(), ta2);
+      lv_textarea_set_cursor_hidden(save_name, false);
+      lv_textarea_set_one_line(save_name, true);
+      lv_obj_align(save_name, NULL, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35);
+      lv_textarea_set_text(save_name, "");
+      lv_textarea_set_placeholder_text(save_name, "File Name");
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_DIRECTORY, "Open");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+      // Create a keyboard and apply the styles
+      lv_obj_t * save_as_kb = lv_keyboard_create(lv_scr_act(), NULL);
+      lv_obj_set_size(save_as_kb, LV_HOR_RES, LV_VER_RES / 2);
+      lv_obj_set_event_cb(save_as_kb, save_as_keyboard_event_cb);
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Delete");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+      lv_keyboard_set_textarea(save_as_kb, save_name);
+      lv_keyboard_set_cursor_manage(save_as_kb, true);
+    }
+  }
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_EDIT, "Edit");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+  // Save current text box content to current loaded file
+  else if (btn_text == "Save") {
+    if (event == LV_EVENT_CLICKED)
+      Serial.println("Save button pressed");
+    else if (event == LV_EVENT_RELEASED) {
+      Serial.println("Save button released");
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_SAVE, "Save");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+      Serial.println("Writing to file: " + (String)menu_function_obj.loaded_file);
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_BELL, "Notify");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+      File script = SD.open(menu_function_obj.loaded_file, FILE_WRITE);
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_BATTERY_FULL, "Battery");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
-    */
+      // Write data to file
+      if (script) {
+        String content = lv_textarea_get_text(ta1);
 
-    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
-    lv_obj_set_event_cb(list_btn, test_btn_cb);
+        Serial.println("Writing content:");
+        Serial.println(content);
+        Serial.println("to file: " + (String)menu_function_obj.loaded_file);
+        script.print(lv_textarea_get_text(ta1));
+        script.close();
+      }
+    }
   }
 }
 
