@@ -29,6 +29,10 @@ typedef struct {
 } DolphinViewIdleUpModel;
 
 typedef struct {
+    bool fw_boot;
+} DolphinViewIdleDownModel;
+
+typedef struct {
     uint8_t idx;
 } DolphinViewMenuModel;
 

@@ -3,6 +3,7 @@
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <api-hal.h>
+#include <version.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
 
@@ -92,19 +93,36 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
 }
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
+    DolphinViewIdleDownModel* m = model;
+    const Version *ver = 0;
+    char buffer[64];
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 15, "Version info:");
+    canvas_draw_str(canvas, 2, 15, m->fw_boot ? "Boot Version info:" : "FW Version info:");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 25, TARGET " " BUILD_DATE);
-    canvas_draw_str(canvas, 5, 35, GIT_BRANCH);
-    canvas_draw_str(canvas, 5, 45, GIT_BRANCH_NUM " " GIT_COMMIT);
 
-    char buffer[64];
+    if (m->fw_boot) {
+        ver = (const Version *) api_hal_boot_version_address_get();
+    }
+
+    snprintf(buffer, sizeof(buffer), "%s %s %s",
+        version_get_version(ver),
+        version_get_target(ver),
+        version_get_builddate(ver));
+    canvas_draw_str(canvas, 5, 25, buffer);
+
+    snprintf(buffer, sizeof(buffer), "%s", version_get_gitbranch(ver));
+    canvas_draw_str(canvas, 5, 35, buffer);
+
+    snprintf(buffer, sizeof(buffer), "%s %s",
+        version_get_gitbranchnum(ver),
+        version_get_githash(ver));
+    canvas_draw_str(canvas, 5, 45, buffer);
+
     snprintf(
         buffer,
-        64,
+        sizeof(buffer),
         "HW: %d.F%dB%dC%d",
         api_hal_version_get_hw_version(),
         api_hal_version_get_hw_target(),

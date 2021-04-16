@@ -54,19 +54,23 @@ void cli_print_version() {
 #if NO_BOOTLOADER
     printf("[boot] No version info\n");
 #else
-    const Version *boot_version_adr = api_hal_boot_version_address_get();
-    printf("[boot] Version: %s\n", version_get_version(boot_version_adr));
-    printf("       Build date: %s\n", version_get_builddate(boot_version_adr));
-    printf("       Git Commit: %s\n", version_get_githash(boot_version_adr));
-    printf("       Git Branch: %s\n", version_get_gitbranch(boot_version_adr));
-    printf("       Commit Number: %s\n", version_get_gitbranchnum(boot_version_adr));
+    const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
+    printf("[boot] boot_version_adr: %lu\r\n", (uint32_t) boot_version_adr);
+    printf("[boot] Version adr: %lu\r\n", (uint32_t) version_get_version(boot_version_adr));
+    printf("[boot] Version: %s\r\n", version_get_version(boot_version_adr));
+    printf("       Build date: %s\r\n", version_get_builddate(boot_version_adr));
+    printf("       Git Commit: %s\r\n", version_get_githash(boot_version_adr));
+    printf("       Git Branch: %s\r\n", version_get_gitbranch(boot_version_adr));
+    printf("       Commit Number: %s\r\n", version_get_gitbranchnum(boot_version_adr));
 #endif
 
-    printf("[flipper] Version: %s\n", version_get_version(0));
-    printf("          Build date: %s\n", version_get_builddate(0));
-    printf("          Git Commit: %s\n", version_get_githash(0));
-    printf("          Git Branch: %s\n", version_get_gitbranch(0));
-    printf("          Commit Number: %s\n", version_get_gitbranchnum(0));
+    printf("[flipper] fw_version_adr: %lu\r\n", (uint32_t) version_get());
+    printf("[flipper] Version adr: %lu\r\n", (uint32_t) version_get_version(boot_version_adr));
+    printf("[flipper] Version: %s\r\n", version_get_version(0));
+    printf("          Build date: %s\r\n", version_get_builddate(0));
+    printf("          Git Commit: %s\r\n", version_get_githash(0));
+    printf("          Git Branch: %s\r\n", version_get_gitbranch(0));
+    printf("          Commit Number: %s\r\n", version_get_gitbranchnum(0));
 }
 
 void cli_motd() {

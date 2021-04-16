@@ -1,6 +1,7 @@
 #include "flipper.h"
 #include <applications.h>
 #include <furi.h>
+#include <version.h>
 #include <api-hal-boot.h>
 
 void flipper_init() {
@@ -8,7 +9,7 @@ void flipper_init() {
 #if NO_BOOTLOADER
     printf("[boot] No version info\n");
 #else
-    const Version *boot_version_adr = api_hal_boot_version_address_get();
+    const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
     printf("[boot] Version: %s\n", version_get_version(boot_version_adr));
     printf("       Build date: %s\n", version_get_builddate(boot_version_adr));
     printf("       Git Commit: %s\n", version_get_githash(boot_version_adr));

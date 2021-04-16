@@ -191,6 +191,24 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     return true;
 }
 
+bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Dolphin* dolphin = context;
+
+    if(event->type != InputTypeShort) return false;
+
+    if(event->key == InputKeyLeft) || (event->key == InputKeyRight)) {
+        with_view_model(
+            dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
+                model->fw_boot = !model->fw_boot;
+                return true;
+            });
+    }
+
+    return true;
+}
+
 Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
     // Message queue
@@ -254,8 +272,12 @@ Dolphin* dolphin_alloc() {
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
 
     // Down Idle View
+//    DolphinViewIdleDownModel
+    view_allocate_model(
+        dolphin->idle_view_down, ViewModelTypeLockFree, sizeof(DolphinViewIdleDownModel));
     dolphin->idle_view_down = view_alloc();
     view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);
+    view_set_input_callback(dolphin->idle_view_down, dolphin_view_idle_down_input);
     view_set_previous_callback(dolphin->idle_view_down, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleDown, dolphin->idle_view_down);
