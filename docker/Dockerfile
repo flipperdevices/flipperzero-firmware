@@ -7,12 +7,17 @@ RUN apt update && \
         software-properties-common \
         gpg-agent \
         make \
+        cmake \
         autoconf \
         automake \
         libtool \
+        libusb-1.0 \
+        libusb-1.0-0-dev \
+        libgtk-3-dev pandoc \
         curl \
         wget \
         g++ \
+        gcc \
         unzip \
         build-essential \
         python \
@@ -22,6 +27,7 @@ RUN apt update && \
         srecord \
         git \
         pkg-config \
+        dfu-util \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
@@ -37,30 +43,18 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal --target thum
 
 # st-flash
 
-RUN apt update && \
-    apt install -y --no-install-recommends \
-    gcc build-essential cmake libusb-1.0 libusb-1.0-0-dev libgtk-3-dev pandoc \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    wget https://github.com/stlink-org/stlink/archive/v1.5.1.zip && \
+RUN wget https://github.com/stlink-org/stlink/archive/v1.5.1.zip && \
     unzip v1.5.1.zip && \
     cd stlink-1.5.1 && make clean && make release && \
     cd build/Release && make install && ldconfig
-
-# dfu-util
-
-RUN apt update && \
-    apt install -y --no-install-recommends \
-        dfu-util \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # install arm-none-eabi
 
 RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
     tar xjf gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
     cd gcc-arm-none-eabi-10-2020-q4-major/bin/ && \
-    for file in * ; do ln -s ${PWD}/${file} /usr/bin/${file} ; done
-
-RUN cd / && arm-none-eabi-gcc -v && arm-none-eabi-gdb -v
+    for file in * ; do ln -s ${PWD}/${file} /usr/bin/${file} ; done && \
+    cd / && arm-none-eabi-gcc -v && arm-none-eabi-gdb -v
     
 # install hex2dfu
 
