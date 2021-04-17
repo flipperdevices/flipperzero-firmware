@@ -21,6 +21,7 @@ RUN apt update && \
         imagemagick \
         srecord \
         git \
+        pkg-config \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
@@ -67,6 +68,12 @@ RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-docume
     unzip hex2dfu.zip && \
     cd hex2dfu-master && gcc hex2dfu.c ED25519/*.c -o hex2dfu && \
     ln -s ${PWD}/hex2dfu /usr/bin/hex2dfu
+
+# install openocd
+
+RUN git clone --depth 1 --branch v0.11.0 https://github.com/ntfreak/openocd.git && \
+    cd openocd && ./bootstrap && ./configure && ls -la && make install && \
+    openocd --version
 
 COPY entrypoint.sh syntax_check.sh /
 
