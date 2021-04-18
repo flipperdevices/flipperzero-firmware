@@ -28,7 +28,7 @@ void input_press_timer_callback(void* arg) {
     if(input_pin->press_counter == INPUT_LONG_PRESS_COUNTS) {
         event.type = InputTypeLong;
         notify_pubsub(&input->event_pubsub, &event);
-    } else if (input_pin->press_counter > INPUT_LONG_PRESS_COUNTS) {
+    } else if(input_pin->press_counter > INPUT_LONG_PRESS_COUNTS) {
         input_pin->press_counter--;
         event.type = InputTypeRepeat;
         notify_pubsub(&input->event_pubsub, &event);
@@ -139,7 +139,7 @@ int32_t input_task() {
                     input_timer_start(input->pin_states[i].press_timer, INPUT_PRESS_TICKS);
                 } else {
                     input_timer_stop(input->pin_states[i].press_timer);
-                    if (input->pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
+                    if(input->pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
                         event.type = InputTypeShort;
                         notify_pubsub(&input->event_pubsub, &event);
                     }
