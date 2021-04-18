@@ -113,7 +113,7 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     __disable_irq();
 
     // Confirm OS that sleep is still possible
-    if (eTaskConfirmSleepModeStatus() == eAbortSleep || true) {
+    if (eTaskConfirmSleepModeStatus() == eAbortSleep) {
         __enable_irq();
         return;
     }
