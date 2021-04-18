@@ -96,28 +96,35 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     DolphinViewIdleDownModel* m = model;
     const Version *ver = 0;
     char buffer[64];
+    size_t len = 0;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 15, m->fw_boot ? "Boot Version info:" : "FW Version info:");
+    canvas_draw_str(canvas, 2, 15, m->show_fw_or_boot ? "Boot Version info:" : "FW Version info:");
     canvas_set_font(canvas, FontSecondary);
 
-    if (m->fw_boot) {
+#ifndef NO_BOOTLOADER
+    if (m->show_fw_or_boot) {
         ver = (const Version *) api_hal_boot_version_address_get();
     }
+#endif  // NO_BOOTLOADER
 
-    snprintf(buffer, sizeof(buffer), "%s %s %s",
-        version_get_version(ver),
-        version_get_target(ver),
-        version_get_builddate(ver));
+    len += snprintf(&buffer[len], sizeof(buffer) - len, "%s", version_get_version(ver));
+
+    if (!m->show_fw_or_boot) {
+        len += snprintf(&buffer[len], sizeof(buffer) - len, " " FLIPPER_NAME);
+    }
     canvas_draw_str(canvas, 5, 25, buffer);
 
-    snprintf(buffer, sizeof(buffer), "%s", version_get_gitbranch(ver));
+    snprintf(buffer, sizeof(buffer), "[%s] %s",
+        version_get_target(ver),
+        version_get_gitbranch(ver));
     canvas_draw_str(canvas, 5, 35, buffer);
 
-    snprintf(buffer, sizeof(buffer), "%s %s",
+    snprintf(buffer, sizeof(buffer), "%s [%s] %s",
+        version_get_githash(ver),
         version_get_gitbranchnum(ver),
-        version_get_githash(ver));
+        version_get_builddate(ver));
     canvas_draw_str(canvas, 5, 45, buffer);
 
     snprintf(

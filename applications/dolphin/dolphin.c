@@ -198,15 +198,28 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
 
     if(event->type != InputTypeShort) return false;
 
-    if(event->key == InputKeyLeft) || (event->key == InputKeyRight)) {
+    if((event->key == InputKeyLeft) || (event->key == InputKeyRight)) {
         with_view_model(
             dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
-                model->fw_boot = !model->fw_boot;
+#ifndef NO_BOOTLOADER
+                model->show_fw_or_boot = !model->show_fw_or_boot;
+#endif  // NO_BOOTLOADER
                 return true;
             });
     }
 
-    return true;
+    if(event->key == InputKeyBack) {
+        with_view_model(
+            dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
+#ifndef NO_BOOTLOADER
+                model->show_fw_or_boot = 0;
+#endif  // NO_BOOTLOADER
+                return true;
+            });
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+    }
+
+    return false;
 }
 
 Dolphin* dolphin_alloc() {
@@ -272,16 +285,15 @@ Dolphin* dolphin_alloc() {
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
 
     // Down Idle View
-//    DolphinViewIdleDownModel
+    dolphin->idle_view_down = view_alloc();
+    view_set_context(dolphin->idle_view_down, dolphin);
     view_allocate_model(
         dolphin->idle_view_down, ViewModelTypeLockFree, sizeof(DolphinViewIdleDownModel));
-    dolphin->idle_view_down = view_alloc();
     view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);
     view_set_input_callback(dolphin->idle_view_down, dolphin_view_idle_down_input);
     view_set_previous_callback(dolphin->idle_view_down, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleDown, dolphin->idle_view_down);
-
     // HW Mismatch
     dolphin->view_hw_mismatch = view_alloc();
     view_set_draw_callback(dolphin->view_hw_mismatch, dolphin_view_hw_mismatch_draw);

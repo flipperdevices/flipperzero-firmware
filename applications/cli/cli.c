@@ -50,32 +50,26 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
     return api_hal_vcp_rx(buffer, size);
 }
 
-void cli_print_version() {
-#if NO_BOOTLOADER
-    printf("[boot] No version info\n");
-#else
-    const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
-    printf("[boot] boot_version_adr: %lu\r\n", (uint32_t) boot_version_adr);
-    printf("[boot] Version adr: %lu\r\n", (uint32_t) version_get_version(boot_version_adr));
-    printf("[boot] Version: %s\r\n", version_get_version(boot_version_adr));
-    printf("       Build date: %s\r\n", version_get_builddate(boot_version_adr));
-    printf("       Git Commit: %s\r\n", version_get_githash(boot_version_adr));
-    printf("       Git Branch: %s\r\n", version_get_gitbranch(boot_version_adr));
-    printf("       Commit Number: %s\r\n", version_get_gitbranchnum(boot_version_adr));
-#endif
-
-    printf("[flipper] fw_version_adr: %lu\r\n", (uint32_t) version_get());
-    printf("[flipper] Version adr: %lu\r\n", (uint32_t) version_get_version(boot_version_adr));
-    printf("[flipper] Version: %s\r\n", version_get_version(0));
-    printf("          Build date: %s\r\n", version_get_builddate(0));
-    printf("          Git Commit: %s\r\n", version_get_githash(0));
-    printf("          Git Branch: %s\r\n", version_get_gitbranch(0));
-    printf("          Commit Number: %s\r\n", version_get_gitbranchnum(0));
+void cli_print_version(const Version * version) {
+    printf("Version:\t%s\r\n", version_get_version(version));
+    printf("Build date:\t%s\r\n", version_get_builddate(version));
+    printf("Git Commit:\t%s (%s)\r\n",
+        version_get_githash(version),
+        version_get_gitbranchnum(version));
+    printf("Git Branch:\t%s\r\n", version_get_gitbranch(version));
 }
 
 void cli_motd() {
     printf("Flipper cli.\r\n");
-    cli_print_version();
+#ifdef NO_BOOTLOADER
+    printf("No bootloader.\r\n");
+#else
+    const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
+    printf("Boot build info\r\n");
+    cli_print_version(boot_version_adr);
+#endif  // NO_BOOTLOADER
+    printf("Firmware build info\r\n");
+    cli_print_version(0);
 }
 
 void cli_nl() {

@@ -29,7 +29,7 @@ typedef struct {
 } DolphinViewIdleUpModel;
 
 typedef struct {
-    bool fw_boot;
+    bool show_fw_or_boot;
 } DolphinViewIdleDownModel;
 
 typedef struct {

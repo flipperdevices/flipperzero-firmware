@@ -4,24 +4,26 @@
 #include <version.h>
 #include <api-hal-boot.h>
 
+static void flipper_print_version(const Version * version) {
+    printf("Version:\t%s\r\n", version_get_version(version));
+    printf("Build date:\t%s\r\n", version_get_builddate(version));
+    printf("Git Commit:\t%s (%s)\r\n",
+        version_get_githash(version),
+        version_get_gitbranchnum(version));
+    printf("Git Branch:\t%s\r\n", version_get_gitbranch(version));
+}
+
 void flipper_init() {
 
-#if NO_BOOTLOADER
-    printf("[boot] No version info\n");
+#ifdef NO_BOOTLOADER
+    printf("No bootloader.\r\n");
 #else
     const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
-    printf("[boot] Version: %s\n", version_get_version(boot_version_adr));
-    printf("       Build date: %s\n", version_get_builddate(boot_version_adr));
-    printf("       Git Commit: %s\n", version_get_githash(boot_version_adr));
-    printf("       Git Branch: %s\n", version_get_gitbranch(boot_version_adr));
-    printf("       Commit Number: %s\n", version_get_gitbranchnum(boot_version_adr));
-#endif
-
-    printf("[flipper] Version: %s\n", version_get_version(0));
-    printf("          Build date: %s\n", version_get_builddate(0));
-    printf("          Git Commit: %s\n", version_get_githash(0));
-    printf("          Git Branch: %s\n", version_get_gitbranch(0));
-    printf("          Commit Number: %s\n", version_get_gitbranchnum(0));
+    printf("Boot build info\r\n");
+    flipper_print_version(boot_version_adr);
+#endif  // NO_BOOTLOADER
+    printf("Firmware build info\r\n");
+    flipper_print_version(0);
 
     printf("[flipper] starting services\r\n");
 
