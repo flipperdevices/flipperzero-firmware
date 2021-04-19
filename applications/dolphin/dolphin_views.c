@@ -124,19 +124,11 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     }
 
     snprintf(
-        buffer,
-        sizeof(buffer),
-        "%s [%s]",
-        version_get_version(ver),
-        version_get_builddate(ver));
+        buffer, sizeof(buffer), "%s [%s]", version_get_version(ver), version_get_builddate(ver));
     canvas_draw_str(canvas, 5, 33, buffer);
 
     snprintf(
-        buffer,
-        sizeof(buffer),
-        "%s [%s]",
-        version_get_githash(ver),
-        version_get_gitbranchnum(ver));
+        buffer, sizeof(buffer), "%s [%s]", version_get_githash(ver), version_get_gitbranchnum(ver));
     canvas_draw_str(canvas, 5, 43, buffer);
 
     snprintf(
