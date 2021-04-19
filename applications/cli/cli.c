@@ -50,10 +50,11 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
     return api_hal_vcp_rx(buffer, size);
 }
 
-void cli_print_version(const Version * version) {
+void cli_print_version(const Version* version) {
     printf("Version:\t%s [%s]\r\n", version_get_version(version), version_get_target(version));
     printf("Build date:\t%s\r\n", version_get_builddate(version));
-    printf("Git Commit:\t%s (%s)\r\n",
+    printf(
+        "Git Commit:\t%s (%s)\r\n",
         version_get_githash(version),
         version_get_gitbranchnum(version));
     printf("Git Branch:\t%s\r\n", version_get_gitbranch(version));
@@ -64,7 +65,7 @@ void cli_motd() {
 #ifdef NO_BOOTLOADER
     printf("No bootloader.\r\n");
 #else
-    const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
+    const Version* boot_version_adr = (const Version*)api_hal_boot_version_address_get();
     printf("Boot build info\r\n");
     cli_print_version(boot_version_adr);
 #endif

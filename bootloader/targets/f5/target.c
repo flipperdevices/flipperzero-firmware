@@ -112,7 +112,7 @@ void rtc_init() {
 }
 
 void version_save(void) {
-    LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR1, (uint32_t) version_get());
+    LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR1, (uint32_t)version_get());
 }
 
 void usb_wire_reset() {
@@ -169,4 +169,3 @@ void target_switch2os() {
     SCB->VTOR = BOOT_ADDRESS + OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
-

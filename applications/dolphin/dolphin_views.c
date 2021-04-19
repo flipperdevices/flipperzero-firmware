@@ -95,7 +95,7 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     DolphinViewIdleDownModel* m = model;
-    const Version *ver = 0;
+    const Version* ver = 0;
     char buffer[64];
     size_t len = 0;
     canvas_clear(canvas);
@@ -105,25 +105,27 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
 
 #ifndef NO_BOOTLOADER
-    if (m->show_fw_or_boot) {
-        ver = (const Version *) api_hal_boot_version_address_get();
+    if(m->show_fw_or_boot) {
+        ver = (const Version*)api_hal_boot_version_address_get();
     }
 #endif
 
     len += snprintf(&buffer[len], sizeof(buffer) - len, "%s", version_get_version(ver));
 
-    if (!m->show_fw_or_boot) {
-        const char *name = api_hal_version_get_name_ptr();
+    if(!m->show_fw_or_boot) {
+        const char* name = api_hal_version_get_name_ptr();
         len += snprintf(&buffer[len], sizeof(buffer) - len, " %s", name ? name : "flipper");
     }
     canvas_draw_str(canvas, 5, 25, buffer);
 
-    snprintf(buffer, sizeof(buffer), "[%s] %s",
-        version_get_target(ver),
-        version_get_gitbranch(ver));
+    snprintf(
+        buffer, sizeof(buffer), "[%s] %s", version_get_target(ver), version_get_gitbranch(ver));
     canvas_draw_str(canvas, 5, 35, buffer);
 
-    snprintf(buffer, sizeof(buffer), "%s [%s] %s",
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s [%s] %s",
         version_get_githash(ver),
         version_get_gitbranchnum(ver),
         version_get_builddate(ver));
