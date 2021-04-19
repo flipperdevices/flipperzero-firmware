@@ -227,7 +227,7 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
 
-const FlipperApplication FLIPPER_SCENES =
+const FlipperApplication FLIPPER_SCENE =
     {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14};
 
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
