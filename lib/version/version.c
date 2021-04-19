@@ -1,12 +1,12 @@
 #include "version.h"
 
 struct Version {
-    const char  *git_hash;
-    const char  *git_branch;
-    const char  *git_branch_num;
-    const char  *build_date;
-    const char  *version;
-    const char  *target;
+    const char*  git_hash;
+    const char*  git_branch;
+    const char*  git_branch_num;
+    const char*  build_date;
+    const char*  version;
+    const char*  target;
 };
 
 /* version of current running firmware (bootloader/flipper) */
@@ -20,31 +20,31 @@ static const Version version = {
 };
 
 
-const Version *version_get(void) {
+const Version* version_get(void) {
     return &version;
 }
 
-const char *version_get_githash(const Version *v) {
+const char* version_get_githash(const Version* v) {
     return v ? v->git_hash : version.git_hash;
 }
 
-const char *version_get_gitbranch(const Version *v) {
+const char* version_get_gitbranch(const Version* v) {
     return v ? v->git_branch : version.git_branch;
 }
 
-const char *version_get_gitbranchnum(const Version *v) {
+const char* version_get_gitbranchnum(const Version* v) {
     return v ? v->git_branch_num : version.git_branch_num;
 }
 
-const char *version_get_builddate(const Version *v) {
+const char* version_get_builddate(const Version* v) {
     return v ? v->build_date : version.build_date;
 }
 
-const char *version_get_version(const Version *v) {
+const char* version_get_version(const Version* v) {
     return v ? v->version : version.version;
 }
 
-const char *version_get_target(const Version *v) {
+const char* version_get_target(const Version* v) {
     return v ? v->target : version.target;
 }
 

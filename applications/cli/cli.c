@@ -1,7 +1,7 @@
 #include "cli_i.h"
 #include "cli_commands.h"
 #include <version.h>
-#include <api-hal-boot.h>
+#include <api-hal-version.h>
 
 Cli* cli_alloc() {
     Cli* cli = furi_alloc(sizeof(Cli));
@@ -51,26 +51,30 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
 }
 
 void cli_print_version(const Version* version) {
-    printf("Version:\t%s [%s]\r\n", version_get_version(version), version_get_target(version));
-    printf("Build date:\t%s\r\n", version_get_builddate(version));
-    printf(
-        "Git Commit:\t%s (%s)\r\n",
-        version_get_githash(version),
-        version_get_gitbranchnum(version));
-    printf("Git Branch:\t%s\r\n", version_get_gitbranch(version));
+    if(version) {
+        printf("\tVersion:\t%s\r\n", version_get_version(version));
+        printf("\tBuild date:\t%s\r\n", version_get_builddate(version));
+        printf(
+            "\tGit Commit:\t%s (%s)\r\n",
+            version_get_githash(version),
+            version_get_gitbranchnum(version));
+        printf("\tGit Branch:\t%s\r\n", version_get_gitbranch(version));
+    } else {
+        printf("\tNo build info\r\n");
+    }
 }
 
 void cli_motd() {
+    const Version* version;
     printf("Flipper cli.\r\n");
-#ifdef NO_BOOTLOADER
-    printf("No bootloader.\r\n");
-#else
-    const Version* boot_version_adr = (const Version*)api_hal_boot_version_address_get();
-    printf("Boot build info\r\n");
-    cli_print_version(boot_version_adr);
-#endif
-    printf("Firmware build info\r\n");
-    cli_print_version(0);
+
+    version = (const Version*)api_hal_version_get_boot_version();
+    printf("Bootloader\r\n");
+    cli_print_version(version);
+
+    version = (const Version*)api_hal_version_get_fw_version();
+    printf("Firmware\r\n");
+    cli_print_version(version);
 }
 
 void cli_nl() {

@@ -2,28 +2,32 @@
 #include <applications.h>
 #include <furi.h>
 #include <version.h>
-#include <api-hal-boot.h>
+#include <api-hal-version.h>
 
 static void flipper_print_version(const Version* version) {
-    printf("Version:\t%s\r\n", version_get_version(version));
-    printf("Build date:\t%s\r\n", version_get_builddate(version));
-    printf(
-        "Git Commit:\t%s (%s)\r\n",
-        version_get_githash(version),
-        version_get_gitbranchnum(version));
-    printf("Git Branch:\t%s\r\n", version_get_gitbranch(version));
+    if(version) {
+        printf("\tVersion:\t%s\r\n", version_get_version(version));
+        printf("\tBuild date:\t%s\r\n", version_get_builddate(version));
+        printf(
+            "\tGit Commit:\t%s (%s)\r\n",
+            version_get_githash(version),
+            version_get_gitbranchnum(version));
+        printf("\tGit Branch:\t%s\r\n", version_get_gitbranch(version));
+    } else {
+        printf("\tNo build info\r\n");
+    }
 }
 
 void flipper_init() {
-#ifdef NO_BOOTLOADER
-    printf("No bootloader.\r\n");
-#else
-    const Version* boot_version_adr = (const Version*)api_hal_boot_version_address_get();
-    printf("Boot build info\r\n");
-    flipper_print_version(boot_version_adr);
-#endif
-    printf("Firmware build info\r\n");
-    flipper_print_version(0);
+    const Version* version;
+
+    version = (const Version*)api_hal_version_get_boot_version();
+    printf("Bootloader\r\n");
+    flipper_print_version(version);
+
+    version = (const Version*)api_hal_version_get_fw_version();
+    printf("Firmware\r\n");
+    flipper_print_version(version);
 
     printf("[flipper] starting services\r\n");
 

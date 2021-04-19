@@ -95,7 +95,7 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
 
 void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     DolphinViewIdleDownModel* m = model;
-    const Version* ver = 0;
+    const Version* ver;
     char buffer[64];
     size_t len = 0;
     canvas_clear(canvas);
@@ -104,11 +104,13 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 2, 15, m->show_fw_or_boot ? "Boot Version info:" : "FW Version info:");
     canvas_set_font(canvas, FontSecondary);
 
-#ifndef NO_BOOTLOADER
-    if(m->show_fw_or_boot) {
-        ver = (const Version*)api_hal_boot_version_address_get();
+    ver = m->show_fw_or_boot ? api_hal_version_get_boot_version() :
+                               api_hal_version_get_fw_version();
+
+    if(!ver) {
+        canvas_draw_str(canvas, 5, 25, "No info");
+        return;
     }
-#endif
 
     len += snprintf(&buffer[len], sizeof(buffer) - len, "%s", version_get_version(ver));
 

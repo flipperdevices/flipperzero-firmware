@@ -201,9 +201,7 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
     if((event->key == InputKeyLeft) || (event->key == InputKeyRight)) {
         with_view_model(
             dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
-#ifndef NO_BOOTLOADER
                 model->show_fw_or_boot = !model->show_fw_or_boot;
-#endif
                 return true;
             });
     }
@@ -211,9 +209,7 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
     if(event->key == InputKeyBack) {
         with_view_model(
             dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
-#ifndef NO_BOOTLOADER
                 model->show_fw_or_boot = 0;
-#endif
                 return true;
             });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
