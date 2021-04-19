@@ -97,51 +97,51 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     DolphinViewIdleDownModel* m = model;
     const Version* ver;
     char buffer[64];
-    size_t len = 0;
-    canvas_clear(canvas);
+
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 15, m->show_fw_or_boot ? "Boot Version info:" : "FW Version info:");
+    canvas_draw_str(canvas, 2, 13, m->show_fw_or_boot ? "Boot Version info:" : "FW Version info:");
     canvas_set_font(canvas, FontSecondary);
+
+    // Hardware version
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "HW: %d.F%dB%dC%d %s",
+        api_hal_version_get_hw_version(),
+        api_hal_version_get_hw_target(),
+        api_hal_version_get_hw_body(),
+        api_hal_version_get_hw_connect(),
+        api_hal_version_get_name_ptr());
+    canvas_draw_str(canvas, 5, 23, buffer);
 
     ver = m->show_fw_or_boot ? api_hal_version_get_boot_version() :
                                api_hal_version_get_fw_version();
 
     if(!ver) {
-        canvas_draw_str(canvas, 5, 25, "No info");
+        canvas_draw_str(canvas, 5, 33, "No info");
         return;
     }
 
-    len += snprintf(&buffer[len], sizeof(buffer) - len, "%s", version_get_version(ver));
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s [%s]",
+        version_get_version(ver),
+        version_get_builddate(ver));
+    canvas_draw_str(canvas, 5, 33, buffer);
 
-    if(!m->show_fw_or_boot) {
-        const char* name = api_hal_version_get_name_ptr();
-        len += snprintf(&buffer[len], sizeof(buffer) - len, " %s", name ? name : "flipper");
-    }
-    canvas_draw_str(canvas, 5, 25, buffer);
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s [%s]",
+        version_get_githash(ver),
+        version_get_gitbranchnum(ver));
+    canvas_draw_str(canvas, 5, 43, buffer);
 
     snprintf(
         buffer, sizeof(buffer), "[%s] %s", version_get_target(ver), version_get_gitbranch(ver));
-    canvas_draw_str(canvas, 5, 35, buffer);
-
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "%s [%s] %s",
-        version_get_githash(ver),
-        version_get_gitbranchnum(ver),
-        version_get_builddate(ver));
-    canvas_draw_str(canvas, 5, 45, buffer);
-
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "HW: %d.F%dB%dC%d",
-        api_hal_version_get_hw_version(),
-        api_hal_version_get_hw_target(),
-        api_hal_version_get_hw_body(),
-        api_hal_version_get_hw_connect());
-    canvas_draw_str(canvas, 5, 55, buffer);
+    canvas_draw_str(canvas, 5, 53, buffer);
 }
 
 void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model) {
