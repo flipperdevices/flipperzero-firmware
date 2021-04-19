@@ -266,7 +266,7 @@ void irda_cli_cmd_rx(string_t args, void* context) {
                 (uint8_t)packet.command);
         }
     }
-    printf("Interrupt command received\r\n");
+    printf("Interrupt command received");
     app->cli_cmd_is_active = false;
     return;
 }
@@ -280,7 +280,7 @@ void irda_cli_cmd_tx(string_t args, void* context) {
     string_init(protocol_str);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("Incorrect input. Try ir_tx <protocol> <address> <data>\r\n");
+        printf("Invalid input. Use ir_tx PROTOCOL ADDRESS COMMAND");
         string_clear(protocol_str);
         return;
     } else {
@@ -293,7 +293,7 @@ void irda_cli_cmd_tx(string_t args, void* context) {
     } else if(!string_cmp_str(protocol_str, "SAMSUNG")) {
         protocol = IRDA_SAMSUNG;
     } else {
-        printf("Incorrect input. Try tm <NEC | SAMSUNG> <address> <data>\r\n");
+        printf("Incorrect protocol. Valid protocols: `NEC`, `SAMSUNG`");
         string_clear(protocol_str);
         return;
     }
@@ -301,14 +301,19 @@ void irda_cli_cmd_tx(string_t args, void* context) {
     // Read address
     uint16_t address = strtoul(string_get_cstr(args), NULL, 16);
     ws = string_search_char(args, ' ');
-    if(ws != 4) {
-        printf("Incorrect input\r\n");
+    if(!(ws == 4 || ws == 6)) {
+        printf("Invalid address format. Use 4 [0-F] hex digits in 0xXXXX or XXXX formats");
         return;
     }
     string_right(args, ws);
     string_strim(args);
-    // Read data
-    uint16_t data = strtoul(string_get_cstr(args), NULL, 16);
+    // Read command
+    uint16_t command = strtoul(string_get_cstr(args), NULL, 16);
+    ws = string_search_char(args, '\0');
+    if(!(ws == 4 || ws == 6)) {
+        printf("Invalid command format. Use 4 [0-F] hex digits in 0xXXXX or XXXX formats");
+        return;
+    }
 
     State* state = (State*)acquire_mutex(state_mutex, 25);
     if(state == NULL) {
@@ -316,9 +321,9 @@ void irda_cli_cmd_tx(string_t args, void* context) {
         return;
     }
     if(protocol == IRDA_NEC) {
-        ir_nec_send(address, data);
+        ir_nec_send(address, command);
     } else if(protocol == IRDA_SAMSUNG) {
-        ir_samsung_send(address, data);
+        ir_samsung_send(address, command);
     }
     release_mutex(state_mutex, state);
     return;
