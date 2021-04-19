@@ -4,6 +4,7 @@
 #include <gui/elements.h>
 #include <api-hal.h>
 #include <version.h>
+#include <api-hal-version.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
 
@@ -107,12 +108,13 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     if (m->show_fw_or_boot) {
         ver = (const Version *) api_hal_boot_version_address_get();
     }
-#endif  // NO_BOOTLOADER
+#endif
 
     len += snprintf(&buffer[len], sizeof(buffer) - len, "%s", version_get_version(ver));
 
     if (!m->show_fw_or_boot) {
-        len += snprintf(&buffer[len], sizeof(buffer) - len, " " FLIPPER_NAME);
+        const char *name = api_hal_version_get_name_ptr();
+        len += snprintf(&buffer[len], sizeof(buffer) - len, " %s", name ? name : "flipper");
     }
     canvas_draw_str(canvas, 5, 25, buffer);
 

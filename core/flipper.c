@@ -21,7 +21,7 @@ void flipper_init() {
     const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
     printf("Boot build info\r\n");
     flipper_print_version(boot_version_adr);
-#endif  // NO_BOOTLOADER
+#endif
     printf("Firmware build info\r\n");
     flipper_print_version(0);
 

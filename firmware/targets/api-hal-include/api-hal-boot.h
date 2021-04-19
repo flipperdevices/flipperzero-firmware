@@ -14,7 +14,7 @@ typedef enum {
 /** Set boot mode */
 void api_hal_boot_set_mode(ApiHalBootMode mode);
 
-#if !NO_BOOTLOADER
+#ifndef NO_BOOTLOADER
 /**
  * Get address of version structure of bootloader, stored in chip flash.
  *

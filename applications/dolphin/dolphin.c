@@ -203,7 +203,7 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
             dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
 #ifndef NO_BOOTLOADER
                 model->show_fw_or_boot = !model->show_fw_or_boot;
-#endif  // NO_BOOTLOADER
+#endif
                 return true;
             });
     }
@@ -213,7 +213,7 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
             dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
 #ifndef NO_BOOTLOADER
                 model->show_fw_or_boot = 0;
-#endif  // NO_BOOTLOADER
+#endif
                 return true;
             });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);

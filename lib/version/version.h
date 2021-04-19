@@ -22,7 +22,7 @@ const Version *version_get(void);
  * Gets git hash of build commit.
  *
  * @param   v - ptr to version handle. If zero - gets current running fw info.
- * @return  git hash 
+ * @return  git hash
  */
 const char *version_get_githash(const Version *v);
 

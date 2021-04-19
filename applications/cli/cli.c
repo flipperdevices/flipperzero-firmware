@@ -51,7 +51,7 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
 }
 
 void cli_print_version(const Version * version) {
-    printf("Version:\t%s\r\n", version_get_version(version));
+    printf("Version:\t%s [%s]\r\n", version_get_version(version), version_get_target(version));
     printf("Build date:\t%s\r\n", version_get_builddate(version));
     printf("Git Commit:\t%s (%s)\r\n",
         version_get_githash(version),
@@ -67,7 +67,7 @@ void cli_motd() {
     const Version *boot_version_adr = (const Version *) api_hal_boot_version_address_get();
     printf("Boot build info\r\n");
     cli_print_version(boot_version_adr);
-#endif  // NO_BOOTLOADER
+#endif
     printf("Firmware build info\r\n");
     cli_print_version(0);
 }
