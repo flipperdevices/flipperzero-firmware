@@ -222,6 +222,15 @@ endfunction()
 function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
     get_filename_component(SCRIPT "${SCRIPT}" ABSOLUTE)
     target_link_options(${TARGET} ${VISIBILITY} -T "${SCRIPT}")
+    get_target_property(LINK_DEPENDS ${TARGET} INTERFACE_LINK_DEPENDS)
+
+    if(LINK_DEPENDS STREQUAL "LINK_DEPENDS-NOTFOUND")
+        set(LINK_DEPENDS "${SCRIPT}")
+    else()
+        list(APPEND LINK_DEPENDS "${SCRIPT}")
+    endif()
+
+    set_target_properties(${TARGET} PROPERTIES INTERFACE_LINK_DEPENDS "${LINK_DEPENDS}")
 endfunction()
 
 if(NOT (TARGET STM32::NoSys))
