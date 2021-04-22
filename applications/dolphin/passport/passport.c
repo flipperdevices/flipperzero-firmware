@@ -16,7 +16,7 @@ typedef struct {
     EventType type;
 } AppEvent;
 
-// Moods, corresponding to butthurt level
+// Moods, corresponding to butthurt level. (temp, unclear about max level)
 static const char* mood_strings[5] = {[0] = "Normal", [1] = "Ok", [2] = "Sad", [3] = "Angry"};
 
 static void input_callback(InputEvent* input_event, void* ctx) {
