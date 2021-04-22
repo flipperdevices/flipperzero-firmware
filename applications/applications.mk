@@ -46,6 +46,7 @@ APP_MENU	= 1
 CFLAGS		+= -DAPP_DOLPHIN
 C_SOURCES	+= $(wildcard $(APP_DIR)/dolphin/*.c)
 C_SOURCES	+= $(wildcard $(APP_DIR)/dolphin/scenes/*.c)
+C_SOURCES	+= $(wildcard $(APP_DIR)/dolphin/scenes/assets/*.c)
 C_SOURCES	+= $(wildcard $(APP_DIR)/passport/*.c)
 endif
 

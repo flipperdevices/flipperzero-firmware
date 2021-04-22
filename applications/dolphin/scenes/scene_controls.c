@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <gui/elements.h>
-#include "dolphin_scene.h"
+#include "scene.h"
 
 void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     furi_assert(state);

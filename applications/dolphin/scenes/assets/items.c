@@ -64,7 +64,7 @@ static void dolphin_scene_start_app(SceneState* state, const FlipperApplication*
     furi_thread_start(state->scene_app_thread);
 }
 
-const void activate_item_callback(SceneState* state, Canvas* canvas) {
+const void scene_activate_item_callback(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
