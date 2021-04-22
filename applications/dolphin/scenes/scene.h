@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <gui/gui.h>
+#include <gui/gui_i.h>
 #include <u8g2/u8g2.h>
 
 #ifndef ARRSIZE
@@ -23,8 +23,9 @@
 // global
 #define SCALE 32
 // screen
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
+
+#define SCREEN_WIDTH GUI_DISPLAY_WIDTH
+#define SCREEN_HEIGHT GUI_DISPLAY_HEIGHT
 #define BONDARIES_X_LEFT 40
 #define BONDARIES_X_RIGHT 88
 
