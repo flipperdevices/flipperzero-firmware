@@ -40,7 +40,7 @@ LfrfidAppViewManager* LfrfidApp::get_view_manager() {
 void LfrfidApp::switch_to_next_scene(Scene next_scene) {
     previous_scenes_list.push_front(current_scene);
 
-    if(next_scene != Scene::SceneExit) {
+    if(next_scene != Scene::Exit) {
         scenes[current_scene]->on_exit(this);
         current_scene = next_scene;
         scenes[current_scene]->on_enter(this);
@@ -48,13 +48,13 @@ void LfrfidApp::switch_to_next_scene(Scene next_scene) {
 }
 
 void LfrfidApp::search_and_switch_to_previous_scene(std::initializer_list<Scene> scenes_list) {
-    Scene previous_scene = Scene::SceneStart;
+    Scene previous_scene = Scene::Start;
     bool scene_found = false;
 
     while(!scene_found) {
         previous_scene = get_previous_scene();
         for(Scene element : scenes_list) {
-            if(previous_scene == element || previous_scene == Scene::SceneStart) {
+            if(previous_scene == element || previous_scene == Scene::Start) {
                 scene_found = true;
                 break;
             }
@@ -67,14 +67,14 @@ void LfrfidApp::search_and_switch_to_previous_scene(std::initializer_list<Scene>
 }
 
 bool LfrfidApp::switch_to_previous_scene(uint8_t count) {
-    Scene previous_scene = Scene::SceneStart;
+    Scene previous_scene = Scene::Start;
 
     for(uint8_t i = 0; i < count; i++) {
         previous_scene = get_previous_scene();
-        if(previous_scene == Scene::SceneExit) break;
+        if(previous_scene == Scene::Exit) break;
     }
 
-    if(previous_scene == Scene::SceneExit) {
+    if(previous_scene == Scene::Exit) {
         return true;
     } else {
         scenes[current_scene]->on_exit(this);
@@ -102,6 +102,14 @@ void LfrfidApp::notify_init() {
 void LfrfidApp::notify_green_blink() {
     api_hal_light_set(LightGreen, 0xFF);
     delay(10);
+    api_hal_light_set(LightGreen, 0x00);
+}
+
+void LfrfidApp::notify_green_on() {
+    api_hal_light_set(LightGreen, 0xFF);
+}
+
+void LfrfidApp::notify_green_off() {
     api_hal_light_set(LightGreen, 0x00);
 }
 

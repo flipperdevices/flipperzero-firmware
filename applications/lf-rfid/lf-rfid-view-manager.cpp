@@ -10,16 +10,13 @@ LfrfidAppViewManager::LfrfidAppViewManager() {
 
     // allocate views
     submenu = submenu_alloc();
-    view_dispatcher_add_view(
-        view_dispatcher,
-        static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Submenu),
-        submenu_get_view(submenu));
+    add_view(ViewType::Submenu, submenu_get_view(submenu));
 
     popup = popup_alloc();
-    view_dispatcher_add_view(
-        view_dispatcher,
-        static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Popup),
-        popup_get_view(popup));
+    add_view(ViewType::Popup, popup_get_view(popup));
+
+    tune = new LfRfidViewTune();
+    add_view(ViewType::Tune, tune->get_view());
 
     gui = static_cast<Gui*>(furi_record_open("gui"));
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -27,6 +24,7 @@ LfrfidAppViewManager::LfrfidAppViewManager() {
     // set previous view callback for all views
     view_set_previous_callback(submenu_get_view(submenu), callback);
     view_set_previous_callback(popup_get_view(popup), callback);
+    view_set_previous_callback(tune->get_view(), callback);
 }
 
 LfrfidAppViewManager::~LfrfidAppViewManager() {
@@ -35,10 +33,13 @@ LfrfidAppViewManager::~LfrfidAppViewManager() {
         view_dispatcher, static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Submenu));
     view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Popup));
+    view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(LfrfidAppViewManager::ViewType::Tune));
 
     // free view modules
     submenu_free(submenu);
     popup_free(popup);
+    delete tune;
 
     // free dispatcher
     view_dispatcher_free(view_dispatcher);
@@ -57,6 +58,10 @@ Submenu* LfrfidAppViewManager::get_submenu() {
 
 Popup* LfrfidAppViewManager::get_popup() {
     return popup;
+}
+
+LfRfidViewTune* LfrfidAppViewManager::get_tune() {
+    return tune;
 }
 
 void LfrfidAppViewManager::receive_event(LfrfidEvent* event) {
@@ -78,4 +83,8 @@ uint32_t LfrfidAppViewManager::previous_view_callback(void* context) {
     }
 
     return VIEW_IGNORE;
+}
+
+void LfrfidAppViewManager::add_view(ViewType view_type, View* view) {
+    view_dispatcher_add_view(view_dispatcher, static_cast<uint32_t>(view_type), view);
 }
