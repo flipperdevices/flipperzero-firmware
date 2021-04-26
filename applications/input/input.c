@@ -106,7 +106,7 @@ int32_t input_task() {
     input->pin_states = furi_alloc(pin_count * sizeof(InputPinState));
 
     for(size_t i = 0; i < pin_count; i++) {
-        const GpioPin gpio = {(GPIO_TypeDef*)input_pins[i].port, (uint16_t)input_pins[i].pin};
+        GpioPin gpio = {(GPIO_TypeDef*)input_pins[i].port, (uint16_t)input_pins[i].pin};
         hal_gpio_add_int_callback(&gpio, input_isr, NULL);
         input->pin_states[i].pin = &input_pins[i];
         input->pin_states[i].state = GPIO_Read(input->pin_states[i]);

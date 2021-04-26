@@ -102,22 +102,22 @@ bool subghz_static_input(InputEvent* event, void* context) {
 
                     api_hal_light_set(LightRed, 0xff);
                     __disable_irq();
-                    gpio_write(&cc1101_g0_gpio, false);
+                    hal_gpio_write(&cc1101_g0_gpio, false);
                     delay_us(136);
-                    gpio_write(&cc1101_g0_gpio, true);
+                    hal_gpio_write(&cc1101_g0_gpio, true);
                     delay_us(10000);
                     for(uint8_t r = 0; r < 8; r++) {
                         for(uint8_t i = 0; i < 25; i++) {
                             uint8_t byte = i / 8;
                             uint8_t bit = i % 8;
                             bool value = (key[byte] >> (7 - bit)) & 1;
-                            gpio_write(&cc1101_g0_gpio, false);
+                            hal_gpio_write(&cc1101_g0_gpio, false);
                             if(value) {
                                 delay_us(360);
                             } else {
                                 delay_us(1086);
                             }
-                            gpio_write(&cc1101_g0_gpio, true);
+                            hal_gpio_write(&cc1101_g0_gpio, true);
                             if(value) {
                                 delay_us(1086);
                             } else {
@@ -144,8 +144,8 @@ void subghz_static_enter(void* context) {
     api_hal_subghz_reset();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
 
-    gpio_init(&cc1101_g0_gpio, GpioModeOutputPushPull);
-    gpio_write(&cc1101_g0_gpio, true);
+    hal_gpio_init(&cc1101_g0_gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    hal_gpio_write(&cc1101_g0_gpio, true);
 
     with_view_model(
         subghz_static->view, (SubghzStaticModel * model) {
