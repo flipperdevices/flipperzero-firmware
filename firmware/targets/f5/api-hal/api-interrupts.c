@@ -10,11 +10,6 @@ void HAL_COMP_TriggerCallback(COMP_HandleTypeDef* hcomp) {
     api_interrupt_call(InterruptTypeComparatorTrigger, hcomp);
 }
 
-/* Timer input capture event */
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef* htim) {
-    api_interrupt_call(InterruptTypeTimerCapture, htim);
-}
-
 /* Output compare event */
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef* htim) {
     api_interrupt_call(InterruptTypeTimerOutputCompare, htim);

@@ -177,7 +177,7 @@ void input_packet(AppEvent* event, State* state) {
     }
 }
 
-static void render_callback(Canvas* canvas, void* ctx) {
+void render_callback(Canvas* canvas, void* ctx) {
     State* state = (State*)acquire_mutex((ValueMutex*)ctx, 25);
 
     if(state != NULL) {
@@ -192,7 +192,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     }
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) {
+void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueueId_t event_queue = ctx;
 
     AppEvent event;
@@ -201,6 +201,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
+#if 0
 void irda_timer_capture_callback(void* htim, void* comp_ctx) {
     TIM_HandleTypeDef* _htim = (TIM_HandleTypeDef*)htim;
     osMessageQueueId_t event_queue = (osMessageQueueId_t)comp_ctx;
@@ -214,10 +215,12 @@ void irda_timer_capture_callback(void* htim, void* comp_ctx) {
             // falling event
             event.value.rx.edge = false;
             channel = TIM_CHANNEL_1;
+            event.value.rx.lasted = LL_TIM_OC_GetCompareCH1();
         } else if(_htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2) {
             // rising event
             event.value.rx.edge = true;
             channel = TIM_CHANNEL_2;
+            event.value.rx.lasted = LL_TIM_OC_GetCompareCH2();
         } else {
             // not our event
             return;
@@ -229,6 +232,7 @@ void irda_timer_capture_callback(void* htim, void* comp_ctx) {
         osMessageQueuePut(event_queue, &event, 0, 0);
     }
 }
+#endif
 
 void init_packet(
     State* state,
@@ -329,7 +333,17 @@ void irda_cli_cmd_tx(string_t args, void* context) {
     return;
 }
 
+void print_m(void);
+
 int32_t irda(void* p) {
+    // setup irda rx timer
+    tim_irda_rx_init();
+
+    for (;;) {
+        print_m();
+        delay(1000);
+    }
+#if 0
     osMessageQueueId_t event_queue = osMessageQueueNew(32, sizeof(AppEvent), NULL);
 
     State _state;
@@ -491,4 +505,5 @@ int32_t irda(void* p) {
             // event timeout
         }
     }
+#endif
 }
