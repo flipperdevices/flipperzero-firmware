@@ -12,10 +12,16 @@ extern "C" {
 // this defined in xx_hal_gpio.c, so...
 #define GPIO_NUMBER (16U)
 
-/** 
+/**
  * Interrupt callback prototype
  */
-typedef void (*GpioExtiCallback) (void* , void*);
+typedef void (*GpioExtiCallback)(void* ctx);
+
+typedef struct {
+    GpioExtiCallback callback;
+    void *context;
+    bool ready;
+} GpioInterrupt;
 
 typedef enum {
     GpioModeInput,
@@ -57,13 +63,8 @@ void hal_gpio_init(
     const GpioPull pull,
     const GpioSpeed speed);
 
-void api_hal_gpio_init(
-    const GpioPin* gpio,
-    const GpioMode mode,
-    const GpioPull pull,
-    const GpioSpeed speed);
-
-void api_hal_gpio_set_callback(const GpioPin* gpio, GpioExtiCallback cb);
+void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx);
+void hal_gpio_remove_int_callback(const GpioPin* gpio);
 
 // write value to GPIO, false = LOW, true = HIGH
 static inline void hal_gpio_write(const GpioPin* gpio, const bool state) {

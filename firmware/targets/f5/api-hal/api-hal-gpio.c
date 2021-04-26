@@ -1,3 +1,4 @@
+#include <furi.h>
 #include <api-hal-gpio.h>
 #include <api-hal-version.h>
 
@@ -25,6 +26,8 @@
 
 #define GET_SYSCFG_EXTI_LINE(pin)   GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
 #define GET_EXTI_LINE(pin)          GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
+
+static GpioInterrupt gpio_interrupt[GPIO_NUMBER];
 
 void hal_gpio_init(
     const GpioPin* gpio,
@@ -82,6 +85,134 @@ void hal_gpio_init(
         }
     }
     __enable_irq();
+}
+
+void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
+    furi_assert(gpio);
+    furi_assert(cb);
+    // Get pin number
+    uint8_t pin_num = 0;
+    for(pin_num = 0; pin_num < GPIO_NUMBER; pin_num++) {
+        if(gpio->pin & (1 << pin_num))
+            break;
+    }
+    gpio_interrupt[pin_num].callback = cb;
+    gpio_interrupt[pin_num].context = ctx;
+    gpio_interrupt[pin_num].ready = true;
+}
+
+void hal_gpio_remove_int_callback(const GpioPin* gpio) {
+    furi_assert(gpio);
+    // Get pin number
+    uint8_t pin_num = 0;
+    for(pin_num = 0; pin_num < GPIO_NUMBER; pin_num++) {
+        if(gpio->pin & (1 << pin_num))
+            break;
+    }
+    gpio_interrupt[pin_num].ready = false;
+}
+
+static void hal_gpio_callback(uint16_t pin_num) {
+    if(gpio_interrupt[pin_num].ready) {
+        gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
+    }
+}
+
+/* Interrupt handlers */
+void EXTI0_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_0)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_0);
+        hal_gpio_callback(0);
+    }
+}
+
+void EXTI1_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
+        hal_gpio_callback(1);
+    }
+}
+
+void EXTI2_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_2)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_2);
+        hal_gpio_callback(2);
+    }
+}
+
+void EXTI3_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
+        hal_gpio_callback(3);
+    }
+}
+
+void EXTI4_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_4)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_4);
+        hal_gpio_callback(4);
+    }
+}
+
+void EXTI9_5_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
+        hal_gpio_callback(5);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
+        hal_gpio_callback(6);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
+        hal_gpio_callback(7);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
+        hal_gpio_callback(8);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
+        hal_gpio_callback(9);
+        return;
+    }
+}
+
+void EXTI15_10_IRQHandler(void) {
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
+        hal_gpio_callback(10);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
+        hal_gpio_callback(11);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
+        hal_gpio_callback(12);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
+        hal_gpio_callback(13);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
+        hal_gpio_callback(14);
+        return;
+    }
+    if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
+        LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
+        hal_gpio_callback(15);
+        return;
+    }
 }
 
 extern COMP_HandleTypeDef hcomp1;
