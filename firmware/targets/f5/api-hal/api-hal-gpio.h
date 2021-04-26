@@ -47,7 +47,7 @@ typedef enum {
 } GpioMode;
 
 /**
- * Gpio push / pull modes
+ * Gpio pull modes
  */
 typedef enum {
     GpioPullNo = LL_GPIO_PULL_NO,
@@ -87,12 +87,24 @@ void hal_gpio_init(
     const GpioSpeed speed);
 
 /**
- * Add interrupt
+ * Add and enable interrupt
  * @param gpio GpioPin
- * @param cb GpioExtiCallback
- * @param ctx context for callback
+ * @param cb   GpioExtiCallback
+ * @param ctx  context for callback
  */
 void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx);
+
+/**
+ * Enable interrupt
+ * @param gpio GpioPin
+ */
+void hal_gpio_enable_int_callback(const GpioPin* gpio);
+
+/**
+ * Disable interrupt
+ * @param gpio GpioPin
+ */
+void hal_gpio_disable_int_callback(const GpioPin* gpio);
 
 /**
  * Remove interrupt
@@ -102,7 +114,7 @@ void hal_gpio_remove_int_callback(const GpioPin* gpio);
 
 /**
  * GPIO write pin
- * @param gpio GpioPin
+ * @param gpio  GpioPin
  * @param state true / false
  */
 static inline void hal_gpio_write(const GpioPin* gpio, const bool state) {

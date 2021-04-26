@@ -87,33 +87,52 @@ void hal_gpio_init(
     __enable_irq();
 }
 
-void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
-    furi_assert(gpio);
-    furi_assert(cb);
-    // Get pin number
+static uint8_t hal_gpio_get_pin_num(const GpioPin* gpio) {
     uint8_t pin_num = 0;
     for(pin_num = 0; pin_num < GPIO_NUMBER; pin_num++) {
         if(gpio->pin & (1 << pin_num))
             break;
     }
+    return pin_num;
+}
+
+void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx) {
+    furi_assert(gpio);
+    furi_assert(cb);
+
+    uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].callback = cb;
     gpio_interrupt[pin_num].context = ctx;
     gpio_interrupt[pin_num].ready = true;
 }
 
-void hal_gpio_remove_int_callback(const GpioPin* gpio) {
+void hal_gpio_enable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
-    // Get pin number
-    uint8_t pin_num = 0;
-    for(pin_num = 0; pin_num < GPIO_NUMBER; pin_num++) {
-        if(gpio->pin & (1 << pin_num))
-            break;
+
+    uint8_t pin_num = hal_gpio_get_pin_num(gpio);
+    if(gpio_interrupt[pin_num].callback) {
+        gpio_interrupt[pin_num].ready = true;
     }
+}
+
+void hal_gpio_disable_int_callback(const GpioPin* gpio) {
+    furi_assert(gpio);
+
+    uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].ready = false;
 }
 
-static void hal_gpio_callback(uint16_t pin_num) {
-    if(gpio_interrupt[pin_num].ready) {
+void hal_gpio_remove_int_callback(const GpioPin* gpio) {
+    furi_assert(gpio);
+
+    uint8_t pin_num = hal_gpio_get_pin_num(gpio);
+    gpio_interrupt[pin_num].callback = NULL;
+    gpio_interrupt[pin_num].context = NULL;
+    gpio_interrupt[pin_num].ready = false;
+}
+
+static void hal_gpio_int_call(uint16_t pin_num) {
+    if(gpio_interrupt[pin_num].callback && gpio_interrupt[pin_num].ready) {
         gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
     }
 }
@@ -122,62 +141,62 @@ static void hal_gpio_callback(uint16_t pin_num) {
 void EXTI0_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_0)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_0);
-        hal_gpio_callback(0);
+        hal_gpio_int_call(0);
     }
 }
 
 void EXTI1_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_1)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_1);
-        hal_gpio_callback(1);
+        hal_gpio_int_call(1);
     }
 }
 
 void EXTI2_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_2)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_2);
-        hal_gpio_callback(2);
+        hal_gpio_int_call(2);
     }
 }
 
 void EXTI3_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_3)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_3);
-        hal_gpio_callback(3);
+        hal_gpio_int_call(3);
     }
 }
 
 void EXTI4_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_4)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_4);
-        hal_gpio_callback(4);
+        hal_gpio_int_call(4);
     }
 }
 
 void EXTI9_5_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
-        hal_gpio_callback(5);
+        hal_gpio_int_call(5);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
-        hal_gpio_callback(6);
+        hal_gpio_int_call(6);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
-        hal_gpio_callback(7);
+        hal_gpio_int_call(7);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
-        hal_gpio_callback(8);
+        hal_gpio_int_call(8);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
-        hal_gpio_callback(9);
+        hal_gpio_int_call(9);
         return;
     }
 }
@@ -185,32 +204,32 @@ void EXTI9_5_IRQHandler(void) {
 void EXTI15_10_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
-        hal_gpio_callback(10);
+        hal_gpio_int_call(10);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
-        hal_gpio_callback(11);
+        hal_gpio_int_call(11);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
-        hal_gpio_callback(12);
+        hal_gpio_int_call(12);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
-        hal_gpio_callback(13);
+        hal_gpio_int_call(13);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
-        hal_gpio_callback(14);
+        hal_gpio_int_call(14);
         return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
-        hal_gpio_callback(15);
+        hal_gpio_int_call(15);
         return;
     }
 }
