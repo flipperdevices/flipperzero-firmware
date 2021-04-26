@@ -7,7 +7,7 @@
 
 void OneWireSlave::start(void) {
     // add exti interrupt
-    api_interrupt_add(exti_cb, InterruptTypeExternalInterrupt, this);
+    hal_gpio_add_int_callback(one_wire_pin_record, exti_cb, this);
 
     // init gpio
     hal_gpio_init(one_wire_pin_record, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
@@ -21,7 +21,7 @@ void OneWireSlave::stop(void) {
     // deinit gpio
     hal_gpio_init(one_wire_pin_record, GpioModeInput, GpioPullNo, GpioSpeedLow);
     // remove exti interrupt
-    api_interrupt_remove(exti_cb, InterruptTypeExternalInterrupt);
+    hal_gpio_remove_int_callback(one_wire_pin_record);
 
     // deattach devices
     deattach();
@@ -280,33 +280,29 @@ bool OneWireSlave::bus_start(void) {
     return result;
 }
 
-void OneWireSlave::exti_callback(void* _pin, void* _ctx) {
-    // interrupt manager get us pin constant, so...
-    uint32_t pin = (uint32_t)_pin;
+void OneWireSlave::exti_callback(void* _ctx) {
     OneWireSlave* _this = static_cast<OneWireSlave*>(_ctx);
 
-    if(pin == _this->one_wire_pin_record->pin) {
-        volatile bool input_state = gpio_read(_this->one_wire_pin_record);
-        static uint32_t pulse_start = 0;
+    volatile bool input_state = gpio_read(_this->one_wire_pin_record);
+    static uint32_t pulse_start = 0;
 
-        if(input_state) {
-            uint32_t pulse_length = (DWT->CYCCNT - pulse_start) / __instructions_per_us;
-            if(pulse_length >= OWET::RESET_MIN) {
-                if(pulse_length <= OWET::RESET_MAX) {
-                    // reset cycle ok
-                    bool result = _this->bus_start();
-                    if(result && _this->result_cb != nullptr) {
-                        _this->result_cb(result, _this->result_cb_ctx);
-                    }
-                } else {
-                    error = OneWireSlaveError::VERY_LONG_RESET;
+    if(input_state) {
+        uint32_t pulse_length = (DWT->CYCCNT - pulse_start) / __instructions_per_us;
+        if(pulse_length >= OWET::RESET_MIN) {
+            if(pulse_length <= OWET::RESET_MAX) {
+                // reset cycle ok
+                bool result = _this->bus_start();
+                if(result && _this->result_cb != nullptr) {
+                    _this->result_cb(result, _this->result_cb_ctx);
                 }
             } else {
-                error = OneWireSlaveError::VERY_SHORT_RESET;
+                error = OneWireSlaveError::VERY_LONG_RESET;
             }
         } else {
-            //FALL event
-            pulse_start = DWT->CYCCNT;
+            error = OneWireSlaveError::VERY_SHORT_RESET;
         }
+    } else {
+        //FALL event
+        pulse_start = DWT->CYCCNT;
     }
 }
