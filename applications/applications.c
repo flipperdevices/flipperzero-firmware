@@ -235,8 +235,8 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(FlipperApplication);
 
 #ifdef APP_DOLPHIN
-const FlipperApplication FLIPPER_SCENES =
-    {.app = dolphin_scene, .name = "Scenes", .stack_size = 1024, .icon = A_Games_14};
+const FlipperApplication FLIPPER_SCENE =
+    {.app = scene_app, .name = "Scenes", .stack_size = 1024, .icon = A_Games_14};
 
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
     {.app = passport, .name = "Passport", .stack_size = 1024, .icon = A_Games_14},
