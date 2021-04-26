@@ -139,6 +139,12 @@ static inline bool hal_gpio_read(const GpioPin* gpio) {
     }
 }
 
+/**
+ * Get RFID IN level
+ * @return false = LOW, true = HIGH
+ */
+bool hal_gpio_get_rfid_in_level();
+
 #ifdef __cplusplus
 }
 #endif

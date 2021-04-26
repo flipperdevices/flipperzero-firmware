@@ -236,7 +236,7 @@ void EXTI15_10_IRQHandler(void) {
 
 extern COMP_HandleTypeDef hcomp1;
 
-bool get_rfid_in_level() {
+bool hal_gpio_get_rfid_in_level() {
     bool value = false;
     if (api_hal_version_get_hw_version() > 7) {
         value = (HAL_COMP_GetOutputLevel(&hcomp1) == COMP_OUTPUT_LEVEL_LOW);
