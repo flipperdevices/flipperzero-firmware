@@ -9,7 +9,9 @@
 extern "C" {
 #endif
 
-// this defined in xx_hal_gpio.c, so...
+/**
+ * Number of gpio on one port
+ */
 #define GPIO_NUMBER (16U)
 
 /**
@@ -17,12 +19,18 @@ extern "C" {
  */
 typedef void (*GpioExtiCallback)(void* ctx);
 
+/**
+ * Gpio interrupt type
+ */
 typedef struct {
     GpioExtiCallback callback;
     void *context;
     bool ready;
 } GpioInterrupt;
 
+/**
+ * Gpio modes
+ */
 typedef enum {
     GpioModeInput,
     GpioModeOutputPushPull,
@@ -38,12 +46,18 @@ typedef enum {
     GpioModeEventRiseFall,
 } GpioMode;
 
+/**
+ * Gpio push / pull modes
+ */
 typedef enum {
     GpioPullNo = LL_GPIO_PULL_NO,
     GpioPullUp = LL_GPIO_PULL_UP,
     GpioPullDown = LL_GPIO_PULL_DOWN,
 } GpioPull;
 
+/**
+ * Gpio speed modes
+ */
 typedef enum {
     GpioSpeedLow = LL_GPIO_SPEED_FREQ_LOW,
     GpioSpeedMedium = LL_GPIO_SPEED_FREQ_MEDIUM,
@@ -51,22 +65,46 @@ typedef enum {
     GpioSpeedVeryHigh = LL_GPIO_SPEED_FREQ_VERY_HIGH,
 } GpioSpeed;
 
+/**
+ * Gpio structure
+ */
 typedef struct {
     GPIO_TypeDef* port;
     uint16_t pin;
 } GpioPin;
 
-// init GPIO
+/**
+ * GPIO initialization function
+ * @param gpio  GpioPin
+ * @param mode  GpioMode
+ * @param pull  GpioPull
+ * @param speed GpioSpeed
+ */
 void hal_gpio_init(
     const GpioPin* gpio,
     const GpioMode mode,
     const GpioPull pull,
     const GpioSpeed speed);
 
+/**
+ * Add interrupt
+ * @param gpio GpioPin
+ * @param cb GpioExtiCallback
+ * @param ctx context for callback
+ */
 void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* ctx);
+
+/**
+ * Remove interrupt
+ * @param gpio GpioPin
+ */
 void hal_gpio_remove_int_callback(const GpioPin* gpio);
 
-// write value to GPIO, false = LOW, true = HIGH
+/**
+ * GPIO write pin
+ * @param gpio GpioPin
+ * @param state true / false
+ */
 static inline void hal_gpio_write(const GpioPin* gpio, const bool state) {
     // writing to BSSR is an atomic operation
     if(state == true) {
@@ -76,7 +114,11 @@ static inline void hal_gpio_write(const GpioPin* gpio, const bool state) {
     }
 }
 
-// read value from GPIO, false = LOW, true = HIGH
+/**
+ * GPIO read pin
+ * @param gpio GpioPin
+ * @return true / false
+ */
 static inline bool hal_gpio_read(const GpioPin* gpio) {
     if((gpio->port->IDR & gpio->pin) != 0x00U) {
         return true;
