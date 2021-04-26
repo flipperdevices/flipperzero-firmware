@@ -46,10 +46,10 @@ void hal_gpio_init(
     if(mode >= GpioModeInterruptRise) {
         // Set pin in interrupt mode
         LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_INPUT);
-        LL_SYSCFG_SetEXTISource(sys_exti_port, exti_line);
+        LL_SYSCFG_SetEXTISource(sys_exti_port, sys_exti_line);
         if(mode == GpioModeInterruptRise || mode == GpioModeInterruptRiseFall) {
-            LL_EXTI_EnableIT_0_31(sys_exti_line);
-            LL_EXTI_EnableRisingTrig_0_31(sys_exti_line);
+            LL_EXTI_EnableIT_0_31(exti_line);
+            LL_EXTI_EnableRisingTrig_0_31(exti_line);
         }
         if(mode == GpioModeInterruptFall || mode == GpioModeInterruptRiseFall) {
             LL_EXTI_EnableIT_0_31(exti_line);
