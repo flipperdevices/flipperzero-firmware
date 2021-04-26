@@ -54,11 +54,11 @@ void OneWireSlave::set_result_callback(OneWireSlaveResultCallback result_cb, voi
 }
 
 void OneWireSlave::pin_set_float() {
-    gpio_write(one_wire_pin_record, true);
+    hal_gpio_write(one_wire_pin_record, true);
 }
 
 void OneWireSlave::pin_set_low() {
-    gpio_write(one_wire_pin_record, false);
+    hal_gpio_write(one_wire_pin_record, false);
 }
 
 void OneWireSlave::pin_init_interrupt_in_isr_ctx(void) {
@@ -78,7 +78,7 @@ OneWiteTimeType OneWireSlave::wait_while_gpio_is(OneWiteTimeType time, const boo
 
     do {
         time_captured = DWT->CYCCNT;
-        if(gpio_read(one_wire_pin_record) != pin_value) {
+        if(hal_gpio_read(one_wire_pin_record) != pin_value) {
             OneWiteTimeType remaining_time = time_ticks - (time_captured - start);
             remaining_time /= __instructions_per_us;
             return remaining_time;
@@ -283,7 +283,7 @@ bool OneWireSlave::bus_start(void) {
 void OneWireSlave::exti_callback(void* _ctx) {
     OneWireSlave* _this = static_cast<OneWireSlave*>(_ctx);
 
-    volatile bool input_state = gpio_read(_this->one_wire_pin_record);
+    volatile bool input_state = hal_gpio_read(_this->one_wire_pin_record);
     static uint32_t pulse_start = 0;
 
     if(input_state) {
