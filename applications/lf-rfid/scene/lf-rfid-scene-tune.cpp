@@ -10,7 +10,7 @@ void LfrfidSceneTune::on_enter(LfrfidApp* app) {
 
     view_manager->switch_to(LfrfidAppViewManager::ViewType::Tune);
 
-    reader.start();
+    reader.start(RfidReader::Type::Indala);
 }
 
 bool LfrfidSceneTune::on_event(LfrfidApp* app, LfrfidEvent* event) {

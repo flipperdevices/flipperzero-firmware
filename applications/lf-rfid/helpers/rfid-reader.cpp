@@ -18,12 +18,18 @@ struct RfidReaderAccessor {
 void RfidReader::decode(bool polarity) {
     uint32_t current_dwt_value = DWT->CYCCNT;
 
-    decoder_em.process_front(polarity, current_dwt_value - last_dwt_value);
-    decoder_hid26.process_front(polarity, current_dwt_value - last_dwt_value);
-    //decoder_indala.process_front(polarity, current_dwt_value - last_dwt_value);
-    //decoder_analyzer.process_front(polarity, current_dwt_value - last_dwt_value);
+    switch(type) {
+    case Type::Normal:
+        decoder_em.process_front(polarity, current_dwt_value - last_dwt_value);
+        decoder_hid26.process_front(polarity, current_dwt_value - last_dwt_value);
+        //decoder_indala.process_front(polarity, current_dwt_value - last_dwt_value);
+        //decoder_analyzer.process_front(polarity, current_dwt_value - last_dwt_value);
 
-    last_dwt_value = current_dwt_value;
+        last_dwt_value = current_dwt_value;
+        break;
+    case Type::Indala:
+        break;
+    }
 }
 
 static void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
@@ -39,9 +45,19 @@ static void comparator_trigger_callback(void* hcomp, void* comp_ctx) {
 RfidReader::RfidReader() {
 }
 
-void RfidReader::start() {
+void RfidReader::start(Type _type) {
+    type = _type;
+
     start_gpio();
-    start_timer();
+    switch(type) {
+    case Type::Normal:
+        start_timer();
+        break;
+    case Type::Indala:
+        start_timer_indala();
+        break;
+    }
+
     start_comparator();
 }
 
@@ -74,7 +90,7 @@ void RfidReader::start_comparator(void) {
     api_interrupt_add(comparator_trigger_callback, InterruptTypeComparatorTrigger, this);
     last_dwt_value = DWT->CYCCNT;
 
-    hcomp1.Init.InputMinus = COMP_INPUT_MINUS_VREFINT;
+    hcomp1.Init.InputMinus = COMP_INPUT_MINUS_1_2VREFINT;
     hcomp1.Init.InputPlus = COMP_INPUT_PLUS_IO1;
     hcomp1.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;
     hcomp1.Init.Hysteresis = COMP_HYSTERESIS_LOW;
@@ -173,7 +189,14 @@ void RfidReader::start_timer(void) {
     */
 
     hal_pwmn_set(0.5, 125000, &LFRFID_TIM, LFRFID_CH);
-    //LFRFID_TIM.Instance->ARR = 511;
+    LFRFID_TIM.Instance->ARR = 511;
+    LFRFID_TIM.Instance->CCR1 = 255;
+}
+
+void RfidReader::start_timer_indala(void) {
+    hal_pwmn_set(0.25, 62500, &LFRFID_TIM, LFRFID_CH);
+    LFRFID_TIM.Instance->ARR = 1023;
+    LFRFID_TIM.Instance->CCR1 = 255;
 }
 
 void RfidReader::start_gpio(void) {
@@ -210,8 +233,8 @@ void RfidReader::stop_comparator(void) {
 
 void RfidReader::stop_timer(void) {
     // reset IRDA timer
-    hal_pwm_stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
-    MX_TIM2_Init();
+    //hal_pwm_stop(&IRDA_RX_TIM, IRDA_RX_FALLING_CH);
+    //MX_TIM2_Init();
 
     hal_pwmn_stop(&LFRFID_TIM, LFRFID_CH);
 }

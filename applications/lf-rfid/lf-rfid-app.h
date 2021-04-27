@@ -4,8 +4,14 @@
 #include "lf-rfid-view-manager.h"
 
 #include "scene/lf-rfid-scene-start.h"
-#include "scene/lf-rfid-scene-read.h"
+#include "scene/lf-rfid-scene-emulate-indala.h"
+#include "scene/lf-rfid-scene-emulate-hid.h"
+#include "scene/lf-rfid-scene-read-normal.h"
+#include "scene/lf-rfid-scene-read-indala.h"
 #include "scene/lf-rfid-scene-tune.h"
+
+#include "helpers/rfid-reader.h"
+#include "helpers/rfid-timer-emulator.h"
 
 class LfrfidApp {
 public:
@@ -17,7 +23,10 @@ public:
     enum class Scene : uint8_t {
         Exit,
         Start,
-        Read,
+        ReadNormal,
+        ReadIndala,
+        EmulateIndala,
+        EmulateHID,
         Tune,
     };
 
@@ -36,6 +45,9 @@ public:
     uint8_t get_text_store_size();
     void set_text_store(const char* text...);
 
+    RfidReader* get_reader();
+    RfidTimerEmulator* get_emulator();
+
 private:
     std::list<Scene> previous_scenes_list = {Scene::Exit};
     Scene current_scene = Scene::Start;
@@ -43,10 +55,16 @@ private:
 
     std::map<Scene, LfrfidScene*> scenes = {
         {Scene::Start, new LfrfidSceneStart()},
-        {Scene::Read, new LfrfidSceneRead()},
+        {Scene::ReadNormal, new LfrfidSceneReadNormal()},
+        {Scene::ReadIndala, new LfrfidSceneReadIndala()},
+        {Scene::EmulateIndala, new LfrfidSceneEmulateIndala()},
+        {Scene::EmulateHID, new LfrfidSceneEmulateHID()},
         {Scene::Tune, new LfrfidSceneTune()},
     };
 
     static const uint8_t text_store_size = 128;
     char text_store[text_store_size + 1];
+
+    RfidReader reader;
+    RfidTimerEmulator emulator;
 };

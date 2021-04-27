@@ -131,3 +131,11 @@ void LfrfidApp::set_text_store(const char* text...) {
 
     va_end(args);
 }
+
+RfidReader* LfrfidApp::get_reader() {
+    return &reader;
+}
+
+RfidTimerEmulator* LfrfidApp::get_emulator() {
+    return &emulator;
+}

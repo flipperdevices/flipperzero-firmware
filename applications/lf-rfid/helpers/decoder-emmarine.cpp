@@ -6,7 +6,7 @@
 constexpr uint32_t clocks_in_us = 64;
 constexpr uint32_t short_time = 255 * clocks_in_us;
 constexpr uint32_t long_time = 510 * clocks_in_us;
-constexpr uint32_t jitter_time = 50 * clocks_in_us;
+constexpr uint32_t jitter_time = 100 * clocks_in_us;
 
 constexpr uint32_t short_time_low = short_time - jitter_time;
 constexpr uint32_t short_time_high = short_time + jitter_time;

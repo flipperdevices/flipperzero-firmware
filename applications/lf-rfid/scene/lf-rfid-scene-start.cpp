@@ -5,9 +5,10 @@
 #include <callback-connector.h>
 
 typedef enum {
-    SubmenuIndexRead,
-    SubmenuIndexEmulateEM,
+    SubmenuIndexReadNormal,
+    SubmenuIndexReadIndala,
     SubmenuIndexEmulateHID,
+    SubmenuIndexEmulateIndala,
     SubmenuIndexTune
 } SubmenuIndex;
 
@@ -16,12 +17,15 @@ void LfrfidSceneStart::on_enter(LfrfidApp* app) {
     Submenu* submenu = view_manager->get_submenu();
     auto callback = cbc::obtain_connector(this, &LfrfidSceneStart::submenu_callback);
 
-    submenu_add_item(submenu, "Read", SubmenuIndexRead, callback, app);
-    submenu_add_item(submenu, "Emulate EM", SubmenuIndexEmulateEM, callback, app);
+    submenu_add_item(submenu, "Read Normal", SubmenuIndexReadNormal, callback, app);
+    submenu_add_item(submenu, "Read Indala", SubmenuIndexReadIndala, callback, app);
     submenu_add_item(submenu, "Emulate HID", SubmenuIndexEmulateHID, callback, app);
+    submenu_add_item(submenu, "Emulate Indala", SubmenuIndexEmulateIndala, callback, app);
     submenu_add_item(submenu, "Tune", SubmenuIndexTune, callback, app);
 
     view_manager->switch_to(LfrfidAppViewManager::ViewType::Submenu);
+
+    //emulator.start();
 }
 
 bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
@@ -29,22 +33,17 @@ bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
 
     if(event->type == LfrfidEvent::Type::MenuSelected) {
         switch(event->payload.menu_index) {
-        case SubmenuIndexRead:
-            app->switch_to_next_scene(LfrfidApp::Scene::Read);
+        case SubmenuIndexReadNormal:
+            app->switch_to_next_scene(LfrfidApp::Scene::ReadNormal);
             break;
-        case SubmenuIndexEmulateEM:
-            app->notify_green_on();
-            emulator.start();
-            emulator.emulate(LfrfidKeyType::KeyEmarine, nullptr, 0);
-            emulator.stop();
-            app->notify_green_off();
+        case SubmenuIndexReadIndala:
+            app->switch_to_next_scene(LfrfidApp::Scene::ReadIndala);
             break;
         case SubmenuIndexEmulateHID:
-            app->notify_green_on();
-            emulator.start();
-            emulator.emulate(LfrfidKeyType::KeyHID, nullptr, 0);
-            emulator.stop();
-            app->notify_green_off();
+            app->switch_to_next_scene(LfrfidApp::Scene::EmulateHID);
+            break;
+        case SubmenuIndexEmulateIndala:
+            app->switch_to_next_scene(LfrfidApp::Scene::EmulateIndala);
             break;
         case SubmenuIndexTune:
             app->switch_to_next_scene(LfrfidApp::Scene::Tune);
@@ -52,10 +51,6 @@ bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
         }
         consumed = true;
     }
-
-    /*if(event->type == LfrfidEvent::Type::Tick) {
-        emulator.emulate(LfrfidKeyType::KeyEmarine, nullptr, 0);
-    }*/
 
     return consumed;
 }
