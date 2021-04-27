@@ -27,10 +27,12 @@ void platformIrqWorker() {
 }
 
 void platformEnableIrqCallback() {
+    hal_gpio_init(&pin, GpioModeInterruptRise, GpioPullNo, GpioSpeedLow);
     hal_gpio_enable_int_callback(&pin);
 }
 
 void platformDisableIrqCallback() {
+    hal_gpio_init(&pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
     hal_gpio_disable_int_callback(&pin);
 }
 
