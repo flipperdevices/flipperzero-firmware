@@ -32,7 +32,7 @@ void flipper_init() {
     printf("[flipper] starting services\r\n");
 
     for(size_t i = 0; i < FLIPPER_SERVICES_COUNT; i++) {
-        printf("[flipper] starting service %s\r\n", FLIPPER_SERVICES[i].name);
+        FURI_LOGI("FLIPPER", "starting service %s", FLIPPER_SERVICES[i].name);
 
         FuriThread* thread = furi_thread_alloc();
 
@@ -43,5 +43,5 @@ void flipper_init() {
         furi_thread_start(thread);
     }
 
-    printf("[flipper] services startup complete\r\n");
+    FURI_LOGD("FLIPPER", "services startup complete");
 }
