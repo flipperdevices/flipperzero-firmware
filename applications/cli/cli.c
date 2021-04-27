@@ -1,5 +1,7 @@
 #include "cli_i.h"
 #include "cli_commands.h"
+#include <version.h>
+#include <api-hal-version.h>
 
 Cli* cli_alloc() {
     Cli* cli = furi_alloc(sizeof(Cli));
@@ -48,16 +50,34 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
     return api_hal_vcp_rx(buffer, size);
 }
 
-void cli_print_version() {
-    printf("Build date:" BUILD_DATE ". "
-           "Git Commit:" GIT_COMMIT ". "
-           "Git Branch:" GIT_BRANCH ". "
-           "Commit Number:" GIT_BRANCH_NUM ".");
+bool cli_cmd_interrupt_received(Cli* cli) {
+    char c;
+    api_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 1);
+    return c == CliSymbolAsciiETX;
+}
+
+void cli_print_version(const Version* version) {
+    if(version) {
+        printf("\tVersion:\t%s\r\n", version_get_version(version));
+        printf("\tBuild date:\t%s\r\n", version_get_builddate(version));
+        printf(
+            "\tGit Commit:\t%s (%s)\r\n",
+            version_get_githash(version),
+            version_get_gitbranchnum(version));
+        printf("\tGit Branch:\t%s\r\n", version_get_gitbranch(version));
+    } else {
+        printf("\tNo build info\r\n");
+    }
 }
 
 void cli_motd() {
     printf("Flipper cli.\r\n");
-    cli_print_version();
+
+    printf("Bootloader\r\n");
+    cli_print_version(api_hal_version_get_boot_version());
+
+    printf("Firmware\r\n");
+    cli_print_version(api_hal_version_get_fw_version());
 }
 
 void cli_nl() {

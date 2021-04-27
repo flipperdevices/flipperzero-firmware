@@ -18,6 +18,7 @@ DICT_DEF2(CliCommandDict, string_t, STRING_OPLIST, CliCommand, M_POD_OPLIST)
 
 typedef enum {
     CliSymbolAsciiSOH = 0x01,
+    CliSymbolAsciiETX = 0x03,
     CliSymbolAsciiEOT = 0x04,
     CliSymbolAsciiBell = 0x07,
     CliSymbolAsciiBackspace = 0x08,
@@ -38,6 +39,6 @@ struct Cli {
 Cli* cli_alloc();
 void cli_free(Cli* cli);
 void cli_reset_state(Cli* cli);
-void cli_print_version();
+void cli_print_version(const Version* version);
 void cli_putc(char c);
 void cli_stdout_callback(void* _cookie, const char* data, size_t size);
