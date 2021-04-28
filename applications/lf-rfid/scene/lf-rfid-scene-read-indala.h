@@ -2,7 +2,6 @@
 #include "lf-rfid-scene-generic.h"
 #include "../helpers/key-info.h"
 
-
 class LfrfidSceneReadIndala : public LfrfidScene {
 public:
     void on_enter(LfrfidApp* app) final;
