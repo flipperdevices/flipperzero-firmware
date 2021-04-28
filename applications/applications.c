@@ -33,8 +33,9 @@ int32_t sd_filesystem(void* p);
 int32_t subghz_app(void* p);
 int32_t gui_test(void* p);
 int32_t keypad_test(void* p);
-int32_t dolphin_scene(void* p);
+int32_t scene_app(void* p);
 int32_t passport(void* p);
+int32_t app_accessor(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef APP_CLI
@@ -149,8 +150,8 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
 
-#ifdef APP_DOLPHIN_SCENE
-    {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14},
+#ifdef APP_ACCESSOR
+    {.app = app_accessor, .name = "accessor", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 };
@@ -184,12 +185,13 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {
-#ifdef BUILD_EXAMPLE_BLINK
-    {.app = application_blink, .name = "blink", .stack_size = 1024, .icon = A_Plugins_14},
+
+#ifdef BUILD_MUSIC_PLAYER
+    {.app = music_player, .name = "music player", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef BUILD_EXAMPLE_INPUT_DUMP
-    {.app = application_input_dump, .name = "input dump", .stack_size = 1024, .icon = A_Plugins_14},
+#ifdef BUILD_FLOOPPER_BLOOPPER
+    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
 #ifdef BUILD_SPEAKER_DEMO
@@ -199,20 +201,26 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
      .icon = A_Plugins_14},
 #endif
 
+};
+
+const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
+
+// Plugin menu
+const FlipperApplication FLIPPER_DEBUG_APPS[] = {
+#ifdef BUILD_EXAMPLE_BLINK
+    {.app = application_blink, .name = "blink", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
+#ifdef BUILD_EXAMPLE_INPUT_DUMP
+    {.app = application_input_dump, .name = "input dump", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
 #ifdef BUILD_SD_TEST
     {.app = sd_card_test, .name = "sd_card_test", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 #ifdef BUILD_VIBRO_DEMO
     {.app = application_vibro, .name = "vibro", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
-#ifdef BUILD_MUSIC_PLAYER
-    {.app = music_player, .name = "music player", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
-#ifdef BUILD_FLOOPPER_BLOOPPER
-    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
 #ifdef BUILD_SDNFC
@@ -227,13 +235,17 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
     {.app = keypad_test, .name = "keypad_test", .icon = A_Plugins_14},
 #endif
 
+#ifdef BUILD_ACCESSOR
+    {.app = app_accessor, .name = "accessor", .stack_size = 4096, .icon = A_Plugins_14},
+#endif
+
 };
 
-const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
+const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(FlipperApplication);
 
-#ifdef BUILD_DOLPHIN_SCENE
-const FlipperApplication FLIPPER_SCENES =
-    {.app = dolphin_scene, .name = "Dolphin [beta]", .stack_size = 1024, .icon = A_Games_14};
+#ifdef APP_DOLPHIN
+const FlipperApplication FLIPPER_SCENE =
+    {.app = scene_app, .name = "Scenes", .stack_size = 1024, .icon = A_Games_14};
 
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
     {.app = passport, .name = "Passport", .stack_size = 1024, .icon = A_Games_14},
