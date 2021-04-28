@@ -235,7 +235,7 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
                 model->screen = (model->screen + 1) % NUM_INFO_SCREENS;
                 return true;
             });
-    } 
+    }
     if(event->key == InputKeyUp) {
         with_view_model(
             dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
