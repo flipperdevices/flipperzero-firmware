@@ -6,7 +6,7 @@
 
 void LfrfidSceneTune::on_enter(LfrfidApp* app) {
     LfrfidAppViewManager* view_manager = app->get_view_manager();
-    LfRfidViewTune* tune = view_manager->get_tune();
+    //LfRfidViewTune* tune = view_manager->get_tune();
 
     view_manager->switch_to(LfrfidAppViewManager::ViewType::Tune);
 
@@ -29,7 +29,7 @@ bool LfrfidSceneTune::on_event(LfrfidApp* app, LfrfidEvent* event) {
 }
 
 void LfrfidSceneTune::on_exit(LfrfidApp* app) {
-    LfRfidViewTune* tune = app->get_view_manager()->get_tune();
+    //LfRfidViewTune* tune = app->get_view_manager()->get_tune();
 
     reader.stop();
 }
