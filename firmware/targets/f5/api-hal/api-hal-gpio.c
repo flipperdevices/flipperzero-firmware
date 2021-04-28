@@ -27,7 +27,7 @@
 #define GET_SYSCFG_EXTI_LINE(pin)   GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
 #define GET_EXTI_LINE(pin)          GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
 
-static GpioInterrupt gpio_interrupt[GPIO_NUMBER];
+static volatile GpioInterrupt gpio_interrupt[GPIO_NUMBER];
 
 void hal_gpio_init(
     const GpioPin* gpio,
@@ -117,35 +117,43 @@ void hal_gpio_add_int_callback(const GpioPin* gpio, GpioExtiCallback cb, void* c
     furi_assert(gpio);
     furi_assert(cb);
 
+    __disable_irq();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].callback = cb;
     gpio_interrupt[pin_num].context = ctx;
     gpio_interrupt[pin_num].ready = true;
+    __enable_irq();
 }
 
 void hal_gpio_enable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
+    __disable_irq();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     if(gpio_interrupt[pin_num].callback) {
         gpio_interrupt[pin_num].ready = true;
     }
+    __enable_irq();
 }
 
 void hal_gpio_disable_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
+    __disable_irq();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].ready = false;
+    __enable_irq();
 }
 
 void hal_gpio_remove_int_callback(const GpioPin* gpio) {
     furi_assert(gpio);
 
+    __disable_irq();
     uint8_t pin_num = hal_gpio_get_pin_num(gpio);
     gpio_interrupt[pin_num].callback = NULL;
     gpio_interrupt[pin_num].context = NULL;
     gpio_interrupt[pin_num].ready = false;
+    __enable_irq();
 }
 
 static void hal_gpio_int_call(uint16_t pin_num) {
