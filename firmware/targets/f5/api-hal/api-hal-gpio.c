@@ -41,8 +41,25 @@ void hal_gpio_init(
 
     // Configure gpio with interrupts disabled
     __disable_irq();
-    LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, speed);
-    LL_GPIO_SetPinPull(gpio->port, gpio->pin, pull);
+    // Set gpio speed
+    if(speed == GpioSpeedLow) {
+        LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, LL_GPIO_SPEED_FREQ_LOW);
+    } else if(speed == GpioSpeedMedium) {
+        LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, LL_GPIO_SPEED_FREQ_MEDIUM);
+    } else if(speed == GpioSpeedHigh) {
+        LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, LL_GPIO_SPEED_FREQ_HIGH);
+    } else {
+        LL_GPIO_SetPinSpeed(gpio->port, gpio->pin, LL_GPIO_SPEED_FREQ_VERY_HIGH);
+    }
+    // Set gpio pull mode
+    if(pull == GpioPullNo) {
+        LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_NO);
+    } else if(pull == GpioPullUp) {
+        LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_UP);
+    } else {
+        LL_GPIO_SetPinPull(gpio->port, gpio->pin, LL_GPIO_PULL_DOWN);
+    }
+    // Set gpio mode
     if(mode >= GpioModeInterruptRise) {
         // Set pin in interrupt mode
         LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_INPUT);
@@ -74,10 +91,10 @@ void hal_gpio_init(
         // Set not interrupt pin modes
         if(mode == GpioModeInput) {
             LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_INPUT);
-        } else if(mode == GpioModeOutputPushPull) {
+        } else if(mode == GpioModeOutputPushPull || mode == GpioModeAltFunctionPushPull) {
             LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_OUTPUT);
             LL_GPIO_SetPinOutputType(gpio->port, gpio->pin, LL_GPIO_OUTPUT_PUSHPULL);
-        } else if(mode == GpioModeOutputOpenDrain) {
+        } else if(mode == GpioModeOutputOpenDrain || mode == GpioModeAltFunctionOpenDrain) {
             LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_OUTPUT);
             LL_GPIO_SetPinOutputType(gpio->port, gpio->pin, LL_GPIO_OUTPUT_OPENDRAIN);
         } else if(mode == GpioModeAnalog) {
@@ -177,27 +194,22 @@ void EXTI9_5_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_5)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_5);
         hal_gpio_int_call(5);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_6)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_6);
         hal_gpio_int_call(6);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_7)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_7);
         hal_gpio_int_call(7);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_8)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_8);
         hal_gpio_int_call(8);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_9)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_9);
         hal_gpio_int_call(9);
-        return;
     }
 }
 
@@ -205,32 +217,26 @@ void EXTI15_10_IRQHandler(void) {
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_10)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_10);
         hal_gpio_int_call(10);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_11)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_11);
         hal_gpio_int_call(11);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_12)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_12);
         hal_gpio_int_call(12);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_13)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_13);
         hal_gpio_int_call(13);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_14)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_14);
         hal_gpio_int_call(14);
-        return;
     }
     if(LL_EXTI_IsActiveFlag_0_31(LL_EXTI_LINE_15)) {
         LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_15);
         hal_gpio_int_call(15);
-        return;
     }
 }
 

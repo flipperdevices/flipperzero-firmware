@@ -50,19 +50,19 @@ typedef enum {
  * Gpio pull modes
  */
 typedef enum {
-    GpioPullNo = LL_GPIO_PULL_NO,
-    GpioPullUp = LL_GPIO_PULL_UP,
-    GpioPullDown = LL_GPIO_PULL_DOWN,
+    GpioPullNo,
+    GpioPullUp,
+    GpioPullDown,
 } GpioPull;
 
 /**
  * Gpio speed modes
  */
 typedef enum {
-    GpioSpeedLow = LL_GPIO_SPEED_FREQ_LOW,
-    GpioSpeedMedium = LL_GPIO_SPEED_FREQ_MEDIUM,
-    GpioSpeedHigh = LL_GPIO_SPEED_FREQ_HIGH,
-    GpioSpeedVeryHigh = LL_GPIO_SPEED_FREQ_VERY_HIGH,
+    GpioSpeedLow,
+    GpioSpeedMedium,
+    GpioSpeedHigh,
+    GpioSpeedVeryHigh,
 } GpioSpeed;
 
 /**
