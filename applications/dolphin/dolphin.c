@@ -122,6 +122,13 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
         }
     } else {
         // locked
+
+        with_view_model(
+            dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                model->show_hint = true;
+                return true;
+            });
+
         dolphin_lock_handler(event, dolphin);
         dolphin_scene_handler_switch_scene(dolphin);
     }

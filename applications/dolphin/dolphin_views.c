@@ -59,7 +59,18 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinViewMainModel* m = model;
-    if(m->animation) canvas_draw_icon(canvas, 0, -3, m->animation);
+    if(m->animation) {
+        canvas_draw_icon(canvas, 0, -3, m->animation);
+    }
+
+    if(m->show_hint) {
+        m->hint_timeout = CLAMP(m->hint_timeout - 1, 255, 0);
+        elements_multiline_text_framed(canvas, 45, 30, "Locked");
+    }
+
+    if(m->hint_timeout == 0) {
+        m->show_hint = false;
+    }
 }
 
 void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
