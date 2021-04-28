@@ -91,26 +91,7 @@ int32_t app_loader(void* p) {
             }
         });
 
-    // //
-    // with_value_mutex(
-    //     menu_mutex, (Menu * menu) {
-    //         menu_item_add(
-    //             menu, menu_item_alloc_function("U2F", assets_icons_get(A_U2F_14), NULL, NULL));
-    //         menu_item_add(
-    //             menu,
-    //             menu_item_alloc_function(
-    //                 "File Manager", assets_icons_get(A_FileManager_14), NULL, NULL));
-    //         menu_item_add(
-    //             menu, menu_item_alloc_function("Games", assets_icons_get(A_Games_14), NULL, NULL));
-    //         menu_item_add(
-    //             menu,
-    //             menu_item_alloc_function("Passport", assets_icons_get(A_Passport_14), NULL, NULL));
-    //         menu_item_add(
-    //             menu,
-    //             menu_item_alloc_function("Settings", assets_icons_get(A_Settings_14), NULL, NULL));
-    //     });
-
-    // plugins
+    // Plugins
     with_value_mutex(
         menu_mutex, (Menu * menu) {
             MenuItem* menu_plugins =
