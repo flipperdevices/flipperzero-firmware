@@ -6,15 +6,34 @@
 #include <input/input.h>
 #include <furi.h>
 
-// Idle scree
+#ifndef MAX
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#endif
+
+#ifndef MIN
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#endif
+
+#ifndef CLAMP
+#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
+#endif
+
+// Idle screen
 typedef enum {
     DolphinViewIdleMain,
     DolphinViewFirstStart,
-    DolphinViewIdleUp,
-    DolphinViewIdleDown,
+    DolphinViewStats,
     DolphinViewHwMismatch,
     DolphinViewLockMenu,
 } DolphinViewIdle;
+
+// Debug info
+typedef enum {
+    FW_INFO,
+    BOOT_INFO,
+    DOLPHIN_INFO,
+    NUM_INFO_SCREENS,
+} DolphinViewStatsScreens;
 
 typedef struct {
     uint32_t page;
@@ -26,15 +45,15 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context);
 typedef struct {
     uint32_t icounter;
     uint32_t butthurt;
-} DolphinViewIdleUpModel;
-
-typedef struct {
-    bool show_fw_or_boot;
-} DolphinViewIdleDownModel;
+    DolphinViewStatsScreens screen;
+} DolphinViewStatsModel;
 
 typedef struct {
     uint8_t idx;
-} DolphinViewMenuModel;
+    int8_t door_left_x;
+    int8_t door_right_x;
+    bool locked;
+} DolphinViewLockMenuModel;
 
 typedef struct {
     Icon* animation;

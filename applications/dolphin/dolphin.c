@@ -61,78 +61,89 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
             }
         }
     }
-    // All events consumed
+    // All evennts cosumed
     return true;
+}
+
+void dolphin_lock_handler(InputEvent* event, Dolphin* dolphin) {
+    furi_assert(event);
+    furi_assert(dolphin);
+    if(event->key == InputKeyBack) {
+        uint32_t press_time = HAL_GetTick();
+        // check if pressed sequentially
+        if(press_time - dolphin->lock_lastpress > 50) {
+            dolphin->lock_lastpress = press_time;
+            // 2do show hint popup
+        } else if(press_time - dolphin->lock_lastpress < 50) {
+            dolphin->lock_count++;
+        }
+
+        if(dolphin->lock_count == 3) {
+            // unlock
+            dolphin->locked = false;
+            dolphin->lock_count = 0;
+
+            // set lock menu defaults
+            with_view_model(
+                dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                    model->locked = false;
+                    model->door_left_x = -57; // defaults
+                    model->door_right_x = 115; // defaults
+                    return true;
+                });
+
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+            view_port_enabled_set(dolphin->lock_viewport, false);
+        }
+    }
 }
 
 bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Dolphin* dolphin = context;
-
-    if(event->type == InputTypeShort) {
-        if(!dolphin->locked) {
-            if(event->key == InputKeyOk) {
-                with_value_mutex(
-                    dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
-            } else if(event->key == InputKeyUp) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
-            } else if(event->key == InputKeyLeft) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleUp);
-            } else if(event->key == InputKeyRight) {
-                dolphin_switch_to_interactive_scene(dolphin, &FLIPPER_SCENE);
-            } else if(event->key == InputKeyDown) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleDown);
-            }
-            if(event->key == InputKeyBack) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-            }
-        } else {
-            if(event->key == InputKeyBack) {
-                dolphin->lock_count++;
-                if(dolphin->lock_count == 3) {
-                    dolphin->locked = false;
-                    dolphin->lock_count = 0;
-                    view_dispatcher_switch_to_view(
-                        dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-                    view_port_enabled_set(dolphin->lock_viewport, false);
-                }
-            }
+    // unlocked
+    if(!dolphin->locked) {
+        if(event->key == InputKeyOk && event->type == InputTypeShort) {
+            with_value_mutex(
+                dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
+        } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
+        } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+            //fav app
+        } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
+            dolphin_switch_to_interactive_scene(dolphin, &FLIPPER_SCENE);
+        } else if(event->key == InputKeyDown && event->type == InputTypeShort) {
+            // open archive
+        } else if(event->key == InputKeyDown && event->type == InputTypeLong) {
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewStats);
+        } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         }
+    } else {
+        // locked
+        dolphin_lock_handler(event, dolphin);
         dolphin_scene_handler_switch_scene(dolphin);
     }
-
     // All events consumed
-    return true;
-}
-
-bool dolphin_view_idle_up_input(InputEvent* event, void* context) {
-    furi_assert(event);
-    furi_assert(context);
-    Dolphin* dolphin = context;
-
-    if(event->type != InputTypeShort) return false;
-
-    if(event->key == InputKeyLeft) {
-        dolphin_deed(dolphin, DolphinDeedWrong);
-    } else if(event->key == InputKeyRight) {
-        dolphin_deed(dolphin, DolphinDeedIButtonRead);
-    } else if(event->key == InputKeyOk) {
-        dolphin_save(dolphin);
-    } else {
-        return false;
-    }
-
     return true;
 }
 
 static void lock_menu_callback(void* context, uint8_t index) {
     Dolphin* dolphin = context;
     switch(index) {
+    // lock
     case 0:
+        with_view_model(
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                model->locked = true;
+                return true;
+            });
+
         dolphin->locked = true;
-        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-        view_port_enabled_set(dolphin->lock_viewport, true);
+        //view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+        view_port_enabled_set(dolphin->lock_viewport, dolphin->locked);
+
         break;
     default:
         break;
@@ -149,43 +160,49 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Dolphin* dolphin = context;
+    bool locked;
+
+    with_view_model(
+        dolphin->idle_view_dolphin_stats, (DolphinViewLockMenuModel * model) {
+            locked = model->locked;
+            return true;
+        });
 
     if(event->type != InputTypeShort) return false;
 
     if(event->key == InputKeyUp) {
         with_view_model(
-            dolphin->view_lockmenu, (DolphinViewMenuModel * model) {
-                if(model->idx <= 0)
-                    model->idx = 0;
-                else
-                    --model->idx;
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                model->idx = CLAMP(model->idx - 1, 2, 0);
                 return true;
             });
     } else if(event->key == InputKeyDown) {
         with_view_model(
-            dolphin->view_lockmenu, (DolphinViewMenuModel * model) {
-                if(model->idx >= 2)
-                    model->idx = 2;
-                else
-                    ++model->idx;
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                model->idx = CLAMP(model->idx + 1, 2, 0);
                 return true;
             });
     } else if(event->key == InputKeyOk) {
         with_view_model(
-            dolphin->view_lockmenu, (DolphinViewMenuModel * model) {
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
                 lock_menu_callback(context, model->idx);
                 return true;
             });
     } else if(event->key == InputKeyBack) {
         with_view_model(
-            dolphin->view_lockmenu, (DolphinViewMenuModel * model) {
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
                 model->idx = 0;
                 return true;
             });
+
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
 
         if(random() % 100 > 50)
             dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
+    }
+
+    if(locked == true) {
+        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
     }
 
     return true;
@@ -195,27 +212,47 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Dolphin* dolphin = context;
+    DolphinViewStatsScreens current;
+
+    with_view_model(
+        dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
+            current = model->screen;
+            return true;
+        });
 
     if(event->type != InputTypeShort) return false;
 
-    if((event->key == InputKeyLeft) || (event->key == InputKeyRight)) {
+    if(event->key == InputKeyDown) {
         with_view_model(
-            dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
-                model->show_fw_or_boot = !model->show_fw_or_boot;
+            dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
+                model->screen = (model->screen + 1) % NUM_INFO_SCREENS;
                 return true;
             });
+    } else if(event->key == InputKeyUp) {
+        with_view_model(
+            dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
+                model->screen = (model->screen - 1) % NUM_INFO_SCREENS;
+                return true;
+            });
+    }
+
+    if(current == DOLPHIN_INFO) {
+        if(event->key == InputKeyLeft) {
+            dolphin_deed(dolphin, DolphinDeedWrong);
+        } else if(event->key == InputKeyRight) {
+            dolphin_deed(dolphin, DolphinDeedIButtonRead);
+        } else if(event->key == InputKeyOk) {
+            dolphin_save(dolphin);
+        } else {
+            return false;
+        }
     }
 
     if(event->key == InputKeyBack) {
-        with_view_model(
-            dolphin->idle_view_down, (DolphinViewIdleDownModel * model) {
-                model->show_fw_or_boot = 0;
-                return true;
-            });
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
     }
 
-    return false;
+    return true;
 }
 
 Dolphin* dolphin_alloc() {
@@ -229,10 +266,8 @@ Dolphin* dolphin_alloc() {
     dolphin->menu_vm = furi_record_open("menu");
     // Scene thread
     dolphin->scene_thread = furi_thread_alloc();
-
     // GUI
     dolphin->gui = furi_record_open("gui");
-
     // Dispatcher
     dolphin->idle_view_dispatcher = view_dispatcher_alloc();
 
@@ -250,46 +285,42 @@ Dolphin* dolphin_alloc() {
     dolphin->idle_view_main = view_alloc();
     view_set_context(dolphin->idle_view_main, dolphin);
     view_allocate_model(
-        dolphin->idle_view_main, ViewModelTypeLockFree, sizeof(DolphinViewIdleUpModel));
+        dolphin->idle_view_main, ViewModelTypeLockFree, sizeof(DolphinViewMainModel));
 
     view_set_draw_callback(dolphin->idle_view_main, dolphin_view_idle_main_draw);
     view_set_input_callback(dolphin->idle_view_main, dolphin_view_idle_main_input);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewIdleMain, dolphin->idle_view_main);
 
-    // Stats Idle View
-    dolphin->idle_view_up = view_alloc();
-    view_set_context(dolphin->idle_view_up, dolphin);
-
-    view_allocate_model(
-        dolphin->idle_view_up, ViewModelTypeLockFree, sizeof(DolphinViewMainModel));
-    view_set_draw_callback(dolphin->idle_view_up, dolphin_view_idle_up_draw);
-    view_set_input_callback(dolphin->idle_view_up, dolphin_view_idle_up_input);
-    view_set_previous_callback(dolphin->idle_view_up, dolphin_view_idle_back);
-    view_dispatcher_add_view(
-        dolphin->idle_view_dispatcher, DolphinViewIdleUp, dolphin->idle_view_up);
-
     // Lock Menu View
     dolphin->view_lockmenu = view_alloc();
     view_set_context(dolphin->view_lockmenu, dolphin);
     view_allocate_model(
-        dolphin->view_lockmenu, ViewModelTypeLockFree, sizeof(DolphinViewMenuModel));
+        dolphin->view_lockmenu, ViewModelTypeLockFree, sizeof(DolphinViewLockMenuModel));
     view_set_draw_callback(dolphin->view_lockmenu, dolphin_view_lockmenu_draw);
     view_set_input_callback(dolphin->view_lockmenu, dolphin_view_lockmenu_input);
     view_set_previous_callback(dolphin->view_lockmenu, dolphin_view_idle_back);
     view_dispatcher_add_view(
         dolphin->idle_view_dispatcher, DolphinViewLockMenu, dolphin->view_lockmenu);
 
-    // Down Idle View
-    dolphin->idle_view_down = view_alloc();
-    view_set_context(dolphin->idle_view_down, dolphin);
+    // default doors xpos
+    with_view_model(
+        dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+            model->door_left_x = -57; // defaults
+            model->door_right_x = 115; // defaults
+            return true;
+        });
+
+    // Stats Idle View
+    dolphin->idle_view_dolphin_stats = view_alloc();
+    view_set_context(dolphin->idle_view_dolphin_stats, dolphin);
     view_allocate_model(
-        dolphin->idle_view_down, ViewModelTypeLockFree, sizeof(DolphinViewIdleDownModel));
-    view_set_draw_callback(dolphin->idle_view_down, dolphin_view_idle_down_draw);
-    view_set_input_callback(dolphin->idle_view_down, dolphin_view_idle_down_input);
-    view_set_previous_callback(dolphin->idle_view_down, dolphin_view_idle_back);
+        dolphin->idle_view_dolphin_stats, ViewModelTypeLockFree, sizeof(DolphinViewStatsModel));
+    view_set_draw_callback(dolphin->idle_view_dolphin_stats, dolphin_view_idle_down_draw);
+    view_set_input_callback(dolphin->idle_view_dolphin_stats, dolphin_view_idle_down_input);
+    view_set_previous_callback(dolphin->idle_view_dolphin_stats, dolphin_view_idle_back);
     view_dispatcher_add_view(
-        dolphin->idle_view_dispatcher, DolphinViewIdleDown, dolphin->idle_view_down);
+        dolphin->idle_view_dispatcher, DolphinViewStats, dolphin->idle_view_dolphin_stats);
     // HW Mismatch
     dolphin->view_hw_mismatch = view_alloc();
     view_set_draw_callback(dolphin->view_hw_mismatch, dolphin_view_hw_mismatch_draw);
@@ -361,8 +392,9 @@ int32_t dolphin_task() {
     } else {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewFirstStart);
     }
+
     with_view_model(
-        dolphin->idle_view_up, (DolphinViewIdleUpModel * model) {
+        dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
             model->icounter = dolphin_state_get_icounter(dolphin->state);
             model->butthurt = dolphin_state_get_butthurt(dolphin->state);
             return true;
@@ -379,7 +411,7 @@ int32_t dolphin_task() {
         if(event.type == DolphinEventTypeDeed) {
             dolphin_state_on_deed(dolphin->state, event.deed);
             with_view_model(
-                dolphin->idle_view_up, (DolphinViewIdleUpModel * model) {
+                dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
                     model->icounter = dolphin_state_get_icounter(dolphin->state);
                     model->butthurt = dolphin_state_get_butthurt(dolphin->state);
                     return true;
