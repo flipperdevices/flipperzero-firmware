@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <furi.h>
 #include "main.h"
+#include "api-hal-pwm.h"
 
 
 static struct{
@@ -17,7 +18,7 @@ static struct{
 void api_hal_irda_tim_isr(TimerIRQSource source)
 {
     uint32_t duration;
-    uint8_t level;
+    bool level;
 
     switch (source) {
     case TimerIRQSourceCCI1:
@@ -104,11 +105,11 @@ void api_hal_irda_rx_irq_set_callback(TimerISRCallback callback, void *ctx) {
 }
 
 void api_hal_irda_pwm_start(float value, float freq) {
-    api_hal_pwm_start(value, freq, &IRDA_TX_TIM, IRDA_TX_CH);
+    hal_pwmn_set(value, freq, &IRDA_TX_TIM, IRDA_TX_CH);
 }
 
 void api_hal_irda_pwm_stop() {
-    api_hal_pwm_stop(&IRDA_TX_TIM, IRDA_TX_CH);
+    hal_pwmn_stop(&IRDA_TX_TIM, IRDA_TX_CH);
 }
 
 

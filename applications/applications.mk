@@ -178,6 +178,7 @@ ifeq ($(BUILD_IRDA), 1)
 CFLAGS		+= -DBUILD_IRDA
 C_SOURCES	+= $(wildcard $(APP_DIR)/irda/*.c)
 C_SOURCES	+= $(wildcard $(APP_DIR)/irda/*/*.c)
+CPP_SOURCES	+= $(wildcard $(APP_DIR)/irda/*.cpp)
 APP_INPUT = 1
 APP_GUI = 1
 endif
