@@ -54,7 +54,7 @@ One liner: `./flash_core1_main.sh`
  - Release `↩ Back`
 <img src="https://habrastorage.org/webt/uu/c3/g2/uuc3g2n36f2sju19rskcvjzjf6w.png" />
 
-1. Run `dfu-util -D full_firmware_latest.bin -a 0 -s 0x08000000:leave`
+1. Run `dfu-util -D full.bin -a 0 -s 0x08000000:leave`
 
 # Build from source
 
