@@ -29,7 +29,7 @@ RUN apt-get update && \
         dfu-util \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN wget --progress=dot:giga -O - "https://apt.llvm.org/llvm-snapshot.gpg.key" | apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
 
 # hadolint ignore=DL3008
