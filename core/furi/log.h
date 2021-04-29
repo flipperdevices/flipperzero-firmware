@@ -51,7 +51,7 @@ void furi_log_set_print(FuriLogPrint print, FuriLogVPrint vprint);
 void furi_log_set_timestamp(FuriLogTimestamp timestamp);
 
 #define FURI_LOG_FORMAT(log_letter, tag, format) \
-    FURI_LOG_CLR_##log_letter "[" #log_letter "][" tag "]: " format FURI_LOG_CLR_RESET "\r\n"
+    FURI_LOG_CLR_##log_letter "[" #log_letter "][" tag "]: " FURI_LOG_CLR_RESET format "\r\n"
 #define FURI_LOG_SHOW(tag, format, log_level, log_letter, ...) \
     furi_log_print(log_level, FURI_LOG_FORMAT(log_letter, tag, format), ##__VA_ARGS__)
 
