@@ -38,9 +38,6 @@ RUN apt update && \
         clang-format-12 \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --profile=minimal --target thumbv7em-none-eabi thumbv7em-none-eabihf && \
-    rustup component add rustfmt --toolchain stable-x86_64-unknown-linux-gnu
-
 # st-flash
 
 RUN wget https://github.com/stlink-org/stlink/archive/v1.5.1.zip && \
