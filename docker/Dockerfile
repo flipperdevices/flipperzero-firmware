@@ -38,13 +38,6 @@ RUN apt update && \
         clang-format-12 \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# st-flash
-
-RUN wget https://github.com/stlink-org/stlink/archive/v1.5.1.zip && \
-    unzip v1.5.1.zip && \
-    cd stlink-1.5.1 && make clean && make release && \
-    cd build/Release && make install && ldconfig
-
 # install arm-none-eabi
 
 RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
