@@ -70,16 +70,19 @@ void dolphin_lock_handler(InputEvent* event, Dolphin* dolphin) {
     furi_assert(dolphin);
     if(event->key == InputKeyBack) {
         uint32_t press_time = HAL_GetTick();
+
         // check if pressed sequentially
-        if(press_time - dolphin->lock_lastpress > 50) {
+        if(press_time - dolphin->lock_lastpress > 100) {
             dolphin->lock_lastpress = press_time;
-            // 2do show hint popup
-        } else if(press_time - dolphin->lock_lastpress < 50) {
+            dolphin->lock_count = 0;
+        }
+
+        if(press_time - dolphin->lock_lastpress < 50) {
+            dolphin->lock_lastpress = press_time;
             dolphin->lock_count++;
         }
 
         if(dolphin->lock_count == 3) {
-            // unlock
             dolphin->locked = false;
             dolphin->lock_count = 0;
 

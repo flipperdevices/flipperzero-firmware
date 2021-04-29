@@ -65,7 +65,9 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
 
     if(m->show_hint) {
         m->hint_timeout = CLAMP(m->hint_timeout - 1, 255, 0);
-        elements_multiline_text_framed(canvas, 45, 30, "Locked");
+        // elements_multiline_text_framed(canvas, 45, 30, "Locked");
+        canvas_draw_icon_name(canvas, 13, 5, I_LockPopup_100x49);
+        elements_multiline_text(canvas, 65, 20, "To unlock\npress:");
     }
 
     if(m->hint_timeout == 0) {
