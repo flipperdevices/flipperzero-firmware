@@ -9,7 +9,7 @@ include 		$(PROJECT_ROOT)/applications/applications.mk
 include			$(PROJECT_ROOT)/lib/lib.mk
 
 CFLAGS += -Werror -Wno-address-of-packed-member
-CPPFLAGS += -Werror
+CPPFLAGS += -Werror -Wno-pmf-conversions
 
 TARGET			?= f5
 

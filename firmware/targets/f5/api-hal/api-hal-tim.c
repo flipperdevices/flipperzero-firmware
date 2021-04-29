@@ -1,5 +1,7 @@
 #include "api-hal-tim_i.h"
 #include "api-hal-irda_i.h"
+#include <stm32wbxx_ll_tim.h>
+#include <furi.h>
 
 
 void TIM2_IRQHandler(void)
@@ -12,7 +14,7 @@ void TIM2_IRQHandler(void)
 
             if (READ_BIT(TIM2->CCMR1, TIM_CCMR1_CC1S)) {
                 // input capture
-                api_hal_irda_tim_isr(TIM2, TimerIRQSourceCCI1);
+                api_hal_irda_tim_isr(TimerIRQSourceCCI1);
                 consumed = true;
             }
             else {
@@ -28,7 +30,7 @@ void TIM2_IRQHandler(void)
 
             if (READ_BIT(TIM2->CCMR1, TIM_CCMR1_CC2S)) {
                 // input capture
-                api_hal_irda_tim_isr(TIM2, TimerIRQSourceCCI2);
+                api_hal_irda_tim_isr(TimerIRQSourceCCI2);
                 consumed = true;
             }
             else {
