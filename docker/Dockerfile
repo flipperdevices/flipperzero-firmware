@@ -40,6 +40,7 @@ RUN apt update && \
 
 RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
     tar xjf gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
+    rm gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2 && \
     cd gcc-arm-none-eabi-10-2020-q4-major/bin/ && \
     for file in * ; do ln -s ${PWD}/${file} /usr/bin/${file} ; done && \
     cd / && arm-none-eabi-gcc -v && arm-none-eabi-gdb -v
@@ -48,6 +49,7 @@ RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-
 
 RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-document=hex2dfu.zip && \
     unzip hex2dfu.zip && \
+    rm hex2dfu.zip && \
     cd hex2dfu-master && gcc hex2dfu.c ED25519/*.c -o hex2dfu && \
     ln -s ${PWD}/hex2dfu /usr/bin/hex2dfu
 
@@ -55,6 +57,7 @@ RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-docume
 
 RUN git clone --depth 1 --branch v0.11.0 https://github.com/ntfreak/openocd.git && \
     cd openocd && ./bootstrap && ./configure && make install && \
+    cd .. && rm -rf openocd && \
     openocd --version
 
 COPY entrypoint.sh syntax_check.sh /
