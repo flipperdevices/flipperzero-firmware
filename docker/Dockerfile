@@ -1,7 +1,5 @@
 FROM ubuntu:18.04
 
-ENV PATH /root/.cargo/bin:$PATH
-
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
         software-properties-common \
