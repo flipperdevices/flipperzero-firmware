@@ -1,5 +1,7 @@
 FROM ubuntu:18.04
 
+RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
+
 RUN apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
         software-properties-common \
@@ -26,12 +28,6 @@ RUN apt update && \
         git \
         pkg-config \
         dfu-util \
-        && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
-
-RUN apt update && \
-    apt install -y --no-install-recommends \
         libclang-12-dev \
         clang-format-12 \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -54,7 +50,7 @@ RUN wget https://github.com/rusdacent/hex2dfu/archive/master.zip --output-docume
 # install openocd
 
 RUN git clone --depth 1 --branch v0.11.0 https://github.com/ntfreak/openocd.git && \
-    cd openocd && ./bootstrap && ./configure && ls -la && make install && \
+    cd openocd && ./bootstrap && ./configure && make install && \
     openocd --version
 
 COPY entrypoint.sh syntax_check.sh /
