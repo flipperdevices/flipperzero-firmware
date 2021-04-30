@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include "applications.h"
 
-static void
-dolphin_switch_to_interactive_scene(Dolphin* dolphin, const FlipperApplication* flipper_app) {
+static void dolphin_switch_to_app(Dolphin* dolphin, const FlipperApplication* flipper_app) {
     furi_assert(dolphin);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
@@ -72,30 +71,30 @@ void dolphin_lock_handler(InputEvent* event, Dolphin* dolphin) {
         uint32_t press_time = HAL_GetTick();
 
         // check if pressed sequentially
-        if(press_time - dolphin->lock_lastpress > 100) {
-            dolphin->lock_lastpress = press_time;
-            dolphin->lock_count = 0;
-        }
-
-        if(press_time - dolphin->lock_lastpress < 50) {
+        if(press_time - dolphin->lock_lastpress < 200) {
             dolphin->lock_lastpress = press_time;
             dolphin->lock_count++;
+        } else if(press_time - dolphin->lock_lastpress > 200) {
+            dolphin->lock_lastpress = press_time;
+            dolphin->lock_count = 0;
         }
 
         if(dolphin->lock_count == 3) {
             dolphin->locked = false;
             dolphin->lock_count = 0;
 
-            // set lock menu defaults
             with_view_model(
                 dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
                     model->locked = false;
-                    model->door_left_x = -57; // defaults
-                    model->door_right_x = 115; // defaults
                     return true;
                 });
 
-            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+            with_view_model(
+                dolphin->idle_view_main, (DolphinViewMainModel * model) {
+                    model->hint_timeout = 0;
+                    return true;
+                });
+
             view_port_enabled_set(dolphin->lock_viewport, false);
         }
     }
@@ -111,13 +110,18 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             with_value_mutex(
                 dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
         } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
+            osTimerStart(dolphin->timeout_timer, 40);
             view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
         } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-            //fav app
+#if 0
+            dolphin_switch_to_app(dolphin, &FAV_APP);
+#endif
         } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
-            dolphin_switch_to_interactive_scene(dolphin, &FLIPPER_SCENE);
+            dolphin_switch_to_app(dolphin, &FLIPPER_SCENE);
         } else if(event->key == InputKeyDown && event->type == InputTypeShort) {
-            // open archive
+#if 0
+            dolphin_switch_to_app(dolphin, &ARCHIVE_APP);
+#endif
         } else if(event->key == InputKeyDown && event->type == InputTypeLong) {
             view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewStats);
         } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
@@ -128,7 +132,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
 
         with_view_model(
             dolphin->idle_view_main, (DolphinViewMainModel * model) {
-                model->show_hint = true;
+                model->hint_timeout = 3;
                 return true;
             });
 
@@ -139,6 +143,13 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     return true;
 }
 
+void lock_menu_refresh_handler(void* p) {
+    osMessageQueueId_t event_queue = p;
+    DolphinEvent event;
+    event.type = DolphinEventTypeTick;
+    furi_check(osMessageQueuePut(event_queue, &event, 0, osWaitForever) == osOK);
+}
+
 static void lock_menu_callback(void* context, uint8_t index) {
     Dolphin* dolphin = context;
     switch(index) {
@@ -147,11 +158,11 @@ static void lock_menu_callback(void* context, uint8_t index) {
         with_view_model(
             dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
                 model->locked = true;
+                model->exit_timeout = 20;
                 return true;
             });
 
         dolphin->locked = true;
-        //view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
         view_port_enabled_set(dolphin->lock_viewport, dolphin->locked);
 
         break;
@@ -322,6 +333,9 @@ Dolphin* dolphin_alloc() {
             return true;
         });
 
+    dolphin->timeout_timer =
+        osTimerNew(lock_menu_refresh_handler, osTimerPeriodic, dolphin->event_queue, NULL);
+
     // Stats Idle View
     dolphin->idle_view_dolphin_stats = view_alloc();
     view_set_context(dolphin->idle_view_dolphin_stats, dolphin);
@@ -362,6 +376,8 @@ void dolphin_free(Dolphin* dolphin) {
     gui_remove_view_port(dolphin->gui, dolphin->lock_viewport);
     view_port_free(dolphin->lock_viewport);
     icon_free(dolphin->lock_icon);
+
+    osTimerDelete(dolphin->timeout_timer);
 
     view_dispatcher_free(dolphin->idle_view_dispatcher);
 
@@ -416,10 +432,22 @@ int32_t dolphin_task() {
     if(!api_hal_version_do_i_belong_here()) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewHwMismatch);
     }
+
     DolphinEvent event;
     while(1) {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
-        if(event.type == DolphinEventTypeDeed) {
+
+        if(event.type == DolphinEventTypeTick) {
+            DolphinViewLockMenuModel* lock_model = view_get_model(dolphin->view_lockmenu);
+
+            if(lock_model->locked && lock_model->exit_timeout == 0) {
+                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+                osTimerStop(dolphin->timeout_timer);
+            }
+
+            view_commit_model(dolphin->view_lockmenu, true);
+
+        } else if(event.type == DolphinEventTypeDeed) {
             dolphin_state_on_deed(dolphin->state, event.deed);
             with_view_model(
                 dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {

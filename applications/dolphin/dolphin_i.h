@@ -17,6 +17,7 @@
 typedef enum {
     DolphinEventTypeDeed,
     DolphinEventTypeSave,
+    DolphinEventTypeTick,
 } DolphinEventType;
 
 typedef struct {
@@ -51,6 +52,7 @@ struct Dolphin {
     bool locked;
     uint8_t lock_count;
     uint32_t lock_lastpress;
+    osTimerId_t timeout_timer;
 };
 
 // Temporary

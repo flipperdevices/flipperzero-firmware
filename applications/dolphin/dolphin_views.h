@@ -52,13 +52,13 @@ typedef struct {
     uint8_t idx;
     int8_t door_left_x;
     int8_t door_right_x;
+    uint8_t exit_timeout;
     bool locked;
 } DolphinViewLockMenuModel;
 
 typedef struct {
     Icon* animation;
     uint8_t scene_num;
-    bool show_hint;
     uint8_t hint_timeout;
 } DolphinViewMainModel;
 
