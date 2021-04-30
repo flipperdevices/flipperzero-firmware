@@ -22,9 +22,7 @@ struct Power {
     ViewDispatcher* view_dispatcher;
     View* info_view;
     View* off_view;
-
-    Icon* usb_icon;
-    ViewPort* usb_view_port;
+    View* disconnect_view;
 
     Icon* battery_icon;
     ViewPort* battery_view_port;
@@ -35,12 +33,6 @@ struct Power {
     Cli* cli;
     MenuItem* menu;
 };
-
-void power_draw_usb_callback(Canvas* canvas, void* context) {
-    furi_assert(context);
-    Power* power = context;
-    canvas_draw_icon(canvas, 0, 0, power->usb_icon);
-}
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -58,16 +50,16 @@ uint32_t power_info_back_callback(void* context) {
 }
 
 void power_menu_off_callback(void* context) {
-    api_hal_power_off();
+    Power* power = context;
+    power_off(power);
 }
 
 void power_menu_reset_dialog_result(DialogResult result, void* context) {
+    Power* power = context;
     if(result == DialogResultLeft) {
-        api_hal_boot_set_mode(ApiHalBootModeDFU);
-        NVIC_SystemReset();
+        power_reset(power, PowerBootModeDfu);
     } else if(result == DialogResultRight) {
-        api_hal_boot_set_mode(ApiHalBootModeNormal);
-        NVIC_SystemReset();
+        power_reset(power, PowerBootModeNormal);
     }
 }
 
@@ -100,9 +92,9 @@ Power* power_alloc() {
     power->menu_vm = furi_record_open("menu");
 
     power->cli = furi_record_open("cli");
-    power_cli_init(power->cli);
+    power_cli_init(power->cli, power);
 
-    power->menu = menu_item_alloc_menu("Power", NULL);
+    power->menu = menu_item_alloc_menu("Power", assets_icons_get(A_Power_14));
     menu_item_subitem_add(
         power->menu, menu_item_alloc_function("Off", NULL, power_menu_off_callback, power));
     menu_item_subitem_add(
@@ -128,15 +120,14 @@ Power* power_alloc() {
     view_set_draw_callback(power->off_view, power_off_draw_callback);
     view_dispatcher_add_view(power->view_dispatcher, PowerViewOff, power->off_view);
 
+    power->disconnect_view = view_alloc();
+    view_set_draw_callback(power->disconnect_view, power_disconnect_draw_callback);
+    view_dispatcher_add_view(power->view_dispatcher, PowerViewDisconnect, power->disconnect_view);
+
     power->dialog = dialog_alloc();
     dialog_set_context(power->dialog, power);
     view_dispatcher_add_view(
         power->view_dispatcher, PowerViewDialog, dialog_get_view(power->dialog));
-
-    power->usb_icon = assets_icons_get(I_USBConnected_15x8);
-    power->usb_view_port = view_port_alloc();
-    view_port_set_width(power->usb_view_port, icon_get_width(power->usb_icon));
-    view_port_draw_callback_set(power->usb_view_port, power_draw_usb_callback, power);
 
     power->battery_icon = assets_icons_get(I_Battery_26x8);
     power->battery_view_port = view_port_alloc();
@@ -151,12 +142,43 @@ void power_free(Power* power) {
     free(power);
 }
 
+void power_off(Power* power) {
+    furi_assert(power);
+    api_hal_power_off();
+    view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewDisconnect);
+}
+
+void power_reset(Power* power, PowerBootMode mode) {
+    if(mode == PowerBootModeNormal) {
+        api_hal_boot_set_mode(ApiHalBootModeNormal);
+    } else if(mode == PowerBootModeDfu) {
+        api_hal_boot_set_mode(ApiHalBootModeDFU);
+    }
+    api_hal_power_reset();
+}
+
+static void power_charging_indication_handler() {
+    if(api_hal_power_is_charging()) {
+        if(api_hal_power_get_pct() == 100) {
+            api_hal_light_set(LightRed, 0x00);
+            api_hal_light_set(LightGreen, 0xFF);
+        } else {
+            api_hal_light_set(LightGreen, 0x00);
+            api_hal_light_set(LightRed, 0xFF);
+        }
+    }
+
+    if(!api_hal_power_is_charging()) {
+        api_hal_light_set(LightRed, 0x00);
+        api_hal_light_set(LightGreen, 0x00);
+    }
+}
+
 int32_t power_task(void* p) {
     (void)p;
     Power* power = power_alloc();
 
     Gui* gui = furi_record_open("gui");
-    gui_add_view_port(gui, power->usb_view_port, GuiLayerStatusBarLeft);
     gui_add_view_port(gui, power->battery_view_port, GuiLayerStatusBarRight);
     view_dispatcher_attach_to_gui(power->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
@@ -199,7 +221,7 @@ int32_t power_task(void* p) {
                             osKernelGetTickCount() + osKernelGetTickFreq() * POWER_OFF_TIMEOUT;
                     } else {
                         if(osKernelGetTickCount() > model->poweroff_tick) {
-                            api_hal_power_off();
+                            power_off(power);
                         }
                     }
                 } else {
@@ -214,8 +236,9 @@ int32_t power_task(void* p) {
                 return true;
             });
 
+        power_charging_indication_handler();
+
         view_port_update(power->battery_view_port);
-        view_port_enabled_set(power->usb_view_port, api_hal_power_is_charging());
 
         osDelay(1024);
     }
