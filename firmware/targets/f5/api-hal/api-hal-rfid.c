@@ -3,6 +3,7 @@
 #include <api-hal-resources.h>
 
 void api_hal_rfid_pins_reset() {
+    // ibutton bus disable
     api_hal_ibutton_stop();
 
     // pulldown rfid antenna
@@ -46,6 +47,7 @@ void api_hal_rfid_pins_read() {
 }
 
 void api_hal_rfid_tim_read(float freq, float duty_cycle) {
+    // TODO LL init
     uint32_t period = (uint32_t)((SystemCoreClock) / freq) - 1;
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
@@ -120,6 +122,7 @@ void api_hal_rfid_tim_read_stop() {
 }
 
 void api_hal_rfid_tim_emulate(float freq) {
+    // TODO LL init
     uint32_t prescaler = (uint32_t)((SystemCoreClock) / freq) - 1;
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
