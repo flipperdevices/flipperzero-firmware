@@ -47,10 +47,8 @@ void api_hal_rfid_tim_read_stop();
  * @brief config rfid timer to emulate state
  * 
  * @param freq timer frequency
- * @param update_callback called on timer update event
- * @param context callback context
  */
-void api_hal_rfid_tim_emulate(float freq, void* update_callback, void* context);
+void api_hal_rfid_tim_emulate(float freq);
 
 /**
  * @brief start emulation timer
