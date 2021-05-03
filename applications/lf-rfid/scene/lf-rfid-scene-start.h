@@ -1,6 +1,5 @@
 #pragma once
 #include "lf-rfid-scene-generic.h"
-#include "../helpers/rfid-emulator.h"
 #include "../helpers/rfid-timer-emulator.h"
 
 class LfrfidSceneStart : public LfrfidScene {
