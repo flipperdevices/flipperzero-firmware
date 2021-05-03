@@ -30,6 +30,11 @@ LfrfidApp::LfrfidApp() {
 }
 
 LfrfidApp::~LfrfidApp() {
+    for(std::map<Scene, LfrfidScene*>::iterator it = scenes.begin(); it != scenes.end(); ++it) {
+        delete it->second;
+        scenes.erase(it);
+    }
+
     api_hal_power_insomnia_exit();
 }
 
