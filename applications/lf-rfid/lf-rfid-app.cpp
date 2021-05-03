@@ -95,8 +95,8 @@ LfrfidApp::Scene LfrfidApp::get_previous_scene() {
 void LfrfidApp::notify_init() {
     // TODO open record
     const GpioPin* vibro_record = &vibro_gpio;
-    gpio_init(vibro_record, GpioModeOutputPushPull);
-    gpio_write(vibro_record, false);
+    hal_gpio_init(vibro_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    hal_gpio_write(vibro_record, false);
 }
 
 void LfrfidApp::notify_green_blink() {
