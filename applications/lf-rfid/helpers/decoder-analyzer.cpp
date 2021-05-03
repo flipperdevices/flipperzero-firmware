@@ -23,12 +23,6 @@ bool DecoderAnalyzer::read(uint8_t* _data, uint8_t _data_size) {
 void DecoderAnalyzer::process_front(bool polarity, uint32_t time) {
     if(ready) return;
 
-    if(polarity) {
-        gpio_write(&ext_pa7_gpio, 1);
-    } else {
-        gpio_write(&ext_pa7_gpio, 0);
-    }
-
     data[data_index] = time;
 
     if(data_index < data_size) {
