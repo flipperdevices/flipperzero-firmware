@@ -389,7 +389,7 @@ void RfidTimerEmulator::timer_update_callback(void* _hw, void* ctx) {
             _this->current_encoder->get_next(&polarity, &period, &pulse);
             result = _this->pulse_joiner.push_pulse(polarity, period, pulse);
         } while(result == false);
-        
+
         _this->pulse_joiner.pop_pulse(&period, &pulse);
 
         hw->Instance->ARR = period - 1;

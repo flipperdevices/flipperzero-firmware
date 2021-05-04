@@ -86,8 +86,6 @@ void PulseJoiner::pop_pulse(uint16_t* period, uint16_t* pulse) {
             break;
         }
     }
-
-    //pulse_index = next_fist_pulse;
 }
 
 PulseJoiner::PulseJoiner() {

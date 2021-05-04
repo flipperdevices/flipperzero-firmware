@@ -50,7 +50,6 @@ void EncoderEM::write_nibble(bool low_nibble, uint8_t data) {
 }
 
 void EncoderEM::get_next(bool* polarity, uint16_t* period, uint16_t* pulse) {
-
     *period = clocks_per_bit;
     *pulse = clocks_per_bit / 2;
     *polarity = (card_data >> (63 - card_data_index)) & 1;
@@ -59,32 +58,4 @@ void EncoderEM::get_next(bool* polarity, uint16_t* period, uint16_t* pulse) {
     if(card_data_index > 63) {
         card_data_index = 0;
     }
-
-    /*
-    static uint8_t data_index = 0;
-    struct Pulse {
-        bool polarity;
-        uint16_t period;
-        uint16_t pulse;
-    };
-
-    Pulse data[8] = {
-        {true, 10, 5},
-        {true, 100, 50},
-        {false, 100, 50},
-        {true, 100, 50},
-        {true, 100, 50},
-        {true, 100, 50},
-        {true, 100, 50},
-        {true, 100, 50},
-    };
-
-    *period = data[data_index].period;
-    *pulse = data[data_index].pulse;
-    *polarity = data[data_index].polarity;
-
-    data_index++;
-    if(data_index > 7) {
-        data_index = 0;
-    }*/
 }
