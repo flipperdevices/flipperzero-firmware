@@ -14,9 +14,11 @@ bool PulseJoiner::push_pulse(bool polarity, uint16_t period, uint16_t pulse) {
         pulse_index++;
     }
 
-    pulses[pulse_index].polarity = !polarity;
-    pulses[pulse_index].time = period - pulse;
-    pulse_index++;
+    if(period > pulse) {
+        pulses[pulse_index].polarity = !polarity;
+        pulses[pulse_index].time = period - pulse;
+        pulse_index++;
+    }
 
     if(pulse_index >= 4) {
         // we know that first pulse is always high
