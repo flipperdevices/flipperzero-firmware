@@ -346,6 +346,12 @@ void RfidTimerEmulator::start(Type type) {
         case Type::EM:
             current_encoder->init(em_data, 5);
             break;
+        case Type::HID:
+            current_encoder->init(nullptr, 3);
+            break;
+        case Type::Indala:
+            current_encoder->init(nullptr, 5);
+            break;
         }
 
         api_hal_rfid_tim_emulate(125000);

@@ -26,8 +26,6 @@ void LfrfidSceneStart::on_enter(LfrfidApp* app) {
     submenu_add_item(submenu, "Tune", SubmenuIndexTune, callback, app);
 
     view_manager->switch_to(LfrfidAppViewManager::ViewType::Submenu);
-
-    //emulator.start();
 }
 
 bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
