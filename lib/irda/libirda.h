@@ -14,7 +14,7 @@ typedef struct IrdaProtocolSpec IrdaProtocolSpec;
 typedef struct {
     uint32_t adr;
     uint32_t cmd;
-    IrdaProtocolSpec* protocol;
+    const IrdaProtocolSpec* protocol;
     bool repeat;
 } IrdaMessage;
 

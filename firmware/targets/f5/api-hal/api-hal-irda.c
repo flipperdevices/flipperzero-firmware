@@ -34,7 +34,7 @@ void api_hal_irda_tim_isr(TimerIRQSource source)
     }
 
     if (timerIrda.callback)
-        timerIrda.callback(timerIrda.ctx, duration, level);
+        timerIrda.callback(timerIrda.ctx, level, duration);
 
     LL_TIM_SetCounter(TIM2, 0);
 }
@@ -104,7 +104,7 @@ void api_hal_irda_rx_irq_set_callback(TimerISRCallback callback, void *ctx) {
     timerIrda.ctx = ctx;
 }
 
-void api_hal_irda_pwm_start(float value, float freq) {
+void api_hal_irda_pwm_set(float value, float freq) {
     hal_pwmn_set(value, freq, &IRDA_TX_TIM, IRDA_TX_CH);
 }
 

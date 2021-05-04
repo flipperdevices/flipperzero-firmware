@@ -42,7 +42,7 @@ void api_hal_irda_rx_irq_set_callback(TimerISRCallback callback, void *ctx);
  * @param   duty_cycle - duty cycle
  * @param   freq - PWM frequency to generate
  */
-void api_hal_irda_pwm_start(float duty_cycle, float freq);
+void api_hal_irda_pwm_set(float duty_cycle, float freq);
 
 /**
  * Stop generating IRDA PWM signal.
