@@ -6,6 +6,7 @@
 #include "scene/lf-rfid-scene-start.h"
 #include "scene/lf-rfid-scene-emulate-indala.h"
 #include "scene/lf-rfid-scene-emulate-hid.h"
+#include "scene/lf-rfid-scene-emulate-emmarine.h"
 #include "scene/lf-rfid-scene-read-normal.h"
 #include "scene/lf-rfid-scene-read-indala.h"
 #include "scene/lf-rfid-scene-tune.h"
@@ -27,6 +28,7 @@ public:
         ReadIndala,
         EmulateIndala,
         EmulateHID,
+        EmulateEM,
         Tune,
     };
 
@@ -59,6 +61,7 @@ private:
         {Scene::ReadIndala, new LfrfidSceneReadIndala()},
         {Scene::EmulateIndala, new LfrfidSceneEmulateIndala()},
         {Scene::EmulateHID, new LfrfidSceneEmulateHID()},
+        {Scene::EmulateEM, new LfrfidSceneEmulateEMMarine()},
         {Scene::Tune, new LfrfidSceneTune()},
     };
 

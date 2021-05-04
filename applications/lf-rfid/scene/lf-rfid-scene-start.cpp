@@ -7,6 +7,7 @@
 typedef enum {
     SubmenuIndexReadNormal,
     SubmenuIndexReadIndala,
+    SubmenuIndexEmulateEM,
     SubmenuIndexEmulateHID,
     SubmenuIndexEmulateIndala,
     SubmenuIndexTune
@@ -19,6 +20,7 @@ void LfrfidSceneStart::on_enter(LfrfidApp* app) {
 
     submenu_add_item(submenu, "Read Normal", SubmenuIndexReadNormal, callback, app);
     submenu_add_item(submenu, "Read Indala", SubmenuIndexReadIndala, callback, app);
+    submenu_add_item(submenu, "Emulate EM", SubmenuIndexEmulateEM, callback, app);
     submenu_add_item(submenu, "Emulate HID", SubmenuIndexEmulateHID, callback, app);
     submenu_add_item(submenu, "Emulate Indala", SubmenuIndexEmulateIndala, callback, app);
     submenu_add_item(submenu, "Tune", SubmenuIndexTune, callback, app);
@@ -38,6 +40,10 @@ bool LfrfidSceneStart::on_event(LfrfidApp* app, LfrfidEvent* event) {
             break;
         case SubmenuIndexReadIndala:
             app->switch_to_next_scene(LfrfidApp::Scene::ReadIndala);
+            break;
+        case SubmenuIndexEmulateEM:
+            app->switch_to_next_scene(LfrfidApp::Scene::EmulateEM);
+            break;
             break;
         case SubmenuIndexEmulateHID:
             app->switch_to_next_scene(LfrfidApp::Scene::EmulateHID);
