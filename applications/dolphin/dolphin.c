@@ -41,24 +41,17 @@ bool dolphin_view_first_start_input(InputEvent* event, void* context) {
     furi_assert(context);
     Dolphin* dolphin = context;
     if(event->type == InputTypeShort) {
+        DolphinViewFirstStartModel* model = view_get_model(dolphin->idle_view_first_start);
         if(event->key == InputKeyLeft) {
-            with_view_model(
-                dolphin->idle_view_first_start, (DolphinViewFirstStartModel * model) {
-                    if(model->page > 0) model->page--;
-                    return true;
-                });
+            if(model->page > 0) model->page--;
         } else if(event->key == InputKeyRight) {
-            uint32_t page;
-            with_view_model(
-                dolphin->idle_view_first_start, (DolphinViewFirstStartModel * model) {
-                    page = ++model->page;
-                    return true;
-                });
+            uint32_t page = ++model->page;
             if(page > 8) {
                 dolphin_save(dolphin);
                 view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
             }
         }
+        view_commit_model(dolphin->idle_view_first_start, true);
     }
     // All evennts cosumed
     return true;
@@ -151,21 +144,22 @@ void lock_menu_refresh_handler(void* p) {
 }
 
 static void lock_menu_callback(void* context, uint8_t index) {
+    furi_assert(context);
     Dolphin* dolphin = context;
     switch(index) {
     // lock
     case 0:
-        with_view_model(
-            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
-                model->locked = true;
-                model->exit_timeout = 20;
-                return true;
-            });
-
         dolphin->locked = true;
+        DolphinViewLockMenuModel* model = view_get_model(dolphin->view_lockmenu);
+
+        model->locked = true;
+        model->exit_timeout = 20;
+
         view_port_enabled_set(dolphin->lock_viewport, dolphin->locked);
+        view_commit_model(dolphin->view_lockmenu, true);
 
         break;
+
     default:
         break;
     }
@@ -181,50 +175,26 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Dolphin* dolphin = context;
-    bool locked;
-
-    with_view_model(
-        dolphin->idle_view_dolphin_stats, (DolphinViewLockMenuModel * model) {
-            locked = model->locked;
-            return true;
-        });
 
     if(event->type != InputTypeShort) return false;
 
-    if(event->key == InputKeyUp) {
-        with_view_model(
-            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
-                model->idx = CLAMP(model->idx - 1, 2, 0);
-                return true;
-            });
-    } else if(event->key == InputKeyDown) {
-        with_view_model(
-            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
-                model->idx = CLAMP(model->idx + 1, 2, 0);
-                return true;
-            });
-    } else if(event->key == InputKeyOk) {
-        with_view_model(
-            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
-                lock_menu_callback(context, model->idx);
-                return true;
-            });
-    } else if(event->key == InputKeyBack) {
-        with_view_model(
-            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
-                model->idx = 0;
-                return true;
-            });
+    DolphinViewLockMenuModel* model = view_get_model(dolphin->view_lockmenu);
 
+    if(event->key == InputKeyUp) {
+        model->idx = CLAMP(model->idx - 1, 2, 0);
+    } else if(event->key == InputKeyDown) {
+        model->idx = CLAMP(model->idx + 1, 2, 0);
+    } else if(event->key == InputKeyOk) {
+        lock_menu_callback(context, model->idx);
+    } else if(event->key == InputKeyBack) {
+        model->idx = 0;
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
 
         if(random() % 100 > 50)
             dolphin_scene_handler_set_scene(dolphin, idle_scenes[random() % sizeof(idle_scenes)]);
     }
 
-    if(locked == true) {
-        view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-    }
+    view_commit_model(dolphin->view_lockmenu, true);
 
     return true;
 }
@@ -235,28 +205,19 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
     Dolphin* dolphin = context;
     DolphinViewStatsScreens current;
 
-    with_view_model(
-        dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
-            current = model->screen;
-            return true;
-        });
-
     if(event->type != InputTypeShort) return false;
 
+    DolphinViewStatsModel* model = view_get_model(dolphin->idle_view_dolphin_stats);
+
+    current = model->screen;
+
     if(event->key == InputKeyDown) {
-        with_view_model(
-            dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
-                model->screen = (model->screen + 1) % NUM_INFO_SCREENS;
-                return true;
-            });
+        model->screen = (model->screen + 1) % NUM_INFO_SCREENS;
+    } else if(event->key == InputKeyUp) {
+        model->screen = ((model->screen - 1) + NUM_INFO_SCREENS) % NUM_INFO_SCREENS;
     }
-    if(event->key == InputKeyUp) {
-        with_view_model(
-            dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
-                model->screen = ((model->screen - 1) + NUM_INFO_SCREENS) % NUM_INFO_SCREENS;
-                return true;
-            });
-    }
+
+    view_commit_model(dolphin->idle_view_dolphin_stats, true);
 
     if(current == DOLPHIN_INFO) {
         if(event->key == InputKeyLeft) {
@@ -437,14 +398,16 @@ int32_t dolphin_task() {
     while(1) {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
 
+        DolphinViewLockMenuModel* lock_model = view_get_model(dolphin->view_lockmenu);
+
+        if(lock_model->locked && lock_model->exit_timeout == 0 &&
+           osTimerIsRunning(dolphin->timeout_timer)) {
+            osTimerStop(dolphin->timeout_timer);
+            osDelay(1); // smol enterprise delay
+            view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
+        }
+
         if(event.type == DolphinEventTypeTick) {
-            DolphinViewLockMenuModel* lock_model = view_get_model(dolphin->view_lockmenu);
-
-            if(lock_model->locked && lock_model->exit_timeout == 0) {
-                view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewIdleMain);
-                osTimerStop(dolphin->timeout_timer);
-            }
-
             view_commit_model(dolphin->view_lockmenu, true);
 
         } else if(event.type == DolphinEventTypeDeed) {
