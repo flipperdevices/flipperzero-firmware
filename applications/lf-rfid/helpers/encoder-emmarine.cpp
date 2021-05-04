@@ -1,12 +1,6 @@
 #include "encoder-emmarine.h"
 #include <furi.h>
 
-// clock pulses per bit
-constexpr uint8_t clocks_per_bit = 64;
-// data transmitted as manchester encoding
-// 0 - high2low
-// 1 - low2high
-
 void EncoderEM::init(const uint8_t* data, const uint8_t data_size) {
     furi_check(data_size == 5);
 
@@ -49,13 +43,16 @@ void EncoderEM::write_nibble(bool low_nibble, uint8_t data) {
     card_data = (card_data << 1) | ((parity_sum % 2) & 1);
 }
 
+// data transmitted as manchester encoding
+// 0 - high2low
+// 1 - low2high
 void EncoderEM::get_next(bool* polarity, uint16_t* period, uint16_t* pulse) {
     *period = clocks_per_bit;
     *pulse = clocks_per_bit / 2;
     *polarity = (card_data >> (63 - card_data_index)) & 1;
 
     card_data_index++;
-    if(card_data_index > 63) {
+    if(card_data_index >= 64) {
         card_data_index = 0;
     }
 }

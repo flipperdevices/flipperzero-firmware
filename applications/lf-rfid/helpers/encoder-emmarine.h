@@ -14,6 +14,9 @@ public:
     void get_next(bool* polarity, uint16_t* period, uint16_t* pulse) final;
 
 private:
+    // clock pulses per bit
+    static const uint8_t clocks_per_bit = 64;
+
     uint64_t card_data;
     uint8_t card_data_index;
     void write_nibble(bool low_nibble, uint8_t data);
