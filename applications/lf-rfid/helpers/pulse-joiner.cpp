@@ -52,14 +52,6 @@ void PulseJoiner::pop_pulse(uint16_t* period, uint16_t* pulse) {
     uint8_t next_fist_pulse = 0;
 
     for(uint8_t i = 0; i < pulse_max; i++) {
-        // sum pulse time
-        if(pulses[i].polarity) {
-            tmp_period += pulses[i].time;
-            tmp_pulse += pulses[i].time;
-        } else {
-            tmp_period += pulses[i].time;
-        }
-
         // count edges
         if(pulses[i].polarity != last_polarity) {
             edges_count++;
@@ -71,6 +63,15 @@ void PulseJoiner::pop_pulse(uint16_t* period, uint16_t* pulse) {
             next_fist_pulse = i;
             break;
         }
+
+        // sum pulse time
+        if(pulses[i].polarity) {
+            tmp_period += pulses[i].time;
+            tmp_pulse += pulses[i].time;
+        } else {
+            tmp_period += pulses[i].time;
+        }
+        pulse_index--;
     }
 
     *period = tmp_period;
@@ -86,7 +87,7 @@ void PulseJoiner::pop_pulse(uint16_t* period, uint16_t* pulse) {
         }
     }
 
-    pulse_index = 0;
+    //pulse_index = next_fist_pulse;
 }
 
 PulseJoiner::PulseJoiner() {
