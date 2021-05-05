@@ -9,7 +9,7 @@ void EncoderHID::init(const uint8_t* data, const uint8_t data_size) {
     card_data[2] = 0;
 
     uint32_t fc_cn = (data[0] << 16) | (data[1] << 8) | data[2];
-    
+
     // even parity sum calculation (high 12 bits of data)
     uint8_t even_parity_sum = 0;
     for(int8_t i = 12; i < 24; i++) {
