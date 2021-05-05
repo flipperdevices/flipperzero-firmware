@@ -140,7 +140,8 @@ void lock_menu_refresh_handler(void* p) {
     osMessageQueueId_t event_queue = p;
     DolphinEvent event;
     event.type = DolphinEventTypeTick;
-    furi_check(osMessageQueuePut(event_queue, &event, 0, osWaitForever) == osOK);
+    // Some tick events may lost and we don't care.
+    osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
 static void lock_menu_callback(void* context, uint8_t index) {
