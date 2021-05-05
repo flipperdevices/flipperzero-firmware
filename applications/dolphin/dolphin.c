@@ -213,14 +213,15 @@ bool dolphin_view_idle_down_input(InputEvent* event, void* context) {
     current = model->screen;
 
     if(event->key == InputKeyDown) {
-        model->screen = (model->screen + 1) % NUM_INFO_SCREENS;
+        model->screen = (model->screen + 1) % DolphinViewStatsTotalCount;
     } else if(event->key == InputKeyUp) {
-        model->screen = ((model->screen - 1) + NUM_INFO_SCREENS) % NUM_INFO_SCREENS;
+        model->screen =
+            ((model->screen - 1) + DolphinViewStatsTotalCount) % DolphinViewStatsTotalCount;
     }
 
     view_commit_model(dolphin->idle_view_dolphin_stats, true);
 
-    if(current == DOLPHIN_INFO) {
+    if(current == DolphinViewStatsMeta) {
         if(event->key == InputKeyLeft) {
             dolphin_deed(dolphin, DolphinDeedWrong);
         } else if(event->key == InputKeyRight) {

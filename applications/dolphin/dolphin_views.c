@@ -115,7 +115,7 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 2, 13, headers[m->screen]);
     canvas_set_font(canvas, FontSecondary);
 
-    if(m->screen != DOLPHIN_INFO) {
+    if(m->screen != DolphinViewStatsMeta) {
         // Hardware version
         snprintf(
             buffer,
@@ -128,8 +128,8 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
             api_hal_version_get_name_ptr());
         canvas_draw_str(canvas, 5, 23, buffer);
 
-        ver = m->screen == BOOT_INFO ? api_hal_version_get_boot_version() :
-                                       api_hal_version_get_fw_version();
+        ver = m->screen == DolphinViewStatsBoot ? api_hal_version_get_boot_version() :
+                                                  api_hal_version_get_fw_version();
 
         if(!ver) {
             canvas_draw_str(canvas, 5, 33, "No info");

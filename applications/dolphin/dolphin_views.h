@@ -29,10 +29,10 @@ typedef enum {
 
 // Debug info
 typedef enum {
-    FW_INFO,
-    BOOT_INFO,
-    DOLPHIN_INFO,
-    NUM_INFO_SCREENS,
+    DolphinViewStatsFw,
+    DolphinViewStatsBoot,
+    DolphinViewStatsMeta,
+    DolphinViewStatsTotalCount,
 } DolphinViewStatsScreens;
 
 typedef struct {
