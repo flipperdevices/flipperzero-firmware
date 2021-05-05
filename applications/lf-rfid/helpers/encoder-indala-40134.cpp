@@ -1,13 +1,13 @@
-#include "encoder-indala.h"
+#include "encoder-indala-40134.h"
 #include <furi.h>
 
-void EncoderIndala::init(const uint8_t* data, const uint8_t data_size) {
+void EncoderIndala_40134::init(const uint8_t* data, const uint8_t data_size) {
     card_data = 0b1010000000000000000000000000000010011101111110011001001001010010;
     last_polarity = card_data & 1;
     card_data_index = 0;
 }
 
-void EncoderIndala::get_next(bool* polarity, uint16_t* period, uint16_t* pulse) {
+void EncoderIndala_40134::get_next(bool* polarity, uint16_t* period, uint16_t* pulse) {
     bool new_bit = (card_data >> (63 - card_data_index)) & 1;
 
     *period = 2;

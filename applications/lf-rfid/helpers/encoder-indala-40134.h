@@ -1,7 +1,7 @@
 #pragma once
 #include "encoder-generic.h"
 
-class EncoderIndala : public EncoderGeneric {
+class EncoderIndala_40134 : public EncoderGeneric {
 public:
     /**
      * @brief init data to emulate
