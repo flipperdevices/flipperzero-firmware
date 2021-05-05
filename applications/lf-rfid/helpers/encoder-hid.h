@@ -14,6 +14,8 @@ public:
     void get_next(bool* polarity, uint16_t* period, uint16_t* pulse) final;
 
 private:
-    uint64_t card_data;
+    static const uint8_t card_data_max = 3;
+    uint32_t card_data[card_data_max];
     uint8_t card_data_index;
+    uint8_t bit_index;
 };
