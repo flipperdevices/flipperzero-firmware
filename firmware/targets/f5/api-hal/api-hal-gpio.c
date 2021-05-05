@@ -120,7 +120,7 @@ void hal_gpio_init_alt(
     LL_GPIO_SetPinMode(gpio->port, gpio->pin, LL_GPIO_MODE_ALTERNATE);
 
     // set alternate function
-    if(gpio->pin < 8) {
+    if(hal_gpio_get_pin_num(gpio->pin) < 8) {
         LL_GPIO_SetAFPin_0_7(gpio->port, gpio->pin, alt_fn);
     } else {
         LL_GPIO_SetAFPin_8_15(gpio->port, gpio->pin, alt_fn);
