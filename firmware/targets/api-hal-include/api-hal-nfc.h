@@ -15,6 +15,11 @@ extern "C" {
 ReturnCode api_hal_nfc_init();
 
 /**
+ * Check if nfc worker is busy
+ */
+bool api_hal_nfc_is_busy();
+
+/**
  * NFC field on
  */
 void api_hal_nfc_field_on();
@@ -37,7 +42,7 @@ void api_hal_nfc_exit_sleep();
 /**
  * NFC poll
  */
-bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout);
+bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t cycles);
 
 #ifdef __cplusplus
 }

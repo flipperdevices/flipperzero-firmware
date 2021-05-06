@@ -7,6 +7,10 @@ ReturnCode api_hal_nfc_init() {
     return rfalNfcInitialize();
 }
 
+bool api_hal_nfc_is_busy() {
+    return rfalNfcGetState() > RFAL_NFC_STATE_IDLE;
+}
+
 void api_hal_nfc_field_on() {
     st25r3916TxRxOn();
 }
@@ -30,15 +34,19 @@ static void api_hal_nfc_change_state_cb(rfalNfcState st) {
     }
 }
 
-bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t timeout) {
+bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t cycles) {
     furi_assert(dev_list);
     furi_assert(dev_cnt);
 
+    rfalLowPowerModeStop();
+    if(rfalNfcGetState() == RFAL_NFC_STATE_NOTINIT) {
+        rfalNfcInitialize();
+    }
     rfalNfcDiscoverParam params;
     params.compMode = RFAL_COMPLIANCE_MODE_EMV;
     params.techs2Find = RFAL_NFC_POLL_TECH_A | RFAL_NFC_POLL_TECH_B | RFAL_NFC_POLL_TECH_F |
                         RFAL_NFC_POLL_TECH_V | RFAL_NFC_POLL_TECH_AP2P | RFAL_NFC_POLL_TECH_ST25TB;
-    params.totalDuration = timeout;
+    params.totalDuration = 1000;
     params.devLimit = 3;
     params.wakeupEnabled = false;
     params.wakeupConfigDefault = true;
@@ -50,7 +58,7 @@ bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t tim
 
     dev_is_found = false;
     rfalNfcDiscover(&params);
-    while(--timeout) {
+    while(--cycles) {
         rfalNfcWorker();
         FURI_LOG_I("HAL NFC", "Current state %d", rfalNfcGetState());
         if(dev_is_found) {
@@ -61,8 +69,8 @@ bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t tim
         osThreadYield();
     }
     rfalNfcDeactivate(false);
-    rfalFieldOff();
-    if(!timeout) {
+    rfalLowPowerModeStart();
+    if(!cycles) {
         FURI_LOG_D("HAL NFC", "Timeout");
         return false;
     }
