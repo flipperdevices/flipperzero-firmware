@@ -4,6 +4,10 @@
 static bool dev_is_found = false;
 
 ReturnCode api_hal_nfc_init() {
+    // Check if Nfc worker was started
+    if(rfalNfcGetState() > RFAL_NFC_STATE_NOTINIT) {
+        return ERR_NONE;
+    }
     return rfalNfcInitialize();
 }
 
@@ -60,13 +64,13 @@ bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t cyc
     rfalNfcDiscover(&params);
     while(--cycles) {
         rfalNfcWorker();
-        FURI_LOG_I("HAL NFC", "Current state %d", rfalNfcGetState());
+        FURI_LOG_D("HAL NFC", "Current state %d", rfalNfcGetState());
         if(dev_is_found) {
             rfalNfcGetDevicesFound(dev_list, dev_cnt);
             FURI_LOG_D("HAL NFC", "Found %d devices", dev_cnt);
             break;
         }
-        osThreadYield();
+        osDelay(5);
     }
     rfalNfcDeactivate(false);
     rfalLowPowerModeStart();
