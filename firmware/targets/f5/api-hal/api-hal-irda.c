@@ -121,10 +121,13 @@ uint32_t cnt = 0;
 struct {
     uint32_t last;
     uint8_t edge;
-} m[500];
+} m[2000];
 
 void api_hal_irda_tim_isr_DBG(TimerIRQSource source)
 {
+    if (cnt >= 2000)
+        return;
+
     switch (source) {
     case TimerIRQSourceCCI1:
         m[cnt].last = LL_TIM_OC_GetCompareCH1(TIM2);
@@ -142,15 +145,18 @@ void api_hal_irda_tim_isr_DBG(TimerIRQSource source)
 }
 
 void print_m(void) {
-    if (cnt == 0) {
-        printf(".");
+    if (cnt < 2000) {
+//    if (cnt == 0) {
+//        printf(".");
         return;
     }
 
     printf("\r\n================ %lu ============\r\n", cnt);
     for (int i = 0; i < cnt; i++) {
-        printf("%8lu  -  %s\r\n", m[i].last, m[i].edge ? "rising" : "falling" );
+        printf("%lu,", m[i].last);
+//        printf("%8lu  -  %s\r\n", m[i].last, m[i].edge ? "rising" : "falling" );
     }
+    printf("\r\n");
     cnt = 0;
 }
 
