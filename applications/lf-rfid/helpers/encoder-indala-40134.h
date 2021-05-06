@@ -17,6 +17,7 @@ private:
     uint64_t card_data;
     uint8_t card_data_index;
     uint8_t bit_clock_index;
-    bool last_polarity;
+    bool last_bit;
+    bool current_polarity;
     static const uint8_t clock_per_bit = 16;
 };
