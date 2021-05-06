@@ -19,16 +19,22 @@ NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue) {
     return nfc_worker;
 }
 
+void nfc_worker_free(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker);
+
+    // Check if worker thread is termminated
+    if(osThreadGetState(nfc_worker->thread) != osThreadTerminated) {
+        furi_check(osThreadTerminate(nfc_worker->thread) == osOK);
+    }
+    free(nfc_worker);
+}
+
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker) {
     return nfc_worker->state;
 }
 
 ReturnCode nfc_worker_get_error(NfcWorker* nfc_worker) {
     return nfc_worker->error;
-}
-
-void nfc_worker_free(NfcWorker* nfc_worker) {
-    furi_assert(nfc_worker);
 }
 
 void nfc_worker_start(NfcWorker* nfc_worker, NfcWorkerState state) {
@@ -56,20 +62,15 @@ void nfc_worker_task(void* context) {
 
     api_hal_power_insomnia_enter();
 
-    rfalLowPowerModeStop();
     if(nfc_worker->state == NfcWorkerStatePoll) {
         nfc_worker_poll(nfc_worker, 0);
-    } else if(nfc_worker->state == NfcWorkerStatePollOnce) {
-        nfc_worker_poll(nfc_worker, 5);
     } else if(nfc_worker->state == NfcWorkerStateEmulate) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
     }
-    rfalLowPowerModeStart();
 
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
-
     api_hal_power_insomnia_exit();
     osThreadExit();
 }

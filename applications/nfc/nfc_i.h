@@ -15,17 +15,16 @@
 
 #include <menu/menu.h>
 #include <menu/menu_item.h>
+#include <gui/modules/submenu.h>
 
 struct Nfc {
     osMessageQueueId_t message_queue;
-    osMessageQueueId_t cli_message_queue;
 
     NfcWorker* worker;
 
-    ValueMutex* menu_vm;
-    MenuItem* menu;
-    Icon* icon;
-    Cli* cli;
+    Gui* gui;
+
+    Submenu* submenu;
 
     View* view_detect;
     View* view_emulate;
