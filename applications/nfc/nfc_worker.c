@@ -21,11 +21,6 @@ NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue) {
 
 void nfc_worker_free(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
-
-    // Check if worker thread is termminated
-    if(osThreadGetState(nfc_worker->thread) != osThreadTerminated) {
-        furi_check(osThreadTerminate(nfc_worker->thread) == osOK);
-    }
     free(nfc_worker);
 }
 
@@ -63,7 +58,7 @@ void nfc_worker_task(void* context) {
     api_hal_power_insomnia_enter();
 
     if(nfc_worker->state == NfcWorkerStatePoll) {
-        nfc_worker_poll(nfc_worker, 0);
+        nfc_worker_poll(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulate) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
@@ -75,7 +70,7 @@ void nfc_worker_task(void* context) {
     osThreadExit();
 }
 
-void nfc_worker_poll(NfcWorker* nfc_worker, uint8_t cycles) {
+void nfc_worker_poll(NfcWorker* nfc_worker) {
     rfalNfcDevice* dev_list;
     uint8_t dev_cnt;
     // Update screen before start searching

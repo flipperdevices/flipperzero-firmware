@@ -1,39 +1,43 @@
 #include "nfc_i.h"
 #include "api-hal-nfc.h"
 
+osMessageQueueId_t message_queue = NULL;
+
 uint32_t nfc_view_stop(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
+    furi_assert(message_queue);
     NfcMessage message;
     message.type = NfcMessageTypeStop;
-    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
+    furi_check(osMessageQueuePut(message_queue, &message, 0, osWaitForever) == osOK);
     return NfcViewMenu;
 }
 
 uint32_t nfc_view_exit(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
+    furi_assert(message_queue);
     NfcMessage message;
     message.type = NfcMessageTypeExit;
-    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
+    furi_check(osMessageQueuePut(message_queue, &message, 0, osWaitForever) == osOK);
     return VIEW_NONE;
 }
 
 void nfc_menu_callback(void* context, uint32_t index) {
+    furi_assert(message_queue);
+    NfcMessage message;
     if(index == 0) {
-        nfc_menu_detect_callback(context);
+        message.type = NfcMessageTypeDetect;
     } else if(index == 1) {
-        nfc_menu_emulate_callback(context);
+        message.type = NfcMessageTypeEmulate;
     } else if(index == 2) {
-        nfc_menu_field_callback(context);
+        message.type = NfcMessageTypeField;
     }
+    furi_check(osMessageQueuePut(message_queue, &message, 0, osWaitForever) == osOK);
 }
 
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
 
-    nfc->message_queue = osMessageQueueNew(8, sizeof(NfcMessage), NULL);
-    nfc->worker = nfc_worker_alloc(nfc->message_queue);
+    message_queue = osMessageQueueNew(8, sizeof(NfcMessage), NULL);
+
+    nfc->worker = nfc_worker_alloc(message_queue);
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");
@@ -91,7 +95,8 @@ void nfc_free(Nfc* nfc) {
     // Free nfc worker
     nfc_worker_free(nfc->worker);
     // Free allocated queue
-    osMessageQueueDelete(nfc->message_queue);
+    osMessageQueueDelete(message_queue);
+    message_queue = NULL;
 
     // Free allocated views
     // Menu
@@ -100,7 +105,6 @@ void nfc_free(Nfc* nfc) {
 
     // Detect
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewRead);
-    view_free_model(nfc->view_detect);
     view_free(nfc->view_detect);
 
     // Emulate
@@ -113,7 +117,6 @@ void nfc_free(Nfc* nfc) {
 
     // Error
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewError);
-    view_free_model(nfc->view_error);
     view_free(nfc->view_error);
 
     // Free View Dispatcher
@@ -125,30 +128,6 @@ void nfc_free(Nfc* nfc) {
 
     // Free nfc object
     free(nfc);
-}
-
-void nfc_menu_detect_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
-    NfcMessage message;
-    message.type = NfcMessageTypeDetect;
-    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
-}
-
-void nfc_menu_emulate_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
-    NfcMessage message;
-    message.type = NfcMessageTypeEmulate;
-    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
-}
-
-void nfc_menu_field_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = context;
-    NfcMessage message;
-    message.type = NfcMessageTypeField;
-    furi_check(osMessageQueuePut(nfc->message_queue, &message, 0, osWaitForever) == osOK);
 }
 
 void nfc_cli_detect(string_t args, void* context) {
@@ -212,7 +191,7 @@ int32_t nfc_task(void* p) {
 
     NfcMessage message;
     while(1) {
-        furi_check(osMessageQueueGet(nfc->message_queue, &message, NULL, osWaitForever) == osOK);
+        furi_check(osMessageQueueGet(message_queue, &message, NULL, osWaitForever) == osOK);
         if(message.type == NfcMessageTypeDetect) {
             with_view_model(
                 nfc->view_detect, (NfcViewReadModel * model) {

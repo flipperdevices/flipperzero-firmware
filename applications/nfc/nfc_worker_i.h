@@ -29,7 +29,7 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
 
 void nfc_worker_task(void* context);
 
-void nfc_worker_poll(NfcWorker* nfc_worker, uint8_t cycles);
+void nfc_worker_poll(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate(NfcWorker* nfc_worker);
 

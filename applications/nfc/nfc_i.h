@@ -36,12 +36,6 @@ struct Nfc {
 
 Nfc* nfc_alloc();
 
-void nfc_menu_detect_callback(void* context);
-
-void nfc_menu_emulate_callback(void* context);
-
-void nfc_menu_field_callback(void* context);
-
 void nfc_start(Nfc* nfc, NfcView view_id, NfcWorkerState worker_state);
 
 int32_t nfc_task(void* p);
