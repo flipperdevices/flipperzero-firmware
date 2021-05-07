@@ -1242,6 +1242,7 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
   String display_string = "";
   String essid = "";
+  String bssid = "";
 
   if (type == WIFI_PKT_MGMT)
   {
@@ -1297,7 +1298,11 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
           Serial.print((char)snifferPacket->payload[i + 38]);
           display_string.concat((char)snifferPacket->payload[i + 38]);
           essid.concat((char)snifferPacket->payload[i + 38]);
+
+          
         }
+
+        bssid.concat(addr);
   
         int temp_len = display_string.length();
         for (int i = 0; i < 40 - temp_len; i++)
@@ -1314,7 +1319,7 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
           display_obj.loading = false;
         }
         if (essid == "") {
-          essid = "N/A";
+          essid = bssid;
           Serial.print(essid + " ");
         }
 

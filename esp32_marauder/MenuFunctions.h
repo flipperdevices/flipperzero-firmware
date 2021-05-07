@@ -90,6 +90,7 @@ PROGMEM static void add_ssid_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t e
 PROGMEM static void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 PROGMEM static void load_btn_cb(lv_obj_t * load_btn, lv_event_t event);
 PROGMEM static void test_btn_cb(lv_obj_t * load_btn, lv_event_t event);
+PROGMEM static void ap_list_cb(lv_obj_t * btn, lv_event_t event);
 PROGMEM static void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
 // lvgl stuff
@@ -125,7 +126,7 @@ class MenuFunctions
 
     uint32_t initTime = 0;
 
-    Menu* current_menu;
+    //Menu* current_menu;
 
     // Main menu stuff
     Menu mainMenu;
@@ -173,10 +174,11 @@ class MenuFunctions
     void battery(bool initial = false);
     void battery2(bool initial = false);
     void showMenuList(Menu* menu, int layer);
-    void orientDisplay();
 
   public:
     MenuFunctions();
+
+    Menu* current_menu;
 
     Ticker tick;
 
@@ -189,6 +191,7 @@ class MenuFunctions
     void deinitLVGL();
     void joinWiFiGFX();
     void addSSIDGFX();
+    void addAPGFX();
     void writeBadUSB();
 
     void buildButtons(Menu* menu);
@@ -196,6 +199,7 @@ class MenuFunctions
     void displayCurrentMenu();
     void main(uint32_t currentTime);
     void RunSetup();
+    void orientDisplay();
 };
 
 
