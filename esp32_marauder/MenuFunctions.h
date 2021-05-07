@@ -158,6 +158,7 @@ class MenuFunctions
     Menu shutdownBLEMenu;
     Menu generateSSIDsMenu;
     Menu clearSSIDsMenu;
+    Menu clearAPsMenu;
 
     static void lv_tick_handler();
 

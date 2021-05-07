@@ -612,6 +612,7 @@ void MenuFunctions::main(uint32_t currentTime)
     // Stop the current scan
     if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
+        (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
@@ -983,6 +984,7 @@ void MenuFunctions::RunSetup()
   shutdownBLEMenu.list = new LinkedList<MenuNode>();
   generateSSIDsMenu.list = new LinkedList<MenuNode>();
   clearSSIDsMenu.list = new LinkedList<MenuNode>();
+  clearAPsMenu.list = new LinkedList<MenuNode>();
 
   // Work menu names
   mainMenu.name = " ESP32 Marauder ";
@@ -1006,6 +1008,7 @@ void MenuFunctions::RunSetup()
   shutdownBLEMenu.name = " Shutdown BLE ";
   generateSSIDsMenu.name = " Generate SSIDs ";
   clearSSIDsMenu.name = " Clear SSIDs ";
+  clearAPsMenu.name = " Clear APs ";
   
 
   // Build Main Menu
@@ -1083,6 +1086,11 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_ORANGE);
   });
+  addNodes(&wifiSnifferMenu, "Scan APs", TFT_MAGENTA, NULL, BEACON_SNIFF, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
+  });
 
   // Build WiFi attack menu
   wifiAttackMenu.parentMenu = &wifiMenu; // Main Menu is second menu parent
@@ -1134,6 +1142,10 @@ void MenuFunctions::RunSetup()
     changeMenu(&clearSSIDsMenu);
     wifi_scan_obj.RunClearSSIDs();
   });
+  addNodes(&wifiGeneralMenu, "Clear APs", TFT_DARKGREY, NULL, CLEAR_ICO, [this]() {
+    changeMenu(&clearAPsMenu);
+    wifi_scan_obj.RunClearAPs();
+  });
 
   // Build shutdown wifi menu
   shutdownWiFiMenu.parentMenu = &wifiGeneralMenu;
@@ -1151,6 +1163,10 @@ void MenuFunctions::RunSetup()
   clearSSIDsMenu.parentMenu = &wifiGeneralMenu;
   addNodes(&clearSSIDsMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
     changeMenu(clearSSIDsMenu.parentMenu);
+  });
+  clearAPsMenu.parentMenu = &wifiGeneralMenu;
+  addNodes(&clearAPsMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(clearAPsMenu.parentMenu);
   });
 
 

@@ -64,7 +64,7 @@
 //#define MENU_FONT &FreeMonoBold9pt7b
 //#define MENU_FONT &FreeSans9pt7b
 //#define MENU_FONT &FreeSansBold9pt7b
-#define BUTTON_ARRAY_LEN 8
+#define BUTTON_ARRAY_LEN 9
 #define STATUS_BAR_WIDTH 16
 #define LVGL_TICK_PERIOD 6
 

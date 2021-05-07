@@ -9,6 +9,7 @@ int num_probe = 0;
 int num_eapol = 0;
 
 LinkedList<ssid>* ssids;
+LinkedList<AccessPoint>* access_points;
 
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
 
@@ -132,11 +133,19 @@ WiFiScan::WiFiScan()
 
 void WiFiScan::RunSetup() {
   ssids = new LinkedList<ssid>();
+  access_points = new LinkedList<AccessPoint>();
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
   this->ble_initialized = true;
   
   this->shutdownBLE();
+}
+
+int WiFiScan::clearAPs() {
+  int num_cleared = access_points->size();
+  access_points->clear();
+  Serial.println("access_points: " + (String)access_points->size());
+  return num_cleared;
 }
 
 int WiFiScan::clearSSIDs() {
@@ -243,6 +252,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunEapolScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_AP)
     RunBeaconScan(scan_mode, color);
+  else if (scan_mode == WIFI_SCAN_TARGET_AP)
+    RunAPScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_PWN)
     RunPwnScan(scan_mode, color);
   else if (scan_mode == WIFI_SCAN_DEAUTH)
@@ -322,6 +333,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
 {
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
+  (currentScanMode == WIFI_SCAN_TARGET_AP) ||
   (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_EAPOL) ||
@@ -424,6 +436,39 @@ String WiFiScan::freeRAM()
   return String(s);
 }
 
+// Function to start running a beacon scan
+void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
+{
+  sd_obj.openCapture("ap");
+
+  Serial.println("Clearing APs: " + (String)access_points->size());
+  access_points->clear();
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_WHITE, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" AP Scan ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
+  //wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_MODE_NULL);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_promiscuous_filter(&filt);
+  esp_wifi_set_promiscuous_rx_cb(&apSnifferCallback);
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  this->wifi_initialized = true;
+  initTime = millis();
+}
+
 void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
 
   display_obj.tft.init();
@@ -444,6 +489,17 @@ void WiFiScan::RunLvJoinWiFi(uint8_t scan_mode, uint16_t color) {
   lv_disp_load_scr(scr);
 
   //display_obj.joinWiFiGFX();
+}
+
+void WiFiScan::RunClearAPs() {
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+  display_obj.tft.setTextColor(TFT_CYAN);
+
+  display_obj.tft.println(F("Clearing APs..."));
+  display_obj.tft.println("APs Cleared: " + (String)this->clearAPs());
 }
 
 void WiFiScan::RunClearSSIDs() {
@@ -1169,6 +1225,113 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         
   
         
+        Serial.println();
+  
+        sd_obj.addPacket(snifferPacket->payload, len);
+      }
+    }
+  }
+}
+
+void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
+{
+  wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
+  WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
+  wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
+  int len = snifferPacket->rx_ctrl.sig_len;
+
+  String display_string = "";
+  String essid = "";
+
+  if (type == WIFI_PKT_MGMT)
+  {
+    len -= 4;
+    int fctl = ntohs(frameControl->fctl);
+    const wifi_ieee80211_packet_t *ipkt = (wifi_ieee80211_packet_t *)snifferPacket->payload;
+    const WifiMgmtHdr *hdr = &ipkt->hdr;
+
+    // If we dont the buffer size is not 0, don't write or else we get CORRUPT_HEAP
+    if ((snifferPacket->payload[0] == 0x80) && (display_obj.display_buffer->size() == 0))
+    {
+      char addr[] = "00:00:00:00:00:00";
+      getMAC(addr, snifferPacket->payload, 10);
+
+      bool in_list = false;
+      bool mac_match = true;
+
+      for (int i = 0; i < access_points->size(); i++) {
+        mac_match = true;
+        //Serial.print("Checking ");
+        //Serial.print(addr);
+        //Serial.println(" against " + (String)access_points->get(i).essid);
+
+        
+        for (int x = 0; x < 6; x++) {
+          //Serial.println((String)snifferPacket->payload[x + 10] + " | " + (String)access_points->get(i).bssid[x]);
+          if (snifferPacket->payload[x + 10] != access_points->get(i).bssid[x]) {
+            mac_match = false;
+            //Serial.println("MACs do not match");
+            break;
+          }
+        }
+        if (mac_match) {
+          in_list = true;
+          break;
+        }
+      }
+
+      if (!in_list) {
+      
+        delay(random(0, 10));
+        Serial.print("RSSI: ");
+        Serial.print(snifferPacket->rx_ctrl.rssi);
+        Serial.print(" Ch: ");
+        Serial.print(snifferPacket->rx_ctrl.channel);
+        Serial.print(" BSSID: ");
+        Serial.print(addr);
+        display_string.concat(addr);
+        Serial.print(" ESSID: ");
+        display_string.concat(" -> ");
+        for (int i = 0; i < snifferPacket->payload[37]; i++)
+        {
+          Serial.print((char)snifferPacket->payload[i + 38]);
+          display_string.concat((char)snifferPacket->payload[i + 38]);
+          essid.concat((char)snifferPacket->payload[i + 38]);
+        }
+  
+        int temp_len = display_string.length();
+        for (int i = 0; i < 40 - temp_len; i++)
+        {
+          display_string.concat(" ");
+        }
+  
+        Serial.print(" ");
+  
+        if (display_obj.display_buffer->size() == 0)
+        {
+          display_obj.loading = true;
+          display_obj.display_buffer->add(display_string);
+          display_obj.loading = false;
+        }
+        if (essid == "") {
+          essid = "N/A";
+          Serial.print(essid + " ");
+        }
+
+        AccessPoint ap = {essid,
+                          snifferPacket->rx_ctrl.channel,
+                          {snifferPacket->payload[10],
+                           snifferPacket->payload[11],
+                           snifferPacket->payload[12],
+                           snifferPacket->payload[13],
+                           snifferPacket->payload[14],
+                           snifferPacket->payload[15]},
+                          false};
+
+        access_points->add(ap);
+
+        Serial.print(access_points->size());
+
         Serial.println();
   
         sd_obj.addPacket(snifferPacket->payload, len);
@@ -2244,6 +2407,7 @@ void WiFiScan::main(uint32_t currentTime)
   // WiFi operations
   if ((currentScanMode == WIFI_SCAN_PROBE) ||
   (currentScanMode == WIFI_SCAN_AP) ||
+  (currentScanMode == WIFI_SCAN_TARGET_AP) ||
   (currentScanMode == WIFI_SCAN_PWN) ||
   (currentScanMode == WIFI_SCAN_ESPRESSIF) ||
   (currentScanMode == WIFI_SCAN_DEAUTH) ||

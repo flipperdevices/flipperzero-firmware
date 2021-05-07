@@ -45,6 +45,7 @@
 #define LV_JOIN_WIFI 13
 #define LV_ADD_SSID 14
 #define WIFI_ATTACK_BEACON_LIST 15
+#define WIFI_SCAN_TARGET_AP 16
 
 #define GRAPH_REFRESH 100
 
@@ -61,6 +62,13 @@ esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, b
 struct ssid {
   String essid;
   int bssid[6];
+};
+
+struct AccessPoint {
+  String essid;
+  int channel;
+  int bssid[6];
+  bool selected;
 };
 
 class WiFiScan
@@ -147,6 +155,7 @@ class WiFiScan
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
+    void RunAPScan(uint8_t scan_mode, uint16_t color);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunBeaconList(uint8_t scan_mode, uint16_t color);
@@ -163,6 +172,8 @@ class WiFiScan
 
   public:
     WiFiScan();
+
+    //AccessPoint ap_list;
 
     //LinkedList<ssid>* ssids;
 
@@ -184,6 +195,7 @@ class WiFiScan
 
     void RunSetup();
     int clearSSIDs();
+    int clearAPs();
     bool addSSID(String essid);
     int generateSSIDs();
     bool shutdownWiFi();
@@ -197,6 +209,7 @@ class WiFiScan
     void RunShutdownBLE();
     void RunGenerateSSIDs();
     void RunClearSSIDs();
+    void RunClearAPs();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);
@@ -207,6 +220,7 @@ class WiFiScan
     static void espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
