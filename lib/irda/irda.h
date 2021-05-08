@@ -11,8 +11,8 @@ typedef struct IrdaHandler IrdaHandler;
 
 typedef struct {
     const char* protocol_name;
-    uint32_t adr;
-    uint32_t cmd;
+    uint32_t address;
+    uint32_t command;
     bool repeat;
 } IrdaMessage;
 
@@ -22,8 +22,8 @@ typedef void (*Fini) (void*);
 
 
 IrdaHandler* irda_init_decoder(void);
-const IrdaMessage* irda_decode(IrdaHandler *d, bool level, uint32_t duration);
-void irda_free_decoder(IrdaHandler * d);
+const IrdaMessage* irda_decode(IrdaHandler* decoder, bool level, uint32_t duration);
+void irda_free_decoder(IrdaHandler* decoder);
 
 #ifdef __cplusplus
 }

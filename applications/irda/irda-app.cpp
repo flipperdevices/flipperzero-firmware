@@ -4,7 +4,7 @@
 #include <input/input.h>
 #include <cli/cli.h>
 #include <api-hal-irda.h>
-#include <libirda.h>
+#include <irda.h>
 
 //#include "irda_nec.h"
 //#include "irda_samsung.h"
@@ -18,7 +18,6 @@
 class IrdaApp {
     void callback(void* ctx, bool level, uint32_t duration);
 
-    IrdaMessage im;
     IrdaHandler* decoder;
     osMessageQueueId_t events;
 
@@ -47,78 +46,29 @@ static uint32_t dbg_fq = 0;
 
 #define COUNT_OF(x)             (sizeof(x) / sizeof(x[0]))
 
-//static const uint32_t delays[] = {1081467, 169, 4580896, 9059, 4475, 590, 507, 614, 509, 613, 510, 592, 505, 617, 506, 616, 507, 594, 503, 619, 504, 608, 1626, 622, 1639, 589, 1645, 614, 1622, 617, 1645, 594, 1641, 618, 1616, 622, 1640, 588, 507, 614};
-
-
 extern "C" {
 void print_m(void);
 }
 
-void IrdaApp::run_test(const uint32_t *delays, uint32_t size) {
-    const IrdaMessage* msg = 0;
-    bool level = 1;
-
-    for (uint32_t i = 0; i < size; ++i) {
-//        int32_t delta = (int32_t) (delays[i] > 1000 ? delays[i] - 1600 : delays[i] - 560);
-//        printf("delay[%lu]: %lu (%ld)\r\n", i, delays[i], delta);
-        msg = irda_decode(decoder, level, delays[i]);
-        level = !level;
-        if (msg) {
-            printf("irda_msg: protocol: %s, adr: %#08lX, cmd: %#08lX %s\r\n",
-                msg->protocol_name,
-                msg->adr,
-                msg->cmd,
-                msg->repeat ? "R" : "" );
-        }
-    }
-}
-
 void IrdaApp::run(void) {
-#if 0
-#include "test_data.h"
-
-    delay(1000);
-    run_test(delays, COUNT_OF(delays));
-    run_test(delays2, COUNT_OF(delays2));
-
-    printf("finished\r\n");
-    while(1) {
-        print_m();
-        delay(1000);
-    };
-
-    delay(1000);
-    printf("\r\n\r\n===========================================\r\n");
-    while(1) {
-        print_m();
-        delay(1000);
-    };
-#else
-    IrdaMessage msg;
-    while (osOK == osMessageQueueGet (events, &msg, 0, osWaitForever)) {
-        printf("irda_msg: protocol: %s, adr: %#08lX, cmd: %#08lX %s\r\n",
-            msg.protocol_name,
-            msg.adr,
-            msg.cmd,
-            msg.repeat ? "R" : "" );
+    IrdaMessage message;
+    while (osOK == osMessageQueueGet (events, &message, 0, osWaitForever)) {
+        printf("irda_msg: protocol: %s, address: %#08lX, command: %#08lX %s\r\n",
+            message.protocol_name,
+            message.address,
+            message.command,
+            message.repeat ? "R" : "" );
     }
-
 
     printf("osMessageQueueGet FAILED\r\n");
-
-    for (;;) {
-        printf("got/missed/fq: %lu/%lu/%lu\r\n", dbg_got, dbg_missed, dbg_fq);
-        delay(1000);
-    }
-#endif
 }
 
 extern "C" void IrdaApp::callback(void* ctx, bool level, uint32_t duration) {
     (void) ctx;
-    const IrdaMessage* msg = irda_decode(decoder, level, duration);
+    const IrdaMessage* message = irda_decode(decoder, level, duration);
 
-    if (msg) {
-        if (osOK != osMessageQueuePut(events, msg, 0, 0)) {
+    if (message) {
+        if (osOK != osMessageQueuePut(events, message, 0, 0)) {
             dbg_fq++;
         }
         dbg_got++;

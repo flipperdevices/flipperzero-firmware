@@ -49,25 +49,25 @@ typedef struct IrdaCommonProtocolSpec {
 } IrdaCommonProtocolSpec;
 
 struct IrdaCommonDecoder {
-    const IrdaCommonProtocolSpec* spec;
+    const IrdaCommonProtocolSpec* protocol;
     IrdaCommonState state;
-    IrdaMessage im;
-    uint32_t t[4];
-    uint8_t tc;
+    IrdaMessage message;
+    uint32_t timings[4];
+    uint8_t timings_cnt;
     uint32_t level;
     uint16_t databit_cnt;
     uint8_t data[];
 };
 
 
-static inline void shift_left_array(uint32_t *arr, uint32_t len, uint32_t shift) {
+static inline void shift_left_array(uint32_t *array, uint32_t len, uint32_t shift) {
     for (int i = 0; i < len; ++i)
-        arr[i] = arr[i + shift];
+        array[i] = array[i + shift];
 }
 
 
-const IrdaMessage* decode_common(IrdaCommonDecoder *d, bool level, uint32_t duration);
-void* common_decoder_init(const IrdaCommonProtocolSpec *spec);
-void common_decoder_fini(void* d);
-DecodeStatus decode_pwm(IrdaCommonDecoder* d);
+const IrdaMessage* decode_common(IrdaCommonDecoder *decoder, bool level, uint32_t duration);
+void* common_decoder_init(const IrdaCommonProtocolSpec *protocol);
+void common_decoder_fini(void* decoder);
+DecodeStatus decode_pwm(IrdaCommonDecoder* decoder);
 
