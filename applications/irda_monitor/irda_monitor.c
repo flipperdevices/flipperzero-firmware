@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <furi.h>
+#include <api-hal-irda.h>
+#include <api-hal.h>
+
+
+#define IRDA_TIMINGS_SIZE       2000
+
+
+typedef struct {
+    uint8_t level;
+    uint32_t duration;
+} IrdaTiming;
+
+
+typedef struct {
+    uint32_t timing_cnt;
+    IrdaTiming* timing;
+} IrdaDelaysArray;
+
+
+static void irda_rx_callback(void* ctx, bool level, uint32_t duration) {
+    IrdaDelaysArray* delays = ctx;
+    if (delays->timing_cnt < IRDA_TIMINGS_SIZE) {
+        delays->timing[delays->timing_cnt].level = level;
+        delays->timing[delays->timing_cnt].duration = duration;
+        delays->timing_cnt++;   // no need to add synchronization
+    }
+}
+
+int32_t irda_monitor_app(void* p) {
+    (void) p;
+    static uint32_t counter = 0;
+
+    IrdaDelaysArray* delays = furi_alloc(sizeof(IrdaDelaysArray));
+
+    delays->timing = furi_alloc(sizeof(*delays->timing) * IRDA_TIMINGS_SIZE);
+    api_hal_irda_rx_irq_init();
+    api_hal_irda_rx_irq_set_callback(irda_rx_callback, delays);
+
+    while (1) {
+        delay(20);
+
+        if (counter != delays->timing_cnt) {
+            api_hal_light_set(LightRed, 0x00);
+            api_hal_light_set(LightGreen, 0x00);
+            api_hal_light_set(LightBlue, 0xFF);
+            delay(20);
+            api_hal_light_set(LightRed, 0x00);
+            api_hal_light_set(LightGreen, 0x00);
+            api_hal_light_set(LightBlue, 0x00);
+            counter = delays->timing_cnt;
+        }
+
+        if (delays->timing_cnt >= IRDA_TIMINGS_SIZE) {
+            api_hal_irda_rx_irq_deinit();
+            printf("== IRDA MONITOR FOUND (%d) records) ==\r\n", IRDA_TIMINGS_SIZE);
+            for (int i = 0; i < IRDA_TIMINGS_SIZE; ++i) {
+                printf("%5s: %lu,\r\n", delays->timing[i].level ? "space" : "mark", delays->timing[i].duration);
+            }
+            free(delays->timing);
+            free(delays);
+            break;
+        }
+    }
+
+    return 0;
+}
+
