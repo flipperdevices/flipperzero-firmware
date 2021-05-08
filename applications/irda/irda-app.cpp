@@ -37,7 +37,7 @@ void IrdaApp::run(void) {
     IrdaMessage message;
     while (osOK == osMessageQueueGet (events, &message, 0, osWaitForever)) {
         printf("irda_msg: protocol: %s, address: %#08lX, command: %#08lX %s\r\n",
-            message.protocol_name,
+            irda_get_protocol_name(message.protocol),
             message.address,
             message.command,
             message.repeat ? "R" : "" );

@@ -1,6 +1,6 @@
 #include <stdbool.h>
 #include <furi.h>
-#include "irda.h"
+#include "irda_i.h"
 #include "decoder_common_i.h"
 
 
@@ -79,10 +79,10 @@ DecodeStatus decode_pwm(IrdaCommonDecoder* decoder) {
     return status;
 }
 
-const IrdaMessage* decode_common(IrdaCommonDecoder* decoder, bool level, uint32_t duration) {
+IrdaMessage* decode_common(IrdaCommonDecoder* decoder, bool level, uint32_t duration) {
     furi_assert(decoder);
 
-    const IrdaMessage* message = 0;
+    IrdaMessage* message = 0;
     DecodeStatus status = DecodeStatusError;
 
     if (decoder->level == level) {

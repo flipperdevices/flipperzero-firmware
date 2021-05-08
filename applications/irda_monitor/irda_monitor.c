@@ -21,10 +21,13 @@ typedef struct {
 
 static void irda_rx_callback(void* ctx, bool level, uint32_t duration) {
     IrdaDelaysArray* delays = ctx;
+
     if (delays->timing_cnt < IRDA_TIMINGS_SIZE) {
+        if (delays->timing_cnt > 1)
+            furi_check(level != delays->timing[delays->timing_cnt-1].level);
         delays->timing[delays->timing_cnt].level = level;
         delays->timing[delays->timing_cnt].duration = duration;
-        delays->timing_cnt++;   // no need to add synchronization
+        delays->timing_cnt++;   // Read-Modify-Write in ISR only: no need to add synchronization
     }
 }
 
@@ -55,9 +58,11 @@ int32_t irda_monitor_app(void* p) {
         if (delays->timing_cnt >= IRDA_TIMINGS_SIZE) {
             api_hal_irda_rx_irq_deinit();
             printf("== IRDA MONITOR FOUND (%d) records) ==\r\n", IRDA_TIMINGS_SIZE);
+            printf("{");
             for (int i = 0; i < IRDA_TIMINGS_SIZE; ++i) {
-                printf("%5s: %lu,\r\n", delays->timing[i].level ? "space" : "mark", delays->timing[i].duration);
+                printf("%s%lu, ", (delays->timing[i].duration > 15000) ? "\r\n" : "", delays->timing[i].duration);
             }
+            printf("\r\n};\r\n");
             free(delays->timing);
             free(delays);
             break;

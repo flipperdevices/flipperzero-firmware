@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "irda.h"
+#include "irda_i.h"
 
 
 #define BIT_TOLERANCE                   (120)
@@ -39,8 +39,7 @@ typedef struct {
     uint16_t bit0_space;
 } IrdaCommonDecoderTimings;
 
-typedef struct IrdaCommonProtocolSpec {
-    const char* name;
+typedef struct {
     IrdaCommonDecoderTimings timings;
     uint32_t databit_len;
     IrdaDecode decode;
@@ -52,7 +51,7 @@ struct IrdaCommonDecoder {
     const IrdaCommonProtocolSpec* protocol;
     IrdaCommonState state;
     IrdaMessage message;
-    uint32_t timings[4];
+    uint32_t timings[6];
     uint8_t timings_cnt;
     uint32_t level;
     uint16_t databit_cnt;
@@ -66,7 +65,7 @@ static inline void shift_left_array(uint32_t *array, uint32_t len, uint32_t shif
 }
 
 
-const IrdaMessage* decode_common(IrdaCommonDecoder *decoder, bool level, uint32_t duration);
+IrdaMessage* decode_common(IrdaCommonDecoder *decoder, bool level, uint32_t duration);
 void* common_decoder_init(const IrdaCommonProtocolSpec *protocol);
 void common_decoder_fini(void* decoder);
 DecodeStatus decode_pwm(IrdaCommonDecoder* decoder);
