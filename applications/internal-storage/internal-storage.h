@@ -20,7 +20,11 @@ typedef struct InternalStorage InternalStorage;
  * @param size - buffer size
  * @return negative on error, otherwise data read
  */
-int internal_storage_read_key(InternalStorage* internal_storage, const char* key, uint8_t* buffer, size_t size);
+int internal_storage_read_key(
+    InternalStorage* internal_storage,
+    const char* key,
+    uint8_t* buffer,
+    size_t size);
 
 /** Write key, blocking api
  * @param internal_storage - InternalStorage instance
@@ -29,4 +33,8 @@ int internal_storage_read_key(InternalStorage* internal_storage, const char* key
  * @param size - buffer size
  * @return negative on error, otherwise data written
  */
-int internal_storage_write_key(InternalStorage* internal_storage, const char* key, uint8_t* buffer, size_t size);
+int internal_storage_write_key(
+    InternalStorage* internal_storage,
+    const char* key,
+    uint8_t* buffer,
+    size_t size);

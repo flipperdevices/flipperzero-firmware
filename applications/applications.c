@@ -75,7 +75,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_INTERNAL_STORAGE
-    {.app = internal_storage_task, .name = "internal_storage", .stack_size = 2048, .icon = A_Plugins_14},
+    {.app = internal_storage_task,
+     .name = "internal_storage",
+     .stack_size = 2048,
+     .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_DOLPHIN

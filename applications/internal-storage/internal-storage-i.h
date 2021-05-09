@@ -31,13 +31,23 @@ typedef struct {
     void* data;
 } InternalStorageCommand;
 
-int internal_storage_device_read(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, void *buffer, lfs_size_t size);
+int internal_storage_device_read(
+    const struct lfs_config* c,
+    lfs_block_t block,
+    lfs_off_t off,
+    void* buffer,
+    lfs_size_t size);
 
-int internal_storage_device_prog(const struct lfs_config *c, lfs_block_t block, lfs_off_t off, const void *buffer, lfs_size_t size);
+int internal_storage_device_prog(
+    const struct lfs_config* c,
+    lfs_block_t block,
+    lfs_off_t off,
+    const void* buffer,
+    lfs_size_t size);
 
-int internal_storage_device_erase(const struct lfs_config *c, lfs_block_t block);
+int internal_storage_device_erase(const struct lfs_config* c, lfs_block_t block);
 
-int internal_storage_device_sync(const struct lfs_config *c);
+int internal_storage_device_sync(const struct lfs_config* c);
 
 InternalStorage* internal_storage_alloc();
 
@@ -47,4 +57,6 @@ int32_t internal_storage_task(void* p);
 
 void _internal_storage_read_key(InternalStorage* internal_storage, InternalStorageCommandKey* data);
 
-void _internal_storage_write_key(InternalStorage* internal_storage, InternalStorageCommandKey* data);
+void _internal_storage_write_key(
+    InternalStorage* internal_storage,
+    InternalStorageCommandKey* data);
