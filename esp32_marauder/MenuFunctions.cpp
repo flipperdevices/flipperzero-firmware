@@ -167,6 +167,9 @@ void MenuFunctions::addAPGFX(){
 
   lv_obj_t * label;
 
+  list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
+  lv_obj_set_event_cb(list_btn, ap_list_cb);
+
   for (int i = 0; i < access_points->size(); i++) {
     char buf[access_points->get(i).essid.length() + 1] = {};
     access_points->get(i).essid.toCharArray(buf, access_points->get(i).essid.length() + 1);
@@ -186,9 +189,6 @@ void MenuFunctions::addAPGFX(){
     //label = lv_label_create(btn1, NULL);
     //lv_label_set_text(label, buf);
   }
-
-  list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
-  lv_obj_set_event_cb(list_btn, ap_list_cb);
 }
 
 void ap_list_cb(lv_obj_t * btn, lv_event_t event) {
@@ -449,6 +449,9 @@ void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
   
       // Build list of files from the SD card
       lv_obj_t * list_btn;
+
+      list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
+      lv_obj_set_event_cb(list_btn, test_btn_cb);
   
       while (true) {
         File entity = scripts.openNextFile();
@@ -471,9 +474,6 @@ void load_btn_cb(lv_obj_t * load_btn, lv_event_t event) {
       }
   
       scripts.close();
-  
-      list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Cancel");
-      lv_obj_set_event_cb(list_btn, test_btn_cb);
     }
   }
 
@@ -672,6 +672,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // Get the display buffer out of the way
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
     display_obj.displayBuffer();
@@ -710,6 +711,7 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
         (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
@@ -734,6 +736,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // Check if any key coordinate boxes contain the touch coordinates
   // This is for when on a menu
   if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
   {
@@ -1203,6 +1206,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);
+  });
+  addNodes(&wifiAttackMenu, "Probe Req Flood", TFT_RED, NULL, PROBE_SNIFF, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
   });
 
   // Build WiFi General menu

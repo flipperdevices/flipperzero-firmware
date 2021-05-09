@@ -47,6 +47,7 @@
 #define WIFI_ATTACK_BEACON_LIST 15
 #define WIFI_SCAN_TARGET_AP 16
 #define LV_SELECT_AP 17
+#define WIFI_ATTACK_AUTH 18
 
 #define GRAPH_REFRESH 100
 
@@ -144,6 +145,42 @@ class WiFiScan
                     /*36*/  0x00
                     };
 
+    /*uint8_t auth_packet[128] = {0xB0, 0x00, 0x3C, 0x00, // Frame Control, Duration
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Dest
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Dest BSSID
+                                0x00, 0x01, // Sequence number
+                                0x00, 0x00, // Algo
+                                0x01, 0x00, // Auth sequence number
+                                0x00, 0x00, // Status Code
+                                0x7F, 0x08,
+                                0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x40,
+                                0xDD, 0x0B, 0x00, 0x17, 0xF2, 0x0A, 0x00, 0x01, // Say it was Apple
+                                0x04, 0x00, 0x00, 0x00, 0x00, 0xDD, 0x0A, 0x00,
+                                0x10, 0x18, 0x02, 0x00, 0x00, 0x10, 0x00, 0x00,
+                                0x00
+                                };*/
+    uint8_t auth_packet[65] = {0xb0, 0x00, 0x3c, 0x00, 
+                              0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 
+                              0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 
+                              0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 
+                              0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 
+                              0x7f, 0x08, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 
+                              0x00, 0x40, 0xdd, 0x0b, 0x00, 0x17, 0xf2, 0x0a, 
+                              0x00, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00, 0xdd, 
+                              0x0a, 0x00, 0x10, 0x18, 0x02, 0x00, 0x00, 0x10, 
+                              0x00, 0x00, 0x00};
+
+    uint8_t prob_req_packet[128] = {0x40, 0x00, 0x00, 0x00, 
+                                  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Destination
+                                  0x01, 0x02, 0x03, 0x04, 0x05, 0x06, // Source
+                                  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // Dest
+                                  0x01, 0x00, // Sequence
+                                  0x00, // SSID Parameter
+                                  0x00, // SSID Length
+                                  /* SSID */
+                                  };
+
     void packetMonitorMain(uint32_t currentTime);
     void eapolMonitorMain(uint32_t currentTime);
     void changeChannel();
@@ -153,12 +190,14 @@ class WiFiScan
     void tftDrawChannelScaleButtons();
     void tftDrawColorKey();
     void tftDrawGraphObjects();
+    void sendProbeAttack(uint32_t currentTime);
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunAPScan(uint8_t scan_mode, uint16_t color);
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
+    void RunProbeFlood(uint8_t scan_mode, uint16_t color);
     void RunBeaconList(uint8_t scan_mode, uint16_t color);
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
