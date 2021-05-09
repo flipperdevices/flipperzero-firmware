@@ -59,15 +59,122 @@ void nfc_worker_task(void* context) {
 
     if(nfc_worker->state == NfcWorkerStatePoll) {
         nfc_worker_poll(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadEMV) {
+        nfc_worker_read_emv(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulate) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
     }
-
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
     api_hal_power_insomnia_exit();
     osThreadExit();
+}
+
+void nfc_worker_read_emv(NfcWorker* nfc_worker) {
+    ReturnCode err;
+    rfalNfcDiscoverParam params;
+    params.compMode = RFAL_COMPLIANCE_MODE_EMV;
+    params.techs2Find = RFAL_NFC_POLL_TECH_A | RFAL_NFC_POLL_TECH_B | RFAL_NFC_POLL_TECH_F |
+                        RFAL_NFC_POLL_TECH_V | RFAL_NFC_POLL_TECH_AP2P | RFAL_NFC_POLL_TECH_ST25TB;
+    params.totalDuration = 100;
+    params.devLimit = 3;
+    params.wakeupEnabled = false;
+    params.wakeupConfigDefault = true;
+    params.nfcfBR = RFAL_BR_212;
+    params.ap2pBR = RFAL_BR_424;
+    params.maxBR = RFAL_BR_KEEP;
+    params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
+    params.notifyCb = NULL;
+    rfalLowPowerModeStop();
+    rfalNfcDiscover(&params);
+
+    rfalNfcDevice* dev_list;
+    rfalNfcDevice* dev_active;
+    uint8_t tx_buff[255];
+    uint8_t dev_cnt = 0;
+    uint8_t ppse_select[] = {0x00, 0xA4, 0x04, 0x00, 0x0E, 0x32, 0x50, 0x41, 0x59, 0x2E,
+                             0x53, 0x59, 0x53, 0x2E, 0x44, 0x44, 0x46, 0x30, 0x31, 0x00};
+    // uint8_t aid_len = 0;
+    // TODO read from data exchange
+    uint8_t aid[] = {0xA0, 0x00 , 0x00, 0x00, 0x03, 0x10, 0x10};
+    // Select mastercard application
+    uint8_t app_select[] = {0x00, 0xA4, 0x04, 0x00};
+    uint8_t* rx_buff;
+    uint16_t* rx_len;
+    rfalNfcState state;
+
+    while(nfc_worker->state == NfcWorkerStateReadEMV) {
+        rfalNfcWorker();
+        state = rfalNfcGetState();
+        FURI_LOG_I("NFC", "Current state: %d", state);
+        if(state >= RFAL_NFC_STATE_ACTIVATED) {
+            err = rfalNfcGetDevicesFound(&dev_list, &dev_cnt);
+            FURI_LOG_E("NFC", "Get device err: %d", err);
+            FURI_LOG_I("NFC", "Devices found: %d", dev_cnt);
+            err = rfalNfcGetActiveDevice(&dev_active);
+            FURI_LOG_E("NFC", "Get active device err: %d", err);
+            break;
+        }
+        osDelay(10);
+    }
+    // Start data exchange
+    err = rfalNfcDataExchangeStart(ppse_select, sizeof(ppse_select), &rx_buff, &rx_len, 0);
+    FURI_LOG_E("NFC", "Start data exchange err: %d", err);
+    while(true) {
+        rfalNfcWorker();
+        FURI_LOG_I("NFC", "State: %d", rfalNfcGetState());
+        err = rfalNfcDataExchangeGetStatus();
+        FURI_LOG_E("NFC", "Data Exchange err: %d", err);
+        if(err == ERR_NONE) {
+            break;
+        }
+        osDelay(10);
+    }
+    FURI_LOG_I("NFC", "Transaction is complete. Received %d bytes", *rx_len);
+
+    for(uint16_t i = 0; i < *rx_len; i++) {
+        printf("%02x ", rx_buff[i]); // Log data
+        // if(rx_buff[i] == 0x61) { // Application template
+        //     aid_len = rx_buff[i + 1];
+        //     FURI_LOG_I("NFC", "aid len: %d", aid_len);
+        // }
+    }
+
+    // Select application preparation buffer
+    uint8_t size = sizeof(app_select);
+    memcpy(tx_buff, app_select, size);
+    tx_buff[size++] = sizeof(aid);
+    memcpy(tx_buff + size, aid, sizeof(aid));
+    size += sizeof(aid);
+    tx_buff[size++] = 0;
+
+    // Start data exchange
+    err = rfalNfcDataExchangeStart(tx_buff, size, &rx_buff, &rx_len, 0);
+    FURI_LOG_E("NFC", "Start data exchange err: %d", err);
+    while(true) {
+        rfalNfcWorker();
+        FURI_LOG_I("NFC", "State: %d", rfalNfcGetState());
+        err = rfalNfcDataExchangeGetStatus();
+        FURI_LOG_E("NFC", "Data Exchange err: %d", err);
+        if(err == ERR_NONE) {
+            break;
+        }
+        osDelay(10);
+    }
+    FURI_LOG_I("NFC", "Transaction is complete. Received %d bytes", *rx_len);
+    for(uint16_t i = 0; i < *rx_len; i++) {
+        printf("%02x ", rx_buff[i]); // Log data
+    }
+
+    // READ PDOL
+    uint8_t pdol_start[] = {0x80, 0xA8, 0x00, 0x00};
+    size = sizeof(pdol_start);
+    memcpy(tx_buff, pdol_start, size);
+    tx_buff[size++] = 2 + 
+
+
+    printf("\r\n");
 }
 
 void nfc_worker_poll(NfcWorker* nfc_worker) {

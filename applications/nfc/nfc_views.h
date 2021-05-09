@@ -10,6 +10,7 @@
 typedef enum {
     NfcViewMenu,
     NfcViewRead,
+    NfcViewReadEmv,
     NfcViewEmulate,
     NfcViewField,
     NfcViewError,
