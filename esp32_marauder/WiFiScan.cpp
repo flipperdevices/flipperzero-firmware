@@ -445,7 +445,7 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
   sd_obj.openCapture("ap");
 
   Serial.println("Clearing APs: " + (String)access_points->size());
-  access_points->clear();
+  //access_points->clear();
   display_obj.TOP_FIXED_AREA_2 = 48;
   display_obj.tteBar = true;
   display_obj.print_delay_1 = 15;
