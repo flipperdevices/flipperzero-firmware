@@ -49,4 +49,4 @@ extern const FlipperApplication FLIPPER_SCENE;
 extern const FlipperApplication FLIPPER_SCENE_APPS[];
 extern const size_t FLIPPER_SCENE_APPS_COUNT;
 
-const FlipperApplication FLIPPER_ARCHIVE;
+extern const FlipperApplication FLIPPER_ARCHIVE;
