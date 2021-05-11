@@ -1,16 +1,10 @@
 #pragma once
 
+#include <stdint.h>
 #include <furi.h>
-#include <gui/gui.h>
 #include <gui/gui_i.h>
-#include <gui/modules/file_select.h>
 #include <gui/view_dispatcher.h>
-#include <gui/elements.h>
 #include <m-string.h>
-#include <sys/param.h>
-#include <input/input.h>
-
-#include <sd-card-api.h>
 #include <filesystem-api.h>
 #include "archive_views.h"
 
@@ -43,39 +37,35 @@ typedef struct {
 
 typedef enum {
     ArchiveTabFavorites,
-    ArchiveTabAll,
     ArchiveTabIButton,
-    // ArchiveTabNFC,
-    // ArchiveTabSubOne,
-    // ArchiveTabLFRFID,
+    ArchiveTabNFC,
+    ArchiveTabSubOne,
+    ArchiveTabLFRFID,
+    ArchiveTabIrda,
     ArchiveTabTotal,
 } ArchiveTabsEnum;
+
+typedef struct {
+    ArchiveTabsEnum id;
+    const char* name;
+    const char* path;
+    const char* extension;
+} ArchiveTab;
 
 typedef struct {
     osMessageQueueId_t event_queue;
     FuriThread* app_thread;
     Gui* gui;
-
     ViewDispatcher* view_dispatcher;
 
     View* view_favorite_items;
-    View* view_all_items;
     View* view_ibutton_keys;
+    View* view_nfc_keys;
+    View* view_subone_keys;
+    View* view_lfrfid_keys;
+    View* view_irda_keys;
 
     FS_Api* fs_api;
-
-    uint8_t current_tab;
-    char string_buff[255];
-
-    const char* path;
-    const char* extension;
-
-    bool init_completed;
-
-    FileSelectCallback callback;
-    void* context;
-
-    char* buffer;
-    uint8_t buffer_size;
+    ArchiveTab tab;
 
 } ArchiveState;

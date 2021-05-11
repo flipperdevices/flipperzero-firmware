@@ -1,32 +1,29 @@
 #include "archive.h"
 
-bool archive_parse_names(ArchiveState* archive);
-bool archive_parse_count(ArchiveState* archive);
+bool archive_get_filenames(ArchiveState* archive);
 
 static View* archive_get_tab_view(ArchiveState* archive) {
     View* tabs[] = {
-        archive->view_favorite_items, archive->view_all_items, archive->view_ibutton_keys};
+        [ArchiveTabFavorites] = archive->view_favorite_items,
+        [ArchiveTabIButton] = archive->view_ibutton_keys,
+        [ArchiveTabNFC] = archive->view_nfc_keys,
+        [ArchiveTabSubOne] = archive->view_subone_keys,
+        [ArchiveTabLFRFID] = archive->view_lfrfid_keys,
+        [ArchiveTabIrda] = archive->view_irda_keys,
+    };
 
-    return tabs[archive->current_tab];
+    return tabs[archive->tab.id];
 }
 
-static void update_offset(ArchiveState* archive, int length, int bounds, int offset) {
+static void update_offset(ArchiveState* archive, uint8_t length) {
     View* current = archive_get_tab_view(archive);
-
     ArchiveViewModelDefault* model = view_get_model(current);
+    uint8_t bounds = model->file_count > 3 ? 4 : model->file_count;
 
-    if(model->idx > model->list_offset + (bounds - offset)) {
-        model->list_offset = model->idx + 1;
-    } else if(model->idx < bounds + (model->idx - (1 - offset))) {
-        model->list_offset = model->idx - 1;
-    }
-
-    if(model->list_offset > length - bounds - 1) {
-        model->list_offset = length - bounds - 1;
-    }
-
-    if(model->idx == 0) {
-        model->list_offset = 0;
+    if(model->idx > model->list_offset + bounds) {
+        model->list_offset = CLAMP(model->idx + 1, length - bounds, 0);
+    } else if(model->idx < bounds + model->idx) {
+        model->list_offset = CLAMP(model->idx - 1, length - bounds, 0);
     }
 
     view_commit_model(current, true);
@@ -34,15 +31,25 @@ static void update_offset(ArchiveState* archive, int length, int bounds, int off
 
 void archive_switch_dir(ArchiveState* archive) {
     const char* paths[] = {
-        [ArchiveTabFavorites] = "/", [ArchiveTabAll] = "/", [ArchiveTabIButton] = "ibutton"};
+        [ArchiveTabFavorites] = "favorites",
+        [ArchiveTabIButton] = "ibutton",
+        [ArchiveTabNFC] = "nfc",
+        [ArchiveTabSubOne] = "subone",
+        [ArchiveTabLFRFID] = "lfrfid",
+        [ArchiveTabIrda] = "irda",
+    };
 
-    archive->extension = "*";
-    archive->path = paths[archive->current_tab];
+    archive->tab.extension = "*";
+    archive->tab.path = paths[archive->tab.id];
 
-    if(archive_parse_count(archive)) {
-        if(archive_parse_names(archive)) {
-        }
-    }
+    archive_get_filenames(archive);
+
+    View* current = archive_get_tab_view(archive);
+    ArchiveViewModelDefault* model = view_get_model(current);
+
+    model->tab_idx = archive->tab.id;
+
+    view_commit_model(current, true);
 }
 
 bool archive_view_input(InputEvent* event, void* context) {
@@ -53,34 +60,21 @@ bool archive_view_input(InputEvent* event, void* context) {
     if(event->type != InputTypeShort) return false;
 
     if(event->key == InputKeyLeft) {
-        archive->current_tab = CLAMP(archive->current_tab - 1, ArchiveTabTotal, 0);
+        archive->tab.id = CLAMP(archive->tab.id - 1, ArchiveTabTotal, 0);
         archive_switch_dir(archive);
-        View* current = archive_get_tab_view(archive);
-        ArchiveViewModelDefault* model = view_get_model(current);
-
-        model->tab_idx = archive->current_tab;
-
-        view_commit_model(current, true);
-        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->current_tab);
-
+        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
     } else if(event->key == InputKeyRight) {
-        archive->current_tab = CLAMP(archive->current_tab + 1, ArchiveTabTotal - 1, 0);
+        archive->tab.id = CLAMP(archive->tab.id + 1, ArchiveTabTotal - 1, 0);
         archive_switch_dir(archive);
-
-        View* current = archive_get_tab_view(archive);
-        ArchiveViewModelDefault* model = view_get_model(current);
-
-        model->tab_idx = archive->current_tab;
-
-        view_commit_model(current, true);
-        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->current_tab);
+        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
     }
 
     if(event->key == InputKeyUp) {
         View* current = archive_get_tab_view(archive);
         ArchiveViewModelDefault* model = view_get_model(current);
+
         model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
-        update_offset(archive, model->file_count, 3, 1);
+        update_offset(archive, model->file_count);
         view_commit_model(current, true);
     }
 
@@ -89,20 +83,20 @@ bool archive_view_input(InputEvent* event, void* context) {
         ArchiveViewModelDefault* model = view_get_model(current);
 
         model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
-        update_offset(archive, model->file_count, 3, 1);
+        update_offset(archive, model->file_count);
         view_commit_model(current, true);
     }
 
     return true;
 }
 
-static bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* name) {
+bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* name) {
     bool result = false;
 
     if(!(file_info->flags & FSF_DIRECTORY)) {
-        if(strcmp(archive->extension, "*") == 0) {
+        if(strcmp(archive->tab.extension, "*") == 0) {
             result = true;
-        } else if(strstr(name, archive->extension) != NULL) {
+        } else if(strstr(name, archive->tab.extension) != NULL) {
             result = true;
         }
     }
@@ -110,7 +104,7 @@ static bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* n
     return result;
 }
 
-bool archive_parse_names(ArchiveState* archive) {
+bool archive_get_filenames(ArchiveState* archive) {
     FileInfo file_info;
     File directory;
     bool result;
@@ -123,14 +117,14 @@ bool archive_parse_names(ArchiveState* archive) {
 
     View* current = archive_get_tab_view(archive);
     ArchiveViewModelDefault* model = view_get_model(current);
+
     first_file_index = model->first_file_index;
-    view_commit_model(current, true);
 
     if(name == NULL) {
         return false;
     }
 
-    result = dir_api->open(&directory, archive->path);
+    result = dir_api->open(&directory, archive->tab.path);
 
     if(!result) {
         dir_api->close(&directory);
@@ -149,10 +143,7 @@ bool archive_parse_names(ArchiveState* archive) {
             if(directory.error_id == FSE_OK) {
                 if(filter_extension(archive, &file_info, name)) {
                     if(file_counter >= first_file_index) {
-                        View* current = archive_get_tab_view(archive);
-                        ArchiveViewModelDefault* model = view_get_model(current);
                         string_set_str(model->filename[string_counter], name);
-                        view_commit_model(current, true);
 
                         string_counter++;
 
@@ -169,58 +160,8 @@ bool archive_parse_names(ArchiveState* archive) {
             }
         }
     }
-
-    dir_api->close(&directory);
-    free(name);
-    return true;
-}
-
-bool archive_parse_count(ArchiveState* archive) {
-    FileInfo file_info;
-    File directory;
-    bool result;
-    FS_Dir_Api* dir_api = &archive->fs_api->dir;
-    uint16_t file_counter = 0;
-    const uint8_t name_length = 100;
-    char* name = calloc(name_length, sizeof(char));
-
-    if(name == NULL) {
-        return false;
-    }
-
-    result = dir_api->open(&directory, archive->path);
-
-    if(!result) {
-        dir_api->close(&directory);
-        free(name);
-        return false;
-    }
-
-    while(1) {
-        result = dir_api->read(&directory, &file_info, name, name_length);
-
-        if(directory.error_id == FSE_NOT_EXIST || name[0] == 0) {
-            break;
-        }
-
-        if(result) {
-            if(directory.error_id == FSE_OK) {
-                if(filter_extension(archive, &file_info, name)) {
-                    file_counter++;
-                }
-            } else {
-                dir_api->close(&directory);
-                free(name);
-                return false;
-            }
-        }
-    }
-
-    View* current = archive_get_tab_view(archive);
-    ArchiveViewModelDefault* model = view_get_model(current);
     model->file_count = file_counter;
     view_commit_model(current, true);
-
     dir_api->close(&directory);
     free(name);
     return true;
@@ -241,36 +182,57 @@ ArchiveState* archive_alloc() {
 
     archive->fs_api = furi_record_open("sdcard");
 
-    // Favorites View
     archive->view_favorite_items = view_alloc();
     view_allocate_model(
         archive->view_favorite_items, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
     view_set_context(archive->view_favorite_items, archive);
-
-    view_set_draw_callback(archive->view_favorite_items, archive_view_favorites);
+    view_set_draw_callback(archive->view_favorite_items, archive_view_render);
     view_set_input_callback(archive->view_favorite_items, archive_view_input);
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveTabFavorites, archive->view_favorite_items);
 
-    // All Items View
-    archive->view_all_items = view_alloc();
-    view_set_context(archive->view_all_items, archive);
-    view_allocate_model(
-        archive->view_all_items, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-
-    view_set_draw_callback(archive->view_all_items, archive_view_all);
-    view_set_input_callback(archive->view_all_items, archive_view_input);
-    view_dispatcher_add_view(archive->view_dispatcher, ArchiveTabAll, archive->view_all_items);
-
-    // Ibutton keys View
     archive->view_ibutton_keys = view_alloc();
     view_set_context(archive->view_ibutton_keys, archive);
     view_allocate_model(
         archive->view_ibutton_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_ibutton_keys, archive_view_ibutton);
+    view_set_draw_callback(archive->view_ibutton_keys, archive_view_render);
     view_set_input_callback(archive->view_ibutton_keys, archive_view_input);
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveTabIButton, archive->view_ibutton_keys);
+
+    archive->view_nfc_keys = view_alloc();
+    view_set_context(archive->view_nfc_keys, archive);
+    view_allocate_model(
+        archive->view_nfc_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+    view_set_draw_callback(archive->view_nfc_keys, archive_view_render);
+    view_set_input_callback(archive->view_nfc_keys, archive_view_input);
+    view_dispatcher_add_view(archive->view_dispatcher, ArchiveTabNFC, archive->view_nfc_keys);
+
+    archive->view_subone_keys = view_alloc();
+    view_set_context(archive->view_subone_keys, archive);
+    view_allocate_model(
+        archive->view_subone_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+    view_set_draw_callback(archive->view_subone_keys, archive_view_render);
+    view_set_input_callback(archive->view_subone_keys, archive_view_input);
+    view_dispatcher_add_view(
+        archive->view_dispatcher, ArchiveTabSubOne, archive->view_subone_keys);
+
+    archive->view_lfrfid_keys = view_alloc();
+    view_set_context(archive->view_lfrfid_keys, archive);
+    view_allocate_model(
+        archive->view_lfrfid_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+    view_set_draw_callback(archive->view_lfrfid_keys, archive_view_render);
+    view_set_input_callback(archive->view_lfrfid_keys, archive_view_input);
+    view_dispatcher_add_view(
+        archive->view_dispatcher, ArchiveTabLFRFID, archive->view_lfrfid_keys);
+
+    archive->view_irda_keys = view_alloc();
+    view_set_context(archive->view_irda_keys, archive);
+    view_allocate_model(
+        archive->view_irda_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+    view_set_draw_callback(archive->view_irda_keys, archive_view_render);
+    view_set_input_callback(archive->view_irda_keys, archive_view_input);
+    view_dispatcher_add_view(archive->view_dispatcher, ArchiveTabIrda, archive->view_irda_keys);
 
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
@@ -280,8 +242,6 @@ ArchiveState* archive_alloc() {
 
 void archive_free(ArchiveState* archive) {
     furi_assert(archive);
-
-    // 2do free everything
 
     furi_record_close("sdcard");
     archive->fs_api = NULL;
@@ -316,17 +276,22 @@ int32_t app_archive(void* p) {
     // default tab
     archive_switch_dir(archive);
     ArchiveViewModelDefault* model = view_get_model(archive->view_favorite_items);
-    model->tab_idx = archive->current_tab;
+    model->tab_idx = archive->tab.id;
     view_commit_model(archive->view_favorite_items, true);
 
-    view_dispatcher_switch_to_view(archive->view_dispatcher, archive->current_tab);
+    view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
 
     while(1) {
         if(osThreadFlagsWait(EXIT_FLAG, osFlagsWaitAny, osWaitForever)) {
             break;
         }
     }
+
     unsubscribe_pubsub(event_pubsub);
+    furi_record_close("input_events");
+    event_record = NULL;
+    event_pubsub = NULL;
+
     archive_free(archive);
     return 0;
 }
