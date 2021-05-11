@@ -5,7 +5,9 @@
 #include <gui/gui_i.h>
 #include <gui/modules/file_select.h>
 #include <gui/view_dispatcher.h>
-
+#include <gui/elements.h>
+#include <m-string.h>
+#include <sys/param.h>
 #include <input/input.h>
 
 #include <sd-card-api.h>
@@ -61,8 +63,19 @@ typedef struct {
     View* view_ibutton_keys;
 
     FS_Api* fs_api;
-    FileSelect* file_select;
 
     uint8_t current_tab;
+    char string_buff[255];
+
+    const char* path;
+    const char* extension;
+
+    bool init_completed;
+
+    FileSelectCallback callback;
+    void* context;
+
+    char* buffer;
+    uint8_t buffer_size;
 
 } ArchiveState;

@@ -184,7 +184,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_ARCHIVE
-    {.app = app_archive, .name = "Archive", .stack_size = 1024, .icon = A_FileManager_14},
+    {.app = app_archive, .name = "Archive", .stack_size = 4096, .icon = A_FileManager_14},
 #endif
 
 };
@@ -267,7 +267,7 @@ const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(Flip
 
 #ifdef APP_ARCHIVE
 const FlipperApplication FLIPPER_ARCHIVE =
-    {.app = app_archive, .name = "Archive", .stack_size = 1024, .icon = A_FileManager_14};
+    {.app = app_archive, .name = "Archive", .stack_size = 4096, .icon = A_FileManager_14};
 #endif
 
 #ifdef SRV_DOLPHIN

@@ -14,13 +14,15 @@ static void draw_list(Canvas* canvas, void* model) {
     ArchiveViewModelDefault* m = model;
     uint8_t y_pos = m->idx;
 
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < m->file_count; ++i) {
         uint8_t idx = i + m->list_offset;
-        canvas_draw_str(canvas, 15, 25 + i * 12, m->list[idx]);
+        canvas_draw_str(canvas, 15, 25 + i * 12, m->filename[idx]->ptr);
         if(y_pos == idx) elements_frame_light(canvas, 0, 15 + i * 12, 120, 13);
     }
 
-    elements_scrollbar_pos(canvas, 126, 53, 15, y_pos, 5);
+    if(m->file_count > 4) {
+        elements_scrollbar_pos(canvas, 126, 53, 15, y_pos, 5);
+    }
 }
 
 void archive_render_status_bar(Canvas* canvas, void* model) {
@@ -53,7 +55,7 @@ void archive_view_favorites(Canvas* canvas, void* model) {
     ArchiveViewModelDefault* m = model;
     archive_render_status_bar(canvas, model);
 
-    if(m->list[0] != 0) {
+    if(m->file_count > 0) {
         draw_list(canvas, model);
     } else {
         canvas_draw_str_aligned(
@@ -65,7 +67,7 @@ void archive_view_all(Canvas* canvas, void* model) {
     ArchiveViewModelDefault* m = model;
     archive_render_status_bar(canvas, model);
 
-    if(m->list[0] != 0) {
+    if(m->file_count > 0) {
         draw_list(canvas, model);
     } else {
         canvas_draw_str_aligned(
@@ -77,7 +79,7 @@ void archive_view_ibutton(Canvas* canvas, void* model) {
     ArchiveViewModelDefault* m = model;
     archive_render_status_bar(canvas, model);
 
-    if(m->list[0] != 0) {
+    if(m->file_count > 0) {
         draw_list(canvas, model);
     } else {
         canvas_draw_str_aligned(
