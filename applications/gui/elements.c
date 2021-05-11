@@ -7,6 +7,30 @@
 #include <string.h>
 #include <stdint.h>
 
+void elements_scrollbar_pos(
+    Canvas* canvas,
+    uint8_t width,
+    uint8_t height,
+    uint8_t offset,
+    uint8_t pos,
+    uint8_t total) {
+    furi_assert(canvas);
+
+    // prevent overflows
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, width - 3, offset, 3, height - offset - 1);
+    // dot line
+    canvas_set_color(canvas, ColorBlack);
+    for(uint8_t i = offset; i < height + offset; i += 2) {
+        canvas_draw_dot(canvas, width - 2, i);
+    }
+    // Position block
+    if(total) {
+        uint8_t block_h = ((float)height) / total;
+        canvas_draw_box(canvas, width - 3, offset + block_h * pos, 3, block_h);
+    }
+}
+
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
     furi_assert(canvas);
 
@@ -37,6 +61,18 @@ void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t
     canvas_draw_line(canvas, x, y + 2, x, y + height - 2);
     canvas_draw_line(canvas, x + width - 1, y + 1, x + width - 1, y + height - 2);
     canvas_draw_line(canvas, x + width, y + 2, x + width, y + height - 2);
+
+    canvas_draw_dot(canvas, x + 1, y + 1);
+}
+
+void elements_frame_light(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    furi_assert(canvas);
+
+    canvas_draw_line(canvas, x + 2, y, x + width - 2, y);
+    canvas_draw_line(canvas, x + 1, y + height - 1, x + width - 2, y + height - 1);
+
+    canvas_draw_line(canvas, x, y + 2, x, y + height - 2);
+    canvas_draw_line(canvas, x + width - 1, y + 1, x + width - 1, y + height - 2);
 
     canvas_draw_dot(canvas, x + 1, y + 1);
 }

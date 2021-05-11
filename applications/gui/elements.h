@@ -13,7 +13,28 @@ extern "C" {
  * @param pos - current element of total elements
  * @param total - total elements
  */
+
+void elements_scrollbar_pos(
+    Canvas* canvas,
+    uint8_t width,
+    uint8_t height,
+    uint8_t offset,
+    uint8_t pos,
+    uint8_t total);
+/*
+ * Draw scrollbar on canvas.
+ * width 3px, height equal to canvas height
+ * @param pos - current element of total elements
+ * @param total - total elements
+ */
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total);
+
+/*
+ * Draw rounded frame (1px width version)
+ * @param x, y - top left corner coordinates
+ * @param width, height - frame width and height
+ */
+void elements_frame_light(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
 /*
  * Draw rounded frame
