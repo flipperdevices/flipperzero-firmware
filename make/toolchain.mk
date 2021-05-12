@@ -6,8 +6,8 @@ PREFIX = $(GCC_PATH)/$(PREFIX)
 endif
 endif
 
-CC	= $(PREFIX)gcc
-CPP	= $(PREFIX)g++
+CC	= $(PREFIX)gcc -std=gnu17
+CPP	= $(PREFIX)g++ -std=gnu++17
 LD	= $(PREFIX)g++
 AS	= $(PREFIX)gcc -x assembler-with-cpp
 CP	= $(PREFIX)objcopy
