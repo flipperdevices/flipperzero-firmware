@@ -4,12 +4,10 @@
 #include "irda_decoder_nec_test_data.h"
 #include "irda_decoder_samsung_test_data.h"
 
-
-#define RUN_DECODER(data,expected)      run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
-
+#define RUN_DECODER(data, expected) \
+    run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
 static IrdaHandler* decoder;
-
 
 static void test_setup(void) {
     decoder = irda_init_decoder();
@@ -19,26 +17,28 @@ static void test_teardown(void) {
     irda_free_decoder(decoder);
 }
 
-static void compare_message_results(const IrdaMessage *message_decoded,
-                                    const IrdaMessage *message_expected) {
+static void
+compare_message_results(const IrdaMessage* message_decoded, const IrdaMessage* message_expected) {
     mu_check(message_decoded->protocol == message_expected->protocol);
     mu_check(message_decoded->command == message_expected->command);
     mu_check(message_decoded->address == message_expected->address);
     mu_check(message_decoded->repeat == message_expected->repeat);
 }
 
-static void run_decoder(const uint32_t* input_delays, uint32_t input_delays_len,
-                        const IrdaMessage* message_expected, uint32_t message_expected_len) {
+static void run_decoder(
+    const uint32_t* input_delays,
+    uint32_t input_delays_len,
+    const IrdaMessage* message_expected,
+    uint32_t message_expected_len) {
     const IrdaMessage* message_decoded = 0;
     bool level = 1;
     uint32_t message_counter = 0;
 
-    for (uint32_t i = 0; i < input_delays_len; ++i) {
+    for(uint32_t i = 0; i < input_delays_len; ++i) {
         message_decoded = irda_decode(decoder, level, input_delays[i]);
-        if (message_decoded) {
+        if(message_decoded) {
             mu_assert(message_counter < message_expected_len, "decoded more than expected");
-            if (message_counter >= message_expected_len)
-                break;
+            if(message_counter >= message_expected_len) break;
             compare_message_results(message_decoded, &message_expected[message_counter]);
             ++message_counter;
         }

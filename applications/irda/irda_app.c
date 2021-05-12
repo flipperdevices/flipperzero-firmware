@@ -29,7 +29,6 @@ typedef struct {
 //    uint32_t command;
 //} IrDAPacket;
 
-
 #define IRDA_PACKET_COUNT 8
 
 typedef struct {
@@ -198,7 +197,8 @@ void irda_cli_cmd_rx(string_t args, void* context) {
         exit = cli_cmd_interrupt_received(app->cli);
         osStatus status = osMessageQueueGet(app->cli_ir_rx_queue, &packet, 0, 5);
         if(status == osOK) {
-            printf("%s "
+            printf(
+                "%s "
                 "Address:0x%02X Command: 0x%02X %s\r\n",
                 irda_get_protocol_name(packet.protocol),
                 (uint8_t)packet.address,
@@ -277,12 +277,12 @@ typedef struct {
 } IsrContext;
 
 void irda_rx_callback(void* ctx, bool level, uint32_t duration) {
-    IsrContext *isr_context = ctx;
+    IsrContext* isr_context = ctx;
     const IrdaMessage* message = irda_decode(isr_context->handler, level, duration);
     AppEvent event;
     event.type = EventTypeRX;
 
-    if (message) {
+    if(message) {
         event.value.rx = *message;
         furi_assert(osOK == osMessageQueuePut(isr_context->event_queue, &event, 0, 0));
     }
