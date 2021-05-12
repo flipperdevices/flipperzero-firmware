@@ -10,15 +10,18 @@ extern "C" {
 /*
  * Draw scrollbar on canvas.
  * width 3px, height equal to canvas height
+ * @param x - scrollbar position on X axis
+ * @param y - scrollbar position on Y axis
+ * @param offset - 
  * @param pos - current element of total elements
  * @param total - total elements
  */
 
 void elements_scrollbar_pos(
     Canvas* canvas,
-    uint8_t width,
+    uint8_t x,
+    uint8_t y,
     uint8_t height,
-    uint8_t offset,
     uint8_t pos,
     uint8_t total);
 /*

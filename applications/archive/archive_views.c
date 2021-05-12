@@ -12,17 +12,17 @@ const char* ArchiveTabNames[] = {
 static void draw_list(Canvas* canvas, void* model) {
     furi_assert(model);
     ArchiveViewModelDefault* m = model;
-    uint8_t y_pos = m->idx;
+
     bool scrollbar = m->file_count > 4;
 
     for(int i = 0; i < m->file_count; ++i) {
         uint8_t idx = i + m->list_offset;
         canvas_draw_str(canvas, 15, 25 + i * 12, m->filename[idx]->ptr);
-        if(y_pos == idx) elements_frame_light(canvas, 0, 15 + i * 12, scrollbar ? 120 : 127, 13);
+        if(m->idx == idx) elements_frame_light(canvas, 0, 15 + i * 12, scrollbar ? 122 : 127, 13);
     }
 
     if(scrollbar) {
-        elements_scrollbar_pos(canvas, 126, 53, 15, y_pos, 5);
+        elements_scrollbar_pos(canvas, 126, 15, 49, m->idx, m->file_count);
     }
 }
 

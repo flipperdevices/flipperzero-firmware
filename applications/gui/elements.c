@@ -9,25 +9,25 @@
 
 void elements_scrollbar_pos(
     Canvas* canvas,
-    uint8_t width,
+    uint8_t x,
+    uint8_t y,
     uint8_t height,
-    uint8_t offset,
     uint8_t pos,
     uint8_t total) {
     furi_assert(canvas);
 
     // prevent overflows
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, width - 3, offset, 3, height - offset - 1);
+    canvas_draw_box(canvas, x - 3, y, 3, height - y - 1);
     // dot line
     canvas_set_color(canvas, ColorBlack);
-    for(uint8_t i = offset; i < height + offset; i += 2) {
-        canvas_draw_dot(canvas, width - 2, i);
+    for(uint8_t i = y; i < height + y; i += 2) {
+        canvas_draw_dot(canvas, x - 2, i);
     }
     // Position block
     if(total) {
         uint8_t block_h = ((float)height) / total;
-        canvas_draw_box(canvas, width - 3, offset + block_h * pos, 3, block_h);
+        canvas_draw_box(canvas, x - 3, y + (block_h * pos), 3, block_h);
     }
 }
 
