@@ -1,5 +1,6 @@
 # Who owns all the code by default
-* @skotopes
+
+* @skotopes @DrZlo13
 
 # Applications
 applications/** @skotopes
@@ -48,6 +49,7 @@ lib/cyfral/** @DrZlo13
 lib/drivers/** @skotopes @gornekich
 lib/fatfs/** @DrZlo13
 lib/fnv1a-hash/** @DrZlo13
+lib/littlefs/** @skotopes
 lib/mlib/** @skotopes
 lib/onewire/** @DrZlo13
 lib/qrcode/** @DrZlo13
