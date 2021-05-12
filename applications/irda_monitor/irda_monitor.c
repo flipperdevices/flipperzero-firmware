@@ -15,7 +15,10 @@ typedef struct {
 
 typedef struct {
     uint32_t timing_cnt;
-    IrdaTiming* timing;
+    struct {
+        uint8_t level;
+        uint32_t duration;
+    } timing[IRDA_TIMINGS_SIZE];
 } IrdaDelaysArray;
 
 
@@ -37,7 +40,6 @@ int32_t irda_monitor_app(void* p) {
 
     IrdaDelaysArray* delays = furi_alloc(sizeof(IrdaDelaysArray));
 
-    delays->timing = furi_alloc(sizeof(*delays->timing) * IRDA_TIMINGS_SIZE);
     api_hal_irda_rx_irq_init();
     api_hal_irda_rx_irq_set_callback(irda_rx_callback, delays);
 
@@ -63,11 +65,11 @@ int32_t irda_monitor_app(void* p) {
                 printf("%s%lu, ", (delays->timing[i].duration > 15000) ? "\r\n" : "", delays->timing[i].duration);
             }
             printf("\r\n};\r\n");
-            free(delays->timing);
-            free(delays);
             break;
         }
     }
+
+    free(delays);
 
     return 0;
 }

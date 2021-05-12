@@ -19,8 +19,12 @@ static bool check_preamble(IrdaCommonDecoder* decoder) {
     }
 
     while ((!result) && (decoder->timings_cnt >= 2)) {
-        if ((MATCH_PREAMBLE_TIMING(decoder->timings[0], decoder->protocol->timings.preamb_mark))
-            && (MATCH_PREAMBLE_TIMING(decoder->timings[1], decoder->protocol->timings.preamb_space))) {
+        float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;
+        uint16_t preamble_mark = decoder->protocol->timings.preamble_mark;
+        uint16_t preamble_space = decoder->protocol->timings.preamble_space;
+
+        if ((MATCH_PREAMBLE_TIMING(decoder->timings[0], preamble_mark, preamble_tolerance))
+            && (MATCH_PREAMBLE_TIMING(decoder->timings[1], preamble_space, preamble_tolerance))) {
             result = true;
         }
 
@@ -39,11 +43,16 @@ DecodeStatus decode_pwm(IrdaCommonDecoder* decoder) {
     uint16_t index = 0;
     uint8_t shift = 0;
     DecodeStatus status = DecodeStatusError;
+    uint32_t bit_tolerance = decoder->protocol->timings.bit_tolerance;
+    uint16_t bit1_mark = decoder->protocol->timings.bit1_mark;
+    uint16_t bit1_space = decoder->protocol->timings.bit1_space;
+    uint16_t bit0_mark = decoder->protocol->timings.bit0_mark;
+    uint16_t bit0_space = decoder->protocol->timings.bit0_space;
 
     while (1) {
         // Stop bit
         if ((decoder->databit_cnt == decoder->protocol->databit_len) && (decoder->timings_cnt == 1)) {
-            if (MATCH_BIT_TIMING(timings[0], decoder->protocol->timings.bit1_mark)) {
+            if (MATCH_BIT_TIMING(timings[0], bit1_mark, bit_tolerance)) {
                 decoder->timings_cnt = 0;
                 status = DecodeStatusReady;
             } else {
@@ -57,11 +66,11 @@ DecodeStatus decode_pwm(IrdaCommonDecoder* decoder) {
             shift = decoder->databit_cnt % 8;   // LSB first
             if (!shift)
                 decoder->data[index] = 0;
-            if (MATCH_BIT_TIMING(timings[0], decoder->protocol->timings.bit1_mark)
-                && MATCH_BIT_TIMING(timings[1], decoder->protocol->timings.bit1_space)) {
+            if (MATCH_BIT_TIMING(timings[0], bit1_mark, bit_tolerance)
+                && MATCH_BIT_TIMING(timings[1], bit1_space, bit_tolerance)) {
                 decoder->data[index] |= (0x1 << shift);           // add 1
-            } else if (MATCH_BIT_TIMING(timings[0], decoder->protocol->timings.bit0_mark)
-                && MATCH_BIT_TIMING(timings[1], decoder->protocol->timings.bit0_space)) {
+            } else if (MATCH_BIT_TIMING(timings[0], bit0_mark, bit_tolerance)
+                && MATCH_BIT_TIMING(timings[1], bit0_space, bit_tolerance)) {
                 (void) decoder->data[index];                      // add 0
             } else {
                 status = DecodeStatusError;

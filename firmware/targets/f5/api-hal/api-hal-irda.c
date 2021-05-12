@@ -12,31 +12,31 @@
 static struct{
     TimerISRCallback callback;
     void *ctx;
-} timerIrda;
+} timer_irda;
 
 
 void api_hal_irda_tim_isr(TimerIRQSource source)
 {
-    uint32_t duration;
-    bool level;
+    uint32_t duration = 0;
+    bool level = 0;
 
     switch (source) {
     case TimerIRQSourceCCI1:
         duration = LL_TIM_OC_GetCompareCH1(TIM2);
+        LL_TIM_SetCounter(TIM2, 0);
         level = 1;
         break;
     case TimerIRQSourceCCI2:
         duration = LL_TIM_OC_GetCompareCH2(TIM2);
+        LL_TIM_SetCounter(TIM2, 0);
         level = 0;
         break;
     default:
         furi_check(0);
     }
 
-    if (timerIrda.callback)
-        timerIrda.callback(timerIrda.ctx, level, duration);
-
-    LL_TIM_SetCounter(TIM2, 0);
+    if (timer_irda.callback)
+        timer_irda.callback(timer_irda.ctx, level, duration);
 }
 
 void api_hal_irda_rx_irq_init(void)
@@ -62,7 +62,7 @@ void api_hal_irda_rx_irq_init(void)
 
     TIM_InitStruct.Prescaler = 64 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = 4294967295;
+    TIM_InitStruct.Autoreload = 0xFFFFFFFF;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
@@ -100,8 +100,8 @@ void api_hal_irda_rx_irq_deinit(void) {
 void api_hal_irda_rx_irq_set_callback(TimerISRCallback callback, void *ctx) {
     furi_check(callback);
 
-    timerIrda.callback = callback;
-    timerIrda.ctx = ctx;
+    timer_irda.callback = callback;
+    timer_irda.ctx = ctx;
 }
 
 void api_hal_irda_pwm_set(float value, float freq) {

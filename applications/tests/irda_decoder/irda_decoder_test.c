@@ -1,4 +1,3 @@
-#if 1
 #include <furi.h>
 #include "../minunit.h"
 #include "irda.h"
@@ -7,7 +6,6 @@
 
 
 #define RUN_DECODER(data,expected)      run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
-#define COUNT_OF(x)                     (sizeof(x) / sizeof(x[0]))
 
 
 static IrdaHandler* decoder;
@@ -70,7 +68,8 @@ MU_TEST(test_nec2) {
 }
 
 MU_TEST(test_unexpected_end_in_sequence) {
-    RUN_DECODER(test_nec_input1, test_nec_expected1);  // test_nec_input1 and test_nec_input2 shuts unexpected
+    // test_nec_input1 and test_nec_input2 shuts unexpected
+    RUN_DECODER(test_nec_input1, test_nec_expected1);
     RUN_DECODER(test_nec_input1, test_nec_expected1);
     RUN_DECODER(test_nec_input2, test_nec_expected2);
     RUN_DECODER(test_nec_input2, test_nec_expected2);
@@ -92,4 +91,3 @@ int run_minunit_test_irda_decoder() {
 
     return MU_EXIT_CODE;
 }
-#endif

@@ -4,13 +4,11 @@
 #include "irda_i.h"
 
 
-#define BIT_TOLERANCE                   (120)
-#define MATCH_BIT_TIMING(x, v)          (  ((x) < (v + BIT_TOLERANCE)) \
-                                        && ((x) > (v - BIT_TOLERANCE)))
+#define MATCH_BIT_TIMING(x, v, delta)       (  ((x) < (v + delta)) \
+                                            && ((x) > (v - delta)))
 
-#define MATCH_PREAMBLE_TIMING(x, v)     MATCH_TIMING(x,v,0.07)
-#define MATCH_TIMING(x, v, d)           (  ((x) < ((v) * (1 + (d)))) \
-                                        && ((x) > ((v) * (1 - (d)))))
+#define MATCH_PREAMBLE_TIMING(x, v, delta)  (  ((x) < ((v) * (1 + (delta)))) \
+                                            && ((x) > ((v) * (1 - (delta)))))
 
 typedef enum {
     DecodeStatusError,
@@ -20,9 +18,9 @@ typedef enum {
 
 typedef struct IrdaCommonDecoder IrdaCommonDecoder;
 
-typedef DecodeStatus (*IrdaDecode)(IrdaCommonDecoder*);
-typedef bool (*IrdaInterpret)(IrdaCommonDecoder*);
-typedef DecodeStatus (*IrdaDecodeRepeat)(IrdaCommonDecoder*);
+typedef DecodeStatus (*IrdaCommonDecode)(IrdaCommonDecoder*);
+typedef bool (*IrdaCommonInterpret)(IrdaCommonDecoder*);
+typedef DecodeStatus (*IrdaCommonDecodeRepeat)(IrdaCommonDecoder*);
 
 typedef enum IrdaCommonState {
     IrdaCommonStateWaitPreamble,
@@ -31,20 +29,22 @@ typedef enum IrdaCommonState {
 } IrdaCommonState;
 
 typedef struct {
-    uint16_t preamb_mark;
-    uint16_t preamb_space;
+    uint16_t preamble_mark;
+    uint16_t preamble_space;
     uint16_t bit1_mark;
     uint16_t bit1_space;
     uint16_t bit0_mark;
     uint16_t bit0_space;
+    float    preamble_tolerance;
+    uint32_t bit_tolerance;
 } IrdaCommonDecoderTimings;
 
 typedef struct {
     IrdaCommonDecoderTimings timings;
     uint32_t databit_len;
-    IrdaDecode decode;
-    IrdaInterpret interpret;
-    IrdaDecodeRepeat decode_repeat;
+    IrdaCommonDecode decode;
+    IrdaCommonInterpret interpret;
+    IrdaCommonDecodeRepeat decode_repeat;
 } IrdaCommonProtocolSpec;
 
 struct IrdaCommonDecoder {

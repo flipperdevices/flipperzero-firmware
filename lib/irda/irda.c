@@ -7,21 +7,18 @@
 #include "decoder_common_i.h"
 
 
-#define COUNT_OF(x)                     (sizeof(x) / sizeof(x[0]))
-
-
 struct IrdaHandler {
     void** ctx;
 };
 
 typedef struct {
-    Init init;
-    Decode decode;
-    Fini fini;
+    IrdaInit init;
+    IrdaDecode decode;
+    IrdaFini fini;
 } IrdaDecoders;
 
 typedef struct {
-    Encode encode;
+    IrdaEncode encode;
 } IrdaEncoders;
 
 typedef struct {
@@ -30,6 +27,7 @@ typedef struct {
     IrdaDecoders decoder;
     IrdaEncoders encoder;
 } IrdaProtocolImplementation;
+
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
@@ -41,8 +39,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
 const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t duration) {
     furi_assert(handler);
 
-    IrdaMessage* message = 0;
-    IrdaMessage* result = 0;
+    IrdaMessage* message = NULL;
+    IrdaMessage* result = NULL;
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
         message = irda_protocols[i].decoder.decode(handler->ctx[i], level, duration);

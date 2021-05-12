@@ -32,6 +32,8 @@
 #define IRDA_NEC_REPEAT_SPACE           2250
 #define IRDA_NEC_CARRIER_FREQUENCY      38000
 #define IRDA_NEC_DUTY_CYCLE             0.33
+#define IRDA_NEC_PREAMBLE_TOLERANCE     0.07    // percents
+#define IRDA_NEC_BIT_TOLERANCE          120     // us
 
 void* init_nec(void);
 void encode_nec(uint32_t address, uint32_t command, bool repeat);
@@ -42,7 +44,6 @@ IrdaMessage* decode_nec(void* decoder, bool level, uint32_t duration);
 /***************************************************************************************************
 *   SAMSUNG32 protocol description
 *   https://www.mikrocontroller.net/articles/IRMP_-_english#SAMSUNG
-****************************************************************************************************
 ****************************************************************************************************
 *  Preamble   Preamble     Pulse Distance/Width        Pause       Preamble   Preamble  Bit1  Stop
 *    mark      space           Modulation                           repeat     repeat          bit
@@ -67,6 +68,8 @@ IrdaMessage* decode_nec(void* decoder, bool level, uint32_t duration);
 #define IRDA_SAMSUNG_REPEAT_SPACE           4500
 #define IRDA_SAMSUNG_CARRIER_FREQUENCY      38000
 #define IRDA_SAMSUNG_DUTY_CYCLE             0.33
+#define IRDA_SAMSUNG_PREAMBLE_TOLERANCE     0.07    // percents
+#define IRDA_SAMSUNG_BIT_TOLERANCE          120     // us
 
 void* init_samsung32(void);
 void encode_samsung32(uint32_t address, uint32_t command, bool repeat);

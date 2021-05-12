@@ -1,8 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi.h>
-#include "decoder_common_i.h"
-#include "protocol_defs_i.h"
+#include "../decoder_common_i.h"
+#include "../protocol_defs_i.h"
 
 
 static bool interpret(IrdaCommonDecoder* decoder);
@@ -16,7 +16,9 @@ static const IrdaCommonProtocolSpec protocol_samsung32 = {
         IRDA_SAMSUNG_BIT1_MARK,
         IRDA_SAMSUNG_BIT1_SPACE,
         IRDA_SAMSUNG_BIT0_MARK,
-        IRDA_SAMSUNG_BIT0_SPACE
+        IRDA_SAMSUNG_BIT0_SPACE,
+        IRDA_SAMSUNG_PREAMBLE_TOLERANCE,
+        IRDA_SAMSUNG_BIT_TOLERANCE,
     },
     32,
     decode_pwm,
@@ -48,6 +50,8 @@ static bool interpret(IrdaCommonDecoder* decoder) {
 static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
+    float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;
+    uint32_t bit_tolerance = decoder->protocol->timings.bit_tolerance;
     DecodeStatus status = DecodeStatusError;
 
     if (decoder->timings_cnt < 6)
@@ -55,11 +59,11 @@ static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
 
     if ((decoder->timings[0] > IRDA_SAMSUNG_REPEAT_PAUSE_MIN)
         && (decoder->timings[0] < IRDA_SAMSUNG_REPEAT_PAUSE_MAX)
-        && MATCH_PREAMBLE_TIMING(decoder->timings[1], IRDA_SAMSUNG_REPEAT_MARK)
-        && MATCH_PREAMBLE_TIMING(decoder->timings[2], IRDA_SAMSUNG_REPEAT_SPACE)
-        && MATCH_BIT_TIMING(decoder->timings[3], decoder->protocol->timings.bit1_mark)
-        && MATCH_BIT_TIMING(decoder->timings[4], decoder->protocol->timings.bit1_space)
-        && MATCH_BIT_TIMING(decoder->timings[5], decoder->protocol->timings.bit1_mark)
+        && MATCH_PREAMBLE_TIMING(decoder->timings[1], IRDA_SAMSUNG_REPEAT_MARK, preamble_tolerance)
+        && MATCH_PREAMBLE_TIMING(decoder->timings[2], IRDA_SAMSUNG_REPEAT_SPACE, preamble_tolerance)
+        && MATCH_BIT_TIMING(decoder->timings[3], decoder->protocol->timings.bit1_mark, bit_tolerance)
+        && MATCH_BIT_TIMING(decoder->timings[4], decoder->protocol->timings.bit1_space, bit_tolerance)
+        && MATCH_BIT_TIMING(decoder->timings[5], decoder->protocol->timings.bit1_mark, bit_tolerance)
         ) {
         status = DecodeStatusReady;
         decoder->timings_cnt = 0;
