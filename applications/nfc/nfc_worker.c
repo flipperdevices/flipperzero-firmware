@@ -78,7 +78,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     ReturnCode err;
     rfalNfcDevice* dev_list;
     rfalNfcDevice* dev_active;
-    EmvApplication emv_app;
+    EmvApplication emv_app = {};
     uint8_t dev_cnt = 0;
     uint8_t tx_buff[255] = {};
     uint16_t tx_len = 0;
@@ -140,7 +140,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 FURI_LOG_I(NFC_WORKER_TAG, "Starting Get Processing Options command ...");
                 tx_len = emv_prepare_get_proc_opt(tx_buff, &emv_app);
                 err = api_hal_nfc_data_exchange(
-                    dev_active, tx_buff, tx_len, &rx_buff, &rx_len, true);
+                    dev_active, tx_buff, tx_len, &rx_buff, &rx_len, false);
                 if(err != ERR_NONE) {
                     FURI_LOG_E(
                         NFC_WORKER_TAG, "Error during Get Processing Options command: %d", err);
@@ -155,11 +155,48 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                         message.device.emv_card.number,
                         emv_app.card_number,
                         sizeof(emv_app.card_number));
+                    api_hal_nfc_deactivate();
+                    continue;
                 } else {
-                    FURI_LOG_E(NFC_WORKER_TAG, "Can't read card number");
-                    message.type = NfcMessageTypeEMVNotFound;
-                }
+                    // Mastercard doesn't give PAN / card number as GPO response
+                    // Iterate over all files found in application
+                    bool pan_found = false;
+                    for(uint8_t i = 0; (i < emv_app.afl.size) && !pan_found; i += 4) {
+                        uint8_t sfi = emv_app.afl.data[i] >> 3;
+                        uint8_t record_start = emv_app.afl.data[i + 1];
+                        uint8_t record_end = emv_app.afl.data[i + 2];
 
+                        // Iterate over all records in file
+                        for(uint8_t record = record_start; record <= record_end; ++record) {
+                            tx_len = emv_prepare_read_sfi_record(tx_buff, sfi, record);
+                            err = api_hal_nfc_data_exchange(
+                                dev_active, tx_buff, tx_len, &rx_buff, &rx_len, false);
+                            if(err != ERR_NONE) {
+                                FURI_LOG_E(
+                                    NFC_WORKER_TAG,
+                                    "Error reading application sfi %d, record %d",
+                                    sfi,
+                                    record);
+                            }
+                            if(emv_decode_read_sfi_record(rx_buff, *rx_len, &emv_app)) {
+                                pan_found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(pan_found) {
+                        FURI_LOG_I(NFC_WORKER_TAG, "Card PAN found");
+                        message.type = NfcMessageTypeEMVFound;
+                        memcpy(
+                            message.device.emv_card.number,
+                            emv_app.card_number,
+                            sizeof(emv_app.card_number));
+                    } else {
+                        FURI_LOG_E(NFC_WORKER_TAG, "Can't read card number");
+                        message.type = NfcMessageTypeEMVNotFound;
+                    }
+                    api_hal_nfc_deactivate();
+                }
             } else {
                 // Can't find EMV card
                 FURI_LOG_W(NFC_WORKER_TAG, "Card doesn't support EMV");

@@ -109,7 +109,7 @@ ReturnCode api_hal_nfc_data_exchange(rfalNfcDevice* dev, uint8_t* tx_buff, uint1
     while(state != RFAL_NFC_STATE_DATAEXCHANGE_DONE) {
         rfalNfcWorker();
         state = rfalNfcGetState();
-        FURI_LOG_D("HAL NFC", "Fata exchange status: %d", rfalNfcDataExchangeGetStatus());
+        FURI_LOG_D("HAL NFC", "Data exchange status: %d", rfalNfcDataExchangeGetStatus());
         osDelay(10);
     }
     FURI_LOG_D("HAL NFC", "Data exchange complete");

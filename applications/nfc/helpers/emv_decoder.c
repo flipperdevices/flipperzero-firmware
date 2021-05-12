@@ -141,7 +141,8 @@ static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {
         }
         if(!tag_found) {
             // Unknown tag, fill zeros
-            uint8_t len = src->data[++i];
+            i += 2;
+            uint8_t len = src->data[i];
             memset(dest->data + dest->size, 0, len);
             dest->size += len;
         }
@@ -151,7 +152,7 @@ static uint16_t emv_prepare_pdol(APDU* dest, APDU* src) {
 
 uint16_t emv_prepare_get_proc_opt(uint8_t* dest, EmvApplication* app) {
     // Get processing option header
-    uint8_t emv_gpo_header[] = {0x80, 0xA8, 0x00, 0x00};
+    const uint8_t emv_gpo_header[] = {0x80, 0xA8, 0x00, 0x00};
     uint16_t size = sizeof(emv_gpo_header);
     // Copy header
     memcpy(dest, emv_gpo_header, size);
@@ -170,6 +171,32 @@ uint16_t emv_prepare_get_proc_opt(uint8_t* dest, EmvApplication* app) {
 bool emv_decode_get_proc_opt(uint8_t* buff, uint16_t len, EmvApplication* app) {
     for(uint16_t i = 0; i < len; i++) {
         if(buff[i] == EMV_TAG_CARD_NUM) {
+            memcpy(app->card_number, &buff[i + 2], 8);
+            return true;
+        } else if(buff[i] == EMV_TAG_AFL) {
+            app->afl.size = emv_parse_TLV(app->afl.data, buff, &i);
+        }
+    }
+    return false;
+}
+
+uint16_t emv_prepare_read_sfi_record(uint8_t* dest, uint8_t sfi, uint8_t record_num) {
+    const uint8_t sfi_param = (sfi << 3) | (1 << 2);
+    const uint8_t emv_sfi_header[] = {
+        0x00,
+        0xB2, // READ RECORD
+        record_num,
+        sfi_param, // P1:record_number and P2:SFI
+        0x00 // Le
+    };
+    uint16_t size = sizeof(emv_sfi_header);
+    memcpy(dest, emv_sfi_header, size);
+    return size;
+}
+
+bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app) {
+    for(uint16_t i = 0; i < len; i++) {
+        if(buff[i] == EMV_TAG_PAN) {
             memcpy(app->card_number, &buff[i + 2], 8);
             return true;
         }

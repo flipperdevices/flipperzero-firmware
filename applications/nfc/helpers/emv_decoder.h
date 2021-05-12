@@ -12,6 +12,8 @@
 #define EMV_TAG_FCI 0xBF0C
 #define EMV_TAG_LOG_CTRL 0x9F4D
 #define EMV_TAG_CARD_NUM 0x57
+#define EMV_TAG_PAN 0x5A
+#define EMV_TAG_AFL 0x94
 
 typedef struct {
     uint16_t tag;
@@ -32,6 +34,7 @@ typedef struct {
     char name[32];
     uint8_t card_number[8];
     APDU pdol;
+    APDU afl;
 } EmvApplication;
 
 uint16_t emv_prepare_select_ppse(uint8_t* dest);
@@ -42,3 +45,6 @@ bool emv_decode_select_app_response(uint8_t* buff, uint16_t len, EmvApplication*
 
 uint16_t emv_prepare_get_proc_opt(uint8_t* dest, EmvApplication* app);
 bool emv_decode_get_proc_opt(uint8_t* buff, uint16_t len, EmvApplication* app);
+
+uint16_t emv_prepare_read_sfi_record(uint8_t* dest, uint8_t sfi, uint8_t record_num);
+bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app);
