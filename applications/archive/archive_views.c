@@ -1,5 +1,7 @@
 #include "archive_views.h"
+#define MAX_LEN 24
 
+// temp
 const char* ArchiveTabNames[] = {
     "Favorites",
     "iButton",
@@ -17,12 +19,19 @@ static void draw_list(Canvas* canvas, void* model) {
 
     for(int i = 0; i < m->file_count; ++i) {
         uint8_t idx = i + m->list_offset;
-        canvas_draw_str(canvas, 15, 25 + i * 12, m->filename[idx]->ptr);
+        uint8_t len = strlen(m->filename[idx]->ptr);
+
+        // cut long names
+        char buff[MAX_LEN];
+        snprintf(buff, 24, m->filename[idx]->ptr);
+        if(len > MAX_LEN) strcpy(&buff[MAX_LEN - 6], "...");
+
+        canvas_draw_str(canvas, 15, 25 + i * 12, buff);
         if(m->idx == idx) elements_frame_light(canvas, 0, 15 + i * 12, scrollbar ? 122 : 127, 13);
     }
 
     if(scrollbar) {
-        elements_scrollbar_pos(canvas, 126, 15, 49, m->idx, m->file_count);
+        elements_scrollbar_pos(canvas, 126, 16, 48, m->idx, m->file_count);
     }
 }
 

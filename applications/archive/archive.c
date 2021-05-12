@@ -15,15 +15,17 @@ static View* archive_get_tab_view(ArchiveState* archive) {
     return tabs[archive->tab.id];
 }
 
-static void update_offset(ArchiveState* archive, uint8_t length) {
+static void update_offset(ArchiveState* archive) {
     View* current = archive_get_tab_view(archive);
     ArchiveViewModelDefault* model = view_get_model(current);
-    uint8_t bounds = model->file_count > 3 ? 4 : model->file_count;
+    uint8_t bounds = model->file_count > 3 ? 2 : model->file_count;
 
-    if(model->idx > model->list_offset + bounds) {
-        model->list_offset = CLAMP(model->idx + 1, length - bounds, 0);
-    } else if(model->idx < bounds + model->idx) {
-        model->list_offset = CLAMP(model->idx - 1, length - bounds, 0);
+    if(model->list_offset < model->idx - bounds) {
+        model->list_offset = CLAMP(model->list_offset + 1, model->file_count - bounds, 0);
+    }
+
+    if(model->list_offset > model->idx - bounds) {
+        model->list_offset = CLAMP(model->idx - 1, model->file_count - bounds, 0);
     }
 
     view_commit_model(current, true);
@@ -74,7 +76,7 @@ bool archive_view_input(InputEvent* event, void* context) {
         ArchiveViewModelDefault* model = view_get_model(current);
 
         model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
-        update_offset(archive, model->file_count);
+        update_offset(archive);
         view_commit_model(current, true);
     }
 
@@ -83,7 +85,7 @@ bool archive_view_input(InputEvent* event, void* context) {
         ArchiveViewModelDefault* model = view_get_model(current);
 
         model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
-        update_offset(archive, model->file_count);
+        update_offset(archive);
         view_commit_model(current, true);
     }
 
