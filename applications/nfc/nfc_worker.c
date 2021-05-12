@@ -1,12 +1,15 @@
 #include "nfc_worker_i.h"
 #include <api-hal.h>
+#include "helpers/emv_decoder.h"
+
+#define NFC_WORKER_TAG "nfc worker"
 
 NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue) {
     NfcWorker* nfc_worker = furi_alloc(sizeof(NfcWorker));
     nfc_worker->message_queue = message_queue;
     // Worker thread attributes
     nfc_worker->thread_attr.name = "nfc_worker";
-    nfc_worker->thread_attr.stack_size = 2048;
+    nfc_worker->thread_attr.stack_size = 8192;
     // Initialize rfal
     nfc_worker->error = api_hal_nfc_init();
     if(nfc_worker->error == ERR_NONE) {
@@ -73,108 +76,105 @@ void nfc_worker_task(void* context) {
 
 void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     ReturnCode err;
-    rfalNfcDiscoverParam params;
-    params.compMode = RFAL_COMPLIANCE_MODE_EMV;
-    params.techs2Find = RFAL_NFC_POLL_TECH_A | RFAL_NFC_POLL_TECH_B | RFAL_NFC_POLL_TECH_F |
-                        RFAL_NFC_POLL_TECH_V | RFAL_NFC_POLL_TECH_AP2P | RFAL_NFC_POLL_TECH_ST25TB;
-    params.totalDuration = 100;
-    params.devLimit = 3;
-    params.wakeupEnabled = false;
-    params.wakeupConfigDefault = true;
-    params.nfcfBR = RFAL_BR_212;
-    params.ap2pBR = RFAL_BR_424;
-    params.maxBR = RFAL_BR_KEEP;
-    params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
-    params.notifyCb = NULL;
-    rfalLowPowerModeStop();
-    rfalNfcDiscover(&params);
-
     rfalNfcDevice* dev_list;
     rfalNfcDevice* dev_active;
-    uint8_t tx_buff[255];
+    EmvApplication emv_app;
     uint8_t dev_cnt = 0;
-    uint8_t ppse_select[] = {0x00, 0xA4, 0x04, 0x00, 0x0E, 0x32, 0x50, 0x41, 0x59, 0x2E,
-                             0x53, 0x59, 0x53, 0x2E, 0x44, 0x44, 0x46, 0x30, 0x31, 0x00};
-    // uint8_t aid_len = 0;
-    // TODO read from data exchange
-    uint8_t aid[] = {0xA0, 0x00 , 0x00, 0x00, 0x03, 0x10, 0x10};
-    // Select mastercard application
-    uint8_t app_select[] = {0x00, 0xA4, 0x04, 0x00};
+    uint8_t tx_buff[255] = {};
+    uint16_t tx_len = 0;
     uint8_t* rx_buff;
     uint16_t* rx_len;
-    rfalNfcState state;
 
+    // Update screen before start searching
+    NfcMessage message = {.type = NfcMessageTypeEMVNotFound};
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
-        rfalNfcWorker();
-        state = rfalNfcGetState();
-        FURI_LOG_I("NFC", "Current state: %d", state);
-        if(state >= RFAL_NFC_STATE_ACTIVATED) {
-            err = rfalNfcGetDevicesFound(&dev_list, &dev_cnt);
-            FURI_LOG_E("NFC", "Get device err: %d", err);
-            FURI_LOG_I("NFC", "Devices found: %d", dev_cnt);
-            err = rfalNfcGetActiveDevice(&dev_active);
-            FURI_LOG_E("NFC", "Get active device err: %d", err);
-            break;
+        furi_check(
+            osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
+            // Card was found. Check that it supports EMV
+            if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
+                dev_active = &dev_list[0];
+                FURI_LOG_I(NFC_WORKER_TAG, "Send select PPSE command");
+                tx_len = emv_prepare_select_ppse(tx_buff);
+                err = api_hal_nfc_data_exchange(
+                    dev_active, tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Error during selection PPSE request: %d", err);
+                    message.type = NfcMessageTypeEMVNotFound;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(
+                    NFC_WORKER_TAG, "Select PPSE response received. Start parsing response");
+                if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Select PPSE responce parced");
+                } else {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Can't find pay application");
+                    message.type = NfcMessageTypeEMVNotFound;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(NFC_WORKER_TAG, "Starting application ...");
+                tx_len = emv_prepare_select_app(tx_buff, &emv_app);
+                err = api_hal_nfc_data_exchange(
+                    dev_active, tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(
+                        NFC_WORKER_TAG, "Error during application selection request: %d", err);
+                    message.type = NfcMessageTypeEMVNotFound;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(
+                    NFC_WORKER_TAG,
+                    "Select application response received. Start parsing response");
+                if(emv_decode_select_app_response(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Card name: %s", emv_app.name);
+                    memcpy(message.device.emv_card.name, emv_app.name, sizeof(emv_app.name));
+                } else {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Can't read card name");
+                    message.type = NfcMessageTypeEMVNotFound;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(NFC_WORKER_TAG, "Starting Get Processing Options command ...");
+                tx_len = emv_prepare_get_proc_opt(tx_buff, &emv_app);
+                err = api_hal_nfc_data_exchange(
+                    dev_active, tx_buff, tx_len, &rx_buff, &rx_len, true);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(
+                        NFC_WORKER_TAG, "Error during Get Processing Options command: %d", err);
+                    message.type = NfcMessageTypeEMVNotFound;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Card number parsed");
+                    message.type = NfcMessageTypeEMVFound;
+                    memcpy(
+                        message.device.emv_card.number,
+                        emv_app.card_number,
+                        sizeof(emv_app.card_number));
+                } else {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Can't read card number");
+                    message.type = NfcMessageTypeEMVNotFound;
+                }
+
+            } else {
+                // Can't find EMV card
+                FURI_LOG_W(NFC_WORKER_TAG, "Card doesn't support EMV");
+                message.type = NfcMessageTypeEMVNotFound;
+                api_hal_nfc_deactivate();
+            }
+        } else {
+            // Can't find EMV card
+            FURI_LOG_W(NFC_WORKER_TAG, "Can't find any cards");
+            message.type = NfcMessageTypeEMVNotFound;
+            api_hal_nfc_deactivate();
         }
-        osDelay(10);
+        osDelay(20);
     }
-    // Start data exchange
-    err = rfalNfcDataExchangeStart(ppse_select, sizeof(ppse_select), &rx_buff, &rx_len, 0);
-    FURI_LOG_E("NFC", "Start data exchange err: %d", err);
-    while(true) {
-        rfalNfcWorker();
-        FURI_LOG_I("NFC", "State: %d", rfalNfcGetState());
-        err = rfalNfcDataExchangeGetStatus();
-        FURI_LOG_E("NFC", "Data Exchange err: %d", err);
-        if(err == ERR_NONE) {
-            break;
-        }
-        osDelay(10);
-    }
-    FURI_LOG_I("NFC", "Transaction is complete. Received %d bytes", *rx_len);
-
-    for(uint16_t i = 0; i < *rx_len; i++) {
-        printf("%02x ", rx_buff[i]); // Log data
-        // if(rx_buff[i] == 0x61) { // Application template
-        //     aid_len = rx_buff[i + 1];
-        //     FURI_LOG_I("NFC", "aid len: %d", aid_len);
-        // }
-    }
-
-    // Select application preparation buffer
-    uint8_t size = sizeof(app_select);
-    memcpy(tx_buff, app_select, size);
-    tx_buff[size++] = sizeof(aid);
-    memcpy(tx_buff + size, aid, sizeof(aid));
-    size += sizeof(aid);
-    tx_buff[size++] = 0;
-
-    // Start data exchange
-    err = rfalNfcDataExchangeStart(tx_buff, size, &rx_buff, &rx_len, 0);
-    FURI_LOG_E("NFC", "Start data exchange err: %d", err);
-    while(true) {
-        rfalNfcWorker();
-        FURI_LOG_I("NFC", "State: %d", rfalNfcGetState());
-        err = rfalNfcDataExchangeGetStatus();
-        FURI_LOG_E("NFC", "Data Exchange err: %d", err);
-        if(err == ERR_NONE) {
-            break;
-        }
-        osDelay(10);
-    }
-    FURI_LOG_I("NFC", "Transaction is complete. Received %d bytes", *rx_len);
-    for(uint16_t i = 0; i < *rx_len; i++) {
-        printf("%02x ", rx_buff[i]); // Log data
-    }
-
-    // READ PDOL
-    uint8_t pdol_start[] = {0x80, 0xA8, 0x00, 0x00};
-    size = sizeof(pdol_start);
-    memcpy(tx_buff, pdol_start, size);
-    tx_buff[size++] = 2 + 
-
-
-    printf("\r\n");
+    api_hal_nfc_deactivate();
 }
 
 void nfc_worker_poll(NfcWorker* nfc_worker) {
@@ -185,7 +185,7 @@ void nfc_worker_poll(NfcWorker* nfc_worker) {
     furi_check(osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
 
     while(nfc_worker->state == NfcWorkerStatePoll) {
-        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100)) {
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, true)) {
             // Send message with first device found
             message.type = NfcMessageTypeDeviceFound;
             if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
