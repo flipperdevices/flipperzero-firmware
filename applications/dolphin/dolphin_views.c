@@ -95,9 +95,6 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
         }
 
     } else {
-        m->door_left_x = CLAMP(m->door_left_x - 5, 0, -57);
-        m->door_right_x = CLAMP(m->door_right_x + 5, 115, 60);
-
         if(m->door_left_x == -57) {
             for(uint8_t i = 0; i < 3; ++i) {
                 canvas_draw_str_aligned(

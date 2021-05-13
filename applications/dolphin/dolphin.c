@@ -86,6 +86,8 @@ void dolphin_lock_handler(InputEvent* event, Dolphin* dolphin) {
             with_view_model(
                 dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
                     model->locked = false;
+                    model->door_left_x = -57; // move doors to default pos
+                    model->door_right_x = 115;
                     return true;
                 });
 
