@@ -1,8 +1,8 @@
 #include <furi.h>
 #include "../minunit.h"
 #include "irda.h"
-#include "irda_decoder_nec_test_data.h"
-#include "irda_decoder_samsung_test_data.h"
+#include "test_data/irda_decoder_nec_test_data.h"
+#include "test_data/irda_decoder_samsung_test_data.h"
 
 #define RUN_DECODER(data, expected) \
     run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
