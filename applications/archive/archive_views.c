@@ -31,7 +31,7 @@ static void draw_list(Canvas* canvas, void* model) {
     }
 
     if(scrollbar) {
-        elements_scrollbar_pos(canvas, 126, 16, 48, m->idx, m->file_count);
+        elements_scrollbar_pos(canvas, 126, 16, 48, m->idx, (uint8_t)m->file_count);
     }
 }
 

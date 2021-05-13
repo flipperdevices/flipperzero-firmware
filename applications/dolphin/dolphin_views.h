@@ -6,18 +6,6 @@
 #include <input/input.h>
 #include <furi.h>
 
-#ifndef MAX
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#endif
-
-#ifndef MIN
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#endif
-
-#ifndef CLAMP
-#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
-#endif
-
 // Idle screen
 typedef enum {
     DolphinViewIdleMain,

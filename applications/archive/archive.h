@@ -10,18 +10,6 @@
 
 #define EXIT_FLAG 0x00000001U
 
-#ifndef MAX
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#endif
-
-#ifndef MIN
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-#endif
-
-#ifndef CLAMP
-#define CLAMP(x, upper, lower) (MIN(upper, MAX(x, lower)))
-#endif
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,

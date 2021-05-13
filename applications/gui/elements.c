@@ -15,10 +15,9 @@ void elements_scrollbar_pos(
     uint8_t pos,
     uint8_t total) {
     furi_assert(canvas);
-
     // prevent overflows
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, x - 3, y, 3, height - y - 1);
+    canvas_draw_box(canvas, x - 3, y, 3, height);
     // dot line
     canvas_set_color(canvas, ColorBlack);
     for(uint8_t i = y; i < height + y; i += 2) {
@@ -26,7 +25,7 @@ void elements_scrollbar_pos(
     }
     // Position block
     if(total) {
-        uint8_t block_h = ((float)height) / total;
+        float block_h = ((float)height) / total;
         canvas_draw_box(canvas, x - 3, y + (block_h * pos), 3, block_h);
     }
 }
