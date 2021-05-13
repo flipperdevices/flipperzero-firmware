@@ -2,22 +2,8 @@
 
 bool archive_get_filenames(ArchiveState* archive);
 
-static View* archive_get_tab_view(ArchiveState* archive) {
-    View* tabs[] = {
-        [ArchiveTabFavorites] = archive->view_favorite_items,
-        [ArchiveTabIButton] = archive->view_ibutton_keys,
-        [ArchiveTabNFC] = archive->view_nfc_keys,
-        [ArchiveTabSubOne] = archive->view_subone_keys,
-        [ArchiveTabLFRFID] = archive->view_lfrfid_keys,
-        [ArchiveTabIrda] = archive->view_irda_keys,
-    };
-
-    return tabs[archive->tab.id];
-}
-
 static void update_offset(ArchiveState* archive) {
-    View* current = archive_get_tab_view(archive);
-    ArchiveViewModelDefault* model = view_get_model(current);
+    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
     uint8_t bounds = model->file_count > 3 ? 2 : model->file_count;
 
     if(model->list_offset < model->idx - bounds) {
@@ -28,7 +14,7 @@ static void update_offset(ArchiveState* archive) {
         model->list_offset = CLAMP(model->idx - 1, model->file_count - bounds, 0);
     }
 
-    view_commit_model(current, true);
+    view_commit_model(archive->view_archive_main, true);
 }
 
 void archive_switch_dir(ArchiveState* archive) {
@@ -44,14 +30,17 @@ void archive_switch_dir(ArchiveState* archive) {
     archive->tab.extension = "*";
     archive->tab.path = paths[archive->tab.id];
 
-    archive_get_filenames(archive);
+    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
 
-    View* current = archive_get_tab_view(archive);
-    ArchiveViewModelDefault* model = view_get_model(current);
+    memset(model->filename, 0, (sizeof(string_t) * FILENAME_COUNT));
+    model->idx = 0;
+    model->file_count = 0;
+    model->first_file_index = 0;
+    model->list_offset = 0;
 
     model->tab_idx = archive->tab.id;
-
-    view_commit_model(current, true);
+    view_commit_model(archive->view_archive_main, true);
+    archive_get_filenames(archive);
 }
 
 bool archive_view_input(InputEvent* event, void* context) {
@@ -64,29 +53,28 @@ bool archive_view_input(InputEvent* event, void* context) {
     if(event->key == InputKeyLeft) {
         archive->tab.id = CLAMP(archive->tab.id - 1, ArchiveTabTotal, 0);
         archive_switch_dir(archive);
-        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
     } else if(event->key == InputKeyRight) {
         archive->tab.id = CLAMP(archive->tab.id + 1, ArchiveTabTotal - 1, 0);
         archive_switch_dir(archive);
-        view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
     }
 
     if(event->key == InputKeyUp) {
-        View* current = archive_get_tab_view(archive);
-        ArchiveViewModelDefault* model = view_get_model(current);
-
+        ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
         model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
         update_offset(archive);
-        view_commit_model(current, true);
-    }
 
-    if(event->key == InputKeyDown) {
-        View* current = archive_get_tab_view(archive);
-        ArchiveViewModelDefault* model = view_get_model(current);
-
+        view_commit_model(archive->view_archive_main, true);
+    } else if(event->key == InputKeyDown) {
+        ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
         model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
         update_offset(archive);
-        view_commit_model(current, true);
+        view_commit_model(archive->view_archive_main, true);
+    }
+
+    if(event->key == InputKeyBack) {
+        AppEvent event;
+        event.type = EventTypeExit;
+        furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
     }
 
     return true;
@@ -117,8 +105,7 @@ bool archive_get_filenames(ArchiveState* archive) {
     char* name = calloc(name_length, sizeof(char));
     uint16_t first_file_index = 0;
 
-    View* current = archive_get_tab_view(archive);
-    ArchiveViewModelDefault* model = view_get_model(current);
+    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
 
     first_file_index = model->first_file_index;
 
@@ -163,83 +150,10 @@ bool archive_get_filenames(ArchiveState* archive) {
         }
     }
     model->file_count = file_counter;
-    view_commit_model(current, true);
+    view_commit_model(archive->view_archive_main, true);
     dir_api->close(&directory);
     free(name);
     return true;
-}
-
-ArchiveState* archive_alloc() {
-    ArchiveState* archive = furi_alloc(sizeof(ArchiveState));
-    // Message queue
-    archive->event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
-
-    furi_check(archive->event_queue);
-    // Scene thread
-    archive->app_thread = furi_thread_alloc();
-    // GUI
-    archive->gui = furi_record_open("gui");
-    // Dispatcher
-    archive->view_dispatcher = view_dispatcher_alloc();
-
-    archive->fs_api = furi_record_open("sdcard");
-
-    archive->view_favorite_items = view_alloc();
-    view_allocate_model(
-        archive->view_favorite_items, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_context(archive->view_favorite_items, archive);
-    view_set_draw_callback(archive->view_favorite_items, archive_view_render);
-    view_set_input_callback(archive->view_favorite_items, archive_view_input);
-    view_dispatcher_add_view(
-        archive->view_dispatcher, ArchiveTabFavorites, archive->view_favorite_items);
-
-    archive->view_ibutton_keys = view_alloc();
-    view_set_context(archive->view_ibutton_keys, archive);
-    view_allocate_model(
-        archive->view_ibutton_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_ibutton_keys, archive_view_render);
-    view_set_input_callback(archive->view_ibutton_keys, archive_view_input);
-    view_dispatcher_add_view(
-        archive->view_dispatcher, ArchiveTabIButton, archive->view_ibutton_keys);
-
-    archive->view_nfc_keys = view_alloc();
-    view_set_context(archive->view_nfc_keys, archive);
-    view_allocate_model(
-        archive->view_nfc_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_nfc_keys, archive_view_render);
-    view_set_input_callback(archive->view_nfc_keys, archive_view_input);
-    view_dispatcher_add_view(archive->view_dispatcher, ArchiveTabNFC, archive->view_nfc_keys);
-
-    archive->view_subone_keys = view_alloc();
-    view_set_context(archive->view_subone_keys, archive);
-    view_allocate_model(
-        archive->view_subone_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_subone_keys, archive_view_render);
-    view_set_input_callback(archive->view_subone_keys, archive_view_input);
-    view_dispatcher_add_view(
-        archive->view_dispatcher, ArchiveTabSubOne, archive->view_subone_keys);
-
-    archive->view_lfrfid_keys = view_alloc();
-    view_set_context(archive->view_lfrfid_keys, archive);
-    view_allocate_model(
-        archive->view_lfrfid_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_lfrfid_keys, archive_view_render);
-    view_set_input_callback(archive->view_lfrfid_keys, archive_view_input);
-    view_dispatcher_add_view(
-        archive->view_dispatcher, ArchiveTabLFRFID, archive->view_lfrfid_keys);
-
-    archive->view_irda_keys = view_alloc();
-    view_set_context(archive->view_irda_keys, archive);
-    view_allocate_model(
-        archive->view_irda_keys, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
-    view_set_draw_callback(archive->view_irda_keys, archive_view_render);
-    view_set_input_callback(archive->view_irda_keys, archive_view_input);
-    view_dispatcher_add_view(archive->view_dispatcher, ArchiveTabIrda, archive->view_irda_keys);
-
-    view_dispatcher_attach_to_gui(
-        archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
-
-    return archive;
 }
 
 void archive_free(ArchiveState* archive) {
@@ -260,39 +174,50 @@ void archive_free(ArchiveState* archive) {
     free(archive);
 }
 
-static void event_cb(const void* value, void* ctx) {
-    furi_assert(value);
-    furi_assert(ctx);
-    const InputEvent* event = value;
-    if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        osThreadFlagsSet((osThreadId_t)ctx, EXIT_FLAG);
-    }
+ArchiveState* archive_alloc() {
+    ArchiveState* archive = furi_alloc(sizeof(ArchiveState));
+    // Message queue
+    archive->event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+
+    furi_check(archive->event_queue);
+    // Scene thread
+    archive->app_thread = furi_thread_alloc();
+    // GUI
+    archive->gui = furi_record_open("gui");
+    // Dispatcher
+    archive->view_dispatcher = view_dispatcher_alloc();
+
+    archive->fs_api = furi_record_open("sdcard");
+
+    archive->view_archive_main = view_alloc();
+    view_allocate_model(
+        archive->view_archive_main, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+    view_set_context(archive->view_archive_main, archive);
+    view_set_draw_callback(archive->view_archive_main, archive_view_render);
+    view_set_input_callback(archive->view_archive_main, archive_view_input);
+    view_dispatcher_add_view(
+        archive->view_dispatcher, ArchiveTabFavorites, archive->view_archive_main);
+
+    view_dispatcher_attach_to_gui(
+        archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
+
+    return archive;
 }
 
 int32_t app_archive(void* p) {
     ArchiveState* archive = archive_alloc();
 
-    PubSub* event_record = furi_record_open("input_events");
-    PubSubItem* event_pubsub = subscribe_pubsub(event_record, event_cb, (void*)osThreadGetId());
-
     // default tab
     archive_switch_dir(archive);
-    ArchiveViewModelDefault* model = view_get_model(archive->view_favorite_items);
-    model->tab_idx = archive->tab.id;
-    view_commit_model(archive->view_favorite_items, true);
-
     view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
 
+    AppEvent event;
     while(1) {
-        if(osThreadFlagsWait(EXIT_FLAG, osFlagsWaitAny, osWaitForever)) {
+        furi_check(osMessageQueueGet(archive->event_queue, &event, NULL, osWaitForever) == osOK);
+        if(event.type == EventTypeExit) {
             break;
         }
     }
-
-    unsubscribe_pubsub(event_pubsub);
-    furi_record_close("input_events");
-    event_record = NULL;
-    event_pubsub = NULL;
 
     archive_free(archive);
     return 0;

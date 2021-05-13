@@ -45,13 +45,7 @@ typedef struct {
     FuriThread* app_thread;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
-
-    View* view_favorite_items;
-    View* view_ibutton_keys;
-    View* view_nfc_keys;
-    View* view_subone_keys;
-    View* view_lfrfid_keys;
-    View* view_irda_keys;
+    View* view_archive_main;
 
     FS_Api* fs_api;
     ArchiveTab tab;
