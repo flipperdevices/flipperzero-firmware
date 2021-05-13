@@ -330,6 +330,7 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
     params.lmConfigPA.SENS_RES[0] = 0x44;
     params.lmConfigPA.SENS_RES[1] = 0x00;
     params.lmConfigPA.SEL_RES = 0x00;
+    api_hal_nfc_exit_sleep();
 
     ReturnCode ret;
     ret = rfalNfcDiscover(&params);
@@ -349,6 +350,7 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
     }
 
     rfalNfcDeactivate(false);
+    api_hal_nfc_start_sleep();
 }
 
 void nfc_worker_field(NfcWorker* nfc_worker) {
