@@ -90,6 +90,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        memset(&emv_app, 0, sizeof(emv_app));
         if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
             // Card was found. Check that it supports EMV
             if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
