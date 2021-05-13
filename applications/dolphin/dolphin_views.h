@@ -60,6 +60,7 @@ typedef struct {
     Icon* animation;
     uint8_t scene_num;
     uint8_t hint_timeout;
+    bool locked;
 } DolphinViewMainModel;
 
 void dolphin_view_idle_main_draw(Canvas* canvas, void* model);
