@@ -6,11 +6,6 @@
 #define IRDA_TIMINGS_SIZE 2000
 
 typedef struct {
-    uint8_t level;
-    uint32_t duration;
-} IrdaTiming;
-
-typedef struct {
     uint32_t timing_cnt;
     struct {
         uint8_t level;
