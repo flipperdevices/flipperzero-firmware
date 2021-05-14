@@ -1,6 +1,6 @@
 #include "archive_views.h"
-#define MAX_LEN 24
-
+#define MAX_LEN_PX 98
+#define FRAME_HEIGHT 12
 // temp
 const char* ArchiveTabNames[] = {
     "Favorites",
@@ -11,23 +11,68 @@ const char* ArchiveTabNames[] = {
     "Infared",
 };
 
+const IconName ArchiveItemIcons[] = {
+    I_ibutt_10px,
+    I_Nfc_10px,
+    I_sub1_10px,
+    I_125_10px,
+    I_ir_10px,
+};
+
 static void draw_list(Canvas* canvas, void* model) {
     furi_assert(model);
     ArchiveViewModelDefault* m = model;
 
     bool scrollbar = m->file_count > 4;
+    string_t short_name_buff;
 
     for(int i = 0; i < m->file_count; ++i) {
         uint8_t idx = i + m->list_offset;
-        uint8_t len = strlen(m->filename[idx]->ptr);
+        size_t str_len = string_size(m->filename[idx]);
 
-        // cut long names
-        char buff[MAX_LEN];
-        snprintf(buff, 24, m->filename[idx]->ptr);
-        if(len > MAX_LEN) strcpy(&buff[MAX_LEN - 6], "...");
+        if(str_len) {
+            const char* name = string_get_cstr(m->filename[idx]);
 
-        canvas_draw_str(canvas, 15, 25 + i * 12, buff);
-        if(m->idx == idx) elements_frame_light(canvas, 0, 15 + i * 12, scrollbar ? 122 : 127, 13);
+            string_init_printf(short_name_buff, name);
+
+            uint16_t str_len_px = canvas_string_width(canvas, name);
+            char* short_name_ptr = stringi_get_cstr(short_name_buff);
+
+            if(str_len_px > MAX_LEN_PX) {
+                // adaptive long name shortening
+                string_mid(
+                    short_name_buff,
+                    0,
+                    str_len -
+                        (size_t)((str_len_px - MAX_LEN_PX) / ((str_len_px / str_len) + 2) + 1));
+
+                string_cat(short_name_buff, "...");
+            }
+
+            if(m->idx == idx) {
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_box(
+                    canvas, 0, 15 + i * FRAME_HEIGHT, scrollbar ? 122 : 127, FRAME_HEIGHT);
+
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_dot(canvas, 0, 15 + i * FRAME_HEIGHT);
+                canvas_draw_dot(canvas, 1, 15 + i * FRAME_HEIGHT);
+                canvas_draw_dot(canvas, 0, (15 + i * FRAME_HEIGHT) + 1);
+
+                canvas_draw_dot(canvas, 0, (15 + i * FRAME_HEIGHT) + 11);
+                canvas_draw_dot(canvas, scrollbar ? 121 : 126, 15 + i * FRAME_HEIGHT);
+                canvas_draw_dot(canvas, scrollbar ? 121 : 126, (15 + i * FRAME_HEIGHT) + 11);
+
+            } else {
+                canvas_set_color(canvas, ColorBlack);
+            }
+
+            canvas_draw_icon_name(
+                canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[m->tab_idx - 1]);
+            canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, short_name_ptr);
+
+            string_clear(short_name_buff);
+        }
     }
 
     if(scrollbar) {

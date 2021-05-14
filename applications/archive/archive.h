@@ -8,8 +8,6 @@
 #include <filesystem-api.h>
 #include "archive_views.h"
 
-#define EXIT_FLAG 0x00000001U
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,
