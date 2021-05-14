@@ -2,9 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <furi.h>
-#include "protocol_defs_i.h"
 #include "irda_i.h"
-#include "decoder_common_i.h"
 
 
 struct IrdaHandler {
@@ -31,8 +29,8 @@ typedef struct {
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
-    { IrdaProtocolSamsung32, "Samsung32",   {init_samsung32, decode_samsung32, fini_samsung32}, {encode_samsung32}  },
-    { IrdaProtocolNEC,       "NEC",         {init_nec,       decode_nec,       fini_nec},       {encode_nec}        },
+    { IrdaProtocolSamsung32, "Samsung32",   {irda_decoder_samsung32_alloc, irda_decoder_samsung32_decode, irda_decoder_samsung32_free}, {irda_encoder_samsung32_encode}  },
+    { IrdaProtocolNEC,       "NEC",         {irda_decoder_nec_alloc,       irda_decoder_nec_decode,       irda_decoder_nec_free},       {irda_encoder_nec_encode}        },
 };
 
 
@@ -53,7 +51,7 @@ const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t durati
     return result;
 }
 
-IrdaHandler* irda_init_decoder(void) {
+IrdaHandler* irda_alloc_decoder(void) {
     IrdaHandler* handler = furi_alloc(sizeof(IrdaHandler));
     handler->ctx = furi_alloc(sizeof(void*) * COUNT_OF(irda_protocols));
 

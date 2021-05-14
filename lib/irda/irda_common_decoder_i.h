@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "irda_i.h"
+#include "irda.h"
 
 
 #define MATCH_BIT_TIMING(x, v, delta)       (  ((x) < (v + delta)) \
@@ -65,8 +65,8 @@ static inline void shift_left_array(uint32_t *array, uint32_t len, uint32_t shif
 }
 
 
-IrdaMessage* decode_common(IrdaCommonDecoder *decoder, bool level, uint32_t duration);
-void* common_decoder_init(const IrdaCommonProtocolSpec *protocol);
-void common_decoder_fini(void* decoder);
-DecodeStatus decode_pwm(IrdaCommonDecoder* decoder);
+IrdaMessage* irda_common_decode(IrdaCommonDecoder *decoder, bool level, uint32_t duration);
+void* irda_common_decoder_alloc(const IrdaCommonProtocolSpec *protocol);
+void irda_common_decoder_free(void* decoder);
+DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder);
 

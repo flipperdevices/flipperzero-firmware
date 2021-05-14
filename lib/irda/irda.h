@@ -28,13 +28,13 @@ typedef struct {
  *
  * \return      returns pointer to IRDA decoder handler if success, otherwise - error.
  */
-IrdaHandler* irda_init_decoder(void);
+IrdaHandler* irda_alloc_decoder(void);
 
 /**
  * Provide to decoder next timing. If message is ready, it returns decoded message,
  * otherwise NULL.
  *
- * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_init_decoder().
+ * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
  * \param[in]   level       - high(true) or low(false) level of input signal to analyze.
  *                          it should alternate every call, otherwise it is an error case,
  *                          and decoder resets its state and start decoding from the start.
@@ -46,7 +46,7 @@ const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t durati
 /**
  * Deinitialize decoder and free allocated memory.
  *
- * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_init_decoder().
+ * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
  */
 void irda_free_decoder(IrdaHandler* handler);
 

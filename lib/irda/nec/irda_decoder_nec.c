@@ -1,12 +1,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi.h>
-#include "../decoder_common_i.h"
-#include "../protocol_defs_i.h"
+#include "../irda_i.h"
 
 
-static bool interpret(IrdaCommonDecoder* decoder);
-static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder);
+static bool interpret_nec(IrdaCommonDecoder* decoder);
+static DecodeStatus decode_repeat_nec(IrdaCommonDecoder* decoder);
 
 
 static const IrdaCommonProtocolSpec protocol_nec = {
@@ -21,13 +20,13 @@ static const IrdaCommonProtocolSpec protocol_nec = {
         IRDA_NEC_BIT_TOLERANCE,
     },
     32,
-    decode_pwm,
-    interpret,
-    decode_repeat,
+    irda_common_decode_pdwm,
+    interpret_nec,
+    decode_repeat_nec,
 };
 
 
-static bool interpret(IrdaCommonDecoder* decoder) {
+static bool interpret_nec(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -47,7 +46,7 @@ static bool interpret(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
+static DecodeStatus decode_repeat_nec(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;
@@ -71,15 +70,15 @@ static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
     return status;
 }
 
-void* init_nec(void) {
-    return common_decoder_init(&protocol_nec);
+void* irda_decoder_nec_alloc(void) {
+    return irda_common_decoder_alloc(&protocol_nec);
 }
 
-IrdaMessage* decode_nec(void* decoder, bool level, uint32_t duration) {
-    return decode_common(decoder, level, duration);
+IrdaMessage* irda_decoder_nec_decode(void* decoder, bool level, uint32_t duration) {
+    return irda_common_decode(decoder, level, duration);
 }
 
-void fini_nec(void* decoder) {
-    common_decoder_fini(decoder);
+void irda_decoder_nec_free(void* decoder) {
+    irda_common_decoder_free(decoder);
 }
 

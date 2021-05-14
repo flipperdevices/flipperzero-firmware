@@ -337,7 +337,7 @@ int32_t irda(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     IsrContext isr_context = {
-        .handler = irda_init_decoder(),
+        .handler = irda_alloc_decoder(),
         .event_queue = event_queue,
     };
     api_hal_irda_rx_irq_init();

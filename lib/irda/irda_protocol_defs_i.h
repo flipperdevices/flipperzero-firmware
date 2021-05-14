@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "irda_i.h"
+#include "irda.h"
 
 
 /***************************************************************************************************
@@ -35,10 +35,10 @@
 #define IRDA_NEC_PREAMBLE_TOLERANCE     0.07    // percents
 #define IRDA_NEC_BIT_TOLERANCE          120     // us
 
-void* init_nec(void);
-void encode_nec(uint32_t address, uint32_t command, bool repeat);
-void fini_nec(void* decoder);
-IrdaMessage* decode_nec(void* decoder, bool level, uint32_t duration);
+void* irda_decoder_nec_alloc(void);
+void irda_encoder_nec_encode(uint32_t address, uint32_t command, bool repeat);
+void irda_decoder_nec_free(void* decoder);
+IrdaMessage* irda_decoder_nec_decode(void* decoder, bool level, uint32_t duration);
 
 
 /***************************************************************************************************
@@ -71,8 +71,8 @@ IrdaMessage* decode_nec(void* decoder, bool level, uint32_t duration);
 #define IRDA_SAMSUNG_PREAMBLE_TOLERANCE     0.07    // percents
 #define IRDA_SAMSUNG_BIT_TOLERANCE          120     // us
 
-void* init_samsung32(void);
-void encode_samsung32(uint32_t address, uint32_t command, bool repeat);
-void fini_samsung32(void* decoder);
-IrdaMessage* decode_samsung32(void* decoder, bool level, uint32_t duration);
+void* irda_decoder_samsung32_alloc(void);
+void irda_encoder_samsung32_encode(uint32_t address, uint32_t command, bool repeat);
+void irda_decoder_samsung32_free(void* decoder);
+IrdaMessage* irda_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration);
 

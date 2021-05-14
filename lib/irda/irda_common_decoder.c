@@ -1,10 +1,9 @@
 #include <stdbool.h>
 #include <furi.h>
 #include "irda_i.h"
-#include "decoder_common_i.h"
 
 
-static bool check_preamble(IrdaCommonDecoder* decoder) {
+static bool irda_check_preamble(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -35,8 +34,8 @@ static bool check_preamble(IrdaCommonDecoder* decoder) {
     return result;
 }
 
-
-DecodeStatus decode_pwm(IrdaCommonDecoder* decoder) {
+// Pulse Distance-Width Modulation
+DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     uint32_t* timings = decoder->timings;
@@ -88,7 +87,7 @@ DecodeStatus decode_pwm(IrdaCommonDecoder* decoder) {
     return status;
 }
 
-IrdaMessage* decode_common(IrdaCommonDecoder* decoder, bool level, uint32_t duration) {
+IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t duration) {
     furi_assert(decoder);
 
     IrdaMessage* message = 0;
@@ -107,7 +106,7 @@ IrdaMessage* decode_common(IrdaCommonDecoder* decoder, bool level, uint32_t dura
     while(1) {
         switch (decoder->state) {
         case IrdaCommonStateWaitPreamble:
-            if (check_preamble(decoder)) {
+            if (irda_check_preamble(decoder)) {
                 decoder->state = IrdaCommonStateDecode;
                 decoder->databit_cnt = 0;
             }
@@ -147,7 +146,7 @@ IrdaMessage* decode_common(IrdaCommonDecoder* decoder, bool level, uint32_t dura
     return message;
 }
 
-void* common_decoder_init(const IrdaCommonProtocolSpec* protocol) {
+void* irda_common_decoder_alloc(const IrdaCommonProtocolSpec* protocol) {
     furi_assert(protocol);
 
     uint32_t alloc_size = sizeof(IrdaCommonDecoder)
@@ -159,7 +158,7 @@ void* common_decoder_init(const IrdaCommonProtocolSpec* protocol) {
     return decoder;
 }
 
-void common_decoder_fini(void* decoder) {
+void irda_common_decoder_free(void* decoder) {
     furi_assert(decoder);
 
     free(decoder);

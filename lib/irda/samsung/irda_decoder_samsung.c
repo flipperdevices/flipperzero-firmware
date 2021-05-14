@@ -1,12 +1,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi.h>
-#include "../decoder_common_i.h"
-#include "../protocol_defs_i.h"
+#include "../irda_i.h"
 
 
-static bool interpret(IrdaCommonDecoder* decoder);
-static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder);
+static bool interpret_samsung32(IrdaCommonDecoder* decoder);
+static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
 
 
 static const IrdaCommonProtocolSpec protocol_samsung32 = {
@@ -21,13 +20,13 @@ static const IrdaCommonProtocolSpec protocol_samsung32 = {
         IRDA_SAMSUNG_BIT_TOLERANCE,
     },
     32,
-    decode_pwm,
-    interpret,
-    decode_repeat,
+    irda_common_decode_pdwm,
+    interpret_samsung32,
+    decode_repeat_samsung32,
 };
 
 
-static bool interpret(IrdaCommonDecoder* decoder) {
+static bool interpret_samsung32(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -47,7 +46,7 @@ static bool interpret(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
+static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;
@@ -74,15 +73,15 @@ static DecodeStatus decode_repeat(IrdaCommonDecoder* decoder) {
     return status;
 }
 
-void* init_samsung32(void) {
-    return common_decoder_init(&protocol_samsung32);
+void* irda_decoder_samsung32_alloc(void) {
+    return irda_common_decoder_alloc(&protocol_samsung32);
 }
 
-IrdaMessage* decode_samsung32(void* decoder, bool level, uint32_t duration) {
-    return decode_common(decoder, level, duration);
+IrdaMessage* irda_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration) {
+    return irda_common_decode(decoder, level, duration);
 }
 
-void fini_samsung32(void* decoder) {
-    common_decoder_fini(decoder);
+void irda_decoder_samsung32_free(void* decoder) {
+    irda_common_decoder_free(decoder);
 }
 

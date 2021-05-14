@@ -10,7 +10,7 @@
 static IrdaHandler* decoder;
 
 static void test_setup(void) {
-    decoder = irda_init_decoder();
+    decoder = irda_alloc_decoder();
 }
 
 static void test_teardown(void) {
