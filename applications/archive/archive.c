@@ -23,7 +23,7 @@ static void archive_switch_dir(ArchiveState* archive, const char* path) {
         [ArchiveTabIButton] = ".ibtn",
         [ArchiveTabNFC] = ".nfc",
         [ArchiveTabSubOne] = ".sub1",
-        [ArchiveTabLFRFID] = ".rifd",
+        [ArchiveTabLFRFID] = ".rfid",
         [ArchiveTabIrda] = ".irda",
         [ArchiveTabBrowser] = "*",
     };
@@ -137,7 +137,7 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
         [FileTypeIButton] = ".ibtn",
         [FileTypeNFC] = ".nfc",
         [FileTypeSubOne] = ".sub1",
-        [FileTypeLFRFID] = ".rifd",
+        [FileTypeLFRFID] = ".rfid",
         [FileTypeIrda] = ".irda",
     };
 
