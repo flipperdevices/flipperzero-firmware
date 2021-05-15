@@ -8,6 +8,8 @@
 #include <filesystem-api.h>
 #include "archive_views.h"
 
+#define MAX_DEPTH_LEVEL 32
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -28,14 +30,24 @@ typedef enum {
     ArchiveTabSubOne,
     ArchiveTabLFRFID,
     ArchiveTabIrda,
+    ArchiveTabBrowser,
     ArchiveTabTotal,
 } ArchiveTabsEnum;
 
 typedef struct {
     ArchiveTabsEnum id;
-    const char* name;
-    const char* path;
+    //const char* name;
+    //const char* path;
     const char* extension;
+
+    //char* prev_path[MAX_DEPTH_LEVEL];
+
+    string_t name;
+    string_t ext_filter;
+    string_t path[MAX_DEPTH_LEVEL];
+
+    uint8_t level;
+
 } ArchiveTab;
 
 typedef struct {

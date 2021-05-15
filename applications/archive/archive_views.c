@@ -1,23 +1,22 @@
 #include "archive_views.h"
-#define MAX_LEN_PX 98
-#define FRAME_HEIGHT 12
-// temp
-const char* ArchiveTabNames[] = {
-    "Favorites",
-    "iButton",
-    "NFC",
-    "SubOne",
-    "Rfid",
-    "Infared",
+
+static const char* ArchiveTabNames[] =
+    {"Favorites", "iButton", "NFC", "SubOne", "Rfid", "Infared", "Browser"};
+
+static const IconName ArchiveItemIcons[] = {
+    [FileTypeIButton] = I_ibutt_10px,
+    [FileTypeNFC] = I_Nfc_10px,
+    [FileTypeSubOne] = I_sub1_10px,
+    [FileTypeLFRFID] = I_125_10px,
+    [FileTypeIrda] = I_ir_10px,
+    [FileTypeFolder] = I_dir_10px,
+    [FileTypeUnknown] = I_unknown_10px,
+
 };
 
-const IconName ArchiveItemIcons[] = {
-    I_ibutt_10px,
-    I_Nfc_10px,
-    I_sub1_10px,
-    I_125_10px,
-    I_ir_10px,
-};
+static IconName archive_get_file_icon(ArchiveViewModelDefault* m, uint8_t idx) {
+    return ArchiveItemIcons[m->files[idx].type];
+}
 
 static void draw_list(Canvas* canvas, void* model) {
     furi_assert(model);
@@ -28,14 +27,22 @@ static void draw_list(Canvas* canvas, void* model) {
 
     for(int i = 0; i < m->file_count; ++i) {
         uint8_t idx = i + m->list_offset;
-        size_t str_len = string_size(m->filename[idx]);
+        size_t str_len = string_size(m->files[idx].name);
 
         if(str_len) {
-            const char* name = string_get_cstr(m->filename[idx]);
+            string_init_set(short_name_buff, m->files[idx].name);
 
-            string_init_printf(short_name_buff, name);
+            // cut file extensions
+            char* buff_ptr = stringi_get_cstr(short_name_buff);
+            char* end = buff_ptr + str_len;
+            while(end > buff_ptr && *end != '.' && *end != '\\' && *end != '/') {
+                --end;
+            }
+            if((end > buff_ptr && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
+                *end = '\0';
+            }
 
-            uint16_t str_len_px = canvas_string_width(canvas, name);
+            uint16_t str_len_px = canvas_string_width(canvas, string_get_cstr(short_name_buff));
             char* short_name_ptr = stringi_get_cstr(short_name_buff);
 
             if(str_len_px > MAX_LEN_PX) {
@@ -67,8 +74,8 @@ static void draw_list(Canvas* canvas, void* model) {
                 canvas_set_color(canvas, ColorBlack);
             }
 
-            canvas_draw_icon_name(
-                canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[m->tab_idx - 1]);
+            canvas_draw_icon_name(canvas, 2, 16 + i * FRAME_HEIGHT, archive_get_file_icon(m, idx));
+
             canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, short_name_ptr);
 
             string_clear(short_name_buff);

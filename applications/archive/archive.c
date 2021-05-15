@@ -1,10 +1,10 @@
 #include "archive.h"
 
-bool archive_get_filenames(ArchiveState* archive);
+static bool archive_get_filenames(ArchiveState* archive);
 
 static void update_offset(ArchiveState* archive) {
     ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
-    uint8_t bounds = model->file_count > 3 ? 2 : model->file_count;
+    uint8_t bounds = model->file_count > 4 ? 2 : model->file_count;
 
     if(model->list_offset < model->idx - bounds) {
         model->list_offset = CLAMP(model->list_offset + 1, model->file_count - bounds, 0);
@@ -17,33 +17,63 @@ static void update_offset(ArchiveState* archive) {
     view_commit_model(archive->view_archive_main, true);
 }
 
-void archive_switch_dir(ArchiveState* archive) {
-    const char* paths[] = {
+static void archive_switch_dir(ArchiveState* archive, const char* path) {
+    const char* tab_ext_filter[] = {
+        [ArchiveTabFavorites] = "*",
+        [ArchiveTabIButton] = ".ibtn",
+        [ArchiveTabNFC] = ".nfc",
+        [ArchiveTabSubOne] = ".sub1",
+        [ArchiveTabLFRFID] = ".rifd",
+        [ArchiveTabIrda] = ".irda",
+        [ArchiveTabBrowser] = "*",
+    };
+
+    string_init_set_str(archive->tab.ext_filter, tab_ext_filter[archive->tab.id]);
+    string_init(archive->tab.path[archive->tab.level]);
+
+    if(archive->tab.level > 0) {
+        string_cat(
+            archive->tab.path[archive->tab.level],
+            archive->tab.path[CLAMP(archive->tab.level - 1, MAX_DEPTH_LEVEL, 0)]);
+        string_cat(archive->tab.path[archive->tab.level], "/");
+    }
+
+    string_cat(archive->tab.path[archive->tab.level], path);
+
+    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
+
+    memset(model->files, 0, (sizeof(ArchiveFile_t) * FILENAME_COUNT));
+    model->idx = 0;
+    model->file_count = 0;
+    model->first_file_index = 0;
+    model->list_offset = 0;
+
+    view_commit_model(archive->view_archive_main, true);
+    model = NULL;
+    archive_get_filenames(archive);
+}
+
+static void archive_switch_tab(ArchiveState* archive) {
+    const char* tab_default_paths[] = {
         [ArchiveTabFavorites] = "favorites",
         [ArchiveTabIButton] = "ibutton",
         [ArchiveTabNFC] = "nfc",
         [ArchiveTabSubOne] = "subone",
         [ArchiveTabLFRFID] = "lfrfid",
         [ArchiveTabIrda] = "irda",
+        [ArchiveTabBrowser] = "/",
     };
 
-    archive->tab.extension = "*";
-    archive->tab.path = paths[archive->tab.id];
-
     ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
-
-    memset(model->filename, 0, (sizeof(string_t) * FILENAME_COUNT));
-    model->idx = 0;
-    model->file_count = 0;
-    model->first_file_index = 0;
-    model->list_offset = 0;
-
     model->tab_idx = archive->tab.id;
     view_commit_model(archive->view_archive_main, true);
-    archive_get_filenames(archive);
+    model = NULL;
+
+    archive->tab.level = 0;
+    archive_switch_dir(archive, tab_default_paths[archive->tab.id]);
 }
 
-bool archive_view_input(InputEvent* event, void* context) {
+static bool archive_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     ArchiveState* archive = context;
@@ -52,49 +82,80 @@ bool archive_view_input(InputEvent* event, void* context) {
 
     if(event->key == InputKeyLeft) {
         archive->tab.id = CLAMP(archive->tab.id - 1, ArchiveTabTotal, 0);
-        archive_switch_dir(archive);
+        archive_switch_tab(archive);
+        return true;
     } else if(event->key == InputKeyRight) {
         archive->tab.id = CLAMP(archive->tab.id + 1, ArchiveTabTotal - 1, 0);
-        archive_switch_dir(archive);
+        archive_switch_tab(archive);
+        return true;
+    } else if(event->key == InputKeyBack) {
+        if(archive->tab.level == 0) {
+            AppEvent event;
+            event.type = EventTypeExit;
+            furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
+        } else {
+            archive->tab.level = CLAMP(archive->tab.level - 1, MAX_DEPTH_LEVEL, 0);
+            archive_switch_dir(archive, string_get_cstr(archive->tab.path[archive->tab.level]));
+        }
+        return true;
     }
+
+    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
 
     if(event->key == InputKeyUp) {
-        ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
         model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
         update_offset(archive);
-
-        view_commit_model(archive->view_archive_main, true);
     } else if(event->key == InputKeyDown) {
-        ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
         model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
         update_offset(archive);
-        view_commit_model(archive->view_archive_main, true);
-    }
-
-    if(event->key == InputKeyBack) {
-        AppEvent event;
-        event.type = EventTypeExit;
-        furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
-    }
-
-    return true;
-}
-
-bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* name) {
-    bool result = false;
-
-    if(!(file_info->flags & FSF_DIRECTORY)) {
-        if(strcmp(archive->tab.extension, "*") == 0) {
-            result = true;
-        } else if(strstr(name, archive->tab.extension) != NULL) {
-            result = true;
+    } else if(event->key == InputKeyOk) {
+        if(model->files[model->idx].type == FileTypeFolder) {
+            archive->tab.level = CLAMP(archive->tab.level + 1, MAX_DEPTH_LEVEL, 0);
+            archive_switch_dir(archive, string_get_cstr(model->files[model->idx].name));
+        } else {
+            // 2do: file interaction menu
         }
     }
 
+    model = NULL;
+    return true;
+}
+
+static bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* name) {
+    bool result = false;
+    const char* filter_ext_ptr = string_get_cstr(archive->tab.ext_filter);
+    if(strcmp(filter_ext_ptr, "*") == 0) {
+        result = true;
+    } else if(strstr(name, filter_ext_ptr) != NULL) {
+        result = true;
+    }
     return result;
 }
 
-bool archive_get_filenames(ArchiveState* archive) {
+static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
+    const char* known_ext[] = {
+        [FileTypeIButton] = ".ibtn",
+        [FileTypeNFC] = ".nfc",
+        [FileTypeSubOne] = ".sub1",
+        [FileTypeLFRFID] = ".rifd",
+        [FileTypeIrda] = ".irda",
+    };
+
+    for(size_t i = 0; i < SIZEOF_ARRAY(known_ext); i++) {
+        if(string_search_str(file->name, known_ext[i], 0) != STRING_FAILURE) {
+            file->type = i;
+            return;
+        }
+    }
+
+    if(file_info->flags & FSF_DIRECTORY) {
+        file->type = FileTypeFolder;
+    } else {
+        file->type = FileTypeUnknown;
+    }
+}
+
+static bool archive_get_filenames(ArchiveState* archive) {
     FileInfo file_info;
     File directory;
     bool result;
@@ -109,11 +170,7 @@ bool archive_get_filenames(ArchiveState* archive) {
 
     first_file_index = model->first_file_index;
 
-    if(name == NULL) {
-        return false;
-    }
-
-    result = dir_api->open(&directory, archive->tab.path);
+    result = dir_api->open(&directory, string_get_cstr(archive->tab.path[archive->tab.level]));
 
     if(!result) {
         dir_api->close(&directory);
@@ -132,7 +189,8 @@ bool archive_get_filenames(ArchiveState* archive) {
             if(directory.error_id == FSE_OK) {
                 if(filter_extension(archive, &file_info, name)) {
                     if(file_counter >= first_file_index) {
-                        string_set_str(model->filename[string_counter], name);
+                        string_set_str(model->files[string_counter].name, name);
+                        set_file_type(&model->files[string_counter], &file_info);
 
                         string_counter++;
 
@@ -142,6 +200,7 @@ bool archive_get_filenames(ArchiveState* archive) {
                     }
                     file_counter++;
                 }
+
             } else {
                 dir_api->close(&directory);
                 free(name);
@@ -151,6 +210,8 @@ bool archive_get_filenames(ArchiveState* archive) {
     }
     model->file_count = file_counter;
     view_commit_model(archive->view_archive_main, true);
+    model = NULL;
+
     dir_api->close(&directory);
     free(name);
     return true;
@@ -208,7 +269,7 @@ int32_t app_archive(void* p) {
     ArchiveState* archive = archive_alloc();
 
     // default tab
-    archive_switch_dir(archive);
+    archive_switch_tab(archive);
     view_dispatcher_switch_to_view(archive->view_dispatcher, archive->tab.id);
 
     AppEvent event;
