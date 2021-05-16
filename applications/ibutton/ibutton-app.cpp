@@ -76,7 +76,7 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
         // Parse write / emulate commands
         size_t ws = string_search_char(args, ' ');
         if(ws == STRING_FAILURE) {
-            printf("Incorrect input. Try tm <read | write | emulate> [key_type] [key_data]\r\n");
+            printf("Incorrect input. Try tm <read | write | emulate> [key_type] [key_data]");
             string_clear(cmd);
             return;
         } else {
@@ -89,7 +89,7 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
         } else if(!string_cmp_str(cmd, "emulate")) {
             scene = iButtonApp::Scene::SceneCliEmulate;
         } else {
-            printf("Incorrect input. Try tm <write | emulate> <key_type> <key_data>\r\n");
+            printf("Incorrect input. Try tm <write | emulate> <key_type> <key_data>");
             string_clear(cmd);
             return;
         }
@@ -125,7 +125,7 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
             ret = read_hex_byte(args, &key_data[i++]);
         }
         if(i != bytes_to_read) {
-            printf("Incorrect key data\r\n");
+            printf("Incorrect key data. Type %d key data hex digits", bytes_to_read);
             return;
         }
         key.set_data(key_data, bytes_to_read);
@@ -140,30 +140,32 @@ void iButtonApp::cli_cmd_callback(string_t args, void* context) {
     // Wait return event
     iButtonApp::CliEvent result;
     if(osMessageQueueGet(cli_event_result, &result, NULL, osWaitForever) != osOK) {
-        printf("Command execution error\r\n");
+        printf("Command execution error");
         return;
     }
     // Process return event
     switch(result) {
     case iButtonApp::CliEvent::CliReadSuccess:
-        print_key_data();
     case iButtonApp::CliEvent::CliReadCRCError:
-        printf("Read error: invalid CRC\r\n");
+        print_key_data();
+        if(result == iButtonApp::CliEvent::CliReadCRCError) {
+            printf("Warning: invalid CRC");
+        }
         break;
     case iButtonApp::CliEvent::CliReadNotKeyError:
-        printf("Read error: not a key\r\n");
+        printf("Read error: not a key");
         break;
     case iButtonApp::CliEvent::CliTimeout:
-        printf("Timeout error\r\n");
+        printf("Timeout error");
         break;
     case iButtonApp::CliEvent::CliInterrupt:
-        printf("Command interrupted\r\n");
+        printf("Command interrupted");
         break;
     case iButtonApp::CliEvent::CliWriteSuccess:
-        printf("Write success\r\n");
+        printf("Write success");
         break;
     case iButtonApp::CliEvent::CliWriteFail:
-        printf("Write fail\r\n");
+        printf("Write fail");
         break;
     default:
         break;
@@ -197,6 +199,12 @@ iButtonApp::~iButtonApp() {
     cli_delete_command(cli, "tm");
     furi_record_close("cli");
     osMessageQueueDelete(cli_event_result);
+
+    for(std::map<Scene, iButtonScene*>::iterator it = scenes.begin(); it != scenes.end(); ++it) {
+        delete it->second;
+        scenes.erase(it);
+    }
+
     api_hal_power_insomnia_exit();
 }
 
@@ -289,8 +297,8 @@ uint8_t iButtonApp::get_file_name_size() {
 void iButtonApp::notify_init() {
     // TODO open record
     const GpioPin* vibro_record = &vibro_gpio;
-    gpio_init(vibro_record, GpioModeOutputPushPull);
-    gpio_write(vibro_record, false);
+    hal_gpio_init(vibro_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    hal_gpio_write(vibro_record, false);
 }
 
 void iButtonApp::notify_green_blink() {
@@ -348,11 +356,11 @@ void iButtonApp::notify_success() {
 }
 
 void iButtonApp::notify_vibro_on() {
-    gpio_write(&vibro_gpio, true);
+    hal_gpio_write(&vibro_gpio, true);
 }
 
 void iButtonApp::notify_vibro_off() {
-    gpio_write(&vibro_gpio, false);
+    hal_gpio_write(&vibro_gpio, false);
 }
 
 void iButtonApp::set_text_store(const char* text...) {

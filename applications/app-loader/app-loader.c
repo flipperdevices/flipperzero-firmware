@@ -58,6 +58,7 @@ void app_loader_thread_state_callback(FuriThreadState state, void* context) {
 }
 
 int32_t app_loader(void* p) {
+    FURI_LOG_I("app-loader", "Starting");
     state.thread = furi_thread_alloc();
     furi_thread_set_state_context(state.thread, &state);
     furi_thread_set_state_callback(state.thread, app_loader_thread_state_callback);
@@ -66,6 +67,7 @@ int32_t app_loader(void* p) {
     state.cli = furi_record_open("cli");
 
     // Main menu
+    FURI_LOG_I("app-loader", "Building main menu");
     with_value_mutex(
         menu_mutex, (Menu * menu) {
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
@@ -92,6 +94,7 @@ int32_t app_loader(void* p) {
         });
 
     // Plugins
+    FURI_LOG_I("app-loader", "Building plugins menu");
     with_value_mutex(
         menu_mutex, (Menu * menu) {
             MenuItem* menu_plugins =
@@ -121,7 +124,9 @@ int32_t app_loader(void* p) {
 
             menu_item_add(menu, menu_plugins);
         });
-#ifdef APP_DEBUG
+
+    // Debug
+    FURI_LOG_I("app-loader", "Building debug menu");
     with_value_mutex(
         menu_mutex, (Menu * menu) {
             MenuItem* menu_debug =
@@ -151,9 +156,13 @@ int32_t app_loader(void* p) {
 
             menu_item_add(menu, menu_debug);
         });
-#endif
 
-    printf("[app loader] start\r\n");
+    // Call on start hooks
+    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
+        (*FLIPPER_ON_SYSTEM_START[i])();
+    }
+
+    FURI_LOG_I("app-loader", "Started");
 
     while(1) {
         osThreadSuspend(osThreadGetId());

@@ -9,8 +9,9 @@
 #include <furi/stdglue.h>
 #include <furi/thread.h>
 #include <furi/valuemutex.h>
+#include <furi/log.h>
 
-#include <api-hal/api-gpio.h>
+#include <api-hal-gpio.h>
 #include <api-hal/api-interrupt-mgr.h>
 
 #include <stdlib.h>

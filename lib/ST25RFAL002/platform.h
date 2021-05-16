@@ -10,10 +10,14 @@
 #include "math.h"
 #include "spi.h"
 #include "main.h"
-#include <api-hal.h>
+#include <api-hal-gpio.h>
+#include <api-hal-light.h>
+#include <api-hal-spi.h>
 
 typedef void (*PlatformIrqCallback)();
 void platformSetIrqCallback(PlatformIrqCallback cb);
+void platformEnableIrqCallback();
+void platformDisableIrqCallback();
 
 HAL_StatusTypeDef platformSpiTxRx(const uint8_t *txBuf, uint8_t *rxBuf, uint16_t len);
 void platformProtectST25RComm();

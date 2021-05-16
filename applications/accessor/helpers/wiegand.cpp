@@ -40,11 +40,11 @@ void input_isr(void* _pin, void* _ctx) {
     uint32_t pin = (uint32_t)_pin;
     WIEGAND* _this = static_cast<WIEGAND*>(_ctx);
 
-    if(pin == ext_pa6_gpio.pin) {
+    if(pin == gpio_ext_pa6.pin) {
         _this->ReadD0();
     }
 
-    if(pin == ext_pa7_gpio.pin) {
+    if(pin == gpio_ext_pa7.pin) {
         _this->ReadD1();
     }
 }
@@ -57,11 +57,11 @@ void WIEGAND::begin() {
     _wiegandType = 0;
     _bitCount = 0;
 
-    const GpioPin* pinD0 = &ext_pa6_gpio;
-    const GpioPin* pinD1 = &ext_pa7_gpio;
+    const GpioPin* pinD0 = &gpio_ext_pa6;
+    const GpioPin* pinD1 = &gpio_ext_pa7;
 
-    gpio_init(pinD0, GpioModeInterruptFall); // Set D0 pin as input
-    gpio_init(pinD1, GpioModeInterruptFall); // Set D1 pin as input
+    hal_gpio_init(pinD0, GpioModeInterruptFall, GpioPullNo, GpioSpeedLow); // Set D0 pin as input
+    hal_gpio_init(pinD1, GpioModeInterruptFall, GpioPullNo, GpioSpeedLow); // Set D1 pin as input
 
     api_interrupt_add(
         input_isr, InterruptTypeExternalInterrupt, this); // Hardware interrupt - high to low pulse
