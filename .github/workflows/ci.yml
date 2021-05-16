@@ -64,7 +64,7 @@ jobs:
         with:
           run: |
             for TARGET in ${TARGETS}; do
-            srec_cat bootloader/.obj/${TARGET}/bootloader.hex -Intel firmware/.obj/${TARGET}/firmware.hex -Intel -o full_${TARGET}.hex -Intel
+            srec_cat bootloader/.obj/${TARGET}/bootloader.hex -Intel firmware/.obj/${TARGET}/firmware.hex -Intel -o ${TARGET}_full.hex -Intel
             done
 
       - name: Move upload files
@@ -72,25 +72,25 @@ jobs:
         with:
           run: |
             for TARGET in ${TARGETS}; do
-            mv bootloader/.obj/${TARGET}/bootloader.dfu bootloader_${TARGET}.dfu
-            mv bootloader/.obj/${TARGET}/bootloader.bin bootloader_${TARGET}.bin
-            mv bootloader/.obj/${TARGET}/bootloader.elf bootloader_${TARGET}.elf
-            mv firmware/.obj/${TARGET}/firmware.dfu firmware_${TARGET}.dfu
-            mv firmware/.obj/${TARGET}/firmware.bin firmware_${TARGET}.bin
-            mv firmware/.obj/${TARGET}/firmware.elf firmware_${TARGET}.elf
+            mv bootloader/.obj/${TARGET}/bootloader.dfu ${TARGET}_bootloader.dfu
+            mv bootloader/.obj/${TARGET}/bootloader.bin ${TARGET}_bootloader.bin
+            mv bootloader/.obj/${TARGET}/bootloader.elf ${TARGET}_bootloader.elf
+            mv firmware/.obj/${TARGET}/firmware.dfu ${TARGET}_firmware.dfu
+            mv firmware/.obj/${TARGET}/firmware.bin ${TARGET}_firmware.bin
+            mv firmware/.obj/${TARGET}/firmware.elf ${TARGET}_firmware.elf
             done
 
       - name: Generate full dfu file
         uses: ./.github/actions/docker
         with:
-          run: for TARGET in ${TARGETS}; do hex2dfu -i full_${TARGET}.hex -o full_${TARGET}.dfu; done
+          run: for TARGET in ${TARGETS}; do hex2dfu -i ${TARGET}_full.hex -o ${TARGET}_full.dfu; done
 
       - name: Copy bootloader for full.bin 
-        run: for TARGET in ${TARGETS}; do cp bootloader_${TARGET}.bin full_${TARGET}.bin; done
+        run: for TARGET in ${TARGETS}; do cp ${TARGET}_bootloader.bin ${TARGET}_full.bin; done
       - name: Truncate full.bin 
-        run: for TARGET in ${TARGETS}; do truncate -s 32768 full_${TARGET}.bin; done
+        run: for TARGET in ${TARGETS}; do truncate -s 32768 ${TARGET}_full.bin; done
       - name: Add firmware.bin at full.bin
-        run: for TARGET in ${TARGETS}; do cat firmware_${TARGET}.bin >> full_${TARGET}.bin; done
+        run: for TARGET in ${TARGETS}; do cat ${TARGET}_firmware.bin >> ${TARGET}_full.bin; done
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
