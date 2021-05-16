@@ -86,11 +86,11 @@ jobs:
           run: for TARGET in ${TARGETS}; do hex2dfu -i full_${TARGET}.hex -o full_${TARGET}.dfu; done
 
       - name: Copy bootloader for full.bin 
-        run: cp bootloader_${TARGET}.bin full_${TARGET}.bin
+        run: for TARGET in ${TARGETS}; do cp bootloader_${TARGET}.bin full_${TARGET}.bin; done
       - name: Truncate full.bin 
-        run: truncate -s 32768 full_${TARGET}.bin
+        run: for TARGET in ${TARGETS}; do truncate -s 32768 full_${TARGET}.bin; done
       - name: Add firmware.bin at full.bin
-        run: cat firmware_${TARGET}.bin >> full_${TARGET}.bin
+        run: for TARGET in ${TARGETS}; do cat firmware_${TARGET}.bin >> full_${TARGET}.bin; done
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
