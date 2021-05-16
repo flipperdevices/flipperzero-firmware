@@ -1,9 +1,9 @@
-#include "archive.h"
+#include "archive_i.h"
 
-static bool archive_get_filenames(ArchiveState* archive);
+static bool archive_get_filenames(ArchiveApp* archive);
 
-static void update_offset(ArchiveState* archive) {
-    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
+static void update_offset(ArchiveApp* archive) {
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     uint8_t bounds = model->file_count > 4 ? 2 : model->file_count;
 
     if(model->list_offset < model->idx - bounds) {
@@ -17,17 +17,7 @@ static void update_offset(ArchiveState* archive) {
     view_commit_model(archive->view_archive_main, true);
 }
 
-static void archive_switch_dir(ArchiveState* archive, const char* path) {
-    const char* tab_ext_filter[] = {
-        [ArchiveTabFavorites] = "*",
-        [ArchiveTabIButton] = ".ibtn",
-        [ArchiveTabNFC] = ".nfc",
-        [ArchiveTabSubOne] = ".sub1",
-        [ArchiveTabLFRFID] = ".rfid",
-        [ArchiveTabIrda] = ".irda",
-        [ArchiveTabBrowser] = "*",
-    };
-
+static void archive_switch_dir(ArchiveApp* archive, const char* path) {
     string_init_set_str(archive->tab.ext_filter, tab_ext_filter[archive->tab.id]);
     string_init(archive->tab.path[archive->tab.level]);
 
@@ -40,7 +30,7 @@ static void archive_switch_dir(ArchiveState* archive, const char* path) {
 
     string_cat(archive->tab.path[archive->tab.level], path);
 
-    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
     memset(model->files, 0, (sizeof(ArchiveFile_t) * FILENAME_COUNT));
     model->idx = 0;
@@ -53,18 +43,8 @@ static void archive_switch_dir(ArchiveState* archive, const char* path) {
     archive_get_filenames(archive);
 }
 
-static void archive_switch_tab(ArchiveState* archive) {
-    const char* tab_default_paths[] = {
-        [ArchiveTabFavorites] = "favorites",
-        [ArchiveTabIButton] = "ibutton",
-        [ArchiveTabNFC] = "nfc",
-        [ArchiveTabSubOne] = "subone",
-        [ArchiveTabLFRFID] = "lfrfid",
-        [ArchiveTabIrda] = "irda",
-        [ArchiveTabBrowser] = "/",
-    };
-
-    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
+static void archive_switch_tab(ArchiveApp* archive) {
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     model->tab_idx = archive->tab.id;
     view_commit_model(archive->view_archive_main, true);
     model = NULL;
@@ -73,12 +53,51 @@ static void archive_switch_tab(ArchiveState* archive) {
     archive_switch_dir(archive, tab_default_paths[archive->tab.id]);
 }
 
+static void archive_open_file_menu(ArchiveApp* archive) {
+    archive->tab.menu = true;
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+    model->menu = true;
+    model->menu_idx = 0;
+    view_commit_model(archive->view_archive_main, true);
+}
+
+static void archive_close_file_menu(ArchiveApp* archive) {
+    archive->tab.menu = false;
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+    model->menu = false;
+    model->menu_idx = 0;
+    view_commit_model(archive->view_archive_main, true);
+}
+
+static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+
+    if(event->key == InputKeyUp) {
+        model->menu_idx = CLAMP(model->menu_idx - 1, MENU_ITEMS - 1, 0);
+    } else if(event->key == InputKeyDown) {
+        model->menu_idx = CLAMP(model->menu_idx + 1, MENU_ITEMS - 1, 0);
+    } else if(event->key == InputKeyOk) {
+        // menu callback
+    } else if(event->key == InputKeyBack) {
+        archive_close_file_menu(archive);
+    }
+
+    view_commit_model(archive->view_archive_main, true);
+}
+
 static bool archive_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
-    ArchiveState* archive = context;
+    ArchiveApp* archive = context;
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+    bool in_menu = archive->tab.menu;
 
     if(event->type != InputTypeShort) return false;
+
+    if(in_menu) {
+        menu_input_handler(archive, event);
+        return true;
+    }
 
     if(event->key == InputKeyLeft) {
         archive->tab.id = CLAMP(archive->tab.id - 1, ArchiveTabTotal, 0);
@@ -100,8 +119,6 @@ static bool archive_view_input(InputEvent* event, void* context) {
         return true;
     }
 
-    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
-
     if(event->key == InputKeyUp) {
         model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
         update_offset(archive);
@@ -109,11 +126,11 @@ static bool archive_view_input(InputEvent* event, void* context) {
         model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
         update_offset(archive);
     } else if(event->key == InputKeyOk) {
-        if(model->files[model->idx].type == FileTypeFolder) {
+        if(model->files[model->idx].type == ArchiveFileTypeFolder) {
             archive->tab.level = CLAMP(archive->tab.level + 1, MAX_DEPTH_LEVEL, 0);
             archive_switch_dir(archive, string_get_cstr(model->files[model->idx].name));
         } else {
-            // 2do: file interaction menu
+            archive_open_file_menu(archive);
         }
     }
 
@@ -121,7 +138,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* name) {
+static bool filter_extension(ArchiveApp* archive, FileInfo* file_info, char* name) {
     bool result = false;
     const char* filter_ext_ptr = string_get_cstr(archive->tab.ext_filter);
     if(strcmp(filter_ext_ptr, "*") == 0) {
@@ -133,14 +150,6 @@ static bool filter_extension(ArchiveState* archive, FileInfo* file_info, char* n
 }
 
 static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
-    const char* known_ext[] = {
-        [FileTypeIButton] = ".ibtn",
-        [FileTypeNFC] = ".nfc",
-        [FileTypeSubOne] = ".sub1",
-        [FileTypeLFRFID] = ".rfid",
-        [FileTypeIrda] = ".irda",
-    };
-
     for(size_t i = 0; i < SIZEOF_ARRAY(known_ext); i++) {
         if(string_search_str(file->name, known_ext[i], 0) != STRING_FAILURE) {
             file->type = i;
@@ -149,13 +158,13 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
     }
 
     if(file_info->flags & FSF_DIRECTORY) {
-        file->type = FileTypeFolder;
+        file->type = ArchiveFileTypeFolder;
     } else {
-        file->type = FileTypeUnknown;
+        file->type = ArchiveFileTypeUnknown;
     }
 }
 
-static bool archive_get_filenames(ArchiveState* archive) {
+static bool archive_get_filenames(ArchiveApp* archive) {
     FileInfo file_info;
     File directory;
     bool result;
@@ -166,7 +175,7 @@ static bool archive_get_filenames(ArchiveState* archive) {
     char* name = calloc(name_length, sizeof(char));
     uint16_t first_file_index = 0;
 
-    ArchiveViewModelDefault* model = view_get_model(archive->view_archive_main);
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
     first_file_index = model->first_file_index;
 
@@ -217,7 +226,7 @@ static bool archive_get_filenames(ArchiveState* archive) {
     return true;
 }
 
-void archive_free(ArchiveState* archive) {
+void archive_free(ArchiveApp* archive) {
     furi_assert(archive);
 
     furi_record_close("sdcard");
@@ -235,8 +244,8 @@ void archive_free(ArchiveState* archive) {
     free(archive);
 }
 
-ArchiveState* archive_alloc() {
-    ArchiveState* archive = furi_alloc(sizeof(ArchiveState));
+ArchiveApp* archive_alloc() {
+    ArchiveApp* archive = furi_alloc(sizeof(ArchiveApp));
     // Message queue
     archive->event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
 
@@ -252,7 +261,7 @@ ArchiveState* archive_alloc() {
 
     archive->view_archive_main = view_alloc();
     view_allocate_model(
-        archive->view_archive_main, ViewModelTypeLockFree, sizeof(ArchiveViewModelDefault));
+        archive->view_archive_main, ViewModelTypeLockFree, sizeof(ArchiveViewModel));
     view_set_context(archive->view_archive_main, archive);
     view_set_draw_callback(archive->view_archive_main, archive_view_render);
     view_set_input_callback(archive->view_archive_main, archive_view_input);
@@ -266,7 +275,7 @@ ArchiveState* archive_alloc() {
 }
 
 int32_t app_archive(void* p) {
-    ArchiveState* archive = archive_alloc();
+    ArchiveApp* archive = archive_alloc();
 
     // default tab
     archive_switch_tab(archive);
