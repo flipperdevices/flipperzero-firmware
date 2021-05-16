@@ -78,11 +78,11 @@ void Error_Handler(void);
 #define RFID_PULL_Pin GPIO_PIN_2
 #define RFID_RF_IN_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
+#define RFID_TUNE_GPIO_Port GPIOA
+#define RFID_TUNE_Pin GPIO_PIN_8
 
 #define RF_SW_0_GPIO_Port GPIOC
 #define RF_SW_0_Pin GPIO_PIN_4
-#define RF_SW_1_GPIO_Port GPIOA
-#define RF_SW_1_Pin GPIO_PIN_8
 
 #define SD_CD_GPIO_Port GPIOA
 #define SD_CD_Pin GPIO_PIN_15

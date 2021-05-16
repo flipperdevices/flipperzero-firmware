@@ -55,10 +55,9 @@ extern const size_t input_pins_count;
 
 extern const GpioPin vibro_gpio;
 extern const GpioPin ibutton_gpio;
-extern const GpioPin cc1101_g0_gpio;
 
-extern const GpioPin gpio_subghz_cs;
-extern const GpioPin gpio_display_cs;
+extern const GpioPin gpio_cc1101_g0;
+extern const GpioPin gpio_rf_sw_0;
 
 extern const GpioPin gpio_subghz_cs;
 extern const GpioPin gpio_display_cs;
@@ -74,6 +73,18 @@ extern const GpioPin gpio_spi_r_miso;
 extern const GpioPin gpio_spi_r_mosi;
 extern const GpioPin gpio_spi_r_sck;
 
+extern const GpioPin gpio_ext_pc0;
+extern const GpioPin gpio_ext_pc1;
+extern const GpioPin gpio_ext_pc3;
+extern const GpioPin gpio_ext_pb2;
+extern const GpioPin gpio_ext_pb3;
+extern const GpioPin gpio_ext_pa4;
+extern const GpioPin gpio_ext_pa6;
+extern const GpioPin gpio_ext_pa7;
+
+extern const GpioPin gpio_rfid_pull;
+extern const GpioPin gpio_rfid_carrier_out;
+extern const GpioPin gpio_rfid_data_in;
 
 #ifdef __cplusplus
 }

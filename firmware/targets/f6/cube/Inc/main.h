@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -108,8 +108,8 @@ void Error_Handler(void);
 #define PA6_GPIO_Port GPIOA
 #define PA7_Pin GPIO_PIN_7
 #define PA7_GPIO_Port GPIOA
-#define RF_SW_1_Pin GPIO_PIN_8
-#define RF_SW_1_GPIO_Port GPIOA
+#define RFID_TUNE_Pin GPIO_PIN_8
+#define RFID_TUNE_GPIO_Port GPIOA
 #define I2C_SCL_Pin GPIO_PIN_9
 #define I2C_SCL_GPIO_Port GPIOA
 #define RF_SW_0_Pin GPIO_PIN_4
@@ -141,13 +141,12 @@ void Error_Handler(void);
 #define SPI_D_MOSI_GPIO_Port GPIOB
 #define BUTTON_DOWN_Pin GPIO_PIN_6
 #define BUTTON_DOWN_GPIO_Port GPIOC
-#define BUTTON_DOWN_EXTI_IRQn EXTI9_5_IRQn
 #define I2C_SDA_Pin GPIO_PIN_10
 #define I2C_SDA_GPIO_Port GPIOA
-#define SD_CD_Pin GPIO_PIN_15
-#define SD_CD_GPIO_Port GPIOA
-#define VIBRO_Pin GPIO_PIN_10
-#define VIBRO_GPIO_Port GPIOC
+#define VIBRO_Pin GPIO_PIN_15
+#define VIBRO_GPIO_Port GPIOA
+#define SD_CD_Pin GPIO_PIN_10
+#define SD_CD_GPIO_Port GPIOC
 #define DISPLAY_CS_Pin GPIO_PIN_11
 #define DISPLAY_CS_GPIO_Port GPIOC
 #define SD_CS_Pin GPIO_PIN_12

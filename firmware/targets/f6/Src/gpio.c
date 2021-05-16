@@ -35,16 +35,13 @@ void MX_GPIO_Init(void) {
     GPIO_InitStruct.Pin = VIBRO_Pin;
     HAL_GPIO_Init(VIBRO_GPIO_Port, &GPIO_InitStruct);
 
-    /* RF_SW_0 and RF_SW_1 */
+    /* RF_SW_0 */
     HAL_GPIO_WritePin(RF_SW_0_GPIO_Port, RF_SW_0_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(RF_SW_1_GPIO_Port, RF_SW_1_Pin, GPIO_PIN_RESET);
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Pin = RF_SW_0_Pin;
     HAL_GPIO_Init(RF_SW_0_GPIO_Port, &GPIO_InitStruct);
-    GPIO_InitStruct.Pin = RF_SW_1_Pin;
-    HAL_GPIO_Init(RF_SW_1_GPIO_Port, &GPIO_InitStruct);
 
     /* PERIPH_POWER */
     HAL_GPIO_WritePin(PERIPH_POWER_GPIO_Port, PERIPH_POWER_Pin, GPIO_PIN_SET);
