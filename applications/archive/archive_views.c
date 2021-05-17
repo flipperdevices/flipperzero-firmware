@@ -30,7 +30,7 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
 }
 
 static void trim_file_ext(string_t name) {
-    size_t str_len = string_size(name);
+    size_t str_len = strlen(string_get_cstr(name));
     char* buff_ptr = stringi_get_cstr(name);
     char* end = buff_ptr + str_len;
     while(end > buff_ptr && *end != '.' && *end != '\\' && *end != '/') {
@@ -44,8 +44,10 @@ static void trim_file_ext(string_t name) {
 static void archive_name_format(Canvas* canvas, string_t name, ArchiveFileTypeEnum type) {
     furi_assert(name);
 
-    size_t s_len = string_size(name);
-    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(name));
+    char* str = stringi_get_cstr(name);
+
+    size_t s_len = strlen(string_get_cstr(name));
+    uint16_t len_px = canvas_string_width(canvas, str);
 
     if(type != ArchiveFileTypeUnknown || type != ArchiveFileTypeFolder) {
         trim_file_ext(name);
@@ -55,6 +57,8 @@ static void archive_name_format(Canvas* canvas, string_t name, ArchiveFileTypeEn
         string_mid(name, 0, s_len - (size_t)((len_px - MAX_LEN_PX) / ((len_px / s_len) + 2) + 1));
         string_cat(name, "...");
     }
+
+    str = NULL;
 }
 
 static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
@@ -84,8 +88,7 @@ static void draw_list(Canvas* canvas, void* model) {
 
         if(s_len) {
             string_init_set(str_buff, m->files[idx].name);
-            archive_name_format(canvas, str_buff, m->files[idx].type);
-            char* str_ptr = stringi_get_cstr(str_buff);
+            archive_name_format(canvas, str_buff, ArchiveItemIcons[m->files[idx].type]);
 
             if(m->idx == idx) {
                 archive_draw_frame(canvas, i, scrollbar);
@@ -95,7 +98,7 @@ static void draw_list(Canvas* canvas, void* model) {
 
             canvas_draw_icon_name(
                 canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[m->files[idx].type]);
-            canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, str_ptr);
+            canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, stringi_get_cstr(str_buff));
             string_clear(str_buff);
         }
     }

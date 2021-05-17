@@ -18,9 +18,8 @@ static void update_offset(ArchiveApp* archive) {
 }
 
 static void archive_switch_dir(ArchiveApp* archive, const char* path) {
-    string_init_set_str(archive->tab.ext_filter, tab_ext_filter[archive->tab.id]);
+    // set path
     string_init(archive->tab.path[archive->tab.level]);
-
     if(archive->tab.level > 0) {
         string_cat(
             archive->tab.path[archive->tab.level],
@@ -29,6 +28,9 @@ static void archive_switch_dir(ArchiveApp* archive, const char* path) {
     }
 
     string_cat(archive->tab.path[archive->tab.level], path);
+
+    // set ext filter
+    string_init_set_str(archive->tab.ext_filter, tab_ext_filter[archive->tab.id]);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
@@ -138,7 +140,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static bool filter_extension(ArchiveApp* archive, FileInfo* file_info, char* name) {
+static bool filter_by_extension(ArchiveApp* archive, FileInfo* file_info, char* name) {
     bool result = false;
     const char* filter_ext_ptr = string_get_cstr(archive->tab.ext_filter);
     if(strcmp(filter_ext_ptr, "*") == 0) {
@@ -171,34 +173,37 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     FS_Dir_Api* dir_api = &archive->fs_api->dir;
     uint8_t string_counter = 0;
     uint16_t file_counter = 0;
-    const uint8_t name_length = 100;
-    char* name = calloc(name_length, sizeof(char));
     uint16_t first_file_index = 0;
+    const uint8_t name_length = 100;
+
+    string_t name;
+    string_init_printf(name, "%0*d\n", name_length, 0); // is there a better way?
+
+    char* name_ptr = stringi_get_cstr(name);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
     first_file_index = model->first_file_index;
-
     result = dir_api->open(&directory, string_get_cstr(archive->tab.path[archive->tab.level]));
 
     if(!result) {
         dir_api->close(&directory);
-        free(name);
+        string_clear(name);
         return false;
     }
 
     while(1) {
-        result = dir_api->read(&directory, &file_info, name, name_length);
+        result = dir_api->read(&directory, &file_info, name_ptr, name_length);
 
-        if(directory.error_id == FSE_NOT_EXIST || name[0] == 0) {
+        if(directory.error_id == FSE_NOT_EXIST || name_ptr[0] == 0) {
             break;
         }
 
         if(result) {
             if(directory.error_id == FSE_OK) {
-                if(filter_extension(archive, &file_info, name)) {
+                if(filter_by_extension(archive, &file_info, name_ptr)) {
                     if(file_counter >= first_file_index) {
-                        string_set_str(model->files[string_counter].name, name);
+                        string_set(model->files[string_counter].name, name);
                         set_file_type(&model->files[string_counter], &file_info);
 
                         string_counter++;
@@ -212,7 +217,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
             } else {
                 dir_api->close(&directory);
-                free(name);
+                string_clear(name);
                 return false;
             }
         }
@@ -222,7 +227,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     model = NULL;
 
     dir_api->close(&directory);
-    free(name);
+    string_clear(name);
     return true;
 }
 
