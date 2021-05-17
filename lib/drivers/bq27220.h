@@ -46,6 +46,9 @@ typedef struct {
 typedef struct {
     uint16_t full_charge_cap;
     uint16_t design_cap;
+    uint16_t EDV0;
+    uint16_t EDV1;
+    uint16_t EDV2;
     uint16_t EMF;
     uint16_t C0;
     uint16_t R0;
