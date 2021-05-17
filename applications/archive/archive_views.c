@@ -16,8 +16,17 @@ static const IconName ArchiveItemIcons[] = {
 
 static const char* test_menu[] = {"Activate", "Open app", "Move", "Delete"};
 
-static IconName archive_get_file_icon(ArchiveViewModel* m, uint8_t idx) {
-    return ArchiveItemIcons[m->files[idx].type];
+static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 61, 17, 60, 46);
+    canvas_set_color(canvas, ColorBlack);
+    elements_slightly_rounded_frame(canvas, 60, 16, 62, 48);
+
+    for(size_t i = 0; i < MENU_ITEMS; i++) {
+        canvas_draw_str(canvas, 72, 27 + i * 11, test_menu[i]);
+    }
+
+    canvas_draw_icon_name(canvas, 64, 20 + model->menu_idx * 11, I_ButtonRight_4x7);
 }
 
 static void trim_file_ext(string_t name) {
@@ -32,17 +41,38 @@ static void trim_file_ext(string_t name) {
     }
 }
 
-static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 61, 17, 60, 46);
-    canvas_set_color(canvas, ColorBlack);
-    elements_slightly_rounded_frame(canvas, 60, 16, 62, 48);
+static void archive_name_format(Canvas* canvas, string_t name, ArchiveFileTypeEnum type){
+    furi_assert(name);
 
-    for(size_t i = 0; i < MENU_ITEMS; i++) {
-        canvas_draw_str(canvas, 72, 27 + i * 11, test_menu[i]);
+    size_t s_len = string_size(name);
+    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(name));
+
+    if(type != ArchiveFileTypeUnknown || type != ArchiveFileTypeFolder){
+        trim_file_ext(name);
     }
 
-    canvas_draw_icon_name(canvas, 64, 20 + model->menu_idx * 11, I_ButtonRight_4x7);
+    if(len_px > MAX_LEN_PX) {
+        string_mid(
+            name,
+            0,
+            s_len - (size_t)((len_px - MAX_LEN_PX) / ((len_px / s_len) + 2) + 1));
+        string_cat(name, "...");
+    }
+}
+
+static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar){
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_box(
+        canvas, 0, 15 + idx * FRAME_HEIGHT, scrollbar ? 122 : 127, FRAME_HEIGHT);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_dot(canvas, 0, 15 + idx * FRAME_HEIGHT);
+    canvas_draw_dot(canvas, 1, 15 + idx * FRAME_HEIGHT);
+    canvas_draw_dot(canvas, 0, (15 + idx * FRAME_HEIGHT) + 1);
+
+    canvas_draw_dot(canvas, 0, (15 + idx * FRAME_HEIGHT) + 11);
+    canvas_draw_dot(canvas, scrollbar ? 121 : 126, 15 + idx * FRAME_HEIGHT);
+    canvas_draw_dot(canvas, scrollbar ? 121 : 126, (15 + idx * FRAME_HEIGHT) + 11);
 }
 
 static void draw_list(Canvas* canvas, void* model) {
@@ -58,41 +88,19 @@ static void draw_list(Canvas* canvas, void* model) {
 
         if(s_len) {
             string_init_set(str_buff, m->files[idx].name);
-            trim_file_ext(str_buff);
-
-            uint16_t len_px = canvas_string_width(canvas, string_get_cstr(str_buff));
+            archive_name_format(canvas, str_buff, m->files[idx].type);
             char* str_ptr = stringi_get_cstr(str_buff);
 
-            if(len_px > MAX_LEN_PX) {
-                string_mid(
-                    str_buff,
-                    0,
-                    s_len - (size_t)((len_px - MAX_LEN_PX) / ((len_px / s_len) + 2) + 1));
-                string_cat(str_buff, "...");
-            }
-
             if(m->idx == idx) {
-                canvas_set_color(canvas, ColorBlack);
-                canvas_draw_box(
-                    canvas, 0, 15 + i * FRAME_HEIGHT, scrollbar ? 122 : 127, FRAME_HEIGHT);
-
-                canvas_set_color(canvas, ColorWhite);
-                canvas_draw_dot(canvas, 0, 15 + i * FRAME_HEIGHT);
-                canvas_draw_dot(canvas, 1, 15 + i * FRAME_HEIGHT);
-                canvas_draw_dot(canvas, 0, (15 + i * FRAME_HEIGHT) + 1);
-
-                canvas_draw_dot(canvas, 0, (15 + i * FRAME_HEIGHT) + 11);
-                canvas_draw_dot(canvas, scrollbar ? 121 : 126, 15 + i * FRAME_HEIGHT);
-                canvas_draw_dot(canvas, scrollbar ? 121 : 126, (15 + i * FRAME_HEIGHT) + 11);
-
+                archive_draw_frame(canvas, i, scrollbar);
             } else {
                 canvas_set_color(canvas, ColorBlack);
             }
 
-            canvas_draw_icon_name(canvas, 2, 16 + i * FRAME_HEIGHT, archive_get_file_icon(m, idx));
+            canvas_draw_icon_name(canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[m->files[idx].type]);
             canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, str_ptr);
-
             string_clear(str_buff);
+
         }
     }
 
