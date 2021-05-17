@@ -7,12 +7,12 @@
 #include <gui/view_dispatcher.h>
 #include <m-string.h>
 #include <m-array.h>
-
 #include <filesystem-api.h>
-
 #include "archive_views.h"
+#include "applications.h"
 
-#define MAX_DEPTH_LEVEL 32
+#define MAX_DEPTH 16
+#define MAX_NAME_LEN 255
 
 typedef enum {
     ArchiveTabFavorites,
@@ -61,9 +61,9 @@ typedef struct {
 
     string_t name;
     string_t ext_filter;
-    string_t path[MAX_DEPTH_LEVEL];
+    string_t path[MAX_DEPTH];
 
-    uint8_t level;
+    uint8_t depth;
     bool menu;
 
 } ArchiveTab;
