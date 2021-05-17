@@ -1,5 +1,6 @@
 #include "archive_views.h"
 
+static const char* test_menu[] = {"Activate", "Open app", "Move", "Delete"};
 static const char* ArchiveTabNames[] =
     {"Favorites", "iButton", "NFC", "SubOne", "Rfid", "Infared", "Browser"};
 
@@ -13,8 +14,6 @@ static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeUnknown] = I_unknown_10px,
 
 };
-
-static const char* test_menu[] = {"Activate", "Open app", "Move", "Delete"};
 
 static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     canvas_set_color(canvas, ColorWhite);
@@ -41,7 +40,7 @@ static void trim_file_ext(string_t name) {
     }
 }
 
-static void archive_name_format(Canvas* canvas, string_t name, ArchiveFileTypeEnum type) {
+static void format_filename_buffer(Canvas* canvas, string_t name, ArchiveFileTypeEnum type) {
     furi_assert(name);
 
     char* str = stringi_get_cstr(name);
@@ -75,48 +74,46 @@ static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
     canvas_draw_dot(canvas, scrollbar ? 121 : 126, (15 + idx * FRAME_HEIGHT) + 11);
 }
 
-static void draw_list(Canvas* canvas, void* model) {
+static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
     furi_assert(model);
-    ArchiveViewModel* m = model;
 
-    bool scrollbar = m->file_count > 4;
+    size_t array_size = files_array_size(model->files);
+
+    bool scrollbar = array_size > 4;
+
     string_t str_buff;
 
-    for(int i = 0; i < m->file_count; ++i) {
-        uint8_t idx = i + m->list_offset;
-        size_t s_len = string_size(m->files[idx].name);
+    for(size_t i = 0; i < MIN(MENU_ITEMS, array_size); ++i) {
+        size_t idx = CLAMP(i + model->list_offset, array_size, 0);
+        ArchiveFile_t* file = files_array_get(model->files, idx);
 
-        if(s_len) {
-            string_init_set(str_buff, m->files[idx].name);
-            archive_name_format(canvas, str_buff, ArchiveItemIcons[m->files[idx].type]);
+        string_init_set(str_buff, file->name);
+        format_filename_buffer(canvas, str_buff, file->type);
 
-            if(m->idx == idx) {
-                archive_draw_frame(canvas, i, scrollbar);
-            } else {
-                canvas_set_color(canvas, ColorBlack);
-            }
-
-            canvas_draw_icon_name(
-                canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[m->files[idx].type]);
-            canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, stringi_get_cstr(str_buff));
-            string_clear(str_buff);
+        if(model->idx == idx) {
+            archive_draw_frame(canvas, i, scrollbar);
+        } else {
+            canvas_set_color(canvas, ColorBlack);
         }
+
+        canvas_draw_icon_name(canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file->type]);
+        canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, stringi_get_cstr(str_buff));
+        string_clear(str_buff);
     }
 
-    if(m->menu) {
-        render_item_menu(canvas, m);
+    if(model->menu) {
+        render_item_menu(canvas, model);
     }
 
     if(scrollbar) {
-        elements_scrollbar_pos(canvas, 126, 16, 48, m->idx, (uint8_t)m->file_count);
+        elements_scrollbar_pos(canvas, 126, 16, 48, model->idx, array_size);
     }
 }
 
-static void archive_render_status_bar(Canvas* canvas, void* model) {
+static void archive_render_status_bar(Canvas* canvas, ArchiveViewModel* model) {
     furi_assert(model);
-    ArchiveViewModel* m = model;
 
-    const char* tab_name = ArchiveTabNames[m->tab_idx];
+    const char* tab_name = ArchiveTabNames[model->tab_idx];
 
     canvas_draw_icon_name(canvas, 0, 0, I_Background_128x11);
 
@@ -130,10 +127,10 @@ static void archive_render_status_bar(Canvas* canvas, void* model) {
 
     elements_frame(canvas, 100, 0, 24, 13);
 
-    if(m->tab_idx > 0) {
+    if(model->tab_idx > 0) {
         canvas_draw_icon_name(canvas, 106, 3, I_ButtonLeft_4x7);
     }
-    if(m->tab_idx < SIZEOF_ARRAY(ArchiveTabNames) - 1) {
+    if(model->tab_idx < SIZEOF_ARRAY(ArchiveTabNames) - 1) {
         canvas_draw_icon_name(canvas, 114, 3, I_ButtonRight_4x7);
     }
 }
@@ -142,8 +139,8 @@ void archive_view_render(Canvas* canvas, void* model) {
     ArchiveViewModel* m = model;
     archive_render_status_bar(canvas, model);
 
-    if(m->file_count > 0) {
-        draw_list(canvas, model);
+    if(files_array_size(m->files) > 0) {
+        draw_list(canvas, m);
     } else {
         canvas_draw_str_aligned(
             canvas, GUI_DISPLAY_WIDTH / 2, 40, AlignCenter, AlignCenter, "No data");

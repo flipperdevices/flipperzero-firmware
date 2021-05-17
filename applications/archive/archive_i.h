@@ -6,6 +6,8 @@
 #include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
 #include <m-string.h>
+#include <m-array.h>
+
 #include <filesystem-api.h>
 
 #include "archive_views.h"
@@ -23,14 +25,12 @@ typedef enum {
     ArchiveTabTotal,
 } ArchiveTabsEnum;
 
-static const char* tab_ext_filter[] = {
-    [ArchiveTabFavorites] = "*",
-    [ArchiveTabIButton] = ".ibtn",
-    [ArchiveTabNFC] = ".nfc",
-    [ArchiveTabSubOne] = ".sub1",
-    [ArchiveTabLFRFID] = ".rfid",
-    [ArchiveTabIrda] = ".irda",
-    [ArchiveTabBrowser] = "*",
+static const char* known_ext[] = {
+    [ArchiveFileTypeIButton] = ".ibtn",
+    [ArchiveFileTypeNFC] = ".nfc",
+    [ArchiveFileTypeSubOne] = ".sub1",
+    [ArchiveFileTypeLFRFID] = ".rfid",
+    [ArchiveFileTypeIrda] = ".irda",
 };
 
 static const char* tab_default_paths[] = {
@@ -41,14 +41,6 @@ static const char* tab_default_paths[] = {
     [ArchiveTabLFRFID] = "lfrfid",
     [ArchiveTabIrda] = "irda",
     [ArchiveTabBrowser] = "/",
-};
-
-static const char* known_ext[] = {
-    [ArchiveFileTypeIButton] = ".ibtn",
-    [ArchiveFileTypeNFC] = ".nfc",
-    [ArchiveFileTypeSubOne] = ".sub1",
-    [ArchiveFileTypeLFRFID] = ".rfid",
-    [ArchiveFileTypeIrda] = ".irda",
 };
 
 typedef enum {

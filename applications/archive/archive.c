@@ -4,14 +4,13 @@ static bool archive_get_filenames(ArchiveApp* archive);
 
 static void update_offset(ArchiveApp* archive) {
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
-    uint8_t bounds = model->file_count > 4 ? 2 : model->file_count;
+    size_t array_size = files_array_size(model->files);
+    uint16_t bounds = array_size > 3 ? 2 : array_size;
 
     if(model->list_offset < model->idx - bounds) {
-        model->list_offset = CLAMP(model->list_offset + 1, model->file_count - bounds, 0);
-    }
-
-    if(model->list_offset > model->idx - bounds) {
-        model->list_offset = CLAMP(model->idx - 1, model->file_count - bounds, 0);
+        model->list_offset = CLAMP(model->list_offset + 1, array_size - (bounds + 2), 0);
+    } else if(model->list_offset > model->idx - bounds) {
+        model->list_offset = CLAMP(model->idx - 1, array_size - (bounds), 0);
     }
 
     view_commit_model(archive->view_archive_main, true);
@@ -29,20 +28,33 @@ static void archive_switch_dir(ArchiveApp* archive, const char* path) {
 
     string_cat(archive->tab.path[archive->tab.level], path);
 
-    // set ext filter
-    string_init_set_str(archive->tab.ext_filter, tab_ext_filter[archive->tab.id]);
-
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
-    memset(model->files, 0, (sizeof(ArchiveFile_t) * FILENAME_COUNT));
+    files_array_clear(model->files);
+
     model->idx = 0;
-    model->file_count = 0;
-    model->first_file_index = 0;
     model->list_offset = 0;
 
     view_commit_model(archive->view_archive_main, true);
     model = NULL;
     archive_get_filenames(archive);
+}
+
+static inline const char* get_tab_ext(ArchiveTabsEnum tab) {
+    switch(tab) {
+    case ArchiveTabIButton:
+        return known_ext[ArchiveFileTypeIButton];
+    case ArchiveTabNFC:
+        return known_ext[ArchiveFileTypeNFC];
+    case ArchiveTabSubOne:
+        return known_ext[ArchiveFileTypeSubOne];
+    case ArchiveTabLFRFID:
+        return known_ext[ArchiveFileTypeLFRFID];
+    case ArchiveTabIrda:
+        return known_ext[ArchiveFileTypeIrda];
+    default:
+        return "*";
+    }
 }
 
 static void archive_switch_tab(ArchiveApp* archive) {
@@ -52,6 +64,8 @@ static void archive_switch_tab(ArchiveApp* archive) {
     model = NULL;
 
     archive->tab.level = 0;
+    // set ext filter
+    string_init_set_str(archive->tab.ext_filter, get_tab_ext(archive->tab.id));
     archive_switch_dir(archive, tab_default_paths[archive->tab.id]);
 }
 
@@ -121,16 +135,21 @@ static bool archive_view_input(InputEvent* event, void* context) {
         return true;
     }
 
+    size_t num_elements = files_array_size(model->files) - 1;
     if(event->key == InputKeyUp) {
-        model->idx = CLAMP(model->idx - 1, model->file_count - 1, 0);
+        model->idx = CLAMP(model->idx - 1, num_elements, 0);
         update_offset(archive);
+
     } else if(event->key == InputKeyDown) {
-        model->idx = CLAMP(model->idx + 1, model->file_count - 1, 0);
+        model->idx = CLAMP(model->idx + 1, num_elements, 0);
         update_offset(archive);
+
     } else if(event->key == InputKeyOk) {
-        if(model->files[model->idx].type == ArchiveFileTypeFolder) {
+        ArchiveFile_t* selected = files_array_get(model->files, model->idx);
+
+        if(selected->type == ArchiveFileTypeFolder) {
             archive->tab.level = CLAMP(archive->tab.level + 1, MAX_DEPTH_LEVEL, 0);
-            archive_switch_dir(archive, string_get_cstr(model->files[model->idx].name));
+            archive_switch_dir(archive, string_get_cstr(selected->name));
         } else {
             archive_open_file_menu(archive);
         }
@@ -167,13 +186,11 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
 }
 
 static bool archive_get_filenames(ArchiveApp* archive) {
+    ArchiveFile_t item;
     FileInfo file_info;
     File directory;
     bool result;
     FS_Dir_Api* dir_api = &archive->fs_api->dir;
-    uint8_t string_counter = 0;
-    uint16_t file_counter = 0;
-    uint16_t first_file_index = 0;
     const uint8_t name_length = 100;
 
     string_t name;
@@ -183,7 +200,6 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
-    first_file_index = model->first_file_index;
     result = dir_api->open(&directory, string_get_cstr(archive->tab.path[archive->tab.level]));
 
     if(!result) {
@@ -202,17 +218,12 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         if(result) {
             if(directory.error_id == FSE_OK) {
                 if(filter_by_extension(archive, &file_info, name_ptr)) {
-                    if(file_counter >= first_file_index) {
-                        string_set(model->files[string_counter].name, name);
-                        set_file_type(&model->files[string_counter], &file_info);
+                    ArchiveFile_t_init(&item);
+                    string_init_set(item.name, name);
+                    set_file_type(&item, &file_info);
 
-                        string_counter++;
-
-                        if(string_counter >= FILENAME_COUNT) {
-                            break;
-                        }
-                    }
-                    file_counter++;
+                    files_array_push_back(model->files, item);
+                    ArchiveFile_t_clear(&item);
                 }
 
             } else {
@@ -222,7 +233,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
             }
         }
     }
-    model->file_count = file_counter;
+
     view_commit_model(archive->view_archive_main, true);
     model = NULL;
 
@@ -275,6 +286,10 @@ ArchiveApp* archive_alloc() {
 
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
+
+    ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+    files_array_init(model->files);
+    model = NULL;
 
     return archive;
 }
