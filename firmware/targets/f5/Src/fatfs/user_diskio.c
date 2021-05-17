@@ -86,8 +86,9 @@ Diskio_drvTypeDef USER_Driver = {
   */
 DSTATUS USER_initialize(BYTE pdrv) {
     /* USER CODE BEGIN INIT */
+    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSdCardFast);
     // TODO: SPI manager
-    api_hal_spi_lock_device(&sd_fast_spi);
+    // api_hal_spi_lock_device(&sd_fast_spi);
 
     DSTATUS status = User_CheckStatus(pdrv);
 
