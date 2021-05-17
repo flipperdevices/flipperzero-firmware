@@ -84,16 +84,16 @@ void Error_Handler(void);
 #define RF_SW_0_GPIO_Port GPIOC
 #define RF_SW_0_Pin GPIO_PIN_4
 
-#define SD_CD_GPIO_Port GPIOA
-#define SD_CD_Pin GPIO_PIN_15
+#define SD_CD_GPIO_Port GPIOC
+#define SD_CD_Pin GPIO_PIN_10
 #define SD_CS_GPIO_Port GPIOC
 #define SD_CS_Pin GPIO_PIN_12
 
 #define SPEAKER_GPIO_Port GPIOB
 #define SPEAKER_Pin GPIO_PIN_8
 
-#define VIBRO_GPIO_Port GPIOC
-#define VIBRO_Pin GPIO_PIN_10
+#define VIBRO_GPIO_Port GPIOA
+#define VIBRO_Pin GPIO_PIN_15
 
 #define iBTN_GPIO_Port GPIOB
 #define iBTN_Pin GPIO_PIN_14
