@@ -58,7 +58,6 @@ typedef struct {
     uint8_t menu_idx;
     uint16_t idx;
     uint16_t list_offset;
-
     files_array_t files;
     bool menu;
 } ArchiveViewModel;
