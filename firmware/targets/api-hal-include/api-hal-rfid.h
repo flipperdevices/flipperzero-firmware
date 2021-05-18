@@ -80,14 +80,14 @@ bool api_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw);
 /**
  * @brief set emulation timer period
  * 
- * @param period 
+ * @param period overall duration
  */
 void api_hal_rfid_set_emulate_period(uint32_t period);
 
 /**
  * @brief set emulation timer pulse
  * 
- * @param period 
+ * @param pulse duration of high level
  */
 void api_hal_rfid_set_emulate_pulse(uint32_t pulse);
 
