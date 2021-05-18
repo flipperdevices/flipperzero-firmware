@@ -20,7 +20,7 @@ void power_cli_factory_reset(Cli* cli, string_t args, void* context) {
     Power* power = context;
     printf("All data will be lost. Are you sure (y/n)?\r\n");
     char c = cli_getc(cli);
-    if (c=='y' || c=='Y') {
+    if(c == 'y' || c == 'Y') {
         printf("Data will be wiped after reboot.\r\n");
         api_hal_boot_set_flags(ApiHalBootFlagFactoryReset);
         power_reset(power, PowerBootModeNormal);

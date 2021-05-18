@@ -126,7 +126,7 @@ int32_t internal_storage_task(void* p) {
 
     int err;
     ApiHalBootFlag boot_flags = api_hal_boot_get_flags();
-    if (boot_flags & ApiHalBootFlagFactoryReset) {
+    if(boot_flags & ApiHalBootFlagFactoryReset) {
         // Factory reset
         err = lfs_format(&internal_storage->lfs, &internal_storage->config);
         if(err == 0) {
