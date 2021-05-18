@@ -105,6 +105,18 @@ void elements_slightly_rounded_frame(
     uint8_t width,
     uint8_t height);
 
+/*
+ * Draw slightly rounded box
+ * @param x, y - top left corner coordinates
+ * @param width, height - size of box
+ */
+void elements_slightly_rounded_box(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height);
+
 #ifdef __cplusplus
 }
 #endif

@@ -12,6 +12,7 @@ struct IrdaHandler {
 typedef struct {
     IrdaAlloc alloc;
     IrdaDecode decode;
+    IrdaReset reset;
     IrdaFree free;
 } IrdaDecoders;
 
@@ -35,6 +36,7 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .decoder = {
           .alloc = irda_decoder_samsung32_alloc,
           .decode = irda_decoder_samsung32_decode,
+          .reset = irda_decoder_samsung32_reset,
           .free = irda_decoder_samsung32_free},
       .encoder = {
           .encode = irda_encoder_samsung32_encode}
@@ -45,6 +47,7 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .decoder = {
           .alloc = irda_decoder_nec_alloc,
           .decode = irda_decoder_nec_decode,
+          .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
       .encoder = {
           .encode = irda_encoder_nec_encode}
@@ -91,6 +94,12 @@ void irda_free_decoder(IrdaHandler* handler) {
 
     free(handler->ctx);
     free(handler);
+}
+
+void irda_reset_decoder(IrdaHandler* handler) {
+    for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
+        irda_protocols[i].decoder.reset(handler->ctx[i]);
+    }
 }
 
 void irda_send(const IrdaMessage* message, int times) {

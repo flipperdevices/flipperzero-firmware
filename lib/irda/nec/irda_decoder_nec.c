@@ -3,8 +3,10 @@
 #include <furi.h>
 #include "../irda_i.h"
 
+
 static bool interpret_nec(IrdaCommonDecoder* decoder);
 static DecodeStatus decode_repeat_nec(IrdaCommonDecoder* decoder);
+
 
 static const IrdaCommonProtocolSpec protocol_nec = {
     {
@@ -23,11 +25,13 @@ static const IrdaCommonProtocolSpec protocol_nec = {
     decode_repeat_nec,
 };
 
+
 static bool interpret_nec(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
-    uint16_t address = decoder->data[0] | (decoder->data[1] << 8);
+    uint8_t address = decoder->data[0];
+    uint8_t address_inverse = decoder->data[1];
     uint8_t command = decoder->data[2];
     uint8_t command_inverse = decoder->data[3];
 
@@ -76,3 +80,8 @@ IrdaMessage* irda_decoder_nec_decode(void* decoder, bool level, uint32_t duratio
 void irda_decoder_nec_free(void* decoder) {
     irda_common_decoder_free(decoder);
 }
+
+void irda_decoder_nec_reset(void* decoder) {
+    irda_common_decoder_reset(decoder);
+}
+

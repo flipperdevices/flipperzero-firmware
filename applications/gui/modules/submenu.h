@@ -17,12 +17,6 @@ typedef void (*SubmenuItemCallback)(void* context, uint32_t index);
 Submenu* submenu_alloc();
 
 /**
- * @brief Allocate and initialize submenu for vertical display
- * This submenu is used to select one option
- */
-Submenu* submenu_vertical_alloc();
-
-/**
  * @brief Deinitialize and free submenu
  * @param submenu - Submenu instance
  */

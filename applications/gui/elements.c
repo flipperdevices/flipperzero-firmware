@@ -1,4 +1,5 @@
 #include "elements.h"
+#include "gui/canvas.h"
 #include <assets_icons.h>
 #include <gui/icon_i.h>
 #include <m-string.h>
@@ -250,11 +251,16 @@ void elements_slightly_rounded_frame(
     uint8_t width,
     uint8_t height) {
     furi_assert(canvas);
-    canvas_draw_frame(canvas, x, y, width, height);
-    canvas_invert_color(canvas);
-    canvas_draw_dot(canvas, x, y);
-    canvas_draw_dot(canvas, x + width - 1, y + height - 1);
-    canvas_draw_dot(canvas, x + width - 1, y);
-    canvas_draw_dot(canvas, x, y + height - 1);
-    canvas_invert_color(canvas);
+    canvas_draw_rframe(canvas, x, y, width, height, 1);
 }
+
+void elements_slightly_rounded_box(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height) {
+    furi_assert(canvas);
+    canvas_draw_rbox(canvas, x, y, width, height, 1);
+}
+

@@ -51,6 +51,13 @@ const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t durati
 void irda_free_decoder(IrdaHandler* handler);
 
 /**
+ * Reset IRDA decoder.
+ *
+ * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
+ */
+void irda_reset_decoder(IrdaHandler* handler);
+
+/**
  * Send message over IRDA.
  *
  * \param[in]   message     - message to send.
