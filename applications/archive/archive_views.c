@@ -114,12 +114,12 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
         string_clean(str_buff);
     }
 
-    if(model->menu) {
-        render_item_menu(canvas, model);
-    }
-
     if(scrollbar) {
         elements_scrollbar_pos(canvas, 126, 16, 48, model->idx, array_size);
+    }
+
+    if(model->menu) {
+        render_item_menu(canvas, model);
     }
 
     string_clear(str_buff);

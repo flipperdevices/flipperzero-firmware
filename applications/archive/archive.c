@@ -85,9 +85,7 @@ static void archive_enter_dir(ArchiveApp* archive, string_t name) {
     archive_update_last_idx(archive);
     archive->browser.depth = CLAMP(archive->browser.depth + 1, MAX_DEPTH, 0);
 
-    if(archive->browser.depth > 0) {
-        string_cat(archive->browser.path, "/");
-    }
+    string_cat(archive->browser.path, "/");
     string_cat(archive->browser.path, archive->browser.name);
 
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
@@ -202,6 +200,26 @@ static uint32_t archive_previous_callback(void* context) {
 }
 
 /* file menu */
+static void archive_add_to_favorites(ArchiveApp* archive) {
+    furi_assert(archive);
+
+    FS_Common_Api* common_api = &archive->fs_api->common;
+
+    string_t buffer_src;
+    string_t buffer_dst;
+
+    string_init_set(buffer_src, archive->browser.path);
+    string_cat(buffer_src, "/");
+    string_cat(buffer_src, archive->browser.name);
+
+    string_init_set_str(buffer_dst, "/favorites/");
+    string_cat(buffer_dst, archive->browser.name);
+
+    FS_Error res = common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
+
+    string_clear(buffer_src);
+    string_clear(buffer_dst);
+}
 
 static void archive_text_input_callback(void* context, char* text) {
     furi_assert(context);
@@ -222,8 +240,7 @@ static void archive_text_input_callback(void* context, char* text) {
     string_cat(buffer_src, archive->browser.name);
     string_cat_str(buffer_dst, text);
 
-    // halp :(
-    common_api->rename(string_get_cstr(buffer_dst), string_get_cstr(buffer_src));
+    FS_Error res = common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewMain);
 
@@ -326,7 +343,10 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         }
         break;
     case 1:
-        // 2dp - add to favorites
+
+        string_set(archive->browser.name, selected->name);
+        archive_add_to_favorites(archive);
+        archive_close_file_menu(archive);
         break;
     case 2:
         // open rename view

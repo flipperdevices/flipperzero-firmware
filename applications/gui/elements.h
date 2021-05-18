@@ -8,12 +8,11 @@ extern "C" {
 #endif
 
 /*
- * Draw scrollbar on canvas.
- * width 3px, height equal to canvas height
+ * Draw scrollbar on canvas at specific position.
  * @param x - scrollbar position on X axis
  * @param y - scrollbar position on Y axis
- * @param offset - 
- * @param pos - current element of total elements
+ * @param height - scrollbar height
+ * @param pos - current element 
  * @param total - total elements
  */
 
@@ -22,8 +21,9 @@ void elements_scrollbar_pos(
     uint8_t x,
     uint8_t y,
     uint8_t height,
-    uint8_t pos,
-    uint8_t total);
+    uint16_t pos,
+    uint16_t total);
+
 /*
  * Draw scrollbar on canvas.
  * width 3px, height equal to canvas height
@@ -31,13 +31,6 @@ void elements_scrollbar_pos(
  * @param total - total elements
  */
 void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total);
-
-/*
- * Draw rounded frame (1px width version)
- * @param x, y - top left corner coordinates
- * @param width, height - frame width and height
- */
-void elements_frame_light(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
 /*
  * Draw rounded frame
