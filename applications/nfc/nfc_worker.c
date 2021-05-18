@@ -1,6 +1,6 @@
 #include "nfc_worker_i.h"
 #include <api-hal.h>
-#include "helpers/emv_decoder.h"
+#include "nfc_protocols/emv_decoder.h"
 
 #define NFC_WORKER_TAG "nfc worker"
 
