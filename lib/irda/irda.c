@@ -10,9 +10,9 @@ struct IrdaHandler {
 };
 
 typedef struct {
-    IrdaInit init;
+    IrdaAlloc alloc;
     IrdaDecode decode;
-    IrdaFini fini;
+    IrdaFree free;
 } IrdaDecoders;
 
 typedef struct {
@@ -29,8 +29,26 @@ typedef struct {
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
-    { IrdaProtocolSamsung32, "Samsung32",   {irda_decoder_samsung32_alloc, irda_decoder_samsung32_decode, irda_decoder_samsung32_free}, {irda_encoder_samsung32_encode}  },
-    { IrdaProtocolNEC,       "NEC",         {irda_decoder_nec_alloc,       irda_decoder_nec_decode,       irda_decoder_nec_free},       {irda_encoder_nec_encode}        },
+    // #0
+    { .protocol = IrdaProtocolSamsung32,
+      .name ="Samsung32",
+      .decoder = {
+          .alloc = irda_decoder_samsung32_alloc,
+          .decode = irda_decoder_samsung32_decode,
+          .free = irda_decoder_samsung32_free},
+      .encoder = {
+          .encode = irda_encoder_samsung32_encode}
+    },
+    // #1
+    { .protocol = IrdaProtocolNEC,
+      .name = "NEC",
+      .decoder = {
+          .alloc = irda_decoder_nec_alloc,
+          .decode = irda_decoder_nec_decode,
+          .free = irda_decoder_nec_free},
+      .encoder = {
+          .encode = irda_encoder_nec_encode}
+    },
 };
 
 
@@ -56,7 +74,7 @@ IrdaHandler* irda_alloc_decoder(void) {
     handler->ctx = furi_alloc(sizeof(void*) * COUNT_OF(irda_protocols));
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        handler->ctx[i] = irda_protocols[i].decoder.init();
+        handler->ctx[i] = irda_protocols[i].decoder.alloc();
         furi_check(handler->ctx[i]);
     }
 
@@ -68,7 +86,7 @@ void irda_free_decoder(IrdaHandler* handler) {
     furi_assert(handler->ctx);
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        irda_protocols[i].decoder.fini(handler->ctx[i]);
+        irda_protocols[i].decoder.free(handler->ctx[i]);
     }
 
     free(handler->ctx);
