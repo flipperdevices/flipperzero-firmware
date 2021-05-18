@@ -58,14 +58,11 @@ typedef struct {
 
 typedef struct {
     ArchiveTabsEnum id;
-
     string_t name;
     string_t ext_filter;
-    string_t path[MAX_DEPTH];
-
+    string_t path;
     uint8_t depth;
     bool menu;
-
 } ArchiveTab;
 
 struct ArchiveApp {
@@ -74,7 +71,6 @@ struct ArchiveApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     View* view_archive_main;
-
     FS_Api* fs_api;
     ArchiveTab tab;
 };

@@ -17,16 +17,7 @@ static void update_offset(ArchiveApp* archive) {
 }
 
 static void archive_switch_dir(ArchiveApp* archive, const char* path) {
-    // set path
-    string_init(archive->tab.path[archive->tab.depth]);
-    if(archive->tab.depth > 0) {
-        string_cat(
-            archive->tab.path[archive->tab.depth],
-            archive->tab.path[CLAMP(archive->tab.depth - 1, MAX_DEPTH, 0)]);
-        string_cat(archive->tab.path[archive->tab.depth], "/");
-    }
-
-    string_cat(archive->tab.path[archive->tab.depth], path);
+    string_set(archive->tab.path, path);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
@@ -69,6 +60,37 @@ static void archive_switch_tab(ArchiveApp* archive) {
     archive_switch_dir(archive, tab_default_paths[archive->tab.id]);
 }
 
+static void archive_leave_dir(ArchiveApp* archive) {
+    furi_assert(archive);
+    archive->tab.depth = CLAMP(archive->tab.depth - 1, MAX_DEPTH, 0);
+
+    string_t path;
+    string_init_set(path, archive->tab.path);
+
+    char* path_ptr = stringi_get_cstr(path);
+    char* last_char = strrchr(path_ptr, '/');
+    path_ptr[last_char - path_ptr] = '\0';
+
+    archive_switch_dir(archive, string_get_cstr(path));
+    string_clear(path);
+    path_ptr = NULL;
+    last_char = NULL;
+}
+
+static void archive_enter_dir(ArchiveApp* archive, string_t name) {
+    archive->tab.depth = CLAMP(archive->tab.depth + 1, MAX_DEPTH, 0);
+
+    string_t path;
+    string_init_set(path, archive->tab.path);
+    if(archive->tab.depth > 0) {
+        string_cat(path, "/");
+    }
+    string_cat(path, name);
+    archive_switch_dir(archive, string_get_cstr(path));
+    string_clear(path);
+}
+
+// file menu
 static void archive_open_file_menu(ArchiveApp* archive) {
     archive->tab.menu = true;
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
@@ -85,6 +107,7 @@ static void archive_close_file_menu(ArchiveApp* archive) {
     view_commit_model(archive->view_archive_main, true);
 }
 
+#if 0
 static void open_app(ArchiveApp* archive, const FlipperApplication* flipper_app) {
     furi_assert(archive);
     furi_assert(flipper_app);
@@ -96,15 +119,12 @@ static void open_app(ArchiveApp* archive, const FlipperApplication* flipper_app)
     furi_thread_set_callback(archive->app_thread, flipper_app->app);
     furi_thread_start(archive->app_thread);
 }
+#endif
 
-static void archive_item_menu_callback(ArchiveApp* archive) {
+static void archive_file_menu_callback(ArchiveApp* archive) {
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
     switch(model->menu_idx) {
-    case 1:
-        open_app(archive, &FLIPPER_APPS[0]);
-        break;
-
     default:
         archive_close_file_menu(archive);
         break;
@@ -119,7 +139,7 @@ static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
     } else if(event->key == InputKeyDown) {
         model->menu_idx = CLAMP(model->menu_idx + 1, MENU_ITEMS - 1, 0);
     } else if(event->key == InputKeyOk) {
-        archive_item_menu_callback(archive);
+        archive_file_menu_callback(archive);
     } else if(event->key == InputKeyBack) {
         archive_close_file_menu(archive);
     }
@@ -155,8 +175,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
             event.type = EventTypeExit;
             furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
         } else {
-            archive->tab.depth = CLAMP(archive->tab.depth - 1, MAX_DEPTH, 0);
-            archive_switch_dir(archive, string_get_cstr(archive->tab.path[archive->tab.depth]));
+            archive_leave_dir(archive);
         }
         return true;
     }
@@ -174,8 +193,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
         ArchiveFile_t* selected = files_array_get(model->files, model->idx);
 
         if(selected->type == ArchiveFileTypeFolder) {
-            archive->tab.depth = CLAMP(archive->tab.depth + 1, MAX_DEPTH, 0);
-            archive_switch_dir(archive, string_get_cstr(selected->name));
+            archive_enter_dir(archive, selected->name);
         } else {
             archive_open_file_menu(archive);
         }
@@ -221,7 +239,8 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     string_init_printf(name, "%0*d\n", MAX_NAME_LEN, 0);
 
-    const char* current_path = string_get_cstr(archive->tab.path[archive->tab.depth]);
+    const char* current_path = string_get_cstr(archive->tab.path);
+
     result = dir_api->open(&directory, current_path);
 
     if(!result) {
@@ -313,7 +332,10 @@ ArchiveApp* archive_alloc() {
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
+
     files_array_init(model->files);
+    string_init(archive->tab.path);
+
     model = NULL;
 
     return archive;
