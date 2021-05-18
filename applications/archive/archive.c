@@ -215,7 +215,7 @@ static void archive_add_to_favorites(ArchiveApp* archive) {
     string_init_set_str(buffer_dst, "/favorites/");
     string_cat(buffer_dst, archive->browser.name);
 
-    FS_Error res = common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
+    common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     string_clear(buffer_src);
     string_clear(buffer_dst);
@@ -240,7 +240,7 @@ static void archive_text_input_callback(void* context, char* text) {
     string_cat(buffer_src, archive->browser.name);
     string_cat_str(buffer_dst, text);
 
-    FS_Error res = common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
+    common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewMain);
 
