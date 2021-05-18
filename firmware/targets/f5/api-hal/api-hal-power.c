@@ -24,6 +24,17 @@ static volatile ApiHalPower api_hal_power = {
 };
 
 const ParamCEDV cedv = {
+    .cedv_conf.gauge_conf = {
+        .CCT = 1,
+        .CSYNC = 0,
+        .EDV_CMP = 0,
+        .SC = 1,
+        .FIXED_EDV0 = 1,
+        .FCC_LIM = 1,
+        .FC_FOR_VDQ = 1,
+        .IGNORE_SD = 1,
+        .SME0 = 0,
+    },
     .full_charge_cap = 2100,
     .design_cap = 2100,
     .EDV0 = 3300,

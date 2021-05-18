@@ -83,6 +83,7 @@ bool bq27220_init(const ParamCEDV* cedv) {
     while((status.CFGUPDATE != 1) && (timeout-- > 0)) {
         bq27220_get_operation_status(&status);
     }
+    bq27220_set_parameter_u16(AddressGaugingConfig, cedv->cedv_conf.gauge_conf_raw);
     bq27220_set_parameter_u16(AddressFullChargeCapacity, cedv->full_charge_cap);
     bq27220_set_parameter_u16(AddressDesignCapacity, cedv->design_cap);
     bq27220_set_parameter_u16(AddressEMF, cedv->EMF);
