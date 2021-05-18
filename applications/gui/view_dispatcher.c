@@ -1,6 +1,8 @@
 #include "view_dispatcher_i.h"
 #include "gui_i.h"
 
+static void view_dispatcher_rotate_buttons(InputEvent* event);
+
 ViewDispatcher* view_dispatcher_alloc() {
     ViewDispatcher* view_dispatcher = furi_alloc(sizeof(ViewDispatcher));
 
@@ -127,7 +129,12 @@ void view_dispatcher_draw_callback(Canvas* canvas, void* context) {
 void view_dispatcher_input_callback(InputEvent* event, void* context) {
     ViewDispatcher* view_dispatcher = context;
     bool is_consumed = false;
+
     if(view_dispatcher->current_view) {
+        if(view_dispatcher->current_view->orientation == ViewOrientationVertical) {
+            view_dispatcher_rotate_buttons(event);
+        }
+
         is_consumed = view_input(view_dispatcher->current_view, event);
     }
     if(!is_consumed && event->type == InputTypeShort) {
@@ -143,6 +150,10 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
 
 void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* view) {
     furi_assert(view_dispatcher);
+
+    ViewOrientation oldOrientation = view_dispatcher->current_view->orientation;
+    ViewOrientation newOrientation = view->orientation;
+
     // Dispatch view exit event
     if(view_dispatcher->current_view) {
         view_exit(view_dispatcher->current_view);
@@ -151,6 +162,14 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
     view_dispatcher->current_view = view;
     // Dispatch view enter event
     if(view_dispatcher->current_view) {
+        if(newOrientation != oldOrientation) {
+            ViewPortOrientation orientation = ViewPortOrientationHorizontal;
+            if(newOrientation == ViewOrientationVertical) {
+                orientation = ViewPortOrientationVertical;
+            }
+            view_port_set_orientation(view_dispatcher->view_port, orientation);
+        }
+
         view_enter(view_dispatcher->current_view);
         view_port_enabled_set(view_dispatcher->view_port, true);
         view_port_update(view_dispatcher->view_port);
@@ -167,5 +186,24 @@ void view_dispatcher_update(View* view, void* context) {
 
     if(view_dispatcher->current_view == view) {
         view_port_update(view_dispatcher->view_port);
+    }
+}
+
+static void view_dispatcher_rotate_buttons(InputEvent* event) {
+    switch(event->key) {
+    case InputKeyUp:
+        event->key = InputKeyRight;
+        break;
+    case InputKeyDown:
+        event->key = InputKeyLeft;
+        break;
+    case InputKeyRight:
+        event->key = InputKeyDown;
+        break;
+    case InputKeyLeft:
+        event->key = InputKeyUp;
+        break;
+    default:
+        break;
     }
 }
