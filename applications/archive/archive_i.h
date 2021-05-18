@@ -104,4 +104,3 @@ struct ArchiveApp {
     FS_Api* fs_api;
     ArchiveBrowser browser;
 };
-

@@ -13,7 +13,7 @@ static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeUnknown] = I_unknown_10px,
 };
 
-static inline bool is_known_app(ArchiveFileTypeEnum type){
+static inline bool is_known_app(ArchiveFileTypeEnum type) {
     return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
 }
 
@@ -32,10 +32,10 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
 
     ArchiveFile_t* selected = files_array_get(model->files, model->idx);
 
-    if(!is_known_app(selected->type)){
+    if(!is_known_app(selected->type)) {
         string_set_str(menu[0], "---");
         string_set_str(menu[1], "---");
-    }else if(model->tab_idx == 0){ 
+    } else if(model->tab_idx == 0) {
         string_set_str(menu[1], "Move");
     }
 
@@ -97,7 +97,6 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
     string_init(str_buff);
 
     for(size_t i = 0; i < MIN(MENU_ITEMS, array_size); ++i) {
-        
         size_t idx = CLAMP(i + model->list_offset, array_size, 0);
         ArchiveFile_t* file = files_array_get(model->files, CLAMP(idx, array_size - 1, 0));
 

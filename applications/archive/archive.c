@@ -23,7 +23,8 @@ static void archive_update_last_idx(ArchiveApp* archive) {
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
 
-    archive->browser.last_idx[archive->browser.depth] = CLAMP(model->idx, files_array_size(model->files) - 1, 0);
+    archive->browser.last_idx[archive->browser.depth] =
+        CLAMP(model->idx, files_array_size(model->files) - 1, 0);
     model->idx = 0;
     view_commit_model(archive->view_archive_main, true);
 
@@ -34,7 +35,7 @@ static void archive_switch_dir(ArchiveApp* archive, const char* path) {
     furi_assert(archive);
     furi_assert(path);
 
-    string_set(archive->browser.path, path);    
+    string_set(archive->browser.path, path);
     archive_get_filenames(archive);
 }
 
@@ -42,13 +43,13 @@ static void archive_switch_tab(ArchiveApp* archive) {
     furi_assert(archive);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
-    
+
     model->tab_idx = archive->browser.tab_id;
     model->idx = 0;
     view_commit_model(archive->view_archive_main, true);
 
     model = NULL;
-    
+
     archive->browser.depth = 0;
     archive_switch_dir(archive, tab_default_paths[archive->browser.tab_id]);
 
@@ -88,9 +89,9 @@ static void archive_enter_dir(ArchiveApp* archive, string_t name) {
         string_cat(archive->browser.path, "/");
     }
     string_cat(archive->browser.path, archive->browser.name);
-    
+
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
-    
+
     update_offset(archive);
 }
 
@@ -141,7 +142,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     string_init_printf(name, "%0*d\n", MAX_NAME_LEN, 0);
     result = dir_api->open(&directory, string_get_cstr(archive->browser.path));
-    
+
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     files_array_clear(model->files);
 
@@ -188,9 +189,9 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     return true;
 }
 
-static void archive_exit_callback(ArchiveApp* archive){
+static void archive_exit_callback(ArchiveApp* archive) {
     furi_assert(archive);
-    
+
     AppEvent event;
     event.type = EventTypeExit;
     furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
@@ -206,7 +207,7 @@ static void archive_text_input_callback(void* context, char* text) {
     furi_assert(context);
     furi_assert(text);
 
-    ArchiveApp* archive = (ArchiveApp*) context;
+    ArchiveApp* archive = (ArchiveApp*)context;
     FS_Common_Api* common_api = &archive->fs_api->common;
 
     string_t buffer_src;
@@ -220,7 +221,7 @@ static void archive_text_input_callback(void* context, char* text) {
 
     string_cat(buffer_src, archive->browser.name);
     string_cat_str(buffer_dst, text);
-    
+
     // halp :(
     common_api->rename(string_get_cstr(buffer_dst), string_get_cstr(buffer_src));
 
@@ -230,13 +231,12 @@ static void archive_text_input_callback(void* context, char* text) {
     string_clear(buffer_dst);
 
     archive_get_filenames(archive);
-
 }
-static void archive_enter_text_input(ArchiveApp* archive){    
+static void archive_enter_text_input(ArchiveApp* archive) {
     furi_assert(archive);
 
     string_set(archive->browser.text_input_buffer, archive->browser.name);
-    
+
     char* text_input_buffer_ptr = stringi_get_cstr(archive->browser.text_input_buffer);
 
     text_input_set_header_text(archive->text_input, "Rename:");
@@ -255,7 +255,7 @@ static void archive_show_file_menu(ArchiveApp* archive) {
     furi_assert(archive);
 
     archive->browser.menu = true;
-    
+
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     model->menu = true;
     model->menu_idx = 0;
@@ -273,14 +273,14 @@ static void archive_close_file_menu(ArchiveApp* archive) {
     view_commit_model(archive->view_archive_main, true);
 }
 
-static void archive_open_app(ArchiveApp* archive, const FlipperApplication* flipper_app, void* arg) {
-
+static void
+archive_open_app(ArchiveApp* archive, const FlipperApplication* flipper_app, void* arg) {
     furi_assert(archive);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
     furi_assert(flipper_app->name);
 
-    if(arg){
+    if(arg) {
         // pass path to app?
     }
 
@@ -290,7 +290,7 @@ static void archive_open_app(ArchiveApp* archive, const FlipperApplication* flip
     furi_thread_start(archive->app_thread);
 }
 
-static void archive_delete_file(ArchiveApp* archive, string_t name){
+static void archive_delete_file(ArchiveApp* archive, string_t name) {
     furi_assert(archive);
     furi_assert(name);
 
@@ -311,7 +311,6 @@ static void archive_delete_file(ArchiveApp* archive, string_t name){
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     model->idx = CLAMP(model->idx, files_array_size(model->files) - 1, 0);
     view_commit_model(archive->view_archive_main, true);
-    
 }
 
 static void archive_file_menu_callback(ArchiveApp* archive) {
@@ -321,23 +320,23 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
     ArchiveFile_t* selected = files_array_get(model->files, model->idx);
 
     switch(model->menu_idx) {
-        case 0:
-            if((selected->type != ArchiveFileTypeFolder && selected->type != ArchiveFileTypeUnknown)){
-                archive_open_app(archive, &FLIPPER_APPS[selected->type], NULL);
-            }
-            break;
-        case 1:
-            // 2dp - add to favorites
-            break;
-        case 2:
-            // open rename view
-            archive_enter_text_input(archive);
-            break;
-        case 3:
-            // confirmation?
-            archive_delete_file(archive, selected->name);
-            archive_close_file_menu(archive);
-            break;
+    case 0:
+        if((selected->type != ArchiveFileTypeFolder && selected->type != ArchiveFileTypeUnknown)) {
+            archive_open_app(archive, &FLIPPER_APPS[selected->type], NULL);
+        }
+        break;
+    case 1:
+        // 2dp - add to favorites
+        break;
+    case 2:
+        // open rename view
+        archive_enter_text_input(archive);
+        break;
+    case 3:
+        // confirmation?
+        archive_delete_file(archive, selected->name);
+        archive_close_file_menu(archive);
+        break;
 
     default:
         archive_close_file_menu(archive);
@@ -353,7 +352,7 @@ static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
     furi_assert(archive);
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
-    if(event->type == InputTypeShort){
+    if(event->type == InputTypeShort) {
         if(event->key == InputKeyUp) {
             model->menu_idx = CLAMP(model->menu_idx - 1, MENU_ITEMS - 1, 0);
         } else if(event->key == InputKeyDown) {
@@ -382,21 +381,18 @@ static bool archive_view_input(InputEvent* event, void* context) {
         return true;
     }
 
-    if(event->type == InputTypeShort){
+    if(event->type == InputTypeShort) {
         if(event->key == InputKeyLeft) {
-
             archive->browser.tab_id = CLAMP(archive->browser.tab_id - 1, ArchiveTabTotal, 0);
             archive_switch_tab(archive);
             return true;
 
         } else if(event->key == InputKeyRight) {
-
             archive->browser.tab_id = CLAMP(archive->browser.tab_id + 1, ArchiveTabTotal - 1, 0);
             archive_switch_tab(archive);
             return true;
 
         } else if(event->key == InputKeyBack) {
-
             if(archive->browser.depth == 0) {
                 archive_exit_callback(archive);
             } else {
@@ -408,39 +404,36 @@ static bool archive_view_input(InputEvent* event, void* context) {
     }
 
     size_t num_elements = files_array_size(model->files) - 1;
-    if((event->type  == InputTypeShort || event->type == InputTypeRepeat)){
-        if(event->key == InputKeyUp ) {
+    if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+        if(event->key == InputKeyUp) {
             model->idx = CLAMP(model->idx - 1, num_elements, 0);
             update_offset(archive);
             return true;
-        } else if(event->key == InputKeyDown ) {
+        } else if(event->key == InputKeyDown) {
             model->idx = CLAMP(model->idx + 1, num_elements, 0);
             update_offset(archive);
             return true;
         }
     }
-   
-   
-   if(event->key == InputKeyOk) {
-       if (files_array_size(model->files) > 0){
 
-        ArchiveFile_t* selected = files_array_get(model->files, model->idx);
-        string_set(archive->browser.name, selected->name);
-        model = NULL;
+    if(event->key == InputKeyOk) {
+        if(files_array_size(model->files) > 0) {
+            ArchiveFile_t* selected = files_array_get(model->files, model->idx);
+            string_set(archive->browser.name, selected->name);
+            model = NULL;
 
-
-        if(selected->type == ArchiveFileTypeFolder) {
-            if(event->type == InputTypeShort){
-                archive_enter_dir(archive, archive->browser.name);
-            } else if(event->type == InputTypeLong){
-                archive_show_file_menu(archive);
-            }
-        } else {
-            if(event->type == InputTypeShort){
-                archive_show_file_menu(archive);
+            if(selected->type == ArchiveFileTypeFolder) {
+                if(event->type == InputTypeShort) {
+                    archive_enter_dir(archive, archive->browser.name);
+                } else if(event->type == InputTypeLong) {
+                    archive_show_file_menu(archive);
+                }
+            } else {
+                if(event->type == InputTypeShort) {
+                    archive_show_file_menu(archive);
+                }
             }
         }
-       }
     }
 
     return true;
@@ -457,7 +450,7 @@ void archive_free(ArchiveApp* archive) {
     view_dispatcher_remove_view(archive->view_dispatcher, ArchiveViewMain);
 
     view_dispatcher_remove_view(archive->view_dispatcher, ArchiveViewTextInput);
-    
+
     view_dispatcher_free(archive->view_dispatcher);
 
     furi_record_close("gui");
@@ -494,7 +487,7 @@ ArchiveApp* archive_alloc() {
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewMain, archive->view_archive_main);
     view_dispatcher_add_view(
-        archive->view_dispatcher,ArchiveViewTextInput,text_input_get_view(archive->text_input));
+        archive->view_dispatcher, ArchiveViewTextInput, text_input_get_view(archive->text_input));
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 

@@ -160,7 +160,7 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
-    
+
 #ifdef APP_IBUTTON
     {.app = app_ibutton, .name = "iButton", .stack_size = 4096, .icon = A_iButton_14},
 #endif
