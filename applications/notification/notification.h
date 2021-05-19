@@ -1,5 +1,8 @@
-#include <furi.h>
-#include <api-hal.h>
+#pragma once
+#include "stdint.h"
+#include "stdbool.h"
+
+typedef struct NotificationApp NotificationApp;
 
 typedef struct {
     float frequency;
@@ -7,14 +10,16 @@ typedef struct {
 } NotificationMessageDataSound;
 
 typedef struct {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
+    uint8_t value;
 } NotificationMessageDataLed;
 
 typedef struct {
     bool on;
 } NotificationMessageDataVibro;
+
+typedef struct {
+    bool on;
+} NotificationMessageDataDisplay;
 
 typedef struct {
     uint32_t length;
@@ -25,13 +30,17 @@ typedef union {
     NotificationMessageDataLed led;
     NotificationMessageDataVibro vibro;
     NotificationMessageDataDelay delay;
+    NotificationMessageDataDisplay display;
 } NotificationMessageData;
 
 typedef enum {
     NotificationMessageTypeVibro,
     NotificationMessageTypeSound,
-    NotificationMessageTypeLed,
+    NotificationMessageTypeLedRed,
+    NotificationMessageTypeLedGreen,
+    NotificationMessageTypeLedBlue,
     NotificationMessageTypeDelay,
+    NotificationMessageTypeDisplay,
 } NotificationMessageType;
 
 typedef struct {
@@ -39,4 +48,4 @@ typedef struct {
     NotificationMessageData data;
 } NotificationMessage;
 
-void send_notify_messages_async(const NotificationMessage* messages);
+void notification_send_messages_async(NotificationApp* app, const NotificationMessage** messages);

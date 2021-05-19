@@ -1,6 +1,6 @@
 #include <furi.h>
 #include <api-hal.h>
-#include "../notification/notifications_i.h"
+#include "../notification/notification_i.h"
 
 #define BACKLIGHT_TIME 30000
 #define BACKLIGHT_FLAG_ACTIVITY 0x00000001U
@@ -11,7 +11,7 @@ static void event_cb(const void* value, void* ctx) {
 
 int32_t backlight_control(void* p) {
     // open record
-    NotificationsApp* notifications = furi_record_open("notifications");
+    NotificationApp* notifications = furi_record_open("notification");
     PubSub* event_record = furi_record_open("input_events");
     subscribe_pubsub(event_record, event_cb, (void*)osThreadGetId());
 

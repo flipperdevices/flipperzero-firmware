@@ -1,86 +1,67 @@
 #include <furi.h>
 #include <api-hal.h>
-#include "notifications_i.h"
-#include "notifications.h"
-
-const NotificationMessage message_display_on = {
-    .type = NotificationMessageTypeDisplay,
-    .data.display.on = true,
-};
-
-const NotificationMessage message_display_off = {
-    .type = NotificationMessageTypeDisplay,
-    .data.display.on = false,
-};
-
-const NotificationMessage* message_display_on_sequence[] = {
-    &message_display_on,
-    NULL,
-};
-
-const NotificationMessage* message_display_off_sequence[] = {
-    &message_display_off,
-    NULL,
-};
+#include "notification_i.h"
+#include "notification.h"
+#include "notification-messages.h"
 
 typedef enum {
     ForegroundMessage,
     BackgroundMessage,
-} NotificationsAppMessageType;
+} NotificationAppMessageType;
 
 typedef struct {
     const NotificationMessage** messages;
-    NotificationsAppMessageType type;
-} NotificationsAppMessage;
+    NotificationAppMessageType type;
+} NotificationAppMessage;
 
 typedef enum {
     LayerInternal = 0,
     LayerNotification = 1,
     LayerMAX = 2,
-} NotificationsLedLayerIndex;
+} NotificationLedLayerIndex;
 
 typedef struct {
     uint8_t value[LayerMAX];
-    NotificationsLedLayerIndex index;
+    NotificationLedLayerIndex index;
     Light light;
-} NotificationsLedLayer;
+} NotificationLedLayer;
 
 typedef struct {
     uint8_t display_brightness;
     float led_brightness;
-} NotificationsSettings;
+} NotificationSettings;
 
-struct NotificationsApp {
+struct NotificationApp {
     osMessageQueueId_t queue;
 
-    NotificationsLedLayer display;
-    NotificationsLedLayer red;
-    NotificationsLedLayer green;
-    NotificationsLedLayer blue;
+    NotificationLedLayer display;
+    NotificationLedLayer red;
+    NotificationLedLayer green;
+    NotificationLedLayer blue;
 
-    NotificationsSettings settings;
+    NotificationSettings settings;
 };
 
-void notification_send_messages_async(NotificationsApp* app, const NotificationMessage** messages) {
-    NotificationsAppMessage m = {.type = ForegroundMessage, .messages = messages};
+void notification_send_messages_async(NotificationApp* app, const NotificationMessage** messages) {
+    NotificationAppMessage m = {.type = ForegroundMessage, .messages = messages};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
-void notification_internal_display_on(NotificationsApp* app) {
+void notification_internal_display_on(NotificationApp* app) {
     const NotificationMessage** messages;
     messages = message_display_on_sequence;
-    NotificationsAppMessage m = {.type = BackgroundMessage, .messages = messages};
+    NotificationAppMessage m = {.type = BackgroundMessage, .messages = messages};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
-void notification_internal_display_off(NotificationsApp* app) {
+void notification_internal_display_off(NotificationApp* app) {
     const NotificationMessage** messages;
     messages = message_display_off_sequence;
-    NotificationsAppMessage m = {.type = BackgroundMessage, .messages = messages};
+    NotificationAppMessage m = {.type = BackgroundMessage, .messages = messages};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
-void notification_apply_internal_led_layer(NotificationsLedLayer* layer, uint8_t layer_value) {
+void notification_apply_internal_led_layer(NotificationLedLayer* layer, uint8_t layer_value) {
     furi_assert(layer);
     furi_assert(layer->index < LayerMAX);
 
@@ -93,13 +74,13 @@ void notification_apply_internal_led_layer(NotificationsLedLayer* layer, uint8_t
     }
 }
 
-uint8_t get_rgb_led_brightness(NotificationsApp* app, uint8_t value) {
+uint8_t get_rgb_led_brightness(NotificationApp* app, uint8_t value) {
     return (value * app->settings.led_brightness);
 }
 
-NotificationsApp* notification_app_alloc() {
-    NotificationsApp* app = furi_alloc(sizeof(NotificationsApp));
-    app->queue = osMessageQueueNew(8, sizeof(NotificationsAppMessage), NULL);
+NotificationApp* notification_app_alloc() {
+    NotificationApp* app = furi_alloc(sizeof(NotificationApp));
+    app->queue = osMessageQueueNew(8, sizeof(NotificationAppMessage), NULL);
 
     app->settings.display_brightness = 0xFF;
     app->settings.led_brightness = 1.0f;
@@ -128,10 +109,15 @@ NotificationsApp* notification_app_alloc() {
 };
 
 int32_t notification_app(void* p) {
-    NotificationsApp* app = notification_app_alloc();
-    furi_record_create("notifications", app);
+    NotificationApp* app = notification_app_alloc();
+    notification_apply_internal_led_layer(&app->display, 0x00);
+    notification_apply_internal_led_layer(&app->red, 0x00);
+    notification_apply_internal_led_layer(&app->green, 0x00);
+    notification_apply_internal_led_layer(&app->blue, 0x00);
 
-    NotificationsAppMessage message;
+    furi_record_create("notification", app);
+
+    NotificationAppMessage message;
     while(1) {
         furi_check(osMessageQueueGet(app->queue, &message, NULL, osWaitForever) == osOK);
 
