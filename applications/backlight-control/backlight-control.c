@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <api-hal.h>
-#include "../notification/notification_i.h"
-#include "../notification/notification-messages.h"
+#include <notification/notification_i.h>
+#include <notification/notification-messages.h>
 
 #define BACKLIGHT_TIME 30000
 #define BACKLIGHT_FLAG_ACTIVITY 0x00000001U

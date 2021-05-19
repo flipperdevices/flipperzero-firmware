@@ -30,3 +30,8 @@ extern const NotificationMessage* message_blue_255_sequence[];
 extern const NotificationMessage* message_red_0_sequence[];
 extern const NotificationMessage* message_green_0_sequence[];
 extern const NotificationMessage* message_blue_0_sequence[];
+
+// Charging
+extern const NotificationMessage* message_charging_sequence[];
+extern const NotificationMessage* message_charged_sequence[];
+extern const NotificationMessage* message_not_charging_sequence[];

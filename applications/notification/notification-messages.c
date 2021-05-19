@@ -88,3 +88,22 @@ const NotificationMessage* message_blue_0_sequence[] = {
     &message_blue_0,
     NULL,
 };
+
+// Charging
+const NotificationMessage* message_charging_sequence[] = {
+    &message_red_255,
+    &message_green_0,
+    NULL,
+};
+
+const NotificationMessage* message_charged_sequence[] = {
+    &message_green_255,
+    &message_red_0,
+    NULL,
+};
+
+const NotificationMessage* message_not_charging_sequence[] = {
+    &message_red_0,
+    &message_green_0,
+    NULL,
+};
