@@ -1,5 +1,24 @@
 #include "gui_i.h"
 
+static void gui_rotate_buttons(InputEvent* event) {
+    switch(event->key) {
+    case InputKeyUp:
+        event->key = InputKeyRight;
+        break;
+    case InputKeyDown:
+        event->key = InputKeyLeft;
+        break;
+    case InputKeyRight:
+        event->key = InputKeyDown;
+        break;
+    case InputKeyLeft:
+        event->key = InputKeyUp;
+        break;
+    default:
+        break;
+    }
+}
+
 static void gui_setup_fs_orientation(const ViewPort* view_port, Canvas* canvas) {
     ViewPortOrientation view_port_orientation = view_port_get_orientation(view_port);
     CanvasOrientation canvas_orientation = canvas_get_orientation(canvas);
@@ -206,6 +225,10 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerNone]);
 
     if(view_port) {
+        if(view_port_get_orientation(view_port) == ViewPortOrientationVertical) {
+            gui_rotate_buttons(input_event);
+        }
+
         view_port_input(view_port, input_event);
     }
 
