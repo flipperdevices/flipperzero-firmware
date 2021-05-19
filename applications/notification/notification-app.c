@@ -5,8 +5,8 @@
 #include "notification-messages.h"
 
 typedef enum {
-    ForegroundMessage,
-    BackgroundMessage,
+    NotificationLayerMessage,
+    InternalLayerMessage,
 } NotificationAppMessageType;
 
 typedef struct {
@@ -42,22 +42,13 @@ struct NotificationApp {
     NotificationSettings settings;
 };
 
-void notification_send_messages_async(NotificationApp* app, const NotificationMessage** messages) {
-    NotificationAppMessage m = {.type = ForegroundMessage, .messages = messages};
+void notification_message(NotificationApp* app, const NotificationMessage** messages) {
+    NotificationAppMessage m = {.type = NotificationLayerMessage, .messages = messages};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
-void notification_internal_display_on(NotificationApp* app) {
-    const NotificationMessage** messages;
-    messages = message_display_on_sequence;
-    NotificationAppMessage m = {.type = BackgroundMessage, .messages = messages};
-    furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
-};
-
-void notification_internal_display_off(NotificationApp* app) {
-    const NotificationMessage** messages;
-    messages = message_display_off_sequence;
-    NotificationAppMessage m = {.type = BackgroundMessage, .messages = messages};
+void notification_internal_message(NotificationApp* app, const NotificationMessage** messages) {
+    NotificationAppMessage m = {.type = InternalLayerMessage, .messages = messages};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
@@ -121,8 +112,8 @@ int32_t notification_app(void* p) {
     while(1) {
         furi_check(osMessageQueueGet(app->queue, &message, NULL, osWaitForever) == osOK);
 
-        if(message.type == ForegroundMessage) {
-        } else if(message.type == BackgroundMessage) {
+        if(message.type == NotificationLayerMessage) {
+        } else if(message.type == InternalLayerMessage) {
             uint32_t notification_message_index = 0;
             const NotificationMessage* notification_message;
             notification_message = message.messages[notification_message_index];

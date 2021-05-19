@@ -48,4 +48,4 @@ typedef struct {
     NotificationMessageData data;
 } NotificationMessage;
 
-void notification_send_messages_async(NotificationApp* app, const NotificationMessage** messages);
+void notification_message(NotificationApp* app, const NotificationMessage** messages);
