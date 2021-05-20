@@ -44,6 +44,7 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
         app->get_fs_api()->common.remove(string_get_cstr(key_file_name));
 
         // Save the key
+        key->set_name(app->get_text_store());
         string_set_str(key_file_name, "ibutton/");
         string_cat_str(key_file_name, app->get_text_store());
         uint8_t key_data[IBUTTON_KEY_SIZE + 1];

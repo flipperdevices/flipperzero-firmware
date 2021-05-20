@@ -36,10 +36,10 @@ uint8_t iButtonKey::get_type_data_size() {
 }
 
 void iButtonKey::set_name(const char* _name) {
-    name = _name;
+    strcpy(name, _name);
 }
 
-const char* iButtonKey::get_name() {
+char* iButtonKey::get_name() {
     return name;
 }
 
