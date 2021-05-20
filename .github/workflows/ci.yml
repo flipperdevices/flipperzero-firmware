@@ -92,7 +92,7 @@ jobs:
       - name: Add firmware.bin at full.bin
         run: for TARGET in ${TARGETS}; do cat ${TARGET}_firmware.bin >> ${TARGET}_full.bin; done
 
-      - name: Create symlink to last full DFU
+      - name: Copy last target to full.dfu
         run: cp $( ls *_full.dfu | tail -1 ) full.dfu
 
       - name: Publish artifacts
