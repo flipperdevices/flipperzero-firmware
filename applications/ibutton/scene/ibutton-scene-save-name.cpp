@@ -34,13 +34,21 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
         iButtonKey* key = app->get_key();
         File key_file;
         string_t key_file_name;
+
+        // Create ibutton directory if necessary
+        app->get_fs_api()->common.mkdir("ibutton");
+
+        // First remove key if it was saved
         string_init_set_str(key_file_name, "ibutton/");
+        string_cat_str(key_file_name, key->get_name());
+        app->get_fs_api()->common.remove(string_get_cstr(key_file_name));
+
+        // Save the key
+        string_set_str(key_file_name, "ibutton/");
         string_cat_str(key_file_name, app->get_text_store());
         uint8_t key_data[IBUTTON_KEY_SIZE + 1];
         key_data[0] = static_cast<uint8_t>(key->get_key_type());
         memcpy(key_data + 1, key->get_data(), IBUTTON_KEY_SIZE);
-        // Create ibutton directory if necessary
-        app->get_fs_api()->common.mkdir("ibutton");
         bool res = app->get_fs_api()->file.open(
             &key_file, string_get_cstr(key_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS);
         // TODO process file system errors from file system service
