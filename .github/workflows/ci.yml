@@ -92,6 +92,9 @@ jobs:
       - name: Add firmware.bin at full.bin
         run: for TARGET in ${TARGETS}; do cat ${TARGET}_firmware.bin >> ${TARGET}_full.bin; done
 
+      - name: Create symlink to last full DFU
+        run: ln -s $( ls *_full.dfu | tail -1 ) full.dfu
+
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -103,6 +106,7 @@ jobs:
             *_firmware.bin
             *_full.dfu
             *_full.bin
+            full.dfu
           if-no-files-found: error
           retention-days: 7
 
