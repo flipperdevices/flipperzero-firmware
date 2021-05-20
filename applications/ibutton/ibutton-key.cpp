@@ -13,6 +13,10 @@ void iButtonKey::set_data(uint8_t* _data, uint8_t _data_count) {
     memcpy(data, _data, _data_count);
 }
 
+void iButtonKey::clear_data() {
+    memset(data, 0, get_size());
+}
+
 uint8_t* iButtonKey::get_data() {
     return data;
 }

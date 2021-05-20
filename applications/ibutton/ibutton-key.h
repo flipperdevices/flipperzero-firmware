@@ -7,6 +7,7 @@ public:
     uint8_t get_size();
 
     void set_data(uint8_t* data, uint8_t data_count);
+    void clear_data();
     uint8_t* get_data();
     uint8_t get_type_data_size();
 
