@@ -19,7 +19,7 @@ public:
     iButtonKey();
 
 private:
-    uint8_t data[IBUTTON_KEY_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t data[IBUTTON_KEY_DATA_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
     char name[IBUTTON_KEY_NAME_SIZE] = {0};
 
     iButtonKeyType type = iButtonKeyType::KeyDallas;

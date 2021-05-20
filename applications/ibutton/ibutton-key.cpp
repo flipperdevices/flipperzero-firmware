@@ -2,7 +2,7 @@
 #include <furi.h>
 
 uint8_t iButtonKey::get_size() {
-    return IBUTTON_KEY_SIZE;
+    return IBUTTON_KEY_DATA_SIZE;
 }
 
 void iButtonKey::set_data(uint8_t* _data, uint8_t _data_count) {

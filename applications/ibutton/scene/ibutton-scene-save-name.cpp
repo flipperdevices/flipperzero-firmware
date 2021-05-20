@@ -47,14 +47,14 @@ bool iButtonSceneSaveName::on_event(iButtonApp* app, iButtonEvent* event) {
         key->set_name(app->get_text_store());
         string_set_str(key_file_name, "ibutton/");
         string_cat_str(key_file_name, app->get_text_store());
-        uint8_t key_data[IBUTTON_KEY_SIZE + 1];
+        uint8_t key_data[IBUTTON_KEY_DATA_SIZE + 1];
         key_data[0] = static_cast<uint8_t>(key->get_key_type());
-        memcpy(key_data + 1, key->get_data(), IBUTTON_KEY_SIZE);
+        memcpy(key_data + 1, key->get_data(), IBUTTON_KEY_DATA_SIZE);
         bool res = app->get_fs_api()->file.open(
             &key_file, string_get_cstr(key_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS);
         // TODO process file system errors from file system service
         if(res) {
-            res = app->get_fs_api()->file.write(&key_file, key_data, IBUTTON_KEY_SIZE + 1);
+            res = app->get_fs_api()->file.write(&key_file, key_data, IBUTTON_KEY_DATA_SIZE + 1);
             res = app->get_fs_api()->file.close(&key_file);
             app->switch_to_next_scene(iButtonApp::Scene::SceneSaveSuccess);
         } else {
