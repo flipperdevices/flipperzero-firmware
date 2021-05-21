@@ -45,65 +45,87 @@ const NotificationMessage message_blue_0 = {
     .data.led.value = 0x00,
 };
 
+// Delay
+const NotificationMessage message_delay_100 = {
+    .type = NotificationMessageTypeDelay,
+    .data.delay.length = 100,
+};
+
 // Message sequences
 // Display
-const NotificationMessage* message_display_on_sequence[] = {
+const NotificationSequence sequence_display_on = {
     &message_display_on,
     NULL,
 };
 
-const NotificationMessage* message_display_off_sequence[] = {
+const NotificationSequence sequence_display_off = {
     &message_display_off,
     NULL,
 };
 
-// Led ON
-const NotificationMessage* message_red_255_sequence[] = {
-    &message_red_255,
-    NULL,
-};
-
-const NotificationMessage* message_green_255_sequence[] = {
-    &message_green_255,
-    NULL,
-};
-
-const NotificationMessage* message_blue_255_sequence[] = {
-    &message_blue_255,
-    NULL,
-};
-
-// Led OFF
-const NotificationMessage* message_red_0_sequence[] = {
-    &message_red_0,
-    NULL,
-};
-
-const NotificationMessage* message_green_0_sequence[] = {
-    &message_green_0,
-    NULL,
-};
-
-const NotificationMessage* message_blue_0_sequence[] = {
-    &message_blue_0,
-    NULL,
-};
-
 // Charging
-const NotificationMessage* message_charging_sequence[] = {
+const NotificationSequence sequence_charging = {
     &message_red_255,
     &message_green_0,
     NULL,
 };
 
-const NotificationMessage* message_charged_sequence[] = {
+const NotificationSequence sequence_charged = {
     &message_green_255,
     &message_red_0,
     NULL,
 };
 
-const NotificationMessage* message_not_charging_sequence[] = {
+const NotificationSequence sequence_not_charging = {
     &message_red_0,
     &message_green_0,
+    NULL,
+};
+
+// Blink
+const NotificationSequence sequence_blink_red_100 = {
+    &message_red_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_green_100 = {
+    &message_green_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_blue_100 = {
+    &message_blue_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_yellow_100 = {
+    &message_red_255,
+    &message_green_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_cyan_100 = {
+    &message_green_255,
+    &message_blue_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_magenta_100 = {
+    &message_red_255,
+    &message_blue_255,
+    &message_delay_100,
+    NULL,
+};
+
+const NotificationSequence sequence_blink_white_100 = {
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_delay_100,
     NULL,
 };

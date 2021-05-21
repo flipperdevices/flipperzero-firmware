@@ -48,4 +48,6 @@ typedef struct {
     NotificationMessageData data;
 } NotificationMessage;
 
-void notification_message(NotificationApp* app, const NotificationMessage** messages);
+typedef const NotificationMessage* NotificationSequence[];
+
+void notification_message(NotificationApp* app, const NotificationSequence* sequence);

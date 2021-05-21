@@ -174,12 +174,12 @@ static void power_charging_indication_handler(Power* power, NotificationApp* not
     if(api_hal_power_is_charging()) {
         if(api_hal_power_get_pct() == 100) {
             if(power->state != PowerStateCharged) {
-                notification_internal_message(notifications, message_charged_sequence);
+                notification_internal_message(notifications, &sequence_charged);
                 power->state = PowerStateCharged;
             }
         } else {
             if(power->state != PowerStateCharging) {
-                notification_internal_message(notifications, message_charging_sequence);
+                notification_internal_message(notifications, &sequence_charging);
                 power->state = PowerStateCharging;
             }
         }
@@ -187,7 +187,7 @@ static void power_charging_indication_handler(Power* power, NotificationApp* not
 
     if(!api_hal_power_is_charging()) {
         if(power->state != PowerStateNotCharging) {
-            notification_internal_message(notifications, message_not_charging_sequence);
+            notification_internal_message(notifications, &sequence_not_charging);
             power->state = PowerStateNotCharging;
         }
     }

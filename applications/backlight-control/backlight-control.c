@@ -16,15 +16,15 @@ int32_t backlight_control(void* p) {
     PubSub* event_record = furi_record_open("input_events");
     subscribe_pubsub(event_record, event_cb, (void*)osThreadGetId());
 
-    notification_internal_message(notifications, message_display_on_sequence);
+    notification_internal_message(notifications, &sequence_display_on);
 
     while(1) {
         // wait for event
         if(osThreadFlagsWait(BACKLIGHT_FLAG_ACTIVITY, osFlagsWaitAny, BACKLIGHT_TIME) ==
            BACKLIGHT_FLAG_ACTIVITY) {
-            notification_internal_message(notifications, message_display_on_sequence);
+            notification_internal_message(notifications, &sequence_display_on);
         } else {
-            notification_internal_message(notifications, message_display_off_sequence);
+            notification_internal_message(notifications, &sequence_display_off);
         }
     }
 
