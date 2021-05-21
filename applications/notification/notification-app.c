@@ -114,6 +114,26 @@ void notification_apply_notification_leds(NotificationApp* app, const uint8_t* v
     }
 }
 
+void notification_init_vibro() {
+    hal_gpio_init(&vibro_gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+}
+
+void notification_vibro_on() {
+    hal_gpio_write(&vibro_gpio, true);
+}
+
+void notification_vibro_off() {
+    hal_gpio_write(&vibro_gpio, false);
+}
+
+void notification_sound_on(float pwm, float freq) {
+    hal_pwm_set(pwm, freq, &SPEAKER_TIM, SPEAKER_CH);
+}
+
+void notification_sound_off() {
+    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+}
+
 NotificationApp* notification_app_alloc() {
     NotificationApp* app = furi_alloc(sizeof(NotificationApp));
     app->queue = osMessageQueueNew(8, sizeof(NotificationAppMessage), NULL);
@@ -146,6 +166,11 @@ NotificationApp* notification_app_alloc() {
 
 int32_t notification_app(void* p) {
     NotificationApp* app = notification_app_alloc();
+
+    notification_init_vibro();
+
+    notification_vibro_off();
+    notification_sound_off();
     notification_apply_internal_led_layer(&app->display, 0x00);
     notification_apply_internal_led_layer(&app->led[0], 0x00);
     notification_apply_internal_led_layer(&app->led[1], 0x00);
@@ -166,7 +191,7 @@ int32_t notification_app(void* p) {
             notification_message = (*message.sequence)[notification_message_index];
 
             bool led_active = false;
-            uint8_t led_value[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
+            uint8_t led_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
 
             while(notification_message != NULL) {
                 switch(notification_message->type) {
@@ -178,21 +203,32 @@ int32_t notification_app(void* p) {
                 case NotificationMessageTypeLedRed:
                     // store and send on delay or after seq
                     led_active = true;
-                    led_value[0] = notification_message->data.led.value;
+                    led_values[0] = notification_message->data.led.value;
                     break;
                 case NotificationMessageTypeLedGreen:
                     // store and send on delay or after seq
                     led_active = true;
-                    led_value[1] = notification_message->data.led.value;
+                    led_values[1] = notification_message->data.led.value;
                     break;
                 case NotificationMessageTypeLedBlue:
                     // store and send on delay or after seq
                     led_active = true;
-                    led_value[2] = notification_message->data.led.value;
+                    led_values[2] = notification_message->data.led.value;
                     break;
                 case NotificationMessageTypeVibro:
+                    if(notification_message->data.vibro.on) {
+                        notification_vibro_on();
+                    } else {
+                        notification_vibro_off();
+                    }
                     break;
-                case NotificationMessageTypeSound:
+                case NotificationMessageTypeSoundOn:
+                    notification_sound_on(
+                        notification_message->data.sound.pwm,
+                        notification_message->data.sound.frequency);
+                    break;
+                case NotificationMessageTypeSoundOff:
+                    notification_sound_off();
                     break;
                 case NotificationMessageTypeDelay:
                     if(led_active) {
@@ -202,7 +238,7 @@ int32_t notification_app(void* p) {
                         }
 
                         led_active = false;
-                        notification_apply_notification_leds(app, led_value);
+                        notification_apply_notification_leds(app, led_values);
                         delay(notification_message->data.delay.length);
                     }
                     break;
@@ -219,7 +255,7 @@ int32_t notification_app(void* p) {
                 }
 
                 led_active = false;
-                notification_apply_notification_leds(app, led_value);
+                notification_apply_notification_leds(app, led_values);
 
                 if(need_minimal_delay) {
                     notification_apply_notification_leds(app, led_off_values);
@@ -227,6 +263,8 @@ int32_t notification_app(void* p) {
                 }
             }
 
+            notification_vibro_off();
+            notification_sound_off();
             notification_reset_notification_led_layer(&app->led[0]);
             notification_reset_notification_led_layer(&app->led[1]);
             notification_reset_notification_led_layer(&app->led[2]);
