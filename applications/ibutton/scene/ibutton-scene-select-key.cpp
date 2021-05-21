@@ -21,11 +21,11 @@ void iButtonSceneSelectKey::on_enter(iButtonApp* app) {
 
         // Read data from file
         File key_file;
-        uint8_t key_data[IBUTTON_KEY_SIZE + 1] = {};
+        uint8_t key_data[IBUTTON_KEY_DATA_SIZE + 1] = {};
         // TODO process false result from file system service
         app->get_fs_api()->file.open(
             &key_file, string_get_cstr(key_str), FSAM_READ, FSOM_OPEN_EXISTING);
-        app->get_fs_api()->file.read(&key_file, key_data, IBUTTON_KEY_SIZE + 1);
+        app->get_fs_api()->file.read(&key_file, key_data, IBUTTON_KEY_DATA_SIZE + 1);
         app->get_fs_api()->file.close(&key_file);
         string_clear(key_str);
 
@@ -36,7 +36,7 @@ void iButtonSceneSelectKey::on_enter(iButtonApp* app) {
         }
         app->get_key()->set_name(app->get_file_name());
         app->get_key()->set_type(key_type);
-        app->get_key()->set_data(key_data + 1, IBUTTON_KEY_SIZE);
+        app->get_key()->set_data(key_data + 1, IBUTTON_KEY_DATA_SIZE);
         app->switch_to_next_scene(iButtonApp::Scene::SceneSavedKeyMenu);
     } else {
         app->switch_to_previous_scene();
