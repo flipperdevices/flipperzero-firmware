@@ -3,23 +3,27 @@
 /*
 Python script for note messages generation
 
-note_names = ['c', 'cs', 'd', 'ds', 'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b']
-base_note = 16.3515979
-cf = 2**(1.0/12)
+# coding: utf-8
+# Python script for note messages generation
+from typing import List
 
-note = base_note;
+note_names: List = ['c', 'cs', 'd', 'ds', 'e', 'f', 'fs', 'g', 'gs', 'a', 'as', 'b']
+base_note: float = 16.3515979
+cf: float = 2 ** (1.0 / 12)
+
+note: float = base_note
 for octave in range(9):
     for name in note_names:
-        print("const NotificationMessage message_note_" + name + str(octave) + " = {")
-        print("    .type = NotificationMessageTypeSoundOn,")
-        print("    .data.sound.frequency = " + str(round(note, 2)) + "f,")
-        print("    .data.sound.pwm = 0.5f,")
-        print("};")
+        print(f"const NotificationMessage message_note_{name}{octave}" + " = {\n"
+              "\t.type = NotificationMessageTypeSoundOn,\n"
+              f"\t.data.sound.frequency = {round(note, 2)}f,\n"
+              "\t.data.sound.pwm = 0.5f,\n"
+              "};")
         note = note * cf
-        
+
 for octave in range(9):
     for name in note_names:
-        print("extern const NotificationMessage message_note_" + name + str(octave) + ";")
+        print(f"extern const NotificationMessage message_note_{name}{octave};")
 */
 
 const NotificationMessage message_note_c0 = {
