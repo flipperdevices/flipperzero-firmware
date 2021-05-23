@@ -295,72 +295,27 @@ uint8_t iButtonApp::get_file_name_size() {
 }
 
 void iButtonApp::notify_init() {
-    // TODO open record
-    const GpioPin* vibro_record = &vibro_gpio;
-    hal_gpio_init(vibro_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(vibro_record, false);
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
 }
 
 void iButtonApp::notify_green_blink() {
-    notify_green_on();
-    delay(10);
-    notify_green_off();
+    notification_message(notification, &sequence_blink_green_10);
 }
 
 void iButtonApp::notify_yellow_blink() {
-    notify_red_on();
-    notify_green_on();
-    delay(10);
-    notify_green_off();
-    notify_red_off();
+    notification_message(notification, &sequence_blink_yellow_10);
 }
 
 void iButtonApp::notify_red_blink() {
-    notify_red_on();
-    delay(10);
-    notify_red_off();
-}
-
-void iButtonApp::notify_green_on() {
-    api_hal_light_set(LightGreen, 0xFF);
-}
-
-void iButtonApp::notify_green_off() {
-    api_hal_light_set(LightGreen, 0x00);
-}
-
-void iButtonApp::notify_red_on() {
-    api_hal_light_set(LightRed, 0xFF);
-}
-
-void iButtonApp::notify_red_off() {
-    api_hal_light_set(LightRed, 0x00);
+    notification_message(notification, &sequence_blink_red_10);
 }
 
 void iButtonApp::notify_error() {
-    notify_vibro_on();
-    delay(50);
-    notify_vibro_off();
-    delay(100);
-    notify_vibro_on();
-    delay(50);
-    notify_vibro_off();
+    notification_message(notification, &sequence_error);
 }
 
 void iButtonApp::notify_success() {
-    notify_vibro_on();
-    hal_pwm_set(0.5, 1760, &SPEAKER_TIM, SPEAKER_CH);
-    delay(50);
-    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
-    notify_vibro_off();
-}
-
-void iButtonApp::notify_vibro_on() {
-    hal_gpio_write(&vibro_gpio, true);
-}
-
-void iButtonApp::notify_vibro_off() {
-    hal_gpio_write(&vibro_gpio, false);
+    notification_message(notification, &sequence_success);
 }
 
 void iButtonApp::set_text_store(const char* text...) {
