@@ -178,7 +178,6 @@ void iButtonApp::cli_send_event(iButtonApp::CliEvent scene) {
 }
 
 iButtonApp::iButtonApp() {
-    notify_init();
     api_hal_power_insomnia_enter();
 
     cli_event_result = osMessageQueueNew(1, sizeof(iButtonApp::Scene), NULL);
@@ -186,6 +185,8 @@ iButtonApp::iButtonApp() {
     sd_ex_api = static_cast<SdCard_Api*>(furi_record_open("sdcard-ex"));
     fs_api = static_cast<FS_Api*>(furi_record_open("sdcard"));
     cli = static_cast<Cli*>(furi_record_open("cli"));
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
+
     auto callback = cbc::obtain_connector(this, &iButtonApp::cli_cmd_callback);
     cli_add_command(cli, "tm", callback, cli);
 
@@ -194,10 +195,13 @@ iButtonApp::iButtonApp() {
 }
 
 iButtonApp::~iButtonApp() {
+    cli_delete_command(cli, "tm");
+
     furi_record_close("sdcard-ex");
     furi_record_close("sdcard");
-    cli_delete_command(cli, "tm");
     furi_record_close("cli");
+    furi_record_close("notification");
+
     osMessageQueueDelete(cli_event_result);
 
     for(std::map<Scene, iButtonScene*>::iterator it = scenes.begin(); it != scenes.end(); ++it) {
@@ -292,10 +296,6 @@ char* iButtonApp::get_file_name() {
 
 uint8_t iButtonApp::get_file_name_size() {
     return file_name_size;
-}
-
-void iButtonApp::notify_init() {
-    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
 }
 
 void iButtonApp::notify_green_blink() {

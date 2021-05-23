@@ -8,9 +8,6 @@ void AccessorApp::run(void) {
     bool consumed;
     bool exit = false;
 
-    notify_init();
-    api_hal_power_enable_otg();
-
     wiegand.begin();
     onewire_master.start();
 
@@ -29,15 +26,19 @@ void AccessorApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
-    api_hal_power_disable_otg();
 }
 
 AccessorApp::AccessorApp()
     : onewire_master{&ibutton_gpio} {
     api_hal_power_insomnia_enter();
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
+    notify_init();
+    api_hal_power_enable_otg();
 }
 
 AccessorApp::~AccessorApp() {
+    api_hal_power_disable_otg();
+    furi_record_close("notification");
     api_hal_power_insomnia_exit();
 }
 
@@ -109,8 +110,6 @@ void AccessorApp::notify_init() {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
     HAL_GPIO_Init(PB3_GPIO_Port, &GPIO_InitStruct);
-
-    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
 }
 
 void AccessorApp::notify_green_blink() {

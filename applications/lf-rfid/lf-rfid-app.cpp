@@ -8,8 +8,6 @@ void LfrfidApp::run(void) {
     bool consumed;
     bool exit = false;
 
-    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
-
     scenes[current_scene]->on_enter(this);
 
     while(!exit) {
@@ -25,12 +23,11 @@ void LfrfidApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
-
-    furi_record_close("notification");
 }
 
 LfrfidApp::LfrfidApp() {
     api_hal_power_insomnia_enter();
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
 }
 
 LfrfidApp::~LfrfidApp() {
@@ -38,6 +35,8 @@ LfrfidApp::~LfrfidApp() {
         delete it->second;
         scenes.erase(it);
     }
+
+    furi_record_close("notification");
 
     api_hal_power_insomnia_exit();
 }

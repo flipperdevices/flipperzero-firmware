@@ -74,6 +74,7 @@ int32_t application_blink(void* p) {
         furi_check(osMessageQueueGet(event_queue, &event, NULL, osWaitForever) == osOK);
         if(event.type == EventTypeKey) {
             if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
+                furi_record_close("notification");
                 view_port_enabled_set(view_port, false);
                 gui_remove_view_port(gui, view_port);
                 view_port_free(view_port);

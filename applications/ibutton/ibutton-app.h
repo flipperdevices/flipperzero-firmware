@@ -156,7 +156,6 @@ private:
 
     NotificationApp* notification;
 
-    void notify_init();
     bool read_hex_byte(string_t arg, uint8_t* byte);
     void print_key_data(void);
 };
