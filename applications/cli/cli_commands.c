@@ -4,6 +4,7 @@
 #include <rtc.h>
 #include <task-control-block.h>
 #include <time.h>
+#include <notification\notification-messages.h>
 
 void cli_command_help(Cli* cli, string_t args, void* context) {
     (void)args;
@@ -116,7 +117,7 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
 
 void cli_command_led(Cli* cli, string_t args, void* context) {
     // Get first word as light name
-    Light light;
+    NotificationMessage notification_message;
     string_t light_name;
     string_init(light_name);
     size_t ws = string_search_char(args, ' ');
@@ -131,13 +132,13 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     }
     // Check light name
     if(!string_cmp(light_name, "r")) {
-        light = LightRed;
+        notification_message.type = NotificationMessageTypeLedRed;
     } else if(!string_cmp(light_name, "g")) {
-        light = LightGreen;
+        notification_message.type = NotificationMessageTypeLedGreen;
     } else if(!string_cmp(light_name, "b")) {
-        light = LightBlue;
+        notification_message.type = NotificationMessageTypeLedBlue;
     } else if(!string_cmp(light_name, "bl")) {
-        light = LightBacklight;
+        notification_message.type = NotificationMessageTypeLedDisplay;
     } else {
         printf("Wrong argument");
         string_clear(light_name);
@@ -151,7 +152,20 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
         printf("Wrong argument");
         return;
     }
-    api_hal_light_set(light, value);
+
+    // Set led value
+    notification_message.data.led.value = value;
+
+    // Form notification sequence
+    const NotificationSequence notification_sequence = {
+        &notification_message,
+        NULL,
+    };
+
+    // Send notification
+    NotificationApp* notification = furi_record_open("notification");
+    notification_internal_message_block(notification, &notification_sequence);
+    furi_record_close("notification");
 }
 
 void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
