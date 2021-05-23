@@ -2,8 +2,11 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-typedef struct NotificationApp NotificationApp;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+typedef struct NotificationApp NotificationApp;
 typedef struct {
     float frequency;
     float pwm;
@@ -52,3 +55,7 @@ typedef struct {
 typedef const NotificationMessage* NotificationSequence[];
 
 void notification_message(NotificationApp* app, const NotificationSequence* sequence);
+
+#ifdef __cplusplus
+}
+#endif

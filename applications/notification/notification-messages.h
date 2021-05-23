@@ -2,6 +2,10 @@
 #include "notification.h"
 #include "notification-messages-notes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*********************************** Messages **********************************/
 
 // Display
@@ -61,3 +65,7 @@ extern const NotificationSequence sequence_blink_white_100;
 // General
 extern const NotificationSequence sequence_success;
 extern const NotificationSequence sequence_error;
+
+#ifdef __cplusplus
+}
+#endif

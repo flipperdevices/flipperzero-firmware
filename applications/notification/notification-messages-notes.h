@@ -1,6 +1,10 @@
 #pragma once
 #include "notification.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const NotificationMessage message_note_c0;
 extern const NotificationMessage message_note_cs0;
 extern const NotificationMessage message_note_d0;
@@ -109,3 +113,7 @@ extern const NotificationMessage message_note_gs8;
 extern const NotificationMessage message_note_a8;
 extern const NotificationMessage message_note_as8;
 extern const NotificationMessage message_note_b8;
+
+#ifdef __cplusplus
+}
+#endif
