@@ -198,6 +198,7 @@ const NotificationSequence sequence_blink_white_100 = {
 
 // General
 const NotificationSequence sequence_success = {
+    &message_display_on,
     &message_green_255,
     &message_vibro_on,
     &message_note_c5,
@@ -215,6 +216,7 @@ const NotificationSequence sequence_success = {
 };
 
 const NotificationSequence sequence_error = {
+    &message_display_on,
     &message_red_255,
     &message_vibro_on,
     &message_delay_50,
