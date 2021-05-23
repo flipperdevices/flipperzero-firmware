@@ -4,7 +4,6 @@
 #include <gui/gui.h>
 #include <input/input.h>
 
-#include <notification/notification_i.h>
 #include <notification/notification-messages.h>
 
 #define BLINK_COLOR_COUNT 7
