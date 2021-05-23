@@ -35,6 +35,7 @@ typedef struct {
 
 struct NotificationApp {
     osMessageQueueId_t queue;
+    osTimerId_t display_timer;
 
     NotificationLedLayer display;
     NotificationLedLayer led[NOTIFICATION_LED_COUNT];
@@ -134,9 +135,16 @@ void notification_sound_off() {
     hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
 }
 
+void display_timer(void* ctx) {
+    furi_assert(ctx);
+    NotificationApp* app = ctx;
+    notification_message(app, &sequence_display_off);
+}
+
 NotificationApp* notification_app_alloc() {
     NotificationApp* app = furi_alloc(sizeof(NotificationApp));
     app->queue = osMessageQueueNew(8, sizeof(NotificationAppMessage), NULL);
+    app->display_timer = osTimerNew(display_timer, osTimerOnce, app, NULL);
 
     app->settings.display_brightness = 0xFF;
     app->settings.led_brightness = 1.0f;
@@ -179,6 +187,7 @@ int32_t notification_app(void* p) {
     furi_record_create("notification", app);
 
     const uint8_t minimal_delay = 100;
+    const uint32_t display_off_delay = 30000.0f / (1000.0f / osKernelGetTickFreq());
     const uint8_t led_off_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
 
     NotificationAppMessage message;
@@ -199,6 +208,17 @@ int32_t notification_app(void* p) {
                     // if on - switch on and start timer
                     // if off - switch off and stop timer
                     // on timer - switch off
+                    if(notification_message->data.display.on) {
+                        notification_apply_notification_led_layer(
+                            &app->display,
+                            get_rgb_led_brightness(app, app->settings.display_brightness));
+                        osTimerStart(app->display_timer, display_off_delay);
+                    } else {
+                        notification_reset_notification_led_layer(&app->display);
+                        if(osTimerIsRunning(app->display_timer)) {
+                            osTimerStop(app->display_timer);
+                        }
+                    }
                     break;
                 case NotificationMessageTypeLedRed:
                     // store and send on delay or after seq
