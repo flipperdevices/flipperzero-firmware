@@ -27,7 +27,7 @@ int32_t flipper_test_app(void* p) {
         notification_message(notification, &sequence_error);
     }
 
-    furi_record_close("notification")
+    furi_record_close("notification");
 
     return 0;
 }
