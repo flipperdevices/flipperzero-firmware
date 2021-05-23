@@ -49,6 +49,11 @@ extern const NotificationSequence sequence_charging;
 extern const NotificationSequence sequence_charged;
 extern const NotificationSequence sequence_not_charging;
 
+// Light up, work only on internal layer
+extern const NotificationSequence sequence_set_only_red_255;
+extern const NotificationSequence sequence_set_only_green_255;
+extern const NotificationSequence sequence_set_only_blue_255;
+
 // Blink
 extern const NotificationSequence sequence_blink_red_10;
 extern const NotificationSequence sequence_blink_green_10;

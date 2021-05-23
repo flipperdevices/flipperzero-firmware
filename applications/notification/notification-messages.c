@@ -129,6 +129,28 @@ const NotificationSequence sequence_not_charging = {
     NULL,
 };
 
+// Light up, work only on internal layer
+const NotificationSequence sequence_set_only_red_255 = {
+    &message_red_255,
+    &message_green_0,
+    &message_blue_0,
+    NULL,
+};
+
+const NotificationSequence sequence_set_only_green_255 = {
+    &message_red_0,
+    &message_green_255,
+    &message_blue_0,
+    NULL,
+};
+
+const NotificationSequence sequence_set_only_blue_255 = {
+    &message_red_0,
+    &message_green_0,
+    &message_blue_255,
+    NULL,
+};
+
 // Blink
 const NotificationSequence sequence_blink_red_10 = {
     &message_red_255,
