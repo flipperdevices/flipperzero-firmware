@@ -8,6 +8,8 @@ void LfrfidApp::run(void) {
     bool consumed;
     bool exit = false;
 
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
+
     scenes[current_scene]->on_enter(this);
 
     while(!exit) {
@@ -23,6 +25,8 @@ void LfrfidApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
+
+    furi_record_close("notification");
 }
 
 LfrfidApp::LfrfidApp() {
@@ -97,25 +101,12 @@ LfrfidApp::Scene LfrfidApp::get_previous_scene() {
 
 /***************************** NOTIFY *******************************/
 
-void LfrfidApp::notify_init() {
-    // TODO open record
-    const GpioPin* vibro_record = &vibro_gpio;
-    hal_gpio_init(vibro_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(vibro_record, false);
-}
-
 void LfrfidApp::notify_green_blink() {
-    api_hal_light_set(LightGreen, 0xFF);
-    delay(10);
-    api_hal_light_set(LightGreen, 0x00);
+    notification_message(notification, &sequence_blink_green_10);
 }
 
-void LfrfidApp::notify_green_on() {
-    api_hal_light_set(LightGreen, 0xFF);
-}
-
-void LfrfidApp::notify_green_off() {
-    api_hal_light_set(LightGreen, 0x00);
+void LfrfidApp::notify_success() {
+    notification_message(notification, &sequence_success);
 }
 
 /*************************** TEXT STORE *****************************/
