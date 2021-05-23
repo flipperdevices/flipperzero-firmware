@@ -117,6 +117,12 @@ osStatus_t furi_thread_terminate(FuriThread* thread);
  */
 osStatus_t furi_thread_join(FuriThread* thread);
 
+/** Get CMSIS Thread ID
+ * @param thread - FuriThread instance
+ * @return osThreadId_t or NULL
+ */
+osThreadId_t furi_thread_get_thread_id(FuriThread* thread);
+
 #ifdef __cplusplus
 }
 #endif

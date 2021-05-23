@@ -125,3 +125,7 @@ osStatus_t furi_thread_join(FuriThread* thread) {
     furi_assert(thread);
     return osThreadJoin(thread->id);
 }
+
+osThreadId_t furi_thread_get_thread_id(FuriThread* thread) {
+    return thread->id;
+}
