@@ -7,7 +7,7 @@
 #include <notification/notification_i.h>
 #include <notification/notification-messages.h>
 
-#define BLINK_COLOR_COUNT 8
+#define BLINK_COLOR_COUNT 7
 
 typedef enum {
     EventTypeTick,
@@ -84,13 +84,12 @@ int32_t application_blink(void* p) {
                 return 0;
             }
         } else {
-            if(state < BLINK_COLOR_COUNT) {
-                state++;
-            } else {
+            notification_message(notifications, colors[state]);
+
+            state++;
+            if(state >= BLINK_COLOR_COUNT) {
                 state = 0;
             }
-
-            notification_message(notifications, colors[state]);
         }
     }
 
