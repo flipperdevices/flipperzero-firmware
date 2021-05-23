@@ -42,7 +42,7 @@ void iButtonSceneReadSuccess::on_enter(iButtonApp* app) {
     dialog_ex_set_context(dialog_ex, app);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewDialogEx);
- 
+
     app->notify_success();
 }
 
