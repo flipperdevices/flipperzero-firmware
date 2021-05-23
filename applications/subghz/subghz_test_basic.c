@@ -89,19 +89,17 @@ bool subghz_test_basic_input(InputEvent* event, void* context) {
                     if(model->path > 0) model->path--;
                 } else if(event->key == InputKeyUp) {
                     if(model->path < ApiHalSubGhzPath3) model->path++;
+                } else if(event->key == InputKeyOk) {
+                    if(model->status == SubghzTestBasicModelStatusTx) {
+                        model->status = SubghzTestBasicModelStatusRx;
+                    } else {
+                        model->status = SubghzTestBasicModelStatusTx;
+                    }
                 }
 
                 model->real_frequency =
-                    api_hal_subghz_set_frequency(subghz_frequencies[model->frequency]);
+                    api_hal_subghz_set_frequency(subghz_frequencies[model->frequency].frequency);
                 api_hal_subghz_set_path(model->path);
-            }
-
-            if(event->key == InputKeyOk) {
-                if(event->type == InputTypePress) {
-                    model->status = SubghzTestBasicModelStatusTx;
-                } else if(event->type == InputTypeRelease) {
-                    model->status = SubghzTestBasicModelStatusRx;
-                }
             }
 
             if(model->status == SubghzTestBasicModelStatusRx) {
@@ -131,9 +129,9 @@ void subghz_test_basic_enter(void* context) {
 
     with_view_model(
         subghz_test_basic->view, (SubghzTestBasicModel * model) {
-            model->frequency = 4; // 433
+            model->frequency = subghz_frequencies_433_92; // 433
             model->real_frequency =
-                api_hal_subghz_set_frequency(subghz_frequencies[model->frequency]);
+                api_hal_subghz_set_frequency(subghz_frequencies[model->frequency].frequency);
             model->path = ApiHalSubGhzPathIsolate; // isolate
             model->rssi = 0.0f;
             model->status = SubghzTestBasicModelStatusRx;

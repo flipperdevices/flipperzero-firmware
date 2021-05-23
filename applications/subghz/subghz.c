@@ -1,5 +1,71 @@
 #include "subghz_i.h"
 
+const SubGhzFrequency subghz_frequencies[] = {
+    /* 301 */
+    {
+        .frequency = 301000000,
+        .path = ApiHalSubGhzPath2,
+    },
+    /* 315 */
+    {
+        .frequency = 315000000,
+        .path = ApiHalSubGhzPath2,
+    },
+    /* 346 - 385 */
+    {
+        .frequency = 346000000,
+        .path = ApiHalSubGhzPath2,
+    },
+    {
+        .frequency = 385000000,
+        .path = ApiHalSubGhzPath2,
+    },
+    /* LPD433 first, mid, last channels */
+    {
+        .frequency = 433075000,
+        .path = ApiHalSubGhzPath1,
+    },
+    {
+        .frequency = 433920000,
+        .path = ApiHalSubGhzPath1,
+    },
+    {
+        .frequency = 434775000,
+        .path = ApiHalSubGhzPath1,
+    },
+    /* 438.9 - 781 */
+    {
+        .frequency = 438900000,
+        .path = ApiHalSubGhzPath1,
+    },
+    {
+        .frequency = 463000000,
+        .path = ApiHalSubGhzPath1,
+    },
+    {
+        .frequency = 781000000,
+        .path = ApiHalSubGhzPath3,
+    },
+    /* 868.35 */
+    {
+        .frequency = 868350000,
+        .path = ApiHalSubGhzPath3,
+    },
+    /* 915 */
+    {
+        .frequency = 915000000,
+        .path = ApiHalSubGhzPath3,
+    },
+    /* 925 */
+    {
+        .frequency = 925000000,
+        .path = ApiHalSubGhzPath3,
+    },
+};
+
+const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(SubGhzFrequency);
+const uint32_t subghz_frequencies_433_92 = 5;
+
 osThreadId subghz_thread_id = NULL;
 
 void subghz_menu_callback(void* context, uint32_t index) {
