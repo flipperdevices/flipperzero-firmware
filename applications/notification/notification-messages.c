@@ -5,13 +5,13 @@
 // Messages
 // Display
 const NotificationMessage message_display_on = {
-    .type = NotificationMessageTypeDisplay,
-    .data.display.on = true,
+    .type = NotificationMessageTypeLedDisplay,
+    .data.led.value = 0xFF,
 };
 
 const NotificationMessage message_display_off = {
-    .type = NotificationMessageTypeDisplay,
-    .data.display.on = false,
+    .type = NotificationMessageTypeLedDisplay,
+    .data.led.value = 0x00,
 };
 
 // Led ON

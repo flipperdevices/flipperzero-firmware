@@ -16,7 +16,6 @@
 #include <assets_icons.h>
 #include <stm32wbxx.h>
 
-#include <notification/notification_i.h>
 #include <notification/notification-messages.h>
 
 #define POWER_OFF_TIMEOUT 30

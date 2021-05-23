@@ -1,6 +1,5 @@
 #include <furi.h>
 #include <api-hal.h>
-#include <notification/notification_i.h>
 #include <notification/notification-messages.h>
 
 #define BACKLIGHT_TIME 30000

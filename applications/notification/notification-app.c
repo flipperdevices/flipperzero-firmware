@@ -1,10 +1,10 @@
 #include <furi.h>
 #include <api-hal.h>
-#include "notification_i.h"
 #include "notification.h"
 #include "notification-messages.h"
 
 #define NOTIFICATION_LED_COUNT 3
+#define NOTIFICATION_EVENT_COMPLETE 0x00000001U
 
 typedef enum {
     NotificationLayerMessage,
@@ -14,6 +14,7 @@ typedef enum {
 typedef struct {
     const NotificationSequence* sequence;
     NotificationAppMessageType type;
+    osEventFlagsId_t back_event;
 } NotificationAppMessage;
 
 typedef enum {
@@ -29,7 +30,7 @@ typedef struct {
 } NotificationLedLayer;
 
 typedef struct {
-    uint8_t display_brightness;
+    float display_brightness;
     float led_brightness;
 } NotificationSettings;
 
@@ -44,13 +45,35 @@ struct NotificationApp {
 };
 
 void notification_message(NotificationApp* app, const NotificationSequence* sequence) {
-    NotificationAppMessage m = {.type = NotificationLayerMessage, .sequence = sequence};
+    NotificationAppMessage m = {
+        .type = NotificationLayerMessage, .sequence = sequence, .back_event = NULL};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
 };
 
 void notification_internal_message(NotificationApp* app, const NotificationSequence* sequence) {
-    NotificationAppMessage m = {.type = InternalLayerMessage, .sequence = sequence};
+    NotificationAppMessage m = {
+        .type = InternalLayerMessage, .sequence = sequence, .back_event = NULL};
     furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
+};
+
+void notification_message_block(NotificationApp* app, const NotificationSequence* sequence) {
+    NotificationAppMessage m = {
+        .type = NotificationLayerMessage,
+        .sequence = sequence,
+        .back_event = osEventFlagsNew(NULL)};
+    furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
+    osEventFlagsWait(m.back_event, NOTIFICATION_EVENT_COMPLETE, osFlagsWaitAny, osWaitForever);
+    osEventFlagsDelete(m.back_event);
+};
+
+void notification_internal_message_block(
+    NotificationApp* app,
+    const NotificationSequence* sequence) {
+    NotificationAppMessage m = {
+        .type = InternalLayerMessage, .sequence = sequence, .back_event = osEventFlagsNew(NULL)};
+    furi_check(osMessageQueuePut(app->queue, &m, 0, osWaitForever) == osOK);
+    osEventFlagsWait(m.back_event, NOTIFICATION_EVENT_COMPLETE, osFlagsWaitAny, osWaitForever);
+    osEventFlagsDelete(m.back_event);
 };
 
 void notification_apply_internal_led_layer(NotificationLedLayer* layer, uint8_t layer_value) {
@@ -88,6 +111,10 @@ void notification_reset_notification_led_layer(NotificationLedLayer* layer) {
     layer->index = LayerInternal;
     // apply
     api_hal_light_set(layer->light, layer->value[LayerInternal]);
+}
+
+uint8_t get_display_brightness(NotificationApp* app, uint8_t value) {
+    return (value * app->settings.display_brightness);
 }
 
 uint8_t get_rgb_led_brightness(NotificationApp* app, uint8_t value) {
@@ -146,11 +173,11 @@ NotificationApp* notification_app_alloc() {
     app->queue = osMessageQueueNew(8, sizeof(NotificationAppMessage), NULL);
     app->display_timer = osTimerNew(display_timer, osTimerOnce, app, NULL);
 
-    app->settings.display_brightness = 0xFF;
+    app->settings.display_brightness = 1.0f;
     app->settings.led_brightness = 1.0f;
 
     app->display.value[LayerInternal] = 0x00;
-    app->display.value[LayerNotification] = app->settings.display_brightness;
+    app->display.value[LayerNotification] = 0x00;
     app->display.index = LayerInternal;
     app->display.light = LightBacklight;
 
@@ -204,14 +231,14 @@ int32_t notification_app(void* p) {
 
             while(notification_message != NULL) {
                 switch(notification_message->type) {
-                case NotificationMessageTypeDisplay:
+                case NotificationMessageTypeLedDisplay:
                     // if on - switch on and start timer
                     // if off - switch off and stop timer
                     // on timer - switch off
-                    if(notification_message->data.display.on) {
+                    if(notification_message->data.led.value > 0x00) {
                         notification_apply_notification_led_layer(
                             &app->display,
-                            get_rgb_led_brightness(app, app->settings.display_brightness));
+                            get_display_brightness(app, notification_message->data.led.value));
                         osTimerStart(app->display_timer, display_off_delay);
                     } else {
                         notification_reset_notification_led_layer(&app->display);
@@ -290,6 +317,9 @@ int32_t notification_app(void* p) {
             notification_reset_notification_led_layer(&app->led[1]);
             notification_reset_notification_led_layer(&app->led[2]);
 
+            if(message.back_event != NULL) {
+                osEventFlagsSet(message.back_event, NOTIFICATION_EVENT_COMPLETE);
+            }
         } else if(message.type == InternalLayerMessage) {
             uint32_t notification_message_index = 0;
             const NotificationMessage* notification_message;
@@ -297,13 +327,10 @@ int32_t notification_app(void* p) {
 
             while(notification_message != NULL) {
                 switch(notification_message->type) {
-                case NotificationMessageTypeDisplay:
-                    if(notification_message->data.display.on) {
-                        notification_apply_internal_led_layer(
-                            &app->display, app->settings.display_brightness);
-                    } else {
-                        notification_apply_internal_led_layer(&app->display, 0x00);
-                    }
+                case NotificationMessageTypeLedDisplay:
+                    notification_apply_internal_led_layer(
+                        &app->display,
+                        get_display_brightness(app, notification_message->data.led.value));
                     break;
                 case NotificationMessageTypeLedRed:
                     notification_apply_internal_led_layer(
@@ -325,6 +352,10 @@ int32_t notification_app(void* p) {
                 }
                 notification_message_index++;
                 notification_message = (*message.sequence)[notification_message_index];
+            }
+
+            if(message.back_event != NULL) {
+                osEventFlagsSet(message.back_event, NOTIFICATION_EVENT_COMPLETE);
             }
         }
     }
