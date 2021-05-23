@@ -4,7 +4,7 @@
 #include <rtc.h>
 #include <task-control-block.h>
 #include <time.h>
-#include <notification\notification-messages.h>
+#include <notification/notification-messages.h>
 
 void cli_command_help(Cli* cli, string_t args, void* context) {
     (void)args;
