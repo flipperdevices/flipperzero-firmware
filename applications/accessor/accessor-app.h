@@ -56,5 +56,5 @@ private:
     WIEGAND wiegand;
     OneWireMaster onewire_master;
 
-     NotificationApp* notification;
+    NotificationApp* notification;
 };
