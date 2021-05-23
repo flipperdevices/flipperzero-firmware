@@ -239,8 +239,9 @@ int32_t notification_app(void* p) {
 
                         led_active = false;
                         notification_apply_notification_leds(app, led_values);
-                        delay(notification_message->data.delay.length);
                     }
+
+                    delay(notification_message->data.delay.length);
                     break;
                 }
                 notification_message_index++;
