@@ -9,6 +9,7 @@ void AccessorApp::run(void) {
     bool exit = false;
 
     notify_init();
+    api_hal_power_enable_otg();
 
     wiegand.begin();
     onewire_master.start();
@@ -28,6 +29,7 @@ void AccessorApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
+    api_hal_power_disable_otg();
 }
 
 AccessorApp::AccessorApp()
@@ -99,11 +101,6 @@ AccessorApp::Scene AccessorApp::get_previous_scene() {
 /***************************** NOTIFY *******************************/
 
 void AccessorApp::notify_init() {
-    // TODO open record
-    const GpioPin* vibro_record = &vibro_gpio;
-    hal_gpio_init(vibro_record, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    hal_gpio_write(vibro_record, false);
-
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     GPIO_InitStruct.Pin = PB3_Pin;
@@ -112,38 +109,26 @@ void AccessorApp::notify_init() {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
     HAL_GPIO_Init(PB3_GPIO_Port, &GPIO_InitStruct);
+
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
 }
 
 void AccessorApp::notify_green_blink() {
-    api_hal_light_set(LightGreen, 0xFF);
-    delay(10);
-    api_hal_light_set(LightGreen, 0x00);
-}
-
-void AccessorApp::notify_green_on() {
-    api_hal_light_set(LightGreen, 0xFF);
-}
-
-void AccessorApp::notify_green_off() {
-    api_hal_light_set(LightGreen, 0x00);
+    notification_message(notification, &sequence_blink_green_10);
 }
 
 void AccessorApp::notify_success() {
-    api_hal_light_set(LightBacklight, 0xFF);
+    notification_message(notification, &sequence_success);
 
     hal_pwm_set(0.5, 1760 / 2, &htim2, TIM_CHANNEL_2);
-    notify_green_on();
     delay(100);
     hal_pwm_stop(&htim2, TIM_CHANNEL_2);
-    notify_green_off();
 
     delay(100);
 
     hal_pwm_set(0.5, 1760, &htim2, TIM_CHANNEL_2);
-    notify_green_on();
     delay(100);
     hal_pwm_stop(&htim2, TIM_CHANNEL_2);
-    notify_green_off();
 }
 
 /*************************** TEXT STORE *****************************/
