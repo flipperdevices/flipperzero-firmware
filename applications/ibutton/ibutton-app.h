@@ -22,6 +22,7 @@
 #include "scene/ibutton-scene-save-name.h"
 #include "scene/ibutton-scene-save-success.h"
 #include "scene/ibutton-scene-info.h"
+#include "scene/ibutton-scene-select-key.h"
 #include "scene/ibutton-scene-add-type.h"
 #include "scene/ibutton-scene-add-value.h"
 
@@ -64,6 +65,7 @@ public:
         SceneSaveName,
         SceneSaveSuccess,
         SceneInfo,
+        SceneSelectKey,
         SceneAddType,
         SceneAddValue,
     };
@@ -134,6 +136,7 @@ private:
         {Scene::SceneSaveName, new iButtonSceneSaveName()},
         {Scene::SceneSaveSuccess, new iButtonSceneSaveSuccess()},
         {Scene::SceneInfo, new iButtonSceneInfo()},
+        {Scene::SceneSelectKey, new iButtonSceneSelectKey()},
         {Scene::SceneAddType, new iButtonSceneAddType()},
         {Scene::SceneAddValue, new iButtonSceneAddValue()},
     };
