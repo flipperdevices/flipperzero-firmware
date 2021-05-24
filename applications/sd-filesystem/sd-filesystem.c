@@ -511,7 +511,6 @@ static void cli_sd_info(Cli* cli, string_t args, void* _ctx) {
         printf("%lu KB total\r\n", sd_info.kb_total);
         printf("%lu KB free\r\n", sd_info.kb_free);
     } else {
-        printf("SD Status error: %s\r\n", fs_error_get_internal_desc(_fs_status(&sd_app->info)));
         printf("SD Info error: %s\r\n", fs_error_get_internal_desc(sd_info.error));
     }
 }
