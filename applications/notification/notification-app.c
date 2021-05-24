@@ -108,7 +108,10 @@ void notification_reset_notification_led_layer(NotificationLedLayer* layer) {
     furi_assert(layer->index < LayerMAX);
 
     // set value
+    layer->value[LayerNotification] = 0;
+    // set layer
     layer->index = LayerInternal;
+
     // apply
     api_hal_light_set(layer->light, layer->value[LayerInternal]);
 }
@@ -142,16 +145,12 @@ void notification_apply_notification_leds(NotificationApp* app, const uint8_t* v
     }
 }
 
-void notification_init_vibro() {
-    hal_gpio_init(&vibro_gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-}
-
 void notification_vibro_on() {
-    hal_gpio_write(&vibro_gpio, true);
+    api_hal_vibro_on(true);
 }
 
 void notification_vibro_off() {
-    hal_gpio_write(&vibro_gpio, false);
+    api_hal_vibro_on(false);
 }
 
 void notification_sound_on(float pwm, float freq) {
@@ -202,8 +201,6 @@ NotificationApp* notification_app_alloc() {
 int32_t notification_app(void* p) {
     NotificationApp* app = notification_app_alloc();
 
-    notification_init_vibro();
-
     notification_vibro_off();
     notification_sound_off();
     notification_apply_internal_led_layer(&app->display, 0x00);
@@ -228,6 +225,7 @@ int32_t notification_app(void* p) {
 
             bool led_active = false;
             uint8_t led_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
+            bool reset_notifications = true;
 
             const uint8_t reset_red_mask = 1 << 0;
             const uint8_t reset_green_mask = 1 << 1;
@@ -310,7 +308,7 @@ int32_t notification_app(void* p) {
                     delay(notification_message->data.delay.length);
                     break;
                 case NotificationMessageTypeDoNotReset:
-                    reset_mask = 0;
+                    reset_notifications = false;
                     break;
                 }
                 notification_message_index++;
@@ -336,23 +334,25 @@ int32_t notification_app(void* p) {
                 }
             }
 
-            if(reset_mask & reset_red_mask) {
-                notification_reset_notification_led_layer(&app->led[0]);
-            }
-            if(reset_mask & reset_green_mask) {
-                notification_reset_notification_led_layer(&app->led[1]);
-            }
-            if(reset_mask & reset_blue_mask) {
-                notification_reset_notification_led_layer(&app->led[2]);
-            }
-            if(reset_mask & reset_vibro_mask) {
-                notification_vibro_off();
-            }
-            if(reset_mask & reset_sound_mask) {
-                notification_sound_off();
-            }
-            if(reset_mask & reset_display_mask) {
-                osTimerStart(app->display_timer, display_off_delay);
+            if(reset_notifications) {
+                if(reset_mask & reset_red_mask) {
+                    notification_reset_notification_led_layer(&app->led[0]);
+                }
+                if(reset_mask & reset_green_mask) {
+                    notification_reset_notification_led_layer(&app->led[1]);
+                }
+                if(reset_mask & reset_blue_mask) {
+                    notification_reset_notification_led_layer(&app->led[2]);
+                }
+                if(reset_mask & reset_vibro_mask) {
+                    notification_vibro_off();
+                }
+                if(reset_mask & reset_sound_mask) {
+                    notification_sound_off();
+                }
+                if(reset_mask & reset_display_mask) {
+                    osTimerStart(app->display_timer, display_off_delay);
+                }
             }
 
             if(message.back_event != NULL) {

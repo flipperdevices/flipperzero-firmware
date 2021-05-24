@@ -52,6 +52,9 @@ extern const NotificationSequence sequence_reset_display;
 extern const NotificationSequence sequence_reset_sound;
 extern const NotificationSequence sequence_reset_vibro;
 
+// Vibro
+extern const NotificationSequence sequence_set_vibro_on;
+
 // Display
 extern const NotificationSequence sequence_display_on;
 extern const NotificationSequence sequence_display_off;

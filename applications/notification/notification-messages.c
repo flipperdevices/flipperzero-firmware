@@ -2,7 +2,8 @@
 #include "notification-messages-notes.h"
 #include <stddef.h>
 
-// Messages
+/*********************************** Messages **********************************/
+
 // Display
 const NotificationMessage message_display_on = {
     .type = NotificationMessageTypeLedDisplay,
@@ -103,7 +104,8 @@ const NotificationMessage message_do_not_reset = {
     .type = NotificationMessageTypeDoNotReset,
 };
 
-// Message sequences
+/****************************** Message sequences ******************************/
+
 // Reset
 const NotificationSequence sequence_reset_red = {
     &message_red_0,
@@ -139,6 +141,13 @@ const NotificationSequence sequence_reset_sound = {
 
 const NotificationSequence sequence_reset_vibro = {
     &message_vibro_off,
+    NULL,
+};
+
+// Vibro
+const NotificationSequence sequence_set_vibro_on = {
+    &message_vibro_on,
+    &message_do_not_reset,
     NULL,
 };
 

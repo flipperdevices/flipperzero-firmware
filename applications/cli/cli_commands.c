@@ -107,9 +107,13 @@ void cli_command_hw_info(Cli* cli, string_t args, void* context) {
 
 void cli_command_vibro(Cli* cli, string_t args, void* context) {
     if(!string_cmp(args, "0")) {
-        api_hal_vibro_on(false);
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message_block(notification, &sequence_reset_vibro);
+        furi_record_close("notification");
     } else if(!string_cmp(args, "1")) {
-        api_hal_vibro_on(true);
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message_block(notification, &sequence_set_vibro_on);
+        furi_record_close("notification");
     } else {
         printf("Wrong input");
     }
