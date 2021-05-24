@@ -5,8 +5,8 @@
 void subghz_cli_init() {
     Cli* cli = furi_record_open("cli");
 
-    cli_add_command(cli, "subghz_tx_carrier", subghz_cli_command_tx, NULL)
-    cli_add_command(cli, "subghz_rx_carrier", subghz_cli_command_tx, NULL)
+    cli_add_command(cli, "subghz_tx_carrier", subghz_cli_command_tx, NULL);
+    cli_add_command(cli, "subghz_rx_carrier", subghz_cli_command_tx, NULL);
 
     furi_record_close("cli");
 }
@@ -32,5 +32,13 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
 }
 
 void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
+
+}
+
+void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
+
+}
+
+void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
 
 }
