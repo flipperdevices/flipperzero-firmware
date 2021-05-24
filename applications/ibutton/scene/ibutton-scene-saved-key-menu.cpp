@@ -22,6 +22,7 @@ void iButtonSceneSavedKeyMenu::on_enter(iButtonApp* app) {
     submenu_add_item(submenu, "Edit", SubmenuIndexEdit, callback, app);
     submenu_add_item(submenu, "Delete", SubmenuIndexDelete, callback, app);
     submenu_add_item(submenu, "Info", SubmenuIndexInfo, callback, app);
+    submenu_set_selected_item(submenu, submenu_item_selected);
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
@@ -30,6 +31,7 @@ bool iButtonSceneSavedKeyMenu::on_event(iButtonApp* app, iButtonEvent* event) {
     bool consumed = false;
 
     if(event->type == iButtonEvent::Type::EventTypeMenuSelected) {
+        submenu_item_selected = event->payload.menu_index;
         switch(event->payload.menu_index) {
         case SubmenuIndexWrite:
             app->switch_to_next_scene(iButtonApp::Scene::SceneWrite);
