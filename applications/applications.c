@@ -211,7 +211,7 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 };
 
 const size_t FLIPPER_ON_SYSTEM_START_COUNT =
-    sizeof(FLIPPER_ON_SYSTEM_START_COUNT) / sizeof(FlipperOnStartHook);
+    sizeof(FLIPPER_ON_SYSTEM_START) / sizeof(FlipperOnStartHook);
 
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {

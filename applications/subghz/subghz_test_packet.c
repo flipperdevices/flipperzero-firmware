@@ -53,11 +53,11 @@ void subghz_test_packet_draw(Canvas* canvas, SubghzTestPacketModel* model) {
     char* path_name = "Unknown";
     if(model->path == ApiHalSubGhzPathIsolate) {
         path_name = "isolate";
-    } else if(model->path == ApiHalSubGhzPath1) {
+    } else if(model->path == ApiHalSubGhzPath433) {
         path_name = "433MHz";
-    } else if(model->path == ApiHalSubGhzPath2) {
+    } else if(model->path == ApiHalSubGhzPath315) {
         path_name = "315MHz";
-    } else if(model->path == ApiHalSubGhzPath3) {
+    } else if(model->path == ApiHalSubGhzPath868) {
         path_name = "868MHz";
     }
     snprintf(buffer, sizeof(buffer), "Path: %d - %s", model->path, path_name);
@@ -96,7 +96,7 @@ bool subghz_test_packet_input(InputEvent* event, void* context) {
                 } else if(event->key == InputKeyDown) {
                     if(model->path > 0) model->path--;
                 } else if(event->key == InputKeyUp) {
-                    if(model->path < ApiHalSubGhzPath3) model->path++;
+                    if(model->path < ApiHalSubGhzPath868) model->path++;
                 } else if(event->key == InputKeyOk) {
                     if(model->status == SubghzTestPacketModelStatusTx) {
                         model->status = SubghzTestPacketModelStatusRx;

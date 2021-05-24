@@ -55,11 +55,11 @@ void subghz_static_draw(Canvas* canvas, SubghzStaticModel* model) {
     char* path_name = "Unknown";
     if(model->path == ApiHalSubGhzPathIsolate) {
         path_name = "isolate";
-    } else if(model->path == ApiHalSubGhzPath1) {
+    } else if(model->path == ApiHalSubGhzPath433) {
         path_name = "433MHz";
-    } else if(model->path == ApiHalSubGhzPath2) {
+    } else if(model->path == ApiHalSubGhzPath315) {
         path_name = "315MHz";
-    } else if(model->path == ApiHalSubGhzPath3) {
+    } else if(model->path == ApiHalSubGhzPath868) {
         path_name = "868MHz";
     }
     snprintf(buffer, sizeof(buffer), "Path: %d - %s", model->path, path_name);

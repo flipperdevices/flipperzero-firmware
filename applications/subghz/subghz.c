@@ -4,62 +4,62 @@ const SubGhzFrequency subghz_frequencies[] = {
     /* 301 */
     {
         .frequency = 301000000,
-        .path = ApiHalSubGhzPath2,
+        .path = ApiHalSubGhzPath315,
     },
     /* 315 */
     {
         .frequency = 315000000,
-        .path = ApiHalSubGhzPath2,
+        .path = ApiHalSubGhzPath315,
     },
     /* 346 - 385 */
     {
         .frequency = 346000000,
-        .path = ApiHalSubGhzPath2,
+        .path = ApiHalSubGhzPath315,
     },
     {
         .frequency = 385000000,
-        .path = ApiHalSubGhzPath2,
+        .path = ApiHalSubGhzPath315,
     },
     /* LPD433 first, mid, last channels */
     {
         .frequency = 433075000,
-        .path = ApiHalSubGhzPath1,
+        .path = ApiHalSubGhzPath433,
     },
     {
         .frequency = 433920000,
-        .path = ApiHalSubGhzPath1,
+        .path = ApiHalSubGhzPath433,
     },
     {
         .frequency = 434775000,
-        .path = ApiHalSubGhzPath1,
+        .path = ApiHalSubGhzPath433,
     },
     /* 438.9 - 781 */
     {
         .frequency = 438900000,
-        .path = ApiHalSubGhzPath1,
+        .path = ApiHalSubGhzPath433,
     },
     {
         .frequency = 463000000,
-        .path = ApiHalSubGhzPath1,
+        .path = ApiHalSubGhzPath433,
     },
     {
         .frequency = 781000000,
-        .path = ApiHalSubGhzPath3,
+        .path = ApiHalSubGhzPath868,
     },
     /* 868.35 */
     {
         .frequency = 868350000,
-        .path = ApiHalSubGhzPath3,
+        .path = ApiHalSubGhzPath868,
     },
     /* 915 */
     {
         .frequency = 915000000,
-        .path = ApiHalSubGhzPath3,
+        .path = ApiHalSubGhzPath868,
     },
     /* 925 */
     {
         .frequency = 925000000,
-        .path = ApiHalSubGhzPath3,
+        .path = ApiHalSubGhzPath868,
     },
 };
 
