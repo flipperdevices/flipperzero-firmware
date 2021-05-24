@@ -164,7 +164,14 @@ typedef struct {
 } GpioPin;
 
 /**
- * GPIO initialization function
+ * GPIO initialization function, simple version
+ * @param gpio  GpioPin
+ * @param mode  GpioMode
+ */
+void hal_gpio_init_simple(const GpioPin* gpio, const GpioMode mode);
+
+/**
+ * GPIO initialization function, normal version
  * @param gpio  GpioPin
  * @param mode  GpioMode
  * @param pull  GpioPull
@@ -177,14 +184,14 @@ void hal_gpio_init(
     const GpioSpeed speed);
 
 /**
- * GPIO initialization with alternative function
+ * GPIO initialization function, extended version
  * @param gpio  GpioPin
  * @param mode  GpioMode
  * @param pull  GpioPull
  * @param speed GpioSpeed
  * @param alt_fn GpioAltFn
  */
-void hal_gpio_init_alt(
+void hal_gpio_init_ex(
     const GpioPin* gpio,
     const GpioMode mode,
     const GpioPull pull,
