@@ -153,6 +153,8 @@ typedef enum {
     GpioAltFn14LPTIM2 = 14, /*!< LPTIM2 Alternate Function mapping */
 
     GpioAltFn15EVENTOUT = 15, /*!< EVENTOUT Alternate Function mapping */
+
+    GpioAltFnUnused = 16, /*!< just dummy value */
 } GpioAltFn;
 
 /**
