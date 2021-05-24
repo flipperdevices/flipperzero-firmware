@@ -20,7 +20,7 @@ void iButtonSceneStart::on_enter(iButtonApp* app) {
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, callback, app);
     submenu_add_item(submenu, "Add manually", SubmenuIndexAdd, callback, app);
     submenu_set_selected_item(submenu, submenu_item_selected);
-    
+
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewSubmenu);
 }
 
