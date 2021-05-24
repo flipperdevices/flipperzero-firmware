@@ -41,6 +41,7 @@ int32_t app_archive(void* p);
 
 // On system start hooks declaration
 void nfc_cli_init();
+void subghz_cli_init();
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
@@ -198,6 +199,9 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef APP_NFC
     nfc_cli_init,
+#endif
+#ifdef APP_SUBGHZ
+    subghz_cli_init,
 #endif
 };
 
