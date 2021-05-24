@@ -96,6 +96,10 @@ public:
 
     void notify_error();
     void notify_success();
+    void notify_green_on();
+    void notify_green_off();
+    void notify_red_on();
+    void notify_red_off();
 
     void set_text_store(const char* text...);
     char* get_text_store();

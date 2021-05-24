@@ -98,7 +98,50 @@ const NotificationMessage message_vibro_off = {
     .data.vibro.on = false,
 };
 
+// Reset
+const NotificationMessage message_do_not_reset = {
+    .type = NotificationMessageTypeDoNotReset,
+};
+
 // Message sequences
+// Reset
+const NotificationSequence sequence_reset_red = {
+    &message_red_0,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_green = {
+    &message_blue_0,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_blue = {
+    &message_green_0,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_rgb = {
+    &message_red_0,
+    &message_blue_0,
+    &message_green_0,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_display = {
+    &message_display_off,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_sound = {
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_reset_vibro = {
+    &message_vibro_off,
+    NULL,
+};
+
 // Display
 const NotificationSequence sequence_display_on = {
     &message_display_on,
@@ -129,11 +172,12 @@ const NotificationSequence sequence_not_charging = {
     NULL,
 };
 
-// Light up, work only on internal layer
+// Light up
 const NotificationSequence sequence_set_only_red_255 = {
     &message_red_255,
     &message_green_0,
     &message_blue_0,
+    &message_do_not_reset,
     NULL,
 };
 
@@ -141,6 +185,7 @@ const NotificationSequence sequence_set_only_green_255 = {
     &message_red_0,
     &message_green_255,
     &message_blue_0,
+    &message_do_not_reset,
     NULL,
 };
 
@@ -148,6 +193,25 @@ const NotificationSequence sequence_set_only_blue_255 = {
     &message_red_0,
     &message_green_0,
     &message_blue_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_red_255 = {
+    &message_red_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_green_255 = {
+    &message_green_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sequence_set_blue_255 = {
+    &message_blue_255,
+    &message_do_not_reset,
     NULL,
 };
 
@@ -233,7 +297,6 @@ const NotificationSequence sequence_success = {
     &message_note_c6,
     &message_delay_50,
     &message_sound_off,
-    &message_delay_500,
     NULL,
 };
 
@@ -247,6 +310,5 @@ const NotificationSequence sequence_error = {
     &message_vibro_on,
     &message_delay_50,
     &message_vibro_off,
-    &message_delay_500,
     NULL,
 };

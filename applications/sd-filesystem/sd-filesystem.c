@@ -257,12 +257,22 @@ const NotificationSequence sd_sequence_eject = {
 const NotificationSequence sd_sequence_wait = {
     &message_red_255,
     &message_blue_255,
-    &message_delay_10,
+    &message_do_not_reset,
+    NULL,
+};
+
+const NotificationSequence sd_sequence_wait_off = {
+    &message_red_0,
+    &message_blue_0,
     NULL,
 };
 
 void app_sd_notify_wait(SdApp* sd_app) {
     notification_message(sd_app->notifications, &sd_sequence_wait);
+}
+
+void app_sd_notify_wait_off(SdApp* sd_app) {
+    notification_message(sd_app->notifications, &sd_sequence_wait_off);
 }
 
 void app_sd_notify_success(SdApp* sd_app) {
@@ -312,7 +322,7 @@ bool app_sd_mount_card(SdApp* sd_app) {
                 }
             }
         }
-        app_sd_notify_wait(sd_app);
+        app_sd_notify_wait_off(sd_app);
 
         if(!result) {
             delay(1000);

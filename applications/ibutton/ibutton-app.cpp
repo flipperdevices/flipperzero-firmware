@@ -318,6 +318,22 @@ void iButtonApp::notify_success() {
     notification_message(notification, &sequence_success);
 }
 
+void iButtonApp::notify_green_on() {
+    notification_message_block(notification, &sequence_set_green_255);
+}
+
+void iButtonApp::notify_green_off() {
+    notification_message(notification, &sequence_reset_green);
+}
+
+void iButtonApp::notify_red_on() {
+    notification_message_block(notification, &sequence_set_red_255);
+}
+
+void iButtonApp::notify_red_off() {
+    notification_message(notification, &sequence_reset_red);
+}
+
 void iButtonApp::set_text_store(const char* text...) {
     va_list args;
     va_start(args, text);

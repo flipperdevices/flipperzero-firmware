@@ -21,6 +21,7 @@ void iButtonSceneWriteSuccess::on_enter(iButtonApp* app) {
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewPopup);
 
     app->notify_success();
+    app->notify_green_on();
 }
 
 bool iButtonSceneWriteSuccess::on_event(iButtonApp* app, iButtonEvent* event) {
@@ -51,4 +52,5 @@ void iButtonSceneWriteSuccess::popup_callback(void* context) {
     iButtonEvent event;
     event.type = iButtonEvent::Type::EventTypeBack;
     app->get_view_manager()->send_event(&event);
+    app->notify_green_off();
 }

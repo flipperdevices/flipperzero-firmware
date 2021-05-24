@@ -12,19 +12,19 @@ int32_t flipper_test_app(void* p) {
 
     NotificationApp* notification = furi_record_open("notification");
 
-    notification_internal_message_block(notification, &sequence_set_only_blue_255);
+    notification_message_block(notification, &sequence_set_only_blue_255);
 
     test_result |= run_minunit();
     test_result |= run_minunit_test_irda_decoder();
 
     if(test_result == 0) {
         // test passed
-        notification_internal_message(notification, &sequence_set_only_green_255);
         notification_message(notification, &sequence_success);
+        notification_message(notification, &sequence_set_only_green_255);
     } else {
         // test failed
-        notification_internal_message(notification, &sequence_set_only_red_255);
         notification_message(notification, &sequence_error);
+        notification_message(notification, &sequence_set_only_red_255);
     }
 
     furi_record_close("notification");

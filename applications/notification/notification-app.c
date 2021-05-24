@@ -229,6 +229,15 @@ int32_t notification_app(void* p) {
             bool led_active = false;
             uint8_t led_values[NOTIFICATION_LED_COUNT] = {0x00, 0x00, 0x00};
 
+            const uint8_t reset_red_mask = 1 << 0;
+            const uint8_t reset_green_mask = 1 << 1;
+            const uint8_t reset_blue_mask = 1 << 2;
+            const uint8_t reset_vibro_mask = 1 << 3;
+            const uint8_t reset_sound_mask = 1 << 4;
+            const uint8_t reset_display_mask = 1 << 5;
+
+            uint8_t reset_mask = 0;
+
             while(notification_message != NULL) {
                 switch(notification_message->type) {
                 case NotificationMessageTypeLedDisplay:
@@ -239,28 +248,31 @@ int32_t notification_app(void* p) {
                         notification_apply_notification_led_layer(
                             &app->display,
                             get_display_brightness(app, notification_message->data.led.value));
-                        osTimerStart(app->display_timer, display_off_delay);
                     } else {
                         notification_reset_notification_led_layer(&app->display);
                         if(osTimerIsRunning(app->display_timer)) {
                             osTimerStop(app->display_timer);
                         }
                     }
+                    reset_mask |= reset_display_mask;
                     break;
                 case NotificationMessageTypeLedRed:
                     // store and send on delay or after seq
                     led_active = true;
                     led_values[0] = notification_message->data.led.value;
+                    reset_mask |= reset_red_mask;
                     break;
                 case NotificationMessageTypeLedGreen:
                     // store and send on delay or after seq
                     led_active = true;
                     led_values[1] = notification_message->data.led.value;
+                    reset_mask |= reset_green_mask;
                     break;
                 case NotificationMessageTypeLedBlue:
                     // store and send on delay or after seq
                     led_active = true;
                     led_values[2] = notification_message->data.led.value;
+                    reset_mask |= reset_blue_mask;
                     break;
                 case NotificationMessageTypeVibro:
                     if(notification_message->data.vibro.on) {
@@ -268,14 +280,17 @@ int32_t notification_app(void* p) {
                     } else {
                         notification_vibro_off();
                     }
+                    reset_mask |= reset_vibro_mask;
                     break;
                 case NotificationMessageTypeSoundOn:
                     notification_sound_on(
                         notification_message->data.sound.pwm,
                         notification_message->data.sound.frequency);
+                    reset_mask |= reset_sound_mask;
                     break;
                 case NotificationMessageTypeSoundOff:
                     notification_sound_off();
+                    reset_mask |= reset_sound_mask;
                     break;
                 case NotificationMessageTypeDelay:
                     if(led_active) {
@@ -285,10 +300,17 @@ int32_t notification_app(void* p) {
                         }
 
                         led_active = false;
+
                         notification_apply_notification_leds(app, led_values);
+                        reset_mask |= reset_red_mask;
+                        reset_mask |= reset_green_mask;
+                        reset_mask |= reset_blue_mask;
                     }
 
                     delay(notification_message->data.delay.length);
+                    break;
+                case NotificationMessageTypeDoNotReset:
+                    reset_mask = 0;
                     break;
                 }
                 notification_message_index++;
@@ -304,6 +326,9 @@ int32_t notification_app(void* p) {
 
                 led_active = false;
                 notification_apply_notification_leds(app, led_values);
+                reset_mask |= reset_red_mask;
+                reset_mask |= reset_green_mask;
+                reset_mask |= reset_blue_mask;
 
                 if(need_minimal_delay) {
                     notification_apply_notification_leds(app, led_off_values);
@@ -311,11 +336,24 @@ int32_t notification_app(void* p) {
                 }
             }
 
-            notification_vibro_off();
-            notification_sound_off();
-            notification_reset_notification_led_layer(&app->led[0]);
-            notification_reset_notification_led_layer(&app->led[1]);
-            notification_reset_notification_led_layer(&app->led[2]);
+            if(reset_mask & reset_red_mask) {
+                notification_reset_notification_led_layer(&app->led[0]);
+            }
+            if(reset_mask & reset_green_mask) {
+                notification_reset_notification_led_layer(&app->led[1]);
+            }
+            if(reset_mask & reset_blue_mask) {
+                notification_reset_notification_led_layer(&app->led[2]);
+            }
+            if(reset_mask & reset_vibro_mask) {
+                notification_vibro_off();
+            }
+            if(reset_mask & reset_sound_mask) {
+                notification_sound_off();
+            }
+            if(reset_mask & reset_display_mask) {
+                osTimerStart(app->display_timer, display_off_delay);
+            }
 
             if(message.back_event != NULL) {
                 osEventFlagsSet(message.back_event, NOTIFICATION_EVENT_COMPLETE);

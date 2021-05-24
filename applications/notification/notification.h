@@ -40,6 +40,7 @@ typedef enum {
     NotificationMessageTypeLedBlue,
     NotificationMessageTypeDelay,
     NotificationMessageTypeLedDisplay,
+    NotificationMessageTypeDoNotReset,
 } NotificationMessageType;
 
 typedef struct {

@@ -107,7 +107,7 @@ bool subghz_static_input(InputEvent* event, void* context) {
                     const uint8_t* key = subghz_static_keys[model->button];
 
                     NotificationApp* notification = furi_record_open("notification");
-                    notification_message_block(notification, &sequence_blink_red_10);
+                    notification_message_block(notification, &sequence_set_red_255);
                     __disable_irq();
                     for(uint8_t r = 0; r < 20; r++) {
                         //Payload
@@ -129,7 +129,7 @@ bool subghz_static_input(InputEvent* event, void* context) {
                         delay_us(10600);
                     }
                     __enable_irq();
-                    notification_message(notification, &sequence_blink_red_10);
+                    notification_message(notification, &sequence_reset_red);
                     furi_record_close("notification");
                 }
             }

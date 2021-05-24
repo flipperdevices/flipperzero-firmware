@@ -38,7 +38,19 @@ extern const NotificationMessage message_sound_off;
 extern const NotificationMessage message_vibro_on;
 extern const NotificationMessage message_vibro_off;
 
+// Reset
+extern const NotificationMessage message_do_not_reset;
+
 /****************************** Message sequences ******************************/
+
+// Reset
+extern const NotificationSequence sequence_reset_red;
+extern const NotificationSequence sequence_reset_green;
+extern const NotificationSequence sequence_reset_blue;
+extern const NotificationSequence sequence_reset_rgb;
+extern const NotificationSequence sequence_reset_display;
+extern const NotificationSequence sequence_reset_sound;
+extern const NotificationSequence sequence_reset_vibro;
 
 // Display
 extern const NotificationSequence sequence_display_on;
@@ -49,10 +61,13 @@ extern const NotificationSequence sequence_charging;
 extern const NotificationSequence sequence_charged;
 extern const NotificationSequence sequence_not_charging;
 
-// Light up, work only on internal layer
+// Light up
 extern const NotificationSequence sequence_set_only_red_255;
 extern const NotificationSequence sequence_set_only_green_255;
 extern const NotificationSequence sequence_set_only_blue_255;
+extern const NotificationSequence sequence_set_red_255;
+extern const NotificationSequence sequence_set_green_255;
+extern const NotificationSequence sequence_set_blue_255;
 
 // Blink
 extern const NotificationSequence sequence_blink_red_10;
