@@ -110,7 +110,7 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
     } else if(!string_cmp(args, "1")) {
         api_hal_vibro_on(true);
     } else {
-        printf("Wrong input");
+        printf("vibro: illegal option -- %s\r\nusage: vibro <1|0>", string_get_cstr(args));
     }
 }
 
@@ -121,7 +121,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     string_init(light_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("Wrong input");
+        printf("led: illegal option -- %s\r\nusage: led <1|0>", string_get_cstr(args));
         string_clear(light_name);
         return;
     } else {
@@ -173,7 +173,9 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     string_init(pin_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("Wrong input. Correct usage: gpio_set <pin_name> <0|1>");
+        printf(
+            "gpio_set: illegal option -- %s\r\nusage: gpio_set <pin_name> <0|1>",
+            string_get_cstr(args));
         string_clear(pin_name);
         return;
     } else {
