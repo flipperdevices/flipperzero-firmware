@@ -75,7 +75,7 @@ void iButtonSceneReadSuccess::on_exit(iButtonApp* app) {
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
     dialog_ex_set_icon(dialog_ex, -1, -1, I_ButtonCenter_7x7);
-    
+
     app->notify_green_off();
 }
 
