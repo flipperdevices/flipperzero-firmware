@@ -121,7 +121,7 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
 
 void cli_command_led(Cli* cli, string_t args, void* context) {
     // Get first word as light name
-    NotificationMessage notification_message;
+    NotificationMessage notification_led_message;
     string_t light_name;
     string_init(light_name);
     size_t ws = string_search_char(args, ' ');
@@ -136,13 +136,13 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     }
     // Check light name
     if(!string_cmp(light_name, "r")) {
-        notification_message.type = NotificationMessageTypeLedRed;
+        notification_led_message.type = NotificationMessageTypeLedRed;
     } else if(!string_cmp(light_name, "g")) {
-        notification_message.type = NotificationMessageTypeLedGreen;
+        notification_led_message.type = NotificationMessageTypeLedGreen;
     } else if(!string_cmp(light_name, "b")) {
-        notification_message.type = NotificationMessageTypeLedBlue;
+        notification_led_message.type = NotificationMessageTypeLedBlue;
     } else if(!string_cmp(light_name, "bl")) {
-        notification_message.type = NotificationMessageTypeLedDisplay;
+        notification_led_message.type = NotificationMessageTypeLedDisplay;
     } else {
         printf("Wrong argument");
         string_clear(light_name);
@@ -158,11 +158,11 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     }
 
     // Set led value
-    notification_message.data.led.value = value;
+    notification_led_message.data.led.value = value;
 
     // Form notification sequence
     const NotificationSequence notification_sequence = {
-        &notification_message,
+        &notification_led_message,
         NULL,
     };
 
