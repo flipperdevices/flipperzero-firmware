@@ -66,8 +66,6 @@ const SubGhzFrequency subghz_frequencies[] = {
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(SubGhzFrequency);
 const uint32_t subghz_frequencies_433_92 = 5;
 
-osThreadId subghz_thread_id = NULL;
-
 void subghz_menu_callback(void* context, uint32_t index) {
     furi_assert(context);
 
@@ -83,21 +81,18 @@ void subghz_menu_callback(void* context, uint32_t index) {
 }
 
 uint32_t subghz_exit(void* context) {
-    osThreadResume(subghz_thread_id);
     return VIEW_NONE;
 }
 
 SubGhz* subghz_alloc() {
     SubGhz* subghz = furi_alloc(sizeof(SubGhz));
 
-    // Thread id
-    subghz_thread_id = osThreadGetId();
-
     // GUI
     subghz->gui = furi_record_open("gui");
 
     // View Dispatcher
     subghz->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(subghz->view_dispatcher);
     view_dispatcher_attach_to_gui(
         subghz->view_dispatcher, subghz->gui, ViewDispatcherTypeFullscreen);
 
@@ -165,7 +160,7 @@ void subghz_free(SubGhz* subghz) {
 int32_t subghz_app(void* context) {
     SubGhz* subghz = subghz_alloc();
 
-    osThreadSuspend(subghz_thread_id);
+    view_dispatcher_run(subghz->view_dispatcher);
 
     subghz_free(subghz);
 
