@@ -22,6 +22,7 @@
 #include "scene/ibutton-scene-save-name.h"
 #include "scene/ibutton-scene-save-success.h"
 #include "scene/ibutton-scene-info.h"
+#include "scene/ibutton-scene-select-key.h"
 #include "scene/ibutton-scene-add-type.h"
 #include "scene/ibutton-scene-add-value.h"
 
@@ -62,6 +63,7 @@ public:
         SceneSaveName,
         SceneSaveSuccess,
         SceneInfo,
+        SceneSelectKey,
         SceneAddType,
         SceneAddValue,
     };
@@ -110,7 +112,7 @@ public:
     char* get_file_name();
     uint8_t get_file_name_size();
 
-    void cli_cmd_callback(string_t args, void* context);
+    void cli_cmd_callback(Cli* cli, string_t args, void* context);
     void cli_send_event(CliEvent scene);
 
     void generate_random_name(char* name, uint8_t max_name_size);
@@ -140,6 +142,7 @@ private:
         {Scene::SceneSaveName, new iButtonSceneSaveName()},
         {Scene::SceneSaveSuccess, new iButtonSceneSaveSuccess()},
         {Scene::SceneInfo, new iButtonSceneInfo()},
+        {Scene::SceneSelectKey, new iButtonSceneSelectKey()},
         {Scene::SceneAddType, new iButtonSceneAddType()},
         {Scene::SceneAddValue, new iButtonSceneAddValue()},
     };

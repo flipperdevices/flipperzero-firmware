@@ -3,10 +3,10 @@
 #include <api-hal-gpio.h>
 #include <rtc.h>
 #include <task-control-block.h>
+#include <time.h>
 
-void cli_command_help(string_t args, void* context) {
+void cli_command_help(Cli* cli, string_t args, void* context) {
     (void)args;
-    Cli* cli = context;
     printf("Commands we have:");
 
     furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
@@ -38,7 +38,7 @@ void cli_command_help(string_t args, void* context) {
     }
 }
 
-void cli_command_version(string_t args, void* context) {
+void cli_command_version(Cli* cli, string_t args, void* context) {
     (void)args;
     (void)context;
     printf("Bootloader\r\n");
@@ -48,7 +48,7 @@ void cli_command_version(string_t args, void* context) {
     cli_print_version(api_hal_version_get_fw_version());
 }
 
-void cli_command_uuid(string_t args, void* context) {
+void cli_command_uuid(Cli* cli, string_t args, void* context) {
     (void)args;
     (void)context;
     size_t uid_size = api_hal_uid_size();
@@ -64,7 +64,7 @@ void cli_command_uuid(string_t args, void* context) {
     printf(string_get_cstr(byte_str));
 }
 
-void cli_command_date(string_t args, void* context) {
+void cli_command_date(Cli* cli, string_t args, void* context) {
     RTC_DateTypeDef date;
     RTC_TimeTypeDef time;
 
@@ -84,15 +84,27 @@ void cli_command_date(string_t args, void* context) {
     string_clear(datetime_str);
 }
 
-void cli_command_log(string_t args, void* context) {
-    Cli* cli = context;
+void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_stdglue_set_global_stdout_callback(cli_stdout_callback);
     printf("Press any key to stop...\r\n");
     cli_getc(cli);
     furi_stdglue_set_global_stdout_callback(NULL);
 }
 
-void cli_command_vibro(string_t args, void* context) {
+void cli_command_hw_info(Cli* cli, string_t args, void* context) {
+    printf(
+        "%-20s %d.F%dB%dC%d\r\n",
+        "HW version:",
+        api_hal_version_get_hw_version(),
+        api_hal_version_get_hw_target(),
+        api_hal_version_get_hw_body(),
+        api_hal_version_get_hw_connect());
+    time_t time = api_hal_version_get_hw_timestamp();
+    printf("%-20s %s\r", "Production date:", ctime(&time));
+    printf("%-20s %s", "Name:", api_hal_version_get_name_ptr());
+}
+
+void cli_command_vibro(Cli* cli, string_t args, void* context) {
     if(!string_cmp(args, "0")) {
         api_hal_vibro_on(false);
     } else if(!string_cmp(args, "1")) {
@@ -102,7 +114,7 @@ void cli_command_vibro(string_t args, void* context) {
     }
 }
 
-void cli_command_led(string_t args, void* context) {
+void cli_command_led(Cli* cli, string_t args, void* context) {
     // Get first word as light name
     Light light;
     string_t light_name;
@@ -142,7 +154,7 @@ void cli_command_led(string_t args, void* context) {
     api_hal_light_set(light, value);
 }
 
-void cli_command_gpio_set(string_t args, void* context) {
+void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     char pin_names[][4] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
     GpioPin gpio[] = {
         {.port = GPIOC, .pin = LL_GPIO_PIN_0},
@@ -200,7 +212,7 @@ void cli_command_gpio_set(string_t args, void* context) {
     return;
 }
 
-void cli_command_os_info(string_t args, void* context) {
+void cli_command_os_info(Cli* cli, string_t args, void* context) {
     const uint8_t threads_num_max = 32;
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
@@ -222,15 +234,16 @@ void cli_command_os_info(string_t args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "help", cli_command_help, cli);
-    cli_add_command(cli, "?", cli_command_help, cli);
-    cli_add_command(cli, "version", cli_command_version, cli);
-    cli_add_command(cli, "!", cli_command_version, cli);
-    cli_add_command(cli, "uid", cli_command_uuid, cli);
-    cli_add_command(cli, "date", cli_command_date, cli);
-    cli_add_command(cli, "log", cli_command_log, cli);
-    cli_add_command(cli, "vibro", cli_command_vibro, cli);
-    cli_add_command(cli, "led", cli_command_led, cli);
-    cli_add_command(cli, "gpio_set", cli_command_gpio_set, cli);
-    cli_add_command(cli, "os_info", cli_command_os_info, cli);
+    cli_add_command(cli, "help", cli_command_help, NULL);
+    cli_add_command(cli, "?", cli_command_help, NULL);
+    cli_add_command(cli, "version", cli_command_version, NULL);
+    cli_add_command(cli, "!", cli_command_version, NULL);
+    cli_add_command(cli, "uid", cli_command_uuid, NULL);
+    cli_add_command(cli, "date", cli_command_date, NULL);
+    cli_add_command(cli, "log", cli_command_log, NULL);
+    cli_add_command(cli, "hw_info", cli_command_hw_info, NULL);
+    cli_add_command(cli, "vibro", cli_command_vibro, NULL);
+    cli_add_command(cli, "led", cli_command_led, NULL);
+    cli_add_command(cli, "gpio_set", cli_command_gpio_set, NULL);
+    cli_add_command(cli, "os_info", cli_command_os_info, NULL);
 }

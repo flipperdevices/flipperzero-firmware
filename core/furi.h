@@ -2,6 +2,7 @@
 
 #include <cmsis_os2.h>
 
+#include <furi/common_defines.h>
 #include <furi/check.h>
 #include <furi/memmgr.h>
 #include <furi/pubsub.h>
@@ -10,7 +11,7 @@
 #include <furi/thread.h>
 #include <furi/valuemutex.h>
 #include <furi/log.h>
-#include <furi/utils.h>
+#include <furi/common_defines.h>
 
 #include <api-hal-gpio.h>
 #include <api-hal/api-interrupt-mgr.h>
