@@ -26,6 +26,9 @@ void AccessorApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
+
+    wiegand.end();
+    onewire_master.stop();
 }
 
 AccessorApp::AccessorApp()
