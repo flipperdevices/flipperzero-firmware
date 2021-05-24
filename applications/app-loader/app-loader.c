@@ -1,14 +1,9 @@
-#include <furi.h>
-#include <cli/cli.h>
-#include "menu/menu.h"
-#include "menu/menu_item.h"
-#include "applications.h"
-#include <assets_icons.h>
-#include <api-hal.h>
+#include "app-loader.h"
 
 typedef struct {
     FuriThread* thread;
     const FlipperApplication* current_app;
+    string_t args;
     Cli* cli;
 } AppLoaderState;
 
@@ -50,6 +45,35 @@ static void app_loader_cli_callback(Cli* cli, string_t args, void* _ctx) {
     furi_thread_start(state.thread);
 }
 
+bool app_loader_start(const char* name, const char* args) {
+    furi_assert(name);
+    furi_assert(args);
+
+    const FlipperApplication* flipper_app = NULL;
+
+    // Search for application
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+        if(!strcmp(FLIPPER_APPS[i].name, name)) {
+            flipper_app = &FLIPPER_APPS[i];
+            break;
+        }
+    }
+    if(!flipper_app) {
+        FURI_LOG_E("app-loader", "Can't find application with name %s", name);
+        return false;
+    }
+    state.current_app = flipper_app;
+    string_set_str(state.args, args);
+    string_strim(state.args);
+
+    FURI_LOG_I("app-loader", "Start %s app  with args: %s", name, args);
+    furi_thread_set_name(state.thread, flipper_app->name);
+    furi_thread_set_stack_size(state.thread, flipper_app->stack_size);
+    furi_thread_set_context(state.thread, (void*)string_get_cstr(state.args));
+    furi_thread_set_callback(state.thread, flipper_app->app);
+    return furi_thread_start(state.thread);
+}
+
 void app_loader_thread_state_callback(FuriThreadState state, void* context) {
     furi_assert(context);
     if(state == FuriThreadStateStopped) {
@@ -62,6 +86,7 @@ int32_t app_loader(void* p) {
     state.thread = furi_thread_alloc();
     furi_thread_set_state_context(state.thread, &state);
     furi_thread_set_state_callback(state.thread, app_loader_thread_state_callback);
+    string_init(state.args);
 
     ValueMutex* menu_mutex = furi_record_open("menu");
     state.cli = furi_record_open("cli");
