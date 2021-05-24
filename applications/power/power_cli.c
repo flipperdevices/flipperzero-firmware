@@ -39,7 +39,7 @@ void power_cli_otg(Cli* cli, string_t args, void* context) {
     } else if(!string_cmp(args, "1")) {
         api_hal_power_enable_otg();
     } else {
-        printf("power_dfu: illegal option -- %s\r\nusage: power_otg <1|0>", string_get_cstr(args));
+        cli_print_usage("power_otg", "<1|0>", string_get_cstr(args));
     }
 }
 

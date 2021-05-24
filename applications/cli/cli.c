@@ -70,6 +70,14 @@ void cli_print_version(const Version* version) {
     }
 }
 
+void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
+    furi_assert(cmd);
+    furi_assert(arg);
+    furi_assert(usage);
+
+    printf("%s: illegal option -- %s\r\nusage: %s %s", cmd, arg, cmd, usage);
+}
+
 void cli_motd() {
     printf("Flipper cli.\r\n");
 

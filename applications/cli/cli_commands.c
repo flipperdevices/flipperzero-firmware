@@ -110,7 +110,7 @@ void cli_command_vibro(Cli* cli, string_t args, void* context) {
     } else if(!string_cmp(args, "1")) {
         api_hal_vibro_on(true);
     } else {
-        printf("vibro: illegal option -- %s\r\nusage: vibro <1|0>", string_get_cstr(args));
+        cli_print_usage("vibro", "<1|0>", string_get_cstr(args));
     }
 }
 
@@ -121,7 +121,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     string_init(light_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("led: illegal option -- %s\r\nusage: led <1|0>", string_get_cstr(args));
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         string_clear(light_name);
         return;
     } else {
@@ -139,7 +139,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     } else if(!string_cmp(light_name, "bl")) {
         light = LightBacklight;
     } else {
-        printf("Wrong argument");
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         string_clear(light_name);
         return;
     }
@@ -148,7 +148,7 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     char* end_ptr;
     uint32_t value = strtoul(string_get_cstr(args), &end_ptr, 0);
     if(!(value < 256 && *end_ptr == '\0')) {
-        printf("Wrong argument");
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         return;
     }
     api_hal_light_set(light, value);
@@ -173,9 +173,7 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     string_init(pin_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf(
-            "gpio_set: illegal option -- %s\r\nusage: gpio_set <pin_name> <0|1>",
-            string_get_cstr(args));
+        cli_print_usage("gpio_set", "<pin_name> <0|1>", string_get_cstr(args));
         string_clear(pin_name);
         return;
     } else {
