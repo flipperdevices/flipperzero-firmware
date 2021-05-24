@@ -16,9 +16,9 @@ void iButtonSceneSavedKeyMenu::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
     auto callback = cbc::obtain_connector(this, &iButtonSceneSavedKeyMenu::submenu_callback);
-
-    submenu_add_item(submenu, "Write", SubmenuIndexWrite, callback, app);
+    
     submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, callback, app);
+    submenu_add_item(submenu, "Write", SubmenuIndexWrite, callback, app);
     submenu_add_item(submenu, "Edit", SubmenuIndexEdit, callback, app);
     submenu_add_item(submenu, "Delete", SubmenuIndexDelete, callback, app);
     submenu_add_item(submenu, "Info", SubmenuIndexInfo, callback, app);
