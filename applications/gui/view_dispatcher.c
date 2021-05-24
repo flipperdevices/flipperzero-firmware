@@ -198,7 +198,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
         view_port_update(view_dispatcher->view_port);
     } else {
         view_port_enabled_set(view_dispatcher->view_port, false);
-        if (view_dispatcher->queue) {
+        if(view_dispatcher->queue) {
             view_dispatcher_stop(view_dispatcher);
         }
     }
