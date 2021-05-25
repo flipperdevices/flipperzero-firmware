@@ -20,7 +20,7 @@ void api_interrupt_add(InterruptCallback callback, InterruptType type, void* con
 
     callback_list[type].callback = callback;
     callback_list[type].context = context;
-    asm volatile("dmb" : : : "memory");
+    __DMB();
     callback_list[type].ready = true;
 }
 
@@ -31,7 +31,7 @@ void api_interrupt_remove(InterruptCallback callback, InterruptType type) {
     }
 
     callback_list[type].ready = false;
-    asm volatile("dmb" : : : "memory");
+    __DMB();
     callback_list[type].callback = NULL;
     callback_list[type].context = NULL;
 }
@@ -41,7 +41,7 @@ void api_interrupt_enable(InterruptCallback callback, InterruptType type) {
     furi_check(callback_list[type].callback == callback);
 
     callback_list[type].ready = true;
-    asm volatile("dmb" : : : "memory");
+    __DMB();
 }
 
 void api_interrupt_disable(InterruptCallback callback, InterruptType type) {
@@ -49,7 +49,7 @@ void api_interrupt_disable(InterruptCallback callback, InterruptType type) {
     furi_check(callback_list[type].callback == callback);
 
     callback_list[type].ready = false;
-    asm volatile("dmb" : : : "memory");
+    __DMB();
 }
 
 void api_interrupt_call(InterruptType type, void* hw) {
