@@ -5,8 +5,8 @@
 #include <callback-connector.h>
 
 typedef enum {
-    SubmenuIndexWrite,
     SubmenuIndexEmulate,
+    SubmenuIndexWrite,
     SubmenuIndexEdit,
     SubmenuIndexDelete,
     SubmenuIndexInfo,
