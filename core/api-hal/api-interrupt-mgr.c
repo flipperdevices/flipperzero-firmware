@@ -2,7 +2,7 @@
 #include <cmsis_os2.h>
 #include <furi.h>
 
-static InterruptCallbackItem callback_list[InterruptTypeLast];
+static volatile InterruptCallbackItem callback_list[InterruptTypeLast];
 
 bool api_interrupt_init() {
     for(uint8_t i = 0; i < InterruptTypeLast; i++) {
