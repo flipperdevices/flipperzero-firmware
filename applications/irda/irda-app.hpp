@@ -47,6 +47,11 @@ public:
     static void text_input_callback(void* context, char* text);
     static void popup_callback(void* context);
 
+    IrdaApp() {}
+    ~IrdaApp() {
+        for (auto &it : scenes)
+            delete it.second;
+    }
 private:
     static const uint8_t text_store_size = 128;
     static const uint8_t text_store_max = 2;
