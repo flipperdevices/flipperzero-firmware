@@ -46,7 +46,7 @@ void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
     }
     // Position block
     if(total) {
-        uint8_t block_h = ((float)height) / total;
+        float block_h = ((float)height) / total;
         canvas_draw_box(canvas, width - 3, block_h * pos, 3, MAX(block_h, 1));
     }
 }

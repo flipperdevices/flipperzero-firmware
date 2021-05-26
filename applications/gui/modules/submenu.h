@@ -53,10 +53,17 @@ void submenu_clean(Submenu* submenu);
 
 /**
  * @brief Set submenu item selector
- * @param submenu 
- * @param index 
+ * @param submenu
+ * @param index
  */
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
+
+/**
+ * @brief Set optional header for submenu
+ * @param submenu   - submenu entity
+ * @param header    - header to set
+ */
+void submenu_set_header(Submenu* submenu, const char* header);
 
 #ifdef __cplusplus
 }
