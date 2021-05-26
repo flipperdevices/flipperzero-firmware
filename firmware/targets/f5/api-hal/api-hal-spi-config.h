@@ -35,13 +35,13 @@ typedef struct {
 
 /** API HAL SPI Standard Device IDs */
 typedef enum {
-    ApiHalSpiDeviceIdSubGhz,    /** SubGhz: CC1101, non-standard SPI usage */
-    ApiHalSpiDeviceIdDisplay,   /** Display: ERC12864, only have MOSI */
+    ApiHalSpiDeviceIdSubGhz,        /** SubGhz: CC1101, non-standard SPI usage */
+    ApiHalSpiDeviceIdDisplay,       /** Display: ERC12864, only have MOSI */
     ApiHalSpiDeviceIdSdCardFast,    /** SDCARD: fast mode, after initialization */
     ApiHalSpiDeviceIdSdCardSlow,    /** SDCARD: slow mode, before initialization */
-    ApiHalSpiDeviceIdNfc,       /** NFC: ST25R3916, pretty standard, but RFAL makes it complex */
+    ApiHalSpiDeviceIdNfc,           /** NFC: ST25R3916, pretty standard, but RFAL makes it complex */
 
-    ApiHalSpiDeviceIdMax,       /** Service Value, do not use */
+    ApiHalSpiDeviceIdMax,           /** Service Value, do not use */
 } ApiHalSpiDeviceId;
 
 /** Api Hal Spi Bus R

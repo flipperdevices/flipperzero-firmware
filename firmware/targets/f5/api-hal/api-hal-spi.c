@@ -55,6 +55,7 @@ void api_hal_spi_bus_reset(const ApiHalSpiBus* bus) {
 
     HAL_SPI_DeInit((SPI_HandleTypeDef*)bus->spi);
     HAL_SPI_Init((SPI_HandleTypeDef*)bus->spi);
+    Enable_SPI((SPI_HandleTypeDef*)bus->spi);
 }
 
 bool api_hal_spi_bus_rx(const ApiHalSpiBus* bus, uint8_t* buffer, size_t size, uint32_t timeout) {

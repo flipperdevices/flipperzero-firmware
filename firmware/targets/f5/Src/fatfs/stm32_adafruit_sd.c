@@ -295,7 +295,7 @@ static uint8_t SD_ReadData(void);
   */
 uint8_t BSP_SD_Init(bool reset_card) {
     /* Slow speed init */
-    static const ApiHalSpiDevice* sd_spi_slow_dev = &api_hal_spi_devices[ApiHalSpiDeviceIdSdCardSlow];
+    const ApiHalSpiDevice* sd_spi_slow_dev = &api_hal_spi_devices[ApiHalSpiDeviceIdSdCardSlow];
     api_hal_spi_bus_lock(sd_spi_slow_dev->bus);
     api_hal_spi_bus_configure(sd_spi_slow_dev->bus, sd_spi_slow_dev->config);
 
