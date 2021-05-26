@@ -4,14 +4,17 @@
 #include <string>
 #include <stdio.h>
 
-
 void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     TextInput* text_input = view_manager->get_text_input();
 
     text_input_set_header_text(text_input, "Name the key");
     text_input_set_result_callback(
-        text_input, IrdaApp::text_input_callback, app, app->get_text_store(0), app->get_text_store_size());
+        text_input,
+        IrdaApp::text_input_callback,
+        app,
+        app->get_text_store(0),
+        app->get_text_store_size());
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::TextInput);
 }
@@ -19,11 +22,12 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
 bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
-    if (event->type == IrdaAppEvent::Type::TextEditDone) {
+    if(event->type == IrdaAppEvent::Type::TextEditDone) {
         auto remote_manager = app->get_remote_manager();
         auto receiver = app->get_receiver();
-        if (app->get_learn_new_remote()) {
-            remote_manager->add_remote_with_button(app->get_text_store(0), receiver->get_last_message());
+        if(app->get_learn_new_remote()) {
+            remote_manager->add_remote_with_button(
+                app->get_text_store(0), receiver->get_last_message());
         } else {
             remote_manager->add_button(app->get_text_store(0), receiver->get_last_message());
         }
@@ -35,5 +39,3 @@ bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
 void IrdaAppSceneLearnEnterName::on_exit(IrdaApp* app) {
 }
-
-

@@ -263,4 +263,3 @@ void elements_slightly_rounded_box(
     furi_assert(canvas);
     canvas_draw_rbox(canvas, x, y, width, height, 1);
 }
-

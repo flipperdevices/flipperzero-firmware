@@ -202,7 +202,13 @@ void canvas_draw_box(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
     u8g2_DrawBox(&canvas->fb, x, y, width, height);
 }
 
-void canvas_draw_rbox(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t radius) {
+void canvas_draw_rbox(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    uint8_t radius) {
     furi_assert(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;
@@ -216,7 +222,13 @@ void canvas_draw_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint
     u8g2_DrawFrame(&canvas->fb, x, y, width, height);
 }
 
-void canvas_draw_rframe(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t height, uint8_t radius) {
+void canvas_draw_rframe(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    uint8_t radius) {
     furi_assert(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;

@@ -5,11 +5,11 @@
 #include <furi.h>
 #include <stdint.h>
 
-#define ITEM_FIRST_OFFSET       17
-#define ITEM_NEXT_OFFSET        4
-#define ITEM_HEIGHT             14
-#define ITEM_WIDTH              64
-#define BUTTONS_PER_SCREEN      6
+#define ITEM_FIRST_OFFSET 17
+#define ITEM_NEXT_OFFSET 4
+#define ITEM_HEIGHT 14
+#define ITEM_WIDTH 64
+#define BUTTONS_PER_SCREEN 6
 
 struct ButtonMenuItem {
     const char* label;
@@ -31,7 +31,11 @@ typedef struct {
     const char* header;
 } ButtonMenuModel;
 
-static void button_menu_draw_control_button(Canvas* canvas, uint8_t item_position, const char* text, bool selected) {
+static void button_menu_draw_control_button(
+    Canvas* canvas,
+    uint8_t item_position,
+    const char* text,
+    bool selected) {
     furi_assert(canvas);
     furi_assert(text);
 
@@ -40,14 +44,24 @@ static void button_menu_draw_control_button(Canvas* canvas, uint8_t item_positio
 
     canvas_set_color(canvas, ColorBlack);
 
-    if (selected) {
+    if(selected) {
         elements_slightly_rounded_box(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_str_aligned(canvas, item_x + (ITEM_WIDTH / 2), item_y + (ITEM_HEIGHT / 2), AlignCenter, AlignCenter, text);
+    canvas_draw_str_aligned(
+        canvas,
+        item_x + (ITEM_WIDTH / 2),
+        item_y + (ITEM_HEIGHT / 2),
+        AlignCenter,
+        AlignCenter,
+        text);
 }
 
-static void button_menu_draw_common_button(Canvas* canvas, uint8_t item_position, const char* text, bool selected) {
+static void button_menu_draw_common_button(
+    Canvas* canvas,
+    uint8_t item_position,
+    const char* text,
+    bool selected) {
     furi_assert(canvas);
     furi_assert(text);
 
@@ -56,20 +70,26 @@ static void button_menu_draw_common_button(Canvas* canvas, uint8_t item_position
 
     canvas_set_color(canvas, ColorBlack);
 
-    if (selected) {
+    if(selected) {
         canvas_draw_rbox(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 5);
         canvas_set_color(canvas, ColorWhite);
     } else {
         canvas_draw_rframe(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 5);
     }
-    canvas_draw_str_aligned(canvas, item_x + (ITEM_WIDTH / 2), item_y + (ITEM_HEIGHT / 2), AlignCenter, AlignCenter, text);
+    canvas_draw_str_aligned(
+        canvas,
+        item_x + (ITEM_WIDTH / 2),
+        item_y + (ITEM_HEIGHT / 2),
+        AlignCenter,
+        AlignCenter,
+        text);
 }
 
 static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
     furi_assert(canvas);
     furi_assert(_model);
 
-    ButtonMenuModel* model = (ButtonMenuModel*) _model;
+    ButtonMenuModel* model = (ButtonMenuModel*)_model;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
@@ -80,11 +100,11 @@ static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
     int8_t max_screen = ((int16_t)items_size - 1) / BUTTONS_PER_SCREEN;
     ButtonMenuItemArray_it_t it;
 
-    if (active_screen > 0) {
+    if(active_screen > 0) {
         canvas_draw_icon_name(canvas, 28, 1, I_IrdaArrowUp_4x8);
     }
 
-    if (max_screen > active_screen) {
+    if(max_screen > active_screen) {
         canvas_draw_icon_name(canvas, 28, 123, I_IrdaArrowDown_4x8);
     }
 
@@ -92,23 +112,23 @@ static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
 
     for(ButtonMenuItemArray_it(it, model->items); !ButtonMenuItemArray_end_p(it);
         ButtonMenuItemArray_next(it), ++item_position) {
-
-        if (active_screen == (item_position / BUTTONS_PER_SCREEN)) {
-            if (ButtonMenuItemArray_cref(it)->type == ButtonMenuItemTypeControl) {
-                button_menu_draw_control_button(canvas,
-                                                item_position % BUTTONS_PER_SCREEN,
-                                                ButtonMenuItemArray_cref(it)->label,
-                                                (item_position == model->position));
-            } else if (ButtonMenuItemArray_cref(it)->type == ButtonMenuItemTypeCommon) {
-                button_menu_draw_common_button(canvas,
-                                               item_position % BUTTONS_PER_SCREEN,
-                                               ButtonMenuItemArray_cref(it)->label,
-                                               (item_position == model->position));
+        if(active_screen == (item_position / BUTTONS_PER_SCREEN)) {
+            if(ButtonMenuItemArray_cref(it)->type == ButtonMenuItemTypeControl) {
+                button_menu_draw_control_button(
+                    canvas,
+                    item_position % BUTTONS_PER_SCREEN,
+                    ButtonMenuItemArray_cref(it)->label,
+                    (item_position == model->position));
+            } else if(ButtonMenuItemArray_cref(it)->type == ButtonMenuItemTypeCommon) {
+                button_menu_draw_common_button(
+                    canvas,
+                    item_position % BUTTONS_PER_SCREEN,
+                    ButtonMenuItemArray_cref(it)->label,
+                    (item_position == model->position));
             }
         }
     }
 }
-
 
 static void button_menu_process_up(ButtonMenu* button_menu) {
     furi_assert(button_menu);
@@ -266,4 +286,3 @@ void button_menu_free(ButtonMenu* button_menu) {
     view_free(button_menu->view);
     free(button_menu);
 }
-

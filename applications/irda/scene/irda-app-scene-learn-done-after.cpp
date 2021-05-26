@@ -8,7 +8,8 @@ void IrdaAppSceneLearnDoneAfter::on_enter(IrdaApp* app) {
     auto popup = view_manager->get_popup();
 
     popup_set_icon(popup, 0, 30, I_IrdaSendShort_128x34);
-    popup_set_text(popup, "Get ready!\nPoint flipper at target.", 64, 16, AlignCenter, AlignCenter);
+    popup_set_text(
+        popup, "Get ready!\nPoint flipper at target.", 64, 16, AlignCenter, AlignCenter);
 
     popup_set_callback(popup, IrdaApp::popup_callback);
     popup_set_context(popup, app);
@@ -34,5 +35,3 @@ bool IrdaAppSceneLearnDoneAfter::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
 void IrdaAppSceneLearnDoneAfter::on_exit(IrdaApp* app) {
 }
-
-

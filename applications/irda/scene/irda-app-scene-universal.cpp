@@ -23,7 +23,8 @@ void IrdaAppSceneUniversal::on_enter(IrdaApp* app) {
 
     submenu_add_item(submenu, "TV's", SubmenuIndexUniversalTV, submenu_callback, app);
     submenu_add_item(submenu, "Audio Players", SubmenuIndexUniversalAudio, submenu_callback, app);
-    submenu_add_item(submenu, "Air Conditioners", SubmenuIndexUniversalAirConditioner, submenu_callback, app);
+    submenu_add_item(
+        submenu, "Air Conditioners", SubmenuIndexUniversalAirConditioner, submenu_callback, app);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
@@ -34,13 +35,13 @@ bool IrdaAppSceneUniversal::on_event(IrdaApp* app, IrdaAppEvent* event) {
     if(event->type == IrdaAppEvent::Type::MenuSelected) {
         switch(event->payload.menu_index) {
         case SubmenuIndexUniversalTV:
-//            app->switch_to_next_scene(IrdaApp::Scene::UniversalTV);
+            //            app->switch_to_next_scene(IrdaApp::Scene::UniversalTV);
             break;
         case SubmenuIndexUniversalAudio:
-//            app->switch_to_next_scene(IrdaApp::Scene::UniversalAudio);
+            //            app->switch_to_next_scene(IrdaApp::Scene::UniversalAudio);
             break;
         case SubmenuIndexUniversalAirConditioner:
-//            app->switch_to_next_scene(IrdaApp::Scene::UniversalAirConditioner);
+            //            app->switch_to_next_scene(IrdaApp::Scene::UniversalAirConditioner);
             break;
         }
         consumed = true;
@@ -55,4 +56,3 @@ void IrdaAppSceneUniversal::on_exit(IrdaApp* app) {
 
     submenu_clean(submenu);
 }
-

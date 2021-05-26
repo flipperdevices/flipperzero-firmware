@@ -2,14 +2,13 @@
 #include "irda.h"
 #include <api-hal-irda.h>
 
-
 void IrdaAppSignalReceiver::irda_rx_callback(void* ctx, bool level, uint32_t duration) {
     IrdaAppEvent event;
     const IrdaMessage* irda_message;
     IrdaAppSignalReceiver* this_ = static_cast<IrdaAppSignalReceiver*>(ctx);
 
     irda_message = irda_decode(this_->decoder, level, duration);
-    if (irda_message) {
+    if(irda_message) {
         this_->capture_stop();
         this_->message = *irda_message;
         event.type = IrdaAppEvent::Type::IrdaMessageReceived;
@@ -19,8 +18,7 @@ void IrdaAppSignalReceiver::irda_rx_callback(void* ctx, bool level, uint32_t dur
 }
 
 IrdaAppSignalReceiver::IrdaAppSignalReceiver(void)
-    : decoder(irda_alloc_decoder())
-{
+    : decoder(irda_alloc_decoder()) {
 }
 
 IrdaAppSignalReceiver::~IrdaAppSignalReceiver() {
@@ -46,4 +44,3 @@ IrdaMessage* IrdaAppSignalReceiver::get_last_message(void) {
 void IrdaAppSignalReceiver::send_message(const IrdaMessage* message) {
     irda_send(message, 1);
 }
-

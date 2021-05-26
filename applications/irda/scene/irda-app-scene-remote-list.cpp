@@ -21,10 +21,11 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     int i = 0;
 
     remote_names = remote_manager->get_remote_list();
-    for (auto &a : remote_names) {
+    for(auto& a : remote_names) {
         submenu_add_item(submenu, a.c_str(), i++, submenu_callback, app);
     }
-    submenu_add_item(submenu, "                           +", SubmenuIndexPlus, submenu_callback, app);
+    submenu_add_item(
+        submenu, "                           +", SubmenuIndexPlus, submenu_callback, app);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
@@ -56,4 +57,3 @@ void IrdaAppSceneRemoteList::on_exit(IrdaApp* app) {
 
     submenu_clean(submenu);
 }
-

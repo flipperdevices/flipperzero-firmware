@@ -7,4 +7,3 @@ extern "C" int32_t irda(void* p) {
 
     return 0;
 }
-

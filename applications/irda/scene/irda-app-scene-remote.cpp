@@ -25,15 +25,15 @@ void IrdaAppSceneRemote::on_enter(IrdaApp* app) {
     buttons_names = remote_manager->get_button_list();
 
     i = 0;
-    for (auto & name : buttons_names) {
-        button_menu_add_item(button_menu, name.c_str(), i++,
-            button_menu_callback, ButtonMenuItemTypeCommon, app);
+    for(auto& name : buttons_names) {
+        button_menu_add_item(
+            button_menu, name.c_str(), i++, button_menu_callback, ButtonMenuItemTypeCommon, app);
     }
 
-    button_menu_add_item(button_menu, "+", ButtonIndexPlus,
-            button_menu_callback, ButtonMenuItemTypeControl, app);
-    button_menu_add_item(button_menu, "Edit", ButtonIndexEdit,
-            button_menu_callback, ButtonMenuItemTypeControl, app);
+    button_menu_add_item(
+        button_menu, "+", ButtonIndexPlus, button_menu_callback, ButtonMenuItemTypeControl, app);
+    button_menu_add_item(
+        button_menu, "Edit", ButtonIndexEdit, button_menu_callback, ButtonMenuItemTypeControl, app);
 
     button_menu_set_header(button_menu, remote_manager->get_current_remote_name());
     view_manager->switch_to(IrdaAppViewManager::ViewType::ButtonMenu);
@@ -57,7 +57,8 @@ bool IrdaAppSceneRemote::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         }
     } else if(event->type == IrdaAppEvent::Type::Back) {
-        app->search_and_switch_to_previous_scene({IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
+        app->search_and_switch_to_previous_scene(
+            {IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
     } else {
         consumed = false;
     }
@@ -71,4 +72,3 @@ void IrdaAppSceneRemote::on_exit(IrdaApp* app) {
 
     button_menu_clean(button_menu);
 }
-

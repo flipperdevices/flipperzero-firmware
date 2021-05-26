@@ -2,14 +2,13 @@
 #include <string>
 #include <stdio.h>
 
-
 void IrdaAppSceneLearnDone::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     Popup* popup = view_manager->get_popup();
 
     popup_set_icon(popup, 32, 5, I_DolphinNice_96x59);
 
-    if (app->get_learn_new_remote()) {
+    if(app->get_learn_new_remote()) {
         popup_set_text(popup, "New remote\ncreated!", 5, 7, AlignLeft, AlignTop);
     } else {
         popup_set_text(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
@@ -37,4 +36,3 @@ bool IrdaAppSceneLearnDone::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
 void IrdaAppSceneLearnDone::on_exit(IrdaApp* app) {
 }
-

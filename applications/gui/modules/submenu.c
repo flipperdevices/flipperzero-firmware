@@ -45,7 +45,8 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
         if(item_position < 4) {
             if(position == model->position) {
                 canvas_set_color(canvas, ColorBlack);
-                elements_slightly_rounded_box(canvas, 0, (item_position * item_height) + 1, item_width, item_height - 2);
+                elements_slightly_rounded_box(
+                    canvas, 0, (item_position * item_height) + 1, item_width, item_height - 2);
                 canvas_set_color(canvas, ColorWhite);
             } else {
                 canvas_set_color(canvas, ColorBlack);

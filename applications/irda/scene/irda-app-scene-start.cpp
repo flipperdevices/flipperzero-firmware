@@ -20,8 +20,10 @@ void IrdaAppSceneStart::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
 
-    submenu_add_item(submenu, "Universal library", SubmenuIndexUniversalLibrary, submenu_callback, app);
-    submenu_add_item(submenu, "Learn new remote", SubmenuIndexLearnNewRemote, submenu_callback, app);
+    submenu_add_item(
+        submenu, "Universal library", SubmenuIndexUniversalLibrary, submenu_callback, app);
+    submenu_add_item(
+        submenu, "Learn new remote", SubmenuIndexLearnNewRemote, submenu_callback, app);
     submenu_add_item(submenu, "Saved remotes", SubmenuIndexSavedRemotes, submenu_callback, app);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
@@ -55,4 +57,3 @@ void IrdaAppSceneStart::on_exit(IrdaApp* app) {
 
     submenu_clean(submenu);
 }
-

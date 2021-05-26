@@ -10,7 +10,8 @@ void IrdaAppSceneLearn::on_enter(IrdaApp* app) {
     auto popup = view_manager->get_popup();
 
     popup_set_icon(popup, 0, 32, I_IrdaLearnShort_128x31);
-    popup_set_text(popup, "Point the remote at IR port\nand push the button", 5, 10, AlignLeft, AlignCenter);
+    popup_set_text(
+        popup, "Point the remote at IR port\nand push the button", 5, 10, AlignLeft, AlignCenter);
     popup_set_callback(popup, NULL);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Popup);
@@ -19,7 +20,7 @@ void IrdaAppSceneLearn::on_enter(IrdaApp* app) {
 bool IrdaAppSceneLearn::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
-    if (event->type == IrdaAppEvent::Type::IrdaMessageReceived) {
+    if(event->type == IrdaAppEvent::Type::IrdaMessageReceived) {
         app->switch_to_next_scene_without_saving(IrdaApp::Scene::LearnSuccess);
     }
 
@@ -28,4 +29,3 @@ bool IrdaAppSceneLearn::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
 void IrdaAppSceneLearn::on_exit(IrdaApp* app) {
 }
-
