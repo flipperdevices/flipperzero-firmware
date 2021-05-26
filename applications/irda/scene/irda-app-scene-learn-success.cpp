@@ -20,7 +20,7 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
     auto message = receiver->get_last_message();
 
     app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
-    app->set_text_store(1, "A: 0x%04X\nC: 0x%02X\n", (uint16_t) message->address, (uint16_t) message->command);
+    app->set_text_store(1, "A: 0x%02X\nC: 0x%02X\n", (uint16_t) message->address, (uint16_t) message->command);
     dialog_ex_set_header(dialog_ex, app->get_text_store(0), 95, 10, AlignCenter, AlignCenter);
     dialog_ex_set_text(dialog_ex, app->get_text_store(1), 75, 23, AlignLeft, AlignTop);
     dialog_ex_set_left_button_text(dialog_ex, "Retry");

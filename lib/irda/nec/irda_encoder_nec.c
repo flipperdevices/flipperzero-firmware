@@ -33,7 +33,12 @@ void irda_encoder_nec_encode(uint32_t addr, uint32_t cmd, bool repeat) {
     if (!repeat) {
         irda_encode_nec_preamble();
         irda_encode_byte(&encoder_timings, address);
-        irda_encode_byte(&encoder_timings, address_inverse);
+        // Some NEC's extensions allow 16 bit address
+        if (addr > 0xFF) {
+            irda_encode_byte(&encoder_timings, (uint8_t) (addr >> 8));
+        } else {
+            irda_encode_byte(&encoder_timings, address_inverse);
+        }
         irda_encode_byte(&encoder_timings, command);
         irda_encode_byte(&encoder_timings, command_inverse);
         irda_encode_bit(&encoder_timings, 1);

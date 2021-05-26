@@ -35,9 +35,13 @@ static bool interpret_nec(IrdaCommonDecoder* decoder) {
     uint8_t command = decoder->data[2];
     uint8_t command_inverse = decoder->data[3];
 
-    if((command == (uint8_t)~command_inverse)) {
-        decoder->message.command = command;
+    if(command == (uint8_t)~command_inverse) {
         decoder->message.address = address;
+        // Some NEC's extensions allow 16 bit address
+        if (address != (uint8_t)~address_inverse) {
+            decoder->message.address |= (address_inverse << 8);
+        }
+        decoder->message.command = command;
         decoder->message.repeat = false;
         result = true;
     }
