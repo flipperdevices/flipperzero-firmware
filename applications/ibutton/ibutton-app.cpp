@@ -397,6 +397,7 @@ bool iButtonApp::save_key(const char* key_name) {
     string_t key_file_name;
     bool result = false;
     FS_Error fs_result;
+    uint16_t write_count;
 
     // Create ibutton directory if necessary
     fs_result = get_fs_api()->common.mkdir(app_folder);
@@ -444,8 +445,8 @@ bool iButtonApp::save_key(const char* key_name) {
             break;
         }
 
-        get_fs_api()->file.write(&key_file, key_type, 1);
-        if(key_file.error_id != FSE_OK) {
+        write_count = get_fs_api()->file.write(&key_file, key_type, 1);
+        if(key_file.error_id != FSE_OK || write_count != 1) {
             show_file_error_message("Cannot write\nto key file");
             get_fs_api()->file.close(&key_file);
             return false;
@@ -456,8 +457,8 @@ bool iButtonApp::save_key(const char* key_name) {
 
         for(uint8_t i = 0; i < get_key()->get_type_data_size(); i++) {
             sniprintf(byte_text, byte_text_size, " %02X", get_key()->get_data()[i]);
-            get_fs_api()->file.write(&key_file, byte_text, 3);
-            if(key_file.error_id != FSE_OK) {
+            write_count = get_fs_api()->file.write(&key_file, byte_text, 3);
+            if(key_file.error_id != FSE_OK || write_count != 3) {
                 show_file_error_message("Cannot write\nto key file");
                 get_fs_api()->file.close(&key_file);
                 return false;
@@ -489,6 +490,7 @@ bool iButtonApp::load_key() {
     if(res) {
         string_t key_str;
         File key_file;
+        uint16_t read_count;
 
         // Get key file path
         string_init_set_str(key_str, app_folder);
@@ -511,8 +513,8 @@ bool iButtonApp::load_key() {
         char byte_text[byte_text_size] = {0, 0, 0, 0};
 
         // load type header
-        get_fs_api()->file.read(&key_file, byte_text, 1);
-        if(key_file.error_id != FSE_OK) {
+        read_count = get_fs_api()->file.read(&key_file, byte_text, 1);
+        if(key_file.error_id != FSE_OK || read_count != 1) {
             show_file_error_message("Cannot read\nkey file");
             get_fs_api()->file.close(&key_file);
             return false;
@@ -537,16 +539,16 @@ bool iButtonApp::load_key() {
         uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};
         for(uint8_t i = 0; i < get_key()->get_type_data_size(); i++) {
             // space
-            get_fs_api()->file.read(&key_file, byte_text, 1);
-            if(key_file.error_id != FSE_OK) {
+            read_count = get_fs_api()->file.read(&key_file, byte_text, 1);
+            if(key_file.error_id != FSE_OK || read_count != 1) {
                 show_file_error_message("Cannot read\nkey file");
                 get_fs_api()->file.close(&key_file);
                 return false;
             }
 
             // value
-            get_fs_api()->file.read(&key_file, byte_text, 2);
-            if(key_file.error_id != FSE_OK) {
+            read_count = get_fs_api()->file.read(&key_file, byte_text, 2);
+            if(key_file.error_id != FSE_OK || read_count != 2) {
                 show_file_error_message("Cannot read\nkey file");
                 get_fs_api()->file.close(&key_file);
                 return false;
