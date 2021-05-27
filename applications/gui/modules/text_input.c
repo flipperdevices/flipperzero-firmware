@@ -42,10 +42,10 @@ static const TextInputKey keyboard_keys_row_1[] = {
     {'i', 64, 8},
     {'o', 73, 8},
     {'p', 82, 8},
-    {'7', 91, 8},
-    {'8', 100, 8},
-    {'9', 109, 8},
-    {'_', 118, 8},
+    {'0', 91, 8},
+    {'1', 100, 8},
+    {'2', 110, 8},
+    {'3', 120, 8},
 };
 
 static const TextInputKey keyboard_keys_row_2[] = {
@@ -58,10 +58,10 @@ static const TextInputKey keyboard_keys_row_2[] = {
     {'j', 55, 20},
     {'k', 64, 20},
     {'l', 73, 20},
-    {'4', 82, 20},
-    {'5', 91, 20},
-    {'6', 100, 20},
-    {BACKSPACE_KEY, 110, 12},
+    {BACKSPACE_KEY, 82, 12},
+    {'4', 100, 20},
+    {'5', 110, 20},
+    {'6', 120, 20},
 };
 
 static const TextInputKey keyboard_keys_row_3[] = {
@@ -72,11 +72,11 @@ static const TextInputKey keyboard_keys_row_3[] = {
     {'b', 37, 32},
     {'n', 46, 32},
     {'m', 55, 32},
-    {'0', 64, 32},
-    {'1', 73, 32},
-    {'2', 82, 32},
-    {'3', 91, 32},
-    {ENTER_KEY, 102, 23},
+    {'_', 64, 32},
+    {ENTER_KEY, 73, 23},
+    {'7', 100, 32},
+    {'8', 110, 32},
+    {'9', 120, 32},
 };
 
 static uint8_t get_row_size(uint8_t row_index) {
@@ -130,20 +130,21 @@ static const char char_to_uppercase(const char letter) {
 static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     TextInputModel* model = _model;
     uint8_t text_length = strlen(model->text);
-    uint8_t needed_string_width = canvas_width(canvas) - 4 - 7 - 4;
+    uint8_t needed_string_width = canvas_width(canvas) - 8;
     char* text = model->text;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
     canvas_draw_str(canvas, 2, 8, model->header);
-    elements_slightly_rounded_frame(canvas, 1, 12, 122, 15);
+    elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
     while(text != 0 && canvas_string_width(canvas, text) > needed_string_width) {
         text++;
     }
 
     canvas_draw_str(canvas, 4, 22, text);
+
     canvas_draw_str(canvas, 4 + canvas_string_width(canvas, text) + 1, 22, "|");
 
     canvas_set_font(canvas, FontKeyboard);
@@ -220,6 +221,9 @@ static void text_input_handle_up(TextInput* text_input) {
         text_input->view, (TextInputModel * model) {
             if(model->selected_row > 0) {
                 model->selected_row--;
+                if(model->selected_column > get_row_size(model->selected_row) - 5) {
+                    model->selected_column = model->selected_column + 1;
+                }
             }
             return true;
         });
@@ -230,8 +234,8 @@ static void text_input_handle_down(TextInput* text_input) {
         text_input->view, (TextInputModel * model) {
             if(model->selected_row < keyboard_row_count - 1) {
                 model->selected_row++;
-                if(model->selected_column > get_row_size(model->selected_row) - 1) {
-                    model->selected_column = get_row_size(model->selected_row) - 1;
+                if(model->selected_column > get_row_size(model->selected_row) - 4) {
+                    model->selected_column = model->selected_column - 1;
                 }
             }
             return true;
