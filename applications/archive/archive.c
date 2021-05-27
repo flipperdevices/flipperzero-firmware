@@ -200,7 +200,7 @@ static uint32_t archive_previous_callback(void* context) {
 }
 
 /* file menu */
-static void archive_add_to_favorites(ArchiveApp* archive) {
+static void archive_add_to_favourites(ArchiveApp* archive) {
     furi_assert(archive);
 
     FS_Common_Api* common_api = &archive->fs_api->common;
@@ -212,7 +212,7 @@ static void archive_add_to_favorites(ArchiveApp* archive) {
     string_cat(buffer_src, "/");
     string_cat(buffer_src, archive->browser.name);
 
-    string_init_set_str(buffer_dst, "/favorites/");
+    string_init_set_str(buffer_dst, "/favourites/");
     string_cat(buffer_dst, archive->browser.name);
 
     common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
@@ -290,21 +290,11 @@ static void archive_close_file_menu(ArchiveApp* archive) {
     view_commit_model(archive->view_archive_main, true);
 }
 
-static void
-archive_open_app(ArchiveApp* archive, const FlipperApplication* flipper_app, void* arg) {
+static void archive_open_app(ArchiveApp* archive, const char* app_name, const char* args) {
     furi_assert(archive);
-    furi_assert(flipper_app);
-    furi_assert(flipper_app->app);
-    furi_assert(flipper_app->name);
+    furi_assert(app_name);
 
-    if(arg) {
-        // pass path to app?
-    }
-
-    furi_thread_set_name(archive->app_thread, flipper_app->name);
-    furi_thread_set_stack_size(archive->app_thread, flipper_app->stack_size);
-    furi_thread_set_callback(archive->app_thread, flipper_app->app);
-    furi_thread_start(archive->app_thread);
+    app_loader_start(app_name, args);
 }
 
 static void archive_delete_file(ArchiveApp* archive, string_t name) {
@@ -339,13 +329,14 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
     switch(model->menu_idx) {
     case 0:
         if((selected->type != ArchiveFileTypeFolder && selected->type != ArchiveFileTypeUnknown)) {
-            archive_open_app(archive, &FLIPPER_APPS[selected->type], NULL);
+            archive_open_app(
+                archive, flipper_app_name[selected->type], string_get_cstr(selected->name));
         }
         break;
     case 1:
 
         string_set(archive->browser.name, selected->name);
-        archive_add_to_favorites(archive);
+        archive_add_to_favourites(archive);
         archive_close_file_menu(archive);
         break;
     case 2:
@@ -521,7 +512,7 @@ ArchiveApp* archive_alloc() {
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 
-    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavorites);
+    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavourites);
 
     return archive;
 }

@@ -263,3 +263,18 @@ void elements_slightly_rounded_box(
     furi_assert(canvas);
     canvas_draw_rbox(canvas, x, y, width, height, 1);
 }
+
+void elements_string_fit_width(Canvas* canvas, string_t string, uint8_t width) {
+    furi_assert(canvas);
+    furi_assert(string);
+
+    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(string));
+
+    if(len_px > width) {
+        size_t s_len = strlen(string_get_cstr(string));
+        uint8_t end_pos = s_len - ((len_px - width) / ((len_px / s_len) + 2) + 2);
+
+        string_mid(string, 0, end_pos);
+        string_cat(string, "...");
+    }
+}
