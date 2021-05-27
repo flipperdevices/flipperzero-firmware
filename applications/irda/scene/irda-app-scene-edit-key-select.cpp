@@ -16,12 +16,13 @@ void IrdaAppSceneEditKeySelect::on_enter(IrdaApp* app) {
     Submenu* submenu = view_manager->get_submenu();
     int i = 0;
 
-    const char* header = app->get_edit_action() == IrdaApp::EditAction::Rename ? "Rename key:" : "Delete key:";
+    const char* header = app->get_edit_action() == IrdaApp::EditAction::Rename ? "Rename key:" :
+                                                                                 "Delete key:";
     submenu_set_header(submenu, header);
 
     auto remote_manager = app->get_remote_manager();
     buttons_names = remote_manager->get_button_list();
-    for (const auto &it : buttons_names) {
+    for(const auto& it : buttons_names) {
         submenu_add_item(submenu, it.c_str(), i++, submenu_callback, app);
     }
 
@@ -35,7 +36,7 @@ bool IrdaAppSceneEditKeySelect::on_event(IrdaApp* app, IrdaAppEvent* event) {
         auto remote_manager = app->get_remote_manager();
         remote_manager->set_current_button(event->payload.menu_index);
         consumed = true;
-        if (app->get_edit_action() == IrdaApp::EditAction::Rename) {
+        if(app->get_edit_action() == IrdaApp::EditAction::Rename) {
             app->switch_to_next_scene(IrdaApp::Scene::EditRename);
         } else {
             app->switch_to_next_scene(IrdaApp::Scene::EditDelete);

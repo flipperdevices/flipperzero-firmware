@@ -19,7 +19,7 @@ bool IrdaAppSceneEditDeleteDone::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
     if(event->type == IrdaAppEvent::Type::PopupTimer) {
-        if (app->get_edit_element() == IrdaApp::EditElement::Remote) {
+        if(app->get_edit_element() == IrdaApp::EditElement::Remote) {
             app->search_and_switch_to_previous_scene(
                 {IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
         } else {
@@ -33,4 +33,3 @@ bool IrdaAppSceneEditDeleteDone::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
 void IrdaAppSceneEditDeleteDone::on_exit(IrdaApp* app) {
 }
-

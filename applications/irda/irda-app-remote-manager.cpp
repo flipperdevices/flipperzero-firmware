@@ -128,4 +128,3 @@ void IrdaAppRemoteManager::rename_button(const char* str) {
 size_t IrdaAppRemoteManager::get_current_remote_buttons_number() {
     return remotes[current_remote_index].buttons.size();
 }
-

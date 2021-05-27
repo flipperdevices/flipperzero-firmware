@@ -154,4 +154,3 @@ void IrdaApp::set_edit_action(IrdaApp::EditAction value) {
 IrdaApp::EditAction IrdaApp::get_edit_action(void) {
     return action;
 }
-
