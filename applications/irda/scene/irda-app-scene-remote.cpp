@@ -35,7 +35,8 @@ void IrdaAppSceneRemote::on_enter(IrdaApp* app) {
     button_menu_add_item(
         button_menu, "Edit", ButtonIndexEdit, button_menu_callback, ButtonMenuItemTypeControl, app);
 
-    button_menu_set_header(button_menu, remote_manager->get_current_remote_name());
+    app->set_text_store(0, "%s", remote_manager->get_current_remote_name().c_str());
+    button_menu_set_header(button_menu, app->get_text_store(0));
     view_manager->switch_to(IrdaAppViewManager::ViewType::ButtonMenu);
 }
 
@@ -48,7 +49,7 @@ bool IrdaAppSceneRemote::on_event(IrdaApp* app, IrdaAppEvent* event) {
             app->switch_to_next_scene(IrdaApp::Scene::Learn);
             break;
         case ButtonIndexEdit:
-            app->switch_to_next_scene(IrdaApp::Scene::Universal);
+            app->switch_to_next_scene(IrdaApp::Scene::Edit);
             break;
         default:
             auto remote_manager = app->get_remote_manager();

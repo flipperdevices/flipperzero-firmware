@@ -138,3 +138,20 @@ void IrdaApp::popup_callback(void* context) {
     event.type = IrdaAppEvent::Type::PopupTimer;
     app->get_view_manager()->send_event(&event);
 }
+
+void IrdaApp::set_edit_element(IrdaApp::EditElement value) {
+    element = value;
+}
+
+IrdaApp::EditElement IrdaApp::get_edit_element(void) {
+    return element;
+}
+
+void IrdaApp::set_edit_action(IrdaApp::EditAction value) {
+    action = value;
+}
+
+IrdaApp::EditAction IrdaApp::get_edit_action(void) {
+    return action;
+}
+

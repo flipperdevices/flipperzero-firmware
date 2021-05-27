@@ -172,6 +172,7 @@ void submenu_clean(Submenu* submenu) {
             SubmenuItemArray_clean(model->items);
             model->position = 0;
             model->window_position = 0;
+            model->header = NULL;
             return true;
         });
 }

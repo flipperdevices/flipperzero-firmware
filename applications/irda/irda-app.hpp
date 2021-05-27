@@ -8,10 +8,19 @@
 #include "irda-app-remote-manager.hpp"
 #include "irda-app-receiver.hpp"
 #include <forward_list>
+#include <stdint.h>
 
 
 class IrdaApp {
 public:
+    enum class EditElement : uint8_t {
+        Button,
+        Remote,
+    };
+    enum class EditAction : uint8_t {
+        Rename,
+        Delete,
+    };
     enum class Scene : uint8_t {
         Exit,
         Start,
@@ -26,7 +35,12 @@ public:
         LearnDoneAfter,
         Remote,
         RemoteList,
-        SavedRemotes,
+        Edit,
+        EditKeySelect,
+        EditRename,
+        EditDelete,
+        EditRenameDone,
+        EditDeleteDone,
     };
 
     void run(void);
@@ -41,8 +55,15 @@ public:
     uint8_t get_text_store_size();
     IrdaAppRemoteManager* get_remote_manager();
     void search_and_switch_to_previous_scene(const std::initializer_list<Scene>& scenes_list);
-    void set_learn_new_remote(bool value);
+
+    void set_edit_element(EditElement value);
+    EditElement get_edit_element(void);
+
+    void set_edit_action(EditAction value);
+    EditAction get_edit_action(void);
+
     bool get_learn_new_remote();
+    void set_learn_new_remote(bool value);
 
     static void text_input_callback(void* context, char* text);
     static void popup_callback(void* context);
@@ -57,6 +78,8 @@ private:
     static const uint8_t text_store_max = 2;
     char text_store[text_store_max][text_store_size + 1];
     bool learn_new_remote;
+    EditElement element;
+    EditAction action;
 
     IrdaAppSignalReceiver receiver;
     IrdaAppViewManager view_manager;
@@ -75,5 +98,11 @@ private:
         {Scene::LearnDoneAfter, new IrdaAppSceneLearnDoneAfter()},
         {Scene::Remote, new IrdaAppSceneRemote()},
         {Scene::RemoteList, new IrdaAppSceneRemoteList()},
+        {Scene::Edit, new IrdaAppSceneEdit()},
+        {Scene::EditKeySelect, new IrdaAppSceneEditKeySelect()},
+        {Scene::EditRename, new IrdaAppSceneEditRename()},
+        {Scene::EditDelete, new IrdaAppSceneEditDelete()},
+        {Scene::EditRenameDone, new IrdaAppSceneEditRenameDone()},
+        {Scene::EditDeleteDone, new IrdaAppSceneEditDeleteDone()},
     };
 };

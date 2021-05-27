@@ -84,3 +84,47 @@ public:
     std::vector<std::string> remote_names;
 };
 
+class IrdaAppSceneEdit : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+
+class IrdaAppSceneEditKeySelect : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+private:
+    std::vector<std::string> buttons_names;
+};
+
+class IrdaAppSceneEditRename : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+
+class IrdaAppSceneEditDelete : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+
+class IrdaAppSceneEditRenameDone : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+
+class IrdaAppSceneEditDeleteDone : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+

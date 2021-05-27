@@ -69,8 +69,8 @@ size_t IrdaAppRemoteManager::get_current_remote(void) const {
     return current_remote_index;
 }
 
-const char* IrdaAppRemoteManager::get_current_remote_name() const {
-    return remotes[current_remote_index].name.c_str();
+size_t IrdaAppRemoteManager::get_current_button(void) const {
+    return current_button_index;
 }
 
 void IrdaAppRemote::add_button(
@@ -81,6 +81,7 @@ void IrdaAppRemote::add_button(
 }
 
 const IrdaMessage* IrdaAppRemoteManager::get_button_data(size_t button_index) const {
+    furi_check(remotes[current_remote_index].buttons.size() > button_index);
     auto& b = remotes[current_remote_index].buttons.at(button_index);
     return &b.message;
 }
@@ -89,3 +90,42 @@ void IrdaAppRemoteManager::set_current_remote(size_t index) {
     furi_check(index < remotes.size());
     current_remote_index = index;
 }
+
+void IrdaAppRemoteManager::set_current_button(size_t index) {
+    furi_check(current_remote_index < remotes.size());
+    furi_check(index < remotes[current_remote_index].buttons.size());
+    current_button_index = index;
+}
+
+void IrdaAppRemoteManager::delete_current_remote() {
+    remotes.erase(remotes.begin() + current_remote_index);
+    current_remote_index = 0;
+}
+
+void IrdaAppRemoteManager::delete_current_button() {
+    auto& buttons = remotes[current_remote_index].buttons;
+    buttons.erase(buttons.begin() + current_button_index);
+    current_button_index = 0;
+}
+
+std::string IrdaAppRemoteManager::get_current_button_name() {
+    auto buttons = remotes[current_remote_index].buttons;
+    return buttons[current_button_index].name;
+}
+
+std::string IrdaAppRemoteManager::get_current_remote_name() {
+    return remotes[current_remote_index].name;
+}
+
+void IrdaAppRemoteManager::rename_remote(const char* str) {
+    remotes[current_remote_index].name = str;
+}
+
+void IrdaAppRemoteManager::rename_button(const char* str) {
+    remotes[current_remote_index].buttons[current_button_index].name = str;
+}
+
+size_t IrdaAppRemoteManager::get_current_remote_buttons_number() {
+    return remotes[current_remote_index].buttons.size();
+}
+

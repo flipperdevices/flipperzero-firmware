@@ -1,5 +1,4 @@
 #include "../irda-app.hpp"
-#include <callback-connector.h>
 
 typedef enum {
     SubmenuIndexUniversalTV,

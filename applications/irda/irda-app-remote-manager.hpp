@@ -27,6 +27,7 @@ public:
 
 class IrdaAppRemoteManager {
     size_t current_remote_index;
+    size_t current_button_index;
     std::vector<IrdaAppRemote> remotes;
 public:
     std::vector<std::string> get_remote_list() const;
@@ -35,9 +36,17 @@ public:
     void add_button(const char* button_name, const IrdaMessage* message);
 
     size_t get_current_remote(void) const;
+    size_t get_current_button(void) const;
     const IrdaMessage* get_button_data(size_t button_index) const;
-    const char* get_current_remote_name() const;
     void set_current_remote(size_t index);
+    void set_current_button(size_t index);
+    void rename_button(const char* str);
+    void rename_remote(const char* str);
+    std::string get_current_button_name();
+    std::string get_current_remote_name();
+    size_t get_current_remote_buttons_number();
+    void delete_current_button();
+    void delete_current_remote();
     IrdaAppRemoteManager();
     ~IrdaAppRemoteManager() {};
 };
