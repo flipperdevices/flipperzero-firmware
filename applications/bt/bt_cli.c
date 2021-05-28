@@ -2,12 +2,6 @@
 #include <furi.h>
 #include <api-hal.h>
 
-static int8_t bt_convert_rssi_raw(uint32_t rssi_raw) {
-    int8_t rssa = 0;
-    // Some ST magic
-    return rssa;
-}
-
 void bt_cli_init() {
     Cli* cli = furi_record_open("cli");
 
@@ -69,17 +63,16 @@ void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
     }
     printf("Receiving carrier at %hu channel\r\n", channel);
     printf("Press CTRL+C to stop\r\n");
-    api_hal_bt_start_rx(channel);
+    api_hal_bt_start_packet_rx(channel, 1);
 
-    uint32_t rssi_raw = 0;
+    float rssi_raw = 0;
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(250);
-        if(api_hal_bt_get_rssi(&rssi_raw)) {
-            printf("RSSI: %03d dB\r", bt_convert_rssi_raw(rssi_raw));
-            fflush(stdout);
-        }
+        rssi_raw = api_hal_bt_get_rssi();
+        printf("RSSI: %03.1f dB\r", rssi_raw);
+        fflush(stdout);
     }
-    api_hal_bt_stop_rx();
+    api_hal_bt_stop_packet_test();
 }
 
 void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
@@ -117,13 +110,14 @@ void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
         pattern,
         channel,
         datarate);
-    printf("Press CTRL+C to stop");
+    printf("Press CTRL+C to stop\r\n");
     api_hal_bt_start_packet_tx(channel, pattern, datarate);
 
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(250);
     }
     api_hal_bt_stop_packet_test();
+    printf("Transmitted %lu packets", api_hal_bt_get_transmitted_packets());
 }
 
 void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
@@ -147,10 +141,11 @@ void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
     printf("Press CTRL+C to stop\r\n");
     api_hal_bt_start_packet_rx(channel, datarate);
 
-    uint32_t rssi_raw = 0;
+    float rssi_raw = 0;
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(250);
-        printf("RSSI: %03d dB\r", bt_convert_rssi_raw(rssi_raw));
+        rssi_raw = api_hal_bt_get_rssi();
+        printf("RSSI: %03.1f dB\r", rssi_raw);
         fflush(stdout);
     }
     uint16_t packets_transmitted = api_hal_bt_stop_packet_test();
