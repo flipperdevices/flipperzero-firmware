@@ -52,6 +52,17 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .encoder = {
           .encode = irda_encoder_nec_encode}
     },
+    // #2
+    { .protocol = IrdaProtocolNECext,
+      .name = "NECext",
+      .decoder = {
+          .alloc = irda_decoder_necext_alloc,
+          .decode = irda_decoder_nec_decode,
+          .reset = irda_decoder_nec_reset,
+          .free = irda_decoder_nec_free},
+      .encoder = {
+          .encode = irda_encoder_necext_encode},
+    },
 };
 
 

@@ -13,6 +13,7 @@ typedef struct IrdaHandler IrdaHandler;
 typedef enum {
     IrdaProtocolSamsung32 = 0,
     IrdaProtocolNEC = 1,
+    IrdaProtocolNECext = 2,
 } IrdaProtocol;
 
 typedef struct {
