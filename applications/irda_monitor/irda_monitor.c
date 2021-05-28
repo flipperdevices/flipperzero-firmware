@@ -29,11 +29,10 @@ typedef struct {
 } IrdaMonitor;
 
 static void irda_rx_callback(void* ctx, bool level, uint32_t duration) {
-    IrdaMonitor* irda_monitor = (IrdaMonitor*) ctx;
+    IrdaMonitor* irda_monitor = (IrdaMonitor*)ctx;
     IrdaDelaysArray* delays = &irda_monitor->delays;
 
-    if(delays->timing_cnt > 1)
-        furi_assert(level != delays->timing[delays->timing_cnt - 1].level);
+    if(delays->timing_cnt > 1) furi_assert(level != delays->timing[delays->timing_cnt - 1].level);
     delays->timing[delays->timing_cnt].level = level;
     delays->timing[delays->timing_cnt].duration = duration;
     delays->timing_cnt++; // Read-Modify-Write in ISR only: no need to add synchronization
@@ -44,9 +43,9 @@ static void irda_rx_callback(void* ctx, bool level, uint32_t duration) {
 
 void irda_monitor_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
-    IrdaMonitor* irda_monitor = (IrdaMonitor*) ctx;
+    IrdaMonitor* irda_monitor = (IrdaMonitor*)ctx;
 
-    if ((input_event->type == InputTypeShort) && (input_event->key == InputKeyBack)) {
+    if((input_event->type == InputTypeShort) && (input_event->key == InputKeyBack)) {
         osMessageQueuePut(irda_monitor->event_queue, input_event, 0, 0);
     }
 }
@@ -54,14 +53,15 @@ void irda_monitor_input_callback(InputEvent* input_event, void* ctx) {
 static void irda_monitor_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(canvas);
     furi_assert(ctx);
-    IrdaMonitor* irda_monitor = (IrdaMonitor*) ctx;
+    IrdaMonitor* irda_monitor = (IrdaMonitor*)ctx;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 64, 0, AlignCenter, AlignTop, "IRDA monitor\n");
     canvas_set_font(canvas, FontKeyboard);
-    if (strlen(irda_monitor->display_text)) {
-        elements_multiline_text_aligned(canvas, 64, 43, AlignCenter, AlignCenter, irda_monitor->display_text);
+    if(strlen(irda_monitor->display_text)) {
+        elements_multiline_text_aligned(
+            canvas, 64, 43, AlignCenter, AlignCenter, irda_monitor->display_text);
     }
 }
 
@@ -89,8 +89,8 @@ int32_t irda_monitor_app(void* p) {
 
     while(1) {
         InputEvent event;
-        if (osOK == osMessageQueueGet(irda_monitor->event_queue, &event, NULL, 50)) {
-            if ((event.type == InputTypeShort) && (event.key == InputKeyBack)) {
+        if(osOK == osMessageQueueGet(irda_monitor->event_queue, &event, NULL, 50)) {
+            if((event.type == InputTypeShort) && (event.key == InputKeyBack)) {
                 break;
             }
         }
@@ -99,40 +99,51 @@ int32_t irda_monitor_app(void* p) {
             notification_message(notification, &sequence_blink_blue_10);
         }
 
-        for (; counter != delays->timing_cnt;) {
-            const IrdaMessage* message = irda_decode(irda_monitor->handler,
-                                                     delays->timing[counter].level,
-                                                     delays->timing[counter].duration);
+        for(; counter != delays->timing_cnt;) {
+            const IrdaMessage* message = irda_decode(
+                irda_monitor->handler,
+                delays->timing[counter].level,
+                delays->timing[counter].duration);
 
             ++counter;
-            if (counter >= IRDA_TIMINGS_SIZE)
-                counter = 0;
+            if(counter >= IRDA_TIMINGS_SIZE) counter = 0;
 
-            if (message) {
-                snprintf(irda_monitor->display_text, sizeof(irda_monitor->display_text),
-                        "%s\nA:0x%02lX\nC:0x%02lX\n%s\n",
+            if(message) {
+                snprintf(
+                    irda_monitor->display_text,
+                    sizeof(irda_monitor->display_text),
+                    "%s\nA:0x%02lX\nC:0x%02lX\n%s\n",
+                    irda_get_protocol_name(message->protocol),
+                    message->address,
+                    message->command,
+                    message->repeat ? " R" : "");
+                view_port_update(view_port);
+            }
+
+            size_t distance = (counter > print_counter) ?
+                                  counter - print_counter :
+                                  (counter + IRDA_TIMINGS_SIZE) - print_counter;
+            if(message || (distance > (IRDA_TIMINGS_SIZE / 2))) {
+                if(message) {
+                    printf(
+                        "== %s, A:0x%02lX, C:0x%02lX%s ==\r\n",
                         irda_get_protocol_name(message->protocol),
                         message->address,
                         message->command,
                         message->repeat ? " R" : "");
-                view_port_update(view_port);
-            }
-
-            size_t distance = (counter > print_counter) ? counter - print_counter
-                                                        : (counter + IRDA_TIMINGS_SIZE) - print_counter;
-            if (message || (distance > (IRDA_TIMINGS_SIZE / 2))) {
-                if (message) {
-                    printf("== %s, A:0x%02lX, C:0x%02lX%s ==\r\n", irda_get_protocol_name(message->protocol), message->address, message->command, message->repeat ? " R" : "");
                 } else {
                     printf("== unknown data ==\r\n");
-                    snprintf(irda_monitor->display_text, sizeof(irda_monitor->display_text), "unknown data");
+                    snprintf(
+                        irda_monitor->display_text,
+                        sizeof(irda_monitor->display_text),
+                        "unknown data");
                     view_port_update(view_port);
                 }
                 printf("{");
                 while(print_counter != counter) {
                     printf("%lu, ", delays->timing[print_counter].duration);
                     ++print_counter;
-                    if (print_counter >= IRDA_TIMINGS_SIZE) {
+                    if(print_counter >= IRDA_TIMINGS_SIZE) {
                         print_counter = 0;
                     }
                 }
@@ -153,4 +164,3 @@ int32_t irda_monitor_app(void* p) {
 
     return 0;
 }
-
