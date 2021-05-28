@@ -39,7 +39,7 @@ void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
         printf("Power must be in 0...6 dB range, not %hu\r\n", power);
         return;
     }
-    printf("Transmitting carrier at %hu channel at %huu dB power\r\n", channel, power);
+    printf("Transmitting carrier at %hu channel at %hu dB power\r\n", channel, power);
     printf("Press CTRL+C to stop");
     api_hal_bt_start_tone_tx(channel, 0x19 + power);
 
@@ -148,6 +148,6 @@ void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
         printf("RSSI: %03.1f dB\r", rssi_raw);
         fflush(stdout);
     }
-    uint16_t packets_transmitted = api_hal_bt_stop_packet_test();
-    printf("Received %hu packets", packets_transmitted);
+    uint16_t packets_received = api_hal_bt_stop_packet_test();
+    printf("Received %hu packets", packets_received);
 }
