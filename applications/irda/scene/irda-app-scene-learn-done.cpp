@@ -13,7 +13,6 @@ void IrdaAppSceneLearnDone::on_enter(IrdaApp* app) {
     } else {
         popup_set_text(popup, "Saved!", 5, 7, AlignLeft, AlignTop);
     }
-    app->set_learn_new_remote(false);
 
     popup_set_callback(popup, IrdaApp::popup_callback);
     popup_set_context(popup, app);
@@ -27,7 +26,11 @@ bool IrdaAppSceneLearnDone::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
     if(event->type == IrdaAppEvent::Type::PopupTimer) {
-        app->switch_to_next_scene(IrdaApp::Scene::LearnDoneAfter);
+        if (app->get_learn_new_remote()) {
+            app->switch_to_next_scene(IrdaApp::Scene::LearnDoneAfter);
+        } else {
+            app->switch_to_next_scene(IrdaApp::Scene::Remote);
+        }
         consumed = true;
     }
 
@@ -35,4 +38,5 @@ bool IrdaAppSceneLearnDone::on_event(IrdaApp* app, IrdaAppEvent* event) {
 }
 
 void IrdaAppSceneLearnDone::on_exit(IrdaApp* app) {
+    app->set_learn_new_remote(false);
 }

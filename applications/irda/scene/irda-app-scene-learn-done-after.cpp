@@ -25,9 +25,6 @@ bool IrdaAppSceneLearnDoneAfter::on_event(IrdaApp* app, IrdaAppEvent* event) {
     if(event->type == IrdaAppEvent::Type::PopupTimer) {
         app->switch_to_next_scene(IrdaApp::Scene::Remote);
         consumed = true;
-    } else if(event->type == IrdaAppEvent::Type::Back) {
-        app->switch_to_previous_scene();
-        consumed = true;
     }
 
     return consumed;

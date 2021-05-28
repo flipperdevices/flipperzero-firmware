@@ -7,7 +7,6 @@ void IrdaAppSceneEditRenameDone::on_enter(IrdaApp* app) {
     popup_set_icon(popup, 32, 5, I_DolphinNice_96x59);
 
     popup_set_text(popup, "Saved!", 13, 22, AlignLeft, AlignTop);
-    app->set_learn_new_remote(false);
 
     popup_set_callback(popup, IrdaApp::popup_callback);
     popup_set_context(popup, app);
