@@ -39,17 +39,19 @@ void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Packets send TX test");
     if(m->type == BtStatusPacketSetup) {
-        canvas_draw_str(canvas, 0, 24, "Setup parameters");
-        canvas_draw_str(canvas, 0, 36, "Press OK to send packets");
+        canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to Send");
     } else {
-        canvas_draw_str(canvas, 0, 24, "Sending packets");
-        canvas_draw_str(canvas, 0, 36, "Packets parameters:");
+        canvas_draw_str(canvas, 0, 24, "Sending packets ...");
     }
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
-    canvas_draw_str(canvas, 0, 48, buffer);
+    canvas_draw_str(canvas, 0, 36, buffer);
     snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->datarate);
-    canvas_draw_str(canvas, 0, 60, buffer);
+    canvas_draw_str(canvas, 0, 48, buffer);
+    if(m->packets_sent) {
+        snprintf(buffer, sizeof(buffer), "%d packets sent", m->packets_sent);
+        canvas_draw_str(canvas, 0, 60, buffer);
+    }
 }
 
 void bt_view_app_draw(Canvas* canvas, void* model) {
@@ -175,7 +177,11 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyOk) {
-            bt->state.type = BtStatusPacketTx;
+            if(bt->state.type == BtStatusPacketSetup) {
+                bt->state.type = BtStatusPacketTx;
+            } else if(bt->state.type == BtStatusPacketTx) {
+                bt->state.type = BtStatusPacketSetup;
+            }
             BtMessage m = {
                 .type = BtMessageTypeStartTestPacketTx,
                 .param.channel = bt->state.param.channel,

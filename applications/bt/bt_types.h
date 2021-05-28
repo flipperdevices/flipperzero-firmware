@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 typedef enum {
     BtMessageTypeStartTestCarrier,
     BtMessageTypeHoppingTx,
@@ -47,6 +49,7 @@ typedef struct {
     BtTestPower power;
     BtTestDataRate datarate;
     float rssi;
+    uint16_t packets;
 } BtTestParam;
 
 typedef struct {

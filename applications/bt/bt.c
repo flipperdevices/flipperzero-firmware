@@ -193,12 +193,18 @@ int32_t bt_task() {
             view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestPacketTx);
         } else if(message.type == BtMessageTypeStartTestPacketTx) {
             // Start sending packets
-            api_hal_bt_start_packet_tx(message.param.channel, 1, message.param.datarate);
+            if(bt->state.type == BtStatusPacketTx) {
+                api_hal_bt_start_packet_tx(message.param.channel, 1, message.param.datarate);
+            } else if(bt->state.type == BtStatusPacketSetup) {
+                api_hal_bt_stop_packet_test();
+                bt->state.param.packets = api_hal_bt_get_transmitted_packets();
+            }
             with_view_model(
                 bt->view_test_packet_tx, (BtViewTestPacketTxModel * model) {
                     model->type = bt->state.type;
                     model->channel = bt->state.param.channel;
                     model->datarate = bt->state.param.datarate;
+                    model->packets_sent = bt->state.param.packets;
                     return true;
                 });
             view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestPacketTx);
