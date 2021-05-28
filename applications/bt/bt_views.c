@@ -4,16 +4,22 @@ void bt_view_test_carrier_draw(Canvas* canvas, void* model) {
     BtViewTestCarrierModel* m = model;
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 12, "Performing continous TX test");
+    canvas_draw_str(canvas, 0, 12, "Performing Cattier test");
     if(m->type == BtStatusCarrierTx) {
-        canvas_draw_str(canvas, 0, 24, "Manual control mode");
-    } else {
-        canvas_draw_str(canvas, 0, 24, "Hopping mode");
+        canvas_draw_str(canvas, 0, 24, "Manual Carrier TX");
+    } else if(m->type == BtStatusHoppingTx) {
+        canvas_draw_str(canvas, 0, 24, "Carrier TX Hopping mode");
+    } else if(m->type == BtStatusCarrierRx) {
+        canvas_draw_str(canvas, 0, 24, "Manual Carrier RX");
     }
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 36, buffer);
-    snprintf(buffer, sizeof(buffer), "Power:%d dB", m->power - BtPower0dB);
+    if(m->type == BtStatusCarrierTx || m->type == BtStatusHoppingTx) {
+        snprintf(buffer, sizeof(buffer), "Power:%d dB", m->power - BtPower0dB);
+    } else if(m->type == BtStatusCarrierRx) {
+        snprintf(buffer, sizeof(buffer), "RSSI: %3.1f dB", m->rssi);
+    }
     canvas_draw_str(canvas, 0, 48, buffer);
 }
 
@@ -101,9 +107,11 @@ bool bt_view_test_carrier_input(InputEvent* event, void* context) {
                 if(bt->state.type == BtStatusCarrierTx) {
                     bt->state.type = BtStatusHoppingTx;
                     osTimerStart(bt->hopping_mode_timer, 2000);
+                } else if(bt->state.type == BtStatusHoppingTx) {
+                    bt->state.type = BtStatusCarrierRx;
                 } else {
-                    bt->state.type = BtStatusCarrierTx;
                     osTimerStop(bt->hopping_mode_timer);
+                    bt->state.type = BtStatusCarrierTx;
                 }
             }
             BtMessage m = {

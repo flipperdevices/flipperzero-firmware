@@ -153,7 +153,6 @@ int32_t bt_task() {
         if(message.type == BtMessageTypeStartTestCarrier) {
             // Start test tx
             api_hal_bt_stop_tone_tx();
-            api_hal_bt_stop_rx();
             if(bt->state.type == BtStatusCarrierTx) {
                 api_hal_bt_start_tone_tx(message.param.channel, message.param.power);
             } else if(bt->state.type == BtStatusHoppingTx) {
@@ -161,20 +160,25 @@ int32_t bt_task() {
                     bt_switch_channel(InputKeyRight, bt->state.param.channel);
                 bt->state.param.power = BtPower6dB;
                 api_hal_bt_start_tone_tx(bt->state.param.channel, bt->state.param.power);
-            } else {
-                api_hal_bt_start_rx(bt->state.param.channel);
+            } else if(bt->state.type == BtStatusCarrierRx) {
+                api_hal_bt_start_packet_rx(bt->state.param.channel, bt->state.param.datarate);
+                bt->state.param.rssi = api_hal_bt_get_rssi();
             }
             with_view_model(
                 bt->view_test_carrier, (BtViewTestCarrierModel * model) {
                     model->type = bt->state.type;
                     model->channel = bt->state.param.channel;
                     model->power = bt->state.param.power;
+                    model->rssi = bt->state.param.rssi;
                     return true;
                 });
             view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestCarrier);
         } else if(message.type == BtMessageTypeStopTestCarrier) {
-            // Stop test tone tx
-            api_hal_bt_stop_tone_tx();
+            if(bt->state.type == BtStatusCarrierRx) {
+                api_hal_bt_stop_packet_test();
+            } else {
+                api_hal_bt_stop_tone_tx();
+            }
             bt->state.type = BtStatusReady;
         } else if(message.type == BtMessageTypeSetupTestPacketTx) {
             // Update packet test setup
