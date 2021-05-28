@@ -21,9 +21,7 @@ typedef struct {
 
 typedef struct {
     IrdaHandler* handler;
-    IrdaMessage message;
     char display_text[64];
-    bool decode_irda;
     osMessageQueueId_t event_queue;
     IrdaDelaysArray delays;
 } IrdaMonitor;
