@@ -11,9 +11,9 @@
 #include <gui/view.h>
 
 typedef enum {
-    BtViewTestToneTx,
+    BtViewTestCarrier,
     BtViewTestPacketTx,
-    BtViewTestToneRx,
+    BtViewTestPacketRx,
     BtViewStartApp,
 } BtView;
 
@@ -21,7 +21,7 @@ typedef struct {
     BtStateType type;
     BtTestChannel channel;
     BtTestPower power;
-} BtViewTestToneTxModel;
+} BtViewTestCarrierModel;
 
 typedef struct {
     BtStateType type;
@@ -33,16 +33,16 @@ typedef struct {
     BtTestChannel channel;
 } BtViewTestRxModel;
 
-void bt_view_test_tone_tx_draw(Canvas* canvas, void* model);
+void bt_view_test_carrier_draw(Canvas* canvas, void* model);
 
-bool bt_view_test_tone_tx_input(InputEvent* event, void* context);
+bool bt_view_test_carrier_input(InputEvent* event, void* context);
 
 void bt_view_test_packet_tx_draw(Canvas* canvas, void* model);
 
 bool bt_view_test_packet_tx_input(InputEvent* event, void* context);
 
-void bt_view_test_tone_rx_draw(Canvas* canvas, void* model);
+void bt_view_test_packet_rx_draw(Canvas* canvas, void* model);
 
-bool bt_view_test_tone_rx_input(InputEvent* event, void* context);
+bool bt_view_test_packet_rx_input(InputEvent* event, void* context);
 
 void bt_view_app_draw(Canvas* canvas, void* model);

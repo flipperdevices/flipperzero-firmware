@@ -15,7 +15,7 @@ void bt_update_statusbar(void* arg) {
 void bt_switch_freq(void* arg) {
     furi_assert(arg);
     Bt* bt = arg;
-    BtMessage m = {.type = BtMessageTypeStartTestToneTx};
+    BtMessage m = {.type = BtMessageTypeStartTestCarrier};
     furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
 }
 
@@ -43,40 +43,49 @@ Bt* bt_alloc() {
     bt->menu_icon = assets_icons_get(A_Bluetooth_14);
     bt->menu_item = menu_item_alloc_menu("Bluetooth", bt->menu_icon);
     menu_item_subitem_add(
-        bt->menu_item, menu_item_alloc_function("Test tone TX", NULL, bt_menu_test_tone_tx, bt));
+        bt->menu_item, menu_item_alloc_function("Carrier test", NULL, bt_menu_test_carrier, bt));
     menu_item_subitem_add(
         bt->menu_item,
         menu_item_alloc_function("Test packet TX", NULL, bt_menu_test_packet_tx, bt));
     menu_item_subitem_add(
-        bt->menu_item, menu_item_alloc_function("Test tone RX", NULL, bt_menu_test_tone_rx, bt));
-    menu_item_subitem_add(
         bt->menu_item, menu_item_alloc_function("Start app", NULL, bt_menu_start_app, bt));
+    menu_item_subitem_add(
+        bt->menu_item, menu_item_alloc_function("Test packet RX", NULL, bt_menu_test_tone_rx, bt));
 
-    bt->view_test_tone_tx = view_alloc();
-    view_set_context(bt->view_test_tone_tx, bt);
-    view_set_draw_callback(bt->view_test_tone_tx, bt_view_test_tone_tx_draw);
+    // Carrier test
+    bt->view_test_carrier = view_alloc();
+    view_set_context(bt->view_test_carrier, bt);
+    view_set_draw_callback(bt->view_test_carrier, bt_view_test_carrier_draw);
     view_allocate_model(
-        bt->view_test_tone_tx, ViewModelTypeLocking, sizeof(BtViewTestToneTxModel));
-    view_set_input_callback(bt->view_test_tone_tx, bt_view_test_tone_tx_input);
+        bt->view_test_carrier, ViewModelTypeLocking, sizeof(BtViewTestCarrierModel));
+    view_set_input_callback(bt->view_test_carrier, bt_view_test_carrier_input);
+
+    // Packet TX test
     bt->view_test_packet_tx = view_alloc();
     view_set_context(bt->view_test_packet_tx, bt);
     view_set_draw_callback(bt->view_test_packet_tx, bt_view_test_packet_tx_draw);
     view_allocate_model(
         bt->view_test_packet_tx, ViewModelTypeLocking, sizeof(BtViewTestPacketTxModel));
     view_set_input_callback(bt->view_test_packet_tx, bt_view_test_packet_tx_input);
-    bt->view_test_tone_rx = view_alloc();
-    view_set_context(bt->view_test_tone_rx, bt);
-    view_set_draw_callback(bt->view_test_tone_rx, bt_view_test_tone_rx_draw);
-    view_allocate_model(bt->view_test_tone_rx, ViewModelTypeLocking, sizeof(BtViewTestRxModel));
-    view_set_input_callback(bt->view_test_tone_rx, bt_view_test_tone_rx_input);
+
+    // Packet RX test
+    bt->view_test_packet_rx = view_alloc();
+    view_set_context(bt->view_test_packet_rx, bt);
+    view_set_draw_callback(bt->view_test_packet_rx, bt_view_test_packet_rx_draw);
+    view_allocate_model(bt->view_test_packet_rx, ViewModelTypeLocking, sizeof(BtViewTestRxModel));
+    view_set_input_callback(bt->view_test_packet_rx, bt_view_test_packet_rx_input);
+
+    // Start app
     bt->view_start_app = view_alloc();
     view_set_context(bt->view_start_app, bt);
     view_set_draw_callback(bt->view_start_app, bt_view_app_draw);
     view_set_previous_callback(bt->view_start_app, bt_view_exit);
+
+    // View dispatcher
     bt->view_dispatcher = view_dispatcher_alloc();
-    view_dispatcher_add_view(bt->view_dispatcher, BtViewTestToneTx, bt->view_test_tone_tx);
+    view_dispatcher_add_view(bt->view_dispatcher, BtViewTestCarrier, bt->view_test_carrier);
     view_dispatcher_add_view(bt->view_dispatcher, BtViewTestPacketTx, bt->view_test_packet_tx);
-    view_dispatcher_add_view(bt->view_dispatcher, BtViewTestToneRx, bt->view_test_tone_rx);
+    view_dispatcher_add_view(bt->view_dispatcher, BtViewTestPacketRx, bt->view_test_packet_rx);
     view_dispatcher_add_view(bt->view_dispatcher, BtViewStartApp, bt->view_start_app);
 
     Gui* gui = furi_record_open("gui");
@@ -91,12 +100,12 @@ void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     canvas_draw_icon_name(canvas, 0, 0, I_Bluetooth_5x8);
 }
 
-void bt_menu_test_tone_tx(void* context) {
+void bt_menu_test_carrier(void* context) {
     furi_assert(context);
     Bt* bt = context;
-    bt->state.type = BtStatusToneTx;
+    bt->state.type = BtStatusCarrier;
     BtMessage message = {
-        .type = BtMessageTypeStartTestToneTx,
+        .type = BtMessageTypeStartTestCarrier,
         .param.channel = bt->state.param.channel,
         .param.power = bt->state.param.power};
     furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
@@ -116,7 +125,7 @@ void bt_menu_test_packet_tx(void* context) {
 void bt_menu_test_tone_rx(void* context) {
     furi_assert(context);
     Bt* bt = context;
-    bt->state.type = BtStatusToneRx;
+    bt->state.type = BtStatusPacketRx;
     BtMessage message = {
         .type = BtMessageTypeStartTestRx,
         .param.channel = bt->state.param.channel,
@@ -141,10 +150,10 @@ int32_t bt_task() {
     BtMessage message;
     while(1) {
         furi_check(osMessageQueueGet(bt->message_queue, &message, NULL, osWaitForever) == osOK);
-        if(message.type == BtMessageTypeStartTestToneTx) {
+        if(message.type == BtMessageTypeStartTestCarrier) {
             // Start test tx
             api_hal_bt_stop_tone_tx();
-            if(bt->state.type == BtStatusToneTx) {
+            if(bt->state.type == BtStatusCarrier) {
                 api_hal_bt_start_tone_tx(message.param.channel, message.param.power);
             } else {
                 bt->state.param.channel =
@@ -153,14 +162,14 @@ int32_t bt_task() {
                 api_hal_bt_start_tone_tx(bt->state.param.channel, bt->state.param.power);
             }
             with_view_model(
-                bt->view_test_tone_tx, (BtViewTestToneTxModel * model) {
+                bt->view_test_carrier, (BtViewTestCarrierModel * model) {
                     model->type = bt->state.type;
                     model->channel = bt->state.param.channel;
                     model->power = bt->state.param.power;
                     return true;
                 });
-            view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestToneTx);
-        } else if(message.type == BtMessageTypeStopTestToneTx) {
+            view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestCarrier);
+        } else if(message.type == BtMessageTypeStopTestCarrier) {
             // Stop test tone tx
             api_hal_bt_stop_tone_tx();
             bt->state.type = BtStatusReady;
@@ -194,11 +203,11 @@ int32_t bt_task() {
             // Start test rx
             api_hal_bt_start_rx(message.param.channel);
             with_view_model(
-                bt->view_test_tone_rx, (BtViewTestRxModel * model) {
+                bt->view_test_packet_rx, (BtViewTestRxModel * model) {
                     model->channel = bt->state.param.channel;
                     return true;
                 });
-            view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestToneRx);
+            view_dispatcher_switch_to_view(bt->view_dispatcher, BtViewTestPacketRx);
         } else if(message.type == BtMessageTypeStopTestRx) {
             // Stop test rx
             api_hal_bt_stop_rx();

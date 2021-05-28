@@ -1,9 +1,9 @@
 #pragma once
 
 typedef enum {
-    BtMessageTypeStartTestToneTx,
+    BtMessageTypeStartTestCarrier,
     BtMessageTypeHoppingTx,
-    BtMessageTypeStopTestToneTx,
+    BtMessageTypeStopTestCarrier,
     BtMessageTypeSetupTestPacketTx,
     BtMessageTypeStartTestPacketTx,
     BtMessageTypeStopTestPacketTx,
@@ -15,9 +15,9 @@ typedef enum {
 
 typedef enum {
     BtStatusReady,
-    BtStatusToneTx,
+    BtStatusCarrier,
     BtStatusHoppingTx,
-    BtStatusToneRx,
+    BtStatusPacketRx,
     BtStatusPacketSetup,
     BtStatusPacketTx,
     BtStatusStartedApp,

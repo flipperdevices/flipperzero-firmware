@@ -1,11 +1,11 @@
 #include "bt_views.h"
 
-void bt_view_test_tone_tx_draw(Canvas* canvas, void* model) {
-    BtViewTestToneTxModel* m = model;
+void bt_view_test_carrier_draw(Canvas* canvas, void* model) {
+    BtViewTestCarrierModel* m = model;
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Performing continous TX test");
-    if(m->type == BtStatusToneTx) {
+    if(m->type == BtStatusCarrier) {
         canvas_draw_str(canvas, 0, 24, "Manual control mode");
     } else {
         canvas_draw_str(canvas, 0, 24, "Hopping mode");
@@ -17,7 +17,7 @@ void bt_view_test_tone_tx_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 0, 48, buffer);
 }
 
-void bt_view_test_tone_rx_draw(Canvas* canvas, void* model) {
+void bt_view_test_packet_rx_draw(Canvas* canvas, void* model) {
     BtViewTestRxModel* m = model;
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
@@ -73,7 +73,7 @@ BtTestChannel bt_switch_channel(InputKey key, BtTestChannel inst_chan) {
     return arr[0];
 }
 
-bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
+bool bt_view_test_carrier_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Bt* bt = context;
@@ -82,7 +82,7 @@ bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
             if(osTimerIsRunning(bt->hopping_mode_timer)) {
                 osTimerStop(bt->hopping_mode_timer);
             }
-            BtMessage m = {.type = BtMessageTypeStopTestToneTx};
+            BtMessage m = {.type = BtMessageTypeStopTestCarrier};
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
             return true;
@@ -98,16 +98,16 @@ bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
                     bt->state.param.power -= 2;
                 }
             } else if(event->key == InputKeyOk) {
-                if(bt->state.type == BtStatusToneTx) {
+                if(bt->state.type == BtStatusCarrier) {
                     bt->state.type = BtStatusHoppingTx;
                     osTimerStart(bt->hopping_mode_timer, 2000);
                 } else {
-                    bt->state.type = BtStatusToneTx;
+                    bt->state.type = BtStatusCarrier;
                     osTimerStop(bt->hopping_mode_timer);
                 }
             }
             BtMessage m = {
-                .type = BtMessageTypeStartTestToneTx,
+                .type = BtMessageTypeStartTestCarrier,
                 .param.channel = bt->state.param.channel,
                 .param.power = bt->state.param.power};
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
@@ -117,7 +117,7 @@ bool bt_view_test_tone_tx_input(InputEvent* event, void* context) {
     return false;
 }
 
-bool bt_view_test_tone_rx_input(InputEvent* event, void* context) {
+bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
     Bt* bt = context;
