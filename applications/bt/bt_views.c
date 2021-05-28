@@ -24,13 +24,24 @@ void bt_view_test_carrier_draw(Canvas* canvas, void* model) {
 }
 
 void bt_view_test_packet_rx_draw(Canvas* canvas, void* model) {
-    BtViewTestRxModel* m = model;
+    BtViewTestPacketRxModel* m = model;
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 12, "Performing continous RX test");
+    canvas_draw_str(canvas, 0, 12, "Performing packets RX test");
+    if(m->type == BtStatusPacketSetup) {
+        canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to start");
+    } else {
+        canvas_draw_str(canvas, 0, 24, "Receiving packets ...");
+    }
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
-    canvas_draw_str(canvas, 0, 24, buffer);
+    canvas_draw_str(canvas, 0, 36, buffer);
+    snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->datarate);
+    canvas_draw_str(canvas, 0, 48, buffer);
+    if(m->packets_received) {
+        snprintf(buffer, sizeof(buffer), "%d packets received", m->packets_received);
+        canvas_draw_str(canvas, 0, 60, buffer);
+    }
 }
 
 void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
@@ -39,7 +50,7 @@ void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Packets send TX test");
     if(m->type == BtStatusPacketSetup) {
-        canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to Send");
+        canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to start");
     } else {
         canvas_draw_str(canvas, 0, 24, "Sending packets ...");
     }
@@ -127,29 +138,6 @@ bool bt_view_test_carrier_input(InputEvent* event, void* context) {
     return false;
 }
 
-bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
-    furi_assert(event);
-    furi_assert(context);
-    Bt* bt = context;
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyRight || event->key == InputKeyLeft) {
-            bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
-            BtMessage m = {
-                .type = BtMessageTypeStartTestRx, .param.channel = bt->state.param.channel};
-            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
-            return true;
-        } else if(event->key == InputKeyBack) {
-            BtMessage m = {.type = BtMessageTypeStopTestRx};
-            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
-            view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
-            return true;
-        } else {
-            return false;
-        }
-    }
-    return false;
-}
-
 bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
@@ -178,8 +166,8 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
             return true;
         } else if(event->key == InputKeyOk) {
             if(bt->state.type == BtStatusPacketSetup) {
-                bt->state.type = BtStatusPacketTx;
-            } else if(bt->state.type == BtStatusPacketTx) {
+                bt->state.type = BtStatusPacketRun;
+            } else if(bt->state.type == BtStatusPacketRun) {
                 bt->state.type = BtStatusPacketSetup;
             }
             BtMessage m = {
@@ -191,7 +179,58 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
             return true;
         } else if(event->key == InputKeyBack) {
             BtMessage m = {
-                .type = BtMessageTypeStopTestPacketTx,
+                .type = BtMessageTypeStopTestPacket,
+            };
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Bt* bt = context;
+    if(event->type == InputTypeShort) {
+        if(event->key < InputKeyOk) {
+            // Process InputKeyUp, InputKeyDown, InputKeyLeft, InputKeyRight
+            if(event->key == InputKeyRight || event->key == InputKeyLeft) {
+                bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
+            } else if(event->key == InputKeyUp) {
+                if(bt->state.param.datarate < BtDateRate2M) {
+                    bt->state.param.datarate += 1;
+                }
+            } else if(event->key == InputKeyDown) {
+                if(bt->state.param.datarate > BtDateRate1M) {
+                    bt->state.param.datarate -= 1;
+                }
+            }
+            bt->state.type = BtStatusPacketSetup;
+            BtMessage m = {
+                .type = BtMessageTypeSetupTestPacketRx,
+                .param.channel = bt->state.param.channel,
+                .param.datarate = bt->state.param.datarate,
+            };
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            return true;
+        } else if(event->key == InputKeyOk) {
+            if(bt->state.type == BtStatusPacketSetup) {
+                bt->state.type = BtStatusPacketRun;
+            } else if(bt->state.type == BtStatusPacketRun) {
+                bt->state.type = BtStatusPacketSetup;
+            }
+            BtMessage m = {
+                .type = BtMessageTypeStartTestPacketRx,
+                .param.channel = bt->state.param.channel,
+                .param.datarate = bt->state.param.datarate,
+            };
+            furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+            return true;
+        } else if(event->key == InputKeyBack) {
+            BtMessage m = {
+                .type = BtMessageTypeStopTestPacket,
             };
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             view_dispatcher_switch_to_view(bt->view_dispatcher, VIEW_NONE);

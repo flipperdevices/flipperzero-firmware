@@ -8,9 +8,10 @@ typedef enum {
     BtMessageTypeStopTestCarrier,
     BtMessageTypeSetupTestPacketTx,
     BtMessageTypeStartTestPacketTx,
-    BtMessageTypeStopTestPacketTx,
-    BtMessageTypeStartTestRx,
-    BtMessageTypeStopTestRx,
+    BtMessageTypeStopTestPacket,
+    BtMessageTypeSetupTestPacketRx,
+    BtMessageTypeStartTestPacketRx,
+    BtMessageTypeStopTestPacketRx,
     BtMessageTypeStartApp,
     BtMessageTypeUpdateStatusbar,
 } BtMessageType;
@@ -20,9 +21,8 @@ typedef enum {
     BtStatusCarrierTx,
     BtStatusHoppingTx,
     BtStatusCarrierRx,
-    BtStatusPacketRx,
     BtStatusPacketSetup,
-    BtStatusPacketTx,
+    BtStatusPacketRun,
     BtStatusStartedApp,
 } BtStateType;
 

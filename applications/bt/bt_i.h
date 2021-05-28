@@ -48,6 +48,6 @@ void bt_menu_test_carrier(void* context);
 
 void bt_menu_test_packet_tx(void* context);
 
-void bt_menu_test_tone_rx(void* context);
+void bt_menu_test_packet_rx(void* context);
 
 void bt_menu_start_app(void* context);

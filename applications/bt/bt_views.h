@@ -32,8 +32,11 @@ typedef struct {
 } BtViewTestPacketTxModel;
 
 typedef struct {
+    BtStateType type;
     BtTestChannel channel;
-} BtViewTestRxModel;
+    BtTestDataRate datarate;
+    uint16_t packets_received;
+} BtViewTestPacketRxModel;
 
 void bt_view_test_carrier_draw(Canvas* canvas, void* model);
 
