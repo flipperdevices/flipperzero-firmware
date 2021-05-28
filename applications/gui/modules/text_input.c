@@ -73,7 +73,7 @@ static const TextInputKey keyboard_keys_row_3[] = {
     {'n', 46, 32},
     {'m', 55, 32},
     {'_', 64, 32},
-    {ENTER_KEY, 73, 23},
+    {ENTER_KEY, 74, 23},
     {'7', 100, 32},
     {'8', 110, 32},
     {'9', 120, 32},
@@ -125,6 +125,13 @@ static const bool char_is_lowercase(char letter) {
 
 static const char char_to_uppercase(const char letter) {
     return (letter - 0x20);
+}
+
+static void text_input_backspace_cb(TextInputModel* model) {
+    uint8_t text_length = strlen(model->text);
+    if(text_length > 0) {
+        model->text[text_length - 1] = 0;
+    }
 }
 
 static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
@@ -286,9 +293,7 @@ static void text_input_handle_ok(TextInput* text_input) {
                     model->callback(model->callback_context, model->text);
                 }
             } else if(selected == BACKSPACE_KEY) {
-                if(text_length > 0) {
-                    model->text[text_length - 1] = 0;
-                }
+                text_input_backspace_cb(model);
             } else if(text_length < model->max_text_length) {
                 if(text_length == 0 && char_is_lowercase(selected)) {
                     selected = char_to_uppercase(selected);
@@ -330,6 +335,17 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
+    }
+
+    if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
+       event->key == InputKeyBack) {
+        with_view_model(
+            text_input->view, (TextInputModel * model) {
+                text_input_backspace_cb(model);
+                return true;
+            });
+
+        consumed = true;
     }
 
     return consumed;

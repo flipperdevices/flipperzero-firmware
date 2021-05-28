@@ -413,6 +413,17 @@ static void byte_input_call_changed_callback(ByteInputModel* model) {
 }
 
 /**
+ * @brief Clear selected byte 
+ */
+
+static void byte_input_clear_selected_byte(ByteInputModel* model) {
+    model->bytes[model->selected_byte] = 0;
+    model->selected_high_nibble = true;
+    byte_input_dec_selected_byte(model);
+    byte_input_call_changed_callback(model);
+}
+
+/**
  * @brief Handle up button
  * 
  * @param model 
@@ -484,10 +495,7 @@ static void byte_input_handle_ok(ByteInputModel* model) {
         if(value == enter_symbol) {
             byte_input_call_input_callback(model);
         } else if(value == backspace_symbol) {
-            model->bytes[model->selected_byte] = 0;
-            model->selected_high_nibble = true;
-            byte_input_dec_selected_byte(model);
-            byte_input_call_changed_callback(model);
+            byte_input_clear_selected_byte(model);
         } else {
             byte_input_set_nibble(
                 model->bytes, model->selected_byte, value, model->selected_high_nibble);
@@ -651,6 +659,16 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
+    }
+
+    if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&
+       event->key == InputKeyBack) {
+        with_view_model(
+            byte_input->view, (ByteInputModel * model) {
+                byte_input_clear_selected_byte(model);
+                return true;
+            });
+        consumed = true;
     }
 
     return consumed;
