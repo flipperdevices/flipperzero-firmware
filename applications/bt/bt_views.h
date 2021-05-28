@@ -21,6 +21,7 @@ typedef struct {
     BtStateType type;
     BtTestChannel channel;
     BtTestPower power;
+    float rssi;
 } BtViewTestCarrierModel;
 
 typedef struct {

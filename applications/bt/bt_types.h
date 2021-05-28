@@ -15,8 +15,9 @@ typedef enum {
 
 typedef enum {
     BtStatusReady,
-    BtStatusCarrier,
+    BtStatusCarrierTx,
     BtStatusHoppingTx,
+    BtStatusCarrierRx,
     BtStatusPacketRx,
     BtStatusPacketSetup,
     BtStatusPacketTx,
@@ -45,6 +46,7 @@ typedef struct {
     BtTestChannel channel;
     BtTestPower power;
     BtTestDataRate datarate;
+    float rssi;
 } BtTestParam;
 
 typedef struct {

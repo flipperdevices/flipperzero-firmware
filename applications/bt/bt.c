@@ -103,7 +103,7 @@ void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
 void bt_menu_test_carrier(void* context) {
     furi_assert(context);
     Bt* bt = context;
-    bt->state.type = BtStatusCarrier;
+    bt->state.type = BtStatusCarrierTx;
     BtMessage message = {
         .type = BtMessageTypeStartTestCarrier,
         .param.channel = bt->state.param.channel,
@@ -153,13 +153,16 @@ int32_t bt_task() {
         if(message.type == BtMessageTypeStartTestCarrier) {
             // Start test tx
             api_hal_bt_stop_tone_tx();
-            if(bt->state.type == BtStatusCarrier) {
+            api_hal_bt_stop_rx();
+            if(bt->state.type == BtStatusCarrierTx) {
                 api_hal_bt_start_tone_tx(message.param.channel, message.param.power);
-            } else {
+            } else if(bt->state.type == BtStatusHoppingTx) {
                 bt->state.param.channel =
                     bt_switch_channel(InputKeyRight, bt->state.param.channel);
                 bt->state.param.power = BtPower6dB;
                 api_hal_bt_start_tone_tx(bt->state.param.channel, bt->state.param.power);
+            } else {
+                api_hal_bt_start_rx(bt->state.param.channel);
             }
             with_view_model(
                 bt->view_test_carrier, (BtViewTestCarrierModel * model) {

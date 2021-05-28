@@ -5,7 +5,7 @@ void bt_view_test_carrier_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Performing continous TX test");
-    if(m->type == BtStatusCarrier) {
+    if(m->type == BtStatusCarrierTx) {
         canvas_draw_str(canvas, 0, 24, "Manual control mode");
     } else {
         canvas_draw_str(canvas, 0, 24, "Hopping mode");
@@ -98,11 +98,11 @@ bool bt_view_test_carrier_input(InputEvent* event, void* context) {
                     bt->state.param.power -= 2;
                 }
             } else if(event->key == InputKeyOk) {
-                if(bt->state.type == BtStatusCarrier) {
+                if(bt->state.type == BtStatusCarrierTx) {
                     bt->state.type = BtStatusHoppingTx;
                     osTimerStart(bt->hopping_mode_timer, 2000);
                 } else {
-                    bt->state.type = BtStatusCarrier;
+                    bt->state.type = BtStatusCarrierTx;
                     osTimerStop(bt->hopping_mode_timer);
                 }
             }
