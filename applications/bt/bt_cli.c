@@ -40,7 +40,7 @@ void bt_cli_command_carrier_tx(Cli* cli, string_t args, void* context) {
         return;
     }
     printf("Transmitting carrier at %hu channel at %hu dB power\r\n", channel, power);
-    printf("Press CTRL+C to stop");
+    printf("Press CTRL+C to stop\r\n");
     api_hal_bt_start_tone_tx(channel, 0x19 + power);
 
     while(!cli_cmd_interrupt_received(cli)) {
