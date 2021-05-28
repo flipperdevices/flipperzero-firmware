@@ -131,6 +131,8 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     TextInputModel* model = _model;
     uint8_t text_length = strlen(model->text);
     uint8_t needed_string_width = canvas_width(canvas) - 8;
+    uint8_t start_pos = 4;
+
     char* text = model->text;
 
     canvas_clear(canvas);
@@ -139,13 +141,20 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str(canvas, 2, 8, model->header);
     elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
 
+    if(canvas_string_width(canvas, text) > needed_string_width) {
+        canvas_draw_str(canvas, start_pos, 22, "...");
+        start_pos += 6;
+        needed_string_width -= 8;
+    }
+
     while(text != 0 && canvas_string_width(canvas, text) > needed_string_width) {
         text++;
     }
 
-    canvas_draw_str(canvas, 4, 22, text);
+    canvas_draw_str(canvas, start_pos, 22, text);
 
-    canvas_draw_str(canvas, 4 + canvas_string_width(canvas, text) + 1, 22, "|");
+    canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 1, 22, "|");
+    canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 2, 22, "|");
 
     canvas_set_font(canvas, FontKeyboard);
 
