@@ -25,6 +25,8 @@ typedef struct {
     const char* name;
     IrdaDecoders decoder;
     IrdaEncoders encoder;
+    uint8_t address_length;
+    uint8_t command_length;
 } IrdaProtocolImplementation;
 
 
@@ -39,7 +41,9 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .reset = irda_decoder_samsung32_reset,
           .free = irda_decoder_samsung32_free},
       .encoder = {
-          .encode = irda_encoder_samsung32_encode}
+          .encode = irda_encoder_samsung32_encode},
+      .address_length = 2,
+      .command_length = 2,
     },
     // #1
     { .protocol = IrdaProtocolNEC,
@@ -50,7 +54,9 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
       .encoder = {
-          .encode = irda_encoder_nec_encode}
+          .encode = irda_encoder_nec_encode},
+      .address_length = 2,
+      .command_length = 2,
     },
     // #2
     { .protocol = IrdaProtocolNECext,
@@ -62,6 +68,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .free = irda_decoder_nec_free},
       .encoder = {
           .encode = irda_encoder_necext_encode},
+      .address_length = 4,
+      .command_length = 2,
     },
 };
 
@@ -127,5 +135,13 @@ void irda_send(const IrdaMessage* message, int times) {
 
 const char* irda_get_protocol_name(IrdaProtocol protocol) {
     return irda_protocols[protocol].name;
+}
+
+uint8_t irda_get_protocol_address_length(IrdaProtocol protocol) {
+    return irda_protocols[protocol].address_length;
+}
+
+uint8_t irda_get_protocol_command_length(IrdaProtocol protocol) {
+    return irda_protocols[protocol].command_length;
 }
 

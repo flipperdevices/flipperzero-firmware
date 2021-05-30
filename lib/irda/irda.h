@@ -74,6 +74,22 @@ void irda_send(const IrdaMessage* message, int times);
  */
 const char* irda_get_protocol_name(IrdaProtocol protocol);
 
+/**
+ * Get address length by protocol enum.
+ *
+ * \param[in]   protocol    - protocol identifier.
+ * \return      length of address in nibbles.
+ */
+uint8_t irda_get_protocol_address_length(IrdaProtocol protocol);
+
+/**
+ * Get command length by protocol enum.
+ *
+ * \param[in]   protocol    - protocol identifier.
+ * \return      length of command in nibbles.
+ */
+uint8_t irda_get_protocol_command_length(IrdaProtocol protocol);
+
 #ifdef __cplusplus
 }
 #endif

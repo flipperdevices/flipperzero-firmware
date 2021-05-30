@@ -8,6 +8,16 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     TextInput* text_input = view_manager->get_text_input();
 
+    auto receiver = app->get_receiver();
+    auto message = receiver->get_last_message();
+
+    app->set_text_store(
+        0,
+        "%.4s_%0*lX",
+        irda_get_protocol_name(message->protocol),
+        irda_get_protocol_command_length(message->protocol),
+        message->command);
+
     text_input_set_header_text(text_input, "Name the key");
     text_input_set_result_callback(
         text_input,

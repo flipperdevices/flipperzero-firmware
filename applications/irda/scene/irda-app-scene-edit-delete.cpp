@@ -24,10 +24,12 @@ void IrdaAppSceneEditDelete::on_enter(IrdaApp* app) {
         dialog_ex_set_header(dialog_ex, "Delete button?", 64, 6, AlignCenter, AlignCenter);
         app->set_text_store(
             0,
-            "%s\n%s\nA=0X%02X C=0X%02X",
+            "%s\n%s\nA=0x%0*lX C=0x%0*lX",
             remote_manager->get_current_button_name().c_str(),
             irda_get_protocol_name(message->protocol),
+            irda_get_protocol_address_length(message->protocol),
             message->address,
+            irda_get_protocol_command_length(message->protocol),
             message->command);
     } else {
         dialog_ex_set_header(dialog_ex, "Delete remote?", 64, 6, AlignCenter, AlignCenter);
