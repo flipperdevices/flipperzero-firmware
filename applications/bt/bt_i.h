@@ -21,7 +21,7 @@ struct Bt {
     osMessageQueueId_t message_queue;
     BtState state;
     osTimerId_t update_status_timer;
-    osTimerId_t hopping_mode_timer;
+    osTimerId_t update_param_timer;
     Gui* gui;
     ValueMutex* menu;
     // Status bar

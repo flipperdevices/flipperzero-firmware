@@ -7,23 +7,24 @@ typedef enum {
     BtMessageTypeHoppingTx,
     BtMessageTypeStopTestCarrier,
     BtMessageTypeSetupTestPacketTx,
-    BtMessageTypeStartTestPacketTx,
-    BtMessageTypeStopTestPacket,
     BtMessageTypeSetupTestPacketRx,
+    BtMessageTypeStartTestPacketTx,
     BtMessageTypeStartTestPacketRx,
-    BtMessageTypeStopTestPacketRx,
+    BtMessageTypeStopTestPacket,
     BtMessageTypeStartApp,
     BtMessageTypeUpdateStatusbar,
 } BtMessageType;
 
 typedef enum {
-    BtStatusReady,
-    BtStatusCarrierTx,
-    BtStatusHoppingTx,
-    BtStatusCarrierRx,
-    BtStatusPacketSetup,
-    BtStatusPacketRun,
-    BtStatusStartedApp,
+    BtStateReady,
+    BtStateCarrierTx,
+    BtStateHoppingTx,
+    BtStateCarrierRxStart,
+    BtStateCarrierRxRunning,
+    BtStatePacketSetup,
+    BtStatePacketStart,
+    BtStatePacketRunning,
+    BtStateStartedApp,
 } BtStateType;
 
 typedef enum {
@@ -40,8 +41,8 @@ typedef enum {
 } BtTestPower;
 
 typedef enum {
-    BtDateRate1M = 1,
-    BtDateRate2M = 2,
+    BtDataRate1M = 1,
+    BtDataRate2M = 2,
 } BtTestDataRate;
 
 typedef struct {
@@ -49,7 +50,8 @@ typedef struct {
     BtTestPower power;
     BtTestDataRate datarate;
     float rssi;
-    uint16_t packets;
+    uint16_t packets_sent;
+    uint16_t packets_received;
 } BtTestParam;
 
 typedef struct {

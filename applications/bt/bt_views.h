@@ -35,6 +35,7 @@ typedef struct {
     BtStateType type;
     BtTestChannel channel;
     BtTestDataRate datarate;
+    float rssi;
     uint16_t packets_received;
 } BtViewTestPacketRxModel;
 

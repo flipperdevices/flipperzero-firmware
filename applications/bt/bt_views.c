@@ -5,19 +5,19 @@ void bt_view_test_carrier_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Performing Cattier test");
-    if(m->type == BtStatusCarrierTx) {
+    if(m->type == BtStateCarrierTx) {
         canvas_draw_str(canvas, 0, 24, "Manual Carrier TX");
-    } else if(m->type == BtStatusHoppingTx) {
+    } else if(m->type == BtStateHoppingTx) {
         canvas_draw_str(canvas, 0, 24, "Carrier TX Hopping mode");
-    } else if(m->type == BtStatusCarrierRx) {
+    } else if(m->type == BtStateCarrierRxRunning) {
         canvas_draw_str(canvas, 0, 24, "Manual Carrier RX");
     }
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 36, buffer);
-    if(m->type == BtStatusCarrierTx || m->type == BtStatusHoppingTx) {
+    if(m->type == BtStateCarrierTx || m->type == BtStateHoppingTx) {
         snprintf(buffer, sizeof(buffer), "Power:%d dB", m->power - BtPower0dB);
-    } else if(m->type == BtStatusCarrierRx) {
+    } else if(m->type == BtStateCarrierRxRunning) {
         snprintf(buffer, sizeof(buffer), "RSSI: %3.1f dB", m->rssi);
     }
     canvas_draw_str(canvas, 0, 48, buffer);
@@ -28,7 +28,7 @@ void bt_view_test_packet_rx_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Performing packets RX test");
-    if(m->type == BtStatusPacketSetup) {
+    if(m->type == BtStatePacketSetup) {
         canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to start");
     } else {
         canvas_draw_str(canvas, 0, 24, "Receiving packets ...");
@@ -36,12 +36,14 @@ void bt_view_test_packet_rx_draw(Canvas* canvas, void* model) {
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 36, buffer);
-    snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->datarate);
+    snprintf(buffer, sizeof(buffer), "Datarate:%d Mbps", m->datarate);
     canvas_draw_str(canvas, 0, 48, buffer);
-    if(m->packets_received) {
+    if(m->type == BtStatePacketSetup) {
         snprintf(buffer, sizeof(buffer), "%d packets received", m->packets_received);
-        canvas_draw_str(canvas, 0, 60, buffer);
+    } else {
+        snprintf(buffer, sizeof(buffer), "RSSI: %3.1f dB", m->rssi);
     }
+    canvas_draw_str(canvas, 0, 60, buffer);
 }
 
 void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
@@ -49,7 +51,7 @@ void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 12, "Packets send TX test");
-    if(m->type == BtStatusPacketSetup) {
+    if(m->type == BtStatePacketSetup) {
         canvas_draw_str(canvas, 0, 24, "Setup parameters. Ok to start");
     } else {
         canvas_draw_str(canvas, 0, 24, "Sending packets ...");
@@ -57,9 +59,9 @@ void bt_view_test_packet_tx_draw(Canvas* canvas, void* model) {
     char buffer[32];
     snprintf(buffer, sizeof(buffer), "Channel:%d MHz", m->channel * 2 + 2402);
     canvas_draw_str(canvas, 0, 36, buffer);
-    snprintf(buffer, sizeof(buffer), "Daterate:%d Mbps", m->datarate);
+    snprintf(buffer, sizeof(buffer), "Datarate:%d Mbps", m->datarate);
     canvas_draw_str(canvas, 0, 48, buffer);
-    if(m->packets_sent) {
+    if(m->packets_sent && m->type == BtStatePacketSetup) {
         snprintf(buffer, sizeof(buffer), "%d packets sent", m->packets_sent);
         canvas_draw_str(canvas, 0, 60, buffer);
     }
@@ -98,8 +100,8 @@ bool bt_view_test_carrier_input(InputEvent* event, void* context) {
     Bt* bt = context;
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyBack) {
-            if(osTimerIsRunning(bt->hopping_mode_timer)) {
-                osTimerStop(bt->hopping_mode_timer);
+            if(osTimerIsRunning(bt->update_param_timer)) {
+                osTimerStop(bt->update_param_timer);
             }
             BtMessage m = {.type = BtMessageTypeStopTestCarrier};
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
@@ -117,14 +119,16 @@ bool bt_view_test_carrier_input(InputEvent* event, void* context) {
                     bt->state.param.power -= 2;
                 }
             } else if(event->key == InputKeyOk) {
-                if(bt->state.type == BtStatusCarrierTx) {
-                    bt->state.type = BtStatusHoppingTx;
-                    osTimerStart(bt->hopping_mode_timer, 2000);
-                } else if(bt->state.type == BtStatusHoppingTx) {
-                    bt->state.type = BtStatusCarrierRx;
+                if(bt->state.type == BtStateCarrierTx) {
+                    bt->state.type = BtStateHoppingTx;
+                    osTimerStart(bt->update_param_timer, 2000);
+                } else if(bt->state.type == BtStateHoppingTx) {
+                    osTimerStop(bt->update_param_timer);
+                    bt->state.type = BtStateCarrierRxStart;
+                    osTimerStart(bt->update_param_timer, 200);
                 } else {
-                    osTimerStop(bt->hopping_mode_timer);
-                    bt->state.type = BtStatusCarrierTx;
+                    osTimerStop(bt->update_param_timer);
+                    bt->state.type = BtStateCarrierTx;
                 }
             }
             BtMessage m = {
@@ -148,15 +152,15 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
             if(event->key == InputKeyRight || event->key == InputKeyLeft) {
                 bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
             } else if(event->key == InputKeyUp) {
-                if(bt->state.param.datarate < BtDateRate2M) {
+                if(bt->state.param.datarate < BtDataRate2M) {
                     bt->state.param.datarate += 1;
                 }
             } else if(event->key == InputKeyDown) {
-                if(bt->state.param.datarate > BtDateRate1M) {
+                if(bt->state.param.datarate > BtDataRate1M) {
                     bt->state.param.datarate -= 1;
                 }
             }
-            bt->state.type = BtStatusPacketSetup;
+            bt->state.type = BtStatePacketSetup;
             BtMessage m = {
                 .type = BtMessageTypeSetupTestPacketTx,
                 .param.channel = bt->state.param.channel,
@@ -165,10 +169,10 @@ bool bt_view_test_packet_tx_input(InputEvent* event, void* context) {
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyOk) {
-            if(bt->state.type == BtStatusPacketSetup) {
-                bt->state.type = BtStatusPacketRun;
-            } else if(bt->state.type == BtStatusPacketRun) {
-                bt->state.type = BtStatusPacketSetup;
+            if(bt->state.type == BtStatePacketSetup) {
+                bt->state.type = BtStatePacketStart;
+            } else if(bt->state.type == BtStatePacketStart) {
+                bt->state.type = BtStatePacketSetup;
             }
             BtMessage m = {
                 .type = BtMessageTypeStartTestPacketTx,
@@ -199,15 +203,15 @@ bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
             if(event->key == InputKeyRight || event->key == InputKeyLeft) {
                 bt->state.param.channel = bt_switch_channel(event->key, bt->state.param.channel);
             } else if(event->key == InputKeyUp) {
-                if(bt->state.param.datarate < BtDateRate2M) {
+                if(bt->state.param.datarate < BtDataRate2M) {
                     bt->state.param.datarate += 1;
                 }
             } else if(event->key == InputKeyDown) {
-                if(bt->state.param.datarate > BtDateRate1M) {
+                if(bt->state.param.datarate > BtDataRate1M) {
                     bt->state.param.datarate -= 1;
                 }
             }
-            bt->state.type = BtStatusPacketSetup;
+            bt->state.type = BtStatePacketSetup;
             BtMessage m = {
                 .type = BtMessageTypeSetupTestPacketRx,
                 .param.channel = bt->state.param.channel,
@@ -216,10 +220,12 @@ bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyOk) {
-            if(bt->state.type == BtStatusPacketSetup) {
-                bt->state.type = BtStatusPacketRun;
-            } else if(bt->state.type == BtStatusPacketRun) {
-                bt->state.type = BtStatusPacketSetup;
+            if(bt->state.type == BtStatePacketSetup) {
+                bt->state.type = BtStatePacketStart;
+                osTimerStart(bt->update_param_timer, 200);
+            } else if(bt->state.type == BtStatePacketRunning) {
+                bt->state.type = BtStatePacketSetup;
+                osTimerStop(bt->update_param_timer);
             }
             BtMessage m = {
                 .type = BtMessageTypeStartTestPacketRx,
@@ -229,6 +235,9 @@ bool bt_view_test_packet_rx_input(InputEvent* event, void* context) {
             furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
             return true;
         } else if(event->key == InputKeyBack) {
+            if(osTimerIsRunning(bt->update_param_timer)) {
+                osTimerStop(bt->update_param_timer);
+            }
             BtMessage m = {
                 .type = BtMessageTypeStopTestPacket,
             };
