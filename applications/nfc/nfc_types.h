@@ -75,6 +75,7 @@ typedef enum {
     NfcWorkerStateEmulateEMV,
     NfcWorkerStateEmulate,
     NfcWorkerStateField,
+    NfcWorkerStateReadMfUltralight,
     // Transition
     NfcWorkerStateStop,
 } NfcWorkerState;
@@ -85,6 +86,7 @@ typedef enum {
     NfcMessageTypeEmulateEMV,
     NfcMessageTypeEmulate,
     NfcMessageTypeField,
+    NfcMessageTypeReadMfUltralight,
     NfcMessageTypeStop,
     NfcMessageTypeExit,
     // From Worker

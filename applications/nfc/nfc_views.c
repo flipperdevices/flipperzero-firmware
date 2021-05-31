@@ -150,6 +150,12 @@ void nfc_view_emulate_draw(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 2, 52, "SAK: 20 ATQA: 00/04");
 }
 
+void nfc_view_read_mf_ultralight_draw(Canvas* canvas, void* model) {
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 0, 12, "Read MfUltralight");
+}
+
 void nfc_view_field_draw(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);

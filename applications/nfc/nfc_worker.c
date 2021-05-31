@@ -71,6 +71,8 @@ void nfc_worker_task(void* context) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
+        nfc_worker_read_mf_ultralight(nfc_worker);
     }
     api_hal_nfc_deactivate();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
@@ -303,6 +305,23 @@ void nfc_worker_poll(NfcWorker* nfc_worker) {
                 osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
         }
         osDelay(5);
+    }
+}
+
+void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
+    // ReturnCode err;
+    rfalNfcDevice* dev_list;
+    uint8_t dev_cnt = 0;
+    // uint8_t tx_buff[255] = {};
+    // uint16_t tx_len = 0;
+    // uint8_t* rx_buff;
+    // uint16_t* rx_len;
+
+    while(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
+            FURI_LOG_I(NFC_WORKER_TAG, "Found card");
+        }
+        osDelay(400);
     }
 }
 

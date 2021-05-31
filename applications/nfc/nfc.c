@@ -32,6 +32,8 @@ void nfc_menu_callback(void* context, uint32_t index) {
         message.type = NfcMessageTypeEmulate;
     } else if(index == 4) {
         message.type = NfcMessageTypeField;
+    } else if(index == 5) {
+        message.type = NfcMessageTypeReadMfUltralight;
     }
     furi_check(osMessageQueuePut(message_queue, &message, 0, osWaitForever) == osOK);
 }
@@ -57,6 +59,8 @@ Nfc* nfc_alloc() {
     submenu_add_item(nfc->submenu, "Emulate EMV", 2, nfc_menu_callback, nfc);
     submenu_add_item(nfc->submenu, "Emulate", 3, nfc_menu_callback, nfc);
     submenu_add_item(nfc->submenu, "Field", 4, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Read MfUltralight", 5, nfc_menu_callback, nfc);
+
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewMenu, submenu_view);
@@ -97,6 +101,14 @@ Nfc* nfc_alloc() {
     view_set_draw_callback(nfc->view_field, nfc_view_field_draw);
     view_set_previous_callback(nfc->view_field, nfc_view_stop);
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewField, nfc->view_field);
+
+    // Read Mifare Ultralight
+    nfc->view_read_mf_ultralight = view_alloc();
+    view_set_context(nfc->view_read_mf_ultralight, nfc);
+    view_set_draw_callback(nfc->view_read_mf_ultralight, nfc_view_read_mf_ultralight_draw);
+    view_set_previous_callback(nfc->view_read_mf_ultralight, nfc_view_stop);
+    view_dispatcher_add_view(
+        nfc->view_dispatcher, NfcViewReadMfUltralight, nfc->view_read_mf_ultralight);
 
     // Error
     nfc->view_error = view_alloc();
@@ -143,6 +155,10 @@ void nfc_free(Nfc* nfc) {
     // Field
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewField);
     view_free(nfc->view_field);
+
+    // Read Mifare Ultralight
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewReadMfUltralight);
+    view_free(nfc->view_read_mf_ultralight);
 
     // Error
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewError);
@@ -200,6 +216,8 @@ int32_t nfc_task(void* p) {
             nfc_start(nfc, NfcViewEmulate, NfcWorkerStateEmulate);
         } else if(message.type == NfcMessageTypeField) {
             nfc_start(nfc, NfcViewField, NfcWorkerStateField);
+        } else if(message.type == NfcMessageTypeReadMfUltralight) {
+            nfc_start(nfc, NfcViewReadMfUltralight, NfcWorkerStateReadMfUltralight);
         } else if(message.type == NfcMessageTypeStop) {
             nfc_worker_stop(nfc->worker);
         } else if(message.type == NfcMessageTypeDeviceFound) {
