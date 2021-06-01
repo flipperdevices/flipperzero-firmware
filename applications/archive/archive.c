@@ -214,7 +214,7 @@ static void archive_add_to_favourites(ArchiveApp* archive) {
     string_cat(buffer_dst, archive->browser.name);
 
     common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
-    
+
     string_clear(buffer_src);
     string_clear(buffer_dst);
 }
