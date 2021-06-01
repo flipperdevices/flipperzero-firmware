@@ -3,6 +3,7 @@
 #include <api-hal-version.h>
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_state.h"
+#include "math.h"
 
 typedef enum {
     EventTypeTick,
@@ -17,7 +18,21 @@ typedef struct {
 } AppEvent;
 
 // Moods, corresponding to butthurt level. (temp, unclear about max level)
-static const char* mood_strings[5] = {[0] = "Normal", [1] = "Ok", [2] = "Sad", [3] = "Angry"};
+static const char* mood_strings[] = {[0] = "Happy", [1] = "Ok", [2] = "Bad"};
+
+static const IconName portrait_happy[] = {
+    I_passport_happy1_43x45,
+    I_passport_happy2_43x45,
+    I_passport_happy3_43x45};
+static const IconName portrait_ok[] = {
+    I_passport_okay1_43x45,
+    I_passport_okay2_43x45,
+    I_passport_okay3_43x45};
+static const IconName portrait_bad[] = {
+    I_passport_bad1_43x45,
+    I_passport_bad2_43x45,
+    I_passport_bad3_43x45};
+static const IconName* portraits[] = {portrait_happy, portrait_ok, portrait_bad};
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueueId_t event_queue = ctx;
@@ -38,6 +53,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     uint32_t prev_cap = dolphin_state_xp_to_levelup(state, current_level - 1, false);
     uint32_t exp = (dolphin_state_xp_to_levelup(state, current_level, true) * 63) /
                    (dolphin_state_xp_to_levelup(state, current_level, false) - prev_cap);
+    uint8_t portrait_level = CLAMP(floor(current_level / 14), 2, 0);
 
     canvas_clear(canvas);
 
@@ -56,7 +72,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 53, 5, 55, 7);
 
     // portrait
-    canvas_draw_icon_name(canvas, 14, 11, I_DolphinOkay_41x43);
+    canvas_draw_icon_name(canvas, 10, 9, portraits[butthurt][portrait_level]);
     canvas_draw_line(canvas, 59, 18, 124, 18);
     canvas_draw_line(canvas, 59, 31, 124, 31);
     canvas_draw_line(canvas, 59, 44, 124, 44);
