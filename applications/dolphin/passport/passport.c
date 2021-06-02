@@ -5,6 +5,9 @@
 #include "dolphin/dolphin_state.h"
 #include "math.h"
 
+#define MOODS_TOTAL 3
+#define BUTTHURT_MAX 3
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -18,21 +21,21 @@ typedef struct {
 } AppEvent;
 
 // Moods, corresponding to butthurt level. (temp, unclear about max level)
-static const char* mood_strings[] = {[0] = "Happy", [1] = "Ok", [2] = "Bad"};
+static const char* mood_strings[MOODS_TOTAL] = {[0] = "Happy", [1] = "Ok", [2] = "Bad"};
 
-static const IconName portrait_happy[] = {
+static const IconName portrait_happy[BUTTHURT_MAX] = {
     I_passport_happy1_43x45,
     I_passport_happy2_43x45,
     I_passport_happy3_43x45};
-static const IconName portrait_ok[] = {
+static const IconName portrait_ok[BUTTHURT_MAX] = {
     I_passport_okay1_43x45,
     I_passport_okay2_43x45,
     I_passport_okay3_43x45};
-static const IconName portrait_bad[] = {
+static const IconName portrait_bad[BUTTHURT_MAX] = {
     I_passport_bad1_43x45,
     I_passport_bad2_43x45,
     I_passport_bad3_43x45};
-static const IconName* portraits[] = {portrait_happy, portrait_ok, portrait_bad};
+static const IconName* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     osMessageQueueId_t event_queue = ctx;
@@ -48,12 +51,12 @@ static void render_callback(Canvas* canvas, void* ctx) {
     char level[20];
     char mood[32];
 
-    uint32_t butthurt = dolphin_state_get_butthurt(state);
+    uint32_t butthurt = CLAMP(dolphin_state_get_butthurt(state), BUTTHURT_MAX - 1, 0);
     uint32_t current_level = dolphin_state_get_level(state);
     uint32_t prev_cap = dolphin_state_xp_to_levelup(state, current_level - 1, false);
     uint32_t exp = (dolphin_state_xp_to_levelup(state, current_level, true) * 63) /
                    (dolphin_state_xp_to_levelup(state, current_level, false) - prev_cap);
-    uint8_t portrait_level = CLAMP(floor(current_level / 14), 2, 0);
+    uint8_t portrait_level = CLAMP(floor(current_level / 14), MOODS_TOTAL - 1, 0);
 
     canvas_clear(canvas);
 
