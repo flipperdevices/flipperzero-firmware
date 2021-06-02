@@ -36,6 +36,9 @@ const char* api_hal_version_get_name_ptr();
 /** Get pointer to target device name */
 const char* api_hal_version_get_device_name_ptr();
 
+/** Get pointer to target ble local device name */
+const char* api_hal_version_get_ble_local_device_name_ptr();
+
 /**
  * Get address of version structure of bootloader, stored in chip flash.
  *

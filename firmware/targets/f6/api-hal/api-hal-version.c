@@ -2,6 +2,7 @@
 #include <stm32wbxx.h>
 #include <stm32wbxx_ll_rtc.h>
 #include <stdio.h>
+#include "ble.h"
 
 #define FLIPPER_NAME_LENGTH 8
 
@@ -15,8 +16,8 @@ typedef struct {
 } ApiHalVersionOTP;
 
 #define FLIPPER_ARRAY_NAME_LENGTH (FLIPPER_NAME_LENGTH + 1)
-// "Flipper Zero " + name
-#define FLIPPER_DEVICE_NAME_LENGTH (13 + FLIPPER_ARRAY_NAME_LENGTH)
+// BLE symbol + "Flipper Zero " + name
+#define FLIPPER_DEVICE_NAME_LENGTH (1 + 13 + FLIPPER_ARRAY_NAME_LENGTH)
 
 // Initialiazed from OTP, used to guarantee zero terminated C string
 static char flipper_name[FLIPPER_ARRAY_NAME_LENGTH];
@@ -27,9 +28,18 @@ void api_hal_version_init() {
     strlcpy(flipper_name, name, FLIPPER_ARRAY_NAME_LENGTH);
 
     if(api_hal_version_get_name_ptr() != NULL) {
-        snprintf(flipper_device_name, FLIPPER_DEVICE_NAME_LENGTH, "Flipper Zero %s", flipper_name);
+        snprintf(
+            flipper_device_name,
+            FLIPPER_DEVICE_NAME_LENGTH,
+            "%cFlipper Zero %s",
+            AD_TYPE_COMPLETE_LOCAL_NAME,
+            flipper_name);
     } else {
-        snprintf(flipper_device_name, FLIPPER_DEVICE_NAME_LENGTH, "Flipper Zero");
+        snprintf(
+            flipper_device_name,
+            FLIPPER_DEVICE_NAME_LENGTH,
+            "%cFlipper Zero",
+            AD_TYPE_COMPLETE_LOCAL_NAME);
     }
 }
 
@@ -62,6 +72,10 @@ const char* api_hal_version_get_name_ptr() {
 }
 
 const char* api_hal_version_get_device_name_ptr() {
+    return flipper_device_name + 1;
+}
+
+const char* api_hal_version_get_ble_local_device_name_ptr() {
     return flipper_device_name;
 }
 
