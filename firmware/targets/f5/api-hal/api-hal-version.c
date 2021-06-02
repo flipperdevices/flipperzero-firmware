@@ -17,7 +17,7 @@ typedef struct {
 
 #define FLIPPER_ARRAY_NAME_LENGTH (FLIPPER_NAME_LENGTH + 1)
 // BLE symbol + "Flipper Zero " + name
-#define FLIPPER_DEVICE_NAME_LENGTH (1 + 13 + FLIPPER_ARRAY_NAME_LENGTH)
+#define FLIPPER_DEVICE_NAME_LENGTH (1 + 8 + FLIPPER_ARRAY_NAME_LENGTH)
 
 // Initialiazed from OTP, used to guarantee zero terminated C string
 static char flipper_name[FLIPPER_ARRAY_NAME_LENGTH];
@@ -31,16 +31,16 @@ void api_hal_version_init() {
         snprintf(
             flipper_device_name,
             FLIPPER_DEVICE_NAME_LENGTH,
-            "%cFlipper Zero %s",
-            AD_TYPE_COMPLETE_LOCAL_NAME,
+            "xFlipper %s",
             flipper_name);
     } else {
         snprintf(
             flipper_device_name,
             FLIPPER_DEVICE_NAME_LENGTH,
-            "%cFlipper Zero",
-            AD_TYPE_COMPLETE_LOCAL_NAME);
+            "xFlipper");
     }
+
+    flipper_device_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
 }
 
 bool api_hal_version_do_i_belong_here() {

@@ -43,7 +43,7 @@ typedef struct {
   uint8_t Advertising_mgr_timer_Id;
 } BleApplicationContext_t;
 
-#define APPBLE_GAP_DEVICE_NAME_LENGTH 7
+
 #define FAST_ADV_TIMEOUT               (30*1000*1000/CFG_TS_TICK_VAL) /**< 30s */
 #define INITIAL_ADV_TIMEOUT            (60*1000*1000/CFG_TS_TICK_VAL) /**< 60s */
 
@@ -540,7 +540,7 @@ static void Ble_Hci_Gap_Gatt_Init() {
   {
     const char *name = api_hal_version_get_device_name_ptr();
     aci_gap_init(role, 0,
-                 APPBLE_GAP_DEVICE_NAME_LENGTH,
+                 strlen(name),
                  &gap_service_handle, &gap_dev_name_char_handle, &gap_appearance_char_handle);
 
     if (aci_gatt_update_char_value(gap_service_handle, gap_dev_name_char_handle, 0, strlen(name), (uint8_t *) name))
@@ -649,7 +649,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
         Max_Inter,
         PUBLIC_ADDR,
         NO_WHITE_LIST_USE, /* use white list */
-        strlen(name) + 1,
+        strlen(name),
         (uint8_t*)name,
         BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen,
         BleApplicationContext.BleApplicationContext_legacy.advtServUUID,
