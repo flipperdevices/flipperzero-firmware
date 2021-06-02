@@ -67,7 +67,6 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "Flipper Devices Inc."
 #define USBD_PID     22336
-#define USBD_PRODUCT_STRING     "Flipper Control Virtual ComPort"
 #define USBD_CONFIGURATION_STRING     "CDC Config"
 #define USBD_INTERFACE_STRING     "CDC Interface"
 /* USER CODE BEGIN PRIVATE_DEFINES */
@@ -79,7 +78,68 @@
   */
 
 /* USER CODE BEGIN 0 */
+/**
+  * @brief  USBD_GetLen
+  *         return the string length
+  * @param  buf : pointer to the ascii string buffer
+  * @retval string length
+  */
+static uint8_t USBD_GetLen(uint8_t* buf) {
+  uint8_t len = 0U;
+  uint8_t* pbuff = buf;
 
+  while(*pbuff != (uint8_t)'\0') {
+    len++;
+    pbuff++;
+  }
+
+  return len;
+}
+
+/**
+  * @brief  USBD_GetStringDouble
+  *         Convert two ascii strings into one unicoded
+  * @param  desc1 : descriptor 1 buffer
+  * @param  desc2 : descriptor 2 buffer
+  * @param  unicode : Formatted string buffer (unicode)
+  * @param  len : descriptor length
+  * @retval None
+  */
+static void USBD_GetStringDouble(uint8_t* desc1, uint8_t* desc2, uint8_t* unicode, uint16_t* len) {
+  uint8_t idx = 0U;
+  uint8_t* pdesc;
+
+  if(desc1 == NULL || desc2 == NULL) {
+      return;
+  }
+
+  *len = (((uint16_t)USBD_GetLen(desc1) + (uint16_t)USBD_GetLen(desc2)) * 2U) + 2U;
+
+  unicode[idx] = *(uint8_t*)len;
+  idx++;
+  unicode[idx] = USB_DESC_TYPE_STRING;
+  idx++;
+
+  pdesc = desc1;
+  while(*pdesc != (uint8_t)'\0') {
+    unicode[idx] = *pdesc;
+    pdesc++;
+    idx++;
+
+    unicode[idx] = 0U;
+    idx++;
+  }
+
+  pdesc = desc2;
+  while(*pdesc != (uint8_t)'\0') {
+    unicode[idx] = *pdesc;
+    pdesc++;
+    idx++;
+
+    unicode[idx] = 0U;
+    idx++;
+  }
+}
 /* USER CODE END 0 */
 
 /** @defgroup USBD_DESC_Private_Macros USBD_DESC_Private_Macros
@@ -247,14 +307,14 @@ uint8_t * USBD_CDC_LangIDStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
   */
 uint8_t * USBD_CDC_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
 {
-  if(speed == 0)
-  {
-    USBD_GetString((uint8_t *)USBD_PRODUCT_STRING, USBD_StrDesc, length);
+  const char* name = api_hal_version_get_name_ptr();
+
+  if(name) {
+    USBD_GetStringDouble((uint8_t*)"Flipper Zero ", (uint8_t*)name, USBD_StrDesc, length);
+  } else {
+    USBD_GetString((uint8_t*)"Flipper Zero", USBD_StrDesc, length);
   }
-  else
-  {
-    USBD_GetString((uint8_t *)USBD_PRODUCT_STRING, USBD_StrDesc, length);
-  }
+
   return USBD_StrDesc;
 }
 
