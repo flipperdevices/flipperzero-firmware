@@ -18,6 +18,7 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     Submenu* submenu = view_manager->get_submenu();
     auto remote_manager = app->get_remote_manager();
+    remote_manager->load();
     int i = 0;
 
     remote_names = remote_manager->get_remote_list();

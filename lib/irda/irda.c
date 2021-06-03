@@ -33,17 +33,17 @@ typedef struct {
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
     // #0
-    { .protocol = IrdaProtocolSamsung32,
-      .name ="Samsung32",
+    { .protocol = IrdaProtocolRaw,
+      .name ="Raw",         // TODO: implement pronto HEX
       .decoder = {
-          .alloc = irda_decoder_samsung32_alloc,
-          .decode = irda_decoder_samsung32_decode,
-          .reset = irda_decoder_samsung32_reset,
-          .free = irda_decoder_samsung32_free},
+          .alloc = NULL,
+          .decode = NULL,
+          .reset = NULL,
+          .free = NULL},
       .encoder = {
-          .encode = irda_encoder_samsung32_encode},
-      .address_length = 2,
-      .command_length = 2,
+          .encode = NULL},
+      .address_length = 0,
+      .command_length = 0,
     },
     // #1
     { .protocol = IrdaProtocolNEC,
@@ -58,7 +58,7 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .address_length = 2,
       .command_length = 2,
     },
-    // #2
+    // #2 - have to be after NEC
     { .protocol = IrdaProtocolNECext,
       .name = "NECext",
       .decoder = {
@@ -71,6 +71,19 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .address_length = 4,
       .command_length = 2,
     },
+    // #3
+    { .protocol = IrdaProtocolSamsung32,
+      .name ="Samsung32",
+      .decoder = {
+          .alloc = irda_decoder_samsung32_alloc,
+          .decode = irda_decoder_samsung32_decode,
+          .reset = irda_decoder_samsung32_reset,
+          .free = irda_decoder_samsung32_free},
+      .encoder = {
+          .encode = irda_encoder_samsung32_encode},
+      .address_length = 2,
+      .command_length = 2,
+    },
 };
 
 
@@ -81,10 +94,12 @@ const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t durati
     IrdaMessage* result = NULL;
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        message = irda_protocols[i].decoder.decode(handler->ctx[i], level, duration);
-        if (!result && message) {
-            message->protocol = irda_protocols[i].protocol;
-            result = message;
+        if (irda_protocols[i].decoder.decode) {
+            message = irda_protocols[i].decoder.decode(handler->ctx[i], level, duration);
+            if (!result && message) {
+                message->protocol = irda_protocols[i].protocol;
+                result = message;
+            }
         }
     }
 
@@ -96,8 +111,9 @@ IrdaHandler* irda_alloc_decoder(void) {
     handler->ctx = furi_alloc(sizeof(void*) * COUNT_OF(irda_protocols));
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        handler->ctx[i] = irda_protocols[i].decoder.alloc();
-        furi_check(handler->ctx[i]);
+        handler->ctx[i] = 0;
+        if (irda_protocols[i].decoder.alloc)
+            handler->ctx[i] = irda_protocols[i].decoder.alloc();
     }
 
     return handler;
@@ -108,7 +124,8 @@ void irda_free_decoder(IrdaHandler* handler) {
     furi_assert(handler->ctx);
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        irda_protocols[i].decoder.free(handler->ctx[i]);
+        if (irda_protocols[i].decoder.free)
+            irda_protocols[i].decoder.free(handler->ctx[i]);
     }
 
     free(handler->ctx);
@@ -117,7 +134,8 @@ void irda_free_decoder(IrdaHandler* handler) {
 
 void irda_reset_decoder(IrdaHandler* handler) {
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
-        irda_protocols[i].decoder.reset(handler->ctx[i]);
+        if (irda_protocols[i].decoder.reset)
+            irda_protocols[i].decoder.reset(handler->ctx[i]);
     }
 }
 
@@ -125,23 +143,36 @@ void irda_send(const IrdaMessage* message, int times) {
     furi_assert(message);
 
     for (int i = 0; i < times; ++i) {
-        osKernelLock();
-        __disable_irq();
-        irda_protocols[message->protocol].encoder.encode(message->address, message->command, !!i);
-        __enable_irq();
-        osKernelUnlock();
+        if(irda_protocols[message->protocol].encoder.encode) {
+            __disable_irq();
+            irda_protocols[message->protocol].encoder.encode(message->address, message->command, !!i);
+            __enable_irq();
+        }
     }
 }
 
+bool irda_is_protocol_valid(IrdaProtocol protocol) {
+    return protocol < COUNT_OF(irda_protocols);
+}
+
 const char* irda_get_protocol_name(IrdaProtocol protocol) {
-    return irda_protocols[protocol].name;
+    if (irda_is_protocol_valid(protocol))
+        return irda_protocols[protocol].name;
+    else
+        return "Invalid";
 }
 
 uint8_t irda_get_protocol_address_length(IrdaProtocol protocol) {
-    return irda_protocols[protocol].address_length;
+    if (irda_is_protocol_valid(protocol))
+        return irda_protocols[protocol].address_length;
+    else
+        return 0;
 }
 
 uint8_t irda_get_protocol_command_length(IrdaProtocol protocol) {
-    return irda_protocols[protocol].command_length;
+    if (irda_is_protocol_valid(protocol))
+        return irda_protocols[protocol].command_length;
+    else
+        return 0;
 }
 

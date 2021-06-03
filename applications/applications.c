@@ -104,7 +104,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_IRDA
-    {.app = irda, .name = "irda", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = irda, .name = "irda", .stack_size = 1024 * 3, .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_EXAMPLE_QRCODE
@@ -186,7 +186,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_IRDA
-    {.app = irda, .name = "Infrared", .stack_size = 1024, .icon = A_Infrared_14},
+    {.app = irda, .name = "Infrared", .stack_size = 1024 * 3, .icon = A_Infrared_14},
 #endif
 
 #ifdef APP_GPIO_DEMO

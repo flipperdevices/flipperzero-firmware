@@ -4,6 +4,8 @@
 #include <list>
 #include <vector>
 #include <irda.h>
+#include <sd-card-api.h>
+#include <filesystem-api.h>
 
 class IrdaAppRemoteButton {
     friend class IrdaAppRemoteManager;
@@ -26,9 +28,17 @@ public:
 };
 
 class IrdaAppRemoteManager {
+    static const char* irda_directory;
+    static const char* irda_extension;
     size_t current_remote_index;
     size_t current_button_index;
     std::vector<IrdaAppRemote> remotes;
+    SdCard_Api* sd_ex_api;
+    FS_Api* fs_api;
+    void show_file_error_message(const char* error_text);
+    bool parse_and_save_button(std::string& str);
+    char file_buf[48];
+    size_t file_buf_cnt;
 public:
     std::vector<std::string> get_remote_list() const;
     std::vector<std::string> get_button_list() const;
@@ -49,5 +59,8 @@ public:
     void delete_current_remote();
     IrdaAppRemoteManager();
     ~IrdaAppRemoteManager() {};
+
+    bool sync_current_remote();
+    bool load();
 };
 
