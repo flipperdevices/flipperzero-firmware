@@ -15,7 +15,7 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
     switch(key->get_key_type()) {
     case iButtonKeyType::KeyDallas:
         app->set_text_store(
-            "Delete %s?\nID: %02X %02X %02X %02X %02X %02X %02X %02X\nType: Dallas",
+            "Delete?\n%s\nID: %02X %02X %02X %02X %02X %02X %02X %02X\nType: Dallas",
             key->get_name(),
             key_data[0],
             key_data[1],
@@ -28,11 +28,11 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
         break;
     case iButtonKeyType::KeyCyfral:
         app->set_text_store(
-            "Delete %s?\nID: %02X %02X\nType: Cyfral", key->get_name(), key_data[0], key_data[1]);
+            "Delete?\n%s\nID: %02X %02X\nType: Cyfral", key->get_name(), key_data[0], key_data[1]);
         break;
     case iButtonKeyType::KeyMetakom:
         app->set_text_store(
-            "Delete %s?\nID: %02X %02X %02X %02X\nType: Metakom",
+            "Delete?\n%s\nID: %02X %02X %02X %02X\nType: Metakom",
             key->get_name(),
             key_data[0],
             key_data[1],

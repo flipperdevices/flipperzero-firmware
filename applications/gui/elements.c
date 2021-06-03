@@ -189,6 +189,9 @@ void elements_multiline_text_aligned(
         } else {
             string_set_str(str, start);
         }
+
+        elements_string_fit_width(canvas, str, canvas_width(canvas) - x / 4); //idk
+
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(str));
         start = end + 1;
         y += font_height;
