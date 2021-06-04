@@ -26,6 +26,7 @@ void IrdaAppSceneStart::on_enter(IrdaApp* app) {
         submenu, "Learn new remote", SubmenuIndexLearnNewRemote, submenu_callback, app);
     submenu_add_item(submenu, "Saved remotes", SubmenuIndexSavedRemotes, submenu_callback, app);
     submenu_set_selected_item(submenu, submenu_item_selected);
+    submenu_item_selected = 0;
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
@@ -51,8 +52,6 @@ bool IrdaAppSceneStart::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         }
         consumed = true;
-    } else {
-        submenu_item_selected = 0;
     }
 
     return consumed;

@@ -40,24 +40,24 @@ IrdaAppRemoteManager::~IrdaAppRemoteManager() {
     furi_record_close("sdcard-ex");
 }
 
-void IrdaAppRemoteManager::add_button(const char* button_name, const IrdaMessage* message) {
+bool IrdaAppRemoteManager::add_button(const char* button_name, const IrdaMessage* message) {
     remote->buttons.emplace_back(button_name, message);
-    store();
+    return store();
 }
 
-void IrdaAppRemoteManager::add_remote_with_button(
+bool IrdaAppRemoteManager::add_remote_with_button(
     const char* button_name,
     const IrdaMessage* message) {
 
     std::vector<std::string> remote_list;
     bool result = get_remote_list(remote_list);
     if (!result)
-        return;
+        return false;
 
     auto new_name = find_vacant_name(remote_list, default_remote_name);
 
     remote = std::make_unique<IrdaAppRemote>(new_name);
-    add_button(button_name, message);
+    return add_button(button_name, message);
 }
 
 IrdaAppRemote::IrdaAppRemote(const std::string& name)
@@ -107,7 +107,7 @@ bool IrdaAppRemoteManager::delete_remote() {
     return true;
 }
 
-bool IrdaAppRemoteManager::delete_current_button() {
+bool IrdaAppRemoteManager::delete_button() {
     auto& buttons = remote->buttons;
     buttons.erase(buttons.begin() + current_button_index);
     current_button_index = 0;
@@ -120,6 +120,17 @@ std::string IrdaAppRemoteManager::get_current_button_name() {
 
 std::string IrdaAppRemoteManager::get_remote_name() {
     return remote->name;
+}
+
+int IrdaAppRemoteManager::find_remote_name(const std::vector<std::string>& strings) {
+    int i = 0;
+    for (const auto& str : strings) {
+        if (!str.compare(remote->name)) {
+            return i;
+        }
+        ++i;
+    }
+    return -1;
 }
 
 bool IrdaAppRemoteManager::rename_remote(const char* str) {

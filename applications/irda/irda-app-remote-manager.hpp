@@ -46,20 +46,22 @@ class IrdaAppRemoteManager {
     char file_buf[48];
     size_t file_buf_cnt;
 public:
-    bool get_remote_list(std::vector<std::string>& remote_names) const;
-    std::vector<std::string> get_button_list() const;
-    void add_remote_with_button(const char* button_name, const IrdaMessage* message);
-    void add_button(const char* button_name, const IrdaMessage* message);
+    bool add_remote_with_button(const char* button_name, const IrdaMessage* message);
+    bool add_button(const char* button_name, const IrdaMessage* message);
 
-    size_t get_current_button(void) const;
-    const IrdaMessage* get_button_data(size_t button_index) const;
-    void set_current_button(size_t index);
+    int find_remote_name(const std::vector<std::string>& strings);
     bool rename_button(const char* str);
     bool rename_remote(const char* str);
+
+    bool get_remote_list(std::vector<std::string>& remote_names) const;
+    std::vector<std::string> get_button_list() const;
     std::string get_current_button_name();
     std::string get_remote_name();
     size_t get_current_remote_buttons_number();
-    bool delete_current_button();
+    size_t get_current_button(void) const;
+    const IrdaMessage* get_button_data(size_t button_index) const;
+    void set_current_button(size_t index);
+    bool delete_button();
     bool delete_remote();
     IrdaAppRemoteManager();
     ~IrdaAppRemoteManager();

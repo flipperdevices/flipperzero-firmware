@@ -25,6 +25,7 @@ void IrdaAppSceneUniversal::on_enter(IrdaApp* app) {
     submenu_add_item(
         submenu, "Air Conditioners", SubmenuIndexUniversalAirConditioner, submenu_callback, app);
     submenu_set_selected_item(submenu, submenu_item_selected);
+    submenu_item_selected = 0;
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
@@ -46,8 +47,6 @@ bool IrdaAppSceneUniversal::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         }
         consumed = true;
-    } else {
-        submenu_item_selected = 0;
     }
 
     return consumed;

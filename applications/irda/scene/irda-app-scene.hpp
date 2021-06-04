@@ -78,7 +78,7 @@ public:
     void on_exit(IrdaApp* app) final;
 private:
     std::vector<std::string> buttons_names;
-    uint32_t submenu_item_selected = 0;
+    uint32_t buttonmenu_item_selected = 0;
 };
 
 class IrdaAppSceneRemoteList : public IrdaAppScene {
@@ -96,6 +96,8 @@ public:
     void on_enter(IrdaApp* app) final;
     bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
     void on_exit(IrdaApp* app) final;
+private:
+    uint32_t submenu_item_selected = 0;
 };
 
 class IrdaAppSceneEditKeySelect : public IrdaAppScene {
@@ -105,7 +107,6 @@ public:
     void on_exit(IrdaApp* app) final;
 private:
     std::vector<std::string> buttons_names;
-    uint32_t submenu_item_selected = 0;
 };
 
 class IrdaAppSceneEditRename : public IrdaAppScene {

@@ -36,12 +36,12 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
     const uint8_t item_width = 123;
 
     canvas_clear(canvas);
-    canvas_set_font(canvas, FontPrimary);
 
     uint8_t position = 0;
     SubmenuItemArray_it_t it;
 
     if(model->header) {
+        canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 4, 11, model->header);
     }
 

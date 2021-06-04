@@ -26,19 +26,25 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
         return;
     }
 
-    for(auto& a : remote_names) {
-        submenu_add_item(submenu, a.c_str(), i++, submenu_callback, app);
+    for(auto& name : remote_names) {
+        submenu_add_item(submenu, name.c_str(), i++, submenu_callback, app);
     }
     submenu_add_item(
         submenu, "                           +", SubmenuIndexPlus, submenu_callback, app);
-    submenu_set_selected_item(submenu, submenu_item_selected);
 
+    if ((SubmenuIndex) submenu_item_selected == SubmenuIndexPlus) {
+        submenu_set_selected_item(submenu, submenu_item_selected);
+    } else {
+        int remote_index = remote_manager->find_remote_name(remote_names);
+        submenu_set_selected_item(submenu, (remote_index >= 0) ? remote_index : 0);
+    }
+
+    submenu_item_selected = 0;
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
 
 bool IrdaAppSceneRemoteList::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
-    submenu_item_selected = 0;
 
     if(event->type == IrdaAppEvent::Type::MenuSelected) {
         switch(event->payload.menu_index) {
@@ -52,7 +58,6 @@ bool IrdaAppSceneRemoteList::on_event(IrdaApp* app, IrdaAppEvent* event) {
             bool result = remote_manager->load(remote_names.at(event->payload.menu_index));
             if (result) {
                 app->switch_to_next_scene(IrdaApp::Scene::Remote);
-                submenu_item_selected = event->payload.menu_index;
             }
             consumed = true;
             break;

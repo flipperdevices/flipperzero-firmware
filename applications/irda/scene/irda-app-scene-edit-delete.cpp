@@ -68,8 +68,9 @@ bool IrdaAppSceneEditDelete::on_event(IrdaApp* app, IrdaAppEvent* event) {
             if(app->get_edit_element() == IrdaApp::EditElement::Remote) {
                 result = remote_manager->delete_remote();
             } else {
-                result = remote_manager->delete_current_button();
+                result = remote_manager->delete_button();
             }
+            remote_manager->set_current_button(0);
 
             if (!result) {
                 app->search_and_switch_to_previous_scene(

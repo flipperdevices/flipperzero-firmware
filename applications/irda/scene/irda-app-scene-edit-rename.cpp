@@ -36,6 +36,7 @@ bool IrdaAppSceneEditRename::on_event(IrdaApp* app, IrdaAppEvent* event) {
         } else {
             result = remote_manager->rename_remote(app->get_text_store(0));
         }
+        remote_manager->set_current_button(0);
         if (!result) {
             app->search_and_switch_to_previous_scene({IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
         } else {
