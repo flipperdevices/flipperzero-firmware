@@ -25,8 +25,10 @@ void IrdaAppSceneEditKeySelect::on_enter(IrdaApp* app) {
     for(const auto& it : buttons_names) {
         submenu_add_item(submenu, it.c_str(), i++, submenu_callback, app);
     }
-    submenu_set_selected_item(submenu, remote_manager->get_current_button());
-    remote_manager->set_current_button(0);
+    if (i > 0) {
+        submenu_set_selected_item(submenu, remote_manager->get_current_button());
+        remote_manager->set_current_button(0);
+    }
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }

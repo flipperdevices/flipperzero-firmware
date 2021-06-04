@@ -109,6 +109,8 @@ bool IrdaAppRemoteManager::delete_remote() {
 
 bool IrdaAppRemoteManager::delete_button() {
     auto& buttons = remote->buttons;
+    furi_assert(current_button_index < buttons.size());
+
     buttons.erase(buttons.begin() + current_button_index);
     current_button_index = 0;
     return store();
