@@ -69,12 +69,12 @@ bool IrdaAppSceneEditDelete::on_event(IrdaApp* app, IrdaAppEvent* event) {
                 result = remote_manager->delete_remote();
             } else {
                 result = remote_manager->delete_button();
-//                remote_manager->set_current_button(0);    does inside
+                //                remote_manager->set_current_button(0);    does inside
             }
 
-            if (!result) {
+            if(!result) {
                 app->search_and_switch_to_previous_scene(
-                        {IrdaApp::Scene::RemoteList, IrdaApp::Scene::Start});
+                    {IrdaApp::Scene::RemoteList, IrdaApp::Scene::Start});
             } else {
                 app->switch_to_next_scene(IrdaApp::Scene::EditDeleteDone);
             }

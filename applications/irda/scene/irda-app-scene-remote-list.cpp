@@ -21,7 +21,7 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     int i = 0;
 
     bool result = remote_manager->get_remote_list(remote_names);
-    if (!result) {
+    if(!result) {
         app->switch_to_previous_scene();
         return;
     }
@@ -32,7 +32,7 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     submenu_add_item(
         submenu, "                           +", SubmenuIndexPlus, submenu_callback, app);
 
-    if ((SubmenuIndex) submenu_item_selected == SubmenuIndexPlus) {
+    if((SubmenuIndex)submenu_item_selected == SubmenuIndexPlus) {
         submenu_set_selected_item(submenu, submenu_item_selected);
     } else {
         int remote_index = remote_manager->find_remote_name(remote_names);
@@ -56,7 +56,7 @@ bool IrdaAppSceneRemoteList::on_event(IrdaApp* app, IrdaAppEvent* event) {
         default:
             auto remote_manager = app->get_remote_manager();
             bool result = remote_manager->load(remote_names.at(event->payload.menu_index));
-            if (result) {
+            if(result) {
                 app->switch_to_next_scene(IrdaApp::Scene::Remote);
             }
             consumed = true;

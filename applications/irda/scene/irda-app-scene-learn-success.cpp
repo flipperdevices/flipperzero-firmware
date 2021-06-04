@@ -48,8 +48,7 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
         case DialogExResultLeft:
             app->switch_to_next_scene_without_saving(IrdaApp::Scene::Learn);
             break;
-        case DialogExResultCenter:
-        {
+        case DialogExResultCenter: {
             auto receiver = app->get_receiver();
             auto message = receiver->get_last_message();
             irda_send(message, 1);
@@ -57,7 +56,7 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
         }
         case DialogExResultRight:
             auto remote_manager = app->get_remote_manager();
-            if (remote_manager->check_fs()) {
+            if(remote_manager->check_fs()) {
                 app->switch_to_next_scene(IrdaApp::Scene::LearnEnterName);
             } else {
                 app->switch_to_previous_scene();

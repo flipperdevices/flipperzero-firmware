@@ -40,11 +40,13 @@ bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
             result = remote_manager->add_remote_with_button(
                 app->get_text_store(0), receiver->get_last_message());
         } else {
-            result = remote_manager->add_button(app->get_text_store(0), receiver->get_last_message());
+            result =
+                remote_manager->add_button(app->get_text_store(0), receiver->get_last_message());
         }
 
-        if (!result) {
-            app->search_and_switch_to_previous_scene({IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
+        if(!result) {
+            app->search_and_switch_to_previous_scene(
+                {IrdaApp::Scene::Start, IrdaApp::Scene::RemoteList});
         } else {
             app->switch_to_next_scene_without_saving(IrdaApp::Scene::LearnDone);
         }

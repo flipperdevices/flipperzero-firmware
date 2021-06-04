@@ -38,7 +38,7 @@ void IrdaAppSceneRemote::on_enter(IrdaApp* app) {
 
     app->set_text_store(0, "%s", remote_manager->get_remote_name().c_str());
     button_menu_set_header(button_menu, app->get_text_store(0));
-    if (buttonmenu_item_selected != ButtonIndexNA) {
+    if(buttonmenu_item_selected != ButtonIndexNA) {
         button_menu_set_selected_item(button_menu, buttonmenu_item_selected);
         buttonmenu_item_selected = ButtonIndexNA;
     }
