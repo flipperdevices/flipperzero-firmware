@@ -19,8 +19,6 @@ void IrdaAppSceneLearnDone::on_enter(IrdaApp* app) {
     popup_set_timeout(popup, 1500);
     popup_enable_timeout(popup);
 
-    auto remote_manager = app->get_remote_manager();
-    remote_manager->sync_current_remote();
     view_manager->switch_to(IrdaAppViewManager::ViewType::Popup);
 }
 

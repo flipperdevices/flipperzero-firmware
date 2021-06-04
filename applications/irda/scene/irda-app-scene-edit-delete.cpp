@@ -1,5 +1,6 @@
 #include "../irda-app.hpp"
 #include "irda.h"
+#include "irda/scene/irda-app-scene.hpp"
 #include <string>
 #include <stdio.h>
 
@@ -36,7 +37,7 @@ void IrdaAppSceneEditDelete::on_enter(IrdaApp* app) {
         app->set_text_store(
             0,
             "%s\n with %lu buttons",
-            remote_manager->get_current_remote_name().c_str(),
+            remote_manager->get_remote_name().c_str(),
             remote_manager->get_current_remote_buttons_number());
     }
 
@@ -63,13 +64,19 @@ bool IrdaAppSceneEditDelete::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         case DialogExResultRight:
             auto remote_manager = app->get_remote_manager();
+            bool result = false;
             if(app->get_edit_element() == IrdaApp::EditElement::Remote) {
-                remote_manager->delete_current_remote();
+                result = remote_manager->delete_remote();
             } else {
-                remote_manager->delete_current_button();
+                result = remote_manager->delete_current_button();
             }
 
-            app->switch_to_next_scene(IrdaApp::Scene::EditDeleteDone);
+            if (!result) {
+                app->search_and_switch_to_previous_scene(
+                        {IrdaApp::Scene::RemoteList, IrdaApp::Scene::Start});
+            } else {
+                app->switch_to_next_scene(IrdaApp::Scene::EditDeleteDone);
+            }
             break;
         }
     }

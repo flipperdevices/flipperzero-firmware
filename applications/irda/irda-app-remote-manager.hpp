@@ -1,8 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <stdint.h>
 #include <string>
 #include <list>
 #include <vector>
+#include <memory>
 #include <irda.h>
 #include <sd-card-api.h>
 #include <filesystem-api.h>
@@ -21,46 +23,49 @@ class IrdaAppRemote {
     friend class IrdaAppRemoteManager;
     std::vector<IrdaAppRemoteButton> buttons;
     std::string name;
-    bool add(const IrdaMessage*);
-    void add_button(size_t remote_index, const char* button_name, const IrdaMessage* message);
 public:
-    IrdaAppRemote(std::string name);
+    IrdaAppRemote(const std::string& name);
+    IrdaAppRemote& operator=(std::string& new_name) noexcept
+    {
+        name = new_name;
+        buttons.clear();
+        return *this;
+    }
 };
 
 class IrdaAppRemoteManager {
     static const char* irda_directory;
     static const char* irda_extension;
-    size_t current_remote_index;
     size_t current_button_index;
-    std::vector<IrdaAppRemote> remotes;
+    std::unique_ptr<IrdaAppRemote> remote;
     SdCard_Api* sd_ex_api;
     FS_Api* fs_api;
-    void show_file_error_message(const char* error_text);
-    bool parse_and_save_button(std::string& str);
+    void show_file_error_message(const char* error_text) const;
+    bool parse_button(std::string& str);
+    std::string make_filename(const std::string& name) const;
     char file_buf[48];
     size_t file_buf_cnt;
 public:
-    std::vector<std::string> get_remote_list() const;
+    bool get_remote_list(std::vector<std::string>& remote_names) const;
     std::vector<std::string> get_button_list() const;
     void add_remote_with_button(const char* button_name, const IrdaMessage* message);
     void add_button(const char* button_name, const IrdaMessage* message);
 
-    size_t get_current_remote(void) const;
     size_t get_current_button(void) const;
     const IrdaMessage* get_button_data(size_t button_index) const;
-    void set_current_remote(size_t index);
     void set_current_button(size_t index);
-    void rename_button(const char* str);
-    void rename_remote(const char* str);
+    bool rename_button(const char* str);
+    bool rename_remote(const char* str);
     std::string get_current_button_name();
-    std::string get_current_remote_name();
+    std::string get_remote_name();
     size_t get_current_remote_buttons_number();
-    void delete_current_button();
-    void delete_current_remote();
+    bool delete_current_button();
+    bool delete_remote();
     IrdaAppRemoteManager();
-    ~IrdaAppRemoteManager() {};
+    ~IrdaAppRemoteManager();
 
-    bool sync_current_remote();
-    bool load();
+    bool store();
+    bool load(const std::string& name);
+    bool check_fs() const;
 };
 

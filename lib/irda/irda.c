@@ -1,3 +1,4 @@
+#include "irda.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -152,7 +153,15 @@ void irda_send(const IrdaMessage* message, int times) {
 }
 
 bool irda_is_protocol_valid(IrdaProtocol protocol) {
-    return protocol < COUNT_OF(irda_protocols);
+    return (protocol > 0) && (protocol < COUNT_OF(irda_protocols));
+}
+
+IrdaProtocol irda_get_protocol_by_name(const char* protocol_name) {
+    for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
+        if (!strcmp(irda_protocols[i].name, protocol_name))
+            return i;
+    }
+    return 0;
 }
 
 const char* irda_get_protocol_name(IrdaProtocol protocol) {

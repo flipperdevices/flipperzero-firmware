@@ -25,6 +25,7 @@ void IrdaAppSceneEditKeySelect::on_enter(IrdaApp* app) {
     for(const auto& it : buttons_names) {
         submenu_add_item(submenu, it.c_str(), i++, submenu_callback, app);
     }
+    submenu_set_selected_item(submenu, submenu_item_selected);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::Submenu);
 }
@@ -33,12 +34,15 @@ bool IrdaAppSceneEditKeySelect::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
     if(event->type == IrdaAppEvent::Type::MenuSelected) {
+        submenu_item_selected = 0;
         auto remote_manager = app->get_remote_manager();
         remote_manager->set_current_button(event->payload.menu_index);
         consumed = true;
         if(app->get_edit_action() == IrdaApp::EditAction::Rename) {
+            submenu_item_selected = event->payload.menu_index;
             app->switch_to_next_scene(IrdaApp::Scene::EditRename);
         } else {
+            submenu_item_selected = event->payload.menu_index;
             app->switch_to_next_scene(IrdaApp::Scene::EditDelete);
         }
     }

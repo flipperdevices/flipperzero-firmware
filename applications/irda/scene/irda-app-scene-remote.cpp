@@ -35,7 +35,7 @@ void IrdaAppSceneRemote::on_enter(IrdaApp* app) {
     button_menu_add_item(
         button_menu, "Edit", ButtonIndexEdit, button_menu_callback, ButtonMenuItemTypeControl, app);
 
-    app->set_text_store(0, "%s", remote_manager->get_current_remote_name().c_str());
+    app->set_text_store(0, "%s", remote_manager->get_remote_name().c_str());
     button_menu_set_header(button_menu, app->get_text_store(0));
     view_manager->switch_to(IrdaAppViewManager::ViewType::ButtonMenu);
 }
