@@ -1,4 +1,5 @@
 #pragma once
+#include "sys/_stdint.h"
 #include <algorithm>
 #include <stdint.h>
 #include <string>
@@ -36,8 +37,8 @@ public:
 class IrdaAppRemoteManager {
     static const char* irda_directory;
     static const char* irda_extension;
-    size_t current_button_index;
     std::unique_ptr<IrdaAppRemote> remote;
+    // TODO: make FS_Api and SdCard_Api unique_ptr
     SdCard_Api* sd_ex_api;
     FS_Api* fs_api;
     void show_file_error_message(const char* error_text) const;
@@ -45,23 +46,22 @@ class IrdaAppRemoteManager {
     std::string make_filename(const std::string& name) const;
     char file_buf[48];
     size_t file_buf_cnt;
+
 public:
     bool add_remote_with_button(const char* button_name, const IrdaMessage* message);
     bool add_button(const char* button_name, const IrdaMessage* message);
 
     int find_remote_name(const std::vector<std::string>& strings);
-    bool rename_button(const char* str);
+    bool rename_button(uint32_t index, const char* str);
     bool rename_remote(const char* str);
 
     bool get_remote_list(std::vector<std::string>& remote_names) const;
     std::vector<std::string> get_button_list() const;
-    std::string get_current_button_name();
+    std::string get_button_name(uint32_t index);
     std::string get_remote_name();
-    size_t get_current_remote_buttons_number();
-    size_t get_current_button(void) const;
+    size_t get_number_of_buttons();
     const IrdaMessage* get_button_data(size_t button_index) const;
-    void set_current_button(size_t index);
-    bool delete_button();
+    bool delete_button(uint32_t index);
     bool delete_remote();
     IrdaAppRemoteManager();
     ~IrdaAppRemoteManager();

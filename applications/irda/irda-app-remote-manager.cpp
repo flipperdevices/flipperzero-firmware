@@ -1,8 +1,10 @@
 #include "irda-app-remote-manager.hpp"
 #include "filesystem-api.h"
 #include "furi.h"
+#include "furi/check.h"
 #include "gui/modules/button_menu.h"
 #include "irda.h"
+#include "sys/_stdint.h"
 #include <cstdio>
 #include <string>
 #include <utility>
@@ -49,6 +51,9 @@ bool IrdaAppRemoteManager::add_button(const char* button_name, const IrdaMessage
 bool IrdaAppRemoteManager::add_remote_with_button(
     const char* button_name,
     const IrdaMessage* message) {
+    furi_check(button_name != nullptr);
+    furi_check(message != nullptr);
+
     std::vector<std::string> remote_list;
     bool result = get_remote_list(remote_list);
     if(!result) return false;
@@ -75,19 +80,12 @@ std::vector<std::string> IrdaAppRemoteManager::get_button_list(void) const {
     return name_vector;
 }
 
-size_t IrdaAppRemoteManager::get_current_button(void) const {
-    return current_button_index;
-}
+const IrdaMessage* IrdaAppRemoteManager::get_button_data(size_t index) const {
+    furi_check(remote.get() != nullptr);
+    auto& buttons = remote->buttons;
+    furi_check(index < buttons.size());
 
-const IrdaMessage* IrdaAppRemoteManager::get_button_data(size_t button_index) const {
-    furi_check(remote->buttons.size() > button_index);
-    auto& b = remote->buttons.at(button_index);
-    return &b.message;
-}
-
-void IrdaAppRemoteManager::set_current_button(size_t index) {
-    furi_check(index < remote->buttons.size());
-    current_button_index = index;
+    return &buttons.at(index).message;
 }
 
 std::string IrdaAppRemoteManager::make_filename(const std::string& name) const {
@@ -106,20 +104,24 @@ bool IrdaAppRemoteManager::delete_remote() {
     return true;
 }
 
-bool IrdaAppRemoteManager::delete_button() {
+bool IrdaAppRemoteManager::delete_button(uint32_t index) {
+    furi_check(remote.get() != nullptr);
     auto& buttons = remote->buttons;
-    furi_assert(current_button_index < buttons.size());
+    furi_check(index < buttons.size());
 
-    buttons.erase(buttons.begin() + current_button_index);
-    current_button_index = 0;
+    buttons.erase(buttons.begin() + index);
     return store();
 }
 
-std::string IrdaAppRemoteManager::get_current_button_name() {
-    return remote->buttons[current_button_index].name;
+std::string IrdaAppRemoteManager::get_button_name(uint32_t index) {
+    furi_check(remote.get() != nullptr);
+    auto& buttons = remote->buttons;
+    furi_check(index < buttons.size());
+    return buttons[index].name;
 }
 
 std::string IrdaAppRemoteManager::get_remote_name() {
+    furi_check(remote.get() != nullptr);
     return remote->name;
 }
 
@@ -135,6 +137,9 @@ int IrdaAppRemoteManager::find_remote_name(const std::vector<std::string>& strin
 }
 
 bool IrdaAppRemoteManager::rename_remote(const char* str) {
+    furi_check(str != nullptr);
+    furi_check(remote.get() != nullptr);
+
     if(!remote->name.compare(str)) return true;
 
     std::vector<std::string> remote_list;
@@ -151,12 +156,17 @@ bool IrdaAppRemoteManager::rename_remote(const char* str) {
     return fs_err == FSE_OK;
 }
 
-bool IrdaAppRemoteManager::rename_button(const char* str) {
-    remote->buttons[current_button_index].name = str;
+bool IrdaAppRemoteManager::rename_button(uint32_t index, const char* str) {
+    furi_check(remote.get() != nullptr);
+    auto& buttons = remote->buttons;
+    furi_check(index < buttons.size());
+
+    buttons[index].name = str;
     return store();
 }
 
-size_t IrdaAppRemoteManager::get_current_remote_buttons_number() {
+size_t IrdaAppRemoteManager::get_number_of_buttons() {
+    furi_check(remote.get() != nullptr);
     return remote->buttons.size();
 }
 

@@ -7,7 +7,8 @@ void IrdaAppSceneEditRename::on_enter(IrdaApp* app) {
 
     auto remote_manager = app->get_remote_manager();
     if(app->get_edit_element() == IrdaApp::EditElement::Button) {
-        auto button_name = remote_manager->get_current_button_name();
+        furi_assert(app->get_current_button() != IrdaApp::ButtonNA);
+        auto button_name = remote_manager->get_button_name(app->get_current_button());
         strncpy(app->get_text_store(0), button_name.c_str(), app->get_text_store_size());
     } else {
         auto remote_name = remote_manager->get_remote_name();
@@ -32,8 +33,9 @@ bool IrdaAppSceneEditRename::on_event(IrdaApp* app, IrdaAppEvent* event) {
         auto remote_manager = app->get_remote_manager();
         bool result = false;
         if(app->get_edit_element() == IrdaApp::EditElement::Button) {
-            result = remote_manager->rename_button(app->get_text_store(0));
-            remote_manager->set_current_button(0);
+            result =
+                remote_manager->rename_button(app->get_current_button(), app->get_text_store(0));
+            app->set_current_button(IrdaApp::ButtonNA);
         } else {
             result = remote_manager->rename_remote(app->get_text_store(0));
         }

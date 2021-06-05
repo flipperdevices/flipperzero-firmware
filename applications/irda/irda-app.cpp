@@ -1,4 +1,5 @@
 #include "irda-app.hpp"
+#include "sys/_stdint.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -153,4 +154,12 @@ void IrdaApp::set_edit_action(IrdaApp::EditAction value) {
 
 IrdaApp::EditAction IrdaApp::get_edit_action(void) {
     return action;
+}
+
+void IrdaApp::set_current_button(int value) {
+    current_button = value;
+}
+
+int IrdaApp::get_current_button() {
+    return current_button;
 }

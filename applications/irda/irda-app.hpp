@@ -1,4 +1,5 @@
 #pragma once
+#include "sys/_stdint.h"
 #include <map>
 #include <irda.h>
 #include <furi.h>
@@ -65,6 +66,12 @@ public:
     bool get_learn_new_remote();
     void set_learn_new_remote(bool value);
 
+    enum : int {
+           ButtonNA = -1,
+    };
+    int get_current_button();
+    void set_current_button(int value);
+
     static void text_input_callback(void* context, char* text);
     static void popup_callback(void* context);
 
@@ -80,6 +87,7 @@ private:
     bool learn_new_remote;
     EditElement element;
     EditAction action;
+    uint32_t current_button;
 
     IrdaAppSignalReceiver receiver;
     IrdaAppViewManager view_manager;
