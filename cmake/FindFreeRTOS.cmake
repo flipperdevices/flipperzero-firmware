@@ -77,7 +77,11 @@ foreach(PORT ${FreeRTOS_FIND_COMPONENTS})
     find_path(FreeRTOS_${PORT}_PATH
         NAMES portmacro.h
         PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
-        PATH_SUFFIXES "portable/GCC/${PORT}/r0p1" "Source/portable/GCC/${PORT}"  "Source/portable/GCC/${PORT}/r0p1"
+        PATH_SUFFIXES
+            "portable/GCC/${PORT}/r0p1"
+            "portable/GCC/${PORT}"
+            "Source/portable/GCC/${PORT}"
+            "Source/portable/GCC/${PORT}/r0p1"
         NO_DEFAULT_PATH
     )
 
