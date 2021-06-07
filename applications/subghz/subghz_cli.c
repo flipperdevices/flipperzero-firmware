@@ -1,7 +1,6 @@
 #include "subghz_cli.h"
 #include <furi.h>
 #include <api-hal.h>
-#include <api-hal-spi.h>
 
 static const uint8_t subghz_test_packet_data[] = {
     0x30, // 48bytes to transmit
@@ -131,8 +130,6 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
 
     api_hal_subghz_reset();
     api_hal_subghz_idle();
-    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
-    api_hal_spi_device_return(device);
 
     api_hal_subghz_load_preset(ApiHalSubGhzPreset2FskPacket);
 
