@@ -51,15 +51,18 @@ bool IrdaAppSceneRemote::on_event(IrdaApp* app, IrdaAppEvent* event) {
     if(event->type == IrdaAppEvent::Type::MenuSelected) {
         switch(event->payload.menu_index) {
         case ButtonIndexPlus:
+            app->notify_click();
             buttonmenu_item_selected = event->payload.menu_index;
             app->set_learn_new_remote(false);
             app->switch_to_next_scene(IrdaApp::Scene::Learn);
             break;
         case ButtonIndexEdit:
+            app->notify_click();
             buttonmenu_item_selected = event->payload.menu_index;
             app->switch_to_next_scene(IrdaApp::Scene::Edit);
             break;
         default:
+            app->notify_click_and_blink();
             auto remote_manager = app->get_remote_manager();
             auto message = remote_manager->get_button_data(event->payload.menu_index);
             app->get_receiver()->send_message(message);

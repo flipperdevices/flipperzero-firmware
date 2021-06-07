@@ -17,6 +17,8 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     DialogEx* dialog_ex = view_manager->get_dialog_ex();
 
+    app->notify_green_on();
+
     auto receiver = app->get_receiver();
     auto message = receiver->get_last_message();
 
@@ -49,6 +51,7 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
             app->switch_to_next_scene_without_saving(IrdaApp::Scene::Learn);
             break;
         case DialogExResultCenter: {
+            app->notify_space_blink();
             auto receiver = app->get_receiver();
             auto message = receiver->get_last_message();
             irda_send(message, 1);
@@ -72,4 +75,5 @@ void IrdaAppSceneLearnSuccess::on_exit(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     DialogEx* dialog_ex = view_manager->get_dialog_ex();
     dialog_ex_set_center_button_text(dialog_ex, nullptr);
+    app->notify_green_off();
 }
