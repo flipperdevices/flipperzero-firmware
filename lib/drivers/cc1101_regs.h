@@ -176,7 +176,7 @@ typedef struct {
 typedef union {
     CC1101Status status;
     uint8_t status_raw;
-}CC1101StatusRaw;
+} CC1101StatusRaw;
 
 
 typedef struct {
