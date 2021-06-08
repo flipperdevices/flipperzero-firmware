@@ -45,7 +45,7 @@ class IrdaAppRemoteManager {
     bool parse_button(std::string& str);
     std::string make_filename(const std::string& name) const;
     char file_buf[48];
-    size_t file_buf_cnt;
+    size_t file_buf_cnt = 0;
 
 public:
     bool add_remote_with_button(const char* button_name, const IrdaMessage* message);
