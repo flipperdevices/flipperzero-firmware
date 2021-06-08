@@ -41,6 +41,7 @@ int32_t app_archive(void* p);
 int32_t notification_app(void* p);
 
 // On system start hooks declaration
+void irda_cli_init();
 void nfc_cli_init();
 void subghz_cli_init();
 void bt_cli_init();
@@ -203,6 +204,7 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 
 // On system start hooks
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
+    irda_cli_init,
 #ifdef APP_NFC
     nfc_cli_init,
 #endif

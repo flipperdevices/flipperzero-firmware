@@ -33,19 +33,6 @@ typedef struct {
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
-    // #0
-    { .protocol = IrdaProtocolRaw,
-      .name ="Raw",         // TODO: implement pronto HEX
-      .decoder = {
-          .alloc = NULL,
-          .decode = NULL,
-          .reset = NULL,
-          .free = NULL},
-      .encoder = {
-          .encode = NULL},
-      .address_length = 0,
-      .command_length = 0,
-    },
     // #1
     { .protocol = IrdaProtocolNEC,
       .name = "NEC",
@@ -142,6 +129,7 @@ void irda_reset_decoder(IrdaHandler* handler) {
 
 void irda_send(const IrdaMessage* message, int times) {
     furi_assert(message);
+    furi_assert(irda_is_protocol_valid(message->protocol));
 
     for (int i = 0; i < times; ++i) {
         if(irda_protocols[message->protocol].encoder.encode) {
@@ -153,7 +141,7 @@ void irda_send(const IrdaMessage* message, int times) {
 }
 
 bool irda_is_protocol_valid(IrdaProtocol protocol) {
-    return (protocol > 0) && (protocol < COUNT_OF(irda_protocols));
+    return (protocol >= 0) && (protocol < COUNT_OF(irda_protocols));
 }
 
 IrdaProtocol irda_get_protocol_by_name(const char* protocol_name) {
@@ -161,7 +149,7 @@ IrdaProtocol irda_get_protocol_by_name(const char* protocol_name) {
         if (!strcmp(irda_protocols[i].name, protocol_name))
             return i;
     }
-    return 0;
+    return IrdaProtocolUnknown;
 }
 
 const char* irda_get_protocol_name(IrdaProtocol protocol) {
