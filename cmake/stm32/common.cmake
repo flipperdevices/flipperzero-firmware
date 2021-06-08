@@ -42,11 +42,14 @@ find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size PATHS ${TOOLCHAIN_BIN
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 
-FUNCTION(stm32_print_size_of_target TARGET)
-    # this target is always considered out of date so size will always be displayed on build
-    ADD_CUSTOM_TARGET(${TARGET}_size ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
-                                                        DEPENDS ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C})
-ENDFUNCTION()
+function(stm32_print_size_of_target TARGET)
+    add_custom_command(
+       TARGET ${TARGET}
+       POST_BUILD
+       COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+       COMMENT "Target Sizes: "
+    )
+endfunction()
 
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)
