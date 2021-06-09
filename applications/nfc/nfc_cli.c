@@ -51,7 +51,8 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
     }
 
     api_hal_nfc_init();
-    printf("Emulating NFC-A...\r\nPress Ctrl+C to abort\r\n");
+    printf("Emulating NFC-A Type: T2T UID: CF72D440 SAK: 20 ATQA: 00/04\r\n");
+    printf("Press Ctrl+C to abort\r\n");
 
     while(!cli_cmd_interrupt_received(cli)) {
         if(api_hal_nfc_listen(100)) {
