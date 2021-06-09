@@ -1,9 +1,7 @@
 #include "irda-app.hpp"
-#include "sys/_stdint.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <callback-connector.h>
 

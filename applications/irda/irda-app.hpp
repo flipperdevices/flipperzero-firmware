@@ -1,5 +1,4 @@
 #pragma once
-#include "sys/_stdint.h"
 #include <map>
 #include <irda.h>
 #include <furi.h>

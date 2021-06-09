@@ -1,8 +1,5 @@
 #include "../irda-app.hpp"
 #include "gui/modules/text_input.h"
-#include <callback-connector.h>
-#include <string>
-#include <stdio.h>
 
 void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();

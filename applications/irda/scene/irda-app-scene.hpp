@@ -2,7 +2,6 @@
 #include "../irda-app.hpp"
 #include <api-hal-irda.h>
 #include "irda.h"
-#include <gui/elements.h>
 #include <vector>
 #include <string>
 

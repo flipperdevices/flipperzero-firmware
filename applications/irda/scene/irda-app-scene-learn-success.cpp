@@ -1,7 +1,5 @@
 #include "../irda-app.hpp"
 #include "irda.h"
-#include <string>
-#include <stdio.h>
 
 static void dialog_result_callback(DialogExResult result, void* context) {
     auto app = static_cast<IrdaApp*>(context);

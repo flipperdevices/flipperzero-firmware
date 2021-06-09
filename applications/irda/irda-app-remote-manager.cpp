@@ -4,7 +4,6 @@
 #include "furi/check.h"
 #include "gui/modules/button_menu.h"
 #include "irda.h"
-#include "sys/_stdint.h"
 #include <cstdio>
 #include <string>
 #include <utility>

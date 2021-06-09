@@ -1,9 +1,6 @@
 #pragma once
-#include "sys/_stdint.h"
-#include <algorithm>
 #include <stdint.h>
 #include <string>
-#include <list>
 #include <vector>
 #include <memory>
 #include <irda.h>

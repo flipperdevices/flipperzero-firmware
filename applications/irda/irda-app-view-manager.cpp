@@ -1,7 +1,4 @@
 #include "furi.h"
-#include "gui/modules/button_menu.h"
-#include "gui/modules/dialog_ex.h"
-#include "gui/modules/text_input.h"
 #include "irda-app.hpp"
 #include <callback-connector.h>
 
