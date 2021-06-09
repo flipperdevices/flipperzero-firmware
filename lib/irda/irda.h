@@ -12,9 +12,9 @@ typedef struct IrdaHandler IrdaHandler;
 // Do not change protocol order, as it can be saved into memory and fw update can be performed!
 typedef enum {
     IrdaProtocolUnknown = -1,
-    IrdaProtocolNEC = 0,
-    IrdaProtocolNECext = 1,
-    IrdaProtocolSamsung32 = 2,
+    IrdaProtocolSamsung32 = 0,
+    IrdaProtocolNEC = 1,
+    IrdaProtocolNECext = 2,
 } IrdaProtocol;
 
 typedef struct {
