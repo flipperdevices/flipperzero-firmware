@@ -59,6 +59,7 @@ void nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
     api_hal_power_insomnia_enter();
+    api_hal_nfc_exit_sleep();
 
     if(nfc_worker->state == NfcWorkerStatePoll) {
         nfc_worker_poll(nfc_worker);
@@ -71,6 +72,7 @@ void nfc_worker_task(void* context) {
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
     }
+    api_hal_nfc_deactivate();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
     api_hal_power_insomnia_exit();
     osThreadExit();
@@ -209,7 +211,6 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
         }
         osDelay(20);
     }
-    api_hal_nfc_deactivate();
 }
 
 void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
@@ -311,9 +312,8 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
             FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
             api_hal_nfc_deactivate();
         }
-        osDelay(10);
+        osDelay(5);
     }
-    api_hal_nfc_deactivate();
 }
 
 void nfc_worker_field(NfcWorker* nfc_worker) {

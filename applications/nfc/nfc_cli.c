@@ -20,6 +20,7 @@ void nfc_cli_detect(Cli* cli, string_t args, void* context) {
     uint8_t dev_cnt = 0;
     bool cmd_exit = false;
     api_hal_nfc_init();
+    api_hal_nfc_exit_sleep();
     printf("Detecting nfc...\r\nPress Ctrl+C to abort\r\n");
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
@@ -51,6 +52,7 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
     }
 
     api_hal_nfc_init();
+    api_hal_nfc_exit_sleep();
     printf("Emulating NFC-A Type: T2T UID: CF72D440 SAK: 20 ATQA: 00/04\r\n");
     printf("Press Ctrl+C to abort\r\n");
 
