@@ -6,6 +6,7 @@
 void nfc_cli_init() {
     Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "nfc_detect", nfc_cli_detect, NULL);
+    cli_add_command(cli, "nfc_emulate", nfc_cli_emulate, NULL);
     furi_record_close("cli");
 }
 
@@ -39,4 +40,25 @@ void nfc_cli_detect(Cli* cli, string_t args, void* context) {
         }
         osDelay(50);
     }
+    api_hal_nfc_deactivate();
+}
+
+void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
+    // Check if nfc worker is not busy
+    if(api_hal_nfc_is_busy()) {
+        printf("Nfc is busy");
+        return;
+    }
+
+    api_hal_nfc_init();
+    printf("Emulating NFC-A...\r\nPress Ctrl+C to abort\r\n");
+
+    while(!cli_cmd_interrupt_received(cli)) {
+        if(api_hal_nfc_listen(100)) {
+            printf("Reader detected\r\n");
+            api_hal_nfc_deactivate();
+        }
+        osDelay(50);
+    }
+    api_hal_nfc_deactivate();
 }
