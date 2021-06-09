@@ -361,6 +361,7 @@ bool IrdaAppRemoteManager::load(const std::string& name) {
 }
 
 bool IrdaAppRemoteManager::check_fs() const {
+    // TODO: [FL-1431] Add return value to sd_ex_api->check_error() and replace get_fs_info().
     auto fs_err = fs_api->common.get_fs_info(nullptr, nullptr);
     if(fs_err != FSE_OK) show_file_error_message("SD card not found");
     return fs_err == FSE_OK;
