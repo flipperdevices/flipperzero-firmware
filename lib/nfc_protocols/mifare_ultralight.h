@@ -46,6 +46,8 @@ typedef struct {
     uint8_t dump[255];
 } MfUltralightRead;
 
+bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
+
 uint16_t mf_ul_prepare_get_version(uint8_t* dest);
 void mf_ul_parse_get_version_response(uint8_t* buff, MfUltralightRead* mf_ul_read);
 void mf_ul_set_default_version(MfUltralightRead* mf_ul_read);

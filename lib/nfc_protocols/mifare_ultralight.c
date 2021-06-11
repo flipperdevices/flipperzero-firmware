@@ -1,5 +1,12 @@
 #include "mifare_ultralight.h"
 
+bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    if((ATQA0 == 0x44) && (ATQA1 == 0x00) && (SAK == 0x00)) {
+        return true;
+    }
+    return false;
+}
+
 uint16_t mf_ul_prepare_get_version(uint8_t* dest) {
     dest[0] = MF_UL_GET_VERSION_CMD;
     return 1;

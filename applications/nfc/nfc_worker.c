@@ -328,7 +328,10 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
         memset(&mf_ul_read, 0, sizeof(mf_ul_read));
         if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
             if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA &&
-               dev_list[0].dev.nfca.sensRes.anticollisionInfo == 0x44) {
+               mf_ul_check_card_type(
+                   dev_list[0].dev.nfca.sensRes.anticollisionInfo,
+                   dev_list[0].dev.nfca.sensRes.platformInfo,
+                   dev_list[0].dev.nfca.selRes.sak)) {
                 // Get Mifare Ultralight version
                 FURI_LOG_I(
                     NFC_WORKER_TAG, "Found Mifare Ultralight tag. Trying to get tag version");
