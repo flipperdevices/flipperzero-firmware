@@ -14,9 +14,10 @@ static void scene_draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
     const Item* near = is_nearby(state);
     if(near) {
         int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 25;
-        int8_t hint_pos_y = near->y < 15 ? near->y + 4 : near->y - 16;
+        int8_t hint_pos_y = (near->y - state->player_global.y) - 5;
 
         strcpy(buf, near->action_name);
+
         if(glitching) {
             for(size_t g = 0; g != state->action_timeout; g++) {
                 buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
@@ -105,7 +106,9 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
 
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
-    } else if(state->action == SLEEP && state->player_global.x == 154) { // 2do - sofa x pos getter
+    } else if(
+        state->action == SLEEP && (state->player_global.x == 154 &&
+                                   state->player_global.y == 52)) { // 2do - sofa x pos getter
         state->dolphin_gfx = A_FX_Sitting_40x27;
         state->dolphin_gfx_b = I_FX_SittingB_40x27;
     } else if(state->action != INTERACT) {
@@ -191,9 +194,11 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
     if(state->debug) {
         sprintf(
             buf,
-            "x:%ld>%d %ld %s",
+            "x:%ld.%ld>%ld.%ld %ld %s",
             state->player_global.x,
-            state->poi,
+            state->player_global.y,
+            state->poi.x,
+            state->poi.y,
             state->action_timeout,
             action_str[state->action]);
         canvas_draw_str(canvas, 0, 13, buf);

@@ -21,7 +21,7 @@
 #define ACTIONS_NUM 5
 #define DOLPHIN_DEFAULT_Y 20
 // world
-#define WORLD_WIDTH 2048
+#define WORLD_WIDTH 512
 #define WORLD_HEIGHT 64
 
 #define LAYERS 8
@@ -79,6 +79,8 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
+    Vec2 poi;
+
     IconName dolphin_gfx;
     IconName dolphin_gfx_b; // temp
 
@@ -97,7 +99,7 @@ typedef struct {
     uint8_t previous_dialogue;
 
     uint32_t action_timeout;
-    uint8_t poi;
+    // uint8_t poi;
 
     uint8_t action;
     uint8_t next_action;

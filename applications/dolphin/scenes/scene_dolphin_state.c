@@ -23,19 +23,29 @@ static void scene_proceed_action(SceneState* state) {
 
 static void scene_dolphin_go_to_poi(SceneState* state) {
     furi_assert(state);
-    if(state->player_global.x < state->poi) {
+    if(state->player_global.x < state->poi.x) {
         state->player_flipped = false;
         state->player_v.x = SPEED_X / 2;
-    } else if(state->player_global.x > state->poi) {
+    } else if(state->player_global.x > state->poi.x) {
         state->player_flipped = true;
         state->player_v.x = -SPEED_X / 2;
+    }
+
+    if(state->player_global.y < state->poi.y) {
+        state->player_flipped = false;
+        state->player_v.y = SPEED_X / 2;
+    } else if(state->player_global.y > state->poi.y) {
+        state->player_flipped = true;
+        state->player_v.y = -SPEED_X / 2;
     }
 }
 
 static void scene_action_handler(SceneState* state) {
     furi_assert(state);
-    if(state->action == MINDCONTROL && state->player_v.x != 0) {
-        state->action_timeout = default_timeout[state->action];
+    if(state->action == MINDCONTROL) {
+        if(state->player_v.x != 0 || state->player_v.y != 0) {
+            state->action_timeout = default_timeout[state->action];
+        }
     }
 
     if(state->action_timeout > 0) {
@@ -43,7 +53,8 @@ static void scene_action_handler(SceneState* state) {
     } else {
         if(random() % 1000 > 500) {
             state->next_action = roll_new(state->prev_action, ACTIONS_NUM);
-            state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
+            state->poi.x = roll_new(state->player_global.x, WORLD_WIDTH);
+            state->poi.y = roll_new(state->player_global.y, WORLD_HEIGHT);
         }
     }
 }
@@ -55,8 +66,9 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
 
     switch(state->action) {
     case WALK:
-        if(state->player_global.x == state->poi) {
+        if(state->player_global.x == state->poi.x && state->player_global.y == state->poi.y) {
             state->player_v.x = 0;
+            state->player_v.y = 0;
             scene_proceed_action(state);
         } else {
             scene_dolphin_go_to_poi(state);
@@ -79,14 +91,17 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
         }
         break;
     case SLEEP:
-        if(state->poi != 154) { // temp
-            state->poi = 154;
-        } else if(state->player_global.x != state->poi) {
+        if(state->poi.x != 154 || state->poi.y != 52) { // temp
+            state->poi.x = 154;
+            state->poi.y = 52;
+        } else if(state->player_global.x != state->poi.x || state->player_global.y != state->poi.y) {
             scene_dolphin_go_to_poi(state);
         } else {
             state->player_v.x = 0;
+            state->player_v.y = 0;
             if(state->action_timeout == 0) {
-                state->poi = roll_new(state->player_global.x, WORLD_WIDTH / 4);
+                state->poi.x = roll_new(state->player_global.x, WORLD_WIDTH);
+                state->poi.y = roll_new(state->player_global.y, WORLD_HEIGHT);
                 scene_proceed_action(state);
             }
             break;

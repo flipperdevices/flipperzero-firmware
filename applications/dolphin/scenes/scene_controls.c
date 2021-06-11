@@ -45,12 +45,12 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_v.y = SPEED_X;
             }
         } else if(input->type == InputTypeRelease) {
-            if(input->key == InputKeyRight || input->key == InputKeyLeft) {
-                state->player_v.x = 0;
-            }
-            if(input->key == InputKeyUp || input->key == InputKeyDown) {
-                state->player_v.y = 0;
-            }
+            // if(input->key == InputKeyRight || input->key == InputKeyLeft) {
+            state->player_v.x = 0;
+            // }
+            // if(input->key == InputKeyUp || input->key == InputKeyDown) {
+            state->player_v.y = 0;
+            // }
 
         } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {
@@ -68,8 +68,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
     // global pos
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
-    state->player_global.y =
-        CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT * 5, 0);
+    state->player_global.y = CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT, 0);
 
     // zoom handlers
     state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);

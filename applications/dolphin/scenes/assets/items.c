@@ -6,7 +6,7 @@ const Item TV = {
     .layer = 7,
     .timeout = 10,
     .x = 160,
-    .y = 34,
+    .y = 84,
     .icon = I_TV_20x24,
     .action_name = "Use",
     .draw = draw_tv,
@@ -16,7 +16,7 @@ const Item Painting = {
     .layer = 3,
     .timeout = 20,
     .x = 160,
-    .y = 10,
+    .y = 60,
     .icon = I_Home_painting_17x20,
     .action_name = "Inspect",
     .draw = NULL,
@@ -26,7 +26,7 @@ const Item Sofa = {
     .layer = 4,
     .timeout = 100,
     .x = 250,
-    .y = 34,
+    .y = 84,
     .icon = I_Sofa_40x13,
     .action_name = "Sit",
     .draw = NULL,
@@ -35,8 +35,8 @@ const Item Sofa = {
 const Item PC = {
     .layer = 4,
     .timeout = 100,
-    .x = 400,
-    .y = 10,
+    .x = 350,
+    .y = 60,
     .icon = I_PC_22x29,
     .action_name = "Use",
     .draw = NULL,
@@ -84,10 +84,13 @@ const Item* is_nearby(SceneState* state) {
     bool found = false;
     const Item** current = get_scene(state);
     while(item < ITEMS_NUM) {
-        int32_t rel =
+        int32_t rel_x =
             (DOLPHIN_CENTER + DOLPHIN_WIDTH / 2 -
              (current[item]->x - state->player_global.x) * PARALLAX(current[item]->layer));
-        if(abs(rel) <= DOLPHIN_WIDTH / 2) {
+
+        int32_t rel_y = (DOLPHIN_HEIGHT - (current[item]->y - state->player_global.y));
+
+        if(abs(rel_x) <= DOLPHIN_WIDTH / 2 && abs(rel_y) <= DOLPHIN_HEIGHT / 2) {
             found = !found;
             break;
         }
@@ -131,6 +134,7 @@ void sofa_sit(Canvas* canvas, void* state) {
     SceneState* s = state;
     // temp fix pos
     s->player_global.x = 154;
+    s->player_global.y = 52;
     s->dolphin_gfx = A_FX_Sitting_40x27;
     s->dolphin_gfx_b = I_FX_SittingB_40x27;
 }

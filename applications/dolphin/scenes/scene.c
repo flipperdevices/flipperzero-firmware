@@ -65,7 +65,7 @@ void scene_alloc() {
     scene_state->player_global.x = random() % WORLD_WIDTH / 4;
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;
-
+    scene_state->debug = true;
     scene_state_mutex = furi_alloc(sizeof(ValueMutex));
     furi_check(init_mutex(scene_state_mutex, scene_state, sizeof(SceneState)));
 
