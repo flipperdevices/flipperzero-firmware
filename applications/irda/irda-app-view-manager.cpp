@@ -16,13 +16,16 @@ IrdaAppViewManager::IrdaAppViewManager() {
     popup = popup_alloc();
     dialog_ex = dialog_ex_alloc();
     text_input = text_input_alloc();
+    button_panel = button_panel_alloc(2, 3);
 
+    add_view(ViewType::ButtonPanel, button_panel_get_view(button_panel));
     add_view(ViewType::ButtonMenu, button_menu_get_view(button_menu));
     add_view(ViewType::Submenu, submenu_get_view(submenu));
     add_view(ViewType::Popup, popup_get_view(popup));
     add_view(ViewType::DialogEx, dialog_ex_get_view(dialog_ex));
     add_view(ViewType::TextInput, text_input_get_view(text_input));
 
+    view_set_previous_callback(button_panel_get_view(button_panel), callback);
     view_set_previous_callback(button_menu_get_view(button_menu), callback);
     view_set_previous_callback(submenu_get_view(submenu), callback);
     view_set_previous_callback(popup_get_view(popup), callback);
@@ -75,6 +78,10 @@ Popup* IrdaAppViewManager::get_popup() {
 
 ButtonMenu* IrdaAppViewManager::get_button_menu() {
     return button_menu;
+}
+
+ButtonPanel* IrdaAppViewManager::get_button_panel() {
+    return button_panel;
 }
 
 osMessageQueueId_t IrdaAppViewManager::get_event_queue() {

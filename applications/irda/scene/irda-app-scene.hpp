@@ -136,3 +136,10 @@ public:
     void on_exit(IrdaApp* app) final;
 };
 
+class IrdaAppSceneUniversalTV : public IrdaAppScene {
+public:
+    void on_enter(IrdaApp* app) final;
+    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
+    void on_exit(IrdaApp* app) final;
+};
+

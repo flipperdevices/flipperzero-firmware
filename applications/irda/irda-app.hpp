@@ -112,6 +112,7 @@ private:
     std::map<Scene, IrdaAppScene*> scenes = {
         {Scene::Start, new IrdaAppSceneStart()},
         {Scene::Universal, new IrdaAppSceneUniversal()},
+        {Scene::UniversalTV, new IrdaAppSceneUniversalTV()},
         {Scene::Learn, new IrdaAppSceneLearn()},
         {Scene::LearnSuccess, new IrdaAppSceneLearnSuccess()},
         {Scene::LearnEnterName, new IrdaAppSceneLearnEnterName()},
