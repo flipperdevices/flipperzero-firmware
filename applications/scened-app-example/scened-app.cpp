@@ -9,7 +9,7 @@ ScenedApp::~ScenedApp() {
 }
 
 void ScenedApp::run() {
-    scene_controller.add_scene(ScenedApp::Scene::Start, new ScenedAppSceneStart());
+    scene_controller.add_scene(SceneType::Start, new ScenedAppSceneStart());
 
     scene_controller.process(100);
 }

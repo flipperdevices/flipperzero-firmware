@@ -6,22 +6,22 @@
 
 class ScenedApp {
 public:
-    enum class Event : uint8_t {
+    enum class EventType : uint8_t {
         GENERIC_EVENT_ENUM_VALUES,
     };
 
-    enum class Scene : uint8_t {
+    enum class SceneType : uint8_t {
         GENERIC_SCENE_ENUM_VALUES,
     };
 
-    class EventType {
+    class Event {
     public:
         union {
             int32_t menu_index;
             //DialogExResult dialog_ex_result;
         } payload;
 
-        Event type;
+        EventType type;
     };
 
     SceneController<GenericScene<ScenedApp>, ScenedApp> scene_controller;
