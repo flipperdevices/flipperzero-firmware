@@ -319,7 +319,11 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
     MfUltralightRead mf_ul_read;
 
+    // Update screen before start searching
+    NfcMessage message = {.type = NfcMessageTypeMfUlNotFound};
     while(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
+        furi_check(
+            osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
         api_hal_nfc_deactivate();
         memset(&mf_ul_read, 0, sizeof(mf_ul_read));
         if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
@@ -347,6 +351,7 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                     api_hal_nfc_deactivate();
                     if(!api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
                         FURI_LOG_E(NFC_WORKER_TAG, "Lost connection. Restarting search");
+                        message.type = NfcMessageTypeMfUlNotFound;
                         continue;
                     }
                 } else {
@@ -354,6 +359,7 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                         NFC_WORKER_TAG,
                         "Error getting Mifare Ultralight version. Error code: %d",
                         err);
+                    message.type = NfcMessageTypeMfUlNotFound;
                     continue;
                 }
 
@@ -373,6 +379,7 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                         mf_ul_read.pages_readed = mf_ul_read.pages_to_read;
                     } else {
                         FURI_LOG_E(NFC_WORKER_TAG, "Fast read failed");
+                        message.type = NfcMessageTypeMfUlNotFound;
                         continue;
                     }
                 } else {
@@ -391,6 +398,15 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                         }
                     }
                 }
+
+                // Fill message for nfc application
+                message.type = NfcMessageTypeMfUlFound;
+                memcpy(
+                    message.device.mf_ul_card.uid,
+                    dev_list[0].dev.nfca.nfcId1,
+                    sizeof(message.device.mf_ul_card.uid));
+                memcpy(message.device.mf_ul_card.man_block, mf_ul_read.dump, 4 * 3);
+                memcpy(message.device.mf_ul_card.otp, &mf_ul_read.dump[4 * 3], 4);
                 for(uint8_t i = 0; i < mf_ul_read.pages_readed * 4; i += 4) {
                     printf("Page %2d: ", i / 4);
                     for(uint8_t j = 0; j < 4; j++) {
@@ -398,11 +414,12 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                     }
                     printf("\r\n");
                 }
-                osDelay(1000);
             } else {
+                message.type = NfcMessageTypeMfUlNotFound;
                 FURI_LOG_W(NFC_WORKER_TAG, "Tag does not support Mifare Ultralight");
             }
         } else {
+            message.type = NfcMessageTypeMfUlNotFound;
             FURI_LOG_W(NFC_WORKER_TAG, "Can't find any tags");
         }
         osDelay(100);

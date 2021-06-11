@@ -107,6 +107,8 @@ Nfc* nfc_alloc() {
     view_set_context(nfc->view_read_mf_ultralight, nfc);
     view_set_draw_callback(nfc->view_read_mf_ultralight, nfc_view_read_mf_ultralight_draw);
     view_set_previous_callback(nfc->view_read_mf_ultralight, nfc_view_stop);
+    view_allocate_model(
+        nfc->view_read_mf_ultralight, ViewModelTypeLocking, sizeof(NfcViewReadModel));
     view_dispatcher_add_view(
         nfc->view_dispatcher, NfcViewReadMfUltralight, nfc->view_read_mf_ultralight);
 
@@ -196,6 +198,7 @@ int32_t nfc_task(void* p) {
     NfcMessage message;
     while(1) {
         furi_check(osMessageQueueGet(message_queue, &message, NULL, osWaitForever) == osOK);
+
         if(message.type == NfcMessageTypeDetect) {
             with_view_model(
                 nfc->view_detect, (NfcViewReadModel * model) {
@@ -243,6 +246,19 @@ int32_t nfc_task(void* p) {
         } else if(message.type == NfcMessageTypeEMVNotFound) {
             with_view_model(
                 nfc->view_read_emv, (NfcViewReadModel * model) {
+                    model->found = false;
+                    return true;
+                });
+        } else if(message.type == NfcMessageTypeMfUlFound) {
+            with_view_model(
+                nfc->view_read_mf_ultralight, (NfcViewReadModel * model) {
+                    model->found = true;
+                    model->device = message.device;
+                    return true;
+                });
+        } else if(message.type == NfcMessageTypeMfUlNotFound) {
+            with_view_model(
+                nfc->view_read_mf_ultralight, (NfcViewReadModel * model) {
                     model->found = false;
                     return true;
                 });
