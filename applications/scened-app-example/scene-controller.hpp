@@ -1,0 +1,195 @@
+#include <map>
+#include <forward_list>
+#include <initializer_list>
+
+#define GENERIC_SCENE_ENUM_VALUES Uninitalized, Exit, Start
+#define GENERIC_EVENT_ENUM_VALUES Tick, Back
+
+/**
+ * @brief Controller for scene navigation in application
+ * 
+ * @tparam TScene generic scene class
+ * @tparam TApp application class
+ */
+template <typename TScene, typename TApp> class SceneController {
+public:
+    /**
+     * @brief Add scene to scene container
+     * 
+     * @param scene_index scene index
+     * @param scene_pointer scene object pointer
+     */
+    void add_scene(typename TApp::Scene scene_index, TScene* scene_pointer);
+
+    /**
+     * @brief Switch to next scene and store current scene in previous scenes list
+     * 
+     * @param scene_index next scene index
+     * @param need_restore true, if we want the scene to restore its parameters
+     */
+    void switch_to_next_scene(typename TApp::Scene scene_index, bool need_restore = false);
+
+    /**
+     * @brief Switch to next scene without ability to return to current scene
+     * 
+     * @param scene_index next scene index
+     * @param need_restore true, if we want the scene to restore its parameters
+     */
+    void switch_to_scene(typename TApp::Scene scene_index, bool need_restore = false);
+
+    /**
+     * @brief Search the scene in the list of previous scenes and switch to it
+     * 
+     * @param scene_index_list list of scene indexes to which you want to switch
+     */
+    void search_and_switch_to_previous_scene(
+        const std::initializer_list<typename TApp::Scene>& scene_index_list);
+
+    bool process(uint32_t tick_length_ms);
+
+    /**
+     * @brief Switch to previous scene
+     * 
+     * @param count how many steps back
+     * @return true if app need to exit
+     */
+    bool switch_to_previous_scene(uint8_t count = 1);
+
+    /**
+     * @brief Construct a new Scene Controller object
+     * 
+     * @param app_pointer pointer to application class
+     */
+    SceneController(TApp* app_pointer);
+
+    /**
+     * @brief Destroy the Scene Controller object
+     * 
+     */
+    ~SceneController();
+
+private:
+    /**
+     * @brief Scenes pointers container
+     * 
+     */
+    std::map<typename TApp::Scene, TScene*> scenes;
+
+    /**
+     * @brief List of indexes of previous scenes
+     * 
+     */
+    std::forward_list<typename TApp::Scene> previous_scenes_list;
+
+    /**
+     * @brief Get the previous scene pointer
+     * 
+     * @return TScene* previous scene pointer
+     */
+    TScene* get_previous_scene();
+
+    /**
+     * @brief Current scene index holder
+     * 
+     */
+    typename TApp::Scene current_scene_index;
+
+    /**
+     * @brief Application pointer holder
+     * 
+     */
+    TApp* app;
+};
+
+template <typename TScene, typename TApp>
+void SceneController<TScene, TApp>::add_scene(typename TApp::Scene scene_index, TScene* scene) {
+    scenes[scene_index] = scene;
+}
+
+template <typename TScene, typename TApp>
+void SceneController<TScene, TApp>::switch_to_next_scene(
+    typename TApp::Scene scene_index,
+    bool need_restore) {
+    previous_scenes_list.push_front(current_scene_index);
+    switch_to_scene(scene_index, need_restore);
+}
+
+template <typename TScene, typename TApp>
+void SceneController<TScene, TApp>::switch_to_scene(
+    typename TApp::Scene scene_index,
+    bool need_restore) {
+    if(scene_index != TApp::Scene::Exit) {
+        scenes[current_scene_index]->on_exit(app);
+        current_scene_index = scene_index;
+        scenes[current_scene_index]->on_enter(app, need_restore);
+    }
+}
+
+template <typename TScene, typename TApp>
+void SceneController<TScene, TApp>::search_and_switch_to_previous_scene(
+    const std::initializer_list<typename TApp::Scene>& scene_index_list) {
+    typename TApp::Scene previous_scene = TApp::Scene::Start;
+    bool scene_found = false;
+
+    while(!scene_found) {
+        previous_scene = get_previous_scene();
+        for(typename TApp::Scene element : scene_index_list) {
+            if(previous_scene == element) {
+                scene_found = true;
+                break;
+            }
+        }
+    }
+
+    switch_to_scene(previous_scene, true);
+}
+
+template <typename TScene, typename TApp>
+bool SceneController<TScene, TApp>::process(uint32_t tick_length_ms) {
+    typename TApp::EventType event;
+    bool consumed;
+    bool exit = false;
+
+    current_scene_index = TApp::Scene::Start;
+    scenes[current_scene_index]->on_enter(app, false);
+
+    while(!exit) {
+        //app->view_manager.receive_event(&event);
+
+        consumed = scenes[current_scene_index]->on_event(app, &event);
+
+        if(!consumed) {
+            if(event.type == TApp::Event::Back) {
+                exit = switch_to_previous_scene();
+            }
+        }
+    };
+
+    scenes[current_scene_index]->on_exit(app);
+
+    return true;
+}
+
+template <typename TScene, typename TApp>
+bool SceneController<TScene, TApp>::switch_to_previous_scene(uint8_t count) {
+    typename TApp::Scene previous_scene_index = TApp::Scene::Start;
+
+    for(uint8_t i = 0; i < count; i++) previous_scene_index = get_previous_scene();
+
+    if(previous_scene_index == TApp::Scene::Exit) return true;
+
+    scenes[current_scene_index]->on_exit(this);
+    current_scene_index = previous_scene_index;
+    scenes[current_scene_index]->on_enter(this, true);
+    return false;
+}
+
+template <typename TScene, typename TApp>
+SceneController<TScene, TApp>::SceneController(TApp* app_pointer) {
+    app = app_pointer;
+    current_scene_index = TApp::Scene::Uninitalized;
+}
+
+template <typename TScene, typename TApp> SceneController<TScene, TApp>::~SceneController() {
+    for(auto& it : scenes) delete it.second;
+}
