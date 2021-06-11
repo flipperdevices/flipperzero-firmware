@@ -101,7 +101,11 @@ void draw_tv(Canvas* canvas, void* state) {
     SceneState* s = state;
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(
-        canvas, (TV.x + 3 - s->player_global.x) * PARALLAX(TV.layer), TV.y + 4, 16, 20);
+        canvas,
+        (TV.x + 3 - s->player_global.x) * PARALLAX(TV.layer),
+        TV.y + 4 - s->player_global.y,
+        16,
+        20);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_bitmap_mode(canvas, true);
 }
@@ -112,7 +116,10 @@ void smash_tv(Canvas* canvas, void* state) {
     s->player_flipped = true;
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
-        canvas, ((TV.x - 5) - s->player_global.x) * PARALLAX(TV.layer), TV.y - 2, I_FX_Bang_32x6);
+        canvas,
+        ((TV.x - 5) - s->player_global.x) * PARALLAX(TV.layer),
+        TV.y - 2 - s->player_global.y,
+        I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
     if(s->action_timeout < TV.timeout - 2) {
         elements_multiline_text_framed(canvas, 80, 24, "Bang!");

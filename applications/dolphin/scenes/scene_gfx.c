@@ -153,22 +153,25 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
     for(uint8_t l = 0; l < LAYERS; l++) {
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ITEMS_NUM; i++) {
-                int32_t item_pos = (current_scene[i]->x - state->player_global.x);
-                if(item_screen_bounds(item_pos)) {
+                int32_t item_pos_X = (current_scene[i]->x - state->player_global.x);
+                int32_t item_pos_Y = (current_scene[i]->y - state->player_global.y);
+                if(item_screen_bounds(item_pos_X)) {
                     if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
 
                     if(l == current_scene[i]->layer) {
                         canvas_draw_icon_name(
                             canvas,
-                            item_pos * PARALLAX(l),
-                            current_scene[i]->y,
+                            item_pos_X * PARALLAX(l),
+                            item_pos_Y, // * PARALLAX(l),
                             current_scene[i]->icon);
                         canvas_set_bitmap_mode(canvas, false);
                     }
                 }
             }
 
-            if(l == 0) canvas_draw_line(canvas, 0, 42, 128, 42);
+            if(l == 0)
+                canvas_draw_line(
+                    canvas, 0, 42 - state->player_global.y, 128, 42 - state->player_global.y);
         }
 
         if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);

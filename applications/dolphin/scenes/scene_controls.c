@@ -5,6 +5,11 @@
 void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     furi_assert(state);
     furi_assert(input);
+    // toggle mind control on any user interaction
+    if(input->type == InputTypePress) {
+        state->action = MINDCONTROL;
+    }
+#if 0
 
     // dolphin_scene_debug
     if(input->type == InputTypeShort) {
@@ -12,12 +17,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
             state->debug = !state->debug;
         }
     }
-    // toggle mind control on any user interaction
-    if(input->type == InputTypePress) {
-        if(input->key == InputKeyLeft || input->key == InputKeyRight || input->key == InputKeyOk) {
-            state->action = MINDCONTROL;
-        }
-    }
+
     // zoom poc for tests
     if(input->type == InputTypePress) {
         if(input->key == InputKeyDown) {
@@ -29,6 +29,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
             state->dialog_progress = 0;
         }
     }
+#endif
     // mind control
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
@@ -38,11 +39,19 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
             } else if(input->key == InputKeyLeft) {
                 state->player_flipped = true;
                 state->player_v.x = -SPEED_X;
+            } else if(input->key == InputKeyUp) {
+                state->player_v.y = -SPEED_X;
+            } else if(input->key == InputKeyDown) {
+                state->player_v.y = SPEED_X;
             }
         } else if(input->type == InputTypeRelease) {
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
                 state->player_v.x = 0;
             }
+            if(input->key == InputKeyUp || input->key == InputKeyDown) {
+                state->player_v.y = 0;
+            }
+
         } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {
                 state->prev_action = MINDCONTROL;
@@ -59,6 +68,8 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
     // global pos
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
+    state->player_global.y =
+        CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT * 5, 0);
 
     // zoom handlers
     state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);
@@ -67,5 +78,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
     //center screen
     state->screen.x = state->player_global.x - state->player.x;
+    state->screen.x = state->player_global.y - state->player.y;
+
     state->player_anim = (state->player_global.x / 10) % 2;
 }
