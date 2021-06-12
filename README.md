@@ -34,8 +34,8 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 
 # Usage
 
-First of all you need to configure toolchain and library pathes using CMake varibles. 
-You can do this by passing values through command line during cmake run or by setting variables inside your CMakeLists.txt
+First of all you need to configure toolchain and library paths using CMake variables. 
+You can do this by passing values through command line during cmake run or by setting variables inside your `CMakeLists.txt`
 
 ## Configuration
 
@@ -45,18 +45,18 @@ You can do this by passing values through command line during cmake run or by se
 
 ## Common usage
 
-First thing that you need to do after toolchain configration in your `CMakeLists.txt` script is to find CMSIS package:
-```
+First thing that you need to do after toolchain configuration in your `CMakeLists.txt` script is to find CMSIS package:
+```cmake
 find_package(CMSIS [CMSIS_version] COMPONENTS STM32F4 REQUIRED)
 ```
 You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONENTS` or omit `COMPONENTS` totally - in that case stm32-cmake will find ALL sources for ALL families and ALL chips (you'll need ALL STM32Cube packages somewhere).
 
-[CMSIS_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiples STM32 families are requested.
+[CMSIS_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiple STM32 families are requested.
 
 Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`.
 
-***Note**: Some devices in STM32H7 family has two different cores (Cortex-M7 and Cortex-M4).
-For those device the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
+***Note**: Some devices in STM32H7 family have two different cores (Cortex-M7 and Cortex-M4).
+For those devices the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
 
 CMSIS consists of three main components:
 
@@ -65,22 +65,22 @@ CMSIS consists of three main components:
 * Device-specific linker scripts which requires information about memory sizes
 
 stm32-cmake uses modern CMake features notably imported targets and target properties.
-Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagates them as dependencies. So in simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
-```
+Every CMSIS component is CMake's target (aka library), which defines compiler definitions, compiler flags, include dirs, sources, etc. to build and propagate them as dependencies. So in a simple use-case all you need is to link your executable with library `CMSIS::STM32::<device>`:
+```cmake
 add_executable(stm32-template main.c)
 target_link_libraries(stm32-template CMSIS::STM32::F407VG)
 ```
 That will add include directories, startup source, linker script and compiler flags to your executable.
 
-CMSIS creates following targets:
+CMSIS creates the following targets:
 
 * `CMSIS::STM32::<FAMILY>` (e.g. `CMSIS::STM32::F4`) - common includes, compiler flags and defines for family
 * `CMSIS::STM32::<TYPE>` (e.g. `CMSIS::STM32::F407xx`) - common startup source for device type, depends on `CMSIS::STM32::<FAMILY>`
 * `CMSIS::STM32::<DEVICE>` (e.g. `CMSIS::STM32::F407VG`) - linker script for device, depends on `CMSIS::STM32::<TYPE>`
 
-So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
+So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide your own script using `stm32_add_linker_script` function
 
-***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
+***Note**: For H7 family, because of it's multi-core architecture, all H7 targets also have a suffix (::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
 The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`. This will add the `--specs=nosys.specs` to compiler and linker flags.
@@ -90,15 +90,15 @@ Keep in mind that when using `STM32::Nano`, by default you cannot use floats in 
 ## HAL
 
 STM32 HAL can be used similar to CMSIS.
-```
+```cmake
 find_package(HAL [HAL_version] COMPONENTS STM32F4 REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 ```
 *`CMAKE_INCLUDE_CURRENT_DIR` here because HAL requires `stm32<family>xx_hal_conf.h` file being in include headers path.*
 
-[HAL_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiples STM32 families are requested.
+[HAL_version] is an optional version requirement. See [find_package documentation](https://cmake.org/cmake/help/v3.13/command/find_package.html?highlight=find%20package#id4). This parameter does not make sense if multiple STM32 families are requested.
 
-HAL module will search all drivers supported by family and create following targets:
+HAL module will search all drivers supported by family and create the following targets:
 
 * `HAL::STM32::<FAMILY>` (e.g. `HAL::STM32::F4`) - common HAL source, depends on `CMSIS::STM32::<FAMILY>`
 * `HAL::STM32::<FAMILY>::<DRIVER>` (e.g. `HAL::STM32::F4::GPIO`) - HAL driver <DRIVER>, depends on `HAL::STM32::<FAMILY>`
@@ -109,7 +109,7 @@ HAL module will search all drivers supported by family and create following targ
 
 Here is typical usage:
 
-```
+```cmake
 add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
 target_link_libraries(stm32-blinky-f4 
     HAL::STM32::F4::RCC
@@ -131,7 +131,7 @@ target_link_libraries(stm32-blinky-f4
 
 CMSIS package will generate linker script for your device automatically (target `CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use `stm32_add_linker_script` function.
 
-## Useful cmake function
+## Useful CMake functions
 
 * `stm32_get_chip_info(<chip> [FAMILY <family>] [TYPE <type>] [DEVICE <device>])` - classify device using name, will return device family (into `<family>` variable), type (`<type>`) and canonical name (`<device>`, uppercase without any package codes)
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
@@ -139,19 +139,20 @@ CMSIS package will generate linker script for your device automatically (target 
 
 # Additional CMake modules
 
-stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in embedded world.
+stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in the embedded world.
 
 ## FreeRTOS
 
 [cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. `FREERTOS_PATH` can be either the path to the whole [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release)
+
 Typical usage:
 
-```
+```cmake
 find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
 target_link_libraries(... FreeRTOS::ARM_CM4F)
 ```
 
-Following FreeRTOS ports supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+The following FreeRTOS ports are supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
 
 Other FreeRTOS libraries:
 
