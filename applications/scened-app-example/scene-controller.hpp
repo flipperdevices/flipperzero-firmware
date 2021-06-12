@@ -45,7 +45,7 @@ public:
     void search_and_switch_to_previous_scene(
         const std::initializer_list<typename TApp::SceneType>& scene_index_list);
 
-    bool process(uint32_t tick_length_ms);
+    bool process(uint32_t tick_length_ms = 100);
 
     /**
      * @brief Switch to previous scene
@@ -82,11 +82,11 @@ private:
     std::forward_list<typename TApp::SceneType> previous_scenes_list;
 
     /**
-     * @brief Get the previous scene pointer
+     * @brief Get the previous scene index
      * 
      * @return previous scene index
      */
-    typename TApp::SceneType get_previous_scene();
+    typename TApp::SceneType get_previous_scene_index();
 
     /**
      * @brief Current scene index holder
@@ -103,6 +103,7 @@ private:
 
 template <typename TScene, typename TApp>
 void SceneController<TScene, TApp>::add_scene(typename TApp::SceneType scene_index, TScene* scene) {
+    furi_check(scenes.count(scene_index) == 0);
     scenes[scene_index] = scene;
 }
 
@@ -128,20 +129,20 @@ void SceneController<TScene, TApp>::switch_to_scene(
 template <typename TScene, typename TApp>
 void SceneController<TScene, TApp>::search_and_switch_to_previous_scene(
     const std::initializer_list<typename TApp::SceneType>& scene_index_list) {
-    typename TApp::SceneType previous_scene = TApp::SceneType::Start;
+    auto previous_scene_index = TApp::SceneType::Start;
     bool scene_found = false;
 
     while(!scene_found) {
-        previous_scene = get_previous_scene();
-        for(typename TApp::SceneType element : scene_index_list) {
-            if(previous_scene == element) {
+        previous_scene_index = get_previous_scene_index();
+        for(const auto& element : scene_index_list) {
+            if(previous_scene_index == element) {
                 scene_found = true;
                 break;
             }
         }
     }
 
-    switch_to_scene(previous_scene, true);
+    switch_to_scene(previous_scene_index, true);
 }
 
 template <typename TScene, typename TApp>
@@ -154,7 +155,7 @@ bool SceneController<TScene, TApp>::process(uint32_t tick_length_ms) {
     scenes[current_scene_index]->on_enter(app, false);
 
     while(!exit) {
-        //app->view_manager.receive_event(&event);
+        app->view_manager.receive_event(&event);
 
         consumed = scenes[current_scene_index]->on_event(app, &event);
 
@@ -172,15 +173,13 @@ bool SceneController<TScene, TApp>::process(uint32_t tick_length_ms) {
 
 template <typename TScene, typename TApp>
 bool SceneController<TScene, TApp>::switch_to_previous_scene(uint8_t count) {
-    typename TApp::SceneType previous_scene_index = TApp::SceneType::Start;
+    auto previous_scene_index = TApp::SceneType::Start;
 
-    for(uint8_t i = 0; i < count; i++) previous_scene_index = get_previous_scene();
+    for(uint8_t i = 0; i < count; i++) previous_scene_index = get_previous_scene_index();
 
     if(previous_scene_index == TApp::SceneType::Exit) return true;
 
-    scenes[current_scene_index]->on_exit(app);
-    current_scene_index = previous_scene_index;
-    scenes[current_scene_index]->on_enter(app, true);
+    switch_to_scene(previous_scene_index, true);
     return false;
 }
 
@@ -195,13 +194,13 @@ template <typename TScene, typename TApp> SceneController<TScene, TApp>::~SceneC
 }
 
 template <typename TScene, typename TApp>
-typename TApp::SceneType SceneController<TScene, TApp>::get_previous_scene() {
-    typename TApp::SceneType scene = TApp::SceneType::Exit;
+typename TApp::SceneType SceneController<TScene, TApp>::get_previous_scene_index() {
+    auto scene_index = TApp::SceneType::Exit;
 
     if(!previous_scenes_list.empty()) {
-        scene = previous_scenes_list.front();
+        scene_index = previous_scenes_list.front();
         previous_scenes_list.pop_front();
     }
 
-    return scene;
+    return scene_index;
 }

@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 class TextStore {
+public:
     TextStore(uint8_t text_size);
     ~TextStore();
 

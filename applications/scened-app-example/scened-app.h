@@ -3,11 +3,16 @@
 #include <api-hal.h>
 #include "generic-scene.hpp"
 #include "scene-controller.hpp"
+#include "view-manager.hpp"
+#include "text-store.h"
+
+#include "view-modules/submenu-m.h"
 
 class ScenedApp {
 public:
     enum class EventType : uint8_t {
         GENERIC_EVENT_ENUM_VALUES,
+        MenuSelected,
     };
 
     enum class SceneType : uint8_t {
@@ -18,13 +23,14 @@ public:
     public:
         union {
             int32_t menu_index;
-            //DialogExResult dialog_ex_result;
         } payload;
 
         EventType type;
     };
 
     SceneController<GenericScene<ScenedApp>, ScenedApp> scene_controller;
+    TextStore text_store;
+    ViewManager<ScenedApp, SubmenuM> view_manager;
 
     ~ScenedApp();
     ScenedApp();

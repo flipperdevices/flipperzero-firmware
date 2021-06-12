@@ -1,4 +1,4 @@
-#include "textstore.h"
+#include "text-store.h"
 #include <furi.h>
 
 TextStore::TextStore(uint8_t _text_size)
