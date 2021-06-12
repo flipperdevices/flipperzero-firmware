@@ -1,19 +1,19 @@
 #include "scened-app-scene-start.h"
 
 typedef enum {
-    SubmenuIndexOne,
+    SubmenuByteInput,
 } SubmenuIndex;
 
 void ScenedAppSceneStart::on_enter(ScenedApp* app, bool need_restore) {
-    SubmenuM* submenu = app->view_controller.get<SubmenuM>();
+    SubmenuVM* submenu = app->view_controller.get<SubmenuVM>();
     auto callback = cbc::obtain_connector(this, &ScenedAppSceneStart::submenu_callback);
 
-    submenu->add_item("Read", SubmenuIndexOne, callback, app);
+    submenu->add_item("Byte Input", SubmenuByteInput, callback, app);
 
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
     }
-    app->view_controller.switch_to<SubmenuM>();
+    app->view_controller.switch_to<SubmenuVM>();
 }
 
 bool ScenedAppSceneStart::on_event(ScenedApp* app, ScenedApp::Event* event) {
@@ -22,7 +22,8 @@ bool ScenedAppSceneStart::on_event(ScenedApp* app, ScenedApp::Event* event) {
     if(event->type == ScenedApp::EventType::MenuSelected) {
         submenu_item_selected = event->payload.menu_index;
         switch(event->payload.menu_index) {
-        case SubmenuIndexOne:
+        case SubmenuByteInput:
+            app->scene_controller.switch_to_next_scene(ScenedApp::SceneType::ByteInputScene);
             break;
         }
         consumed = true;
@@ -32,6 +33,7 @@ bool ScenedAppSceneStart::on_event(ScenedApp* app, ScenedApp::Event* event) {
 }
 
 void ScenedAppSceneStart::on_exit(ScenedApp* app) {
+    app->view_controller.get<SubmenuVM>()->clean();
 }
 
 void ScenedAppSceneStart::submenu_callback(void* context, uint32_t index) {

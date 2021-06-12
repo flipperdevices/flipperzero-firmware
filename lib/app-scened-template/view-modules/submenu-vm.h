@@ -2,20 +2,16 @@
 #include "generic-view-module.h"
 #include <gui/modules/submenu.h>
 
-class SubmenuM : public GenericViewModule {
+class SubmenuVM : public GenericViewModule {
 public:
-    SubmenuM();
-    ~SubmenuM() final;
+    SubmenuVM();
+    ~SubmenuVM() final;
     View* get_view() final;
-
-    /**
-     * @brief Remove all items from submenu
-     * @param submenu - Submenu instance
-     */
     void clean() final;
 
     /**
      * @brief Add item to submenu
+     * 
      * @param label - menu item label
      * @param index - menu item index, used for callback, may be the same with other items
      * @param callback - menu item callback
@@ -30,13 +26,15 @@ public:
 
     /**
      * @brief Set submenu item selector
-     * @param index
+     * 
+     * @param index index of the item to be selected
      */
     void set_selected_item(uint32_t index);
 
     /**
      * @brief Set optional header for submenu
-     * @param header    - header to set
+     * 
+     * @param header header to set
      */
     void set_header(const char* header);
 
