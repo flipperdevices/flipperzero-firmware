@@ -5,7 +5,7 @@ typedef enum {
 } SubmenuIndex;
 
 void ScenedAppSceneStart::on_enter(ScenedApp* app, bool need_restore) {
-    SubmenuM* submenu = app->view_manager.get<SubmenuM>();
+    SubmenuM* submenu = app->view_controller.get<SubmenuM>();
     auto callback = cbc::obtain_connector(this, &ScenedAppSceneStart::submenu_callback);
 
     submenu->add_item("Read", SubmenuIndexOne, callback, app);
@@ -13,7 +13,7 @@ void ScenedAppSceneStart::on_enter(ScenedApp* app, bool need_restore) {
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
     }
-    app->view_manager.switch_to<SubmenuM>();
+    app->view_controller.switch_to<SubmenuM>();
 }
 
 bool ScenedAppSceneStart::on_event(ScenedApp* app, ScenedApp::Event* event) {
@@ -41,5 +41,5 @@ void ScenedAppSceneStart::submenu_callback(void* context, uint32_t index) {
     event.type = ScenedApp::EventType::MenuSelected;
     event.payload.menu_index = index;
 
-    app->view_manager.send_event(&event);
+    app->view_controller.send_event(&event);
 }

@@ -3,7 +3,7 @@
 #include <api-hal.h>
 #include "generic-scene.hpp"
 #include "scene-controller.hpp"
-#include "view-manager.hpp"
+#include "view-controller.hpp"
 #include "text-store.h"
 
 #include "view-modules/submenu-m.h"
@@ -30,7 +30,7 @@ public:
 
     SceneController<GenericScene<ScenedApp>, ScenedApp> scene_controller;
     TextStore text_store;
-    ViewManager<ScenedApp, SubmenuM> view_manager;
+    ViewController<ScenedApp, SubmenuM> view_controller;
 
     ~ScenedApp();
     ScenedApp();
