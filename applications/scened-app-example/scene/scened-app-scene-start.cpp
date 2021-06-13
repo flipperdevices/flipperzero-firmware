@@ -5,7 +5,7 @@ typedef enum {
 } SubmenuIndex;
 
 void ScenedAppSceneStart::on_enter(ScenedApp* app, bool need_restore) {
-    SubmenuVM* submenu = app->view_controller.get<SubmenuVM>();
+    auto submenu = app->view_controller.get<SubmenuVM>();
     auto callback = cbc::obtain_connector(this, &ScenedAppSceneStart::submenu_callback);
 
     submenu->add_item("Byte Input", SubmenuByteInput, callback, app);

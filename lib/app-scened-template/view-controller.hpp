@@ -52,6 +52,18 @@ public:
     }
 
     /**
+     * @brief Get ViewModule pointer by cast
+     * 
+     * @tparam T Concrete ViewModule class
+     * @return T* ViewModule pointer
+     */
+    template <typename T> operator T*() {
+        uint32_t view_index = ext::make_type_index<T>().hash_code();
+        furi_check(holder.count(view_index) != 0);
+        return static_cast<T*>(holder[view_index]);
+    }
+
+    /**
      * @brief Switch view to ViewModule
      * 
      * @tparam T Concrete ViewModule class

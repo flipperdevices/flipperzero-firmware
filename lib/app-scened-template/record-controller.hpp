@@ -34,7 +34,7 @@ public:
     }
 
     /**
-     * @brief Record getter (by conversion)
+     * @brief Record getter (by cast)
      * 
      * @return TRecordClass* record value
      */
