@@ -1,12 +1,17 @@
 #pragma once
 #include <furi.h>
 #include <api-hal.h>
+
 #include <generic-scene.hpp>
 #include <scene-controller.hpp>
 #include <view-controller.hpp>
+#include <record-controller.hpp>
 #include <text-store.h>
+
 #include <view-modules/submenu-vm.h>
 #include <view-modules/byte-input-vm.h>
+
+#include <notification/notification-messages.h>
 
 class ScenedApp {
 public:
@@ -33,6 +38,7 @@ public:
     SceneController<GenericScene<ScenedApp>, ScenedApp> scene_controller;
     TextStore text_store;
     ViewController<ScenedApp, SubmenuVM, ByteInputVM> view_controller;
+    RecordController<NotificationApp> notification;
 
     ~ScenedApp();
     ScenedApp();
