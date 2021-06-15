@@ -22,19 +22,7 @@ uint32_t nfc_view_exit(void* context) {
 void nfc_menu_callback(void* context, uint32_t index) {
     furi_assert(message_queue);
     NfcMessage message;
-    if(index == 0) {
-        message.type = NfcMessageTypeDetect;
-    } else if(index == 1) {
-        message.type = NfcMessageTypeReadEMV;
-    } else if(index == 2) {
-        message.type = NfcMessageTypeEmulateEMV;
-    } else if(index == 3) {
-        message.type = NfcMessageTypeEmulate;
-    } else if(index == 4) {
-        message.type = NfcMessageTypeField;
-    } else if(index == 5) {
-        message.type = NfcMessageTypeReadMfUltralight;
-    }
+    message.type = index;
     furi_check(osMessageQueuePut(message_queue, &message, 0, osWaitForever) == osOK);
 }
 
@@ -54,12 +42,14 @@ Nfc* nfc_alloc() {
 
     // Menu
     nfc->submenu = submenu_alloc();
-    submenu_add_item(nfc->submenu, "Detect", 0, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Read EMV", 1, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Emulate EMV", 2, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Emulate", 3, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Field", 4, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Read MfUltralight", 5, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Detect", NfcMessageTypeDetect, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Read EMV", NfcMessageTypeReadEMV, nfc_menu_callback, nfc);
+    submenu_add_item(
+        nfc->submenu, "Emulate EMV", NfcMessageTypeEmulateEMV, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Emulate", NfcMessageTypeEmulate, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Field", NfcMessageTypeField, nfc_menu_callback, nfc);
+    submenu_add_item(
+        nfc->submenu, "Read MfUltralight", NfcMessageTypeReadMfUltralight, nfc_menu_callback, nfc);
 
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
