@@ -9,12 +9,12 @@
 #define MF_UL_FAST_READ_CMD (0x3A)
 
 typedef enum {
-    MF_UL_TYPE_UNKNOWN,
-    MF_UL_TYPE_EV1_UL11,
-    MF_UL_TYPE_EV1_UL21,
-    MF_UL_TYPE_NTAG_213,
-    MF_UL_TYPE_NTAG_215,
-    MF_UL_TYPE_NTAG_216,
+    MfUltralightTypeUnknown,
+    MfUltralightTypeUL11,
+    MfUltralightTypeUL21,
+    MfUltralightTypeNTAG213,
+    MfUltralightTypeNTAG215,
+    MfUltralightTypeNTAG216,
 } MfUltralightType;
 
 typedef struct {

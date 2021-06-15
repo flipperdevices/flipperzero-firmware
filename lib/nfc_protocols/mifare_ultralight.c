@@ -15,23 +15,23 @@ uint16_t mf_ul_prepare_get_version(uint8_t* dest) {
 void mf_ul_parse_get_version_response(uint8_t* buff, MfUltralightRead* mf_ul_read) {
     MfUltralightVersion* version = (MfUltralightVersion*) buff;
     if(version->storage_size == 0x0B || version->storage_size == 0x00) {
-        mf_ul_read->type = MF_UL_TYPE_EV1_UL11;
+        mf_ul_read->type = MfUltralightTypeUL11;
         mf_ul_read->pages_to_read = 20;
         mf_ul_read->support_fast_read = true;
     } else if(version->storage_size == 0x0E) {
-        mf_ul_read->type = MF_UL_TYPE_EV1_UL21;
+        mf_ul_read->type = MfUltralightTypeUL21;
         mf_ul_read->pages_to_read = 41;
         mf_ul_read->support_fast_read = true;
     } else if(version->storage_size == 0x0F) {
-        mf_ul_read->type = MF_UL_TYPE_NTAG_213;
+        mf_ul_read->type = MfUltralightTypeNTAG213;
         mf_ul_read->pages_to_read = 45;
         mf_ul_read->support_fast_read = false;
     } else if(version->storage_size == 0x11) {
-        mf_ul_read->type = MF_UL_TYPE_NTAG_215;
+        mf_ul_read->type = MfUltralightTypeNTAG215;
         mf_ul_read->pages_to_read = 135;
         mf_ul_read->support_fast_read = false;
     } else if(version->storage_size == 0x13) {
-        mf_ul_read->type = MF_UL_TYPE_NTAG_216;
+        mf_ul_read->type = MfUltralightTypeNTAG216;
         mf_ul_read->pages_to_read = 231;
         mf_ul_read->support_fast_read = false;
     } else {
@@ -40,7 +40,7 @@ void mf_ul_parse_get_version_response(uint8_t* buff, MfUltralightRead* mf_ul_rea
 }
 
 void mf_ul_set_default_version(MfUltralightRead* mf_ul_read) {
-    mf_ul_read->type = MF_UL_TYPE_UNKNOWN;
+    mf_ul_read->type = MfUltralightTypeUnknown;
     mf_ul_read->pages_to_read = 20;
     mf_ul_read->support_fast_read = false;
 }
