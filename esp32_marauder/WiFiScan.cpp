@@ -344,6 +344,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
   (currentScanMode == WIFI_ATTACK_AUTH) ||
+  (currentScanMode == WIFI_ATTACK_MIMIC) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR) ||
   (currentScanMode == LV_JOIN_WIFI))
@@ -829,6 +830,37 @@ void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
   //Serial.println("End of func");
 }
 */
+
+// Function to prepare for beacon mimic
+void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Mimic Flood ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
+  initTime = millis();
+  //display_obj.clearScreen();
+  //Serial.println("End of func");
+}
 
 // Function to prepare for beacon spam
 void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
@@ -2536,6 +2568,13 @@ void WiFiScan::channelHop()
   delay(1);
 }
 
+char* WiFiScan::stringToChar(String string) {
+  char buf[string.length() + 1] = {};
+  string.toCharArray(buf, string.length() + 1);
+
+  return buf;
+}
+
 
 // Function for updating scan status
 void WiFiScan::main(uint32_t currentTime)
@@ -2569,6 +2608,37 @@ void WiFiScan::main(uint32_t currentTime)
 
     if (currentTime - initTime >= 1000) {
       initTime = millis();
+      String displayString = "";
+      String displayString2 = "";
+      displayString.concat("packets/sec: ");
+      displayString.concat(packets_sent);
+      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+        displayString2.concat(" ");
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.showCenterText(displayString2, 160);
+      display_obj.showCenterText(displayString, 160);
+      packets_sent = 0;
+    }
+  }
+  else if ((currentScanMode == WIFI_ATTACK_MIMIC)) {
+    // Need this for loop because getTouch causes ~10ms delay
+    // which makes beacon spam less effective
+    for (int i = 0; i < access_points->size(); i++) {
+      if (access_points->get(i).selected)
+        this->broadcastCustomBeacon(currentTime, ssid{access_points->get(i).essid, {random(256), 
+                                                                                    random(256), 
+                                                                                    random(256), 
+                                                                                    random(256), 
+                                                                                    random(256), 
+                                                                                    random(256)}});
+    }
+      
+
+    if (currentTime - initTime >= 1000)
+    {
+      initTime = millis();
+      //Serial.print("packets/sec: ");
+      //Serial.println(packets_sent);
       String displayString = "";
       String displayString2 = "";
       displayString.concat("packets/sec: ");

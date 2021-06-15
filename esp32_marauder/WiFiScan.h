@@ -48,6 +48,7 @@
 #define WIFI_SCAN_TARGET_AP 16
 #define LV_SELECT_AP 17
 #define WIFI_ATTACK_AUTH 18
+#define WIFI_ATTACK_MIMIC 19
 
 #define GRAPH_REFRESH 100
 
@@ -198,6 +199,7 @@ class WiFiScan
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunProbeFlood(uint8_t scan_mode, uint16_t color);
+    void RunMimicFlood(uint8_t scan_mode, uint16_t color);
     void RunBeaconList(uint8_t scan_mode, uint16_t color);
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
@@ -231,8 +233,9 @@ class WiFiScan
 
     //lv_obj_t * scr = lv_cont_create(NULL, NULL);
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();    
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); 
 
+    char* stringToChar(String string);
     void RunSetup();
     int clearSSIDs();
     int clearAPs();

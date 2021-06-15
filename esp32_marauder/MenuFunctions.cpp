@@ -673,6 +673,7 @@ void MenuFunctions::main(uint32_t currentTime)
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
     display_obj.displayBuffer();
@@ -712,6 +713,7 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
+        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
         (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
@@ -737,6 +739,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // This is for when on a menu
   if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
   {
@@ -1212,6 +1215,11 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
   });
+  //addNodes(&wifiAttackMenu, "AP Mimic Flood", TFT_PURPLE, NULL, DEAUTH_SNIFF, [this]() {
+  //  display_obj.clearScreen();
+  //  this->drawStatusBar();
+  //  wifi_scan_obj.StartScan(WIFI_ATTACK_MIMIC, TFT_PURPLE);
+  //});
 
   // Build WiFi General menu
   wifiGeneralMenu.parentMenu = &wifiMenu;
