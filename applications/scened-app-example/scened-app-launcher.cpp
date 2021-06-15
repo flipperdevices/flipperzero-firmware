@@ -6,5 +6,5 @@ extern "C" int32_t scened_app(void* p) {
     app->run();
     delete app;
 
-    return 255;
+    return 0;
 }
