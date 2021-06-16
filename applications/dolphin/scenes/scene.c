@@ -62,7 +62,7 @@ void scene_alloc() {
     SceneState* scene_state = furi_alloc(sizeof(SceneState));
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
-    scene_state->player_global.x = random() % WORLD_WIDTH / 4;
+    scene_state->player_global.x = random() % WORLD_WIDTH;
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;
     scene_state->debug = true;

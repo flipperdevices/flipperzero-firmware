@@ -40,7 +40,11 @@ static void scene_draw_sleep_emote(SceneState* state, Canvas* canvas) {
 
     char dialog_str[] = "zZzZ..";
     // 2do - sofa x pos getter
-    if(state->player_global.x == 154 && state->action_timeout % 100 < 50) {
+
+    bool on_pos = (abs(state->player_global.x - 154) <= 1) &&
+                  (abs(state->player_global.y - 52) <= 1);
+
+    if(on_pos && state->action_timeout % 100 < 50) {
         if(state->dialog_progress < strlen(dialog_str)) {
             if(state->action_timeout % 10 == 0) state->dialog_progress++;
 
@@ -73,14 +77,6 @@ static void scene_draw_dialog(SceneState* state, Canvas* canvas) {
     elements_multiline_text_framed(canvas, 68, 16, buf);
 }
 
-/*
-static void draw_idle_emote(SceneState* state, Canvas* canvas){
-    if(state->action_timeout % 50 < 40 && state->prev_action == MINDCONTROL){
-        elements_multiline_text_framed(canvas, 68, 16, "WUT?!");
-    }
-}
-*/
-
 static void draw_idle_emote(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
@@ -104,13 +100,16 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
+    if(state->action == SLEEP) { // 2do - sofa x pos getter
+
+        if((abs(state->player_global.x - 154) <= 5) && (abs(state->player_global.y - 52) <= 5)) {
+            state->dolphin_gfx = A_FX_Sitting_40x27;
+            state->dolphin_gfx_b = I_FX_SittingB_40x27;
+        }
+    }
+
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
-    } else if(
-        state->action == SLEEP && (state->player_global.x == 154 &&
-                                   state->player_global.y == 52)) { // 2do - sofa x pos getter
-        state->dolphin_gfx = A_FX_Sitting_40x27;
-        state->dolphin_gfx_b = I_FX_SittingB_40x27;
     } else if(state->action != INTERACT) {
         if(state->player_v.x < 0 || state->player_flipped) {
             if(state->player_anim == 0) {
@@ -172,9 +171,12 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                 }
             }
 
-            if(l == 0)
+            if(l == 0) {
                 canvas_draw_line(
-                    canvas, 0, 42 - state->player_global.y, 128, 42 - state->player_global.y);
+                    canvas, 0, 30 - state->player_global.y, 128, 30 - state->player_global.y);
+                canvas_draw_line(
+                    canvas, 0, 92 - state->player_global.y, 128, 92 - state->player_global.y);
+            }
         }
 
         if(l == DOLPHIN_LAYER) dolphin_scene_render_dolphin(state, canvas);

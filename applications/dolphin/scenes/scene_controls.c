@@ -40,9 +40,9 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_flipped = true;
                 state->player_v.x = -SPEED_X;
             } else if(input->key == InputKeyUp) {
-                state->player_v.y = -SPEED_X;
+                state->player_v.y = -SPEED_Y;
             } else if(input->key == InputKeyDown) {
-                state->player_v.y = SPEED_X;
+                state->player_v.y = SPEED_Y;
             }
         } else if(input->type == InputTypeRelease) {
             // if(input->key == InputKeyRight || input->key == InputKeyLeft) {
@@ -73,7 +73,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     // zoom handlers
     state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);
     state->player.x = CLAMP(state->player.x - (state->zoom_v * (SPEED_X * 2)), DOLPHIN_CENTER, 0);
-    state->player.y = CLAMP(state->player.y - (state->zoom_v * SPEED_X / 2), DOLPHIN_DEFAULT_Y, 3);
+    state->player.y = CLAMP(state->player.y - (state->zoom_v * SPEED_X / 2), DOLPHIN_DEFAULT_Y, 0);
 
     //center screen
     state->screen.x = state->player_global.x - state->player.x;
