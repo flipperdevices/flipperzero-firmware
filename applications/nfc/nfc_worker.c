@@ -224,7 +224,7 @@ void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
 
     while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
-        if(api_hal_nfc_listen(1000)) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsEMV, 1000)) {
             FURI_LOG_I(NFC_WORKER_TAG, "POS terminal detected");
             // Read data from POS terminal
             err = api_hal_nfc_data_exchange(NULL, 0, &rx_buff, &rx_len, false);
@@ -431,7 +431,7 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        if(api_hal_nfc_listen(100)) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
             FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
             api_hal_nfc_deactivate();
         }

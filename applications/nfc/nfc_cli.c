@@ -57,7 +57,7 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
     printf("Press Ctrl+C to abort\r\n");
 
     while(!cli_cmd_interrupt_received(cli)) {
-        if(api_hal_nfc_listen(100)) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
             printf("Reader detected\r\n");
             api_hal_nfc_deactivate();
         }
