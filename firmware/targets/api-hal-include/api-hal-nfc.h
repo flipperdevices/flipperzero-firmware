@@ -42,7 +42,7 @@ void api_hal_nfc_exit_sleep();
 /**
  * NFC poll
  */
-bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t cycles, bool deactivate);
+bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout, bool deactivate);
 
 /**
  * NFC listen

@@ -1,7 +1,6 @@
 #include "api-hal-nfc.h"
 #include <st25r3916.h>
 
-static bool dev_is_found = false;
 const uint32_t clocks_in_ms = 64 * 1000;
 
 ReturnCode api_hal_nfc_init() {
@@ -34,19 +33,13 @@ void api_hal_nfc_exit_sleep() {
     rfalLowPowerModeStop();
 }
 
-static void api_hal_nfc_change_state_cb(rfalNfcState st) {
-    FURI_LOG_D("HAL NFC", "NFC worker state: %d", st);
-    if(st >= RFAL_NFC_STATE_POLL_SELECT) {
-        dev_is_found = true;
-    }
-}
-
-bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t cycles, bool deactivate) {
+bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t timeout, bool deactivate) {
     furi_assert(dev_list);
     furi_assert(dev_cnt);
 
     rfalLowPowerModeStop();
-    if(rfalNfcGetState() == RFAL_NFC_STATE_NOTINIT) {
+    rfalNfcState state = rfalNfcGetState();
+    if(state == RFAL_NFC_STATE_NOTINIT) {
         rfalNfcInitialize();
     }
     rfalNfcDiscoverParam params;
@@ -61,29 +54,30 @@ bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t cyc
     params.ap2pBR = RFAL_BR_424;
     params.maxBR = RFAL_BR_KEEP;
     params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
-    params.notifyCb = api_hal_nfc_change_state_cb;
+    params.notifyCb = NULL;
 
-    dev_is_found = false;
+    uint32_t start = DWT->CYCCNT;
     rfalNfcDiscover(&params);
-    while(--cycles) {
+    while(state != RFAL_NFC_STATE_ACTIVATED) {
         rfalNfcWorker();
-        FURI_LOG_D("HAL NFC", "Current state %d", rfalNfcGetState());
-        if(dev_is_found) {
-            rfalNfcGetDevicesFound(dev_list, dev_cnt);
-            FURI_LOG_D("HAL NFC", "Found %d devices", dev_cnt);
-            break;
+        state = rfalNfcGetState();
+        FURI_LOG_D("HAL NFC", "Current state %d", state);
+        if(state == RFAL_NFC_STATE_POLL_ACTIVATION) {
+            start = DWT->CYCCNT;
+            continue;
         }
-        osDelay(10);
+        if(DWT->CYCCNT - start > timeout * clocks_in_ms) {
+            rfalNfcDeactivate(true);
+            FURI_LOG_D("HAL NFC", "Timeout");
+            return false;
+        }
+        osThreadYield();
     }
+    rfalNfcGetDevicesFound(dev_list, dev_cnt);
     if(deactivate) {
         rfalNfcDeactivate(false);
         rfalLowPowerModeStart();
     }
-    if(!cycles) {
-        FURI_LOG_D("HAL NFC", "Timeout");
-        return false;
-    }
-
     return true;
 }
 
@@ -109,14 +103,17 @@ bool api_hal_nfc_listen(uint32_t timeout) {
     params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
     params.notifyCb = NULL;
 
-    params.lmConfigPA.nfcidLen = RFAL_LM_NFCID_LEN_04;
-    params.lmConfigPA.nfcid[0] = 0XCF;
-    params.lmConfigPA.nfcid[1] = 0x72;
-    params.lmConfigPA.nfcid[2] = 0xD4;
-    params.lmConfigPA.nfcid[3] = 0x40;
-    params.lmConfigPA.SENS_RES[0] = 0x04;
+    params.lmConfigPA.nfcidLen = RFAL_LM_NFCID_LEN_07;
+    params.lmConfigPA.nfcid[0] = 0X36;
+    params.lmConfigPA.nfcid[1] = 0x9C;
+    params.lmConfigPA.nfcid[2] = 0xE7;
+    params.lmConfigPA.nfcid[3] = 0xB1;
+    params.lmConfigPA.nfcid[4] = 0x0A;
+    params.lmConfigPA.nfcid[5] = 0xC1;
+    params.lmConfigPA.nfcid[6] = 0x34;
+    params.lmConfigPA.SENS_RES[0] = 0x44;
     params.lmConfigPA.SENS_RES[1] = 0x00;
-    params.lmConfigPA.SEL_RES = 0x20;
+    params.lmConfigPA.SEL_RES = 0x00;
 
     uint32_t start = DWT->CYCCNT;
     rfalNfcDiscover(&params);
@@ -132,9 +129,8 @@ bool api_hal_nfc_listen(uint32_t timeout) {
             start = DWT->CYCCNT;
             continue;
         }
-        taskYIELD();
+        osThreadYield();
     }
-
     return true;
 }
 
