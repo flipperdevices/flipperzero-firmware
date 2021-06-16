@@ -2,6 +2,7 @@
 #include "irda-app.hpp"
 #include <callback-connector.h>
 
+
 IrdaAppViewManager::IrdaAppViewManager() {
     event_queue = osMessageQueueNew(10, sizeof(IrdaAppEvent), NULL);
 
@@ -17,6 +18,7 @@ IrdaAppViewManager::IrdaAppViewManager() {
     dialog_ex = dialog_ex_alloc();
     text_input = text_input_alloc();
     button_panel = button_panel_alloc(2, 3);
+    popup_brut = popup_brut_alloc();  // number of protocols.
 
     add_view(ViewType::ButtonPanel, button_panel_get_view(button_panel));
     add_view(ViewType::ButtonMenu, button_menu_get_view(button_menu));
@@ -35,6 +37,8 @@ IrdaAppViewManager::IrdaAppViewManager() {
 
 IrdaAppViewManager::~IrdaAppViewManager() {
     view_dispatcher_remove_view(
+        view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::ButtonPanel));
+    view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::ButtonMenu));
     view_dispatcher_remove_view(
         view_dispatcher, static_cast<uint32_t>(IrdaAppViewManager::ViewType::TextInput));
@@ -47,9 +51,11 @@ IrdaAppViewManager::~IrdaAppViewManager() {
 
     submenu_free(submenu);
     popup_free(popup);
+    button_panel_free(button_panel);
     button_menu_free(button_menu);
     dialog_ex_free(dialog_ex);
     text_input_free(text_input);
+    popup_brut_free(popup_brut);
 
     view_dispatcher_free(view_dispatcher);
     furi_record_close("gui");
@@ -82,6 +88,10 @@ ButtonMenu* IrdaAppViewManager::get_button_menu() {
 
 ButtonPanel* IrdaAppViewManager::get_button_panel() {
     return button_panel;
+}
+
+IrdaAppPopupBrut* IrdaAppViewManager::get_popup_brut() {
+    return popup_brut;
 }
 
 osMessageQueueId_t IrdaAppViewManager::get_event_queue() {

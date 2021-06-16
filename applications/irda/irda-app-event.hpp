@@ -13,6 +13,8 @@ public:
         IrdaMessageReceived,
         TextEditDone,
         PopupTimer,
+        ButtonPanelPressed,
+        ButtonPanelPopupBackPressed,
     };
 
     union {
