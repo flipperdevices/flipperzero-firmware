@@ -13,8 +13,8 @@ static void scene_draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
 
     const Item* near = is_nearby(state);
     if(near) {
-        int32_t hint_pos_x = (near->x - state->player_global.x) * PARALLAX(near->layer) + 25;
-        int8_t hint_pos_y = (near->y - state->player_global.y) - 5;
+        int32_t hint_pos_x = (near->pos.x - state->player_global.x) * PARALLAX(near->layer) + 25;
+        int8_t hint_pos_y = (near->pos.y - state->player_global.y) - 5;
 
         strcpy(buf, near->action_name);
 
@@ -40,9 +40,10 @@ static void scene_draw_sleep_emote(SceneState* state, Canvas* canvas) {
 
     char dialog_str[] = "zZzZ..";
     // 2do - sofa x pos getter
+    const Vec2 item_pos = item_get_pos(state, ItemsSofa);
 
-    bool on_pos = (abs(state->player_global.x - 154) <= 1) &&
-                  (abs(state->player_global.y - 52) <= 1);
+    bool on_pos = (abs(state->player_global.x - item_pos.x) <= 1) &&
+                  (abs(state->player_global.y - item_pos.y) <= 1);
 
     if(on_pos && state->action_timeout % 100 < 50) {
         if(state->dialog_progress < strlen(dialog_str)) {
@@ -100,14 +101,6 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
-    if(state->action == SLEEP) { // 2do - sofa x pos getter
-
-        if((abs(state->player_global.x - 154) <= 5) && (abs(state->player_global.y - 52) <= 5)) {
-            state->dolphin_gfx = A_FX_Sitting_40x27;
-            state->dolphin_gfx_b = I_FX_SittingB_40x27;
-        }
-    }
-
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
     } else if(state->action != INTERACT) {
@@ -128,6 +121,15 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             } else {
                 state->dolphin_gfx = I_WalkR2_32x32;
                 state->dolphin_gfx_b = I_WalkRB2_32x32;
+            }
+        }
+        if(state->action == SLEEP) {
+            const Vec2 item_pos = item_get_pos(state, ItemsSofa);
+
+            if((abs(state->player_global.x - item_pos.x) <= 1) &&
+               (abs(state->player_global.y - item_pos.y) <= 1)) {
+                state->dolphin_gfx = A_FX_Sitting_40x27;
+                state->dolphin_gfx_b = I_FX_SittingB_40x27;
             }
         }
     }
@@ -155,8 +157,8 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
     for(uint8_t l = 0; l < LAYERS; l++) {
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ITEMS_NUM; i++) {
-                int32_t item_pos_X = (current_scene[i]->x - state->player_global.x);
-                int32_t item_pos_Y = (current_scene[i]->y - state->player_global.y);
+                int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
+                int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
                 if(item_screen_bounds(item_pos_X)) {
                     if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
 
@@ -175,7 +177,7 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                 canvas_draw_line(
                     canvas, 0, 30 - state->player_global.y, 128, 30 - state->player_global.y);
                 canvas_draw_line(
-                    canvas, 0, 92 - state->player_global.y, 128, 92 - state->player_global.y);
+                    canvas, 0, 102 - state->player_global.y, 128, 102 - state->player_global.y);
             }
         }
 

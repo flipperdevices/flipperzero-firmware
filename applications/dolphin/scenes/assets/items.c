@@ -5,8 +5,11 @@
 const Item TV = {
     .layer = 7,
     .timeout = 10,
-    .x = 160,
-    .y = 84,
+    .pos =
+        {
+            .x = 160,
+            .y = 94,
+        },
     .icon = I_TV_20x24,
     .action_name = "Use",
     .draw = draw_tv,
@@ -15,8 +18,11 @@ const Item TV = {
 const Item Painting = {
     .layer = 3,
     .timeout = 20,
-    .x = 160,
-    .y = 60,
+    .pos =
+        {
+            .x = 160,
+            .y = 70,
+        },
     .icon = I_Home_painting_17x20,
     .action_name = "Inspect",
     .draw = NULL,
@@ -25,8 +31,11 @@ const Item Painting = {
 const Item Sofa = {
     .layer = 4,
     .timeout = 100,
-    .x = 250,
-    .y = 84,
+    .pos =
+        {
+            .x = 250,
+            .y = 94,
+        },
     .icon = I_Sofa_40x13,
     .action_name = "Sit",
     .draw = NULL,
@@ -35,14 +44,18 @@ const Item Sofa = {
 const Item PC = {
     .layer = 4,
     .timeout = 100,
-    .x = 350,
-    .y = 60,
+    .pos =
+        {
+            .x = 350,
+            .y = 70,
+        },
     .icon = I_PC_22x29,
     .action_name = "Use",
     .draw = NULL,
     .callback = pc_callback};
 
-const Item* Home[ITEMS_NUM] = {&TV, &Sofa, &Painting, &PC};
+const Item* Home[ITEMS_NUM] =
+    {[ItemsTV] = &TV, [ItemsSofa] = &Sofa, [ItemsPainting] = &Painting, [ItemsPC] = &PC};
 const Item** Scenes[1] = {*&Home};
 
 const Item** get_scene(SceneState* state) {
@@ -78,6 +91,16 @@ const void scene_activate_item_callback(SceneState* state, Canvas* canvas) {
     }
 }
 
+const Vec2 item_get_pos(SceneState* state, ItemsEnum item) {
+    const Item** current = get_scene(state);
+    Vec2 rel_pos = {0, 0};
+
+    rel_pos.x = DOLPHIN_WIDTH / 2 + (current[item]->pos.x * PARALLAX(current[item]->layer));
+    rel_pos.y = DOLPHIN_WIDTH / 4 + (current[item]->pos.y * PARALLAX(current[item]->layer));
+
+    return rel_pos;
+}
+
 const Item* is_nearby(SceneState* state) {
     furi_assert(state);
     uint8_t item = 0;
@@ -86,9 +109,9 @@ const Item* is_nearby(SceneState* state) {
     while(item < ITEMS_NUM) {
         int32_t rel_x =
             (DOLPHIN_CENTER + DOLPHIN_WIDTH / 2 -
-             (current[item]->x - state->player_global.x) * PARALLAX(current[item]->layer));
+             (current[item]->pos.x - state->player_global.x) * PARALLAX(current[item]->layer));
 
-        int32_t rel_y = (DOLPHIN_HEIGHT - (current[item]->y - state->player_global.y));
+        int32_t rel_y = (DOLPHIN_HEIGHT - (current[item]->pos.y - state->player_global.y));
 
         if(abs(rel_x) <= DOLPHIN_WIDTH / 2 && abs(rel_y) <= DOLPHIN_HEIGHT / 2) {
             found = !found;
@@ -105,8 +128,8 @@ void draw_tv(Canvas* canvas, void* state) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(
         canvas,
-        (TV.x + 3 - s->player_global.x) * PARALLAX(TV.layer),
-        TV.y + 4 - s->player_global.y,
+        (TV.pos.x + 3 - s->player_global.x) * PARALLAX(TV.layer),
+        TV.pos.y + 4 - s->player_global.y,
         16,
         20);
     canvas_set_color(canvas, ColorBlack);
@@ -120,8 +143,8 @@ void smash_tv(Canvas* canvas, void* state) {
     canvas_set_bitmap_mode(canvas, true);
     canvas_draw_icon_name(
         canvas,
-        ((TV.x - 5) - s->player_global.x) * PARALLAX(TV.layer),
-        TV.y - 2 - s->player_global.y,
+        ((TV.pos.x - 5) - s->player_global.x) * PARALLAX(TV.layer),
+        TV.pos.y - 2 - s->player_global.y,
         I_FX_Bang_32x6);
     canvas_set_bitmap_mode(canvas, false);
     if(s->action_timeout < TV.timeout - 2) {
@@ -133,8 +156,10 @@ void sofa_sit(Canvas* canvas, void* state) {
     furi_assert(state);
     SceneState* s = state;
     // temp fix pos
-    s->player_global.x = 154;
-    s->player_global.y = 52;
+    Vec2 sofa_pos = item_get_pos(state, ItemsSofa);
+
+    s->player_global.x = sofa_pos.x;
+    s->player_global.y = sofa_pos.y;
     s->dolphin_gfx = A_FX_Sitting_40x27;
     s->dolphin_gfx_b = I_FX_SittingB_40x27;
 }

@@ -22,7 +22,7 @@
 #define ACTIONS_NUM 5
 #define DOLPHIN_DEFAULT_Y 20
 // world
-#define WORLD_WIDTH 512
+#define WORLD_WIDTH 256
 #define WORLD_HEIGHT 64
 
 #define LAYERS 8
@@ -65,8 +65,7 @@ typedef struct {
 typedef struct {
     uint8_t layer;
     uint16_t timeout;
-    int32_t x;
-    int32_t y;
+    Vec2 pos;
     IconName icon;
     char action_name[16];
     void (*draw)(Canvas* canvas, void* model);
