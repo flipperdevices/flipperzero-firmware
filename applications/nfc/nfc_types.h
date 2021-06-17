@@ -3,6 +3,44 @@
 #include <rfal_nfc.h>
 #include <st_errno.h>
 
+typedef enum {
+    NfcDeviceTypeNfca,
+    NfcDeviceTypeNfcb,
+    NfcDeviceTypeNfcf,
+    NfcDeviceTypeNfcv,
+    NfcDeviceTypeEMV,
+    NfcDeviceTypeMfUltralight,
+} NfcDeviceType;
+
+typedef enum {
+    NfcDeviceProtocolEMV,
+    NfcDeviceProtocolMfUltralight,
+    NfcDeviceProtocolUnknown,
+} NfcProtocol;
+
+typedef struct {
+    char name[32];
+    uint8_t number[8];
+} EMVCard;
+
+typedef struct {
+    uint8_t uid[7];
+    uint8_t man_block[12];
+    uint8_t otp[4];
+} MfUlCard;
+
+typedef struct {
+    NfcDeviceType type;
+    union {
+        rfalNfcaListenDevice nfca;
+        rfalNfcbListenDevice nfcb;
+        rfalNfcfListenDevice nfcf;
+        rfalNfcvListenDevice nfcv;
+        EMVCard emv_card;
+        MfUlCard mf_ul_card;
+    };
+} NfcDevice;
+
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
     if(type == RFAL_NFC_LISTEN_TYPE_NFCA) {
         return "NFC-A";
@@ -39,37 +77,15 @@ static inline const char* nfc_get_nfca_type(rfalNfcaListenDeviceType type) {
     }
 }
 
-typedef enum {
-    NfcDeviceTypeNfca,
-    NfcDeviceTypeNfcb,
-    NfcDeviceTypeNfcf,
-    NfcDeviceTypeNfcv,
-    NfcDeviceTypeEMV,
-    NfcDeviceTypeMfUltralight,
-} NfcDeviceType;
-
-typedef struct {
-    char name[32];
-    uint8_t number[8];
-} EMVCard;
-
-typedef struct {
-    uint8_t uid[7];
-    uint8_t man_block[12];
-    uint8_t otp[4];
-} MfUlCard;
-
-typedef struct {
-    NfcDeviceType type;
-    union {
-        rfalNfcaListenDevice nfca;
-        rfalNfcbListenDevice nfcb;
-        rfalNfcfListenDevice nfcf;
-        rfalNfcvListenDevice nfcv;
-        EMVCard emv_card;
-        MfUlCard mf_ul_card;
-    };
-} NfcDevice;
+static inline const char* nfc_get_protocol(NfcProtocol protocol) {
+    if(protocol == NfcDeviceProtocolEMV) {
+        return "EMV";
+    } else if(protocol == NfcDeviceProtocolMfUltralight) {
+        return "Mifare UL";
+    } else {
+        return "Unknown";
+    }
+}
 
 typedef enum {
     // Init states

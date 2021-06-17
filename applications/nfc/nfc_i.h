@@ -37,6 +37,14 @@ struct Nfc {
     ViewDispatcher* view_dispatcher;
 };
 
+typedef enum {
+    NfcViewMenu,
+    NfcViewDetect,
+    NfcViewEmulate,
+    NfcViewEMV,
+    NfcViewMifareUL,
+} NfcView;
+
 Nfc* nfc_alloc();
 
 void nfc_start(Nfc* nfc, NfcView view_id, NfcWorkerState worker_state);
