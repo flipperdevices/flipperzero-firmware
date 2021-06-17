@@ -50,7 +50,7 @@ void ibutton_cli_print_key_data(iButtonKey* key) {
     switch(key->get_key_type()) {
     case iButtonKeyType::KeyDallas:
         printf(
-            "Dallas %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            "Dallas %02X%02X%02X%02X%02X%02X%02X%02X\r\n",
             key_data[0],
             key_data[1],
             key_data[2],
@@ -61,11 +61,10 @@ void ibutton_cli_print_key_data(iButtonKey* key) {
             key_data[7]);
         break;
     case iButtonKeyType::KeyCyfral:
-        printf("Cyfral %02X %02X\r\n", key_data[0], key_data[1]);
+        printf("Cyfral %02X%02X\r\n", key_data[0], key_data[1]);
         break;
     case iButtonKeyType::KeyMetakom:
-        printf(
-            "Metakom %02X %02X %02X %02X\r\n", key_data[0], key_data[1], key_data[2], key_data[3]);
+        printf("Metakom %02X%02X%02X%02X\r\n", key_data[0], key_data[1], key_data[2], key_data[3]);
         break;
     }
 }
@@ -85,8 +84,8 @@ void ibutton_cli_read(Cli* cli) {
         case KeyReader::Error::EMPTY:
             break;
         case KeyReader::Error::CRC_ERROR:
-            printf("Warning: invalid CRC\r\n");
             ibutton_cli_print_key_data(&key);
+            printf("Warning: invalid CRC\r\n");
             exit = true;
             break;
         case KeyReader::Error::OK:
@@ -94,13 +93,13 @@ void ibutton_cli_read(Cli* cli) {
             exit = true;
             break;
         case KeyReader::Error::NOT_ARE_KEY:
-            printf("Read error: not a key\r\n");
             ibutton_cli_print_key_data(&key);
+            printf("Warning: not a key\r\n");
             exit = true;
             break;
         }
 
-        delay(50);
+        delay(100);
     }
 
     worker->stop_read();
@@ -108,12 +107,105 @@ void ibutton_cli_read(Cli* cli) {
     delete worker;
 };
 
-void ibutton_cli_write(Cli* cli, string_t args){
+void ibutton_cli_write(Cli* cli, string_t args) {
+    iButtonKey key;
+    iButtonKeyType type;
+    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    bool exit = false;
+    string_t data;
+    string_init(data);
 
+    if(!args_read_string_and_trim(args, data)) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    if(!ibutton_cli_get_key_type(data, &type)) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    key.set_type(type);
+
+    if(!args_read_hex_bytes(args, key.get_data(), key.get_type_data_size())) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    printf("Writing key ");
+    ibutton_cli_print_key_data(&key);
+
+    worker->start_write();
+
+    while(!exit) {
+        exit = cli_cmd_interrupt_received(cli);
+
+        KeyWriter::Error result = worker->write(&key);
+
+        switch(result) {
+        case KeyWriter::Error::SAME_KEY:
+        case KeyWriter::Error::OK:
+            printf("Write success\r\n");
+            exit = true;
+            break;
+        case KeyWriter::Error::NO_DETECT:
+            break;
+        case KeyWriter::Error::CANNOT_WRITE:
+            printf("Write fail\r\n");
+            exit = true;
+            break;
+        }
+    };
+
+    worker->stop_write();
+
+    delete worker;
+    string_clear(data);
 };
 
-void ibutton_cli_emulate(Cli* cli, string_t args){
+void ibutton_cli_emulate(Cli* cli, string_t args) {
+    iButtonKey key;
+    iButtonKeyType type;
+    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    bool exit = false;
+    string_t data;
+    string_init(data);
 
+    if(!args_read_string_and_trim(args, data)) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    if(!ibutton_cli_get_key_type(data, &type)) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    key.set_type(type);
+
+    if(!args_read_hex_bytes(args, key.get_data(), key.get_type_data_size())) {
+        ibutton_cli_print_usage();
+        string_clear(data);
+        delete worker;
+        return;
+    }
+
+    while(!exit) {
+        exit = cli_cmd_interrupt_received(cli);
+    };
+
+    delete worker;
+    string_clear(data);
 };
 
 void ibutton_cli(Cli* cli, string_t args, void* context) {
