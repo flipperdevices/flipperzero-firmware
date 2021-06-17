@@ -140,6 +140,7 @@ void ibutton_cli_write(Cli* cli, string_t args) {
 
     printf("Writing key ");
     ibutton_cli_print_key_data(&key);
+    printf("Press Ctrl+C to abort\r\n");
 
     worker->start_write();
 
@@ -200,9 +201,17 @@ void ibutton_cli_emulate(Cli* cli, string_t args) {
         return;
     }
 
+    printf("Emulating key ");
+    ibutton_cli_print_key_data(&key);
+    printf("Press Ctrl+C to abort\r\n");
+
+    worker->start_emulate(&key);
+
     while(!exit) {
         exit = cli_cmd_interrupt_received(cli);
     };
+
+    worker->stop_emulate();
 
     delete worker;
     string_clear(data);
