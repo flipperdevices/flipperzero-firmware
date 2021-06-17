@@ -21,6 +21,9 @@ struct NfcWorker {
     osThreadAttr_t thread_attr;
     osThreadId_t thread;
 
+    NfcWorkerCallback callback;
+    void* context;
+
     NfcWorkerState state;
     ReturnCode error;
 };

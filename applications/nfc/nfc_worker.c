@@ -11,6 +11,8 @@ NfcWorker* nfc_worker_alloc(osMessageQueueId_t message_queue) {
     // Worker thread attributes
     nfc_worker->thread_attr.name = "nfc_worker";
     nfc_worker->thread_attr.stack_size = 8192;
+    nfc_worker->callback = NULL;
+    nfc_worker->context = NULL;
     // Initialize rfal
     nfc_worker->error = api_hal_nfc_init();
     if(nfc_worker->error == ERR_NONE) {
@@ -34,6 +36,19 @@ NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker) {
 
 ReturnCode nfc_worker_get_error(NfcWorker* nfc_worker) {
     return nfc_worker->error;
+}
+
+void nfc_worker_set_callback(NfcWorker* nfc_worker, NfcWorkerCallback callback) {
+    furi_assert(nfc_worker);
+    furi_assert(callback);
+
+    nfc_worker->callback = callback;
+}
+
+void nfc_worker_set_context(NfcWorker* nfc_worker, void* context) {
+    furi_assert(nfc_worker);
+
+    nfc_worker->context = context;
 }
 
 void nfc_worker_start(NfcWorker* nfc_worker, NfcWorkerState state) {
