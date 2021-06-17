@@ -7,6 +7,8 @@
 #include "helpers/key-info.h"
 #include "helpers/key-worker.h"
 
+#include <memory>
+
 void ibutton_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
@@ -71,7 +73,8 @@ void ibutton_cli_print_key_data(iButtonKey* key) {
 
 void ibutton_cli_read(Cli* cli) {
     iButtonKey key;
-    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    std::unique_ptr<KeyWorker> worker(new KeyWorker(&ibutton_gpio));
+
     bool exit = false;
 
     worker->start_read();
@@ -103,14 +106,13 @@ void ibutton_cli_read(Cli* cli) {
     }
 
     worker->stop_read();
-
-    delete worker;
 };
 
 void ibutton_cli_write(Cli* cli, string_t args) {
     iButtonKey key;
     iButtonKeyType type;
-    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    std::unique_ptr<KeyWorker> worker(new KeyWorker(&ibutton_gpio));
+
     bool exit = false;
     string_t data;
     string_init(data);
@@ -118,14 +120,12 @@ void ibutton_cli_write(Cli* cli, string_t args) {
     if(!args_read_string_and_trim(args, data)) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
     if(!ibutton_cli_get_key_type(data, &type)) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
@@ -134,7 +134,6 @@ void ibutton_cli_write(Cli* cli, string_t args) {
     if(!args_read_hex_bytes(args, key.get_data(), key.get_type_data_size())) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
@@ -166,14 +165,13 @@ void ibutton_cli_write(Cli* cli, string_t args) {
 
     worker->stop_write();
 
-    delete worker;
     string_clear(data);
 };
 
 void ibutton_cli_emulate(Cli* cli, string_t args) {
     iButtonKey key;
     iButtonKeyType type;
-    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    std::unique_ptr<KeyWorker> worker(new KeyWorker(&ibutton_gpio));
     bool exit = false;
     string_t data;
     string_init(data);
@@ -181,14 +179,12 @@ void ibutton_cli_emulate(Cli* cli, string_t args) {
     if(!args_read_string_and_trim(args, data)) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
     if(!ibutton_cli_get_key_type(data, &type)) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
@@ -197,7 +193,6 @@ void ibutton_cli_emulate(Cli* cli, string_t args) {
     if(!args_read_hex_bytes(args, key.get_data(), key.get_type_data_size())) {
         ibutton_cli_print_usage();
         string_clear(data);
-        delete worker;
         return;
     }
 
@@ -213,7 +208,6 @@ void ibutton_cli_emulate(Cli* cli, string_t args) {
 
     worker->stop_emulate();
 
-    delete worker;
     string_clear(data);
 };
 
