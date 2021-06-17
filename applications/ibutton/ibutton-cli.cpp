@@ -19,7 +19,6 @@ extern "C" void ibutton_cli_init() {
 }
 
 void ibutton_cli_print_usage() {
-    //printf("Incorrect input. Try tm <read | write | emulate> [key_type] [key_data]\r\n");
     printf("Usage:\r\n");
     printf("tm read\r\n");
     printf("tm <write | emulate> <key_type> <key_data>\r\n");
