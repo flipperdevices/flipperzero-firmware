@@ -1,0 +1,140 @@
+#include <furi.h>
+#include <api-hal.h>
+#include <stdarg.h>
+#include <cli/cli.h>
+#include <args.h>
+
+#include "helpers/key-info.h"
+#include "helpers/key-worker.h"
+
+void ibutton_cli(Cli* cli, string_t args, void* context);
+
+// app cli function
+extern "C" void ibutton_cli_init() {
+    Cli* cli = static_cast<Cli*>(furi_record_open("cli"));
+    cli_add_command(cli, "tm", ibutton_cli, cli);
+    furi_record_close("cli");
+}
+
+void ibutton_cli_print_usage() {
+    //printf("Incorrect input. Try tm <read | write | emulate> [key_type] [key_data]\r\n");
+    printf("Usage:\r\n");
+    printf("tm read\r\n");
+    printf("tm <write | emulate> <key_type> <key_data>\r\n");
+    printf("\t<key_type> choose from:\r\n");
+    printf("\t0, Dallas (8 bytes key_data)\r\n");
+    printf("\t1, Cyfral (2 bytes key_data)\r\n");
+    printf("\t2, Metakom (4 bytes key_data)\r\n");
+    printf("\t<key_data> are hex-formatted\r\n");
+};
+
+bool ibutton_cli_get_key_type(string_t data, iButtonKeyType* type) {
+    bool result = false;
+
+    if(string_cmp_str(data, "0") == 0 || string_cmp_str(data, "Dallas") == 0) {
+        result = true;
+        *type = iButtonKeyType::KeyDallas;
+    } else if(string_cmp_str(data, "1") == 0 || string_cmp_str(data, "Cyfral") == 0) {
+        result = true;
+        *type = iButtonKeyType::KeyCyfral;
+    } else if(string_cmp_str(data, "2") == 0 || string_cmp_str(data, "Metakom") == 0) {
+        result = true;
+        *type = iButtonKeyType::KeyMetakom;
+    }
+
+    return result;
+}
+
+void ibutton_cli_print_key_data(iButtonKey* key) {
+    uint8_t* key_data = key->get_data();
+    switch(key->get_key_type()) {
+    case iButtonKeyType::KeyDallas:
+        printf(
+            "Dallas %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
+            key_data[0],
+            key_data[1],
+            key_data[2],
+            key_data[3],
+            key_data[4],
+            key_data[5],
+            key_data[6],
+            key_data[7]);
+        break;
+    case iButtonKeyType::KeyCyfral:
+        printf("Cyfral %02X %02X\r\n", key_data[0], key_data[1]);
+        break;
+    case iButtonKeyType::KeyMetakom:
+        printf(
+            "Metakom %02X %02X %02X %02X\r\n", key_data[0], key_data[1], key_data[2], key_data[3]);
+        break;
+    }
+}
+
+void ibutton_cli_read(Cli* cli) {
+    iButtonKey key;
+    KeyWorker* worker = new KeyWorker(&ibutton_gpio);
+    bool exit = false;
+
+    worker->start_read();
+    printf("Reading iButton...\r\nPress Ctrl+C to abort\r\n");
+
+    while(!exit) {
+        exit = cli_cmd_interrupt_received(cli);
+
+        switch(worker->read(&key)) {
+        case KeyReader::Error::EMPTY:
+            break;
+        case KeyReader::Error::CRC_ERROR:
+            printf("Warning: invalid CRC\r\n");
+            ibutton_cli_print_key_data(&key);
+            exit = true;
+            break;
+        case KeyReader::Error::OK:
+            ibutton_cli_print_key_data(&key);
+            exit = true;
+            break;
+        case KeyReader::Error::NOT_ARE_KEY:
+            printf("Read error: not a key\r\n");
+            ibutton_cli_print_key_data(&key);
+            exit = true;
+            break;
+        }
+
+        delay(50);
+    }
+
+    worker->stop_read();
+
+    delete worker;
+};
+
+void ibutton_cli_write(Cli* cli, string_t args){
+
+};
+
+void ibutton_cli_emulate(Cli* cli, string_t args){
+
+};
+
+void ibutton_cli(Cli* cli, string_t args, void* context) {
+    string_t cmd;
+    string_init(cmd);
+
+    if(!args_read_string_and_trim(args, cmd)) {
+        string_clear(cmd);
+        ibutton_cli_print_usage();
+        return;
+    }
+
+    if(string_cmp_str(cmd, "read") == 0) {
+        ibutton_cli_read(cli);
+    } else if(string_cmp_str(cmd, "write") == 0) {
+        ibutton_cli_write(cli, args);
+    } else if(string_cmp_str(cmd, "emulate") == 0) {
+        ibutton_cli_emulate(cli, args);
+    } else {
+        ibutton_cli_print_usage();
+    }
+
+    string_clear(cmd);
+}
