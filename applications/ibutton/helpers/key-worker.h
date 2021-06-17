@@ -23,7 +23,7 @@ public:
     void stop_write();
 
     KeyWorker(const GpioPin* one_wire_gpio);
-
+    ~KeyWorker();
 private:
     // one wire
     OneWireMaster onewire_master;
