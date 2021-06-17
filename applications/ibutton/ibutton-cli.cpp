@@ -23,22 +23,22 @@ void ibutton_cli_print_usage() {
     printf("tm read\r\n");
     printf("tm <write | emulate> <key_type> <key_data>\r\n");
     printf("\t<key_type> choose from:\r\n");
-    printf("\t0, Dallas (8 bytes key_data)\r\n");
-    printf("\t1, Cyfral (2 bytes key_data)\r\n");
-    printf("\t2, Metakom (4 bytes key_data)\r\n");
+    printf("\tDallas (8 bytes key_data)\r\n");
+    printf("\tCyfral (2 bytes key_data)\r\n");
+    printf("\tMetakom (4 bytes key_data)\r\n");
     printf("\t<key_data> are hex-formatted\r\n");
 };
 
 bool ibutton_cli_get_key_type(string_t data, iButtonKeyType* type) {
     bool result = false;
 
-    if(string_cmp_str(data, "0") == 0 || string_cmp_str(data, "Dallas") == 0) {
+    if(string_cmp_str(data, "Dallas") == 0 || string_cmp_str(data, "dallas") == 0) {
         result = true;
         *type = iButtonKeyType::KeyDallas;
-    } else if(string_cmp_str(data, "1") == 0 || string_cmp_str(data, "Cyfral") == 0) {
+    } else if(string_cmp_str(data, "Cyfral") == 0 || string_cmp_str(data, "cyfral") == 0) {
         result = true;
         *type = iButtonKeyType::KeyCyfral;
-    } else if(string_cmp_str(data, "2") == 0 || string_cmp_str(data, "Metakom") == 0) {
+    } else if(string_cmp_str(data, "Metakom") == 0 || string_cmp_str(data, "metakom") == 0) {
         result = true;
         *type = iButtonKeyType::KeyMetakom;
     }
