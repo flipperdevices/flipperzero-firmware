@@ -7,6 +7,8 @@
 #include <cstdio>
 #include <string>
 #include <utility>
+#include "irda-app-file-reader.hpp"
+
 
 const char* IrdaAppRemoteManager::irda_directory = "irda";
 const char* IrdaAppRemoteManager::irda_extension = ".ir";
@@ -184,8 +186,7 @@ bool IrdaAppRemoteManager::store(void) {
         return false;
     }
 
-    std::string filename = dirname + "/" + remote->name + irda_extension;
-    bool res = fs_api->file.open(&file, filename.c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    bool res = fs_api->file.open(&file, make_filename(remote->name).c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(!res) {
         show_file_error_message("Cannot create\nnew remote file");
@@ -223,89 +224,6 @@ bool IrdaAppRemoteManager::store(void) {
     return true;
 }
 
-bool IrdaAppRemoteManager::parse_button(std::string& str) {
-    char button_name[32];
-    char protocol_name[32];
-    uint32_t address;
-    uint32_t command;
-
-    int parsed = std::sscanf(
-        str.c_str(), "%31s %31s A:%lX C:%lX", button_name, protocol_name, &address, &command);
-
-    if(parsed != 4) {
-        return false;
-    }
-
-    IrdaProtocol protocol = irda_get_protocol_by_name(protocol_name);
-
-    if(!irda_is_protocol_valid((IrdaProtocol)protocol)) {
-        return false;
-    }
-
-    int address_length = irda_get_protocol_address_length(protocol);
-    uint32_t address_mask = (1LU << (4 * address_length)) - 1;
-    if(address != (address & address_mask)) {
-        return false;
-    }
-
-    int command_length = irda_get_protocol_command_length(protocol);
-    uint32_t command_mask = (1LU << (4 * command_length)) - 1;
-    if(command != (command & command_mask)) {
-        return false;
-    }
-
-    IrdaMessage irda_message = {
-        .protocol = protocol,
-        .address = address,
-        .command = command,
-        .repeat = false,
-    };
-    remote->buttons.emplace_back(button_name, &irda_message);
-
-    return true;
-}
-
-std::string getline(
-    const FS_Api* fs_api,
-    File& file,
-    char file_buf[],
-    size_t file_buf_size,
-    size_t& file_buf_cnt) {
-    std::string str;
-    size_t newline_index = 0;
-    bool found_eol = false;
-
-    while(1) {
-        if(file_buf_cnt > 0) {
-            size_t end_index = 0;
-            char* endline_ptr = (char*)memchr(file_buf, '\n', file_buf_cnt);
-            newline_index = endline_ptr - file_buf;
-
-            if(endline_ptr == 0) {
-                end_index = file_buf_cnt;
-            } else if(newline_index < file_buf_cnt) {
-                end_index = newline_index + 1;
-                found_eol = true;
-            } else {
-                furi_assert(0);
-            }
-
-            str.append(file_buf, end_index);
-            memmove(file_buf, &file_buf[end_index], file_buf_cnt - end_index);
-            file_buf_cnt = file_buf_cnt - end_index;
-            if(found_eol) break;
-        }
-
-        file_buf_cnt +=
-            fs_api->file.read(&file, &file_buf[file_buf_cnt], file_buf_size - file_buf_cnt);
-        if(file_buf_cnt == 0) {
-            break; // end of reading
-        }
-    }
-
-    return str;
-}
-
 bool IrdaAppRemoteManager::get_remote_list(std::vector<std::string>& remote_names) const {
     bool fs_res = false;
     char name[128];
@@ -339,9 +257,9 @@ bool IrdaAppRemoteManager::get_remote_list(std::vector<std::string>& remote_name
 
 bool IrdaAppRemoteManager::load(const std::string& name) {
     bool fs_res = false;
-    File file;
+    IrdaAppFileReader file_reader(sd_ex_api, fs_api);
 
-    fs_res = fs_api->file.open(&file, make_filename(name).c_str(), FSAM_READ, FSOM_OPEN_EXISTING);
+    fs_res = file_reader.open_file(make_filename(name).c_str());
     if(!fs_res) {
         show_file_error_message("Error opening file");
         return false;
@@ -350,11 +268,12 @@ bool IrdaAppRemoteManager::load(const std::string& name) {
     remote = std::make_unique<IrdaAppRemote>(name);
 
     while(1) {
-        auto str = getline(fs_api, file, file_buf, sizeof(file_buf), file_buf_cnt);
-        if(str.empty()) break;
-        parse_button(str);
+        auto message = file_reader.read_message();
+        if(!message)
+            break;
+        remote->buttons.emplace_back(message->name, &message->message);
     }
-    fs_api->file.close(&file);
+    file_reader.close_file();
 
     return true;
 }

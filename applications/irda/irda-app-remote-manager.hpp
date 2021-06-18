@@ -39,10 +39,7 @@ class IrdaAppRemoteManager {
     SdCard_Api* sd_ex_api;
     FS_Api* fs_api;
     void show_file_error_message(const char* error_text) const;
-    bool parse_button(std::string& str);
     std::string make_filename(const std::string& name) const;
-    char file_buf[48];
-    size_t file_buf_cnt = 0;
 
 public:
     bool add_remote_with_button(const char* button_name, const IrdaMessage* message);
