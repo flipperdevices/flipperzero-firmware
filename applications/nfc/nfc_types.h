@@ -3,20 +3,41 @@
 #include <rfal_nfc.h>
 #include <st_errno.h>
 
+#include <gui/view_dispatcher.h>
+#include "nfc_worker.h"
+
+typedef struct {
+    NfcWorker* worker;
+    ViewDispatcher* view_dispatcher;
+    osMessageQueueId_t message_queue;
+} NfcCommon;
+
 typedef enum {
-    NfcDeviceTypeNfca,
-    NfcDeviceTypeNfcb,
-    NfcDeviceTypeNfcf,
-    NfcDeviceTypeNfcv,
-    NfcDeviceTypeEMV,
-    NfcDeviceTypeMfUltralight,
+    NfcDeviceNfca,
+    NfcDeviceNfcb,
+    NfcDeviceNfcf,
+    NfcDeviceNfcv,
 } NfcDeviceType;
 
 typedef enum {
+    NfcDeviceProtocolUnknown,
     NfcDeviceProtocolEMV,
     NfcDeviceProtocolMfUltralight,
-    NfcDeviceProtocolUnknown,
 } NfcProtocol;
+
+typedef struct {
+    uint8_t uid_len;
+    uint8_t uid[10];
+    uint8_t atqa[2];
+    uint8_t sak;
+    NfcDeviceType device;
+    NfcProtocol protocol;
+} NfcDeviceData;
+
+typedef struct {
+    bool found;
+    NfcDeviceData data;
+} NfcDetectModel;
 
 typedef struct {
     char name[32];
@@ -29,17 +50,13 @@ typedef struct {
     uint8_t otp[4];
 } MfUlCard;
 
-typedef struct {
-    NfcDeviceType type;
-    union {
-        rfalNfcaListenDevice nfca;
-        rfalNfcbListenDevice nfcb;
-        rfalNfcfListenDevice nfcf;
-        rfalNfcvListenDevice nfcv;
-        EMVCard emv_card;
-        MfUlCard mf_ul_card;
-    };
-} NfcDevice;
+typedef enum {
+    NfcEventDetect,
+} NfcEvent;
+
+typedef union {
+    NfcDetectModel nfc_detect_model;
+} NfcMessage;
 
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
     if(type == RFAL_NFC_LISTEN_TYPE_NFCA) {
@@ -88,22 +105,6 @@ static inline const char* nfc_get_protocol(NfcProtocol protocol) {
 }
 
 typedef enum {
-    // Init states
-    NfcWorkerStateNone,
-    NfcWorkerStateBroken,
-    NfcWorkerStateReady,
-    // Main worker states
-    NfcWorkerStatePoll,
-    NfcWorkerStateReadEMV,
-    NfcWorkerStateEmulateEMV,
-    NfcWorkerStateEmulate,
-    NfcWorkerStateField,
-    NfcWorkerStateReadMfUltralight,
-    // Transition
-    NfcWorkerStateStop,
-} NfcWorkerState;
-
-typedef enum {
     // From Menu
     NfcMessageTypeDetect,
     NfcMessageTypeReadEMV,
@@ -121,10 +122,3 @@ typedef enum {
     NfcMessageTypeMfUlFound,
     NfcMessageTypeMfUlNotFound,
 } NfcMessageType;
-
-typedef struct {
-    NfcMessageType type;
-    union {
-        NfcDevice device;
-    };
-} NfcMessage;
