@@ -52,8 +52,8 @@ static const rfalNfcDiscoverParam api_hal_nfc_emulate_params_emv = {
 
 ReturnCode api_hal_nfc_init() {
     // Check if Nfc worker was started
-    if(rfalNfcGetState() > RFAL_NFC_STATE_NOTINIT) {
-        return ERR_NONE;
+    if(rfalNfcGetState() > RFAL_NFC_STATE_IDLE) {
+        return ERR_BUSY;
     }
     return rfalNfcInitialize();
 }
