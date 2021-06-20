@@ -10,12 +10,13 @@
 static const uint8_t api_hal_subghz_preset_ook_async_regs[][2] = {
     /* Base setting */
     { CC1101_IOCFG0,    0x0D }, // GD0 as async serial data output/input
-    { CC1101_FSCTRL1,   0x06 }, // Set IF 26m/2^10*2=2.2MHz
     { CC1101_MCSM0,     0x18 }, // Autocalibrate on idle to TRX, ~150us OSC guard time
+
     /* Async OOK Specific things  */
     { CC1101_MDMCFG2,   0x30 }, // ASK/OOK, No preamble/sync
     { CC1101_PKTCTRL0,  0x32 }, // Async, no CRC, Infinite
     { CC1101_FREND0,    0x01 }, // OOK/ASK PATABLE
+
     /* End  */
     { 0, 0 },
 };
@@ -27,12 +28,12 @@ static const uint8_t api_hal_subghz_preset_ook_async_patable[8] = {
 static const uint8_t api_hal_subghz_preset_2fsk_packet_regs[][2] = {
     /* Base setting */
     { CC1101_IOCFG0,    0x06 }, // GD0 as async serial data output/input
-    { CC1101_FSCTRL1,   0x06 }, // Set IF 26m/2^10*2=2.2MHz
     { CC1101_MCSM0,     0x18 }, // Autocalibrate on idle to TRX, ~150us OSC guard time
 
-    { CC1101_TEST2,   0x81},
-    { CC1101_TEST1,   0x35},
-    { CC1101_TEST0,   0x09},
+    /* Magic */
+    { CC1101_TEST2,     0x81},
+    { CC1101_TEST1,     0x35},
+    { CC1101_TEST0,     0x09},
 
     /* End */
     { 0, 0 },
@@ -173,6 +174,20 @@ float api_hal_subghz_get_rssi() {
     }
 
     return rssi;
+}
+
+uint32_t api_hal_subghz_set_frequency_and_path(uint32_t value) {
+    value = api_hal_subghz_set_frequency(value);
+    if(value >= 300000000 && value <= 348000000) {
+        api_hal_subghz_set_path(ApiHalSubGhzPath315);
+    } else if(value >= 387000000 && value <= 464000000) {
+        api_hal_subghz_set_path(ApiHalSubGhzPath433);
+    } else if(value >= 779000000 && value <= 928000000) {
+        api_hal_subghz_set_path(ApiHalSubGhzPath868);
+    } else {
+        furi_check(0);
+    }
+    return value;
 }
 
 uint32_t api_hal_subghz_set_frequency(uint32_t value) {

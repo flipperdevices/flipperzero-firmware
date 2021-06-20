@@ -68,16 +68,9 @@ const uint32_t subghz_frequencies_433_92 = 5;
 
 void subghz_menu_callback(void* context, uint32_t index) {
     furi_assert(context);
-
     SubGhz* subghz = context;
 
-    if(index == 0) {
-        view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTestBasic);
-    } else if(index == 1) {
-        view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTestPacket);
-    } else if(index == 2) {
-        view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewStatic);
-    }
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, index);
 }
 
 uint32_t subghz_exit(void* context) {
@@ -98,9 +91,12 @@ SubGhz* subghz_alloc() {
 
     // Menu
     subghz->submenu = submenu_alloc();
-    submenu_add_item(subghz->submenu, "Basic Test", 0, subghz_menu_callback, subghz);
-    submenu_add_item(subghz->submenu, "Packet Test", 1, subghz_menu_callback, subghz);
-    submenu_add_item(subghz->submenu, "Static Code", 2, subghz_menu_callback, subghz);
+    submenu_add_item(
+        subghz->submenu, "Basic Test", SubGhzViewTestBasic, subghz_menu_callback, subghz);
+    submenu_add_item(
+        subghz->submenu, "Packet Test", SubGhzViewTestPacket, subghz_menu_callback, subghz);
+    submenu_add_item(
+        subghz->submenu, "Static Code", SubGhzViewStatic, subghz_menu_callback, subghz);
 
     View* submenu_view = submenu_get_view(subghz->submenu);
     view_set_previous_callback(submenu_view, subghz_exit);

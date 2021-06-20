@@ -88,6 +88,13 @@ void api_hal_subghz_tx();
 /** Get RSSI value in dBm */
 float api_hal_subghz_get_rssi();
 
+/** Set frequency and path
+ * This function automatically selects antenna matching network
+ * @param frequency in herz
+ * @return real frequency in herz
+ */
+uint32_t api_hal_subghz_set_frequency_and_path(uint32_t value);
+
 /** Set frequency
  * @param frequency in herz
  * @return real frequency in herz

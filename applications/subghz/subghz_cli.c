@@ -9,6 +9,16 @@ static const uint8_t subghz_test_packet_data[] = {
     0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77, 0x77,
 };
 
+bool subghz_check_frequency_range(uint32_t frequency) {
+    if(!(frequency >= 300000000 && frequency <= 348000000)
+        && !(frequency >= 387000000 && frequency <= 464000000)
+        && !(frequency >= 779000000 && frequency <= 928000000)
+    ) {
+        return false;
+    }
+    return true;
+}
+
 void subghz_cli_init() {
     Cli* cli = furi_record_open("cli");
 
@@ -29,23 +39,16 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
         return;
     }
 
-    if(frequency < 300000000 || frequency > 925000000) {
-        printf("Frequency must be in 300000000...925000000 range, not %lu\r\n", frequency);
+    if(!subghz_check_frequency_range(frequency)) {
+        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
         return;
     }
 
     api_hal_subghz_reset();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency(frequency);
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
     printf("Transmitting at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
-    if(frequency < 400000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath315);
-    } else if(frequency < 500000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath433);
-    } else {
-        api_hal_subghz_set_path(ApiHalSubGhzPath868);
-    }
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, false);
@@ -70,23 +73,16 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
         return;
     }
 
-    if(frequency < 300000000 || frequency > 925000000) {
-        printf("Frequency must be in 300000000...925000000 range, not %lu\r\n", frequency);
+    if(!subghz_check_frequency_range(frequency)) {
+        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
         return;
     }
 
     api_hal_subghz_reset();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency(frequency);
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
     printf("Receiving at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
-    if(frequency < 400000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath315);
-    } else if(frequency < 500000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath433);
-    } else {
-        api_hal_subghz_set_path(ApiHalSubGhzPath868);
-    }
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
@@ -120,8 +116,8 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
         return;
     }
 
-    if(frequency < 300000000 || frequency > 925000000) {
-        printf("Frequency must be in 300000000...925000000 range, not %lu\r\n", frequency);
+    if(!subghz_check_frequency_range(frequency)) {
+        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
         return;
     }
     if(pattern > 1) {
@@ -133,14 +129,7 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
 
     api_hal_subghz_load_preset(ApiHalSubGhzPreset2FskPacket);
 
-    frequency = api_hal_subghz_set_frequency(frequency);
-    if(frequency < 400000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath315);
-    } else if(frequency < 500000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath433);
-    } else {
-        api_hal_subghz_set_path(ApiHalSubGhzPath868);
-    }
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     uint8_t status = api_hal_subghz_get_status();
@@ -172,8 +161,8 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
         return;
     }
 
-    if(frequency < 300000000 || frequency > 925000000) {
-        printf("Frequency must be in 300000000...925000000 range, not %lu\r\n", frequency);
+    if(!subghz_check_frequency_range(frequency)) {
+        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
         return;
     }
 
@@ -181,14 +170,7 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
     api_hal_subghz_idle();
     api_hal_subghz_load_preset(ApiHalSubGhzPreset2FskPacket);
 
-    frequency = api_hal_subghz_set_frequency(frequency);
-    if(frequency < 400000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath315);
-    } else if(frequency < 500000000) {
-        api_hal_subghz_set_path(ApiHalSubGhzPath433);
-    } else {
-        api_hal_subghz_set_path(ApiHalSubGhzPath868);
-    }
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     uint8_t status = api_hal_subghz_get_status();
