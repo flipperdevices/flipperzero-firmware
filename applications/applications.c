@@ -38,9 +38,16 @@ int32_t passport(void* p);
 int32_t app_accessor(void* p);
 int32_t internal_storage_task(void* p);
 int32_t app_archive(void* p);
+int32_t notification_app(void* p);
+int32_t scened_app(void* p);
 
 // On system start hooks declaration
+void irda_cli_init();
 void nfc_cli_init();
+void subghz_cli_init();
+void bt_cli_init();
+void lfrfid_cli_init();
+void ibutton_cli_init();
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
@@ -101,7 +108,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_IRDA
-    {.app = irda, .name = "irda", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = irda, .name = "irda", .stack_size = 1024 * 3, .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_EXAMPLE_QRCODE
@@ -155,6 +162,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = app_accessor, .name = "accessor", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
+#ifdef SRV_NOTIFICATION
+    {.app = notification_app, .name = "notification", .stack_size = 1024, .icon = A_Plugins_14},
+#endif
+
 };
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
@@ -179,7 +190,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_IRDA
-    {.app = irda, .name = "Infrared", .stack_size = 1024, .icon = A_Infrared_14},
+    {.app = irda, .name = "Infrared", .stack_size = 1024 * 3, .icon = A_Infrared_14},
 #endif
 
 #ifdef APP_GPIO_DEMO
@@ -196,13 +207,26 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 
 // On system start hooks
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
+    irda_cli_init,
 #ifdef APP_NFC
     nfc_cli_init,
+#endif
+#ifdef APP_SUBGHZ
+    subghz_cli_init,
+#endif
+#ifdef APP_LF_RFID
+    lfrfid_cli_init,
+#endif
+#ifdef APP_IBUTTON
+    ibutton_cli_init,
+#endif
+#ifdef SRV_BT
+    bt_cli_init,
 #endif
 };
 
 const size_t FLIPPER_ON_SYSTEM_START_COUNT =
-    sizeof(FLIPPER_ON_SYSTEM_START_COUNT) / sizeof(FlipperOnStartHook);
+    sizeof(FLIPPER_ON_SYSTEM_START) / sizeof(FlipperOnStartHook);
 
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {
@@ -273,6 +297,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Vertical Screen",
      .stack_size = 1024,
      .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_SCENED
+    {.app = scened_app, .name = "Templated Scene", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 };
 

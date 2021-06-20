@@ -7,6 +7,7 @@
 #include <m-string.h>
 #include "sd-card-api.h"
 #include "view_holder.h"
+#include <notification/notification-messages.h>
 
 #define SD_FS_MAX_FILES _FS_LOCK
 #define SD_STATE_LINES_COUNT 6
@@ -86,6 +87,7 @@ typedef enum {
     SdAppStateEjected,
     SdAppStateFileSelect,
     SdAppStateCheckError,
+    SdAppStateShowError,
 } SdAppState;
 
 struct SdApp {
@@ -100,6 +102,8 @@ struct SdApp {
 
     osMessageQueueId_t event_queue;
     string_t text_holder;
+
+    NotificationApp* notifications;
 };
 
 /* core api fns */
@@ -112,7 +116,7 @@ SDError _fs_status(SdFsInfo* fs_info);
 bool fs_file_open(File* file, const char* path, FS_AccessMode access_mode, FS_OpenMode open_mode);
 bool fs_file_close(File* file);
 uint16_t fs_file_read(File* file, void* buff, uint16_t bytes_to_read);
-uint16_t fs_file_write(File* file, void* buff, uint16_t bytes_to_write);
+uint16_t fs_file_write(File* file, const void* buff, uint16_t bytes_to_write);
 bool fs_file_seek(File* file, uint32_t offset, bool from_start);
 uint64_t fs_file_tell(File* file);
 bool fs_file_truncate(File* file);

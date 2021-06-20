@@ -12,15 +12,13 @@ typedef void (*InterruptCallback)(void*, void*);
 /** Interupt type */
 typedef enum {
     InterruptTypeComparatorTrigger,
-    InterruptTypeTimerOutputCompare,
     InterruptTypeTimerUpdate,
-    InterruptTypeExternalInterrupt,
+    InterruptTypeLast,
 } InterruptType;
 
 /** Interrupt callback type */
 typedef struct {
     InterruptCallback callback;
-    InterruptType type;
     void* context;
     bool ready;
 } InterruptCallbackItem;

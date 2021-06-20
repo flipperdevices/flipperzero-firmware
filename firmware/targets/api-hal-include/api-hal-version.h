@@ -9,6 +9,9 @@
 extern "C" {
 #endif
 
+/** Init flipper version */
+void api_hal_version_init();
+
 /** Check target firmware version */
 bool api_hal_version_do_i_belong_here();
 
@@ -28,7 +31,13 @@ const uint8_t api_hal_version_get_hw_connect();
 const uint32_t api_hal_version_get_hw_timestamp();
 
 /** Get pointer to target name */
-const char * api_hal_version_get_name_ptr();
+const char* api_hal_version_get_name_ptr();
+
+/** Get pointer to target device name */
+const char* api_hal_version_get_device_name_ptr();
+
+/** Get pointer to target ble local device name */
+const char* api_hal_version_get_ble_local_device_name_ptr();
 
 /**
  * Get address of version structure of bootloader, stored in chip flash.

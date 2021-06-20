@@ -1,7 +1,7 @@
 #include "archive_views.h"
 
 static const char* ArchiveTabNames[] =
-    {"Favorites", "iButton", "NFC", "SubOne", "Rfid", "Infared", "Browser"};
+    {"Favourites", "iButton", "NFC", "SubOne", "Rfid", "Infared", "Browser"};
 
 static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeIButton] = I_ibutt_10px,
@@ -47,7 +47,7 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     canvas_draw_icon_name(canvas, 64, 20 + model->menu_idx * 11, I_ButtonRight_4x7);
 }
 
-static void trim_file_ext(string_t name) {
+void archive_trim_file_ext(string_t name) {
     size_t str_len = strlen(string_get_cstr(name));
     char* buff_ptr = stringi_get_cstr(name);
     char* end = buff_ptr + str_len;
@@ -56,20 +56,6 @@ static void trim_file_ext(string_t name) {
     }
     if((end > buff_ptr && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
         *end = '\0';
-    }
-}
-
-static void format_filename_buffer(Canvas* canvas, string_t name, ArchiveFileTypeEnum type) {
-    furi_assert(name);
-
-    size_t s_len = strlen(string_get_cstr(name));
-    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(name));
-
-    if(is_known_app(type)) trim_file_ext(name);
-
-    if(len_px > MAX_LEN_PX) {
-        string_mid(name, 0, s_len - (size_t)((len_px - MAX_LEN_PX) / ((len_px / s_len) + 2) + 2));
-        string_cat(name, "...");
     }
 }
 
@@ -101,7 +87,9 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
         ArchiveFile_t* file = files_array_get(model->files, CLAMP(idx, array_size - 1, 0));
 
         string_set(str_buff, file->name);
-        format_filename_buffer(canvas, str_buff, file->type);
+
+        if(is_known_app(file->type)) archive_trim_file_ext(str_buff);
+        elements_string_fit_width(canvas, str_buff, scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX);
 
         if(model->idx == idx) {
             archive_draw_frame(canvas, i, scrollbar);

@@ -14,8 +14,10 @@ typedef struct {
         const char* path,
         const char* extension,
         char* result,
-        uint8_t result_size);
+        uint8_t result_size,
+        char* selected_filename);
     void (*check_error)(SdApp* context);
+    void (*show_error)(SdApp* context, const char* error_text);
 } SdCard_Api;
 
 #ifdef __cplusplus

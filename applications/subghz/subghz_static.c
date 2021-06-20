@@ -5,6 +5,7 @@
 #include <furi.h>
 #include <api-hal.h>
 #include <input/input.h>
+#include <notification/notification-messages.h>
 
 static const uint8_t subghz_static_keys[][4] = {
     {0x74, 0xBA, 0xDE},
@@ -54,11 +55,11 @@ void subghz_static_draw(Canvas* canvas, SubghzStaticModel* model) {
     char* path_name = "Unknown";
     if(model->path == ApiHalSubGhzPathIsolate) {
         path_name = "isolate";
-    } else if(model->path == ApiHalSubGhzPath1) {
+    } else if(model->path == ApiHalSubGhzPath433) {
         path_name = "433MHz";
-    } else if(model->path == ApiHalSubGhzPath2) {
+    } else if(model->path == ApiHalSubGhzPath315) {
         path_name = "315MHz";
-    } else if(model->path == ApiHalSubGhzPath3) {
+    } else if(model->path == ApiHalSubGhzPath868) {
         path_name = "868MHz";
     }
     snprintf(buffer, sizeof(buffer), "Path: %d - %s", model->path, path_name);
@@ -90,13 +91,13 @@ bool subghz_static_input(InputEvent* event, void* context) {
                 } else if(event->key == InputKeyUp) {
                     if(model->button < 3) model->button++;
                 }
-                model->path = subghz_frequencies_paths[model->frequency];
+                model->path = subghz_frequencies[model->frequency].path;
             }
 
             if(reconfigure) {
                 api_hal_subghz_idle();
                 model->real_frequency =
-                    api_hal_subghz_set_frequency(subghz_frequencies[model->frequency]);
+                    api_hal_subghz_set_frequency(subghz_frequencies[model->frequency].frequency);
                 api_hal_subghz_set_path(model->path);
                 api_hal_subghz_tx();
             }
@@ -105,7 +106,8 @@ bool subghz_static_input(InputEvent* event, void* context) {
                 if(event->type == InputTypePress) {
                     const uint8_t* key = subghz_static_keys[model->button];
 
-                    api_hal_light_set(LightRed, 0xff);
+                    NotificationApp* notification = furi_record_open("notification");
+                    notification_message_block(notification, &sequence_set_red_255);
                     __disable_irq();
                     for(uint8_t r = 0; r < 20; r++) {
                         //Payload
@@ -127,7 +129,8 @@ bool subghz_static_input(InputEvent* event, void* context) {
                         delay_us(10600);
                     }
                     __enable_irq();
-                    api_hal_light_set(LightRed, 0x00);
+                    notification_message(notification, &sequence_reset_red);
+                    furi_record_close("notification");
                 }
             }
 
@@ -149,10 +152,10 @@ void subghz_static_enter(void* context) {
 
     with_view_model(
         subghz_static->view, (SubghzStaticModel * model) {
-            model->frequency = 4;
+            model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
-                api_hal_subghz_set_frequency(subghz_frequencies[model->frequency]);
-            model->path = subghz_frequencies_paths[model->frequency];
+                api_hal_subghz_set_frequency(subghz_frequencies[model->frequency].frequency);
+            model->path = subghz_frequencies[model->frequency].path;
             model->button = 0;
             api_hal_subghz_set_path(model->path);
             return true;

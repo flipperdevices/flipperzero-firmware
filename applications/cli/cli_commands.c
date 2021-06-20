@@ -3,6 +3,8 @@
 #include <api-hal-gpio.h>
 #include <rtc.h>
 #include <task-control-block.h>
+#include <time.h>
+#include <notification/notification-messages.h>
 
 void cli_command_help(Cli* cli, string_t args, void* context) {
     (void)args;
@@ -90,24 +92,49 @@ void cli_command_log(Cli* cli, string_t args, void* context) {
     furi_stdglue_set_global_stdout_callback(NULL);
 }
 
+void cli_command_hw_info(Cli* cli, string_t args, void* context) {
+    printf(
+        "%-20s %d.F%dB%dC%d\r\n",
+        "HW version:",
+        api_hal_version_get_hw_version(),
+        api_hal_version_get_hw_target(),
+        api_hal_version_get_hw_body(),
+        api_hal_version_get_hw_connect());
+    time_t time = api_hal_version_get_hw_timestamp();
+    char time_string[26] = "";
+    ctime_r(&time, time_string);
+    if(time_string[strlen(time_string) - 1] == '\n') {
+        time_string[strlen(time_string) - 1] = '\0';
+    }
+    printf("%-20s %s\r\n", "Production date:", time_string);
+    const char* name = api_hal_version_get_name_ptr();
+    if(name) {
+        printf("%-20s %s", "Name:", name);
+    }
+}
+
 void cli_command_vibro(Cli* cli, string_t args, void* context) {
     if(!string_cmp(args, "0")) {
-        api_hal_vibro_on(false);
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message_block(notification, &sequence_reset_vibro);
+        furi_record_close("notification");
     } else if(!string_cmp(args, "1")) {
-        api_hal_vibro_on(true);
+        NotificationApp* notification = furi_record_open("notification");
+        notification_message_block(notification, &sequence_set_vibro_on);
+        furi_record_close("notification");
     } else {
-        printf("Wrong input");
+        cli_print_usage("vibro", "<1|0>", string_get_cstr(args));
     }
 }
 
 void cli_command_led(Cli* cli, string_t args, void* context) {
     // Get first word as light name
-    Light light;
+    NotificationMessage notification_led_message;
     string_t light_name;
     string_init(light_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("Wrong input");
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         string_clear(light_name);
         return;
     } else {
@@ -117,15 +144,15 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     }
     // Check light name
     if(!string_cmp(light_name, "r")) {
-        light = LightRed;
+        notification_led_message.type = NotificationMessageTypeLedRed;
     } else if(!string_cmp(light_name, "g")) {
-        light = LightGreen;
+        notification_led_message.type = NotificationMessageTypeLedGreen;
     } else if(!string_cmp(light_name, "b")) {
-        light = LightBlue;
+        notification_led_message.type = NotificationMessageTypeLedBlue;
     } else if(!string_cmp(light_name, "bl")) {
-        light = LightBacklight;
+        notification_led_message.type = NotificationMessageTypeLedDisplay;
     } else {
-        printf("Wrong argument");
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         string_clear(light_name);
         return;
     }
@@ -134,14 +161,42 @@ void cli_command_led(Cli* cli, string_t args, void* context) {
     char* end_ptr;
     uint32_t value = strtoul(string_get_cstr(args), &end_ptr, 0);
     if(!(value < 256 && *end_ptr == '\0')) {
-        printf("Wrong argument");
+        cli_print_usage("led", "<r|g|b|bl> <0-255>", string_get_cstr(args));
         return;
     }
-    api_hal_light_set(light, value);
+
+    // Set led value
+    notification_led_message.data.led.value = value;
+
+    // Form notification sequence
+    const NotificationSequence notification_sequence = {
+        &notification_led_message,
+        NULL,
+    };
+
+    // Send notification
+    NotificationApp* notification = furi_record_open("notification");
+    notification_internal_message_block(notification, &notification_sequence);
+    furi_record_close("notification");
 }
 
 void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
-    char pin_names[][4] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
+    char pin_names[][4] = {
+        "PC0",
+        "PC1",
+        "PC3",
+        "PB2",
+        "PB3",
+        "PA4",
+        "PA6",
+        "PA7",
+#ifdef DEBUG
+        "PA0",
+        "PB7",
+        "PB8",
+        "PB9"
+#endif
+    };
     GpioPin gpio[] = {
         {.port = GPIOC, .pin = LL_GPIO_PIN_0},
         {.port = GPIOC, .pin = LL_GPIO_PIN_1},
@@ -150,7 +205,14 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
         {.port = GPIOB, .pin = LL_GPIO_PIN_3},
         {.port = GPIOA, .pin = LL_GPIO_PIN_4},
         {.port = GPIOA, .pin = LL_GPIO_PIN_6},
-        {.port = GPIOA, .pin = LL_GPIO_PIN_7}};
+        {.port = GPIOA, .pin = LL_GPIO_PIN_7},
+#ifdef DEBUG
+        {.port = GPIOA, .pin = LL_GPIO_PIN_0}, // IR_RX (PA0)
+        {.port = GPIOB, .pin = LL_GPIO_PIN_7}, // UART RX (PB7)
+        {.port = GPIOB, .pin = LL_GPIO_PIN_8}, // SPEAKER (PB8)
+        {.port = GPIOB, .pin = LL_GPIO_PIN_9}, // IR_TX (PB9)
+#endif
+    };
     uint8_t num = 0;
     bool pin_found = false;
 
@@ -159,7 +221,7 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
     string_init(pin_name);
     size_t ws = string_search_char(args, ' ');
     if(ws == STRING_FAILURE) {
-        printf("Wrong input. Correct usage: gpio_set <pin_name> <0|1>");
+        cli_print_usage("gpio_set", "<pin_name> <0|1>", string_get_cstr(args));
         string_clear(pin_name);
         return;
     } else {
@@ -189,6 +251,18 @@ void cli_command_gpio_set(Cli* cli, string_t args, void* context) {
         LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
         LL_GPIO_ResetOutputPin(gpio[num].port, gpio[num].pin);
     } else if(!string_cmp(args, "1")) {
+#ifdef DEBUG
+        if(num == 8) { // PA0
+            printf(
+                "Setting PA0 pin HIGH with TSOP connected can damage IR receiver. Are you sure you want to continue? (y/n)?\r\n");
+            char c = cli_getc(cli);
+            if(c != 'y' || c != 'Y') {
+                printf("Cancelled.\r\n");
+                return;
+            }
+        }
+#endif
+
         LL_GPIO_SetPinMode(gpio[num].port, gpio[num].pin, LL_GPIO_MODE_OUTPUT);
         LL_GPIO_SetPinOutputType(gpio[num].port, gpio[num].pin, LL_GPIO_OUTPUT_PUSHPULL);
         LL_GPIO_SetOutputPin(gpio[num].port, gpio[num].pin);
@@ -227,6 +301,7 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "uid", cli_command_uuid, NULL);
     cli_add_command(cli, "date", cli_command_date, NULL);
     cli_add_command(cli, "log", cli_command_log, NULL);
+    cli_add_command(cli, "hw_info", cli_command_hw_info, NULL);
     cli_add_command(cli, "vibro", cli_command_vibro, NULL);
     cli_add_command(cli, "led", cli_command_led, NULL);
     cli_add_command(cli, "gpio_set", cli_command_gpio_set, NULL);

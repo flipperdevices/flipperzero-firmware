@@ -25,17 +25,17 @@ bool LfrfidSceneReadNormal::on_event(LfrfidApp* app, LfrfidEvent* event) {
         LfrfidKeyType type;
 
         if(app->get_reader()->read(&type, data, data_size)) {
-            app->notify_green_blink();
-
             if(memcmp(last_data, data, data_size) == 0) {
                 success_reads++;
+                app->notify_green_blink();
             } else {
                 success_reads = 1;
                 memcpy(last_data, data, data_size);
+                app->notify_success();
             }
 
             switch(type) {
-            case LfrfidKeyType::KeyEmarine:
+            case LfrfidKeyType::KeyEM4100:
                 app->set_text_store(
                     "[EM] %02X %02X %02X %02X %02X\n"
                     "count: %u",
@@ -46,7 +46,7 @@ bool LfrfidSceneReadNormal::on_event(LfrfidApp* app, LfrfidEvent* event) {
                     data[4],
                     success_reads);
                 break;
-            case LfrfidKeyType::KeyHID:
+            case LfrfidKeyType::KeyH10301:
                 app->set_text_store(
                     "[HID26] %02X %02X %02X\n"
                     "count: %u",
@@ -55,7 +55,7 @@ bool LfrfidSceneReadNormal::on_event(LfrfidApp* app, LfrfidEvent* event) {
                     data[2],
                     success_reads);
                 break;
-            case LfrfidKeyType::KeyIndala:
+            case LfrfidKeyType::KeyI40134:
                 app->set_text_store(
                     "[IND] %02X %02X %02X\n"
                     "count: %u",

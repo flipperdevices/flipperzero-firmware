@@ -10,17 +10,7 @@ void HAL_COMP_TriggerCallback(COMP_HandleTypeDef* hcomp) {
     api_interrupt_call(InterruptTypeComparatorTrigger, hcomp);
 }
 
-/* Output compare event */
-void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef* htim) {
-    api_interrupt_call(InterruptTypeTimerOutputCompare, htim);
-}
-
 /* Timer update event */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
     api_interrupt_call(InterruptTypeTimerUpdate, htim);
-}
-
-/* External interrupt event */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-    api_interrupt_call(InterruptTypeExternalInterrupt, (void*)(uint32_t)GPIO_Pin);
 }

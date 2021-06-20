@@ -1,4 +1,5 @@
 #include "elements.h"
+#include "gui/canvas.h"
 #include <assets_icons.h>
 #include <gui/icon_i.h>
 #include <m-string.h>
@@ -45,7 +46,7 @@ void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
     }
     // Position block
     if(total) {
-        uint8_t block_h = ((float)height) / total;
+        float block_h = ((float)height) / total;
         canvas_draw_box(canvas, width - 3, block_h * pos, 3, MAX(block_h, 1));
     }
 }
@@ -70,7 +71,7 @@ void elements_button_left(Canvas* canvas, const char* str) {
     const uint8_t horizontal_offset = 3;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const IconData* icon = assets_icons_get_data(I_ButtonLeft_4x7);
-    const uint8_t icon_offset = 6;
+    const uint8_t icon_offset = 3;
     const uint8_t icon_width_with_offset = icon->width + icon_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
@@ -96,7 +97,7 @@ void elements_button_right(Canvas* canvas, const char* str) {
     const uint8_t horizontal_offset = 3;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const IconData* icon = assets_icons_get_data(I_ButtonRight_4x7);
-    const uint8_t icon_offset = 6;
+    const uint8_t icon_offset = 3;
     const uint8_t icon_width_with_offset = icon->width + icon_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
@@ -121,10 +122,10 @@ void elements_button_right(Canvas* canvas, const char* str) {
 void elements_button_center(Canvas* canvas, const char* str) {
     const uint8_t button_height = 13;
     const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
+    const uint8_t horizontal_offset = 1;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const IconData* icon = assets_icons_get_data(I_ButtonCenter_7x7);
-    const uint8_t icon_offset = 6;
+    const uint8_t icon_offset = 3;
     const uint8_t icon_width_with_offset = icon->width + icon_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
@@ -250,11 +251,30 @@ void elements_slightly_rounded_frame(
     uint8_t width,
     uint8_t height) {
     furi_assert(canvas);
-    canvas_draw_frame(canvas, x, y, width, height);
-    canvas_invert_color(canvas);
-    canvas_draw_dot(canvas, x, y);
-    canvas_draw_dot(canvas, x + width - 1, y + height - 1);
-    canvas_draw_dot(canvas, x + width - 1, y);
-    canvas_draw_dot(canvas, x, y + height - 1);
-    canvas_invert_color(canvas);
+    canvas_draw_rframe(canvas, x, y, width, height, 1);
+}
+
+void elements_slightly_rounded_box(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height) {
+    furi_assert(canvas);
+    canvas_draw_rbox(canvas, x, y, width, height, 1);
+}
+
+void elements_string_fit_width(Canvas* canvas, string_t string, uint8_t width) {
+    furi_assert(canvas);
+    furi_assert(string);
+
+    uint16_t len_px = canvas_string_width(canvas, string_get_cstr(string));
+
+    if(len_px > width) {
+        size_t s_len = strlen(string_get_cstr(string));
+        uint8_t end_pos = s_len - ((len_px - width) / ((len_px / s_len) + 2) + 2);
+
+        string_mid(string, 0, end_pos);
+        string_cat(string, "...");
+    }
 }

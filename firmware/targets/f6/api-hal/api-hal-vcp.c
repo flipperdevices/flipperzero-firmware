@@ -43,14 +43,18 @@ void _api_hal_vcp_deinit() {
 void _api_hal_vcp_control_line(uint8_t state) {
     // bit 0: DTR state, bit 1: RTS state
     // bool dtr = state & 0b01;
-    bool rts = state & 0b10;
+    bool dtr = state & 0b1;
 
-    if (rts) {
-        api_hal_vcp->alive = true;
-        _api_hal_vcp_rx_callback(&ascii_soh, 1); // SOH
+    if (dtr) {
+        if (!api_hal_vcp->alive) {
+            api_hal_vcp->alive = true;
+            _api_hal_vcp_rx_callback(&ascii_soh, 1); // SOH
+        }
     } else {
-        api_hal_vcp->alive = false;
-        _api_hal_vcp_rx_callback(&ascii_eot, 1); // EOT
+        if (api_hal_vcp->alive) {
+            _api_hal_vcp_rx_callback(&ascii_eot, 1); // EOT
+            api_hal_vcp->alive = false;
+        }
     }
 
     osSemaphoreRelease(api_hal_vcp->tx_semaphore);

@@ -16,9 +16,9 @@ typedef enum {
 /**  Switchable Radio Paths */
 typedef enum {
     ApiHalSubGhzPathIsolate,        /** Isolate Radio from antenna */
-    ApiHalSubGhzPath1,              /** Path 1: SW1RF1-SW2RF2, LCLCL */
-    ApiHalSubGhzPath2,              /** Path 2: SW1RF2-SW2RF1, LCLCLCL */
-    ApiHalSubGhzPath3,              /** Path 3: SW1RF3-SW2RF3, LCLC */
+    ApiHalSubGhzPath433,            /** Center Frquency: 433MHz. Path 1: SW1RF1-SW2RF2, LCLCL */
+    ApiHalSubGhzPath315,            /** Center Frquency: 315MHz. Path 2: SW1RF2-SW2RF1, LCLCLCL */
+    ApiHalSubGhzPath868,            /** Center Frquency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
 } ApiHalSubGhzPath;
 
 /** Initialize and switch to power save mode
@@ -34,6 +34,9 @@ void api_hal_subghz_dump_state();
  * @param preset to load
  */
 void api_hal_subghz_load_preset(ApiHalSubGhzPreset preset);
+
+/** Get status */
+uint8_t api_hal_subghz_get_status();
 
 /** Load registers
  * @param register-value pairs array, terminated with {0,0}
@@ -55,7 +58,11 @@ void api_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
  * @param data, pointer
  * @param size, size
  */
-void api_hal_subghz_read_packet(uint8_t* data, uint8_t size);
+
+void api_hal_subghz_read_packet(uint8_t* data, uint8_t* size);
+
+/** Flush rx FIFO buffer */
+void api_hal_subghz_flush_rx();
 
 /** Shutdown
  * Issue spwd command

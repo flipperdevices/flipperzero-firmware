@@ -37,8 +37,10 @@ static bool file_select_init_inner(FileSelect* file_select);
 static void file_select_draw_callback(Canvas* canvas, void* _model) {
     FileSelectModel* model = _model;
 
+    string_t string_buff;
     const uint8_t item_height = 16;
     const uint8_t item_width = 123;
+    const uint8_t max_width = 100;
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
@@ -58,11 +60,12 @@ static void file_select_draw_callback(Canvas* canvas, void* _model) {
                 canvas_set_color(canvas, ColorBlack);
             }
 
+            string_init_set(string_buff, model->filename[i]);
+            elements_string_fit_width(canvas, string_buff, max_width);
             canvas_draw_str(
-                canvas,
-                6,
-                (i * item_height) + item_height - 4,
-                string_get_cstr(model->filename[i]));
+                canvas, 6, (i * item_height) + item_height - 4, string_get_cstr(string_buff));
+
+            string_clear(string_buff);
         }
     } else {
         canvas_draw_str(canvas, 6, item_height, "Empty folder");
@@ -139,15 +142,16 @@ static bool file_select_input_callback(InputEvent* event, void* context) {
             }
         } else if(event->key == InputKeyOk) {
             if(file_select->callback != NULL) {
-                const char* result;
-                with_view_model(
-                    file_select->view, (FileSelectModel * model) {
-                        result = string_get_cstr(model->filename[model->position]);
-                        return false;
-                    });
-
                 if(file_select->buffer) {
-                    strlcpy(file_select->buffer, result, file_select->buffer_size);
+                    with_view_model(
+                        file_select->view, (FileSelectModel * model) {
+                            strlcpy(
+                                file_select->buffer,
+                                string_get_cstr(model->filename[model->position]),
+                                file_select->buffer_size);
+
+                            return false;
+                        });
                 };
 
                 file_select->callback(true, file_select->context);
@@ -309,6 +313,14 @@ bool file_select_fill_strings(FileSelect* file_select) {
                         with_view_model(
                             file_select->view, (FileSelectModel * model) {
                                 string_set_str(model->filename[string_counter], name);
+
+                                if(strcmp(file_select->extension, "*") != 0) {
+                                    string_replace_all_str(
+                                        model->filename[string_counter],
+                                        file_select->extension,
+                                        "");
+                                }
+
                                 return true;
                             });
                         string_counter++;
@@ -387,4 +399,103 @@ bool file_select_fill_count(FileSelect* file_select) {
     dir_api->close(&directory);
     free(name);
     return true;
+}
+
+void file_select_set_selected_file_internal(FileSelect* file_select, const char* filename) {
+    furi_assert(file_select);
+    furi_assert(filename);
+    furi_assert(file_select->fs_api);
+    furi_assert(file_select->path);
+    furi_assert(file_select->extension);
+
+    if(strlen(filename) == 0) return;
+
+    FileInfo file_info;
+    File directory;
+    bool result;
+    FS_Dir_Api* dir_api = &file_select->fs_api->dir;
+    const uint8_t name_length = 100;
+    char* name = calloc(name_length, sizeof(char));
+
+    if(name == NULL) {
+        return;
+    }
+
+    uint16_t file_position = 0;
+    bool file_found = false;
+
+    string_t filename_str;
+    string_init_set_str(filename_str, filename);
+    if(strcmp(file_select->extension, "*") != 0) {
+        string_cat_str(filename_str, file_select->extension);
+    }
+
+    result = dir_api->open(&directory, file_select->path);
+
+    if(!result) {
+        string_clear(filename_str);
+        dir_api->close(&directory);
+        free(name);
+        return;
+    }
+
+    while(1) {
+        result = dir_api->read(&directory, &file_info, name, name_length);
+
+        if(directory.error_id == FSE_NOT_EXIST || name[0] == 0) {
+            break;
+        }
+
+        if(result) {
+            if(directory.error_id == FSE_OK) {
+                if(filter_file(file_select, &file_info, name)) {
+                    if(strcmp(string_get_cstr(filename_str), name) == 0) {
+                        file_found = true;
+                        break;
+                    }
+
+                    file_position++;
+                }
+            } else {
+                string_clear(filename_str);
+                dir_api->close(&directory);
+                free(name);
+                return;
+            }
+        }
+    }
+
+    if(file_found) {
+        with_view_model(
+            file_select->view, (FileSelectModel * model) {
+                uint16_t max_first_file_index =
+                    model->file_count > FILENAME_COUNT ? model->file_count - FILENAME_COUNT : 0;
+
+                model->first_file_index = file_position;
+
+                if(model->first_file_index > 0) {
+                    model->first_file_index -= 1;
+                }
+
+                if(model->first_file_index >= max_first_file_index) {
+                    model->first_file_index = max_first_file_index;
+                }
+
+                model->position = file_position - model->first_file_index;
+
+                return true;
+            });
+    }
+
+    string_clear(filename_str);
+    dir_api->close(&directory);
+    free(name);
+}
+
+void file_select_set_selected_file(FileSelect* file_select, const char* filename) {
+    file_select_set_selected_file_internal(file_select, filename);
+
+    if(!file_select_fill_strings(file_select)) {
+        file_select->callback(false, file_select->context);
+    }
 }

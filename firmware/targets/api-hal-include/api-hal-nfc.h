@@ -9,6 +9,12 @@
 extern "C" {
 #endif
 
+/** Nfc emulation parameters */
+typedef enum {
+    ApiHalNfcEmulateParamsMifare,
+    ApiHalNfcEmulateParamsEMV,
+} ApiHalNfcEmulateParams;
+
 /**
  * Init nfc
  */
@@ -42,12 +48,17 @@ void api_hal_nfc_exit_sleep();
 /**
  * NFC poll
  */
-bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t cycles, bool deactivate);
+bool api_hal_nfc_detect(rfalNfcDevice** dev_list, uint8_t* dev_cnt, uint32_t timeout, bool deactivate);
+
+/**
+ * NFC listen
+ */
+bool api_hal_nfc_listen(ApiHalNfcEmulateParams params, uint32_t timeout);
 
 /**
  * NFC data exchange
  */
-ReturnCode api_hal_nfc_data_exchange(rfalNfcDevice* dev, uint8_t* tx_buff, uint16_t tx_len, uint8_t** rx_buff, uint16_t** rx_len, bool deactivate);
+ReturnCode api_hal_nfc_data_exchange(uint8_t* tx_buff, uint16_t tx_len, uint8_t** rx_buff, uint16_t** rx_len, bool deactivate);
 
 /**
  * NFC deactivate and start sleep

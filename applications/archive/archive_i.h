@@ -6,6 +6,7 @@
 #include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/text_input.h>
+#include <app-loader/app-loader.h>
 
 #include <m-string.h>
 #include <m-array.h>
@@ -23,7 +24,7 @@ typedef enum {
 } ArchiveViewEnum;
 
 typedef enum {
-    ArchiveTabFavorites,
+    ArchiveTabFavourites,
     ArchiveTabIButton,
     ArchiveTabNFC,
     ArchiveTabSubOne,
@@ -32,6 +33,14 @@ typedef enum {
     ArchiveTabBrowser,
     ArchiveTabTotal,
 } ArchiveTabEnum;
+
+static const char* flipper_app_name[] = {
+    [ArchiveFileTypeIButton] = "iButton",
+    [ArchiveFileTypeNFC] = "NFC",
+    [ArchiveFileTypeSubOne] = "Sub-1 GHz",
+    [ArchiveFileTypeLFRFID] = "125 kHz RFID",
+    [ArchiveFileTypeIrda] = "Infrared",
+};
 
 static const char* known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
@@ -42,7 +51,7 @@ static const char* known_ext[] = {
 };
 
 static const char* tab_default_paths[] = {
-    [ArchiveTabFavorites] = "favorites",
+    [ArchiveTabFavourites] = "favourites",
     [ArchiveTabIButton] = "ibutton",
     [ArchiveTabNFC] = "nfc",
     [ArchiveTabSubOne] = "subone",

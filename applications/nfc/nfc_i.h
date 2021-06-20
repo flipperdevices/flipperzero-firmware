@@ -28,8 +28,10 @@ struct Nfc {
 
     View* view_detect;
     View* view_read_emv;
+    View* view_emulate_emv;
     View* view_emulate;
     View* view_field;
+    View* view_read_mf_ultralight;
     View* view_cli;
     View* view_error;
     ViewDispatcher* view_dispatcher;
