@@ -99,7 +99,7 @@ osMessageQueueId_t IrdaAppViewManager::get_event_queue() {
 }
 
 void IrdaAppViewManager::receive_event(IrdaAppEvent* event) {
-    if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
+    if(osMessageQueueGet(event_queue, event, NULL, 150) != osOK) {
         event->type = IrdaAppEvent::Type::Tick;
     }
 }

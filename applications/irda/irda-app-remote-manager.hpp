@@ -35,10 +35,6 @@ class IrdaAppRemoteManager {
     static const char* irda_directory;
     static const char* irda_extension;
     std::unique_ptr<IrdaAppRemote> remote;
-    // TODO: make FS_Api and SdCard_Api unique_ptr
-    SdCard_Api* sd_ex_api;
-    FS_Api* fs_api;
-    void show_file_error_message(const char* error_text) const;
     std::string make_filename(const std::string& name) const;
 
 public:
@@ -57,8 +53,6 @@ public:
     const IrdaMessage* get_button_data(size_t button_index) const;
     bool delete_button(uint32_t index);
     bool delete_remote();
-    IrdaAppRemoteManager();
-    ~IrdaAppRemoteManager();
 
     bool store();
     bool load(const std::string& name);

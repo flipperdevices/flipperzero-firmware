@@ -21,6 +21,8 @@ void popup_brut_increase_progress(IrdaAppPopupBrut* popup_brut) {
 
     if (popup_brut->progress < popup_brut->progress_max)
         ++popup_brut->progress;
+    else
+        furi_assert(0);
 }
 
 void popup_brut_draw_callback(Canvas* canvas, void* context) {
@@ -61,6 +63,7 @@ void popup_brut_draw_callback(Canvas* canvas, void* context) {
 }
 
 void popup_brut_set_progress_max(IrdaAppPopupBrut* popup_brut, uint16_t progress_max) {
+    furi_assert(popup_brut);
     popup_brut->progress = 0;
     popup_brut->progress_max = progress_max;
 }

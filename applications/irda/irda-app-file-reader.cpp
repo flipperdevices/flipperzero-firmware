@@ -41,28 +41,18 @@ std::string getline(
     return str;
 }
 
-
-bool IrdaAppFileReader::open_file(const char* filename) {
-    furi_assert(filename);
-
-    bool fs_res = false;
-    fs_res = fs_api->file.open(&file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
-    return fs_res;
-}
-
-void IrdaAppFileReader::close_file() {
-    fs_api->file.close(&file);
-}
-
 std::unique_ptr<IrdaAppFileReader::IrdaFileMessage>
-IrdaAppFileReader::read_message() {
+IrdaAppFileReader::read_message(File* file) {
     while(1) {
-        auto str = getline(fs_api, &file, file_buf, sizeof(file_buf), file_buf_cnt);
+        auto str = getline(fs_api, file, file_buf, sizeof(file_buf), file_buf_cnt);
         if(str.empty()) return nullptr;
 
         auto message = parse_message(str);
         if(message)
             return message;
+        else {
+            printf("can't parse: \'%s\'\n", str.c_str());
+        }
     }
 }
 

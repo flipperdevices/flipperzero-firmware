@@ -34,16 +34,6 @@ find_vacant_name(const std::vector<std::string>& strings, const std::string& nam
     }
 }
 
-IrdaAppRemoteManager::IrdaAppRemoteManager() {
-    sd_ex_api = static_cast<SdCard_Api*>(furi_record_open("sdcard-ex"));
-    fs_api = static_cast<FS_Api*>(furi_record_open("sdcard"));
-}
-
-IrdaAppRemoteManager::~IrdaAppRemoteManager() {
-    furi_record_close("sdcard");
-    furi_record_close("sdcard-ex");
-}
-
 bool IrdaAppRemoteManager::add_button(const char* button_name, const IrdaMessage* message) {
     remote->buttons.emplace_back(button_name, message);
     return store();
@@ -95,10 +85,11 @@ std::string IrdaAppRemoteManager::make_filename(const std::string& name) const {
 
 bool IrdaAppRemoteManager::delete_remote() {
     FS_Error fs_res;
+    IrdaAppFileReader file_reader;
 
-    fs_res = fs_api->common.remove(make_filename(remote->name).c_str());
+    fs_res = file_reader.get_fs_api().common.remove(make_filename(remote->name).c_str());
     if(fs_res != FSE_OK) {
-        show_file_error_message("Error deleting file");
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Error deleting file");
         return false;
     }
     remote.reset();
@@ -148,11 +139,12 @@ bool IrdaAppRemoteManager::rename_remote(const char* str) {
     if(!result) return false;
 
     auto new_name = find_vacant_name(remote_list, str);
-    FS_Error fs_err = fs_api->common.rename(
+    IrdaAppFileReader file_reader;
+    FS_Error fs_err = file_reader.get_fs_api().common.rename(
         make_filename(remote->name).c_str(), make_filename(new_name).c_str());
     remote->name = new_name;
     if(fs_err != FSE_OK) {
-        show_file_error_message("Error renaming\nremote file");
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Error renaming\nremote file");
     }
     return fs_err == FSE_OK;
 }
@@ -171,25 +163,22 @@ size_t IrdaAppRemoteManager::get_number_of_buttons() {
     return remote->buttons.size();
 }
 
-void IrdaAppRemoteManager::show_file_error_message(const char* error_text) const {
-    sd_ex_api->show_error(sd_ex_api->context, error_text);
-}
-
 bool IrdaAppRemoteManager::store(void) {
     File file;
     uint16_t write_count;
     std::string dirname(std::string("/") + irda_directory);
 
-    FS_Error fs_err = fs_api->common.mkdir(dirname.c_str());
+    IrdaAppFileReader file_reader;
+    FS_Error fs_err = file_reader.get_fs_api().common.mkdir(dirname.c_str());
     if((fs_err != FSE_OK) && (fs_err != FSE_EXIST)) {
-        show_file_error_message("Can't create directory");
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Can't create directory");
         return false;
     }
 
-    bool res = fs_api->file.open(&file, make_filename(remote->name).c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    bool res = file_reader.get_fs_api().file.open(&file, make_filename(remote->name).c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(!res) {
-        show_file_error_message("Cannot create\nnew remote file");
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Cannot create\nnew remote file");
         return false;
     }
 
@@ -210,16 +199,16 @@ bool IrdaAppRemoteManager::store(void) {
             button.message.command);
 
         auto content_len = strlen(content);
-        write_count = fs_api->file.write(&file, content, content_len);
+        write_count = file_reader.get_fs_api().file.write(&file, content, content_len);
         if(file.error_id != FSE_OK || write_count != content_len) {
-            show_file_error_message("Cannot write\nto key file");
-            fs_api->file.close(&file);
+            file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Cannot write\nto key file");
+            file_reader.get_fs_api().file.close(&file);
             return false;
         }
     }
 
-    fs_api->file.close(&file);
-    sd_ex_api->check_error(sd_ex_api->context);
+    file_reader.get_fs_api().file.close(&file);
+    file_reader.get_sd_api().check_error(file_reader.get_sd_api().context);
 
     return true;
 }
@@ -231,17 +220,18 @@ bool IrdaAppRemoteManager::get_remote_list(std::vector<std::string>& remote_name
     std::string dirname(std::string("/") + irda_directory);
     remote_names.clear();
 
-    fs_res = fs_api->dir.open(&dir, dirname.c_str());
+    IrdaAppFileReader file_reader;
+    fs_res = file_reader.get_fs_api().dir.open(&dir, dirname.c_str());
     if(!fs_res) {
         if(!check_fs()) {
-            show_file_error_message("Cannot open\napplication directory");
+            file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Cannot open\napplication directory");
             return false;
         } else {
             return true; // SD ok, but no files written yet
         }
     }
 
-    while(fs_api->dir.read(&dir, nullptr, name, sizeof(name)) && strlen(name)) {
+    while(file_reader.get_fs_api().dir.read(&dir, nullptr, name, sizeof(name)) && strlen(name)) {
         std::string filename(name);
         auto extension_index = filename.rfind(irda_extension);
         if((extension_index == std::string::npos) ||
@@ -250,37 +240,40 @@ bool IrdaAppRemoteManager::get_remote_list(std::vector<std::string>& remote_name
         }
         remote_names.push_back(filename.erase(extension_index));
     }
-    fs_api->dir.close(&dir);
+    file_reader.get_fs_api().dir.close(&dir);
 
     return true;
 }
 
 bool IrdaAppRemoteManager::load(const std::string& name) {
     bool fs_res = false;
-    IrdaAppFileReader file_reader(sd_ex_api, fs_api);
+    IrdaAppFileReader file_reader;
+    File file;
 
-    fs_res = file_reader.open_file(make_filename(name).c_str());
+    fs_res = file_reader.get_fs_api().file.open(&file, make_filename(name).c_str(), FSAM_READ, FSOM_OPEN_EXISTING);
     if(!fs_res) {
-        show_file_error_message("Error opening file");
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "Error opening file");
         return false;
     }
 
     remote = std::make_unique<IrdaAppRemote>(name);
 
     while(1) {
-        auto message = file_reader.read_message();
+        auto message = file_reader.read_message(&file);
         if(!message)
             break;
         remote->buttons.emplace_back(message->name, &message->message);
     }
-    file_reader.close_file();
+    file_reader.get_fs_api().file.close(&file);
 
     return true;
 }
 
 bool IrdaAppRemoteManager::check_fs() const {
-    // TODO: [FL-1431] Add return value to sd_ex_api->check_error() and replace get_fs_info().
-    auto fs_err = fs_api->common.get_fs_info(nullptr, nullptr);
-    if(fs_err != FSE_OK) show_file_error_message("SD card not found");
+    // TODO: [FL-1431] Add return value to file_reader.get_sd_api().check_error() and replace get_fs_info().
+    IrdaAppFileReader file_reader;
+    auto fs_err = file_reader.get_fs_api().common.get_fs_info(nullptr, nullptr);
+    if(fs_err != FSE_OK)
+        file_reader.get_sd_api().show_error(file_reader.get_sd_api().context, "SD card not found");
     return fs_err == FSE_OK;
 }
