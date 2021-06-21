@@ -15,7 +15,7 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
     switch(key->get_key_type()) {
     case iButtonKeyType::KeyDallas:
         app->set_text_store(
-            "Delete?\n%s\nID: %02X %02X %02X %02X %02X %02X %02X %02X\nType: Dallas",
+            "Delete %s?\nID: %02X %02X %02X %02X %02X %02X %02X %02X\nType: Dallas",
             key->get_name(),
             key_data[0],
             key_data[1],
@@ -28,11 +28,11 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
         break;
     case iButtonKeyType::KeyCyfral:
         app->set_text_store(
-            "Delete?\n%s\nID: %02X %02X\nType: Cyfral", key->get_name(), key_data[0], key_data[1]);
+            "Delete %s?\nID: %02X %02X\nType: Cyfral", key->get_name(), key_data[0], key_data[1]);
         break;
     case iButtonKeyType::KeyMetakom:
         app->set_text_store(
-            "Delete?\n%s\nID: %02X %02X %02X %02X\nType: Metakom",
+            "Delete %s?\nID: %02X %02X %02X %02X\nType: Metakom",
             key->get_name(),
             key_data[0],
             key_data[1],
@@ -41,7 +41,7 @@ void iButtonSceneDeleteConfirm::on_enter(iButtonApp* app) {
         break;
     }
 
-    dialog_ex_set_text(dialog_ex, app->get_text_store(), 64, 26, AlignCenter, AlignCenter);
+    dialog_ex_set_text(dialog_ex, app->get_text_store(), 64, 20, AlignCenter, AlignCenter);
     dialog_ex_set_left_button_text(dialog_ex, "Back");
     dialog_ex_set_right_button_text(dialog_ex, "Delete");
     dialog_ex_set_result_callback(dialog_ex, callback);
