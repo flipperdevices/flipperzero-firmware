@@ -10,7 +10,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
 extern UART_HandleTypeDef DEBUG_UART;
 
 DICT_DEF2(
@@ -126,12 +125,10 @@ bool furi_stdglue_set_thread_stdout_callback(FuriStdglueWriteCallback callback) 
     }
 }
 
-void __malloc_lock(struct _reent *REENT)
-{
+void __malloc_lock(struct _reent* REENT) {
     vTaskSuspendAll();
 }
 
-void __malloc_unlock(struct _reent *REENT)
-{
+void __malloc_unlock(struct _reent* REENT) {
     xTaskResumeAll();
 }
