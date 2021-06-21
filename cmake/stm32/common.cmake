@@ -11,10 +11,16 @@ endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
 
 if(NOT STM32_TOOLCHAIN_PATH)
-     set(STM32_TOOLCHAIN_PATH "/usr")
-     message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
-else()
-     file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
+    if(NOT CMAKE_C_COMPILER)
+        set(STM32_TOOLCHAIN_PATH "/usr")
+        message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
+    else()
+        # keep only directory of compiler
+        get_filename_component(STM32_TOOLCHAIN_PATH ${CMAKE_C_COMPILER} DIRECTORY)
+        # remove the last /bin directory
+        get_filename_component(STM32_TOOLCHAIN_PATH ${STM32_TOOLCHAIN_PATH} DIRECTORY)
+    endif()
+    file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
 endif()
 
 if(NOT STM32_TARGET_TRIPLET)
@@ -35,6 +41,12 @@ find_program(CMAKE_OBJDUMP NAMES ${STM32_TARGET_TRIPLET}-objdump PATHS ${TOOLCHA
 find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
+
+FUNCTION(stm32_print_size_of_target TARGET)
+    # this target is always considered out of date so size will always be displayed on build
+    ADD_CUSTOM_TARGET(${TARGET}_size ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+                                                        DEPENDS ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C})
+ENDFUNCTION()
 
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)

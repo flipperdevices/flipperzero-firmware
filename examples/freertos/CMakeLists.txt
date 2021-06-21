@@ -24,3 +24,4 @@ target_link_libraries(stm32-freertos PRIVATE
     CMSIS::STM32::F407VG 
     STM32::NoSys
 )
+stm32_print_size_of_target(stm32-freertos)
