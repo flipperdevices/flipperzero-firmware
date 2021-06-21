@@ -1,6 +1,7 @@
 #include "nfc_worker_i.h"
 #include <api-hal.h>
 #include "nfc_protocols/emv_decoder.h"
+#include "nfc_protocols/mifare_ultralight.h"
 
 #define NFC_WORKER_TAG "nfc worker"
 
@@ -59,6 +60,7 @@ void nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
 
     api_hal_power_insomnia_enter();
+    api_hal_nfc_exit_sleep();
 
     if(nfc_worker->state == NfcWorkerStatePoll) {
         nfc_worker_poll(nfc_worker);
@@ -70,7 +72,10 @@ void nfc_worker_task(void* context) {
         nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
+        nfc_worker_read_mf_ultralight(nfc_worker);
     }
+    api_hal_nfc_deactivate();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
     api_hal_power_insomnia_exit();
     osThreadExit();
@@ -92,7 +97,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
         memset(&emv_app, 0, sizeof(emv_app));
-        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, false)) {
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
             // Card was found. Check that it supports EMV
             if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
                 FURI_LOG_I(NFC_WORKER_TAG, "Send select PPSE command");
@@ -209,7 +214,6 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
         }
         osDelay(20);
     }
-    api_hal_nfc_deactivate();
 }
 
 void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
@@ -220,7 +224,7 @@ void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
 
     while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
-        if(api_hal_nfc_listen(1000)) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsEMV, 1000)) {
             FURI_LOG_I(NFC_WORKER_TAG, "POS terminal detected");
             // Read data from POS terminal
             err = api_hal_nfc_data_exchange(NULL, 0, &rx_buff, &rx_len, false);
@@ -275,7 +279,7 @@ void nfc_worker_poll(NfcWorker* nfc_worker) {
     furi_check(osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
 
     while(nfc_worker->state == NfcWorkerStatePoll) {
-        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 100, true)) {
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, true)) {
             // Send message with first device found
             message.type = NfcMessageTypeDeviceFound;
             if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
@@ -305,104 +309,134 @@ void nfc_worker_poll(NfcWorker* nfc_worker) {
     }
 }
 
-void nfc_worker_state_callback(rfalNfcState st) {
-    (void)st;
-}
-
-ReturnCode nfc_worker_trx(
-    uint8_t* txBuf,
-    uint16_t txBufSize,
-    uint8_t** rxData,
-    uint16_t** rcvLen,
-    uint32_t fwt) {
+void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
     ReturnCode err;
+    rfalNfcDevice* dev_list;
+    uint8_t dev_cnt = 0;
+    uint8_t tx_buff[255] = {};
+    uint16_t tx_len = 0;
+    uint8_t* rx_buff;
+    uint16_t* rx_len;
+    MfUltralightRead mf_ul_read;
 
-    err = rfalNfcDataExchangeStart(txBuf, txBufSize, rxData, rcvLen, fwt);
-    if(err == ERR_NONE) {
-        do {
-            rfalNfcWorker();
-            err = rfalNfcDataExchangeGetStatus();
-        } while(err == ERR_BUSY);
-    }
-    return err;
-}
+    // Update screen before start searching
+    NfcMessage message = {.type = NfcMessageTypeMfUlNotFound};
+    while(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
+        furi_check(
+            osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        api_hal_nfc_deactivate();
+        memset(&mf_ul_read, 0, sizeof(mf_ul_read));
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
+            if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA &&
+               mf_ul_check_card_type(
+                   dev_list[0].dev.nfca.sensRes.anticollisionInfo,
+                   dev_list[0].dev.nfca.sensRes.platformInfo,
+                   dev_list[0].dev.nfca.selRes.sak)) {
+                // Get Mifare Ultralight version
+                FURI_LOG_I(
+                    NFC_WORKER_TAG, "Found Mifare Ultralight tag. Trying to get tag version");
+                tx_len = mf_ul_prepare_get_version(tx_buff);
+                err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err == ERR_NONE) {
+                    mf_ul_parse_get_version_response(rx_buff, &mf_ul_read);
+                    FURI_LOG_I(
+                        NFC_WORKER_TAG,
+                        "Mifare Ultralight Type: %d, Pages: %d",
+                        mf_ul_read.type,
+                        mf_ul_read.pages_to_read);
+                } else if(err == ERR_TIMEOUT) {
+                    FURI_LOG_W(
+                        NFC_WORKER_TAG,
+                        "Card doesn't respond to GET VERSION command. Reinit card and set default read parameters");
+                    err = ERR_NONE;
+                    mf_ul_set_default_version(&mf_ul_read);
+                    // Reinit device
+                    api_hal_nfc_deactivate();
+                    if(!api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
+                        FURI_LOG_E(NFC_WORKER_TAG, "Lost connection. Restarting search");
+                        message.type = NfcMessageTypeMfUlNotFound;
+                        continue;
+                    }
+                } else {
+                    FURI_LOG_E(
+                        NFC_WORKER_TAG,
+                        "Error getting Mifare Ultralight version. Error code: %d",
+                        err);
+                    message.type = NfcMessageTypeMfUlNotFound;
+                    continue;
+                }
 
-void nfc_worker_exchange(NfcWorker* nfc_worker, rfalNfcDevice* nfc_device) {
-    ReturnCode err = ERR_NONE;
-    uint8_t* rxData;
-    uint16_t* rcvLen;
-    uint8_t txBuf[100];
-    uint16_t txLen;
+                // Dump Mifare Ultralight card
+                FURI_LOG_I(NFC_WORKER_TAG, "Trying to read pages");
+                if(mf_ul_read.support_fast_read) {
+                    // Read card with FAST_READ command
+                    tx_len = mf_ul_prepare_fast_read(tx_buff, 0x00, mf_ul_read.pages_to_read - 1);
+                    err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                    if(err == ERR_NONE) {
+                        FURI_LOG_I(
+                            NFC_WORKER_TAG,
+                            "Fast read pages %d - %d succeed",
+                            0,
+                            mf_ul_read.pages_to_read - 1);
+                        memcpy(mf_ul_read.dump, rx_buff, mf_ul_read.pages_to_read * 4);
+                        mf_ul_read.pages_readed = mf_ul_read.pages_to_read;
+                    } else {
+                        FURI_LOG_E(NFC_WORKER_TAG, "Fast read failed");
+                        message.type = NfcMessageTypeMfUlNotFound;
+                        continue;
+                    }
+                } else {
+                    // READ card with READ command (4 pages at a time)
+                    for(uint8_t page = 0; page < mf_ul_read.pages_to_read; page += 4) {
+                        tx_len = mf_ul_prepare_read(tx_buff, page);
+                        err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                        if(err == ERR_NONE) {
+                            FURI_LOG_I(
+                                NFC_WORKER_TAG, "Read pages %d - %d succeed", page, page + 3);
+                            memcpy(&mf_ul_read.dump[page * 4], rx_buff, 4 * 4);
+                            mf_ul_read.pages_readed += 4;
+                        } else {
+                            FURI_LOG_W(
+                                NFC_WORKER_TAG, "Read pages %d - %d failed", page, page + 3);
+                        }
+                    }
+                }
 
-    do {
-        rfalNfcWorker();
-        switch(rfalNfcGetState()) {
-        case RFAL_NFC_STATE_ACTIVATED:
-            err = nfc_worker_trx(NULL, 0, &rxData, &rcvLen, 0);
-            break;
-        case RFAL_NFC_STATE_DATAEXCHANGE:
-        case RFAL_NFC_STATE_DATAEXCHANGE_DONE:
-            // Not supported
-            txBuf[0] = ((char)0x68);
-            txBuf[1] = ((char)0x00);
-            txLen = 2;
-            err = nfc_worker_trx(txBuf, txLen, &rxData, &rcvLen, RFAL_FWT_NONE);
-            break;
-        case RFAL_NFC_STATE_START_DISCOVERY:
-            return;
-        case RFAL_NFC_STATE_LISTEN_SLEEP:
-        default:
-            break;
+                // Fill message for nfc application
+                message.type = NfcMessageTypeMfUlFound;
+                memcpy(
+                    message.device.mf_ul_card.uid,
+                    dev_list[0].dev.nfca.nfcId1,
+                    sizeof(message.device.mf_ul_card.uid));
+                memcpy(message.device.mf_ul_card.man_block, mf_ul_read.dump, 4 * 3);
+                memcpy(message.device.mf_ul_card.otp, &mf_ul_read.dump[4 * 3], 4);
+                for(uint8_t i = 0; i < mf_ul_read.pages_readed * 4; i += 4) {
+                    printf("Page %2d: ", i / 4);
+                    for(uint8_t j = 0; j < 4; j++) {
+                        printf("%02X ", mf_ul_read.dump[i + j]);
+                    }
+                    printf("\r\n");
+                }
+            } else {
+                message.type = NfcMessageTypeMfUlNotFound;
+                FURI_LOG_W(NFC_WORKER_TAG, "Tag does not support Mifare Ultralight");
+            }
+        } else {
+            message.type = NfcMessageTypeMfUlNotFound;
+            FURI_LOG_W(NFC_WORKER_TAG, "Can't find any tags");
         }
-    } while((err == ERR_NONE) || (err == ERR_SLEEP_REQ));
+        osDelay(100);
+    }
 }
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
-    rfalNfcDiscoverParam params;
-    params.compMode = RFAL_COMPLIANCE_MODE_NFC;
-    params.techs2Find = RFAL_NFC_LISTEN_TECH_A;
-    params.totalDuration = 1000U;
-    params.devLimit = 1;
-    params.wakeupEnabled = false;
-    params.wakeupConfigDefault = true;
-    params.nfcfBR = RFAL_BR_212;
-    params.ap2pBR = RFAL_BR_424;
-    params.maxBR = RFAL_BR_KEEP;
-    params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
-    params.notifyCb = nfc_worker_state_callback;
-
-    params.lmConfigPA.nfcidLen = RFAL_LM_NFCID_LEN_07;
-    params.lmConfigPA.nfcid[0] = 0x00;
-    params.lmConfigPA.nfcid[1] = 0x01;
-    params.lmConfigPA.nfcid[2] = 0x02;
-    params.lmConfigPA.nfcid[3] = 0x03;
-    params.lmConfigPA.nfcid[4] = 0x04;
-    params.lmConfigPA.nfcid[5] = 0x05;
-    params.lmConfigPA.nfcid[6] = 0x06;
-    params.lmConfigPA.SENS_RES[0] = 0x44;
-    params.lmConfigPA.SENS_RES[1] = 0x00;
-    params.lmConfigPA.SEL_RES = 0x00;
-    api_hal_nfc_exit_sleep();
-
-    ReturnCode ret;
-    ret = rfalNfcDiscover(&params);
-    if(ret != ERR_NONE) {
-        asm("bkpt 1");
-        return;
-    }
-
-    rfalNfcDevice* nfc_device;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        rfalNfcWorker();
-        if(rfalNfcIsDevActivated(rfalNfcGetState())) {
-            rfalNfcGetActiveDevice(&nfc_device);
-            nfc_worker_exchange(nfc_worker, nfc_device);
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
+            FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
+            api_hal_nfc_deactivate();
         }
-        osDelay(10);
+        osDelay(5);
     }
-
-    rfalNfcDeactivate(false);
-    api_hal_nfc_start_sleep();
 }
 
 void nfc_worker_field(NfcWorker* nfc_worker) {
