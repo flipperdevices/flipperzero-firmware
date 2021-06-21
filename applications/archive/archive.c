@@ -12,7 +12,7 @@ static void update_offset(ArchiveApp* archive) {
     if(model->list_offset < model->idx - bounds) {
         model->list_offset = CLAMP(model->list_offset + 1, array_size - (bounds + 2), 0);
     } else if(model->list_offset > model->idx - bounds) {
-        model->list_offset = CLAMP(model->idx - 1, array_size - (bounds), 0);
+        model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
     }
 
     view_commit_model(archive->view_archive_main, true);
@@ -26,6 +26,7 @@ static void archive_update_last_idx(ArchiveApp* archive) {
     archive->browser.last_idx[archive->browser.depth] =
         CLAMP(model->idx, files_array_size(model->files) - 1, 0);
     model->idx = 0;
+    model->list_offset = 0;
     view_commit_model(archive->view_archive_main, true);
 
     model = NULL;
@@ -67,6 +68,8 @@ static void archive_leave_dir(ArchiveApp* archive) {
 
     ArchiveViewModel* model = view_get_model(archive->view_archive_main);
     model->idx = archive->browser.last_idx[archive->browser.depth];
+    model->list_offset = 0;
+
     view_commit_model(archive->view_archive_main, true);
 
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
@@ -156,15 +159,14 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         if(directory.error_id == FSE_NOT_EXIST || name_ptr[0] == 0) {
             view_commit_model(archive->view_archive_main, true);
             break;
-        }
-
-        if(result) {
+        } else if(result) {
             if(directory.error_id == FSE_OK) {
-                if(filter_by_extension(archive, &file_info, name_ptr)) {
+                if(files_array_size(model->files) > 170) {
+                    break;
+                } else if(filter_by_extension(archive, &file_info, name_ptr)) {
                     ArchiveFile_t_init(&item);
                     string_init_set(item.name, name);
                     set_file_type(&item, &file_info);
-
                     files_array_push_back(model->files, item);
                     ArchiveFile_t_clear(&item);
                 }
@@ -253,6 +255,7 @@ static void archive_text_input_callback(void* context, char* text) {
 
     string_clear(buffer_src);
     string_clear(buffer_dst);
+    view_commit_model(archive->view_archive_main, true);
 
     archive_get_filenames(archive);
 }
