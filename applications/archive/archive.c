@@ -340,7 +340,7 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
 
     switch(model->menu_idx) {
     case 0:
-        if((selected->type != ArchiveFileTypeFolder && selected->type != ArchiveFileTypeUnknown)) {
+        if(is_known_app(selected->type)) {
             string_t full_path;
             string_init_set(full_path, archive->browser.path);
             string_cat(full_path, "/");
@@ -353,14 +353,17 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         }
         break;
     case 1:
-
-        string_set(archive->browser.name, selected->name);
-        archive_add_to_favourites(archive);
-        archive_close_file_menu(archive);
+        if(is_known_app(selected->type)) {
+            string_set(archive->browser.name, selected->name);
+            archive_add_to_favourites(archive);
+            archive_close_file_menu(archive);
+        }
         break;
     case 2:
         // open rename view
-        archive_enter_text_input(archive);
+        if(is_known_app(selected->type)) {
+            archive_enter_text_input(archive);
+        }
         break;
     case 3:
         // confirmation?
@@ -413,14 +416,18 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyLeft) {
-            archive->browser.tab_id = CLAMP(archive->browser.tab_id - 1, ArchiveTabTotal, 0);
-            archive_switch_tab(archive);
-            return true;
-
+            if(archive->browser.tab_id > 0) {
+                archive->browser.tab_id = CLAMP(archive->browser.tab_id - 1, ArchiveTabTotal, 0);
+                archive_switch_tab(archive);
+                return true;
+            }
         } else if(event->key == InputKeyRight) {
-            archive->browser.tab_id = CLAMP(archive->browser.tab_id + 1, ArchiveTabTotal - 1, 0);
-            archive_switch_tab(archive);
-            return true;
+            if(archive->browser.tab_id < ArchiveTabTotal - 1) {
+                archive->browser.tab_id =
+                    CLAMP(archive->browser.tab_id + 1, ArchiveTabTotal - 1, 0);
+                archive_switch_tab(archive);
+                return true;
+            }
 
         } else if(event->key == InputKeyBack) {
             if(archive->browser.depth == 0) {

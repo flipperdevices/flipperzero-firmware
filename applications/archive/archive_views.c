@@ -13,10 +13,6 @@ static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeUnknown] = I_unknown_10px,
 };
 
-static inline bool is_known_app(ArchiveFileTypeEnum type) {
-    return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
-}
-
 static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 61, 17, 62, 46);
@@ -35,6 +31,7 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     if(!is_known_app(selected->type)) {
         string_set_str(menu[0], "---");
         string_set_str(menu[1], "---");
+        string_set_str(menu[2], "---");
     } else if(model->tab_idx == 0) {
         string_set_str(menu[1], "Move");
     }
@@ -82,13 +79,16 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
     string_t str_buff;
     string_init(str_buff);
 
-    for(size_t i = 0; i < MIN(MENU_ITEMS, array_size); ++i) {
+    for(size_t i = 0; i < MIN(array_size, MENU_ITEMS); ++i) {
         size_t idx = CLAMP(i + model->list_offset, array_size, 0);
         ArchiveFile_t* file = files_array_get(model->files, CLAMP(idx, array_size - 1, 0));
 
         string_set(str_buff, file->name);
 
-        if(is_known_app(file->type)) archive_trim_file_ext(str_buff);
+        if(is_known_app(file->type)) {
+            archive_trim_file_ext(str_buff);
+        }
+
         elements_string_fit_width(canvas, str_buff, scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX);
 
         if(model->idx == idx) {
