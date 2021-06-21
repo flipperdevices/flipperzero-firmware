@@ -55,7 +55,7 @@ static esp_loader_error_t SLIP_receive_data(uint8_t *buff, uint32_t size)
 {
     uint8_t ch;
 
-    for (int i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         RETURN_ON_ERROR( serial_read(&ch, 1) );
 
         if (ch == 0xDB) {
@@ -108,7 +108,7 @@ static esp_loader_error_t SLIP_send(const uint8_t *data, uint32_t size)
     uint32_t to_write = 0;  // Bytes ready to write as they are
     uint32_t written = 0;   // Bytes already written
 
-    for (int i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++) {
         if (data[i] != 0xC0 && data[i] != 0xDB) {
             to_write++; // Queue this byte for writing
             continue;
