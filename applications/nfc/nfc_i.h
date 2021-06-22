@@ -14,18 +14,20 @@
 #include <gui/modules/submenu.h>
 
 #include "nfc_detect.h"
+#include "nfc_emulate.h"
 
 struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
     Submenu* submenu;
     NfcDetect* nfc_detect;
+    NfcEmulate* nfc_emulate;
 };
 
 typedef enum {
     NfcViewMenu,
     NfcViewDetect,
-    // NfcViewEmulate,
+    NfcViewEmulate,
     // NfcViewEMV,
     // NfcViewMifareUL,
 } NfcView;

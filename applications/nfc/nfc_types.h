@@ -107,9 +107,9 @@ static inline const char* nfc_get_protocol(NfcProtocol protocol) {
 typedef enum {
     // From Menu
     NfcMessageTypeDetect,
+    NfcMessageTypeEmulate,
     NfcMessageTypeReadEMV,
     NfcMessageTypeEmulateEMV,
-    NfcMessageTypeEmulate,
     NfcMessageTypeField,
     NfcMessageTypeReadMfUltralight,
     NfcMessageTypeStop,

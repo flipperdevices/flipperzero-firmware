@@ -47,7 +47,6 @@ void nfc_worker_start(
     void* context) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->state == NfcWorkerStateReady);
-    furi_assert(callback);
 
     nfc_worker->callback = callback;
     nfc_worker->context = context;
@@ -78,12 +77,12 @@ void nfc_worker_task(void* context) {
 
     if(nfc_worker->state == NfcWorkerStateDetect) {
         nfc_worker_detect(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateEmulate) {
+        nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadEMV) {
         nfc_worker_read_emv(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateEMV) {
         nfc_worker_emulate_emv(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateEmulate) {
-        nfc_worker_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateField) {
         nfc_worker_field(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
@@ -126,10 +125,22 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                 message.nfc_detect_model.data.device = NfcDeviceNfcv;
             }
         }
-        nfc_worker->callback(nfc_worker->context);
+        if(nfc_worker->callback) {
+            nfc_worker->callback(nfc_worker->context);
+        }
         furi_check(
             osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
         osDelay(100);
+    }
+}
+
+void nfc_worker_emulate(NfcWorker* nfc_worker) {
+    while(nfc_worker->state == NfcWorkerStateEmulate) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
+            FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
+            api_hal_nfc_deactivate();
+        }
+        osDelay(10);
     }
 }
 
@@ -440,16 +451,6 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
     //         FURI_LOG_W(NFC_WORKER_TAG, "Can't find any tags");
     //     }
     //     osDelay(100);
-    // }
-}
-
-void nfc_worker_emulate(NfcWorker* nfc_worker) {
-    // while(nfc_worker->state == NfcWorkerStateEmulate) {
-    //     if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
-    //         FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
-    //         api_hal_nfc_deactivate();
-    //     }
-    //     osDelay(5);
     // }
 }
 

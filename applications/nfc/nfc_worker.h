@@ -9,9 +9,9 @@ typedef enum {
     NfcWorkerStateReady,
     // Main worker states
     NfcWorkerStateDetect,
+    NfcWorkerStateEmulate,
     NfcWorkerStateReadEMV,
     NfcWorkerStateEmulateEMV,
-    NfcWorkerStateEmulate,
     NfcWorkerStateField,
     NfcWorkerStateReadMfUltralight,
     // Transition
