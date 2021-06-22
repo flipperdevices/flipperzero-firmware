@@ -1,3 +1,9 @@
+# Requirements
+
+- Python3
+- ImageMagic
+- Make
+
 # Asset naming rules
 
 ## Images and Animations
