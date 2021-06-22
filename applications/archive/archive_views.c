@@ -1,7 +1,7 @@
 #include "archive_views.h"
 
 static const char* ArchiveTabNames[] =
-    {"Favourites", "iButton", "NFC", "SubOne", "Rfid", "Infared", "Browser"};
+    {"Favourites", "iButton", "NFC", "SubOne", "Rfid", "Infrared", "Browser"};
 
 static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeIButton] = I_ibutt_10px,

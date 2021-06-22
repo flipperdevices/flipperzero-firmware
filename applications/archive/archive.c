@@ -204,6 +204,16 @@ static void archive_add_to_favourites(ArchiveApp* archive) {
     furi_assert(archive);
 
     FS_Common_Api* common_api = &archive->fs_api->common;
+    common_api->mkdir("favourites");
+
+    FS_File_Api* file_api = &archive->fs_api->file;
+    File src;
+    File dst;
+
+    bool fr;
+    uint16_t buffer[64]; /* File copy buffer */
+    uint16_t bw = 0; /* File write count */
+    uint16_t br = 0; /* File read count */
 
     string_t buffer_src;
     string_t buffer_dst;
@@ -215,7 +225,20 @@ static void archive_add_to_favourites(ArchiveApp* archive) {
     string_init_set_str(buffer_dst, "/favourites/");
     string_cat(buffer_dst, archive->browser.name);
 
-    common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
+    fr = file_api->open(&src, string_get_cstr(buffer_src), FSAM_READ, FSOM_OPEN_EXISTING);
+    FURI_LOG_I("FATFS", "OPEN: %d", fr);
+    fr = file_api->open(&dst, string_get_cstr(buffer_dst), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    FURI_LOG_I("FATFS", "CREATE: %d", fr);
+
+    for(;;) {
+        br = file_api->read(&src, &buffer, sizeof(buffer));
+        if(br == 0) break;
+        bw = file_api->write(&dst, &buffer, sizeof(buffer));
+        if(bw < br) break;
+    }
+
+    file_api->close(&src);
+    file_api->close(&dst);
 
     string_clear(buffer_src);
     string_clear(buffer_dst);
