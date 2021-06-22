@@ -1,7 +1,7 @@
 #pragma once
 
-#include <rfal_nfc.h>
-#include <st_errno.h>
+#include "st_errno.h"
+#include "rfal_nfc.h"
 
 #include <gui/view_dispatcher.h>
 #include "nfc_worker.h"
@@ -35,44 +35,31 @@ typedef struct {
 } NfcDeviceData;
 
 typedef struct {
-    bool found;
-    NfcDeviceData data;
-} NfcDetectModel;
-
-typedef struct {
+    NfcDeviceData nfc_data;
     char name[32];
     uint8_t number[8];
 } NfcEmvData;
 
 typedef struct {
-    bool found;
     NfcDeviceData nfc_data;
-    NfcEmvData emv_data;
-} NfcEmvModel;
-
-typedef struct {
-    uint8_t uid[7];
     uint8_t man_block[12];
     uint8_t otp[4];
-} NfcMfUlData;
+} NfcMifareUlData;
 
 typedef struct {
     bool found;
-    NfcDeviceData nfc_data;
-    NfcMfUlData nfc_mf_ul_data;
-} NfcMifareUlModel;
+    union {
+        NfcDeviceData nfc_detect_data;
+        NfcEmvData nfc_emv_data;
+        NfcMifareUlData nfc_mifare_ul_data;
+    };
+} NfcMessage;
 
 typedef enum {
     NfcEventDetect,
     NfcEventEmv,
     NfcEventMifareUl,
 } NfcEvent;
-
-typedef union {
-    NfcDetectModel nfc_detect_model;
-    NfcEmvModel nfc_emv;
-    NfcMifareUlModel nfc_mifare_ul;
-} NfcMessage;
 
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
     if(type == RFAL_NFC_LISTEN_TYPE_NFCA) {

@@ -11,6 +11,11 @@ struct NfcEmv {
     View* view;
 };
 
+typedef struct {
+    bool found;
+    NfcEmvData emv_data;
+} NfcEmvModel;
+
 void nfc_emv_draw(Canvas* canvas, NfcEmvModel* model) {
     char buffer[32];
     canvas_clear(canvas);
@@ -51,17 +56,24 @@ void nfc_emv_worker_callback(void* context) {
     view_dispatcher_send_custom_event(nfc_emv->nfc_common->view_dispatcher, NfcEventEmv);
 }
 
-void nfc_emv_view_dispatcher_callback(NfcEmv* nfc_emv, NfcEmvModel* model) {
+void nfc_emv_view_dispatcher_callback(NfcEmv* nfc_emv, NfcMessage* message) {
     furi_assert(nfc_emv);
-    furi_assert(model);
+    furi_assert(message);
 
-    with_view_model(
-        nfc_emv->view, (NfcEmvModel * m) {
-            m->found = model->found;
-            m->nfc_data = model->nfc_data;
-            m->emv_data = model->emv_data;
-            return true;
-        });
+    if(message->found) {
+        with_view_model(
+            nfc_emv->view, (NfcEmvModel * model) {
+                model->found = true;
+                model->emv_data = message->nfc_emv_data;
+                return true;
+            });
+    } else {
+        with_view_model(
+            nfc_emv->view, (NfcEmvModel * model) {
+                model->found = false;
+                return true;
+            });
+    }
 }
 
 void nfc_emv_enter(void* context) {
@@ -69,8 +81,8 @@ void nfc_emv_enter(void* context) {
 
     NfcEmv* nfc_emv = (NfcEmv*)context;
     with_view_model(
-        nfc_emv->view, (NfcEmvModel * m) {
-            m->found = false;
+        nfc_emv->view, (NfcEmvModel * model) {
+            model->found = false;
             return true;
         });
     nfc_worker_start(

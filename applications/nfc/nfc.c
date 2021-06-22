@@ -27,11 +27,11 @@ void nfc_view_dispatcher_callback(uint32_t event, void* context) {
     NfcMessage message;
     osMessageQueueGet(nfc->nfc_common.message_queue, &message, NULL, osWaitForever);
     if(event == NfcEventDetect) {
-        nfc_detect_view_dispatcher_callback(nfc->nfc_detect, (NfcDetectModel*)&message);
+        nfc_detect_view_dispatcher_callback(nfc->nfc_detect, &message);
     } else if(event == NfcEventEmv) {
-        nfc_emv_view_dispatcher_callback(nfc->nfc_emv, (NfcEmvModel*)&message);
+        nfc_emv_view_dispatcher_callback(nfc->nfc_emv, &message);
     } else if(event == NfcEventMifareUl) {
-        nfc_mifare_ul_view_dispatcher_callback(nfc->nfc_mifare_ul, (NfcMifareUlModel*)&message);
+        nfc_mifare_ul_view_dispatcher_callback(nfc->nfc_mifare_ul, &message);
     }
 }
 

@@ -11,6 +11,11 @@ struct NfcDetect {
     View* view;
 };
 
+typedef struct {
+    bool found;
+    NfcDeviceData data;
+} NfcDetectModel;
+
 void nfc_detect_draw(Canvas* canvas, NfcDetectModel* model) {
     char buffer[32];
     canvas_clear(canvas);
@@ -59,16 +64,24 @@ void nfc_detect_worker_callback(void* context) {
     view_dispatcher_send_custom_event(nfc_detect->nfc_common->view_dispatcher, NfcEventDetect);
 }
 
-void nfc_detect_view_dispatcher_callback(NfcDetect* nfc_detect, NfcDetectModel* model) {
+void nfc_detect_view_dispatcher_callback(NfcDetect* nfc_detect, NfcMessage* message) {
     furi_assert(nfc_detect);
-    furi_assert(model);
+    furi_assert(message);
 
-    with_view_model(
-        nfc_detect->view, (NfcDetectModel * m) {
-            m->found = model->found;
-            m->data = model->data;
-            return true;
-        });
+    if(message->found) {
+        with_view_model(
+            nfc_detect->view, (NfcDetectModel * model) {
+                model->found = true;
+                model->data = message->nfc_detect_data;
+                return true;
+            });
+    } else {
+        with_view_model(
+            nfc_detect->view, (NfcDetectModel * model) {
+                model->found = false;
+                return true;
+            });
+    }
 }
 
 void nfc_detect_enter(void* context) {
@@ -78,6 +91,7 @@ void nfc_detect_enter(void* context) {
     with_view_model(
         nfc_detect->view, (NfcDetectModel * model) {
             model->found = false;
+            model->data.protocol = NfcDeviceProtocolUnknown;
             return true;
         });
     nfc_worker_start(

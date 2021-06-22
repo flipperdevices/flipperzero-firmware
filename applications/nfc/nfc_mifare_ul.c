@@ -11,6 +11,11 @@ struct NfcMifareUl {
     View* view;
 };
 
+typedef struct {
+    bool found;
+    NfcMifareUlData nfc_mf_ul_data;
+} NfcMifareUlModel;
+
 void nfc_mifare_ul_draw(Canvas* canvas, NfcMifareUlModel* model) {
     char buffer[32];
     canvas_clear(canvas);
@@ -19,10 +24,14 @@ void nfc_mifare_ul_draw(Canvas* canvas, NfcMifareUlModel* model) {
         canvas_draw_str(canvas, 0, 12, "Found Mifare Ultralight");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 2, 22, "UID:");
-        for(uint8_t i = 0; i < sizeof(model->nfc_data.uid); i++) {
-            snprintf(buffer + (i * 2), sizeof(buffer) - (i * 2), "%02X", model->nfc_data.uid[i]);
+        for(uint8_t i = 0; i < model->nfc_mf_ul_data.nfc_data.uid_len; i++) {
+            snprintf(
+                buffer + (i * 2),
+                sizeof(buffer) - (i * 2),
+                "%02X",
+                model->nfc_mf_ul_data.nfc_data.uid[i]);
         }
-        buffer[sizeof(model->nfc_data.uid) * 2] = 0;
+        buffer[model->nfc_mf_ul_data.nfc_data.uid_len * 2] = 0;
         canvas_draw_str(canvas, 18, 22, buffer);
 
         uint8_t man_bl_size = sizeof(model->nfc_mf_ul_data.man_block);
@@ -76,17 +85,24 @@ void nfc_mifare_ul_worker_callback(void* context) {
         nfc_mifare_ul->nfc_common->view_dispatcher, NfcEventMifareUl);
 }
 
-void nfc_mifare_ul_view_dispatcher_callback(NfcMifareUl* nfc_mifare_ul, NfcMifareUlModel* model) {
+void nfc_mifare_ul_view_dispatcher_callback(NfcMifareUl* nfc_mifare_ul, NfcMessage* message) {
     furi_assert(nfc_mifare_ul);
-    furi_assert(model);
+    furi_assert(message);
 
-    with_view_model(
-        nfc_mifare_ul->view, (NfcMifareUlModel * m) {
-            m->found = model->found;
-            m->nfc_data = model->nfc_data;
-            m->nfc_mf_ul_data = model->nfc_mf_ul_data;
-            return true;
-        });
+    if(message->found) {
+        with_view_model(
+            nfc_mifare_ul->view, (NfcMifareUlModel * model) {
+                model->found = true;
+                model->nfc_mf_ul_data = message->nfc_mifare_ul_data;
+                return true;
+            });
+    } else {
+        with_view_model(
+            nfc_mifare_ul->view, (NfcMifareUlModel * model) {
+                model->found = false;
+                return true;
+            });
+    }
 }
 
 void nfc_mifare_ul_enter(void* context) {
