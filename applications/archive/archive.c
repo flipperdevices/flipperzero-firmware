@@ -108,6 +108,8 @@ static bool filter_by_extension(ArchiveApp* archive, FileInfo* file_info, char* 
         result = true;
     } else if(strstr(name, filter_ext_ptr) != NULL) {
         result = true;
+    } else if(file_info->flags & FSF_DIRECTORY) {
+        result = true;
     }
 
     return result;
