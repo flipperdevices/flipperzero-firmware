@@ -48,8 +48,9 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
 }
 
 void archive_trim_file_ext(string_t name) {
+    // TODO:IGOR_CSTR
     size_t str_len = string_size(name);
-    char* buff_ptr = stringi_get_cstr(name);
+    char* buff_ptr = (char*)string_get_cstr(name);
     char* end = buff_ptr + str_len;
     while(end > buff_ptr && *end != '.' && *end != '\\' && *end != '/') {
         --end;
@@ -98,7 +99,7 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
         }
 
         canvas_draw_icon_name(canvas, 2, 16 + i * FRAME_HEIGHT, ArchiveItemIcons[file->type]);
-        canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, stringi_get_cstr(str_buff));
+        canvas_draw_str(canvas, 15, 24 + i * FRAME_HEIGHT, string_get_cstr(str_buff));
         string_clean(str_buff);
     }
 
