@@ -9,7 +9,6 @@
 typedef struct {
     NfcWorker* worker;
     ViewDispatcher* view_dispatcher;
-    osMessageQueueId_t message_queue;
 } NfcCommon;
 
 typedef enum {

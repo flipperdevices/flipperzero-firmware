@@ -25,7 +25,7 @@ void nfc_view_dispatcher_callback(uint32_t event, void* context) {
 
     Nfc* nfc = (Nfc*)context;
     NfcMessage message;
-    osMessageQueueGet(nfc->nfc_common.message_queue, &message, NULL, osWaitForever);
+    osMessageQueueGet(nfc->message_queue, &message, NULL, osWaitForever);
     if(event == NfcEventDetect) {
         nfc_detect_view_dispatcher_callback(nfc->nfc_detect, &message);
     } else if(event == NfcEventEmv) {
@@ -38,8 +38,8 @@ void nfc_view_dispatcher_callback(uint32_t event, void* context) {
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
 
-    nfc->nfc_common.message_queue = osMessageQueueNew(8, sizeof(NfcMessage), NULL);
-    nfc->nfc_common.worker = nfc_worker_alloc(nfc->nfc_common.message_queue);
+    nfc->message_queue = osMessageQueueNew(8, sizeof(NfcMessage), NULL);
+    nfc->nfc_common.worker = nfc_worker_alloc(nfc->message_queue);
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
 
@@ -127,7 +127,7 @@ void nfc_free(Nfc* nfc) {
     nfc->gui = NULL;
 
     // The rest
-    osMessageQueueDelete(nfc->nfc_common.message_queue);
+    osMessageQueueDelete(nfc->message_queue);
     free(nfc);
 }
 
