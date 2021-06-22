@@ -68,7 +68,7 @@ void nfc_detect_view_dispatcher_callback(NfcDetect* nfc_detect, NfcDetectModel* 
             m->found = model->found;
             m->data = model->data;
             return true;
-        })
+        });
 }
 
 void nfc_detect_enter(void* context) {

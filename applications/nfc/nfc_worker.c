@@ -145,193 +145,195 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_read_emv(NfcWorker* nfc_worker) {
-    // ReturnCode err;
-    // rfalNfcDevice* dev_list;
-    // EmvApplication emv_app = {};
-    // uint8_t dev_cnt = 0;
-    // uint8_t tx_buff[255] = {};
-    // uint16_t tx_len = 0;
-    // uint8_t* rx_buff;
-    // uint16_t* rx_len;
+    ReturnCode err;
+    rfalNfcDevice* dev_list;
+    EmvApplication emv_app = {};
+    uint8_t dev_cnt = 0;
+    uint8_t tx_buff[255] = {};
+    uint16_t tx_len = 0;
+    uint8_t* rx_buff;
+    uint16_t* rx_len;
 
-    // // Update screen before start searching
-    // NfcMessage message = {.type = NfcMessageTypeEMVNotFound};
-    // while(nfc_worker->state == NfcWorkerStateReadEMV) {
-    //     furi_check(
-    //         osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
-    //     memset(&emv_app, 0, sizeof(emv_app));
-    //     if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
-    //         // Card was found. Check that it supports EMV
-    //         if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Send select PPSE command");
-    //             tx_len = emv_prepare_select_ppse(tx_buff);
-    //             err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //             if(err != ERR_NONE) {
-    //                 FURI_LOG_E(NFC_WORKER_TAG, "Error during selection PPSE request: %d", err);
-    //                 message.type = NfcMessageTypeEMVNotFound;
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             }
-    //             FURI_LOG_I(
-    //                 NFC_WORKER_TAG, "Select PPSE response received. Start parsing response");
-    //             if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
-    //                 FURI_LOG_I(NFC_WORKER_TAG, "Select PPSE responce parced");
-    //             } else {
-    //                 FURI_LOG_E(NFC_WORKER_TAG, "Can't find pay application");
-    //                 message.type = NfcMessageTypeEMVNotFound;
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             }
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Starting application ...");
-    //             tx_len = emv_prepare_select_app(tx_buff, &emv_app);
-    //             err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //             if(err != ERR_NONE) {
-    //                 FURI_LOG_E(
-    //                     NFC_WORKER_TAG, "Error during application selection request: %d", err);
-    //                 message.type = NfcMessageTypeEMVNotFound;
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             }
-    //             FURI_LOG_I(
-    //                 NFC_WORKER_TAG,
-    //                 "Select application response received. Start parsing response");
-    //             if(emv_decode_select_app_response(rx_buff, *rx_len, &emv_app)) {
-    //                 FURI_LOG_I(NFC_WORKER_TAG, "Card name: %s", emv_app.name);
-    //                 memcpy(message.device.emv_card.name, emv_app.name, sizeof(emv_app.name));
-    //             } else {
-    //                 FURI_LOG_E(NFC_WORKER_TAG, "Can't read card name");
-    //                 message.type = NfcMessageTypeEMVNotFound;
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             }
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Starting Get Processing Options command ...");
-    //             tx_len = emv_prepare_get_proc_opt(tx_buff, &emv_app);
-    //             err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //             if(err != ERR_NONE) {
-    //                 FURI_LOG_E(
-    //                     NFC_WORKER_TAG, "Error during Get Processing Options command: %d", err);
-    //                 message.type = NfcMessageTypeEMVNotFound;
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             }
-    //             if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
-    //                 FURI_LOG_I(NFC_WORKER_TAG, "Card number parsed");
-    //                 message.type = NfcMessageTypeEMVFound;
-    //                 memcpy(
-    //                     message.device.emv_card.number,
-    //                     emv_app.card_number,
-    //                     sizeof(emv_app.card_number));
-    //                 api_hal_nfc_deactivate();
-    //                 continue;
-    //             } else {
-    //                 // Mastercard doesn't give PAN / card number as GPO response
-    //                 // Iterate over all files found in application
-    //                 bool pan_found = false;
-    //                 for(uint8_t i = 0; (i < emv_app.afl.size) && !pan_found; i += 4) {
-    //                     uint8_t sfi = emv_app.afl.data[i] >> 3;
-    //                     uint8_t record_start = emv_app.afl.data[i + 1];
-    //                     uint8_t record_end = emv_app.afl.data[i + 2];
+    NfcMessage message = {.nfc_emv.found = false};
+    while(nfc_worker->state == NfcWorkerStateReadEMV) {
+        if(nfc_worker->callback) {
+            nfc_worker->callback(nfc_worker->context);
+        }
+        furi_check(
+            osMessageQueuePut(nfc_worker->message_queue, &message, 0, osWaitForever) == osOK);
+        memset(&emv_app, 0, sizeof(emv_app));
+        if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, false)) {
+            // Card was found. Check that it supports EMV
+            if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Send select PPSE command");
+                tx_len = emv_prepare_select_ppse(tx_buff);
+                err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Error during selection PPSE request: %d", err);
+                    message.nfc_emv.found = false;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(
+                    NFC_WORKER_TAG, "Select PPSE response received. Start parsing response");
+                if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Select PPSE responce parced");
+                } else {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Can't find pay application");
+                    message.nfc_emv.found = false;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(NFC_WORKER_TAG, "Starting application ...");
+                tx_len = emv_prepare_select_app(tx_buff, &emv_app);
+                err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(
+                        NFC_WORKER_TAG, "Error during application selection request: %d", err);
+                    message.nfc_emv.found = false;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(
+                    NFC_WORKER_TAG,
+                    "Select application response received. Start parsing response");
+                if(emv_decode_select_app_response(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Card name: %s", emv_app.name);
+                    memcpy(message.nfc_emv.emv_data.name, emv_app.name, sizeof(emv_app.name));
+                } else {
+                    FURI_LOG_E(NFC_WORKER_TAG, "Can't read card name");
+                    message.nfc_emv.found = false;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                FURI_LOG_I(NFC_WORKER_TAG, "Starting Get Processing Options command ...");
+                tx_len = emv_prepare_get_proc_opt(tx_buff, &emv_app);
+                err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(
+                        NFC_WORKER_TAG, "Error during Get Processing Options command: %d", err);
+                    message.nfc_emv.found = false;
+                    api_hal_nfc_deactivate();
+                    continue;
+                }
+                if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
+                    FURI_LOG_I(NFC_WORKER_TAG, "Card number parsed");
+                    message.nfc_emv.found = true;
+                    memcpy(
+                        message.nfc_emv.emv_data.number,
+                        emv_app.card_number,
+                        sizeof(emv_app.card_number));
+                    api_hal_nfc_deactivate();
+                    continue;
+                } else {
+                    // Mastercard doesn't give PAN / card number as GPO response
+                    // Iterate over all files found in application
+                    bool pan_found = false;
+                    for(uint8_t i = 0; (i < emv_app.afl.size) && !pan_found; i += 4) {
+                        uint8_t sfi = emv_app.afl.data[i] >> 3;
+                        uint8_t record_start = emv_app.afl.data[i + 1];
+                        uint8_t record_end = emv_app.afl.data[i + 2];
 
-    //                     // Iterate over all records in file
-    //                     for(uint8_t record = record_start; record <= record_end; ++record) {
-    //                         tx_len = emv_prepare_read_sfi_record(tx_buff, sfi, record);
-    //                         err = api_hal_nfc_data_exchange(
-    //                             tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //                         if(err != ERR_NONE) {
-    //                             FURI_LOG_E(
-    //                                 NFC_WORKER_TAG,
-    //                                 "Error reading application sfi %d, record %d",
-    //                                 sfi,
-    //                                 record);
-    //                         }
-    //                         if(emv_decode_read_sfi_record(rx_buff, *rx_len, &emv_app)) {
-    //                             pan_found = true;
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //                 if(pan_found) {
-    //                     FURI_LOG_I(NFC_WORKER_TAG, "Card PAN found");
-    //                     message.type = NfcMessageTypeEMVFound;
-    //                     memcpy(
-    //                         message.device.emv_card.number,
-    //                         emv_app.card_number,
-    //                         sizeof(emv_app.card_number));
-    //                 } else {
-    //                     FURI_LOG_E(NFC_WORKER_TAG, "Can't read card number");
-    //                     message.type = NfcMessageTypeEMVNotFound;
-    //                 }
-    //                 api_hal_nfc_deactivate();
-    //             }
-    //         } else {
-    //             // Can't find EMV card
-    //             FURI_LOG_W(NFC_WORKER_TAG, "Card doesn't support EMV");
-    //             message.type = NfcMessageTypeEMVNotFound;
-    //             api_hal_nfc_deactivate();
-    //         }
-    //     } else {
-    //         // Can't find EMV card
-    //         FURI_LOG_W(NFC_WORKER_TAG, "Can't find any cards");
-    //         message.type = NfcMessageTypeEMVNotFound;
-    //         api_hal_nfc_deactivate();
-    //     }
-    //     osDelay(20);
-    // }
+                        // Iterate over all records in file
+                        for(uint8_t record = record_start; record <= record_end; ++record) {
+                            tx_len = emv_prepare_read_sfi_record(tx_buff, sfi, record);
+                            err = api_hal_nfc_data_exchange(
+                                tx_buff, tx_len, &rx_buff, &rx_len, false);
+                            if(err != ERR_NONE) {
+                                FURI_LOG_E(
+                                    NFC_WORKER_TAG,
+                                    "Error reading application sfi %d, record %d",
+                                    sfi,
+                                    record);
+                            }
+                            if(emv_decode_read_sfi_record(rx_buff, *rx_len, &emv_app)) {
+                                pan_found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(pan_found) {
+                        FURI_LOG_I(NFC_WORKER_TAG, "Card PAN found");
+                        message.nfc_emv.found = true;
+                        memcpy(
+                            message.nfc_emv.emv_data.number,
+                            emv_app.card_number,
+                            sizeof(emv_app.card_number));
+                    } else {
+                        FURI_LOG_E(NFC_WORKER_TAG, "Can't read card number");
+                        message.nfc_emv.found = false;
+                    }
+                    api_hal_nfc_deactivate();
+                }
+            } else {
+                // Can't find EMV card
+                FURI_LOG_W(NFC_WORKER_TAG, "Card doesn't support EMV");
+                message.nfc_emv.found = false;
+                api_hal_nfc_deactivate();
+            }
+        } else {
+            // Can't find EMV card
+            FURI_LOG_W(NFC_WORKER_TAG, "Can't find any cards");
+            message.nfc_emv.found = false;
+            api_hal_nfc_deactivate();
+        }
+        osDelay(20);
+    }
 }
 
 void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
-    // ReturnCode err;
-    // uint8_t tx_buff[255] = {};
-    // uint16_t tx_len = 0;
-    // uint8_t* rx_buff;
-    // uint16_t* rx_len;
+    ReturnCode err;
+    uint8_t tx_buff[255] = {};
+    uint16_t tx_len = 0;
+    uint8_t* rx_buff;
+    uint16_t* rx_len;
 
-    // while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
-    //     if(api_hal_nfc_listen(ApiHalNfcEmulateParamsEMV, 1000)) {
-    //         FURI_LOG_I(NFC_WORKER_TAG, "POS terminal detected");
-    //         // Read data from POS terminal
-    //         err = api_hal_nfc_data_exchange(NULL, 0, &rx_buff, &rx_len, false);
-    //         if(err == ERR_NONE) {
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Received Select PPSE");
-    //         } else {
-    //             FURI_LOG_E(NFC_WORKER_TAG, "Error in 1st data exchange: select PPSE");
-    //             api_hal_nfc_deactivate();
-    //             continue;
-    //         }
-    //         FURI_LOG_I(NFC_WORKER_TAG, "Transive SELECT PPSE ANS");
-    //         tx_len = emv_select_ppse_ans(tx_buff);
-    //         err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //         if(err == ERR_NONE) {
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Received Select APP");
-    //         } else {
-    //             FURI_LOG_E(NFC_WORKER_TAG, "Error in 2nd data exchange: select APP");
-    //             api_hal_nfc_deactivate();
-    //             continue;
-    //         }
+    while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
+        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsEMV, 1000)) {
+            FURI_LOG_I(NFC_WORKER_TAG, "POS terminal detected");
+            // Read data from POS terminal
+            err = api_hal_nfc_data_exchange(NULL, 0, &rx_buff, &rx_len, false);
+            if(err == ERR_NONE) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Received Select PPSE");
+            } else {
+                FURI_LOG_E(NFC_WORKER_TAG, "Error in 1st data exchange: select PPSE");
+                api_hal_nfc_deactivate();
+                continue;
+            }
+            FURI_LOG_I(NFC_WORKER_TAG, "Transive SELECT PPSE ANS");
+            tx_len = emv_select_ppse_ans(tx_buff);
+            err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+            if(err == ERR_NONE) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Received Select APP");
+            } else {
+                FURI_LOG_E(NFC_WORKER_TAG, "Error in 2nd data exchange: select APP");
+                api_hal_nfc_deactivate();
+                continue;
+            }
 
-    //         FURI_LOG_I(NFC_WORKER_TAG, "Transive SELECT APP ANS");
-    //         tx_len = emv_select_app_ans(tx_buff);
-    //         err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //         if(err == ERR_NONE) {
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Received PDOL");
-    //         } else {
-    //             FURI_LOG_E(NFC_WORKER_TAG, "Error in 3rd data exchange: receive PDOL");
-    //             api_hal_nfc_deactivate();
-    //             continue;
-    //         }
+            FURI_LOG_I(NFC_WORKER_TAG, "Transive SELECT APP ANS");
+            tx_len = emv_select_app_ans(tx_buff);
+            err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+            if(err == ERR_NONE) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Received PDOL");
+            } else {
+                FURI_LOG_E(NFC_WORKER_TAG, "Error in 3rd data exchange: receive PDOL");
+                api_hal_nfc_deactivate();
+                continue;
+            }
 
-    //         FURI_LOG_I(NFC_WORKER_TAG, "Transive PDOL ANS");
-    //         tx_len = emv_get_proc_opt_ans(tx_buff);
-    //         err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-    //         if(err == ERR_NONE) {
-    //             FURI_LOG_I(NFC_WORKER_TAG, "Received PDOL");
-    //         }
-    //         api_hal_nfc_deactivate();
-    //     } else {
-    //         FURI_LOG_W(NFC_WORKER_TAG, "Can't find reader");
-    //     }
-    //     osDelay(20);
-    // }
+            FURI_LOG_I(NFC_WORKER_TAG, "Transive PDOL ANS");
+            tx_len = emv_get_proc_opt_ans(tx_buff);
+            err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+            if(err == ERR_NONE) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Received PDOL");
+            }
+            api_hal_nfc_deactivate();
+        } else {
+            FURI_LOG_W(NFC_WORKER_TAG, "Can't find reader");
+        }
+        osDelay(20);
+    }
 }
 
 void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {

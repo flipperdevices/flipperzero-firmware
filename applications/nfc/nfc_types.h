@@ -42,7 +42,13 @@ typedef struct {
 typedef struct {
     char name[32];
     uint8_t number[8];
-} EMVCard;
+} NfcEmvData;
+
+typedef struct {
+    bool found;
+    NfcDeviceData nfc_data;
+    NfcEmvData emv_data;
+} NfcEmvModel;
 
 typedef struct {
     uint8_t uid[7];
@@ -52,10 +58,12 @@ typedef struct {
 
 typedef enum {
     NfcEventDetect,
+    NfcEventEmv,
 } NfcEvent;
 
 typedef union {
     NfcDetectModel nfc_detect_model;
+    NfcEmvModel nfc_emv;
 } NfcMessage;
 
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
@@ -108,8 +116,7 @@ typedef enum {
     // From Menu
     NfcMessageTypeDetect,
     NfcMessageTypeEmulate,
-    NfcMessageTypeReadEMV,
-    NfcMessageTypeEmulateEMV,
+    NfcMessageTypeEMV,
     NfcMessageTypeField,
     NfcMessageTypeReadMfUltralight,
     NfcMessageTypeStop,

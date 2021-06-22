@@ -13,6 +13,8 @@ void nfc_menu_callback(void* context, uint32_t index) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewDetect);
     } else if(index == NfcMessageTypeEmulate) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmulate);
+    } else if(index == NfcMessageTypeEMV) {
+        view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
     }
 }
 
@@ -24,6 +26,8 @@ void nfc_view_dispatcher_callback(uint32_t event, void* context) {
     osMessageQueueGet(nfc->nfc_common.message_queue, &message, NULL, osWaitForever);
     if(event == NfcEventDetect) {
         nfc_detect_view_dispatcher_callback(nfc->nfc_detect, (NfcDetectModel*)&message);
+    } else if(event == NfcEventEmv) {
+        nfc_emv_view_dispatcher_callback(nfc->nfc_emv, (NfcEmvModel*)&message);
     }
 }
 
@@ -44,6 +48,7 @@ Nfc* nfc_alloc() {
     nfc->submenu = submenu_alloc();
     submenu_add_item(nfc->submenu, "Detect", NfcMessageTypeDetect, nfc_menu_callback, nfc);
     submenu_add_item(nfc->submenu, "Emulate", NfcMessageTypeEmulate, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Read bank card", NfcMessageTypeEMV, nfc_menu_callback, nfc);
 
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
@@ -58,6 +63,11 @@ Nfc* nfc_alloc() {
     nfc->nfc_emulate = nfc_emulate_alloc(&nfc->nfc_common);
     view_dispatcher_add_view(
         nfc->nfc_common.view_dispatcher, NfcViewEmulate, nfc_emulate_get_view(nfc->nfc_emulate));
+
+    // EMV
+    nfc->nfc_emv = nfc_emv_alloc(&nfc->nfc_common);
+    view_dispatcher_add_view(
+        nfc->nfc_common.view_dispatcher, NfcViewEmv, nfc_emv_get_view(nfc->nfc_emv));
 
     // Set View Dispatcher custom event callback
     view_dispatcher_set_custom_callback(
@@ -83,6 +93,10 @@ void nfc_free(Nfc* nfc) {
     // Emulate
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewEmulate);
     nfc_emulate_free(nfc->nfc_emulate);
+
+    // EMV
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
+    nfc_emv_free(nfc->nfc_emv);
 
     // Worker
     nfc_worker_stop(nfc->nfc_common.worker);
