@@ -48,7 +48,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubOne] = ".sub1",
     [ArchiveFileTypeLFRFID] = ".rfid",
-    [ArchiveFileTypeIrda] = ".irda",
+    [ArchiveFileTypeIrda] = ".ir",
 };
 
 static const char* tab_default_paths[] = {
