@@ -61,6 +61,13 @@ typedef enum {
     NfcEventMifareUl,
 } NfcEvent;
 
+typedef enum {
+    NfcSubmenuDetect,
+    NfcSubmenuEmulate,
+    NfcSubmenuEMV,
+    NfcSubmenuMifareUl,
+} NfcSubmenu;
+
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
     if(type == RFAL_NFC_LISTEN_TYPE_NFCA) {
         return "NFC-A";
@@ -106,21 +113,3 @@ static inline const char* nfc_get_protocol(NfcProtocol protocol) {
         return "Unknown";
     }
 }
-
-typedef enum {
-    // From Menu
-    NfcMessageTypeDetect,
-    NfcMessageTypeEmulate,
-    NfcMessageTypeEMV,
-    NfcMessageTypeField,
-    NfcMessageTypeReadMfUltralight,
-    NfcMessageTypeStop,
-    NfcMessageTypeExit,
-    // From Worker
-    NfcMessageTypeDeviceFound,
-    NfcMessageTypeDeviceNotFound,
-    NfcMessageTypeEMVFound,
-    NfcMessageTypeEMVNotFound,
-    NfcMessageTypeMfUlFound,
-    NfcMessageTypeMfUlNotFound,
-} NfcMessageType;

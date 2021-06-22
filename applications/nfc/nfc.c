@@ -9,13 +9,13 @@ void nfc_menu_callback(void* context, uint32_t index) {
     furi_assert(context);
 
     Nfc* nfc = (Nfc*)context;
-    if(index == NfcMessageTypeDetect) {
+    if(index == NfcSubmenuDetect) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewDetect);
-    } else if(index == NfcMessageTypeEmulate) {
+    } else if(index == NfcSubmenuEmulate) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmulate);
-    } else if(index == NfcMessageTypeEMV) {
+    } else if(index == NfcSubmenuEMV) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
-    } else if(index == NfcMessageTypeReadMfUltralight) {
+    } else if(index == NfcSubmenuMifareUl) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMifareUl);
     }
 }
@@ -50,15 +50,11 @@ Nfc* nfc_alloc() {
 
     // Menu
     nfc->submenu = submenu_alloc();
-    submenu_add_item(nfc->submenu, "Detect", NfcMessageTypeDetect, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Emulate", NfcMessageTypeEmulate, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Read bank card", NfcMessageTypeEMV, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Detect", NfcSubmenuDetect, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Emulate", NfcSubmenuEmulate, nfc_menu_callback, nfc);
+    submenu_add_item(nfc->submenu, "Read bank card", NfcSubmenuEMV, nfc_menu_callback, nfc);
     submenu_add_item(
-        nfc->submenu,
-        "Read Mifare Ultralight",
-        NfcMessageTypeReadMfUltralight,
-        nfc_menu_callback,
-        nfc);
+        nfc->submenu, "Read Mifare Ultralight", NfcSubmenuMifareUl, nfc_menu_callback, nfc);
 
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
