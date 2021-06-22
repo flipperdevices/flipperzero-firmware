@@ -6,13 +6,16 @@ import subprocess
 import sys
 import os
 
+
 class Main:
     def __init__(self):
         # command args
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument("-d", "--debug", action="store_true", help="Debug")
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
-        self.parser_check = self.subparsers.add_parser("check", help="Check Option Bytes")
+        self.parser_check = self.subparsers.add_parser(
+            "check", help="Check Option Bytes"
+        )
         self.parser_check.set_defaults(func=self.check)
         self.parser_set = self.subparsers.add_parser("set", help="Set Option Bytes")
         self.parser_set.set_defaults(func=self.set)
@@ -42,15 +45,17 @@ class Main:
         file_path = os.path.join(os.path.dirname(sys.argv[0]), "ob_check.data")
         file = open(file_path, "r")
         for line in file.readlines():
-            k,v,o = line.split(":")
+            k, v, o = line.split(":")
             self.ob[k.strip()] = v.strip(), o.strip()
 
     def check(self):
         self.logger.info(f"Checking Option Bytes")
         try:
-            output = subprocess.check_output(["STM32_Programmer_CLI", "-q", "-c port=swd", "-ob displ"])
+            output = subprocess.check_output(
+                ["STM32_Programmer_CLI", "-q", "-c port=swd", "-ob displ"]
+            )
             assert output
-        except Exception as e: 
+        except Exception as e:
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
             self.logger.exception(e)
             return
@@ -71,7 +76,9 @@ class Main:
             value = value.strip()
             comment = comment.strip()
             if self.ob[key][0] != value:
-                self.logger.error(f"Invalid OB: {key} {value}, expected: {self.ob[key][0]}")
+                self.logger.error(
+                    f"Invalid OB: {key} {value}, expected: {self.ob[key][0]}"
+                )
                 ob_correct = False
         if ob_correct:
             self.logger.info(f"OB Check OK")
@@ -86,13 +93,21 @@ class Main:
             if "w" in attr:
                 options.append(f"{key}={value}")
         try:
-            output = subprocess.check_output(["STM32_Programmer_CLI", "-q", "-c port=swd", f"-ob {' '.join(options)}"])
+            output = subprocess.check_output(
+                [
+                    "STM32_Programmer_CLI",
+                    "-q",
+                    "-c port=swd",
+                    f"-ob {' '.join(options)}",
+                ]
+            )
             assert output
             self.logger.info(f"Success")
-        except Exception as e: 
+        except Exception as e:
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
             self.logger.exception(e)
             return
+
 
 if __name__ == "__main__":
     Main()()

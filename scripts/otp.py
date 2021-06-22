@@ -8,6 +8,7 @@ import re
 import struct
 import datetime
 
+
 class Main:
     def __init__(self):
         # command args
@@ -23,11 +24,15 @@ class Main:
         self.parser_generate.add_argument(
             "--firmware", type=int, help="Firmware", required=True
         )
-        self.parser_generate.add_argument("--body", type=int, help="Body", required=True)
+        self.parser_generate.add_argument(
+            "--body", type=int, help="Body", required=True
+        )
         self.parser_generate.add_argument(
             "--connect", type=int, help="Connect", required=True
         )
-        self.parser_generate.add_argument("--name", type=str, help="Name", required=True)
+        self.parser_generate.add_argument(
+            "--name", type=str, help="Name", required=True
+        )
         self.parser_generate.add_argument("file", help="Output file")
         self.parser_generate.set_defaults(func=self.generate)
         # logging
@@ -80,6 +85,7 @@ class Main:
             n8,
         )
         open(self.args.file, "wb").write(data)
+
 
 if __name__ == "__main__":
     Main()()
