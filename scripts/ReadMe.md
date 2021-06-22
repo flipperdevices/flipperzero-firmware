@@ -11,6 +11,7 @@ Always flash your device in the folllowing sequence:
 - OTP (Only on empty MCU)
 - Core2 firmware
 - Core1 firmware
+- Option Bytes
 
 ## Otp flashing
 
@@ -18,7 +19,7 @@ Always flash your device in the folllowing sequence:
 
 Normally OTP data generated and flashed at factory.
 In case if MCU was replaced you'll need correct OTP data to be able to use companion applications.
-Use `assets.py` to generate OTP data and `flash_otp_version_*` to flash OTP zone.
+Use `otp.py` to generate OTP data and `flash_otp_version_*` to flash OTP zone.
 You will need exact main board revision to genrate OTP data. It can be found on main PCB.
 
 !!! Flashing incorrect OTP may permanently brick your device !!!
@@ -31,3 +32,20 @@ Reflash Core1 after Core2.
 ## Core1 flashing
 
 Script compiles and flashes both bootloader and firmware.
+
+## Option Bytes
+
+!!! Setting incorrect Otion Bytes may brick your MCU !!!
+
+Defaults are mostly OK, but there are couple things that we'd like to tune.
+Also OB may be damaged, so we've made couple scripts to check and set option bytes.
+
+!!! Setting incorrect Otion Bytes may brick your MCU !!!
+
+Checking option bytes:
+
+	ob_check.py check
+
+Setting option bytes:
+
+	ob_check.py set

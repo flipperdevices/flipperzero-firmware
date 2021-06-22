@@ -4,6 +4,10 @@
 - ImageMagic
 - Make
 
+# Compiling
+
+	make all
+
 # Asset naming rules
 
 ## Images and Animations
