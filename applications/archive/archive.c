@@ -157,11 +157,10 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         result = dir_api->read(&directory, &file_info, name_ptr, MAX_NAME_LEN);
 
         if(directory.error_id == FSE_NOT_EXIST || name_ptr[0] == 0) {
-            view_commit_model(archive->view_archive_main, true);
             break;
         } else if(result) {
             if(directory.error_id == FSE_OK) {
-                if(files_array_size(model->files) > 170) {
+                if(files_array_size(model->files) > MAX_FILES) {
                     break;
                 } else if(filter_by_extension(archive, &file_info, name_ptr)) {
                     ArchiveFile_t_init(&item);
@@ -173,7 +172,6 @@ static bool archive_get_filenames(ArchiveApp* archive) {
             } else {
                 dir_api->close(&directory);
                 string_clear(name);
-                view_commit_model(archive->view_archive_main, true);
                 return false;
             }
         }

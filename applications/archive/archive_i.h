@@ -16,6 +16,7 @@
 
 #define MAX_DEPTH 32
 #define MAX_NAME_LEN 255
+#define MAX_FILES 100
 
 typedef enum {
     ArchiveViewMain,
