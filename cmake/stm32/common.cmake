@@ -229,11 +229,12 @@ function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
     endif()
 
     get_target_property(LINK_DEPENDS ${TARGET} ${INTERFACE_PREFIX}LINK_DEPENDS)
-    if(LINK_DEPENDS STREQUAL "LINK_DEPENDS-NOTFOUND")
-        set(LINK_DEPENDS "${SCRIPT}")
+    if(LINK_DEPENDS)
+        list(APPEND LINK_DEPENDS "${SCRIPT}")        
     else()
-        list(APPEND LINK_DEPENDS "${SCRIPT}")
+        set(LINK_DEPENDS "${SCRIPT}")
     endif()
+
 
     set_target_properties(${TARGET} PROPERTIES ${INTERFACE_PREFIX}LINK_DEPENDS "${LINK_DEPENDS}")
 endfunction()
@@ -272,5 +273,4 @@ include(stm32/l0)
 include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
-
 
