@@ -15,6 +15,8 @@ void nfc_menu_callback(void* context, uint32_t index) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmulate);
     } else if(index == NfcMessageTypeEMV) {
         view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
+    } else if(index == NfcMessageTypeReadMfUltralight) {
+        view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMifareUl);
     }
 }
 
@@ -28,6 +30,8 @@ void nfc_view_dispatcher_callback(uint32_t event, void* context) {
         nfc_detect_view_dispatcher_callback(nfc->nfc_detect, (NfcDetectModel*)&message);
     } else if(event == NfcEventEmv) {
         nfc_emv_view_dispatcher_callback(nfc->nfc_emv, (NfcEmvModel*)&message);
+    } else if(event == NfcEventMifareUl) {
+        nfc_mifare_ul_view_dispatcher_callback(nfc->nfc_mifare_ul, (NfcMifareUlModel*)&message);
     }
 }
 
@@ -49,6 +53,12 @@ Nfc* nfc_alloc() {
     submenu_add_item(nfc->submenu, "Detect", NfcMessageTypeDetect, nfc_menu_callback, nfc);
     submenu_add_item(nfc->submenu, "Emulate", NfcMessageTypeEmulate, nfc_menu_callback, nfc);
     submenu_add_item(nfc->submenu, "Read bank card", NfcMessageTypeEMV, nfc_menu_callback, nfc);
+    submenu_add_item(
+        nfc->submenu,
+        "Read Mifare Ultralight",
+        NfcMessageTypeReadMfUltralight,
+        nfc_menu_callback,
+        nfc);
 
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
@@ -68,6 +78,13 @@ Nfc* nfc_alloc() {
     nfc->nfc_emv = nfc_emv_alloc(&nfc->nfc_common);
     view_dispatcher_add_view(
         nfc->nfc_common.view_dispatcher, NfcViewEmv, nfc_emv_get_view(nfc->nfc_emv));
+
+    // Mifare Ultralight
+    nfc->nfc_mifare_ul = nfc_mifare_ul_alloc(&nfc->nfc_common);
+    view_dispatcher_add_view(
+        nfc->nfc_common.view_dispatcher,
+        NfcViewMifareUl,
+        nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
 
     // Set View Dispatcher custom event callback
     view_dispatcher_set_custom_callback(
@@ -98,6 +115,10 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
     nfc_emv_free(nfc->nfc_emv);
 
+    // Mifare ultralight
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewMifareUl);
+    nfc_mifare_ul_free(nfc->nfc_mifare_ul);
+
     // Worker
     nfc_worker_stop(nfc->nfc_common.worker);
     nfc_worker_free(nfc->nfc_common.worker);
@@ -110,6 +131,7 @@ void nfc_free(Nfc* nfc) {
     nfc->gui = NULL;
 
     // The rest
+    osMessageQueueDelete(nfc->nfc_common.message_queue);
     free(nfc);
 }
 

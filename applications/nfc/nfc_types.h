@@ -54,16 +54,24 @@ typedef struct {
     uint8_t uid[7];
     uint8_t man_block[12];
     uint8_t otp[4];
-} MfUlCard;
+} NfcMfUlData;
+
+typedef struct {
+    bool found;
+    NfcDeviceData nfc_data;
+    NfcMfUlData nfc_mf_ul_data;
+} NfcMifareUlModel;
 
 typedef enum {
     NfcEventDetect,
     NfcEventEmv,
+    NfcEventMifareUl,
 } NfcEvent;
 
 typedef union {
     NfcDetectModel nfc_detect_model;
     NfcEmvModel nfc_emv;
+    NfcMifareUlModel nfc_mifare_ul;
 } NfcMessage;
 
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
