@@ -43,7 +43,7 @@ find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 
 function(stm32_print_size_of_target TARGET)
-    add_custom_target(do_always 
+    add_custom_target(always_display_size
         ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
         COMMENT "Target Sizes: "
         DEPENDS ${TARGET}
