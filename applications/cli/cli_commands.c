@@ -93,7 +93,19 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
             date.Year = Year - 2000;
             HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
             HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
-            printf("Success");
+
+            // Verification
+            HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+            HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+            printf(
+                "New time is: %.2d:%.2d:%.2d %.2d-%.2d-%.2d %d",
+                time.Hours,
+                time.Minutes,
+                time.Seconds,
+                date.Month,
+                date.Date,
+                2000 + date.Year,
+                date.WeekDay);
         } else {
             printf(
                 "Invalid time format, use `hh:mm:ss MM-DD-YYYY WD`. sscanf %d %s",
