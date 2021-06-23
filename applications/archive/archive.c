@@ -57,10 +57,11 @@ static void archive_switch_tab(ArchiveApp* archive) {
 static void archive_leave_dir(ArchiveApp* archive) {
     furi_assert(archive);
 
-    // TODO:IGOR_CSTR
-    char* path_ptr = (char*)string_get_cstr(archive->browser.path);
-    char* last_char = strrchr(path_ptr, '/');
-    if(last_char) path_ptr[last_char - path_ptr] = '\0';
+    size_t last_char =
+        string_search_rchar(archive->browser.path, '/', string_size(archive->browser.path));
+    if(last_char) {
+        string_right(archive->browser.path, last_char);
+    }
 
     archive->browser.depth = CLAMP(archive->browser.depth - 1, MAX_DEPTH, 0);
 
@@ -131,10 +132,9 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     ArchiveFile_t item;
     FileInfo file_info;
     File directory;
-    string_t name;
+    char name[MAX_NAME_LEN];
     bool result;
 
-    string_init_printf(name, "%0*d\n", MAX_NAME_LEN, 0);
     result = dir_api->open(&directory, string_get_cstr(archive->browser.path));
 
     with_view_model(
@@ -145,17 +145,13 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     if(!result) {
         dir_api->close(&directory);
-        string_clear(name);
         return false;
     }
 
     while(1) {
-        char* name_ptr = (char*)string_get_cstr(name);
+        result = dir_api->read(&directory, &file_info, name, MAX_NAME_LEN);
 
-        // TODO:IGOR_CSTR
-        result = dir_api->read(&directory, &file_info, name_ptr, MAX_NAME_LEN);
-
-        if(directory.error_id == FSE_NOT_EXIST || name_ptr[0] == 0) {
+        if(directory.error_id == FSE_NOT_EXIST || name[0] == 0) {
             break;
         }
 
@@ -171,7 +167,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
             if(files_cnt > MAX_FILES) {
                 break;
             } else if(directory.error_id == FSE_OK) {
-                if(filter_by_extension(archive, &file_info, name_ptr)) {
+                if(filter_by_extension(archive, &file_info, name)) {
                     ArchiveFile_t_init(&item);
                     string_init_set(item.name, name);
                     set_file_type(&item, &file_info);
@@ -186,14 +182,12 @@ static bool archive_get_filenames(ArchiveApp* archive) {
                 }
             } else {
                 dir_api->close(&directory);
-                string_clear(name);
                 return false;
             }
         }
     }
 
     dir_api->close(&directory);
-    string_clear(name);
     return true;
 }
 
@@ -247,19 +241,20 @@ static void archive_text_input_callback(void* context) {
     string_cat(buffer_dst, "/");
 
     string_cat(buffer_src, archive->browser.name);
-    // TODO:IGOR_CSTR
-    string_cat_str(buffer_dst, string_get_cstr(archive->browser.text_input_buffer));
+    string_cat_str(buffer_dst, archive->browser.text_input_buffer);
 
     // append extension
+
+    ArchiveFile_t* file;
+
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
-            ArchiveFile_t* file = files_array_get(
+            file = files_array_get(
                 model->files, CLAMP(model->idx, files_array_size(model->files) - 1, 0));
-            string_cat(buffer_src, known_ext[file->type]);
-            string_cat(buffer_dst, known_ext[file->type]);
             return true;
         });
 
+    string_cat(buffer_dst, known_ext[file->type]);
     common_api->rename(string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewMain);
@@ -272,20 +267,22 @@ static void archive_text_input_callback(void* context) {
 
 static void archive_enter_text_input(ArchiveApp* archive) {
     furi_assert(archive);
+    *archive->browser.text_input_buffer = '\0';
 
-    string_set(archive->browser.text_input_buffer, archive->browser.name);
+    strlcpy(
+        archive->browser.text_input_buffer,
+        string_get_cstr(archive->browser.name),
+        string_size(archive->browser.name));
 
     archive_trim_file_ext(archive->browser.text_input_buffer);
 
     text_input_set_header_text(archive->text_input, "Rename:");
 
-    // TODO:IGOR_CSTR
-    char* text_input_buffer_ptr = (char*)string_get_cstr(archive->browser.text_input_buffer);
     text_input_set_result_callback(
         archive->text_input,
         archive_text_input_callback,
         archive,
-        text_input_buffer_ptr,
+        archive->browser.text_input_buffer,
         MAX_NAME_LEN);
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewTextInput);
@@ -522,7 +519,6 @@ void archive_free(ArchiveApp* archive) {
 
     string_clear(archive->browser.name);
     string_clear(archive->browser.path);
-    string_clear(archive->browser.text_input_buffer);
 
     text_input_free(archive->text_input);
 
