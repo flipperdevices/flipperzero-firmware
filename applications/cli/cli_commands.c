@@ -69,13 +69,18 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
     RTC_TimeTypeDef time;
     RTC_DateTypeDef date;
 
-    if (string_size(args) > 0) {
+    if(string_size(args) > 0) {
         uint16_t Hours, Minutes, Seconds, Month, Date, Year, WeekDay;
         int ret = sscanf(
-            string_get_cstr(args), "%hu:%hu:%hu %hu-%hu-%hu %hu",
-            &Hours, &Minutes, &Seconds,
-            &Month, &Date, &Year, &WeekDay
-        );
+            string_get_cstr(args),
+            "%hu:%hu:%hu %hu-%hu-%hu %hu",
+            &Hours,
+            &Minutes,
+            &Seconds,
+            &Month,
+            &Date,
+            &Year,
+            &WeekDay);
         if(ret == 7) {
             time.Hours = Hours;
             time.Minutes = Minutes;
@@ -90,7 +95,10 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
             HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
             printf("Success");
         } else {
-            printf("Invalid time format, use `hh:mm:ss MM-DD-YYYY WD`. sscanf %d %s", ret, string_get_cstr(args));
+            printf(
+                "Invalid time format, use `hh:mm:ss MM-DD-YYYY WD`. sscanf %d %s",
+                ret,
+                string_get_cstr(args));
             return;
         }
     } else {
@@ -100,9 +108,13 @@ void cli_command_date(Cli* cli, string_t args, void* context) {
         HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
         printf(
             "%.2d:%.2d:%.2d %.2d-%.2d-%.2d %d",
-            time.Hours, time.Minutes, time.Seconds,
-            date.Month, date.Date, 2000 + date.Year, date.WeekDay
-        );
+            time.Hours,
+            time.Minutes,
+            time.Seconds,
+            date.Month,
+            date.Date,
+            2000 + date.Year,
+            date.WeekDay);
     }
 }
 
