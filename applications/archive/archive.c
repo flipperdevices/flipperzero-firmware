@@ -151,6 +151,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     while(1) {
         char* name_ptr = (char*)string_get_cstr(name);
+
         // TODO:IGOR_CSTR
         result = dir_api->read(&directory, &file_info, name_ptr, MAX_NAME_LEN);
 
@@ -159,7 +160,17 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         }
 
         if(result) {
-            if(directory.error_id == FSE_OK) {
+            uint16_t files_cnt;
+            with_view_model(
+                archive->view_archive_main, (ArchiveViewModel * model) {
+                    files_cnt = files_array_size(model->files);
+
+                    return true;
+                });
+
+            if(files_cnt > MAX_FILES) {
+                break;
+            } else if(directory.error_id == FSE_OK) {
                 if(filter_by_extension(archive, &file_info, name_ptr)) {
                     ArchiveFile_t_init(&item);
                     string_init_set(item.name, name);
@@ -341,69 +352,76 @@ static void archive_delete_file(ArchiveApp* archive, string_t name) {
 static void archive_file_menu_callback(ArchiveApp* archive) {
     furi_assert(archive);
 
+    ArchiveFile_t* selected;
+    uint8_t idx = 0;
+
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
-            ArchiveFile_t* selected = files_array_get(model->files, model->idx);
-
-            switch(model->menu_idx) {
-            case 0:
-                if((selected->type != ArchiveFileTypeFolder &&
-                    selected->type != ArchiveFileTypeUnknown)) {
-                    string_t full_path;
-                    string_init_set(full_path, archive->browser.path);
-                    string_cat(full_path, "/");
-                    string_cat(full_path, selected->name);
-
-                    archive_open_app(
-                        archive, flipper_app_name[selected->type], string_get_cstr(full_path));
-
-                    string_clear(full_path);
-                }
-                break;
-            case 1:
-
-                string_set(archive->browser.name, selected->name);
-                archive_add_to_favourites(archive);
-                archive_close_file_menu(archive);
-                break;
-            case 2:
-                // open rename view
-                archive_enter_text_input(archive);
-                break;
-            case 3:
-                // confirmation?
-                archive_delete_file(archive, selected->name);
-                archive_close_file_menu(archive);
-                break;
-
-            default:
-                archive_close_file_menu(archive);
-                break;
-            }
-            selected = NULL;
+            selected = files_array_get(model->files, model->idx);
+            idx = model->menu_idx;
             return true;
         });
+
+    switch(idx) {
+    case 0:
+        if((selected->type != ArchiveFileTypeFolder && selected->type != ArchiveFileTypeUnknown)) {
+            string_t full_path;
+            string_init_set(full_path, archive->browser.path);
+            string_cat(full_path, "/");
+            string_cat(full_path, selected->name);
+
+            archive_open_app(
+                archive, flipper_app_name[selected->type], string_get_cstr(full_path));
+
+            string_clear(full_path);
+        }
+        break;
+    case 1:
+
+        string_set(archive->browser.name, selected->name);
+        archive_add_to_favourites(archive);
+        archive_close_file_menu(archive);
+        break;
+    case 2:
+        // open rename view
+        archive_enter_text_input(archive);
+        break;
+    case 3:
+        // confirmation?
+        archive_delete_file(archive, selected->name);
+        archive_close_file_menu(archive);
+        break;
+
+    default:
+        archive_close_file_menu(archive);
+        break;
+    }
+    selected = NULL;
 }
 
 static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
     furi_assert(archive);
     furi_assert(archive);
 
-    with_view_model(
-        archive->view_archive_main, (ArchiveViewModel * model) {
-            if(event->type == InputTypeShort) {
-                if(event->key == InputKeyUp) {
-                    model->menu_idx = CLAMP(model->menu_idx - 1, MENU_ITEMS - 1, 0);
-                } else if(event->key == InputKeyDown) {
-                    model->menu_idx = CLAMP(model->menu_idx + 1, MENU_ITEMS - 1, 0);
-                } else if(event->key == InputKeyOk) {
-                    archive_file_menu_callback(archive);
-                } else if(event->key == InputKeyBack) {
-                    archive_close_file_menu(archive);
-                }
-            }
-            return true;
-        });
+    if(event->type == InputTypeShort) {
+        if(event->key == InputKeyUp || event->key == InputKeyDown) {
+            with_view_model(
+                archive->view_archive_main, (ArchiveViewModel * model) {
+                    if(event->key == InputKeyUp) {
+                        model->menu_idx = CLAMP(model->menu_idx - 1, MENU_ITEMS - 1, 0);
+                    } else if(event->key == InputKeyDown) {
+                        model->menu_idx = CLAMP(model->menu_idx + 1, MENU_ITEMS - 1, 0);
+                    }
+                    return true;
+                });
+        }
+
+        if(event->key == InputKeyOk) {
+            archive_file_menu_callback(archive);
+        } else if(event->key == InputKeyBack) {
+            archive_close_file_menu(archive);
+        }
+    }
 }
 
 /* main controls */
@@ -441,38 +459,48 @@ static bool archive_view_input(InputEvent* event, void* context) {
             return true;
         }
     }
-
-    with_view_model(
-        archive->view_archive_main, (ArchiveViewModel * model) {
-            size_t num_elements = files_array_size(model->files) - 1;
-            if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-                if(event->key == InputKeyUp) {
-                    model->idx = CLAMP(model->idx - 1, num_elements, 0);
-                    update_offset(archive);
-                } else if(event->key == InputKeyDown) {
-                    model->idx = CLAMP(model->idx + 1, num_elements, 0);
-                    update_offset(archive);
-                }
-            } else if(event->key == InputKeyOk) {
-                if(files_array_size(model->files) > 0) {
-                    ArchiveFile_t* selected = files_array_get(model->files, model->idx);
-                    string_set(archive->browser.name, selected->name);
-
-                    if(selected->type == ArchiveFileTypeFolder) {
-                        if(event->type == InputTypeShort) {
-                            archive_enter_dir(archive, archive->browser.name);
-                        } else if(event->type == InputTypeLong) {
-                            archive_show_file_menu(archive);
-                        }
-                    } else {
-                        if(event->type == InputTypeShort) {
-                            archive_show_file_menu(archive);
-                        }
+    if(event->key == InputKeyUp || event->key == InputKeyDown) {
+        with_view_model(
+            archive->view_archive_main, (ArchiveViewModel * model) {
+                size_t num_elements = files_array_size(model->files) - 1;
+                if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+                    if(event->key == InputKeyUp) {
+                        model->idx = CLAMP(model->idx - 1, num_elements, 0);
+                    } else if(event->key == InputKeyDown) {
+                        model->idx = CLAMP(model->idx + 1, num_elements, 0);
                     }
                 }
+                return true;
+            });
+        update_offset(archive);
+    }
+
+    if(event->key == InputKeyOk) {
+        ArchiveFile_t* selected;
+        with_view_model(
+            archive->view_archive_main, (ArchiveViewModel * model) {
+                if(files_array_size(model->files) > 0) {
+                    selected = files_array_get(model->files, model->idx);
+                }
+
+                return true;
+            });
+
+        string_set(archive->browser.name, selected->name);
+        if(selected->type == ArchiveFileTypeFolder) {
+            if(event->type == InputTypeShort) {
+                archive_enter_dir(archive, archive->browser.name);
+            } else if(event->type == InputTypeLong) {
+                archive_show_file_menu(archive);
             }
-            return true;
-        });
+        } else {
+            if(event->type == InputTypeShort) {
+                archive_show_file_menu(archive);
+            }
+        }
+    }
+
+    update_offset(archive);
 
     return true;
 }
