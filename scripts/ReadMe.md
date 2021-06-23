@@ -44,8 +44,8 @@ Also OB may be damaged, so we've made couple scripts to check and set option byt
 
 Checking option bytes:
 
-	ob_check.py check
+	ob.py check
 
 Setting option bytes:
 
-	ob_check.py set
+	ob.py set

@@ -42,7 +42,7 @@ class Main:
 
     def loadOB(self):
         self.logger.info(f"Loading Option Bytes data")
-        file_path = os.path.join(os.path.dirname(sys.argv[0]), "ob_check.data")
+        file_path = os.path.join(os.path.dirname(sys.argv[0]), "ob.data")
         file = open(file_path, "r")
         for line in file.readlines():
             k, v, o = line.split(":")
