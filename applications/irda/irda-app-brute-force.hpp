@@ -1,13 +1,13 @@
 #pragma once
 #include "furi/check.h"
 #include <unordered_map>
-#include "irda-app-file-reader.hpp"
-#include "irda-app-receiver.hpp"
+#include "irda-app-file-parser.hpp"
+#include "irda-app-tranceiver.hpp"
 
 
 class IrdaAppBruteForce {
     const char* universal_db_filename;
-    IrdaAppFileReader file_reader;
+    IrdaAppFileParser file_parser;
     File file;
     std::string current_record;
 
@@ -26,7 +26,7 @@ class IrdaAppBruteForce {
 public:
     bool calculate_messages();
     void stop_bruteforce();
-    bool send_next_bruteforce(const IrdaAppSignalReceiver& receiver);
+    bool send_next_bruteforce(const IrdaAppSignalTranceiver& receiver);
     bool start_bruteforce(int index, int& record_amount);
     void add_record(int index, const char* name);
 

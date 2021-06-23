@@ -4,7 +4,6 @@
 #include "irda.h"
 #include <vector>
 #include <string>
-#include "../irda-app-file-reader.hpp"
 #include "../irda-app-brute-force.hpp"
 
 

@@ -31,10 +31,10 @@ void popup_brut_draw_callback(Canvas* canvas, void* context) {
     IrdaAppPopupBrut* popup_brut = (IrdaAppPopupBrut*)context;
     uint8_t x = 0;
     uint8_t width = 64;
-    uint8_t x_max = x + width - 1;   // 64
+    uint8_t x_max = x + width - 1;
     uint8_t y = 36;
     uint8_t height = 59;
-    uint8_t y_max = y + height - 1;   // 95
+    uint8_t y_max = y + height - 1;
 
     canvas_invert_color(canvas);
     canvas_draw_rbox(canvas, x + 1, y + 1, width - 2, height - 2, 3);

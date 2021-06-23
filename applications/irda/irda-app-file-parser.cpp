@@ -1,7 +1,7 @@
-#include "irda-app-file-reader.hpp"
+#include "irda-app-file-parser.hpp"
 
-std::unique_ptr<IrdaAppFileReader::IrdaFileMessage>
-IrdaAppFileReader::read_message(File* file) {
+std::unique_ptr<IrdaAppFileParser::IrdaFileMessage>
+IrdaAppFileParser::read_message(File* file) {
     while(1) {
         auto str = getline(file);
         if(str.empty()) return nullptr;
@@ -12,7 +12,7 @@ IrdaAppFileReader::read_message(File* file) {
     }
 }
 
-std::unique_ptr<IrdaAppFileReader::IrdaFileMessage> IrdaAppFileReader::parse_message(const std::string& str) const {
+std::unique_ptr<IrdaAppFileParser::IrdaFileMessage> IrdaAppFileParser::parse_message(const std::string& str) const {
     char protocol_name[32];
     uint32_t address;
     uint32_t command;
