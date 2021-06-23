@@ -1,10 +1,8 @@
-#include "lf-rfid-view-tune.h"
+#include "lfrfid-view-tune-vm.h"
 #include <callback-connector.h>
 #include <gui/elements.h>
-#include <variant>
-#include <list>
 
-struct LfRfidViewTuneModel {
+struct LfRfidViewTuneVMModel {
     bool dirty;
     bool fine;
     uint32_t ARR;
@@ -12,8 +10,8 @@ struct LfRfidViewTuneModel {
     int pos;
 };
 
-void LfRfidViewTune::view_draw_callback(Canvas* canvas, void* _model) {
-    LfRfidViewTuneModel* model = reinterpret_cast<LfRfidViewTuneModel*>(_model);
+void LfRfidViewTuneVM::view_draw_callback(Canvas* canvas, void* _model) {
+    LfRfidViewTuneVMModel* model = reinterpret_cast<LfRfidViewTuneVMModel*>(_model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
@@ -47,8 +45,8 @@ void LfRfidViewTune::view_draw_callback(Canvas* canvas, void* _model) {
     elements_multiline_text_aligned(canvas, 2, 2, AlignLeft, AlignTop, buffer);
 }
 
-bool LfRfidViewTune::view_input_callback(InputEvent* event, void* context) {
-    LfRfidViewTune* _this = reinterpret_cast<LfRfidViewTune*>(context);
+bool LfRfidViewTuneVM::view_input_callback(InputEvent* event, void* context) {
+    LfRfidViewTuneVM* _this = reinterpret_cast<LfRfidViewTuneVM*>(context);
     bool consumed = false;
 
     // Process key presses only
@@ -80,22 +78,22 @@ bool LfRfidViewTune::view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void LfRfidViewTune::button_up() {
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+void LfRfidViewTuneVM::button_up() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         if(model->pos > 0) model->pos--;
         return true;
     });
 }
 
-void LfRfidViewTune::button_down() {
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+void LfRfidViewTuneVM::button_down() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         if(model->pos < 1) model->pos++;
         return true;
     });
 }
 
-void LfRfidViewTune::button_left() {
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+void LfRfidViewTuneVM::button_left() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         if(model->pos == 0) {
             if(model->fine) {
                 model->ARR -= 1;
@@ -115,8 +113,8 @@ void LfRfidViewTune::button_left() {
     });
 }
 
-void LfRfidViewTune::button_right() {
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+void LfRfidViewTuneVM::button_right() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         if(model->pos == 0) {
             if(model->fine) {
                 model->ARR += 1;
@@ -136,19 +134,19 @@ void LfRfidViewTune::button_right() {
     });
 }
 
-void LfRfidViewTune::button_ok() {
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+void LfRfidViewTuneVM::button_ok() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         model->fine = !model->fine;
         return true;
     });
 }
 
-LfRfidViewTune::LfRfidViewTune() {
+LfRfidViewTuneVM::LfRfidViewTuneVM() {
     view = view_alloc();
     view_set_context(view, this);
-    view_allocate_model(view, ViewModelTypeLocking, sizeof(LfRfidViewTuneModel));
+    view_allocate_model(view, ViewModelTypeLocking, sizeof(LfRfidViewTuneVMModel));
 
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         model->dirty = true;
         model->fine = false;
         model->ARR = 511;
@@ -157,22 +155,34 @@ LfRfidViewTune::LfRfidViewTune() {
         return true;
     });
 
-    view_set_draw_callback(view, cbc::obtain_connector(this, &LfRfidViewTune::view_draw_callback));
+    view_set_draw_callback(
+        view, cbc::obtain_connector(this, &LfRfidViewTuneVM::view_draw_callback));
     view_set_input_callback(
-        view, cbc::obtain_connector(this, &LfRfidViewTune::view_input_callback));
+        view, cbc::obtain_connector(this, &LfRfidViewTuneVM::view_input_callback));
 }
 
-LfRfidViewTune::~LfRfidViewTune() {
+LfRfidViewTuneVM::~LfRfidViewTuneVM() {
     view_free(view);
 }
 
-View* LfRfidViewTune::get_view() {
+View* LfRfidViewTuneVM::get_view() {
     return view;
 }
 
-bool LfRfidViewTune::is_dirty() {
+void LfRfidViewTuneVM::clean() {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
+        model->dirty = true;
+        model->fine = false;
+        model->ARR = 511;
+        model->CCR = 255;
+        model->pos = 0;
+        return true;
+    });
+}
+
+bool LfRfidViewTuneVM::is_dirty() {
     bool result;
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         result = model->dirty;
         model->dirty = false;
         return false;
@@ -181,9 +191,9 @@ bool LfRfidViewTune::is_dirty() {
     return result;
 }
 
-uint32_t LfRfidViewTune::get_ARR() {
+uint32_t LfRfidViewTuneVM::get_ARR() {
     uint32_t result;
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         result = model->ARR;
         return false;
     });
@@ -191,9 +201,9 @@ uint32_t LfRfidViewTune::get_ARR() {
     return result;
 }
 
-uint32_t LfRfidViewTune::get_CCR() {
+uint32_t LfRfidViewTuneVM::get_CCR() {
     uint32_t result;
-    with_view_model_cpp(view, LfRfidViewTuneModel, model, {
+    with_view_model_cpp(view, LfRfidViewTuneVMModel, model, {
         result = model->CCR;
         return false;
     });

@@ -7,7 +7,7 @@
 #include <view-controller.hpp>
 
 #include <view-modules/submenu-vm.h>
-#include "view-modules/lf-rfid-view-tune-vm.h"
+#include "view-modules/lfrfid-view-tune-vm.h"
 
 class LfRfidDebugApp {
 public:

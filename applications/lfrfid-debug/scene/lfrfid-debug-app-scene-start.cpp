@@ -1,4 +1,4 @@
-#include "lf-rfid-debug-app-scene-start.h"
+#include "lfrfid-debug-app-scene-start.h"
 
 typedef enum {
     SubmenuTune,

@@ -1,5 +1,5 @@
 #pragma once
-#include "../lf-rfid-debug-app.h"
+#include "../lfrfid-debug-app.h"
 
 class LfRfidDebugAppSceneStart : public GenericScene<LfRfidDebugApp> {
 public:

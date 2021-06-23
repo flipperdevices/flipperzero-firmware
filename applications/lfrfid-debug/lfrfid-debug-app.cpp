@@ -1,6 +1,6 @@
-#include "lf-rfid-debug-app.h"
-#include "scene/lf-rfid-debug-app-scene-start.h"
-#include "scene/lf-rfid-debug-app-scene-tune.h"
+#include "lfrfid-debug-app.h"
+#include "scene/lfrfid-debug-app-scene-start.h"
+#include "scene/lfrfid-debug-app-scene-tune.h"
 
 LfRfidDebugApp::LfRfidDebugApp()
     : scene_controller{this} {
