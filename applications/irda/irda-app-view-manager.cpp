@@ -1,4 +1,5 @@
 #include "furi.h"
+#include "gui/modules/button_panel.h"
 #include "irda-app.hpp"
 #include <callback-connector.h>
 
@@ -17,8 +18,8 @@ IrdaAppViewManager::IrdaAppViewManager() {
     popup = popup_alloc();
     dialog_ex = dialog_ex_alloc();
     text_input = text_input_alloc();
-    button_panel = button_panel_alloc(2, 3);
-    popup_brut = popup_brut_alloc();  // number of protocols.
+    button_panel = button_panel_alloc();
+    popup_brut = popup_brut_alloc();
 
     add_view(ViewType::ButtonPanel, button_panel_get_view(button_panel));
     add_view(ViewType::ButtonMenu, button_menu_get_view(button_menu));
@@ -99,7 +100,7 @@ osMessageQueueId_t IrdaAppViewManager::get_event_queue() {
 }
 
 void IrdaAppViewManager::receive_event(IrdaAppEvent* event) {
-    if(osMessageQueueGet(event_queue, event, NULL, 150) != osOK) {
+    if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
         event->type = IrdaAppEvent::Type::Tick;
     }
 }

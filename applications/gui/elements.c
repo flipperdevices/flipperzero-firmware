@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdint.h>
 
-// 56 x 9
 void elements_progress_bar(
     Canvas* canvas,
     uint8_t x,
@@ -23,21 +22,6 @@ void elements_progress_bar(
     furi_assert(width > marker_width);
 
     uint8_t progress_length = ((float) progress / total) * (width - marker_width - 2);
-//    canvas_draw_rframe(canvas, x, y, width, height, 3);
-//    canvas_draw_line(canvas, x, y, x + width, y);
-//    canvas_draw_line(canvas, x + width, y, x + width, y + height);
-//    canvas_draw_line(canvas, x + width, y + height, x, y + height);
-//    canvas_draw_line(canvas, x, y + height, x, y);
-
-//    canvas_draw_line(canvas, x + 3, y, x + width - 3, y);
-//    canvas_draw_line(canvas, x + width - 3, y, x + width, y + 3);
-//    canvas_draw_line(canvas, x + width, y + 3, x + width, y + height - 3);
-
-///    canvas_draw_line(canvas, x + 3, y, x + width - 3, y);
-///    canvas_draw_line(canvas, x + width, y + 3, x + width, y + height - 3);
-///    canvas_draw_line(canvas, x + width - 3, y + height, x + 3, y + height);
-///    canvas_draw_line(canvas, x, y + height - 3, x + 3, y);
-
 
     // rframe doesnt work if (radius * 2) > any rect side, so write manually
     uint8_t x_max = x + width - 1;
@@ -50,8 +34,6 @@ void elements_progress_bar(
     canvas_draw_line(canvas, x + 3, y_max, x, y_max - 3);
     canvas_draw_line(canvas, x, y_max - 3, x, y + 3);
     canvas_draw_line(canvas, x, y + 3, x + 3, y);
-
-
 
     canvas_draw_rbox(canvas, x + 1, y + 1, marker_width + progress_length, height - 2, 3);
     canvas_invert_color(canvas);

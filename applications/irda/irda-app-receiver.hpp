@@ -1,3 +1,4 @@
+#pragma once
 #include <furi.h>
 #include <irda.h>
 
@@ -8,7 +9,7 @@ public:
     void capture_once_start(osMessageQueueId_t event_queue);
     void capture_stop(void);
     IrdaMessage* get_last_message(void);
-    void send_message(const IrdaMessage* message);
+    void send_message(const IrdaMessage* message) const;
 
 private:
     osMessageQueueId_t event_queue;

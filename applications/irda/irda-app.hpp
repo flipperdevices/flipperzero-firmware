@@ -2,6 +2,7 @@
 #include <map>
 #include <irda.h>
 #include <furi.h>
+#include "irda/scene/irda-app-scene.hpp"
 #include "irda-app-event.hpp"
 #include "scene/irda-app-scene.hpp"
 #include "irda-app-view-manager.hpp"
@@ -113,6 +114,7 @@ private:
         {Scene::Start, new IrdaAppSceneStart()},
         {Scene::Universal, new IrdaAppSceneUniversal()},
         {Scene::UniversalTV, new IrdaAppSceneUniversalTV()},
+//        {Scene::UniversalAudio, new IrdaAppSceneUniversalAudio()},
         {Scene::Learn, new IrdaAppSceneLearn()},
         {Scene::LearnSuccess, new IrdaAppSceneLearnSuccess()},
         {Scene::LearnEnterName, new IrdaAppSceneLearnEnterName()},

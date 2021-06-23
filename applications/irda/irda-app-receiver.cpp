@@ -41,6 +41,6 @@ IrdaMessage* IrdaAppSignalReceiver::get_last_message(void) {
     return &message;
 }
 
-void IrdaAppSignalReceiver::send_message(const IrdaMessage* message) {
+void IrdaAppSignalReceiver::send_message(const IrdaMessage* message) const {
     irda_send(message, 1);
 }

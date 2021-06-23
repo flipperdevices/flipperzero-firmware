@@ -56,6 +56,7 @@ typedef struct {
     void* draw_context;
 } ButtonPanelModel;
 
+static ButtonItem** button_panel_get_item(ButtonPanelModel* model, size_t x, size_t y);
 static void button_panel_process_up(ButtonPanel* button_panel);
 static void button_panel_process_down(ButtonPanel* button_panel);
 static void button_panel_process_left(ButtonPanel* button_panel);
@@ -64,9 +65,7 @@ static void button_panel_process_ok(ButtonPanel* button_panel);
 static void button_panel_view_draw_callback(Canvas* canvas, void* _model);
 static bool button_panel_view_input_callback(InputEvent* event, void* context);
 
-ButtonPanel* button_panel_alloc(size_t reserve_x, size_t reserve_y) {
-    furi_check(reserve_x > 0);
-    furi_check(reserve_y > 0);
+ButtonPanel* button_panel_alloc() {
     ButtonPanel* button_panel = furi_alloc(sizeof(ButtonPanel));
     button_panel->view = view_alloc();
     view_set_orientation(button_panel->view, ViewOrientationVertical);
@@ -78,12 +77,27 @@ ButtonPanel* button_panel_alloc(size_t reserve_x, size_t reserve_y) {
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-            model->reserve_x = reserve_x;
-            model->reserve_y = reserve_y;
+            model->reserve_x = 0;
+            model->reserve_y = 0;
             model->selected_item_x = 0;
             model->selected_item_y = 0;
             model->draw_callback = NULL;
             ButtonMatrix_init(model->button_matrix);
+            LabelList_init(model->labels);
+            return true;
+        });
+
+    return button_panel;
+}
+
+void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t reserve_y) {
+    furi_check(reserve_x > 0);
+    furi_check(reserve_y > 0);
+
+    with_view_model(
+        button_panel->view, (ButtonPanelModel * model) {
+            model->reserve_x = reserve_x;
+            model->reserve_y = reserve_y;
             ButtonMatrix_reserve(model->button_matrix, model->reserve_y);
             for (size_t i = 0; i > model->reserve_y; ++i) {
                 ButtonArray_t* array = ButtonMatrix_get(model->button_matrix, i);
@@ -94,11 +108,44 @@ ButtonPanel* button_panel_alloc(size_t reserve_x, size_t reserve_y) {
             LabelList_init(model->labels);
             return true;
         });
+}
 
-    return button_panel;
+void button_panel_free(ButtonPanel* button_panel) {
+    furi_assert(button_panel);
+
+    button_panel_clean(button_panel);
+
+    with_view_model(
+        button_panel->view, (ButtonPanelModel * model) {
+            LabelList_clear(model->labels);
+            ButtonMatrix_clear(model->button_matrix);
+            return true;
+        });
+
+    view_free(button_panel->view);
+    free(button_panel);
+}
+
+void button_panel_clean(ButtonPanel* button_panel) {
+    furi_assert(button_panel);
+
+    with_view_model(
+        button_panel->view, (ButtonPanelModel * model) {
+            for(size_t x = 0; x < model->reserve_x; ++x) {
+                for(size_t y = 0; y < model->reserve_y; ++y) {
+                    ButtonItem** button_item = button_panel_get_item(model, x, y);
+                    free(*button_item);
+                    *button_item = NULL;
+
+                }
+            }
+            return true;
+        });
 }
 
 static ButtonItem** button_panel_get_item(ButtonPanelModel* model, size_t x, size_t y) {
+    furi_assert(model);
+
     furi_check(x < model->reserve_x);
     furi_check(y < model->reserve_y);
     ButtonArray_t* button_array = ButtonMatrix_get_at(model->button_matrix, x);
@@ -117,6 +164,7 @@ void button_panel_add_item(
     IconName icon_name_selected,
     ButtonItemCallback callback,
     void* callback_context) {
+    furi_assert(button_panel);
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
@@ -134,27 +182,6 @@ void button_panel_add_item(
             return true;
         });
 }
-
-void button_panel_free(ButtonPanel* button_panel) {
-    button_panel_clean(button_panel);
-    free(button_panel);
-}
-
-void button_panel_clean(ButtonPanel* button_panel) {
-    with_view_model(
-        button_panel->view, (ButtonPanelModel * model) {
-            for(size_t x = 0; x < model->reserve_x; ++x) {
-                for(size_t y = 0; y < model->reserve_y; ++y) {
-                    ButtonItem** button_item = button_panel_get_item(model, x, y);
-                    free(*button_item);
-                    *button_item = NULL;
-
-                }
-            }
-            return true;
-        });
-}
-
 
 View* button_panel_get_view(ButtonPanel* button_panel) {
     furi_assert(button_panel);
@@ -325,7 +352,6 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     furi_assert(button_panel);
     bool consumed = false;
 
-    // model.... ?????
     if (button_panel->input_callback) {
         consumed = button_panel->input_callback(event, button_panel->input_context);
     } else if(event->type == InputTypeShort) {
@@ -376,7 +402,7 @@ void button_panel_add_label(ButtonPanel* button_panel,
         });
 }
 
-void button_panel_set_draw_callback(ButtonPanel* button_panel, ButtonPanelDrawCallback callback, void* context) {
+void button_panel_set_popup_draw_callback(ButtonPanel* button_panel, ButtonPanelDrawCallback callback, void* context) {
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             model->draw_callback = callback;
@@ -385,13 +411,8 @@ void button_panel_set_draw_callback(ButtonPanel* button_panel, ButtonPanelDrawCa
         });
 }
 
-void button_panel_set_input_callback(ButtonPanel* button_panel, ButtonPanelInputCallback callback, void* context) {
-    with_view_model(
-        button_panel->view, (ButtonPanelModel * model) {
-            // with_view_model for lock
-            button_panel->input_callback = callback;
-            button_panel->input_context = context;
-            return true;
-        });
+void button_panel_set_popup_input_callback(ButtonPanel* button_panel, ButtonPanelInputCallback callback, void* context) {
+    button_panel->input_context = context;
+    button_panel->input_callback = callback;
 }
 
