@@ -6,12 +6,12 @@
 const char* iButtonApp::app_folder = "ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
 
-void iButtonApp::run(void* p) {
+void iButtonApp::run(void* argc) {
     iButtonEvent event;
     bool consumed;
     bool exit = false;
 
-    if(p && load_key((const char*)p)) {
+    if(argc && load_key((const char*)argc)) {
         current_scene = Scene::SceneEmulate;
     }
 
