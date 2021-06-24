@@ -1,4 +1,5 @@
 #include "app-loader.h"
+#include "api-hal-delay.h"
 
 #define APP_LOADER_TAG "app_loader"
 
@@ -7,6 +8,7 @@ typedef struct {
     const FlipperApplication* current_app;
     string_t args;
     Cli* cli;
+    size_t free_heap_size;
 } AppLoaderState;
 
 static AppLoaderState state;
@@ -28,6 +30,7 @@ static void app_loader_menu_callback(void* _ctx) {
     FURI_LOG_I(APP_LOADER_TAG, "Starting furi application: %s", state.current_app->name);
     furi_thread_set_name(state.thread, flipper_app->name);
     furi_thread_set_stack_size(state.thread, flipper_app->stack_size);
+    furi_thread_set_context(state.thread, NULL);
     furi_thread_set_callback(state.thread, flipper_app->app);
     furi_thread_start(state.thread);
 }
@@ -87,9 +90,31 @@ bool app_loader_start(const char* name, const char* args) {
     return furi_thread_start(state.thread);
 }
 
-void app_loader_thread_state_callback(FuriThreadState state, void* context) {
+void app_loader_thread_state_callback(FuriThreadState thread_state, void* context) {
     furi_assert(context);
-    if(state == FuriThreadStateStopped) {
+
+    AppLoaderState* state = context;
+
+    if(thread_state == FuriThreadStateRunning) {
+        state->free_heap_size = xPortGetFreeHeapSize();
+    } else if(thread_state == FuriThreadStateStopped) {
+        /*
+         * Current Leak Sanitizer assumes that memory is allocated and freed
+         * inside one thread. Timers are allocated in one task, but freed in
+         * Timer-Task thread, and xTimerDelete() just put command to queue.
+         * To avoid some bad cases there are few fixes:
+         * 1) delay for Timer to process commands
+         * 2) there are 'heap diff' which shows difference in heap before task
+         * started and after task completed. In process of leakage monitoring
+         * both values should be taken into account.
+         */
+        delay(20);
+        int heap_diff = state->free_heap_size - xPortGetFreeHeapSize();
+        FURI_LOG_I(
+            APP_LOADER_TAG,
+            "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
+            heap_diff,
+            furi_thread_get_heap_size(state->thread));
         api_hal_power_insomnia_exit();
     }
 }
@@ -97,6 +122,7 @@ void app_loader_thread_state_callback(FuriThreadState state, void* context) {
 int32_t app_loader(void* p) {
     FURI_LOG_I(APP_LOADER_TAG, "Starting");
     state.thread = furi_thread_alloc();
+    furi_thread_enable_heap_trace(state.thread);
     furi_thread_set_state_context(state.thread, &state);
     furi_thread_set_state_callback(state.thread, app_loader_thread_state_callback);
     string_init(state.args);

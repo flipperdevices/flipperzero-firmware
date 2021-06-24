@@ -39,12 +39,15 @@ int32_t app_accessor(void* p);
 int32_t internal_storage_task(void* p);
 int32_t app_archive(void* p);
 int32_t notification_app(void* p);
+int32_t scened_app(void* p);
 
 // On system start hooks declaration
 void irda_cli_init();
 void nfc_cli_init();
 void subghz_cli_init();
 void bt_cli_init();
+void lfrfid_cli_init();
+void ibutton_cli_init();
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
@@ -211,6 +214,12 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef APP_SUBGHZ
     subghz_cli_init,
 #endif
+#ifdef APP_LF_RFID
+    lfrfid_cli_init,
+#endif
+#ifdef APP_IBUTTON
+    ibutton_cli_init,
+#endif
 #ifdef SRV_BT
     bt_cli_init,
 #endif
@@ -288,6 +297,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
      .name = "Vertical Screen",
      .stack_size = 1024,
      .icon = A_Plugins_14},
+#endif
+
+#ifdef APP_SCENED
+    {.app = scened_app, .name = "Templated Scene", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 };
 
