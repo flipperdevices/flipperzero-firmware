@@ -26,6 +26,7 @@ typedef enum {
 typedef struct {
     string_t name;
     ArchiveFileTypeEnum type;
+    bool fav;
 } ArchiveFile_t;
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {

@@ -78,6 +78,23 @@ static inline const char* get_tab_ext(ArchiveTabEnum tab) {
     }
 }
 
+static inline const char* get_default_path(ArchiveFileTypeEnum type) {
+    switch(type) {
+    case ArchiveFileTypeIButton:
+        return tab_default_paths[ArchiveTabIButton];
+    case ArchiveFileTypeNFC:
+        return tab_default_paths[ArchiveTabNFC];
+    case ArchiveFileTypeSubOne:
+        return tab_default_paths[ArchiveTabSubOne];
+    case ArchiveFileTypeLFRFID:
+        return tab_default_paths[ArchiveTabLFRFID];
+    case ArchiveFileTypeIrda:
+        return tab_default_paths[ArchiveTabIrda];
+    default:
+        return false;
+    }
+}
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,

@@ -32,7 +32,7 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
         string_set_str(menu[0], "---");
         string_set_str(menu[1], "---");
         string_set_str(menu[2], "---");
-    } else if(model->tab_idx == 0) {
+    } else if(model->tab_idx == 0 || selected->fav) {
         string_set_str(menu[1], "Unpin");
     }
 

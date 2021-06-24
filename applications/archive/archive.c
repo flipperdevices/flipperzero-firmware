@@ -2,6 +2,21 @@
 
 static bool archive_get_filenames(ArchiveApp* archive);
 
+static bool is_favourite(ArchiveApp* archive, ArchiveFile_t* file) {
+    FS_Common_Api* common_api = &archive->fs_api->common;
+    FileInfo file_info;
+    FS_Error fr;
+    string_t path;
+
+    string_init_set(path, "favourites/");
+    string_cat(path, file->name);
+
+    fr = common_api->info(string_get_cstr(path), &file_info, NULL, 0);
+    FURI_LOG_I("FAV", "%d", fr);
+
+    return fr == 0 || fr == 2;
+}
+
 static void update_offset(ArchiveApp* archive) {
     furi_assert(archive);
 
@@ -322,8 +337,12 @@ static void archive_show_file_menu(ArchiveApp* archive) {
 
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
+            ArchiveFile_t* selected;
+            selected = files_array_get(model->files, model->idx);
             model->menu = true;
             model->menu_idx = 0;
+            selected->fav = is_favourite(archive, selected);
+
             return true;
         });
 }
@@ -348,29 +367,43 @@ static void archive_open_app(ArchiveApp* archive, const char* app_name, const ch
     app_loader_start(app_name, args);
 }
 
-static void archive_delete_file(ArchiveApp* archive, string_t name) {
+static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool fav, bool orig) {
     furi_assert(archive);
-    furi_assert(name);
+    furi_assert(file);
 
     FS_Common_Api* common_api = &archive->fs_api->common;
-
     string_t path;
-    string_init_set(path, archive->browser.path);
-    string_cat(path, "/");
-    string_cat(path, name);
+    string_init(path);
 
-    common_api->remove(string_get_cstr(path));
+    if(!fav && !orig) {
+        string_set(path, archive->browser.path);
+        string_cat(path, "/");
+        string_cat(path, file->name);
+        common_api->remove(string_get_cstr(path));
+
+    } else {
+        string_set(path, "favourites/");
+        string_cat(path, file->name);
+        common_api->remove(string_get_cstr(path));
+
+        if(orig) {
+            string_set_str(path, get_default_path(file->type));
+            string_cat(path, "/");
+            string_cat(path, file->name);
+            common_api->remove(string_get_cstr(path));
+        }
+    }
+
     string_clear(path);
-
     archive_get_filenames(archive);
-
-    update_offset(archive);
 
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
             model->idx = CLAMP(model->idx, files_array_size(model->files) - 1, 0);
             return true;
         });
+
+    update_offset(archive);
 }
 
 static void archive_file_menu_callback(ArchiveApp* archive) {
@@ -402,8 +435,13 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 1:
         if(is_known_app(selected->type)) {
-            string_set(archive->browser.name, selected->name);
-            archive_add_to_favourites(archive);
+            if(!is_favourite(archive, selected)) {
+                string_set(archive->browser.name, selected->name);
+                archive_add_to_favourites(archive);
+            } else {
+                // delete from favourites
+                archive_delete_file(archive, selected, true, false);
+            }
             archive_close_file_menu(archive);
         }
         break;
@@ -415,8 +453,15 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 3:
         // confirmation?
-        archive_delete_file(archive, selected->name);
+        if(is_favourite(archive, selected)) {
+            //delete both fav & original
+            archive_delete_file(archive, selected, true, true);
+        } else {
+            archive_delete_file(archive, selected, false, false);
+        }
+
         archive_close_file_menu(archive);
+
         break;
 
     default:
