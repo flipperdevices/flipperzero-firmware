@@ -1,6 +1,5 @@
 #include "app-loader.h"
 #include "api-hal-delay.h"
-#include "furi/thread.h"
 
 #define APP_LOADER_TAG "app_loader"
 
@@ -9,6 +8,7 @@ typedef struct {
     const FlipperApplication* current_app;
     string_t args;
     Cli* cli;
+    size_t free_heap_size;
 } AppLoaderState;
 
 static AppLoaderState state;
@@ -95,7 +95,7 @@ void app_loader_thread_state_callback(FuriThreadState thread_state, void* contex
     AppLoaderState* state = context;
 
     if(thread_state == FuriThreadStateRunning) {
-        furi_thread_save_free_heap_size(state->thread);
+        state->free_heap_size = xPortGetFreeHeapSize();
     } else if(thread_state == FuriThreadStateStopped) {
         /*
          * Current Leak Sanitizer assumes that memory is allocated and freed
@@ -108,7 +108,7 @@ void app_loader_thread_state_callback(FuriThreadState thread_state, void* contex
          * both values should be taken into account.
          */
         delay(20);
-        int heap_diff = furi_thread_get_free_heap_size(state->thread) - xPortGetFreeHeapSize();
+        int heap_diff = state->free_heap_size - xPortGetFreeHeapSize();
         FURI_LOG_I(
             APP_LOADER_TAG,
             "Application thread stopped, heap leaked: %d, heap diff: %d",
