@@ -15,8 +15,8 @@
 #include "applications.h"
 
 #define MAX_DEPTH 32
-#define MAX_NAME_LEN 255
-#define MAX_FILES 100
+#define MAX_FILES 100 //temp
+#define MAX_FILE_SIZE 128
 
 typedef enum {
     ArchiveViewMain,
@@ -95,7 +95,7 @@ typedef struct {
     ArchiveTabEnum tab_id;
     string_t name;
     string_t path;
-    string_t text_input_buffer;
+    char text_input_buffer[MAX_NAME_LEN];
 
     uint8_t depth;
     uint16_t last_idx[MAX_DEPTH];
