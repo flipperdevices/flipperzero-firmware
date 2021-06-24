@@ -9,10 +9,13 @@ static void update_offset(ArchiveApp* archive) {
         archive->view_archive_main, (ArchiveViewModel * model) {
             size_t array_size = files_array_size(model->files);
             uint16_t bounds = array_size > 3 ? 2 : array_size;
-            if(model->list_offset < model->idx - bounds) {
-                model->list_offset = CLAMP(model->list_offset + 1, array_size - (bounds + 2), 0);
+
+            if(array_size > 3 && model->idx >= array_size - 1) {
+                model->list_offset = model->idx - 3;
+            } else if(model->list_offset < model->idx - bounds) {
+                model->list_offset = CLAMP(model->list_offset + 1, array_size - bounds, 0);
             } else if(model->list_offset > model->idx - bounds) {
-                model->list_offset = CLAMP(model->idx - 1, array_size - (bounds), 0);
+                model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
             }
             return true;
         });
@@ -33,9 +36,9 @@ static void archive_update_last_idx(ArchiveApp* archive) {
 static void archive_switch_dir(ArchiveApp* archive, const char* path) {
     furi_assert(archive);
     furi_assert(path);
-
     string_set(archive->browser.path, path);
     archive_get_filenames(archive);
+    update_offset(archive);
 }
 
 static void archive_switch_tab(ArchiveApp* archive) {
@@ -45,22 +48,22 @@ static void archive_switch_tab(ArchiveApp* archive) {
         archive->view_archive_main, (ArchiveViewModel * model) {
             model->tab_idx = archive->browser.tab_id;
             model->idx = 0;
+
             return true;
         });
 
     archive->browser.depth = 0;
     archive_switch_dir(archive, tab_default_paths[archive->browser.tab_id]);
-
-    update_offset(archive);
 }
 
 static void archive_leave_dir(ArchiveApp* archive) {
     furi_assert(archive);
 
-    size_t last_char =
-        string_search_rchar(archive->browser.path, '/', string_size(archive->browser.path));
-    if(last_char) {
-        string_right(archive->browser.path, last_char);
+    char* last_char_ptr = strrchr(string_get_cstr(archive->browser.path), '/');
+
+    if(last_char_ptr) {
+        size_t pos = last_char_ptr - string_get_cstr(archive->browser.path);
+        string_left(archive->browser.path, pos);
     }
 
     archive->browser.depth = CLAMP(archive->browser.depth - 1, MAX_DEPTH, 0);
@@ -68,12 +71,13 @@ static void archive_leave_dir(ArchiveApp* archive) {
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
             model->idx = archive->browser.last_idx[archive->browser.depth];
+            model->list_offset =
+                model->idx -
+                (files_array_size(model->files) > 3 ? 3 : files_array_size(model->files));
             return true;
         });
 
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
-
-    update_offset(archive);
 }
 
 static void archive_enter_dir(ArchiveApp* archive, string_t name) {
@@ -87,8 +91,6 @@ static void archive_enter_dir(ArchiveApp* archive, string_t name) {
     string_cat(archive->browser.path, archive->browser.name);
 
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
-
-    update_offset(archive);
 }
 
 static bool filter_by_extension(ArchiveApp* archive, FileInfo* file_info, const char* name) {
@@ -217,9 +219,9 @@ static void archive_add_to_favourites(ArchiveApp* archive) {
     File dst;
 
     bool fr;
-    uint16_t buffer[64]; /* File copy buffer */
-    uint16_t bw = 0; /* File write count */
-    uint16_t br = 0; /* File read count */
+    uint16_t buffer[MAX_FILE_SIZE];
+    uint16_t bw = 0;
+    uint16_t br = 0;
 
     string_t buffer_src;
     string_t buffer_dst;
@@ -286,7 +288,6 @@ static void archive_text_input_callback(void* context) {
 
     string_clear(buffer_src);
     string_clear(buffer_dst);
-    view_commit_model(archive->view_archive_main, true);
 
     archive_get_filenames(archive);
 }
@@ -492,14 +493,15 @@ static bool archive_view_input(InputEvent* event, void* context) {
     if(event->key == InputKeyUp || event->key == InputKeyDown) {
         with_view_model(
             archive->view_archive_main, (ArchiveViewModel * model) {
-                size_t num_elements = files_array_size(model->files) - 1;
+                uint16_t num_elements = (uint16_t)files_array_size(model->files);
                 if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
                     if(event->key == InputKeyUp) {
-                        model->idx = CLAMP(model->idx - 1, num_elements, 0);
+                        model->idx = ((model->idx - 1) + num_elements) % num_elements;
                     } else if(event->key == InputKeyDown) {
-                        model->idx = CLAMP(model->idx + 1, num_elements, 0);
+                        model->idx = (model->idx + 1) % num_elements;
                     }
                 }
+
                 return true;
             });
         update_offset(archive);

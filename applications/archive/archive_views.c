@@ -33,7 +33,7 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
         string_set_str(menu[1], "---");
         string_set_str(menu[2], "---");
     } else if(model->tab_idx == 0) {
-        string_set_str(menu[1], "Move");
+        string_set_str(menu[1], "Unpin");
     }
 
     for(size_t i = 0; i < MENU_ITEMS; i++) {
@@ -83,7 +83,7 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
         size_t idx = CLAMP(i + model->list_offset, array_size, 0);
         ArchiveFile_t* file = files_array_get(model->files, CLAMP(idx, array_size - 1, 0));
 
-        strlcpy(cstr_buff, string_get_cstr(file->name), string_size(file->name));
+        strlcpy(cstr_buff, string_get_cstr(file->name), string_size(file->name) + 1);
         if(is_known_app(file->type)) archive_trim_file_ext(cstr_buff);
         string_set_str(str_buff, cstr_buff);
 

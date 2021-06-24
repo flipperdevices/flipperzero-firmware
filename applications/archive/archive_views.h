@@ -6,7 +6,7 @@
 #include <furi.h>
 #include <filesystem-api.h>
 
-#define MAX_LEN_PX 98
+#define MAX_LEN_PX 100
 #define MAX_NAME_LEN 255
 
 #define FRAME_HEIGHT 12
