@@ -48,6 +48,7 @@ iButtonApp::~iButtonApp() {
         delete it->second;
         scenes.erase(it);
     }
+    delete key_worker;
 
     api_hal_power_insomnia_exit();
 }
