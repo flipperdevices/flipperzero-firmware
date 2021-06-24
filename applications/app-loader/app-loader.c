@@ -1,4 +1,6 @@
 #include "app-loader.h"
+#include "api-hal-delay.h"
+#include "furi/thread.h"
 
 #define APP_LOADER_TAG "app_loader"
 
@@ -89,11 +91,29 @@ bool app_loader_start(const char* name, const char* args) {
 
 void app_loader_thread_state_callback(FuriThreadState thread_state, void* context) {
     furi_assert(context);
-    if(thread_state == FuriThreadStateStopped) {
+
+    AppLoaderState* state = context;
+
+    if(thread_state == FuriThreadStateRunning) {
+        furi_thread_save_free_heap_size(state->thread);
+    } else if(thread_state == FuriThreadStateStopped) {
+        /*
+         * Current Leak Sanitizer assumes that memory is allocated and freed
+         * inside one thread. Timers are allocated in one task, but freed in
+         * Timer-Task thread, and xTimerDelete() just put command to queue.
+         * To avoid some bad cases there are few fixes:
+         * 1) delay for Timer to process commands
+         * 2) there are 'heap diff' which shows difference in heap before task
+         * started and after task completed. In process of leakage monitoring
+         * both values should be taken into account.
+         */
+        delay(20);
+        int heap_diff = furi_thread_get_free_heap_size(state->thread) - xPortGetFreeHeapSize();
         FURI_LOG_I(
             APP_LOADER_TAG,
-            "Application thread stopped, heap leaked: %d",
-            furi_thread_get_heap_size(state.thread));
+            "Application thread stopped, heap leaked: %d, heap diff: %d",
+            furi_thread_get_heap_size(state->thread),
+            heap_diff);
         api_hal_power_insomnia_exit();
     }
 }

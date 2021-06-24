@@ -124,6 +124,17 @@ void furi_thread_disable_heap_trace(FuriThread* thread);
  */
 size_t furi_thread_get_heap_size(FuriThread* thread);
 
+/** Remember free heap size.
+ * @param thread - FuriThread instance
+ */
+void furi_thread_save_free_heap_size(FuriThread* thread);
+
+/** Get free heap size which previously was saved
+ * @param thread - FuriThread instance
+ * @return saved free heap size
+ */
+size_t furi_thread_get_free_heap_size(FuriThread* thread);
+
 #ifdef __cplusplus
 }
 #endif

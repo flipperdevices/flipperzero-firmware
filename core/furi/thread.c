@@ -2,6 +2,7 @@
 #include "memmgr.h"
 #include "memmgr_heap.h"
 #include "check.h"
+#include "FreeRTOS.h"
 
 #include <m-string.h>
 
@@ -20,6 +21,7 @@ struct FuriThread {
 
     bool heap_trace_enabled;
     size_t heap_size;
+    size_t free_heap_size;
 };
 
 void furi_thread_set_state(FuriThread* thread, FuriThreadState state) {
@@ -155,6 +157,16 @@ void furi_thread_disable_heap_trace(FuriThread* thread) {
     furi_assert(thread->state == FuriThreadStateStopped);
     furi_assert(thread->heap_trace_enabled == true);
     thread->heap_trace_enabled = false;
+}
+
+void furi_thread_save_free_heap_size(FuriThread* thread) {
+    furi_assert(thread);
+    thread->free_heap_size = xPortGetFreeHeapSize();
+}
+
+size_t furi_thread_get_free_heap_size(FuriThread* thread) {
+    furi_assert(thread);
+    return thread->free_heap_size;
 }
 
 size_t furi_thread_get_heap_size(FuriThread* thread) {
