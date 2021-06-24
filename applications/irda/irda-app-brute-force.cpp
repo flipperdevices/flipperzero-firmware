@@ -7,8 +7,9 @@ void IrdaAppBruteForce::add_record(int index, const char* name) {
 
 bool IrdaAppBruteForce::calculate_messages() {
     bool fs_res = false;
-    fs_res = file_parser.get_fs_api().file.open(&file, universal_db_filename, FSAM_READ, FSOM_OPEN_EXISTING);
-    if (!fs_res) {
+    fs_res = file_parser.get_fs_api().file.open(
+        &file, universal_db_filename, FSAM_READ, FSOM_OPEN_EXISTING);
+    if(!fs_res) {
         file_parser.get_sd_api().show_error(file_parser.get_sd_api().context, "Can't open file");
         return false;
     }
@@ -16,9 +17,9 @@ bool IrdaAppBruteForce::calculate_messages() {
     file_parser.reset();
     while(1) {
         auto message = file_parser.read_message(&file);
-        if (!message) break;
+        if(!message) break;
         auto element = records.find(message->name);
-        if (element != records.cend()) {
+        if(element != records.cend()) {
             ++element->second.amount;
         }
     }
@@ -29,7 +30,7 @@ bool IrdaAppBruteForce::calculate_messages() {
 }
 
 void IrdaAppBruteForce::stop_bruteforce() {
-    if (current_record.size()) {
+    if(current_record.size()) {
         file_parser.get_fs_api().file.close(&file);
         current_record.clear();
     }
@@ -43,9 +44,9 @@ bool IrdaAppBruteForce::send_next_bruteforce(const IrdaAppSignalTranceiver& tran
 
     do {
         message = file_parser.read_message(&file);
-    } while (message && current_record.compare(message->name));
+    } while(message && current_record.compare(message->name));
 
-    if (message) {
+    if(message) {
         tranceiver.send_message(&message->message);
     }
     return !!message;
@@ -53,23 +54,24 @@ bool IrdaAppBruteForce::send_next_bruteforce(const IrdaAppSignalTranceiver& tran
 
 bool IrdaAppBruteForce::start_bruteforce(int index, int& record_amount) {
     file_parser.reset();
-    for (const auto& it : records) {
-        if (it.second.index == index) {
+    for(const auto& it : records) {
+        if(it.second.index == index) {
             record_amount = it.second.amount;
             current_record = it.first;
             break;
         }
     }
 
-    if (record_amount) {
-        bool fs_res = file_parser.get_fs_api().file.open(&file, universal_db_filename, FSAM_READ, FSOM_OPEN_EXISTING);
-        if (fs_res) {
+    if(record_amount) {
+        bool fs_res = file_parser.get_fs_api().file.open(
+            &file, universal_db_filename, FSAM_READ, FSOM_OPEN_EXISTING);
+        if(fs_res) {
             return true;
         } else {
-            file_parser.get_sd_api().show_error(file_parser.get_sd_api().context, "Can't open file");
+            file_parser.get_sd_api().show_error(
+                file_parser.get_sd_api().context, "Can't open file");
         }
     }
 
     return false;
 }
-

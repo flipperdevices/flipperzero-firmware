@@ -21,7 +21,7 @@ void elements_progress_bar(
     uint8_t marker_width = 7;
     furi_assert(width > marker_width);
 
-    uint8_t progress_length = ((float) progress / total) * (width - marker_width - 2);
+    uint8_t progress_length = ((float)progress / total) * (width - marker_width - 2);
 
     // rframe doesnt work if (radius * 2) > any rect side, so write manually
     uint8_t x_max = x + width - 1;

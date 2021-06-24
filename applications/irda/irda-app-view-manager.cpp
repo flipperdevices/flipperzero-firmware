@@ -3,7 +3,6 @@
 #include "irda-app.hpp"
 #include <callback-connector.h>
 
-
 IrdaAppViewManager::IrdaAppViewManager() {
     event_queue = osMessageQueueNew(10, sizeof(IrdaAppEvent), NULL);
 

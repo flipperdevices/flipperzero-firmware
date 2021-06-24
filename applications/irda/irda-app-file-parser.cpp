@@ -1,25 +1,29 @@
 #include "irda-app-file-parser.hpp"
 
-std::unique_ptr<IrdaAppFileParser::IrdaFileMessage>
-IrdaAppFileParser::read_message(File* file) {
+std::unique_ptr<IrdaAppFileParser::IrdaFileMessage> IrdaAppFileParser::read_message(File* file) {
     while(1) {
         auto str = getline(file);
         if(str.empty()) return nullptr;
 
         auto message = parse_message(str);
-        if(message)
-            return message;
+        if(message) return message;
     }
 }
 
-std::unique_ptr<IrdaAppFileParser::IrdaFileMessage> IrdaAppFileParser::parse_message(const std::string& str) const {
+std::unique_ptr<IrdaAppFileParser::IrdaFileMessage>
+IrdaAppFileParser::parse_message(const std::string& str) const {
     char protocol_name[32];
     uint32_t address;
     uint32_t command;
     auto irda_file_message = std::make_unique<IrdaFileMessage>();
 
     int parsed = std::sscanf(
-        str.c_str(), "%31s %31s A:%lX C:%lX", irda_file_message->name, protocol_name, &address, &command);
+        str.c_str(),
+        "%31s %31s A:%lX C:%lX",
+        irda_file_message->name,
+        protocol_name,
+        &address,
+        &command);
 
     if(parsed != 4) {
         return nullptr;
@@ -52,4 +56,3 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileMessage> IrdaAppFileParser::parse_mes
 
     return irda_file_message;
 }
-

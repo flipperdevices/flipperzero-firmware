@@ -19,7 +19,6 @@ typedef struct {
 LIST_DEF(LabelList, LabelElement, M_POD_OPLIST)
 #define M_OPL_LabelList_t() LIST_OPLIST(LabelList)
 
-
 typedef struct {
     uint16_t x;
     uint16_t y;
@@ -99,7 +98,7 @@ void button_panel_reserve(ButtonPanel* button_panel, size_t reserve_x, size_t re
             model->reserve_x = reserve_x;
             model->reserve_y = reserve_y;
             ButtonMatrix_reserve(model->button_matrix, model->reserve_y);
-            for (size_t i = 0; i > model->reserve_y; ++i) {
+            for(size_t i = 0; i > model->reserve_y; ++i) {
                 ButtonArray_t* array = ButtonMatrix_get(model->button_matrix, i);
                 ButtonArray_init(*array);
                 ButtonArray_reserve(*array, reserve_x);
@@ -136,7 +135,6 @@ void button_panel_clean(ButtonPanel* button_panel) {
                     ButtonItem** button_item = button_panel_get_item(model, x, y);
                     free(*button_item);
                     *button_item = NULL;
-
                 }
             }
             return true;
@@ -168,7 +166,8 @@ void button_panel_add_item(
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-            ButtonItem** button_item_ptr = button_panel_get_item(model, matrix_place_x, matrix_place_y);
+            ButtonItem** button_item_ptr =
+                button_panel_get_item(model, matrix_place_x, matrix_place_y);
             furi_check(*button_item_ptr == NULL);
             *button_item_ptr = furi_alloc(sizeof(ButtonItem));
             ButtonItem* button_item = *button_item_ptr;
@@ -201,46 +200,40 @@ static void button_panel_view_draw_callback(Canvas* canvas, void* _model) {
         for(size_t y = 0; y < model->reserve_y; ++y) {
             ButtonItem* button_item = *button_panel_get_item(model, x, y);
             IconName icon_name = button_item->icon.name;
-            if ((model->selected_item_x == x) && (model->selected_item_y == y)) {
+            if((model->selected_item_x == x) && (model->selected_item_y == y)) {
                 icon_name = button_item->icon.name_selected;
             }
-            canvas_draw_icon_name(canvas,
-                                  button_item->icon.x,
-                                  button_item->icon.y,
-                                  icon_name);
+            canvas_draw_icon_name(canvas, button_item->icon.x, button_item->icon.y, icon_name);
         }
     }
 
-    for M_EACH(label, model->labels, LabelList_t) {
-        canvas_set_font(canvas, label->font);
-        canvas_draw_str(canvas, label->x, label->y, label->str);
-    }
+    for
+        M_EACH(label, model->labels, LabelList_t) {
+            canvas_set_font(canvas, label->font);
+            canvas_draw_str(canvas, label->x, label->y, label->str);
+        }
 
-    if (model->draw_callback)
-        model->draw_callback(canvas, model->draw_context);
+    if(model->draw_callback) model->draw_callback(canvas, model->draw_context);
 }
 
 static void button_panel_process_down(ButtonPanel* button_panel) {
-
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             size_t new_selected_item_x = model->selected_item_x;
             size_t new_selected_item_y = model->selected_item_y;
             size_t i;
 
-            if(new_selected_item_y >= (model->reserve_y - 1))
-                return false;
+            if(new_selected_item_y >= (model->reserve_y - 1)) return false;
 
             ++new_selected_item_y;
 
-            for (i = 0; i < model->reserve_x; ++i) {
+            for(i = 0; i < model->reserve_x; ++i) {
                 new_selected_item_x = (model->selected_item_x + i) % model->reserve_x;
-                if (*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
+                if(*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
                     break;
                 }
             }
-            if (i == model->reserve_x)
-                return false;
+            if(i == model->reserve_x) return false;
 
             model->selected_item_x = new_selected_item_x;
             model->selected_item_y = new_selected_item_y;
@@ -250,26 +243,23 @@ static void button_panel_process_down(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_up(ButtonPanel* button_panel) {
-
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             size_t new_selected_item_x = model->selected_item_x;
             size_t new_selected_item_y = model->selected_item_y;
             size_t i;
 
-            if(new_selected_item_y <= 0)
-                return false;
+            if(new_selected_item_y <= 0) return false;
 
             --new_selected_item_y;
 
-            for (i = 0; i < model->reserve_x; ++i) {
+            for(i = 0; i < model->reserve_x; ++i) {
                 new_selected_item_x = (model->selected_item_x + i) % model->reserve_x;
-                if (*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
+                if(*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
                     break;
                 }
             }
-            if (i == model->reserve_x)
-                return false;
+            if(i == model->reserve_x) return false;
 
             model->selected_item_x = new_selected_item_x;
             model->selected_item_y = new_selected_item_y;
@@ -278,26 +268,23 @@ static void button_panel_process_up(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_left(ButtonPanel* button_panel) {
-
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             size_t new_selected_item_x = model->selected_item_x;
             size_t new_selected_item_y = model->selected_item_y;
             size_t i;
 
-            if(new_selected_item_x <= 0)
-                return false;
+            if(new_selected_item_x <= 0) return false;
 
             --new_selected_item_x;
 
-            for (i = 0; i < model->reserve_y; ++i) {
+            for(i = 0; i < model->reserve_y; ++i) {
                 new_selected_item_y = (model->selected_item_y + i) % model->reserve_y;
-                if (*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
+                if(*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
                     break;
                 }
             }
-            if (i == model->reserve_y)
-                return false;
+            if(i == model->reserve_y) return false;
 
             model->selected_item_x = new_selected_item_x;
             model->selected_item_y = new_selected_item_y;
@@ -306,26 +293,23 @@ static void button_panel_process_left(ButtonPanel* button_panel) {
 }
 
 static void button_panel_process_right(ButtonPanel* button_panel) {
-
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             size_t new_selected_item_x = model->selected_item_x;
             size_t new_selected_item_y = model->selected_item_y;
             size_t i;
 
-            if(new_selected_item_x >= (model->reserve_x - 1))
-                return false;
+            if(new_selected_item_x >= (model->reserve_x - 1)) return false;
 
             ++new_selected_item_x;
 
-            for (i = 0; i < model->reserve_y; ++i) {
+            for(i = 0; i < model->reserve_y; ++i) {
                 new_selected_item_y = (model->selected_item_y + i) % model->reserve_y;
-                if (*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
+                if(*button_panel_get_item(model, new_selected_item_x, new_selected_item_y)) {
                     break;
                 }
             }
-            if (i == model->reserve_y)
-                return false;
+            if(i == model->reserve_y) return false;
 
             model->selected_item_x = new_selected_item_x;
             model->selected_item_y = new_selected_item_y;
@@ -338,11 +322,12 @@ void button_panel_process_ok(ButtonPanel* button_panel) {
 
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
-            button_item = *button_panel_get_item(model, model->selected_item_x, model->selected_item_y);
+            button_item =
+                *button_panel_get_item(model, model->selected_item_x, model->selected_item_y);
             return true;
         });
 
-    if (button_item && button_item->callback) {
+    if(button_item && button_item->callback) {
         button_item->callback(button_item->callback_context, button_item->index);
     }
 }
@@ -352,7 +337,7 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     furi_assert(button_panel);
     bool consumed = false;
 
-    if (button_panel->input_callback) {
+    if(button_panel->input_callback) {
         consumed = button_panel->input_callback(event, button_panel->input_context);
     } else if(event->type == InputTypeShort) {
         switch(event->key) {
@@ -384,11 +369,12 @@ static bool button_panel_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void button_panel_add_label(ButtonPanel* button_panel,
-                            uint16_t x,
-                            uint16_t y,
-                            Font font,
-                            const char* label_str) {
+void button_panel_add_label(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    Font font,
+    const char* label_str) {
     furi_assert(button_panel);
 
     with_view_model(
@@ -402,7 +388,10 @@ void button_panel_add_label(ButtonPanel* button_panel,
         });
 }
 
-void button_panel_set_popup_draw_callback(ButtonPanel* button_panel, ButtonPanelDrawCallback callback, void* context) {
+void button_panel_set_popup_draw_callback(
+    ButtonPanel* button_panel,
+    ButtonPanelDrawCallback callback,
+    void* context) {
     with_view_model(
         button_panel->view, (ButtonPanelModel * model) {
             model->draw_callback = callback;
@@ -411,8 +400,10 @@ void button_panel_set_popup_draw_callback(ButtonPanel* button_panel, ButtonPanel
         });
 }
 
-void button_panel_set_popup_input_callback(ButtonPanel* button_panel, ButtonPanelInputCallback callback, void* context) {
+void button_panel_set_popup_input_callback(
+    ButtonPanel* button_panel,
+    ButtonPanelInputCallback callback,
+    void* context) {
     button_panel->input_context = context;
     button_panel->input_callback = callback;
 }
-

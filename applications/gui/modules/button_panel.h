@@ -89,11 +89,12 @@ View* button_panel_get_view(ButtonPanel* button_panel);
  * @param   font - font to write label with
  * @param   label_str - string label to write
  */
-void button_panel_add_label(ButtonPanel* button_panel,
-                            uint16_t x,
-                            uint16_t y,
-                            Font font,
-                            const char* label_str);
+void button_panel_add_label(
+    ButtonPanel* button_panel,
+    uint16_t x,
+    uint16_t y,
+    Font font,
+    const char* label_str);
 
 // TODO: [FL-1445] Have to replace callbacks above with additional popup-layer
 /** Set popup draw callback for button_panel module.
@@ -104,7 +105,10 @@ void button_panel_add_label(ButtonPanel* button_panel,
  * @param   callback - callback function to set for draw event
  * @param   context - context to pass to callback
  */
-void button_panel_set_popup_draw_callback(ButtonPanel* button_panel, ButtonPanelDrawCallback callback, void* context);
+void button_panel_set_popup_draw_callback(
+    ButtonPanel* button_panel,
+    ButtonPanelDrawCallback callback,
+    void* context);
 
 /** Set popup input callback for button_panel module.
  *
@@ -115,7 +119,10 @@ void button_panel_set_popup_draw_callback(ButtonPanel* button_panel, ButtonPanel
  * @param   callback - function to overwrite main input callbacks
  * @param   context - context to pass to callback
  */
-void button_panel_set_popup_input_callback(ButtonPanel* button_panel, ButtonPanelInputCallback callback, void* context);
+void button_panel_set_popup_input_callback(
+    ButtonPanel* button_panel,
+    ButtonPanelInputCallback callback,
+    void* context);
 
 #ifdef __cplusplus
 }

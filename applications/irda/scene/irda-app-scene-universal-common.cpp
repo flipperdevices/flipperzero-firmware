@@ -23,7 +23,7 @@ static bool irda_popup_brut_input_callback(InputEvent* event, void* context) {
     auto app = static_cast<IrdaApp*>(context);
     bool consumed = false;
 
-    if ((event->type == InputTypeShort) && (event->key == InputKeyBack)) {
+    if((event->type == InputTypeShort) && (event->key == InputKeyBack)) {
         consumed = true;
         IrdaAppEvent irda_event;
 
@@ -51,15 +51,15 @@ void IrdaAppSceneUniversalCommon::show_popup(IrdaApp* app, int record_amount) {
 void IrdaAppSceneUniversalCommon::progress_popup(IrdaApp* app) {
     popup_brut_increase_progress(app->get_view_manager()->get_popup_brut());
     auto button_panel = app->get_view_manager()->get_button_panel();
-    with_view_model_cpp(button_panel_get_view(button_panel), void*, model, {return true;});
+    with_view_model_cpp(button_panel_get_view(button_panel), void*, model, { return true; });
 }
 
 bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
 
     if(event->type == IrdaAppEvent::Type::Tick) {
-        if (brute_force_started) {
-            if (brute_force.send_next_bruteforce(*app->get_tranceiver())) {
+        if(brute_force_started) {
+            if(brute_force.send_next_bruteforce(*app->get_tranceiver())) {
                 progress_popup(app);
             } else {
                 brute_force.stop_bruteforce();
@@ -70,15 +70,15 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
         consumed = true;
     }
 
-    if (event->type == IrdaAppEvent::Type::ButtonPanelPopupBackPressed) {
+    if(event->type == IrdaAppEvent::Type::ButtonPanelPopupBackPressed) {
         consumed = true;
         brute_force_started = false;
         brute_force.stop_bruteforce();
         remove_popup(app);
-    } else if (event->type == IrdaAppEvent::Type::ButtonPanelPressed) {
+    } else if(event->type == IrdaAppEvent::Type::ButtonPanelPressed) {
         int record_amount = 0;
-        if (brute_force.start_bruteforce(event->payload.menu_index, record_amount)) {
-            if (record_amount > 0) {
+        if(brute_force.start_bruteforce(event->payload.menu_index, record_amount)) {
+            if(record_amount > 0) {
                 brute_force_started = true;
                 show_popup(app, record_amount);
             }
@@ -96,4 +96,3 @@ void IrdaAppSceneUniversalCommon::on_exit(IrdaApp* app) {
     ButtonPanel* button_panel = view_manager->get_button_panel();
     button_panel_clean(button_panel);
 }
-

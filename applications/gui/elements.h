@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-
 /*
  * Draw progress bar.
  * @param x - progress bar position on X axis
