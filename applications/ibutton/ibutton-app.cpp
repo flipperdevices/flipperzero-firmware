@@ -6,12 +6,12 @@
 const char* iButtonApp::app_folder = "ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
 
-void iButtonApp::run(void* argc) {
+void iButtonApp::run(void* args) {
     iButtonEvent event;
     bool consumed;
     bool exit = false;
 
-    if(argc && load_key((const char*)argc)) {
+    if(args && load_key((const char*)args)) {
         current_scene = Scene::SceneEmulate;
     }
 
@@ -347,6 +347,8 @@ bool iButtonApp::load_key_data(string_t key_path) {
         get_fs_api()->file.close(&key_file);
         return false;
     }
+
+    get_key()->set_type(key_type);
 
     // load data
     uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0, 0, 0, 0, 0, 0, 0, 0};

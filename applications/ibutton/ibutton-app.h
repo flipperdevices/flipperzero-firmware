@@ -39,7 +39,7 @@
 
 class iButtonApp {
 public:
-    void run(void* p);
+    void run(void* args);
 
     iButtonApp();
     ~iButtonApp();
