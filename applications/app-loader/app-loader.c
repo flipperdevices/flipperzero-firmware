@@ -111,9 +111,9 @@ void app_loader_thread_state_callback(FuriThreadState thread_state, void* contex
         int heap_diff = state->free_heap_size - xPortGetFreeHeapSize();
         FURI_LOG_I(
             APP_LOADER_TAG,
-            "Application thread stopped, heap leaked: %d, heap diff: %d",
-            furi_thread_get_heap_size(state->thread),
-            heap_diff);
+            "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
+            heap_diff,
+            furi_thread_get_heap_size(state->thread));
         api_hal_power_insomnia_exit();
     }
 }
