@@ -20,7 +20,6 @@
 
 struct Nfc {
     NfcCommon nfc_common;
-    osMessageQueueId_t message_queue;
     Gui* gui;
     Submenu* submenu;
     NfcDetect* nfc_detect;

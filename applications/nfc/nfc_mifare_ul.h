@@ -10,5 +10,3 @@ NfcMifareUl* nfc_mifare_ul_alloc(NfcCommon* nfc_common);
 void nfc_mifare_ul_free(NfcMifareUl* nfc_mifare_ul);
 
 View* nfc_mifare_ul_get_view(NfcMifareUl* nfc_mifare_ul);
-
-void nfc_mifare_ul_view_dispatcher_callback(NfcMifareUl* nfc_mifare_ul, NfcMessage* message);

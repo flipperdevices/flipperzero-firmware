@@ -37,14 +37,6 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher);
  */
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher);
 
-/** Set custom event callback
- * Custom callback is called when custom event in internal queue received
- */
-void view_dispatcher_set_custom_callback(
-    ViewDispatcher* view_dispatcher,
-    CustomEventCallback callback,
-    void* context);
-
 /** Send custom event
  */
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event);

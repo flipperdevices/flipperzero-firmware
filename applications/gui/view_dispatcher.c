@@ -175,6 +175,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         is_consumed = view_input(view_dispatcher->current_view, event);
     }
     if(!is_consumed && event->type == InputTypeShort) {
+        // TODO get next view from view_navigato
         uint32_t view_id = VIEW_IGNORE;
         if(event->key == InputKeyBack) {
             view_id = view_previous(view_dispatcher->current_view);
@@ -185,20 +186,13 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
     }
 }
 
-void view_dispatcher_set_custom_callback(
-    ViewDispatcher* view_dispatcher,
-    CustomEventCallback callback,
-    void* context) {
-    furi_assert(view_dispatcher);
-    furi_assert(callback);
-
-    view_dispatcher->custom_event_cb = callback;
-    view_dispatcher->custom_event_ctx = context;
-}
-
 void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {
-    if(view_dispatcher->custom_event_cb) {
-        view_dispatcher->custom_event_cb(event, view_dispatcher->custom_event_ctx);
+    bool is_consumed = false;
+    if(view_dispatcher->current_view) {
+        is_consumed = view_custom(view_dispatcher->current_view, event);
+    }
+    if(is_consumed) {
+        // TODO get next view from view_navigator
     }
 }
 

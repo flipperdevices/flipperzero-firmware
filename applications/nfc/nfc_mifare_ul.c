@@ -85,24 +85,26 @@ void nfc_mifare_ul_worker_callback(void* context) {
         nfc_mifare_ul->nfc_common->view_dispatcher, NfcEventMifareUl);
 }
 
-void nfc_mifare_ul_view_dispatcher_callback(NfcMifareUl* nfc_mifare_ul, NfcMessage* message) {
-    furi_assert(nfc_mifare_ul);
-    furi_assert(message);
+bool nfc_mifare_ul_custom(uint32_t event, void* context) {
+    furi_assert(context);
 
-    if(message->found) {
+    NfcMifareUl* nfc_mifare_ul = (NfcMifareUl*)context;
+    if(event == NfcEventMifareUl) {
+        NfcWorkerResult worker_result;
+        nfc_worker_get_result(nfc_mifare_ul->nfc_common->worker, &worker_result);
+        NfcMifareUlData* data = (NfcMifareUlData*)&worker_result;
+
         with_view_model(
             nfc_mifare_ul->view, (NfcMifareUlModel * model) {
                 model->found = true;
-                model->nfc_mf_ul_data = message->nfc_mifare_ul_data;
+                model->nfc_mf_ul_data = *data;
                 return true;
             });
-    } else {
-        with_view_model(
-            nfc_mifare_ul->view, (NfcMifareUlModel * model) {
-                model->found = false;
-                return true;
-            });
+        // TODO add and configure next view model
+        return true;
     }
+
+    return false;
 }
 
 void nfc_mifare_ul_enter(void* context) {
@@ -144,6 +146,7 @@ NfcMifareUl* nfc_mifare_ul_alloc(NfcCommon* nfc_common) {
     view_set_context(nfc_mifare_ul->view, nfc_mifare_ul);
     view_set_draw_callback(nfc_mifare_ul->view, (ViewDrawCallback)nfc_mifare_ul_draw);
     view_set_input_callback(nfc_mifare_ul->view, nfc_mifare_ul_input);
+    view_set_custom_callback(nfc_mifare_ul->view, nfc_mifare_ul_custom);
     view_set_enter_callback(nfc_mifare_ul->view, nfc_mifare_ul_enter);
     view_set_exit_callback(nfc_mifare_ul->view, nfc_mifare_ul_exit);
     view_set_previous_callback(nfc_mifare_ul->view, nfc_mifare_ul_back);

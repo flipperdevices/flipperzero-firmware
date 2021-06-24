@@ -20,26 +20,10 @@ void nfc_menu_callback(void* context, uint32_t index) {
     }
 }
 
-void nfc_view_dispatcher_callback(uint32_t event, void* context) {
-    furi_assert(context);
-
-    Nfc* nfc = (Nfc*)context;
-    NfcMessage message;
-    osMessageQueueGet(nfc->message_queue, &message, NULL, osWaitForever);
-    if(event == NfcEventDetect) {
-        nfc_detect_view_dispatcher_callback(nfc->nfc_detect, &message);
-    } else if(event == NfcEventEmv) {
-        nfc_emv_view_dispatcher_callback(nfc->nfc_emv, &message);
-    } else if(event == NfcEventMifareUl) {
-        nfc_mifare_ul_view_dispatcher_callback(nfc->nfc_mifare_ul, &message);
-    }
-}
-
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
 
-    nfc->message_queue = osMessageQueueNew(8, sizeof(NfcMessage), NULL);
-    nfc->nfc_common.worker = nfc_worker_alloc(nfc->message_queue);
+    nfc->nfc_common.worker = nfc_worker_alloc();
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
 
@@ -82,10 +66,6 @@ Nfc* nfc_alloc() {
         NfcViewMifareUl,
         nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
 
-    // Set View Dispatcher custom event callback
-    view_dispatcher_set_custom_callback(
-        nfc->nfc_common.view_dispatcher, nfc_view_dispatcher_callback, nfc);
-
     // Switch to menu
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
 
@@ -126,8 +106,6 @@ void nfc_free(Nfc* nfc) {
     furi_record_close("gui");
     nfc->gui = NULL;
 
-    // The rest
-    osMessageQueueDelete(nfc->message_queue);
     free(nfc);
 }
 
