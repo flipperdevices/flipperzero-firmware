@@ -19,7 +19,7 @@ find_path(FreeRTOS_COMMON_INCLUDE
     NO_DEFAULT_PATH
 )
 
-if(FreeRTOS_COMMON_INCLUDE MATCHES "FreeRTOS_COMMON_INCLUDE-NOTFOUND")
+if(NOT FreeRTOS_COMMON_INCLUDE)
     message(WARNING "FreeRTOS common include path not found, build might fail")
 endif()
 
@@ -85,7 +85,7 @@ foreach(PORT ${FreeRTOS_FIND_COMPONENTS})
         NO_DEFAULT_PATH
     )
 
-    if(FreeRTOS_${PORT}_PATH MATCHES "FreeRTOS_${PORT}_PATH-NOTFOUND")
+    if(NOT FreeRTOS_${PORT}_PATH)
         message(WARNING "FreeRTOS port path not found, build might fail")
     endif()
 
