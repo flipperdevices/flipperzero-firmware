@@ -85,7 +85,7 @@ foreach(PORT ${FreeRTOS_FIND_COMPONENTS})
         NO_DEFAULT_PATH
     )
 
-    if(FreeRTOS_${PORT}_PATH MATCHES "FreeRTOS_${PORT}_PATH-NOTFOUND")
+    if(NOT FreeRTOS_${PORT}_PATH)
         message(WARNING "FreeRTOS port path not found, build might fail")
     endif()
 
