@@ -1,7 +1,13 @@
 #include "archive_views.h"
 
-static const char* ArchiveTabNames[] =
-    {"Favourites", "iButton", "NFC", "SubOne", "Rfid", "Infrared", "Browser"};
+static const char* ArchiveTabNames[] = {
+    [ArchiveTabFavourites] = "Favourites",
+    [ArchiveTabIButton] = "iButton",
+    [ArchiveTabNFC] = "NFC",
+    [ArchiveTabSubOne] = "SubOne",
+    [ArchiveTabLFRFID] = "RFID LF",
+    [ArchiveTabIrda] = "Infrared",
+    [ArchiveTabBrowser] = "Browser"};
 
 static const IconName ArchiveItemIcons[] = {
     [ArchiveFileTypeIButton] = I_ibutt_10px,
@@ -15,13 +21,13 @@ static const IconName ArchiveItemIcons[] = {
 
 static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 61, 17, 62, 46);
+    canvas_draw_box(canvas, 71, 17, 57, 46);
     canvas_set_color(canvas, ColorBlack);
-    elements_slightly_rounded_frame(canvas, 60, 16, 64, 48);
+    elements_slightly_rounded_frame(canvas, 70, 16, 58, 48);
 
     string_t menu[MENU_ITEMS];
 
-    string_init_set_str(menu[0], "Open in app");
+    string_init_set_str(menu[0], "Run in app");
     string_init_set_str(menu[1], "Pin");
     string_init_set_str(menu[2], "Rename");
     string_init_set_str(menu[3], "Delete");
@@ -37,11 +43,11 @@ static void render_item_menu(Canvas* canvas, ArchiveViewModel* model) {
     }
 
     for(size_t i = 0; i < MENU_ITEMS; i++) {
-        canvas_draw_str(canvas, 72, 27 + i * 11, string_get_cstr(menu[i]));
+        canvas_draw_str(canvas, 82, 27 + i * 11, string_get_cstr(menu[i]));
         string_clear(menu[i]);
     }
 
-    canvas_draw_icon_name(canvas, 64, 20 + model->menu_idx * 11, I_ButtonRight_4x7);
+    canvas_draw_icon_name(canvas, 74, 20 + model->menu_idx * 11, I_ButtonRight_4x7);
 }
 
 void archive_trim_file_ext(char* name) {
@@ -105,7 +111,7 @@ static void draw_list(Canvas* canvas, ArchiveViewModel* model) {
     }
 
     if(scrollbar) {
-        elements_scrollbar_pos(canvas, 126, 16, 48, model->idx, array_size);
+        elements_scrollbar_pos(canvas, 126, 15, 49, model->idx, array_size);
     }
 
     if(model->menu) {
@@ -124,20 +130,30 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveViewModel* model) {
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 50, 13);
-    canvas_draw_box(canvas, 100, 0, 28, 13);
+    canvas_draw_box(canvas, 107, 0, 20, 13);
 
     canvas_set_color(canvas, ColorBlack);
-    elements_frame(canvas, 0, 0, 50, 13);
-    canvas_draw_str_aligned(canvas, 25, 10, AlignCenter, AlignBottom, tab_name);
+    canvas_draw_frame(canvas, 1, 0, 50, 12);
+    canvas_draw_line(canvas, 0, 1, 0, 11);
+    canvas_draw_line(canvas, 1, 12, 49, 12);
+    canvas_draw_str_aligned(canvas, 26, 9, AlignCenter, AlignBottom, tab_name);
 
-    elements_frame(canvas, 100, 0, 24, 13);
+    canvas_draw_frame(canvas, 108, 0, 20, 12);
+    canvas_draw_line(canvas, 107, 1, 107, 11);
+    canvas_draw_line(canvas, 108, 12, 126, 12);
 
     if(model->tab_idx > 0) {
-        canvas_draw_icon_name(canvas, 106, 3, I_ButtonLeft_4x7);
+        canvas_draw_icon_name(canvas, 112, 2, I_ButtonLeft_4x7);
     }
     if(model->tab_idx < SIZEOF_ARRAY(ArchiveTabNames) - 1) {
-        canvas_draw_icon_name(canvas, 114, 3, I_ButtonRight_4x7);
+        canvas_draw_icon_name(canvas, 120, 2, I_ButtonRight_4x7);
     }
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_dot(canvas, 50, 0);
+    canvas_draw_dot(canvas, 127, 0);
+
+    canvas_set_color(canvas, ColorBlack);
 }
 
 void archive_view_render(Canvas* canvas, void* model) {

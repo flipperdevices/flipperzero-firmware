@@ -381,12 +381,12 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
         string_cat(path, file->name);
         common_api->remove(string_get_cstr(path));
 
-    } else {
+    } else { // remove from favorites
         string_set(path, "favourites/");
         string_cat(path, file->name);
         common_api->remove(string_get_cstr(path));
 
-        if(orig) {
+        if(orig) { // remove original file
             string_set_str(path, get_default_path(file->type));
             string_cat(path, "/");
             string_cat(path, file->name);
@@ -480,9 +480,9 @@ static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
             with_view_model(
                 archive->view_archive_main, (ArchiveViewModel * model) {
                     if(event->key == InputKeyUp) {
-                        model->menu_idx = CLAMP(model->menu_idx - 1, MENU_ITEMS - 1, 0);
+                        model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
                     } else if(event->key == InputKeyDown) {
-                        model->menu_idx = CLAMP(model->menu_idx + 1, MENU_ITEMS - 1, 0);
+                        model->menu_idx = (model->menu_idx + 1) % MENU_ITEMS;
                     }
                     return true;
                 });

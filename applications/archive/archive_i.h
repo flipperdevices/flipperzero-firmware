@@ -24,17 +24,6 @@ typedef enum {
     ArchiveViewTotal,
 } ArchiveViewEnum;
 
-typedef enum {
-    ArchiveTabFavourites,
-    ArchiveTabIButton,
-    ArchiveTabNFC,
-    ArchiveTabSubOne,
-    ArchiveTabLFRFID,
-    ArchiveTabIrda,
-    ArchiveTabBrowser,
-    ArchiveTabTotal,
-} ArchiveTabEnum;
-
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
     [ArchiveFileTypeNFC] = "NFC",

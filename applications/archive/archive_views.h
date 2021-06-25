@@ -8,7 +8,6 @@
 
 #define MAX_LEN_PX 100
 #define MAX_NAME_LEN 255
-
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 4
 
@@ -22,6 +21,17 @@ typedef enum {
     ArchiveFileTypeUnknown,
     AppIdTotal,
 } ArchiveFileTypeEnum;
+
+typedef enum {
+    ArchiveTabFavourites,
+    ArchiveTabLFRFID,
+    ArchiveTabSubOne,
+    ArchiveTabNFC,
+    ArchiveTabIButton,
+    ArchiveTabIrda,
+    ArchiveTabBrowser,
+    ArchiveTabTotal,
+} ArchiveTabEnum;
 
 typedef struct {
     string_t name;
