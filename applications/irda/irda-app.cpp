@@ -99,8 +99,8 @@ IrdaAppRemoteManager* IrdaApp::get_remote_manager() {
     return &remote_manager;
 }
 
-IrdaAppSignalTranceiver* IrdaApp::get_tranceiver() {
-    return &tranceiver;
+IrdaAppSignalTransceiver* IrdaApp::get_transceiver() {
+    return &transceiver;
 }
 
 void IrdaApp::set_text_store(uint8_t index, const char* text...) {

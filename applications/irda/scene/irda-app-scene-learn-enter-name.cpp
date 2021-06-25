@@ -5,8 +5,8 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     TextInput* text_input = view_manager->get_text_input();
 
-    auto tranceiver = app->get_tranceiver();
-    auto message = tranceiver->get_last_message();
+    auto transceiver = app->get_transceiver();
+    auto message = transceiver->get_last_message();
 
     app->set_text_store(
         0,
@@ -31,14 +31,14 @@ bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
     if(event->type == IrdaAppEvent::Type::TextEditDone) {
         auto remote_manager = app->get_remote_manager();
-        auto tranceiver = app->get_tranceiver();
+        auto transceiver = app->get_transceiver();
         bool result = false;
         if(app->get_learn_new_remote()) {
             result = remote_manager->add_remote_with_button(
-                app->get_text_store(0), tranceiver->get_last_message());
+                app->get_text_store(0), transceiver->get_last_message());
         } else {
             result =
-                remote_manager->add_button(app->get_text_store(0), tranceiver->get_last_message());
+                remote_manager->add_button(app->get_text_store(0), transceiver->get_last_message());
         }
 
         if(!result) {

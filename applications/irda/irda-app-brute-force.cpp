@@ -37,7 +37,7 @@ void IrdaAppBruteForce::stop_bruteforce() {
 }
 
 // TODO: [FL-1418] replace with timer-chained consequence of messages.
-bool IrdaAppBruteForce::send_next_bruteforce(const IrdaAppSignalTranceiver& tranceiver) {
+bool IrdaAppBruteForce::send_next_bruteforce(const IrdaAppSignalTransceiver& transceiver) {
     furi_assert(current_record.size());
 
     std::unique_ptr<IrdaAppFileParser::IrdaFileMessage> message;
@@ -47,7 +47,7 @@ bool IrdaAppBruteForce::send_next_bruteforce(const IrdaAppSignalTranceiver& tran
     } while(message && current_record.compare(message->name));
 
     if(message) {
-        tranceiver.send_message(&message->message);
+        transceiver.send_message(&message->message);
     }
     return !!message;
 }

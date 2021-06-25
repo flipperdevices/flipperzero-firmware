@@ -2,7 +2,7 @@
 #include "furi/check.h"
 #include <unordered_map>
 #include "irda-app-file-parser.hpp"
-#include "irda-app-tranceiver.hpp"
+#include "irda-app-transceiver.hpp"
 
 
 class IrdaAppBruteForce {
@@ -26,7 +26,7 @@ class IrdaAppBruteForce {
 public:
     bool calculate_messages();
     void stop_bruteforce();
-    bool send_next_bruteforce(const IrdaAppSignalTranceiver& receiver);
+    bool send_next_bruteforce(const IrdaAppSignalTransceiver& receiver);
     bool start_bruteforce(int index, int& record_amount);
     void add_record(int index, const char* name);
 

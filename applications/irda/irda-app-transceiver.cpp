@@ -2,10 +2,10 @@
 #include "irda.h"
 #include <api-hal-irda.h>
 
-void IrdaAppSignalTranceiver::irda_rx_callback(void* ctx, bool level, uint32_t duration) {
+void IrdaAppSignalTransceiver::irda_rx_callback(void* ctx, bool level, uint32_t duration) {
     IrdaAppEvent event;
     const IrdaMessage* irda_message;
-    IrdaAppSignalTranceiver* this_ = static_cast<IrdaAppSignalTranceiver*>(ctx);
+    IrdaAppSignalTransceiver* this_ = static_cast<IrdaAppSignalTransceiver*>(ctx);
 
     irda_message = irda_decode(this_->decoder, level, duration);
     if(irda_message) {
@@ -17,30 +17,30 @@ void IrdaAppSignalTranceiver::irda_rx_callback(void* ctx, bool level, uint32_t d
     }
 }
 
-IrdaAppSignalTranceiver::IrdaAppSignalTranceiver(void)
+IrdaAppSignalTransceiver::IrdaAppSignalTransceiver(void)
     : decoder(irda_alloc_decoder()) {
 }
 
-IrdaAppSignalTranceiver::~IrdaAppSignalTranceiver() {
+IrdaAppSignalTransceiver::~IrdaAppSignalTransceiver() {
     api_hal_irda_rx_irq_deinit();
     irda_free_decoder(decoder);
 }
 
-void IrdaAppSignalTranceiver::capture_once_start(osMessageQueueId_t queue) {
+void IrdaAppSignalTransceiver::capture_once_start(osMessageQueueId_t queue) {
     event_queue = queue;
     irda_reset_decoder(decoder);
     api_hal_irda_rx_irq_init();
-    api_hal_irda_rx_irq_set_callback(IrdaAppSignalTranceiver::irda_rx_callback, this);
+    api_hal_irda_rx_irq_set_callback(IrdaAppSignalTransceiver::irda_rx_callback, this);
 }
 
-void IrdaAppSignalTranceiver::capture_stop(void) {
+void IrdaAppSignalTransceiver::capture_stop(void) {
     api_hal_irda_rx_irq_deinit();
 }
 
-IrdaMessage* IrdaAppSignalTranceiver::get_last_message(void) {
+IrdaMessage* IrdaAppSignalTransceiver::get_last_message(void) {
     return &message;
 }
 
-void IrdaAppSignalTranceiver::send_message(const IrdaMessage* message) const {
+void IrdaAppSignalTransceiver::send_message(const IrdaMessage* message) const {
     irda_send(message, 1);
 }

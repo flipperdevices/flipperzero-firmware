@@ -2,10 +2,10 @@
 
 void IrdaAppSceneLearn::on_enter(IrdaApp* app) {
     auto view_manager = app->get_view_manager();
-    auto tranceiver = app->get_tranceiver();
+    auto transceiver = app->get_transceiver();
     auto event_queue = view_manager->get_event_queue();
 
-    tranceiver->capture_once_start(event_queue);
+    transceiver->capture_once_start(event_queue);
 
     auto popup = view_manager->get_popup();
 

@@ -17,8 +17,8 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
     app->notify_green_on();
 
-    auto tranceiver = app->get_tranceiver();
-    auto message = tranceiver->get_last_message();
+    auto transceiver = app->get_transceiver();
+    auto message = transceiver->get_last_message();
 
     app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
     app->set_text_store(
@@ -50,8 +50,8 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         case DialogExResultCenter: {
             app->notify_space_blink();
-            auto tranceiver = app->get_tranceiver();
-            auto message = tranceiver->get_last_message();
+            auto transceiver = app->get_transceiver();
+            auto message = transceiver->get_last_message();
             irda_send(message, 1);
             break;
         }

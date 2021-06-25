@@ -7,7 +7,7 @@
 #include "scene/irda-app-scene.hpp"
 #include "irda-app-view-manager.hpp"
 #include "irda-app-remote-manager.hpp"
-#include "irda-app-tranceiver.hpp"
+#include "irda-app-transceiver.hpp"
 #include <forward_list>
 #include <stdint.h>
 #include <notification/notification-messages.h>
@@ -51,7 +51,7 @@ public:
     bool switch_to_previous_scene(uint8_t count = 1);
     Scene get_previous_scene();
     IrdaAppViewManager* get_view_manager();
-    IrdaAppSignalTranceiver* get_tranceiver();
+    IrdaAppSignalTransceiver* get_transceiver();
     void set_text_store(uint8_t index, const char* text...);
     char* get_text_store(uint8_t index);
     uint8_t get_text_store_size();
@@ -103,7 +103,7 @@ private:
     uint32_t current_button;
 
     NotificationApp* notification;
-    IrdaAppSignalTranceiver tranceiver;
+    IrdaAppSignalTransceiver transceiver;
     IrdaAppViewManager view_manager;
     IrdaAppRemoteManager remote_manager;
 

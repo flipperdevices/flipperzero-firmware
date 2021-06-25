@@ -59,7 +59,7 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
 
     if(event->type == IrdaAppEvent::Type::Tick) {
         if(brute_force_started) {
-            if(brute_force.send_next_bruteforce(*app->get_tranceiver())) {
+            if(brute_force.send_next_bruteforce(*app->get_transceiver())) {
                 progress_popup(app);
             } else {
                 brute_force.stop_bruteforce();

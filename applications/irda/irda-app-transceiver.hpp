@@ -2,10 +2,10 @@
 #include <furi.h>
 #include <irda.h>
 
-class IrdaAppSignalTranceiver {
+class IrdaAppSignalTransceiver {
 public:
-    IrdaAppSignalTranceiver(void);
-    ~IrdaAppSignalTranceiver(void);
+    IrdaAppSignalTransceiver(void);
+    ~IrdaAppSignalTransceiver(void);
     void capture_once_start(osMessageQueueId_t event_queue);
     void capture_stop(void);
     IrdaMessage* get_last_message(void);
