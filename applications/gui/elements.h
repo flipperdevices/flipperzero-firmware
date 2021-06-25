@@ -9,6 +9,22 @@ extern "C" {
 #endif
 
 /*
+ * Draw progress bar.
+ * @param x - progress bar position on X axis
+ * @param y - progress bar position on Y axis
+ * @param width - progress bar width
+ * @param progress - progress in unnamed metric
+ * @param total - total amount in unnamed metric
+ */
+void elements_progress_bar(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t progress,
+    uint8_t total);
+
+/*
  * Draw scrollbar on canvas at specific position.
  * @param x - scrollbar position on X axis
  * @param y - scrollbar position on Y axis
@@ -16,7 +32,6 @@ extern "C" {
  * @param pos - current element 
  * @param total - total elements
  */
-
 void elements_scrollbar_pos(
     Canvas* canvas,
     uint8_t x,
@@ -31,7 +46,7 @@ void elements_scrollbar_pos(
  * @param pos - current element of total elements
  * @param total - total elements
  */
-void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total);
+void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total);
 
 /*
  * Draw rounded frame
