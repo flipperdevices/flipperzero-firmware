@@ -13,6 +13,8 @@ set(PROJECT_SOURCES
 
 add_executable(stm32-fetch-f4 ${PROJECT_SOURCES})
 target_link_libraries(stm32-fetch-f4 CMSIS::STM32::F407VG STM32::NoSys)
+stm32_print_size_of_target(stm32-fetch-f4)
 
 add_executable(stm32-fetch-l0 ${PROJECT_SOURCES})
 target_link_libraries(stm32-fetch-l0 CMSIS::STM32::L053C8 STM32::NoSys)
+stm32_print_size_of_target(stm32-fetch-l0)
