@@ -37,8 +37,8 @@ bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
             result = remote_manager->add_remote_with_button(
                 app->get_text_store(0), transceiver->get_last_message());
         } else {
-            result =
-                remote_manager->add_button(app->get_text_store(0), transceiver->get_last_message());
+            result = remote_manager->add_button(
+                app->get_text_store(0), transceiver->get_last_message());
         }
 
         if(!result) {
