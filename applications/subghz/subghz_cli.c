@@ -1,6 +1,10 @@
 #include "subghz_cli.h"
 #include <furi.h>
 #include <api-hal.h>
+#include <stream_buffer.h>
+
+#define CC1101_FREQUENCY_RANGE_STR \
+    "300000000...348000000 or 387000000...464000000 or 779000000...928000000"
 
 static const uint8_t subghz_test_packet_data[] = {
     0x30, // 48bytes to transmit
@@ -10,10 +14,9 @@ static const uint8_t subghz_test_packet_data[] = {
 };
 
 bool subghz_check_frequency_range(uint32_t frequency) {
-    if(!(frequency >= 300000000 && frequency <= 348000000)
-        && !(frequency >= 387000000 && frequency <= 464000000)
-        && !(frequency >= 779000000 && frequency <= 928000000)
-    ) {
+    if(!(frequency >= 300000000 && frequency <= 348000000) &&
+       !(frequency >= 387000000 && frequency <= 464000000) &&
+       !(frequency >= 779000000 && frequency <= 928000000)) {
         return false;
     }
     return true;
@@ -26,12 +29,14 @@ void subghz_cli_init() {
     cli_add_command(cli, "subghz_rx_carrier", subghz_cli_command_rx_carrier, NULL);
     cli_add_command(cli, "subghz_tx_pt", subghz_cli_command_tx_pt, NULL);
     cli_add_command(cli, "subghz_rx_pt", subghz_cli_command_rx_pt, NULL);
+    cli_add_command(cli, "subghz_tx", subghz_cli_command_tx, NULL);
+    cli_add_command(cli, "subghz_rx", subghz_cli_command_rx, NULL);
 
     furi_record_close("cli");
 }
 
 void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
-    uint32_t frequency;
+    uint32_t frequency = 0;
     int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
     if(ret != 1) {
         printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
@@ -40,7 +45,8 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
     }
 
     if(!subghz_check_frequency_range(frequency)) {
-        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
+        printf(
+            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
         return;
     }
 
@@ -65,7 +71,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
 }
 
 void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
-    uint32_t frequency;
+    uint32_t frequency = 0;
     int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
     if(ret != 1) {
         printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
@@ -74,7 +80,8 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
     }
 
     if(!subghz_check_frequency_range(frequency)) {
-        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
+        printf(
+            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
         return;
     }
 
@@ -99,7 +106,7 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
 }
 
 void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
-    uint32_t frequency;
+    uint32_t frequency = 0;
     uint32_t pattern;
     uint32_t count;
 
@@ -117,7 +124,8 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
     }
 
     if(!subghz_check_frequency_range(frequency)) {
-        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
+        printf(
+            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
         return;
     }
     if(pattern > 1) {
@@ -152,7 +160,7 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
 }
 
 void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
-    uint32_t frequency;
+    uint32_t frequency = 0;
 
     int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
     if(ret != 1) {
@@ -162,7 +170,8 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
     }
 
     if(!subghz_check_frequency_range(frequency)) {
-        printf("Frequency must be in 300000000...348000000 or 387000000...464000000 or 779000000...928000000 range, not %lu\r\n", frequency);
+        printf(
+            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
         return;
     }
 
@@ -197,4 +206,71 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
     api_hal_subghz_reset();
     api_hal_subghz_set_path(ApiHalSubGhzPathIsolate);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+}
+
+void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
+}
+
+#include <fl_subghz/parsers/subghz_princeton_decoder.h>
+
+volatile bool subghz_cli_overrun = false;
+
+void subghz_cli_command_rx_callback(
+    ApiHalSubGhzCaptureLevel level,
+    uint32_t duration,
+    void* context) {
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    LevelPair pair = {.level = level, .duration = duration};
+    if(subghz_cli_overrun) {
+        subghz_cli_overrun = false;
+        pair.level = ApiHalSubGhzCaptureLevelOverrun;
+    }
+    size_t ret =
+        xStreamBufferSendFromISR(context, &pair, sizeof(LevelPair), &xHigherPriorityTaskWoken);
+    if(sizeof(LevelPair) != ret) subghz_cli_overrun = true;
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
+    uint32_t frequency = 0;
+    int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
+    if(ret != 1) {
+        printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
+        cli_print_usage("subghz_rx_pt", "<Frequency in HZ>", string_get_cstr(args));
+        return;
+    }
+
+    if(!subghz_check_frequency_range(frequency)) {
+        printf(
+            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        return;
+    }
+
+    api_hal_subghz_reset();
+    api_hal_subghz_idle();
+    api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
+
+    subghz_princeton_decoder_init();
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+
+    StreamBufferHandle_t rx_stream = xStreamBufferCreate(sizeof(LevelPair) * 128, 2);
+
+    api_hal_subghz_set_capture_callback(subghz_cli_command_rx_callback, rx_stream);
+    api_hal_subghz_enable_capture();
+    api_hal_subghz_flush_rx();
+    api_hal_subghz_rx();
+
+    printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);
+    LevelPair pair;
+    while(!cli_cmd_interrupt_received(cli)) {
+        xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
+        if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
+            printf(".");
+        }
+        subghz_princeton_decoder_parse(pair);
+    }
+
+    api_hal_subghz_disable_capture();
+    api_hal_subghz_reset();
 }

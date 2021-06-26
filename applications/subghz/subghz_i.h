@@ -1,9 +1,9 @@
 #pragma once
 
 #include "subghz.h"
-#include "subghz_test_basic.h"
-#include "subghz_test_packet.h"
-#include "subghz_static.h"
+#include "views/subghz_test_basic.h"
+#include "views/subghz_test_packet.h"
+#include "views/subghz_static.h"
 
 #include <furi.h>
 #include <api-hal.h>

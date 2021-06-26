@@ -223,3 +223,9 @@ void api_hal_subghz_set_path(ApiHalSubGhzPath path) {
         furi_check(0);
     }
 }
+
+void api_hal_subghz_set_capture_callback(ApiHalSubGhzCaptureCallback callback, void* context) {}
+
+void api_hal_subghz_enable_capture() {}
+
+void api_hal_subghz_disable_capture() {}

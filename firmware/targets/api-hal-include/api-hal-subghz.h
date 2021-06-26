@@ -11,6 +11,7 @@ extern "C" {
 typedef enum {
     ApiHalSubGhzPresetOokAsync,     /** OOK, asynchronous */
     ApiHalSubGhzPreset2FskPacket,   /** 2FSK, 115kBaud, variable packet length */
+    ApiHalSubGhzPresetMP,      /** MP OOK, asynchronous */
 } ApiHalSubGhzPreset;
 
 /**  Switchable Radio Paths */
@@ -106,6 +107,36 @@ uint32_t api_hal_subghz_set_frequency(uint32_t value);
  */
 void api_hal_subghz_set_path(ApiHalSubGhzPath path);
 
+/** Front Definition for capture callback */
+typedef enum {
+    ApiHalSubGhzCaptureLevelHigh,
+    ApiHalSubGhzCaptureLevelLow,
+    ApiHalSubGhzCaptureLevelOverrun,
+    ApiHalSubGhzCaptureLevelUnderrun,
+} ApiHalSubGhzCaptureLevel;
+
+typedef struct {
+    ApiHalSubGhzCaptureLevel level;
+    uint32_t duration;
+} LevelPair;
+
+/** Signal Timings Capture callback */
+typedef void (*ApiHalSubGhzCaptureCallback)(ApiHalSubGhzCaptureLevel level, uint32_t time, void* context);
+
+/** Set signal timings capture callback
+ * @param callback - your callback for front capture
+ */
+void api_hal_subghz_set_capture_callback(ApiHalSubGhzCaptureCallback callback, void* context);
+
+/** Enable signal timings capture 
+ * Initializes GPIO and TIM2 for timings capture
+ */
+void api_hal_subghz_enable_capture();
+
+/** Disable signal timings capture
+ * Resets GPIO and TIM2
+ */
+void api_hal_subghz_disable_capture();
 
 #ifdef __cplusplus
 }

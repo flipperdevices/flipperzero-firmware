@@ -1,5 +1,5 @@
 #include "subghz_test_basic.h"
-#include "subghz_i.h"
+#include "../subghz_i.h"
 
 #include <math.h>
 #include <furi.h>
