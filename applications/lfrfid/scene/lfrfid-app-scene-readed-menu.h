@@ -1,15 +1,13 @@
 #pragma once
 #include "../lfrfid-app.h"
 
-class LfRfidAppSceneReadSuccess : public GenericScene<LfRfidApp> {
+class LfRfidAppSceneReadedMenu : public GenericScene<LfRfidApp> {
 public:
     void on_enter(LfRfidApp* app, bool need_restore) final;
     bool on_event(LfRfidApp* app, LfRfidApp::Event* event) final;
     void on_exit(LfRfidApp* app) final;
 
 private:
-    static void back_callback(void* context);
-    static void more_callback(void* context);
-
-    string_t string[3];
+    static void submenu_callback(void* context, uint32_t index);
+    uint32_t submenu_item_selected = 0;
 };

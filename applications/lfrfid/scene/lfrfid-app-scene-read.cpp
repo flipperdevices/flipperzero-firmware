@@ -1,11 +1,10 @@
 #include "lfrfid-app-scene-read.h"
-#include "../view/elements/string-element.h"
 
 void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool need_restore) {
     auto popup = app->view_controller.get<PopupVM>();
 
-    popup->set_header("Reading\nLF RFID", 77, 35, AlignLeft, AlignTop);
-    popup->set_icon(0, 3, I_RFIDDolphinReceive_105x61);
+    popup->set_header("Reading\nLF RFID", 70, 34, AlignLeft, AlignTop);
+    popup->set_icon(0, 4, I_RFIDDolphinReceive_98x60);
 
     app->view_controller.switch_to<PopupVM>();
     app->worker.start_read();

@@ -28,3 +28,13 @@ bool RfidWorker::read() {
 void RfidWorker::stop_read() {
     reader.stop();
 }
+
+void RfidWorker::start_write() {
+}
+
+bool RfidWorker::write() {
+    return false;
+}
+
+void RfidWorker::stop_write() {
+}

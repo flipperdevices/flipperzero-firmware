@@ -24,6 +24,7 @@ class LfRfidApp {
 public:
     enum class EventType : uint8_t {
         GENERIC_EVENT_ENUM_VALUES,
+        Next,
         MenuSelected,
     };
 
@@ -31,6 +32,8 @@ public:
         GENERIC_SCENE_ENUM_VALUES,
         Read,
         ReadSuccess,
+        ReadedMenu,
+        Write,
     };
 
     class Event {

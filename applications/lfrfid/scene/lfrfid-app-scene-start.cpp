@@ -8,11 +8,10 @@ typedef enum {
 
 void LfRfidAppSceneStart::on_enter(LfRfidApp* app, bool need_restore) {
     auto submenu = app->view_controller.get<SubmenuVM>();
-    auto callback = cbc::obtain_connector(this, &LfRfidAppSceneStart::submenu_callback);
 
-    submenu->add_item("Read", SubmenuRead, callback, app);
-    submenu->add_item("Saved", SubmenuSaved, callback, app);
-    submenu->add_item("Add manually", SubmenuAddManually, callback, app);
+    submenu->add_item("Read", SubmenuRead, submenu_callback, app);
+    submenu->add_item("Saved", SubmenuSaved, submenu_callback, app);
+    submenu->add_item("Add manually", SubmenuAddManually, submenu_callback, app);
 
     if(need_restore) {
         submenu->set_selected_item(submenu_item_selected);
