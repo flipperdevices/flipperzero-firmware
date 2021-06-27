@@ -1,10 +1,10 @@
 #include "nfc_emv.h"
 
-#include "nfc_i.h"
-#include "nfc_types.h"
 #include <furi.h>
 #include <api-hal.h>
 #include <input/input.h>
+
+#include "../nfc_i.h"
 
 struct NfcEmv {
     NfcCommon* nfc_common;
