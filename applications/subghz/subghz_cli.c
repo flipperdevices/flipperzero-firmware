@@ -211,8 +211,7 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
 void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 }
 
-#include <fl_subghz/protocols/subghz_protocol_keeloq.h>
-#include <fl_subghz/protocols/subghz_protocol_princeton.h>
+#include <fl_subghz/protocols/subghz_protocol.h>
 
 volatile bool subghz_cli_overrun = false;
 
@@ -251,8 +250,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     api_hal_subghz_idle();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
 
-    SubGhzProtocolPrinceton* princeton = subghz_protocol_princeton_alloc();
-    SubGhzProtocolKeeloq* keeloq = subghz_protocol_keeloq_alloc();
+    SubGhzProtocol* protocol = subghz_protocol_alloc();
 
     frequency = api_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
@@ -271,13 +269,12 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
         xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
         if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
             printf(".");
+            subghz_protocol_reset(protocol);
         }
-        subghz_protocol_princeton_parse(princeton, pair);
-        subghz_protocol_keeloq_parse(keeloq, pair);
+        subghz_protocol_parse(protocol, pair);
     }
 
-    subghz_protocol_keeloq_free(keeloq);
-    subghz_protocol_princeton_free(princeton);
+    subghz_protocol_free(protocol);
 
     api_hal_subghz_disable_capture();
     api_hal_subghz_reset();

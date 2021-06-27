@@ -11,7 +11,6 @@ struct SubGhzProtocolPrinceton {
 };
 
 SubGhzProtocolPrinceton* subghz_protocol_princeton_alloc(void) {
-
     SubGhzProtocolPrinceton* instance = furi_alloc(sizeof(SubGhzProtocolPrinceton));
 
     snprintf(instance->common.name, SUBGHZ_PROTOCOL_NAME_LEN,"PRINCETON");

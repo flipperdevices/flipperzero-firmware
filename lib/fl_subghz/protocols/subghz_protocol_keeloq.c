@@ -86,6 +86,7 @@ void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance) {
     for
         M_EACH(manufacture_code, instance->manufacture_codes, KeeLoqManufactureCodeArray_t) {
             string_clear(manufacture_code->name);
+            manufacture_code->key = 0;
     }
     KeeLoqManufactureCodeArray_clear(instance->manufacture_codes);
     free(instance);
