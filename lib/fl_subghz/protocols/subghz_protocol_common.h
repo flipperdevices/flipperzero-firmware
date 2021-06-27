@@ -1,7 +1,7 @@
 #pragma once
 
 #include <api-hal.h>
-#include <api-hal-subghz.h>
+#include <stdint.h>
 
 #define bit_read(value, bit) (((value) >> (bit)) & 0x01)
 #define bit_set(value, bit) ((value) |= (1UL << (bit)))
@@ -12,10 +12,10 @@
 #define SUBGHZ_TX_PIN_LOW() 
 #define DURATION_DIFF(x,y) ((x<y)?(y-x):(x-y))
 
-#define CC1101_PROTOCOL_NAME_LEN 15
+#define SUBGHZ_PROTOCOL_NAME_LEN 15
 typedef struct{
-    char        name [CC1101_PROTOCOL_NAME_LEN];
-    char        name_remote_controller [CC1101_PROTOCOL_NAME_LEN];
+    char        name [SUBGHZ_PROTOCOL_NAME_LEN];
+    char        name_remote_controller [SUBGHZ_PROTOCOL_NAME_LEN];
     uint16_t    te_long;
     uint16_t    te_shot;
     uint16_t    te_delta;
@@ -27,9 +27,12 @@ typedef struct{
     uint16_t    te_last;
     uint8_t     header_count;
     uint16_t    cnt;
-} CC1101ProtocolStruct;
+} SubGhzProtocolCommon;
 
-void subghz_protocol_header_add_bit(CC1101ProtocolStruct *pr, uint8_t bit);
-uint8_t subghz_protocol_header_check_interval (CC1101ProtocolStruct *pr,uint32_t interval, uint16_t intervel_check);
-void subghz_protocol_header_printf (CC1101ProtocolStruct *pr);
-uint64_t subghz_protocol_header_reverse_key(uint64_t key, uint8_t count_bit);
+void subghz_protocol_common_add_bit(SubGhzProtocolCommon *pr, uint8_t bit);
+
+uint8_t subghz_protocol_common_check_interval(SubGhzProtocolCommon *pr,uint32_t interval, uint16_t intervel_check);
+
+void subghz_protocol_common_printf(SubGhzProtocolCommon *pr);
+
+uint64_t subghz_protocol_common_reverse_key(uint64_t key, uint8_t count_bit);
