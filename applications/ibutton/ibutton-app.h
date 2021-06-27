@@ -38,7 +38,7 @@
 
 class iButtonApp {
 public:
-    void run(void);
+    void run(void* args);
 
     iButtonApp();
     ~iButtonApp();
@@ -99,6 +99,7 @@ public:
 
     bool save_key(const char* key_name);
     bool load_key();
+    bool load_key(const char* key_name);
     bool delete_key();
 
 private:
@@ -145,4 +146,5 @@ private:
     static const char* app_extension;
 
     void show_file_error_message(const char* error_text);
+    bool load_key_data(string_t key_path);
 };
