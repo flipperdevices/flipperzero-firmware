@@ -8,6 +8,7 @@
 typedef struct {
     string_t name;
     uint64_t key;
+    uint16_t type;
 } KeeLoqManufactureCode;
 
 ARRAY_DEF(KeeLoqManufactureCodeArray, KeeLoqManufactureCode, M_POD_OPLIST)
@@ -92,10 +93,11 @@ void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance) {
     free(instance);
 }
 
-void subghz_protocol_keeloq_add_manafacture_key(SubGhzProtocolKeeloq* instance, const char* name, uint64_t key) {
+void subghz_protocol_keeloq_add_manafacture_key(SubGhzProtocolKeeloq* instance, const char* name, uint64_t key, uint16_t type) {
     KeeLoqManufactureCode* manufacture_code = KeeLoqManufactureCodeArray_push_raw(instance->manufacture_codes);
     string_init_set_str(manufacture_code->name, name);
     manufacture_code->key = key;
+    manufacture_code->type = type;
 }
 
 uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKeeloq* instance, uint32_t fix , uint32_t hop) {

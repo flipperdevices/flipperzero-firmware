@@ -1,4 +1,5 @@
 #include "subghz_cli.h"
+
 #include <furi.h>
 #include <api-hal.h>
 #include <stream_buffer.h>
@@ -251,6 +252,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
 
     SubGhzProtocol* protocol = subghz_protocol_alloc();
+    subghz_protocol_load_keeloq_file(protocol, "/assets/subghz/keeloq_mfcodes");
 
     frequency = api_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
@@ -260,6 +262,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
 
     api_hal_subghz_set_capture_callback(subghz_cli_command_rx_callback, rx_stream);
     api_hal_subghz_enable_capture();
+
     api_hal_subghz_flush_rx();
     api_hal_subghz_rx();
 
@@ -275,7 +278,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     }
 
     subghz_protocol_free(protocol);
-
+    vStreamBufferDelete(rx_stream);
     api_hal_subghz_disable_capture();
     api_hal_subghz_reset();
 }
