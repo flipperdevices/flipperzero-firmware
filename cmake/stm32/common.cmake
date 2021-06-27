@@ -11,10 +11,16 @@ endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
 
 if(NOT STM32_TOOLCHAIN_PATH)
-     set(STM32_TOOLCHAIN_PATH "/usr")
-     message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
-else()
-     file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
+    if(NOT CMAKE_C_COMPILER)
+        set(STM32_TOOLCHAIN_PATH "/usr")
+        message(STATUS "No STM32_TOOLCHAIN_PATH specified, using default: " ${STM32_TOOLCHAIN_PATH})
+    else()
+        # keep only directory of compiler
+        get_filename_component(STM32_TOOLCHAIN_PATH ${CMAKE_C_COMPILER} DIRECTORY)
+        # remove the last /bin directory
+        get_filename_component(STM32_TOOLCHAIN_PATH ${STM32_TOOLCHAIN_PATH} DIRECTORY)
+    endif()
+    file(TO_CMAKE_PATH "${STM32_TOOLCHAIN_PATH}" STM32_TOOLCHAIN_PATH)
 endif()
 
 if(NOT STM32_TARGET_TRIPLET)
@@ -35,6 +41,14 @@ find_program(CMAKE_OBJDUMP NAMES ${STM32_TARGET_TRIPLET}-objdump PATHS ${TOOLCHA
 find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt PATHS ${TOOLCHAIN_BIN_PATH} NO_DEFAULT_PATH)
+
+function(stm32_print_size_of_target TARGET)
+    add_custom_target(${TARGET}_always_display_size
+        ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+        COMMENT "Target Sizes: "
+        DEPENDS ${TARGET}
+    )
+endfunction()
 
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)
@@ -222,6 +236,21 @@ endfunction()
 function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
     get_filename_component(SCRIPT "${SCRIPT}" ABSOLUTE)
     target_link_options(${TARGET} ${VISIBILITY} -T "${SCRIPT}")
+
+    get_target_property(TARGET_TYPE ${TARGET} TYPE)
+    if(TARGET_TYPE STREQUAL "INTERFACE_LIBRARY")
+        set(INTERFACE_PREFIX "INTERFACE_")
+    endif()
+
+    get_target_property(LINK_DEPENDS ${TARGET} ${INTERFACE_PREFIX}LINK_DEPENDS)
+    if(LINK_DEPENDS)
+        list(APPEND LINK_DEPENDS "${SCRIPT}")        
+    else()
+        set(LINK_DEPENDS "${SCRIPT}")
+    endif()
+
+
+    set_target_properties(${TARGET} PROPERTIES ${INTERFACE_PREFIX}LINK_DEPENDS "${LINK_DEPENDS}")
 endfunction()
 
 if(NOT (TARGET STM32::NoSys))
@@ -264,5 +293,4 @@ include(stm32/l0)
 include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
-
 

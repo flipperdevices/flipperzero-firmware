@@ -21,6 +21,7 @@ target_link_libraries(m7core PRIVATE
     CMSIS::STM32::H757VG::M7
     STM32::NoSys
     )
+stm32_print_size_of_target(m7core)
 
 target_link_libraries(m4core PRIVATE
     HAL::STM32::H7::M4::RCC
@@ -29,3 +30,4 @@ target_link_libraries(m4core PRIVATE
     CMSIS::STM32::H757VG::M4
     STM32::NoSys
     )
+stm32_print_size_of_target(m4core)

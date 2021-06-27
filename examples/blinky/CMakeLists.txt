@@ -24,6 +24,7 @@ target_link_libraries(stm32-blinky-f4
     CMSIS::STM32::F407VG
     STM32::NoSys 
 )
+stm32_print_size_of_target(stm32-blinky-f4)
 
 # STM32VL-Discovery
 add_executable(stm32-blinky-f1 blinky.c stm32f1xx_hal_conf.h)
@@ -34,6 +35,7 @@ target_link_libraries(stm32-blinky-f1
     CMSIS::STM32::F100RB
     STM32::NoSys
 )
+stm32_print_size_of_target(stm32-blinky-f1)
 
 # STM32L0538-Discovery
 add_executable(stm32-blinky-l0 blinky.c stm32l0xx_hal_conf.h)
@@ -44,3 +46,4 @@ target_link_libraries(stm32-blinky-l0
     CMSIS::STM32::L053C8
     STM32::NoSys
 )
+stm32_print_size_of_target(stm32-blinky-l0)
