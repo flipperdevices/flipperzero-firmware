@@ -2,8 +2,9 @@
 
 #include <api-hal-gpio.h>
 #include <api-hal-spi.h>
-#include <api-hal-tim.h>
+#include <api-hal-interrupt.h>
 #include <api-hal-resources.h>
+
 #include <furi.h>
 #include <cc1101.h>
 #include <stdio.h>
@@ -346,7 +347,7 @@ void api_hal_subghz_enable_capture() {
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
 
     // ISR setup
-    api_hal_tim_set_isr(TIM2, api_hal_subghz_capture_ISR);
+    api_hal_interrupt_set_timer_isr(TIM2, api_hal_subghz_capture_ISR);
     NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
     NVIC_EnableIRQ(TIM2_IRQn);
 
@@ -363,6 +364,6 @@ void api_hal_subghz_enable_capture() {
 
 void api_hal_subghz_disable_capture() {
     LL_TIM_DeInit(TIM2);
-    api_hal_tim_set_isr(TIM2, NULL);
+    api_hal_interrupt_set_timer_isr(TIM2, NULL);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }

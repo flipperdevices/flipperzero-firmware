@@ -1,4 +1,4 @@
-#include "api-hal-tim.h"
+#include "api-hal-interrupt.h"
 #include "api-hal-irda.h"
 
 #include <stm32wbxx_ll_tim.h>
@@ -117,14 +117,14 @@ void api_hal_irda_rx_irq_init(void)
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
 
-    api_hal_tim_set_isr(TIM2, api_hal_irda_isr);
+    api_hal_interrupt_set_timer_isr(TIM2, api_hal_irda_isr);
     NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
     NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 void api_hal_irda_rx_irq_deinit(void) {
     LL_TIM_DeInit(TIM2);
-    api_hal_tim_set_isr(TIM2, NULL);
+    api_hal_interrupt_set_timer_isr(TIM2, NULL);
 }
 
 bool api_hal_irda_rx_irq_is_busy(void) {
