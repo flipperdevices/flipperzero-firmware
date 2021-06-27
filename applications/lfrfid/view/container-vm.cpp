@@ -1,6 +1,8 @@
 #include "container-vm.h"
 #include "elements/generic-element.h"
 #include "elements/string-element.h"
+#include "elements/icon-element.h"
+#include "elements/button-element.h"
 #include <list>
 
 class ContainerVMData {
@@ -15,7 +17,7 @@ public:
 
     template <typename T> T add(const T element, View* view) {
         elements.push_back(element);
-        element->view = view;
+        element->set_parent_view(view);
         return element;
     }
 
@@ -109,3 +111,5 @@ bool ContainerVM::view_input_callback(InputEvent* event, void* context) {
 }
 
 template StringElement* ContainerVM::add<StringElement>();
+template IconElement* ContainerVM::add<IconElement>();
+template ButtonElement* ContainerVM::add<ButtonElement>();

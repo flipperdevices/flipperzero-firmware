@@ -24,12 +24,12 @@ void StringElement::set_text(
     Align _horizontal,
     Align _vertical,
     Font _font) {
-    view_get_model(view);
+    lock_model();
     text = _text;
     x = _x;
     y = _y;
     horizontal = _horizontal;
     vertical = _vertical;
     font = _font;
-    view_commit_model(view, true);
+    unlock_model(true);
 }

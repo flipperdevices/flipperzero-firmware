@@ -17,7 +17,7 @@ void DialogExVM::clean() {
     set_context(NULL);
     set_header(NULL, 0, 0, AlignLeft, AlignBottom);
     set_text(NULL, 0, 0, AlignLeft, AlignBottom);
-    set_icon(-1, -1, I_ButtonCenter_7x7);
+    set_icon(0, 0, I_Empty_1x1);
     set_left_button_text(NULL);
     set_center_button_text(NULL);
     set_right_button_text(NULL);
