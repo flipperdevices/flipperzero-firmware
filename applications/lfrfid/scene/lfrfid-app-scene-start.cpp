@@ -27,6 +27,7 @@ bool LfRfidAppSceneStart::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
         submenu_item_selected = event->payload.menu_index;
         switch(event->payload.menu_index) {
         case SubmenuRead:
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Read);
             break;
         case SubmenuSaved:
             break;

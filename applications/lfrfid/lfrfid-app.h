@@ -5,8 +5,20 @@
 #include <generic-scene.hpp>
 #include <scene-controller.hpp>
 #include <view-controller.hpp>
+#include <record-controller.hpp>
 
 #include <view-modules/submenu-vm.h>
+#include <view-modules/popup-vm.h>
+#include <view-modules/dialog-ex-vm.h>
+#include <view-modules/text-input-vm.h>
+#include <view-modules/byte-input-vm.h>
+#include "view/container-vm.h"
+
+#include <sd-card-api.h>
+#include <filesystem-api.h>
+#include <notification/notification-messages.h>
+
+#include "helpers/rfid-worker.h"
 
 class LfRfidApp {
 public:
@@ -17,6 +29,7 @@ public:
 
     enum class SceneType : uint8_t {
         GENERIC_SCENE_ENUM_VALUES,
+        Read,
     };
 
     class Event {
@@ -29,10 +42,17 @@ public:
     };
 
     SceneController<GenericScene<LfRfidApp>, LfRfidApp> scene_controller;
-    ViewController<LfRfidApp, SubmenuVM> view_controller;
+    ViewController<LfRfidApp, SubmenuVM, PopupVM, DialogExVM, TextInputVM, ByteInputVM, ContainerVM>
+        view_controller;
 
     ~LfRfidApp();
     LfRfidApp();
+
+    RecordController<FS_Api> fs_api;
+    RecordController<SdCard_Api> sd_ex_api;
+    RecordController<NotificationApp> notification;
+
+    RfidWorker worker;
 
     void run();
 };

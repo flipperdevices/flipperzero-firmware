@@ -1,0 +1,25 @@
+#include "lfrfid-app-scene-read.h"
+#include "../view/elements/string-element.h"
+
+void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool need_restore) {
+    auto popup = app->view_controller.get<PopupVM>();
+
+    popup->set_header("Reading\nLF RFID", 77, 35, AlignLeft, AlignTop);
+    popup->set_icon(0, 3, I_RFIDDolphinReceive_105x61);
+
+    app->view_controller.switch_to<PopupVM>();
+}
+
+bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
+    bool consumed = false;
+
+    if(event->type == LfRfidApp::EventType::Tick) {
+        notification_message(app->notification, &sequence_blink_red_10);
+    }
+
+    return consumed;
+}
+
+void LfRfidAppSceneRead::on_exit(LfRfidApp* app) {
+    app->view_controller.get<PopupVM>()->clean();
+}
