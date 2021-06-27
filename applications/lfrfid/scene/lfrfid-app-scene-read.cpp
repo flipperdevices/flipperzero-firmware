@@ -17,9 +17,10 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     if(event->type == LfRfidApp::EventType::Tick) {
         if(app->worker.read()) {
             notification_message(app->notification, &sequence_success);
-            //app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadSuccess);
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadSuccess);
+        } else {
+            notification_message(app->notification, &sequence_blink_red_10);
         }
-        notification_message(app->notification, &sequence_blink_red_10);
     }
 
     return consumed;

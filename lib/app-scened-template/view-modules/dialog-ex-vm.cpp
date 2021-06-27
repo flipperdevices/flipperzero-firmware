@@ -44,7 +44,7 @@ void DialogExVM::set_text(const char* text, uint8_t x, uint8_t y, Align horizont
     dialog_ex_set_text(dialog_ex, text, x, y, horizontal, vertical);
 }
 
-void DialogExVM::set_icon(int8_t x, int8_t y, IconName name) {
+void DialogExVM::set_icon(uint8_t x, uint8_t y, IconName name) {
     dialog_ex_set_icon(dialog_ex, x, y, name);
 }
 

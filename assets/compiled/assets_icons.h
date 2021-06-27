@@ -25,6 +25,7 @@ typedef enum {
 	I_ButtonLeft_4x7,
 	I_ButtonRightSmall_3x5,
 	I_ButtonRight_4x7,
+	I_Empty_1x1,
 	I_BigBurger_24x24,
 	I_BigGames_24x24,
 	I_BigProfile_24x24,
