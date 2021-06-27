@@ -30,6 +30,7 @@ public:
     enum class SceneType : uint8_t {
         GENERIC_SCENE_ENUM_VALUES,
         Read,
+        ReadSuccess,
     };
 
     class Event {

@@ -1,6 +1,7 @@
 #include "lfrfid-app.h"
 #include "scene/lfrfid-app-scene-start.h"
 #include "scene/lfrfid-app-scene-read.h"
+#include "scene/lfrfid-app-scene-read-success.h"
 
 LfRfidApp::LfRfidApp()
     : scene_controller{this}
@@ -20,5 +21,6 @@ LfRfidApp::~LfRfidApp() {
 void LfRfidApp::run() {
     scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
     scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
+    scene_controller.add_scene(SceneType::ReadSuccess, new LfRfidAppSceneReadSuccess());
     scene_controller.process(100);
 }

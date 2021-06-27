@@ -8,12 +8,17 @@ void LfRfidAppSceneRead::on_enter(LfRfidApp* app, bool need_restore) {
     popup->set_icon(0, 3, I_RFIDDolphinReceive_105x61);
 
     app->view_controller.switch_to<PopupVM>();
+    app->worker.start_read();
 }
 
 bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::Tick) {
+        if(app->worker.read()) {
+            notification_message(app->notification, &sequence_success);
+            //app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::ReadSuccess);
+        }
         notification_message(app->notification, &sequence_blink_red_10);
     }
 
@@ -22,4 +27,5 @@ bool LfRfidAppSceneRead::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
 
 void LfRfidAppSceneRead::on_exit(LfRfidApp* app) {
     app->view_controller.get<PopupVM>()->clean();
+    app->worker.stop_read();
 }

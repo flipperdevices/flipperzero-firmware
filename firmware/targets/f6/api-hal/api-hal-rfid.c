@@ -207,6 +207,8 @@ void api_hal_rfid_tim_emulate_stop() {
 }
 
 void api_hal_rfid_tim_reset() {
+    HAL_TIM_Base_DeInit(&LFRFID_READ_TIM);
+    HAL_TIM_Base_DeInit(&LFRFID_EMULATE_TIM);
 }
 
 bool api_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw) {
