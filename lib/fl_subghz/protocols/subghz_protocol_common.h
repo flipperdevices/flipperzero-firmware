@@ -13,7 +13,7 @@
 #define DURATION_DIFF(x,y) ((x < y) ? (y - x) : (x - y))
 
 #define SUBGHZ_PROTOCOL_NAME_LEN 15
-typedef struct{
+typedef struct {
     char        name [SUBGHZ_PROTOCOL_NAME_LEN];
     char        name_remote_controller [SUBGHZ_PROTOCOL_NAME_LEN];
     uint16_t    te_long;

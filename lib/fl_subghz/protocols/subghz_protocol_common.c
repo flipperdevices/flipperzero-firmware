@@ -32,33 +32,39 @@ void subghz_protocol_common_printf (SubGhzProtocolCommon *common){
     uint32_t code_found_reverse_hi = code_found_reverse>>32;
     uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
 
-    if(code_found_hi>0){
-        printf("Found protocol %s   %d Bit  KEY:0x%lX%08lX  Reverse KEY:0x%lX%08lX \r\n",
-                    common->name,
-                    common->code_count_bit,
-                    code_found_hi,
-                    code_found_lo,
-                    code_found_reverse_hi,
-                    code_found_reverse_lo
-                );
-    } else{
-        printf("Found protocol %s   %d Bit  KEY:0x%lX%lX  Reverse KEY:0x%lX%lX \r\n",
-                common->name,
-                common->code_count_bit,
-                code_found_hi,
-                code_found_lo,
-                code_found_reverse_hi,
-                code_found_reverse_lo
-            );
+    if (code_found_hi>0) {
+        printf(
+            "Found protocol %s, %d Bit\r\n"
+            " |- KEY:0x%lX%08lX  Reverse KEY:0x%lX%08lX\r\n",
+            common->name,
+            common->code_count_bit,
+            code_found_hi,
+            code_found_lo,
+            code_found_reverse_hi,
+            code_found_reverse_lo
+        );
+    } else {
+        printf(
+            "Found protocol %s, %d Bit\r\n"
+            " |- KEY:0x%lX%lX  Reverse KEY:0x%lX%lX\r\n",
+            common->name,
+            common->code_count_bit,
+            code_found_hi,
+            code_found_lo,
+            code_found_reverse_hi,
+            code_found_reverse_lo
+        );
     }
     if(common->name[0] =='K'){
-        printf("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tFIX: %lX  \r\n"
-                "\tremote controller:%s\t\t\t\t\t\t\t\tHOP: %lX  \r\n"
-                "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tCNT: %04X  BTN: %02lX\r\n",
-                code_found_reverse_hi,
-                common->name_remote_controller,
-                code_found_reverse_lo,
-                common->cnt, //need manufacture code
-                code_found_reverse_hi>>28);
+        printf(
+            " |- FIX: %lX\r\n"
+            " |- Remote controller: %s\r\n"
+            " |- HOP: %lX CNT: %04X  BTN: %02lX\r\n",
+            code_found_reverse_hi,
+            common->name_remote_controller,
+            code_found_reverse_lo,
+            common->cnt, //need manufacture code
+            code_found_reverse_hi>>28
+        );
     }
 }
