@@ -233,18 +233,21 @@ void subghz_cli_command_rx_callback(
 }
 
 void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
-    uint32_t frequency = 0;
-    int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
-    if(ret != 1) {
-        printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
-        cli_print_usage("subghz_rx_pt", "<Frequency in HZ>", string_get_cstr(args));
-        return;
-    }
+    uint32_t frequency = 433920000;
+    if(string_size(args)) {
+        int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
+        if(ret != 1) {
+            printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
+            cli_print_usage("subghz_rx", "<Frequency in HZ>", string_get_cstr(args));
+            return;
+        }
 
-    if(!subghz_check_frequency_range(frequency)) {
-        printf(
-            "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
-        return;
+        if(!subghz_check_frequency_range(frequency)) {
+            printf(
+                "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n",
+                frequency);
+            return;
+        }
     }
 
     api_hal_subghz_reset();
