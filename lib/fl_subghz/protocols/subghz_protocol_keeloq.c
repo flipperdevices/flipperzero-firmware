@@ -93,7 +93,7 @@ void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance) {
 
 void subghz_protocol_keeloq_add_manafacture_key(SubGhzProtocolKeeloq* instance, const char* name, uint64_t key) {
     KeeLoqManufactureCode* manufacture_code = KeeLoqManufactureCodeArray_push_raw(instance->manufacture_codes);
-    string_init(manufacture_code->name);
+    string_init_set_str(manufacture_code->name, name);
     manufacture_code->key = key;
 }
 
