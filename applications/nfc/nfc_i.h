@@ -17,6 +17,7 @@
 #include "nfc_emulate.h"
 #include "nfc_emv.h"
 #include "nfc_mifare_ul.h"
+#include <nfc/scenes/nfc_scene_start.h>
 
 struct Nfc {
     NfcCommon nfc_common;
@@ -26,6 +27,9 @@ struct Nfc {
     NfcEmulate* nfc_emulate;
     NfcEmv* nfc_emv;
     NfcMifareUl* nfc_mifare_ul;
+
+    // Scenes
+    NfcSceneStart* scene_start;
 };
 
 typedef enum {

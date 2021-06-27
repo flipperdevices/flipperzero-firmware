@@ -34,11 +34,11 @@ Nfc* nfc_alloc() {
 
     // Menu
     nfc->submenu = submenu_alloc();
-    submenu_add_item(nfc->submenu, "Detect", NfcSubmenuDetect, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Emulate", NfcSubmenuEmulate, nfc_menu_callback, nfc);
-    submenu_add_item(nfc->submenu, "Read bank card", NfcSubmenuEMV, nfc_menu_callback, nfc);
-    submenu_add_item(
-        nfc->submenu, "Read Mifare Ultralight", NfcSubmenuMifareUl, nfc_menu_callback, nfc);
+    // submenu_add_item(nfc->submenu, "Detect", NfcSubmenuDetect, nfc_menu_callback, nfc);
+    // submenu_add_item(nfc->submenu, "Emulate", NfcSubmenuEmulate, nfc_menu_callback, nfc);
+    // submenu_add_item(nfc->submenu, "Read bank card", NfcSubmenuEMV, nfc_menu_callback, nfc);
+    // submenu_add_item(
+    //     nfc->submenu, "Read Mifare Ultralight", NfcSubmenuMifareUl, nfc_menu_callback, nfc);
 
     View* submenu_view = submenu_get_view(nfc->submenu);
     view_set_previous_callback(submenu_view, nfc_view_exit);
@@ -66,8 +66,8 @@ Nfc* nfc_alloc() {
         NfcViewMifareUl,
         nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
 
-    // Switch to menu
-    view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
+    // Scene allocation
+    nfc->scene_start = nfc_scence_start_alloc();
 
     return nfc;
 }
@@ -111,6 +111,8 @@ void nfc_free(Nfc* nfc) {
 
 int32_t nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
+
+    nfc->scene_start->scene.on_start(nfc);
 
     view_dispatcher_run(nfc->nfc_common.view_dispatcher);
 
