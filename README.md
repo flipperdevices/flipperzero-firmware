@@ -81,11 +81,20 @@ CMSIS creates following targets:
 So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide own script using `stm32_add_linker_script` function
 
 ***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
-For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`, `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
+For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`,
+`CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
-The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`. This will add the `--specs=nosys.specs` to compiler and linker flags.
-If you want to use C++ on MCUs with little flash, you might instead want to link the newlib-nano to reduce the code size. You can do so by linking `STM32::Nano`, which will add the `--specs=nano.specs` flags to both compiler and linker.
-Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls, and you have to provide implementations for several OS interfacing functions (_sbrk, _close, _fstat, and others).
+The GCC C/C++ standard libraries are added by linking the library `STM32::NoSys`. This will add
+the `--specs=nosys.specs` to compiler and linker flags.
+If you want to use C++ on MCUs with little flash, you might instead want to link the newlib-nano to
+reduce the code size. You can do so by linking `STM32::Nano`, which will add the
+`--specs=nano.specs` flags to both compiler and linker.
+Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls,
+and you have to provide implementations for several OS interfacing
+functions (`_sbrk`, `_close`, `_fstat`, and others). You can enable IO floating point support with
+newlib-nano by linking against `STM32::Nano::FloatPrint` and/or `STM32::Nano::FloatScan`.
+It is also possible to combine `STM32::Nano` and `STM32::NoSys`
+to have the benefits of reduced code size while not being forced to implement system calls.
 
 ## HAL
 
