@@ -62,7 +62,7 @@ void LfRfidAppSceneReadSuccess::on_enter(LfRfidApp* app, bool need_restore) {
         for(uint8_t i = 0; i < app->worker.key.get_type_data_count(); i++) {
             string_cat_printf(string[0], "%02X", data[i]);
         }
-        
+
         string_printf(string[1], "%u", data[0]);
         string_printf(string[2], "%u", (uint16_t)((data[1] << 8) | (data[2])));
 
