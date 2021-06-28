@@ -13,6 +13,9 @@
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/popup.h>
+#include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 
 #include "views/nfc_detect.h"
 #include "views/nfc_emulate.h"
@@ -38,6 +41,9 @@ struct Nfc {
     // Common Views
     Submenu* submenu;
     DialogEx* dialog_ex;
+    Popup* popup;
+    TextInput* text_input;
+    ByteInput* byte_input;
 
     // Scenes
     AppScene* scene_start;
@@ -50,6 +56,9 @@ struct Nfc {
 typedef enum {
     NfcViewMenu,
     NfcViewDialogEx,
+    NfcViewPopup,
+    NfcViewTextInput,
+    NfcViewByteInput,
     NfcViewDetect,
     NfcViewEmulate,
     NfcViewEmv,

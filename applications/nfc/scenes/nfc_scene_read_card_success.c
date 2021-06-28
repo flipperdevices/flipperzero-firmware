@@ -14,11 +14,13 @@ void nfc_scene_read_card_success_dialog_callback(DialogExResult result, void* co
 const void nfc_scene_read_card_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
 
-    // TODO Set data from worker
+    NfcDeviceData* data = (NfcDeviceData*)nfc->nfc_common.worker_result;
+
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "More");
-    dialog_ex_set_header(dialog_ex, "NFC-A may be:", 60, 24, AlignCenter, AlignCenter);
+    dialog_ex_set_header(dialog_ex, nfc_get_dev_type(data->device), 48, 8, AlignLeft, AlignCenter);
+    dialog_ex_set_icon(dialog_ex, 3, 3, I_RFIDBigChip_37x36);
     dialog_ex_set_context(dialog_ex, nfc);
     dialog_ex_set_result_callback(dialog_ex, nfc_scene_read_card_success_dialog_callback);
 
@@ -47,6 +49,7 @@ const void nfc_scene_read_card_success_on_exit(void* context) {
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_header(dialog_ex, NULL, 0, 0, AlignCenter, AlignCenter);
     dialog_ex_set_text(dialog_ex, NULL, 0, 0, AlignCenter, AlignTop);
+    dialog_ex_set_icon(dialog_ex, 0, 0, I_Empty_1x1);
     dialog_ex_set_left_button_text(dialog_ex, NULL);
     dialog_ex_set_right_button_text(dialog_ex, NULL);
     dialog_ex_set_result_callback(dialog_ex, NULL);

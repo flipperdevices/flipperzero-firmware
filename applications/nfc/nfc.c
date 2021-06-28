@@ -26,6 +26,21 @@ Nfc* nfc_alloc() {
     view_dispatcher_add_view(
         nfc->nfc_common.view_dispatcher, NfcViewDialogEx, dialog_ex_get_view(nfc->dialog_ex));
 
+    // Popup
+    nfc->popup = popup_alloc();
+    view_dispatcher_add_view(
+        nfc->nfc_common.view_dispatcher, NfcViewPopup, popup_get_view(nfc->popup));
+
+    // Text Input
+    nfc->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        nfc->nfc_common.view_dispatcher, NfcViewTextInput, text_input_get_view(nfc->text_input));
+
+    // Byte Input
+    nfc->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        nfc->nfc_common.view_dispatcher, NfcViewByteInput, byte_input_get_view(nfc->byte_input));
+
     // Detect
     nfc->nfc_detect = nfc_detect_alloc(&nfc->nfc_common);
     view_dispatcher_add_view(
