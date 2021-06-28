@@ -2,12 +2,12 @@
 
 #include "view_navigator.h"
 #include <furi.h>
+#include <m-array.h>
+
+ARRAY_DEF(ViewNavSceneArray, AppScene*, M_PTR_OPLIST);
 
 struct ViewNavigator {
-    bool navigator_started;
-    // TODO rework with M-LIB container
-    uint32_t current_scene_i;
-    AppScene* scene[10];
+    ViewNavSceneArray_t scene_array;
     void* context;
 };
 
