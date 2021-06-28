@@ -18,21 +18,13 @@ void RfidTimerEmulator::start(LfrfidKeyType type, const uint8_t* data, uint8_t d
     if(encoders.count(type)) {
         current_encoder = encoders.find(type)->second;
 
-        if(lfrfid_key_get_type_data_count(type) == data_size) {
+        if(data_size >= lfrfid_key_get_type_data_count(type)) {
             current_encoder->init(data, data_size);
 
             api_hal_rfid_tim_emulate(125000);
             api_hal_rfid_pins_emulate();
 
             api_interrupt_add(timer_update_callback, InterruptTypeTimerUpdate, this);
-
-            // TODO make api for interrupts priority
-            for(size_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
-                HAL_NVIC_SetPriority(static_cast<IRQn_Type>(i), 15, 0);
-            }
-
-            HAL_NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 5, 0);
-            HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
 
             api_hal_rfid_tim_emulate_start();
         }

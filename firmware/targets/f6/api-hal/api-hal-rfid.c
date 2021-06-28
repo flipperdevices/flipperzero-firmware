@@ -197,6 +197,14 @@ void api_hal_rfid_tim_emulate(float freq) {
 }
 
 void api_hal_rfid_tim_emulate_start() {
+    // TODO make api for interrupts priority
+    for(size_t i = WWDG_IRQn; i <= DMAMUX1_OVR_IRQn; i++) {
+        HAL_NVIC_SetPriority(i, 15, 0);
+    }
+
+    HAL_NVIC_SetPriority(TIM2_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(TIM2_IRQn);
+
     HAL_TIM_PWM_Start_IT(&LFRFID_EMULATE_TIM, LFRFID_EMULATE_CHANNEL);
     HAL_TIM_Base_Start_IT(&LFRFID_EMULATE_TIM);
 }

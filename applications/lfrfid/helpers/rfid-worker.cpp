@@ -50,6 +50,14 @@ void RfidWorker::stop_write() {
     reader.stop();
 }
 
+void RfidWorker::start_emulate() {
+    emulator.start(key.get_type(), key.get_data(), key.get_type_data_count());
+}
+
+void RfidWorker::stop_emulate() {
+    emulator.stop();
+}
+
 void RfidWorker::sq_write() {
     // TODO expand this
     switch(key.get_type()) {

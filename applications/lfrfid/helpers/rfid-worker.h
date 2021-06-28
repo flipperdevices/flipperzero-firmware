@@ -25,7 +25,7 @@ public:
     WriteResult write();
     void stop_write();
 
-    bool start_emulate();
+    void start_emulate();
     void stop_emulate();
 
     RfidKey key;

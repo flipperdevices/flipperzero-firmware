@@ -33,7 +33,7 @@ bool LfRfidAppSceneReadedMenu::on_event(LfRfidApp* app, LfRfidApp::Event* event)
             //app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::);
             break;
         case SubmenuEmulate:
-            //app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::);
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Emulate);
             break;
         }
         consumed = true;
