@@ -273,7 +273,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     LevelPair pair;
     while(!cli_cmd_interrupt_received(cli)) {
         int ret = xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
-        if (ret == sizeof(LevelPair)) {
+        if(ret == sizeof(LevelPair)) {
             if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
                 printf(".");
                 subghz_protocol_reset(protocol);
