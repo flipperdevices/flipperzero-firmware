@@ -58,6 +58,12 @@ void view_dispatcher_add_scene(ViewDispatcher* view_dispatcher, AppScene* scene)
  */
 void view_dispatcher_send_navigation_event(ViewDispatcher* view_dispatcher, uint32_t event);
 
+/** Send search scene event
+ * @param view_dispatcher ViewDispatcher instance
+ * @param event event
+ */
+void view_dispatcher_send_back_search_scene_event(ViewDispatcher* view_dispatcher, uint32_t event);
+
 /** Run ViewDispatcher
  * Use only after queue enabled
  * @param view_dispatcher ViewDispatcher instance

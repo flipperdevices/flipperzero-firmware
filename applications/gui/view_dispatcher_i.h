@@ -22,6 +22,7 @@ typedef enum {
     ViewDispatcherMessageTypeInput,
     ViewDispatcherMessageTypeCustomEvent,
     ViewDispatcherMessageTypeNavigationEvent,
+    ViewDispatcherMessageTypeBackSearchScene,
     ViewDispatcherMessageTypeStop,
 } ViewDispatcherMessageType;
 
@@ -31,6 +32,7 @@ typedef struct {
         InputEvent input;
         uint32_t custom_event;
         ViewNavigatorEvent navigator_event;
+        uint32_t scene_id;
     };
 } ViewDispatcherMessage;
 

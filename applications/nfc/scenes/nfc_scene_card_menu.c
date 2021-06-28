@@ -65,9 +65,9 @@ const bool nfc_scene_card_menu_on_event(void* context, uint32_t event) {
         view_dispatcher_send_navigation_event(
             nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
         return true;
-    } else if(event == ViewNavigatorEventPreviousSearch) {
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, VIEW_NAV_SEARCH_PREV_SCENE(NfcSceneStart));
+    } else if(event == ViewNavigatorEventBack) {
+        view_dispatcher_send_back_search_scene_event(
+            nfc->nfc_common.view_dispatcher, NfcSceneStart);
         return true;
     }
 

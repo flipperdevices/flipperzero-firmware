@@ -80,6 +80,9 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
         } else if(message.type == ViewDispatcherMessageTypeNavigationEvent) {
             view_navigator_handle_navigation_event(
                 view_dispatcher->view_navigator, message.navigator_event);
+        } else if(message.type == ViewDispatcherMessageTypeBackSearchScene) {
+            view_navigator_handle_back_search_scene_event(
+                view_dispatcher->view_navigator, message.navigator_event);
         }
     }
 }
@@ -203,8 +206,8 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         if(event->key == InputKeyBack) {
             view_id = view_previous(view_dispatcher->current_view);
             if((view_id == VIEW_IGNORE) && (view_dispatcher->view_navigator)) {
-                is_consumed = view_navigator_handle_custom_event(
-                    view_dispatcher->view_navigator, ViewNavigatorEventPreviousSearch);
+                is_consumed = view_navigator_handle_navigation_event(
+                    view_dispatcher->view_navigator, ViewNavigatorEventBack);
                 if(!is_consumed) {
                     view_dispatcher_stop(view_dispatcher);
                     return;
@@ -248,6 +251,18 @@ void view_dispatcher_send_navigation_event(ViewDispatcher* view_dispatcher, uint
 
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeNavigationEvent;
+    message.custom_event = event;
+
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
+void view_dispatcher_send_back_search_scene_event(ViewDispatcher* view_dispatcher, uint32_t event) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->queue);
+    furi_assert(view_dispatcher->view_navigator);
+
+    ViewDispatcherMessage message;
+    message.type = ViewDispatcherMessageTypeBackSearchScene;
     message.custom_event = event;
 
     furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);

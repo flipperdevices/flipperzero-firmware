@@ -17,24 +17,26 @@ void view_navigator_free(ViewNavigator* view_navigator) {
 }
 
 bool view_navigator_handle_custom_event(ViewNavigator* view_navigator, uint32_t event) {
-    furi_assert(view_navigator);
-
     return view_navigator->scene[view_navigator->current_scene_i]->on_event(
         view_navigator->context, event);
 }
 
 bool view_navigator_handle_navigation_event(ViewNavigator* view_navigator, uint32_t event) {
-    furi_assert(view_navigator);
-
     if(event == ViewNavigatorEventNext) {
         return view_navigator_next_scene(view_navigator);
-    } else if(event == ViewNavigatorEventPrevious) {
-        return view_navigator_previous_scene(view_navigator);
-    } else if(VIEW_NAV_IS_SEARCH_PREV_SCENE_EVENT(event)) {
-        return view_navigator_search_previous_scene(
-            view_navigator, VIEW_NAV_SEARCH_GET_SCENE(event));
+    } else if(event == ViewNavigatorEventBack) {
+        if(view_navigator->scene[view_navigator->current_scene_i]->on_event(
+               view_navigator->context, ViewNavigatorEventBack)) {
+            return true;
+        } else {
+            return view_navigator_previous_scene(view_navigator);
+        }
     }
     return false;
+}
+
+bool view_navigator_handle_back_search_scene_event(ViewNavigator* view_navigator, uint32_t event) {
+    return view_navigator_search_previous_scene(view_navigator, event);
 }
 
 void view_navigator_add_next_scene(ViewNavigator* view_navigator, AppScene* scene) {
