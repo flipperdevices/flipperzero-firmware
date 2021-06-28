@@ -15,24 +15,14 @@
 #include "applications.h"
 
 #define MAX_DEPTH 32
-#define MAX_NAME_LEN 255
+#define MAX_FILES 100 //temp
+#define MAX_FILE_SIZE 128
 
 typedef enum {
     ArchiveViewMain,
     ArchiveViewTextInput,
     ArchiveViewTotal,
 } ArchiveViewEnum;
-
-typedef enum {
-    ArchiveTabFavourites,
-    ArchiveTabIButton,
-    ArchiveTabNFC,
-    ArchiveTabSubOne,
-    ArchiveTabLFRFID,
-    ArchiveTabIrda,
-    ArchiveTabBrowser,
-    ArchiveTabTotal,
-} ArchiveTabEnum;
 
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
@@ -47,7 +37,7 @@ static const char* known_ext[] = {
     [ArchiveFileTypeNFC] = ".nfc",
     [ArchiveFileTypeSubOne] = ".sub1",
     [ArchiveFileTypeLFRFID] = ".rfid",
-    [ArchiveFileTypeIrda] = ".irda",
+    [ArchiveFileTypeIrda] = ".ir",
 };
 
 static const char* tab_default_paths[] = {
@@ -77,6 +67,23 @@ static inline const char* get_tab_ext(ArchiveTabEnum tab) {
     }
 }
 
+static inline const char* get_default_path(ArchiveFileTypeEnum type) {
+    switch(type) {
+    case ArchiveFileTypeIButton:
+        return tab_default_paths[ArchiveTabIButton];
+    case ArchiveFileTypeNFC:
+        return tab_default_paths[ArchiveTabNFC];
+    case ArchiveFileTypeSubOne:
+        return tab_default_paths[ArchiveTabSubOne];
+    case ArchiveFileTypeLFRFID:
+        return tab_default_paths[ArchiveTabLFRFID];
+    case ArchiveFileTypeIrda:
+        return tab_default_paths[ArchiveTabIrda];
+    default:
+        return false;
+    }
+}
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -94,7 +101,7 @@ typedef struct {
     ArchiveTabEnum tab_id;
     string_t name;
     string_t path;
-    string_t text_input_buffer;
+    char text_input_buffer[MAX_NAME_LEN];
 
     uint8_t depth;
     uint16_t last_idx[MAX_DEPTH];

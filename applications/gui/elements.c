@@ -8,6 +8,42 @@
 #include <string.h>
 #include <stdint.h>
 
+void elements_progress_bar(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t progress,
+    uint8_t total) {
+    furi_assert(canvas);
+    furi_assert(total > 0);
+    uint8_t height = 9;
+    uint8_t marker_width = 7;
+    furi_assert(width > marker_width);
+
+    uint8_t progress_length = ((float)progress / total) * (width - marker_width - 2);
+
+    // rframe doesnt work if (radius * 2) > any rect side, so write manually
+    uint8_t x_max = x + width - 1;
+    uint8_t y_max = y + height - 1;
+    canvas_draw_line(canvas, x + 3, y, x_max - 3, y);
+    canvas_draw_line(canvas, x_max - 3, y, x_max, y + 3);
+    canvas_draw_line(canvas, x_max, y + 3, x_max, y_max - 3);
+    canvas_draw_line(canvas, x_max, y_max - 3, x_max - 3, y_max);
+    canvas_draw_line(canvas, x_max - 3, y_max, x + 3, y_max);
+    canvas_draw_line(canvas, x + 3, y_max, x, y_max - 3);
+    canvas_draw_line(canvas, x, y_max - 3, x, y + 3);
+    canvas_draw_line(canvas, x, y + 3, x + 3, y);
+
+    canvas_draw_rbox(canvas, x + 1, y + 1, marker_width + progress_length, height - 2, 3);
+    canvas_invert_color(canvas);
+    canvas_draw_dot(canvas, x + progress_length + 3, y + 2);
+    canvas_draw_dot(canvas, x + progress_length + 4, y + 2);
+    canvas_draw_dot(canvas, x + progress_length + 5, y + 3);
+    canvas_draw_dot(canvas, x + progress_length + 6, y + 4);
+    canvas_invert_color(canvas);
+}
+
 void elements_scrollbar_pos(
     Canvas* canvas,
     uint8_t x,
@@ -31,7 +67,7 @@ void elements_scrollbar_pos(
     }
 }
 
-void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
+void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total) {
     furi_assert(canvas);
 
     uint8_t width = canvas_width(canvas);
@@ -184,11 +220,35 @@ void elements_multiline_text_aligned(
 
     do {
         end = strchr(start, '\n');
+
         if(end) {
             string_set_strn(str, start, end - start);
         } else {
             string_set_str(str, start);
         }
+
+        uint16_t len_px = canvas_string_width(canvas, string_get_cstr(str));
+        uint8_t px_left =
+            canvas_width(canvas) - (x - (horizontal == AlignCenter ? len_px / 2 : 0));
+
+        // hacky
+        if(len_px > px_left) {
+            string_t buff;
+            string_init_set(buff, str);
+            size_t s_len = string_size(str);
+            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 2);
+
+            string_left(buff, end_pos);
+            string_cat(buff, "-");
+            string_right(str, end_pos);
+
+            canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(buff));
+            string_clear(buff);
+
+            start = end + 1;
+            y += font_height;
+        }
+
         canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, string_get_cstr(str));
         start = end + 1;
         y += font_height;
@@ -271,7 +331,7 @@ void elements_string_fit_width(Canvas* canvas, string_t string, uint8_t width) {
     uint16_t len_px = canvas_string_width(canvas, string_get_cstr(string));
 
     if(len_px > width) {
-        size_t s_len = strlen(string_get_cstr(string));
+        size_t s_len = string_size(string);
         uint8_t end_pos = s_len - ((len_px - width) / ((len_px / s_len) + 2) + 2);
 
         string_mid(string, 0, end_pos);

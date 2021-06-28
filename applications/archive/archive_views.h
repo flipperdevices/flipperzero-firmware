@@ -6,7 +6,8 @@
 #include <furi.h>
 #include <filesystem-api.h>
 
-#define MAX_LEN_PX 98
+#define MAX_LEN_PX 100
+#define MAX_NAME_LEN 255
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 4
 
@@ -21,9 +22,21 @@ typedef enum {
     AppIdTotal,
 } ArchiveFileTypeEnum;
 
+typedef enum {
+    ArchiveTabFavourites,
+    ArchiveTabLFRFID,
+    ArchiveTabSubOne,
+    ArchiveTabNFC,
+    ArchiveTabIButton,
+    ArchiveTabIrda,
+    ArchiveTabBrowser,
+    ArchiveTabTotal,
+} ArchiveTabEnum;
+
 typedef struct {
     string_t name;
     ArchiveFileTypeEnum type;
+    bool fav;
 } ArchiveFile_t;
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
@@ -63,4 +76,8 @@ typedef struct {
 } ArchiveViewModel;
 
 void archive_view_render(Canvas* canvas, void* model);
-void archive_trim_file_ext(string_t name);
+void archive_trim_file_ext(char* name);
+
+static inline bool is_known_app(ArchiveFileTypeEnum type) {
+    return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
+}
