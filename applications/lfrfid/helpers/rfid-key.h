@@ -16,7 +16,10 @@ public:
     const char* get_type_text();
     const uint8_t get_type_data_count();
 
+    char* get_name();
+
 private:
     std::array<uint8_t, LFRFID_KEY_SIZE> data;
     LfrfidKeyType type;
+    char name[LFRFID_KEY_NAME_SIZE + 1];
 };

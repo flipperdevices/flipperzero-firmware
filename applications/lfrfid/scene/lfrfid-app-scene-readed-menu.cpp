@@ -30,7 +30,7 @@ bool LfRfidAppSceneReadedMenu::on_event(LfRfidApp* app, LfRfidApp::Event* event)
             app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Write);
             break;
         case SubmenuNameAndSave:
-            //app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::);
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SaveName);
             break;
         case SubmenuEmulate:
             app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::Emulate);

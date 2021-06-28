@@ -6,6 +6,7 @@
 #include <scene-controller.hpp>
 #include <view-controller.hpp>
 #include <record-controller.hpp>
+#include <text-store.h>
 
 #include <view-modules/submenu-vm.h>
 #include <view-modules/popup-vm.h>
@@ -36,6 +37,7 @@ public:
         Write,
         WriteSuccess,
         Emulate,
+        SaveName,
     };
 
     class Event {
@@ -60,5 +62,6 @@ public:
 
     RfidWorker worker;
 
+    TextStore text_store;
     void run();
 };

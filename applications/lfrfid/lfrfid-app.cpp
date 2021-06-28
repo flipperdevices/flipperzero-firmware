@@ -6,12 +6,14 @@
 #include "scene/lfrfid-app-scene-write.h"
 #include "scene/lfrfid-app-scene-write-success.h"
 #include "scene/lfrfid-app-scene-emulate.h"
+#include "scene/lfrfid-app-scene-save-name.h"
 
 LfRfidApp::LfRfidApp()
     : scene_controller{this}
     , fs_api{"sdcard"}
     , sd_ex_api{"sdcard-ex"}
-    , notification{"notification"} {
+    , notification{"notification"}
+    , text_store(40) {
     api_hal_power_insomnia_enter();
 
     // we need random
@@ -30,5 +32,6 @@ void LfRfidApp::run() {
     scene_controller.add_scene(SceneType::Write, new LfRfidAppSceneWrite());
     scene_controller.add_scene(SceneType::WriteSuccess, new LfRfidAppSceneWriteSuccess());
     scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
+    scene_controller.add_scene(SceneType::SaveName, new LfRfidAppSceneSaveName());
     scene_controller.process(100);
 }

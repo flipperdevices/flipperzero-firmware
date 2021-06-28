@@ -3,6 +3,10 @@
 
 RfidKey::RfidKey() {
     data.fill(0);
+
+    for(uint8_t i = 0; i < (LFRFID_KEY_NAME_SIZE + 1); i++) {
+        name[i] = 0;
+    }
 }
 
 RfidKey::~RfidKey() {
@@ -33,4 +37,8 @@ const char* RfidKey::get_type_text() {
 
 const uint8_t RfidKey::get_type_data_count() {
     return lfrfid_key_get_type_data_count(type);
+}
+
+char* RfidKey::get_name() {
+    return name;
 }
