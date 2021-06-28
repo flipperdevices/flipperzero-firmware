@@ -11,7 +11,7 @@ public:
 
     // TODO that must be accessible only to ContainerVMData
     void set_parent_view(View* view);
-    
+
     // TODO that must be accessible only to inheritors
     void lock_model();
     void unlock_model(bool need_redraw);

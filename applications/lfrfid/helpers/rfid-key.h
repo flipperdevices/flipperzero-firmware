@@ -15,6 +15,7 @@ public:
 
     const char* get_type_text();
     const uint8_t get_type_data_count();
+
 private:
     std::array<uint8_t, LFRFID_KEY_SIZE> data;
     LfrfidKeyType type;
