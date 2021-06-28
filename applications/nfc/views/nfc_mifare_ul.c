@@ -130,10 +130,6 @@ void nfc_mifare_ul_exit(void* context) {
     nfc_worker_stop(nfc_mifare_ul->nfc_common->worker);
 }
 
-uint32_t nfc_mifare_ul_back(void* context) {
-    return NfcViewMenu;
-}
-
 NfcMifareUl* nfc_mifare_ul_alloc(NfcCommon* nfc_common) {
     furi_assert(nfc_common);
 
@@ -149,7 +145,6 @@ NfcMifareUl* nfc_mifare_ul_alloc(NfcCommon* nfc_common) {
     view_set_custom_callback(nfc_mifare_ul->view, nfc_mifare_ul_custom);
     view_set_enter_callback(nfc_mifare_ul->view, nfc_mifare_ul_enter);
     view_set_exit_callback(nfc_mifare_ul->view, nfc_mifare_ul_exit);
-    view_set_previous_callback(nfc_mifare_ul->view, nfc_mifare_ul_back);
 
     return nfc_mifare_ul;
 }

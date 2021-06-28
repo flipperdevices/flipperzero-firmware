@@ -43,10 +43,6 @@ void nfc_emulate_exit(void* context) {
     nfc_worker_stop(nfc_emulate->nfc_common->worker);
 }
 
-uint32_t nfc_emulate_back(void* context) {
-    return NfcViewMenu;
-}
-
 NfcEmulate* nfc_emulate_alloc(NfcCommon* nfc_common) {
     furi_assert(nfc_common);
 
@@ -60,7 +56,6 @@ NfcEmulate* nfc_emulate_alloc(NfcCommon* nfc_common) {
     view_set_input_callback(nfc_emulate->view, nfc_emulate_input);
     view_set_enter_callback(nfc_emulate->view, nfc_emulate_enter);
     view_set_exit_callback(nfc_emulate->view, nfc_emulate_exit);
-    view_set_previous_callback(nfc_emulate->view, nfc_emulate_back);
 
     return nfc_emulate;
 }

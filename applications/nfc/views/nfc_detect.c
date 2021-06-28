@@ -80,7 +80,7 @@ bool nfc_detect_view_custom(uint32_t event, void* context) {
                 return true;
             });
         // TODO add and configure next view model
-        return true;
+        return false;
     }
 
     return false;
@@ -110,10 +110,6 @@ void nfc_detect_exit(void* context) {
     nfc_worker_stop(nfc_detect->nfc_common->worker);
 }
 
-uint32_t nfc_detect_back(void* context) {
-    return NfcViewMenu;
-}
-
 NfcDetect* nfc_detect_alloc(NfcCommon* nfc_common) {
     furi_assert(nfc_common);
 
@@ -129,7 +125,6 @@ NfcDetect* nfc_detect_alloc(NfcCommon* nfc_common) {
     view_set_custom_callback(nfc_detect->view, nfc_detect_view_custom);
     view_set_enter_callback(nfc_detect->view, nfc_detect_enter);
     view_set_exit_callback(nfc_detect->view, nfc_detect_exit);
-    view_set_previous_callback(nfc_detect->view, nfc_detect_back);
 
     return nfc_detect;
 }

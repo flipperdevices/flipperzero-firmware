@@ -98,10 +98,6 @@ void nfc_emv_exit(void* context) {
     nfc_worker_stop(nfc_emv->nfc_common->worker);
 }
 
-uint32_t nfc_emv_back(void* context) {
-    return NfcViewMenu;
-}
-
 NfcEmv* nfc_emv_alloc(NfcCommon* nfc_common) {
     furi_assert(nfc_common);
 
@@ -117,7 +113,6 @@ NfcEmv* nfc_emv_alloc(NfcCommon* nfc_common) {
     view_set_custom_callback(nfc_emv->view, nfc_emv_custom);
     view_set_enter_callback(nfc_emv->view, nfc_emv_enter);
     view_set_exit_callback(nfc_emv->view, nfc_emv_exit);
-    view_set_previous_callback(nfc_emv->view, nfc_emv_back);
 
     return nfc_emv;
 }
