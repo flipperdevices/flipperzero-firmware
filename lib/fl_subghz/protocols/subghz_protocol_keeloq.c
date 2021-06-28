@@ -28,6 +28,10 @@ struct SubGhzProtocolKeeloq {
 #define bit(x,n)           (((x)>>(n))&1)
 #define g5(x,a,b,c,d,e)    (bit(x,a)+bit(x,b)*2+bit(x,c)*4+bit(x,d)*8+bit(x,e)*16)
 
+#define UNKNOWN_LEARNING 0u
+#define SIMPLE_LEARNING 1u
+#define NORMAL_LEARNING 2u
+
 //Simple Learning
 inline uint32_t subghz_protocol_keeloq_encrypt(const uint32_t data, const uint64_t key) {
     uint32_t x = data, r;
@@ -101,38 +105,87 @@ void subghz_protocol_keeloq_add_manafacture_key(SubGhzProtocolKeeloq* instance, 
 }
 
 uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKeeloq* instance, uint32_t fix , uint32_t hop) {
-      uint16_t end_serial =(uint16_t)(fix&0x3FF);
-      uint8_t btn = (uint8_t)(fix>>28);
-      uint32_t decript=0;
+    uint16_t end_serial = (uint16_t)(fix&0x3FF);
+    uint8_t btn = (uint8_t)(fix>>28);
+    uint32_t decrypt = 0;
+    uint64_t man_normal_learning;
 
-      for
+    for
         M_EACH(manufacture_code, instance->manufacture_codes, KeeLoqManufactureCodeArray_t) {
+            switch (manufacture_code->type){
+                case SIMPLE_LEARNING:
+                    //Simple Learning
+                    decrypt = subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
+                    if((decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16)) & 0x3FF) == end_serial)){
+                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->common.cnt = decrypt & 0x0000FFFF;
+                        return 1;
+                    }
+                break;
+                case NORMAL_LEARNING:
+                    //Normal_Learning
+                    //https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
+                    man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
+                    decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
+                    if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){ 
+                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->common.cnt = decrypt & 0x0000FFFF;
+                        return 1;
+                    }
+                break;
+                case UNKNOWN_LEARNING:
+                    //Simple Learning
+                    decrypt=subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
+                    if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
+                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->common.cnt = decrypt & 0x0000FFFF;
+                        return 1;
+                    }
+                    //check for mirrored man
+                    uint64_t man_rev=0;
+                    uint64_t man_rev_byte=0;
+                    for(uint8_t i=0; i<64; i+=8){
+                        man_rev_byte=(uint8_t)(manufacture_code->key >> i);
+                        man_rev = man_rev  | man_rev_byte << (56-i);
+                    }
+                    decrypt=subghz_protocol_keeloq_decrypt(hop, man_rev);
+                    if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
+                      snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                      instance->common.cnt= decrypt&0x0000FFFF;
+                      return 1;
+                    }
+                    //###########################
+                    //Normal_Learning
+                    //https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
+                    man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
+                    decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
+                    if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
+                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->common.cnt= decrypt&0x0000FFFF;
+                        return 1;
+                    }
+                    //check for mirrored man
+                    man_rev=0;
+                    man_rev_byte=0;
+                    for(uint8_t i=0; i<64; i+=8){
+                        man_rev_byte=(uint8_t)(manufacture_code->key >> i);
+                        man_rev = man_rev  | man_rev_byte << (56-i);
+                    }
+                    man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, man_rev);
+                    decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
+                    if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
+                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->common.cnt= decrypt&0x0000FFFF;
+                        return 1;
+                    }
+                break;
+            }
+        }
 
-          decript=subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
-          if( (decript>>28 ==btn) && ((((uint16_t)(decript>>16))&0x3FF)==end_serial)){
-              snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
-              instance->common.cnt= decript&0x0000FFFF;
-              return 1;
-          }
+    snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, "Unknown");
+    instance->common.cnt=0;
 
-          // проверка на зеркальный мак
-          uint64_t man_rev=0;
-          uint64_t man_rev_byte=0;
-          for(uint8_t i=0; i<64; i+=8){
-              man_rev_byte=(uint8_t)(manufacture_code->key >> i);
-              man_rev = man_rev  | man_rev_byte << (56-i);
-          }
-          decript=subghz_protocol_keeloq_decrypt(hop, man_rev);
-          if( (decript>>28 ==btn) && ((((uint16_t)(decript>>16))&0x3FF)==end_serial)){
-                  snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
-                  instance->common.cnt= decript&0x0000FFFF;
-                  return 1;
-              }
-          ////////////////////////////////////
-      }
-      snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, "Unknown");
-      instance->common.cnt=0;
-      return 0;
+    return 0;
 }
 
 void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instance) {
