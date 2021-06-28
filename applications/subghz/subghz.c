@@ -91,6 +91,7 @@ SubGhz* subghz_alloc() {
 
     // Menu
     subghz->submenu = submenu_alloc();
+    submenu_add_item(subghz->submenu, "Capture", SubGhzViewCapture, subghz_menu_callback, subghz);
     submenu_add_item(
         subghz->submenu, "Basic Test", SubGhzViewTestBasic, subghz_menu_callback, subghz);
     submenu_add_item(
@@ -101,6 +102,13 @@ SubGhz* subghz_alloc() {
     View* submenu_view = submenu_get_view(subghz->submenu);
     view_set_previous_callback(submenu_view, subghz_exit);
     view_dispatcher_add_view(subghz->view_dispatcher, SubGhzViewMenu, submenu_view);
+
+    // Capture
+    subghz->subghz_capture = subghz_capture_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher,
+        SubGhzViewCapture,
+        subghz_capture_get_view(subghz->subghz_capture));
 
     // Basic Test Module
     subghz->subghz_test_basic = subghz_test_basic_alloc();
@@ -145,6 +153,10 @@ void subghz_free(SubGhz* subghz) {
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);
     submenu_free(subghz->submenu);
+
+    // Capture
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewCapture);
+    subghz_capture_free(subghz->subghz_capture);
 
     // View Dispatcher
     view_dispatcher_free(subghz->view_dispatcher);

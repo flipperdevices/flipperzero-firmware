@@ -286,5 +286,5 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     subghz_protocol_free(protocol);
     vStreamBufferDelete(rx_stream);
     api_hal_subghz_disable_capture();
-    api_hal_subghz_reset();
+    api_hal_subghz_init();
 }

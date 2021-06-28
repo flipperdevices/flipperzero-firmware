@@ -1,6 +1,7 @@
 #pragma once
 
 #include "subghz.h"
+#include "views/subghz_capture.h"
 #include "views/subghz_test_basic.h"
 #include "views/subghz_test_packet.h"
 #include "views/subghz_static.h"
@@ -27,6 +28,8 @@ struct SubGhz {
 
     Submenu* submenu;
 
+    SubghzCapture* subghz_capture;
+
     SubghzTestBasic* subghz_test_basic;
 
     SubghzTestPacket* subghz_test_packet;
@@ -36,6 +39,7 @@ struct SubGhz {
 
 typedef enum {
     SubGhzViewMenu,
+    SubGhzViewCapture,
     SubGhzViewTestBasic,
     SubGhzViewTestPacket,
     SubGhzViewStatic,
