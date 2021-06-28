@@ -51,7 +51,6 @@ static void subghz_protocol_load_keeloq_file_process_line(SubGhzProtocol* instan
     int ret = sscanf(string_get_cstr(line), "%16s:%hu:%64s", skey, &type, name);
     key = strtoull(skey, NULL, 16);
     if (ret == 3) {
-        printf("Loaded: %s\r\n", name);
         subghz_protocol_keeloq_add_manafacture_key(instance->keeloq, name, key, type);
     } else {
         printf("Failed to load line: %s\r\n", string_get_cstr(line));
@@ -65,7 +64,7 @@ void subghz_protocol_load_keeloq_file(SubGhzProtocol* instance, const char* file
     string_t line;
     string_init(line);
     if(manufacture_keys_file.error_id == FSE_OK) {
-        printf("Loading %s\r\n", file_name);
+        printf("Loading manufacture keys file %s\r\n", file_name);
         char buffer[FILE_BUFFER_SIZE];
         uint16_t ret;
         do {
@@ -80,7 +79,7 @@ void subghz_protocol_load_keeloq_file(SubGhzProtocol* instance, const char* file
             }
         } while(ret > 0);
     } else {
-        printf("File not found: %s\r\n", file_name);
+        printf("Manufacture keys file is not found: %s\r\n", file_name);
     }
     fs_api->file.close(&manufacture_keys_file);
     furi_record_close("sdcard");

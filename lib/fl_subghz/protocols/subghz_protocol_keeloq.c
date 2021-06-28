@@ -1,9 +1,29 @@
 #include "subghz_protocol_keeloq.h"
 
+#include <furi.h>
+
 #include <m-string.h>
 #include <m-array.h>
 
-#include <furi.h>
+/*
+ * Keeloq
+ * https://ru.wikipedia.org/wiki/KeeLoq
+ * https://phreakerclub.com/forum/showthread.php?t=1094
+ *
+ */
+
+#define KEELOQ_NLF          0x3A5C742E
+#define bit(x,n)            (((x)>>(n))&1)
+#define g5(x,a,b,c,d,e)     (bit(x,a)+bit(x,b)*2+bit(x,c)*4+bit(x,d)*8+bit(x,e)*16)
+
+/*
+ * KeeLoq learning types
+ * https://phreakerclub.com/forum/showthread.php?t=67
+ */
+#define KEELOQ_LEARNING_UNKNOWN    0u
+#define KEELOQ_LEARNING_SIMPLE     1u
+#define KEELOQ_LEARNING_NORMAL     2u
+#define KEELOQ_LEARNING_SECURE     3u
 
 typedef struct {
     string_t name;
@@ -19,41 +39,36 @@ struct SubGhzProtocolKeeloq {
     KeeLoqManufactureCodeArray_t manufacture_codes;
 };
 
-/*
- * keelog
- * https://ru.wikipedia.org/wiki/KeeLoq
- *
- */
-#define KeeLoq_NLF         0x3A5C742E
-#define bit(x,n)           (((x)>>(n))&1)
-#define g5(x,a,b,c,d,e)    (bit(x,a)+bit(x,b)*2+bit(x,c)*4+bit(x,d)*8+bit(x,e)*16)
-
-#define UNKNOWN_LEARNING 0u
-#define SIMPLE_LEARNING 1u
-#define NORMAL_LEARNING 2u
-
-//Simple Learning
-inline uint32_t subghz_protocol_keeloq_encrypt(const uint32_t data, const uint64_t key) {
-    uint32_t x = data, r;
-    for (r = 0; r < 528; r++)
-        x = (x>>1)^((bit(x,0)^bit(x,16)^(uint32_t)bit(key,r&63)^bit(KeeLoq_NLF,g5(x,1,9,20,26,31)))<<31);
-    return x;
-}
-
-inline uint32_t subghz_protocol_keeloq_decrypt(const uint32_t data, const uint64_t key) {
-    uint32_t x = data, r;
-    for (r = 0; r < 528; r++)
-        x = (x<<1)^bit(x,31)^bit(x,15)^(uint32_t)bit(key,(15-r)&63)^bit(KeeLoq_NLF,g5(x,0,8,19,25,30));
-    return x;
-}
-
-/** Normal_Learning
- * https://phreakerclub.com/forum/showthread.php?t=67
+/** Simple Learning Encrypt
  * @param data - serial number (28bit)
  * @param key - manufacture (64bit)
  * @return ?
  */
-uint64_t subghz_protocol_keeloq_normal_learning(uint32_t data, const uint64_t key){
+inline uint32_t subghz_protocol_keeloq_encrypt(const uint32_t data, const uint64_t key) {
+    uint32_t x = data, r;
+    for (r = 0; r < 528; r++)
+        x = (x>>1)^((bit(x,0)^bit(x,16)^(uint32_t)bit(key,r&63)^bit(KEELOQ_NLF,g5(x,1,9,20,26,31)))<<31);
+    return x;
+}
+
+/** Simple Learning Decrypt
+ * @param data - serial number (28bit)
+ * @param key - manufacture (64bit)
+ * @return ?
+ */
+inline uint32_t subghz_protocol_keeloq_decrypt(const uint32_t data, const uint64_t key) {
+    uint32_t x = data, r;
+    for (r = 0; r < 528; r++)
+        x = (x<<1)^bit(x,31)^bit(x,15)^(uint32_t)bit(key,(15-r)&63)^bit(KEELOQ_NLF,g5(x,0,8,19,25,30));
+    return x;
+}
+
+/** Normal Learning
+ * @param data - serial number (28bit)
+ * @param key - manufacture (64bit)
+ * @return ?
+ */
+inline uint64_t subghz_protocol_keeloq_normal_learning(uint32_t data, const uint64_t key){
     uint32_t k1,k2;
 
     data&=0x0FFFFFFF;
@@ -67,11 +82,6 @@ uint64_t subghz_protocol_keeloq_normal_learning(uint32_t data, const uint64_t ke
     return ((uint64_t)k2<<32)| k1; // key - shifrovanoya
 }
 
-/*
- * Help
- * https://phreakerclub.com/forum/showthread.php?t=1094
- *
- */
 SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc() {
     SubGhzProtocolKeeloq* instance = furi_alloc(sizeof(SubGhzProtocolKeeloq));
 
@@ -113,18 +123,18 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
     for
         M_EACH(manufacture_code, instance->manufacture_codes, KeeLoqManufactureCodeArray_t) {
             switch (manufacture_code->type){
-                case SIMPLE_LEARNING:
+                case KEELOQ_LEARNING_SIMPLE:
                     //Simple Learning
                     decrypt = subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
-                    if((decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16)) & 0x3FF) == end_serial)){
+                    if((decrypt>>28 == btn) && ((((uint16_t)(decrypt>>16)) & 0x3FF) == end_serial)){
                         snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
                         instance->common.cnt = decrypt & 0x0000FFFF;
                         return 1;
                     }
                 break;
-                case NORMAL_LEARNING:
-                    //Normal_Learning
-                    //https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
+                case KEELOQ_LEARNING_NORMAL:
+                    // Normal_Learning
+                    // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
                     if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){ 
@@ -133,15 +143,15 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                         return 1;
                     }
                 break;
-                case UNKNOWN_LEARNING:
-                    //Simple Learning
+                case KEELOQ_LEARNING_UNKNOWN:
+                    // Simple Learning
                     decrypt=subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
                     if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
                         snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
                         instance->common.cnt = decrypt & 0x0000FFFF;
                         return 1;
                     }
-                    //check for mirrored man
+                    // Check for mirrored man
                     uint64_t man_rev=0;
                     uint64_t man_rev_byte=0;
                     for(uint8_t i=0; i<64; i+=8){
@@ -155,8 +165,8 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                       return 1;
                     }
                     //###########################
-                    //Normal_Learning
-                    //https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
+                    // Normal_Learning
+                    // https://phreakerclub.com/forum/showpost.php?p=43557&postcount=37
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
                     if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
@@ -164,11 +174,11 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                         instance->common.cnt= decrypt&0x0000FFFF;
                         return 1;
                     }
-                    //check for mirrored man
+                    // Check for mirrored man
                     man_rev=0;
                     man_rev_byte=0;
                     for(uint8_t i=0; i<64; i+=8){
-                        man_rev_byte=(uint8_t)(manufacture_code->key >> i);
+                        man_rev_byte = (uint8_t)(manufacture_code->key >> i);
                         man_rev = man_rev  | man_rev_byte << (56-i);
                     }
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, man_rev);
@@ -192,7 +202,7 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     uint64_t key = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
-    //check key AN-Motors
+    // Check key AN-Motors
     if((key_hop >> 24) == ((key_hop>>16)&0x00ff) && (key_fix>>28) ==((key_hop>>12)&0x0f) ){
         snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, "AN-Motors");
         instance->common.cnt = key_hop>>16;
@@ -204,13 +214,13 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
 
 void subghz_protocol_keeloq_send_bit(SubGhzProtocolKeeloq* instance, uint8_t bit) {
     if (bit) {
-        //send bit 1
+        // send bit 1
         SUBGHZ_TX_PIN_HIGTH();
         delay_us(instance->common.te_shot);
         SUBGHZ_TX_PIN_LOW();
         delay_us(instance->common.te_long);
     } else {
-        //send bit 0
+        // send bit 0
         SUBGHZ_TX_PIN_HIGTH();
         delay_us(instance->common.te_long);
         SUBGHZ_TX_PIN_LOW();
@@ -220,7 +230,7 @@ void subghz_protocol_keeloq_send_bit(SubGhzProtocolKeeloq* instance, uint8_t bit
 
 void subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, uint64_t key, uint8_t bit, uint8_t repeat) {
     while (repeat--) {
-        //Send header
+        // Send header
         for (uint8_t i = 11; i > 0; i--) {
             SUBGHZ_TX_PIN_HIGTH();
             delay_us(instance->common.te_shot);
@@ -232,10 +242,10 @@ void subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, uint64_t ke
         for (uint8_t i = bit; i > 0; i--) {
             subghz_protocol_keeloq_send_bit(instance, bit_read(key, i - 1));
         }
-        //+send 2 status bit
+        // +send 2 status bit
         subghz_protocol_keeloq_send_bit(instance, 0);
         subghz_protocol_keeloq_send_bit(instance, 0);
-        //send end
+        // send end
         subghz_protocol_keeloq_send_bit(instance, 0);
         delay_us(instance->common.te_shot * 2);   //+2 interval END SEND
     }
@@ -258,7 +268,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
             break;
         }
         if ((instance->common.header_count > 2) && ( DURATION_DIFF(data.duration, instance->common.te_shot * 10)< instance->common.te_delta * 10)) {
-            //Found header
+            // Found header
             instance->common.parser_step = 2;
             instance->common.code_found = 0;
             instance->common.code_count_bit = 0;
@@ -275,8 +285,8 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
         break;
     case 3:
         if (data.level == ApiHalSubGhzCaptureLevelLow) {
-            if (data.duration >= (instance->common.te_shot*2+ instance->common.te_delta)) {
-                //Found end TX
+            if (data.duration >= (instance->common.te_shot * 2 + instance->common.te_delta)) {
+                // Found end TX
                 instance->common.parser_step = 0;
                 if (instance->common.code_count_bit >= instance->common.code_min_count_bit_for_found) {
                     //&& (instance->common.code_last_found != instance->common.code_found )) {
