@@ -1,6 +1,7 @@
 #include "rfid-writer.h"
 #include <api-hal.h>
 #include "protocols/protocol-emmarin.h"
+#include "protocols/protocol-hid-h10301.h"
 
 extern COMP_HandleTypeDef hcomp1;
 
@@ -65,6 +66,8 @@ void RfidWriter::write_byte(uint8_t value) {
 }
 
 void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data) {
+    delay_us(T55xxTiming::wait_time * 8);
+
     // start gap
     write_gap(T55xxTiming::start_gap);
 
@@ -97,6 +100,9 @@ void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_
     write_bit((block >> 0) & 1);
 
     delay_us(T55xxTiming::program * 8);
+
+    delay_us(T55xxTiming::wait_time * 8);
+    write_reset();
 }
 
 void RfidWriter::write_reset() {
@@ -109,26 +115,28 @@ void RfidWriter::write_em(uint8_t em_data[5]) {
     ProtocolEMMarin em_card;
     uint64_t em_encoded_data;
     em_card.encode(em_data, 5, reinterpret_cast<uint8_t*>(&em_encoded_data), sizeof(uint64_t));
-    uint32_t em_config_block_data = 0b01100000000101001000000001000000;
+    const uint32_t em_config_block_data = 0b01100000000101001000000001000000;
 
     __disable_irq();
-    // wait to power card
-    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 0, false, em_config_block_data);
-    delay_us(T55xxTiming::wait_time * 8);
-
-    write_reset();
-
-    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 1, false, em_encoded_data);
-    delay_us(T55xxTiming::wait_time * 8);
-
-    write_reset();
-
-    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 2, false, em_encoded_data >> 32);
-    delay_us(T55xxTiming::wait_time * 8);
+    write_reset();
+    __enable_irq();
+}
 
+void RfidWriter::write_hid(uint8_t hid_data[3]) {
+    ProtocolHID10301 hid_card;
+    uint32_t card_data[3];
+    hid_card.encode(hid_data, 3, reinterpret_cast<uint8_t*>(&card_data), sizeof(card_data) * 3);
+
+    const uint32_t hid_config_block_data = 0b00000000000100000111000001100000;
+
+    __disable_irq();
+    write_block(0, 0, false, hid_config_block_data);
+    write_block(0, 1, false, card_data[0]);
+    write_block(0, 2, false, card_data[1]);
+    write_block(0, 3, false, card_data[2]);
     write_reset();
     __enable_irq();
 }

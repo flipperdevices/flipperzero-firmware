@@ -36,7 +36,7 @@ void RfidWorker::start_write() {
 
     write_sequence->do_every_tick(1, std::bind(&RfidWorker::sq_write, this));
     write_sequence->do_after_tick(2, std::bind(&RfidWorker::sq_write_start_validate, this));
-    write_sequence->do_after_tick(10, std::bind(&RfidWorker::sq_write_validate, this));
+    write_sequence->do_after_tick(15, std::bind(&RfidWorker::sq_write_validate, this));
     write_sequence->do_every_tick(1, std::bind(&RfidWorker::sq_write_stop_validate, this));
 }
 
@@ -56,6 +56,11 @@ void RfidWorker::sq_write() {
     case LfrfidKeyType::KeyEM4100:
         writer.start();
         writer.write_em(key.get_data());
+        writer.stop();
+        break;
+    case LfrfidKeyType::KeyH10301:
+        writer.start();
+        writer.write_hid(key.get_data());
         writer.stop();
         break;
 
