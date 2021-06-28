@@ -1,11 +1,7 @@
 #pragma once
 
-#include <nfc/scenes/nfc_scene.h>
+#include "app_scene.h"
 
-typedef struct {
-    NfcScene scene;
-} NfcSceneStart;
+AppScene* nfc_scene_start_alloc();
 
-NfcSceneStart* nfc_scence_start_alloc();
-
-void nfc_scence_start_free(NfcSceneStart* scene);
+void nfc_scene_start_free(AppScene* scene);
