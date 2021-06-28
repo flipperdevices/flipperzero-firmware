@@ -25,7 +25,8 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     ViewDict_it(it, view_dispatcher->views);
     while(!ViewDict_end_p(it)) {
         ViewDict_itref_t* ref = ViewDict_ref(it);
-        view_free(ref->value);
+        // Crash if view wasn't freed
+        furi_assert(ref->value);
         ViewDict_next(it);
     }
     ViewDict_clear(view_dispatcher->views);
