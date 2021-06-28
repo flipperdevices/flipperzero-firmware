@@ -35,6 +35,10 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     if(view_dispatcher->queue) {
         osMessageQueueDelete(view_dispatcher->queue);
     }
+    // Free View Navigator
+    if(view_dispatcher->view_navigator) {
+        view_navigator_free(view_dispatcher->view_navigator);
+    }
     // Free dispatcher
     free(view_dispatcher);
 }
@@ -45,9 +49,25 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     view_dispatcher->queue = osMessageQueueNew(8, sizeof(ViewDispatcherMessage), NULL);
 }
 
+void view_dispatcher_enable_navigation(ViewDispatcher* view_dispatcher, void* context) {
+    furi_assert(view_dispatcher);
+    view_dispatcher->view_navigator = view_navigator_alloc(context);
+}
+
+void view_dispatcher_add_scene(ViewDispatcher* view_dispatcher, AppScene* scene) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->view_navigator);
+    furi_assert(scene);
+    view_navigator_add_next_scene(view_dispatcher->view_navigator, scene);
+}
+
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue);
+
+    if(view_dispatcher->view_navigator) {
+        view_navigator_start(view_dispatcher->view_navigator);
+    }
 
     ViewDispatcherMessage message;
     while(osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever) == osOK) {
@@ -57,6 +77,9 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             view_dispatcher_handle_input(view_dispatcher, &message.input);
         } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
+        } else if(message.type == ViewDispatcherMessageTypeNavigationEvent) {
+            view_navigator_handle_navigation_event(
+                view_dispatcher->view_navigator, message.navigator_event);
         }
     }
 }
@@ -175,14 +198,24 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         is_consumed = view_input(view_dispatcher->current_view, event);
     }
     if(!is_consumed && event->type == InputTypeShort) {
-        // TODO get next view from view_navigato
+        // TODO remove view navigation handlers
         uint32_t view_id = VIEW_IGNORE;
         if(event->key == InputKeyBack) {
             view_id = view_previous(view_dispatcher->current_view);
+            if((view_id == VIEW_IGNORE) && (view_dispatcher->view_navigator)) {
+                is_consumed = view_navigator_handle_custom_event(
+                    view_dispatcher->view_navigator, ViewNavigatorEventPreviousSearch);
+                if(!is_consumed) {
+                    view_dispatcher_stop(view_dispatcher);
+                    return;
+                }
+            }
         } else if(event->key == InputKeyOk) {
             view_id = view_next(view_dispatcher->current_view);
         }
-        view_dispatcher_switch_to_view(view_dispatcher, view_id);
+        if(!is_consumed) {
+            view_dispatcher_switch_to_view(view_dispatcher, view_id);
+        }
     }
 }
 
@@ -191,8 +224,9 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     if(view_dispatcher->current_view) {
         is_consumed = view_custom(view_dispatcher->current_view, event);
     }
-    if(is_consumed) {
-        // TODO get next view from view_navigator
+    // If custom event is not consumed in View, handle it in Scene
+    if(!is_consumed) {
+        is_consumed = view_navigator_handle_custom_event(view_dispatcher->view_navigator, event);
     }
 }
 
@@ -202,6 +236,18 @@ void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t
 
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeCustomEvent;
+    message.custom_event = event;
+
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
+void view_dispatcher_send_navigation_event(ViewDispatcher* view_dispatcher, uint32_t event) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->queue);
+    furi_assert(view_dispatcher->view_navigator);
+
+    ViewDispatcherMessage message;
+    message.type = ViewDispatcherMessageTypeNavigationEvent;
     message.custom_event = event;
 
     furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
