@@ -61,9 +61,7 @@ bool nfc_emv_custom(uint32_t event, void* context) {
 
     NfcEmv* nfc_emv = (NfcEmv*)context;
     if(event == NfcEventEmv) {
-        NfcWorkerResult worker_result;
-        nfc_worker_get_result(nfc_emv->nfc_common->worker, &worker_result);
-        NfcEmvData* data = (NfcEmvData*)&worker_result;
+        NfcEmvData* data = (NfcEmvData*)nfc_emv->nfc_common->worker_result;
 
         with_view_model(
             nfc_emv->view, (NfcEmvModel * model) {
@@ -88,7 +86,11 @@ void nfc_emv_enter(void* context) {
             return true;
         });
     nfc_worker_start(
-        nfc_emv->nfc_common->worker, NfcWorkerStateReadEMV, nfc_emv_worker_callback, nfc_emv);
+        nfc_emv->nfc_common->worker,
+        NfcWorkerStateReadEMV,
+        nfc_emv->nfc_common->worker_result,
+        nfc_emv_worker_callback,
+        nfc_emv);
 }
 
 void nfc_emv_exit(void* context) {

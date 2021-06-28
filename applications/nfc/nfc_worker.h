@@ -73,9 +73,8 @@ void nfc_worker_free(NfcWorker* nfc_worker);
 void nfc_worker_start(
     NfcWorker* nfc_worker,
     NfcWorkerState state,
+    NfcWorkerResult* result_dest,
     NfcWorkerCallback callback,
     void* context);
-
-void nfc_worker_get_result(NfcWorker* nfc_worker, NfcWorkerResult* result);
 
 void nfc_worker_stop(NfcWorker* nfc_worker);

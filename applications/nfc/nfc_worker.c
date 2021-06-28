@@ -42,22 +42,18 @@ ReturnCode nfc_worker_get_error(NfcWorker* nfc_worker) {
 void nfc_worker_start(
     NfcWorker* nfc_worker,
     NfcWorkerState state,
+    NfcWorkerResult* result_dest,
     NfcWorkerCallback callback,
     void* context) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->state == NfcWorkerStateReady);
+    furi_assert(result_dest);
 
     nfc_worker->callback = callback;
     nfc_worker->context = context;
+    nfc_worker->last_result = result_dest;
     nfc_worker_change_state(nfc_worker, state);
     nfc_worker->thread = osThreadNew(nfc_worker_task, nfc_worker, &nfc_worker->thread_attr);
-}
-
-void nfc_worker_get_result(NfcWorker* nfc_worker, NfcWorkerResult* result) {
-    furi_assert(nfc_worker);
-    furi_assert(result);
-
-    memcpy(result, &nfc_worker->last_result, sizeof(NfcWorkerResult));
 }
 
 void nfc_worker_stop(NfcWorker* nfc_worker) {
@@ -104,7 +100,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
     rfalNfcDevice* dev_list;
     rfalNfcDevice* dev;
     uint8_t dev_cnt;
-    NfcDeviceData* result = &nfc_worker->last_result.nfc_detect_data;
+    NfcDeviceData* result = &nfc_worker->last_result->nfc_detect_data;
 
     while(nfc_worker->state == NfcWorkerStateDetect) {
         if(api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, true)) {
@@ -126,7 +122,6 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCV) {
                 result->device = NfcDeviceNfcv;
             }
-
             // Notify caller and exit
             if(nfc_worker->callback) {
                 nfc_worker->callback(nfc_worker->context);
@@ -156,7 +151,7 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
     uint16_t tx_len = 0;
     uint8_t* rx_buff;
     uint16_t* rx_len;
-    NfcEmvData* result = &nfc_worker->last_result.nfc_emv_data;
+    NfcEmvData* result = &nfc_worker->last_result->nfc_emv_data;
 
     while(nfc_worker->state == NfcWorkerStateReadEMV) {
         memset(&emv_app, 0, sizeof(emv_app));
@@ -212,7 +207,6 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
                     FURI_LOG_I(NFC_WORKER_TAG, "Card number parsed");
                     memcpy(result->number, emv_app.card_number, sizeof(emv_app.card_number));
-                    api_hal_nfc_deactivate();
                     // Notify caller and exit
                     if(nfc_worker->callback) {
                         nfc_worker->callback(nfc_worker->context);
@@ -336,7 +330,7 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
     uint8_t* rx_buff;
     uint16_t* rx_len;
     MfUltralightRead mf_ul_read;
-    NfcMifareUlData* result = &nfc_worker->last_result.nfc_mifare_ul_data;
+    NfcMifareUlData* result = &nfc_worker->last_result->nfc_mifare_ul_data;
 
     while(nfc_worker->state == NfcWorkerStateReadMfUltralight) {
         api_hal_nfc_deactivate();
@@ -430,7 +424,6 @@ void nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
                     }
                     printf("\r\n");
                 }
-
                 // Notify caller and exit
                 if(nfc_worker->callback) {
                     nfc_worker->callback(nfc_worker->context);

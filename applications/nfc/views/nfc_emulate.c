@@ -33,7 +33,12 @@ void nfc_emulate_enter(void* context) {
     furi_assert(context);
 
     NfcEmulate* nfc_emulate = (NfcEmulate*)context;
-    nfc_worker_start(nfc_emulate->nfc_common->worker, NfcWorkerStateEmulate, NULL, NULL);
+    nfc_worker_start(
+        nfc_emulate->nfc_common->worker,
+        NfcWorkerStateEmulate,
+        nfc_emulate->nfc_common->worker_result,
+        NULL,
+        NULL);
 }
 
 void nfc_emulate_exit(void* context) {

@@ -20,7 +20,7 @@ struct NfcWorker {
     osThreadAttr_t thread_attr;
     osThreadId_t thread;
 
-    NfcWorkerResult last_result;
+    NfcWorkerResult* last_result;
     NfcWorkerCallback callback;
     void* context;
 

@@ -9,6 +9,7 @@ Nfc* nfc_alloc() {
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
     view_dispatcher_enable_navigation(nfc->nfc_common.view_dispatcher, nfc);
+    nfc->nfc_common.worker_result = furi_alloc(sizeof(NfcWorkerResult));
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");

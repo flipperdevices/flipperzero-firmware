@@ -90,9 +90,7 @@ bool nfc_mifare_ul_custom(uint32_t event, void* context) {
 
     NfcMifareUl* nfc_mifare_ul = (NfcMifareUl*)context;
     if(event == NfcEventMifareUl) {
-        NfcWorkerResult worker_result;
-        nfc_worker_get_result(nfc_mifare_ul->nfc_common->worker, &worker_result);
-        NfcMifareUlData* data = (NfcMifareUlData*)&worker_result;
+        NfcMifareUlData* data = (NfcMifareUlData*)nfc_mifare_ul->nfc_common->worker_result;
 
         with_view_model(
             nfc_mifare_ul->view, (NfcMifareUlModel * model) {
@@ -119,6 +117,7 @@ void nfc_mifare_ul_enter(void* context) {
     nfc_worker_start(
         nfc_mifare_ul->nfc_common->worker,
         NfcWorkerStateReadMfUltralight,
+        nfc_mifare_ul->nfc_common->worker_result,
         nfc_mifare_ul_worker_callback,
         nfc_mifare_ul);
 }
