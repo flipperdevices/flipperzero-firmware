@@ -55,6 +55,7 @@ function(stm32_generate_binary_file TARGET)
         TARGET ${TARGET}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.bin
+        BYPRODUCTS ${TARGET}.bin
         COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
     )
 endfunction()
@@ -64,6 +65,7 @@ function(stm32_generate_hex_file TARGET)
         TARGET ${TARGET}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.hex
+        BYPRODUCTS ${TARGET}.hex
         COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
     )
 endfunction()
