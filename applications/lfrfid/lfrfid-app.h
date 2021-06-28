@@ -34,6 +34,7 @@ public:
         ReadSuccess,
         ReadedMenu,
         Write,
+        WriteSuccess,
     };
 
     class Event {

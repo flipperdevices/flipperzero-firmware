@@ -11,8 +11,8 @@ extern COMP_HandleTypeDef hcomp1;
 class T55xxTiming {
 public:
     constexpr static const uint16_t wait_time = 400;
-    constexpr static const uint8_t start_gap = 15;
-    constexpr static const uint8_t write_gap = 10;
+    constexpr static const uint8_t start_gap = 30;
+    constexpr static const uint8_t write_gap = 18;
     constexpr static const uint8_t data_0 = 24;
     constexpr static const uint8_t data_1 = 56;
     constexpr static const uint16_t program = 700;
@@ -34,6 +34,7 @@ RfidWriter::~RfidWriter() {
 void RfidWriter::start() {
     api_hal_rfid_tim_read(125000, 0.5);
     api_hal_rfid_pins_read();
+    api_hal_rfid_tim_read_start();
 }
 
 void RfidWriter::stop() {
@@ -64,10 +65,6 @@ void RfidWriter::write_byte(uint8_t value) {
 }
 
 void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data) {
-    // wait to power card
-    api_hal_rfid_tim_read_start();
-    delay_us(T55xxTiming::wait_time * 8);
-
     // start gap
     write_gap(T55xxTiming::start_gap);
 
@@ -100,8 +97,12 @@ void RfidWriter::write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_
     write_bit((block >> 0) & 1);
 
     delay_us(T55xxTiming::program * 8);
+}
 
-    api_hal_rfid_tim_read_stop();
+void RfidWriter::write_reset() {
+    write_gap(T55xxTiming::start_gap);
+    write_bit(1);
+    write_bit(0);
 }
 
 void RfidWriter::write_em(uint8_t em_data[5]) {
@@ -111,8 +112,23 @@ void RfidWriter::write_em(uint8_t em_data[5]) {
     uint32_t em_config_block_data = 0b01100000000101001000000001000000;
 
     __disable_irq();
+    // wait to power card
+    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 0, false, em_config_block_data);
+    delay_us(T55xxTiming::wait_time * 8);
+
+    write_reset();
+
+    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 1, false, em_encoded_data);
+    delay_us(T55xxTiming::wait_time * 8);
+
+    write_reset();
+
+    delay_us(T55xxTiming::wait_time * 8);
     write_block(0, 2, false, em_encoded_data >> 32);
+    delay_us(T55xxTiming::wait_time * 8);
+
+    write_reset();
     __enable_irq();
 }

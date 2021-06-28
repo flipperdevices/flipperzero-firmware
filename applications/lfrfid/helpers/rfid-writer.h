@@ -14,4 +14,5 @@ private:
     void write_bit(bool value);
     void write_byte(uint8_t value);
     void write_block(uint8_t page, uint8_t block, bool lock_bit, uint32_t data);
+    void write_reset();
 };

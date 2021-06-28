@@ -4,6 +4,7 @@
 #include "scene/lfrfid-app-scene-read-success.h"
 #include "scene/lfrfid-app-scene-readed-menu.h"
 #include "scene/lfrfid-app-scene-write.h"
+#include "scene/lfrfid-app-scene-write-success.h"
 
 LfRfidApp::LfRfidApp()
     : scene_controller{this}
@@ -26,5 +27,6 @@ void LfRfidApp::run() {
     scene_controller.add_scene(SceneType::ReadSuccess, new LfRfidAppSceneReadSuccess());
     scene_controller.add_scene(SceneType::ReadedMenu, new LfRfidAppSceneReadedMenu());
     scene_controller.add_scene(SceneType::Write, new LfRfidAppSceneWrite());
+    scene_controller.add_scene(SceneType::WriteSuccess, new LfRfidAppSceneWriteSuccess());
     scene_controller.process(100);
 }
