@@ -212,7 +212,10 @@ Typical usage:
 
 ```cmake
 find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
-target_link_libraries(... FreeRTOS::ARM_CM4F)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM4F
+)
 ```
 
 The following FreeRTOS ports are supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
@@ -224,3 +227,26 @@ Other FreeRTOS libraries:
 * `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
 * `FreeRTOS::Timers` - timers (`timers.c`)
 * `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
+
+The STM32Cube packages can contain the FreeRTOS source package and a CMSIS RTOS and RTOS_V2
+implementation. You can specify to use CMSIS with a `CMSIS` target and by finding the CMSIS
+`RTOS` package.
+
+Typical usage for a H7 device when using the M7 core with CMSIS `RTOS`:
+
+```cmake
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM7
+    CMSIS::STM32::H7::M7::RTOS
+)
+```
+
+The following targets are available in general:
+
+* `CMSIS::STM32::<Family>::RTOS`
+* `CMSIS::STM32::<Family>::RTOS_V2`
+
+For the multi-core architectures, you have to specify both family and core like specified in the
+example.
