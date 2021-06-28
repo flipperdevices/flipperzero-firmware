@@ -12,33 +12,57 @@
 #include <cli/cli.h>
 
 #include <gui/modules/submenu.h>
+#include <gui/modules/dialog_ex.h>
 
-#include "nfc_detect.h"
-#include "nfc_emulate.h"
-#include "nfc_emv.h"
-#include "nfc_mifare_ul.h"
-#include <nfc/scenes/nfc_scene_start.h>
+#include "views/nfc_detect.h"
+#include "views/nfc_emulate.h"
+#include "views/nfc_emv.h"
+#include "views/nfc_mifare_ul.h"
+
+#include "scenes/nfc_scene_start.h"
+#include "scenes/nfc_scene_read_card.h"
+#include "scenes/nfc_scene_read_card_success.h"
+#include "scenes/nfc_scene_card_menu.h"
+#include "scenes/nfc_scene_not_implemented.h"
 
 struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
-    Submenu* submenu;
+
+    // Nfc Views
     NfcDetect* nfc_detect;
     NfcEmulate* nfc_emulate;
     NfcEmv* nfc_emv;
     NfcMifareUl* nfc_mifare_ul;
 
+    // Common Views
+    Submenu* submenu;
+    DialogEx* dialog_ex;
+
     // Scenes
-    NfcSceneStart* scene_start;
+    AppScene* scene_start;
+    AppScene* scene_read_card;
+    AppScene* scene_read_card_success;
+    AppScene* scene_card_menu;
+    AppScene* scene_not_implemented;
 };
 
 typedef enum {
     NfcViewMenu,
+    NfcViewDialogEx,
     NfcViewDetect,
     NfcViewEmulate,
     NfcViewEmv,
     NfcViewMifareUl,
 } NfcView;
+
+typedef enum {
+    NfcSceneStart,
+    NfcSceneReadCard,
+    NfcSceneReadCardSuccess,
+    NfcSceneCardMenu,
+    NfcSceneNotImplemented,
+} NfcScene;
 
 Nfc* nfc_alloc();
 
