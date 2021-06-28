@@ -272,12 +272,15 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);
     LevelPair pair;
     while(!cli_cmd_interrupt_received(cli)) {
-        xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
-        if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
-            printf(".");
-            subghz_protocol_reset(protocol);
+        int ret = xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
+        if (ret == sizeof(LevelPair)) {
+            if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
+                printf(".");
+                subghz_protocol_reset(protocol);
+            } else {
+                subghz_protocol_parse(protocol, pair);
+            }
         }
-        subghz_protocol_parse(protocol, pair);
     }
 
     subghz_protocol_free(protocol);
