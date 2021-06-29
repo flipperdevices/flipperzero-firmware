@@ -24,7 +24,7 @@ typedef struct {
     string_t text;
 } SubghzCaptureModel;
 
-static const char subghz_symbols[] = { '-', '\\', '|', '/' };
+static const char subghz_symbols[] = {'-', '\\', '|', '/'};
 
 void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
     char buffer[64];
@@ -68,8 +68,8 @@ bool subghz_capture_input(InputEvent* event, void* context) {
 
             if(reconfigure) {
                 api_hal_subghz_idle();
-                model->real_frequency = api_hal_subghz_set_frequency_and_path(
-                    subghz_frequencies[model->frequency]);
+                model->real_frequency =
+                    api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
                 api_hal_subghz_rx();
             }
 
@@ -102,8 +102,8 @@ void subghz_capture_enter(void* context) {
     with_view_model(
         subghz_capture->view, (SubghzCaptureModel * model) {
             model->frequency = subghz_frequencies_433_92;
-            model->real_frequency = api_hal_subghz_set_frequency_and_path(
-                subghz_frequencies[model->frequency]);
+            model->real_frequency =
+                api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
             return true;
         });
 
@@ -161,7 +161,8 @@ SubghzCapture* subghz_capture_alloc() {
     subghz_worker_set_context(subghz_capture->worker, subghz_capture->protocol);
 
     subghz_protocol_load_keeloq_file(subghz_capture->protocol, "/assets/subghz/keeloq_mfcodes");
-    subghz_protocol_enable_dump(subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
+    subghz_protocol_enable_dump(
+        subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
 
     return subghz_capture;
 }
