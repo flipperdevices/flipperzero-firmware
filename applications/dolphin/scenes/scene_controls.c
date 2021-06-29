@@ -37,7 +37,6 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_flipped = false;
                 state->player_v.x = SPEED_X;
             } else if(input->key == InputKeyLeft) {
-                state->player_flipped = true;
                 state->player_v.x = -SPEED_X;
             } else if(input->key == InputKeyUp) {
                 state->player_v.y = -SPEED_Y;
@@ -79,5 +78,16 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     state->screen.x = CLAMP(state->player_global.x - state->player.x, WORLD_WIDTH, 0);
     state->screen.y = CLAMP(state->player_global.y - state->player.y, WORLD_HEIGHT, 0);
 
-    state->player_anim = (state->player_global.x / 10) % 2;
+    state->player_anim = (state->player_global.x / 10) % 3;
+
+    if(state->player_v.x < 0 && !state->player_flipped && state->player_anim == 0) {
+        state->transition = true;
+        state->player_flipped = true;
+    } else if(state->player_v.x > 0 && state->player_flipped && state->player_anim == 0) {
+        state->transition = true;
+    }
+
+    if(state->player_anim == 2 && state->transition) {
+        state->transition = false;
+    }
 }

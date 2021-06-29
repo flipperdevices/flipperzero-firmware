@@ -100,29 +100,168 @@ static void draw_idle_emote(SceneState* state, Canvas* canvas) {
 void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
+    uint8_t offset_x = 0;
+    uint8_t offset_y = 0;
 
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = I_DolphinExcited_64x63;
     } else if(state->action != INTERACT) {
-        if(state->player_v.x < 0 || state->player_flipped) {
-            if(state->player_anim == 0) {
-                state->dolphin_gfx = I_WalkL1_32x32;
-                state->dolphin_gfx_b = I_WalkLB1_32x32;
-
+        //do not look below this mark
+        // ------ (mark)
+        // (u've been warned)
+        if(state->player_v.x < 0 && state->player_v.y < 0) {
+            if(state->transition) {
             } else {
-                state->dolphin_gfx = I_WalkL2_32x32;
-                state->dolphin_gfx_b = I_WalkLB2_32x32;
+                offset_x = 15;
+                offset_y = 15;
+
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_leftup1_58x38;
+                    state->dolphin_gfx_b = I_black_leftup1;
+                } else {
+                    state->dolphin_gfx = I_leftup2_34x58;
+                    state->dolphin_gfx_b = I_black_leftup2;
+                }
             }
-        } else if(state->player_v.x > 0 || !state->player_flipped) {
-            if(state->player_anim == 0) {
-                state->dolphin_gfx = I_WalkR1_32x32;
-                state->dolphin_gfx_b = I_WalkRB1_32x32;
 
+        } else if(state->player_v.x < 0 && state->player_v.y > 0) {
+            if(state->transition) {
             } else {
-                state->dolphin_gfx = I_WalkR2_32x32;
-                state->dolphin_gfx_b = I_WalkRB2_32x32;
+                offset_x = 15;
+                offset_y = 15;
+
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_leftdown1_52x40;
+                    state->dolphin_gfx_b = I_black_leftdown1;
+                } else {
+                    state->dolphin_gfx = I_leftdown2_35x57;
+                    state->dolphin_gfx_b = I_black_leftdown2;
+                }
+            }
+
+        } else if(state->player_v.x > 0 && state->player_v.y > 0) {
+            if(state->transition) {
+            } else {
+                offset_x = 15;
+                offset_y = 15;
+
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_rightdown1_52x40;
+                    state->dolphin_gfx_b = I_black_rightdown1;
+                } else {
+                    state->dolphin_gfx = I_rightdown2_35x57;
+                    state->dolphin_gfx_b = I_black_rightdown2;
+                }
+            }
+        } else if(state->player_v.x > 0 && state->player_v.y < 0) {
+            if(state->transition) {
+            } else {
+                offset_x = 15;
+                offset_y = 15;
+
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_rightup1_58x38;
+                    state->dolphin_gfx_b = I_black_rightup1;
+                } else {
+                    state->dolphin_gfx = I_rightup2_34x58;
+                    state->dolphin_gfx_b = I_black_rightup2;
+                }
+            }
+
+        } else if(state->player_v.y < 0) {
+            if(state->transition) {
+            } else {
+                offset_x = 15;
+                offset_y = 15;
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_up1_29x59;
+                    state->dolphin_gfx_b = I_black_up1;
+
+                } else {
+                    state->dolphin_gfx = I_up1_29x59;
+                    state->dolphin_gfx_b = I_black_up2;
+                }
+            }
+        } else if(state->player_v.y > 0) {
+            if(state->transition) {
+            } else {
+                offset_x = 15;
+                offset_y = 15;
+
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_down1_29x59;
+                    state->dolphin_gfx_b = I_black_down1;
+                } else {
+                    state->dolphin_gfx = I_down1_29x59;
+                    state->dolphin_gfx_b = I_black_down2;
+                }
             }
         }
+
+        else if(state->player_v.x < 0 || state->player_flipped) {
+            if(state->transition) {
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_rightleft1_38x24;
+                    state->dolphin_gfx_b = I_black_rightleft1;
+                } else if(state->player_anim == 1) {
+                    state->dolphin_gfx = I_rightleft2_28x24;
+                    state->dolphin_gfx_b = I_black_rightleft2;
+                } else {
+                    state->dolphin_gfx = I_rightleft3_38x24;
+                    state->dolphin_gfx_b = I_black_rightleft3;
+                }
+
+            } else {
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_left1_70x25;
+                    state->dolphin_gfx_b = I_black_left1;
+                } else if(state->player_anim == 1) {
+                    state->dolphin_gfx = I_left2_70x26;
+                    state->dolphin_gfx_b = I_black_left2;
+
+                } else {
+                    state->dolphin_gfx = I_left3_71x25;
+                    state->dolphin_gfx_b = I_black_left3;
+                }
+            }
+        } else if(state->player_v.x > 0) {
+            if(state->transition) {
+#if 0
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_upright1_33x57;
+                    state->dolphin_gfx_b = I_black_upright1;
+                } else {
+                    state->dolphin_gfx = I_upright2_57x36;
+                    state->dolphin_gfx_b = I_black_upright2;
+                }
+#endif
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_rightleft1_38x24;
+                    state->dolphin_gfx_b = I_black_rightleft1;
+                } else if(state->player_anim == 1) {
+                    state->dolphin_gfx = I_rightleft2_28x24;
+                    state->dolphin_gfx_b = I_black_rightleft2;
+                } else {
+                    state->dolphin_gfx = I_rightleft3_38x24;
+                    state->dolphin_gfx_b = I_black_rightleft3;
+                }
+
+            } else {
+                if(state->player_anim == 0) {
+                    state->dolphin_gfx = I_right1_70x25;
+                    state->dolphin_gfx_b = I_black_right1;
+                } else if(state->player_anim == 1) {
+                    state->dolphin_gfx = I_right2_70x26;
+                    state->dolphin_gfx_b = I_black_right2;
+
+                } else {
+                    state->dolphin_gfx = I_right3_71x25;
+                    state->dolphin_gfx_b = I_black_right3;
+                }
+            }
+        }
+
+#if 0
         if(state->action == SLEEP) {
             const Vec2 item_pos = item_get_pos(state, ItemsSofa);
 
@@ -132,13 +271,15 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                 state->dolphin_gfx_b = I_FX_SittingB_40x27;
             }
         }
+#endif
     }
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx_b);
+    canvas_draw_icon_name(canvas, 2, 0, state->dolphin_gfx_b);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx);
+    canvas_draw_icon_name(
+        canvas, state->player.x + offset_x, state->player.y - offset_y, state->dolphin_gfx);
     canvas_set_bitmap_mode(canvas, false);
 }
 
@@ -198,13 +339,14 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
     if(state->debug) {
         sprintf(
             buf,
-            "x:%ld.%ld>%ld.%ld %ld %s",
+            "x:%ld.%ld>%ld.%ld %ld %s %d",
             state->player_global.x,
             state->player_global.y,
             state->poi.x,
             state->poi.y,
             state->action_timeout,
-            action_str[state->action]);
+            action_str[state->action],
+            state->transition);
         canvas_draw_str(canvas, 0, 13, buf);
     }
 
