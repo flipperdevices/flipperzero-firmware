@@ -14,7 +14,7 @@ void LfRfidAppSceneSaveName::on_enter(LfRfidApp* app, bool need_restore) {
     text_input->set_header_text("Name the card");
 
     text_input->set_result_callback(
-        save_callback, app, app->text_store.text, LFRFID_KEY_NAME_SIZE);
+        save_callback, app, app->text_store.text, app->worker.key.get_name_length());
 
     app->view_controller.switch_to<TextInputVM>();
 }

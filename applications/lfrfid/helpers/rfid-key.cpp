@@ -1,5 +1,6 @@
 #include "rfid-key.h"
 #include <furi/check.h>
+#include <string.h>
 
 RfidKey::RfidKey() {
     data.fill(0);
@@ -23,6 +24,10 @@ void RfidKey::set_data(uint8_t* _data, const uint8_t _data_size) {
     }
 }
 
+void RfidKey::set_name(const char* _name) {
+    strlcpy(name, _name, get_name_length());
+}
+
 LfrfidKeyType RfidKey::get_type() {
     return type;
 }
@@ -41,4 +46,8 @@ const uint8_t RfidKey::get_type_data_count() {
 
 char* RfidKey::get_name() {
     return name;
+}
+
+uint8_t RfidKey::get_name_length() {
+    return LFRFID_KEY_NAME_SIZE;
 }

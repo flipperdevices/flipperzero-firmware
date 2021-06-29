@@ -1,4 +1,5 @@
 #include "file-worker.h"
+#include <hex.h>
 
 FileWorker::FileWorker(bool _silent)
     : fs_api{"sdcard"}
@@ -98,6 +99,7 @@ bool FileWorker::read_until(string_t str_result, char separator) {
 }
 
 bool FileWorker::read_hex(uint8_t* buffer, uint16_t bytes_to_read) {
+    uint8_t hi_nibble_value, low_nibble_value;
     uint8_t text[2];
 
     for(uint8_t i = 0; i < bytes_to_read; i++) {
@@ -114,7 +116,13 @@ bool FileWorker::read_hex(uint8_t* buffer, uint16_t bytes_to_read) {
         }
 
         // convert hex value to byte
-        buffer[i] = strtol(reinterpret_cast<char*>(text), NULL, 16);
+        if(hex_char_to_hex_nibble(text[0], &hi_nibble_value) &&
+           hex_char_to_hex_nibble(text[1], &low_nibble_value)) {
+            buffer[i] = (hi_nibble_value << 4) | low_nibble_value;
+        } else {
+            show_error_internal("Cannot parse\nfile");
+            return false;
+        }
     }
 
     return check_common_errors();
@@ -179,7 +187,6 @@ bool FileWorker::file_select(
     char* selected_filename) {
     return sd_ex_api.get()->file_select(
         sd_ex_api.get()->context, path, extension, result, result_size, selected_filename);
-
 }
 
 bool FileWorker::check_common_errors() {

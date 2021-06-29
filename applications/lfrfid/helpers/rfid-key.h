@@ -9,6 +9,7 @@ public:
 
     void set_type(LfrfidKeyType type);
     void set_data(uint8_t* data, const uint8_t data_size);
+    void set_name(const char* name);
 
     LfrfidKeyType get_type();
     uint8_t* get_data();
@@ -17,6 +18,7 @@ public:
     const uint8_t get_type_data_count();
 
     char* get_name();
+    uint8_t get_name_length();
 
 private:
     std::array<uint8_t, LFRFID_KEY_SIZE> data;
