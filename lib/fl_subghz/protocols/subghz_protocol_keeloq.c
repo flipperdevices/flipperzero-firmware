@@ -355,7 +355,8 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
         string_cat_printf(
             output,
             "Protocol %s, %d Bit\r\n"
-            " KEY:0x%lX%lX YEK:0x%lX%lX\r\n",
+            " KEY:0x%lX%lX\r\n"
+            " YEK:0x%lX%lX\r\n",
             instance->common.name,
             instance->common.code_count_bit,
             code_found_hi,
