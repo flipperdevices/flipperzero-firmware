@@ -10,6 +10,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <cli/cli.h>
+#include <notification/notification-messages.h>
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
@@ -36,6 +37,7 @@
 struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
+    NotificationApp* notifications;
 
     // Nfc Views
     NfcDetect* nfc_detect;

@@ -14,8 +14,11 @@ void nfc_scene_read_card_success_dialog_callback(DialogExResult result, void* co
 const void nfc_scene_read_card_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
 
-    NfcDeviceData* data = (NfcDeviceData*)nfc->nfc_common.worker_result;
+    // Send notification
+    notification_message(nfc->notifications, &sequence_success);
 
+    // Setup view
+    NfcDeviceData* data = (NfcDeviceData*)nfc->nfc_common.worker_result;
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "More");
