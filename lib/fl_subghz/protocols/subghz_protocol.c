@@ -81,6 +81,7 @@ void subghz_protocol_load_keeloq_file(SubGhzProtocol* instance, const char* file
     } else {
         printf("Manufacture keys file is not found: %s\r\n", file_name);
     }
+    string_clear(line);
     fs_api->file.close(&manufacture_keys_file);
     furi_record_close("sdcard");
 }
