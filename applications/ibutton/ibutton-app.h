@@ -27,7 +27,6 @@
 
 #include <sd-card-api.h>
 #include <filesystem-api.h>
-#include "../cli/cli.h"
 
 #include "one_wire_master.h"
 #include "maxim_crc.h"
@@ -91,8 +90,6 @@ public:
     char* get_text_store();
     uint8_t get_text_store_size();
 
-    SdCard_Api* get_sd_ex_api();
-    FS_Api* get_fs_api();
     char* get_file_name();
     uint8_t get_file_name_size();
 
@@ -133,8 +130,6 @@ private:
 
     iButtonKey key;
 
-    RecordController<FS_Api> fs_api;
-    RecordController<SdCard_Api> sd_ex_api;
     RecordController<NotificationApp> notification;
 
     static const uint8_t file_name_size = 100;
@@ -146,6 +141,5 @@ private:
     static const char* app_folder;
     static const char* app_extension;
 
-    void show_file_error_message(const char* error_text);
     bool load_key_data(string_t key_path);
 };
