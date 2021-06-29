@@ -10,7 +10,7 @@
  */
 class FileWorker {
 public:
-    FileWorker();
+    FileWorker(bool silent = false);
     ~FileWorker();
 
     RecordController<FS_Api> fs_api;
@@ -69,7 +69,7 @@ public:
     bool read_until(string_t result, char separator = '\n');
 
     /**
-     * @brief Reads data in hexadecimal format. For example AF in a file - 175 in a read buffer.
+     * @brief Reads data in hexadecimal space-delimited format. For example "AF FF" in a file - [175, 255] in a read buffer.
      * 
      * @param buffer 
      * @param bytes_to_read 
@@ -94,15 +94,58 @@ public:
      */
     bool seek(uint64_t position, bool from_start);
 
+    /**
+     * @brief Write data to file.
+     * 
+     * @param buffer 
+     * @param bytes_to_write 
+     * @return true on success  
+     */
+    bool write(const void* buffer, uint16_t bytes_to_write = 1);
+
+    /**
+     * @brief Write data to file in hexadecimal space-delimited format. For example [175, 255] in a write buffer - "AF FF" in a file.
+     * 
+     * @param buffer 
+     * @param bytes_to_write 
+     * @return true on success  
+     */
+    bool write_hex(const uint8_t* buffer, uint16_t bytes_to_write = 1);
+
+    /**
+     * @brief Show system file error message
+     * 
+     * @param error_text 
+     */
+    void show_error(const char* error_text);
+
+    /**
+     * @brief Show system file select widget
+     * 
+     * @param path 
+     * @param extension 
+     * @param result 
+     * @param result_size 
+     * @param selected_filename 
+     * @return true if file was selected
+     */
+    bool file_select(
+        const char* path,
+        const char* extension,
+        char* result,
+        uint8_t result_size,
+        char* selected_filename);
+
 private:
     File file;
+    bool silent;
 
     bool check_common_errors();
-    void show_error_message(const char* error_text);
+
+    void show_error_internal(const char* error_text);
 
     bool read_internal(void* buffer, uint16_t bytes_to_read = 1);
+    bool write_internal(const void* buffer, uint16_t bytes_to_write = 1);
     bool tell_internal(uint64_t* position);
     bool seek_internal(uint64_t position, bool from_start);
-
-    string_t error_string;
 };
