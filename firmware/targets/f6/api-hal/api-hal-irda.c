@@ -24,12 +24,12 @@ void api_hal_irda_tim_isr(TimerIRQSource source)
     case TimerIRQSourceCCI1:
         duration = LL_TIM_OC_GetCompareCH1(TIM2);
         LL_TIM_SetCounter(TIM2, 0);
-        level = 1;
+        level = 0;
         break;
     case TimerIRQSourceCCI2:
         duration = LL_TIM_OC_GetCompareCH2(TIM2);
         LL_TIM_SetCounter(TIM2, 0);
-        level = 0;
+        level = 1;
         break;
     default:
         furi_check(0);

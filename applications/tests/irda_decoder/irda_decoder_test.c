@@ -4,6 +4,7 @@
 #include "test_data/irda_decoder_nec_test_data.srcdata"
 #include "test_data/irda_decoder_necext_test_data.srcdata"
 #include "test_data/irda_decoder_samsung_test_data.srcdata"
+#include "test_data/irda_decoder_rc6_test_data.srcdata"
 
 #define RUN_DECODER(data, expected) \
     run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
@@ -32,12 +33,13 @@ static void run_decoder(
     const IrdaMessage* message_expected,
     uint32_t message_expected_len) {
     const IrdaMessage* message_decoded = 0;
-    bool level = 1;
+    bool level = 0;
     uint32_t message_counter = 0;
 
     for(uint32_t i = 0; i < input_delays_len; ++i) {
         message_decoded = irda_decode(decoder, level, input_delays[i]);
         if(message_decoded) {
+            printf("expected: adr: 0x%lX, cmd: 0x%lX, repeat %d\r\n", message_expected[message_counter].address, message_expected[message_counter].command, message_expected[message_counter].repeat);
             mu_assert(message_counter < message_expected_len, "decoded more than expected");
             if(message_counter >= message_expected_len) break;
             compare_message_results(message_decoded, &message_expected[message_counter]);
@@ -49,6 +51,7 @@ static void run_decoder(
     mu_assert(message_counter == message_expected_len, "decoded less than expected");
 }
 
+#if 0
 MU_TEST(test_samsung32) {
     RUN_DECODER(test_samsung32_input1, test_samsung32_expected1);
 }
@@ -94,9 +97,59 @@ MU_TEST_SUITE(test_irda_decoder) {
     MU_RUN_TEST(test_mix);
 }
 
+#else
+
+MU_TEST(test_rc6_0) {
+    RUN_DECODER(test_rc6_input0, test_rc6_expected0);
+}
+
+MU_TEST(test_rc6_1) {
+    RUN_DECODER(test_rc6_input1, test_rc6_expected1);
+}
+
+MU_TEST(test_rc6_2) {
+    RUN_DECODER(test_rc6_input2, test_rc6_expected2);
+}
+
+MU_TEST(test_rc6_3) {
+    RUN_DECODER(test_rc6_input3, test_rc6_expected3);
+}
+
+MU_TEST(test_rc6_4) {
+    RUN_DECODER(test_rc6_input4, test_rc6_expected4);
+}
+
+MU_TEST(test_rc6_5) {
+    RUN_DECODER(test_rc6_input5, test_rc6_expected5);
+}
+
+MU_TEST(test_rc6_6) {
+    RUN_DECODER(test_rc6_input6, test_rc6_expected6);
+}
+
+MU_TEST(test_rc6_conseq) {
+    RUN_DECODER(test_rc6_input_conseq, test_rc6_expected_conseq);
+}
+
+MU_TEST_SUITE(test_irda_decoder) {
+    MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
+
+    MU_RUN_TEST(test_rc6_0);
+    MU_RUN_TEST(test_rc6_1);
+    MU_RUN_TEST(test_rc6_2);
+    MU_RUN_TEST(test_rc6_3);
+    MU_RUN_TEST(test_rc6_4);
+    MU_RUN_TEST(test_rc6_5);
+    MU_RUN_TEST(test_rc6_6);
+    MU_RUN_TEST(test_rc6_conseq);
+}
+
+#endif  // 0
+
 int run_minunit_test_irda_decoder() {
     MU_RUN_SUITE(test_irda_decoder);
     MU_REPORT();
 
     return MU_EXIT_CODE;
 }
+

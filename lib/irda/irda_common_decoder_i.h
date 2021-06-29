@@ -41,6 +41,7 @@ typedef struct {
 
 typedef struct {
     IrdaCommonDecoderTimings timings;
+    bool     manchester_inverse_level;
     uint32_t databit_len;
     IrdaCommonDecode decode;
     IrdaCommonInterpret interpret;
@@ -53,6 +54,8 @@ struct IrdaCommonDecoder {
     IrdaMessage message;
     uint32_t timings[6];
     uint8_t timings_cnt;
+    void* context;
+    bool avanse;
     uint32_t level;
     uint16_t databit_cnt;
     uint8_t data[];
@@ -70,4 +73,5 @@ void* irda_common_decoder_alloc(const IrdaCommonProtocolSpec *protocol);
 void irda_common_decoder_free(void* decoder);
 void irda_common_decoder_reset(void* decoder);
 DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder);
+void irda_common_set_context(void* decoder, void* context);
 

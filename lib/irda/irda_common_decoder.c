@@ -11,7 +11,7 @@ static bool irda_check_preamble(IrdaCommonDecoder* decoder) {
     bool start_level = (decoder->level + decoder->timings_cnt + 1) % 2;
 
     // align to start at Mark timing
-    if (start_level) {
+    if (!start_level) {
         if (decoder->timings_cnt > 0) {
             --decoder->timings_cnt;
             shift_left_array(decoder->timings, decoder->timings_cnt, 1);
@@ -156,7 +156,13 @@ void* irda_common_decoder_alloc(const IrdaCommonProtocolSpec* protocol) {
     IrdaCommonDecoder* decoder = furi_alloc(alloc_size);
     memset(decoder, 0, alloc_size);
     decoder->protocol = protocol;
+    decoder->level = true;
     return decoder;
+}
+
+void irda_common_set_context(void* decoder, void* context) {
+    IrdaCommonDecoder* common_decoder = decoder;
+    common_decoder->context = context;
 }
 
 void irda_common_decoder_free(void* decoder) {

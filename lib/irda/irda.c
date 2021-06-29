@@ -33,6 +33,19 @@ typedef struct {
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
+    // #3
+    { .protocol = IrdaProtocolRC6,
+      .name = "RC6",
+      .decoder = {
+          .alloc = irda_decoder_rc6_alloc,
+          .decode = irda_decoder_rc6_decode,
+          .reset = irda_decoder_rc6_reset,
+          .free = irda_decoder_rc6_free},
+      .encoder = {
+          .encode = NULL /*irda_encoder_rc6_encode*/},
+      .address_length = 2,
+      .command_length = 2,
+    },
     // #0
     { .protocol = IrdaProtocolSamsung32,
       .name ="Samsung32",

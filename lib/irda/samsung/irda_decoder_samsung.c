@@ -9,20 +9,20 @@ static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
 
 
 static const IrdaCommonProtocolSpec protocol_samsung32 = {
-    {
-        IRDA_SAMSUNG_PREAMBULE_MARK,
-        IRDA_SAMSUNG_PREAMBULE_SPACE,
-        IRDA_SAMSUNG_BIT1_MARK,
-        IRDA_SAMSUNG_BIT1_SPACE,
-        IRDA_SAMSUNG_BIT0_MARK,
-        IRDA_SAMSUNG_BIT0_SPACE,
-        IRDA_SAMSUNG_PREAMBLE_TOLERANCE,
-        IRDA_SAMSUNG_BIT_TOLERANCE,
+    .timings = {
+        .preamble_mark = IRDA_SAMSUNG_PREAMBULE_MARK,
+        .preamble_space = IRDA_SAMSUNG_PREAMBULE_SPACE,
+        .bit1_mark = IRDA_SAMSUNG_BIT1_MARK,
+        .bit1_space = IRDA_SAMSUNG_BIT1_SPACE,
+        .bit0_mark = IRDA_SAMSUNG_BIT0_MARK,
+        .bit0_space = IRDA_SAMSUNG_BIT0_SPACE,
+        .preamble_tolerance = IRDA_SAMSUNG_PREAMBLE_TOLERANCE,
+        .bit_tolerance = IRDA_SAMSUNG_BIT_TOLERANCE,
     },
-    32,
-    irda_common_decode_pdwm,
-    interpret_samsung32,
-    decode_repeat_samsung32,
+    .databit_len = 32,
+    .decode = irda_common_decode_pdwm,
+    .interpret = interpret_samsung32,
+    .decode_repeat = decode_repeat_samsung32,
 };
 
 

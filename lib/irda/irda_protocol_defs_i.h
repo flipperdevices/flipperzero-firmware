@@ -80,3 +80,14 @@ void irda_decoder_samsung32_reset(void* decoder);
 void irda_decoder_samsung32_free(void* decoder);
 IrdaMessage* irda_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration);
 
+
+
+void* irda_decoder_rc6_alloc(void);
+void irda_encoder_rc6_encode(uint32_t address, uint32_t command, bool repeat);
+void irda_decoder_rc6_reset(void* decoder);
+void irda_decoder_rc6_free(void* decoder);
+IrdaMessage* irda_decoder_rc6_decode(void* decoder, bool level, uint32_t duration);
+
+
+
+

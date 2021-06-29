@@ -1,3 +1,4 @@
+#include "irda_protocol_defs_i.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi.h>
@@ -10,37 +11,37 @@ static DecodeStatus decode_repeat_nec(IrdaCommonDecoder* decoder);
 
 
 static const IrdaCommonProtocolSpec protocol_nec = {
-    {
-        IRDA_NEC_PREAMBULE_MARK,
-        IRDA_NEC_PREAMBULE_SPACE,
-        IRDA_NEC_BIT1_MARK,
-        IRDA_NEC_BIT1_SPACE,
-        IRDA_NEC_BIT0_MARK,
-        IRDA_NEC_BIT0_SPACE,
-        IRDA_NEC_PREAMBLE_TOLERANCE,
-        IRDA_NEC_BIT_TOLERANCE,
+    .timings = {
+        .preamble_mark = IRDA_NEC_PREAMBULE_MARK,
+        .preamble_space = IRDA_NEC_PREAMBULE_SPACE,
+        .bit1_mark = IRDA_NEC_BIT1_MARK,
+        .bit1_space = IRDA_NEC_BIT1_SPACE,
+        .bit0_mark = IRDA_NEC_BIT0_MARK,
+        .bit0_space = IRDA_NEC_BIT0_SPACE,
+        .preamble_tolerance = IRDA_NEC_PREAMBLE_TOLERANCE,
+        .bit_tolerance = IRDA_NEC_BIT_TOLERANCE,
     },
-    32,
-    irda_common_decode_pdwm,
-    interpret_nec,
-    decode_repeat_nec,
+    .databit_len = 32,
+    .decode = irda_common_decode_pdwm,
+    .interpret = interpret_nec,
+    .decode_repeat = decode_repeat_nec,
 };
 
 static const IrdaCommonProtocolSpec protocol_necext = {
-    {
-        IRDA_NEC_PREAMBULE_MARK,
-        IRDA_NEC_PREAMBULE_SPACE,
-        IRDA_NEC_BIT1_MARK,
-        IRDA_NEC_BIT1_SPACE,
-        IRDA_NEC_BIT0_MARK,
-        IRDA_NEC_BIT0_SPACE,
-        IRDA_NEC_PREAMBLE_TOLERANCE,
-        IRDA_NEC_BIT_TOLERANCE,
+    .timings = {
+        .preamble_mark = IRDA_NEC_PREAMBULE_MARK,
+        .preamble_space = IRDA_NEC_PREAMBULE_SPACE,
+        .bit1_mark = IRDA_NEC_BIT1_MARK,
+        .bit1_space = IRDA_NEC_BIT1_SPACE,
+        .bit0_mark = IRDA_NEC_BIT0_MARK,
+        .bit0_space = IRDA_NEC_BIT0_SPACE,
+        .preamble_tolerance = IRDA_NEC_PREAMBLE_TOLERANCE,
+        .bit_tolerance = IRDA_NEC_BIT_TOLERANCE,
     },
-    32,
-    irda_common_decode_pdwm,
-    interpret_necext,
-    decode_repeat_nec,
+    .databit_len = 32,
+    .decode = irda_common_decode_pdwm,
+    .interpret = interpret_necext,
+    .decode_repeat = decode_repeat_nec,
 };
 
 static bool interpret_nec(IrdaCommonDecoder* decoder) {
