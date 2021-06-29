@@ -23,6 +23,7 @@ struct NfcWorker {
     NfcWorkerResult* last_result;
     NfcWorkerCallback callback;
     void* context;
+    NfcDeviceData emulate_params;
 
     NfcWorkerState state;
     ReturnCode error;

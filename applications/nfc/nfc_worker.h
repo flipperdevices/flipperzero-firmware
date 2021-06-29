@@ -68,6 +68,8 @@ NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker);
 
 ReturnCode nfc_worker_get_error(NfcWorker* nfc_worker);
 
+void nfc_worker_set_emulation_params(NfcWorker* nfc_worker, NfcDeviceData* data);
+
 void nfc_worker_free(NfcWorker* nfc_worker);
 
 void nfc_worker_start(

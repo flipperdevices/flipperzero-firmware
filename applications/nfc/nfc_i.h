@@ -27,7 +27,10 @@
 #include "scenes/nfc_scene_read_card.h"
 #include "scenes/nfc_scene_read_card_success.h"
 #include "scenes/nfc_scene_card_menu.h"
+#include "scenes/nfc_scene_emulate_uid.h"
 #include "scenes/nfc_scene_not_implemented.h"
+
+// TODO delete debug scenes
 #include "scenes/nfc_scene_debug_menu.h"
 #include "scenes/nfc_scene_debug_detect.h"
 #include "scenes/nfc_scene_debug_emulate.h"
@@ -58,6 +61,9 @@ struct Nfc {
     AppScene* scene_read_card_success;
     AppScene* scene_card_menu;
     AppScene* scene_not_implemented;
+    AppScene* scene_emualate_uid;
+
+    // TODO delete debug scenes
     AppScene* scene_debug_menu;
     AppScene* scene_debug_detect;
     AppScene* scene_debug_emulate;
@@ -82,6 +88,7 @@ typedef enum {
     NfcSceneReadCard,
     NfcSceneReadCardSuccess,
     NfcSceneCardMenu,
+    NfcSceneEmulateUID,
     NfcSceneNotImplemented,
     NfcSceneDebugMenu,
     NfcSceneDebugDetect,

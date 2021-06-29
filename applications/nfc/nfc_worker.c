@@ -39,6 +39,13 @@ ReturnCode nfc_worker_get_error(NfcWorker* nfc_worker) {
     return nfc_worker->error;
 }
 
+void nfc_worker_set_emulation_params(NfcWorker* nfc_worker, NfcDeviceData* data) {
+    furi_assert(nfc_worker);
+    furi_assert(data);
+
+    nfc_worker->emulate_params = *data;
+}
+
 void nfc_worker_start(
     NfcWorker* nfc_worker,
     NfcWorkerState state,
@@ -133,10 +140,10 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
+    NfcDeviceData* param = &nfc_worker->emulate_params;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsMifare, 100)) {
+        if(api_hal_nfc_listen(param->uid, param->uid_len, param->atqa, param->sak, 100)) {
             FURI_LOG_I(NFC_WORKER_TAG, "Reader detected");
-            api_hal_nfc_deactivate();
         }
         osDelay(10);
     }
@@ -272,9 +279,17 @@ void nfc_worker_emulate_emv(NfcWorker* nfc_worker) {
     uint16_t tx_len = 0;
     uint8_t* rx_buff;
     uint16_t* rx_len;
+    NfcDeviceData params = {
+        .uid = {0xCF, 0x72, 0xd4, 0x40},
+        .uid_len = 4,
+        .atqa = {0x00, 0x04},
+        .sak = 0x20,
+        .device = NfcDeviceNfca,
+        .protocol = NfcDeviceProtocolEMV,
+    };
 
     while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
-        if(api_hal_nfc_listen(ApiHalNfcEmulateParamsEMV, 1000)) {
+        if(api_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, 100)) {
             FURI_LOG_I(NFC_WORKER_TAG, "POS terminal detected");
             // Read data from POS terminal
             err = api_hal_nfc_data_exchange(NULL, 0, &rx_buff, &rx_len, false);
