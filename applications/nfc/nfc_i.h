@@ -27,6 +27,11 @@
 #include "scenes/nfc_scene_read_card_success.h"
 #include "scenes/nfc_scene_card_menu.h"
 #include "scenes/nfc_scene_not_implemented.h"
+#include "scenes/nfc_scene_debug_menu.h"
+#include "scenes/nfc_scene_debug_detect.h"
+#include "scenes/nfc_scene_debug_emulate.h"
+#include "scenes/nfc_scene_debug_read_emv.h"
+#include "scenes/nfc_scene_debug_read_mifare_ul.h"
 
 struct Nfc {
     NfcCommon nfc_common;
@@ -51,6 +56,11 @@ struct Nfc {
     AppScene* scene_read_card_success;
     AppScene* scene_card_menu;
     AppScene* scene_not_implemented;
+    AppScene* scene_debug_menu;
+    AppScene* scene_debug_detect;
+    AppScene* scene_debug_emulate;
+    AppScene* scene_debug_read_emv;
+    AppScene* scene_debug_read_mifare_ul;
 };
 
 typedef enum {
@@ -71,6 +81,11 @@ typedef enum {
     NfcSceneReadCardSuccess,
     NfcSceneCardMenu,
     NfcSceneNotImplemented,
+    NfcSceneDebugMenu,
+    NfcSceneDebugDetect,
+    NfcSceneDebugEmulate,
+    NfcSceneDebugReadEmv,
+    NfcSceneDebugReadMifareUl,
 } NfcScene;
 
 Nfc* nfc_alloc();

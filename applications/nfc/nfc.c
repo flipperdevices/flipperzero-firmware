@@ -69,6 +69,11 @@ Nfc* nfc_alloc() {
     nfc->scene_read_card_success = nfc_scene_read_card_success_alloc();
     nfc->scene_card_menu = nfc_scene_card_menu_alloc();
     nfc->scene_not_implemented = nfc_scene_not_implemented_alloc();
+    nfc->scene_debug_menu = nfc_scene_debug_menu_alloc();
+    nfc->scene_debug_detect = nfc_scene_debug_detect_alloc();
+    nfc->scene_debug_emulate = nfc_scene_debug_emulate_alloc();
+    nfc->scene_debug_read_emv = nfc_scene_debug_read_emv_alloc();
+    nfc->scene_debug_read_mifare_ul = nfc_scene_debug_read_mifare_ul_alloc();
 
     view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_start);
 
@@ -108,6 +113,11 @@ void nfc_free(Nfc* nfc) {
     nfc_scene_read_card_success_alloc(nfc->scene_read_card_success);
     nfc_scene_card_menu_free(nfc->scene_card_menu);
     nfc_scene_not_implemented_free(nfc->scene_not_implemented);
+    nfc_scene_debug_menu_free(nfc->scene_debug_menu);
+    nfc_scene_debug_detect_free(nfc->scene_debug_detect);
+    nfc_scene_debug_emulate_free(nfc->scene_debug_emulate);
+    nfc_scene_debug_read_emv_free(nfc->scene_debug_read_emv);
+    nfc_scene_debug_read_mifare_ul_free(nfc->scene_debug_read_mifare_ul);
 
     // View Dispatcher
     view_dispatcher_free(nfc->nfc_common.view_dispatcher);
