@@ -220,7 +220,7 @@ float api_hal_subghz_get_rssi() {
 
 uint32_t api_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = api_hal_subghz_set_frequency(value);
-    if(value >= 300000000 && value <= 348000000) {
+    if(value >= 300000000 && value <= 348000335) {
         api_hal_subghz_set_path(ApiHalSubGhzPath315);
     } else if(value >= 387000000 && value <= 464000000) {
         api_hal_subghz_set_path(ApiHalSubGhzPath433);
