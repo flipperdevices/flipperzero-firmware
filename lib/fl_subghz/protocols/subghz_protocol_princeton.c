@@ -13,7 +13,7 @@ struct SubGhzProtocolPrinceton {
 SubGhzProtocolPrinceton* subghz_protocol_princeton_alloc(void) {
     SubGhzProtocolPrinceton* instance = furi_alloc(sizeof(SubGhzProtocolPrinceton));
 
-    snprintf(instance->common.name, SUBGHZ_PROTOCOL_NAME_LEN,"PRINCETON");
+    instance->common.name = "Princeton";
     instance->common.code_min_count_bit_for_found = 24;
     instance->common.te_shot = 450;//150;
     instance->common.te_long = 1350;//450;
@@ -83,7 +83,7 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPai
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     //ToDo out data display
-                    subghz_protocol_common_printf(&instance->common);
+                    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 instance->common.code_found = 0;
                 instance->common.code_count_bit = 0;

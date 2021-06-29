@@ -19,15 +19,34 @@ struct SubGhzProtocol {
     SubGhzProtocolNiceFlo* nice_flo;
     SubGhzProtocolNiceFlorS* nice_flor_s;
     SubGhzProtocolPrinceton* princeton;
+
+    SubGhzProtocolTextCallback text_callback;
+    void* text_callback_context;
 };
+
+static void subghz_protocol_came_rx_callback(SubGhzProtocolCommon* parser, void* context) {
+    SubGhzProtocol* instance = context;
+
+    string_t output;
+    string_init(output);
+    subghz_protocol_common_to_str((SubGhzProtocolCommon*)parser, output);
+    if (instance->text_callback) {
+        instance->text_callback(output, instance->text_callback_context);
+    } else {
+        printf(string_get_cstr(output));
+    }
+    string_clear(output);
+}
 
 SubGhzProtocol* subghz_protocol_alloc() {
     SubGhzProtocol* instance = furi_alloc(sizeof(SubGhzProtocol));
+
     instance->came = subghz_protocol_came_alloc();
     instance->keeloq = subghz_protocol_keeloq_alloc();
     instance->princeton = subghz_protocol_princeton_alloc();
     instance->nice_flo = subghz_protocol_nice_flo_alloc();
     instance->nice_flor_s = subghz_protocol_nice_flor_s_alloc();
+
     return instance;
 }
 
@@ -41,6 +60,19 @@ void subghz_protocol_free(SubGhzProtocol* instance) {
     subghz_protocol_nice_flor_s_free(instance->nice_flor_s);
 
     free(instance);
+}
+
+void subghz_protocol_enable_dump(SubGhzProtocol* instance, SubGhzProtocolTextCallback callback, void* context) {
+    furi_assert(instance);
+
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->came, subghz_protocol_came_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->keeloq, subghz_protocol_came_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->princeton, subghz_protocol_came_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_came_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_came_rx_callback, instance);
+
+    instance->text_callback = callback;
+    instance->text_callback_context = context;
 }
 
 static void subghz_protocol_load_keeloq_file_process_line(SubGhzProtocol* instance, string_t line) {

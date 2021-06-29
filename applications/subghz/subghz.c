@@ -1,69 +1,26 @@
 #include "subghz_i.h"
 
-const SubGhzFrequency subghz_frequencies[] = {
-    /* 301 */
-    {
-        .frequency = 301000000,
-        .path = ApiHalSubGhzPath315,
-    },
-    /* 315 */
-    {
-        .frequency = 315000000,
-        .path = ApiHalSubGhzPath315,
-    },
-    /* 346 - 385 */
-    {
-        .frequency = 346000000,
-        .path = ApiHalSubGhzPath315,
-    },
-    {
-        .frequency = 385000000,
-        .path = ApiHalSubGhzPath315,
-    },
-    /* LPD433 first, mid, last channels */
-    {
-        .frequency = 433075000,
-        .path = ApiHalSubGhzPath433,
-    },
-    {
-        .frequency = 433920000,
-        .path = ApiHalSubGhzPath433,
-    },
-    {
-        .frequency = 434775000,
-        .path = ApiHalSubGhzPath433,
-    },
-    /* 438.9 - 781 */
-    {
-        .frequency = 438900000,
-        .path = ApiHalSubGhzPath433,
-    },
-    {
-        .frequency = 463000000,
-        .path = ApiHalSubGhzPath433,
-    },
-    {
-        .frequency = 781000000,
-        .path = ApiHalSubGhzPath868,
-    },
-    /* 868.35 */
-    {
-        .frequency = 868350000,
-        .path = ApiHalSubGhzPath868,
-    },
-    /* 915 */
-    {
-        .frequency = 915000000,
-        .path = ApiHalSubGhzPath868,
-    },
-    /* 925 */
-    {
-        .frequency = 925000000,
-        .path = ApiHalSubGhzPath868,
-    },
+const uint32_t subghz_frequencies[] = {
+    /* 300 - 348 */
+    300000000,
+    315000000,
+    348000000,
+    /* 387 - 464 */
+    387000000,
+    433075000, /* LPD433 first */
+    433920000, /* LPD433 mid */
+    434775000, /* LPD433 last channels */
+    438900000,
+    464000000,
+    /* 779 - 928 */
+    779000000,
+    868350000,
+    915000000,
+    925000000,
+    928000000,
 };
 
-const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(SubGhzFrequency);
+const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_frequencies_433_92 = 5;
 
 void subghz_menu_callback(void* context, uint32_t index) {

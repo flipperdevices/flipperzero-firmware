@@ -22,49 +22,48 @@ uint64_t subghz_protocol_common_reverse_key(uint64_t key, uint8_t count_bit){
     return key_reverse;
 }
 
-void subghz_protocol_common_printf (SubGhzProtocolCommon *common){
-    //snprintf(BufTX, sizeof(BufTX),"Protocol %s: %d Bit | KEY:0x%llX HEX  \n\r", common->Name_Protocol, common->Count_BIT, common->Code);
-    uint32_t code_found_hi = common->code_found>>32;
-    uint32_t code_found_lo = common->code_found&0x00000000ffffffff;
+void subghz_protocol_common_set_callback(SubGhzProtocolCommon* common, SubGhzProtocolCommonCallback callback, void* context) {
+    common->callback = callback;
+    common->context = context;
+}
 
-    uint64_t code_found_reverse = subghz_protocol_common_reverse_key(common->code_found, common->code_count_bit);
-
-    uint32_t code_found_reverse_hi = code_found_reverse>>32;
-    uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
-
-    if (code_found_hi>0) {
-        printf(
-            "Found protocol %s, %d Bit\r\n"
-            " |- KEY:0x%lX%08lX  Reverse KEY:0x%lX%08lX\r\n",
-            common->name,
-            common->code_count_bit,
-            code_found_hi,
-            code_found_lo,
-            code_found_reverse_hi,
-            code_found_reverse_lo
-        );
+void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output) {
+    if (instance->to_string) {
+        instance->to_string(instance, output);
     } else {
-        printf(
-            "Found protocol %s, %d Bit\r\n"
-            " |- KEY:0x%lX%lX  Reverse KEY:0x%lX%lX\r\n",
-            common->name,
-            common->code_count_bit,
-            code_found_hi,
-            code_found_lo,
-            code_found_reverse_hi,
-            code_found_reverse_lo
-        );
-    }
-    if(common->name[0] =='K'){
-        printf(
-            " |- FIX: %lX\r\n"
-            " |- Remote controller: %s\r\n"
-            " |- HOP: %lX CNT: %04X  BTN: %02lX\r\n",
-            code_found_reverse_hi,
-            common->name_remote_controller,
-            code_found_reverse_lo,
-            common->cnt, //need manufacture code
-            code_found_reverse_hi>>28
-        );
+        uint32_t code_found_hi = instance->code_found >> 32;
+        uint32_t code_found_lo = instance->code_found & 0x00000000ffffffff;
+
+        uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->code_found, instance->code_count_bit);
+
+        uint32_t code_found_reverse_hi = code_found_reverse>>32;
+        uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
+
+        if (code_found_hi>0) {
+            string_cat_printf(
+                output,
+                "Protocol %s, %d Bit\r\n"
+                " KEY:0x%lX%08lX\r\n"
+                " YEK:0x%lX%08lX\r\n",
+                instance->name,
+                instance->code_count_bit,
+                code_found_hi,
+                code_found_lo,
+                code_found_reverse_hi,
+                code_found_reverse_lo
+            );
+        } else {
+            string_cat_printf(
+                output,
+                "Protocol %s, %d Bit\r\n"
+                " KEY:0x%lX%lX YEK:0x%lX%lX\r\n",
+                instance->name,
+                instance->code_count_bit,
+                code_found_hi,
+                code_found_lo,
+                code_found_reverse_hi,
+                code_found_reverse_lo
+            );
+        }
     }
 }

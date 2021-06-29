@@ -37,6 +37,7 @@ ARRAY_DEF(KeeLoqManufactureCodeArray, KeeLoqManufactureCode, M_POD_OPLIST)
 struct SubGhzProtocolKeeloq {
     SubGhzProtocolCommon common;
     KeeLoqManufactureCodeArray_t manufacture_codes;
+    const char* manufacture_name;
 };
 
 /** Simple Learning Encrypt
@@ -85,11 +86,12 @@ inline uint64_t subghz_protocol_keeloq_normal_learning(uint32_t data, const uint
 SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc() {
     SubGhzProtocolKeeloq* instance = furi_alloc(sizeof(SubGhzProtocolKeeloq));
 
-    snprintf(instance->common.name, SUBGHZ_PROTOCOL_NAME_LEN, "KEELOQ");
+    instance->common.name = "KeeLoq";
     instance->common.code_min_count_bit_for_found = 64;
     instance->common.te_shot = 400;
     instance->common.te_long = 800;
     instance->common.te_delta = 140;
+    instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_keeloq_to_str;
 
     KeeLoqManufactureCodeArray_init(instance->manufacture_codes);
 
@@ -127,7 +129,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     //Simple Learning
                     decrypt = subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
                     if((decrypt>>28 == btn) && ((((uint16_t)(decrypt>>16)) & 0x3FF) == end_serial)){
-                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->manufacture_name = string_get_cstr(manufacture_code->name);
                         instance->common.cnt = decrypt & 0x0000FFFF;
                         return 1;
                     }
@@ -138,7 +140,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
                     if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){ 
-                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->manufacture_name = string_get_cstr(manufacture_code->name);
                         instance->common.cnt = decrypt & 0x0000FFFF;
                         return 1;
                     }
@@ -147,7 +149,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     // Simple Learning
                     decrypt=subghz_protocol_keeloq_decrypt(hop, manufacture_code->key);
                     if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
-                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->manufacture_name = string_get_cstr(manufacture_code->name);
                         instance->common.cnt = decrypt & 0x0000FFFF;
                         return 1;
                     }
@@ -160,7 +162,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     }
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_rev);
                     if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
-                      snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                      instance->manufacture_name = string_get_cstr(manufacture_code->name);
                       instance->common.cnt= decrypt&0x0000FFFF;
                       return 1;
                     }
@@ -170,7 +172,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, manufacture_code->key);
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
                     if( (decrypt>>28 ==btn)&& ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
-                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->manufacture_name = string_get_cstr(manufacture_code->name);
                         instance->common.cnt= decrypt&0x0000FFFF;
                         return 1;
                     }
@@ -184,7 +186,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
                     man_normal_learning = subghz_protocol_keeloq_normal_learning(fix, man_rev);
                     decrypt=subghz_protocol_keeloq_decrypt(hop, man_normal_learning);
                     if( (decrypt>>28 ==btn) && ((((uint16_t)(decrypt>>16))&0x3FF)==end_serial)){
-                        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, string_get_cstr(manufacture_code->name));
+                        instance->manufacture_name = string_get_cstr(manufacture_code->name);
                         instance->common.cnt= decrypt&0x0000FFFF;
                         return 1;
                     }
@@ -192,7 +194,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
             }
         }
 
-    snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, "Unknown");
+    instance->manufacture_name = "Unknown";
     instance->common.cnt=0;
 
     return 0;
@@ -204,12 +206,12 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     uint32_t key_hop = key & 0x00000000ffffffff;
     // Check key AN-Motors
     if((key_hop >> 24) == ((key_hop>>16)&0x00ff) && (key_fix>>28) ==((key_hop>>12)&0x0f) ){
-        snprintf(instance->common.name_remote_controller, SUBGHZ_PROTOCOL_NAME_LEN, "AN-Motors");
+        instance->manufacture_name = "AN-Motors";
         instance->common.cnt = key_hop>>16;
     } else {
         subghz_protocol_keeloq_check_remote_controller_selector(instance, key_fix, key_hop);
     }
-    subghz_protocol_common_printf(&instance->common);
+    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
 }
 
 void subghz_protocol_keeloq_send_bit(SubGhzProtocolKeeloq* instance, uint8_t bit) {
@@ -293,7 +295,6 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
                     instance->common.code_last_found = instance->common.code_found;
 
                     //ToDo out data display
-                    //subghz_protocol_common_printf(&instance->common);
                     subghz_protocol_keeloq_check_remote_controller(instance);
 
                     //Print_Code(&KEELOQ);
@@ -325,4 +326,52 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
         }
         break;
     }
+}
+
+void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t output) {
+    //snprintf(BufTX, sizeof(BufTX),"Protocol %s: %d Bit | KEY:0x%llX HEX  \n\r", common->Name_Protocol, common->Count_BIT, common->Code);
+    uint32_t code_found_hi = instance->common.code_found >> 32;
+    uint32_t code_found_lo = instance->common.code_found & 0x00000000ffffffff;
+
+    uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+
+    uint32_t code_found_reverse_hi = code_found_reverse>>32;
+    uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
+
+    if (code_found_hi>0) {
+        string_cat_printf(
+            output,
+            "Protocol %s, %d Bit\r\n"
+            " KEY:0x%lX%08lX\r\n"
+            " YEK:0x%lX%08lX\r\n",
+            instance->common.name,
+            instance->common.code_count_bit,
+            code_found_hi,
+            code_found_lo,
+            code_found_reverse_hi,
+            code_found_reverse_lo
+        );
+    } else {
+        string_cat_printf(
+            output,
+            "Protocol %s, %d Bit\r\n"
+            " KEY:0x%lX%lX YEK:0x%lX%lX\r\n",
+            instance->common.name,
+            instance->common.code_count_bit,
+            code_found_hi,
+            code_found_lo,
+            code_found_reverse_hi,
+            code_found_reverse_lo
+        );
+    }
+    string_cat_printf(
+        output,
+        " MF:%s FIX:%lX\r\n"
+        " HOP:%lX CNT:%04X BTN:%02lX\r\n",
+        instance->manufacture_name,
+        code_found_reverse_hi,
+        code_found_reverse_lo,
+        instance->common.cnt, //need manufacture code
+        code_found_reverse_hi >> 28
+    );
 }

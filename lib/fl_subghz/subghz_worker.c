@@ -58,7 +58,7 @@ SubGhzWorker* subghz_worker_alloc() {
 
     instance->thread = furi_thread_alloc();
     furi_thread_set_name(instance->thread, "subghz_worker");
-    furi_thread_set_stack_size(instance->thread, 1024);
+    furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_worker_thread_callback);
     

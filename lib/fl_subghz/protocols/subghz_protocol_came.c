@@ -1,4 +1,5 @@
 #include "subghz_protocol_came.h"
+#include "subghz_protocol_common.h"
 
 /*
  * Help
@@ -13,7 +14,7 @@ struct SubGhzProtocolCame {
 SubGhzProtocolCame* subghz_protocol_came_alloc() {
     SubGhzProtocolCame* instance = furi_alloc(sizeof(SubGhzProtocolCame));
 
-    snprintf(instance->common.name, SUBGHZ_PROTOCOL_NAME_LEN, "CAME");
+    instance->common.name = "Came";
     instance->common.code_min_count_bit_for_found = 12;
     instance->common.te_shot = 320;
     instance->common.te_long = 640;
@@ -87,7 +88,8 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
                     //ToDo out data display
-                    subghz_protocol_common_printf(&instance->common);
+                    if (instance->common.callback)
+                        instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 break;
             }
@@ -115,15 +117,3 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
         break;
     }
 }
-
-//if (Check_Interval(&CAME, CAME.Interval_SMALL,
-//              CAME.Last_Time_Itnetval)
-//              && Check_Interval(&CAME, CAME.Interval_LONG, data.Time)) {
-//          Add_Bit(&CAME, 0);
-//          instance->common.parser_step = 2;
-//      } else if (Check_Interval(&CAME, CAME.Interval_LONG,
-//              CAME.Last_Time_Itnetval)
-//              && Check_Interval(&CAME, CAME.Interval_SMALL, data.Time)) {
-//          Add_Bit(&CAME, 1);
-//          instance->common.parser_step = 2;
-//      } else

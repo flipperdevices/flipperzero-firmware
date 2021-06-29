@@ -12,7 +12,7 @@ struct SubGhzProtocolNiceFlorS {
 SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
     SubGhzProtocolNiceFlorS* instance = furi_alloc(sizeof(SubGhzProtocolNiceFlorS));
 
-    snprintf(instance->common.name, SUBGHZ_PROTOCOL_NAME_LEN, "NICE FLOR-S");
+    instance->common.name = "Nice FloR S";
     instance->common.code_min_count_bit_for_found = 52;
     instance->common.te_shot = 500;
     instance->common.te_long = 1000;
@@ -75,7 +75,6 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
             instance->common.parser_step = 0;
         }
         break;
-
     case 1:
         if ((data.level == ApiHalSubGhzCaptureLevelHigh)
                 && (DURATION_DIFF(data.duration,instance->common.te_shot * 3)< instance->common.te_delta * 3)) {
@@ -85,7 +84,6 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
             instance->common.parser_step = 0;
         }
         break;
-
     case 2:
         if ((data.level == ApiHalSubGhzCaptureLevelLow)
                 && (DURATION_DIFF(data.duration,instance->common.te_shot * 3)< instance->common.te_delta * 3)) {
@@ -97,8 +95,6 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
             instance->common.parser_step = 0;
         }
         break;
-
-
     case 3:
         if (data.level == ApiHalSubGhzCaptureLevelHigh) {
             if(DURATION_DIFF(data.duration,instance->common.te_shot*3) < instance->common.te_delta){
@@ -107,7 +103,7 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
                     //ToDo out data display
-                    subghz_protocol_common_printf(&instance->common);
+                    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 break;
             } else {
@@ -135,5 +131,3 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
         break;
     }
 }
-
-
