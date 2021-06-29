@@ -256,7 +256,7 @@ bool iButtonApp::save_key(const char* key_name) {
             break;
         }
 
-        if(!file_worker.write(key_type, 1)) {
+        if(!file_worker.write(key_type, 2)) {
             file_worker.close();
             return false;
         }
