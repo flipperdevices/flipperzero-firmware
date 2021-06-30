@@ -120,7 +120,14 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                 result->atqa[0] = dev->dev.nfca.sensRes.anticollisionInfo;
                 result->atqa[1] = dev->dev.nfca.sensRes.platformInfo;
                 result->sak = dev->dev.nfca.selRes.sak;
-                // TODO check protocols
+                if(mf_ul_check_card_type(
+                       dev->dev.nfca.sensRes.anticollisionInfo,
+                       dev->dev.nfca.sensRes.platformInfo,
+                       dev->dev.nfca.selRes.sak)) {
+                    result->protocol = NfcDeviceProtocolMfUltralight;
+                } else {
+                    result->protocol = NfcDeviceProtocolUnknown;
+                }
 
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCB) {
                 result->device = NfcDeviceNfcb;

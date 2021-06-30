@@ -37,10 +37,14 @@
 #include "scenes/nfc_scene_debug_read_emv.h"
 #include "scenes/nfc_scene_debug_read_mifare_ul.h"
 
+#define NFC_TEXT_STORE_SIZE 128
+
 struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
     NotificationApp* notifications;
+
+    char text_store[NFC_TEXT_STORE_SIZE + 1];
 
     // Nfc Views
     NfcDetect* nfc_detect;
@@ -100,3 +104,5 @@ typedef enum {
 Nfc* nfc_alloc();
 
 int32_t nfc_task(void* p);
+
+void nfc_set_text_store(Nfc* nfc, const char* text, ...);

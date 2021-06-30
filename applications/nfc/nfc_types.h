@@ -27,19 +27,17 @@ typedef enum {
 
 static inline const char* nfc_get_dev_type(rfalNfcDevType type) {
     if(type == RFAL_NFC_LISTEN_TYPE_NFCA) {
-        return "NFC-A";
+        return "NFC-A may be:";
     } else if(type == RFAL_NFC_LISTEN_TYPE_NFCB) {
-        return "NFC-B";
+        return "NFC-B may be:";
     } else if(type == RFAL_NFC_LISTEN_TYPE_NFCF) {
-        return "NFC-F";
-    } else if(type == RFAL_NFC_LISTEN_TYPE_NFCB) {
-        return "NFC-B";
+        return "NFC-F may be:";
     } else if(type == RFAL_NFC_LISTEN_TYPE_NFCV) {
-        return "NFC-V";
+        return "NFC-V may be:";
     } else if(type == RFAL_NFC_LISTEN_TYPE_ST25TB) {
-        return "NFC-ST25TB";
+        return "NFC-ST25TB may be:";
     } else if(type == RFAL_NFC_LISTEN_TYPE_AP2P) {
-        return "NFC-AP2P";
+        return "NFC-AP2P may be:";
     } else {
         return "Unknown";
     }
@@ -63,10 +61,10 @@ static inline const char* nfc_get_nfca_type(rfalNfcaListenDeviceType type) {
 
 static inline const char* nfc_get_protocol(NfcProtocol protocol) {
     if(protocol == NfcDeviceProtocolEMV) {
-        return "EMV";
+        return "EMV bank card";
     } else if(protocol == NfcDeviceProtocolMfUltralight) {
-        return "Mifare UL";
+        return "Mifare Ultralight";
     } else {
-        return "Unknown";
+        return "Unrecognized";
     }
 }

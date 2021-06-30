@@ -5,6 +5,8 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/view_dispatcher.h>
 
+#define NFC_SCENE_READ_SUCCESS_SHIFT "              "
+
 void nfc_scene_read_card_success_dialog_callback(DialogExResult result, void* context) {
     Nfc* nfc = (Nfc*)context;
 
@@ -22,8 +24,41 @@ const void nfc_scene_read_card_success_on_enter(void* context) {
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "More");
-    dialog_ex_set_header(dialog_ex, nfc_get_dev_type(data->device), 48, 8, AlignLeft, AlignCenter);
-    dialog_ex_set_icon(dialog_ex, 3, 3, I_RFIDBigChip_37x36);
+    dialog_ex_set_header(dialog_ex, nfc_get_dev_type(data->device), 36, 8, AlignLeft, AlignCenter);
+    dialog_ex_set_icon(dialog_ex, 8, 13, I_Medium_chip_22x21);
+    // Display UID
+    if(data->uid_len == 4) {
+        nfc_set_text_store(
+            nfc,
+            NFC_SCENE_READ_SUCCESS_SHIFT "%s\n" NFC_SCENE_READ_SUCCESS_SHIFT
+                                         "ATQA: %02X%02X SAK: %02X\nUID: %02X %02X %02X %02X",
+            nfc_get_protocol(data->protocol),
+            data->atqa[0],
+            data->atqa[1],
+            data->sak,
+            data->uid[0],
+            data->uid[1],
+            data->uid[2],
+            data->uid[3]);
+    } else if(data->uid_len == 7) {
+        nfc_set_text_store(
+            nfc,
+            NFC_SCENE_READ_SUCCESS_SHIFT
+            "%s\n" NFC_SCENE_READ_SUCCESS_SHIFT
+            "ATQA: %02X%02X SAK: %02X\nUID: %02X %02X %02X %02X %02X %02X %02X",
+            nfc_get_protocol(data->protocol),
+            data->atqa[0],
+            data->atqa[1],
+            data->sak,
+            data->uid[0],
+            data->uid[1],
+            data->uid[2],
+            data->uid[3],
+            data->uid[4],
+            data->uid[5],
+            data->uid[6]);
+    }
+    dialog_ex_set_text(dialog_ex, nfc->text_store, 8, 16, AlignLeft, AlignTop);
     dialog_ex_set_context(dialog_ex, nfc);
     dialog_ex_set_result_callback(dialog_ex, nfc_scene_read_card_success_dialog_callback);
 
