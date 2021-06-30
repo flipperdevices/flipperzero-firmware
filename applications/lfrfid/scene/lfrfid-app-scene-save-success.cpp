@@ -11,7 +11,6 @@ void LfRfidAppSceneSaveSuccess::on_enter(LfRfidApp* app, bool need_restore) {
     popup->enable_timeout();
 
     app->view_controller.switch_to<PopupVM>();
-    notification_message_block(app->notification, &sequence_set_green_255);
 }
 
 bool LfRfidAppSceneSaveSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
@@ -19,14 +18,14 @@ bool LfRfidAppSceneSaveSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event
 
     if(event->type == LfRfidApp::EventType::Back) {
         bool result = app->scene_controller.has_previous_scene(
-            {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SavedKeyMenu});
+            {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SelectKey});
 
         if(result) {
             app->scene_controller.search_and_switch_to_previous_scene(
-                {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SavedKeyMenu});
+                {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SelectKey});
         } else {
             app->scene_controller.search_and_switch_to_another_scene(
-                {LfRfidApp::SceneType::SaveType}, LfRfidApp::SceneType::SavedKeyMenu);
+                {LfRfidApp::SceneType::SaveType}, LfRfidApp::SceneType::SelectKey);
         }
 
         consumed = true;
@@ -36,7 +35,6 @@ bool LfRfidAppSceneSaveSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event
 }
 
 void LfRfidAppSceneSaveSuccess::on_exit(LfRfidApp* app) {
-    notification_message_block(app->notification, &sequence_reset_green);
     app->view_controller.get<PopupVM>()->clean();
 }
 

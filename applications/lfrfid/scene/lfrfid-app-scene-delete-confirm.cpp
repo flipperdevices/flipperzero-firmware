@@ -1,17 +1,22 @@
-#include "lfrfid-app-scene-saved-info.h"
+#include "lfrfid-app-scene-delete-confirm.h"
 #include "../view/elements/button-element.h"
 #include "../view/elements/icon-element.h"
 #include "../view/elements/string-element.h"
 
-void LfRfidAppSceneSavedInfo::on_enter(LfRfidApp* app, bool need_restore) {
+void LfRfidAppSceneDeleteConfirm::on_enter(LfRfidApp* app, bool need_restore) {
     string_init(string_data);
     string_init(string_decrypted);
+    string_init(string_header);
 
     auto container = app->view_controller.get<ContainerVM>();
 
     auto button = container->add<ButtonElement>();
     button->set_type(ButtonElement::Type::Left, "Back");
-    button->set_callback(app, LfRfidAppSceneSavedInfo::back_callback);
+    button->set_callback(app, LfRfidAppSceneDeleteConfirm::back_callback);
+
+    button = container->add<ButtonElement>();
+    button->set_type(ButtonElement::Type::Right, "Delete");
+    button->set_callback(app, LfRfidAppSceneDeleteConfirm::delete_callback);
 
     auto line_1 = container->add<StringElement>();
     auto line_2 = container->add<StringElement>();
@@ -28,8 +33,11 @@ void LfRfidAppSceneSavedInfo::on_enter(LfRfidApp* app, bool need_restore) {
         string_cat_printf(string_data, "%02X", data[i]);
     }
 
-    line_1->set_text(key.get_name(), 64, 17, AlignCenter, AlignBottom, FontSecondary);
-    line_2->set_text(string_get_cstr(string_data), 64, 29, AlignCenter, AlignBottom, FontPrimary);
+    string_printf(string_header, "Delete %s?", key.get_name());
+    line_1->set_text(
+        string_get_cstr(string_header), 64, 19, AlignCenter, AlignBottom, FontPrimary);
+    line_2->set_text(
+        string_get_cstr(string_data), 64, 29, AlignCenter, AlignBottom, FontSecondary);
 
     switch(key.get_type()) {
     case LfrfidKeyType::KeyEM4100:
@@ -57,21 +65,35 @@ void LfRfidAppSceneSavedInfo::on_enter(LfRfidApp* app, bool need_restore) {
     app->view_controller.switch_to<ContainerVM>();
 }
 
-bool LfRfidAppSceneSavedInfo::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
+bool LfRfidAppSceneDeleteConfirm::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
+
+    if(event->type == LfRfidApp::EventType::Next) {
+        app->delete_key(&app->worker.key);
+        app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::DeleteSuccess);
+        consumed = true;
+    }
 
     return consumed;
 }
 
-void LfRfidAppSceneSavedInfo::on_exit(LfRfidApp* app) {
+void LfRfidAppSceneDeleteConfirm::on_exit(LfRfidApp* app) {
     app->view_controller.get<ContainerVM>()->clean();
     string_clear(string_data);
     string_clear(string_decrypted);
+    string_clear(string_header);
 }
 
-void LfRfidAppSceneSavedInfo::back_callback(void* context) {
+void LfRfidAppSceneDeleteConfirm::back_callback(void* context) {
     LfRfidApp* app = static_cast<LfRfidApp*>(context);
     LfRfidApp::Event event;
     event.type = LfRfidApp::EventType::Back;
+    app->view_controller.send_event(&event);
+}
+
+void LfRfidAppSceneDeleteConfirm::delete_callback(void* context) {
+    LfRfidApp* app = static_cast<LfRfidApp*>(context);
+    LfRfidApp::Event event;
+    event.type = LfRfidApp::EventType::Next;
     app->view_controller.send_event(&event);
 }

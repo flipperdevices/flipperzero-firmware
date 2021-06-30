@@ -44,6 +44,8 @@ public:
         SaveData,
         SaveType,
         SavedInfo,
+        DeleteConfirm,
+        DeleteSuccess,
     };
 
     class Event {

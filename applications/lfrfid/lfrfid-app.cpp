@@ -13,6 +13,8 @@
 #include "scene/lfrfid-app-scene-save-data.h"
 #include "scene/lfrfid-app-scene-save-type.h"
 #include "scene/lfrfid-app-scene-saved-info.h"
+#include "scene/lfrfid-app-scene-delete-confirm.h"
+#include "scene/lfrfid-app-scene-delete-success.h"
 
 #include <file-worker-cpp.h>
 #include <path.h>
@@ -58,6 +60,8 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::SaveData, new LfRfidAppSceneSaveData());
         scene_controller.add_scene(SceneType::SaveType, new LfRfidAppSceneSaveType());
         scene_controller.add_scene(SceneType::SavedInfo, new LfRfidAppSceneSavedInfo());
+        scene_controller.add_scene(SceneType::DeleteConfirm, new LfRfidAppSceneDeleteConfirm());
+        scene_controller.add_scene(SceneType::DeleteSuccess, new LfRfidAppSceneDeleteSuccess());
         scene_controller.process(100);
     }
 }
