@@ -8,7 +8,7 @@
 #include "scene/lfrfid-app-scene-emulate.h"
 #include "scene/lfrfid-app-scene-save-name.h"
 
-#include <file-worker.h>
+#include <file-worker-cpp.h>
 #include <path.h>
 
 const char* LfRfidApp::app_folder = "lfrfid";
@@ -43,7 +43,7 @@ void LfRfidApp::run(void* args) {
 }
 
 bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
-    FileWorker file_worker;
+    FileWorkerCpp file_worker;
     bool result = false;
 
     bool res = file_worker.open(path, FSAM_READ, FSOM_OPEN_EXISTING);
@@ -84,7 +84,7 @@ bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
 }
 
 bool LfRfidApp::save_key_data(const char* path, RfidKey* key) {
-    FileWorker file_worker;
+    FileWorkerCpp file_worker;
     bool result = false;
 
     bool res = file_worker.open(path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
