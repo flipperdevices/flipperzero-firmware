@@ -23,14 +23,14 @@ bool LfRfidAppSceneSaveName::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::Next) {
-        /*if(app->save_key(app->get_text_store())) {
-            app->switch_to_next_scene(iButtonApp::Scene::SceneSaveSuccess);
+        app->worker.key.set_name(app->text_store.text);
+
+        if(app->save_key(&app->worker.key)) {
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SaveSuccess);
         } else {
-            app->search_and_switch_to_previous_scene(
-                {iButtonApp::Scene::SceneReadedKeyMenu,
-                 iButtonApp::Scene::SceneSavedKeyMenu,
-                 iButtonApp::Scene::SceneAddType});
-        }*/
+            app->scene_controller.search_and_switch_to_previous_scene(
+                {LfRfidApp::SceneType::ReadedMenu});
+        }
     }
 
     return consumed;

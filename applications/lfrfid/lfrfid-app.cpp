@@ -7,6 +7,7 @@
 #include "scene/lfrfid-app-scene-write-success.h"
 #include "scene/lfrfid-app-scene-emulate.h"
 #include "scene/lfrfid-app-scene-save-name.h"
+#include "scene/lfrfid-app-scene-save-success.h"
 
 #include <file-worker-cpp.h>
 #include <path.h>
@@ -39,7 +40,33 @@ void LfRfidApp::run(void* args) {
     scene_controller.add_scene(SceneType::WriteSuccess, new LfRfidAppSceneWriteSuccess());
     scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
     scene_controller.add_scene(SceneType::SaveName, new LfRfidAppSceneSaveName());
+    scene_controller.add_scene(SceneType::SaveSuccess, new LfRfidAppSceneSaveSuccess());
     scene_controller.process(100);
+}
+
+bool LfRfidApp::save_key(RfidKey* key) {
+    string_t file_name;
+    bool result = false;
+
+    make_app_folder();
+
+    string_init_printf(file_name, "%s/%s%s", app_folder, key->get_name(), app_extension);
+    result = save_key_data(string_get_cstr(file_name), key);
+    string_clear(file_name);
+
+    return result;
+}
+
+bool LfRfidApp::delete_key(RfidKey* key) {
+    FileWorkerCpp file_worker;
+    string_t file_name;
+    bool result = false;
+
+    string_init_printf(file_name, "%s/%s%s", app_folder, key->get_name(), app_extension);
+    result = file_worker.remove(string_get_cstr(file_name));
+    string_clear(file_name);
+
+    return result;
 }
 
 bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
@@ -106,4 +133,9 @@ bool LfRfidApp::save_key_data(const char* path, RfidKey* key) {
     file_worker.close();
 
     return result;
+}
+
+void LfRfidApp::make_app_folder() {
+    FileWorkerCpp file_worker;
+    file_worker.mkdir(app_folder);
 }
