@@ -1,4 +1,7 @@
 #include "irda.h"
+#include "furi/check.h"
+#include "irda_common_i.h"
+#include "irda_protocol_defs_i.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -18,7 +21,10 @@ typedef struct {
 } IrdaDecoders;
 
 typedef struct {
+    IrdaAlloc alloc;
     IrdaEncode encode;
+    IrdaReset reset;
+    IrdaFree free;
 } IrdaEncoders;
 
 typedef struct {
@@ -26,6 +32,7 @@ typedef struct {
     const char* name;
     IrdaDecoders decoder;
     IrdaEncoders encoder;
+    IrdaTimingsGet get_timings;
     uint8_t address_length;
     uint8_t command_length;
 } IrdaProtocolImplementation;
@@ -42,7 +49,10 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .reset = irda_decoder_rc6_reset,
           .free = irda_decoder_rc6_free},
       .encoder = {
-          .encode = NULL /*irda_encoder_rc6_encode*/},
+          .encode = irda_encoder_rc6_encode,
+          .alloc = irda_encoder_rc6_alloc,
+          .reset = irda_encoder_rc6_reset,
+          .free = irda_encoder_rc6_free},
       .address_length = 2,
       .command_length = 2,
     },
@@ -54,8 +64,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_samsung32_decode,
           .reset = irda_decoder_samsung32_reset,
           .free = irda_decoder_samsung32_free},
-      .encoder = {
-          .encode = irda_encoder_samsung32_encode},
+//      .encoder = {
+//          .encode = irda_encoder_samsung32_encode},
       .address_length = 2,
       .command_length = 2,
     },
@@ -67,8 +77,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_nec_decode,
           .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
-      .encoder = {
-          .encode = irda_encoder_nec_encode},
+//      .encoder = {
+//          .encode = irda_encoder_nec_encode},
       .address_length = 2,
       .command_length = 2,
     },
@@ -80,8 +90,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_nec_decode,
           .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
-      .encoder = {
-          .encode = irda_encoder_necext_encode},
+//      .encoder = {
+//          .encode = irda_encoder_necext_encode},
       .address_length = 4,
       .command_length = 2,
     },
@@ -140,17 +150,64 @@ void irda_reset_decoder(IrdaHandler* handler) {
     }
 }
 
+void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark, IrdaEncoderTimings* timings_settings) {
+    IrdaEncoderTimings timings_settings_common = {
+        .duty_cycle = IRDA_COMMON_DUTY_CYCLE,
+        .carrier_frequency = IRDA_COMMON_CARRIER_FREQUENCY,
+    };
+
+    if (timings_settings == NULL) {
+        timings_settings = &timings_settings_common;
+    }
+
+    for (uint32_t i = 0; i < timings_cnt; ++i) {
+        if ((i % 2) ^ start_from_mark)
+            irda_encode_mark(timings_settings, timings[i]);
+        else
+            irda_encode_space(timings_settings, timings[i]);
+    }
+    irda_encode_space(timings_settings, 0);
+}
+
 void irda_send(const IrdaMessage* message, int times) {
     furi_assert(message);
     furi_assert(irda_is_protocol_valid(message->protocol));
+    furi_assert(irda_protocols[message->protocol].encoder.encode);
 
-    for (int i = 0; i < times; ++i) {
-        if(irda_protocols[message->protocol].encoder.encode) {
-            __disable_irq();
-            irda_protocols[message->protocol].encoder.encode(message->address, message->command, !!i);
-            __enable_irq();
-        }
+    const IrdaProtocolImplementation* protocol = &irda_protocols[message->protocol];
+    void* encoder = protocol->encoder.alloc();
+
+    __disable_irq();
+
+    while (times) {
+        IrdaStatus status;
+        uint32_t duration = 0;
+        bool level = false;
+        status = protocol->encoder.encode(encoder, &duration, &level);
+        if (level)
+            irda_encode_mark(protocol->get_timings(), duration);
+        else
+            irda_encode_space(protocol->get_timings(), duration);
+        if (status == IrdaStatusDone)
+            --times;
     }
+
+    IrdaEncoderTimings timings_settings_common = {
+        .duty_cycle = IRDA_COMMON_DUTY_CYCLE,
+        .carrier_frequency = IRDA_COMMON_CARRIER_FREQUENCY,
+    };
+
+    irda_encode_space(timings_settings, 0);
+
+    __enable_irq();
+}
+
+void irda_send_rc6_plz(const IrdaMessage* message, int times) {
+    IrdaCommonEncoder* encoder = irda_encoder_rc6_alloc();
+
+    IrdaStatus status = IrdaStatusError;
+
+    irda_encoder_rc6_free(encoder);
 }
 
 bool irda_is_protocol_valid(IrdaProtocol protocol) {

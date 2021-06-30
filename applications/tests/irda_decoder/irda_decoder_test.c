@@ -36,6 +36,8 @@ static void run_decoder(
     bool level = 0;
     uint32_t message_counter = 0;
 
+    irda_send_raw(input_delays, input_delays_len, false, NULL);
+
     for(uint32_t i = 0; i < input_delays_len; ++i) {
         message_decoded = irda_decode(decoder, level, input_delays[i]);
         if(message_decoded) {

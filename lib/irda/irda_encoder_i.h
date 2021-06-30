@@ -3,15 +3,16 @@
 #include <stdbool.h>
 #include "irda.h"
 
+typedef struct IrdaEncoderTimings IrdaEncoderTimings;
 
-typedef struct {
+struct IrdaEncoderTimings {
     uint32_t bit1_mark;
     uint32_t bit1_space;
     uint32_t bit0_mark;
     uint32_t bit0_space;
     float duty_cycle;
     uint32_t carrier_frequency;
-} IrdaEncoderTimings;
+};
 
 
 void irda_encode_byte(const IrdaEncoderTimings *timings, uint8_t data);

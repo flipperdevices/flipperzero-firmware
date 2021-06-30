@@ -4,7 +4,6 @@
 #include <api-hal-delay.h>
 #include "irda_i.h"
 
-
 void irda_encode_mark(const IrdaEncoderTimings *timings, uint32_t duration) {
     api_hal_irda_pwm_set(timings->duty_cycle, timings->carrier_frequency);
     delay_us(duration);

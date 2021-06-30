@@ -25,6 +25,7 @@ typedef struct {
     bool repeat;
 } IrdaMessage;
 
+typedef struct IrdaEncoderTimings IrdaEncoderTimings;
 
 /**
  * Initialize decoder.
@@ -108,6 +109,7 @@ uint8_t irda_get_protocol_command_length(IrdaProtocol protocol);
  */
 bool irda_is_protocol_valid(IrdaProtocol protocol);
 
+void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark, IrdaEncoderTimings* timings_settings);
 #ifdef __cplusplus
 }
 #endif

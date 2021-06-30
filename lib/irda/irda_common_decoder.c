@@ -1,4 +1,5 @@
-#include "irda_common_decoder_i.h"
+#include "furi/check.h"
+#include "irda_common_i.h"
 #include <stdbool.h>
 #include <furi.h>
 #include "irda_i.h"
@@ -35,14 +36,14 @@ static bool irda_check_preamble(IrdaCommonDecoder* decoder) {
     return result;
 }
 
-// Pulse Distance-Width Modulation
-DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder) {
+/* Pulse Distance-Width Modulation */
+IrdaStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     uint32_t* timings = decoder->timings;
     uint16_t index = 0;
     uint8_t shift = 0;
-    DecodeStatus status = DecodeStatusError;
+    IrdaStatus status = IrdaStatusError;
     uint32_t bit_tolerance = decoder->protocol->timings.bit_tolerance;
     uint16_t bit1_mark = decoder->protocol->timings.bit1_mark;
     uint16_t bit1_space = decoder->protocol->timings.bit1_space;
@@ -54,9 +55,9 @@ DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder) {
         if ((decoder->databit_cnt == decoder->protocol->databit_len) && (decoder->timings_cnt == 1)) {
             if (MATCH_BIT_TIMING(timings[0], bit1_mark, bit_tolerance)) {
                 decoder->timings_cnt = 0;
-                status = DecodeStatusReady;
+                status = IrdaStatusReady;
             } else {
-                status = DecodeStatusError;
+                status = IrdaStatusError;
             }
             break;
         }
@@ -73,15 +74,80 @@ DecodeStatus irda_common_decode_pdwm(IrdaCommonDecoder* decoder) {
                 && MATCH_BIT_TIMING(timings[1], bit0_space, bit_tolerance)) {
                 (void) decoder->data[index];                      // add 0
             } else {
-                status = DecodeStatusError;
+                status = IrdaStatusError;
                 break;
             }
             ++decoder->databit_cnt;
             decoder->timings_cnt -= 2;
             shift_left_array(decoder->timings, decoder->timings_cnt, 2);
         } else {
-            status = DecodeStatusOk;
+            status = IrdaStatusOk;
             break;
+        }
+    }
+
+    return status;
+}
+
+/* level switch detection goes in middle of time-quant */
+IrdaStatus irda_common_decode_manchester(IrdaCommonDecoder* decoder) {
+    furi_assert(decoder);
+    IrdaStatus status = IrdaStatusError;
+    uint16_t bit = decoder->protocol->timings.bit1_mark;
+    uint16_t tolerance = decoder->protocol->timings.bit_tolerance;
+
+    while (decoder->timings_cnt) {
+        uint32_t timing = decoder->timings[0];
+        bool* switch_detect = &decoder->switch_detect;
+        furi_assert((*switch_detect == true) || (*switch_detect == false));
+
+        bool single_timing = MATCH_BIT_TIMING(timing, bit, tolerance);
+        bool double_timing = MATCH_BIT_TIMING(timing, 2*bit, tolerance);
+
+        if((!single_timing && !double_timing) || (double_timing && !*switch_detect)) {
+            status = IrdaStatusError;
+            break;
+        }
+
+        if (*switch_detect == 0) {
+            /* only single timing - level switch required in the middle of time-quant */
+            *switch_detect = 1;
+        } else {
+            /* double timing means we in the middle of time-quant again */
+            if (single_timing)
+                *switch_detect = 0;
+        }
+
+        --decoder->timings_cnt;
+        shift_left_array(decoder->timings, decoder->timings_cnt, 1);
+        status = IrdaStatusOk;
+
+        if (decoder->databit_cnt < decoder->protocol->databit_len) {
+            if (*switch_detect) {
+                uint8_t index = decoder->databit_cnt / 8;
+                uint8_t shift = decoder->databit_cnt % 8;   // LSB first
+                if (!shift)
+                    decoder->data[index] = 0;
+                bool inverse_level = decoder->protocol->manchester_inverse_level;
+                uint8_t logic_value = inverse_level ? !decoder->level : decoder->level;
+                decoder->data[index] |= (logic_value << shift);
+                ++decoder->databit_cnt;
+            }
+            if (decoder->databit_cnt == decoder->protocol->databit_len) {
+                if (decoder->level) {
+                    status = IrdaStatusReady;
+                    break;
+                }
+            }
+        } else {
+            furi_assert(decoder->level);
+            /* cover case: sequence should be stopped after last bit was received */
+            if (single_timing) {
+                status = IrdaStatusReady;
+                break;
+            } else {
+                status = IrdaStatusError;
+            }
         }
     }
 
@@ -92,13 +158,13 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
     furi_assert(decoder);
 
     IrdaMessage* message = 0;
-    DecodeStatus status = DecodeStatusError;
+    IrdaStatus status = IrdaStatusError;
 
     if (decoder->level == level) {
         furi_assert(0);
         decoder->timings_cnt = 0;
     }
-    decoder->level = level;   // start with high level (Space timing)
+    decoder->level = level;   // start with low level (Space timing)
 
     decoder->timings[decoder->timings_cnt] = duration;
     decoder->timings_cnt++;
@@ -106,36 +172,36 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
 
     while(1) {
         switch (decoder->state) {
-        case IrdaCommonStateWaitPreamble:
+        case IrdaCommonDecoderStateWaitPreamble:
             if (irda_check_preamble(decoder)) {
-                decoder->state = IrdaCommonStateDecode;
+                decoder->state = IrdaCommonDecoderStateDecode;
                 decoder->databit_cnt = 0;
             }
             break;
-        case IrdaCommonStateDecode:
+        case IrdaCommonDecoderStateDecode:
             status = decoder->protocol->decode(decoder);
-            if (status == DecodeStatusReady) {
+            if (status == IrdaStatusReady) {
                 if (decoder->protocol->interpret(decoder)) {
                     message = &decoder->message;
-                    decoder->state = IrdaCommonStateProcessRepeat;
+                    decoder->state = IrdaCommonDecoderStateProcessRepeat;
                 } else {
-                    decoder->state = IrdaCommonStateWaitPreamble;
+                    decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 }
-            } else if (status == DecodeStatusError) {
-                decoder->state = IrdaCommonStateWaitPreamble;
+            } else if (status == IrdaStatusError) {
+                decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 continue;
             }
             break;
-        case IrdaCommonStateProcessRepeat:
+        case IrdaCommonDecoderStateProcessRepeat:
             if (!decoder->protocol->decode_repeat) {
-                decoder->state = IrdaCommonStateWaitPreamble;
+                decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 continue;
             }
             status = decoder->protocol->decode_repeat(decoder);
-            if (status == DecodeStatusError) {
-                decoder->state = IrdaCommonStateWaitPreamble;
+            if (status == IrdaStatusError) {
+                decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 continue;
-            } else if (status == DecodeStatusReady) {
+            } else if (status == IrdaStatusReady) {
                 decoder->message.repeat = true;
                 message = &decoder->message;
             }
@@ -160,14 +226,13 @@ void* irda_common_decoder_alloc(const IrdaCommonProtocolSpec* protocol) {
     return decoder;
 }
 
-void irda_common_set_context(void* decoder, void* context) {
+void irda_common_decoder_set_context(void* decoder, void* context) {
     IrdaCommonDecoder* common_decoder = decoder;
     common_decoder->context = context;
 }
 
 void irda_common_decoder_free(void* decoder) {
     furi_assert(decoder);
-
     free(decoder);
 }
 
@@ -175,7 +240,7 @@ void irda_common_decoder_reset(void* decoder) {
     furi_assert(decoder);
     IrdaCommonDecoder* common_decoder = decoder;
 
-    common_decoder->state = IrdaCommonStateWaitPreamble;
+    common_decoder->state = IrdaCommonDecoderStateWaitPreamble;
     common_decoder->timings_cnt = 0;
     common_decoder->databit_cnt = 0;
 }

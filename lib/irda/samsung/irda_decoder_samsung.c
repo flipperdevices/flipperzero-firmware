@@ -5,7 +5,7 @@
 
 
 static bool interpret_samsung32(IrdaCommonDecoder* decoder);
-static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
+static IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
 
 
 static const IrdaCommonProtocolSpec protocol_samsung32 = {
@@ -46,15 +46,15 @@ static bool interpret_samsung32(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
+static IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;
     uint32_t bit_tolerance = decoder->protocol->timings.bit_tolerance;
-    DecodeStatus status = DecodeStatusError;
+    IrdaStatus status = IrdaStatusError;
 
     if (decoder->timings_cnt < 6)
-        return DecodeStatusOk;
+        return IrdaStatusOk;
 
     if ((decoder->timings[0] > IRDA_SAMSUNG_REPEAT_PAUSE_MIN)
         && (decoder->timings[0] < IRDA_SAMSUNG_REPEAT_PAUSE_MAX)
@@ -64,10 +64,10 @@ static DecodeStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
         && MATCH_BIT_TIMING(decoder->timings[4], decoder->protocol->timings.bit1_space, bit_tolerance)
         && MATCH_BIT_TIMING(decoder->timings[5], decoder->protocol->timings.bit1_mark, bit_tolerance)
         ) {
-        status = DecodeStatusReady;
+        status = IrdaStatusReady;
         decoder->timings_cnt = 0;
     } else {
-        status = DecodeStatusError;
+        status = IrdaStatusError;
     }
 
     return status;

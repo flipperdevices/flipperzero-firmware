@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "../irda_i.h"
-
+#include "irda_protocol_defs_i.h"
 
 static const IrdaEncoderTimings encoder_timings = {
     .bit1_mark = IRDA_SAMSUNG_BIT1_MARK,
