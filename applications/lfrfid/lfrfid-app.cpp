@@ -8,6 +8,10 @@
 #include "scene/lfrfid-app-scene-emulate.h"
 #include "scene/lfrfid-app-scene-save-name.h"
 #include "scene/lfrfid-app-scene-save-success.h"
+#include "scene/lfrfid-app-scene-select-key.h"
+#include "scene/lfrfid-app-scene-saved-key-menu.h"
+#include "scene/lfrfid-app-scene-save-data.h"
+#include "scene/lfrfid-app-scene-save-type.h"
 
 #include <file-worker-cpp.h>
 #include <path.h>
@@ -31,17 +35,29 @@ LfRfidApp::~LfRfidApp() {
     api_hal_power_insomnia_exit();
 }
 
-void LfRfidApp::run(void* args) {
-    scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
-    scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
-    scene_controller.add_scene(SceneType::ReadSuccess, new LfRfidAppSceneReadSuccess());
-    scene_controller.add_scene(SceneType::ReadedMenu, new LfRfidAppSceneReadedMenu());
-    scene_controller.add_scene(SceneType::Write, new LfRfidAppSceneWrite());
-    scene_controller.add_scene(SceneType::WriteSuccess, new LfRfidAppSceneWriteSuccess());
-    scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
-    scene_controller.add_scene(SceneType::SaveName, new LfRfidAppSceneSaveName());
-    scene_controller.add_scene(SceneType::SaveSuccess, new LfRfidAppSceneSaveSuccess());
-    scene_controller.process(100);
+void LfRfidApp::run(void* _args) {
+    const char* args = reinterpret_cast<const char*>(_args);
+
+    if(strlen(args)) {
+        load_key_data(args, &worker.key);
+        scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
+        scene_controller.process(100, SceneType::Emulate);
+    } else {
+        scene_controller.add_scene(SceneType::Start, new LfRfidAppSceneStart());
+        scene_controller.add_scene(SceneType::Read, new LfRfidAppSceneRead());
+        scene_controller.add_scene(SceneType::ReadSuccess, new LfRfidAppSceneReadSuccess());
+        scene_controller.add_scene(SceneType::ReadedMenu, new LfRfidAppSceneReadedMenu());
+        scene_controller.add_scene(SceneType::Write, new LfRfidAppSceneWrite());
+        scene_controller.add_scene(SceneType::WriteSuccess, new LfRfidAppSceneWriteSuccess());
+        scene_controller.add_scene(SceneType::Emulate, new LfRfidAppSceneEmulate());
+        scene_controller.add_scene(SceneType::SaveName, new LfRfidAppSceneSaveName());
+        scene_controller.add_scene(SceneType::SaveSuccess, new LfRfidAppSceneSaveSuccess());
+        scene_controller.add_scene(SceneType::SelectKey, new LfRfidAppSceneSelectKey());
+        scene_controller.add_scene(SceneType::SavedKeyMenu, new LfRfidAppSceneSavedKeyMenu());
+        scene_controller.add_scene(SceneType::SaveData, new LfRfidAppSceneSaveData());
+        scene_controller.add_scene(SceneType::SaveType, new LfRfidAppSceneSaveType());
+        scene_controller.process(100);
+    }
 }
 
 bool LfRfidApp::save_key(RfidKey* key) {
@@ -54,6 +70,34 @@ bool LfRfidApp::save_key(RfidKey* key) {
     result = save_key_data(string_get_cstr(file_name), key);
     string_clear(file_name);
 
+    return result;
+}
+
+bool LfRfidApp::load_key_from_file_select(bool need_restore) {
+    FileWorkerCpp file_worker;
+    TextStore* filename_ts = new TextStore(64);
+    bool result;
+
+    if(need_restore) {
+        result = file_worker.file_select(
+            app_folder,
+            app_extension,
+            filename_ts->text,
+            filename_ts->text_size,
+            worker.key.get_name());
+    } else {
+        result = file_worker.file_select(
+            app_folder, app_extension, filename_ts->text, filename_ts->text_size, NULL);
+    }
+
+    if(result) {
+        string_t key_str;
+        string_init_printf(key_str, "%s/%s%s", app_folder, filename_ts->text, app_extension);
+        result = load_key_data(string_get_cstr(key_str), &worker.key);
+        string_clear(key_str);
+    }
+
+    delete filename_ts;
     return result;
 }
 
@@ -92,7 +136,9 @@ bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
             loaded_key.set_type(loaded_type);
 
             // load data
-            if(!file_worker.read_hex(key->get_data(), key->get_type_data_count())) break;
+            uint8_t tmp_data[loaded_key.get_type_data_count()];
+            if(!file_worker.read_hex(tmp_data, loaded_key.get_type_data_count())) break;
+            loaded_key.set_data(tmp_data, loaded_key.get_type_data_count());
 
             *key = loaded_key;
             result = true;

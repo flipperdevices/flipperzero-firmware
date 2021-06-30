@@ -23,6 +23,10 @@ bool LfRfidAppSceneSaveName::on_event(LfRfidApp* app, LfRfidApp::Event* event) {
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::Next) {
+        if(strlen(app->worker.key.get_name())) {
+            app->delete_key(&app->worker.key);
+        }
+
         app->worker.key.set_name(app->text_store.text);
 
         if(app->save_key(&app->worker.key)) {

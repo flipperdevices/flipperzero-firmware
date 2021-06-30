@@ -39,6 +39,10 @@ public:
         Emulate,
         SaveName,
         SaveSuccess,
+        SelectKey,
+        SavedKeyMenu,
+        SaveData,
+        SaveType,
     };
 
     class Event {
@@ -71,6 +75,7 @@ public:
     static const char* app_extension;
 
     bool save_key(RfidKey* key);
+    bool load_key_from_file_select(bool need_restore);
     bool delete_key(RfidKey* key);
 
     bool load_key_data(const char* path, RfidKey* key);

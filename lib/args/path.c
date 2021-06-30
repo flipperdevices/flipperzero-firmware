@@ -8,11 +8,13 @@ void path_extract_filename_no_ext(const char* path, string_t filename) {
 
     if(start_position == STRING_FAILURE) {
         start_position = 0;
+    } else {
+        start_position += 1;
     }
 
     if(end_position == STRING_FAILURE) {
         end_position = string_size(filename);
     }
 
-    string_mid(filename, start_position, start_position - end_position);
+    string_mid(filename, start_position, end_position - start_position);
 }

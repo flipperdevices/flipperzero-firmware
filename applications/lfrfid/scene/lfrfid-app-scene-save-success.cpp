@@ -18,8 +18,17 @@ bool LfRfidAppSceneSaveSuccess::on_event(LfRfidApp* app, LfRfidApp::Event* event
     bool consumed = false;
 
     if(event->type == LfRfidApp::EventType::Back) {
-        app->scene_controller.search_and_switch_to_previous_scene(
-            {LfRfidApp::SceneType::ReadedMenu});
+        bool result = app->scene_controller.has_previous_scene(
+            {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SavedKeyMenu});
+
+        if(result) {
+            app->scene_controller.search_and_switch_to_previous_scene(
+                {LfRfidApp::SceneType::ReadedMenu, LfRfidApp::SceneType::SavedKeyMenu});
+        } else {
+            app->scene_controller.search_and_switch_to_another_scene(
+                {LfRfidApp::SceneType::SaveType}, LfRfidApp::SceneType::SavedKeyMenu);
+        }
+
         consumed = true;
     }
 
