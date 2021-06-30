@@ -56,7 +56,7 @@ const bool nfc_scene_card_menu_on_event(void* context, uint32_t event) {
             nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
         return true;
     } else if(event == SubmenuIndexEmulate) {
-        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_emualate_uid);
+        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_emulate_uid);
         view_dispatcher_send_navigation_event(
             nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
         return true;
@@ -91,6 +91,5 @@ AppScene* nfc_scene_card_menu_alloc() {
 }
 
 void nfc_scene_card_menu_free(AppScene* scene) {
-    furi_assert(scene);
     free(scene);
 }

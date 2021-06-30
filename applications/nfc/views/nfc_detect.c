@@ -69,7 +69,7 @@ bool nfc_detect_view_custom(uint32_t event, void* context) {
 
     NfcDetect* nfc_detect = (NfcDetect*)context;
     if(event == NfcEventDetect) {
-        NfcDeviceData* data = (NfcDeviceData*)nfc_detect->nfc_common->worker_result;
+        NfcDeviceData* data = (NfcDeviceData*)&nfc_detect->nfc_common->worker_result;
 
         with_view_model(
             nfc_detect->view, (NfcDetectModel * model) {
@@ -97,7 +97,7 @@ void nfc_detect_enter(void* context) {
     nfc_worker_start(
         nfc_detect->nfc_common->worker,
         NfcWorkerStateDetect,
-        nfc_detect->nfc_common->worker_result,
+        &nfc_detect->nfc_common->worker_result,
         nfc_detect_worker_callback,
         nfc_detect);
 }

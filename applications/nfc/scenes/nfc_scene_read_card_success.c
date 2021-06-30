@@ -20,7 +20,7 @@ const void nfc_scene_read_card_success_on_enter(void* context) {
     notification_message(nfc->notifications, &sequence_success);
 
     // Setup view
-    NfcDeviceData* data = (NfcDeviceData*)nfc->nfc_common.worker_result;
+    NfcDeviceData* data = (NfcDeviceData*)&nfc->nfc_common.worker_result;
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "More");
@@ -104,4 +104,6 @@ AppScene* nfc_scene_read_card_success_alloc() {
     return scene;
 }
 
-void nfc_scene_read_card_success_free(AppScene* scene);
+void nfc_scene_read_card_success_free(AppScene* scene) {
+    free(scene);
+}

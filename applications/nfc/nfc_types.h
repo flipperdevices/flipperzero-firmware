@@ -9,7 +9,7 @@
 typedef struct {
     NfcWorker* worker;
     ViewDispatcher* view_dispatcher;
-    NfcWorkerResult* worker_result;
+    NfcWorkerResult worker_result;
 } NfcCommon;
 
 typedef enum {

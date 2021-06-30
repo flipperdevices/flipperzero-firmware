@@ -65,7 +65,7 @@ struct Nfc {
     AppScene* scene_read_card_success;
     AppScene* scene_card_menu;
     AppScene* scene_not_implemented;
-    AppScene* scene_emualate_uid;
+    AppScene* scene_emulate_uid;
 
     // TODO delete debug scenes
     AppScene* scene_debug_menu;

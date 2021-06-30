@@ -27,6 +27,5 @@ AppScene* nfc_scene_debug_emulate_alloc() {
 }
 
 void nfc_scene_debug_emulate_free(AppScene* scene) {
-    furi_assert(scene);
     free(scene);
 }

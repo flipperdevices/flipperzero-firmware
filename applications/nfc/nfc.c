@@ -9,7 +9,6 @@ Nfc* nfc_alloc() {
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
     view_dispatcher_enable_navigation(nfc->nfc_common.view_dispatcher, nfc);
-    nfc->nfc_common.worker_result = furi_alloc(sizeof(NfcWorkerResult));
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");
@@ -77,7 +76,7 @@ Nfc* nfc_alloc() {
     nfc->scene_debug_emulate = nfc_scene_debug_emulate_alloc();
     nfc->scene_debug_read_emv = nfc_scene_debug_read_emv_alloc();
     nfc->scene_debug_read_mifare_ul = nfc_scene_debug_read_mifare_ul_alloc();
-    nfc->scene_emualate_uid = nfc_scene_emulate_uid_alloc();
+    nfc->scene_emulate_uid = nfc_scene_emulate_uid_alloc();
 
     view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_start);
 
@@ -91,6 +90,22 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
     submenu_free(nfc->submenu);
 
+    // DialogEx
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewDialogEx);
+    dialog_ex_free(nfc->dialog_ex);
+
+    // Popup
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);
+    popup_free(nfc->popup);
+
+    // TextInput
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewTextInput);
+    text_input_free(nfc->text_input);
+
+    // ByteInput
+    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewByteInput);
+    byte_input_free(nfc->byte_input);
+
     // Detect
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewDetect);
     nfc_detect_free(nfc->nfc_detect);
@@ -103,7 +118,7 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
     nfc_emv_free(nfc->nfc_emv);
 
-    // Mifare ultralight
+    // Mifare Ultralight
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewMifareUl);
     nfc_mifare_ul_free(nfc->nfc_mifare_ul);
 
@@ -114,7 +129,7 @@ void nfc_free(Nfc* nfc) {
     // Scenes
     nfc_scene_start_free(nfc->scene_start);
     nfc_scene_read_card_free(nfc->scene_read_card);
-    nfc_scene_read_card_success_alloc(nfc->scene_read_card_success);
+    nfc_scene_read_card_success_free(nfc->scene_read_card_success);
     nfc_scene_card_menu_free(nfc->scene_card_menu);
     nfc_scene_not_implemented_free(nfc->scene_not_implemented);
     nfc_scene_debug_menu_free(nfc->scene_debug_menu);
@@ -122,7 +137,7 @@ void nfc_free(Nfc* nfc) {
     nfc_scene_debug_emulate_free(nfc->scene_debug_emulate);
     nfc_scene_debug_read_emv_free(nfc->scene_debug_read_emv);
     nfc_scene_debug_read_mifare_ul_free(nfc->scene_debug_read_mifare_ul);
-    nfc_scene_emulate_uid_free(nfc->scene_emualate_uid);
+    nfc_scene_emulate_uid_free(nfc->scene_emulate_uid);
 
     // View Dispatcher
     view_dispatcher_free(nfc->nfc_common.view_dispatcher);

@@ -24,7 +24,7 @@ const void nfc_scene_read_card_on_enter(void* context) {
     nfc_worker_start(
         nfc->nfc_common.worker,
         NfcWorkerStateDetect,
-        nfc->nfc_common.worker_result,
+        &nfc->nfc_common.worker_result,
         nfc_read_card_worker_callback,
         nfc);
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);

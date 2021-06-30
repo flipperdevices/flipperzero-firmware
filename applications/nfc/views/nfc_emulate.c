@@ -36,7 +36,7 @@ void nfc_emulate_enter(void* context) {
     nfc_worker_start(
         nfc_emulate->nfc_common->worker,
         NfcWorkerStateEmulate,
-        nfc_emulate->nfc_common->worker_result,
+        &nfc_emulate->nfc_common->worker_result,
         NULL,
         NULL);
 }
