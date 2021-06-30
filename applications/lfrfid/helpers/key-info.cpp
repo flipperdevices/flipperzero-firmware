@@ -22,7 +22,7 @@ bool lfrfid_key_get_string_type(const char* string, LfrfidKeyType* type) {
 
     if(strcmp("EM4100", string) == 0) {
         *type = LfrfidKeyType::KeyEM4100;
-    } else if(strcmp("KeyH10301", string) == 0) {
+    } else if(strcmp("H10301", string) == 0) {
         *type = LfrfidKeyType::KeyH10301;
     } else if(strcmp("I40134", string) == 0) {
         *type = LfrfidKeyType::KeyI40134;

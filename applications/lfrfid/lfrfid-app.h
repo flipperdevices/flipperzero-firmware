@@ -43,6 +43,7 @@ public:
         SavedKeyMenu,
         SaveData,
         SaveType,
+        SavedInfo,
     };
 
     class Event {

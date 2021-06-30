@@ -12,6 +12,7 @@
 #include "scene/lfrfid-app-scene-saved-key-menu.h"
 #include "scene/lfrfid-app-scene-save-data.h"
 #include "scene/lfrfid-app-scene-save-type.h"
+#include "scene/lfrfid-app-scene-saved-info.h"
 
 #include <file-worker-cpp.h>
 #include <path.h>
@@ -56,6 +57,7 @@ void LfRfidApp::run(void* _args) {
         scene_controller.add_scene(SceneType::SavedKeyMenu, new LfRfidAppSceneSavedKeyMenu());
         scene_controller.add_scene(SceneType::SaveData, new LfRfidAppSceneSaveData());
         scene_controller.add_scene(SceneType::SaveType, new LfRfidAppSceneSaveType());
+        scene_controller.add_scene(SceneType::SavedInfo, new LfRfidAppSceneSavedInfo());
         scene_controller.process(100);
     }
 }

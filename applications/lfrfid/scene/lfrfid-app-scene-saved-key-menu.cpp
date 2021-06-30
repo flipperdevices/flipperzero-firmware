@@ -42,6 +42,7 @@ bool LfRfidAppSceneSavedKeyMenu::on_event(LfRfidApp* app, LfRfidApp::Event* even
         case SubmenuDelete:
             break;
         case SubmenuInfo:
+            app->scene_controller.switch_to_next_scene(LfRfidApp::SceneType::SavedInfo);
             break;
         }
         consumed = true;
