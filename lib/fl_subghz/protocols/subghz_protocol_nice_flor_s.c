@@ -64,6 +64,36 @@ void subghz_protocol_nice_flor_s_send_key(SubGhzProtocolNiceFlorS* instance, uin
     }
 }
 
+
+void subghz_nice_flor_s_decoder_decrypt (SubGhzProtocolNiceFlorS* instance){
+    //P2 (4-бита) - часть серийного номера, P2 = (K ^ S3) & 0xF;
+    //P3 (байт) - старшая часть зашифрованного индекса.
+    //P4 (байт) - младшая часть зашифрованного индекса.
+    //P5 (байт) - часть серийного номера, P5 = K ^ S2;
+    //P6 (байт) - часть серийного номера, P6 = K ^ S1;
+    //P7 (байт) - часть серийного номера, P7 = K ^ S0;
+    //K (байт) - зависит от P3 и P4, K = Fk(P3, P4);
+    //S3,S2,S1,S0 - серийный номер пульта 28 бит.
+
+    uint16_t p3p4 = (uint16_t)(instance->common.code_found>>24);
+    instance->common.cnt = 0x00 << 8 | 0x00; //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    //instance->common.cnt = nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла
+    
+    //uint8_t  k =(uint8_t)(p3p4 &0x00FF) ^ nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
+    //тут надо считать поле в конце таблицы [0х20000 | instance->common.cnt & 0x00ff] ВРОДЕ ТАК ПРОВЕРИТЬ
+    uint8_t  k =(uint8_t)(p3p4 &0x00FF) ^ 0x00; //nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
+
+    
+    uint8_t s3= ((uint8_t)(instance->common.code_found>>40) ^k)&0x0f;
+    uint8_t s2= ((uint8_t)(instance->common.code_found>>16) ^k);
+    uint8_t s1= ((uint8_t)(instance->common.code_found>>8)  ^k);
+    uint8_t s0= ((uint8_t)(instance->common.code_found)     ^k);
+    instance->common.serial = s3<<24 | s2<<16 | s1<<8 | s0;
+
+    instance->common.btn = (instance->common.code_found >> 48) &0x0f;
+    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+}
+
 void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelPair data) {
     switch (instance->common.parser_step) {
     case 0:
@@ -103,7 +133,7 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
                     //ToDo out data display
-                    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+                    subghz_nice_flor_s_decoder_decrypt(instance);
                 }
                 break;
             } else {

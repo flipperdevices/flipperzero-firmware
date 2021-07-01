@@ -211,6 +211,8 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     } else {
         subghz_protocol_keeloq_check_remote_controller_selector(instance, key_fix, key_hop);
     }
+    instance ->common.serial= key_fix&0x0FFFFF;
+    instance->common.btn = key_fix >> 28;
     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
 }
 
@@ -297,8 +299,6 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
                     //ToDo out data display
                     subghz_protocol_keeloq_check_remote_controller(instance);
 
-                    //Print_Code(&KEELOQ);
-                    //Reverse_Code(KEELOQ.Code);
                     instance->common.code_found = 0;
                     instance->common.code_count_bit = 0;
                     instance->common.header_count = 0;
@@ -329,7 +329,6 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
 }
 
 void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t output) {
-    //snprintf(BufTX, sizeof(BufTX),"Protocol %s: %d Bit | KEY:0x%llX HEX  \n\r", common->Name_Protocol, common->Count_BIT, common->Code);
     uint32_t code_found_hi = instance->common.code_found >> 32;
     uint32_t code_found_lo = instance->common.code_found & 0x00000000ffffffff;
 
@@ -341,38 +340,41 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
     if (code_found_hi>0) {
         string_cat_printf(
             output,
-            "Protocol %s, %d Bit\r\n"
-            " KEY:0x%lX%08lX\r\n"
-            " YEK:0x%lX%08lX\r\n",
+            "     Protocol %s, %d Bit\r\n"
+            "KEY:0x%lX%08lX\r\n",
+            //"YEK:0x%lX%08lX\r\n",
             instance->common.name,
             instance->common.code_count_bit,
             code_found_hi,
-            code_found_lo,
-            code_found_reverse_hi,
-            code_found_reverse_lo
+            code_found_lo
+            //code_found_reverse_hi,
+            //code_found_reverse_lo
         );
     } else {
         string_cat_printf(
             output,
-            "Protocol %s, %d Bit\r\n"
-            " KEY:0x%lX%lX\r\n"
-            " YEK:0x%lX%lX\r\n",
+            "     Protocol %s, %d Bit\r\n"
+            "KEY:0x%lX%lX\r\n",
+            //"YEK:0x%lX%lX\r\n",
             instance->common.name,
             instance->common.code_count_bit,
             code_found_hi,
-            code_found_lo,
-            code_found_reverse_hi,
-            code_found_reverse_lo
+            code_found_lo
+            //code_found_reverse_hi,
+            //code_found_reverse_lo
         );
     }
     string_cat_printf(
         output,
-        " MF:%s FIX:%lX\r\n"
-        " HOP:%lX CNT:%04X BTN:%02lX\r\n",
-        instance->manufacture_name,
+        "FIX:%lX MF:%s \r\n"
+        "HOP:%lX \r\n"
+        //"CNT:%04X BTN:%02lX\r\n",
+        "SN:%05lX CNT:%04X BTN:%02lX\r\n",
         code_found_reverse_hi,
+        instance->manufacture_name,
         code_found_reverse_lo,
-        instance->common.cnt, //need manufacture code
-        code_found_reverse_hi >> 28
+        instance->common.serial,
+        instance->common.cnt, 
+        instance->common.btn
     );
 }

@@ -44,26 +44,32 @@ void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t outp
                 output,
                 "Protocol %s, %d Bit\r\n"
                 " KEY:0x%lX%08lX\r\n"
-                " YEK:0x%lX%08lX\r\n",
+                " YEK:0x%lX%08lX\r\n"
+                " SN:0x%05lX BTN:%02X\r\n",
                 instance->name,
                 instance->code_count_bit,
                 code_found_hi,
                 code_found_lo,
                 code_found_reverse_hi,
-                code_found_reverse_lo
+                code_found_reverse_lo,
+                instance->serial,
+                instance->btn
             );
         } else {
             string_cat_printf(
                 output,
                 "Protocol %s, %d Bit\r\n"
                 " KEY:0x%lX%lX\r\n"
-                " YEK:0x%lX%lX\r\n",
+                " YEK:0x%lX%lX\r\n"
+                " SN:0x%05lX BTN:%02X\r\n",
                 instance->name,
                 instance->code_count_bit,
                 code_found_hi,
                 code_found_lo,
                 code_found_reverse_hi,
-                code_found_reverse_lo
+                code_found_reverse_lo,
+                instance->serial,
+                instance->btn
             );
         }
     }

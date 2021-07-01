@@ -87,6 +87,7 @@ void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, LevelPair d
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
                     //ToDo out data display
+                    //instance->common.serial = 0x12345;
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 break;

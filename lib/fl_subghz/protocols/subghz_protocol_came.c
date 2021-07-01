@@ -88,6 +88,8 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
                     //ToDo out data display
+                    instance->common.serial = 0x0;
+                    instance->common.btn = 0x0;
                     if (instance->common.callback)
                         instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }

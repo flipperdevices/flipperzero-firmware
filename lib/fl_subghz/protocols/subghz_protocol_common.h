@@ -32,6 +32,8 @@ struct SubGhzProtocolCommon {
     uint16_t    te_last;
     uint8_t     header_count;
     uint16_t    cnt;
+    uint32_t    serial;
+    uint8_t     btn;
 
     /* Standard Callback for on rx complete event */
     SubGhzProtocolCommonCallback callback;

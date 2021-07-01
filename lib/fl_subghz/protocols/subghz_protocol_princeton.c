@@ -83,6 +83,8 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPai
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     //ToDo out data display
+                    instance->common.serial = instance->common.code_found >> 4;
+                    instance->common.btn = (uint8_t)instance->common.code_found & 0x00000F;
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 instance->common.code_found = 0;
