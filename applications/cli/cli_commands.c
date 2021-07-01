@@ -7,6 +7,11 @@
 #include <notification/notification-messages.h>
 #include <shci.h>
 
+/* 
+ * Device Info Command
+ * This command is intended to be used by humans and machines
+ * Keys and values format MUST NOT BE changed
+ */
 void cli_command_device_info(Cli* cli, string_t args, void* context) {
     // Model name
     printf("hardware_model      : %s\r\n", api_hal_version_get_model_name());

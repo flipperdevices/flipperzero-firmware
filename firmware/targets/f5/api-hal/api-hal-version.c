@@ -119,3 +119,11 @@ const struct Version* api_hal_version_get_boot_version(void) {
     return (const struct Version*)LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR1);
 #endif
 }
+
+size_t api_hal_version_uid_size() {
+    return 64/8;
+}
+
+const uint8_t* api_hal_version_uid() {
+    return (const uint8_t *)UID64_BASE;
+}
