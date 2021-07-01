@@ -3,6 +3,7 @@
 #include "nfc.h"
 #include "nfc_types.h"
 #include "nfc_worker.h"
+#include "nfc_device.h"
 
 #include <furi.h>
 
@@ -45,6 +46,7 @@ struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
     NotificationApp* notifications;
+    NfcDevice device;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
 
