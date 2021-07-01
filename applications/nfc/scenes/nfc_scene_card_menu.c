@@ -61,7 +61,7 @@ const bool nfc_scene_card_menu_on_event(void* context, uint32_t event) {
             nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
         return true;
     } else if(event == SubmenuIndexSave) {
-        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
+        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_name);
         view_dispatcher_send_navigation_event(
             nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
         return true;

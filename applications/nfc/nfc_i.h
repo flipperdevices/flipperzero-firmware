@@ -36,6 +36,8 @@
 #include "scenes/nfc_scene_debug_emulate.h"
 #include "scenes/nfc_scene_debug_read_emv.h"
 #include "scenes/nfc_scene_debug_read_mifare_ul.h"
+#include "scenes/nfc_scene_save_name.h"
+#include "scenes/nfc_scene_save_success.h"
 
 #define NFC_TEXT_STORE_SIZE 128
 
@@ -66,6 +68,8 @@ struct Nfc {
     AppScene* scene_card_menu;
     AppScene* scene_not_implemented;
     AppScene* scene_emulate_uid;
+    AppScene* scene_save_name;
+    AppScene* scene_save_success;
 
     // TODO delete debug scenes
     AppScene* scene_debug_menu;
@@ -99,6 +103,8 @@ typedef enum {
     NfcSceneDebugEmulate,
     NfcSceneDebugReadEmv,
     NfcSceneDebugReadMifareUl,
+    NfcSceneSaveName,
+    NfcSceneSaveSuccess,
 } NfcScene;
 
 Nfc* nfc_alloc();
