@@ -12,8 +12,7 @@
 
 struct SubGhzProtocolNiceFlorS {
     SubGhzProtocolCommon common;
-    //const char* file_name;
-    FileWorker* rainbow_table_file;
+    const char* rainbow_table_file_name;
 };
 
 SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
@@ -29,24 +28,13 @@ SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
 }
 
 void subghz_protocol_nice_flor_s_free(SubGhzProtocolNiceFlorS* instance) {
-    if(instance->rainbow_table_file) {
-        file_worker_close(instance->rainbow_table_file);
-        file_worker_free(instance->rainbow_table_file);
-    }
     furi_assert(instance);
     free(instance);
 }
-void subghz_protocol_nice_flor_s_name_file(SubGhzProtocolNiceFlorS* instance, const char* name){
-    instance->rainbow_table_file = file_worker_alloc(true);
-     if(file_worker_open(instance->rainbow_table_file,name,FSAM_READ,FSOM_OPEN_EXISTING)){
-              
-    } else {
-        file_worker_close(instance->rainbow_table_file);
-        file_worker_free(instance->rainbow_table_file);
-        printf("Rainbow table file is not found: %s\r\n", name);
-    }
 
-    
+void subghz_protocol_nice_flor_s_name_file(SubGhzProtocolNiceFlorS* instance, const char* name){
+    instance->rainbow_table_file_name = name;
+    printf("Nice FloR S: rainbow table %s\r\n", name);
 }
 
 void subghz_protocol_nice_flor_s_send_bit(SubGhzProtocolNiceFlorS* instance, uint8_t bit) {
@@ -86,12 +74,19 @@ void subghz_protocol_nice_flor_s_send_key(SubGhzProtocolNiceFlorS* instance, uin
         delay_us(instance->common.te_shot*3);
     }
 }
-uint8_t subghz_nice_flor_s_get_byte_in_file (SubGhzProtocolNiceFlorS* instance, uint32_t address){
+uint8_t subghz_nice_flor_s_get_byte_in_file(SubGhzProtocolNiceFlorS* instance, uint32_t address){
+    if(!instance->rainbow_table_file_name) 
+        return 0;
+
     uint8_t buffer = 0;
-    if(instance->rainbow_table_file){
-        file_worker_seek(instance->rainbow_table_file, address, true);
-        file_worker_read(instance->rainbow_table_file, &buffer, 1);
+    FileWorker* file_worker = file_worker_alloc(true);
+    if(file_worker_open(file_worker, instance->rainbow_table_file_name, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        file_worker_seek(file_worker, address, true);
+        furi_assert(file_worker_read(file_worker, &buffer, 1) == true);
     }
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+
     return buffer;
 }
 
@@ -106,8 +101,8 @@ void subghz_nice_flor_s_decoder_decrypt (SubGhzProtocolNiceFlorS* instance){
     //S3,S2,S1,S0 - серийный номер пульта 28 бит.
 
     uint16_t p3p4 = (uint16_t)(instance->common.code_found>>24);
-    //instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
-    instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,0) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    // instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,0) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
     
     
     //instance->common.cnt = nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла
