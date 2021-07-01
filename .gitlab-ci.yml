@@ -33,11 +33,12 @@ before_script:
 
 build_with_idf:
   stage: build
-  image: ${CI_DOCKER_REGISTRY}/esp32-ci-env
+  image: $CI_DOCKER_REGISTRY/esp-env:v4.4-1
   tags:
     - build
     - internet
   script:
+    - source /opt/pyenv/activate && pyenv global 3.6.13
     - *clone_and_setup_idf
     - cd $CI_PROJECT_DIR/examples/esp32_example
     # Build for all supported targets

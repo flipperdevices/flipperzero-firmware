@@ -57,8 +57,9 @@ typedef enum {
     ESP32_CHIP   = 1,
     ESP32S2_CHIP = 2,
     ESP32C3_CHIP = 3,
-    ESP_MAX_CHIP = 4,
-    ESP_UNKNOWN_CHIP = 4
+    ESP32S3_CHIP = 4,
+    ESP_MAX_CHIP = 5,
+    ESP_UNKNOWN_CHIP = 5
 } target_chip_t;
 
 /**

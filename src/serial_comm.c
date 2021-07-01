@@ -238,7 +238,9 @@ static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, voi
 
 static inline uint32_t encryption_field_size(target_chip_t target)
 {
-    return (target == ESP32S2_CHIP || target == ESP32C3_CHIP) ? 0 : sizeof(uint32_t);
+    return (target == ESP32S2_CHIP || 
+            target == ESP32C3_CHIP || 
+            target == ESP32S3_CHIP) ? 0 : sizeof(uint32_t);
 }
 
 
