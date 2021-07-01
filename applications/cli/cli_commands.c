@@ -65,11 +65,11 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
         printf("radio_fus_flash     : %dK\r\n", pWirelessInfo.FusMemorySizeFlash * 4);
         // Stack Info
         printf("radio_stack_type    : %d\r\n", pWirelessInfo.StackType);
-        printf("radio_stack_release : %d\r\n", pWirelessInfo.VersionReleaseType);
-        printf("radio_stack_branch  : %d\r\n", pWirelessInfo.VersionBranch);
         printf("radio_stack_major   : %d\r\n", pWirelessInfo.VersionMajor);
         printf("radio_stack_minor   : %d\r\n", pWirelessInfo.VersionMinor);
         printf("radio_stack_sub     : %d\r\n", pWirelessInfo.VersionSub);
+        printf("radio_stack_branch  : %d\r\n", pWirelessInfo.VersionBranch);
+        printf("radio_stack_release : %d\r\n", pWirelessInfo.VersionReleaseType);
         printf("radio_stack_sram2b  : %dK\r\n", pWirelessInfo.MemorySizeSram2B);
         printf("radio_stack_sram2a  : %dK\r\n", pWirelessInfo.MemorySizeSram2A);
         printf("radio_stack_sram1   : %dK\r\n", pWirelessInfo.MemorySizeSram1);
