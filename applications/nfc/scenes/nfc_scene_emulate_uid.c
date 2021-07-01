@@ -9,8 +9,11 @@ const void nfc_scene_emulate_uid_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    NfcDeviceData* data = &nfc->nfc_common.worker_result.nfc_detect_data;
-    if(data->uid_len == 4) {
+    NfcDeviceData* data = &nfc->device.data;
+
+    if(strcmp(nfc->device.dev_name, "")) {
+        nfc_set_text_store(nfc, "%s", nfc->device.dev_name);
+    } else if(data->uid_len == 4) {
         nfc_set_text_store(
             nfc, "%02X %02X %02X %02X", data->uid[0], data->uid[1], data->uid[2], data->uid[3]);
     } else if(data->uid_len == 7) {
