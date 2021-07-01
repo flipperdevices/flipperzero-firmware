@@ -1,4 +1,9 @@
 #include "subghz_protocol_nice_flor_s.h"
+
+#include <furi.h>
+//#include <m-string.h>
+//#include <filesystem-api.h>
+#include "file-worker.h"
 /*
  * https://phreakerclub.com/1615
  * https://phreakerclub.com/forum/showthread.php?t=2360
@@ -7,6 +12,8 @@
 
 struct SubGhzProtocolNiceFlorS {
     SubGhzProtocolCommon common;
+    //const char* file_name;
+    FileWorker* rainbow_table_file;
 };
 
 SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
@@ -22,8 +29,24 @@ SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
 }
 
 void subghz_protocol_nice_flor_s_free(SubGhzProtocolNiceFlorS* instance) {
+    if(instance->rainbow_table_file) {
+        file_worker_close(instance->rainbow_table_file);
+        file_worker_free(instance->rainbow_table_file);
+    }
     furi_assert(instance);
     free(instance);
+}
+void subghz_protocol_nice_flor_s_name_file(SubGhzProtocolNiceFlorS* instance, const char* name){
+    instance->rainbow_table_file = file_worker_alloc(true);
+     if(file_worker_open(instance->rainbow_table_file,name,FSAM_READ,FSOM_OPEN_EXISTING)){
+              
+    } else {
+        file_worker_close(instance->rainbow_table_file);
+        file_worker_free(instance->rainbow_table_file);
+        printf("Rainbow table file is not found: %s\r\n", name);
+    }
+
+    
 }
 
 void subghz_protocol_nice_flor_s_send_bit(SubGhzProtocolNiceFlorS* instance, uint8_t bit) {
@@ -63,7 +86,14 @@ void subghz_protocol_nice_flor_s_send_key(SubGhzProtocolNiceFlorS* instance, uin
         delay_us(instance->common.te_shot*3);
     }
 }
-
+uint8_t subghz_nice_flor_s_get_byte_in_file (SubGhzProtocolNiceFlorS* instance, uint32_t address){
+    uint8_t buffer = 0;
+    if(instance->rainbow_table_file){
+        file_worker_seek(instance->rainbow_table_file, address, true);
+        file_worker_read(instance->rainbow_table_file, &buffer, 1);
+    }
+    return buffer;
+}
 
 void subghz_nice_flor_s_decoder_decrypt (SubGhzProtocolNiceFlorS* instance){
     //P2 (4-бита) - часть серийного номера, P2 = (K ^ S3) & 0xF;
@@ -76,12 +106,15 @@ void subghz_nice_flor_s_decoder_decrypt (SubGhzProtocolNiceFlorS* instance){
     //S3,S2,S1,S0 - серийный номер пульта 28 бит.
 
     uint16_t p3p4 = (uint16_t)(instance->common.code_found>>24);
-    instance->common.cnt = 0x00 << 8 | 0x00; //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    //instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,0) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
+    
+    
     //instance->common.cnt = nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла
     
     //uint8_t  k =(uint8_t)(p3p4 &0x00FF) ^ nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
     //тут надо считать поле в конце таблицы [0х20000 | instance->common.cnt & 0x00ff] ВРОДЕ ТАК ПРОВЕРИТЬ
-    uint8_t  k =(uint8_t)(p3p4 &0x00FF) ^ 0x00; //nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
+    uint8_t  k =(uint8_t)(p3p4 &0x00FF) ^ subghz_nice_flor_s_get_byte_in_file(instance,instance->common.cnt & 0x00ff); //nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
 
     
     uint8_t s3= ((uint8_t)(instance->common.code_found>>40) ^k)&0x0f;

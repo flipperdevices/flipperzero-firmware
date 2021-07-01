@@ -12,6 +12,8 @@ void subghz_protocol_free(SubGhzProtocol* instance);
 
 void subghz_protocol_enable_dump(SubGhzProtocol* instance, SubGhzProtocolTextCallback callback, void* context);
 
+void subghz_protocol_load_nice_flor_s_file(SubGhzProtocol* instance, const char* file_name);
+
 void subghz_protocol_load_keeloq_file(SubGhzProtocol* instance, const char* file_name);
 
 void subghz_protocol_reset(SubGhzProtocol* instance);
