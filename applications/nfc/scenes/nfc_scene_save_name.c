@@ -36,7 +36,7 @@ const bool nfc_scene_save_name_on_event(void* context, uint32_t event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
-        memcpy(&nfc->device.name, nfc->text_store, strlen(nfc->text_store));
+        memcpy(&nfc->device.dev_name, nfc->text_store, strlen(nfc->text_store));
         nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
         if(nfc_device_save(&nfc->device, "test")) {
             view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_success);
