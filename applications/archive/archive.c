@@ -554,14 +554,16 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
     if(event->key == InputKeyOk) {
         ArchiveFile_t* selected;
-        
+
         with_view_model(
             archive->view_archive_main, (ArchiveViewModel * model) {
-                selected = files_array_size(model->files) > 0 ? files_array_get(model->files, model->idx) : NULL;
+                selected = files_array_size(model->files) > 0 ?
+                               files_array_get(model->files, model->idx) :
+                               NULL;
                 return true;
             });
 
-        if(selected){
+        if(selected) {
             string_set(archive->browser.name, selected->name);
 
             if(selected->type == ArchiveFileTypeFolder) {
@@ -576,7 +578,6 @@ static bool archive_view_input(InputEvent* event, void* context) {
                 }
             }
         }
-
     }
 
     update_offset(archive);
