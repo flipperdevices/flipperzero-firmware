@@ -41,9 +41,9 @@ struct SubGhzProtocolKeeloq {
 };
 
 /** Simple Learning Encrypt
- * @param data - serial number (28bit)
+ * @param data - 0xBSSSCCCC, B(4bit) key, S(10bit) serial&0x3FF, C(16bit) counter
  * @param key - manufacture (64bit)
- * @return ?
+ * @return keelog encrypt data
  */
 inline uint32_t subghz_protocol_keeloq_encrypt(const uint32_t data, const uint64_t key) {
     uint32_t x = data, r;
@@ -53,9 +53,9 @@ inline uint32_t subghz_protocol_keeloq_encrypt(const uint32_t data, const uint64
 }
 
 /** Simple Learning Decrypt
- * @param data - serial number (28bit)
+ * @param data - keelog encrypt data
  * @param key - manufacture (64bit)
- * @return ?
+ * @return 0xBSSSCCCC, B(4bit) key, S(10bit) serial&0x3FF, C(16bit) counter
  */
 inline uint32_t subghz_protocol_keeloq_decrypt(const uint32_t data, const uint64_t key) {
     uint32_t x = data, r;
@@ -67,7 +67,7 @@ inline uint32_t subghz_protocol_keeloq_decrypt(const uint32_t data, const uint64
 /** Normal Learning
  * @param data - serial number (28bit)
  * @param key - manufacture (64bit)
- * @return ?
+ * @return manufacture for this serial number (64bit)
  */
 inline uint64_t subghz_protocol_keeloq_normal_learning(uint32_t data, const uint64_t key){
     uint32_t k1,k2;
@@ -336,40 +336,21 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
 
     uint32_t code_found_reverse_hi = code_found_reverse>>32;
     uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
-
-    if (code_found_hi>0) {
-        string_cat_printf(
-            output,
-            "     Protocol %s, %d Bit\r\n"
-            "KEY:0x%lX%08lX\r\n",
-            //"YEK:0x%lX%08lX\r\n",
-            instance->common.name,
-            instance->common.code_count_bit,
-            code_found_hi,
-            code_found_lo
-            //code_found_reverse_hi,
-            //code_found_reverse_lo
-        );
-    } else {
-        string_cat_printf(
-            output,
-            "     Protocol %s, %d Bit\r\n"
-            "KEY:0x%lX%lX\r\n",
-            //"YEK:0x%lX%lX\r\n",
-            instance->common.name,
-            instance->common.code_count_bit,
-            code_found_hi,
-            code_found_lo
-            //code_found_reverse_hi,
-            //code_found_reverse_lo
-        );
-    }
     string_cat_printf(
         output,
+        "Protocol %s, %d Bit\r\n"
+        "KEY:0x%lX%lX\r\n"
         "FIX:%lX MF:%s \r\n"
         "HOP:%lX \r\n"
         //"CNT:%04X BTN:%02lX\r\n",
         "SN:%05lX CNT:%04X BTN:%02lX\r\n",
+        //"YEK:0x%lX%lX\r\n",
+        instance->common.name,
+        instance->common.code_count_bit,
+        code_found_hi,
+        code_found_lo,
+        //code_found_reverse_hi,
+        //code_found_reverse_lo
         code_found_reverse_hi,
         instance->manufacture_name,
         code_found_reverse_lo,
