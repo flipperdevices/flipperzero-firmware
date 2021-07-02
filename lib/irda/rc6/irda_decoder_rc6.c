@@ -6,26 +6,12 @@
 #include "../irda_i.h"
 #include "../irda_protocol_defs_i.h"
 
-#define container_of(ptr, type, member) ((type *)((char *)(ptr) - offsetof(type, member)))
-
-
 typedef struct {
     IrdaCommonDecoder* common_decoder;
     bool toggle;
 } IrdaRc6Decoder;
 
-static uint8_t reverse(uint8_t value);
-
-static uint8_t reverse(uint8_t value) {
-    uint8_t reverse_value = 0;
-    for (int i = 0; i < sizeof(value) * 8; ++i) {
-        reverse_value |= (value & (0x01 << i)) ? 1 << (7 - i) : 0;
-    }
-
-    return reverse_value;
-}
-
-bool interpret_rc6(IrdaCommonDecoder* decoder) {
+bool irda_decoder_rc6_interpret(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -62,7 +48,7 @@ bool interpret_rc6(IrdaCommonDecoder* decoder) {
  * it separately and than pass decoding for other bits to
  * common manchester decode function.
  */
-IrdaStatus irda_common_decode_rc6(IrdaCommonDecoder* decoder) {
+IrdaStatus irda_decoder_rc6_decode_manchester(IrdaCommonDecoder* decoder) {
     // 4th bit lasts 2x times more
     IrdaStatus status = IrdaStatusError;
     uint16_t bit = decoder->protocol->timings.bit1_mark;

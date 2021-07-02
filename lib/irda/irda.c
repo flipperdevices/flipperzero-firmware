@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <furi.h>
 #include "irda_i.h"
+#include <api-hal-irda.h>
 
-
-struct IrdaHandler {
+struct IrdaDecoderHandler {
     void** ctx;
 };
 
@@ -21,9 +21,9 @@ typedef struct {
 } IrdaDecoders;
 
 typedef struct {
+    IrdaEncoderReset reset;
     IrdaAlloc alloc;
     IrdaEncode encode;
-    IrdaReset reset;
     IrdaFree free;
 } IrdaEncoders;
 
@@ -32,11 +32,14 @@ typedef struct {
     const char* name;
     IrdaDecoders decoder;
     IrdaEncoders encoder;
-    IrdaTimingsGet get_timings;
     uint8_t address_length;
     uint8_t command_length;
 } IrdaProtocolImplementation;
 
+struct IrdaEncoderHandler {
+    void* encoder;
+    IrdaProtocol protocol;
+};
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
@@ -49,8 +52,8 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .reset = irda_decoder_rc6_reset,
           .free = irda_decoder_rc6_free},
       .encoder = {
-          .encode = irda_encoder_rc6_encode,
           .alloc = irda_encoder_rc6_alloc,
+          .encode = irda_encoder_rc6_encode,
           .reset = irda_encoder_rc6_reset,
           .free = irda_encoder_rc6_free},
       .address_length = 2,
@@ -77,8 +80,11 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_nec_decode,
           .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
-//      .encoder = {
-//          .encode = irda_encoder_nec_encode},
+      .encoder = {
+          .alloc = irda_encoder_nec_alloc,
+          .encode = irda_encoder_nec_encode,
+          .reset = irda_encoder_nec_reset,
+          .free = irda_encoder_nec_free},
       .address_length = 2,
       .command_length = 2,
     },
@@ -90,15 +96,17 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_nec_decode,
           .reset = irda_decoder_nec_reset,
           .free = irda_decoder_nec_free},
-//      .encoder = {
-//          .encode = irda_encoder_necext_encode},
+      .encoder = {
+          .alloc = irda_encoder_necext_alloc,
+          .encode = irda_encoder_nec_encode,
+          .reset = irda_encoder_necext_reset,
+          .free = irda_encoder_nec_free},
       .address_length = 4,
       .command_length = 2,
     },
 };
 
-
-const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t duration) {
+const IrdaMessage* irda_decode(IrdaDecoderHandler* handler, bool level, uint32_t duration) {
     furi_assert(handler);
 
     IrdaMessage* message = NULL;
@@ -117,8 +125,8 @@ const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t durati
     return result;
 }
 
-IrdaHandler* irda_alloc_decoder(void) {
-    IrdaHandler* handler = furi_alloc(sizeof(IrdaHandler));
+IrdaDecoderHandler* irda_alloc_decoder(void) {
+    IrdaDecoderHandler* handler = furi_alloc(sizeof(IrdaDecoderHandler));
     handler->ctx = furi_alloc(sizeof(void*) * COUNT_OF(irda_protocols));
 
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
@@ -130,7 +138,7 @@ IrdaHandler* irda_alloc_decoder(void) {
     return handler;
 }
 
-void irda_free_decoder(IrdaHandler* handler) {
+void irda_free_decoder(IrdaDecoderHandler* handler) {
     furi_assert(handler);
     furi_assert(handler->ctx);
 
@@ -143,72 +151,53 @@ void irda_free_decoder(IrdaHandler* handler) {
     free(handler);
 }
 
-void irda_reset_decoder(IrdaHandler* handler) {
+void irda_reset_decoder(IrdaDecoderHandler* handler) {
     for (int i = 0; i < COUNT_OF(irda_protocols); ++i) {
         if (irda_protocols[i].decoder.reset)
             irda_protocols[i].decoder.reset(handler->ctx[i]);
     }
 }
 
-void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark, IrdaEncoderTimings* timings_settings) {
-    IrdaEncoderTimings timings_settings_common = {
-        .duty_cycle = IRDA_COMMON_DUTY_CYCLE,
-        .carrier_frequency = IRDA_COMMON_CARRIER_FREQUENCY,
-    };
+IrdaEncoderHandler* irda_alloc_encoder(IrdaProtocol protocol) {
+    furi_assert(irda_is_protocol_valid(protocol));
+    furi_assert(irda_protocols[protocol].encoder.alloc);
 
-    if (timings_settings == NULL) {
-        timings_settings = &timings_settings_common;
-    }
-
-    for (uint32_t i = 0; i < timings_cnt; ++i) {
-        if ((i % 2) ^ start_from_mark)
-            irda_encode_mark(timings_settings, timings[i]);
-        else
-            irda_encode_space(timings_settings, timings[i]);
-    }
-    irda_encode_space(timings_settings, 0);
+    IrdaEncoderHandler* handler = furi_alloc(sizeof(IrdaEncoderHandler));
+    handler->encoder = irda_protocols[protocol].encoder.alloc();
+    handler->protocol = protocol;
+    return handler;
 }
 
-void irda_send(const IrdaMessage* message, int times) {
+void irda_free_encoder(IrdaEncoderHandler* handler) {
+    furi_assert(handler);
+    furi_assert(irda_is_protocol_valid(handler->protocol));
+    furi_assert(irda_protocols[handler->protocol].encoder.free);
+
+    irda_protocols[handler->protocol].encoder.free(handler->encoder);
+    free(handler);
+}
+
+void irda_reset_encoder(IrdaEncoderHandler* handler, const IrdaMessage* message) {
+    furi_assert(handler);
     furi_assert(message);
-    furi_assert(irda_is_protocol_valid(message->protocol));
-    furi_assert(irda_protocols[message->protocol].encoder.encode);
+    furi_assert(irda_is_protocol_valid(handler->protocol));
+    furi_assert(irda_protocols[handler->protocol].encoder.reset);
 
-    const IrdaProtocolImplementation* protocol = &irda_protocols[message->protocol];
-    void* encoder = protocol->encoder.alloc();
-
-    __disable_irq();
-
-    while (times) {
-        IrdaStatus status;
-        uint32_t duration = 0;
-        bool level = false;
-        status = protocol->encoder.encode(encoder, &duration, &level);
-        if (level)
-            irda_encode_mark(protocol->get_timings(), duration);
-        else
-            irda_encode_space(protocol->get_timings(), duration);
-        if (status == IrdaStatusDone)
-            --times;
-    }
-
-    IrdaEncoderTimings timings_settings_common = {
-        .duty_cycle = IRDA_COMMON_DUTY_CYCLE,
-        .carrier_frequency = IRDA_COMMON_CARRIER_FREQUENCY,
-    };
-
-    irda_encode_space(timings_settings, 0);
-
-    __enable_irq();
+    irda_protocols[handler->protocol].encoder.reset(handler->encoder, message);
 }
 
-void irda_send_rc6_plz(const IrdaMessage* message, int times) {
-    IrdaCommonEncoder* encoder = irda_encoder_rc6_alloc();
 
-    IrdaStatus status = IrdaStatusError;
+IrdaStatus irda_encode(IrdaEncoderHandler* handler, uint32_t* duration, bool* level) {
+    furi_assert(handler);
+    furi_assert(irda_is_protocol_valid(handler->protocol));
+    furi_assert(irda_protocols[handler->protocol].encoder.encode);
 
-    irda_encoder_rc6_free(encoder);
+    IrdaStatus status = irda_protocols[handler->protocol].encoder.encode(handler->encoder, duration, level);
+    furi_assert(status != IrdaStatusError);
+
+    return status;
 }
+
 
 bool irda_is_protocol_valid(IrdaProtocol protocol) {
     return (protocol >= 0) && (protocol < COUNT_OF(irda_protocols));

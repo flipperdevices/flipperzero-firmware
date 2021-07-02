@@ -119,10 +119,15 @@ void irda_common_encoder_reset(IrdaCommonEncoder* encoder) {
     encoder->timings_encoded = 0;
     encoder->bits_encoded = 0;
     encoder->state = IrdaCommonEncoderStatePreamble;
+    encoder->switch_detect = 0;
+
+    uint8_t bytes_to_clear = encoder->protocol->databit_len / 8
+        + !!(encoder->protocol->databit_len % 8);
+    memset(encoder->data, 0, bytes_to_clear);
 }
 
 void irda_common_encoder_set_context(void* decoder, void* context) {
-    IrdaCommonDecoder* common_decoder = decoder;
-    common_decoder->context = context;
+    IrdaCommonEncoder* common_encoder = decoder;
+    common_encoder->context = context;
 }
 

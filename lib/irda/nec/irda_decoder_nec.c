@@ -5,46 +5,7 @@
 #include "../irda_i.h"
 
 
-static bool interpret_nec(IrdaCommonDecoder* decoder);
-static bool interpret_necext(IrdaCommonDecoder* decoder);
-static IrdaStatus decode_repeat_nec(IrdaCommonDecoder* decoder);
-
-
-static const IrdaCommonProtocolSpec protocol_nec = {
-    .timings = {
-        .preamble_mark = IRDA_NEC_PREAMBULE_MARK,
-        .preamble_space = IRDA_NEC_PREAMBULE_SPACE,
-        .bit1_mark = IRDA_NEC_BIT1_MARK,
-        .bit1_space = IRDA_NEC_BIT1_SPACE,
-        .bit0_mark = IRDA_NEC_BIT0_MARK,
-        .bit0_space = IRDA_NEC_BIT0_SPACE,
-        .preamble_tolerance = IRDA_NEC_PREAMBLE_TOLERANCE,
-        .bit_tolerance = IRDA_NEC_BIT_TOLERANCE,
-    },
-    .databit_len = 32,
-    .decode = irda_common_decode_pdwm,
-    .interpret = interpret_nec,
-    .decode_repeat = decode_repeat_nec,
-};
-
-static const IrdaCommonProtocolSpec protocol_necext = {
-    .timings = {
-        .preamble_mark = IRDA_NEC_PREAMBULE_MARK,
-        .preamble_space = IRDA_NEC_PREAMBULE_SPACE,
-        .bit1_mark = IRDA_NEC_BIT1_MARK,
-        .bit1_space = IRDA_NEC_BIT1_SPACE,
-        .bit0_mark = IRDA_NEC_BIT0_MARK,
-        .bit0_space = IRDA_NEC_BIT0_SPACE,
-        .preamble_tolerance = IRDA_NEC_PREAMBLE_TOLERANCE,
-        .bit_tolerance = IRDA_NEC_BIT_TOLERANCE,
-    },
-    .databit_len = 32,
-    .decode = irda_common_decode_pdwm,
-    .interpret = interpret_necext,
-    .decode_repeat = decode_repeat_nec,
-};
-
-static bool interpret_nec(IrdaCommonDecoder* decoder) {
+bool interpret_nec(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -64,7 +25,7 @@ static bool interpret_nec(IrdaCommonDecoder* decoder) {
 }
 
 // Some NEC's extensions allow 16 bit address
-static bool interpret_necext(IrdaCommonDecoder* decoder) {
+bool interpret_necext(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -82,7 +43,7 @@ static bool interpret_necext(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-static IrdaStatus decode_repeat_nec(IrdaCommonDecoder* decoder) {
+IrdaStatus decode_repeat_nec(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;

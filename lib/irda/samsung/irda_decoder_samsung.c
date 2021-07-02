@@ -1,32 +1,11 @@
+#include "irda_protocol_defs_i.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi.h>
 #include "../irda_i.h"
 
 
-static bool interpret_samsung32(IrdaCommonDecoder* decoder);
-static IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
-
-
-static const IrdaCommonProtocolSpec protocol_samsung32 = {
-    .timings = {
-        .preamble_mark = IRDA_SAMSUNG_PREAMBULE_MARK,
-        .preamble_space = IRDA_SAMSUNG_PREAMBULE_SPACE,
-        .bit1_mark = IRDA_SAMSUNG_BIT1_MARK,
-        .bit1_space = IRDA_SAMSUNG_BIT1_SPACE,
-        .bit0_mark = IRDA_SAMSUNG_BIT0_MARK,
-        .bit0_space = IRDA_SAMSUNG_BIT0_SPACE,
-        .preamble_tolerance = IRDA_SAMSUNG_PREAMBLE_TOLERANCE,
-        .bit_tolerance = IRDA_SAMSUNG_BIT_TOLERANCE,
-    },
-    .databit_len = 32,
-    .decode = irda_common_decode_pdwm,
-    .interpret = interpret_samsung32,
-    .decode_repeat = decode_repeat_samsung32,
-};
-
-
-static bool interpret_samsung32(IrdaCommonDecoder* decoder) {
+bool interpret_samsung32(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -46,7 +25,7 @@ static bool interpret_samsung32(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-static IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
+IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;

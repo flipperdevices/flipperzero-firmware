@@ -7,7 +7,11 @@
 extern "C" {
 #endif
 
-typedef struct IrdaHandler IrdaHandler;
+#define IRDA_COMMON_CARRIER_FREQUENCY      38000
+#define IRDA_COMMON_DUTY_CYCLE             0.33
+
+typedef struct IrdaDecoderHandler IrdaDecoderHandler;
+typedef struct IrdaEncoderHandler IrdaEncoderHandler;
 
 // Do not change protocol order, as it can be saved into memory and fw update can be performed!
 typedef enum {
@@ -25,14 +29,19 @@ typedef struct {
     bool repeat;
 } IrdaMessage;
 
-typedef struct IrdaEncoderTimings IrdaEncoderTimings;
+typedef enum {
+    IrdaStatusError,
+    IrdaStatusOk,
+    IrdaStatusDone,
+    IrdaStatusReady,
+} IrdaStatus;
 
 /**
  * Initialize decoder.
  *
  * \return      returns pointer to IRDA decoder handler if success, otherwise - error.
  */
-IrdaHandler* irda_alloc_decoder(void);
+IrdaDecoderHandler* irda_alloc_decoder(void);
 
 /**
  * Provide to decoder next timing. If message is ready, it returns decoded message,
@@ -45,21 +54,21 @@ IrdaHandler* irda_alloc_decoder(void);
  * \param[in]   duration    - duration of steady high/low input signal.
  * \return      if message is ready, returns pointer to decoded message, returns NULL.
  */
-const IrdaMessage* irda_decode(IrdaHandler* handler, bool level, uint32_t duration);
+const IrdaMessage* irda_decode(IrdaDecoderHandler* handler, bool level, uint32_t duration);
 
 /**
  * Deinitialize decoder and free allocated memory.
  *
  * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
  */
-void irda_free_decoder(IrdaHandler* handler);
+void irda_free_decoder(IrdaDecoderHandler* handler);
 
 /**
  * Reset IRDA decoder.
  *
  * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
  */
-void irda_reset_decoder(IrdaHandler* handler);
+void irda_reset_decoder(IrdaDecoderHandler* handler);
 
 /**
  * Send message over IRDA.
@@ -109,7 +118,24 @@ uint8_t irda_get_protocol_command_length(IrdaProtocol protocol);
  */
 bool irda_is_protocol_valid(IrdaProtocol protocol);
 
-void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark, IrdaEncoderTimings* timings_settings);
+/**
+ * Send raw data through infrared port.
+ *
+ * \param[in]   protocol - use irda settings (duty cycle, frequency) from
+ *              this protocol. If provided IrdaProtocolUnknown - use
+ *              default settings.
+ * \param[in]   timings - array of timings to send.
+ * \param[in]   timings_cnt - timings array size.
+ * \param[in]   start_from_mark - true if timings starts from mark,
+ *              otherwise from space
+ */
+void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark);
+
+IrdaStatus irda_encode(IrdaEncoderHandler* handler, uint32_t* duration, bool* level);
+void irda_reset_encoder(IrdaEncoderHandler* handler, const IrdaMessage* message);
+void irda_free_encoder(IrdaEncoderHandler* handler);
+IrdaEncoderHandler* irda_alloc_encoder(IrdaProtocol protocol);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,15 +1,6 @@
 #pragma once
 #include "irda.h"
 #include <stddef.h>
-#include "irda_encoder_i.h"
-
-typedef enum {
-    IrdaStatusError,
-    IrdaStatusOk,
-    IrdaStatusDone,
-    IrdaStatusReady,
-    IrdaStatusDoneRepeat,
-} IrdaStatus;
 
 typedef struct {
     uint16_t preamble_mark;
@@ -21,8 +12,6 @@ typedef struct {
     uint16_t silence_time;
     float    preamble_tolerance;
     uint32_t bit_tolerance;
-    float    duty_cycle;
-    uint32_t carrier_frequency;
 } IrdaTimings;
 
 typedef void* (*IrdaAlloc) (void);
@@ -30,6 +19,16 @@ typedef IrdaMessage* (*IrdaDecode) (void* ctx, bool level, uint32_t duration);
 typedef void (*IrdaReset) (void*);
 typedef void (*IrdaFree) (void*);
 
+typedef void (*IrdaEncoderReset)(void* encoder, const IrdaMessage* message);
 typedef IrdaStatus (*IrdaEncode)(void* encoder, uint32_t* out, bool* polarity);
 typedef IrdaTimings (*IrdaTimingsGet)(void);
+
+static inline uint8_t reverse(uint8_t value) {
+    uint8_t reverse_value = 0;
+    for (int i = 0; i < 8; ++i) {
+        reverse_value |= (value & (0x01 << i)) ? 1 << (7 - i) : 0;
+    }
+
+    return reverse_value;
+}
 

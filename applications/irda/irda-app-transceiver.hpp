@@ -14,7 +14,7 @@ public:
 private:
     osMessageQueueId_t event_queue;
     static void irda_rx_callback(void* ctx, bool level, uint32_t duration);
-    IrdaHandler* decoder;
+    IrdaDecoderHandler* decoder;
     IrdaMessage message;
 };
 

@@ -16,7 +16,7 @@ typedef struct IrdaCommonEncoder IrdaCommonEncoder;
 
 typedef IrdaStatus (*IrdaCommonDecode)(IrdaCommonDecoder*);
 typedef bool (*IrdaCommonInterpret)(IrdaCommonDecoder*);
-typedef IrdaStatus (*IrdaCommonEncode)(void* encoder, uint32_t* out, bool* polarity);
+typedef IrdaStatus (*IrdaCommonEncode)(IrdaCommonEncoder* encoder, uint32_t* out, bool* polarity);
 
 typedef struct {
     IrdaTimings timings;
@@ -56,11 +56,12 @@ struct IrdaCommonDecoder {
 };
 
 struct IrdaCommonEncoder {
+    const IrdaCommonProtocolSpec* protocol;
+    IrdaCommonStateEncoder state;
     bool switch_detect;
     uint32_t bits_encoded;
     uint32_t timings_encoded;
-    IrdaCommonStateEncoder state;
-    const IrdaCommonProtocolSpec* protocol;
+    void* context;
     uint8_t data[];
 };
 

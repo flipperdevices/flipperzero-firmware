@@ -9,7 +9,7 @@
 #define RUN_DECODER(data, expected) \
     run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
-static IrdaHandler* decoder;
+static IrdaDecoderHandler* decoder;
 
 static void test_setup(void) {
     decoder = irda_alloc_decoder();
@@ -36,7 +36,7 @@ static void run_decoder(
     bool level = 0;
     uint32_t message_counter = 0;
 
-    irda_send_raw(input_delays, input_delays_len, false, NULL);
+    irda_send_raw(input_delays, input_delays_len, false);
 
     for(uint32_t i = 0; i < input_delays_len; ++i) {
         message_decoded = irda_decode(decoder, level, input_delays[i]);
