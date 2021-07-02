@@ -298,10 +298,10 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
     }
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
+    canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 4);
     canvas_set_color(canvas, ColorBlack);
-    elements_multiline_text(canvas, x + 4, y + 1, text);
-    elements_frame(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
+    elements_multiline_text(canvas, x + 4, y - 1, text);
+    elements_frame(canvas, x, y - font_y, str_width + 8, font_y * lines + 4);
 }
 
 void elements_slightly_rounded_frame(
