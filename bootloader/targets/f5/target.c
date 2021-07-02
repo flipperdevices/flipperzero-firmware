@@ -13,7 +13,8 @@
 #include <api-hal.h>
 
 // Boot request enum
-#define BOOT_REQUEST_NONE 0x00000000
+#define BOOT_REQUEST_TAINTED 0x00000000
+#define BOOT_REQUEST_CLEAN 0xDADEDADE
 #define BOOT_REQUEST_DFU 0xDF00B000
 // Boot to DFU pin
 #define BOOT_DFU_PORT GPIOB
@@ -135,8 +136,12 @@ void target_init() {
 }
 
 int target_is_dfu_requested() {
-    if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
-        LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_NONE);
+    if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_TAINTED) {
+        // Default system state is tainted
+        // We must ensure that MCU is cleanly booted
+        LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_CLEAN);
+        NVIC_SystemReset();
+    } else if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
         return 1;
     }
     LL_mDelay(100);
@@ -159,6 +164,8 @@ void target_switch(void* offset) {
 
 void target_switch2dfu() {
     target_led_control("B");
+    // Mark system as tainted, it will be soon
+    LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_TAINTED);
     // Remap memory to system bootloader
     LL_SYSCFG_SetRemapMemory(LL_SYSCFG_REMAP_SYSTEMFLASH);
     target_switch(0x0);
@@ -166,6 +173,6 @@ void target_switch2dfu() {
 
 void target_switch2os() {
     target_led_control("G");
-    SCB->VTOR = BOOT_ADDRESS + OS_OFFSET;
+    SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
