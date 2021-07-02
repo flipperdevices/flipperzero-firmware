@@ -17,7 +17,8 @@ void IrdaAppSignalTransceiver::irda_rx_callback(void* ctx, bool level, uint32_t 
 }
 
 IrdaAppSignalTransceiver::IrdaAppSignalTransceiver(void)
-    : capture_started(false), decoder(irda_alloc_decoder()) {
+    : capture_started(false)
+    , decoder(irda_alloc_decoder()) {
 }
 
 IrdaAppSignalTransceiver::~IrdaAppSignalTransceiver() {
@@ -28,7 +29,7 @@ IrdaAppSignalTransceiver::~IrdaAppSignalTransceiver() {
 void IrdaAppSignalTransceiver::capture_once_start(osMessageQueueId_t queue) {
     event_queue = queue;
     irda_reset_decoder(decoder);
-    if (!capture_started) {
+    if(!capture_started) {
         capture_started = true;
         api_hal_irda_rx_irq_set_callback(IrdaAppSignalTransceiver::irda_rx_callback, this);
         api_hal_irda_rx_irq_init();
@@ -38,10 +39,11 @@ void IrdaAppSignalTransceiver::capture_once_start(osMessageQueueId_t queue) {
 void IrdaAppSignalTransceiver::capture_stop(void) {
     IrdaAppEvent event;
 
-    if (capture_started) {
+    if(capture_started) {
         capture_started = false;
         api_hal_irda_rx_irq_deinit();
-        while(osMessageQueueGet(this->event_queue, &event, 0, 0) == osOK);
+        while(osMessageQueueGet(this->event_queue, &event, 0, 0) == osOK)
+            ;
     }
 }
 
