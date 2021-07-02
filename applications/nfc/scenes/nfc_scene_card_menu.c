@@ -5,12 +5,12 @@
 #include <gui/modules/submenu.h>
 #include <gui/view_dispatcher.h>
 
-typedef enum {
+enum SubmenuIndex {
     SubmenuIndexRunApp,
     SubmenuIndexChooseScript,
     SubmenuIndexEmulate,
     SubmenuIndexSave,
-} SubmenuIndex;
+};
 
 void nfc_scene_card_menu_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = (Nfc*)context;
