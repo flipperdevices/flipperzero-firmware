@@ -36,12 +36,11 @@ C_SOURCES		+= $(FATFS_DIR)/ff_gen_drv.c
 C_SOURCES		+= $(FATFS_DIR)/diskio.c
 C_SOURCES		+= $(FATFS_DIR)/option/unicode.c
 
-ifeq ($(SRV_INTERNAL_STORAGE), 1)
+# Little FS
 LITTLEFS_DIR	= $(LIB_DIR)/littlefs
 CFLAGS			+= -I$(LITTLEFS_DIR)
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs.c
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs_util.c
-endif
 
 ifeq ($(APP_NFC), 1)
 ST25RFAL002_DIR	= $(LIB_DIR)/ST25RFAL002
@@ -61,6 +60,9 @@ CFLAGS			+= -I$(LIB_DIR)/callback-connector
 
 # app template library
 CFLAGS			+= -I$(LIB_DIR)/app-template
+
+# add C scene template
+CFLAGS			+= -I$(LIB_DIR)/app_scene_template
 
 # fnv1a hash library
 CFLAGS			+= -I$(LIB_DIR)/fnv1a-hash
@@ -100,7 +102,12 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/irda/*/*.c)
 CFLAGS			+= -I$(LIB_DIR)/args
 C_SOURCES		+= $(wildcard $(LIB_DIR)/args/*.c)
 
+# SubGhz
+C_SOURCES		+= $(wildcard $(LIB_DIR)/fl_subghz/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/fl_subghz/*/*.c)
+
 #scened app template lib
 CFLAGS			+= -I$(LIB_DIR)/app-scened-template
+C_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*.c)
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*.cpp)
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*/*.cpp)

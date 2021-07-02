@@ -16,7 +16,6 @@ int32_t gui_task(void* p);
 int32_t backlight_control(void* p);
 int32_t irda(void* p);
 int32_t app_loader(void* p);
-int32_t app_lfrfid(void* p);
 int32_t nfc_task(void* p);
 int32_t dolphin_task(void* p);
 int32_t power_task(void* p);
@@ -28,7 +27,6 @@ int32_t app_ibutton(void* p);
 int32_t cli_task(void* p);
 int32_t music_player(void* p);
 int32_t sdnfc(void* p);
-int32_t floopper_bloopper(void* p);
 int32_t sd_filesystem(void* p);
 int32_t subghz_app(void* p);
 int32_t gui_test(void* p);
@@ -40,6 +38,8 @@ int32_t internal_storage_task(void* p);
 int32_t app_archive(void* p);
 int32_t notification_app(void* p);
 int32_t scened_app(void* p);
+int32_t lfrfid_app(void* p);
+int32_t lfrfid_debug_app(void* p);
 
 // On system start hooks declaration
 void irda_cli_init();
@@ -51,7 +51,7 @@ void ibutton_cli_init();
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
-    {.app = cli_task, .name = "cli_task", .stack_size = 2048, .icon = A_Plugins_14},
+    {.app = cli_task, .name = "cli_task", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_EXAMPLE_BLINK
@@ -104,7 +104,8 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_LF_RFID
-    {.app = app_lfrfid, .name = "125 kHz RFID", .stack_size = 1024, .icon = A_Plugins_14},
+    // TODO: fix stack size when sd api will be in separate thread
+    {.app = lfrfid_app, .name = "125 kHz RFID", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_IRDA
@@ -142,10 +143,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = app_gpio_test, .name = "gpio test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
-#ifdef SRV_FLOOPPER_BLOOPPER
-    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
-#endif
-
 #ifdef SRV_SDNFC
     {.app = sdnfc, .name = "sdnfc", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -178,15 +175,17 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_NFC
-    {.app = nfc_task, .name = "NFC", .stack_size = 1024, .icon = A_NFC_14},
+    {.app = nfc_task, .name = "NFC", .stack_size = 4096, .icon = A_NFC_14},
 #endif
 
 #ifdef APP_SUBGHZ
-    {.app = subghz_app, .name = "Sub-1 GHz", .stack_size = 1024, .icon = A_Sub1ghz_14},
+    // TODO: decrease stack after SD API refactoring
+    {.app = subghz_app, .name = "Sub-1 GHz", .stack_size = 4096, .icon = A_Sub1ghz_14},
 #endif
 
 #ifdef APP_LF_RFID
-    {.app = app_lfrfid, .name = "125 kHz RFID", .stack_size = 1024, .icon = A_125khz_14},
+    // TODO: fix stack size when sd api will be in separate thread
+    {.app = lfrfid_app, .name = "125 kHz RFID", .stack_size = 4096, .icon = A_125khz_14},
 #endif
 
 #ifdef APP_IRDA
@@ -233,10 +232,6 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player, .name = "music player", .stack_size = 1024, .icon = A_Plugins_14},
-#endif
-
-#ifdef APP_FLOOPPER_BLOOPPER
-    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 #endif
 
 #ifdef APP_SPEAKER_DEMO
@@ -302,6 +297,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #ifdef APP_SCENED
     {.app = scened_app, .name = "Templated Scene", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
+
+#ifdef APP_LF_RFID
+    {.app = lfrfid_debug_app, .name = "LF-RFID Debug", .stack_size = 1024, .icon = A_125khz_14},
+#endif
 };
 
 const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(FlipperApplication);
@@ -318,7 +317,6 @@ const FlipperApplication FLIPPER_SCENE =
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
     {.app = passport, .name = "Passport", .stack_size = 1024, .icon = A_Games_14},
     {.app = music_player, .name = "Music player", .stack_size = 1024, .icon = A_Plugins_14},
-    {.app = floopper_bloopper, .name = "Floopper Bloopper", .stack_size = 1024, .icon = A_Games_14},
 };
 
 const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);

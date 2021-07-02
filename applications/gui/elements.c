@@ -67,7 +67,7 @@ void elements_scrollbar_pos(
     }
 }
 
-void elements_scrollbar(Canvas* canvas, uint8_t pos, uint8_t total) {
+void elements_scrollbar(Canvas* canvas, uint16_t pos, uint16_t total) {
     furi_assert(canvas);
 
     uint8_t width = canvas_width(canvas);
@@ -236,7 +236,7 @@ void elements_multiline_text_aligned(
             string_t buff;
             string_init_set(buff, str);
             size_t s_len = string_size(str);
-            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 2);
+            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 5);
 
             string_left(buff, end_pos);
             string_cat(buff, "-");
