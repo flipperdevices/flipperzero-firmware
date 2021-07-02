@@ -91,7 +91,7 @@ reduce the code size. You can do so by linking `STM32::Nano`, which will add the
 `--specs=nano.specs` flags to both compiler and linker.
 Keep in mind that when using `STM32::Nano`, by default you cannot use floats in printf/scanf calls,
 and you have to provide implementations for several OS interfacing
-functions (`_sbrk`, `_close`, `_fstat`, and others). You can enable IO floating point support with
+functions (`_sbrk`, `_close`, `_fstat`, and others). You can enable printf/scanf floating point support with
 newlib-nano by linking against `STM32::Nano::FloatPrint` and/or `STM32::Nano::FloatScan`.
 It is also possible to combine `STM32::Nano` and `STM32::NoSys`
 to have the benefits of reduced code size while not being forced to implement system calls.
@@ -170,4 +170,3 @@ Other FreeRTOS libraries:
 * `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
 * `FreeRTOS::Timers` - timers (`timers.c`)
 * `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
-
