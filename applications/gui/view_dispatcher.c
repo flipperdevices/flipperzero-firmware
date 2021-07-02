@@ -20,15 +20,9 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     if(view_dispatcher->gui) {
         gui_remove_view_port(view_dispatcher->gui, view_dispatcher->view_port);
     }
-    // Free views
-    ViewDict_it_t it;
-    ViewDict_it(it, view_dispatcher->views);
-    while(!ViewDict_end_p(it)) {
-        ViewDict_itref_t* ref = ViewDict_ref(it);
-        // Crash if view wasn't freed
-        furi_check(ref->value);
-        ViewDict_next(it);
-    }
+    // Crash if not all views were freed
+    furi_assert(ViewDict_size(view_dispatcher->views) == 0);
+
     ViewDict_clear(view_dispatcher->views);
     // Free ViewPort
     view_port_free(view_dispatcher->view_port);
