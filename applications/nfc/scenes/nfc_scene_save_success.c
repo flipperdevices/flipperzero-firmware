@@ -31,7 +31,7 @@ const bool nfc_scene_save_success_on_event(void* context, uint32_t event) {
 
     if(event == SCENE_SAVE_SUCCESS_CUSTOM_EVENT) {
         view_dispatcher_send_back_search_scene_event(
-            nfc->nfc_common.view_dispatcher, NfcSceneCardMenu);
+            nfc->nfc_common.view_dispatcher, NfcSceneStart);
         return true;
     }
     return false;

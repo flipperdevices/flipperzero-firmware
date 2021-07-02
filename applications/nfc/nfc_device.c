@@ -74,7 +74,7 @@ static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevi
     }
 
     // // Load other data
-    if(!file_worker_read_hex(file_worker, &buff[1], buff[0])) {
+    if(!file_worker_read_hex(file_worker, &buff[1], buff[0] + 3)) {
         return false;
     }
 
