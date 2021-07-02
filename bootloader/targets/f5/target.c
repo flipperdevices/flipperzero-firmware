@@ -137,7 +137,6 @@ void target_init() {
 
 int target_is_dfu_requested() {
     if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
-        LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_NONE);
         return 1;
     } else if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_TAINTED) {
         // We came here directly from STM bootloader and chip is unusable
@@ -174,6 +173,6 @@ void target_switch2dfu() {
 
 void target_switch2os() {
     target_led_control("G");
-    SCB->VTOR = BOOT_ADDRESS + OS_OFFSET;
+    SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }

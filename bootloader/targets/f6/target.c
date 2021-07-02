@@ -173,6 +173,6 @@ void target_switch2dfu() {
 
 void target_switch2os() {
     target_led_control("G");
-    SCB->VTOR = BOOT_ADDRESS + OS_OFFSET;
+    SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
