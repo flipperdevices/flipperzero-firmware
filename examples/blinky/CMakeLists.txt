@@ -5,9 +5,9 @@ project(stm32-blinky C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
 # F4 example enabled by default
-option(F4_EXAMPLE ON "Compile F4 example")
-option(F1_EXAMPLE OFF "Compile F1 example")
-option(L0_EXAMPLE OFF "Compile L0 example")
+option(F4_EXAMPLE "Compile F4 example" ON)
+option(F1_EXAMPLE "Compile F1 example" OFF)
+option(L0_EXAMPLE "Compile L0 example" OFF)
 
 find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
 find_package(HAL COMPONENTS STM32F4 RCC GPIO CORTEX REQUIRED)
