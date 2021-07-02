@@ -34,6 +34,7 @@
 #include "scenes/nfc_scene_save_success.h"
 #include "scenes/nfc_scene_file_select.h"
 #include "scenes/nfc_scene_saved_menu.h"
+#include "scenes/nfc_scene_set_sak.h"
 
 // TODO delete debug scenes
 #include "scenes/nfc_scene_debug_menu.h"
@@ -76,6 +77,7 @@ struct Nfc {
     AppScene* scene_save_success;
     AppScene* scene_file_select;
     AppScene* scene_saved_menu;
+    AppScene* scene_set_sak;
 
     // TODO delete debug scenes
     AppScene* scene_debug_menu;
@@ -113,6 +115,7 @@ typedef enum {
     NfcSceneSaveSuccess,
     NfcSceneFileSelect,
     NfcSceneSavedMenu,
+    NfcSceneSetSak,
 } NfcScene;
 
 Nfc* nfc_alloc();
