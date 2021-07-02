@@ -10,43 +10,28 @@ static const uint32_t repeat_timings[] = {
     IRDA_SAMSUNG_REPEAT_MARK,
     IRDA_SAMSUNG_REPEAT_SPACE,
     IRDA_SAMSUNG_BIT1_MARK,
+    IRDA_SAMSUNG_BIT1_SPACE,
+    IRDA_SAMSUNG_BIT1_MARK,
 };
 
-void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message) {
+void irda_encoder_samsung32_reset(void* encoder_ptr, const IrdaMessage* message) {
     furi_assert(encoder_ptr);
 
     IrdaCommonEncoder* encoder = encoder_ptr;
     irda_common_encoder_reset(encoder);
 
     uint8_t address = message->address;
-    uint8_t address_inverse = ~address;
     uint8_t command = message->command;
     uint8_t command_inverse = ~command;
 
     uint32_t* data = (void*) encoder->data;
     *data |= address;
-    *data |= address_inverse << 8;
+    *data |= address << 8;
     *data |= command << 16;
     *data |= command_inverse << 24;
 }
 
-void irda_encoder_necext_reset(void* encoder_ptr, const IrdaMessage* message) {
-    furi_assert(encoder_ptr);
-
-    IrdaCommonEncoder* encoder = encoder_ptr;
-    irda_common_encoder_reset(encoder);
-
-    uint16_t address = message->address;
-    uint8_t command = message->command;
-    uint8_t command_inverse = ~command;
-
-    uint32_t* data = (void*) encoder->data;
-    *data |= address;
-    *data |= command << 16;
-    *data |= command_inverse << 24;
-}
-
-IrdaStatus irda_encoder_nec_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
+IrdaStatus irda_encoder_samsung32_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
     furi_assert(encoder);
 
     /* 2 timings preambule + payload + stop bit */
@@ -55,27 +40,21 @@ IrdaStatus irda_encoder_nec_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* 
 
     furi_assert(encoder->timings_encoded >= timings_encoded_up_to_repeat);
 
-    if (repeat_cnt > 0)
-        *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
-    else
-        *duration = IRDA_NEC_REPEAT_PAUSE1;
+    *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
 
     return IrdaStatusOk;
 }
 
-void* irda_encoder_necext_alloc(void) {
-    return irda_common_encoder_alloc(&protocol_necext);
+void* irda_encoder_samsung32_alloc(void) {
+    return irda_common_encoder_alloc(&protocol_samsung32);
 }
 
-void* irda_encoder_nec_alloc(void) {
-    return irda_common_encoder_alloc(&protocol_nec);
-}
-
-void irda_encoder_nec_free(void* encoder_ptr) {
+void irda_encoder_samsung32_free(void* encoder_ptr) {
     irda_common_encoder_free(encoder_ptr);
 }
 
-IrdaStatus irda_encoder_nec_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
+IrdaStatus irda_encoder_samsung32_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
     return irda_common_encode(encoder_ptr, duration, level);
 }
+
 

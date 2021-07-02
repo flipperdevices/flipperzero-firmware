@@ -67,8 +67,11 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .decode = irda_decoder_samsung32_decode,
           .reset = irda_decoder_samsung32_reset,
           .free = irda_decoder_samsung32_free},
-//      .encoder = {
-//          .encode = irda_encoder_samsung32_encode},
+      .encoder = {
+          .alloc = irda_encoder_samsung32_alloc,
+          .encode = irda_encoder_samsung32_encode,
+          .reset = irda_encoder_samsung32_reset,
+          .free = irda_encoder_samsung32_free},
       .address_length = 2,
       .command_length = 2,
     },

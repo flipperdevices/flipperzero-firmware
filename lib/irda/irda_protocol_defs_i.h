@@ -87,10 +87,14 @@ extern const IrdaCommonProtocolSpec protocol_nec;
 #define IRDA_SAMSUNG_BIT_TOLERANCE          120     // us
 
 void* irda_decoder_samsung32_alloc(void);
-void irda_encoder_samsung32_encode(uint32_t address, uint32_t command, bool repeat);
 void irda_decoder_samsung32_reset(void* decoder);
 void irda_decoder_samsung32_free(void* decoder);
 IrdaMessage* irda_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration);
+
+IrdaStatus irda_encoder_samsung32_encode(void* encoder_ptr, uint32_t* duration, bool* level);
+void irda_encoder_samsung32_reset(void* encoder_ptr, const IrdaMessage* message);
+void* irda_encoder_samsung32_alloc(void);
+void irda_encoder_samsung32_free(void* encoder_ptr);
 
 bool interpret_samsung32(IrdaCommonDecoder* decoder);
 IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);

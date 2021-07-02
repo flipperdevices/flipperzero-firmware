@@ -5,7 +5,7 @@
 #include "../irda_i.h"
 
 
-bool interpret_nec(IrdaCommonDecoder* decoder) {
+bool irda_decoder_nec_interpret(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -25,7 +25,7 @@ bool interpret_nec(IrdaCommonDecoder* decoder) {
 }
 
 // Some NEC's extensions allow 16 bit address
-bool interpret_necext(IrdaCommonDecoder* decoder) {
+bool irda_decoder_necext_interpret(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -43,7 +43,7 @@ bool interpret_necext(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-IrdaStatus decode_repeat_nec(IrdaCommonDecoder* decoder) {
+IrdaStatus irda_decoder_nec_decode_repeat(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;

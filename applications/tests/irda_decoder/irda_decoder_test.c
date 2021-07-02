@@ -1,6 +1,7 @@
 #include <furi.h>
 #include "../minunit.h"
 #include "irda.h"
+#include "irda_common_i.h"
 #include "test_data/irda_decoder_nec_test_data.srcdata"
 #include "test_data/irda_decoder_necext_test_data.srcdata"
 #include "test_data/irda_decoder_samsung_test_data.srcdata"
@@ -28,6 +29,30 @@ static void compare_message_results(
     mu_check(message_decoded->repeat == message_expected->repeat);
 }
 
+static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messages_len,
+    const uint32_t expected_timings[], uint32_t expected_timings_len) {
+    uint32_t i = 0;
+    uint32_t j = 0;
+    uint32_t encoded_timings = 0;
+    uint32_t duration = 0;
+    bool level = false;
+    bool expected_level = true; // start from Mark
+
+    for(; i < input_messages_len; ++i) {
+        const IrdaMessage* message = &input_messages[i];
+        IrdaEncoderHandler* handler = irda_alloc_encoder(message->protocol);
+        irda_reset_encoder(handler, message);
+
+        for(; j < expected_timings_len; ++j) {
+            irda_encode(handler, &duration, &level);
+            mu_check(MATCH_BIT_TIMING(duration, expected_timings[expected_timings_len], 120));
+            mu_check(level == expected_level);
+            expected_level = !expected_level;
+            ++encoded_timings;
+        }
+    }
+}
+
 static void run_decoder(
     const uint32_t* input_delays,
     uint32_t input_delays_len,
@@ -36,8 +61,6 @@ static void run_decoder(
     const IrdaMessage* message_decoded = 0;
     bool level = 0;
     uint32_t message_counter = 0;
-
-    irda_send_raw(input_delays, input_delays_len, false);
 
     for(uint32_t i = 0; i < input_delays_len; ++i) {
         message_decoded = irda_decode(decoder, level, input_delays[i]);
