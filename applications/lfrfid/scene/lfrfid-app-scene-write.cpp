@@ -12,7 +12,7 @@ void LfRfidAppSceneWrite::on_enter(LfRfidApp* app, bool need_restore) {
 
     auto popup = app->view_controller.get<PopupVM>();
 
-    popup->set_header("LF writing", 89, 30, AlignCenter, AlignTop);
+    popup->set_header("Writing", 89, 30, AlignCenter, AlignTop);
     if(strlen(app->worker.key.get_name())) {
         popup->set_text(app->worker.key.get_name(), 89, 43, AlignCenter, AlignTop);
     } else {

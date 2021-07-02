@@ -11,7 +11,7 @@ void LfRfidAppSceneEmulate::on_enter(LfRfidApp* app, bool need_restore) {
 
     auto popup = app->view_controller.get<PopupVM>();
 
-    popup->set_header("LF emulating", 89, 30, AlignCenter, AlignTop);
+    popup->set_header("Emulating", 89, 30, AlignCenter, AlignTop);
     if(strlen(app->worker.key.get_name())) {
         popup->set_text(app->worker.key.get_name(), 89, 43, AlignCenter, AlignTop);
     } else {
