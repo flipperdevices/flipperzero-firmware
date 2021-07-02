@@ -103,7 +103,7 @@ bool nfc_file_select(NfcDevice* dev) {
         nfc_app_extension,
         dev->file_name,
         sizeof(dev->file_name),
-        dev->dev_name);
+        NULL);
     if(res) {
         string_t dev_str;
 
@@ -116,7 +116,7 @@ bool nfc_file_select(NfcDevice* dev) {
         }
         string_clear(dev_str);
     }
-
+    file_worker_close(file_worker);
     file_worker_free(file_worker);
 
     return res;
