@@ -6,11 +6,11 @@ void subghz_protocol_common_add_bit(SubGhzProtocolCommon *common, uint8_t bit){
     common->code_count_bit++;
 }
 
-uint8_t subghz_protocol_common_check_interval (SubGhzProtocolCommon *common, uint32_t interval, uint16_t interval_check) {
-    if ((interval_check >= (interval - common->te_delta))&&(interval_check <= (interval + common->te_delta))){
-        return 1;
+bool subghz_protocol_common_check_interval (SubGhzProtocolCommon *common, uint32_t duration, uint16_t duration_check) {
+    if ((duration_check >= (duration - common->te_delta))&&(duration_check <= (duration + common->te_delta))){
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 

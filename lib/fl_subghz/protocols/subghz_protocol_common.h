@@ -43,13 +43,49 @@ struct SubGhzProtocolCommon {
     SubGhzProtocolCommonToStr to_string;
 };
 
+
+/**
+ * @brief Add data bit to code_found
+ * 
+ * @param common - SubGhzProtocolCommon common
+ * @param bit - add bit
+ */
 void subghz_protocol_common_add_bit(SubGhzProtocolCommon *common, uint8_t bit);
 
-uint8_t subghz_protocol_common_check_interval(SubGhzProtocolCommon *common, uint32_t interval, uint16_t interval_check);
+/**
+ * @brief Checking that the duration is included in the interval
+ * 
+ * @param common - SubGhzProtocolCommon common
+ * @param duration duration reference
+ * @param duration_check duration checked
+ * @return true on success
+ */
+bool subghz_protocol_common_check_interval(SubGhzProtocolCommon *common, uint32_t duration, uint16_t duration_check);
 
+/**
+ * @brief Bit-by-bit data mirroring
+ * 
+ * @param key - data to mirror
+ * @param count_bit number of data bits
+ * @return mirrored data
+ */
 uint64_t subghz_protocol_common_reverse_key(uint64_t key, uint8_t count_bit);
 
+
+/**
+ * @brief Callback protocol
+ * 
+ * @param instance - SubGhzProtocolCommon* instance
+ * @param callback
+ * @param context
+ */
 void subghz_protocol_common_set_callback(SubGhzProtocolCommon* instance, SubGhzProtocolCommonCallback callback, void* context);
 
+/**
+ * @brief outputting information from the parser
+ * 
+ * @param instance - SubGhzProtocolCommon* instance
+ * @param output   - output string
+ */
 void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output);
 
