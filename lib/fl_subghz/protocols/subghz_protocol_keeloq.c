@@ -116,6 +116,13 @@ void subghz_protocol_keeloq_add_manafacture_key(SubGhzProtocolKeeloq* instance, 
     manufacture_code->type = type;
 }
 
+/** Checking the accepted code against the database manafacture key
+ * 
+ * @param instance SubGhzProtocolKeeloq instance
+ * @param fix fix part of the parcel
+ * @param hop hop encrypted part of the parcel
+ * @return true on successful search
+ */
 uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKeeloq* instance, uint32_t fix , uint32_t hop) {
     uint16_t end_serial = (uint16_t)(fix&0x3FF);
     uint8_t btn = (uint8_t)(fix>>28);
@@ -200,6 +207,10 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(SubGhzProtocolKe
     return 0;
 }
 
+/** Analysis of received data
+ * 
+ * @param instance SubGhzProtocolKeeloq instance
+ */
 void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instance) {
     uint64_t key = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
     uint32_t key_fix = key >> 32;
@@ -216,6 +227,11 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
 }
 
+/** Send bit 
+ * 
+ * @param instance - SubGhzProtocolKeeloq instance
+ * @param bit - bit
+ */
 void subghz_protocol_keeloq_send_bit(SubGhzProtocolKeeloq* instance, uint8_t bit) {
     if (bit) {
         // send bit 1

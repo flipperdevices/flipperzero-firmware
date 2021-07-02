@@ -28,6 +28,11 @@ void subghz_protocol_came_free(SubGhzProtocolCame* instance) {
     free(instance);
 }
 
+/** Send bit 
+ * 
+ * @param instance - SubGhzProtocolCame instance
+ * @param bit - bit
+ */
 void subghz_protocol_came_send_bit(SubGhzProtocolCame* instance, uint8_t bit) {
     if (bit) {
         //send bit 1

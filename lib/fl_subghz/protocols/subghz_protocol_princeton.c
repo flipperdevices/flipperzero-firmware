@@ -27,6 +27,11 @@ void subghz_protocol_princeton_free(SubGhzProtocolPrinceton* instance) {
     free(instance);
 }
 
+/** Send bit 
+ * 
+ * @param instance - SubGhzProtocolPrinceton instance
+ * @param bit - bit
+ */
 void subghz_protocol_princeton_send_bit(SubGhzProtocolPrinceton* instance, uint8_t bit) {
     if (bit) {
         //send bit 1

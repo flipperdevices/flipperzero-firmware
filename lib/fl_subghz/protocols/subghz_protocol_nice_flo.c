@@ -27,6 +27,11 @@ void subghz_protocol_nice_flo_free(SubGhzProtocolNiceFlo* instance) {
     free(instance);
 }
 
+/** Send bit 
+ * 
+ * @param instance - SubGhzProtocolNiceFlo instance
+ * @param bit - bit
+ */
 void subghz_protocol_nice_flo_send_bit(SubGhzProtocolNiceFlo* instance, uint8_t bit) {
     if (bit) {
         //send bit 1

@@ -4,25 +4,19 @@
 
 typedef struct SubGhzProtocolNiceFlo SubGhzProtocolNiceFlo;
 
-/**
- * @brief Allocate SubGhzProtocolNiceFlo
+/** Allocate SubGhzProtocolNiceFlo
  * 
  * @return SubGhzProtocolNiceFlo* 
  */
 SubGhzProtocolNiceFlo* subghz_protocol_nice_flo_alloc();
 
-/**
- * @brief Free SubGhzProtocolNiceFlo
+/** Free SubGhzProtocolNiceFlo
  * 
  * @param instance 
  */
 void subghz_protocol_nice_flo_free(SubGhzProtocolNiceFlo* instance);
 
-
-//void subghz_protocol_nice_flo_set_callback(SubGhzProtocolNiceFlo* instance, SubGhzProtocolCommonCallback callback, void* context);
-
-/**
- * @brief Sends the key on the air
+/** Sends the key on the air
  * 
  * @param instance - SubGhzProtocolNiceFlo instance
  * @param key - key send
@@ -31,8 +25,7 @@ void subghz_protocol_nice_flo_free(SubGhzProtocolNiceFlo* instance);
  */
 void subghz_protocol_nice_flo_send_key(SubGhzProtocolNiceFlo* instance, uint64_t key, uint8_t bit, uint8_t repeat);
 
-/**
- * @brief Parse accepted duration
+/** Parse accepted duration
  * 
  * @param instance - SubGhzProtocolNiceFlo instance
  * @param data - LevelPair data

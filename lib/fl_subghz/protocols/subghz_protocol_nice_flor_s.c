@@ -36,6 +36,11 @@ void subghz_protocol_nice_flor_s_name_file(SubGhzProtocolNiceFlorS* instance, co
     printf("Loading Nice FloR S rainbow table %s\r\n", name);
 }
 
+/** Send bit 
+ * 
+ * @param instance - SubGhzProtocolNiceFlorS instance
+ * @param bit - bit
+ */
 void subghz_protocol_nice_flor_s_send_bit(SubGhzProtocolNiceFlorS* instance, uint8_t bit) {
     if(bit) {
         //send bit 1
@@ -77,6 +82,13 @@ void subghz_protocol_nice_flor_s_send_key(
         delay_us(instance->common.te_shot * 3);
     }
 }
+
+/** Read bytes from rainbow table
+ * 
+ * @param instance - SubGhzProtocolNiceFlorS* instance
+ * @param address  - address byte
+ * @return byte data
+ */
 uint8_t subghz_nice_flor_s_get_byte_in_file(SubGhzProtocolNiceFlorS* instance, uint32_t address) {
     if(!instance->rainbow_table_file_name) 
         return 0;
@@ -95,15 +107,28 @@ uint8_t subghz_nice_flor_s_get_byte_in_file(SubGhzProtocolNiceFlorS* instance, u
     return buffer;
 }
 
+/** Decrypt protocol Nice Flor S
+ * 
+ * @param instance - SubGhzProtocolNiceFlorS* instance
+ */
 void subghz_nice_flor_s_decoder_decrypt(SubGhzProtocolNiceFlorS* instance) {
-    //P2 (4-бита) - часть серийного номера, P2 = (K ^ S3) & 0xF;
-    //P3 (байт) - старшая часть зашифрованного индекса.
-    //P4 (байт) - младшая часть зашифрованного индекса.
-    //P5 (байт) - часть серийного номера, P5 = K ^ S2;
-    //P6 (байт) - часть серийного номера, P6 = K ^ S1;
-    //P7 (байт) - часть серийного номера, P7 = K ^ S0;
-    //K (байт) - зависит от P3 и P4, K = Fk(P3, P4);
-    //S3,S2,S1,S0 - серийный номер пульта 28 бит.
+    /*
+    * Packet format Nice Flor-s: START-P0-P1-P2-P3-P4-P5-P6-P7-STOP
+    * P0 (4-bit)    - button positional code - 1:0x1, 2:0x2, 3:0x4, 4:0x8;
+    * P1 (4-bit)    - batch repetition number, calculated by the formula:
+    * P1 = 0xF ^ P0 ^ n; where n changes from 1 to 15, then 0, and then in a circle
+    * key 1: {0xF,0xC,0xD,0xA,0xB,0x8,0x9,0x6,0x7,0x4,0x5,0x2,0x3,0x0,0x1,0xE};
+    * key 2: {0xC,0xF,0xE,0x9,0x8,0xB,0xA,0x5,0x4,0x7,0x6,0x1,0x0,0x3,0x2,0xD};
+    * key 3: {0xA,0x9,0x8,0xF,0xE,0xD,0xC,0x3,0x2,0x1,0x0,0x7,0x6,0x5,0x4,0xB};
+    * P2 (4-bit)    - part of the serial number, P2 = (K ^ S3) & 0xF;
+    * P3 (byte)     - the major part of the encrypted index
+    * P4 (byte)     - the low-order part of the encrypted index
+    * P5 (byte)     - part of the serial number, P5 = K ^ S2;
+    * P6 (byte)     - part of the serial number, P6 = K ^ S1;
+    * P7 (byte)     - part of the serial number, P7 = K ^ S0;
+    * K (byte)      - depends on P3 and P4, K = Fk(P3, P4);
+    * S3,S2,S1,S0   - serial number of the console 28 bit.
+    */
 
     uint16_t p3p4 = (uint16_t)(instance->common.code_found >> 24);
     instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
