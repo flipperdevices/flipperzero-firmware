@@ -326,13 +326,13 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
         target_link_libraries(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE BSP::STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C})
         target_include_directories(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE "${BSP_${FAMILY}_PATH}/Components/${BCOMP}")
         
-        find_file(BSP_${BOARD_CANONICAL}_${COMP}_SOURCE
+        find_file(BSP_${BOARD_CANONICAL}_${BCOMP}_SOURCE
             NAMES ${BCOMP}.c
             PATHS "${BSP_${FAMILY}_PATH}/Components/${BCOMP}"
             NO_DEFAULT_PATH
         )
-        if (BSP_${BOARD_CANONICAL}_${COMP}_SOURCE)
-            target_sources(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE "${BSP_${BOARD_CANONICAL}_${COMP}_SOURCE}")
+        if (BSP_${BOARD_CANONICAL}_${BCOMP}_SOURCE)
+            target_sources(BSP::STM32::${FAMILY}${CORE_C}::${BCOMP_U} INTERFACE "${BSP_${BOARD_CANONICAL}_${BCOMP}_SOURCE}")
         endif()
     endforeach()
     
