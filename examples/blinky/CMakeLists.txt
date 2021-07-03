@@ -4,23 +4,31 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake
 project(stm32-blinky C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
-# F4 example enabled by default
-option(F4_EXAMPLE "Compile F4 example" ON)
-option(F1_EXAMPLE "Compile F1 example" OFF)
-option(L0_EXAMPLE "Compile L0 example" OFF)
+# Configure here which STM32 target(s) to build
+option(BLINKY_F4_EXAMPLE "Compile F4 example" ON)
+option(BLINKY_F1_EXAMPLE "Compile F1 example" OFF)
+option(BLINKY_L_EXAMPLE "Compile L0 example" OFF)
 
-find_package(CMSIS COMPONENTS STM32F4 REQUIRED)
-find_package(HAL COMPONENTS STM32F4 RCC GPIO CORTEX REQUIRED)
+set(HAL_COMP_LIST "RCC GPIO CORTEX")
+set(CMSIS_COMP_LIST "")
 
-if(L0_EXAMPLE)
-    find_package(CMSIS COMPONENTS STM32L0 REQUIRED)
-    find_package(HAL COMPONENTS STM32L0 REQUIRED)
+if(BLINKY_F4_EXAMPLE)
+    list(APPEND HAL_COMP_LIST STM32F4)
+    list(APPEND CMSIS_COMP_LIST STM32F4)
 endif()
 
-if(F1_EXAMPLE)
-    find_package(CMSIS COMPONENTS STM32F1 REQUIRED)
-    find_package(HAL COMPONENTS STM32F1 REQUIRED)
+if(BLINKY_L0_EXAMPLE)
+    list(APPEND HAL_COMP_LIST STM32L0)
+    list(APPEND CMSIS_COMP_LIST STM32L0)
 endif()
+
+if(BLINKY_F1_EXAMPLE)
+    list(APPEND HAL_COMP_LIST STM32F1)
+    list(APPEND CMSIS_COMP_LIST STM32F1)
+endif()
+
+find_package(CMSIS COMPONENTS ${CMSIS_COMP_LIST} REQUIRED)
+find_package(HAL COMPONENTS ${HAL_COMP_LIST} REQUIRED)
 
 # Find all device specific drivers:
 #find_package(HAL COMPONENTS STM32L0 STM32F1 STM32F4 REQUIRED)
@@ -32,18 +40,20 @@ endif()
 #find_package(HAL REQUIRED)
 
 # STM32F4-Discovery
-add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
-target_link_libraries(stm32-blinky-f4 
-    HAL::STM32::F4::RCC
-    HAL::STM32::F4::GPIO
-    HAL::STM32::F4::CORTEX
-    CMSIS::STM32::F407VG
-    STM32::NoSys 
-)
-stm32_print_size_of_target(stm32-blinky-f4)
+if(BLINKY_F4_EXAMPLE)
+    add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
+    target_link_libraries(stm32-blinky-f4
+        HAL::STM32::F4::RCC
+        HAL::STM32::F4::GPIO
+        HAL::STM32::F4::CORTEX
+        CMSIS::STM32::F407VG
+        STM32::NoSys
+    )
+    stm32_print_size_of_target(stm32-blinky-f4)
+endif()
 
 # STM32VL-Discovery
-if(F1_EXAMPLE)
+if(BLINKY_F1_EXAMPLE)
     add_executable(stm32-blinky-f1 blinky.c stm32f1xx_hal_conf.h)
     target_link_libraries(stm32-blinky-f1
         HAL::STM32::F1::RCC
@@ -56,7 +66,7 @@ if(F1_EXAMPLE)
 endif()
 
 # STM32L0538-Discovery
-if(L0_EXAMPLE)
+if(BLINKY_L0_EXAMPLE)
     add_executable(stm32-blinky-l0 blinky.c stm32l0xx_hal_conf.h)
     target_link_libraries(stm32-blinky-l0
         HAL::STM32::L0::RCC
@@ -67,4 +77,3 @@ if(L0_EXAMPLE)
     )
     stm32_print_size_of_target(stm32-blinky-l0)
 endif()
-
