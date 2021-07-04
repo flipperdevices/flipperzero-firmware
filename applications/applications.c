@@ -49,6 +49,9 @@ void bt_cli_init();
 void lfrfid_cli_init();
 void ibutton_cli_init();
 
+// Settings
+int32_t notification_app_settings(void* p);
+
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
     {.app = cli_task, .name = "cli_task", .stack_size = 4096, .icon = A_Plugins_14},
@@ -322,3 +325,16 @@ const FlipperApplication FLIPPER_SCENE_APPS[] = {
 const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);
 
 #endif
+
+// Settings menu
+const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
+#ifdef SRV_NOTIFICATION
+    {.app = notification_app_settings,
+     .name = "Notification",
+     .stack_size = 1024,
+     .icon = A_Plugins_14},
+#endif
+};
+
+const size_t FLIPPER_SETTINGS_APPS_COUNT =
+    sizeof(FLIPPER_SETTINGS_APPS) / sizeof(FlipperApplication);
