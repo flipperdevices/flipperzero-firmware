@@ -51,7 +51,7 @@ void ibutton_cli_init();
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
-    {.app = cli_task, .name = "cli_task", .stack_size = 2048, .icon = A_Plugins_14},
+    {.app = cli_task, .name = "cli_task", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
 
 #ifdef SRV_EXAMPLE_BLINK
@@ -175,7 +175,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_NFC
-    {.app = nfc_task, .name = "NFC", .stack_size = 1024, .icon = A_NFC_14},
+    {.app = nfc_task, .name = "NFC", .stack_size = 4096, .icon = A_NFC_14},
 #endif
 
 #ifdef APP_SUBGHZ
