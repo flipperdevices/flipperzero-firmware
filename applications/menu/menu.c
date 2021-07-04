@@ -266,6 +266,7 @@ void menu_ok(Menu* menu) {
     if(type == MenuItemTypeMenu) {
         menu->current = item;
         menu_item_set_position(menu->current, 0);
+        menu_item_set_window_position(menu->current, 0);
         menu_update(menu);
     } else if(type == MenuItemTypeFunction) {
         menu_item_function_call(item);
