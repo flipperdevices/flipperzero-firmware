@@ -9,15 +9,18 @@ if(STM32H7 IN_LIST CMSIS_FIND_COMPONENTS)
 endif()
 list(REMOVE_DUPLICATES CMSIS_FIND_COMPONENTS)
 
+# This section fills the RTOS or family components list
 foreach(COMP ${CMSIS_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP)
 
+    # Component is RTOS component
     if(${COMP} IN_LIST CMSIS_RTOS)
         list(APPEND CMSIS_FIND_COMPONENTS_RTOS ${COMP})
         continue()
     endif()
 
+    # Component is not RTOS component, so check whether it is a family component
     string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
     if(CMAKE_MATCH_1)
         list(APPEND CMSIS_FIND_COMPONENTS_FAMILIES ${COMP})

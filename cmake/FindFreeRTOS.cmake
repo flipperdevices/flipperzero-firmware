@@ -1,9 +1,8 @@
-set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7)
+set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7 ARM_CM4_MPU ARM_CM3_MPU ARM_CM7_MPU)
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
 endif()
-
-set(FreeRTOS_HEAPS 1 2 3 4 5)
+list(REMOVE_DUPLICATES FreeRTOS_FIND_COMPONENTS)
 
 if((NOT FREERTOS_PATH) AND (DEFINED ENV{FREERTOS_PATH}))
     set(FREERTOS_PATH $ENV{FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
@@ -11,47 +10,33 @@ if((NOT FREERTOS_PATH) AND (DEFINED ENV{FREERTOS_PATH}))
 endif()
 
 if(NOT FREERTOS_PATH)
-    set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
-    message(STATUS "No FREERTOS_PATH specified using default: ${FREERTOS_PATH}")
+    set(DEFAULT_FREERTOS_PATH "/opt/FreeRTOS")
+    if(EXISTS ${DEFAULT_FREERTOS_PATH})
+        set(FREERTOS_PATH ${DEFAULT_FREERTOS_PATH} CACHE PATH "Path to FreeRTOS")
+        message(STATUS "No FREERTOS_PATH specified using default: ${DEFAULT_FREERTOS_PATH}")
+    else()
+        message(STATUS
+            "No FreeRTOS folder found at default location ${DEFAULT_FREERTOS_PATH}. "
+            "Leaving empty"
+        )
+    endif()
 endif()
 
-find_path(FreeRTOS_COMMON_INCLUDE
-    NAMES FreeRTOS.h
-    PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
-    PATH_SUFFIXES  "Source/include" "include"
-    NO_DEFAULT_PATH
-)
-
-if(NOT FreeRTOS_COMMON_INCLUDE)
-    message(WARNING "FreeRTOS common include path not found, build might fail")
+if(STM32H7 IN_LIST FreeRTOS_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32H7)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
 endif()
 
-list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_COMMON_INCLUDE}")
-
-find_path(FreeRTOS_SOURCE_DIR
-    NAMES tasks.c
-    PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
-    PATH_SUFFIXES  "Source"
-    NO_DEFAULT_PATH
-)
-if(NOT (TARGET FreeRTOS))
-    add_library(FreeRTOS INTERFACE IMPORTED)
-    target_sources(FreeRTOS INTERFACE 
-        "${FreeRTOS_SOURCE_DIR}/tasks.c"
-        "${FreeRTOS_SOURCE_DIR}/list.c"
-        "${FreeRTOS_SOURCE_DIR}/queue.c"
-    )
-    target_include_directories(FreeRTOS INTERFACE "${FreeRTOS_COMMON_INCLUDE}")
-endif()
-
+# This section fills the family and ports components list
 foreach(COMP ${FreeRTOS_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP)
     string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" FAMILY_COMP ${COMP})
+    # Valid family component, so add it (e.g. STM32H7)
     if(CMAKE_MATCH_1)
         list(APPEND FreeRTOS_FIND_COMPONENTS_FAMILIES ${FAMILY_COMP})
         continue()
     endif()
-
+    # Was not a family component, so add it to the port list
     list(APPEND FreeRTOS_FIND_COMPONENTS_PORTS ${COMP})
 endforeach()
 
@@ -69,23 +54,20 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     find_path(FreeRTOS_COMMON_INCLUDE
         NAMES FreeRTOS.h
         PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
-        PATH_SUFFIXES
-            "portable/GCC/${PORT}/r0p1"
-            "portable/GCC/${PORT}"
-            "Source/portable/GCC/${PORT}"
-            "Source/portable/GCC/${PORT}/r0p1"
+        PATH_SUFFIXES  "Source/include" "include"
         NO_DEFAULT_PATH
     )
 
-    if(NOT FreeRTOS_${PORT}_PATH)
-        message(WARNING "FreeRTOS port path not found, build might fail")
+    if(NOT FreeRTOS_COMMON_INCLUDE)
+        message(WARNING "FreeRTOS common include path not found, build might fail")
     endif()
 
-    list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_${PORT}_PATH}")
-    
-    find_file(FreeRTOS_${PORT}_SOURCE
-        NAMES port.c
-        PATHS "${FreeRTOS_${PORT}_PATH}"
+    list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_COMMON_INCLUDE}")
+
+    find_path(FreeRTOS_SOURCE_DIR
+        NAMES tasks.c
+        PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS"
+        PATH_SUFFIXES  "Source"
         NO_DEFAULT_PATH
     )
     if(NOT (TARGET FreeRTOS))
@@ -134,9 +116,18 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
         find_path(FreeRTOS_${PORT}_PATH
             NAMES portmacro.h
             PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
-            PATH_SUFFIXES "Source/portable/GCC/${PORT}"  "Source/portable/GCC/${PORT}/r0p1"
+            PATH_SUFFIXES
+                "portable/GCC/${PORT}/r0p1"
+                "portable/GCC/${PORT}"
+                "Source/portable/GCC/${PORT}"
+                "Source/portable/GCC/${PORT}/r0p1"
             NO_DEFAULT_PATH
         )
+
+        if(NOT FreeRTOS_${PORT}_PATH)
+            message(WARNING "FreeRTOS port path not found, build might fail")
+        endif()
+
         list(APPEND FreeRTOS_INCLUDE_DIRS "${FreeRTOS_${PORT}_PATH}")
         
         find_file(FreeRTOS_${PORT}_SOURCE
@@ -162,15 +153,16 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     endforeach()
 endmacro()
 
+message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
+
 if(NOT FreeRTOS_FIND_COMPONENTS_FAMILIES)
     if(NOT FREERTOS_PATH)
         set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
-        message(STATUS "No FREERTOS_PATH specified using default: ${FREERTOS_PATH}")
+        message(STATUS "No FREERTOS_PATH specified, using default: ${FREERTOS_PATH}")
     endif()
     stm32_find_freertos(FreeRTOS ${FREERTOS_PATH})
 else()
     message(STATUS "Search for FreeRTOS families: ${FreeRTOS_FIND_COMPONENTS_FAMILIES}")
-    message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
 
     foreach(COMP ${FreeRTOS_FIND_COMPONENTS_FAMILIES})
         string(TOLOWER ${COMP} COMP_L)
@@ -184,10 +176,10 @@ else()
         
         if(CMAKE_MATCH_2)
             set(FAMILY ${CMAKE_MATCH_1})
-            set(DEVICES "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
+            set(STM_DEVICES "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
         else()
             set(FAMILY ${CMAKE_MATCH_1})
-            stm32_get_devices_by_family(DEVICES FAMILY ${FAMILY} CORE ${CORE})
+            stm32_get_devices_by_family(STM_DEVICES FAMILY ${FAMILY})
         endif()
         
         if(CMAKE_MATCH_3)
