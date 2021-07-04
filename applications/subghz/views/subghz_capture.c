@@ -148,27 +148,6 @@ SubghzCapture* subghz_capture_alloc() {
     with_view_model(
         subghz_capture->view, (SubghzCaptureModel * model) {
             string_init(model->text);
-            string_cat_printf(
-                model->text,
-                "Protocol %s, %d Bit\r\n"
-                "KEY:0x%lX%lX\r\n"
-                "FIX:%lX MF:%s \r\n"
-                "HOP:%lX \r\n"
-                //"CNT:%04X BTN:%02lX\r\n",
-                "SN:%05lX CNT:%04X BTN:%02lX\r\n",
-                //"YEK:0x%lX%lX\r\n",
-                "KeeLoq",
-                64,
-                0x12345678,
-                0xABCDEF01,
-                //code_found_reverse_hi,
-                //code_found_reverse_lo
-                0x12345678,
-                "TestData",
-                0xABCDEF01,
-                0xDEADBEEF,
-                0xEDAE,
-                0xED);
             return true;
         });
 
