@@ -9,24 +9,18 @@ typedef struct VariableItemList VariableItemList;
 typedef struct VariableItem VariableItem;
 typedef void (*VariableItemChangeCallback)(VariableItem* item);
 
-/**
- * @brief Allocate and initialize VariableItemList
- * 
- * @return VariableItemList* instance
+/** Allocate and initialize VariableItemList
+ * @return VariableItemList* 
  */
 VariableItemList* variable_item_list_alloc();
 
-/**
- * @brief Deinitialize and free VariableItemList
- * 
+/** Deinitialize and free VariableItemList
  * @param variable_item_list VariableItemList instance
  */
 void variable_item_list_free(VariableItemList* variable_item_list);
 View* variable_item_list_get_view(VariableItemList* variable_item_list);
 
-/**
- * @brief Add item to VariableItemList
- * 
+/** Add item to VariableItemList
  * @param variable_item_list VariableItemList instance
  * @param label item name
  * @param values_count item values count
@@ -41,33 +35,25 @@ VariableItem* variable_item_list_add(
     VariableItemChangeCallback change_callback,
     void* context);
 
-/**
- * @brief Set item current selected index
- * 
+/** Set item current selected index
  * @param item VariableItem* instance
  * @param current_value_index 
  */
 void variable_item_set_current_value_index(VariableItem* item, uint8_t current_value_index);
 
-/**
- * @brief Set item current selected text
- * 
+/** Set item current selected text
  * @param item VariableItem* instance
  * @param current_value_text 
  */
 void variable_item_set_current_value_text(VariableItem* item, const char* current_value_text);
 
-/**
- * @brief Get item current selected index
- * 
+/** Get item current selected index
  * @param item VariableItem* instance
  * @return uint8_t current selected index
  */
 uint8_t variable_item_get_current_value_index(VariableItem* item);
 
-/**
- * @brief Get item context
- * 
+/** Get item context
  * @param item VariableItem* instance
  * @return void* item context
  */
