@@ -126,13 +126,10 @@ target_link_libraries(stm32-blinky-f4
 
 ### Building
 
-```sh
-cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
-cmake --build .
 ```
-
-You can also ommit the `-DCMAKE_TOOLCHAIN_FILE` argument and use `set (CMAKE_TOOLCHAIN_FILE ...)`
-in your `CMakeLists.txt` file
+    $ cmake -DCMAKE_TOOLCHAIN_FILE=<path_to_gcc_stm32.cmake> -DCMAKE_BUILD_TYPE=Debug <path_to_sources>
+    $ make
+```
 
 ## Linker script & variables
 
