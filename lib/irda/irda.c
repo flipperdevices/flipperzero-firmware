@@ -43,39 +43,7 @@ struct IrdaEncoderHandler {
 
 // TODO: replace with key-value, Now we refer by enum index, which is dangerous.
 static const IrdaProtocolImplementation irda_protocols[] = {
-    // #3
-    { .protocol = IrdaProtocolRC6,
-      .name = "RC6",
-      .decoder = {
-          .alloc = irda_decoder_rc6_alloc,
-          .decode = irda_decoder_rc6_decode,
-          .reset = irda_decoder_rc6_reset,
-          .free = irda_decoder_rc6_free},
-      .encoder = {
-          .alloc = irda_encoder_rc6_alloc,
-          .encode = irda_encoder_rc6_encode,
-          .reset = irda_encoder_rc6_reset,
-          .free = irda_encoder_rc6_free},
-      .address_length = 2,
-      .command_length = 2,
-    },
     // #0
-    { .protocol = IrdaProtocolSamsung32,
-      .name ="Samsung32",
-      .decoder = {
-          .alloc = irda_decoder_samsung32_alloc,
-          .decode = irda_decoder_samsung32_decode,
-          .reset = irda_decoder_samsung32_reset,
-          .free = irda_decoder_samsung32_free},
-      .encoder = {
-          .alloc = irda_encoder_samsung32_alloc,
-          .encode = irda_encoder_samsung32_encode,
-          .reset = irda_encoder_samsung32_reset,
-          .free = irda_encoder_samsung32_free},
-      .address_length = 2,
-      .command_length = 2,
-    },
-    // #1
     { .protocol = IrdaProtocolNEC,
       .name = "NEC",
       .decoder = {
@@ -91,7 +59,7 @@ static const IrdaProtocolImplementation irda_protocols[] = {
       .address_length = 2,
       .command_length = 2,
     },
-    // #2 - have to be after NEC
+    // #1 - have to be after NEC
     { .protocol = IrdaProtocolNECext,
       .name = "NECext",
       .decoder = {
@@ -105,6 +73,38 @@ static const IrdaProtocolImplementation irda_protocols[] = {
           .reset = irda_encoder_necext_reset,
           .free = irda_encoder_nec_free},
       .address_length = 4,
+      .command_length = 2,
+    },
+    // #2
+    { .protocol = IrdaProtocolSamsung32,
+      .name ="Samsung32",
+      .decoder = {
+          .alloc = irda_decoder_samsung32_alloc,
+          .decode = irda_decoder_samsung32_decode,
+          .reset = irda_decoder_samsung32_reset,
+          .free = irda_decoder_samsung32_free},
+      .encoder = {
+          .alloc = irda_encoder_samsung32_alloc,
+          .encode = irda_encoder_samsung32_encode,
+          .reset = irda_encoder_samsung32_reset,
+          .free = irda_encoder_samsung32_free},
+      .address_length = 2,
+      .command_length = 2,
+    },
+    // #3
+    { .protocol = IrdaProtocolRC6,
+      .name = "RC6",
+      .decoder = {
+          .alloc = irda_decoder_rc6_alloc,
+          .decode = irda_decoder_rc6_decode,
+          .reset = irda_decoder_rc6_reset,
+          .free = irda_decoder_rc6_free},
+      .encoder = {
+          .alloc = irda_encoder_rc6_alloc,
+          .encode = irda_encoder_rc6_encode,
+          .reset = irda_encoder_rc6_reset,
+          .free = irda_encoder_rc6_free},
+      .address_length = 2,
       .command_length = 2,
     },
 };

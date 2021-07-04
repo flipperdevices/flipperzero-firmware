@@ -1,9 +1,11 @@
 #include "furi/check.h"
+#include "irda.h"
 #include "irda_common_i.h"
 #include <stdbool.h>
 #include <furi.h>
 #include "irda_i.h"
 
+static void irda_common_decoder_reset_state(IrdaCommonDecoder* common_decoder);
 
 static bool irda_check_preamble(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
@@ -175,6 +177,7 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
             if (irda_check_preamble(decoder)) {
                 decoder->state = IrdaCommonDecoderStateDecode;
                 decoder->databit_cnt = 0;
+                decoder->switch_detect = false;
             }
             break;
         case IrdaCommonDecoderStateDecode:
@@ -187,7 +190,7 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
                     decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 }
             } else if (status == IrdaStatusError) {
-                decoder->state = IrdaCommonDecoderStateWaitPreamble;
+                irda_common_decoder_reset_state(decoder);
                 continue;
             }
             break;
@@ -198,7 +201,7 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
             }
             status = decoder->protocol->decode_repeat(decoder);
             if (status == IrdaStatusError) {
-                decoder->state = IrdaCommonDecoderStateWaitPreamble;
+                irda_common_decoder_reset_state(decoder);
                 continue;
             } else if (status == IrdaStatusReady) {
                 decoder->message.repeat = true;
@@ -235,12 +238,18 @@ void irda_common_decoder_free(void* decoder) {
     free(decoder);
 }
 
+void irda_common_decoder_reset_state(IrdaCommonDecoder* common_decoder) {
+    common_decoder->state = IrdaCommonDecoderStateWaitPreamble;
+    common_decoder->databit_cnt = 0;
+    common_decoder->switch_detect = false;
+    common_decoder->message.protocol = IrdaProtocolUnknown;
+}
+
 void irda_common_decoder_reset(void* decoder) {
     furi_assert(decoder);
     IrdaCommonDecoder* common_decoder = decoder;
 
-    common_decoder->state = IrdaCommonDecoderStateWaitPreamble;
+    irda_common_decoder_reset_state(common_decoder);
     common_decoder->timings_cnt = 0;
-    common_decoder->databit_cnt = 0;
 }
 

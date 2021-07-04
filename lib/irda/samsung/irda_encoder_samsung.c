@@ -34,15 +34,19 @@ void irda_encoder_samsung32_reset(void* encoder_ptr, const IrdaMessage* message)
 IrdaStatus irda_encoder_samsung32_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
     furi_assert(encoder);
 
-    /* 2 timings preambule + payload + stop bit */
-    uint32_t timings_encoded_up_to_repeat = 2 + encoder->protocol->databit_len * 2 + 1;
+    /* space + 2 timings preambule + payload + stop bit */
+    uint32_t timings_encoded_up_to_repeat = 1 + 2 + encoder->protocol->databit_len * 2 + 1;
     uint32_t repeat_cnt = encoder->timings_encoded - timings_encoded_up_to_repeat;
 
     furi_assert(encoder->timings_encoded >= timings_encoded_up_to_repeat);
 
     *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
 
-    return IrdaStatusOk;
+    *level = repeat_cnt % 2;
+    ++encoder->timings_encoded;
+    bool done = (!((repeat_cnt + 1) % COUNT_OF(repeat_timings)));
+
+    return done ? IrdaStatusDone : IrdaStatusOk;
 }
 
 void* irda_encoder_samsung32_alloc(void) {

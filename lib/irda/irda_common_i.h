@@ -36,10 +36,10 @@ typedef enum {
 } IrdaCommonStateDecoder;
 
 typedef enum {
+    IrdaCommonEncoderStateSpace,
     IrdaCommonEncoderStatePreamble,
     IrdaCommonEncoderStateEncode,
     IrdaCommonEncoderStateEncodeRepeat,
-    IrdaCommonEncoderStateEncodeSpace,
 } IrdaCommonStateEncoder;
 
 struct IrdaCommonDecoder {

@@ -2,22 +2,25 @@
 #include "../minunit.h"
 #include "irda.h"
 #include "irda_common_i.h"
-#include "test_data/irda_decoder_nec_test_data.srcdata"
-#include "test_data/irda_decoder_necext_test_data.srcdata"
-#include "test_data/irda_decoder_samsung_test_data.srcdata"
-#include "test_data/irda_decoder_rc6_test_data.srcdata"
+#include "test_data/irda_nec_test_data.srcdata"
+#include "test_data/irda_necext_test_data.srcdata"
+#include "test_data/irda_samsung_test_data.srcdata"
+#include "test_data/irda_rc6_test_data.srcdata"
+
+#define RUN_ENCODER(data, expected) \
+    run_encoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
 #define RUN_DECODER(data, expected) \
     run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
-static IrdaDecoderHandler* decoder;
+static IrdaDecoderHandler* decoder_handler;
 
 static void test_setup(void) {
-    decoder = irda_alloc_decoder();
+    decoder_handler = irda_alloc_decoder();
 }
 
 static void test_teardown(void) {
-    irda_free_decoder(decoder);
+    irda_free_decoder(decoder_handler);
 }
 
 static void compare_message_results(
@@ -29,29 +32,99 @@ static void compare_message_results(
     mu_check(message_decoded->repeat == message_expected->repeat);
 }
 
+static void run_encoder_fill_array(IrdaEncoderHandler* handler, uint32_t* timings, uint32_t* timings_len) {
+    uint32_t duration = 0;
+    bool level = false;     // start from space
+    bool level_read;
+    IrdaStatus status = IrdaStatusError;
+    int i = 0;
+
+    while (1) {
+        status = irda_encode(handler, &duration, &level_read);
+        if (level_read != level) {
+            level = level_read;
+            ++i;
+        }
+        timings[i] += duration;
+        furi_assert((status == IrdaStatusOk) || (status == IrdaStatusDone));
+        if (status == IrdaStatusDone)
+            break;
+        furi_assert(i < *timings_len);
+    }
+
+    *timings_len = i + 1;
+}
+
+// one protocol
 static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messages_len,
     const uint32_t expected_timings[], uint32_t expected_timings_len) {
-    uint32_t i = 0;
+    uint32_t* timings = 0;
+    uint32_t timings_len = 0;
     uint32_t j = 0;
-    uint32_t encoded_timings = 0;
-    uint32_t duration = 0;
-    bool level = false;
-    bool expected_level = true; // start from Mark
+    IrdaEncoderHandler* encoder_handler = irda_alloc_encoder(input_messages[0].protocol);
 
-    for(; i < input_messages_len; ++i) {
-        const IrdaMessage* message = &input_messages[i];
-        IrdaEncoderHandler* handler = irda_alloc_encoder(message->protocol);
-        irda_reset_encoder(handler, message);
-
-        for(; j < expected_timings_len; ++j) {
-            irda_encode(handler, &duration, &level);
-            mu_check(MATCH_BIT_TIMING(duration, expected_timings[expected_timings_len], 120));
-            mu_check(level == expected_level);
-            expected_level = !expected_level;
-            ++encoded_timings;
+    for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
+        const IrdaMessage* message = &input_messages[message_counter];
+        if (!message->repeat) {
+            irda_reset_encoder(encoder_handler, message);
         }
+
+        timings_len = 200;
+        timings = furi_alloc(sizeof(uint32_t) * timings_len);
+        run_encoder_fill_array(encoder_handler, timings, &timings_len);
+        furi_assert(timings_len <= 200);
+
+        for (int i = 0; i < timings_len; ++i, ++j) {
+            mu_check(MATCH_BIT_TIMING(timings[i], expected_timings[j], 120));
+            mu_assert(j < expected_timings_len, "encoded more timings than expected");
+        }
+
+        free(timings);
     }
+    irda_free_encoder(encoder_handler);
+    mu_assert(j == expected_timings_len, "encoded less timings than expected");
 }
+
+static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t input_messages_len) {
+    uint32_t* timings = 0;
+    uint32_t timings_len = 0;
+    bool level = false;
+
+    IrdaEncoderHandler* encoder_handler = irda_alloc_encoder(input_messages[0].protocol);
+
+    for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
+        const IrdaMessage* message_encoded = &input_messages[message_counter];
+        if (!message_encoded->repeat) {
+            irda_reset_encoder(encoder_handler, message_encoded);
+            level = false;
+        }
+
+        timings_len = 200;
+        timings = furi_alloc(sizeof(uint32_t) * timings_len);
+        run_encoder_fill_array(encoder_handler, timings, &timings_len);
+        furi_assert(timings_len <= 200);
+
+        const IrdaMessage* message_decoded = 0;
+        for (int i = 0; i < timings_len; ++i) {
+            message_decoded = irda_decode(decoder_handler, level, timings[i]);
+            if (i < timings_len - 1)
+                mu_check(!message_decoded);
+            else
+                mu_check(message_decoded);
+            level = !level;
+        }
+        if (message_decoded) {
+            compare_message_results(message_decoded, message_encoded);
+        } else {
+            mu_check(0);
+        }
+
+        free(timings);
+    }
+    
+    irda_free_encoder(encoder_handler);
+}
+
 
 static void run_decoder(
     const uint32_t* input_delays,
@@ -63,9 +136,8 @@ static void run_decoder(
     uint32_t message_counter = 0;
 
     for(uint32_t i = 0; i < input_delays_len; ++i) {
-        message_decoded = irda_decode(decoder, level, input_delays[i]);
+        message_decoded = irda_decode(decoder_handler, level, input_delays[i]);
         if(message_decoded) {
-            printf("expected: adr: 0x%lX, cmd: 0x%lX, repeat %d\r\n", message_expected[message_counter].address, message_expected[message_counter].command, message_expected[message_counter].repeat);
             mu_assert(message_counter < message_expected_len, "decoded more than expected");
             if(message_counter >= message_expected_len) break;
             compare_message_results(message_decoded, &message_expected[message_counter]);
@@ -77,100 +149,73 @@ static void run_decoder(
     mu_assert(message_counter == message_expected_len, "decoded less than expected");
 }
 
-#if 0
-MU_TEST(test_samsung32) {
-    RUN_DECODER(test_samsung32_input1, test_samsung32_expected1);
+MU_TEST(test_decoder_samsung32) {
+    RUN_DECODER(test_decoder_samsung32_input1, test_decoder_samsung32_expected1);
 }
 
 MU_TEST(test_mix) {
-    RUN_DECODER(test_necext_input1, test_necext_expected1);
-    RUN_DECODER(test_samsung32_input1, test_samsung32_expected1);
-    RUN_DECODER(test_nec_input1, test_nec_expected1);
-    RUN_DECODER(test_samsung32_input1, test_samsung32_expected1);
-    RUN_DECODER(test_necext_input1, test_necext_expected1);
-    RUN_DECODER(test_nec_input2, test_nec_expected2);
+    RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
+    // can use encoder data for decoding, but can't do opposite
+    RUN_DECODER(test_encoder_rc6_expected1, test_encoder_rc6_input1);
+    RUN_DECODER(test_decoder_samsung32_input1, test_decoder_samsung32_expected1);
+    RUN_DECODER(test_decoder_rc6_input1, test_decoder_rc6_expected1);
+    RUN_DECODER(test_decoder_samsung32_input1, test_decoder_samsung32_expected1);
+    RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
+    RUN_DECODER(test_decoder_nec_input2, test_decoder_nec_expected2);
+    RUN_DECODER(test_decoder_rc6_input1, test_decoder_rc6_expected1);
+    RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
+    RUN_DECODER(test_decoder_samsung32_input1, test_decoder_samsung32_expected1);
 }
 
-MU_TEST(test_nec1) {
-    RUN_DECODER(test_nec_input1, test_nec_expected1);
+MU_TEST(test_decoder_nec1) {
+    RUN_DECODER(test_decoder_nec_input1, test_decoder_nec_expected1);
 }
 
-MU_TEST(test_nec2) {
-    RUN_DECODER(test_nec_input2, test_nec_expected2);
+MU_TEST(test_decoder_nec2) {
+    RUN_DECODER(test_decoder_nec_input2, test_decoder_nec_expected2);
 }
 
-MU_TEST(test_unexpected_end_in_sequence) {
-    // test_nec_input1 and test_nec_input2 shuts unexpected
-    RUN_DECODER(test_nec_input1, test_nec_expected1);
-    RUN_DECODER(test_nec_input1, test_nec_expected1);
-    RUN_DECODER(test_nec_input2, test_nec_expected2);
-    RUN_DECODER(test_nec_input2, test_nec_expected2);
+MU_TEST(test_decoder_unexpected_end_in_sequence) {
+    // test_decoder_nec_input1 and test_decoder_nec_input2 shuts unexpected
+    RUN_DECODER(test_decoder_nec_input1, test_decoder_nec_expected1);
+    RUN_DECODER(test_decoder_nec_input1, test_decoder_nec_expected1);
+    RUN_DECODER(test_decoder_nec_input2, test_decoder_nec_expected2);
+    RUN_DECODER(test_decoder_nec_input2, test_decoder_nec_expected2);
 }
 
-MU_TEST(test_necext1) {
-    RUN_DECODER(test_necext_input1, test_necext_expected1);
-    RUN_DECODER(test_necext_input1, test_necext_expected1);
+MU_TEST(test_decoder_necext1) {
+    RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
+    RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
+}
+
+MU_TEST(test_decoder_rc6) {
+    RUN_DECODER(test_decoder_rc6_input1, test_decoder_rc6_expected1);
+}
+
+MU_TEST(test_encoder_rc6) {
+    RUN_ENCODER(test_encoder_rc6_input1, test_encoder_rc6_expected1);
+}
+
+MU_TEST(test_encoder_decoder_all) {
+    run_encoder_decoder(test_nec_all, COUNT_OF(test_nec_all));
+    run_encoder_decoder(test_necext_all, COUNT_OF(test_necext_all));
+    run_encoder_decoder(test_samsung32_all, COUNT_OF(test_samsung32_all));
+    run_encoder_decoder(test_rc6_all, COUNT_OF(test_rc6_all));
 }
 
 MU_TEST_SUITE(test_irda_decoder) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
-    MU_RUN_TEST(test_unexpected_end_in_sequence);
-    MU_RUN_TEST(test_nec1);
-    MU_RUN_TEST(test_nec2);
-    MU_RUN_TEST(test_samsung32);
-    MU_RUN_TEST(test_necext1);
+    MU_RUN_TEST(test_encoder_decoder_all);
+    MU_RUN_TEST(test_decoder_unexpected_end_in_sequence);
+    MU_RUN_TEST(test_decoder_nec1);
+    MU_RUN_TEST(test_decoder_nec2);
+    MU_RUN_TEST(test_decoder_samsung32);
+    MU_RUN_TEST(test_decoder_necext1);
     MU_RUN_TEST(test_mix);
+    MU_RUN_TEST(test_decoder_rc6);
+    MU_RUN_TEST(test_encoder_rc6);
 }
-
-#else
-
-MU_TEST(test_rc6_0) {
-    RUN_DECODER(test_rc6_input0, test_rc6_expected0);
-}
-
-MU_TEST(test_rc6_1) {
-    RUN_DECODER(test_rc6_input1, test_rc6_expected1);
-}
-
-MU_TEST(test_rc6_2) {
-    RUN_DECODER(test_rc6_input2, test_rc6_expected2);
-}
-
-MU_TEST(test_rc6_3) {
-    RUN_DECODER(test_rc6_input3, test_rc6_expected3);
-}
-
-MU_TEST(test_rc6_4) {
-    RUN_DECODER(test_rc6_input4, test_rc6_expected4);
-}
-
-MU_TEST(test_rc6_5) {
-    RUN_DECODER(test_rc6_input5, test_rc6_expected5);
-}
-
-MU_TEST(test_rc6_6) {
-    RUN_DECODER(test_rc6_input6, test_rc6_expected6);
-}
-
-MU_TEST(test_rc6_conseq) {
-    RUN_DECODER(test_rc6_input_conseq, test_rc6_expected_conseq);
-}
-
-MU_TEST_SUITE(test_irda_decoder) {
-    MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
-
-    MU_RUN_TEST(test_rc6_0);
-    MU_RUN_TEST(test_rc6_1);
-    MU_RUN_TEST(test_rc6_2);
-    MU_RUN_TEST(test_rc6_3);
-    MU_RUN_TEST(test_rc6_4);
-    MU_RUN_TEST(test_rc6_5);
-    MU_RUN_TEST(test_rc6_6);
-    MU_RUN_TEST(test_rc6_conseq);
-}
-
-#endif  // 0
 
 int run_minunit_test_irda_decoder() {
     MU_RUN_SUITE(test_irda_decoder);

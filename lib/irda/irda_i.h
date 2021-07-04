@@ -3,13 +3,13 @@
 #include <stddef.h>
 
 typedef struct {
+    uint32_t silence_time;
     uint16_t preamble_mark;
     uint16_t preamble_space;
     uint16_t bit1_mark;
     uint16_t bit1_space;
     uint16_t bit0_mark;
     uint16_t bit0_space;
-    uint16_t silence_time;
     float    preamble_tolerance;
     uint32_t bit_tolerance;
 } IrdaTimings;

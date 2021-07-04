@@ -29,6 +29,7 @@
 #define IRDA_NEC_REPEAT_PAUSE_MIN       30000
 #define IRDA_NEC_REPEAT_PAUSE1          40000
 #define IRDA_NEC_REPEAT_PAUSE2          100000
+#define IRDA_NEC_SILENCE                IRDA_NEC_REPEAT_PAUSE2
 #define IRDA_NEC_REPEAT_PAUSE_MAX       150000
 #define IRDA_NEC_REPEAT_MARK            9000
 #define IRDA_NEC_REPEAT_SPACE           2250
@@ -80,6 +81,7 @@ extern const IrdaCommonProtocolSpec protocol_nec;
 #define IRDA_SAMSUNG_BIT0_SPACE             550
 #define IRDA_SAMSUNG_REPEAT_PAUSE_MIN       30000
 #define IRDA_SAMSUNG_REPEAT_PAUSE           47000
+#define IRDA_SAMSUNG_SILENCE                IRDA_SAMSUNG_REPEAT_PAUSE
 #define IRDA_SAMSUNG_REPEAT_PAUSE_MAX       150000
 #define IRDA_SAMSUNG_REPEAT_MARK            4500
 #define IRDA_SAMSUNG_REPEAT_SPACE           4500
@@ -129,6 +131,7 @@ extern const IrdaCommonProtocolSpec protocol_samsung32;
 #define IRDA_RC6_BIT                        444     // half of time-quant for 1 bit
 #define IRDA_RC6_PREAMBLE_TOLERANCE         0.07    // percents
 #define IRDA_RC6_BIT_TOLERANCE              120     // us
+#define IRDA_RC6_SILENCE                    2700
 
 void* irda_decoder_rc6_alloc(void);
 void irda_decoder_rc6_reset(void* decoder);

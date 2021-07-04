@@ -23,10 +23,13 @@ void irda_encoder_rc6_reset(void* encoder_ptr, const IrdaMessage* message) {
     *data |= encoder->toggle_bit ? 0x10 : 0;
     *data |= reverse(message->address) << 5;
     *data |= reverse(message->command) << 13;
+
+    encoder->toggle_bit ^= 1;
 }
 
 IrdaStatus irda_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration, bool* level) {
-    return irda_common_encode(encoder_ptr, duration, level);
+    IrdaEncoderRC6* encoder = encoder_ptr;
+    return irda_common_encode(encoder->common_encoder, duration, level);
 }
 
 void* irda_encoder_rc6_alloc(void) {
@@ -46,16 +49,12 @@ void irda_encoder_rc6_free(void* encoder_ptr) {
 }
 
 IrdaStatus irda_encoder_rc6_encode_manchester(IrdaCommonEncoder* common_encoder, uint32_t* duration, bool* polarity) {
-    IrdaEncoderRC6* encoder_rc6 = common_encoder->context;
     IrdaStatus status = IrdaStatusError;
 
     bool toggle_bit = (common_encoder->bits_encoded == 4);
     status = irda_common_encode_manchester(common_encoder, duration, polarity);
     if (toggle_bit)
         *duration *= 2;
-    
-    if (status == IrdaStatusDone)
-        encoder_rc6->toggle_bit ^= 1;
     return status;
 }
 
