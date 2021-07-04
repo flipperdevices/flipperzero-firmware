@@ -133,9 +133,7 @@ target_link_libraries(stm32-blinky-f4
 
 ## Linker script & variables
 
-CMSIS package will generate linker script for your device automatically (target
-`CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use the
-`stm32_add_linker_script` function.
+CMSIS package will generate linker script for your device automatically (target `CMSIS::STM32::<DEVICE>`). To specify a custom linker script, use `stm32_add_linker_script` function.
 
 ## Useful CMake functions
 
