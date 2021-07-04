@@ -13,7 +13,6 @@ int32_t menu_task(void* p);
 int32_t coreglitch_demo_0(void* p);
 int32_t u8g2_qrcode(void* p);
 int32_t gui_task(void* p);
-int32_t backlight_control(void* p);
 int32_t irda(void* p);
 int32_t app_loader(void* p);
 int32_t nfc_task(void* p);
@@ -70,10 +69,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_GUI
-    {.app = backlight_control,
-     .name = "backlight_control",
-     .stack_size = 1024,
-     .icon = A_Plugins_14},
     // TODO: fix stack size when sd api will be in separate thread
     {.app = gui_task, .name = "gui_task", .stack_size = 8192, .icon = A_Plugins_14},
 #endif

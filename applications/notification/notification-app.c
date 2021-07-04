@@ -356,6 +356,11 @@ static void notification_save_settings(NotificationApp* app) {
     furi_record_close("internal-storage");
 };
 
+static void input_event_callback(const void* value, void* context) {
+    NotificationApp* app = context;
+    notification_message(app, &sequence_display_on);
+}
+
 // App alloc
 static NotificationApp* notification_app_alloc() {
     NotificationApp* app = furi_alloc(sizeof(NotificationApp));
@@ -389,6 +394,11 @@ static NotificationApp* notification_app_alloc() {
     app->led[2].light = LightBlue;
 
     app->settings.version = NOTIFICATION_SETTINGS_VERSION;
+
+    // display backlight control
+    app->event_record = furi_record_open("input_events");
+    subscribe_pubsub(app->event_record, input_event_callback, app);
+    notification_message(app, &sequence_display_on);
 
     return app;
 };
