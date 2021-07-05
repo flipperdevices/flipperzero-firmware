@@ -292,7 +292,7 @@ static void api_hal_subghz_capture_ISR() {
         LL_TIM_ClearFlag_CC1(TIM2);
         api_hal_subghz_capture_delta_duration = LL_TIM_IC_GetCaptureCH1(TIM2);
         if (api_hal_subghz_capture_callback) {
-            api_hal_subghz_capture_callback(api_hal_subghz_capture_delta_duration,
+            api_hal_subghz_capture_callback(true, api_hal_subghz_capture_delta_duration,
                 (void*)api_hal_subghz_capture_callback_context
             );
         }
@@ -301,7 +301,7 @@ static void api_hal_subghz_capture_ISR() {
     if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
         LL_TIM_ClearFlag_CC2(TIM2);
         if (api_hal_subghz_capture_callback) {
-            api_hal_subghz_capture_callback(-(LL_TIM_IC_GetCaptureCH2(TIM2) - api_hal_subghz_capture_delta_duration),
+            api_hal_subghz_capture_callback(false, LL_TIM_IC_GetCaptureCH2(TIM2) - api_hal_subghz_capture_delta_duration,
                 (void*)api_hal_subghz_capture_callback_context
             );
         }

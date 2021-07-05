@@ -8,7 +8,7 @@ typedef void (*SubGhzWorkerOverrunCallback)(void* context);
 
 typedef void (*SubGhzWorkerPairCallback)(void* context, bool level, uint32_t duration);
 
-void subghz_worker_rx_callback(LevelDuration duration, void* context);
+void subghz_worker_rx_callback(bool level, uint32_t duration, void* context);
 
 /** Allocate SubGhzWorker
  * 
