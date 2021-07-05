@@ -63,8 +63,10 @@ void scene_alloc() {
 
     scene_state->dolphin_gfx = I_right1_73x61;
     scene_state->dolphin_gfx_b = I_black_right1_73x61;
+
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
+    
     scene_state->player_global.x = random() % WORLD_WIDTH;
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;
