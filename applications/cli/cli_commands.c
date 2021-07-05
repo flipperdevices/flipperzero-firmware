@@ -361,6 +361,7 @@ void cli_command_os_info(Cli* cli, string_t args, void* context) {
 
     printf("Free HEAP size: %d\r\n", xPortGetFreeHeapSize());
     printf("Minimum heap size: %d\r\n", xPortGetMinimumEverFreeHeapSize());
+    printf("Maximum heap block: %d\r\n", memmgr_heap_get_max_free_block());
     printf("%d threads in total:\r\n", thread_num);
     printf("%-20s %-14s %-14s %s\r\n", "Name", "Stack start", "Stack alloc", "Stack free");
     for(uint8_t i = 0; i < thread_num; i++) {
