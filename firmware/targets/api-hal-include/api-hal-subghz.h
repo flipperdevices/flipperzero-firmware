@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <toolbox/level_duration.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,17 +108,8 @@ uint32_t api_hal_subghz_set_frequency(uint32_t value);
  */
 void api_hal_subghz_set_path(ApiHalSubGhzPath path);
 
-/** Front Definition for capture callback */
-#define API_HAL_SUBGHZ_CAPTURE_DURATION_RESET 0U
-#define API_HAL_SUBGHZ_CAPTURE_DURATION_RESERVED 0x800000U
-
-
-typedef struct {
-    int32_t duration;
-} LevelPair;
-
 /** Signal Timings Capture callback */
-typedef void (*ApiHalSubGhzCaptureCallback)(int32_t duration, void* context);
+typedef void (*ApiHalSubGhzCaptureCallback)(LevelDuration duration, void* context);
 
 /** Set signal timings capture callback
  * @param callback - your callback for front capture

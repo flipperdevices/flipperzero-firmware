@@ -52,6 +52,7 @@ void subghz_protocol_reset(SubGhzProtocol* instance);
 /** Loading data into all parsers
  * 
  * @param instance - SubGhzProtocol instance
- * @param data - LevelPair data
+ * @param level - true is high, false if low
+ * @param duration - level duration in microseconds
  */
-void subghz_protocol_parse(SubGhzProtocol* instance, LevelPair data);
+void subghz_protocol_parse(SubGhzProtocol* instance, bool level, uint32_t duration);

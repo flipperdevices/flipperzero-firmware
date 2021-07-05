@@ -123,12 +123,17 @@ void subghz_protocol_load_keeloq_file(SubGhzProtocol* instance, const char* file
 }
 
 void subghz_protocol_reset(SubGhzProtocol* instance) {
+    subghz_protocol_came_reset(instance->came);
+    subghz_protocol_keeloq_reset(instance->keeloq);
+    subghz_protocol_princeton_reset(instance->princeton);
+    subghz_protocol_nice_flo_reset(instance->nice_flo);
+    subghz_protocol_nice_flor_s_reset(instance->nice_flor_s);
 }
 
-void subghz_protocol_parse(SubGhzProtocol* instance, LevelPair data) {
-    subghz_protocol_came_parse(instance->came, data);
-    subghz_protocol_keeloq_parse(instance->keeloq, data);
-    subghz_protocol_princeton_parse(instance->princeton, data);
-    subghz_protocol_nice_flo_parse(instance->nice_flo, data);
-    subghz_protocol_nice_flor_s_parse(instance->nice_flor_s, data);
+void subghz_protocol_parse(SubGhzProtocol* instance, bool level, uint32_t duration) {
+    subghz_protocol_came_parse(instance->came, level, duration);
+    subghz_protocol_keeloq_parse(instance->keeloq, level, duration);
+    subghz_protocol_princeton_parse(instance->princeton, level, duration);
+    subghz_protocol_nice_flo_parse(instance->nice_flo, level, duration);
+    subghz_protocol_nice_flor_s_parse(instance->nice_flor_s, level, duration);
 }

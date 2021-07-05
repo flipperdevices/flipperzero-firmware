@@ -216,17 +216,16 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
 volatile bool subghz_cli_overrun = false;
 
-void subghz_cli_command_rx_callback(int32_t duration,
+void subghz_cli_command_rx_callback(LevelDuration level_duration,
     void* context) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    LevelPair pair = {.duration = duration};
     if(subghz_cli_overrun) {
         subghz_cli_overrun = false;
-        pair.duration = API_HAL_SUBGHZ_CAPTURE_DURATION_RESET;
+        level_duration = LEVEL_DURATION_RESET;
     }
     size_t ret =
-        xStreamBufferSendFromISR(context, &pair, sizeof(LevelPair), &xHigherPriorityTaskWoken);
-    if(sizeof(LevelPair) != ret) subghz_cli_overrun = true;
+        xStreamBufferSendFromISR(context, &level_duration, sizeof(LevelDuration), &xHigherPriorityTaskWoken);
+    if(sizeof(LevelDuration) != ret) subghz_cli_overrun = true;
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
@@ -261,7 +260,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     StreamBufferHandle_t rx_stream =
-        xStreamBufferCreate(sizeof(LevelPair) * 1024, sizeof(LevelPair));
+        xStreamBufferCreate(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
 
     api_hal_subghz_set_capture_callback(subghz_cli_command_rx_callback, rx_stream);
     api_hal_subghz_enable_capture();
@@ -270,15 +269,17 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     api_hal_subghz_rx();
 
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);
-    LevelPair pair;
+    LevelDuration level_duration;
     while(!cli_cmd_interrupt_received(cli)) {
-        int ret = xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
-        if(ret == sizeof(LevelPair)) {
-            if(pair.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET) {
+        int ret = xStreamBufferReceive(rx_stream, &level_duration, sizeof(LevelDuration), 10);
+        if(ret == sizeof(LevelDuration)) {
+            if(level_duration_is_reset(level_duration)) {
                 printf(".");
                 subghz_protocol_reset(protocol);
             } else {
-                subghz_protocol_parse(protocol, pair);
+                bool level = level_duration_get_level(level_duration);
+                uint32_t duration = level_duration_get_duration(level_duration);
+                subghz_protocol_parse(protocol, level, duration);
             }
         }
     }

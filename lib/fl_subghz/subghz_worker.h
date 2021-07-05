@@ -6,7 +6,7 @@ typedef struct SubGhzWorker SubGhzWorker;
 
 typedef void (*SubGhzWorkerOverrunCallback)(void* context);
 
-typedef void (*SubGhzWorkerPairCallback)(void* context, LevelPair pair);
+typedef void (*SubGhzWorkerPairCallback)(void* context, LevelDuration level_duration);
 
 void subghz_worker_rx_callback(int32_t duration, void* context);
 

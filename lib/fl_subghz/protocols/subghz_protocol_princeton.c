@@ -62,14 +62,15 @@ void subghz_protocol_princeton_send_key(SubGhzProtocolPrinceton* instance, uint6
     }
 }
 
-void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPair data) {
-    if (data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET) {
-        instance->common.parser_step = 0;
-    }
+void subghz_protocol_princeton_reset(SubGhzProtocolPrinceton* instance) {
+    instance->common.parser_step = 0;
+}
+
+void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, bool level, uint32_t duration) {
     switch (instance->common.parser_step) {
     case 0:
-        if ((data.duration < 0)
-                && (DURATION_DIFF(data.duration,instance->common.te_shot * 36)< instance->common.te_delta * 36)) {
+        if ((!level)
+                && (DURATION_DIFF(duration,instance->common.te_shot * 36)< instance->common.te_delta * 36)) {
             //Found Preambula
             instance->common.parser_step = 1;
             instance->common.code_found = 0;
@@ -80,14 +81,14 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPai
         break;
     case 1:
         //save duration
-        if (data.duration > 0) {
-            instance->common.te_last = data.duration;
+        if (level) {
+            instance->common.te_last = duration;
             instance->common.parser_step = 2;
         }
         break;
     case 2:
-        if (data.duration < 0) {
-            if (ABS(data.duration)>= (instance->common.te_shot * 10+ instance->common.te_delta)) {
+        if (!level) {
+            if (duration >= (instance->common.te_shot * 10 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
@@ -102,11 +103,11 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPai
             }
 
             if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
-                    && (DURATION_DIFF(data.duration,instance->common.te_long)< instance->common.te_delta*3)) {
+                    && (DURATION_DIFF(duration,instance->common.te_long)< instance->common.te_delta*3)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 1;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long)< instance->common.te_delta*3)
-                    && (DURATION_DIFF(data.duration,instance->common.te_shot)< instance->common.te_delta)) {
+                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 1;
             } else {
