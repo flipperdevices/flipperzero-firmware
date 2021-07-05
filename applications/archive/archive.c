@@ -8,8 +8,7 @@ static bool is_favourite(ArchiveApp* archive, ArchiveFile_t* file) {
     FS_Error fr;
     string_t path;
 
-    string_init_set(path, "favourites/");
-    string_cat(path, file->name);
+    string_init_printf(path, "favourites/%s", string_get_cstr(file->name));
 
     fr = common_api->info(string_get_cstr(path), &file_info, NULL, 0);
     FURI_LOG_I("FAV", "%d", fr);
@@ -243,12 +242,12 @@ static void archive_add_to_favourites(ArchiveApp* archive) {
     string_t buffer_src;
     string_t buffer_dst;
 
-    string_init_set(buffer_src, archive->browser.path);
-    string_cat(buffer_src, "/");
-    string_cat(buffer_src, archive->browser.name);
-
-    string_init_set_str(buffer_dst, "/favourites/");
-    string_cat(buffer_dst, archive->browser.name);
+    string_init_printf(
+        buffer_src,
+        "%s/%s",
+        string_get_cstr(archive->browser.path),
+        string_get_cstr(archive->browser.name));
+    string_init_printf(buffer_dst, "/favourites/%s", string_get_cstr(archive->browser.name));
 
     fr = file_api->open(&src, string_get_cstr(buffer_src), FSAM_READ, FSOM_OPEN_EXISTING);
     FURI_LOG_I("FATFS", "OPEN: %d", fr);
@@ -278,14 +277,16 @@ static void archive_text_input_callback(void* context) {
     string_t buffer_src;
     string_t buffer_dst;
 
-    string_init_set(buffer_src, archive->browser.path);
-    string_init_set(buffer_dst, archive->browser.path);
-
-    string_cat(buffer_src, "/");
-    string_cat(buffer_dst, "/");
-
-    string_cat(buffer_src, archive->browser.name);
-    string_cat_str(buffer_dst, archive->browser.text_input_buffer);
+    string_init_printf(
+        buffer_src,
+        "%s/%s",
+        string_get_cstr(archive->browser.path),
+        string_get_cstr(archive->browser.name));
+    string_init_printf(
+        buffer_dst,
+        "%s/%s",
+        string_get_cstr(archive->browser.path),
+        archive->browser.text_input_buffer);
 
     // append extension
 
@@ -314,9 +315,7 @@ static void archive_enter_text_input(ArchiveApp* archive) {
     *archive->browser.text_input_buffer = '\0';
 
     strlcpy(
-        archive->browser.text_input_buffer,
-        string_get_cstr(archive->browser.name),
-        string_size(archive->browser.name));
+        archive->browser.text_input_buffer, string_get_cstr(archive->browser.name), MAX_NAME_LEN);
 
     archive_trim_file_ext(archive->browser.text_input_buffer);
 
@@ -378,20 +377,17 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
     string_init(path);
 
     if(!fav && !orig) {
-        string_set(path, archive->browser.path);
-        string_cat(path, "/");
-        string_cat(path, file->name);
+        string_printf(
+            path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file->name));
         common_api->remove(string_get_cstr(path));
 
     } else { // remove from favorites
-        string_set(path, "favourites/");
-        string_cat(path, file->name);
+        string_printf(path, "favourites/%s", string_get_cstr(file->name));
         common_api->remove(string_get_cstr(path));
 
         if(orig) { // remove original file
-            string_set_str(path, get_default_path(file->type));
-            string_cat(path, "/");
-            string_cat(path, file->name);
+            string_printf(
+                path, "%s/%s", get_default_path(file->type), string_get_cstr(file->name));
             common_api->remove(string_get_cstr(path));
         }
     }
@@ -425,9 +421,11 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
     case 0:
         if(is_known_app(selected->type)) {
             string_t full_path;
-            string_init_set(full_path, archive->browser.path);
-            string_cat(full_path, "/");
-            string_cat(full_path, selected->name);
+            string_init_printf(
+                full_path,
+                "%s/%s",
+                string_get_cstr(archive->browser.path),
+                string_get_cstr(selected->name));
 
             archive_open_app(
                 archive, flipper_app_name[selected->type], string_get_cstr(full_path));
