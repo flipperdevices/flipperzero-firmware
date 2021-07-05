@@ -20,7 +20,7 @@
 #define SPEED_X 2
 #define SPEED_Y 2
 #define ACTIONS_NUM 5
-#define DOLPHIN_DEFAULT_Y 20
+#define DOLPHIN_DEFAULT_Y 0
 // world
 #define WORLD_WIDTH 256
 #define WORLD_HEIGHT 64

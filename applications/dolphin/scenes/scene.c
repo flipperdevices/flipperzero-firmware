@@ -60,6 +60,9 @@ void scene_alloc() {
     printf("scene_alloc: timer %p\r\n", scene_app_gui->timer);
     // Scene State
     SceneState* scene_state = furi_alloc(sizeof(SceneState));
+
+    scene_state->dolphin_gfx = I_right1_73x61;
+    scene_state->dolphin_gfx_b = I_black_right1_73x61;
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
     scene_state->player_global.x = random() % WORLD_WIDTH;
