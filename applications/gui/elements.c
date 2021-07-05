@@ -196,7 +196,7 @@ void elements_multiline_text_aligned(
     furi_assert(canvas);
     furi_assert(text);
 
-    uint8_t font_height = canvas_current_font_height(canvas) + 2;
+    uint8_t font_height = canvas_current_font_height(canvas);
     string_t str;
     string_init(str);
     const char* start = text;
@@ -236,7 +236,7 @@ void elements_multiline_text_aligned(
             string_t buff;
             string_init_set(buff, str);
             size_t s_len = string_size(str);
-            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 2);
+            uint8_t end_pos = s_len - ((len_px - px_left) / (len_px / s_len) + 5);
 
             string_left(buff, end_pos);
             string_cat(buff, "-");
@@ -298,10 +298,10 @@ void elements_multiline_text_framed(Canvas* canvas, uint8_t x, uint8_t y, const 
     }
 
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
+    canvas_draw_box(canvas, x, y - font_y, str_width + 8, font_y * lines + 4);
     canvas_set_color(canvas, ColorBlack);
-    elements_multiline_text(canvas, x + 4, y + 1, text);
-    elements_frame(canvas, x, y - font_y, str_width + 8, font_y * lines + 6);
+    elements_multiline_text(canvas, x + 4, y - 1, text);
+    elements_frame(canvas, x, y - font_y, str_width + 8, font_y * lines + 4);
 }
 
 void elements_slightly_rounded_frame(

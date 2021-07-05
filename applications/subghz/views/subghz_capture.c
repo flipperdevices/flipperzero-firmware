@@ -39,10 +39,10 @@ void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
         model->real_frequency / 1000000 % 1000,
         model->real_frequency / 1000 % 1000,
         subghz_symbols[model->counter % 4]);
-    canvas_draw_str(canvas, 2, 12, buffer);
+    canvas_draw_str(canvas, 0, 8, buffer);
 
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text(canvas, 0, 24, string_get_cstr(model->text));
+    elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
 }
 
 bool subghz_capture_input(InputEvent* event, void* context) {
@@ -161,6 +161,8 @@ SubghzCapture* subghz_capture_alloc() {
     subghz_worker_set_context(subghz_capture->worker, subghz_capture->protocol);
 
     subghz_protocol_load_keeloq_file(subghz_capture->protocol, "/assets/subghz/keeloq_mfcodes");
+    subghz_protocol_load_nice_flor_s_file(
+        subghz_capture->protocol, "/assets/subghz/nice_floor_s_rx");
     subghz_protocol_enable_dump(
         subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
 
