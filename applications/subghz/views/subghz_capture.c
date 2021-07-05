@@ -11,6 +11,8 @@
 #include <fl_subghz/subghz_worker.h>
 #include <fl_subghz/protocols/subghz_protocol.h>
 
+#include <assets_icons.h>
+
 struct SubghzCapture {
     View* view;
     SubGhzWorker* worker;
@@ -22,6 +24,7 @@ typedef struct {
     uint32_t real_frequency;
     uint32_t counter;
     string_t text;
+    uint16_t scene;
 } SubghzCaptureModel;
 
 static const char subghz_symbols[] = {'-', '\\', '|', '/'};
@@ -40,9 +43,28 @@ void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
         model->real_frequency / 1000 % 1000,
         subghz_symbols[model->counter % 4]);
     canvas_draw_str(canvas, 0, 8, buffer);
+    
+    switch (model->scene)
+    {
+    case 1:
+        canvas_draw_icon_name(canvas, 0, 10, I_RFIDDolphinReceive_97x61);
+        canvas_invert_color(canvas);
+        canvas_draw_box(canvas, 80, 12, 20, 20);
+        canvas_invert_color(canvas);
+        canvas_draw_icon_name(canvas, 80, 18, I_sub1_10px);
+        break;
+    
+    default:
 
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+
+        break;
+    }
+   
+
+
+
 }
 
 bool subghz_capture_input(InputEvent* event, void* context) {
@@ -87,6 +109,7 @@ void subghz_capture_text_callback(string_t text, void* context) {
         subghz_capture->view, (SubghzCaptureModel * model) {
             model->counter++;
             string_set(model->text, text);
+            model->scene = 0;
             return true;
         });
 }
@@ -104,6 +127,7 @@ void subghz_capture_enter(void* context) {
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
                 api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
+            model->scene = 1;
             return true;
         });
 
