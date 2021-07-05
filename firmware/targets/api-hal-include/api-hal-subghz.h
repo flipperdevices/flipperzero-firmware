@@ -108,20 +108,16 @@ uint32_t api_hal_subghz_set_frequency(uint32_t value);
 void api_hal_subghz_set_path(ApiHalSubGhzPath path);
 
 /** Front Definition for capture callback */
-typedef enum {
-    ApiHalSubGhzCaptureLevelHigh,
-    ApiHalSubGhzCaptureLevelLow,
-    ApiHalSubGhzCaptureLevelOverrun,
-    ApiHalSubGhzCaptureLevelUnderrun,
-} ApiHalSubGhzCaptureLevel;
+#define API_HAL_SUBGHZ_CAPTURE_DURATION_RESET 0U
+#define API_HAL_SUBGHZ_CAPTURE_DURATION_RESERVED 0x800000U
+
 
 typedef struct {
-    ApiHalSubGhzCaptureLevel level;
-    uint32_t duration;
+    int32_t duration;
 } LevelPair;
 
 /** Signal Timings Capture callback */
-typedef void (*ApiHalSubGhzCaptureCallback)(ApiHalSubGhzCaptureLevel level, uint32_t time, void* context);
+typedef void (*ApiHalSubGhzCaptureCallback)(int32_t duration, void* context);
 
 /** Set signal timings capture callback
  * @param callback - your callback for front capture

@@ -21,18 +21,15 @@ struct SubGhzWorker {
  * @param duration received signal duration
  * @param context 
  */
-void subghz_worker_rx_callback(
-    ApiHalSubGhzCaptureLevel level,
-    uint32_t duration,
-    void* context) {
+void subghz_worker_rx_callback(int32_t duration,void* context) {
 
     SubGhzWorker* instance = context;
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    LevelPair pair = {.level = level, .duration = duration};
+    LevelPair pair = {.duration = duration};
     if(instance->overrun) {
         instance->overrun = false;
-        pair.level = ApiHalSubGhzCaptureLevelOverrun;
+        pair.duration = API_HAL_SUBGHZ_CAPTURE_DURATION_RESET;
     }
     size_t ret =
         xStreamBufferSendFromISR(instance->stream, &pair, sizeof(LevelPair), &xHigherPriorityTaskWoken);
@@ -52,7 +49,7 @@ static int32_t subghz_worker_thread_callback(void* context) {
     while(instance->running) {
         int ret = xStreamBufferReceive(instance->stream, &pair, sizeof(LevelPair), 10);
         if(ret == sizeof(LevelPair)) {
-            if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
+            if(pair.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET) {
                 printf(".");
                 if (instance->overrun_callback) instance->overrun_callback(instance->context);
             } else {

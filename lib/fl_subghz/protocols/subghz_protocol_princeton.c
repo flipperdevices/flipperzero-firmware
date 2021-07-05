@@ -63,9 +63,12 @@ void subghz_protocol_princeton_send_key(SubGhzProtocolPrinceton* instance, uint6
 }
 
 void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPair data) {
+    if (data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET) {
+        instance->common.parser_step = 0;
+    }
     switch (instance->common.parser_step) {
     case 0:
-        if ((data.level == ApiHalSubGhzCaptureLevelLow)
+        if ((data.duration < 0)
                 && (DURATION_DIFF(data.duration,instance->common.te_shot * 36)< instance->common.te_delta * 36)) {
             //Found Preambula
             instance->common.parser_step = 1;
@@ -77,20 +80,21 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, LevelPai
         break;
     case 1:
         //save duration
-        if (data.level == ApiHalSubGhzCaptureLevelHigh) {
+        if (data.duration > 0) {
             instance->common.te_last = data.duration;
             instance->common.parser_step = 2;
         }
         break;
     case 2:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) {
-            if (data.duration>= (instance->common.te_shot * 10+ instance->common.te_delta)) {
+        if (data.duration < 0) {
+            if (ABS(data.duration)>= (instance->common.te_shot * 10+ instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
-                    //ToDo out data display
+
                     instance->common.serial = instance->common.code_found >> 4;
                     instance->common.btn = (uint8_t)instance->common.code_found & 0x00000F;
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+
                 }
                 instance->common.code_found = 0;
                 instance->common.code_count_bit = 0;

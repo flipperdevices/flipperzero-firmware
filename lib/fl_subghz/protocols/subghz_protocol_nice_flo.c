@@ -63,9 +63,12 @@ void subghz_protocol_nice_flo_send_key(SubGhzProtocolNiceFlo* instance, uint64_t
 }
 
 void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, LevelPair data) {
+    if (data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET){
+        instance->common.parser_step = 0;
+    }
     switch (instance->common.parser_step) {
     case 0:
-        if ((data.level == ApiHalSubGhzCaptureLevelLow)
+        if ((data.duration < 0)
                 && (DURATION_DIFF(data.duration,instance->common.te_shot * 36)< instance->common.te_delta * 36)) {
             //Found header Nice Flo
             instance->common.parser_step = 1;
@@ -74,7 +77,7 @@ void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, LevelPair d
         }
         break;
     case 1:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) {
+        if (data.duration < 0) {
             break;
         } else if (DURATION_DIFF(data.duration,instance->common.te_shot)< instance->common.te_delta) {
             //Found start bit Nice Flo
@@ -86,14 +89,13 @@ void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, LevelPair d
         }
         break;
     case 2:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) { //save interval
-            if (data.duration >= (instance->common.te_shot * 4)) {
+        if (data.duration < 0) { //save interval
+            if (ABS(data.duration) >= (instance->common.te_shot * 4)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
-                    //ToDo out data display
-                    //instance->common.serial = 0x12345;
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+
                 }
                 break;
             }
@@ -104,7 +106,7 @@ void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, LevelPair d
         }
         break;
     case 3:
-        if (data.level == ApiHalSubGhzCaptureLevelHigh) {
+        if (data.duration > 0) {
             if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot) < instance->common.te_delta)
                     && (DURATION_DIFF(data.duration,instance->common.te_long)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);

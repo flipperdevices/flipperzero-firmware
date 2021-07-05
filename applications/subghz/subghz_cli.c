@@ -216,15 +216,13 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
 volatile bool subghz_cli_overrun = false;
 
-void subghz_cli_command_rx_callback(
-    ApiHalSubGhzCaptureLevel level,
-    uint32_t duration,
+void subghz_cli_command_rx_callback(int32_t duration,
     void* context) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    LevelPair pair = {.level = level, .duration = duration};
+    LevelPair pair = {.duration = duration};
     if(subghz_cli_overrun) {
         subghz_cli_overrun = false;
-        pair.level = ApiHalSubGhzCaptureLevelOverrun;
+        pair.duration = API_HAL_SUBGHZ_CAPTURE_DURATION_RESET;
     }
     size_t ret =
         xStreamBufferSendFromISR(context, &pair, sizeof(LevelPair), &xHigherPriorityTaskWoken);
@@ -276,7 +274,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     while(!cli_cmd_interrupt_received(cli)) {
         int ret = xStreamBufferReceive(rx_stream, &pair, sizeof(LevelPair), 10);
         if(ret == sizeof(LevelPair)) {
-            if(pair.level == ApiHalSubGhzCaptureLevelOverrun) {
+            if(pair.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET) {
                 printf(".");
                 subghz_protocol_reset(protocol);
             } else {

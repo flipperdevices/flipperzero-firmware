@@ -64,9 +64,12 @@ void subghz_protocol_came_send_key(SubGhzProtocolCame* instance, uint64_t key, u
 }
 
 void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
+    if(data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET){
+        instance->common.parser_step = 0;
+    }
     switch (instance->common.parser_step) {
     case 0:
-        if ((data.level == ApiHalSubGhzCaptureLevelLow)
+        if ((data.duration < 0)
                 && (DURATION_DIFF(data.duration,instance->common.te_shot * 51)< instance->common.te_delta * 51)) { //Need protocol 36 te_shot
             //Found header CAME
             instance->common.parser_step = 1;
@@ -75,7 +78,7 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
         }
         break;
     case 1:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) {
+        if (data.duration < 0) {
             break;
         } else if (DURATION_DIFF(data.duration,instance->common.te_shot)< instance->common.te_delta) {
             //Found start bit CAME
@@ -87,16 +90,17 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
         }
         break;
     case 2:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) { //save interval
-            if (data.duration >= (instance->common.te_shot * 4)) {
+        if (data.duration < 0) { //save interval
+            if (ABS(data.duration) >= (instance->common.te_shot * 4)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
-                    //ToDo out data display
+
                     instance->common.serial = 0x0;
                     instance->common.btn = 0x0;
                     if (instance->common.callback)
                         instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+                
                 }
                 break;
             }
@@ -107,7 +111,7 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, LevelPair data) {
         }
         break;
     case 3:
-        if (data.level == ApiHalSubGhzCaptureLevelHigh) {
+        if (data.duration > 0) {
             if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot) < instance->common.te_delta)
                     && (DURATION_DIFF(data.duration,instance->common.te_long)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);

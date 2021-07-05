@@ -145,9 +145,12 @@ void subghz_nice_flor_s_decoder_decrypt(SubGhzProtocolNiceFlorS* instance) {
 }
 
 void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelPair data) {
+    if(data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET){
+        instance->common.parser_step = 0;
+    }
     switch(instance->common.parser_step) {
     case 0:
-        if((data.level == ApiHalSubGhzCaptureLevelLow) 
+        if((data.duration < 0) 
             && (DURATION_DIFF(data.duration, instance->common.te_shot * 38) < instance->common.te_delta * 38)) {
             //Found start header Nice Flor-S
             instance->common.parser_step = 1;
@@ -156,7 +159,7 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
         }
         break;
     case 1:
-        if((data.level == ApiHalSubGhzCaptureLevelHigh) 
+        if((data.duration > 0) 
             && (DURATION_DIFF(data.duration, instance->common.te_shot * 3) < instance->common.te_delta * 3)) {
             //Found next header Nice Flor-S
             instance->common.parser_step = 2;
@@ -165,7 +168,7 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
         }
         break;
     case 2:
-        if((data.level == ApiHalSubGhzCaptureLevelLow) 
+        if((data.duration < 0) 
             && (DURATION_DIFF(data.duration, instance->common.te_shot * 3) < instance->common.te_delta * 3)) {
             //Found header Nice Flor-S
             instance->common.parser_step = 3;
@@ -176,13 +179,14 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
         }
         break;
     case 3:
-        if(data.level == ApiHalSubGhzCaptureLevelHigh) {
+        if(data.duration > 0) {
             if(DURATION_DIFF(data.duration, instance->common.te_shot * 3) < instance->common.te_delta) {
                 //Found STOP bit
                 instance->common.parser_step = 0;
                 if(instance->common.code_count_bit >=instance->common.code_min_count_bit_for_found) {
-                    //ToDo out data display
+
                     subghz_nice_flor_s_decoder_decrypt(instance);
+                    
                 }
                 break;
             } else {
@@ -193,7 +197,7 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, LevelP
         }
         break;
     case 4:
-        if(data.level == ApiHalSubGhzCaptureLevelLow) {
+        if(data.duration < 0) {
             if((DURATION_DIFF(instance->common.te_last, instance->common.te_shot) < instance->common.te_delta) 
                 &&(DURATION_DIFF(data.duration, instance->common.te_long) < instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);

@@ -272,9 +272,12 @@ void subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, uint64_t ke
 }
 
 void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data) {
+    if(data.duration == API_HAL_SUBGHZ_CAPTURE_DURATION_RESET){
+        instance->common.parser_step = 0;
+    }
     switch (instance->common.parser_step) {
     case 0:
-        if ((data.level == ApiHalSubGhzCaptureLevelHigh) && DURATION_DIFF(data.duration, instance->common.te_shot)< instance->common.te_delta) {
+        if ((data.duration > 0) && DURATION_DIFF(data.duration, instance->common.te_shot)< instance->common.te_delta) {
             instance->common.parser_step = 1;
             instance->common.header_count++;
         } else {
@@ -283,7 +286,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
 
         break;
     case 1:
-        if ((data.level == ApiHalSubGhzCaptureLevelLow) && (DURATION_DIFF(data.duration, instance->common.te_shot ) < instance->common.te_delta)) {
+        if ((data.duration < 0) && (DURATION_DIFF(data.duration, instance->common.te_shot ) < instance->common.te_delta)) {
             instance->common.parser_step = 0;
             break;
         }
@@ -298,21 +301,20 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, LevelPair data
         }
         break;
     case 2:
-        if (data.level == ApiHalSubGhzCaptureLevelHigh) {
+        if (data.duration > 0) {
             instance->common.te_last = data.duration;
             instance->common.parser_step = 3;
         }
         break;
     case 3:
-        if (data.level == ApiHalSubGhzCaptureLevelLow) {
-            if (data.duration >= (instance->common.te_shot * 2 + instance->common.te_delta)) {
+        if (data.duration < 0) {
+            if (ABS(data.duration) >= (instance->common.te_shot * 2 + instance->common.te_delta)) {
                 // Found end TX
                 instance->common.parser_step = 0;
                 if (instance->common.code_count_bit >= instance->common.code_min_count_bit_for_found) {
                     //&& (instance->common.code_last_found != instance->common.code_found )) {
                     instance->common.code_last_found = instance->common.code_found;
 
-                    //ToDo out data display
                     subghz_protocol_keeloq_check_remote_controller(instance);
 
                     instance->common.code_found = 0;
