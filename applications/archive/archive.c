@@ -14,6 +14,7 @@ static bool is_favourite(ArchiveApp* archive, ArchiveFile_t* file) {
     fr = common_api->info(string_get_cstr(path), &file_info, NULL, 0);
     FURI_LOG_I("FAV", "%d", fr);
 
+    string_clear(path);
     return fr == 0 || fr == 2;
 }
 
@@ -197,6 +198,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
                             return true;
                         });
 
+                    string_clear(item.name);
                     ArchiveFile_t_clear(&item);
                 }
             } else {
