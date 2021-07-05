@@ -51,7 +51,9 @@ static int32_t subghz_worker_thread_callback(void* context) {
                 printf(".");
                 if (instance->overrun_callback) instance->overrun_callback(instance->context);
             } else {
-                if (instance->pair_callback) instance->pair_callback(instance->context, level_duration);
+                bool level = level_duration_get_level(level_duration);
+                uint32_t duration = level_duration_get_duration(level_duration);
+                if (instance->pair_callback) instance->pair_callback(instance->context, level, duration);
             }
         }
     }
