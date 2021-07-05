@@ -197,7 +197,6 @@ static bool archive_get_filenames(ArchiveApp* archive) {
                             return true;
                         });
 
-                    string_clear(item.name);
                     ArchiveFile_t_clear(&item);
                 }
             } else {
