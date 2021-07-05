@@ -216,12 +216,13 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
 volatile bool subghz_cli_overrun = false;
 
-void subghz_cli_command_rx_callback(LevelDuration level_duration,
+void subghz_cli_command_rx_callback(bool level, uint32_t duration,
     void* context) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    LevelDuration level_duration = level_duration_make(level, duration);
     if(subghz_cli_overrun) {
         subghz_cli_overrun = false;
-        level_duration = LEVEL_DURATION_RESET;
+        level_duration = level_duration_reset();
     }
     size_t ret =
         xStreamBufferSendFromISR(context, &level_duration, sizeof(LevelDuration), &xHigherPriorityTaskWoken);
