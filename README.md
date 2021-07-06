@@ -37,7 +37,8 @@ It will compile a project for the `F4` family by default, but you can also compi
 # Usage
 
 First of all you need to configure toolchain and library paths using CMake variables. There are
-generally three ways to do this
+generally three ways to do this:
+
 1. Pass the variables through command line during cmake run with passed to CMake with 
    `-D<VAR_NAME>=...`
 2. Set the variables inside your `CMakeLists.txt`
@@ -62,7 +63,7 @@ These configuration variables are optional:
 ### Helper script on Unix shells
 
 If you have access to a Unix shell, which is the default terminal on Linux, or tools like
-`MinGW64` or `git bash` on Windows, you can write a small `path_helper.sh` script like this
+`MinGW64` or `git bash` on Windows, you can write a small `path_helper.sh` script like this:
 
 ```sh
 export STM32_TOOLCHAIN_PATH="<ToolchainPath>"
@@ -74,7 +75,7 @@ and then use `. path_helper.sh` to set up the environment for the local terminal
 
 ### Helper script in Powershell
 
-On Windows, you can use a Powershell script `path_helper.ps1`to set up the environment
+On Windows, you can use a Powershell script `path_helper.ps1`to set up the environment:
 
 ```sh
 $env:STM32_TOOLCHAIN_PATH = "<ToolchainPath>"
