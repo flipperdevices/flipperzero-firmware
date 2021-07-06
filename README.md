@@ -38,7 +38,7 @@ It will compile a project for the `F4` family by default, but you can also compi
 
 First of all you need to configure toolchain and library paths using CMake variables. 
 You can do this by passing values through command line during cmake run or by setting variables
-inside your `CMakeLists.txt`. You can also set pass these variables to CMake by setting them
+inside your `CMakeLists.txt`. You can also pass these variables to CMake by setting them
 as environmental variables.
 
 ## Configuration
