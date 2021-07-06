@@ -36,16 +36,18 @@ It will compile a project for the `F4` family by default, but you can also compi
 
 # Usage
 
-First of all you need to configure toolchain and library paths using CMake variables. 
-You can do this by passing values through command line during cmake run with passed to CMake with 
-`-D<VAR_NAME>=...`or by setting variables inside your `CMakeLists.txt`. You can also pass these
-variables to CMake by setting them as environmental variables. The most important set of variables
-which needs to be set can be found in the following section
+First of all you need to configure toolchain and library paths using CMake variables. There are
+generally three ways to do this
+1. Pass the variables through command line during cmake run with passed to CMake with 
+   `-D<VAR_NAME>=...`
+2. Set the variables inside your `CMakeLists.txt`
+3. Pass these variables to CMake by setting them as environmental variables. 
+
+The most important set of variables which needs to be set can be found in the following section.
 
 ## Configuration
 
-These configuration options need to be  or by setting them 
-as environmental variables.
+These configuration options need to be set for the build process to work properly:
 
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
@@ -57,15 +59,28 @@ These configuration variables are optional:
 * `FREERTOS_PATH` - Path to the FreeRTOS kernel when compiling with a RTOS. Does not need to be
    specified when using CMSIS
 
-Alternatively, you can write a small `path_helper.sh` script like this
+### Helper script on Unix shells
+
+If you have access to a Unix shell, which is the default terminal on Linux, or tools like
+`MinGW64` or `git bash` on Windows, you can write a small `path_helper.sh` script like this
 
 ```sh
-export STM32_TOOLCHAIN_PATH=<ToolchainPath>
+export STM32_TOOLCHAIN_PATH="<ToolchainPath>"
 export TARGET_TRIPLET=arm-none-eabi
-export STM32_CUBE_<FAMILY>_PATH=<PathToCubeRoot>
+export STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
 ```
 
-and then use `. path_helper.sh` to set up the environment in one go.
+and then use `. path_helper.sh` to set up the environment for the local terminal instance in one go.
+
+### Helper script in Powershell
+
+On Windows, you can use a Powershell script `path_helper.ps1`to set up the environment
+
+```sh
+$env:STM32_TOOLCHAIN_PATH = "<ToolchainPath>"
+$env:TARGET_TRIPLET = arm-none-eabi
+$env:STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
+```
 
 ## Common usage
 
