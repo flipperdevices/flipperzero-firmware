@@ -67,7 +67,7 @@ void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
     api_hal_bt_start_packet_rx(channel, 1);
 
     while(!cli_cmd_interrupt_received(cli)) {
-        osDelay(1024/2);
+        osDelay(1024 / 4);
         printf("RSSI: %6.1f dB\r", api_hal_bt_get_rssi());
         fflush(stdout);
     }
