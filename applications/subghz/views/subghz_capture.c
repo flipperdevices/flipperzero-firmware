@@ -25,6 +25,7 @@ typedef struct {
     uint32_t counter;
     string_t text;
     uint16_t scene;
+    SubGhzProtocolCommon* parser;
 } SubghzCaptureModel;
 
 static const char subghz_symbols[] = {'-', '\\', '|', '/'};
@@ -51,14 +52,22 @@ void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, 80, 12, 20, 20);
         canvas_invert_color(canvas);
-        canvas_draw_icon_name(canvas, 80, 18, I_sub1_10px);
+        canvas_draw_icon_name(canvas, 75, 18, I_sub1_10px);
+        elements_multiline_text(canvas, 65, 45, "Detecting \r\n SubGhz");
         break;
     
     default:
-
+        canvas_draw_icon_name(canvas, -5, 13, I_DolphinExcited_64x63);
         canvas_set_font(canvas, FontSecondary);
-        elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
-
+        elements_multiline_text(canvas, 60, 25, string_get_cstr(model->text));
+        // snprintf(
+        // buffer,
+        //     sizeof(buffer),
+        //     "Name: %s %dbit",
+        //     model->parser->name,
+        //     model->parser->code_count_bit
+        //     );
+        // canvas_draw_str(canvas, 0, 20, buffer);
         break;
     }
    
@@ -112,6 +121,37 @@ void subghz_capture_text_callback(string_t text, void* context) {
             model->scene = 0;
             return true;
         });
+
+}
+
+void subghz_capture_protocol_callback(SubGhzProtocolCommon *parser, void* context) {
+    furi_assert(context);
+    SubghzCapture* subghz_capture = context;
+    char buffer[64];
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s\r\n"
+        "K:%lX%lX\r\n"
+        "SN:%lX\r\n"
+        "BTN:%X",
+        parser->name,
+        (uint32_t)(parser->code_found >> 32),
+        (uint32_t)(parser->code_found & 0x00000000FFFFFFFF),
+        parser->serial,
+        parser->btn
+        );
+
+
+    with_view_model(
+        subghz_capture->view, (SubghzCaptureModel * model) {
+            model->counter++;
+            //model->parser = parser;
+            string_set(model->text, buffer);
+            model->scene = 0;
+            return true;
+        });
+
 }
 
 void subghz_capture_enter(void* context) {
@@ -187,8 +227,8 @@ SubghzCapture* subghz_capture_alloc() {
     subghz_protocol_load_keeloq_file(subghz_capture->protocol, "/assets/subghz/keeloq_mfcodes");
     subghz_protocol_load_nice_flor_s_file(
         subghz_capture->protocol, "/assets/subghz/nice_floor_s_rx");
-    subghz_protocol_enable_dump(
-        subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
+    //subghz_protocol_enable_dump_text(subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
+    subghz_protocol_enable_dump(subghz_capture->protocol, subghz_capture_protocol_callback, subghz_capture);
 
     return subghz_capture;
 }

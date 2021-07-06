@@ -22,9 +22,11 @@ struct SubGhzProtocol {
 
     SubGhzProtocolTextCallback text_callback;
     void* text_callback_context;
+    SubGhzProtocolCommonCallbackDump parser_callback;
+    void* parser_callback_context;
 };
 
-static void subghz_protocol_came_rx_callback(SubGhzProtocolCommon* parser, void* context) {
+static void subghz_protocol_text_rx_callback(SubGhzProtocolCommon* parser, void* context) {
     SubGhzProtocol* instance = context;
 
     string_t output;
@@ -36,6 +38,13 @@ static void subghz_protocol_came_rx_callback(SubGhzProtocolCommon* parser, void*
         printf(string_get_cstr(output));
     }
     string_clear(output);
+}
+
+static void subghz_protocol_parser_rx_callback(SubGhzProtocolCommon* parser, void* context) {
+    SubGhzProtocol* instance = context;
+    if (instance->parser_callback) {
+        instance->parser_callback(parser, instance->parser_callback_context);
+    } 
 }
 
 SubGhzProtocol* subghz_protocol_alloc() {
@@ -62,17 +71,29 @@ void subghz_protocol_free(SubGhzProtocol* instance) {
     free(instance);
 }
 
-void subghz_protocol_enable_dump(SubGhzProtocol* instance, SubGhzProtocolTextCallback callback, void* context) {
+void subghz_protocol_enable_dump_text(SubGhzProtocol* instance, SubGhzProtocolTextCallback callback, void* context) {
     furi_assert(instance);
 
-    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->came, subghz_protocol_came_rx_callback, instance);
-    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->keeloq, subghz_protocol_came_rx_callback, instance);
-    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->princeton, subghz_protocol_came_rx_callback, instance);
-    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_came_rx_callback, instance);
-    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_came_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->came, subghz_protocol_text_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->keeloq, subghz_protocol_text_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->princeton, subghz_protocol_text_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_text_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_text_rx_callback, instance);
 
     instance->text_callback = callback;
     instance->text_callback_context = context;
+}
+
+void subghz_protocol_enable_dump(SubGhzProtocol* instance, SubGhzProtocolCommonCallbackDump callback, void* context) {
+    furi_assert(instance);
+
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->came, subghz_protocol_parser_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->keeloq, subghz_protocol_parser_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->princeton, subghz_protocol_parser_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_parser_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_parser_rx_callback, instance);
+    instance->parser_callback = callback;
+    instance->parser_callback_context = context;
 }
 
 static void subghz_protocol_load_keeloq_file_process_line(SubGhzProtocol* instance, string_t line) {
