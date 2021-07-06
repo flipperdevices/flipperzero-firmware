@@ -176,25 +176,28 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
-void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon) {
+void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon_animation) {
     furi_assert(canvas);
-    if(!icon) return;
+    furi_assert(icon_animation);
+
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawXBM(
         &canvas->fb,
         x,
         y,
-        icon_animation_get_width(icon),
-        icon_animation_get_height(icon),
-        icon_animation_get_data(icon));
+        icon_animation_get_width(icon_animation),
+        icon_animation_get_height(icon_animation),
+        icon_animation_get_data(icon_animation));
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
     furi_assert(canvas);
+    furi_assert(icon);
+
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon->frames[0]);
+    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {

@@ -91,16 +91,19 @@ void canvas_draw_str_aligned(
  */
 uint16_t canvas_string_width(Canvas* canvas, const char* str);
 
-/*
- * Draw animation at position defined by x,y.
+/** Draw animation at position defined by x,y.
+ * @param canvas - canvas instance
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon_animation - data pointer to IconAnimation
  */
-void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon);
+void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon_animation);
 
 /** Draw icon at position defined by x,y.
  * @param canvas - canvas instance
- * @param canvas - x coordinate
- * @param canvas - y coordinate
- * @param canvas - data pointer to Icon
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon - data pointer to Icon
  */
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon);
 
