@@ -47,27 +47,16 @@ void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
 
     switch(model->scene) {
     case 1:
-        canvas_draw_icon_name(canvas, 0, 10, I_RFIDDolphinReceive_97x61);
+        canvas_draw_icon(canvas, 0, 10, &I_RFIDDolphinReceive_97x61);
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, 80, 12, 20, 20);
         canvas_invert_color(canvas);
-        canvas_draw_icon_name(canvas, 75, 18, I_sub1_10px);
+        canvas_draw_icon(canvas, 75, 18, &I_sub1_10px);
         elements_multiline_text_aligned(
             canvas, 90, 38, AlignCenter, AlignTop, "Detecting\r\nSubGhz");
         break;
 
     default:
-        // canvas_draw_icon_name(canvas, -5, 13, I_DolphinExcited_64x63);
-        // canvas_set_font(canvas, FontSecondary);
-
-        // snprintf(
-        //     buffer,
-        //     sizeof(buffer),
-        //     "Name: %s %dbit",
-        //     model->parser.name,
-        //     model->parser.code_count_bit);
-        // canvas_draw_str(canvas, 0, 20, buffer);
-
         canvas_set_font(canvas, FontSecondary);
         elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
         break;
@@ -221,7 +210,8 @@ SubghzCapture* subghz_capture_alloc() {
     subghz_protocol_load_keeloq_file(subghz_capture->protocol, "/assets/subghz/keeloq_mfcodes");
     subghz_protocol_load_nice_flor_s_file(
         subghz_capture->protocol, "/assets/subghz/nice_floor_s_rx");
-    subghz_protocol_enable_dump_text(subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
+    subghz_protocol_enable_dump_text(
+        subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
     //subghz_protocol_enable_dump(subghz_capture->protocol, subghz_capture_protocol_callback, subghz_capture);
 
     return subghz_capture;
