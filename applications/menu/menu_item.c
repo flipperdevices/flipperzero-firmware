@@ -7,9 +7,10 @@ struct MenuItem {
     MenuItemType type;
 
     const char* label;
-    Icon* icon;
+    IconAnimation* icon;
 
     size_t position;
+    size_t window_position;
     MenuItem* parent;
     void* data;
 
@@ -23,7 +24,7 @@ MenuItem* menu_item_alloc() {
     return menu_item;
 }
 
-MenuItem* menu_item_alloc_menu(const char* label, Icon* icon) {
+MenuItem* menu_item_alloc_menu(const char* label, IconAnimation* icon) {
     MenuItem* menu_item = menu_item_alloc();
 
     menu_item->type = MenuItemTypeMenu;
@@ -39,7 +40,7 @@ MenuItem* menu_item_alloc_menu(const char* label, Icon* icon) {
 
 MenuItem* menu_item_alloc_function(
     const char* label,
-    Icon* icon,
+    IconAnimation* icon,
     MenuItemCallback callback,
     void* context) {
     MenuItem* menu_item = menu_item_alloc();
@@ -49,6 +50,7 @@ MenuItem* menu_item_alloc_function(
     menu_item->icon = icon;
     menu_item->callback = callback;
     menu_item->callback_context = context;
+    menu_item->parent = NULL;
 
     return menu_item;
 }
@@ -90,6 +92,16 @@ size_t menu_item_get_position(MenuItem* menu_item) {
     return menu_item->position;
 }
 
+void menu_item_set_window_position(MenuItem* menu_item, size_t window_position) {
+    furi_assert(menu_item);
+    menu_item->window_position = window_position;
+}
+
+size_t menu_item_get_window_position(MenuItem* menu_item) {
+    furi_assert(menu_item);
+    return menu_item->window_position;
+}
+
 void menu_item_set_label(MenuItem* menu_item, const char* label) {
     furi_assert(menu_item);
     menu_item->label = label;
@@ -100,12 +112,12 @@ const char* menu_item_get_label(MenuItem* menu_item) {
     return menu_item->label;
 }
 
-void menu_item_set_icon(MenuItem* menu_item, Icon* icon) {
+void menu_item_set_icon(MenuItem* menu_item, IconAnimation* icon) {
     furi_assert(menu_item);
     menu_item->icon = icon;
 }
 
-Icon* menu_item_get_icon(MenuItem* menu_item) {
+IconAnimation* menu_item_get_icon(MenuItem* menu_item) {
     furi_assert(menu_item);
     return menu_item->icon;
 }
