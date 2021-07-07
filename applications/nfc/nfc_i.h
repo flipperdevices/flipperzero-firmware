@@ -38,6 +38,7 @@
 #include "scenes/nfc_scene_set_sak.h"
 #include "scenes/nfc_scene_set_atqa.h"
 #include "scenes/nfc_scene_set_uid.h"
+#include "scenes/nfc_scene_scripts_menu.h"
 
 // TODO delete debug scenes
 #include "scenes/nfc_scene_debug_menu.h"
@@ -84,6 +85,7 @@ struct Nfc {
     AppScene* scene_set_sak;
     AppScene* scene_set_atqa;
     AppScene* scene_set_uid;
+    AppScene* scene_scripts_menu;
 
     // TODO delete debug scenes
     AppScene* scene_debug_menu;
@@ -125,6 +127,7 @@ typedef enum {
     NfcSceneSetSak,
     NfcSceneSetAtqa,
     NfcSceneSetUid,
+    NfcSceneScriptsMenu,
 } NfcScene;
 
 Nfc* nfc_alloc();

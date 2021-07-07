@@ -85,6 +85,7 @@ Nfc* nfc_alloc() {
     nfc->scene_set_sak = nfc_scene_set_sak_alloc();
     nfc->scene_set_atqa = nfc_scene_set_atqa_alloc();
     nfc->scene_set_uid = nfc_scene_set_uid_alloc();
+    nfc->scene_scripts_menu = nfc_scene_scripts_menu_alloc();
 
     view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_start);
 
@@ -154,6 +155,7 @@ void nfc_free(Nfc* nfc) {
     nfc_scene_set_sak_free(nfc->scene_set_sak);
     nfc_scene_set_atqa_free(nfc->scene_set_atqa);
     nfc_scene_set_uid_free(nfc->scene_set_uid);
+    nfc_scene_scripts_menu_free(nfc->scene_scripts_menu);
 
     // View Dispatcher
     view_dispatcher_free(nfc->nfc_common.view_dispatcher);
