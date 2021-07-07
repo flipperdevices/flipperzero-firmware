@@ -55,7 +55,7 @@ static void run_encoder_fill_array(IrdaEncoderHandler* handler, uint32_t* timing
     *timings_len = i + 1;
 }
 
-// one protocol
+// messages in input array for encoder should have one protocol
 static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messages_len,
     const uint32_t expected_timings[], uint32_t expected_timings_len) {
     uint32_t* timings = 0;
@@ -121,10 +121,9 @@ static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t inp
 
         free(timings);
     }
-    
+
     irda_free_encoder(encoder_handler);
 }
-
 
 static void run_decoder(
     const uint32_t* input_delays,
@@ -203,7 +202,7 @@ MU_TEST(test_encoder_decoder_all) {
     run_encoder_decoder(test_rc6_all, COUNT_OF(test_rc6_all));
 }
 
-MU_TEST_SUITE(test_irda_decoder) {
+MU_TEST_SUITE(test_irda_decoder_encoder) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
     MU_RUN_TEST(test_encoder_decoder_all);
@@ -217,8 +216,8 @@ MU_TEST_SUITE(test_irda_decoder) {
     MU_RUN_TEST(test_encoder_rc6);
 }
 
-int run_minunit_test_irda_decoder() {
-    MU_RUN_SUITE(test_irda_decoder);
+int run_minunit_test_irda_decoder_encoder() {
+    MU_RUN_SUITE(test_irda_decoder_encoder);
     MU_REPORT();
 
     return MU_EXIT_CODE;

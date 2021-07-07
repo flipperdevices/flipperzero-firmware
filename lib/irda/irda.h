@@ -44,10 +44,9 @@ typedef enum {
 IrdaDecoderHandler* irda_alloc_decoder(void);
 
 /**
- * Provide to decoder next timing. If message is ready, it returns decoded message,
- * otherwise NULL.
+ * Provide to decoder next timing.
  *
- * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
+ * \param[in]   handler     - handler to IRDA decoders. Should be aquired with \c irda_alloc_decoder().
  * \param[in]   level       - high(true) or low(false) level of input signal to analyze.
  *                          it should alternate every call, otherwise it is an error case,
  *                          and decoder resets its state and start decoding from the start.
@@ -59,14 +58,14 @@ const IrdaMessage* irda_decode(IrdaDecoderHandler* handler, bool level, uint32_t
 /**
  * Deinitialize decoder and free allocated memory.
  *
- * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
+ * \param[in]   handler     - handler to IRDA decoders. Should be aquired with \c irda_alloc_decoder().
  */
 void irda_free_decoder(IrdaDecoderHandler* handler);
 
 /**
  * Reset IRDA decoder.
  *
- * \param[in]   handler     - handler to irda decoders. Should be aquired with \c irda_alloc_decoder().
+ * \param[in]   handler     - handler to IRDA decoders. Should be aquired with \c irda_alloc_decoder().
  */
 void irda_reset_decoder(IrdaDecoderHandler* handler);
 
@@ -121,7 +120,7 @@ bool irda_is_protocol_valid(IrdaProtocol protocol);
 /**
  * Send raw data through infrared port.
  *
- * \param[in]   protocol - use irda settings (duty cycle, frequency) from
+ * \param[in]   protocol - use IRDA settings (duty cycle, frequency) from
  *              this protocol. If provided IrdaProtocolUnknown - use
  *              default settings.
  * \param[in]   timings - array of timings to send.
@@ -131,10 +130,50 @@ bool irda_is_protocol_valid(IrdaProtocol protocol);
  */
 void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark);
 
-IrdaStatus irda_encode(IrdaEncoderHandler* handler, uint32_t* duration, bool* level);
-void irda_reset_encoder(IrdaEncoderHandler* handler, const IrdaMessage* message);
-void irda_free_encoder(IrdaEncoderHandler* handler);
+/**
+ * Allocate IRDA encoder. Have to setup protocol at this time, because it is quite
+ * expensive and useless to allocate all encoders and use just one, as we use only
+ * one at single moment of time.
+ *
+ * \param[in]   protocol    - which protocol we intend to encode.
+ *
+ * \return      encoder handler.
+ */
 IrdaEncoderHandler* irda_alloc_encoder(IrdaProtocol protocol);
+
+/**
+ * Free encoder handler previously allocated with \c irda_alloc_encoder().
+ *
+ * \param[in]   handler     - handler to IRDA encoder. Should be aquired with \c irda_alloc_encoder().
+ */
+void irda_free_encoder(IrdaEncoderHandler* handler);
+
+/**
+ * Encode previously set IRDA message.
+ * Usage:
+ *  1) alloc with \c irda_alloc_encoder()
+ *  2) set message to encode with \c irda_reset_encoder()
+ *  3) call for \c irda_encode() to continuously get one at a time timings.
+ *  4) when \c irda_encode() returns IrdaStatusDone, it means new message is fully encoded.
+ *  5) to encode additional timings, just continue calling \c irda_encode().
+ *
+ * \param[in]   handler     - handler to IRDA encoder. Should be aquired with \c irda_alloc_encoder().
+ * \param[out]  duration    - encoded timing.
+ * \param[out]  level       - encoded level.
+ *
+ * \return      status of encode operation.
+ */
+IrdaStatus irda_encode(IrdaEncoderHandler* handler, uint32_t* duration, bool* level);
+
+/**
+ * Reset IRDA encoder and set new message to encode. If it's not called after receiveing
+ * IrdaStatusDone in \c irda_encode(), encoder will encode repeat messages
+ * till the end of time.
+ *
+ * \param[in]   handler     - handler to IRDA encoder. Should be aquired with \c irda_alloc_encoder().
+ * \param[in]   message     - message to encode.
+ */
+void irda_reset_encoder(IrdaEncoderHandler* handler, const IrdaMessage* message);
 
 #ifdef __cplusplus
 }

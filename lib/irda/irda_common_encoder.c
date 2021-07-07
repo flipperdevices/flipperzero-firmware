@@ -30,7 +30,7 @@ IrdaStatus irda_common_encode_manchester(IrdaCommonEncoder* encoder, uint32_t* d
     bool logic_value = !!(encoder->data[index] & (0x01 << shift));
     bool inverse = encoder->protocol->manchester_inverse_level;
     bool even_timing = !(encoder->timings_encoded % 2);
- 
+
     *level = even_timing ^ logic_value ^ inverse;
     *duration = timings->bit1_mark;
     if (even_timing)        /* start encoding from space */
@@ -120,7 +120,7 @@ IrdaStatus irda_common_encode(IrdaCommonEncoder* encoder, uint32_t* duration, bo
     case IrdaCommonEncoderStateEncodeRepeat:
         status = encoder->protocol->encode_repeat(encoder, duration, level);
         break;
-    }   
+    }
     return status;
 }
 

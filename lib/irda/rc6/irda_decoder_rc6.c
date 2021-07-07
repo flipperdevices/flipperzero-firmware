@@ -31,8 +31,9 @@ bool irda_decoder_rc6_interpret(IrdaCommonDecoder* decoder) {
             && (message->command == command)
             && (message->protocol == IrdaProtocolRC6)) {
             message->repeat = (toggle == *prev_toggle);
-        } else 
+        } else {
             message->repeat = false;
+        }
         *prev_toggle = toggle;
         message->command = command;
         message->address = address;
