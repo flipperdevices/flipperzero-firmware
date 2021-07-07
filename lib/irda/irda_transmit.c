@@ -29,15 +29,24 @@ void irda_send(const IrdaMessage* message, int times) {
     furi_assert(message);
     furi_assert(irda_is_protocol_valid(message->protocol));
 
+    IrdaStatus status;
+    uint32_t duration = 0;
+    bool level = false;
     IrdaEncoderHandler* handler = irda_alloc_encoder(message->protocol);
     irda_reset_encoder(handler, message);
+
+    /* Hotfix: first timings is space timing, so make delay instead of locking
+     * whole system for that long. Replace when async timing lib will be ready.
+     * This timing doesn't have to be precise.
+     */
+    status = irda_encode(handler, &duration, &level);
+    furi_assert(status != IrdaStatusError);
+    furi_assert(level == false);
+    delay_us(duration);
 
     __disable_irq();
 
     while (times) {
-        IrdaStatus status;
-        uint32_t duration = 0;
-        bool level = false;
         status = irda_encode(handler, &duration, &level);
         if (status != IrdaStatusError) {
             irda_set_tx(duration, level);
