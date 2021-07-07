@@ -95,9 +95,7 @@ FS_Api* fs_api_alloc() {
     fs_api->common.info = fs_common_info;
     fs_api->common.remove = fs_common_remove;
     fs_api->common.rename = fs_common_rename;
-    fs_api->common.set_attr = fs_common_set_attr;
     fs_api->common.mkdir = fs_common_mkdir;
-    fs_api->common.set_time = fs_common_set_time;
     fs_api->common.get_fs_info = fs_get_fs_info;
 
     // fill errors api

@@ -436,16 +436,10 @@ bool fs_dir_read(File* file, FileInfo* fileinfo, char* name, const uint16_t name
         file->internal_error_id = f_readdir(&filedata->data.dir, &_fileinfo);
 
         if(fileinfo != NULL) {
-            fileinfo->date.value = _fileinfo.fdate;
-            fileinfo->time.value = _fileinfo.ftime;
             fileinfo->size = _fileinfo.fsize;
             fileinfo->flags = 0;
 
-            if(_fileinfo.fattrib & AM_RDO) fileinfo->flags |= FSF_READ_ONLY;
-            if(_fileinfo.fattrib & AM_HID) fileinfo->flags |= FSF_HIDDEN;
-            if(_fileinfo.fattrib & AM_SYS) fileinfo->flags |= FSF_SYSTEM;
             if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
-            if(_fileinfo.fattrib & AM_ARC) fileinfo->flags |= FSF_ARCHIVE;
         }
 
         if(name != NULL && name_length > 0) {
@@ -481,16 +475,10 @@ FS_Error
         fresult = f_stat(path, &_fileinfo);
         if((FRESULT)fresult == FR_OK) {
             if(fileinfo != NULL) {
-                fileinfo->date.value = _fileinfo.fdate;
-                fileinfo->time.value = _fileinfo.ftime;
                 fileinfo->size = _fileinfo.fsize;
                 fileinfo->flags = 0;
 
-                if(_fileinfo.fattrib & AM_RDO) fileinfo->flags |= FSF_READ_ONLY;
-                if(_fileinfo.fattrib & AM_HID) fileinfo->flags |= FSF_HIDDEN;
-                if(_fileinfo.fattrib & AM_SYS) fileinfo->flags |= FSF_SYSTEM;
                 if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
-                if(_fileinfo.fattrib & AM_ARC) fileinfo->flags |= FSF_ARCHIVE;
             }
 
             if(name != NULL && name_length > 0) {
@@ -523,51 +511,6 @@ FS_Error fs_common_rename(const char* old_path, const char* new_path) {
 
     if(fresult == SD_OK) {
         fresult = f_rename(old_path, new_path);
-    }
-
-    return _fs_parse_error(fresult);
-}
-
-// Set attributes of file/dir
-// For example:
-// set "read only" flag and remove "hidden" flag
-// fs_common_set_attr("file.txt", FSF_READ_ONLY, FSF_READ_ONLY | FSF_HIDDEN);
-FS_Error fs_common_set_attr(const char* path, uint8_t attr, uint8_t mask) {
-    SDError fresult = _fs_status(fs_info);
-
-    if(fresult == SD_OK) {
-        uint8_t _mask = 0;
-        uint8_t _attr = 0;
-
-        if(mask & FSF_READ_ONLY) _mask |= AM_RDO;
-        if(mask & FSF_HIDDEN) _mask |= AM_HID;
-        if(mask & FSF_SYSTEM) _mask |= AM_SYS;
-        if(mask & FSF_DIRECTORY) _mask |= AM_DIR;
-        if(mask & FSF_ARCHIVE) _mask |= AM_ARC;
-
-        if(attr & FSF_READ_ONLY) _attr |= AM_RDO;
-        if(attr & FSF_HIDDEN) _attr |= AM_HID;
-        if(attr & FSF_SYSTEM) _attr |= AM_SYS;
-        if(attr & FSF_DIRECTORY) _attr |= AM_DIR;
-        if(attr & FSF_ARCHIVE) _attr |= AM_ARC;
-
-        fresult = f_chmod(path, attr, mask);
-    }
-
-    return _fs_parse_error(fresult);
-}
-
-// Set time of file/dir
-FS_Error fs_common_set_time(const char* path, FileDateUnion date, FileTimeUnion time) {
-    SDError fresult = _fs_status(fs_info);
-
-    if(fresult == SD_OK) {
-        SDFileInfo _fileinfo;
-
-        _fileinfo.fdate = date.value;
-        _fileinfo.ftime = time.value;
-
-        fresult = f_utime(path, &_fileinfo);
     }
 
     return _fs_parse_error(fresult);

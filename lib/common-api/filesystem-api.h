@@ -43,11 +43,7 @@ typedef enum {
  *  @brief FileInfo flags
  */
 typedef enum {
-    FSF_READ_ONLY = (1 << 0), /**< Readonly */
-    FSF_HIDDEN = (1 << 1), /**< Hidden */
-    FSF_SYSTEM = (1 << 2), /**< System */
-    FSF_DIRECTORY = (1 << 3), /**< Directory */
-    FSF_ARCHIVE = (1 << 4), /**< Archive */
+    FSF_DIRECTORY = (1 << 0), /**< Directory */
 } FS_Flags;
 
 /** 
@@ -59,49 +55,12 @@ typedef struct {
     uint32_t internal_error_id; /**< Internal API error value */
 } File;
 
-// TODO: solve year 2107 problem
-/** 
- *  @brief Structure that hold packed date values 
- */
-typedef struct __attribute__((packed)) {
-    uint16_t month_day : 5; /**< month day */
-    uint16_t month : 4; /**< month index */
-    uint16_t year : 7; /**< year, year + 1980 to get actual value */
-} FileDate;
-
-/** 
- *  @brief Structure that hold packed time values 
- */
-typedef struct __attribute__((packed)) {
-    uint16_t second : 5; /**< second, second * 2 to get actual value  */
-    uint16_t minute : 6; /**< minute */
-    uint16_t hour : 5; /**< hour */
-} FileTime;
-
-/** 
- *  @brief Union of simple date and real value 
- */
-typedef union {
-    FileDate simple; /**< simple access to date */
-    uint16_t value; /**< real date value */
-} FileDateUnion;
-
-/** 
- *  @brief Union of simple time and real value 
- */
-typedef union {
-    FileTime simple; /**< simple access to time */
-    uint16_t value; /**< real time value */
-} FileTimeUnion;
-
 /** 
  *  @brief Structure that hold file info
  */
 typedef struct {
     uint8_t flags; /**< flags from FS_Flags enum */
     uint64_t size; /**< file size */
-    FileDateUnion date; /**< file date */
-    FileTimeUnion time; /**< file time */
 } FileInfo;
 
 /** @struct FS_File_Api
@@ -286,9 +245,7 @@ typedef struct {
     FS_Error (*info)(const char* path, FileInfo* fileinfo, char* name, const uint16_t name_length);
     FS_Error (*remove)(const char* path);
     FS_Error (*rename)(const char* old_path, const char* new_path);
-    FS_Error (*set_attr)(const char* path, uint8_t attr, uint8_t mask);
     FS_Error (*mkdir)(const char* path);
-    FS_Error (*set_time)(const char* path, FileDateUnion date, FileTimeUnion time);
     FS_Error (*get_fs_info)(uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
