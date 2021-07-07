@@ -5,7 +5,7 @@
 #include "../irda_i.h"
 
 
-bool interpret_samsung32(IrdaCommonDecoder* decoder) {
+bool irda_decoder_samsung32_interpret(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     bool result = false;
@@ -25,7 +25,7 @@ bool interpret_samsung32(IrdaCommonDecoder* decoder) {
 }
 
 // timings start from Space (delay between message and repeat)
-IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder) {
+IrdaStatus irda_decoder_samsung32_decode_repeat(IrdaCommonDecoder* decoder) {
     furi_assert(decoder);
 
     float preamble_tolerance = decoder->protocol->timings.preamble_tolerance;

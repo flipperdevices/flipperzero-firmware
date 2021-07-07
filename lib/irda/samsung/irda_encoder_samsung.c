@@ -6,7 +6,7 @@
 #include <furi.h>
 
 static const uint32_t repeat_timings[] = {
-    IRDA_SAMSUNG_REPEAT_PAUSE,
+    IRDA_SAMSUNG_REPEAT_PAUSE2,
     IRDA_SAMSUNG_REPEAT_MARK,
     IRDA_SAMSUNG_REPEAT_SPACE,
     IRDA_SAMSUNG_BIT1_MARK,
@@ -40,7 +40,10 @@ IrdaStatus irda_encoder_samsung32_encode_repeat(IrdaCommonEncoder* encoder, uint
 
     furi_assert(encoder->timings_encoded >= timings_encoded_up_to_repeat);
 
-    *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
+    if (repeat_cnt > 0)
+        *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
+    else
+        *duration = IRDA_SAMSUNG_REPEAT_PAUSE1;
 
     *level = repeat_cnt % 2;
     ++encoder->timings_encoded;

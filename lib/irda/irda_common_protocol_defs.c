@@ -15,10 +15,10 @@ const IrdaCommonProtocolSpec protocol_nec = {
     },
     .databit_len = 32,
     .decode = irda_common_decode_pdwm,
+    .encode = irda_common_encode_pdwm,
     .interpret = irda_decoder_nec_interpret,
     .decode_repeat = irda_decoder_nec_decode_repeat,
     .encode_repeat = irda_encoder_nec_encode_repeat,
-    .encode = irda_common_encode_pdwm,
 };
 
 const IrdaCommonProtocolSpec protocol_necext = {
@@ -35,8 +35,10 @@ const IrdaCommonProtocolSpec protocol_necext = {
     },
     .databit_len = 32,
     .decode = irda_common_decode_pdwm,
+    .encode = irda_common_encode_pdwm,
     .interpret = irda_decoder_necext_interpret,
     .decode_repeat = irda_decoder_nec_decode_repeat,
+    .encode_repeat = irda_encoder_nec_encode_repeat,
 };
 
 const IrdaCommonProtocolSpec protocol_samsung32 = {
@@ -53,8 +55,10 @@ const IrdaCommonProtocolSpec protocol_samsung32 = {
     },
     .databit_len = 32,
     .decode = irda_common_decode_pdwm,
-    .interpret = interpret_samsung32,
-    .decode_repeat = decode_repeat_samsung32,
+    .encode = irda_common_encode_pdwm,
+    .interpret = irda_decoder_samsung32_interpret,
+    .decode_repeat = irda_decoder_samsung32_decode_repeat,
+    .encode_repeat = irda_encoder_samsung32_encode_repeat,
 };
 
 const IrdaCommonProtocolSpec protocol_rc6 = {
@@ -69,9 +73,9 @@ const IrdaCommonProtocolSpec protocol_rc6 = {
     .databit_len = 1 + 3 + 1 + 8 + 8,   // start_bit + 3 mode bits, + 1 toggle bit (x2 timing) + 8 address + 8 command
     .manchester_inverse_level = false,
     .decode = irda_decoder_rc6_decode_manchester,
+    .encode = irda_encoder_rc6_encode_manchester,
     .interpret = irda_decoder_rc6_interpret,
     .decode_repeat = NULL,
-    .encode = irda_encoder_rc6_encode_manchester,
     .encode_repeat = NULL,
 };
 

@@ -27,8 +27,8 @@
 #define IRDA_NEC_BIT0_MARK              560
 #define IRDA_NEC_BIT0_SPACE             560
 #define IRDA_NEC_REPEAT_PAUSE_MIN       30000
-#define IRDA_NEC_REPEAT_PAUSE1          40000
-#define IRDA_NEC_REPEAT_PAUSE2          100000
+#define IRDA_NEC_REPEAT_PAUSE1          46000
+#define IRDA_NEC_REPEAT_PAUSE2          97000
 #define IRDA_NEC_SILENCE                IRDA_NEC_REPEAT_PAUSE2
 #define IRDA_NEC_REPEAT_PAUSE_MAX       150000
 #define IRDA_NEC_REPEAT_MARK            9000
@@ -80,9 +80,10 @@ extern const IrdaCommonProtocolSpec protocol_nec;
 #define IRDA_SAMSUNG_BIT0_MARK              550
 #define IRDA_SAMSUNG_BIT0_SPACE             550
 #define IRDA_SAMSUNG_REPEAT_PAUSE_MIN       30000
-#define IRDA_SAMSUNG_REPEAT_PAUSE           47000
-#define IRDA_SAMSUNG_SILENCE                IRDA_SAMSUNG_REPEAT_PAUSE
-#define IRDA_SAMSUNG_REPEAT_PAUSE_MAX       150000
+#define IRDA_SAMSUNG_REPEAT_PAUSE1          46000
+#define IRDA_SAMSUNG_REPEAT_PAUSE2          97000
+#define IRDA_SAMSUNG_SILENCE                (IRDA_SAMSUNG_REPEAT_PAUSE2 * 1.5)
+#define IRDA_SAMSUNG_REPEAT_PAUSE_MAX       140000
 #define IRDA_SAMSUNG_REPEAT_MARK            4500
 #define IRDA_SAMSUNG_REPEAT_SPACE           4500
 #define IRDA_SAMSUNG_PREAMBLE_TOLERANCE     0.07    // percents
@@ -98,8 +99,8 @@ void irda_encoder_samsung32_reset(void* encoder_ptr, const IrdaMessage* message)
 void* irda_encoder_samsung32_alloc(void);
 void irda_encoder_samsung32_free(void* encoder_ptr);
 
-bool interpret_samsung32(IrdaCommonDecoder* decoder);
-IrdaStatus decode_repeat_samsung32(IrdaCommonDecoder* decoder);
+bool irda_decoder_samsung32_interpret(IrdaCommonDecoder* decoder);
+IrdaStatus irda_decoder_samsung32_decode_repeat(IrdaCommonDecoder* decoder);
 IrdaStatus irda_encoder_samsung32_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level);
 
 extern const IrdaCommonProtocolSpec protocol_samsung32;
