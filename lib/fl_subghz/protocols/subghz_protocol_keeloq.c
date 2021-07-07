@@ -313,7 +313,6 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
                 // Found end TX
                 instance->common.parser_step = 0;
                 if (instance->common.code_count_bit >= instance->common.code_min_count_bit_for_found) {
-                    //&& (instance->common.code_last_found != instance->common.code_found )) {
                     instance->common.code_last_found = instance->common.code_found;
 
                     subghz_protocol_keeloq_check_remote_controller(instance);

@@ -212,7 +212,6 @@ SubghzCapture* subghz_capture_alloc() {
         subghz_capture->protocol, "/assets/subghz/nice_floor_s_rx");
     subghz_protocol_enable_dump_text(
         subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
-    //subghz_protocol_enable_dump(subghz_capture->protocol, subghz_capture_protocol_callback, subghz_capture);
 
     return subghz_capture;
 }
