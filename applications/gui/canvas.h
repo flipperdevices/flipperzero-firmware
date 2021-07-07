@@ -97,7 +97,11 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str);
  * @param y - y coordinate
  * @param icon_animation - data pointer to IconAnimation
  */
-void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon_animation);
+void canvas_draw_icon_animation(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    IconAnimation* icon_animation);
 
 /** Draw icon at position defined by x,y.
  * @param canvas - canvas instance

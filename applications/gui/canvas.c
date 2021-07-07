@@ -176,7 +176,11 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str) {
     return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
-void canvas_draw_icon_animation(Canvas* canvas, uint8_t x, uint8_t y, IconAnimation* icon_animation) {
+void canvas_draw_icon_animation(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    IconAnimation* icon_animation) {
     furi_assert(canvas);
     furi_assert(icon_animation);
 
@@ -197,7 +201,8 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
 
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+    u8g2_DrawXBM(
+        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
