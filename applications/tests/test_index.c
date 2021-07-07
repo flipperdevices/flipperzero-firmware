@@ -14,7 +14,7 @@ int32_t flipper_test_app(void* p) {
 
     notification_message_block(notification, &sequence_set_only_blue_255);
 
-//    test_result |= run_minunit();     // disabled as it fails randomly
+    //    test_result |= run_minunit();     // disabled as it fails randomly
     test_result |= run_minunit_test_irda_decoder_encoder();
 
     if(test_result == 0) {

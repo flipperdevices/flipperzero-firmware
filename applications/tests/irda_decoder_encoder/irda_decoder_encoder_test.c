@@ -32,23 +32,23 @@ static void compare_message_results(
     mu_check(message_decoded->repeat == message_expected->repeat);
 }
 
-static void run_encoder_fill_array(IrdaEncoderHandler* handler, uint32_t* timings, uint32_t* timings_len) {
+static void
+    run_encoder_fill_array(IrdaEncoderHandler* handler, uint32_t* timings, uint32_t* timings_len) {
     uint32_t duration = 0;
-    bool level = false;     // start from space
+    bool level = false; // start from space
     bool level_read;
     IrdaStatus status = IrdaStatusError;
     int i = 0;
 
-    while (1) {
+    while(1) {
         status = irda_encode(handler, &duration, &level_read);
-        if (level_read != level) {
+        if(level_read != level) {
             level = level_read;
             ++i;
         }
         timings[i] += duration;
         furi_assert((status == IrdaStatusOk) || (status == IrdaStatusDone));
-        if (status == IrdaStatusDone)
-            break;
+        if(status == IrdaStatusDone) break;
         furi_assert(i < *timings_len);
     }
 
@@ -56,8 +56,11 @@ static void run_encoder_fill_array(IrdaEncoderHandler* handler, uint32_t* timing
 }
 
 // messages in input array for encoder should have one protocol
-static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messages_len,
-    const uint32_t expected_timings[], uint32_t expected_timings_len) {
+static void run_encoder(
+    const IrdaMessage input_messages[],
+    uint32_t input_messages_len,
+    const uint32_t expected_timings[],
+    uint32_t expected_timings_len) {
     uint32_t* timings = 0;
     uint32_t timings_len = 0;
     uint32_t j = 0;
@@ -65,7 +68,7 @@ static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messa
 
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const IrdaMessage* message = &input_messages[message_counter];
-        if (!message->repeat) {
+        if(!message->repeat) {
             irda_reset_encoder(encoder_handler, message);
         }
 
@@ -74,7 +77,7 @@ static void run_encoder(const IrdaMessage input_messages[], uint32_t input_messa
         run_encoder_fill_array(encoder_handler, timings, &timings_len);
         furi_assert(timings_len <= 200);
 
-        for (int i = 0; i < timings_len; ++i, ++j) {
+        for(int i = 0; i < timings_len; ++i, ++j) {
             mu_check(MATCH_BIT_TIMING(timings[i], expected_timings[j], 120));
             mu_assert(j < expected_timings_len, "encoded more timings than expected");
         }
@@ -94,7 +97,7 @@ static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t inp
 
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const IrdaMessage* message_encoded = &input_messages[message_counter];
-        if (!message_encoded->repeat) {
+        if(!message_encoded->repeat) {
             irda_reset_encoder(encoder_handler, message_encoded);
             level = false;
         }
@@ -105,15 +108,15 @@ static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t inp
         furi_assert(timings_len <= 200);
 
         const IrdaMessage* message_decoded = 0;
-        for (int i = 0; i < timings_len; ++i) {
+        for(int i = 0; i < timings_len; ++i) {
             message_decoded = irda_decode(decoder_handler, level, timings[i]);
-            if (i < timings_len - 1)
+            if(i < timings_len - 1)
                 mu_check(!message_decoded);
             else
                 mu_check(message_decoded);
             level = !level;
         }
-        if (message_decoded) {
+        if(message_decoded) {
             compare_message_results(message_decoded, message_encoded);
         } else {
             mu_check(0);
@@ -222,4 +225,3 @@ int run_minunit_test_irda_decoder_encoder() {
 
     return MU_EXIT_CODE;
 }
-
