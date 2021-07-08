@@ -161,30 +161,41 @@ void irda_reset_decoder(IrdaDecoderHandler* handler) {
     }
 }
 
-IrdaEncoderHandler* irda_alloc_encoder(IrdaProtocol protocol) {
-    furi_assert(irda_is_protocol_valid(protocol));
-    furi_assert(irda_protocols[protocol].encoder.alloc);
-
+IrdaEncoderHandler* irda_alloc_encoder(void) {
     IrdaEncoderHandler* handler = furi_alloc(sizeof(IrdaEncoderHandler));
-    handler->encoder = irda_protocols[protocol].encoder.alloc();
-    handler->protocol = protocol;
+    handler->encoder = NULL;
+    handler->protocol = IrdaProtocolUnknown;
     return handler;
 }
 
 void irda_free_encoder(IrdaEncoderHandler* handler) {
     furi_assert(handler);
-    furi_assert(irda_is_protocol_valid(handler->protocol));
-    furi_assert(irda_protocols[handler->protocol].encoder.free);
 
-    irda_protocols[handler->protocol].encoder.free(handler->encoder);
+    if (handler->encoder) {
+        furi_assert(irda_is_protocol_valid(handler->protocol));
+        furi_assert(irda_protocols[handler->protocol].encoder.free);
+        irda_protocols[handler->protocol].encoder.free(handler->encoder);
+    }
+
     free(handler);
 }
 
 void irda_reset_encoder(IrdaEncoderHandler* handler, const IrdaMessage* message) {
     furi_assert(handler);
     furi_assert(message);
-    furi_assert(irda_is_protocol_valid(handler->protocol));
-    furi_assert(irda_protocols[handler->protocol].encoder.reset);
+    furi_assert(irda_is_protocol_valid(message->protocol));
+    furi_assert(irda_protocols[message->protocol].encoder.reset);
+    furi_assert(irda_protocols[message->protocol].encoder.alloc);
+
+    /* Realloc encoder if different protocol set */
+    if (message->protocol != handler->protocol) {
+        if (handler->encoder != NULL) {
+            furi_assert(handler->protocol != IrdaProtocolUnknown);
+            irda_protocols[handler->protocol].encoder.free(handler->encoder);
+        }
+        handler->encoder = irda_protocols[message->protocol].encoder.alloc();
+        handler->protocol = message->protocol;
+    }
 
     irda_protocols[handler->protocol].encoder.reset(handler->encoder, message);
 }

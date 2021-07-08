@@ -131,15 +131,11 @@ bool irda_is_protocol_valid(IrdaProtocol protocol);
 void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_from_mark);
 
 /**
- * Allocate IRDA encoder. Have to setup protocol at this time, because it is quite
- * expensive and useless to allocate all encoders and use just one, as we use only
- * one at single moment of time.
- *
- * \param[in]   protocol    - which protocol we intend to encode.
+ * Allocate IRDA encoder.
  *
  * \return      encoder handler.
  */
-IrdaEncoderHandler* irda_alloc_encoder(IrdaProtocol protocol);
+IrdaEncoderHandler* irda_alloc_encoder(void);
 
 /**
  * Free encoder handler previously allocated with \c irda_alloc_encoder().

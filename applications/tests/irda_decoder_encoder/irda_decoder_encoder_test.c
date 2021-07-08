@@ -14,13 +14,16 @@
     run_decoder((data), COUNT_OF(data), (expected), COUNT_OF(expected))
 
 static IrdaDecoderHandler* decoder_handler;
+static IrdaEncoderHandler* encoder_handler;
 
 static void test_setup(void) {
     decoder_handler = irda_alloc_decoder();
+    encoder_handler = irda_alloc_encoder();
 }
 
 static void test_teardown(void) {
     irda_free_decoder(decoder_handler);
+    irda_free_encoder(encoder_handler);
 }
 
 static void compare_message_results(
@@ -64,7 +67,6 @@ static void run_encoder(
     uint32_t* timings = 0;
     uint32_t timings_len = 0;
     uint32_t j = 0;
-    IrdaEncoderHandler* encoder_handler = irda_alloc_encoder(input_messages[0].protocol);
 
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const IrdaMessage* message = &input_messages[message_counter];
@@ -84,7 +86,6 @@ static void run_encoder(
 
         free(timings);
     }
-    irda_free_encoder(encoder_handler);
     mu_assert(j == expected_timings_len, "encoded less timings than expected");
 }
 
@@ -92,8 +93,6 @@ static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t inp
     uint32_t* timings = 0;
     uint32_t timings_len = 0;
     bool level = false;
-
-    IrdaEncoderHandler* encoder_handler = irda_alloc_encoder(input_messages[0].protocol);
 
     for(uint32_t message_counter = 0; message_counter < input_messages_len; ++message_counter) {
         const IrdaMessage* message_encoded = &input_messages[message_counter];
@@ -124,8 +123,6 @@ static void run_encoder_decoder(const IrdaMessage input_messages[], uint32_t inp
 
         free(timings);
     }
-
-    irda_free_encoder(encoder_handler);
 }
 
 static void run_decoder(

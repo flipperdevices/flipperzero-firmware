@@ -32,7 +32,7 @@ void irda_send(const IrdaMessage* message, int times) {
     IrdaStatus status;
     uint32_t duration = 0;
     bool level = false;
-    IrdaEncoderHandler* handler = irda_alloc_encoder(message->protocol);
+    IrdaEncoderHandler* handler = irda_alloc_encoder();
     irda_reset_encoder(handler, message);
 
     /* Hotfix: first timings is space timing, so make delay instead of locking

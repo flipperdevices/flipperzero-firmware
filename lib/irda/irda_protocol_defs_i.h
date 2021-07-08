@@ -82,7 +82,12 @@ extern const IrdaCommonProtocolSpec protocol_nec;
 #define IRDA_SAMSUNG_REPEAT_PAUSE_MIN       30000
 #define IRDA_SAMSUNG_REPEAT_PAUSE1          46000
 #define IRDA_SAMSUNG_REPEAT_PAUSE2          97000
-#define IRDA_SAMSUNG_SILENCE                (IRDA_SAMSUNG_REPEAT_PAUSE2 * 1.5)
+/* Samsung silence have to be greater than REPEAT MAX
+ * otherwise there can be problems during unit tests parsing
+ * of some data. Real tolerances we don't know, but in real life
+ * silence time should be greater than max repeat time. This is
+ * because of similar preambule timings for repeat and first messages. */
+#define IRDA_SAMSUNG_SILENCE                145000
 #define IRDA_SAMSUNG_REPEAT_PAUSE_MAX       140000
 #define IRDA_SAMSUNG_REPEAT_MARK            4500
 #define IRDA_SAMSUNG_REPEAT_SPACE           4500

@@ -35,7 +35,6 @@ IrdaStatus irda_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration, bool* 
 void* irda_encoder_rc6_alloc(void) {
     IrdaEncoderRC6* encoder = furi_alloc(sizeof(IrdaEncoderRC6));
     encoder->common_encoder = irda_common_encoder_alloc(&protocol_rc6);
-    irda_common_encoder_set_context(encoder->common_encoder, encoder);
     encoder->toggle_bit = false;
     return encoder;
 }
