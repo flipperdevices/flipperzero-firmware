@@ -42,6 +42,7 @@
 #include "scenes/nfc_scene_scripts_menu.h"
 #include "scenes/nfc_scene_read_mifare_ul.h"
 #include "scenes/nfc_scene_read_mifare_ul_success.h"
+#include "scenes/nfc_scene_mifare_ul_menu.h"
 
 // TODO delete debug scenes
 #include "scenes/nfc_scene_debug_menu.h"
@@ -93,6 +94,7 @@ struct Nfc {
     AppScene* scene_scripts_menu;
     AppScene* scene_read_mifare_ul;
     AppScene* scene_read_mifare_ul_success;
+    AppScene* scene_mifare_ul_menu;
 
     // TODO delete debug scenes
     AppScene* scene_debug_menu;
@@ -138,6 +140,7 @@ typedef enum {
     NfcSceneScriptsMenu,
     NfcSceneReadMifareUl,
     NfcSceneReadMifareUlSuccess,
+    NfcSceneReadMifareUlMenu,
 } NfcScene;
 
 Nfc* nfc_alloc();
