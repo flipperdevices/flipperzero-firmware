@@ -15,8 +15,8 @@ typedef struct {
     const char* text;
     char* text_pos;
     string_t text_formatted;
-    uint8_t scroll_pos;
-    uint8_t scroll_num;
+    size_t scroll_pos;
+    size_t scroll_num;
     TextBoxFont font;
     bool formatted;
 } TextBoxModel;
@@ -59,12 +59,12 @@ static void text_box_process_back(TextBox* text_box) {
 }
 
 static void text_box_insert_endline(Canvas* canvas, TextBoxModel* model) {
-    uint16_t i = 0;
-    uint8_t line_width = 0;
+    size_t i = 0;
+    size_t line_width = 0;
     const char* str = model->text;
-    int8_t line_num = 0;
+    size_t line_num = 0;
 
-    const uint8_t text_width = 140;
+    const size_t text_width = 140;
 
     while(str[i] != '\0') {
         char symb = str[i++];
