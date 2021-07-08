@@ -11,9 +11,14 @@ extern Display display_obj;
 
 #define SD_CS 12
 
+#ifdef KIT
+  #define SD_DET 4
+#endif
+
 class SDInterface {
 
   private:
+    bool checkDetectPin();
 
   public:
     uint8_t cardType;

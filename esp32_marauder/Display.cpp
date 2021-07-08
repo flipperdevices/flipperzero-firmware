@@ -68,6 +68,10 @@ void Display::RunSetup()
   //digitalWrite(TFT_BL, HIGH);
 
   //delay(5000);
+
+  #ifdef KIT
+    pinMode(KIT_LED_BUILTIN, OUTPUT);
+  #endif
 }
 
 /* Interrupt driven periodic handler */

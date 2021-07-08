@@ -48,6 +48,7 @@
 
 #define TFT_SHIELD
 //#define TFT_DIY
+//#define KIT
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -69,6 +70,8 @@
 #define LVGL_TICK_PERIOD 6
 
 #define STATUSBAR_COLOR 0x4A49
+
+#define KIT_LED_BUILTIN 13
 
 /*
 PROGMEM void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
@@ -108,7 +111,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    const String PROGMEM version_number = "v0.9.1";
+    const String PROGMEM version_number = "v0.9.2";
 
     bool printing = false;
     bool loading = false;

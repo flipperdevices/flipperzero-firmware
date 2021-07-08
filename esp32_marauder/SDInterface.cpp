@@ -2,6 +2,18 @@
 
 bool SDInterface::initSD() {
   String display_string = "";
+
+  #ifdef KIT
+    pinMode(SD_DET, INPUT);
+    if (digitalRead(SD_DET) == LOW) {
+      Serial.println(F("SD Card Detect Pin Detected"));
+    }
+    else {
+      Serial.println(F("SD Card Detect Pin Not Detected"));
+      this->supported = false;
+      return false;
+    }
+  #endif
   
   if (!SD.begin(SD_CS)) {
     Serial.println(F("Failed to mount SD Card"));
@@ -167,10 +179,27 @@ void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
   }
 }
 
+bool SDInterface::checkDetectPin() {
+  #ifdef KIT
+    if (digitalRead(SD_DET) == LOW)
+      return true;
+    else
+      return false;
+  #endif
+
+  return false;
+}
+
 void SDInterface::main() {
   if ((this->supported) && (this->do_save)) {
     //Serial.println("Saving packet...");
     buffer_obj.forceSave(&SD);
+  }
+  else if (!this->supported) {
+    if (checkDetectPin()) {
+      delay(100);
+      this->initSD();
+    }
   }
 }
 
