@@ -229,5 +229,6 @@ bool storage_sd_file_close(void* ctx, File* file) {
     SDFile* file_data = storage_get_storage_file_data(file, storage);
     file->internal_error_id = f_close(file_data);
     file->error_id = storage_sd_parse_error(file->internal_error_id);
+    free(file_data);
     return (file->error_id == FSE_OK);
 }
