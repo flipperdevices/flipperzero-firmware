@@ -76,7 +76,7 @@ debug: flash
 		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
 		-ex "set confirm off" \
 		-ex "source ../debug/FreeRTOS/FreeRTOS.py" \
-		-ex "source ../debug/PyCortexMDebug/scripts/gdb.py" \
+		-ex "source ../debug/PyCortexMDebug/PyCortexMDebug.py" \
 		-ex "svd_load $(SVD_FILE)" \
 		-ex "compare-sections" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
