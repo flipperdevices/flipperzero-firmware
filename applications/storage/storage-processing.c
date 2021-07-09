@@ -86,6 +86,25 @@ bool storage_process_close(StorageApp* app, File* file) {
     return ret;
 }
 
+static uint16_t
+    storage_sd_file_read(StorageApp* app, File* file, void* buff, uint16_t const bytes_to_read) {
+    uint16_t ret = 0;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.read(storage, file, buff, bytes_to_read));
+    return ret;
+}
+
+static uint16_t storage_sd_file_write(
+    StorageApp* app,
+    File* file,
+    const void* buff,
+    uint16_t const bytes_to_write) {
+    uint16_t ret = 0;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.write(storage, file, buff, bytes_to_write));
+    return ret;
+}
+
 void storage_process_message(StorageApp* app, StorageMessage* message) {
     switch(message->command) {
     case SC_FILE_OPEN:
@@ -98,6 +117,20 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
         break;
     case SC_FILE_CLOSE:
         message->return_data->bool_value = storage_process_close(app, message->data->fopen.file);
+        break;
+    case SC_FILE_READ:
+        message->return_data->uint16_value = storage_sd_file_read(
+            app,
+            message->data->fread.file,
+            message->data->fread.buff,
+            message->data->fread.bytes_to_read);
+        break;
+    case SC_FILE_WRITE:
+        message->return_data->uint16_value = storage_sd_file_write(
+            app,
+            message->data->fwrite.file,
+            message->data->fwrite.buff,
+            message->data->fwrite.bytes_to_write);
         break;
     default:
         break;

@@ -28,6 +28,10 @@ static bool storage_sd_file_open(
     FS_OpenMode open_mode);
 static bool storage_sd_file_close(void* ctx, File* file);
 static FS_Error storage_sd_parse_error(SDError error);
+static uint16_t
+    storage_sd_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read);
+static uint16_t
+    storage_sd_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write);
 
 /******************* Core Functions *******************/
 
@@ -41,13 +45,15 @@ void storage_sd_init(StorageData* storage) {
     storage->api.tick = storage_sd_tick;
     storage->fs_api.file.open = storage_sd_file_open;
     storage->fs_api.file.close = storage_sd_file_close;
+    storage->fs_api.file.read = storage_sd_file_read;
+    storage->fs_api.file.write = storage_sd_file_write;
 
     hal_sd_detect_init();
 
     storage_sd_tick(storage);
 }
 
-bool sd_mount_card(StorageData* storage) {
+static bool sd_mount_card(StorageData* storage) {
     bool result = false;
     const uint8_t max_init_counts = 10;
     uint8_t counter = max_init_counts;
@@ -110,7 +116,7 @@ bool sd_mount_card(StorageData* storage) {
     return result;
 }
 
-void sd_unmount_card(StorageData* storage) {
+static void sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
 
     storage_data_lock(storage);
@@ -122,7 +128,7 @@ void sd_unmount_card(StorageData* storage) {
     storage_data_unlock(storage);
 }
 
-void storage_sd_tick(StorageData* storage) {
+static void storage_sd_tick(StorageData* storage) {
     SDData* sd_data = storage->data;
 
     if(sd_data->sd_was_present) {
@@ -199,7 +205,7 @@ static FS_Error storage_sd_parse_error(SDError error) {
 
 /******************* File Functions *******************/
 
-bool storage_sd_file_open(
+static bool storage_sd_file_open(
     void* ctx,
     File* file,
     const char* path,
@@ -224,11 +230,31 @@ bool storage_sd_file_open(
     return (file->error_id == FSE_OK);
 }
 
-bool storage_sd_file_close(void* ctx, File* file) {
+static bool storage_sd_file_close(void* ctx, File* file) {
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
     file->internal_error_id = f_close(file_data);
     file->error_id = storage_sd_parse_error(file->internal_error_id);
     free(file_data);
     return (file->error_id == FSE_OK);
+}
+
+static uint16_t
+    storage_sd_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read) {
+    StorageData* storage = ctx;
+    SDFile* file_data = storage_get_storage_file_data(file, storage);
+    uint16_t bytes_readed = 0;
+    file->internal_error_id = f_read(file_data, buff, bytes_to_read, &bytes_readed);
+    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    return bytes_readed;
+}
+
+static uint16_t
+    storage_sd_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write) {
+    StorageData* storage = ctx;
+    SDFile* file_data = storage_get_storage_file_data(file, storage);
+    uint16_t bytes_written = 0;
+    file->internal_error_id = f_write(file_data, buff, bytes_to_write, &bytes_written);
+    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    return bytes_written;
 }
