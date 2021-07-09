@@ -34,7 +34,7 @@ void storage_data_init(StorageData* storage) {
     storage->mutex = osMutexNew(NULL);
     furi_check(storage->mutex != NULL);
     storage->data = NULL;
-    storage->status = FSE_NOT_READY;
+    storage->status = SE_ERROR_NOT_READY;
     StorageFileArray_init(storage->files);
 }
 
@@ -48,8 +48,8 @@ bool storage_data_unlock(StorageData* storage) {
     return (osMutexRelease(storage->mutex) == osOK);
 }
 
-FS_Error storage_data_status(StorageData* storage) {
-    FS_Error status;
+StorageError storage_data_status(StorageData* storage) {
+    StorageError status;
 
     storage_data_lock(storage);
     status = storage->status;
@@ -58,31 +58,61 @@ FS_Error storage_data_status(StorageData* storage) {
     return status;
 }
 
+const char* storage_data_status_text(StorageData* storage) {
+    const char* result = "unknown";
+    switch(storage->status) {
+    case SE_OK:
+        result = "ok";
+        break;
+    case SE_ERROR_NOT_READY:
+        result = "not ready";
+        break;
+    case SE_ERROR_NOT_MOUNTED:
+        result = "not mounted";
+        break;
+    case SE_ERROR_NO_FILESYSTEM:
+        result = "no filesystem";
+        break;
+    case SE_ERROR_NOT_ACCESSIBLE:
+        result = "not accessible";
+        break;
+    case SE_ERROR_INTERNAL:
+        result = "internal";
+        break;
+    }
+
+    return result;
+}
+
 /****************** helpers ******************/
 
 static void check_path(const char* path) {
-    if(path[0] != '/' || strlen(path) == 0) {
+    if(strlen(path) == 0) {
+        furi_check(0);
+    }
+
+    if(path[0] != '/') {
         furi_check(0);
     }
 }
 
 /****************** storage glue ******************/
 
-StorageType storage_get_type_by_file(const File* file, StorageFileArray_t array) {
-    StorageType type = ST_ERROR;
+bool storage_has_file(const File* file, StorageData* storage_data) {
+    bool result = false;
 
     StorageFileArray_it_t it;
-
-    for(StorageFileArray_it(it, array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
+    for(StorageFileArray_it(it, storage_data->files); !StorageFileArray_end_p(it);
+        StorageFileArray_next(it)) {
         const StorageFile* storage_file = StorageFileArray_cref(it);
 
         if(storage_file->file->file_id == file->file_id) {
-            type = storage_file->type;
+            result = true;
             break;
         }
     }
 
-    return type;
+    return result;
 }
 
 StorageType storage_get_type_by_path(const char* path) {

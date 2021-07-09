@@ -23,6 +23,15 @@ typedef struct {
     string_t path;
 } StorageFile;
 
+typedef enum {
+    SE_OK, /**< storage ok */
+    SE_ERROR_NOT_READY, /**< storage not ready (not initialized or waiting for data storage to appear) */
+    SE_ERROR_NOT_MOUNTED, /**< datastore appeared, but we cannot mount it */
+    SE_ERROR_NO_FILESYSTEM, /**< datastore appeared and mounted, but does not have a file system */
+    SE_ERROR_NOT_ACCESSIBLE, /**< datastore appeared and mounted, but not available */
+    SE_ERROR_INTERNAL, /**< any other internal error */
+} StorageError;
+
 void storage_file_init(StorageFile* obj);
 void storage_file_init_set(StorageFile* obj, const StorageFile* src);
 void storage_file_set(StorageFile* obj, const StorageFile* src);
@@ -31,7 +40,8 @@ void storage_file_clear(StorageFile* obj);
 void storage_data_init(StorageData* storage);
 bool storage_data_lock(StorageData* storage);
 bool storage_data_unlock(StorageData* storage);
-FS_Error storage_data_status(StorageData* storage);
+StorageError storage_data_status(StorageData* storage);
+const char* storage_data_status_text(StorageData* storage);
 
 ARRAY_DEF(
     StorageFileArray,
@@ -46,11 +56,11 @@ struct StorageData {
     StorageApi api;
     void* data;
     osMutexId_t mutex;
-    FS_Error status;
+    StorageError status;
     StorageFileArray_t files;
 };
 
-StorageType storage_get_type_by_file(const File* file, StorageFileArray_t array);
+bool storage_has_file(const File* file, StorageData* storage_data);
 StorageType storage_get_type_by_path(const char* path);
 bool storage_path_already_open(const char* path, StorageFileArray_t array);
 
@@ -62,6 +72,7 @@ void storage_push_storage_file(
     const char* path,
     StorageType type,
     StorageData* storage);
+void storage_pop_storage_file(File* file, StorageData* storage);
 
 #ifdef __cplusplus
 }

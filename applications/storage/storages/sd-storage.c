@@ -10,6 +10,7 @@ typedef DIR SDDir;
 typedef FILINFO SDFileInfo;
 typedef FRESULT SDError;
 
+#define TAG "sd-storage"
 /********************* Definitions ********************/
 
 typedef struct {
@@ -18,13 +19,14 @@ typedef struct {
     bool sd_was_present;
 } SDData;
 
-void storage_sd_tick(StorageData* storage);
-bool storage_sd_file_open(
+static void storage_sd_tick(StorageData* storage);
+static bool storage_sd_file_open(
     void* ctx,
     File* file,
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode);
+static bool storage_sd_file_close(void* ctx, File* file);
 static FS_Error storage_sd_parse_error(SDError error);
 
 /******************* Core Functions *******************/
@@ -38,6 +40,7 @@ void storage_sd_init(StorageData* storage) {
     storage->data = sd_data;
     storage->api.tick = storage_sd_tick;
     storage->fs_api.file.open = storage_sd_file_open;
+    storage->fs_api.file.close = storage_sd_file_close;
 
     hal_sd_detect_init();
 
@@ -66,7 +69,7 @@ bool sd_mount_card(StorageData* storage) {
 
         if(bsp_result) {
             // bsp error
-            storage->status = FSE_INTERNAL;
+            storage->status = SE_ERROR_INTERNAL;
         } else {
             SDError status = f_mount(sd_data->fs, sd_data->path, 1);
 
@@ -81,26 +84,22 @@ bool sd_mount_card(StorageData* storage) {
                 }
 
                 if(status == FR_OK) {
-                    storage->status = FSE_OK;
+                    storage->status = SE_OK;
                 } else if(status == FR_NO_FILESYSTEM) {
-                    storage->status = FSE_INVALID_NAME;
+                    storage->status = SE_ERROR_NO_FILESYSTEM;
                 } else {
-                    storage->status = FSE_NOT_EXIST;
+                    storage->status = SE_ERROR_NOT_ACCESSIBLE;
                 }
             } else {
-                storage->status = FSE_DENIED;
+                storage->status = SE_ERROR_NOT_MOUNTED;
             }
         }
         sd_notify_wait_off(notification);
 
         if(!result) {
             delay(1000);
-            /*FURI_LOG_E(
-                "sd-storage",
-                "init(%d), error: %s\r\n",
-                counter,
-                fs_error_get_internal_desc(sd_app->info.status));*/
-
+            FURI_LOG_E(
+                TAG, "init cycle %d, error: %s", counter, storage_data_status_text(storage));
             counter--;
         }
     }
@@ -115,21 +114,9 @@ void sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
 
     storage_data_lock(storage);
-    storage->status = FSE_NOT_READY;
+    storage->status = SE_ERROR_NOT_READY;
 
-    // TODO close files
-    /*for(uint8_t index = 0; index < SD_FS_MAX_FILES; index++) {
-        FileData* filedata = &sd_app->info.files[index];
-
-        if(filedata->thread_id != NULL) {
-            if(filedata->is_dir) {
-                f_closedir(&filedata->data.dir);
-            } else {
-                f_close(&filedata->data.file);
-            }
-            filedata->thread_id = NULL;
-        }
-    }*/
+    // TODO do i need to close the files?
 
     f_mount(0, sd_data->path, 0);
     storage_data_unlock(storage);
@@ -140,18 +127,15 @@ void storage_sd_tick(StorageData* storage) {
 
     if(sd_data->sd_was_present) {
         if(hal_sd_detect()) {
-            FURI_LOG_I("sd-storage", "card detected");
+            FURI_LOG_I(TAG, "card detected");
             sd_mount_card(storage);
 
             NotificationApp* notification = furi_record_open("notification");
-            if(storage->status != FSE_OK) {
-                /*FURI_LOG_E(
-                    "sd-storage",
-                    "sd init error: %s",
-                    fs_error_get_internal_desc(sd_app->info.status));*/
+            if(storage->status != SE_OK) {
+                FURI_LOG_E(TAG, "sd init error: %s", storage_data_status_text(storage));
                 sd_notify_error(notification);
             } else {
-                FURI_LOG_I("sd-storage", "card mounted");
+                FURI_LOG_I(TAG, "card mounted");
                 sd_notify_success(notification);
             }
             furi_record_close("notification");
@@ -159,14 +143,14 @@ void storage_sd_tick(StorageData* storage) {
             sd_data->sd_was_present = false;
 
             if(!hal_sd_detect()) {
-                FURI_LOG_I("sd-storage", "card removed while mounting");
+                FURI_LOG_I(TAG, "card removed while mounting");
                 sd_unmount_card(storage);
                 sd_data->sd_was_present = true;
             }
         }
     } else {
         if(!hal_sd_detect()) {
-            FURI_LOG_I("sd-storage", "card removed");
+            FURI_LOG_I(TAG, "card removed");
             sd_data->sd_was_present = true;
 
             sd_unmount_card(storage);
@@ -236,6 +220,14 @@ bool storage_sd_file_open(
     storage_set_storage_file_data(file, file_data, storage);
 
     file->internal_error_id = f_open(file_data, path, _mode);
+    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_sd_file_close(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    SDFile* file_data = storage_get_storage_file_data(file, storage);
+    file->internal_error_id = f_close(file_data);
     file->error_id = storage_sd_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }

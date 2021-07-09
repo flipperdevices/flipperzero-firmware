@@ -59,6 +59,7 @@ void storage_tick(StorageApp* app) {
 
 int32_t storage_app(void* p) {
     StorageApp* app = storage_app_alloc();
+    furi_record_create("storage", &app->external_api);
 
     StorageMessage message;
     while(1) {
