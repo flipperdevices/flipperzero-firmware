@@ -50,10 +50,14 @@ class SmartDict:
         return self.od[self.prefix_match(key)]
 
     def is_ambiguous(self, key: str) -> bool:
-        return key not in self.od and key not in self.casemap and len(list(self.prefix_match_iter(key))) > 1
+        return (
+            key not in self.od
+            and key not in self.casemap
+            and len(list(self.prefix_match_iter(key))) > 1
+        )
 
     def prefix_match_iter(self, key: str) -> Any:
-        name, number = re.match(r'^(.*?)([0-9]*)$', key.lower()).groups()
+        name, number = re.match(r"^(.*?)([0-9]*)$", key.lower()).groups()
         for entry, od_key in self.casemap.items():
             if entry.startswith(name) and entry.endswith(number):
                 yield od_key
@@ -65,15 +69,19 @@ class SmartDict:
 
     def __setitem__(self, key: str, value: Any) -> None:
         if key in self.od:
-            warnings.warn(f'Duplicate entry {key}')
+            warnings.warn(f"Duplicate entry {key}")
         elif key.lower() in self.casemap:
-            warnings.warn(f'Entry {key} differs from duplicate {self.casemap[key.lower()]} only in cAsE')
+            warnings.warn(
+                f"Entry {key} differs from duplicate {self.casemap[key.lower()]} only in cAsE"
+            )
 
         self.casemap[key.lower()] = key
         self.od[key] = value
 
     def __delitem__(self, key: str) -> None:
-        if self.casemap[key.lower()] == key:  # Check that we did not overwrite this entry
+        if (
+            self.casemap[key.lower()] == key
+        ):  # Check that we did not overwrite this entry
             del self.casemap[key.lower()]
         del self.od[key]
 
@@ -100,7 +108,7 @@ class SmartDict:
 
 
 class SVDNonFatalError(Exception):
-    """ Exception class for non-fatal errors
+    """Exception class for non-fatal errors
     So far, these have related to quirks in some vendor SVD files which are reasonable to ignore
     """
 
@@ -161,7 +169,7 @@ def add_register(parent: Union["SVDPeripheral", "SVDRegisterCluster"], node):
         incr = int(str(node.dimIncrement), 0)
         default_dim_index = ",".join((str(i) for i in range(dim)))
         dim_index = str(getattr(node, "dimIndex", default_dim_index))
-        indices = dim_index.split(',')
+        indices = dim_index.split(",")
         offset = 0
         for i in indices:
             name = str(node.name) % i
@@ -193,7 +201,7 @@ def add_cluster(parent: "SVDPeripheral", node) -> None:
         incr = int(str(node.dimIncrement), 0)
         default_dim_index = ",".join((str(i) for i in range(dim)))
         dim_index = str(getattr(node, "dimIndex", default_dim_index))
-        indices = dim_index.split(',')
+        indices = dim_index.split(",")
         offset = 0
         for i in indices:
             name = str(node.name) % i
@@ -261,6 +269,7 @@ class SVDPeripheral:
     """
     This is a peripheral as defined in the SVD file
     """
+
     parent_base_address: int
     name: str
     description: str
@@ -278,8 +287,8 @@ class SVDPeripheral:
         if not hasattr(svd_elem, "baseAddress"):
             raise SVDNonFatalError(f"Periph without base address")
         self.base_address = int(str(svd_elem.baseAddress), 0)
-        if 'derivedFrom' in svd_elem.attrib:
-            derived_from = svd_elem.attrib['derivedFrom']
+        if "derivedFrom" in svd_elem.attrib:
+            derived_from = svd_elem.attrib["derivedFrom"]
             try:
                 self.name = str(svd_elem.name)
             except AttributeError:
@@ -305,7 +314,11 @@ class SVDPeripheral:
             self.clusters = SmartDict()
 
             if hasattr(svd_elem, "registers"):
-                registers = [r for r in svd_elem.registers.getchildren() if r.tag in ["cluster", "register"]]
+                registers = [
+                    r
+                    for r in svd_elem.registers.getchildren()
+                    if r.tag in ["cluster", "register"]
+                ]
                 for r in registers:
                     if r.tag == "cluster":
                         add_cluster(self, r)
@@ -368,7 +381,12 @@ class SVDPeripheralRegister:
         return self.access in ["read-only", "read-write", "read-writeOnce"]
 
     def writable(self) -> bool:
-        return self.access in ["write-only", "read-write", "writeOnce", "read-writeOnce"]
+        return self.access in [
+            "write-only",
+            "read-write",
+            "writeOnce",
+            "read-writeOnce",
+        ]
 
     def __str__(self) -> str:
         return str(self.name)
@@ -399,8 +417,9 @@ class SVDPeripheralRegisterField:
             self.offset = bitrange[1]
             self.width = 1 + bitrange[0] - bitrange[1]
         else:
-            assert hasattr(svd_elem, "lsb") and hasattr(svd_elem, "msb"),\
-                f"Range not found for field {self.name} in register {parent}"
+            assert hasattr(svd_elem, "lsb") and hasattr(
+                svd_elem, "msb"
+            ), f"Range not found for field {self.name} in register {parent}"
             lsb = int(str(svd_elem.lsb))
             msb = int(str(svd_elem.msb))
             self.offset = lsb
@@ -410,7 +429,11 @@ class SVDPeripheralRegisterField:
         self.enum = {}
 
         if hasattr(svd_elem, "enumeratedValues"):
-            values = [v for v in svd_elem.enumeratedValues.getchildren() if v.tag == "enumeratedValue"]
+            values = [
+                v
+                for v in svd_elem.enumeratedValues.getchildren()
+                if v.tag == "enumeratedValue"
+            ]
             for v in values:
                 # Skip the "name" tag and any entries that don't have a value
                 if v.tag == "name" or not hasattr(v, "value"):
@@ -429,7 +452,12 @@ class SVDPeripheralRegisterField:
         return self.access in ["read-only", "read-write", "read-writeOnce"]
 
     def writable(self) -> bool:
-        return self.access in ["write-only", "read-write", "writeOnce", "read-writeOnce"]
+        return self.access in [
+            "write-only",
+            "read-write",
+            "writeOnce",
+            "read-writeOnce",
+        ]
 
     def __str__(self) -> str:
         return str(self.name)
@@ -450,5 +478,5 @@ def _main() -> None:
         print("Done testing file: {}".format(f))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _main()

@@ -20,6 +20,7 @@ RUN apt-get update && \
         unzip \
         build-essential \
         python \
+        python-dev \
         python-pip \
         python3 \
         imagemagick \
@@ -48,7 +49,7 @@ RUN wget --progress=dot:giga "https://developer.arm.com/-/media/Files/downloads/
     cd gcc-arm-none-eabi-10-2020-q4-major/bin/ && \
     for file in * ; do ln -s "${PWD}/${file}" "/usr/bin/${file}" ; done && \
     cd / && arm-none-eabi-gcc -v && arm-none-eabi-gdb -v
-    
+
 # install hex2dfu
 
 # hadolint ignore=DL3003

@@ -23,7 +23,7 @@ import sys
 import struct
 import pkg_resources
 
-sys.path.append('.')
+sys.path.append(".")
 from cmdebug.svd import SVDFile
 
 BITS_TO_UNPACK_FORMAT = {
@@ -34,7 +34,7 @@ BITS_TO_UNPACK_FORMAT = {
 
 
 class LoadSVD(gdb.Command):
-    """ A command to load an SVD file and to create the command for inspecting
+    """A command to load an SVD file and to create the command for inspecting
     that object
     """
 
@@ -43,15 +43,21 @@ class LoadSVD(gdb.Command):
         try:
             vendor_names = pkg_resources.resource_listdir("cmsis_svd", "data")
             for vendor in vendor_names:
-                fnames = pkg_resources.resource_listdir("cmsis_svd", "data/{}".format(vendor))
-                self.vendors[vendor] = [fname for fname in fnames if fname.lower().endswith(".svd")]
+                fnames = pkg_resources.resource_listdir(
+                    "cmsis_svd", "data/{}".format(vendor)
+                )
+                self.vendors[vendor] = [
+                    fname for fname in fnames if fname.lower().endswith(".svd")
+                ]
         except:
             pass
 
         if len(self.vendors) > 0:
             gdb.Command.__init__(self, "svd_load", gdb.COMMAND_USER)
         else:
-            gdb.Command.__init__(self, "svd_load", gdb.COMMAND_DATA, gdb.COMPLETE_FILENAME)
+            gdb.Command.__init__(
+                self, "svd_load", gdb.COMMAND_DATA, gdb.COMPLETE_FILENAME
+            )
 
     def complete(self, text, word):
         args = gdb.string_to_argv(text)
@@ -64,7 +70,9 @@ class LoadSVD(gdb.Command):
         # "svd_load <tab>" or "svd_load ST<tab>"
         if num_args == 1:
             prefix = word.lower()
-            return [vendor for vendor in self.vendors if vendor.lower().startswith(prefix)]
+            return [
+                vendor for vendor in self.vendors if vendor.lower().startswith(prefix)
+            ]
         # "svd_load STMicro<tab>" or "svd_load STMicro STM32F1<tab>"
         elif num_args == 2 and args[0] in self.vendors:
             prefix = word.lower()
@@ -81,9 +89,13 @@ class LoadSVD(gdb.Command):
             f = args[0]
         elif argc == 2:
             gdb.write("Loading SVD file {}/{}...\n".format(args[0], args[1]))
-            f = pkg_resources.resource_filename("cmsis_svd", "data/{}/{}".format(args[0], args[1]))
+            f = pkg_resources.resource_filename(
+                "cmsis_svd", "data/{}/{}".format(args[0], args[1])
+            )
         else:
-            raise gdb.GdbError("Usage: svd_load <vendor> <device.svd> or svd_load <path/to/filename.svd>\n")
+            raise gdb.GdbError(
+                "Usage: svd_load <vendor> <device.svd> or svd_load <path/to/filename.svd>\n"
+            )
         try:
             SVD(SVDFile(f))
         except Exception as e:
@@ -98,7 +110,7 @@ if __name__ == "__main__":
 
 
 class SVD(gdb.Command):
-    """ The CMSIS SVD (System View Description) inspector command
+    """The CMSIS SVD (System View Description) inspector command
 
     This allows easy access to all peripheral registers supported by the system
     in the GDB debug environment
@@ -122,21 +134,35 @@ class SVD(gdb.Command):
                 try:
                     data = self.read(r.address(), r.size)
                     data = self.format(data, form, r.size)
-                    if form == 'a':
-                        data += " <" + re.sub(r'\s+', ' ',
-                                              gdb.execute("info symbol {}".format(data), True,
-                                                          True).strip()) + ">"
+                    if form == "a":
+                        data += (
+                            " <"
+                            + re.sub(
+                                r"\s+",
+                                " ",
+                                gdb.execute(
+                                    "info symbol {}".format(data), True, True
+                                ).strip(),
+                            )
+                            + ">"
+                        )
                 except gdb.MemoryError:
                     data = "(error reading)"
             else:
                 data = "(not readable)"
-            desc = re.sub(r'\s+', ' ', r.description)
+            desc = re.sub(r"\s+", " ", r.description)
             reg_list.append((r.name, data, desc))
 
         column1_width = max(len(reg[0]) for reg in reg_list) + 2  # padding
         column2_width = max(len(reg[1]) for reg in reg_list)
         for reg in reg_list:
-            gdb.write("\t{}:{}{}".format(reg[0], "".ljust(column1_width - len(reg[0])), reg[1].rjust(column2_width)))
+            gdb.write(
+                "\t{}:{}{}".format(
+                    reg[0],
+                    "".ljust(column1_width - len(reg[0])),
+                    reg[1].rjust(column2_width),
+                )
+            )
             if reg[2] != reg[0]:
                 gdb.write("  {}".format(reg[2]))
             gdb.write("\n")
@@ -154,7 +180,7 @@ class SVD(gdb.Command):
         except AttributeError:
             fields_iter = fields.values()
         for f in fields_iter:
-            desc = re.sub(r'\s+', ' ', f.description)
+            desc = re.sub(r"\s+", " ", f.description)
             if register.readable():
                 val = data >> f.offset
                 val &= (1 << f.width) - 1
@@ -174,7 +200,12 @@ class SVD(gdb.Command):
         column2_width = max(len(field[1]) for field in field_list)  # padding
         for field in field_list:
             gdb.write(
-                "\t{}:{}{}".format(field[0], "".ljust(column1_width - len(field[0])), field[1].rjust(column2_width)))
+                "\t{}:{}{}".format(
+                    field[0],
+                    "".ljust(column1_width - len(field[0])),
+                    field[1].rjust(column2_width),
+                )
+            )
             if field[2] != field[0]:
                 gdb.write("  {}".format(field[2]))
             gdb.write("\n")
@@ -182,7 +213,7 @@ class SVD(gdb.Command):
     def invoke(self, args, from_tty):
         s = str(args).split(" ")
         form = ""
-        if s[0] and s[0][0] == '/':
+        if s[0] and s[0][0] == "/":
             if len(s[0]) == 1:
                 gdb.write("Incorrect format\n")
                 return
@@ -192,7 +223,7 @@ class SVD(gdb.Command):
                     return
                 s = s[1:]
 
-        if s[0].lower() == 'help':
+        if s[0].lower() == "help":
             gdb.write("Usage:\n")
             gdb.write("=========\n")
             gdb.write("svd:\n")
@@ -206,7 +237,8 @@ class SVD(gdb.Command):
             gdb.write("\td(default):decimal, x: hex, o: octal, b: binary\n")
             gdb.write("\n")
             gdb.write(
-                "Both prefix matching and case-insensitive matching is supported for peripherals, registers, clusters and fields.\n")
+                "Both prefix matching and case-insensitive matching is supported for peripherals, registers, clusters and fields.\n"
+            )
             return
 
         if not len(s[0]):
@@ -221,15 +253,21 @@ class SVD(gdb.Command):
             except AttributeError:
                 peripherals = self.svd_file.peripherals.values()
             for p in peripherals:
-                desc = re.sub(r'\s+', ' ', p.description)
-                gdb.write("\t{}:{}{}\n".format(p.name, "".ljust(column_width - len(p.name)), desc))
+                desc = re.sub(r"\s+", " ", p.description)
+                gdb.write(
+                    "\t{}:{}{}\n".format(
+                        p.name, "".ljust(column_width - len(p.name)), desc
+                    )
+                )
             return
 
         def warn_if_ambiguous(smart_dict, key):
             if smart_dict.is_ambiguous(key):
-                gdb.write('Warning: {} could prefix match any of: {}\n'.format(
-
-                    key, ', '.join(smart_dict.prefix_match_iter(key))))
+                gdb.write(
+                    "Warning: {} could prefix match any of: {}\n".format(
+                        key, ", ".join(smart_dict.prefix_match_iter(key))
+                    )
+                )
 
         registers = None
         if len(s) >= 1:
@@ -252,14 +290,19 @@ class SVD(gdb.Command):
                 gdb.write("Clusters in %s:\n" % peripheral.name)
                 reg_list = []
                 for r in clusters_iter:
-                    desc = re.sub(r'\s+', ' ', r.description)
+                    desc = re.sub(r"\s+", " ", r.description)
                     reg_list.append((r.name, "", desc))
 
                 column1_width = max(len(reg[0]) for reg in reg_list) + 2  # padding
                 column2_width = max(len(reg[1]) for reg in reg_list)
                 for reg in reg_list:
                     gdb.write(
-                        "\t{}:{}{}".format(reg[0], "".ljust(column1_width - len(reg[0])), reg[1].rjust(column2_width)))
+                        "\t{}:{}{}".format(
+                            reg[0],
+                            "".ljust(column1_width - len(reg[0])),
+                            reg[1].rjust(column2_width),
+                        )
+                    )
                     if reg[2] != reg[0]:
                         gdb.write("  {}".format(reg[2]))
                     gdb.write("\n")
@@ -270,60 +313,78 @@ class SVD(gdb.Command):
             if s[1] in peripheral.clusters:
                 warn_if_ambiguous(peripheral.clusters, s[1])
                 cluster = peripheral.clusters[s[1]]
-                container = peripheral.name + ' > ' + cluster.name
+                container = peripheral.name + " > " + cluster.name
                 self._print_registers(container, form, cluster.registers)
 
             elif s[1] in peripheral.registers:
                 warn_if_ambiguous(peripheral.registers, s[1])
                 register = peripheral.registers[s[1]]
-                container = peripheral.name + ' > ' + register.name
+                container = peripheral.name + " > " + register.name
 
                 self._print_register_fields(container, form, register)
 
             else:
-                gdb.write("Register/cluster {} in peripheral {} does not exist!\n".format(
-                    s[1], peripheral.name))
+                gdb.write(
+                    "Register/cluster {} in peripheral {} does not exist!\n".format(
+                        s[1], peripheral.name
+                    )
+                )
             return
 
         if len(s) == 3:
             if s[1] not in peripheral.clusters:
-                gdb.write("Cluster {} in peripheral {} does not exist!\n".format(
-                    s[1], peripheral.name))
+                gdb.write(
+                    "Cluster {} in peripheral {} does not exist!\n".format(
+                        s[1], peripheral.name
+                    )
+                )
                 return
             warn_if_ambiguous(peripheral.clusters, s[1])
 
             cluster = peripheral.clusters[s[1]]
             if s[2] not in cluster.registers:
-                gdb.write("Register {} in cluster {} in peripheral {} does not exist!\n".format(
-                    s[2], cluster.name, peripheral.name))
+                gdb.write(
+                    "Register {} in cluster {} in peripheral {} does not exist!\n".format(
+                        s[2], cluster.name, peripheral.name
+                    )
+                )
                 return
             warn_if_ambiguous(cluster.registers, s[2])
 
             register = cluster.registers[s[2]]
-            container = ' > '.join([peripheral.name, cluster.name, register.name])
+            container = " > ".join([peripheral.name, cluster.name, register.name])
             self._print_register_fields(container, form, register)
             return
 
         if len(s) == 4:
             if s[1] not in peripheral.registers:
-                gdb.write("Register {} in peripheral {} does not exist!\n".format(
-                    s[1], peripheral.name))
+                gdb.write(
+                    "Register {} in peripheral {} does not exist!\n".format(
+                        s[1], peripheral.name
+                    )
+                )
                 return
             warn_if_ambiguous(peripheral.registers, s[1])
 
             reg = peripheral.registers[s[1]]
 
             if s[2] not in reg.fields:
-                gdb.write("Field {} in register {} in peripheral {} does not exist!\n".format(
-                    s[2], reg.name, peripheral.name))
+                gdb.write(
+                    "Field {} in register {} in peripheral {} does not exist!\n".format(
+                        s[2], reg.name, peripheral.name
+                    )
+                )
                 return
             warn_if_ambiguous(reg.fields, s[2])
 
             field = reg.fields[s[2]]
 
             if not field.writable() or not reg.writable():
-                gdb.write("Field {} in register {} in peripheral {} is read-only!\n".format(
-                    field.name, reg.name, peripheral.name))
+                gdb.write(
+                    "Field {} in register {} in peripheral {} is read-only!\n".format(
+                        field.name, reg.name, peripheral.name
+                    )
+                )
                 return
 
             try:
@@ -331,11 +392,16 @@ class SVD(gdb.Command):
             except ValueError:
                 gdb.write(
                     "{} is not a valid number! You can prefix numbers with 0x for hex, 0b for binary, or any python "
-                    "int literal\n".format(s[3]))
+                    "int literal\n".format(s[3])
+                )
                 return
 
             if val >= 1 << field.width or val < 0:
-                gdb.write("{} not a valid number for a field with width {}!\n".format(val, field.width))
+                gdb.write(
+                    "{} not a valid number for a field with width {}!\n".format(
+                        val, field.width
+                    )
+                )
                 return
 
             if not reg.readable():
@@ -350,24 +416,23 @@ class SVD(gdb.Command):
         gdb.write("Unknown input\n")
 
     def complete(self, text, word):
-        """ Perform tab-completion for the command
-        """
+        """Perform tab-completion for the command"""
         text = str(text)
         s = text.split(" ")
 
         # Deal with the possibility of a '/' parameter
-        if s[0] and s[0][0] == '/':
+        if s[0] and s[0][0] == "/":
             if len(s) > 1:
                 s = s[1:]
             else:
-                return [] # completion after e.g. "svd/x" but before trailing space
+                return []  # completion after e.g. "svd/x" but before trailing space
 
         if len(s) == 1:
             return list(self.svd_file.peripherals.prefix_match_iter(s[0]))
 
         if len(s) == 2:
             reg = s[1].upper()
-            if len(reg) and reg[0] == '&':
+            if len(reg) and reg[0] == "&":
                 reg = reg[1:]
 
             if s[0] not in self.svd_file.peripherals:
@@ -380,8 +445,7 @@ class SVD(gdb.Command):
 
     @staticmethod
     def read(address, bits=32):
-        """ Read from memory and return an integer
-        """
+        """Read from memory and return an integer"""
         value = gdb.selected_inferior().read_memory(address, bits / 8)
         unpack_format = "I"
         if bits in BITS_TO_UNPACK_FORMAT:
@@ -391,23 +455,23 @@ class SVD(gdb.Command):
 
     @staticmethod
     def write(address, data, bits=32):
-        """ Write data to memory
-        """
+        """Write data to memory"""
         gdb.selected_inferior().write_memory(address, bytes(data), bits / 8)
 
     @staticmethod
     def format(value, form, length=32):
-        """ Format a number based on a format character and length
-        """
+        """Format a number based on a format character and length"""
         # get current gdb radix setting
-        radix = int(re.search(r"\d+", gdb.execute("show output-radix", True, True)).group(0))
+        radix = int(
+            re.search(r"\d+", gdb.execute("show output-radix", True, True)).group(0)
+        )
 
         # override it if asked to
-        if form == 'x' or form == 'a':
+        if form == "x" or form == "a":
             radix = 16
-        elif form == 'o':
+        elif form == "o":
             radix = 8
-        elif form == 'b' or form == 't':
+        elif form == "b" or form == "t":
             radix = 2
 
         # format the output

@@ -40,15 +40,13 @@ class DWT(gdb.Command):
 
     @staticmethod
     def read(address, bits=32):
-        """ Read from memory (using print) and return an integer
-        """
+        """Read from memory (using print) and return an integer"""
         value = gdb.selected_inferior().read_memory(address, bits / 8)
         return struct.unpack_from("<i", value)[0]
 
     @staticmethod
     def write(address, value, bits=32):
-        """ Set a value in memory
-        """
+        """Set a value in memory"""
         gdb.selected_inferior().write_memory(address, bytes(value), bits / 8)
 
     def invoke(self, args, from_tty):
@@ -59,7 +57,7 @@ class DWT(gdb.Command):
 
         s = list(map(lambda x: x.lower(), str(args).split(" ")))
         # Check for empty command
-        if s[0] in ['', 'help']:
+        if s[0] in ["", "help"]:
             self.print_help()
             return ()
 
@@ -71,8 +69,11 @@ class DWT(gdb.Command):
                     self.cyccnt_reset()
                 elif s[1][0] == "d":
                     self.cyccnt_dis()
-            gdb.write(prefix + "CYCCNT ({}): ".format("ON" if (self.read(DWT_CTRL) & 1) else "OFF") +
-                      self.cycles_str(self.read(DWT_CYCCNT)))
+            gdb.write(
+                prefix
+                + "CYCCNT ({}): ".format("ON" if (self.read(DWT_CTRL) & 1) else "OFF")
+                + self.cycles_str(self.read(DWT_CYCCNT))
+            )
         elif s[0] == "reset":
             if len(s) > 1:
                 if s[1] == "cyccnt":
@@ -106,17 +107,17 @@ class DWT(gdb.Command):
         text = str(text).lower()
         s = text.split(" ")
 
-        commands = ['configclk', 'reset', 'cyccnt']
-        reset_commands = ['counters', 'cyccnt']
-        cyccnt_commands = ['enable', 'reset', 'disable']
+        commands = ["configclk", "reset", "cyccnt"]
+        reset_commands = ["counters", "cyccnt"]
+        cyccnt_commands = ["enable", "reset", "disable"]
 
         if len(s) == 1:
             return filter(lambda x: x.startswith(s[0]), commands)
 
         if len(s) == 2:
-            if s[0] == 'reset':
+            if s[0] == "reset":
                 return filter(lambda x: x.startswith(s[1]), reset_commands)
-            if s[0] == 'cyccnt':
+            if s[0] == "cyccnt":
                 return filter(lambda x: x.startswith(s[1]), cyccnt_commands)
 
     def cycles_str(self, cycles):
@@ -153,6 +154,7 @@ class DWT(gdb.Command):
         gdb.write("\tDisplay the cycle count\n")
         gdb.write("\td(default):decimal, x: hex, o: octal, b: binary\n")
         return
+
 
 # Registers our class to GDB when sourced:
 DWT()
