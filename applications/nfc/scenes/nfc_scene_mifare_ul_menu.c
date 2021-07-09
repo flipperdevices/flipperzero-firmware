@@ -1,7 +1,4 @@
-#include "nfc_scene_mifare_ul_menu.h"
 #include "../nfc_i.h"
-
-#include <furi.h>
 
 enum SubmenuIndex {
     SubmenuIndexSave,
@@ -22,7 +19,8 @@ const void nfc_scene_mifare_ul_menu_on_enter(void* context) {
         submenu, "Name and save", SubmenuIndexSave, nfc_scene_mifare_ul_menu_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_mifare_ul_menu_submenu_callback, nfc);
-    submenu_set_selected_item(nfc->submenu, nfc->scene_mifare_ul_menu->state);
+    submenu_set_selected_item(
+        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMifareUlMenu));
 
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
 }
@@ -32,12 +30,14 @@ const bool nfc_scene_mifare_ul_menu_on_event(void* context, SceneManagerEvent ev
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexSave) {
-            nfc->scene_mifare_ul_menu->state = SubmenuIndexSave;
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_not_implemented);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneMifareUlMenu, SubmenuIndexSave);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             return scene_manager_next_scene(nfc->scene_manager);
         } else if(event.event == SubmenuIndexEmulate) {
-            nfc->scene_mifare_ul_menu->state = SubmenuIndexEmulate;
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_not_implemented);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneMifareUlMenu, SubmenuIndexEmulate);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             return scene_manager_next_scene(nfc->scene_manager);
         }
     } else if(event.type == SceneManagerEventTypeNavigation) {
@@ -51,18 +51,4 @@ const void nfc_scene_mifare_ul_menu_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     submenu_clean(nfc->submenu);
-}
-
-AppScene* nfc_scene_mifare_ul_menu_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneReadMifareUlMenu;
-    scene->on_enter = nfc_scene_mifare_ul_menu_on_enter;
-    scene->on_event = nfc_scene_mifare_ul_menu_on_event;
-    scene->on_exit = nfc_scene_mifare_ul_menu_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_mifare_ul_menu_free(AppScene* scene) {
-    free(scene);
 }

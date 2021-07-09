@@ -1,9 +1,4 @@
-#include "nfc_scene_not_implemented.h"
 #include "../nfc_i.h"
-
-#include <furi.h>
-#include <gui/modules/dialog_ex.h>
-#include <gui/view_dispatcher.h>
 
 void nfc_scene_not_implemented_dialog_callback(DialogExResult result, void* context) {
     Nfc* nfc = (Nfc*)context;
@@ -44,18 +39,4 @@ const void nfc_scene_not_implemented_on_exit(void* context) {
     dialog_ex_set_left_button_text(dialog_ex, NULL);
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
-}
-
-AppScene* nfc_scene_not_implemented_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneReadCardSuccess;
-    scene->on_enter = nfc_scene_not_implemented_on_enter;
-    scene->on_event = nfc_scene_not_implemented_on_event;
-    scene->on_exit = nfc_scene_not_implemented_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_not_implemented_free(AppScene* scene) {
-    free(scene);
 }

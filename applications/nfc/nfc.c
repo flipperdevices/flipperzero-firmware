@@ -20,7 +20,7 @@ Nfc* nfc_alloc() {
 
     nfc->nfc_common.worker = nfc_worker_alloc();
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
-    nfc->scene_manager = scene_manager_alloc(nfc);
+    nfc->scene_manager = scene_manager_alloc(nfc_scene_handlers, nfc);
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
     view_dispatcher_set_event_callback_context(nfc->nfc_common.view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(
@@ -89,32 +89,7 @@ Nfc* nfc_alloc() {
         NfcViewMifareUl,
         nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
 
-    // Scene allocation
-    nfc->scene_start = nfc_scene_start_alloc();
-    nfc->scene_read_card = nfc_scene_read_card_alloc();
-    nfc->scene_read_card_success = nfc_scene_read_card_success_alloc();
-    nfc->scene_card_menu = nfc_scene_card_menu_alloc();
-    nfc->scene_not_implemented = nfc_scene_not_implemented_alloc();
-    nfc->scene_debug_menu = nfc_scene_debug_menu_alloc();
-    nfc->scene_debug_detect = nfc_scene_debug_detect_alloc();
-    nfc->scene_debug_emulate = nfc_scene_debug_emulate_alloc();
-    nfc->scene_debug_read_emv = nfc_scene_debug_read_emv_alloc();
-    nfc->scene_debug_read_mifare_ul = nfc_scene_debug_read_mifare_ul_alloc();
-    nfc->scene_emulate_uid = nfc_scene_emulate_uid_alloc();
-    nfc->scene_save_name = nfc_scene_save_name_alloc();
-    nfc->scene_save_success = nfc_scene_save_success_alloc();
-    nfc->scene_file_select = nfc_scene_file_select_alloc();
-    nfc->scene_saved_menu = nfc_scene_saved_menu_alloc();
-    nfc->scene_set_type = nfc_scene_set_type_alloc();
-    nfc->scene_set_sak = nfc_scene_set_sak_alloc();
-    nfc->scene_set_atqa = nfc_scene_set_atqa_alloc();
-    nfc->scene_set_uid = nfc_scene_set_uid_alloc();
-    nfc->scene_scripts_menu = nfc_scene_scripts_menu_alloc();
-    nfc->scene_read_mifare_ul = nfc_scene_read_mifare_ul_alloc();
-    nfc->scene_read_mifare_ul_success = nfc_scene_read_mifare_ul_success_alloc();
-    nfc->scene_mifare_ul_menu = nfc_scene_mifare_ul_menu_alloc();
-
-    scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_start);
+    scene_manager_add_next_scene(nfc->scene_manager, NfcSceneStart);
     scene_manager_start(nfc->scene_manager);
 
     return nfc;
@@ -167,31 +142,6 @@ void nfc_free(Nfc* nfc) {
     // Worker
     nfc_worker_stop(nfc->nfc_common.worker);
     nfc_worker_free(nfc->nfc_common.worker);
-
-    // Scenes
-    nfc_scene_start_free(nfc->scene_start);
-    nfc_scene_read_card_free(nfc->scene_read_card);
-    nfc_scene_read_card_success_free(nfc->scene_read_card_success);
-    nfc_scene_card_menu_free(nfc->scene_card_menu);
-    nfc_scene_not_implemented_free(nfc->scene_not_implemented);
-    nfc_scene_debug_menu_free(nfc->scene_debug_menu);
-    nfc_scene_debug_detect_free(nfc->scene_debug_detect);
-    nfc_scene_debug_emulate_free(nfc->scene_debug_emulate);
-    nfc_scene_debug_read_emv_free(nfc->scene_debug_read_emv);
-    nfc_scene_debug_read_mifare_ul_free(nfc->scene_debug_read_mifare_ul);
-    nfc_scene_emulate_uid_free(nfc->scene_emulate_uid);
-    nfc_scene_save_name_free(nfc->scene_save_name);
-    nfc_scene_save_success_free(nfc->scene_save_success);
-    nfc_scene_file_select_free(nfc->scene_file_select);
-    nfc_scene_saved_menu_free(nfc->scene_saved_menu);
-    nfc_scene_set_type_free(nfc->scene_set_type);
-    nfc_scene_set_sak_free(nfc->scene_set_sak);
-    nfc_scene_set_atqa_free(nfc->scene_set_atqa);
-    nfc_scene_set_uid_free(nfc->scene_set_uid);
-    nfc_scene_scripts_menu_free(nfc->scene_scripts_menu);
-    nfc_scene_read_mifare_ul_free(nfc->scene_read_mifare_ul);
-    nfc_scene_read_mifare_ul_success_free(nfc->scene_read_mifare_ul_success);
-    nfc_scene_mifare_ul_menu_free(nfc->scene_mifare_ul_menu);
 
     // View Dispatcher
     view_dispatcher_free(nfc->nfc_common.view_dispatcher);

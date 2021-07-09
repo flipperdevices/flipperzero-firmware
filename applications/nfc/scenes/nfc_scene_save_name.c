@@ -1,11 +1,4 @@
-#include <nfc/scenes/nfc_scene_save_name.h>
-
-#include <furi.h>
-
 #include "../nfc_i.h"
-#include "../views/nfc_detect.h"
-
-#include <gui/view_dispatcher.h>
 
 #define SCENE_SAVE_NAME_CUSTOM_EVENT (0UL)
 
@@ -39,7 +32,7 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
         if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
             memcpy(&nfc->device.dev_name, nfc->text_store, strlen(nfc->text_store));
             if(nfc_device_save(&nfc->device, "test")) {
-                scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_save_success);
+                scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 return scene_manager_next_scene(nfc->scene_manager);
             } else {
                 return scene_manager_search_previous_scene(nfc->scene_manager, NfcSceneStart);
@@ -54,18 +47,4 @@ const void nfc_scene_save_name_on_exit(void* context) {
 
     // Clear view
     text_input_set_header_text(nfc->text_input, NULL);
-}
-
-AppScene* nfc_scene_save_name_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneSaveName;
-    scene->on_enter = nfc_scene_save_name_on_enter;
-    scene->on_event = nfc_scene_save_name_on_event;
-    scene->on_exit = nfc_scene_save_name_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_save_name_free(AppScene* scene) {
-    free(scene);
 }

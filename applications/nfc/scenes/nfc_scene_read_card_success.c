@@ -1,9 +1,4 @@
-#include "nfc_scene_read_card_success.h"
 #include "../nfc_i.h"
-
-#include <furi.h>
-#include <gui/modules/dialog_ex.h>
-#include <gui/view_dispatcher.h>
 
 #define NFC_SCENE_READ_SUCCESS_SHIFT "              "
 
@@ -75,7 +70,7 @@ const bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent
         if(event.event == DialogExResultLeft) {
             return scene_manager_previous_scene(nfc->scene_manager);
         } else if(event.event == DialogExResultRight) {
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_card_menu);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneCardMenu);
             return scene_manager_next_scene(nfc->scene_manager);
         }
     }
@@ -93,18 +88,4 @@ const void nfc_scene_read_card_success_on_exit(void* context) {
     dialog_ex_set_right_button_text(dialog_ex, NULL);
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
-}
-
-AppScene* nfc_scene_read_card_success_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneReadCardSuccess;
-    scene->on_enter = nfc_scene_read_card_success_on_enter;
-    scene->on_event = nfc_scene_read_card_success_on_event;
-    scene->on_exit = nfc_scene_read_card_success_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_read_card_success_free(AppScene* scene) {
-    free(scene);
 }

@@ -1,11 +1,4 @@
-#include <nfc/scenes/nfc_scene_read_card.h>
-
-#include <furi.h>
-
 #include "../nfc_i.h"
-#include "../views/nfc_detect.h"
-
-#include <gui/view_dispatcher.h>
 
 void nfc_read_card_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
@@ -36,7 +29,7 @@ const bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcEventDetect) {
             nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_read_card_success);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             return scene_manager_next_scene(nfc->scene_manager);
         }
     }
@@ -54,18 +47,4 @@ const void nfc_scene_read_card_on_exit(void* context) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 0, NULL);
-}
-
-AppScene* nfc_scene_read_card_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneReadCard;
-    scene->on_enter = nfc_scene_read_card_on_enter;
-    scene->on_event = nfc_scene_read_card_on_event;
-    scene->on_exit = nfc_scene_read_card_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_read_card_free(AppScene* scene) {
-    free(scene);
 }

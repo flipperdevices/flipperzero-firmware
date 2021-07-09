@@ -1,10 +1,4 @@
-#include <nfc/scenes/nfc_scene_set_atqa.h>
-
-#include <furi.h>
-
 #include "../nfc_i.h"
-
-#include <gui/view_dispatcher.h>
 
 #define SCENE_SET_ATQA_CUSTOM_EVENT (0UL)
 
@@ -31,7 +25,7 @@ const bool nfc_scene_set_atqa_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SET_ATQA_CUSTOM_EVENT) {
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_set_uid);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetUid);
             return scene_manager_next_scene(nfc->scene_manager);
         }
     }
@@ -44,18 +38,4 @@ const void nfc_scene_set_atqa_on_exit(void* context) {
     // Clear view
     byte_input_set_result_callback(nfc->byte_input, NULL, NULL, NULL, NULL, 0);
     byte_input_set_header_text(nfc->byte_input, "");
-}
-
-AppScene* nfc_scene_set_atqa_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneSetAtqa;
-    scene->on_enter = nfc_scene_set_atqa_on_enter;
-    scene->on_event = nfc_scene_set_atqa_on_event;
-    scene->on_exit = nfc_scene_set_atqa_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_set_atqa_free(AppScene* scene) {
-    free(scene);
 }

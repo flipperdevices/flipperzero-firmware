@@ -1,9 +1,4 @@
-#include "nfc_scene_set_type.h"
 #include "../nfc_i.h"
-
-#include <furi.h>
-#include <gui/modules/submenu.h>
-#include <gui/view_dispatcher.h>
 
 enum SubmenuIndex {
     SubmenuIndexNFCA4,
@@ -33,11 +28,11 @@ const bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexNFCA7) {
             nfc->device.data.uid_len = 7;
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_set_sak);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetSak);
             return scene_manager_next_scene(nfc->scene_manager);
         } else if(event.event == SubmenuIndexNFCA4) {
             nfc->device.data.uid_len = 4;
-            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_set_sak);
+            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetSak);
             return scene_manager_next_scene(nfc->scene_manager);
         }
     }
@@ -48,18 +43,4 @@ const void nfc_scene_set_type_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     submenu_clean(nfc->submenu);
-}
-
-AppScene* nfc_scene_set_type_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneSetType;
-    scene->on_enter = nfc_scene_set_type_on_enter;
-    scene->on_event = nfc_scene_set_type_on_event;
-    scene->on_exit = nfc_scene_set_type_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_set_type_free(AppScene* scene) {
-    free(scene);
 }

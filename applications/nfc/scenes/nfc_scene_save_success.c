@@ -1,7 +1,3 @@
-#include <nfc/scenes/nfc_scene_save_success.h>
-
-#include <furi.h>
-
 #include "../nfc_i.h"
 
 #define SCENE_SAVE_SUCCESS_CUSTOM_EVENT (0UL)
@@ -49,18 +45,4 @@ const void nfc_scene_save_success_on_exit(void* context) {
     popup_set_context(popup, NULL);
     popup_set_timeout(popup, 0);
     popup_disable_timeout(popup);
-}
-
-AppScene* nfc_scene_save_success_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneSaveSuccess;
-    scene->on_enter = nfc_scene_save_success_on_enter;
-    scene->on_event = nfc_scene_save_success_on_event;
-    scene->on_exit = nfc_scene_save_success_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_save_success_free(AppScene* scene) {
-    free(scene);
 }

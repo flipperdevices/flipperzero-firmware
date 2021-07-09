@@ -1,7 +1,3 @@
-#include <nfc/scenes/nfc_scene_emulate_uid.h>
-
-#include <furi.h>
-
 #include "../nfc_i.h"
 
 const void nfc_scene_emulate_uid_on_enter(void* context) {
@@ -56,18 +52,4 @@ const void nfc_scene_emulate_uid_on_exit(void* context) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 0, NULL);
-}
-
-AppScene* nfc_scene_emulate_uid_alloc() {
-    AppScene* scene = furi_alloc(sizeof(AppScene));
-    scene->id = NfcSceneEmulateUID;
-    scene->on_enter = nfc_scene_emulate_uid_on_enter;
-    scene->on_event = nfc_scene_emulate_uid_on_event;
-    scene->on_exit = nfc_scene_emulate_uid_on_exit;
-
-    return scene;
-}
-
-void nfc_scene_emulate_uid_free(AppScene* scene) {
-    free(scene);
 }
