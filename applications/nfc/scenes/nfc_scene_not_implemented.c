@@ -29,7 +29,7 @@ const bool nfc_scene_not_implemented_on_event(void* context, uint32_t event) {
 
     if(event == DialogExResultLeft) {
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventBack);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventBack);
         return true;
     }
     return false;

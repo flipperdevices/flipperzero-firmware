@@ -48,24 +48,24 @@ const bool nfc_scene_card_menu_on_event(void* context, uint32_t event) {
     if(event == SubmenuIndexRunApp) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexChooseScript) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexEmulate) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_emulate_uid);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexSave) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_name);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
-    } else if(event == ViewNavigatorEventBack) {
+    } else if(event == SceneManagerEventBack) {
         view_dispatcher_send_back_search_scene_event(
             nfc->nfc_common.view_dispatcher, NfcSceneStart);
         return true;

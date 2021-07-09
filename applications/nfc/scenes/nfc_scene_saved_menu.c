@@ -40,22 +40,22 @@ const bool nfc_scene_saved_menu_on_event(void* context, uint32_t event) {
     if(event == SubmenuIndexEmulate) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_emulate_uid);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexEdit) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexDelete) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexInfo) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     }
 

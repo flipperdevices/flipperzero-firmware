@@ -40,7 +40,7 @@ const bool nfc_scene_save_name_on_event(void* context, uint32_t event) {
         if(nfc_device_save(&nfc->device, "test")) {
             view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_success);
             view_dispatcher_send_navigation_event(
-                nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+                nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         } else {
             view_dispatcher_send_back_search_scene_event(
                 nfc->nfc_common.view_dispatcher, NfcSceneStart);

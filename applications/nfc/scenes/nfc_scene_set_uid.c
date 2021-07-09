@@ -36,7 +36,7 @@ const bool nfc_scene_set_uid_on_event(void* context, uint32_t event) {
     if(event == SCENE_SET_UID_CUSTOM_EVENT) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_name);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     }
     return false;

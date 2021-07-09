@@ -15,7 +15,7 @@ struct ViewDispatcher {
     ViewPort* view_port;
     ViewDict_t views;
     View* current_view;
-    ViewNavigator* view_navigator;
+    SceneManager* scene_manager;
 };
 
 typedef enum {
@@ -31,7 +31,7 @@ typedef struct {
     union {
         InputEvent input;
         uint32_t custom_event;
-        ViewNavigatorEvent navigator_event;
+        SceneManagerEvent navigator_event;
         uint32_t scene_id;
     };
 } ViewDispatcherMessage;

@@ -32,14 +32,14 @@ const bool nfc_scene_mifare_ul_menu_on_event(void* context, uint32_t event) {
     if(event == SubmenuIndexSave) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexEmulate) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
-    } else if(event == ViewNavigatorEventBack) {
+    } else if(event == SceneManagerEventBack) {
         view_dispatcher_send_back_search_scene_event(
             nfc->nfc_common.view_dispatcher, NfcSceneStart);
         return true;

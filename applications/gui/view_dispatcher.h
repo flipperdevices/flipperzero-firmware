@@ -2,7 +2,7 @@
 
 #include "view.h"
 #include "gui.h"
-#include "view_navigator.h"
+#include "scene_manager.h"
 
 #ifdef __cplusplus
 extern "C" {

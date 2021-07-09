@@ -37,8 +37,8 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
         osMessageQueueDelete(view_dispatcher->queue);
     }
     // Free View Navigator
-    if(view_dispatcher->view_navigator) {
-        view_navigator_free(view_dispatcher->view_navigator);
+    if(view_dispatcher->scene_manager) {
+        scene_manager_free(view_dispatcher->scene_manager);
     }
     // Free dispatcher
     free(view_dispatcher);
@@ -52,22 +52,22 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
 
 void view_dispatcher_enable_navigation(ViewDispatcher* view_dispatcher, void* context) {
     furi_assert(view_dispatcher);
-    view_dispatcher->view_navigator = view_navigator_alloc(context);
+    view_dispatcher->scene_manager = scene_manager_alloc(context);
 }
 
 void view_dispatcher_add_scene(ViewDispatcher* view_dispatcher, AppScene* scene) {
     furi_assert(view_dispatcher);
-    furi_assert(view_dispatcher->view_navigator);
+    furi_assert(view_dispatcher->scene_manager);
     furi_assert(scene);
-    view_navigator_add_next_scene(view_dispatcher->view_navigator, scene);
+    scene_manager_add_next_scene(view_dispatcher->scene_manager, scene);
 }
 
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue);
 
-    if(view_dispatcher->view_navigator) {
-        view_navigator_start(view_dispatcher->view_navigator);
+    if(view_dispatcher->scene_manager) {
+        scene_manager_start(view_dispatcher->scene_manager);
     }
 
     ViewDispatcherMessage message;
@@ -79,11 +79,11 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
         } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
         } else if(message.type == ViewDispatcherMessageTypeNavigationEvent) {
-            view_navigator_handle_navigation_event(
-                view_dispatcher->view_navigator, message.navigator_event);
+            scene_manager_handle_navigation_event(
+                view_dispatcher->scene_manager, message.navigator_event);
         } else if(message.type == ViewDispatcherMessageTypeBackSearchScene) {
-            view_navigator_handle_back_search_scene_event(
-                view_dispatcher->view_navigator, message.navigator_event);
+            scene_manager_handle_back_search_scene_event(
+                view_dispatcher->scene_manager, message.navigator_event);
         }
     }
 }
@@ -206,9 +206,9 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         uint32_t view_id = VIEW_IGNORE;
         if(event->key == InputKeyBack) {
             view_id = view_previous(view_dispatcher->current_view);
-            if((view_id == VIEW_IGNORE) && (view_dispatcher->view_navigator)) {
-                is_consumed = view_navigator_handle_navigation_event(
-                    view_dispatcher->view_navigator, ViewNavigatorEventBack);
+            if((view_id == VIEW_IGNORE) && (view_dispatcher->scene_manager)) {
+                is_consumed = scene_manager_handle_navigation_event(
+                    view_dispatcher->scene_manager, SceneManagerEventBack);
                 if(!is_consumed) {
                     view_dispatcher_stop(view_dispatcher);
                     return;
@@ -230,7 +230,7 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     }
     // If custom event is not consumed in View, handle it in Scene
     if(!is_consumed) {
-        is_consumed = view_navigator_handle_custom_event(view_dispatcher->view_navigator, event);
+        is_consumed = scene_manager_handle_custom_event(view_dispatcher->scene_manager, event);
     }
 }
 
@@ -248,7 +248,7 @@ void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t
 void view_dispatcher_send_navigation_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue);
-    furi_assert(view_dispatcher->view_navigator);
+    furi_assert(view_dispatcher->scene_manager);
 
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeNavigationEvent;
@@ -260,7 +260,7 @@ void view_dispatcher_send_navigation_event(ViewDispatcher* view_dispatcher, uint
 void view_dispatcher_send_back_search_scene_event(ViewDispatcher* view_dispatcher, uint32_t event) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue);
-    furi_assert(view_dispatcher->view_navigator);
+    furi_assert(view_dispatcher->scene_manager);
 
     ViewDispatcherMessage message;
     message.type = ViewDispatcherMessageTypeBackSearchScene;

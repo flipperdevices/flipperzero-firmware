@@ -73,12 +73,12 @@ const bool nfc_scene_read_card_success_on_event(void* context, uint32_t event) {
 
     if(event == DialogExResultLeft) {
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventBack);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventBack);
         return true;
     } else if(event == DialogExResultRight) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_card_menu);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     }
     return false;

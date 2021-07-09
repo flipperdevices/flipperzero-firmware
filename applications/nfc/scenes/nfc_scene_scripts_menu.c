@@ -42,12 +42,12 @@ const bool nfc_scene_scripts_menu_on_event(void* context, uint32_t event) {
     if(event == SubmenuIndexBankCard) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_not_implemented);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     } else if(event == SubmenuIndexMifareUltralight) {
         view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_read_mifare_ul);
         view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, ViewNavigatorEventNext);
+            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
         return true;
     }
 
