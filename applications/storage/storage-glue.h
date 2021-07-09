@@ -13,16 +13,8 @@ typedef enum { ST_EXT = 0, ST_INT = 1, ST_ANY, ST_ERROR } StorageType;
 typedef struct StorageData StorageData;
 
 typedef struct {
-    void (*init)(StorageData* context);
-    FS_Error (*status)(StorageData* context);
+    void (*tick)(StorageData* storage);
 } StorageApi;
-
-struct StorageData {
-    FS_Api fs_api;
-    StorageApi api;
-    void* data;
-    osMutexId_t mutex;
-};
 
 typedef struct {
     File* file;
@@ -39,6 +31,7 @@ void storage_file_clear(StorageFile* obj);
 void storage_data_init(StorageData* storage);
 bool storage_data_lock(StorageData* storage);
 bool storage_data_unlock(StorageData* storage);
+FS_Error storage_data_status(StorageData* storage);
 
 ARRAY_DEF(
     StorageFileArray,
@@ -48,10 +41,27 @@ ARRAY_DEF(
      INIT_SET(API_6(storage_file_set)),
      CLEAR(API_2(storage_file_clear))))
 
-StorageType storage_get_type_by_file(const File* file, StorageFileArray_t* array);
+struct StorageData {
+    FS_Api fs_api;
+    StorageApi api;
+    void* data;
+    osMutexId_t mutex;
+    FS_Error status;
+    StorageFileArray_t files;
+};
+
+StorageType storage_get_type_by_file(const File* file, StorageFileArray_t array);
 StorageType storage_get_type_by_path(const char* path);
-bool storage_path_already_open(const char* path, StorageFileArray_t* array);
-StorageFile* storage_get_storage_file(const File* file, StorageFileArray_t* array);
+bool storage_path_already_open(const char* path, StorageFileArray_t array);
+
+void storage_set_storage_file_data(const File* file, void* file_data, StorageData* storage);
+void* storage_get_storage_file_data(const File* file, StorageData* storage);
+
+void storage_push_storage_file(
+    File* file,
+    const char* path,
+    StorageType type,
+    StorageData* storage);
 
 #ifdef __cplusplus
 }

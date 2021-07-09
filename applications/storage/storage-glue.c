@@ -32,8 +32,10 @@ void storage_file_clear(StorageFile* obj) {
 
 void storage_data_init(StorageData* storage) {
     storage->mutex = osMutexNew(NULL);
-    if(storage->mutex == NULL) furi_check(false);
+    furi_check(storage->mutex != NULL);
     storage->data = NULL;
+    storage->status = FSE_NOT_READY;
+    StorageFileArray_init(storage->files);
 }
 
 bool storage_data_lock(StorageData* storage) {
@@ -46,6 +48,16 @@ bool storage_data_unlock(StorageData* storage) {
     return (osMutexRelease(storage->mutex) == osOK);
 }
 
+FS_Error storage_data_status(StorageData* storage) {
+    FS_Error status;
+
+    storage_data_lock(storage);
+    status = storage->status;
+    storage_data_unlock(storage);
+
+    return status;
+}
+
 /****************** helpers ******************/
 
 static void check_path(const char* path) {
@@ -56,12 +68,12 @@ static void check_path(const char* path) {
 
 /****************** storage glue ******************/
 
-StorageType storage_get_type_by_file(const File* file, StorageFileArray_t* array) {
+StorageType storage_get_type_by_file(const File* file, StorageFileArray_t array) {
     StorageType type = ST_ERROR;
 
     StorageFileArray_it_t it;
 
-    for(StorageFileArray_it(it, *array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
+    for(StorageFileArray_it(it, array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
         const StorageFile* storage_file = StorageFileArray_cref(it);
 
         if(storage_file->file->file_id == file->file_id) {
@@ -95,13 +107,13 @@ StorageType storage_get_type_by_path(const char* path) {
     return type;
 }
 
-bool storage_path_already_open(const char* path, StorageFileArray_t* array) {
+bool storage_path_already_open(const char* path, StorageFileArray_t array) {
     bool open = false;
     check_path(path);
 
     StorageFileArray_it_t it;
 
-    for(StorageFileArray_it(it, *array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
+    for(StorageFileArray_it(it, array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
         const StorageFile* storage_file = StorageFileArray_cref(it);
 
         if(string_cmp(storage_file->path, path) == 0) {
@@ -113,12 +125,13 @@ bool storage_path_already_open(const char* path, StorageFileArray_t* array) {
     return open;
 }
 
-StorageFile* storage_get_storage_file(const File* file, StorageFileArray_t* array) {
+void storage_set_storage_file_data(const File* file, void* file_data, StorageData* storage) {
     StorageFile* founded_file = NULL;
 
     StorageFileArray_it_t it;
 
-    for(StorageFileArray_it(it, *array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
+    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
+        StorageFileArray_next(it)) {
         StorageFile* storage_file = StorageFileArray_ref(it);
 
         if(storage_file->file->file_id == file->file_id) {
@@ -127,5 +140,55 @@ StorageFile* storage_get_storage_file(const File* file, StorageFileArray_t* arra
         }
     }
 
-    return founded_file;
+    furi_check(founded_file != NULL);
+
+    founded_file->file_data = file_data;
+}
+
+void* storage_get_storage_file_data(const File* file, StorageData* storage) {
+    const StorageFile* founded_file = NULL;
+
+    StorageFileArray_it_t it;
+
+    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
+        StorageFileArray_next(it)) {
+        const StorageFile* storage_file = StorageFileArray_cref(it);
+
+        if(storage_file->file->file_id == file->file_id) {
+            founded_file = storage_file;
+            break;
+        }
+    }
+
+    furi_check(founded_file != NULL);
+
+    return founded_file->file_data;
+}
+
+void storage_push_storage_file(
+    File* file,
+    const char* path,
+    StorageType type,
+    StorageData* storage) {
+    StorageFile* storage_file = StorageFileArray_push_new(storage->files);
+    furi_check(storage_file != NULL);
+
+    file->file_id = (uint32_t)storage_file;
+    storage_file->file = file;
+    storage_file->type = type;
+    string_set(storage_file->path, path);
+}
+
+void storage_pop_storage_file(File* file, StorageData* storage) {
+    StorageFileArray_it_t it;
+
+    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
+        StorageFileArray_next(it)) {
+        if(StorageFileArray_cref(it)->file->file_id == file->file_id) {
+            break;
+        }
+    }
+
+    furi_check(!StorageFileArray_end_p(it));
+    StorageFileArray_remove(storage->files, it);
 }

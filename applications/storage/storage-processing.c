@@ -15,11 +15,9 @@ static StorageData* storage_get_storage_by_type(StorageApp* app, StorageType typ
 
     if(type == ST_ANY) {
         type = ST_INT;
-        FS_Error ret;
         StorageData* ext_storage = &app->storage[ST_EXT];
-        ST_CALL(ext_storage, status(ext_storage));
 
-        if(ret == FSE_OK) {
+        if(storage_data_status(ext_storage) == FSE_OK) {
             type = ST_EXT;
         }
     }
@@ -45,15 +43,14 @@ bool storage_process_open(
 
     if(storage_type_is_not_valid(type)) {
         file->error_id = FSE_INVALID_NAME;
-    }
-
-    if(storage_path_already_open(path, &app->files)) {
-        file->error_id = FSE_ALREADY_OPEN;
-    }
-
-    if(file->error_id == FSE_OK) {
+    } else {
         storage = storage_get_storage_by_type(app, type);
-        FS_CALL(storage, file.open(storage, file, path, access_mode, open_mode));
+        if(storage_path_already_open(path, &storage->files)) {
+            file->error_id = FSE_ALREADY_OPEN;
+        } else {
+            storage_push_storage_file(file, path, type, storage);
+            FS_CALL(storage, file.open(storage, file, path, access_mode, open_mode));
+        }
     }
 
     return ret;

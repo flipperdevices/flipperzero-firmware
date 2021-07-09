@@ -122,7 +122,7 @@ typedef enum {
     SC_COMMON_MKDIR,
     SC_COMMON_GET_FS_INFO,
     SC_ERROR_GET_DESC,
-    SC_ERROR_GET_INTERNAL_DESC
+    SC_ERROR_GET_INTERNAL_DESC,
 } StorageCommand;
 
 typedef struct {

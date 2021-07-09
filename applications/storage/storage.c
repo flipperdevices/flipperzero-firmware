@@ -2,6 +2,8 @@
 #include "storage-external-api.h"
 #include "storage-message.h"
 #include "storage-processing.h"
+#include "storages/sd-storage.h"
+#include "storages/lfs-storage.h"
 
 #define STORAGE_TICK 1000
 
@@ -39,19 +41,20 @@ StorageApp* storage_app_alloc() {
     app->message_queue = osMessageQueueNew(8, sizeof(StorageMessage), NULL);
     storage_app_fill_api(app);
 
-    StorageFileArray_init(app->files);
-
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         storage_data_init(&app->storage[i]);
     }
 
-    //storage_sd_init(&app->storage[ST_EXT]);
-    //storage_lfs_init(&app->storage[ST_INT]);
+    storage_sd_init(&app->storage[ST_EXT]);
+    storage_lfs_init(&app->storage[ST_INT]);
 
     return app;
 }
 
 void storage_tick(StorageApp* app) {
+    for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
+        app->storage[i].api.tick(&app->storage[i]);
+    }
 }
 
 int32_t storage_app(void* p) {
