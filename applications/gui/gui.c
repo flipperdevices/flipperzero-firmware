@@ -266,9 +266,9 @@ void gui_cli_screen_stream(Cli* cli, string_t args, void* context) {
     // Wait for control events
     while(true) {
         char c = cli_getc(gui->cli);
-        if (c == CliSymbolAsciiEsc) {
+        if(c == CliSymbolAsciiEsc) {
             c = cli_getc(gui->cli);
-            if (c == 'i') {
+            if(c == 'i') {
                 InputEvent input_event;
                 input_event.key = cli_getc(gui->cli);
                 input_event.type = cli_getc(gui->cli);
