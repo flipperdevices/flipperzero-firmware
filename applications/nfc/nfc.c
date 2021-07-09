@@ -1,14 +1,32 @@
 #include "nfc_i.h"
 #include "api-hal-nfc.h"
-#include "app_scene.h"
+
+bool nfc_custom_event_callback(void* context, uint32_t event) {
+    furi_assert(context);
+
+    Nfc* nfc = (Nfc*)context;
+    return scene_manager_handle_custom_event(nfc->scene_manager, event);
+}
+
+bool nfc_navigation_event_callback(void* context) {
+    furi_assert(context);
+
+    Nfc* nfc = (Nfc*)context;
+    return scene_manager_handle_navigation_event(nfc->scene_manager);
+}
 
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
 
     nfc->nfc_common.worker = nfc_worker_alloc();
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
+    nfc->scene_manager = scene_manager_alloc(nfc);
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
-    view_dispatcher_enable_navigation(nfc->nfc_common.view_dispatcher, nfc);
+    view_dispatcher_set_event_callback_context(nfc->nfc_common.view_dispatcher, nfc);
+    view_dispatcher_set_custom_event_callback(
+        nfc->nfc_common.view_dispatcher, nfc_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        nfc->nfc_common.view_dispatcher, nfc_navigation_event_callback);
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");
@@ -96,7 +114,8 @@ Nfc* nfc_alloc() {
     nfc->scene_read_mifare_ul_success = nfc_scene_read_mifare_ul_success_alloc();
     nfc->scene_mifare_ul_menu = nfc_scene_mifare_ul_menu_alloc();
 
-    view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_start);
+    scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_start);
+    scene_manager_start(nfc->scene_manager);
 
     return nfc;
 }
@@ -176,6 +195,9 @@ void nfc_free(Nfc* nfc) {
 
     // View Dispatcher
     view_dispatcher_free(nfc->nfc_common.view_dispatcher);
+
+    // Scene Manager
+    scene_manager_free(nfc->scene_manager);
 
     // GUI
     furi_record_close("gui");

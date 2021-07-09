@@ -10,6 +10,7 @@
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
 #include <cli/cli.h>
 #include <notification/notification-messages.h>
 
@@ -57,6 +58,7 @@ struct Nfc {
     NfcCommon nfc_common;
     Gui* gui;
     NotificationApp* notifications;
+    SceneManager* scene_manager;
     NfcDevice device;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];

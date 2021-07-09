@@ -27,21 +27,19 @@ const void nfc_scene_set_type_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
 }
 
-const bool nfc_scene_set_type_on_event(void* context, uint32_t event) {
+const bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
-    if(event == SubmenuIndexNFCA7) {
-        nfc->device.data.uid_len = 7;
-        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_set_sak);
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
-        return true;
-    } else if(event == SubmenuIndexNFCA4) {
-        nfc->device.data.uid_len = 4;
-        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_set_sak);
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
-        return true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SubmenuIndexNFCA7) {
+            nfc->device.data.uid_len = 7;
+            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_set_sak);
+            return scene_manager_next_scene(nfc->scene_manager);
+        } else if(event.event == SubmenuIndexNFCA4) {
+            nfc->device.data.uid_len = 4;
+            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_set_sak);
+            return scene_manager_next_scene(nfc->scene_manager);
+        }
     }
     return false;
 }

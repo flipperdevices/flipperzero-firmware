@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_scene.h"
+#include <gui/scene_manager.h>
 
 AppScene* nfc_scene_read_card_success_alloc();
 

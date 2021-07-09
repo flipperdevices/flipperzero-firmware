@@ -24,13 +24,13 @@ const void nfc_scene_not_implemented_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewDialogEx);
 }
 
-const bool nfc_scene_not_implemented_on_event(void* context, uint32_t event) {
+const bool nfc_scene_not_implemented_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
-    if(event == DialogExResultLeft) {
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, SceneManagerEventBack);
-        return true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == DialogExResultLeft) {
+            return scene_manager_previous_scene(nfc->scene_manager);
+        }
     }
     return false;
 }

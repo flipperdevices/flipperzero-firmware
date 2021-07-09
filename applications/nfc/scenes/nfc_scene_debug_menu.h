@@ -1,6 +1,6 @@
 #pragma once
 
-#include "app_scene.h"
+#include <gui/scene_manager.h>
 
 AppScene* nfc_scene_debug_menu_alloc();
 

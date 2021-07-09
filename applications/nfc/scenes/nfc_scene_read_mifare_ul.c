@@ -25,16 +25,15 @@ const void nfc_scene_read_mifare_ul_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);
 }
 
-const bool nfc_scene_read_mifare_ul_on_event(void* context, uint32_t event) {
+const bool nfc_scene_read_mifare_ul_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
-    if(event == NfcEventMifareUl) {
-        nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
-        view_dispatcher_add_scene(
-            nfc->nfc_common.view_dispatcher, nfc->scene_read_mifare_ul_success);
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
-        return true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == NfcEventMifareUl) {
+            nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
+            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_read_mifare_ul_success);
+            return scene_manager_next_scene(nfc->scene_manager);
+        }
     }
     return false;
 }

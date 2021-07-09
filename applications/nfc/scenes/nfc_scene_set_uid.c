@@ -30,14 +30,14 @@ const void nfc_scene_set_uid_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewByteInput);
 }
 
-const bool nfc_scene_set_uid_on_event(void* context, uint32_t event) {
+const bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
-    if(event == SCENE_SET_UID_CUSTOM_EVENT) {
-        view_dispatcher_add_scene(nfc->nfc_common.view_dispatcher, nfc->scene_save_name);
-        view_dispatcher_send_navigation_event(
-            nfc->nfc_common.view_dispatcher, SceneManagerEventNext);
-        return true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SCENE_SET_UID_CUSTOM_EVENT) {
+            scene_manager_add_next_scene(nfc->scene_manager, nfc->scene_save_name);
+            return scene_manager_next_scene(nfc->scene_manager);
+        }
     }
     return false;
 }

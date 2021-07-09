@@ -26,13 +26,13 @@ const void nfc_scene_save_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);
 }
 
-const bool nfc_scene_save_success_on_event(void* context, uint32_t event) {
+const bool nfc_scene_save_success_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
-    if(event == SCENE_SAVE_SUCCESS_CUSTOM_EVENT) {
-        view_dispatcher_send_back_search_scene_event(
-            nfc->nfc_common.view_dispatcher, NfcSceneStart);
-        return true;
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SCENE_SAVE_SUCCESS_CUSTOM_EVENT) {
+            return scene_manager_search_previous_scene(nfc->scene_manager, NfcSceneStart);
+        }
     }
     return false;
 }
