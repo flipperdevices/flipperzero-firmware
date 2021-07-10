@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void storage_sd_init(StorageData* storage);
+void storage_int_init(StorageData* storage);
 
 #ifdef __cplusplus
 }

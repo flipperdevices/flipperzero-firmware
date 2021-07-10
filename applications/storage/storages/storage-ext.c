@@ -1,6 +1,6 @@
 #include "fatfs.h"
 #include <filesystem-api-v2.h>
-#include "sd-storage.h"
+#include "storage-ext.h"
 #include <api-hal.h>
 #include "sd-notify.h"
 #include <api-hal-sd.h>
@@ -10,7 +10,7 @@ typedef DIR SDDir;
 typedef FILINFO SDFileInfo;
 typedef FRESULT SDError;
 
-#define TAG "sd-storage"
+#define TAG "storage-ext"
 /********************* Definitions ********************/
 
 typedef struct {
@@ -19,38 +19,38 @@ typedef struct {
     bool sd_was_present;
 } SDData;
 
-static void storage_sd_tick(StorageData* storage);
-static bool storage_sd_file_open(
+static void storage_ext_tick(StorageData* storage);
+static bool storage_ext_file_open(
     void* ctx,
     File* file,
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode);
-static bool storage_sd_file_close(void* ctx, File* file);
-static FS_Error storage_sd_parse_error(SDError error);
+static bool storage_ext_file_close(void* ctx, File* file);
+static FS_Error storage_ext_parse_error(SDError error);
 static uint16_t
-    storage_sd_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read);
+    storage_ext_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read);
 static uint16_t
-    storage_sd_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write);
+    storage_ext_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write);
 
 /******************* Core Functions *******************/
 
-void storage_sd_init(StorageData* storage) {
+void storage_ext_init(StorageData* storage) {
     SDData* sd_data = malloc(sizeof(SDData));
     sd_data->fs = &USERFatFS;
     sd_data->path = "0:/";
     sd_data->sd_was_present = true;
 
     storage->data = sd_data;
-    storage->api.tick = storage_sd_tick;
-    storage->fs_api.file.open = storage_sd_file_open;
-    storage->fs_api.file.close = storage_sd_file_close;
-    storage->fs_api.file.read = storage_sd_file_read;
-    storage->fs_api.file.write = storage_sd_file_write;
+    storage->api.tick = storage_ext_tick;
+    storage->fs_api.file.open = storage_ext_file_open;
+    storage->fs_api.file.close = storage_ext_file_close;
+    storage->fs_api.file.read = storage_ext_file_read;
+    storage->fs_api.file.write = storage_ext_file_write;
 
     hal_sd_detect_init();
 
-    storage_sd_tick(storage);
+    storage_ext_tick(storage);
 }
 
 static bool sd_mount_card(StorageData* storage) {
@@ -128,7 +128,7 @@ static void sd_unmount_card(StorageData* storage) {
     storage_data_unlock(storage);
 }
 
-static void storage_sd_tick(StorageData* storage) {
+static void storage_ext_tick(StorageData* storage) {
     SDData* sd_data = storage->data;
 
     if(sd_data->sd_was_present) {
@@ -168,7 +168,8 @@ static void storage_sd_tick(StorageData* storage) {
 }
 
 /****************** Common Functions ******************/
-static FS_Error storage_sd_parse_error(SDError error) {
+
+static FS_Error storage_ext_parse_error(SDError error) {
     FS_Error result;
     switch(error) {
     case FR_OK:
@@ -205,7 +206,7 @@ static FS_Error storage_sd_parse_error(SDError error) {
 
 /******************* File Functions *******************/
 
-static bool storage_sd_file_open(
+static bool storage_ext_file_open(
     void* ctx,
     File* file,
     const char* path,
@@ -226,35 +227,35 @@ static bool storage_sd_file_open(
     storage_set_storage_file_data(file, file_data, storage);
 
     file->internal_error_id = f_open(file_data, path, _mode);
-    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
 
-static bool storage_sd_file_close(void* ctx, File* file) {
+static bool storage_ext_file_close(void* ctx, File* file) {
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
     file->internal_error_id = f_close(file_data);
-    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
     free(file_data);
     return (file->error_id == FSE_OK);
 }
 
 static uint16_t
-    storage_sd_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read) {
+    storage_ext_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read) {
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
     uint16_t bytes_readed = 0;
     file->internal_error_id = f_read(file_data, buff, bytes_to_read, &bytes_readed);
-    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
     return bytes_readed;
 }
 
 static uint16_t
-    storage_sd_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write) {
+    storage_ext_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write) {
     StorageData* storage = ctx;
     SDFile* file_data = storage_get_storage_file_data(file, storage);
     uint16_t bytes_written = 0;
     file->internal_error_id = f_write(file_data, buff, bytes_to_write, &bytes_written);
-    file->error_id = storage_sd_parse_error(file->internal_error_id);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
     return bytes_written;
 }
