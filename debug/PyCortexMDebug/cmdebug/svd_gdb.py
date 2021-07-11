@@ -23,8 +23,7 @@ import sys
 import struct
 import pkg_resources
 
-sys.path.append(".")
-from cmdebug.svd import SVDFile
+from .svd import SVDFile
 
 BITS_TO_UNPACK_FORMAT = {
     8: "B",
