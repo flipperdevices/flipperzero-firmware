@@ -22,6 +22,7 @@ RUN apt-get update && \
         python \
         python-dev \
         python-pip \
+        python-setuptools \
         python3 \
         imagemagick \
         srecord \
@@ -29,6 +30,9 @@ RUN apt-get update && \
         pkg-config \
         dfu-util \
         && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN pip install lxml
+
 
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 RUN wget --progress=dot:giga -O - "https://apt.llvm.org/llvm-snapshot.gpg.key" | apt-key add - && add-apt-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-12 main"
