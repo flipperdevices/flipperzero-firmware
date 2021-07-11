@@ -52,7 +52,7 @@ const char* remove_vfs(const char* path) {
     return path + 4;
 }
 
-bool storage_process_open(
+bool storage_process_file_open(
     StorageApp* app,
     File* file,
     const char* path,
@@ -78,7 +78,7 @@ bool storage_process_open(
     return ret;
 }
 
-bool storage_process_close(StorageApp* app, File* file) {
+bool storage_process_file_close(StorageApp* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
     FS_CALL(storage, file.close(storage, file));
@@ -86,15 +86,18 @@ bool storage_process_close(StorageApp* app, File* file) {
     return ret;
 }
 
-static uint16_t
-    storage_sd_file_read(StorageApp* app, File* file, void* buff, uint16_t const bytes_to_read) {
+static uint16_t storage_process_file_read(
+    StorageApp* app,
+    File* file,
+    void* buff,
+    uint16_t const bytes_to_read) {
     uint16_t ret = 0;
     StorageData* storage = get_storage_by_file(file, app->storage);
     FS_CALL(storage, file.read(storage, file, buff, bytes_to_read));
     return ret;
 }
 
-static uint16_t storage_sd_file_write(
+static uint16_t storage_process_file_write(
     StorageApp* app,
     File* file,
     const void* buff,
@@ -105,10 +108,56 @@ static uint16_t storage_sd_file_write(
     return ret;
 }
 
+static bool storage_process_file_seek(
+    StorageApp* app,
+    File* file,
+    const uint32_t offset,
+    const bool from_start) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.seek(storage, file, offset, from_start));
+    return ret;
+}
+
+static uint64_t storage_process_file_tell(StorageApp* app, File* file) {
+    uint64_t ret = 0;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.tell(storage, file));
+    return ret;
+}
+
+static bool storage_process_file_truncate(StorageApp* app, File* file) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.truncate(storage, file));
+    return ret;
+}
+
+static bool storage_process_file_sync(StorageApp* app, File* file) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.sync(storage, file));
+    return ret;
+}
+
+static uint64_t storage_process_file_size(StorageApp* app, File* file) {
+    uint64_t ret = 0;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.size(storage, file));
+    return ret;
+}
+
+static bool storage_process_file_eof(StorageApp* app, File* file) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, file.eof(storage, file));
+    return ret;
+}
+
 void storage_process_message(StorageApp* app, StorageMessage* message) {
     switch(message->command) {
     case StorageCommandFileOpen:
-        message->return_data->bool_value = storage_process_open(
+        message->return_data->bool_value = storage_process_file_open(
             app,
             message->data->fopen.file,
             message->data->fopen.path,
@@ -116,21 +165,48 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
             message->data->fopen.open_mode);
         break;
     case StorageCommandFileClose:
-        message->return_data->bool_value = storage_process_close(app, message->data->fopen.file);
+        message->return_data->bool_value =
+            storage_process_file_close(app, message->data->fopen.file);
         break;
     case StorageCommandFileRead:
-        message->return_data->uint16_value = storage_sd_file_read(
+        message->return_data->uint16_value = storage_process_file_read(
             app,
             message->data->fread.file,
             message->data->fread.buff,
             message->data->fread.bytes_to_read);
         break;
     case StorageCommandFileWrite:
-        message->return_data->uint16_value = storage_sd_file_write(
+        message->return_data->uint16_value = storage_process_file_write(
             app,
             message->data->fwrite.file,
             message->data->fwrite.buff,
             message->data->fwrite.bytes_to_write);
+        break;
+    case StorageCommandFileSeek:
+        message->return_data->bool_value = storage_process_file_seek(
+            app,
+            message->data->fseek.file,
+            message->data->fseek.offset,
+            message->data->fseek.from_start);
+        break;
+    case StorageCommandFileTell:
+        message->return_data->uint64_value =
+            storage_process_file_tell(app, message->data->file.file);
+        break;
+    case StorageCommandFileTruncate:
+        message->return_data->bool_value =
+            storage_process_file_truncate(app, message->data->file.file);
+        break;
+    case StorageCommandFileSync:
+        message->return_data->bool_value =
+            storage_process_file_sync(app, message->data->file.file);
+        break;
+    case StorageCommandFileSize:
+        message->return_data->uint64_value =
+            storage_process_file_size(app, message->data->file.file);
+        break;
+    case StorageCommandFileEof:
+        message->return_data->bool_value = storage_process_file_eof(app, message->data->file.file);
         break;
     default:
         break;

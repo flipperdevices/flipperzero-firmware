@@ -11,19 +11,6 @@ typedef struct {
     lfs_t lfs;
 } LFSData;
 
-static FS_Error storage_int_parse_error(int error);
-static bool storage_int_file_open(
-    void* ctx,
-    File* file,
-    const char* path,
-    FS_AccessMode access_mode,
-    FS_OpenMode open_mode);
-static bool storage_int_file_close(void* ctx, File* file);
-static uint16_t
-    storage_int_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read);
-static uint16_t
-    storage_int_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write);
-
 /* INTERNALS */
 
 static int storage_int_device_read(
@@ -175,29 +162,6 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     }
 }
 
-void storage_int_init(StorageData* storage) {
-    FURI_LOG_I(TAG, "Starting");
-    LFSData* lfs_data = storage_int_lfs_data_alloc();
-    FURI_LOG_I(
-        TAG,
-        "Config: start %p, read %d, write %d, page size: %d, page count: %d, cycles: %d",
-        lfs_data->start_address,
-        lfs_data->config.read_size,
-        lfs_data->config.prog_size,
-        lfs_data->config.block_size,
-        lfs_data->config.block_count,
-        lfs_data->config.block_cycles);
-
-    storage_int_lfs_mount(lfs_data, storage);
-
-    storage->data = lfs_data;
-    storage->api.tick = NULL;
-    storage->fs_api.file.open = storage_int_file_open;
-    storage->fs_api.file.close = storage_int_file_close;
-    storage->fs_api.file.read = storage_int_file_read;
-    storage->fs_api.file.write = storage_int_file_write;
-}
-
 /****************** Common Functions ******************/
 
 static FS_Error storage_int_parse_error(int error) {
@@ -307,8 +271,9 @@ static uint16_t
     file->internal_error_id = lfs_file_read(&lfs_data->lfs, file_data, buff, bytes_to_read);
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
-    if(file->internal_error_id >= 0) {
+    if(file->error_id == FSE_OK) {
         bytes_readed = file->internal_error_id;
+        file->internal_error_id = 0;
     }
     return bytes_readed;
 }
@@ -323,8 +288,145 @@ static uint16_t
     file->internal_error_id = lfs_file_write(&lfs_data->lfs, file_data, buff, bytes_to_write);
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
-    if(file->internal_error_id >= 0) {
+    if(file->error_id == FSE_OK) {
         bytes_written = file->internal_error_id;
+        file->internal_error_id = 0;
     }
     return bytes_written;
+}
+
+static bool
+    storage_int_file_seek(void* ctx, File* file, const uint32_t offset, const bool from_start) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    if(from_start) {
+        file->internal_error_id = lfs_file_seek(&lfs_data->lfs, file_data, offset, LFS_SEEK_SET);
+    } else {
+        file->internal_error_id = lfs_file_seek(&lfs_data->lfs, file_data, offset, LFS_SEEK_CUR);
+    }
+
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
+static uint64_t storage_int_file_tell(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_file_tell(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+
+    int32_t position = 0;
+    if(file->error_id == FSE_OK) {
+        position = file->internal_error_id;
+        file->internal_error_id = 0;
+    }
+
+    return position;
+}
+
+static bool storage_int_file_truncate(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_file_tell(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+
+    if(file->error_id == FSE_OK) {
+        uint32_t position = file->internal_error_id;
+        file->internal_error_id = lfs_file_truncate(&lfs_data->lfs, file_data, position);
+        file->error_id = storage_int_parse_error(file->internal_error_id);
+    }
+
+    return (file->error_id == FSE_OK);
+}
+
+static bool storage_int_file_sync(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_file_sync(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
+static uint64_t storage_int_file_size(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_file_size(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+
+    uint32_t size = 0;
+    if(file->error_id == FSE_OK) {
+        size = file->internal_error_id;
+        file->internal_error_id = 0;
+    }
+
+    return size;
+}
+
+static bool storage_int_file_eof(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+
+    bool eof = false;
+    int32_t position = lfs_file_tell(&lfs_data->lfs, file_data);
+    int32_t size = lfs_file_size(&lfs_data->lfs, file_data);
+
+    if(position < 0) {
+        file->internal_error_id = position;
+    } else if(size < 0) {
+        file->internal_error_id = size;
+    } else {
+        file->error_id = FSE_OK;
+        eof = (position >= size);
+    }
+
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    return eof;
+}
+
+/******************* Dir Functions *******************/
+
+/******************* Common FS Functions *******************/
+
+/******************* Error Reporting Functions *******************/
+
+/******************* Init Storage *******************/
+
+void storage_int_init(StorageData* storage) {
+    FURI_LOG_I(TAG, "Starting");
+    LFSData* lfs_data = storage_int_lfs_data_alloc();
+    FURI_LOG_I(
+        TAG,
+        "Config: start %p, read %d, write %d, page size: %d, page count: %d, cycles: %d",
+        lfs_data->start_address,
+        lfs_data->config.read_size,
+        lfs_data->config.prog_size,
+        lfs_data->config.block_size,
+        lfs_data->config.block_count,
+        lfs_data->config.block_cycles);
+
+    storage_int_lfs_mount(lfs_data, storage);
+
+    storage->data = lfs_data;
+    storage->api.tick = NULL;
+    storage->fs_api.file.open = storage_int_file_open;
+    storage->fs_api.file.close = storage_int_file_close;
+    storage->fs_api.file.read = storage_int_file_read;
+    storage->fs_api.file.write = storage_int_file_write;
+    storage->fs_api.file.seek = storage_int_file_seek;
+    storage->fs_api.file.tell = storage_int_file_tell;
+    storage->fs_api.file.truncate = storage_int_file_truncate;
+    storage->fs_api.file.size = storage_int_file_size;
+    storage->fs_api.file.sync = storage_int_file_sync;
+    storage->fs_api.file.eof = storage_int_file_eof;
 }
