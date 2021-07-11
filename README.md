@@ -36,14 +36,52 @@ It will compile a project for the `F4` family by default, but you can also compi
 
 # Usage
 
-First of all you need to configure toolchain and library paths using CMake variables. 
-You can do this by passing values through command line during cmake run or by setting variables inside your `CMakeLists.txt`
+First of all you need to configure toolchain and library paths using CMake variables. There are
+generally three ways to do this:
+
+1. Pass the variables through command line during cmake run with passed to CMake with 
+   `-D<VAR_NAME>=...`
+2. Set the variables inside your `CMakeLists.txt`
+3. Pass these variables to CMake by setting them as environmental variables. 
+
+The most important set of variables which needs to be set can be found in the following section.
 
 ## Configuration
 
+These configuration options need to be set for the build process to work properly:
+
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`
+* `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
+   of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
+
+These configuration variables are optional:
+
 * `TARGET_TRIPLET` - toolchain target triplet, **default**: `arm-none-eabi`
-* `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
+* `FREERTOS_PATH` - Path to the FreeRTOS kernel when compiling with a RTOS. Does not need to be
+   specified when using CMSIS
+
+### Helper script on Unix shells
+
+If you have access to a Unix shell, which is the default terminal on Linux, or tools like
+`MinGW64` or `git bash` on Windows, you can write a small `path_helper.sh` script like this:
+
+```sh
+export STM32_TOOLCHAIN_PATH="<ToolchainPath>"
+export TARGET_TRIPLET=arm-none-eabi
+export STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
+```
+
+and then use `. path_helper.sh` to set up the environment for the local terminal instance in one go.
+
+### Helper script in Powershell
+
+On Windows, you can use a Powershell script `path_helper.ps1`to set up the environment:
+
+```sh
+$env:STM32_TOOLCHAIN_PATH = "<ToolchainPath>"
+$env:TARGET_TRIPLET = arm-none-eabi
+$env:STM32_CUBE_<FAMILY>_PATH="<PathToCubeRoot>"
+```
 
 ## Common usage
 
@@ -155,9 +193,14 @@ CMSIS package will generate linker script for your device automatically (target 
 
 stm32-cmake contains additional CMake modules for finding and configuring various libraries and RTOSes used in the embedded world.
 
-## FreeRTOS
+## <a id="freertos"></a> FreeRTOS
 
-[cmake/FindFreeRTOS](cmake/FindFreeRTOS) - finds FreeRTOS sources in location specified by `FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets. `FREERTOS_PATH` can be either the path to the whole [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release)
+[cmake/FindFreeRTOS](cmake/FindFreeRTOS.cmake) - finds FreeRTOS sources in location specified by
+`FREERTOS_PATH` (*default*: `/opt/FreeRTOS`) variable and format them as `IMPORTED` targets.
+`FREERTOS_PATH` can be either the path to the whole
+[FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
+FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
+You can supply `FREERTOS_PATH` as an environmental variable as well.
 
 Typical usage:
 
