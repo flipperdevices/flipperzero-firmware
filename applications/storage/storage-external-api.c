@@ -55,7 +55,7 @@ bool s_api_file_open(
             .open_mode = open_mode,
         }};
 
-    S_API_MESSAGE(SC_FILE_OPEN);
+    S_API_MESSAGE(StorageCommandFileOpen);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -63,7 +63,7 @@ bool s_api_file_open(
 bool s_api_file_close(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_CLOSE);
+    S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -78,7 +78,7 @@ uint16_t s_api_file_read(void* context, File* file, void* buff, uint16_t bytes_t
             .bytes_to_read = bytes_to_read,
         }};
 
-    S_API_MESSAGE(SC_FILE_READ);
+    S_API_MESSAGE(StorageCommandFileRead);
     S_API_EPILOGUE;
     return S_RETURN_UINT16;
 }
@@ -93,7 +93,7 @@ uint16_t s_api_file_write(void* context, File* file, const void* buff, uint16_t 
             .bytes_to_write = bytes_to_write,
         }};
 
-    S_API_MESSAGE(SC_FILE_WRITE);
+    S_API_MESSAGE(StorageCommandFileWrite);
     S_API_EPILOGUE;
     return S_RETURN_UINT16;
 }
@@ -108,7 +108,7 @@ bool s_api_file_seek(void* context, File* file, uint32_t offset, bool from_start
             .from_start = from_start,
         }};
 
-    S_API_MESSAGE(SC_FILE_SEEK);
+    S_API_MESSAGE(StorageCommandFileSeek);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -116,7 +116,7 @@ bool s_api_file_seek(void* context, File* file, uint32_t offset, bool from_start
 uint64_t s_api_file_tell(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_TELL);
+    S_API_MESSAGE(StorageCommandFileTell);
     S_API_EPILOGUE;
     return S_RETURN_UINT64;
 }
@@ -124,7 +124,7 @@ uint64_t s_api_file_tell(void* context, File* file) {
 bool s_api_file_truncate(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_TRUNCATE);
+    S_API_MESSAGE(StorageCommandFileTruncate);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -132,7 +132,7 @@ bool s_api_file_truncate(void* context, File* file) {
 uint64_t s_api_file_size(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_SIZE);
+    S_API_MESSAGE(StorageCommandFileSize);
     S_API_EPILOGUE;
     return S_RETURN_UINT64;
 }
@@ -140,7 +140,7 @@ uint64_t s_api_file_size(void* context, File* file) {
 bool s_api_file_sync(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_SYNC);
+    S_API_MESSAGE(StorageCommandFileSync);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -148,7 +148,7 @@ bool s_api_file_sync(void* context, File* file) {
 bool s_api_file_eof(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_FILE_EOF);
+    S_API_MESSAGE(StorageCommandFileEof);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -164,7 +164,7 @@ bool s_api_dir_open(void* context, File* file, const char* path) {
             .path = path,
         }};
 
-    S_API_MESSAGE(SC_DIR_OPEN);
+    S_API_MESSAGE(StorageCommandFirOpen);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -172,7 +172,7 @@ bool s_api_dir_open(void* context, File* file, const char* path) {
 bool s_api_dir_close(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_DIR_CLOSE);
+    S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -193,7 +193,7 @@ bool s_api_dir_read(
             .name_length = name_length,
         }};
 
-    S_API_MESSAGE(SC_DIR_READ);
+    S_API_MESSAGE(StorageCommandDirRead);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -201,7 +201,7 @@ bool s_api_dir_read(
 bool s_api_dir_rewind(void* context, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
-    S_API_MESSAGE(SC_DIR_REWIND);
+    S_API_MESSAGE(StorageCommandDirRewind);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }
@@ -224,7 +224,7 @@ FS_Error s_api_common_info(
             .name_length = name_length,
         }};
 
-    S_API_MESSAGE(SC_COMMON_INFO);
+    S_API_MESSAGE(StorageCommandCommonInfo);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -232,7 +232,7 @@ FS_Error s_api_common_info(
 FS_Error s_api_common_remove(void* context, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
-    S_API_MESSAGE(SC_COMMON_REMOVE);
+    S_API_MESSAGE(StorageCommandCommonRemove);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -246,7 +246,7 @@ FS_Error s_api_common_rename(void* context, const char* old_path, const char* ne
             .new_path = new_path,
         }};
 
-    S_API_MESSAGE(SC_COMMON_RENAME);
+    S_API_MESSAGE(StorageCommandCommonRename);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -254,7 +254,7 @@ FS_Error s_api_common_rename(void* context, const char* old_path, const char* ne
 FS_Error s_api_common_mkdir(void* context, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
-    S_API_MESSAGE(SC_COMMON_MKDIR);
+    S_API_MESSAGE(StorageCommandCommonMkDir);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -273,7 +273,7 @@ FS_Error s_api_common_get_fs_info(
             .free_space = free_space,
         }};
 
-    S_API_MESSAGE(SC_COMMON_GET_FS_INFO);
+    S_API_MESSAGE(StorageCommandCommonGetFSInfo);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -286,7 +286,7 @@ const char* s_api_error_get_desc(void* context, FS_Error error_id) {
         .error = {
             .id = error_id,
         }};
-    S_API_MESSAGE(SC_ERROR_GET_DESC);
+    S_API_MESSAGE(StorageCommandErrorGetDesc);
     S_API_EPILOGUE;
     return S_RETURN_CSTRING;
 }
@@ -297,7 +297,7 @@ const char* s_api_error_get_internal_desc(void* context, uint32_t internal_error
         .error = {
             .id = internal_error_id,
         }};
-    S_API_MESSAGE(SC_ERROR_GET_INTERNAL_DESC);
+    S_API_MESSAGE(StorageCommandCommonGetInternalDesc);
     S_API_EPILOGUE;
     return S_RETURN_CSTRING;
 }

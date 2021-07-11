@@ -107,7 +107,7 @@ static uint16_t storage_sd_file_write(
 
 void storage_process_message(StorageApp* app, StorageMessage* message) {
     switch(message->command) {
-    case SC_FILE_OPEN:
+    case StorageCommandFileOpen:
         message->return_data->bool_value = storage_process_open(
             app,
             message->data->fopen.file,
@@ -115,17 +115,17 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
             message->data->fopen.access_mode,
             message->data->fopen.open_mode);
         break;
-    case SC_FILE_CLOSE:
+    case StorageCommandFileClose:
         message->return_data->bool_value = storage_process_close(app, message->data->fopen.file);
         break;
-    case SC_FILE_READ:
+    case StorageCommandFileRead:
         message->return_data->uint16_value = storage_sd_file_read(
             app,
             message->data->fread.file,
             message->data->fread.buff,
             message->data->fread.bytes_to_read);
         break;
-    case SC_FILE_WRITE:
+    case StorageCommandFileWrite:
         message->return_data->uint16_value = storage_sd_file_write(
             app,
             message->data->fwrite.file,
