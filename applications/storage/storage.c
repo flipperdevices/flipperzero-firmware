@@ -31,7 +31,6 @@ void storage_app_fill_api(StorageApp* app) {
     app->external_api.common.get_fs_info = s_api_common_get_fs_info;
 
     app->external_api.error.get_desc = s_api_error_get_desc;
-    app->external_api.error.get_internal_desc = s_api_error_get_internal_desc;
 
     app->external_api.context = app;
 }

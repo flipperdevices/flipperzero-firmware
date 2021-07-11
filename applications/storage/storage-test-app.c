@@ -9,7 +9,7 @@
 #define SEEK_OFFSET_INCREASE 12
 #define SEEK_OFFSET_SUM (SEEK_OFFSET_FROM_START + SEEK_OFFSET_INCREASE)
 
-static void do_test(FS_Api* api, const char* path) {
+static void do_file_test(FS_Api* api, const char* path) {
     File file;
     bool result;
     uint8_t bytes[BYTES_COUNT + 1];
@@ -24,13 +24,13 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file open");
     } else {
-        FURI_LOG_E(TAG, "file open, %d", file.error_id);
+        FURI_LOG_E(TAG, "file open, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // write
     bytes_count = api->file.write(api->context, &file, TEST_STRING, strlen(TEST_STRING));
     if(bytes_count == 0) {
-        FURI_LOG_E(TAG, "file write, %d", file.error_id);
+        FURI_LOG_E(TAG, "file write, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         FURI_LOG_I(TAG, "file write");
     }
@@ -40,7 +40,7 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file sync");
     } else {
-        FURI_LOG_E(TAG, "file sync, %d", file.error_id);
+        FURI_LOG_E(TAG, "file sync, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // eof #1
@@ -48,7 +48,7 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file eof #1");
     } else {
-        FURI_LOG_E(TAG, "file eof #1, %d", file.error_id);
+        FURI_LOG_E(TAG, "file eof #1, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // seek from start and tell
@@ -56,11 +56,11 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file seek #1");
     } else {
-        FURI_LOG_E(TAG, "file seek #1, %d", file.error_id);
+        FURI_LOG_E(TAG, "file seek #1, %s", api->error.get_desc(api->context, file.error_id));
     }
     position = api->file.tell(api->context, &file);
     if(position != SEEK_OFFSET_FROM_START) {
-        FURI_LOG_E(TAG, "file tell #1, %d", file.error_id);
+        FURI_LOG_E(TAG, "file tell #1, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         FURI_LOG_I(TAG, "file tell #1");
     }
@@ -68,7 +68,7 @@ static void do_test(FS_Api* api, const char* path) {
     // size
     size = api->file.size(api->context, &file);
     if(size != strlen(TEST_STRING)) {
-        FURI_LOG_E(TAG, "file size #1, %d", file.error_id);
+        FURI_LOG_E(TAG, "file size #1, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         FURI_LOG_I(TAG, "file size #1");
     }
@@ -78,11 +78,11 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file seek #2");
     } else {
-        FURI_LOG_E(TAG, "file seek #2, %d", file.error_id);
+        FURI_LOG_E(TAG, "file seek #2, %s", api->error.get_desc(api->context, file.error_id));
     }
     position = api->file.tell(api->context, &file);
     if(position != SEEK_OFFSET_SUM) {
-        FURI_LOG_E(TAG, "file tell #2, %d", file.error_id);
+        FURI_LOG_E(TAG, "file tell #2, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         FURI_LOG_I(TAG, "file tell #2");
     }
@@ -92,7 +92,7 @@ static void do_test(FS_Api* api, const char* path) {
     if(!result) {
         FURI_LOG_I(TAG, "file eof #2");
     } else {
-        FURI_LOG_E(TAG, "file eof #2, %d", file.error_id);
+        FURI_LOG_E(TAG, "file eof #2, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // truncate
@@ -100,11 +100,11 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file truncate");
     } else {
-        FURI_LOG_E(TAG, "file truncate, %d", file.error_id);
+        FURI_LOG_E(TAG, "file truncate, %s", api->error.get_desc(api->context, file.error_id));
     }
     size = api->file.size(api->context, &file);
     if(size != SEEK_OFFSET_SUM) {
-        FURI_LOG_E(TAG, "file size #2, %d", file.error_id);
+        FURI_LOG_E(TAG, "file size #2, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         FURI_LOG_I(TAG, "file size #2");
     }
@@ -114,7 +114,7 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file close");
     } else {
-        FURI_LOG_E(TAG, "file close, %d", file.error_id);
+        FURI_LOG_E(TAG, "file close, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // open
@@ -122,14 +122,14 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file open");
     } else {
-        FURI_LOG_E(TAG, "file open, %d", file.error_id);
+        FURI_LOG_E(TAG, "file open, %s", api->error.get_desc(api->context, file.error_id));
     }
 
     // read
     memset(bytes, 0, BYTES_COUNT + 1);
     bytes_count = api->file.read(api->context, &file, bytes, BYTES_COUNT);
     if(bytes_count == 0) {
-        FURI_LOG_E(TAG, "file read, %d", file.error_id);
+        FURI_LOG_E(TAG, "file read, %s", api->error.get_desc(api->context, file.error_id));
     } else {
         if(memcmp(TEST_STRING, bytes, bytes_count) == 0) {
             FURI_LOG_I(TAG, "file read");
@@ -143,16 +143,16 @@ static void do_test(FS_Api* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "file close");
     } else {
-        FURI_LOG_E(TAG, "file close, %d", file.error_id);
+        FURI_LOG_E(TAG, "file close, %s", api->error.get_desc(api->context, file.error_id));
     }
 }
 
 int32_t storage_app_test(void* p) {
     FS_Api* api = furi_record_open("storage");
 
-    do_test(api, "/int/test.txt");
-    do_test(api, "/any/test.txt");
-    do_test(api, "/ext/test.txt");
+    do_file_test(api, "/int/test.txt");
+    do_file_test(api, "/any/test.txt");
+    do_file_test(api, "/ext/test.txt");
 
     while(true) {
         delay(1000);

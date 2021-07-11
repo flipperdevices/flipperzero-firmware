@@ -122,7 +122,6 @@ typedef enum {
     StorageCommandCommonMkDir,
     StorageCommandCommonGetFSInfo,
     StorageCommandErrorGetDesc,
-    StorageCommandCommonGetInternalDesc,
 } StorageCommand;
 
 typedef struct {

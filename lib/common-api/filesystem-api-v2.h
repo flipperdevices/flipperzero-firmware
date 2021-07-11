@@ -271,11 +271,6 @@ typedef struct {
  *      @brief Get error description text
  *      @param error_id FS_Error error id (for fire/dir functions result can be obtained from File.error_id)
  *      @return pointer to description text
- * 
- *  @var FS_Error_Api::get_internal_desc
- *      @brief Get internal error description text
- *      @param internal_error_id error id (for fire/dir functions result can be obtained from File.internal_error_id)
- *      @return pointer to description text
  */
 
 /**
@@ -283,7 +278,6 @@ typedef struct {
  */
 typedef struct {
     const char* (*get_desc)(void* context, FS_Error error_id);
-    const char* (*get_internal_desc)(void* context, uint32_t internal_error_id);
 } FS_Error_Api;
 
 /**

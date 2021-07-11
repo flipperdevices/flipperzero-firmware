@@ -290,14 +290,3 @@ const char* s_api_error_get_desc(void* context, FS_Error error_id) {
     S_API_EPILOGUE;
     return S_RETURN_CSTRING;
 }
-
-const char* s_api_error_get_internal_desc(void* context, uint32_t internal_error_id) {
-    S_API_PROLOGUE;
-    SAData data = {
-        .error = {
-            .id = internal_error_id,
-        }};
-    S_API_MESSAGE(StorageCommandCommonGetInternalDesc);
-    S_API_EPILOGUE;
-    return S_RETURN_CSTRING;
-}
