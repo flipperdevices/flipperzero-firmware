@@ -25,22 +25,17 @@ import traceback
 import re
 import warnings
 
-from typing import Dict, Tuple, Any, Iterable, Union
-
 
 class SmartDict:
     """
     Dictionary for search by case-insensitive lookup and/or prefix lookup
     """
 
-    od: OrderedDict
-    casemap: Dict[str, Any]
-
-    def __init__(self) -> None:
+    def __init__(self):
         self.od = OrderedDict()
         self.casemap = {}
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key):
         if key in self.od:
             return self.od[key]
 
@@ -49,61 +44,63 @@ class SmartDict:
 
         return self.od[self.prefix_match(key)]
 
-    def is_ambiguous(self, key: str) -> bool:
+    def is_ambiguous(self, key):
         return (
             key not in self.od
             and key not in self.casemap
             and len(list(self.prefix_match_iter(key))) > 1
         )
 
-    def prefix_match_iter(self, key: str) -> Any:
+    def prefix_match_iter(self, key):
         name, number = re.match(r"^(.*?)([0-9]*)$", key.lower()).groups()
         for entry, od_key in self.casemap.items():
             if entry.startswith(name) and entry.endswith(number):
                 yield od_key
 
-    def prefix_match(self, key: str) -> Any:
+    def prefix_match(self, key):
         for od_key in self.prefix_match_iter(key):
             return od_key
         return None
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key, value):
         if key in self.od:
-            warnings.warn(f"Duplicate entry {key}")
+            warnings.warn("Duplicate entry %s", key)
         elif key.lower() in self.casemap:
             warnings.warn(
-                f"Entry {key} differs from duplicate {self.casemap[key.lower()]} only in cAsE"
+                "Entry %s differs from duplicate %s only in cAsE",
+                key,
+                self.casemap[key.lower()],
             )
 
         self.casemap[key.lower()] = key
         self.od[key] = value
 
-    def __delitem__(self, key: str) -> None:
+    def __delitem__(self, key):
         if (
             self.casemap[key.lower()] == key
         ):  # Check that we did not overwrite this entry
             del self.casemap[key.lower()]
         del self.od[key]
 
-    def __contains__(self, key: str) -> bool:
+    def __contains__(self, key):
         return key in self.od or key.lower() in self.casemap or self.prefix_match(key)
 
-    def __iter__(self) -> Iterable[Any]:
+    def __iter__(self):
         return iter(self.od)
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.od)
 
-    def items(self) -> Iterable[Tuple[str, Any]]:
+    def items(self):
         return self.od.items()
 
-    def keys(self) -> Iterable[Any]:
+    def keys(self):
         return self.od.keys()
 
-    def values(self) -> Iterable[Any]:
+    def values(self):
         return self.od.values()
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.od)
 
 
@@ -112,11 +109,11 @@ class SVDNonFatalError(Exception):
     So far, these have related to quirks in some vendor SVD files which are reasonable to ignore
     """
 
-    def __init__(self, m: str) -> None:
+    def __init__(self, m):
         self.m = m
         self.exc_info = sys.exc_info()
 
-    def __str__(self) -> str:
+    def __str__(self):
         s = "Non-fatal: {}".format(self.m)
         s += "\n" + str("".join(traceback.format_exc())).strip()
         return s
@@ -127,10 +124,7 @@ class SVDFile:
     A parsed SVD file
     """
 
-    peripherals: SmartDict
-    base_address: int
-
-    def __init__(self, fname: str) -> None:
+    def __init__(self, fname):
         """
 
         Args:
@@ -154,7 +148,7 @@ class SVDFile:
                 print(e)
 
 
-def add_register(parent: Union["SVDPeripheral", "SVDRegisterCluster"], node):
+def add_register(parent, node):
     """
     Add a register node to a peripheral
 
@@ -186,12 +180,12 @@ def add_register(parent: Union["SVDPeripheral", "SVDRegisterCluster"], node):
                 parent.registers[name] = reg
             else:
                 if hasattr(node, "alternateGroup"):
-                    print(f"Register {name} has an alternate group")
+                    print("Register %s has an alternate group", name)
         except SVDNonFatalError as e:
             print(e)
 
 
-def add_cluster(parent: "SVDPeripheral", node) -> None:
+def add_cluster(parent, node):
     """
     Add a register cluster to a peripheral
     """
@@ -223,16 +217,7 @@ class SVDRegisterCluster:
     Register cluster
     """
 
-    parent_base_address: int
-    parent_name: str
-    address_offset: int
-    base_address: int
-    description: str
-    name: str
-    registers: SmartDict
-    clusters: SmartDict
-
-    def __init__(self, svd_elem, parent: "SVDPeripheral"):
+    def __init__(self, svd_elem, parent):
         """
 
         Args:
@@ -253,7 +238,7 @@ class SVDRegisterCluster:
             if r.tag == "register":
                 add_register(self, r)
 
-    def refactor_parent(self, parent: "SVDPeripheral"):
+    def refactor_parent(self, parent):
         self.parent_base_address = parent.base_address
         self.parent_name = parent.name
         self.base_address = self.parent_base_address + self.address_offset
@@ -270,11 +255,7 @@ class SVDPeripheral:
     This is a peripheral as defined in the SVD file
     """
 
-    parent_base_address: int
-    name: str
-    description: str
-
-    def __init__(self, svd_elem, parent: SVDFile) -> None:
+    def __init__(self, svd_elem, parent):
         """
 
         Args:
@@ -285,7 +266,7 @@ class SVDPeripheral:
 
         # Look for a base address, as it is required
         if not hasattr(svd_elem, "baseAddress"):
-            raise SVDNonFatalError(f"Periph without base address")
+            raise SVDNonFatalError("Periph without base address")
         self.base_address = int(str(svd_elem.baseAddress), 0)
         if "derivedFrom" in svd_elem.attrib:
             derived_from = svd_elem.attrib["derivedFrom"]
@@ -300,7 +281,7 @@ class SVDPeripheral:
 
             # pickle is faster than deepcopy by up to 50% on svd files with a
             # lot of derivedFrom definitions
-            def copier(a: Any) -> Any:
+            def copier(a):
                 return pickle.loads(pickle.dumps(a))
 
             self.registers = copier(parent.peripherals[derived_from].registers)
@@ -325,7 +306,7 @@ class SVDPeripheral:
                     elif r.tag == "register":
                         add_register(self, r)
 
-    def refactor_parent(self, parent: SVDFile) -> None:
+    def refactor_parent(self, parent):
         self.parent_base_address = parent.base_address
         values = self.registers.values()
         for r in values:
@@ -334,7 +315,7 @@ class SVDPeripheral:
         for c in self.clusters.values():
             c.refactor_parent(self)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.name)
 
 
@@ -343,15 +324,7 @@ class SVDPeripheralRegister:
     A register within a peripheral
     """
 
-    parent_base_address: int
-    name: str
-    description: str
-    offset: int
-    access: str
-    size: int
-    fields: SmartDict
-
-    def __init__(self, svd_elem, parent: SVDPeripheral) -> None:
+    def __init__(self, svd_elem, parent):
         self.parent_base_address = parent.base_address
         self.name = str(svd_elem.name)
         self.description = str(svd_elem.description)
@@ -371,16 +344,16 @@ class SVDPeripheralRegister:
             for f in fields:
                 self.fields[str(f.name)] = SVDPeripheralRegisterField(f, self)
 
-    def refactor_parent(self, parent: SVDPeripheral) -> None:
+    def refactor_parent(self, parent):
         self.parent_base_address = parent.base_address
 
-    def address(self) -> int:
+    def address(self):
         return self.parent_base_address + self.offset
 
-    def readable(self) -> bool:
+    def readable(self):
         return self.access in ["read-only", "read-write", "read-writeOnce"]
 
-    def writable(self) -> bool:
+    def writable(self):
         return self.access in [
             "write-only",
             "read-write",
@@ -388,7 +361,7 @@ class SVDPeripheralRegister:
             "read-writeOnce",
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.name)
 
 
@@ -397,14 +370,7 @@ class SVDPeripheralRegisterField:
     Field within a register
     """
 
-    name: str
-    description: str
-    offset: int
-    width: int
-    access: str
-    enum: Dict[int, Tuple[str, str]]
-
-    def __init__(self, svd_elem, parent: SVDPeripheralRegister) -> None:
+    def __init__(self, svd_elem, parent):
         self.name = str(svd_elem.name)
         self.description = str(getattr(svd_elem, "description", ""))
 
@@ -419,7 +385,7 @@ class SVDPeripheralRegisterField:
         else:
             assert hasattr(svd_elem, "lsb") and hasattr(
                 svd_elem, "msb"
-            ), f"Range not found for field {self.name} in register {parent}"
+            ), "Range not found for field {} in register {}".format(self.name, parent)
             lsb = int(str(svd_elem.lsb))
             msb = int(str(svd_elem.msb))
             self.offset = lsb
@@ -448,10 +414,10 @@ class SVDPeripheralRegisterField:
                     # If the value couldn't be converted as a single integer, skip it
                     pass
 
-    def readable(self) -> bool:
+    def readable(self):
         return self.access in ["read-only", "read-write", "read-writeOnce"]
 
-    def writable(self) -> bool:
+    def writable(self):
         return self.access in [
             "write-only",
             "read-write",
@@ -459,11 +425,11 @@ class SVDPeripheralRegisterField:
             "read-writeOnce",
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.name)
 
 
-def _main() -> None:
+def _main():
     """
     Basic test to parse a file and do some things
     """
