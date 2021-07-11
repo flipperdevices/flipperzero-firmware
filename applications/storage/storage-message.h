@@ -112,7 +112,7 @@ typedef enum {
     StorageCommandFileSize,
     StorageCommandFileSync,
     StorageCommandFileEof,
-    StorageCommandFirOpen,
+    StorageCommandDirOpen,
     StorageCommandDirClose,
     StorageCommandDirRead,
     StorageCommandDirRewind,

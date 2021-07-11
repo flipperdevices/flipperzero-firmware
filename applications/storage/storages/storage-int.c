@@ -3,6 +3,7 @@
 #include <api-hal.h>
 
 #define TAG "storage-int"
+#define STORAGE_PATH "/int"
 
 typedef struct {
     const size_t start_address;
@@ -396,6 +397,69 @@ static bool storage_int_file_eof(void* ctx, File* file) {
 
 /******************* Dir Functions *******************/
 
+bool storage_int_dir_open(void* ctx, File* file, const char* path) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_dir_t* file_data = malloc(sizeof(lfs_dir_t));
+
+    storage_set_storage_file_data(file, file_data, storage);
+
+    file->internal_error_id = lfs_dir_open(&lfs_data->lfs, file_data, path);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_int_dir_close(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_dir_close(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    free(file_data);
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_int_dir_read(
+    void* ctx,
+    File* file,
+    FileInfo* fileinfo,
+    char* name,
+    const uint16_t name_length) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+
+    struct lfs_info _fileinfo;
+    // LFS returns virtual directories "." and "..", so we read until we get something meaningful or an empty string
+    do {
+        file->internal_error_id = lfs_dir_read(&lfs_data->lfs, file_data, &_fileinfo);
+        file->error_id = storage_int_parse_error(file->internal_error_id);
+    } while(strcmp(_fileinfo.name, ".") == 0 || strcmp(_fileinfo.name, "..") == 0);
+
+    if(fileinfo != NULL) {
+        fileinfo->size = _fileinfo.size;
+        fileinfo->flags = 0;
+        if(_fileinfo.type & LFS_TYPE_DIR) fileinfo->flags |= FSF_DIRECTORY;
+    }
+
+    if(name != NULL) {
+        snprintf(name, name_length, "%s", _fileinfo.name);
+    }
+
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_int_dir_rewind(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = lfs_dir_rewind(&lfs_data->lfs, file_data);
+    file->error_id = storage_int_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
 /******************* Common FS Functions *******************/
 
 /******************* Error Reporting Functions *******************/
@@ -429,4 +493,9 @@ void storage_int_init(StorageData* storage) {
     storage->fs_api.file.size = storage_int_file_size;
     storage->fs_api.file.sync = storage_int_file_sync;
     storage->fs_api.file.eof = storage_int_file_eof;
+
+    storage->fs_api.dir.open = storage_int_dir_open;
+    storage->fs_api.dir.close = storage_int_dir_close;
+    storage->fs_api.dir.read = storage_int_dir_read;
+    storage->fs_api.dir.rewind = storage_int_dir_rewind;
 }

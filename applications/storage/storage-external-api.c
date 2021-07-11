@@ -164,7 +164,7 @@ bool s_api_dir_open(void* context, File* file, const char* path) {
             .path = path,
         }};
 
-    S_API_MESSAGE(StorageCommandFirOpen);
+    S_API_MESSAGE(StorageCommandDirOpen);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
 }

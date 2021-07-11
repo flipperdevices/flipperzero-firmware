@@ -239,6 +239,7 @@ typedef struct {
  * 
  *  @var FS_Common_Api::get_fs_info
  *      @brief Get total and free space storage values
+ *      @param fs_path path of fs
  *      @param total_space pointer to total space value
  *      @param free_space pointer to free space value
  *      @return FS_Error error info

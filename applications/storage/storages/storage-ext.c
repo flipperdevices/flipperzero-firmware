@@ -11,6 +11,7 @@ typedef FILINFO SDFileInfo;
 typedef FRESULT SDError;
 
 #define TAG "storage-ext"
+#define STORAGE_PATH "/ext"
 /********************* Definitions ********************/
 
 typedef struct {
@@ -295,6 +296,61 @@ static bool storage_ext_file_eof(void* ctx, File* file) {
 
 /******************* Dir Functions *******************/
 
+bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
+    StorageData* storage = ctx;
+
+    SDDir* file_data = malloc(sizeof(SDDir));
+    storage_set_storage_file_data(file, file_data, storage);
+    file->internal_error_id = f_opendir(file_data, path);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_ext_dir_close(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    SDDir* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = f_closedir(file_data);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
+    free(file_data);
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_ext_dir_read(
+    void* ctx,
+    File* file,
+    FileInfo* fileinfo,
+    char* name,
+    const uint16_t name_length) {
+    StorageData* storage = ctx;
+    SDDir* file_data = storage_get_storage_file_data(file, storage);
+
+    SDFileInfo _fileinfo;
+    file->internal_error_id = f_readdir(file_data, &_fileinfo);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
+
+    if(fileinfo != NULL) {
+        fileinfo->size = _fileinfo.fsize;
+        fileinfo->flags = 0;
+
+        if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
+    }
+
+    if(name != NULL) {
+        snprintf(name, name_length, "%s", _fileinfo.fname);
+    }
+
+    return (file->error_id == FSE_OK);
+}
+
+bool storage_ext_dir_rewind(void* ctx, File* file) {
+    StorageData* storage = ctx;
+    SDDir* file_data = storage_get_storage_file_data(file, storage);
+
+    file->internal_error_id = f_readdir(file_data, NULL);
+    file->error_id = storage_ext_parse_error(file->internal_error_id);
+    return (file->error_id == FSE_OK);
+}
 /******************* Common FS Functions *******************/
 
 /******************* Error Reporting Functions *******************/
@@ -319,6 +375,11 @@ void storage_ext_init(StorageData* storage) {
     storage->fs_api.file.size = storage_ext_file_size;
     storage->fs_api.file.sync = storage_ext_file_sync;
     storage->fs_api.file.eof = storage_ext_file_eof;
+
+    storage->fs_api.dir.open = storage_ext_dir_open;
+    storage->fs_api.dir.close = storage_ext_dir_close;
+    storage->fs_api.dir.read = storage_ext_dir_read;
+    storage->fs_api.dir.rewind = storage_ext_dir_rewind;
 
     hal_sd_detect_init();
 

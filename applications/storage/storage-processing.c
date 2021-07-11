@@ -52,6 +52,8 @@ const char* remove_vfs(const char* path) {
     return path + 4;
 }
 
+/******************* File Functions *******************/
+
 bool storage_process_file_open(
     StorageApp* app,
     File* file,
@@ -154,6 +156,62 @@ static bool storage_process_file_eof(StorageApp* app, File* file) {
     return ret;
 }
 
+/******************* Dir Functions *******************/
+
+// storage_process_dir_read storage_process_dir_rewind
+
+bool storage_process_dir_open(StorageApp* app, File* file, const char* path) {
+    bool ret = false;
+    StorageType type = storage_get_type_by_path(path);
+    StorageData* storage;
+    file->error_id = FSE_OK;
+
+    if(storage_type_is_not_valid(type)) {
+        file->error_id = FSE_INVALID_NAME;
+    } else {
+        storage = storage_get_storage_by_type(app, type);
+        if(storage_path_already_open(path, storage->files)) {
+            file->error_id = FSE_ALREADY_OPEN;
+        } else {
+            storage_push_storage_file(file, path, type, storage);
+            FS_CALL(storage, dir.open(storage, file, remove_vfs(path)));
+        }
+    }
+
+    return ret;
+}
+
+bool storage_process_dir_close(StorageApp* app, File* file) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, dir.close(storage, file));
+    storage_pop_storage_file(file, storage);
+    return ret;
+}
+
+bool storage_process_dir_read(
+    StorageApp* app,
+    File* file,
+    FileInfo* fileinfo,
+    char* name,
+    const uint16_t name_length) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, dir.read(storage, file, fileinfo, name, name_length));
+    return ret;
+}
+
+bool storage_process_dir_rewind(StorageApp* app, File* file) {
+    bool ret = false;
+    StorageData* storage = get_storage_by_file(file, app->storage);
+    FS_CALL(storage, dir.rewind(storage, file));
+    return ret;
+}
+
+/******************* Common FS Functions *******************/
+
+/******************* Error Reporting Functions *******************/
+
 static const char* storage_process_error_get_desc(FS_Error error_id) {
     const char* result = "unknown error";
     switch(error_id) {
@@ -246,11 +304,30 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
         message->return_data->bool_value = storage_process_file_eof(app, message->data->file.file);
         break;
 
+    case StorageCommandDirOpen:
+        message->return_data->bool_value =
+            storage_process_dir_open(app, message->data->dopen.file, message->data->dopen.path);
+        break;
+    case StorageCommandDirClose:
+        message->return_data->bool_value =
+            storage_process_dir_close(app, message->data->file.file);
+        break;
+    case StorageCommandDirRead:
+        message->return_data->bool_value = storage_process_dir_read(
+            app,
+            message->data->dread.file,
+            message->data->dread.fileinfo,
+            message->data->dread.name,
+            message->data->dread.name_length);
+        break;
+    case StorageCommandDirRewind:
+        message->return_data->bool_value =
+            storage_process_dir_rewind(app, message->data->file.file);
+        break;
+
     case StorageCommandErrorGetDesc:
         message->return_data->cstring_value =
             storage_process_error_get_desc(message->data->error.id);
-        break;
-    default:
         break;
     }
 

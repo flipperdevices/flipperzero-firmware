@@ -17,7 +17,7 @@ static void do_file_test(FS_Api* api, const char* path) {
     uint64_t position;
     uint64_t size;
 
-    FURI_LOG_I(TAG, "--------- \"%s\" ---------", path);
+    FURI_LOG_I(TAG, "--------- FILE \"%s\" ---------", path);
 
     // open
     result = api->file.open(api->context, &file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
@@ -147,12 +147,88 @@ static void do_file_test(FS_Api* api, const char* path) {
     }
 }
 
+static void do_dir_test(FS_Api* api, const char* path) {
+    File file;
+    bool result;
+
+    FURI_LOG_I(TAG, "--------- DIR \"%s\" ---------", path);
+
+    // open
+    result = api->dir.open(api->context, &file, path);
+    if(result) {
+        FURI_LOG_I(TAG, "dir open");
+    } else {
+        FURI_LOG_E(TAG, "dir open, %s", api->error.get_desc(api->context, file.error_id));
+    }
+
+    // read
+    const uint8_t filename_size = 100;
+    char* filename = malloc(filename_size);
+    FileInfo fileinfo;
+
+    do {
+        result = api->dir.read(api->context, &file, &fileinfo, filename, filename_size);
+        if(result) {
+            if(strlen(filename)) {
+                FURI_LOG_I(
+                    TAG,
+                    "dir read #1, [%s]%s",
+                    ((fileinfo.flags & FSF_DIRECTORY) ? "D" : "F"),
+                    filename);
+            }
+        } else {
+            FURI_LOG_E(TAG, "dir read #1, %s", api->error.get_desc(api->context, file.error_id));
+            break;
+        }
+
+    } while((strlen(filename)));
+
+    // rewind
+    result = api->dir.rewind(api->context, &file);
+    if(result) {
+        FURI_LOG_I(TAG, "dir rewind");
+    } else {
+        FURI_LOG_E(TAG, "dir rewind, %s", api->error.get_desc(api->context, file.error_id));
+    }
+
+    // read
+    do {
+        result = api->dir.read(api->context, &file, &fileinfo, filename, filename_size);
+        if(result) {
+            if(strlen(filename)) {
+                FURI_LOG_I(
+                    TAG,
+                    "dir read #2, [%s]%s",
+                    ((fileinfo.flags & FSF_DIRECTORY) ? "D" : "F"),
+                    filename);
+            }
+        } else {
+            FURI_LOG_E(TAG, "dir read #2, %s", api->error.get_desc(api->context, file.error_id));
+            break;
+        }
+
+    } while((strlen(filename)));
+
+    // close
+    result = api->dir.close(api->context, &file);
+    if(result) {
+        FURI_LOG_I(TAG, "dir close");
+    } else {
+        FURI_LOG_E(TAG, "dir close, %s", api->error.get_desc(api->context, file.error_id));
+    }
+
+    free(filename);
+}
+
 int32_t storage_app_test(void* p) {
     FS_Api* api = furi_record_open("storage");
 
-    do_file_test(api, "/int/test.txt");
-    do_file_test(api, "/any/test.txt");
-    do_file_test(api, "/ext/test.txt");
+    //do_file_test(api, "/int/test.txt");
+    //do_file_test(api, "/any/test.txt");
+    //do_file_test(api, "/ext/test.txt");
+
+    do_dir_test(api, "/int");
+    do_dir_test(api, "/ext");
 
     while(true) {
         delay(1000);
