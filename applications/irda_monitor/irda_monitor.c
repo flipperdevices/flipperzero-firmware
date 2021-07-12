@@ -81,7 +81,7 @@ int32_t irda_monitor_app(void* p) {
 
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    api_hal_irda_rx_irq_init();
+    api_hal_irda_rx_irq_init(500);
     api_hal_irda_rx_irq_set_callback(irda_rx_callback, irda_monitor);
     irda_monitor->handler = irda_alloc_decoder();
 

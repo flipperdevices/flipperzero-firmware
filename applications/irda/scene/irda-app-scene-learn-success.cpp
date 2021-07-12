@@ -17,19 +17,26 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
     app->notify_green_on();
 
-    auto transceiver = app->get_transceiver();
-    auto message = transceiver->get_last_message();
+    auto signal = app->get_received_signal();
 
-    app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
-    app->set_text_store(
-        1,
-        "A: 0x%0*lX\nC: 0x%0*lX\n",
-        irda_get_protocol_address_length(message->protocol),
-        message->address,
-        irda_get_protocol_command_length(message->protocol),
-        message->command);
-    dialog_ex_set_header(dialog_ex, app->get_text_store(0), 95, 10, AlignCenter, AlignCenter);
-    dialog_ex_set_text(dialog_ex, app->get_text_store(1), 75, 23, AlignLeft, AlignTop);
+    if (signal->decoded) {
+        auto message = &signal->data.message;
+        app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
+        app->set_text_store(
+            1,
+            "A: 0x%0*lX\nC: 0x%0*lX\n",
+            irda_get_protocol_address_length(message->protocol),
+            message->address,
+            irda_get_protocol_command_length(message->protocol),
+            message->command);
+        dialog_ex_set_header(dialog_ex, app->get_text_store(0), 95, 10, AlignCenter, AlignCenter);
+        dialog_ex_set_text(dialog_ex, app->get_text_store(1), 75, 23, AlignLeft, AlignTop);
+    } else {
+        dialog_ex_set_header(dialog_ex, "Unknown", 95, 10, AlignCenter, AlignCenter);
+        app->set_text_store(0, "%d samples", signal->timings_cnt);
+        dialog_ex_set_text(dialog_ex, app->get_text_store(0), 75, 23, AlignLeft, AlignTop);
+    }
+
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "Save");
     dialog_ex_set_center_button_text(dialog_ex, "Send");
@@ -50,9 +57,12 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
             break;
         case DialogExResultCenter: {
             app->notify_space_blink();
-            auto transceiver = app->get_transceiver();
-            auto message = transceiver->get_last_message();
-            irda_send(message, 1);
+            auto signal = app->get_received_signal();
+            if (signal->decoded) {
+                irda_send(&signal->data.message, 1);
+            } else {
+                irda_send_raw(signal->data.timings, signal->timings_cnt, true);
+            }
             break;
         }
         case DialogExResultRight:

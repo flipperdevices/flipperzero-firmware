@@ -97,6 +97,7 @@ CPP_SOURCES		+= $(wildcard $(LIB_DIR)/file_reader/*.cpp)
 CFLAGS			+= -I$(LIB_DIR)/irda
 C_SOURCES		+= $(wildcard $(LIB_DIR)/irda/*.c)
 C_SOURCES		+= $(wildcard $(LIB_DIR)/irda/*/*.c)
+C_SOURCES		+= $(wildcard $(LIB_DIR)/irda_worker/*.c)
 
 #args lib
 CFLAGS			+= -I$(LIB_DIR)/args

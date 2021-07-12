@@ -12,15 +12,16 @@ extern "C" {
  * @param   level - level of input IRDA rx signal
  * @param   duration - duration of continuous rx signal level in us
  */
-typedef void (*TimerISRCallback)(void* ctx, bool level, uint32_t duration);
+typedef void (*ApiHalIrdaCaptureCallback)(void* ctx, bool level, uint32_t duration);
 
+typedef void (*ApiHalIrdaTimeoutCallback)(void* ctx);
 
 /**
  * Initialize IRDA RX timer to receive interrupts.
  * It provides interrupts for every RX-signal edge changing
  * with its duration.
  */
-void api_hal_irda_rx_irq_init(void);
+void api_hal_irda_rx_irq_init(uint32_t timeout_ms);
 
 /**
  * Deinitialize IRDA RX interrupt.
@@ -33,7 +34,9 @@ void api_hal_irda_rx_irq_deinit(void);
  * @param   callback - callback to call when RX signal edge changing occurs
  * @param   ctx - context for callback
  */
-void api_hal_irda_rx_irq_set_callback(TimerISRCallback callback, void *ctx);
+void api_hal_irda_rx_irq_set_callback(ApiHalIrdaCaptureCallback callback, void *ctx);
+
+void api_hal_irda_timeout_irq_set_callback(ApiHalIrdaTimeoutCallback callback, void *ctx);
 
 /**
  * Start generating IRDA TX PWM. Provides PWM initialization on

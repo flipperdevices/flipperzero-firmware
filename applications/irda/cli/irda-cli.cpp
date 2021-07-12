@@ -30,7 +30,7 @@ static void irda_cli_start_ir_rx(Cli* cli, string_t args, void* context) {
     IrdaCli irda_cli;
     irda_cli.handler = irda_alloc_decoder();
     irda_cli.message_queue = osMessageQueueNew(2, sizeof(IrdaMessage), NULL);
-    api_hal_irda_rx_irq_init();
+    api_hal_irda_rx_irq_init(500);
     api_hal_irda_rx_irq_set_callback(irda_rx_callback, &irda_cli);
 
     printf("Receiving IRDA...\r\nPress Ctrl+C to abort\r\n");

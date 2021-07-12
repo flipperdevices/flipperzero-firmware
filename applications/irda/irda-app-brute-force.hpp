@@ -26,7 +26,7 @@ class IrdaAppBruteForce {
 public:
     bool calculate_messages();
     void stop_bruteforce();
-    bool send_next_bruteforce(const IrdaAppSignalTransceiver& receiver);
+    bool send_next_bruteforce();
     bool start_bruteforce(int index, int& record_amount);
     void add_record(int index, const char* name);
 

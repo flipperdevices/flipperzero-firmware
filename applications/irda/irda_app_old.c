@@ -343,7 +343,7 @@ int32_t irda2(void* p) {
         .handler = irda_alloc_decoder(),
         .event_queue = event_queue,
     };
-    api_hal_irda_rx_irq_init();
+    api_hal_irda_rx_irq_init(0);
     api_hal_irda_rx_irq_set_callback(irda_rx_callback, &isr_context);
 
     AppEvent event;
