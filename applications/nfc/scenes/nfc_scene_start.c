@@ -32,7 +32,7 @@ const void nfc_scene_start_on_enter(void* context) {
         submenu, "Add manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(submenu, "Debug", SubmenuIndexDebug, nfc_scene_start_submenu_callback, nfc);
     submenu_set_selected_item(
-        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneStart));
+        submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneStart));
 
     view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewMenu);
 }
