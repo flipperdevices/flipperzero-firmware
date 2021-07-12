@@ -10,6 +10,7 @@ extern "C" {
 typedef enum {
     SceneManagerEventTypeCustom,
     SceneManagerEventTypeNavigation,
+    SceneManagerEventTypeTick,
 } SceneManagerEventType;
 
 typedef struct {
@@ -38,6 +39,7 @@ void scene_manager_free(SceneManager* scene_manager);
 
 bool scene_manager_handle_custom_event(SceneManager* scene_manager, uint32_t custom_event);
 bool scene_manager_handle_navigation_event(SceneManager* scene_manager);
+void scene_manager_handle_tick_event(SceneManager* scene_manager);
 
 void scene_manager_next_scene(SceneManager* scene_manager, uint32_t next_scene_id);
 bool scene_manager_previous_scene(SceneManager* scene_manager);

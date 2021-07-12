@@ -74,6 +74,16 @@ bool scene_manager_handle_navigation_event(SceneManager* scene_manager) {
     return consumed;
 }
 
+void scene_manager_handle_tick_event(SceneManager* scene_manager) {
+    furi_assert(scene_manager);
+
+    SceneManagerEvent event = {
+        .type = SceneManagerEventTypeTick,
+    };
+    uint32_t scene_id = *SceneManagerIdArray_back(scene_manager->scene_id_array);
+    scene_manager->scene_handlers->on_event_handlers[scene_id](scene_manager->context, event);
+}
+
 void scene_manager_next_scene(SceneManager* scene_manager, uint32_t next_scene_id) {
     furi_assert(scene_manager);
     furi_assert(next_scene_id < scene_manager->scene_handlers->scene_num);
