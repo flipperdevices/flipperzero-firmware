@@ -40,7 +40,7 @@ const void nfc_scene_read_mifare_ul_success_on_enter(void* context) {
     dialog_ex_set_header(dialog_ex, "Mifare Ultralight", 22, 8, AlignLeft, AlignCenter);
     dialog_ex_set_icon(dialog_ex, 8, 13, &I_Medium_chip_22x21);
     // Display UID
-    nfc_set_text_store(
+    nfc_text_store_set(
         nfc,
         NFC_SCENE_READ_SUCCESS_SHIFT "ATQA: %02X%02X\n" NFC_SCENE_READ_SUCCESS_SHIFT
                                      "SAK: %02X\nUID: %02X %02X %02X %02X %02X %02X %02X",

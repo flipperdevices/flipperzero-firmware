@@ -176,11 +176,15 @@ int32_t nfc_task(void* p) {
     return 0;
 }
 
-void nfc_set_text_store(Nfc* nfc, const char* text, ...) {
+void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
     va_list args;
     va_start(args, text);
 
     vsnprintf(nfc->text_store, sizeof(nfc->text_store), text, args);
 
     va_end(args);
+}
+
+void nfc_text_store_clear(Nfc* nfc) {
+    memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }

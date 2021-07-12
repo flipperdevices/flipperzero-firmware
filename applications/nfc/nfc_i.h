@@ -72,4 +72,6 @@ Nfc* nfc_alloc();
 
 int32_t nfc_task(void* p);
 
-void nfc_set_text_store(Nfc* nfc, const char* text, ...);
+void nfc_text_store_set(Nfc* nfc, const char* text, ...);
+
+void nfc_text_store_clear(Nfc* nfc);

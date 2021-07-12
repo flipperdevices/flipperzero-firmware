@@ -26,7 +26,7 @@ const void nfc_scene_read_card_success_on_enter(void* context) {
     dialog_ex_set_icon(dialog_ex, 8, 13, &I_Medium_chip_22x21);
     // Display UID
     if(data->uid_len == 4) {
-        nfc_set_text_store(
+        nfc_text_store_set(
             nfc,
             NFC_SCENE_READ_SUCCESS_SHIFT "%s\n" NFC_SCENE_READ_SUCCESS_SHIFT
                                          "ATQA: %02X%02X SAK: %02X\nUID: %02X %02X %02X %02X",
@@ -39,7 +39,7 @@ const void nfc_scene_read_card_success_on_enter(void* context) {
             data->uid[2],
             data->uid[3]);
     } else if(data->uid_len == 7) {
-        nfc_set_text_store(
+        nfc_text_store_set(
             nfc,
             NFC_SCENE_READ_SUCCESS_SHIFT
             "%s\n" NFC_SCENE_READ_SUCCESS_SHIFT

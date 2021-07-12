@@ -14,7 +14,7 @@ const void nfc_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = nfc->text_input;
-    nfc_set_text_store(nfc, "");
+    nfc_text_store_clear(nfc);
     text_input_set_header_text(text_input, "Name the card");
     text_input_set_result_callback(
         text_input,
@@ -31,7 +31,7 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
             memcpy(&nfc->device.dev_name, nfc->text_store, strlen(nfc->text_store));
-            if(nfc_device_save(&nfc->device, "test")) {
+            if(nfc_device_save(&nfc->device, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 return true;
             } else {
