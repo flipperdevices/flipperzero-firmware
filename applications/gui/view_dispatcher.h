@@ -26,6 +26,10 @@ typedef bool (*ViewDispatcherCustomEventCallback)(void* context, uint32_t event)
  */
 typedef bool (*ViewDispatcherNavigationEventCallback)(void* context);
 
+/** Prototype for tick event callback
+ */
+typedef void (*ViewDispatcherTickEventCallback)(void* context);
+
 /** Allocate ViewDispatcher instance
  * @return pointer to ViewDispatcher instance
  */
@@ -64,6 +68,16 @@ void view_dispatcher_set_custom_event_callback(
 void view_dispatcher_set_navigation_event_callback(
     ViewDispatcher* view_dispatcher,
     ViewDispatcherNavigationEventCallback callback);
+
+/** Set tick event handler
+ * @param view_dispatcher ViewDispatcher instance
+ * @param callback ViewDispatcherTickEventCallback
+ * @param tick_period callback call period
+ */
+void view_dispatcher_set_tick_event_callback(
+    ViewDispatcher* view_dispatcher,
+    ViewDispatcherTickEventCallback callback,
+    uint32_t tick_period);
 
 /** Set event callback context
  * @param view_dispatcher ViewDispatcher instance

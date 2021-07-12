@@ -17,6 +17,8 @@ struct ViewDispatcher {
     View* current_view;
     ViewDispatcherCustomEventCallback custom_event_callback;
     ViewDispatcherNavigationEventCallback navigation_event_callback;
+    ViewDispatcherTickEventCallback tick_event_callback;
+    uint32_t tick_period;
     void* event_context;
 };
 
@@ -42,6 +44,9 @@ void view_dispatcher_input_callback(InputEvent* event, void* context);
 
 /* Input handler */
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event);
+
+/* Tick handler */
+void view_dispatcher_handle_tick_event(ViewDispatcher* view_dispatcher);
 
 /* Custom event handler */
 void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32_t event);

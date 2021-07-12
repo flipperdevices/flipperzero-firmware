@@ -61,12 +61,28 @@ void view_dispatcher_set_custom_event_callback(
     view_dispatcher->custom_event_callback = callback;
 }
 
+void view_dispatcher_set_tick_event_callback(
+    ViewDispatcher* view_dispatcher,
+    ViewDispatcherTickEventCallback callback,
+    uint32_t tick_period) {
+    furi_assert(view_dispatcher);
+    furi_assert(callback);
+    view_dispatcher->tick_event_callback = callback;
+    view_dispatcher->tick_period = tick_period;
+}
+
 void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue);
 
+    uint32_t tick_period = view_dispatcher->tick_period == 0 ? osWaitForever :
+                                                               view_dispatcher->tick_period;
     ViewDispatcherMessage message;
-    while(osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever) == osOK) {
+    while(1) {
+        if(osMessageQueueGet(view_dispatcher->queue, &message, NULL, tick_period) != osOK) {
+            view_dispatcher_handle_tick_event(view_dispatcher);
+            continue;
+        }
         if(message.type == ViewDispatcherMessageTypeStop) {
             break;
         } else if(message.type == ViewDispatcherMessageTypeInput) {
@@ -209,6 +225,12 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         if(!is_consumed) {
             view_dispatcher_switch_to_view(view_dispatcher, view_id);
         }
+    }
+}
+
+void view_dispatcher_handle_tick_event(ViewDispatcher* view_dispatcher) {
+    if(view_dispatcher->tick_event_callback) {
+        view_dispatcher->tick_event_callback(view_dispatcher->event_context);
     }
 }
 
