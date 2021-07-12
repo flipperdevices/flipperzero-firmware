@@ -216,8 +216,11 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
     // Check key AN-Motors
-    if((key_hop >> 24) == ((key_hop>>16)&0x00ff) && (key_fix>>28) ==((key_hop>>12)&0x0f) ){
+    if((key_hop >> 24) == ((key_hop>>16)&0x00ff) && (key_fix>>28) ==((key_hop>>12)&0x0f) && (key_hop & 0xFFF ) == 0x404){
         instance->manufacture_name = "AN-Motors";
+        instance->common.cnt = key_hop>>16;
+    } else if((key_hop & 0xFFF) == (0x000) && (key_fix>>28) ==((key_hop>>12)&0x0f) ){
+        instance->manufacture_name = "HCS101";
         instance->common.cnt = key_hop>>16;
     } else {
         subghz_protocol_keeloq_check_remote_controller_selector(instance, key_fix, key_hop);
@@ -358,8 +361,8 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
         output,
         "Protocol %s, %d Bit\r\n"
         "KEY:0x%lX%lX\r\n"
-        "FIX:%lX MF:%s \r\n"
-        "HOP:%lX \r\n"
+        "FIX:%08lX MF:%s \r\n"
+        "HOP:%08lX \r\n"
         //"CNT:%04X BTN:%02lX\r\n",
         "SN:%05lX CNT:%04X BTN:%02lX\r\n",
         //"YEK:0x%lX%lX\r\n",
