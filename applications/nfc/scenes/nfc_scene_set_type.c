@@ -28,12 +28,12 @@ const bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexNFCA7) {
             nfc->device.data.uid_len = 7;
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetSak);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetSak);
+            return true;
         } else if(event.event == SubmenuIndexNFCA4) {
             nfc->device.data.uid_len = 4;
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetSak);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetSak);
+            return true;
         }
     }
     return false;

@@ -29,8 +29,8 @@ const bool nfc_scene_read_mifare_ul_on_event(void* context, SceneManagerEvent ev
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcEventMifareUl) {
             nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUlSuccess);
+            return true;
         }
     }
     return false;

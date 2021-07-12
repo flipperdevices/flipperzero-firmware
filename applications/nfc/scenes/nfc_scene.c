@@ -22,7 +22,7 @@ void (*const nfc_on_exit_handlers[])(void* context) = {
 #undef ADD_SCENE
 
 // Initialize scene handlers configuration structure
-AppSceneHandlers nfc_scene_handlers = {
+const SceneManagerHandlers nfc_scene_handlers = {
     .on_enter_handlers = nfc_on_enter_handlers,
     .on_event_handlers = nfc_on_event_handlers,
     .on_exit_handlers = nfc_on_exit_handlers,

@@ -24,8 +24,8 @@ const bool nfc_scene_set_sak_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SET_SAK_CUSTOM_EVENT) {
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetAtqua);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetAtqua);
+            return true;
         }
     }
     return false;

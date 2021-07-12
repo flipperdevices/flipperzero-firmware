@@ -38,21 +38,21 @@ const bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event)
         if(event.event == SubmenuIndexEmulate) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexEmulate);
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            return true;
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexEdit);
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            return true;
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexDelete);
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            return true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexInfo);
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            return true;
         }
     }
 

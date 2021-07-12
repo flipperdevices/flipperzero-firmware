@@ -70,8 +70,8 @@ const bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent
         if(event.event == DialogExResultLeft) {
             return scene_manager_previous_scene(nfc->scene_manager);
         } else if(event.event == DialogExResultRight) {
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneCardMenu);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneCardMenu);
+            return true;
         }
     }
     return false;

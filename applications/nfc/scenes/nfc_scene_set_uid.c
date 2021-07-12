@@ -29,8 +29,8 @@ const bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SET_UID_CUSTOM_EVENT) {
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSaveName);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
+            return true;
         }
     }
     return false;

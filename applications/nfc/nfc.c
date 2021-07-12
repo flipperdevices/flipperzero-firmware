@@ -20,7 +20,7 @@ Nfc* nfc_alloc() {
 
     nfc->nfc_common.worker = nfc_worker_alloc();
     nfc->nfc_common.view_dispatcher = view_dispatcher_alloc();
-    nfc->scene_manager = scene_manager_alloc(nfc_scene_handlers, nfc);
+    nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
     view_dispatcher_enable_queue(nfc->nfc_common.view_dispatcher);
     view_dispatcher_set_event_callback_context(nfc->nfc_common.view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(
@@ -89,8 +89,8 @@ Nfc* nfc_alloc() {
         NfcViewMifareUl,
         nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
 
-    scene_manager_add_next_scene(nfc->scene_manager, NfcSceneStart);
-    scene_manager_start(nfc->scene_manager);
+    // Run first scene
+    scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
 
     return nfc;
 }

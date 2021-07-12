@@ -32,8 +32,8 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
         if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
             memcpy(&nfc->device.dev_name, nfc->text_store, strlen(nfc->text_store));
             if(nfc_device_save(&nfc->device, "test")) {
-                scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
-                return scene_manager_next_scene(nfc->scene_manager);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
+                return true;
             } else {
                 return scene_manager_search_previous_scene(nfc->scene_manager, NfcSceneStart);
             }

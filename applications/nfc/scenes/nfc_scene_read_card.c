@@ -29,8 +29,8 @@ const bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcEventDetect) {
             nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+            return true;
         }
     }
     return false;

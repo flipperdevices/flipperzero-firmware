@@ -10,7 +10,7 @@ typedef enum {
 } NfcScene;
 #undef ADD_SCENE
 
-extern AppSceneHandlers nfc_scene_handlers;
+extern const SceneManagerHandlers nfc_scene_handlers;
 
 // Generate scene on_enter handlers declaration
 #define ADD_SCENE(prefix, name, id) void prefix##_scene_##name##_on_enter(void*);

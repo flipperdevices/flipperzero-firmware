@@ -25,8 +25,8 @@ const bool nfc_scene_set_atqa_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SET_ATQA_CUSTOM_EVENT) {
-            scene_manager_add_next_scene(nfc->scene_manager, NfcSceneSetUid);
-            return scene_manager_next_scene(nfc->scene_manager);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetUid);
+            return true;
         }
     }
     return false;
