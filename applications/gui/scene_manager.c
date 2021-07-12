@@ -12,9 +12,6 @@ SceneManager* scene_manager_alloc(const SceneManagerHandlers* app_scene_handlers
 
     // Allocate and configure all scenes
     scene_manager->scene = furi_alloc(sizeof(AppScene) * app_scene_handlers->scene_num);
-    for(uint32_t i = 0; i < app_scene_handlers->scene_num; i++) {
-        scene_manager->scene[i].id = i;
-    }
 
     // Initialize ScaneManager array for navigation
     SceneManagerIdArray_init(scene_manager->scene_id_array);
