@@ -1,10 +1,5 @@
 #include "subghz_protocol_gate_tx.h"
 
-/*
- * Help
- * https://phreakerclub.com/447
- *
- */
 
 struct SubGhzProtocolGateTX {
     SubGhzProtocolCommon common;

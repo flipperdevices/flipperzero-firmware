@@ -7,6 +7,7 @@
 #include "subghz_protocol_nice_flor_s.h"
 #include "subghz_protocol_princeton.h"
 #include "subghz_protocol_gate_tx.h"
+#include "subghz_protocol_ido.h"
 
 #include <furi.h>
 #include <m-string.h>
@@ -21,6 +22,7 @@ struct SubGhzProtocol {
     SubGhzProtocolNiceFlorS* nice_flor_s;
     SubGhzProtocolPrinceton* princeton;
     SubGhzProtocolGateTX* gate_tx;
+    SubGhzProtocolIDo* ido;
 
     SubGhzProtocolTextCallback text_callback;
     void* text_callback_context;
@@ -58,6 +60,7 @@ SubGhzProtocol* subghz_protocol_alloc() {
     instance->nice_flo = subghz_protocol_nice_flo_alloc();
     instance->nice_flor_s = subghz_protocol_nice_flor_s_alloc();
     instance->gate_tx = subghz_protocol_gate_tx_alloc();
+    instance->ido = subghz_protocol_ido_alloc();
 
     return instance;
 }
@@ -71,6 +74,7 @@ void subghz_protocol_free(SubGhzProtocol* instance) {
     subghz_protocol_nice_flo_free(instance->nice_flo);
     subghz_protocol_nice_flor_s_free(instance->nice_flor_s);
     subghz_protocol_gate_tx_free(instance->gate_tx);
+    subghz_protocol_ido_free(instance->ido);
 
     free(instance);
 }
@@ -84,7 +88,7 @@ void subghz_protocol_enable_dump_text(SubGhzProtocol* instance, SubGhzProtocolTe
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_text_rx_callback, instance);
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_text_rx_callback, instance);
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->gate_tx, subghz_protocol_text_rx_callback, instance);
-    
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->ido, subghz_protocol_text_rx_callback, instance);
 
     instance->text_callback = callback;
     instance->text_callback_context = context;
@@ -99,6 +103,7 @@ void subghz_protocol_enable_dump(SubGhzProtocol* instance, SubGhzProtocolCommonC
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flo, subghz_protocol_parser_rx_callback, instance);
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->nice_flor_s, subghz_protocol_parser_rx_callback, instance);
     subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->gate_tx, subghz_protocol_parser_rx_callback, instance);
+    subghz_protocol_common_set_callback((SubGhzProtocolCommon*)instance->ido, subghz_protocol_parser_rx_callback, instance);
     
     instance->parser_callback = callback;
     instance->parser_callback_context = context;
@@ -158,6 +163,7 @@ void subghz_protocol_reset(SubGhzProtocol* instance) {
     subghz_protocol_nice_flo_reset(instance->nice_flo);
     subghz_protocol_nice_flor_s_reset(instance->nice_flor_s);
     subghz_protocol_gate_tx_reset(instance->gate_tx);
+    subghz_protocol_ido_reset(instance->ido);
 }
 
 void subghz_protocol_parse(SubGhzProtocol* instance, bool level, uint32_t duration) {
@@ -167,4 +173,5 @@ void subghz_protocol_parse(SubGhzProtocol* instance, bool level, uint32_t durati
     subghz_protocol_nice_flo_parse(instance->nice_flo, level, duration);
     subghz_protocol_nice_flor_s_parse(instance->nice_flor_s, level, duration);
     subghz_protocol_gate_tx_parse(instance->gate_tx, level, duration);
+    subghz_protocol_ido_parse(instance->ido, level, duration);
 }

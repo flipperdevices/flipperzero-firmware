@@ -42,4 +42,4 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
  * @param instance - SubGhzProtocolGateTX* instance
  * @param output   - output string
  */
-//void subghz_protocol_princeton_to_str(SubGhzProtocolGateTX* instance, string_t output);
+
