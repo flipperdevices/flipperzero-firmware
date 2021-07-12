@@ -7,11 +7,10 @@
 #include "scene/irda-app-scene.hpp"
 #include "irda-app-view-manager.hpp"
 #include "irda-app-remote-manager.hpp"
-#include "irda-app-transceiver.hpp"
 #include <forward_list>
 #include <stdint.h>
 #include <notification/notification-messages.h>
-#include <irda_worker/irda_worker.h>
+#include <irda_worker.h>
 
 
 class IrdaApp {
@@ -58,8 +57,8 @@ public:
     IrdaAppRemoteManager* get_remote_manager();
 
     IrdaWorker* get_irda_worker();
-    IrdaWorkerReceivedSignal* get_received_signal();
-    void set_received_signal(IrdaWorkerReceivedSignal* signal);
+    const IrdaAppSignal& get_received_signal() const;
+    void set_received_signal(const IrdaAppSignal& signal);
 
     void search_and_switch_to_previous_scene(const std::initializer_list<Scene>& scenes_list);
 
@@ -113,7 +112,7 @@ private:
     IrdaAppViewManager view_manager;
     IrdaAppRemoteManager remote_manager;
     IrdaWorker* irda_worker;
-    IrdaWorkerReceivedSignal received_signal;
+    IrdaAppSignal received_signal;
 
     std::forward_list<Scene> previous_scenes_list;
     Scene current_scene = Scene::Start;

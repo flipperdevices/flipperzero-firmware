@@ -1,5 +1,5 @@
 #include "api-hal-irda.h"
-#include "cmsis_os2.h"
+#include <cmsis_os2.h>
 #include <api-hal-interrupt.h>
 #include <api-hal-resources.h>
 
@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 #include <furi.h>
-#include "main.h"
-#include "api-hal-pwm.h"
+#include <main.h>
+#include <api-hal-pwm.h>
 
 static struct{
     ApiHalIrdaCaptureCallback capture_callback;
@@ -25,10 +25,20 @@ typedef enum{
 } TimerIRQSource;
 
 static void api_hal_irda_handle_timeout(void) {
+    /* Timers CNT register starts to counting from 0 to ARR, but it is
+     * reseted when Channel 1 catches interrupt. It is not reseted by
+     * channel 2, though, so we have to distract it's values (see TimerIRQSourceCCI1 ISR).
+     * This can cause false timeout: when time is over, but we started
+     * receiving new signal few microseconds ago, because CNT register
+     * is reseted once per period, not per sample. */
+    if (LL_GPIO_IsInputPinSet(gpio_irda_rx.port, gpio_irda_rx.pin) == 0)
+        return;
+
     if (timer_irda.timeout_callback)
         timer_irda.timeout_callback(timer_irda.timeout_context);
 }
 
+/* High pin level is a Space state of IRDA signal. Invert level for further processing. */
 static void api_hal_irda_handle_capture(TimerIRQSource source) {
     uint32_t duration = 0;
     bool level = 0;
@@ -51,6 +61,10 @@ static void api_hal_irda_handle_capture(TimerIRQSource source) {
 }
 
 static void api_hal_irda_isr() {
+    if(LL_TIM_IsActiveFlag_CC3(TIM2)) {
+        LL_TIM_ClearFlag_CC3(TIM2);
+        api_hal_irda_handle_timeout();
+    }
     if(LL_TIM_IsActiveFlag_CC1(TIM2)) {
         LL_TIM_ClearFlag_CC1(TIM2);
 
@@ -59,7 +73,7 @@ static void api_hal_irda_isr() {
             api_hal_irda_handle_capture(TimerIRQSourceCCI1);
         }
     }
-    else if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
+    if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
         LL_TIM_ClearFlag_CC2(TIM2);
 
         if(READ_BIT(TIM2->CCMR1, TIM_CCMR1_CC2S)) {
@@ -67,13 +81,9 @@ static void api_hal_irda_isr() {
             api_hal_irda_handle_capture(TimerIRQSourceCCI2);
         }
     }
-    else if(LL_TIM_IsActiveFlag_CC3(TIM2)) {
-        LL_TIM_ClearFlag_CC3(TIM2);
-        api_hal_irda_handle_timeout();
-    }
 }
 
-void api_hal_irda_rx_irq_init(uint32_t timeout_ms) {
+void api_hal_irda_rx_irq_init(void) {
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
     LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
 
@@ -104,11 +114,6 @@ void api_hal_irda_rx_irq_init(uint32_t timeout_ms) {
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_INDIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
 
-    LL_TIM_OC_SetCompareCH3(TIM2, timeout_ms * 1000);   // 10 * 500 = 5 sec (10*0x7A120)
-    LL_TIM_OC_SetMode(TIM2, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_ACTIVE);
-    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH3);
-    LL_TIM_EnableIT_CC3(TIM2);
-
     LL_TIM_EnableIT_CC1(TIM2);
     LL_TIM_EnableIT_CC2(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
@@ -127,6 +132,13 @@ void api_hal_irda_rx_irq_deinit(void) {
     api_hal_interrupt_set_timer_isr(TIM2, NULL);
 }
 
+void api_hal_irda_rx_timeout_irq_init(uint32_t timeout_ms) {
+    LL_TIM_OC_SetCompareCH3(TIM2, timeout_ms * 1000);
+    LL_TIM_OC_SetMode(TIM2, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_ACTIVE);
+    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH3);
+    LL_TIM_EnableIT_CC3(TIM2);
+}
+
 bool api_hal_irda_rx_irq_is_busy(void) {
     return (LL_TIM_IsEnabledIT_CC1(TIM2) || LL_TIM_IsEnabledIT_CC2(TIM2));
 }
@@ -136,7 +148,7 @@ void api_hal_irda_rx_irq_set_callback(ApiHalIrdaCaptureCallback callback, void *
     timer_irda.capture_context = ctx;
 }
 
-void api_hal_irda_timeout_irq_set_callback(ApiHalIrdaTimeoutCallback callback, void *ctx) {
+void api_hal_irda_rx_timeout_irq_set_callback(ApiHalIrdaTimeoutCallback callback, void *ctx) {
     timer_irda.timeout_callback = callback;
     timer_irda.timeout_context = ctx;
 }

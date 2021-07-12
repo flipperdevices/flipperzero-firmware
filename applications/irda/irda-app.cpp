@@ -1,5 +1,5 @@
 #include "irda-app.hpp"
-#include "irda_worker/irda_worker.h"
+#include <irda_worker.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -222,11 +222,11 @@ IrdaWorker* IrdaApp::get_irda_worker() {
     return irda_worker;
 }
 
-IrdaWorkerReceivedSignal* IrdaApp::get_received_signal() {
-    return &received_signal;
+const IrdaAppSignal& IrdaApp::get_received_signal() const {
+    return received_signal;
 }
 
-void IrdaApp::set_received_signal(IrdaWorkerReceivedSignal* signal) {
-    received_signal = *signal;
+void IrdaApp::set_received_signal(const IrdaAppSignal& signal) {
+    received_signal = signal;
 }
 

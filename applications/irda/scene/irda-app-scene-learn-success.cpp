@@ -19,8 +19,8 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
     auto signal = app->get_received_signal();
 
-    if (signal->decoded) {
-        auto message = &signal->data.message;
+    if (!signal.is_raw()) {
+        auto message = &signal.get_message();
         app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
         app->set_text_store(
             1,
@@ -33,7 +33,7 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
         dialog_ex_set_text(dialog_ex, app->get_text_store(1), 75, 23, AlignLeft, AlignTop);
     } else {
         dialog_ex_set_header(dialog_ex, "Unknown", 95, 10, AlignCenter, AlignCenter);
-        app->set_text_store(0, "%d samples", signal->timings_cnt);
+        app->set_text_store(0, "%d samples", signal.get_raw_signal().timings_cnt);
         dialog_ex_set_text(dialog_ex, app->get_text_store(0), 75, 23, AlignLeft, AlignTop);
     }
 
@@ -58,11 +58,7 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
         case DialogExResultCenter: {
             app->notify_space_blink();
             auto signal = app->get_received_signal();
-            if (signal->decoded) {
-                irda_send(&signal->data.message, 1);
-            } else {
-                irda_send_raw(signal->data.timings, signal->timings_cnt, true);
-            }
+            signal.transmit();
             break;
         }
         case DialogExResultRight:

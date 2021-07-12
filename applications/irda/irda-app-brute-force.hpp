@@ -2,7 +2,6 @@
 #include "furi/check.h"
 #include <unordered_map>
 #include "irda-app-file-parser.hpp"
-#include "irda-app-transceiver.hpp"
 
 
 class IrdaAppBruteForce {
