@@ -3,11 +3,16 @@
 #include "scene_manager.h"
 #include <m-array.h>
 
-ARRAY_DEF(SceneManagerArray, AppScene*, M_PTR_OPLIST);
+ARRAY_DEF(SceneManagerIdArray, uint32_t, M_DEFAULT_OPLIST);
+
+typedef struct {
+    uint32_t id;
+    uint32_t state;
+} AppScene;
 
 struct SceneManager {
-    SceneManagerArray_t scene_array;
+    SceneManagerIdArray_t scene_id_array;
+    const SceneManagerHandlers* scene_handlers;
     AppScene* scene;
-    uint32_t scene_num;
     void* context;
 };
