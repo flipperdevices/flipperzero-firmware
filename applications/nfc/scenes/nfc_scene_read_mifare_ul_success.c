@@ -89,6 +89,7 @@ const bool nfc_scene_read_mifare_ul_success_on_event(void* context, SceneManager
         if((scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadMifareUlSuccess) ==
             ReadMifareUlStateShowUID) &&
            (event.event == DialogExResultLeft)) {
+            scene_manager_previous_scene(nfc->scene_manager);
             return true;
         } else if(
             (scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadMifareUlSuccess) ==
