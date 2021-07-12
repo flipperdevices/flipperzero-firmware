@@ -3,16 +3,20 @@
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-
     Nfc* nfc = (Nfc*)context;
     return scene_manager_handle_custom_event(nfc->scene_manager, event);
 }
 
 bool nfc_navigation_event_callback(void* context) {
     furi_assert(context);
-
     Nfc* nfc = (Nfc*)context;
     return scene_manager_handle_navigation_event(nfc->scene_manager);
+}
+
+void nfc_tick_event_callback(void* context) {
+    furi_assert(context);
+    Nfc* nfc = (Nfc*)context;
+    scene_manager_handle_tick_event(nfc->scene_manager);
 }
 
 Nfc* nfc_alloc() {
@@ -27,6 +31,8 @@ Nfc* nfc_alloc() {
         nfc->nfc_common.view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         nfc->nfc_common.view_dispatcher, nfc_navigation_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        nfc->nfc_common.view_dispatcher, nfc_tick_event_callback, 300);
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");

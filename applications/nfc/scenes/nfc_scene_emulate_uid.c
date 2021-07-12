@@ -38,6 +38,12 @@ const void nfc_scene_emulate_uid_on_enter(void* context) {
 }
 
 const bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
+    Nfc* nfc = (Nfc*)context;
+
+    if(event.type == SceneManagerEventTypeTick) {
+        notification_message(nfc->notifications, &sequence_blink_blue_10);
+        return true;
+    }
     return false;
 }
 

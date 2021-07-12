@@ -32,6 +32,9 @@ const bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) 
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             return true;
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        notification_message(nfc->notifications, &sequence_blink_blue_10);
+        return true;
     }
     return false;
 }
