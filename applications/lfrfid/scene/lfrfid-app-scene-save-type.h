@@ -11,5 +11,5 @@ private:
     static void submenu_callback(void* context, uint32_t index);
     uint32_t submenu_item_selected = 0;
     static const uint8_t keys_count = static_cast<uint8_t>(LfrfidKeyType::KeyI40134);
-    string_t submenu_name[keys_count];
+    string_t submenu_name[keys_count + 1];
 };
