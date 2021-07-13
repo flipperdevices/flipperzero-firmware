@@ -22,18 +22,21 @@ typedef struct {
 
 /******************* Core Functions *******************/
 
-static bool sd_mount_card(StorageData* storage) {
+static bool sd_mount_card(StorageData* storage, bool notify) {
     bool result = false;
     const uint8_t max_init_counts = 10;
     uint8_t counter = max_init_counts;
     uint8_t bsp_result;
     SDData* sd_data = storage->data;
 
-    NotificationApp* notification = furi_record_open("notification");
     storage_data_lock(storage);
 
     while(result == false && counter > 0 && hal_sd_detect()) {
-        sd_notify_wait(notification);
+        if(notify) {
+            NotificationApp* notification = furi_record_open("notification");
+            sd_notify_wait(notification);
+            furi_record_close("notification");
+        }
 
         if((counter % 2) == 0) {
             // power reset sd card
@@ -69,7 +72,12 @@ static bool sd_mount_card(StorageData* storage) {
                 storage->status = SE_ERROR_NOT_MOUNTED;
             }
         }
-        sd_notify_wait_off(notification);
+
+        if(notify) {
+            NotificationApp* notification = furi_record_open("notification");
+            sd_notify_wait_off(notification);
+            furi_record_close("notification");
+        }
 
         if(!result) {
             delay(1000);
@@ -80,7 +88,6 @@ static bool sd_mount_card(StorageData* storage) {
     }
 
     storage_data_unlock(storage);
-    furi_record_close("notification");
 
     return result;
 }
@@ -97,23 +104,29 @@ static void sd_unmount_card(StorageData* storage) {
     storage_data_unlock(storage);
 }
 
-static void storage_ext_tick(StorageData* storage) {
+static void storage_ext_tick_internal(StorageData* storage, bool notify) {
     SDData* sd_data = storage->data;
 
     if(sd_data->sd_was_present) {
         if(hal_sd_detect()) {
             FURI_LOG_I(TAG, "card detected");
-            sd_mount_card(storage);
+            sd_mount_card(storage, notify);
 
-            NotificationApp* notification = furi_record_open("notification");
             if(storage->status != SE_OK) {
                 FURI_LOG_E(TAG, "sd init error: %s", storage_data_status_text(storage));
-                sd_notify_error(notification);
+                if(notify) {
+                    NotificationApp* notification = furi_record_open("notification");
+                    sd_notify_error(notification);
+                    furi_record_close("notification");
+                }
             } else {
                 FURI_LOG_I(TAG, "card mounted");
-                sd_notify_success(notification);
+                if(notify) {
+                    NotificationApp* notification = furi_record_open("notification");
+                    sd_notify_success(notification);
+                    furi_record_close("notification");
+                }
             }
-            furi_record_close("notification");
 
             sd_data->sd_was_present = false;
 
@@ -129,11 +142,17 @@ static void storage_ext_tick(StorageData* storage) {
             sd_data->sd_was_present = true;
 
             sd_unmount_card(storage);
-            NotificationApp* notification = furi_record_open("notification");
-            sd_notify_eject(notification);
-            furi_record_close("notification");
+            if(notify) {
+                NotificationApp* notification = furi_record_open("notification");
+                sd_notify_eject(notification);
+                furi_record_close("notification");
+            }
         }
     }
+}
+
+static void storage_ext_tick(StorageData* storage) {
+    storage_ext_tick_internal(storage, true);
 }
 
 /****************** Common Functions ******************/
@@ -449,5 +468,6 @@ void storage_ext_init(StorageData* storage) {
 
     hal_sd_detect_init();
 
-    storage_ext_tick(storage);
+    // do not notify on first launch, notifications app is waiting for our thread to read settings
+    storage_ext_tick_internal(storage, false);
 }

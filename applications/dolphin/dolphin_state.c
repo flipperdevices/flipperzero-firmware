@@ -1,10 +1,9 @@
 #include "dolphin_state.h"
-
-#include <internal-storage/internal-storage.h>
+#include <filesystem-api-v2.h>
 #include <furi.h>
 #include <math.h>
 
-#define DOLPHIN_STORE_KEY "dolphin_state"
+#define DOLPHIN_STORE_KEY "/int/dolphin.state"
 #define DOLPHIN_STORE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STORE_HEADER_VERSION 0x01
 #define DOLPHIN_LVL_THRESHOLD 20.0f
@@ -34,24 +33,24 @@ typedef struct {
 } DolphinStore;
 
 struct DolphinState {
-    InternalStorage* internal_storage;
+    FS_Api* fs_api;
     DolphinStoreData data;
 };
 
 DolphinState* dolphin_state_alloc() {
     DolphinState* dolphin_state = furi_alloc(sizeof(DolphinState));
-    dolphin_state->internal_storage = furi_record_open("internal-storage");
+    dolphin_state->fs_api = furi_record_open("storage");
     return dolphin_state;
 }
 
 void dolphin_state_free(DolphinState* dolphin_state) {
-    furi_record_close("internal-storage");
+    furi_record_close("storage");
     free(dolphin_state);
 }
 
 bool dolphin_state_save(DolphinState* dolphin_state) {
     DolphinStore store;
-    FURI_LOG_I("dolphin-state", "Saving state to internal-storage");
+    FURI_LOG_I("dolphin-state", "Saving state to \"%s\"", DOLPHIN_STORE_KEY);
     // Calculate checksum
     uint8_t* source = (uint8_t*)&dolphin_state->data;
     uint8_t checksum = 0;
@@ -66,11 +65,29 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     store.header.timestamp = 0;
     // Set data
     store.data = dolphin_state->data;
+
     // Store
-    int ret = internal_storage_write_key(
-        dolphin_state->internal_storage, DOLPHIN_STORE_KEY, (uint8_t*)&store, sizeof(DolphinStore));
-    if(ret != sizeof(DolphinStore)) {
-        FURI_LOG_E("dolphin-state", "Save failed. Storage returned: %d", ret);
+    File file;
+    FS_Api* api = dolphin_state->fs_api;
+    bool fs_result =
+        api->file.open(api->context, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+
+    if(fs_result) {
+        uint16_t bytes_count = api->file.write(api->context, &file, &store, sizeof(DolphinStore));
+
+        if(bytes_count != sizeof(DolphinStore)) {
+            fs_result = false;
+        }
+    }
+
+    FS_Error fs_error = file.error_id;
+    api->file.close(api->context, &file);
+
+    if(!fs_result) {
+        FURI_LOG_E(
+            "dolphin-state",
+            "Save failed. Storage returned: %s",
+            api->error.get_desc(api->context, fs_error));
         return false;
     }
 
@@ -81,11 +98,29 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
 bool dolphin_state_load(DolphinState* dolphin_state) {
     DolphinStore store;
     // Read Dolphin State Store
-    FURI_LOG_I("dolphin-state", "Loading state from internal-storage");
-    int ret = internal_storage_read_key(
-        dolphin_state->internal_storage, DOLPHIN_STORE_KEY, (uint8_t*)&store, sizeof(DolphinStore));
-    if(ret != sizeof(DolphinStore)) {
-        FURI_LOG_E("dolphin-state", "Load failed. Storage returned: %d", ret);
+    FURI_LOG_I("dolphin-state", "Loading state from \"%s\"", DOLPHIN_STORE_KEY);
+
+    File file;
+    FS_Api* api = dolphin_state->fs_api;
+    bool fs_result =
+        api->file.open(api->context, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(fs_result) {
+        uint16_t bytes_count = api->file.read(api->context, &file, &store, sizeof(DolphinStore));
+
+        if(bytes_count != sizeof(DolphinStore)) {
+            fs_result = false;
+        }
+    }
+
+    FS_Error fs_error = file.error_id;
+    api->file.close(api->context, &file);
+
+    if(!fs_result) {
+        FURI_LOG_E(
+            "dolphin-state",
+            "Load failed. Storage returned: %s",
+            api->error.get_desc(api->context, fs_error));
         return false;
     }
 

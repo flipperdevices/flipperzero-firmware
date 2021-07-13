@@ -166,7 +166,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_STORAGE
     {.app = storage_app, .name = "storage", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
-#ifdef SRV_STORAGE
+#ifdef SRV_STORAGE_TEST
     {.app = storage_app_test, .name = "storage test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
 
