@@ -26,7 +26,6 @@
 #include "views/nfc_detect.h"
 #include "views/nfc_emulate.h"
 #include "views/nfc_emv.h"
-#include "views/nfc_mifare_ul.h"
 
 #define NFC_TEXT_STORE_SIZE 128
 
@@ -44,7 +43,6 @@ struct Nfc {
     NfcDetect* nfc_detect;
     NfcEmulate* nfc_emulate;
     NfcEmv* nfc_emv;
-    NfcMifareUl* nfc_mifare_ul;
 
     // Common Views
     Submenu* submenu;
@@ -65,7 +63,6 @@ typedef enum {
     NfcViewDetect,
     NfcViewEmulate,
     NfcViewEmv,
-    NfcViewMifareUl,
 } NfcView;
 
 Nfc* nfc_alloc();

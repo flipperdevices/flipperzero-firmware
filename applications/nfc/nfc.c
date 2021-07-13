@@ -88,12 +88,8 @@ Nfc* nfc_alloc() {
     view_dispatcher_add_view(
         nfc->nfc_common.view_dispatcher, NfcViewEmv, nfc_emv_get_view(nfc->nfc_emv));
 
-    // Mifare Ultralight
-    nfc->nfc_mifare_ul = nfc_mifare_ul_alloc(&nfc->nfc_common);
-    view_dispatcher_add_view(
-        nfc->nfc_common.view_dispatcher,
-        NfcViewMifareUl,
-        nfc_mifare_ul_get_view(nfc->nfc_mifare_ul));
+    // Run first scene
+    scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
 
     return nfc;
 }
@@ -137,10 +133,6 @@ void nfc_free(Nfc* nfc) {
     // EMV
     view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewEmv);
     nfc_emv_free(nfc->nfc_emv);
-
-    // Mifare Ultralight
-    view_dispatcher_remove_view(nfc->nfc_common.view_dispatcher, NfcViewMifareUl);
-    nfc_mifare_ul_free(nfc->nfc_mifare_ul);
 
     // Worker
     nfc_worker_stop(nfc->nfc_common.worker);

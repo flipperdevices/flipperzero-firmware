@@ -4,7 +4,6 @@ enum SubmenuIndex {
     SubmenuIndexDetect,
     SubmenuIndexEmulate,
     SubmenuIndexReadEmv,
-    SubmenuIndexReadMifareUl,
 };
 
 void nfc_scene_debug_menu_submenu_callback(void* context, uint32_t index) {
@@ -23,12 +22,6 @@ const void nfc_scene_debug_menu_on_enter(void* context) {
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_debug_menu_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Read EMV", SubmenuIndexReadEmv, nfc_scene_debug_menu_submenu_callback, nfc);
-    submenu_add_item(
-        submenu,
-        "Read Mifare Ultralight",
-        SubmenuIndexReadMifareUl,
-        nfc_scene_debug_menu_submenu_callback,
-        nfc);
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneDebugMenu));
 
@@ -53,11 +46,6 @@ const bool nfc_scene_debug_menu_on_event(void* context, SceneManagerEvent event)
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneDebugMenu, SubmenuIndexReadEmv);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDebugReadEmv);
-            return true;
-        } else if(event.event == SubmenuIndexReadMifareUl) {
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneDebugMenu, SubmenuIndexReadMifareUl);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneDebugReadMifareUl);
             return true;
         }
     }
