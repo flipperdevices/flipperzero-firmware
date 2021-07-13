@@ -3,10 +3,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "mifare_ultralight.h"
+
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_FILE_NAME_MAX_LEN 120
-
-#define NFC_MIFARE_UL_MAX_SIZE 256
 
 typedef enum {
     NfcDeviceNfca,
@@ -38,12 +38,8 @@ typedef struct {
 
 typedef struct {
     NfcDeviceData nfc_data;
-    uint8_t full_dump[NFC_MIFARE_UL_MAX_SIZE];
-    uint16_t dump_size;
-    // TODO delete with debug view
-    uint8_t man_block[12];
-    uint8_t otp[4];
-} NfcMifareUlData;
+    MifareUlData data;
+} NfcMifareUl;
 
 typedef struct {
     NfcDeviceData data;

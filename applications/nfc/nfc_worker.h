@@ -6,7 +6,7 @@ typedef struct {
     union {
         NfcDeviceData nfc_detect_data;
         NfcEmvData nfc_emv_data;
-        NfcMifareUlData nfc_mifare_ul_data;
+        NfcMifareUl nfc_mifare_ul;
     };
 } NfcWorkerResult;
 

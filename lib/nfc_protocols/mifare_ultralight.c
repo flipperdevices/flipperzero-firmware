@@ -12,7 +12,7 @@ uint16_t mf_ul_prepare_get_version(uint8_t* dest) {
     return 1;
 }
 
-void mf_ul_parse_get_version_response(uint8_t* buff, MfUltralightRead* mf_ul_read) {
+void mf_ul_parse_get_version_response(uint8_t* buff, MifareUlDevice* mf_ul_read) {
     MfUltralightVersion* version = (MfUltralightVersion*) buff;
     if(version->storage_size == 0x0B || version->storage_size == 0x00) {
         mf_ul_read->type = MfUltralightTypeUL11;
@@ -39,7 +39,7 @@ void mf_ul_parse_get_version_response(uint8_t* buff, MfUltralightRead* mf_ul_rea
     }
 }
 
-void mf_ul_set_default_version(MfUltralightRead* mf_ul_read) {
+void mf_ul_set_default_version(MifareUlDevice* mf_ul_read) {
     mf_ul_read->type = MfUltralightTypeUnknown;
     mf_ul_read->pages_to_read = 20;
     mf_ul_read->support_fast_read = false;
