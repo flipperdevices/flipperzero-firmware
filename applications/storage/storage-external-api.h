@@ -27,16 +27,11 @@ bool s_api_dir_close(void* context, File* file);
 bool s_api_dir_read(void* context, File* file, FileInfo* fileinfo, char* name, uint16_t name_length);
 bool s_api_dir_rewind(void* context, File* file);
 
-FS_Error s_api_common_info(
-    void* context,
-    const char* path,
-    FileInfo* fileinfo,
-    char* name,
-    const uint16_t name_length);
+FS_Error s_api_common_stat(void* context, const char* path, FileInfo* fileinfo);
 FS_Error s_api_common_remove(void* context, const char* path);
 FS_Error s_api_common_rename(void* context, const char* old_path, const char* new_path);
 FS_Error s_api_common_mkdir(void* context, const char* path);
-FS_Error s_api_common_get_fs_info(
+FS_Error s_api_common_fs_info(
     void* context,
     const char* fs_path,
     uint64_t* total_space,

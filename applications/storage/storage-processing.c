@@ -210,6 +210,84 @@ bool storage_process_dir_rewind(StorageApp* app, File* file) {
 
 /******************* Common FS Functions *******************/
 
+static FS_Error
+    storage_process_common_stat(StorageApp* app, const char* path, FileInfo* fileinfo) {
+    FS_Error ret = FSE_OK;
+    StorageType type = storage_get_type_by_path(path);
+
+    if(storage_type_is_not_valid(type)) {
+        ret = FSE_INVALID_NAME;
+    } else {
+        StorageData* storage = storage_get_storage_by_type(app, type);
+        FS_CALL(storage, common.stat(storage, remove_vfs(path), fileinfo));
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_common_remove(StorageApp* app, const char* path) {
+    FS_Error ret = FSE_OK;
+    StorageType type = storage_get_type_by_path(path);
+
+    if(storage_type_is_not_valid(type)) {
+        ret = FSE_INVALID_NAME;
+    } else {
+        StorageData* storage = storage_get_storage_by_type(app, type);
+        FS_CALL(storage, common.remove(storage, remove_vfs(path)));
+    }
+
+    return ret;
+}
+
+static FS_Error
+    storage_process_common_rename(StorageApp* app, const char* old_path, const char* new_path) {
+    FS_Error ret = FSE_OK;
+    StorageType type_old = storage_get_type_by_path(old_path);
+    StorageType type_new = storage_get_type_by_path(new_path);
+
+    if(storage_type_is_not_valid(type_old) || storage_type_is_not_valid(type_old) ||
+       type_old != type_new) {
+        ret = FSE_INVALID_NAME;
+    } else {
+        StorageData* storage = storage_get_storage_by_type(app, type_old);
+        FS_CALL(storage, common.rename(storage, remove_vfs(old_path), remove_vfs(new_path)));
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_common_mkdir(StorageApp* app, const char* path) {
+    FS_Error ret = FSE_OK;
+    StorageType type = storage_get_type_by_path(path);
+
+    if(storage_type_is_not_valid(type)) {
+        ret = FSE_INVALID_NAME;
+    } else {
+        StorageData* storage = storage_get_storage_by_type(app, type);
+        FS_CALL(storage, common.mkdir(storage, remove_vfs(path)));
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_common_fs_info(
+    StorageApp* app,
+    const char* fs_path,
+    uint64_t* total_space,
+    uint64_t* free_space) {
+    FS_Error ret = FSE_OK;
+    StorageType type = storage_get_type_by_path(fs_path);
+
+    if(storage_type_is_not_valid(type)) {
+        ret = FSE_INVALID_NAME;
+    } else {
+        StorageData* storage = storage_get_storage_by_type(app, type);
+        FS_CALL(storage, common.fs_info(storage, remove_vfs(fs_path), total_space, free_space));
+    }
+
+    return ret;
+}
+
 /******************* Error Reporting Functions *******************/
 
 static const char* storage_process_error_get_desc(FS_Error error_id) {
@@ -324,7 +402,29 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
         message->return_data->bool_value =
             storage_process_dir_rewind(app, message->data->file.file);
         break;
-
+    case StorageCommandCommonStat:
+        message->return_data->error_value = storage_process_common_stat(
+            app, message->data->cstat.path, message->data->cstat.fileinfo);
+        break;
+    case StorageCommandCommonRemove:
+        message->return_data->error_value =
+            storage_process_common_remove(app, message->data->path.path);
+        break;
+    case StorageCommandCommonRename:
+        message->return_data->error_value = storage_process_common_rename(
+            app, message->data->crename.old_path, message->data->crename.new_path);
+        break;
+    case StorageCommandCommonMkDir:
+        message->return_data->error_value =
+            storage_process_common_mkdir(app, message->data->path.path);
+        break;
+    case StorageCommandCommonFSInfo:
+        message->return_data->error_value = storage_process_common_fs_info(
+            app,
+            message->data->cfsinfo.fs_path,
+            message->data->cfsinfo.total_space,
+            message->data->cfsinfo.free_space);
+        break;
     case StorageCommandErrorGetDesc:
         message->return_data->cstring_value =
             storage_process_error_get_desc(message->data->error.id);

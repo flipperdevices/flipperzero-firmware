@@ -189,7 +189,7 @@ typedef struct {
 /** @struct FS_Common_Api
  *  @brief Common api structure
  * 
- *  @var FS_Common_Api::info
+ *  @var FS_Common_Api::stat
  *      @brief Open directory to get objects from
  *      @param path path to file/directory
  *      @param fileinfo pointer to readed FileInfo, can be NULL
@@ -211,33 +211,12 @@ typedef struct {
  *      @param path path to file/directory
  *      @return FS_Error error info
  * 
- *  @var FS_Common_Api::set_attr
- *      @brief Set attributes of file/directory, 
- *          for example:
- *          @code
- *          set "read only" flag and remove "hidden" flag
- *          set_attr("file.txt", FSF_READ_ONLY, FSF_READ_ONLY | FSF_HIDDEN);
- *          @endcode
- *      @param path path to file/directory
- *      @param attr attribute values consist of FS_Flags
- *      @param mask attribute mask consist of FS_Flags
- *      @return FS_Error error info
- * 
  *  @var FS_Common_Api::mkdir
  *      @brief Create new directory
  *      @param path path to new directory
  *      @return FS_Error error info
  * 
- *  @var FS_Common_Api::set_time
- *      @brief Set file/directory modification time
- *      @param path path to file/directory
- *      @param date modification date 
- *      @param time modification time
- *      @see FileDateUnion
- *      @see FileTimeUnion
- *      @return FS_Error error info
- * 
- *  @var FS_Common_Api::get_fs_info
+ *  @var FS_Common_Api::fs_info
  *      @brief Get total and free space storage values
  *      @param fs_path path of fs
  *      @param total_space pointer to total space value
@@ -249,20 +228,12 @@ typedef struct {
  * @brief Common api structure
  */
 typedef struct {
-    FS_Error (*info)(
-        void* context,
-        const char* path,
-        FileInfo* fileinfo,
-        char* name,
-        const uint16_t name_length);
+    FS_Error (*stat)(void* context, const char* path, FileInfo* fileinfo);
     FS_Error (*remove)(void* context, const char* path);
     FS_Error (*rename)(void* context, const char* old_path, const char* new_path);
     FS_Error (*mkdir)(void* context, const char* path);
-    FS_Error (*get_fs_info)(
-        void* context,
-        const char* fs_path,
-        uint64_t* total_space,
-        uint64_t* free_space);
+    FS_Error (
+        *fs_info)(void* context, const char* fs_path, uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
 /** @struct FS_Error_Api

@@ -24,11 +24,11 @@ void storage_app_fill_api(StorageApp* app) {
     app->external_api.dir.read = s_api_dir_read;
     app->external_api.dir.rewind = s_api_dir_rewind;
 
-    app->external_api.common.info = s_api_common_info;
+    app->external_api.common.stat = s_api_common_stat;
     app->external_api.common.remove = s_api_common_remove;
     app->external_api.common.rename = s_api_common_rename;
     app->external_api.common.mkdir = s_api_common_mkdir;
-    app->external_api.common.get_fs_info = s_api_common_get_fs_info;
+    app->external_api.common.fs_info = s_api_common_fs_info;
 
     app->external_api.error.get_desc = s_api_error_get_desc;
 

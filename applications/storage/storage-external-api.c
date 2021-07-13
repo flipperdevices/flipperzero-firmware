@@ -208,23 +208,12 @@ bool s_api_dir_rewind(void* context, File* file) {
 
 /****************** COMMON ******************/
 
-FS_Error s_api_common_info(
-    void* context,
-    const char* path,
-    FileInfo* fileinfo,
-    char* name,
-    const uint16_t name_length) {
+FS_Error s_api_common_stat(void* context, const char* path, FileInfo* fileinfo) {
     S_API_PROLOGUE;
 
-    SAData data = {
-        .cinfo = {
-            .path = path,
-            .fileinfo = fileinfo,
-            .name = name,
-            .name_length = name_length,
-        }};
+    SAData data = {.cstat = {.path = path, .fileinfo = fileinfo}};
 
-    S_API_MESSAGE(StorageCommandCommonInfo);
+    S_API_MESSAGE(StorageCommandCommonStat);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
@@ -259,7 +248,7 @@ FS_Error s_api_common_mkdir(void* context, const char* path) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_common_get_fs_info(
+FS_Error s_api_common_fs_info(
     void* context,
     const char* fs_path,
     uint64_t* total_space,
@@ -273,7 +262,7 @@ FS_Error s_api_common_get_fs_info(
             .free_space = free_space,
         }};
 
-    S_API_MESSAGE(StorageCommandCommonGetFSInfo);
+    S_API_MESSAGE(StorageCommandCommonFSInfo);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }

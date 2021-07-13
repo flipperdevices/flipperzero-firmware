@@ -37,7 +37,7 @@ static int storage_int_device_read(
     return 0;
 }
 
-int storage_int_device_prog(
+static int storage_int_device_prog(
     const struct lfs_config* c,
     lfs_block_t block,
     lfs_off_t off,
@@ -397,7 +397,7 @@ static bool storage_int_file_eof(void* ctx, File* file) {
 
 /******************* Dir Functions *******************/
 
-bool storage_int_dir_open(void* ctx, File* file, const char* path) {
+static bool storage_int_dir_open(void* ctx, File* file, const char* path) {
     StorageData* storage = ctx;
     LFSData* lfs_data = storage->data;
     lfs_dir_t* file_data = malloc(sizeof(lfs_dir_t));
@@ -409,7 +409,7 @@ bool storage_int_dir_open(void* ctx, File* file, const char* path) {
     return (file->error_id == FSE_OK);
 }
 
-bool storage_int_dir_close(void* ctx, File* file) {
+static bool storage_int_dir_close(void* ctx, File* file) {
     StorageData* storage = ctx;
     LFSData* lfs_data = storage->data;
     lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
@@ -420,7 +420,7 @@ bool storage_int_dir_close(void* ctx, File* file) {
     return (file->error_id == FSE_OK);
 }
 
-bool storage_int_dir_read(
+static bool storage_int_dir_read(
     void* ctx,
     File* file,
     FileInfo* fileinfo,
@@ -450,7 +450,7 @@ bool storage_int_dir_read(
     return (file->error_id == FSE_OK);
 }
 
-bool storage_int_dir_rewind(void* ctx, File* file) {
+static bool storage_int_dir_rewind(void* ctx, File* file) {
     StorageData* storage = ctx;
     LFSData* lfs_data = storage->data;
     lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
@@ -462,7 +462,59 @@ bool storage_int_dir_rewind(void* ctx, File* file) {
 
 /******************* Common FS Functions *******************/
 
-/******************* Error Reporting Functions *******************/
+static FS_Error storage_int_common_stat(void* ctx, const char* path, FileInfo* fileinfo) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    struct lfs_info _fileinfo;
+    int result = lfs_stat(&lfs_data->lfs, path, &_fileinfo);
+
+    if(fileinfo != NULL) {
+        fileinfo->size = _fileinfo.size;
+        fileinfo->flags = 0;
+        if(_fileinfo.type & LFS_TYPE_DIR) fileinfo->flags |= FSF_DIRECTORY;
+    }
+
+    return storage_int_parse_error(result);
+}
+
+static FS_Error storage_int_common_remove(void* ctx, const char* path) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    int result = lfs_remove(&lfs_data->lfs, path);
+    return storage_int_parse_error(result);
+}
+
+static FS_Error storage_int_common_rename(void* ctx, const char* old_path, const char* new_path) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    int result = lfs_rename(&lfs_data->lfs, old_path, new_path);
+    return storage_int_parse_error(result);
+}
+
+static FS_Error storage_int_common_mkdir(void* ctx, const char* path) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+    int result = lfs_mkdir(&lfs_data->lfs, path);
+    return storage_int_parse_error(result);
+}
+
+static FS_Error storage_int_common_fs_info(
+    void* ctx,
+    const char* fs_path,
+    uint64_t* total_space,
+    uint64_t* free_space) {
+    StorageData* storage = ctx;
+    LFSData* lfs_data = storage->data;
+
+    *total_space = lfs_data->config.block_size * lfs_data->config.block_count;
+
+    lfs_ssize_t result = lfs_fs_size(&lfs_data->lfs);
+    if(result >= 0) {
+        *free_space = *total_space - (result * lfs_data->config.block_size);
+    }
+
+    return storage_int_parse_error(result);
+}
 
 /******************* Init Storage *******************/
 
@@ -498,4 +550,10 @@ void storage_int_init(StorageData* storage) {
     storage->fs_api.dir.close = storage_int_dir_close;
     storage->fs_api.dir.read = storage_int_dir_read;
     storage->fs_api.dir.rewind = storage_int_dir_rewind;
+
+    storage->fs_api.common.stat = storage_int_common_stat;
+    storage->fs_api.common.mkdir = storage_int_common_mkdir;
+    storage->fs_api.common.rename = storage_int_common_rename;
+    storage->fs_api.common.remove = storage_int_common_remove;
+    storage->fs_api.common.fs_info = storage_int_common_fs_info;
 }

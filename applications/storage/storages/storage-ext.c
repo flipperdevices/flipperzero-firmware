@@ -296,7 +296,7 @@ static bool storage_ext_file_eof(void* ctx, File* file) {
 
 /******************* Dir Functions *******************/
 
-bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
+static bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
     StorageData* storage = ctx;
 
     SDDir* file_data = malloc(sizeof(SDDir));
@@ -306,7 +306,7 @@ bool storage_ext_dir_open(void* ctx, File* file, const char* path) {
     return (file->error_id == FSE_OK);
 }
 
-bool storage_ext_dir_close(void* ctx, File* file) {
+static bool storage_ext_dir_close(void* ctx, File* file) {
     StorageData* storage = ctx;
     SDDir* file_data = storage_get_storage_file_data(file, storage);
 
@@ -316,7 +316,7 @@ bool storage_ext_dir_close(void* ctx, File* file) {
     return (file->error_id == FSE_OK);
 }
 
-bool storage_ext_dir_read(
+static bool storage_ext_dir_read(
     void* ctx,
     File* file,
     FileInfo* fileinfo,
@@ -343,7 +343,7 @@ bool storage_ext_dir_read(
     return (file->error_id == FSE_OK);
 }
 
-bool storage_ext_dir_rewind(void* ctx, File* file) {
+static bool storage_ext_dir_rewind(void* ctx, File* file) {
     StorageData* storage = ctx;
     SDDir* file_data = storage_get_storage_file_data(file, storage);
 
@@ -353,7 +353,67 @@ bool storage_ext_dir_rewind(void* ctx, File* file) {
 }
 /******************* Common FS Functions *******************/
 
-/******************* Error Reporting Functions *******************/
+static FS_Error storage_ext_common_stat(void* ctx, const char* path, FileInfo* fileinfo) {
+    SDFileInfo _fileinfo;
+    SDError result = f_stat(path, &_fileinfo);
+
+    if(fileinfo != NULL) {
+        fileinfo->size = _fileinfo.fsize;
+        fileinfo->flags = 0;
+
+        if(_fileinfo.fattrib & AM_DIR) fileinfo->flags |= FSF_DIRECTORY;
+    }
+
+    return storage_ext_parse_error(result);
+}
+
+static FS_Error storage_ext_common_remove(void* ctx, const char* path) {
+    SDError result = f_unlink(path);
+    return storage_ext_parse_error(result);
+}
+
+static FS_Error storage_ext_common_rename(void* ctx, const char* old_path, const char* new_path) {
+    SDError result = f_rename(old_path, new_path);
+    return storage_ext_parse_error(result);
+}
+
+static FS_Error storage_ext_common_mkdir(void* ctx, const char* path) {
+    SDError result = f_mkdir(path);
+    return storage_ext_parse_error(result);
+}
+
+static FS_Error storage_ext_common_fs_info(
+    void* ctx,
+    const char* fs_path,
+    uint64_t* total_space,
+    uint64_t* free_space) {
+    StorageData* storage = ctx;
+    SDData* sd_data = storage->data;
+
+    DWORD free_clusters;
+    FATFS* fs;
+
+    SDError fresult = f_getfree(sd_data->path, &free_clusters, &fs);
+    if((FRESULT)fresult == FR_OK) {
+        uint32_t total_sectors = (fs->n_fatent - 2) * fs->csize;
+        uint32_t free_sectors = free_clusters * fs->csize;
+
+        uint16_t sector_size = _MAX_SS;
+#if _MAX_SS != _MIN_SS
+        sector_size = fs->ssize;
+#endif
+
+        if(total_space != NULL) {
+            *total_space = (uint64_t)total_sectors * (uint64_t)sector_size;
+        }
+
+        if(free_space != NULL) {
+            *free_space = (uint64_t)free_sectors * (uint64_t)sector_size;
+        }
+    }
+
+    return storage_ext_parse_error(fresult);
+}
 
 /******************* Init Storage *******************/
 
@@ -380,6 +440,12 @@ void storage_ext_init(StorageData* storage) {
     storage->fs_api.dir.close = storage_ext_dir_close;
     storage->fs_api.dir.read = storage_ext_dir_read;
     storage->fs_api.dir.rewind = storage_ext_dir_rewind;
+
+    storage->fs_api.common.stat = storage_ext_common_stat;
+    storage->fs_api.common.mkdir = storage_ext_common_mkdir;
+    storage->fs_api.common.rename = storage_ext_common_rename;
+    storage->fs_api.common.remove = storage_ext_common_remove;
+    storage->fs_api.common.fs_info = storage_ext_common_fs_info;
 
     hal_sd_detect_init();
 
