@@ -37,3 +37,9 @@ void subghz_protocol_gate_tx_reset(SubGhzProtocolGateTX* instance);
  */
 void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, uint32_t duration);
 
+/** Outputting information from the parser
+ * 
+ * @param instance - SubGhzProtocolFaacSLH* instance
+ * @param output   - output string
+ */
+void subghz_protocol_gate_tx_to_str(SubGhzProtocolGateTX* instance, string_t output);

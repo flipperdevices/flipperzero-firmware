@@ -13,6 +13,7 @@ SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc(void) {
     instance->common.te_shot = 350;
     instance->common.te_long = 700;
     instance->common.te_delta = 100;
+    instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_gate_tx_to_str;
 
     return instance;
 }
@@ -62,6 +63,20 @@ void subghz_protocol_gate_tx_reset(SubGhzProtocolGateTX* instance) {
     instance->common.parser_step = 0;
 }
 
+/** Analysis of received data
+ * 
+ * @param instance SubGhzProtocolFaacSLH instance
+ */
+void subghz_protocol_gate_tx_check_remote_controller(SubGhzProtocolGateTX* instance) {
+    uint32_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+
+    instance->common.serial = (code_found_reverse & 0xFF) << 12 | ((code_found_reverse >>8) & 0xFF) << 4 | ((code_found_reverse >>20) & 0x0F) ;
+    instance->common.btn = ((code_found_reverse >> 16) & 0x0F);
+
+    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+
+}
+
 void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, uint32_t duration) {
     switch (instance->common.parser_step) {
     case 0:
@@ -88,11 +103,7 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
             if (duration >= (instance->common.te_shot * 10 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
-
-                    instance->common.serial = instance->common.code_found >> 8;
-                    instance->common.btn = (uint8_t)instance->common.code_found & 0x0000FF;
-                    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
-
+                    subghz_protocol_gate_tx_check_remote_controller(instance);
                 }
                 instance->common.code_found = 0;
                 instance->common.code_count_bit = 0;
@@ -121,4 +132,23 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
         }
         break;
     }
+}
+
+void subghz_protocol_gate_tx_to_str(SubGhzProtocolGateTX* instance, string_t output) {
+    
+   // uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+   // uint32_t code_fix = code_found_reverse & 0xFFFFFFFF;
+   // uint32_t code_hop = (code_found_reverse >>32) & 0xFFFFFFFF;
+
+    //uint32_t rev_hi =
+
+    string_cat_printf(output,
+                      "Protocol %s, %d Bit\r\n"
+                      " KEY:%06lX\r\n"
+                      " SN:%05lX  BTN:%lX\r\n",
+                      instance->common.name,
+                      instance->common.code_count_bit,
+                      (uint32_t)(instance->common.code_found & 0xFFFFFF),
+                      instance->common.serial, 
+                      instance->common.btn);
 }
