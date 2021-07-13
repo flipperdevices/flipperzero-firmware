@@ -71,7 +71,7 @@ void subghz_protocol_faac_slh_check_remote_controller(SubGhzProtocolFaacSLH* ins
     uint32_t code_fix = code_found_reverse & 0xFFFFFFFF;
     //uint32_t code_hop = (code_found_reverse >> 24) & 0xFFFFF;
 
-    instance->common.serial = code_fix & 0xFFFFFF;
+    instance->common.serial = code_fix & 0xFFFFFFF;
     instance->common.btn = (code_fix >> 28) & 0x0F;
 
     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
@@ -149,7 +149,6 @@ void subghz_protocol_faac_slh_to_str(SubGhzProtocolFaacSLH* instance, string_t o
     string_cat_printf(output,
                       "Protocol %s, %d Bit\r\n"
                       " KEY:0x%lX%08lX\r\n"
-                      //" YEK:0x%lX%06lX\r\n"
                       " FIX:%08lX \r\n"
                       " HOP:%08lX \r\n"
                       " SN:%07lX BTN:%lX\r\n",

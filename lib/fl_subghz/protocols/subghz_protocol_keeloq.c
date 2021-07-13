@@ -363,15 +363,11 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
         "KEY:0x%lX%lX\r\n"
         "FIX:%08lX MF:%s \r\n"
         "HOP:%08lX \r\n"
-        //"CNT:%04X BTN:%02lX\r\n",
         "SN:%07lX CNT:%04X B:%02lX\r\n",
-        //"YEK:0x%lX%lX\r\n",
         instance->common.name,
         instance->common.code_count_bit,
         code_found_hi,
         code_found_lo,
-        //code_found_reverse_hi,
-        //code_found_reverse_lo
         code_found_reverse_hi,
         instance->manufacture_name,
         code_found_reverse_lo,

@@ -144,12 +144,9 @@ void subghz_protocol_ido_to_str(SubGhzProtocolIDo* instance, string_t output) {
     uint32_t code_fix = code_found_reverse & 0xFFFFFF;
     uint32_t code_hop = (code_found_reverse >>24) & 0xFFFFFF;
 
-    //uint32_t rev_hi =
-
     string_cat_printf(output,
                       "Protocol %s, %d Bit\r\n"
                       " KEY:0x%lX%08lX\r\n"
-                      //" YEK:0x%lX%06lX\r\n"
                       " FIX:%06lX \r\n"
                       " HOP:%06lX \r\n"
                       " SN:%05lX BTN:%lX\r\n",

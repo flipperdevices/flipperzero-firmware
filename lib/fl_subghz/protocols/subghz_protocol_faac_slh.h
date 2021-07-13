@@ -41,13 +41,7 @@ void subghz_protocol_faac_slh_check_remote_controller(SubGhzProtocolFaacSLH* ins
  * @param instance - SubGhzProtocolFaacSLH instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_faac_slh_parse(SubGhzProtocolFaacSLH* instance, bool level, uint32_t duration);;
-
-/** Outputting information from the parser
- * 
- * @param instance - SubGhzProtocolFaacSLH* instance
- * @param output   - output string
- */
+void subghz_protocol_faac_slh_parse(SubGhzProtocolFaacSLH* instance, bool level, uint32_t duration);
 
 /** Outputting information from the parser
  * 

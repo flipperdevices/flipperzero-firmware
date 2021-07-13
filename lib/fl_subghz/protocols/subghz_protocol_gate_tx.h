@@ -35,11 +35,5 @@ void subghz_protocol_gate_tx_reset(SubGhzProtocolGateTX* instance);
  * @param instance - SubGhzProtocolGateTX instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, uint32_t duration);;
-
-/** Outputting information from the parser
- * 
- * @param instance - SubGhzProtocolGateTX* instance
- * @param output   - output string
- */
+void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, uint32_t duration);
 

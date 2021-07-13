@@ -41,13 +41,7 @@ void subghz_protocol_ido_check_remote_controller(SubGhzProtocolIDo* instance);
  * @param instance - SubGhzProtocolIDo instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t duration);;
-
-/** Outputting information from the parser
- * 
- * @param instance - SubGhzProtocolIDo* instance
- * @param output   - output string
- */
+void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t duration);
 
 /** Outputting information from the parser
  * 
