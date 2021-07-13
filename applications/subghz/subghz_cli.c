@@ -148,10 +148,8 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
         api_hal_subghz_idle();
         api_hal_subghz_write_packet(subghz_test_packet_data, sizeof(subghz_test_packet_data));
         api_hal_subghz_tx();
-        while(!hal_gpio_read(&gpio_cc1101_g0))
-            ; // Wait for sync
-        while(hal_gpio_read(&gpio_cc1101_g0))
-            ; // Wait end of transaction
+        while(!hal_gpio_read(&gpio_cc1101_g0)) osDelay(1); // Wait for sync
+        while(hal_gpio_read(&gpio_cc1101_g0)) osDelay(1); // Wait end of transaction
         count--;
     }
 
@@ -210,6 +208,36 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
 }
 
 void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
+    uint32_t frequency = 433920000;
+    if(string_size(args)) {
+        int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
+        if(ret != 1) {
+            printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
+            cli_print_usage("subghz_rx", "<Frequency in HZ>", string_get_cstr(args));
+            return;
+        }
+
+        if(!subghz_check_frequency_range(frequency)) {
+            printf(
+                "Frequency must be in " CC1101_FREQUENCY_RANGE_STR " range, not %lu\r\n",
+                frequency);
+            return;
+        }
+    }
+
+    api_hal_subghz_reset();
+    api_hal_subghz_idle();
+    api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
+    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+
+    api_hal_subghz_tx();
+
+    api_hal_subghz_enable_output();
+
+    osDelay(1000);
+
+    api_hal_subghz_disable_output();
+    api_hal_subghz_init();
 }
 
 #include <fl_subghz/protocols/subghz_protocol.h>
@@ -265,7 +293,6 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     api_hal_subghz_set_capture_callback(subghz_cli_command_rx_callback, rx_stream);
     api_hal_subghz_enable_capture();
 
-    api_hal_subghz_flush_rx();
     api_hal_subghz_rx();
 
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);

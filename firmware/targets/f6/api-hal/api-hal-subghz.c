@@ -324,11 +324,11 @@ void api_hal_subghz_enable_capture() {
     LL_TIM_DisableARRPreload(TIM2);
     LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI2FP2);
     LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_RESET);
-    LL_TIM_DisableIT_TRIG(TIM2);
-    LL_TIM_DisableDMAReq_TRIG(TIM2);
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
     LL_TIM_EnableMasterSlaveMode(TIM2);
-    
+    LL_TIM_DisableDMAReq_TRIG(TIM2);
+    LL_TIM_DisableIT_TRIG(TIM2);
+
     // Timer: channel 1 indirect
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_INDIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
@@ -372,27 +372,32 @@ void api_hal_subghz_set_output_callback(ApiHalSubGhzOutputCallback callback, voi
     api_hal_subghz_output_callback_context = context;
 }
 
-void api_hal_subghz_enable_output(size_t ring_size) {
-    assert(api_hal_subghz_output_callback != NULL);
-    assert(api_hal_subghz_output_ring == NULL);
+uint32_t buf_tx[]={ 9256,372,855,372,855,10,10,1028,263,1021,271,357,870,352,875,1000,281,372,855,372,855,1028,263,1021,271,357,870,352,875,2000,2000,100 };//ПОСЛЕДНИЙ ИНТЕРВАЛ нужен чтоб DMA успело выключится
 
-    api_hal_subghz_output_ring = furi_alloc(ring_size * sizeof(uint32_t));
+void api_hal_subghz_enable_output() {
+    // assert(api_hal_subghz_output_callback != NULL);
+    assert(api_hal_subghz_output_ring == NULL);
 
     // Connect CC1101_GD0 to TIM2 as output
     hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Configure DMA
-    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_TIM2_UP);
-    LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
-    LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
-    LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
-    LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
-    LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
-    LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_WORD);
-    LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_WORD);
+    LL_DMA_InitTypeDef dma_config = {0};
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)TIM2->CCR2;
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)buf_tx;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_NORMAL;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = COUNT_OF(buf_tx);
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH2;
+    dma_config.Priority = LL_DMA_MODE_NORMAL;
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, api_hal_subghz_output_ring);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ring_size);
+    LL_DMAMUX_SetRequestID(DMAMUX1, LL_DMAMUX_CHANNEL_0, LL_DMAMUX_REQ_TIM1_CH2);
 
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -409,12 +414,16 @@ void api_hal_subghz_enable_output(size_t ring_size) {
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_TOGGLE;
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.CompareValue = 0;
-    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    TIM_OC_InitStruct.CompareValue = 10;
+    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_LOW;
     LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
     LL_TIM_DisableMasterSlaveMode(TIM2);
+
+    LL_TIM_CC_SetDMAReqTrigger(TIM2, LL_TIM_CCDMAREQUEST_CC);
+    LL_TIM_EnableDMAReq_CC2(TIM2);
+    LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
     // Start counter
     LL_TIM_SetCounter(TIM2, 0);
@@ -423,7 +432,8 @@ void api_hal_subghz_enable_output(size_t ring_size) {
 
 void api_hal_subghz_disable_output() {
     LL_TIM_DeInit(TIM2);
+    LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    free(api_hal_subghz_output_ring);
-    api_hal_subghz_output_ring = NULL;
+    // free(api_hal_subghz_output_ring);
+    // api_hal_subghz_output_ring = NULL;
 }
