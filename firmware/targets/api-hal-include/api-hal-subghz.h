@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <toolbox/level_duration.h>
 
 #ifdef __cplusplus
@@ -125,6 +126,24 @@ void api_hal_subghz_enable_capture();
  * Resets GPIO and TIM2
  */
 void api_hal_subghz_disable_capture();
+
+/** Signal Timings Output callback */
+typedef size_t (*ApiHalSubGhzOutputCallback)(uint32_t* buffer, size_t length, void* context);
+
+/** Set timings output callback
+ * @param callback - your callback for output signal durations
+ */
+void api_hal_subghz_set_output_callback(ApiHalSubGhzOutputCallback callback, void* context);
+
+/** Enable signal generation from signal durations
+ * Initializes GPIO, TIM2 and DMA1 for signal output
+ */
+void api_hal_subghz_enable_output();
+
+/** Disable signal generation
+ * Resets GPIO, TIM2, and DMA1
+ */
+void api_hal_subghz_disable_output();
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,9 @@ extern "C" {
 /** Timer ISR */
 typedef void (*ApiHalInterruptISR)();
 
+/** Initialize interrupt subsystem */
+void api_hal_interrupt_init();
+
 /** Set Timer ISR
  * By default ISR is serviced by ST HAL. Use this function to override it.
  * We don't clear interrupt flags for you, do it by your self.

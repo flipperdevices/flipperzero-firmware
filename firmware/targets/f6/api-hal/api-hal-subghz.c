@@ -309,10 +309,6 @@ static void api_hal_subghz_capture_ISR() {
 }
 
 void api_hal_subghz_enable_capture() {
-    /* Peripheral clock enable */
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
-    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
-
     hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Timer: base
@@ -361,5 +357,59 @@ void api_hal_subghz_enable_capture() {
 void api_hal_subghz_disable_capture() {
     LL_TIM_DeInit(TIM2);
     api_hal_interrupt_set_timer_isr(TIM2, NULL);
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+}
+
+volatile ApiHalSubGhzOutputCallback api_hal_subghz_output_callback = NULL;
+volatile void* api_hal_subghz_output_callback_context = NULL;
+
+void api_hal_subghz_set_output_callback(ApiHalSubGhzOutputCallback callback, void* context) {
+    api_hal_subghz_output_callback = callback;
+    api_hal_subghz_output_callback_context = context;
+}
+
+void api_hal_subghz_enable_output() {
+    // Connect CC1101_GD0 to TIM2 as output
+    hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+
+    // Configure DMA
+    LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_TIM2_UP);
+    LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
+    LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
+    LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_CIRCULAR);
+    LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
+    LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
+    LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_WORD);
+    LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_WORD);
+
+    // Configure TIM2
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
+    TIM_InitStruct.Prescaler = 63;
+    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+    TIM_InitStruct.Autoreload = 0xFFFFFFFF;
+    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    LL_TIM_Init(TIM2, &TIM_InitStruct);
+    LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+    LL_TIM_EnableARRPreload(TIM2);
+
+    // Configure TIM2 CH2
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_TOGGLE;
+    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.CompareValue = 0;
+    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
+    LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
+    LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
+    LL_TIM_DisableMasterSlaveMode(TIM2);
+
+    // Start counter
+    LL_TIM_SetCounter(TIM2, 0);
+    LL_TIM_EnableCounter(TIM2);
+}
+
+void api_hal_subghz_disable_output() {
+    LL_TIM_DeInit(TIM2);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }

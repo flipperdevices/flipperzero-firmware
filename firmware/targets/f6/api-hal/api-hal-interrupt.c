@@ -14,6 +14,20 @@ void TIM2_IRQHandler(void) {
     }
 }
 
+void DMAMUX1_OVR_IRQHandler(void) {
+}
+
+void DMA1_Channel1_IRQHandler(void) {
+}
+
+void api_hal_interrupt_init() {
+    NVIC_SetPriority(DMA1_Channel1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+    NVIC_SetPriority(DMAMUX1_OVR_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
+    NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
+}
+
 void api_hal_interrupt_set_timer_isr(TIM_TypeDef *timer, ApiHalInterruptISR isr) {
     if (timer == TIM2) {
         if (isr) {
