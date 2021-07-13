@@ -319,24 +319,27 @@ void api_hal_subghz_enable_capture() {
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
 
-    // Timer: advanced and channel
+    // Timer: advanced
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
     LL_TIM_DisableARRPreload(TIM2);
     LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI2FP2);
     LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_RESET);
-    LL_TIM_CC_DisableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV1);
-    LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
     LL_TIM_DisableIT_TRIG(TIM2);
     LL_TIM_DisableDMAReq_TRIG(TIM2);
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
     LL_TIM_EnableMasterSlaveMode(TIM2);
+    
+    // Timer: channel 1 indirect
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_INDIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
-    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_FALLING);
+    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
+
+    // Timer: channel 2 direct
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
+    LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
+    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV1);
 
     // ISR setup
     api_hal_interrupt_set_timer_isr(TIM2, api_hal_subghz_capture_ISR);
@@ -362,13 +365,19 @@ void api_hal_subghz_disable_capture() {
 
 volatile ApiHalSubGhzOutputCallback api_hal_subghz_output_callback = NULL;
 volatile void* api_hal_subghz_output_callback_context = NULL;
+volatile uint8_t* api_hal_subghz_output_ring = NULL;
 
 void api_hal_subghz_set_output_callback(ApiHalSubGhzOutputCallback callback, void* context) {
     api_hal_subghz_output_callback = callback;
     api_hal_subghz_output_callback_context = context;
 }
 
-void api_hal_subghz_enable_output() {
+void api_hal_subghz_enable_output(size_t ring_size) {
+    assert(api_hal_subghz_output_callback != NULL);
+    assert(api_hal_subghz_output_ring == NULL);
+
+    api_hal_subghz_output_ring = furi_alloc(ring_size * sizeof(uint32_t));
+
     // Connect CC1101_GD0 to TIM2 as output
     hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
@@ -376,15 +385,18 @@ void api_hal_subghz_enable_output() {
     LL_DMA_SetPeriphRequest(DMA1, LL_DMA_CHANNEL_1, LL_DMAMUX_REQ_TIM2_UP);
     LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_CHANNEL_1, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetChannelPriorityLevel(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PRIORITY_LOW);
-    LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_CIRCULAR);
+    LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MODE_NORMAL);
     LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PERIPH_NOINCREMENT);
     LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MEMORY_INCREMENT);
     LL_DMA_SetPeriphSize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_PDATAALIGN_WORD);
     LL_DMA_SetMemorySize(DMA1, LL_DMA_CHANNEL_1, LL_DMA_MDATAALIGN_WORD);
 
+    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, api_hal_subghz_output_ring);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, ring_size);
+
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = 63;
+    TIM_InitStruct.Prescaler = 64-1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     TIM_InitStruct.Autoreload = 0xFFFFFFFF;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
@@ -412,4 +424,6 @@ void api_hal_subghz_enable_output() {
 void api_hal_subghz_disable_output() {
     LL_TIM_DeInit(TIM2);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    free(api_hal_subghz_output_ring);
+    api_hal_subghz_output_ring = NULL;
 }
