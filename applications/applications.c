@@ -168,11 +168,11 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_STORAGE
-    {.app = storage_app, .name = "storage", .stack_size = 4096, .icon = A_Plugins_14},
+    {.app = storage_app, .name = "storage", .stack_size = 4096, .icon = &A_Plugins_14},
 #endif
 
 #ifdef SRV_STORAGE_TEST
-    {.app = storage_app_test, .name = "storage test", .stack_size = 1024, .icon = A_Plugins_14},
+    {.app = storage_app_test, .name = "storage test", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
 };
@@ -341,14 +341,11 @@ const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(Flip
 // Settings menu
 const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 #ifdef SRV_NOTIFICATION
-    {.app = notification_app_settings,
-     .name = "Notification",
-     .stack_size = 1024,
-     .icon = I_Empty_1x1},
+    {.app = notification_app_settings, .name = "Notification", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_STORAGE
-    {.app = storage_settings, .name = "Storage", .stack_size = 1024, .icon = I_Empty_1x1},
+    {.app = storage_settings, .name = "Storage", .stack_size = 1024, .icon = NULL},
 #endif
 };
 

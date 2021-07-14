@@ -13,8 +13,6 @@ extern "C" {
 
 typedef struct {
     ViewPort* view_port;
-    Icon* icon_mounted;
-    Icon* icon_error;
     bool enabled;
 } StorageAppSDGui;
 

@@ -7,19 +7,23 @@
 
 #define STORAGE_TICK 1000
 
+#define ICON_SD_MOUNTED &I_SDcardMounted_11x8
+#define ICON_SD_ERROR &I_SDcardFail_11x8
+
 static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
     StorageApp* app = context;
 
+    // here we don't care about thread race when reading / writing status
     switch(app->storage[ST_EXT].status) {
     case StorageStatusNotReady:
         break;
     case StorageStatusOK:
-        canvas_draw_icon(canvas, 0, 0, app->sd_gui.icon_mounted);
+        canvas_draw_icon(canvas, 0, 0, ICON_SD_MOUNTED);
         break;
     default:
-        canvas_draw_icon(canvas, 0, 0, app->sd_gui.icon_error);
+        canvas_draw_icon(canvas, 0, 0, ICON_SD_ERROR);
         break;
     }
 }
@@ -73,9 +77,7 @@ StorageApp* storage_app_alloc() {
     // sd icon gui
     app->sd_gui.enabled = false;
     app->sd_gui.view_port = view_port_alloc();
-    app->sd_gui.icon_mounted = assets_icons_get(I_SDcardMounted_11x8);
-    app->sd_gui.icon_error = assets_icons_get(I_SDcardFail_11x8);
-    view_port_set_width(app->sd_gui.view_port, icon_get_width(app->sd_gui.icon_mounted));
+    view_port_set_width(app->sd_gui.view_port, icon_get_width(ICON_SD_MOUNTED));
     view_port_draw_callback_set(app->sd_gui.view_port, storage_app_sd_icon_draw_callback, app);
     view_port_enabled_set(app->sd_gui.view_port, false);
 
