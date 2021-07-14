@@ -383,7 +383,7 @@ void api_hal_subghz_enable_output() {
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->CCR2);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->ARR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)buf_tx;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_NORMAL;
@@ -392,23 +392,19 @@ void api_hal_subghz_enable_output() {
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
     dma_config.NbData = COUNT_OF(buf_tx);
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH2;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config.Priority = LL_DMA_MODE_NORMAL;
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-
-    LL_DMAMUX_SetRequestID(DMAMUX1, LL_DMAMUX_CHANNEL_0, LL_DMAMUX_REQ_TIM2_CH2);
-    LL_DMAMUX_EnableRequestGen(DMAMUX1, LL_DMAMUX_REQ_GEN_0);
 
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Prescaler = 64-1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = 0xFFFFFFFF;
+    TIM_InitStruct.Autoreload = 1000;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_EnableARRPreload(TIM2);
 
     // Configure TIM2 CH2
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -422,8 +418,7 @@ void api_hal_subghz_enable_output() {
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
     LL_TIM_DisableMasterSlaveMode(TIM2);
 
-    LL_TIM_CC_SetDMAReqTrigger(TIM2, LL_TIM_CCDMAREQUEST_CC);
-    LL_TIM_EnableDMAReq_CC2(TIM2);
+    LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
     // Start counter
