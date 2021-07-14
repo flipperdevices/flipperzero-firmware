@@ -52,6 +52,7 @@ void ibutton_cli_init();
 
 // Settings
 int32_t notification_app_settings(void* p);
+int32_t storage_settings(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_CLI
@@ -166,6 +167,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_STORAGE
     {.app = storage_app, .name = "storage", .stack_size = 4096, .icon = A_Plugins_14},
 #endif
+
 #ifdef SRV_STORAGE_TEST
     {.app = storage_app_test, .name = "storage test", .stack_size = 1024, .icon = A_Plugins_14},
 #endif
@@ -336,7 +338,11 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
     {.app = notification_app_settings,
      .name = "Notification",
      .stack_size = 1024,
-     .icon = A_Plugins_14},
+     .icon = I_Empty_1x1},
+#endif
+
+#ifdef SRV_STORAGE
+    {.app = storage_settings, .name = "Storage", .stack_size = 1024, .icon = I_Empty_1x1},
 #endif
 };
 
