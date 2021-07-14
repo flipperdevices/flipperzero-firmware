@@ -236,6 +236,13 @@ static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, voi
     return ESP_LOADER_SUCCESS;
 }
 
+static inline uint32_t encryption_field_size(target_chip_t target)
+{
+    return (target == ESP32S2_CHIP || 
+            target == ESP32C3_CHIP || 
+            target == ESP32S3_CHIP) ? 0 : sizeof(uint32_t);
+}
+
 
 esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t erase_size,
@@ -243,13 +250,13 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t blocks_to_write,
                                           target_chip_t target)
 {
-    size_t removeEncryption = target == ESP32S2_CHIP ? 0 : sizeof(uint32_t);
+    uint32_t encryption_size = encryption_field_size(target);
 
     begin_command_t begin_cmd = {
         .common = {
             .direction = WRITE_DIRECTION,
             .command = FLASH_BEGIN,
-            .size = CMD_SIZE(begin_cmd) - removeEncryption,
+            .size = CMD_SIZE(begin_cmd) - encryption_size,
             .checksum = 0
         },
         .erase_size = erase_size,
@@ -261,7 +268,7 @@ esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
 
     s_sequence_number = 0;
 
-    return send_cmd(&begin_cmd.common, sizeof(begin_cmd) - removeEncryption, NULL);
+    return send_cmd(&begin_cmd, sizeof(begin_cmd) - encryption_size, NULL);
 }
 
 

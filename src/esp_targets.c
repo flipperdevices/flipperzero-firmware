@@ -30,10 +30,12 @@ typedef struct {
 
 #define ESP8266_SPI_REG_BASE 0x60000200
 #define ESP32S2_SPI_REG_BASE 0x3f402000
+#define ESP32C3_SPI_REG_BASE 0x60002000
+#define ESP32S3_SPI_REG_BASE 0x60002000
 #define ESP32_SPI_REG_BASE   0x3ff42000
 
 static esp_loader_error_t spi_config_esp32(uint32_t efuse_base, uint32_t *spi_config);
-static esp_loader_error_t spi_config_esp32s2(uint32_t efuse_base, uint32_t *spi_config);
+static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_config);
 
 static const esp_target_t esp_target[ESP_MAX_CHIP] = {
 
@@ -82,8 +84,40 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
         },
         .efuse_base = 0x3f41A000,
         .chip_magic_value  = 0x000007c6,
-        .read_spi_config = spi_config_esp32s2,
-    }
+        .read_spi_config = spi_config_esp32xx,
+    },
+
+    // ESP32C3
+    {
+        .regs = {
+            .cmd  = ESP32C3_SPI_REG_BASE + 0x00,
+            .usr  = ESP32C3_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32C3_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32C3_SPI_REG_BASE + 0x20,
+            .w0   = ESP32C3_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32C3_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x60008800,
+        .chip_magic_value = 0x6921506f,
+        .read_spi_config = spi_config_esp32xx,
+    },
+
+    // ESP32S3
+    {
+        .regs = {
+            .cmd  = ESP32C3_SPI_REG_BASE + 0x00,
+            .usr  = ESP32C3_SPI_REG_BASE + 0x18,
+            .usr1 = ESP32C3_SPI_REG_BASE + 0x1c,
+            .usr2 = ESP32C3_SPI_REG_BASE + 0x20,
+            .w0   = ESP32C3_SPI_REG_BASE + 0x58,
+            .mosi_dlen = ESP32C3_SPI_REG_BASE + 0x24,
+            .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
+        },
+        .efuse_base = 0x60007000,
+        .chip_magic_value = 0x00000009,
+        .read_spi_config = spi_config_esp32xx, // !
+    },
 };
 
 const target_registers_t *get_esp_target_data(target_chip_t chip)
@@ -99,7 +133,7 @@ esp_loader_error_t loader_detect_chip(target_chip_t *target_chip, const target_r
     for (int chip = 0; chip < ESP_MAX_CHIP; chip++) {
         if (magic_value == esp_target[chip].chip_magic_value) {
             *target_chip = (target_chip_t)chip;
-            *target_data = (target_registers_t*)&esp_target[chip];
+            *target_data = (target_registers_t *)&esp_target[chip];
             return ESP_LOADER_SUCCESS;
         }
     }
@@ -154,7 +188,8 @@ static esp_loader_error_t spi_config_esp32(uint32_t efuse_base, uint32_t *spi_co
     return ESP_LOADER_SUCCESS;
 }
 
-static esp_loader_error_t spi_config_esp32s2(uint32_t efuse_base, uint32_t *spi_config)
+// Applies for esp32s2, esp32c3 and esp32c3
+static esp_loader_error_t spi_config_esp32xx(uint32_t efuse_base, uint32_t *spi_config)
 {
     *spi_config = 0;
 
