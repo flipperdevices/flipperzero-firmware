@@ -383,7 +383,7 @@ void api_hal_subghz_enable_output() {
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t)TIM2->CCR2;
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->CCR2);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)buf_tx;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_NORMAL;
@@ -397,7 +397,8 @@ void api_hal_subghz_enable_output() {
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
-    LL_DMAMUX_SetRequestID(DMAMUX1, LL_DMAMUX_CHANNEL_0, LL_DMAMUX_REQ_TIM1_CH2);
+    LL_DMAMUX_SetRequestID(DMAMUX1, LL_DMAMUX_CHANNEL_0, LL_DMAMUX_REQ_TIM2_CH2);
+    LL_DMAMUX_EnableRequestGen(DMAMUX1, LL_DMAMUX_REQ_GEN_0);
 
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
