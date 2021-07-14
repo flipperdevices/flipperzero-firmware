@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-#include <gui/icon.h>
-#include <assets_icons_i.h>
+#include <gui/icon_animation.h>
+#include <assets_icons.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,15 +91,30 @@ void canvas_draw_str_aligned(
  */
 uint16_t canvas_string_width(Canvas* canvas, const char* str);
 
-/*
- * Draw stateful icon at position defined by x,y.
+/** Get glyph width
+ * @return width in pixels
  */
-void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, Icon* icon);
+uint8_t canvas_glyph_width(Canvas* canvas, char symbol);
 
-/*
- * Draw stateless icon at position defined by x,y.
+/** Draw animation at position defined by x,y.
+ * @param canvas - canvas instance
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon_animation - data pointer to IconAnimation
  */
-void canvas_draw_icon_name(Canvas* canvas, uint8_t x, uint8_t y, IconName name);
+void canvas_draw_icon_animation(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    IconAnimation* icon_animation);
+
+/** Draw icon at position defined by x,y.
+ * @param canvas - canvas instance
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon - data pointer to Icon
+ */
+void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon);
 
 /*
  * Draw xbm icon of width, height at position defined by x,y.
