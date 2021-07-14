@@ -423,7 +423,7 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
             string_init_printf(
                 full_path,
                 "%s/%s",
-                string_get_cstr(archive->browser.path),
+                get_default_path(selected->type),
                 string_get_cstr(selected->name));
 
             archive_open_app(
