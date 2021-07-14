@@ -9,6 +9,8 @@
 #include <cc1101.h>
 #include <stdio.h>
 
+static volatile SubGhzState api_hal_subghz_state = SubGhzStateInit;
+
 static const uint8_t api_hal_subghz_preset_ook_async_regs[][2] = {
     /* Base setting */
     { CC1101_IOCFG0,    0x0D }, // GD0 as async serial data output/input
@@ -24,7 +26,7 @@ static const uint8_t api_hal_subghz_preset_ook_async_regs[][2] = {
 };
 
 static const uint8_t api_hal_subghz_preset_ook_async_patable[8] = {
-    0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 static const uint8_t api_hal_subghz_preset_mp_regs[][2] = {
@@ -63,7 +65,7 @@ static const uint8_t api_hal_subghz_preset_mp_regs[][2] = {
 };
 
 static const uint8_t api_hal_subghz_preset_mp_patable[8] = {
-    0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    0x00, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 static const uint8_t api_hal_subghz_preset_2fsk_packet_regs[][2] = {
@@ -85,9 +87,15 @@ static const uint8_t api_hal_subghz_preset_2fsk_packet_patable[8] = {
 };
 
 void api_hal_subghz_init() {
+    furi_assert(api_hal_subghz_state == SubGhzStateInit);
+    api_hal_subghz_state = SubGhzStateIdle;
+
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
-    // Reset and shutdown
+
+    // Reset
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_reset(device);
+    cc1101_write_reg(device, CC1101_IOCFG0, CC1101IocfgHighImpedance);
 
     // Prepare GD0 for power on self test
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
@@ -108,8 +116,23 @@ void api_hal_subghz_init() {
     hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     cc1101_write_reg(device, CC1101_IOCFG2, CC1101IocfgHW);
 
-    // Turn off oscillator
+    // Go to sleep
     cc1101_shutdown(device);
+
+    api_hal_spi_device_return(device);
+}
+
+void api_hal_subghz_sleep() {
+    furi_assert(api_hal_subghz_state == SubGhzStateIdle);
+    const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
+
+    cc1101_switch_to_idle(device);
+
+    cc1101_write_reg(device, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+
+    cc1101_shutdown(device);
+
     api_hal_spi_device_return(device);
 }
 
@@ -189,7 +212,10 @@ void api_hal_subghz_shutdown() {
 
 void api_hal_subghz_reset() {
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
+    hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    cc1101_switch_to_idle(device);
     cc1101_reset(device);
+    cc1101_write_reg(device, CC1101_IOCFG0, CC1101IocfgHighImpedance);
     api_hal_spi_device_return(device);
 }
 
@@ -207,7 +233,6 @@ void api_hal_subghz_rx() {
 
 void api_hal_subghz_tx() {
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
-    cc1101_switch_to_idle(device);
     cc1101_switch_to_tx(device);
     api_hal_spi_device_return(device);
 }
@@ -281,11 +306,6 @@ volatile uint32_t api_hal_subghz_capture_delta_duration = 0;
 volatile ApiHalSubGhzCaptureCallback api_hal_subghz_capture_callback = NULL;
 volatile void* api_hal_subghz_capture_callback_context = NULL;
 
-void api_hal_subghz_set_capture_callback(ApiHalSubGhzCaptureCallback callback, void* context) {
-    api_hal_subghz_capture_callback = callback;
-    api_hal_subghz_capture_callback_context = context;
-}
-
 static void api_hal_subghz_capture_ISR() {
     // Channel 1
     if(LL_TIM_IsActiveFlag_CC1(TIM2)) {
@@ -308,7 +328,15 @@ static void api_hal_subghz_capture_ISR() {
     }
 }
 
-void api_hal_subghz_enable_capture() {
+void api_hal_subghz_set_async_rx_callback(ApiHalSubGhzCaptureCallback callback, void* context) {
+    api_hal_subghz_capture_callback = callback;
+    api_hal_subghz_capture_callback_context = context;
+}
+
+void api_hal_subghz_start_async_rx() {
+    furi_assert(api_hal_subghz_state == SubGhzStateIdle);
+    api_hal_subghz_state = SubGhzStateAsyncRx;
+
     hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Timer: base
@@ -355,46 +383,65 @@ void api_hal_subghz_enable_capture() {
     // Start timer
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
+
+    // Switch to RX
+    api_hal_subghz_rx();
 }
 
-void api_hal_subghz_disable_capture() {
+void api_hal_subghz_stop_async_rx() {
+    furi_assert(api_hal_subghz_state == SubGhzStateAsyncRx);
+    api_hal_subghz_state = SubGhzStateIdle;
+
+    // Shutdown radio
+    api_hal_subghz_idle();
+
     LL_TIM_DeInit(TIM2);
     api_hal_interrupt_set_timer_isr(TIM2, NULL);
+
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-volatile ApiHalSubGhzOutputCallback api_hal_subghz_output_callback = NULL;
-volatile void* api_hal_subghz_output_callback_context = NULL;
-volatile uint8_t* api_hal_subghz_output_ring = NULL;
-
-void api_hal_subghz_set_output_callback(ApiHalSubGhzOutputCallback callback, void* context) {
-    api_hal_subghz_output_callback = callback;
-    api_hal_subghz_output_callback_context = context;
+static void api_hal_subghz_tx_dma_isr() {
+    if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
+        LL_DMA_ClearFlag_TC1(DMA1);
+        furi_assert(api_hal_subghz_state == SubGhzStateAsyncTx);
+        api_hal_subghz_state = SubGhzStateAsyncTxLast;
+    }
 }
 
-uint32_t buf_tx[]={ 9256,372,855,372,855,10,10,1028,263,1021,271,357,870,352,875,1000,281,372,855,372,855,1028,263,1021,271,357,870,352,875,2000,2000,100 };//ПОСЛЕДНИЙ ИНТЕРВАЛ нужен чтоб DMA успело выключится
+static void api_hal_subghz_tx_timer_isr() {
+    if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
+        LL_TIM_ClearFlag_UPDATE(TIM2);
+        if (api_hal_subghz_state == SubGhzStateAsyncTxLast) {
+            api_hal_subghz_state = SubGhzStateAsyncTxEnd;
+            LL_TIM_DisableCounter(TIM2);
+        }
+    }
+}
 
-void api_hal_subghz_enable_output() {
-    // assert(api_hal_subghz_output_callback != NULL);
-    assert(api_hal_subghz_output_ring == NULL);
+void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size) {
+    furi_assert(api_hal_subghz_state == SubGhzStateIdle);
+    api_hal_subghz_state = SubGhzStateAsyncTx;
 
     // Connect CC1101_GD0 to TIM2 as output
-    hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+    hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
     dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->ARR);
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)buf_tx;
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)buffer;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_NORMAL;
     dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = COUNT_OF(buf_tx);
+    dma_config.NbData = buffer_size / sizeof(uint32_t);
     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config.Priority = LL_DMA_MODE_NORMAL;
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
+    api_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_1, api_hal_subghz_tx_dma_isr);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
     // Configure TIM2
@@ -405,31 +452,51 @@ void api_hal_subghz_enable_output() {
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+    LL_TIM_EnableARRPreload(TIM2);
 
     // Configure TIM2 CH2
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_TOGGLE;
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.CompareValue = 10;
-    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_LOW;
+    TIM_OC_InitStruct.CompareValue = 0;
+    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
     LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
-    LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
     LL_TIM_DisableMasterSlaveMode(TIM2);
 
+    api_hal_interrupt_set_timer_isr(TIM2, api_hal_subghz_tx_timer_isr);
+    LL_TIM_EnableIT_UPDATE(TIM2);
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
     // Start counter
+    LL_TIM_GenerateEvent_UPDATE(TIM2);
+    api_hal_subghz_tx();
+
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
 }
 
-void api_hal_subghz_disable_output() {
+void api_hal_subghz_wait_async_tx() {
+    while(api_hal_subghz_state != SubGhzStateAsyncTxEnd) osDelay(1);
+}
+
+void api_hal_subghz_stop_async_tx() {
+    furi_assert(api_hal_subghz_state == SubGhzStateAsyncTxEnd);
+    api_hal_subghz_state = SubGhzStateIdle;
+
+    // Shutdown radio
+    api_hal_subghz_idle();
+
+    // Deinitialize Timer
     LL_TIM_DeInit(TIM2);
+    api_hal_interrupt_set_timer_isr(TIM2, NULL);
+
+    // Deinitialize DMA
     LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
+    api_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_1, NULL);
+
+    // Deinitialize GPIO
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    // free(api_hal_subghz_output_ring);
-    // api_hal_subghz_output_ring = NULL;
 }
