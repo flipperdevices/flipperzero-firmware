@@ -1,0 +1,7 @@
+ADD_SCENE(storage_settings, start, Start)
+ADD_SCENE(storage_settings, unmount_confirm, UnmountConfirm)
+ADD_SCENE(storage_settings, unmounted, Unmounted)
+ADD_SCENE(storage_settings, format_confirm, FormatConfirm)
+ADD_SCENE(storage_settings, formatting, Formatting)
+ADD_SCENE(storage_settings, sd_info, SDInfo)
+ADD_SCENE(storage_settings, internal_info, InternalInfo)

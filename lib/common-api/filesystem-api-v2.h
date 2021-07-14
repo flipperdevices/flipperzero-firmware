@@ -263,6 +263,9 @@ typedef struct {
     void* context;
 } FS_Api;
 
+// TODO remove FS_Error_Api completely
+const char* filesystem_api_error_get_desc(FS_Error error_id);
+
 #ifdef __cplusplus
 }
 #endif

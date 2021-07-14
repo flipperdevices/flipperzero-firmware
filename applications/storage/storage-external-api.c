@@ -304,7 +304,7 @@ FS_Error s_api_sd_info(void* context, SDInfo* info) {
         .sdinfo = {
             .info = info,
         }};
-    S_API_MESSAGE(StorageCommandSDUnmount);
+    S_API_MESSAGE(StorageCommandSDInfo);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
 }
