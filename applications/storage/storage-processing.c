@@ -17,7 +17,7 @@ static StorageData* storage_get_storage_by_type(StorageApp* app, StorageType typ
         type = ST_INT;
         StorageData* ext_storage = &app->storage[ST_EXT];
 
-        if(storage_data_status(ext_storage) == SE_OK) {
+        if(storage_data_status(ext_storage) == StorageStatusOK) {
             type = ST_EXT;
         }
     }

@@ -127,21 +127,21 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
             err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
             if(err == 0) {
                 FURI_LOG_I(TAG, "Factory reset: Mounted");
-                storage->status = SE_OK;
+                storage->status = StorageStatusOK;
             } else {
                 FURI_LOG_E(TAG, "Factory reset: Mount after format failed");
-                storage->status = SE_ERROR_NOT_MOUNTED;
+                storage->status = StorageStatusNotMounted;
             }
         } else {
             FURI_LOG_E(TAG, "Factory reset: Format failed");
-            storage->status = SE_ERROR_NO_FILESYSTEM;
+            storage->status = StorageStatusNoFS;
         }
     } else {
         // Normal
         err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
         if(err == 0) {
             FURI_LOG_I(TAG, "Mounted");
-            storage->status = SE_OK;
+            storage->status = StorageStatusOK;
         } else {
             FURI_LOG_E(TAG, "Mount failed, formatting");
             err = lfs_format(&lfs_data->lfs, &lfs_data->config);
@@ -150,14 +150,14 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
                 err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
                 if(err == 0) {
                     FURI_LOG_I(TAG, "Mounted");
-                    storage->status = SE_OK;
+                    storage->status = StorageStatusOK;
                 } else {
                     FURI_LOG_E(TAG, "Mount after format failed");
-                    storage->status = SE_ERROR_NOT_MOUNTED;
+                    storage->status = StorageStatusNotMounted;
                 }
             } else {
                 FURI_LOG_E(TAG, "Format failed");
-                storage->status = SE_ERROR_NO_FILESYSTEM;
+                storage->status = StorageStatusNoFS;
             }
         }
     }

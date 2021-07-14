@@ -24,13 +24,13 @@ typedef struct {
 } StorageFile;
 
 typedef enum {
-    SE_OK, /**< storage ok */
-    SE_ERROR_NOT_READY, /**< storage not ready (not initialized or waiting for data storage to appear) */
-    SE_ERROR_NOT_MOUNTED, /**< datastore appeared, but we cannot mount it */
-    SE_ERROR_NO_FILESYSTEM, /**< datastore appeared and mounted, but does not have a file system */
-    SE_ERROR_NOT_ACCESSIBLE, /**< datastore appeared and mounted, but not available */
-    SE_ERROR_INTERNAL, /**< any other internal error */
-} StorageError;
+    StorageStatusOK, /**< storage ok */
+    StorageStatusNotReady, /**< storage not ready (not initialized or waiting for data storage to appear) */
+    StorageStatusNotMounted, /**< datastore appeared, but we cannot mount it */
+    StorageStatusNoFS, /**< datastore appeared and mounted, but does not have a file system */
+    StorageStatusNotAccessible, /**< datastore appeared and mounted, but not available */
+    StorageStatusErrorInternal, /**< any other internal error */
+} StorageStatus;
 
 void storage_file_init(StorageFile* obj);
 void storage_file_init_set(StorageFile* obj, const StorageFile* src);
@@ -40,7 +40,7 @@ void storage_file_clear(StorageFile* obj);
 void storage_data_init(StorageData* storage);
 bool storage_data_lock(StorageData* storage);
 bool storage_data_unlock(StorageData* storage);
-StorageError storage_data_status(StorageData* storage);
+StorageStatus storage_data_status(StorageData* storage);
 const char* storage_data_status_text(StorageData* storage);
 
 ARRAY_DEF(
@@ -56,7 +56,7 @@ struct StorageData {
     StorageApi api;
     void* data;
     osMutexId_t mutex;
-    StorageError status;
+    StorageStatus status;
     StorageFileArray_t files;
 };
 

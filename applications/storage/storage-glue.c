@@ -34,7 +34,7 @@ void storage_data_init(StorageData* storage) {
     storage->mutex = osMutexNew(NULL);
     furi_check(storage->mutex != NULL);
     storage->data = NULL;
-    storage->status = SE_ERROR_NOT_READY;
+    storage->status = StorageStatusNotReady;
     StorageFileArray_init(storage->files);
 }
 
@@ -48,8 +48,8 @@ bool storage_data_unlock(StorageData* storage) {
     return (osMutexRelease(storage->mutex) == osOK);
 }
 
-StorageError storage_data_status(StorageData* storage) {
-    StorageError status;
+StorageStatus storage_data_status(StorageData* storage) {
+    StorageStatus status;
 
     storage_data_lock(storage);
     status = storage->status;
@@ -61,22 +61,22 @@ StorageError storage_data_status(StorageData* storage) {
 const char* storage_data_status_text(StorageData* storage) {
     const char* result = "unknown";
     switch(storage->status) {
-    case SE_OK:
+    case StorageStatusOK:
         result = "ok";
         break;
-    case SE_ERROR_NOT_READY:
+    case StorageStatusNotReady:
         result = "not ready";
         break;
-    case SE_ERROR_NOT_MOUNTED:
+    case StorageStatusNotMounted:
         result = "not mounted";
         break;
-    case SE_ERROR_NO_FILESYSTEM:
+    case StorageStatusNoFS:
         result = "no filesystem";
         break;
-    case SE_ERROR_NOT_ACCESSIBLE:
+    case StorageStatusNotAccessible:
         result = "not accessible";
         break;
-    case SE_ERROR_INTERNAL:
+    case StorageStatusErrorInternal:
         result = "internal";
         break;
     }

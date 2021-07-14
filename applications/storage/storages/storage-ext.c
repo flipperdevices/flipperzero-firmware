@@ -47,7 +47,7 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
 
         if(bsp_result) {
             // bsp error
-            storage->status = SE_ERROR_INTERNAL;
+            storage->status = StorageStatusErrorInternal;
         } else {
             SDError status = f_mount(sd_data->fs, sd_data->path, 1);
 
@@ -62,14 +62,14 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
                 }
 
                 if(status == FR_OK) {
-                    storage->status = SE_OK;
+                    storage->status = StorageStatusOK;
                 } else if(status == FR_NO_FILESYSTEM) {
-                    storage->status = SE_ERROR_NO_FILESYSTEM;
+                    storage->status = StorageStatusNoFS;
                 } else {
-                    storage->status = SE_ERROR_NOT_ACCESSIBLE;
+                    storage->status = StorageStatusNotAccessible;
                 }
             } else {
-                storage->status = SE_ERROR_NOT_MOUNTED;
+                storage->status = StorageStatusNotMounted;
             }
         }
 
@@ -96,7 +96,7 @@ static void sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
 
     storage_data_lock(storage);
-    storage->status = SE_ERROR_NOT_READY;
+    storage->status = StorageStatusNotReady;
 
     // TODO do i need to close the files?
 
@@ -112,7 +112,7 @@ static void storage_ext_tick_internal(StorageData* storage, bool notify) {
             FURI_LOG_I(TAG, "card detected");
             sd_mount_card(storage, notify);
 
-            if(storage->status != SE_OK) {
+            if(storage->status != StorageStatusOK) {
                 FURI_LOG_E(TAG, "sd init error: %s", storage_data_status_text(storage));
                 if(notify) {
                     NotificationApp* notification = furi_record_open("notification");
