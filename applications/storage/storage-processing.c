@@ -327,6 +327,67 @@ static const char* storage_process_error_get_desc(FS_Error error_id) {
     return result;
 }
 
+/****************** Raw SD API ******************/
+// TODO think about implementing a custom storage API to split that kind of api linkage
+#include "storages/storage-ext.h"
+
+static FS_Error storage_process_sd_format(StorageApp* app) {
+    FS_Error ret = FSE_OK;
+
+    if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
+        ret = FSE_NOT_READY;
+    } else {
+        ret = sd_format_card(&app->storage[ST_EXT]);
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_sd_unmount(StorageApp* app) {
+    FS_Error ret = FSE_OK;
+
+    if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
+        ret = FSE_NOT_READY;
+    } else {
+        sd_unmount_card(&app->storage[ST_EXT]);
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_sd_info(StorageApp* app, SDInfo* info) {
+    FS_Error ret = FSE_OK;
+
+    if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
+        ret = FSE_NOT_READY;
+    } else {
+        ret = sd_card_info(&app->storage[ST_EXT], info);
+    }
+
+    return ret;
+}
+
+static FS_Error storage_process_sd_status(StorageApp* app) {
+    FS_Error ret;
+    StorageStatus status = storage_data_status(&app->storage[ST_EXT]);
+
+    switch(status) {
+    case StorageStatusOK:
+        ret = FSE_OK;
+        break;
+    case StorageStatusNotReady:
+        ret = FSE_NOT_READY;
+        break;
+    default:
+        ret = FSE_INTERNAL;
+        break;
+    }
+
+    return ret;
+}
+
+/****************** API calls processing ******************/
+
 void storage_process_message(StorageApp* app, StorageMessage* message) {
     switch(message->command) {
     case StorageCommandFileOpen:
@@ -428,6 +489,19 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
     case StorageCommandErrorGetDesc:
         message->return_data->cstring_value =
             storage_process_error_get_desc(message->data->error.id);
+        break;
+    case StorageCommandSDFormat:
+        message->return_data->error_value = storage_process_sd_format(app);
+        break;
+    case StorageCommandSDUnmount:
+        message->return_data->error_value = storage_process_sd_unmount(app);
+        break;
+    case StorageCommandSDInfo:
+        message->return_data->error_value =
+            storage_process_sd_info(app, message->data->sdinfo.info);
+        break;
+    case StorageCommandSDStatus:
+        message->return_data->error_value = storage_process_sd_status(app);
         break;
     }
 

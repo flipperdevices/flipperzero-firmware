@@ -279,3 +279,40 @@ const char* s_api_error_get_desc(void* context, FS_Error error_id) {
     S_API_EPILOGUE;
     return S_RETURN_CSTRING;
 }
+
+/****************** Raw SD API ******************/
+
+FS_Error s_api_sd_format(void* context) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandSDFormat);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error s_api_sd_unmount(void* context) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandSDUnmount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error s_api_sd_info(void* context, SDInfo* info) {
+    S_API_PROLOGUE;
+    SAData data = {
+        .sdinfo = {
+            .info = info,
+        }};
+    S_API_MESSAGE(StorageCommandSDUnmount);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}
+
+FS_Error s_api_sd_status(void* context) {
+    S_API_PROLOGUE;
+    SAData data = {};
+    S_API_MESSAGE(StorageCommandSDStatus);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
+}

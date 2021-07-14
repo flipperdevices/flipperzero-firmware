@@ -3,6 +3,7 @@
 #include <filesystem-api-v2.h>
 #include "storage-glue.h"
 #include <gui/gui.h>
+#include "storage-sd-api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,6 +23,7 @@ typedef struct {
     osMessageQueueId_t message_queue;
     StorageData storage[STORAGE_COUNT];
     StorageAppSDGui sd_gui;
+    StorageSDApi sd_api;
 } StorageApp;
 
 #ifdef __cplusplus

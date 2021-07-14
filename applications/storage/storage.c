@@ -50,6 +50,12 @@ void storage_app_fill_api(StorageApp* app) {
     app->external_api.error.get_desc = s_api_error_get_desc;
 
     app->external_api.context = app;
+
+    app->sd_api.format = s_api_sd_format;
+    app->sd_api.unmount = s_api_sd_unmount;
+    app->sd_api.info = s_api_sd_info;
+    app->sd_api.status = s_api_sd_status;
+    app->sd_api.context = app;
 }
 
 StorageApp* storage_app_alloc() {
@@ -107,6 +113,7 @@ void storage_tick(StorageApp* app) {
 int32_t storage_app(void* p) {
     StorageApp* app = storage_app_alloc();
     furi_record_create("storage", &app->external_api);
+    furi_record_create("storage-sd", &app->sd_api);
 
     StorageMessage message;
     while(1) {

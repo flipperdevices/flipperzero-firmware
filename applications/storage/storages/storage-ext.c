@@ -20,6 +20,8 @@ typedef struct {
     bool sd_was_present;
 } SDData;
 
+static FS_Error storage_ext_parse_error(SDError error);
+
 /******************* Core Functions *******************/
 
 static bool sd_mount_card(StorageData* storage, bool notify) {
@@ -92,16 +94,84 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
     return result;
 }
 
-static void sd_unmount_card(StorageData* storage) {
+FS_Error sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
+    SDError error;
 
     storage_data_lock(storage);
-    storage->status = StorageStatusNotReady;
+    error = storage->status = StorageStatusNotReady;
 
     // TODO do i need to close the files?
 
     f_mount(0, sd_data->path, 0);
     storage_data_unlock(storage);
+    return storage_ext_parse_error(error);
+}
+
+FS_Error sd_format_card(StorageData* storage) {
+    uint8_t* work_area;
+    SDData* sd_data = storage->data;
+    SDError error;
+
+    storage_data_lock(storage);
+
+    work_area = malloc(_MAX_SS);
+    error = f_mkfs(sd_data->path, FM_ANY, 0, work_area, _MAX_SS);
+    free(work_area);
+
+    do {
+        storage->status = StorageStatusNotAccessible;
+        if(error != FR_OK) break;
+        storage->status = StorageStatusNoFS;
+        error = f_setlabel("Flipper SD");
+        if(error != FR_OK) break;
+        storage->status = StorageStatusNotMounted;
+        error = f_mount(sd_data->fs, sd_data->path, 1);
+        if(error != FR_OK) break;
+        storage->status = StorageStatusOK;
+    } while(false);
+
+    storage_data_unlock(storage);
+
+    return storage_ext_parse_error(error);
+}
+
+FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
+    uint32_t free_clusters, free_sectors, total_sectors;
+    FATFS* fs;
+    SDData* sd_data = storage->data;
+    SDError error;
+
+    // clean data
+    memset(sd_info, 0, sizeof(SDInfo));
+
+    // get fs info
+    storage_data_lock(storage);
+    error = f_getlabel(sd_data->path, sd_info->label, NULL);
+    if(error == FR_OK) {
+        error = f_getfree(sd_data->path, &free_clusters, &fs);
+    }
+    storage_data_unlock(storage);
+
+    if(error == FR_OK) {
+        // calculate size
+        total_sectors = (fs->n_fatent - 2) * fs->csize;
+        free_sectors = free_clusters * fs->csize;
+
+        uint16_t sector_size = _MAX_SS;
+#if _MAX_SS != _MIN_SS
+        sector_size = fs->ssize;
+#endif
+
+        sd_info->fs_type = fs->fs_type;
+
+        sd_info->kb_total = total_sectors / 1024 * sector_size;
+        sd_info->kb_free = free_sectors / 1024 * sector_size;
+        sd_info->cluster_size = fs->csize;
+        sd_info->sector_size = sector_size;
+    }
+
+    return storage_ext_parse_error(error);
 }
 
 static void storage_ext_tick_internal(StorageData* storage, bool notify) {

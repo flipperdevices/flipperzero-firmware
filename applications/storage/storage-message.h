@@ -72,6 +72,10 @@ typedef struct {
     File* file;
 } SADataFile;
 
+typedef struct {
+    SDInfo* info;
+} SAInfo;
+
 typedef union {
     SADataFOpen fopen;
     SADataFRead fread;
@@ -89,6 +93,8 @@ typedef union {
 
     SADataFile file;
     SADataPath path;
+
+    SAInfo sdinfo;
 } SAData;
 
 typedef union {
@@ -120,6 +126,10 @@ typedef enum {
     StorageCommandCommonMkDir,
     StorageCommandCommonFSInfo,
     StorageCommandErrorGetDesc,
+    StorageCommandSDFormat,
+    StorageCommandSDUnmount,
+    StorageCommandSDInfo,
+    StorageCommandSDStatus,
 } StorageCommand;
 
 typedef struct {

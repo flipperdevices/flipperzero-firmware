@@ -38,8 +38,11 @@ FS_Error s_api_common_fs_info(
     uint64_t* free_space);
 
 const char* s_api_error_get_desc(void* context, FS_Error error_id);
-const char* s_api_error_get_internal_desc(void* context, uint32_t internal_error_id);
 
+FS_Error s_api_sd_format(void* context);
+FS_Error s_api_sd_unmount(void* context);
+FS_Error s_api_sd_info(void* context, SDInfo* info);
+FS_Error s_api_sd_status(void* context);
 #ifdef __cplusplus
 }
 #endif
