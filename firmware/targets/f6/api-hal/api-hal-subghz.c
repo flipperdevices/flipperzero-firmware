@@ -401,11 +401,15 @@ void api_hal_subghz_stop_async_rx() {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
+volatile size_t api_hal_subghz_tx_repeat = 0;
+
 static void api_hal_subghz_tx_dma_isr() {
     if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
         LL_DMA_ClearFlag_TC1(DMA1);
         furi_assert(api_hal_subghz_state == SubGhzStateAsyncTx);
-        api_hal_subghz_state = SubGhzStateAsyncTxLast;
+        if (--api_hal_subghz_tx_repeat == 0) {
+            api_hal_subghz_state = SubGhzStateAsyncTxLast;
+        }
     }
 }
 
@@ -413,15 +417,16 @@ static void api_hal_subghz_tx_timer_isr() {
     if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
         LL_TIM_ClearFlag_UPDATE(TIM2);
         if (api_hal_subghz_state == SubGhzStateAsyncTxLast) {
-            api_hal_subghz_state = SubGhzStateAsyncTxEnd;
             LL_TIM_DisableCounter(TIM2);
+            api_hal_subghz_state = SubGhzStateAsyncTxEnd;
         }
     }
 }
 
-void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size) {
+void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size, size_t repeat) {
     furi_assert(api_hal_subghz_state == SubGhzStateIdle);
     api_hal_subghz_state = SubGhzStateAsyncTx;
+    api_hal_subghz_tx_repeat = repeat;
 
     // Connect CC1101_GD0 to TIM2 as output
     hal_gpio_init_ex(&gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
@@ -431,7 +436,7 @@ void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size) {
     dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM2->ARR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)buffer;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_NORMAL;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
     dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;

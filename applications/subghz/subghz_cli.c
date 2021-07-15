@@ -253,18 +253,15 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         }
     }
     subghz_test_data[pos++] = SUBGHZ_PT_SHORT;
-    subghz_test_data[pos++] = 0xFFFFFFFF;
+    subghz_test_data[pos++] = SUBGHZ_PT_GUARD;
 
     api_hal_subghz_reset();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
     frequency = api_hal_subghz_set_frequency_and_path(frequency);
 
-    while(--repeat > 0) {
-        api_hal_subghz_start_async_tx(subghz_test_data, subghz_test_data_size);
-        api_hal_subghz_wait_async_tx();
-        api_hal_subghz_stop_async_tx();
-        osDelay(10);
-    }
+    api_hal_subghz_start_async_tx(subghz_test_data, subghz_test_data_size, repeat);
+    api_hal_subghz_wait_async_tx();
+    api_hal_subghz_stop_async_tx();
 
     free(subghz_test_data);
     api_hal_subghz_sleep();

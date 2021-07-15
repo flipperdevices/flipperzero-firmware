@@ -149,7 +149,7 @@ void api_hal_subghz_stop_async_rx();
  * @param buffer - pointer to data buffer
  * @param buffer_size - buffer size in bytes
  */
-void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size);
+void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size, size_t repeat);
 
 /** Wait for async transmission to complete */
 void api_hal_subghz_wait_async_tx();
