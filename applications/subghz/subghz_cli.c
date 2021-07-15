@@ -265,6 +265,8 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         api_hal_subghz_stop_async_tx();
         osDelay(10);
     }
+
+    free(subghz_test_data);
 }
 
 #include <fl_subghz/protocols/subghz_protocol.h>
