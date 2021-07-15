@@ -92,6 +92,10 @@ void api_hal_subghz_init() {
 
     const ApiHalSpiDevice* device = api_hal_spi_device_get(ApiHalSpiDeviceIdSubGhz);
 
+#ifdef API_HAL_SUBGHZ_TX_GPIO
+    hal_gpio_init(&API_HAL_SUBGHZ_TX_GPIO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+#endif
+
     // Reset
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_reset(device);
@@ -478,6 +482,9 @@ void api_hal_subghz_start_async_tx(uint32_t* buffer, size_t buffer_size, size_t 
 
     // Start counter
     LL_TIM_GenerateEvent_UPDATE(TIM2);
+#ifdef API_HAL_SUBGHZ_TX_GPIO
+    hal_gpio_write(&API_HAL_SUBGHZ_TX_GPIO, true);
+#endif
     api_hal_subghz_tx();
 
     LL_TIM_SetCounter(TIM2, 0);
@@ -494,6 +501,9 @@ void api_hal_subghz_stop_async_tx() {
 
     // Shutdown radio
     api_hal_subghz_idle();
+#ifdef API_HAL_SUBGHZ_TX_GPIO
+    hal_gpio_write(&API_HAL_SUBGHZ_TX_GPIO, false);
+#endif
 
     // Deinitialize Timer
     LL_TIM_DeInit(TIM2);
