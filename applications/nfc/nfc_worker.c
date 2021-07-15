@@ -171,6 +171,8 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 result->nfc_data.atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
                 result->nfc_data.atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
                 result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
+                memcpy(
+                    result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
                 result->nfc_data.protocol = NfcDeviceProtocolEMV;
 
                 FURI_LOG_I(NFC_WORKER_TAG, "Send select PPSE command");

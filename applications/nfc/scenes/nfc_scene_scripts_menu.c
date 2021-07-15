@@ -39,7 +39,7 @@ const bool nfc_scene_scripts_menu_on_event(void* context, SceneManagerEvent even
         if(event.event == SubmenuIndexBankCard) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneScriptsMenu, SubmenuIndexBankCard);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvApp);
             return true;
         } else if(event.event == SubmenuIndexMifareUltralight) {
             scene_manager_set_scene_state(
