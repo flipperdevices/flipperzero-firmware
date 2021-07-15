@@ -1,6 +1,7 @@
 #include "nfc_device.h"
 
 #include <file-worker.h>
+#include <path.h>
 
 #define NFC_DEVICE_MAX_DATA_LEN 14
 
@@ -97,9 +98,7 @@ bool nfc_device_load(NfcDevice* dev, const char* file_path) {
     bool dev_load = nfc_device_load_data(file_worker, path, dev);
     if(dev_load) {
         // Set device name
-        uint8_t folder_end = strlen(nfc_app_folder) + 1;
-        uint8_t extension_start = string_size(path) - strlen(nfc_app_extension);
-        string_mid(path, folder_end, extension_start - folder_end);
+        path_extract_filename_no_ext(file_path, path);
         nfc_device_set_name(dev, string_get_cstr(path));
     }
     string_clear(path);
