@@ -7,6 +7,8 @@
 #include <string_view>
 #include <furi.h>
 
+uint32_t const IrdaAppFileParser::max_line_length = ((9 + 1) * 512 + 100);
+
 std::unique_ptr<IrdaAppFileParser::IrdaFileSignal> IrdaAppFileParser::read_signal(File* file) {
     while(1) {
         auto str = getline(file);
@@ -20,20 +22,17 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal> IrdaAppFileParser::read_signa
     }
 }
 
-#define MAX_LINE_LENGTH 2048
-
 bool IrdaAppFileParser::store_signal(File* file, const IrdaAppSignal& signal, const char* name) {
-    char* content = NULL;
+    char* content = new char[max_line_length];
     size_t written = 0;
 
     if(!signal.is_raw()) {
-        content = new char[128];
         auto message = signal.get_message();
         auto protocol = message.protocol;
 
         sniprintf(
             content,
-            sizeof(content),
+            max_line_length,
             "%.31s %.31s A:%0*lX C:%0*lX\n",
             name,
             irda_get_protocol_name(protocol),
@@ -42,14 +41,11 @@ bool IrdaAppFileParser::store_signal(File* file, const IrdaAppSignal& signal, co
             irda_get_protocol_command_length(protocol),
             message.command);
         written = strlen(content);
-        furi_assert(written <= 128);
     } else {
-        content = new char[MAX_LINE_LENGTH];
-
         int duty_cycle = 100 * IRDA_COMMON_DUTY_CYCLE;
         written += sniprintf(
             &content[written],
-            MAX_LINE_LENGTH - written,
+            max_line_length - written,
             "%.31s RAW F:%d DC:%d",
             name,
             IRDA_COMMON_CARRIER_FREQUENCY,
@@ -58,12 +54,12 @@ bool IrdaAppFileParser::store_signal(File* file, const IrdaAppSignal& signal, co
         auto& raw_signal = signal.get_raw_signal();
         for(size_t i = 0; i < raw_signal.timings_cnt; ++i) {
             written += sniprintf(
-                &content[written], MAX_LINE_LENGTH - written, " %ld", raw_signal.timings[i]);
-            furi_assert(written <= MAX_LINE_LENGTH);
+                &content[written], max_line_length - written, " %ld", raw_signal.timings[i]);
+            furi_assert(written <= max_line_length);
         }
-        written += snprintf(&content[written], MAX_LINE_LENGTH - written, "\n");
-        furi_assert(written <= MAX_LINE_LENGTH);
+        written += snprintf(&content[written], max_line_length - written, "\n");
     }
+    furi_assert(written < max_line_length);
 
     size_t write_count = 0;
     write_count = get_fs_api().file.write(file, content, written);
@@ -165,6 +161,7 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     furi_assert(header_len < str_len);
     str.remove_prefix(header_len);
 
+    /* move allocated timings into raw signal object */
     IrdaAppSignal::RawSignal raw_signal = {.timings_cnt = 0, .timings = new uint32_t[500]};
     bool result = false;
 
