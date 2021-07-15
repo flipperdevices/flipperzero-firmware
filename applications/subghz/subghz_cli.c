@@ -150,7 +150,7 @@ void subghz_cli_command_tx_pt(Cli* cli, string_t args, void* context) {
         count--;
     }
 
-    api_hal_subghz_reset();
+    api_hal_subghz_sleep();
     api_hal_subghz_set_path(ApiHalSubGhzPathIsolate);
 }
 
@@ -198,7 +198,7 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
 
     printf("Received %lu packets", packet_cnt);
 
-    api_hal_subghz_reset();
+    api_hal_subghz_sleep();
     api_hal_subghz_set_path(ApiHalSubGhzPathIsolate);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
@@ -267,6 +267,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     }
 
     free(subghz_test_data);
+    api_hal_subghz_sleep();
 }
 
 #include <fl_subghz/protocols/subghz_protocol.h>
@@ -337,6 +338,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     }
 
     api_hal_subghz_stop_async_rx();
+    api_hal_subghz_sleep();
     subghz_protocol_free(protocol);
     vStreamBufferDelete(rx_stream);
 }
