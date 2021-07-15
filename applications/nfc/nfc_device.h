@@ -28,21 +28,23 @@ typedef struct {
     uint8_t sak;
     NfcDeviceType device;
     NfcProtocol protocol;
-} NfcDeviceData;
+} NfcDeviceCommomData;
 
 typedef struct {
-    NfcDeviceData nfc_data;
     char name[32];
     uint8_t number[8];
 } NfcEmvData;
 
 typedef struct {
-    NfcDeviceData nfc_data;
-    MifareUlData data;
-} NfcMifareUl;
+    NfcDeviceCommomData nfc_data;
+    union {
+        NfcEmvData emv_data;
+        MifareUlData mf_ul_data;
+    };
+} NfcDeviceData;
 
 typedef struct {
-    NfcDeviceData data;
+    NfcDeviceData dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN];
     char file_name[NFC_FILE_NAME_MAX_LEN];
 } NfcDevice;

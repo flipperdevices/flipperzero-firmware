@@ -5,8 +5,7 @@
 void nfc_scene_save_name_text_input_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
 
-    view_dispatcher_send_custom_event(
-        nfc->nfc_common.view_dispatcher, SCENE_SAVE_NAME_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, SCENE_SAVE_NAME_CUSTOM_EVENT);
 }
 
 const void nfc_scene_save_name_on_enter(void* context) {
@@ -22,7 +21,7 @@ const void nfc_scene_save_name_on_enter(void* context) {
         nfc,
         nfc->text_store,
         sizeof(nfc->text_store));
-    view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewTextInput);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
 }
 
 const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
@@ -30,8 +29,8 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
-            memcpy(&nfc->device.dev_name, nfc->text_store, strlen(nfc->text_store));
-            if(nfc_device_save(&nfc->device, nfc->text_store)) {
+            memcpy(&nfc->dev.dev_name, nfc->text_store, strlen(nfc->text_store));
+            if(nfc_device_save(&nfc->dev, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 return true;
             } else {

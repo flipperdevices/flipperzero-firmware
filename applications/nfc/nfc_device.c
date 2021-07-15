@@ -34,18 +34,18 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
 
     // Prepare buffer to write
     uint8_t buff[NFC_DEVICE_MAX_DATA_LEN];
-    buff[0] = dev->data.uid_len;
-    memcpy(&buff[1], dev->data.uid, dev->data.uid_len);
-    memcpy(&buff[dev->data.uid_len + 1], dev->data.atqa, 2);
-    buff[dev->data.uid_len + 3] = dev->data.sak;
+    buff[0] = dev->dev_data.nfc_data.uid_len;
+    memcpy(&buff[1], dev->dev_data.nfc_data.uid, dev->dev_data.nfc_data.uid_len);
+    memcpy(&buff[dev->dev_data.nfc_data.uid_len + 1], dev->dev_data.nfc_data.atqa, 2);
+    buff[dev->dev_data.nfc_data.uid_len + 3] = dev->dev_data.nfc_data.sak;
 
     // Save nfc device
     bool res = file_worker_open(
         file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS);
     string_clear(dev_file_name);
     if(res) {
-        // Write UID length
-        if(!file_worker_write_hex(file_worker, buff, dev->data.uid_len + 4)) {
+        // Write data
+        if(!file_worker_write_hex(file_worker, buff, dev->dev_data.nfc_data.uid_len + 4)) {
             file_worker_close(file_worker);
             return false;
         }
@@ -80,10 +80,10 @@ static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevi
     }
 
     // Set loaded data
-    dev->data.uid_len = buff[0];
-    memcpy(dev->data.uid, &buff[1], dev->data.uid_len);
-    memcpy(dev->data.atqa, &buff[dev->data.uid_len + 1], 2);
-    dev->data.sak = buff[dev->data.uid_len + 3];
+    dev->dev_data.nfc_data.uid_len = buff[0];
+    memcpy(dev->dev_data.nfc_data.uid, &buff[1], dev->dev_data.nfc_data.uid_len);
+    memcpy(dev->dev_data.nfc_data.atqa, &buff[dev->dev_data.nfc_data.uid_len + 1], 2);
+    dev->dev_data.nfc_data.sak = buff[dev->dev_data.nfc_data.uid_len + 3];
     return true;
 }
 

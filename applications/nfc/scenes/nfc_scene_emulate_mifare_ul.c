@@ -5,7 +5,7 @@ const void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    NfcDeviceCommomData* data = &nfc->dev.data;
+    NfcDeviceCommomData* data = &nfc->dev.dev_data.nfc_data;
 
     if(strcmp(nfc->dev.dev_name, "")) {
         nfc_text_store_set(nfc, "%s", nfc->dev.dev_name);
@@ -31,10 +31,8 @@ const void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
 
     // Setup and start worker
 
-    nfc_worker_set_emulation_params(nfc->worker, data);
-    nfc_worker_start(
-        nfc->worker, NfcWorkerStateEmulate, &nfc->dev_data, NULL, nfc);
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);  
+    nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev.dev_data, NULL, nfc);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
 const bool nfc_scene_emulate_mifare_ul_on_event(void* context, SceneManagerEvent event) {

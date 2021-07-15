@@ -23,26 +23,18 @@
 
 #include <nfc/scenes/nfc_scene.h>
 
-#include "views/nfc_detect.h"
-#include "views/nfc_emulate.h"
-#include "views/nfc_emv.h"
-
 #define NFC_TEXT_STORE_SIZE 128
 
 struct Nfc {
-    NfcCommon nfc_common;
+    NfcWorker* worker;
+    ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
     SceneManager* scene_manager;
-    NfcDevice device;
+    NfcDevice dev;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     string_t text_box_store;
-
-    // Nfc Views
-    NfcDetect* nfc_detect;
-    NfcEmulate* nfc_emulate;
-    NfcEmv* nfc_emv;
 
     // Common Views
     Submenu* submenu;
@@ -60,9 +52,6 @@ typedef enum {
     NfcViewTextInput,
     NfcViewByteInput,
     NfcViewTextBox,
-    NfcViewDetect,
-    NfcViewEmulate,
-    NfcViewEmv,
 } NfcView;
 
 Nfc* nfc_alloc();

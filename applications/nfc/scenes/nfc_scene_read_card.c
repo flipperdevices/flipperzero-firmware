@@ -1,8 +1,10 @@
 #include "../nfc_i.h"
 
+#define NFC_READ_CARD_CUSTOM_EVENT (0UL)
+
 void nfc_read_card_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(nfc->nfc_common.view_dispatcher, NfcEventDetect);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_READ_CARD_CUSTOM_EVENT);
 }
 
 const void nfc_scene_read_card_on_enter(void* context) {
@@ -15,20 +17,15 @@ const void nfc_scene_read_card_on_enter(void* context) {
 
     // Start worker
     nfc_worker_start(
-        nfc->nfc_common.worker,
-        NfcWorkerStateDetect,
-        &nfc->nfc_common.worker_result,
-        nfc_read_card_worker_callback,
-        nfc);
-    view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);
+        nfc->worker, NfcWorkerStateDetect, &nfc->dev.dev_data, nfc_read_card_worker_callback, nfc);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
 const bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcEventDetect) {
-            nfc->device.data = nfc->nfc_common.worker_result.nfc_detect_data;
+        if(event.event == NFC_READ_CARD_CUSTOM_EVENT) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
             return true;
         }
@@ -43,7 +40,7 @@ const void nfc_scene_read_card_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Stop worker
-    nfc_worker_stop(nfc->nfc_common.worker);
+    nfc_worker_stop(nfc->worker);
 
     // Clear view
     Popup* popup = nfc->popup;
