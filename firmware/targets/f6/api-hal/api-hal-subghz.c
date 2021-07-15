@@ -409,6 +409,7 @@ static void api_hal_subghz_tx_dma_isr() {
         furi_assert(api_hal_subghz_state == SubGhzStateAsyncTx);
         if (--api_hal_subghz_tx_repeat == 0) {
             api_hal_subghz_state = SubGhzStateAsyncTxLast;
+            LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
         }
     }
 }

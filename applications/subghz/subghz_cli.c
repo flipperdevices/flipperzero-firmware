@@ -203,9 +203,9 @@ void subghz_cli_command_rx_pt(Cli* cli, string_t args, void* context) {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
-#define SUBGHZ_PT_SHORT 376
+#define SUBGHZ_PT_SHORT 260
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
-#define SUBGHZ_PT_GUARD 10600
+#define SUBGHZ_PT_GUARD 8060
 
 void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     uint32_t frequency = 433920000;
@@ -253,7 +253,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         }
     }
     subghz_test_data[pos++] = SUBGHZ_PT_SHORT;
-    subghz_test_data[pos++] = SUBGHZ_PT_GUARD;
+    subghz_test_data[pos++] = SUBGHZ_PT_SHORT + SUBGHZ_PT_GUARD;
 
     api_hal_subghz_reset();
     api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
