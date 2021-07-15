@@ -22,7 +22,7 @@ void IrdaAppSceneEditDelete::on_enter(IrdaApp* app) {
     if(app->get_edit_element() == IrdaApp::EditElement::Button) {
         auto signal = remote_manager->get_button_data(app->get_current_button());
         dialog_ex_set_header(dialog_ex, "Delete button?", 64, 6, AlignCenter, AlignCenter);
-        if (!signal.is_raw()) {
+        if(!signal.is_raw()) {
             auto message = &signal.get_message();
             app->set_text_store(
                 0,

@@ -59,4 +59,3 @@ public:
         return payload.raw;
     }
 };
-

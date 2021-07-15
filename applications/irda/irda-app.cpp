@@ -229,4 +229,3 @@ const IrdaAppSignal& IrdaApp::get_received_signal() const {
 void IrdaApp::set_received_signal(const IrdaAppSignal& signal) {
     received_signal = signal;
 }
-

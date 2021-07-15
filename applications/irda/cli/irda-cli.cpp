@@ -15,11 +15,13 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
     furi_assert(received_signal);
     char buf[100];
     size_t buf_cnt;
-    Cli* cli = (Cli*) context;
+    Cli* cli = (Cli*)context;
 
-    if (irda_worker_signal_is_decoded(received_signal)) {
+    if(irda_worker_signal_is_decoded(received_signal)) {
         const IrdaMessage* message = irda_worker_get_decoded_message(received_signal);
-        buf_cnt = sniprintf(buf, sizeof(buf),
+        buf_cnt = sniprintf(
+            buf,
+            sizeof(buf),
             "%s, A:0x%0*lX, C:0x%0*lX%s\r\n",
             irda_get_protocol_name(message->protocol),
             irda_get_protocol_address_length(message->protocol),
@@ -27,20 +29,20 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
             irda_get_protocol_command_length(message->protocol),
             message->command,
             message->repeat ? " R" : "");
-        cli_write(cli, (uint8_t *) buf, buf_cnt);
+        cli_write(cli, (uint8_t*)buf, buf_cnt);
     } else {
-        const uint32_t *timings;
+        const uint32_t* timings;
         size_t timings_cnt;
         irda_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
 
         buf_cnt = sniprintf(buf, sizeof(buf), "RAW, %d samples:\r\n", timings_cnt);
-        cli_write(cli, (uint8_t *) buf, buf_cnt);
-        for (size_t i = 0; i < timings_cnt; ++i) {
+        cli_write(cli, (uint8_t*)buf, buf_cnt);
+        for(size_t i = 0; i < timings_cnt; ++i) {
             buf_cnt = sniprintf(buf, sizeof(buf), "%lu ", timings[i]);
-            cli_write(cli, (uint8_t *) buf, buf_cnt);
+            cli_write(cli, (uint8_t*)buf, buf_cnt);
         }
         buf_cnt = sniprintf(buf, sizeof(buf), "\r\n");
-        cli_write(cli, (uint8_t *) buf, buf_cnt);
+        cli_write(cli, (uint8_t*)buf, buf_cnt);
     }
 }
 
@@ -98,37 +100,39 @@ static bool parse_message(const char* str, IrdaMessage* message) {
     return true;
 }
 
-static bool parse_signal_raw(const char* str, uint32_t* timings, uint32_t* timings_cnt, float* duty_cycle, float* frequency) {
+static bool parse_signal_raw(
+    const char* str,
+    uint32_t* timings,
+    uint32_t* timings_cnt,
+    float* duty_cycle,
+    float* frequency) {
     char frequency_str[10];
     char duty_cycle_str[10];
     int parsed = sscanf(str, "RAW F:%9s DC:%9s", frequency_str, duty_cycle_str);
-    if (parsed != 2)
-        return false;
+    if(parsed != 2) return false;
 
     *frequency = atoi(frequency_str);
-    *duty_cycle = (float) atoi(duty_cycle_str) / 100;
+    *duty_cycle = (float)atoi(duty_cycle_str) / 100;
     str += strlen(frequency_str) + strlen(duty_cycle_str) + 10;
 
     uint32_t timings_cnt_max = *timings_cnt;
     *timings_cnt = 0;
 
-    while (1) {
+    while(1) {
         char timing_str[10];
-        for (; *str == ' '; ++str);
-        if (1 != sscanf(str, "%9s", timing_str))
-            break;
+        for(; *str == ' '; ++str)
+            ;
+        if(1 != sscanf(str, "%9s", timing_str)) break;
         str += strlen(timing_str);
         uint32_t timing = atoi(timing_str);
-        if (timing <= 0)
-            break;
-        if (*timings_cnt >= timings_cnt_max)
-            break;
+        if(timing <= 0) break;
+        if(*timings_cnt >= timings_cnt_max) break;
         timings[*timings_cnt] = timing;
         ++*timings_cnt;
     }
 
     printf("\r\nTransmit:");
-    for (size_t i = 0; i < *timings_cnt; ++i) {
+    for(size_t i = 0; i < *timings_cnt; ++i) {
         printf(" %ld", timings[i]);
     }
     printf("\r\n");
@@ -146,12 +150,12 @@ static void irda_cli_start_ir_tx(Cli* cli, string_t args, void* context) {
     const char* str = string_get_cstr(args);
     float frequency;
     float duty_cycle;
-    uint32_t* timings = (uint32_t*) furi_alloc(sizeof(uint32_t) * 1000);
+    uint32_t* timings = (uint32_t*)furi_alloc(sizeof(uint32_t) * 1000);
     uint32_t timings_cnt = 1000;
 
-    if (parse_message(str, &message)) {
+    if(parse_message(str, &message)) {
         irda_send(&message, 1);
-    } else if (parse_signal_raw(str, timings, &timings_cnt, &duty_cycle, &frequency)) {
+    } else if(parse_signal_raw(str, timings, &timings_cnt, &duty_cycle, &frequency)) {
         irda_send_raw_ext(timings, timings_cnt, true, duty_cycle, frequency);
     } else {
         printf("Wrong arguments.\r\n");

@@ -8,11 +8,11 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
 
     IrdaApp* app = static_cast<IrdaApp*>(context);
 
-    if (irda_worker_signal_is_decoded(received_signal)) {
+    if(irda_worker_signal_is_decoded(received_signal)) {
         IrdaAppSignal signal(irda_worker_get_decoded_message(received_signal));
         app->set_received_signal(signal);
     } else {
-        const uint32_t *timings;
+        const uint32_t* timings;
         size_t timings_cnt;
         irda_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
         IrdaAppSignal signal(timings, timings_cnt);

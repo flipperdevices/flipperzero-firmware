@@ -5,7 +5,7 @@ void IrdaAppSignal::copy_timings(const uint32_t* timings, size_t size) {
     furi_assert(size);
     furi_assert(timings);
 
-    if (size) {
+    if(size) {
         payload.raw.timings = new uint32_t[size];
         payload.raw.timings_cnt = size;
         memcpy(payload.raw.timings, timings, size * sizeof(uint32_t));
@@ -13,8 +13,8 @@ void IrdaAppSignal::copy_timings(const uint32_t* timings, size_t size) {
 }
 
 void IrdaAppSignal::clear_timings() {
-    if (!decoded) {
-        delete [] payload.raw.timings;
+    if(!decoded) {
+        delete[] payload.raw.timings;
         payload.raw.timings_cnt = 0;
         payload.raw.timings = nullptr;
     }
@@ -33,7 +33,7 @@ IrdaAppSignal::IrdaAppSignal(const IrdaMessage* irda_message) {
 IrdaAppSignal& IrdaAppSignal::operator=(const IrdaAppSignal& other) {
     clear_timings();
     decoded = other.decoded;
-    if (decoded) {
+    if(decoded) {
         payload.message = other.payload.message;
     } else {
         copy_timings(other.payload.raw.timings, other.payload.raw.timings_cnt);
@@ -44,7 +44,7 @@ IrdaAppSignal& IrdaAppSignal::operator=(const IrdaAppSignal& other) {
 
 IrdaAppSignal::IrdaAppSignal(const IrdaAppSignal& other) {
     decoded = other.decoded;
-    if (decoded) {
+    if(decoded) {
         payload.message = other.payload.message;
     } else {
         copy_timings(other.payload.raw.timings, other.payload.raw.timings_cnt);
@@ -55,7 +55,7 @@ IrdaAppSignal::IrdaAppSignal(IrdaAppSignal&& other) {
     clear_timings();
 
     decoded = other.decoded;
-    if (decoded) {
+    if(decoded) {
         payload.message = other.payload.message;
     } else {
         furi_assert(other.payload.raw.timings_cnt > 0);
@@ -87,10 +87,9 @@ void IrdaAppSignal::copy_raw_signal(uint32_t* timings, size_t timings_cnt) {
 }
 
 void IrdaAppSignal::transmit() const {
-    if (decoded) {
+    if(decoded) {
         irda_send(&payload.message, 1);
     } else {
         irda_send_raw(payload.raw.timings, payload.raw.timings_cnt, true);
     }
 }
-

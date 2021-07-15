@@ -7,7 +7,7 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
 
     auto signal = app->get_received_signal();
 
-    if (!signal.is_raw()) {
+    if(!signal.is_raw()) {
         auto message = &signal.get_message();
         app->set_text_store(
             0,
@@ -17,10 +17,7 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
             message->command);
     } else {
         auto raw_signal = signal.get_raw_signal();
-        app->set_text_store(
-            0,
-            "RAW_%d",
-            raw_signal.timings_cnt);
+        app->set_text_store(0, "RAW_%d", raw_signal.timings_cnt);
     }
 
     text_input_set_header_text(text_input, "Name the key");
@@ -44,8 +41,8 @@ bool IrdaAppSceneLearnEnterName::on_event(IrdaApp* app, IrdaAppEvent* event) {
             result = remote_manager->add_remote_with_button(
                 app->get_text_store(0), app->get_received_signal());
         } else {
-            result = remote_manager->add_button(
-                app->get_text_store(0), app->get_received_signal());
+            result =
+                remote_manager->add_button(app->get_text_store(0), app->get_received_signal());
         }
 
         if(!result) {

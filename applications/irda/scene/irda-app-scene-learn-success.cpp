@@ -19,7 +19,7 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
     auto signal = app->get_received_signal();
 
-    if (!signal.is_raw()) {
+    if(!signal.is_raw()) {
         auto message = &signal.get_message();
         app->set_text_store(0, "%s", irda_get_protocol_name(message->protocol));
         app->set_text_store(

@@ -57,7 +57,7 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
     furi_assert(received_signal);
     IrdaMonitor* irda_monitor = context;
 
-    if (irda_worker_signal_is_decoded(received_signal)) {
+    if(irda_worker_signal_is_decoded(received_signal)) {
         const IrdaMessage* message = irda_worker_get_decoded_message(received_signal);
         snprintf(
             irda_monitor->display_text,
@@ -79,7 +79,7 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
             message->command,
             message->repeat ? " R" : "");
     } else {
-        const uint32_t *timings;
+        const uint32_t* timings;
         size_t timings_cnt;
         irda_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
         snprintf(
@@ -89,8 +89,9 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
             timings_cnt);
         view_port_update(irda_monitor->view_port);
         printf("RAW, %d samples:\r\n", timings_cnt);
-        for (size_t i = 0; i < timings_cnt; ++i)
+        for(size_t i = 0; i < timings_cnt; ++i) {
             printf("%lu ", timings[i]);
+        }
         printf("\r\n");
     }
 }
@@ -105,7 +106,8 @@ int32_t irda_monitor_app(void* p) {
     Gui* gui = furi_record_open("gui");
 
     view_port_draw_callback_set(irda_monitor->view_port, irda_monitor_draw_callback, irda_monitor);
-    view_port_input_callback_set(irda_monitor->view_port, irda_monitor_input_callback, irda_monitor);
+    view_port_input_callback_set(
+        irda_monitor->view_port, irda_monitor_input_callback, irda_monitor);
 
     gui_add_view_port(gui, irda_monitor->view_port, GuiLayerFullscreen);
 
