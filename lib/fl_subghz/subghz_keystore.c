@@ -31,7 +31,10 @@ void subghz_keystore_free(SubGhzKeystore* instance) {
 }
 
 static void subghz_keystore_add_key(SubGhzKeystore* instance, const char* name, uint64_t key, uint16_t type) {
-
+    SubGhzKey* manufacture_code = SubGhzKeyArray_push_raw(instance->data);
+    string_init_set_str(manufacture_code->name, name);
+    manufacture_code->key = key;
+    manufacture_code->type = type;
 }
 
 static void subghz_keystore_process_line(SubGhzKeystore* instance, string_t line) {
