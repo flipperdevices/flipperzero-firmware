@@ -17,6 +17,8 @@
 #include <m-string.h>
 
 struct SubGhzProtocol {
+    SubGhzKeystore* keystore;
+
     SubGhzProtocolCame* came;
     SubGhzProtocolKeeloq* keeloq;
     SubGhzProtocolNiceFlo* nice_flo;
