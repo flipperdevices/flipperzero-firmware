@@ -1,3 +1,5 @@
+# For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
+
 set(BSP_F0_BOARDS 
     STM32F0xx_Nucleo_32 STM32F0xx-Nucleo STM32F072B-Discovery 
     STM32F0308-Discovery STM32072B_EVAL STM32091C_EVAL
@@ -244,7 +246,7 @@ foreach(COMP ${BSP_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})
     if(NOT CMAKE_MATCH_1)
         message(FATAL_ERROR "Unknown BSP component: ${COMP}")
     endif()

@@ -2,10 +2,12 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32F0 STM32F1 STM32F2 STM32F3 STM32F4 STM32F7
     STM32G0 STM32G4
     STM32H7_M4 STM32H7_M7
-    STM32L0 STM32L1 STM32L4 STM32L5)
+    STM32L0 STM32L1 STM32L4 STM32L5
+    STM32WB STM32WL )
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
-    string(REGEX MATCH "^STM32([A-Z][0-9])_?(M[47])?" FAMILY ${FAMILY})
+    # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])_?(M[47])?" FAMILY ${FAMILY})
     list(APPEND STM32_SUPPORTED_FAMILIES_SHORT_NAME ${CMAKE_MATCH_1})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
@@ -75,6 +77,7 @@ function(stm32_generate_hex_file TARGET)
     )
 endfunction()
 
+# This function takes FAMILY (e.g. L4) and DEVICE (e.g. L496VG) to output TYPE (e.g. L496xx)  
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)
     foreach(C_TYPE ${STM32_${FAMILY}_TYPES})
@@ -98,7 +101,7 @@ function(stm32_get_chip_info CHIP)
         
     string(TOUPPER ${CHIP} CHIP)
         
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
     
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown chip ${CHIP}")
@@ -132,8 +135,10 @@ function(stm32_get_cores CORES)
     cmake_parse_arguments(PARSE_ARGV 1 ARG "${ARG_OPTIONS}" "${ARG_SINGLE}" "${ARG_MULTIPLE}")
         
     if(ARG_CHIP)
+        # TODO: I don't get why stm32_get_chip_info is called in stm32_get_cores
         stm32_get_chip_info(${ARG_CHIP} FAMILY ARG_FAMILY TYPE ARG_TYPE DEVICE ARG_DEVICE)
     elseif(ARG_FAMILY AND ARG_DEVICE)
+        # TODO: I don't get why stm32_get_chip_type is called in stm32_get_cores
         stm32_get_chip_type(${ARG_FAMILY} ${ARG_DEVICE} ARG_TYPE)
     elseif(ARG_FAMILY)
         if(${ARG_FAMILY} STREQUAL "H7")
@@ -146,8 +151,15 @@ function(stm32_get_cores CORES)
         message(FATAL_ERROR "Either CHIP or FAMILY or FAMILY/DEVICE should be specified for stm32_get_cores()")
     endif()
     
+    # TODO following is the only part really used by FindCMSIS. Maybe a cleanup is needed
     if(${ARG_FAMILY} STREQUAL "H7")
         stm32h7_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
+    elseif(${ARG_FAMILY} STREQUAL "WB")
+        # note STM32WB have an M0 core but in current state of the art it runs ST stacks and is not needed/allowed to build for customer
+        set(CORE_LIST M4)
+    elseif(${ARG_FAMILY} STREQUAL "WL")
+        message(WARNING "common: WL family stm32_get_cores has not been tested")
+        set(CORE_LIST M4 M0)
     endif()
     set(${CORES} "${CORE_LIST}" PARENT_SCOPE)
 endfunction()
@@ -168,7 +180,7 @@ function(stm32_get_memory_info)
         stm32_get_chip_type(${INFO_FAMILY} ${INFO_DEVICE} INFO_TYPE)
     endif()
     
-    string(REGEX REPLACE "^[FGHL][0-9][0-9A-Z][0-9].([3468BCDEFGHIZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
+    string(REGEX REPLACE "^[FGHLW][0-9BL][0-9A-Z][0-9M].([3468BCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
     
     if(SIZE_CODE STREQUAL "3")
         set(FLASH "8K")
@@ -181,6 +193,7 @@ function(stm32_get_memory_info)
     elseif(SIZE_CODE STREQUAL "B")
         set(FLASH "128K")
     elseif(SIZE_CODE STREQUAL "C")
+        # Note there is a problem with STM32WB15CC (320kB flash)
         set(FLASH "256K")
     elseif(SIZE_CODE STREQUAL "D")
         set(FLASH "384K")
@@ -194,6 +207,8 @@ function(stm32_get_memory_info)
         set(FLASH "1536K")
     elseif(SIZE_CODE STREQUAL "I")
         set(FLASH "2048K")
+    elseif(SIZE_CODE STREQUAL "Y")    
+        set(FLASH "640K")
     elseif(SIZE_CODE STREQUAL "Z")
         set(FLASH "192K")
     else()
@@ -269,7 +284,7 @@ function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
 
     get_target_property(LINK_DEPENDS ${TARGET} ${INTERFACE_PREFIX}LINK_DEPENDS)
     if(LINK_DEPENDS)
-        list(APPEND LINK_DEPENDS "${SCRIPT}")
+        list(APPEND LINK_DEPENDS "${SCRIPT}")        
     else()
         set(LINK_DEPENDS "${SCRIPT}")
     endif()
@@ -318,3 +333,5 @@ include(stm32/l0)
 include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
+include(stm32/wb)
+#include(stm32/wl) #TODO

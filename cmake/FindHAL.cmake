@@ -1,3 +1,5 @@
+# For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
+
 set(HAL_DRIVERS_F0
     adc can cec comp cortex crc dac dma exti flash gpio i2c i2s irda iwdg pcd 
     pwr rcc rtc smartcard smbus spi tim tsc uart usart wwdg
@@ -171,6 +173,20 @@ set(HAL_LL_DRIVERS_L5
     rng rtc sdmmc spi tim ucpd usart usb utils
 )
 
+set(HAL_DRIVERS_WB
+    adc comp cortex crc cryp dma exti flash gpio hsem 
+    i2c ipcc irda iwdg lcd lptim pcd pka pwr qspi rcc 
+    rng rtc sai smartcard smbus spi sram tim tsc uart usart wwdg
+)
+set(HAL_EX_DRIVERS_WB
+    adc crc cryp dma flash i2c pcd pwr rcc
+    rtc sai smartcard spi tim uart usart
+)
+set(HAL_LL_DRIVERS_WB
+    adc comp crc crs dma exti gpio i2c lptim lpuart pka pwr rcc 
+    rng rtc spi tim usart usb utils
+)
+
 foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
     list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY_SUFFIX}})
     list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY_SUFFIX}})
@@ -182,21 +198,24 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})
     if(CMAKE_MATCH_1)
         list(APPEND HAL_FIND_COMPONENTS_FAMILIES ${COMP})
+        message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_FAMILIES")
         continue()
     endif()
     if(${COMP_L} IN_LIST HAL_DRIVERS)
         list(APPEND HAL_FIND_COMPONENTS_DRIVERS ${COMP})
+        message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_DRIVERS")
         continue()
     endif()
     string(REGEX REPLACE "^ll_" "" COMP_L ${COMP_L})
     if(${COMP_L} IN_LIST HAL_LL_DRIVERS)
         list(APPEND HAL_FIND_COMPONENTS_DRIVERS_LL ${COMP})
+        message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_DRIVERS_LL")
         continue()
     endif()
-    message(FATAL_ERROR "Unknown HAL component: ${COMP}")
+    message(FATAL_ERROR "FindHAL: unknown HAL component: ${COMP}")
 endforeach()
 
 if(NOT HAL_FIND_COMPONENTS_FAMILIES)
@@ -209,6 +228,8 @@ if(STM32H7 IN_LIST HAL_FIND_COMPONENTS_FAMILIES)
 endif()
 list(REMOVE_DUPLICATES HAL_FIND_COMPONENTS_FAMILIES)
 
+# when no explicit driver and driver_ll is given to find_component(HAL )
+# then search for all supported driver and driver_ll
 if((NOT HAL_FIND_COMPONENTS_DRIVERS) AND (NOT HAL_FIND_COMPONENTS_DRIVERS_LL))
     set(HAL_FIND_COMPONENTS_DRIVERS ${HAL_DRIVERS})
     set(HAL_FIND_COMPONENTS_DRIVERS_LL ${HAL_LL_DRIVERS})
@@ -223,7 +244,7 @@ message(STATUS "Search for HAL LL drivers: ${HAL_FIND_COMPONENTS_DRIVERS_LL}")
 foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})    
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP_U ${COMP_U})    
     if(CMAKE_MATCH_3)
         set(CORE ${CMAKE_MATCH_3})
         set(CORE_C "::${CORE}")
@@ -270,6 +291,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
         NO_DEFAULT_PATH
     )
     if (NOT HAL_${FAMILY}_PATH)
+        message(DEBUG "Missing HAL_${FAMILY}_PATH path")
         continue()
     endif()
     
@@ -286,14 +308,19 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
     
     if ((NOT HAL_${FAMILY}${CORE_U}_INCLUDE) OR (NOT HAL_${FAMILY}${CORE_U}_SOURCE))
         set(HAL_${COMP}_FOUND FALSE)
+        message(DEBUG "FindHAL: did not find path to HAL /src or /inc dir")
         continue()
     endif()
 
     if(NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}))
+        message(TRACE "FindHAL: creating library HAL::STM32::${FAMILY}${CORE_C}")
         add_library(HAL::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
-        target_link_libraries(HAL::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C})
+        target_link_libraries(HAL::STM32::${FAMILY}${CORE_C} INTERFACE 
+                                                    STM32::${FAMILY}${CORE_C} 
+                                                    CMSIS::STM32::${FAMILY}${CORE_C})
         target_include_directories(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_INCLUDE}")
         target_sources(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_SOURCE}")
+        message(TRACE "REMOVE ME: depends STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C}")
     endif()
     
     foreach(DRV_COMP ${HAL_FIND_COMPONENTS_DRIVERS})
@@ -318,6 +345,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
                 
         set(HAL_${DRV_COMP}_FOUND TRUE)
         if(HAL_${FAMILY}${CORE_U}_${DRV}_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}::${DRV})))
+            message(TRACE "FindHAL: creating library HAL::STM32::${FAMILY}${CORE_C}::${DRV}")
             add_library(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE IMPORTED)
             target_link_libraries(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE HAL::STM32::${FAMILY}${CORE_C})
             target_sources(HAL::STM32::${FAMILY}${CORE_C}::${DRV} INTERFACE "${HAL_${FAMILY}${CORE_U}_${DRV}_SOURCE}")
@@ -335,6 +363,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
             endif()
                         
             if((TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}) AND (NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex)))
+                message(TRACE "FindHAL: creating library HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex")
                 add_library(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE IMPORTED)
                 target_link_libraries(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE HAL::STM32::${FAMILY}${CORE_C}::${DRV})
                 target_sources(HAL::STM32::${FAMILY}${CORE_C}::${DRV}Ex INTERFACE "${HAL_${FAMILY}${CORE_U}_${DRV}_EX_SOURCE}")
@@ -365,6 +394,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
     
         set(HAL_${DRV_COMP}_FOUND TRUE)
         if(HAL_${FAMILY}${CORE_U}_${DRV}_LL_SOURCE AND (NOT (TARGET HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV})))
+            message(TRACE "FindHAL: creating library HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV}")
             add_library(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE IMPORTED)
             target_include_directories(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE "${HAL_${FAMILY}${CORE_U}_INCLUDE}")
             target_sources(HAL::STM32::${FAMILY}${CORE_C}::LL_${DRV} INTERFACE "${HAL_${FAMILY}${CORE_U}_${DRV}_LL_SOURCE}")

@@ -1101,7 +1101,10 @@ set(STM32_ALL_DEVICES
     MP153C
     MP157A
     MP157C
+    WB5MMG
     WB50CG
+    WB30CE
+    WB10CC
     WB55CC
     WB55CE
     WB55CG
@@ -1111,9 +1114,26 @@ set(STM32_ALL_DEVICES
     WB55VC
     WB55VE
     WB55VG
+    WB55VY
+    WB15CC
+    WB35CC
+    WB35CE
+    WL55CC
+    WL54CC
+    WL55JC
+    WL54JC
     WLE5J8
     WLE5JB
     WLE5JC
+    WLE5C8
+    WLE5CB
+    WLE5CC
+    WLE4J8
+    WLE4JB
+    WLE4JC
+    WLE4C8
+    WLE4CB
+    WLE4CC
 )
 
 function(stm32_get_devices_by_family DEVICES)

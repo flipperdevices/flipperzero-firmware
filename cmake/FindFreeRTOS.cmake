@@ -1,3 +1,5 @@
+# For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
+
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS
         ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7
