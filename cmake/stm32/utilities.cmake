@@ -13,17 +13,19 @@ function(stm32_util_create_family_targets FAMILY)
 
     if(NOT (TARGET STM32::${FAMILY}${CORE_C}))
         add_library(STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
+        # Set compiler flags for target
+        # -Wall: all warnings activated
+        # -ffunction-sections -fdata-sections: remove unused code
         target_compile_options(STM32::${FAMILY}${CORE_C} INTERFACE 
             --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wall -ffunction-sections -fdata-sections -fno-strict-aliasing -fno-builtin -ffast-math
-            $<$<CONFIG:Debug>:-Og>
-            $<$<CONFIG:Release>:-Os>
+            -mthumb -Wall -ffunction-sections -fdata-sections
         )
+        # Set linker flags
+        # -mthumb: Generate thumb code
+        # -Wl,--gc-sections: Remove unused code
         target_link_options(STM32::${FAMILY}${CORE_C} INTERFACE 
             --sysroot="${TOOLCHAIN_SYSROOT}"
-            -mthumb -mabi=aapcs -Wl,--gc-sections
-            $<$<CONFIG:Debug>:-Og>
-            $<$<CONFIG:Release>:-Os -s>
+            -mthumb -Wl,--gc-sections
         )
         target_compile_definitions(STM32::${FAMILY}${CORE_C} INTERFACE 
             STM32${FAMILY}
@@ -151,4 +153,3 @@ function(stm32_fetch_hal)
         set(STM32_HAL_${FAMILY}_PATH ${${HAL_NAME_L}_SOURCE_DIR} PARENT_SCOPE)
     endforeach()
 endfunction()
-
