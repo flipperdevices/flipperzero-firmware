@@ -3,8 +3,6 @@
 
 #include <furi.h>
 
-#include <m-string.h>
-#include <m-array.h>
 /*
  * Keeloq
  * https://ru.wikipedia.org/wiki/KeeLoq
@@ -25,14 +23,6 @@
 #define KEELOQ_LEARNING_NORMAL     2u
 #define KEELOQ_LEARNING_SECURE     3u
 
-typedef struct {
-    string_t name;
-    uint64_t key;
-    uint16_t type;
-} KeeLoqManufactureCode;
-
-ARRAY_DEF(KeeLoqManufactureCodeArray, KeeLoqManufactureCode, M_POD_OPLIST)
-#define M_OPL_KeeLoqManufactureCodeArray_t() ARRAY_OPLIST(KeeLoqManufactureCodeArray, M_POD_OPLIST)
 
 /** Simple Learning Encrypt
  * @param data - 0xBSSSCCCC, B(4bit) key, S(10bit) serial&0x3FF, C(16bit) counter

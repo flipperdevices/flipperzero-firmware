@@ -2,28 +2,21 @@
 
 #include "subghz_protocol_common.h"
 
+typedef struct SubGhzKeystore SubGhzKeystore;
+
 typedef struct SubGhzProtocolStarLine SubGhzProtocolStarLine;
 
 /** Allocate SubGhzProtocolStarLine
  * 
  * @return SubGhzProtocolStarLine* 
  */
-SubGhzProtocolStarLine* subghz_protocol_star_line_alloc();
+SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore);
 
 /** Free SubGhzProtocolStarLine
  * 
  * @param instance 
  */
 void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance);
-
-/** Loading of manufacture keys
- * 
- * @param instance - SubGhzProtocolStarLine instance
- * @param name - key name
- * @param key - manufacture (64bit)
- * @param type - type manufacture key 
- */
-void subghz_protocol_star_line_add_manafacture_key(SubGhzProtocolStarLine* instance, const char* name, uint64_t key, uint16_t type);
 
 /** Sends the key on the air
  * 

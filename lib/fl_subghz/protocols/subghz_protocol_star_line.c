@@ -1,6 +1,8 @@
 #include "subghz_protocol_star_line.h"
 #include "subghz_protocol_keeloq_common.h"
 
+#include "../subghz_keystore.h"
+
 #include <furi.h>
 
 #include <m-string.h>
@@ -9,12 +11,14 @@
 
 struct SubGhzProtocolStarLine {
     SubGhzProtocolCommon common;
-    KeeLoqManufactureCodeArray_t manufacture_codes;
+    SubGhzKeystore* keystore;
     const char* manufacture_name;
 };
 
-SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(void) {
+SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore) {
     SubGhzProtocolStarLine* instance = furi_alloc(sizeof(SubGhzProtocolStarLine));
+
+    instance->keystore = keystore;
 
     instance->common.name = "Star Line"; 
     instance->common.code_min_count_bit_for_found = 64;
@@ -23,29 +27,12 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(void) {
     instance->common.te_delta = 120;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_star_line_to_str;
 
-     KeeLoqManufactureCodeArray_init(instance->manufacture_codes);
-
     return instance;
 }
 
 void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance) {
     furi_assert(instance);
-    for
-    M_EACH(manufacture_code, instance->manufacture_codes, KeeLoqManufactureCodeArray_t) {
-        string_clear(manufacture_code->name);
-        manufacture_code->key = 0;
-    }
-    KeeLoqManufactureCodeArray_clear(instance->manufacture_codes);
-    
-    
     free(instance);
-}
-
-void subghz_protocol_star_line_add_manafacture_key(SubGhzProtocolStarLine* instance, const char* name, uint64_t key, uint16_t type) {
-    KeeLoqManufactureCode* manufacture_code = KeeLoqManufactureCodeArray_push_raw(instance->manufacture_codes);
-    string_init_set_str(manufacture_code->name, name);
-    manufacture_code->key = key;
-    manufacture_code->type = type;
 }
 
 /** Send bit 
@@ -105,7 +92,7 @@ uint8_t subghz_protocol_star_line_check_remote_controller_selector(SubGhzProtoco
     uint64_t man_normal_learning;
 
     for
-        M_EACH(manufacture_code, instance->manufacture_codes, KeeLoqManufactureCodeArray_t) {
+        M_EACH(manufacture_code, *subghz_keystore_get_data(instance->keystore), SubGhzKeyArray_t) {
             switch (manufacture_code->type){
                 case KEELOQ_LEARNING_SIMPLE:
                     //Simple Learning
