@@ -79,29 +79,35 @@ void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
 }
 
 void cli_motd() {
-    printf("\r\n \
-              _.-------.._                    -,\r\n \
-          .-\"```\"--..,,_/ /`-,               -,  \\ \r\n \
-       .:\"          /:/  /'\\  \\     ,_...,  `. |  |\r\n \
-      /       ,----/:/  /`\\ _\\~`_-\"`     _;\r\n \
-     '      / /`\"\"\"'\\ \\ \\.~`_-'      ,-\"'/ \r\n \
-    |      | |  0    | | .-'      ,/`  /\r\n \
-   |    ,..\\ \\     ,.-\"`       ,/`    /\r\n \
-  ;    :    `/`\"\"\\`           ,/--==,/-----,\r\n \
-  |    `-...|        -.___-Z:_______J...---;\r\n \
-  :         `                           _-'\r\n \
- _L_  _     ___  ___  ___  ___  ____--\"`___  _     ___\r\n \
-| __|| |   |_ _|| _ \\| _ \\| __|| _ \\   / __|| |   |_ _|\r\n \
-| _| | |__  | | |  _/|  _/| _| |   /  | (__ | |__  | |\r\n \
-|_|  |____||___||_|  |_|  |___||_|_\\   \\___||____||___|\r\n\r\n");
+    printf("\r\n"
+           "              _.-------.._                    -,\r\n"
+           "          .-\"```\"--..,,_/ /`-,               -,  \\ \r\n"
+           "       .:\"          /:/  /'\\  \\     ,_...,  `. |  |\r\n"
+           "      /       ,----/:/  /`\\ _\\~`_-\"`     _;\r\n"
+           "     '      / /`\"\"\"'\\ \\ \\.~`_-'      ,-\"'/ \r\n"
+           "    |      | |  0    | | .-'      ,/`  /\r\n"
+           "   |    ,..\\ \\     ,.-\"`       ,/`    /\r\n"
+           "  ;    :    `/`\"\"\\`           ,/--==,/-----,\r\n"
+           "  |    `-...|        -.___-Z:_______J...---;\r\n"
+           "  :         `                           _-'\r\n"
+           " _L_  _     ___  ___  ___  ___  ____--\"`___  _     ___\r\n"
+           "| __|| |   |_ _|| _ \\| _ \\| __|| _ \\   / __|| |   |_ _|\r\n"
+           "| _| | |__  | | |  _/|  _/| _| |   /  | (__ | |__  | |\r\n"
+           "|_|  |____||___||_|  |_|  |___||_|_\\   \\___||____||___|\r\n"
+           "\r\n"
+           "Welcome to Flipper Zero Command Line Interface!\r\n"
+           "Read Manual https://docs.flipperzero.one\r\n"
+           "\r\n");
 
-    printf("You are now connected to Flipper Command Line Interface.\r\n\r\n");
-
-    printf("Bootloader\r\n");
-    cli_print_version(api_hal_version_get_boot_version());
-
-    printf("Firmware\r\n");
-    cli_print_version(api_hal_version_get_firmware_version());
+    const Version* firmware_version = api_hal_version_get_firmware_version();
+    if(firmware_version) {
+        printf(
+            "Firmware version: %s %s (%s built on %s)\r\n",
+            version_get_gitbranch(firmware_version),
+            version_get_version(firmware_version),
+            version_get_githash(firmware_version),
+            version_get_builddate(firmware_version));
+    }
 }
 
 void cli_nl() {
