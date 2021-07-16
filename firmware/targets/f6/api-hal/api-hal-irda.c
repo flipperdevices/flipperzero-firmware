@@ -119,12 +119,10 @@ void api_hal_irda_rx_irq_init(void) {
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
 
+    api_hal_interrupt_set_timer_isr(TIM2, api_hal_irda_isr);
+
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
-
-    api_hal_interrupt_set_timer_isr(TIM2, api_hal_irda_isr);
-    NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),5, 0));
-    NVIC_EnableIRQ(TIM2_IRQn);
 }
 
 void api_hal_irda_rx_irq_deinit(void) {
