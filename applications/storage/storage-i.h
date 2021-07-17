@@ -1,9 +1,9 @@
 #pragma once
 #include <furi.h>
-#include <filesystem-api-v2.h>
-#include "storage-glue.h"
 #include <gui/gui.h>
+#include "storage-glue.h"
 #include "storage-sd-api.h"
+#include "filesystem-api-v2.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,13 +16,11 @@ typedef struct {
     bool enabled;
 } StorageAppSDGui;
 
-typedef struct {
-    FS_Api external_api;
+struct StorageApp {
     osMessageQueueId_t message_queue;
     StorageData storage[STORAGE_COUNT];
     StorageAppSDGui sd_gui;
-    StorageSDApi sd_api;
-} StorageApp;
+};
 
 #ifdef __cplusplus
 }

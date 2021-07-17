@@ -12,8 +12,7 @@ void storage_settings_scene_internal_info_on_enter(void* context) {
     StorageSettings* app = context;
     uint64_t total_space;
     uint64_t free_space;
-    FS_Error error =
-        app->fs_api->common.fs_info(app->fs_api->context, "/int", &total_space, &free_space);
+    FS_Error error = storage_common_fs_info(app->fs_api, "/int", &total_space, &free_space);
     DialogEx* dialog_ex = app->dialog_ex;
 
     string_init(app->text_string);

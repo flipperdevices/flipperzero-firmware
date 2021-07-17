@@ -9,7 +9,7 @@ static void storage_settings_scene_sd_info_dialog_callback(DialogExResult result
 void storage_settings_scene_sd_info_on_enter(void* context) {
     StorageSettings* app = context;
     SDInfo sd_info;
-    FS_Error sd_status = app->sd_api->info(app->sd_api->context, &sd_info);
+    FS_Error sd_status = storage_sd_info(app->fs_api, &sd_info);
     DialogEx* dialog_ex = app->dialog_ex;
 
     string_init(app->text_string);

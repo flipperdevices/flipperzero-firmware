@@ -1,8 +1,8 @@
+#include "storage.h"
 #include "storage-i.h"
 #include "storage-message.h"
 
 #define S_API_PROLOGUE                            \
-    StorageApp* app = context;                    \
     osThreadId_t caller_thread = osThreadGetId(); \
     if(caller_thread == 0) furi_check(0);
 
@@ -39,8 +39,8 @@
 
 /****************** FILE ******************/
 
-bool s_api_file_open(
-    void* context,
+bool storage_file_open(
+    StorageApp* app,
     File* file,
     const char* path,
     FS_AccessMode access_mode,
@@ -60,7 +60,7 @@ bool s_api_file_open(
     return S_RETURN_BOOL;
 }
 
-bool s_api_file_close(void* context, File* file) {
+bool storage_file_close(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileClose);
@@ -68,7 +68,7 @@ bool s_api_file_close(void* context, File* file) {
     return S_RETURN_BOOL;
 }
 
-uint16_t s_api_file_read(void* context, File* file, void* buff, uint16_t bytes_to_read) {
+uint16_t storage_file_read(StorageApp* app, File* file, void* buff, uint16_t bytes_to_read) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -83,7 +83,7 @@ uint16_t s_api_file_read(void* context, File* file, void* buff, uint16_t bytes_t
     return S_RETURN_UINT16;
 }
 
-uint16_t s_api_file_write(void* context, File* file, const void* buff, uint16_t bytes_to_write) {
+uint16_t storage_file_write(StorageApp* app, File* file, const void* buff, uint16_t bytes_to_write) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -98,7 +98,7 @@ uint16_t s_api_file_write(void* context, File* file, const void* buff, uint16_t 
     return S_RETURN_UINT16;
 }
 
-bool s_api_file_seek(void* context, File* file, uint32_t offset, bool from_start) {
+bool storage_file_seek(StorageApp* app, File* file, uint32_t offset, bool from_start) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -113,7 +113,7 @@ bool s_api_file_seek(void* context, File* file, uint32_t offset, bool from_start
     return S_RETURN_BOOL;
 }
 
-uint64_t s_api_file_tell(void* context, File* file) {
+uint64_t storage_file_tell(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileTell);
@@ -121,7 +121,7 @@ uint64_t s_api_file_tell(void* context, File* file) {
     return S_RETURN_UINT64;
 }
 
-bool s_api_file_truncate(void* context, File* file) {
+bool storage_file_truncate(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileTruncate);
@@ -129,7 +129,7 @@ bool s_api_file_truncate(void* context, File* file) {
     return S_RETURN_BOOL;
 }
 
-uint64_t s_api_file_size(void* context, File* file) {
+uint64_t storage_file_size(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileSize);
@@ -137,7 +137,7 @@ uint64_t s_api_file_size(void* context, File* file) {
     return S_RETURN_UINT64;
 }
 
-bool s_api_file_sync(void* context, File* file) {
+bool storage_file_sync(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileSync);
@@ -145,7 +145,7 @@ bool s_api_file_sync(void* context, File* file) {
     return S_RETURN_BOOL;
 }
 
-bool s_api_file_eof(void* context, File* file) {
+bool storage_file_eof(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileEof);
@@ -155,7 +155,7 @@ bool s_api_file_eof(void* context, File* file) {
 
 /****************** DIR ******************/
 
-bool s_api_dir_open(void* context, File* file, const char* path) {
+bool storage_dir_open(StorageApp* app, File* file, const char* path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -169,7 +169,7 @@ bool s_api_dir_open(void* context, File* file, const char* path) {
     return S_RETURN_BOOL;
 }
 
-bool s_api_dir_close(void* context, File* file) {
+bool storage_dir_close(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandDirClose);
@@ -177,8 +177,8 @@ bool s_api_dir_close(void* context, File* file) {
     return S_RETURN_BOOL;
 }
 
-bool s_api_dir_read(
-    void* context,
+bool storage_dir_read(
+    StorageApp* app,
     File* file,
     FileInfo* fileinfo,
     char* name,
@@ -198,7 +198,7 @@ bool s_api_dir_read(
     return S_RETURN_BOOL;
 }
 
-bool s_api_dir_rewind(void* context, File* file) {
+bool storage_dir_rewind(StorageApp* app, File* file) {
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandDirRewind);
@@ -208,7 +208,7 @@ bool s_api_dir_rewind(void* context, File* file) {
 
 /****************** COMMON ******************/
 
-FS_Error s_api_common_stat(void* context, const char* path, FileInfo* fileinfo) {
+FS_Error storage_common_stat(StorageApp* app, const char* path, FileInfo* fileinfo) {
     S_API_PROLOGUE;
 
     SAData data = {.cstat = {.path = path, .fileinfo = fileinfo}};
@@ -218,7 +218,7 @@ FS_Error s_api_common_stat(void* context, const char* path, FileInfo* fileinfo) 
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_common_remove(void* context, const char* path) {
+FS_Error storage_common_remove(StorageApp* app, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonRemove);
@@ -226,7 +226,7 @@ FS_Error s_api_common_remove(void* context, const char* path) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_common_rename(void* context, const char* old_path, const char* new_path) {
+FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char* new_path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -240,7 +240,7 @@ FS_Error s_api_common_rename(void* context, const char* old_path, const char* ne
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_common_mkdir(void* context, const char* path) {
+FS_Error storage_common_mkdir(StorageApp* app, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonMkDir);
@@ -248,8 +248,8 @@ FS_Error s_api_common_mkdir(void* context, const char* path) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_common_fs_info(
-    void* context,
+FS_Error storage_common_fs_info(
+    StorageApp* app,
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
@@ -269,7 +269,7 @@ FS_Error s_api_common_fs_info(
 
 /****************** ERROR ******************/
 
-const char* s_api_error_get_desc(void* context, FS_Error error_id) {
+const char* storage_error_get_desc(StorageApp* app, FS_Error error_id) {
     S_API_PROLOGUE;
     SAData data = {
         .error = {
@@ -282,7 +282,7 @@ const char* s_api_error_get_desc(void* context, FS_Error error_id) {
 
 /****************** Raw SD API ******************/
 
-FS_Error s_api_sd_format(void* context) {
+FS_Error storage_sd_format(StorageApp* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDFormat);
@@ -290,7 +290,7 @@ FS_Error s_api_sd_format(void* context) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_sd_unmount(void* context) {
+FS_Error storage_sd_unmount(StorageApp* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDUnmount);
@@ -298,7 +298,7 @@ FS_Error s_api_sd_unmount(void* context) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_sd_info(void* context, SDInfo* info) {
+FS_Error storage_sd_info(StorageApp* app, SDInfo* info) {
     S_API_PROLOGUE;
     SAData data = {
         .sdinfo = {
@@ -309,7 +309,7 @@ FS_Error s_api_sd_info(void* context, SDInfo* info) {
     return S_RETURN_ERROR;
 }
 
-FS_Error s_api_sd_status(void* context) {
+FS_Error storage_sd_status(StorageApp* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDStatus);

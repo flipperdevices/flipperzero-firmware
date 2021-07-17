@@ -1,6 +1,6 @@
 #pragma once
 #include <furi.h>
-#include <filesystem-api-v2.h>
+#include "filesystem-api-v2.h"
 #include <fatfs.h>
 #include "storage-glue.h"
 
@@ -26,14 +26,6 @@ typedef struct {
     char label[SD_LABEL_LENGTH];
     FS_Error error;
 } SDInfo;
-
-typedef struct {
-    FS_Error (*unmount)(void* context);
-    FS_Error (*format)(void* context);
-    FS_Error (*status)(void* context);
-    FS_Error (*info)(void* context, SDInfo* info);
-    void* context;
-} StorageSDApi;
 
 const char* sd_api_get_fs_type_text(SDFsType fs_type);
 

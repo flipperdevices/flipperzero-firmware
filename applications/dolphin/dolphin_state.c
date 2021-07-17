@@ -1,5 +1,5 @@
 #include "dolphin_state.h"
-#include <filesystem-api-v2.h>
+#include <storage/storage.h>
 #include <furi.h>
 #include <math.h>
 
@@ -33,7 +33,7 @@ typedef struct {
 } DolphinStore;
 
 struct DolphinState {
-    FS_Api* fs_api;
+    StorageApp* fs_api;
     DolphinStoreData data;
 };
 
@@ -68,12 +68,12 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
 
     // Store
     File file;
-    FS_Api* api = dolphin_state->fs_api;
+    StorageApp* api = dolphin_state->fs_api;
     bool fs_result =
-        api->file.open(api->context, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+        storage_file_open(api, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(fs_result) {
-        uint16_t bytes_count = api->file.write(api->context, &file, &store, sizeof(DolphinStore));
+        uint16_t bytes_count = storage_file_write(api, &file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
             fs_result = false;
@@ -81,13 +81,13 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     }
 
     FS_Error fs_error = file.error_id;
-    api->file.close(api->context, &file);
+    storage_file_close(api, &file);
 
     if(!fs_result) {
         FURI_LOG_E(
             "dolphin-state",
             "Save failed. Storage returned: %s",
-            api->error.get_desc(api->context, fs_error));
+            storage_error_get_desc(api, fs_error));
         return false;
     }
 
@@ -101,12 +101,12 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     FURI_LOG_I("dolphin-state", "Loading state from \"%s\"", DOLPHIN_STORE_KEY);
 
     File file;
-    FS_Api* api = dolphin_state->fs_api;
+    StorageApp* api = dolphin_state->fs_api;
     bool fs_result =
-        api->file.open(api->context, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
+        storage_file_open(api, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(fs_result) {
-        uint16_t bytes_count = api->file.read(api->context, &file, &store, sizeof(DolphinStore));
+        uint16_t bytes_count = storage_file_read(api, &file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
             fs_result = false;
@@ -114,13 +114,13 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     }
 
     FS_Error fs_error = file.error_id;
-    api->file.close(api->context, &file);
+    storage_file_close(api, &file);
 
     if(!fs_result) {
         FURI_LOG_E(
             "dolphin-state",
             "Load failed. Storage returned: %s",
-            api->error.get_desc(api->context, fs_error));
+            storage_error_get_desc(api, fs_error));
         return false;
     }
 

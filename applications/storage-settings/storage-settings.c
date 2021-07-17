@@ -18,7 +18,6 @@ static StorageSettings* storage_settings_alloc() {
     app->gui = furi_record_open("gui");
     app->fs_api = furi_record_open("storage");
     app->notification = furi_record_open("notification");
-    app->sd_api = furi_record_open("storage-sd");
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&storage_settings_scene_handlers, app);

@@ -1,5 +1,6 @@
 #pragma once
 #include <furi.h>
+#include "storage.h"
 #include "storage-i.h"
 #include "storage-message.h"
 #include "storage-glue.h"

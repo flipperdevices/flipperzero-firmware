@@ -10,8 +10,8 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 
+#include <storage/storage.h>
 #include <storage/storage-sd-api.h>
-#include <filesystem-api-v2.h>
 
 #include "scenes/storage-settings-scene.h"
 
@@ -23,8 +23,7 @@ typedef struct {
     // records
     Gui* gui;
     NotificationApp* notification;
-    StorageSDApi* sd_api;
-    FS_Api* fs_api;
+    StorageApp* fs_api;
 
     // view managment
     SceneManager* scene_manager;

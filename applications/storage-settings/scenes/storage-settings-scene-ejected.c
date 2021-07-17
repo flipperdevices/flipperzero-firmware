@@ -9,7 +9,7 @@ static void
 
 void storage_settings_scene_unmounted_on_enter(void* context) {
     StorageSettings* app = context;
-    FS_Error error = app->sd_api->unmount(app->sd_api->context);
+    FS_Error error = storage_sd_unmount(app->fs_api);
     DialogEx* dialog_ex = app->dialog_ex;
 
     dialog_ex_set_left_button_text(dialog_ex, "Back");
