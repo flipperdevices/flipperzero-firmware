@@ -125,7 +125,6 @@ typedef enum {
     StorageCommandCommonRename,
     StorageCommandCommonMkDir,
     StorageCommandCommonFSInfo,
-    StorageCommandErrorGetDesc,
     StorageCommandSDFormat,
     StorageCommandSDUnmount,
     StorageCommandSDInfo,

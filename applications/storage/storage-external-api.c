@@ -6,6 +6,10 @@
     osThreadId_t caller_thread = osThreadGetId(); \
     if(caller_thread == 0) furi_check(0);
 
+#define S_FILE_API_PROLOGUE      \
+    StorageApp* app = file->api; \
+    furi_assert(app);
+
 #define S_API_EPILOGUE                                                                     \
     furi_check(osMessageQueuePut(app->message_queue, &message, 0, osWaitForever) == osOK); \
     osThreadFlagsWait(STORAGE_THREAD_FLAG_COMPLETE, osFlagsWaitAny, osWaitForever);
@@ -40,11 +44,11 @@
 /****************** FILE ******************/
 
 bool storage_file_open(
-    StorageApp* app,
     File* file,
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -60,7 +64,8 @@ bool storage_file_open(
     return S_RETURN_BOOL;
 }
 
-bool storage_file_close(StorageApp* app, File* file) {
+bool storage_file_close(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileClose);
@@ -68,7 +73,8 @@ bool storage_file_close(StorageApp* app, File* file) {
     return S_RETURN_BOOL;
 }
 
-uint16_t storage_file_read(StorageApp* app, File* file, void* buff, uint16_t bytes_to_read) {
+uint16_t storage_file_read(File* file, void* buff, uint16_t bytes_to_read) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -83,7 +89,8 @@ uint16_t storage_file_read(StorageApp* app, File* file, void* buff, uint16_t byt
     return S_RETURN_UINT16;
 }
 
-uint16_t storage_file_write(StorageApp* app, File* file, const void* buff, uint16_t bytes_to_write) {
+uint16_t storage_file_write(File* file, const void* buff, uint16_t bytes_to_write) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -98,7 +105,8 @@ uint16_t storage_file_write(StorageApp* app, File* file, const void* buff, uint1
     return S_RETURN_UINT16;
 }
 
-bool storage_file_seek(StorageApp* app, File* file, uint32_t offset, bool from_start) {
+bool storage_file_seek(File* file, uint32_t offset, bool from_start) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -113,7 +121,8 @@ bool storage_file_seek(StorageApp* app, File* file, uint32_t offset, bool from_s
     return S_RETURN_BOOL;
 }
 
-uint64_t storage_file_tell(StorageApp* app, File* file) {
+uint64_t storage_file_tell(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileTell);
@@ -121,7 +130,8 @@ uint64_t storage_file_tell(StorageApp* app, File* file) {
     return S_RETURN_UINT64;
 }
 
-bool storage_file_truncate(StorageApp* app, File* file) {
+bool storage_file_truncate(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileTruncate);
@@ -129,7 +139,8 @@ bool storage_file_truncate(StorageApp* app, File* file) {
     return S_RETURN_BOOL;
 }
 
-uint64_t storage_file_size(StorageApp* app, File* file) {
+uint64_t storage_file_size(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileSize);
@@ -137,7 +148,8 @@ uint64_t storage_file_size(StorageApp* app, File* file) {
     return S_RETURN_UINT64;
 }
 
-bool storage_file_sync(StorageApp* app, File* file) {
+bool storage_file_sync(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileSync);
@@ -145,7 +157,8 @@ bool storage_file_sync(StorageApp* app, File* file) {
     return S_RETURN_BOOL;
 }
 
-bool storage_file_eof(StorageApp* app, File* file) {
+bool storage_file_eof(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandFileEof);
@@ -155,7 +168,8 @@ bool storage_file_eof(StorageApp* app, File* file) {
 
 /****************** DIR ******************/
 
-bool storage_dir_open(StorageApp* app, File* file, const char* path) {
+bool storage_dir_open(File* file, const char* path) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -169,7 +183,8 @@ bool storage_dir_open(StorageApp* app, File* file, const char* path) {
     return S_RETURN_BOOL;
 }
 
-bool storage_dir_close(StorageApp* app, File* file) {
+bool storage_dir_close(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandDirClose);
@@ -177,12 +192,8 @@ bool storage_dir_close(StorageApp* app, File* file) {
     return S_RETURN_BOOL;
 }
 
-bool storage_dir_read(
-    StorageApp* app,
-    File* file,
-    FileInfo* fileinfo,
-    char* name,
-    uint16_t name_length) {
+bool storage_dir_read(File* file, FileInfo* fileinfo, char* name, uint16_t name_length) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
 
     SAData data = {
@@ -198,7 +209,8 @@ bool storage_dir_read(
     return S_RETURN_BOOL;
 }
 
-bool storage_dir_rewind(StorageApp* app, File* file) {
+bool storage_dir_rewind(File* file) {
+    S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;
     S_API_DATA_FILE;
     S_API_MESSAGE(StorageCommandDirRewind);
@@ -269,15 +281,12 @@ FS_Error storage_common_fs_info(
 
 /****************** ERROR ******************/
 
-const char* storage_error_get_desc(StorageApp* app, FS_Error error_id) {
-    S_API_PROLOGUE;
-    SAData data = {
-        .error = {
-            .id = error_id,
-        }};
-    S_API_MESSAGE(StorageCommandErrorGetDesc);
-    S_API_EPILOGUE;
-    return S_RETURN_CSTRING;
+const char* storage_error_get_desc(FS_Error error_id) {
+    return filesystem_api_error_get_desc(error_id);
+}
+
+const char* storage_file_error_get_desc(File* file) {
+    return filesystem_api_error_get_desc(file->error_id);
 }
 
 /****************** Raw SD API ******************/
@@ -315,4 +324,16 @@ FS_Error storage_sd_status(StorageApp* app) {
     S_API_MESSAGE(StorageCommandSDStatus);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
+}
+
+/****************** File API ******************/
+
+File storage_file(StorageApp* app) {
+    File file = {
+        .file_id = UINT32_MAX,
+        .error_id = FSE_INTERNAL,
+        .internal_error_id = INT32_MIN,
+        .api = app};
+
+    return file;
 }

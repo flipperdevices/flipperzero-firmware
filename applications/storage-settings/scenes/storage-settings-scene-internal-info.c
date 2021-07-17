@@ -24,7 +24,7 @@ void storage_settings_scene_internal_info_on_enter(void* context) {
         dialog_ex_set_header(
             dialog_ex, "Internal storage error", 64, 10, AlignCenter, AlignCenter);
         dialog_ex_set_text(
-            dialog_ex, filesystem_api_error_get_desc(error), 64, 32, AlignCenter, AlignCenter);
+            dialog_ex, storage_error_get_desc(error), 64, 32, AlignCenter, AlignCenter);
     } else {
         string_printf(
             app->text_string,

@@ -67,32 +67,28 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     store.data = dolphin_state->data;
 
     // Store
-    File file;
-    StorageApp* api = dolphin_state->fs_api;
-    bool fs_result =
-        storage_file_open(api, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    File file = storage_file(dolphin_state->fs_api);
+    bool save_result = storage_file_open(&file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_write(api, &file, &store, sizeof(DolphinStore));
+    if(save_result) {
+        uint16_t bytes_count = storage_file_write(&file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
-            fs_result = false;
+            save_result = false;
         }
     }
 
-    FS_Error fs_error = file.error_id;
-    storage_file_close(api, &file);
-
-    if(!fs_result) {
+    if(!save_result) {
         FURI_LOG_E(
             "dolphin-state",
             "Save failed. Storage returned: %s",
-            storage_error_get_desc(api, fs_error));
-        return false;
+            storage_file_error_get_desc(&file));
     }
 
+    storage_file_close(&file);
+
     FURI_LOG_I("dolphin-state", "Saved");
-    return true;
+    return save_result;
 }
 
 bool dolphin_state_load(DolphinState* dolphin_state) {
@@ -100,61 +96,62 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     // Read Dolphin State Store
     FURI_LOG_I("dolphin-state", "Loading state from \"%s\"", DOLPHIN_STORE_KEY);
 
-    File file;
-    StorageApp* api = dolphin_state->fs_api;
-    bool fs_result =
-        storage_file_open(api, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
+    File file = storage_file(dolphin_state->fs_api);
+    bool load_result = storage_file_open(&file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
 
-    if(fs_result) {
-        uint16_t bytes_count = storage_file_read(api, &file, &store, sizeof(DolphinStore));
+    if(load_result) {
+        uint16_t bytes_count = storage_file_read(&file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
-            fs_result = false;
+            load_result = false;
         }
     }
 
-    FS_Error fs_error = file.error_id;
-    storage_file_close(api, &file);
-
-    if(!fs_result) {
+    if(!load_result) {
         FURI_LOG_E(
             "dolphin-state",
             "Load failed. Storage returned: %s",
-            storage_error_get_desc(api, fs_error));
-        return false;
-    }
+            storage_file_error_get_desc(&file));
+    } else {
+        FURI_LOG_I("dolphin-state", "State loaded, verifying header");
+        if(store.header.magic == DOLPHIN_STORE_HEADER_MAGIC &&
+           store.header.version == DOLPHIN_STORE_HEADER_VERSION) {
+            FURI_LOG_I(
+                "dolphin-state",
+                "Magic(%d) and Version(%d) match",
+                store.header.magic,
+                store.header.version);
+            uint8_t checksum = 0;
+            const uint8_t* source = (const uint8_t*)&store.data;
+            for(size_t i = 0; i < sizeof(DolphinStoreData); i++) {
+                checksum += source[i];
+            }
 
-    FURI_LOG_I("dolphin-state", "State loaded, verifying header");
-    if(store.header.magic == DOLPHIN_STORE_HEADER_MAGIC &&
-       store.header.version == DOLPHIN_STORE_HEADER_VERSION) {
-        FURI_LOG_I(
-            "dolphin-state",
-            "Magic(%d) and Version(%d) match",
-            store.header.magic,
-            store.header.version);
-        uint8_t checksum = 0;
-        const uint8_t* source = (const uint8_t*)&store.data;
-        for(size_t i = 0; i < sizeof(DolphinStoreData); i++) {
-            checksum += source[i];
-        }
-        if(store.header.checksum == checksum) {
-            FURI_LOG_I("dolphin-state", "Checksum(%d) match", store.header.checksum);
-            dolphin_state->data = store.data;
-            return true;
+            if(store.header.checksum == checksum) {
+                FURI_LOG_I("dolphin-state", "Checksum(%d) match", store.header.checksum);
+                dolphin_state->data = store.data;
+            } else {
+                FURI_LOG_E(
+                    "dolphin-state",
+                    "Checksum(%d != %d) mismatch",
+                    store.header.checksum,
+                    checksum);
+                load_result = false;
+            }
         } else {
             FURI_LOG_E(
-                "dolphin-state", "Checksum(%d != %d) mismatch", store.header.checksum, checksum);
+                "dolphin-state",
+                "Magic(%d != %d) and Version(%d != %d) mismatch",
+                store.header.magic,
+                DOLPHIN_STORE_HEADER_MAGIC,
+                store.header.version,
+                DOLPHIN_STORE_HEADER_VERSION);
+            load_result = false;
         }
-    } else {
-        FURI_LOG_E(
-            "dolphin-state",
-            "Magic(%d != %d) and Version(%d != %d) mismatch",
-            store.header.magic,
-            DOLPHIN_STORE_HEADER_MAGIC,
-            store.header.version,
-            DOLPHIN_STORE_HEADER_VERSION);
     }
-    return false;
+
+    storage_file_close(&file);
+    return load_result;
 }
 
 void dolphin_state_clear(DolphinState* dolphin_state) {
