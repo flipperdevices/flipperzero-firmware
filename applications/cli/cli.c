@@ -8,6 +8,7 @@ Cli* cli_alloc() {
 
     CliCommandTree_init(cli->commands);
 
+    string_init(cli->last_line);
     string_init(cli->line);
 
     cli->mutex = osMutexNew(NULL);
@@ -19,6 +20,7 @@ Cli* cli_alloc() {
 void cli_free(Cli* cli) {
     furi_assert(cli);
 
+    string_clear(cli->last_line);
     string_clear(cli->line);
 
     CliCommandTree_clear(cli->commands);
@@ -107,7 +109,8 @@ void cli_prompt(Cli* cli) {
 }
 
 void cli_reset(Cli* cli) {
-    string_clean(cli->line);
+    string_move(cli->last_line, cli->line);
+    string_init(cli->line);
     cli->cursor_position = 0;
 }
 
@@ -169,7 +172,9 @@ static void cli_handle_enter(Cli* cli) {
         cli_reset(cli);
     } else {
         cli_nl(cli);
-        printf("`%s` command not found", string_get_cstr(command));
+        printf(
+            "`%s` command not found, use `help` or `?` to list all available commands",
+            string_get_cstr(command));
         cli_putc(CliSymbolAsciiBell);
     }
     furi_check(osMutexRelease(cli->mutex) == osOK);
@@ -238,6 +243,15 @@ static void cli_handle_autocomplete(Cli* cli) {
 
 static void cli_handle_escape(Cli* cli, char c) {
     if(c == 'A') {
+        // Use previous command if line buffer is empty
+        if(string_size(cli->line) == 0 && string_cmp(cli->line, cli->last_line) != 0) {
+            // Set line buffer and cursor position
+            string_set(cli->line, cli->last_line);
+            cli->cursor_position = string_size(cli->line);
+            // Show new line to user
+            printf(string_get_cstr(cli->line));
+            fflush(stdout);
+        }
     } else if(c == 'B') {
     } else if(c == 'C') {
         if(cli->cursor_position < string_size(cli->line)) {

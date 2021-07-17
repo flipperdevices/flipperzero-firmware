@@ -30,6 +30,7 @@ BPTREE_DEF2(
 struct Cli {
     CliCommandTree_t commands;
     osMutexId_t mutex;
+    string_t last_line;
     string_t line;
 
     size_t cursor_position;
