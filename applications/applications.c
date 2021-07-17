@@ -49,6 +49,7 @@ void subghz_cli_init();
 void bt_cli_init();
 void lfrfid_cli_init();
 void ibutton_cli_init();
+void storage_cli_init();
 
 // Settings
 int32_t notification_app_settings(void* p);
@@ -233,6 +234,9 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #endif
 #ifdef SRV_BT
     bt_cli_init,
+#endif
+#ifdef SRV_STORAGE
+    storage_cli_init,
 #endif
 };
 
