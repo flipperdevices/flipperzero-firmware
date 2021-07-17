@@ -1,19 +1,33 @@
 #include "irda-app.hpp"
+#include <irda_worker.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdio.h>
 #include <callback-connector.h>
 
-void IrdaApp::run(void) {
+int32_t IrdaApp::run(void* args) {
     IrdaAppEvent event;
     bool consumed;
     bool exit = false;
+
+    if(args) {
+        const char* remote_name = static_cast<const char*>(args);
+        bool result = remote_manager.load(std::string(remote_name), true);
+        if(result) {
+            current_scene = IrdaApp::Scene::Remote;
+        } else {
+            printf("Failed to load remote \'%s\'\r\n", remote_name);
+            return -1;
+        }
+    }
 
     scenes[current_scene]->on_enter(this);
 
     while(!exit) {
         view_manager.receive_event(&event);
+
+        if(event.type == IrdaAppEvent::Type::Exit) break;
 
         consumed = scenes[current_scene]->on_event(this, &event);
 
@@ -25,6 +39,8 @@ void IrdaApp::run(void) {
     };
 
     scenes[current_scene]->on_exit(this);
+
+    return 0;
 };
 
 IrdaAppViewManager* IrdaApp::get_view_manager() {
@@ -58,6 +74,9 @@ void IrdaApp::search_and_switch_to_previous_scene(const std::initializer_list<Sc
 
     while(!scene_found) {
         previous_scene = get_previous_scene();
+
+        if(previous_scene == Scene::Exit) break;
+
         for(Scene element : scenes_list) {
             if(previous_scene == element) {
                 scene_found = true;
@@ -66,9 +85,15 @@ void IrdaApp::search_and_switch_to_previous_scene(const std::initializer_list<Sc
         }
     }
 
-    scenes[current_scene]->on_exit(this);
-    current_scene = previous_scene;
-    scenes[current_scene]->on_enter(this);
+    if(previous_scene == Scene::Exit) {
+        IrdaAppEvent event;
+        event.type = IrdaAppEvent::Type::Exit;
+        view_manager.send_event(&event);
+    } else {
+        scenes[current_scene]->on_exit(this);
+        current_scene = previous_scene;
+        scenes[current_scene]->on_enter(this);
+    }
 }
 
 bool IrdaApp::switch_to_previous_scene(uint8_t count) {
@@ -97,10 +122,6 @@ IrdaApp::Scene IrdaApp::get_previous_scene() {
 
 IrdaAppRemoteManager* IrdaApp::get_remote_manager() {
     return &remote_manager;
-}
-
-IrdaAppSignalTransceiver* IrdaApp::get_transceiver() {
-    return &transceiver;
 }
 
 void IrdaApp::set_text_store(uint8_t index, const char* text...) {
@@ -219,4 +240,16 @@ void IrdaApp::notify_green_on() {
 
 void IrdaApp::notify_green_off() {
     notification_message(notification, &sequence_reset_green);
+}
+
+IrdaWorker* IrdaApp::get_irda_worker() {
+    return irda_worker;
+}
+
+const IrdaAppSignal& IrdaApp::get_received_signal() const {
+    return received_signal;
+}
+
+void IrdaApp::set_received_signal(const IrdaAppSignal& signal) {
+    received_signal = signal;
 }
