@@ -190,7 +190,6 @@ static void cli_handle_autocomplete(Cli* cli) {
     cli_normalize_line(cli);
 
     if(string_size(cli->line) == 0) {
-        cli_prompt(cli);
         return;
     }
 
@@ -208,11 +207,10 @@ static void cli_handle_autocomplete(Cli* cli) {
                 printf("%s\r\n", string_get_cstr(*cli_command->key_ptr));
                 // Process common base for autocomplete
                 if(string_size(common) > 0) {
-                    // Min string as base for iteration
-                    const size_t min_size = string_size(*cli_command->key_ptr) >
-                                                    string_size(common) ?
-                                                string_size(common) :
-                                                string_size(*cli_command->key_ptr);
+                    // Choose shortest string
+                    const size_t key_size = string_size(*cli_command->key_ptr);
+                    const size_t common_size = string_size(common);
+                    const size_t min_size = key_size > common_size ? common_size : key_size;
                     size_t i = 0;
                     while(i < min_size) {
                         // Stop when do not match
@@ -250,7 +248,6 @@ static void cli_handle_escape(Cli* cli, char c) {
             cli->cursor_position = string_size(cli->line);
             // Show new line to user
             printf(string_get_cstr(cli->line));
-            fflush(stdout);
         }
     } else if(c == 'B') {
     } else if(c == 'C') {
