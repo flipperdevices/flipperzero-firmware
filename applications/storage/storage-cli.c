@@ -12,7 +12,7 @@ void storage_cli(Cli* cli, string_t args, void* context);
 // app cli function
 void storage_cli_init() {
     Cli* cli = furi_record_open("cli");
-    cli_add_command(cli, "storage", storage_cli, NULL);
+    cli_add_command(cli, "storage", CliCommandFlagDefault, storage_cli, NULL);
     furi_record_close("cli");
 }
 
