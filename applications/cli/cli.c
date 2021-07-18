@@ -1,7 +1,9 @@
 #include "cli_i.h"
 #include "cli_commands.h"
+
 #include <version.h>
 #include <api-hal-version.h>
+#include <loader/loader.h>
 
 Cli* cli_alloc() {
     Cli* cli = furi_alloc(sizeof(Cli));
@@ -55,8 +57,11 @@ size_t cli_read(Cli* cli, uint8_t* buffer, size_t size) {
 
 bool cli_cmd_interrupt_received(Cli* cli) {
     char c = '\0';
-    api_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 1);
-    return c == CliSymbolAsciiETX;
+    if(api_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 0) == 1) {
+        return c == CliSymbolAsciiETX;
+    } else {
+        return false;
+    }
 }
 
 void cli_print_usage(const char* cmd, const char* usage, const char* arg) {
@@ -137,6 +142,37 @@ static void cli_normalize_line(Cli* cli) {
     cli->cursor_position = string_size(cli->line);
 }
 
+static void cli_execute_command(Cli* cli, CliCommand* command, string_t args) {
+    if(!(command->flags & CliCommandFlagInsomniaSafe)) {
+        api_hal_power_insomnia_enter();
+    }
+
+    // Ensure that we running alone
+    if(!(command->flags & CliCommandFlagParallelSafe)) {
+        Loader* loader = furi_record_open("loader");
+        bool safety_lock = loader_lock(loader);
+        if(safety_lock) {
+            // Execute command
+            command->callback(cli, args, command->context);
+            loader_unlock(loader);
+            // Clear line
+            cli_reset(cli);
+        } else {
+            printf("Other application is running, close it first");
+        }
+        furi_record_close("loader");
+    } else {
+        // Execute command
+        command->callback(cli, args, command->context);
+        // Clear line
+        cli_reset(cli);
+    }
+
+    if(!(command->flags & CliCommandFlagInsomniaSafe)) {
+        api_hal_power_insomnia_exit();
+    }
+}
+
 static void cli_handle_enter(Cli* cli) {
     cli_normalize_line(cli);
 
@@ -166,10 +202,7 @@ static void cli_handle_enter(Cli* cli) {
     CliCommand* cli_command = CliCommandTree_get(cli->commands, command);
     if(cli_command) {
         cli_nl(cli);
-        // Execute command
-        cli_command->callback(cli, args, cli_command->context);
-        // Clear line
-        cli_reset(cli);
+        cli_execute_command(cli, cli_command, args);
     } else {
         cli_nl(cli);
         printf(
@@ -310,7 +343,12 @@ void cli_process_input(Cli* cli) {
     }
 }
 
-void cli_add_command(Cli* cli, const char* name, CliCallback callback, void* context) {
+void cli_add_command(
+    Cli* cli,
+    const char* name,
+    CliCommandFlag flags,
+    CliCallback callback,
+    void* context) {
     string_t name_str;
     string_init_set_str(name_str, name);
     string_strim(name_str);
@@ -323,6 +361,7 @@ void cli_add_command(Cli* cli, const char* name, CliCallback callback, void* con
     CliCommand c;
     c.callback = callback;
     c.context = context;
+    c.flags = flags;
 
     furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
     CliCommandTree_set_at(cli->commands, name_str, c);
