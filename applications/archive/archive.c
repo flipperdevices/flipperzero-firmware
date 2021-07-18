@@ -652,7 +652,7 @@ ArchiveApp* archive_alloc() {
     view_dispatcher_attach_to_gui(
         archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 
-    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavourites);
+    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavorites);
 
     return archive;
 }
