@@ -364,7 +364,7 @@ static void archive_open_app(ArchiveApp* archive, const char* app_name, const ch
     furi_assert(archive);
     furi_assert(app_name);
 
-    app_loader_start(app_name, args);
+    loader_start(archive->loader, app_name, args);
 }
 
 static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool fav, bool orig) {
@@ -608,6 +608,8 @@ void archive_free(ArchiveApp* archive) {
     archive->fs_api = NULL;
     furi_record_close("gui");
     archive->gui = NULL;
+    furi_record_close("loader");
+    archive->loader = NULL;
     furi_thread_free(archive->app_thread);
     furi_check(osMessageQueueDelete(archive->event_queue) == osOK);
 
@@ -620,6 +622,7 @@ ArchiveApp* archive_alloc() {
     archive->event_queue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
     archive->app_thread = furi_thread_alloc();
     archive->gui = furi_record_open("gui");
+    archive->loader = furi_record_open("loader");
     archive->fs_api = furi_record_open("sdcard");
     archive->text_input = text_input_alloc();
     archive->view_archive_main = view_alloc();

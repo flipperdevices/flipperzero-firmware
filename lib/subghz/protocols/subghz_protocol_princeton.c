@@ -70,7 +70,7 @@ void subghz_protocol_princeton_parse(SubGhzProtocolPrinceton* instance, bool lev
     switch (instance->common.parser_step) {
     case 0:
         if ((!level)
-                && (DURATION_DIFF(duration,instance->common.te_shot * 36)< instance->common.te_delta * 36)) {
+                && (DURATION_DIFF(duration,instance->common.te_shot * 36) < instance->common.te_delta * 36)) {
             //Found Preambula
             instance->common.parser_step = 1;
             instance->common.code_found = 0;

@@ -25,7 +25,7 @@ void subghz_protocol_free(SubGhzProtocol* instance);
  * @param callback - SubGhzProtocolTextCallback callback
  * @param context
  */
-void subghz_protocol_enable_dump_text(SubGhzProtocol* instance,SubGhzProtocolTextCallback callback,void* context);
+void subghz_protocol_enable_dump_text(SubGhzProtocol* instance, SubGhzProtocolTextCallback callback, void* context);
 
 /** Outputting data SubGhzProtocol from all parsers
  * 
