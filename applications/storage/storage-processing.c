@@ -39,8 +39,6 @@ static StorageData* get_storage_by_file(File* file, StorageData* storages) {
         }
     }
 
-    furi_check(storage_data != NULL);
-
     return storage_data;
 }
 
@@ -83,8 +81,15 @@ bool storage_process_file_open(
 bool storage_process_file_close(StorageApp* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
-    FS_CALL(storage, file.close(storage, file));
-    storage_pop_storage_file(file, storage);
+
+    if(storage != NULL) {
+        FS_CALL(storage, file.close(storage, file));
+        storage_pop_storage_file(file, storage);
+    } else {
+        file->error_id = FSE_NOT_EXIST;
+        ret = false;
+    }
+
     return ret;
 }
 
@@ -158,8 +163,6 @@ static bool storage_process_file_eof(StorageApp* app, File* file) {
 
 /******************* Dir Functions *******************/
 
-// storage_process_dir_read storage_process_dir_rewind
-
 bool storage_process_dir_open(StorageApp* app, File* file, const char* path) {
     bool ret = false;
     StorageType type = storage_get_type_by_path(path);
@@ -184,8 +187,15 @@ bool storage_process_dir_open(StorageApp* app, File* file, const char* path) {
 bool storage_process_dir_close(StorageApp* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
-    FS_CALL(storage, dir.close(storage, file));
-    storage_pop_storage_file(file, storage);
+
+    if(storage != NULL) {
+        FS_CALL(storage, dir.close(storage, file));
+        storage_pop_storage_file(file, storage);
+    } else {
+        file->error_id = FSE_NOT_EXIST;
+        ret = false;
+    }
+
     return ret;
 }
 

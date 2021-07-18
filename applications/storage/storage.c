@@ -61,11 +61,13 @@ void storage_tick(StorageApp* app) {
         }
     }
 
+    // storage not enabled but was enabled (sd card unmount)
     if(app->storage[ST_EXT].status == StorageStatusNotReady && app->sd_gui.enabled == true) {
         app->sd_gui.enabled = false;
         view_port_enabled_set(app->sd_gui.view_port, false);
     }
 
+    // storage enabled (or in error state) but was not enabled (sd card mount)
     if((app->storage[ST_EXT].status == StorageStatusOK ||
         app->storage[ST_EXT].status == StorageStatusNotMounted ||
         app->storage[ST_EXT].status == StorageStatusNoFS ||

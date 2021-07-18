@@ -72,7 +72,7 @@ void storage_push_storage_file(
     const char* path,
     StorageType type,
     StorageData* storage);
-void storage_pop_storage_file(File* file, StorageData* storage);
+bool storage_pop_storage_file(File* file, StorageData* storage);
 
 #ifdef __cplusplus
 }

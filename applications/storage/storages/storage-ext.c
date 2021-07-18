@@ -429,6 +429,10 @@ static bool storage_ext_dir_read(
         snprintf(name, name_length, "%s", _fileinfo.fname);
     }
 
+    if(_fileinfo.fname[0] == 0) {
+        file->error_id = FSE_NOT_EXIST;
+    }
+
     return (file->error_id == FSE_OK);
 }
 

@@ -29,6 +29,12 @@
             .file = file, \
         }};
 
+#define S_API_DATA_FILE_POINTER \
+    SAData data = {             \
+        .file = {               \
+            .file = *file,      \
+        }};
+
 #define S_API_DATA_PATH   \
     SAData data = {       \
         .path = {         \
@@ -44,16 +50,22 @@
 /****************** FILE ******************/
 
 bool storage_file_open(
-    File* file,
+    StorageApp* app,
+    File** file,
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
-    S_FILE_API_PROLOGUE;
+    furi_assert(app);
+    furi_assert(file == NULL);
+
+    *file = malloc(sizeof(File));
+    (*file)->api = app;
+
     S_API_PROLOGUE;
 
     SAData data = {
         .fopen = {
-            .file = file,
+            .file = *file,
             .path = path,
             .access_mode = access_mode,
             .open_mode = open_mode,
@@ -64,12 +76,16 @@ bool storage_file_open(
     return S_RETURN_BOOL;
 }
 
-bool storage_file_close(File* file) {
-    S_FILE_API_PROLOGUE;
+bool storage_file_close(File** file) {
+    StorageApp* app = (*file)->api;
     S_API_PROLOGUE;
-    S_API_DATA_FILE;
+    S_API_DATA_FILE_POINTER;
     S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
+
+    free(*file);
+    *file = NULL;
+
     return S_RETURN_BOOL;
 }
 
@@ -168,13 +184,18 @@ bool storage_file_eof(File* file) {
 
 /****************** DIR ******************/
 
-bool storage_dir_open(File* file, const char* path) {
-    S_FILE_API_PROLOGUE;
+bool storage_dir_open(StorageApp* app, File** file, const char* path) {
+    furi_assert(app);
+    furi_assert(file == NULL);
+
+    *file = malloc(sizeof(File));
+    (*file)->api = app;
+
     S_API_PROLOGUE;
 
     SAData data = {
         .dopen = {
-            .file = file,
+            .file = *file,
             .path = path,
         }};
 
@@ -183,12 +204,16 @@ bool storage_dir_open(File* file, const char* path) {
     return S_RETURN_BOOL;
 }
 
-bool storage_dir_close(File* file) {
-    S_FILE_API_PROLOGUE;
+bool storage_dir_close(File** file) {
+    StorageApp* app = (*file)->api;
     S_API_PROLOGUE;
-    S_API_DATA_FILE;
+    S_API_DATA_FILE_POINTER;
     S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
+
+    free(*file);
+    *file = NULL;
+
     return S_RETURN_BOOL;
 }
 
@@ -285,7 +310,13 @@ const char* storage_error_get_desc(FS_Error error_id) {
     return filesystem_api_error_get_desc(error_id);
 }
 
-const char* storage_file_error_get_desc(File* file) {
+FS_Error storage_file_get_error(File* file) {
+    furi_check(file != NULL);
+    return file->error_id;
+}
+
+const char* storage_file_get_error_desc(File* file) {
+    furi_check(file != NULL);
     return filesystem_api_error_get_desc(file->error_id);
 }
 
@@ -326,14 +357,6 @@ FS_Error storage_sd_status(StorageApp* app) {
     return S_RETURN_ERROR;
 }
 
-/****************** File API ******************/
-
-File storage_file(StorageApp* app) {
-    File file = {
-        .file_id = UINT32_MAX,
-        .error_id = FSE_INTERNAL,
-        .internal_error_id = INT32_MIN,
-        .api = app};
-
-    return file;
+File* storage_file() {
+    return NULL;
 }

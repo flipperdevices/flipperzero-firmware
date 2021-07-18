@@ -209,16 +209,21 @@ void storage_push_storage_file(
     string_set(storage_file->path, path);
 }
 
-void storage_pop_storage_file(File* file, StorageData* storage) {
+bool storage_pop_storage_file(File* file, StorageData* storage) {
     StorageFileArray_it_t it;
+    bool result = false;
 
     for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
         StorageFileArray_next(it)) {
         if(StorageFileArray_cref(it)->file->file_id == file->file_id) {
+            result = true;
             break;
         }
     }
 
-    furi_check(!StorageFileArray_end_p(it));
-    StorageFileArray_remove(storage->files, it);
+    if(result) {
+        StorageFileArray_remove(storage->files, it);
+    }
+
+    return result;
 }

@@ -67,11 +67,12 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     store.data = dolphin_state->data;
 
     // Store
-    File file = storage_file(dolphin_state->fs_api);
-    bool save_result = storage_file_open(&file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    File* file = storage_file();
+    bool save_result = storage_file_open(
+        dolphin_state->fs_api, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(save_result) {
-        uint16_t bytes_count = storage_file_write(&file, &store, sizeof(DolphinStore));
+        uint16_t bytes_count = storage_file_write(file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
             save_result = false;
@@ -82,7 +83,7 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
         FURI_LOG_E(
             "dolphin-state",
             "Save failed. Storage returned: %s",
-            storage_file_error_get_desc(&file));
+            storage_file_get_error_desc(file));
     }
 
     storage_file_close(&file);
@@ -96,11 +97,12 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     // Read Dolphin State Store
     FURI_LOG_I("dolphin-state", "Loading state from \"%s\"", DOLPHIN_STORE_KEY);
 
-    File file = storage_file(dolphin_state->fs_api);
-    bool load_result = storage_file_open(&file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
+    File* file = storage_file();
+    bool load_result = storage_file_open(
+        dolphin_state->fs_api, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(load_result) {
-        uint16_t bytes_count = storage_file_read(&file, &store, sizeof(DolphinStore));
+        uint16_t bytes_count = storage_file_read(file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
             load_result = false;
@@ -111,7 +113,7 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
         FURI_LOG_E(
             "dolphin-state",
             "Load failed. Storage returned: %s",
-            storage_file_error_get_desc(&file));
+            storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I("dolphin-state", "State loaded, verifying header");
         if(store.header.magic == DOLPHIN_STORE_HEADER_MAGIC &&

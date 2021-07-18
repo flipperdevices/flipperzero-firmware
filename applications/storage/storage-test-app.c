@@ -10,7 +10,7 @@
 #define SEEK_OFFSET_SUM (SEEK_OFFSET_FROM_START + SEEK_OFFSET_INCREASE)
 
 static void do_file_test(StorageApp* api, const char* path) {
-    File file = storage_file(api);
+    File* file = storage_file();
     bool result;
     uint8_t bytes[BYTES_COUNT + 1];
     uint8_t bytes_count;
@@ -20,91 +20,91 @@ static void do_file_test(StorageApp* api, const char* path) {
     FURI_LOG_I(TAG, "--------- FILE \"%s\" ---------", path);
 
     // open
-    result = storage_file_open(&file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    result = storage_file_open(api, &file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
-        FURI_LOG_E(TAG, "open, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(file));
     }
 
     // write
-    bytes_count = storage_file_write(&file, TEST_STRING, strlen(TEST_STRING));
+    bytes_count = storage_file_write(file, TEST_STRING, strlen(TEST_STRING));
     if(bytes_count == 0) {
-        FURI_LOG_E(TAG, "write, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "write, %s", storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I(TAG, "write");
     }
 
     // sync
-    result = storage_file_sync(&file);
+    result = storage_file_sync(file);
     if(result) {
         FURI_LOG_I(TAG, "sync");
     } else {
-        FURI_LOG_E(TAG, "sync, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "sync, %s", storage_file_get_error_desc(file));
     }
 
     // eof #1
-    result = storage_file_eof(&file);
+    result = storage_file_eof(file);
     if(result) {
         FURI_LOG_I(TAG, "eof #1");
     } else {
-        FURI_LOG_E(TAG, "eof #1, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "eof #1, %s", storage_file_get_error_desc(file));
     }
 
     // seek from start and tell
-    result = storage_file_seek(&file, SEEK_OFFSET_FROM_START, true);
+    result = storage_file_seek(file, SEEK_OFFSET_FROM_START, true);
     if(result) {
         FURI_LOG_I(TAG, "seek #1");
     } else {
-        FURI_LOG_E(TAG, "seek #1, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "seek #1, %s", storage_file_get_error_desc(file));
     }
-    position = storage_file_tell(&file);
+    position = storage_file_tell(file);
     if(position != SEEK_OFFSET_FROM_START) {
-        FURI_LOG_E(TAG, "tell #1, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "tell #1, %s", storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I(TAG, "tell #1");
     }
 
     // size
-    size = storage_file_size(&file);
+    size = storage_file_size(file);
     if(size != strlen(TEST_STRING)) {
-        FURI_LOG_E(TAG, "size #1, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "size #1, %s", storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I(TAG, "size #1");
     }
 
     // seek and tell
-    result = storage_file_seek(&file, SEEK_OFFSET_INCREASE, false);
+    result = storage_file_seek(file, SEEK_OFFSET_INCREASE, false);
     if(result) {
         FURI_LOG_I(TAG, "seek #2");
     } else {
-        FURI_LOG_E(TAG, "seek #2, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "seek #2, %s", storage_file_get_error_desc(file));
     }
-    position = storage_file_tell(&file);
+    position = storage_file_tell(file);
     if(position != SEEK_OFFSET_SUM) {
-        FURI_LOG_E(TAG, "tell #2, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "tell #2, %s", storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I(TAG, "tell #2");
     }
 
     // eof #2
-    result = storage_file_eof(&file);
+    result = storage_file_eof(file);
     if(!result) {
         FURI_LOG_I(TAG, "eof #2");
     } else {
-        FURI_LOG_E(TAG, "eof #2, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "eof #2, %s", storage_file_get_error_desc(file));
     }
 
     // truncate
-    result = storage_file_truncate(&file);
+    result = storage_file_truncate(file);
     if(result) {
         FURI_LOG_I(TAG, "truncate");
     } else {
-        FURI_LOG_E(TAG, "truncate, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "truncate, %s", storage_file_get_error_desc(file));
     }
-    size = storage_file_size(&file);
+    size = storage_file_size(file);
     if(size != SEEK_OFFSET_SUM) {
-        FURI_LOG_E(TAG, "size #2, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "size #2, %s", storage_file_get_error_desc(file));
     } else {
         FURI_LOG_I(TAG, "size #2");
     }
@@ -114,22 +114,22 @@ static void do_file_test(StorageApp* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
-        FURI_LOG_E(TAG, "close, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "close, error");
     }
 
     // open
-    result = storage_file_open(&file, path, FSAM_READ, FSOM_OPEN_EXISTING);
+    result = storage_file_open(api, &file, path, FSAM_READ, FSOM_OPEN_EXISTING);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
-        FURI_LOG_E(TAG, "open, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(file));
     }
 
     // read
     memset(bytes, 0, BYTES_COUNT + 1);
-    bytes_count = storage_file_read(&file, bytes, BYTES_COUNT);
+    bytes_count = storage_file_read(file, bytes, BYTES_COUNT);
     if(bytes_count == 0) {
-        FURI_LOG_E(TAG, "read, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "read, %s", storage_file_get_error_desc(file));
     } else {
         if(memcmp(TEST_STRING, bytes, bytes_count) == 0) {
             FURI_LOG_I(TAG, "read");
@@ -143,22 +143,22 @@ static void do_file_test(StorageApp* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
-        FURI_LOG_E(TAG, "close, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "close, error");
     }
 }
 
 static void do_dir_test(StorageApp* api, const char* path) {
-    File file = storage_file(api);
+    File* file = storage_file();
     bool result;
 
     FURI_LOG_I(TAG, "--------- DIR \"%s\" ---------", path);
 
     // open
-    result = storage_dir_open(&file, path);
+    result = storage_dir_open(api, &file, path);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
-        FURI_LOG_E(TAG, "open, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(file));
     }
 
     // read
@@ -167,7 +167,7 @@ static void do_dir_test(StorageApp* api, const char* path) {
     FileInfo fileinfo;
 
     do {
-        result = storage_dir_read(&file, &fileinfo, filename, filename_size);
+        result = storage_dir_read(file, &fileinfo, filename, filename_size);
         if(result) {
             if(strlen(filename)) {
                 FURI_LOG_I(
@@ -176,24 +176,24 @@ static void do_dir_test(StorageApp* api, const char* path) {
                     ((fileinfo.flags & FSF_DIRECTORY) ? "D" : "F"),
                     filename);
             }
-        } else {
-            FURI_LOG_E(TAG, "read #1, %s", storage_file_error_get_desc(&file));
+        } else if(storage_file_get_error(file) != FSE_NOT_EXIST) {
+            FURI_LOG_E(TAG, "read #1, %s", storage_file_get_error_desc(file));
             break;
         }
 
-    } while((strlen(filename)));
+    } while(result);
 
     // rewind
-    result = storage_dir_rewind(&file);
+    result = storage_dir_rewind(file);
     if(result) {
         FURI_LOG_I(TAG, "rewind");
     } else {
-        FURI_LOG_E(TAG, "rewind, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "rewind, %s", storage_file_get_error_desc(file));
     }
 
     // read
     do {
-        result = storage_dir_read(&file, &fileinfo, filename, filename_size);
+        result = storage_dir_read(file, &fileinfo, filename, filename_size);
         if(result) {
             if(strlen(filename)) {
                 FURI_LOG_I(
@@ -202,8 +202,8 @@ static void do_dir_test(StorageApp* api, const char* path) {
                     ((fileinfo.flags & FSF_DIRECTORY) ? "D" : "F"),
                     filename);
             }
-        } else {
-            FURI_LOG_E(TAG, "read #2, %s", storage_file_error_get_desc(&file));
+        } else if(storage_file_get_error(file) != FSE_NOT_EXIST) {
+            FURI_LOG_E(TAG, "read #2, %s", storage_file_get_error_desc(file));
             break;
         }
 
@@ -214,7 +214,7 @@ static void do_dir_test(StorageApp* api, const char* path) {
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
-        FURI_LOG_E(TAG, "close, %s", storage_file_error_get_desc(&file));
+        FURI_LOG_E(TAG, "close, error");
     }
 
     free(filename);

@@ -37,7 +37,7 @@ void storage_cli_print_file_error(string_t path, File* file) {
     printf(
         "Storage error for path \"%s\": %s\r\n",
         string_get_cstr(path),
-        storage_file_error_get_desc(file));
+        storage_file_get_error_desc(file));
 }
 
 void storage_cli_info(Cli* cli, string_t path) {
@@ -106,14 +106,14 @@ void storage_cli_format(Cli* cli, string_t path) {
 
 void storage_cli_list(Cli* cli, string_t path) {
     StorageApp* api = furi_record_open("storage");
-    File file = storage_file(api);
+    File* file = storage_file();
 
-    if(storage_dir_open(&file, string_get_cstr(path))) {
+    if(storage_dir_open(api, &file, string_get_cstr(path))) {
         FileInfo fileinfo;
         char name[MAX_NAME_LENGTH];
         bool readed = false;
 
-        while(storage_dir_read(&file, &fileinfo, name, MAX_NAME_LENGTH) && strlen(name)) {
+        while(storage_dir_read(file, &fileinfo, name, MAX_NAME_LENGTH)) {
             readed = true;
             if(fileinfo.flags & FSF_DIRECTORY) {
                 printf("\t[D] %s\r\n", name);
@@ -126,7 +126,7 @@ void storage_cli_list(Cli* cli, string_t path) {
             printf("\tEmpty\r\n");
         }
     } else {
-        storage_cli_print_file_error(path, &file);
+        storage_cli_print_file_error(path, file);
     }
 
     storage_dir_close(&file);

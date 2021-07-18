@@ -447,6 +447,10 @@ static bool storage_int_dir_read(
         snprintf(name, name_length, "%s", _fileinfo.name);
     }
 
+    if(file->internal_error_id == 0) {
+        file->error_id = FSE_NOT_EXIST;
+    }
+
     return (file->error_id == FSE_OK);
 }
 
