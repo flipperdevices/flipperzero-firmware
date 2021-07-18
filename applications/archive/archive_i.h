@@ -41,7 +41,7 @@ static const char* known_ext[] = {
 };
 
 static const char* tab_default_paths[] = {
-    [ArchiveTabFavourites] = "favourites",
+    [ArchiveTabFavourites] = "favorites",
     [ArchiveTabIButton] = "ibutton",
     [ArchiveTabNFC] = "nfc",
     [ArchiveTabSubOne] = "subone",
