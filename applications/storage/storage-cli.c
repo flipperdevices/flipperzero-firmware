@@ -5,6 +5,8 @@
 #include <storage/storage-sd-api.h>
 #include <api-hal-version.h>
 
+#define MAX_NAME_LENGTH 64
+
 void storage_cli(Cli* cli, string_t args, void* context);
 
 // app cli function
@@ -21,6 +23,7 @@ void storage_cli_print_usage() {
     printf("Cmd list:\r\n");
     printf("\tinfo\t - get FS info\r\n");
     printf("\tformat\t - format filesystem\r\n");
+    printf("\tlist\t - list files and dirs\r\n");
 };
 
 void storage_cli_print_error(string_t path, FS_Error error) {
@@ -28,6 +31,13 @@ void storage_cli_print_error(string_t path, FS_Error error) {
         "Storage error for path \"%s\": %s\r\n",
         string_get_cstr(path),
         storage_error_get_desc(error));
+}
+
+void storage_cli_print_file_error(string_t path, File* file) {
+    printf(
+        "Storage error for path \"%s\": %s\r\n",
+        string_get_cstr(path),
+        storage_file_error_get_desc(file));
 }
 
 void storage_cli_info(Cli* cli, string_t path) {
@@ -42,7 +52,7 @@ void storage_cli_info(Cli* cli, string_t path) {
             storage_cli_print_error(path, error);
         } else {
             printf(
-                "Label: %s\r\nType: LittleFS\r\n%lu KB total\r\n%lu KB free",
+                "Label: %s\r\nType: LittleFS\r\n%lu KB total\r\n%lu KB free\r\n",
                 api_hal_version_get_name_ptr(),
                 (uint32_t)(total_space / 1024),
                 (uint32_t)(free_space / 1024));
@@ -55,7 +65,7 @@ void storage_cli_info(Cli* cli, string_t path) {
             storage_cli_print_error(path, error);
         } else {
             printf(
-                "Label: %s\r\nType: %s\r\n%lu KB total\r\n%lu KB free",
+                "Label: %s\r\nType: %s\r\n%lu KB total\r\n%lu KB free\r\n",
                 sd_info.label,
                 sd_api_get_fs_type_text(sd_info.fs_type),
                 sd_info.kb_total,
@@ -94,6 +104,35 @@ void storage_cli_format(Cli* cli, string_t path) {
     }
 };
 
+void storage_cli_list(Cli* cli, string_t path) {
+    StorageApp* api = furi_record_open("storage");
+    File file = storage_file(api);
+
+    if(storage_dir_open(&file, string_get_cstr(path))) {
+        FileInfo fileinfo;
+        char name[MAX_NAME_LENGTH];
+        bool readed = false;
+
+        while(storage_dir_read(&file, &fileinfo, name, MAX_NAME_LENGTH) && strlen(name)) {
+            readed = true;
+            if(fileinfo.flags & FSF_DIRECTORY) {
+                printf("\t[D] %s\r\n", name);
+            } else {
+                printf("\t[F] %s %lub\r\n", name, (uint32_t)(fileinfo.size));
+            }
+        }
+
+        if(!readed) {
+            printf("\tEmpty\r\n");
+        }
+    } else {
+        storage_cli_print_file_error(path, &file);
+    }
+
+    storage_dir_close(&file);
+    furi_record_close("storage");
+}
+
 void storage_cli(Cli* cli, string_t args, void* context) {
     string_t cmd;
     string_t path;
@@ -118,6 +157,11 @@ void storage_cli(Cli* cli, string_t args, void* context) {
 
         if(string_cmp_str(cmd, "format") == 0) {
             storage_cli_format(cli, path);
+            break;
+        }
+
+        if(string_cmp_str(cmd, "list") == 0) {
+            storage_cli_list(cli, path);
             break;
         }
 
