@@ -30,7 +30,7 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         nfc->view_dispatcher, nfc_navigation_event_callback);
-    view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 300);
+    view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 100);
 
     // Open GUI record
     nfc->gui = furi_record_open("gui");
@@ -67,9 +67,6 @@ Nfc* nfc_alloc() {
     view_dispatcher_add_view(
         nfc->view_dispatcher, NfcViewTextBox, text_box_get_view(nfc->text_box));
     string_init(nfc->text_box_store);
-
-    // Run first scene
-    scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
 
     return nfc;
 }
@@ -127,7 +124,7 @@ int32_t nfc_task(void* p) {
     Nfc* nfc = nfc_alloc();
 
     // Check argument and run corresponding scene
-    if(p && nfc_device_load(&nfc->device, p)) {
+    if(p && nfc_device_load(&nfc->dev, p)) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
     } else {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);

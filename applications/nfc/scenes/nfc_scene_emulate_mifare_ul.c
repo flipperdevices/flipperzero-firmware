@@ -26,12 +26,12 @@ const void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
     }
 
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    popup_set_header(popup, "Emulating UID", 56, 31, AlignLeft, AlignTop);
+    popup_set_header(popup, "Emulating Mf Ul", 56, 31, AlignLeft, AlignTop);
     popup_set_text(popup, nfc->text_store, 56, 43, AlignLeft, AlignTop);
 
     // Setup and start worker
 
-    nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev.dev_data, NULL, nfc);
+    nfc_worker_start(nfc->worker, NfcWorkerStateEmulateMifareUl, &nfc->dev.dev_data, NULL, nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 

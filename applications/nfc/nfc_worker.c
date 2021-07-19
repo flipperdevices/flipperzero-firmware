@@ -483,17 +483,40 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
-    // ReturnCode err;
-    // uint8_t tx_buff[255] = {};
-    // uint16_t tx_len = 0;
-    // uint8_t* rx_buff;
-    // uint16_t* rx_len;
-    // NfcDeviceData* data = nfc_worker->dev_data;
+    ReturnCode err;
+    uint8_t tx_buff[255] = {};
+    uint16_t tx_len = 0;
+    uint8_t* rx_buff;
+    uint16_t* rx_len;
+    NfcDeviceData* data = nfc_worker->dev_data;
 
-    // while(nfc_worker->state == NfcWorkerStateEmulateEMV) {
-    //     if(api_hal_nfc_listen(data->nfc_data.uid, data->nfc_data.uid_len, data->nfc_data.atqa, data->nfc_data.sak, 100)) {
-    //     }
-    // }
+    while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
+        if(api_hal_nfc_listen(
+               data->nfc_data.uid,
+               data->nfc_data.uid_len,
+               data->nfc_data.atqa,
+               data->nfc_data.sak,
+               1000)) {
+            FURI_LOG_I(NFC_WORKER_TAG, "Hello my dudes");
+            // Prepare version answer
+            tx_len = sizeof(data->mf_ul_data.version);
+            memcpy(tx_buff, &data->mf_ul_data.version, tx_len);
+            err = api_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+            if(err == ERR_NONE) {
+                FURI_LOG_I(NFC_WORKER_TAG, "Received 1st message:");
+                for(uint16_t i = 0; i < *rx_len; i++) {
+                    printf("%02X ", rx_buff[i]);
+                }
+                printf("\r\n");
+            } else {
+                FURI_LOG_E(NFC_WORKER_TAG, "Error in 1st data exchange: select PPSE");
+                api_hal_nfc_deactivate();
+                continue;
+            }
+        }
+        FURI_LOG_W(NFC_WORKER_TAG, "Hello my dudes");
+        osDelay(10);
+    }
 }
 
 void nfc_worker_field(NfcWorker* nfc_worker) {
