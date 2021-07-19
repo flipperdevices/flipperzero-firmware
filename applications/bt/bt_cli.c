@@ -5,11 +5,11 @@
 void bt_cli_init() {
     Cli* cli = furi_record_open("cli");
 
-    cli_add_command(cli, "bt_info", bt_cli_command_info, NULL);
-    cli_add_command(cli, "bt_tx_carrier", bt_cli_command_carrier_tx, NULL);
-    cli_add_command(cli, "bt_rx_carrier", bt_cli_command_carrier_rx, NULL);
-    cli_add_command(cli, "bt_tx_pt", bt_cli_command_packet_tx, NULL);
-    cli_add_command(cli, "bt_rx_pt", bt_cli_command_packet_rx, NULL);
+    cli_add_command(cli, "bt_info", CliCommandFlagDefault, bt_cli_command_info, NULL);
+    cli_add_command(cli, "bt_tx_carrier", CliCommandFlagDefault, bt_cli_command_carrier_tx, NULL);
+    cli_add_command(cli, "bt_rx_carrier", CliCommandFlagDefault, bt_cli_command_carrier_rx, NULL);
+    cli_add_command(cli, "bt_tx_pt", CliCommandFlagDefault, bt_cli_command_packet_tx, NULL);
+    cli_add_command(cli, "bt_rx_pt", CliCommandFlagDefault, bt_cli_command_packet_rx, NULL);
 
     furi_record_close("cli");
 }
@@ -63,15 +63,15 @@ void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
     }
     printf("Receiving carrier at %hu channel\r\n", channel);
     printf("Press CTRL+C to stop\r\n");
+
     api_hal_bt_start_packet_rx(channel, 1);
 
-    float rssi_raw = 0;
     while(!cli_cmd_interrupt_received(cli)) {
-        osDelay(250);
-        rssi_raw = api_hal_bt_get_rssi();
-        printf("RSSI: %03.1f dB\r", rssi_raw);
+        osDelay(1024 / 4);
+        printf("RSSI: %6.1f dB\r", api_hal_bt_get_rssi());
         fflush(stdout);
     }
+
     api_hal_bt_stop_packet_test();
 }
 

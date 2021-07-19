@@ -118,11 +118,7 @@ uint32_t cc1101_set_frequency(const ApiHalSpiDevice* device, uint32_t value) {
     return (uint32_t)real_frequency;
 }
 
-uint32_t cc1101_get_frequency_step(const ApiHalSpiDevice* device) {
-    return CC1101_QUARTZ / CC1101_FDIV;
-}
-
-uint32_t cc1101_set_frequency_offset(const ApiHalSpiDevice* device, uint32_t value) {
+uint32_t cc1101_set_intermediate_frequency(const ApiHalSpiDevice* device, uint32_t value) {
     uint64_t real_value = value * CC1101_IFDIV / CC1101_QUARTZ;
     assert((real_value & 0xFF) == real_value);
 
@@ -133,10 +129,6 @@ uint32_t cc1101_set_frequency_offset(const ApiHalSpiDevice* device, uint32_t val
     return (uint32_t)real_frequency;
 }
 
-uint32_t cc1101_get_frequency_offset_step(const ApiHalSpiDevice* device) {
-    return CC1101_QUARTZ / CC1101_IFDIV;
-}
-
 void cc1101_set_pa_table(const ApiHalSpiDevice* device, const uint8_t value[8]) {
     uint8_t tx[9] = { CC1101_PATABLE | CC1101_BURST };
     CC1101Status rx[9] = { 0 };
@@ -145,7 +137,7 @@ void cc1101_set_pa_table(const ApiHalSpiDevice* device, const uint8_t value[8]) 
 
     hal_gpio_write(device->chip_select, false);
     while(hal_gpio_read(device->bus->miso));
-    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, 2, CC1101_TIMEOUT);
+    api_hal_spi_bus_trx(device->bus, tx, (uint8_t*)rx, sizeof(rx), CC1101_TIMEOUT);
     hal_gpio_write(device->chip_select, true);
 
     assert((rx[0].CHIP_RDYn|rx[8].CHIP_RDYn) == 0);

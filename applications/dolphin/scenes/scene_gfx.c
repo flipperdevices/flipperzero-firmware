@@ -102,7 +102,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(canvas);
 
     if(state->scene_zoom == SCENE_ZOOM) {
-        state->dolphin_gfx = I_DolphinExcited_64x63;
+        state->dolphin_gfx = &I_DolphinExcited_64x63;
     } else if(state->action != INTERACT) {
         //do not look below this mark
         // ------ (mark)
@@ -111,11 +111,11 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_leftup1_73x61;
-                    state->dolphin_gfx_b = I_black_leftup1_73x61;
+                    state->dolphin_gfx = &I_leftup1_73x61;
+                    state->dolphin_gfx_b = &I_black_leftup1_73x61;
                 } else {
-                    state->dolphin_gfx = I_leftup2_73x61;
-                    state->dolphin_gfx_b = I_black_leftup2_73x61;
+                    state->dolphin_gfx = &I_leftup2_73x61;
+                    state->dolphin_gfx_b = &I_black_leftup2_73x61;
                 }
             }
 
@@ -123,11 +123,11 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_leftdown1_73x61;
-                    state->dolphin_gfx_b = I_black_leftdown1_73x61;
+                    state->dolphin_gfx = &I_leftdown1_73x61;
+                    state->dolphin_gfx_b = &I_black_leftdown1_73x61;
                 } else {
-                    state->dolphin_gfx = I_leftdown2_73x61;
-                    state->dolphin_gfx_b = I_black_leftdown2_73x61;
+                    state->dolphin_gfx = &I_leftdown2_73x61;
+                    state->dolphin_gfx_b = &I_black_leftdown2_73x61;
                 }
             }
 
@@ -135,22 +135,22 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_rightdown1_73x61;
-                    state->dolphin_gfx_b = I_black_rightdown1_73x61;
+                    state->dolphin_gfx = &I_rightdown1_73x61;
+                    state->dolphin_gfx_b = &I_black_rightdown1_73x61;
                 } else {
-                    state->dolphin_gfx = I_rightdown2_73x61;
-                    state->dolphin_gfx_b = I_black_rightdown2_73x61;
+                    state->dolphin_gfx = &I_rightdown2_73x61;
+                    state->dolphin_gfx_b = &I_black_rightdown2_73x61;
                 }
             }
         } else if(state->player_v.x > 0 && state->player_v.y < 0) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_rightup1_73x61;
-                    state->dolphin_gfx_b = I_black_rightup1_73x61;
+                    state->dolphin_gfx = &I_rightup1_73x61;
+                    state->dolphin_gfx_b = &I_black_rightup1_73x61;
                 } else {
-                    state->dolphin_gfx = I_rightup2_73x61;
-                    state->dolphin_gfx_b = I_black_rightup2_73x61;
+                    state->dolphin_gfx = &I_rightup2_73x61;
+                    state->dolphin_gfx_b = &I_black_rightup2_73x61;
                 }
             }
 
@@ -158,23 +158,23 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_up1_73x61;
-                    state->dolphin_gfx_b = I_black_up1_73x61;
+                    state->dolphin_gfx = &I_up1_73x61;
+                    state->dolphin_gfx_b = &I_black_up1_73x61;
 
                 } else {
-                    state->dolphin_gfx = I_up1_73x61;
-                    state->dolphin_gfx_b = I_black_up2_73x61;
+                    state->dolphin_gfx = &I_up1_73x61;
+                    state->dolphin_gfx_b = &I_black_up2_73x61;
                 }
             }
         } else if(state->player_v.y > 0) {
             if(state->transition) {
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_down1_73x61;
-                    state->dolphin_gfx_b = I_black_down1_73x61;
+                    state->dolphin_gfx = &I_down1_73x61;
+                    state->dolphin_gfx_b = &I_black_down1_73x61;
                 } else {
-                    state->dolphin_gfx = I_down1_73x61;
-                    state->dolphin_gfx_b = I_black_down2_73x61;
+                    state->dolphin_gfx = &I_down1_73x61;
+                    state->dolphin_gfx_b = &I_black_down2_73x61;
                 }
             }
         }
@@ -182,24 +182,24 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
         else if(state->player_v.x < 0 || state->player_flipped) {
             if(state->transition) {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_rightleft1_73x61;
-                    state->dolphin_gfx_b = I_black_rightleft1_73x61;
+                    state->dolphin_gfx = &I_rightleft1_73x61;
+                    state->dolphin_gfx_b = &I_black_rightleft1_73x61;
                 } else {
-                    state->dolphin_gfx = I_rightleft2_73x61;
-                    state->dolphin_gfx_b = I_black_rightleft2_73x61;
+                    state->dolphin_gfx = &I_rightleft2_73x61;
+                    state->dolphin_gfx_b = &I_black_rightleft2_73x61;
                 }
 
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_left1_73x61;
-                    state->dolphin_gfx_b = I_black_left1_73x61;
+                    state->dolphin_gfx = &I_left1_73x61;
+                    state->dolphin_gfx_b = &I_black_left1_73x61;
                 } else if(state->player_anim == 1) {
-                    state->dolphin_gfx = I_left2_73x61;
-                    state->dolphin_gfx_b = I_black_left2_73x61;
+                    state->dolphin_gfx = &I_left2_73x61;
+                    state->dolphin_gfx_b = &I_black_left2_73x61;
 
                 } else {
-                    state->dolphin_gfx = I_left3_73x61;
-                    state->dolphin_gfx_b = I_black_left3_73x61;
+                    state->dolphin_gfx = &I_left3_73x61;
+                    state->dolphin_gfx_b = &I_black_left3_73x61;
                 }
             }
         } else if(state->player_v.x > 0) {
@@ -214,24 +214,24 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                 }
 #endif
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_rightleft1_73x61;
-                    state->dolphin_gfx_b = I_black_rightleft1_73x61;
+                    state->dolphin_gfx = &I_rightleft1_73x61;
+                    state->dolphin_gfx_b = &I_black_rightleft1_73x61;
                 } else {
-                    state->dolphin_gfx = I_rightleft2_73x61;
-                    state->dolphin_gfx_b = I_black_rightleft2_73x61;
+                    state->dolphin_gfx = &I_rightleft2_73x61;
+                    state->dolphin_gfx_b = &I_black_rightleft2_73x61;
                 }
 
             } else {
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_right1_73x61;
-                    state->dolphin_gfx_b = I_black_right1_73x61;
+                    state->dolphin_gfx = &I_right1_73x61;
+                    state->dolphin_gfx_b = &I_black_right1_73x61;
                 } else if(state->player_anim == 1) {
-                    state->dolphin_gfx = I_right2_73x61;
-                    state->dolphin_gfx_b = I_black_right2_73x61;
+                    state->dolphin_gfx = &I_right2_73x61;
+                    state->dolphin_gfx_b = &I_black_right2_73x61;
 
                 } else {
-                    state->dolphin_gfx = I_right3_73x61;
-                    state->dolphin_gfx_b = I_black_right3_73x61;
+                    state->dolphin_gfx = &I_right3_73x61;
+                    state->dolphin_gfx_b = &I_black_right3_73x61;
                 }
             }
         }
@@ -251,9 +251,9 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon_name(canvas, state->player.x - 1, state->player.y - 1, state->dolphin_gfx_b);
+    canvas_draw_icon(canvas, state->player.x, state->player.y, state->dolphin_gfx_b);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon_name(canvas, state->player.x, state->player.y, state->dolphin_gfx);
+    canvas_draw_icon(canvas, state->player.x, state->player.y, state->dolphin_gfx);
     canvas_set_bitmap_mode(canvas, false);
 }
 
@@ -278,7 +278,7 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                     if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
 
                     if(l == current_scene[i]->layer) {
-                        canvas_draw_icon_name(
+                        canvas_draw_icon(
                             canvas,
                             item_pos_X * PARALLAX(l),
                             item_pos_Y, // * PARALLAX(l),

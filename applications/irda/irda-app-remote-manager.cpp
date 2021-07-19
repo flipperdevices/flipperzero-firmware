@@ -33,16 +33,15 @@ static std::string
     }
 }
 
-bool IrdaAppRemoteManager::add_button(const char* button_name, const IrdaMessage* message) {
-    remote->buttons.emplace_back(button_name, message);
+bool IrdaAppRemoteManager::add_button(const char* button_name, const IrdaAppSignal& signal) {
+    remote->buttons.emplace_back(button_name, signal);
     return store();
 }
 
 bool IrdaAppRemoteManager::add_remote_with_button(
     const char* button_name,
-    const IrdaMessage* message) {
+    const IrdaAppSignal& signal) {
     furi_check(button_name != nullptr);
-    furi_check(message != nullptr);
 
     std::vector<std::string> remote_list;
     bool result = get_remote_list(remote_list);
@@ -51,11 +50,7 @@ bool IrdaAppRemoteManager::add_remote_with_button(
     auto new_name = find_vacant_name(remote_list, default_remote_name);
 
     remote = std::make_unique<IrdaAppRemote>(new_name);
-    return add_button(button_name, message);
-}
-
-IrdaAppRemote::IrdaAppRemote(const std::string& name)
-    : name(name) {
+    return add_button(button_name, signal);
 }
 
 std::vector<std::string> IrdaAppRemoteManager::get_button_list(void) const {
@@ -70,23 +65,30 @@ std::vector<std::string> IrdaAppRemoteManager::get_button_list(void) const {
     return name_vector;
 }
 
-const IrdaMessage* IrdaAppRemoteManager::get_button_data(size_t index) const {
+const IrdaAppSignal& IrdaAppRemoteManager::get_button_data(size_t index) const {
     furi_check(remote.get() != nullptr);
     auto& buttons = remote->buttons;
     furi_check(index < buttons.size());
 
-    return &buttons.at(index).message;
+    return buttons.at(index).signal;
 }
 
-std::string IrdaAppRemoteManager::make_filename(const std::string& name) const {
-    return std::string("/") + irda_directory + "/" + name + irda_extension;
+std::string IrdaAppRemoteManager::make_full_name(const std::string& remote_name) const {
+    return std::string("/") + irda_directory + "/" + remote_name + irda_extension;
+}
+
+std::string IrdaAppRemoteManager::make_remote_name(const std::string& full_name) const {
+    std::string str(full_name, full_name.find_last_of('/') + 1, full_name.size());
+    str.erase(str.find_last_of('.'));
+
+    return str;
 }
 
 bool IrdaAppRemoteManager::delete_remote() {
     FS_Error fs_res;
     IrdaAppFileParser file_parser;
 
-    fs_res = file_parser.get_fs_api().common.remove(make_filename(remote->name).c_str());
+    fs_res = file_parser.get_fs_api().common.remove(make_full_name(remote->name).c_str());
     if(fs_res != FSE_OK) {
         file_parser.get_sd_api().show_error(
             file_parser.get_sd_api().context, "Error deleting file");
@@ -141,7 +143,7 @@ bool IrdaAppRemoteManager::rename_remote(const char* str) {
     auto new_name = find_vacant_name(remote_list, str);
     IrdaAppFileParser file_parser;
     FS_Error fs_err = file_parser.get_fs_api().common.rename(
-        make_filename(remote->name).c_str(), make_filename(new_name).c_str());
+        make_full_name(remote->name).c_str(), make_full_name(new_name).c_str());
     remote->name = new_name;
     if(fs_err != FSE_OK) {
         file_parser.get_sd_api().show_error(
@@ -166,7 +168,6 @@ size_t IrdaAppRemoteManager::get_number_of_buttons() {
 
 bool IrdaAppRemoteManager::store(void) {
     File file;
-    uint16_t write_count;
     std::string dirname(std::string("/") + irda_directory);
 
     IrdaAppFileParser file_parser;
@@ -178,7 +179,7 @@ bool IrdaAppRemoteManager::store(void) {
     }
 
     bool res = file_parser.get_fs_api().file.open(
-        &file, make_filename(remote->name).c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+        &file, make_full_name(remote->name).c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(!res) {
         file_parser.get_sd_api().show_error(
@@ -186,25 +187,9 @@ bool IrdaAppRemoteManager::store(void) {
         return false;
     }
 
-    char content[128];
-
     for(const auto& button : remote->buttons) {
-        auto protocol = button.message.protocol;
-
-        sniprintf(
-            content,
-            sizeof(content),
-            "%.31s %.31s A:%0*lX C:%0*lX\n",
-            button.name.c_str(),
-            irda_get_protocol_name(protocol),
-            irda_get_protocol_address_length(protocol),
-            button.message.address,
-            irda_get_protocol_command_length(protocol),
-            button.message.command);
-
-        auto content_len = strlen(content);
-        write_count = file_parser.get_fs_api().file.write(&file, content, content_len);
-        if(file.error_id != FSE_OK || write_count != content_len) {
+        bool result = file_parser.store_signal(&file, button.signal, button.name.c_str());
+        if(!result) {
             file_parser.get_sd_api().show_error(
                 file_parser.get_sd_api().context, "Cannot write\nto key file");
             file_parser.get_fs_api().file.close(&file);
@@ -251,25 +236,35 @@ bool IrdaAppRemoteManager::get_remote_list(std::vector<std::string>& remote_name
     return true;
 }
 
-bool IrdaAppRemoteManager::load(const std::string& name) {
+bool IrdaAppRemoteManager::load(const std::string& name_arg, bool fullpath) {
     bool fs_res = false;
     IrdaAppFileParser file_parser;
     File file;
+    std::string full_filename;
+    std::string remote_name;
+
+    if(fullpath) {
+        full_filename = name_arg;
+        remote_name = make_remote_name(name_arg);
+    } else {
+        full_filename = make_full_name(name_arg);
+        remote_name = name_arg;
+    }
 
     fs_res = file_parser.get_fs_api().file.open(
-        &file, make_filename(name).c_str(), FSAM_READ, FSOM_OPEN_EXISTING);
+        &file, full_filename.c_str(), FSAM_READ, FSOM_OPEN_EXISTING);
     if(!fs_res) {
         file_parser.get_sd_api().show_error(
             file_parser.get_sd_api().context, "Error opening file");
         return false;
     }
 
-    remote = std::make_unique<IrdaAppRemote>(name);
+    remote = std::make_unique<IrdaAppRemote>(remote_name);
 
     while(1) {
-        auto message = file_parser.read_message(&file);
-        if(!message) break;
-        remote->buttons.emplace_back(message->name, &message->message);
+        auto file_signal = file_parser.read_signal(&file);
+        if(!file_signal.get()) break;
+        remote->buttons.emplace_back(file_signal->name, file_signal->signal);
     }
     file_parser.get_fs_api().file.close(&file);
 

@@ -66,7 +66,7 @@ typedef struct {
     uint8_t layer;
     uint16_t timeout;
     Vec2 pos;
-    IconName icon;
+    const Icon* icon;
     char action_name[16];
     void (*draw)(Canvas* canvas, void* model);
     void (*callback)(Canvas* canvas, void* model);
@@ -79,10 +79,8 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
-    Vec2 poi;
-
-    IconName dolphin_gfx;
-    IconName dolphin_gfx_b; // temp
+    const Icon* dolphin_gfx;
+    const Icon* dolphin_gfx_b; // temp
 
     bool player_flipped;
     bool transition;
@@ -100,7 +98,8 @@ typedef struct {
     uint8_t previous_dialogue;
 
     uint32_t action_timeout;
-    // uint8_t poi;
+
+    Vec2 poi;
 
     uint8_t action;
     uint8_t next_action;

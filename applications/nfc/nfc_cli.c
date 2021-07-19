@@ -5,8 +5,8 @@
 
 void nfc_cli_init() {
     Cli* cli = furi_record_open("cli");
-    cli_add_command(cli, "nfc_detect", nfc_cli_detect, NULL);
-    cli_add_command(cli, "nfc_emulate", nfc_cli_emulate, NULL);
+    cli_add_command(cli, "nfc_detect", CliCommandFlagDefault, nfc_cli_detect, NULL);
+    cli_add_command(cli, "nfc_emulate", CliCommandFlagDefault, nfc_cli_emulate, NULL);
     furi_record_close("cli");
 }
 
@@ -24,7 +24,7 @@ void nfc_cli_detect(Cli* cli, string_t args, void* context) {
     printf("Detecting nfc...\r\nPress Ctrl+C to abort\r\n");
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
-        cmd_exit |= api_hal_nfc_detect(&dev_list, &dev_cnt, 1000, true);
+        cmd_exit |= api_hal_nfc_detect(&dev_list, &dev_cnt, 200, true);
         if(dev_cnt > 0) {
             printf("Found %d devices\r\n", dev_cnt);
             for(uint8_t i = 0; i < dev_cnt; i++) {
@@ -57,7 +57,7 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
     printf("Press Ctrl+C to abort\r\n");
 
     NfcDeviceData params = {
-        .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1},
+        .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1, 0x34},
         .uid_len = 7,
         .atqa = {0x44, 0x00},
         .sak = 0x00,

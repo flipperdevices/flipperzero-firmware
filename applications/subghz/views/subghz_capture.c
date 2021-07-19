@@ -8,8 +8,10 @@
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
 
-#include <fl_subghz/subghz_worker.h>
-#include <fl_subghz/protocols/subghz_protocol.h>
+#include <lib/subghz/subghz_worker.h>
+#include <lib/subghz/protocols/subghz_protocol.h>
+
+#include <assets_icons.h>
 
 struct SubghzCapture {
     View* view;
@@ -22,6 +24,8 @@ typedef struct {
     uint32_t real_frequency;
     uint32_t counter;
     string_t text;
+    uint16_t scene;
+    SubGhzProtocolCommon parser;
 } SubghzCaptureModel;
 
 static const char subghz_symbols[] = {'-', '\\', '|', '/'};
@@ -41,8 +45,22 @@ void subghz_capture_draw(Canvas* canvas, SubghzCaptureModel* model) {
         subghz_symbols[model->counter % 4]);
     canvas_draw_str(canvas, 0, 8, buffer);
 
-    canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+    switch(model->scene) {
+    case 1:
+        canvas_draw_icon(canvas, 0, 10, &I_RFIDDolphinReceive_97x61);
+        canvas_invert_color(canvas);
+        canvas_draw_box(canvas, 80, 12, 20, 20);
+        canvas_invert_color(canvas);
+        canvas_draw_icon(canvas, 75, 18, &I_sub1_10px);
+        elements_multiline_text_aligned(
+            canvas, 90, 38, AlignCenter, AlignTop, "Detecting\r\nSubGhz");
+        break;
+
+    default:
+        canvas_set_font(canvas, FontSecondary);
+        elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+        break;
+    }
 }
 
 bool subghz_capture_input(InputEvent* event, void* context) {
@@ -87,6 +105,34 @@ void subghz_capture_text_callback(string_t text, void* context) {
         subghz_capture->view, (SubghzCaptureModel * model) {
             model->counter++;
             string_set(model->text, text);
+            model->scene = 0;
+            return true;
+        });
+}
+
+void subghz_capture_protocol_callback(SubGhzProtocolCommon* parser, void* context) {
+    furi_assert(context);
+    SubghzCapture* subghz_capture = context;
+    char buffer[64];
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%s\r\n"
+        "K:%lX%lX\r\n"
+        "SN:%lX\r\n"
+        "BTN:%X",
+        parser->name,
+        (uint32_t)(parser->code_found >> 32),
+        (uint32_t)(parser->code_found & 0x00000000FFFFFFFF),
+        parser->serial,
+        parser->btn);
+
+    with_view_model(
+        subghz_capture->view, (SubghzCaptureModel * model) {
+            model->counter++;
+            model->parser = *parser;
+            string_set(model->text, buffer);
+            model->scene = 0;
             return true;
         });
 }
@@ -97,20 +143,21 @@ void subghz_capture_enter(void* context) {
 
     api_hal_subghz_reset();
     api_hal_subghz_idle();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetMP);
+    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
 
     with_view_model(
         subghz_capture->view, (SubghzCaptureModel * model) {
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
                 api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
+            model->scene = 1;
             return true;
         });
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
-    api_hal_subghz_set_capture_callback(subghz_worker_rx_callback, subghz_capture->worker);
-    api_hal_subghz_enable_capture();
+    api_hal_subghz_set_async_rx_callback(subghz_worker_rx_callback, subghz_capture->worker);
+    api_hal_subghz_start_async_rx();
 
     subghz_worker_start(subghz_capture->worker);
 
@@ -124,8 +171,8 @@ void subghz_capture_exit(void* context) {
 
     subghz_worker_stop(subghz_capture->worker);
 
-    api_hal_subghz_disable_capture();
-    api_hal_subghz_init();
+    api_hal_subghz_stop_async_rx();
+    api_hal_subghz_sleep();
 }
 
 uint32_t subghz_capture_back(void* context) {
@@ -163,7 +210,7 @@ SubghzCapture* subghz_capture_alloc() {
     subghz_protocol_load_keeloq_file(subghz_capture->protocol, "/assets/subghz/keeloq_mfcodes");
     subghz_protocol_load_nice_flor_s_file(
         subghz_capture->protocol, "/assets/subghz/nice_floor_s_rx");
-    subghz_protocol_enable_dump(
+    subghz_protocol_enable_dump_text(
         subghz_capture->protocol, subghz_capture_text_callback, subghz_capture);
 
     return subghz_capture;

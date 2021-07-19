@@ -94,7 +94,6 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
     (void)args;
     printf("Commands we have:");
 
-    furi_check(osMutexAcquire(cli->mutex, osWaitForever) == osOK);
     // Get the middle element
     CliCommandTree_it_t it_mid;
     uint8_t cmd_num = CliCommandTree_size(cli->commands);
@@ -113,7 +112,6 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
         ref = CliCommandTree_ref(it_j);
         printf(string_get_cstr(ref->key_ptr[0]));
     };
-    furi_check(osMutexRelease(cli->mutex) == osOK);
 
     if(string_size(args) > 0) {
         cli_nl();
@@ -359,7 +357,7 @@ void cli_command_ps(Cli* cli, string_t args, void* context) {
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
     printf("%d threads in total:\r\n", thread_num);
-    printf("%-20s %-14s %-14s %s\r\n", "Name", "Stack start", "Stack alloc", "Stack free");
+    printf("%-20s %-14s %-14s %s\r\n", "Name", "Stack start", "Stack alloc", "Stack watermark");
     for(uint8_t i = 0; i < thread_num; i++) {
         TaskControlBlock* tcb = (TaskControlBlock*)threads_id[i];
         printf(
@@ -378,17 +376,18 @@ void cli_command_free(Cli* cli, string_t args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", cli_command_device_info, NULL);
-    cli_add_command(cli, "device_info", cli_command_device_info, NULL);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
+    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
 
-    cli_add_command(cli, "?", cli_command_help, NULL);
-    cli_add_command(cli, "help", cli_command_help, NULL);
+    cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
+    cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
 
-    cli_add_command(cli, "date", cli_command_date, NULL);
-    cli_add_command(cli, "log", cli_command_log, NULL);
-    cli_add_command(cli, "vibro", cli_command_vibro, NULL);
-    cli_add_command(cli, "led", cli_command_led, NULL);
-    cli_add_command(cli, "gpio_set", cli_command_gpio_set, NULL);
-    cli_add_command(cli, "ps", cli_command_ps, NULL);
-    cli_add_command(cli, "free", cli_command_free, NULL);
+    cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
+    cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
+    cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
+    cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
+
+    cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
+    cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
+    cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
 }
