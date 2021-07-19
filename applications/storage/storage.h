@@ -1,6 +1,6 @@
 #pragma once
 #include <furi.h>
-#include "filesystem-api-v2.h"
+#include "filesystem-api-defines.h"
 #include "storage-sd-api.h"
 
 #ifdef __cplusplus

@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include "storage-glue.h"
 #include "storage-sd-api.h"
-#include "filesystem-api-v2.h"
+#include "filesystem-api-internal.h"
 
 #ifdef __cplusplus
 extern "C" {

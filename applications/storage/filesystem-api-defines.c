@@ -1,4 +1,4 @@
-#include "filesystem-api-v2.h"
+#include "filesystem-api-defines.h"
 
 const char* filesystem_api_error_get_desc(FS_Error error_id) {
     const char* result = "unknown error";

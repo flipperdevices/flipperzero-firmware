@@ -1,5 +1,5 @@
 #include "fatfs.h"
-#include "../filesystem-api-v2.h"
+#include "../filesystem-api-internal.h"
 #include "storage-ext.h"
 #include <api-hal.h>
 #include "sd-notify.h"
