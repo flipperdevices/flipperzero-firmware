@@ -1,10 +1,11 @@
 #include "../storage-settings.h"
 
 enum StorageSettingsStartSubmenuIndex {
+    StorageSettingsStartSubmenuIndexInternalInfo,
+    StorageSettingsStartSubmenuIndexSDInfo,
     StorageSettingsStartSubmenuIndexUnmount,
     StorageSettingsStartSubmenuIndexFormat,
-    StorageSettingsStartSubmenuIndexSDInfo,
-    StorageSettingsStartSubmenuIndexInternalInfo,
+    StorageSettingsStartSubmenuIndexBenchy,
 };
 
 static void storage_settings_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -19,6 +20,18 @@ void storage_settings_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "About internal storage",
+        StorageSettingsStartSubmenuIndexInternalInfo,
+        storage_settings_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "About SD Card",
+        StorageSettingsStartSubmenuIndexSDInfo,
+        storage_settings_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
         "Unmount SD Card",
         StorageSettingsStartSubmenuIndexUnmount,
         storage_settings_scene_start_submenu_callback,
@@ -29,18 +42,10 @@ void storage_settings_scene_start_on_enter(void* context) {
         StorageSettingsStartSubmenuIndexFormat,
         storage_settings_scene_start_submenu_callback,
         app);
-
     submenu_add_item(
         submenu,
-        "About SD Card",
-        StorageSettingsStartSubmenuIndexSDInfo,
-        storage_settings_scene_start_submenu_callback,
-        app);
-
-    submenu_add_item(
-        submenu,
-        "About internal flash",
-        StorageSettingsStartSubmenuIndexInternalInfo,
+        "Benchmark SD Card",
+        StorageSettingsStartSubmenuIndexBenchy,
         storage_settings_scene_start_submenu_callback,
         app);
 
@@ -80,6 +85,12 @@ bool storage_settings_scene_start_on_event(void* context, SceneManagerEvent even
             scene_manager_set_scene_state(
                 app->scene_manager, StorageSettingsStart, StorageSettingsStartSubmenuIndexFormat);
             scene_manager_next_scene(app->scene_manager, StorageSettingsFormatConfirm);
+            consumed = true;
+            break;
+        case StorageSettingsStartSubmenuIndexBenchy:
+            scene_manager_set_scene_state(
+                app->scene_manager, StorageSettingsStart, StorageSettingsStartSubmenuIndexBenchy);
+            scene_manager_next_scene(app->scene_manager, StorageSettingsBenchmark);
             consumed = true;
             break;
         }

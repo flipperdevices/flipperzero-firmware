@@ -12,7 +12,6 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
     FS_Error sd_status = storage_sd_info(app->fs_api, &sd_info);
     DialogEx* dialog_ex = app->dialog_ex;
 
-    string_init(app->text_string);
     dialog_ex_set_context(dialog_ex, app);
     dialog_ex_set_result_callback(dialog_ex, storage_settings_scene_sd_info_dialog_callback);
 
@@ -71,5 +70,5 @@ void storage_settings_scene_sd_info_on_exit(void* context) {
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
 
-    string_clear(app->text_string);
+    string_clean(app->text_string);
 }

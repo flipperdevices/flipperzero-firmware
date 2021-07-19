@@ -15,7 +15,6 @@ void storage_settings_scene_internal_info_on_enter(void* context) {
     FS_Error error = storage_common_fs_info(app->fs_api, "/int", &total_space, &free_space);
     DialogEx* dialog_ex = app->dialog_ex;
 
-    string_init(app->text_string);
     dialog_ex_set_context(dialog_ex, app);
     dialog_ex_set_result_callback(dialog_ex, storage_settings_scene_internal_info_dialog_callback);
 
@@ -48,10 +47,6 @@ bool storage_settings_scene_internal_info_on_event(void* context, SceneManagerEv
         case DialogExResultLeft:
             consumed = scene_manager_previous_scene(app->scene_manager);
             break;
-        case DialogExResultRight:
-            scene_manager_next_scene(app->scene_manager, StorageSettingsUnmounted);
-            consumed = true;
-            break;
         }
     }
     return consumed;
@@ -69,5 +64,5 @@ void storage_settings_scene_internal_info_on_exit(void* context) {
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
 
-    string_clear(app->text_string);
+    string_clean(app->text_string);
 }
