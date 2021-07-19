@@ -1,4 +1,4 @@
-#include "nfc_device.h"
+#include "nfc_device_i.h"
 
 #include <file-worker.h>
 #include <path.h>
@@ -7,6 +7,149 @@
 
 static const char* nfc_app_folder = "nfc";
 static const char* nfc_app_extension = ".nfc";
+
+uint16_t nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string) {
+    if(dev->format == NfcDeviceSaveFormatUid) {
+        string_set_str(format_string, "UID\n");
+    } else if(dev->format == NfcDeviceSaveFormatBankCard) {
+        string_set_str(format_string, "Bank card\n");
+    } else if(dev->format == NfcDeviceSaveFormatMifareUl) {
+        string_set_str(format_string, "Mifare Ultralight\n");
+    } else {
+        string_set_str(format_string, "Unknown\n");
+    }
+    return string_size(format_string);
+}
+
+bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_string) {
+    if(string_start_with_str_p(format_string, "UID")) {
+        dev->format = NfcDeviceSaveFormatUid;
+        return true;
+    } else if(string_start_with_str_p(format_string, "Bank card")) {
+        dev->format = NfcDeviceSaveFormatBankCard;
+        return true;
+    } else if(string_start_with_str_p(format_string, "Mifare Ultralight")) {
+        dev->format = NfcDeviceSaveFormatMifareUl;
+        return true;
+    }
+    return false;
+}
+
+uint16_t nfc_device_prepare_uid_string(NfcDevice* dev, string_t uid_string) {
+    NfcDeviceCommomData* uid_data = &dev->dev_data.nfc_data;
+    string_printf(uid_string, "UID len: %02X UID: ", dev->dev_data.nfc_data.uid_len);
+    for(uint8_t i = 0; i < uid_data->uid_len; i++) {
+        string_cat_printf(uid_string, "%02X ", uid_data->uid[i]);
+    }
+    string_cat_printf(
+        uid_string,
+        "ATQA: %02X %02X SAK: %02X\n",
+        uid_data->atqa[0],
+        uid_data->atqa[1],
+        uid_data->sak);
+    return string_size(uid_string);
+}
+
+bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
+    NfcDeviceCommomData* uid_data = &dev->dev_data.nfc_data;
+    int parsed = 0;
+    // Sscanf only works with u16
+    uint16_t data_u16[14] = {};
+
+    parsed = sscanf(string_get_cstr(uid_string), "UID len: %02hhX ", &uid_data->uid_len);
+    if(parsed != 1) {
+        return false;
+    }
+    if(uid_data->uid_len == 4) {
+        parsed = sscanf(
+            string_get_cstr(uid_string),
+            "UID len: %02hX UID: %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
+            &data_u16[0],
+            &data_u16[1],
+            &data_u16[2],
+            &data_u16[3],
+            &data_u16[4],
+            &data_u16[5],
+            &data_u16[6],
+            &data_u16[7]);
+
+        uid_data->uid[0] = (uint8_t)data_u16[1];
+        uid_data->uid[1] = (uint8_t)data_u16[2];
+        uid_data->uid[2] = (uint8_t)data_u16[3];
+        uid_data->uid[3] = (uint8_t)data_u16[4];
+        uid_data->atqa[0] = (uint8_t)data_u16[5];
+        uid_data->atqa[1] = (uint8_t)data_u16[6];
+        uid_data->sak = (uint8_t)data_u16[7];
+        if(parsed == 8) {
+            return true;
+        }
+    } else if(uid_data->uid_len == 7) {
+        parsed = sscanf(
+            string_get_cstr(uid_string),
+            "UID len: %02hX UID: %02hX %02hX %02hX %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
+            &data_u16[0],
+            &data_u16[1],
+            &data_u16[2],
+            &data_u16[3],
+            &data_u16[4],
+            &data_u16[5],
+            &data_u16[6],
+            &data_u16[7],
+            &data_u16[8],
+            &data_u16[9],
+            &data_u16[10]);
+
+        uid_data->uid[0] = (uint8_t)data_u16[1];
+        uid_data->uid[1] = (uint8_t)data_u16[2];
+        uid_data->uid[2] = (uint8_t)data_u16[3];
+        uid_data->uid[3] = (uint8_t)data_u16[4];
+        uid_data->uid[4] = (uint8_t)data_u16[5];
+        uid_data->uid[5] = (uint8_t)data_u16[6];
+        uid_data->uid[6] = (uint8_t)data_u16[7];
+        uid_data->atqa[0] = (uint8_t)data_u16[8];
+        uid_data->atqa[1] = (uint8_t)data_u16[9];
+        uid_data->sak = (uint8_t)data_u16[10];
+        if(parsed == 11) {
+            return true;
+        }
+    } else if(uid_data->uid_len == 10) {
+        parsed = sscanf(
+            string_get_cstr(uid_string),
+            "UID len: %02hX UID: %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
+            &data_u16[0],
+            &data_u16[1],
+            &data_u16[2],
+            &data_u16[3],
+            &data_u16[4],
+            &data_u16[5],
+            &data_u16[6],
+            &data_u16[7],
+            &data_u16[8],
+            &data_u16[9],
+            &data_u16[10],
+            &data_u16[11],
+            &data_u16[12],
+            &data_u16[13]);
+
+        uid_data->uid[0] = (uint8_t)data_u16[1];
+        uid_data->uid[1] = (uint8_t)data_u16[2];
+        uid_data->uid[2] = (uint8_t)data_u16[3];
+        uid_data->uid[3] = (uint8_t)data_u16[4];
+        uid_data->uid[4] = (uint8_t)data_u16[5];
+        uid_data->uid[5] = (uint8_t)data_u16[6];
+        uid_data->uid[6] = (uint8_t)data_u16[7];
+        uid_data->uid[7] = (uint8_t)data_u16[8];
+        uid_data->uid[8] = (uint8_t)data_u16[9];
+        uid_data->uid[9] = (uint8_t)data_u16[10];
+        uid_data->atqa[0] = (uint8_t)data_u16[11];
+        uid_data->atqa[1] = (uint8_t)data_u16[12];
+        uid_data->sak = (uint8_t)data_u16[13];
+        if(parsed == 14) {
+            return true;
+        }
+    }
+    return false;
+}
 
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
     furi_assert(dev);
@@ -19,37 +162,39 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
 
     FileWorker* file_worker = file_worker_alloc(false);
     string_t dev_file_name;
+    string_t temp_str;
+    string_init(temp_str);
+    uint16_t string_len = 0;
 
-    // Create nfc directory if necessary
-    if(!file_worker_mkdir(file_worker, nfc_app_folder)) {
-        return false;
-    };
-
-    // First remove nfc device file if it was saved
-    string_init_printf(dev_file_name, "%s/%s%s", nfc_app_folder, dev_name, nfc_app_extension);
-    if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
-        string_clear(dev_file_name);
-        return false;
-    };
-
-    // Prepare buffer to write
-    uint8_t buff[NFC_DEVICE_MAX_DATA_LEN];
-    buff[0] = dev->dev_data.nfc_data.uid_len;
-    memcpy(&buff[1], dev->dev_data.nfc_data.uid, dev->dev_data.nfc_data.uid_len);
-    memcpy(&buff[dev->dev_data.nfc_data.uid_len + 1], dev->dev_data.nfc_data.atqa, 2);
-    buff[dev->dev_data.nfc_data.uid_len + 3] = dev->dev_data.nfc_data.sak;
-
-    // Save nfc device
-    bool res = file_worker_open(
-        file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS);
-    string_clear(dev_file_name);
-    if(res) {
-        // Write data
-        if(!file_worker_write_hex(file_worker, buff, dev->dev_data.nfc_data.uid_len + 4)) {
-            file_worker_close(file_worker);
-            return false;
+    do {
+        // Create nfc directory if necessary
+        if(!file_worker_mkdir(file_worker, nfc_app_folder)) {
+            break;
+        };
+        // First remove nfc device file if it was saved
+        string_init_printf(dev_file_name, "%s/%s%s", nfc_app_folder, dev_name, nfc_app_extension);
+        if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
+            break;
+        };
+        // Open file
+        if(!file_worker_open(
+               file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            break;
         }
-    }
+        // Prepare and write format name on 1st line
+        string_len = nfc_device_prepare_format_string(dev, temp_str);
+        if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+            break;
+        }
+        // Prepare and write UID data on 2nd line
+        string_len = nfc_device_prepare_uid_string(dev, temp_str);
+        if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+            break;
+        }
+    } while(0);
+
+    string_clear(temp_str);
+    string_clear(dev_file_name);
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 
@@ -57,34 +202,34 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
 }
 
 static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevice* dev) {
-    // Open key file
-    if(!file_worker_open(file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        return false;
-    }
+    string_t temp_string;
+    string_init(temp_string);
+    bool parsed = false;
 
-    uint8_t buff[NFC_DEVICE_MAX_DATA_LEN] = {};
+    do {
+        // Open key file
+        if(!file_worker_open(file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+            break;
+        }
+        // Read and parse format from 1st line
+        if(!file_worker_read_until(file_worker, temp_string, '\n')) {
+            break;
+        }
+        if(!nfc_device_parse_format_string(dev, temp_string)) {
+            break;
+        }
+        // Read and parse UID data from 2nd line
+        if(!file_worker_read_until(file_worker, temp_string, '\n')) {
+            break;
+        }
+        if(!nfc_device_parse_uid_string(dev, temp_string)) {
+            break;
+        }
+        parsed = true;
+    } while(0);
 
-    // Load first byte - UID length
-    if(!file_worker_read_hex(file_worker, buff, 1)) {
-        return false;
-    }
-    // Read space
-    uint8_t space = 0;
-    if(!file_worker_read(file_worker, &space, 1)) {
-        return false;
-    }
-
-    // Load other data
-    if(!file_worker_read_hex(file_worker, &buff[1], buff[0] + 3)) {
-        return false;
-    }
-
-    // Set loaded data
-    dev->dev_data.nfc_data.uid_len = buff[0];
-    memcpy(dev->dev_data.nfc_data.uid, &buff[1], dev->dev_data.nfc_data.uid_len);
-    memcpy(dev->dev_data.nfc_data.atqa, &buff[dev->dev_data.nfc_data.uid_len + 1], 2);
-    dev->dev_data.nfc_data.sak = buff[dev->dev_data.nfc_data.uid_len + 3];
-    return true;
+    string_clear(temp_string);
+    return parsed;
 }
 
 bool nfc_device_load(NfcDevice* dev, const char* file_path) {

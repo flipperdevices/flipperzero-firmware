@@ -18,8 +18,14 @@ typedef enum {
 typedef enum {
     NfcDeviceProtocolUnknown,
     NfcDeviceProtocolEMV,
-    NfcDeviceProtocolMfUltralight,
+    NfcDeviceProtocolMifareUl,
 } NfcProtocol;
+
+typedef enum {
+    NfcDeviceSaveFormatUid,
+    NfcDeviceSaveFormatBankCard,
+    NfcDeviceSaveFormatMifareUl,
+} NfcDeviceSaveFormat;
 
 typedef struct {
     uint8_t uid_len;
@@ -47,6 +53,7 @@ typedef struct {
     NfcDeviceData dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN];
     char file_name[NFC_FILE_NAME_MAX_LEN];
+    NfcDeviceSaveFormat format;
 } NfcDevice;
 
 void nfc_device_set_name(NfcDevice* dev, const char* name);

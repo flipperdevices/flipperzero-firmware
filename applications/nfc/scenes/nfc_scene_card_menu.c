@@ -60,6 +60,7 @@ const bool nfc_scene_card_menu_on_event(void* context, SceneManagerEvent event) 
             return true;
         } else if(event.event == SubmenuIndexSave) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneCardMenu, SubmenuIndexSave);
+            nfc->dev.format = NfcDeviceSaveFormatUid;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;
         }

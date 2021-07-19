@@ -62,7 +62,7 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
         .atqa = {0x44, 0x00},
         .sak = 0x00,
         .device = NfcDeviceNfca,
-        .protocol = NfcDeviceProtocolMfUltralight,
+        .protocol = NfcDeviceProtocolMifareUl,
     };
 
     while(!cli_cmd_interrupt_received(cli)) {

@@ -119,7 +119,7 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                        dev->dev.nfca.sensRes.anticollisionInfo,
                        dev->dev.nfca.sensRes.platformInfo,
                        dev->dev.nfca.selRes.sak)) {
-                    result->protocol = NfcDeviceProtocolMfUltralight;
+                    result->protocol = NfcDeviceProtocolMifareUl;
                 } else {
                     result->protocol = NfcDeviceProtocolUnknown;
                 }
@@ -462,7 +462,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
                 result->nfc_data.atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
                 result->nfc_data.atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
                 result->nfc_data.sak = dev_list[0].dev.nfca.selRes.sak;
-                result->nfc_data.protocol = NfcDeviceProtocolMfUltralight;
+                result->nfc_data.protocol = NfcDeviceProtocolMifareUl;
                 memcpy(
                     result->nfc_data.uid, dev_list[0].dev.nfca.nfcId1, result->nfc_data.uid_len);
                 result->mf_ul_data = mf_ul_read.data;

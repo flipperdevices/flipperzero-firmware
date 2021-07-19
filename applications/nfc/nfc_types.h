@@ -43,7 +43,7 @@ static inline const char* nfc_get_nfca_type(rfalNfcaListenDeviceType type) {
 static inline const char* nfc_get_protocol(NfcProtocol protocol) {
     if(protocol == NfcDeviceProtocolEMV) {
         return "EMV bank card";
-    } else if(protocol == NfcDeviceProtocolMfUltralight) {
+    } else if(protocol == NfcDeviceProtocolMifareUl) {
         return "Mifare Ultralight";
     } else {
         return "Unrecognized";
