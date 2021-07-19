@@ -105,7 +105,6 @@ int main(void)
   MX_RTC_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
-  MX_USART1_UART_Init();
   MX_USB_Device_Init();
   MX_TIM1_Init();
   MX_TIM2_Init();
@@ -117,6 +116,7 @@ int main(void)
   MX_AES1_Init();
   MX_AES2_Init();
   MX_CRC_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

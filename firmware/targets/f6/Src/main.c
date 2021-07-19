@@ -11,7 +11,6 @@
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
-#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 #include "fatfs/fatfs.h"
@@ -36,8 +35,6 @@ int main(void) {
     FURI_LOG_I("HAL", "USB OK");
 
     // Initialise the rest of HAL
-    MX_USART1_UART_Init();
-    FURI_LOG_I("HAL", "USART OK");
     MX_RTC_Init();
     FURI_LOG_I("HAL", "RTC OK");
     MX_GPIO_Init();

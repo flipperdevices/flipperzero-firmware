@@ -3,12 +3,20 @@
 #include <stm32wbxx_ll_rcc.h>
 
 void api_hal_clock_init() {
-    // AHB
+    // AHB1
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMAMUX1);
     LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_DMA1);
-
-    // APB
+    // AHB2
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOD);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOE);
+    LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOH);
+    // APB1
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+    // APB2
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
 }
 
 void api_hal_clock_switch_to_hsi() {
