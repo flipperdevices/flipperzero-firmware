@@ -35,7 +35,7 @@ void storage_data_init(StorageData* storage) {
     furi_check(storage->mutex != NULL);
     storage->data = NULL;
     storage->status = StorageStatusNotReady;
-    StorageFileArray_init(storage->files);
+    StorageFileList_init(storage->files);
 }
 
 bool storage_data_lock(StorageData* storage) {
@@ -101,10 +101,10 @@ static void check_path(const char* path) {
 bool storage_has_file(const File* file, StorageData* storage_data) {
     bool result = false;
 
-    StorageFileArray_it_t it;
-    for(StorageFileArray_it(it, storage_data->files); !StorageFileArray_end_p(it);
-        StorageFileArray_next(it)) {
-        const StorageFile* storage_file = StorageFileArray_cref(it);
+    StorageFileList_it_t it;
+    for(StorageFileList_it(it, storage_data->files); !StorageFileList_end_p(it);
+        StorageFileList_next(it)) {
+        const StorageFile* storage_file = StorageFileList_cref(it);
 
         if(storage_file->file->file_id == file->file_id) {
             result = true;
@@ -137,14 +137,14 @@ StorageType storage_get_type_by_path(const char* path) {
     return type;
 }
 
-bool storage_path_already_open(const char* path, StorageFileArray_t array) {
+bool storage_path_already_open(const char* path, StorageFileList_t array) {
     bool open = false;
     check_path(path);
 
-    StorageFileArray_it_t it;
+    StorageFileList_it_t it;
 
-    for(StorageFileArray_it(it, array); !StorageFileArray_end_p(it); StorageFileArray_next(it)) {
-        const StorageFile* storage_file = StorageFileArray_cref(it);
+    for(StorageFileList_it(it, array); !StorageFileList_end_p(it); StorageFileList_next(it)) {
+        const StorageFile* storage_file = StorageFileList_cref(it);
 
         if(string_cmp(storage_file->path, path) == 0) {
             open = true;
@@ -158,11 +158,11 @@ bool storage_path_already_open(const char* path, StorageFileArray_t array) {
 void storage_set_storage_file_data(const File* file, void* file_data, StorageData* storage) {
     StorageFile* founded_file = NULL;
 
-    StorageFileArray_it_t it;
+    StorageFileList_it_t it;
 
-    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
-        StorageFileArray_next(it)) {
-        StorageFile* storage_file = StorageFileArray_ref(it);
+    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
+        StorageFileList_next(it)) {
+        StorageFile* storage_file = StorageFileList_ref(it);
 
         if(storage_file->file->file_id == file->file_id) {
             founded_file = storage_file;
@@ -178,11 +178,11 @@ void storage_set_storage_file_data(const File* file, void* file_data, StorageDat
 void* storage_get_storage_file_data(const File* file, StorageData* storage) {
     const StorageFile* founded_file = NULL;
 
-    StorageFileArray_it_t it;
+    StorageFileList_it_t it;
 
-    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
-        StorageFileArray_next(it)) {
-        const StorageFile* storage_file = StorageFileArray_cref(it);
+    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
+        StorageFileList_next(it)) {
+        const StorageFile* storage_file = StorageFileList_cref(it);
 
         if(storage_file->file->file_id == file->file_id) {
             founded_file = storage_file;
@@ -200,7 +200,7 @@ void storage_push_storage_file(
     const char* path,
     StorageType type,
     StorageData* storage) {
-    StorageFile* storage_file = StorageFileArray_push_new(storage->files);
+    StorageFile* storage_file = StorageFileList_push_new(storage->files);
     furi_check(storage_file != NULL);
 
     file->file_id = (uint32_t)storage_file;
@@ -210,19 +210,19 @@ void storage_push_storage_file(
 }
 
 bool storage_pop_storage_file(File* file, StorageData* storage) {
-    StorageFileArray_it_t it;
+    StorageFileList_it_t it;
     bool result = false;
 
-    for(StorageFileArray_it(it, storage->files); !StorageFileArray_end_p(it);
-        StorageFileArray_next(it)) {
-        if(StorageFileArray_cref(it)->file->file_id == file->file_id) {
+    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
+        StorageFileList_next(it)) {
+        if(StorageFileList_cref(it)->file->file_id == file->file_id) {
             result = true;
             break;
         }
     }
 
     if(result) {
-        StorageFileArray_remove(storage->files, it);
+        StorageFileList_remove(storage->files, it);
     }
 
     return result;

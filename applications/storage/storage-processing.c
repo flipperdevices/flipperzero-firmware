@@ -472,5 +472,5 @@ void storage_process_message(StorageApp* app, StorageMessage* message) {
         break;
     }
 
-    osThreadFlagsSet(message->thread, STORAGE_THREAD_FLAG_COMPLETE);
+    osSemaphoreRelease(message->semaphore);
 }

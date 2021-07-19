@@ -43,8 +43,8 @@ bool storage_data_unlock(StorageData* storage);
 StorageStatus storage_data_status(StorageData* storage);
 const char* storage_data_status_text(StorageData* storage);
 
-ARRAY_DEF(
-    StorageFileArray,
+LIST_DEF(
+    StorageFileList,
     StorageFile,
     (INIT(API_2(storage_file_init)),
      SET(API_6(storage_file_init_set)),
@@ -57,12 +57,12 @@ struct StorageData {
     void* data;
     osMutexId_t mutex;
     StorageStatus status;
-    StorageFileArray_t files;
+    StorageFileList_t files;
 };
 
 bool storage_has_file(const File* file, StorageData* storage_data);
 StorageType storage_get_type_by_path(const char* path);
-bool storage_path_already_open(const char* path, StorageFileArray_t array);
+bool storage_path_already_open(const char* path, StorageFileList_t files);
 
 void storage_set_storage_file_data(const File* file, void* file_data, StorageData* storage);
 void* storage_get_storage_file_data(const File* file, StorageData* storage);

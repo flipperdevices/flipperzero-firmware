@@ -2,9 +2,9 @@
 #include "storage-i.h"
 #include "storage-message.h"
 
-#define S_API_PROLOGUE                            \
-    osThreadId_t caller_thread = osThreadGetId(); \
-    if(caller_thread == 0) furi_check(0);
+#define S_API_PROLOGUE                                      \
+    osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
+    furi_check(semaphore != NULL);
 
 #define S_FILE_API_PROLOGUE      \
     StorageApp* app = file->api; \
@@ -12,12 +12,13 @@
 
 #define S_API_EPILOGUE                                                                     \
     furi_check(osMessageQueuePut(app->message_queue, &message, 0, osWaitForever) == osOK); \
-    osThreadFlagsWait(STORAGE_THREAD_FLAG_COMPLETE, osFlagsWaitAny, osWaitForever);
+    osSemaphoreAcquire(semaphore, osWaitForever);                                          \
+    osSemaphoreDelete(semaphore);
 
 #define S_API_MESSAGE(_command)      \
     SAReturn return_data;            \
     StorageMessage message = {       \
-        .thread = caller_thread,     \
+        .semaphore = semaphore,      \
         .command = _command,         \
         .data = &data,               \
         .return_data = &return_data, \

@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#define STORAGE_THREAD_FLAG_COMPLETE (1)
-
 typedef struct {
     File* file;
     const char* path;
@@ -132,7 +130,7 @@ typedef enum {
 } StorageCommand;
 
 typedef struct {
-    osThreadId thread;
+    osSemaphoreId_t semaphore;
     StorageCommand command;
     SAData* data;
     SAReturn* return_data;
