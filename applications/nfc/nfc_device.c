@@ -151,6 +151,43 @@ bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
     return false;
 }
 
+uint16_t nfc_device_prepare_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
+    MifareUlData* data = &dev->dev_data.mf_ul_data;
+    string_printf(mifare_ul_string, "Signature:");
+    for(uint8_t i = 0; i < sizeof(data->signature); i++) {
+        string_cat_printf(mifare_ul_string, " %02X", data->signature[i]);
+    }
+    string_cat_printf(mifare_ul_string, "\nVersion:");
+    uint8_t* version = (uint8_t*)&data->version;
+    for(uint8_t i = 0; i < sizeof(data->version); i++) {
+        string_cat_printf(mifare_ul_string, " %02X", version[i]);
+    }
+    for(uint8_t i = 0; i < 3; i++) {
+        string_cat_printf(
+            mifare_ul_string,
+            "\nCNT%d: %lu; Tearing flag %d: %02X",
+            i,
+            data->counter[i],
+            i,
+            data->tearing[i]);
+    }
+    string_cat_printf(mifare_ul_string, "\nData size: %d\n", data->data_size);
+    for(uint16_t i = 0; i < data->data_size; i += 4) {
+        string_cat_printf(
+            mifare_ul_string,
+            "%02X %02X %02X %02X\n",
+            data->data[i],
+            data->data[i + 1],
+            data->data[i + 2],
+            data->data[i + 3]);
+    }
+    return string_size(mifare_ul_string);
+}
+
+bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
+    return true;
+}
+
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
     furi_assert(dev);
 
@@ -162,6 +199,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
 
     FileWorker* file_worker = file_worker_alloc(false);
     string_t dev_file_name;
+    string_init(dev_file_name);
     string_t temp_str;
     string_init(temp_str);
     uint16_t string_len = 0;
@@ -172,7 +210,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             break;
         };
         // First remove nfc device file if it was saved
-        string_init_printf(dev_file_name, "%s/%s%s", nfc_app_folder, dev_name, nfc_app_extension);
+        string_printf(dev_file_name, "%s/%s%s", nfc_app_folder, dev_name, nfc_app_extension);
         if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
             break;
         };
@@ -190,6 +228,13 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         string_len = nfc_device_prepare_uid_string(dev, temp_str);
         if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
             break;
+        }
+        // Save more data if necessary
+        if(dev->format == NfcDeviceSaveFormatMifareUl) {
+            string_len = nfc_device_prepare_mifare_ul_string(dev, temp_str);
+            if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+                break;
+            }
         }
     } while(0);
 

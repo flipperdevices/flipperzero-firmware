@@ -14,6 +14,7 @@ uint16_t mf_ul_prepare_get_version(uint8_t* dest) {
 
 void mf_ul_parse_get_version_response(uint8_t* buff, MifareUlDevice* mf_ul_read) {
     MfUltralightVersion* version = (MfUltralightVersion*) buff;
+    memcpy(&mf_ul_read->data.version, version, sizeof(MfUltralightVersion));
     if(version->storage_size == 0x0B || version->storage_size == 0x00) {
         mf_ul_read->type = MfUltralightTypeUL11;
         mf_ul_read->pages_to_read = 20;
