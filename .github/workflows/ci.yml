@@ -127,7 +127,7 @@ jobs:
     runs-on: [self-hosted]
     steps:
 
-      - name: Download date
+      - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
           name: artifacts
@@ -138,13 +138,11 @@ jobs:
           name: date
 
       - name: Get current date
-        run: 
-            | 
-              DATE=`cat date.txt`
-              echo ${DATE}
+        id: date
+        run: echo "::set-output name=date::$(cat date.txt)"
 
       - name: Debug
-        run: echo ${DATE}
+        run: echo ${{ steps.date.outputs.date }}
 
       - name: Make empty dir
         run: mkdir -p empty
@@ -163,14 +161,14 @@ jobs:
       - name: Generate files list
         run: |
               ls \
-              *-bootloader-dev${DATE}.dfu \
-              *-bootloader-dev${DATE}.bin \
-              *-bootloader-dev${DATE}.elf \
-              *-firmware-dev${DATE}.dfu \
-              *-firmware-dev${DATE}.bin \
-              *-firmware-dev${DATE}.elf \
-              *-full-dev${DATE}.dfu \
-              *-full-dev${DATE}.bin \
+              *-bootloader-dev${{ steps.date.outputs.date }}.dfu \
+              *-bootloader-dev${{ steps.date.outputs.date }}.bin \
+              *-bootloader-dev${{ steps.date.outputs.date }}.elf \
+              *-firmware-dev${{ steps.date.outputs.date }}.dfu \
+              *-firmware-dev${{ steps.date.outputs.date }}.bin \
+              *-firmware-dev${{ steps.date.outputs.date }}.elf \
+              *-full-dev${{ steps.date.outputs.date }}.dfu \
+              *-full-dev${{ steps.date.outputs.date }}.bin \
               full.dfu > uploadlist.txt
 
       - name: Upload artifacts
