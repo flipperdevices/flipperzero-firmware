@@ -17,12 +17,14 @@ const void nfc_scene_card_menu_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item(
-        submenu,
-        "Run compatible app",
-        SubmenuIndexRunApp,
-        nfc_scene_card_menu_submenu_callback,
-        nfc);
+    if(nfc->dev.dev_data.nfc_data.protocol > NfcDeviceProtocolUnknown) {
+        submenu_add_item(
+            submenu,
+            "Run compatible app",
+            SubmenuIndexRunApp,
+            nfc_scene_card_menu_submenu_callback,
+            nfc);
+    }
     submenu_add_item(
         submenu,
         "Additional reading scripts",
@@ -46,12 +48,16 @@ const bool nfc_scene_card_menu_on_event(void* context, SceneManagerEvent event) 
         if(event.event == SubmenuIndexRunApp) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneCardMenu, SubmenuIndexRunApp);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            if(nfc->dev.dev_data.nfc_data.protocol == NfcDeviceProtocolMifareUl) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMifareUl);
+            } else if(nfc->dev.dev_data.nfc_data.protocol == NfcDeviceProtocolEMV) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvApp);
+            }
             return true;
         } else if(event.event == SubmenuIndexChooseScript) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneCardMenu, SubmenuIndexChooseScript);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneScriptsMenu);
             return true;
         } else if(event.event == SubmenuIndexEmulate) {
             scene_manager_set_scene_state(

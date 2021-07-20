@@ -120,10 +120,11 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
                        dev->dev.nfca.sensRes.platformInfo,
                        dev->dev.nfca.selRes.sak)) {
                     result->protocol = NfcDeviceProtocolMifareUl;
+                } else if(dev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
+                    result->protocol = NfcDeviceProtocolEMV;
                 } else {
                     result->protocol = NfcDeviceProtocolUnknown;
                 }
-
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCB) {
                 result->device = NfcDeviceNfcb;
             } else if(dev->type == RFAL_NFC_LISTEN_TYPE_NFCF) {
