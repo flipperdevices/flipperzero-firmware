@@ -4,6 +4,7 @@ on: push
 
 env:
   TARGETS: f6
+  DATE: $(date +'%Y%m%d')
 
 jobs:
   build:
@@ -125,13 +126,13 @@ jobs:
     runs-on: [self-hosted]
     steps:
 
-      - name: Download date
-        uses: actions/download-artifact@v2
-        with:
-          name: date
+      # - name: Download date
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: date
 
-      - name: Get current date
-        run: DATE=`cat date.txt`
+      # - name: Get current date
+      #   run: DATE=`cat date.txt`
 
       - name: Debug
         run: echo ${DATE}
