@@ -388,6 +388,15 @@ bool nfc_file_select(NfcDevice* dev) {
     return res;
 }
 
+
+void nfc_device_clear(NfcDevice* dev) {
+    furi_assert(dev);
+
+    memset(&dev->dev_data, 0, sizeof(dev->dev_data));
+    nfc_device_set_name(dev, "");
+    dev->format = NfcDeviceSaveFormatUid;
+}
+
 bool nfc_device_delete(NfcDevice* dev) {
     furi_assert(dev);
 

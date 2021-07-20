@@ -13,7 +13,10 @@ const void nfc_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = nfc->text_input;
-    nfc_text_store_clear(nfc);
+    if(nfc->dev.dev_name) {
+        nfc_device_delete(&nfc->dev);
+    }
+    nfc_text_store_set(nfc, nfc->dev.dev_name);
     text_input_set_header_text(text_input, "Name the card");
     text_input_set_result_callback(
         text_input,

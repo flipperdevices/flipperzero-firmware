@@ -42,7 +42,7 @@ const bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event)
             return true;
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexEdit);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetUid);
             return true;
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_set_scene_state(
