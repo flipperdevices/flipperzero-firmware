@@ -12,6 +12,7 @@ typedef enum {
     // Main worker states
     NfcWorkerStateDetect,
     NfcWorkerStateEmulate,
+    NfcWorkerStateReadEMVApp,
     NfcWorkerStateReadEMV,
     NfcWorkerStateEmulateEMV,
     NfcWorkerStateField,

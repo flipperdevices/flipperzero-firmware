@@ -1,13 +1,13 @@
 #include "../nfc_i.h"
 
-#define NFC_READ_EMV_APP_CUSTOM_EVENT (0UL)
+#define NFC_READ_EMV_DATA_CUSTOM_EVENT (0UL)
 
-void nfc_read_emv_app_worker_callback(void* context) {
+void nfc_read_emv_data_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_READ_EMV_APP_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_READ_EMV_DATA_CUSTOM_EVENT);
 }
 
-const void nfc_scene_read_emv_app_on_enter(void* context) {
+const void nfc_scene_read_emv_data_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Setup view
@@ -18,19 +18,19 @@ const void nfc_scene_read_emv_app_on_enter(void* context) {
     // Start worker
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateReadEMVApp,
+        NfcWorkerStateReadEMV,
         &nfc->dev.dev_data,
-        nfc_read_emv_app_worker_callback,
+        nfc_read_emv_data_worker_callback,
         nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
-const bool nfc_scene_read_emv_app_on_event(void* context, SceneManagerEvent event) {
+const bool nfc_scene_read_emv_data_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NFC_READ_EMV_APP_CUSTOM_EVENT) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvAppSuccess);
+        if(event.event == NFC_READ_EMV_DATA_CUSTOM_EVENT) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -40,7 +40,7 @@ const bool nfc_scene_read_emv_app_on_event(void* context, SceneManagerEvent even
     return false;
 }
 
-const void nfc_scene_read_emv_app_on_exit(void* context) {
+const void nfc_scene_read_emv_data_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Stop worker
