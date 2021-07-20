@@ -6,9 +6,6 @@
 #include <api-hal.h>
 #include <flipper.h>
 
-void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
-
 int main(void) {
     // Initialize FURI layer
     furi_init();
