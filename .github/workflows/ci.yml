@@ -4,7 +4,6 @@ on: push
 
 env:
   TARGETS: f6
-  DATE: $(date +'%Y%m%d')
 
 jobs:
   build:
@@ -112,8 +111,10 @@ jobs:
           path: |
             *-bootloader-dev${{ steps.date.outputs.date }}.dfu
             *-bootloader-dev${{ steps.date.outputs.date }}.bin
+            *-bootloader-dev${{ steps.date.outputs.date }}.elf
             *-firmware-dev${{ steps.date.outputs.date }}.dfu
             *-firmware-dev${{ steps.date.outputs.date }}.bin
+            *-firmware-dev${{ steps.date.outputs.date }}.elf
             *-full-dev${{ steps.date.outputs.date }}.dfu
             *-full-dev${{ steps.date.outputs.date }}.bin
             full.dfu
@@ -126,13 +127,21 @@ jobs:
     runs-on: [self-hosted]
     steps:
 
-      # - name: Download date
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: date
+      - name: Download date
+        uses: actions/download-artifact@v2
+        with:
+          name: artifacts
 
-      # - name: Get current date
-      #   run: DATE=`cat date.txt`
+      - name: Download date
+        uses: actions/download-artifact@v2
+        with:
+          name: date
+
+      - name: Get current date
+        run: 
+            | 
+              DATE=`cat date.txt`
+              echo ${DATE}
 
       - name: Debug
         run: echo ${DATE}
