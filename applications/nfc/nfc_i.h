@@ -21,6 +21,10 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 
+#include "gui_widget/gui_widget.h"
+#include "gui_widget/gui_element_string.h"
+#include "gui_widget/gui_element_button.h"
+
 #include <nfc/scenes/nfc_scene.h>
 
 #define NFC_TEXT_STORE_SIZE 128
@@ -43,6 +47,7 @@ struct Nfc {
     TextInput* text_input;
     ByteInput* byte_input;
     TextBox* text_box;
+    GuiWidget* widget;
 };
 
 typedef enum {
@@ -52,6 +57,7 @@ typedef enum {
     NfcViewTextInput,
     NfcViewByteInput,
     NfcViewTextBox,
+    NfcViewWidget,
 } NfcView;
 
 Nfc* nfc_alloc();

@@ -68,6 +68,11 @@ Nfc* nfc_alloc() {
         nfc->view_dispatcher, NfcViewTextBox, text_box_get_view(nfc->text_box));
     string_init(nfc->text_box_store);
 
+    // Custom Widget
+    nfc->widget = gui_widget_alloc();
+    view_dispatcher_add_view(
+        nfc->view_dispatcher, NfcViewWidget, gui_widget_get_view(nfc->widget));
+
     return nfc;
 }
 
@@ -98,6 +103,10 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextBox);
     text_box_free(nfc->text_box);
     string_clear(nfc->text_box_store);
+
+    // Custom Widget
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
+    gui_widget_free(nfc->widget);
 
     // Worker
     nfc_worker_stop(nfc->worker);
