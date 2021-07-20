@@ -12,8 +12,8 @@ const void nfc_scene_delete_success_on_enter(void* context) {
 
     // Setup view
     Popup* popup = nfc->popup;
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(popup, "Deleted", 13, 22, AlignLeft, AlignBottom);
+    popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
+    popup_set_header(popup, "Deleted", 83, 19, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_delete_success_popup_callback);
