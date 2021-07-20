@@ -193,7 +193,7 @@ bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
 
     for(uint16_t i = 0; i < len; i++) {
         if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
-        hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
+           hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
             buff[i] = (nibble_high << 4) | nibble_low;
             string_right(str, 3);
         } else {
@@ -206,8 +206,8 @@ bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
 
 bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
     MifareUlData* data = &dev->dev_data.mf_ul_data;
-    uint16_t tearing_tmp = 0;
-    size_t ws = 0;
+    // uint16_t tearing_tmp = 0;
+    // size_t ws = 0;
 
     do {
         string_right(mifare_ul_string, strlen("Signature: "));
@@ -215,24 +215,25 @@ bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string
             break;
         }
         string_right(mifare_ul_string, strlen("\nVersion: "));
-        if(!nfc_device_read_hex(mifare_ul_string, (uint8_t*)&data->version, sizeof(data->version))) {
+        if(!nfc_device_read_hex(
+               mifare_ul_string, (uint8_t*)&data->version, sizeof(data->version))) {
             break;
         }
-    //     string_strim(mifare_ul_string);
-    //     sscanf(string_get_cstr(mifare_ul_string), "Counter 0: %u Tearing flag 0: %02hX", data->counter[0], &tearing_tmp);
-    //     data->tearing[0] = tearing_tmp;
-    //     ws = string_search_char(mifare_ul_string, '\n');
-    //     string_right(mifare_ul_string, ws + 1);
-    //     sscanf(string_get_cstr(mifare_ul_string), "Counter 1: %u Tearing flag 1: %02hX", data->counter[1], &tearing_tmp);
-    //     data->tearing[1] = tearing_tmp;
-    //     ws = string_search_char(mifare_ul_string, '\n');
-    //     string_right(mifare_ul_string, ws + 1);
-    //     sscanf(string_get_cstr(mifare_ul_string), "Counter 2: %u Tearing flag 2: %02hX", data->counter[2], &tearing_tmp);
-    //     data->tearing[2] = tearing_tmp;
-    //     ws = string_search_char(mifare_ul_string, '\n');
-    //     string_right(mifare_ul_string, ws + 1);
+        //     string_strim(mifare_ul_string);
+        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 0: %u Tearing flag 0: %02hX", data->counter[0], &tearing_tmp);
+        //     data->tearing[0] = tearing_tmp;
+        //     ws = string_search_char(mifare_ul_string, '\n');
+        //     string_right(mifare_ul_string, ws + 1);
+        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 1: %u Tearing flag 1: %02hX", data->counter[1], &tearing_tmp);
+        //     data->tearing[1] = tearing_tmp;
+        //     ws = string_search_char(mifare_ul_string, '\n');
+        //     string_right(mifare_ul_string, ws + 1);
+        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 2: %u Tearing flag 2: %02hX", data->counter[2], &tearing_tmp);
+        //     data->tearing[2] = tearing_tmp;
+        //     ws = string_search_char(mifare_ul_string, '\n');
+        //     string_right(mifare_ul_string, ws + 1);
 
-    // } while(0);
+    } while(0);
 
     return true;
 }
@@ -385,4 +386,18 @@ bool nfc_file_select(NfcDevice* dev) {
     file_worker_free(file_worker);
 
     return res;
+}
+
+bool nfc_device_delete(NfcDevice* dev) {
+    furi_assert(dev);
+
+    bool result = false;
+    FileWorker* file_worker = file_worker_alloc(false);
+    string_t file_path;
+    string_init_printf(file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_extension);
+    result = file_worker_remove(file_worker, string_get_cstr(file_path));
+    string_clear(file_path);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return result;
 }

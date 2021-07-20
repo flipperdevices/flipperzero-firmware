@@ -47,7 +47,7 @@ const bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexDelete);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
             return true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexInfo);

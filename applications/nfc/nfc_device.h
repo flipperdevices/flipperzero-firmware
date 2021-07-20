@@ -63,3 +63,5 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name);
 bool nfc_device_load(NfcDevice* dev, const char* file_path);
 
 bool nfc_file_select(NfcDevice* dev);
+
+bool nfc_device_delete(NfcDevice* dev);
