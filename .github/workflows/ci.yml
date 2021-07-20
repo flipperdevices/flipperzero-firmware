@@ -39,6 +39,9 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
 
+      - name: Save current date
+        run: echo ${{ steps.date.outputs.date }} > date.txt
+
       - name: Build bootloader in docker
         uses: ./.github/actions/docker
         with:
@@ -95,6 +98,12 @@ jobs:
       - name: Copy last target to full.dfu
         run: cp flipper-z-${TARGETS##*" "}-full-dev${{ steps.date.outputs.date }}.dfu full.dfu
 
+      - name: Upload date
+        uses: actions/upload-artifact@v2
+        with:
+          name: date
+          path: date.txt
+
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -116,6 +125,14 @@ jobs:
     runs-on: [self-hosted]
     steps:
 
+      - name: Download date
+        uses: actions/download-artifact@v2
+        with:
+          name: date
+
+      - name: Get current date
+        run: DATE=`cat date.txt`
+
       - name: Make empty dir
         run: mkdir -p empty
 
@@ -133,14 +150,14 @@ jobs:
       - name: Generate files list
         run: |
               ls \
-              *-bootloader-dev${{ steps.date.outputs.date }}.dfu \
-              *-bootloader-dev${{ steps.date.outputs.date }}.bin \
-              *-bootloader-dev${{ steps.date.outputs.date }}.elf \
-              *-firmware-dev${{ steps.date.outputs.date }}.dfu \
-              *-firmware-dev${{ steps.date.outputs.date }}.bin \
-              *-firmware-dev${{ steps.date.outputs.date }}.elf \
-              *-full-dev${{ steps.date.outputs.date }}.dfu \
-              *-full-dev${{ steps.date.outputs.date }}.bin \
+              *-bootloader-dev${DATE}.dfu \
+              *-bootloader-dev${DATE}.bin \
+              *-bootloader-dev${DATE}.elf \
+              *-firmware-dev${DATE}.dfu \
+              *-firmware-dev${DATE}.bin \
+              *-firmware-dev${DATE}.elf \
+              *-full-dev${DATE}.dfu \
+              *-full-dev${DATE}.bin \
               full.dfu > uploadlist.txt
 
       - name: Upload artifacts
