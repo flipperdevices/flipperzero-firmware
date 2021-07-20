@@ -4,10 +4,6 @@
 
 #include <m-string.h>
 
-struct GuiString {
-    GuiElement element;
-};
-
 typedef struct {
     uint8_t x;
     uint8_t y;
@@ -34,7 +30,19 @@ static void gui_string_draw(Canvas* canvas, GuiElement* element) {
     }
 }
 
-GuiString* gui_string_alloc(
+static void gui_string_free(GuiElement* gui_string) {
+    furi_assert(gui_string);
+
+    GuiStringModel* model = gui_string->model;
+    if(gui_string->parent != NULL) {
+        // TODO deattach element
+    }
+    string_clear(model->text);
+    free(gui_string->model);
+    free(gui_string);
+}
+
+GuiElement* gui_string_create(
     uint8_t x,
     uint8_t y,
     Align horizontal,
@@ -53,27 +61,12 @@ GuiString* gui_string_alloc(
     string_init_set_str(model->text, text);
 
     // Allocate and init Element
-    GuiString* gui_string = furi_alloc(sizeof(GuiString));
-    gui_string->element.parent = NULL;
-    gui_string->element.input = NULL;
-    gui_string->element.draw = gui_string_draw;
-    gui_string->element.model = model;
+    GuiElement* gui_string = furi_alloc(sizeof(GuiElement));
+    gui_string->parent = NULL;
+    gui_string->input = NULL;
+    gui_string->draw = gui_string_draw;
+    gui_string->free = gui_string_free;
+    gui_string->model = model;
 
     return gui_string;
-}
-
-void gui_string_free(GuiString* gui_string) {
-    furi_assert(gui_string);
-
-    GuiStringModel* model = gui_string->element.model;
-    if(gui_string->element.parent != NULL) {
-        // TODO deattach element
-    }
-    string_clear(model->text);
-    free(gui_string->element.model);
-    free(gui_string);
-}
-
-GuiElement* gui_string_get_element(GuiString* gui_string) {
-    return &gui_string->element;
 }

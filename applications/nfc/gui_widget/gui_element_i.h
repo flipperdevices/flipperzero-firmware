@@ -10,6 +10,9 @@ struct GuiElement {
     void (*draw)(Canvas* canvas, GuiElement* element);
     bool (*input)(InputEvent* event, GuiElement* element);
 
+    // free callback
+    void (*free)(GuiElement* element);
+
     // generic model holder
     void* model;
 

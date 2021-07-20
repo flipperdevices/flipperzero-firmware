@@ -4,10 +4,6 @@
 #include <gui/elements.h>
 #include <m-string.h>
 
-struct GuiButton {
-    GuiElement element;
-};
-
 typedef struct {
     GuiButtonType button_type;
     string_t text;
@@ -35,25 +31,16 @@ static void gui_button_draw(Canvas* canvas, GuiElement* element) {
 static bool gui_button_input(InputEvent* event, GuiElement* element) {
     GuiButtonModel* model = element->model;
     bool consumed = false;
-    ButtonCallback callback;
-    void* context;
-    GuiButtonType button_type;
 
-    view_get_model(gui_widget_get_view(element->parent));
-    callback = model->callback;
-    context = model->context;
-    button_type = model->button_type;
-    view_commit_model(gui_widget_get_view(element->parent), false);
-
-    if((event->type == InputTypeShort) && callback) {
-        if((button_type == GuiButtonTypeLeft) && (event->key == InputKeyLeft)) {
-            callback(context);
+    if((event->type == InputTypeShort) && model->callback) {
+        if((model->button_type == GuiButtonTypeLeft) && (event->key == InputKeyLeft)) {
+            model->callback(model->button_type, model->context);
             consumed = true;
-        } else if((button_type == GuiButtonTypeRight) && (event->key == InputKeyRight)) {
-            callback(context);
+        } else if((model->button_type == GuiButtonTypeRight) && (event->key == InputKeyRight)) {
+            model->callback(model->button_type, model->context);
             consumed = true;
-        } else if((button_type == GuiButtonTypeCenter) && (event->key == InputKeyOk)) {
-            callback(context);
+        } else if((model->button_type == GuiButtonTypeCenter) && (event->key == InputKeyOk)) {
+            model->callback(model->button_type, model->context);
             consumed = true;
         }
     }
@@ -61,7 +48,19 @@ static bool gui_button_input(InputEvent* event, GuiElement* element) {
     return consumed;
 }
 
-GuiButton* gui_button_alloc(
+static void gui_button_free(GuiElement* gui_button) {
+    furi_assert(gui_button);
+
+    GuiButtonModel* model = gui_button->model;
+    if(gui_button->parent != NULL) {
+        // TODO deattach element
+    }
+    string_clear(model->text);
+    free(gui_button->model);
+    free(gui_button);
+}
+
+GuiElement* gui_button_create(
     GuiButtonType button_type,
     const char* text,
     ButtonCallback callback,
@@ -74,27 +73,12 @@ GuiButton* gui_button_alloc(
     string_init_set_str(model->text, text);
 
     // Allocate and init Element
-    GuiButton* gui_button = furi_alloc(sizeof(GuiButton));
-    gui_button->element.parent = NULL;
-    gui_button->element.input = gui_button_input;
-    gui_button->element.draw = gui_button_draw;
-    gui_button->element.model = model;
+    GuiElement* gui_button = furi_alloc(sizeof(GuiElement));
+    gui_button->parent = NULL;
+    gui_button->input = gui_button_input;
+    gui_button->draw = gui_button_draw;
+    gui_button->free = gui_button_free;
+    gui_button->model = model;
 
     return gui_button;
-}
-
-void gui_button_free(GuiButton* gui_button) {
-    furi_assert(gui_button);
-
-    GuiButtonModel* model = gui_button->element.model;
-    if(gui_button->element.parent != NULL) {
-        // TODO deattach element
-    }
-    string_clear(model->text);
-    free(gui_button->element.model);
-    free(gui_button);
-}
-
-GuiElement* gui_button_get_element(GuiButton* gui_button) {
-    return &gui_button->element;
 }
