@@ -9,6 +9,25 @@
 static const char* nfc_app_folder = "nfc";
 static const char* nfc_app_extension = ".nfc";
 
+static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
+    string_strim(str);
+    uint8_t nibble_high = 0;
+    uint8_t nibble_low = 0;
+    bool parsed = true;
+
+    for(uint16_t i = 0; i < len; i++) {
+        if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
+           hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
+            buff[i] = (nibble_high << 4) | nibble_low;
+            string_right(str, 3);
+        } else {
+            parsed = false;
+            break;
+        }
+    }
+    return parsed;
+}
+
 uint16_t nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string) {
     if(dev->format == NfcDeviceSaveFormatUid) {
         string_set_str(format_string, "UID\n");
@@ -53,103 +72,33 @@ uint16_t nfc_device_prepare_uid_string(NfcDevice* dev, string_t uid_string) {
 
 bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
     NfcDeviceCommomData* uid_data = &dev->dev_data.nfc_data;
-    int parsed = 0;
-    // Sscanf only works with u16
-    uint16_t data_u16[14] = {};
+    bool parsed = false;
 
-    parsed = sscanf(string_get_cstr(uid_string), "UID len: %02hhX ", &uid_data->uid_len);
-    if(parsed != 1) {
-        return false;
-    }
-    if(uid_data->uid_len == 4) {
-        parsed = sscanf(
-            string_get_cstr(uid_string),
-            "UID len: %02hX UID: %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
-            &data_u16[0],
-            &data_u16[1],
-            &data_u16[2],
-            &data_u16[3],
-            &data_u16[4],
-            &data_u16[5],
-            &data_u16[6],
-            &data_u16[7]);
-
-        uid_data->uid[0] = (uint8_t)data_u16[1];
-        uid_data->uid[1] = (uint8_t)data_u16[2];
-        uid_data->uid[2] = (uint8_t)data_u16[3];
-        uid_data->uid[3] = (uint8_t)data_u16[4];
-        uid_data->atqa[0] = (uint8_t)data_u16[5];
-        uid_data->atqa[1] = (uint8_t)data_u16[6];
-        uid_data->sak = (uint8_t)data_u16[7];
-        if(parsed == 8) {
-            return true;
+    do {
+        // strlen("UID len: ") = 9
+        string_right(uid_string, 9);
+        if(!nfc_device_read_hex(uid_string, &uid_data->uid_len, 1)) {
+            break;
         }
-    } else if(uid_data->uid_len == 7) {
-        parsed = sscanf(
-            string_get_cstr(uid_string),
-            "UID len: %02hX UID: %02hX %02hX %02hX %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
-            &data_u16[0],
-            &data_u16[1],
-            &data_u16[2],
-            &data_u16[3],
-            &data_u16[4],
-            &data_u16[5],
-            &data_u16[6],
-            &data_u16[7],
-            &data_u16[8],
-            &data_u16[9],
-            &data_u16[10]);
-
-        uid_data->uid[0] = (uint8_t)data_u16[1];
-        uid_data->uid[1] = (uint8_t)data_u16[2];
-        uid_data->uid[2] = (uint8_t)data_u16[3];
-        uid_data->uid[3] = (uint8_t)data_u16[4];
-        uid_data->uid[4] = (uint8_t)data_u16[5];
-        uid_data->uid[5] = (uint8_t)data_u16[6];
-        uid_data->uid[6] = (uint8_t)data_u16[7];
-        uid_data->atqa[0] = (uint8_t)data_u16[8];
-        uid_data->atqa[1] = (uint8_t)data_u16[9];
-        uid_data->sak = (uint8_t)data_u16[10];
-        if(parsed == 11) {
-            return true;
+        // strlen("UID: ") = 5
+        string_right(uid_string, 5);
+        if(!nfc_device_read_hex(uid_string, uid_data->uid, uid_data->uid_len)) {
+            break;
         }
-    } else if(uid_data->uid_len == 10) {
-        parsed = sscanf(
-            string_get_cstr(uid_string),
-            "UID len: %02hX UID: %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX %02hX ATQA: %02hX %02hX SAK: %02hX\n",
-            &data_u16[0],
-            &data_u16[1],
-            &data_u16[2],
-            &data_u16[3],
-            &data_u16[4],
-            &data_u16[5],
-            &data_u16[6],
-            &data_u16[7],
-            &data_u16[8],
-            &data_u16[9],
-            &data_u16[10],
-            &data_u16[11],
-            &data_u16[12],
-            &data_u16[13]);
-
-        uid_data->uid[0] = (uint8_t)data_u16[1];
-        uid_data->uid[1] = (uint8_t)data_u16[2];
-        uid_data->uid[2] = (uint8_t)data_u16[3];
-        uid_data->uid[3] = (uint8_t)data_u16[4];
-        uid_data->uid[4] = (uint8_t)data_u16[5];
-        uid_data->uid[5] = (uint8_t)data_u16[6];
-        uid_data->uid[6] = (uint8_t)data_u16[7];
-        uid_data->uid[7] = (uint8_t)data_u16[8];
-        uid_data->uid[8] = (uint8_t)data_u16[9];
-        uid_data->uid[9] = (uint8_t)data_u16[10];
-        uid_data->atqa[0] = (uint8_t)data_u16[11];
-        uid_data->atqa[1] = (uint8_t)data_u16[12];
-        uid_data->sak = (uint8_t)data_u16[13];
-        if(parsed == 14) {
-            return true;
+        // strlen("ATQA: ") = 6
+        string_right(uid_string, 6);
+        if(!nfc_device_read_hex(uid_string, uid_data->atqa, 2)) {
+            break;
         }
-    }
-    return false;
+        // strlen("SAK: ") = 5
+        string_right(uid_string, 5);
+        if(!nfc_device_read_hex(uid_string, &uid_data->sak, 1)) {
+            break;
+        }
+        parsed = true;
+    } while(0);
+
+    return parsed;
 }
 
 uint16_t nfc_device_prepare_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
@@ -185,57 +134,60 @@ uint16_t nfc_device_prepare_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_
     return string_size(mifare_ul_string);
 }
 
-bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
-    string_strim(str);
-    uint8_t nibble_high = 0;
-    uint8_t nibble_low = 0;
-    bool parsed = true;
-
-    for(uint16_t i = 0; i < len; i++) {
-        if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
-           hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
-            buff[i] = (nibble_high << 4) | nibble_low;
-            string_right(str, 3);
-        } else {
-            parsed = false;
-            break;
-        }
-    }
-    return parsed;
-}
-
 bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
     MifareUlData* data = &dev->dev_data.mf_ul_data;
-    // uint16_t tearing_tmp = 0;
-    // size_t ws = 0;
+    uint16_t tearing_tmp = 0;
+    uint16_t cnt_num = 0;
+    size_t ws = 0;
+    int res = 0;
+    bool parsed = false;
 
     do {
-        string_right(mifare_ul_string, strlen("Signature: "));
+        // strlen("Signature: ") = 11
+        string_right(mifare_ul_string, 11);
         if(!nfc_device_read_hex(mifare_ul_string, data->signature, sizeof(data->signature))) {
             break;
         }
-        string_right(mifare_ul_string, strlen("\nVersion: "));
+        // strlen("Version: ") = 9
+        string_right(mifare_ul_string, 9);
         if(!nfc_device_read_hex(
                mifare_ul_string, (uint8_t*)&data->version, sizeof(data->version))) {
             break;
         }
-        //     string_strim(mifare_ul_string);
-        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 0: %u Tearing flag 0: %02hX", data->counter[0], &tearing_tmp);
-        //     data->tearing[0] = tearing_tmp;
-        //     ws = string_search_char(mifare_ul_string, '\n');
-        //     string_right(mifare_ul_string, ws + 1);
-        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 1: %u Tearing flag 1: %02hX", data->counter[1], &tearing_tmp);
-        //     data->tearing[1] = tearing_tmp;
-        //     ws = string_search_char(mifare_ul_string, '\n');
-        //     string_right(mifare_ul_string, ws + 1);
-        //     sscanf(string_get_cstr(mifare_ul_string), "Counter 2: %u Tearing flag 2: %02hX", data->counter[2], &tearing_tmp);
-        //     data->tearing[2] = tearing_tmp;
-        //     ws = string_search_char(mifare_ul_string, '\n');
-        //     string_right(mifare_ul_string, ws + 1);
-
+        string_strim(mifare_ul_string);
+        // Read counters and tearing flags
+        for(uint8_t i = 0; i < 3; i++) {
+            res = sscanf(
+                string_get_cstr(mifare_ul_string),
+                "Counter %hX: %lu Tearing flag %hX: %02hX",
+                &cnt_num,
+                &data->counter[i],
+                &cnt_num,
+                &tearing_tmp);
+            if(res != 4) {
+                break;
+            }
+            data->tearing[i] = tearing_tmp;
+            ws = string_search_char(mifare_ul_string, '\n');
+            string_right(mifare_ul_string, ws + 1);
+        }
+        // Read data size
+        res = sscanf(string_get_cstr(mifare_ul_string), "Data size: %hu", &data->data_size);
+        if(res != 1) {
+            break;
+        }
+        ws = string_search_char(mifare_ul_string, '\n');
+        string_right(mifare_ul_string, ws + 1);
+        // Read data
+        for(uint16_t i = 0; i < data->data_size; i += 4) {
+            if(!nfc_device_read_hex(mifare_ul_string, &data->data[i], 4)) {
+                break;
+            }
+        }
+        parsed = true;
     } while(0);
 
-    return true;
+    return parsed;
 }
 
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
@@ -387,7 +339,6 @@ bool nfc_file_select(NfcDevice* dev) {
 
     return res;
 }
-
 
 void nfc_device_clear(NfcDevice* dev) {
     furi_assert(dev);
