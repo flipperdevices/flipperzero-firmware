@@ -41,6 +41,13 @@ bool storage_file_open(
 bool storage_file_close(File** file);
 
 /**
+ * Tells if the file is open
+ * @param file pointer to a file object
+ * @return bool true if file is open
+ */
+bool storage_file_is_open(File* file);
+
+/**
  * Reads bytes from a file into a buffer
  * @param file pointer to file object. Pointer must not point to NULL and file must be open.
  * @param buff pointer to a buffer, for reading

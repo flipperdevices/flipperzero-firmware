@@ -90,6 +90,10 @@ bool storage_file_close(File** file) {
     return S_RETURN_BOOL;
 }
 
+bool storage_file_is_open(File* file) {
+    return (file != NULL);
+}
+
 uint16_t storage_file_read(File* file, void* buff, uint16_t bytes_to_read) {
     S_FILE_API_PROLOGUE;
     S_API_PROLOGUE;

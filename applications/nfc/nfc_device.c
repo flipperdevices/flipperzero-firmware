@@ -5,7 +5,7 @@
 
 #define NFC_DEVICE_MAX_DATA_LEN 14
 
-static const char* nfc_app_folder = "nfc";
+static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
 
 void nfc_device_set_name(NfcDevice* dev, const char* name) {

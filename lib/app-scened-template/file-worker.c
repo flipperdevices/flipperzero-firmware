@@ -50,7 +50,9 @@ bool file_worker_open(
 }
 
 bool file_worker_close(FileWorker* file_worker) {
-    storage_file_close(&file_worker->file);
+    if(storage_file_is_open(file_worker->file)) {
+        storage_file_close(&file_worker->file);
+    }
 
     return file_worker_check_common_errors(file_worker);
 }
