@@ -44,12 +44,15 @@ uint16_t nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string
 bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_string) {
     if(string_start_with_str_p(format_string, "UID")) {
         dev->format = NfcDeviceSaveFormatUid;
+        dev->dev_data.nfc_data.protocol = NfcDeviceProtocolUnknown;
         return true;
     } else if(string_start_with_str_p(format_string, "Bank card")) {
         dev->format = NfcDeviceSaveFormatBankCard;
+        dev->dev_data.nfc_data.protocol = NfcDeviceProtocolEMV;
         return true;
     } else if(string_start_with_str_p(format_string, "Mifare Ultralight")) {
         dev->format = NfcDeviceSaveFormatMifareUl;
+        dev->dev_data.nfc_data.protocol = NfcDeviceProtocolMifareUl;
         return true;
     }
     return false;
