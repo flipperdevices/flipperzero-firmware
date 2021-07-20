@@ -34,7 +34,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
-                state->player_flipped = false;
+                state->player_flipped_x = false;
                 state->player_v.x = SPEED_X;
             } else if(input->key == InputKeyLeft) {
                 state->player_v.x = -SPEED_X;
@@ -43,11 +43,11 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
             } else if(input->key == InputKeyDown) {
                 state->player_v.y = SPEED_Y;
             }
-        } else if(input->type == InputTypeRelease) {
+        }
+        if(input->type == InputTypeRelease) {
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
                 state->player_v.x = 0;
-            }
-            if(input->key == InputKeyUp || input->key == InputKeyDown) {
+            } else if(input->key == InputKeyUp || input->key == InputKeyDown) {
                 state->player_v.y = 0;
             }
 
@@ -80,10 +80,10 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
     state->player_anim = (state->player_global.x / 10) % 3;
 
-    if(state->player_v.x < 0 && !state->player_flipped && state->player_anim == 0) {
+    if(state->player_v.x < 0 && !state->player_flipped_x && state->player_anim == 0) {
         state->transition = true;
-        state->player_flipped = true;
-    } else if(state->player_v.x > 0 && state->player_flipped && state->player_anim == 0) {
+        state->player_flipped_x = true;
+    } else if(state->player_v.x > 0 && state->player_flipped_x && state->player_anim == 0) {
         state->transition = true;
     }
 

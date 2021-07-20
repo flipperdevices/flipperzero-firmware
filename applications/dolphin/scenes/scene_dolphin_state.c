@@ -40,10 +40,10 @@ static void scene_dolphin_go_to_poi(SceneState* state) {
     if(!scene_dolphin_on_poi(state)) {
         if(!scene_dolphin_on_x_axis(state)) {
             if(state->player_global.x < state->poi.x) {
-                state->player_flipped = false;
+                state->player_flipped_x = false;
                 state->player_v.x = SPEED_X / 2;
             } else if(state->player_global.x > state->poi.x) {
-                state->player_flipped = true;
+                state->player_flipped_x = true;
                 state->player_v.x = -SPEED_X / 2;
             } else if(state->player_global.x == state->poi.x) {
                 state->player_v.x = 0;
@@ -98,7 +98,7 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
         }
         break;
     case EMOTE:
-        state->player_flipped = false;
+        state->player_flipped_x = false;
         if(state->action_timeout == 0) {
             scene_proceed_action(state);
             state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(emotes_list));

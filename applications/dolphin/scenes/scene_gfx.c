@@ -179,7 +179,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             }
         }
 
-        else if(state->player_v.x < 0 || state->player_flipped) {
+        else if(state->player_v.x < 0 || state->player_flipped_x) {
             if(state->transition) {
                 if(state->player_anim == 0) {
                     state->dolphin_gfx = &I_rightleft1_73x61;
@@ -251,7 +251,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon(canvas, state->player.x, state->player.y, state->dolphin_gfx_b);
+    canvas_draw_icon(canvas, state->player.x - 1, state->player.y - 1, state->dolphin_gfx_b);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, state->player.x, state->player.y, state->dolphin_gfx);
     canvas_set_bitmap_mode(canvas, false);
@@ -274,16 +274,36 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
             for(uint8_t i = 0; i < ITEMS_NUM; i++) {
                 int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
                 int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
+
+                IconAnimation* animation = NULL;
+
                 if(item_screen_bounds(item_pos_X)) {
                     if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
 
                     if(l == current_scene[i]->layer) {
-                        canvas_draw_icon(
-                            canvas,
-                            item_pos_X * PARALLAX(l),
-                            item_pos_Y, // * PARALLAX(l),
-                            current_scene[i]->icon);
-                        canvas_set_bitmap_mode(canvas, false);
+                        if(current_scene[i]->anim == true) {
+                            animation = icon_animation_alloc(current_scene[i]->icon);
+                            icon_animation_start(animation);
+
+                            canvas_draw_icon_animation(
+                                canvas,
+                                item_pos_X * PARALLAX(l),
+                                item_pos_Y, // * PARALLAX(l),
+                                animation);
+
+                        } else {
+                            canvas_draw_icon(
+                                canvas,
+                                item_pos_X * PARALLAX(l),
+                                item_pos_Y, // * PARALLAX(l),
+                                current_scene[i]->icon);
+                            canvas_set_bitmap_mode(canvas, false);
+                        }
+                    }
+
+                } else {
+                    if(animation != NULL) {
+                        icon_animation_free(animation);
                     }
                 }
             }

@@ -125,6 +125,7 @@ extern const Icon I_TV_20x20;
 extern const Icon I_WalkR1_32x32;
 extern const Icon I_WalkRB2_32x32;
 extern const Icon I_TV_20x24;
+extern const Icon A_Console_74x67;
 extern const Icon I_rightdown2_73x61;
 extern const Icon I_black_upright2_73x61;
 extern const Icon I_black_leftup1_73x61;
