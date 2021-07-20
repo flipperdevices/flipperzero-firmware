@@ -145,7 +145,7 @@ void storage_cli(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        if(!args_read_string_and_trim(args, path)) {
+        if(!args_read_probably_quoted_string_and_trim(args, path)) {
             storage_cli_print_usage();
             break;
         }
