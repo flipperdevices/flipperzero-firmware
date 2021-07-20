@@ -133,6 +133,9 @@ jobs:
       - name: Get current date
         run: DATE=`cat date.txt`
 
+      - name: Debug
+        run: echo ${DATE}
+
       - name: Make empty dir
         run: mkdir -p empty
 
