@@ -1,6 +1,6 @@
 #pragma once
 #include <m-string.h>
-#include <filesystem-api.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -150,20 +150,20 @@ void file_worker_show_error(FileWorker* file_worker, const char* error_text);
  * @brief Show system file select widget
  * 
  * @param file_worker FileWorker instance 
- * @param path 
- * @param extension 
- * @param result 
- * @param result_size 
- * @param selected_filename 
- * @return true if file was selected
+ * @param path path to directory
+ * @param extension file extension to be offered for selection
+ * @param selected_filename buffer where the selected filename will be saved
+ * @param selected_filename_size and the size of this buffer
+ * @param preselected_filename filename to be preselected
+ * @return bool whether a file was selected
  */
 bool file_worker_file_select(
     FileWorker* file_worker,
     const char* path,
     const char* extension,
-    char* result,
-    uint8_t result_size,
-    char* selected_filename);
+    char* selected_filename,
+    uint8_t selected_filename_size,
+    char* preselected_filename);
 
 #ifdef __cplusplus
 }
