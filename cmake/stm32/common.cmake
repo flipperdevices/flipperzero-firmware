@@ -7,7 +7,7 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])_?(M[47])?" FAMILY ${FAMILY})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])_?(M0PLUS|M4|M7)?" FAMILY ${FAMILY})
     list(APPEND STM32_SUPPORTED_FAMILIES_SHORT_NAME ${CMAKE_MATCH_1})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
@@ -158,8 +158,7 @@ function(stm32_get_cores CORES)
         # note STM32WB have an M0 core but in current state of the art it runs ST stacks and is not needed/allowed to build for customer
         set(CORE_LIST M4)
     elseif(${ARG_FAMILY} STREQUAL "WL")
-        message(WARNING "common: WL family stm32_get_cores has not been tested")
-        set(CORE_LIST M4 M0)
+        stm32wl_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
     endif()
     set(${CORES} "${CORE_LIST}" PARENT_SCOPE)
 endfunction()
@@ -334,4 +333,4 @@ include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
 include(stm32/wb)
-#include(stm32/wl) #TODO
+include(stm32/wl)

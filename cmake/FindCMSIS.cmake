@@ -47,7 +47,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP)
     
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
     # CMAKE_MATCH_<n> contains n'th subexpression
     # CMAKE_MATCH_0 contains full match
 
