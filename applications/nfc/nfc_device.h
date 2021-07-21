@@ -38,6 +38,8 @@ typedef struct {
 
 typedef struct {
     char name[32];
+    uint8_t aid[16];
+    uint16_t aid_len;
     uint8_t number[8];
 } NfcEmvData;
 

@@ -191,6 +191,8 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker) {
                 if(emv_decode_ppse_response(rx_buff, *rx_len, &emv_app)) {
                     FURI_LOG_I(NFC_WORKER_TAG, "Select PPSE responce parced");
                     // Notify caller and exit
+                    result->emv_data.aid_len = emv_app.aid_len;
+                    memcpy(result->emv_data.aid, emv_app.aid, emv_app.aid_len);
                     if(nfc_worker->callback) {
                         nfc_worker->callback(nfc_worker->context);
                     }

@@ -193,6 +193,53 @@ bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string
     return parsed;
 }
 
+uint16_t nfc_device_prepare_bank_card_string(NfcDevice* dev, string_t bank_card_string) {
+    NfcEmvData* data = &dev->dev_data.emv_data;
+    string_printf(bank_card_string, "AID len: %d, AID:", data->aid_len);
+    for(uint8_t i = 0; i < data->aid_len; i++) {
+        string_cat_printf(bank_card_string, " %02X", data->aid[i]);
+    }
+    string_cat_printf(bank_card_string, "\nName: %s\nNumber:", data->name);
+    for(uint8_t i = 0; i < sizeof(data->number); i++) {
+        string_cat_printf(bank_card_string, " %02X", data->number[i]);
+    }
+    return string_size(bank_card_string);
+}
+
+bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string) {
+    NfcEmvData* data = &dev->dev_data.emv_data;
+    bool parsed = false;
+    int res = 0;
+
+    do {
+        res = sscanf(string_get_cstr(bank_card_string), "AID len: %hu", &data->aid_len);
+        if(res != 1) {
+            break;
+        }
+        // strlen("AID len: ") = 9
+        string_right(bank_card_string, 9);
+        size_t ws = string_search_char(bank_card_string, ':');
+        string_right(bank_card_string, ws + 1);
+        if(!nfc_device_read_hex(bank_card_string, data->aid, data->aid_len)) {
+            break;
+        }
+        res = sscanf(string_get_cstr(bank_card_string), "Name: %s\n", data->name);
+        if(res != 1) {
+            break;
+        }
+        ws = string_search_char(bank_card_string, '\n');
+        string_right(bank_card_string, ws + 1);
+        // strlen("Number: ") = 8
+        string_right(bank_card_string, 8);
+        if(!nfc_device_read_hex(bank_card_string, data->number, sizeof(data->number))) {
+            break;
+        }
+        parsed = true;
+    } while(0);
+
+    return parsed;
+}
+
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
     furi_assert(dev);
 
@@ -240,6 +287,11 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
                 break;
             }
+        } else if(dev->format == NfcDeviceSaveFormatBankCard) {
+            string_len = nfc_device_prepare_bank_card_string(dev, temp_str);
+            if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+                break;
+            }
         }
     } while(0);
 
@@ -282,6 +334,14 @@ static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevi
                 break;
             }
             if(!nfc_device_parse_mifare_ul_string(dev, temp_string)) {
+                break;
+            }
+        } else if(dev->format == NfcDeviceSaveFormatBankCard) {
+            // Read until EOF
+            if(!file_worker_read_until(file_worker, temp_string, 0x05)) {
+                break;
+            }
+            if(!nfc_device_parse_bank_card_string(dev, temp_string)) {
                 break;
             }
         }

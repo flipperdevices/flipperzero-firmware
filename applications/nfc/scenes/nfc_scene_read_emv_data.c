@@ -46,6 +46,9 @@ const void nfc_scene_read_emv_data_on_exit(void* context) {
     // Stop worker
     nfc_worker_stop(nfc->worker);
 
+    // Send notification
+    notification_message(nfc->notifications, &sequence_success);
+
     // Clear view
     Popup* popup = nfc->popup;
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);

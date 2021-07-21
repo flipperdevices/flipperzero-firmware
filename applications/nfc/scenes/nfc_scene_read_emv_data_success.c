@@ -14,9 +14,6 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     // Clear device name
     nfc_device_set_name(&nfc->dev, "");
 
-    // Send notification
-    notification_message(nfc->notifications, &sequence_success);
-
     // Setup Custom Widget view
     gui_widget_add_button_element(
         nfc->widget,
@@ -77,7 +74,8 @@ const bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerE
             return scene_manager_search_previous_scene(
                 nfc->scene_manager, NfcSceneReadEmvAppSuccess);
         } else if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            nfc->dev.format = NfcDeviceSaveFormatBankCard;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;
         }
     }
