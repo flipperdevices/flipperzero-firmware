@@ -2,6 +2,7 @@
 #include <gui/view.h>
 #include "gui_element_string.h"
 #include "gui_element_button.h"
+#include "gui_element_icon.h"
 
 typedef struct GuiWidget GuiWidget;
 typedef struct GuiElement GuiElement;
@@ -65,3 +66,11 @@ void gui_widget_add_button_element(
     const char* text,
     ButtonCallback callback,
     void* context);
+
+/** Add Icon Element
+ * @param gui_widget GuiWidget instance
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon Icon instance
+ */
+void gui_widget_add_icon_element(GuiWidget* gui_widget, uint8_t x, uint8_t y, const Icon* icon);

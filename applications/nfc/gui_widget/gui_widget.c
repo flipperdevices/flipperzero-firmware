@@ -132,3 +132,10 @@ void gui_widget_add_button_element(
     GuiElement* button_element = gui_button_create(button_type, text, callback, context);
     gui_widget_add_element(gui_widget, button_element);
 }
+
+void gui_widget_add_icon_element(GuiWidget* gui_widget, uint8_t x, uint8_t y, const Icon* icon) {
+    furi_assert(gui_widget);
+    furi_assert(icon);
+    GuiElement* icon_element = gui_icon_create(x, y, icon);
+    gui_widget_add_element(gui_widget, icon_element);
+}
