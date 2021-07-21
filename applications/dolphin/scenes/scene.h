@@ -66,6 +66,8 @@ typedef struct {
     uint8_t layer;
     uint16_t timeout;
     Vec2 pos;
+    IconAnimation* icon_animation;
+
     const Icon* icon;
     bool anim;
     char action_name[16];

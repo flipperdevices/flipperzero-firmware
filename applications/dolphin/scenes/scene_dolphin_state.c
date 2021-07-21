@@ -113,6 +113,8 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
             }
         }
         break;
+
+#if 0
     case SLEEP:;
         const Vec2 pos = item_get_pos(state, ItemsSofa);
 
@@ -133,6 +135,8 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
 
             break;
         }
+#endif
+
     default:
         if(state->action_timeout == 0) {
             scene_proceed_action(state);

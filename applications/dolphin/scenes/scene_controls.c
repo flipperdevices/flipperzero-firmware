@@ -34,7 +34,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
-                state->player_flipped_x = false;
+                // state->player_flipped_x = false;
                 state->player_v.x = SPEED_X;
             } else if(input->key == InputKeyLeft) {
                 state->player_v.x = -SPEED_X;
@@ -69,6 +69,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
     state->player_global.y = CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT, 0);
 
+#if 0
     // zoom handlers
     state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);
     state->player.x = CLAMP(state->player.x - (state->zoom_v * (SPEED_X * 2)), DOLPHIN_CENTER, 0);
@@ -77,6 +78,12 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     //center screen
     state->screen.x = CLAMP(state->player_global.x - state->player.x, WORLD_WIDTH, 0);
     state->screen.y = CLAMP(state->player_global.y - state->player.y, WORLD_HEIGHT, 0);
+#endif
+
+    // nudge camera postition
+    if(state->player_global.x > 178) {
+        state->player.x = CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, 0);
+    }
 
     state->player_anim = (state->player_global.x / 10) % 3;
 
@@ -85,6 +92,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
         state->player_flipped_x = true;
     } else if(state->player_v.x > 0 && state->player_flipped_x && state->player_anim == 0) {
         state->transition = true;
+        state->player_flipped_x = false;
     }
 
     if(state->player_anim == 2 && state->transition) {

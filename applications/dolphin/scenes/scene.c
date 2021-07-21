@@ -52,7 +52,7 @@ void scene_alloc() {
 
     // SceneAppGui
     scene_app_gui = furi_alloc(sizeof(SceneAppGui));
-    scene_app_gui->mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+    scene_app_gui->mqueue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
     scene_app_gui->gui = furi_record_open("gui");
     scene_app_gui->view_port = view_port_alloc();
     scene_app_gui->timer =
@@ -78,7 +78,7 @@ void scene_alloc() {
     view_port_draw_callback_set(scene_app_gui->view_port, dolphin_scene_redraw, scene_state_mutex);
     view_port_input_callback_set(
         scene_app_gui->view_port, scene_engine_input_callback, scene_app_gui->mqueue);
-    gui_add_view_port(scene_app_gui->gui, scene_app_gui->view_port, GuiLayerMain);
+    gui_add_view_port(scene_app_gui->gui, scene_app_gui->view_port, GuiLayerFullscreen);
     view_port_enabled_set(scene_app_gui->view_port, true);
     printf("scene_alloc: complete\r\n");
 }

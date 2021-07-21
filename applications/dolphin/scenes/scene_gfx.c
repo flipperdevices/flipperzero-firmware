@@ -104,9 +104,6 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = &I_DolphinExcited_64x63;
     } else if(state->action != INTERACT) {
-        //do not look below this mark
-        // ------ (mark)
-        // (u've been warned)
         if(state->player_v.x < 0 && state->player_v.y < 0) {
             if(state->transition) {
             } else {
@@ -204,21 +201,12 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             }
         } else if(state->player_v.x > 0) {
             if(state->transition) {
-#if 0
                 if(state->player_anim == 0) {
-                    state->dolphin_gfx = I_upright1_33x57;
-                    state->dolphin_gfx_b = I_black_upright1;
-                } else {
-                    state->dolphin_gfx = I_upright2_57x36;
-                    state->dolphin_gfx_b = I_black_upright2;
-                }
-#endif
-                if(state->player_anim == 0) {
-                    state->dolphin_gfx = &I_rightleft1_73x61;
-                    state->dolphin_gfx_b = &I_black_rightleft1_73x61;
-                } else {
                     state->dolphin_gfx = &I_rightleft2_73x61;
                     state->dolphin_gfx_b = &I_black_rightleft2_73x61;
+                } else {
+                    state->dolphin_gfx = &I_rightleft1_73x61;
+                    state->dolphin_gfx_b = &I_black_rightleft1_73x61;
                 }
 
             } else {
@@ -278,26 +266,18 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                 IconAnimation* animation = NULL;
 
                 if(item_screen_bounds(item_pos_X)) {
-                    if(current_scene[i]->draw) current_scene[i]->draw(canvas, state);
-
                     if(l == current_scene[i]->layer) {
-                        if(current_scene[i]->anim == true) {
-                            animation = icon_animation_alloc(current_scene[i]->icon);
-                            icon_animation_start(animation);
-
-                            canvas_draw_icon_animation(
-                                canvas,
-                                item_pos_X * PARALLAX(l),
-                                item_pos_Y, // * PARALLAX(l),
-                                animation);
-
-                        } else {
+                        if(current_scene[i]->icon) {
                             canvas_draw_icon(
                                 canvas,
                                 item_pos_X * PARALLAX(l),
-                                item_pos_Y, // * PARALLAX(l),
+                                item_pos_Y,
                                 current_scene[i]->icon);
                             canvas_set_bitmap_mode(canvas, false);
+                        }
+
+                        if(current_scene[i]->draw) {
+                            current_scene[i]->draw(canvas, state);
                         }
                     }
 
@@ -306,13 +286,6 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
                         icon_animation_free(animation);
                     }
                 }
-            }
-
-            if(l == 0) {
-                canvas_draw_line(
-                    canvas, 0, 30 - state->player_global.y, 128, 30 - state->player_global.y);
-                canvas_draw_line(
-                    canvas, 0, 102 - state->player_global.y, 128, 102 - state->player_global.y);
             }
         }
 
