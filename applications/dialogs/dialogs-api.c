@@ -3,7 +3,7 @@
 
 /****************** File select ******************/
 
-bool dialog_show_file_select(
+bool dialog_file_select_show(
     DialogsApp* context,
     const char* path,
     const char* extension,
@@ -38,16 +38,7 @@ bool dialog_show_file_select(
 
 /****************** Message ******************/
 
-DialogMessage* dialog_allocate_message() {
-    DialogMessage* message = furi_alloc(sizeof(DialogMessage));
-    return message;
-}
-
-void dialog_free_message(DialogMessage* message) {
-    free(message);
-}
-
-DialogMessageButton dialog_show_message(DialogsApp* context, const DialogMessage* dialog_message) {
+DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage* dialog_message) {
     osSemaphoreId_t semaphore = API_LOCK_INIT_LOCKED();
     furi_check(semaphore != NULL);
 

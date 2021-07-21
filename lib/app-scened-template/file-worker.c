@@ -206,21 +206,14 @@ bool file_worker_write_hex(FileWorker* file_worker, const uint8_t* buffer, uint1
 
 void file_worker_show_error(FileWorker* file_worker, const char* error_text) {
     DialogsApp* dialogs = furi_record_open("dialogs");
-    DialogMessage* message = dialog_allocate_message();
 
-    message->dialog_text = error_text;
-    message->dialog_text_x = 88;
-    message->dialog_text_y = 32;
-    message->dialog_text_vertical = AlignCenter;
-    message->dialog_text_horizontal = AlignCenter;
-    message->icon = &I_SDQuestion_35x43;
-    message->icon_x = 5;
-    message->icon_y = 6;
-    message->left_button_text = "Back";
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_text(message, error_text, 88, 32, AlignCenter, AlignCenter);
+    dialog_message_set_icon(message, &I_SDQuestion_35x43, 5, 6);
+    dialog_message_set_buttons(message, "Back", NULL, NULL);
+    dialog_message_show(dialogs, message);
+    dialog_message_free(message);
 
-    dialog_show_message(dialogs, message);
-
-    dialog_free_message(message);
     furi_record_close("dialogs");
 }
 
@@ -233,7 +226,7 @@ bool file_worker_file_select(
     char* selected_filename) {
     DialogsApp* dialogs = furi_record_open("dialogs");
     bool ret =
-        dialog_show_file_select(dialogs, path, extension, result, result_size, selected_filename);
+        dialog_file_select_show(dialogs, path, extension, result, result_size, selected_filename);
     furi_record_close("dialogs");
     return ret;
 }

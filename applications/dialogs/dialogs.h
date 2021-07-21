@@ -6,7 +6,11 @@
 extern "C" {
 #endif
 
+/****************** COMMON ******************/
+
 typedef struct DialogsApp DialogsApp;
+
+/****************** FILE SELECT ******************/
 
 /**
  * Shows and processes the file selection dialog
@@ -18,13 +22,15 @@ typedef struct DialogsApp DialogsApp;
  * @param preselected_filename filename to be preselected
  * @return bool whether a file was selected
  */
-bool dialog_show_file_select(
+bool dialog_file_select_show(
     DialogsApp* context,
     const char* path,
     const char* extension,
     char* result,
     uint8_t result_size,
     const char* preselected_filename);
+
+/****************** MESSAGE ******************/
 
 /**
  * Message result type
@@ -39,36 +45,75 @@ typedef enum {
 /**
  * Message struct
  */
-typedef struct {
-    const char* header_text;
-    uint8_t header_text_x;
-    uint8_t header_text_y;
-    Align header_horizontal;
-    Align header_vertical;
-    const char* dialog_text;
-    uint8_t dialog_text_x;
-    uint8_t dialog_text_y;
-    Align dialog_text_horizontal;
-    Align dialog_text_vertical;
-    const Icon* icon;
-    uint8_t icon_x;
-    uint8_t icon_y;
-    const char* left_button_text;
-    const char* center_button_text;
-    const char* right_button_text;
-} DialogMessage;
+typedef struct DialogMessage DialogMessage;
 
 /**
- * Allocate and fill message struct
+ * Allocate and fill message
  * @return DialogMessage* 
  */
-DialogMessage* dialog_allocate_message();
+DialogMessage* dialog_message_alloc();
 
 /**
  * Free message struct
- * @param message message struct pointer
+ * @param message message pointer
  */
-void dialog_free_message(DialogMessage* message);
+void dialog_message_free(DialogMessage* message);
+
+/**
+ * Set message text
+ * @param message message pointer
+ * @param text text, can be NULL if you don't want to display the text
+ * @param x x position
+ * @param y y position
+ * @param horizontal horizontal alignment
+ * @param vertical vertical alignment
+ */
+void dialog_message_set_text(
+    DialogMessage* message,
+    const char* text,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical);
+
+/**
+ * Set message header
+ * @param message message pointer
+ * @param text text, can be NULL if you don't want to display the header
+ * @param x x position
+ * @param y y position
+ * @param horizontal horizontal alignment
+ * @param vertical vertical alignment
+ */
+void dialog_message_set_header(
+    DialogMessage* message,
+    const char* text,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical);
+
+/**
+ * Set message icon
+ * @param message message pointer
+ * @param icon icon pointer, can be NULL if you don't want to display the icon
+ * @param x x position
+ * @param y y position
+ */
+void dialog_message_set_icon(DialogMessage* message, const Icon* icon, uint8_t x, uint8_t y);
+
+/**
+ * Set message buttons text, button text can be NULL if you don't want to display and process some buttons
+ * @param message message pointer
+ * @param left left button text, can be NULL if you don't want to display the left button
+ * @param center center button text, can be NULL if you don't want to display the center button
+ * @param right right button text, can be NULL if you don't want to display the right button
+ */
+void dialog_message_set_buttons(
+    DialogMessage* message,
+    const char* left,
+    const char* center,
+    const char* right);
 
 /**
  * Show message from filled struct
@@ -76,7 +121,7 @@ void dialog_free_message(DialogMessage* message);
  * @param message message struct pointer to be shown
  * @return DialogMessageButton type
  */
-DialogMessageButton dialog_show_message(DialogsApp* context, const DialogMessage* message);
+DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage* message);
 
 #ifdef __cplusplus
 }

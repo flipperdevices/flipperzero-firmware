@@ -7,6 +7,25 @@ typedef struct {
     DialogMessageButton result;
 } DialogsAppMessageContext;
 
+struct DialogMessage {
+    const char* header_text;
+    uint8_t header_text_x;
+    uint8_t header_text_y;
+    Align header_horizontal;
+    Align header_vertical;
+    const char* dialog_text;
+    uint8_t dialog_text_x;
+    uint8_t dialog_text_y;
+    Align dialog_text_horizontal;
+    Align dialog_text_vertical;
+    const Icon* icon;
+    uint8_t icon_x;
+    uint8_t icon_y;
+    const char* left_button_text;
+    const char* center_button_text;
+    const char* right_button_text;
+};
+
 static void dialogs_app_message_back_callback(void* context) {
     furi_assert(context);
     DialogsAppMessageContext* message_context = context;
@@ -77,4 +96,57 @@ DialogMessageButton dialogs_app_process_module_message(const DialogsAppMessageDa
     furi_record_close("gui");
 
     return ret;
+}
+
+DialogMessage* dialog_message_alloc() {
+    DialogMessage* message = furi_alloc(sizeof(DialogMessage));
+    return message;
+}
+
+void dialog_message_free(DialogMessage* message) {
+    free(message);
+}
+
+void dialog_message_set_text(
+    DialogMessage* message,
+    const char* text,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical) {
+    message->dialog_text = text;
+    message->dialog_text_x = x;
+    message->dialog_text_y = y;
+    message->dialog_text_horizontal = horizontal;
+    message->dialog_text_vertical = vertical;
+}
+
+void dialog_message_set_header(
+    DialogMessage* message,
+    const char* text,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical) {
+    message->header_text = text;
+    message->header_text_x = x;
+    message->header_text_y = y;
+    message->header_horizontal = horizontal;
+    message->header_vertical = vertical;
+}
+
+void dialog_message_set_icon(DialogMessage* message, const Icon* icon, uint8_t x, uint8_t y) {
+    message->icon = icon;
+    message->icon_x = x;
+    message->icon_y = y;
+}
+
+void dialog_message_set_buttons(
+    DialogMessage* message,
+    const char* left,
+    const char* center,
+    const char* right) {
+    message->left_button_text = left;
+    message->center_button_text = center;
+    message->right_button_text = right;
 }
