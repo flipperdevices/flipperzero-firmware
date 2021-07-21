@@ -17,8 +17,8 @@
 #define DOLPHIN_WIDTH 32
 #define DOLPHIN_HEIGHT 32
 #define DOLPHIN_CENTER (SCREEN_WIDTH / 2 - DOLPHIN_WIDTH)
-#define SPEED_X 2
-#define SPEED_Y 2
+#define SPEED_X 4
+#define SPEED_Y 4
 #define ACTIONS_NUM 5
 #define DOLPHIN_DEFAULT_Y 0
 // world

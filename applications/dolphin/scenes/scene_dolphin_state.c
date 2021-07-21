@@ -14,52 +14,9 @@ static uint16_t roll_new(uint16_t prev, uint16_t max) {
 
 static void scene_proceed_action(SceneState* state) {
     furi_assert(state);
-
     state->prev_action = state->action;
-
     state->action = roll_new(state->prev_action, ACTIONS_NUM);
-
     state->action_timeout = default_timeout[state->action];
-}
-
-static bool scene_dolphin_on_x_axis(SceneState* state) {
-    return abs(state->player_global.x - state->poi.x) <= 1;
-}
-
-static bool scene_dolphin_on_y_axis(SceneState* state) {
-    return abs(state->player_global.y - state->poi.y) <= 1;
-}
-
-static bool scene_dolphin_on_poi(SceneState* state) {
-    return (abs(state->player_global.x - state->poi.x) <= 1) &&
-           (abs(state->player_global.y - state->poi.y) <= 1);
-}
-
-static void scene_dolphin_go_to_poi(SceneState* state) {
-    furi_assert(state);
-    if(!scene_dolphin_on_poi(state)) {
-        if(!scene_dolphin_on_x_axis(state)) {
-            if(state->player_global.x < state->poi.x) {
-                state->player_flipped_x = false;
-                state->player_v.x = SPEED_X / 2;
-            } else if(state->player_global.x > state->poi.x) {
-                state->player_flipped_x = true;
-                state->player_v.x = -SPEED_X / 2;
-            } else if(state->player_global.x == state->poi.x) {
-                state->player_v.x = 0;
-            }
-        }
-
-        if(!scene_dolphin_on_y_axis(state)) {
-            if(state->player_global.y < state->poi.y) {
-                state->player_v.y = SPEED_Y / 2;
-            } else if(state->player_global.y > state->poi.y) {
-                state->player_v.y = -SPEED_Y / 2;
-            } else if(state->player_global.y == state->poi.y) {
-                state->player_v.y = 0;
-            }
-        }
-    }
 }
 
 static void scene_action_handler(SceneState* state) {
@@ -87,16 +44,6 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
     UNUSED(dialogues_list);
 
     switch(state->action) {
-    case WALK:
-        if(state->player_global.x == state->poi.x && state->player_global.y == state->poi.y) {
-            state->player_v.x = 0;
-            state->player_v.y = 0;
-        } else if(state->action_timeout == 0) {
-            scene_proceed_action(state);
-        } else {
-            scene_dolphin_go_to_poi(state);
-        }
-        break;
     case EMOTE:
         state->player_flipped_x = false;
         if(state->action_timeout == 0) {
@@ -113,29 +60,6 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
             }
         }
         break;
-
-#if 0
-    case SLEEP:;
-        const Vec2 pos = item_get_pos(state, ItemsSofa);
-
-        if(state->poi.x != pos.x || state->poi.y != pos.y) {
-            state->poi.x = pos.x;
-            state->poi.y = pos.y;
-        } else if(!scene_dolphin_on_poi(state)) {
-            scene_dolphin_go_to_poi(state);
-        } else {
-            state->player_v.x = 0;
-            state->player_v.y = 0;
-
-            if(state->action_timeout == 0) {
-                state->poi.x = roll_new(state->player_global.x, WORLD_WIDTH);
-                state->poi.y = roll_new(state->player_global.y, WORLD_HEIGHT);
-                scene_proceed_action(state);
-            }
-
-            break;
-        }
-#endif
 
     default:
         if(state->action_timeout == 0) {

@@ -34,7 +34,6 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
-                // state->player_flipped_x = false;
                 state->player_v.x = SPEED_X;
             } else if(input->key == InputKeyLeft) {
                 state->player_v.x = -SPEED_X;
@@ -82,10 +81,11 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
     // nudge camera postition
     if(state->player_global.x > 178) {
-        state->player.x = CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, 0);
+        state->player.x =
+            CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
     }
 
-    state->player_anim = (state->player_global.x / 10) % 3;
+    state->player_anim = (state->player_global.x / 20) % 3;
 
     if(state->player_v.x < 0 && !state->player_flipped_x && state->player_anim == 0) {
         state->transition = true;

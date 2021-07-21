@@ -6,6 +6,7 @@
 
 const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "MC"};
 
+#if 0
 static void scene_draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
     furi_assert(state);
     furi_assert(canvas);
@@ -26,12 +27,6 @@ static void scene_draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
 
         canvas_draw_str(canvas, hint_pos_x, hint_pos_y, buf);
     }
-}
-
-static void scene_draw_current_emote(SceneState* state, Canvas* canvas) {
-    furi_assert(state);
-    furi_assert(canvas);
-    elements_multiline_text_framed(canvas, 80, 20, (char*)emotes_list[state->emote_id]);
 }
 
 static void scene_draw_sleep_emote(SceneState* state, Canvas* canvas) {
@@ -56,6 +51,13 @@ static void scene_draw_sleep_emote(SceneState* state, Canvas* canvas) {
     } else {
         state->dialog_progress = 0;
     }
+}
+#endif
+
+static void scene_draw_current_emote(SceneState* state, Canvas* canvas) {
+    furi_assert(state);
+    furi_assert(canvas);
+    elements_multiline_text_framed(canvas, 80, 20, (char*)emotes_list[state->emote_id]);
 }
 
 static void scene_draw_dialog(SceneState* state, Canvas* canvas) {
@@ -259,7 +261,7 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
 
     for(uint8_t l = 0; l < LAYERS; l++) {
         if(state->scene_zoom < SCENE_ZOOM) {
-            for(uint8_t i = 0; i < ITEMS_NUM; i++) {
+            for(uint8_t i = 0; i < ItemsEnumTotal; i++) {
                 int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
                 int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
 
@@ -321,12 +323,14 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
         scene_draw_dialog(state, canvas);
     else if(state->action == EMOTE)
         scene_draw_current_emote(state, canvas);
+
+#if 0
     else if(state->action == MINDCONTROL)
         scene_draw_hint(state, canvas, state->action_timeout > 45);
+#endif
+
     else if(state->action == INTERACT)
         scene_activate_item_callback(state, canvas);
-    else if(state->action == SLEEP)
-        scene_draw_sleep_emote(state, canvas);
     else if(state->action == IDLE)
         draw_idle_emote(state, canvas);
 }

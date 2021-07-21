@@ -1,13 +1,9 @@
 #pragma once
 #include "dolphin/scenes/scene.h"
 
-#define ITEMS_NUM 4
-
 typedef enum {
-    ItemsTV,
-    ItemsSofa,
-    ItemsPainting,
     ItemsPC,
+    ItemsEnumTotal,
 } ItemsEnum;
 
 const Vec2 item_get_pos(SceneState* state, ItemsEnum item);
