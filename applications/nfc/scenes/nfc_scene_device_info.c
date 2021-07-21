@@ -106,6 +106,17 @@ void nfc_scene_device_info_on_enter(void* context) {
                 nfc->text_box_store, "%02X%02X ", mf_ul_data->data[i], mf_ul_data->data[i + 1]);
         }
         text_box_set_text(text_box, string_get_cstr(nfc->text_box_store));
+    } else if(nfc->dev.format == NfcDeviceSaveFormatBankCard) {
+        NfcEmvData* emv_data = &nfc->dev.dev_data.emv_data;
+        BankCard* bank_card = nfc->bank_card;
+        bank_card_set_name(bank_card, emv_data->name);
+        bank_card_set_number(bank_card, emv_data->number);
+        if(!strcmp(emv_data->name, "")) {
+            bank_card_set_cardholder_name(bank_card, emv_data->cardholder);
+        }
+        if(emv_data->exp_mon) {
+            bank_card_set_exp_date(bank_card, emv_data->exp_mon, emv_data->exp_year);
+        }
     }
     scene_manager_set_scene_state(nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoUid);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
@@ -129,6 +140,11 @@ const bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event
                 scene_manager_set_scene_state(
                     nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoData);
                 view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+                consumed = true;
+            } else if(nfc->dev.format == NfcDeviceSaveFormatBankCard) {
+                scene_manager_set_scene_state(
+                    nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoData);
+                view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
                 consumed = true;
             }
         } else if(state == NfcSceneDeviceInfoData) {
@@ -160,8 +176,10 @@ const void nfc_scene_device_info_on_exit(void* context) {
         dialog_ex_set_context(dialog_ex, NULL);
     } else if(nfc->dev.format == NfcDeviceSaveFormatMifareUl) {
         // Clear TextBox
-        TextBox* text_box = nfc->text_box;
-        text_box_clean(text_box);
+        text_box_clean(nfc->text_box);
         string_clean(nfc->text_box_store);
+    } else if(nfc->dev.format == NfcDeviceSaveFormatBankCard) {
+        // Clear Bank Card
+        bank_card_clear(nfc->bank_card);
     }
 }

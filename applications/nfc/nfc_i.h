@@ -21,6 +21,8 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 
+#include "views/bank_card.h"
+
 #include "gui_widget/gui_widget.h"
 #include "gui_widget/gui_element_string.h"
 #include "gui_widget/gui_element_button.h"
@@ -48,6 +50,7 @@ struct Nfc {
     ByteInput* byte_input;
     TextBox* text_box;
     GuiWidget* widget;
+    BankCard* bank_card;
 };
 
 typedef enum {
@@ -58,6 +61,7 @@ typedef enum {
     NfcViewByteInput,
     NfcViewTextBox,
     NfcViewWidget,
+    NfcViewBankCard,
 } NfcView;
 
 Nfc* nfc_alloc();
