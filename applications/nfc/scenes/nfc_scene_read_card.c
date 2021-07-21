@@ -16,9 +16,9 @@ const void nfc_scene_read_card_on_enter(void* context) {
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
     // Start worker
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     nfc_worker_start(
         nfc->worker, NfcWorkerStateDetect, &nfc->dev.dev_data, nfc_read_card_worker_callback, nfc);
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
 const bool nfc_scene_read_card_on_event(void* context, SceneManagerEvent event) {

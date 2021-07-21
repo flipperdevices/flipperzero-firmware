@@ -31,8 +31,8 @@ const void nfc_scene_emulate_uid_on_enter(void* context) {
 
     // Setup and start worker
 
-    nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev.dev_data, NULL, nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
+    nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev.dev_data, NULL, nfc);
 }
 
 const bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {

@@ -31,8 +31,8 @@ const void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
 
     // Setup and start worker
 
-    nfc_worker_start(nfc->worker, NfcWorkerStateEmulateMifareUl, &nfc->dev.dev_data, NULL, nfc);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
+    nfc_worker_start(nfc->worker, NfcWorkerStateEmulateMifareUl, &nfc->dev.dev_data, NULL, nfc);
 }
 
 const bool nfc_scene_emulate_mifare_ul_on_event(void* context, SceneManagerEvent event) {

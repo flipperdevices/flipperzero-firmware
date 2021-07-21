@@ -46,8 +46,10 @@ void nfc_worker_start(
     NfcWorkerCallback callback,
     void* context) {
     furi_assert(nfc_worker);
-    furi_assert(nfc_worker->state == NfcWorkerStateReady);
     furi_assert(dev_data);
+    while(nfc_worker->state != NfcWorkerStateReady) {
+        osDelay(10);
+    }
 
     nfc_worker->callback = callback;
     nfc_worker->context = context;

@@ -15,6 +15,7 @@ const void nfc_scene_read_emv_data_on_enter(void* context) {
     popup_set_header(popup, "Reading\nbank card", 70, 34, AlignLeft, AlignTop);
     popup_set_icon(popup, 0, 3, &I_RFIDDolphinReceive_97x61);
 
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     // Start worker
     nfc_worker_start(
         nfc->worker,
@@ -22,7 +23,6 @@ const void nfc_scene_read_emv_data_on_enter(void* context) {
         &nfc->dev.dev_data,
         nfc_read_emv_data_worker_callback,
         nfc);
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
 const bool nfc_scene_read_emv_data_on_event(void* context, SceneManagerEvent event) {
