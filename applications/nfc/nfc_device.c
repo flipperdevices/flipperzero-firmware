@@ -210,6 +210,7 @@ bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string
     NfcEmvData* data = &dev->dev_data.emv_data;
     bool parsed = false;
     int res = 0;
+    memset(data, 0, sizeof(NfcEmvData));
 
     do {
         res = sscanf(string_get_cstr(bank_card_string), "AID len: %hu", &data->aid_len);

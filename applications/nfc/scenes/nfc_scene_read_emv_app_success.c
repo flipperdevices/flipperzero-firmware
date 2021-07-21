@@ -33,6 +33,7 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
         nfc_data->uid[2],
         nfc_data->uid[3],
         string_get_cstr(aid));
+    string_clear(aid);
     dialog_ex_set_text(dialog_ex, nfc->text_store, 8, 16, AlignLeft, AlignTop);
     dialog_ex_set_context(dialog_ex, nfc);
     dialog_ex_set_result_callback(dialog_ex, nfc_scene_read_emv_app_success_dialog_callback);

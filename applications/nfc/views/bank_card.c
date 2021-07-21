@@ -44,7 +44,8 @@ void bank_card_set_number(BankCard* bank_card, uint8_t* number) {
         string_cat_printf(num_str, "%02X%02X ", number[i], number[i + 1]);
     }
     gui_widget_add_string_element(
-        bank_card->widget, 70, 22, AlignCenter, AlignTop, FontSecondary, string_get_cstr(num_str));
+        bank_card->widget, 25, 22, AlignLeft, AlignTop, FontSecondary, string_get_cstr(num_str));
+    gui_widget_add_icon_element(bank_card->widget, 6, 20, &I_EMV_Chip_14x11);
     string_clear(num_str);
 }
 

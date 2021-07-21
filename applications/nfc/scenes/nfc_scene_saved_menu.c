@@ -17,8 +17,10 @@ const void nfc_scene_saved_menu_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item(
-        submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
+    if(nfc->dev.format != NfcDeviceSaveFormatBankCard) {
+        submenu_add_item(
+            submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
+    }
     submenu_add_item(
         submenu, "Edit UID and name", SubmenuIndexEdit, nfc_scene_saved_menu_submenu_callback, nfc);
     submenu_add_item(
