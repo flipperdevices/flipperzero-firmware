@@ -15,7 +15,7 @@ bool IrdaAppBruteForce::calculate_messages() {
 
     file_parser = std::make_unique<IrdaAppFileParser>();
     fs_res = file_parser->open_irda_file_read(universal_db_filename);
-    if (!fs_res) {
+    if(!fs_res) {
         file_parser.reset(nullptr);
         return false;
     }
@@ -71,7 +71,7 @@ bool IrdaAppBruteForce::start_bruteforce(int index, int& record_amount) {
     for(const auto& it : records) {
         if(it.second.index == index) {
             record_amount = it.second.amount;
-            if (record_amount) {
+            if(record_amount) {
                 current_record = it.first;
             }
             break;
@@ -81,8 +81,9 @@ bool IrdaAppBruteForce::start_bruteforce(int index, int& record_amount) {
     if(record_amount) {
         file_parser = std::make_unique<IrdaAppFileParser>();
         result = file_parser->open_irda_file_read(universal_db_filename);
-        if (!result)
-            (void) file_parser.reset(nullptr);
+        if(!result) {
+            (void)file_parser.reset(nullptr);
+        }
     }
 
     return result;

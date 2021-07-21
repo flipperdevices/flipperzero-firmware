@@ -16,15 +16,16 @@ std::string IrdaAppRemoteManager::find_vacant_remote_name(const std::string& nam
     IrdaAppFileParser file_parser;
     bool exist = true;
 
-    if (!file_parser.is_irda_file_exist(name.c_str(), &exist)) {
+    if(!file_parser.is_irda_file_exist(name.c_str(), &exist)) {
         return std::string();
-    } else if (!exist) {
+    } else if(!exist) {
         return name;
     }
 
     uint32_t i = 1;
     /* if suggested name is occupied, try another one (name2, name3, etc) */
-    while(file_parser.is_irda_file_exist((name + std::to_string(++i)).c_str(), &exist) && exist);
+    while(file_parser.is_irda_file_exist((name + std::to_string(++i)).c_str(), &exist) && exist)
+        ;
 
     return !exist ? name + std::to_string(i) : std::string();
 }
@@ -40,7 +41,9 @@ bool IrdaAppRemoteManager::add_remote_with_button(
     furi_check(button_name != nullptr);
 
     auto new_name = find_vacant_remote_name(default_remote_name);
-    if (new_name.empty()) return false;
+    if(new_name.empty()) {
+        return false;
+    }
 
     remote = std::make_unique<IrdaAppRemote>(new_name);
     return add_button(button_name, signal);
@@ -114,10 +117,14 @@ bool IrdaAppRemoteManager::rename_remote(const char* str) {
     furi_check(str != nullptr);
     furi_check(remote.get() != nullptr);
 
-    if(!remote->name.compare(str)) return true;
+    if(!remote->name.compare(str)) {
+        return true;
+    }
 
     auto new_name = find_vacant_remote_name(str);
-    if (new_name.empty()) return false;
+    if(new_name.empty()) {
+        return false;
+    }
 
     IrdaAppFileParser file_parser;
     bool result = file_parser.rename_irda_file(remote->name.c_str(), new_name.c_str());
@@ -145,8 +152,9 @@ bool IrdaAppRemoteManager::store(void) {
     IrdaAppFileParser file_parser;
     bool result = true;
 
-    if (!file_parser.open_irda_file_write(remote->name.c_str()))
+    if(!file_parser.open_irda_file_write(remote->name.c_str())) {
         return false;
+    }
 
     for(const auto& button : remote->buttons) {
         bool result = file_parser.save_signal(button.signal, button.name.c_str());
@@ -166,18 +174,20 @@ bool IrdaAppRemoteManager::load(const std::string& name) {
     IrdaAppFileParser file_parser;
 
     fs_res = file_parser.open_irda_file_read(name.c_str());
-    if(!fs_res)
+    if(!fs_res) {
         return false;
+    }
 
     remote = std::make_unique<IrdaAppRemote>(name);
 
     while(1) {
         auto file_signal = file_parser.read_signal();
-        if(!file_signal) break;
+        if(!file_signal) {
+            break;
+        }
         remote->buttons.emplace_back(file_signal->name, file_signal->signal);
     }
     file_parser.close();
 
     return true;
 }
-

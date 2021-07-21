@@ -19,7 +19,7 @@ uint32_t const IrdaAppFileParser::max_raw_timings_in_signal = 512;
 
 bool IrdaAppFileParser::open_irda_file_read(const char* name) {
     std::string full_filename;
-    if (name[0] != '/')
+    if(name[0] != '/')
         full_filename = make_full_name(name);
     else
         full_filename = name;
@@ -31,13 +31,16 @@ bool IrdaAppFileParser::open_irda_file_write(const char* name) {
     std::string dirname(irda_directory);
     auto full_filename = make_full_name(name);
 
-    if (!file_worker.mkdir(dirname.c_str()))
-        return false;
+    if(!file_worker.mkdir(dirname.c_str())) return false;
 
     return file_worker.open(full_filename.c_str(), FSAM_WRITE, FSOM_CREATE_ALWAYS);
 }
 
-size_t IrdaAppFileParser::stringify_message(const IrdaAppSignal& signal, const char* name, char* buf, size_t buf_size) {
+size_t IrdaAppFileParser::stringify_message(
+    const IrdaAppSignal& signal,
+    const char* name,
+    char* buf,
+    size_t buf_size) {
     auto message = signal.get_message();
     auto protocol = message.protocol;
     size_t written = 0;
@@ -54,13 +57,18 @@ size_t IrdaAppFileParser::stringify_message(const IrdaAppSignal& signal, const c
         message.command);
 
     furi_assert(written < buf_size);
-    if (written >= buf_size)
+    if(written >= buf_size) {
         written = 0;
+    }
 
     return written;
 }
 
-size_t IrdaAppFileParser::stringify_raw_signal(const IrdaAppSignal& signal, const char* name, char* buf, size_t buf_size) {
+size_t IrdaAppFileParser::stringify_raw_signal(
+    const IrdaAppSignal& signal,
+    const char* name,
+    char* buf,
+    size_t buf_size) {
     size_t written = 0;
     int duty_cycle = 100 * IRDA_COMMON_DUTY_CYCLE;
     written += sniprintf(
@@ -73,17 +81,17 @@ size_t IrdaAppFileParser::stringify_raw_signal(const IrdaAppSignal& signal, cons
 
     auto& raw_signal = signal.get_raw_signal();
     for(size_t i = 0; i < raw_signal.timings_cnt; ++i) {
-        written += sniprintf(
-            &buf[written], buf_size - written, " %ld", raw_signal.timings[i]);
-        if (written > buf_size) {
+        written += sniprintf(&buf[written], buf_size - written, " %ld", raw_signal.timings[i]);
+        if(written > buf_size) {
             return false;
         }
     }
     written += snprintf(&buf[written], buf_size - written, "\n");
 
     furi_assert(written < buf_size);
-    if (written >= buf_size)
+    if(written >= buf_size) {
         written = 0;
+    }
 
     return written;
 }
@@ -99,7 +107,7 @@ bool IrdaAppFileParser::save_signal(const IrdaAppSignal& signal, const char* nam
         buf_cnt = stringify_message(signal, name, buf, max_line_length);
     }
 
-    if (buf_cnt) {
+    if(buf_cnt) {
         write_result = file_worker.write(buf, buf_cnt);
     }
     delete[] buf;
@@ -112,13 +120,16 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal> IrdaAppFileParser::read_signa
     string_reserve(line, max_line_length);
     std::unique_ptr<IrdaAppFileParser::IrdaFileSignal> file_signal;
 
-    while(!file_signal && file_worker.read_until_buffered(line, file_buf, &file_buf_cnt, sizeof(file_buf))) {
-        if (string_empty_p(line))
+    while(!file_signal &&
+          file_worker.read_until_buffered(line, file_buf, &file_buf_cnt, sizeof(file_buf))) {
+        if(string_empty_p(line)) {
             continue;
+        }
         auto c_str = string_get_cstr(line);
         file_signal = parse_signal(c_str);
-        if(!file_signal)
+        if(!file_signal) {
             file_signal = parse_signal_raw(c_str);
+        }
     }
     string_clear(line);
 
@@ -193,17 +204,10 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     auto irda_file_signal = std::make_unique<IrdaFileSignal>();
 
     int parsed = std::sscanf(
-        str.data(),
-        "%31s RAW F:%ld DC:%ld",
-        irda_file_signal->name,
-        &frequency,
-        &duty_cycle);
+        str.data(), "%31s RAW F:%ld DC:%ld", irda_file_signal->name, &frequency, &duty_cycle);
 
-    if((parsed != 3)
-        || (frequency > 42000)
-        || (frequency < 32000)
-        || (duty_cycle == 0)
-        || (duty_cycle >= 100)) {
+    if((parsed != 3) || (frequency > 42000) || (frequency < 32000) || (duty_cycle == 0) ||
+       (duty_cycle >= 100)) {
         return nullptr;
     }
 
@@ -221,7 +225,8 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     str.remove_prefix(header_len);
 
     /* move allocated timings into raw signal object */
-    IrdaAppSignal::RawSignal raw_signal = {.timings_cnt = 0, .timings = new uint32_t[max_raw_timings_in_signal]};
+    IrdaAppSignal::RawSignal raw_signal = {
+        .timings_cnt = 0, .timings = new uint32_t[max_raw_timings_in_signal]};
     bool result = false;
 
     while(!str.empty()) {
@@ -305,14 +310,9 @@ std::string IrdaAppFileParser::file_select(const char* selected) {
     bool result;
 
     result = file_worker.file_select(
-        irda_directory,
-        irda_extension,
-        filename_ts->text,
-        filename_ts->text_size,
-        selected);
+        irda_directory, irda_extension, filename_ts->text, filename_ts->text_size, selected);
 
     delete filename_ts;
 
     return result ? std::string(filename_ts->text) : std::string();
 }
-

@@ -630,8 +630,9 @@ void free_view_holder(SdApp* sd_app) {
 
 void app_reset_state(SdApp* sd_app) {
     _fs_lock(&sd_app->info);
-    if(sd_app->view_holder)
+    if(sd_app->view_holder) {
         view_holder_stop(sd_app->view_holder);
+    }
     _fs_unlock(&sd_app->info);
 
     free_view_holder(sd_app);

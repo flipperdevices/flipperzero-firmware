@@ -101,7 +101,8 @@ osMessageQueueId_t IrdaAppViewManager::get_event_queue() {
 
 void IrdaAppViewManager::clear_events() {
     IrdaAppEvent event;
-    while(osMessageQueueGet(event_queue, &event, NULL, 0) == osOK);
+    while(osMessageQueueGet(event_queue, &event, NULL, 0) == osOK)
+        ;
 }
 
 void IrdaAppViewManager::receive_event(IrdaAppEvent* event) {
