@@ -23,9 +23,6 @@ static void gui_icon_draw(Canvas* canvas, GuiElement* element) {
 static void gui_icon_free(GuiElement* gui_icon) {
     furi_assert(gui_icon);
 
-    if(gui_icon->parent != NULL) {
-        // TODO deattach element
-    }
     free(gui_icon->model);
     free(gui_icon);
 }

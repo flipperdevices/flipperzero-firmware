@@ -1,30 +1,33 @@
 #include <furi.h>
 #include "gui_element_i.h"
 #include "gui_widget.h"
+#include <m-array.h>
 
-#define MAX_GUI_ELEMENTS 8
+ARRAY_DEF(ElementArray, GuiElement*, M_PTR_OPLIST);
 
 struct GuiWidget {
     View* view;
     void* context;
 };
 
-// TODO rework with M-LIB container
 typedef struct {
-    GuiElement* element[MAX_GUI_ELEMENTS];
+    ElementArray_t element;
 } GuiWidgetModel;
 
 static void gui_widget_view_draw_callback(Canvas* canvas, void* _model) {
     GuiWidgetModel* model = _model;
     canvas_clear(canvas);
 
-    for(uint8_t i = 0; i < MAX_GUI_ELEMENTS; i++) {
-        if(model->element[i] != NULL) {
-            if(model->element[i]->draw != NULL) {
-                model->element[i]->draw(canvas, model->element[i]);
-            }
+    // Draw all elements
+    ElementArray_it_t it;
+    ElementArray_it(it, model->element);
+    while(!ElementArray_end_p(it)) {
+        GuiElement* element = *ElementArray_ref(it);
+        if(element->draw != NULL) {
+            element->draw(canvas, element);
         }
-    };
+        ElementArray_next(it);
+    }
 }
 
 static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
@@ -33,13 +36,15 @@ static bool gui_widget_view_input_callback(InputEvent* event, void* context) {
 
     with_view_model(
         gui_widget->view, (GuiWidgetModel * model) {
-            for(uint8_t i = 0; i < MAX_GUI_ELEMENTS; i++) {
-                if(model->element[i] != NULL) {
-                    if(model->element[i]->input != NULL) {
-                        consumed = model->element[i]->input(event, model->element[i]);
-                    }
+            ElementArray_it_t it;
+            ElementArray_it(it, model->element);
+            while(!ElementArray_end_p(it)) {
+                GuiElement* element = *ElementArray_ref(it);
+                if(element->input != NULL) {
+                    consumed |= element->input(event, element);
                 }
-            };
+                ElementArray_next(it);
+            }
             return true;
         });
 
@@ -56,20 +61,11 @@ GuiWidget* gui_widget_alloc() {
 
     with_view_model(
         gui_widget->view, (GuiWidgetModel * model) {
-            for(uint8_t i = 0; i < MAX_GUI_ELEMENTS; i++) {
-                model->element[i] = NULL;
-            };
+            ElementArray_init(model->element);
             return true;
         });
 
     return gui_widget;
-}
-
-void gui_widget_free(GuiWidget* gui_widget) {
-    furi_assert(gui_widget);
-    gui_widget_clear(gui_widget);
-    view_free(gui_widget->view);
-    free(gui_widget);
 }
 
 void gui_widget_clear(GuiWidget* gui_widget) {
@@ -77,15 +73,32 @@ void gui_widget_clear(GuiWidget* gui_widget) {
 
     with_view_model(
         gui_widget->view, (GuiWidgetModel * model) {
-            for(uint8_t i = 0; i < MAX_GUI_ELEMENTS; i++) {
-                if(model->element[i]) {
-                    furi_assert(model->element[i]->free);
-                    model->element[i]->free(model->element[i]);
-                    model->element[i] = NULL;
-                }
-            };
+            ElementArray_it_t it;
+            ElementArray_it(it, model->element);
+            while(!ElementArray_end_p(it)) {
+                GuiElement* element = *ElementArray_ref(it);
+                furi_assert(element->free);
+                element->free(element);
+                ElementArray_next(it);
+            }
+            ElementArray_clean(model->element);
             return true;
         });
+}
+
+void gui_widget_free(GuiWidget* gui_widget) {
+    furi_assert(gui_widget);
+    // Free all elements
+    gui_widget_clear(gui_widget);
+    // Free elements container
+    with_view_model(
+        gui_widget->view, (GuiWidgetModel * model) {
+            ElementArray_clear(model->element);
+            return true;
+        });
+
+    view_free(gui_widget->view);
+    free(gui_widget);
 }
 
 View* gui_widget_get_view(GuiWidget* gui_widget) {
@@ -95,16 +108,12 @@ View* gui_widget_get_view(GuiWidget* gui_widget) {
 
 void gui_widget_add_element(GuiWidget* gui_widget, GuiElement* element) {
     furi_assert(gui_widget);
+    furi_assert(element);
+
     with_view_model(
         gui_widget->view, (GuiWidgetModel * model) {
-            // add element to first null position
-            for(uint8_t i = 0; i < MAX_GUI_ELEMENTS; i++) {
-                if(model->element[i] == NULL) {
-                    model->element[i] = element;
-                    element->parent = gui_widget;
-                    break;
-                }
-            };
+            element->parent = gui_widget;
+            ElementArray_push_back(model->element, element);
             return true;
         });
 }

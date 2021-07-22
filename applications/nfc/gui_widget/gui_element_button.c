@@ -52,9 +52,6 @@ static void gui_button_free(GuiElement* gui_button) {
     furi_assert(gui_button);
 
     GuiButtonModel* model = gui_button->model;
-    if(gui_button->parent != NULL) {
-        // TODO deattach element
-    }
     string_clear(model->text);
     free(gui_button->model);
     free(gui_button);

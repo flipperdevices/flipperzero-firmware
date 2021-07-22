@@ -34,9 +34,6 @@ static void gui_string_free(GuiElement* gui_string) {
     furi_assert(gui_string);
 
     GuiStringModel* model = gui_string->model;
-    if(gui_string->parent != NULL) {
-        // TODO deattach element
-    }
     string_clear(model->text);
     free(gui_string->model);
     free(gui_string);
