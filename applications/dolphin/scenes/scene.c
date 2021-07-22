@@ -67,7 +67,9 @@ void scene_alloc() {
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
 
-    scene_state->player_global.x = random() % WORLD_WIDTH / 2;
+    scene_state->player_global.x = 160;
+    scene_state->player_global.y = WORLD_HEIGHT;
+
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;
     // scene_state->debug = true;

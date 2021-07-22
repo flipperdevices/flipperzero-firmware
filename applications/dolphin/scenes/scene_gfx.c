@@ -67,7 +67,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                     state->dolphin_gfx_b = &I_black_up1_73x61;
 
                 } else {
-                    state->dolphin_gfx = &I_up1_73x61;
+                    state->dolphin_gfx = &I_up2_73x61;
                     state->dolphin_gfx_b = &I_black_up2_73x61;
                 }
             }
@@ -78,7 +78,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                     state->dolphin_gfx = &I_down1_73x61;
                     state->dolphin_gfx_b = &I_black_down1_73x61;
                 } else {
-                    state->dolphin_gfx = &I_down1_73x61;
+                    state->dolphin_gfx = &I_down2_73x61;
                     state->dolphin_gfx_b = &I_black_down2_73x61;
                 }
             }
