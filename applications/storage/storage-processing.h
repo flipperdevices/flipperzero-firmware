@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-void storage_process_message(StorageApp* app, StorageMessage* message);
+void storage_process_message(Storage* app, StorageMessage* message);
 
 #ifdef __cplusplus
 }

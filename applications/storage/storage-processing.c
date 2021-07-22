@@ -10,7 +10,7 @@
     ret = _storage->api._fn;     \
     storage_data_unlock(_storage);
 
-static StorageData* storage_get_storage_by_type(StorageApp* app, StorageType type) {
+static StorageData* storage_get_storage_by_type(Storage* app, StorageType type) {
     StorageData* storage;
 
     if(type == ST_ANY) {
@@ -49,7 +49,7 @@ const char* remove_vfs(const char* path) {
 /******************* File Functions *******************/
 
 bool storage_process_file_open(
-    StorageApp* app,
+    Storage* app,
     File* file,
     const char* path,
     FS_AccessMode access_mode,
@@ -74,7 +74,7 @@ bool storage_process_file_open(
     return ret;
 }
 
-bool storage_process_file_close(StorageApp* app, File* file) {
+bool storage_process_file_close(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -89,7 +89,7 @@ bool storage_process_file_close(StorageApp* app, File* file) {
 }
 
 static uint16_t storage_process_file_read(
-    StorageApp* app,
+    Storage* app,
     File* file,
     void* buff,
     uint16_t const bytes_to_read) {
@@ -106,7 +106,7 @@ static uint16_t storage_process_file_read(
 }
 
 static uint16_t storage_process_file_write(
-    StorageApp* app,
+    Storage* app,
     File* file,
     const void* buff,
     uint16_t const bytes_to_write) {
@@ -123,7 +123,7 @@ static uint16_t storage_process_file_write(
 }
 
 static bool storage_process_file_seek(
-    StorageApp* app,
+    Storage* app,
     File* file,
     const uint32_t offset,
     const bool from_start) {
@@ -139,7 +139,7 @@ static bool storage_process_file_seek(
     return ret;
 }
 
-static uint64_t storage_process_file_tell(StorageApp* app, File* file) {
+static uint64_t storage_process_file_tell(Storage* app, File* file) {
     uint64_t ret = 0;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -152,7 +152,7 @@ static uint64_t storage_process_file_tell(StorageApp* app, File* file) {
     return ret;
 }
 
-static bool storage_process_file_truncate(StorageApp* app, File* file) {
+static bool storage_process_file_truncate(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -165,7 +165,7 @@ static bool storage_process_file_truncate(StorageApp* app, File* file) {
     return ret;
 }
 
-static bool storage_process_file_sync(StorageApp* app, File* file) {
+static bool storage_process_file_sync(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -178,7 +178,7 @@ static bool storage_process_file_sync(StorageApp* app, File* file) {
     return ret;
 }
 
-static uint64_t storage_process_file_size(StorageApp* app, File* file) {
+static uint64_t storage_process_file_size(Storage* app, File* file) {
     uint64_t ret = 0;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -191,7 +191,7 @@ static uint64_t storage_process_file_size(StorageApp* app, File* file) {
     return ret;
 }
 
-static bool storage_process_file_eof(StorageApp* app, File* file) {
+static bool storage_process_file_eof(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -206,7 +206,7 @@ static bool storage_process_file_eof(StorageApp* app, File* file) {
 
 /******************* Dir Functions *******************/
 
-bool storage_process_dir_open(StorageApp* app, File* file, const char* path) {
+bool storage_process_dir_open(Storage* app, File* file, const char* path) {
     bool ret = false;
     StorageType type = storage_get_type_by_path(path);
     StorageData* storage;
@@ -227,7 +227,7 @@ bool storage_process_dir_open(StorageApp* app, File* file, const char* path) {
     return ret;
 }
 
-bool storage_process_dir_close(StorageApp* app, File* file) {
+bool storage_process_dir_close(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -242,7 +242,7 @@ bool storage_process_dir_close(StorageApp* app, File* file) {
 }
 
 bool storage_process_dir_read(
-    StorageApp* app,
+    Storage* app,
     File* file,
     FileInfo* fileinfo,
     char* name,
@@ -259,7 +259,7 @@ bool storage_process_dir_read(
     return ret;
 }
 
-bool storage_process_dir_rewind(StorageApp* app, File* file) {
+bool storage_process_dir_rewind(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -275,7 +275,7 @@ bool storage_process_dir_rewind(StorageApp* app, File* file) {
 /******************* Common FS Functions *******************/
 
 static FS_Error
-    storage_process_common_stat(StorageApp* app, const char* path, FileInfo* fileinfo) {
+    storage_process_common_stat(Storage* app, const char* path, FileInfo* fileinfo) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(path);
 
@@ -289,7 +289,7 @@ static FS_Error
     return ret;
 }
 
-static FS_Error storage_process_common_remove(StorageApp* app, const char* path) {
+static FS_Error storage_process_common_remove(Storage* app, const char* path) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(path);
 
@@ -311,7 +311,7 @@ static FS_Error storage_process_common_remove(StorageApp* app, const char* path)
     return ret;
 }
 
-static FS_Error storage_process_common_copy(StorageApp* app, const char* old, const char* new) {
+static FS_Error storage_process_common_copy(Storage* app, const char* old, const char* new) {
     FS_Error ret = FSE_INTERNAL;
     File file_old;
     File file_new;
@@ -352,7 +352,7 @@ static FS_Error storage_process_common_copy(StorageApp* app, const char* old, co
     return ret;
 }
 
-static FS_Error storage_process_common_rename(StorageApp* app, const char* old, const char* new) {
+static FS_Error storage_process_common_rename(Storage* app, const char* old, const char* new) {
     FS_Error ret = FSE_INTERNAL;
     StorageType type_old = storage_get_type_by_path(old);
     StorageType type_new = storage_get_type_by_path(new);
@@ -374,7 +374,7 @@ static FS_Error storage_process_common_rename(StorageApp* app, const char* old, 
     return ret;
 }
 
-static FS_Error storage_process_common_mkdir(StorageApp* app, const char* path) {
+static FS_Error storage_process_common_mkdir(Storage* app, const char* path) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(path);
 
@@ -389,7 +389,7 @@ static FS_Error storage_process_common_mkdir(StorageApp* app, const char* path) 
 }
 
 static FS_Error storage_process_common_fs_info(
-    StorageApp* app,
+    Storage* app,
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
@@ -410,7 +410,7 @@ static FS_Error storage_process_common_fs_info(
 // TODO think about implementing a custom storage API to split that kind of api linkage
 #include "storages/storage-ext.h"
 
-static FS_Error storage_process_sd_format(StorageApp* app) {
+static FS_Error storage_process_sd_format(Storage* app) {
     FS_Error ret = FSE_OK;
 
     if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
@@ -422,7 +422,7 @@ static FS_Error storage_process_sd_format(StorageApp* app) {
     return ret;
 }
 
-static FS_Error storage_process_sd_unmount(StorageApp* app) {
+static FS_Error storage_process_sd_unmount(Storage* app) {
     FS_Error ret = FSE_OK;
 
     if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
@@ -434,7 +434,7 @@ static FS_Error storage_process_sd_unmount(StorageApp* app) {
     return ret;
 }
 
-static FS_Error storage_process_sd_info(StorageApp* app, SDInfo* info) {
+static FS_Error storage_process_sd_info(Storage* app, SDInfo* info) {
     FS_Error ret = FSE_OK;
 
     if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusNotReady) {
@@ -446,7 +446,7 @@ static FS_Error storage_process_sd_info(StorageApp* app, SDInfo* info) {
     return ret;
 }
 
-static FS_Error storage_process_sd_status(StorageApp* app) {
+static FS_Error storage_process_sd_status(Storage* app) {
     FS_Error ret;
     StorageStatus status = storage_data_status(&app->storage[ST_EXT]);
 
@@ -467,7 +467,7 @@ static FS_Error storage_process_sd_status(StorageApp* app) {
 
 /****************** API calls processing ******************/
 
-void storage_process_message(StorageApp* app, StorageMessage* message) {
+void storage_process_message(Storage* app, StorageMessage* message) {
     switch(message->command) {
     case StorageCommandFileOpen:
         message->return_data->bool_value = storage_process_file_open(

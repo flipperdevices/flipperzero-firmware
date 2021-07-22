@@ -5,7 +5,7 @@
 #include <furi.h>
 
 struct FileWorker {
-    StorageApp* api;
+    Storage* api;
     bool silent;
     File* file;
 };

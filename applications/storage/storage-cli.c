@@ -51,7 +51,7 @@ void storage_cli_print_file_error(string_t path, File* file) {
 }
 
 void storage_cli_info(Cli* cli, string_t path) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
 
     if(string_cmp_str(path, "/int") == 0) {
         uint64_t total_space;
@@ -95,7 +95,7 @@ void storage_cli_format(Cli* cli, string_t path) {
         printf("Formatting SD card, all data will be lost. Are you sure (y/n)?\r\n");
         char answer = cli_getc(cli);
         if(answer == 'y' || answer == 'Y') {
-            StorageApp* api = furi_record_open("storage");
+            Storage* api = furi_record_open("storage");
             printf("Formatting, please wait...\r\n");
 
             FS_Error error = storage_sd_format(api);
@@ -120,7 +120,7 @@ void storage_cli_list(Cli* cli, string_t path) {
         printf("\t[D] ext\r\n");
         printf("\t[D] any\r\n");
     } else {
-        StorageApp* api = furi_record_open("storage");
+        Storage* api = furi_record_open("storage");
         File* file = storage_file_alloc(api);
 
         if(storage_dir_open(file, string_get_cstr(path))) {
@@ -151,7 +151,7 @@ void storage_cli_list(Cli* cli, string_t path) {
 }
 
 void storage_cli_read(Cli* cli, string_t path) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
     if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -181,7 +181,7 @@ void storage_cli_read(Cli* cli, string_t path) {
 }
 
 void storage_cli_write(Cli* cli, string_t path, string_t args) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
     uint32_t size;
@@ -235,7 +235,7 @@ void storage_cli_write(Cli* cli, string_t path, string_t args) {
 }
 
 void storage_cli_copy(Cli* cli, string_t old_path, string_t args) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     string_t new_path;
     string_init(new_path);
 
@@ -255,7 +255,7 @@ void storage_cli_copy(Cli* cli, string_t old_path, string_t args) {
 }
 
 void storage_cli_remove(Cli* cli, string_t path) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     FS_Error error = storage_common_remove(api, string_get_cstr(path));
 
     if(error != FSE_OK) {
@@ -266,7 +266,7 @@ void storage_cli_remove(Cli* cli, string_t path) {
 }
 
 void storage_cli_rename(Cli* cli, string_t old_path, string_t args) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     string_t new_path;
     string_init(new_path);
 

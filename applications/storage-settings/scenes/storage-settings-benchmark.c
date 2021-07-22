@@ -13,7 +13,7 @@ static void
 }
 
 static bool storage_settings_bench_write(
-    StorageApp* api,
+    Storage* api,
     uint16_t size,
     const uint8_t* data,
     uint32_t* speed) {
@@ -43,7 +43,7 @@ static bool storage_settings_bench_write(
 }
 
 static bool
-    storage_settings_bench_read(StorageApp* api, uint16_t size, uint8_t* data, uint32_t* speed) {
+    storage_settings_bench_read(Storage* api, uint16_t size, uint8_t* data, uint32_t* speed) {
     File* file = storage_file_alloc(api);
     bool result = true;
     *speed = -1;

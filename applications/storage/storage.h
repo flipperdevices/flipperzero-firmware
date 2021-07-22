@@ -7,13 +7,13 @@
 extern "C" {
 #endif
 
-typedef struct StorageApp StorageApp;
+typedef struct Storage Storage;
 
 /**
  * Allocates and initializes a file descriptor
  * @return File*
  */
-File* storage_file_alloc(StorageApp* app);
+File* storage_file_alloc(Storage* app);
 
 /**
  * Frees the file descriptor. Closes the file if it was open.
@@ -156,7 +156,7 @@ bool storage_dir_rewind(File* file);
  * @param fileinfo pointer to the readed FileInfo, may be NULL
  * @return FS_Error operation result
  */
-FS_Error storage_common_stat(StorageApp* app, const char* path, FileInfo* fileinfo);
+FS_Error storage_common_stat(Storage* app, const char* path, FileInfo* fileinfo);
 
 /**
  * Removes a file/directory from the repository, the directory must be empty and the file/directory must not be open
@@ -164,7 +164,7 @@ FS_Error storage_common_stat(StorageApp* app, const char* path, FileInfo* filein
  * @param path 
  * @return FS_Error operation result
  */
-FS_Error storage_common_remove(StorageApp* app, const char* path);
+FS_Error storage_common_remove(Storage* app, const char* path);
 
 /**
  * Renames file/directory, file/directory must not be open
@@ -173,7 +173,7 @@ FS_Error storage_common_remove(StorageApp* app, const char* path);
  * @param new_path new path
  * @return FS_Error operation result
  */
-FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char* new_path);
+FS_Error storage_common_rename(Storage* app, const char* old_path, const char* new_path);
 
 /**
  * Copy file, file must not be open
@@ -182,7 +182,7 @@ FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char
  * @param new_path new path
  * @return FS_Error operation result
  */
-FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* new_path);
+FS_Error storage_common_copy(Storage* app, const char* old_path, const char* new_path);
 
 /**
  * Creates a directory
@@ -190,7 +190,7 @@ FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* 
  * @param path directory path
  * @return FS_Error operation result
  */
-FS_Error storage_common_mkdir(StorageApp* app, const char* path);
+FS_Error storage_common_mkdir(Storage* app, const char* path);
 
 /**
  * Gets general information about the storage
@@ -201,7 +201,7 @@ FS_Error storage_common_mkdir(StorageApp* app, const char* path);
  * @return FS_Error operation result
  */
 FS_Error storage_common_fs_info(
-    StorageApp* app,
+    Storage* app,
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space);
@@ -236,14 +236,14 @@ const char* storage_file_get_error_desc(File* file);
  * @param api pointer to the api
  * @return FS_Error operation result
  */
-FS_Error storage_sd_format(StorageApp* api);
+FS_Error storage_sd_format(Storage* api);
 
 /**
  * Will unmount the SD card
  * @param api pointer to the api
  * @return FS_Error operation result
  */
-FS_Error storage_sd_unmount(StorageApp* api);
+FS_Error storage_sd_unmount(Storage* api);
 
 /**
  * Retrieves SD card information
@@ -251,14 +251,14 @@ FS_Error storage_sd_unmount(StorageApp* api);
  * @param info pointer to the info
  * @return FS_Error operation result
  */
-FS_Error storage_sd_info(StorageApp* api, SDInfo* info);
+FS_Error storage_sd_info(Storage* api, SDInfo* info);
 
 /**
  * Retrieves SD card status
  * @param api pointer to the api
  * @return FS_Error operation result
  */
-FS_Error storage_sd_status(StorageApp* api);
+FS_Error storage_sd_status(Storage* api);
 
 #ifdef __cplusplus
 }

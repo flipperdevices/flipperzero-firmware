@@ -14,12 +14,12 @@ extern "C" {
 typedef struct {
     ViewPort* view_port;
     bool enabled;
-} StorageAppSDGui;
+} StorageSDGui;
 
-struct StorageApp {
+struct Storage {
     osMessageQueueId_t message_queue;
     StorageData storage[STORAGE_COUNT];
-    StorageAppSDGui sd_gui;
+    StorageSDGui sd_gui;
 };
 
 #ifdef __cplusplus

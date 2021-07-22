@@ -9,7 +9,7 @@
 #define SEEK_OFFSET_INCREASE 12
 #define SEEK_OFFSET_SUM (SEEK_OFFSET_FROM_START + SEEK_OFFSET_INCREASE)
 
-static void do_file_test(StorageApp* api, const char* path) {
+static void do_file_test(Storage* api, const char* path) {
     File* file = storage_file_alloc(api);
     bool result;
     uint8_t bytes[BYTES_COUNT + 1];
@@ -149,7 +149,7 @@ static void do_file_test(StorageApp* api, const char* path) {
     storage_file_free(file);
 }
 
-static void do_dir_test(StorageApp* api, const char* path) {
+static void do_dir_test(Storage* api, const char* path) {
     File* file = storage_file_alloc(api);
     bool result;
 
@@ -223,7 +223,7 @@ static void do_dir_test(StorageApp* api, const char* path) {
     free(filename);
 }
 
-static void do_test_start(StorageApp* api, const char* path) {
+static void do_test_start(Storage* api, const char* path) {
     string_t str_path;
     string_init_printf(str_path, "%s/test-folder", path);
 
@@ -255,7 +255,7 @@ static void do_test_start(StorageApp* api, const char* path) {
     string_clear(str_path);
 }
 
-static void do_test_end(StorageApp* api, const char* path) {
+static void do_test_end(Storage* api, const char* path) {
     uint64_t total_space;
     uint64_t free_space;
     string_t str_path_1;
@@ -316,7 +316,7 @@ static void do_test_end(StorageApp* api, const char* path) {
 }
 
 int32_t storage_app_test(void* p) {
-    StorageApp* api = furi_record_open("storage");
+    Storage* api = furi_record_open("storage");
     do_test_start(api, "/int");
     do_test_start(api, "/any");
     do_test_start(api, "/ext");

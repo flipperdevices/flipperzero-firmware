@@ -122,6 +122,6 @@ struct ArchiveApp {
     View* view_archive_main;
     TextInput* text_input;
 
-    StorageApp* api;
+    Storage* api;
     ArchiveBrowser browser;
 };

@@ -9,7 +9,7 @@
 struct FileSelect {
     // public
     View* view;
-    StorageApp* fs_api;
+    Storage* fs_api;
     const char* path;
     const char* extension;
 

@@ -13,7 +13,7 @@
 static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
-    StorageApp* app = context;
+    Storage* app = context;
 
     // here we don't care about thread race when reading / writing status
     switch(app->storage[ST_EXT].status) {
@@ -28,8 +28,8 @@ static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
-StorageApp* storage_app_alloc() {
-    StorageApp* app = malloc(sizeof(StorageApp));
+Storage* storage_app_alloc() {
+    Storage* app = malloc(sizeof(Storage));
     app->message_queue = osMessageQueueNew(8, sizeof(StorageMessage), NULL);
 
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
@@ -53,7 +53,7 @@ StorageApp* storage_app_alloc() {
     return app;
 }
 
-void storage_tick(StorageApp* app) {
+void storage_tick(Storage* app) {
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         StorageApi api = app->storage[i].api;
         if(api.tick != NULL) {
@@ -80,7 +80,7 @@ void storage_tick(StorageApp* app) {
 }
 
 int32_t storage_app(void* p) {
-    StorageApp* app = storage_app_alloc();
+    Storage* app = storage_app_alloc();
     furi_record_create("storage", app);
 
     StorageMessage message;

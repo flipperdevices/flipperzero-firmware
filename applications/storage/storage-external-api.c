@@ -7,7 +7,7 @@
     furi_check(semaphore != NULL);
 
 #define S_FILE_API_PROLOGUE      \
-    StorageApp* app = file->api; \
+    Storage* app = file->api; \
     furi_assert(app);
 
 #define S_API_EPILOGUE                                                                     \
@@ -229,7 +229,7 @@ bool storage_dir_rewind(File* file) {
 
 /****************** COMMON ******************/
 
-FS_Error storage_common_stat(StorageApp* app, const char* path, FileInfo* fileinfo) {
+FS_Error storage_common_stat(Storage* app, const char* path, FileInfo* fileinfo) {
     S_API_PROLOGUE;
 
     SAData data = {.cstat = {.path = path, .fileinfo = fileinfo}};
@@ -239,7 +239,7 @@ FS_Error storage_common_stat(StorageApp* app, const char* path, FileInfo* filein
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_remove(StorageApp* app, const char* path) {
+FS_Error storage_common_remove(Storage* app, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonRemove);
@@ -247,7 +247,7 @@ FS_Error storage_common_remove(StorageApp* app, const char* path) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char* new_path) {
+FS_Error storage_common_rename(Storage* app, const char* old_path, const char* new_path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -261,7 +261,7 @@ FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* new_path) {
+FS_Error storage_common_copy(Storage* app, const char* old_path, const char* new_path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -275,7 +275,7 @@ FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* 
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_mkdir(StorageApp* app, const char* path) {
+FS_Error storage_common_mkdir(Storage* app, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonMkDir);
@@ -284,7 +284,7 @@ FS_Error storage_common_mkdir(StorageApp* app, const char* path) {
 }
 
 FS_Error storage_common_fs_info(
-    StorageApp* app,
+    Storage* app,
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
@@ -320,7 +320,7 @@ const char* storage_file_get_error_desc(File* file) {
 
 /****************** Raw SD API ******************/
 
-FS_Error storage_sd_format(StorageApp* app) {
+FS_Error storage_sd_format(Storage* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDFormat);
@@ -328,7 +328,7 @@ FS_Error storage_sd_format(StorageApp* app) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_unmount(StorageApp* app) {
+FS_Error storage_sd_unmount(Storage* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDUnmount);
@@ -336,7 +336,7 @@ FS_Error storage_sd_unmount(StorageApp* app) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_info(StorageApp* app, SDInfo* info) {
+FS_Error storage_sd_info(Storage* app, SDInfo* info) {
     S_API_PROLOGUE;
     SAData data = {
         .sdinfo = {
@@ -347,7 +347,7 @@ FS_Error storage_sd_info(StorageApp* app, SDInfo* info) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_status(StorageApp* app) {
+FS_Error storage_sd_status(Storage* app) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDStatus);
@@ -355,7 +355,7 @@ FS_Error storage_sd_status(StorageApp* app) {
     return S_RETURN_ERROR;
 }
 
-File* storage_file_alloc(StorageApp* app) {
+File* storage_file_alloc(Storage* app) {
     File* file = furi_alloc(sizeof(File));
     file->file_id = 0;
     file->api = app;

@@ -33,7 +33,7 @@ typedef struct {
 } DolphinStore;
 
 struct DolphinState {
-    StorageApp* fs_api;
+    Storage* fs_api;
     DolphinStoreData data;
 };
 

@@ -23,7 +23,7 @@ typedef struct {
     // records
     Gui* gui;
     NotificationApp* notification;
-    StorageApp* fs_api;
+    Storage* fs_api;
 
     // view managment
     SceneManager* scene_manager;
