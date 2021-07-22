@@ -8,7 +8,6 @@ struct FileWorker {
     StorageApp* api;
     bool silent;
     File* file;
-    size_t file_buf_cnt;
 };
 
 bool file_worker_check_common_errors(FileWorker* file_worker);
@@ -26,7 +25,6 @@ FileWorker* file_worker_alloc(bool _silent) {
     file_worker->silent = _silent;
     file_worker->api = furi_record_open("storage");
     file_worker->file = storage_file();
-    file_worker->file_buf_cnt = 0;
 
     return file_worker;
 }
