@@ -3,7 +3,7 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32G0 STM32G4
     STM32H7_M4 STM32H7_M7
     STM32L0 STM32L1 STM32L4 STM32L5
-    STM32WB STM32WL )
+    STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS )
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
@@ -143,6 +143,10 @@ function(stm32_get_cores CORES)
     elseif(ARG_FAMILY)
         if(${ARG_FAMILY} STREQUAL "H7")
             set(${CORES} M7 M4 PARENT_SCOPE)
+        elseif(${ARG_FAMILY} STREQUAL "WB")
+            set(${CORES} M4 PARENT_SCOPE)
+        elseif(${ARG_FAMILY} STREQUAL "WL")
+            set(${CORES} M4 M0PLUS PARENT_SCOPE)
         else()
             set(${CORES} "" PARENT_SCOPE)
         endif()

@@ -176,7 +176,7 @@ set(HAL_LL_DRIVERS_L5
 set(HAL_DRIVERS_WB
     adc comp cortex crc cryp dma exti flash gpio hsem 
     i2c ipcc irda iwdg lcd lptim pcd pka pwr qspi rcc 
-    rng rtc sai smartcard smbus spi sram tim tsc uart usart wwdg
+    rng rtc sai smartcard smbus spi tim tsc uart usart wwdg
 )
 set(HAL_EX_DRIVERS_WB
     adc crc cryp dma flash i2c pcd pwr rcc
@@ -188,7 +188,7 @@ set(HAL_LL_DRIVERS_WB
 )
 
 set(HAL_DRIVERS_WL
-    adc comp cortex crc cryp dac def dma exti flash gpio gtzc hsem 
+    adc comp cortex crc cryp dac dma exti flash gpio gtzc hsem 
     i2c i2s ipcc irda iwdg lptim pka pwr rcc 
     rng rtc smartcard smbus spi subghz tim uart usart wwdg
 )
@@ -197,8 +197,8 @@ set(HAL_EX_DRIVERS_WL
     rng rtc smartcard spi tim uart usart
 )
 set(HAL_LL_DRIVERS_WL
-    adc bus comp cortex crc dac dma dmamux exti gpio hsem i2c ipcc iwdg lptim lpuart pka pwr rcc 
-    rng rtc spi system tim usart utils wwdg
+    adc comp crc dac dma exti gpio i2c lptim lpuart pka pwr rcc 
+    rng rtc spi tim usart utils
 )
 
 foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
