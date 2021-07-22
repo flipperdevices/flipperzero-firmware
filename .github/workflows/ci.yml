@@ -141,6 +141,10 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(cat date.txt)"
 
+      - name: Get branch name
+        id: branch
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF##*/})"        
+
       - name: Make empty dir
         run: mkdir -p empty
 
