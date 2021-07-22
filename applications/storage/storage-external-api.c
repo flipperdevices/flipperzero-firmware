@@ -6,7 +6,7 @@
     osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
     furi_check(semaphore != NULL);
 
-#define S_FILE_API_PROLOGUE      \
+#define S_FILE_API_PROLOGUE   \
     Storage* app = file->api; \
     furi_assert(app);
 

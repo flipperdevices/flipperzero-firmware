@@ -88,11 +88,8 @@ bool storage_process_file_close(Storage* app, File* file) {
     return ret;
 }
 
-static uint16_t storage_process_file_read(
-    Storage* app,
-    File* file,
-    void* buff,
-    uint16_t const bytes_to_read) {
+static uint16_t
+    storage_process_file_read(Storage* app, File* file, void* buff, uint16_t const bytes_to_read) {
     uint16_t ret = 0;
     StorageData* storage = get_storage_by_file(file, app->storage);
 
@@ -274,8 +271,7 @@ bool storage_process_dir_rewind(Storage* app, File* file) {
 
 /******************* Common FS Functions *******************/
 
-static FS_Error
-    storage_process_common_stat(Storage* app, const char* path, FileInfo* fileinfo) {
+static FS_Error storage_process_common_stat(Storage* app, const char* path, FileInfo* fileinfo) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(path);
 
