@@ -163,7 +163,7 @@ bool file_worker_file_select(
     const char* extension,
     char* selected_filename,
     uint8_t selected_filename_size,
-    char* preselected_filename);
+    const char* preselected_filename);
 
 /**
  * @brief Reads data from a file until separator or EOF is found.
@@ -177,7 +177,13 @@ bool file_worker_file_select(
  * @param separator
  * @return true on success
  */
-bool file_worker_read_until_buffered(FileWorker* file_worker, string_t str_result, char* file_buf, size_t* file_buf_cnt, size_t max_length, char separator);
+bool file_worker_read_until_buffered(
+    FileWorker* file_worker,
+    string_t str_result,
+    char* file_buf,
+    size_t* file_buf_cnt,
+    size_t max_length,
+    char separator);
 
 /**
  * @brief Check whether file exist or not
@@ -187,10 +193,7 @@ bool file_worker_read_until_buffered(FileWorker* file_worker, string_t str_resul
  * @param exist - flag to show file exist
  * @return true on success
  */
-bool file_worker_is_file_exist(
-    FileWorker* file_worker,
-    const char* filename,
-    bool* exist);
+bool file_worker_is_file_exist(FileWorker* file_worker, const char* filename, bool* exist);
 
 /**
  * @brief Rename file or directory
@@ -200,9 +203,7 @@ bool file_worker_is_file_exist(
  * @param new_filename
  * @return true on success
  */
-bool file_worker_rename(FileWorker* file_worker,
-    const char* old_path,
-    const char* new_path);
+bool file_worker_rename(FileWorker* file_worker, const char* old_path, const char* new_path);
 
 /**
  * @brief Check errors
