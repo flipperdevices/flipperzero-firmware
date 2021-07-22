@@ -272,9 +272,9 @@ FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char
     S_API_PROLOGUE;
 
     SAData data = {
-        .crename = {
-            .old_path = old_path,
-            .new_path = new_path,
+        .cpaths = {
+            .old = old_path,
+            .new = new_path,
         }};
 
     S_API_MESSAGE(StorageCommandCommonRename);
@@ -283,7 +283,17 @@ FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char
 }
 
 FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* new_path) {
-    return FSE_NOT_IMPLEMENTED;
+    S_API_PROLOGUE;
+
+    SAData data = {
+        .cpaths = {
+            .old = old_path,
+            .new = new_path,
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonCopy);
+    S_API_EPILOGUE;
+    return S_RETURN_ERROR;
 }
 
 FS_Error storage_common_mkdir(StorageApp* app, const char* path) {

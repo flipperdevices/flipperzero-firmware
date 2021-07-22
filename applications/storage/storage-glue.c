@@ -84,18 +84,6 @@ const char* storage_data_status_text(StorageData* storage) {
     return result;
 }
 
-/****************** helpers ******************/
-
-static void check_path(const char* path) {
-    if(strlen(path) == 0) {
-        furi_check(0);
-    }
-
-    if(path[0] != '/') {
-        furi_check(0);
-    }
-}
-
 /****************** storage glue ******************/
 
 bool storage_has_file(const File* file, StorageData* storage_data) {
@@ -117,20 +105,16 @@ bool storage_has_file(const File* file, StorageData* storage_data) {
 
 StorageType storage_get_type_by_path(const char* path) {
     StorageType type = ST_ERROR;
-    check_path(path);
-    path++;
 
-    const char* sd_path = "ext";
-    const char* internal_path = "int";
-    const char* user_path = "any";
+    const char* ext_path = "/ext";
+    const char* int_path = "/int";
+    const char* any_path = "/any";
 
-    if(strlen(path) >= strlen(sd_path) && memcmp(path, sd_path, strlen(sd_path)) == 0) {
+    if(strlen(path) >= strlen(ext_path) && memcmp(path, ext_path, strlen(ext_path)) == 0) {
         type = ST_EXT;
-    } else if(
-        strlen(path) >= strlen(internal_path) &&
-        memcmp(path, internal_path, strlen(internal_path)) == 0) {
+    } else if(strlen(path) >= strlen(int_path) && memcmp(path, int_path, strlen(int_path)) == 0) {
         type = ST_INT;
-    } else if(strlen(path) >= strlen(user_path) && memcmp(path, user_path, strlen(user_path)) == 0) {
+    } else if(strlen(path) >= strlen(any_path) && memcmp(path, any_path, strlen(any_path)) == 0) {
         type = ST_ANY;
     }
 
@@ -139,7 +123,6 @@ StorageType storage_get_type_by_path(const char* path) {
 
 bool storage_path_already_open(const char* path, StorageFileList_t array) {
     bool open = false;
-    check_path(path);
 
     StorageFileList_it_t it;
 

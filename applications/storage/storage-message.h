@@ -48,9 +48,9 @@ typedef struct {
 } SADataCStat;
 
 typedef struct {
-    const char* old_path;
-    const char* new_path;
-} SADataCRename;
+    const char* old;
+    const char* new;
+} SADataCPaths;
 
 typedef struct {
     const char* fs_path;
@@ -84,7 +84,7 @@ typedef union {
     SADataDRead dread;
 
     SADataCStat cstat;
-    SADataCRename crename;
+    SADataCPaths cpaths;
     SADataCFSInfo cfsinfo;
 
     SADataError error;
@@ -121,6 +121,7 @@ typedef enum {
     StorageCommandCommonStat,
     StorageCommandCommonRemove,
     StorageCommandCommonRename,
+    StorageCommandCommonCopy,
     StorageCommandCommonMkDir,
     StorageCommandCommonFSInfo,
     StorageCommandSDFormat,
