@@ -1,5 +1,5 @@
 #pragma once
-#include "widget_element_i.h"
+#include "widget_elements/widget_element_i.h"
 
 typedef struct Widget Widget;
 typedef struct WidgetElement WidgetElement;
