@@ -311,13 +311,12 @@ void notification_process_internal_message(NotificationApp* app, NotificationApp
 
 static bool notification_load_settings(NotificationApp* app) {
     NotificationSettings settings;
-    StorageApp* api = furi_record_open("storage");
-    File* file = storage_file();
+    File* file = storage_file_alloc(furi_record_open("storage"));
     const size_t settings_size = sizeof(NotificationSettings);
 
     FURI_LOG_I("notification", "loading settings from \"%s\"", NOTIFICATION_SETTINGS_PATH);
     bool fs_result =
-        storage_file_open(api, &file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+        storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(fs_result) {
         uint16_t bytes_count = storage_file_read(file, &settings, settings_size);
@@ -345,7 +344,8 @@ static bool notification_load_settings(NotificationApp* app) {
         FURI_LOG_E("notification", "load failed, %s", storage_file_get_error_desc(file));
     }
 
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
     furi_record_close("storage");
 
     return fs_result;
@@ -353,8 +353,7 @@ static bool notification_load_settings(NotificationApp* app) {
 
 static bool notification_save_settings(NotificationApp* app) {
     NotificationSettings settings;
-    StorageApp* api = furi_record_open("storage");
-    File* file = storage_file();
+    File* file = storage_file_alloc(furi_record_open("storage"));
     const size_t settings_size = sizeof(NotificationSettings);
 
     FURI_LOG_I("notification", "saving settings to \"%s\"", NOTIFICATION_SETTINGS_PATH);
@@ -364,7 +363,7 @@ static bool notification_save_settings(NotificationApp* app) {
     osKernelUnlock();
 
     bool fs_result =
-        storage_file_open(api, &file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+        storage_file_open(file, NOTIFICATION_SETTINGS_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(fs_result) {
         uint16_t bytes_count = storage_file_write(file, &settings, settings_size);
@@ -380,7 +379,8 @@ static bool notification_save_settings(NotificationApp* app) {
         FURI_LOG_E("notification", "save failed, %s", storage_file_get_error_desc(file));
     }
 
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
     furi_record_close("storage");
 
     return fs_result;

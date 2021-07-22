@@ -52,11 +52,10 @@ static void subghz_keystore_process_line(SubGhzKeystore* instance, string_t line
 }
 
 void subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
-    StorageApp* api = furi_record_open("storage");
-    File* manufacture_keys_file = storage_file();
+    File* manufacture_keys_file = storage_file_alloc(furi_record_open("storage"));
     string_t line;
     string_init(line);
-    if(storage_file_open(api, &manufacture_keys_file, file_name, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open(manufacture_keys_file, file_name, FSAM_READ, FSOM_OPEN_EXISTING)) {
         printf("Loading manufacture keys file %s\r\n", file_name);
         char buffer[FILE_BUFFER_SIZE];
         uint16_t ret;
@@ -75,7 +74,8 @@ void subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
         printf("Manufacture keys file is not found: %s\r\n", file_name);
     }
     string_clear(line);
-    storage_file_close(&manufacture_keys_file);
+    storage_file_close(manufacture_keys_file);
+    storage_file_free(manufacture_keys_file);
     furi_record_close("storage");
 }
 

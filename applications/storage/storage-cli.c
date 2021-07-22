@@ -121,9 +121,9 @@ void storage_cli_list(Cli* cli, string_t path) {
         printf("\t[D] any\r\n");
     } else {
         StorageApp* api = furi_record_open("storage");
-        File* file = storage_file();
+        File* file = storage_file_alloc(api);
 
-        if(storage_dir_open(api, &file, string_get_cstr(path))) {
+        if(storage_dir_open(file, string_get_cstr(path))) {
             FileInfo fileinfo;
             char name[MAX_NAME_LENGTH];
             bool readed = false;
@@ -144,16 +144,17 @@ void storage_cli_list(Cli* cli, string_t path) {
             storage_cli_print_file_error(path, file);
         }
 
-        storage_dir_close(&file);
+        storage_dir_close(file);
+        storage_file_free(file);
         furi_record_close("storage");
     }
 }
 
 void storage_cli_read(Cli* cli, string_t path) {
     StorageApp* api = furi_record_open("storage");
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
 
-    if(storage_file_open(api, &file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         const uint16_t read_size = 128;
         uint16_t readed_size = 0;
         uint8_t* data = furi_alloc(read_size);
@@ -173,13 +174,15 @@ void storage_cli_read(Cli* cli, string_t path) {
         storage_cli_print_file_error(path, file);
     }
 
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
+
     furi_record_close("storage");
 }
 
 void storage_cli_write(Cli* cli, string_t path, string_t args) {
     StorageApp* api = furi_record_open("storage");
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
 
     uint32_t size;
     int parsed_count = sscanf(string_get_cstr(args), "%lu", &size);
@@ -187,7 +190,7 @@ void storage_cli_write(Cli* cli, string_t path, string_t args) {
     if(parsed_count == EOF || parsed_count != 1) {
         storage_cli_print_usage();
     } else {
-        if(storage_file_open(api, &file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
             const uint16_t write_size = 8;
             uint32_t readed_index = 0;
             uint8_t* data = furi_alloc(write_size);
@@ -224,9 +227,10 @@ void storage_cli_write(Cli* cli, string_t path, string_t args) {
         } else {
             storage_cli_print_file_error(path, file);
         }
-        storage_file_close(&file);
+        storage_file_close(file);
     }
 
+    storage_file_free(file);
     furi_record_close("storage");
 }
 

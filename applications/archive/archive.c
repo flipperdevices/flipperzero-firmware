@@ -149,7 +149,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
 
     ArchiveFile_t item;
     FileInfo file_info;
-    File* directory = storage_file();
+    File* directory = storage_file_alloc(archive->api);
     char name[MAX_NAME_LEN];
 
     with_view_model(
@@ -158,8 +158,9 @@ static bool archive_get_filenames(ArchiveApp* archive) {
             return true;
         });
 
-    if(!storage_dir_open(archive->api, &directory, string_get_cstr(archive->browser.path))) {
-        storage_dir_close(&directory);
+    if(!storage_dir_open(directory, string_get_cstr(archive->browser.path))) {
+        storage_dir_close(directory);
+        storage_file_free(directory);
         return false;
     }
 
@@ -193,12 +194,14 @@ static bool archive_get_filenames(ArchiveApp* archive) {
                 ArchiveFile_t_clear(&item);
             }
         } else {
-            storage_dir_close(&directory);
+            storage_dir_close(directory);
+            storage_file_free(directory);
             return false;
         }
     }
 
-    storage_dir_close(&directory);
+    storage_dir_close(directory);
+    storage_file_free(directory);
     return true;
 }
 

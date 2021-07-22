@@ -17,9 +17,9 @@ static bool storage_settings_bench_write(
     uint16_t size,
     const uint8_t* data,
     uint32_t* speed) {
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
     bool result = true;
-    if(storage_file_open(api, &file, BENCH_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(storage_file_open(file, BENCH_FILE, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         uint32_t ticks;
         ticks = osKernelGetTickCount();
 
@@ -37,17 +37,18 @@ static bool storage_settings_bench_write(
         *speed /= ticks;
         *speed /= 1024.0f;
     }
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
     return result;
 }
 
 static bool
     storage_settings_bench_read(StorageApp* api, uint16_t size, uint8_t* data, uint32_t* speed) {
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
     bool result = true;
     *speed = -1;
 
-    if(storage_file_open(api, &file, BENCH_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(storage_file_open(file, BENCH_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint32_t ticks;
         ticks = osKernelGetTickCount();
 
@@ -65,7 +66,8 @@ static bool
         *speed /= ticks;
         *speed /= 1024;
     }
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
     return result;
 }
 

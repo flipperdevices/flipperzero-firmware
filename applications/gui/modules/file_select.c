@@ -271,8 +271,7 @@ bool file_select_fill_strings(FileSelect* file_select) {
     furi_assert(file_select->extension);
 
     FileInfo file_info;
-    StorageApp* api = file_select->fs_api;
-    File* directory = storage_file();
+    File* directory = storage_file_alloc(file_select->fs_api);
 
     uint8_t string_counter = 0;
     uint16_t file_counter = 0;
@@ -286,8 +285,9 @@ bool file_select_fill_strings(FileSelect* file_select) {
             return false;
         });
 
-    if(!storage_dir_open(api, &directory, file_select->path)) {
-        storage_dir_close(&directory);
+    if(!storage_dir_open(directory, file_select->path)) {
+        storage_dir_close(directory);
+        storage_file_free(directory);
         free(name);
         return false;
     }
@@ -320,13 +320,15 @@ bool file_select_fill_strings(FileSelect* file_select) {
                 file_counter++;
             }
         } else {
-            storage_dir_close(&directory);
+            storage_dir_close(directory);
+            storage_file_free(directory);
             free(name);
             return false;
         }
     }
 
-    storage_dir_close(&directory);
+    storage_dir_close(directory);
+    storage_file_free(directory);
     free(name);
     return true;
 }
@@ -338,15 +340,15 @@ bool file_select_fill_count(FileSelect* file_select) {
     furi_assert(file_select->extension);
 
     FileInfo file_info;
-    StorageApp* api = file_select->fs_api;
-    File* directory = storage_file();
+    File* directory = storage_file_alloc(file_select->fs_api);
 
     uint16_t file_counter = 0;
     const uint8_t name_length = 100;
     char* name = furi_alloc(name_length);
 
-    if(!storage_dir_open(api, &directory, file_select->path)) {
-        storage_dir_close(&directory);
+    if(!storage_dir_open(directory, file_select->path)) {
+        storage_dir_close(directory);
+        storage_file_free(directory);
         free(name);
         return false;
     }
@@ -361,7 +363,8 @@ bool file_select_fill_count(FileSelect* file_select) {
                 file_counter++;
             }
         } else {
-            storage_dir_close(&directory);
+            storage_dir_close(directory);
+            storage_file_free(directory);
             free(name);
             return false;
         }
@@ -373,7 +376,8 @@ bool file_select_fill_count(FileSelect* file_select) {
             return false;
         });
 
-    storage_dir_close(&directory);
+    storage_dir_close(directory);
+    storage_file_free(directory);
     free(name);
     return true;
 }
@@ -388,8 +392,7 @@ void file_select_set_selected_file_internal(FileSelect* file_select, const char*
     if(strlen(filename) == 0) return;
 
     FileInfo file_info;
-    StorageApp* api = file_select->fs_api;
-    File* directory = storage_file();
+    File* directory = storage_file_alloc(file_select->fs_api);
 
     const uint8_t name_length = 100;
     char* name = furi_alloc(name_length);
@@ -402,9 +405,10 @@ void file_select_set_selected_file_internal(FileSelect* file_select, const char*
         string_cat_str(filename_str, file_select->extension);
     }
 
-    if(!storage_dir_open(api, &directory, file_select->path)) {
+    if(!storage_dir_open(directory, file_select->path)) {
         string_clear(filename_str);
-        storage_dir_close(&directory);
+        storage_dir_close(directory);
+        storage_file_free(directory);
         free(name);
         return;
     }
@@ -425,7 +429,8 @@ void file_select_set_selected_file_internal(FileSelect* file_select, const char*
             }
         } else {
             string_clear(filename_str);
-            storage_dir_close(&directory);
+            storage_dir_close(directory);
+            storage_file_free(directory);
             free(name);
             return;
         }
@@ -454,7 +459,8 @@ void file_select_set_selected_file_internal(FileSelect* file_select, const char*
     }
 
     string_clear(filename_str);
-    storage_dir_close(&directory);
+    storage_dir_close(directory);
+    storage_file_free(directory);
     free(name);
 }
 

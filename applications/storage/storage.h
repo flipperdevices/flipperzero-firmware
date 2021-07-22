@@ -10,35 +10,38 @@ extern "C" {
 typedef struct StorageApp StorageApp;
 
 /**
- * Initializes a file pointer with NULL
- * @return NULL
+ * Allocates and initializes a file descriptor
+ * @return File*
  */
-File* storage_file();
+File* storage_file_alloc(StorageApp* app);
+
+/**
+ * Frees the file descriptor. Closes the file if it was open.
+ */
+void storage_file_free(File* file);
 
 /******************* File Functions *******************/
 
 /**
- * Opens an existing file or create a new one. Also allocates the file handle structure and binds it to the api.
- * @param app pointer to the api
- * @param file pointer to pointer to file object, will be allocated and filled by api. The pointer to a file object must point to the NULL.
+ * Opens an existing file or create a new one.
+ * @param file pointer to file object.
  * @param path path to file 
  * @param access_mode access mode from FS_AccessMode 
  * @param open_mode open mode from FS_OpenMode 
  * @return success flag. You need to close the file even if the open operation failed.
  */
 bool storage_file_open(
-    StorageApp* app,
-    File** file,
+    File* file,
     const char* path,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode);
 
 /**
- * Close the file. Also free file handle structure and point it to the NULL.
- * @param file pointer to a pointer to a file object, the file object will be freed, and the pointer to a file object will be set to NULL. The pointer to a file object must not point to NULL.
+ * Close the file.
+ * @param file pointer to a file object, the file object will be freed.
  * @return success flag
  */
-bool storage_file_close(File** file);
+bool storage_file_close(File* file);
 
 /**
  * Tells if the file is open
@@ -49,7 +52,7 @@ bool storage_file_is_open(File* file);
 
 /**
  * Reads bytes from a file into a buffer
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @param buff pointer to a buffer, for reading
  * @param bytes_to_read how many bytes to read. Must be less than or equal to the size of the buffer.
  * @return uint16_t how many bytes were actually readed
@@ -58,7 +61,7 @@ uint16_t storage_file_read(File* file, void* buff, uint16_t bytes_to_read);
 
 /**
  * Writes bytes from a buffer to a file
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @param buff pointer to buffer, for writing
  * @param bytes_to_write how many bytes to write. Must be less than or equal to the size of the buffer.
  * @return uint16_t how many bytes were actually written
@@ -67,7 +70,7 @@ uint16_t storage_file_write(File* file, const void* buff, uint16_t bytes_to_writ
 
 /**
  * Moves the r/w pointer 
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @param offset offset to move the r/w pointer
  * @param from_start set an offset from the start or from the current position
  * @return success flag
@@ -76,35 +79,35 @@ bool storage_file_seek(File* file, uint32_t offset, bool from_start);
 
 /**
  * Gets the position of the r/w pointer 
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return uint64_t position of the r/w pointer 
  */
 uint64_t storage_file_tell(File* file);
 
 /**
  * Truncates the file size to the current position of the r/w pointer
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return bool success flag
  */
 bool storage_file_truncate(File* file);
 
 /**
  * Gets the size of the file
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return uint64_t size of the file
  */
 uint64_t storage_file_size(File* file);
 
 /**
  * Writes file cache to storage
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return bool success flag
  */
 bool storage_file_sync(File* file);
 
 /**
  * Checks that the r/w pointer is at the end of the file
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return bool success flag
  */
 bool storage_file_eof(File* file);
@@ -114,22 +117,22 @@ bool storage_file_eof(File* file);
 /**
  * Opens a directory to get objects from it
  * @param app pointer to the api
- * @param file pointer to pointer to file object, will be allocated and filled by api. The pointer to a file object must point to the NULL.
+ * @param file pointer to file object.
  * @param path path to directory
  * @return bool success flag. You need to close the directory even if the open operation failed.
  */
-bool storage_dir_open(StorageApp* app, File** file, const char* path);
+bool storage_dir_open(File* file, const char* path);
 
 /**
  * Close the directory. Also free file handle structure and point it to the NULL.
- * @param file pointer to a pointer to a file object, the file object will be freed, and the pointer to a file object will be set to NULL. The pointer to a file object must not point to NULL.
+ * @param file pointer to a file object.
  * @return bool success flag
  */
-bool storage_dir_close(File** file);
+bool storage_dir_close(File* file);
 
 /**
  * Reads the next object in the directory
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @param fileinfo pointer to the readed FileInfo, may be NULL
  * @param name pointer to name buffer, may be NULL
  * @param name_length name buffer length
@@ -139,7 +142,7 @@ bool storage_dir_read(File* file, FileInfo* fileinfo, char* name, uint16_t name_
 
 /**
  * Rewinds the read pointer to first item in the directory
- * @param file pointer to file object. Pointer must not point to NULL and file must be open.
+ * @param file pointer to file object.
  * @return bool success flag
  */
 bool storage_dir_rewind(File* file);

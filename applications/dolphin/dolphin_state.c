@@ -67,9 +67,8 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     store.data = dolphin_state->data;
 
     // Store
-    File* file = storage_file();
-    bool save_result = storage_file_open(
-        dolphin_state->fs_api, &file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    File* file = storage_file_alloc(dolphin_state->fs_api);
+    bool save_result = storage_file_open(file, DOLPHIN_STORE_KEY, FSAM_WRITE, FSOM_CREATE_ALWAYS);
 
     if(save_result) {
         uint16_t bytes_count = storage_file_write(file, &store, sizeof(DolphinStore));
@@ -86,7 +85,8 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
             storage_file_get_error_desc(file));
     }
 
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
 
     FURI_LOG_I("dolphin-state", "Saved");
     return save_result;
@@ -97,9 +97,8 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     // Read Dolphin State Store
     FURI_LOG_I("dolphin-state", "Loading state from \"%s\"", DOLPHIN_STORE_KEY);
 
-    File* file = storage_file();
-    bool load_result = storage_file_open(
-        dolphin_state->fs_api, &file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
+    File* file = storage_file_alloc(dolphin_state->fs_api);
+    bool load_result = storage_file_open(file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(load_result) {
         uint16_t bytes_count = storage_file_read(file, &store, sizeof(DolphinStore));
@@ -152,7 +151,8 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
         }
     }
 
-    storage_file_close(&file);
+    storage_file_close(file);
+    storage_file_free(file);
     return load_result;
 }
 

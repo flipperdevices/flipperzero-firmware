@@ -24,12 +24,13 @@ FileWorker* file_worker_alloc(bool _silent) {
     FileWorker* file_worker = malloc(sizeof(FileWorker));
     file_worker->silent = _silent;
     file_worker->api = furi_record_open("storage");
-    file_worker->file = storage_file();
+    file_worker->file = storage_file_alloc(file_worker->api);
 
     return file_worker;
 }
 
 void file_worker_free(FileWorker* file_worker) {
+    storage_file_free(file_worker->file);
     furi_record_close("storage");
     free(file_worker);
 }
@@ -39,8 +40,7 @@ bool file_worker_open(
     const char* filename,
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
-    bool result =
-        storage_file_open(file_worker->api, &file_worker->file, filename, access_mode, open_mode);
+    bool result = storage_file_open(file_worker->file, filename, access_mode, open_mode);
 
     if(!result) {
         file_worker_show_error_internal(file_worker, "Cannot open\nfile");
@@ -52,7 +52,7 @@ bool file_worker_open(
 
 bool file_worker_close(FileWorker* file_worker) {
     if(storage_file_is_open(file_worker->file)) {
-        storage_file_close(&file_worker->file);
+        storage_file_close(file_worker->file);
     }
 
     return file_worker_check_common_errors(file_worker);
@@ -371,10 +371,11 @@ bool file_worker_check_errors(FileWorker* file_worker) {
 }
 
 bool file_worker_is_file_exist(FileWorker* file_worker, const char* filename, bool* exist) {
-    File* file = storage_file();
+    File* file = storage_file_alloc(file_worker->api);
 
-    *exist = storage_file_open(file_worker->api, &file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
-    storage_file_close(&file);
+    *exist = storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
+    storage_file_close(file);
+    storage_file_free(file);
 
     return file_worker_check_common_errors(file_worker);
 }

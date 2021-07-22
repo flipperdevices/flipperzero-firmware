@@ -10,7 +10,7 @@
 #define SEEK_OFFSET_SUM (SEEK_OFFSET_FROM_START + SEEK_OFFSET_INCREASE)
 
 static void do_file_test(StorageApp* api, const char* path) {
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
     bool result;
     uint8_t bytes[BYTES_COUNT + 1];
     uint8_t bytes_count;
@@ -20,7 +20,7 @@ static void do_file_test(StorageApp* api, const char* path) {
     FURI_LOG_I(TAG, "--------- FILE \"%s\" ---------", path);
 
     // open
-    result = storage_file_open(api, &file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    result = storage_file_open(file, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
@@ -110,7 +110,7 @@ static void do_file_test(StorageApp* api, const char* path) {
     }
 
     // close
-    result = storage_file_close(&file);
+    result = storage_file_close(file);
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
@@ -118,7 +118,7 @@ static void do_file_test(StorageApp* api, const char* path) {
     }
 
     // open
-    result = storage_file_open(api, &file, path, FSAM_READ, FSOM_OPEN_EXISTING);
+    result = storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
@@ -139,22 +139,24 @@ static void do_file_test(StorageApp* api, const char* path) {
     }
 
     // close
-    result = storage_file_close(&file);
+    result = storage_file_close(file);
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
         FURI_LOG_E(TAG, "close, error");
     }
+
+    storage_file_free(file);
 }
 
 static void do_dir_test(StorageApp* api, const char* path) {
-    File* file = storage_file();
+    File* file = storage_file_alloc(api);
     bool result;
 
     FURI_LOG_I(TAG, "--------- DIR \"%s\" ---------", path);
 
     // open
-    result = storage_dir_open(api, &file, path);
+    result = storage_dir_open(file, path);
     if(result) {
         FURI_LOG_I(TAG, "open");
     } else {
@@ -210,13 +212,14 @@ static void do_dir_test(StorageApp* api, const char* path) {
     } while((strlen(filename)));
 
     // close
-    result = storage_dir_close(&file);
+    result = storage_dir_close(file);
     if(result) {
         FURI_LOG_I(TAG, "close");
     } else {
         FURI_LOG_E(TAG, "close, error");
     }
 
+    storage_file_free(file);
     free(filename);
 }
 
