@@ -4,8 +4,7 @@
 
 void nfc_scene_save_success_popup_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(
-        nfc->nfc_common.view_dispatcher, SCENE_SAVE_SUCCESS_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, SCENE_SAVE_SUCCESS_CUSTOM_EVENT);
 }
 
 const void nfc_scene_save_success_on_enter(void* context) {
@@ -19,7 +18,7 @@ const void nfc_scene_save_success_on_enter(void* context) {
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_save_success_popup_callback);
     popup_enable_timeout(popup);
-    view_dispatcher_switch_to_view(nfc->nfc_common.view_dispatcher, NfcViewPopup);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 
 const bool nfc_scene_save_success_on_event(void* context, SceneManagerEvent event) {
