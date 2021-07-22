@@ -42,6 +42,9 @@
 #define S_RETURN_ERROR (return_data.error_value);
 #define S_RETURN_CSTRING (return_data.cstring_value);
 
+#define FILE_OPENED 1
+#define FILE_CLOSED 0
+
 /****************** FILE ******************/
 
 bool storage_file_open(
@@ -60,6 +63,8 @@ bool storage_file_open(
             .open_mode = open_mode,
         }};
 
+    file->file_id = FILE_OPENED;
+
     S_API_MESSAGE(StorageCommandFileOpen);
     S_API_EPILOGUE;
 
@@ -74,7 +79,7 @@ bool storage_file_close(File* file) {
     S_API_MESSAGE(StorageCommandFileClose);
     S_API_EPILOGUE;
 
-    file->file_id = 0;
+    file->file_id = FILE_CLOSED;
 
     return S_RETURN_BOOL;
 }
@@ -184,6 +189,8 @@ bool storage_dir_open(File* file, const char* path) {
             .path = path,
         }};
 
+    file->file_id = FILE_OPENED;
+
     S_API_MESSAGE(StorageCommandDirOpen);
     S_API_EPILOGUE;
     return S_RETURN_BOOL;
@@ -196,7 +203,7 @@ bool storage_dir_close(File* file) {
     S_API_MESSAGE(StorageCommandDirClose);
     S_API_EPILOGUE;
 
-    file->file_id = 0;
+    file->file_id = FILE_CLOSED;
 
     return S_RETURN_BOOL;
 }
@@ -357,14 +364,14 @@ FS_Error storage_sd_status(Storage* app) {
 
 File* storage_file_alloc(Storage* app) {
     File* file = furi_alloc(sizeof(File));
-    file->file_id = 0;
+    file->file_id = FILE_CLOSED;
     file->api = app;
 
     return file;
 }
 
 bool storage_file_is_open(File* file) {
-    return (file->file_id != 0);
+    return (file->file_id != FILE_CLOSED);
 }
 
 void storage_file_free(File* file) {
