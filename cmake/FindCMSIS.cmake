@@ -98,7 +98,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         NO_DEFAULT_PATH
     )
     if (NOT CMSIS_${FAMILY}${CORE_U}_CORE_PATH)
-        message(VERBOSE "TODO meaning full message 1")
+        message(VERBOSE "FindCMSIS: cmsis_gcc.h for ${FAMILY}${CORE_U} has not been found")
         continue()
     endif()
 	
@@ -109,7 +109,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
         NO_DEFAULT_PATH
     )
     if (NOT CMSIS_${FAMILY}${CORE_U}_PATH)
-        message(VERBOSE "TODO meaning full message 2")
+        message(VERBOSE "FindCMSIS: stm32${FAMILY_L}xx.h for ${FAMILY}${CORE_U} has not been found")
         continue()
     endif()
     list(APPEND CMSIS_INCLUDE_DIRS "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}/Include" "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include")
@@ -142,7 +142,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
     
     if(NOT CMSIS_${FAMILY}${CORE_U}_SOURCE)
-        message(VERBOSE "TODO meaning full message 3")
+        message(VERBOSE "FindCMSIS: system_stm32${FAMILY_L}xx.c for ${FAMILY}${CORE_U} has not been found")
         continue()
     endif()
 

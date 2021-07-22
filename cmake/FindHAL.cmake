@@ -334,7 +334,6 @@ foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
                                                     CMSIS::STM32::${FAMILY}${CORE_C})
         target_include_directories(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_INCLUDE}")
         target_sources(HAL::STM32::${FAMILY}${CORE_C} INTERFACE "${HAL_${FAMILY}${CORE_U}_SOURCE}")
-        message(TRACE "REMOVE ME: depends STM32::${FAMILY}${CORE_C} CMSIS::STM32::${FAMILY}${CORE_C}")
     endif()
     
     foreach(DRV_COMP ${HAL_FIND_COMPONENTS_DRIVERS})
