@@ -42,6 +42,10 @@ jobs:
       - name: Save current date
         run: echo ${{ steps.date.outputs.date }} > date.txt
 
+      - name: Get branch name
+        id: branch
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF##*/})"
+
       - name: Build bootloader in docker
         uses: ./.github/actions/docker
         with:
@@ -67,7 +71,7 @@ jobs:
         with:
           run: |
             for TARGET in ${TARGETS}; do
-            srec_cat bootloader/.obj/${TARGET}/bootloader.hex -Intel firmware/.obj/${TARGET}/firmware.hex -Intel -o flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.hex -Intel
+            srec_cat bootloader/.obj/${TARGET}/bootloader.hex -Intel firmware/.obj/${TARGET}/firmware.hex -Intel -o flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.hex -Intel
             done
 
       - name: Move upload files
@@ -75,28 +79,25 @@ jobs:
         with:
           run: |
             for TARGET in ${TARGETS}; do
-            mv bootloader/.obj/${TARGET}/bootloader.dfu flipper-z-${TARGET}-bootloader-dev${{ steps.date.outputs.date }}.dfu
-            mv bootloader/.obj/${TARGET}/bootloader.bin flipper-z-${TARGET}-bootloader-dev${{ steps.date.outputs.date }}.bin
-            mv bootloader/.obj/${TARGET}/bootloader.elf flipper-z-${TARGET}-bootloader-dev${{ steps.date.outputs.date }}.elf
-            mv firmware/.obj/${TARGET}/firmware.dfu flipper-z-${TARGET}-firmware-dev${{ steps.date.outputs.date }}.dfu
-            mv firmware/.obj/${TARGET}/firmware.bin flipper-z-${TARGET}-firmware-dev${{ steps.date.outputs.date }}.bin
-            mv firmware/.obj/${TARGET}/firmware.elf flipper-z-${TARGET}-firmware-dev${{ steps.date.outputs.date }}.elf
+            mv bootloader/.obj/${TARGET}/bootloader.dfu flipper-z-${TARGET}-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu
+            mv bootloader/.obj/${TARGET}/bootloader.bin flipper-z-${TARGET}-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin
+            mv bootloader/.obj/${TARGET}/bootloader.elf flipper-z-${TARGET}-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf
+            mv firmware/.obj/${TARGET}/firmware.dfu flipper-z-${TARGET}-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu
+            mv firmware/.obj/${TARGET}/firmware.bin flipper-z-${TARGET}-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin
+            mv firmware/.obj/${TARGET}/firmware.elf flipper-z-${TARGET}-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf
             done
 
       - name: Generate full dfu file
         uses: ./.github/actions/docker
         with:
-          run: for TARGET in ${TARGETS}; do hex2dfu -i flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.hex -o flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.dfu; done
+          run: for TARGET in ${TARGETS}; do hex2dfu -i flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.hex -o flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu; done
 
       - name: Copy bootloader for full.bin 
-        run: for TARGET in ${TARGETS}; do cp flipper-z-${TARGET}-bootloader-dev${{ steps.date.outputs.date }}.bin flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.bin; done
+        run: for TARGET in ${TARGETS}; do cp flipper-z-${TARGET}-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin; done
       - name: Truncate full.bin 
-        run: for TARGET in ${TARGETS}; do truncate -s 32768 flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.bin; done
+        run: for TARGET in ${TARGETS}; do truncate -s 32768 flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}{{ steps.date.outputs.date }}.bin; done
       - name: Add firmware.bin at full.bin
-        run: for TARGET in ${TARGETS}; do cat flipper-z-${TARGET}-firmware-dev${{ steps.date.outputs.date }}.bin >> flipper-z-${TARGET}-full-dev${{ steps.date.outputs.date }}.bin; done
-
-      - name: Copy last target to full.dfu
-        run: cp flipper-z-${TARGETS##*" "}-full-dev${{ steps.date.outputs.date }}.dfu full.dfu
+        run: for TARGET in ${TARGETS}; do cat flipper-z-${TARGET}-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin >> flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin; done
 
       - name: Upload date
         uses: actions/upload-artifact@v2
@@ -109,15 +110,14 @@ jobs:
         with:
           name: artifacts
           path: |
-            *-bootloader-dev${{ steps.date.outputs.date }}.dfu
-            *-bootloader-dev${{ steps.date.outputs.date }}.bin
-            *-bootloader-dev${{ steps.date.outputs.date }}.elf
-            *-firmware-dev${{ steps.date.outputs.date }}.dfu
-            *-firmware-dev${{ steps.date.outputs.date }}.bin
-            *-firmware-dev${{ steps.date.outputs.date }}.elf
-            *-full-dev${{ steps.date.outputs.date }}.dfu
-            *-full-dev${{ steps.date.outputs.date }}.bin
-            full.dfu
+            *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu
+            *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin
+            *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf
+            *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu
+            *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin
+            *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf
+            *-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu
+            *-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin
           if-no-files-found: error
           retention-days: 7
 
@@ -141,9 +141,6 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(cat date.txt)"
 
-      - name: Debug
-        run: echo ${{ steps.date.outputs.date }}
-
       - name: Make empty dir
         run: mkdir -p empty
 
@@ -161,15 +158,14 @@ jobs:
       - name: Generate files list
         run: |
               ls \
-              *-bootloader-dev${{ steps.date.outputs.date }}.dfu \
-              *-bootloader-dev${{ steps.date.outputs.date }}.bin \
-              *-bootloader-dev${{ steps.date.outputs.date }}.elf \
-              *-firmware-dev${{ steps.date.outputs.date }}.dfu \
-              *-firmware-dev${{ steps.date.outputs.date }}.bin \
-              *-firmware-dev${{ steps.date.outputs.date }}.elf \
-              *-full-dev${{ steps.date.outputs.date }}.dfu \
-              *-full-dev${{ steps.date.outputs.date }}.bin \
-              full.dfu > uploadlist.txt
+              *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu \
+              *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin \
+              *-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf \
+              *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu \
+              *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin \
+              *-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.elf \
+              *-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.dfu \
+              *-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin > uploadlist.txt
 
       - name: Upload artifacts
         uses: burnett01/rsync-deployments@4.1
@@ -186,34 +182,3 @@ jobs:
         with:
           args: -X POST -F 'key=${{ secrets.REINDEX_KEY }}' ${{ secrets.REINDEX_URL }}
 
-  genpic:
-    name: Generate pic
-    needs: upload
-    if: github.ref == 'refs/heads/release'
-    runs-on: [self-hosted]
-    steps:
-      - name: Set test env
-        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-      - name: Test output NUMBER_OF_COMMITS
-        run: echo $NUMBER_OF_COMMITS
-      - name: Test output date
-        run: |
-          GET_DATE=$(date +"%b %d")
-          PREP_DATE=$(echo "${GET_DATE^^}")
-          echo "PREP_DATE=$PREP_DATE" >> $GITHUB_ENV
-      - name: Test output PREP_DATE
-        run: echo $PREP_DATE
-      - name: Gen pic
-        uses: ./.github/actions/docker
-        with:
-          run: convert ./.github/assets/latest-firmware-template.png -font ./.github/assets/Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS $PREP_DATE" latest-firmware-banner.png
-      - name: Upload pic
-        uses: burnett01/rsync-deployments@4.1
-        with:
-          switches: -avzp --delete
-          path: latest-firmware-banner.png
-          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
-          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
