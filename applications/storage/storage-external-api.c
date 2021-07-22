@@ -282,6 +282,10 @@ FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char
     return S_RETURN_ERROR;
 }
 
+FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* new_path) {
+    return FSE_NOT_IMPLEMENTED;
+}
+
 FS_Error storage_common_mkdir(StorageApp* app, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;

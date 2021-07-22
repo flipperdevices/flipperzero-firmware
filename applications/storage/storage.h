@@ -173,6 +173,15 @@ FS_Error storage_common_remove(StorageApp* app, const char* path);
 FS_Error storage_common_rename(StorageApp* app, const char* old_path, const char* new_path);
 
 /**
+ * Copy file, file must not be open
+ * @param app pointer to the api
+ * @param old_path old path
+ * @param new_path new path
+ * @return FS_Error operation result
+ */
+FS_Error storage_common_copy(StorageApp* app, const char* old_path, const char* new_path);
+
+/**
  * Creates a directory
  * @param app pointer to the api
  * @param path directory path
