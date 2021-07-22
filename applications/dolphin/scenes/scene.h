@@ -20,7 +20,7 @@
 #define SPEED_X 4
 #define SPEED_Y 4
 #define ACTIONS_NUM 5
-#define DOLPHIN_DEFAULT_Y 0
+#define DOLPHIN_DEFAULT_Y 2
 // world
 #define WORLD_WIDTH 256
 #define WORLD_HEIGHT 64
@@ -33,10 +33,10 @@
 
 #define DIALOG_PROGRESS 250
 
-enum Actions { SLEEP = 0, IDLE, WALK, EMOTE, INTERACT, MINDCONTROL };
+enum Actions { IDLE = 0, EMOTE, INTERACT, MINDCONTROL };
 
 static const uint16_t default_timeout[] =
-    {[SLEEP] = 300, [IDLE] = 100, [WALK] = 100, [EMOTE] = 50, [INTERACT] = 10, [MINDCONTROL] = 50};
+    {[IDLE] = 100, [EMOTE] = 50, [INTERACT] = 10, [MINDCONTROL] = 50};
 
 typedef enum {
     EventTypeTick,

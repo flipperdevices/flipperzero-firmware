@@ -1,6 +1,7 @@
 #include <gui/elements.h>
 #include "applications.h"
 #include "items_i.h"
+#include "emotes.h"
 #include <gui/icon_i.h>
 
 const Item PC = {
@@ -17,8 +18,7 @@ const Item PC = {
     .draw = draw_pc,
     .callback = pc_callback};
 
-const Item* Home[ItemsEnumTotal] = {
-    /* [ItemsTV] = &TV, [ItemsSofa] = &Sofa, [ItemsPainting] = &Painting, */ [ItemsPC] = &PC};
+const Item* Home[ItemsEnumTotal] = {[ItemsPC] = &PC};
 const Item** Scenes[1] = {*&Home};
 
 const Item** get_scene(SceneState* state) {
@@ -38,6 +38,15 @@ static void dolphin_scene_start_app(SceneState* state, const FlipperApplication*
     furi_thread_set_stack_size(state->scene_app_thread, flipper_app->stack_size);
     furi_thread_set_callback(state->scene_app_thread, flipper_app->app);
     furi_thread_start(state->scene_app_thread);
+}
+
+uint16_t roll_new(uint16_t prev, uint16_t max) {
+    uint16_t val = 999;
+    while(val != prev) {
+        val = random() % max;
+        break;
+    }
+    return val;
 }
 
 const void scene_activate_item_callback(SceneState* state, Canvas* canvas) {
@@ -74,9 +83,9 @@ const Item* is_nearby(SceneState* state) {
             (DOLPHIN_CENTER + DOLPHIN_WIDTH / 2 -
              (current[item]->pos.x - state->player_global.x) * PARALLAX(current[item]->layer));
 
-        int32_t rel_y = (DOLPHIN_HEIGHT - (current[item]->pos.y - state->player_global.y));
+        int32_t rel_y = ((current[item]->pos.y - state->player_global.y));
 
-        if(abs(rel_x) <= DOLPHIN_WIDTH / 2 && abs(rel_y) <= DOLPHIN_HEIGHT / 2) {
+        if(abs(rel_x) <= DOLPHIN_WIDTH && abs(rel_y) <= DOLPHIN_HEIGHT / 4) {
             found = !found;
             break;
         }
@@ -111,6 +120,33 @@ void draw_pc(Canvas* canvas, void* state) {
         console[frame]);
 
     canvas_set_bitmap_mode(canvas, true);
+
+    if(is_nearby(s)) {
+        char dialog_str[64];
+        char buf[64];
+
+        strcpy(dialog_str, (char*)console_emotes[s->emote_id]);
+
+        if(s->dialog_progress <= strlen(dialog_str)) {
+            if(HAL_GetTick() / 10 % 2 == 0) s->dialog_progress++;
+            dialog_str[s->dialog_progress] = '\0';
+            snprintf(buf, s->dialog_progress, dialog_str);
+        } else {
+            snprintf(buf, 64, dialog_str);
+        }
+
+        canvas_draw_str_aligned(
+            canvas,
+            (PC.pos.x - s->player_global.x) * PARALLAX(PC.layer) - 25,
+            PC.pos.y - s->player.y - 50,
+            AlignCenter,
+            AlignCenter,
+            buf);
+
+    } else {
+        s->dialog_progress = 0;
+        s->emote_id = roll_new(s->previous_emote, SIZEOF_ARRAY(console_emotes));
+    }
 }
 
 void pc_callback(Canvas* canvas, void* state) {

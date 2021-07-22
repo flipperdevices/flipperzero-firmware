@@ -1,103 +1,9 @@
 #include <furi.h>
 #include "scene.h"
-#include "assets/emotes.h"
 #include "assets/items.h"
 #include <gui/elements.h>
 
-const char* action_str[] = {"Sleep", "Idle", "Walk", "Emote", "Use", "MC"};
-
-#if 0
-static void scene_draw_hint(SceneState* state, Canvas* canvas, bool glitching) {
-    furi_assert(state);
-    furi_assert(canvas);
-    char buf[32];
-
-    const Item* near = is_nearby(state);
-    if(near) {
-        int32_t hint_pos_x = (near->pos.x - state->player_global.x) * PARALLAX(near->layer) + 25;
-        int8_t hint_pos_y = (near->pos.y - state->player_global.y) - 5;
-
-        strcpy(buf, near->action_name);
-
-        if(glitching) {
-            for(size_t g = 0; g != state->action_timeout; g++) {
-                buf[(g * 23) % strlen(buf)] = ' ' + (random() % g * 17) % ('z' - ' ');
-            }
-        }
-
-        canvas_draw_str(canvas, hint_pos_x, hint_pos_y, buf);
-    }
-}
-
-static void scene_draw_sleep_emote(SceneState* state, Canvas* canvas) {
-    furi_assert(state);
-    furi_assert(canvas);
-
-    char dialog_str[] = "zZzZ..";
-    // 2do - sofa x pos getter
-    const Vec2 item_pos = item_get_pos(state, ItemsSofa);
-
-    bool on_pos = (abs(state->player_global.x - item_pos.x) <= 1) &&
-                  (abs(state->player_global.y - item_pos.y) <= 1);
-
-    if(on_pos && state->action_timeout % 100 < 50) {
-        if(state->dialog_progress < strlen(dialog_str)) {
-            if(state->action_timeout % 10 == 0) state->dialog_progress++;
-
-            dialog_str[state->dialog_progress + 1] = '\0';
-            canvas_draw_str(canvas, 80, 20, dialog_str);
-        }
-
-    } else {
-        state->dialog_progress = 0;
-    }
-}
-#endif
-
-static void scene_draw_current_emote(SceneState* state, Canvas* canvas) {
-    furi_assert(state);
-    furi_assert(canvas);
-    elements_multiline_text_framed(canvas, 80, 20, (char*)emotes_list[state->emote_id]);
-}
-
-static void scene_draw_dialog(SceneState* state, Canvas* canvas) {
-    furi_assert(state);
-    furi_assert(canvas);
-
-    char dialog_str[64];
-    char buf[64];
-
-    strcpy(dialog_str, (char*)dialogues_list[state->dialogue_id]);
-
-    if(state->dialog_progress <= strlen(dialog_str)) {
-        if(state->action_timeout % 2 == 0) state->dialog_progress++;
-        dialog_str[state->dialog_progress] = '\0';
-        snprintf(buf, state->dialog_progress, dialog_str);
-    } else {
-        snprintf(buf, 64, dialog_str);
-    }
-
-    elements_multiline_text_framed(canvas, 68, 16, buf);
-}
-
-static void draw_idle_emote(SceneState* state, Canvas* canvas) {
-    furi_assert(state);
-    furi_assert(canvas);
-
-    char dialog_str[] = "...";
-
-    if(state->action_timeout % 100 < 50) {
-        if(state->dialog_progress < strlen(dialog_str)) {
-            if(state->action_timeout % 10 == 0) state->dialog_progress++;
-
-            dialog_str[state->dialog_progress + 1] = '\0';
-            canvas_draw_str(canvas, 70, 15, dialog_str);
-        }
-
-    } else {
-        state->dialog_progress = 0;
-    }
-}
+const char* action_str[] = {"Idle", "Emote", "Use", "MC"};
 
 void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
@@ -201,7 +107,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                     state->dolphin_gfx_b = &I_black_left3_73x61;
                 }
             }
-        } else if(state->player_v.x > 0) {
+        } else if(state->player_v.x > 0 || !state->player_flipped_x) {
             if(state->transition) {
                 if(state->player_anim == 0) {
                     state->dolphin_gfx = &I_rightleft2_73x61;
@@ -225,18 +131,6 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
                 }
             }
         }
-
-#if 0
-        if(state->action == SLEEP) {
-            const Vec2 item_pos = item_get_pos(state, ItemsSofa);
-
-            if((abs(state->player_global.x - item_pos.x) <= 1) &&
-               (abs(state->player_global.y - item_pos.y) <= 1)) {
-                state->dolphin_gfx = A_FX_Sitting_40x27;
-                state->dolphin_gfx_b = I_FX_SittingB_40x27;
-            }
-        }
-#endif
     }
 
     canvas_set_bitmap_mode(canvas, true);
@@ -319,18 +213,5 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
         canvas_draw_str(canvas, 0, 13, buf);
     }
 
-    if(state->scene_zoom == SCENE_ZOOM)
-        scene_draw_dialog(state, canvas);
-    else if(state->action == EMOTE)
-        scene_draw_current_emote(state, canvas);
-
-#if 0
-    else if(state->action == MINDCONTROL)
-        scene_draw_hint(state, canvas, state->action_timeout > 45);
-#endif
-
-    else if(state->action == INTERACT)
-        scene_activate_item_callback(state, canvas);
-    else if(state->action == IDLE)
-        draw_idle_emote(state, canvas);
+    if(state->action == INTERACT) scene_activate_item_callback(state, canvas);
 }

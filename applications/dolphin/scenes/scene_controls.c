@@ -9,27 +9,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     if(input->type == InputTypePress) {
         state->action = MINDCONTROL;
     }
-#if 0
 
-    // dolphin_scene_debug
-    if(input->type == InputTypeShort) {
-        if(input->key == InputKeyUp) {
-            state->debug = !state->debug;
-        }
-    }
-
-    // zoom poc for tests
-    if(input->type == InputTypePress) {
-        if(input->key == InputKeyDown) {
-            state->zoom_v = SPEED_X;
-        }
-    } else if(input->type == InputTypeRelease) {
-        if(input->key == InputKeyDown) {
-            state->zoom_v = -SPEED_X * 2;
-            state->dialog_progress = 0;
-        }
-    }
-#endif
     // mind control
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
@@ -43,6 +23,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_v.y = SPEED_Y;
             }
         }
+
         if(input->type == InputTypeRelease) {
             if(input->key == InputKeyRight || input->key == InputKeyLeft) {
                 state->player_v.x = 0;
@@ -68,19 +49,12 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
     state->player_global.y = CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT, 0);
 
-#if 0
-    // zoom handlers
-    state->scene_zoom = CLAMP(state->scene_zoom + state->zoom_v, SCENE_ZOOM, 0);
-    state->player.x = CLAMP(state->player.x - (state->zoom_v * (SPEED_X * 2)), DOLPHIN_CENTER, 0);
-    state->player.y = CLAMP(state->player.y - (state->zoom_v * SPEED_X / 2), DOLPHIN_DEFAULT_Y, 0);
-
-    //center screen
-    state->screen.x = CLAMP(state->player_global.x - state->player.x, WORLD_WIDTH, 0);
-    state->screen.y = CLAMP(state->player_global.y - state->player.y, WORLD_HEIGHT, 0);
-#endif
-
     // nudge camera postition
     if(state->player_global.x > 178) {
+        if(state->player_v.x > 0) {
+            state->player_v.x *= 1.3;
+        }
+
         state->player.x =
             CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
     }

@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 static const char* emotes_list[] = {
     "(O_o)",   "(!_?)",   "(^_^)",   "(*__*)", "(@_@)",   "(X_x)",   "(>_<)",   "(^ ^)", "(^_^)",
     "(-_-)",   "(~_~)",   "(#^.^#)", "(^ ^)",  "(^.^)",   "(-.-)",   "zZzZ",    "(^_-)", "(^_-)",
@@ -9,7 +10,14 @@ static const char* emotes_list[] = {
     "(?_?)",   "(*^_^*)", "(^<^)",   "(^.^)",  "(^·^)",   "(^.^)",   "(^_^.)",  "(^_^)", "(^^)",
     "(^J^)",   "(*^.^*)", "(#^.^#)", "(~o~)",  "(^o^)",   "(-o-)",   "(^. ^)",  "(^o^)", "(*^0^*)",
     "(*_*)",   "(~ o ~)", "(~_~)",   "(p_-)",  "d[-_-]b", "(^0_0^)", "- ^ -"};
+#endif
 
-static const char* dialogues_list[] = {
-    "Let's hack!\n\nbla bla bla\nbla bla..",
+const char* console_emotes[] = {
+    "Run it, m8",
+    "Lets GOOOO",
+    "Click it, buddy",
+    "I wanna play",
+    "Wtf is this?",
+    "Just do it",
+    "JUST DO IT!",
 };
