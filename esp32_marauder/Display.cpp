@@ -53,7 +53,7 @@ void Display::RunSetup()
   // This should probably have its own class
   if (!SPIFFS.begin()) {
     Serial.println(F("SPIFFS initialisation failed!"));
-    while (1) yield(); // Stay here twiddling thumbs waiting
+    //while (1) yield(); // Stay here twiddling thumbs waiting
   }
 
   //this->initLVGL();
@@ -447,15 +447,16 @@ void Display::drawJpeg(const char *filename, int xpos, int ypos) {
   fs::File jpegFile = SPIFFS.open( filename, "r");    // File handle reference for SPIFFS
 
   //ESP32 always seems to return 1 for jpegFile so this null trap does not work
-  if ( !jpegFile ) {
-    Serial.print("ERROR: File \""); Serial.print(filename); Serial.println ("\" not found!");
-    return;
-  }
+  //if ( !jpegFile ) {
+  //  Serial.print("ERROR: File \""); Serial.print(filename); Serial.println ("\" not found!");
+  //  return;
+  //}
 
   // Use one of the three following methods to initialise the decoder,
   // the filename can be a String or character array type:
 
-  boolean decoded = JpegDec.decodeFsFile(filename);  // or pass the filename (leading / distinguishes SPIFFS files)
+  //boolean decoded = JpegDec.decodeFsFile(filename);  // or pass the filename (leading / distinguishes SPIFFS files)
+  boolean decoded = JpegDec.decodeArray(MarauderTitle, 13578);
 
   if (decoded) {
     // print information about the image to the serial port
@@ -619,7 +620,7 @@ void Display::jpegRender(int xpos, int ypos) {
 //   Print information decoded from the Jpeg image
 //====================================================================================
 void Display::jpegInfo() {
-/*
+
   Serial.println("===============");
   Serial.println("JPEG image info");
   Serial.println("===============");
@@ -633,7 +634,7 @@ void Display::jpegInfo() {
   Serial.print  ("MCU height :"); Serial.println(JpegDec.MCUHeight);
   Serial.println("===============");
   Serial.println("");
-  */
+  
 }
 
 //====================================================================================

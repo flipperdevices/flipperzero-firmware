@@ -47,8 +47,8 @@
 #define WIFI_ATTACK_BEACON_LIST 15
 
 #define TFT_SHIELD
-//#define TFT_DIY
-//#define KIT
+#define TFT_DIY
+#define KIT
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320

@@ -74,6 +74,8 @@ void setup()
   Serial.begin(115200);
   
   //Serial.begin(115200);
+
+  Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
   
   display_obj.RunSetup();
   display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
