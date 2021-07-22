@@ -79,7 +79,7 @@ bool storage_process_file_close(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.close(storage, file));
         storage_pop_storage_file(file, storage);
@@ -94,7 +94,7 @@ static uint16_t
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.read(storage, file, buff, bytes_to_read));
     }
@@ -111,7 +111,7 @@ static uint16_t storage_process_file_write(
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.write(storage, file, buff, bytes_to_write));
     }
@@ -128,7 +128,7 @@ static bool storage_process_file_seek(
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.seek(storage, file, offset, from_start));
     }
@@ -141,7 +141,7 @@ static uint64_t storage_process_file_tell(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.tell(storage, file));
     }
@@ -154,7 +154,7 @@ static bool storage_process_file_truncate(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.truncate(storage, file));
     }
@@ -167,7 +167,7 @@ static bool storage_process_file_sync(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.sync(storage, file));
     }
@@ -180,7 +180,7 @@ static uint64_t storage_process_file_size(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.size(storage, file));
     }
@@ -193,7 +193,7 @@ static bool storage_process_file_eof(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, file.eof(storage, file));
     }
@@ -229,7 +229,7 @@ bool storage_process_dir_close(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, dir.close(storage, file));
         storage_pop_storage_file(file, storage);
@@ -248,7 +248,7 @@ bool storage_process_dir_read(
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, dir.read(storage, file, fileinfo, name, name_length));
     }
@@ -261,7 +261,7 @@ bool storage_process_dir_rewind(Storage* app, File* file) {
     StorageData* storage = get_storage_by_file(file, app->storage);
 
     if(storage == NULL) {
-        file->error_id = FSE_INVALID_NAME;
+        file->error_id = FSE_INVALID_PARAMETER;
     } else {
         FS_CALL(storage, dir.rewind(storage, file));
     }
