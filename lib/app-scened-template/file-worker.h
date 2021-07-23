@@ -1,6 +1,6 @@
 #pragma once
 #include <m-string.h>
-#include <filesystem-api.h>
+#include <storage/storage.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -150,20 +150,68 @@ void file_worker_show_error(FileWorker* file_worker, const char* error_text);
  * @brief Show system file select widget
  * 
  * @param file_worker FileWorker instance 
- * @param path 
- * @param extension 
- * @param result 
- * @param result_size 
- * @param selected_filename 
- * @return true if file was selected
+ * @param path path to directory
+ * @param extension file extension to be offered for selection
+ * @param selected_filename buffer where the selected filename will be saved
+ * @param selected_filename_size and the size of this buffer
+ * @param preselected_filename filename to be preselected
+ * @return bool whether a file was selected
  */
 bool file_worker_file_select(
     FileWorker* file_worker,
     const char* path,
     const char* extension,
-    char* result,
-    uint8_t result_size,
-    char* selected_filename);
+    char* selected_filename,
+    uint8_t selected_filename_size,
+    const char* preselected_filename);
+
+/**
+ * @brief Reads data from a file until separator or EOF is found.
+ * The separator is included in the result.
+ *
+ * @param file_worker FileWorker instance
+ * @param str_result
+ * @param file_buf
+ * @param file_buf_cnt
+ * @param max_length
+ * @param separator
+ * @return true on success
+ */
+bool file_worker_read_until_buffered(
+    FileWorker* file_worker,
+    string_t str_result,
+    char* file_buf,
+    size_t* file_buf_cnt,
+    size_t max_length,
+    char separator);
+
+/**
+ * @brief Check whether file exist or not
+ *
+ * @param file_worker FileWorker instance
+ * @param filename
+ * @param exist - flag to show file exist
+ * @return true on success
+ */
+bool file_worker_is_file_exist(FileWorker* file_worker, const char* filename, bool* exist);
+
+/**
+ * @brief Rename file or directory
+ *
+ * @param file_worker FileWorker instance
+ * @param old_filename
+ * @param new_filename
+ * @return true on success
+ */
+bool file_worker_rename(FileWorker* file_worker, const char* old_path, const char* new_path);
+
+/**
+ * @brief Check errors
+ *
+ * @param file_worker FileWorker instance
+ * @return true on success
+ */
+bool file_worker_check_errors(FileWorker* file_worker);
 
 #ifdef __cplusplus
 }

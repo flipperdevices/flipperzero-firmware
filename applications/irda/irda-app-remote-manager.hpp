@@ -5,10 +5,8 @@
 #include <vector>
 #include <memory>
 #include <irda.h>
-#include <sd-card-api.h>
-#include <filesystem-api.h>
+#include <storage/storage.h>
 #include "irda-app-signal.h"
-
 
 class IrdaAppRemoteButton {
     friend class IrdaAppRemoteManager;
@@ -49,8 +47,8 @@ public:
     int find_remote_name(const std::vector<std::string>& strings);
     bool rename_button(uint32_t index, const char* str);
     bool rename_remote(const char* str);
+    std::string find_vacant_remote_name(const std::string& name);
 
-    bool get_remote_list(std::vector<std::string>& remote_names) const;
     std::vector<std::string> get_button_list() const;
     std::string get_button_name(uint32_t index);
     std::string get_remote_name();
@@ -58,9 +56,9 @@ public:
     const IrdaAppSignal& get_button_data(size_t index) const;
     bool delete_button(uint32_t index);
     bool delete_remote();
+    void reset_remote();
 
     bool store();
-    bool load(const std::string& name, bool fullpath = false);
-    bool check_fs() const;
+    bool load(const std::string& name);
 };
 

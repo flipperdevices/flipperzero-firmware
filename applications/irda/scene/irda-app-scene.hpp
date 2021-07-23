@@ -65,13 +65,6 @@ public:
     void on_exit(IrdaApp* app) final;
 };
 
-class IrdaAppSceneLearnDoneAfter : public IrdaAppScene {
-public:
-    void on_enter(IrdaApp* app) final;
-    bool on_event(IrdaApp* app, IrdaAppEvent* event) final;
-    void on_exit(IrdaApp* app) final;
-};
-
 class IrdaAppSceneRemote : public IrdaAppScene {
 public:
     void on_enter(IrdaApp* app) final;
@@ -155,14 +148,16 @@ protected:
 class IrdaAppSceneUniversalTV : public IrdaAppSceneUniversalCommon {
 public:
     void on_enter(IrdaApp* app) final;
-    IrdaAppSceneUniversalTV() : IrdaAppSceneUniversalCommon("/irda/universal/tv.ir") {}
+    IrdaAppSceneUniversalTV()
+        : IrdaAppSceneUniversalCommon("/ext/irda/universal/tv.ir") {
+    }
     ~IrdaAppSceneUniversalTV() {}
 };
 
 class IrdaAppSceneUniversalAudio : public IrdaAppSceneUniversalCommon {
 public:
     void on_enter(IrdaApp* app) final;
-    IrdaAppSceneUniversalAudio() : IrdaAppSceneUniversalCommon("/irda/universal/audio.ir") {}
+    IrdaAppSceneUniversalAudio() : IrdaAppSceneUniversalCommon("/ext/irda/universal/audio.ir") {}
     ~IrdaAppSceneUniversalAudio() {}
 };
 
