@@ -4,7 +4,7 @@ on: push
 
 env:
   TARGETS: f6
-  SUFFIX: ${{GITHUB_SHA}}
+  SUFFIX: ${{ github.sha }}
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
         run: echo ":set-env name=SUFFIX::${GITHUB_REF/refs\/tags\//}"
 
       - name: 'Docker cache'
-      - uses: satackey/action-docker-layer-caching@v0.0.11
+        uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
         with:
           key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
@@ -67,10 +67,10 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: |
-          for TARGET in ${TARGETS}
-          do
-            make -j$(nproc) -C firmware TARGET=${TARGET}
-          done
+            for TARGET in ${TARGETS}
+            do
+              make -j$(nproc) -C firmware TARGET=${TARGET}
+            done
 
       - name: 'Generate dfu file for firmware'
         uses: ./.github/actions/docker
@@ -153,6 +153,7 @@ jobs:
 
       - name: 'Publish artifacts'
         uses: actions/upload-artifact@v2
+        with:
           name: artifacts
           path: artifacts/*
           if-no-files-found: error
