@@ -2,7 +2,7 @@ name: 'Release'
 
 on:
   release:
-    types: [prereleased,published]
+    types: [prereleased,released]
 
 env:
   TARGETS: f6
