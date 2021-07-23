@@ -14,10 +14,6 @@ const void nfc_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = nfc->text_input;
-    // TODO Don't delete until we get new name
-    if(nfc->dev.dev_name) {
-        nfc_device_delete(&nfc->dev);
-    }
     bool dev_name_empty = false;
     if(!strcmp(nfc->dev.dev_name, "")) {
         set_random_name(nfc->text_store, sizeof(nfc->text_store));
@@ -31,7 +27,7 @@ const void nfc_scene_save_name_on_enter(void* context) {
         nfc_scene_save_name_text_input_callback,
         nfc,
         nfc->text_store,
-        sizeof(nfc->text_store),
+        NFC_DEV_NAME_MAX_LEN,
         dev_name_empty);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
 }
@@ -41,6 +37,9 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
+            if(nfc->dev.dev_name) {
+                nfc_device_delete(&nfc->dev);
+            }
             memcpy(&nfc->dev.dev_name, nfc->text_store, strlen(nfc->text_store));
             if(nfc_device_save(&nfc->dev, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
