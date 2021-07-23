@@ -99,7 +99,7 @@ jobs:
       - name: Copy bootloader for full.bin 
         run: for TARGET in ${TARGETS}; do cp flipper-z-${TARGET}-bootloader-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin; done
       - name: Truncate full.bin 
-        run: for TARGET in ${TARGETS}; do truncate -s 32768 flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}{{ steps.date.outputs.date }}.bin; done
+        run: for TARGET in ${TARGETS}; do truncate -s 32768 flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin; done
       - name: Add firmware.bin at full.bin
         run: for TARGET in ${TARGETS}; do cat flipper-z-${TARGET}-firmware-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin >> flipper-z-${TARGET}-full-${{ steps.branch.outputs.branch }}${{ steps.date.outputs.date }}.bin; done
 
