@@ -164,7 +164,7 @@ static LFSData* storage_int_lfs_data_alloc() {
 static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     int err;
     ApiHalBootFlag boot_flags = api_hal_boot_get_flags();
-    lfs_t* lfs = lfs_data->lfs;
+    lfs_t* lfs = &lfs_data->lfs;
 
     if(boot_flags & ApiHalBootFlagFactoryReset) {
         // Factory reset
