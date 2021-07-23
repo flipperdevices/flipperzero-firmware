@@ -1,13 +1,12 @@
-name: 'CI'
+name: 'Release'
 
 on:
-  push:
-    branches:
-      - 'rd_add-release-ci'
-      # - 'release-candidate'
-      # - 'release'
-  # release:
-  #   types: [published]
+  # push:
+  #   branches:
+  #     - 'release-candidate'
+  #     - 'release'
+  release:
+    types: [published]
 
 env:
   TARGETS: f6
