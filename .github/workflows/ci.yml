@@ -2,9 +2,9 @@ name: 'CI'
 
 on:
   push:
-    branches:
-      - '!release-candidate'
-      - '!release'
+    branches-ignore:
+      - 'release-candidate'
+      - 'release'
 
 env:
   TARGETS: f6
