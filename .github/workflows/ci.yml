@@ -1,6 +1,10 @@
 name: 'CI'
 
-on: push
+on:
+  push:
+    branches:
+      - '!release-candidate'
+      - '!release'
 
 env:
   TARGETS: f6
