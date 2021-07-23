@@ -58,18 +58,4 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
         state->player.x =
             CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
     }
-
-    state->player_anim = (HAL_GetTick() / 200) % 3;
-
-    if(state->player_v.x < 0 && !state->player_flipped_x && state->player_anim == 0) {
-        state->transition = true;
-        state->player_flipped_x = true;
-    } else if(state->player_v.x > 0 && state->player_flipped_x && state->player_anim == 0) {
-        state->transition = true;
-        state->player_flipped_x = false;
-    }
-
-    if(state->player_anim == 2 && state->transition) {
-        state->transition = false;
-    }
 }

@@ -93,6 +93,8 @@ typedef struct {
     bool debug;
 
     uint8_t player_anim;
+    uint8_t frame_idx;
+
     uint8_t scene_id;
 
     uint8_t emote_id;

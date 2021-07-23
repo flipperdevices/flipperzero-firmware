@@ -320,10 +320,20 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(canvas);
 
     const DolphinFrame* current_frame = NULL;
-    FrameGroupsEnum group = GroupRight;
-    FrameTypeEnum frame = 0;
+    // FrameGroupsEnum group = GroupRight;
+    // FrameTypeEnum frame = 0;
 
-    state->player_anim = (HAL_GetTick() / 200) % 3;
+    state->player_anim += 1;
+
+    if(state->player_v.x < 0 && !state->player_flipped_x) {
+        state->transition = true;
+        state->player_flipped_x = true;
+        state->player_anim = 0;
+    } else if(state->player_v.x > 0 && state->player_flipped_x) {
+        state->transition = true;
+        state->player_flipped_x = false;
+        state->player_anim = 0;
+    }
 
     if(state->scene_zoom == SCENE_ZOOM) {
         state->dolphin_gfx = &I_DolphinExcited_64x63;
@@ -331,57 +341,60 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
         //default
         current_frame = *&frames[GroupRight][FrameRight];
 
-        if(state->player_v.x < 0 && state->player_v.y < 0) {
-            if(state->transition) {
-            } else {
-                current_frame = *&frames[GroupLeft][FrameUp];
-            }
-        } else if(state->player_v.x < 0 && state->player_v.y > 0) {
-            if(state->transition) {
-            } else {
-                current_frame = *&frames[GroupLeft][FrameDown];
-            }
-        } else if(state->player_v.x > 0 && state->player_v.y > 0) {
-            if(state->transition) {
-            } else {
-                current_frame = *&frames[GroupRight][FrameDown];
-            }
-        } else if(state->player_v.x > 0 && state->player_v.y < 0) {
-            if(state->transition) {
-            } else {
-                current_frame = *&frames[GroupRight][FrameUp];
-            }
-        } else if(state->player_v.y < 0) {
-            group = GroupUp;
+        // if(state->player_v.x < 0 && state->player_v.y < 0) {
+        //     if(state->transition) {
+        //     } else {
+        //         current_frame = *&frames[GroupLeft][FrameUp];
+        //     }
+        // } else if(state->player_v.x < 0 && state->player_v.y > 0) {
+        //     if(state->transition) {
+        //     } else {
+        //         current_frame = *&frames[GroupLeft][FrameDown];
+        //     }
+        // } else if(state->player_v.x > 0 && state->player_v.y > 0) {
+        //     if(state->transition) {
+        //     } else {
+        //         current_frame = *&frames[GroupRight][FrameDown];
+        //     }
+        // } else if(state->player_v.x > 0 && state->player_v.y < 0) {
+        //     if(state->transition) {
+        //     } else {
+        //         current_frame = *&frames[GroupRight][FrameUp];
+        //     }
+        // } else if(state->player_v.y < 0) {
+        //     group = GroupUp;
 
-            if(state->transition) {
-            } else {
-                if(state->player_v.x > 0) {
-                    frame = FrameRight;
-                } else if(state->player_v.x < 0) {
-                    frame = FrameLeft;
-                } else if(state->player_v.x == 0) {
-                    frame = FrameUp;
-                }
+        //     if(state->transition) {
+        //     } else {
+        //         if(state->player_v.x > 0){
+        //             frame = FrameRight;
+        //         } else if(state->player_v.x < 0) {
+        //             frame = FrameLeft;
+        //         } else if(state->player_v.x == 0) {
+        //             frame = FrameUp;
+        //         }
 
-                current_frame = *&frames[group][frame];
-            }
-        } else if(state->player_v.y > 0) {
-            group = GroupDown;
+        //         current_frame = *&frames[group][frame];
+        //     }
+        // } else if(state->player_v.y > 0) {
+        //     group = GroupDown;
 
-            if(state->transition) {
-            } else {
-                if(state->player_v.x > 0) {
-                    frame = FrameRight;
-                } else if(state->player_v.x < 0) {
-                    frame = FrameLeft;
-                } else if(state->player_v.x == 0) {
-                    frame = FrameDown;
-                }
+        //     if(state->transition) {
+        //     } else {
+        //         if(state->player_v.x > 0){
+        //             frame = FrameRight;
+        //         } else if(state->player_v.x < 0) {
+        //             frame = FrameLeft;
+        //         } else if(state->player_v.x == 0) {
+        //             frame = FrameDown;
+        //         }
 
-                current_frame = *&frames[group][frame];
-            }
-        } else if(state->player_v.x < 0 || state->player_flipped_x) {
+        //         current_frame = *&frames[group][frame];
+        //     }
+        // }
+        // else
+
+        if(state->player_v.x < 0 || state->player_flipped_x) {
             if(state->transition) {
                 current_frame = *&frames[GroupRight][FrameLeft];
             } else {
@@ -395,8 +408,16 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
             }
         }
 
-        state->dolphin_gfx = current_frame->frames[state->player_anim % current_frame->total].f;
-        state->dolphin_gfx_b = current_frame->frames[state->player_anim % current_frame->total].b;
+        if(state->player_anim == current_frame->total && state->transition) {
+            state->transition = false;
+        }
+
+        if(state->player_anim % 6 == 0) {
+            state->frame_idx = (state->frame_idx + 1) % current_frame->total;
+        }
+
+        state->dolphin_gfx = current_frame->frames[state->frame_idx].f;
+        state->dolphin_gfx_b = current_frame->frames[state->frame_idx].b;
     }
 
     canvas_set_bitmap_mode(canvas, true);
