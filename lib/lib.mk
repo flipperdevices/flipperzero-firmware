@@ -113,3 +113,7 @@ CFLAGS			+= -I$(LIB_DIR)/app-scened-template
 C_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*.c)
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*.cpp)
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*/*.cpp)
+
+#random name generator
+CFLAGS			+= -I$(LIB_DIR)/random_name
+C_SOURCES		+= $(wildcard $(LIB_DIR)/random_name/*.c)
