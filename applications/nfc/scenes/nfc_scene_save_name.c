@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <lib/random_name/random_name.h>
 
 #define SCENE_SAVE_NAME_CUSTOM_EVENT (0UL)
 
@@ -13,17 +14,25 @@ const void nfc_scene_save_name_on_enter(void* context) {
 
     // Setup view
     TextInput* text_input = nfc->text_input;
+    // TODO Don't delete until we get new name
     if(nfc->dev.dev_name) {
         nfc_device_delete(&nfc->dev);
     }
-    nfc_text_store_set(nfc, nfc->dev.dev_name);
+    bool dev_name_empty = false;
+    if(!strcmp(nfc->dev.dev_name, "")) {
+        set_random_name(nfc->text_store, sizeof(nfc->text_store));
+        dev_name_empty = true;
+    } else {
+        nfc_text_store_set(nfc, nfc->dev.dev_name);
+    }
     text_input_set_header_text(text_input, "Name the card");
     text_input_set_result_callback(
         text_input,
         nfc_scene_save_name_text_input_callback,
         nfc,
         nfc->text_store,
-        sizeof(nfc->text_store));
+        sizeof(nfc->text_store),
+        dev_name_empty);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
 }
 
@@ -49,4 +58,5 @@ const void nfc_scene_save_name_on_exit(void* context) {
 
     // Clear view
     text_input_set_header_text(nfc->text_input, NULL);
+    text_input_set_result_callback(nfc->text_input, NULL, NULL, NULL, 0, false);
 }

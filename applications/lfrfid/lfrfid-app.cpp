@@ -27,9 +27,6 @@ LfRfidApp::LfRfidApp()
     , notification{"notification"}
     , text_store(40) {
     api_hal_power_insomnia_enter();
-
-    // we need random
-    srand(DWT->CYCCNT);
 }
 
 LfRfidApp::~LfRfidApp() {
