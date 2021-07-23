@@ -5,6 +5,7 @@ on:
     branches-ignore:
       - 'release-candidate'
       - 'release'
+      - 'rd_add-release-ci'
 
 env:
   TARGETS: f6
@@ -132,7 +133,7 @@ jobs:
     steps:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
-        
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
