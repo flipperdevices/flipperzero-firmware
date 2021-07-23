@@ -6,9 +6,7 @@
 extern "C" {
 #endif
 
-/** 
- *  @brief Structure that hold file index and returned api errors 
- */
+/** Structure that hold file index and returned api errors */
 struct File {
     uint32_t file_id; /**< File ID for internal references */
     FS_Error error_id; /**< Standart API error from FS_Error enum */
@@ -16,9 +14,7 @@ struct File {
     void* storage;
 };
 
-/** @struct FS_File_Api
- *  @brief File api structure
- * 
+/** File api structure
  *  @var FS_File_Api::open
  *      @brief Open file
  *      @param file pointer to file object, filled by api
@@ -78,10 +74,6 @@ struct File {
  *      @param file pointer to file object
  *      @return end of file flag
  */
-
-/**
- * @brief File api structure
- */
 typedef struct {
     bool (*open)(
         void* context,
@@ -100,9 +92,7 @@ typedef struct {
     bool (*eof)(void* context, File* file);
 } FS_File_Api;
 
-/** @struct FS_Dir_Api
- *  @brief Dir api structure
- * 
+/** Dir api structure
  *  @var FS_Dir_Api::open
  *      @brief Open directory to get objects from
  *      @param file pointer to file object, filled by api
@@ -127,10 +117,6 @@ typedef struct {
  *      @param file pointer to file object
  *      @return success flag
  */
-
-/**
- * @brief Dir api structure
- */
 typedef struct {
     bool (*open)(void* context, File* file, const char* path);
     bool (*close)(void* context, File* file);
@@ -138,9 +124,7 @@ typedef struct {
     bool (*rewind)(void* context, File* file);
 } FS_Dir_Api;
 
-/** @struct FS_Common_Api
- *  @brief Common api structure
- * 
+/** Common api structure
  *  @var FS_Common_Api::stat
  *      @brief Open directory to get objects from
  *      @param path path to file/directory
@@ -175,10 +159,6 @@ typedef struct {
  *      @param free_space pointer to free space value
  *      @return FS_Error error info
  */
-
-/**
- * @brief Common api structure
- */
 typedef struct {
     FS_Error (*stat)(void* context, const char* path, FileInfo* fileinfo);
     FS_Error (*remove)(void* context, const char* path);
@@ -188,25 +168,17 @@ typedef struct {
         *fs_info)(void* context, const char* fs_path, uint64_t* total_space, uint64_t* free_space);
 } FS_Common_Api;
 
-/** @struct FS_Error_Api
- *  @brief Errors api structure
- * 
+/** Errors api structure
  *  @var FS_Error_Api::get_desc
  *      @brief Get error description text
  *      @param error_id FS_Error error id (for fire/dir functions result can be obtained from File.error_id)
  *      @return pointer to description text
  */
-
-/**
- * @brief Errors api structure
- */
 typedef struct {
     const char* (*get_desc)(void* context, FS_Error error_id);
 } FS_Error_Api;
 
-/**
- * @brief Full filesystem api structure
- */
+/** Full filesystem api structure */
 typedef struct {
     FS_File_Api file;
     FS_Dir_Api dir;
