@@ -6,13 +6,13 @@
     osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
     furi_check(semaphore != NULL);
 
-#define S_FILE_API_PROLOGUE   \
+#define S_FILE_API_PROLOGUE           \
     Storage* storage = file->storage; \
     furi_assert(storage);
 
-#define S_API_EPILOGUE                                                                     \
+#define S_API_EPILOGUE                                                                         \
     furi_check(osMessageQueuePut(storage->message_queue, &message, 0, osWaitForever) == osOK); \
-    osSemaphoreAcquire(semaphore, osWaitForever);                                          \
+    osSemaphoreAcquire(semaphore, osWaitForever);                                              \
     osSemaphoreDelete(semaphore);
 
 #define S_API_MESSAGE(_command)      \
