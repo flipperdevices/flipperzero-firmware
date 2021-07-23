@@ -5,7 +5,6 @@ on:
     branches-ignore:
       - 'release-candidate'
       - 'release'
-      - 'rd_add-release-ci'
 
 env:
   TARGETS: f6
