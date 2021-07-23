@@ -12,7 +12,53 @@ typedef struct {
     lfs_t lfs;
 } LFSData;
 
+typedef struct {
+    void* data;
+    bool open;
+} LFSHandle;
+
+static LFSHandle* lfs_handle_alloc_file() {
+    LFSHandle* handle = furi_alloc(sizeof(LFSHandle));
+    handle->data = furi_alloc(sizeof(lfs_file_t));
+    return handle;
+}
+
+static LFSHandle* lfs_handle_alloc_dir() {
+    LFSHandle* handle = furi_alloc(sizeof(LFSHandle));
+    handle->data = furi_alloc(sizeof(lfs_dir_t));
+    return handle;
+}
+
 /* INTERNALS */
+
+static lfs_dir_t* lfs_handle_get_dir(LFSHandle* handle) {
+    return handle->data;
+}
+
+static lfs_file_t* lfs_handle_get_file(LFSHandle* handle) {
+    return handle->data;
+}
+
+static void lfs_handle_free(LFSHandle* handle) {
+    free(handle->data);
+    free(handle);
+}
+
+static void lfs_handle_set_open(LFSHandle* handle) {
+    handle->open = true;
+}
+
+static bool lfs_handle_is_open(LFSHandle* handle) {
+    return handle->open;
+}
+
+static lfs_t* lfs_get_from_storage(StorageData* storage) {
+    return &((LFSData*)storage->data)->lfs;
+}
+
+static LFSData* lfs_data_get_from_storage(StorageData* storage) {
+    return (LFSData*)storage->data;
+}
 
 static int storage_int_device_read(
     const struct lfs_config* c,
@@ -118,13 +164,15 @@ static LFSData* storage_int_lfs_data_alloc() {
 static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     int err;
     ApiHalBootFlag boot_flags = api_hal_boot_get_flags();
+    lfs_t* lfs = lfs_data->lfs;
+
     if(boot_flags & ApiHalBootFlagFactoryReset) {
         // Factory reset
-        err = lfs_format(&lfs_data->lfs, &lfs_data->config);
+        err = lfs_format(lfs, &lfs_data->config);
         if(err == 0) {
             FURI_LOG_I(TAG, "Factory reset: Format successful, trying to mount");
             api_hal_boot_set_flags(boot_flags & ~ApiHalBootFlagFactoryReset);
-            err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
+            err = lfs_mount(lfs, &lfs_data->config);
             if(err == 0) {
                 FURI_LOG_I(TAG, "Factory reset: Mounted");
                 storage->status = StorageStatusOK;
@@ -138,16 +186,16 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
         }
     } else {
         // Normal
-        err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
+        err = lfs_mount(lfs, &lfs_data->config);
         if(err == 0) {
             FURI_LOG_I(TAG, "Mounted");
             storage->status = StorageStatusOK;
         } else {
             FURI_LOG_E(TAG, "Mount failed, formatting");
-            err = lfs_format(&lfs_data->lfs, &lfs_data->config);
+            err = lfs_format(lfs, &lfs_data->config);
             if(err == 0) {
                 FURI_LOG_I(TAG, "Format successful, trying to mount");
-                err = lfs_mount(&lfs_data->lfs, &lfs_data->config);
+                err = lfs_mount(lfs, &lfs_data->config);
                 if(err == 0) {
                     FURI_LOG_I(TAG, "Mounted");
                     storage->status = StorageStatusOK;
@@ -231,7 +279,7 @@ static bool storage_int_file_open(
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
+    lfs_t* lfs = lfs_get_from_storage(storage);
 
     int flags = 0;
 
@@ -244,32 +292,49 @@ static bool storage_int_file_open(
     if(open_mode & FSOM_CREATE_NEW) flags |= LFS_O_CREAT | LFS_O_EXCL;
     if(open_mode & FSOM_CREATE_ALWAYS) flags |= LFS_O_CREAT | LFS_O_TRUNC;
 
-    lfs_file_t* file_data = malloc(sizeof(lfs_file_t));
-    storage_set_storage_file_data(file, file_data, storage);
-    file->internal_error_id = lfs_file_open(&lfs_data->lfs, file_data, path, flags);
+    LFSHandle* handle = lfs_handle_alloc_file();
+    storage_set_storage_file_data(file, handle, storage);
+    file->internal_error_id = lfs_file_open(lfs, lfs_handle_get_file(handle), path, flags);
+
+    if(file->internal_error_id >= LFS_ERR_OK) {
+        lfs_handle_set_open(handle);
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
 
 static bool storage_int_file_close(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_file_close(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_file_close(lfs, lfs_handle_get_file(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    free(file_data);
+    lfs_handle_free(handle);
     return (file->error_id == FSE_OK);
 }
 
 static uint16_t
     storage_int_file_read(void* ctx, File* file, void* buff, uint16_t const bytes_to_read) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
     uint16_t bytes_readed = 0;
-    file->internal_error_id = lfs_file_read(&lfs_data->lfs, file_data, buff, bytes_to_read);
+
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id =
+            lfs_file_read(lfs, lfs_handle_get_file(handle), buff, bytes_to_read);
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
     if(file->error_id == FSE_OK) {
@@ -282,11 +347,18 @@ static uint16_t
 static uint16_t
     storage_int_file_write(void* ctx, File* file, const void* buff, uint16_t const bytes_to_write) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
     uint16_t bytes_written = 0;
-    file->internal_error_id = lfs_file_write(&lfs_data->lfs, file_data, buff, bytes_to_write);
+
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id =
+            lfs_file_write(lfs, lfs_handle_get_file(handle), buff, bytes_to_write);
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
     if(file->error_id == FSE_OK) {
@@ -299,13 +371,19 @@ static uint16_t
 static bool
     storage_int_file_seek(void* ctx, File* file, const uint32_t offset, const bool from_start) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    if(from_start) {
-        file->internal_error_id = lfs_file_seek(&lfs_data->lfs, file_data, offset, LFS_SEEK_SET);
+    if(lfs_handle_is_open(handle)) {
+        if(from_start) {
+            file->internal_error_id =
+                lfs_file_seek(lfs, lfs_handle_get_file(handle), offset, LFS_SEEK_SET);
+        } else {
+            file->internal_error_id =
+                lfs_file_seek(lfs, lfs_handle_get_file(handle), offset, LFS_SEEK_CUR);
+        }
     } else {
-        file->internal_error_id = lfs_file_seek(&lfs_data->lfs, file_data, offset, LFS_SEEK_CUR);
+        file->internal_error_id = LFS_ERR_BADF;
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
@@ -314,10 +392,15 @@ static bool
 
 static uint64_t storage_int_file_tell(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_file_tell(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_file_tell(lfs, lfs_handle_get_file(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
     int32_t position = 0;
@@ -331,15 +414,21 @@ static uint64_t storage_int_file_tell(void* ctx, File* file) {
 
 static bool storage_int_file_truncate(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_file_tell(&lfs_data->lfs, file_data);
-    file->error_id = storage_int_parse_error(file->internal_error_id);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_file_tell(lfs, lfs_handle_get_file(handle));
+        file->error_id = storage_int_parse_error(file->internal_error_id);
 
-    if(file->error_id == FSE_OK) {
-        uint32_t position = file->internal_error_id;
-        file->internal_error_id = lfs_file_truncate(&lfs_data->lfs, file_data, position);
+        if(file->error_id == FSE_OK) {
+            uint32_t position = file->internal_error_id;
+            file->internal_error_id =
+                lfs_file_truncate(lfs, lfs_handle_get_file(handle), position);
+            file->error_id = storage_int_parse_error(file->internal_error_id);
+        }
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
         file->error_id = storage_int_parse_error(file->internal_error_id);
     }
 
@@ -348,20 +437,30 @@ static bool storage_int_file_truncate(void* ctx, File* file) {
 
 static bool storage_int_file_sync(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_file_sync(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_file_sync(lfs, lfs_handle_get_file(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
 
 static uint64_t storage_int_file_size(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_file_size(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_file_size(lfs, lfs_handle_get_file(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
 
     uint32_t size = 0;
@@ -375,20 +474,25 @@ static uint64_t storage_int_file_size(void* ctx, File* file) {
 
 static bool storage_int_file_eof(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_file_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    bool eof = false;
-    int32_t position = lfs_file_tell(&lfs_data->lfs, file_data);
-    int32_t size = lfs_file_size(&lfs_data->lfs, file_data);
+    bool eof = true;
 
-    if(position < 0) {
-        file->internal_error_id = position;
-    } else if(size < 0) {
-        file->internal_error_id = size;
+    if(lfs_handle_is_open(handle)) {
+        int32_t position = lfs_file_tell(lfs, lfs_handle_get_file(handle));
+        int32_t size = lfs_file_size(lfs, lfs_handle_get_file(handle));
+
+        if(position < 0) {
+            file->internal_error_id = position;
+        } else if(size < 0) {
+            file->internal_error_id = size;
+        } else {
+            file->internal_error_id = LFS_ERR_OK;
+            eof = (position >= size);
+        }
     } else {
-        file->error_id = FSE_OK;
-        eof = (position >= size);
+        file->internal_error_id = LFS_ERR_BADF;
     }
 
     file->error_id = storage_int_parse_error(file->internal_error_id);
@@ -399,24 +503,33 @@ static bool storage_int_file_eof(void* ctx, File* file) {
 
 static bool storage_int_dir_open(void* ctx, File* file, const char* path) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_dir_t* file_data = malloc(sizeof(lfs_dir_t));
+    lfs_t* lfs = lfs_get_from_storage(storage);
 
-    storage_set_storage_file_data(file, file_data, storage);
+    LFSHandle* handle = lfs_handle_alloc_dir();
+    storage_set_storage_file_data(file, handle, storage);
 
-    file->internal_error_id = lfs_dir_open(&lfs_data->lfs, file_data, path);
+    file->internal_error_id = lfs_dir_open(lfs, lfs_handle_get_dir(handle), path);
+    if(file->internal_error_id >= LFS_ERR_OK) {
+        lfs_handle_set_open(handle);
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
 
 static bool storage_int_dir_close(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_dir_close(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_dir_close(lfs, lfs_handle_get_dir(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
-    free(file_data);
+    lfs_handle_free(handle);
     return (file->error_id == FSE_OK);
 }
 
@@ -427,28 +540,35 @@ static bool storage_int_dir_read(
     char* name,
     const uint16_t name_length) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    struct lfs_info _fileinfo;
-    // LFS returns virtual directories "." and "..", so we read until we get something meaningful or an empty string
-    do {
-        file->internal_error_id = lfs_dir_read(&lfs_data->lfs, file_data, &_fileinfo);
+    if(lfs_handle_is_open(handle)) {
+        struct lfs_info _fileinfo;
+
+        // LFS returns virtual directories "." and "..", so we read until we get something meaningful or an empty string
+        do {
+            file->internal_error_id = lfs_dir_read(lfs, lfs_handle_get_dir(handle), &_fileinfo);
+            file->error_id = storage_int_parse_error(file->internal_error_id);
+        } while(strcmp(_fileinfo.name, ".") == 0 || strcmp(_fileinfo.name, "..") == 0);
+
+        if(fileinfo != NULL) {
+            fileinfo->size = _fileinfo.size;
+            fileinfo->flags = 0;
+            if(_fileinfo.type & LFS_TYPE_DIR) fileinfo->flags |= FSF_DIRECTORY;
+        }
+
+        if(name != NULL) {
+            snprintf(name, name_length, "%s", _fileinfo.name);
+        }
+
+        // set FSE_NOT_EXIST error on end of directory
+        if(file->internal_error_id == 0) {
+            file->error_id = FSE_NOT_EXIST;
+        }
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
         file->error_id = storage_int_parse_error(file->internal_error_id);
-    } while(strcmp(_fileinfo.name, ".") == 0 || strcmp(_fileinfo.name, "..") == 0);
-
-    if(fileinfo != NULL) {
-        fileinfo->size = _fileinfo.size;
-        fileinfo->flags = 0;
-        if(_fileinfo.type & LFS_TYPE_DIR) fileinfo->flags |= FSF_DIRECTORY;
-    }
-
-    if(name != NULL) {
-        snprintf(name, name_length, "%s", _fileinfo.name);
-    }
-
-    if(file->internal_error_id == 0) {
-        file->error_id = FSE_NOT_EXIST;
     }
 
     return (file->error_id == FSE_OK);
@@ -456,10 +576,15 @@ static bool storage_int_dir_read(
 
 static bool storage_int_dir_rewind(void* ctx, File* file) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    lfs_dir_t* file_data = storage_get_storage_file_data(file, storage);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSHandle* handle = storage_get_storage_file_data(file, storage);
 
-    file->internal_error_id = lfs_dir_rewind(&lfs_data->lfs, file_data);
+    if(lfs_handle_is_open(handle)) {
+        file->internal_error_id = lfs_dir_rewind(lfs, lfs_handle_get_dir(handle));
+    } else {
+        file->internal_error_id = LFS_ERR_BADF;
+    }
+
     file->error_id = storage_int_parse_error(file->internal_error_id);
     return (file->error_id == FSE_OK);
 }
@@ -468,9 +593,9 @@ static bool storage_int_dir_rewind(void* ctx, File* file) {
 
 static FS_Error storage_int_common_stat(void* ctx, const char* path, FileInfo* fileinfo) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
+    lfs_t* lfs = lfs_get_from_storage(storage);
     struct lfs_info _fileinfo;
-    int result = lfs_stat(&lfs_data->lfs, path, &_fileinfo);
+    int result = lfs_stat(lfs, path, &_fileinfo);
 
     if(fileinfo != NULL) {
         fileinfo->size = _fileinfo.size;
@@ -483,22 +608,22 @@ static FS_Error storage_int_common_stat(void* ctx, const char* path, FileInfo* f
 
 static FS_Error storage_int_common_remove(void* ctx, const char* path) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    int result = lfs_remove(&lfs_data->lfs, path);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    int result = lfs_remove(lfs, path);
     return storage_int_parse_error(result);
 }
 
 static FS_Error storage_int_common_rename(void* ctx, const char* old_path, const char* new_path) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    int result = lfs_rename(&lfs_data->lfs, old_path, new_path);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    int result = lfs_rename(lfs, old_path, new_path);
     return storage_int_parse_error(result);
 }
 
 static FS_Error storage_int_common_mkdir(void* ctx, const char* path) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
-    int result = lfs_mkdir(&lfs_data->lfs, path);
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    int result = lfs_mkdir(lfs, path);
     return storage_int_parse_error(result);
 }
 
@@ -508,11 +633,13 @@ static FS_Error storage_int_common_fs_info(
     uint64_t* total_space,
     uint64_t* free_space) {
     StorageData* storage = ctx;
-    LFSData* lfs_data = storage->data;
+
+    lfs_t* lfs = lfs_get_from_storage(storage);
+    LFSData* lfs_data = lfs_data_get_from_storage(storage);
 
     *total_space = lfs_data->config.block_size * lfs_data->config.block_count;
 
-    lfs_ssize_t result = lfs_fs_size(&lfs_data->lfs);
+    lfs_ssize_t result = lfs_fs_size(lfs);
     if(result >= 0) {
         *free_space = *total_space - (result * lfs_data->config.block_size);
     }
