@@ -7,11 +7,11 @@
     furi_check(semaphore != NULL);
 
 #define S_FILE_API_PROLOGUE   \
-    Storage* app = file->api; \
-    furi_assert(app);
+    Storage* storage = file->storage; \
+    furi_assert(storage);
 
 #define S_API_EPILOGUE                                                                     \
-    furi_check(osMessageQueuePut(app->message_queue, &message, 0, osWaitForever) == osOK); \
+    furi_check(osMessageQueuePut(storage->message_queue, &message, 0, osWaitForever) == osOK); \
     osSemaphoreAcquire(semaphore, osWaitForever);                                          \
     osSemaphoreDelete(semaphore);
 
@@ -236,7 +236,7 @@ bool storage_dir_rewind(File* file) {
 
 /****************** COMMON ******************/
 
-FS_Error storage_common_stat(Storage* app, const char* path, FileInfo* fileinfo) {
+FS_Error storage_common_stat(Storage* storage, const char* path, FileInfo* fileinfo) {
     S_API_PROLOGUE;
 
     SAData data = {.cstat = {.path = path, .fileinfo = fileinfo}};
@@ -246,7 +246,7 @@ FS_Error storage_common_stat(Storage* app, const char* path, FileInfo* fileinfo)
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_remove(Storage* app, const char* path) {
+FS_Error storage_common_remove(Storage* storage, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonRemove);
@@ -254,7 +254,7 @@ FS_Error storage_common_remove(Storage* app, const char* path) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_rename(Storage* app, const char* old_path, const char* new_path) {
+FS_Error storage_common_rename(Storage* storage, const char* old_path, const char* new_path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -268,7 +268,7 @@ FS_Error storage_common_rename(Storage* app, const char* old_path, const char* n
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_copy(Storage* app, const char* old_path, const char* new_path) {
+FS_Error storage_common_copy(Storage* storage, const char* old_path, const char* new_path) {
     S_API_PROLOGUE;
 
     SAData data = {
@@ -282,7 +282,7 @@ FS_Error storage_common_copy(Storage* app, const char* old_path, const char* new
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_common_mkdir(Storage* app, const char* path) {
+FS_Error storage_common_mkdir(Storage* storage, const char* path) {
     S_API_PROLOGUE;
     S_API_DATA_PATH;
     S_API_MESSAGE(StorageCommandCommonMkDir);
@@ -291,7 +291,7 @@ FS_Error storage_common_mkdir(Storage* app, const char* path) {
 }
 
 FS_Error storage_common_fs_info(
-    Storage* app,
+    Storage* storage,
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space) {
@@ -327,7 +327,7 @@ const char* storage_file_get_error_desc(File* file) {
 
 /****************** Raw SD API ******************/
 
-FS_Error storage_sd_format(Storage* app) {
+FS_Error storage_sd_format(Storage* storage) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDFormat);
@@ -335,7 +335,7 @@ FS_Error storage_sd_format(Storage* app) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_unmount(Storage* app) {
+FS_Error storage_sd_unmount(Storage* storage) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDUnmount);
@@ -343,7 +343,7 @@ FS_Error storage_sd_unmount(Storage* app) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_info(Storage* app, SDInfo* info) {
+FS_Error storage_sd_info(Storage* storage, SDInfo* info) {
     S_API_PROLOGUE;
     SAData data = {
         .sdinfo = {
@@ -354,7 +354,7 @@ FS_Error storage_sd_info(Storage* app, SDInfo* info) {
     return S_RETURN_ERROR;
 }
 
-FS_Error storage_sd_status(Storage* app) {
+FS_Error storage_sd_status(Storage* storage) {
     S_API_PROLOGUE;
     SAData data = {};
     S_API_MESSAGE(StorageCommandSDStatus);
@@ -362,10 +362,10 @@ FS_Error storage_sd_status(Storage* app) {
     return S_RETURN_ERROR;
 }
 
-File* storage_file_alloc(Storage* app) {
+File* storage_file_alloc(Storage* storage) {
     File* file = furi_alloc(sizeof(File));
     file->file_id = FILE_CLOSED;
-    file->api = app;
+    file->storage = storage;
 
     return file;
 }

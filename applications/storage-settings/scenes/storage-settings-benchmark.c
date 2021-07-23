@@ -35,7 +35,7 @@ static bool storage_settings_bench_write(
         ticks = osKernelGetTickCount() - ticks;
         *speed = BENCH_DATA_SIZE * osKernelGetTickFreq() * BENCH_REPEATS;
         *speed /= ticks;
-        *speed /= 1024.0f;
+        *speed /= 1024;
     }
     storage_file_close(file);
     storage_file_free(file);
