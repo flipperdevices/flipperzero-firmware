@@ -1,12 +1,8 @@
 name: 'Release'
 
 on:
-  # push:
-  #   branches:
-  #     - 'release-candidate'
-  #     - 'release'
   release:
-    types: [published]
+    types: [prereleased,published]
 
 env:
   TARGETS: f6
