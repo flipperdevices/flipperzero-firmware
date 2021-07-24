@@ -4,7 +4,6 @@ on: push
 
 env:
   TARGETS: f6
-  SUFFIX: ${{ github.sha }}
 
 jobs:
   build:
@@ -24,15 +23,6 @@ jobs:
       - name: 'Checkout submodules: sync'
         run: git submodule sync
 
-      - name: 'Make artifacts directory'
-        run: |
-          test -d artifacts && rm -rf artifacts || true
-          mkdir artifacts
-
-      - name: 'Generate tag suffix'
-        if: ${{ github.ref == 'refs/tags/*' }}
-        run: echo ":set-env name=SUFFIX::${GITHUB_REF/refs\/tags\//}"
-
       - name: 'Docker cache'
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
@@ -42,6 +32,19 @@ jobs:
 
       - name: 'Build docker image'
         uses: ./.github/actions/docker
+
+      - name: 'Make artifacts directory'
+        run: |
+          test -d artifacts && rm -rf artifacts || true
+          mkdir artifacts
+
+      - name: 'Generate tag suffix'
+        if: startsWith(github.ref, 'refs/tags/') == true
+        run: echo "SUFFIX::${GITHUB_REF/refs\/tags\//}"  >> $GITHUB_ENV
+
+      - name: 'Generate branch suffix'
+        if: startsWith(github.ref, 'refs/tags/') != true
+        run: echo "SUFFIX=$(date +'%Y-%m-%d')_${GITHUB_SHA:8}" >> $GITHUB_ENV
 
       - name: 'Build bootloader in docker'
         uses: ./.github/actions/docker
@@ -92,7 +95,7 @@ jobs:
               srec_cat \
                 bootloader/.obj/${TARGET}/bootloader.hex -Intel \
                 firmware/.obj/${TARGET}/firmware.hex -Intel \
-                -o artifacts/flipper-z-${TARGET}-full-${SUFFIX}.hex -Intel
+                -o firmware/.obj/${TARGET}/full.hex -Intel
             done
 
       - name: 'Move upload files'
@@ -122,7 +125,7 @@ jobs:
             for TARGET in ${TARGETS}
             do
               hex2dfu \
-                -i artifacts/flipper-z-${TARGET}-full-${SUFFIX}.hex \
+                -i firmware/.obj/${TARGET}/full.hex \
                 -o artifacts/flipper-z-${TARGET}-full-${SUFFIX}.dfu
             done
 

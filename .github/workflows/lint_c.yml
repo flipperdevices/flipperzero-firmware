@@ -17,6 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 'Checkout submodules: update'
+        run: git submodule update --init --recursive
+
+      - name: 'Checkout submodules: sync'
+        run: git submodule sync
+
       - name: 'Docker cache'
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
