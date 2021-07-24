@@ -61,6 +61,7 @@ extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
+int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
 
 struct ssid {
   String essid;
@@ -211,6 +212,8 @@ class WiFiScan
     void RunBluetoothScan(uint8_t scan_mode, uint16_t color);
     void RunLvJoinWiFi(uint8_t scan_mode, uint16_t color);
     static void scanCompleteCB(BLEScanResults scanResults);
+
+    //int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
 
   public:
     WiFiScan();

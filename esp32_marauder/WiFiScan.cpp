@@ -11,6 +11,11 @@ int num_eapol = 0;
 LinkedList<ssid>* ssids;
 LinkedList<AccessPoint>* access_points;
 
+int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
+    printf("Sanity check bypass called!\n");
+    return 0;
+}
+
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
 
     /* Original BLE */
@@ -130,6 +135,11 @@ class bluetoothScanSkimmersCallback: public BLEAdvertisedDeviceCallbacks {
 WiFiScan::WiFiScan()
 {
 }
+
+/*int WiFiScan::ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
+    printf("Sanity check bypass called!\n");
+    return 0;
+}*/
 
 void WiFiScan::RunSetup() {
   ssids = new LinkedList<ssid>();
