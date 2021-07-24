@@ -44,7 +44,7 @@ jobs:
 
       - name: 'Generate branch suffix'
         if: startsWith(github.ref, 'refs/tags/') != true
-        run: echo "SUFFIX=$(date +'%Y-%m-%d')_${GITHUB_SHA:8}" >> $GITHUB_ENV
+        run: echo "SUFFIX=$(date +'%Y-%m-%d')-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: 'Build bootloader in docker'
         uses: ./.github/actions/docker
