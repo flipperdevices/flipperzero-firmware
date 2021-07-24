@@ -13,7 +13,7 @@ jobs:
         uses: AutoModality/action-clean@v1
 
       - name: 'Decontaminate previous build leftovers'
-        run: git submodule deinit --all -f || true
+        run: git checkout ${GITHUB_REF} || true
 
       - name: 'Checkout code'
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
 
       - name: 'Generate tag suffix'
         if: startsWith(github.ref, 'refs/tags/') == true
-        run: echo "SUFFIX::${GITHUB_REF/refs\/tags\//}"  >> $GITHUB_ENV
+        run: echo "SUFFIX=$(git describe --tags --abbrev=0)"  >> $GITHUB_ENV
 
       - name: 'Generate branch suffix'
         if: startsWith(github.ref, 'refs/tags/') != true
