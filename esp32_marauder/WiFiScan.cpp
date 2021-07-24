@@ -279,15 +279,20 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
   else if (scan_mode == WIFI_PACKET_MONITOR)
     RunPacketMonitor(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_BEACON_LIST)
-    RunBeaconList(scan_mode, color);
+    this->startWiFiAttacks(scan_mode, color, " Beacon Spam List ");
+    //RunBeaconList(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_BEACON_SPAM)
-    RunBeaconSpam(scan_mode, color);
+    this->startWiFiAttacks(scan_mode, color, " Beacon Spam Random ");
+    //RunBeaconSpam(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_RICK_ROLL)
-    RunRickRoll(scan_mode, color);
+    this->startWiFiAttacks(scan_mode, color, " Rick Roll Beacon ");
+    //RunRickRoll(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_AUTH)
-    RunProbeFlood(scan_mode, color);
+    this->startWiFiAttacks(scan_mode, color, " Probe Flood ");
+    //RunProbeFlood(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_DEAUTH)
-    RunDeauthFlood(scan_mode, color);
+    this->startWiFiAttacks(scan_mode, color, " Deauth Flood ");
+    //RunDeauthFlood(scan_mode, color);
   else if (scan_mode == BT_SCAN_ALL)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == BT_SCAN_SKIMMERS)
@@ -300,6 +305,35 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunLvJoinWiFi(scan_mode, color);
 
   WiFiScan::currentScanMode = scan_mode;
+}
+
+void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_string) {
+  // Common wifi attack configurations
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString((String)title_string,120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
+  initTime = millis();
 }
 
 bool WiFiScan::shutdownWiFi() {
@@ -767,6 +801,7 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
   initTime = millis();
 }
 
+/*
 void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
 {
   //Serial.println("Rick Roll...");
@@ -793,9 +828,10 @@ void WiFiScan::RunRickRoll(uint8_t scan_mode, uint16_t color)
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
-}
+}*/
 
 // Function to prepare for beacon list
+/*
 void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color) {
   sd_obj.openCapture("beacon_list");
   
@@ -824,40 +860,8 @@ void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color) {
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   this->wifi_initialized = true;
   initTime = millis();
-}
-/*
-void WiFiScan::RunBeaconList(uint8_t scan_mode, uint16_t color)
-{
-  //Serial.println("Beacon list...");
-  display_obj.TOP_FIXED_AREA_2 = 48;
-  display_obj.tteBar = true;
-  display_obj.print_delay_1 = 15;
-  display_obj.print_delay_2 = 10;
-  //display_obj.clearScreen();
-  display_obj.initScrollValues(true);
-  display_obj.tft.setTextWrap(false);
-  display_obj.tft.setTextColor(TFT_BLACK, color);
-  display_obj.tft.fillRect(0,16,240,16, color);
-  display_obj.tft.drawCentreString(" Beacon Spam List ",120,16,2);
-  display_obj.touchToExit();
-  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
-  packets_sent = 0;
-  //esp_wifi_set_mode(WIFI_MODE_STA);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_init(&cfg);
-  esp_wifi_set_storage(WIFI_STORAGE_RAM);
-  //WiFi.mode(WIFI_AP_STA);
-  esp_wifi_set_mode(WIFI_AP_STA);
-  esp_wifi_start();
-  esp_wifi_set_promiscuous_filter(NULL);
-  esp_wifi_set_promiscuous(true);
-  esp_wifi_set_max_tx_power(78);
-  this->wifi_initialized = true;
-  initTime = millis();
-  //display_obj.clearScreen();
-  //Serial.println("End of func");
-}
-*/
+}*/
+
 
 // Function to prepare for beacon mimic
 void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
@@ -891,6 +895,7 @@ void WiFiScan::RunMimicFlood(uint8_t scan_mode, uint16_t color) {
 }
 
 // Function to prepare for beacon spam
+/*
 void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
   display_obj.TOP_FIXED_AREA_2 = 48;
   display_obj.tteBar = true;
@@ -919,8 +924,9 @@ void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
-}
+}*/
 
+/*
 void WiFiScan::RunDeauthFlood(uint8_t scan_mode, uint16_t color) {
   display_obj.TOP_FIXED_AREA_2 = 48;
   display_obj.tteBar = true;
@@ -949,9 +955,10 @@ void WiFiScan::RunDeauthFlood(uint8_t scan_mode, uint16_t color) {
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
-}
+}*/
 
 // Function to prepare for beacon spam
+/*
 void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 {
   //Serial.println("Beacon Spam...");
@@ -982,7 +989,7 @@ void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
   initTime = millis();
   //display_obj.clearScreen();
   //Serial.println("End of func");
-}
+}*/
 
 void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 {

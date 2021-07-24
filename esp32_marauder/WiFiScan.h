@@ -194,6 +194,8 @@ class WiFiScan
                               0xf0, 0xff, 0x02, 0x00
                           };
 
+    void startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_string);
+
     void packetMonitorMain(uint32_t currentTime);
     void eapolMonitorMain(uint32_t currentTime);
     void changeChannel();
@@ -209,12 +211,12 @@ class WiFiScan
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunAPScan(uint8_t scan_mode, uint16_t color);
-    void RunRickRoll(uint8_t scan_mode, uint16_t color);
-    void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
-    void RunProbeFlood(uint8_t scan_mode, uint16_t color);
-    void RunDeauthFlood(uint8_t scan_mode, uint16_t color);
+    //void RunRickRoll(uint8_t scan_mode, uint16_t color);
+    //void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
+    //void RunProbeFlood(uint8_t scan_mode, uint16_t color);
+    //void RunDeauthFlood(uint8_t scan_mode, uint16_t color);
     void RunMimicFlood(uint8_t scan_mode, uint16_t color);
-    void RunBeaconList(uint8_t scan_mode, uint16_t color);
+    //void RunBeaconList(uint8_t scan_mode, uint16_t color);
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
