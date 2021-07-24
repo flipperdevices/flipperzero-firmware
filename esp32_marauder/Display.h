@@ -47,8 +47,8 @@
 #define WIFI_ATTACK_BEACON_LIST 15
 
 #define TFT_SHIELD
-#define TFT_DIY
-#define KIT
+//#define TFT_DIY
+//#define KIT
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -111,7 +111,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    const String PROGMEM version_number = "v0.9.2";
+    const String PROGMEM version_number = "v0.9.3";
 
     bool printing = false;
     bool loading = false;
