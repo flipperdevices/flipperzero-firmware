@@ -673,6 +673,7 @@ void MenuFunctions::main(uint32_t currentTime)
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
@@ -713,6 +714,7 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
+        (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
         (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
@@ -739,6 +741,7 @@ void MenuFunctions::main(uint32_t currentTime)
   // This is for when on a menu
   if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
       //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
@@ -1214,6 +1217,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
+  });
+  addNodes(&wifiAttackMenu, "Deauth Flood", TFT_RED, NULL, DEAUTH_SNIFF, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
   });
   //addNodes(&wifiAttackMenu, "AP Mimic Flood", TFT_PURPLE, NULL, DEAUTH_SNIFF, [this]() {
   //  display_obj.clearScreen();

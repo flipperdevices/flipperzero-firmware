@@ -186,9 +186,9 @@ void setup()
   digitalWrite(TFT_BL, HIGH);
   */
 
-  esp_obj.begin();
+  //esp_obj.begin();
   
-  a32u4_obj.begin(); // This goes last to make sure nothing is messed up when reading serial
+  //a32u4_obj.begin(); // This goes last to make sure nothing is messed up when reading serial
 
   display_obj.tft.println(F("Starting..."));
 
@@ -216,8 +216,8 @@ void loop()
     sd_obj.main();
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
-    esp_obj.main(currentTime);
-    a32u4_obj.main(currentTime);
+    //esp_obj.main(currentTime);
+    //a32u4_obj.main(currentTime);
     //led_obj.main(currentTime);
     //if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM))
     if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
@@ -235,7 +235,7 @@ void loop()
   else if (wifi_scan_obj.currentScanMode == ESP_UPDATE) {
     display_obj.main(wifi_scan_obj.currentScanMode);
     menu_function_obj.main(currentTime);
-    esp_obj.program();
+    //esp_obj.program();
     delay(1);
   }
   //else

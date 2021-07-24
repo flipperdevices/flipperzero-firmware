@@ -69,7 +69,7 @@ void Web::setupOTAupdate()
   Serial.println(wifi_scan_obj.freeRAM());
 
   Serial.println("Starting softAP...");
-  esp_wifi_set_mac(ESP_IF_WIFI_AP, &newMACAddress[0]);
+  esp_wifi_set_mac(WIFI_IF_AP, &newMACAddress[0]);
   WiFi.softAP(ssid, password);
   Serial.println("");
 

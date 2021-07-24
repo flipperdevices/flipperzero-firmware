@@ -9,7 +9,7 @@
 
 // Testing NimBLE
 #include <NimBLEDevice.h>
-#include <NimBLEAdvertisedDevice.h>
+//#include <NimBLEAdvertisedDevice.h>
 
 #include <WiFi.h>
 #include <math.h>
@@ -49,6 +49,7 @@
 #define LV_SELECT_AP 17
 #define WIFI_ATTACK_AUTH 18
 #define WIFI_ATTACK_MIMIC 19
+#define WIFI_ATTACK_DEAUTH 20
 
 #define GRAPH_REFRESH 100
 
@@ -61,7 +62,7 @@ extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
-int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
+//int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
 
 struct ssid {
   String essid;
@@ -91,6 +92,8 @@ class WiFiScan
 
     bool do_break = false;
 
+    bool wsl_bypass_enabled = false;
+
     //int num_beacon = 0; // GREEN
     //int num_probe = 0; // BLUE
     //int num_deauth = 0; // RED
@@ -100,7 +103,7 @@ class WiFiScan
     int bluetoothScanTime = 5;
     int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};
-    BLEScan* pBLEScan;
+    NimBLEScan* pBLEScan;
 
     //String connected_network = "";
     String alfa = "1234567890qwertyuiopasdfghjkklzxcvbnm QWERTYUIOPASDFGHJKLZXCVBNM_";
@@ -130,8 +133,8 @@ class WiFiScan
     } __attribute__((packed)) WifiMgmtHdr;
     
     typedef struct {
-      WifiMgmtHdr hdr;
       uint8_t payload[0];
+      WifiMgmtHdr hdr;
     } wifi_ieee80211_packet_t;
 
     // barebones packet
@@ -183,6 +186,14 @@ class WiFiScan
                                   /* SSID */
                                   };
 
+    uint8_t deauth_frame_default[26] = {
+                              0xc0, 0x00, 0x3a, 0x01,
+                              0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0xf0, 0xff, 0x02, 0x00
+                          };
+
     void packetMonitorMain(uint32_t currentTime);
     void eapolMonitorMain(uint32_t currentTime);
     void changeChannel();
@@ -193,6 +204,7 @@ class WiFiScan
     void tftDrawColorKey();
     void tftDrawGraphObjects();
     void sendProbeAttack(uint32_t currentTime);
+    void sendDeauthAttack(uint32_t currentTime);
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
@@ -200,6 +212,7 @@ class WiFiScan
     void RunRickRoll(uint8_t scan_mode, uint16_t color);
     void RunBeaconSpam(uint8_t scan_mode, uint16_t color);
     void RunProbeFlood(uint8_t scan_mode, uint16_t color);
+    void RunDeauthFlood(uint8_t scan_mode, uint16_t color);
     void RunMimicFlood(uint8_t scan_mode, uint16_t color);
     void RunBeaconList(uint8_t scan_mode, uint16_t color);
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
