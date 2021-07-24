@@ -13,10 +13,9 @@ jobs:
         uses: AutoModality/action-clean@v1
 
       - name: 'Decontaminate previous build leftovers'
-        continue-on-error: true
         run: |
-          git fetch
-          git checkout ${GITHUB_REF}
+          git submodule status \
+            || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
 
       - name: 'Checkout code'
         uses: actions/checkout@v2
