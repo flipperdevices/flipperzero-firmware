@@ -13,7 +13,10 @@ jobs:
         uses: AutoModality/action-clean@v1
 
       - name: 'Decontaminate previous build leftovers'
-        run: git checkout ${GITHUB_REF} || true
+        continue-on-error: true
+        run: |
+          git fetch
+          git checkout ${GITHUB_REF}
 
       - name: 'Checkout code'
         uses: actions/checkout@v2
