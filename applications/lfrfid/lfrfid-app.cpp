@@ -17,7 +17,7 @@
 #include "scene/lfrfid-app-scene-delete-success.h"
 
 #include <file-worker-cpp.h>
-#include <path.h>
+#include <lib/toolbox/path.h>
 
 const char* LfRfidApp::app_folder = "/any/lfrfid";
 const char* LfRfidApp::app_extension = ".rfid";

@@ -4,7 +4,7 @@
 #include "../ibutton-event.h"
 #include "../ibutton-key.h"
 #include <callback-connector.h>
-#include <lib/random_name/random_name.h>
+#include <lib/toolbox/random_name.h>
 
 void iButtonSceneSaveName::on_enter(iButtonApp* app) {
     iButtonAppViewManager* view_manager = app->get_view_manager();

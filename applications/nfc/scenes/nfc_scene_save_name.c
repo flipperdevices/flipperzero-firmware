@@ -1,5 +1,5 @@
 #include "../nfc_i.h"
-#include <lib/random_name/random_name.h>
+#include <lib/toolbox/random_name.h>
 
 #define SCENE_SAVE_NAME_CUSTOM_EVENT (0UL)
 

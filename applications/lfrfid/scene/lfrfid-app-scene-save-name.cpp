@@ -1,5 +1,5 @@
 #include "lfrfid-app-scene-save-name.h"
-#include <lib/random_name/random_name.h>
+#include <lib/toolbox/random_name.h>
 
 void LfRfidAppSceneSaveName::on_enter(LfRfidApp* app, bool need_restore) {
     const char* key_name = app->worker.key.get_name();

@@ -3,7 +3,7 @@
 #include <callback-connector.h>
 #include <m-string.h>
 #include <file-worker-cpp.h>
-#include <path.h>
+#include <lib/toolbox/path.h>
 
 const char* iButtonApp::app_folder = "/any/ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
