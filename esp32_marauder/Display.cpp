@@ -51,10 +51,10 @@ void Display::RunSetup()
   
   // Initialize file system
   // This should probably have its own class
-  if (!SPIFFS.begin()) {
-    Serial.println(F("SPIFFS initialisation failed!"));
+  //if (!SPIFFS.begin()) {
+  //  Serial.println(F("SPIFFS initialisation failed!"));
     //while (1) yield(); // Stay here twiddling thumbs waiting
-  }
+  //}
 
   //this->initLVGL();
 
@@ -444,7 +444,9 @@ void Display::scrollAddress(uint16_t vsp) {
 void Display::drawJpeg(const char *filename, int xpos, int ypos) {
 
   // Open the named file (the Jpeg decoder library will close it after rendering image)
-  fs::File jpegFile = SPIFFS.open( filename, "r");    // File handle reference for SPIFFS
+  //fs::File jpegFile = SPIFFS.open( filename, "r");    // File handle reference for SPIFFS
+
+  //jpegFile.close();
 
   //ESP32 always seems to return 1 for jpegFile so this null trap does not work
   //if ( !jpegFile ) {

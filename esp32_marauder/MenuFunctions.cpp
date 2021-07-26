@@ -155,6 +155,49 @@ void MenuFunctions::writeBadUSB(){
   lv_keyboard_set_cursor_manage(kb, true);
 }
 
+void MenuFunctions::displaySettingsGFX(){
+  extern Settings settings_obj;
+
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, settings_obj.getSettingsString())) {
+    Serial.println("\nCould not parse json");
+  }
+  
+  lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+  lv_obj_set_size(list1, 160, 200);
+  lv_obj_set_width(list1, LV_HOR_RES);
+  lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
+
+  lv_obj_t * list_btn;
+
+  lv_obj_t * label;
+
+  list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
+  lv_obj_set_event_cb(list_btn, ap_list_cb);
+
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    char buf[json["Settings"][i]["name"].as<String>().length() + 1] = {};
+    json["Settings"][i]["name"].as<String>().toCharArray(buf, json["Settings"][i]["name"].as<String>().length() + 1);
+    
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
+    lv_btn_set_checkable(list_btn, true);
+    lv_obj_set_event_cb(list_btn, ap_list_cb);
+
+    //if (access_points->get(i).selected)
+    //  lv_btn_toggle(list_btn);
+
+    //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
+    //lv_obj_set_event_cb(btn1, ap_list_cb);
+    //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
+    //lv_btn_set_checkable(btn1, true);
+
+    //label = lv_label_create(btn1, NULL);
+    //lv_label_set_text(label, buf);
+  }
+}
+
+// GFX Function to build a list showing all APs scanned
 void MenuFunctions::addAPGFX(){
   extern LinkedList<AccessPoint>* access_points;
 
@@ -189,6 +232,57 @@ void MenuFunctions::addAPGFX(){
     //label = lv_label_create(btn1, NULL);
     //lv_label_set_text(label, buf);
   }
+}
+
+void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
+  extern Settings settings_obj;
+  extern MenuFunctions menu_function_obj;
+
+  String btn_text = lv_list_get_btn_text(btn);
+  String display_string = "";
+  
+  if (event == LV_EVENT_CLICKED) {
+    if (btn_text != "Exit") {
+      //lv_list_focus_btn(lv_obj_get_parent(lv_obj_get_parent(btn)), btn);
+    }
+    else {
+      Serial.println("Exiting...");
+      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+
+      printf("LV_EVENT_CANCEL\n");
+      menu_function_obj.deinitLVGL();
+      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      display_obj.exit_draw = true; // set everything back to normal
+    }
+  }
+
+  /*
+  if (event == LV_EVENT_VALUE_CHANGED) {      
+    if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+      //Serial.print("Toggle on: ");
+      //Serial.println(btn_text);
+      for (int i = 0; i < access_points->size(); i++) {
+        if (access_points->get(i).essid == btn_text) {
+          Serial.println("Adding AP: " + (String)access_points->get(i).essid);
+          AccessPoint ap = access_points->get(i);
+          ap.selected = true;
+          access_points->set(i, ap);
+        }
+      }
+    }
+    else {
+      //Serial.print("Toggle off: ");
+      //Serial.println(btn_text);
+      for (int i = 0; i < access_points->size(); i++) {
+        if (access_points->get(i).essid == btn_text) {
+          Serial.println("Removing AP: " + (String)access_points->get(i).essid);
+          AccessPoint ap = access_points->get(i);
+          ap.selected = false;
+          access_points->set(i, ap);
+        }
+      }
+    }
+  }*/
 }
 
 void ap_list_cb(lv_obj_t * btn, lv_event_t event) {
@@ -1386,6 +1480,12 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.currentScanMode = SHOW_INFO;
     changeMenu(&infoMenu);
     wifi_scan_obj.RunInfo();
+  });
+  addNodes(&deviceMenu, "Settings", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+    display_obj.clearScreen(); 
+    wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+    wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
+    displaySettingsGFX();
   });
  
   // Select update

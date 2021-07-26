@@ -10,6 +10,7 @@
 #include "Web.h"
 #include "esp_interface.h"
 #include "a32u4_interface.h"
+#include "settings.h"
 
 
 extern Display display_obj;
@@ -19,6 +20,7 @@ extern SDInterface sd_obj;
 extern BatteryInterface battery_obj;
 extern EspInterface esp_obj;
 extern A32u4Interface a32u4_obj;
+extern Settings settings_obj;
 
 // Keypad start position, key sizes and spacing
 #define KEY_X 120 // Centre of key
@@ -192,6 +194,7 @@ class MenuFunctions
     void joinWiFiGFX();
     void addSSIDGFX();
     void addAPGFX();
+    void displaySettingsGFX();
     void writeBadUSB();
 
     void buildButtons(Menu* menu);

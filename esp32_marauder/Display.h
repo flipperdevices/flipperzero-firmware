@@ -46,8 +46,8 @@
 #define LV_ADD_SSID 14
 #define WIFI_ATTACK_BEACON_LIST 15
 
-#define TFT_SHIELD
-//#define TFT_DIY
+//#define TFT_SHIELD
+#define TFT_DIY
 //#define KIT
 
 #define SCREEN_WIDTH 240

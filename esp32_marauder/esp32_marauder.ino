@@ -28,6 +28,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "LedInterface.h"
 #include "esp_interface.h"
 #include "a32u4_interface.h"
+#include "settings.h"
 //#include "icons.h"
 
 /*
@@ -52,6 +53,7 @@ TemperatureInterface temp_obj;
 LedInterface led_obj;
 EspInterface esp_obj;
 A32u4Interface a32u4_obj;
+Settings settings_obj;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -111,6 +113,8 @@ void setup()
   Serial.println(F("--------------------------------\n\n"));
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
+
+  settings_obj.begin();
 
   wifi_scan_obj.RunSetup();
 
@@ -216,6 +220,7 @@ void loop()
     sd_obj.main();
     battery_obj.main(currentTime);
     temp_obj.main(currentTime);
+    settings_obj.main(currentTime);
     //esp_obj.main(currentTime);
     //a32u4_obj.main(currentTime);
     //led_obj.main(currentTime);

@@ -1326,16 +1326,19 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         //Serial.println("\n" + (String)(snifferPacket->payload[37]) + " -> " + essid);
 
         // Load json
-        DynamicJsonBuffer jsonBuffer;
-        JsonObject& json = jsonBuffer.parseObject(essid);
-        if (!json.success()) {
+        //DynamicJsonBuffer jsonBuffer; // ArduinoJson v5
+        DynamicJsonDocument json(1024); // ArduinoJson v6
+        //JsonObject& json = jsonBuffer.parseObject(essid); // ArduinoJson v5
+         // ArduinoJson v6
+        if (deserializeJson(json, essid)) {
           Serial.println("\nCould not parse Pwnagotchi json");
           display_string.concat(essid);
         }
         else {
           Serial.println("\nSuccessfully parsed json");
           String json_output;
-          json.printTo(json_output);
+          //json.printTo(json_output); // ArduinoJson v5
+          serializeJson(json, json_output); // ArduinoJson v6
           Serial.println(json_output);
           display_string.concat(json["name"].as<String>() + " pwnd: " + json["pwnd_tot"].as<String>());
         }
