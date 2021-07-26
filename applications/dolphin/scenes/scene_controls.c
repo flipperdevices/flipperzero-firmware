@@ -14,12 +14,16 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     if(state->action == MINDCONTROL) {
         if(input->type == InputTypePress) {
             if(input->key == InputKeyRight) {
+                state->player_v.y = 0;
                 state->player_v.x = SPEED_X;
             } else if(input->key == InputKeyLeft) {
+                state->player_v.y = 0;
                 state->player_v.x = -SPEED_X;
             } else if(input->key == InputKeyUp) {
+                state->player_v.x = 0;
                 state->player_v.y = -SPEED_Y;
             } else if(input->key == InputKeyDown) {
+                state->player_v.x = 0;
                 state->player_v.y = SPEED_Y;
             }
         }
@@ -57,5 +61,37 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
 
         state->player.x =
             CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
+    }
+
+    state->player_anim += 1;
+
+    if(state->player_v.y < 0 && !state->player_flipped_y) {
+        state->transition = true;
+        state->player_flipped_y = true;
+        state->player_anim = 0;
+        state->frame_idx = 0;
+    } else if(state->player_v.y > 0 && state->player_flipped_y) {
+        state->transition = true;
+        state->player_flipped_y = false;
+        state->player_anim = 0;
+        state->frame_idx = 0;
+    } else if(state->player_v.x < 0 && !state->player_flipped_x) {
+        state->transition = true;
+        state->player_flipped_x = true;
+        state->player_anim = 0;
+        state->frame_idx = 0;
+    } else if(state->player_v.x > 0 && state->player_flipped_x) {
+        state->transition = true;
+        state->player_flipped_x = false;
+        state->player_anim = 0;
+        state->frame_idx = 0;
+    }
+
+    if(state->player_anim == state->current_frame->total && state->transition) {
+        state->transition = false;
+    }
+
+    if(state->player_anim % 6 == 0 && state->current_frame != NULL) {
+        state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
     }
 }

@@ -21,6 +21,8 @@
 #define SPEED_Y 4
 #define ACTIONS_NUM 5
 #define DOLPHIN_DEFAULT_Y 2
+#define MAX_FRAMES 3
+
 // world
 #define WORLD_WIDTH 256
 #define WORLD_HEIGHT 64
@@ -75,12 +77,38 @@ typedef struct {
     void (*callback)(Canvas* canvas, void* model);
 } Item;
 
+typedef enum {
+    GroupUp = 0,
+    GroupRight,
+    GroupDown,
+    GroupLeft,
+} FrameGroupsEnum;
+
+typedef enum {
+    FrameUp = 0,
+    FrameDown,
+    FrameLeft,
+    FrameRight,
+} FrameTypeEnum;
+
+typedef struct {
+    const Icon* f;
+    const Icon* b;
+} DolphinGfxAsset;
+
+typedef struct {
+    const DolphinGfxAsset frames[MAX_FRAMES];
+    const uint8_t total;
+} DolphinFrame;
+
 typedef struct {
     ///
     Vec2 player;
     Vec2 player_global;
     Vec2 player_v;
     Vec2 screen;
+
+    const DolphinFrame* current_frame;
 
     const Icon* dolphin_gfx;
     const Icon* dolphin_gfx_b; // temp
@@ -103,7 +131,7 @@ typedef struct {
     uint8_t dialogue_id;
     uint8_t previous_dialogue;
 
-    uint32_t action_timeout;
+    uint8_t action_timeout;
 
     Vec2 poi;
 

@@ -59,14 +59,10 @@ task.h is included from an application file. */
 /* Assumes 8bit bytes! */
 #define heapBITS_PER_BYTE ((size_t)8)
 
-/* Allocate the memory for the heap. */
-#if(configAPPLICATION_ALLOCATED_HEAP == 1)
-/* The application writer has already defined the array used for the RTOS
-    heap - probably so it can be placed in a special segment or address. */
-extern uint8_t ucHeap[configTOTAL_HEAP_SIZE];
-#else
-static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
-#endif /* configAPPLICATION_ALLOCATED_HEAP */
+/* Heap start end symbols provided by linker */
+extern const void __heap_start__;
+extern const void __heap_end__;
+uint8_t* ucHeap = (uint8_t*)&__heap_start__;
 
 /* Define the linked list structure.  This is used to link free blocks in order
 of their memory address. */
@@ -222,6 +218,20 @@ size_t memmgr_heap_get_max_free_block() {
 
     osKernelUnlock();
     return max_free_size;
+}
+
+void memmgr_heap_printf_free_blocks() {
+    BlockLink_t* pxBlock;
+    //TODO enable when we can do printf with a locked scheduler
+    //osKernelLock();
+
+    pxBlock = xStart.pxNextFreeBlock;
+    while(pxBlock->pxNextFreeBlock != NULL) {
+        printf("A %p S %lu\r\n", (void*)pxBlock, (uint32_t)pxBlock->xBlockSize);
+        pxBlock = pxBlock->pxNextFreeBlock;
+    }
+
+    //osKernelUnlock();
 }
 /*-----------------------------------------------------------*/
 
@@ -407,7 +417,7 @@ static void prvHeapInit(void) {
     BlockLink_t* pxFirstFreeBlock;
     uint8_t* pucAlignedHeap;
     size_t uxAddress;
-    size_t xTotalHeapSize = configTOTAL_HEAP_SIZE;
+    size_t xTotalHeapSize = (size_t)&__heap_end__ - (size_t)&__heap_start__;
 
     /* Ensure the heap starts on a correctly aligned boundary. */
     uxAddress = (size_t)ucHeap;
