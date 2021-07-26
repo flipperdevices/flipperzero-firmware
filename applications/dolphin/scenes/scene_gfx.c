@@ -14,31 +14,28 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     FrameTypeEnum frame = FrameRight;
 
     // horizontal movement
-    if(state->player_v.y == 0) {
-        if(state->player_v.x < 0 || state->player_flipped_x) {
-            group = state->transition ? GroupRight : GroupLeft;
-            frame = FrameLeft;
+    if(state->player_v.x < 0 || state->player_flipped_x) {
+        group = state->transition ? GroupRight : GroupLeft;
+        frame = FrameLeft;
 
-        } else if(state->player_v.x > 0 || !state->player_flipped_x) {
-            group = state->transition ? GroupLeft : GroupRight;
-            frame = FrameRight;
+    } else if(state->player_v.x > 0 || !state->player_flipped_x) {
+        group = state->transition ? GroupLeft : GroupRight;
+        frame = FrameRight;
+    }
+    // vertical movement
+    if(state->player_v.y < 0 && state->player_global.y > 0) {
+        group = GroupUp;
+        frame = FrameUp;
+
+        if(state->transition) {
+            frame = state->player_flipped_x ? FrameLeft : FrameRight;
         }
-    } else {
-        // vertical movement
-        if(state->player_v.y < 0) {
-            group = GroupUp;
-            frame = FrameUp;
+    } else if(state->player_v.y > 0 && state->player_global.y < WORLD_HEIGHT) {
+        group = GroupDown;
+        frame = FrameDown;
 
-            if(state->transition) {
-                frame = state->player_flipped_x ? FrameLeft : FrameRight;
-            }
-        } else if(state->player_v.y > 0) {
-            group = GroupDown;
-            frame = FrameDown;
-
-            if(state->transition) {
-                frame = state->player_flipped_x ? FrameLeft : FrameRight;
-            }
+        if(state->transition) {
+            frame = state->player_flipped_x ? FrameLeft : FrameRight;
         }
     }
 

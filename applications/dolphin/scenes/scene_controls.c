@@ -91,7 +91,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
         state->transition = false;
     }
 
-    if(state->player_anim % 6 == 0 && state->current_frame != NULL) {
+    if(state->player_anim % 7 == 0 && state->current_frame != NULL) {
         state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
     }
 }
