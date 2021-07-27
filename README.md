@@ -3,11 +3,11 @@
 ![Tests](https://github.com/ObKo/stm32-cmake/workflows/Tests/badge.svg)
 
 This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. 
-It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 device families.
+It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 WB WL device families.
 
 ## Requirements
 
-* cmake >= 3.13
+* cmake >= 3.16
 * GCC toolchain with newlib (optional).
 * STM32Cube package for appropriate STM32 family.
 
@@ -52,7 +52,7 @@ These configuration options need to be set for the build process to work properl
 
 * `STM32_TOOLCHAIN_PATH` - where toolchain is located, **default**: `/usr`
 * `STM32_CUBE_<FAMILY>_PATH` - path to STM32Cube directory, where `<FAMILY>` is one
-   of `F0 G0 L0 F1 L1 F2 F3 F4 G4 L4 F7 H7` **default**: `/opt/STM32Cube<FAMILY>`
+   of `F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 WB WL` **default**: `/opt/STM32Cube<FAMILY>`
 
 These configuration variables are optional:
 
@@ -95,8 +95,9 @@ You can specify STM32 family or even specific device (`STM32F407VG`) in `COMPONE
 
 Each STM32 device can be categorized into family and device type groups, for example STM32F407VG is device from `F4` family, with type `F407xx`.
 
-***Note**: Some devices in STM32H7 family have two different cores (Cortex-M7 and Cortex-M4).
+***Note**: Some devices have two different cores (e.g. STM32H7 has Cortex-M7 and Cortex-M4).
 For those devices the name used must include the core name e.g STM32H7_M7 and STM32H7_M4.
+STM32WB is a multi-cores device even if the second core is not accessible by end user.
 
 CMSIS consists of three main components:
 
@@ -120,7 +121,7 @@ CMSIS creates the following targets:
 
 So, if you don't need linker script, you can link only `CMSIS::STM32::<TYPE>` library and provide your own script using `stm32_add_linker_script` function
 
-***Note**: For H7 family, because of it multi-cores architecture, all H7 targets also have a suffix (::M7 or ::M4).
+***Note**: Because of some families multi-cores architecture, all targets also have a suffix (e.g. STM32H7 has ::M7 or ::M4).
 For example, targets created for STM32H747BI will look like `CMSIS::STM32::H7::M7`,
 `CMSIS::STM32::H7::M4`, `CMSIS::STM32::H747BI::M7`, `CMSIS::STM32::H747BI::M4`, etc.*
 
@@ -154,7 +155,7 @@ HAL module will search all drivers supported by family and create the following 
 * `HAL::STM32::<FAMILY>::<DRIVER>Ex` (e.g. `HAL::STM32::F4::ADCEx`) - HAL Extension driver , depends on `HAL::STM32::<FAMILY>::<DRIVER>`
 * `HAL::STM32::<FAMILY>::LL_<DRIVER>` (e.g. `HAL::STM32::F4::LL_ADC`) - HAL LL (Low-Level) driver , depends on `HAL::STM32::<FAMILY>`
 
-***Note**: Targets for STM32H7 will look like `HAL::STM32::<FAMILY>::[M7|M4]`, `HAL::STM32::<FAMILY>::[M7|M4]::<DRIVER>`, etc.*
+***Note**: Targets for multi-cores devices will look like `HAL::STM32::<FAMILY>::<CORE>`, `HAL::STM32::<FAMILY>::<CORE>::<DRIVER>`, etc.*
 
 Here is typical usage:
 
