@@ -18,6 +18,8 @@ int32_t IrdaApp::run(void* args) {
     printf("enabled PWM\r\n");
     uint32_t buf[] = {9000, 4500, 1000, 500, 1000, 500, 1000};
     api_hal_irda_start_async_tx(buf, COUNT_OF(buf));
+    delay(800);
+    api_hal_irda_start_async_tx(buf, COUNT_OF(buf));
     printf("enabled PWM done\r\n");
 
     if(args) {

@@ -1,4 +1,5 @@
 #include "api-hal-irda.h"
+#include "furi/common_defines.h"
 #include <cmsis_os2.h>
 #include <api-hal-interrupt.h>
 #include <api-hal-resources.h>
@@ -165,22 +166,10 @@ void api_hal_irda_pwm_stop() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void api_hal_irda_tx_dma_isr() {
-    if (LL_DMA_IsActiveFlag_TC1(DMA1)) {
-        LL_DMA_ClearFlag_TC1(DMA1);
-        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
-        hal_gpio_init_ex(&gpio_irda_tx, GpioModeOutputOpenDrain, GpioPullDown, GpioSpeedLow, 0);        // tmp
-        LL_TIM_EnableIT_UPDATE(TIM16);
-    }
-}
-
-void api_hal_irda_tx_timer_isr() {
-    if(LL_TIM_IsActiveFlag_UPDATE(TIM16)) {
-        LL_TIM_ClearFlag_UPDATE(TIM16);
+    if (LL_DMA_IsActiveFlag_TC2(DMA1)) {
+        LL_DMA_ClearFlag_TC2(DMA1);
+        LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
         hal_gpio_init_ex(&gpio_irda_tx, GpioModeOutputOpenDrain, GpioPullDown, GpioSpeedLow, 0);
-
-        LL_TIM_DisableIT_UPDATE(TIM16);
-        LL_TIM_DisableCounter(TIM16);
-        LL_TIM_DisableCounter(TIM17);
     }
 }
 
@@ -191,25 +180,49 @@ void Configure_TIMPWMOutput(TIM_TypeDef* timer, uint32_t channel, uint32_t freq,
     LL_TIM_EnableARRPreload(timer);
     LL_TIM_SetAutoReload(timer, __LL_TIM_CALC_ARR(SystemCoreClock, LL_TIM_GetPrescaler(timer), freq));
 
-    LL_TIM_OC_SetMode(timer, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1);
-    LL_TIM_OC_SetPolarity(timer, LL_TIM_CHANNEL_CH1, LL_TIM_OCPOLARITY_LOW);
+    LL_TIM_OC_SetMode(timer, channel, LL_TIM_OCMODE_PWM2);
+    LL_TIM_OC_SetPolarity(timer, channel, LL_TIM_OCPOLARITY_HIGH);
 
-    LL_TIM_OC_SetCompareCH1(timer, ( (LL_TIM_GetAutoReload(timer) + 1 ) * duty_cycle));
-    LL_TIM_OC_EnablePreload(timer, LL_TIM_CHANNEL_CH1);
+    LL_TIM_OC_SetCompareCH3(timer, ( (LL_TIM_GetAutoReload(timer) + 1 ) * (1 - duty_cycle)));
+    LL_TIM_OC_EnablePreload(timer, channel);
 
     LL_TIM_DisableIT_CC1(timer);
-    LL_TIM_CC_EnableChannel(timer, LL_TIM_CHANNEL_CH1);
+    LL_TIM_CC_EnableChannel(timer, channel);
     LL_TIM_EnableCounter(timer);
+
+    LL_TIM_OC_DisableFast(timer, channel);
+    LL_TIM_DisableMasterSlaveMode(timer);
 
     /* Force update generation */
     LL_TIM_GenerateEvent_UPDATE(timer);
 }
 
 void api_hal_irda_start_async_tx(uint32_t* buffer, size_t buffer_size) {
+    static uint32_t buf[] = {0x48, 0x78};
+    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM1);
+    LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM1_STOP);
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM16->ARR);
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM1->CCMR2);
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)buf;
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = COUNT_OF(buf);
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
+    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+
+    for (int i = 0; i < buffer_size; ++i) {
+        buffer[i] = buffer[i] * 38 / 1000;
+    }
+
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM1->RCR);
     dma_config.MemoryOrM2MDstAddress = (uint32_t)buffer;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_CIRCULAR;
@@ -217,57 +230,28 @@ void api_hal_irda_start_async_tx(uint32_t* buffer, size_t buffer_size) {
     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = buffer_size;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM16_UP;
-    dma_config.Priority = LL_DMA_MODE_NORMAL;
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-    api_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_1, api_hal_irda_tx_dma_isr);
-    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+    dma_config.NbData = buffer_size + 1;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM1_UP;
+    dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config);
+    api_hal_interrupt_set_dma_channel_isr(DMA1, LL_DMA_CHANNEL_2, api_hal_irda_tx_dma_isr);
+    LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_2);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
 
-    // Configure TIM16
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = 64-1;
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = 100;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(TIM16, &TIM_InitStruct);
-    LL_TIM_SetClockSource(TIM16, LL_TIM_CLOCKSOURCE_INTERNAL);
-    LL_TIM_EnableARRPreload(TIM16);
+    // Configure TIM1
+    LL_TIM_EnableDMAReq_UPDATE(TIM1);
+    Configure_TIMPWMOutput(TIM1, LL_TIM_CHANNEL_CH3, 38000, 0.33);
 
-    // Configure TIM16 CH1
-    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_TOGGLE;
-    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.CompareValue = 0;
-    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    LL_TIM_OC_SetPolarity(TIM1, LL_TIM_CHANNEL_CH3N, LL_TIM_OCPOLARITY_LOW);
+    LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH3N);
 
-    TIM_OC_InitStruct.OCNPolarity  = LL_TIM_OCPOLARITY_HIGH;
-    TIM_OC_InitStruct.OCIdleState  = LL_TIM_OCIDLESTATE_HIGH;
-    TIM_OC_InitStruct.OCNIdleState = LL_TIM_OCIDLESTATE_LOW;
+    LL_TIM_EnableAllOutputs(TIM1);
 
-    LL_TIM_OC_Init(TIM16, LL_TIM_CHANNEL_CH1, &TIM_OC_InitStruct);
-    LL_TIM_OC_DisableFast(TIM16, LL_TIM_CHANNEL_CH1);
-    LL_TIM_DisableMasterSlaveMode(TIM16);
+    hal_gpio_init_ex(&gpio_irda_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
 
-    api_hal_interrupt_set_timer_isr(TIM16, api_hal_irda_tx_timer_isr);
-    LL_TIM_EnableDMAReq_UPDATE(TIM16);
-//    LL_TIM_CC_EnableChannel(TIM16, LL_TIM_CHANNEL_CH1N);
-    LL_TIM_CC_EnableChannel(TIM16, LL_TIM_CHANNEL_CH1);
-
-//    LL_TIM_SetOffStates(TIM16, LL_TIM_OSSI_DISABLE, LL_TIM_OSSR_ENABLE);
-    LL_TIM_SetCounter(TIM16, 0);
-    LL_TIM_EnableCounter(TIM16);
-    LL_TIM_EnableAllOutputs(TIM16);
-
-    // Configure TIM17
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
-    Configure_TIMPWMOutput(TIM17, LL_TIM_CHANNEL_CH1, 38000, 0.33);
-    LL_TIM_EnableAllOutputs(TIM17);
-
-    hal_gpio_init_ex(&gpio_irda_tx, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedHigh, GpioAltFn8IR);
     // Start counter
-    LL_TIM_GenerateEvent_UPDATE(TIM16);
+//    LL_TIM_DisableUpdateEvent(TIM1);
+//    LL_TIM_GenerateEvent_UPDATE(TIM1);
+//    LL_TIM_EnableUpdateEvent(TIM1);
 }
 
