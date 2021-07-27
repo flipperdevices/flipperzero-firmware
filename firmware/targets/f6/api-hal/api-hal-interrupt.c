@@ -5,6 +5,7 @@
 #include <stm32wbxx_ll_tim.h>
 
 volatile ApiHalInterruptISR api_hal_tim_tim2_isr = NULL;
+volatile ApiHalInterruptISR api_hal_tim_tim16_isr = NULL;
 
 #define API_HAL_INTERRUPT_DMA_COUNT 2
 #define API_HAL_INTERRUPT_DMA_CHANNELS_COUNT 8
@@ -24,6 +25,13 @@ void api_hal_interrupt_set_timer_isr(TIM_TypeDef* timer, ApiHalInterruptISR isr)
             furi_assert(api_hal_tim_tim2_isr != NULL);
         }
         api_hal_tim_tim2_isr = isr;
+    } if (timer == TIM16) {
+        if (isr) {
+            furi_assert(api_hal_tim_tim16_isr == NULL);
+        } else {
+            furi_assert(api_hal_tim_tim16_isr != NULL);
+        }
+        api_hal_tim_tim16_isr = isr;
     } else {
         furi_check(0);
     }
@@ -62,6 +70,15 @@ void TIM2_IRQHandler(void) {
         api_hal_tim_tim2_isr();
     } else {
         HAL_TIM_IRQHandler(&htim2);
+    }
+}
+
+/* Timer 16 */
+void TIM1_UP_TIM16_IRQHandler(void) {
+    if (api_hal_tim_tim16_isr) {
+        api_hal_tim_tim16_isr();
+    } else {
+        HAL_TIM_IRQHandler(&htim16);
     }
 }
 

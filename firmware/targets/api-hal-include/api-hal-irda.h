@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,6 +79,9 @@ void api_hal_irda_pwm_stop();
  * @return  false - IRDA is busy, true otherwise.
  */
 bool api_hal_irda_rx_irq_is_busy(void);
+
+void api_hal_irda_enable_pwm(void);
+void api_hal_irda_start_async_tx(uint32_t* buffer, size_t buffer_size);
 
 #ifdef __cplusplus
 }

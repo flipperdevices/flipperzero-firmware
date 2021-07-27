@@ -1,4 +1,5 @@
 #include "irda-app.hpp"
+#include "api-hal-delay.h"
 #include "irda/irda-app-file-parser.hpp"
 #include <irda_worker.h>
 #include <furi.h>
@@ -11,6 +12,13 @@ int32_t IrdaApp::run(void* args) {
     IrdaAppEvent event;
     bool consumed;
     bool exit = false;
+
+    delay(1000);
+
+    printf("enabled PWM\r\n");
+    uint32_t buf[] = {9000, 4500, 1000, 500, 1000, 500, 1000};
+    api_hal_irda_start_async_tx(buf, COUNT_OF(buf));
+    printf("enabled PWM done\r\n");
 
     if(args) {
         std::string remote_name;
