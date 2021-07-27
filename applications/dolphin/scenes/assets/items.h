@@ -2,6 +2,7 @@
 #include "dolphin/scenes/scene.h"
 
 typedef enum {
+    ItemsFood,
     ItemsPC,
     ItemsEnumTotal,
 } ItemsEnum;

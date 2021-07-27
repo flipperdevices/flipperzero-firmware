@@ -49,6 +49,7 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
 void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     furi_assert(state);
 
+    uint8_t speed_mod = (state->player_v.x != 0 || state->player_v.y != 0) ? 4 : 7;
     // global pos
     state->player_global.x = CLAMP(state->player_global.x + state->player_v.x, WORLD_WIDTH, 0);
     state->player_global.y = CLAMP(state->player_global.y + state->player_v.y, WORLD_HEIGHT, 0);
@@ -56,11 +57,20 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
     // nudge camera postition
     if(state->player_global.x > 178) {
         if(state->player_v.x > 0) {
-            state->player_v.x *= 1.3;
+            state->player_v.x = SPEED_X * 1.3;
         }
 
         state->player.x =
-            CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
+            CLAMP(state->player.x - state->player_v.x / 1.8, DOLPHIN_CENTER, -DOLPHIN_WIDTH / 2);
+    }
+
+    if(state->player_global.x < 60) {
+        if(state->player_v.x < 0) {
+            state->player_v.x = -SPEED_X * 1.3;
+        }
+
+        state->player.x = CLAMP(
+            state->player.x - state->player_v.x / 1.8, DOLPHIN_CENTER * 1.8, DOLPHIN_WIDTH / 2);
     }
 
     state->player_anim += 1;
@@ -91,7 +101,7 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
         state->transition = false;
     }
 
-    if(state->player_anim % 7 == 0 && state->current_frame != NULL) {
+    if(state->player_anim % speed_mod == 0 && state->current_frame != NULL) {
         state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
     }
 }

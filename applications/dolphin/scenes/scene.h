@@ -25,7 +25,7 @@
 
 // world
 #define WORLD_WIDTH 256
-#define WORLD_HEIGHT 64
+#define WORLD_HEIGHT 128
 
 #define LAYERS 8
 #define SCENE_ZOOM 9
