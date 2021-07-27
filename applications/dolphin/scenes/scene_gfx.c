@@ -54,7 +54,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     canvas_set_bitmap_mode(canvas, false);
 }
 
-static bool item_screen_bounds(int32_t pos) {
+static bool item_screen_bounds_x(int32_t pos) {
     return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
 }
 
@@ -70,19 +70,9 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ItemsEnumTotal; i++) {
                 int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
-                int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
 
-                if(item_screen_bounds(item_pos_X)) {
+                if(item_screen_bounds_x(item_pos_X)) {
                     if(l == current_scene[i]->layer) {
-                        if(current_scene[i]->icon) {
-                            canvas_draw_icon(
-                                canvas,
-                                item_pos_X * PARALLAX(l),
-                                item_pos_Y,
-                                current_scene[i]->icon);
-                            canvas_set_bitmap_mode(canvas, false);
-                        }
-
                         if(current_scene[i]->draw) {
                             current_scene[i]->draw(canvas, state);
                         }

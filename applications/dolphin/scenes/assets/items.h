@@ -3,7 +3,7 @@
 
 typedef enum {
     ItemsFood,
-    ItemsPC,
+    ItemsConsole,
     ItemsEnumTotal,
 } ItemsEnum;
 
