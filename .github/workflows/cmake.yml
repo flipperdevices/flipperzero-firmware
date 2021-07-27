@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        family: [F0, F1, F2, F3, F4, F7, G0, G4, H7, L0, L1, L4, L5, WB, WL]
+        family: [F0, F1, F2, F3, F4, F7, G0, G4, H7, L0, L1, L4, L5, U5, WB, WL]
       fail-fast: false
 
     steps:
