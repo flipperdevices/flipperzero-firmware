@@ -33,7 +33,6 @@ void dolphin_scene_update_state(SceneState* state, uint32_t t, uint32_t dt) {
                 state->action = MINDCONTROL;
             } else {
                 scene_proceed_action(state);
-                state->emote_id = roll_new(state->previous_emote, 6);
             }
         }
         break;

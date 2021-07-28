@@ -109,14 +109,10 @@ typedef struct {
 
     const DolphinFrame* current_frame;
 
-    const Icon* dolphin_gfx;
-    const Icon* dolphin_gfx_b; // temp
-
     bool player_flipped_x;
     bool player_flipped_y;
     bool transition;
     bool use_pending;
-    // dolphin_scene_debug
     bool debug;
 
     uint8_t player_anim;
@@ -127,12 +123,7 @@ typedef struct {
     uint8_t emote_id;
     uint8_t previous_emote;
 
-    uint8_t dialogue_id;
-    uint8_t previous_dialogue;
-
     uint8_t action_timeout;
-
-    Vec2 poi;
 
     uint8_t action;
     uint8_t next_action;

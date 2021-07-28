@@ -39,18 +39,20 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
         }
     }
 
-    state->current_frame = *&frames[group][frame];
-
-    if(state->current_frame->frames[state->frame_idx].f != NULL) {
-        state->dolphin_gfx = state->current_frame->frames[state->frame_idx].f;
-        state->dolphin_gfx_b = state->current_frame->frames[state->frame_idx].b;
+    if(*&frames[group][frame]->frames[state->frame_idx].f != NULL) {
+        state->current_frame = *&frames[group][frame];
     }
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon(canvas, state->player.x - 1, state->player.y - 1, state->dolphin_gfx_b);
+    canvas_draw_icon(
+        canvas,
+        state->player.x - 1,
+        state->player.y - 1,
+        state->current_frame->frames[state->frame_idx].b);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon(canvas, state->player.x, state->player.y, state->dolphin_gfx);
+    canvas_draw_icon(
+        canvas, state->player.x, state->player.y, state->current_frame->frames[state->frame_idx].f);
     canvas_set_bitmap_mode(canvas, false);
 }
 
