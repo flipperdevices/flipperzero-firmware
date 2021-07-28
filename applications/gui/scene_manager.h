@@ -109,7 +109,9 @@ bool scene_manager_previous_scene(SceneManager* scene_manager);
  * @param scene_id Scene ID
  * @return true if previous scene was found, false otherwise
  */
-bool scene_manager_search_previous_scene(SceneManager* scene_manager, uint32_t scene_id);
+bool scene_manager_search_and_switch_to_previous_scene(
+    SceneManager* scene_manager,
+    uint32_t scene_id);
 
 #ifdef __cplusplus
 }

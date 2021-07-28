@@ -109,7 +109,9 @@ bool scene_manager_previous_scene(SceneManager* scene_manager) {
     return true;
 }
 
-bool scene_manager_search_previous_scene(SceneManager* scene_manager, uint32_t scene_id) {
+bool scene_manager_search_and_switch_to_previous_scene(
+    SceneManager* scene_manager,
+    uint32_t scene_id) {
     furi_assert(scene_manager);
 
     uint32_t prev_scene_id = 0;

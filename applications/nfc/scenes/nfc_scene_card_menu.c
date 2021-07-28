@@ -71,7 +71,8 @@ const bool nfc_scene_card_menu_on_event(void* context, SceneManagerEvent event) 
             return true;
         }
     } else if(event.type == SceneManagerEventTypeNavigation) {
-        return scene_manager_search_previous_scene(nfc->scene_manager, NfcSceneStart);
+        return scene_manager_search_and_switch_to_previous_scene(
+            nfc->scene_manager, NfcSceneStart);
     }
 
     return false;
