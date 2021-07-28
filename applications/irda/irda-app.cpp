@@ -1,12 +1,14 @@
 #include "irda-app.hpp"
 #include "api-hal-delay.h"
 #include "irda/irda-app-file-parser.hpp"
+#include <cmath>
 #include <irda_worker.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdio.h>
 #include <callback-connector.h>
+#include <math.h>
 
 int32_t IrdaApp::run(void* args) {
     IrdaAppEvent event;
@@ -16,10 +18,15 @@ int32_t IrdaApp::run(void* args) {
     delay(1000);
 
     printf("enabled PWM\r\n");
-    uint32_t buf[] = {9000, 4500, 1000, 500, 1000, 500, 1000};
-    api_hal_irda_start_async_tx(buf, COUNT_OF(buf));
-    delay(800);
-    api_hal_irda_start_async_tx(buf, COUNT_OF(buf));
+    float t = 1000000.0 / 38000;
+    uint32_t buf[] = {3, 4, 5, 6, 7};
+    for (uint32_t i = 0; i < COUNT_OF(buf); ++i) {
+        buf[i] = roundf(t*buf[i]);
+    }
+    api_hal_irda_start_async_tx(buf, COUNT_OF(buf), 38000, 0.33);
+    delay(200);
+    uint32_t buf2[] = {9000, 4500, 560, 560*3, 560, 560*1, 560};
+    api_hal_irda_start_async_tx(buf2, COUNT_OF(buf2), 38000, 0.33);
     printf("enabled PWM done\r\n");
 
     if(args) {

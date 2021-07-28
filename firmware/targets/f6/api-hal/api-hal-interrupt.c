@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_tim.h>
 
 volatile ApiHalInterruptISR api_hal_tim_tim2_isr = NULL;
-volatile ApiHalInterruptISR api_hal_tim_tim16_isr = NULL;
+volatile ApiHalInterruptISR api_hal_tim_tim1_isr = NULL;
 
 #define API_HAL_INTERRUPT_DMA_COUNT 2
 #define API_HAL_INTERRUPT_DMA_CHANNELS_COUNT 8
@@ -25,13 +25,13 @@ void api_hal_interrupt_set_timer_isr(TIM_TypeDef* timer, ApiHalInterruptISR isr)
             furi_assert(api_hal_tim_tim2_isr != NULL);
         }
         api_hal_tim_tim2_isr = isr;
-    } if (timer == TIM16) {
+    } if (timer == TIM1) {
         if (isr) {
-            furi_assert(api_hal_tim_tim16_isr == NULL);
+            furi_assert(api_hal_tim_tim1_isr == NULL);
         } else {
-            furi_assert(api_hal_tim_tim16_isr != NULL);
+            furi_assert(api_hal_tim_tim1_isr != NULL);
         }
-        api_hal_tim_tim16_isr = isr;
+        api_hal_tim_tim1_isr = isr;
     } else {
         furi_check(0);
     }
@@ -43,7 +43,7 @@ void api_hal_interrupt_set_dma_channel_isr(DMA_TypeDef* dma, uint32_t channel, A
     furi_check(channel < API_HAL_INTERRUPT_DMA_CHANNELS_COUNT);
     if (dma == DMA1) {
         api_hal_dma_channel_isr[0][channel] = isr;
-    } else if (dma == DMA1) {
+    } else if (dma == DMA2) {
         api_hal_dma_channel_isr[1][channel] = isr;
     } else {
         furi_check(0);
@@ -73,12 +73,12 @@ void TIM2_IRQHandler(void) {
     }
 }
 
-/* Timer 16 */
+/* Timer 1 Update */
 void TIM1_UP_TIM16_IRQHandler(void) {
-    if (api_hal_tim_tim16_isr) {
-        api_hal_tim_tim16_isr();
+    if (api_hal_tim_tim1_isr) {
+        api_hal_tim_tim1_isr();
     } else {
-        HAL_TIM_IRQHandler(&htim16);
+        HAL_TIM_IRQHandler(&htim1);
     }
 }
 
