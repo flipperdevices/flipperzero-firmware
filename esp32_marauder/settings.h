@@ -22,6 +22,21 @@ class Settings {
   public:
     bool begin();
 
+    template <typename T>
+    T loadSetting(String name);
+
+    //template<>
+    //int loadSetting<int>(String key);
+    
+    //template<>
+    //String loadSetting<String>(String key);
+    
+    //template<>
+    //bool loadSetting<bool>(String key);
+    
+    //template<>
+    //uint8_t loadSetting<uint8_t>(String key);
+
     String getSettingsString();
     void main(uint32_t currentTime);
 };

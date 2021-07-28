@@ -116,6 +116,12 @@ void setup()
 
   settings_obj.begin();
 
+  Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
+  if (settings_obj.loadSetting<bool>("Force PMKID"))
+    Serial.println("This is a test Force PMKID: true");
+  else
+    Serial.println("This is a test Force PMKID: false");
+
   wifi_scan_obj.RunSetup();
 
   Serial.println(wifi_scan_obj.freeRAM());

@@ -46,6 +46,79 @@ bool Settings::begin() {
   return true;
 }
 
+template <typename T>
+T Settings::loadSetting(String key) {}
+
+// Get type int settings
+template<>
+int Settings::loadSetting<int>(String key) {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    if (json["Settings"][i]["name"].as<String>() == key)
+      return json["Settings"][i]["value"];
+  }
+
+  return 0;
+}
+
+// Get type string settings
+template<>
+String Settings::loadSetting<String>(String key) {
+  //return this->json_settings_string;
+  
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    if (json["Settings"][i]["name"].as<String>() == key)
+      return json["Settings"][i]["value"];
+  }
+
+  return "";
+}
+
+// Get type bool settings
+template<>
+bool Settings::loadSetting<bool>(String key) {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    if (json["Settings"][i]["name"].as<String>() == key)
+      return json["Settings"][i]["value"];
+  }
+
+  return false;
+}
+
+//Get type uint8_t settings
+template<>
+uint8_t Settings::loadSetting<uint8_t>(String key) {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    if (json["Settings"][i]["name"].as<String>() == key)
+      return json["Settings"][i]["value"];
+  }
+
+  return 0;
+}
+
 void Settings::printJsonSettings(String json_string) {
   DynamicJsonDocument json(1024); // ArduinoJson v6
 
@@ -75,15 +148,15 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
   DynamicJsonDocument jsonBuffer(1024);
   String settings_string;
 
-  jsonBuffer["Settings"][0]["name"] = "channel";
-  jsonBuffer["Settings"][0]["type"] = "int";
+  jsonBuffer["Settings"][0]["name"] = "Channel";
+  jsonBuffer["Settings"][0]["type"] = "uint8_t";
   jsonBuffer["Settings"][0]["value"] = 11;
 
-  jsonBuffer["Settings"][1]["name"] = "force pmkid";
+  jsonBuffer["Settings"][1]["name"] = "Force PMKID";
   jsonBuffer["Settings"][1]["type"] = "bool";
   jsonBuffer["Settings"][1]["value"] = true;
 
-  jsonBuffer["Settings"][2]["name"] = "save pcap";
+  jsonBuffer["Settings"][2]["name"] = "Save PCAP";
   jsonBuffer["Settings"][2]["type"] = "bool";
   jsonBuffer["Settings"][2]["value"] = true;
 
@@ -97,6 +170,8 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
 
   // Close the file
   settingsFile.close();
+
+  this->json_settings_string = settings_string;
 
   this->printJsonSettings(settings_string);
 
