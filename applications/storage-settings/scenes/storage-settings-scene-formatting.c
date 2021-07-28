@@ -64,7 +64,7 @@ bool storage_settings_scene_formatting_on_event(void* context, SceneManagerEvent
                 app->scene_manager, StorageSettingsStart);
             break;
         }
-    } else if(event.type == SceneManagerEventTypeNavigation) {
+    } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
             app->scene_manager, StorageSettingsStart);
     }

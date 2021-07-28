@@ -75,7 +75,7 @@ const bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerE
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;
         }
-    } else if(event.type == SceneManagerEventTypeNavigation) {
+    } else if(event.type == SceneManagerEventTypeBack) {
         return scene_manager_search_and_switch_to_previous_scene(
             nfc->scene_manager, NfcSceneReadEmvAppSuccess);
     }

@@ -11,7 +11,7 @@ extern "C" {
  */
 typedef enum {
     SceneManagerEventTypeCustom,
-    SceneManagerEventTypeNavigation,
+    SceneManagerEventTypeBack,
     SceneManagerEventTypeTick,
 } SceneManagerEventType;
 
@@ -78,12 +78,12 @@ void scene_manager_free(SceneManager* scene_manager);
  */
 bool scene_manager_handle_custom_event(SceneManager* scene_manager, uint32_t custom_event);
 
-/** Navigation event handler
- * Calls Scene event handler with Navigation event parameter
+/** Back event handler
+ * Calls Scene event handler with Back event parameter
  * @param scene_manager SceneManager instance
  * @return true if event was consumed, false otherwise
  */
-bool scene_manager_handle_navigation_event(SceneManager* scene_manager);
+bool scene_manager_handle_back_event(SceneManager* scene_manager);
 
 /** Tick event handler
  * Calls Scene event handler with Tick event parameter

@@ -53,11 +53,11 @@ bool scene_manager_handle_custom_event(SceneManager* scene_manager, uint32_t cus
         scene_manager->context, event);
 }
 
-bool scene_manager_handle_navigation_event(SceneManager* scene_manager) {
+bool scene_manager_handle_back_event(SceneManager* scene_manager) {
     furi_assert(scene_manager);
 
     SceneManagerEvent event = {
-        .type = SceneManagerEventTypeNavigation,
+        .type = SceneManagerEventTypeBack,
     };
     uint32_t scene_id = *SceneManagerIdStack_back(scene_manager->scene_id_stack);
     bool consumed =
