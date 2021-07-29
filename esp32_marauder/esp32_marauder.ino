@@ -77,6 +77,8 @@ void setup()
   
   //Serial.begin(115200);
 
+  Serial.println("\n\nHello, World!\n");
+
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
   
   display_obj.RunSetup();

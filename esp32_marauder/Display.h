@@ -69,6 +69,23 @@
 #define STATUS_BAR_WIDTH 16
 #define LVGL_TICK_PERIOD 6
 
+#define FRAME_X 100
+#define FRAME_Y 64
+#define FRAME_W 120
+#define FRAME_H 50
+
+// Red zone size
+#define REDBUTTON_X FRAME_X
+#define REDBUTTON_Y FRAME_Y
+#define REDBUTTON_W (FRAME_W/2)
+#define REDBUTTON_H FRAME_H
+
+// Green zone size
+#define GREENBUTTON_X (REDBUTTON_X + REDBUTTON_W)
+#define GREENBUTTON_Y FRAME_Y
+#define GREENBUTTON_W (FRAME_W/2)
+#define GREENBUTTON_H FRAME_H
+
 #define STATUSBAR_COLOR 0x4A49
 
 #define KIT_LED_BUILTIN 13
@@ -90,6 +107,7 @@ PROGMEM static lv_obj_t *kb;
 class Display
 {
   private:
+    bool SwitchOn = false;
     
     bool run_setup = true;
     
@@ -99,6 +117,8 @@ class Display
     // A few test variables used during debugging
     boolean change_colour = 1;
     boolean selected = 1;
+
+    void drawFrame();
 
     //void addNodes(Menu* menu, String name, Menu* child, std::function<void()> callable);
     //void changeMenu(Menu* menu);
@@ -150,6 +170,8 @@ class Display
     //void initLVGL();
     //void deinitLVGL();
     //void joinWiFiGFX();
+    void tftDrawRedOnOffButton();
+    void tftDrawGreenOnOffButton();
     void tftDrawGraphObjects(byte x_scale);
     void tftDrawEapolColorKey();
     void tftDrawColorKey();

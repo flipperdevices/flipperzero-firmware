@@ -119,6 +119,39 @@ uint8_t Settings::loadSetting<uint8_t>(String key) {
   return 0;
 }
 
+String Settings::setting_index_to_name(int i) {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  return json["Settings"][i]["name"];
+}
+
+int Settings::getNumberSettings() {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+
+  return json["Settings"].size();
+}
+
+String Settings::getSettingType(String key) {
+  DynamicJsonDocument json(1024); // ArduinoJson v6
+
+  if (deserializeJson(json, this->json_settings_string)) {
+    Serial.println("\nCould not parse json");
+  }
+  
+  for (int i = 0; i < json["Settings"].size(); i++) {
+    if (json["Settings"][i]["name"].as<String>() == key)
+      return json["Settings"][i]["type"];
+  }
+}
+
 void Settings::printJsonSettings(String json_string) {
   DynamicJsonDocument json(1024); // ArduinoJson v6
 
@@ -151,14 +184,32 @@ bool Settings::createDefaultSettings(fs::FS &fs) {
   jsonBuffer["Settings"][0]["name"] = "Channel";
   jsonBuffer["Settings"][0]["type"] = "uint8_t";
   jsonBuffer["Settings"][0]["value"] = 11;
+  jsonBuffer["Settings"][0]["range"]["min"] = 1;
+  jsonBuffer["Settings"][0]["range"]["max"] = 14;
 
-  jsonBuffer["Settings"][1]["name"] = "Force PMKID";
-  jsonBuffer["Settings"][1]["type"] = "bool";
-  jsonBuffer["Settings"][1]["value"] = true;
+  jsonBuffer["Settings"][1]["name"] = "Channel Hop Delay";
+  jsonBuffer["Settings"][1]["type"] = "int";
+  jsonBuffer["Settings"][1]["value"] = 1;
+  jsonBuffer["Settings"][1]["range"]["min"] = 1;
+  jsonBuffer["Settings"][1]["range"]["max"] = 10;
 
-  jsonBuffer["Settings"][2]["name"] = "Save PCAP";
+  jsonBuffer["Settings"][2]["name"] = "Force PMKID";
   jsonBuffer["Settings"][2]["type"] = "bool";
   jsonBuffer["Settings"][2]["value"] = true;
+  jsonBuffer["Settings"][2]["range"]["min"] = false;
+  jsonBuffer["Settings"][2]["range"]["max"] = true;
+
+  jsonBuffer["Settings"][3]["name"] = "Force Probe";
+  jsonBuffer["Settings"][3]["type"] = "bool";
+  jsonBuffer["Settings"][3]["value"] = true;
+  jsonBuffer["Settings"][3]["range"]["min"] = false;
+  jsonBuffer["Settings"][3]["range"]["max"] = true;
+
+  jsonBuffer["Settings"][4]["name"] = "Save PCAP";
+  jsonBuffer["Settings"][4]["type"] = "bool";
+  jsonBuffer["Settings"][4]["value"] = true;
+  jsonBuffer["Settings"][4]["range"]["min"] = false;
+  jsonBuffer["Settings"][4]["range"]["max"] = true;
 
   //jsonBuffer.printTo(settingsFile);
   if (serializeJson(jsonBuffer, settingsFile) == 0) {

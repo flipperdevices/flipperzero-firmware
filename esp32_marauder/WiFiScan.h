@@ -21,6 +21,7 @@
 #include "Buffer.h"
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"
+#include "settings.h"
 #include "Assets.h"
 //#include "MenuFunctions.h"
 
@@ -60,6 +61,7 @@ extern SDInterface sd_obj;
 extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
+extern Settings settings_obj;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 //int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
@@ -79,6 +81,12 @@ struct AccessPoint {
 class WiFiScan
 {
   private:
+    // Settings
+    int channel_hop_delay = 1;
+    bool force_pmkid = false;
+    bool force_probe = false;
+    bool save_pcap = false;
+  
     int x_pos; //position along the graph x axis
     float y_pos_x; //current graph y axis position of X value
     float y_pos_x_old = 120; //old y axis position of X value
@@ -100,6 +108,7 @@ class WiFiScan
 
     uint32_t initTime = 0;
     bool run_setup = true;
+    void initWiFi(uint8_t scan_mode);
     int bluetoothScanTime = 5;
     int packets_sent = 0;
     const wifi_promiscuous_filter_t filt = {.filter_mask=WIFI_PROMIS_FILTER_MASK_MGMT | WIFI_PROMIS_FILTER_MASK_DATA};

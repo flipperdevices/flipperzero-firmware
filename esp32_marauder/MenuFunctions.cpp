@@ -155,6 +155,90 @@ void MenuFunctions::writeBadUSB(){
   lv_keyboard_set_cursor_manage(kb, true);
 }
 
+// Event handler for settings drop down menus
+void setting_dropdown_cb(lv_obj_t * obj, lv_event_t event) {
+  //lv_event_code_t code = lv_event_get_code(event);
+  //lv_obj_t * obj = lv_event_get_target(event);
+  //lv_obj_t * list1 = lv_obj_get_parent(lv_obj_get_parent(obj));
+  //if(event == LV_EVENT_CLICKED) {
+  //    LV_LOG_USER("Clicked: %s", lv_list_get_btn_text(list1, obj));
+  //}
+}
+
+void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
+  extern Settings settings_obj;
+  extern MenuFunctions menu_function_obj;
+
+  String btn_text = lv_list_get_btn_text(btn);
+  String display_string = "";
+  
+  if (event == LV_EVENT_CLICKED) {
+    if (btn_text == "Exit") {
+      Serial.println("Exiting...");
+      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+
+      printf("LV_EVENT_CANCEL\n");
+      Serial.println("Potato");
+      //menu_function_obj.deinitLVGL();
+      //wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+      //display_obj.exit_draw = true; // set everything back to normal
+    }
+    else {
+      // Build base obj to host buttons
+      Serial.println("Creating base object...");
+      lv_obj_t * obj;
+      obj = lv_obj_create(lv_scr_act(), NULL);
+      lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
+      
+      lv_obj_t * exit_btn;
+
+      lv_obj_t * label;
+      
+      // Build the generic Exit button
+      exit_btn = lv_btn_create(obj, NULL);
+      lv_obj_set_event_cb(exit_btn, settings_list_cb);
+      lv_label_set_text(label, "Exit");
+      //lv_obj_center(label);
+
+      label = lv_label_create(exit_btn, NULL);
+
+      // Create the type specific device
+      if (settings_obj.getSettingType(btn_text) == "bool") {
+        lv_obj_t * sw = lv_switch_create(obj, NULL);
+        lv_obj_align(sw, NULL, LV_ALIGN_CENTER, 0, 0);
+      }
+    }
+  }
+
+  /*
+  if (event == LV_EVENT_VALUE_CHANGED) {      
+    if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+      //Serial.print("Toggle on: ");
+      //Serial.println(btn_text);
+      for (int i = 0; i < access_points->size(); i++) {
+        if (access_points->get(i).essid == btn_text) {
+          Serial.println("Adding AP: " + (String)access_points->get(i).essid);
+          AccessPoint ap = access_points->get(i);
+          ap.selected = true;
+          access_points->set(i, ap);
+        }
+      }
+    }
+    else {
+      //Serial.print("Toggle off: ");
+      //Serial.println(btn_text);
+      for (int i = 0; i < access_points->size(); i++) {
+        if (access_points->get(i).essid == btn_text) {
+          Serial.println("Removing AP: " + (String)access_points->get(i).essid);
+          AccessPoint ap = access_points->get(i);
+          ap.selected = false;
+          access_points->set(i, ap);
+        }
+      }
+    }
+  }*/
+}
+
 void MenuFunctions::displaySettingsGFX(){
   extern Settings settings_obj;
 
@@ -173,6 +257,8 @@ void MenuFunctions::displaySettingsGFX(){
 
   lv_obj_t * label;
 
+  lv_obj_t * sw;
+
   list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, "Exit");
   lv_obj_set_event_cb(list_btn, ap_list_cb);
 
@@ -181,9 +267,30 @@ void MenuFunctions::displaySettingsGFX(){
     json["Settings"][i]["name"].as<String>().toCharArray(buf, json["Settings"][i]["name"].as<String>().length() + 1);
     
     list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
-    lv_btn_set_checkable(list_btn, true);
-    lv_obj_set_event_cb(list_btn, ap_list_cb);
+    lv_btn_set_checkable(list_btn, false);
+    lv_obj_set_event_cb(list_btn, settings_list_cb);
 
+    //lv_list_add_text(list1, buf);
+
+    // Create the dropdown menu
+    /*lv_obj_t * dd = lv_dropdown_create(list1, NULL);
+    lv_dropdown_set_options(dd, "Apple\n"
+                                "Banana\n"
+                                "Orange\n"
+                                "Cherry\n"
+                                "Grape\n"
+                                "Raspberry\n"
+                                "Melon\n"
+                                "Orange\n"
+                                "Lemon\n"
+                                "Nuts");
+
+    //lv_obj_align(dd, LV_ALIGN_IN_RIGHT_MID, 0, 20);
+    lv_obj_align(dd, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
+    lv_obj_set_width(dd, LV_HOR_RES / 3);
+    lv_obj_set_event_cb(dd, setting_dropdown_cb);
+    //lv_obj_add_event_cb(dd, setting_dropdown_cb, LV_EVENT_ALL, NULL);*/
+    
     //if (access_points->get(i).selected)
     //  lv_btn_toggle(list_btn);
 
@@ -191,9 +298,6 @@ void MenuFunctions::displaySettingsGFX(){
     //lv_obj_set_event_cb(btn1, ap_list_cb);
     //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
     //lv_btn_set_checkable(btn1, true);
-
-    //label = lv_label_create(btn1, NULL);
-    //lv_label_set_text(label, buf);
   }
 }
 
@@ -234,56 +338,7 @@ void MenuFunctions::addAPGFX(){
   }
 }
 
-void settings_list_cb(lv_obj_t * btn, lv_event_t event) {
-  extern Settings settings_obj;
-  extern MenuFunctions menu_function_obj;
 
-  String btn_text = lv_list_get_btn_text(btn);
-  String display_string = "";
-  
-  if (event == LV_EVENT_CLICKED) {
-    if (btn_text != "Exit") {
-      //lv_list_focus_btn(lv_obj_get_parent(lv_obj_get_parent(btn)), btn);
-    }
-    else {
-      Serial.println("Exiting...");
-      lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
-
-      printf("LV_EVENT_CANCEL\n");
-      menu_function_obj.deinitLVGL();
-      wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
-      display_obj.exit_draw = true; // set everything back to normal
-    }
-  }
-
-  /*
-  if (event == LV_EVENT_VALUE_CHANGED) {      
-    if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
-      //Serial.print("Toggle on: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Adding AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = true;
-          access_points->set(i, ap);
-        }
-      }
-    }
-    else {
-      //Serial.print("Toggle off: ");
-      //Serial.println(btn_text);
-      for (int i = 0; i < access_points->size(); i++) {
-        if (access_points->get(i).essid == btn_text) {
-          Serial.println("Removing AP: " + (String)access_points->get(i).essid);
-          AccessPoint ap = access_points->get(i);
-          ap.selected = false;
-          access_points->set(i, ap);
-        }
-      }
-    }
-  }*/
-}
 
 void ap_list_cb(lv_obj_t * btn, lv_event_t event) {
   extern LinkedList<AccessPoint>* access_points;
@@ -1141,6 +1196,22 @@ void MenuFunctions::orientDisplay()
   changeMenu(current_menu);
 }
 
+void MenuFunctions::runBoolSetting(String key) {
+  Serial.println("Building bool setting screen...");
+  display_obj.tftDrawRedOnOffButton();
+  //display_obj.tftDrawGreenOnOffButton();
+}
+
+void MenuFunctions::callSetting(String key) {
+  specSettingMenu.name = key;
+  
+  String setting_type = settings_obj.getSettingType(key);
+
+  if (setting_type == "bool") {
+    this->runBoolSetting(key);
+  }
+}
+
 
 // Function to build the menus
 void MenuFunctions::RunSetup()
@@ -1163,6 +1234,8 @@ void MenuFunctions::RunSetup()
   confirmMenu.list = new LinkedList<MenuNode>();
   espUpdateMenu.list = new LinkedList<MenuNode>();
   updateMenu.list = new LinkedList<MenuNode>();
+  settingsMenu.list = new LinkedList<MenuNode>();
+  specSettingMenu.list = new LinkedList<MenuNode>();
   infoMenu.list = new LinkedList<MenuNode>();
 
   // WiFi menu stuff
@@ -1193,6 +1266,7 @@ void MenuFunctions::RunSetup()
   espUpdateMenu.name = " ESP8266 Update ";
   updateMenu.name = " Update Firmware ";
   infoMenu.name = " Device Info ";
+  settingsMenu.name = " Settings ";
   bluetoothMenu.name = " Bluetooth ";
   wifiSnifferMenu.name = " WiFi Sniffers ";
   wifiAttackMenu.name = " WiFi Attacks ";
@@ -1481,11 +1555,33 @@ void MenuFunctions::RunSetup()
     changeMenu(&infoMenu);
     wifi_scan_obj.RunInfo();
   });
-  addNodes(&deviceMenu, "Settings", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+  addNodes(&deviceMenu, "Settings", TFT_NAVY, NULL, KEYBOARD_ICO, [this]() {
+    changeMenu(&settingsMenu);
+  });
+  /*addNodes(&deviceMenu, "Settings", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
     display_obj.clearScreen(); 
     wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
     wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
     displaySettingsGFX();
+  });*/
+
+  // Settings menu
+  // Device menu
+  settingsMenu.parentMenu = &deviceMenu;
+  addNodes(&settingsMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(settingsMenu.parentMenu);
+  });
+  for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
+    addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFT_LIGHTGREY, NULL, 0, [this, i]() {
+      changeMenu(&specSettingMenu);
+      this->callSetting(settings_obj.setting_index_to_name(i));
+    });
+  }
+
+  // Specific setting menu
+  specSettingMenu.parentMenu = &settingsMenu;
+  addNodes(&specSettingMenu, "Back", TFT_LIGHTGREY, NULL, 0, [this]() {
+    changeMenu(specSettingMenu.parentMenu);
   });
  
   // Select update

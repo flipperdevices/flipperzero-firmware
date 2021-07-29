@@ -152,11 +152,15 @@ void WiFiScan::RunSetup() {
     
   ssids = new LinkedList<ssid>();
   access_points = new LinkedList<AccessPoint>();
+  NimBLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DEVICE);
+  NimBLEDevice::setScanDuplicateCacheSize(200);
   NimBLEDevice::init("");
   pBLEScan = NimBLEDevice::getScan(); //create new scan
   this->ble_initialized = true;
   
   this->shutdownBLE();
+
+  this->initWiFi(1);
 }
 
 int WiFiScan::clearAPs() {
@@ -258,10 +262,26 @@ void WiFiScan::joinWiFi(String ssid, String password)
   this->wifi_initialized = true;
 }
 
+// Apply WiFi settings
+void WiFiScan::initWiFi(uint8_t scan_mode) {
+  // Set the channel
+  if (scan_mode != WIFI_SCAN_OFF) {
+    Serial.println(F("Initializing WiFi settings..."));
+    this->set_channel = settings_obj.loadSetting<uint8_t>("Channel");
+    this->changeChannel();
+  
+    this->force_pmkid = settings_obj.loadSetting<bool>("Force PMKID");
+    this->force_probe = settings_obj.loadSetting<bool>("Force Probe");
+    this->save_pcap = settings_obj.loadSetting<bool>("Save PCAP");
+    this->channel_hop_delay = settings_obj.loadSetting<int>("Channel Hop Delay");
+    Serial.println(F("Initialization complete"));
+  }
+}
+
 // Function to prepare to run a specific scan
 void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
 {  
-  //Serial.println("Starting Scan...");
+  this->initWiFi(scan_mode);
   if (scan_mode == WIFI_SCAN_OFF)
     StopScan(scan_mode);
   else if (scan_mode == WIFI_SCAN_PROBE)
@@ -1137,6 +1157,7 @@ void WiFiScan::RunBluetoothScan(uint8_t scan_mode, uint16_t color)
   Serial.println("BT Controller Status: " + (String)esp_bt_controller_get_status());
   */
   NimBLEDevice::setScanFilterMode(CONFIG_BTDM_SCAN_DUPL_TYPE_DEVICE);
+  NimBLEDevice::setScanDuplicateCacheSize(200);
   NimBLEDevice::init("");
   pBLEScan = NimBLEDevice::getScan(); //create new scan
   if (scan_mode == BT_SCAN_ALL)
@@ -2693,7 +2714,7 @@ void WiFiScan::main(uint32_t currentTime)
   (currentScanMode == WIFI_SCAN_DEAUTH) ||
   (currentScanMode == WIFI_SCAN_ALL))
   {
-    if (currentTime - initTime >= 1000)
+    if (currentTime - initTime >= this->channel_hop_delay * 1000)
     {
       initTime = millis();
       channelHop();
