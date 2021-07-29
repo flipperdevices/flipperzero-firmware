@@ -26,7 +26,8 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
                 state->player_v.x = 0;
                 state->player_v.y = SPEED_Y;
             }
-            state->last_group = state->frame_group;
+            state->last_group = state->last_group != state->frame_group ? state->frame_group :
+                                                                          state->last_group;
         }
 
         if(input->type == InputTypeRelease) {
