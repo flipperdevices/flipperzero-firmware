@@ -85,9 +85,9 @@ typedef enum {
 
 typedef enum {
     FrameUp = 0,
+    FrameRight,
     FrameDown,
     FrameLeft,
-    FrameRight,
 } FrameTypeEnum;
 
 typedef struct {
@@ -106,6 +106,10 @@ typedef struct {
     Vec2 player_global;
     Vec2 player_v;
     Vec2 screen;
+
+    FrameGroupsEnum frame_group;
+    FrameGroupsEnum last_group;
+    FrameTypeEnum frame_type;
 
     const DolphinFrame* current_frame;
 

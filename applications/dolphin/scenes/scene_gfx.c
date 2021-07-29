@@ -10,37 +10,67 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(state);
     furi_assert(canvas);
 
-    FrameGroupsEnum group = GroupRight;
-    FrameTypeEnum frame = FrameRight;
-
-    // horizontal movement
-    if(state->player_v.x < 0 || state->player_flipped_x) {
-        group = state->transition ? GroupRight : GroupLeft;
-        frame = FrameLeft;
-
-    } else if(state->player_v.x > 0 || !state->player_flipped_x) {
-        group = state->transition ? GroupLeft : GroupRight;
-        frame = FrameRight;
-    }
-    // vertical movement
-    if(state->player_v.y < 0 && state->player_global.y > 0) {
-        group = GroupUp;
-        frame = FrameUp;
+    if(state->player_v.x < 0) {
+        state->frame_group = GroupLeft;
 
         if(state->transition) {
-            frame = state->player_flipped_x ? FrameLeft : FrameRight;
+            if(state->last_group == GroupDown) {
+                state->frame_type = FrameDown;
+            } else if(state->last_group == GroupUp) {
+                state->frame_type = FrameUp;
+            } else if(state->last_group == GroupRight) {
+                state->frame_type = FrameRight;
+            }
+        } else {
+            state->frame_type = FrameLeft;
         }
-    } else if(state->player_v.y > 0 && state->player_global.y < WORLD_HEIGHT) {
-        group = GroupDown;
-        frame = FrameDown;
+    } else if(state->player_v.x > 0) {
+        state->frame_group = GroupRight;
 
         if(state->transition) {
-            frame = state->player_flipped_x ? FrameLeft : FrameRight;
+            if(state->last_group == GroupDown) {
+                state->frame_type = FrameDown;
+            } else if(state->last_group == GroupLeft) {
+                state->frame_type = FrameLeft;
+            } else if(state->last_group == GroupUp) {
+                state->frame_type = FrameUp;
+            }
+        } else {
+            state->frame_type = FrameRight;
+        }
+
+    } else if(state->player_v.y < 0) {
+        state->frame_group = GroupUp;
+
+        if(state->transition) {
+            if(state->last_group == GroupDown) {
+                state->frame_type = FrameDown;
+            } else if(state->last_group == GroupLeft) {
+                state->frame_type = FrameLeft;
+            } else if(state->last_group == GroupRight) {
+                state->frame_type = FrameRight;
+            }
+        } else {
+            state->frame_type = FrameUp;
+        }
+    } else if(state->player_v.y > 0) {
+        state->frame_group = GroupDown;
+
+        if(state->transition) {
+            if(state->last_group == GroupUp) {
+                state->frame_type = FrameUp;
+            } else if(state->last_group == GroupLeft) {
+                state->frame_type = FrameLeft;
+            } else if(state->last_group == GroupRight) {
+                state->frame_type = FrameRight;
+            }
+        } else {
+            state->frame_type = FrameDown;
         }
     }
 
-    if(*&frames[group][frame]->frames[state->frame_idx].f != NULL) {
-        state->current_frame = *&frames[group][frame];
+    if(*&frames[state->frame_group][state->frame_type]->frames[state->frame_idx].f != NULL) {
+        state->current_frame = *&frames[state->frame_group][state->frame_type];
     }
 
     canvas_set_bitmap_mode(canvas, true);
@@ -100,13 +130,12 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
     if(state->debug) {
         sprintf(
             buf,
-            "%ld.%ld v:%ld.%ld; %d.%d %d %s %d",
-            state->player_global.x,
-            state->player_global.y,
+            "%ld.%ld v:%d.%d; %d %d %s %d",
             state->player_v.x,
             state->player_v.y,
-            state->player_flipped_x,
-            state->player_flipped_y,
+            state->frame_group,
+            state->frame_type,
+            state->last_group,
             state->action_timeout,
             action_str[state->action],
             state->transition);
