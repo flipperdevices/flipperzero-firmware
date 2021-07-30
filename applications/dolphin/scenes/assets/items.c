@@ -152,7 +152,7 @@ void food_redraw(Canvas* canvas, void* s) {
 
     uint8_t frame = ((HAL_GetTick() / 200) % SIZEOF_ARRAY(food_frames));
 
-    if(is_nearby(state) && !state->player_v.y) {
+    if(is_nearby(state) && (state->player_global.y > Food.pos.y)) {
         dolphin_scene_type_text(
             canvas,
             state,
