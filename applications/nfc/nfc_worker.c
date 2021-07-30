@@ -324,6 +324,10 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                             result->emv_data.number,
                             emv_app.card_number,
                             sizeof(emv_app.card_number));
+                        if(emv_app.exp_month) {
+                            result->emv_data.exp_mon = emv_app.exp_month;
+                            result->emv_data.exp_year = emv_app.exp_year;
+                        }
                         // Notify caller and exit
                         if(nfc_worker->callback) {
                             nfc_worker->callback(nfc_worker->context);
