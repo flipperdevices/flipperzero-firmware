@@ -10,9 +10,9 @@ const Item Food = {
     .pos =
         {
             .x = 0,
-            .y = 0,
+            .y = 90,
         },
-    .width = 60,
+    .width = 126,
     .height = 50,
     .draw = food_redraw,
     .callback = food_callback};
@@ -23,7 +23,7 @@ const Item Console = {
     .pos =
         {
             .x = 357,
-            .y = 124,
+            .y = 190,
         },
     .width = 40,
     .height = 20,

@@ -76,10 +76,7 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_icon(
-        canvas,
-        state->player.x - 1,
-        state->player.y - 1,
-        state->current_frame->frames[state->frame_idx].b);
+        canvas, state->player.x, state->player.y, state->current_frame->frames[state->frame_idx].b);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(
         canvas, state->player.x, state->player.y, state->current_frame->frames[state->frame_idx].f);
@@ -88,6 +85,9 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
 
 static bool item_screen_bounds_x(int32_t pos) {
     return pos > -SCREEN_WIDTH && pos < (SCREEN_WIDTH * 2);
+}
+static bool item_screen_bounds_y(int32_t pos) {
+    return pos > -SCREEN_HEIGHT * 2 && pos < (SCREEN_HEIGHT * 2);
 }
 
 void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
@@ -102,8 +102,56 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
         if(state->scene_zoom < SCENE_ZOOM) {
             for(uint8_t i = 0; i < ItemsEnumTotal; i++) {
                 int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
+                int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
 
-                if(item_screen_bounds_x(item_pos_X)) {
+                if(l == 0) {
+                    if(item_screen_bounds_x(0 - state->player_global.x) &&
+                       item_screen_bounds_y(0 - state->player_global.y)) {
+                        canvas_draw_icon(
+                            canvas,
+                            0 - state->player_global.x,
+                            0 - state->player_global.y,
+                            &I_map1_128x128);
+                    }
+
+                    if(item_screen_bounds_x(128 - state->player_global.x) &&
+                       item_screen_bounds_y(0 - state->player_global.y)) {
+                        canvas_draw_icon(
+                            canvas,
+                            128 - state->player_global.x,
+                            0 - state->player_global.y,
+                            &I_map2_128x128);
+                    }
+
+                    if(item_screen_bounds_x(0 - state->player_global.x) &&
+                       item_screen_bounds_y(124 - state->player_global.y)) {
+                        canvas_draw_icon(
+                            canvas,
+                            0 - state->player_global.x,
+                            124 - state->player_global.y,
+                            &I_map3_128x128);
+                    }
+
+                    if(item_screen_bounds_x(128 - state->player_global.x) &&
+                       item_screen_bounds_y(124 - state->player_global.y)) {
+                        canvas_draw_icon(
+                            canvas,
+                            128 - state->player_global.x,
+                            124 - state->player_global.y,
+                            &I_map4_128x128);
+                    }
+
+                    if(state->player_global.x > 128 &&
+                       item_screen_bounds_y(124 - state->player_global.y)) {
+                        canvas_draw_icon(
+                            canvas,
+                            240 - state->player_global.x,
+                            124 - state->player_global.y,
+                            &I_map5_128x128);
+                    }
+                }
+
+                if(item_screen_bounds_x(item_pos_X) && item_screen_bounds_y(item_pos_Y)) {
                     if(l == current_scene[i]->layer) {
                         if(current_scene[i]->draw) {
                             current_scene[i]->draw(canvas, state);
