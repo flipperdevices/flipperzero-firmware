@@ -30,8 +30,7 @@ set(CMAKE_TOOLCHAIN_FILE ${STM32_CMAKE_PATH}/cmake/stm32_gcc.cmake)
 project(${PROJ_NAME} CXX C ASM)
 set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 
-# Can be used to print out all devices for the H7 family
-# include(${STM32_CMAKE_PATH}/cmake/stm32/devices.cmake)
+# Can be used to print out all devices for the H7 or/and the F4 family
 # stm32_print_devices_by_family(FAMILY H7)
 # stm32_print_devices_by_family(FAMILY F4)
 
@@ -59,11 +58,12 @@ if(USE_CMSIS_RTOS_V2)
 endif()
 
 if(FREERTOS_H743ZI_EXAMPLE)
-    list(APPEND CMSIS_COMP_LIST STM32H743ZI STM32H7_M7)
-    list(APPEND HAL_COMP_LIST STM32H7M7 STM32H743ZI)
+    list(APPEND CMSIS_COMP_LIST STM32H743ZI_M7)
+    list(APPEND HAL_COMP_LIST STM32H7M7)
     list(APPEND FREERTOS_COMP_LIST ARM_CM7)
-    list(APPEND FREERTOS_COMP_LIST STM32H7)
     if(USE_CUBE_FREERTOS)
+        # The device family needs to be supplied as a component to use the Cube FreeRTOS sources
+        list(APPEND FREERTOS_COMP_LIST STM32H7)
         set(FREERTOS_H7_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::H7::M7)
     else()
         set(FREERTOS_H7_NAMESPACE ${FREERTOS_NAMESPACE})
@@ -74,7 +74,8 @@ if(FREERTOS_F407VG_EXAMPLE)
     list(APPEND CMSIS_COMP_LIST STM32F407VG)
     list(APPEND HAL_COMP_LIST STM32F407VG)
     list(APPEND FREERTOS_COMP_LIST ARM_CM4F)
-    if(USE_CMSIS_RTOS OR USE_CMSIS_RTOS_V2)
+    if(USE_CUBE_FREERTOS)
+        # The device family needs to be supplied as a component to use the Cube FreeRTOS sources
         list(APPEND FREERTOS_COMP_LIST STM32F4)
         set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::F4)
      else()

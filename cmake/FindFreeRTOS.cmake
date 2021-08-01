@@ -17,7 +17,7 @@ if(NOT FREERTOS_PATH)
     else()
         message(STATUS
             "No FreeRTOS folder found at default location ${DEFAULT_FREERTOS_PATH}. "
-            "Leaving empty"
+            "Leaving empty.."
         )
     endif()
 endif()
@@ -156,10 +156,6 @@ endmacro()
 message(STATUS "Search for FreeRTOS ports: ${FreeRTOS_FIND_COMPONENTS_PORTS}")
 
 if(NOT FreeRTOS_FIND_COMPONENTS_FAMILIES)
-    if(NOT FREERTOS_PATH)
-        set(FREERTOS_PATH /opt/FreeRTOS CACHE PATH "Path to FreeRTOS")
-        message(STATUS "No FREERTOS_PATH specified, using default: ${FREERTOS_PATH}")
-    endif()
     stm32_find_freertos(FreeRTOS ${FREERTOS_PATH})
 else()
     message(STATUS "Search for FreeRTOS families: ${FreeRTOS_FIND_COMPONENTS_FAMILIES}")
