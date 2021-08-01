@@ -15,6 +15,7 @@ public:
 
     RfidReader();
     void start();
+    void start_forced(RfidReader::Type type);
     void stop();
     bool read(LfrfidKeyType* type, uint8_t* data, uint8_t data_size);
 

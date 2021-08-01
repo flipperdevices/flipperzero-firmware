@@ -85,6 +85,24 @@ void RfidReader::start() {
     last_readed_count = 0;
 }
 
+void RfidReader::start_forced(RfidReader::Type _type) {
+    type = _type;
+    switch(type) {
+    case Type::Normal:
+        start();
+        break;
+    case Type::Indala:
+        api_hal_rfid_pins_read();
+        api_hal_rfid_tim_read(62500.0f, 0.25f);
+        api_hal_rfid_tim_read_start();
+        start_comparator();
+
+        switch_timer_reset();
+        last_readed_count = 0;
+        break;
+    }
+}
+
 void RfidReader::stop() {
     api_hal_rfid_pins_reset();
     api_hal_rfid_tim_read_stop();
