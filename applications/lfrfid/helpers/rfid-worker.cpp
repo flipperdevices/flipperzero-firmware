@@ -7,7 +7,7 @@ RfidWorker::~RfidWorker() {
 }
 
 void RfidWorker::start_read() {
-    reader.start(RfidReader::Type::Normal);
+    reader.start();
 }
 
 bool RfidWorker::read() {
@@ -23,6 +23,15 @@ bool RfidWorker::read() {
     };
 
     return result;
+}
+
+bool RfidWorker::detect() {
+    return reader.detect();
+}
+
+bool RfidWorker::any_read() 
+{
+    return reader.any_read();
 }
 
 void RfidWorker::stop_read() {
@@ -78,7 +87,7 @@ void RfidWorker::sq_write() {
 }
 
 void RfidWorker::sq_write_start_validate() {
-    reader.start(RfidReader::Type::Normal);
+    reader.start();
 }
 
 void RfidWorker::sq_write_validate() {
