@@ -32,6 +32,8 @@ If applicable, add screenshots to help explain your problem.
  - OS: [e.g. iOS]
  - Compiler: [e.g. arm-none-eabi-gcc +version]
  - stm32-cmake: [v2.0 or 86d1dd2 or ...]
+ - cmake: [e.g 3.21.0]
+ - HAL/cube/CMSIS: [stm32cubeL4 v1.2.3] 
 
 **Additional context**
 Add any other context about the problem here.

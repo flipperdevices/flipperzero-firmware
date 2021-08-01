@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 if(NOT TEST_FAMILIES)
@@ -17,8 +17,8 @@ find_package(HAL REQUIRED)
 set(SOURCES main.c)
 
 foreach(FAMILY ${TEST_FAMILIES})
-    stm32_get_devices_by_family(DEVICES FAMILY ${FAMILY})
-    list(GET DEVICES 0 DEVICE)
+    stm32_get_devices_by_family(STM_DEVICES FAMILY ${FAMILY})
+    list(GET STM_DEVICES 0 DEVICE)
     stm32_get_cores(CORES FAMILY ${FAMILY} DEVICE ${DEVICE})
     
     if(CORES)

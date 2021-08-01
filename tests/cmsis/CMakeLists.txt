@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/stm32_gcc.cmake)
 
 if(NOT TEST_FAMILIES)
@@ -18,9 +18,9 @@ set(SOURCES main.c)
 include(stm32/devices)
 
 foreach(FAMILY ${TEST_FAMILIES})
-    stm32_get_devices_by_family(DEVICES FAMILY ${FAMILY})
+    stm32_get_devices_by_family(STM_DEVICES FAMILY ${FAMILY})
     stm32_get_cores(CORES FAMILY ${FAMILY})
-    foreach(DEVICE ${DEVICES})
+    foreach(DEVICE ${STM_DEVICES})
         stm32_get_chip_type(${FAMILY} ${DEVICE} TYPE)
         
         if(NOT CORES)
