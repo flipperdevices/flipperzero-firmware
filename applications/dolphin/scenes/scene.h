@@ -77,18 +77,11 @@ typedef struct {
 } Item;
 
 typedef enum {
-    GroupUp = 0,
-    GroupRight,
-    GroupDown,
-    GroupLeft,
-} FrameGroupsEnum;
-
-typedef enum {
-    FrameUp = 0,
-    FrameRight,
-    FrameDown,
-    FrameLeft,
-} FrameTypeEnum;
+    DirUp = 0,
+    DirRight,
+    DirDown,
+    DirLeft,
+} FrameDirectionEnum;
 
 typedef struct {
     const Icon* f;
@@ -107,9 +100,9 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
-    FrameGroupsEnum frame_group;
-    FrameGroupsEnum last_group;
-    FrameTypeEnum frame_type;
+    FrameDirectionEnum frame_group;
+    FrameDirectionEnum last_group;
+    FrameDirectionEnum frame_type;
 
     const DolphinFrame* current_frame;
 

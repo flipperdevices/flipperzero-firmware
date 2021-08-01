@@ -315,22 +315,11 @@ const DolphinFrame left_right = {
 };
 
 const DolphinFrame* frames[4][4] = {
-    [GroupUp] =
-        {[FrameUp] = &up, [FrameDown] = &up_down, [FrameLeft] = &up_left, [FrameRight] = &up_right},
-
-    [GroupRight] =
-        {[FrameUp] = &right_up,
-         [FrameDown] = &right_down,
-         [FrameLeft] = &right_left,
-         [FrameRight] = &right},
-    [GroupDown] =
-        {[FrameUp] = &down_up,
-         [FrameDown] = &down,
-         [FrameLeft] = &down_left,
-         [FrameRight] = &down_right},
-    [GroupLeft] =
-        {[FrameUp] = &left_up,
-         [FrameDown] = &left_down,
-         [FrameLeft] = &left,
-         [FrameRight] = &left_right},
+    [DirUp] = {[DirUp] = &up, [DirDown] = &up_down, [DirLeft] = &up_left, [DirRight] = &up_right},
+    [DirRight] =
+        {[DirUp] = &right_up, [DirDown] = &right_down, [DirLeft] = &right_left, [DirRight] = &right},
+    [DirDown] =
+        {[DirUp] = &down_up, [DirDown] = &down, [DirLeft] = &down_left, [DirRight] = &down_right},
+    [DirLeft] =
+        {[DirUp] = &left_up, [DirDown] = &left_down, [DirLeft] = &left, [DirRight] = &left_right},
 };

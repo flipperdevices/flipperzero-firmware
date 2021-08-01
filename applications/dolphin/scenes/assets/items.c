@@ -12,7 +12,7 @@ const Item Food = {
             .x = 0,
             .y = 90,
         },
-    .width = 126,
+    .width = 60,
     .height = 50,
     .draw = food_redraw,
     .callback = food_callback};
@@ -31,6 +31,7 @@ const Item Console = {
     .callback = console_callback};
 
 const Item* Home[ItemsEnumTotal] = {[ItemsFood] = &Food, [ItemsConsole] = &Console};
+
 const Item** Scenes[1] = {*&Home};
 
 const Item** get_scene(SceneState* state) {
