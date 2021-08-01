@@ -192,62 +192,62 @@ int IrdaApp::get_current_button() {
 }
 
 void IrdaApp::notify_success() {
-    // notification_message(notification, &sequence_success);
+    notification_message(notification, &sequence_success);
 }
 
 void IrdaApp::notify_red_blink() {
-    // notification_message(notification, &sequence_blink_red_10);
+    notification_message(notification, &sequence_blink_red_10);
 }
 
 void IrdaApp::notify_space_blink() {
-    // static const NotificationSequence sequence = {
-    //     &message_green_0,
-    //     &message_delay_50,
-    //     &message_green_255,
-    //     &message_do_not_reset,
-    //     NULL,
-    // };
+    static const NotificationSequence sequence = {
+        &message_green_0,
+        &message_delay_50,
+        &message_green_255,
+        &message_do_not_reset,
+        NULL,
+    };
 
-    // notification_message_block(notification, &sequence);
+    notification_message_block(notification, &sequence);
 }
 
 void IrdaApp::notify_click() {
-    // static const NotificationSequence sequence = {
-    //     &message_click,
-    //     &message_delay_1,
-    //     &message_sound_off,
-    //     NULL,
-    // };
+    static const NotificationSequence sequence = {
+        &message_click,
+        &message_delay_1,
+        &message_sound_off,
+        NULL,
+    };
 
-    // notification_message_block(notification, &sequence);
+    notification_message_block(notification, &sequence);
 }
 
 void IrdaApp::notify_click_and_blink() {
-    // static const NotificationSequence sequence = {
-    //     &message_click,
-    //     &message_delay_1,
-    //     &message_sound_off,
-    //     &message_red_0,
-    //     &message_green_255,
-    //     &message_blue_0,
-    //     &message_delay_10,
-    //     &message_green_0,
-    //     NULL,
-    // };
+    static const NotificationSequence sequence = {
+        &message_click,
+        &message_delay_1,
+        &message_sound_off,
+        &message_red_0,
+        &message_green_255,
+        &message_blue_0,
+        &message_delay_10,
+        &message_green_0,
+        NULL,
+    };
 
-    // notification_message_block(notification, &sequence);
+    notification_message_block(notification, &sequence);
 }
 
 void IrdaApp::notify_double_vibro() {
-    // notification_message(notification, &sequence_double_vibro);
+    notification_message(notification, &sequence_double_vibro);
 }
 
 void IrdaApp::notify_green_on() {
-    // notification_message(notification, &sequence_set_only_green_255);
+    notification_message(notification, &sequence_set_only_green_255);
 }
 
 void IrdaApp::notify_green_off() {
-    // notification_message(notification, &sequence_reset_green);
+    notification_message(notification, &sequence_reset_green);
 }
 
 IrdaWorker* IrdaApp::get_irda_worker() {
