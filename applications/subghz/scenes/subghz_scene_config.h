@@ -1,0 +1,6 @@
+ADD_SCENE(subghz, start, Start)
+ADD_SCENE(subghz, capture, Capture)
+ADD_SCENE(subghz, saved, Saved)
+ADD_SCENE(subghz, test, Test)
+ADD_SCENE(subghz, test_carrier, TestCarrier)
+ADD_SCENE(subghz, test_packet, TestPacket)

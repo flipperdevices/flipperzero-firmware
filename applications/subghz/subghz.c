@@ -23,15 +23,22 @@ const uint32_t subghz_frequencies[] = {
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_frequencies_433_92 = 5;
 
-void subghz_menu_callback(void* context, uint32_t index) {
+bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SubGhz* subghz = context;
-
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, index);
+    return scene_manager_handle_custom_event(subghz->scene_manager, event);
 }
 
-uint32_t subghz_exit(void* context) {
-    return VIEW_NONE;
+bool subghz_back_event_callback(void* context) {
+    furi_assert(context);
+    SubGhz* subghz = context;
+    return scene_manager_handle_back_event(subghz->scene_manager);
+}
+
+void subghz_tick_event_callback(void* context) {
+    furi_assert(context);
+    SubGhz* subghz = context;
+    scene_manager_handle_tick_event(subghz->scene_manager);
 }
 
 SubGhz* subghz_alloc() {
@@ -46,19 +53,19 @@ SubGhz* subghz_alloc() {
     view_dispatcher_attach_to_gui(
         subghz->view_dispatcher, subghz->gui, ViewDispatcherTypeFullscreen);
 
-    // Menu
-    subghz->submenu = submenu_alloc();
-    submenu_add_item(subghz->submenu, "Capture", SubGhzViewCapture, subghz_menu_callback, subghz);
-    submenu_add_item(
-        subghz->submenu, "Basic Test", SubGhzViewTestBasic, subghz_menu_callback, subghz);
-    submenu_add_item(
-        subghz->submenu, "Packet Test", SubGhzViewTestPacket, subghz_menu_callback, subghz);
-    submenu_add_item(
-        subghz->submenu, "Static Code", SubGhzViewStatic, subghz_menu_callback, subghz);
+    subghz->scene_manager = scene_manager_alloc(&subghz_scene_handlers, subghz);
+    view_dispatcher_set_event_callback_context(subghz->view_dispatcher, subghz);
+    view_dispatcher_set_custom_event_callback(
+        subghz->view_dispatcher, subghz_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        subghz->view_dispatcher, subghz_back_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        subghz->view_dispatcher, subghz_tick_event_callback, 100);
 
-    View* submenu_view = submenu_get_view(subghz->submenu);
-    view_set_previous_callback(submenu_view, subghz_exit);
-    view_dispatcher_add_view(subghz->view_dispatcher, SubGhzViewMenu, submenu_view);
+    // SubMenu
+    subghz->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher, SubGhzViewMenu, submenu_get_view(subghz->submenu));
 
     // Capture
     subghz->subghz_capture = subghz_capture_alloc();
@@ -67,12 +74,12 @@ SubGhz* subghz_alloc() {
         SubGhzViewCapture,
         subghz_capture_get_view(subghz->subghz_capture));
 
-    // Basic Test Module
-    subghz->subghz_test_basic = subghz_test_basic_alloc();
+    // Carrier Test Module
+    subghz->subghz_test_carrier = subghz_test_carrier_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher,
-        SubGhzViewTestBasic,
-        subghz_test_basic_get_view(subghz->subghz_test_basic));
+        SubGhzViewTestCarrier,
+        subghz_test_carrier_get_view(subghz->subghz_test_carrier));
 
     // Packet Test
     subghz->subghz_test_packet = subghz_test_packet_alloc();
@@ -96,24 +103,27 @@ void subghz_free(SubGhz* subghz) {
     furi_assert(subghz);
 
     // Packet Test
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewStatic);
-    subghz_static_free(subghz->subghz_static);
-
-    // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTestPacket);
     subghz_test_packet_free(subghz->subghz_test_packet);
 
-    // Basic Test
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTestBasic);
-    subghz_test_basic_free(subghz->subghz_test_basic);
+    // Carrier Test
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTestCarrier);
+    subghz_test_carrier_free(subghz->subghz_test_carrier);
+
+    // Static
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewStatic);
+    subghz_static_free(subghz->subghz_static);
+
+    // Capture
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewCapture);
+    subghz_capture_free(subghz->subghz_capture);
 
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);
     submenu_free(subghz->submenu);
 
-    // Capture
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewCapture);
-    subghz_capture_free(subghz->subghz_capture);
+    // Scene manager
+    scene_manager_free(subghz->scene_manager);
 
     // View Dispatcher
     view_dispatcher_free(subghz->view_dispatcher);
@@ -126,8 +136,10 @@ void subghz_free(SubGhz* subghz) {
     free(subghz);
 }
 
-int32_t subghz_app(void* context) {
+int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
+
+    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
 
     view_dispatcher_run(subghz->view_dispatcher);
 

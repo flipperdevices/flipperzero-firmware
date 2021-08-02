@@ -148,14 +148,7 @@ void subghz_static_enter(void* context) {
 
 void subghz_static_exit(void* context) {
     furi_assert(context);
-    // SubghzStatic* subghz_static = context;
-
-    // Reinitialize IC to default state
     api_hal_subghz_sleep();
-}
-
-uint32_t subghz_static_back(void* context) {
-    return SubGhzViewMenu;
 }
 
 SubghzStatic* subghz_static_alloc() {
@@ -169,7 +162,6 @@ SubghzStatic* subghz_static_alloc() {
     view_set_input_callback(subghz_static->view, subghz_static_input);
     view_set_enter_callback(subghz_static->view, subghz_static_enter);
     view_set_exit_callback(subghz_static->view, subghz_static_exit);
-    view_set_previous_callback(subghz_static->view, subghz_static_back);
 
     return subghz_static;
 }

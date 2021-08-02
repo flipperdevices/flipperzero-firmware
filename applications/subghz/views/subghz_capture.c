@@ -175,10 +175,6 @@ void subghz_capture_exit(void* context) {
     api_hal_subghz_sleep();
 }
 
-uint32_t subghz_capture_back(void* context) {
-    return SubGhzViewMenu;
-}
-
 SubghzCapture* subghz_capture_alloc() {
     SubghzCapture* subghz_capture = furi_alloc(sizeof(SubghzCapture));
 
@@ -190,7 +186,6 @@ SubghzCapture* subghz_capture_alloc() {
     view_set_input_callback(subghz_capture->view, subghz_capture_input);
     view_set_enter_callback(subghz_capture->view, subghz_capture_enter);
     view_set_exit_callback(subghz_capture->view, subghz_capture_exit);
-    view_set_previous_callback(subghz_capture->view, subghz_capture_back);
 
     with_view_model(
         subghz_capture->view, (SubghzCaptureModel * model) {

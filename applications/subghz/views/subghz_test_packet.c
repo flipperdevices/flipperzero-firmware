@@ -232,10 +232,6 @@ void subghz_test_packet_exit(void* context) {
     api_hal_subghz_sleep();
 }
 
-uint32_t subghz_test_packet_back(void* context) {
-    return SubGhzViewMenu;
-}
-
 SubghzTestPacket* subghz_test_packet_alloc() {
     SubghzTestPacket* instance = furi_alloc(sizeof(SubghzTestPacket));
 
@@ -247,7 +243,6 @@ SubghzTestPacket* subghz_test_packet_alloc() {
     view_set_input_callback(instance->view, subghz_test_packet_input);
     view_set_enter_callback(instance->view, subghz_test_packet_enter);
     view_set_exit_callback(instance->view, subghz_test_packet_exit);
-    view_set_previous_callback(instance->view, subghz_test_packet_back);
 
     instance->timer =
         osTimerNew(subghz_test_packet_rssi_timer_callback, osTimerPeriodic, instance, NULL);

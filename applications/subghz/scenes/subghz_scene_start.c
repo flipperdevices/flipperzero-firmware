@@ -1,0 +1,61 @@
+#include "../subghz_i.h"
+
+enum SubmenuIndex {
+    SubmenuIndexCapture,
+    SubmenuIndexSaved,
+    SubmenuIndexTest,
+};
+
+void subghz_scene_start_submenu_callback(void* context, uint32_t index) {
+    SubGhz* subghz = context;
+    view_dispatcher_send_custom_event(subghz->view_dispatcher, index);
+}
+
+const void subghz_scene_start_on_enter(void* context) {
+    SubGhz* subghz = context;
+
+    submenu_add_item(
+        subghz->submenu,
+        "Capture",
+        SubmenuIndexCapture,
+        subghz_scene_start_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu, "Saved", SubmenuIndexSaved, subghz_scene_start_submenu_callback, subghz);
+    submenu_add_item(
+        subghz->submenu, "Test", SubmenuIndexTest, subghz_scene_start_submenu_callback, subghz);
+
+    submenu_set_selected_item(
+        subghz->submenu, scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneStart));
+
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewMenu);
+}
+
+const bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
+    SubGhz* subghz = context;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SubmenuIndexCapture) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexCapture);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneCapture);
+            return true;
+        } else if(event.event == SubmenuIndexSaved) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
+            return true;
+        } else if(event.event == SubmenuIndexTest) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
+            return true;
+        }
+    }
+    return false;
+}
+
+const void subghz_scene_start_on_exit(void* context) {
+    SubGhz* subghz = context;
+    submenu_clean(subghz->submenu);
+}
