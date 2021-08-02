@@ -3,6 +3,7 @@
 enum SubmenuIndex {
     SubmenuIndexCapture,
     SubmenuIndexSaved,
+    SubmenuIndexStatic,
     SubmenuIndexTest,
 };
 
@@ -22,6 +23,8 @@ const void subghz_scene_start_on_enter(void* context) {
         subghz);
     submenu_add_item(
         subghz->submenu, "Saved", SubmenuIndexSaved, subghz_scene_start_submenu_callback, subghz);
+    submenu_add_item(
+        subghz->submenu, "Static", SubmenuIndexStatic, subghz_scene_start_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu, "Test", SubmenuIndexTest, subghz_scene_start_submenu_callback, subghz);
 
@@ -44,6 +47,11 @@ const bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
+            return true;
+        } else if(event.event == SubmenuIndexStatic) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexStatic);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStatic);
             return true;
         } else if(event.event == SubmenuIndexTest) {
             scene_manager_set_scene_state(

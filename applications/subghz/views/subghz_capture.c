@@ -156,8 +156,7 @@ void subghz_capture_enter(void* context) {
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
-    api_hal_subghz_set_async_rx_callback(subghz_worker_rx_callback, subghz_capture->worker);
-    api_hal_subghz_start_async_rx();
+    api_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz_capture->worker);
 
     subghz_worker_start(subghz_capture->worker);
 
