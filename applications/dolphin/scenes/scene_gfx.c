@@ -4,48 +4,24 @@
 #include "assets/meta.h"
 #include <gui/elements.h>
 
-const char* action_str[] = {"Idle", "Emote", "Use", "MC"};
-
 void dolphin_scene_transition_handler(SceneState* state) {
     uint8_t speed_mod = (!state->player_v.x || !state->player_v.y) ? 6 : 10;
 
-    ++state->player_anim;
+    state->transition = state->frame_group != state->last_group;
 
-    if(!(state->player_anim % speed_mod)) {
-        state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
-    }
-
-    if(!state->transition) {
-        state->transition = state->frame_group == state->last_group;
+    if(state->frame_idx == state->current_frame->total) {
+        state->transition = false;
+        state->frame_type = state->last_group;
     } else {
-        state->transition = !(state->player_anim == state->current_frame->total);
-
-        if(state->frame_idx) {
-            state->player_anim = 0;
-            state->frame_idx = 0;
-        }
-        if(!state->player_v.x && !state->player_v.y) {
-            state->frame_type = state->frame_group;
-            state->transition = false;
-        }
+        state->frame_type = state->transition ? state->last_group : state->frame_group;
     }
-}
-
-void dolphin_scene_set_meta_frame(SceneState* state) {
-    if(state->player_v.x < 0) {
-        state->frame_group = DirLeft;
-    } else if(state->player_v.x > 0) {
-        state->frame_group = DirRight;
-    } else if(state->player_v.y < 0) {
-        state->frame_group = DirUp;
-    } else if(state->player_v.y > 0) {
-        state->frame_group = DirDown;
-    }
-
-    state->frame_type = state->transition ? state->last_group : state->frame_group;
 
     if(*&frames[state->frame_group][state->frame_type]->frames[state->frame_idx].f) {
         state->current_frame = *&frames[state->frame_group][state->frame_type];
+    }
+
+    if(!(state->player_anim % speed_mod)) {
+        state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
     }
 }
 
@@ -54,7 +30,6 @@ void dolphin_scene_render_dolphin(SceneState* state, Canvas* canvas) {
     furi_assert(canvas);
 
     dolphin_scene_transition_handler(state);
-    dolphin_scene_set_meta_frame(state);
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
@@ -82,16 +57,14 @@ void dolphin_scene_render(SceneState* state, Canvas* canvas, uint32_t t) {
     const Item** current_scene = get_scene(state);
 
     for(uint8_t l = 0; l < LAYERS; l++) {
-        if(state->scene_zoom < SCENE_ZOOM) {
-            for(uint8_t i = 0; i < ItemsEnumTotal; i++) {
-                int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
-                int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
+        for(uint8_t i = 0; i < ItemsEnumTotal; i++) {
+            int32_t item_pos_X = (current_scene[i]->pos.x - state->player_global.x);
+            int32_t item_pos_Y = (current_scene[i]->pos.y - state->player_global.y);
 
-                if(item_screen_bounds_x(item_pos_X) && item_screen_bounds_y(item_pos_Y)) {
-                    if(l == current_scene[i]->layer) {
-                        if(current_scene[i]->draw) {
-                            current_scene[i]->draw(canvas, state);
-                        }
+            if(item_screen_bounds_x(item_pos_X) && item_screen_bounds_y(item_pos_Y)) {
+                if(l == current_scene[i]->layer) {
+                    if(current_scene[i]->draw) {
+                        current_scene[i]->draw(canvas, state);
                     }
                 }
             }
@@ -114,14 +87,13 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
     if(state->debug) {
         sprintf(
             buf,
-            "%ld.%ld v:%d.%d; %d %d %s %d",
-            state->player_v.x,
-            state->player_v.y,
+            "%d.%d v:%d.%d; %d %d %d",
+            state->frame_idx,
+            state->player_anim,
             state->frame_group,
             state->frame_type,
             state->last_group,
             state->action_timeout,
-            action_str[state->action],
             state->transition);
         canvas_draw_str(canvas, 0, 13, buf);
     }

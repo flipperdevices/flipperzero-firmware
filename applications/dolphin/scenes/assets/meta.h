@@ -12,11 +12,6 @@ const DolphinFrame up = {
                 .f = &I_up2_73x61,
                 .b = &I_black_up2_73x61,
             },
-            {
-                .f = NULL,
-                .b = NULL,
-            },
-
         },
     .total = 2,
 };
@@ -51,33 +46,23 @@ const DolphinFrame up_right = {
                 .f = &I_upright2_73x61,
                 .b = &I_black_upright2_73x61,
             },
-            {
-                .f = &I_upright2_73x61,
-                .b = &I_black_upright2_73x61,
-            },
-
         },
-    .total = 3,
+    .total = 2,
 };
 
 const DolphinFrame up_left = {
     .frames =
         {
             {
+                .f = &I_upleft2_73x61,
+                .b = &I_black_upleft2_73x61,
+            },
+            {
                 .f = &I_upleft1_73x61,
                 .b = &I_black_upleft1_73x61,
             },
-            {
-                .f = &I_upleft2_73x61,
-                .b = &I_black_upleft2_73x61,
-            },
-            {
-                .f = &I_upleft2_73x61,
-                .b = &I_black_upleft2_73x61,
-            },
-
         },
-    .total = 3,
+    .total = 2,
 };
 
 const DolphinFrame right = {
@@ -110,11 +95,6 @@ const DolphinFrame right_up = {
                 .f = &I_rightup2_73x61,
                 .b = &I_black_rightup2_73x61,
             },
-            {
-                .f = NULL,
-                .b = NULL,
-            },
-
         },
     .total = 2,
 };
@@ -123,16 +103,12 @@ const DolphinFrame right_down = {
     .frames =
         {
             {
-                .f = &I_rightdown1_73x61,
-                .b = &I_black_rightdown1_73x61,
+                .f = &I_downright2_73x61,
+                .b = &I_black_downright2_73x61,
             },
             {
-                .f = &I_rightdown2_73x61,
-                .b = &I_black_rightdown2_73x61,
-            },
-            {
-                .f = NULL,
-                .b = NULL,
+                .f = &I_downright3_73x61,
+                .b = &I_black_downright3_73x61,
             },
         },
     .total = 2,
@@ -149,11 +125,6 @@ const DolphinFrame right_left = {
                 .f = &I_rightleft2_73x61,
                 .b = &I_black_rightleft2_73x61,
             },
-            {
-                .f = NULL,
-                .b = NULL,
-            },
-
         },
     .total = 2,
 };
@@ -169,11 +140,6 @@ const DolphinFrame down = {
                 .f = &I_down2_73x61,
                 .b = &I_black_down2_73x61,
             },
-            {
-                .f = NULL,
-                .b = NULL,
-            },
-
         },
     .total = 2,
 };
@@ -220,16 +186,16 @@ const DolphinFrame down_right = {
     .frames =
         {
             {
-                .f = &I_downright1_73x61,
-                .b = &I_black_downright1_73x61,
+                .f = &I_downright3_73x61,
+                .b = &I_black_downright3_73x61,
             },
             {
                 .f = &I_downright2_73x61,
                 .b = &I_black_downright2_73x61,
             },
             {
-                .f = &I_downright3_73x61,
-                .b = &I_black_downright3_73x61,
+                .f = &I_downright1_73x61,
+                .b = &I_black_downright1_73x61,
             },
         },
     .total = 3,
@@ -265,13 +231,8 @@ const DolphinFrame left_up = {
                 .f = &I_leftup2_73x61,
                 .b = &I_black_leftup2_73x61,
             },
-            {
-                .f = &I_leftup2_73x61,
-                .b = &I_black_leftup2_73x61,
-            },
-
         },
-    .total = 3,
+    .total = 2,
 };
 
 const DolphinFrame left_down = {
@@ -285,33 +246,23 @@ const DolphinFrame left_down = {
                 .f = &I_leftdown2_73x61,
                 .b = &I_black_leftdown2_73x61,
             },
-            {
-                .f = &I_leftdown2_73x61,
-                .b = &I_black_leftdown2_73x61,
-            },
-
         },
-    .total = 3,
+    .total = 2,
 };
 
 const DolphinFrame left_right = {
     .frames =
         {
             {
+                .f = &I_rightleft1_73x61,
+                .b = &I_black_rightleft1_73x61,
+            },
+            {
                 .f = &I_rightleft2_73x61,
                 .b = &I_black_rightleft2_73x61,
             },
-            {
-                .f = &I_rightleft1_73x61,
-                .b = &I_black_rightleft1_73x61,
-            },
-            {
-                .f = &I_rightleft1_73x61,
-                .b = &I_black_rightleft1_73x61,
-            },
-
         },
-    .total = 3,
+    .total = 2,
 };
 
 const DolphinFrame* frames[4][4] = {

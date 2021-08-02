@@ -19,7 +19,7 @@
 #define DOLPHIN_CENTER (SCREEN_WIDTH / 2 - DOLPHIN_WIDTH)
 #define SPEED_X 4
 #define SPEED_Y 4
-#define ACTIONS_NUM 5
+#define ACTIONS_NUM 4
 #define DOLPHIN_DEFAULT_Y 2
 #define MAX_FRAMES 3
 
@@ -28,7 +28,6 @@
 #define WORLD_HEIGHT 192
 
 #define LAYERS 8
-#define SCENE_ZOOM 9
 #define DOLPHIN_LAYER 6
 #define PARALLAX_MOD 7
 #define PARALLAX(layer) layer / PARALLAX_MOD - layer
@@ -94,7 +93,6 @@ typedef struct {
 } DolphinFrame;
 
 typedef struct {
-    ///
     Vec2 player;
     Vec2 player_global;
     Vec2 player_v;
@@ -106,8 +104,6 @@ typedef struct {
 
     const DolphinFrame* current_frame;
 
-    bool player_flipped_x;
-    bool player_flipped_y;
     bool transition;
     bool use_pending;
     bool debug;
@@ -116,18 +112,12 @@ typedef struct {
     uint8_t frame_idx;
 
     uint8_t scene_id;
-
     uint8_t emote_id;
     uint8_t previous_emote;
 
-    uint8_t action_timeout;
-
     uint8_t action;
-    uint8_t next_action;
     uint8_t prev_action;
-
-    int8_t zoom_v;
-    uint8_t scene_zoom;
+    uint8_t action_timeout;
     uint8_t dialog_progress;
 
     FuriThread* scene_app_thread;
