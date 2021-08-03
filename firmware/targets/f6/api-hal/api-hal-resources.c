@@ -16,7 +16,7 @@ const InputPin input_pins[] = {
 
 const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 
-const GpioPin vibro_gpio = {.port = VIBRO_GPIO_Port, .pin = VIBRO_Pin};
+const GpioPin vibro_gpio = {.port = RFID_TUNE_GPIO_Port, .pin = RFID_TUNE_Pin};
 const GpioPin ibutton_gpio = {.port = iBTN_GPIO_Port, .pin = iBTN_Pin};
 
 const GpioPin gpio_cc1101_g0 = {.port = CC1101_G0_GPIO_Port, .pin = CC1101_G0_Pin};
@@ -48,6 +48,7 @@ const GpioPin gpio_ext_pa7 = {.port = GPIOA, .pin = GPIO_PIN_7};
 const GpioPin gpio_rfid_pull = {.port = RFID_PULL_GPIO_Port, .pin = RFID_PULL_Pin};
 const GpioPin gpio_rfid_carrier_out = {.port = RFID_OUT_GPIO_Port, .pin = RFID_OUT_Pin};
 const GpioPin gpio_rfid_data_in = {.port = RFID_RF_IN_GPIO_Port, .pin = RFID_RF_IN_Pin};
+const GpioPin gpio_rfid_clk_in = {.port = GPIOA, .pin = GPIO_PIN_15};
 
 const GpioPin gpio_irda_rx = {.port = IR_RX_GPIO_Port, .pin = IR_RX_Pin};
 const GpioPin gpio_irda_tx = {.port = IR_TX_GPIO_Port, .pin = IR_TX_Pin};

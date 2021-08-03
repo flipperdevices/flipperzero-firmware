@@ -32,6 +32,10 @@ void api_hal_rfid_pins_emulate() {
     // pull rfid antenna from carrier side
     hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
     hal_gpio_write(&gpio_rfid_carrier_out, false);
+
+    //gpio_rfid_clk_in
+    hal_gpio_init_ex(
+        &gpio_rfid_clk_in, GpioModeAltFunctionPushPull, GpioSpeedLow, GpioPullUp, GpioAltFn2TIM2);
 }
 
 void api_hal_rfid_pins_read() {
@@ -139,7 +143,7 @@ void api_hal_rfid_tim_emulate(float freq) {
     TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
     // basic PWM setup with needed freq and internal clock
-    LFRFID_EMULATE_TIM.Init.Prescaler = prescaler;
+    LFRFID_EMULATE_TIM.Init.Prescaler = 0;
     LFRFID_EMULATE_TIM.Init.CounterMode = TIM_COUNTERMODE_UP;
     LFRFID_EMULATE_TIM.Init.Period = 1;
     LFRFID_EMULATE_TIM.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -148,7 +152,11 @@ void api_hal_rfid_tim_emulate(float freq) {
     if(HAL_TIM_Base_Init(&LFRFID_EMULATE_TIM) != HAL_OK) {
         Error_Handler();
     }
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_ETRMODE2;
+    sClockSourceConfig.ClockPolarity = TIM_ETRPOLARITY_INVERTED;
+    sClockSourceConfig.ClockPrescaler = TIM_CLOCKPRESCALER_DIV1;
+    sClockSourceConfig.ClockFilter = 0;
     if(HAL_TIM_ConfigClockSource(&LFRFID_EMULATE_TIM, &sClockSourceConfig) != HAL_OK) {
         Error_Handler();
     }
