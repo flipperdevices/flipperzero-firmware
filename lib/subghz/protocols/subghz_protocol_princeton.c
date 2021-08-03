@@ -6,9 +6,9 @@
  *
  */
 
-#define SUBGHZ_PT_SHORT 376
+#define SUBGHZ_PT_SHORT 450
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
-#define SUBGHZ_PT_GUARD 10600
+#define SUBGHZ_PT_GUARD (SUBGHZ_PT_SHORT * 30)
 
 struct SubGhzEncoderPrinceton {
     uint32_t key;

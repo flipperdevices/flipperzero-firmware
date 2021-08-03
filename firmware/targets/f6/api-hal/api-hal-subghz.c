@@ -446,8 +446,12 @@ static void api_hal_subghz_async_tx_timer_isr() {
     if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
         LL_TIM_ClearFlag_UPDATE(TIM2);
         if (LL_TIM_GetAutoReload(TIM2) == 0) {
-            LL_TIM_DisableCounter(TIM2);
-            api_hal_subghz_state = SubGhzStateAsyncTxEnd;
+            if (api_hal_subghz_state == SubGhzStateAsyncTx) {
+                api_hal_subghz_state = SubGhzStateAsyncTxLast;
+            } else {
+                api_hal_subghz_state = SubGhzStateAsyncTxEnd;
+                LL_TIM_DisableCounter(TIM2);
+            }
         }
     }
 }

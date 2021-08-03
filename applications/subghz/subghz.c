@@ -93,9 +93,6 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewStatic, subghz_static_get_view(subghz->subghz_static));
 
-    // Switch to menu
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewMenu);
-
     return subghz;
 }
 
