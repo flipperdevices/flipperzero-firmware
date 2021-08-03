@@ -103,17 +103,17 @@ set(HAL_LL_DRIVERS_G4
 )
 
 set(HAL_DRIVERS_H7
-    adc cec comp cortex crc cryp dac dcmi dfsdm dma dma2d dsi dts eth exti fdcan
-    flash gfxmmu gpio hash hrtim hsem i2c i2s irda iwdg jpeg lptim ltdc mdios 
+    adc cec comp cordic cortex crc cryp dac dcmi dfsdm dma dma2d dsi dts eth exti fdcan
+    flash fmac gfxmmu gpio hash hcd hrtim hsem i2c i2s irda iwdg jpeg lptim ltdc mdios
     mdma mmc nand nor opamp ospi otfdec pcd pssi pwr qspi ramecc rcc rng rtc sai 
     sd sdram smartcard smbus spdifrx spi sram swpmi tim uart usart wwdg
 )
 set(HAL_EX_DRIVERS_H7
-    adc crc cryp dac dfsdm dma eth flash hash i2c i2s ltdc mmc opamp pcd pwr rcc 
+    adc crc cryp dac dfsdm dma eth flash hash i2c i2s ltdc mmc opamp pcd pwr rcc
     rng rtc sai sd smartcard spi tim uart usart
 )
 set(HAL_LL_DRIVERS_H7
-    adc bdma comp crc crs dac delayblock dma dma2d exti fmc gpio hrtim i2c lptim 
+    adc bdma comp cordic crc crs dac delayblock dma dma2d exti fmac fmc gpio hrtim i2c lptim
     lpuart mdma opamp pwr rcc rng rtc sdmmc spi swpmi tim usart usb utils
 )
 
