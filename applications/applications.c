@@ -39,6 +39,7 @@ int32_t lfrfid_debug_app(void* p);
 int32_t storage_app(void* p);
 int32_t storage_app_test(void* p);
 int32_t dialogs_app(void* p);
+int32_t power_observer(void* p);
 
 // On system start hooks declaration
 void irda_cli_init();
@@ -91,6 +92,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = power_task, .name = "power_task", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
+#ifdef SRV_POWER_OBSERVER
+    {.app = power_observer, .name = "power_observer", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
 #ifdef SRV_BT
     {.app = bt_task, .name = "bt_task", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
@@ -139,7 +144,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #endif
 
 #ifdef SRV_KEYPAD_TEST
-    {.app = keypad_test, .name = "keypad_test", .icon = &A_Plugins_14},
+    {.app = keypad_test, .name = "keypad_test", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
 #ifdef SRV_ACCESSOR
@@ -268,7 +273,7 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #endif
 
 #ifdef APP_KEYPAD_TEST
-    {.app = keypad_test, .name = "keypad_test", .icon = &A_Plugins_14},
+    {.app = keypad_test, .name = "keypad_test", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 
 #ifdef APP_ACCESSOR
