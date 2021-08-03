@@ -135,7 +135,7 @@ void api_hal_rfid_tim_read_stop() {
 
 void api_hal_rfid_tim_emulate(float freq) {
     // TODO LL init
-    uint32_t prescaler = (uint32_t)((SystemCoreClock) / freq) - 1;
+    // uint32_t prescaler = (uint32_t)((SystemCoreClock) / freq) - 1;
 
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
