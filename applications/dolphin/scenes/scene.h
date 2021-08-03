@@ -100,11 +100,13 @@ typedef struct {
 
     FrameDirectionEnum frame_group;
     FrameDirectionEnum last_group;
+    FrameDirectionEnum frame_pending;
     FrameDirectionEnum frame_type;
 
     const DolphinFrame* current_frame;
 
     bool transition;
+    bool transition_pending;
     bool use_pending;
     bool debug;
 

@@ -7,7 +7,6 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
     furi_assert(input);
 
     state->last_group = state->frame_group;
-
     if(input->type == InputTypePress) {
         state->action = MINDCONTROL;
     }
@@ -17,26 +16,21 @@ void dolphin_scene_handle_user_input(SceneState* state, InputEvent* input) {
             if(input->key == InputKeyRight) {
                 state->player_v.y = 0;
                 state->player_v.x = SPEED_X;
-                state->frame_group = DirRight;
             } else if(input->key == InputKeyLeft) {
                 state->player_v.y = 0;
-                state->frame_group = DirLeft;
                 state->player_v.x = -SPEED_X;
             } else if(input->key == InputKeyUp) {
                 state->player_v.x = 0;
                 state->player_v.y = -SPEED_Y;
-                state->frame_group = DirUp;
             } else if(input->key == InputKeyDown) {
                 state->player_v.x = 0;
                 state->player_v.y = SPEED_Y;
-                state->frame_group = DirDown;
             }
         }
 
         if(input->type == InputTypeRelease) {
             state->player_v.x = 0;
             state->player_v.y = 0;
-
         } else if(input->type == InputTypeShort) {
             if(input->key == InputKeyOk) {
                 state->prev_action = MINDCONTROL;
@@ -63,6 +57,4 @@ void dolphin_scene_coordinates(SceneState* state, uint32_t dt) {
         state->player.x =
             CLAMP(state->player.x - state->player_v.x / 2, DOLPHIN_WIDTH * 2, DOLPHIN_CENTER);
     }
-
-    state->player_anim++;
 }

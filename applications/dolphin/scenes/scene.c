@@ -67,8 +67,9 @@ void scene_alloc() {
     scene_state->player_global.y = WORLD_HEIGHT;
 
     scene_state->frame_group = DirRight;
-    scene_state->last_group = DirRight;
     scene_state->frame_type = DirRight;
+    scene_state->frame_pending = DirRight;
+    scene_state->last_group = DirRight;
 
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;

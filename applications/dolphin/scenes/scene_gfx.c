@@ -5,23 +5,42 @@
 #include <gui/elements.h>
 
 void dolphin_scene_transition_handler(SceneState* state) {
-    uint8_t speed_mod = (!state->player_v.x || !state->player_v.y) ? 6 : 10;
+    uint8_t speed_mod = (!state->player_v.x || !state->player_v.y) ? 6 : 8;
 
-    state->transition = state->frame_group != state->last_group;
-
-    if(state->frame_idx == state->current_frame->total) {
-        state->transition = false;
-        state->frame_type = state->last_group;
-    } else {
-        state->frame_type = state->transition ? state->last_group : state->frame_group;
+    if(state->player_v.x < 0) {
+        state->frame_pending = DirLeft;
+    } else if(state->player_v.x > 0) {
+        state->frame_pending = DirRight;
+    } else if(state->player_v.y < 0) {
+        state->frame_pending = DirUp;
+    } else if(state->player_v.y > 0) {
+        state->frame_pending = DirDown;
     }
+    state->transition_pending = state->frame_group != state->frame_pending;
 
     if(*&frames[state->frame_group][state->frame_type]->frames[state->frame_idx].f) {
         state->current_frame = *&frames[state->frame_group][state->frame_type];
     }
 
+    uint8_t total = state->current_frame->frames[2].f == NULL ? 2 : 3;
+
+    if(state->transition_pending && !state->frame_idx) {
+        state->transition_pending = false;
+        state->transition = true;
+    }
+
+    if(state->transition) {
+        state->frame_type = state->frame_pending;
+        state->frame_group = state->last_group;
+        state->transition = !(state->frame_idx == total - 1);
+    } else {
+        state->frame_group = state->frame_type;
+    }
+
+    state->player_anim++;
+
     if(!(state->player_anim % speed_mod)) {
-        state->frame_idx = (state->frame_idx + 1) % state->current_frame->total;
+        state->frame_idx = (state->frame_idx + 1) % total;
     }
 }
 
@@ -87,16 +106,16 @@ void dolphin_scene_render_state(SceneState* state, Canvas* canvas) {
     if(state->debug) {
         sprintf(
             buf,
-            "%d.%d v:%d.%d; %d %d %d",
+            "%d:%d %d/%dP%dL%d T%d-%d",
             state->frame_idx,
-            state->player_anim,
+            state->current_frame->frames[2].f == NULL ? 2 : 3,
             state->frame_group,
             state->frame_type,
+            state->frame_pending,
             state->last_group,
-            state->action_timeout,
+            state->transition_pending,
             state->transition);
         canvas_draw_str(canvas, 0, 13, buf);
     }
-
     if(state->action == INTERACT) scene_activate_item_callback(state, canvas);
 }

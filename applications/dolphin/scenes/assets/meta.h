@@ -54,12 +54,12 @@ const DolphinFrame up_left = {
     .frames =
         {
             {
-                .f = &I_upleft2_73x61,
-                .b = &I_black_upleft2_73x61,
-            },
-            {
                 .f = &I_upleft1_73x61,
                 .b = &I_black_upleft1_73x61,
+            },
+            {
+                .f = &I_upleft2_73x61,
+                .b = &I_black_upleft2_73x61,
             },
         },
     .total = 2,
@@ -103,12 +103,12 @@ const DolphinFrame right_down = {
     .frames =
         {
             {
-                .f = &I_downright2_73x61,
-                .b = &I_black_downright2_73x61,
+                .f = &I_rightdown1_73x61,
+                .b = &I_black_rightdown1_73x61,
             },
             {
-                .f = &I_downright3_73x61,
-                .b = &I_black_downright3_73x61,
+                .f = &I_rightdown2_73x61,
+                .b = &I_black_rightdown2_73x61,
             },
         },
     .total = 2,
@@ -186,16 +186,16 @@ const DolphinFrame down_right = {
     .frames =
         {
             {
-                .f = &I_downright3_73x61,
-                .b = &I_black_downright3_73x61,
+                .f = &I_downright1_73x61,
+                .b = &I_black_downright1_73x61,
             },
             {
                 .f = &I_downright2_73x61,
                 .b = &I_black_downright2_73x61,
             },
             {
-                .f = &I_downright1_73x61,
-                .b = &I_black_downright1_73x61,
+                .f = &I_downright3_73x61,
+                .b = &I_black_downright3_73x61,
             },
         },
     .total = 3,
@@ -266,11 +266,11 @@ const DolphinFrame left_right = {
 };
 
 const DolphinFrame* frames[4][4] = {
-    [DirUp] = {[DirUp] = &up, [DirDown] = &up_down, [DirLeft] = &up_left, [DirRight] = &up_right},
+    [DirUp] = {[DirUp] = &up, [DirRight] = &up_right, [DirDown] = &up_down, [DirLeft] = &up_left},
     [DirRight] =
-        {[DirUp] = &right_up, [DirDown] = &right_down, [DirLeft] = &right_left, [DirRight] = &right},
+        {[DirUp] = &right_up, [DirRight] = &right, [DirDown] = &right_down, [DirLeft] = &right_left},
     [DirDown] =
-        {[DirUp] = &down_up, [DirDown] = &down, [DirLeft] = &down_left, [DirRight] = &down_right},
+        {[DirUp] = &down_up, [DirRight] = &down_right, [DirDown] = &down, [DirLeft] = &down_left},
     [DirLeft] =
-        {[DirUp] = &left_up, [DirDown] = &left_down, [DirLeft] = &left, [DirRight] = &left_right},
+        {[DirUp] = &left_up, [DirRight] = &left_right, [DirDown] = &left_down, [DirLeft] = &left},
 };
