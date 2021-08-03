@@ -5,7 +5,7 @@
 #include <gui/elements.h>
 
 void dolphin_scene_transition_handler(SceneState* state) {
-    uint8_t speed_mod = (!state->player_v.x || !state->player_v.y) ? 6 : 8;
+    uint8_t speed_mod = (state->player_v.x || state->player_v.y || state->transition) ? 6 : 10;
 
     if(state->player_v.x < 0) {
         state->frame_pending = DirLeft;
