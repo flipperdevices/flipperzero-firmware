@@ -8,7 +8,9 @@ const uint32_t subghz_frequencies[] = {
     /* 387 - 464 */
     387000000,
     433075000, /* LPD433 first */
+    433840000, /* - */
     433920000, /* LPD433 mid */
+    433922000, /* + */
     434775000, /* LPD433 last channels */
     438900000,
     464000000,
@@ -21,7 +23,7 @@ const uint32_t subghz_frequencies[] = {
 };
 
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
-const uint32_t subghz_frequencies_433_92 = 5;
+const uint32_t subghz_frequencies_433_92 = 6;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

@@ -6,11 +6,18 @@
  *
  */
 
-#define SUBGHZ_PT_SHORT 450
+#define SUBGHZ_PT_SHORT 350
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
 #define SUBGHZ_PT_GUARD (SUBGHZ_PT_SHORT * 30)
 
+typedef enum {
+    SubGhzEncoderPrincetonPhasePreambula,
+    SubGhzEncoderPrincetonPhasePayload,
+    SubGhzEncoderPrincetonPhaseComplete
+} SubGhzEncoderPrincetonPhase;
+
 struct SubGhzEncoderPrinceton {
+    SubGhzEncoderPrincetonPhase phase;
     uint32_t key;
     size_t repeat;
     size_t front;
@@ -28,6 +35,7 @@ void subghz_encoder_princeton_free(SubGhzEncoderPrinceton* instance) {
 
 void subghz_encoder_princeton_reset(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
+    instance->phase = SubGhzEncoderPrincetonPhasePreambula;
     instance->key = key;
     instance->repeat = repeat;
     instance->front = 0;
@@ -38,15 +46,26 @@ size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance
     return instance->repeat;
 }
 
-LevelDuration subghz_encoder_princeton_yield(void* context) {
-    SubGhzEncoderPrinceton* instance = context;
-    if (instance->repeat == 0)
-        return level_duration_reset();
-
-    size_t bit = instance->front / 2;
-    bool level = !(instance->front % 2);
-
+static inline LevelDuration subghz_encoder_princeton_yield_preambula(SubGhzEncoderPrinceton* instance) {
     LevelDuration ret;
+    bool level = instance->front % 2;
+    if (instance->front == 24) {
+        ret = level_duration_make(level, SUBGHZ_PT_SHORT * 10);
+        instance->front = 0;
+        instance->phase = SubGhzEncoderPrincetonPhasePayload;
+    } else {
+        ret = level_duration_make(level, SUBGHZ_PT_SHORT);
+    }
+
+    return ret;
+}
+
+static inline LevelDuration subghz_encoder_princeton_yield_payload(SubGhzEncoderPrinceton* instance) {
+    LevelDuration ret;
+
+    size_t bit = (instance->front - 1) / 2;
+    bool level = instance->front % 2;
+
     if (bit < 24) {
         uint8_t byte = bit / 8;
         uint8_t bit_in_byte = bit % 8;
@@ -60,13 +79,31 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
         ret = level_duration_make(level, level ? SUBGHZ_PT_SHORT : SUBGHZ_PT_GUARD);
     }
 
-    instance->front++;
     if (instance->front == 50) {
         instance->repeat--;
         instance->front = 0;
     }
 
+    if (instance->repeat == 0) {
+        instance->phase = SubGhzEncoderPrincetonPhaseComplete;
+    }
+
     return ret;
+}
+
+LevelDuration subghz_encoder_princeton_yield(void* context) {
+    SubGhzEncoderPrinceton* instance = context;
+    instance->front++;
+    if (instance->phase == SubGhzEncoderPrincetonPhasePreambula) {
+        return subghz_encoder_princeton_yield_preambula(instance);
+    } else if (instance->phase == SubGhzEncoderPrincetonPhasePayload) {
+        return subghz_encoder_princeton_yield_payload(instance);
+    } else if (instance->phase == SubGhzEncoderPrincetonPhaseComplete) {
+        return level_duration_reset();
+    } else {
+        furi_assert(0);
+        return level_duration_reset();
+    }
 }
 
 

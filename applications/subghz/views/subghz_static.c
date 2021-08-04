@@ -90,7 +90,7 @@ bool subghz_static_input(InputEvent* event, void* context) {
                     notification_message_block(notification, &sequence_set_red_255);
 
                     subghz_encoder_princeton_reset(
-                        instance->encoder, subghz_static_keys[model->button], 20);
+                        instance->encoder, subghz_static_keys[model->button], 10);
                     api_hal_subghz_start_async_tx(
                         subghz_encoder_princeton_yield, instance->encoder);
                     while(!api_hal_subghz_is_async_tx_complete()) osDelay(33);
