@@ -72,6 +72,7 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
 
 struct SubGhzDecoderPrinceton {
     SubGhzProtocolCommon common;
+    uint16_t te;
 };
 
 SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
@@ -82,6 +83,7 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.te_shot = 450;//150;
     instance->common.te_long = 1350;//450;
     instance->common.te_delta = 200;//50;
+    instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
 
     return instance;
 }
@@ -155,7 +157,15 @@ void subghz_decoder_princeton_parse(SubGhzDecoderPrinceton* instance, bool level
             if (duration >= (instance->common.te_shot * 10 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
-
+                    
+                    if(instance->common.code_last_found==instance->common.code_found ){
+                       //instance->te = (instance->te+instance->common.te_last)/2; //Option 1 TE averaging
+                        if(instance->te>instance->common.te_last) instance->te = instance->common.te_last; //Option 2 TE averaging
+                    } else {
+                        instance->te = instance->common.te_last;
+                    }
+                    
+                    instance->common.code_last_found = instance->common.code_found;
                     instance->common.serial = instance->common.code_found >> 4;
                     instance->common.btn = (uint8_t)instance->common.code_found & 0x00000F;
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
@@ -182,4 +192,61 @@ void subghz_decoder_princeton_parse(SubGhzDecoderPrinceton* instance, bool level
         }
         break;
     }
+}
+
+void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t output){
+    
+    uint32_t code_found_hi = instance->common.code_last_found >> 32;
+    uint32_t code_found_lo = instance->common.code_last_found  & 0x00000000ffffffff;
+
+    uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_last_found , instance->common.code_count_bit);
+
+    uint32_t code_found_reverse_hi = code_found_reverse>>32;
+    uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
+
+    string_cat_printf(
+        output,
+        "Protocol %s %d Bit\r\n"
+        "                                 te %d us  \r\n"
+        " KEY:0x%lX%08lX\r\n"
+        " YEK:0x%lX%08lX\r\n"
+        " SN:0x%05lX BTN:%02X\r\n",
+        instance->common.name,
+        instance->common.code_count_bit,
+        instance->te,
+        code_found_hi,
+        code_found_lo,
+        code_found_reverse_hi,
+        code_found_reverse_lo,
+        instance->common.serial,
+        instance->common.btn
+    );
+    
+    
+    
+    // uint32_t code_found_hi = instance->common.code_found >> 32;
+    // uint32_t code_found_lo = instance->common.code_found & 0x00000000ffffffff;
+
+    // uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+
+    // uint32_t code_found_reverse_hi = code_found_reverse>>32;
+    // uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
+    // string_cat_printf(
+    //     output,
+    //     "Protocol %s, %d Bit\r\n"
+    //     "KEY:0x%lX%lX\r\n"
+    //     "FIX:%08lX MF:%s \r\n"
+    //     "HOP:%08lX \r\n"
+    //     "SN:%07lX CNT:%04X B:%02lX\r\n",
+    //     instance->common.name,
+    //     instance->common.code_count_bit,
+    //     code_found_hi,
+    //     code_found_lo,
+    //     code_found_reverse_hi,
+    //     instance->manufacture_name,
+    //     code_found_reverse_lo,
+    //     instance->common.serial,
+    //     instance->common.cnt, 
+    //     instance->common.btn
+    // );
 }

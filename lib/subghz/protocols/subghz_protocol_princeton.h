@@ -72,3 +72,10 @@ void subghz_decoder_princeton_reset(SubGhzDecoderPrinceton* instance);
  */
 void subghz_decoder_princeton_parse(SubGhzDecoderPrinceton* instance, bool level, uint32_t duration);
 
+/** Outputting information from the parser
+ * 
+ * @param instance - SubGhzDecoderPrinceton* instance
+ * @param output   - output string
+ */
+void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t output);
+
