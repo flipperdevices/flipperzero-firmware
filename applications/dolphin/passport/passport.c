@@ -120,7 +120,7 @@ int32_t passport(void* p) {
 
     AppEvent event;
     while(1) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 25);
+        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
         if(event_status == osOK) {
             if(event.type == EventTypeKey && event.value.input.type == InputTypeShort &&
                event.value.input.key == InputKeyBack) {
