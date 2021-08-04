@@ -13,6 +13,9 @@
 #define SUBGHZ_TX_PIN_LOW() 
 #define DURATION_DIFF(x, y) ((x < y) ? (y - x) : (x - y))
 
+#define SUBGHZ_APP_PATH_FOLDER "/ext/assets/subghz/key"
+#define SUBGHZ_APP_EXTENSION ".sub"
+
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
 
 typedef void (*SubGhzProtocolCommonCallback)(SubGhzProtocolCommon* parser, void* context);
