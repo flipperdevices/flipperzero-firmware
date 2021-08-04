@@ -236,6 +236,7 @@ bool subghz_decoder_princeton_save_data(SubGhzDecoderPrinceton* instance, const 
     string_init(dev_file_name);
     string_t temp_str;
     string_init(temp_str);
+    bool saved = false;
 
     do {
         // Create subghz directory if necessary
@@ -266,6 +267,7 @@ bool subghz_decoder_princeton_save_data(SubGhzDecoderPrinceton* instance, const 
         if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_size(temp_str))) {
             break;
         }
+        saved = true;
     } while(0);
 
     string_clear(temp_str);
@@ -273,7 +275,7 @@ bool subghz_decoder_princeton_save_data(SubGhzDecoderPrinceton* instance, const 
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 
-    return true;
+    return saved;
 }
 
 //static 
@@ -286,7 +288,7 @@ bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const 
     string_init(temp_str);
     int res = 0;
     int data = 0;
-    bool parsed = false;
+    bool loaded = false;
 
     do {
         // Open key file
@@ -340,7 +342,7 @@ bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const 
         //         break;
         //     }
 
-        parsed = true;
+        loaded = true;
     } while(0);
 
     string_clear(temp_str);
@@ -348,5 +350,5 @@ bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const 
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 
-    return parsed;
+    return loaded;
 }

@@ -1,5 +1,6 @@
 ADD_SCENE(subghz, start, Start)
 ADD_SCENE(subghz, capture, Capture)
+ADD_SCENE(subghz, read, Read)
 ADD_SCENE(subghz, saved, Saved)
 ADD_SCENE(subghz, static, Static)
 ADD_SCENE(subghz, test, Test)
