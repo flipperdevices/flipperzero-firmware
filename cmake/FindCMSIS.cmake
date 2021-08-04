@@ -38,7 +38,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS})
     endif()
 
     # Component is not RTOS component, so check whether it is a family component
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
     if(CMAKE_MATCH_1)
         list(APPEND CMSIS_FIND_COMPONENTS_FAMILIES ${COMP})
     endif()
