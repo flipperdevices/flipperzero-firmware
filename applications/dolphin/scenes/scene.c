@@ -34,7 +34,7 @@ static void scene_engine_tick_callback(void* p) {
     osMessageQueueId_t event_queue = p;
     AppEvent event;
     event.type = EventTypeTick;
-    osMessageQueuePut(event_queue, (void*)&event, 0, 0);
+    osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
 static void scene_engine_input_callback(InputEvent* input_event, void* ctx) {

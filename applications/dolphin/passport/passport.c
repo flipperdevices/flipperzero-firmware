@@ -46,7 +46,9 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 }
 
 static void render_callback(Canvas* canvas, void* ctx) {
-    DolphinState* state = (DolphinState*)acquire_mutex((ValueMutex*)ctx, 25);
+    ValueMutex* dolphin_state_mutex = ctx;
+    DolphinState* state = acquire_mutex(dolphin_state_mutex, 25);
+    if (!state) return;
 
     char level[20];
     char mood[32];
@@ -94,7 +96,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_line(canvas, 123 - exp, 48, 123 - exp, 54);
 
-    release_mutex((ValueMutex*)ctx, state);
+    release_mutex(dolphin_state_mutex, state);
 }
 
 int32_t passport(void* p) {
