@@ -104,6 +104,7 @@ int32_t scene_app(void* p) {
     api_hal_power_insomnia_enter();
     scene_alloc();
 
+    // TODO: replace timer with something else, it's not intended for such use.
     osTimerStart(scene_app_gui->timer, 40);
 
     uint32_t t = xTaskGetTickCount();

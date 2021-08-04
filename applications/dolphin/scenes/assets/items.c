@@ -53,6 +53,7 @@ static void dolphin_scene_start_app(SceneState* state, const FlipperApplication*
     furi_assert(state);
     furi_assert(flipper_app);
 
+    // TODO: memory leak, suspend scene ticks and free it
     state->scene_app_thread = furi_thread_alloc();
 
     furi_assert(flipper_app->app);
