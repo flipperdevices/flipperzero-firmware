@@ -13,6 +13,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/dialog_ex.h>
 
 #include <subghz/scenes/subghz_scene.h>
 
@@ -28,18 +29,22 @@ struct SubGhz {
     ViewDispatcher* view_dispatcher;
 
     Submenu* submenu;
+    DialogEx* dialog_ex;
 
     SubghzCapture* subghz_capture;
     SubghzStatic* subghz_static;
 
     SubghzTestCarrier* subghz_test_carrier;
     SubghzTestPacket* subghz_test_packet;
+
+
 };
 
 typedef enum {
     SubGhzViewMenu,
-
+    
     SubGhzViewCapture,
+    SubGhzViewDialogEx,
     SubGhzViewStatic,
 
     SubGhzViewTestCarrier,
