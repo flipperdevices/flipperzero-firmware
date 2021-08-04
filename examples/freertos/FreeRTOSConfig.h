@@ -49,7 +49,9 @@ extern uint32_t SystemCoreClock;
 #define configUSE_TICK_HOOK				1
 #define configCPU_CLOCK_HZ				( SystemCoreClock )
 #define configTICK_RATE_HZ				( ( TickType_t ) 1000 )
+#if !defined USE_CMSIS_RTOS_V2
 #define configMAX_PRIORITIES			( 5 )
+#endif
 #define configMINIMAL_STACK_SIZE		( ( unsigned short ) 130 )
 #define configTOTAL_HEAP_SIZE			( ( size_t ) ( 8 * 1024 ) )
 #define configMAX_TASK_NAME_LEN			( 10 )
@@ -85,6 +87,26 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelayUntil			1
 #define INCLUDE_vTaskDelay				1
 
+#if defined USE_CMSIS_RTOS_V2
+
+#ifndef CMSIS_RTOS_V2_DEVICE_HEADER
+#error "CMSIS device header needs to be passed by the build system"
+#endif
+#define CMSIS_device_header CMSIS_RTOS_V2_DEVICE_HEADER
+
+/* Needed for CMSIS RTOS_V2 */
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
+#define configMAX_PRIORITIES 56
+
+#define INCLUDE_xSemaphoreGetMutexHolder 1
+#define INCLUDE_xTaskGetCurrentTaskHandle 1
+#define INCLUDE_xTaskGetSchedulerState 1
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
+#define INCLUDE_eTaskGetState 1
+#define INCLUDE_xTimerPendFunctionCall 1
+
+#endif
+
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS
 	/* __BVIC_PRIO_BITS will be specified when CMSIS is being used. */
@@ -118,7 +140,11 @@ header file. */
 standard names. */
 #define vPortSVCHandler SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
+
+/* When using CMSIS RTOS V2, this define causes  a multiple definition error */
+#if !defined USE_CMSIS_RTOS_V2
 #define xPortSysTickHandler SysTick_Handler
+#endif
 
 #endif /* FREERTOS_CONFIG_H */
 

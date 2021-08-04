@@ -30,19 +30,24 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
 * `fetch-cube` ([examples/fetch-cube](examples/fetch-cube)) - example of using FetchContent for fetching STM32Cube from ST's git.
 * `fetch-cmsis-hal` ([examples/fetch-cmsis-hal](examples/fetch-cmsis-hal)) - example of using FetchContent for fetching STM32 CMSIS and HAL from ST's git.
 * `blinky` ([examples/blinky](examples/blinky)) - blink led using STM32 HAL library and SysTick.
-It will compile a project for the `F4` family by default, but you can also compile for the
-`L0` and `F1` family by passing `L0_EXAMPLE=ON` or `F1_EXAMPLE=ON` to the CMake generation call.
+   It will compile a project for the `F4` family by default, but you can also compile for the
+   `L0` and `F1` family by passing `BLINKY_L0_EXAMPLE=ON` or `BLINKY_F1_EXAMPLE=ON` to the CMake
+   generation call.
 * `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
+   You need to specify at least one board by passing `FREERTOS_<BOARD>_EXAMPLE=ON` to CMake.
+   Currently, the example can be built for the `H743ZI` and `F407VG` board targets. 
+   You can opt to use the FreeRTOS CMSIS implementation provided by the Cube repository by supplying
+   `USE_CMSIS_RTOS=ON` or `USE_CMSIS_RTOS_V2` to CMake.
 
 # Usage
 
 First of all you need to configure toolchain and library paths using CMake variables. There are
 generally three ways to do this:
 
-1. Pass the variables through command line during cmake run with passed to CMake with 
+1. Pass the variables through command line during cmake run with passed to CMake with
    `-D<VAR_NAME>=...`
 2. Set the variables inside your `CMakeLists.txt`
-3. Pass these variables to CMake by setting them as environmental variables. 
+3. Pass these variables to CMake by setting them as environmental variables.
 
 The most important set of variables which needs to be set can be found in the following section.
 
@@ -207,21 +212,78 @@ stm32-cmake contains additional CMake modules for finding and configuring variou
 `FREERTOS_PATH` can be either the path to the whole
 [FreeRTOS/FreeRTOS](https://github.com/FreeRTOS/FreeRTOS) github repo, or the path to
 FreeRTOS-Kernel (usually located in the subfolder `FreeRTOS` on a downloaded release).
-You can supply `FREERTOS_PATH` as an environmental variable as well.
+`FREERTOS_PATH` can be supplied as an environmental variable as well.
 
-Typical usage:
+It is possible to either use the FreeRTOS kernel provided in the Cube repositories, or a separate
+FreeRTOS kernel. The Cube repository also provides the CMSIS RTOS and CMSIS RTOS V2 implementations.
+If the CMSIS implementations is used, it is recommended to also use the FreeRTOS sources
+provided in the Cube repository because the CMSIS port might be incompatible to newer kernel
+versions. The FreeRTOS port to use is specified as a `FreeRTOS` component. A list of available
+ports can be found below. If the FreeRTOS sources provided in the Cube repository are used, the
+device family also has to be specified as a component for the `FreeRTOS` package.
+
+CMSIS RTOS can be used by specifying a `CMSIS` target and by finding the CMSIS `RTOS` package.
+The following section will show a few example configurations for the H7 and F4 family.
+You can also find example code for the `H743ZI` and `F407VG` devices in the `examples`
+folder.
+
+Typical usage for a H7 device when using the M7 core, using an external kernel without CMSIS
+support. The FreeRTOS namespace is set to `FreeRTOS` and the `ARM_CM7` port is used:
+
+```cmake
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 REQUIRED)
+find_package(FreeRTOS ARM_CM7 REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM7
+)
+```
+
+Typical usage for a F4 device, using an external kernel without CMSIS support.
+The FreeRTOS namespace is set to `FreeRTOS` and the `ARM_CM4F` port is used:
 
 ```cmake
 find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
-target_link_libraries(... FreeRTOS::ARM_CM4F)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM4F
+)
 ```
 
-The following FreeRTOS ports are supported: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`.
+Another typical usage using the FreeRTOS provided in the Cube repository and the CMSIS support.
+The FreeRTOS namespace is set to `FreeRTOS::STM32::<FAMILY>`, the `ARM_CM7` port is used and
+the device family is specified as a `FreeRTOS` component with `STM32H7`:
 
-Other FreeRTOS libraries:
+```cmake
+find_package(CMSIS COMPONENTS STM32H743ZI STM32H7_M7 RTOS REQUIRED)
+find_package(FreeRTOS COMPONENTS ARM_CM7 STM32H7 REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::STM32::H7::M7::ARM_CM7
+    CMSIS::STM32::H7::M7::RTOS
+)
+```
 
-* `FreeRTOS::Coroutine` - co-routines (`croutines.c`)
-* `FreeRTOS::EventGroups` - event groups (`event_groups.c`)
-* `FreeRTOS::StreamBuffer` - stream buffer (`stream_buffer.c`)
-* `FreeRTOS::Timers` - timers (`timers.c`)
-* `FreeRTOS::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
+The following CMSIS targets are available in general:
+
+* `CMSIS::STM32::<Family>::RTOS`
+* `CMSIS::STM32::<Family>::RTOS_V2`
+
+The following additional FreeRTOS targets are available in general to use the FreeRTOS provided
+in the Cube repository
+
+* `FreeRTOS::STM32::<Family>`
+
+For the multi-core architectures, both family and core need to be specified like shown in the
+example above.
+
+The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`,
+`ARM_CM3_MPU`, `ARM_CM4_MPU`, `ARM_CM7_MPU`.
+
+Other FreeRTOS libraries, with `FREERTOS_NAMESPACE` being set as specified in the examples above:
+
+* `${FREERTOS_NAMESPACE}::Coroutine` - co-routines (`croutines.c`)
+* `${FREERTOS_NAMESPACE}::EventGroups` - event groups (`event_groups.c`)
+* `${FREERTOS_NAMESPACE}::StreamBuffer` - stream buffer (`stream_buffer.c`)
+* `${FREERTOS_NAMESPACE}::Timers` - timers (`timers.c`)
+* `${FREERTOS_NAMESPACE}::Heap::<N>` - heap implementation (`heap_<N>.c`), `<N>`: [1-5]
