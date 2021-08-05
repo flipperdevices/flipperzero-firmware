@@ -30,6 +30,7 @@ int32_t gui_test(void* p);
 int32_t keypad_test(void* p);
 int32_t scene_app(void* p);
 int32_t passport(void* p);
+int32_t food_minigame(void* p);
 int32_t app_accessor(void* p);
 int32_t app_archive(void* p);
 int32_t notification_app(void* p);
@@ -317,7 +318,7 @@ const FlipperApplication FLIPPER_SCENE =
 
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
     {.app = passport, .name = "Passport", .stack_size = 1024, .icon = &A_Games_14},
-    {.app = music_player, .name = "Music player", .stack_size = 1024, .icon = &A_Plugins_14},
+    {.app = food_minigame, .name = "Food minigame", .stack_size = 1024, .icon = &A_Games_14},
 };
 
 const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);
