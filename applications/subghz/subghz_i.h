@@ -2,6 +2,7 @@
 
 #include "subghz.h"
 #include "views/subghz_capture.h"
+#include "views/subghz_receiver.h"
 #include "views/subghz_static.h"
 
 #include "views/subghz_test_carrier.h"
@@ -14,8 +15,14 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/text_input.h>
 
 #include <subghz/scenes/subghz_scene.h>
+
+#include <lib/subghz/subghz_worker.h>
+#include <lib/subghz/protocols/subghz_protocol.h>
+
+#define SUBGHZ_TEXT_STORE_SIZE 128
 
 extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_frequencies_count;
@@ -24,14 +31,21 @@ extern const uint32_t subghz_frequencies_433_92;
 struct SubGhz {
     Gui* gui;
 
+    SubGhzWorker* worker;
+    SubGhzProtocol* protocol;
+    SubGhzProtocolCommon* protocol_result;
+
     SceneManager* scene_manager;
 
     ViewDispatcher* view_dispatcher;
 
     Submenu* submenu;
     DialogEx* dialog_ex;
+    TextInput* text_input;
+    char text_store[SUBGHZ_TEXT_STORE_SIZE + 1];
 
     SubghzCapture* subghz_capture;
+    SubghzReceiver* subghz_receiver;
     SubghzStatic* subghz_static;
 
     SubghzTestCarrier* subghz_test_carrier;
@@ -45,8 +59,17 @@ typedef enum {
     
     SubGhzViewCapture,
     SubGhzViewDialogEx,
+    SubGhzViewReceiver,
+    SubGhzViewTextInput,
     SubGhzViewStatic,
 
     SubGhzViewTestCarrier,
     SubGhzViewTestPacket,
 } SubGhzView;
+
+void subghz_begin(ApiHalSubGhzPreset preset);
+void subghz_rx(uint32_t frequency);
+void subghz_tx(uint32_t frequency);
+void subghz_idle(void);
+void subghz_end(void);
+void subghz_text_callback(string_t text, void* context);

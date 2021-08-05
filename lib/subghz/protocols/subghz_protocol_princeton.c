@@ -169,9 +169,10 @@ void subghz_decoder_princeton_parse(SubGhzDecoderPrinceton* instance, bool level
                     instance->common.code_last_found = instance->common.code_found;
                     instance->common.serial = instance->common.code_found >> 4;
                     instance->common.btn = (uint8_t)instance->common.code_found & 0x00000F;
+                    instance->common.result = SubGhzDecoderResultPricenton;
 
-                   //subghz_decoder_princeton_save_data(instance, "test1"); //test save
-                   //subghz_decoder_princeton_load_data(instance, "test1"); //test load
+                    //subghz_decoder_princeton_save_data(instance, "test1"); //test save
+                    //subghz_decoder_princeton_load_data(instance, "test1"); //test load
 
                     if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
 

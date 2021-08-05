@@ -74,10 +74,22 @@ SubGhz* subghz_alloc() {
         SubGhzViewCapture,
         subghz_capture_get_view(subghz->subghz_capture));
 
+    // Receiver
+    subghz->subghz_receiver = subghz_receiver_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher,
+        SubGhzViewReceiver,
+        subghz_receiver_get_view(subghz->subghz_receiver));
+
      // Dialog
     subghz->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
-        subghz->view_dispatcher, SubGhzViewDialogEx, dialog_ex_get_view(subghz->dialog_ex));    
+        subghz->view_dispatcher, SubGhzViewDialogEx, dialog_ex_get_view(subghz->dialog_ex));
+
+    // Text Input
+    subghz->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher, SubGhzViewTextInput, text_input_get_view(subghz->text_input));
 
     // Carrier Test Module
     subghz->subghz_test_carrier = subghz_test_carrier_alloc();
@@ -98,6 +110,20 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewStatic, subghz_static_get_view(subghz->subghz_static));
 
+    //init Worker & Protocol
+    subghz->worker = subghz_worker_alloc();
+    subghz->protocol = subghz_protocol_alloc();
+    subghz_worker_set_overrun_callback(
+        subghz->worker, (SubGhzWorkerOverrunCallback)subghz_protocol_reset);
+    subghz_worker_set_pair_callback(
+        subghz->worker, (SubGhzWorkerPairCallback)subghz_protocol_parse);
+    subghz_worker_set_context(subghz->worker, subghz->protocol);
+
+    subghz_protocol_load_keeloq_file(subghz->protocol, "/ext/assets/subghz/keeloq_mfcodes");
+    subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/assets/subghz/nice_floor_s_rx");
+
+    //subghz_protocol_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
+    
     return subghz;
 }
 
@@ -120,6 +146,14 @@ void subghz_free(SubGhz* subghz) {
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewCapture);
     subghz_capture_free(subghz->subghz_capture);
 
+    // Receiver
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewReceiver);
+    subghz_receiver_free(subghz->subghz_receiver);
+
+    // TextInput
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTextInput);
+    text_input_free(subghz->text_input);
+
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);
     submenu_free(subghz->submenu);
@@ -137,6 +171,11 @@ void subghz_free(SubGhz* subghz) {
     // GUI
     furi_record_close("gui");
     subghz->gui = NULL;
+
+    //Worker & Protocol
+    subghz_protocol_free(subghz->protocol);
+    subghz_worker_free(subghz->worker);
+
 
     // The rest
     free(subghz);

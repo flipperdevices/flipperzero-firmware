@@ -22,6 +22,20 @@ typedef void (*SubGhzProtocolCommonCallback)(SubGhzProtocolCommon* parser, void*
 
 typedef void (*SubGhzProtocolCommonToStr)(SubGhzProtocolCommon* instance, string_t output);
 
+/* SubGhz Protocol result */
+typedef enum {
+    SubGhzDecoderResultCame,
+    SubGhzDecoderResultFaacSLH,
+    SubGhzDecoderResultGateTX,
+    SubGhzDecoderResultIdo,
+    SubGhzDecoderResultKeelog,
+    SubGhzDecoderResultNeroSketch,
+    SubGhzDecoderResultNiceFlo,
+    SubGhzDecoderResultNiceFlor_S,
+    SubGhzDecoderResultPricenton,
+    SubGhzDecoderResultStarLine,
+} SubGhzDecoderResult;
+
 struct SubGhzProtocolCommon {
     const char* name;
     uint16_t    te_long;
@@ -37,7 +51,8 @@ struct SubGhzProtocolCommon {
     uint16_t    cnt;
     uint32_t    serial;
     uint8_t     btn;
-
+    SubGhzDecoderResult result;
+    
     /* Standard Callback for on rx complete event */
     SubGhzProtocolCommonCallback callback;
     void* context;
