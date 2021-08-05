@@ -25,7 +25,7 @@ void api_hal_interrupt_set_timer_isr(TIM_TypeDef* timer, ApiHalInterruptISR isr)
             furi_assert(api_hal_tim_tim2_isr != NULL);
         }
         api_hal_tim_tim2_isr = isr;
-    } if (timer == TIM1) {
+    } else if (timer == TIM1) {
         if (isr) {
             furi_assert(api_hal_tim_tim1_isr == NULL);
         } else {
