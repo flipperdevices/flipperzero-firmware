@@ -30,9 +30,9 @@ const Item Console = {
     .draw = console_redraw,
     .callback = console_callback};
 
-const Item* Home[ItemsEnumTotal] = {[ItemsFood] = &Food, [ItemsConsole] = &Console};
+const Item* Home[] = {&Food, &Console};
 
-const Item** Scenes[1] = {*&Home};
+const Item** Scenes[] = {Home};
 
 const Item** get_scene(SceneState* state) {
     return Scenes[state->scene_id];
