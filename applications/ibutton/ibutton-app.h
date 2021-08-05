@@ -25,9 +25,6 @@
 
 #include "helpers/key-worker.h"
 
-#include <sd-card-api.h>
-#include <filesystem-api.h>
-
 #include "one_wire_master.h"
 #include "maxim_crc.h"
 #include "ibutton-key.h"
@@ -93,8 +90,6 @@ public:
     char* get_file_name();
     uint8_t get_file_name_size();
 
-    void generate_random_name(char* name, uint8_t max_name_size);
-
     bool save_key(const char* key_name);
     bool load_key();
     bool load_key(const char* key_name);
@@ -142,4 +137,5 @@ private:
     static const char* app_extension;
 
     bool load_key_data(string_t key_path);
+    void make_app_folder();
 };

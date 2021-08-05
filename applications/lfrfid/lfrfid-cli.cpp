@@ -2,7 +2,7 @@
 #include <api-hal.h>
 #include <stdarg.h>
 #include <cli/cli.h>
-#include <args.h>
+#include <lib/toolbox/args.h>
 
 #include "helpers/rfid-reader.h"
 #include "helpers/rfid-timer-emulator.h"
@@ -46,7 +46,7 @@ bool lfrfid_cli_get_key_type(string_t data, LfrfidKeyType* type) {
 
 void lfrfid_cli_read(Cli* cli) {
     RfidReader reader;
-    reader.start(RfidReader::Type::Normal);
+    reader.start();
 
     static const uint8_t data_size = LFRFID_KEY_SIZE;
     uint8_t data[data_size] = {0};

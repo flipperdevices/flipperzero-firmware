@@ -7,10 +7,10 @@ bool nfc_custom_event_callback(void* context, uint32_t event) {
     return scene_manager_handle_custom_event(nfc->scene_manager, event);
 }
 
-bool nfc_navigation_event_callback(void* context) {
+bool nfc_back_event_callback(void* context) {
     furi_assert(context);
     Nfc* nfc = (Nfc*)context;
-    return scene_manager_handle_navigation_event(nfc->scene_manager);
+    return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
 void nfc_tick_event_callback(void* context) {
@@ -28,8 +28,7 @@ Nfc* nfc_alloc() {
     view_dispatcher_enable_queue(nfc->view_dispatcher);
     view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        nfc->view_dispatcher, nfc_navigation_event_callback);
+    view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
     view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 100);
 
     // Open GUI record
@@ -69,9 +68,8 @@ Nfc* nfc_alloc() {
     string_init(nfc->text_box_store);
 
     // Custom Widget
-    nfc->widget = gui_widget_alloc();
-    view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewWidget, gui_widget_get_view(nfc->widget));
+    nfc->widget = widget_alloc();
+    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewWidget, widget_get_view(nfc->widget));
 
     // Bank Card
     nfc->bank_card = bank_card_alloc();
@@ -111,7 +109,7 @@ void nfc_free(Nfc* nfc) {
 
     // Custom Widget
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
-    gui_widget_free(nfc->widget);
+    widget_free(nfc->widget);
 
     // Bank Card
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewBankCard);

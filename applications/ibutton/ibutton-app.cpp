@@ -3,15 +3,17 @@
 #include <callback-connector.h>
 #include <m-string.h>
 #include <file-worker-cpp.h>
-#include <path.h>
+#include <lib/toolbox/path.h>
 
-const char* iButtonApp::app_folder = "ibutton";
+const char* iButtonApp::app_folder = "/any/ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
 
 void iButtonApp::run(void* args) {
     iButtonEvent event;
     bool consumed;
     bool exit = false;
+
+    make_app_folder();
 
     if(args && load_key((const char*)args)) {
         current_scene = Scene::SceneEmulate;
@@ -38,9 +40,6 @@ iButtonApp::iButtonApp()
     : notification{"notification"} {
     api_hal_power_insomnia_enter();
     key_worker = new KeyWorker(&ibutton_gpio);
-
-    // we need random
-    srand(DWT->CYCCNT);
 }
 
 iButtonApp::~iButtonApp() {
@@ -184,48 +183,14 @@ uint8_t iButtonApp::get_text_store_size() {
     return text_store_size;
 }
 
-void iButtonApp::generate_random_name(char* name, uint8_t max_name_size) {
-    const uint8_t prefix_size = 9;
-    const char* prefix[prefix_size] = {
-        "ancient",
-        "hollow",
-        "strange",
-        "disappeared",
-        "unknown",
-        "unthinkable",
-        "unnamable",
-        "nameless",
-        "my",
-    };
-
-    const uint8_t suffix_size = 8;
-    const char* suffix[suffix_size] = {
-        "door",
-        "entrance",
-        "doorway",
-        "entry",
-        "portal",
-        "entree",
-        "opening",
-        "crack",
-    };
-
-    sniprintf(
-        name, max_name_size, "%s_%s", prefix[rand() % prefix_size], suffix[rand() % suffix_size]);
-    // to upper
-    name[0] = name[0] - 0x20;
-}
-
 // file managment
 bool iButtonApp::save_key(const char* key_name) {
+    // Create ibutton directory if necessary
+    make_app_folder();
+
     FileWorkerCpp file_worker;
     string_t key_file_name;
     bool result = false;
-
-    // Create ibutton directory if necessary
-    if(!file_worker.mkdir(app_folder)) {
-        return false;
-    };
 
     // First remove key if it was saved
     string_init_printf(key_file_name, "%s/%s%s", app_folder, get_key()->get_name(), app_extension);
@@ -370,4 +335,9 @@ bool iButtonApp::delete_key() {
     string_clear(file_name);
 
     return result;
+}
+
+void iButtonApp::make_app_folder() {
+    FileWorkerCpp file_worker;
+    file_worker.mkdir(app_folder);
 }

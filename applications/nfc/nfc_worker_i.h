@@ -26,7 +26,6 @@ struct NfcWorker {
     void* context;
 
     NfcWorkerState state;
-    ReturnCode error;
 };
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state);
@@ -37,7 +36,7 @@ void nfc_worker_read_emv_app(NfcWorker* nfc_worker);
 
 void nfc_worker_read_emv(NfcWorker* nfc_worker);
 
-void nfc_worker_emulate_emv(NfcWorker* nfc_worker);
+void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
 
 void nfc_worker_detect(NfcWorker* nfc_worker);
 
