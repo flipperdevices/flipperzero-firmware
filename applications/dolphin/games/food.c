@@ -8,6 +8,7 @@
 #define MAX_TRIES 3
 #define DISHES_TOTAL 3
 #define LID_POS_MAX 20
+#define TRY_TIMEOUT 40
 
 typedef enum {
     EventTypeTick,
@@ -41,6 +42,7 @@ typedef struct {
     GameEventType current_event;
     uint8_t cursor_pos;
     uint8_t lid_pos;
+    uint8_t timeout;
     uint8_t try;
     bool selected;
     LootIdEnum loot_list[DISHES_TOTAL];
@@ -93,6 +95,7 @@ static void draw_dish(Canvas* canvas, GameState* state, uint8_t x, uint8_t y, ui
     }
 
     if(opened) {
+        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
         state->lid_pos = CLAMP(state->lid_pos + 1, LID_POS_MAX, 0);
     }
 
@@ -158,7 +161,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 30, 30, "Dolphin_happy.png");
         break;
     case LooseEvent:
-        canvas_draw_str(canvas, 50, 30, "Try again!");
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter,  "Try again!");
         break;
 
     default:
@@ -181,7 +184,8 @@ static void gamestate_update(GameState* state) {
         }
         break;
     case OpenLootEvent:
-        if(state->lid_pos == LID_POS_MAX) {
+        if(state->timeout == TRY_TIMEOUT) {
+            state->timeout = 0;
             state->current_event = gamestate_selected_is_food(state) ? WinEvent : LooseEvent;
         }
         break;
