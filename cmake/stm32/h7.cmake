@@ -25,11 +25,6 @@ set(STM32_H7_CCRAM_SIZES
       0K   0K   0K   0K   0K   0K
 )
 
-set(STM32_H7_NO_FLASH_SPLIT
-      H723xx H725xx H730xx H730xxQ H733xx H735xx
-      H750xx H7B0xx H7B0xxQ
-)
-
 set(STM32_H7_DUAL_CORE
       H745xx H755xx H747xx H757xx
 )
@@ -59,10 +54,10 @@ target_compile_definitions(STM32::H7::M4 INTERFACE
 )
 
 function(stm32h7_get_memory_info DEVICE TYPE CORE RAM FLASH_ORIGIN RAM_ORIGIN TWO_FLASH_BANKS)
-    if(${TYPE} IN_LIST STM32_H7_NO_FLASH_SPLIT)
-        set(${TWO_FLASH_BANKS} FALSE PARENT_SCOPE)  
+    if(${TYPE} IN_LIST STM32_H7_DUAL_CORE)
+        set(${TWO_FLASH_BANKS} TRUE PARENT_SCOPE)  
     else()
-        set(${TWO_FLASH_BANKS} TRUE PARENT_SCOPE)
+        set(${TWO_FLASH_BANKS} FALSE PARENT_SCOPE)
     endif()
     if(NOT CORE)
         set(CORE "M7")

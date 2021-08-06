@@ -1,4 +1,6 @@
+# For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
 set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7 ARM_CM4_MPU ARM_CM3_MPU ARM_CM7_MPU)
+
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
 endif()
@@ -27,10 +29,20 @@ if(STM32H7 IN_LIST FreeRTOS_FIND_COMPONENTS)
     list(APPEND FreeRTOS_FIND_COMPONENTS STM32H7_M7 STM32H7_M4)
 endif()
 
+if(STM32WB IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32WB)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32WB_M4)
+endif()
+
+if(STM32WL IN_LIST BSP_FIND_COMPONENTS)
+    list(REMOVE_ITEM FreeRTOS_FIND_COMPONENTS STM32WL)
+    list(APPEND FreeRTOS_FIND_COMPONENTS STM32WL_M4 STM32WL_M0PLUS)
+endif()
+
 # This section fills the family and ports components list
 foreach(COMP ${FreeRTOS_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP)
-    string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" FAMILY_COMP ${COMP})
+    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" FAMILY_COMP ${COMP})
     # Valid family component, so add it (e.g. STM32H7)
     if(CMAKE_MATCH_1)
         list(APPEND FreeRTOS_FIND_COMPONENTS_FAMILIES ${FAMILY_COMP})
@@ -164,7 +176,7 @@ else()
         string(TOLOWER ${COMP} COMP_L)
         string(TOUPPER ${COMP} COMP)
         
-        string(REGEX MATCH "^STM32([A-Z][0-9])([0-9A-Z][0-9][A-Z][0-9A-Z])?_?(M[47])?.*$" COMP ${COMP})
+        string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP ${COMP})
         
         if((NOT CMAKE_MATCH_1) AND (NOT CMAKE_MATCH_2))
             message(FATAL_ERROR "Unknown FreeRTOS component: ${COMP}")

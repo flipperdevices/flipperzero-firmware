@@ -16,7 +16,19 @@ _eccmram = .;\n\
 } >CCMRAM AT> FLASH\n\
         ")
 endif()
-    
+
+if((NOT RAM_SHARE_SIZE) OR (RAM_SHARE_SIZE STREQUAL "0K"))
+    set(RAM_SHARE_DEFINITION "")
+    set(RAM_SHARE_SECTION "")
+else()
+    set(RAM_SHARE_DEFINITION "    RAM_SHARED (rw) : ORIGIN = ${RAM_SHARE_ORIGIN}, LENGTH = ${RAM_SHARE_SIZE}\n")
+    set(RAM_SHARE_SECTION "
+MAPPING_TABLE (NOLOAD) : { *(MAPPING_TABLE) } >RAM_SHARED\n\
+MB_MEM1 (NOLOAD)       : { *(MB_MEM1) } >RAM_SHARED\n\
+MB_MEM2 (NOLOAD)       : { _sMB_MEM2 = . ; *(MB_MEM2) ; _eMB_MEM2 = . ; } >RAM_SHARED\n\
+    ")
+endif()
+
 set(SCRIPT_TEXT 
 "ENTRY(Reset_Handler)\n\
 \n\
@@ -29,6 +41,7 @@ MEMORY\n\
     FLASH (rx)      : ORIGIN = ${FLASH_ORIGIN}, LENGTH = ${FLASH_SIZE}\n\
     RAM (xrw)      : ORIGIN = ${RAM_ORIGIN}, LENGTH = ${RAM_SIZE}\n\
 ${CCRAM_DEFINITION}\n\
+${RAM_SHARE_DEFINITION}\n\
 }\n\
 \n\
 SECTIONS\n\
@@ -137,6 +150,7 @@ ${CCRAM_SECTION}\n\
   }\n\
 \n\
   .ARM.attributes 0 : { *(.ARM.attributes) }\n\
+${RAM_SHARE_SECTION}\n\
 }"
 )
 file(WRITE "${LINKER_SCRIPT}" "${SCRIPT_TEXT}")

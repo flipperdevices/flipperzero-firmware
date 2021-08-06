@@ -44,10 +44,10 @@ endfunction()
 
 include(FetchContent)
 
-set(STM32_FETCH_FAMILIES       F0      F1      F2      F3      F4       F7      G0      G4      H7       L0      L1      L4      L5)
-set(STM32_FETCH_CUBE_VERSIONS  v1.11.2 v1.8.4  v1.9.3  v1.11.2 v1.26.1  v1.16.1 v1.4.1  v1.4.0  v1.9.0   v1.12.0 v1.10.3 v1.17.0 v1.4.0)
-set(STM32_FETCH_CMSIS_VERSIONS v2.3.5  v4.3.3  v2.2.5  v2.3.5  v2.6.6   v1.2.6  v1.4.0  v1.2.1  v1.10.0  v1.9.1  v2.3.2  v1.7.1  v1.0.4)
-set(STM32_FETCH_HAL_VERSIONS   v1.7.5  v1.1.8  v1.2.7  v1.5.5  v1.7.12  v1.2.9  v1.4.1  v1.2.1  v1.10.0  v1.10.4 v1.4.4  v1.13.0 v1.0.4)
+set(STM32_FETCH_FAMILIES       F0      F1      F2      F3      F4       F7      G0      G4      H7       L0      L1      L4      L5     WB      WL    )
+set(STM32_FETCH_CUBE_VERSIONS  v1.11.2 v1.8.4  v1.9.3  v1.11.2 v1.26.1  v1.16.1 v1.4.1  v1.4.0  v1.9.0   v1.12.0 v1.10.3 v1.17.0 v1.4.0 v1.12.0 v1.1.0)
+set(STM32_FETCH_CMSIS_VERSIONS v2.3.5  v4.3.3  v2.2.5  v2.3.5  v2.6.6   v1.2.6  v1.4.0  v1.2.1  v1.10.0  v1.9.1  v2.3.2  v1.7.1  v1.0.4 v1.9.0  v1.1.0)
+set(STM32_FETCH_HAL_VERSIONS   v1.7.5  v1.1.8  v1.2.7  v1.5.5  v1.7.12  v1.2.9  v1.4.1  v1.2.1  v1.10.0  v1.10.4 v1.4.4  v1.13.0 v1.0.4 v1.9.0  v1.1.0)
 
 FetchContent_Declare(
     STM32-CMSIS
