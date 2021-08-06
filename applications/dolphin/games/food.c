@@ -1,8 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <api-hal-version.h>
-#include "dolphin/dolphin.h"
-#include "dolphin/dolphin_state.h"
 #include "math.h"
 
 #define MAX_TRIES 3
@@ -28,6 +26,7 @@ typedef enum {
     WinEvent,
     LooseEvent,
     FinishedEvent,
+    ExitGameEvent,
     GameEventTotal,
 } GameEventType;
 
@@ -143,7 +142,7 @@ static void reset_loot_array(GameState* state) {
     }
 }
 
-static bool gamestate_selected_is_food(GameState* state) {
+static bool selected_is_food(GameState* state) {
     return state->loot_list[state->cursor_pos] == LootFish;
 }
 
@@ -151,19 +150,15 @@ static void render_callback(Canvas* canvas, void* ctx) {
     GameState* state = (GameState*)acquire_mutex((ValueMutex*)ctx, 25);
     canvas_clear(canvas);
 
-    // char buff[16];
-
-    // snprintf(buff, 16, "%d %d %d", 3 - state->try, state->current_event, state->lid_pos);
-    // canvas_draw_str(canvas, 10, 10, buff);
-
     switch(state->current_event) {
     case WinEvent:
         canvas_draw_str(canvas, 30, 30, "Dolphin_happy.png");
         break;
     case LooseEvent:
-        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter,  "Try again!");
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, "Try again!");
         break;
-
+    case ExitGameEvent:
+        break;
     default:
         draw_dishes_scene(canvas, state);
         break;
@@ -172,38 +167,64 @@ static void render_callback(Canvas* canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, state);
 }
 
-static bool gamestate_tries_exceed(GameState* state) {
-    return state->current_event == PlayerChoiceEvent && state->try == MAX_TRIES;
+static bool tries_exceed(GameState* state) {
+    return state->try == MAX_TRIES;
+}
+
+static bool timeout_exceed(GameState* state) {
+    return state->timeout == TRY_TIMEOUT;
 }
 
 static void gamestate_update(GameState* state) {
     switch(state->current_event) {
     case PlayerChoiceEvent:
-        if(state->selected && state->try < MAX_TRIES) {
+        if(state->selected && !tries_exceed(state)) {
             state->current_event = OpenLootEvent;
         }
         break;
     case OpenLootEvent:
-        if(state->timeout == TRY_TIMEOUT) {
+        if(timeout_exceed(state)) {
             state->timeout = 0;
-            state->current_event = gamestate_selected_is_food(state) ? WinEvent : LooseEvent;
+            state->current_event = selected_is_food(state) ? WinEvent : LooseEvent;
         }
         break;
 
-    case WinEvent:
-        break;
-    case LooseEvent:
-        break;
     case FinishedEvent:
         reset_lid_pos(state);
         reset_loot_array(state);
 
         state->try++;
-        state->current_event = PlayerChoiceEvent;
+        state->current_event = tries_exceed(state) ? ExitGameEvent : PlayerChoiceEvent;
         break;
 
     default:
         break;
+    }
+}
+
+static void food_minigame_controls(GameState* state, AppEvent* event) {
+    furi_assert(state);
+    furi_assert(event);
+
+    if(event->value.input.key == InputKeyRight) {
+        if(state->current_event == PlayerChoiceEvent) {
+            state->cursor_pos = CLAMP(state->cursor_pos + 1, DISHES_TOTAL - 1, 0);
+        }
+    } else if(event->value.input.key == InputKeyLeft) {
+        if(state->current_event == PlayerChoiceEvent) {
+            state->cursor_pos = CLAMP(state->cursor_pos - 1, DISHES_TOTAL - 1, 0);
+        }
+    } else if(event->value.input.key == InputKeyOk) {
+        switch(state->current_event) {
+        case PlayerChoiceEvent:
+            state->selected = true;
+            break;
+        case OpenLootEvent:
+            break;
+        default:
+            state->current_event = FinishedEvent;
+            break;
+        }
     }
 }
 
@@ -234,53 +255,26 @@ int32_t food_minigame(void* p) {
         osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
         if(event_status == osOK) {
             if(event.type == EventTypeKey && event.value.input.type == InputTypeShort) {
-                if(event.value.input.key == InputKeyRight) {
-                    if(state->current_event == PlayerChoiceEvent) {
-                        state->cursor_pos = CLAMP(state->cursor_pos + 1, 2, 0);
-                    }
-                } else if(event.value.input.key == InputKeyLeft) {
-                    if(state->current_event == PlayerChoiceEvent) {
-                        state->cursor_pos = CLAMP(state->cursor_pos - 1, 2, 0);
-                    }
-                } else if(event.value.input.key == InputKeyOk) {
-                    switch(state->current_event) {
-                    case PlayerChoiceEvent:
-                        state->selected = true;
-                        break;
-                    case WinEvent:
-                        state->current_event = FinishedEvent;
-                        break;
-                    case LooseEvent:
-                        state->current_event = FinishedEvent;
-                        break;
-                    default:
-                        state->current_event = FinishedEvent;
-                        break;
-                    }
-                } else if(event.value.input.key == InputKeyBack) {
-                    break;
-                }
+                food_minigame_controls(state, &event);
 
-                if(gamestate_tries_exceed(state)) {
+                if(event.value.input.key == InputKeyBack) {
                     break;
                 }
             }
         }
 
+        if(state->current_event == ExitGameEvent) {
+            break;
+        }
         gamestate_update(state);
         view_port_update(view_port);
     }
 
     gui_remove_view_port(gui, view_port);
-
     view_port_free(view_port);
-
     furi_record_close("gui");
-
     delete_mutex(&state_mutex);
-
     osMessageQueueDelete(event_queue);
-
     free(state);
 
     return 0;
