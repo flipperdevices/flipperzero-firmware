@@ -15,12 +15,14 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
 
 #include <subghz/scenes/subghz_scene.h>
 
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/protocols/subghz_protocol.h>
+#include <lib/subghz/protocols/subghz_protocol_common.h>
 
 #define SUBGHZ_TEXT_STORE_SIZE 128
 
@@ -41,6 +43,7 @@ struct SubGhz {
 
     Submenu* submenu;
     DialogEx* dialog_ex;
+    Popup* popup;
     TextInput* text_input;
     char text_store[SUBGHZ_TEXT_STORE_SIZE + 1];
 
@@ -60,6 +63,7 @@ typedef enum {
     SubGhzViewCapture,
     SubGhzViewDialogEx,
     SubGhzViewReceiver,
+    SubGhzViewPopup,
     SubGhzViewTextInput,
     SubGhzViewStatic,
 

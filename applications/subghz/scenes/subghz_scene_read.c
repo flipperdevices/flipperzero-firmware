@@ -10,7 +10,7 @@ void subghz_read_protocol_callback(SubGhzProtocolCommon* parser, void* context) 
 }
 void subghz_scene_read_callback(DialogExResult result, void* context) {
     SubGhz* subghz = context;
-    view_dispatcher_send_custom_event(subghz->view_dispatcher, result); //передаем в евент действия на экране
+    view_dispatcher_send_custom_event(subghz->view_dispatcher, result);
 }
 
 const void subghz_scene_read_on_enter(void* context) {
@@ -19,8 +19,8 @@ const void subghz_scene_read_on_enter(void* context) {
     // Setup view
     DialogEx* dialog_ex = subghz->dialog_ex;
 
-    dialog_ex_set_header(dialog_ex, "SubGhz 433.92", 36, 6, AlignLeft, AlignCenter); //рисуем заголовок
-    dialog_ex_set_icon(dialog_ex, 10, 12, &I_RFIDDolphinReceive_97x61); //присуем иконку
+    dialog_ex_set_header(dialog_ex, "SubGhz 433.92", 36, 6, AlignLeft, AlignCenter);
+    dialog_ex_set_icon(dialog_ex, 10, 12, &I_RFIDDolphinReceive_97x61);
 
     //Start CC1101 rx
     subghz_begin(ApiHalSubGhzPresetOokAsync);
@@ -29,21 +29,14 @@ const void subghz_scene_read_on_enter(void* context) {
     subghz_worker_start(subghz->worker);
     subghz_protocol_enable_dump(subghz->protocol, subghz_read_protocol_callback, subghz);
 
-    //subghz_protocol_load_keeloq_file(subghz->protocol, "/ext/assets/subghz/keeloq_mfcodes");
-    //subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/assets/subghz/nice_floor_s_rx");
-
-    //dialog_ex_set_context(dialog_ex, subghz); //регистрируем объект
-    //dialog_ex_set_result_callback(dialog_ex, subghz_scene_read_callback); //добавляем колбек
-    
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewDialogEx); //отрисовываем экран
-
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewDialogEx); 
 }
 
 const bool subghz_scene_read_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GUBGHZ_READ_CUSTOM_EVENT) {
-            scene_manager_next_scene(subghz->scene_manager, SubGhzViewReceiver); //добавить сохранение
+            scene_manager_next_scene(subghz->scene_manager, SubGhzViewReceiver);
             return true;
         }
     }

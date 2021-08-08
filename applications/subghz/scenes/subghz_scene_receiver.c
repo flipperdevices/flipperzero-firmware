@@ -13,12 +13,10 @@ const void subghz_scene_receiver_on_enter(void* context) {
     DialogEx* dialog_ex = subghz->dialog_ex;
     SubghzReceiver* subghz_receiver = subghz->subghz_receiver;
 
-
     subghz_receiver_set_callback(subghz_receiver, subghz_scene_receiver_callback,subghz); //добавляем колбек
 
     subghz_receiver_set_protocol( subghz_receiver, subghz->protocol_result);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
-    //view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
 }
 
 const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
@@ -33,10 +31,7 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
             return true;
         }
     }
-
     return false;
-
-
 }
 
 const void subghz_scene_receiver_on_exit(void* context) {

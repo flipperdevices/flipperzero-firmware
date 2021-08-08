@@ -43,12 +43,14 @@ void subghz_receiver_set_protocol(SubghzReceiver* subghz_receiver, SubGhzProtoco
 }
 
 void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
-    //char buffer[64];
+    
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+    elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
+
+    elements_button_left(canvas, "Back");
+    elements_button_right(canvas, "Save");
 }
 
 bool subghz_receiver_input(InputEvent* event, void* context) {
@@ -56,7 +58,6 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
     SubghzReceiver* subghz_receiver = context;
 
     if(event->key == InputKeyBack) {
-        //string_clear(model->text);
         return false;
     }else if(event->key == InputKeyRight){
         subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
@@ -67,21 +68,20 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
     }
 
 
-    with_view_model(
-        subghz_receiver->view, (SubghzReceiverModel * model) {
-            if(event->type == InputTypeShort) {
-                if(event->key == InputKeyLeft) {
-                    // НАЗАД
-                    return true;
-                } else if(event->key == InputKeyRight) {
-                    //СОХРАНЕНИЕ
-                    //view_dispatcher_switch_to_view(subghz_receiver ->view_dispatcher, SubGhzViewTextInput);
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        });
+    // with_view_model(
+    //     subghz_receiver->view, (SubghzReceiverModel * model) {
+    //         if(event->type == InputTypeShort) {
+    //             if(event->key == InputKeyLeft) {
+    //                 // НАЗАД
+    //                 return true;
+    //             } else if(event->key == InputKeyRight) {
+    //                 //СОХРАНЕНИЕ
+    //                 return true;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     });
 
     return true;
 }
