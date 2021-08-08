@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <input/input.h>
 #include <notification/notification-messages.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
@@ -78,10 +78,10 @@ bool subghz_static_input(InputEvent* event, void* context) {
             }
 
             if(reconfigure) {
-                api_hal_subghz_idle();
+                furi_hal_subghz_idle();
                 model->real_frequency =
-                    api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
-                api_hal_subghz_tx();
+                    furi_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
+                furi_hal_subghz_tx();
             }
 
             if(event->key == InputKeyOk) {
@@ -91,10 +91,10 @@ bool subghz_static_input(InputEvent* event, void* context) {
 
                     subghz_encoder_princeton_reset(
                         instance->encoder, subghz_static_keys[model->button], 20);
-                    api_hal_subghz_start_async_tx(
+                    furi_hal_subghz_start_async_tx(
                         subghz_encoder_princeton_yield, instance->encoder);
-                    while(!api_hal_subghz_is_async_tx_complete()) osDelay(33);
-                    api_hal_subghz_stop_async_tx();
+                    while(!furi_hal_subghz_is_async_tx_complete()) osDelay(33);
+                    furi_hal_subghz_stop_async_tx();
 
                     notification_message(notification, &sequence_reset_red);
                     furi_record_close("notification");
@@ -111,8 +111,8 @@ void subghz_static_enter(void* context) {
     furi_assert(context);
     SubghzStatic* instance = context;
 
-    api_hal_subghz_reset();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, false);
@@ -121,17 +121,17 @@ void subghz_static_enter(void* context) {
         instance->view, (SubghzStaticModel * model) {
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
-                api_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
+                furi_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
             model->button = 0;
             return true;
         });
 
-    api_hal_subghz_tx();
+    furi_hal_subghz_tx();
 }
 
 void subghz_static_exit(void* context) {
     furi_assert(context);
-    api_hal_subghz_sleep();
+    furi_hal_subghz_sleep();
 }
 
 SubghzStatic* subghz_static_alloc() {

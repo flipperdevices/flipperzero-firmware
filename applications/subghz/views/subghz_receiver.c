@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <notification/notification-messages.h>

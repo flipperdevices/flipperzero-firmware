@@ -9,7 +9,7 @@
 #include "views/subghz_test_packet.h"
 
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <gui/gui.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
@@ -69,7 +69,7 @@ typedef enum {
     SubGhzViewTestPacket,
 } SubGhzView;
 
-void subghz_begin(ApiHalSubGhzPreset preset);
+void subghz_begin(FuriHalSubGhzPreset preset);
 void subghz_rx(uint32_t frequency);
 void subghz_tx(uint32_t frequency);
 void subghz_idle(void);

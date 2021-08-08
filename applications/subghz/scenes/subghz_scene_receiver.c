@@ -9,7 +9,6 @@ void subghz_scene_receiver_callback(SubghzReceverEvent event, void* context) {
 
 const void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
-    DialogEx* dialog_ex = subghz->dialog_ex;
     SubghzReceiver* subghz_receiver = subghz->subghz_receiver;
 
     subghz_receiver_set_callback(

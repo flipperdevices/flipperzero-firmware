@@ -23,9 +23,9 @@ const void subghz_scene_read_on_enter(void* context) {
     dialog_ex_set_icon(dialog_ex, 10, 12, &I_RFIDDolphinReceive_97x61);
 
     //Start CC1101 rx
-    subghz_begin(ApiHalSubGhzPresetOokAsync);
+    subghz_begin(FuriHalSubGhzPresetOokAsync);
     subghz_rx(433920000);
-    api_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz->worker);
+    furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz->worker);
     subghz_worker_start(subghz->worker);
     subghz_protocol_enable_dump(subghz->protocol, subghz_read_protocol_callback, subghz);
 
@@ -48,7 +48,7 @@ const void subghz_scene_read_on_exit(void* context) {
 
     //Stop CC1101
     subghz_worker_stop(subghz->worker);
-    api_hal_subghz_stop_async_rx();
+    furi_hal_subghz_stop_async_rx();
     subghz_end();
 
     //удаляем ресурсы которые заюзали

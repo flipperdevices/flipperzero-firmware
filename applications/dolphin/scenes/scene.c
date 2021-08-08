@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include "scene.h"
 
 static SceneAppGui* scene_app_gui = NULL;
@@ -52,7 +52,7 @@ void scene_alloc() {
 
     // SceneAppGui
     scene_app_gui = furi_alloc(sizeof(SceneAppGui));
-    scene_app_gui->mqueue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+    scene_app_gui->mqueue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
     scene_app_gui->gui = furi_record_open("gui");
     scene_app_gui->view_port = view_port_alloc();
     scene_app_gui->timer =
@@ -62,10 +62,18 @@ void scene_alloc() {
     SceneState* scene_state = furi_alloc(sizeof(SceneState));
     scene_state->player.y = DOLPHIN_DEFAULT_Y;
     scene_state->player.x = DOLPHIN_CENTER;
-    scene_state->player_global.x = random() % WORLD_WIDTH / 4;
+
+    scene_state->player_global.x = 160;
+    scene_state->player_global.y = WORLD_HEIGHT;
+
+    scene_state->frame_group = DirRight;
+    scene_state->frame_type = DirRight;
+    scene_state->frame_pending = DirRight;
+    scene_state->last_group = DirRight;
+
     scene_state->screen.x = scene_state->player.x;
     scene_state->screen.y = scene_state->player.y;
-
+    // scene_state->debug = true;
     scene_state_mutex = furi_alloc(sizeof(ValueMutex));
     furi_check(init_mutex(scene_state_mutex, scene_state, sizeof(SceneState)));
 
@@ -73,7 +81,7 @@ void scene_alloc() {
     view_port_draw_callback_set(scene_app_gui->view_port, dolphin_scene_redraw, scene_state_mutex);
     view_port_input_callback_set(
         scene_app_gui->view_port, scene_engine_input_callback, scene_app_gui->mqueue);
-    gui_add_view_port(scene_app_gui->gui, scene_app_gui->view_port, GuiLayerMain);
+    gui_add_view_port(scene_app_gui->gui, scene_app_gui->view_port, GuiLayerFullscreen);
     view_port_enabled_set(scene_app_gui->view_port, true);
     printf("scene_alloc: complete\r\n");
 }
@@ -101,7 +109,7 @@ void scene_free() {
 }
 
 int32_t scene_app(void* p) {
-    api_hal_power_insomnia_enter();
+    furi_hal_power_insomnia_enter();
     scene_alloc();
 
     osTimerStart(scene_app_gui->timer, 40);
@@ -138,6 +146,6 @@ int32_t scene_app(void* p) {
     osDelay(15);
 
     scene_free();
-    api_hal_power_insomnia_exit();
+    furi_hal_power_insomnia_exit();
     return 0;
 }
