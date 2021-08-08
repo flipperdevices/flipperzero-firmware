@@ -173,6 +173,20 @@ set(HAL_LL_DRIVERS_L5
     rng rtc sdmmc spi tim ucpd usart usb utils
 )
 
+set(HAL_DRIVERS_U5
+    adc comp cordic cortex crc cryp dac dcache dcmi dma dma2d exti fdcan flash fmac gpio 
+    gtzc hash hcd i2c icache irda iwdg lptim mdf mmc nand nor opamp ospi otfdec pcd pka pssi pwr ramcfg rcc
+    rng rtc sai sd smartcard smbus spi sram tim tsc uart usart wwdg
+)
+set(HAL_EX_DRIVERS_U5
+    adc crc cryp dac dma flash hash i2c mmc opamp pcd pwr rcc
+    rng rtc sai sd smartcard smbus spi tim uart usart
+)
+set(HAL_LL_DRIVERS_U5
+    adc comp cordic crc crs dac dlyb dma dma2d exti fmac fmc gpio i2c icache lpgpio lptim lpuart opamp pka pwr rcc 
+    rng rtc sdmmc spi tim ucpd usart usb utils
+)
+
 set(HAL_DRIVERS_WB
     adc comp cortex crc cryp dma exti flash gpio hsem 
     i2c ipcc irda iwdg lcd lptim pcd pka pwr qspi rcc 
@@ -212,7 +226,7 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     string(TOLOWER ${COMP} COMP_L)
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
+    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
     if(CMAKE_MATCH_1)
         list(APPEND HAL_FIND_COMPONENTS_FAMILIES ${COMP})
         message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_FAMILIES")
@@ -269,7 +283,7 @@ message(STATUS "Search for HAL LL drivers: ${HAL_FIND_COMPONENTS_DRIVERS_LL}")
 foreach(COMP ${HAL_FIND_COMPONENTS_FAMILIES})
     string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})    
+    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})    
     if(CMAKE_MATCH_3)
         set(CORE ${CMAKE_MATCH_3})
         set(CORE_C "::${CORE}")

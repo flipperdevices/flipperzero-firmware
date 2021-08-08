@@ -3,11 +3,12 @@ set(STM32_SUPPORTED_FAMILIES_LONG_NAME
     STM32G0 STM32G4
     STM32H7_M4 STM32H7_M7
     STM32L0 STM32L1 STM32L4 STM32L5
+    STM32U5
     STM32WB_M4 STM32WL_M4 STM32WL_M0PLUS )
 
 foreach(FAMILY ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
     # append short names (F0, F1, H7_M4, ...) to STM32_SUPPORTED_FAMILIES_SHORT_NAME
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])_?(M0PLUS|M4|M7)?" FAMILY ${FAMILY})
+    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])_?(M0PLUS|M4|M7)?" FAMILY ${FAMILY})
     list(APPEND STM32_SUPPORTED_FAMILIES_SHORT_NAME ${CMAKE_MATCH_1})
 endforeach()
 list(REMOVE_DUPLICATES STM32_SUPPORTED_FAMILIES_SHORT_NAME)
@@ -101,7 +102,7 @@ function(stm32_get_chip_info CHIP)
         
     string(TOUPPER ${CHIP} CHIP)
         
-    string(REGEX MATCH "^STM32([FGHLW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
+    string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
     
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown chip ${CHIP}")
@@ -183,7 +184,7 @@ function(stm32_get_memory_info)
         stm32_get_chip_type(${INFO_FAMILY} ${INFO_DEVICE} INFO_TYPE)
     endif()
     
-    string(REGEX REPLACE "^[FGHLW][0-9BL][0-9A-Z][0-9M].([3468BCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
+    string(REGEX REPLACE "^[FGHLUW][0-9BL][0-9A-Z][0-9M].([3468BCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
     
     if(SIZE_CODE STREQUAL "3")
         set(FLASH "8K")
@@ -346,5 +347,6 @@ include(stm32/l0)
 include(stm32/l1)
 include(stm32/l4)
 include(stm32/l5)
+include(stm32/u5)
 include(stm32/wb)
 include(stm32/wl)
