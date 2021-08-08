@@ -29,7 +29,7 @@ const void subghz_scene_read_on_enter(void* context) {
     subghz_worker_start(subghz->worker);
     subghz_protocol_enable_dump(subghz->protocol, subghz_read_protocol_callback, subghz);
 
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewDialogEx); 
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewDialogEx);
 }
 
 const bool subghz_scene_read_on_event(void* context, SceneManagerEvent event) {

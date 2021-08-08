@@ -10,8 +10,6 @@
 
 #include <assets_icons.h>
 
-
-
 struct SubghzReceiver {
     View* view;
     SubghzReceiverCallback callback;
@@ -24,8 +22,10 @@ typedef struct {
     SubGhzProtocolCommon* protocol;
 } SubghzReceiverModel;
 
-
-void subghz_receiver_set_callback(SubghzReceiver* subghz_receiver, SubghzReceiverCallback callback, void* context){
+void subghz_receiver_set_callback(
+    SubghzReceiver* subghz_receiver,
+    SubghzReceiverCallback callback,
+    void* context) {
     furi_assert(subghz_receiver);
     furi_assert(callback);
     subghz_receiver->callback = callback;
@@ -33,17 +33,14 @@ void subghz_receiver_set_callback(SubghzReceiver* subghz_receiver, SubghzReceive
 }
 
 void subghz_receiver_set_protocol(SubghzReceiver* subghz_receiver, SubGhzProtocolCommon* protocol) {
-    
-    with_view_model(subghz_receiver->view, (SubghzReceiverModel * model) {
-        model->protocol = protocol;
-        return true;
-    });
-
-
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            model->protocol = protocol;
+            return true;
+        });
 }
 
 void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
-    
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -59,14 +56,13 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
 
     if(event->key == InputKeyBack) {
         return false;
-    }else if(event->key == InputKeyRight){
+    } else if(event->key == InputKeyRight) {
         subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
         return true;
-    }else if(event->key == InputKeyLeft){
+    } else if(event->key == InputKeyLeft) {
         subghz_receiver->callback(SubghzReceverEventBack, subghz_receiver->context);
         return true;
     }
-
 
     // with_view_model(
     //     subghz_receiver->view, (SubghzReceiverModel * model) {
@@ -101,11 +97,11 @@ void subghz_receiver_text_callback(string_t text, void* context) {
 void subghz_receiver_enter(void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
-        with_view_model(
-            subghz_receiver->view, (SubghzReceiverModel * model) {
-                model->protocol->to_string(model->protocol, model->text);
-                return true;
-            });
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            model->protocol->to_string(model->protocol, model->text);
+            return true;
+        });
 }
 
 void subghz_receiver_exit(void* context) {

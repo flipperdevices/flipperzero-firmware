@@ -53,13 +53,11 @@ struct SubGhz {
 
     SubghzTestCarrier* subghz_test_carrier;
     SubghzTestPacket* subghz_test_packet;
-
-
 };
 
 typedef enum {
     SubGhzViewMenu,
-    
+
     SubGhzViewCapture,
     SubGhzViewDialogEx,
     SubGhzViewReceiver,

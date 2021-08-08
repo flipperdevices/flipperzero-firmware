@@ -6,13 +6,16 @@
 typedef enum {
     SubghzReceverEventSave,
     SubghzReceverEventBack,
-}SubghzReceverEvent;
+} SubghzReceverEvent;
 
 typedef struct SubghzReceiver SubghzReceiver;
 
 typedef void (*SubghzReceiverCallback)(SubghzReceverEvent event, void* context);
 
-void subghz_receiver_set_callback(SubghzReceiver* subghz_receiver, SubghzReceiverCallback callback, void* context);
+void subghz_receiver_set_callback(
+    SubghzReceiver* subghz_receiver,
+    SubghzReceiverCallback callback,
+    void* context);
 
 SubghzReceiver* subghz_receiver_alloc();
 

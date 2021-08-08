@@ -81,14 +81,15 @@ SubGhz* subghz_alloc() {
         SubGhzViewReceiver,
         subghz_receiver_get_view(subghz->subghz_receiver));
 
-     // Dialog
+    // Dialog
     subghz->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewDialogEx, dialog_ex_get_view(subghz->dialog_ex));
 
     // Popup
     subghz->popup = popup_alloc();
-    view_dispatcher_add_view(subghz->view_dispatcher, SubGhzViewPopup, popup_get_view(subghz->popup));
+    view_dispatcher_add_view(
+        subghz->view_dispatcher, SubGhzViewPopup, popup_get_view(subghz->popup));
 
     // Text Input
     subghz->text_input = text_input_alloc();
@@ -127,7 +128,7 @@ SubGhz* subghz_alloc() {
     subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/assets/subghz/nice_floor_s_rx");
 
     //subghz_protocol_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
-    
+
     return subghz;
 }
 
@@ -183,7 +184,6 @@ void subghz_free(SubGhz* subghz) {
     //Worker & Protocol
     subghz_protocol_free(subghz->protocol);
     subghz_worker_free(subghz->worker);
-
 
     // The rest
     free(subghz);
