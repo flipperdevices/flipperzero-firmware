@@ -47,7 +47,9 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
 
     elements_button_left(canvas, "Back");
-    //elements_button(canvas, "Send");
+    elements_button_center(canvas, "Send");
+    elements_button_right(canvas, "Exit");
+
 }
 
 bool subghz_transmitter_input(InputEvent* event, void* context) {
@@ -55,11 +57,15 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     SubghzTransmitter* subghz_transmitter = context;
 
     if(event->key == InputKeyBack) {
+        //subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
         return false;
     } else if(event->key == InputKeyOk) {
         subghz_transmitter->callback(SubghzTransmitterEventSend, subghz_transmitter->context);
         return true;
     } else if(event->key == InputKeyLeft) {
+        subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
+        return true;
+    } else if(event->key == InputKeyRight) {
         subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
         return true;
     }

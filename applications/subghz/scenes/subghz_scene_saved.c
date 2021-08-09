@@ -28,9 +28,15 @@ bool subghz_scene_saved_file_select(SubGhz* subghz ) {
     if(res) {
         // Get key file path
         string_printf(protocol_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->text_store, SUBGHZ_APP_EXTENSION);
+    } else {
+        string_clear(temp_str);
+        string_clear(protocol_file_name);
+
+        file_worker_close(file_worker);
+        file_worker_free(file_worker);
+        return res;
     }
 
-    res = false;
     do {
          if(!file_worker_open(
                file_worker, string_get_cstr(protocol_file_name), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -45,18 +51,15 @@ bool subghz_scene_saved_file_select(SubGhz* subghz ) {
         subghz->protocol_result =
             subghz_protocol_get_by_name(subghz->protocol, string_get_cstr(temp_str));
         if(subghz->protocol_result == NULL) {
+            file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
         if(!subghz->protocol_result->to_load_protocol(file_worker, subghz->protocol_result)){
+            file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-
         res = true;
     } while(0);
-
-    if(!res){
-        file_worker_show_error(file_worker, "Cannot parse\nfile");
-    }
 
     string_clear(temp_str);
     string_clear(protocol_file_name);

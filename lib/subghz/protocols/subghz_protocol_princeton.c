@@ -289,13 +289,13 @@ bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDe
             break;
         }
         instance->common.code_last_found = (uint64_t)temp_key;
+        instance->common.serial = instance->common.code_last_found >> 4;
+        instance->common.btn = (uint8_t)instance->common.code_last_found & 0x00000F;
 
         loaded = true;
     } while(0);
 
     string_clear(temp_str);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
 
     return loaded;
 }

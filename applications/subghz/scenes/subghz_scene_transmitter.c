@@ -1,5 +1,30 @@
 #include "../subghz_i.h"
 #include "../views/subghz_transmitter.h"
+#include "lib/subghz/protocols/subghz_protocol_princeton.h"
+
+void subghz_scene_transmitter_rx(void* context){
+    SubGhz* subghz = context;
+    SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
+    
+    subghz_encoder_princeton_reset(encoder, subghz->protocol_result->code_last_found, 10);
+
+    subghz_begin(FuriHalSubGhzPresetOokAsync);
+    subghz_tx(433920000);
+
+    furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, encoder);
+
+    while(!furi_hal_subghz_is_async_tx_complete()) {
+        printf(".");
+        fflush(stdout);
+        osDelay(333);
+    }
+
+    furi_hal_subghz_stop_async_tx();
+
+    subghz_end();
+    subghz_encoder_princeton_free(encoder);
+}
+
 
 void subghz_scene_transmitter_callback(SubghzTransmitterEvent event, void* context) {
     furi_assert(context);
@@ -24,9 +49,10 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzTransmitterEventSend) {
             //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
-            //return true;
+            subghz_scene_transmitter_rx(subghz);
+            return true;
         } else if(event.event == SubghzTransmitterEventBack) {
-            scene_manager_previous_scene(subghz->scene_manager);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
             return true;
         }
     }
@@ -34,5 +60,8 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
 }
 
 const void subghz_scene_transmitter_on_exit(void* context) {
-    // SubGhz* subghz = context;
+    SubGhz* subghz = context;
+    SubghzTransmitter* subghz_transmitter = subghz->subghz_transmitter;
+
+    subghz_transmitter_set_callback(subghz_transmitter, NULL, subghz);
 }
