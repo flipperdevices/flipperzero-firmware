@@ -3,6 +3,7 @@
 #include <m-string.h>
 #include <furi-hal.h>
 #include <stdint.h>
+#include "file-worker.h"
 
 #define bit_read(value, bit) (((value) >> (bit)) & 0x01)
 #define bit_set(value, bit) ((value) |= (1UL << (bit)))
@@ -26,6 +27,9 @@ typedef void (*SubGhzProtocolCommonToStr)(SubGhzProtocolCommon* instance, string
 
 //Save
 typedef void (*SubGhzProtocolCommonGetStrSave)(SubGhzProtocolCommon* instance, string_t output);
+
+//Load
+typedef bool (*SubGhzProtocolCommonLoad)(FileWorker* file_worker, SubGhzProtocolCommon* instance);
 
 struct SubGhzProtocolCommon {
     const char* name;
@@ -52,6 +56,8 @@ struct SubGhzProtocolCommon {
     SubGhzProtocolCommonToStr to_string;
     /* Get string to save */
     SubGhzProtocolCommonGetStrSave to_save_string;
+    /*Load protocol by file*/
+    SubGhzProtocolCommonLoad to_load_protocol;
 };
 
 /** Add data bit to code_found

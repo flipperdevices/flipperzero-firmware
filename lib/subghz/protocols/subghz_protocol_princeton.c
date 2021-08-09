@@ -1,6 +1,4 @@
 #include "subghz_protocol_princeton.h"
-#include "file-worker.h"
-
 /*
  * Help
  * https://phreakerclub.com/447
@@ -85,6 +83,9 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
+
+    instance->common.to_load_protocol=
+        (SubGhzProtocolCommonLoad)subghz_decoder_princeton_to_load_protocol;
 
     return instance;
 }
@@ -245,89 +246,19 @@ void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, stri
         "Te: %d\n"
         "Key: %08lX\n",
         instance->common.name,
-        instance->common.code_count_bit,
+        instance->common.code_last_count_bit,
         instance->te,
         (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
 }
 
-bool subghz_decoder_princeton_save_data(SubGhzDecoderPrinceton* instance, const char* dev_name) {
-    FileWorker* file_worker = file_worker_alloc(false);
-    string_t dev_file_name;
-    string_init(dev_file_name);
-    string_t temp_str;
-    string_init(temp_str);
-    bool saved = false;
-
-    do {
-        // Create subghz directory if necessary
-        if(!file_worker_mkdir(file_worker, SUBGHZ_APP_PATH_FOLDER)) {
-            break;
-        }
-        // First remove subghz device file if it was saved
-        string_printf(
-            dev_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
-        if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
-            break;
-        }
-        // Open file
-        if(!file_worker_open(
-               file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-            break;
-        }
-        string_printf(
-            temp_str,
-            "Protocol: %s\n"
-            "Bit: %d\n"
-            "Te: %d\n"
-            "Key: %08lX\n",
-            instance->common.name,
-            instance->common.code_count_bit,
-            instance->te,
-            (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
-        // Prepare and write data to file
-        if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_size(temp_str))) {
-            break;
-        }
-        saved = true;
-    } while(0);
-
-    string_clear(temp_str);
-    string_clear(dev_file_name);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
-
-    return saved;
-}
-
-//static
-bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const char* dev_name) {
-    FileWorker* file_worker = file_worker_alloc(false);
-    string_t dev_file_name;
-    string_init(dev_file_name);
+bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDecoderPrinceton* instance){
+    bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
     int res = 0;
     int data = 0;
-    bool loaded = false;
 
     do {
-        // Open key file
-        string_printf(
-            dev_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, dev_name, SUBGHZ_APP_EXTENSION);
-        if(!file_worker_open(
-               file_worker, string_get_cstr(dev_file_name), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            break;
-        }
-        // Read and parse name protocol from 1st line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        // strlen("Protocol: ") = 10
-        string_right(temp_str, 10);
-        if(!string_start_with_str_p(temp_str, instance->common.name)) {
-            break;
-        }
-
         // Read and parse bit data from 2nd line
         if(!file_worker_read_until(file_worker, temp_str, '\n')) {
             break;
@@ -336,7 +267,7 @@ bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const 
         if(res != 1) {
             break;
         }
-        instance->common.code_count_bit = (uint8_t)data;
+        instance->common.code_last_count_bit = (uint8_t)data;
 
         // Read and parse te data from 3nd line
         if(!file_worker_read_until(file_worker, temp_str, '\n')) {
@@ -359,16 +290,10 @@ bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const 
         }
         instance->common.code_last_found = (uint64_t)temp_key;
 
-        // // Read until EOF
-        //     if(!file_worker_read_until(file_worker, temp_str, 0x05)) {
-        //         break;
-        //     }
-
         loaded = true;
     } while(0);
 
     string_clear(temp_str);
-    string_clear(dev_file_name);
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 

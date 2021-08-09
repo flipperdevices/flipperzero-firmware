@@ -80,9 +80,6 @@ void subghz_decoder_princeton_parse(SubGhzDecoderPrinceton* instance, bool level
 void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t output);
 
 void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, string_t output);
+bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDecoderPrinceton* instance);
 
 
-
-bool subghz_decoder_princeton_save_data(SubGhzDecoderPrinceton* instance, const char* dev_name);
-
-bool subghz_decoder_princeton_load_data(SubGhzDecoderPrinceton* instance, const char* dev_name);

@@ -96,6 +96,13 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewTextInput, text_input_get_view(subghz->text_input));
 
+    // Transmitter
+    subghz->subghz_transmitter = subghz_transmitter_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher,
+        SubGhzViewTransmitter,
+        subghz_transmitter_get_view(subghz->subghz_transmitter));
+
     // Carrier Test Module
     subghz->subghz_test_carrier = subghz_test_carrier_alloc();
     view_dispatcher_add_view(
@@ -158,6 +165,10 @@ void subghz_free(SubGhz* subghz) {
     // TextInput
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTextInput);
     text_input_free(subghz->text_input);
+
+    // Receiver
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTransmitter);
+    subghz_transmitter_free(subghz->subghz_transmitter);
 
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);

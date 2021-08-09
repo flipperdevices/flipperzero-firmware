@@ -3,6 +3,7 @@
 #include "subghz.h"
 #include "views/subghz_capture.h"
 #include "views/subghz_receiver.h"
+#include "views/subghz_transmitter.h"
 #include "views/subghz_static.h"
 
 #include "views/subghz_test_carrier.h"
@@ -49,6 +50,7 @@ struct SubGhz {
 
     SubghzCapture* subghz_capture;
     SubghzReceiver* subghz_receiver;
+    SubghzTransmitter* subghz_transmitter;
     SubghzStatic* subghz_static;
 
     SubghzTestCarrier* subghz_test_carrier;
@@ -63,8 +65,9 @@ typedef enum {
     SubGhzViewReceiver,
     SubGhzViewPopup,
     SubGhzViewTextInput,
-    SubGhzViewStatic,
+    SubGhzViewTransmitter,
 
+    SubGhzViewStatic,
     SubGhzViewTestCarrier,
     SubGhzViewTestPacket,
 } SubGhzView;
