@@ -1,5 +1,5 @@
 #include "nfc_i.h"
-#include "api-hal-nfc.h"
+#include "furi-hal-nfc.h"
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -136,7 +136,20 @@ void nfc_free(Nfc* nfc) {
     free(nfc);
 }
 
-int32_t nfc_task(void* p) {
+void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
+    va_list args;
+    va_start(args, text);
+
+    vsnprintf(nfc->text_store, sizeof(nfc->text_store), text, args);
+
+    va_end(args);
+}
+
+void nfc_text_store_clear(Nfc* nfc) {
+    memset(nfc->text_store, 0, sizeof(nfc->text_store));
+}
+
+int32_t nfc_app(void* p) {
     Nfc* nfc = nfc_alloc();
 
     // Check argument and run corresponding scene
@@ -151,17 +164,4 @@ int32_t nfc_task(void* p) {
     nfc_free(nfc);
 
     return 0;
-}
-
-void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
-    va_list args;
-    va_start(args, text);
-
-    vsnprintf(nfc->text_store, sizeof(nfc->text_store), text, args);
-
-    va_end(args);
-}
-
-void nfc_text_store_clear(Nfc* nfc) {
-    memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }

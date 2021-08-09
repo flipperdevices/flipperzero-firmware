@@ -1,6 +1,5 @@
 #include <furi.h>
 #include <gui/gui.h>
-#include <api-hal-version.h>
 #include "math.h"
 
 #define MAX_TRIES 3
@@ -146,6 +145,14 @@ static bool selected_is_food(GameState* state) {
     return state->loot_list[state->cursor_pos] == LootFish;
 }
 
+static bool tries_exceed(GameState* state) {
+    return state->try == MAX_TRIES;
+}
+
+static bool timeout_exceed(GameState* state) {
+    return state->timeout == TRY_TIMEOUT;
+}
+
 static void render_callback(Canvas* canvas, void* ctx) {
     GameState* state = (GameState*)acquire_mutex((ValueMutex*)ctx, 25);
     canvas_clear(canvas);
@@ -155,9 +162,12 @@ static void render_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 30, 30, "Dolphin_happy.png");
         break;
     case LooseEvent:
+        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
         canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, "Try again!");
         break;
     case ExitGameEvent:
+        break;
+    case FinishedEvent:
         break;
     default:
         draw_dishes_scene(canvas, state);
@@ -167,18 +177,10 @@ static void render_callback(Canvas* canvas, void* ctx) {
     release_mutex((ValueMutex*)ctx, state);
 }
 
-static bool tries_exceed(GameState* state) {
-    return state->try == MAX_TRIES;
-}
-
-static bool timeout_exceed(GameState* state) {
-    return state->timeout == TRY_TIMEOUT;
-}
-
 static void gamestate_update(GameState* state) {
     switch(state->current_event) {
     case PlayerChoiceEvent:
-        if(state->selected && !tries_exceed(state)) {
+        if(state->selected) {
             state->current_event = OpenLootEvent;
         }
         break;
@@ -186,6 +188,12 @@ static void gamestate_update(GameState* state) {
         if(timeout_exceed(state)) {
             state->timeout = 0;
             state->current_event = selected_is_food(state) ? WinEvent : LooseEvent;
+        }
+        break;
+    case LooseEvent:
+        if(timeout_exceed(state)) {
+            state->timeout = 0;
+            state->current_event = FinishedEvent;
         }
         break;
 
@@ -219,16 +227,16 @@ static void food_minigame_controls(GameState* state, AppEvent* event) {
         case PlayerChoiceEvent:
             state->selected = true;
             break;
-        case OpenLootEvent:
+        case WinEvent:
+            state->current_event = FinishedEvent;
             break;
         default:
-            state->current_event = FinishedEvent;
             break;
         }
     }
 }
 
-int32_t food_minigame(void* p) {
+int32_t food_minigame_app(void* p) {
     GameState* state = furi_alloc(sizeof(GameState));
     ValueMutex state_mutex;
 
