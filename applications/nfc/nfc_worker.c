@@ -57,8 +57,8 @@ void nfc_worker_stop(NfcWorker* nfc_worker) {
     if(nfc_worker->state == NfcWorkerStateBroken || nfc_worker->state == NfcWorkerStateReady) {
         return;
     }
-
     nfc_worker_change_state(nfc_worker, NfcWorkerStateStop);
+    furi_hal_nfc_stop();
 }
 
 void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
@@ -633,7 +633,7 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                 continue;
             }
         }
-        FURI_LOG_W(NFC_WORKER_TAG, "Hello my dudes");
+        FURI_LOG_W(NFC_WORKER_TAG, "Card wasn't activated");
         osDelay(10);
     }
 }

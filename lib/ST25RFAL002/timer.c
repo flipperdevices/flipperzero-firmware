@@ -41,6 +41,7 @@
 ******************************************************************************
 */
 #include "timer.h"
+#include <furi-hal-nfc.h>
 
 
 /*
@@ -67,26 +68,29 @@ static uint32_t timerStopwatchTick;
 /*******************************************************************************/
 uint32_t timerCalculateTimer( uint16_t time )
 {  
-  return (HAL_GetTick() + time);
+  // return (HAL_GetTick() + time);
+  furi_hal_nfc_timer_start(time);
+  return time;
 }
 
 
 /*******************************************************************************/
 bool timerIsExpired( uint32_t timer )
 {
-  uint32_t uDiff;
-  int32_t sDiff;
+  // uint32_t uDiff;
+  // int32_t sDiff;
   
-  uDiff = (timer - HAL_GetTick());          /* Calculate the diff between the timers */
-  sDiff = uDiff;                            /* Convert the diff to a signed var      */
+  // uDiff = (timer - HAL_GetTick());          /* Calculate the diff between the timers */
+  // sDiff = uDiff;                            /* Convert the diff to a signed var      */
   
-  /* Check if the given timer has expired already */
-  if( sDiff < 0 )
-  {
-    return true;
-  }
+  // /* Check if the given timer has expired already */
+  // if( sDiff < 0 )
+  // {
+  //   return true;
+  // }
   
-  return false;
+  // return false;
+  return furi_hal_nfc_timer_expired();
 }
 
 
