@@ -91,7 +91,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
-#include "spi.h"
 #include <furi-hal-spi.h>
 #include <furi-hal-power.h>
 #include <furi-hal-delay.h>
@@ -281,6 +280,46 @@ static uint8_t SD_ReadData(void);
   */
 
 /* Private functions ---------------------------------------------------------*/
+
+void SD_SPI_Bus_To_Down_State(){
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+
+    GPIO_InitStruct.Pin = SPI_D_MISO_Pin;
+    HAL_GPIO_Init(SPI_D_MISO_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = SPI_D_MOSI_Pin;
+    HAL_GPIO_Init(SPI_D_MOSI_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = SPI_D_SCK_Pin;
+    HAL_GPIO_Init(SPI_D_SCK_GPIO_Port, &GPIO_InitStruct);
+
+    HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SPI_D_MISO_GPIO_Port, SPI_D_MISO_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SPI_D_MOSI_GPIO_Port, SPI_D_MOSI_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(SPI_D_SCK_GPIO_Port, SPI_D_SCK_Pin, GPIO_PIN_RESET);
+}
+
+void SD_SPI_Bus_To_Normal_State(){
+    HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);
+
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
+
+    GPIO_InitStruct.Pin = SPI_D_MISO_Pin;
+    HAL_GPIO_Init(SPI_D_MISO_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = SPI_D_MOSI_Pin;
+    HAL_GPIO_Init(SPI_D_MOSI_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = SPI_D_SCK_Pin;
+    HAL_GPIO_Init(SPI_D_SCK_GPIO_Port, &GPIO_InitStruct);
+}
 
 /** @defgroup STM32_ADAFRUIT_SD_Private_Functions
   * @{
