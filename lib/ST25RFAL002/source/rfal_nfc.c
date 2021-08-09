@@ -1327,7 +1327,7 @@ static ReturnCode rfalNfcPollActivation( uint8_t devIt )
                     gNfcDev.devList[devIt].dev.nfca.isSleep = false;
                     gNfcDev.isOperOngoing = false;
                 }
-                return ERR_BUSY;
+                // return ERR_BUSY;
             }
             
             
