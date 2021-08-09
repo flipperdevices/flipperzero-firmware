@@ -1,15 +1,17 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include "math.h"
+#include "dolphin/dolphin_state.h"
 
 #define MAX_TRIES 3
 #define DISHES_TOTAL 3
 #define LID_POS_MAX 20
-#define TRY_TIMEOUT 40
+#define TRY_TIMEOUT 10
 
 typedef enum {
     EventTypeTick,
     EventTypeKey,
+    EventTypeDeed,
 } EventType;
 
 typedef struct {
@@ -38,11 +40,13 @@ typedef enum {
 
 typedef struct {
     GameEventType current_event;
+    osMessageQueueId_t event_queue;
     uint8_t cursor_pos;
     uint8_t lid_pos;
     uint8_t timeout;
     uint8_t try;
     bool selected;
+    bool deed;
     LootIdEnum loot_list[DISHES_TOTAL];
 
 } GameState;
@@ -93,7 +97,6 @@ static void draw_dish(Canvas* canvas, GameState* state, uint8_t x, uint8_t y, ui
     }
 
     if(opened) {
-        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
         state->lid_pos = CLAMP(state->lid_pos + 1, LID_POS_MAX, 0);
     }
 
@@ -122,9 +125,38 @@ static void draw_dishes_scene(Canvas* canvas, GameState* state) {
     }
 }
 
+static void render_callback(Canvas* canvas, void* ctx) {
+    GameState* state = (GameState*)acquire_mutex((ValueMutex*)ctx, 25);
+    canvas_clear(canvas);
+
+    switch(state->current_event) {
+    case WinEvent:
+        canvas_draw_str(canvas, 30, 30, "Dolphin_happy.png");
+        break;
+    case LooseEvent:
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, "Try again!");
+        break;
+    case ExitGameEvent:
+        break;
+    case FinishedEvent:
+        break;
+    default:
+        draw_dishes_scene(canvas, state);
+        break;
+    }
+
+    release_mutex((ValueMutex*)ctx, state);
+}
 static void reset_lid_pos(GameState* state) {
     state->selected = false;
     state->lid_pos = 0;
+}
+
+void dolphin_food_deed(GameState* state) {
+    furi_assert(state);
+    AppEvent event;
+    event.type = EventTypeDeed;
+    furi_check(osMessageQueuePut(state->event_queue, &event, 0, osWaitForever) == osOK);
 }
 
 static void reset_loot_array(GameState* state) {
@@ -153,31 +185,7 @@ static bool timeout_exceed(GameState* state) {
     return state->timeout == TRY_TIMEOUT;
 }
 
-static void render_callback(Canvas* canvas, void* ctx) {
-    GameState* state = (GameState*)acquire_mutex((ValueMutex*)ctx, 25);
-    canvas_clear(canvas);
-
-    switch(state->current_event) {
-    case WinEvent:
-        canvas_draw_str(canvas, 30, 30, "Dolphin_happy.png");
-        break;
-    case LooseEvent:
-        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
-        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignCenter, "Try again!");
-        break;
-    case ExitGameEvent:
-        break;
-    case FinishedEvent:
-        break;
-    default:
-        draw_dishes_scene(canvas, state);
-        break;
-    }
-
-    release_mutex((ValueMutex*)ctx, state);
-}
-
-static void gamestate_update(GameState* state) {
+static void gamestate_update(GameState* state, DolphinState* dolphin_state) {
     switch(state->current_event) {
     case PlayerChoiceEvent:
         if(state->selected) {
@@ -185,18 +193,25 @@ static void gamestate_update(GameState* state) {
         }
         break;
     case OpenLootEvent:
+        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
         if(timeout_exceed(state)) {
             state->timeout = 0;
             state->current_event = selected_is_food(state) ? WinEvent : LooseEvent;
+            state->deed = selected_is_food(state);
         }
         break;
     case LooseEvent:
+        state->timeout = CLAMP(state->timeout + 1, TRY_TIMEOUT, 0);
         if(timeout_exceed(state)) {
             state->timeout = 0;
             state->current_event = FinishedEvent;
         }
         break;
-
+    case WinEvent:
+        if(state->deed) {
+            dolphin_food_deed(state);
+        }
+        break;
     case FinishedEvent:
         reset_lid_pos(state);
         reset_loot_array(state);
@@ -238,10 +253,14 @@ static void food_minigame_controls(GameState* state, AppEvent* event) {
 
 int32_t food_minigame_app(void* p) {
     GameState* state = furi_alloc(sizeof(GameState));
+    DolphinState* dolphin_state = dolphin_state_alloc();
+    dolphin_state_load(dolphin_state);
+
     ValueMutex state_mutex;
 
-    osMessageQueueId_t event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
-    furi_check(event_queue);
+    state->event_queue = osMessageQueueNew(2, sizeof(AppEvent), NULL);
+
+    furi_check(state->event_queue);
 
     if(!init_mutex(&state_mutex, state, sizeof(GameState*))) {
         printf("[Food minigame] cannot create mutex\r\n");
@@ -251,7 +270,7 @@ int32_t food_minigame_app(void* p) {
     ViewPort* view_port = view_port_alloc();
 
     view_port_draw_callback_set(view_port, render_callback, &state_mutex);
-    view_port_input_callback_set(view_port, input_callback, event_queue);
+    view_port_input_callback_set(view_port, input_callback, state->event_queue);
 
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -260,7 +279,7 @@ int32_t food_minigame_app(void* p) {
 
     AppEvent event;
     while(1) {
-        osStatus_t event_status = osMessageQueueGet(event_queue, &event, NULL, 100);
+        osStatus_t event_status = osMessageQueueGet(state->event_queue, &event, NULL, 100);
         if(event_status == osOK) {
             if(event.type == EventTypeKey && event.value.input.type == InputTypeShort) {
                 food_minigame_controls(state, &event);
@@ -268,13 +287,17 @@ int32_t food_minigame_app(void* p) {
                 if(event.value.input.key == InputKeyBack) {
                     break;
                 }
+            } else if(event.type == EventTypeDeed) {
+                dolphin_state_on_deed(dolphin_state, DolphinDeedIButtonRead);
+                dolphin_state_save(dolphin_state);
+                state->deed = false;
             }
         }
 
         if(state->current_event == ExitGameEvent) {
             break;
         }
-        gamestate_update(state);
+        gamestate_update(state, dolphin_state);
         view_port_update(view_port);
     }
 
@@ -282,7 +305,8 @@ int32_t food_minigame_app(void* p) {
     view_port_free(view_port);
     furi_record_close("gui");
     delete_mutex(&state_mutex);
-    osMessageQueueDelete(event_queue);
+    osMessageQueueDelete(state->event_queue);
+    dolphin_state_free(dolphin_state);
     free(state);
 
     return 0;
