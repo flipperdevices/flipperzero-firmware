@@ -5,8 +5,10 @@
 void subghz_scene_transmitter_rx(void* context){
     SubGhz* subghz = context;
     SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
+
     
-    subghz_encoder_princeton_reset(encoder, subghz->protocol_result->code_last_found, 10);
+    subghz_encoder_princeton_reset(encoder, subghz->protocol_result->code_last_found, 3);
+    subghz_encoder_princeton_set_te(encoder, subghz->protocol_result);
 
     subghz_begin(FuriHalSubGhzPresetOokAsync);
     subghz_tx(433920000);
@@ -14,9 +16,9 @@ void subghz_scene_transmitter_rx(void* context){
     furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, encoder);
 
     while(!furi_hal_subghz_is_async_tx_complete()) {
-        printf(".");
-        fflush(stdout);
-        osDelay(333);
+        //printf(".");
+        //fflush(stdout);
+        osDelay(50);
     }
 
     furi_hal_subghz_stop_async_tx();

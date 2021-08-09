@@ -11,12 +11,20 @@
 
 struct SubGhzEncoderPrinceton {
     uint32_t key;
+    uint16_t te;
     size_t repeat;
     size_t front;
 };
 
+struct SubGhzDecoderPrinceton {
+    SubGhzProtocolCommon common;
+    uint16_t te;
+};
+
 SubGhzEncoderPrinceton* subghz_encoder_princeton_alloc() {
     SubGhzEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzEncoderPrinceton));
+    
+
     return instance;
 }
 
@@ -24,9 +32,19 @@ void subghz_encoder_princeton_free(SubGhzEncoderPrinceton* instance) {
     furi_assert(instance);
     free(instance);
 }
+void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder){
+   SubGhzDecoderPrinceton* pricenton = decoder;
+    if((pricenton->te) !=0){
+        instance->te = pricenton->te;
+    }else{
+        instance->te = SUBGHZ_PT_SHORT;
+    }
+}
+
 
 void subghz_encoder_princeton_reset(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
+    
     instance->key = key;
     instance->repeat = repeat;
     instance->front = 0;
@@ -50,12 +68,12 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
         uint8_t bit_in_byte = bit % 8;
         bool value = (((uint8_t*)&instance->key)[2 - byte] >> (7 - bit_in_byte)) & 1;
         if(value) {
-            ret = level_duration_make(level, level ? SUBGHZ_PT_SHORT : SUBGHZ_PT_LONG);
+            ret = level_duration_make(level, level ? instance->te * 3 : instance->te);
         } else {
-            ret = level_duration_make(level, level ? SUBGHZ_PT_LONG : SUBGHZ_PT_SHORT);
+            ret = level_duration_make(level, level ? instance->te : instance->te * 3);
         }
     } else {
-        ret = level_duration_make(level, level ? SUBGHZ_PT_SHORT : SUBGHZ_PT_GUARD);
+        ret = level_duration_make(level, level ? instance->te : instance->te * 30);
     }
 
     instance->front++;
@@ -67,10 +85,6 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
     return ret;
 }
 
-struct SubGhzDecoderPrinceton {
-    SubGhzProtocolCommon common;
-    uint16_t te;
-};
 
 SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     SubGhzDecoderPrinceton* instance = furi_alloc(sizeof(SubGhzDecoderPrinceton));
