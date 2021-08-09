@@ -7,6 +7,8 @@
 volatile FuriHalInterruptISR furi_hal_tim_tim2_isr = NULL;
 volatile FuriHalInterruptISR furi_hal_tim_tim1_isr = NULL;
 
+volatile FuriHalInterruptISR furi_hal_lptim1_isr = NULL;
+
 #define FURI_HAL_INTERRUPT_DMA_COUNT 2
 #define FURI_HAL_INTERRUPT_DMA_CHANNELS_COUNT 8
 
@@ -58,6 +60,20 @@ void furi_hal_interrupt_set_dma_channel_isr(DMA_TypeDef* dma, uint32_t channel, 
     }
 }
 
+void furi_hal_interrupt_set_lptimer_isr(LPTIM_TypeDef *lptimer, FuriHalInterruptISR isr) {
+    furi_assert(lptimer);
+    if(lptimer == LPTIM1) {
+        if(isr) {
+            furi_assert(furi_hal_lptim1_isr == NULL);
+        } else {
+            furi_assert(furi_hal_lptim1_isr != NULL);
+        }
+        furi_hal_lptim1_isr = isr;
+    } else {
+        furi_check(0);
+    }
+}
+
 extern void api_interrupt_call(InterruptType type, void* hw);
 
 /* ST HAL symbols */
@@ -87,6 +103,13 @@ void TIM1_UP_TIM16_IRQHandler(void) {
         furi_hal_tim_tim1_isr();
     } else {
         HAL_TIM_IRQHandler(&htim1);
+    }
+}
+
+/* LPTimer 1 update */
+void LPTIM1_IRQHandler(void) {
+    if(furi_hal_lptim1_isr) {
+        furi_hal_lptim1_isr();
     }
 }
 

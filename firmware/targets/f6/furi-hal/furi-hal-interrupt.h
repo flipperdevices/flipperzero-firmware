@@ -28,6 +28,13 @@ void furi_hal_interrupt_set_dma_channel_isr(DMA_TypeDef* dma, uint32_t channel, 
  */
 void furi_hal_interrupt_set_timer_isr(TIM_TypeDef *timer, FuriHalInterruptISR isr);
 
+/** Set Low Power Timer ISR
+ * By default ISR is serviced by ST HAL. Use this function to override it.
+ * We don't clear interrupt flags for you, do it by your self.
+ * @param lptimer - low power timer instance
+ * @param isr - your interrupt service routine or use NULL to clear
+ */
+void furi_hal_interrupt_set_lptimer_isr(LPTIM_TypeDef *lptimer, FuriHalInterruptISR isr);
 
 #ifdef __cplusplus
 }
