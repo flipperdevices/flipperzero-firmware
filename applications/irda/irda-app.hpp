@@ -83,7 +83,8 @@ public:
     void notify_green_on();
     void notify_green_off();
     void notify_click();
-    void notify_click_and_blink();
+    void notify_click_and_green_blink();
+    void notify_blink_green();
 
     static void text_input_callback(void* context);
     static void popup_callback(void* context);

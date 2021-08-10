@@ -14,7 +14,15 @@ typedef enum {
     ApiHalIrdaTxGetDataStateLastDone,   /* New data obtained, and this is end of package and no more data available */
 } ApiHalIrdaTxGetDataState;
 
-typedef ApiHalIrdaTxGetDataState (*ApiHalIrdaTxGetDataCallback) (void* context, uint32_t* duration, bool* level);
+/* Callback type for providing data to IRDA DMA TX system. It is called every tim */
+typedef ApiHalIrdaTxGetDataState (*ApiHalIrdaTxGetDataISRCallback) (void* context, uint32_t* duration, bool* level);
+
+/* Callback type called every time signal is sent by DMA to Timer.
+ * Actually, it means there are 2 timings left to send for this signal, which is almost end.
+ * Don't use this callback to stop transmission, as far as there are next signal is
+ * charged for transmission by DMA.
+ */
+typedef void (*ApiHalIrdaTxSignalSentISRCallback) (void* context);
 
 /**
  * Signature of callback function for receiving continuous IRDA rx signal.
@@ -82,7 +90,7 @@ bool api_hal_irda_is_busy(void);
  * @param[in]   callback - function to provide new data
  * @param[in]   context - context for callback
  */
-void api_hal_irda_async_tx_set_data_isr_callback(ApiHalIrdaTxGetDataCallback callback, void* context);
+void api_hal_irda_async_tx_set_data_isr_callback(ApiHalIrdaTxGetDataISRCallback callback, void* context);
 
 /**
  * Start IR asynchronous transmission. It can be stopped by 2 reasons:
@@ -114,6 +122,14 @@ void api_hal_irda_async_tx_stop(void);
  * transmission (ApiHalIrdaTxGetDataStateLastDone).
  */
 void api_hal_irda_async_tx_wait_termination(void);
+
+/**
+ * Set callback for end of signal transmission
+ *
+ * @param[in]   callback - function to call when signal is sent
+ * @param[in]   context - context for callback
+ */
+void api_hal_irda_async_tx_set_signal_sent_isr_callback(ApiHalIrdaTxSignalSentISRCallback callback, void* context);
 
 #ifdef __cplusplus
 }

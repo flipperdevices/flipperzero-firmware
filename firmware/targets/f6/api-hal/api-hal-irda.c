@@ -40,8 +40,10 @@ typedef struct{
 
 typedef struct {
     float cycle_duration;
-    ApiHalIrdaTxGetDataCallback data_callback;
+    ApiHalIrdaTxGetDataISRCallback data_callback;
+    ApiHalIrdaTxSignalSentISRCallback signal_sent_callback;
     void* data_context;
+    void* signal_sent_context;
     IrdaTxBuf buffer[2];
     osSemaphoreId_t stop_semaphore;
 } IrdaTimTx;
@@ -286,6 +288,9 @@ static void api_hal_irda_tx_dma_isr() {
         } else {
             /* if it's not end of the packet - continue receiving */
             api_hal_irda_tx_dma_set_buffer(next_buf_num);
+        }
+        if (irda_tim_tx.signal_sent_callback) {
+            irda_tim_tx.signal_sent_callback(irda_tim_tx.signal_sent_context);
         }
     }
 }
@@ -576,9 +581,14 @@ void api_hal_irda_async_tx_stop(void) {
     api_hal_irda_async_tx_wait_termination();
 }
 
-void api_hal_irda_async_tx_set_data_isr_callback(ApiHalIrdaTxGetDataCallback callback, void* context) {
+void api_hal_irda_async_tx_set_data_isr_callback(ApiHalIrdaTxGetDataISRCallback callback, void* context) {
     furi_assert(api_hal_irda_state == IrdaStateIdle);
     irda_tim_tx.data_callback = callback;
     irda_tim_tx.data_context = context;
+}
+
+void api_hal_irda_async_tx_set_signal_sent_isr_callback(ApiHalIrdaTxSignalSentISRCallback callback, void* context) {
+    irda_tim_tx.signal_sent_callback = callback;
+    irda_tim_tx.signal_sent_context = context;
 }
 

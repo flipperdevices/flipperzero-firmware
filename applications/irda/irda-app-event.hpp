@@ -9,6 +9,8 @@ public:
         Exit,
         Back,
         MenuSelected,
+        MenuSelectedPress,
+        MenuSelectedRelease,
         DialogExSelected,
         NextScene,
         IrdaMessageReceived,

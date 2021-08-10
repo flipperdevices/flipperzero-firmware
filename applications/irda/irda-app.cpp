@@ -222,20 +222,31 @@ void IrdaApp::notify_click() {
     notification_message_block(notification, &sequence);
 }
 
-void IrdaApp::notify_click_and_blink() {
+void IrdaApp::notify_click_and_green_blink() {
     static const NotificationSequence sequence = {
         &message_click,
         &message_delay_1,
         &message_sound_off,
-        &message_red_0,
         &message_green_255,
-        &message_blue_0,
         &message_delay_10,
         &message_green_0,
+        &message_do_not_reset,
         NULL,
     };
 
     notification_message_block(notification, &sequence);
+}
+
+void IrdaApp::notify_blink_green() {
+    static const NotificationSequence sequence = {
+        &message_green_255,
+        &message_delay_10,
+        &message_green_0,
+        &message_do_not_reset,
+        NULL,
+    };
+
+    notification_message(notification, &sequence);
 }
 
 void IrdaApp::notify_double_vibro() {

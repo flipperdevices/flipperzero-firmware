@@ -49,10 +49,11 @@ void IrdaAppSceneUniversalCommon::show_popup(IrdaApp* app, int record_amount) {
     button_panel_set_popup_input_callback(button_panel, irda_popup_brut_input_callback, app);
 }
 
-void IrdaAppSceneUniversalCommon::progress_popup(IrdaApp* app) {
-    popup_brut_increase_progress(app->get_view_manager()->get_popup_brut());
+bool IrdaAppSceneUniversalCommon::progress_popup(IrdaApp* app) {
+    bool result = popup_brut_increase_progress(app->get_view_manager()->get_popup_brut());
     auto button_panel = app->get_view_manager()->get_button_panel();
     with_view_model_cpp(button_panel_get_view(button_panel), void*, model, { return true; });
+    return result;
 }
 
 bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
@@ -63,9 +64,11 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
             auto view_manager = app->get_view_manager();
             IrdaAppEvent tick_event = {.type = IrdaAppEvent::Type::Tick};
             view_manager->send_event(&tick_event);
-            if(brute_force.send_next_bruteforce()) {
-                progress_popup(app);
-            } else {
+            bool result = brute_force.send_next_bruteforce();
+            if(result) {
+                result = progress_popup(app);
+            }
+            if(!result) {
                 brute_force.stop_bruteforce();
                 brute_force_started = false;
                 remove_popup(app);

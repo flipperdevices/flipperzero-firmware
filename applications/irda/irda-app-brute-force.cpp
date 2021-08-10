@@ -47,7 +47,6 @@ void IrdaAppBruteForce::stop_bruteforce() {
     }
 }
 
-// TODO: [FL-1418] replace with timer-chained consequence of messages.
 bool IrdaAppBruteForce::send_next_bruteforce(void) {
     furi_assert(current_record.size());
     furi_assert(file_parser);

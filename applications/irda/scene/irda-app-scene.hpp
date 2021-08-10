@@ -73,6 +73,7 @@ public:
 private:
     std::vector<std::string> buttons_names;
     uint32_t buttonmenu_item_selected = 0;
+    bool button_pressed = false;
 };
 
 class IrdaAppSceneRemoteList : public IrdaAppScene {
@@ -139,7 +140,7 @@ protected:
     IrdaAppBruteForce brute_force;
     void remove_popup(IrdaApp* app);
     void show_popup(IrdaApp* app, int record_amount);
-    void progress_popup(IrdaApp* app);
+    bool progress_popup(IrdaApp* app);
     static void irda_app_item_callback(void* context, uint32_t index);
     IrdaAppSceneUniversalCommon(const char* filename) : brute_force(filename) {}
     ~IrdaAppSceneUniversalCommon() {}
