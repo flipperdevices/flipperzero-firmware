@@ -1596,11 +1596,11 @@ static ReturnCode rfalNfcListenActivation( void )
             
             if( isDataRcvd )                                                          /* Check if Reader/Initator has sent some data */
             {
-                printf("Hi from rfal: %d\r\n", gNfcDev.rxLen / 8);
-                for(uint8_t i = 0; i < gNfcDev.rxLen / 8; i++) {
-                    printf("%02X ", gNfcDev.rxBuf.rfBuf[i]);
-                }
-                printf("\r\n");
+                // printf("Hi from rfal: %d\r\n", gNfcDev.rxLen / 8);
+                // for(uint8_t i = 0; i < gNfcDev.rxLen / 8; i++) {
+                //     printf("%02X ", gNfcDev.rxBuf.rfBuf[i]);
+                // }
+                // printf("\r\n");
                 /* Check if received data is a Sleep request */
                 if( rfalNfcaListenerIsSleepReq( gNfcDev.rxBuf.rfBuf, rfalConvBitsToBytes(gNfcDev.rxLen)) )     /* Check if received data is a SLP_REQ */
                 {
