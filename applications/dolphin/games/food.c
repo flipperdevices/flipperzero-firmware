@@ -120,6 +120,12 @@ static void draw_dish(Canvas* canvas, GameState* state, uint8_t x, uint8_t y, ui
 }
 
 static void draw_dishes_scene(Canvas* canvas, GameState* state) {
+    char buffer[16];
+    uint8_t tries_left = MAX_TRIES - state->try;
+
+    snprintf(buffer, 16, "Tries left: %d", tries_left);
+    canvas_draw_str(canvas, 0, 10, buffer);
+
     for(size_t i = 0; i < DISHES_TOTAL; i++) {
         draw_dish(canvas, state, i * 40, i % 2 ? 26 : 44, i);
     }
