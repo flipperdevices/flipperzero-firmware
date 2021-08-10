@@ -1,5 +1,5 @@
 # For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
-set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7 ARM_CM4_MPU ARM_CM3_MPU ARM_CM7_MPU)
+set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM3_MPU ARM_CM4_MPU ARM_CM4F ARM_CM7 ARM_CM7_MPU ARM_CM23_NTZ ARM_CM33_NTZ)
 
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
@@ -129,10 +129,12 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
             NAMES portmacro.h
             PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
             PATH_SUFFIXES
-                "portable/GCC/${PORT}/r0p1"
                 "portable/GCC/${PORT}"
+                "portable/GCC/${PORT}/r0p1"
+                "portable/GCC/${PORT}/non_secure"
                 "Source/portable/GCC/${PORT}"
                 "Source/portable/GCC/${PORT}/r0p1"
+                "Source/portable/GCC/${PORT}/non_secure"
             NO_DEFAULT_PATH
         )
 
