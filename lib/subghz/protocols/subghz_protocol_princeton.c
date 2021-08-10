@@ -44,7 +44,7 @@ void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* dec
 
 void subghz_encoder_princeton_reset(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
-    
+    instance->te = SUBGHZ_PT_SHORT;
     instance->key = key;
     instance->repeat = repeat;
     instance->front = 48;
