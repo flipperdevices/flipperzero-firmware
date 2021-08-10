@@ -1,7 +1,7 @@
 #pragma once
 
 #include <irda.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,13 +44,13 @@ IrdaWorker* irda_worker_alloc();
  */
 void irda_worker_free(IrdaWorker* instance);
 
-/** Start IrdaWorker thread, initialise api-hal, prepare all work.
+/** Start IrdaWorker thread, initialise furi-hal, prepare all work.
  *
  * @param[in]   instance - IrdaWorker instance
  */
 void irda_worker_rx_start(IrdaWorker* instance);
 
-/** Stop IrdaWorker thread, deinitialize api-hal.
+/** Stop IrdaWorker thread, deinitialize furi-hal.
  *
  * @param[in]   instance - IrdaWorker instance
  */

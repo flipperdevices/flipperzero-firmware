@@ -3,7 +3,7 @@
 #include "sys/_stdint.h"
 #include "irda_worker.h"
 #include <irda.h>
-#include <api-hal-irda.h>
+#include <furi-hal-irda.h>
 #include <limits.h>
 #include <stdint.h>
 #include <furi.h>
@@ -70,12 +70,12 @@ struct IrdaWorker {
 typedef struct {
     uint32_t duration;
     bool level;
-    ApiHalIrdaTxGetDataState state;
+    FuriHalIrdaTxGetDataState state;
 } IrdaWorkerTiming;
 
 static int32_t irda_worker_tx_thread(void* context);
-static ApiHalIrdaTxGetDataState irda_worker_api_hal_data_isr_callback(void* context, uint32_t* duration, bool* level);
-static void irda_worker_api_hal_message_sent_isr_callback(void* context);
+static FuriHalIrdaTxGetDataState irda_worker_furi_hal_data_isr_callback(void* context, uint32_t* duration, bool* level);
+static void irda_worker_furi_hal_message_sent_isr_callback(void* context);
 
 
 static void irda_worker_rx_timeout_callback(void* context) {
@@ -234,10 +234,10 @@ void irda_worker_rx_start(IrdaWorker* instance) {
     furi_thread_start(instance->thread);
 
     instance->worker_handle = furi_thread_get_thread_id(instance->thread);
-    api_hal_irda_async_rx_start();
-    api_hal_irda_async_rx_set_timeout(IRDA_WORKER_RX_TIMEOUT);
-    api_hal_irda_async_rx_set_capture_isr_callback(irda_worker_rx_callback, instance);
-    api_hal_irda_async_rx_set_timeout_isr_callback(irda_worker_rx_timeout_callback, instance);
+    furi_hal_irda_async_rx_start();
+    furi_hal_irda_async_rx_set_timeout(IRDA_WORKER_RX_TIMEOUT);
+    furi_hal_irda_async_rx_set_capture_isr_callback(irda_worker_rx_callback, instance);
+    furi_hal_irda_async_rx_set_timeout_isr_callback(irda_worker_rx_timeout_callback, instance);
 
     instance->state = IrdaWorkerStateRunRx;
 }
@@ -247,9 +247,9 @@ void irda_worker_rx_stop(IrdaWorker* instance) {
     furi_assert(instance->worker_handle);
     furi_assert(instance->state == IrdaWorkerStateRunRx);
 
-    api_hal_irda_async_rx_set_timeout_isr_callback(NULL, NULL);
-    api_hal_irda_async_rx_set_capture_isr_callback(NULL, NULL);
-    api_hal_irda_async_rx_stop();
+    furi_hal_irda_async_rx_set_timeout_isr_callback(NULL, NULL);
+    furi_hal_irda_async_rx_set_capture_isr_callback(NULL, NULL);
+    furi_hal_irda_async_rx_stop();
 
     xTaskNotify(instance->worker_handle, IRDA_WORKER_EXIT, eSetBits);
     furi_thread_join(instance->thread);
@@ -299,13 +299,13 @@ void irda_worker_tx_start(IrdaWorker* instance) {
     instance->u.tx.steady_signal_sent = false;
     instance->u.tx.need_reinitialization = false;
     instance->worker_handle = furi_thread_get_thread_id(instance->thread);
-    api_hal_irda_async_tx_set_data_isr_callback(irda_worker_api_hal_data_isr_callback, instance);
-    api_hal_irda_async_tx_set_signal_sent_isr_callback(irda_worker_api_hal_message_sent_isr_callback, instance);
+    furi_hal_irda_async_tx_set_data_isr_callback(irda_worker_furi_hal_data_isr_callback, instance);
+    furi_hal_irda_async_tx_set_signal_sent_isr_callback(irda_worker_furi_hal_message_sent_isr_callback, instance);
 
     instance->state = IrdaWorkerStateStartTx;
 }
 
-static void irda_worker_api_hal_message_sent_isr_callback(void* context) {
+static void irda_worker_furi_hal_message_sent_isr_callback(void* context) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     IrdaWorker* instance = context;
 
@@ -313,22 +313,22 @@ static void irda_worker_api_hal_message_sent_isr_callback(void* context) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-static ApiHalIrdaTxGetDataState irda_worker_api_hal_data_isr_callback(void* context, uint32_t* duration, bool* level) {
+static FuriHalIrdaTxGetDataState irda_worker_furi_hal_data_isr_callback(void* context, uint32_t* duration, bool* level) {
     furi_assert(context);
     furi_assert(duration);
     furi_assert(level);
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     IrdaWorker* instance = context;
-    IrdaWorkerTiming timing = {.state = ApiHalIrdaTxGetDataStateError} ;
+    IrdaWorkerTiming timing = {.state = FuriHalIrdaTxGetDataStateError} ;
 
     if (sizeof(IrdaWorkerTiming) == xStreamBufferReceiveFromISR(instance->stream, &timing, sizeof(IrdaWorkerTiming), 0)) {
         *level = timing.level;
         *duration = timing.duration;
-        furi_assert(timing.state != ApiHalIrdaTxGetDataStateError);
+        furi_assert(timing.state != FuriHalIrdaTxGetDataStateError);
     } else {
         furi_assert(0);
-        timing.state = ApiHalIrdaTxGetDataStateError;
+        timing.state = FuriHalIrdaTxGetDataStateError;
     }
 
     xTaskNotifyFromISR(instance->worker_handle, IRDA_WORKER_TX_FILL_BUFFER, eSetBits,  &xHigherPriorityTaskWoken);
@@ -399,13 +399,13 @@ static bool irda_worker_tx_fill_buffer(IrdaWorker* instance) {
             new_data_available = false;
             break;
         } else if (status == IrdaStatusOk) {
-            timing.state = ApiHalIrdaTxGetDataStateOk;
+            timing.state = FuriHalIrdaTxGetDataStateOk;
         } else if (status == IrdaStatusDone) {
-            timing.state = ApiHalIrdaTxGetDataStateDone;
+            timing.state = FuriHalIrdaTxGetDataStateDone;
 
             new_data_available = irda_get_new_signal(instance);
             if (instance->u.tx.need_reinitialization || !new_data_available) {
-                timing.state = ApiHalIrdaTxGetDataStateLastDone;
+                timing.state = FuriHalIrdaTxGetDataStateLastDone;
             }
         } else {
             furi_assert(0);
@@ -435,7 +435,7 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
         case IrdaWorkerStateStartTx:
             instance->u.tx.need_reinitialization = false;
             new_data_available = irda_worker_tx_fill_buffer(instance);
-            api_hal_irda_async_tx_start(instance->u.tx.frequency, instance->u.tx.duty_cycle);
+            furi_hal_irda_async_tx_start(instance->u.tx.frequency, instance->u.tx.duty_cycle);
 
             if (!new_data_available) {
                 instance->state = IrdaWorkerStateStopTx;
@@ -447,11 +447,11 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
 
             break;
         case IrdaWorkerStateStopTx:
-            api_hal_irda_async_tx_stop();
+            furi_hal_irda_async_tx_stop();
             exit = true;
             break;
         case IrdaWorkerStateWaitTxEnd:
-            api_hal_irda_async_tx_wait_termination();
+            furi_hal_irda_async_tx_wait_termination();
             instance->state = IrdaWorkerStateStartTx;
 
             result = xTaskNotifyWait(pdFALSE, ULONG_MAX, &notify_value, 0);
@@ -510,8 +510,8 @@ void irda_worker_tx_stop(IrdaWorker* instance) {
     xTaskNotify(instance->worker_handle, IRDA_WORKER_EXIT, eSetBits);
     furi_thread_join(instance->thread);
     instance->worker_handle = NULL;
-    api_hal_irda_async_tx_set_data_isr_callback(NULL, NULL);
-    api_hal_irda_async_tx_set_signal_sent_isr_callback(NULL, NULL);
+    furi_hal_irda_async_tx_set_data_isr_callback(NULL, NULL);
+    furi_hal_irda_async_tx_set_signal_sent_isr_callback(NULL, NULL);
 
     instance->signal.timings_cnt = 0;
     BaseType_t xReturn = pdFAIL;
