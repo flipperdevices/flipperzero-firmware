@@ -187,9 +187,3 @@ void hal_gpio_remove_int_callback(const GpioPin* gpio) {
     gpio_interrupt[pin_num].ready = false;
     __enable_irq();
 }
-
-static void hal_gpio_int_call(uint16_t pin_num) {
-    if(gpio_interrupt[pin_num].callback && gpio_interrupt[pin_num].ready) {
-        gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);
-    }
-}

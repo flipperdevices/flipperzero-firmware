@@ -37,14 +37,14 @@ void furi_hal_spi_init() {
 void furi_hal_spi_bus_lock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
     if (bus->mutex) {
-        osMutexAcquire(*bus->mutex, osWaitForever);
+        furi_assert(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
     }
 }
 
 void furi_hal_spi_bus_unlock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
     if (bus->mutex) {
-        osMutexRelease(*bus->mutex);
+        furi_assert(osMutexRelease(*bus->mutex) == osOK);
     }
 }
 
