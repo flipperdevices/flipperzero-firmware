@@ -288,14 +288,14 @@ void SD_SPI_Bus_To_Down_State(){
     hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeOutputPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFnUnused);
     hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeOutputPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFnUnused);
 
-    HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(SPI_D_MISO_GPIO_Port, SPI_D_MISO_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(SPI_D_MOSI_GPIO_Port, SPI_D_MOSI_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(SPI_D_SCK_GPIO_Port, SPI_D_SCK_Pin, GPIO_PIN_RESET);
+    hal_gpio_write(&gpio_sdcard_cs, false);
+    hal_gpio_write(&gpio_spi_d_miso, false);
+    hal_gpio_write(&gpio_spi_d_mosi, false);
+    hal_gpio_write(&gpio_spi_d_sck, false);
 }
 
 void SD_SPI_Bus_To_Normal_State(){
-    HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);
+    hal_gpio_write(&gpio_sdcard_cs, true);
 
     hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
     hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
