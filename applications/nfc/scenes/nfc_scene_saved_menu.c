@@ -38,9 +38,13 @@ const bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexEmulate) {
+            if(nfc->dev.format == NfcDeviceSaveFormatMifareUl) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            }
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexEmulate);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
             return true;
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, SubmenuIndexEdit);

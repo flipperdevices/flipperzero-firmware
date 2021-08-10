@@ -86,7 +86,7 @@ bool furi_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t ti
     return true;
 }
 
-bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak, uint32_t timeout) {
+bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak, bool activate_after_sak, uint32_t timeout) {
     rfalNfcState state = rfalNfcGetState();
 
     if(state == RFAL_NFC_STATE_NOTINIT) {
@@ -107,6 +107,7 @@ bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t s
         .maxBR = RFAL_BR_KEEP,
         .GBLen = RFAL_NFCDEP_GB_MAX_LEN,
         .notifyCb = NULL,
+        .activate_after_sak = activate_after_sak,
     };
     params.lmConfigPA.nfcidLen = uid_len;
     memcpy(params.lmConfigPA.nfcid, uid, uid_len);
