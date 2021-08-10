@@ -51,13 +51,7 @@ const void subghz_scene_read_on_exit(void* context) {
     furi_hal_subghz_stop_async_rx();
     subghz_end();
 
-    //удаляем ресурсы которые заюзали
     DialogEx* dialog_ex = subghz->dialog_ex;
     dialog_ex_set_header(dialog_ex, NULL, 0, 0, AlignCenter, AlignCenter);
-    //dialog_ex_set_text(dialog_ex, NULL, 0, 0, AlignCenter, AlignTop);
     dialog_ex_set_icon(dialog_ex, 0, 0, NULL);
-    //dialog_ex_set_left_button_text(dialog_ex, NULL);
-    //dialog_ex_set_right_button_text(dialog_ex, NULL);
-    //dialog_ex_set_result_callback(dialog_ex, NULL);
-    //dialog_ex_set_context(dialog_ex, NULL);
 }

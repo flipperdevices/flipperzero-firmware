@@ -40,8 +40,12 @@ static const uint8_t furi_hal_subghz_preset_ook_async_regs[][2] = {
     { CC1101_FOCCFG,    0x18 }, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
     /* Automatic Gain Control */
-    { CC1101_AGCTRL1,   0x00 }, // LNA 2 gain is decreased to minimum before decreasing LNA gain
-    { CC1101_AGCTRL2,   0x07 }, // MAGN_TARGET is 42 dB
+    //{ CC1101_AGCTRL1,   0x00 }, // LNA 2 gain is decreased to minimum before decreasing LNA gain
+    //{ CC1101_AGCTRL2,   0x07 }, // MAGN_TARGET is 42 dB
+
+    { CC1101_AGCTRL2, 0x03 },
+    { CC1101_AGCTRL1, 0x00 },
+    { CC1101_AGCTRL0, 0x40 },
 
     /* Wake on radio and timeouts control */
     { CC1101_WORCTRL,   0xFB }, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours 
@@ -60,7 +64,7 @@ static const uint8_t furi_hal_subghz_preset_ook_async_regs[][2] = {
     { CC1101_TEST2,     0x81 }, // FIFOTHR ADC_RETENTION=1 matched value
     { CC1101_TEST1,     0x35 }, // FIFOTHR ADC_RETENTION=1 matched value
     { CC1101_TEST0,     0x09 }, // VCO selection calibration stage is disabled
-
+	
     /* End  */
     { 0, 0 },
 };

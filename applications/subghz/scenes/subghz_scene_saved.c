@@ -1,12 +1,6 @@
 #include "../subghz_i.h"
 #include"file-worker.h"
 
-// void subghz_scene_saved_callback(DialogExResult result, void* context) {
-//     SubGhz* subghz = context;
-//     view_dispatcher_send_custom_event(
-//         subghz->view_dispatcher, result); //передаем в евент действия на экране
-// }
-
 bool subghz_scene_saved_file_select(SubGhz* subghz ) {
     furi_assert(subghz);
 
@@ -78,24 +72,13 @@ const void subghz_scene_saved_on_enter(void* context) {
     } else {
         scene_manager_search_and_switch_to_previous_scene(subghz->scene_manager, SubGhzSceneStart);
     }
-
 }
 
 const bool subghz_scene_saved_on_event(void* context, SceneManagerEvent event) {
     // SubGhz* subghz = context;
     return false;
-
 }
 
 const void subghz_scene_saved_on_exit(void* context) {
     // SubGhz* subghz = context;
-    // //удаляем ресурсы которые заюзали
-    // DialogEx* dialog_ex = subghz->dialog_ex;
-    // dialog_ex_set_header(dialog_ex, NULL, 0, 0, AlignCenter, AlignCenter);
-    // //dialog_ex_set_text(dialog_ex, NULL, 0, 0, AlignCenter, AlignTop);
-    // dialog_ex_set_icon(dialog_ex, 0, 0, NULL);
-    // dialog_ex_set_left_button_text(dialog_ex, NULL);
-    // dialog_ex_set_right_button_text(dialog_ex, NULL);
-    // dialog_ex_set_result_callback(dialog_ex, NULL);
-    // dialog_ex_set_context(dialog_ex, NULL);
 }

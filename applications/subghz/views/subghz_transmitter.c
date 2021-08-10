@@ -57,7 +57,6 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     SubghzTransmitter* subghz_transmitter = context;
 
     if(event->key == InputKeyBack) {
-        //subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
         return false;
     } else if(event->key == InputKeyOk) {
         subghz_transmitter->callback(SubghzTransmitterEventSend, subghz_transmitter->context);

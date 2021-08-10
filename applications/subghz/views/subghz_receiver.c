@@ -63,22 +63,6 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         subghz_receiver->callback(SubghzReceverEventBack, subghz_receiver->context);
         return true;
     }
-
-    // with_view_model(
-    //     subghz_receiver->view, (SubghzReceiverModel * model) {
-    //         if(event->type == InputTypeShort) {
-    //             if(event->key == InputKeyLeft) {
-    //                 // НАЗАД
-    //                 return true;
-    //             } else if(event->key == InputKeyRight) {
-    //                 //СОХРАНЕНИЕ
-    //                 return true;
-    //             }
-    //         } else {
-    //             return false;
-    //         }
-    //     });
-
     return true;
 }
 

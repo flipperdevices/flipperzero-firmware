@@ -77,4 +77,3 @@ void subghz_rx(uint32_t frequency);
 void subghz_tx(uint32_t frequency);
 void subghz_idle(void);
 void subghz_end(void);
-void subghz_text_callback(string_t text, void* context);

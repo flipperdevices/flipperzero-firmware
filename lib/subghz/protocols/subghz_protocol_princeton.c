@@ -47,7 +47,7 @@ void subghz_encoder_princeton_reset(SubGhzEncoderPrinceton* instance, uint32_t k
     
     instance->key = key;
     instance->repeat = repeat;
-    instance->front = 0;
+    instance->front = 48;
 }
 
 size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance) {
