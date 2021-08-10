@@ -1,5 +1,5 @@
-#include "irda-app-brute-force.hpp"
-#include "irda/irda-app-file-parser.hpp"
+#include "irda-app-brute-force.h"
+#include "irda/irda-app-file-parser.h"
 #include "m-string.h"
 #include <file-worker-cpp.h>
 #include <memory>

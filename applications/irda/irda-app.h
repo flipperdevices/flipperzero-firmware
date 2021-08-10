@@ -2,11 +2,11 @@
 #include <map>
 #include <irda.h>
 #include <furi.h>
-#include "scene/irda-app-scene.hpp"
-#include "irda-app-event.hpp"
-#include "scene/irda-app-scene.hpp"
-#include "irda-app-view-manager.hpp"
-#include "irda-app-remote-manager.hpp"
+#include "scene/irda-app-scene.h"
+#include "irda-app-event.h"
+#include "scene/irda-app-scene.h"
+#include "irda-app-view-manager.h"
+#include "irda-app-remote-manager.h"
 #include <forward_list>
 #include <stdint.h>
 #include <notification/notification-messages.h>

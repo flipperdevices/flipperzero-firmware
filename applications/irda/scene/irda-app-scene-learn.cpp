@@ -1,5 +1,5 @@
-#include "../irda-app.hpp"
-#include "../irda-app-event.hpp"
+#include "../irda-app.h"
+#include "../irda-app-event.h"
 #include <irda_worker.h>
 
 static void signal_received_callback(void* context, IrdaWorkerSignal* received_signal) {

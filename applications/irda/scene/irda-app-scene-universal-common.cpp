@@ -1,12 +1,12 @@
-#include "../irda-app.hpp"
+#include "../irda-app.h"
 #include "assets_icons.h"
 #include "gui/modules/button_menu.h"
 #include "gui/modules/button_panel.h"
 #include "../view/irda-app-brut-view.h"
 #include "gui/view.h"
-#include "irda/irda-app-event.hpp"
-#include "irda/irda-app-view-manager.hpp"
-#include "irda/scene/irda-app-scene.hpp"
+#include "irda/irda-app-event.h"
+#include "irda/irda-app-view-manager.h"
+#include "irda/scene/irda-app-scene.h"
 
 void IrdaAppSceneUniversalCommon::irda_app_item_callback(void* context, uint32_t index) {
     IrdaApp* app = static_cast<IrdaApp*>(context);

@@ -1,6 +1,6 @@
-#include "../irda-app.hpp"
+#include "../irda-app.h"
 #include "irda.h"
-#include "../irda-app-file-parser.hpp"
+#include "../irda-app-file-parser.h"
 #include <memory>
 
 static void dialog_result_callback(DialogExResult result, void* context) {

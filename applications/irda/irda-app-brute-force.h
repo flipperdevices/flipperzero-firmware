@@ -1,7 +1,7 @@
 #pragma once
 #include "furi/check.h"
 #include <unordered_map>
-#include "irda-app-file-parser.hpp"
+#include "irda-app-file-parser.h"
 #include <memory>
 
 class IrdaAppBruteForce {

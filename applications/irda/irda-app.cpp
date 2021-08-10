@@ -1,5 +1,5 @@
-#include "irda-app.hpp"
-#include "irda/irda-app-file-parser.hpp"
+#include "irda-app.h"
+#include "irda/irda-app-file-parser.h"
 #include <irda_worker.h>
 #include <furi.h>
 #include <gui/gui.h>

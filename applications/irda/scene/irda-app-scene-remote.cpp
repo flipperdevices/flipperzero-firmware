@@ -1,4 +1,4 @@
-#include "../irda-app.hpp"
+#include "../irda-app.h"
 #include "gui/modules/button_menu.h"
 #include "input/input.h"
 #include "irda_worker.h"

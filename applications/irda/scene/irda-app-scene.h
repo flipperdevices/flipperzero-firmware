@@ -1,10 +1,10 @@
 #pragma once
-#include "../irda-app-event.hpp"
+#include "../irda-app-event.h"
 #include <furi-hal-irda.h>
 #include "irda.h"
 #include <vector>
 #include <string>
-#include "../irda-app-brute-force.hpp"
+#include "../irda-app-brute-force.h"
 
 
 class IrdaApp;
