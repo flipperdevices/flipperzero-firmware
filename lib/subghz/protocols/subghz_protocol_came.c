@@ -22,7 +22,6 @@ SubGhzProtocolCame* subghz_protocol_came_alloc() {
         instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_came_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_came_to_save_str;
-
     instance->common.to_load_protocol=
         (SubGhzProtocolCommonLoad)subghz_protocol_came_to_load_protocol;
 

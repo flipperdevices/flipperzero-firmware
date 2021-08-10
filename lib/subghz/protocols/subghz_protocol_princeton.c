@@ -97,7 +97,6 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
-
     instance->common.to_load_protocol=
         (SubGhzProtocolCommonLoad)subghz_decoder_princeton_to_load_protocol;
 
