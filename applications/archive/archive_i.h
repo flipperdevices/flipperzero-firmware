@@ -27,7 +27,7 @@ typedef enum {
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
     [ArchiveFileTypeNFC] = "NFC",
-    [ArchiveFileTypeSubOne] = "SubGHz",
+    [ArchiveFileTypeSubOne] = "Sub-1 GHz",
     [ArchiveFileTypeLFRFID] = "125 kHz RFID",
     [ArchiveFileTypeIrda] = "Infrared",
 };
