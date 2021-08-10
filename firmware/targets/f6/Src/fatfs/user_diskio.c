@@ -52,7 +52,6 @@ static DSTATUS User_CheckStatus(BYTE lun) {
     return Stat;
 }
 
-static const FuriHalSpiDevice* sd_spi_fast_dev = &furi_hal_spi_devices[FuriHalSpiDeviceIdSdCardFast];
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,12 +87,11 @@ Diskio_drvTypeDef USER_Driver = {
 DSTATUS USER_initialize(BYTE pdrv) {
     /* USER CODE BEGIN INIT */
 
-    furi_hal_spi_bus_lock(sd_spi_fast_dev->bus);
-    furi_hal_spi_bus_configure(sd_spi_fast_dev->bus, sd_spi_fast_dev->config);
+    const FuriHalSpiDevice* sd_spi_fast_dev = furi_hal_spi_device_get(FuriHalSpiDeviceIdSdCardFast);
 
     DSTATUS status = User_CheckStatus(pdrv);
 
-    furi_hal_spi_bus_unlock(sd_spi_fast_dev->bus);
+    furi_hal_spi_device_return(sd_spi_fast_dev);
 
     return status;
     /* USER CODE END INIT */
@@ -122,8 +120,7 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     /* USER CODE BEGIN READ */
     DRESULT res = RES_ERROR;
 
-    furi_hal_spi_bus_lock(sd_spi_fast_dev->bus);
-    furi_hal_spi_bus_configure(sd_spi_fast_dev->bus, sd_spi_fast_dev->config);
+    const FuriHalSpiDevice* sd_spi_fast_dev = furi_hal_spi_device_get(FuriHalSpiDeviceIdSdCardFast);
 
     if(BSP_SD_ReadBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the read operation is finished */
@@ -132,7 +129,7 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
         res = RES_OK;
     }
 
-    furi_hal_spi_bus_unlock(sd_spi_fast_dev->bus);
+    furi_hal_spi_device_return(sd_spi_fast_dev);
 
     return res;
     /* USER CODE END READ */
@@ -152,8 +149,7 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     /* USER CODE HERE */
     DRESULT res = RES_ERROR;
 
-    furi_hal_spi_bus_lock(sd_spi_fast_dev->bus);
-    furi_hal_spi_bus_configure(sd_spi_fast_dev->bus, sd_spi_fast_dev->config);
+    const FuriHalSpiDevice* sd_spi_fast_dev = furi_hal_spi_device_get(FuriHalSpiDeviceIdSdCardFast);
 
     if(BSP_SD_WriteBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the Write operation is finished */
@@ -162,7 +158,7 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
         res = RES_OK;
     }
 
-    furi_hal_spi_bus_unlock(sd_spi_fast_dev->bus);
+    furi_hal_spi_device_return(sd_spi_fast_dev);
 
     return res;
     /* USER CODE END WRITE */
@@ -184,8 +180,7 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
 
     if(Stat & STA_NOINIT) return RES_NOTRDY;
 
-    furi_hal_spi_bus_lock(sd_spi_fast_dev->bus);
-    furi_hal_spi_bus_configure(sd_spi_fast_dev->bus, sd_spi_fast_dev->config);
+    const FuriHalSpiDevice* sd_spi_fast_dev = furi_hal_spi_device_get(FuriHalSpiDeviceIdSdCardFast);
 
     switch(cmd) {
     /* Make sure that no pending write process */
@@ -218,7 +213,7 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
         res = RES_PARERR;
     }
 
-    furi_hal_spi_bus_unlock(sd_spi_fast_dev->bus);
+    furi_hal_spi_device_return(sd_spi_fast_dev);
 
     return res;
     /* USER CODE END IOCTL */

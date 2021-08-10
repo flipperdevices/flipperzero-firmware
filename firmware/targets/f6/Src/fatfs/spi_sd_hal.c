@@ -18,7 +18,7 @@ static const FuriHalSpiDevice* sd_spi_dev = &furi_hal_spi_devices[FuriHalSpiDevi
  */
 static void SPIx_Error(void) {
     /* Re-Initiaize the SPI communication BUS */
-    furi_hal_spi_bus_reset(sd_spi_dev);
+    furi_hal_spi_bus_device_configure(sd_spi_dev);
 }
 
 /**
