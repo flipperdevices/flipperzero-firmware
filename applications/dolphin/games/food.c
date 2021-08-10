@@ -1,6 +1,5 @@
 #include <furi.h>
 #include <gui/gui.h>
-#include "math.h"
 #include "dolphin/dolphin_state.h"
 
 #define MAX_TRIES 3
@@ -41,13 +40,15 @@ typedef enum {
 typedef struct {
     GameEventType current_event;
     osMessageQueueId_t event_queue;
+    LootIdEnum loot_list[DISHES_TOTAL];
+
     uint8_t cursor_pos;
     uint8_t lid_pos;
     uint8_t timeout;
     uint8_t try;
+
     bool selected;
     bool deed;
-    LootIdEnum loot_list[DISHES_TOTAL];
 
 } GameState;
 
@@ -89,7 +90,6 @@ static void draw_dish(Canvas* canvas, GameState* state, uint8_t x, uint8_t y, ui
     bool opened = state->current_event == OpenLootEvent && active;
 
     canvas_set_bitmap_mode(canvas, true);
-
     canvas_set_color(canvas, ColorBlack);
 
     if(active) {
@@ -113,7 +113,6 @@ static void draw_dish(Canvas* canvas, GameState* state, uint8_t x, uint8_t y, ui
     canvas_draw_icon(canvas, x + 6, lid_pos, &I_blacklid_36x27);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, x + 6, lid_pos, &I_lid_36x27);
-
     canvas_set_bitmap_mode(canvas, false);
 
     canvas_draw_icon(canvas, x + 19, y + 8, letters[id]);
