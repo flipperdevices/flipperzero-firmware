@@ -1579,6 +1579,7 @@ static ReturnCode rfalNfcListenActivation( void )
 
     
     lmSt = rfalListenGetState( &isDataRcvd, &bitRate );
+
     switch(lmSt)
     {
 
@@ -1586,14 +1587,31 @@ static ReturnCode rfalNfcListenActivation( void )
         /*******************************************************************************/
         case RFAL_LM_STATE_ACTIVE_A:                                                  /* NFC-A CE activation */
         case RFAL_LM_STATE_ACTIVE_Ax:
+
+            // if(gNfcDev.disc.activate_after_sak) {
+            //     gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_NFCA;
+            //     rfalListenSetState(RFAL_LM_STATE_ACTIVE_A);
+            //     return ERR_NONE;
+            // }
             
             if( isDataRcvd )                                                          /* Check if Reader/Initator has sent some data */
             {
+                printf("Hi from rfal: %d\r\n", gNfcDev.rxLen / 8);
+                for(uint8_t i = 0; i < gNfcDev.rxLen / 8; i++) {
+                    printf("%02X ", gNfcDev.rxBuf.rfBuf[i]);
+                }
+                printf("\r\n");
                 /* Check if received data is a Sleep request */
                 if( rfalNfcaListenerIsSleepReq( gNfcDev.rxBuf.rfBuf, rfalConvBitsToBytes(gNfcDev.rxLen)) )     /* Check if received data is a SLP_REQ */
                 {
                     /* Set the Listen Mode in Sleep state */
                     EXIT_ON_ERR( ret, rfalListenSleepStart( RFAL_LM_STATE_SLEEP_A, gNfcDev.rxBuf.rfBuf, sizeof(gNfcDev.rxBuf.rfBuf), &gNfcDev.rxLen ) );
+                }
+
+                else if(gNfcDev.disc.activate_after_sak) {
+                    gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_NFCA;
+                    rfalListenSetState(RFAL_LM_STATE_ACTIVE_A);
+                    return ERR_NONE;
                 }
                 
             #if RFAL_FEATURE_ISO_DEP && RFAL_FEATURE_ISO_DEP_LISTEN
