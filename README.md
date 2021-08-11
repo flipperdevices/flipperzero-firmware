@@ -224,7 +224,7 @@ device family also has to be specified as a component for the `FreeRTOS` package
 
 CMSIS RTOS can be used by specifying a `CMSIS` target and by finding the CMSIS `RTOS` package.
 The following section will show a few example configurations for the H7 and F4 family.
-You can also find example code for the `H743ZI` and `F407VG` devices in the `examples`
+You can also find example code for several devices in the [examples](https://github.com/ObKo/stm32-cmake/tree/master/examples/freertos)
 folder.
 
 Typical usage for a H7 device when using the M7 core, using an external kernel without CMSIS
@@ -247,6 +247,30 @@ find_package(FreeRTOS COMPONENTS ARM_CM4F REQUIRED)
 target_link_libraries(${TARGET_NAME} PRIVATE
     ...
     FreeRTOS::ARM_CM4F
+)
+```
+
+For ARMv8-M architecture (CM23 and CM33) you can choose "No Trust Zone" port:
+
+```cmake
+find_package(FreeRTOS COMPONENTS ARM_CM33_NTZ REQUIRED)
+target_link_libraries(${TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM33_NTZ
+)
+```
+
+Or you can use the trust zone with:
+
+```cmake
+find_package(FreeRTOS COMPONENTS ARM_CM33 REQUIRED)
+target_link_libraries(${SECURE_TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM33::SECURE
+)
+target_link_libraries(${NON_SECURE_TARGET_NAME} PRIVATE
+    ...
+    FreeRTOS::ARM_CM33::NON_SECURE
 )
 ```
 
@@ -277,8 +301,9 @@ in the Cube repository
 For the multi-core architectures, both family and core need to be specified like shown in the
 example above.
 
-The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`, `ARM_CM4F`, `ARM_CM7`,
-`ARM_CM3_MPU`, `ARM_CM4_MPU`, `ARM_CM7_MPU`.
+The following FreeRTOS ports are supported in general: `ARM_CM0`, `ARM_CM3`,
+`ARM_CM3_MPU`, `ARM_CM4F`, `ARM_CM4_MPU`, `ARM_CM7`, `ARM_CM7_MPU`, 
+`ARM_CM23`, `ARM_CM23_NTZ`, `ARM_CM33`, `ARM_CM33_NTZ`.
 
 Other FreeRTOS libraries, with `FREERTOS_NAMESPACE` being set as specified in the examples above:
 
