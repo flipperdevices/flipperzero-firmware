@@ -68,6 +68,11 @@ bool furi_hal_spi_bus_trx(
 
 /* Device Level API */
 
+/** Reconfigure SPI bus for device
+ * @param device - device description
+ */
+void furi_hal_spi_device_configure(const FuriHalSpiDevice* device);
+
 /** Get Device handle
  * And lock access to the corresponding SPI BUS
  * @param device_id - device identifier

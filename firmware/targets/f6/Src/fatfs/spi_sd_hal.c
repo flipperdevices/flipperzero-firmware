@@ -48,6 +48,7 @@ void SD_IO_Init(void) {
 
     /* SD chip select high */
     hal_gpio_write(sd_spi_dev->chip_select, true);
+    delay_us(10);
 
     /* Send dummy byte 0xFF, 10 times with CS high */
     /* Rise CS and MOSI for 80 clocks cycles */
@@ -63,6 +64,7 @@ void SD_IO_Init(void) {
  * @retval None
  */
 void SD_IO_CSState(uint8_t val) {
+    /* Some SD Cards are prone to fail if CLK-ed too soon after CS transition. Worst case found: 8us */
     if(val == 1) {
         delay_us(10); // Exit guard time for some SD cards
         hal_gpio_write(sd_spi_dev->chip_select, true);

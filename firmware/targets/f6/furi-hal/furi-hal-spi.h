@@ -62,7 +62,7 @@ bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t*
 /** Reconfigure SPI bus for device
  * @param device - device description
  */
-void furi_hal_spi_bus_device_configure(const FuriHalSpiDevice* device);
+void furi_hal_spi_device_configure(const FuriHalSpiDevice* device);
 
 /** Get Device handle
  * And lock access to the corresponding SPI BUS

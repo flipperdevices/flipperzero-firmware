@@ -105,13 +105,6 @@ bool furi_hal_spi_bus_tx(const FuriHalSpiBus* bus, uint8_t* buffer, size_t size,
             buffer++;
             size--;
         }
-
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            if(--timeout == 0) {
-                ret = false;
-                break;
-            }
-        }
     }
 
     furi_hal_spi_bus_end_txrx(bus, timeout);
@@ -148,13 +141,6 @@ bool furi_hal_spi_bus_trx(
             size--;
             tx_allowed = true;
         }
-
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            if(--timeout == 0) {
-                ret = false;
-                break;
-            }
-        }
     }
 
     furi_hal_spi_bus_end_txrx(bus, timeout);
@@ -162,7 +148,7 @@ bool furi_hal_spi_bus_trx(
     return ret;
 }
 
-void furi_hal_spi_bus_device_configure(const FuriHalSpiDevice* device) {
+void furi_hal_spi_device_configure(const FuriHalSpiDevice* device) {
     assert(device);
     assert(device->config);
 
@@ -176,7 +162,7 @@ const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id) {
     assert(device);
 
     furi_hal_spi_bus_lock(device->bus);
-    furi_hal_spi_bus_device_configure(device);
+    furi_hal_spi_device_configure(device);
 
     return device;
 }
