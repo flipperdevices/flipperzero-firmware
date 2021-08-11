@@ -83,13 +83,6 @@ bool furi_hal_spi_bus_tx(const FuriHalSpiBus* bus, uint8_t* buffer, size_t size,
             buffer++;
             size--;
         }
-
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            if(--timeout == 0) {
-                ret = false;
-                break;
-            }
-        }
     }
 
     furi_hal_spi_bus_end_txrx(bus, timeout);
@@ -121,13 +114,6 @@ bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t*
             rx_buffer++;
             size--;
             tx_allowed = true;
-        }
-
-        if(LL_SYSTICK_IsActiveCounterFlag()) {
-            if(--timeout == 0) {
-                ret = false;
-                break;
-            }
         }
     }
 

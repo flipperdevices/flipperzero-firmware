@@ -1,25 +1,17 @@
 #include "main.h"
-#include "furi-hal-spi.h"
+#include <furi-hal.h>
+#include <furi.h>
 
 #define SD_DUMMY_BYTE 0xFF
 
 const uint32_t SpiTimeout = 1000;
 uint8_t SD_IO_WriteByte(uint8_t Data);
-static const FuriHalSpiDevice* sd_spi_dev = &furi_hal_spi_devices[FuriHalSpiDeviceIdSdCardFast];
 
+static const FuriHalSpiDevice* sd_spi_dev = &furi_hal_spi_devices[FuriHalSpiDeviceIdSdCardFast];
 
 /******************************************************************************
                             BUS OPERATIONS
  *******************************************************************************/
-
-/**
- * @brief  SPI error treatment function
- * @retval None
- */
-static void SPIx_Error(void) {
-    /* Re-Initiaize the SPI communication BUS */
-    furi_hal_spi_bus_device_configure(sd_spi_dev);
-}
 
 /**
  * @brief  SPI Write byte(s) to device
@@ -29,13 +21,7 @@ static void SPIx_Error(void) {
  * @retval None
  */
 static void SPIx_WriteReadData(const uint8_t* DataIn, uint8_t* DataOut, uint16_t DataLength) {
-    bool status = furi_hal_spi_bus_trx(sd_spi_dev->bus, (uint8_t*)DataIn, DataOut, DataLength, SpiTimeout);
-
-    /* Check the communication status */
-    if(!status) {
-        /* Execute user timeout callback */
-        SPIx_Error();
-    }
+    furi_check(furi_hal_spi_bus_trx(sd_spi_dev->bus, (uint8_t*)DataIn, DataOut, DataLength, SpiTimeout));
 }
 
 /**
@@ -46,13 +32,7 @@ static void SPIx_WriteReadData(const uint8_t* DataIn, uint8_t* DataOut, uint16_t
 __attribute__((unused)) static void SPIx_Write(uint8_t Value) {
     uint8_t data;
 
-    bool status = furi_hal_spi_bus_trx(sd_spi_dev->bus, (uint8_t*)&Value, &data, 1, SpiTimeout);
-
-    /* Check the communication status */
-    if(!status) {
-        /* Execute user timeout callback */
-        SPIx_Error();
-    }
+    furi_check(furi_hal_spi_bus_trx(sd_spi_dev->bus, (uint8_t*)&Value, &data, 1, SpiTimeout));
 }
 
 /******************************************************************************
