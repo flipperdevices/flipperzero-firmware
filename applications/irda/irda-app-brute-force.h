@@ -28,7 +28,9 @@ public:
     bool start_bruteforce(int index, int& record_amount);
     void add_record(int index, const char* name);
 
-    IrdaAppBruteForce(const char* filename) : universal_db_filename (filename) {}
-    ~IrdaAppBruteForce() {}
+    IrdaAppBruteForce(const char* filename)
+        : universal_db_filename(filename) {
+    }
+    ~IrdaAppBruteForce() {
+    }
 };
-

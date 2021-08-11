@@ -12,7 +12,6 @@
 #include <notification/notification-messages.h>
 #include <irda_worker.h>
 
-
 class IrdaApp {
 public:
     enum class EditElement : uint8_t {
@@ -71,7 +70,7 @@ public:
     void set_learn_new_remote(bool value);
 
     enum : int {
-           ButtonNA = -1,
+        ButtonNA = -1,
     };
     int get_current_button();
     void set_current_button(int value);
@@ -96,9 +95,9 @@ public:
     ~IrdaApp() {
         irda_worker_free(irda_worker);
         furi_record_close("notification");
-        for (auto &it : scenes)
-            delete it.second;
+        for(auto& it : scenes) delete it.second;
     }
+
 private:
     static const uint8_t text_store_size = 128;
     static const uint8_t text_store_max = 2;
@@ -121,7 +120,7 @@ private:
         {Scene::Start, new IrdaAppSceneStart()},
         {Scene::Universal, new IrdaAppSceneUniversal()},
         {Scene::UniversalTV, new IrdaAppSceneUniversalTV()},
-//        {Scene::UniversalAudio, new IrdaAppSceneUniversalAudio()},
+        //        {Scene::UniversalAudio, new IrdaAppSceneUniversalAudio()},
         {Scene::Learn, new IrdaAppSceneLearn()},
         {Scene::LearnSuccess, new IrdaAppSceneLearnSuccess()},
         {Scene::LearnEnterName, new IrdaAppSceneLearnEnterName()},

@@ -57,4 +57,3 @@ private:
 
     void add_view(ViewType view_type, View* view);
 };
-
