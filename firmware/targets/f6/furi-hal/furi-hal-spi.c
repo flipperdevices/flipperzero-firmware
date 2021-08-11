@@ -38,12 +38,12 @@ void furi_hal_spi_init() {
 
 void furi_hal_spi_bus_lock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    furi_assert(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
+    furi_check(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
 }
 
 void furi_hal_spi_bus_unlock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    furi_assert(osMutexRelease(*bus->mutex) == osOK);
+    furi_check(osMutexRelease(*bus->mutex) == osOK);
 }
 
 void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const LL_SPI_InitTypeDef* config) {
