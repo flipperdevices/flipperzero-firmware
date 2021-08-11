@@ -76,10 +76,12 @@ void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const LL_SPI_InitTypeD
 }
 
 void furi_hal_spi_bus_end_txrx(const FuriHalSpiBus* bus, uint32_t timeout) {
-    while(LL_SPI_GetTxFIFOLevel((SPI_TypeDef *)bus->spi) != LL_SPI_TX_FIFO_EMPTY);
-    while(LL_SPI_IsActiveFlag_BSY((SPI_TypeDef *)bus->spi));
-    while(LL_SPI_GetRxFIFOLevel((SPI_TypeDef *)bus->spi) != LL_SPI_RX_FIFO_EMPTY) {
-        LL_SPI_ReceiveData8((SPI_TypeDef *)bus->spi);
+    while(LL_SPI_GetTxFIFOLevel((SPI_TypeDef*)bus->spi) != LL_SPI_TX_FIFO_EMPTY)
+        ;
+    while(LL_SPI_IsActiveFlag_BSY((SPI_TypeDef*)bus->spi))
+        ;
+    while(LL_SPI_GetRxFIFOLevel((SPI_TypeDef*)bus->spi) != LL_SPI_RX_FIFO_EMPTY) {
+        LL_SPI_ReceiveData8((SPI_TypeDef*)bus->spi);
     }
 }
 
