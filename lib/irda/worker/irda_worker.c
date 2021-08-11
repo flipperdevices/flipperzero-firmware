@@ -442,7 +442,9 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
         case IrdaWorkerStateStartTx:
             instance->tx.need_reinitialization = false;
             new_data_available = irda_worker_tx_fill_buffer(instance);
-            furi_hal_irda_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
+            exit = !furi_hal_irda_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
+            if (exit)
+                break;
 
             if (!new_data_available) {
                 instance->state = IrdaWorkerStateStopTx;

@@ -263,7 +263,6 @@ static void furi_hal_irda_tx_dma_isr() {
                 LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_2);
             }
             if (!result) {
-                furi_assert(0);
                 furi_hal_irda_state = IrdaStateAsyncTxStopReq;
             }
         } else if (furi_hal_irda_state == IrdaStateAsyncTxStopReq) {
@@ -427,7 +426,6 @@ static bool furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift
         uint32_t num_of_impulses = roundf(duration / irda_tim_tx.cycle_duration);
 
         if ((buffer->data[*size] + num_of_impulses - 1) > 0xFFFF) {
-            furi_assert(0);
             status = FuriHalIrdaTxGetDataStateError;
             break;
         }

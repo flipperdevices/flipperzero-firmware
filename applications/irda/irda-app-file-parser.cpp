@@ -51,7 +51,7 @@ size_t IrdaAppFileParser::stringify_message(
         buf,
         buf_size,
         "%.*s %.31s A:%0*lX C:%0*lX\n",
-        IrdaAppFileParser::max_signal_name_length,
+        (int) IrdaAppFileParser::max_signal_name_length,
         name,
         irda_get_protocol_name(protocol),
         irda_get_protocol_address_length(protocol),
@@ -78,7 +78,7 @@ size_t IrdaAppFileParser::stringify_raw_signal(
         &buf[written],
         max_line_length - written,
         "%.*s RAW F:%d DC:%d",
-        IrdaAppFileParser::max_signal_name_length,
+        (int) IrdaAppFileParser::max_signal_name_length,
         name,
         IRDA_COMMON_CARRIER_FREQUENCY,
         duty_cycle);
@@ -146,6 +146,7 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     uint32_t address;
     uint32_t command;
     auto irda_file_signal = std::make_unique<IrdaFileSignal>();
+    furi_assert(IrdaAppFileParser::max_signal_name_length < sizeof(irda_file_signal->name));
 
     int parsed = std::sscanf(
         str.c_str(),
@@ -216,8 +217,8 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     int str_len = string.size();
     std::string_view str(string.c_str());
     auto irda_file_signal = std::make_unique<IrdaFileSignal>();
-
     furi_assert(IrdaAppFileParser::max_signal_name_length < sizeof(irda_file_signal->name));
+
     int parsed = std::sscanf(
         str.data(), "%31s RAW F:%ld DC:%ld", irda_file_signal->name, &frequency, &duty_cycle);
 

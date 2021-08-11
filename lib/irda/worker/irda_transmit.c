@@ -45,8 +45,11 @@ void irda_send_raw_ext(const uint32_t timings[], uint32_t timings_cnt, bool star
     irda_tx_raw_timings_number = timings_cnt;
     irda_tx_raw_add_silence = start_from_mark;
     furi_hal_irda_async_tx_set_data_isr_callback(irda_get_raw_data_callback, (void*) timings);
-    furi_hal_irda_async_tx_start(frequency, duty_cycle);
-    furi_hal_irda_async_tx_wait_termination();
+    if (furi_hal_irda_async_tx_start(frequency, duty_cycle)) {
+        furi_hal_irda_async_tx_wait_termination();
+    } else {
+        FURI_LOG_I("IRDA CLI", "failed to send signal\r\n");
+    }
 
     furi_assert(!furi_hal_irda_is_busy());
 }
@@ -91,8 +94,11 @@ void irda_send(const IrdaMessage* message, int times) {
     irda_tx_number_of_transmissions = times;
 
     furi_hal_irda_async_tx_set_data_isr_callback(irda_get_data_callback, handler);
-    furi_hal_irda_async_tx_start(IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE);
-    furi_hal_irda_async_tx_wait_termination();
+    if (furi_hal_irda_async_tx_start(IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE)) {
+        furi_hal_irda_async_tx_wait_termination();
+    } else {
+        FURI_LOG_I("IRDA CLI", "failed to send signal\r\n");
+    }
 
     irda_free_encoder(handler);
 
