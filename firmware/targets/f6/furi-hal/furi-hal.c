@@ -1,9 +1,7 @@
 #include <furi-hal.h>
 
-#include <adc.h>
 #include <aes.h>
 #include <comp.h>
-#include <crc.h>
 #include <pka.h>
 #include <rf.h>
 #include <rng.h>
@@ -25,9 +23,6 @@ void furi_hal_init() {
     FURI_LOG_I("HAL", "RTC OK");
     furi_hal_boot_init();
     furi_hal_version_init();
-    
-    MX_ADC1_Init();
-    FURI_LOG_I("HAL", "ADC1 OK");
 
     furi_hal_spi_init();
 
@@ -49,8 +44,6 @@ void furi_hal_init() {
     FURI_LOG_I("HAL", "AES1 OK");
     MX_AES2_Init();
     FURI_LOG_I("HAL", "AES2 OK");
-    MX_CRC_Init();
-    FURI_LOG_I("HAL", "CRC OK");
 
     // VCP + USB
     furi_hal_vcp_init();
