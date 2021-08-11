@@ -155,6 +155,16 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
             target_sources(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE "${FreeRTOS_${PORT}_SOURCE}")
             target_include_directories(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE "${FreeRTOS_${PORT}_PATH}")
         endif()
+
+        # armv8-m needs additional file even if using "No Trust Zone" port
+        if(${PORT} STREQUAL ARM_CM23_NTZ OR ${PORT} STREQUAL ARM_CM33_NTZ)
+            find_file(FreeRTOS_${PORT}_ASM
+                NAMES portasm.c
+                PATHS "${FreeRTOS_${PORT}_PATH}"
+                NO_DEFAULT_PATH
+            )
+            target_sources(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE "${FreeRTOS_${PORT}_ASM}")
+        endif()
         
         if(FreeRTOS_${PORT}_PATH AND 
            FreeRTOS_${PORT}_SOURCE AND 
