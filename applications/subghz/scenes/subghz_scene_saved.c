@@ -1,5 +1,4 @@
 #include "../subghz_i.h"
-#include "file-worker.h"
 
 bool subghz_scene_saved_file_select(SubGhz* subghz) {
     furi_assert(subghz);

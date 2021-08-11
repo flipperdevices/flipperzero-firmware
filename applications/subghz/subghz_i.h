@@ -77,3 +77,4 @@ void subghz_rx(uint32_t frequency);
 void subghz_tx(uint32_t frequency);
 void subghz_idle(void);
 void subghz_end(void);
+bool subghz_key_load(SubGhz* subghz, const char* file_path);

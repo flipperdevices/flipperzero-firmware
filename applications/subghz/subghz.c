@@ -203,7 +203,12 @@ void subghz_free(SubGhz* subghz) {
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
 
-    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+    // Check argument and run corresponding scene
+    if(p && subghz_key_load(subghz, p)) {
+        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+    } else {
+        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+    }
 
     view_dispatcher_run(subghz->view_dispatcher);
 
