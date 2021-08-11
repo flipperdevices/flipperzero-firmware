@@ -30,9 +30,7 @@ static void SPIx_WriteReadData(const uint8_t* DataIn, uint8_t* DataOut, uint16_t
  * @retval None
  */
 __attribute__((unused)) static void SPIx_Write(uint8_t Value) {
-    uint8_t data;
-
-    furi_check(furi_hal_spi_bus_trx(sd_spi_dev->bus, (uint8_t*)&Value, &data, 1, SpiTimeout));
+    furi_check(furi_hal_spi_bus_tx(sd_spi_dev->bus, (uint8_t*)&Value, 1, SpiTimeout));
 }
 
 /******************************************************************************
@@ -66,9 +64,11 @@ void SD_IO_Init(void) {
  */
 void SD_IO_CSState(uint8_t val) {
     if(val == 1) {
+        delay_us(10); // Exit guard time for some SD cards
         hal_gpio_write(sd_spi_dev->chip_select, true);
     } else {
         hal_gpio_write(sd_spi_dev->chip_select, false);
+        delay_us(10); // Entry guard time for some SD cards
     }
 }
 
