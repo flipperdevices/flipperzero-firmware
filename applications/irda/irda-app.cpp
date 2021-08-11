@@ -48,6 +48,17 @@ int32_t IrdaApp::run(void* args) {
     return 0;
 };
 
+IrdaApp::IrdaApp() {
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
+    irda_worker = irda_worker_alloc();
+}
+
+IrdaApp::~IrdaApp() {
+    irda_worker_free(irda_worker);
+    furi_record_close("notification");
+    for(auto& it : scenes) delete it.second;
+}
+
 IrdaAppViewManager* IrdaApp::get_view_manager() {
     return &view_manager;
 }

@@ -88,15 +88,8 @@ public:
     static void text_input_callback(void* context);
     static void popup_callback(void* context);
 
-    IrdaApp() {
-        notification = static_cast<NotificationApp*>(furi_record_open("notification"));
-        irda_worker = irda_worker_alloc();
-    }
-    ~IrdaApp() {
-        irda_worker_free(irda_worker);
-        furi_record_close("notification");
-        for(auto& it : scenes) delete it.second;
-    }
+    IrdaApp();
+    ~IrdaApp();
 
 private:
     static const uint8_t text_store_size = 128;

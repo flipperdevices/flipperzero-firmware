@@ -47,6 +47,7 @@ class IrdaAppRemoteManager {
     std::string make_remote_name(const std::string& full_name) const;
 
 public:
+    static uint32_t const max_button_name_length;
     bool add_remote_with_button(const char* button_name, const IrdaAppSignal& signal);
     bool add_button(const char* button_name, const IrdaAppSignal& signal);
 
