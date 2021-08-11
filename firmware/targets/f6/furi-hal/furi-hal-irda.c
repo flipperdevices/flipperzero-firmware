@@ -49,7 +49,7 @@ typedef struct {
 } IrdaTimTx;
 
 typedef enum {
-    IrdaStateIdle,                  /** Api Hal Irda is ready to start RX or TX */
+    IrdaStateIdle,                  /** Furi Hal Irda is ready to start RX or TX */
     IrdaStateAsyncRx,               /** Async RX started */
     IrdaStateAsyncTx,               /** Async TX started, DMA and timer is on */
     IrdaStateAsyncTxStopReq,        /** Async TX started, async stop request received */

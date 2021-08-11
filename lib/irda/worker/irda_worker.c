@@ -51,7 +51,6 @@ struct IrdaWorkerSignal{
 struct IrdaWorker {
     FuriThread* thread;
     StreamBufferHandle_t stream;
-    TaskHandle_t worker_handle2;
     osEventFlagsId_t events;
 
     IrdaWorkerSignal signal;
@@ -78,7 +77,7 @@ struct IrdaWorker {
             void* received_signal_context;
             bool overrun;
         } rx;
-    } u;
+    };
 };
 
 typedef struct {
@@ -119,8 +118,8 @@ static void irda_worker_process_timeout(IrdaWorker* instance) {
         return;
 
     instance->signal.decoded = false;
-    if (instance->u.rx.received_signal_callback)
-        instance->u.rx.received_signal_callback(instance->u.rx.received_signal_context, &instance->signal);
+    if (instance->rx.received_signal_callback)
+        instance->rx.received_signal_callback(instance->rx.received_signal_context, &instance->signal);
 }
 
 static void irda_worker_process_timings(IrdaWorker* instance, uint32_t duration, bool level) {
@@ -129,8 +128,8 @@ static void irda_worker_process_timings(IrdaWorker* instance, uint32_t duration,
         instance->signal.data.message = *message_decoded;
         instance->signal.timings_cnt = 0;
         instance->signal.decoded = true;
-        if (instance->u.rx.received_signal_callback)
-            instance->u.rx.received_signal_callback(instance->u.rx.received_signal_context, &instance->signal);
+        if (instance->rx.received_signal_callback)
+            instance->rx.received_signal_callback(instance->rx.received_signal_context, &instance->signal);
     } else {
         /* Skip first timing if it's starts from Space */
         if ((instance->signal.timings_cnt == 0) && !level) {
@@ -143,7 +142,7 @@ static void irda_worker_process_timings(IrdaWorker* instance, uint32_t duration,
         } else {
             uint32_t flags_set = osEventFlagsSet(instance->events, IRDA_WORKER_OVERRUN);
             furi_check(flags_set & IRDA_WORKER_OVERRUN);
-            instance->u.rx.overrun = true;
+            instance->rx.overrun = true;
         }
     }
 }
@@ -159,14 +158,14 @@ static int32_t irda_worker_rx_thread(void* thread_context) {
         furi_check(events & IRDA_WORKER_ALL_RX_EVENTS); /* at least one caught */
 
         if (events & IRDA_WORKER_RX_RECEIVED) {
-            if (!instance->u.rx.overrun && instance->blink_enable && ((xTaskGetTickCount() - last_blink_time) > 80)) {
+            if (!instance->rx.overrun && instance->blink_enable && ((xTaskGetTickCount() - last_blink_time) > 80)) {
                 last_blink_time = xTaskGetTickCount();
                 notification_message(instance->notification, &sequence_blink_blue_10);
             }
             if (instance->signal.timings_cnt == 0)
                 notification_message(instance->notification, &sequence_display_on);
             while (sizeof(LevelDuration) == xStreamBufferReceive(instance->stream, &level_duration, sizeof(LevelDuration), 0)) {
-                if (!instance->u.rx.overrun) {
+                if (!instance->rx.overrun) {
                     bool level = level_duration_get_level(level_duration);
                     uint32_t duration = level_duration_get_duration(level_duration);
                     irda_worker_process_timings(instance, duration, level);
@@ -181,9 +180,9 @@ static int32_t irda_worker_rx_thread(void* thread_context) {
                 notification_message(instance->notification, &sequence_set_red_255);
         }
         if (events & IRDA_WORKER_RX_TIMEOUT_RECEIVED) {
-            if (instance->u.rx.overrun) {
+            if (instance->rx.overrun) {
                 printf("\nOVERRUN, max samples: %d\n", MAX_TIMINGS_AMOUNT);
-                instance->u.rx.overrun = false;
+                instance->rx.overrun = false;
                 if (instance->blink_enable)
                     notification_message(instance->notification, &sequence_reset_red);
             } else {
@@ -200,8 +199,8 @@ static int32_t irda_worker_rx_thread(void* thread_context) {
 
 void irda_worker_rx_set_received_signal_callback(IrdaWorker* instance, IrdaWorkerReceivedSignalCallback callback, void* context) {
     furi_assert(instance);
-    instance->u.rx.received_signal_callback = callback;
-    instance->u.rx.received_signal_context = context;
+    instance->rx.received_signal_callback = callback;
+    instance->rx.received_signal_context = context;
 }
 
 IrdaWorker* irda_worker_alloc() {
@@ -309,8 +308,8 @@ void irda_worker_tx_start(IrdaWorker* instance) {
     furi_thread_set_callback(instance->thread, irda_worker_tx_thread);
     furi_thread_start(instance->thread);
 
-    instance->u.tx.steady_signal_sent = false;
-    instance->u.tx.need_reinitialization = false;
+    instance->tx.steady_signal_sent = false;
+    instance->tx.need_reinitialization = false;
     furi_hal_irda_async_tx_set_data_isr_callback(irda_worker_furi_hal_data_isr_callback, instance);
     furi_hal_irda_async_tx_set_signal_sent_isr_callback(irda_worker_furi_hal_message_sent_isr_callback, instance);
 
@@ -349,7 +348,7 @@ static FuriHalIrdaTxGetDataState irda_worker_furi_hal_data_isr_callback(void* co
 static bool irda_get_new_signal(IrdaWorker* instance) {
     bool new_signal_obtained = false;
 
-    IrdaWorkerGetSignalResponse response = instance->u.tx.get_signal_callback(instance->u.tx.get_signal_context, instance);
+    IrdaWorkerGetSignalResponse response = instance->tx.get_signal_callback(instance->tx.get_signal_context, instance);
     if (response == IrdaWorkerGetSignalResponseNew) {
         uint32_t new_tx_frequency = 0;
         float new_tx_duty_cycle = 0;
@@ -362,10 +361,10 @@ static bool irda_get_new_signal(IrdaWorker* instance) {
             new_tx_duty_cycle = IRDA_COMMON_DUTY_CYCLE;
         }
 
-        instance->u.tx.tx_raw_cnt = 0;
-        instance->u.tx.need_reinitialization = (new_tx_frequency != instance->u.tx.frequency) || (new_tx_duty_cycle != instance->u.tx.duty_cycle);
-        instance->u.tx.frequency = new_tx_frequency;
-        instance->u.tx.duty_cycle = new_tx_duty_cycle;
+        instance->tx.tx_raw_cnt = 0;
+        instance->tx.need_reinitialization = (new_tx_frequency != instance->tx.frequency) || (new_tx_duty_cycle != instance->tx.duty_cycle);
+        instance->tx.frequency = new_tx_frequency;
+        instance->tx.duty_cycle = new_tx_duty_cycle;
         if (instance->signal.decoded) {
             irda_reset_encoder(instance->irda_encoder, &instance->signal.data.message);
         }
@@ -387,16 +386,16 @@ static bool irda_worker_tx_fill_buffer(IrdaWorker* instance) {
     IrdaWorkerTiming timing;
     IrdaStatus status = IrdaStatusError;
 
-    while(!xStreamBufferIsFull(instance->stream) && !instance->u.tx.need_reinitialization && new_data_available) {
+    while(!xStreamBufferIsFull(instance->stream) && !instance->tx.need_reinitialization && new_data_available) {
         if (instance->signal.decoded) {
             status = irda_encode(instance->irda_encoder, &timing.duration, &timing.level);
         } else {
-            timing.duration = instance->signal.data.timings[instance->u.tx.tx_raw_cnt];
+            timing.duration = instance->signal.data.timings[instance->tx.tx_raw_cnt];
 /* raw always starts from Mark, but we fulfill it with space delay at start */
-            timing.level = (instance->u.tx.tx_raw_cnt % 2);
-            ++instance->u.tx.tx_raw_cnt;
-            if (instance->u.tx.tx_raw_cnt >= instance->signal.timings_cnt) {
-                instance->u.tx.tx_raw_cnt = 0;
+            timing.level = (instance->tx.tx_raw_cnt % 2);
+            ++instance->tx.tx_raw_cnt;
+            if (instance->tx.tx_raw_cnt >= instance->signal.timings_cnt) {
+                instance->tx.tx_raw_cnt = 0;
                 status = IrdaStatusDone;
             } else {
                 status = IrdaStatusOk;
@@ -413,7 +412,7 @@ static bool irda_worker_tx_fill_buffer(IrdaWorker* instance) {
             timing.state = FuriHalIrdaTxGetDataStateDone;
 
             new_data_available = irda_get_new_signal(instance);
-            if (instance->u.tx.need_reinitialization || !new_data_available) {
+            if (instance->tx.need_reinitialization || !new_data_available) {
                 timing.state = FuriHalIrdaTxGetDataStateLastDone;
             }
         } else {
@@ -441,13 +440,13 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
     while(!exit) {
         switch (instance->state) {
         case IrdaWorkerStateStartTx:
-            instance->u.tx.need_reinitialization = false;
+            instance->tx.need_reinitialization = false;
             new_data_available = irda_worker_tx_fill_buffer(instance);
-            furi_hal_irda_async_tx_start(instance->u.tx.frequency, instance->u.tx.duty_cycle);
+            furi_hal_irda_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
 
             if (!new_data_available) {
                 instance->state = IrdaWorkerStateStopTx;
-            } else if (instance->u.tx.need_reinitialization) {
+            } else if (instance->tx.need_reinitialization) {
                 instance->state = IrdaWorkerStateWaitTxEnd;
             } else {
                 instance->state = IrdaWorkerStateRunTx;
@@ -481,14 +480,14 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
             if (events & IRDA_WORKER_TX_FILL_BUFFER) {
                 irda_worker_tx_fill_buffer(instance);
 
-                if (instance->u.tx.need_reinitialization) {
+                if (instance->tx.need_reinitialization) {
                     instance->state = IrdaWorkerStateWaitTxEnd;
                 }
             }
 
             if (events & IRDA_WORKER_TX_MESSAGE_SENT) {
-                if (instance->u.tx.message_sent_callback)
-                    instance->u.tx.message_sent_callback(instance->u.tx.message_sent_context);
+                if (instance->tx.message_sent_callback)
+                    instance->tx.message_sent_callback(instance->tx.message_sent_context);
             }
             break;
         default:
@@ -502,14 +501,14 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
 
 void irda_worker_tx_set_get_signal_callback(IrdaWorker* instance, IrdaWorkerGetSignalCallback callback, void* context) {
     furi_assert(instance);
-    instance->u.tx.get_signal_callback = callback;
-    instance->u.tx.get_signal_context = context;
+    instance->tx.get_signal_callback = callback;
+    instance->tx.get_signal_context = context;
 }
 
 void irda_worker_tx_set_signal_sent_callback(IrdaWorker* instance, IrdaWorkerMessageSentCallback callback, void* context) {
     furi_assert(instance);
-    instance->u.tx.message_sent_callback = callback;
-    instance->u.tx.message_sent_context = context;
+    instance->tx.message_sent_callback = callback;
+    instance->tx.message_sent_context = context;
 }
 
 void irda_worker_tx_stop(IrdaWorker* instance) {
@@ -548,8 +547,8 @@ void irda_worker_set_raw_signal(IrdaWorker* instance, const uint32_t* timings, s
 }
 
 IrdaWorkerGetSignalResponse irda_worker_tx_get_signal_steady_callback(void* context, IrdaWorker* instance) {
-    IrdaWorkerGetSignalResponse response = instance->u.tx.steady_signal_sent ? IrdaWorkerGetSignalResponseSame : IrdaWorkerGetSignalResponseNew;
-    instance->u.tx.steady_signal_sent = true;
+    IrdaWorkerGetSignalResponse response = instance->tx.steady_signal_sent ? IrdaWorkerGetSignalResponseSame : IrdaWorkerGetSignalResponseNew;
+    instance->tx.steady_signal_sent = true;
     return response;
 }
 
