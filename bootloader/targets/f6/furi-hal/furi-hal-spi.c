@@ -24,19 +24,19 @@ void furi_hal_spi_init() {
         &gpio_spi_r_miso,
         GpioModeAltFunctionPushPull,
         GpioSpeedVeryHigh,
-        GpioPullUp,
+        GpioPullNo,
         GpioAltFn5SPI1);
     hal_gpio_init_ex(
         &gpio_spi_r_mosi,
         GpioModeAltFunctionPushPull,
         GpioSpeedVeryHigh,
-        GpioPullUp,
+        GpioPullNo,
         GpioAltFn5SPI1);
     hal_gpio_init_ex(
         &gpio_spi_r_sck,
         GpioModeAltFunctionPushPull,
         GpioSpeedVeryHigh,
-        GpioPullUp,
+        GpioPullNo,
         GpioAltFn5SPI1);
 
     hal_gpio_init_ex(

@@ -25,9 +25,9 @@ void furi_hal_spi_init() {
         );
     }
 
-    hal_gpio_init_ex(&gpio_spi_r_miso, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI1);
-    hal_gpio_init_ex(&gpio_spi_r_mosi, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI1);
-    hal_gpio_init_ex(&gpio_spi_r_sck, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI1);
+    hal_gpio_init_ex(&gpio_spi_r_miso, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFn5SPI1);
+    hal_gpio_init_ex(&gpio_spi_r_mosi, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFn5SPI1);
+    hal_gpio_init_ex(&gpio_spi_r_sck, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFn5SPI1);
 
     hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
     hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
@@ -38,16 +38,12 @@ void furi_hal_spi_init() {
 
 void furi_hal_spi_bus_lock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    if (bus->mutex) {
-        furi_assert(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
-    }
+    furi_assert(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
 }
 
 void furi_hal_spi_bus_unlock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    if (bus->mutex) {
-        furi_assert(osMutexRelease(*bus->mutex) == osOK);
-    }
+    furi_assert(osMutexRelease(*bus->mutex) == osOK);
 }
 
 void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const LL_SPI_InitTypeDef* config) {
