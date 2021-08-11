@@ -46,6 +46,9 @@ extern uint32_t SystemCoreClock;
 
 #if defined STM32L5
 	#define configENABLE_TRUSTZONE                   0
+	#if configENABLE_TRUSTZONE
+		#define configMINIMAL_SECURE_STACK_SIZE          ((uint16_t)1024)
+	#endif
 	#define configRUN_FREERTOS_SECURE_ONLY           0
 	#define configENABLE_FPU                         1
 	#define configENABLE_MPU                         0

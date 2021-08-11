@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 set(PROJ_NAME stm32-freertos)
 set(STM32_CMAKE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
-set(CMAKE_MESSAGE_LOG_LEVEL trace)
-
 # Please note: When using CMSIS, it is recommended to use the FreeRTOS version supplied in the 
 # Cube repository because more recent kernels might be incompatible to the CMSIS
 # implementation provided by STM
@@ -39,7 +37,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 set(SUPPORTED_BOARDS F407VG H743ZI)
 option(FREERTOS_F407VG_EXAMPLE "Compile FreeRTOS example for the F407VG board" OFF)
 option(FREERTOS_H743ZI_EXAMPLE "Compile FreeRTOS example for the H743ZI board" OFF)
-option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the F407VG board" ON)
+option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the L552ZE board" OFF)
 
 if(NOT FREERTOS_F407VG_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE)
     message(FATAL_ERROR
