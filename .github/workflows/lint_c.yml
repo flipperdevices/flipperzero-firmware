@@ -7,7 +7,6 @@ on:
       - '**.c'
       - '**.hpp'
       - '**.cpp'
-  pull_request:
 
 env:
   TARGETS: f6
