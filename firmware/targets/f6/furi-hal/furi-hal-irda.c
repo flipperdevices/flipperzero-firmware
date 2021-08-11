@@ -177,8 +177,10 @@ void furi_hal_irda_async_rx_stop(void) {
     furi_hal_irda_state = IrdaStateIdle;
 }
 
-void furi_hal_irda_async_rx_set_timeout(uint32_t timeout_ms) {
-    LL_TIM_OC_SetCompareCH3(TIM2, timeout_ms * 1000);
+void furi_hal_irda_async_rx_set_timeout(uint32_t timeout_us) {
+    furi_assert(LL_APB1_GRP1_IsEnabledClock(LL_APB1_GRP1_PERIPH_TIM2));
+
+    LL_TIM_OC_SetCompareCH3(TIM2, timeout_us);
     LL_TIM_OC_SetMode(TIM2, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_ACTIVE);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH3);
     LL_TIM_EnableIT_CC3(TIM2);

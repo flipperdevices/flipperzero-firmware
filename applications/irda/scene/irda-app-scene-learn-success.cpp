@@ -51,6 +51,10 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
 bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
+    if(event->type == IrdaAppEvent::Type::Tick) {
+        /* Send event every tick to suppress any switching off green light */
+        app->notify_green_on();
+    }
 
     if(event->type == IrdaAppEvent::Type::DialogExSelected) {
         switch(event->payload.dialog_ex_result) {

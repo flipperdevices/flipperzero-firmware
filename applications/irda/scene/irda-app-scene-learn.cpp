@@ -57,11 +57,9 @@ bool IrdaAppSceneLearn::on_event(IrdaApp* app, IrdaAppEvent* event) {
     case IrdaAppEvent::Type::IrdaMessageReceived:
         app->notify_success();
         app->switch_to_next_scene_without_saving(IrdaApp::Scene::LearnSuccess);
-        irda_worker_rx_stop(app->get_irda_worker());
         break;
     case IrdaAppEvent::Type::Back:
         consumed = true;
-        irda_worker_rx_stop(app->get_irda_worker());
         app->switch_to_previous_scene();
         break;
     default:
@@ -72,4 +70,5 @@ bool IrdaAppSceneLearn::on_event(IrdaApp* app, IrdaAppEvent* event) {
 }
 
 void IrdaAppSceneLearn::on_exit(IrdaApp* app) {
+    irda_worker_rx_stop(app->get_irda_worker());
 }

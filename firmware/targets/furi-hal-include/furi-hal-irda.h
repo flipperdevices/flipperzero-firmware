@@ -55,10 +55,10 @@ void furi_hal_irda_async_rx_stop(void);
 /** Setup api hal for receiving silence timeout.
  * Should be used with 'furi_hal_irda_timeout_irq_set_callback()'.
  *
- * @param[in]   timeout_ms - time to wait for silence on IRDA port
+ * @param[in]   timeout_us - time to wait for silence on IRDA port
  *                           before generating IRQ.
  */
-void furi_hal_irda_async_rx_set_timeout(uint32_t timeout_ms);
+void furi_hal_irda_async_rx_set_timeout(uint32_t timeout_us);
 
 /**
  * Setup callback for previously initialized IRDA RX interrupt.

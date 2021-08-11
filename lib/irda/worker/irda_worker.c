@@ -248,10 +248,10 @@ void irda_worker_rx_start(IrdaWorker* instance) {
     furi_thread_set_callback(instance->thread, irda_worker_rx_thread);
     furi_thread_start(instance->thread);
 
-    furi_hal_irda_async_rx_start();
-    furi_hal_irda_async_rx_set_timeout(IRDA_WORKER_RX_TIMEOUT);
     furi_hal_irda_async_rx_set_capture_isr_callback(irda_worker_rx_callback, instance);
     furi_hal_irda_async_rx_set_timeout_isr_callback(irda_worker_rx_timeout_callback, instance);
+    furi_hal_irda_async_rx_start();
+    furi_hal_irda_async_rx_set_timeout(IRDA_WORKER_RX_TIMEOUT);
 
     instance->state = IrdaWorkerStateRunRx;
 }
