@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
-#include"file-worker.h"
+#include "file-worker.h"
 
-bool subghz_scene_saved_file_select(SubGhz* subghz ) {
+bool subghz_scene_saved_file_select(SubGhz* subghz) {
     furi_assert(subghz);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -21,7 +21,12 @@ bool subghz_scene_saved_file_select(SubGhz* subghz ) {
 
     if(res) {
         // Get key file path
-        string_printf(protocol_file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->text_store, SUBGHZ_APP_EXTENSION);
+        string_printf(
+            protocol_file_name,
+            "%s/%s%s",
+            SUBGHZ_APP_PATH_FOLDER,
+            subghz->text_store,
+            SUBGHZ_APP_EXTENSION);
     } else {
         string_clear(temp_str);
         string_clear(protocol_file_name);
@@ -32,7 +37,7 @@ bool subghz_scene_saved_file_select(SubGhz* subghz ) {
     }
 
     do {
-         if(!file_worker_open(
+        if(!file_worker_open(
                file_worker, string_get_cstr(protocol_file_name), FSAM_READ, FSOM_OPEN_EXISTING)) {
             break;
         }
@@ -48,7 +53,7 @@ bool subghz_scene_saved_file_select(SubGhz* subghz ) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-        if(!subghz->protocol_result->to_load_protocol(file_worker, subghz->protocol_result)){
+        if(!subghz->protocol_result->to_load_protocol(file_worker, subghz->protocol_result)) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }

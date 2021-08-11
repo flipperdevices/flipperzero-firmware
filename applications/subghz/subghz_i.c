@@ -28,7 +28,6 @@ void subghz_tx(uint32_t frequency) {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
     furi_hal_subghz_tx();
-    
 }
 
 void subghz_idle(void) {

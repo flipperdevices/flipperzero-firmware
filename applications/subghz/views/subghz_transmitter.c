@@ -32,7 +32,9 @@ void subghz_transmitter_set_callback(
     subghz_transmitter->context = context;
 }
 
-void subghz_transmitter_set_protocol(SubghzTransmitter* subghz_transmitter, SubGhzProtocolCommon* protocol) {
+void subghz_transmitter_set_protocol(
+    SubghzTransmitter* subghz_transmitter,
+    SubGhzProtocolCommon* protocol) {
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
             model->protocol = protocol;
@@ -49,7 +51,6 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     elements_button_left(canvas, "Back");
     elements_button_center(canvas, "Send");
     elements_button_right(canvas, "Exit");
-
 }
 
 bool subghz_transmitter_input(InputEvent* event, void* context) {
@@ -105,11 +106,12 @@ void subghz_transmitter_exit(void* context) {
 }
 
 SubghzTransmitter* subghz_transmitter_alloc() {
-    SubghzTransmitter* subghz_transmitter= furi_alloc(sizeof(SubghzTransmitter));
+    SubghzTransmitter* subghz_transmitter = furi_alloc(sizeof(SubghzTransmitter));
 
     // View allocation and configuration
     subghz_transmitter->view = view_alloc();
-    view_allocate_model(subghz_transmitter->view, ViewModelTypeLocking, sizeof(SubghzTransmitterModel));
+    view_allocate_model(
+        subghz_transmitter->view, ViewModelTypeLocking, sizeof(SubghzTransmitterModel));
     view_set_context(subghz_transmitter->view, subghz_transmitter);
     view_set_draw_callback(subghz_transmitter->view, (ViewDrawCallback)subghz_transmitter_draw);
     view_set_input_callback(subghz_transmitter->view, subghz_transmitter_input);

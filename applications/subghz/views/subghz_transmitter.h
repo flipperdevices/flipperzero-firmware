@@ -23,4 +23,6 @@ void subghz_transmitter_free(SubghzTransmitter* subghz_transmitter);
 
 View* subghz_transmitter_get_view(SubghzTransmitter* subghz_transmitter);
 
-void subghz_transmitter_set_protocol(SubghzTransmitter* subghz_transmitter, SubGhzProtocolCommon* protocol);
+void subghz_transmitter_set_protocol(
+    SubghzTransmitter* subghz_transmitter,
+    SubGhzProtocolCommon* protocol);

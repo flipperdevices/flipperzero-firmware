@@ -11,8 +11,7 @@ const void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
     SubghzReceiver* subghz_receiver = subghz->subghz_receiver;
 
-    subghz_receiver_set_callback(
-        subghz_receiver, subghz_scene_receiver_callback, subghz);
+    subghz_receiver_set_callback(subghz_receiver, subghz_scene_receiver_callback, subghz);
 
     subghz_receiver_set_protocol(subghz_receiver, subghz->protocol_result);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);

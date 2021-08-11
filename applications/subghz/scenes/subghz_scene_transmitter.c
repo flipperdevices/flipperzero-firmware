@@ -2,7 +2,7 @@
 #include "../views/subghz_transmitter.h"
 #include "lib/subghz/protocols/subghz_protocol_princeton.h"
 
-void subghz_scene_transmitter_rx(void* context){
+void subghz_scene_transmitter_rx(void* context) {
     SubGhz* subghz = context;
     SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
 
@@ -24,7 +24,6 @@ void subghz_scene_transmitter_rx(void* context){
     subghz_encoder_princeton_free(encoder);
 }
 
-
 void subghz_scene_transmitter_callback(SubghzTransmitterEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -35,8 +34,7 @@ const void subghz_scene_transmitter_on_enter(void* context) {
     SubGhz* subghz = context;
     SubghzTransmitter* subghz_transmitter = subghz->subghz_transmitter;
 
-    subghz_transmitter_set_callback(
-        subghz_transmitter, subghz_scene_transmitter_callback, subghz);
+    subghz_transmitter_set_callback(subghz_transmitter, subghz_scene_transmitter_callback, subghz);
 
     subghz_transmitter_set_protocol(subghz_transmitter, subghz->protocol_result);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTransmitter);
