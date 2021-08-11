@@ -3,20 +3,18 @@
 
 static const uint32_t clocks_in_ms = 64 * 1000;
 
-ReturnCode api_hal_nfc_init() {
-    // Check if Nfc worker was started
-    rfalNfcState state = rfalNfcGetState();
-    if(state == RFAL_NFC_STATE_NOTINIT) {
-        return rfalNfcInitialize();
-    } else if(state == RFAL_NFC_STATE_IDLE) {
-        return ERR_NONE;
+void api_hal_nfc_init() {
+    ReturnCode ret = rfalNfcInitialize();
+    if(ret == ERR_NONE) {
+        api_hal_nfc_start_sleep();
+        FURI_LOG_I("FuriHalNfc", "Init OK");
     } else {
-        return ERR_BUSY;
+        FURI_LOG_W("FuriHalNfc", "Initialization failed, RFAL returned: %d", ret);
     }
 }
 
 bool api_hal_nfc_is_busy() {
-    return rfalNfcGetState() > RFAL_NFC_STATE_IDLE;
+    return rfalNfcGetState() != RFAL_NFC_STATE_IDLE;
 }
 
 void api_hal_nfc_field_on() {
@@ -90,12 +88,13 @@ bool api_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t tim
 
 bool api_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak, uint32_t timeout) {
     rfalNfcState state = rfalNfcGetState();
+
     if(state == RFAL_NFC_STATE_NOTINIT) {
         rfalNfcInitialize();
     } else if(state >= RFAL_NFC_STATE_ACTIVATED) {
         rfalNfcDeactivate(false);
     }
-
+    rfalLowPowerModeStop();
     rfalNfcDiscoverParam params = {
         .compMode = RFAL_COMPLIANCE_MODE_NFC,
         .techs2Find = RFAL_NFC_LISTEN_TECH_A,

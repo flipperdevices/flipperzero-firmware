@@ -31,7 +31,7 @@ void api_hal_rfid_pins_emulate() {
 
     // pull rfid antenna from carrier side
     hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
-    hal_gpio_write(&gpio_rfid_carrier_out, true);
+    hal_gpio_write(&gpio_rfid_carrier_out, false);
 }
 
 void api_hal_rfid_pins_read() {
@@ -269,4 +269,10 @@ void api_hal_rfid_set_read_pulse(uint32_t pulse) {
         furi_check(0);
         break;
     }
+}
+
+void api_hal_rfid_change_read_config(float freq, float duty_cycle) {
+    uint32_t period = (uint32_t)((SystemCoreClock) / freq) - 1;
+    api_hal_rfid_set_read_period(period);
+    api_hal_rfid_set_read_pulse(period * duty_cycle);
 }

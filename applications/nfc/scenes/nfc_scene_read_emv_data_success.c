@@ -59,6 +59,12 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     char sak_str[16];
     snprintf(sak_str, sizeof(sak_str), "SAK: %02X", nfc_data->sak);
     widget_add_string_element(nfc->widget, 121, 42, AlignRight, AlignTop, FontSecondary, sak_str);
+    if(emv_data->exp_mon) {
+        char exp_str[16];
+        snprintf(
+            exp_str, sizeof(exp_str), "Exp: %02X/%02X", emv_data->exp_mon, emv_data->exp_year);
+        widget_add_string_element(nfc->widget, 7, 32, AlignLeft, AlignTop, FontSecondary, exp_str);
+    }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
@@ -68,15 +74,16 @@ const bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerE
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
-            return scene_manager_search_previous_scene(
+            return scene_manager_search_and_switch_to_previous_scene(
                 nfc->scene_manager, NfcSceneReadEmvAppSuccess);
         } else if(event.event == GuiButtonTypeRight) {
             nfc->dev.format = NfcDeviceSaveFormatBankCard;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;
         }
-    } else if(event.type == SceneManagerEventTypeNavigation) {
-        return scene_manager_search_previous_scene(nfc->scene_manager, NfcSceneReadEmvAppSuccess);
+    } else if(event.type == SceneManagerEventTypeBack) {
+        return scene_manager_search_and_switch_to_previous_scene(
+            nfc->scene_manager, NfcSceneReadEmvAppSuccess);
     }
     return false;
 }
