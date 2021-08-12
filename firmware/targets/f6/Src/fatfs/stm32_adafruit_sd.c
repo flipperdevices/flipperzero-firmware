@@ -284,9 +284,9 @@ static uint8_t SD_ReadData(void);
 /* Private functions ---------------------------------------------------------*/
 
 void SD_SPI_Bus_To_Down_State(){
-    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeOutputPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFnUnused);
-    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeOutputPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFnUnused);
-    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeOutputPushPull, GpioSpeedVeryHigh, GpioPullNo, GpioAltFnUnused);
+    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
 
     hal_gpio_write(&gpio_sdcard_cs, false);
     hal_gpio_write(&gpio_spi_d_miso, false);
@@ -297,9 +297,9 @@ void SD_SPI_Bus_To_Down_State(){
 void SD_SPI_Bus_To_Normal_State(){
     hal_gpio_write(&gpio_sdcard_cs, true);
 
-    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
-    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
-    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioPullUp, GpioAltFn5SPI2);
+    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
 }
 
 /** @defgroup STM32_ADAFRUIT_SD_Private_Functions
