@@ -39,9 +39,8 @@ void subghz_end(void) {
     furi_hal_subghz_sleep();
 }
 
-
 bool subghz_key_load(SubGhz* subghz, const char* file_path) {
-    furi_assert(dev);
+    furi_assert(subghz);
     furi_assert(file_path);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -53,8 +52,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     string_init(temp_str);
 
     do {
-        if(!file_worker_open(
-               file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        if(!file_worker_open(file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             break;
         }
         // Read and parse name protocol from 1st line
