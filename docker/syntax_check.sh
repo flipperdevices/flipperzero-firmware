@@ -1,9 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # set -e
-
-CLANG_FORMAT_BIN="/usr/bin/clang-format-12"
-PATH="$HOME/.cargo/bin:${PATH}"
 
 PROJECT_DIR=$(pwd)
 
@@ -18,20 +15,20 @@ C_FILES=$(find . \
     -name *.c -o -name *.h -o -name *.cpp)
 
 ulimit -s 65536
-$CLANG_FORMAT_BIN --version
-$CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
+clang-format --version
+clang-format --verbose -style=file -n --Werror --ferror-limit=0 $C_FILES
 c_syntax_rc=$?
 
 if [[ $c_syntax_rc -eq 0 ]]; then
-    echo "Code looks fine for me!"
+    echo "Code looks fine to me!"
     exit 0
 fi
 
-read -p "Do you want fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
+read -p "Do you want to fix syntax? (y/n): " confirm && [[ $confirm == [yY] || $confirm == [yY][eE][sS] ]] || exit 1
 
 cd $PROJECT_DIR
 
 # We use root in container and clang-format rewriting files. We'll need change owner to original
 local_user=$(stat -c '%u' .clang-format)
-$CLANG_FORMAT_BIN -style=file -i $C_FILES
+clang-format -style=file -i $C_FILES
 chown $local_user $C_FILES
