@@ -40,12 +40,9 @@ static const uint8_t furi_hal_subghz_preset_ook_async_regs[][2] = {
     { CC1101_FOCCFG,    0x18 }, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
     /* Automatic Gain Control */
-    //{ CC1101_AGCTRL1,   0x00 }, // LNA 2 gain is decreased to minimum before decreasing LNA gain
-    //{ CC1101_AGCTRL2,   0x07 }, // MAGN_TARGET is 42 dB
-
-    { CC1101_AGCTRL0,   0x40 },
-    { CC1101_AGCTRL1,   0x00 },
-    { CC1101_AGCTRL2,   0x03 },
+    { CC1101_AGCTRL0,   0x40 }, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
+    { CC1101_AGCTRL1,   0x00 }, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    { CC1101_AGCTRL2,   0x03 }, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
 
     /* Wake on radio and timeouts control */
     { CC1101_WORCTRL,   0xFB }, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours 
