@@ -4,6 +4,7 @@
 #include "irda-app-remote-manager.h"
 #include "irda-app-signal.h"
 #include "m-string.h"
+#include "sys/_stdint.h"
 #include <text-store.h>
 #include <irda.h>
 #include <cstdio>
@@ -17,7 +18,6 @@ const char* IrdaAppFileParser::irda_directory = "/any/irda";
 const char* IrdaAppFileParser::irda_extension = ".ir";
 uint32_t const IrdaAppFileParser::max_raw_timings_in_signal = 512;
 uint32_t const IrdaAppFileParser::max_line_length = (9 + 1) * IrdaAppFileParser::max_raw_timings_in_signal + 100;
-uint32_t const IrdaAppFileParser::max_signal_name_length = IrdaAppRemoteManager::max_button_name_length;
 
 bool IrdaAppFileParser::open_irda_file_read(const char* name) {
     std::string full_filename;
@@ -50,8 +50,7 @@ size_t IrdaAppFileParser::stringify_message(
     written += sniprintf(
         buf,
         buf_size,
-        "%.*s %.31s A:%0*lX C:%0*lX\n",
-        (int) IrdaAppFileParser::max_signal_name_length,
+        "%.31s %.31s A:%0*lX C:%0*lX\n",
         name,
         irda_get_protocol_name(protocol),
         irda_get_protocol_address_length(protocol),
@@ -77,8 +76,7 @@ size_t IrdaAppFileParser::stringify_raw_signal(
     written += sniprintf(
         &buf[written],
         max_line_length - written,
-        "%.*s RAW F:%d DC:%d",
-        (int) IrdaAppFileParser::max_signal_name_length,
+        "%.31s RAW F:%d DC:%d",
         name,
         IRDA_COMMON_CARRIER_FREQUENCY,
         duty_cycle);
@@ -146,7 +144,6 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     uint32_t address;
     uint32_t command;
     auto irda_file_signal = std::make_unique<IrdaFileSignal>();
-    furi_assert(IrdaAppFileParser::max_signal_name_length < sizeof(irda_file_signal->name));
 
     int parsed = std::sscanf(
         str.c_str(),
@@ -160,31 +157,24 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
         return nullptr;
     }
 
-    if (strlen(irda_file_signal->name) > IrdaAppFileParser::max_signal_name_length) {
-        FURI_LOG_E("IrdaFileParser", "Signal name is too long (max %ld): \'%s\'\r\n",
-                IrdaAppFileParser::max_signal_name_length,
-                irda_file_signal->name);
-        return nullptr;
-    }
-
     IrdaProtocol protocol = irda_get_protocol_by_name(protocol_name);
 
     if(!irda_is_protocol_valid((IrdaProtocol)protocol)) {
-        FURI_LOG_E("IrdaFileParser", "Unknown protocol: \'%s\'\r\n", protocol_name);
+        FURI_LOG_E("IrdaFileParser", "Unknown protocol: \'%s\'", protocol_name);
         return nullptr;
     }
 
     int address_length = irda_get_protocol_address_length(protocol);
     uint32_t address_mask = (1LU << (4 * address_length)) - 1;
     if(address != (address & address_mask)) {
-        FURI_LOG_E("IrdaFileParser", "Address is too long (mask for this protocol is 0x%08X): 0x%X\r\n", address_mask, address);
+        FURI_LOG_E("IrdaFileParser", "Signal: command is too long (mask for this protocol is 0x%08X): 0x%X", address_mask, address);
         return nullptr;
     }
 
     int command_length = irda_get_protocol_command_length(protocol);
     uint32_t command_mask = (1LU << (4 * command_length)) - 1;
     if(command != (command & command_mask)) {
-        FURI_LOG_E("IrdaFileParser", "Command is too long (mask for this protocol is 0x%08X): 0x%X\r\n", command_mask, command);
+        FURI_LOG_E("IrdaFileParser", "Signal: command is too long (mask for this protocol is 0x%08X): 0x%X", command_mask, command);
         return nullptr;
     }
 
@@ -210,14 +200,41 @@ const char* find_first_not_of(const char* str, char symbol) {
     return str;
 }
 
+static int remove_args32(std::string_view& str, size_t num) {
+    int removed_length = 0;
+
+    while (num--) {
+        char buf[32];
+
+        size_t index = str.find_first_not_of(" ");
+        removed_length += index;
+        if (index == std::string_view::npos) break;
+        str.remove_prefix(index);
+
+        if (str.empty()) break;
+
+        int parsed = std::sscanf(str.data(), "%31s", buf);
+        if(!parsed) break;
+
+        size_t len = strlen(buf);
+        if (!len) break;
+        removed_length += len;
+        str.remove_prefix(len);
+
+        if (str.empty()) break;
+    }
+
+    return removed_length;
+}
+
+
+
 std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     IrdaAppFileParser::parse_signal_raw(const std::string& string) const {
     uint32_t frequency;
     uint32_t duty_cycle;
-    int str_len = string.size();
     std::string_view str(string.c_str());
     auto irda_file_signal = std::make_unique<IrdaFileSignal>();
-    furi_assert(IrdaAppFileParser::max_signal_name_length < sizeof(irda_file_signal->name));
 
     int parsed = std::sscanf(
         str.data(), "%31s RAW F:%ld DC:%ld", irda_file_signal->name, &frequency, &duty_cycle);
@@ -227,34 +244,24 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     }
 
     if((frequency < 10000) || (frequency > 100000)) {
-        FURI_LOG_E("IrdaFileParser", "Frequency is out of bounds (10000-100000): %ld\r\n", frequency);
+        FURI_LOG_E("IrdaFileParser", "RAW signal: frequency is out of bounds (10000-100000): %ld", frequency);
         return nullptr;
     }
 
     if((duty_cycle == 0) || (duty_cycle > 100)) {
-        FURI_LOG_E("IrdaFileParser", "Duty cycle is out of bounds (0-100): %ld\r\n", duty_cycle);
+        FURI_LOG_E("IrdaFileParser", "RAW signal: duty cycle is out of bounds (0-100): %ld", duty_cycle);
         return nullptr;
     }
 
-    if (strlen(irda_file_signal->name) > IrdaAppFileParser::max_signal_name_length) {
-        FURI_LOG_E("IrdaFileParser", "Signal name is too long (max %ld): \'%s\'\r\n",
-                IrdaAppFileParser::max_signal_name_length,
-                irda_file_signal->name);
+    int header_len = remove_args32(str, 4);
+
+    size_t last_valid_ch = str.find_last_not_of(" \r\n");
+    if (last_valid_ch != std::string_view::npos) {
+        str.remove_suffix(str.size() - last_valid_ch - 1);
+    } else {
+        FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s\'): no timings", header_len, string.c_str());
         return nullptr;
     }
-
-    char dummy[100] = {0};
-    int header_len = 0;
-    header_len = sniprintf(
-        dummy,
-        sizeof(dummy),
-        "%.31s RAW F:%ld DC:%ld",
-        irda_file_signal->name,
-        frequency,
-        duty_cycle);
-
-    furi_assert(header_len < str_len);
-    str.remove_prefix(header_len);
 
     /* move allocated timings into raw signal object */
     IrdaAppSignal::RawSignal raw_signal = {
@@ -270,7 +277,7 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
         str.remove_prefix(index);
         parsed = std::sscanf(str.data(), "%9s", buf);
         if(parsed != 1) {
-            FURI_LOG_E("IrdaFileParser", "Failed to parse RAW timing[%ld] \'%s\'\r\n", raw_signal.timings_cnt, buf);
+            FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): failed on timing[%ld] \'%*s\'", header_len, string.c_str(), raw_signal.timings_cnt, str.size(), str.data());
             result = false;
             break;
         }
@@ -278,25 +285,25 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
 
         int value = atoi(buf);
         if(value <= 0) {
-            FURI_LOG_E("IrdaFileParser", "Failed to parse RAW timing[%ld] \'%s\'\r\n", raw_signal.timings_cnt, buf);
+            FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): failed on timing[%ld] \'%s\'", header_len, string.c_str(), raw_signal.timings_cnt, buf);
+            result = false;
+            break;
+        }
+
+        if(raw_signal.timings_cnt >= max_raw_timings_in_signal) {
+            FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): too much timings (max %ld)", header_len, string.c_str(), max_raw_timings_in_signal);
             result = false;
             break;
         }
         raw_signal.timings[raw_signal.timings_cnt] = value;
         ++raw_signal.timings_cnt;
         result = true;
-        if(raw_signal.timings_cnt >= max_raw_timings_in_signal) {
-            FURI_LOG_E("IrdaFileParser", "RAW signal is too long (max %ld timings)\r\n", max_raw_timings_in_signal);
-            result = false;
-            break;
-        }
     }
 
     if(result) {
         /* copy timings instead of moving them to occupy less than max_raw_timings_in_signal */
         irda_file_signal->signal.copy_raw_signal(raw_signal.timings, raw_signal.timings_cnt);
     } else {
-        FURI_LOG_E("IrdaFileParser", "Failed to parse RAW signal: \'%s\'\r\n", string.c_str());
         (void)irda_file_signal.release();
     }
     delete[] raw_signal.timings;

@@ -44,7 +44,7 @@ struct IrdaWorkerSignal{
     size_t timings_cnt;
     union {
         IrdaMessage message;
-        uint32_t timings[MAX_TIMINGS_AMOUNT];
+        uint32_t timings[MAX_TIMINGS_AMOUNT + 1];
     } data;
 };
 
@@ -211,7 +211,7 @@ IrdaWorker* irda_worker_alloc() {
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
 
-    size_t buffer_size = MAX(sizeof(IrdaWorkerTiming) * MAX_TIMINGS_AMOUNT, sizeof(LevelDuration) * MAX_TIMINGS_AMOUNT);
+    size_t buffer_size = MAX(sizeof(IrdaWorkerTiming) * (MAX_TIMINGS_AMOUNT + 1), sizeof(LevelDuration) * MAX_TIMINGS_AMOUNT);
     instance->stream = xStreamBufferCreate(buffer_size, sizeof(IrdaWorkerTiming));
     instance->irda_decoder = irda_alloc_decoder();
     instance->irda_encoder = irda_alloc_encoder();
@@ -540,7 +540,9 @@ void irda_worker_set_decoded_signal(IrdaWorker* instance, const IrdaMessage* mes
 void irda_worker_set_raw_signal(IrdaWorker* instance, const uint32_t* timings, size_t timings_cnt) {
     furi_assert(instance);
     furi_assert(timings);
-    furi_assert(timings_cnt > 2);
+    furi_assert(timings_cnt > 0);
+    size_t max_copy_num = COUNT_OF(instance->signal.data.timings) - 1;
+    furi_assert(timings_cnt <= max_copy_num);
 
     instance->signal.data.timings[0] = IRDA_RAW_TX_TIMING_DELAY_US;
     memcpy(&instance->signal.data.timings[1], timings, timings_cnt * sizeof(uint32_t));
