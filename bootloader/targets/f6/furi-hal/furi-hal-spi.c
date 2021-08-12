@@ -23,39 +23,39 @@ void furi_hal_spi_init() {
     hal_gpio_init_ex(
         &gpio_spi_r_miso,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullNo,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI1);
     hal_gpio_init_ex(
         &gpio_spi_r_mosi,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullNo,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI1);
     hal_gpio_init_ex(
         &gpio_spi_r_sck,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullNo,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI1);
 
     hal_gpio_init_ex(
         &gpio_spi_d_miso,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullUp,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI2);
     hal_gpio_init_ex(
         &gpio_spi_d_mosi,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullUp,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI2);
     hal_gpio_init_ex(
         &gpio_spi_d_sck,
         GpioModeAltFunctionPushPull,
-        GpioSpeedVeryHigh,
         GpioPullUp,
+        GpioSpeedVeryHigh,
         GpioAltFn5SPI2);
 }
 
