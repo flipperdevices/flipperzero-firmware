@@ -1,5 +1,6 @@
 #include "subghz_protocol_common.h"
 #include <stdio.h>
+#include <lib/toolbox/hex.h>
 
 void subghz_protocol_common_add_bit(SubGhzProtocolCommon *common, uint8_t bit){
     common->code_found = common->code_found <<1 | bit;
@@ -74,4 +75,28 @@ void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t outp
             );
         }
     }
+}
+
+bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len) {
+    string_strim(str);
+    uint8_t nibble_high = 0;
+    uint8_t nibble_low = 0;
+    bool parsed = true;
+
+    for(uint16_t i = 0; i < len; i++) {
+        if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
+           hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
+            buff[i] = (nibble_high << 4) | nibble_low;
+            if(string_size(str)>2){
+                string_right(str, 2);
+            }else if(i<len-1){
+                parsed = false;
+                break;
+            };
+        } else {
+            parsed = false;
+            break;
+        }
+    }
+    return parsed;
 }

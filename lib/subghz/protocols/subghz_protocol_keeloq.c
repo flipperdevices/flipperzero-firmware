@@ -364,20 +364,30 @@ uint64_t subghz_protocol_keeloq_gen_key(SubGhzProtocolKeeloq* instance) {
 }
 
 void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output) {
-    string_printf(
+    // string_printf(
+    //     output,
+    //     "Protocol: %s\n"
+    //     "Bit: %d\n"
+    //     "Manufacture_name: %s\n"
+    //     "Serial: %08lX\n"
+    //     "Cnt: %04lX\n"
+    //     "Btn: %01lX\n",
+    //     instance->common.name,
+    //     instance->common.code_last_count_bit,
+    //     instance->manufacture_name,
+    //     instance->common.serial,
+    //     instance->common.cnt,
+    //     instance->common.btn);
+        string_printf(
         output,
         "Protocol: %s\n"
         "Bit: %d\n"
-        "Manufacture_name: %s\n"
-        "Serial: %08lX\n"
-        "Cnt: %04lX\n"
-        "Btn: %01lX\n",
+        "Key: %08lX%08lX\n",
         instance->common.name,
         instance->common.code_last_count_bit,
-        instance->manufacture_name,
-        instance->common.serial,
-        instance->common.cnt,
-        instance->common.btn);
+        (uint32_t)(instance->common.code_last_found >> 32),
+        (uint32_t)(instance->common.code_last_found & 0xFFFFFFFF)
+        );
 }
 
 bool subghz_protocol_keeloq_to_load_protocol(
@@ -386,8 +396,6 @@ bool subghz_protocol_keeloq_to_load_protocol(
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
-    string_t temp_name_man;
-    string_init(temp_name_man);
     int res = 0;
     int data = 0;
 
@@ -402,50 +410,23 @@ bool subghz_protocol_keeloq_to_load_protocol(
         }
         instance->common.code_last_count_bit = (uint8_t)data;
 
-        // Read and parse name protocol from 3st line
-        if(!file_worker_read_until(file_worker, temp_name_man, '\n')) {
-            break;
-        }
-        // strlen("Manufacture_name: ") = 18
-        string_right(temp_name_man, 18);
-        instance->manufacture_name = string_get_cstr(temp_name_man);
-
-        // Read and parse key data from 4nd line
+        // Read and parse key data from 3nd line
         if(!file_worker_read_until(file_worker, temp_str, '\n')) {
             break;
         }
-        uint32_t temp_param = 0;
-        res = sscanf(string_get_cstr(temp_str), "Serial: %08lX\n", &temp_param);
-        if(res != 1) {
-            break;
-        }
-        instance->common.serial = temp_param;
+        // strlen("Key: ") = 5
+        string_right(temp_str, 5);
 
-        // Read and parse key data from 5nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
+        uint8_t buf_key[8]={0};
+        if(!subghz_protocol_common_read_hex(temp_str, buf_key, 8)){
             break;
         }
-        res = sscanf(string_get_cstr(temp_str), "Cnt: %04lX\n", &temp_param);
-        if(res != 1) {
-            break;
-        }
-        instance->common.cnt = (uint16_t)temp_param;
 
-        // Read and parse key data from 5nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
+        for(uint8_t i = 0; i < 8; i++){
+            instance->common.code_last_found = instance->common.code_last_found << 8 | buf_key[i];
         }
-        res = sscanf(string_get_cstr(temp_str), "Btn: %01lX\n", &temp_param);
-        if(res != 1) {
-            break;
-        }
-        instance->common.btn = (uint8_t)temp_param;
-
-        instance->common.code_last_found = subghz_protocol_keeloq_gen_key(instance);
-
         loaded = true;
     } while(0);
-    string_clear(temp_name_man);
     string_clear(temp_str);
 
     return loaded;

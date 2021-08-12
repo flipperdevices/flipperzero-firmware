@@ -104,3 +104,5 @@ void subghz_protocol_common_set_callback(
  * @param output   - output string
  */
 void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t output);
+
+bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len);
