@@ -26,6 +26,8 @@ void furi_hal_os_timer_callback() {
 }
 #endif
 
+extern void xPortSysTickHandler();
+
 volatile uint32_t furi_hal_os_skew = 0;
 
 void furi_hal_os_init() {
