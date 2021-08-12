@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexCapture,
+    SubmenuIndexAnalyze,
     SubmenuIndexRead,
     SubmenuIndexSaved,
     SubmenuIndexStatic,
@@ -18,8 +18,8 @@ const void subghz_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         subghz->submenu,
-        "Capture",
-        SubmenuIndexCapture,
+        "Analyze",
+        SubmenuIndexAnalyze,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(
@@ -41,10 +41,10 @@ const bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexCapture) {
+        if(event.event == SubmenuIndexAnalyze) {
             scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexCapture);
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneCapture);
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAnalyze);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneAnalyze);
             return true;
         } else if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(

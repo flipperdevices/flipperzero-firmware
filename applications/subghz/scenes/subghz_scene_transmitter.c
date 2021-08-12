@@ -2,7 +2,7 @@
 #include "../views/subghz_transmitter.h"
 #include "lib/subghz/protocols/subghz_protocol_princeton.h"
 
-void subghz_scene_transmitter_rx(void* context) {
+void subghz_scene_transmitter_tx(void* context) {
     SubGhz* subghz = context;
     SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
 
@@ -46,10 +46,11 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzTransmitterEventSend) {
             //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
-            subghz_scene_transmitter_rx(subghz);
+            subghz_scene_transmitter_tx(subghz);
             return true;
         } else if(event.event == SubghzTransmitterEventBack) {
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+            scene_manager_search_and_switch_to_previous_scene(
+                subghz->scene_manager, SubGhzSceneStart);
             return true;
         }
     }

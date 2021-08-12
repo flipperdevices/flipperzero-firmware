@@ -27,7 +27,7 @@ void subghz_transmitter_set_callback(
     SubghzTransmitterCallback callback,
     void* context) {
     furi_assert(subghz_transmitter);
-    furi_assert(callback);
+
     subghz_transmitter->callback = callback;
     subghz_transmitter->context = context;
 }
@@ -48,25 +48,19 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
 
-    elements_button_left(canvas, "Back");
     elements_button_center(canvas, "Send");
-    elements_button_right(canvas, "Exit");
 }
 
 bool subghz_transmitter_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubghzTransmitter* subghz_transmitter = context;
 
+    if(event->type != InputTypeShort) return false;
+
     if(event->key == InputKeyBack) {
         return false;
     } else if(event->key == InputKeyOk) {
         subghz_transmitter->callback(SubghzTransmitterEventSend, subghz_transmitter->context);
-        return true;
-    } else if(event->key == InputKeyLeft) {
-        subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
-        return true;
-    } else if(event->key == InputKeyRight) {
-        subghz_transmitter->callback(SubghzTransmitterEventBack, subghz_transmitter->context);
         return true;
     }
 

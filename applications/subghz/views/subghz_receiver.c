@@ -47,22 +47,32 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
     elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
 
     elements_button_left(canvas, "Back");
-    elements_button_right(canvas, "Save");
+    if(model->protocol && model->protocol->to_save_string) {
+        elements_button_right(canvas, "Save");
+    }
 }
 
 bool subghz_receiver_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
 
+    if(event->type != InputTypeShort) return false;
+
+    bool can_be_saved = false;
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            can_be_saved = (model->protocol && model->protocol->to_save_string);
+            return false;
+        });
+
     if(event->key == InputKeyBack) {
         return false;
-    } else if(event->key == InputKeyRight) {
-        subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
-        return true;
     } else if(event->key == InputKeyLeft) {
         subghz_receiver->callback(SubghzReceverEventBack, subghz_receiver->context);
-        return true;
+    } else if(can_be_saved && event->key == InputKeyRight) {
+        subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
     }
+
     return true;
 }
 
