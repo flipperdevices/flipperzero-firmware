@@ -36,3 +36,13 @@ void subghz_protocol_nice_flo_reset(SubGhzProtocolNiceFlo* instance);
  * @param data - LevelDuration level_duration
  */
 void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, bool level, uint32_t duration);
+
+/** Outputting information from the parser
+ * 
+ * @param instance - SubGhzProtocolNiceFlo* instance
+ * @param output   - output string
+ */
+void subghz_protocol_nice_flo_to_str(SubGhzProtocolNiceFlo* instance, string_t output);
+
+void subghz_protocol_nice_flo_to_save_str(SubGhzProtocolNiceFlo* instance, string_t output);
+bool subghz_protocol_nice_flo_to_load_protocol(FileWorker* file_worker, SubGhzProtocolNiceFlo* instance);
