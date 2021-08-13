@@ -16,15 +16,15 @@ SubGhzProtocolCame* subghz_protocol_came_alloc();
  */
 void subghz_protocol_came_free(SubGhzProtocolCame* instance);
 
-/** Sends the key on the air
- * 
- * @param instance - SubGhzProtocolCame instance
- * @param key - key send
- * @param bit - count bit key
- * @param repeat - repeat send key
- */
-void subghz_protocol_came_send_key(SubGhzProtocolCame* instance, uint64_t key, uint8_t bit, uint8_t repeat);
-
+// /** Sends the key on the air
+//  * 
+//  * @param instance - SubGhzProtocolCame instance
+//  * @param key - key send
+//  * @param bit - count bit key
+//  * @param repeat - repeat send key
+//  */
+// void subghz_protocol_came_send_key(SubGhzProtocolCame* instance, uint64_t key, uint8_t bit, uint8_t repeat);
+bool subghz_protocol_came_send_key(SubGhzProtocolCame* instance, SubGhzProtocolEncoderCommon* encoder);
 /** Reset internal state
  * @param instance - SubGhzProtocolCame instance
  */

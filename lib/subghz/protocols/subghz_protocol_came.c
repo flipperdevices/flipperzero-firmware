@@ -24,6 +24,8 @@ SubGhzProtocolCame* subghz_protocol_came_alloc() {
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_came_to_save_str;
     instance->common.to_load_protocol=
         (SubGhzProtocolCommonLoad)subghz_protocol_came_to_load_protocol;
+    instance->common.get_upload_protocol =
+        (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_came_send_key;
 
     return instance;
 }
@@ -33,40 +35,33 @@ void subghz_protocol_came_free(SubGhzProtocolCame* instance) {
     free(instance);
 }
 
-/** Send bit 
- * 
- * @param instance - SubGhzProtocolCame instance
- * @param bit - bit
- */
-void subghz_protocol_came_send_bit(SubGhzProtocolCame* instance, uint8_t bit) {
-    if (bit) {
-        //send bit 1
-        SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_long);
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
-    } else {
-        //send bit 0
-        SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot);
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_long);
-    }
-}
-
-void subghz_protocol_came_send_key(SubGhzProtocolCame* instance, uint64_t key, uint8_t bit, uint8_t repeat) {
-    while (repeat--) {
-        //Send header
-        SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot * 34);     //+2 interval v bit 1
-        //Send start bit
-        subghz_protocol_came_send_bit(instance, 1);
-        //Send key data
-        for (uint8_t i = bit; i > 0; i--) {
-            subghz_protocol_came_send_bit(instance, bit_read(key, i - 1));
+bool subghz_protocol_came_send_key(SubGhzProtocolCame* instance, SubGhzProtocolEncoderCommon* encoder){
+    furi_assert(instance);
+    furi_assert(encoder);
+    size_t index = 0;
+    encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
+    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    //Send header
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot * 36);
+    //Send start bit
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+    //Send key data
+    for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+        if(bit_read(instance->common.code_last_found, i - 1)){
+            //send bit 1
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+        }else{
+            //send bit 0
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
         }
     }
+    return true;
 }
+
+
+
 
 void subghz_protocol_came_reset(SubGhzProtocolCame* instance) {
     instance->common.parser_step = 0;

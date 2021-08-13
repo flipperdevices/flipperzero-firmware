@@ -4,24 +4,33 @@
 
 void subghz_scene_transmitter_tx(void* context) {
     SubGhz* subghz = context;
-    SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
+    //SubGhzEncoderPrinceton* encoder = subghz_encoder_princeton_alloc();
 
-    subghz_encoder_princeton_reset(encoder, subghz->protocol_result->code_last_found, 4);
-    subghz_encoder_princeton_set_te(encoder, subghz->protocol_result);
+    //subghz_encoder_princeton_reset(encoder, subghz->protocol_result->code_last_found, 4);
+   // subghz_encoder_princeton_set_te(encoder, subghz->protocol_result);
 
-    subghz_begin(FuriHalSubGhzPresetOokAsync);
-    subghz_tx(433920000);
+    SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
+    //encoder->repeat = 4;
+    //get upload
+     if(subghz->protocol_result->get_upload_protocol(subghz->protocol_result, encoder)){
+        subghz_begin(FuriHalSubGhzPresetOokAsync);
+        subghz_tx(433920000);
 
-    furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, encoder);
+        //furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, encoder);
+        furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
 
-    while(!furi_hal_subghz_is_async_tx_complete()) {
-        osDelay(20);
-    }
+        while(!furi_hal_subghz_is_async_tx_complete()) {
+            osDelay(20);
+        }
 
-    //Stop tx
-    furi_hal_subghz_stop_async_tx();
-    subghz_end();
-    subghz_encoder_princeton_free(encoder);
+        //Stop tx
+        furi_hal_subghz_stop_async_tx();
+        subghz_end();
+     }
+
+    
+    //subghz_encoder_princeton_free(encoder);
+    subghz_protocol_encoder_common_free(encoder);
 }
 
 void subghz_scene_transmitter_callback(SubghzTransmitterEvent event, void* context) {
