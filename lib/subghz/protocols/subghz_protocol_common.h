@@ -77,6 +77,7 @@ struct SubGhzProtocolEncoderCommon {
 
 SubGhzProtocolEncoderCommon* subghz_protocol_encoder_common_alloc();
 void subghz_protocol_encoder_common_free(SubGhzProtocolEncoderCommon* instance);
+size_t subghz_encoder_common_get_repeat_left(SubGhzProtocolEncoderCommon* instance);
 LevelDuration subghz_protocol_encoder_common_yield(void* context);
 
 /** Add data bit to code_found

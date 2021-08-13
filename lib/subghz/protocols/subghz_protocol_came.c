@@ -60,9 +60,6 @@ bool subghz_protocol_came_send_key(SubGhzProtocolCame* instance, SubGhzProtocolE
     return true;
 }
 
-
-
-
 void subghz_protocol_came_reset(SubGhzProtocolCame* instance) {
     instance->common.parser_step = 0;
 }

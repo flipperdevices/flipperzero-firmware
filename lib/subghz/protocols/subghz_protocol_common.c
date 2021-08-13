@@ -15,6 +15,11 @@ void subghz_protocol_encoder_common_free(SubGhzProtocolEncoderCommon* instance) 
     free(instance);
 }
 
+size_t subghz_encoder_common_get_repeat_left(SubGhzProtocolEncoderCommon* instance) {
+    furi_assert(instance);
+    return instance->repeat;
+}
+
 LevelDuration subghz_protocol_encoder_common_yield(void* context) {
     SubGhzProtocolEncoderCommon* instance = context;
     if(instance->repeat == 0) return level_duration_reset();

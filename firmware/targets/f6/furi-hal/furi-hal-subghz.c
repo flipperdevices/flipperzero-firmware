@@ -417,6 +417,11 @@ static FuriHalSubGhzAsyncTx furi_hal_subghz_async_tx = {0};
 static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     while (samples > 0) {
         LevelDuration ld = furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
+        if(samples%2){
+            furi_assert(level_duration_get_level(ld) == LEVEL_DURATION_LEVEL_HIGH);
+        } else{
+            furi_assert(level_duration_get_level(ld) == LEVEL_DURATION_LEVEL_LOW);
+        }
         if (level_duration_is_reset(ld)) {
             break;
         } else  {
