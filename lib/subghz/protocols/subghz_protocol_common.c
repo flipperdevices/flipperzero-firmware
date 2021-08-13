@@ -2,6 +2,42 @@
 #include <stdio.h>
 #include <lib/toolbox/hex.h>
 
+
+SubGhzProtocolEncoderCommon* subghz_protocol_encoder_common_alloc() {
+    SubGhzProtocolEncoderCommon* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCommon));
+    instance->start = true;
+    instance->repeat = 5; //default number of repeat
+    return instance;
+}
+
+void subghz_protocol_encoder_common_free(SubGhzProtocolEncoderCommon* instance) {
+    furi_assert(instance);
+    free(instance);
+}
+
+LevelDuration subghz_protocol_encoder_common_yield(void* context) {
+    SubGhzProtocolEncoderCommon* instance = context;
+    if(instance->repeat == 0) return level_duration_reset();
+    LevelDuration ret;
+    //if the upload starts from a low level, to start DMA, we first submit 1 shortcut high
+    if(instance->start){
+        instance->start = false;
+        if(instance->upload[0].level == LEVEL_DURATION_LEVEL_LOW) {
+            ret.level = LEVEL_DURATION_LEVEL_HIGH;
+            ret.duration = 300;
+            return ret;
+        }
+    }
+    ret = instance->upload[instance->front++];
+
+    if(instance->front == instance->size_upload) {
+        instance->repeat--;
+        instance->front = 0;
+    }
+    return ret;
+}
+
+
 void subghz_protocol_common_add_bit(SubGhzProtocolCommon *common, uint8_t bit){
     common->code_found = common->code_found <<1 | bit;
     common->code_count_bit++;
