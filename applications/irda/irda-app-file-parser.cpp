@@ -160,21 +160,24 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     IrdaProtocol protocol = irda_get_protocol_by_name(protocol_name);
 
     if(!irda_is_protocol_valid((IrdaProtocol)protocol)) {
-        FURI_LOG_E("IrdaFileParser", "Unknown protocol: \'%s\'", protocol_name);
+        size_t end_of_str = MIN(str.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
+        FURI_LOG_E("IrdaFileParser", "Unknown protocol(\'%.*s...\'): \'%s\'", end_of_str, str.c_str(), protocol_name);
         return nullptr;
     }
 
     int address_length = irda_get_protocol_address_length(protocol);
     uint32_t address_mask = (1LU << (4 * address_length)) - 1;
     if(address != (address & address_mask)) {
-        FURI_LOG_E("IrdaFileParser", "Signal: command is too long (mask for this protocol is 0x%08X): 0x%X", address_mask, address);
+        size_t end_of_str = MIN(str.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
+        FURI_LOG_E("IrdaFileParser", "Signal(\'%.*s...\'): address is too long (mask for this protocol is 0x%08X): 0x%X", end_of_str, str.c_str(), address_mask, address);
         return nullptr;
     }
 
     int command_length = irda_get_protocol_command_length(protocol);
     uint32_t command_mask = (1LU << (4 * command_length)) - 1;
     if(command != (command & command_mask)) {
-        FURI_LOG_E("IrdaFileParser", "Signal: command is too long (mask for this protocol is 0x%08X): 0x%X", command_mask, command);
+        size_t end_of_str = MIN(str.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
+        FURI_LOG_E("IrdaFileParser", "Signal(\'%.*s...\'): command is too long (mask for this protocol is 0x%08X): 0x%X", end_of_str, str.c_str(), command_mask, command);
         return nullptr;
     }
 
@@ -206,7 +209,7 @@ static int remove_args32(std::string_view& str, size_t num) {
     while (num--) {
         char buf[32];
 
-        size_t index = str.find_first_not_of(" ");
+        size_t index = str.find_first_not_of(" \t");
         removed_length += index;
         if (index == std::string_view::npos) break;
         str.remove_prefix(index);
@@ -244,18 +247,20 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     }
 
     if((frequency < 10000) || (frequency > 100000)) {
-        FURI_LOG_E("IrdaFileParser", "RAW signal: frequency is out of bounds (10000-100000): %ld", frequency);
+        size_t end_of_str = MIN(string.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
+        FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): frequency is out of bounds (10000-100000): %ld", end_of_str, string.c_str(), frequency);
         return nullptr;
     }
 
     if((duty_cycle == 0) || (duty_cycle > 100)) {
-        FURI_LOG_E("IrdaFileParser", "RAW signal: duty cycle is out of bounds (0-100): %ld", duty_cycle);
+        size_t end_of_str = MIN(string.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
+        FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): duty cycle is out of bounds (0-100): %ld", end_of_str, string.c_str(), duty_cycle);
         return nullptr;
     }
 
     int header_len = remove_args32(str, 4);
 
-    size_t last_valid_ch = str.find_last_not_of(" \r\n");
+    size_t last_valid_ch = str.find_last_not_of(" \t\r\n");
     if (last_valid_ch != std::string_view::npos) {
         str.remove_suffix(str.size() - last_valid_ch - 1);
     } else {
@@ -270,7 +275,7 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
 
     while(!str.empty()) {
         char buf[10];
-        size_t index = str.find_first_not_of(' ', 1);
+        size_t index = str.find_first_not_of(" \t", 1);
         if(index == std::string_view::npos) {
             break;
         }

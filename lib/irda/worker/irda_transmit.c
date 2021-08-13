@@ -45,11 +45,8 @@ void irda_send_raw_ext(const uint32_t timings[], uint32_t timings_cnt, bool star
     irda_tx_raw_timings_number = timings_cnt;
     irda_tx_raw_add_silence = start_from_mark;
     furi_hal_irda_async_tx_set_data_isr_callback(irda_get_raw_data_callback, (void*) timings);
-    if (furi_hal_irda_async_tx_start(frequency, duty_cycle)) {
-        furi_hal_irda_async_tx_wait_termination();
-    } else {
-        FURI_LOG_I("IRDA CLI", "failed to send signal\r\n");
-    }
+    furi_hal_irda_async_tx_start(frequency, duty_cycle);
+    furi_hal_irda_async_tx_wait_termination();
 
     furi_assert(!furi_hal_irda_is_busy());
 }
@@ -59,7 +56,7 @@ void irda_send_raw(const uint32_t timings[], uint32_t timings_cnt, bool start_fr
 }
 
 FuriHalIrdaTxGetDataState irda_get_data_callback (void* context, uint32_t* duration, bool* level) {
-    FuriHalIrdaTxGetDataState state = FuriHalIrdaTxGetDataStateError;
+    FuriHalIrdaTxGetDataState state = FuriHalIrdaTxGetDataStateLastDone;
     IrdaEncoderHandler* handler = context;
     IrdaStatus status = IrdaStatusError;
 
@@ -68,7 +65,9 @@ FuriHalIrdaTxGetDataState irda_get_data_callback (void* context, uint32_t* durat
     }
 
     if (status == IrdaStatusError) {
-        state = FuriHalIrdaTxGetDataStateError;
+        state = FuriHalIrdaTxGetDataStateLastDone;
+        *duration = 0;
+        *level = 0;
     } else if (status == IrdaStatusOk) {
         state = FuriHalIrdaTxGetDataStateOk;
     } else if (status == IrdaStatusDone) {
@@ -78,7 +77,6 @@ FuriHalIrdaTxGetDataState irda_get_data_callback (void* context, uint32_t* durat
         }
     } else {
         furi_assert(0);
-        state = FuriHalIrdaTxGetDataStateError;
     }
 
     return state;
@@ -94,11 +92,8 @@ void irda_send(const IrdaMessage* message, int times) {
     irda_tx_number_of_transmissions = times;
 
     furi_hal_irda_async_tx_set_data_isr_callback(irda_get_data_callback, handler);
-    if (furi_hal_irda_async_tx_start(IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE)) {
-        furi_hal_irda_async_tx_wait_termination();
-    } else {
-        FURI_LOG_I("IRDA CLI", "failed to send signal\r\n");
-    }
+    furi_hal_irda_async_tx_start(IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE);
+    furi_hal_irda_async_tx_wait_termination();
 
     irda_free_encoder(handler);
 

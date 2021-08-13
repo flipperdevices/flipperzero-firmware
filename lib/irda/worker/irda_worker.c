@@ -328,21 +328,24 @@ static FuriHalIrdaTxGetDataState irda_worker_furi_hal_data_isr_callback(void* co
     furi_assert(level);
 
     IrdaWorker* instance = context;
-    IrdaWorkerTiming timing = {.state = FuriHalIrdaTxGetDataStateError} ;
+    IrdaWorkerTiming timing;
+    FuriHalIrdaTxGetDataState state;
 
     if (sizeof(IrdaWorkerTiming) == xStreamBufferReceiveFromISR(instance->stream, &timing, sizeof(IrdaWorkerTiming), 0)) {
         *level = timing.level;
         *duration = timing.duration;
-        furi_assert(timing.state != FuriHalIrdaTxGetDataStateError);
+        state = timing.state;
     } else {
-        furi_assert(0);
-        timing.state = FuriHalIrdaTxGetDataStateError;
+        *level = 0;
+        *duration = 0;
+        state = FuriHalIrdaTxGetDataStateLastDone;
+        furi_assert(0);    // tmp
     }
 
     uint32_t flags_set = osEventFlagsSet(instance->events, IRDA_WORKER_TX_FILL_BUFFER);
     furi_check(flags_set & IRDA_WORKER_TX_FILL_BUFFER);
 
-    return timing.state;
+    return state;
 }
 
 static bool irda_get_new_signal(IrdaWorker* instance) {
@@ -391,7 +394,7 @@ static bool irda_worker_tx_fill_buffer(IrdaWorker* instance) {
             status = irda_encode(instance->irda_encoder, &timing.duration, &timing.level);
         } else {
             timing.duration = instance->signal.data.timings[instance->tx.tx_raw_cnt];
-/* raw always starts from Mark, but we fulfill it with space delay at start */
+/* raw always starts from Mark, but we fill it with space delay at start */
             timing.level = (instance->tx.tx_raw_cnt % 2);
             ++instance->tx.tx_raw_cnt;
             if (instance->tx.tx_raw_cnt >= instance->signal.timings_cnt) {
@@ -442,9 +445,7 @@ static int32_t irda_worker_tx_thread(void* thread_context) {
         case IrdaWorkerStateStartTx:
             instance->tx.need_reinitialization = false;
             new_data_available = irda_worker_tx_fill_buffer(instance);
-            exit = !furi_hal_irda_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
-            if (exit)
-                break;
+            furi_hal_irda_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
 
             if (!new_data_available) {
                 instance->state = IrdaWorkerStateStopTx;

@@ -46,6 +46,9 @@ typedef struct {
     void* signal_sent_context;
     IrdaTxBuf buffer[2];
     osSemaphoreId_t stop_semaphore;
+    uint32_t tx_timing_rest_duration;       /** if timing is too long (> 0xFFFF), send it in few iterations */
+    bool tx_timing_rest_level;
+    FuriHalIrdaTxGetDataState tx_timing_rest_status;
 } IrdaTimTx;
 
 typedef enum {
@@ -62,7 +65,7 @@ static volatile IrdaState furi_hal_irda_state = IrdaStateIdle;
 static IrdaTimTx irda_tim_tx;
 static IrdaTimRx irda_tim_rx;
 
-static bool furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
+static void furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift);
 static void furi_hal_irda_async_tx_free_resources(void);
 static void furi_hal_irda_tx_dma_set_polarity(uint8_t buf_num, uint8_t polarity_shift);
 static void furi_hal_irda_tx_dma_set_buffer(uint8_t buf_num);
@@ -72,6 +75,7 @@ static void furi_hal_irda_tx_dma_polarity_isr();
 static void furi_hal_irda_tx_dma_isr();
 
 static void furi_hal_irda_tim_rx_isr() {
+    static uint32_t previous_captured_ch2 = 0;
 
     /* Timeout */
     if(LL_TIM_IsActiveFlag_CC3(TIM2)) {
@@ -97,7 +101,7 @@ static void furi_hal_irda_tim_rx_isr() {
 
         if(READ_BIT(TIM2->CCMR1, TIM_CCMR1_CC1S)) {
             /* Low pin level is a Mark state of IRDA signal. Invert level for further processing. */
-            uint32_t duration = LL_TIM_IC_GetCaptureCH1(TIM2) - LL_TIM_IC_GetCaptureCH2(TIM2);
+            uint32_t duration = LL_TIM_IC_GetCaptureCH1(TIM2) - previous_captured_ch2;
             if (irda_tim_rx.capture_callback)
                 irda_tim_rx.capture_callback(irda_tim_rx.capture_context, 1, duration);
         } else {
@@ -113,6 +117,7 @@ static void furi_hal_irda_tim_rx_isr() {
         if(READ_BIT(TIM2->CCMR1, TIM_CCMR1_CC2S)) {
             /* High pin level is a Space state of IRDA signal. Invert level for further processing. */
             uint32_t duration = LL_TIM_IC_GetCaptureCH2(TIM2);
+            previous_captured_ch2 = duration;
             if (irda_tim_rx.capture_callback)
                 irda_tim_rx.capture_callback(irda_tim_rx.capture_context, 0, duration);
         } else {
@@ -258,12 +263,9 @@ static void furi_hal_irda_tx_dma_isr() {
         if (irda_tim_tx.buffer[buf_num].last_packet_end) {
             LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_2);
         } else if (!irda_tim_tx.buffer[buf_num].packet_end || (furi_hal_irda_state == IrdaStateAsyncTx)) {
-            bool result = furi_hal_irda_tx_fill_buffer(next_buf_num, 0);
+            furi_hal_irda_tx_fill_buffer(next_buf_num, 0);
             if (irda_tim_tx.buffer[next_buf_num].last_packet_end) {
                 LL_DMA_DisableIT_HT(DMA1, LL_DMA_CHANNEL_2);
-            }
-            if (!result) {
-                furi_hal_irda_state = IrdaStateAsyncTxStopReq;
             }
         } else if (furi_hal_irda_state == IrdaStateAsyncTxStopReq) {
             /* fallthrough */
@@ -290,7 +292,7 @@ static void furi_hal_irda_tx_dma_isr() {
             /* if it's not end of the packet - continue receiving */
             furi_hal_irda_tx_dma_set_buffer(next_buf_num);
         }
-        if (irda_tim_tx.signal_sent_callback) {
+        if (irda_tim_tx.signal_sent_callback && irda_tim_tx.buffer[buf_num].packet_end && (furi_hal_irda_state != IrdaStateAsyncTxStopped)) {
             irda_tim_tx.signal_sent_callback(irda_tim_tx.signal_sent_context);
         }
     }
@@ -398,7 +400,7 @@ static void furi_hal_irda_tx_fill_buffer_last(uint8_t buf_num) {
     irda_tim_tx.buffer[buf_num].packet_end = true;
 }
 
-static bool furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift) {
+static void furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift) {
     furi_assert(buf_num < 2);
     furi_assert(furi_hal_irda_state != IrdaStateAsyncRx);
     furi_assert(furi_hal_irda_state < IrdaStateMAX);
@@ -417,27 +419,56 @@ static bool furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift
     }
 
     for (*size = 0; (*size < IRDA_TIM_TX_DMA_BUFFER_SIZE) && (status == FuriHalIrdaTxGetDataStateOk); ++(*size), ++polarity_counter) {
-        status = irda_tim_tx.data_callback(irda_tim_tx.data_context, &duration, &level);
-        if (status == FuriHalIrdaTxGetDataStateError) {
-            furi_assert(0);
-            break;
+        if (irda_tim_tx.tx_timing_rest_duration > 0) {
+            if (irda_tim_tx.tx_timing_rest_duration > 0xFFFF) {
+                buffer->data[*size] = 0xFFFF;
+                status = FuriHalIrdaTxGetDataStateOk;
+            } else {
+                buffer->data[*size] = irda_tim_tx.tx_timing_rest_duration;
+                status = irda_tim_tx.tx_timing_rest_status;
+            }
+            irda_tim_tx.tx_timing_rest_duration -= buffer->data[*size];
+            buffer->polarity[polarity_counter] = irda_tim_tx.tx_timing_rest_level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;
+            continue;
         }
+
+        status = irda_tim_tx.data_callback(irda_tim_tx.data_context, &duration, &level);
 
         uint32_t num_of_impulses = roundf(duration / irda_tim_tx.cycle_duration);
 
-        if ((buffer->data[*size] + num_of_impulses - 1) > 0xFFFF) {
-            status = FuriHalIrdaTxGetDataStateError;
-            break;
+        if (num_of_impulses == 0) {
+            --(*size);
+            --polarity_counter;
+        } else if ((num_of_impulses - 1) > 0xFFFF) {
+            irda_tim_tx.tx_timing_rest_duration = num_of_impulses - 1;
+            irda_tim_tx.tx_timing_rest_status = status;
+            irda_tim_tx.tx_timing_rest_level = level;
+            buffer->polarity[polarity_counter] = level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;
+            buffer->data[*size] = 0xFFFF;
+            status = FuriHalIrdaTxGetDataStateOk;
+        } else {
+            buffer->polarity[polarity_counter] = level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;
+            buffer->data[*size] = num_of_impulses - 1;
         }
-
-        buffer->polarity[polarity_counter] = level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;
-        buffer->data[*size] = num_of_impulses - 1;
     }
 
     buffer->last_packet_end = (status == FuriHalIrdaTxGetDataStateLastDone);
     buffer->packet_end = buffer->last_packet_end || (status == FuriHalIrdaTxGetDataStateDone);
 
-    return status != FuriHalIrdaTxGetDataStateError;
+    /* DMA can mess polarity if it has less than 2 timings */
+    if (*size == 0) {
+        buffer->data[0] = 0;       // 1 pulse
+        buffer->polarity[0] = IRDA_TX_CCMR_LOW;
+        buffer->data[1] = 0;       // 1 pulse
+        buffer->polarity[1] = IRDA_TX_CCMR_LOW;
+        buffer->size = 2;
+    } else if (*size == 1) {
+        // TODO: check
+        /* DMA buffer > 1, so we are here means end of signal, so we can add 1 dumb space painlessly */
+        buffer->data[1] = 0;       // 1 pulse
+        buffer->polarity[1] = IRDA_TX_CCMR_LOW;
+        buffer->size = 2;
+    }
 }
 
 static void furi_hal_irda_tx_dma_set_polarity(uint8_t buf_num, uint8_t polarity_shift) {
@@ -503,10 +534,9 @@ static void furi_hal_irda_async_tx_free_resources(void) {
     irda_tim_tx.buffer[1].polarity = NULL;
 }
 
-bool furi_hal_irda_async_tx_start(uint32_t freq, float duty_cycle) {
-    if ((duty_cycle > 1) || (duty_cycle < 0) || (freq > 40000) || (freq < 10000) || (irda_tim_tx.data_callback == NULL)) {
-        furi_assert(0);
-        return false;
+void furi_hal_irda_async_tx_start(uint32_t freq, float duty_cycle) {
+    if ((duty_cycle > 1) || (duty_cycle <= 0) || (freq > 100000) || (freq < 10000) || (irda_tim_tx.data_callback == NULL)) {
+        furi_check(0);
     }
 
     furi_assert(furi_hal_irda_state == IrdaStateIdle);
@@ -525,37 +555,31 @@ bool furi_hal_irda_async_tx_start(uint32_t freq, float duty_cycle) {
 
     irda_tim_tx.stop_semaphore = osSemaphoreNew(1, 0, NULL);
     irda_tim_tx.cycle_duration = 1000000.0 / freq;
+    irda_tim_tx.tx_timing_rest_duration = 0;
 
-    bool result = furi_hal_irda_tx_fill_buffer(0, IRDA_POLARITY_SHIFT);
+    furi_hal_irda_tx_fill_buffer(0, IRDA_POLARITY_SHIFT);
 
-    if (result) {
-        furi_hal_irda_configure_tim_pwm_tx(freq, duty_cycle);
-        furi_hal_irda_configure_tim_cmgr2_dma_tx();
-        furi_hal_irda_configure_tim_rcr_dma_tx();
-        furi_hal_irda_tx_dma_set_polarity(0, IRDA_POLARITY_SHIFT);
-        furi_hal_irda_tx_dma_set_buffer(0);
+    furi_hal_irda_configure_tim_pwm_tx(freq, duty_cycle);
+    furi_hal_irda_configure_tim_cmgr2_dma_tx();
+    furi_hal_irda_configure_tim_rcr_dma_tx();
+    furi_hal_irda_tx_dma_set_polarity(0, IRDA_POLARITY_SHIFT);
+    furi_hal_irda_tx_dma_set_buffer(0);
 
-        furi_hal_irda_state = IrdaStateAsyncTx;
+    furi_hal_irda_state = IrdaStateAsyncTx;
 
-        LL_TIM_ClearFlag_UPDATE(TIM1);
-        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-        LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-        delay_us(5);
-        LL_TIM_GenerateEvent_UPDATE(TIM1);  /* DMA -> TIMx_RCR */
-        delay_us(5);
-        LL_GPIO_ResetOutputPin(gpio_irda_tx.port, gpio_irda_tx.pin);    /* when disable it prevents false pulse */
-        hal_gpio_init_ex(&gpio_irda_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
+    LL_TIM_ClearFlag_UPDATE(TIM1);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+    delay_us(5);
+    LL_TIM_GenerateEvent_UPDATE(TIM1);  /* DMA -> TIMx_RCR */
+    delay_us(5);
+    LL_GPIO_ResetOutputPin(gpio_irda_tx.port, gpio_irda_tx.pin);    /* when disable it prevents false pulse */
+    hal_gpio_init_ex(&gpio_irda_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedHigh, GpioAltFn1TIM1);
 
-        __disable_irq();
-        LL_TIM_GenerateEvent_UPDATE(TIM1);  /* TIMx_RCR -> Repetition counter */
-        LL_TIM_EnableCounter(TIM1);
-        __enable_irq();
-
-    } else {
-        furi_hal_irda_async_tx_free_resources();
-    }
-
-    return result;
+    __disable_irq();
+    LL_TIM_GenerateEvent_UPDATE(TIM1);  /* TIMx_RCR -> Repetition counter */
+    LL_TIM_EnableCounter(TIM1);
+    __enable_irq();
 }
 
 void furi_hal_irda_async_tx_wait_termination(void) {
