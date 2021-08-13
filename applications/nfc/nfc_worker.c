@@ -609,7 +609,6 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
     NfcDeviceData* data = nfc_worker->dev_data;
     MifareUlDevice mf_ul_emulate;
-    // uint8_t i = 0;
     mf_ul_prepare_emulation(&mf_ul_emulate, &data->mf_ul_data);
 
     while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
@@ -619,43 +618,32 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                data->nfc_data.atqa,
                data->nfc_data.sak,
                true,
-               1000)) {
-            // FURI_LOG_I(NFC_WORKER_TAG, "Anticollision passed");
-            // Read first command
-            // err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+               200)) {
+            FURI_LOG_D(NFC_WORKER_TAG, "Anticollision passed");
             if(furi_hal_nfc_get_first_frame(&rx_buff, &rx_len)) {
-hui:
-                if((rx_buff[0] == 0x50) && (rx_buff[1] == 0x00)) {
-                    // FURI_LOG_I(NFC_WORKER_TAG, "Halt received");
-                    furi_hal_nfc_deactivate();
-                    continue;
-                }
-                // FURI_LOG_I(NFC_WORKER_TAG, "Received %d command", i++);
-                // for(uint16_t i = 0; i < *rx_len / 8; i++) {
-                //     printf("%02X ", rx_buff[i]);
-                // }
-                // printf("\r\n");
-                tx_len = mf_ul_prepare_emulation_response(rx_buff, tx_buff, &mf_ul_emulate);
-                if(tx_len > 0) {
-                    err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-                    tx_len = 0;
-                    if(err == ERR_NONE) {
-                        goto hui;
+                while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
+                    tx_len = mf_ul_prepare_emulation_response(rx_buff, *rx_len, tx_buff, &mf_ul_emulate);
+                    if(tx_len > 0) {
+                        err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                        if(err == ERR_NONE) {
+                            continue;
+                        } else {
+                            FURI_LOG_E(NFC_WORKER_TAG, "Communication error: %d", err);
+                            break;
+                        }
                     } else {
-                        FURI_LOG_E(NFC_WORKER_TAG, "Communication error");
+                        FURI_LOG_W(NFC_WORKER_TAG, "Not valid command: %02X", rx_buff[0]);
+                        furi_hal_nfc_deactivate();
+                        break;
                     }
-                } else {
-                    FURI_LOG_E(NFC_WORKER_TAG, "Not valid command");
-                    furi_hal_nfc_deactivate();
                 }
             } else {
-                FURI_LOG_E(NFC_WORKER_TAG, "Error in 1st data exchange");
+                FURI_LOG_W(NFC_WORKER_TAG, "Error in 1st data exchange");
                 furi_hal_nfc_deactivate();
-                continue;
             }
         }
-        FURI_LOG_W(NFC_WORKER_TAG, "Hello my dudes");
-        osDelay(10);
+        FURI_LOG_W(NFC_WORKER_TAG, "Can't find reader");
+        osThreadYield();
     }
 }
 

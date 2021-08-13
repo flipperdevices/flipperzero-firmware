@@ -8,6 +8,7 @@
 
 #define MF_UL_TEARING_FLAG_DEFAULT (0xBD)
 
+// #define MF_UL_HALT_CMD (0x5000)
 #define MF_UL_GET_VERSION_CMD (0x60)
 #define MF_UL_READ_CMD (0x30)
 #define MF_UL_FAST_READ_CMD (0x3A)
@@ -95,4 +96,4 @@ void mf_ul_parse_fast_read_response(uint8_t* buff, uint8_t start_page, uint8_t e
 uint16_t mf_ul_prepare_write(uint8_t* dest, uint16_t page_addr, uint32_t data);
 
 void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data);
-uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint8_t* buff_tx, MifareUlDevice* mf_ul_emulate);
+uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uint8_t* buff_tx, MifareUlDevice* mf_ul_emulate);

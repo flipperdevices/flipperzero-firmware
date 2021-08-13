@@ -153,11 +153,11 @@ void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data) 
     }
 }
 
-uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint8_t* buff_tx, MifareUlDevice* mf_ul_emulate) {
+uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uint8_t* buff_tx, MifareUlDevice* mf_ul_emulate) {
     uint8_t cmd = buff_rx[0];
     uint16_t page_num = mf_ul_emulate->data.data_size / 4;
     uint16_t tx_len = 0;
-    
+
     if(cmd == MF_UL_GET_VERSION_CMD) {
         if(mf_ul_emulate->type != MfUltralightTypeUnknown) {
             tx_len = sizeof(mf_ul_emulate->data.version);
