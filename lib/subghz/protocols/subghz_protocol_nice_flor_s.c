@@ -130,18 +130,17 @@ void subghz_nice_flor_s_decoder_decrypt(SubGhzProtocolNiceFlorS* instance) {
     * S3,S2,S1,S0   - serial number of the console 28 bit.
     */
 
-    uint16_t p3p4 = (uint16_t)(instance->common.code_found >> 24);
+    uint16_t p3p4 = (uint16_t)(instance->common.code_last_found >> 24);
     instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
     uint8_t k =(uint8_t)(p3p4 & 0x00FF) ^subghz_nice_flor_s_get_byte_in_file(instance,(0x20000 |(instance->common.cnt &0x00ff))); //nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
 
-    uint8_t s3 = ((uint8_t)(instance->common.code_found >> 40) ^ k) & 0x0f;
-    uint8_t s2 = ((uint8_t)(instance->common.code_found >> 16) ^ k);
-    uint8_t s1 = ((uint8_t)(instance->common.code_found >> 8) ^ k);
-    uint8_t s0 = ((uint8_t)(instance->common.code_found) ^ k);
+    uint8_t s3 = ((uint8_t)(instance->common.code_last_found >> 40) ^ k) & 0x0f;
+    uint8_t s2 = ((uint8_t)(instance->common.code_last_found >> 16) ^ k);
+    uint8_t s1 = ((uint8_t)(instance->common.code_last_found >> 8) ^ k);
+    uint8_t s0 = ((uint8_t)(instance->common.code_last_found) ^ k);
     instance->common.serial = s3 << 24 | s2 << 16 | s1 << 8 | s0;
 
-    instance->common.btn = (instance->common.code_found >> 48) & 0x0f;
-    if(instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+    instance->common.btn = (instance->common.code_last_found >> 48) & 0x0f;
 }
 
 void subghz_protocol_nice_flor_s_reset(SubGhzProtocolNiceFlorS* instance) {
@@ -185,9 +184,9 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, bool l
                 //Found STOP bit
                 instance->common.parser_step = 0;
                 if(instance->common.code_count_bit >=instance->common.code_min_count_bit_for_found) {
-
-                    subghz_nice_flor_s_decoder_decrypt(instance);
-                    
+                    instance->common.code_last_found = instance->common.code_found;
+                    instance->common.code_last_count_bit = instance->common.code_count_bit;
+                    if(instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                 }
                 break;
             } else {
@@ -218,17 +217,18 @@ void subghz_protocol_nice_flor_s_parse(SubGhzProtocolNiceFlorS* instance, bool l
 }
 
 void subghz_protocol_nice_flor_s_to_str(SubGhzProtocolNiceFlorS* instance, string_t output) {
-    uint32_t code_found_hi = instance->common.code_found >> 32;
-    uint32_t code_found_lo = instance->common.code_found & 0x00000000ffffffff;
+    subghz_nice_flor_s_decoder_decrypt(instance);
+    uint32_t code_found_hi = instance->common.code_last_found >> 32;
+    uint32_t code_found_lo = instance->common.code_last_found & 0x00000000ffffffff;
 
     string_cat_printf(
         output,
-        "Protocol %s, %d Bit\r\n"
+        "%s, %d Bit\r\n"
         " KEY:0x%lX%08lX\r\n"
         " SN:%05lX\r\n"
         " CNT:%04X BTN:%02lX\r\n",
         instance->common.name,
-        instance->common.code_count_bit,
+        instance->common.code_last_count_bit,
         code_found_hi,
         code_found_lo,
         instance->common.serial,
