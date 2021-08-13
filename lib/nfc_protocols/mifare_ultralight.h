@@ -8,7 +8,6 @@
 
 #define MF_UL_TEARING_FLAG_DEFAULT (0xBD)
 
-// #define MF_UL_HALT_CMD (0x5000)
 #define MF_UL_GET_VERSION_CMD (0x60)
 #define MF_UL_READ_CMD (0x30)
 #define MF_UL_FAST_READ_CMD (0x3A)

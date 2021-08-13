@@ -187,9 +187,13 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
                }
         }
     } else if(cmd == MF_UL_WRITE) {
-        
-    } else if(cmd == MF_UL_COMP_WRITE) {
-        
+        uint8_t write_page = buff_rx[1];
+        if((write_page > 1) && (write_page < page_num - 2)) {
+            memcpy(&mf_ul_emulate->data.data[write_page * 4], &buff_rx[2], 4);
+            // TODO make 4-bit ACK
+            buff_tx[0] = 0x0A;
+            tx_len = 1;
+        }
     } else if(cmd == MF_UL_READ_CNT) {
         uint8_t cnt_num = buff_rx[1];
         if(cnt_num < 3) {
@@ -199,7 +203,14 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
             tx_len = 3;
         }
     } else if(cmd == MF_UL_INC_CNT) {
-        
+        uint8_t cnt_num = buff_rx[1];
+        uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
+        if((cnt_num < 3) && (mf_ul_emulate->data.counter[cnt_num] + inc < 0x00FFFFFF)) {
+            mf_ul_emulate->data.counter[cnt_num] += inc;
+            // TODO make 4-bit ACK
+            buff_tx[0] = 0x0A;
+            tx_len = 1;
+        }
     } else if(cmd == MF_UL_READ_SIG) {
         // Check 2nd byte = 0x00 - RFU
         if(buff_rx[1] == 0x00) {
