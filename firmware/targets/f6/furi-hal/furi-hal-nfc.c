@@ -88,10 +88,6 @@ bool furi_hal_nfc_detect(rfalNfcDevice **dev_list, uint8_t* dev_cnt, uint32_t ti
 
 bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak, bool activate_after_sak, uint32_t timeout) {
     rfalNfcState state = rfalNfcGetState();
-    rfalNfcState state_prev = 0;
-    rfalLmState lm_state = rfalListenGetState(NULL, NULL);
-    rfalLmState lm_state_prev = 0;
-
     if(state == RFAL_NFC_STATE_NOTINIT) {
         rfalNfcInitialize();
     } else if(state >= RFAL_NFC_STATE_ACTIVATED) {
@@ -123,12 +119,6 @@ bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t s
     while(state != RFAL_NFC_STATE_ACTIVATED) {
         rfalNfcWorker();
         state = rfalNfcGetState();
-        lm_state = rfalListenGetState(NULL, NULL);
-        if((state != state_prev) || (lm_state_prev != lm_state)) {
-            state_prev = state;
-            lm_state_prev = lm_state;
-            // printf("Listen: state: %d lm_sate: %d\r\n", state, lm_state);
-        }
         if(DWT->CYCCNT - start > timeout * clocks_in_ms) {
             rfalNfcDeactivate(true);
             return false;
@@ -138,14 +128,17 @@ bool furi_hal_nfc_listen(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t s
     return true;
 }
 
+bool furi_hal_nfc_get_first_frame(uint8_t** rx_buff, uint16_t** rx_len) {
+    ReturnCode ret = rfalNfcDataExchangeStart(NULL, 0, rx_buff, rx_len, 0);
+    return ret == ERR_NONE;
+}
+
 ReturnCode furi_hal_nfc_data_exchange(uint8_t* tx_buff, uint16_t tx_len, uint8_t** rx_buff, uint16_t** rx_len, bool deactivate) {
     furi_assert(rx_buff);
     furi_assert(rx_len);
 
     ReturnCode ret;
-    ReturnCode ret_prev = ERR_NONE;
     rfalNfcState state = RFAL_NFC_STATE_ACTIVATED;
-    rfalNfcState state_prev = RFAL_NFC_STATE_ACTIVATED;
     ret = rfalNfcDataExchangeStart(tx_buff, tx_len, rx_buff, rx_len, 0);
     if(ret != ERR_NONE) {
         return ret;
@@ -155,12 +148,6 @@ ReturnCode furi_hal_nfc_data_exchange(uint8_t* tx_buff, uint16_t tx_len, uint8_t
         rfalNfcWorker();
         state = rfalNfcGetState();
         ret = rfalNfcDataExchangeGetStatus();
-        if((state != state_prev) || (ret != ret_prev)) {
-            state_prev = state;
-            ret_prev = ret;
-            // printf("Nfc st: %d Data st: %d\r\n", state, ret);
-        }
-
         if(ret > ERR_SLEEP_REQ) {
             return ret;
         }

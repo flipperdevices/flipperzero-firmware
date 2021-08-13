@@ -622,8 +622,8 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                1000)) {
             // FURI_LOG_I(NFC_WORKER_TAG, "Anticollision passed");
             // Read first command
-            err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
-            if(err == ERR_NONE) {
+            // err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+            if(furi_hal_nfc_get_first_frame(&rx_buff, &rx_len)) {
 hui:
                 if((rx_buff[0] == 0x50) && (rx_buff[1] == 0x00)) {
                     // FURI_LOG_I(NFC_WORKER_TAG, "Halt received");
