@@ -48,18 +48,25 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
 
-    elements_button_center(canvas, "Send");
+    if(model->protocol && model->protocol->get_upload_protocol){
+        elements_button_center(canvas, "Send");
+    }
 }
 
 bool subghz_transmitter_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubghzTransmitter* subghz_transmitter = context;
-
+    bool can_be_send = false;
+    with_view_model(
+        subghz_transmitter->view, (SubghzTransmitterModel * model) {
+            can_be_send = (model->protocol && model->protocol->get_upload_protocol);
+            return false;
+        });
     if(event->type != InputTypeShort) return false;
 
     if(event->key == InputKeyBack) {
         return false;
-    } else if(event->key == InputKeyOk) {
+    } else if(can_be_send && event->key == InputKeyOk) {
         subghz_transmitter->callback(SubghzTransmitterEventSend, subghz_transmitter->context);
         return true;
     }

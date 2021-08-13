@@ -61,7 +61,7 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc();
  */
 void subghz_decoder_princeton_free(SubGhzDecoderPrinceton* instance);
 
-/** Sends the key on the air
+/** Get upload protocol
  * 
  * @param instance - SubGhzDecoderPrinceton instance
  * @param encoder - SubGhzProtocolEncoderCommon encoder
