@@ -131,8 +131,8 @@ void subghz_nice_flor_s_decoder_decrypt(SubGhzProtocolNiceFlorS* instance) {
     */
 
     uint16_t p3p4 = (uint16_t)(instance->common.code_last_found >> 24);
-    instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); //nice_flor_srainbow_table_for_search[p3p4]; тут надо считать поле с файла причем адрес надо у множить на 2
-    uint8_t k =(uint8_t)(p3p4 & 0x00FF) ^subghz_nice_flor_s_get_byte_in_file(instance,(0x20000 |(instance->common.cnt &0x00ff))); //nice_flor_srainbow_table_for_search[0x10000|subghz_protocol_nice_flor_s.cnt & 0x00ff];
+    instance->common.cnt = subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2) << 8 | subghz_nice_flor_s_get_byte_in_file(instance,p3p4*2+1); 
+    uint8_t k =(uint8_t)(p3p4 & 0x00FF) ^subghz_nice_flor_s_get_byte_in_file(instance,(0x20000 |(instance->common.cnt &0x00ff))); 
 
     uint8_t s3 = ((uint8_t)(instance->common.code_last_found >> 40) ^ k) & 0x0f;
     uint8_t s2 = ((uint8_t)(instance->common.code_last_found >> 16) ^ k);
