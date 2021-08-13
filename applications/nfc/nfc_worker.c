@@ -609,8 +609,8 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
     uint16_t* rx_len;
     NfcDeviceData* data = nfc_worker->dev_data;
     MifareUlDevice mf_ul_emulate;
+    // Setup emulation parameters from mifare ultralight data structure
     mf_ul_prepare_emulation(&mf_ul_emulate, &data->mf_ul_data);
-
     while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
         if(furi_hal_nfc_listen(
                data->nfc_data.uid,
@@ -621,10 +621,13 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                200)) {
             FURI_LOG_D(NFC_WORKER_TAG, "Anticollision passed");
             if(furi_hal_nfc_get_first_frame(&rx_buff, &rx_len)) {
+                // Data exchange loop
                 while(nfc_worker->state == NfcWorkerStateEmulateMifareUl) {
-                    tx_len = mf_ul_prepare_emulation_response(rx_buff, *rx_len, tx_buff, &mf_ul_emulate);
+                    tx_len = mf_ul_prepare_emulation_response(
+                        rx_buff, *rx_len, tx_buff, &mf_ul_emulate);
                     if(tx_len > 0) {
-                        err = furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                        err =
+                            furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
                         if(err == ERR_NONE) {
                             continue;
                         } else {
@@ -644,6 +647,10 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
         }
         FURI_LOG_W(NFC_WORKER_TAG, "Can't find reader");
         osThreadYield();
+    }
+    // Check if data was modified
+    if(memcpy(&mf_ul_emulate.data, &nfc_worker->dev_data->mf_ul_data, sizeof(MifareUlData))) {
+        nfc_worker->dev_data->mf_ul_data.data_changed = true;
     }
 }
 

@@ -140,7 +140,6 @@ uint16_t mf_ul_prepare_write(uint8_t* dest, uint16_t page_addr, uint32_t data) {
 
 void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data) {
     mf_ul_emulate->data = *data;
-    mf_ul_emulate->data_changed = false;
     if(data->version.storage_size == 0) {
         mf_ul_emulate->type = MfUltralightTypeUnknown;
         mf_ul_emulate->support_fast_read = false;

@@ -58,6 +58,7 @@ typedef struct {
     uint8_t tearing[3];
     uint16_t data_size;
     uint8_t data[MF_UL_MAX_DUMP_SIZE];
+    bool data_changed;
 } MifareUlData;
 
 typedef struct {
@@ -65,7 +66,6 @@ typedef struct {
     uint8_t pages_to_read;
     uint8_t pages_readed;
     bool support_fast_read;
-    bool data_changed;
     MifareUlData data;
 } MifareUlDevice;
 
