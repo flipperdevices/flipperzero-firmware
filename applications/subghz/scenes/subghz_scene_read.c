@@ -25,6 +25,7 @@ const void subghz_scene_read_on_enter(void* context) {
     //Start CC1101 rx
     subghz_begin(FuriHalSubGhzPresetOokAsync);
     subghz_rx(433920000);
+    //subghz_rx(315000000);
     furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz->worker);
     subghz_worker_start(subghz->worker);
     subghz_protocol_enable_dump(subghz->protocol, subghz_read_protocol_callback, subghz);
