@@ -37,6 +37,7 @@ struct SubGhz {
     SubGhzWorker* worker;
     SubGhzProtocol* protocol;
     SubGhzProtocolCommon* protocol_result;
+    SubGhzProtocolEncoderCommon* encoder;
 
     SceneManager* scene_manager;
 
