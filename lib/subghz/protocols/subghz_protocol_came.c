@@ -19,7 +19,8 @@ SubGhzProtocolCame* subghz_protocol_came_alloc() {
     instance->common.te_shot = 320;
     instance->common.te_long = 640;
     instance->common.te_delta = 150;
-        instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_came_to_str;
+    instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
+    instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_came_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_came_to_save_str;
     instance->common.to_load_protocol=

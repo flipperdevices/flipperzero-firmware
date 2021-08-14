@@ -60,7 +60,9 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
             can_be_send = (model->protocol && model->protocol->get_upload_protocol);
-            return false;
+            string_clean(model->text);
+            model->protocol->to_string(model->protocol, model->text);
+            return true;
         });
     //if(event->type != InputTypeShort) return false;
 
@@ -127,7 +129,7 @@ SubghzTransmitter* subghz_transmitter_alloc() {
             string_init(model->text);
             return true;
         });
-    return subghz_transmitter;
+     return subghz_transmitter;
 }
 
 void subghz_transmitter_free(SubghzTransmitter* subghz_transmitter) {

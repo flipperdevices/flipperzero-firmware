@@ -13,6 +13,7 @@ SubGhzProtocolFaacSLH* subghz_protocol_faac_slh_alloc(void) {
     instance->common.te_shot = 255;
     instance->common.te_long = 595;
     instance->common.te_delta = 100;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_faac_slh_to_str;
 
     return instance;

@@ -18,7 +18,10 @@
 #define SUBGHZ_APP_FOLDER "/any/subghz"
 #define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
 #define SUBGHZ_APP_EXTENSION ".sub"
-#define MAX_SIZE_UPLOAD     512 
+#define MAX_SIZE_UPLOAD         512 
+
+#define TYPE_PROTOCOL_STATIC    1u
+#define TYPE_PROTOCOL_DYNAMIC   2u
 
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
 typedef struct SubGhzProtocolEncoderCommon SubGhzProtocolEncoderCommon;
@@ -47,6 +50,7 @@ struct SubGhzProtocolCommon {
     uint64_t code_last_found;
     uint8_t code_min_count_bit_for_found;
     uint8_t parser_step;
+    uint8_t type_protocol;
     uint32_t te_last;
     uint8_t header_count;
     uint16_t cnt;

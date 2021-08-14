@@ -13,6 +13,7 @@ SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc(void) {
     instance->common.te_shot = 350;
     instance->common.te_long = 700;
     instance->common.te_delta = 100;
+    instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_gate_tx_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_gate_tx_to_save_str;

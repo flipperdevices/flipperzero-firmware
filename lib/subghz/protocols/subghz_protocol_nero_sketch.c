@@ -13,6 +13,7 @@ SubGhzProtocolNeroSketch* subghz_protocol_nero_sketch_alloc(void) {
     instance->common.te_shot = 330;
     instance->common.te_long = 660;
     instance->common.te_delta = 150;
+    instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_nero_sketch_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_nero_sketch_to_save_str;

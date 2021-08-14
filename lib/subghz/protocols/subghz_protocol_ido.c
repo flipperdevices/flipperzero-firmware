@@ -13,6 +13,7 @@ SubGhzProtocolIDo* subghz_protocol_ido_alloc(void) {
     instance->common.te_shot = 450;
     instance->common.te_long = 1450;
     instance->common.te_delta = 150;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_ido_to_str;
 
     return instance;

@@ -23,6 +23,7 @@ SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore) {
     instance->common.te_shot = 400;
     instance->common.te_long = 800;
     instance->common.te_delta = 140;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_keeloq_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_keeloq_to_save_str;
@@ -165,9 +166,49 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     instance->common.btn = key_fix >> 28;
 }
 
+uint64_t subghz_protocol_keeloq_gen_key(SubGhzProtocolKeeloq* instance) {
+    uint32_t fix = instance->common.btn << 28 | instance->common.serial;
+    uint32_t decrypt = instance->common.btn << 28 | (instance->common.serial & 0x3FF) << 16 |
+                       instance->common.cnt;
+    uint32_t hop = 0;
+    uint64_t man_normal_learning = 0;
+    int res = 0;
+
+    for
+        M_EACH(manufacture_code, *subghz_keystore_get_data(instance->keystore), SubGhzKeyArray_t) {
+            res = strcmp(string_get_cstr(manufacture_code->name), instance->manufacture_name);
+            if(res == 0) {
+                switch(manufacture_code->type) {
+                case KEELOQ_LEARNING_SIMPLE:
+                    //Simple Learning
+                    hop = subghz_protocol_keeloq_common_encrypt(decrypt, manufacture_code->key);
+                    break;
+                case KEELOQ_LEARNING_NORMAL:
+                    //Simple Learning
+                    man_normal_learning =
+                        subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
+                    hop = subghz_protocol_keeloq_common_encrypt(decrypt, man_normal_learning);
+                    break;
+                case KEELOQ_LEARNING_UNKNOWN:
+                    hop = 0; //todo
+                    break;
+                }
+                break;
+            }
+        }
+    uint64_t yek = (uint64_t)fix << 32 | hop;
+    return subghz_protocol_common_reverse_key(yek, instance->common.code_last_count_bit);
+}
+
 bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolEncoderCommon* encoder){
     furi_assert(instance);
     furi_assert(encoder);
+
+    //gen new key
+    instance->common.cnt++;
+    instance->common.code_last_found = subghz_protocol_keeloq_gen_key(instance);
+    if(instance->common.callback)instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+    
     size_t index = 0;
     encoder->size_upload =11*2+2+(instance->common.code_last_count_bit * 2) + 4;
     if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
@@ -324,55 +365,7 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
         instance->common.btn);
 }
 
-uint64_t subghz_protocol_keeloq_gen_key(SubGhzProtocolKeeloq* instance) {
-    uint32_t fix = instance->common.btn << 28 | instance->common.serial;
-    uint32_t decrypt = instance->common.btn << 28 | (instance->common.serial & 0x3FF) << 16 |
-                       instance->common.cnt;
-    uint32_t hop = 0;
-    uint64_t man_normal_learning = 0;
-    int res = 0;
-
-    for
-        M_EACH(manufacture_code, *subghz_keystore_get_data(instance->keystore), SubGhzKeyArray_t) {
-            res = strcmp(string_get_cstr(manufacture_code->name), instance->manufacture_name);
-            if(res == 0) {
-                switch(manufacture_code->type) {
-                case KEELOQ_LEARNING_SIMPLE:
-                    //Simple Learning
-                    hop = subghz_protocol_keeloq_common_encrypt(decrypt, manufacture_code->key);
-                    break;
-                case KEELOQ_LEARNING_NORMAL:
-                    //Simple Learning
-                    man_normal_learning =
-                        subghz_protocol_keeloq_common_normal_learning(fix, manufacture_code->key);
-                    hop = subghz_protocol_keeloq_common_encrypt(decrypt, man_normal_learning);
-                    break;
-                case KEELOQ_LEARNING_UNKNOWN:
-                    hop = 0; //todo
-                    break;
-                }
-                break;
-            }
-        }
-    uint64_t yek = (uint64_t)fix << 32 | hop;
-    return subghz_protocol_common_reverse_key(yek, instance->common.code_last_count_bit);
-}
-
 void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output) {
-    // string_printf(
-    //     output,
-    //     "Protocol: %s\n"
-    //     "Bit: %d\n"
-    //     "Manufacture_name: %s\n"
-    //     "Serial: %08lX\n"
-    //     "Cnt: %04lX\n"
-    //     "Btn: %01lX\n",
-    //     instance->common.name,
-    //     instance->common.code_last_count_bit,
-    //     instance->manufacture_name,
-    //     instance->common.serial,
-    //     instance->common.cnt,
-    //     instance->common.btn);
         string_printf(
         output,
         "Protocol: %s\n"

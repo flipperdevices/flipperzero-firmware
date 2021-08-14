@@ -1,30 +1,6 @@
 #include "../subghz_i.h"
 #include "../views/subghz_transmitter.h"
-//#include "lib/subghz/protocols/subghz_protocol_princeton.h"
 
-void subghz_scene_transmitter_tx_start(void* context) {
-    SubGhz* subghz = context;
-
-    subghz->encoder = subghz_protocol_encoder_common_alloc();
-    subghz->encoder->repeat = 200; //max repeat with the button held down
-    //get upload
-    if(subghz->protocol_result->get_upload_protocol) {
-        if(subghz->protocol_result->get_upload_protocol(subghz->protocol_result, subghz->encoder)) {
-            subghz_begin(FuriHalSubGhzPresetOokAsync);
-            subghz_tx(433920000);
-            //Start TX
-            furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, subghz->encoder);
-        }
-    }
-}
-
-void subghz_scene_transmitter_tx_stop(void* context) {
-    SubGhz* subghz = context;
-    //Stop TX
-    furi_hal_subghz_stop_async_tx();
-    subghz_end();
-    subghz_protocol_encoder_common_free(subghz->encoder);
-}
 
 void subghz_scene_transmitter_callback(SubghzTransmitterEvent event, void* context) {
     furi_assert(context);
@@ -47,10 +23,10 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzTransmitterEventSendStart) {
-            subghz_scene_transmitter_tx_start(subghz);
+            subghz_transmitter_tx_start(subghz);
             return true;
         } else if(event.event == SubghzTransmitterEventSendStop) {
-            subghz_scene_transmitter_tx_stop(subghz);
+            subghz_transmitter_tx_stop(subghz);
             return true;
         } else if(event.event == SubghzTransmitterEventBack) {
             scene_manager_search_and_switch_to_previous_scene(

@@ -21,6 +21,7 @@ SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
     instance->common.te_shot = 500;
     instance->common.te_long = 1000;
     instance->common.te_delta = 300;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_nice_flor_s_to_str;
 
     return instance;

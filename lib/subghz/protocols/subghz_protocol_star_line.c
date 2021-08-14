@@ -25,6 +25,7 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
     instance->common.te_shot = 250;
     instance->common.te_long = 500;
     instance->common.te_delta = 120;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_star_line_to_str;
 
     return instance;

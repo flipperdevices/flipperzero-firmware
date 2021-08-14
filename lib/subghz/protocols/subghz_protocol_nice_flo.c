@@ -18,6 +18,7 @@ SubGhzProtocolNiceFlo* subghz_protocol_nice_flo_alloc() {
     instance->common.te_shot = 700;
     instance->common.te_long = 1400;
     instance->common.te_delta = 200;
+    instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_nice_flo_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_nice_flo_to_save_str;
