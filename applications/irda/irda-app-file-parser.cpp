@@ -13,6 +13,7 @@
 #include <string_view>
 #include <furi.h>
 #include <file-worker-cpp.h>
+#include <furi-hal-irda.h>
 
 const char* IrdaAppFileParser::irda_directory = "/any/irda";
 const char* IrdaAppFileParser::irda_extension = ".ir";
@@ -210,8 +211,8 @@ static int remove_args32(std::string_view& str, size_t num) {
         char buf[32];
 
         size_t index = str.find_first_not_of(" \t");
-        removed_length += index;
         if (index == std::string_view::npos) break;
+        removed_length += index;
         str.remove_prefix(index);
 
         if (str.empty()) break;
@@ -230,8 +231,6 @@ static int remove_args32(std::string_view& str, size_t num) {
     return removed_length;
 }
 
-
-
 std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
     IrdaAppFileParser::parse_signal_raw(const std::string& string) const {
     uint32_t frequency;
@@ -246,9 +245,9 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
         return nullptr;
     }
 
-    if((frequency < 10000) || (frequency > 100000)) {
+    if((frequency < IRDA_MIN_FREQUENCY) || (frequency > IRDA_MAX_FREQUENCY)) {
         size_t end_of_str = MIN(string.find_last_not_of(" \t\r\n") + 1, (size_t) 30);
-        FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): frequency is out of bounds (10000-100000): %ld", end_of_str, string.c_str(), frequency);
+        FURI_LOG_E("IrdaFileParser", "RAW signal(\'%.*s...\'): frequency is out of bounds (%ld-%ld): %ld", end_of_str, string.c_str(), IRDA_MIN_FREQUENCY, IRDA_MAX_FREQUENCY, frequency);
         return nullptr;
     }
 
@@ -309,7 +308,7 @@ std::unique_ptr<IrdaAppFileParser::IrdaFileSignal>
         /* copy timings instead of moving them to occupy less than max_raw_timings_in_signal */
         irda_file_signal->signal.copy_raw_signal(raw_signal.timings, raw_signal.timings_cnt);
     } else {
-        (void)irda_file_signal.release();
+        irda_file_signal.reset();
     }
     delete[] raw_signal.timings;
     return irda_file_signal;

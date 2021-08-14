@@ -437,6 +437,12 @@ static void furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift
         uint32_t num_of_impulses = roundf(duration / irda_tim_tx.cycle_duration);
 
         if (num_of_impulses == 0) {
+            if ((*size == 0) && (status == FuriHalIrdaTxGetDataStateDone)) {
+                /* if this is one sample in current buffer, but we
+                 * have more to send - continue
+                 */
+                status = FuriHalIrdaTxGetDataStateOk;
+            }
             --(*size);
             --polarity_counter;
         } else if ((num_of_impulses - 1) > 0xFFFF) {
@@ -455,19 +461,10 @@ static void furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift
     buffer->last_packet_end = (status == FuriHalIrdaTxGetDataStateLastDone);
     buffer->packet_end = buffer->last_packet_end || (status == FuriHalIrdaTxGetDataStateDone);
 
-    /* DMA can mess polarity if it has less than 2 timings */
     if (*size == 0) {
         buffer->data[0] = 0;       // 1 pulse
         buffer->polarity[0] = IRDA_TX_CCMR_LOW;
-        buffer->data[1] = 0;       // 1 pulse
-        buffer->polarity[1] = IRDA_TX_CCMR_LOW;
-        buffer->size = 2;
-    } else if (*size == 1) {
-        // TODO: check
-        /* DMA buffer > 1, so we are here means end of signal, so we can add 1 dumb space painlessly */
-        buffer->data[1] = 0;       // 1 pulse
-        buffer->polarity[1] = IRDA_TX_CCMR_LOW;
-        buffer->size = 2;
+        buffer->size = 1;
     }
 }
 
@@ -535,7 +532,7 @@ static void furi_hal_irda_async_tx_free_resources(void) {
 }
 
 void furi_hal_irda_async_tx_start(uint32_t freq, float duty_cycle) {
-    if ((duty_cycle > 1) || (duty_cycle <= 0) || (freq > 100000) || (freq < 10000) || (irda_tim_tx.data_callback == NULL)) {
+    if ((duty_cycle > 1) || (duty_cycle <= 0) || (freq > IRDA_MAX_FREQUENCY) || (freq < IRDA_MIN_FREQUENCY) || (irda_tim_tx.data_callback == NULL)) {
         furi_check(0);
     }
 

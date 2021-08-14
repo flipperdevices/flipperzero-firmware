@@ -9,8 +9,11 @@ void IrdaAppSceneEditRename::on_enter(IrdaApp* app) {
     if(app->get_edit_element() == IrdaApp::EditElement::Button) {
         furi_assert(app->get_current_button() != IrdaApp::ButtonNA);
         auto button_name = remote_manager->get_button_name(app->get_current_button());
-        strncpy(app->get_text_store(0), button_name.c_str(), IrdaAppRemoteManager::max_button_name_length);
-        enter_name_length = IrdaAppRemoteManager::max_button_name_length;
+        char* buffer_str = app->get_text_store(0);
+        size_t max_len = IrdaAppRemoteManager::max_button_name_length;
+        strncpy(buffer_str, button_name.c_str(), max_len);
+        buffer_str[max_len+1] = 0;
+        enter_name_length = max_len;
     } else {
         auto remote_name = remote_manager->get_remote_name();
         strncpy(app->get_text_store(0), remote_name.c_str(), app->get_text_store_size());

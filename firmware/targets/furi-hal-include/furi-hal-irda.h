@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+#define IRDA_MAX_FREQUENCY      56000
+#define IRDA_MIN_FREQUENCY      10000
+
 typedef enum {
     FuriHalIrdaTxGetDataStateOk,         /* New data obtained */
     FuriHalIrdaTxGetDataStateDone,       /* New data obtained, and this is end of package */

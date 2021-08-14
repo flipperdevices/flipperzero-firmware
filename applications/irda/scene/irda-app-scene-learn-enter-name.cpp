@@ -21,8 +21,6 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
     }
 
     text_input_set_header_text(text_input, "Name the key");
-
-    furi_check(IrdaAppRemoteManager::max_button_name_length < app->get_text_store_size());
     text_input_set_result_callback(
         text_input,
         IrdaApp::text_input_callback,
