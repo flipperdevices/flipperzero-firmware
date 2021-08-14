@@ -7,6 +7,21 @@
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
 #include "file-worker.h"
+#include "../notification/notification.h"
+
+const NotificationSequence sequence_read_ok= {
+    &message_green_255,
+    &message_delay_500,
+    &message_green_0,
+    &message_delay_250,
+    &message_green_255,
+    &message_delay_500,
+    &message_green_0,
+    &message_delay_250,
+    &message_green_255,
+    &message_delay_500,
+    NULL,
+};
 
 void subghz_begin(FuriHalSubGhzPreset preset) {
     furi_hal_subghz_reset();
@@ -41,7 +56,6 @@ void subghz_end(void) {
 
 void subghz_transmitter_tx_start(void* context) {
     SubGhz* subghz = context;
-
     subghz->encoder = subghz_protocol_encoder_common_alloc();
     subghz->encoder->repeat = 200; //max repeat with the button held down
     //get upload
@@ -65,6 +79,7 @@ void subghz_transmitter_tx_stop(void* context) {
     if(subghz->protocol_result->type_protocol == TYPE_PROTOCOL_DYNAMIC){
         subghz_save_protocol_to_file(subghz, subghz->text_store);
     }
+    notification_message(subghz->notifications, &sequence_reset_red);
 }
 
 
@@ -225,3 +240,109 @@ bool subghz_saved_protocol_select(SubGhz* subghz) {
 
     return res;
 }
+
+
+const NotificationSequence sequence_subghz_start= {
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_ds4,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_ds4,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_500,
+    &message_note_d5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_d5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_d5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_ds5,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_fs4,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_ds4,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_g4,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_500,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_g4,
+    &message_delay_250,
+    &message_note_g4,
+    &message_delay_100,
+    &message_note_g5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_fs5,
+    &message_delay_250,
+    &message_note_f5,
+    &message_delay_100,
+    &message_note_e5,
+    &message_delay_100,
+    &message_note_ds5,
+    &message_delay_100,
+    &message_note_e5,
+    &message_delay_100,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_gs4,
+    &message_delay_100,
+    &message_delay_50,
+    &message_note_cs5,
+    &message_delay_100,
+    &message_delay_250,
+    &message_note_c5,
+    &message_delay_250,
+    &message_note_b4,
+    &message_delay_100,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_a4,
+    &message_delay_100,
+    &message_note_as4,
+    &message_delay_250,
+    &message_delay_100,
+    &message_delay_100,
+    &message_note_ds4,
+    &message_delay_100,
+    &message_delay_50,
+    &message_note_fs4,
+    &message_delay_250,
+    &message_delay_100,
+    &message_note_ds4,
+    &message_delay_250,
+    &message_note_as4,
+    &message_delay_100,
+    &message_note_g4,
+    &message_delay_500,
+    &message_delay_250,
+    NULL
+};

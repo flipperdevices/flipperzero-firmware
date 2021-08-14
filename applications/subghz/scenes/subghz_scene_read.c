@@ -6,6 +6,7 @@ void subghz_read_protocol_callback(SubGhzProtocolCommon* parser, void* context) 
     furi_assert(context);
     SubGhz* subghz = context;
     subghz->protocol_result = parser;
+    notification_message(subghz->notifications, &sequence_read_ok);
     view_dispatcher_send_custom_event(subghz->view_dispatcher, GUBGHZ_READ_CUSTOM_EVENT);
 }
 void subghz_scene_read_callback(DialogExResult result, void* context) {
@@ -40,6 +41,9 @@ const bool subghz_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(subghz->scene_manager, SubGhzViewReceiver);
             return true;
         }
+    } else if(event.type == SceneManagerEventTypeTick) {
+        notification_message(subghz->notifications, &sequence_blink_blue_10);
+        return true;
     }
     return false;
 }

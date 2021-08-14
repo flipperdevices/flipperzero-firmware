@@ -13,6 +13,7 @@
 #include <furi-hal.h>
 #include <gui/gui.h>
 #include <gui/scene_manager.h>
+#include <notification/notification-messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
@@ -27,12 +28,20 @@
 
 #define SUBGHZ_TEXT_STORE_SIZE 128
 
+#define NOTIFICATION_STARTING_STATE 0u
+#define NOTIFICATION_IDLE_STATE 1u
+#define NOTIFICATION_TX_STATE 2u
+
+
+extern const NotificationSequence sequence_read_ok;
+extern const NotificationSequence sequence_subghz_start;
 extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_frequencies_count;
 extern const uint32_t subghz_frequencies_433_92;
 
 struct SubGhz {
     Gui* gui;
+    NotificationApp* notifications; 
 
     SubGhzWorker* worker;
     SubGhzProtocol* protocol;
@@ -48,6 +57,7 @@ struct SubGhz {
     Popup* popup;
     TextInput* text_input;
     char text_store[SUBGHZ_TEXT_STORE_SIZE + 1];
+    uint8_t state_notifications;
 
     SubghzAnalyze* subghz_analyze;
     SubghzReceiver* subghz_receiver;
