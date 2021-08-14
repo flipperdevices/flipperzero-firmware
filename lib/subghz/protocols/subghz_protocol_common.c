@@ -6,7 +6,7 @@
 SubGhzProtocolEncoderCommon* subghz_protocol_encoder_common_alloc() {
     SubGhzProtocolEncoderCommon* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCommon));
     instance->start = true;
-    instance->repeat = 5; //default number of repeat
+    instance->repeat = 10; //default number of repeat
     return instance;
 }
 
