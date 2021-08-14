@@ -6,7 +6,7 @@ void subghz_scene_transmitter_tx_start(void* context) {
     SubGhz* subghz = context;
 
     SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
-    encoder->repeat = 50;
+    encoder->repeat = 200; //max repeat with the button held down
     //get upload
     if(subghz->protocol_result->get_upload_protocol) {
         if(subghz->protocol_result->get_upload_protocol(subghz->protocol_result, encoder)) {
