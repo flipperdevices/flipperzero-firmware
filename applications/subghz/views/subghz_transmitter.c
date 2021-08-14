@@ -62,12 +62,15 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
             can_be_send = (model->protocol && model->protocol->get_upload_protocol);
             return false;
         });
-    if(event->type != InputTypeShort) return false;
+    //if(event->type != InputTypeShort) return false;
 
     if(event->key == InputKeyBack) {
         return false;
-    } else if(can_be_send && event->key == InputKeyOk) {
-        subghz_transmitter->callback(SubghzTransmitterEventSend, subghz_transmitter->context);
+    } else if(can_be_send && event->key == InputKeyOk && event->type == InputTypePress) {
+        subghz_transmitter->callback(SubghzTransmitterEventSendStart, subghz_transmitter->context);
+        return true;
+    } else if(can_be_send && event->key == InputKeyOk && event->type == InputTypeRelease) {
+        subghz_transmitter->callback(SubghzTransmitterEventSendStop, subghz_transmitter->context);
         return true;
     }
 

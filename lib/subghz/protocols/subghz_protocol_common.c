@@ -22,8 +22,18 @@ size_t subghz_encoder_common_get_repeat_left(SubGhzProtocolEncoderCommon* instan
 
 LevelDuration subghz_protocol_encoder_common_yield(void* context) {
     SubGhzProtocolEncoderCommon* instance = context;
-    if(instance->repeat == 0) return level_duration_reset();
     LevelDuration ret;
+
+    if(instance->repeat == 0){
+        //if the last interval in the parcel was high, send low to remove the carrier
+        if(!(instance->start) && instance->upload[instance->front].level ==LEVEL_DURATION_LEVEL_HIGH) {
+            instance->start = true;
+            ret.level = LEVEL_DURATION_LEVEL_LOW;
+            ret.duration = 300;
+            return ret;
+        }
+        return level_duration_reset();
+     }
     //if the upload starts from a low level, to start DMA, we first submit 1 shortcut high
     if(instance->start){
         instance->start = false;

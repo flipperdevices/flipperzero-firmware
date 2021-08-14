@@ -2,31 +2,28 @@
 #include "../views/subghz_transmitter.h"
 #include "lib/subghz/protocols/subghz_protocol_princeton.h"
 
-void subghz_scene_transmitter_tx(void* context) {
+void subghz_scene_transmitter_tx_start(void* context) {
     SubGhz* subghz = context;
 
     SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
-    //encoder->repeat = 4;
+    encoder->repeat = 50;
     //get upload
-    if(subghz->protocol_result->get_upload_protocol){
-        if(subghz->protocol_result->get_upload_protocol(subghz->protocol_result, encoder)){
+    if(subghz->protocol_result->get_upload_protocol) {
+        if(subghz->protocol_result->get_upload_protocol(subghz->protocol_result, encoder)) {
             subghz_begin(FuriHalSubGhzPresetOokAsync);
             subghz_tx(433920000);
-
-            //furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, encoder);
+            //Start TX
             furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
-
-            while(!furi_hal_subghz_is_async_tx_complete()) {
-                osDelay(20);
-            }
-
-            //Stop tx
-            furi_hal_subghz_stop_async_tx();
-            subghz_end();
         }
     }
-
     subghz_protocol_encoder_common_free(encoder);
+}
+
+void subghz_scene_transmitter_tx_stop(void* context) {
+    //SubGhz* subghz = context;
+    //Stop TX
+    furi_hal_subghz_stop_async_tx();
+    subghz_end();
 }
 
 void subghz_scene_transmitter_callback(SubghzTransmitterEvent event, void* context) {
@@ -49,8 +46,11 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
     SubGhz* subghz = context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzTransmitterEventSend) {
-            subghz_scene_transmitter_tx(subghz);
+        if(event.event == SubghzTransmitterEventSendStart) {
+            subghz_scene_transmitter_tx_start(subghz);
+            return true;
+        } else if(event.event == SubghzTransmitterEventSendStop) {
+            subghz_scene_transmitter_tx_stop(subghz);
             return true;
         } else if(event.event == SubghzTransmitterEventBack) {
             scene_manager_search_and_switch_to_previous_scene(

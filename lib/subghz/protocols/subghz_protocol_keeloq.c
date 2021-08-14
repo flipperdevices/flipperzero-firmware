@@ -165,54 +165,6 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     instance->common.btn = key_fix >> 28;
 }
 
-// /** Send bit 
-//  * 
-//  * @param instance - SubGhzProtocolKeeloq instance
-//  * @param bit - bit
-//  */
-// void subghz_protocol_keeloq_send_bit(SubGhzProtocolKeeloq* instance, uint8_t bit) {
-//     if(bit) {
-//         // send bit 1
-//         SUBGHZ_TX_PIN_HIGTH();
-//         delay_us(instance->common.te_shot);
-//         SUBGHZ_TX_PIN_LOW();
-//         delay_us(instance->common.te_long);
-//     } else {
-//         // send bit 0
-//         SUBGHZ_TX_PIN_HIGTH();
-//         delay_us(instance->common.te_long);
-//         SUBGHZ_TX_PIN_LOW();
-//         delay_us(instance->common.te_shot);
-//     }
-// }
-
-// void subghz_protocol_keeloq_send_key(
-//     SubGhzProtocolKeeloq* instance,
-//     uint64_t key,
-//     uint8_t bit,
-//     uint8_t repeat) {
-//     while(repeat--) {
-//         // Send header
-//         for(uint8_t i = 11; i > 0; i--) {
-//             SUBGHZ_TX_PIN_HIGTH();
-//             delay_us(instance->common.te_shot);
-//             SUBGHZ_TX_PIN_LOW();
-//             delay_us(instance->common.te_shot);
-//         }
-//         delay_us(instance->common.te_shot * 9); //+1 up Send header
-
-//         for(uint8_t i = bit; i > 0; i--) {
-//             subghz_protocol_keeloq_send_bit(instance, bit_read(key, i - 1));
-//         }
-//         // +send 2 status bit
-//         subghz_protocol_keeloq_send_bit(instance, 0);
-//         subghz_protocol_keeloq_send_bit(instance, 0);
-//         // send end
-//         subghz_protocol_keeloq_send_bit(instance, 0);
-//         delay_us(instance->common.te_shot * 2); //+2 interval END SEND
-//     }
-// }
-
 bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolEncoderCommon* encoder){
     furi_assert(instance);
     furi_assert(encoder);
