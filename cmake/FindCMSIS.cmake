@@ -183,28 +183,28 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
     set(CMSIS_${COMP}_VERSION ${CMSIS_${FAMILY}${CORE_U}_VERSION})
     set(CMSIS_VERSION ${CMSIS_${COMP}_VERSION})
 
+    if(NOT (TARGET CMSIS::STM32::${FAMILY}${CORE_C}))
+        message(TRACE "FindCMSIS: creating library CMSIS::STM32::${FAMILY}${CORE_C}")
+        add_library(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
+        #STM32::${FAMILY}${CORE_C} contains compile options and is define in <family>.cmake
+        target_link_libraries(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C})
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}/Include")
+        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include")
+    endif()
+
     # search for system_stm32[XX]xx.c
-    find_file(CMSIS_${FAMILY}${CORE_U}_SOURCE
+    find_file(CMSIS_${FAMILY}${CORE_U}_SYSTEM
         NAMES system_stm32${FAMILY_L}xx.c
         PATHS "${CMSIS_${FAMILY}${CORE_U}_PATH}/Source/Templates"
         NO_DEFAULT_PATH
     )
-    list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
+    list(APPEND CMSIS_SOURCES "${CMSIS_${FAMILY}${CORE_U}_SYSTEM}")
     
-    if(NOT CMSIS_${FAMILY}${CORE_U}_SOURCE)
+    if(NOT CMSIS_${FAMILY}${CORE_U}_SYSTEM)
         message(VERBOSE "FindCMSIS: system_stm32${FAMILY_L}xx.c for ${FAMILY}${CORE_U} has not been found")
         continue()
     endif()
-
-    if(NOT (TARGET CMSIS::STM32::${FAMILY}${CORE_C}))
-        message(TRACE "FindCMSIS: creating library CMSIS::STM32::${FAMILY}${CORE_C}")
-        add_library(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE IMPORTED)
-        target_link_libraries(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE STM32::${FAMILY}${CORE_C})
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_CORE_PATH}/Include")
-        target_include_directories(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_PATH}/Include")
-        target_sources(CMSIS::STM32::${FAMILY}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_SOURCE}")
-    endif()
-
+    
     set(STM_DEVICES_FOUND TRUE)
     foreach(DEVICE ${STM_DEVICES})
         message(TRACE "FindCMSIS: Iterating DEVICE ${DEVICE}")
@@ -236,6 +236,7 @@ foreach(COMP ${CMSIS_FIND_COMPONENTS_FAMILIES})
             add_library(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE IMPORTED)
             target_link_libraries(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE CMSIS::STM32::${FAMILY}${CORE_C} STM32::${TYPE}${CORE_C})
             target_sources(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_${TYPE}_STARTUP}")
+            target_sources(CMSIS::STM32::${TYPE}${CORE_C} INTERFACE "${CMSIS_${FAMILY}${CORE_U}_SYSTEM}")
         endif()
         
         add_library(CMSIS::STM32::${DEVICE}${CORE_C} INTERFACE IMPORTED)
