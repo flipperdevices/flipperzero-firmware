@@ -48,7 +48,7 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
 
-    if(model->protocol && model->protocol->get_upload_protocol){
+    if(model->protocol && model->protocol->get_upload_protocol) {
         elements_button_center(canvas, "Send");
     }
 }
@@ -129,7 +129,7 @@ SubghzTransmitter* subghz_transmitter_alloc() {
             string_init(model->text);
             return true;
         });
-     return subghz_transmitter;
+    return subghz_transmitter;
 }
 
 void subghz_transmitter_free(SubghzTransmitter* subghz_transmitter) {

@@ -133,8 +133,9 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
         case SubmenuIndexGateTX:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "GateTX")) {
                 subghz->protocol_result->code_last_count_bit = 24;
-                key = (key & 0x00F0FFFF) | 0xF<<16; //btn 0xF, 0xC, 0xA, 0x6
-                subghz->protocol_result->code_last_found = subghz_protocol_common_reverse_key(key,subghz->protocol_result->code_last_count_bit);
+                key = (key & 0x00F0FFFF) | 0xF << 16; //btn 0xF, 0xC, 0xA, 0x6
+                subghz->protocol_result->code_last_found = subghz_protocol_common_reverse_key(
+                    key, subghz->protocol_result->code_last_count_bit);
                 generated_protocol = true;
             }
             break;
@@ -144,8 +145,9 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
                 subghz->protocol_result->serial = key & 0x0FFFFFFF;
                 subghz->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
                 subghz->protocol_result->cnt = 0x0003;
-                subghz_protocol_keeloq_set_manufacture_name(subghz->protocol_result,"DoorHan");
-                subghz->protocol_result->code_last_found =subghz_protocol_keeloq_gen_key(subghz->protocol_result);
+                subghz_protocol_keeloq_set_manufacture_name(subghz->protocol_result, "DoorHan");
+                subghz->protocol_result->code_last_found =
+                    subghz_protocol_keeloq_gen_key(subghz->protocol_result);
 
                 generated_protocol = true;
             }
@@ -160,7 +162,7 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             return true;
         }
     }
-    
+
     return false;
 }
 

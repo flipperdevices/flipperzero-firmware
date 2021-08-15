@@ -4,7 +4,6 @@
 
 #define SCENE_SAVE_NAME_CUSTOM_EVENT (0UL)
 
-
 void subghz_scene_save_name_text_input_callback(void* context) {
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SCENE_SAVE_NAME_CUSTOM_EVENT);
