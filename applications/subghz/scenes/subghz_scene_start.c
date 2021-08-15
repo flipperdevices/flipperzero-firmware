@@ -62,7 +62,12 @@ const bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
             return true;
-        } else if(event.event == SubmenuIndexStatic) {
+        } else if(event.event == SubmenuIndexAddManualy) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAddManualy);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetType);
+            return true;
+        }else if(event.event == SubmenuIndexStatic) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexStatic);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStatic);
@@ -72,12 +77,7 @@ const bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
             return true;
-        } else if(event.event == SubmenuIndexAddManualy) {
-            scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetType);
-            return true;
-        }
+        } 
     }
     return false;
 }

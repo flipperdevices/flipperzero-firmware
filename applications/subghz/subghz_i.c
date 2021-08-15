@@ -207,7 +207,7 @@ bool subghz_saved_protocol_select(SubGhz* subghz) {
         file_worker_free(file_worker);
         return res;
     }
-
+    res = false;
     do {
         if(!file_worker_open(
                file_worker, string_get_cstr(protocol_file_name), FSAM_READ, FSOM_OPEN_EXISTING)) {

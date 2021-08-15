@@ -156,40 +156,11 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             break;
         }
         if(generated_protocol) {
-            //scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexRead);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }
     }
-
-    // if(event.event == SubmenuIndexPricenton) {
-    //     scene_manager_set_scene_state(
-    //         subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexPricenton);
-    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneAnalyze);
-    //     return true;
-    // }
-    //else if(event.event == SubmenuIndexRead) {
-    //     scene_manager_set_scene_state(
-    //         subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexRead);
-    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneRead);
-    //     return true;
-    // } else if(event.event == SubmenuIndexSaved) {
-    //     scene_manager_set_scene_state(
-    //         subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexSaved);
-    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
-    //     return true;
-    // } else if(event.event == SubmenuIndexStatic) {
-    //     scene_manager_set_scene_state(
-    //         subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexStatic);
-    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStatic);
-    //     return true;
-    // } else if(event.event == SubmenuIndexTest) {
-    //     scene_manager_set_scene_state(
-    //         subghz->scene_manager, SubGhzSceneSetType, SubmenuIndexTest);
-    //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
-    //     return true;
-    // }
-    //}
+    
     return false;
 }
 
