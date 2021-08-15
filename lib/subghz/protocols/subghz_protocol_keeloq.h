@@ -18,6 +18,20 @@ SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore);
  */
 void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance);
 
+/** Set manufacture name
+ * 
+ * @param manufacture_name - manufacture name
+ * @param context - SubGhzProtocolKeeloq context
+ */
+void subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manufacture_name);
+
+/** Get key keeloq
+ * 
+ * @param context - SubGhzProtocolKeeloq context
+ * @return key
+ */
+uint64_t subghz_protocol_keeloq_gen_key(void* context);
+
 /** Get upload protocol
  * 
  * @param instance - SubGhzProtocolCame instance

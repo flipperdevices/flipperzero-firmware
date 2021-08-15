@@ -241,6 +241,19 @@ bool subghz_saved_protocol_select(SubGhz* subghz) {
     return res;
 }
 
+uint32_t subghz_random_serial(void) {
+    static bool rand_generator_inited = false;
+
+    if(!rand_generator_inited) {
+        srand(DWT->CYCCNT);
+        rand_generator_inited = true;
+    }
+    return (uint32_t)rand();
+    // uint8_t prefix_i = rand() % SIZEOF_ARRAY(prefix);
+    // uint8_t suffix_i = rand() % SIZEOF_ARRAY(suffix);
+}
+
+
 
 const NotificationSequence sequence_subghz_start= {
     &message_note_g4,

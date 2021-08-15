@@ -165,8 +165,13 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     instance->common.serial = key_fix & 0x0FFFFFFF;
     instance->common.btn = key_fix >> 28;
 }
+void subghz_protocol_keeloq_set_manufacture_name (void* context, const char* manufacture_name){
+    SubGhzProtocolKeeloq* instance = context;
+    instance->manufacture_name = manufacture_name;
+}
 
-uint64_t subghz_protocol_keeloq_gen_key(SubGhzProtocolKeeloq* instance) {
+uint64_t subghz_protocol_keeloq_gen_key(void* context) {
+    SubGhzProtocolKeeloq* instance = context;
     uint32_t fix = instance->common.btn << 28 | instance->common.serial;
     uint32_t decrypt = instance->common.btn << 28 | (instance->common.serial & 0x3FF) << 16 |
                        instance->common.cnt;

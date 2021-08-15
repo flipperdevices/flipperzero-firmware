@@ -14,7 +14,7 @@ struct SubGhzProtocolCame {
 SubGhzProtocolCame* subghz_protocol_came_alloc() {
     SubGhzProtocolCame* instance = furi_alloc(sizeof(SubGhzProtocolCame));
 
-    instance->common.name = "Came";
+    instance->common.name = "CAME";
     instance->common.code_min_count_bit_for_found = 12;
     instance->common.te_shot = 320;
     instance->common.te_long = 640;
