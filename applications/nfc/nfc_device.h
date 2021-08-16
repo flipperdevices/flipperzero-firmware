@@ -75,3 +75,5 @@ bool nfc_file_select(NfcDevice* dev);
 void nfc_device_clear(NfcDevice* dev);
 
 bool nfc_device_delete(NfcDevice* dev);
+
+bool nfc_device_restore(NfcDevice* dev);
