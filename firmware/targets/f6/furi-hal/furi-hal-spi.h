@@ -30,13 +30,7 @@ void furi_hal_spi_bus_unlock(const FuriHalSpiBus* bus);
  * @param bus - spi bus handler
  * @param config - spi configuration structure
  */
-void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const SPI_InitTypeDef* config);
-
-/**
- * Reset SPI bus
- * @param bus - spi bus handler
- */
-void furi_hal_spi_bus_reset(const FuriHalSpiBus* bus);
+void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const LL_SPI_InitTypeDef* config);
 
 /** SPI Receive
  * @param bus - spi bus handler
@@ -64,6 +58,11 @@ bool furi_hal_spi_bus_tx(const FuriHalSpiBus* bus, uint8_t* buffer, size_t size,
 bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t* rx_buffer, size_t size, uint32_t timeout);
 
 /* Device Level API */
+
+/** Reconfigure SPI bus for device
+ * @param device - device description
+ */
+void furi_hal_spi_device_configure(const FuriHalSpiDevice* device);
 
 /** Get Device handle
  * And lock access to the corresponding SPI BUS
@@ -103,16 +102,6 @@ bool furi_hal_spi_device_tx(const FuriHalSpiDevice* device, uint8_t* buffer, siz
  */
 bool furi_hal_spi_device_trx(const FuriHalSpiDevice* device, uint8_t* tx_buffer, uint8_t* rx_buffer, size_t size, uint32_t timeout);
 
-
-/**
- * Lock SPI device bus and apply config if needed
- */
-void furi_hal_spi_lock_device(const SPIDevice* device);
-
-/**
- * Unlock SPI device bus
- */
-void furi_hal_spi_unlock_device(const SPIDevice* device);
 
 #ifdef __cplusplus
 }

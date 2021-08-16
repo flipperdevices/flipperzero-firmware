@@ -1,23 +1,24 @@
 #pragma once
 
 #include <furi-hal-gpio.h>
+#include <stm32wbxx_ll_spi.h>
 #include <cmsis_os2.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const SPI_InitTypeDef furi_hal_spi_config_nfc;
-extern const SPI_InitTypeDef furi_hal_spi_config_subghz;
-extern const SPI_InitTypeDef furi_hal_spi_config_display;
-extern const SPI_InitTypeDef furi_hal_spi_config_sd_fast;
-extern const SPI_InitTypeDef furi_hal_spi_config_sd_slow;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_nfc;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_subghz;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_display;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_sd_fast;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow;
 
 /** FURI HAL SPI BUS handler
  * Structure content may change at some point
  */
 typedef struct {
-    const SPI_HandleTypeDef* spi;
+    const SPI_TypeDef* spi;
     const osMutexId_t* mutex;
     const GpioPin* miso;
     const GpioPin* mosi;
@@ -29,7 +30,7 @@ typedef struct {
  */
 typedef struct {
     const FuriHalSpiBus* bus;
-    const SPI_InitTypeDef* config;
+    const LL_SPI_InitTypeDef* config;
     const GpioPin* chip_select;
 } FuriHalSpiDevice;
 
@@ -56,11 +57,6 @@ extern const FuriHalSpiBus spi_d;
 
 /** Furi Hal Spi devices */
 extern const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax];
-
-typedef struct {
-    const FuriHalSpiBus* bus;
-    const SPI_InitTypeDef config;
-} SPIDevice;
 
 #ifdef __cplusplus
 }

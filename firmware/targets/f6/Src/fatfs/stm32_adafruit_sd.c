@@ -91,8 +91,9 @@
 #include "stdlib.h"
 #include "string.h"
 #include "stdio.h"
-#include "spi.h"
 #include <furi-hal-spi.h>
+#include <furi-hal-gpio.h>
+#include <furi-hal-resources.h>
 #include <furi-hal-power.h>
 #include <furi-hal-delay.h>
 #include <furi-hal-sd.h>
@@ -282,6 +283,25 @@ static uint8_t SD_ReadData(void);
 
 /* Private functions ---------------------------------------------------------*/
 
+void SD_SPI_Bus_To_Down_State(){
+    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+
+    hal_gpio_write(&gpio_sdcard_cs, false);
+    hal_gpio_write(&gpio_spi_d_miso, false);
+    hal_gpio_write(&gpio_spi_d_mosi, false);
+    hal_gpio_write(&gpio_spi_d_sck, false);
+}
+
+void SD_SPI_Bus_To_Normal_State(){
+    hal_gpio_write(&gpio_sdcard_cs, true);
+
+    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+}
+
 /** @defgroup STM32_ADAFRUIT_SD_Private_Functions
   * @{
   */
@@ -295,9 +315,7 @@ static uint8_t SD_ReadData(void);
   */
 uint8_t BSP_SD_Init(bool reset_card) {
     /* Slow speed init */
-    const FuriHalSpiDevice* sd_spi_slow_dev = &furi_hal_spi_devices[FuriHalSpiDeviceIdSdCardSlow];
-    furi_hal_spi_bus_lock(sd_spi_slow_dev->bus);
-    furi_hal_spi_bus_configure(sd_spi_slow_dev->bus, sd_spi_slow_dev->config);
+    const FuriHalSpiDevice* sd_spi_slow_dev = furi_hal_spi_device_get(FuriHalSpiDeviceIdSdCardSlow);
 
     /* We must reset card in spi_lock context */
     if(reset_card) {
@@ -326,7 +344,7 @@ uint8_t BSP_SD_Init(bool reset_card) {
         if(res == BSP_SD_OK) break;
     }
 
-    furi_hal_spi_bus_unlock(sd_spi_slow_dev->bus);
+    furi_hal_spi_device_return(sd_spi_slow_dev);
 
     /* SD initialized and set to SPI mode properly */
     return res;
@@ -375,12 +393,11 @@ uint8_t BSP_SD_GetCardInfo(SD_CardInfo* pCardInfo) {
 uint8_t
 BSP_SD_ReadBlocks(uint32_t* pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint32_t Timeout) {
     uint32_t offset = 0;
+    uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
+    uint8_t* ptr = NULL;
     SD_CmdAnswer_typedef response;
     uint16_t BlockSize = 512;
-
-    uint8_t* ptr = NULL;
-    //  uint8_t ptr[512];
 
     /* Send CMD16 (SD_CMD_SET_BLOCKLEN) to set the size of the block and 
      Check if the SD acknowledged the set block length command: R1 response (0x00: no errors) */
@@ -397,15 +414,14 @@ BSP_SD_ReadBlocks(uint32_t* pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint
     }
     memset(ptr, SD_DUMMY_BYTE, sizeof(uint8_t) * BlockSize);
 
+    /* Initialize the address */
+    addr = (ReadAddr * ((flag_SDHC == 1) ? 1 : BlockSize));
+
     /* Data transfer */
     while(NumOfBlocks--) {
         /* Send CMD17 (SD_CMD_READ_SINGLE_BLOCK) to read one block */
         /* Check if the SD acknowledged the read block command: R1 response (0x00: no errors) */
-        response = SD_SendCmd(
-            SD_CMD_READ_SINGLE_BLOCK,
-            (ReadAddr + offset) * (flag_SDHC == 1 ? 1 : BlockSize),
-            0xFF,
-            SD_ANSWER_R1_EXPECTED);
+        response = SD_SendCmd(SD_CMD_READ_SINGLE_BLOCK, addr, 0xFF, SD_ANSWER_R1_EXPECTED);
         if(response.r1 != SD_R1_NO_ERROR) {
             goto error;
         }
@@ -417,6 +433,8 @@ BSP_SD_ReadBlocks(uint32_t* pData, uint32_t ReadAddr, uint32_t NumOfBlocks, uint
 
             /* Set next read address*/
             offset += BlockSize;
+            addr = ((flag_SDHC == 1) ? (addr + 1) : (addr + BlockSize));
+
             /* get CRC bytes (not really needed by us, but required by SD) */
             SD_IO_WriteByte(SD_DUMMY_BYTE);
             SD_IO_WriteByte(SD_DUMMY_BYTE);
@@ -453,6 +471,7 @@ error:
 uint8_t
 BSP_SD_WriteBlocks(uint32_t* pData, uint32_t WriteAddr, uint32_t NumOfBlocks, uint32_t Timeout) {
     uint32_t offset = 0;
+    uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
     uint8_t* ptr = NULL;
     SD_CmdAnswer_typedef response;
@@ -472,15 +491,14 @@ BSP_SD_WriteBlocks(uint32_t* pData, uint32_t WriteAddr, uint32_t NumOfBlocks, ui
         goto error;
     }
 
+    /* Initialize the address */
+    addr = (WriteAddr * ((flag_SDHC == 1) ? 1 : BlockSize));
+
     /* Data transfer */
     while(NumOfBlocks--) {
         /* Send CMD24 (SD_CMD_WRITE_SINGLE_BLOCK) to write blocks  and
        Check if the SD acknowledged the write block command: R1 response (0x00: no errors) */
-        response = SD_SendCmd(
-            SD_CMD_WRITE_SINGLE_BLOCK,
-            (WriteAddr + offset) * (flag_SDHC == 1 ? 1 : BlockSize),
-            0xFF,
-            SD_ANSWER_R1_EXPECTED);
+        response = SD_SendCmd(SD_CMD_WRITE_SINGLE_BLOCK, addr, 0xFF, SD_ANSWER_R1_EXPECTED);
         if(response.r1 != SD_R1_NO_ERROR) {
             goto error;
         }
@@ -497,7 +515,8 @@ BSP_SD_WriteBlocks(uint32_t* pData, uint32_t WriteAddr, uint32_t NumOfBlocks, ui
 
         /* Set next write address */
         offset += BlockSize;
-
+        addr = ((flag_SDHC == 1) ? (addr + 1) : (addr + BlockSize));
+        
         /* Put CRC bytes (not really needed by us, but required by SD) */
         SD_IO_WriteByte(SD_DUMMY_BYTE);
         SD_IO_WriteByte(SD_DUMMY_BYTE);

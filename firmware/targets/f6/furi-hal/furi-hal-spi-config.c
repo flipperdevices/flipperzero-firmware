@@ -1,100 +1,85 @@
 #include <furi-hal-spi-config.h>
 #include <furi-hal-resources.h>
 
-extern SPI_HandleTypeDef SPI_R;
-extern SPI_HandleTypeDef SPI_D;
+#define SPI_R SPI1
+#define SPI_D SPI2
 
-const SPI_InitTypeDef furi_hal_spi_config_nfc = {
-    .Mode = SPI_MODE_MASTER,
-    .Direction = SPI_DIRECTION_2LINES,
-    .DataSize = SPI_DATASIZE_8BIT,
-    .CLKPolarity = SPI_POLARITY_LOW,
-    .CLKPhase = SPI_PHASE_2EDGE,
-    .NSS = SPI_NSS_SOFT,
-    .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8,
-    .FirstBit = SPI_FIRSTBIT_MSB,
-    .TIMode = SPI_TIMODE_DISABLE,
-    .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-    .CRCPolynomial = 7,
-    .CRCLength = SPI_CRC_LENGTH_DATASIZE,
-    .NSSPMode = SPI_NSS_PULSE_DISABLE,
+const LL_SPI_InitTypeDef furi_hal_spi_config_nfc = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_2EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
 };
 
-const SPI_InitTypeDef furi_hal_spi_config_subghz = {
-    .Mode = SPI_MODE_MASTER,
-    .Direction = SPI_DIRECTION_2LINES,
-    .DataSize = SPI_DATASIZE_8BIT,
-    .CLKPolarity = SPI_POLARITY_LOW,
-    .CLKPhase = SPI_PHASE_1EDGE,
-    .NSS = SPI_NSS_SOFT,
-    .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8,
-    .FirstBit = SPI_FIRSTBIT_MSB,
-    .TIMode = SPI_TIMODE_DISABLE,
-    .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-    .CRCPolynomial = 7,
-    .CRCLength = SPI_CRC_LENGTH_DATASIZE,
-    .NSSPMode = SPI_NSS_PULSE_DISABLE,
+const LL_SPI_InitTypeDef furi_hal_spi_config_subghz = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_1EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV8,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
 };
 
-const SPI_InitTypeDef furi_hal_spi_config_display = {
-    .Mode = SPI_MODE_MASTER,
-    .Direction = SPI_DIRECTION_2LINES,
-    .DataSize = SPI_DATASIZE_8BIT,
-    .CLKPolarity = SPI_POLARITY_LOW,
-    .CLKPhase = SPI_PHASE_1EDGE,
-    .NSS = SPI_NSS_SOFT,
-    .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16,
-    .FirstBit = SPI_FIRSTBIT_MSB,
-    .TIMode = SPI_TIMODE_DISABLE,
-    .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-    .CRCPolynomial = 7,
-    .CRCLength = SPI_CRC_LENGTH_DATASIZE,
-    .NSSPMode = SPI_NSS_PULSE_ENABLE,
+const LL_SPI_InitTypeDef furi_hal_spi_config_display = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_1EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV16,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
 };
 
 /**
  * SD Card in fast mode (after init)
  */
-const SPI_InitTypeDef furi_hal_spi_config_sd_fast = {
-    .Mode = SPI_MODE_MASTER,
-    .Direction = SPI_DIRECTION_2LINES,
-    .DataSize = SPI_DATASIZE_8BIT,
-    .CLKPolarity = SPI_POLARITY_LOW,
-    .CLKPhase = SPI_PHASE_1EDGE,
-    .NSS = SPI_NSS_SOFT,
-    .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2,
-    .FirstBit = SPI_FIRSTBIT_MSB,
-    .TIMode = SPI_TIMODE_DISABLE,
-    .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-    .CRCPolynomial = 7,
-    .CRCLength = SPI_CRC_LENGTH_DATASIZE,
-    .NSSPMode = SPI_NSS_PULSE_ENABLE,
+const LL_SPI_InitTypeDef furi_hal_spi_config_sd_fast = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_1EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV2,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
 };
 
 /**
  * SD Card in slow mode (before init)
  */
-const SPI_InitTypeDef furi_hal_spi_config_sd_slow = {
-    .Mode = SPI_MODE_MASTER,
-    .Direction = SPI_DIRECTION_2LINES,
-    .DataSize = SPI_DATASIZE_8BIT,
-    .CLKPolarity = SPI_POLARITY_LOW,
-    .CLKPhase = SPI_PHASE_1EDGE,
-    .NSS = SPI_NSS_SOFT,
-    .BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32,
-    .FirstBit = SPI_FIRSTBIT_MSB,
-    .TIMode = SPI_TIMODE_DISABLE,
-    .CRCCalculation = SPI_CRCCALCULATION_DISABLE,
-    .CRCPolynomial = 7,
-    .CRCLength = SPI_CRC_LENGTH_DATASIZE,
-    .NSSPMode = SPI_NSS_PULSE_ENABLE,
+const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_1EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV32,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
 };
 
 osMutexId_t spi_mutex_d = NULL;
 osMutexId_t spi_mutex_r = NULL;
 
 const FuriHalSpiBus spi_r = {
-    .spi=&SPI_R,
+    .spi=SPI_R,
     .mutex=&spi_mutex_r,
     .miso=&gpio_spi_r_miso,
     .mosi=&gpio_spi_r_mosi,
@@ -102,7 +87,7 @@ const FuriHalSpiBus spi_r = {
 };
 
 const FuriHalSpiBus spi_d = {
-    .spi=&SPI_D,
+    .spi=SPI_D,
     .mutex=&spi_mutex_d,
     .miso=&gpio_spi_d_miso,
     .mosi=&gpio_spi_d_mosi,
