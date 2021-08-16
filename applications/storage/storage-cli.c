@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
+#include <lib/toolbox/md5.h>
 #include <storage/storage.h>
 #include <storage/storage-sd-api.h>
 #include <furi-hal-version.h>
@@ -34,6 +35,7 @@ void storage_cli_print_usage() {
     printf("\tcopy\t - copy file to new file, <args> must contain new path\r\n");
     printf("\trename\t - move file to new file, <args> must contain new path\r\n");
     printf("\tmkdir\t - creates a new directory\r\n");
+    printf("\tmd5\t - md5 hash of the file\r\n");
 };
 
 void storage_cli_print_error(FS_Error error) {
@@ -188,7 +190,7 @@ void storage_cli_write(Cli* cli, string_t path) {
     Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
-    const uint16_t buffer_size = 256;
+    const uint16_t buffer_size = 512;
     uint8_t* buffer = furi_alloc(buffer_size);
 
     printf("Just write your text data. New line by Ctrl+Enter, exit by Ctrl+C.\r\n");
@@ -248,20 +250,21 @@ void storage_cli_read_chunks(Cli* cli, string_t path, string_t args) {
     if(parsed_count == EOF || parsed_count != 1) {
         storage_cli_print_usage();
     } else if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-        uint16_t readed_size = 0;
         uint8_t* data = furi_alloc(buffer_size);
+        uint64_t file_size = storage_file_size(file);
 
-        printf("Size: %lu\r\n", (uint32_t)storage_file_size(file));
+        printf("Size: %lu\r\n", (uint32_t)file_size);
 
-        do {
+        while(file_size > 0) {
             printf("\r\nReady?\r\n");
             cli_getc(cli);
 
-            readed_size = storage_file_read(file, data, buffer_size);
+            uint16_t readed_size = storage_file_read(file, data, buffer_size);
             for(uint16_t i = 0; i < readed_size; i++) {
                 putchar(data[i]);
             }
-        } while(readed_size > 0);
+            file_size -= readed_size;
+        }
         printf("\r\n");
 
         free(data);
@@ -373,6 +376,43 @@ void storage_cli_mkdir(Cli* cli, string_t path) {
     furi_record_close("storage");
 }
 
+void storage_cli_md5(Cli* cli, string_t path) {
+    Storage* api = furi_record_open("storage");
+    File* file = storage_file_alloc(api);
+
+    if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        const uint16_t read_size = 512;
+        const uint8_t hash_size = 16;
+        uint8_t* data = malloc(read_size);
+        uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
+        md5_context* md5_ctx = malloc(sizeof(md5_context));
+
+        md5_starts(md5_ctx);
+        while(true) {
+            uint16_t readed_size = storage_file_read(file, data, read_size);
+            if(readed_size == 0) break;
+            md5_update(md5_ctx, data, readed_size);
+        }
+        md5_finish(md5_ctx, hash);
+        free(md5_ctx);
+
+        for(uint8_t i = 0; i < hash_size; i++) {
+            printf("%02x", hash[i]);
+        }
+        printf("\r\n");
+
+        free(hash);
+        free(data);
+    } else {
+        storage_cli_print_file_error(path, file);
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close("storage");
+}
+
 void storage_cli(Cli* cli, string_t args, void* context) {
     string_t cmd;
     string_t path;
@@ -442,6 +482,11 @@ void storage_cli(Cli* cli, string_t args, void* context) {
 
         if(string_cmp_str(cmd, "mkdir") == 0) {
             storage_cli_mkdir(cli, path);
+            break;
+        }
+
+        if(string_cmp_str(cmd, "md5") == 0) {
+            storage_cli_md5(cli, path);
             break;
         }
 
