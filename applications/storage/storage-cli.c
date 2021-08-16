@@ -286,7 +286,7 @@ void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
         storage_cli_print_usage();
     } else {
         if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
-            printf("Ready?\r\n");
+            printf("Ready\r\n");
 
             uint8_t* buffer = furi_alloc(buffer_size);
 
