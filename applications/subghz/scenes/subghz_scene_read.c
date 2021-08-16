@@ -6,7 +6,6 @@ void subghz_read_protocol_callback(SubGhzProtocolCommon* parser, void* context) 
     furi_assert(context);
     SubGhz* subghz = context;
     subghz->protocol_result = parser;
-    notification_message(subghz->notifications, &sequence_read_ok);
     view_dispatcher_send_custom_event(subghz->view_dispatcher, GUBGHZ_READ_CUSTOM_EVENT);
 }
 void subghz_scene_read_callback(DialogExResult result, void* context) {
@@ -26,7 +25,7 @@ const void subghz_scene_read_on_enter(void* context) {
     //Start CC1101 rx
     subghz_begin(FuriHalSubGhzPresetOokAsync);
     subghz_rx(433920000);
-    //subghz_rx(315000000);
+
     furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz->worker);
     subghz_worker_start(subghz->worker);
     subghz_protocol_enable_dump(subghz->protocol, subghz_read_protocol_callback, subghz);
@@ -38,7 +37,8 @@ const bool subghz_scene_read_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GUBGHZ_READ_CUSTOM_EVENT) {
-            scene_manager_next_scene(subghz->scene_manager, SubGhzViewReceiver);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiver);
+            notification_message(subghz->notifications, &sequence_success);
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
@@ -51,7 +51,7 @@ const bool subghz_scene_read_on_event(void* context, SceneManagerEvent event) {
 const void subghz_scene_read_on_exit(void* context) {
     SubGhz* subghz = context;
 
-    //Stop CC1101
+    // Stop CC1101
     subghz_worker_stop(subghz->worker);
     furi_hal_subghz_stop_async_rx();
     subghz_end();

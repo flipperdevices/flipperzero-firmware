@@ -32,8 +32,6 @@
 #define NOTIFICATION_IDLE_STATE 1u
 #define NOTIFICATION_TX_STATE 2u
 
-extern const NotificationSequence sequence_read_ok;
-extern const NotificationSequence sequence_subghz_start;
 extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_frequencies_count;
 extern const uint32_t subghz_frequencies_433_92;

@@ -9,20 +9,6 @@
 #include "file-worker.h"
 #include "../notification/notification.h"
 
-const NotificationSequence sequence_read_ok = {
-    &message_green_255,
-    &message_delay_500,
-    &message_green_0,
-    &message_delay_250,
-    &message_green_255,
-    &message_delay_500,
-    &message_green_0,
-    &message_delay_250,
-    &message_green_255,
-    &message_delay_500,
-    NULL,
-};
-
 void subghz_begin(FuriHalSubGhzPreset preset) {
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
@@ -247,42 +233,4 @@ uint32_t subghz_random_serial(void) {
         rand_generator_inited = true;
     }
     return (uint32_t)rand();
-    // uint8_t prefix_i = rand() % SIZEOF_ARRAY(prefix);
-    // uint8_t suffix_i = rand() % SIZEOF_ARRAY(suffix);
 }
-
-const NotificationSequence sequence_subghz_start = {
-    &message_note_g4,   &message_delay_100, &message_delay_250,
-    &message_note_g4,   &message_delay_100, &message_delay_250,
-    &message_note_g4,   &message_delay_100, &message_delay_250,
-    &message_note_ds4,  &message_delay_250, &message_note_as4,
-    &message_delay_100, &message_note_g4,   &message_delay_100,
-    &message_delay_250, &message_note_ds4,  &message_delay_250,
-    &message_note_as4,  &message_delay_100, &message_note_g4,
-    &message_delay_100, &message_delay_100, &message_delay_500,
-    &message_note_d5,   &message_delay_100, &message_delay_250,
-    &message_note_d5,   &message_delay_100, &message_delay_250,
-    &message_note_d5,   &message_delay_100, &message_delay_250,
-    &message_note_ds5,  &message_delay_250, &message_note_as4,
-    &message_delay_100, &message_note_fs4,  &message_delay_100,
-    &message_delay_250, &message_note_ds4,  &message_delay_250,
-    &message_note_as4,  &message_delay_100, &message_note_g4,
-    &message_delay_100, &message_delay_100, &message_delay_500,
-    &message_note_g5,   &message_delay_100, &message_delay_250,
-    &message_note_g4,   &message_delay_250, &message_note_g4,
-    &message_delay_100, &message_note_g5,   &message_delay_100,
-    &message_delay_250, &message_note_fs5,  &message_delay_250,
-    &message_note_f5,   &message_delay_100, &message_note_e5,
-    &message_delay_100, &message_note_ds5,  &message_delay_100,
-    &message_note_e5,   &message_delay_100, &message_delay_100,
-    &message_delay_250, &message_note_gs4,  &message_delay_100,
-    &message_delay_50,  &message_note_cs5,  &message_delay_100,
-    &message_delay_250, &message_note_c5,   &message_delay_250,
-    &message_note_b4,   &message_delay_100, &message_note_as4,
-    &message_delay_100, &message_note_a4,   &message_delay_100,
-    &message_note_as4,  &message_delay_250, &message_delay_100,
-    &message_delay_100, &message_note_ds4,  &message_delay_100,
-    &message_delay_50,  &message_note_fs4,  &message_delay_250,
-    &message_delay_100, &message_note_ds4,  &message_delay_250,
-    &message_note_as4,  &message_delay_100, &message_note_g4,
-    &message_delay_500, &message_delay_250, NULL};

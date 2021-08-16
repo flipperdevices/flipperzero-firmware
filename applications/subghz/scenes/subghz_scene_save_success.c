@@ -9,7 +9,6 @@ void subghz_scene_save_success_popup_callback(void* context) {
 
 const void subghz_scene_save_success_on_enter(void* context) {
     SubGhz* subghz = context;
-    notification_message(subghz->notifications, &sequence_success);
 
     // Setup view
     Popup* popup = subghz->popup;

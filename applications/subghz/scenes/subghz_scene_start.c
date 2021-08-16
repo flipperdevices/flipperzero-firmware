@@ -18,7 +18,6 @@ const void subghz_scene_start_on_enter(void* context) {
     SubGhz* subghz = context;
     if(subghz->state_notifications == NOTIFICATION_STARTING_STATE) {
         subghz->state_notifications = NOTIFICATION_IDLE_STATE;
-        //notification_message(subghz->notifications, &sequence_subghz_start);
     }
     submenu_add_item(
         subghz->submenu,
