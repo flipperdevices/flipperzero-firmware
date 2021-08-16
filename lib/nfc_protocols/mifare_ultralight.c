@@ -140,6 +140,7 @@ uint16_t mf_ul_prepare_write(uint8_t* dest, uint16_t page_addr, uint32_t data) {
 
 void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data) {
     mf_ul_emulate->data = *data;
+    mf_ul_emulate->data_changed = false;
     if(data->version.storage_size == 0) {
         mf_ul_emulate->type = MfUltralightTypeUnknown;
         mf_ul_emulate->support_fast_read = false;
@@ -189,6 +190,7 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
         uint8_t write_page = buff_rx[1];
         if((write_page > 1) && (write_page < page_num - 2)) {
             memcpy(&mf_ul_emulate->data.data[write_page * 4], &buff_rx[2], 4);
+            mf_ul_emulate->data_changed = true;
             // TODO make 4-bit ACK
             buff_tx[0] = 0x0A;
             tx_len = 1;
@@ -206,6 +208,7 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
         uint32_t inc = (buff_rx[2] | (buff_rx[3] << 8) | (buff_rx[4] << 16));
         if((cnt_num < 3) && (mf_ul_emulate->data.counter[cnt_num] + inc < 0x00FFFFFF)) {
             mf_ul_emulate->data.counter[cnt_num] += inc;
+            mf_ul_emulate->data_changed = true;
             // TODO make 4-bit ACK
             buff_tx[0] = 0x0A;
             tx_len = 1;
