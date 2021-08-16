@@ -645,12 +645,15 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                 furi_hal_nfc_deactivate();
             }
         }
+        // Check if data was modified
+        if(mf_ul_emulate.data_changed) {
+            nfc_worker->dev_data->mf_ul_data = mf_ul_emulate.data;
+            if(nfc_worker->callback) {
+                nfc_worker->callback(nfc_worker->context);
+            }
+        }
         FURI_LOG_W(NFC_WORKER_TAG, "Can't find reader");
         osThreadYield();
-    }
-    // Check if data was modified
-    if(memcpy(&mf_ul_emulate.data, &nfc_worker->dev_data->mf_ul_data, sizeof(MifareUlData))) {
-        nfc_worker->dev_data->mf_ul_data.data_changed = true;
     }
 }
 

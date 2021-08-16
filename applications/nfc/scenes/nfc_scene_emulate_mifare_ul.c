@@ -1,10 +1,12 @@
 #include "../nfc_i.h"
 
-#define NFC_EMULATE_MF_UL_CUSTOM_CALLBACK (0UL)
+#define NFC_MF_UL_DATA_NOT_CHANGED (0UL)
+#define NFC_MF_UL_DATA_CHANGED (1UL)
 
 void nfc_emulate_mifare_ul_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_EMULATE_MF_UL_CUSTOM_CALLBACK);
+    scene_manager_set_scene_state(
+        nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_UL_DATA_CHANGED);
 }
 
 const void nfc_scene_emulate_mifare_ul_on_enter(void* context) {
@@ -35,19 +37,23 @@ const bool nfc_scene_emulate_mifare_ul_on_event(void* context, SceneManagerEvent
     if(event.type == SceneManagerEventTypeTick) {
         notification_message(nfc->notifications, &sequence_blink_blue_10);
         consumed = true;
-    } else if(event.type == SceneManagerEventTypeCustom) {
-        if(nfc->dev.dev_data.mf_ul_data.data_changed) {
-            // TODO move to save select scene
+    } else if(event.type == SceneManagerEventTypeBack) {
+        // Stop worker
+        nfc_worker_stop(nfc->worker);
+        // Check if data changed and save in shadow file
+        if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateMifareUl) ==
+           NFC_MF_UL_DATA_CHANGED) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneEmulateMifareUl, NFC_MF_UL_DATA_NOT_CHANGED);
+            nfc_device_save_shadow(&nfc->dev, nfc->dev.dev_name);
         }
+        consumed = false;
     }
     return consumed;
 }
 
 const void nfc_scene_emulate_mifare_ul_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
-
-    // Stop worker
-    nfc_worker_stop(nfc->worker);
 
     // Clear view
     Popup* popup = nfc->popup;
