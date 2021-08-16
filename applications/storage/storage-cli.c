@@ -25,10 +25,12 @@ void storage_cli_print_usage() {
     printf("\tformat\t - format filesystem\r\n");
     printf("\tlist\t - list files and dirs\r\n");
     printf("\tremove\t - delete the file or directory\r\n");
-    printf("\tread\t - read data from file and print file size and content to cli\r\n");
+    printf("\tread\t - read text from file and print file size and content to cli\r\n");
+    printf(
+        "\tread_chunks\t - read data from file and print file size and content to cli, <args> should contain how many bytes you want to read in block\r\n");
     printf("\twrite\t - read text from cli and append it to file, stops by ctrl+c\r\n");
     printf(
-        "\twrite_raw\t - read data from cli and append it to file, <args> should contain how many bytes you want to write\r\n");
+        "\twrite_chunk\t - read data from cli and append it to file, <args> should contain how many bytes you want to write\r\n");
     printf("\tcopy\t - copy file to new file, <args> must contain new path\r\n");
     printf("\trename\t - move file to new file, <args> must contain new path\r\n");
     printf("\tmkdir\t - creates a new directory\r\n");
@@ -236,7 +238,44 @@ void storage_cli_write(Cli* cli, string_t path) {
     furi_record_close("storage");
 }
 
-void storage_cli_write_raw(Cli* cli, string_t path, string_t args) {
+void storage_cli_read_chunks(Cli* cli, string_t path, string_t args) {
+    Storage* api = furi_record_open("storage");
+    File* file = storage_file_alloc(api);
+
+    uint32_t buffer_size;
+    int parsed_count = sscanf(string_get_cstr(args), "%lu", &buffer_size);
+
+    if(parsed_count == EOF || parsed_count != 1) {
+        storage_cli_print_usage();
+    } else if(storage_file_open(file, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        uint16_t readed_size = 0;
+        uint8_t* data = furi_alloc(buffer_size);
+
+        printf("Size: %lu\r\n", (uint32_t)storage_file_size(file));
+
+        do {
+            printf("\r\nReady?\r\n");
+            cli_getc(cli);
+
+            readed_size = storage_file_read(file, data, buffer_size);
+            for(uint16_t i = 0; i < readed_size; i++) {
+                putchar(data[i]);
+            }
+        } while(readed_size > 0);
+        printf("\r\n");
+
+        free(data);
+    } else {
+        storage_cli_print_file_error(path, file);
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close("storage");
+}
+
+void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
     Storage* api = furi_record_open("storage");
     File* file = storage_file_alloc(api);
 
@@ -247,6 +286,8 @@ void storage_cli_write_raw(Cli* cli, string_t path, string_t args) {
         storage_cli_print_usage();
     } else {
         if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+            printf("Ready?\r\n");
+
             uint8_t* buffer = furi_alloc(buffer_size);
 
             for(uint32_t i = 0; i < buffer_size; i++) {
@@ -369,13 +410,18 @@ void storage_cli(Cli* cli, string_t args, void* context) {
             break;
         }
 
+        if(string_cmp_str(cmd, "read_chunks") == 0) {
+            storage_cli_read_chunks(cli, path, args);
+            break;
+        }
+
         if(string_cmp_str(cmd, "write") == 0) {
             storage_cli_write(cli, path);
             break;
         }
 
-        if(string_cmp_str(cmd, "write_raw") == 0) {
-            storage_cli_write_raw(cli, path, args);
+        if(string_cmp_str(cmd, "write_chunk") == 0) {
+            storage_cli_write_chunk(cli, path, args);
             break;
         }
 
