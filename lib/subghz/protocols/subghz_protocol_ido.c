@@ -10,7 +10,7 @@ SubGhzProtocolIDo* subghz_protocol_ido_alloc(void) {
 
     instance->common.name = "iDo 117/111"; // PT4301-X";
     instance->common.code_min_count_bit_for_found = 48;
-    instance->common.te_shot = 450;
+    instance->common.te_short = 450;
     instance->common.te_long = 1450;
     instance->common.te_delta = 150;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
@@ -32,14 +32,14 @@ void subghz_protocol_ido_free(SubGhzProtocolIDo* instance) {
 void subghz_protocol_ido_send_bit(SubGhzProtocolIDo* instance, uint8_t bit) {
     if (bit) {
         //send bit 1
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
+        SUBGHZ_TX_PIN_HIGH();
+        delay_us(instance->common.te_short);
         SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot);
+        delay_us(instance->common.te_short);
     } else {
         //send bit 0
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
+        SUBGHZ_TX_PIN_HIGH();
+        delay_us(instance->common.te_short);
         SUBGHZ_TX_PIN_LOW();
         delay_us(instance->common.te_long);
     }
@@ -47,11 +47,11 @@ void subghz_protocol_ido_send_bit(SubGhzProtocolIDo* instance, uint8_t bit) {
 
 void subghz_protocol_ido_send_key(SubGhzProtocolIDo* instance, uint64_t key, uint8_t bit,uint8_t repeat) {
     while (repeat--) {
-        SUBGHZ_TX_PIN_HIGTH();
+        SUBGHZ_TX_PIN_HIGH();
         //Send header
-        delay_us(instance->common.te_shot * 10);
+        delay_us(instance->common.te_short * 10);
         SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot * 10); 
+        delay_us(instance->common.te_short * 10); 
         //Send key data
         for (uint8_t i = bit; i > 0; i--) {
             subghz_protocol_ido_send_bit(instance, bit_read(key, i - 1));
@@ -79,7 +79,7 @@ void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t
     switch (instance->common.parser_step) {
     case 0:
         if ((level)
-                && (DURATION_DIFF(duration,instance->common.te_shot * 10)< instance->common.te_delta * 5)) {
+                && (DURATION_DIFF(duration,instance->common.te_short * 10)< instance->common.te_delta * 5)) {
             instance->common.parser_step = 1;
         } else {
             instance->common.parser_step = 0;
@@ -87,7 +87,7 @@ void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t
         break;
     case 1:
         if ((!level)
-                && (DURATION_DIFF(duration,instance->common.te_shot * 10)< instance->common.te_delta * 5)) {
+                && (DURATION_DIFF(duration,instance->common.te_short * 10)< instance->common.te_delta * 5)) {
             //Found Preambula
             instance->common.parser_step = 2;
             instance->common.code_found = 0;
@@ -98,7 +98,7 @@ void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t
         break;
     case 2:
         if (level) {
-            if (duration >= (instance->common.te_shot * 5 + instance->common.te_delta)) {
+            if (duration >= (instance->common.te_short * 5 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     instance->common.code_last_found = instance->common.code_found;
@@ -119,12 +119,12 @@ void subghz_protocol_ido_parse(SubGhzProtocolIDo* instance, bool level, uint32_t
         break;
     case 3:
         if(!level){
-                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
+                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
                     && (DURATION_DIFF(duration,instance->common.te_long)< instance->common.te_delta*3)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
-            } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot )< instance->common.te_delta*3)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+            } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short )< instance->common.te_delta*3)
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 2;
             } else {

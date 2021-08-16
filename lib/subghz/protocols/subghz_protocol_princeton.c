@@ -16,15 +16,9 @@ struct SubGhzEncoderPrinceton {
     size_t front;
 };
 
-// struct SubGhzDecoderPrinceton {
-//     SubGhzProtocolCommon common;
-//     uint16_t te;
-// };
 
 SubGhzEncoderPrinceton* subghz_encoder_princeton_alloc() {
     SubGhzEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzEncoderPrinceton));
-    
-
     return instance;
 }
 
@@ -32,6 +26,7 @@ void subghz_encoder_princeton_free(SubGhzEncoderPrinceton* instance) {
     furi_assert(instance);
     free(instance);
 }
+
 void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder){
    SubGhzDecoderPrinceton* pricenton = decoder;
     if((pricenton->te) !=0){
@@ -42,7 +37,7 @@ void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* dec
 }
 
 
-void subghz_encoder_princeton_reset(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
+void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
     instance->te = SUBGHZ_PT_SHORT;
     instance->key = key;
@@ -88,11 +83,11 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
 SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     SubGhzDecoderPrinceton* instance = furi_alloc(sizeof(SubGhzDecoderPrinceton));
 
+    instance->te = SUBGHZ_PT_SHORT;
     instance->common.name = "Princeton";
     instance->common.code_min_count_bit_for_found = 24;
-    instance->common.te_shot = 450; //150;
-    instance->te = 450;
-    instance->common.te_long = 1350; //450;
+    instance->common.te_short = SUBGHZ_PT_SHORT; //150;
+    instance->common.te_long = SUBGHZ_PT_LONG; //450;
     instance->common.te_delta = 200; //50;
     instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
@@ -116,7 +111,7 @@ bool subghz_protocol_princeton_send_key(SubGhzDecoderPrinceton* instance, SubGhz
     furi_assert(encoder);
     size_t index = 0;
     encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
-    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
     
     //Send key data
     for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
@@ -135,7 +130,7 @@ bool subghz_protocol_princeton_send_key(SubGhzDecoderPrinceton* instance, SubGhz
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te);
     //Send PT_GUARD
     encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te*30);
-    
+
     return true;
 }
 
@@ -149,7 +144,7 @@ void subghz_decoder_princeton_parse(
     uint32_t duration) {
     switch(instance->common.parser_step) {
     case 0:
-        if((!level) && (DURATION_DIFF(duration, instance->common.te_shot * 36) <
+        if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 36) <
                         instance->common.te_delta * 36)) {
             //Found Preambula
             instance->common.parser_step = 1;
@@ -168,7 +163,7 @@ void subghz_decoder_princeton_parse(
         break;
     case 2:
         if(!level) {
-            if(duration >= (instance->common.te_shot * 10 + instance->common.te_delta)) {
+            if(duration >= (instance->common.te_short * 10 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if(instance->common.code_count_bit >=
                    instance->common.code_min_count_bit_for_found) {
@@ -194,7 +189,7 @@ void subghz_decoder_princeton_parse(
                 break;
             }
 
-            if((DURATION_DIFF(instance->common.te_last, instance->common.te_shot) <
+            if((DURATION_DIFF(instance->common.te_last, instance->common.te_short) <
                 instance->common.te_delta) &&
                (DURATION_DIFF(duration, instance->common.te_long) <
                 instance->common.te_delta * 3)) {
@@ -203,7 +198,7 @@ void subghz_decoder_princeton_parse(
             } else if(
                 (DURATION_DIFF(instance->common.te_last, instance->common.te_long) <
                  instance->common.te_delta * 3) &&
-                (DURATION_DIFF(duration, instance->common.te_shot) < instance->common.te_delta)) {
+                (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 1;
             } else {

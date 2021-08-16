@@ -133,6 +133,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     SubGhzDecoderPrinceton* protocol = subghz_decoder_princeton_alloc();
     protocol->common.code_last_found = key;
     protocol->common.code_last_count_bit = 24;
+
     SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
     encoder->repeat = repeat;
 
@@ -142,7 +143,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
 
-    while(!furi_hal_subghz_is_async_tx_complete()) {
+    while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
         printf(".");
         fflush(stdout);
         osDelay(333);

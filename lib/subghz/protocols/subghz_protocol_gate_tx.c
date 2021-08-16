@@ -10,7 +10,7 @@ SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc(void) {
 
     instance->common.name = "GateTX";
     instance->common.code_min_count_bit_for_found = 24;
-    instance->common.te_shot = 350;
+    instance->common.te_short = 350;
     instance->common.te_long = 700;
     instance->common.te_delta = 100;
     instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
@@ -34,9 +34,9 @@ bool subghz_protocol_gate_tx_send_key(SubGhzProtocolGateTX* instance, SubGhzProt
     furi_assert(encoder);
     size_t index = 0;
     encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
-    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
     //Send header
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot * 49);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short * 49);
     //Send start bit
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
     //Send key data
@@ -44,10 +44,10 @@ bool subghz_protocol_gate_tx_send_key(SubGhzProtocolGateTX* instance, SubGhzProt
         if(bit_read(instance->common.code_last_found, i - 1)){
             //send bit 1
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
         }else{
             //send bit 0
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
         }
     }
@@ -73,7 +73,7 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
     switch (instance->common.parser_step) {
     case 0:
         if ((!level)
-                && (DURATION_DIFF(duration,instance->common.te_shot * 47)< instance->common.te_delta * 47)) {
+                && (DURATION_DIFF(duration,instance->common.te_short * 47)< instance->common.te_delta * 47)) {
             //Found Preambula
             instance->common.parser_step = 1;
         } else {
@@ -92,7 +92,7 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
         break;
     case 2:
         if (!level) {
-            if (duration >= (instance->common.te_shot * 10 + instance->common.te_delta)) {
+            if (duration >= (instance->common.te_short * 10 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     
@@ -112,12 +112,12 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
          break;
     case 3:
         if(level){
-            if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
+            if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
                     && (DURATION_DIFF(duration,instance->common.te_long)< instance->common.te_delta*3)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long)< instance->common.te_delta*3)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 2;
             } else {

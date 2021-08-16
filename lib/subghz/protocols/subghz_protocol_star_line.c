@@ -22,7 +22,7 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
 
     instance->common.name = "Star Line"; 
     instance->common.code_min_count_bit_for_found = 64;
-    instance->common.te_shot = 250;
+    instance->common.te_short = 250;
     instance->common.te_long = 500;
     instance->common.te_delta = 120;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
@@ -44,16 +44,16 @@ void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance) {
 void subghz_protocol_star_line_send_bit(SubGhzProtocolStarLine* instance, uint8_t bit) {
     if (bit) {
         //send bit 1
-        SUBGHZ_TX_PIN_HIGTH();
+        SUBGHZ_TX_PIN_HIGH();
         delay_us(instance->common.te_long);
         SUBGHZ_TX_PIN_LOW();
         delay_us(instance->common.te_long);
     } else {
         //send bit 0
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
+        SUBGHZ_TX_PIN_HIGH();
+        delay_us(instance->common.te_short);
         SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot);
+        delay_us(instance->common.te_short);
     }
 }
 
@@ -61,7 +61,7 @@ void subghz_protocol_star_line_send_key(SubGhzProtocolStarLine* instance, uint64
     while (repeat--) {
         //Send header
         for(uint8_t i = 0; i < 6; i++){
-            SUBGHZ_TX_PIN_HIGTH();
+            SUBGHZ_TX_PIN_HIGH();
             delay_us(instance->common.te_long * 2);
             SUBGHZ_TX_PIN_LOW();
             delay_us(instance->common.te_long * 2); 
@@ -239,8 +239,8 @@ void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool leve
         break;
     case 3:
         if(!level){
-                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long )< instance->common.te_delta)

@@ -11,6 +11,7 @@ enum SubmenuIndex {
     SubmenuIndexGateTX,
     SubmenuIndexDoorHan,
 };
+
 bool subghz_scene_set_type_submenu_to_find_protocol(void* context, const char* protocol_name) {
     SubGhz* subghz = context;
     subghz->protocol_result = subghz_protocol_get_by_name(subghz->protocol, protocol_name);

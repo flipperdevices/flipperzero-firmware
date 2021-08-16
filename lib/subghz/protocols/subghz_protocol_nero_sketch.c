@@ -10,7 +10,7 @@ SubGhzProtocolNeroSketch* subghz_protocol_nero_sketch_alloc(void) {
 
     instance->common.name = "Nero Sketch"; 
     instance->common.code_min_count_bit_for_found = 40;
-    instance->common.te_shot = 330;
+    instance->common.te_short = 330;
     instance->common.te_long = 660;
     instance->common.te_delta = 150;
     instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
@@ -35,34 +35,34 @@ bool subghz_protocol_nero_sketch_send_key(SubGhzProtocolNeroSketch* instance, Su
     furi_assert(encoder);
     size_t index = 0;
     encoder->size_upload = 47*2+2+(instance->common.code_last_count_bit * 2) + 2;
-    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
     
     //Send header
     for(uint8_t i = 0; i < 47; i++){
-        encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
-        encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+        encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
+        encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
     }
     
     //Send start bit
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot*4);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short*4);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
 
     //Send key data
     for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
         if(bit_read(instance->common.code_last_found, i - 1)){
             //send bit 1
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
         }else{
             //send bit 0
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
         }
     }
 
     //Send stop bit
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot*3);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short*3);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
 
     return true;
 }
@@ -92,7 +92,7 @@ void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool 
     switch (instance->common.parser_step) {
     case 0:
         if ((level)
-                && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
             instance->common.parser_step = 1;
             instance->common.te_last = duration;
             instance->common.header_count = 0;
@@ -102,18 +102,18 @@ void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool 
         break;
     case 1:
        if (level){
-            if((DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta )
-                || (DURATION_DIFF(duration,instance->common.te_shot*4)< instance->common.te_delta)) {
+            if((DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta )
+                || (DURATION_DIFF(duration,instance->common.te_short*4)< instance->common.te_delta)) {
                 instance->common.te_last = duration;
             } else {
                 instance->common.parser_step = 0;
             }
-        } else if(DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta){
-            if(DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta){
+        } else if(DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta){
+            if(DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta){
                 // Found header
                 instance->common.header_count++;
                 break;
-            }else if(DURATION_DIFF(instance->common.te_last,instance->common.te_shot*4)< instance->common.te_delta){
+            }else if(DURATION_DIFF(instance->common.te_last,instance->common.te_short*4)< instance->common.te_delta){
                  // Found start bit
                  if(instance->common.header_count>40) {
                     instance->common.parser_step = 2;
@@ -131,7 +131,7 @@ void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool 
         break;
     case 2:
         if (level) {
-            if (duration >= (instance->common.te_shot * 2 + instance->common.te_delta*2)) {
+            if (duration >= (instance->common.te_short * 2 + instance->common.te_delta*2)) {
                 //Found stop bit
                 instance->common.parser_step = 0;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
@@ -155,12 +155,12 @@ void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool 
         break;
     case 3:
         if(!level){
-                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
+                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
                     && (DURATION_DIFF(duration,instance->common.te_long)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long )< instance->common.te_delta)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 2;
             } else {

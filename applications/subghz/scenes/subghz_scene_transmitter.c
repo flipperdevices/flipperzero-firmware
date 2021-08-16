@@ -12,9 +12,10 @@ const void subghz_scene_transmitter_on_enter(void* context) {
     SubghzTransmitter* subghz_transmitter = subghz->subghz_transmitter;
 
     subghz_transmitter_set_callback(subghz_transmitter, subghz_scene_transmitter_callback, subghz);
-
     subghz_transmitter_set_protocol(subghz_transmitter, subghz->protocol_result);
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTransmitter);
+
     subghz->state_notifications = NOTIFICATION_IDLE_STATE;
 }
 

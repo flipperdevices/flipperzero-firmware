@@ -16,7 +16,7 @@ SubGhzProtocolCame* subghz_protocol_came_alloc() {
 
     instance->common.name = "CAME";
     instance->common.code_min_count_bit_for_found = 12;
-    instance->common.te_shot = 320;
+    instance->common.te_short = 320;
     instance->common.te_long = 640;
     instance->common.te_delta = 150;
     instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
@@ -41,20 +41,20 @@ bool subghz_protocol_came_send_key(SubGhzProtocolCame* instance, SubGhzProtocolE
     furi_assert(encoder);
     size_t index = 0;
     encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
-    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
     //Send header
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot * 36);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short * 36);
     //Send start bit
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
     //Send key data
     for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
         if(bit_read(instance->common.code_last_found, i - 1)){
             //send bit 1
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
         }else{
             //send bit 0
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
         }
     }
@@ -69,7 +69,7 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
     switch (instance->common.parser_step) {
     case 0:
         if ((!level)
-                && (DURATION_DIFF(duration, instance->common.te_shot * 51)< instance->common.te_delta * 51)) { //Need protocol 36 te_shot
+                && (DURATION_DIFF(duration, instance->common.te_short * 51)< instance->common.te_delta * 51)) { //Need protocol 36 te_short
             //Found header CAME
             instance->common.parser_step = 1;
         } else {
@@ -79,7 +79,7 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
     case 1:
         if (!level) {
             break;
-        } else if (DURATION_DIFF(duration, instance->common.te_shot)< instance->common.te_delta) {
+        } else if (DURATION_DIFF(duration, instance->common.te_short)< instance->common.te_delta) {
             //Found start bit CAME
             instance->common.parser_step = 2;
             instance->common.code_found = 0;
@@ -90,7 +90,7 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
         break;
     case 2:
         if (!level) { //save interval
-            if (duration >= (instance->common.te_shot * 4)) {
+            if (duration >= (instance->common.te_short * 4)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
 
@@ -115,12 +115,12 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
         break;
     case 3:
         if (level) {
-            if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot) < instance->common.te_delta)
+            if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short) < instance->common.te_delta)
                     && (DURATION_DIFF(duration, instance->common.te_long)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long)< instance->common.te_delta)
-                    && (DURATION_DIFF(duration, instance->common.te_shot)< instance->common.te_delta)) {
+                    && (DURATION_DIFF(duration, instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 2;
             } else

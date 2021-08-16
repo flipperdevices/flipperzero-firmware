@@ -10,7 +10,7 @@ SubGhzProtocolFaacSLH* subghz_protocol_faac_slh_alloc(void) {
 
     instance->common.name = "Faac SLH"; 
     instance->common.code_min_count_bit_for_found = 64;
-    instance->common.te_shot = 255;
+    instance->common.te_short = 255;
     instance->common.te_long = 595;
     instance->common.te_delta = 100;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
@@ -32,14 +32,14 @@ void subghz_protocol_faac_slh_free(SubGhzProtocolFaacSLH* instance) {
 void subghz_protocol_faac_slh_send_bit(SubGhzProtocolFaacSLH* instance, uint8_t bit) {
     if (bit) {
         //send bit 1
-        SUBGHZ_TX_PIN_HIGTH();
+        SUBGHZ_TX_PIN_HIGH();
         delay_us(instance->common.te_long);
         SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot);
+        delay_us(instance->common.te_short);
     } else {
         //send bit 0
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
+        SUBGHZ_TX_PIN_HIGH();
+        delay_us(instance->common.te_short);
         SUBGHZ_TX_PIN_LOW();
         delay_us(instance->common.te_long);
     }
@@ -47,7 +47,7 @@ void subghz_protocol_faac_slh_send_bit(SubGhzProtocolFaacSLH* instance, uint8_t 
 
 void subghz_protocol_faac_slh_send_key(SubGhzProtocolFaacSLH* instance, uint64_t key, uint8_t bit,uint8_t repeat) {
     while (repeat--) {
-        SUBGHZ_TX_PIN_HIGTH();
+        SUBGHZ_TX_PIN_HIGH();
         //Send header
         delay_us(instance->common.te_long * 2);
         SUBGHZ_TX_PIN_LOW();
@@ -99,7 +99,7 @@ void subghz_protocol_faac_slh_parse(SubGhzProtocolFaacSLH* instance, bool level,
         break;
     case 2:
         if (level) {
-            if (duration >= (instance->common.te_shot * 3 + instance->common.te_delta)) {
+            if (duration >= (instance->common.te_short * 3 + instance->common.te_delta)) {
                 instance->common.parser_step = 1;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     instance->common.code_last_found = instance->common.code_found;
@@ -120,12 +120,12 @@ void subghz_protocol_faac_slh_parse(SubGhzProtocolFaacSLH* instance, bool level,
         break;
     case 3:
         if(!level){
-                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
+                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
                     && (DURATION_DIFF(duration,instance->common.te_long)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long )< instance->common.te_delta)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
                 instance->common.parser_step = 2;
             } else {

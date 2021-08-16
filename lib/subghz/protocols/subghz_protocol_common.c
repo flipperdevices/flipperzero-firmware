@@ -5,6 +5,7 @@
 
 SubGhzProtocolEncoderCommon* subghz_protocol_encoder_common_alloc() {
     SubGhzProtocolEncoderCommon* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCommon));
+    instance->upload = furi_alloc(SUBGHZ_ENCODER_UPLOAD_MAX_SIZE * sizeof(LevelDuration));
     instance->start = true;
     instance->repeat = 10; //default number of repeat
     return instance;
@@ -12,6 +13,7 @@ SubGhzProtocolEncoderCommon* subghz_protocol_encoder_common_alloc() {
 
 void subghz_protocol_encoder_common_free(SubGhzProtocolEncoderCommon* instance) {
     furi_assert(instance);
+    free(instance->upload);
     free(instance);
 }
 
@@ -22,43 +24,27 @@ size_t subghz_encoder_common_get_repeat_left(SubGhzProtocolEncoderCommon* instan
 
 LevelDuration subghz_protocol_encoder_common_yield(void* context) {
     SubGhzProtocolEncoderCommon* instance = context;
-    LevelDuration ret;
 
     if(instance->repeat == 0){
-        //if the last interval in the parcel was high, send low to remove the carrier
-        if(!(instance->start) && instance->upload[instance->front].level ==LEVEL_DURATION_LEVEL_HIGH) {
-            instance->start = true;
-            ret.level = LEVEL_DURATION_LEVEL_LOW;
-            ret.duration = 300;
-            return ret;
-        }
         return level_duration_reset();
-     }
-    //if the upload starts from a low level, to start DMA, we first submit 1 shortcut high
-    if(instance->start){
-        instance->start = false;
-        if(instance->upload[0].level == LEVEL_DURATION_LEVEL_LOW) {
-            ret.level = LEVEL_DURATION_LEVEL_HIGH;
-            ret.duration = 300;
-            return ret;
-        }
     }
-    ret = instance->upload[instance->front++];
 
-    if(instance->front == instance->size_upload) {
+    LevelDuration ret = instance->upload[instance->front];
+
+    if(++instance->front == instance->size_upload) {
         instance->repeat--;
         instance->front = 0;
     }
+
     return ret;
 }
 
-
 void subghz_protocol_common_add_bit(SubGhzProtocolCommon *common, uint8_t bit){
-    common->code_found = common->code_found <<1 | bit;
+    common->code_found = common->code_found << 1 | bit;
     common->code_count_bit++;
 }
 
-bool subghz_protocol_common_check_interval (SubGhzProtocolCommon *common, uint32_t duration, uint16_t duration_check) {
+bool subghz_protocol_common_check_interval(SubGhzProtocolCommon *common, uint32_t duration, uint16_t duration_check) {
     if ((duration_check >= (duration - common->te_delta))&&(duration_check <= (duration + common->te_delta))){
         return true;
     } else {

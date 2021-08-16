@@ -20,7 +20,7 @@ SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore) {
 
     instance->common.name = "KeeLoq";
     instance->common.code_min_count_bit_for_found = 64;
-    instance->common.te_shot = 400;
+    instance->common.te_short = 400;
     instance->common.te_long = 800;
     instance->common.te_delta = 140;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
@@ -216,38 +216,38 @@ bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProto
     
     size_t index = 0;
     encoder->size_upload =11*2+2+(instance->common.code_last_count_bit * 2) + 4;
-    if(encoder->size_upload > MAX_SIZE_UPLOAD) return false;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
 
     //Send header
     for(uint8_t i = 11; i > 0; i--) {
-        encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
-        encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+        encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
+        encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
     }
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot*10);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short*10);
 
     //Send key data
     for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
         if(bit_read(instance->common.code_last_found, i - 1)){
             //send bit 1
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
         }else{
             //send bit 0
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
         }
     }
     // +send 2 status bit
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
     encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
 
     //encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
-    //encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot);
+    //encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
 
     // send end
-    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_shot);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_shot*40);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short*40);
 
     return true;
 }
@@ -260,7 +260,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
     switch(instance->common.parser_step) {
     case 0:
         if((level) &&
-           DURATION_DIFF(duration, instance->common.te_shot) < instance->common.te_delta) {
+           DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta) {
             instance->common.parser_step = 1;
             instance->common.header_count++;
         } else {
@@ -270,12 +270,12 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
         break;
     case 1:
         if((!level) &&
-           (DURATION_DIFF(duration, instance->common.te_shot) < instance->common.te_delta)) {
+           (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
             instance->common.parser_step = 0;
             break;
         }
         if((instance->common.header_count > 2) &&
-           (DURATION_DIFF(duration, instance->common.te_shot * 10) <
+           (DURATION_DIFF(duration, instance->common.te_short * 10) <
             instance->common.te_delta * 10)) {
             // Found header
             instance->common.parser_step = 2;
@@ -294,7 +294,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
         break;
     case 3:
         if(!level) {
-            if(duration >= (instance->common.te_shot * 2 + instance->common.te_delta)) {
+            if(duration >= (instance->common.te_short * 2 + instance->common.te_delta)) {
                 // Found end TX
                 instance->common.parser_step = 0;
                 if(instance->common.code_count_bit >=
@@ -312,7 +312,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
                 }
                 break;
             } else if(
-                (DURATION_DIFF(instance->common.te_last, instance->common.te_shot) <
+                (DURATION_DIFF(instance->common.te_last, instance->common.te_short) <
                  instance->common.te_delta) &&
                 (DURATION_DIFF(duration, instance->common.te_long) < instance->common.te_delta)) {
                 if(instance->common.code_count_bit <
@@ -323,7 +323,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
             } else if(
                 (DURATION_DIFF(instance->common.te_last, instance->common.te_long) <
                  instance->common.te_delta) &&
-                (DURATION_DIFF(duration, instance->common.te_shot) < instance->common.te_delta)) {
+                (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
                 if(instance->common.code_count_bit <
                    instance->common.code_min_count_bit_for_found) {
                     subghz_protocol_common_add_bit(&instance->common, 0);
