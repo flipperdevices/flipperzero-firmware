@@ -144,6 +144,93 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
     }
 }
 
+bool archive_file_seek(File* file, uint64_t position, bool from_start) {
+    storage_file_seek(file, position, from_start);
+    if(storage_file_get_error(file) != FSE_OK) {
+        FURI_LOG_E("Archive", "Cannot seek\nfile");
+        return false;
+    }
+
+    return true;
+}
+
+static bool archive_favorites_read(ArchiveApp* archive) {
+    const size_t buffer_size = 255;
+    char buffer[buffer_size];
+    // uint64_t position = 0;
+    ArchiveFile_t item;
+    FileInfo file_info;
+
+    // Store
+    File* file = storage_file_alloc(archive->api);
+    bool load_result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(load_result) {
+        if(storage_file_get_error(file) != FSE_OK) {
+            FURI_LOG_E("Archive", "Cannot read\nfile");
+            return false;
+        }
+
+        size_t read_count = 0;
+        size_t newline_index = 0;
+
+        while(1) {
+            if(read_count > 0) {
+                size_t end_index = 0;
+                char* endline_ptr = (char*)memchr(buffer, '\n', read_count);
+                newline_index = endline_ptr - buffer;
+
+                if(endline_ptr == 0) {
+                    end_index = read_count;
+                } else if(newline_index < read_count) {
+                    end_index = newline_index + 1;
+                } else {
+                    furi_assert(0);
+                }
+
+                memmove(buffer, &buffer[end_index], read_count - end_index);
+                read_count = read_count - end_index;
+            }
+
+            read_count += storage_file_read(file, &buffer[read_count], buffer_size - read_count);
+
+            if(storage_file_get_error(file) != FSE_OK) {
+                read_count = 0;
+                break;
+            }
+
+            if(read_count == 0) {
+                break; // end of reading
+            }
+
+            if(filter_by_extension(archive, &file_info, buffer)) {
+                ArchiveFile_t_init(&item);
+                string_init_set_str(item.name, buffer);
+                set_file_type(&item, &file_info);
+
+                with_view_model(
+                    archive->view_archive_main, (ArchiveViewModel * model) {
+                        files_array_push_back(model->files, item);
+                        return true;
+                    });
+
+                ArchiveFile_t_clear(&item);
+            }
+        }
+    }
+
+    if(!load_result) {
+        FURI_LOG_E(
+            "Archive", "Loading favorites failure. Error: %s", storage_file_get_error_desc(file));
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+
+    FURI_LOG_I("Archive", "Favorites loaded");
+    return load_result;
+}
+
 static bool archive_get_filenames(ArchiveApp* archive) {
     furi_assert(archive);
 
@@ -163,41 +250,44 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         storage_file_free(directory);
         return false;
     }
-
-    while(1) {
-        if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
-            break;
-        }
-
-        uint16_t files_cnt;
-        with_view_model(
-            archive->view_archive_main, (ArchiveViewModel * model) {
-                files_cnt = files_array_size(model->files);
-
-                return true;
-            });
-
-        if(files_cnt > MAX_FILES) {
-            break;
-        } else if(storage_file_get_error(directory) == FSE_OK) {
-            if(filter_by_extension(archive, &file_info, name)) {
-                ArchiveFile_t_init(&item);
-                string_init_set(item.name, name);
-                set_file_type(&item, &file_info);
-
-                with_view_model(
-                    archive->view_archive_main, (ArchiveViewModel * model) {
-                        files_array_push_back(model->files, item);
-                        return true;
-                    });
-
-                ArchiveFile_t_clear(&item);
+    if(archive->browser.tab_id != ArchiveTabFavorites) {
+        while(1) {
+            if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
+                break;
             }
-        } else {
-            storage_dir_close(directory);
-            storage_file_free(directory);
-            return false;
+
+            uint16_t files_cnt;
+            with_view_model(
+                archive->view_archive_main, (ArchiveViewModel * model) {
+                    files_cnt = files_array_size(model->files);
+
+                    return true;
+                });
+
+            if(files_cnt > MAX_FILES) {
+                break;
+            } else if(storage_file_get_error(directory) == FSE_OK) {
+                if(filter_by_extension(archive, &file_info, name)) {
+                    ArchiveFile_t_init(&item);
+                    string_init_set(item.name, name);
+                    set_file_type(&item, &file_info);
+
+                    with_view_model(
+                        archive->view_archive_main, (ArchiveViewModel * model) {
+                            files_array_push_back(model->files, item);
+                            return true;
+                        });
+
+                    ArchiveFile_t_clear(&item);
+                }
+            } else {
+                storage_dir_close(directory);
+                storage_file_free(directory);
+                return false;
+            }
         }
+    } else {
+        archive_favorites_read(archive);
     }
 
     storage_dir_close(directory);
