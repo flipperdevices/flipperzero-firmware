@@ -17,6 +17,13 @@
 #include <main.h>
 #include <furi-hal-pwm.h>
 
+#define IRDA_TX_DEBUG 0
+
+#if IRDA_TX_DEBUG == 1
+#define gpio_irda_tx gpio_irda_tx_debug
+const GpioPin gpio_irda_tx_debug = {.port = GPIOA, .pin = GPIO_PIN_7};
+#endif
+
 #define IRDA_TIM_TX_DMA_BUFFER_SIZE         200
 #define IRDA_POLARITY_SHIFT                 1
 
@@ -310,6 +317,16 @@ static void furi_hal_irda_configure_tim_pwm_tx(uint32_t freq, float duty_cycle)
     LL_TIM_SetCounterMode(TIM1, LL_TIM_COUNTERMODE_UP);
     LL_TIM_EnableARRPreload(TIM1);
     LL_TIM_SetAutoReload(TIM1, __LL_TIM_CALC_ARR(SystemCoreClock, LL_TIM_GetPrescaler(TIM1), freq));
+#if IRDA_TX_DEBUG == 1
+    LL_TIM_OC_SetCompareCH1(TIM1, ( (LL_TIM_GetAutoReload(TIM1) + 1 ) * (1 - duty_cycle)));
+    LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH1);
+    /* LL_TIM_OCMODE_PWM2 set by DMA */
+    LL_TIM_OC_SetMode(TIM1, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_FORCED_INACTIVE);
+    LL_TIM_OC_SetPolarity(TIM1, LL_TIM_CHANNEL_CH1N, LL_TIM_OCPOLARITY_HIGH);
+    LL_TIM_OC_DisableFast(TIM1, LL_TIM_CHANNEL_CH1);
+    LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH1N);
+    LL_TIM_DisableIT_CC1(TIM1);
+#else
     LL_TIM_OC_SetCompareCH3(TIM1, ( (LL_TIM_GetAutoReload(TIM1) + 1 ) * (1 - duty_cycle)));
     LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH3);
     /* LL_TIM_OCMODE_PWM2 set by DMA */
@@ -318,6 +335,7 @@ static void furi_hal_irda_configure_tim_pwm_tx(uint32_t freq, float duty_cycle)
     LL_TIM_OC_DisableFast(TIM1, LL_TIM_CHANNEL_CH3);
     LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH3N);
     LL_TIM_DisableIT_CC3(TIM1);
+#endif
     LL_TIM_DisableMasterSlaveMode(TIM1);
     LL_TIM_EnableAllOutputs(TIM1);
     LL_TIM_DisableIT_UPDATE(TIM1);
@@ -331,7 +349,11 @@ static void furi_hal_irda_configure_tim_cmgr2_dma_tx(void) {
     LL_C2_AHB1_GRP1_EnableClock(LL_C2_AHB1_GRP1_PERIPH_DMA1);
 
     LL_DMA_InitTypeDef dma_config = {0};
+#if IRDA_TX_DEBUG == 1
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM1->CCMR1);
+#else
     dma_config.PeriphOrM2MSrcAddress = (uint32_t)&(TIM1->CCMR2);
+#endif
     dma_config.MemoryOrM2MDstAddress = (uint32_t) NULL;
     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     dma_config.Mode = LL_DMA_MODE_NORMAL;
