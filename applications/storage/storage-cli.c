@@ -318,8 +318,11 @@ void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
 void storage_cli_stat(Cli* cli, string_t path) {
     Storage* api = furi_record_open("storage");
 
-    if(string_cmp_str(path, "/ext") == 0 || string_cmp_str(path, "/int") == 0 ||
-       string_cmp_str(path, "/any") == 0) {
+    if(string_cmp_str(path, "/") == 0) {
+        printf("Storage\r\n");
+    } else if(
+        string_cmp_str(path, "/ext") == 0 || string_cmp_str(path, "/int") == 0 ||
+        string_cmp_str(path, "/any") == 0) {
         uint64_t total_space;
         uint64_t free_space;
         FS_Error error =
