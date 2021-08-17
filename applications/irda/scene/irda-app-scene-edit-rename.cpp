@@ -14,13 +14,14 @@ void IrdaAppSceneEditRename::on_enter(IrdaApp* app) {
         strncpy(buffer_str, button_name.c_str(), max_len);
         buffer_str[max_len + 1] = 0;
         enter_name_length = max_len;
+        text_input_set_header_text(text_input, "Name the key");
     } else {
         auto remote_name = remote_manager->get_remote_name();
         strncpy(app->get_text_store(0), remote_name.c_str(), app->get_text_store_size());
-        enter_name_length = app->get_text_store_size();
+        enter_name_length = IrdaAppRemoteManager::max_remote_name_length;
+        text_input_set_header_text(text_input, "Name the remote");
     }
 
-    text_input_set_header_text(text_input, "Name the key");
     text_input_set_result_callback(
         text_input,
         IrdaApp::text_input_callback,

@@ -399,7 +399,7 @@ bool IrdaAppFileParser::check_errors() {
 }
 
 std::string IrdaAppFileParser::file_select(const char* selected) {
-    TextStore* filename_ts = new TextStore(128);
+    TextStore* filename_ts = new TextStore(IrdaAppRemoteManager::max_remote_name_length);
     bool result;
 
     result = file_worker.file_select(

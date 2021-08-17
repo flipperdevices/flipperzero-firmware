@@ -44,7 +44,6 @@ private:
     static const char* irda_extension;
     static const uint32_t max_line_length;
     static uint32_t const max_raw_timings_in_signal;
-    static uint32_t const max_signal_name_length;
 
     FileWorkerCpp file_worker;
     char file_buf[128];
