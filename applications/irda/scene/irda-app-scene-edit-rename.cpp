@@ -12,7 +12,7 @@ void IrdaAppSceneEditRename::on_enter(IrdaApp* app) {
         char* buffer_str = app->get_text_store(0);
         size_t max_len = IrdaAppRemoteManager::max_button_name_length;
         strncpy(buffer_str, button_name.c_str(), max_len);
-        buffer_str[max_len+1] = 0;
+        buffer_str[max_len + 1] = 0;
         enter_name_length = max_len;
     } else {
         auto remote_name = remote_manager->get_remote_name();

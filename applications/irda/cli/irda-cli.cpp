@@ -76,7 +76,10 @@ static void irda_cli_print_usage(void) {
     printf("\r\n");
     printf("\tRaw format:\r\n");
     printf("\tir_tx RAW F:<frequency> DC:<duty_cycle> <sample0> <sample1>...\r\n");
-    printf("\tFrequency (%d - %d), Duty cycle (0 - 100), max 512 samples\r\n", IRDA_MIN_FREQUENCY, IRDA_MAX_FREQUENCY);
+    printf(
+        "\tFrequency (%d - %d), Duty cycle (0 - 100), max 512 samples\r\n",
+        IRDA_MIN_FREQUENCY,
+        IRDA_MAX_FREQUENCY);
 }
 
 static bool parse_message(const char* str, IrdaMessage* message) {
@@ -118,11 +121,11 @@ static bool parse_signal_raw(
     *duty_cycle = (float)atoi(duty_cycle_str) / 100;
     str += strlen(frequency_str) + strlen(duty_cycle_str) + 10;
 
-    if ((*frequency > IRDA_MAX_FREQUENCY) || (*frequency < IRDA_MIN_FREQUENCY)) {
+    if((*frequency > IRDA_MAX_FREQUENCY) || (*frequency < IRDA_MIN_FREQUENCY)) {
         return false;
     }
 
-    if ((*duty_cycle <= 0) || (*duty_cycle > 1)) {
+    if((*duty_cycle <= 0) || (*duty_cycle > 1)) {
         return false;
     }
 
@@ -142,7 +145,7 @@ static bool parse_signal_raw(
         ++*timings_cnt;
     }
 
-    if (*timings_cnt > 0) {
+    if(*timings_cnt > 0) {
         printf("\r\nTransmit:");
         for(size_t i = 0; i < *timings_cnt; ++i) {
             printf(" %ld", timings[i]);

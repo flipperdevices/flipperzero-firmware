@@ -2,31 +2,45 @@
 #include <stddef.h>
 #include <assert.h>
 
-#define GET_SYSCFG_EXTI_PORT(gpio)                \
-    (((gpio) == (GPIOA)) ? LL_SYSCFG_EXTI_PORTA : \
-     ((gpio) == (GPIOB)) ? LL_SYSCFG_EXTI_PORTB : \
-     ((gpio) == (GPIOC)) ? LL_SYSCFG_EXTI_PORTC : \
-     ((gpio) == (GPIOD)) ? LL_SYSCFG_EXTI_PORTD : \
-     ((gpio) == (GPIOE)) ? LL_SYSCFG_EXTI_PORTE : \
-                           LL_SYSCFG_EXTI_PORTH)
+#define GET_SYSCFG_EXTI_PORT(gpio)                    \
+    (((gpio) == (GPIOA)) ?                            \
+         LL_SYSCFG_EXTI_PORTA :                       \
+         ((gpio) == (GPIOB)) ?                        \
+         LL_SYSCFG_EXTI_PORTB :                       \
+         ((gpio) == (GPIOC)) ?                        \
+         LL_SYSCFG_EXTI_PORTC :                       \
+         ((gpio) == (GPIOD)) ? LL_SYSCFG_EXTI_PORTD : \
+                               ((gpio) == (GPIOE)) ? LL_SYSCFG_EXTI_PORTE : LL_SYSCFG_EXTI_PORTH)
 
-#define GPIO_PIN_MAP(pin, prefix)               \
-    (((pin) == (LL_GPIO_PIN_0))  ? prefix##0 :  \
-     ((pin) == (LL_GPIO_PIN_1))  ? prefix##1 :  \
-     ((pin) == (LL_GPIO_PIN_2))  ? prefix##2 :  \
-     ((pin) == (LL_GPIO_PIN_3))  ? prefix##3 :  \
-     ((pin) == (LL_GPIO_PIN_4))  ? prefix##4 :  \
-     ((pin) == (LL_GPIO_PIN_5))  ? prefix##5 :  \
-     ((pin) == (LL_GPIO_PIN_6))  ? prefix##6 :  \
-     ((pin) == (LL_GPIO_PIN_7))  ? prefix##7 :  \
-     ((pin) == (LL_GPIO_PIN_8))  ? prefix##8 :  \
-     ((pin) == (LL_GPIO_PIN_9))  ? prefix##9 :  \
-     ((pin) == (LL_GPIO_PIN_10)) ? prefix##10 : \
-     ((pin) == (LL_GPIO_PIN_11)) ? prefix##11 : \
-     ((pin) == (LL_GPIO_PIN_12)) ? prefix##12 : \
-     ((pin) == (LL_GPIO_PIN_13)) ? prefix##13 : \
-     ((pin) == (LL_GPIO_PIN_14)) ? prefix##14 : \
-                                   prefix##15)
+#define GPIO_PIN_MAP(pin, prefix)                   \
+    (((pin) == (LL_GPIO_PIN_0)) ?                   \
+         prefix##0 :                                \
+         ((pin) == (LL_GPIO_PIN_1)) ?               \
+         prefix##1 :                                \
+         ((pin) == (LL_GPIO_PIN_2)) ?               \
+         prefix##2 :                                \
+         ((pin) == (LL_GPIO_PIN_3)) ?               \
+         prefix##3 :                                \
+         ((pin) == (LL_GPIO_PIN_4)) ?               \
+         prefix##4 :                                \
+         ((pin) == (LL_GPIO_PIN_5)) ?               \
+         prefix##5 :                                \
+         ((pin) == (LL_GPIO_PIN_6)) ?               \
+         prefix##6 :                                \
+         ((pin) == (LL_GPIO_PIN_7)) ?               \
+         prefix##7 :                                \
+         ((pin) == (LL_GPIO_PIN_8)) ?               \
+         prefix##8 :                                \
+         ((pin) == (LL_GPIO_PIN_9)) ?               \
+         prefix##9 :                                \
+         ((pin) == (LL_GPIO_PIN_10)) ?              \
+         prefix##10 :                               \
+         ((pin) == (LL_GPIO_PIN_11)) ?              \
+         prefix##11 :                               \
+         ((pin) == (LL_GPIO_PIN_12)) ?              \
+         prefix##12 :                               \
+         ((pin) == (LL_GPIO_PIN_13)) ? prefix##13 : \
+                                       ((pin) == (LL_GPIO_PIN_14)) ? prefix##14 : prefix##15)
 
 #define GET_SYSCFG_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_SYSCFG_EXTI_LINE)
 #define GET_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_EXTI_LINE_)
