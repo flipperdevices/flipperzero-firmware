@@ -57,7 +57,7 @@ IrdaApp::IrdaApp() {
 IrdaApp::~IrdaApp() {
     irda_worker_free(irda_worker);
     furi_record_close("notification");
-    for(auto& it : scenes) delete it.second;
+    for(auto& [key, scene] : scenes) delete scene;
 }
 
 IrdaAppViewManager* IrdaApp::get_view_manager() {
