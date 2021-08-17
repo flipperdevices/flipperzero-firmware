@@ -124,9 +124,6 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
     // Sleep and track how much ticks we spent sleeping
     uint32_t completed_ticks = furi_hal_os_sleep(expected_idle_ticks);
 
-    // Reenable IRQ
-    __enable_irq();
-
     // Notify system about time spent in sleep
     if (completed_ticks > 0) {
         if (completed_ticks > expected_idle_ticks) {
@@ -135,6 +132,9 @@ void vPortSuppressTicksAndSleep(TickType_t expected_idle_ticks) {
             vTaskStepTick(completed_ticks);
         }
     }
+
+    // Reenable IRQ
+    __enable_irq();
 }
 
 void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName) {
