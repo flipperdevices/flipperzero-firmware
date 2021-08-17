@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 
 #include <gui/gui.h>
 #include <input/input.h>
@@ -358,7 +358,7 @@ void music_player_thread(void* p) {
     }
 }
 
-int32_t music_player(void* p) {
+int32_t music_player_app(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(MusicDemoEvent), NULL);
 
     State _state;

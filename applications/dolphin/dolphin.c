@@ -393,7 +393,7 @@ void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
     furi_check(osMessageQueuePut(dolphin->event_queue, &event, 0, osWaitForever) == osOK);
 }
 
-int32_t dolphin_task() {
+int32_t dolphin_srv() {
     Dolphin* dolphin = dolphin_alloc();
 
     if(dolphin_state_load(dolphin->state)) {
@@ -411,7 +411,7 @@ int32_t dolphin_task() {
 
     furi_record_create("dolphin", dolphin);
 
-    if(!api_hal_version_do_i_belong_here()) {
+    if(!furi_hal_version_do_i_belong_here()) {
         view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewHwMismatch);
     }
 

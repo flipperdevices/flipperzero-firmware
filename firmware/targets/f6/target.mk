@@ -14,14 +14,14 @@ FLASH_ADDRESS	= 0x08000000
 CFLAGS			+= -DNO_BOOTLOADER
 endif
 
-API_HAL_OS_DEBUG ?= 0
-ifeq ($(API_HAL_OS_DEBUG), 1)
-CFLAGS			+= -DAPI_HAL_OS_DEBUG
+FURI_HAL_OS_DEBUG ?= 0
+ifeq ($(FURI_HAL_OS_DEBUG), 1)
+CFLAGS			+= -DFURI_HAL_OS_DEBUG
 endif
 
-API_HAL_SUBGHZ_TX_GPIO ?= 0
-ifneq ($(API_HAL_SUBGHZ_TX_GPIO), 0)
-CFLAGS			+= -DAPI_HAL_SUBGHZ_TX_GPIO=$(API_HAL_SUBGHZ_TX_GPIO)
+FURI_HAL_SUBGHZ_TX_GPIO ?= 0
+ifneq ($(FURI_HAL_SUBGHZ_TX_GPIO), 0)
+CFLAGS			+= -DFURI_HAL_SUBGHZ_TX_GPIO=$(FURI_HAL_SUBGHZ_TX_GPIO)
 endif
 
 ifeq ($(INVERT_RFID_IN), 1)
@@ -39,18 +39,14 @@ CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions
 LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group
 
 MXPROJECT_DIR = $(TARGET_DIR)
-API_HAL_DIR = $(TARGET_DIR)
+FURI_HAL_DIR = $(TARGET_DIR)
 
 CUBE_DIR		= ../lib/STM32CubeWB
 C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_adc.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_adc_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_comp.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_cortex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_cryp.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_crc.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_crc_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_exti.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_flash_ex.c \
@@ -67,20 +63,19 @@ C_SOURCES		+= \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rng.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc_ex.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_spi_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_adc.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_dma.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_gpio.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_i2c.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rcc.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_lptim.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rcc.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_spi.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usart.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usb.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/croutine.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/list.c \
@@ -96,7 +91,7 @@ C_SOURCES		+= \
 	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c \
 	$(wildcard $(MXPROJECT_DIR)/Src/*.c) \
 	$(wildcard $(MXPROJECT_DIR)/Src/fatfs/*.c) \
-	$(wildcard $(API_HAL_DIR)/api-hal/*.c)
+	$(wildcard $(FURI_HAL_DIR)/furi-hal/*.c)
 
 ASM_SOURCES += $(MXPROJECT_DIR)/startup_stm32wb55xx_cm4.s
 
@@ -124,7 +119,7 @@ CFLAGS += \
 	-I$(CUBE_DIR)/Drivers/CMSIS/Include \
 	-I$(MXPROJECT_DIR)/Inc \
 	-I$(MXPROJECT_DIR)/Src/fatfs \
-	-I$(API_HAL_DIR)/api-hal \
+	-I$(FURI_HAL_DIR)/furi-hal \
 
 # Ble glue 
 CFLAGS += -I$(TARGET_DIR)/ble-glue \
