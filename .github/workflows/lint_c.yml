@@ -1,6 +1,6 @@
 name: 'Lint C/C++ with clang-format'
 
-on: pull_request
+on: [push,pull_request]
 
 env:
   TARGETS: f6
