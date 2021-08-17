@@ -15,12 +15,6 @@
 #include <file-worker-cpp.h>
 #include <furi-hal-irda.h>
 
-const char* IrdaAppFileParser::irda_directory = "/any/irda";
-const char* IrdaAppFileParser::irda_extension = ".ir";
-uint32_t const IrdaAppFileParser::max_raw_timings_in_signal = 512;
-uint32_t const IrdaAppFileParser::max_line_length =
-    (9 + 1) * IrdaAppFileParser::max_raw_timings_in_signal + 100;
-
 bool IrdaAppFileParser::open_irda_file_read(const char* name) {
     std::string full_filename;
     if(name[0] != '/')
@@ -399,15 +393,11 @@ bool IrdaAppFileParser::check_errors() {
 }
 
 std::string IrdaAppFileParser::file_select(const char* selected) {
-    TextStore* filename_ts = new TextStore(IrdaAppRemoteManager::max_remote_name_length);
+    auto filename_ts = std::make_unique<TextStore>(IrdaAppRemoteManager::max_remote_name_length);
     bool result;
 
     result = file_worker.file_select(
         irda_directory, irda_extension, filename_ts->text, filename_ts->text_size, selected);
 
-    std::string retval = result ? std::string(filename_ts->text) : std::string();
-
-    delete filename_ts;
-
-    return retval;
+    return result ? std::string(filename_ts->text) : std::string();
 }

@@ -12,8 +12,6 @@
 #include "irda-app-file-parser.h"
 
 static const std::string default_remote_name = "remote";
-uint32_t const IrdaAppRemoteManager::max_button_name_length = 31;
-uint32_t const IrdaAppRemoteManager::max_remote_name_length = 31;
 
 std::string IrdaAppRemoteManager::find_vacant_remote_name(const std::string& name) {
     IrdaAppFileParser file_parser;

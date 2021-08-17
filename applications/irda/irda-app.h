@@ -92,8 +92,8 @@ public:
     ~IrdaApp();
 
 private:
-    static const uint8_t text_store_size = 128;
-    static const uint8_t text_store_max = 2;
+    static inline const uint8_t text_store_size = 128;
+    static inline const uint8_t text_store_max = 2;
     char text_store[text_store_max][text_store_size + 1];
     bool learn_new_remote;
     EditElement element;
