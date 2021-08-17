@@ -1,6 +1,8 @@
 FROM ubuntu:focal
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get upgrade -y && apt-get install --no-install-recommends -y \
         ca-certificates \
         build-essential \
         python3 \
