@@ -36,6 +36,7 @@ void storage_cli_print_usage() {
     printf("\trename\t - move file to new file, <args> must contain new path\r\n");
     printf("\tmkdir\t - creates a new directory\r\n");
     printf("\tmd5\t - md5 hash of the file\r\n");
+    printf("\tstat\t - info about file or dir\r\n");
 };
 
 void storage_cli_print_error(FS_Error error) {
@@ -314,6 +315,42 @@ void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
     furi_record_close("storage");
 }
 
+void storage_cli_stat(Cli* cli, string_t path) {
+    Storage* api = furi_record_open("storage");
+
+    if(string_cmp_str(path, "/ext") == 0 || string_cmp_str(path, "/int") == 0 ||
+       string_cmp_str(path, "/any") == 0) {
+        uint64_t total_space;
+        uint64_t free_space;
+        FS_Error error =
+            storage_common_fs_info(api, string_get_cstr(path), &total_space, &free_space);
+
+        if(error != FSE_OK) {
+            storage_cli_print_path_error(path, error);
+        } else {
+            printf(
+                "Storage, %luKB total, %luKB free\r\n",
+                (uint32_t)(total_space / 1024),
+                (uint32_t)(free_space / 1024));
+        }
+    } else {
+        FileInfo fileinfo;
+        FS_Error error = storage_common_stat(api, string_get_cstr(path), &fileinfo);
+
+        if(error == FSE_OK) {
+            if(fileinfo.flags & FSF_DIRECTORY) {
+                printf("Directory\r\n");
+            } else {
+                printf("File, size: %lub\r\n", (uint32_t)(fileinfo.size));
+            }
+        } else {
+            storage_cli_print_path_error(path, error);
+        }
+    }
+
+    furi_record_close("storage");
+}
+
 void storage_cli_copy(Cli* cli, string_t old_path, string_t args) {
     Storage* api = furi_record_open("storage");
     string_t new_path;
@@ -487,6 +524,11 @@ void storage_cli(Cli* cli, string_t args, void* context) {
 
         if(string_cmp_str(cmd, "md5") == 0) {
             storage_cli_md5(cli, path);
+            break;
+        }
+
+        if(string_cmp_str(cmd, "stat") == 0) {
+            storage_cli_stat(cli, path);
             break;
         }
 
