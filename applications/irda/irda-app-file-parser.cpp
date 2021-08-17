@@ -405,7 +405,9 @@ std::string IrdaAppFileParser::file_select(const char* selected) {
     result = file_worker.file_select(
         irda_directory, irda_extension, filename_ts->text, filename_ts->text_size, selected);
 
+    std::string retval = result ? std::string(filename_ts->text) : std::string();
+
     delete filename_ts;
 
-    return result ? std::string(filename_ts->text) : std::string();
+    return retval;
 }
