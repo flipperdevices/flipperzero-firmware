@@ -1,19 +1,15 @@
 #include "irda-app-file-parser.h"
-#include "furi/check.h"
-#include "furi/log.h"
 #include "irda-app-remote-manager.h"
 #include "irda-app-signal.h"
-#include "m-string.h"
-#include "sys/_stdint.h"
+
+#include <m-string.h>
+#include <cstdio>
 #include <text-store.h>
 #include <irda.h>
-#include <cstdio>
-#include <stdint.h>
-#include <string>
 #include <string_view>
 #include <furi.h>
-#include <file-worker-cpp.h>
 #include <furi-hal-irda.h>
+#include <file-worker-cpp.h>
 
 bool IrdaAppFileParser::open_irda_file_read(const char* name) {
     std::string full_filename;

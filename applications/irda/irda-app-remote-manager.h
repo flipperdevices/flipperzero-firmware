@@ -1,12 +1,14 @@
 #pragma once
-#include <irda_worker.h>
-#include <stdint.h>
-#include <string>
-#include <vector>
-#include <memory>
-#include <irda.h>
-#include <storage/storage.h>
+
 #include "irda-app-signal.h"
+
+#include <irda_worker.h>
+#include <irda.h>
+
+#include <cstdint>
+#include <string>
+#include <memory>
+#include <vector>
 
 class IrdaAppRemoteButton {
     friend class IrdaAppRemoteManager;
