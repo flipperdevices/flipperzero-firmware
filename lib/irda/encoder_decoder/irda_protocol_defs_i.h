@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "irda.h"
-#include "irda_common_i.h"
+#include "common/irda_common_i.h"
 
 /***************************************************************************************************
 *   NEC protocol description

@@ -1,7 +1,7 @@
 #include <furi.h>
 #include "../minunit.h"
 #include "irda.h"
-#include "irda_common_i.h"
+#include "common/irda_common_i.h"
 #include "test_data/irda_nec_test_data.srcdata"
 #include "test_data/irda_necext_test_data.srcdata"
 #include "test_data/irda_samsung_test_data.srcdata"

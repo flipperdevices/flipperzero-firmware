@@ -1,6 +1,6 @@
 #include "irda.h"
 #include "furi/check.h"
-#include "irda_common_i.h"
+#include "common/irda_common_i.h"
 #include "irda_protocol_defs_i.h"
 #include <stdbool.h>
 #include <stdint.h>
