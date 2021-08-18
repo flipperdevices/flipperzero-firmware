@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flipper.storage import FlipperStorage
 import logging
 import argparse
