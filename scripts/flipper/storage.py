@@ -50,7 +50,6 @@ class BufferedRead:
 
 class FlipperStorage:
     CLI_PROMPT = ">: "
-    CLI_SOH = "\x01"
     CLI_EOL = "\r\n"
 
     def __init__(self, portname: str):
@@ -63,7 +62,13 @@ class FlipperStorage:
 
     def start(self):
         self.port.open()
-        self.send_and_wait_prompt(self.CLI_SOH)
+        self.port.reset_input_buffer()
+
+        # Send a command with a known syntax to make sure the buffer is flushed
+        self.send("device_info\r")
+        self.read.until("hardware_ver        : ")
+        # And read buffer until we get prompt
+        self.read.until(self.CLI_PROMPT)
 
     def stop(self):
         self.port.close()
