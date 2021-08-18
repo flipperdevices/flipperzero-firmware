@@ -53,9 +53,7 @@ class Main:
         self.parser_list = self.subparsers.add_parser(
             "list", help="Recursively list files and dirs"
         )
-        self.parser_list.add_argument(
-            "flipper_path", help="Flipper path", default="/"
-        )
+        self.parser_list.add_argument("flipper_path", help="Flipper path", default="/")
         self.parser_list.set_defaults(func=self.list)
 
         # logging

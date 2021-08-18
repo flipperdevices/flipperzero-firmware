@@ -320,7 +320,9 @@ class FlipperStorage:
             if answer.find(b"File, size:") != -1:
                 size = int(
                     "".join(
-                        ch for ch in answer.split(b": ")[1].decode("ascii") if ch.isdigit()
+                        ch
+                        for ch in answer.split(b": ")[1].decode("ascii")
+                        if ch.isdigit()
                     )
                 )
                 return size
