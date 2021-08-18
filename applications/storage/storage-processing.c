@@ -343,6 +343,7 @@ static FS_Error storage_process_common_copy(Storage* app, const char* old, const
                 if(!storage_process_file_open(app, &file_new, new, FSAM_WRITE, FSOM_CREATE_NEW)) {
                     ret = storage_file_get_error(&file_new);
                     storage_process_file_close(app, &file_new);
+                    storage_process_file_close(app, &file_old);
                     break;
                 }
 
