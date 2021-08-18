@@ -172,18 +172,39 @@ static bool archive_favorites_read(ArchiveApp* archive) {
         }
 
         size_t read_count = 0;
-        size_t newline_index = 0;
+        size_t end_index = 0;
 
         while(1) {
+            size_t newline_index = 0;
+            char* endline_ptr;
             if(read_count > 0) {
-                size_t end_index = 0;
-                char* endline_ptr = (char*)memchr(buffer, '\n', read_count);
+                end_index = 0;
+                endline_ptr = (char*)memchr(buffer, '\n', read_count);
                 newline_index = endline_ptr - buffer;
 
                 if(endline_ptr == 0) {
                     end_index = read_count;
+
                 } else if(newline_index < read_count) {
                     end_index = newline_index + 1;
+
+                    if(filter_by_extension(archive, &file_info, buffer)) {
+                        endline_ptr = (char*)memchr(buffer, '\n', read_count);
+                        *endline_ptr = '\0';
+
+                        ArchiveFile_t_init(&item);
+                        string_init_set_str(item.name, buffer);
+                        set_file_type(&item, &file_info);
+
+                        with_view_model(
+                            archive->view_archive_main, (ArchiveViewModel * model) {
+                                files_array_push_back(model->files, item);
+                                return true;
+                            });
+
+                        ArchiveFile_t_clear(&item);
+                    }
+
                 } else {
                     furi_assert(0);
                 }
@@ -201,20 +222,6 @@ static bool archive_favorites_read(ArchiveApp* archive) {
 
             if(read_count == 0) {
                 break; // end of reading
-            }
-
-            if(filter_by_extension(archive, &file_info, buffer)) {
-                ArchiveFile_t_init(&item);
-                string_init_set_str(item.name, buffer);
-                set_file_type(&item, &file_info);
-
-                with_view_model(
-                    archive->view_archive_main, (ArchiveViewModel * model) {
-                        files_array_push_back(model->files, item);
-                        return true;
-                    });
-
-                ArchiveFile_t_clear(&item);
             }
         }
     }
@@ -465,6 +472,25 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
     update_offset(archive);
 }
 
+static void
+    archive_run_in_app(ArchiveApp* archive, ArchiveFile_t* selected, bool full_path_provided) {
+    string_t full_path;
+
+    if(!full_path_provided) {
+        string_init_printf(
+            full_path,
+            "%s/%s",
+            string_get_cstr(archive->browser.path),
+            string_get_cstr(selected->name));
+    } else {
+        string_init_set(full_path, selected->name);
+    }
+    FURI_LOG_E("archive", "%s", string_get_cstr(full_path));
+    archive_open_app(archive, flipper_app_name[selected->type], string_get_cstr(full_path));
+
+    string_clear(full_path);
+}
+
 static void archive_file_menu_callback(ArchiveApp* archive) {
     furi_assert(archive);
 
@@ -481,17 +507,7 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
     switch(idx) {
     case 0:
         if(is_known_app(selected->type)) {
-            string_t full_path;
-            string_init_printf(
-                full_path,
-                "%s/%s",
-                string_get_cstr(archive->browser.path),
-                string_get_cstr(selected->name));
-
-            archive_open_app(
-                archive, flipper_app_name[selected->type], string_get_cstr(full_path));
-
-            string_clear(full_path);
+            archive_run_in_app(archive, selected, false);
         }
         break;
     case 1:
@@ -635,7 +651,13 @@ static bool archive_view_input(InputEvent* event, void* context) {
                 }
             } else {
                 if(event->type == InputTypeShort) {
-                    archive_show_file_menu(archive);
+                    if(archive->browser.tab_id == ArchiveTabFavorites) {
+                        if(is_known_app(selected->type)) {
+                            archive_run_in_app(archive, selected, true);
+                        }
+                    } else {
+                        archive_show_file_menu(archive);
+                    }
                 }
             }
         }
