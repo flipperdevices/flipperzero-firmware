@@ -25,6 +25,7 @@
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/protocols/subghz_protocol.h>
 #include <lib/subghz/protocols/subghz_protocol_common.h>
+#include "subghz_history.h"
 
 #define SUBGHZ_TEXT_STORE_SIZE 128
 
@@ -44,6 +45,7 @@ struct SubGhz {
     SubGhzProtocol* protocol;
     SubGhzProtocolCommon* protocol_result;
     SubGhzProtocolEncoderCommon* encoder;
+    SubGhzHistory* history;
 
     SceneManager* scene_manager;
 

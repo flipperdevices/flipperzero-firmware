@@ -18,6 +18,8 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
  */
 void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance);
 
+const char* subghz_protocol_star_line_get_manufacture_name(void* context);
+
 /** Sends the key on the air
  * 
  * @param instance - SubGhzProtocolStarLine instance

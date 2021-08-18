@@ -36,6 +36,11 @@ void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance) {
     free(instance);
 }
 
+const char* subghz_protocol_star_line_get_manufacture_name (void* context){
+    SubGhzProtocolStarLine* instance = context;
+    return instance->manufacture_name;
+}
+
 /** Send bit 
  * 
  * @param instance - SubGhzProtocolStarLine instance

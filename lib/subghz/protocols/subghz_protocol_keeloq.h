@@ -18,6 +18,8 @@ SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore);
  */
 void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance);
 
+const char* subghz_protocol_keeloq_get_manufacture_name(void* context);
+
 /** Set manufacture name
  * 
  * @param manufacture_name - manufacture name

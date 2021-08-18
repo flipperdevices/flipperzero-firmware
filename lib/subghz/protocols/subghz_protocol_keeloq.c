@@ -165,7 +165,13 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     instance->common.serial = key_fix & 0x0FFFFFFF;
     instance->common.btn = key_fix >> 28;
 }
-void subghz_protocol_keeloq_set_manufacture_name (void* context, const char* manufacture_name){
+
+const char* subghz_protocol_keeloq_get_manufacture_name(void* context) {
+    SubGhzProtocolKeeloq* instance = context;
+    return instance->manufacture_name;
+}
+
+void subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manufacture_name) {
     SubGhzProtocolKeeloq* instance = context;
     instance->manufacture_name = manufacture_name;
 }
@@ -205,17 +211,20 @@ uint64_t subghz_protocol_keeloq_gen_key(void* context) {
     return subghz_protocol_common_reverse_key(yek, instance->common.code_last_count_bit);
 }
 
-bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolEncoderCommon* encoder){
+bool subghz_protocol_keeloq_send_key(
+    SubGhzProtocolKeeloq* instance,
+    SubGhzProtocolEncoderCommon* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
 
     //gen new key
     instance->common.cnt++;
     instance->common.code_last_found = subghz_protocol_keeloq_gen_key(instance);
-    if(instance->common.callback)instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
-    
+    if(instance->common.callback)
+        instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
+
     size_t index = 0;
-    encoder->size_upload =11*2+2+(instance->common.code_last_count_bit * 2) + 4;
+    encoder->size_upload = 11 * 2 + 2 + (instance->common.code_last_count_bit * 2) + 4;
     if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
 
     //Send header
@@ -224,18 +233,23 @@ bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProto
         encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
     }
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short*10);
+    encoder->upload[index++] =
+        level_duration_make(false, (uint32_t)instance->common.te_short * 10);
 
     //Send key data
-    for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
-        if(bit_read(instance->common.code_last_found, i - 1)){
+    for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+        if(bit_read(instance->common.code_last_found, i - 1)) {
             //send bit 1
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_long);
-        }else{
+            encoder->upload[index++] =
+                level_duration_make(true, (uint32_t)instance->common.te_short);
+            encoder->upload[index++] =
+                level_duration_make(false, (uint32_t)instance->common.te_long);
+        } else {
             //send bit 0
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_long);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
+            encoder->upload[index++] =
+                level_duration_make(true, (uint32_t)instance->common.te_long);
+            encoder->upload[index++] =
+                level_duration_make(false, (uint32_t)instance->common.te_short);
         }
     }
     // +send 2 status bit
@@ -247,7 +261,8 @@ bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProto
 
     // send end
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short*40);
+    encoder->upload[index++] =
+        level_duration_make(false, (uint32_t)instance->common.te_short * 40);
 
     return true;
 }
@@ -371,7 +386,7 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
 }
 
 void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output) {
-        string_printf(
+    string_printf(
         output,
         "Protocol: %s\n"
         "Bit: %d\n"
@@ -379,8 +394,7 @@ void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t
         instance->common.name,
         instance->common.code_last_count_bit,
         (uint32_t)(instance->common.code_last_found >> 32),
-        (uint32_t)(instance->common.code_last_found & 0xFFFFFFFF)
-        );
+        (uint32_t)(instance->common.code_last_found & 0xFFFFFFFF));
 }
 
 bool subghz_protocol_keeloq_to_load_protocol(
@@ -410,12 +424,12 @@ bool subghz_protocol_keeloq_to_load_protocol(
         // strlen("Key: ") = 5
         string_right(temp_str, 5);
 
-        uint8_t buf_key[8]={0};
-        if(!subghz_protocol_common_read_hex(temp_str, buf_key, 8)){
+        uint8_t buf_key[8] = {0};
+        if(!subghz_protocol_common_read_hex(temp_str, buf_key, 8)) {
             break;
         }
 
-        for(uint8_t i = 0; i < 8; i++){
+        for(uint8_t i = 0; i < 8; i++) {
             instance->common.code_last_found = instance->common.code_last_found << 8 | buf_key[i];
         }
         loaded = true;

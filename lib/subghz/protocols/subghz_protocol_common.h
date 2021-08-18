@@ -14,14 +14,13 @@
 #define SUBGHZ_TX_PIN_LOW()
 #define DURATION_DIFF(x, y) ((x < y) ? (y - x) : (x - y))
 
-//#define SUBGHZ_APP_PATH_FOLDER "/ext/subghz/saved"
 #define SUBGHZ_APP_FOLDER "/any/subghz"
 #define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
 #define SUBGHZ_APP_EXTENSION ".sub"
-#define SUBGHZ_ENCODER_UPLOAD_MAX_SIZE  512
+#define SUBGHZ_ENCODER_UPLOAD_MAX_SIZE 512
 
-#define TYPE_PROTOCOL_STATIC    1u
-#define TYPE_PROTOCOL_DYNAMIC   2u
+#define TYPE_PROTOCOL_STATIC 1u
+#define TYPE_PROTOCOL_DYNAMIC 2u
 
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
 typedef struct SubGhzProtocolEncoderCommon SubGhzProtocolEncoderCommon;
@@ -37,7 +36,9 @@ typedef void (*SubGhzProtocolCommonGetStrSave)(SubGhzProtocolCommon* instance, s
 typedef bool (*SubGhzProtocolCommonLoad)(FileWorker* file_worker, SubGhzProtocolCommon* instance);
 
 //Get upload encoder protocol
-typedef bool (*SubGhzProtocolEncoderCommonGetUpLoad)(SubGhzProtocolCommon* instance, SubGhzProtocolEncoderCommon* encoder);
+typedef bool (*SubGhzProtocolEncoderCommonGetUpLoad)(
+    SubGhzProtocolCommon* instance,
+    SubGhzProtocolEncoderCommon* encoder);
 
 struct SubGhzProtocolCommon {
     const char* name;

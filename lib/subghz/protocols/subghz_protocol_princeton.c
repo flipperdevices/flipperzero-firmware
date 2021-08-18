@@ -16,7 +16,6 @@ struct SubGhzEncoderPrinceton {
     size_t front;
 };
 
-
 SubGhzEncoderPrinceton* subghz_encoder_princeton_alloc() {
     SubGhzEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzEncoderPrinceton));
     return instance;
@@ -27,15 +26,14 @@ void subghz_encoder_princeton_free(SubGhzEncoderPrinceton* instance) {
     free(instance);
 }
 
-void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder){
-   SubGhzDecoderPrinceton* pricenton = decoder;
-    if((pricenton->te) !=0){
+void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder) {
+    SubGhzDecoderPrinceton* pricenton = decoder;
+    if((pricenton->te) != 0) {
         instance->te = pricenton->te;
-    }else{
+    } else {
         instance->te = SUBGHZ_PT_SHORT;
     }
 }
-
 
 void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
@@ -93,11 +91,11 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
-    instance->common.to_load_protocol=
+    instance->common.to_load_protocol =
         (SubGhzProtocolCommonLoad)subghz_decoder_princeton_to_load_protocol;
     instance->common.get_upload_protocol =
         (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_princeton_send_key;
-        
+
     return instance;
 }
 
@@ -106,30 +104,37 @@ void subghz_decoder_princeton_free(SubGhzDecoderPrinceton* instance) {
     free(instance);
 }
 
-bool subghz_protocol_princeton_send_key(SubGhzDecoderPrinceton* instance, SubGhzProtocolEncoderCommon* encoder){
+uint16_t subghz_protocol_princeton_get_te(void* context) {
+    SubGhzDecoderPrinceton* instance = context;
+    return instance->te;
+}
+
+bool subghz_protocol_princeton_send_key(
+    SubGhzDecoderPrinceton* instance,
+    SubGhzProtocolEncoderCommon* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
     size_t index = 0;
-    encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
+    encoder->size_upload = (instance->common.code_last_count_bit * 2) + 2;
     if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
-    
+
     //Send key data
-    for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
-        if(bit_read(instance->common.code_last_found, i - 1)){
+    for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+        if(bit_read(instance->common.code_last_found, i - 1)) {
             //send bit 1
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te*3);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te * 3);
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te);
-        }else{
+        } else {
             //send bit 0
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te*3);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te * 3);
         }
     }
 
     //Send Stop bit
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te);
     //Send PT_GUARD
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te*30);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te * 30);
 
     return true;
 }
@@ -247,7 +252,9 @@ void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, stri
         (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
 }
 
-bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDecoderPrinceton* instance){
+bool subghz_decoder_princeton_to_load_protocol(
+    FileWorker* file_worker,
+    SubGhzDecoderPrinceton* instance) {
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
