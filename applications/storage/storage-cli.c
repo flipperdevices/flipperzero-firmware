@@ -180,9 +180,9 @@ void storage_cli_write(Cli* cli, string_t path) {
     const uint16_t buffer_size = 512;
     uint8_t* buffer = furi_alloc(buffer_size);
 
-    printf("Just write your text data. New line by Ctrl+Enter, exit by Ctrl+C.\r\n");
-
     if(storage_file_open(file, string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        printf("Just write your text data. New line by Ctrl+Enter, exit by Ctrl+C.\r\n");
+
         uint32_t readed_index = 0;
 
         while(true) {
