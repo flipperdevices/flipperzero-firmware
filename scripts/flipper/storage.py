@@ -30,7 +30,7 @@ class BufferedRead:
         self.stream = stream
 
     def until(self, eol="\n", cut_eol=True):
-        eol = eol.encode()
+        eol = eol.encode("ascii")
         while True:
             # search in buffer
             i = self.buffer.find(eol)
@@ -63,10 +63,9 @@ class FlipperStorage:
     def start(self):
         self.port.open()
         self.port.reset_input_buffer()
-
         # Send a command with a known syntax to make sure the buffer is flushed
         self.send("device_info\r")
-        self.read.until("hardware_ver        : ")
+        self.read.until("hardware_model      :")
         # And read buffer until we get prompt
         self.read.until(self.CLI_PROMPT)
 
@@ -74,7 +73,7 @@ class FlipperStorage:
         self.port.close()
 
     def send(self, line):
-        self.port.write(line.encode())
+        self.port.write(line.encode("ascii"))
 
     def send_and_wait_eol(self, line):
         self.send(line)
@@ -84,20 +83,20 @@ class FlipperStorage:
         self.send(line)
         return self.read.until(self.CLI_PROMPT)
 
-    # Is data has error
     def has_error(self, data):
+        """Is data has error"""
         if data.find(b"Storage error") != -1:
             return True
         else:
             return False
 
-    # Extract error text from data and print it
     def get_error(self, data):
+        """Extract error text from data and print it"""
         error, error_text = data.decode("ascii").split(": ")
         return error_text.strip()
 
-    # List files and dirs on Flipper
     def list_tree(self, path="/", level=0):
+        """List files and dirs on Flipper"""
         path = path.replace("//", "/")
 
         self.send_and_wait_eol('storage list "' + path + '"\r')
@@ -117,8 +116,8 @@ class FlipperStorage:
             if len(line) == 0:
                 continue
 
-            if self.has_error(line.encode()):
-                print(self.get_error(line.encode()))
+            if self.has_error(line.encode("ascii")):
+                print(self.get_error(line.encode("ascii")))
                 continue
 
             if line == "Empty":
@@ -160,7 +159,7 @@ class FlipperStorage:
             if len(line) == 0:
                 continue
 
-            if self.has_error(line.encode()):
+            if self.has_error(line.encode("ascii")):
                 continue
 
             if line == "Empty":
@@ -185,8 +184,8 @@ class FlipperStorage:
         for new_path in walk_dirs:
             yield from self.walk(new_path)
 
-    # Send file from local device to Flipper
     def send_file(self, filename_from, filename_to):
+        """Send file from local device to Flipper"""
         self.remove(filename_to)
 
         file = open(filename_from, "rb")
@@ -222,8 +221,8 @@ class FlipperStorage:
         print()
         return True
 
-    # Receive file from Flipper, and get filedata (bytes)
     def read_file(self, filename):
+        """Receive file from Flipper, and get filedata (bytes)"""
         buffer_size = 512
         self.send_and_wait_eol(
             'storage read_chunks "' + filename + '" ' + str(buffer_size) + "\r"
@@ -254,8 +253,8 @@ class FlipperStorage:
         self.read.until(self.CLI_PROMPT)
         return filedata
 
-    # Receive file from Flipper to local storage
     def receive_file(self, filename_from, filename_to):
+        """Receive file from Flipper to local storage"""
         with open(filename_to, "wb") as file:
             data = self.read_file(filename_from)
             if not data:
@@ -264,8 +263,8 @@ class FlipperStorage:
                 file.write(data)
                 return True
 
-    # Is file or dir exist on Flipper
     def exist(self, path):
+        """Is file or dir exist on Flipper"""
         self.send_and_wait_eol('storage stat "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -276,8 +275,8 @@ class FlipperStorage:
         else:
             return True
 
-    # Is dir exist on Flipper
     def exist_dir(self, path):
+        """Is dir exist on Flipper"""
         self.send_and_wait_eol('storage stat "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -293,8 +292,8 @@ class FlipperStorage:
             else:
                 return False
 
-    # Is file exist on Flipper
     def exist_file(self, path):
+        """Is file exist on Flipper"""
         self.send_and_wait_eol('storage stat "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -308,8 +307,8 @@ class FlipperStorage:
             else:
                 return False
 
-    # file size on Flipper
     def size(self, path):
+        """file size on Flipper"""
         self.send_and_wait_eol('storage stat "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -321,7 +320,7 @@ class FlipperStorage:
             if answer.find(b"File, size:") != -1:
                 size = int(
                     "".join(
-                        ch for ch in answer.split(b": ")[1].decode() if ch.isdigit()
+                        ch for ch in answer.split(b": ")[1].decode("ascii") if ch.isdigit()
                     )
                 )
                 return size
@@ -329,8 +328,8 @@ class FlipperStorage:
                 self.last_error = "access denied"
                 return -1
 
-    # Create a directory on Flipper
     def mkdir(self, path):
+        """Create a directory on Flipper"""
         self.send_and_wait_eol('storage mkdir "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -341,8 +340,8 @@ class FlipperStorage:
         else:
             return True
 
-    # Remove file or directory on Flipper
     def remove(self, path):
+        """Remove file or directory on Flipper"""
         self.send_and_wait_eol('storage remove "' + path + '"\r')
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
@@ -353,16 +352,16 @@ class FlipperStorage:
         else:
             return True
 
-    # Hash of local file
     def hash_local(self, filename):
+        """Hash of local file"""
         hash_md5 = hashlib.md5()
         with open(filename, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    # Get hash of file on Flipper
     def hash_flipper(self, filename):
+        """Get hash of file on Flipper"""
         self.send_and_wait_eol('storage md5 "' + filename + '"\r')
         hash = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
