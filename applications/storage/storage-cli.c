@@ -43,20 +43,6 @@ void storage_cli_print_error(FS_Error error) {
     printf("Storage error: %s\r\n", storage_error_get_desc(error));
 }
 
-void storage_cli_print_path_error(string_t path, FS_Error error) {
-    printf(
-        "Storage error for path \"%s\": %s\r\n",
-        string_get_cstr(path),
-        storage_error_get_desc(error));
-}
-
-void storage_cli_print_file_error(string_t path, File* file) {
-    printf(
-        "Storage error for path \"%s\": %s\r\n",
-        string_get_cstr(path),
-        storage_file_get_error_desc(file));
-}
-
 void storage_cli_info(Cli* cli, string_t path) {
     Storage* api = furi_record_open("storage");
 
@@ -66,7 +52,7 @@ void storage_cli_info(Cli* cli, string_t path) {
         FS_Error error = storage_common_fs_info(api, "/int", &total_space, &free_space);
 
         if(error != FSE_OK) {
-            storage_cli_print_path_error(path, error);
+            storage_cli_print_error(error);
         } else {
             printf(
                 "Label: %s\r\nType: LittleFS\r\n%lu KB total\r\n%lu KB free\r\n",
@@ -79,7 +65,7 @@ void storage_cli_info(Cli* cli, string_t path) {
         FS_Error error = storage_sd_info(api, &sd_info);
 
         if(error != FSE_OK) {
-            storage_cli_print_path_error(path, error);
+            storage_cli_print_error(error);
         } else {
             printf(
                 "Label: %s\r\nType: %s\r\n%lu KB total\r\n%lu KB free\r\n",
@@ -97,7 +83,7 @@ void storage_cli_info(Cli* cli, string_t path) {
 
 void storage_cli_format(Cli* cli, string_t path) {
     if(string_cmp_str(path, "/int") == 0) {
-        storage_cli_print_path_error(path, FSE_NOT_IMPLEMENTED);
+        storage_cli_print_error(FSE_NOT_IMPLEMENTED);
     } else if(string_cmp_str(path, "/ext") == 0) {
         printf("Formatting SD card, all data will be lost. Are you sure (y/n)?\r\n");
         char answer = cli_getc(cli);
@@ -108,7 +94,7 @@ void storage_cli_format(Cli* cli, string_t path) {
             FS_Error error = storage_sd_format(api);
 
             if(error != FSE_OK) {
-                storage_cli_print_path_error(path, error);
+                storage_cli_print_error(error);
             } else {
                 printf("SD card was successfully formatted.\r\n");
             }
@@ -148,7 +134,7 @@ void storage_cli_list(Cli* cli, string_t path) {
                 printf("\tEmpty\r\n");
             }
         } else {
-            storage_cli_print_file_error(path, file);
+            storage_cli_print_error(storage_file_get_error(file));
         }
 
         storage_dir_close(file);
@@ -178,7 +164,7 @@ void storage_cli_read(Cli* cli, string_t path) {
 
         free(data);
     } else {
-        storage_cli_print_file_error(path, file);
+        storage_cli_print_error(storage_file_get_error(file));
     }
 
     storage_file_close(file);
@@ -209,7 +195,7 @@ void storage_cli_write(Cli* cli, string_t path) {
                     uint16_t writed_size = storage_file_write(file, buffer, write_size);
 
                     if(writed_size != write_size) {
-                        storage_cli_print_file_error(path, file);
+                        storage_cli_print_error(storage_file_get_error(file));
                     }
                     break;
                 }
@@ -224,7 +210,7 @@ void storage_cli_write(Cli* cli, string_t path) {
                 uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
 
                 if(writed_size != buffer_size) {
-                    storage_cli_print_file_error(path, file);
+                    storage_cli_print_error(storage_file_get_error(file));
                     break;
                 }
             }
@@ -232,7 +218,7 @@ void storage_cli_write(Cli* cli, string_t path) {
         printf("\r\n");
 
     } else {
-        storage_cli_print_file_error(path, file);
+        storage_cli_print_error(storage_file_get_error(file));
     }
     storage_file_close(file);
 
@@ -270,7 +256,7 @@ void storage_cli_read_chunks(Cli* cli, string_t path, string_t args) {
 
         free(data);
     } else {
-        storage_cli_print_file_error(path, file);
+        storage_cli_print_error(storage_file_get_error(file));
     }
 
     storage_file_close(file);
@@ -301,12 +287,12 @@ void storage_cli_write_chunk(Cli* cli, string_t path, string_t args) {
             uint16_t writed_size = storage_file_write(file, buffer, buffer_size);
 
             if(writed_size != buffer_size) {
-                storage_cli_print_file_error(path, file);
+                storage_cli_print_error(storage_file_get_error(file));
             }
 
             free(buffer);
         } else {
-            storage_cli_print_file_error(path, file);
+            storage_cli_print_error(storage_file_get_error(file));
         }
         storage_file_close(file);
     }
@@ -329,7 +315,7 @@ void storage_cli_stat(Cli* cli, string_t path) {
             storage_common_fs_info(api, string_get_cstr(path), &total_space, &free_space);
 
         if(error != FSE_OK) {
-            storage_cli_print_path_error(path, error);
+            storage_cli_print_error(error);
         } else {
             printf(
                 "Storage, %luKB total, %luKB free\r\n",
@@ -347,7 +333,7 @@ void storage_cli_stat(Cli* cli, string_t path) {
                 printf("File, size: %lub\r\n", (uint32_t)(fileinfo.size));
             }
         } else {
-            storage_cli_print_path_error(path, error);
+            storage_cli_print_error(error);
         }
     }
 
@@ -444,7 +430,7 @@ void storage_cli_md5(Cli* cli, string_t path) {
         free(hash);
         free(data);
     } else {
-        storage_cli_print_file_error(path, file);
+        storage_cli_print_error(storage_file_get_error(file));
     }
 
     storage_file_close(file);
