@@ -4,24 +4,32 @@ import time
 import hashlib
 import math
 
+
 def timing(func):
     """
     Speedometer decorator
     """
+
     def wrapper(*args, **kwargs):
         time1 = time.monotonic()
         ret = func(*args, **kwargs)
         time2 = time.monotonic()
-        print('{:s} function took {:.3f} ms'.format(func.__name__, (time2 - time1) * 1000.0))
+        print(
+            "{:s} function took {:.3f} ms".format(
+                func.__name__, (time2 - time1) * 1000.0
+            )
+        )
         return ret
+
     return wrapper
+
 
 class BufferedRead:
     def __init__(self, stream):
         self.buffer = bytearray()
         self.stream = stream
 
-    def until(self, eol='\n', cut_eol=True):
+    def until(self, eol="\n", cut_eol=True):
         eol = eol.encode()
         while True:
             # search in buffer
@@ -30,8 +38,8 @@ class BufferedRead:
                 if cut_eol:
                     read = self.buffer[:i]
                 else:
-                    read = self.buffer[:i + len(eol)]
-                self.buffer = self.buffer[i + len(eol):]
+                    read = self.buffer[: i + len(eol)]
+                self.buffer = self.buffer[i + len(eol) :]
                 return read
 
             # read and append to buffer
@@ -41,9 +49,9 @@ class BufferedRead:
 
 
 class FlipperStorage:
-    CLI_PROMPT = '>: '
-    CLI_SOH = '\x01'
-    CLI_EOL = '\r\n'
+    CLI_PROMPT = ">: "
+    CLI_SOH = "\x01"
+    CLI_EOL = "\r\n"
 
     def __init__(self, portname: str):
         self.port = serial.Serial()
@@ -51,7 +59,7 @@ class FlipperStorage:
         self.port.timeout = 2
         self.port.baudrate = 115200
         self.read = BufferedRead(self.port)
-        self.last_error = ''
+        self.last_error = ""
 
     def start(self):
         self.port.open()
@@ -73,24 +81,24 @@ class FlipperStorage:
 
     # Is data has error
     def has_error(self, data):
-        if data.find(b'Storage error') != -1:
+        if data.find(b"Storage error") != -1:
             return True
         else:
             return False
 
     # Extract error text from data and print it
     def get_error(self, data):
-        error, error_text = data.decode('ascii').split(': ')
+        error, error_text = data.decode("ascii").split(": ")
         return error_text.strip()
 
     # List files and dirs on Flipper
     def list_tree(self, path="/", level=0):
-        path = path.replace('//', '/')
+        path = path.replace("//", "/")
 
         self.send_and_wait_eol('storage list "' + path + '"\r')
 
         data = self.read.until(self.CLI_PROMPT)
-        lines = data.split(b'\r\n')
+        lines = data.split(b"\r\n")
 
         for line in lines:
             try:
@@ -108,19 +116,19 @@ class FlipperStorage:
                 print(self.get_error(line.encode()))
                 continue
 
-            if line == 'Empty':
+            if line == "Empty":
                 continue
 
             type, info = line.split(" ", 1)
-            if type == '[D]':
+            if type == "[D]":
                 # Print directory name
-                print((path + '/' + info).replace('//', '/'))
+                print((path + "/" + info).replace("//", "/"))
                 # And recursively go inside
-                self.list_tree(path + '/' + info, level + 1)
-            elif type == '[F]':
+                self.list_tree(path + "/" + info, level + 1)
+            elif type == "[F]":
                 name, size = info.rsplit(" ", 1)
                 # Print file name and size
-                print((path + '/' + name).replace('//', '/') + ', size ' + size)
+                print((path + "/" + name).replace("//", "/") + ", size " + size)
             else:
                 # Something wrong, pass
                 pass
@@ -130,10 +138,10 @@ class FlipperStorage:
         nondirs = []
         walk_dirs = []
 
-        path = path.replace('//', '/')
+        path = path.replace("//", "/")
         self.send_and_wait_eol('storage list "' + path + '"\r')
         data = self.read.until(self.CLI_PROMPT)
-        lines = data.split(b'\r\n')
+        lines = data.split(b"\r\n")
 
         for line in lines:
             try:
@@ -150,23 +158,23 @@ class FlipperStorage:
             if self.has_error(line.encode()):
                 continue
 
-            if line == 'Empty':
+            if line == "Empty":
                 continue
 
             type, info = line.split(" ", 1)
-            if type == '[D]':
+            if type == "[D]":
                 # Print directory name
                 dirs.append(info)
-                walk_dirs.append((path + '/' + info).replace('//', '/'))
+                walk_dirs.append((path + "/" + info).replace("//", "/"))
 
-            elif type == '[F]':
+            elif type == "[F]":
                 name, size = info.rsplit(" ", 1)
                 # Print file name and size
                 nondirs.append(name)
             else:
                 # Something wrong, pass
                 pass
-        
+
         # topdown walk, yield before recursy
         yield path, dirs, nondirs
         for new_path in walk_dirs:
@@ -175,8 +183,8 @@ class FlipperStorage:
     # Send file from local device to Flipper
     def send_file(self, filename_from, filename_to):
         self.remove(filename_to)
-        
-        file = open(filename_from, 'rb')
+
+        file = open(filename_from, "rb")
         filesize = os.fstat(file.fileno()).st_size
 
         buffer_size = 512
@@ -186,7 +194,9 @@ class FlipperStorage:
             if size == 0:
                 break
 
-            self.send_and_wait_eol('storage write_chunk "' + filename_to +  '" ' + str(size) + '\r')
+            self.send_and_wait_eol(
+                'storage write_chunk "' + filename_to + '" ' + str(size) + "\r"
+            )
             answer = self.read.until(self.CLI_EOL)
             if self.has_error(answer):
                 self.last_error = self.get_error(answer)
@@ -200,7 +210,9 @@ class FlipperStorage:
             percent = str(math.ceil(file.tell() / filesize * 100))
             total_chunks = str(math.ceil(filesize / buffer_size))
             current_chunk = str(math.ceil(file.tell() / buffer_size))
-            print(percent + '%, chunk ' + current_chunk + ' of ' + total_chunks, end='\r')
+            print(
+                percent + "%, chunk " + current_chunk + " of " + total_chunks, end="\r"
+            )
         file.close()
         print()
         return True
@@ -208,19 +220,21 @@ class FlipperStorage:
     # Receive file from Flipper, and get filedata (bytes)
     def read_file(self, filename):
         buffer_size = 512
-        self.send_and_wait_eol('storage read_chunks "' + filename + '" ' + str(buffer_size) + '\r')
+        self.send_and_wait_eol(
+            'storage read_chunks "' + filename + '" ' + str(buffer_size) + "\r"
+        )
         answer = self.read.until(self.CLI_EOL)
         filedata = bytearray()
         if self.has_error(answer):
             self.last_error = self.get_error(answer)
             self.read.until(self.CLI_PROMPT)
             return filedata
-        size = int(answer.split(b': ')[1])
+        size = int(answer.split(b": ")[1])
         readed_size = 0
 
         while readed_size < size:
-            self.read.until('Ready?' + self.CLI_EOL)
-            self.send('y')
+            self.read.until("Ready?" + self.CLI_EOL)
+            self.send("y")
             read_size = min(size - readed_size, buffer_size)
             filedata.extend(self.port.read(read_size))
             readed_size = readed_size + read_size
@@ -228,14 +242,16 @@ class FlipperStorage:
             percent = str(math.ceil(readed_size / size * 100))
             total_chunks = str(math.ceil(size / buffer_size))
             current_chunk = str(math.ceil(readed_size / buffer_size))
-            print(percent + '%, chunk ' + current_chunk + ' of ' + total_chunks, end='\r')
+            print(
+                percent + "%, chunk " + current_chunk + " of " + total_chunks, end="\r"
+            )
         print()
         self.read.until(self.CLI_PROMPT)
         return filedata
 
     # Receive file from Flipper to local storage
     def receive_file(self, filename_from, filename_to):
-        with open(filename_to, 'wb') as file:
+        with open(filename_to, "wb") as file:
             data = self.read_file(filename_from)
             if not data:
                 return False
@@ -265,11 +281,11 @@ class FlipperStorage:
             self.last_error = self.get_error(answer)
             return False
         else:
-            if answer.find(b'Directory') != -1:
+            if answer.find(b"Directory") != -1:
                 return True
-            elif answer.find(b'Storage') != -1:
+            elif answer.find(b"Storage") != -1:
                 return True
-            else: 
+            else:
                 return False
 
     # Is file exist on Flipper
@@ -282,9 +298,9 @@ class FlipperStorage:
             self.last_error = self.get_error(answer)
             return False
         else:
-            if answer.find(b'File, size:') != -1:
+            if answer.find(b"File, size:") != -1:
                 return True
-            else: 
+            else:
                 return False
 
     # file size on Flipper
@@ -297,11 +313,15 @@ class FlipperStorage:
             self.last_error = self.get_error(answer)
             return False
         else:
-            if answer.find(b'File, size:') != -1:
-                size = int(''.join(ch for ch in answer.split(b': ')[1].decode() if ch.isdigit()))
+            if answer.find(b"File, size:") != -1:
+                size = int(
+                    "".join(
+                        ch for ch in answer.split(b": ")[1].decode() if ch.isdigit()
+                    )
+                )
                 return size
             else:
-                self.last_error = 'access denied'
+                self.last_error = "access denied"
                 return -1
 
     # Create a directory on Flipper
@@ -344,7 +364,6 @@ class FlipperStorage:
 
         if self.has_error(hash):
             self.last_error = self.get_error(hash)
-            return ''
+            return ""
         else:
-            return hash.decode('ascii')
-
+            return hash.decode("ascii")
