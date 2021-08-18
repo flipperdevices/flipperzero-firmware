@@ -168,6 +168,7 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
 
 const char* subghz_protocol_keeloq_get_manufacture_name(void* context) {
     SubGhzProtocolKeeloq* instance = context;
+    subghz_protocol_keeloq_check_remote_controller(instance);
     return instance->manufacture_name;
 }
 
