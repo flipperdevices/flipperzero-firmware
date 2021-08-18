@@ -18,59 +18,43 @@ class Main:
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
 
         self.parser_mkdir = self.subparsers.add_parser("mkdir", help="Create directory")
-        self.parser_mkdir.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
+        self.parser_mkdir.add_argument("flipper_path", help="Flipper path")
         self.parser_mkdir.set_defaults(func=self.mkdir)
 
         self.parser_remove = self.subparsers.add_parser(
             "remove", help="Remove file/directory"
         )
-        self.parser_remove.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
+        self.parser_remove.add_argument("flipper_path", help="Flipper path")
         self.parser_remove.set_defaults(func=self.remove)
 
         self.parser_read = self.subparsers.add_parser("read", help="Read file")
-        self.parser_read.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
+        self.parser_read.add_argument("flipper_path", help="Flipper path")
         self.parser_read.set_defaults(func=self.read)
 
         self.parser_size = self.subparsers.add_parser("size", help="Size of file")
-        self.parser_size.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
+        self.parser_size.add_argument("flipper_path", help="Flipper path")
         self.parser_size.set_defaults(func=self.size)
 
         self.parser_receive = self.subparsers.add_parser("receive", help="Receive file")
-        self.parser_receive.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
-        self.parser_receive.add_argument(
-            "-lp", "--local-path", help="Local path", required=True
-        )
+        self.parser_receive.add_argument("flipper_path", help="Flipper path")
+        self.parser_receive.add_argument("local_path", help="Local path")
         self.parser_receive.set_defaults(func=self.receive)
 
         self.parser_send = self.subparsers.add_parser(
             "send", help="Send file or directory"
         )
         self.parser_send.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", required=True
-        )
-        self.parser_send.add_argument(
-            "-lp", "--local-path", help="Local path", required=True
-        )
-        self.parser_send.add_argument(
             "-f", "--force", help="Force sending", action="store_true"
         )
+        self.parser_send.add_argument("local_path", help="Local path")
+        self.parser_send.add_argument("flipper_path", help="Flipper path")
         self.parser_send.set_defaults(func=self.send)
 
         self.parser_list = self.subparsers.add_parser(
             "list", help="Recursively list files and dirs"
         )
         self.parser_list.add_argument(
-            "-fp", "--flipper-path", help="Flipper path", default="/"
+            "flipper_path", help="Flipper path", default="/"
         )
         self.parser_list.set_defaults(func=self.list)
 
