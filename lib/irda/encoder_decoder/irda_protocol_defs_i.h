@@ -40,22 +40,15 @@ void* irda_decoder_nec_alloc(void);
 void irda_decoder_nec_reset(void* decoder);
 void irda_decoder_nec_free(void* decoder);
 IrdaMessage* irda_decoder_nec_decode(void* decoder, bool level, uint32_t duration);
-
 void* irda_encoder_nec_alloc(void);
 IrdaStatus irda_encoder_nec_encode(void* encoder_ptr, uint32_t* duration, bool* level);
 void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message);
 void irda_encoder_nec_free(void* encoder_ptr);
-
-void* irda_decoder_necext_alloc(void);
-void* irda_encoder_necext_alloc(void);
-void irda_encoder_necext_reset(void* encoder_ptr, const IrdaMessage* message);
-
 bool irda_decoder_nec_interpret(IrdaCommonDecoder* decoder);
-bool irda_decoder_necext_interpret(IrdaCommonDecoder* decoder);
 IrdaStatus irda_decoder_nec_decode_repeat(IrdaCommonDecoder* decoder);
 IrdaStatus irda_encoder_nec_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level);
+const IrdaProtocolSpecification* irda_nec_get_spec(IrdaProtocol protocol);
 
-extern const IrdaCommonProtocolSpec protocol_necext;
 extern const IrdaCommonProtocolSpec protocol_nec;
 
 
@@ -98,15 +91,14 @@ void* irda_decoder_samsung32_alloc(void);
 void irda_decoder_samsung32_reset(void* decoder);
 void irda_decoder_samsung32_free(void* decoder);
 IrdaMessage* irda_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration);
-
 IrdaStatus irda_encoder_samsung32_encode(void* encoder_ptr, uint32_t* duration, bool* level);
 void irda_encoder_samsung32_reset(void* encoder_ptr, const IrdaMessage* message);
 void* irda_encoder_samsung32_alloc(void);
 void irda_encoder_samsung32_free(void* encoder_ptr);
-
 bool irda_decoder_samsung32_interpret(IrdaCommonDecoder* decoder);
 IrdaStatus irda_decoder_samsung32_decode_repeat(IrdaCommonDecoder* decoder);
 IrdaStatus irda_encoder_samsung32_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level);
+const IrdaProtocolSpecification* irda_samsung32_get_spec(IrdaProtocol protocol);
 
 extern const IrdaCommonProtocolSpec protocol_samsung32;
 
@@ -148,10 +140,10 @@ void* irda_encoder_rc6_alloc(void);
 void irda_encoder_rc6_reset(void* encoder_ptr, const IrdaMessage* message);
 void irda_encoder_rc6_free(void* decoder);
 IrdaStatus irda_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
-
 bool irda_decoder_rc6_interpret(IrdaCommonDecoder* decoder);
 IrdaStatus irda_decoder_rc6_decode_manchester(IrdaCommonDecoder* decoder);
 IrdaStatus irda_encoder_rc6_encode_manchester(IrdaCommonEncoder* encoder_ptr, uint32_t* duration, bool* polarity);
+const IrdaProtocolSpecification* irda_rc6_get_spec(IrdaProtocol protocol);
 
 extern const IrdaCommonProtocolSpec protocol_rc6;
 

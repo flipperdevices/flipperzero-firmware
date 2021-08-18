@@ -21,26 +21,6 @@ const IrdaCommonProtocolSpec protocol_nec = {
     .encode_repeat = irda_encoder_nec_encode_repeat,
 };
 
-const IrdaCommonProtocolSpec protocol_necext = {
-    .timings = {
-        .preamble_mark = IRDA_NEC_PREAMBULE_MARK,
-        .preamble_space = IRDA_NEC_PREAMBULE_SPACE,
-        .bit1_mark = IRDA_NEC_BIT1_MARK,
-        .bit1_space = IRDA_NEC_BIT1_SPACE,
-        .bit0_mark = IRDA_NEC_BIT0_MARK,
-        .bit0_space = IRDA_NEC_BIT0_SPACE,
-        .preamble_tolerance = IRDA_NEC_PREAMBLE_TOLERANCE,
-        .bit_tolerance = IRDA_NEC_BIT_TOLERANCE,
-        .silence_time = IRDA_NEC_SILENCE,
-    },
-    .databit_len = 32,
-    .decode = irda_common_decode_pdwm,
-    .encode = irda_common_encode_pdwm,
-    .interpret = irda_decoder_necext_interpret,
-    .decode_repeat = irda_decoder_nec_decode_repeat,
-    .encode_repeat = irda_encoder_nec_encode_repeat,
-};
-
 const IrdaCommonProtocolSpec protocol_samsung32 = {
     .timings = {
         .preamble_mark = IRDA_SAMSUNG_PREAMBULE_MARK,
