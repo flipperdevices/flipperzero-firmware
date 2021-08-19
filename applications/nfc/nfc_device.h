@@ -45,7 +45,6 @@ typedef struct {
     uint8_t exp_year;
     uint16_t country_code;
     uint16_t currency_code;
-    char cardholder[32];
 } NfcEmvData;
 
 typedef struct {

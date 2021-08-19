@@ -51,9 +51,9 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     if((emv_data->country_code) &&
        nfc_emv_parser_get_country_name(emv_data->country_code, country_name)) {
         string_t disp_country;
-        string_init_printf(disp_country, "REG:%s", country_name);
+        string_init_printf(disp_country, "Reg:%s", country_name);
         widget_add_string_element(
-            nfc->widget, 4, 23, AlignLeft, AlignTop, FontSecondary, string_get_cstr(disp_country));
+            nfc->widget, 7, 23, AlignLeft, AlignTop, FontSecondary, string_get_cstr(disp_country));
         string_clear(disp_country);
     }
     string_clear(country_name);
@@ -64,7 +64,7 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     if((emv_data->currency_code) &&
        nfc_emv_parser_get_currency_name(emv_data->currency_code, currency_name)) {
         string_t disp_currency;
-        string_init_printf(disp_currency, "CUR:%s", currency_name);
+        string_init_printf(disp_currency, "Cur:%s", currency_name);
         widget_add_string_element(
             nfc->widget,
             121,
