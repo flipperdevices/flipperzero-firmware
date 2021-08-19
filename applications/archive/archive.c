@@ -140,10 +140,8 @@ bool archive_file_seek(File* file, uint64_t position, bool from_start) {
     return true;
 }
 
-
 static void
     archive_file_append(ArchiveApp* archive, const char* path, const char* string, size_t size) {
-
     // Store
     File* file = storage_file_alloc(archive->api);
     bool result = storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND);
@@ -170,12 +168,11 @@ static void
 }
 
 static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavActionsEnum action) {
-    
     FileInfo file_info;
     ArchiveFile_t item;
     string_t path;
     string_init(path);
-    if(action != FavoritesRead){
+    if(action != FavoritesRead) {
         string_printf(
             path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file_t->name));
     }
@@ -215,9 +212,8 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
                     *endline_ptr = '\0';
                     ++line_num;
 
-                    
-                    if(action == FavoritesCheck){
-                    char* str_ptr = strstr(buffer, string_get_cstr(path));
+                    if(action == FavoritesCheck) {
+                        char* str_ptr = strstr(buffer, string_get_cstr(path));
 
                         if(str_ptr != NULL) {
                             FURI_LOG_E("Archive", "Search in favorites, res: %ld", str_ptr);
@@ -226,7 +222,6 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
                         }
                     } else if(action == FavoritesRead) {
                         if(filter_by_extension(archive, &file_info, buffer)) {
-
                             ArchiveFile_t_init(&item);
                             string_init_set_str(item.name, buffer);
                             set_file_type(&item, &file_info);
@@ -239,9 +234,8 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
 
                             ArchiveFile_t_clear(&item);
                         }
-                    } else if(action == FavoritesDelete){
+                    } else if(action == FavoritesDelete) {
                         char* str_ptr = strstr(buffer, string_get_cstr(path));
-
 
                         FURI_LOG_E("Archive", "Current string: %s", buffer);
 
@@ -260,7 +254,6 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
                                 string_size(temp));
                             string_clear(temp);
                         }
-
                     }
                 } else {
                     furi_assert(0);
@@ -296,22 +289,18 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
 
     FURI_LOG_I("Archive", "Searching favorites.txt finished, res: %d", found);
 
-    if(action == FavoritesDelete){
-
+    if(action == FavoritesDelete) {
         FURI_LOG_I("Archive", "Removing original");
         storage_common_remove(archive->api, ARCHIVE_FAV_PATH);
         storage_common_copy(archive->api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
         storage_common_remove(archive->api, ARCHIVE_FAV_TEMP_PATH);
-
     }
 
-
-    if(action == FavoritesCheck){
+    if(action == FavoritesCheck) {
         return found;
     } else {
         return load_result;
     }
-
 }
 
 static bool archive_get_filenames(ArchiveApp* archive) {
@@ -487,7 +476,9 @@ static void archive_show_file_menu(ArchiveApp* archive) {
             selected = files_array_get(model->files, model->idx);
             model->menu = true;
             model->menu_idx = 0;
-            selected->fav = is_known_app(selected->type) ? favorites_handler(archive, selected, FavoritesCheck) : false;
+            selected->fav = is_known_app(selected->type) ?
+                                favorites_handler(archive, selected, FavoritesCheck) :
+                                false;
 
             return true;
         });
@@ -528,7 +519,6 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
     } else { // remove from favorites
         string_printf(path, "%s/%s", get_favorites_path(), string_get_cstr(file->name));
         favorites_handler(archive, file, FavoritesDelete);
-
     }
 
     string_clear(path);
@@ -542,7 +532,6 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
 
     update_offset(archive);
 }
-
 
 static void
     archive_run_in_app(ArchiveApp* archive, ArchiveFile_t* selected, bool full_path_provided) {
@@ -620,7 +609,6 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
     }
     selected = NULL;
 }
-
 
 static void menu_input_handler(ArchiveApp* archive, InputEvent* event) {
     furi_assert(archive);

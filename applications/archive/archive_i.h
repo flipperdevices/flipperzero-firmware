@@ -103,12 +103,11 @@ typedef struct {
     EventType type;
 } AppEvent;
 
-typedef enum{
+typedef enum {
     FavoritesCheck,
     FavoritesRead,
     FavoritesDelete,
 } FavActionsEnum;
-
 
 typedef struct {
     ArchiveTabEnum tab_id;
