@@ -41,6 +41,7 @@ struct SubGhzHistoryStruct {
 struct SubGhzHistory {
     uint32_t last_update_timestamp;
     uint8_t last_index_write;
+    uint64_t code_last_found;
     SubGhzHistoryStruct history[SUBGHZ_HISTORY_MAX];
 };
 
@@ -59,6 +60,11 @@ void subghz_history_free(SubGhzHistory* instance) {
     }
     free(instance);
 }
+void subghz_history_clean(SubGhzHistory* instance){
+    furi_assert(instance);
+    instance->last_index_write = 0;
+    instance->code_last_found = 0;
+}
 
 void subghz_history_add_to_history(SubGhzHistory* instance, void* context) {
     furi_assert(instance);
@@ -66,12 +72,15 @@ void subghz_history_add_to_history(SubGhzHistory* instance, void* context) {
     SubGhzProtocolCommon* protocol = context;
 
     if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return;
-    if((instance->history[instance->last_index_write].code_found == protocol->code_last_found) &&
-       ((instance->last_update_timestamp - millis()) < 500)) {
+    if((instance->code_last_found == protocol->code_last_found) &&
+       ((millis() - instance->last_update_timestamp) < 500)) {
+        instance->last_update_timestamp = millis();
         return;
     }
 
+    instance->code_last_found = protocol->code_last_found;
     instance->last_update_timestamp = millis();
+
     instance->history[instance->last_index_write].te = 0;
     instance->history[instance->last_index_write].fix = 0;
     instance->history[instance->last_index_write].hop = 0;
