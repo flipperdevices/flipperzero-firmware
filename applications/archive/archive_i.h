@@ -17,7 +17,8 @@
 #define MAX_DEPTH 32
 #define MAX_FILES 100 //temp
 #define MAX_FILE_SIZE 128
-#define ARCHIVE_FAV_PATH "/any/favorites.txt"
+#define ARCHIVE_FAV_PATH "/ext/favorites.txt"
+#define ARCHIVE_FAV_TEMP_PATH "/ext/favorites.temp"
 
 typedef enum {
     ArchiveViewMain,
