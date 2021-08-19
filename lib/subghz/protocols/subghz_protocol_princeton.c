@@ -226,17 +226,18 @@ void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t 
 
     string_cat_printf(
         output,
-        "%s %d Bit te %dus\r\n"
-        " KEY:0x%08lX\r\n"
-        " YEK:0x%08lX\r\n"
-        " SN:0x%05lX BTN:%02X\r\n",
+        "%s %dbit\r\n"
+        "Key:0x%08lX\r\n"
+        "Yek:0x%08lX\r\n"
+        "Sn:0x%05lX BTN:%02X\r\n"
+        "Te:%dus\r\n",
         instance->common.name,
         instance->common.code_last_count_bit,
-        instance->te,
         code_found_lo,
         code_found_reverse_lo,
         instance->common.serial,
-        instance->common.btn);
+        instance->common.btn,
+        instance->te);
 }
 
 void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, string_t output) {

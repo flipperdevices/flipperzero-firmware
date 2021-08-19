@@ -7,7 +7,6 @@ void subghz_read_protocol_callback(SubGhzProtocolCommon* parser, void* context) 
     furi_assert(context);
     SubGhz* subghz = context;
     subghz->protocol_result = parser;
-    subghz_history_add_to_history(subghz->history, subghz->protocol_result);
     view_dispatcher_send_custom_event(subghz->view_dispatcher, GUBGHZ_READ_CUSTOM_EVENT);
 }
 void subghz_scene_read_callback(DialogExResult result, void* context) {

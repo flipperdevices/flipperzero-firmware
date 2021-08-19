@@ -224,10 +224,10 @@ void subghz_protocol_nice_flor_s_to_str(SubGhzProtocolNiceFlorS* instance, strin
 
     string_cat_printf(
         output,
-        "%s, %d Bit\r\n"
-        " KEY:0x%lX%08lX\r\n"
-        " SN:%05lX\r\n"
-        " CNT:%04X BTN:%02lX\r\n",
+        "%s %dbit\r\n"
+        "Key:0x%lX%08lX\r\n"
+        "Sn:%05lX\r\n"
+        "Cnt:%04X Btn:%02lX\r\n",
         instance->common.name,
         instance->common.code_last_count_bit,
         code_found_hi,

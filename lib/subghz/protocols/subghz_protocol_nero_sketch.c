@@ -184,9 +184,9 @@ void subghz_protocol_nero_sketch_to_str(SubGhzProtocolNeroSketch* instance, stri
     uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
 
     string_cat_printf(output,
-                      "%s, %d Bit\r\n"
-                      " KEY:0x%lX%08lX\r\n"
-                      " YEK:0x%lX%08lX\r\n",
+                      "%s %dbit\r\n"
+                      "Key:0x%lX%08lX\r\n"
+                      "Yek:0x%lX%08lX\r\n",
                       instance->common.name,
                       instance->common.code_last_count_bit,
                       code_found_hi,

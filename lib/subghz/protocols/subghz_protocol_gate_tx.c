@@ -133,9 +133,9 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
 void subghz_protocol_gate_tx_to_str(SubGhzProtocolGateTX* instance, string_t output) {
     subghz_protocol_gate_tx_check_remote_controller(instance);
     string_cat_printf(output,
-                      "%s, %d Bit\r\n"
-                      " KEY:%06lX\r\n"
-                      " SN:%05lX  BTN:%lX\r\n",
+                      "%s %dbit\r\n"
+                      "Key:%06lX\r\n"
+                      "Sn:%05lX  Btn:%lX\r\n",
                       instance->common.name,
                       instance->common.code_last_count_bit,
                       (uint32_t)(instance->common.code_last_found & 0xFFFFFF),

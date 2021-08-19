@@ -58,7 +58,7 @@ void subghz_analyze_draw(Canvas* canvas, SubghzAnalyzeModel* model) {
 
     default:
         canvas_set_font(canvas, FontSecondary);
-        elements_multiline_text(canvas, 0, 20, string_get_cstr(model->text));
+        elements_multiline_text(canvas, 0, 18, string_get_cstr(model->text));
         break;
     }
 }

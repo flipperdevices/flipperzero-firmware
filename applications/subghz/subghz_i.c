@@ -113,6 +113,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
 
 bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
     SubGhz* subghz = context;
+    furi_assert(subghz->protocol_result);
     FileWorker* file_worker = file_worker_alloc(false);
     string_t dev_file_name;
     string_init(dev_file_name);
@@ -157,7 +158,7 @@ bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
     return saved;
 }
 
-bool subghz_saved_protocol_select(SubGhz* subghz) {
+bool subghz_protocol_load(SubGhz* subghz) {
     furi_assert(subghz);
 
     FileWorker* file_worker = file_worker_alloc(false);

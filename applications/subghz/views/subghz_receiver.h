@@ -9,8 +9,11 @@
 
 
 typedef enum {
+    SubghzReceverEventOK,
+    SubghzReceverEventConfig,
     SubghzReceverEventSave,
     SubghzReceverEventBack,
+    SubghzReceverEventMore,
 } SubghzReceverEvent;
 
 typedef struct SubghzReceiver SubghzReceiver;
@@ -32,5 +35,5 @@ void subghz_receiver_set_protocol(
     SubghzReceiver* subghz_receiver,
     SubGhzProtocolCommon* protocol_result,
     SubGhzProtocol* protocol);
+SubGhzProtocolCommon* subghz_receiver_get_protocol(SubghzReceiver* subghz_receiver);
 void subghz_receiver_set_worker(SubghzReceiver* subghz_receiver, SubGhzWorker* worker);
-void subghz_receiver_set_history(SubghzReceiver* subghz_receiver, SubGhzHistory* history);

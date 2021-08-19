@@ -91,5 +91,5 @@ void subghz_transmitter_tx_start(void* context);
 void subghz_transmitter_tx_stop(void* context);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_save_protocol_to_file(void* context, const char* dev_name);
-bool subghz_saved_protocol_select(SubGhz* subghz);
+bool subghz_protocol_load(SubGhz* subghz);
 uint32_t subghz_random_serial(void);

@@ -15,7 +15,6 @@ const void subghz_scene_receiver_on_enter(void* context) {
 
     subghz_receiver_set_protocol(subghz_receiver, subghz->protocol_result, subghz->protocol);
     subghz_receiver_set_worker(subghz_receiver, subghz->worker);
-    subghz_receiver_set_history(subghz_receiver, subghz->history);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
 }
 
@@ -24,6 +23,7 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzReceverEventSave) {
+            subghz->protocol_result = subghz_receiver_get_protocol(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         } else if(event.event == SubghzReceverEventBack) {

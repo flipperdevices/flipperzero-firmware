@@ -128,7 +128,6 @@ SubGhz* subghz_alloc() {
     //init Worker & Protocol
     subghz->worker = subghz_worker_alloc();
     subghz->protocol = subghz_protocol_alloc();
-    subghz->history = subghz_history_alloc();
     subghz_worker_set_overrun_callback(
         subghz->worker, (SubGhzWorkerOverrunCallback)subghz_protocol_reset);
     subghz_worker_set_pair_callback(
@@ -199,7 +198,6 @@ void subghz_free(SubGhz* subghz) {
     //Worker & Protocol
     subghz_protocol_free(subghz->protocol);
     subghz_worker_free(subghz->worker);
-    subghz_history_free(subghz->history);
 
     // Notifications
     furi_record_close("notification");

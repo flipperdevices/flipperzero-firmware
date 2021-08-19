@@ -142,9 +142,9 @@ void subghz_protocol_came_to_str(SubGhzProtocolCame* instance, string_t output) 
 
     string_cat_printf(
         output,
-        "%s %d Bit\r\n"
-        " KEY:0x%08lX\r\n"
-        " YEK:0x%08lX\r\n",
+        "%s %dbit\r\n"
+        "Key:0x%08lX\r\n"
+        "Yek:0x%08lX\r\n",
         instance->common.name,
         instance->common.code_last_count_bit,
         code_found_lo,

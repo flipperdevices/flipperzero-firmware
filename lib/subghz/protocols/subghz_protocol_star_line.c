@@ -274,20 +274,21 @@ void subghz_protocol_star_line_to_str(SubGhzProtocolStarLine* instance, string_t
     uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
     string_cat_printf(
         output,
-        "%s, %d Bit\r\n"
-        "KEY:0x%lX%lX\r\n"
-        "FIX:%08lX MF:%s \r\n"
-        "HOP:%08lX \r\n"
-        "SN:%06lX CNT:%04X B:%02lX\r\n",
+        "%s %dbit\r\n"
+        "Key:0x%lX%lX\r\n"
+        "Fix:0x%08lX     Cnt:%04X\r\n"
+        "Hop:0x%08lX     Btn:%02lX\r\n"
+        "MF:%s\r\n"
+        "Sn:0x%07lX \r\n",
         instance->common.name,
         instance->common.code_last_count_bit,
         code_found_hi,
         code_found_lo,
         code_found_reverse_hi,
-        instance->manufacture_name,
+        instance->common.cnt,
         code_found_reverse_lo,
-        instance->common.serial,
-        instance->common.cnt, 
-        instance->common.btn
+        instance->common.btn,
+        instance->manufacture_name,
+        instance->common.serial
     );
 }

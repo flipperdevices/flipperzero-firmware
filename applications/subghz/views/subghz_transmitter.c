@@ -8,7 +8,8 @@
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
 
-#include <assets_icons.h>
+//#include <assets_icons.h>
+#include <gui/icon_i.h>
 
 struct SubghzTransmitter {
     View* view;
@@ -42,14 +43,45 @@ void subghz_transmitter_set_protocol(
         });
 }
 
+static void subghz_transmitter_button_right(Canvas* canvas, const char* str) {
+    const uint8_t button_height = 13;
+    const uint8_t vertical_offset = 3;
+    const uint8_t horizontal_offset = 1;
+    const uint8_t string_width = canvas_string_width(canvas, str);
+    const Icon* icon = &I_ButtonCenter_7x7;
+    const uint8_t icon_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_offset;
+    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
+
+    const uint8_t x = (canvas_width(canvas) - button_width) / 2 + 40;
+    const uint8_t y = canvas_height(canvas);
+
+    canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
+
+    canvas_draw_line(canvas, x - 1, y, x - 1, y - button_height + 0);
+    canvas_draw_line(canvas, x - 2, y, x - 2, y - button_height + 1);
+    canvas_draw_line(canvas, x - 3, y, x - 3, y - button_height + 2);
+
+    canvas_draw_line(canvas, x + button_width + 0, y, x + button_width + 0, y - button_height + 0);
+    canvas_draw_line(canvas, x + button_width + 1, y, x + button_width + 1, y - button_height + 1);
+    canvas_draw_line(canvas, x + button_width + 2, y, x + button_width + 2, y - button_height + 2);
+
+    canvas_invert_color(canvas);
+    canvas_draw_icon(
+        canvas, x + horizontal_offset, y - button_height + vertical_offset, &I_ButtonCenter_7x7);
+    canvas_draw_str(
+        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
+    canvas_invert_color(canvas);
+}
+
 void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
+    elements_multiline_text(canvas, 0, 8, string_get_cstr(model->text));
 
     if(model->protocol && model->protocol->get_upload_protocol) {
-        elements_button_center(canvas, "Send");
+        subghz_transmitter_button_right(canvas, "Send");
     }
 }
 

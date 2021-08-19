@@ -144,11 +144,11 @@ void subghz_protocol_ido_to_str(SubGhzProtocolIDo* instance, string_t output) {
     uint32_t code_hop = (code_found_reverse >>24) & 0xFFFFFF;
 
     string_cat_printf(output,
-                      "%s, %d Bit\r\n"
-                      " KEY:0x%lX%08lX\r\n"
-                      " FIX:%06lX \r\n"
-                      " HOP:%06lX \r\n"
-                      " SN:%05lX BTN:%lX\r\n",
+                      "%s %dbit\r\n"
+                      "Key:0x%lX%08lX\r\n"
+                      "Fix:%06lX \r\n"
+                      "Hop:%06lX \r\n"
+                      "Sn:%05lX Btn:%lX\r\n",
                       instance->common.name,
                       instance->common.code_last_count_bit,
                       (uint32_t)(instance->common.code_last_found >> 32),
