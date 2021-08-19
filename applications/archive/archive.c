@@ -504,19 +504,18 @@ static void archive_open_app(ArchiveApp* archive, const char* app_name, const ch
     loader_start(archive->loader, app_name, args);
 }
 
-static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool fav, bool orig) {
+static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool fav) {
     furi_assert(archive);
     furi_assert(file);
 
     string_t path;
     string_init(path);
 
-    if(!fav && !orig) {
-        string_printf(
-            path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file->name));
-        storage_common_remove(archive->api, string_get_cstr(path));
+    string_printf(
+        path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file->name));
+    storage_common_remove(archive->api, string_get_cstr(path));
 
-    } else { // remove from favorites
+    if(fav) { // remove from favorites
         string_printf(path, "%s/%s", get_favorites_path(), string_get_cstr(file->name));
         favorites_handler(archive, file, FavoritesDelete);
     }
@@ -594,9 +593,9 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         // confirmation?
         if(favorites_handler(archive, selected, FavoritesCheck)) {
             //delete both fav & original
-            archive_delete_file(archive, selected, true, true);
+            archive_delete_file(archive, selected, true);
         } else {
-            archive_delete_file(archive, selected, false, false);
+            archive_delete_file(archive, selected, false);
         }
 
         archive_close_file_menu(archive);
