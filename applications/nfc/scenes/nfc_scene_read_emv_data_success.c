@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include "../helpers/nfc_emv_parser.h"
 
 void nfc_scene_read_emv_data_success_widget_callback(GuiButtonType result, void* context) {
     Nfc* nfc = (Nfc*)context;
@@ -43,6 +44,39 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         emv_data->number[6],
         emv_data->number[7]);
     widget_add_string_element(nfc->widget, 64, 13, AlignCenter, AlignTop, FontSecondary, pan_str);
+
+    // Parse country code
+    string_t country_name;
+    string_init(country_name);
+    if((emv_data->country_code) &&
+       nfc_emv_parser_get_country_name(emv_data->country_code, country_name)) {
+        string_t disp_country;
+        string_init_printf(disp_country, "REG:%s", country_name);
+        widget_add_string_element(
+            nfc->widget, 4, 23, AlignLeft, AlignTop, FontSecondary, string_get_cstr(disp_country));
+        string_clear(disp_country);
+    }
+    string_clear(country_name);
+
+    // Parse currency code
+    string_t currency_name;
+    string_init(currency_name);
+    if((emv_data->currency_code) &&
+       nfc_emv_parser_get_currency_name(emv_data->currency_code, currency_name)) {
+        string_t disp_currency;
+        string_init_printf(disp_currency, "CUR:%s", currency_name);
+        widget_add_string_element(
+            nfc->widget,
+            121,
+            23,
+            AlignRight,
+            AlignTop,
+            FontSecondary,
+            string_get_cstr(disp_currency));
+        string_clear(disp_currency);
+    }
+    string_clear(currency_name);
+
     char atqa_str[16];
     snprintf(atqa_str, sizeof(atqa_str), "ATQA: %02X%02X", nfc_data->atqa[0], nfc_data->atqa[1]);
     widget_add_string_element(nfc->widget, 121, 32, AlignRight, AlignTop, FontSecondary, atqa_str);
