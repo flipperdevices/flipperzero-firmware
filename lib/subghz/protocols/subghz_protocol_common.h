@@ -19,8 +19,12 @@
 #define SUBGHZ_APP_EXTENSION ".sub"
 #define SUBGHZ_ENCODER_UPLOAD_MAX_SIZE 512
 
-#define TYPE_PROTOCOL_STATIC 1u
-#define TYPE_PROTOCOL_DYNAMIC 2u
+enum {
+    TYPE_PROTOCOL_UNKNOWN,
+    TYPE_PROTOCOL_STATIC,
+    TYPE_PROTOCOL_DYNAMIC,
+};
+
 
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
 typedef struct SubGhzProtocolEncoderCommon SubGhzProtocolEncoderCommon;

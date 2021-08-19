@@ -40,7 +40,7 @@ struct SubGhzHistoryStruct {
 
 struct SubGhzHistory {
     uint32_t last_update_timestamp;
-    uint8_t last_index_write;
+    uint16_t last_index_write;
     uint64_t code_last_found;
     SubGhzHistoryStruct history[SUBGHZ_HISTORY_MAX];
 };
@@ -60,10 +60,20 @@ void subghz_history_free(SubGhzHistory* instance) {
     }
     free(instance);
 }
-void subghz_history_clean(SubGhzHistory* instance){
+void subghz_history_clean(SubGhzHistory* instance) {
     furi_assert(instance);
     instance->last_index_write = 0;
     instance->code_last_found = 0;
+}
+
+uint16_t subghz_history_get_item(SubGhzHistory* instance) {
+    furi_assert(instance);
+    return instance->last_index_write;
+}
+
+const char* subghz_history_get_name(SubGhzHistory* instance, uint16_t idx) {
+    furi_assert(instance);
+    return instance->history[idx].name;
 }
 
 void subghz_history_add_to_history(SubGhzHistory* instance, void* context) {
