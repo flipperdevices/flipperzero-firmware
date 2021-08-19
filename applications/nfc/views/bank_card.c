@@ -45,7 +45,7 @@ void bank_card_set_number(BankCard* bank_card, uint8_t* number) {
     }
     widget_add_string_element(
         bank_card->widget, 64, 32, AlignCenter, AlignTop, FontSecondary, string_get_cstr(num_str));
-    widget_add_icon_element(bank_card->widget, 6, 20, &I_EMV_Chip_14x11);
+    widget_add_icon_element(bank_card->widget, 8, 15, &I_Detailed_chip_17x13);
     string_clear(num_str);
 }
 
