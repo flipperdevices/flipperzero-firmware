@@ -396,7 +396,7 @@ static uint32_t archive_previous_callback(void* context) {
 
 static void
     archive_file_append(ArchiveApp* archive, const char* path, const char* string, size_t size) {
-    storage_common_remove(archive->api, ARCHIVE_FAV_TEMP_PATH);
+
 
     // Store
     File* file = storage_file_alloc(archive->api);
@@ -473,7 +473,6 @@ static bool archive_delete_from_favorites(ArchiveApp* archive, ArchiveFile_t* fi
                     } else {
                         string_t temp;
                         FURI_LOG_E("Archive", "Writing: %s", buffer);
-                        string_init_set_str(temp, buffer);
                         string_init_printf(temp, "%s\r\n", buffer);
 
                         archive_file_append(
