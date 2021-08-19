@@ -51,10 +51,28 @@ const IrdaCommonProtocolSpec protocol_rc6 = {
         .silence_time = IRDA_RC6_SILENCE,
     },
     .databit_len = 1 + 3 + 1 + 8 + 8,   // start_bit + 3 mode bits, + 1 toggle bit (x2 timing) + 8 address + 8 command
-    .manchester_inverse_level = false,
+    .manchester_start_from_space = false,
     .decode = irda_decoder_rc6_decode_manchester,
     .encode = irda_encoder_rc6_encode_manchester,
     .interpret = irda_decoder_rc6_interpret,
+    .decode_repeat = NULL,
+    .encode_repeat = NULL,
+};
+
+const IrdaCommonProtocolSpec protocol_rc5 = {
+    .timings = {
+        .preamble_mark = 0,
+        .preamble_space = 0,
+        .bit1_mark = IRDA_RC5_BIT,
+        .preamble_tolerance = 0,
+        .bit_tolerance = IRDA_RC5_BIT_TOLERANCE,
+        .silence_time = IRDA_RC5_SILENCE,
+    },
+    .databit_len = 1 + 1 + 1 + 5 + 6,   // start_bit + start_bit/command_bit + toggle_bit + 5 address + 6 command
+    .manchester_start_from_space = true,
+    .decode = irda_common_decode_manchester,
+    .encode = irda_common_encode_manchester,
+    .interpret = irda_decoder_rc5_interpret,
     .decode_repeat = NULL,
     .encode_repeat = NULL,
 };

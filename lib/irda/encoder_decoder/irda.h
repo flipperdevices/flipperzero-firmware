@@ -26,6 +26,8 @@ typedef enum {
     IrdaProtocolNECext = 1,
     IrdaProtocolSamsung32 = 2,
     IrdaProtocolRC6 = 3,
+    IrdaProtocolRC5 = 4,
+    IrdaProtocolRC5X = 5,
     IrdaProtocolMAX,
 } IrdaProtocol;
 

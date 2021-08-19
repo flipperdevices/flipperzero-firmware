@@ -41,6 +41,19 @@ typedef struct {
 static const IrdaEncoderDecoder irda_encoder_decoder[] = {
     {
       .decoder = {
+          .alloc = irda_decoder_rc5_alloc,
+          .decode = irda_decoder_rc5_decode,
+          .reset = irda_decoder_rc5_reset,
+          .free = irda_decoder_rc5_free},
+      .encoder = {
+          .alloc = irda_encoder_rc5_alloc,
+          .encode = irda_encoder_rc5_encode,
+          .reset = irda_encoder_rc5_reset,
+          .free = irda_encoder_rc5_free},
+      .get_protocol_spec = irda_rc5_get_spec,
+    },
+    {
+      .decoder = {
           .alloc = irda_decoder_nec_alloc,
           .decode = irda_decoder_nec_decode,
           .reset = irda_decoder_nec_reset,
