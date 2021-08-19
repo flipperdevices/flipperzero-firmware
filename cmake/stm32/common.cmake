@@ -68,6 +68,16 @@ function(stm32_generate_binary_file TARGET)
     )
 endfunction()
 
+function(stm32_generate_srec_file TARGET)
+    add_custom_command(
+        TARGET ${TARGET}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O srec ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.srec
+        BYPRODUCTS ${TARGET}.hex
+        COMMENT "Generating srec file ${CMAKE_PROJECT_NAME}.srec"
+    )
+endfunction()
+
 function(stm32_generate_hex_file TARGET)
     add_custom_command(
         TARGET ${TARGET}
@@ -78,7 +88,7 @@ function(stm32_generate_hex_file TARGET)
     )
 endfunction()
 
-# This function takes FAMILY (e.g. L4) and DEVICE (e.g. L496VG) to output TYPE (e.g. L496xx)  
+# This function takes FAMILY (e.g. L4) and DEVICE (e.g. L496VG) to output TYPE (e.g. L496xx)
 function(stm32_get_chip_type FAMILY DEVICE TYPE)
     set(INDEX 0)
     foreach(C_TYPE ${STM32_${FAMILY}_TYPES})
@@ -99,15 +109,15 @@ function(stm32_get_chip_info CHIP)
     set(ARG_SINGLE FAMILY DEVICE TYPE)
     set(ARG_MULTIPLE "")
     cmake_parse_arguments(PARSE_ARGV 1 ARG "${ARG_OPTIONS}" "${ARG_SINGLE}" "${ARG_MULTIPLE}")
-        
+
     string(TOUPPER ${CHIP} CHIP)
-        
+
     string(REGEX MATCH "^STM32([FGHLUW][0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z]).*$" CHIP ${CHIP})
-    
+
     if((NOT CMAKE_MATCH_1) OR (NOT CMAKE_MATCH_2))
         message(FATAL_ERROR "Unknown chip ${CHIP}")
     endif()
-    
+
     set(STM32_FAMILY ${CMAKE_MATCH_1})
     set(STM32_DEVICE "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
 
@@ -117,7 +127,7 @@ function(stm32_get_chip_info CHIP)
     endif()
 
     stm32_get_chip_type(${STM32_FAMILY} ${STM32_DEVICE} STM32_TYPE)
-    
+
     if(ARG_FAMILY)
         set(${ARG_FAMILY} ${STM32_FAMILY} PARENT_SCOPE)
     endif()
@@ -134,7 +144,7 @@ function(stm32_get_cores CORES)
     set(ARG_SINGLE CHIP FAMILY DEVICE)
     set(ARG_MULTIPLE "")
     cmake_parse_arguments(PARSE_ARGV 1 ARG "${ARG_OPTIONS}" "${ARG_SINGLE}" "${ARG_MULTIPLE}")
-        
+
     if(ARG_CHIP)
         # TODO: I don't get why stm32_get_chip_info is called in stm32_get_cores
         stm32_get_chip_info(${ARG_CHIP} FAMILY ARG_FAMILY TYPE ARG_TYPE DEVICE ARG_DEVICE)
@@ -155,7 +165,7 @@ function(stm32_get_cores CORES)
     else()
         message(FATAL_ERROR "Either CHIP or FAMILY or FAMILY/DEVICE should be specified for stm32_get_cores()")
     endif()
-    
+
     # TODO following is the only part really used by FindCMSIS. Maybe a cleanup is needed
     if(${ARG_FAMILY} STREQUAL "H7")
         stm32h7_get_device_cores(${ARG_DEVICE} ${ARG_TYPE} CORE_LIST)
@@ -177,15 +187,15 @@ function(stm32_get_memory_info)
     if((NOT INFO_CHIP) AND ((NOT INFO_FAMILY) OR (NOT INFO_DEVICE)))
         message(FATAL_ERROR "Either CHIP or FAMILY/DEVICE is required for stm32_get_memory_info()")
     endif()
-        
+
     if(INFO_CHIP)
         stm32_get_chip_info(${INFO_CHIP} FAMILY INFO_FAMILY TYPE INFO_TYPE DEVICE INFO_DEVICE)
     else()
         stm32_get_chip_type(${INFO_FAMILY} ${INFO_DEVICE} INFO_TYPE)
     endif()
-    
+
     string(REGEX REPLACE "^[FGHLUW][0-9BL][0-9A-Z][0-9M].([3468BCDEFGHIYZ])$" "\\1" SIZE_CODE ${INFO_DEVICE})
-    
+
     if(SIZE_CODE STREQUAL "3")
         set(FLASH "8K")
     elseif(SIZE_CODE STREQUAL "4")
@@ -210,7 +220,7 @@ function(stm32_get_memory_info)
         set(FLASH "1536K")
     elseif(SIZE_CODE STREQUAL "I")
         set(FLASH "2048K")
-    elseif(SIZE_CODE STREQUAL "Y")    
+    elseif(SIZE_CODE STREQUAL "Y")
         set(FLASH "640K")
     elseif(SIZE_CODE STREQUAL "Z")
         set(FLASH "192K")
@@ -218,7 +228,7 @@ function(stm32_get_memory_info)
         set(FLASH "16K")
         message(WARNING "Unknow flash size for device ${DEVICE}. Set to ${FLASH}")
     endif()
-    
+
     list(FIND STM32_${INFO_FAMILY}_TYPES ${INFO_TYPE} TYPE_INDEX)
     list(GET STM32_${INFO_FAMILY}_RAM_SIZES ${TYPE_INDEX} RAM)
     list(GET STM32_${INFO_FAMILY}_CCRAM_SIZES ${TYPE_INDEX} CCRAM)
@@ -248,9 +258,9 @@ function(stm32_get_memory_info)
     if(TWO_FLASH_BANKS)
         string(REGEX MATCH "([0-9]+)K" FLASH_KB ${FLASH})
         math(EXPR FLASH_KB "${CMAKE_MATCH_1} / 2")
-        set(FLASH "${FLASH_KB}K")   
+        set(FLASH "${FLASH_KB}K")
     endif()
-    
+
     if(INFO_FLASH)
         set(SIZE ${FLASH})
         set(ORIGIN ${FLASH_ORIGIN})
@@ -278,7 +288,7 @@ function(stm32_get_memory_info)
         endif()
         set(ORIGIN ${RAM_ORIGIN}) #TODO: Real heap pointer?
     endif()
-    
+
     if(INFO_SIZE)
         set(${INFO_SIZE} ${SIZE} PARENT_SCOPE)
     endif()
@@ -298,7 +308,7 @@ function(stm32_add_linker_script TARGET VISIBILITY SCRIPT)
 
     get_target_property(LINK_DEPENDS ${TARGET} ${INTERFACE_PREFIX}LINK_DEPENDS)
     if(LINK_DEPENDS)
-        list(APPEND LINK_DEPENDS "${SCRIPT}")        
+        list(APPEND LINK_DEPENDS "${SCRIPT}")
     else()
         set(LINK_DEPENDS "${SCRIPT}")
     endif()
