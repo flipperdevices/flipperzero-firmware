@@ -131,6 +131,10 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
 }
 
 static void archive_file_append(ArchiveApp* archive, const char* path, string_t string) {
+    furi_assert(archive);
+    furi_assert(path);
+    furi_assert(string);
+
     File* file = storage_file_alloc(archive->api);
     bool result = storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND);
 
@@ -145,16 +149,19 @@ static void archive_file_append(ArchiveApp* archive, const char* path, string_t 
     }
 
     result = storage_file_close(file);
-    if(result) {
-        FURI_LOG_I("Archive", "close");
-    } else {
-        FURI_LOG_E("Archive", "close, error");
+
+    if(!result) {
+        FURI_LOG_E("Archive", "File close, error");
     }
 
     storage_file_free(file);
 }
 
 static void archive_view_add_item(ArchiveApp* archive, FileInfo* file_info, const char* name) {
+    furi_assert(archive);
+    furi_assert(file_info);
+    furi_assert(name);
+
     ArchiveFile_t item;
 
     if(filter_by_extension(archive, file_info, name)) {
@@ -182,6 +189,7 @@ static bool archive_favorites_action(
     FileInfo file_info;
     string_t path;
     string_init(path);
+
     if(action != FavoritesRead) {
         furi_assert(file_t);
         string_printf(
