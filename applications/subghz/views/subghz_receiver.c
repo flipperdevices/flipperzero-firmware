@@ -123,7 +123,6 @@ static void subghz_receiver_draw_frame(Canvas* canvas, uint16_t idx, bool scroll
 void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
     size_t history_item = model->history_item;
     bool scrollbar = history_item > 4;
-    if(history_item) model->scene = ReceiverSceneMain;
     string_t str_buff;
     //char cstr_buff[22]; //todo проверитьм аксимальную длинну
     string_init(str_buff);
@@ -155,7 +154,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         }
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 60, 61, "433.92 OOK");
+        canvas_draw_str(canvas, 60, 61, "433.92   OOK");
         elements_button_left(canvas, "Config");
         break;
 
@@ -169,7 +168,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_draw_str(canvas, 63, 40, "Scanning...");
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 60, 61, "433.92 OOK");
+        canvas_draw_str(canvas, 60, 61, "433.92   OOK");
         elements_button_left(canvas, "Config");
         break;
 
@@ -179,7 +178,8 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
 
     case ReceiverSceneInfo:
         canvas_set_font(canvas, FontSecondary);
-        elements_multiline_text(canvas, 0, 10, string_get_cstr(model->text));
+        elements_multiline_text(canvas, 0, 8, string_get_cstr(model->text));
+        //elements_button_left(canvas, "Back");
         if(model->protocol_result && model->protocol_result->to_save_string &&
            strcmp(model->protocol_result->name, "KeeLoq")) {
             elements_button_right(canvas, "Save");
@@ -231,12 +231,39 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                     model->scene = ReceiverSceneConfig;
                     return true;
                 });
+        } else if(event->key == InputKeyOk) {
+            with_view_model(
+                subghz_receiver->view, (SubghzReceiverModel * model) {
+                    string_clean(model->text);
+                    model->scene = ReceiverSceneInfo;
+                    model->protocol_result = subghz_protocol_get_by_name(
+                        subghz_receiver->protocol,
+                        subghz_history_get_name(model->history, model->idx));
+                    model->protocol_result->to_string(model->protocol_result, model->text);
+                    return true;
+                });
         }
 
         break;
 
     case ReceiverSceneInfo:
-
+        with_view_model(
+            subghz_receiver->view, (SubghzReceiverModel * model) {
+                can_be_saved =
+                    (model->protocol_result && model->protocol_result->to_save_string &&
+                     strcmp(model->protocol_result->name, "KeeLoq"));
+                return false;
+            });
+        if(event->key == InputKeyBack) {
+            with_view_model(
+                subghz_receiver->view, (SubghzReceiverModel * model) {
+                    model->scene = ReceiverSceneMain;
+                    return true;
+                });
+        } else if(can_be_saved && event->key == InputKeyRight) {
+            subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
+            return false;
+        }
         break;
 
     case ReceiverSceneConfig:
