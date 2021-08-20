@@ -130,29 +130,16 @@ static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
     }
 }
 
-bool archive_file_seek(File* file, uint64_t position, bool from_start) {
-    storage_file_seek(file, position, from_start);
-    if(storage_file_get_error(file) != FSE_OK) {
-        FURI_LOG_E("Archive", "Cannot seek\nfile");
-        return false;
-    }
-
-    return true;
-}
-
-static void
-    archive_file_append(ArchiveApp* archive, const char* path, const char* string, size_t size) {
-    // Store
+static void archive_file_append(ArchiveApp* archive, const char* path, string_t string) {
     File* file = storage_file_alloc(archive->api);
     bool result = storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND);
 
     if(result) {
-        uint16_t bytes_count = storage_file_write(file, string, size);
-        if(bytes_count != size) {
+        uint16_t bytes_count =
+            storage_file_write(file, string_get_cstr(string), string_size(string));
+        if(bytes_count != string_size(string)) {
             result = false;
         }
-        FURI_LOG_E("Archive", "Save: bytes written: %d string size: %d", bytes_count, size);
-
     } else {
         FURI_LOG_E("Archive", "Cant open file");
     }
@@ -167,14 +154,41 @@ static void
     storage_file_free(file);
 }
 
-static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavActionsEnum action) {
-    FileInfo file_info;
+static void archive_view_add_item(ArchiveApp* archive, FileInfo* file_info, const char* name) {
     ArchiveFile_t item;
+
+    if(filter_by_extension(archive, file_info, name)) {
+        ArchiveFile_t_init(&item);
+        string_init_set_str(item.name, name);
+        set_file_type(&item, file_info);
+
+        with_view_model(
+            archive->view_archive_main, (ArchiveViewModel * model) {
+                files_array_push_back(model->files, item);
+                return true;
+            });
+
+        ArchiveFile_t_clear(&item);
+    }
+}
+
+static bool archive_favorites_action(
+    ArchiveApp* archive,
+    FavActionsEnum action,
+    ArchiveFile_t* file_t,
+    const char* s_buff) {
+    furi_assert(archive);
+
+    FileInfo file_info;
     string_t path;
     string_init(path);
     if(action != FavoritesRead) {
+        furi_assert(file_t);
         string_printf(
             path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file_t->name));
+    }
+    if(action == FavoritesRename) {
+        furi_assert(s_buff);
     }
 
     const size_t buffer_size = 255;
@@ -193,11 +207,12 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
         size_t read_count = 0;
         size_t end_index = 0;
         size_t line_num = 0;
-        size_t line_to_delete = 0;
 
         while(1) {
             size_t newline_index = 0;
             char* endline_ptr;
+            char* str_ptr;
+
             if(read_count > 0) {
                 end_index = 0;
                 endline_ptr = (char*)memchr(buffer, '\n', read_count);
@@ -208,50 +223,40 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
 
                 } else if(newline_index < read_count) {
                     end_index = newline_index + 1;
-                    endline_ptr = (char*)memchr(buffer, '\n', read_count);
                     *endline_ptr = '\0';
                     ++line_num;
 
                     if(action == FavoritesCheck) {
-                        char* str_ptr = strstr(buffer, string_get_cstr(path));
+                        str_ptr = strstr(buffer, string_get_cstr(path));
 
-                        if(str_ptr != NULL) {
-                            FURI_LOG_E("Archive", "Search in favorites, res: %ld", str_ptr);
+                        if(str_ptr) {
                             found = true;
                             break;
                         }
                     } else if(action == FavoritesRead) {
-                        if(filter_by_extension(archive, &file_info, buffer)) {
-                            ArchiveFile_t_init(&item);
-                            string_init_set_str(item.name, buffer);
-                            set_file_type(&item, &file_info);
+                        archive_view_add_item(archive, &file_info, buffer);
 
-                            with_view_model(
-                                archive->view_archive_main, (ArchiveViewModel * model) {
-                                    files_array_push_back(model->files, item);
-                                    return true;
-                                });
-
-                            ArchiveFile_t_clear(&item);
-                        }
                     } else if(action == FavoritesDelete) {
-                        char* str_ptr = strstr(buffer, string_get_cstr(path));
+                        str_ptr = strstr(buffer, string_get_cstr(path));
 
-                        FURI_LOG_E("Archive", "Current string: %s", buffer);
-
-                        if(str_ptr != NULL) {
-                            line_to_delete = line_num;
-                            FURI_LOG_E("Archive", "Line to delete: %ld", line_to_delete);
-                        } else {
+                        if(!str_ptr) {
                             string_t temp;
-                            FURI_LOG_E("Archive", "Writing: %s", buffer);
                             string_init_printf(temp, "%s\r\n", buffer);
 
-                            archive_file_append(
-                                archive,
-                                ARCHIVE_FAV_TEMP_PATH,
-                                string_get_cstr(temp),
-                                string_size(temp));
+                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+                            string_clear(temp);
+                        }
+                    } else if(action == FavoritesRename) {
+                        str_ptr = strstr(buffer, string_get_cstr(path));
+                        string_t temp;
+
+                        if(str_ptr) {
+                            string_init_printf(temp, "%s\r\n", s_buff);
+                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+                            string_clear(temp);
+                        } else {
+                            string_init_printf(temp, "%s\r\n", buffer);
+                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
                             string_clear(temp);
                         }
                     }
@@ -279,7 +284,8 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
     if(!load_result) {
         FURI_LOG_E(
             "Archive",
-            "Searching favorites.txt failure. Error: %s",
+            "Favorites handler failure. Action: %d Error: %s",
+            action,
             storage_file_get_error_desc(file));
     }
 
@@ -287,10 +293,7 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
     storage_file_close(file);
     storage_file_free(file);
 
-    FURI_LOG_I("Archive", "Searching favorites.txt finished, res: %d", found);
-
-    if(action == FavoritesDelete) {
-        FURI_LOG_I("Archive", "Removing original");
+    if(action == FavoritesDelete || action == FavoritesRename) {
         storage_common_remove(archive->api, ARCHIVE_FAV_PATH);
         storage_common_copy(archive->api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
         storage_common_remove(archive->api, ARCHIVE_FAV_TEMP_PATH);
@@ -302,15 +305,47 @@ static bool favorites_handler(ArchiveApp* archive, ArchiveFile_t* file_t, FavAct
         return load_result;
     }
 }
-
-static bool archive_get_filenames(ArchiveApp* archive) {
-    furi_assert(archive);
-
-    ArchiveFile_t item;
+static bool archive_read_dir(ArchiveApp* archive) {
     FileInfo file_info;
     File* directory = storage_file_alloc(archive->api);
     char name[MAX_NAME_LEN];
 
+    if(!storage_dir_open(directory, string_get_cstr(archive->browser.path))) {
+        storage_dir_close(directory);
+        storage_file_free(directory);
+        return false;
+    }
+    while(1) {
+        if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
+            break;
+        }
+
+        uint16_t files_cnt;
+        with_view_model(
+            archive->view_archive_main, (ArchiveViewModel * model) {
+                files_cnt = files_array_size(model->files);
+
+                return true;
+            });
+
+        if(files_cnt > MAX_FILES) {
+            break;
+        } else if(storage_file_get_error(directory) == FSE_OK) {
+            archive_view_add_item(archive, &file_info, name);
+        } else {
+            storage_dir_close(directory);
+            storage_file_free(directory);
+            return false;
+        }
+    }
+    storage_dir_close(directory);
+    storage_file_free(directory);
+
+    return true;
+}
+
+static bool archive_get_filenames(ArchiveApp* archive) {
+    furi_assert(archive);
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
             files_array_clean(model->files);
@@ -318,56 +353,10 @@ static bool archive_get_filenames(ArchiveApp* archive) {
         });
 
     if(archive->browser.tab_id != ArchiveTabFavorites) {
-        FURI_LOG_E("Archive", "Reading dir");
-        if(!storage_dir_open(directory, string_get_cstr(archive->browser.path))) {
-            storage_dir_close(directory);
-            storage_file_free(directory);
-            return false;
-        }
-        while(1) {
-            if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
-                break;
-            }
-
-            uint16_t files_cnt;
-            with_view_model(
-                archive->view_archive_main, (ArchiveViewModel * model) {
-                    files_cnt = files_array_size(model->files);
-
-                    return true;
-                });
-
-            if(files_cnt > MAX_FILES) {
-                break;
-            } else if(storage_file_get_error(directory) == FSE_OK) {
-                if(filter_by_extension(archive, &file_info, name)) {
-                    ArchiveFile_t_init(&item);
-                    string_init_set(item.name, name);
-                    set_file_type(&item, &file_info);
-
-                    with_view_model(
-                        archive->view_archive_main, (ArchiveViewModel * model) {
-                            files_array_push_back(model->files, item);
-                            return true;
-                        });
-
-                    ArchiveFile_t_clear(&item);
-                }
-            } else {
-                storage_dir_close(directory);
-                storage_file_free(directory);
-                return false;
-            }
-        }
-        storage_dir_close(directory);
-        storage_file_free(directory);
-
+        archive_read_dir(archive);
     } else {
-        FURI_LOG_E("Archive", "Reading favorites");
-
-        favorites_handler(archive, &item, FavoritesRead);
+        archive_favorites_action(archive, FavoritesRead, NULL, NULL);
     }
-
     return true;
 }
 static void archive_exit_callback(ArchiveApp* archive) {
@@ -393,11 +382,7 @@ static void archive_add_to_favorites(ArchiveApp* archive) {
         string_get_cstr(archive->browser.path),
         string_get_cstr(archive->browser.name));
 
-    FURI_LOG_E("Archive", "Adding key to fav: %s", string_get_cstr(buffer_src));
-
-    // Store
-    archive_file_append(
-        archive, ARCHIVE_FAV_PATH, string_get_cstr(buffer_src), string_size(buffer_src));
+    archive_file_append(archive, ARCHIVE_FAV_PATH, buffer_src);
 
     string_clear(buffer_src);
 }
@@ -429,11 +414,17 @@ static void archive_text_input_callback(void* context) {
         archive->view_archive_main, (ArchiveViewModel * model) {
             file = files_array_get(
                 model->files, CLAMP(model->idx, files_array_size(model->files) - 1, 0));
+            file->fav = archive_favorites_action(archive, FavoritesCheck, file, NULL);
+
             return true;
         });
 
     string_cat(buffer_dst, known_ext[file->type]);
     storage_common_rename(archive->api, string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
+
+    if(file->fav) {
+        archive_favorites_action(archive, FavoritesRename, file, string_get_cstr(buffer_dst));
+    }
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewMain);
 
@@ -477,7 +468,7 @@ static void archive_show_file_menu(ArchiveApp* archive) {
             model->menu = true;
             model->menu_idx = 0;
             selected->fav = is_known_app(selected->type) ?
-                                favorites_handler(archive, selected, FavoritesCheck) :
+                                archive_favorites_action(archive, FavoritesCheck, selected, NULL) :
                                 false;
 
             return true;
@@ -516,8 +507,7 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
     storage_common_remove(archive->api, string_get_cstr(path));
 
     if(fav) { // remove from favorites
-        string_printf(path, "%s/%s", get_favorites_path(), string_get_cstr(file->name));
-        favorites_handler(archive, file, FavoritesDelete);
+        archive_favorites_action(archive, FavoritesDelete, file, NULL);
     }
 
     string_clear(path);
@@ -545,9 +535,8 @@ static void
     } else {
         string_init_set(full_path, selected->name);
     }
-    FURI_LOG_E("archive", "%s", string_get_cstr(full_path));
-    archive_open_app(archive, flipper_app_name[selected->type], string_get_cstr(full_path));
 
+    archive_open_app(archive, flipper_app_name[selected->type], string_get_cstr(full_path));
     string_clear(full_path);
 }
 
@@ -572,13 +561,12 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 1:
         if(is_known_app(selected->type)) {
-            if(!favorites_handler(archive, selected, FavoritesCheck)) {
+            if(!archive_favorites_action(archive, FavoritesCheck, selected, NULL)) {
                 string_set(archive->browser.name, selected->name);
                 archive_add_to_favorites(archive);
             } else {
                 // delete from favorites
-                favorites_handler(archive, selected, FavoritesDelete);
-                // archive_delete_file(archive, selected, true, false);
+                archive_favorites_action(archive, FavoritesDelete, selected, NULL);
             }
             archive_close_file_menu(archive);
         }
@@ -591,13 +579,8 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 3:
         // confirmation?
-        if(favorites_handler(archive, selected, FavoritesCheck)) {
-            //delete both fav & original
-            archive_delete_file(archive, selected, true);
-        } else {
-            archive_delete_file(archive, selected, false);
-        }
-
+        archive_delete_file(
+            archive, selected, archive_favorites_action(archive, FavoritesCheck, selected, NULL));
         archive_close_file_menu(archive);
 
         break;

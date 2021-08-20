@@ -107,6 +107,7 @@ typedef enum {
     FavoritesCheck,
     FavoritesRead,
     FavoritesDelete,
+    FavoritesRename,
 } FavActionsEnum;
 
 typedef struct {
