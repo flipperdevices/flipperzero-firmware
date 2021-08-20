@@ -16,6 +16,9 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     nfc_device_set_name(&nfc->dev, "");
 
     // Setup Custom Widget view
+    // Add frame
+    widget_add_frame_element(nfc->widget, 0, 0, 128, 64, 6);
+    // Add buttons
     widget_add_button_element(
         nfc->widget,
         GuiButtonTypeLeft,
@@ -28,8 +31,10 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         "Save",
         nfc_scene_read_emv_data_success_widget_callback,
         nfc);
+    // Add card name
     widget_add_string_element(
         nfc->widget, 64, 3, AlignCenter, AlignTop, FontSecondary, nfc->dev.dev_data.emv_data.name);
+    // Add cad number
     char pan_str[32];
     snprintf(
         pan_str,
@@ -44,7 +49,6 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         emv_data->number[6],
         emv_data->number[7]);
     widget_add_string_element(nfc->widget, 64, 13, AlignCenter, AlignTop, FontSecondary, pan_str);
-
     // Parse country code
     string_t country_name;
     string_init(country_name);
@@ -57,7 +61,6 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         string_clear(disp_country);
     }
     string_clear(country_name);
-
     // Parse currency code
     string_t currency_name;
     string_init(currency_name);
@@ -76,10 +79,11 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         string_clear(disp_currency);
     }
     string_clear(currency_name);
-
+    // Add ATQA
     char atqa_str[16];
     snprintf(atqa_str, sizeof(atqa_str), "ATQA: %02X%02X", nfc_data->atqa[0], nfc_data->atqa[1]);
     widget_add_string_element(nfc->widget, 121, 32, AlignRight, AlignTop, FontSecondary, atqa_str);
+    // Add UID
     char uid_str[32];
     snprintf(
         uid_str,
@@ -90,9 +94,11 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         nfc_data->uid[2],
         nfc_data->uid[3]);
     widget_add_string_element(nfc->widget, 7, 42, AlignLeft, AlignTop, FontSecondary, uid_str);
+    // Add SAK
     char sak_str[16];
     snprintf(sak_str, sizeof(sak_str), "SAK: %02X", nfc_data->sak);
     widget_add_string_element(nfc->widget, 121, 42, AlignRight, AlignTop, FontSecondary, sak_str);
+    // Add expiration date
     if(emv_data->exp_mon) {
         char exp_str[16];
         snprintf(

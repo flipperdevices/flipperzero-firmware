@@ -43,10 +43,14 @@ void bank_card_set_number(BankCard* bank_card, uint8_t* number) {
     for(uint8_t i = 0; i < 8; i += 2) {
         string_cat_printf(num_str, "%02X%02X ", number[i], number[i + 1]);
     }
+    // Add number
     widget_add_string_element(
         bank_card->widget, 64, 32, AlignCenter, AlignTop, FontSecondary, string_get_cstr(num_str));
-    widget_add_icon_element(bank_card->widget, 8, 15, &I_Detailed_chip_17x13);
     string_clear(num_str);
+    // Add icon
+    widget_add_icon_element(bank_card->widget, 8, 15, &I_Detailed_chip_17x13);
+    // Add frame
+    widget_add_frame_element(bank_card->widget, 0, 0, 128, 64, 6);
 }
 
 void bank_card_set_back_callback(BankCard* bank_card, ButtonCallback callback, void* context) {
