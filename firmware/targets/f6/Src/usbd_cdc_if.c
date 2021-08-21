@@ -242,9 +242,12 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
   if (*Len) {
-    _furi_hal_vcp_rx_callback((char*)Buf, *Len);
+      // send data, USBD_CDC_ReceivePacket will be called after receipt of data
+      _furi_hal_vcp_rx_callback((char*)Buf, *Len);
+  } else {
+      USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   }
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  
   return (USBD_OK);
   /* USER CODE END 6 */
 }

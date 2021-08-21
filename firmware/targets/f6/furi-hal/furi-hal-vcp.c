@@ -9,7 +9,8 @@ typedef struct {
     StreamBufferHandle_t rx_stream;
     osSemaphoreId_t tx_semaphore;
     volatile bool alive;
-    volatile bool underrun;
+    volatile uint32_t data_size_in_stream;
+    volatile bool waiting_for_data;
 } FuriHalVcp;
 
 static FuriHalVcp* furi_hal_vcp = NULL;
@@ -28,7 +29,8 @@ void furi_hal_vcp_init() {
     furi_hal_vcp->rx_stream = xStreamBufferCreate(FURI_HAL_VCP_RX_BUFFER_SIZE, 1);
     furi_hal_vcp->tx_semaphore = osSemaphoreNew(1, 1, NULL);
     furi_hal_vcp->alive = false;
-    furi_hal_vcp->underrun = false;
+    furi_hal_vcp->data_size_in_stream = 0;
+    furi_hal_vcp->waiting_for_data = false;
     FURI_LOG_I("FuriHalVcp", "Init OK");
 }
 
@@ -64,8 +66,12 @@ void _furi_hal_vcp_control_line(uint8_t state) {
 void _furi_hal_vcp_rx_callback(const uint8_t* buffer, size_t size) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     size_t ret = xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, buffer, size, &xHigherPriorityTaskWoken);
-    if (ret != size) {
-        furi_hal_vcp->underrun = true;
+
+    furi_hal_vcp->data_size_in_stream += ret;
+    furi_hal_vcp->waiting_for_data = true;
+
+    if(ret != size) {
+        furi_check(false);
     }
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -74,9 +80,21 @@ void _furi_hal_vcp_tx_complete(size_t size) {
     osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
 }
 
+extern USBD_HandleTypeDef hUsbDeviceFS;
 size_t furi_hal_vcp_rx(uint8_t* buffer, size_t size) {
     furi_assert(furi_hal_vcp);
-    return xStreamBufferReceive(furi_hal_vcp->rx_stream, buffer, size, portMAX_DELAY);
+
+    size_t received = xStreamBufferReceive(furi_hal_vcp->rx_stream, buffer, size, portMAX_DELAY);
+
+    furi_hal_vcp->data_size_in_stream -= received;
+    if(furi_hal_vcp->data_size_in_stream == 0 && furi_hal_vcp->waiting_for_data) {
+        furi_hal_vcp->waiting_for_data = false;
+
+        // data accepted, start waiting for next packet
+        USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+    }
+
+    return received;
 }
 
 size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeout) {
