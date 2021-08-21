@@ -53,3 +53,4 @@ void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool leve
  * @param output   - output string
  */
 void subghz_protocol_star_line_to_str(SubGhzProtocolStarLine* instance, string_t output);
+void subghz_decoder_star_line_to_load_protocol(SubGhzProtocolStarLine* instance, void* context);

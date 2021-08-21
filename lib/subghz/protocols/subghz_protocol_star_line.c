@@ -27,6 +27,8 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
     instance->common.te_delta = 120;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_star_line_to_str;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_star_line_to_load_protocol;
 
     return instance;
 }
@@ -291,4 +293,15 @@ void subghz_protocol_star_line_to_str(SubGhzProtocolStarLine* instance, string_t
         instance->manufacture_name,
         instance->common.serial
     );
+}
+
+void subghz_decoder_star_line_to_load_protocol(
+    SubGhzProtocolStarLine* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    subghz_protocol_star_line_check_remote_controller(instance);
 }

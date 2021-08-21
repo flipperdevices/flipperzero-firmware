@@ -23,6 +23,8 @@ SubGhzProtocolNiceFlorS* subghz_protocol_nice_flor_s_alloc() {
     instance->common.te_delta = 300;
     instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_nice_flor_s_to_str;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_nice_flor_s_to_load_protocol;
 
     return instance;
 }
@@ -236,4 +238,15 @@ void subghz_protocol_nice_flor_s_to_str(SubGhzProtocolNiceFlorS* instance, strin
         instance->common.cnt,
         instance->common.btn
     );
+}
+
+void subghz_decoder_nice_flor_s_to_load_protocol(
+    SubGhzProtocolNiceFlorS* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    subghz_nice_flor_s_decoder_decrypt(instance);
 }

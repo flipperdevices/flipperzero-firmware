@@ -27,10 +27,12 @@ SubGhzProtocolKeeloq* subghz_protocol_keeloq_alloc(SubGhzKeystore* keystore) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_keeloq_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_keeloq_to_save_str;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_keeloq_to_load_protocol_from_file;
     instance->common.to_load_protocol =
-        (SubGhzProtocolCommonLoad)subghz_protocol_keeloq_to_load_protocol;
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_keeloq_to_load_protocol;
     instance->common.get_upload_protocol =
-        (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_keeloq_send_key;
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_keeloq_send_key;
 
     return instance;
 }
@@ -214,7 +216,7 @@ uint64_t subghz_protocol_keeloq_gen_key(void* context) {
 
 bool subghz_protocol_keeloq_send_key(
     SubGhzProtocolKeeloq* instance,
-    SubGhzProtocolEncoderCommon* encoder) {
+    SubGhzProtocolCommonEncoder* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
 
@@ -400,7 +402,7 @@ void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t
         (uint32_t)(instance->common.code_last_found & 0xFFFFFFFF));
 }
 
-bool subghz_protocol_keeloq_to_load_protocol(
+bool subghz_protocol_keeloq_to_load_protocol_from_file(
     FileWorker* file_worker,
     SubGhzProtocolKeeloq* instance) {
     bool loaded = false;
@@ -440,4 +442,15 @@ bool subghz_protocol_keeloq_to_load_protocol(
     string_clear(temp_str);
 
     return loaded;
+}
+
+void subghz_decoder_keeloq_to_load_protocol(
+    SubGhzProtocolKeeloq* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    subghz_protocol_keeloq_check_remote_controller(instance);
 }

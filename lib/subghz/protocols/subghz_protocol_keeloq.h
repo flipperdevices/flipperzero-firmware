@@ -37,10 +37,10 @@ uint64_t subghz_protocol_keeloq_gen_key(void* context);
 /** Get upload protocol
  * 
  * @param instance - SubGhzProtocolCame instance
- * @param encoder - SubGhzProtocolEncoderCommon encoder
+ * @param encoder - SubGhzProtocolCommonEncoder encoder
  * @return bool
  */
-bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolEncoderCommon* encoder);
+bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolKeeloq instance
@@ -62,4 +62,5 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
 void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t output);
 
 void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output);
-bool subghz_protocol_keeloq_to_load_protocol(FileWorker* file_worker, SubGhzProtocolKeeloq* instance);
+bool subghz_protocol_keeloq_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolKeeloq* instance);
+void subghz_decoder_keeloq_to_load_protocol(SubGhzProtocolKeeloq* instance, void* context);

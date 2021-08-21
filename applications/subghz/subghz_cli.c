@@ -134,7 +134,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     protocol->common.code_last_found = key;
     protocol->common.code_last_count_bit = 24;
 
-    SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
+    SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
     encoder->repeat = repeat;
 
     subghz_protocol_princeton_send_key(protocol, encoder);

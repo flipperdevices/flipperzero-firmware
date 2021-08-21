@@ -30,6 +30,7 @@ struct SubGhzHistory {
     uint16_t last_index_write;
     uint64_t code_last_found;
     SubGhzHistoryStruct history[SUBGHZ_HISTORY_MAX];
+    SubGhzProtocolCommonLoad data;
 };
 
 SubGhzHistory* subghz_history_alloc(void) {
@@ -60,6 +61,14 @@ uint8_t subghz_history_get_type_protocol(SubGhzHistory* instance, uint16_t idx) 
 const char* subghz_history_get_name(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     return instance->history[idx].name;
+}
+
+SubGhzProtocolCommonLoad* subghz_history_get_raw_data (SubGhzHistory* instance, uint16_t idx){
+    furi_assert(instance);
+    instance->data.code_found = instance->history[idx].code_found;
+    instance->data.code_count_bit = instance->history[idx].code_count_bit;
+    instance->data.param1 = instance->history[idx].te;
+    return &instance->data;
 }
 
 void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output, uint16_t idx) {

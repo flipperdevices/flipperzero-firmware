@@ -6,6 +6,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
+#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #include <assets_icons.h>
 
@@ -21,9 +22,9 @@ enum {
 };
 
 static const Icon* ReceiverItemIcons[] = {
-    [TYPE_PROTOCOL_UNKNOWN] = &I_unknown_10px,
-    [TYPE_PROTOCOL_STATIC] = &I_Nfc_10px,
-    [TYPE_PROTOCOL_DYNAMIC] = &I_sub1_10px,
+    [TYPE_PROTOCOL_UNKNOWN] = &I_quest_7x8,
+    [TYPE_PROTOCOL_STATIC] = &I_unlock_7x8,
+    [TYPE_PROTOCOL_DYNAMIC] = &I_lock_7x8,
 };
 
 struct SubghzReceiver {
@@ -144,9 +145,9 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
             canvas_draw_icon(
                 canvas,
                 1,
-                1 + i * FRAME_HEIGHT,
+                2 + i * FRAME_HEIGHT,
                 ReceiverItemIcons[subghz_history_get_type_protocol(model->history, idx)]);
-            canvas_draw_str(canvas, 15, 10 + i * FRAME_HEIGHT, string_get_cstr(str_buff));
+            canvas_draw_str(canvas, 15, 9 + i * FRAME_HEIGHT, string_get_cstr(str_buff));
             string_clean(str_buff);
         }
         if(scrollbar) {
@@ -235,11 +236,16 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     string_clean(model->text);
-                    model->scene = ReceiverSceneInfo;
                     model->protocol_result = subghz_protocol_get_by_name(
                         subghz_receiver->protocol,
                         subghz_history_get_name(model->history, model->idx));
-                    model->protocol_result->to_string(model->protocol_result, model->text);
+                    if(model->protocol_result->to_load_protocol != NULL) {
+                        model->protocol_result->to_load_protocol(
+                            model->protocol_result,
+                            subghz_history_get_raw_data(model->history, model->idx));
+                        model->protocol_result->to_string(model->protocol_result, model->text);
+                        model->scene = ReceiverSceneInfo;
+                    }
                     return true;
                 });
         }
@@ -274,7 +280,6 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                     return true;
                 });
         }
-
         break;
 
     case ReceiverSceneStart:

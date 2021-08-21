@@ -91,10 +91,12 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_decoder_princeton_to_load_protocol_from_file;
     instance->common.to_load_protocol =
-        (SubGhzProtocolCommonLoad)subghz_decoder_princeton_to_load_protocol;
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_princeton_to_load_protocol;
     instance->common.get_upload_protocol =
-        (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_princeton_send_key;
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_princeton_send_key;
 
     return instance;
 }
@@ -111,7 +113,7 @@ uint16_t subghz_protocol_princeton_get_te(void* context) {
 
 bool subghz_protocol_princeton_send_key(
     SubGhzDecoderPrinceton* instance,
-    SubGhzProtocolEncoderCommon* encoder) {
+    SubGhzProtocolCommonEncoder* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
     size_t index = 0;
@@ -253,7 +255,7 @@ void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, stri
         (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
 }
 
-bool subghz_decoder_princeton_to_load_protocol(
+bool subghz_decoder_princeton_to_load_protocol_from_file(
     FileWorker* file_worker,
     SubGhzDecoderPrinceton* instance) {
     bool loaded = false;
@@ -302,4 +304,17 @@ bool subghz_decoder_princeton_to_load_protocol(
     string_clear(temp_str);
 
     return loaded;
+}
+
+void subghz_decoder_princeton_to_load_protocol(
+    SubGhzDecoderPrinceton* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    instance->te = data->param1;
+    instance->common.serial = instance->common.code_last_found >> 4;
+    instance->common.btn = (uint8_t)instance->common.code_last_found & 0x00000F;
 }

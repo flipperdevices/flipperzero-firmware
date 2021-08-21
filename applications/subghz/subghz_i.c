@@ -96,7 +96,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-        if(!subghz->protocol_result->to_load_protocol(file_worker, subghz->protocol_result)) {
+        if(!subghz->protocol_result->to_load_protocol_from_file(file_worker, subghz->protocol_result)) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
@@ -210,7 +210,7 @@ bool subghz_protocol_load(SubGhz* subghz) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-        if(!subghz->protocol_result->to_load_protocol(file_worker, subghz->protocol_result)) {
+        if(!subghz->protocol_result->to_load_protocol_from_file(file_worker, subghz->protocol_result)) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }

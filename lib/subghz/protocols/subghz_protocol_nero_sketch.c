@@ -17,10 +17,12 @@ SubGhzProtocolNeroSketch* subghz_protocol_nero_sketch_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_nero_sketch_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_protocol_nero_sketch_to_save_str;
-    instance->common.to_load_protocol=
-        (SubGhzProtocolCommonLoad)subghz_protocol_nero_sketch_to_load_protocol;
+    instance->common.to_load_protocol_from_file=
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_nero_sketch_to_load_protocol_from_file;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_nero_sketch_to_load_protocol;
     instance->common.get_upload_protocol =
-        (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_nero_sketch_send_key;
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_nero_sketch_send_key;
 
     return instance;
 }
@@ -30,7 +32,7 @@ void subghz_protocol_nero_sketch_free(SubGhzProtocolNeroSketch* instance) {
     free(instance);
 }
 
-bool subghz_protocol_nero_sketch_send_key(SubGhzProtocolNeroSketch* instance, SubGhzProtocolEncoderCommon* encoder){
+bool subghz_protocol_nero_sketch_send_key(SubGhzProtocolNeroSketch* instance, SubGhzProtocolCommonEncoder* encoder){
     furi_assert(instance);
     furi_assert(encoder);
     size_t index = 0;
@@ -212,7 +214,7 @@ void subghz_protocol_nero_sketch_to_save_str(SubGhzProtocolNeroSketch* instance,
         );
 }
 
-bool subghz_protocol_nero_sketch_to_load_protocol(FileWorker* file_worker, SubGhzProtocolNeroSketch* instance){
+bool subghz_protocol_nero_sketch_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolNeroSketch* instance){
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
@@ -248,4 +250,14 @@ bool subghz_protocol_nero_sketch_to_load_protocol(FileWorker* file_worker, SubGh
     string_clear(temp_str);
 
     return loaded;
+}
+
+void subghz_decoder_nero_sketch_to_load_protocol(
+    SubGhzProtocolNeroSketch* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
 }
