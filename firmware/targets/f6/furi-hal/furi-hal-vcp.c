@@ -3,14 +3,17 @@
 #include <furi.h>
 #include <stream_buffer.h>
 
-#define FURI_HAL_VCP_RX_BUFFER_SIZE 600
+#define FURI_HAL_VCP_RX_BUFFER_SIZE (APP_RX_DATA_SIZE * 5)
+
+extern USBD_HandleTypeDef hUsbDeviceFS;
 
 typedef struct {
-    StreamBufferHandle_t rx_stream;
-    osSemaphoreId_t tx_semaphore;
     volatile bool alive;
-    volatile uint32_t data_size_in_stream;
-    volatile bool waiting_for_data;
+
+    StreamBufferHandle_t rx_stream;
+    volatile bool rx_stream_full;
+
+    osSemaphoreId_t tx_semaphore;
 } FuriHalVcp;
 
 static FuriHalVcp* furi_hal_vcp = NULL;
@@ -26,11 +29,13 @@ void _furi_hal_vcp_tx_complete(size_t size);
 
 void furi_hal_vcp_init() {
     furi_hal_vcp = furi_alloc(sizeof(FuriHalVcp));
-    furi_hal_vcp->rx_stream = xStreamBufferCreate(FURI_HAL_VCP_RX_BUFFER_SIZE, 1);
-    furi_hal_vcp->tx_semaphore = osSemaphoreNew(1, 1, NULL);
     furi_hal_vcp->alive = false;
-    furi_hal_vcp->data_size_in_stream = 0;
-    furi_hal_vcp->waiting_for_data = false;
+    
+    furi_hal_vcp->rx_stream = xStreamBufferCreate(FURI_HAL_VCP_RX_BUFFER_SIZE, 1);
+    furi_hal_vcp->rx_stream_full = false;
+
+    furi_hal_vcp->tx_semaphore = osSemaphoreNew(1, 1, NULL);
+
     FURI_LOG_I("FuriHalVcp", "Init OK");
 }
 
@@ -66,13 +71,14 @@ void _furi_hal_vcp_control_line(uint8_t state) {
 void _furi_hal_vcp_rx_callback(const uint8_t* buffer, size_t size) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     size_t ret = xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, buffer, size, &xHigherPriorityTaskWoken);
-
-    furi_hal_vcp->data_size_in_stream += ret;
-    furi_hal_vcp->waiting_for_data = true;
-
-    if(ret != size) {
-        furi_check(false);
+    furi_check(ret == size);
+    
+    if (xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream) >= APP_RX_DATA_SIZE) {
+        USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+    } else {
+        furi_hal_vcp->rx_stream_full = true;
     }
+
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
@@ -80,16 +86,14 @@ void _furi_hal_vcp_tx_complete(size_t size) {
     osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
 }
 
-extern USBD_HandleTypeDef hUsbDeviceFS;
 size_t furi_hal_vcp_rx(uint8_t* buffer, size_t size) {
     furi_assert(furi_hal_vcp);
 
     size_t received = xStreamBufferReceive(furi_hal_vcp->rx_stream, buffer, size, portMAX_DELAY);
 
-    furi_hal_vcp->data_size_in_stream -= received;
-    if(furi_hal_vcp->data_size_in_stream == 0 && furi_hal_vcp->waiting_for_data) {
-        furi_hal_vcp->waiting_for_data = false;
-
+    if(furi_hal_vcp->rx_stream_full
+        &&xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream) >= APP_RX_DATA_SIZE) {
+        furi_hal_vcp->rx_stream_full = false;
         // data accepted, start waiting for next packet
         USBD_CDC_ReceivePacket(&hUsbDeviceFS);
     }
