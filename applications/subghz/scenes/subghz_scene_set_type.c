@@ -32,7 +32,7 @@ const void subghz_scene_set_type_on_enter(void* context) {
 
     submenu_add_item(
         subghz->submenu,
-        "Pricenton",
+        "Princeton",
         SubmenuIndexPricenton,
         subghz_scene_set_type_submenu_callback,
         subghz);
