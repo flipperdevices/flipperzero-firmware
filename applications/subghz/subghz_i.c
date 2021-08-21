@@ -16,20 +16,22 @@ void subghz_begin(FuriHalSubGhzPreset preset) {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 }
 
-void subghz_rx(uint32_t frequency) {
+uint32_t subghz_rx(uint32_t frequency) {
     furi_hal_subghz_idle();
-    furi_hal_subghz_set_frequency_and_path(frequency);
+    uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
+    return value;
 }
 
-void subghz_tx(uint32_t frequency) {
+uint32_t subghz_tx(uint32_t frequency) {
     furi_hal_subghz_idle();
-    furi_hal_subghz_set_frequency_and_path(frequency);
+    uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
     furi_hal_subghz_tx();
+    return value;
 }
 
 void subghz_idle(void) {
@@ -96,7 +98,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-        if(!subghz->protocol_result->to_load_protocol_from_file(file_worker, subghz->protocol_result)) {
+        if(!subghz->protocol_result->to_load_protocol_from_file(
+               file_worker, subghz->protocol_result)) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
@@ -210,7 +213,8 @@ bool subghz_protocol_load(SubGhz* subghz) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
-        if(!subghz->protocol_result->to_load_protocol_from_file(file_worker, subghz->protocol_result)) {
+        if(!subghz->protocol_result->to_load_protocol_from_file(
+               file_worker, subghz->protocol_result)) {
             file_worker_show_error(file_worker, "Cannot parse\nfile");
             break;
         }
