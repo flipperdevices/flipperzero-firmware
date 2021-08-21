@@ -97,7 +97,7 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output,
             string_get_cstr(str_buff),
             (uint32_t)(instance->history[idx].code_found >> 32),
             (uint32_t)(instance->history[idx].code_found & 0xFFFFFFFF));
-        string_clean(str_buff);
+        string_clear(str_buff);
     }
 }
 
