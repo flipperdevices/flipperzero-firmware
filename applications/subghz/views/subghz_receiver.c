@@ -411,10 +411,12 @@ void subghz_receiver_enter(void* context) {
     SubghzReceiver* subghz_receiver = context;
     //Start CC1101 rx
     subghz_begin(FuriHalSubGhzPresetOokAsync);
+    //subghz_begin(FuriHalSubGhzPreset2FSKAsync);
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency = subghz_rx(subghz_frequencies[model->frequency]);
+            //model->real_frequency = subghz_rx(433770000);
             if(subghz_history_get_item(model->history) == 0) {
                 model->scene = ReceiverSceneStart;
             } else {
