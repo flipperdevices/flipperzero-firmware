@@ -43,6 +43,17 @@ void subghz_end(void) {
     furi_hal_subghz_sleep();
 }
 
+void subghz_frequency_preset_to_str(void* context, string_t output) {
+    furi_assert(context);
+    SubGhz* subghz = context;
+    string_cat_printf(
+        output,
+        "Frequency: %d\n"
+        "Preset: %d\n",
+        (int)subghz->frequency,
+        (int)subghz->preset);
+}
+
 void subghz_transmitter_tx_start(void* context) {
     SubGhz* subghz = context;
     subghz->encoder = subghz_protocol_encoder_common_alloc();
@@ -179,7 +190,7 @@ bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
             break;
         }
         //Get string frequency preset protocol
-        subghz_receiver_frequency_preset_to_str(subghz->subghz_receiver, temp_str);
+        subghz_frequency_preset_to_str(subghz, temp_str);
         if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_size(temp_str))) {
             break;
         }

@@ -23,6 +23,8 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzReceverEventSave) {
+            subghz->frequency = subghz_receiver_get_frequency(subghz->subghz_receiver);
+            subghz->preset = subghz_receiver_get_preset(subghz->subghz_receiver);
             subghz->protocol_result = subghz_receiver_get_protocol(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;

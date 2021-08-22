@@ -207,7 +207,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
             sizeof(buffer),
             "%03ld.%03ld",
             subghz_history_get_frequency(model->history, model->idx) / 1000000 % 1000,
-            subghz_history_get_frequency(model->history, model->idx)  / 1000 % 1000);
+            subghz_history_get_frequency(model->history, model->idx) / 1000 % 1000);
         canvas_draw_str(canvas, 90, 8, buffer);
         //elements_button_left(canvas, "Back");
         if(model->protocol_result && model->protocol_result->to_save_string &&
@@ -309,7 +309,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                     model->real_frequency = subghz_frequencies[model->frequency];
                     if(subghz_history_get_item(model->history) == 0) {
                         model->scene = ReceiverSceneStart;
-                        
+
                     } else {
                         model->scene = ReceiverSceneMain;
                     }
@@ -397,10 +397,12 @@ void subghz_receiver_protocol_callback(SubGhzProtocolCommon* parser, void* conte
                 model->real_frequency,
                 FuriHalSubGhzPresetOokAsync);
             subghz_history_add_to_history(model->history, parser);
+
             model->history_item = subghz_history_get_item(model->history);
             model->scene = ReceiverSceneMain;
             return true;
         });
+    subghz_protocol_reset(subghz_receiver->protocol);
     subghz_receiver_update_offset(subghz_receiver);
 }
 
@@ -479,6 +481,28 @@ void subghz_receiver_free(SubghzReceiver* subghz_receiver) {
 View* subghz_receiver_get_view(SubghzReceiver* subghz_receiver) {
     furi_assert(subghz_receiver);
     return subghz_receiver->view;
+}
+
+uint32_t subghz_receiver_get_frequency(SubghzReceiver* subghz_receiver) {
+    furi_assert(subghz_receiver);
+    uint32_t frequency;
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            frequency = subghz_history_get_frequency(model->history, model->idx);
+            return false;
+        });
+    return frequency;
+}
+
+FuriHalSubGhzPreset subghz_receiver_get_preset(SubghzReceiver* subghz_receiver) {
+    furi_assert(subghz_receiver);
+    FuriHalSubGhzPreset preset;
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            preset = subghz_history_get_preset(model->history, model->idx);
+            return false;
+        });
+    return preset;
 }
 
 void subghz_receiver_frequency_preset_to_str(SubghzReceiver* subghz_receiver, string_t output) {
