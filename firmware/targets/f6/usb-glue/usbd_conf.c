@@ -197,7 +197,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
     hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
 
     if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK) {
-        Error_Handler( );
+        Error_Handler();
     }
 
     HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);
