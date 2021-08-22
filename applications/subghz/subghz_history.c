@@ -45,19 +45,23 @@ void subghz_history_free(SubGhzHistory* instance) {
     free(instance);
 }
 
-void subghz_history_set_frequency_preset(SubGhzHistory* instance, uint16_t idx, uint32_t frequency, FuriHalSubGhzPreset preset){
+void subghz_history_set_frequency_preset(
+    SubGhzHistory* instance,
+    uint16_t idx,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
     furi_assert(instance);
     if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return;
     instance->history[idx].preset = preset;
     instance->history[idx].real_frequency = frequency;
 }
 
-uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx){
+uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     return instance->history[idx].real_frequency;
 }
 
-FuriHalSubGhzPreset subghz_history_get_preset(SubGhzHistory* instance, uint16_t idx){
+FuriHalSubGhzPreset subghz_history_get_preset(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     return instance->history[idx].preset;
 }
@@ -83,7 +87,7 @@ const char* subghz_history_get_name(SubGhzHistory* instance, uint16_t idx) {
     return instance->history[idx].name;
 }
 
-SubGhzProtocolCommonLoad* subghz_history_get_raw_data (SubGhzHistory* instance, uint16_t idx){
+SubGhzProtocolCommonLoad* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     instance->data.code_found = instance->history[idx].code_found;
     instance->data.code_count_bit = instance->history[idx].code_count_bit;

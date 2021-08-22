@@ -6,8 +6,6 @@
 #include <lib/subghz/subghz_worker.h>
 #include "../subghz_history.h"
 
-
-
 typedef enum {
     SubghzReceverEventOK,
     SubghzReceverEventConfig,
