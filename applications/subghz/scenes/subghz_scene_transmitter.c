@@ -13,6 +13,7 @@ const void subghz_scene_transmitter_on_enter(void* context) {
 
     subghz_transmitter_set_callback(subghz_transmitter, subghz_scene_transmitter_callback, subghz);
     subghz_transmitter_set_protocol(subghz_transmitter, subghz->protocol_result);
+    subghz_transmitter_set_frequency_preset(subghz_transmitter, subghz->frequency, subghz->preset);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTransmitter);
 

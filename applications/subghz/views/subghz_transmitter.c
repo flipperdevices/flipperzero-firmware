@@ -20,6 +20,8 @@ struct SubghzTransmitter {
 typedef struct {
     string_t text;
     uint16_t scene;
+    uint32_t real_frequency;
+    FuriHalSubGhzPreset preset;
     SubGhzProtocolCommon* protocol;
 } SubghzTransmitterModel;
 
@@ -39,6 +41,18 @@ void subghz_transmitter_set_protocol(
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
             model->protocol = protocol;
+            return true;
+        });
+}
+
+void subghz_transmitter_set_frequency_preset(
+    SubghzTransmitter* subghz_transmitter,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
+    with_view_model(
+        subghz_transmitter->view, (SubghzTransmitterModel * model) {
+            model->real_frequency = frequency;
+            model->preset = preset;
             return true;
         });
 }
@@ -75,10 +89,18 @@ static void subghz_transmitter_button_right(Canvas* canvas, const char* str) {
 }
 
 void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
+    char buffer[64];
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text(canvas, 0, 8, string_get_cstr(model->text));
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%03ld.%03ld",
+        model->real_frequency / 1000000 % 1000,
+        model->real_frequency / 1000 % 1000);
+    canvas_draw_str(canvas, 90, 8, buffer);
 
     if(model->protocol && model->protocol->get_upload_protocol) {
         subghz_transmitter_button_right(canvas, "Send");

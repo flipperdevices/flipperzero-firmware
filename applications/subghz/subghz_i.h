@@ -45,10 +45,10 @@ struct SubGhz {
     SubGhzProtocol* protocol;
     SubGhzProtocolCommon* protocol_result;
     SubGhzProtocolCommonEncoder* encoder;
-    SubGhzHistory* history;
+    uint32_t frequency;
+    FuriHalSubGhzPreset preset;
 
     SceneManager* scene_manager;
-
     ViewDispatcher* view_dispatcher;
 
     Submenu* submenu;

@@ -37,3 +37,4 @@ void subghz_receiver_set_protocol(
     SubGhzProtocol* protocol);
 SubGhzProtocolCommon* subghz_receiver_get_protocol(SubghzReceiver* subghz_receiver);
 void subghz_receiver_set_worker(SubghzReceiver* subghz_receiver, SubGhzWorker* worker);
+void subghz_receiver_frequency_preset_to_str(SubghzReceiver* subghz_receiver, string_t output);

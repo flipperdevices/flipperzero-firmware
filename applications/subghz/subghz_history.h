@@ -20,3 +20,4 @@ const char* subghz_history_get_name(SubGhzHistory* instance, uint16_t idx);
 void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output, uint16_t idx);
 void subghz_history_add_to_history(SubGhzHistory* instance, void* context);
 SubGhzProtocolCommonLoad* subghz_history_get_raw_data (SubGhzHistory* instance, uint16_t idx);
+
