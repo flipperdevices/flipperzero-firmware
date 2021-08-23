@@ -2,7 +2,7 @@
 
 ![Tests](https://github.com/ObKo/stm32-cmake/workflows/Tests/badge.svg)
 
-This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs. 
+This project is used to develop applications for the STM32 - ST's ARM Cortex-Mx MCUs.
 It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3 F4 F7 G0 G4 H7 L0 L1 L4 L5 U5 WB WL device families.
 
 ## Requirements
@@ -35,7 +35,7 @@ It uses cmake and GCC, along with newlib (libc), STM32Cube. Supports F0 F1 F2 F3
    generation call.
 * `freertos` ([examples/freertos](examples/freertos)) - blink led using STM32 HAL library and FreeRTOS.
    You need to specify at least one board by passing `FREERTOS_<BOARD>_EXAMPLE=ON` to CMake.
-   Currently, the example can be built for the `H743ZI` and `F407VG` board targets. 
+   Currently, the example can be built for the `H743ZI` and `F407VG` board targets.
    You can opt to use the FreeRTOS CMSIS implementation provided by the Cube repository by supplying
    `USE_CMSIS_RTOS=ON` or `USE_CMSIS_RTOS_V2` to CMake.
 
@@ -168,12 +168,12 @@ Here is typical usage:
 
 ```cmake
 add_executable(stm32-blinky-f4 blinky.c stm32f4xx_hal_conf.h)
-target_link_libraries(stm32-blinky-f4 
+target_link_libraries(stm32-blinky-f4
     HAL::STM32::F4::RCC
     HAL::STM32::F4::GPIO
     HAL::STM32::F4::CORTEX
     CMSIS::STM32::F407VG
-    STM32::NoSys 
+    STM32::NoSys
 )
 ```
 
@@ -194,7 +194,9 @@ CMSIS package will generate linker script for your device automatically (target 
 * `stm32_get_memory_info((CHIP <chip>)|(DEVICE <device> TYPE <type>) [FLASH|RAM|CCRAM|STACK|HEAP] [SIZE <size>] [ORIGIN <origin>])` - get information about device memories (into `<size>` and `<origin>`). Linker script generator uses values from this function
 * `stm32_print_size_of_target(<target>)` - Print the application sizes for all formats
 * `stm32_generate_binary_file(<target>)` - Generate the binary file for the given target
+* `stm32_generate_srec_file(<target>)` - Generate the srec file for the given target
 * `stm32_generate_hex_file(<target>)` - Generate the hex file for the given target
+
 
 In the following functions, you can also specify mutiple families.
 
