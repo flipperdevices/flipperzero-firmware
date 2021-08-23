@@ -6,7 +6,7 @@
 #include "usbd_def.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
-#include "usbd_cdc.h"
+#include <usbd_cdc_dual.h>
 #include "usbd_cdc_if.h"
 
 extern void Error_Handler(void);
