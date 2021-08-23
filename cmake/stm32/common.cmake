@@ -73,7 +73,8 @@ function(stm32_generate_srec_file TARGET)
         TARGET ${TARGET}
         POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O srec ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.srec
-        BYPRODUCTS ${TARGET}.hex
+        BYPRODUCTS ${TARGET}.srec
+
         COMMENT "Generating srec file ${CMAKE_PROJECT_NAME}.srec"
     )
 endfunction()
