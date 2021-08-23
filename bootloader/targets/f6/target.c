@@ -197,7 +197,7 @@ void target_display_init() {
     u8g2_ClearBuffer(&fb);
     u8g2_SetDrawColor(&fb, 0x01);
     u8g2_SetFont(&fb, u8g2_font_helvB08_tf);
-    u8g2_DrawXBM(&fb, 0, 64-50, 128, 50, I_DFU_128x50);
+    u8g2_DrawXBM(&fb, 0, 64 - 50, 128, 50, I_DFU_128x50);
     u8g2_DrawStr(&fb, 2, 8, "Update & Recovery Mode");
     u8g2_DrawStr(&fb, 2, 21, "DFU started");
     // Send buffer

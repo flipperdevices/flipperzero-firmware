@@ -155,7 +155,7 @@ void subghz_test_carrier_rssi_timer_callback(void* context) {
 
     with_view_model(
         subghz_test_carrier->view, (SubghzTestCarrierModel * model) {
-            if (model->status == SubghzTestCarrierModelStatusRx) {
+            if(model->status == SubghzTestCarrierModelStatusRx) {
                 model->rssi = furi_hal_subghz_get_rssi();
                 return true;
             }
