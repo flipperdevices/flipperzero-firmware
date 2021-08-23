@@ -15,13 +15,7 @@ struct SubGhzHistoryStruct {
     const char* manufacture_name;
     uint8_t type_protocol;
     uint8_t code_count_bit;
-    uint16_t cnt;
     uint64_t code_found;
-    uint64_t code_reverse_found;
-    uint32_t fix;
-    uint32_t hop;
-    uint32_t serial;
-    uint8_t btn;
     uint16_t te;
     FuriHalSubGhzPreset preset;
     uint32_t real_frequency;
@@ -141,39 +135,21 @@ void subghz_history_add_to_history(SubGhzHistory* instance, void* context) {
     instance->last_update_timestamp = millis();
 
     instance->history[instance->last_index_write].te = 0;
-    instance->history[instance->last_index_write].fix = 0;
-    instance->history[instance->last_index_write].hop = 0;
+    instance->history[instance->last_index_write].manufacture_name = NULL;
     instance->history[instance->last_index_write].name = protocol->name;
     instance->history[instance->last_index_write].code_count_bit = protocol->code_last_count_bit;
     instance->history[instance->last_index_write].code_found = protocol->code_last_found;
-    instance->history[instance->last_index_write].code_reverse_found =
-        subghz_protocol_common_reverse_key(
-            protocol->code_last_found, protocol->code_last_count_bit);
     if(strcmp(protocol->name, "KeeLoq") == 0) {
         instance->history[instance->last_index_write].manufacture_name =
             subghz_protocol_keeloq_get_manufacture_name(protocol);
-        instance->history[instance->last_index_write].fix =
-            instance->history[instance->last_index_write].code_reverse_found >> 32;
-        instance->history[instance->last_index_write].hop =
-            instance->history[instance->last_index_write].code_reverse_found & 0xFFFFFFFF;
     } else if(strcmp(protocol->name, "Star Line") == 0) {
         instance->history[instance->last_index_write].manufacture_name =
             subghz_protocol_star_line_get_manufacture_name(protocol);
-        instance->history[instance->last_index_write].fix =
-            instance->history[instance->last_index_write].code_reverse_found >> 32;
-        instance->history[instance->last_index_write].hop =
-            instance->history[instance->last_index_write].code_reverse_found & 0xFFFFFFFF;
     } else if(strcmp(protocol->name, "Princeton") == 0) {
         instance->history[instance->last_index_write].te =
             subghz_protocol_princeton_get_te(protocol);
-        instance->history[instance->last_index_write].manufacture_name = NULL;
-    } else {
-        instance->history[instance->last_index_write].manufacture_name = NULL;
     }
-    instance->history[instance->last_index_write].serial = protocol->serial;
     instance->history[instance->last_index_write].type_protocol = protocol->type_protocol;
-    instance->history[instance->last_index_write].cnt = protocol->cnt;
-    instance->history[instance->last_index_write].btn = protocol->btn;
 
     instance->last_index_write++;
 }

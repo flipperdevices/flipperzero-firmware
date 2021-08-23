@@ -189,6 +189,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         break;
 
     case ReceiverSceneConfig:
+
         snprintf(
             buffer,
             sizeof(buffer),
@@ -318,10 +319,8 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         } else if(event->key == InputKeyOk) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
-                    furi_hal_subghz_idle();
-                    model->real_frequency = furi_hal_subghz_set_frequency_and_path(
-                        subghz_frequencies[model->frequency]);
-                    furi_hal_subghz_rx();
+                    model->real_frequency =
+                        subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
                     if(subghz_history_get_item(model->history) == 0) {
                         model->scene = ReceiverSceneStart;
                     } else {
@@ -409,14 +408,14 @@ void subghz_receiver_protocol_callback(SubGhzProtocolCommon* parser, void* conte
 void subghz_receiver_enter(void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
-    //Start CC1101 rx
+    //Start CC1101 Rx
     subghz_begin(FuriHalSubGhzPresetOokAsync);
     //subghz_begin(FuriHalSubGhzPreset2FSKAsync);
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
             model->frequency = subghz_frequencies_433_92;
-            model->real_frequency = subghz_rx(subghz_frequencies[model->frequency]);
-            //model->real_frequency = subghz_rx(433770000);
+            model->real_frequency =
+                subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
             if(subghz_history_get_item(model->history) == 0) {
                 model->scene = ReceiverSceneStart;
             } else {
@@ -424,10 +423,6 @@ void subghz_receiver_enter(void* context) {
             }
             return true;
         });
-    furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz_receiver->worker);
-    subghz_worker_start(subghz_receiver->worker);
-
-    //subghz_protocol_enable_dump_text(subghz_receiver->protocol, subghz_receiver_text_callback, subghz_receiver);
     subghz_protocol_enable_dump(
         subghz_receiver->protocol, subghz_receiver_protocol_callback, subghz_receiver);
 }
@@ -440,10 +435,8 @@ void subghz_receiver_exit(void* context) {
             string_clean(model->text);
             return true;
         });
-    // Stop CC1101
-    subghz_worker_stop(subghz_receiver->worker);
-    furi_hal_subghz_stop_async_rx();
-    subghz_end();
+    // Stop CC1101 Rx
+    subghz_rx_end(subghz_receiver->worker);
 }
 
 SubghzReceiver* subghz_receiver_alloc() {

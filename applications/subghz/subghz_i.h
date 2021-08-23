@@ -83,13 +83,13 @@ typedef enum {
 } SubGhzView;
 
 void subghz_begin(FuriHalSubGhzPreset preset);
-uint32_t subghz_rx(uint32_t frequency);
+uint32_t subghz_rx(void* context, uint32_t frequency);
 uint32_t subghz_tx(uint32_t frequency);
 void subghz_idle(void);
-void subghz_end(void);
+void subghz_rx_end(void* context);
 void subghz_transmitter_tx_start(void* context);
 void subghz_transmitter_tx_stop(void* context);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_save_protocol_to_file(void* context, const char* dev_name);
-bool subghz_protocol_load(SubGhz* subghz);
+bool subghz_load_protocol_from_file(SubGhz* subghz);
 uint32_t subghz_random_serial(void);

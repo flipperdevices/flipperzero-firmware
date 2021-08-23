@@ -17,12 +17,21 @@ void subghz_begin(FuriHalSubGhzPreset preset) {
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 }
 
-uint32_t subghz_rx(uint32_t frequency) {
+uint32_t subghz_rx(void* context, uint32_t frequency) {
+    furi_assert(context);
+    SubGhzWorker* worker = context;
+
+    subghz_worker_stop(worker);
+    furi_hal_subghz_stop_async_rx();
+
     furi_hal_subghz_idle();
     uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
+
+    furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, worker);
+    subghz_worker_start(worker);
     return value;
 }
 
@@ -39,7 +48,12 @@ void subghz_idle(void) {
     furi_hal_subghz_idle();
 }
 
-void subghz_end(void) {
+void subghz_rx_end(void* context) {
+    furi_assert(context);
+    SubGhzWorker* worker = context;
+
+    subghz_worker_stop(worker);
+    furi_hal_subghz_stop_async_rx();
     furi_hal_subghz_sleep();
 }
 
@@ -82,7 +96,7 @@ void subghz_transmitter_tx_stop(void* context) {
     SubGhz* subghz = context;
     //Stop TX
     furi_hal_subghz_stop_async_tx();
-    subghz_end();
+    furi_hal_subghz_sleep();
     subghz_protocol_encoder_common_free(subghz->encoder);
     //if protocol dynamic then we save the last upload
     if(subghz->protocol_result->type_protocol == TYPE_PROTOCOL_DYNAMIC) {
@@ -211,7 +225,7 @@ bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
     return saved;
 }
 
-bool subghz_protocol_load(SubGhz* subghz) {
+bool subghz_load_protocol_from_file(SubGhz* subghz) {
     furi_assert(subghz);
 
     FileWorker* file_worker = file_worker_alloc(false);
