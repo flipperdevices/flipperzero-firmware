@@ -56,7 +56,7 @@ void subghz_rx_end(void* context) {
     furi_hal_subghz_stop_async_rx();
 }
 
-void subghz_sleep(void){
+void subghz_sleep(void) {
     furi_hal_subghz_sleep();
 }
 
