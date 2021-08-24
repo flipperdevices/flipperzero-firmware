@@ -11,7 +11,7 @@
 
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 
-static const uint8_t furi_hal_subghz_preset_ook_bw_270khz_async_regs[][2] = {
+static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
 
     /* GPIO GD0 */
@@ -66,7 +66,7 @@ static const uint8_t furi_hal_subghz_preset_ook_bw_270khz_async_regs[][2] = {
     { 0, 0 },
 };
 
-static const uint8_t furi_hal_subghz_preset_ook_bw_650khz_async_regs[][2] = {
+static const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
 
     /* GPIO GD0 */
@@ -263,8 +263,11 @@ void furi_hal_subghz_dump_state() {
 }
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
-    if(preset == FuriHalSubGhzPresetOokAsync) {
-        furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_bw_650khz_async_regs);
+    if(preset == FuriHalSubGhzPresetOok650Async) {
+        furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_650khz_async_regs);
+        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
+    } else if(preset == FuriHalSubGhzPresetOok270Async){
+        furi_hal_subghz_load_registers(furi_hal_subghz_preset_ook_270khz_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKAsync){
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_async_regs);

@@ -160,7 +160,7 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
         }
         if(generated_protocol) {
             subghz->frequency = subghz_frequencies[subghz_frequencies_433_92];
-            subghz->preset = FuriHalSubGhzPresetOokAsync;
+            subghz->preset = FuriHalSubGhzPresetOok650Async;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }

@@ -144,7 +144,7 @@ void subghz_analyze_enter(void* context) {
 
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
 
     with_view_model(
         subghz_analyze->view, (SubghzAnalyzeModel * model) {

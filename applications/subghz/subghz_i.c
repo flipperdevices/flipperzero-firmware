@@ -78,7 +78,7 @@ void subghz_transmitter_tx_start(void* context) {
             if(subghz->preset) {
                 subghz_begin(subghz->preset);
             } else {
-                subghz_begin(FuriHalSubGhzPresetOokAsync);
+                subghz_begin(FuriHalSubGhzPresetOok650Async);
             }
             if(subghz->frequency) {
                 subghz_tx(subghz->frequency);

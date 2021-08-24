@@ -394,7 +394,7 @@ void subghz_receiver_protocol_callback(SubGhzProtocolCommon* parser, void* conte
                 model->history,
                 model->history_item,
                 model->real_frequency,
-                FuriHalSubGhzPresetOokAsync);
+                FuriHalSubGhzPresetOok650Async);
             subghz_history_add_to_history(model->history, parser);
 
             model->history_item = subghz_history_get_item(model->history);
@@ -409,7 +409,7 @@ void subghz_receiver_enter(void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
     //Start CC1101 Rx
-    subghz_begin(FuriHalSubGhzPresetOokAsync);
+    subghz_begin(FuriHalSubGhzPresetOok650Async);
     //subghz_begin(FuriHalSubGhzPreset2FSKAsync);
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
