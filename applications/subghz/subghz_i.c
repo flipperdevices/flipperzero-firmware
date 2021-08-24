@@ -54,6 +54,9 @@ void subghz_rx_end(void* context) {
 
     subghz_worker_stop(worker);
     furi_hal_subghz_stop_async_rx();
+}
+
+void subghz_sleep(void){
     furi_hal_subghz_sleep();
 }
 
@@ -96,7 +99,6 @@ void subghz_transmitter_tx_stop(void* context) {
     SubGhz* subghz = context;
     //Stop TX
     furi_hal_subghz_stop_async_tx();
-    furi_hal_subghz_sleep();
     subghz_protocol_encoder_common_free(subghz->encoder);
     //if protocol dynamic then we save the last upload
     if(subghz->protocol_result->type_protocol == TYPE_PROTOCOL_DYNAMIC) {

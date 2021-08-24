@@ -32,6 +32,7 @@
 #define NOTIFICATION_STARTING_STATE 0u
 #define NOTIFICATION_IDLE_STATE 1u
 #define NOTIFICATION_TX_STATE 2u
+#define NOTIFICATION_RX_STATE 3u
 
 extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_frequencies_count;
@@ -87,6 +88,7 @@ uint32_t subghz_rx(void* context, uint32_t frequency);
 uint32_t subghz_tx(uint32_t frequency);
 void subghz_idle(void);
 void subghz_rx_end(void* context);
+void subghz_sleep(void);
 void subghz_transmitter_tx_start(void* context);
 void subghz_transmitter_tx_stop(void* context);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
