@@ -13,6 +13,7 @@
 #include <storage/storage.h>
 #include "archive_views.h"
 #include "applications.h"
+#include "file-worker.h"
 
 #define MAX_DEPTH 32
 #define MAX_FILES 100 //temp
@@ -132,5 +133,6 @@ struct ArchiveApp {
     TextInput* text_input;
 
     Storage* api;
+    FileWorker* file_worker;
     ArchiveBrowser browser;
 };

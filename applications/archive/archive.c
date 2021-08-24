@@ -135,26 +135,18 @@ static void archive_file_append(ArchiveApp* archive, const char* path, string_t 
     furi_assert(path);
     furi_assert(string);
 
-    File* file = storage_file_alloc(archive->api);
-    bool result = storage_file_open(file, path, FSAM_WRITE, FSOM_OPEN_APPEND);
+    FileWorker* file_worker = file_worker_alloc(false);
 
-    if(result) {
-        uint16_t bytes_count =
-            storage_file_write(file, string_get_cstr(string), string_size(string));
-        if(bytes_count != string_size(string)) {
-            result = false;
-        }
-    } else {
-        FURI_LOG_E("Archive", "Cant open file");
+    if(!file_worker_open(file_worker, path, FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        FURI_LOG_E("Archive", "Append open error");
     }
 
-    result = storage_file_close(file);
-
-    if(!result) {
-        FURI_LOG_E("Archive", "File close, error");
+    if(!file_worker_write(file_worker, string_get_cstr(string), string_size(string))) {
+        FURI_LOG_E("Archive", "Append write error");
     }
 
-    storage_file_free(file);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
 }
 
 static void archive_view_add_item(ArchiveApp* archive, FileInfo* file_info, const char* name) {
@@ -179,140 +171,156 @@ static void archive_view_add_item(ArchiveApp* archive, FileInfo* file_info, cons
     }
 }
 
-static bool archive_favorites_action(
-    ArchiveApp* archive,
-    FavActionsEnum action,
-    ArchiveFile_t* file_t,
-    const char* s_buff) {
-    furi_assert(archive);
-
-    FileInfo file_info;
+static bool archive_is_favorite(ArchiveApp* archive, ArchiveFile_t* selected) {
+    furi_assert(selected);
     string_t path;
-    string_init(path);
-
-    if(action != FavoritesRead) {
-        furi_assert(file_t);
-        string_printf(
-            path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file_t->name));
-    }
-    if(action == FavoritesRename) {
-        furi_assert(s_buff);
-    }
-
-    const size_t buffer_size = 255;
-    char buffer[buffer_size];
+    string_t buffer;
+    string_init(buffer);
     bool found = false;
 
-    File* file = storage_file_alloc(archive->api);
-    bool load_result = storage_file_open(file, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    string_init_printf(
+        path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(selected->name));
+
+    bool load_result =
+        file_worker_open(archive->file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_ALWAYS);
 
     if(load_result) {
-        if(storage_file_get_error(file) != FSE_OK) {
-            FURI_LOG_E("Archive", "Cannot read\nfile");
-            return false;
-        }
-
-        size_t read_count = 0;
-        size_t end_index = 0;
-        size_t line_num = 0;
-
         while(1) {
-            size_t newline_index = 0;
-            char* endline_ptr;
-            char* str_ptr;
-
-            if(read_count > 0) {
-                end_index = 0;
-                endline_ptr = (char*)memchr(buffer, '\n', read_count);
-                newline_index = endline_ptr - buffer;
-
-                if(endline_ptr == 0) {
-                    end_index = read_count;
-
-                } else if(newline_index < read_count) {
-                    end_index = newline_index + 1;
-                    *endline_ptr = '\0';
-                    ++line_num;
-
-                    if(action == FavoritesCheck) {
-                        str_ptr = strstr(buffer, string_get_cstr(path));
-
-                        if(str_ptr) {
-                            found = true;
-                            break;
-                        }
-                    } else if(action == FavoritesRead) {
-                        archive_view_add_item(archive, &file_info, buffer);
-
-                    } else if(action == FavoritesDelete) {
-                        str_ptr = strstr(buffer, string_get_cstr(path));
-
-                        if(!str_ptr) {
-                            string_t temp;
-                            string_init_printf(temp, "%s\r\n", buffer);
-
-                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
-                            string_clear(temp);
-                        }
-                    } else if(action == FavoritesRename) {
-                        str_ptr = strstr(buffer, string_get_cstr(path));
-                        string_t temp;
-
-                        if(str_ptr) {
-                            string_init_printf(temp, "%s\r\n", s_buff);
-                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
-                            string_clear(temp);
-                        } else {
-                            string_init_printf(temp, "%s\r\n", buffer);
-                            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
-                            string_clear(temp);
-                        }
-                    }
-                } else {
-                    furi_assert(0);
-                }
-
-                memmove(buffer, &buffer[end_index], read_count - end_index);
-                read_count = read_count - end_index;
+            if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
+                break;
             }
+            if(string_size(buffer)) {
+                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
+                if(str_ptr) {
+                    found = true;
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
 
-            read_count += storage_file_read(file, &buffer[read_count], buffer_size - read_count);
+    string_clear(buffer);
+    string_clear(path);
+    file_worker_close(archive->file_worker);
 
-            if(storage_file_get_error(file) != FSE_OK) {
-                read_count = 0;
+    return found;
+}
+
+static bool archive_favorites_read(ArchiveApp* archive) {
+    string_t buffer;
+    FileInfo file_info;
+    string_init(buffer);
+
+    bool load_result =
+        file_worker_open(archive->file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(load_result) {
+        while(1) {
+            if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
+                break;
+            }
+            if(string_size(buffer)) {
+                archive_view_add_item(archive, &file_info, string_get_cstr(buffer));
+                string_clean(buffer);
+            } else {
+                break;
+            }
+        }
+    }
+    string_clean(buffer);
+    file_worker_close(archive->file_worker);
+
+    return load_result;
+}
+
+static bool
+    archive_favorites_rename(ArchiveApp* archive, ArchiveFile_t* selected, const char* dst) {
+    furi_assert(selected);
+    string_t path;
+    string_t buffer;
+
+    string_init(buffer);
+
+    string_init_printf(
+        path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(selected->name));
+    bool load_result =
+        file_worker_open(archive->file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(load_result) {
+        while(1) {
+            if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
                 break;
             }
 
-            if(read_count == 0) {
-                break; // end of reading
+            if(string_size(buffer)) {
+                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
+                string_t temp;
+                string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
+
+                if(str_ptr) {
+                    string_init_printf(temp, "%s\r\n", dst);
+                }
+                archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+                string_clear(temp);
+            } else {
+                break;
             }
         }
     }
 
-    if(!load_result) {
-        FURI_LOG_E(
-            "Archive",
-            "Favorites handler failure. Action: %d Error: %s",
-            action,
-            storage_file_get_error_desc(file));
-    }
-
+    string_clear(buffer);
     string_clear(path);
-    storage_file_close(file);
-    storage_file_free(file);
 
-    if(action == FavoritesDelete || action == FavoritesRename) {
-        storage_common_remove(archive->api, ARCHIVE_FAV_PATH);
-        storage_common_copy(archive->api, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
-        storage_common_remove(archive->api, ARCHIVE_FAV_TEMP_PATH);
-    }
+    file_worker_close(archive->file_worker);
+    file_worker_remove(archive->file_worker, ARCHIVE_FAV_PATH);
+    file_worker_rename(archive->file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
 
-    if(action == FavoritesCheck) {
-        return found;
-    } else {
-        return load_result;
-    }
+    return load_result;
 }
+
+static bool archive_favorites_delete(ArchiveApp* archive, ArchiveFile_t* selected) {
+    furi_assert(selected);
+    string_t path;
+    string_t buffer;
+    string_init(buffer);
+
+    string_init_printf(
+        path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(selected->name));
+
+    bool load_result =
+        file_worker_open(archive->file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    if(load_result) {
+        while(1) {
+            if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
+                break;
+            }
+
+            if(string_size(buffer)) {
+                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
+                if(!str_ptr) {
+                    string_t temp;
+                    string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
+                    archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+                    string_clear(temp);
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    string_clear(buffer);
+    string_clear(path);
+
+    file_worker_close(archive->file_worker);
+    file_worker_remove(archive->file_worker, ARCHIVE_FAV_PATH);
+    file_worker_rename(archive->file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+
+    return load_result;
+}
+
 static bool archive_read_dir(ArchiveApp* archive) {
     FileInfo file_info;
     File* directory = storage_file_alloc(archive->api);
@@ -363,7 +371,7 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     if(archive->browser.tab_id != ArchiveTabFavorites) {
         archive_read_dir(archive);
     } else {
-        archive_favorites_action(archive, FavoritesRead, NULL, NULL);
+        archive_favorites_read(archive);
     }
     return true;
 }
@@ -422,7 +430,7 @@ static void archive_text_input_callback(void* context) {
         archive->view_archive_main, (ArchiveViewModel * model) {
             file = files_array_get(
                 model->files, CLAMP(model->idx, files_array_size(model->files) - 1, 0));
-            file->fav = archive_favorites_action(archive, FavoritesCheck, file, NULL);
+            file->fav = archive_is_favorite(archive, file);
 
             return true;
         });
@@ -431,7 +439,7 @@ static void archive_text_input_callback(void* context) {
     storage_common_rename(archive->api, string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     if(file->fav) {
-        archive_favorites_action(archive, FavoritesRename, file, string_get_cstr(buffer_dst));
+        archive_favorites_rename(archive, file, string_get_cstr(buffer_dst));
     }
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewMain);
@@ -475,9 +483,8 @@ static void archive_show_file_menu(ArchiveApp* archive) {
             selected = files_array_get(model->files, model->idx);
             model->menu = true;
             model->menu_idx = 0;
-            selected->fav = is_known_app(selected->type) ?
-                                archive_favorites_action(archive, FavoritesCheck, selected, NULL) :
-                                false;
+            selected->fav = is_known_app(selected->type) ? archive_is_favorite(archive, selected) :
+                                                           false;
 
             return true;
         });
@@ -503,7 +510,7 @@ static void archive_open_app(ArchiveApp* archive, const char* app_name, const ch
     loader_start(archive->loader, app_name, args);
 }
 
-static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool fav) {
+static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file) {
     furi_assert(archive);
     furi_assert(file);
 
@@ -514,8 +521,8 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file, bool f
         path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file->name));
     storage_common_remove(archive->api, string_get_cstr(path));
 
-    if(fav) { // remove from favorites
-        archive_favorites_action(archive, FavoritesDelete, file, NULL);
+    if(archive_is_favorite(archive, file)) { // remove from favorites
+        archive_favorites_delete(archive, file);
     }
 
     string_clear(path);
@@ -569,12 +576,12 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 1:
         if(is_known_app(selected->type)) {
-            if(!archive_favorites_action(archive, FavoritesCheck, selected, NULL)) {
+            if(!archive_is_favorite(archive, selected)) {
                 string_set(archive->browser.name, selected->name);
                 archive_add_to_favorites(archive);
             } else {
                 // delete from favorites
-                archive_favorites_action(archive, FavoritesDelete, selected, NULL);
+                archive_favorites_delete(archive, selected);
             }
             archive_close_file_menu(archive);
         }
@@ -587,8 +594,7 @@ static void archive_file_menu_callback(ArchiveApp* archive) {
         break;
     case 3:
         // confirmation?
-        archive_delete_file(
-            archive, selected, archive_favorites_action(archive, FavoritesCheck, selected, NULL));
+        archive_delete_file(archive, selected);
         archive_close_file_menu(archive);
 
         break;
@@ -723,6 +729,8 @@ static bool archive_view_input(InputEvent* event, void* context) {
 void archive_free(ArchiveApp* archive) {
     furi_assert(archive);
 
+    file_worker_free(archive->file_worker);
+
     view_dispatcher_remove_view(archive->view_dispatcher, ArchiveViewMain);
     view_dispatcher_remove_view(archive->view_dispatcher, ArchiveViewTextInput);
     view_dispatcher_free(archive->view_dispatcher);
@@ -762,6 +770,7 @@ ArchiveApp* archive_alloc() {
     archive->api = furi_record_open("storage");
     archive->text_input = text_input_alloc();
     archive->view_archive_main = view_alloc();
+    archive->file_worker = file_worker_alloc(true);
 
     furi_check(archive->event_queue);
 
