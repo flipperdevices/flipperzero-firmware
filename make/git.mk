@@ -1,6 +1,6 @@
-GIT_COMMIT		= $(shell git describe --always  --exclude '*' || echo 'unknown')
-GIT_BRANCH		= $(shell git rev-parse --abbrev-ref HEAD || echo 'unknown')
-GIT_BRANCH_NUM	= $(shell git rev-list --count $(GIT_BRANCH) || echo 'nan')
+GIT_COMMIT		= $(shell git rev-parse --short HEAD || echo 'unknown')
+GIT_BRANCH		= $(shell echo $${WORKFLOW_BRANCH-$$(git rev-parse --abbrev-ref HEAD || echo 'unknown')})
+GIT_BRANCH_NUM	= $(shell git rev-list --count HEAD || echo 'nan')
 BUILD_DATE		= $(shell date '+%d-%m-%Y' || echo 'unknown')
 VERSION			= $(shell git describe --tags --abbrev=0 || echo 'unknown')
 
