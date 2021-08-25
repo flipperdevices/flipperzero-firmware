@@ -1,5 +1,7 @@
 # For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
 set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM3_MPU ARM_CM4_MPU ARM_CM4F ARM_CM7 ARM_CM7_MPU ARM_CM23 ARM_CM23_NTZ ARM_CM33 ARM_CM33_NTZ)
+set(FreeRTOS_armv8_PORTS ARM_CM23_NTZ ARM_CM33_NTZ ARM_CM23 ARM_CM33)
+set(FreeRTOS_armv8_trustZone_PORTS ARM_CM23 ARM_CM33)
 
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
@@ -125,7 +127,7 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     endforeach()
 
     foreach(PORT ${FreeRTOS_FIND_COMPONENTS_PORTS})
-        if(${PORT} STREQUAL ARM_CM23 OR ${PORT} STREQUAL ARM_CM33)
+        if(${PORT} IN_LIST FreeRTOS_armv8_trustZone_PORTS)
             set(ARMv8_NON_SECURE "::NON_SECURE")
         endif()
         
@@ -161,11 +163,11 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
             message(trace "FindFreeRTOS: creating target ${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE}")
             
             # armv8-m needs additional file even if using "No Trust Zone" port
-            if(${PORT} STREQUAL ARM_CM23_NTZ OR ${PORT} STREQUAL ARM_CM33_NTZ OR ${PORT} STREQUAL ARM_CM23 OR ${PORT} STREQUAL ARM_CM33)
+            if(${PORT} IN_LIST FreeRTOS_armv8_PORTS)
                 target_sources(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE "${FreeRTOS_${PORT}_PATH}/portasm.c")
             endif()
 
-            if(${PORT} STREQUAL ARM_CM23 OR ${PORT} STREQUAL ARM_CM33)
+            if(${PORT} IN_LIST FreeRTOS_armv8_trustZone_PORTS)
                 # create the secure target
                 add_library(${FreeRTOS_NAMESPACE}::${PORT}::SECURE INTERFACE IMPORTED)
                 # ::SECURE doesn't link FreeRTOS like ::NON_SECURE does
