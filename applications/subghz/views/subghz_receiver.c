@@ -453,8 +453,7 @@ static void subghz_receiver_timer_callback(void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
 
-    switch (subghz_receiver->sniffer_state)
-    {
+    switch(subghz_receiver->sniffer_state) {
     case SnifferStateOFF:
         osTimerStop(subghz_receiver->timer);
         return;
@@ -480,7 +479,6 @@ static void subghz_receiver_timer_callback(void* context) {
     float rssi = furi_hal_subghz_get_rssi();
     if(rssi > -90.0f) {
         osTimerStart(subghz_receiver->timer, 1024);
-        //osTimerStop(subghz_receiver->timer);
     } else {
         osTimerStart(subghz_receiver->timer, 1024 / 10);
     }
