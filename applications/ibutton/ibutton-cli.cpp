@@ -258,7 +258,6 @@ void onewire_cli_search(Cli* cli) {
             printf("Found: ");
             for(uint8_t i = 0; i < 8; i++) {
                 printf("%02X", address[i]);
-                if(i < 7) printf(" ");
             }
             printf("\r\n");
         }
