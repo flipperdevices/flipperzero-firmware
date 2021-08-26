@@ -65,7 +65,7 @@ jobs:
             SUFFIX=${BRANCH_OR_TAG}-$(date +'%d%m%Y')-${SHA}
           fi
           
-          echo "WORKFLOW_BRANCH=${BRANCH_OR_TAG}" >> $GITHUB_ENV
+          echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
           echo "::set-output name=artifacts-path::${BRANCH_OR_TAG}"
           echo "::set-output name=suffix::${SUFFIX}"
           echo "::set-output name=short-hash::${SHA}"
