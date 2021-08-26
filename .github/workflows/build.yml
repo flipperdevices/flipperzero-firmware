@@ -56,17 +56,17 @@ jobs:
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             REF=${{ github.head_ref }}
           fi
-          BRANCH=${REF##*/}
+          BRANCH_OR_TAG=${REF##*/}
           SHA=$(git rev-parse --short HEAD)
           
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH}
+            SUFFIX=${BRANCH_OR_TAG}
           else
-            SUFFIX=${BRANCH}-$(date +'%d%m%Y')-${SHA}
+            SUFFIX=${BRANCH_OR_TAG}-$(date +'%d%m%Y')-${SHA}
           fi
           
-          echo "WORKFLOW_BRANCH=${BRANCH}" >> $GITHUB_ENV
-          echo "::set-output name=artifacts-path::${BRANCH}"
+          echo "WORKFLOW_BRANCH=${BRANCH_OR_TAG}" >> $GITHUB_ENV
+          echo "::set-output name=artifacts-path::${BRANCH_OR_TAG}"
           echo "::set-output name=suffix::${SUFFIX}"
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=latest-target::${TARGETS[${#TARGETS[@]}-1]}"
