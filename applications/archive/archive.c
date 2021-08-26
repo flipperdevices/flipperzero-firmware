@@ -78,6 +78,7 @@ static void archive_leave_dir(ArchiveApp* archive) {
         });
 
     archive_switch_dir(archive, string_get_cstr(archive->browser.path));
+    update_offset(archive);
 }
 
 static void archive_enter_dir(ArchiveApp* archive, string_t name) {
@@ -189,13 +190,11 @@ static bool archive_is_favorite(ArchiveApp* archive, ArchiveFile_t* selected) {
             if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
                 break;
             }
-            if(string_size(buffer)) {
-                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
-                if(str_ptr) {
-                    found = true;
-                    break;
-                }
-            } else {
+            if(!string_size(buffer)) {
+                break;
+            }
+            if(!string_search(buffer, path)) {
+                found = true;
                 break;
             }
         }
@@ -221,15 +220,15 @@ static bool archive_favorites_read(ArchiveApp* archive) {
             if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
                 break;
             }
-            if(string_size(buffer)) {
-                archive_view_add_item(archive, &file_info, string_get_cstr(buffer));
-                string_clean(buffer);
-            } else {
+            if(!string_size(buffer)) {
                 break;
             }
+
+            archive_view_add_item(archive, &file_info, string_get_cstr(buffer));
+            string_clean(buffer);
         }
     }
-    string_clean(buffer);
+    string_clear(buffer);
     file_worker_close(archive->file_worker);
 
     return load_result;
@@ -240,8 +239,10 @@ static bool
     furi_assert(selected);
     string_t path;
     string_t buffer;
+    string_t temp;
 
     string_init(buffer);
+    string_init(temp);
 
     string_init_printf(
         path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(selected->name));
@@ -253,23 +254,18 @@ static bool
             if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
                 break;
             }
-
-            if(string_size(buffer)) {
-                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
-                string_t temp;
-                string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
-
-                if(str_ptr) {
-                    string_init_printf(temp, "%s\r\n", dst);
-                }
-                archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
-                string_clear(temp);
-            } else {
+            if(!string_size(buffer)) {
                 break;
             }
+
+            string_printf(
+                temp, "%s\r\n", string_search(buffer, path) ? string_get_cstr(buffer) : dst);
+            archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+            string_clean(temp);
         }
     }
 
+    string_clear(temp);
     string_clear(buffer);
     string_clear(path);
 
@@ -296,17 +292,15 @@ static bool archive_favorites_delete(ArchiveApp* archive, ArchiveFile_t* selecte
             if(!file_worker_read_until(archive->file_worker, buffer, '\n')) {
                 break;
             }
-
-            if(string_size(buffer)) {
-                char* str_ptr = strstr(string_get_cstr(buffer), string_get_cstr(path));
-                if(!str_ptr) {
-                    string_t temp;
-                    string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
-                    archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
-                    string_clear(temp);
-                }
-            } else {
+            if(!string_size(buffer)) {
                 break;
+            }
+
+            if(string_search(buffer, path)) {
+                string_t temp;
+                string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
+                archive_file_append(archive, ARCHIVE_FAV_TEMP_PATH, temp);
+                string_clear(temp);
             }
         }
     }
@@ -519,11 +513,12 @@ static void archive_delete_file(ArchiveApp* archive, ArchiveFile_t* file) {
 
     string_printf(
         path, "%s/%s", string_get_cstr(archive->browser.path), string_get_cstr(file->name));
-    storage_common_remove(archive->api, string_get_cstr(path));
 
     if(archive_is_favorite(archive, file)) { // remove from favorites
         archive_favorites_delete(archive, file);
     }
+
+    file_worker_remove(archive->file_worker, string_get_cstr(path));
 
     string_clear(path);
     archive_get_filenames(archive);
