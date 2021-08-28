@@ -21,9 +21,6 @@ uint32_t subghz_rx(void* context, uint32_t frequency) {
     furi_assert(context);
     SubGhzWorker* worker = context;
 
-    subghz_worker_stop(worker);
-    furi_hal_subghz_stop_async_rx();
-
     furi_hal_subghz_idle();
     uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
@@ -52,8 +49,10 @@ void subghz_rx_end(void* context) {
     furi_assert(context);
     SubGhzWorker* worker = context;
 
-    subghz_worker_stop(worker);
-    furi_hal_subghz_stop_async_rx();
+    if(subghz_worker_is_running(worker)) {
+        subghz_worker_stop(worker);
+        furi_hal_subghz_stop_async_rx();
+    }
 }
 
 void subghz_sleep(void) {

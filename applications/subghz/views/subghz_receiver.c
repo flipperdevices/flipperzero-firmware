@@ -292,6 +292,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         if(event->key == InputKeyBack && event->type == InputTypeShort) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
+                    subghz_rx_end(subghz_receiver->worker);
                     model->real_frequency =
                         subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
                     model->scene = ReceiverSceneMain;
@@ -328,6 +329,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         } else if(event->key == InputKeyOk) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
+                    subghz_rx_end(subghz_receiver->worker);
                     model->real_frequency =
                         subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
                     if(subghz_history_get_item(model->history) == 0) {
@@ -421,6 +423,7 @@ void subghz_receiver_enter(void* context) {
     subghz_begin(FuriHalSubGhzPresetOok650Async);
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
+            subghz_rx_end(subghz_receiver->worker);
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
                 subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
