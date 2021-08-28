@@ -392,7 +392,8 @@ void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t outp
         code_found_reverse_lo,
         instance->common.btn,
         instance->manufacture_name,
-        instance->common.serial);
+        instance->common.serial
+    );
 }
 
 void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output) {
@@ -449,7 +450,9 @@ bool subghz_protocol_keeloq_to_load_protocol_from_file(
     return loaded;
 }
 
-void subghz_decoder_keeloq_to_load_protocol(SubGhzProtocolKeeloq* instance, void* context) {
+void subghz_decoder_keeloq_to_load_protocol(
+    SubGhzProtocolKeeloq* instance,
+    void* context) {
     furi_assert(context);
     furi_assert(instance);
     SubGhzProtocolCommonLoad* data = context;

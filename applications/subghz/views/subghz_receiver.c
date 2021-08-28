@@ -316,6 +316,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         if(event->key == InputKeyBack && event->type == InputTypeShort) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
+                    subghz_rx_end(subghz_receiver->worker);
                     model->real_frequency =
                         subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
                     subghz_receiver->sniffer_state = SnifferStateRunnig;
@@ -356,6 +357,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     if(model->frequency < subghz_frequencies_count) {
+                        subghz_rx_end(subghz_receiver->worker);
                         model->real_frequency = subghz_rx(
                             subghz_receiver->worker, subghz_frequencies[model->frequency]);
                         subghz_receiver->sniffer_state = SnifferStateOFF;
@@ -471,6 +473,7 @@ static void subghz_receiver_timer_callback(void* context) {
             } else {
                 model->frequency = 0;
             }
+            subghz_rx_end(subghz_receiver->worker);
             model->real_frequency =
                 subghz_rx(subghz_receiver->worker, subghz_frequencies_scaner[model->frequency]);
             return true;
@@ -492,6 +495,7 @@ void subghz_receiver_enter(void* context) {
     subghz_begin(FuriHalSubGhzPresetOok650Async);
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
+            subghz_rx_end(subghz_receiver->worker);
             model->frequency = subghz_frequencies_433_92;
             model->real_frequency =
                 subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
@@ -504,8 +508,6 @@ void subghz_receiver_enter(void* context) {
         });
     subghz_protocol_enable_dump(
         subghz_receiver->protocol, subghz_receiver_protocol_callback, subghz_receiver);
-
-    // osTimerStart(subghz_receiver->timer, 1024 / 10);
 }
 
 void subghz_receiver_exit(void* context) {
