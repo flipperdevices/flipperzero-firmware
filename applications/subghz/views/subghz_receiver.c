@@ -15,7 +15,7 @@
 #define MENU_ITEMS 4
 
 #define COUNT_FREQUNCY_SCANER 3
-const uint32_t subghz_frequencies_scaner[] = {
+const uint32_t subghz_frequencies_scanner[] = {
     /* 300 - 348 */
     315000000,
     /* 387 - 464 */
@@ -32,10 +32,10 @@ typedef enum {
 } SubghzReceiverScene;
 
 typedef enum {
-    SnifferStateOFF,
-    SnifferStatePause,
-    SnifferStateRunnig,
-} SubghzSnifferState;
+    SubGhzHopperStateOFF,
+    SubGhzHopperStatePause,
+    SubGhzHopperStateRunnig,
+} SubGhzHopperState;
 
 static const Icon* ReceiverItemIcons[] = {
     [TYPE_PROTOCOL_UNKNOWN] = &I_quest_7x8,
@@ -50,7 +50,7 @@ struct SubghzReceiver {
     SubGhzWorker* worker;
     SubGhzProtocol* protocol;
     osTimerId timer;
-    SubghzSnifferState sniffer_state;
+    SubGhzHopperState hopper_state;
 };
 
 typedef struct {
@@ -215,7 +215,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
                 model->real_frequency / 1000 % 1000);
             canvas_draw_str(canvas, 0, 8, buffer);
         } else {
-            canvas_draw_str(canvas, 0, 8, "Frequency: <sniffer>");
+            canvas_draw_str(canvas, 0, 8, "Frequency: <auto>");
         }
 
         elements_button_center(canvas, "Save");
@@ -278,7 +278,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                     return true;
                 });
         } else if(event->key == InputKeyLeft) {
-            subghz_receiver->sniffer_state = SnifferStatePause;
+            subghz_receiver->hopper_state = SubGhzHopperStatePause;
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     model->scene = ReceiverSceneConfig;
@@ -319,7 +319,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                     subghz_rx_end(subghz_receiver->worker);
                     model->real_frequency =
                         subghz_rx(subghz_receiver->worker, subghz_frequencies[model->frequency]);
-                    subghz_receiver->sniffer_state = SnifferStateRunnig;
+                    subghz_receiver->hopper_state = SubGhzHopperStateRunnig;
                     model->scene = ReceiverSceneMain;
                     return true;
                 });
@@ -328,7 +328,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
             subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
             return false;
         } else if(can_be_saved && event->key == InputKeyOk && event->type == InputTypePress) {
-            subghz_receiver->sniffer_state = SnifferStatePause;
+            subghz_receiver->hopper_state = SubGhzHopperStatePause;
             subghz_rx_end(subghz_receiver->worker);
             subghz_receiver->callback(SubghzReceverEventSendStart, subghz_receiver->context);
             return true;
@@ -344,7 +344,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     model->frequency = model->temp_frequency;
                     model->real_frequency = subghz_frequencies[model->frequency];
-                    subghz_receiver->sniffer_state = SnifferStateRunnig;
+                    subghz_receiver->hopper_state = SubGhzHopperStateRunnig;
                     if(subghz_history_get_item(model->history) == 0) {
                         model->scene = ReceiverSceneStart;
                     } else {
@@ -360,10 +360,10 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                         subghz_rx_end(subghz_receiver->worker);
                         model->real_frequency = subghz_rx(
                             subghz_receiver->worker, subghz_frequencies[model->frequency]);
-                        subghz_receiver->sniffer_state = SnifferStateOFF;
+                        subghz_receiver->hopper_state = SubGhzHopperStateOFF;
                     } else {
                         osTimerStart(subghz_receiver->timer, 1024 / 10);
-                        subghz_receiver->sniffer_state = SnifferStateRunnig;
+                        subghz_receiver->hopper_state = SubGhzHopperStateRunnig;
                     }
 
                     if(subghz_history_get_item(model->history) == 0) {
@@ -398,7 +398,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         if(event->key == InputKeyBack) {
             return false;
         } else if(event->key == InputKeyLeft) {
-            subghz_receiver->sniffer_state = SnifferStatePause;
+            subghz_receiver->hopper_state = SubGhzHopperStatePause;
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     model->temp_frequency = model->frequency;
@@ -455,37 +455,46 @@ static void subghz_receiver_timer_callback(void* context) {
     furi_assert(context);
     SubghzReceiver* subghz_receiver = context;
 
-    switch(subghz_receiver->sniffer_state) {
-    case SnifferStateOFF:
-        osTimerStop(subghz_receiver->timer);
+    switch(subghz_receiver->hopper_state) {
+    case SubGhzHopperStateOFF:
         return;
         break;
-    case SnifferStatePause:
+    case SubGhzHopperStatePause:
+        osTimerStart(subghz_receiver->timer, 1024 / 10);
         return;
         break;
     default:
         break;
     }
+    float rssi = -127.0f;
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
+            // See RSSI Calculation timings in CC1101 17.3 RSSI
+            rssi = furi_hal_subghz_get_rssi();
+
+            // Stay if RSSI is high enough
+            if(rssi > -90.0f) {
+                osTimerStart(subghz_receiver->timer, 1024 / 4);
+                return false;
+            } else {
+                osTimerStart(subghz_receiver->timer, 1024 / 10);
+            }
+
+            // Select next frequency
             if(model->frequency < COUNT_FREQUNCY_SCANER - 1) {
                 model->frequency++;
             } else {
                 model->frequency = 0;
             }
+
+            // Restart radio
             subghz_rx_end(subghz_receiver->worker);
+            subghz_protocol_reset(subghz_receiver->protocol);
             model->real_frequency =
-                subghz_rx(subghz_receiver->worker, subghz_frequencies_scaner[model->frequency]);
+                subghz_rx(subghz_receiver->worker, subghz_frequencies_scanner[model->frequency]);
+
             return true;
         });
-    osDelay(10);
-    float rssi = furi_hal_subghz_get_rssi();
-    if(rssi > -90.0f) {
-        osTimerStart(subghz_receiver->timer, 1024);
-    } else {
-        osTimerStart(subghz_receiver->timer, 1024 / 10);
-    }
-    subghz_protocol_reset(subghz_receiver->protocol);
 }
 
 void subghz_receiver_enter(void* context) {
@@ -544,8 +553,8 @@ SubghzReceiver* subghz_receiver_alloc() {
         });
 
     subghz_receiver->timer =
-        osTimerNew(subghz_receiver_timer_callback, osTimerPeriodic, subghz_receiver, NULL);
-    subghz_receiver->sniffer_state = SnifferStateOFF;
+        osTimerNew(subghz_receiver_timer_callback, osTimerOnce, subghz_receiver, NULL);
+    subghz_receiver->hopper_state = SubGhzHopperStateOFF;
     return subghz_receiver;
 }
 
