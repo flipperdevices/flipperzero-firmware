@@ -85,9 +85,11 @@ bool subghz_test_static_input(InputEvent* event, void* context) {
                     furi_hal_subghz_idle();
                     furi_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
 
-                    subghz_encoder_princeton_set(instance->encoder, subghz_test_static_keys[model->button], 10000);
+                    subghz_encoder_princeton_set(
+                        instance->encoder, subghz_test_static_keys[model->button], 10000);
 
-                    furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, instance->encoder);
+                    furi_hal_subghz_start_async_tx(
+                        subghz_encoder_princeton_yield, instance->encoder);
                 } else if(event->type == InputTypeRelease) {
                     FURI_LOG_I("SubghzTestStatic", "TX Stop");
                     furi_hal_subghz_stop_async_tx();
