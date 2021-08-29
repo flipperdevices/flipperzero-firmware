@@ -14,8 +14,8 @@
 #define MAX_LEN_PX 100
 #define MENU_ITEMS 4
 
-#define COUNT_FREQUNCY_SCANER 3
-const uint32_t subghz_frequencies_scanner[] = {
+#define COUNT_FREQUNCY_HOPPER 3
+const uint32_t subghz_frequencies_hopper[] = {
     /* 300 - 348 */
     315000000,
     /* 387 - 464 */
@@ -35,6 +35,7 @@ typedef enum {
     SubGhzHopperStateOFF,
     SubGhzHopperStatePause,
     SubGhzHopperStateRunnig,
+    SubGhzHopperStateRSSITimeOut,
 } SubGhzHopperState;
 
 static const Icon* ReceiverItemIcons[] = {
@@ -51,6 +52,7 @@ struct SubghzReceiver {
     SubGhzProtocol* protocol;
     osTimerId timer;
     SubGhzHopperState hopper_state;
+    uint8_t hopper_timeout;
 };
 
 typedef struct {
@@ -456,12 +458,18 @@ static void subghz_receiver_timer_callback(void* context) {
     SubghzReceiver* subghz_receiver = context;
 
     switch(subghz_receiver->hopper_state) {
-    case SubGhzHopperStateOFF:
+    case SubGhzHopperStatePause:
         return;
         break;
-    case SubGhzHopperStatePause:
-        osTimerStart(subghz_receiver->timer, 1024 / 10);
+    case SubGhzHopperStateOFF:
+        osTimerStop(subghz_receiver->timer);
         return;
+        break;
+    case SubGhzHopperStateRSSITimeOut:
+        if(subghz_receiver->hopper_timeout != 0) {
+            subghz_receiver->hopper_timeout--;
+            return;
+        }
         break;
     default:
         break;
@@ -469,19 +477,22 @@ static void subghz_receiver_timer_callback(void* context) {
     float rssi = -127.0f;
     with_view_model(
         subghz_receiver->view, (SubghzReceiverModel * model) {
-            // See RSSI Calculation timings in CC1101 17.3 RSSI
-            rssi = furi_hal_subghz_get_rssi();
+            if(subghz_receiver->hopper_state != SubGhzHopperStateRSSITimeOut) {
+                // See RSSI Calculation timings in CC1101 17.3 RSSI
+                rssi = furi_hal_subghz_get_rssi();
 
-            // Stay if RSSI is high enough
-            if(rssi > -90.0f) {
-                osTimerStart(subghz_receiver->timer, 1024 / 4);
-                return false;
+                // Stay if RSSI is high enough
+                if(rssi > -90.0f) {
+                    subghz_receiver->hopper_timeout = 10;
+                    subghz_receiver->hopper_state = SubGhzHopperStateRSSITimeOut;
+                    return false;
+                }
             } else {
-                osTimerStart(subghz_receiver->timer, 1024 / 10);
+                subghz_receiver->hopper_state = SubGhzHopperStateRunnig;
             }
 
             // Select next frequency
-            if(model->frequency < COUNT_FREQUNCY_SCANER - 1) {
+            if(model->frequency < COUNT_FREQUNCY_HOPPER - 1) {
                 model->frequency++;
             } else {
                 model->frequency = 0;
@@ -491,7 +502,7 @@ static void subghz_receiver_timer_callback(void* context) {
             subghz_rx_end(subghz_receiver->worker);
             subghz_protocol_reset(subghz_receiver->protocol);
             model->real_frequency =
-                subghz_rx(subghz_receiver->worker, subghz_frequencies_scanner[model->frequency]);
+                subghz_rx(subghz_receiver->worker, subghz_frequencies_hopper[model->frequency]);
 
             return true;
         });
@@ -553,7 +564,7 @@ SubghzReceiver* subghz_receiver_alloc() {
         });
 
     subghz_receiver->timer =
-        osTimerNew(subghz_receiver_timer_callback, osTimerOnce, subghz_receiver, NULL);
+        osTimerNew(subghz_receiver_timer_callback, osTimerPeriodic, subghz_receiver, NULL);
     subghz_receiver->hopper_state = SubGhzHopperStateOFF;
     return subghz_receiver;
 }
