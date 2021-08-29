@@ -10,9 +10,15 @@ static void dolphin_switch_to_app(Dolphin* dolphin, const FlipperApplication* fl
     furi_assert(flipper_app->app);
     furi_assert(flipper_app->name);
 
+    if(furi_thread_get_state(dolphin->scene_thread) != FuriThreadStateStopped) {
+        FURI_LOG_E("Dolphin", "Thread is already running");
+        return;
+    }
+
     furi_thread_set_name(dolphin->scene_thread, flipper_app->name);
     furi_thread_set_stack_size(dolphin->scene_thread, flipper_app->stack_size);
     furi_thread_set_callback(dolphin->scene_thread, flipper_app->app);
+
     furi_thread_start(dolphin->scene_thread);
 }
 
@@ -117,14 +123,8 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
             with_value_mutex(
                 dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
         } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
-            osTimerStart(dolphin->timeout_timer, 40);
+            osTimerStart(dolphin->timeout_timer, 64);
             view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
-        } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-#if 0
-            dolphin_switch_to_app(dolphin, &FAV_APP);
-#endif
-        } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
-            dolphin_switch_to_app(dolphin, &FLIPPER_SCENE);
         } else if(event->key == InputKeyDown && event->type == InputTypeShort) {
             dolphin_switch_to_app(dolphin, &FLIPPER_ARCHIVE);
         } else if(event->key == InputKeyDown && event->type == InputTypeLong) {
@@ -180,6 +180,12 @@ static void lock_menu_callback(void* context, uint8_t index) {
         break;
 
     default:
+        // wip message
+        with_view_model(
+            dolphin->view_lockmenu, (DolphinViewLockMenuModel * model) {
+                model->hint_timeout = HINT_TIMEOUT_H;
+                return true;
+            });
         break;
     }
 }
@@ -198,6 +204,8 @@ bool dolphin_view_lockmenu_input(InputEvent* event, void* context) {
     if(event->type != InputTypeShort) return false;
 
     DolphinViewLockMenuModel* model = view_get_model(dolphin->view_lockmenu);
+
+    model->hint_timeout = 0; // clear hint timeout
 
     if(event->key == InputKeyUp) {
         model->idx = CLAMP(model->idx - 1, 2, 0);

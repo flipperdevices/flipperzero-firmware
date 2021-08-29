@@ -1,6 +1,13 @@
 name: 'Build'
 
-on: push
+on: 
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
 
 env:
   TARGETS: f6
@@ -58,18 +65,6 @@ jobs:
               make -j$(nproc) -C bootloader TARGET=${TARGET}
             done
 
-      - name: 'Generate dfu file for bootloader'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            for TARGET in ${TARGETS}
-            do
-              hex2dfu \
-                -i bootloader/.obj/${TARGET}/bootloader.hex \
-                -o bootloader/.obj/${TARGET}/bootloader.dfu \
-                -l "Flipper Zero $(echo $TARGET | tr a-z A-Z)"
-            done
-
       - name: 'Build firmware in docker'
         uses: ./.github/actions/docker
         with:
@@ -79,19 +74,8 @@ jobs:
               make -j$(nproc) -C firmware TARGET=${TARGET}
             done
 
-      - name: 'Generate dfu file for firmware'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            for TARGET in ${TARGETS}
-            do
-              hex2dfu \
-                -i firmware/.obj/${TARGET}/firmware.hex \
-                -o firmware/.obj/${TARGET}/firmware.dfu \
-                -l "Flipper Zero $(echo $TARGET | tr a-z A-Z)"
-            done
-
       - name: 'Generate full hex file'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: ./.github/actions/docker
         with:
           run: |
@@ -104,6 +88,7 @@ jobs:
             done
 
       - name: 'Move upload files'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: ./.github/actions/docker
         with:
           run: |
@@ -124,6 +109,7 @@ jobs:
             done
 
       - name: 'Generate full dfu file'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: ./.github/actions/docker
         with:
           run: |
@@ -136,6 +122,7 @@ jobs:
             done
 
       - name: 'Full flash asssembly: bootloader as base'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
           for TARGET in ${TARGETS}
           do
@@ -145,13 +132,15 @@ jobs:
           done
 
       - name: 'Full flash asssembly: bootloader padding'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
           for TARGET in ${TARGETS}
           do
             truncate -s 32768 artifacts/flipper-z-${TARGET}-full-${SUFFIX}.bin
           done
-      
+
       - name: 'Full flash asssembly: append firmware'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
           for TARGET in ${TARGETS}
           do
@@ -160,7 +149,31 @@ jobs:
               >> artifacts/flipper-z-${TARGET}-full-${SUFFIX}.bin
           done
 
+      - name: 'Bundle core2 firmware'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          test -d core2_firmware && rm -rf core2_firmware || true
+          mkdir core2_firmware
+          cp \
+            lib/STM32CubeWB/package.xml \
+            lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x/stm32wb5x_FUS_fw.bin \
+            lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x/stm32wb5x_FUS_fw_for_fus_0_5_3.bin \
+            lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Binaries/STM32WB5x/stm32wb5x_BLE_Stack_full_fw.bin \
+            core2_firmware
+          tar czpf artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz core2_firmware
+
+      - name: 'Bundle scripts'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          tar czpf artifacts/flipper-z-any-scripts-${SUFFIX}.tgz scripts
+
+      - name: 'Bundle resources'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          tar czpf artifacts/flipper-z-any-resources-${SUFFIX}.tgz -C assets resources
+
       - name: 'Upload artifacts to update server'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: burnett01/rsync-deployments@4.1
         with:
           switches: -avzP --delete
@@ -172,6 +185,7 @@ jobs:
           remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
 
       - name: 'Trigger update server reindex'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
         uses: wei/curl@master
         with:
           args: -X POST -F 'key=${{ secrets.REINDEX_KEY }}' ${{ secrets.REINDEX_URL }}
