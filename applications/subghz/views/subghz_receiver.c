@@ -64,8 +64,6 @@ typedef struct {
     uint8_t temp_frequency;
     uint32_t real_frequency;
 
-    uint8_t tab_idx;
-    uint8_t menu_idx;
     uint16_t idx;
     uint16_t list_offset;
     uint16_t history_item;
@@ -291,6 +289,9 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         if(event->key == InputKeyBack) {
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
+                    model->idx = 0;
+                    model->list_offset = 0;
+                    model->history_item = 0;
                     subghz_history_clean(model->history);
                     return true;
                 });
