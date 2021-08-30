@@ -1,5 +1,7 @@
 #include "bt_i.h"
 
+#include "bt_settings.h"
+
 uint32_t bt_view_exit(void* context) {
     (void)context;
     return VIEW_NONE;
@@ -26,6 +28,11 @@ void bt_update_param(void* arg) {
 
 Bt* bt_alloc() {
     Bt* bt = furi_alloc(sizeof(Bt));
+
+    BtSettings bt_settings = {};
+    if(!bt_settings_load(&bt_settings)) {
+        bt_settings_save(&bt_settings);
+    }
 
     bt->message_queue = osMessageQueueNew(8, sizeof(BtMessage), NULL);
     bt->update_status_timer = osTimerNew(bt_update_statusbar, osTimerPeriodic, bt, NULL);
