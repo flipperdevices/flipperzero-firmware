@@ -218,12 +218,11 @@ void furi_hal_rfid_tim_emulate_stop() {
 void furi_hal_rfid_tim_reset() {
     HAL_TIM_Base_DeInit(&LFRFID_READ_TIM);
     LL_TIM_DeInit(TIM1);
-    LL_APB1_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_TIM1);
+    LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_TIM1);
     HAL_TIM_Base_DeInit(&LFRFID_EMULATE_TIM);
     LL_TIM_DeInit(TIM2);
     LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);
 }
-
 
 bool furi_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw) {
     return (hw == &LFRFID_EMULATE_TIM);
