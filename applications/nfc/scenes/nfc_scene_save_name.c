@@ -41,6 +41,7 @@ const bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) 
                 nfc_device_delete(&nfc->dev);
             }
             memcpy(&nfc->dev.dev_name, nfc->text_store, strlen(nfc->text_store));
+            nfc->dev.dev_data.nfc_data = nfc->dev_edit_data;
             if(nfc_device_save(&nfc->dev, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 return true;
