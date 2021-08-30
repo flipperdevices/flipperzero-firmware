@@ -92,7 +92,7 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
         }
     }
 
-    // Wait till all input events 
+    // Wait till all input events delivered
     while(view_dispatcher->ongoing_input_events_count > 0) {
         osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever);
         if(message.type == ViewDispatcherMessageTypeInput) {
