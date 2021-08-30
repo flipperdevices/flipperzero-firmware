@@ -118,9 +118,9 @@ static void view_holder_draw_callback(Canvas* canvas, void* context) {
 static void view_holder_input_callback(InputEvent* event, void* context) {
     ViewHolder* view_holder = context;
 
-    if (event->type == InputTypePress) {
+    if(event->type == InputTypePress) {
         view_holder->ongoing_input_events_count++;
-    } if (event->type == InputTypeRelease) {
+    } else if(event->type == InputTypeRelease) {
         view_holder->ongoing_input_events_count--;
     }
 
