@@ -8,9 +8,6 @@
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
 
-//#include <assets_icons.h>
-//#include <gui/icon_i.h>
-
 struct SubghzTransmitter {
     View* view;
     SubghzTransmitterCallback callback;
