@@ -122,7 +122,7 @@ static void view_holder_input_callback(InputEvent* event, void* context) {
         view_holder->ongoing_input_events_count--;
     } else if(event->type == InputTypePress) {
         view_holder->ongoing_input_events_count++;
-    } else if(view_holder->ongoing_input_events_count==0) {
+    } else if(view_holder->ongoing_input_events_count == 0) {
         FURI_LOG_E("ViewHolder", "non-complementary input, discarding");
         return;
     }

@@ -222,7 +222,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         view_dispatcher->ongoing_input_events_count--;
     } else if(event->type == InputTypePress) {
         view_dispatcher->ongoing_input_events_count++;
-    } else if(view_dispatcher->ongoing_input_events_count==0) {
+    } else if(view_dispatcher->ongoing_input_events_count == 0) {
         FURI_LOG_E("ViewDispatcher", "non-complementary input, discarding");
         return;
     }
