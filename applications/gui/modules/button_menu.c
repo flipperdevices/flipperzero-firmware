@@ -78,13 +78,20 @@ static void button_menu_draw_common_button(
     } else {
         canvas_draw_rframe(canvas, item_x, item_y, ITEM_WIDTH, ITEM_HEIGHT, 5);
     }
+
+    string_t disp_str;
+    string_init_set_str(disp_str, text);
+    elements_string_fit_width(canvas, disp_str, ITEM_WIDTH - 6);
+
     canvas_draw_str_aligned(
         canvas,
         item_x + (ITEM_WIDTH / 2),
         item_y + (ITEM_HEIGHT / 2),
         AlignCenter,
         AlignCenter,
-        text);
+        string_get_cstr(disp_str));
+
+    string_clear(disp_str);
 }
 
 static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
