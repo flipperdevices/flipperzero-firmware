@@ -196,8 +196,6 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         subghz_history_get_text_space_left(model->history, str_buff);
         canvas_draw_str(canvas, 94, 62, string_get_cstr(str_buff));
         canvas_draw_line(canvas, 38, 51, 125, 51);
-        // canvas_draw_line(canvas, 75, 51, 82, 51);
-        // canvas_draw_line(canvas, 90, 51, 125, 51);
         break;
 
     case ReceiverSceneStart:
@@ -230,8 +228,6 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         subghz_history_get_text_space_left(model->history, str_buff);
         canvas_draw_str(canvas, 94, 62, string_get_cstr(str_buff));
         canvas_draw_line(canvas, 48, 51, 125, 51);
-        // canvas_draw_line(canvas, 75, 51, 82, 51);
-        // canvas_draw_line(canvas, 90, 51, 125, 51);
         break;
 
     case ReceiverSceneConfig:
@@ -293,6 +289,11 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
     switch(scene) {
     case ReceiverSceneMain:
         if(event->key == InputKeyBack) {
+            with_view_model(
+                subghz_receiver->view, (SubghzReceiverModel * model) {
+                    subghz_history_clean(model->history);
+                    return true;
+                });
             return false;
         } else if(event->key == InputKeyUp) {
             with_view_model(
