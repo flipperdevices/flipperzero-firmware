@@ -9,7 +9,6 @@ struct BtCarrierTest {
     BtTestMode mode;
     BtTestChannel channel;
     BtTestPower power;
-    float rssi;
     osTimerId_t timer;
 };
 
@@ -124,8 +123,7 @@ static void bt_test_carrier_timer_callback(void* context) {
     furi_assert(context);
     BtCarrierTest* bt_carrier_test = context;
     if(bt_carrier_test->mode == BtTestModeRx) {
-        bt_carrier_test->rssi = furi_hal_bt_get_rssi();
-        bt_test_set_rssi(bt_carrier_test->bt_test, bt_carrier_test->rssi);
+        bt_test_set_rssi(bt_carrier_test->bt_test, furi_hal_bt_get_rssi());
     } else if(bt_carrier_test->mode == BtTestModeTxHopping) {
         bt_carrier_test_switch_channel(bt_carrier_test);
     }

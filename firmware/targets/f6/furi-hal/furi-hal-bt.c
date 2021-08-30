@@ -100,7 +100,7 @@ void furi_hal_bt_start_packet_rx(uint8_t channel, uint8_t datarate) {
 }
 
 uint16_t furi_hal_bt_stop_packet_test() {
-    uint16_t num_of_packets;
+    uint16_t num_of_packets = 0;
     hci_le_test_end(&num_of_packets);
     return num_of_packets;
 }

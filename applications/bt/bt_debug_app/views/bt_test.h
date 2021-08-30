@@ -33,6 +33,10 @@ void bt_test_set_context(BtTest* bt_test, void* context);
 
 void bt_test_set_rssi(BtTest* bt_test, float rssi);
 
+void bt_test_set_packets_tx(BtTest* bt_test, uint32_t packets_num);
+
+void bt_test_set_packets_rx(BtTest* bt_test, uint32_t packets_num);
+
 void bt_test_set_current_value_index(BtTestParam* param, uint8_t current_value_index);
 
 void bt_test_set_current_value_text(BtTestParam* param, const char* current_value_text);

@@ -10,7 +10,7 @@ bool bt_settings_load(BtSettings* bt_settings) {
     bool file_loaded = false;
     BtSettings settings = {};
 
-    FURI_LOG_I(BT_SETTINGS_TAG, "Loading settingd from \"%s\"", BT_SETTINGS_PATH);
+    FURI_LOG_I(BT_SETTINGS_TAG, "Loading settings from \"%s\"", BT_SETTINGS_PATH);
     FileWorker* file_worker = file_worker_alloc(true);
     if(file_worker_open(file_worker, BT_SETTINGS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         if(file_worker_read(file_worker, &settings, sizeof(settings))) {
