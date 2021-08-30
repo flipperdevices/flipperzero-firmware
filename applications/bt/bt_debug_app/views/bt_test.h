@@ -2,12 +2,13 @@
 #include <gui/view.h>
 
 typedef enum {
-    BtTestStateStart,
-    BtTestStateStop,
+    BtTestStateStarted,
+    BtTestStateStopped,
 } BtTestState;
 
 typedef struct BtTest BtTest;
 typedef void (*BtTestChangeStateCallback)(BtTestState state, void* context);
+typedef void (*BtTestBackCallback)(void* context);
 typedef struct BtTestParam BtTestParam;
 typedef void (*BtTestParamChangeCallback)(BtTestParam* param);
 
@@ -24,12 +25,13 @@ BtTestParam* bt_test_param_add(
     BtTestParamChangeCallback change_callback,
     void* context);
 
-void bt_test_set_change_state_callback(
-    BtTest* bt_test,
-    BtTestChangeStateCallback callback,
-    void* context);
+void bt_test_set_change_state_callback(BtTest* bt_test, BtTestChangeStateCallback callback);
 
-void bt_test_set_message(BtTest* bt_test, const char* message);
+void bt_test_set_back_callback(BtTest* bt_test, BtTestBackCallback callback);
+
+void bt_test_set_context(BtTest* bt_test, void* context);
+
+void bt_test_set_rssi(BtTest* bt_test, float rssi);
 
 void bt_test_set_current_value_index(BtTestParam* param, uint8_t current_value_index);
 

@@ -47,9 +47,9 @@ BtDebugApp* bt_debug_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, BtDebugAppViewSubmenu, submenu_get_view(app->submenu));
     app->popup = popup_alloc();
-    // TODO add exit callback
     view_dispatcher_add_view(
         app->view_dispatcher, BtDebugAppViewPopup, popup_get_view(app->popup));
+    view_set_previous_callback(popup_get_view(app->popup), bt_debug_exit);
     app->bt_carrier_test = bt_carrier_test_alloc();
     view_set_previous_callback(
         bt_carrier_test_get_view(app->bt_carrier_test), bt_debug_start_view);

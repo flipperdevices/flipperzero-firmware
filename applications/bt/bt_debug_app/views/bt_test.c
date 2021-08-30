@@ -20,7 +20,8 @@ ARRAY_DEF(BtTestParamArray, BtTestParam, M_POD_OPLIST);
 
 struct BtTest {
     View* view;
-    BtTestChangeStateCallback callback;
+    BtTestChangeStateCallback change_state_callback;
+    BtTestBackCallback back_callback;
     void* context;
 };
 
@@ -30,16 +31,22 @@ typedef struct {
     uint8_t position;
     uint8_t window_position;
     const char* message;
+    float rssi;
 } BtTestModel;
+
+#define BT_TEST_START_MESSAGE "Ok - Start"
+#define BT_TEST_STOP_MESSAGE "Ok - Stop"
 
 static void bt_test_process_up(BtTest* bt_test);
 static void bt_test_process_down(BtTest* bt_test);
 static void bt_test_process_left(BtTest* bt_test);
 static void bt_test_process_right(BtTest* bt_test);
 static void bt_test_process_ok(BtTest* bt_test);
+static void bt_test_process_back(BtTest* bt_test);
 
 static void bt_test_draw_callback(Canvas* canvas, void* _model) {
     BtTestModel* model = _model;
+    char rssi_str[32];
 
     const uint8_t param_height = 16;
     const uint8_t param_width = 123;
@@ -88,6 +95,10 @@ static void bt_test_draw_callback(Canvas* canvas, void* _model) {
 
     elements_scrollbar(canvas, model->position, BtTestParamArray_size(model->params));
     canvas_draw_str(canvas, 6, 60, model->message);
+    if(model->rssi != 0.0f) {
+        snprintf(rssi_str, sizeof(rssi_str), "RSSI:%3.1f dB", model->rssi);
+        canvas_draw_str_aligned(canvas, 124, 60, AlignRight, AlignBottom, rssi_str);
+    }
 }
 
 static bool bt_test_input_callback(InputEvent* event, void* context) {
@@ -116,6 +127,10 @@ static bool bt_test_input_callback(InputEvent* event, void* context) {
         case InputKeyOk:
             consumed = true;
             bt_test_process_ok(bt_test);
+            break;
+        case InputKeyBack:
+            consumed = false;
+            bt_test_process_back(bt_test);
             break;
         default:
             break;
@@ -191,6 +206,9 @@ void bt_test_process_left(BtTest* bt_test) {
                 param->current_value_index--;
                 if(param->change_callback) {
                     param->change_callback(param);
+                    model->state = BtTestStateStopped;
+                    model->message = BT_TEST_START_MESSAGE;
+                    model->rssi = 0.0f;
                 }
             }
             return true;
@@ -205,6 +223,9 @@ void bt_test_process_right(BtTest* bt_test) {
                 param->current_value_index++;
                 if(param->change_callback) {
                     param->change_callback(param);
+                    model->state = BtTestStateStopped;
+                    model->message = BT_TEST_START_MESSAGE;
+                    model->rssi = 0.0f;
                 }
             }
             return true;
@@ -215,16 +236,31 @@ void bt_test_process_ok(BtTest* bt_test) {
     BtTestState state;
     with_view_model(
         bt_test->view, (BtTestModel * model) {
-            if(model->state == BtTestStateStart) {
-                model->state = BtTestStateStop;
-            } else if(model->state == BtTestStateStop) {
-                model->state = BtTestStateStart;
+            if(model->state == BtTestStateStarted) {
+                model->state = BtTestStateStopped;
+                model->message = BT_TEST_START_MESSAGE;
+                model->rssi = 0.0f;
+            } else if(model->state == BtTestStateStopped) {
+                model->state = BtTestStateStarted;
+                model->message = BT_TEST_STOP_MESSAGE;
             }
             state = model->state;
             return true;
         });
-    if(bt_test->callback) {
-        bt_test->callback(state, bt_test->context);
+    if(bt_test->change_state_callback) {
+        bt_test->change_state_callback(state, bt_test->context);
+    }
+}
+
+void bt_test_process_back(BtTest* bt_test) {
+    with_view_model(
+        bt_test->view, (BtTestModel * model) {
+            model->state = BtTestStateStopped;
+            model->rssi = 0.0f;
+            return false;
+        });
+    if(bt_test->back_callback) {
+        bt_test->back_callback(bt_test->context);
     }
 }
 
@@ -238,9 +274,12 @@ BtTest* bt_test_alloc() {
 
     with_view_model(
         bt_test->view, (BtTestModel * model) {
+            model->state = BtTestStateStopped;
+            model->message = "Ok - Start";
             BtTestParamArray_init(model->params);
             model->position = 0;
             model->window_position = 0;
+            model->rssi = 0.0f;
             return true;
         });
 
@@ -294,24 +333,30 @@ BtTestParam* bt_test_param_add(
     return param;
 }
 
-void bt_test_set_change_state_callback(
-    BtTest* bt_test,
-    BtTestChangeStateCallback callback,
-    void* context) {
+void bt_test_set_rssi(BtTest* bt_test, float rssi) {
     furi_assert(bt_test);
-    furi_assert(callback);
-    bt_test->callback = callback;
-    bt_test->context = context;
-}
-
-void bt_test_set_message(BtTest* bt_test, const char* message) {
-    furi_assert(bt_test);
-    furi_assert(message);
     with_view_model(
         bt_test->view, (BtTestModel * model) {
-            model->message = message;
+            model->rssi = rssi;
             return true;
         });
+}
+
+void bt_test_set_change_state_callback(BtTest* bt_test, BtTestChangeStateCallback callback) {
+    furi_assert(bt_test);
+    furi_assert(callback);
+    bt_test->change_state_callback = callback;
+}
+
+void bt_test_set_back_callback(BtTest* bt_test, BtTestBackCallback callback) {
+    furi_assert(bt_test);
+    furi_assert(callback);
+    bt_test->back_callback = callback;
+}
+
+void bt_test_set_context(BtTest* bt_test, void* context) {
+    furi_assert(bt_test);
+    bt_test->context = context;
 }
 
 void bt_test_set_current_value_index(BtTestParam* param, uint8_t current_value_index) {
