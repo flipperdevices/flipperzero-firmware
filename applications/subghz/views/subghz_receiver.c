@@ -178,19 +178,19 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         }
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
-        
+
         elements_button_left(canvas, "Conf");
         if((model->real_frequency / 1000 % 10) > 4) {
             frequency = model->real_frequency + 10000;
-         } else {
-             frequency = model->real_frequency;
-         }
+        } else {
+            frequency = model->real_frequency;
+        }
         snprintf(
             buffer,
             sizeof(buffer),
             "%03ld.%02ld",
             frequency / 1000000 % 1000,
-            frequency / 10000 % 100 );
+            frequency / 10000 % 100);
         canvas_draw_str(canvas, 40, 62, buffer);
         canvas_draw_str(canvas, 75, 62, "AM");
         subghz_history_get_text_space_left(model->history, str_buff);
@@ -214,15 +214,15 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_invert_color(canvas);
         if((model->real_frequency / 1000 % 10) > 4) {
             frequency = model->real_frequency + 10000;
-         } else {
-             frequency = model->real_frequency;
-         }
+        } else {
+            frequency = model->real_frequency;
+        }
         snprintf(
             buffer,
             sizeof(buffer),
             "%03ld.%02ld",
             frequency / 1000000 % 1000,
-            frequency / 10000 % 100 );
+            frequency / 10000 % 100);
         canvas_draw_str(canvas, 40, 62, buffer);
         canvas_draw_str(canvas, 75, 62, "AM");
         subghz_history_get_text_space_left(model->history, str_buff);
