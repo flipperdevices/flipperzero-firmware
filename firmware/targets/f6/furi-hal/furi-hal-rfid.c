@@ -1,7 +1,8 @@
 #include <furi-hal-rfid.h>
 #include <furi-hal-ibutton.h>
 #include <furi-hal-resources.h>
-#include "stm32wbxx_ll_tim.h"
+
+#include <stm32wbxx_ll_tim.h>
 
 #define LFRFID_READ_TIM htim1
 #define LFRFID_READ_CHANNEL TIM_CHANNEL_1
