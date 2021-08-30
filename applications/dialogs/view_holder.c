@@ -118,10 +118,13 @@ static void view_holder_draw_callback(Canvas* canvas, void* context) {
 static void view_holder_input_callback(InputEvent* event, void* context) {
     ViewHolder* view_holder = context;
 
-    if(event->type == InputTypePress) {
-        view_holder->ongoing_input_events_count++;
-    } else if(event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease && view_holder->ongoing_input_events_count > 0) {
         view_holder->ongoing_input_events_count--;
+    } else if(event->type == InputTypePress) {
+        view_holder->ongoing_input_events_count++;
+    } else if(view_holder->ongoing_input_events_count==0) {
+        FURI_LOG_E("ViewHolder", "non-complementary input, discarding");
+        return;
     }
 
     bool is_consumed = false;

@@ -217,16 +217,14 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
 }
 
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event) {
-    if(event->type == InputTypePress) {
-        view_dispatcher->ongoing_input_events_count++;
-    } else if(event->type == InputTypeRelease) {
+    // Ongoing input events counting
+    if(event->type == InputTypeRelease && view_dispatcher->ongoing_input_events_count > 0) {
         view_dispatcher->ongoing_input_events_count--;
-    }
-
-    // Handle delayed view switch
-    if(view_dispatcher->delayed_next_view && view_dispatcher->ongoing_input_events_count == 0) {
-        view_dispatcher_set_current_view(view_dispatcher, view_dispatcher->delayed_next_view);
-        view_dispatcher->delayed_next_view = NULL;
+    } else if(event->type == InputTypePress) {
+        view_dispatcher->ongoing_input_events_count++;
+    } else if(view_dispatcher->ongoing_input_events_count==0) {
+        FURI_LOG_E("ViewDispatcher", "non-complementary input, discarding");
+        return;
     }
 
     bool is_consumed = false;
@@ -250,6 +248,12 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         if(!is_consumed) {
             view_dispatcher_switch_to_view(view_dispatcher, view_id);
         }
+    }
+
+    // Delayed view switch
+    if(view_dispatcher->delayed_next_view && view_dispatcher->ongoing_input_events_count == 0) {
+        view_dispatcher_set_current_view(view_dispatcher, view_dispatcher->delayed_next_view);
+        view_dispatcher->delayed_next_view = NULL;
     }
 }
 
