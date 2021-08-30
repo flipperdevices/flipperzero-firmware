@@ -148,6 +148,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
     bool scrollbar = model->history_item > 4;
     string_t str_buff;
     char buffer[64];
+    uint32_t frequency;
     string_init(str_buff);
 
     canvas_clear(canvas);
@@ -176,15 +177,27 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
             elements_scrollbar_pos(canvas, 126, 0, 49, model->idx, model->history_item);
         }
         canvas_set_color(canvas, ColorBlack);
-        canvas_set_font(canvas, FontPrimary);
+        canvas_set_font(canvas, FontSecondary);
+        
+        elements_button_left(canvas, "Conf");
+        if((model->real_frequency / 1000 % 10) > 4) {
+            frequency = model->real_frequency + 10000;
+         } else {
+             frequency = model->real_frequency;
+         }
         snprintf(
             buffer,
             sizeof(buffer),
-            "%03ld.%03ld  OOK",
-            model->real_frequency / 1000000 % 1000,
-            model->real_frequency / 1000 % 1000);
-        canvas_draw_str(canvas, 60, 61, buffer);
-        elements_button_left(canvas, "Config");
+            "%03ld.%02ld",
+            frequency / 1000000 % 1000,
+            frequency / 10000 % 100 );
+        canvas_draw_str(canvas, 40, 62, buffer);
+        canvas_draw_str(canvas, 75, 62, "AM");
+        subghz_history_get_text_space_left(model->history, str_buff);
+        canvas_draw_str(canvas, 94, 62, string_get_cstr(str_buff));
+        canvas_draw_line(canvas, 38, 51, 125, 51);
+        // canvas_draw_line(canvas, 75, 51, 82, 51);
+        // canvas_draw_line(canvas, 90, 51, 125, 51);
         break;
 
     case ReceiverSceneStart:
@@ -196,15 +209,29 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 63, 40, "Scanning...");
         canvas_set_color(canvas, ColorBlack);
-        canvas_set_font(canvas, FontPrimary);
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "Conf");
+        canvas_invert_color(canvas);
+        canvas_draw_box(canvas, 38, 52, 10, 10);
+        canvas_invert_color(canvas);
+        if((model->real_frequency / 1000 % 10) > 4) {
+            frequency = model->real_frequency + 10000;
+         } else {
+             frequency = model->real_frequency;
+         }
         snprintf(
             buffer,
             sizeof(buffer),
-            "%03ld.%03ld  OOK",
-            model->real_frequency / 1000000 % 1000,
-            model->real_frequency / 1000 % 1000);
-        canvas_draw_str(canvas, 60, 61, buffer);
-        elements_button_left(canvas, "Config");
+            "%03ld.%02ld",
+            frequency / 1000000 % 1000,
+            frequency / 10000 % 100 );
+        canvas_draw_str(canvas, 40, 62, buffer);
+        canvas_draw_str(canvas, 75, 62, "AM");
+        subghz_history_get_text_space_left(model->history, str_buff);
+        canvas_draw_str(canvas, 94, 62, string_get_cstr(str_buff));
+        canvas_draw_line(canvas, 48, 51, 125, 51);
+        // canvas_draw_line(canvas, 75, 51, 82, 51);
+        // canvas_draw_line(canvas, 90, 51, 125, 51);
         break;
 
     case ReceiverSceneConfig:
