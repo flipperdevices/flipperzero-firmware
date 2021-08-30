@@ -1,10 +1,10 @@
-FROM ubuntu:focal
+FROM ubuntu:hirsute
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         ca-certificates \
         build-essential \
         python3 \
-        python-lxml \
+        python3-lxml \
         git \
         clang-format-12 \
         dfu-util \
