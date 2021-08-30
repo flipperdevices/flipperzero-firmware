@@ -46,10 +46,6 @@ BtDebugApp* bt_debug_app_alloc() {
     view_set_previous_callback(submenu_get_view(app->submenu), bt_debug_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtDebugAppViewSubmenu, submenu_get_view(app->submenu));
-    app->popup = popup_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, BtDebugAppViewPopup, popup_get_view(app->popup));
-    view_set_previous_callback(popup_get_view(app->popup), bt_debug_exit);
     app->bt_carrier_test = bt_carrier_test_alloc();
     view_set_previous_callback(
         bt_carrier_test_get_view(app->bt_carrier_test), bt_debug_start_view);
@@ -76,8 +72,6 @@ void bt_debug_app_free(BtDebugApp* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtDebugAppViewSubmenu);
     submenu_free(app->submenu);
-    view_dispatcher_remove_view(app->view_dispatcher, BtDebugAppViewPopup);
-    popup_free(app->popup);
     view_dispatcher_remove_view(app->view_dispatcher, BtDebugAppViewCarrierTest);
     bt_carrier_test_free(app->bt_carrier_test);
     view_dispatcher_remove_view(app->view_dispatcher, BtDebugAppViewPacketTest);

@@ -14,21 +14,13 @@ void bt_settings_scene_start_on_enter(void* context) {
     BtSettingsApp* app = context;
     Submenu* submenu = app->submenu;
 
-    if(app->settings.enabled) {
-        submenu_add_item(
-            submenu,
-            "Disable",
-            BtSettingsAppStartSubmenuIndexEnable,
-            bt_settings_scene_start_submenu_callback,
-            app);
-    } else {
-        submenu_add_item(
-            submenu,
-            "Enable",
-            BtSettingsAppStartSubmenuIndexEnable,
-            bt_settings_scene_start_submenu_callback,
-            app);
-    }
+    const char* submenu_label = app->settings.enabled ? "Disable" : "Enable";
+    submenu_add_item(
+        submenu,
+        submenu_label,
+        BtSettingsAppStartSubmenuIndexEnable,
+        bt_settings_scene_start_submenu_callback,
+        app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BtSettingsAppViewSubmenu);
 }
