@@ -91,6 +91,18 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
         }
     }
+
+    // Wait till all input events 
+    while(view_dispatcher->ongoing_input_events_count > 0) {
+        osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever);
+        if(message.type == ViewDispatcherMessageTypeInput) {
+            if(message.input.type == InputTypePress) {
+                view_dispatcher->ongoing_input_events_count++;
+            } else if(message.input.type == InputTypeRelease) {
+                view_dispatcher->ongoing_input_events_count--;
+            }
+        }
+    }
 }
 
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
@@ -234,8 +246,6 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
                     return;
                 }
             }
-        } else if(event->key == InputKeyOk) {
-            view_id = view_next(view_dispatcher->current_view);
         }
         if(!is_consumed) {
             view_dispatcher_switch_to_view(view_dispatcher, view_id);

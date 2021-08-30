@@ -114,12 +114,6 @@ void view_set_custom_callback(View* view, ViewCustomCallback callback);
  */
 void view_set_previous_callback(View* view, ViewNavigationCallback callback);
 
-/* Set Navigation Next callback
- * @param view, pointer to View
- * @param callback, input callback
- */
-void view_set_next_callback(View* view, ViewNavigationCallback callback);
-
 /* Set Enter callback
  * @param view, pointer to View
  * @param callback, callback
