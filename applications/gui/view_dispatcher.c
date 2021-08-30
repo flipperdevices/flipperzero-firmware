@@ -169,7 +169,7 @@ void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t vi
     } else {
         View** view_pp = ViewDict_get(view_dispatcher->views, view_id);
         furi_check(view_pp != NULL);
-        if(view_dispatcher->ongoing_input > 0) {
+        if(view_dispatcher->ongoing_input) {
             view_dispatcher->delayed_next_view = *view_pp;
         } else {
             view_dispatcher->delayed_next_view = NULL;
@@ -257,7 +257,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
     }
 
     // Delayed view switch
-    if(view_dispatcher->delayed_next_view && view_dispatcher->ongoing_input == 0) {
+    if(view_dispatcher->delayed_next_view && !(view_dispatcher->ongoing_input)) {
         view_dispatcher_set_current_view(view_dispatcher, view_dispatcher->delayed_next_view);
         view_dispatcher->delayed_next_view = NULL;
     }
