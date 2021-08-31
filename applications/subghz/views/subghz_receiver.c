@@ -53,6 +53,7 @@ struct SubghzReceiver {
     osTimerId timer;
     SubGhzHopperState hopper_state;
     uint8_t hopper_timeout;
+    uint32_t event_key_id;
 };
 
 typedef struct {
@@ -318,6 +319,7 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
                 });
             subghz_receiver->callback(SubghzReceverEventConfig, subghz_receiver->context);
         } else if(event->key == InputKeyOk) {
+            subghz_receiver->event_key_id = event->id;
             with_view_model(
                 subghz_receiver->view, (SubghzReceiverModel * model) {
                     string_clean(model->text);
@@ -358,12 +360,12 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
         } else if(can_be_saved && event->key == InputKeyRight) {
             subghz_receiver->callback(SubghzReceverEventSave, subghz_receiver->context);
             return false;
-        } else if(can_be_saved && event->key == InputKeyOk && event->type == InputTypePress) {
+        } else if(can_be_saved && event->key == InputKeyOk && event->type == InputTypePress && subghz_receiver->event_key_id != event->id) {
             subghz_receiver->hopper_state = SubGhzHopperStatePause;
             subghz_rx_end(subghz_receiver->worker);
             subghz_receiver->callback(SubghzReceverEventSendStart, subghz_receiver->context);
             return true;
-        } else if(can_be_saved && event->key == InputKeyOk && event->type == InputTypeRelease) {
+        } else if(can_be_saved && event->key == InputKeyOk && event->type == InputTypeRelease && subghz_receiver->event_key_id != event->id) {
             subghz_receiver->callback(SubghzReceverEventSendStop, subghz_receiver->context);
             return true;
         }
