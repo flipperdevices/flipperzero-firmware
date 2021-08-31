@@ -86,8 +86,9 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output,
  * 
  * @param instance  - SubGhzHistory instance
  * @param output    - string_t output
+ * @return bool - is FUUL
  */
-void subghz_history_get_text_space_left(SubGhzHistory* instance, string_t output);
+bool subghz_history_get_text_space_left(SubGhzHistory* instance, string_t output);
 
 /** Add protocol to history
  * 
