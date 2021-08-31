@@ -37,8 +37,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 set(SUPPORTED_BOARDS F407VG H743ZI)
 option(FREERTOS_F407VG_EXAMPLE "Compile FreeRTOS example for the F407VG board" OFF)
 option(FREERTOS_H743ZI_EXAMPLE "Compile FreeRTOS example for the H743ZI board" OFF)
+option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the L552ZE board" OFF)
 
-if(NOT FREERTOS_F407VG_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE)
+if(NOT FREERTOS_F407VG_EXAMPLE AND NOT FREERTOS_H743ZI_EXAMPLE AND NOT FREERTOS_L552ZE_EXAMPLE)
     message(FATAL_ERROR
         "Please select at least one target to compile by passing FREERTOS_<BOARD>_EXAMPLE=ON\n"
         "Supported boards: ${SUPPORTED_BOARDS}"
@@ -80,6 +81,19 @@ if(FREERTOS_F407VG_EXAMPLE)
         set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::F4)
      else()
         set(FREERTOS_F4_NAMESPACE ${FREERTOS_NAMESPACE})
+    endif()
+endif()
+
+if(FREERTOS_L552ZE_EXAMPLE)
+    list(APPEND CMSIS_COMP_LIST STM32L552ZE)
+    list(APPEND HAL_COMP_LIST STM32L552ZE)
+    list(APPEND FREERTOS_COMP_LIST ARM_CM33_NTZ)
+    if(USE_CUBE_FREERTOS)
+        # The device family needs to be supplied as a component to use the Cube FreeRTOS sources
+        list(APPEND FREERTOS_COMP_LIST STM32L5)
+        set(FREERTOS_L5_NAMESPACE ${FREERTOS_NAMESPACE}::STM32::L5)
+     else()
+        set(FREERTOS_L5_NAMESPACE ${FREERTOS_NAMESPACE})
     endif()
 endif()
 
@@ -161,6 +175,42 @@ if(FREERTOS_F407VG_EXAMPLE)
         target_compile_definitions(${TARGET_NAME} PRIVATE
             USE_CMSIS_RTOS_V2
             CMSIS_RTOS_V2_DEVICE_HEADER="stm32f4xx_hal.h"
+        )
+    endif()
+
+    stm32_print_size_of_target(${TARGET_NAME})
+    stm32_generate_binary_file(${TARGET_NAME})
+    stm32_generate_hex_file(${TARGET_NAME})
+endif()
+
+if(FREERTOS_L552ZE_EXAMPLE)
+    set(TARGET_NAME ${PROJ_NAME}-l552ze)
+    add_executable(${TARGET_NAME})
+
+    target_sources(${TARGET_NAME} PRIVATE ${PROJECT_SOURCES})
+    target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIRS})
+    target_link_libraries(${TARGET_NAME} PRIVATE
+        ${FREERTOS_L5_NAMESPACE}::Timers
+        ${FREERTOS_L5_NAMESPACE}::Heap::1
+        ${FREERTOS_L5_NAMESPACE}::ARM_CM33_NTZ
+        HAL::STM32::L5::RCC
+        HAL::STM32::L5::GPIO
+        HAL::STM32::L5::CORTEX
+        CMSIS::STM32::L552ZE
+        STM32::NoSys
+    )
+    if(USE_CMSIS_RTOS)
+        target_link_libraries(${TARGET_NAME} PRIVATE
+            CMSIS::STM32::L5::RTOS
+        )
+    endif()
+    if(USE_CMSIS_RTOS_V2)
+        target_link_libraries(${TARGET_NAME} PRIVATE
+            CMSIS::STM32::L5::RTOS_V2
+        )
+        target_compile_definitions(${TARGET_NAME} PRIVATE
+            USE_CMSIS_RTOS_V2
+            CMSIS_RTOS_V2_DEVICE_HEADER="stm32l5xx_hal.h"
         )
     endif()
 

@@ -1,5 +1,7 @@
 # For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
-set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM4F ARM_CM7 ARM_CM4_MPU ARM_CM3_MPU ARM_CM7_MPU)
+set(FreeRTOS_PORTS ARM_CM0 ARM_CM3 ARM_CM3_MPU ARM_CM4_MPU ARM_CM4F ARM_CM7 ARM_CM7_MPU ARM_CM23 ARM_CM23_NTZ ARM_CM33 ARM_CM33_NTZ)
+set(FreeRTOS_armv8_PORTS ARM_CM23_NTZ ARM_CM33_NTZ ARM_CM23 ARM_CM33)
+set(FreeRTOS_armv8_trustZone_PORTS ARM_CM23 ARM_CM33)
 
 if(NOT FreeRTOS_FIND_COMPONENTS)
     set(FreeRTOS_FIND_COMPONENTS ${FreeRTOS_PORTS})
@@ -125,14 +127,20 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
     endforeach()
 
     foreach(PORT ${FreeRTOS_FIND_COMPONENTS_PORTS})
+        if(${PORT} IN_LIST FreeRTOS_armv8_trustZone_PORTS)
+            set(ARMv8_NON_SECURE "::NON_SECURE")
+        endif()
+        
         find_path(FreeRTOS_${PORT}_PATH
             NAMES portmacro.h
             PATHS "${FREERTOS_PATH}" "${FREERTOS_PATH}/FreeRTOS" 
             PATH_SUFFIXES
-                "portable/GCC/${PORT}/r0p1"
                 "portable/GCC/${PORT}"
+                "portable/GCC/${PORT}/r0p1"
+                "portable/GCC/${PORT}/non_secure"
                 "Source/portable/GCC/${PORT}"
                 "Source/portable/GCC/${PORT}/r0p1"
+                "Source/portable/GCC/${PORT}/non_secure"
             NO_DEFAULT_PATH
         )
 
@@ -147,11 +155,34 @@ macro(stm32_find_freertos FreeRTOS_NAMESPACE FREERTOS_PATH)
             PATHS "${FreeRTOS_${PORT}_PATH}"
             NO_DEFAULT_PATH
         )
-        if(NOT (TARGET ${FreeRTOS_NAMESPACE}::${PORT}))
-            add_library(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE IMPORTED)
-            target_link_libraries(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE FreeRTOS)
-            target_sources(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE "${FreeRTOS_${PORT}_SOURCE}")
-            target_include_directories(${FreeRTOS_NAMESPACE}::${PORT} INTERFACE "${FreeRTOS_${PORT}_PATH}")
+        if(NOT (TARGET ${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE}))
+            add_library(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE IMPORTED)
+            target_link_libraries(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE FreeRTOS)
+            target_sources(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE "${FreeRTOS_${PORT}_SOURCE}")
+            target_include_directories(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE "${FreeRTOS_${PORT}_PATH}")
+            message(trace "FindFreeRTOS: creating target ${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE}")
+            
+            # armv8-m needs additional file even if using "No Trust Zone" port
+            if(${PORT} IN_LIST FreeRTOS_armv8_PORTS)
+                target_sources(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE "${FreeRTOS_${PORT}_PATH}/portasm.c")
+            endif()
+
+            if(${PORT} IN_LIST FreeRTOS_armv8_trustZone_PORTS)
+                # create the secure target
+                add_library(${FreeRTOS_NAMESPACE}::${PORT}::SECURE INTERFACE IMPORTED)
+                # ::SECURE doesn't link FreeRTOS like ::NON_SECURE does
+                target_sources(${FreeRTOS_NAMESPACE}::${PORT}::SECURE INTERFACE "${FreeRTOS_${PORT}_PATH}/../secure/secure_context.c"
+                                                                                "${FreeRTOS_${PORT}_PATH}/../secure/secure_context_port.c"
+                                                                                "${FreeRTOS_${PORT}_PATH}/../secure/secure_heap.c"
+                                                                                "${FreeRTOS_${PORT}_PATH}/../secure/secure_init.c")
+                message(trace "FindFreeRTOS: creating target ${FreeRTOS_NAMESPACE}::${PORT}::SECURE")
+
+                # non-secure part needs declaratation from secure includes
+                target_include_directories(${FreeRTOS_NAMESPACE}::${PORT}${ARMv8_NON_SECURE} INTERFACE "${FreeRTOS_${PORT}_PATH}/../secure")
+                # secure part needs declaratation from non-secure includes and common freeRTOS includes
+                target_include_directories(${FreeRTOS_NAMESPACE}::${PORT}::SECURE INTERFACE "${FreeRTOS_${PORT}_PATH}"
+                                                                                            "${FreeRTOS_COMMON_INCLUDE}")
+            endif()
         endif()
         
         if(FreeRTOS_${PORT}_PATH AND 
