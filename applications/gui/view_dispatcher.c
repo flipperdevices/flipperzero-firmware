@@ -226,9 +226,10 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
     } else if(!(view_dispatcher->ongoing_input & key_bit)) {
         FURI_LOG_W(
             "ViewDispatcher",
-            "non-complementary input, discarding key: %s, type: %s",
+            "non-complementary input, discarding key: %s, type: %s, id: %p",
             input_get_key_name(event->key),
-            input_get_type_name(event->type));
+            input_get_type_name(event->type),
+            event->id);
         return;
     }
 
@@ -264,11 +265,12 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
     } else if(view_dispatcher->ongoing_input_view && event->type == InputTypeRelease) {
         FURI_LOG_W(
             "ViewDispatcher",
-            "View changed while key press %x -> %x. Sending key: %s, type: %s to previous view port",
+            "View changed while key press %p -> %p. Sending key: %s, type: %s, id: %p to previous view port",
             view_dispatcher->ongoing_input_view,
             view_dispatcher->current_view,
             input_get_key_name(event->key),
-            input_get_type_name(event->type));
+            input_get_type_name(event->type),
+            event->id);
         view_input(view_dispatcher->ongoing_input_view, event);
     }
 }

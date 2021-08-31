@@ -191,9 +191,10 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     } else if(!(gui->ongoing_input & key_bit)) {
         FURI_LOG_W(
             "Gui",
-            "non-complementary input, discarding key %s type %s",
+            "non-complementary input, discarding key: %s type: %s, %p",
             input_get_key_name(input_event->key),
-            input_get_type_name(input_event->type));
+            input_get_type_name(input_event->type),
+            input_event->id);
         return;
     }
 
@@ -212,20 +213,22 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     } else if(gui->ongoing_input_view_port && input_event->type == InputTypeRelease) {
         FURI_LOG_W(
             "Gui",
-            "ViewPort changed while key press %x -> %x. Sending key: %s, type: %s to previous view port",
+            "ViewPort changed while key press %p -> %p. Sending key: %s, type: %s, id: %p to previous view port",
             gui->ongoing_input_view_port,
             view_port,
             input_get_key_name(input_event->key),
-            input_get_type_name(input_event->type));
+            input_get_type_name(input_event->type),
+            input_event->id);
         view_port_input(gui->ongoing_input_view_port, input_event);
     } else {
         FURI_LOG_W(
             "Gui",
-            "ViewPort changed while key press %x -> %x. Discarding key: %s, type: %s",
+            "ViewPort changed while key press %p -> %p. Discarding key: %s, type: %s, id: %p",
             gui->ongoing_input_view_port,
             view_port,
             input_get_key_name(input_event->key),
-            input_get_type_name(input_event->type));
+            input_get_type_name(input_event->type),
+            input_event->id);
     }
 
     gui_unlock(gui);
