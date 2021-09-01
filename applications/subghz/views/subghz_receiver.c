@@ -208,7 +208,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Config");
         canvas_invert_color(canvas);
-        canvas_draw_box(canvas, 38, 52, 10, 10);
+        canvas_draw_box(canvas, 38, 52, 10, 12);
         canvas_invert_color(canvas);
         if((model->real_frequency / 1000 % 10) > 4) {
             frequency = model->real_frequency + 10000;
