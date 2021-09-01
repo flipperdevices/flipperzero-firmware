@@ -52,6 +52,7 @@ int32_t bt_srv() {
         if(!furi_hal_bt_wait_startup()) {
             FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
         } else {
+            view_port_enabled_set(bt->statusbar_view_port, true);
             bool bt_app_started = furi_hal_bt_start_app();
             if(!bt_app_started) {
                 FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
