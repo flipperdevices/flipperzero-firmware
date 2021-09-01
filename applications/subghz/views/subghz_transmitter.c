@@ -7,6 +7,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
+#include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 
 struct SubghzTransmitter {
     View* view;
@@ -100,6 +101,10 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     canvas_draw_str(canvas, 90, 8, buffer);
 
     if(model->protocol && model->protocol->get_upload_protocol) {
+        if((!strcmp(model->protocol->name, "KeeLoq")) &&
+           (!strcmp(subghz_protocol_keeloq_get_manufacture_name(model->protocol), "Unknown"))) {
+            return;
+        }
         subghz_transmitter_button_right(canvas, "Send");
     }
 }
@@ -110,7 +115,15 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     bool can_be_sent = false;
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
-            can_be_sent = (model->protocol && model->protocol->get_upload_protocol);
+            if(model->protocol && model->protocol->get_upload_protocol) {
+                if((!strcmp(model->protocol->name, "KeeLoq")) &&
+                   (!strcmp(
+                       subghz_protocol_keeloq_get_manufacture_name(model->protocol), "Unknown"))) {
+                    return true;
+                }
+                can_be_sent = true;
+            }
+            //can_be_sent = (model->protocol && model->protocol->get_upload_protocol);
             string_clean(model->text);
             model->protocol->to_string(model->protocol, model->text);
             return true;

@@ -21,7 +21,7 @@ void subghz_protocol_keeloq_free(SubGhzProtocolKeeloq* instance);
 /** Get manufacture name
  * 
  * @param context - SubGhzProtocolKeeloq context
- * @return bool - char* manufacture name
+ * @return name - char* manufacture name
  */
 const char* subghz_protocol_keeloq_get_manufacture_name(void* context);
 
@@ -29,8 +29,9 @@ const char* subghz_protocol_keeloq_get_manufacture_name(void* context);
  * 
  * @param manufacture_name - manufacture name
  * @param context - SubGhzProtocolKeeloq context
+ * @return bool
  */
-void subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manufacture_name);
+bool subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manufacture_name);
 
 /** Get key keeloq
  * 
