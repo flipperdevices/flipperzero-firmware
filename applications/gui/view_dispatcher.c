@@ -37,7 +37,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue == NULL);
-    view_dispatcher->queue = osMessageQueueNew(8, sizeof(ViewDispatcherMessage), NULL);
+    view_dispatcher->queue = osMessageQueueNew(16, sizeof(ViewDispatcherMessage), NULL);
 }
 
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
