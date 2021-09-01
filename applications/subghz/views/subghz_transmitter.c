@@ -147,6 +147,7 @@ void subghz_transmitter_enter(void* context) {
     SubghzTransmitter* subghz_transmitter = context;
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
+            string_clean(model->text);
             model->protocol->to_string(model->protocol, model->text);
             return true;
         });
