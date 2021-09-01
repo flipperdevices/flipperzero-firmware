@@ -18,10 +18,17 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
  */
 void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance);
 
+/** Find and get manufacture name
+ * 
+ * @param context - SubGhzProtocolStarLine context
+ * @return name - char* manufacture name
+ */
+const char* subghz_protocol_star_line_find_and_get_manufacture_name(void* context);
+
 /** Get manufacture name
  * 
  * @param context - SubGhzProtocolStarLine context
- * @return bool - char* manufacture name
+ * @return name - char* manufacture name
  */
 const char* subghz_protocol_star_line_get_manufacture_name(void* context);
 

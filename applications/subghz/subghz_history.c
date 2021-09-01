@@ -150,10 +150,10 @@ void subghz_history_add_to_history(SubGhzHistory* instance, void* context) {
     instance->history[instance->last_index_write].code_found = protocol->code_last_found;
     if(strcmp(protocol->name, "KeeLoq") == 0) {
         instance->history[instance->last_index_write].manufacture_name =
-            subghz_protocol_keeloq_get_manufacture_name(protocol);
+            subghz_protocol_keeloq_find_and_get_manufacture_name(protocol);
     } else if(strcmp(protocol->name, "Star Line") == 0) {
         instance->history[instance->last_index_write].manufacture_name =
-            subghz_protocol_star_line_get_manufacture_name(protocol);
+            subghz_protocol_star_line_find_and_get_manufacture_name(protocol);
     } else if(strcmp(protocol->name, "Princeton") == 0) {
         instance->history[instance->last_index_write].te =
             subghz_protocol_princeton_get_te(protocol);

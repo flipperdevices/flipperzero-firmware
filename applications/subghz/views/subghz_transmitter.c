@@ -113,13 +113,18 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubghzTransmitter* subghz_transmitter = context;
     bool can_be_sent = false;
+
+    if(event->key == InputKeyBack) {
+        return false;
+    }
+
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
             if(model->protocol && model->protocol->get_upload_protocol) {
                 if((!strcmp(model->protocol->name, "KeeLoq")) &&
                    (!strcmp(
                        subghz_protocol_keeloq_get_manufacture_name(model->protocol), "Unknown"))) {
-                    return true;
+                    return false;
                 }
                 can_be_sent = true;
             }
@@ -130,9 +135,7 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
         });
     //if(event->type != InputTypeShort) return false;
 
-    if(event->key == InputKeyBack) {
-        return false;
-    } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
+    if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
         subghz_transmitter->callback(SubghzTransmitterEventSendStart, subghz_transmitter->context);
         return true;
     } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypeRelease) {

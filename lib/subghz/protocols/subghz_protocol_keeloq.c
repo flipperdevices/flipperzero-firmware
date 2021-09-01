@@ -174,9 +174,14 @@ void subghz_protocol_keeloq_check_remote_controller(SubGhzProtocolKeeloq* instan
     instance->common.btn = key_fix >> 28;
 }
 
-const char* subghz_protocol_keeloq_get_manufacture_name(void* context) {
+const char* subghz_protocol_keeloq_find_and_get_manufacture_name(void* context) {
     SubGhzProtocolKeeloq* instance = context;
     subghz_protocol_keeloq_check_remote_controller(instance);
+    return instance->manufacture_name;
+}
+
+const char* subghz_protocol_keeloq_get_manufacture_name(void* context) {
+    SubGhzProtocolKeeloq* instance = context;
     return instance->manufacture_name;
 }
 
