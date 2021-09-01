@@ -70,13 +70,6 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewMenu, submenu_get_view(subghz->submenu));
 
-    // Analyze
-    subghz->subghz_analyze = subghz_analyze_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewAnalyze,
-        subghz_analyze_get_view(subghz->subghz_analyze));
-
     // Receiver
     subghz->subghz_receiver = subghz_receiver_alloc();
     view_dispatcher_add_view(
@@ -136,8 +129,8 @@ SubGhz* subghz_alloc() {
         subghz->worker, (SubGhzWorkerPairCallback)subghz_protocol_parse);
     subghz_worker_set_context(subghz->worker, subghz->protocol);
 
-    subghz_protocol_load_keeloq_file(subghz->protocol, "/ext/assets/subghz/keeloq_mfcodes");
-    subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/assets/subghz/nice_floor_s_rx");
+    subghz_protocol_load_keeloq_file(subghz->protocol, "/ext/subghz/keeloq_mfcodes");
+    subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/subghz/nice_floor_s_rx");
 
     //subghz_protocol_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
 
@@ -158,10 +151,6 @@ void subghz_free(SubGhz* subghz) {
     // Static
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewStatic);
     subghz_test_static_free(subghz->subghz_test_static);
-
-    // Analyze
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewAnalyze);
-    subghz_analyze_free(subghz->subghz_analyze);
 
     // Receiver
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewReceiver);

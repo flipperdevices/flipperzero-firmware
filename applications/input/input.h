@@ -15,6 +15,19 @@ typedef enum {
 
 /* Input Event, dispatches with PubSub */
 typedef struct {
+    uint32_t sequence;
     InputKey key;
     InputType type;
 } InputEvent;
+
+/** Get human readable input key name
+ * @param key - InputKey
+ * @return string
+ */
+const char* input_get_key_name(InputKey key);
+
+/** Get human readable input type name
+ * @param type - InputType
+ * @return string
+ */
+const char* input_get_type_name(InputType type);
