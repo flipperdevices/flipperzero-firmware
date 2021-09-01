@@ -11,6 +11,7 @@
 #include "shci.h"
 #include "otp.h"
 #include "dis_app.h"
+#include "bas_app.h"
 
 #include <furi-hal.h>
 
@@ -179,6 +180,8 @@ bool APP_BLE_Start() {
 
   // Initialize DIS Application
   DISAPP_Init();
+  // Initialize BAS Application
+  BASAPP_Init();
   // Create timer to handle the connection state machine
   HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
 

@@ -81,11 +81,9 @@
 #define BLE_CFG_DIS_PNP_ID_LEN_MAX                                           (7)
 
 /******************************************************************************
- * Heart Rate Service (HRS)
+ * Battery Service (BAS)
  ******************************************************************************/
-#define BLE_CFG_HRS_BODY_SENSOR_LOCATION_CHAR               1/**< BODY SENSOR LOCATION CHARACTERISTIC */
-#define BLE_CFG_HRS_ENERGY_EXPENDED_INFO_FLAG               1/**< ENERGY EXTENDED INFO FLAG */
-#define BLE_CFG_HRS_ENERGY_RR_INTERVAL_FLAG                 1/**< Max number of RR interval values - Shall not be greater than 9 */
+#define BLE_CFG_BAS_NUMBER                                                    1
 
 /******************************************************************************
  * GAP Service - Apprearance
