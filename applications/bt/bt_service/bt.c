@@ -1,13 +1,13 @@
 #include "bt_i.h"
 
-#define BT_SERVICE_TAG "bt service"
+#define BT_SERVICE_TAG "BT"
 
-static void bt_update_statusbar(void* arg) {
-    furi_assert(arg);
-    Bt* bt = arg;
-    BtMessage m = {.type = BtMessageTypeUpdateStatusbar};
-    furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
-}
+// static void bt_update_statusbar(void* arg) {
+//     furi_assert(arg);
+//     Bt* bt = arg;
+//     BtMessage m = {.type = BtMessageTypeUpdateStatusbar};
+//     furi_check(osMessageQueuePut(bt->message_queue, &m, 0, osWaitForever) == osOK);
+// }
 
 static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_5x8);
@@ -29,9 +29,12 @@ Bt* bt_alloc() {
     }
     // Alloc queue
     bt->message_queue = osMessageQueueNew(8, sizeof(BtMessage), NULL);
+
+    // doesn't make sense if we waiting for transition on service start
+    // bt->update_status_timer = osTimerNew(bt_update_statusbar, osTimerPeriodic, bt, NULL);
+    // osTimerStart(bt->update_status_timer, 4000);
+
     // Setup statusbar view port
-    bt->update_status_timer = osTimerNew(bt_update_statusbar, osTimerPeriodic, bt, NULL);
-    osTimerStart(bt->update_status_timer, 4000);
     bt->statusbar_view_port = bt_statusbar_view_port_alloc();
     // Gui
     bt->gui = furi_record_open("gui");
@@ -44,12 +47,17 @@ int32_t bt_srv() {
     Bt* bt = bt_alloc();
     furi_record_create("bt", bt);
     furi_hal_bt_init();
+
     if(bt->bt_settings.enabled) {
-        bool bt_app_started = furi_hal_bt_start_app();
-        if(!bt_app_started) {
-            FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
+        if(!furi_hal_bt_wait_startup()) {
+            FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
         } else {
-            FURI_LOG_I(BT_SERVICE_TAG, "BT App started");
+            bool bt_app_started = furi_hal_bt_start_app();
+            if(!bt_app_started) {
+                FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
+            } else {
+                FURI_LOG_I(BT_SERVICE_TAG, "BT App started");
+            }
         }
     }
 

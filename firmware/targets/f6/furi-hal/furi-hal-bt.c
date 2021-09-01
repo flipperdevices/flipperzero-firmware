@@ -43,7 +43,7 @@ bool furi_hal_bt_is_alive() {
     return APPE_Status() == BleGlueStatusStarted;
 }
 
-bool furi_hal_bt_wait_transition() {
+bool furi_hal_bt_wait_startup() {
     uint8_t counter = 0;
     while (APPE_Status() == BleGlueStatusStartup) {
         osDelay(10);
@@ -56,7 +56,7 @@ bool furi_hal_bt_wait_transition() {
 }
 
 bool furi_hal_bt_lock_flash() {
-    if (!furi_hal_bt_wait_transition()) {
+    if (!furi_hal_bt_wait_startup()) {
         return false;
     }
     if (APPE_Status() == BleGlueStatusUninitialized) {
