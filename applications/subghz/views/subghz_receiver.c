@@ -179,7 +179,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_set_font(canvas, FontSecondary);
 
         elements_button_left(canvas, "Config");
-        canvas_draw_line(canvas, 38, 51, 125, 51);
+        canvas_draw_line(canvas, 46, 51, 125, 51);
         if(subghz_history_get_text_space_left(model->history, str_buff)) {
             canvas_draw_str(canvas, 54, 62, string_get_cstr(str_buff));
         } else {
@@ -207,9 +207,6 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Config");
-        canvas_invert_color(canvas);
-        canvas_draw_box(canvas, 38, 52, 10, 12);
-        canvas_invert_color(canvas);
         if((model->real_frequency / 1000 % 10) > 4) {
             frequency = model->real_frequency + 10000;
         } else {
@@ -225,7 +222,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         canvas_draw_str(canvas, 79, 62, "AM");
         subghz_history_get_text_space_left(model->history, str_buff);
         canvas_draw_str(canvas, 96, 62, string_get_cstr(str_buff));
-        canvas_draw_line(canvas, 48, 51, 125, 51);
+        canvas_draw_line(canvas, 46, 51, 125, 51);
         break;
 
     case ReceiverSceneConfig:
