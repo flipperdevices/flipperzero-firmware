@@ -39,9 +39,9 @@ typedef enum {
 } SubGhzHopperState;
 
 static const Icon* ReceiverItemIcons[] = {
-    [TYPE_PROTOCOL_UNKNOWN] = &I_quest_7x8,
-    [TYPE_PROTOCOL_STATIC] = &I_unlock_7x8,
-    [TYPE_PROTOCOL_DYNAMIC] = &I_lock_7x8,
+    [TYPE_PROTOCOL_UNKNOWN] = &I_Quest_7x8,
+    [TYPE_PROTOCOL_STATIC] = &I_Unlock_7x8,
+    [TYPE_PROTOCOL_DYNAMIC] = &I_Lock_7x8,
 };
 
 struct SubghzReceiver {
