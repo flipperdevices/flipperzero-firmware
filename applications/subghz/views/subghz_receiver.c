@@ -201,13 +201,9 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         break;
 
     case ReceiverSceneStart:
-        canvas_draw_icon(canvas, 0, 0, &I_RFIDDolphinReceive_97x61);
-        canvas_invert_color(canvas);
-        canvas_draw_box(canvas, 80, 2, 20, 20);
-        canvas_invert_color(canvas);
-        canvas_draw_icon(canvas, 75, 8, &I_sub1_10px);
+        canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 63, 40, "Scanning...");
+        canvas_draw_str(canvas, 63, 46, "Scanning...");
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Config");
