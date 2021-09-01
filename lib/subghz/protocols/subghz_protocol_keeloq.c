@@ -192,6 +192,7 @@ bool subghz_protocol_keeloq_set_manufacture_name(void* context, const char* manu
                 res = strcmp(string_get_cstr(manufacture_code->name), instance->manufacture_name);
                 if(res == 0) return true;
             }
+        instance->manufacture_name = "Unknown";
         return false;
 }
 
@@ -241,7 +242,7 @@ bool subghz_protocol_keeloq_send_key(
     instance->common.code_last_found = subghz_protocol_keeloq_gen_key(instance);
     if(instance->common.callback)
         instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
-        
+
     if(!strcmp(instance->manufacture_name, "Unknown")) {
         return false;
     }
