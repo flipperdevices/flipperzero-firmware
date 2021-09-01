@@ -559,10 +559,11 @@ static void subghz_receiver_timer_callback(void* context) {
             }
 
             // Restart radio
-            subghz_rx_end(subghz_receiver->worker);
+            furi_hal_subghz_idle();
             subghz_protocol_reset(subghz_receiver->protocol);
-            model->real_frequency =
-                subghz_rx(subghz_receiver->worker, subghz_frequencies_hopper[model->frequency]);
+            model->real_frequency = furi_hal_subghz_set_frequency_and_path(
+                subghz_frequencies_hopper[model->frequency]);
+            furi_hal_subghz_rx();
 
             return true;
         });
