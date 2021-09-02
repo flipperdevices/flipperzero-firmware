@@ -124,7 +124,7 @@ typedef struct {
 } ArchiveBrowser;
 
 struct ArchiveApp {
-    osMessageQueueId_t event_queue;
+
     FuriThread* app_thread;
     Loader* loader;
     Gui* gui;

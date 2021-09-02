@@ -369,13 +369,6 @@ static bool archive_get_filenames(ArchiveApp* archive) {
     }
     return true;
 }
-static void archive_exit_callback(ArchiveApp* archive) {
-    furi_assert(archive);
-
-    AppEvent event;
-    event.type = EventTypeExit;
-    furi_check(osMessageQueuePut(archive->event_queue, &event, 0, osWaitForever) == osOK);
-}
 
 static uint32_t archive_previous_callback(void* context) {
     return ArchiveViewMain;
@@ -672,7 +665,7 @@ static bool archive_view_input(InputEvent* event, void* context) {
 
         } else if(event->key == InputKeyBack) {
             if(archive->browser.depth == 0) {
-                archive_exit_callback(archive);
+                view_dispatcher_stop(archive->view_dispatcher);
             } else {
                 archive_leave_dir(archive);
             }
@@ -764,28 +757,25 @@ void archive_free(ArchiveApp* archive) {
     archive->gui = NULL;
     furi_record_close("loader");
     archive->loader = NULL;
-    furi_thread_free(archive->app_thread);
-    furi_check(osMessageQueueDelete(archive->event_queue) == osOK);
 
     free(archive);
 }
 
+
 ArchiveApp* archive_alloc() {
     ArchiveApp* archive = furi_alloc(sizeof(ArchiveApp));
 
-    archive->event_queue = osMessageQueueNew(8, sizeof(AppEvent), NULL);
-    archive->app_thread = furi_thread_alloc();
     archive->gui = furi_record_open("gui");
     archive->loader = furi_record_open("loader");
     archive->api = furi_record_open("storage");
     archive->text_input = text_input_alloc();
-    archive->view_archive_main = view_alloc();
     archive->file_worker = file_worker_alloc(true);
 
-    furi_check(archive->event_queue);
+    archive->view_archive_main = view_alloc();
 
     view_allocate_model(
         archive->view_archive_main, ViewModelTypeLocking, sizeof(ArchiveViewModel));
+
     with_view_model(
         archive->view_archive_main, (ArchiveViewModel * model) {
             files_array_init(model->files);
@@ -795,19 +785,25 @@ ArchiveApp* archive_alloc() {
     view_set_context(archive->view_archive_main, archive);
     view_set_draw_callback(archive->view_archive_main, archive_view_render);
     view_set_input_callback(archive->view_archive_main, archive_view_input);
+
     view_set_previous_callback(
         text_input_get_view(archive->text_input), archive_previous_callback);
 
     // View Dispatcher
     archive->view_dispatcher = view_dispatcher_alloc();
+    view_dispatcher_enable_queue(archive->view_dispatcher);
+    view_dispatcher_attach_to_gui(
+        archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
+
+    view_dispatcher_set_event_callback_context(archive->view_dispatcher, archive);
+
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewMain, archive->view_archive_main);
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewTextInput, text_input_get_view(archive->text_input));
-    view_dispatcher_attach_to_gui(
-        archive->view_dispatcher, archive->gui, ViewDispatcherTypeFullscreen);
 
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavorites);
+    archive_switch_tab(archive);
 
     return archive;
 }
@@ -815,17 +811,8 @@ ArchiveApp* archive_alloc() {
 int32_t archive_app(void* p) {
     ArchiveApp* archive = archive_alloc();
 
-    // default tab
-    archive_switch_tab(archive);
-
-    AppEvent event;
-    while(1) {
-        furi_check(osMessageQueueGet(archive->event_queue, &event, NULL, osWaitForever) == osOK);
-        if(event.type == EventTypeExit) {
-            break;
-        }
-    }
-
+    view_dispatcher_run(archive->view_dispatcher);
     archive_free(archive);
+
     return 0;
 }
