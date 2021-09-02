@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "app_common.h"
 
 #include "app_debug.h"
 #include "utilities_common.h"
@@ -28,6 +27,7 @@
 #include "tl.h"
 #include "dbg_trace.h"
 #include <furi-hal.h>
+#include "app_common.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
