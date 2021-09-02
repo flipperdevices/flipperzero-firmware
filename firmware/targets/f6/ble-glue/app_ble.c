@@ -389,7 +389,7 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
     } else if (uid_len == 4) {
         BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_32_BIT_SERV_UUID;
     } else if(uid_len == 16) {
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_128_BIT_SERV_UUID;
+        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
     }
     memcpy(&BleApplicationContext.BleApplicationContext_legacy.advtServUUID[1], uid, uid_len);
     BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen += uid_len;
@@ -397,52 +397,6 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
 
 APP_BLE_ConnStatus_t APP_BLE_Get_Server_Connection_Status() {
     return BleApplicationContext.Device_Connection_Status;
-}
-
-/* USER CODE BEGIN FD*/
-void APP_BLE_Key_Button1_Action() {
-  tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
-  ret = aci_gap_clear_security_db();
-  if (ret == BLE_STATUS_SUCCESS) {
-    APP_DBG_MSG("Successfully aci_gap_clear_security_db()\r\n");
-  } else {
-    APP_DBG_MSG("aci_gap_clear_security_db() Failed , result: %d \r\n", ret);
-  }
-}
-
-void APP_BLE_Key_Button2_Action() {
-  tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
-  ret = aci_gap_slave_security_req(BleApplicationContext.BleApplicationContext_legacy.connectionHandle); 
-  if (ret == BLE_STATUS_SUCCESS) {
-    APP_DBG_MSG("Successfully aci_gap_slave_security_req()");
-  } else {
-    APP_DBG_MSG("aci_gap_slave_security_req() Failed , result: %d \r\n", ret);
-  }
-}
-  
-void APP_BLE_Key_Button3_Action() {
-  uint8_t TX_PHY, RX_PHY;
-  tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
-  ret = hci_le_read_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,&TX_PHY,&RX_PHY);
-  if (ret == BLE_STATUS_SUCCESS) {
-    APP_DBG_MSG("Read_PHY success \r\n");
-    APP_DBG_MSG("PHY Param  TX= %d, RX= %d \r\n", TX_PHY, RX_PHY);
-    if ((TX_PHY == TX_2M) && (RX_PHY == RX_2M)) {
-      APP_DBG_MSG("hci_le_set_phy PHY Param  TX= %d, RX= %d \r\n", TX_1M, RX_1M);
-      ret = hci_le_set_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,ALL_PHYS_PREFERENCE,TX_1M,RX_1M,0);
-    } else {
-      APP_DBG_MSG("hci_le_set_phy PHY Param  TX= %d, RX= %d \r\n", TX_2M_PREFERRED, RX_2M_PREFERRED);
-      ret = hci_le_set_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,ALL_PHYS_PREFERENCE,TX_2M_PREFERRED,RX_2M_PREFERRED,0);
-    } 
-  } else {
-    APP_DBG_MSG("Read conf not succeess \r\n");
-  }
-
-  if (ret == BLE_STATUS_SUCCESS) {
-    APP_DBG_MSG("set PHY cmd ok\r\n");
-  } else {
-    APP_DBG_MSG("set PHY cmd NOK\r\n");
-  }
 }
 
 static void Ble_Tl_Init( void ) {
