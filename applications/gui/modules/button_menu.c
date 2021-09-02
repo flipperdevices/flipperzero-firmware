@@ -117,7 +117,11 @@ static void button_menu_view_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_icon(canvas, 28, 123, &I_IrdaArrowDown_4x8);
     }
 
-    canvas_draw_str_aligned(canvas, 32, 10, AlignCenter, AlignCenter, model->header);
+    string_t disp_str;
+    string_init_set_str(disp_str, model->header);
+    elements_string_fit_width(canvas, disp_str, ITEM_WIDTH - 6);
+    canvas_draw_str_aligned(canvas, 32, 10, AlignCenter, AlignCenter, string_get_cstr(disp_str));
+    string_clear(disp_str);
 
     for(ButtonMenuItemArray_it(it, model->items); !ButtonMenuItemArray_end_p(it);
         ButtonMenuItemArray_next(it), ++item_position) {
