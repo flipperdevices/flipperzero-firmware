@@ -411,7 +411,9 @@ static void furi_hal_irda_tx_fill_buffer_last(uint8_t buf_num) {
     furi_assert(irda_tim_tx.data_callback);
     IrdaTxBuf* buffer = &irda_tim_tx.buffer[buf_num];
     furi_assert(buffer->data != NULL);
+    (void)buffer->data;
     furi_assert(buffer->polarity != NULL);
+    (void)buffer->polarity;
 
     irda_tim_tx.buffer[buf_num].data[0] = 0;       // 1 pulse
     irda_tim_tx.buffer[buf_num].polarity[0] = IRDA_TX_CCMR_LOW;
@@ -471,8 +473,8 @@ static void furi_hal_irda_tx_fill_buffer(uint8_t buf_num, uint8_t polarity_shift
             irda_tim_tx.tx_timing_rest_duration = num_of_impulses - 1;
             irda_tim_tx.tx_timing_rest_status = status;
             irda_tim_tx.tx_timing_rest_level = level;
-            buffer->polarity[polarity_counter] = level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;
-            buffer->data[*size] = 0xFFFF;
+            --(*size);
+            --polarity_counter;
             status = FuriHalIrdaTxGetDataStateOk;
         } else {
             buffer->polarity[polarity_counter] = level ? IRDA_TX_CCMR_HIGH : IRDA_TX_CCMR_LOW;

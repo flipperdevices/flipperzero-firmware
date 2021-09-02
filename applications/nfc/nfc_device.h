@@ -34,7 +34,7 @@ typedef struct {
     uint8_t sak;
     NfcDeviceType device;
     NfcProtocol protocol;
-} NfcDeviceCommomData;
+} NfcDeviceCommonData;
 
 typedef struct {
     char name[32];
@@ -43,11 +43,12 @@ typedef struct {
     uint8_t number[8];
     uint8_t exp_mon;
     uint8_t exp_year;
-    char cardholder[32];
+    uint16_t country_code;
+    uint16_t currency_code;
 } NfcEmvData;
 
 typedef struct {
-    NfcDeviceCommomData nfc_data;
+    NfcDeviceCommonData nfc_data;
     union {
         NfcEmvData emv_data;
         MifareUlData mf_ul_data;

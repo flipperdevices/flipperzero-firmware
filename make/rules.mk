@@ -19,7 +19,7 @@ $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
 
 BUILD_FLAGS_SHELL=\
 	echo "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
-	diff $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp 2>/dev/null \
+	diff -u $(OBJ_DIR)/BUILD_FLAGS $(OBJ_DIR)/BUILD_FLAGS.tmp 2>&1 > /dev/null \
 		&& ( echo "CFLAGS ok"; rm $(OBJ_DIR)/BUILD_FLAGS.tmp) \
 		|| ( echo "CFLAGS has been changed"; mv $(OBJ_DIR)/BUILD_FLAGS.tmp $(OBJ_DIR)/BUILD_FLAGS )
 $(info $(shell $(BUILD_FLAGS_SHELL)))
@@ -127,4 +127,6 @@ generate_cscope_db:
 	@rm -rf $(OBJ_DIR)/source.list $(OBJ_DIR)/source.list.p
 
 
+ifneq ("$(wildcard $(OBJ_DIR)/*.d)","")
 -include $(DEPS)
+endif

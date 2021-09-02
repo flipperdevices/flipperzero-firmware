@@ -46,7 +46,7 @@ void cli_stdout_callback(void* _cookie, const char* data, size_t size) {
     furi_hal_vcp_tx((const uint8_t*)data, size);
 }
 
-void cli_write(Cli* cli, uint8_t* buffer, size_t size) {
+void cli_write(Cli* cli, const uint8_t* buffer, size_t size) {
     return furi_hal_vcp_tx(buffer, size);
 }
 
@@ -300,6 +300,7 @@ void cli_process_input(Cli* cli) {
     if(c == CliSymbolAsciiTab) {
         cli_handle_autocomplete(cli);
     } else if(c == CliSymbolAsciiSOH) {
+        osDelay(33); // We are too fast, Minicom is not ready yet
         cli_motd();
         cli_prompt(cli);
     } else if(c == CliSymbolAsciiETX) {

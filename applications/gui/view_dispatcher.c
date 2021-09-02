@@ -37,7 +37,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue == NULL);
-    view_dispatcher->queue = osMessageQueueNew(8, sizeof(ViewDispatcherMessage), NULL);
+    view_dispatcher->queue = osMessageQueueNew(16, sizeof(ViewDispatcherMessage), NULL);
 }
 
 void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
@@ -91,6 +91,19 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
         }
     }
+
+    // Wait till all input events delivered
+    while(view_dispatcher->ongoing_input) {
+        osMessageQueueGet(view_dispatcher->queue, &message, NULL, osWaitForever);
+        if(message.type == ViewDispatcherMessageTypeInput) {
+            uint8_t key_bit = (1 << message.input.key);
+            if(message.input.type == InputTypePress) {
+                view_dispatcher->ongoing_input |= key_bit;
+            } else if(message.input.type == InputTypeRelease) {
+                view_dispatcher->ongoing_input &= ~key_bit;
+            }
+        }
+    }
 }
 
 void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
@@ -136,6 +149,10 @@ void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_
     if(view_dispatcher->current_view == view) {
         view_dispatcher_set_current_view(view_dispatcher, NULL);
     }
+    // Check if view is recieving input
+    if(view_dispatcher->ongoing_input_view == view) {
+        view_dispatcher->ongoing_input_view = NULL;
+    }
     // Remove view
     ViewDict_erase(view_dispatcher->views, view_id);
 
@@ -153,8 +170,6 @@ void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t vi
     if(view_id == VIEW_NONE) {
         view_dispatcher_set_current_view(view_dispatcher, NULL);
     } else if(view_id == VIEW_IGNORE) {
-    } else if(view_id == VIEW_DESTROY) {
-        view_dispatcher_free(view_dispatcher);
     } else {
         View** view_pp = ViewDict_get(view_dispatcher->views, view_id);
         furi_check(view_pp != NULL);
@@ -202,29 +217,61 @@ void view_dispatcher_input_callback(InputEvent* event, void* context) {
 }
 
 void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* event) {
-    bool is_consumed = false;
-    if(view_dispatcher->current_view) {
-        is_consumed = view_input(view_dispatcher->current_view, event);
+    // Check input complementarity
+    uint8_t key_bit = (1 << event->key);
+    if(event->type == InputTypePress) {
+        view_dispatcher->ongoing_input |= key_bit;
+    } else if(event->type == InputTypeRelease) {
+        view_dispatcher->ongoing_input &= ~key_bit;
+    } else if(!(view_dispatcher->ongoing_input & key_bit)) {
+        FURI_LOG_W(
+            "ViewDispatcher",
+            "non-complementary input, discarding key: %s, type: %s, sequence: %p",
+            input_get_key_name(event->key),
+            input_get_type_name(event->type),
+            event->sequence);
+        return;
     }
-    if(!is_consumed && event->type == InputTypeShort) {
-        // TODO remove view navigation handlers
-        uint32_t view_id = VIEW_IGNORE;
-        if(event->key == InputKeyBack) {
-            view_id = view_previous(view_dispatcher->current_view);
-            if((view_id == VIEW_IGNORE) && (view_dispatcher->navigation_event_callback)) {
-                is_consumed =
-                    view_dispatcher->navigation_event_callback(view_dispatcher->event_context);
-                if(!is_consumed) {
-                    view_dispatcher_stop(view_dispatcher);
-                    return;
+
+    // Set ongoing input view if this is event is first press event
+    if(!(view_dispatcher->ongoing_input & ~key_bit) && event->type == InputTypePress) {
+        view_dispatcher->ongoing_input_view = view_dispatcher->current_view;
+    }
+
+    // Deliver event
+    if(view_dispatcher->ongoing_input_view == view_dispatcher->current_view) {
+        bool is_consumed = false;
+        if(view_dispatcher->current_view) {
+            is_consumed = view_input(view_dispatcher->current_view, event);
+        }
+        if(!is_consumed && event->type == InputTypeShort) {
+            // TODO remove view navigation handlers
+            uint32_t view_id = VIEW_IGNORE;
+            if(event->key == InputKeyBack) {
+                view_id = view_previous(view_dispatcher->current_view);
+                if((view_id == VIEW_IGNORE) && (view_dispatcher->navigation_event_callback)) {
+                    is_consumed =
+                        view_dispatcher->navigation_event_callback(view_dispatcher->event_context);
+                    if(!is_consumed) {
+                        view_dispatcher_stop(view_dispatcher);
+                        return;
+                    }
                 }
             }
-        } else if(event->key == InputKeyOk) {
-            view_id = view_next(view_dispatcher->current_view);
+            if(!is_consumed) {
+                view_dispatcher_switch_to_view(view_dispatcher, view_id);
+            }
         }
-        if(!is_consumed) {
-            view_dispatcher_switch_to_view(view_dispatcher, view_id);
-        }
+    } else if(view_dispatcher->ongoing_input_view && event->type == InputTypeRelease) {
+        FURI_LOG_W(
+            "ViewDispatcher",
+            "View changed while key press %p -> %p. Sending key: %s, type: %s, sequence: %p to previous view port",
+            view_dispatcher->ongoing_input_view,
+            view_dispatcher->current_view,
+            input_get_key_name(event->key),
+            input_get_type_name(event->type),
+            event->sequence);
+        view_input(view_dispatcher->ongoing_input_view, event);
     }
 }
 

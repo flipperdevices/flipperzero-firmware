@@ -32,31 +32,31 @@ const void subghz_scene_set_type_on_enter(void* context) {
 
     submenu_add_item(
         subghz->submenu,
-        "Pricenton",
+        "Princeton_433",
         SubmenuIndexPricenton,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Nice Flo 12bit",
+        "Nice Flo 12bit_433",
         SubmenuIndexNiceFlo12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "Nice Flo 24bit",
+        "Nice Flo 24bit_433",
         SubmenuIndexNiceFlo24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "CAME 12bit",
+        "CAME 12bit_433",
         SubmenuIndexCAME12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "CAME 24bit",
+        "CAME 24bit_433",
         SubmenuIndexCAME24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
@@ -64,13 +64,13 @@ const void subghz_scene_set_type_on_enter(void* context) {
     //     subghz->submenu, "Nero Sketch", SubmenuIndexNeroSketch, subghz_scene_set_type_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu,
-        "Gate TX",
+        "Gate TX_433",
         SubmenuIndexGateTX,
         subghz_scene_set_type_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
-        "DoorHan",
+        "DoorHan_433",
         SubmenuIndexDoorHan,
         subghz_scene_set_type_submenu_callback,
         subghz);
@@ -146,11 +146,15 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
                 subghz->protocol_result->serial = key & 0x0FFFFFFF;
                 subghz->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
                 subghz->protocol_result->cnt = 0x0003;
-                subghz_protocol_keeloq_set_manufacture_name(subghz->protocol_result, "DoorHan");
-                subghz->protocol_result->code_last_found =
-                    subghz_protocol_keeloq_gen_key(subghz->protocol_result);
-
-                generated_protocol = true;
+                if(subghz_protocol_keeloq_set_manufacture_name(
+                       subghz->protocol_result, "DoorHan")) {
+                    subghz->protocol_result->code_last_found =
+                        subghz_protocol_keeloq_gen_key(subghz->protocol_result);
+                    generated_protocol = true;
+                } else {
+                    generated_protocol = false;
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNoMan);
+                }
             }
             break;
 
@@ -159,6 +163,8 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             break;
         }
         if(generated_protocol) {
+            subghz->frequency = subghz_frequencies[subghz_frequencies_433_92];
+            subghz->preset = FuriHalSubGhzPresetOok650Async;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }
