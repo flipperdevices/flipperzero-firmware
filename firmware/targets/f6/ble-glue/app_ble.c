@@ -159,6 +159,8 @@ bool APP_BLE_Init() {
   return (SHCI_C2_BLE_Init( &ble_init_cmd_packet ) == SHCI_Success);
 }
 
+static void set_advertisment_service_uid(uint8_t* uid, uint8_t uin_len);
+
 bool APP_BLE_Start() {
   if (APPE_Status() != BleGlueStatusStarted) {
     return false;
@@ -185,9 +187,9 @@ bool APP_BLE_Start() {
   // Create timer to handle the connection state machine
   HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
 
-  // Make device discoverable
-  BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_16_BIT_SERV_UUID;
-  BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen = 1;
+  uint8_t adv_service_uid[] = {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
+
+  set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
   /* Initialize intervals for reconnexion without intervals update */
   AdvIntervalMin = CFG_FAST_CONN_ADV_INTERVAL_MIN;
   AdvIntervalMax = CFG_FAST_CONN_ADV_INTERVAL_MAX;
@@ -378,6 +380,19 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
   }
 
   return (SVCCTL_UserEvtFlowEnable);
+}
+
+static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
+    BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen = 1;
+    if(uid_len == 2) {
+        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_16_BIT_SERV_UUID;
+    } else if (uid_len == 4) {
+        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_32_BIT_SERV_UUID;
+    } else if(uid_len == 16) {
+        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_128_BIT_SERV_UUID;
+    }
+    memcpy(&BleApplicationContext.BleApplicationContext_legacy.advtServUUID[1], uid, uid_len);
+    BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen += uid_len;
 }
 
 APP_BLE_ConnStatus_t APP_BLE_Get_Server_Connection_Status() {
@@ -637,7 +652,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
 
     BleApplicationContext.Device_Connection_Status = New_Status;
 
-    const char* name = furi_hal_version_get_ble_local_device_name_ptr();
+    const char* name = "A";//furi_hal_version_get_ble_local_device_name_ptr();
 
     /* Start Fast or Low Power Advertising */
     ret = aci_gap_set_discoverable(
@@ -652,6 +667,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
         BleApplicationContext.BleApplicationContext_legacy.advtServUUID,
         0,
         0);
+    FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
 
     /* Update Advertising data */
     ret = aci_gap_update_adv_data(sizeof(manuf_data), (uint8_t*) manuf_data);
