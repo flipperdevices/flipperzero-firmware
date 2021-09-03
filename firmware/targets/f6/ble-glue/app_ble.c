@@ -186,8 +186,9 @@ bool APP_BLE_Start() {
   BASAPP_Init();
   // Create timer to handle the connection state machine
   HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
-
-  uint8_t adv_service_uid[] = {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
+  uint8_t adv_service_uid[2];
+  adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
+  adv_service_uid[1] = 0x30;
 
   set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
   /* Initialize intervals for reconnexion without intervals update */
@@ -606,7 +607,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
 
     BleApplicationContext.Device_Connection_Status = New_Status;
 
-    const char* name = "A";//furi_hal_version_get_ble_local_device_name_ptr();
+    const char* name = furi_hal_version_get_ble_local_device_name_ptr();
 
     /* Start Fast or Low Power Advertising */
     ret = aci_gap_set_discoverable(
@@ -621,7 +622,9 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
         BleApplicationContext.BleApplicationContext_legacy.advtServUUID,
         0,
         0);
-    FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
+    if(ret) {
+      FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
+    }
 
     /* Update Advertising data */
     ret = aci_gap_update_adv_data(sizeof(manuf_data), (uint8_t*) manuf_data);
