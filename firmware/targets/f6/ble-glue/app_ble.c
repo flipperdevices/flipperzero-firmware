@@ -12,6 +12,7 @@
 #include "otp.h"
 #include "dis_app.h"
 #include "bas_app.h"
+#include "serial_service.h"
 
 #include <furi-hal.h>
 
@@ -184,6 +185,8 @@ bool APP_BLE_Start() {
   DISAPP_Init();
   // Initialize BAS Application
   BASAPP_Init();
+  // Initialize Serial application
+  serial_svc_init();
   // Create timer to handle the connection state machine
   HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
   uint8_t adv_service_uid[2];
