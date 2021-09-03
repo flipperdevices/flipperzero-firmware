@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gui/gui_i.h>
+#include <gui/view.h>
 #include <gui/canvas.h>
 #include <gui/elements.h>
 #include <furi.h>
@@ -39,6 +40,52 @@ typedef struct {
     bool fav;
 } ArchiveFile_t;
 
+static const char* known_ext[] = {
+    [ArchiveFileTypeIButton] = ".ibtn",
+    [ArchiveFileTypeNFC] = ".nfc",
+    [ArchiveFileTypeSubGhz] = ".sub",
+    [ArchiveFileTypeLFRFID] = ".rfid",
+    [ArchiveFileTypeIrda] = ".ir",
+};
+
+static inline const char* get_tab_ext(ArchiveTabEnum tab) {
+    switch(tab) {
+    case ArchiveTabIButton:
+        return known_ext[ArchiveFileTypeIButton];
+    case ArchiveTabNFC:
+        return known_ext[ArchiveFileTypeNFC];
+    case ArchiveTabSubGhz:
+        return known_ext[ArchiveFileTypeSubGhz];
+    case ArchiveTabLFRFID:
+        return known_ext[ArchiveFileTypeLFRFID];
+    case ArchiveTabIrda:
+        return known_ext[ArchiveFileTypeIrda];
+    default:
+        return "*";
+    }
+}
+
+typedef enum {
+    ArchiveMainViewEventOK,
+    ArchiveMainViewEventBack,
+    ArchiveMainViewEventMore,
+} ArchiveMainViewEvent;
+
+typedef struct ArchiveMainView ArchiveMainView;
+
+typedef void (*ArchiveMainViewCallback)(ArchiveMainViewEvent event, void* context);
+
+void archive_main_view_set_callback(
+    ArchiveMainView* archive_main_view,
+    ArchiveMainViewCallback callback,
+    void* context);
+
+ArchiveMainView* archive_main_view_alloc();
+
+void archive_main_view_free(ArchiveMainView* archive_main_view);
+
+View* archive_main_get_view(ArchiveMainView* archive_main_view);
+
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
     obj->type = ArchiveFileTypeUnknown;
     string_init(obj->name);
@@ -66,17 +113,17 @@ ARRAY_DEF(
      INIT_SET(API_6(ArchiveFile_t_init_set)),
      CLEAR(API_2(ArchiveFile_t_clear))))
 
-typedef struct {
-    uint8_t tab_idx;
-    uint8_t menu_idx;
-    uint16_t idx;
-    uint16_t list_offset;
-    files_array_t files;
-    bool menu;
-} ArchiveViewModel;
-
 void archive_view_render(Canvas* canvas, void* model);
 void archive_trim_file_ext(char* name);
+void update_offset(ArchiveMainView* archive_main_view);
+void archive_view_add_item(
+    ArchiveMainView* archive_main_view,
+    FileInfo* file_info,
+    const char* name);
+
+size_t archive_file_array_size(ArchiveMainView* archive_main_view);
+void archive_file_array_remove_selected(ArchiveMainView* archive_main_view);
+void archive_file_array_clean(ArchiveMainView* archive_main_view);
 
 static inline bool is_known_app(ArchiveFileTypeEnum type) {
     return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
