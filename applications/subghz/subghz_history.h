@@ -94,8 +94,11 @@ bool subghz_history_get_text_space_left(SubGhzHistory* instance, string_t output
  * 
  * @param instance  - SubGhzHistory instance
  * @param context    - SubGhzProtocolCommon context
+ * @param frequency - frequency Hz
+ * @param preset    - FuriHalSubGhzPreset preset
+ * @return bool;
  */
-void subghz_history_add_to_history(SubGhzHistory* instance, void* context);
+bool subghz_history_add_to_history(SubGhzHistory* instance, void* context, uint32_t frequency, FuriHalSubGhzPreset preset);
 
 /** Get SubGhzProtocolCommonLoad to load into the protocol decoder bin data
  * 

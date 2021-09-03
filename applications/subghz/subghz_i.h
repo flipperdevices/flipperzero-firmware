@@ -37,16 +37,30 @@ extern const uint32_t subghz_frequencies[];
 extern const uint32_t subghz_frequencies_count;
 extern const uint32_t subghz_frequencies_433_92;
 
-struct SubGhz {
-    Gui* gui;
-    NotificationApp* notifications;
-
+struct SubGhzTxRx {
     SubGhzWorker* worker;
     SubGhzProtocol* protocol;
     SubGhzProtocolCommon* protocol_result;
     SubGhzProtocolCommonEncoder* encoder;
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
+    SubGhzHistory* history;
+    uint16_t idx_menu_chosen;
+};
+
+typedef struct SubGhzTxRx SubGhzTxRx;
+
+struct SubGhz {
+    Gui* gui;
+    NotificationApp* notifications;
+
+    SubGhzTxRx* txrx;
+    // SubGhzWorker* worker;
+    // SubGhzProtocol* protocol;
+    // SubGhzProtocolCommon* protocol_result;
+    // SubGhzProtocolCommonEncoder* encoder;
+    // uint32_t frequency;
+    // FuriHalSubGhzPreset preset;
 
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -92,3 +106,4 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_save_protocol_to_file(void* context, const char* dev_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 uint32_t subghz_random_serial(void);
+void subghz_add_to_history_callback(SubGhzProtocolCommon* parser, void* context);

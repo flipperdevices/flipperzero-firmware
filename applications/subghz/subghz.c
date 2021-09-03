@@ -120,17 +120,21 @@ SubGhz* subghz_alloc() {
         SubGhzViewStatic,
         subghz_test_static_get_view(subghz->subghz_test_static));
 
-    //init Worker & Protocol
-    subghz->worker = subghz_worker_alloc();
-    subghz->protocol = subghz_protocol_alloc();
+    //init Worker & Protocol & History
+    subghz->txrx=furi_alloc(sizeof(SubGhzTxRx));
+    subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+    subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+    subghz->txrx->history = subghz_history_alloc();
+    subghz->txrx->worker = subghz_worker_alloc();
+    subghz->txrx->protocol = subghz_protocol_alloc();
     subghz_worker_set_overrun_callback(
-        subghz->worker, (SubGhzWorkerOverrunCallback)subghz_protocol_reset);
+        subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_protocol_reset);
     subghz_worker_set_pair_callback(
-        subghz->worker, (SubGhzWorkerPairCallback)subghz_protocol_parse);
-    subghz_worker_set_context(subghz->worker, subghz->protocol);
+        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_protocol_parse);
+    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->protocol);
 
-    subghz_protocol_load_keeloq_file(subghz->protocol, "/ext/subghz/keeloq_mfcodes");
-    subghz_protocol_load_nice_flor_s_file(subghz->protocol, "/ext/subghz/nice_floor_s_rx");
+    subghz_protocol_load_keeloq_file(subghz->txrx->protocol, "/ext/subghz/keeloq_mfcodes");
+    subghz_protocol_load_nice_flor_s_file(subghz->txrx->protocol, "/ext/subghz/nice_floor_s_rx");
 
     //subghz_protocol_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
 
@@ -186,9 +190,11 @@ void subghz_free(SubGhz* subghz) {
     furi_record_close("gui");
     subghz->gui = NULL;
 
-    //Worker & Protocol
-    subghz_protocol_free(subghz->protocol);
-    subghz_worker_free(subghz->worker);
+    //Worker & Protocol & History
+    subghz_protocol_free(subghz->txrx->protocol);
+    subghz_worker_free(subghz->txrx->worker);
+    subghz_history_free(subghz->txrx->history);
+    free(subghz->txrx);
 
     // Notifications
     furi_record_close("notification");

@@ -1,5 +1,7 @@
 ADD_SCENE(subghz, start, Start)
+ADD_SCENE(subghz, read, Read)
 ADD_SCENE(subghz, receiver, Receiver)
+ADD_SCENE(subghz, receiver_config, ReceiverConfig)
 ADD_SCENE(subghz, save_name, SaveName)
 ADD_SCENE(subghz, save_success, SaveSuccess)
 ADD_SCENE(subghz, saved, Saved)

@@ -14,8 +14,8 @@ enum SubmenuIndex {
 
 bool subghz_scene_set_type_submenu_to_find_protocol(void* context, const char* protocol_name) {
     SubGhz* subghz = context;
-    subghz->protocol_result = subghz_protocol_get_by_name(subghz->protocol, protocol_name);
-    if(subghz->protocol_result == NULL) {
+    subghz->txrx->protocol_result = subghz_protocol_get_by_name(subghz->txrx->protocol, protocol_name);
+    if(subghz->txrx->protocol_result == NULL) {
         //show error
         return false;
     }
@@ -90,41 +90,41 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
         switch(event.event) {
         case SubmenuIndexPricenton:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "Princeton")) {
-                subghz->protocol_result->code_last_count_bit = 24;
+                subghz->txrx->protocol_result->code_last_count_bit = 24;
                 key = (key & 0x00FFFFF0) | 0x4; //btn 0x1, 0x2, 0x4, 0x8
-                subghz->protocol_result->code_last_found = key;
+                subghz->txrx->protocol_result->code_last_found = key;
                 generated_protocol = true;
             }
             break;
         case SubmenuIndexNiceFlo12bit:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "Nice FLO")) {
-                subghz->protocol_result->code_last_count_bit = 12;
+                subghz->txrx->protocol_result->code_last_count_bit = 12;
                 key = (key & 0x0000FFF0) | 0x1; //btn 0x1, 0x2, 0x4
-                subghz->protocol_result->code_last_found = key;
+                subghz->txrx->protocol_result->code_last_found = key;
                 generated_protocol = true;
             }
             break;
         case SubmenuIndexNiceFlo24bit:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "Nice FLO")) {
-                subghz->protocol_result->code_last_count_bit = 24;
+                subghz->txrx->protocol_result->code_last_count_bit = 24;
                 key = (key & 0x00FFFFF0) | 0x4; //btn 0x1, 0x2, 0x4, 0x8
-                subghz->protocol_result->code_last_found = key;
+                subghz->txrx->protocol_result->code_last_found = key;
                 generated_protocol = true;
             }
             break;
         case SubmenuIndexCAME12bit:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "CAME")) {
-                subghz->protocol_result->code_last_count_bit = 12;
+                subghz->txrx->protocol_result->code_last_count_bit = 12;
                 key = (key & 0x0000FFF0) | 0x1; //btn 0x1, 0x2, 0x4
-                subghz->protocol_result->code_last_found = key;
+                subghz->txrx->protocol_result->code_last_found = key;
                 generated_protocol = true;
             }
             break;
         case SubmenuIndexCAME24bit:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "CAME")) {
-                subghz->protocol_result->code_last_count_bit = 24;
+                subghz->txrx->protocol_result->code_last_count_bit = 24;
                 key = (key & 0x00FFFFF0) | 0x4; //btn 0x1, 0x2, 0x4, 0x8
-                subghz->protocol_result->code_last_found = key;
+                subghz->txrx->protocol_result->code_last_found = key;
                 generated_protocol = true;
             }
             break;
@@ -133,23 +133,23 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
         //     break;
         case SubmenuIndexGateTX:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "GateTX")) {
-                subghz->protocol_result->code_last_count_bit = 24;
+                subghz->txrx->protocol_result->code_last_count_bit = 24;
                 key = (key & 0x00F0FFFF) | 0xF << 16; //btn 0xF, 0xC, 0xA, 0x6
-                subghz->protocol_result->code_last_found = subghz_protocol_common_reverse_key(
-                    key, subghz->protocol_result->code_last_count_bit);
+                subghz->txrx->protocol_result->code_last_found = subghz_protocol_common_reverse_key(
+                    key, subghz->txrx->protocol_result->code_last_count_bit);
                 generated_protocol = true;
             }
             break;
         case SubmenuIndexDoorHan:
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "KeeLoq")) {
-                subghz->protocol_result->code_last_count_bit = 64;
-                subghz->protocol_result->serial = key & 0x0FFFFFFF;
-                subghz->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
-                subghz->protocol_result->cnt = 0x0003;
+                subghz->txrx->protocol_result->code_last_count_bit = 64;
+                subghz->txrx->protocol_result->serial = key & 0x0FFFFFFF;
+                subghz->txrx->protocol_result->btn = 0x2; //btn 0x1, 0x2, 0x4, 0x8
+                subghz->txrx->protocol_result->cnt = 0x0003;
                 if(subghz_protocol_keeloq_set_manufacture_name(
-                       subghz->protocol_result, "DoorHan")) {
-                    subghz->protocol_result->code_last_found =
-                        subghz_protocol_keeloq_gen_key(subghz->protocol_result);
+                       subghz->txrx->protocol_result, "DoorHan")) {
+                    subghz->txrx->protocol_result->code_last_found =
+                        subghz_protocol_keeloq_gen_key(subghz->txrx->protocol_result);
                     generated_protocol = true;
                 } else {
                     generated_protocol = false;
@@ -163,8 +163,8 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             break;
         }
         if(generated_protocol) {
-            subghz->frequency = subghz_frequencies[subghz_frequencies_433_92];
-            subghz->preset = FuriHalSubGhzPresetOok650Async;
+            subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+            subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }
