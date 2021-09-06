@@ -18,6 +18,7 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
 
@@ -26,6 +27,8 @@
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include "subghz_history.h"
 
+#include <gui/modules/variable-item-list.h>
+
 #define SUBGHZ_TEXT_STORE_SIZE 128
 
 #define NOTIFICATION_STARTING_STATE 0u
@@ -33,9 +36,27 @@
 #define NOTIFICATION_TX_STATE 2u
 #define NOTIFICATION_RX_STATE 3u
 
+extern const char* const subghz_frequencies_text[];
 extern const uint32_t subghz_frequencies[];
+extern const uint32_t subghz_hopper_frequencies[];
 extern const uint32_t subghz_frequencies_count;
+extern const uint32_t subghz_hopper_frequencies_count;
 extern const uint32_t subghz_frequencies_433_92;
+
+/** SubGhzTxRx state */
+typedef enum {
+    SubGhzTxRxStateIdle,
+    SubGhzTxRxStateRx,
+    SubGhzTxRxStateTx,
+} SubGhzTxRxState;
+
+/** SubGhzHopperState state */
+typedef enum {
+    SubGhzHopperStateOFF,
+    SubGhzHopperStateRunnig,
+    SubGhzHopperStatePause,
+    SubGhzHopperStateRSSITimeOut,
+} SubGhzHopperState;
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -46,6 +67,11 @@ struct SubGhzTxRx {
     FuriHalSubGhzPreset preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
+    SubGhzTxRxState txrx_state;
+    //bool hopper_runing;
+    SubGhzHopperState hopper_state;
+    uint8_t hopper_timeout;
+    uint8_t hopper_idx_frequency;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -55,12 +81,6 @@ struct SubGhz {
     NotificationApp* notifications;
 
     SubGhzTxRx* txrx;
-    // SubGhzWorker* worker;
-    // SubGhzProtocol* protocol;
-    // SubGhzProtocolCommon* protocol_result;
-    // SubGhzProtocolCommonEncoder* encoder;
-    // uint32_t frequency;
-    // FuriHalSubGhzPreset preset;
 
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -69,11 +89,13 @@ struct SubGhz {
     DialogEx* dialog_ex;
     Popup* popup;
     TextInput* text_input;
+    Widget* widget;
     char text_store[SUBGHZ_TEXT_STORE_SIZE + 1];
     uint8_t state_notifications;
 
     SubghzReceiver* subghz_receiver;
     SubghzTransmitter* subghz_transmitter;
+    VariableItemList* variable_item_list;
 
     SubghzTestStatic* subghz_test_static;
     SubghzTestCarrier* subghz_test_carrier;
@@ -87,8 +109,9 @@ typedef enum {
     SubGhzViewReceiver,
     SubGhzViewPopup,
     SubGhzViewTextInput,
+    SubGhzViewWidget,
     SubGhzViewTransmitter,
-
+    SubGhzViewVariableItemList,
     SubGhzViewStatic,
     SubGhzViewTestCarrier,
     SubGhzViewTestPacket,

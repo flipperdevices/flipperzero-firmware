@@ -1,5 +1,22 @@
 #include "subghz_i.h"
 
+const char* const subghz_frequencies_text[] = {
+    "300.00",
+    "315.00",
+    "348.00",
+    "387.00",
+    "433.08",
+    "433.92",
+    "434.78",
+    "438.90",
+    "464.00",
+    "779.00",
+    "868.35",
+    "915.00",
+    "925.00",
+    "928.00",
+};
+
 const uint32_t subghz_frequencies[] = {
     /* 300 - 348 */
     300000000,
@@ -20,7 +37,15 @@ const uint32_t subghz_frequencies[] = {
     928000000,
 };
 
+const uint32_t subghz_hopper_frequencies[] = {
+    315000000,
+    433920000,
+    868350000,
+};
+
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
+const uint32_t subghz_hopper_frequencies_count =
+    sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_frequencies_433_92 = 5;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
@@ -92,12 +117,24 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewTextInput, text_input_get_view(subghz->text_input));
 
+    // Custom Widget
+    subghz->widget = widget_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher, SubGhzViewWidget, widget_get_view(subghz->widget));
+
     // Transmitter
     subghz->subghz_transmitter = subghz_transmitter_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewTransmitter,
         subghz_transmitter_get_view(subghz->subghz_transmitter));
+
+    // Variable Item List
+    subghz->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher,
+        SubGhzViewVariableItemList,
+        variable_item_list_get_view(subghz->variable_item_list));
 
     // Carrier Test Module
     subghz->subghz_test_carrier = subghz_test_carrier_alloc();
@@ -121,9 +158,11 @@ SubGhz* subghz_alloc() {
         subghz_test_static_get_view(subghz->subghz_test_static));
 
     //init Worker & Protocol & History
-    subghz->txrx=furi_alloc(sizeof(SubGhzTxRx));
+    subghz->txrx = furi_alloc(sizeof(SubGhzTxRx));
     subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+    subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+    subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
     subghz->txrx->protocol = subghz_protocol_alloc();
@@ -164,9 +203,17 @@ void subghz_free(SubGhz* subghz) {
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTextInput);
     text_input_free(subghz->text_input);
 
-    // Receiver
+    // Custom Widget
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewWidget);
+    widget_free(subghz->widget);
+
+    // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTransmitter);
     subghz_transmitter_free(subghz->subghz_transmitter);
+
+    // Variable Item List
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewVariableItemList);
+    variable_item_list_free(subghz->variable_item_list);
 
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);

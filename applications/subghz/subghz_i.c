@@ -76,7 +76,8 @@ void subghz_transmitter_tx_start(void* context) {
     subghz->txrx->encoder->repeat = 200; //max repeat with the button held down
     //get upload
     if(subghz->txrx->protocol_result->get_upload_protocol) {
-        if(subghz->txrx->protocol_result->get_upload_protocol(subghz->txrx->protocol_result, subghz->txrx->encoder)) {
+        if(subghz->txrx->protocol_result->get_upload_protocol(
+               subghz->txrx->protocol_result, subghz->txrx->encoder)) {
             if(subghz->txrx->preset) {
                 subghz_begin(subghz->txrx->preset);
             } else {
@@ -89,7 +90,8 @@ void subghz_transmitter_tx_start(void* context) {
             }
 
             //Start TX
-            furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, subghz->txrx->encoder);
+            furi_hal_subghz_start_async_tx(
+                subghz_protocol_encoder_common_yield, subghz->txrx->encoder);
         }
     }
 }
@@ -176,7 +178,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
 
 bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
     SubGhz* subghz = context;
-    furi_assert(subghz->protocol_result);
+    furi_assert(subghz->txrx->protocol_result);
     FileWorker* file_worker = file_worker_alloc(false);
     string_t dev_file_name;
     string_init(dev_file_name);
@@ -335,4 +337,59 @@ void subghz_add_to_history_callback(SubGhzProtocolCommon* parser, void* context)
 
     subghz_history_add_to_history(txrx->history, parser, txrx->frequency, txrx->preset);
     subghz_protocol_reset(txrx->protocol);
+}
+
+void subghz_hopper_update(void* context) {
+    furi_assert(context);
+    SubGhzTxRx* txrx = context;
+
+    switch(txrx->hopper_state) {
+    case SubGhzHopperStateOFF:
+        return;
+        break;
+    case SubGhzHopperStatePause:
+        return;
+        break;
+    case SubGhzHopperStateRSSITimeOut:
+        if(txrx->hopper_timeout != 0) {
+            txrx->hopper_timeout--;
+            return;
+        }
+        break;
+    default:
+        break;
+    }
+    float rssi = -127.0f;
+    if(txrx->hopper_state != SubGhzHopperStateRSSITimeOut) {
+        // See RSSI Calculation timings in CC1101 17.3 RSSI
+        rssi = furi_hal_subghz_get_rssi();
+
+        // Stay if RSSI is high enough
+        if(rssi > -90.0f) {
+            txrx->hopper_timeout = 10;
+            txrx->hopper_state = SubGhzHopperStateRSSITimeOut;
+            return;
+        }
+    } else {
+        txrx->hopper_state = SubGhzHopperStateRunnig;
+    }
+
+    // Select next frequency
+    if(txrx->hopper_idx_frequency < subghz_hopper_frequencies_count - 1) {
+        txrx->hopper_idx_frequency++;
+    } else {
+        txrx->hopper_idx_frequency = 0;
+    }
+
+    if(txrx->txrx_state == SubGhzTxRxStateRx) {
+        subghz_idle();
+        subghz_rx_end(txrx->worker);
+        txrx->txrx_state = SubGhzTxRxStateIdle;
+    };
+    if(txrx->txrx_state == SubGhzTxRxStateIdle) {
+        subghz_protocol_reset(txrx->protocol);
+        txrx->frequency = subghz_hopper_frequencies[txrx->hopper_idx_frequency];
+        subghz_rx(txrx->worker, txrx->frequency);
+        txrx->txrx_state = SubGhzTxRxStateRx;
+    }
 }

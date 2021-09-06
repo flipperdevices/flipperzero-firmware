@@ -1,5 +1,6 @@
 #include "widget_element_i.h"
 #include <m-string.h>
+#include <gui/elements.h>
 
 typedef struct {
     uint8_t x;
@@ -17,13 +18,21 @@ static void gui_string_draw(Canvas* canvas, WidgetElement* element) {
 
     if(string_size(model->text)) {
         canvas_set_font(canvas, model->font);
-        canvas_draw_str_aligned(
+        elements_multiline_text_aligned(
             canvas,
             model->x,
             model->y,
             model->horizontal,
             model->vertical,
             string_get_cstr(model->text));
+
+        // canvas_draw_str_aligned(
+        //     canvas,
+        //     model->x,
+        //     model->y,
+        //     model->horizontal,
+        //     model->vertical,
+        //     string_get_cstr(model->text));
     }
 }
 

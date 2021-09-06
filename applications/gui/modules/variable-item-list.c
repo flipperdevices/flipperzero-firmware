@@ -235,6 +235,21 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
     free(variable_item_list);
 }
 
+void variable_item_list_clean(VariableItemList* variable_item_list) {
+    furi_assert(variable_item_list);
+
+    with_view_model(
+        variable_item_list->view, (VariableItemListModel * model) {
+            VariableItemArray_it_t it;
+            for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
+                VariableItemArray_next(it)) {
+                string_clean(VariableItemArray_ref(it)->current_value_text);
+            }
+            VariableItemArray_clean(model->items);
+            return false;
+        });
+}
+
 View* variable_item_list_get_view(VariableItemList* variable_item_list) {
     furi_assert(variable_item_list);
     return variable_item_list->view;

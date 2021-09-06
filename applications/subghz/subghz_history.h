@@ -107,3 +107,5 @@ bool subghz_history_add_to_history(SubGhzHistory* instance, void* context, uint3
  * @return SubGhzProtocolCommonLoad*
  */
 SubGhzProtocolCommonLoad* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx);
+
+void subghz_hopper_update(void* context);
