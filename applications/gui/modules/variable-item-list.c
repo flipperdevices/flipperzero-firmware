@@ -68,10 +68,10 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
                 canvas_draw_str(canvas, 73, item_text_y, "<");
             }
 
-            canvas_draw_str(canvas, 84, item_text_y, string_get_cstr(item->current_value_text));
+            canvas_draw_str(canvas, 80, item_text_y, string_get_cstr(item->current_value_text));
 
             if(item->current_value_index < (item->values_count - 1)) {
-                canvas_draw_str(canvas, 113, item_text_y, ">");
+                canvas_draw_str(canvas, 115, item_text_y, ">");
             }
         }
 
