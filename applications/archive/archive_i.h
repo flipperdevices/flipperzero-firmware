@@ -20,18 +20,10 @@
 #define MAX_FILE_SIZE 128
 
 typedef enum {
-    ArchiveViewMain,
+    ArchiveViewBrowser,
     ArchiveViewTextInput,
     ArchiveViewTotal,
 } ArchiveViewEnum;
-
-// static const char* flipper_app_name[] = {
-//     [ArchiveFileTypeIButton] = "iButton",
-//     [ArchiveFileTypeNFC] = "NFC",
-//     [ArchiveFileTypeSubGhz] = "Sub-GHz",
-//     [ArchiveFileTypeLFRFID] = "125 kHz RFID",
-//     [ArchiveFileTypeIrda] = "Infrared",
-// };
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/any/favorites",
@@ -78,12 +70,8 @@ typedef struct {
 } AppEvent;
 
 struct ArchiveApp {
-    Loader* loader;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
-    ArchiveMainView* archive_main_view;
+    ArchiveMainView* main_view;
     TextInput* text_input;
-
-    Storage* api;
-    FileWorker* file_worker;
 };

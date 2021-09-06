@@ -1,7 +1,11 @@
 #include "archive_favorites.h"
 #include "archive_files.h"
+#include "../views/archive_main_view.h"
 
 void archive_add_to_favorites(string_t file_path, string_t name) {
+    furi_assert(file_path);
+    furi_assert(name);
+
     string_t buffer_src;
 
     string_init_printf(buffer_src, "%s/%s\r\n", string_get_cstr(file_path), string_get_cstr(name));
@@ -12,7 +16,9 @@ void archive_add_to_favorites(string_t file_path, string_t name) {
 }
 
 bool archive_favorites_rename(string_t file_path, string_t selected, string_t dst) {
+    furi_assert(file_path);
     furi_assert(selected);
+    furi_assert(dst);
 
     FileWorker* file_worker = file_worker_alloc(false);
 
@@ -59,6 +65,7 @@ bool archive_favorites_rename(string_t file_path, string_t selected, string_t ds
 }
 
 bool archive_favorites_delete(string_t file_path, string_t selected) {
+    furi_assert(file_path);
     furi_assert(selected);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -102,6 +109,7 @@ bool archive_favorites_delete(string_t file_path, string_t selected) {
 }
 
 bool archive_is_favorite(string_t file_path, string_t selected) {
+    furi_assert(file_path);
     furi_assert(selected);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -139,7 +147,10 @@ bool archive_is_favorite(string_t file_path, string_t selected) {
     return found;
 }
 
-bool archive_favorites_read(ArchiveMainView* archive_view) {
+bool archive_favorites_read(void* context) {
+    furi_assert(context);
+
+    ArchiveMainView* archive_view = context;
     FileWorker* file_worker = file_worker_alloc(false);
 
     string_t buffer;
@@ -147,7 +158,7 @@ bool archive_favorites_read(ArchiveMainView* archive_view) {
     string_init(buffer);
 
     bool load_result =
-        file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+        file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_ALWAYS);
 
     if(load_result) {
         while(1) {

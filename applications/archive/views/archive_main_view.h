@@ -75,16 +75,16 @@ typedef struct ArchiveMainView ArchiveMainView;
 
 typedef void (*ArchiveMainViewCallback)(ArchiveMainViewEvent event, void* context);
 
-void archive_main_view_set_callback(
-    ArchiveMainView* archive_main_view,
+void main_view_set_callback(
+    ArchiveMainView* main_view,
     ArchiveMainViewCallback callback,
     void* context);
 
-ArchiveMainView* archive_main_view_alloc();
+ArchiveMainView* main_view_alloc();
 
-void archive_main_view_free(ArchiveMainView* archive_main_view);
+void main_view_free(ArchiveMainView* main_view);
 
-View* archive_main_get_view(ArchiveMainView* archive_main_view);
+View* archive_main_get_view(ArchiveMainView* main_view);
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
     obj->type = ArchiveFileTypeUnknown;
@@ -115,15 +115,12 @@ ARRAY_DEF(
 
 void archive_view_render(Canvas* canvas, void* model);
 void archive_trim_file_ext(char* name);
-void update_offset(ArchiveMainView* archive_main_view);
-void archive_view_add_item(
-    ArchiveMainView* archive_main_view,
-    FileInfo* file_info,
-    const char* name);
+void update_offset(ArchiveMainView* main_view);
+void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
 
-size_t archive_file_array_size(ArchiveMainView* archive_main_view);
-void archive_file_array_remove_selected(ArchiveMainView* archive_main_view);
-void archive_file_array_clean(ArchiveMainView* archive_main_view);
+size_t archive_file_array_size(ArchiveMainView* main_view);
+void archive_file_array_remove_selected(ArchiveMainView* main_view);
+void archive_file_array_clean(ArchiveMainView* main_view);
 
 static inline bool is_known_app(ArchiveFileTypeEnum type) {
     return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
