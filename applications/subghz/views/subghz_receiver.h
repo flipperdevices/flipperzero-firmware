@@ -31,6 +31,8 @@ void subghz_receiver_add_data_statusbar(
 
 void subghz_receiver_add_item_to_menu(SubghzReceiver* subghz_receiver, const char* name, uint8_t type);
 
-uint16_t subghz_receiver_get_idx_menu_ok(SubghzReceiver* subghz_receiver);
+uint16_t subghz_receiver_get_idx_menu(SubghzReceiver* subghz_receiver);
+
+void subghz_receiver_set_idx_menu(SubghzReceiver* subghz_receiver, uint16_t idx);
 
 void subghz_receiver_exit(void* context);

@@ -127,7 +127,6 @@ static void subghz_receiver_draw_frame(Canvas* canvas, uint16_t idx, bool scroll
 }
 
 void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
-
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -145,7 +144,7 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
         return;
     }
     canvas_draw_line(canvas, 46, 51, 125, 51);
-    
+
     bool scrollbar = model->history_item > 4;
     string_t str_buff;
     //char buffer[64];
@@ -199,7 +198,13 @@ bool subghz_receiver_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         subghz_receiver->callback(SubghzReceverEventConfig, subghz_receiver->context);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        subghz_receiver->callback(SubghzReceverEventOK, subghz_receiver->context);
+        with_view_model(
+            subghz_receiver->view, (SubghzReceiverModel * model) {
+                if(model->history_item != 0) {
+                    subghz_receiver->callback(SubghzReceverEventOK, subghz_receiver->context);
+                }
+                return false;
+            });
     }
 
     subghz_receiver_update_offset(subghz_receiver);
@@ -284,7 +289,7 @@ View* subghz_receiver_get_view(SubghzReceiver* subghz_receiver) {
     return subghz_receiver->view;
 }
 
-uint16_t subghz_receiver_get_idx_menu_ok(SubghzReceiver* subghz_receiver) {
+uint16_t subghz_receiver_get_idx_menu(SubghzReceiver* subghz_receiver) {
     furi_assert(subghz_receiver);
     uint32_t idx = 0;
     with_view_model(
@@ -293,4 +298,15 @@ uint16_t subghz_receiver_get_idx_menu_ok(SubghzReceiver* subghz_receiver) {
             return false;
         });
     return idx;
+}
+
+void subghz_receiver_set_idx_menu(SubghzReceiver* subghz_receiver, uint16_t idx) {
+    furi_assert(subghz_receiver);
+    with_view_model(
+        subghz_receiver->view, (SubghzReceiverModel * model) {
+            model->idx = idx;
+            if(model->idx > 2) model->list_offset = idx - 2;
+            return true;
+        });
+    subghz_receiver_update_offset(subghz_receiver);
 }

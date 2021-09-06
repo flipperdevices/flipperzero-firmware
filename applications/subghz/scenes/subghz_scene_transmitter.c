@@ -32,12 +32,18 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
                 subghz_sleep();
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             }
-            subghz_transmitter_tx_start(subghz);
+            if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
+                subghz_transmitter_tx_start(subghz);
+                subghz->txrx->txrx_state = SubGhzTxRxStateTx;
+            }
             return true;
         } else if(event.event == SubghzTransmitterEventSendStop) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
-            subghz_transmitter_tx_stop(subghz);
-            subghz_sleep();
+            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
+                subghz_transmitter_tx_stop(subghz);
+                subghz_sleep();
+                subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+            }
             return true;
         } else if(event.event == SubghzTransmitterEventBack) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;

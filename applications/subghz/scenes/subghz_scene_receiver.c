@@ -1,16 +1,6 @@
 #include "../subghz_i.h"
 #include "../views/subghz_receiver.h"
 
-#define COUNT_FREQUNCY_HOPPER 3
-const uint32_t subghz_frequencies_hopper[] = {
-    /* 300 - 348 */
-    315000000,
-    /* 387 - 464 */
-    433920000, /* LPD433 mid */
-    /* 779 - 928 */
-    868350000,
-};
-
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     char frequency_str[20];
@@ -24,11 +14,14 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
             "%03ld.%02ld",
             subghz->txrx->frequency / 1000000 % 1000,
             subghz->txrx->frequency / 10000 % 100);
-        snprintf(
-            preset_str,
-            sizeof(preset_str),
-            "AM" //,subghz->txrx->preset
-        );
+        if(subghz->txrx->preset == FuriHalSubGhzPresetOok650Async ||
+           subghz->txrx->preset == FuriHalSubGhzPresetOok270Async) {
+            snprintf(preset_str, sizeof(preset_str), "AM");
+        } else if(subghz->txrx->preset == FuriHalSubGhzPreset2FSKAsync) {
+            snprintf(preset_str, sizeof(preset_str), "FM");
+        } else {
+            furi_check(0);
+        }
         subghz_receiver_add_data_statusbar(
             subghz->subghz_receiver, frequency_str, preset_str, string_get_cstr(history_stat_str));
     } else {
@@ -100,6 +93,9 @@ const void subghz_scene_receiver_on_enter(void* context) {
         subghz_rx(subghz->txrx->worker, subghz->txrx->frequency);
         subghz->txrx->txrx_state = SubGhzTxRxStateRx;
     }
+    if(subghz->txrx->idx_menu_chosen != 0) {
+        subghz_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+    }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
 }
@@ -117,24 +113,18 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             };
             subghz_history_clean(subghz->txrx->history);
+            subghz->txrx->hopper_state = SubGhzHopperStateOFF;
+            subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+            subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+            subghz->txrx->idx_menu_chosen = 0;
             subghz_protocol_enable_dump(subghz->txrx->protocol, NULL, subghz);
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
             break;
         case SubghzReceverEventOK:
-            subghz->txrx->idx_menu_chosen =
-                subghz_receiver_get_idx_menu_ok(subghz->subghz_receiver);
-            subghz->txrx->protocol_result = subghz_protocol_get_by_name(
-                subghz->txrx->protocol,
-                subghz_history_get_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
-            if(subghz->txrx->protocol_result->to_load_protocol != NULL) {
-                subghz->txrx->protocol_result->to_load_protocol(
-                    subghz->txrx->protocol_result,
-                    subghz_history_get_raw_data(
-                        subghz->txrx->history, subghz->txrx->idx_menu_chosen));
-                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
-            }
+            subghz->txrx->idx_menu_chosen = subghz_receiver_get_idx_menu(subghz->subghz_receiver);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             return true;
             break;
         case SubghzReceverEventConfig:
@@ -152,9 +142,6 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
         }
 
         switch(subghz->state_notifications) {
-        case NOTIFICATION_TX_STATE:
-            notification_message(subghz->notifications, &sequence_blink_red_10);
-            break;
         case NOTIFICATION_RX_STATE:
             notification_message(subghz->notifications, &sequence_blink_blue_10);
             break;

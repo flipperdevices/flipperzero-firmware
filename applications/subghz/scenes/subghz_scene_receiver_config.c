@@ -18,7 +18,7 @@ const char* const hopping_text[HOPPING_COUNT] = {
 const uint32_t hopping_value[HOPPING_COUNT] = {
     SubGhzHopperStateOFF,
     SubGhzHopperStateRunnig,
-    };
+};
 
 uint8_t subghz_scene_receiver_config_uint32_value_index(
     const uint32_t value,
@@ -37,12 +37,20 @@ uint8_t subghz_scene_receiver_config_uint32_value_index(
 }
 
 uint8_t subghz_scene_receiver_config_hopper_value_index(
-    const bool value,
-    const bool values[],
-    uint8_t values_count) {
+    const uint32_t value,
+    const uint32_t values[],
+    uint8_t values_count,
+    void* context) {
+    furi_assert(context);
+    SubGhz* subghz = context;
+
     if(value == values[0]) {
         return 0;
     } else {
+        variable_item_set_current_value_text(
+            (VariableItem*)scene_manager_get_scene_state(
+                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            " -----");
         return 1;
     }
 }
@@ -51,8 +59,10 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, subghz_frequencies_text[index]);
-    subghz->txrx->frequency = subghz_frequencies[index];
+    if(subghz->txrx->hopper_state == SubGhzHopperStateOFF) {
+        variable_item_set_current_value_text(item, subghz_frequencies_text[index]);
+        subghz->txrx->frequency = subghz_frequencies[index];
+    }
 }
 
 static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
@@ -68,6 +78,19 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, hopping_text[index]);
+    if(hopping_value[index] == SubGhzHopperStateOFF) {
+        variable_item_set_current_value_text(
+            (VariableItem*)scene_manager_get_scene_state(
+                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            subghz_frequencies_text[subghz_frequencies_433_92]);
+        subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+    } else {
+        variable_item_set_current_value_text(
+            (VariableItem*)scene_manager_get_scene_state(
+                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            " -----");
+    }
+
     subghz->txrx->hopper_state = hopping_value[index];
 }
 
@@ -90,6 +113,8 @@ const void subghz_scene_receiver_config_on_enter(void* context) {
         subghz);
     value_index = subghz_scene_receiver_config_uint32_value_index(
         subghz->txrx->frequency, subghz_frequencies, subghz_frequencies_count);
+    scene_manager_set_scene_state(
+        subghz->scene_manager, SubGhzSceneReceiverConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, subghz_frequencies_text[value_index]);
 
@@ -100,7 +125,7 @@ const void subghz_scene_receiver_config_on_enter(void* context) {
         subghz_scene_receiver_config_set_hopping_runing,
         subghz);
     value_index = subghz_scene_receiver_config_hopper_value_index(
-        subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT);
+        subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, hopping_text[value_index]);
 
