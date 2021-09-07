@@ -11,6 +11,7 @@
 #include "views/subghz_receiver.h"
 
 void subghz_begin(FuriHalSubGhzPreset preset) {
+    furi_assert(preset);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
     furi_hal_subghz_load_preset(preset);
@@ -19,6 +20,9 @@ void subghz_begin(FuriHalSubGhzPreset preset) {
 
 uint32_t subghz_rx(void* context, uint32_t frequency) {
     furi_assert(context);
+    if(!furi_hal_subghz_is_frequency_valid(frequency)){
+        furi_check(0);
+    }
     SubGhzWorker* worker = context;
 
     furi_hal_subghz_idle();
@@ -33,6 +37,9 @@ uint32_t subghz_rx(void* context, uint32_t frequency) {
 }
 
 uint32_t subghz_tx(uint32_t frequency) {
+    if(!furi_hal_subghz_is_frequency_valid(frequency)){
+        furi_check(0);
+    }
     furi_hal_subghz_idle();
     uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -53,6 +60,7 @@ void subghz_rx_end(void* context) {
         subghz_worker_stop(worker);
         furi_hal_subghz_stop_async_rx();
     }
+    furi_hal_subghz_idle();
 }
 
 void subghz_sleep(void) {
@@ -70,7 +78,8 @@ void subghz_frequency_preset_to_str(void* context, string_t output) {
         (int)subghz->txrx->preset);
 }
 
-void subghz_transmitter_tx_start(void* context) {
+void subghz_tx_start(void* context) {
+    furi_assert(context);
     SubGhz* subghz = context;
     subghz->txrx->encoder = subghz_protocol_encoder_common_alloc();
     subghz->txrx->encoder->repeat = 200; //max repeat with the button held down
@@ -81,7 +90,7 @@ void subghz_transmitter_tx_start(void* context) {
             if(subghz->txrx->preset) {
                 subghz_begin(subghz->txrx->preset);
             } else {
-                subghz_begin(FuriHalSubGhzPresetOok650Async);
+                subghz_begin(FuriHalSubGhzPresetOok270Async);
             }
             if(subghz->txrx->frequency) {
                 subghz_tx(subghz->txrx->frequency);
@@ -96,11 +105,13 @@ void subghz_transmitter_tx_start(void* context) {
     }
 }
 
-void subghz_transmitter_tx_stop(void* context) {
+void subghz_tx_stop(void* context) {
+    furi_assert(context);
     SubGhz* subghz = context;
     //Stop TX
     furi_hal_subghz_stop_async_tx();
     subghz_protocol_encoder_common_free(subghz->txrx->encoder);
+    furi_hal_subghz_idle();
     //if protocol dynamic then we save the last upload
     if(subghz->txrx->protocol_result->type_protocol == TYPE_PROTOCOL_DYNAMIC) {
         subghz_save_protocol_to_file(subghz, subghz->text_store);
@@ -177,6 +188,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
 }
 
 bool subghz_save_protocol_to_file(void* context, const char* dev_name) {
+    furi_assert(context);
     SubGhz* subghz = context;
     furi_assert(subghz->txrx->protocol_result);
     FileWorker* file_worker = file_worker_alloc(false);
@@ -331,14 +343,6 @@ uint32_t subghz_random_serial(void) {
     return (uint32_t)rand();
 }
 
-void subghz_add_to_history_callback(SubGhzProtocolCommon* parser, void* context) {
-    furi_assert(context);
-    SubGhzTxRx* txrx = context;
-
-    subghz_history_add_to_history(txrx->history, parser, txrx->frequency, txrx->preset);
-    subghz_protocol_reset(txrx->protocol);
-}
-
 void subghz_hopper_update(void* context) {
     furi_assert(context);
     SubGhzTxRx* txrx = context;
@@ -382,7 +386,6 @@ void subghz_hopper_update(void* context) {
     }
 
     if(txrx->txrx_state == SubGhzTxRxStateRx) {
-        subghz_idle();
         subghz_rx_end(txrx->worker);
         txrx->txrx_state = SubGhzTxRxStateIdle;
     };

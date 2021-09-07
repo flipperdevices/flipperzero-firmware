@@ -128,7 +128,11 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, string_t output,
     }
 }
 
-bool subghz_history_add_to_history(SubGhzHistory* instance, void* context, uint32_t frequency, FuriHalSubGhzPreset preset) {
+bool subghz_history_add_to_history(
+    SubGhzHistory* instance,
+    void* context,
+    uint32_t frequency,
+    FuriHalSubGhzPreset preset) {
     furi_assert(instance);
     furi_assert(context);
     SubGhzProtocolCommon* protocol = context;

@@ -37,7 +37,17 @@ const void subghz_scene_receiver_info_on_enter(void* context) {
             subghz->txrx->frequency / 1000000 % 1000,
             subghz->txrx->frequency / 10000 % 100);
         widget_add_string_element(
-            subghz->widget, 90, 0, AlignLeft, AlignTop, FontSecondary, buffer_str);
+            subghz->widget, 78, 0, AlignLeft, AlignTop, FontSecondary, buffer_str);
+        if(subghz->txrx->preset == FuriHalSubGhzPresetOok650Async ||
+           subghz->txrx->preset == FuriHalSubGhzPresetOok270Async) {
+            snprintf(buffer_str, sizeof(buffer_str), "AM");
+        } else if(subghz->txrx->preset == FuriHalSubGhzPreset2FSKAsync) {
+            snprintf(buffer_str, sizeof(buffer_str), "FM");
+        } else {
+            furi_check(0);
+        }
+        widget_add_string_element(
+            subghz->widget, 113, 0, AlignLeft, AlignTop, FontSecondary, buffer_str);
         string_t text;
         string_init(text);
         subghz->txrx->protocol_result->to_string(subghz->txrx->protocol_result, text);
@@ -81,14 +91,14 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz->txrx->worker);
-                subghz_sleep();
+                //subghz_sleep();
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             }
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
-                subghz_transmitter_tx_start(subghz);
+                subghz_tx_start(subghz);
                 subghz->txrx->txrx_state = SubGhzTxRxStateTx;
             }
             return true;
@@ -96,8 +106,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_transmitter_tx_stop(subghz);
-                subghz_sleep();
+                subghz_tx_stop(subghz);
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {

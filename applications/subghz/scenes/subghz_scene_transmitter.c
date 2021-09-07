@@ -29,18 +29,17 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
             subghz->state_notifications = NOTIFICATION_TX_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz->txrx->worker);
-                subghz_sleep();
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
-                subghz_transmitter_tx_start(subghz);
+                subghz_tx_start(subghz);
                 subghz->txrx->txrx_state = SubGhzTxRxStateTx;
             }
             return true;
         } else if(event.event == SubghzTransmitterEventSendStop) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_transmitter_tx_stop(subghz);
+                subghz_tx_stop(subghz);
                 subghz_sleep();
                 subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
             }
@@ -52,8 +51,8 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
             return true;
         } else if(event.event == SubghzTransmitterEventNoMan) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
-            scene_manager_search_and_switch_to_previous_scene(
-                subghz->scene_manager, SubGhzSceneNoMan);
+            string_set(subghz->error_str, "No manufactory key");
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

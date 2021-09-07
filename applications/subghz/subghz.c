@@ -172,6 +172,9 @@ SubGhz* subghz_alloc() {
         subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_protocol_parse);
     subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->protocol);
 
+    //Init Error_str
+    string_init(subghz->error_str);
+
     subghz_protocol_load_keeloq_file(subghz->txrx->protocol, "/ext/subghz/keeloq_mfcodes");
     subghz_protocol_load_nice_flor_s_file(subghz->txrx->protocol, "/ext/subghz/nice_floor_s_rx");
 
@@ -242,6 +245,9 @@ void subghz_free(SubGhz* subghz) {
     subghz_worker_free(subghz->txrx->worker);
     subghz_history_free(subghz->txrx->history);
     free(subghz->txrx);
+
+    //Error string
+    string_clear(subghz->error_str);
 
     // Notifications
     furi_record_close("notification");

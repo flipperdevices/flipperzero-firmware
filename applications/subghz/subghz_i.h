@@ -100,6 +100,7 @@ struct SubGhz {
     SubghzTestStatic* subghz_test_static;
     SubghzTestCarrier* subghz_test_carrier;
     SubghzTestPacket* subghz_test_packet;
+    string_t error_str;
 };
 
 typedef enum {
@@ -123,10 +124,9 @@ uint32_t subghz_tx(uint32_t frequency);
 void subghz_idle(void);
 void subghz_rx_end(void* context);
 void subghz_sleep(void);
-void subghz_transmitter_tx_start(void* context);
-void subghz_transmitter_tx_stop(void* context);
+void subghz_tx_start(void* context);
+void subghz_tx_stop(void* context);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_save_protocol_to_file(void* context, const char* dev_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 uint32_t subghz_random_serial(void);
-void subghz_add_to_history_callback(SubGhzProtocolCommon* parser, void* context);

@@ -85,7 +85,7 @@ const void subghz_scene_receiver_on_enter(void* context) {
     subghz->state_notifications = NOTIFICATION_RX_STATE;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz->txrx->worker);
-        subghz_sleep();
+        //subghz_sleep();
         subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
     };
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {

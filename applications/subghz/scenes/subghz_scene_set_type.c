@@ -14,9 +14,11 @@ enum SubmenuIndex {
 
 bool subghz_scene_set_type_submenu_to_find_protocol(void* context, const char* protocol_name) {
     SubGhz* subghz = context;
-    subghz->txrx->protocol_result = subghz_protocol_get_by_name(subghz->txrx->protocol, protocol_name);
+    subghz->txrx->protocol_result =
+        subghz_protocol_get_by_name(subghz->txrx->protocol, protocol_name);
     if(subghz->txrx->protocol_result == NULL) {
-        //show error
+        string_set(subghz->error_str, "Protocol not found");
+        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
         return false;
     }
     return true;
@@ -135,8 +137,9 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             if(subghz_scene_set_type_submenu_to_find_protocol(subghz, "GateTX")) {
                 subghz->txrx->protocol_result->code_last_count_bit = 24;
                 key = (key & 0x00F0FFFF) | 0xF << 16; //btn 0xF, 0xC, 0xA, 0x6
-                subghz->txrx->protocol_result->code_last_found = subghz_protocol_common_reverse_key(
-                    key, subghz->txrx->protocol_result->code_last_count_bit);
+                subghz->txrx->protocol_result->code_last_found =
+                    subghz_protocol_common_reverse_key(
+                        key, subghz->txrx->protocol_result->code_last_count_bit);
                 generated_protocol = true;
             }
             break;
@@ -153,15 +156,16 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
                     generated_protocol = true;
                 } else {
                     generated_protocol = false;
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNoMan);
+                    string_set(subghz->error_str, "No manufactory key");
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
                 }
             }
             break;
-
         default:
             return false;
             break;
         }
+
         if(generated_protocol) {
             subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
             subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;

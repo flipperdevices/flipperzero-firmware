@@ -17,7 +17,6 @@ struct SubghzTransmitter {
 
 typedef struct {
     string_t text;
-    uint16_t scene;
     uint32_t real_frequency;
     FuriHalSubGhzPreset preset;
     SubGhzProtocolCommon* protocol;
@@ -95,10 +94,18 @@ void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
     snprintf(
         buffer,
         sizeof(buffer),
-        "%03ld.%03ld",
+        "%03ld.%02ld",
         model->real_frequency / 1000000 % 1000,
-        model->real_frequency / 1000 % 1000);
-    canvas_draw_str(canvas, 90, 8, buffer);
+        model->real_frequency / 10000 % 100);
+    canvas_draw_str(canvas, 78, 8, buffer);
+
+    if(model->preset == FuriHalSubGhzPresetOok650Async ||
+       model->preset == FuriHalSubGhzPresetOok270Async) {
+        snprintf(buffer, sizeof(buffer), "AM");
+    } else if(model->preset == FuriHalSubGhzPreset2FSKAsync) {
+        snprintf(buffer, sizeof(buffer), "FM");
+    }
+    canvas_draw_str(canvas, 113, 8, buffer);
 
     if(model->protocol && model->protocol->get_upload_protocol) {
         if((!strcmp(model->protocol->name, "KeeLoq")) &&
@@ -153,7 +160,6 @@ void subghz_transmitter_text_callback(string_t text, void* context) {
     with_view_model(
         subghz_transmitter->view, (SubghzTransmitterModel * model) {
             string_set(model->text, text);
-            model->scene = 0;
             return true;
         });
 }
