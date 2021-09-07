@@ -2,6 +2,6 @@
 #include "ble.h"
 
 void SVCCTL_SvcInit() {
-    BAS_Init();
+    // BAS_Init();
     DIS_Init();
 }

@@ -11,7 +11,7 @@
 #include "shci.h"
 #include "otp.h"
 #include "dis_app.h"
-#include "bas_app.h"
+#include "battery_service.h"
 #include "serial_service.h"
 
 #include <furi-hal.h>
@@ -184,7 +184,7 @@ bool APP_BLE_Start() {
   // Initialize DIS Application
   DISAPP_Init();
   // Initialize BAS Application
-  BASAPP_Init();
+  battery_svc_init();
   // Initialize Serial application
   serial_svc_init();
   // Create timer to handle the connection state machine
