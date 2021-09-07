@@ -1,5 +1,9 @@
 #include "archive_i.h"
 
+static uint32_t archive_previous_callback(void* context) {
+    return ArchiveViewBrowser;
+}
+
 ArchiveApp* archive_alloc() {
     ArchiveApp* archive = furi_alloc(sizeof(ArchiveApp));
 
@@ -13,7 +17,7 @@ ArchiveApp* archive_alloc() {
 
     view_dispatcher_set_event_callback_context(archive->view_dispatcher, archive);
 
-    archive->main_view = main_view_alloc();
+    archive->main_view = main_view_alloc(archive);
 
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewBrowser, archive_main_get_view(archive->main_view));
@@ -21,7 +25,10 @@ ArchiveApp* archive_alloc() {
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewTextInput, text_input_get_view(archive->text_input));
 
-    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveTabFavorites);
+    view_set_previous_callback(
+        text_input_get_view(archive->text_input), archive_previous_callback);
+
+    view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 
     return archive;
 }

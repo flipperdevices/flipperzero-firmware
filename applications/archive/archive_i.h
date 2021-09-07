@@ -74,4 +74,5 @@ struct ArchiveApp {
     ViewDispatcher* view_dispatcher;
     ArchiveMainView* main_view;
     TextInput* text_input;
+    char text_store[MAX_NAME_LEN];
 };

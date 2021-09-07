@@ -1,9 +1,8 @@
+#include <furi.h>
 #include "../archive_i.h"
 #include "archive_main_view.h"
 #include "../helpers/archive_files.h"
 #include "../helpers/archive_favorites.h"
-
-#include <furi.h>
 
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
@@ -34,17 +33,12 @@ static const Icon* ArchiveItemIcons[] = {
 
 struct ArchiveMainView {
     View* view;
-    ArchiveMainViewCallback callback;
-    void* context;
-
+    ArchiveApp* archive;
     ArchiveTabEnum tab_id;
     string_t name;
     string_t path;
-    char text_input_buffer[MAX_NAME_LEN];
-
     uint8_t depth;
     uint16_t last_idx[MAX_DEPTH];
-
     bool menu;
 };
 
@@ -82,6 +76,28 @@ void archive_file_array_clean(ArchiveMainView* main_view) {
             files_array_clean(model->files);
             return true;
         });
+}
+
+ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view) {
+    ArchiveFile_t* selected;
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            selected = files_array_size(model->files) > 0 ?
+                           files_array_get(model->files, model->idx) :
+                           NULL;
+            return true;
+        });
+    return selected;
+}
+
+uint8_t archive_get_current_menu_idx(ArchiveMainView* main_view) {
+    uint8_t menu_idx;
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            menu_idx = model->menu_idx;
+            return true;
+        });
+    return menu_idx;
 }
 
 void update_offset(ArchiveMainView* main_view) {
@@ -331,11 +347,11 @@ static void archive_text_input_callback(void* context) {
     string_init_printf(
         buffer_src, "%s/%s", string_get_cstr(main_view->path), string_get_cstr(main_view->name));
     string_init_printf(
-        buffer_dst, "%s/%s", string_get_cstr(main_view->path), main_view->text_input_buffer);
+        buffer_dst, "%s/%s", string_get_cstr(main_view->path), main_view->archive->text_store);
 
-    string_set(main_view->name, main_view->text_input_buffer);
+    string_set(main_view->name, main_view->archive->text_store);
+
     // append extension
-
     ArchiveFile_t* file;
 
     with_view_model(
@@ -351,10 +367,13 @@ static void archive_text_input_callback(void* context) {
     storage_common_rename(fs_api, string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
 
     if(file->fav) {
-        archive_favorites_rename(main_view->path, file->name, buffer_dst);
+        archive_favorites_rename(
+            string_get_cstr(main_view->path),
+            string_get_cstr(file->name),
+            string_get_cstr(buffer_dst));
     }
 
-    // view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
+    view_dispatcher_switch_to_view(main_view->archive->view_dispatcher, ArchiveViewBrowser);
     archive_get_filenames(main_view, main_view->tab_id, main_view->path);
 
     with_view_model(
@@ -362,7 +381,7 @@ static void archive_text_input_callback(void* context) {
             model->idx = 0;
             while(model->idx < files_array_size(model->files)) {
                 ArchiveFile_t* current = files_array_get(model->files, model->idx);
-                if(!string_search(current->name, main_view->text_input_buffer)) {
+                if(!string_search(current->name, main_view->archive->text_store)) {
                     break;
                 }
                 ++model->idx;
@@ -378,26 +397,23 @@ static void archive_text_input_callback(void* context) {
 
 static void archive_enter_text_input(void* context) {
     furi_assert(context);
-    ArchiveApp* archive = context;
-    ArchiveMainView* main_view = archive->main_view;
+    ArchiveMainView* main_view = (ArchiveMainView*)context;
 
-    *main_view->text_input_buffer = '\0';
+    strlcpy(main_view->archive->text_store, string_get_cstr(main_view->name), MAX_NAME_LEN);
 
-    strlcpy(main_view->text_input_buffer, string_get_cstr(main_view->name), MAX_NAME_LEN);
+    archive_trim_file_ext(main_view->archive->text_store);
 
-    archive_trim_file_ext(main_view->text_input_buffer);
-
-    text_input_set_header_text(archive->text_input, "Rename:");
+    text_input_set_header_text(main_view->archive->text_input, "Rename:");
 
     text_input_set_result_callback(
-        archive->text_input,
+        main_view->archive->text_input,
         archive_text_input_callback,
-        archive,
-        main_view->text_input_buffer,
+        main_view,
+        main_view->archive->text_store,
         MAX_NAME_LEN,
         false);
 
-    // view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewTextInput);
+    view_dispatcher_switch_to_view(main_view->archive->view_dispatcher, ArchiveViewTextInput);
 }
 
 static void archive_show_file_menu(ArchiveMainView* main_view) {
@@ -455,15 +471,9 @@ static void archive_run_in_app(
 static void archive_file_menu_callback(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
-    ArchiveFile_t* selected;
-    uint8_t idx = 0;
-
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            selected = files_array_get(model->files, model->idx);
-            idx = model->menu_idx;
-            return true;
-        });
+    ArchiveFile_t* selected = archive_get_current_file(main_view);
+    uint8_t idx = archive_get_current_menu_idx(main_view);
+    ;
 
     switch(idx) {
     case 0:
@@ -493,7 +503,6 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
         // confirmation?
         archive_delete_file(main_view, main_view->path, selected->name);
         archive_close_file_menu(main_view);
-
         break;
 
     default:
@@ -599,9 +608,7 @@ bool archive_view_input(InputEvent* event, void* context) {
 
     ArchiveMainView* main_view = context;
 
-    bool in_menu = main_view->menu;
-
-    if(in_menu) {
+    if(main_view->menu) {
         menu_input_handler(main_view, event);
         return true;
     }
@@ -622,7 +629,7 @@ bool archive_view_input(InputEvent* event, void* context) {
 
         } else if(event->key == InputKeyBack) {
             if(main_view->depth == 0) {
-                // view_dispatcher_stop(archive->view_dispatcher);
+                view_dispatcher_stop(main_view->archive->view_dispatcher);
             } else {
                 archive_leave_dir(main_view);
             }
@@ -648,15 +655,7 @@ bool archive_view_input(InputEvent* event, void* context) {
     }
 
     if(event->key == InputKeyOk) {
-        ArchiveFile_t* selected;
-
-        with_view_model(
-            main_view->view, (ArchiveMainViewModel * model) {
-                selected = files_array_size(model->files) > 0 ?
-                               files_array_get(model->files, model->idx) :
-                               NULL;
-                return true;
-            });
+        ArchiveFile_t* selected = archive_get_current_file(main_view);
 
         if(selected) {
             string_set(main_view->name, selected->name);
@@ -686,10 +685,11 @@ bool archive_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-ArchiveMainView* main_view_alloc() {
-    ArchiveMainView* main_view = furi_alloc(sizeof(ArchiveMainView));
+ArchiveMainView* main_view_alloc(void* context) {
+    furi_assert(context);
 
-    // View allocation and configuration
+    ArchiveMainView* main_view = furi_alloc(sizeof(ArchiveMainView));
+    main_view->archive = context;
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(ArchiveMainViewModel));
     view_set_context(main_view->view, main_view);
