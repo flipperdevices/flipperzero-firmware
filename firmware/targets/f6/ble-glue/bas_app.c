@@ -1,6 +1,7 @@
 #include "bas_app.h"
 #include "app_common.h"
 #include "ble.h"
+#include <furi/log.h>
 
 void BASAPP_Init(void) {
     uint8_t battery = 65;
@@ -8,4 +9,5 @@ void BASAPP_Init(void) {
 }
 
 void BAS_Notification(BAS_Notification_evt_t * pNotification) {
+    FURI_LOG_I("BAS", "Update event: %d", pNotification->BAS_Evt_Opcode);
 }

@@ -15,8 +15,21 @@ struct SerialSvc {
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *Event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
-
-    return ret; 
+    hci_event_pckt* event_pckt = (hci_event_pckt *)(((hci_uart_pckt*)Event)->data);
+    evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
+    aci_gatt_attribute_modified_event_rp0* attribute_modified;
+    if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
+        if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
+            attribute_modified = (aci_gatt_attribute_modified_event_rp0*)blecore_evt->data;
+            FURI_LOG_I(SERIAL_SERVICE_TAG, "Data len: %d", attribute_modified->Attr_Data_Length);
+            for(uint8_t i = 0; i < attribute_modified->Attr_Data_Length; i++) {
+                printf("%02X ", attribute_modified->Attr_Data[i]);
+            }
+            printf("\r\n");
+            ret = SVCCTL_EvtAckFlowEnable;
+        }
+    }
+    return ret;
 }
 
 SerialSvc* serial_svc_init() {
@@ -26,11 +39,11 @@ SerialSvc* serial_svc_init() {
     const uint8_t char_tx_uuid[] = {SERIAL_CHAR_TX_UUID_128};
 
     SerialSvc* serial_svc = furi_alloc(sizeof(SerialSvc));
-    serial_svc->char_value_size = 20;
+    serial_svc->char_value_size = SERIAL_SVC_DATA_LEN_MAX;
     SVCCTL_RegisterSvcHandler(serial_svc_event_handler);
 
     // Add service
-    status = aci_gatt_add_service(UUID_TYPE_128, (Service_UUID_t *)service_uuid, PRIMARY_SERVICE, 5, &serial_svc->svc_handle);
+    status = aci_gatt_add_service(UUID_TYPE_128, (Service_UUID_t *)service_uuid, PRIMARY_SERVICE, 6, &serial_svc->svc_handle);
     if(status) {
         FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to add Serial service: %d", status);
     }
@@ -38,7 +51,7 @@ SerialSvc* serial_svc_init() {
     // Add TX characteristics
     status = aci_gatt_add_char(serial_svc->svc_handle, UUID_TYPE_128, (const Char_UUID_t*)char_tx_uuid ,
                                 serial_svc->char_value_size,                                  
-                                CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_READ,
+                                CHAR_PROP_WRITE_WITHOUT_RESP| CHAR_PROP_WRITE | CHAR_PROP_READ,
                                 ATTR_PERMISSION_NONE,
                                 GATT_NOTIFY_ATTRIBUTE_WRITE,
                                 10,
@@ -69,4 +82,17 @@ void serial_svc_free(SerialSvc* serial_svc) {
     free(serial_svc);
 }
 
+bool serial_svc_update_rx(SerialSvc* serial_svc, uint8_t* data, uint8_t data_len) {
+    furi_assert(serial_svc);
+    furi_assert(data_len > SERIAL_SVC_DATA_LEN_MAX);
 
+    tBleStatus result = aci_gatt_update_char_value(serial_svc->svc_handle,
+                                          serial_svc->rx_char_handle,
+                                          0,
+                                          data_len,
+                                          data);
+    if(result) {
+        FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed updating RX charachteristic: %d", result);
+    }
+    return result != BLE_STATUS_SUCCESS;
+}
