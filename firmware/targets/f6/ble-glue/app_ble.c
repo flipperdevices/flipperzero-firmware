@@ -10,7 +10,7 @@
 #include "cmsis_os.h"
 #include "shci.h"
 #include "otp.h"
-#include "dis_app.h"
+#include "dev_info_service.h"
 #include "battery_service.h"
 #include "serial_service.h"
 
@@ -182,7 +182,7 @@ bool APP_BLE_Start() {
 #endif
 
   // Initialize DIS Application
-  DISAPP_Init();
+  dev_info_service_init();
   // Initialize BAS Application
   battery_svc_init();
   // Initialize Serial application
@@ -200,6 +200,11 @@ bool APP_BLE_Start() {
 
   Adv_Request(APP_BLE_FAST_ADV);
   return true;
+}
+
+void SVCCTL_SvcInit() {
+    // Dummy function to prevent unused services initialization
+    // TODO refactore
 }
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
