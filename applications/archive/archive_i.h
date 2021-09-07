@@ -5,6 +5,7 @@
 #include <furi.h>
 #include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
 #include <gui/modules/text_input.h>
 #include <loader/loader.h>
 
@@ -15,6 +16,7 @@
 #include "file-worker.h"
 
 #include "views/archive_main_view.h"
+#include "scenes/archive_scene.h"
 
 #define MAX_DEPTH 32
 #define MAX_FILE_SIZE 128
@@ -72,6 +74,7 @@ typedef struct {
 struct ArchiveApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
+    SceneManager* scene_manager;
     ArchiveMainView* main_view;
     TextInput* text_input;
     char text_store[MAX_NAME_LEN];

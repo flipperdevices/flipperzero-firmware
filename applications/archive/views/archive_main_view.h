@@ -7,7 +7,7 @@
 #include <furi.h>
 #include <storage/storage.h>
 
-#define MAX_LEN_PX 100
+#define MAX_LEN_PX 110
 #define MAX_NAME_LEN 255
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 4
@@ -66,25 +66,24 @@ static inline const char* get_tab_ext(ArchiveTabEnum tab) {
 }
 
 typedef enum {
-    ArchiveMainViewEventOK,
-    ArchiveMainViewEventBack,
-    ArchiveMainViewEventMore,
-} ArchiveMainViewEvent;
+    ArchiveBrowserEventRename,
+    ArchiveBrowserEventExit,
+    ArchiveBrowserEventLeaveDir,
+} ArchiveBrowserEvent;
 
 typedef struct ArchiveMainView ArchiveMainView;
 
-typedef void (*ArchiveMainViewCallback)(ArchiveMainViewEvent event, void* context);
+typedef void (*ArchiveMainViewCallback)(ArchiveBrowserEvent event, void* context);
 
-void main_view_set_callback(
+void archive_browser_set_callback(
     ArchiveMainView* main_view,
     ArchiveMainViewCallback callback,
     void* context);
 
-ArchiveMainView* main_view_alloc();
-
-void main_view_free(ArchiveMainView* main_view);
-
 View* archive_main_get_view(ArchiveMainView* main_view);
+
+ArchiveMainView* main_view_alloc();
+void main_view_free(ArchiveMainView* main_view);
 
 static void ArchiveFile_t_init(ArchiveFile_t* obj) {
     obj->type = ArchiveFileTypeUnknown;
@@ -113,14 +112,17 @@ ARRAY_DEF(
      INIT_SET(API_6(ArchiveFile_t_init_set)),
      CLEAR(API_2(ArchiveFile_t_clear))))
 
-void archive_view_render(Canvas* canvas, void* model);
-void archive_trim_file_ext(char* name);
-void update_offset(ArchiveMainView* main_view);
-void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
-
 size_t archive_file_array_size(ArchiveMainView* main_view);
 void archive_file_array_remove_selected(ArchiveMainView* main_view);
 void archive_file_array_clean(ArchiveMainView* main_view);
+
+void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
+void archive_browser_update(ArchiveMainView* main_view);
+
+ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view);
+const char* archive_get_path(ArchiveMainView* main_view);
+const char* archive_get_name(ArchiveMainView* main_view);
+void archive_set_name(ArchiveMainView* main_view, const char* name);
 
 static inline bool is_known_app(ArchiveFileTypeEnum type) {
     return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);

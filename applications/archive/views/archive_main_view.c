@@ -31,25 +31,61 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
 };
 
+typedef enum {
+    BrowserActionBrowse,
+    BrowserActionMenu,
+    BrowserActionTotal,
+} BrowserActionEnum;
+
 struct ArchiveMainView {
     View* view;
-    ArchiveApp* archive;
-    ArchiveTabEnum tab_id;
+    ArchiveMainViewCallback callback;
+    void* context;
+
     string_t name;
     string_t path;
-    uint8_t depth;
-    uint16_t last_idx[MAX_DEPTH];
-    bool menu;
 };
 
 typedef struct {
-    uint8_t tab_idx;
+    BrowserActionEnum action;
+    uint8_t depth;
+    uint16_t last_idx[MAX_DEPTH];
+    ArchiveTabEnum tab_idx;
     uint8_t menu_idx;
     uint16_t idx;
     uint16_t list_offset;
     files_array_t files;
-    bool menu;
+
 } ArchiveMainViewModel;
+
+void archive_browser_set_callback(
+    ArchiveMainView* main_view,
+    ArchiveMainViewCallback callback,
+    void* context) {
+    furi_assert(main_view);
+    furi_assert(callback);
+    main_view->callback = callback;
+    main_view->context = context;
+}
+
+void update_offset(ArchiveMainView* main_view) {
+    furi_assert(main_view);
+
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            size_t array_size = files_array_size(model->files);
+            uint16_t bounds = array_size > 3 ? 2 : array_size;
+
+            if(array_size > 3 && model->idx >= array_size - 1) {
+                model->list_offset = model->idx - 3;
+            } else if(model->list_offset < model->idx - bounds) {
+                model->list_offset = CLAMP(model->list_offset + 1, array_size - bounds, 0);
+            } else if(model->list_offset > model->idx - bounds) {
+                model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
+            }
+            return true;
+        });
+}
 
 size_t archive_file_array_size(ArchiveMainView* main_view) {
     uint16_t size = 0;
@@ -68,6 +104,8 @@ void archive_file_array_remove_selected(ArchiveMainView* main_view) {
             model->idx = CLAMP(model->idx, files_array_size(model->files) - 1, 0);
             return true;
         });
+
+    update_offset(main_view);
 }
 
 void archive_file_array_clean(ArchiveMainView* main_view) {
@@ -90,33 +128,71 @@ ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view) {
     return selected;
 }
 
-uint8_t archive_get_current_menu_idx(ArchiveMainView* main_view) {
-    uint8_t menu_idx;
+ArchiveTabEnum archive_get_tab(ArchiveMainView* main_view) {
+    ArchiveTabEnum tab_id;
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            menu_idx = model->menu_idx;
+            tab_id = model->tab_idx;
             return true;
         });
-    return menu_idx;
+    return tab_id;
 }
 
-void update_offset(ArchiveMainView* main_view) {
+void archive_set_tab(ArchiveMainView* main_view, ArchiveTabEnum tab) {
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            model->tab_idx = tab;
+            return true;
+        });
+}
+
+uint8_t archive_get_depth(ArchiveMainView* main_view) {
+    uint8_t depth;
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            depth = model->depth;
+            return true;
+        });
+
+    return depth;
+}
+
+const char* archive_get_path(ArchiveMainView* main_view) {
+    return string_get_cstr(main_view->path);
+}
+const char* archive_get_name(ArchiveMainView* main_view) {
+    ArchiveFile_t* selected = archive_get_current_file(main_view);
+
+    return string_get_cstr(selected->name);
+}
+
+void archive_set_name(ArchiveMainView* main_view, const char* name) {
     furi_assert(main_view);
+    furi_assert(name);
+
+    string_set(main_view->name, name);
+}
+
+void archive_browser_update(ArchiveMainView* main_view) {
+    furi_assert(main_view);
+
+    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
 
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            size_t array_size = files_array_size(model->files);
-            uint16_t bounds = array_size > 3 ? 2 : array_size;
-
-            if(array_size > 3 && model->idx >= array_size - 1) {
-                model->list_offset = model->idx - 3;
-            } else if(model->list_offset < model->idx - bounds) {
-                model->list_offset = CLAMP(model->list_offset + 1, array_size - bounds, 0);
-            } else if(model->list_offset > model->idx - bounds) {
-                model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
+            uint16_t idx = 0;
+            while(idx < files_array_size(model->files)) {
+                ArchiveFile_t* current = files_array_get(model->files, idx);
+                if(!string_search(current->name, string_get_cstr(main_view->name))) {
+                    model->idx = idx;
+                    break;
+                }
+                ++idx;
             }
             return true;
         });
+
+    update_offset(main_view);
 }
 
 static bool filter_by_extension(ArchiveTabEnum tab_id, FileInfo* file_info, const char* name) {
@@ -161,14 +237,8 @@ void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, cons
     furi_assert(name);
 
     ArchiveFile_t item;
-    ArchiveTabEnum tab_id;
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            tab_id = model->tab_idx;
-            return true;
-        });
 
-    if(filter_by_extension(tab_id, file_info, name)) {
+    if(filter_by_extension(archive_get_tab(main_view), file_info, name)) {
         ArchiveFile_t_init(&item);
         string_init_set_str(item.name, name);
         set_file_type(&item, file_info);
@@ -202,7 +272,7 @@ static void render_item_menu(Canvas* canvas, ArchiveMainViewModel* model) {
         string_set_str(menu[0], "---");
         string_set_str(menu[1], "---");
         string_set_str(menu[2], "---");
-    } else if(model->tab_idx == 0 || selected->fav) {
+    } else if(selected->fav) {
         string_set_str(menu[1], "Unpin");
     }
 
@@ -212,17 +282,6 @@ static void render_item_menu(Canvas* canvas, ArchiveMainViewModel* model) {
     }
 
     canvas_draw_icon(canvas, 74, 20 + model->menu_idx * 11, &I_ButtonRight_4x7);
-}
-
-void archive_trim_file_ext(char* name) {
-    size_t str_len = strlen(name);
-    char* end = name + str_len;
-    while(end > name && *end != '.' && *end != '\\' && *end != '/') {
-        --end;
-    }
-    if((end > name && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
-        *end = '\0';
-    }
 }
 
 static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
@@ -278,7 +337,7 @@ static void draw_list(Canvas* canvas, ArchiveMainViewModel* model) {
         elements_scrollbar_pos(canvas, 126, 15, 49, model->idx, array_size);
     }
 
-    if(model->menu) {
+    if(model->action == BrowserActionMenu) {
         render_item_menu(canvas, model);
     }
 }
@@ -336,100 +395,18 @@ View* archive_main_get_view(ArchiveMainView* main_view) {
     return main_view->view;
 }
 
-static void archive_text_input_callback(void* context) {
-    furi_assert(context);
-    ArchiveMainView* main_view = context;
-    Storage* fs_api = furi_record_open("storage");
-
-    string_t buffer_src;
-    string_t buffer_dst;
-
-    string_init_printf(
-        buffer_src, "%s/%s", string_get_cstr(main_view->path), string_get_cstr(main_view->name));
-    string_init_printf(
-        buffer_dst, "%s/%s", string_get_cstr(main_view->path), main_view->archive->text_store);
-
-    string_set(main_view->name, main_view->archive->text_store);
-
-    // append extension
-    ArchiveFile_t* file;
-
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            file = files_array_get(
-                model->files, CLAMP(model->idx, files_array_size(model->files) - 1, 0));
-            file->fav = archive_is_favorite(main_view->path, file->name);
-
-            return true;
-        });
-
-    string_cat(buffer_dst, known_ext[file->type]);
-    storage_common_rename(fs_api, string_get_cstr(buffer_src), string_get_cstr(buffer_dst));
-
-    if(file->fav) {
-        archive_favorites_rename(
-            string_get_cstr(main_view->path),
-            string_get_cstr(file->name),
-            string_get_cstr(buffer_dst));
-    }
-
-    view_dispatcher_switch_to_view(main_view->archive->view_dispatcher, ArchiveViewBrowser);
-    archive_get_filenames(main_view, main_view->tab_id, main_view->path);
-
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            model->idx = 0;
-            while(model->idx < files_array_size(model->files)) {
-                ArchiveFile_t* current = files_array_get(model->files, model->idx);
-                if(!string_search(current->name, main_view->archive->text_store)) {
-                    break;
-                }
-                ++model->idx;
-            }
-            return true;
-        });
-    furi_record_close("storage");
-    update_offset(main_view);
-
-    string_clear(buffer_src);
-    string_clear(buffer_dst);
-}
-
-static void archive_enter_text_input(void* context) {
-    furi_assert(context);
-    ArchiveMainView* main_view = (ArchiveMainView*)context;
-
-    strlcpy(main_view->archive->text_store, string_get_cstr(main_view->name), MAX_NAME_LEN);
-
-    archive_trim_file_ext(main_view->archive->text_store);
-
-    text_input_set_header_text(main_view->archive->text_input, "Rename:");
-
-    text_input_set_result_callback(
-        main_view->archive->text_input,
-        archive_text_input_callback,
-        main_view,
-        main_view->archive->text_store,
-        MAX_NAME_LEN,
-        false);
-
-    view_dispatcher_switch_to_view(main_view->archive->view_dispatcher, ArchiveViewTextInput);
-}
-
 static void archive_show_file_menu(ArchiveMainView* main_view) {
     furi_assert(main_view);
-
-    main_view->menu = true;
-
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
             ArchiveFile_t* selected;
             selected = files_array_get(model->files, model->idx);
-            model->menu = true;
+            model->action = BrowserActionMenu;
             model->menu_idx = 0;
-            selected->fav = is_known_app(selected->type) ?
-                                archive_is_favorite(main_view->path, selected->name) :
-                                false;
+            selected->fav = is_known_app(selected->type) ? archive_is_favorite(
+                                                               string_get_cstr(main_view->path),
+                                                               string_get_cstr(selected->name)) :
+                                                           false;
 
             return true;
         });
@@ -438,11 +415,9 @@ static void archive_show_file_menu(ArchiveMainView* main_view) {
 static void archive_close_file_menu(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
-    main_view->menu = false;
-
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            model->menu = false;
+            model->action = BrowserActionBrowse;
             model->menu_idx = 0;
             return true;
         });
@@ -472,8 +447,15 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
     ArchiveFile_t* selected = archive_get_current_file(main_view);
-    uint8_t idx = archive_get_current_menu_idx(main_view);
-    ;
+    const char* path = string_get_cstr(main_view->path);
+    const char* name = string_get_cstr(selected->name);
+
+    uint8_t idx;
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            idx = model->menu_idx;
+            return true;
+        });
 
     switch(idx) {
     case 0:
@@ -483,12 +465,12 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
         break;
     case 1:
         if(is_known_app(selected->type)) {
-            if(!archive_is_favorite(main_view->path, selected->name)) {
+            if(!archive_is_favorite(path, name)) {
                 string_set(main_view->name, selected->name);
-                archive_add_to_favorites(main_view->path, selected->name);
+                archive_add_to_favorites(path, name);
             } else {
                 // delete from favorites
-                archive_favorites_delete(main_view->path, selected->name);
+                archive_favorites_delete(path, name);
             }
             archive_close_file_menu(main_view);
         }
@@ -496,7 +478,7 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
     case 2:
         // open rename view
         if(is_known_app(selected->type)) {
-            archive_enter_text_input(main_view);
+            main_view->callback(ArchiveBrowserEventRename, main_view->context);
         }
         break;
     case 3:
@@ -512,52 +494,26 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
     selected = NULL;
 }
 
-static void menu_input_handler(ArchiveMainView* main_view, InputEvent* event) {
-    furi_assert(main_view);
-
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyUp || event->key == InputKeyDown) {
-            with_view_model(
-                main_view->view, (ArchiveMainViewModel * model) {
-                    if(event->key == InputKeyUp) {
-                        model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
-                    } else if(event->key == InputKeyDown) {
-                        model->menu_idx = (model->menu_idx + 1) % MENU_ITEMS;
-                    }
-                    return true;
-                });
-        }
-
-        if(event->key == InputKeyOk) {
-            archive_file_menu_callback(main_view);
-        } else if(event->key == InputKeyBack) {
-            archive_close_file_menu(main_view);
-        }
-    }
-}
-
 static void archive_switch_dir(ArchiveMainView* main_view, const char* path) {
     furi_assert(main_view);
     furi_assert(path);
 
     string_set(main_view->path, path);
-    archive_get_filenames(main_view, main_view->tab_id, main_view->path);
+    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
     update_offset(main_view);
 }
 
-static void archive_switch_tab(ArchiveMainView* main_view) {
+void archive_switch_tab(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            model->tab_idx = main_view->tab_id;
             model->idx = 0;
-
+            model->depth = 0;
             return true;
         });
 
-    main_view->depth = 0;
-    archive_switch_dir(main_view, tab_default_paths[main_view->tab_id]);
+    archive_switch_dir(main_view, tab_default_paths[archive_get_tab(main_view)]);
 }
 
 static void archive_enter_dir(ArchiveMainView* main_view, string_t name) {
@@ -567,13 +523,12 @@ static void archive_enter_dir(ArchiveMainView* main_view, string_t name) {
     // update last index
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            main_view->last_idx[main_view->depth] =
+            model->last_idx[model->depth] =
                 CLAMP(model->idx, files_array_size(model->files) - 1, 0);
             model->idx = 0;
+            model->depth = CLAMP(model->depth + 1, MAX_DEPTH, 0);
             return true;
         });
-
-    main_view->depth = CLAMP(main_view->depth + 1, MAX_DEPTH, 0);
 
     string_cat(main_view->path, "/");
     string_cat(main_view->path, main_view->name);
@@ -591,11 +546,10 @@ static void archive_leave_dir(ArchiveMainView* main_view) {
         string_left(main_view->path, pos);
     }
 
-    main_view->depth = CLAMP(main_view->depth - 1, MAX_DEPTH, 0);
-
     with_view_model(
         main_view->view, (ArchiveMainViewModel * model) {
-            model->idx = main_view->last_idx[main_view->depth];
+            model->depth = CLAMP(model->depth - 1, MAX_DEPTH, 0);
+            model->idx = model->last_idx[model->depth];
             return true;
         });
 
@@ -608,88 +562,117 @@ bool archive_view_input(InputEvent* event, void* context) {
 
     ArchiveMainView* main_view = context;
 
-    if(main_view->menu) {
-        menu_input_handler(main_view, event);
-        return true;
-    }
-
-    if(event->type == InputTypeShort) {
-        if(event->key == InputKeyLeft) {
-            if(main_view->tab_id > 0) {
-                main_view->tab_id = CLAMP(main_view->tab_id - 1, ArchiveTabTotal, 0);
-                archive_switch_tab(main_view);
-                return true;
-            }
-        } else if(event->key == InputKeyRight) {
-            if(main_view->tab_id < ArchiveTabTotal - 1) {
-                main_view->tab_id = CLAMP(main_view->tab_id + 1, ArchiveTabTotal - 1, 0);
-                archive_switch_tab(main_view);
-                return true;
-            }
-
-        } else if(event->key == InputKeyBack) {
-            if(main_view->depth == 0) {
-                view_dispatcher_stop(main_view->archive->view_dispatcher);
-            } else {
-                archive_leave_dir(main_view);
-            }
-
+    BrowserActionEnum action;
+    with_view_model(
+        main_view->view, (ArchiveMainViewModel * model) {
+            action = model->action;
             return true;
+        });
+
+    switch(action) {
+    case BrowserActionMenu:
+
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyUp || event->key == InputKeyDown) {
+                with_view_model(
+                    main_view->view, (ArchiveMainViewModel * model) {
+                        if(event->key == InputKeyUp) {
+                            model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
+                        } else if(event->key == InputKeyDown) {
+                            model->menu_idx = (model->menu_idx + 1) % MENU_ITEMS;
+                        }
+                        return true;
+                    });
+            }
+
+            if(event->key == InputKeyOk) {
+                archive_file_menu_callback(main_view);
+            } else if(event->key == InputKeyBack) {
+                archive_close_file_menu(main_view);
+            }
         }
-    }
-    if(event->key == InputKeyUp || event->key == InputKeyDown) {
-        with_view_model(
-            main_view->view, (ArchiveMainViewModel * model) {
-                uint16_t num_elements = (uint16_t)files_array_size(model->files);
-                if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
-                    if(event->key == InputKeyUp) {
-                        model->idx = ((model->idx - 1) + num_elements) % num_elements;
-                    } else if(event->key == InputKeyDown) {
-                        model->idx = (model->idx + 1) % num_elements;
-                    }
+        break;
+
+    case BrowserActionBrowse:
+
+        if(event->type == InputTypeShort) {
+            if(event->key == InputKeyLeft) {
+                ArchiveTabEnum tab = archive_get_tab(main_view);
+                if(tab) {
+                    archive_set_tab(main_view, CLAMP(tab - 1, ArchiveTabTotal, 0));
+                    archive_switch_tab(main_view);
+                    return true;
+                }
+            } else if(event->key == InputKeyRight) {
+                ArchiveTabEnum tab = archive_get_tab(main_view);
+
+                if(tab < ArchiveTabTotal - 1) {
+                    archive_set_tab(main_view, CLAMP(tab + 1, ArchiveTabTotal - 1, 0));
+                    archive_switch_tab(main_view);
+                    return true;
+                }
+
+            } else if(event->key == InputKeyBack) {
+                if(!archive_get_depth(main_view)) {
+                    main_view->callback(ArchiveBrowserEventExit, main_view->context);
+                } else {
+                    archive_leave_dir(main_view);
                 }
 
                 return true;
-            });
-        update_offset(main_view);
-    }
-
-    if(event->key == InputKeyOk) {
-        ArchiveFile_t* selected = archive_get_current_file(main_view);
-
-        if(selected) {
-            string_set(main_view->name, selected->name);
-
-            if(selected->type == ArchiveFileTypeFolder) {
-                if(event->type == InputTypeShort) {
-                    archive_enter_dir(main_view, main_view->name);
-                } else if(event->type == InputTypeLong) {
-                    archive_show_file_menu(main_view);
-                }
-            } else {
-                if(event->type == InputTypeShort) {
-                    if(main_view->tab_id == ArchiveTabFavorites) {
-                        if(is_known_app(selected->type)) {
-                            archive_run_in_app(main_view, selected, true);
+            }
+        }
+        if(event->key == InputKeyUp || event->key == InputKeyDown) {
+            with_view_model(
+                main_view->view, (ArchiveMainViewModel * model) {
+                    uint16_t num_elements = (uint16_t)files_array_size(model->files);
+                    if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+                        if(event->key == InputKeyUp) {
+                            model->idx = ((model->idx - 1) + num_elements) % num_elements;
+                        } else if(event->key == InputKeyDown) {
+                            model->idx = (model->idx + 1) % num_elements;
                         }
-                    } else {
+                    }
+
+                    return true;
+                });
+            update_offset(main_view);
+        }
+
+        if(event->key == InputKeyOk) {
+            ArchiveFile_t* selected = archive_get_current_file(main_view);
+
+            if(selected) {
+                string_set(main_view->name, selected->name);
+                if(selected->type == ArchiveFileTypeFolder) {
+                    if(event->type == InputTypeShort) {
+                        archive_enter_dir(main_view, main_view->name);
+                    } else if(event->type == InputTypeLong) {
                         archive_show_file_menu(main_view);
                     }
+                } else {
+                    if(event->type == InputTypeShort) {
+                        if(archive_get_tab(main_view) == ArchiveTabFavorites) {
+                            if(is_known_app(selected->type)) {
+                                archive_run_in_app(main_view, selected, true);
+                            }
+                        } else {
+                            archive_show_file_menu(main_view);
+                        }
+                    }
                 }
             }
         }
+        break;
+    default:
+        break;
     }
-
-    update_offset(main_view);
 
     return true;
 }
 
-ArchiveMainView* main_view_alloc(void* context) {
-    furi_assert(context);
-
+ArchiveMainView* main_view_alloc() {
     ArchiveMainView* main_view = furi_alloc(sizeof(ArchiveMainView));
-    main_view->archive = context;
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(ArchiveMainViewModel));
     view_set_context(main_view->view, main_view);
@@ -704,8 +687,6 @@ ArchiveMainView* main_view_alloc(void* context) {
             files_array_init(model->files);
             return true;
         });
-
-    archive_switch_tab(main_view);
 
     return main_view;
 }

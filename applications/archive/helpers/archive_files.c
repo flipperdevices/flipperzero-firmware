@@ -2,7 +2,18 @@
 #include "archive_favorites.h"
 #include "../archive_i.h"
 
-bool archive_get_filenames(void* context, uint8_t tab_id, string_t path) {
+void archive_trim_file_ext(char* name) {
+    size_t str_len = strlen(name);
+    char* end = name + str_len;
+    while(end > name && *end != '.' && *end != '\\' && *end != '/') {
+        --end;
+    }
+    if((end > name && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
+        *end = '\0';
+    }
+}
+
+bool archive_get_filenames(void* context, uint8_t tab_id, const char* path) {
     furi_assert(context);
 
     ArchiveMainView* main_view = context;
@@ -16,7 +27,7 @@ bool archive_get_filenames(void* context, uint8_t tab_id, string_t path) {
     return true;
 }
 
-bool archive_read_dir(void* context, string_t path) {
+bool archive_read_dir(void* context, const char* path) {
     furi_assert(context);
 
     ArchiveMainView* main_view = context;
@@ -25,7 +36,7 @@ bool archive_read_dir(void* context, string_t path) {
     File* directory = storage_file_alloc(fs_api);
     char name[MAX_NAME_LEN];
 
-    if(!storage_dir_open(directory, string_get_cstr(path))) {
+    if(!storage_dir_open(directory, path)) {
         storage_dir_close(directory);
         storage_file_free(directory);
         return false;
@@ -88,10 +99,9 @@ void archive_delete_file(void* context, string_t path, string_t name) {
     file_worker_free(file_worker);
     string_clear(full_path);
 
-    if(archive_is_favorite(path, name)) {
-        archive_favorites_delete(path, name);
+    if(archive_is_favorite(string_get_cstr(path), string_get_cstr(name))) {
+        archive_favorites_delete(string_get_cstr(path), string_get_cstr(name));
     }
 
     archive_file_array_remove_selected(main_view);
-    update_offset(main_view);
 }
