@@ -30,6 +30,9 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *Event) {
             printf("\r\n");
             serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
             ret = SVCCTL_EvtAckFlowEnable;
+        } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
+            FURI_LOG_I(SERIAL_SERVICE_TAG, "Rx was read", blecore_evt->ecode);
+            ret = SVCCTL_EvtAckFlowEnable;
         }
     }
     return ret;
@@ -65,7 +68,7 @@ bool serial_svc_init() {
     // Add RX characteristic
     status = aci_gatt_add_char(serial_svc.svc_handle, UUID_TYPE_128, (const Char_UUID_t*)char_rx_uuid ,
                                 SERIAL_SVC_DATA_LEN_MAX,                                  
-                                CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+                                CHAR_PROP_READ | CHAR_PROP_INDICATE,
                                 ATTR_PERMISSION_NONE,
                                 GATT_DONT_NOTIFY_EVENTS,
                                 10,
