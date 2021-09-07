@@ -6,32 +6,37 @@
 
 #define SERIAL_SERVICE_TAG "serial service"
 
-struct SerialSvc {
+typedef struct {
     uint16_t svc_handle;
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
-    uint16_t char_value_size;
-};
+} SerialSvc;
 
 static SerialSvc serial_svc;
 
-static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *Event) {
+static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
-    hci_event_pckt* event_pckt = (hci_event_pckt *)(((hci_uart_pckt*)Event)->data);
+    hci_event_pckt* event_pckt = (hci_event_pckt *)(((hci_uart_pckt*)event)->data);
     evt_blecore_aci* blecore_evt = (evt_blecore_aci*)event_pckt->data;
     aci_gatt_attribute_modified_event_rp0* attribute_modified;
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
             attribute_modified = (aci_gatt_attribute_modified_event_rp0*)blecore_evt->data;
-            FURI_LOG_I(SERIAL_SERVICE_TAG, "Data len: %d", attribute_modified->Attr_Data_Length);
-            for(uint8_t i = 0; i < attribute_modified->Attr_Data_Length; i++) {
-                printf("%02X ", attribute_modified->Attr_Data[i]);
+            if(attribute_modified->Attr_Handle == serial_svc.tx_char_handle + 2) {
+                // Descriptor handle
+                ret = SVCCTL_EvtAckFlowEnable;
+                FURI_LOG_D(SERIAL_SERVICE_TAG, "TX descriptor event");
+            } else if(attribute_modified->Attr_Handle == serial_svc.tx_char_handle + 1) {
+                FURI_LOG_I(SERIAL_SERVICE_TAG, "Data len: %d", attribute_modified->Attr_Data_Length);
+                for(uint8_t i = 0; i < attribute_modified->Attr_Data_Length; i++) {
+                    printf("%02X ", attribute_modified->Attr_Data[i]);
+                }
+                printf("\r\n");
+                serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
+                ret = SVCCTL_EvtAckFlowEnable;
             }
-            printf("\r\n");
-            serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
-            ret = SVCCTL_EvtAckFlowEnable;
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
-            FURI_LOG_I(SERIAL_SERVICE_TAG, "Rx was read", blecore_evt->ecode);
+            FURI_LOG_I(SERIAL_SERVICE_TAG, "Ack received", blecore_evt->ecode);
             ret = SVCCTL_EvtAckFlowEnable;
         }
     }
@@ -44,6 +49,7 @@ bool serial_svc_init() {
     const uint8_t char_rx_uuid[] = {SERIAL_CHAR_RX_UUID_128};
     const uint8_t char_tx_uuid[] = {SERIAL_CHAR_TX_UUID_128};
 
+    // Register event handler
     SVCCTL_RegisterSvcHandler(serial_svc_event_handler);
 
     // Add service
@@ -54,7 +60,7 @@ bool serial_svc_init() {
 
     // Add TX characteristics
     status = aci_gatt_add_char(serial_svc.svc_handle, UUID_TYPE_128, (const Char_UUID_t*)char_tx_uuid ,
-                                SERIAL_SVC_DATA_LEN_MAX,                                  
+                                SERIAL_SVC_DATA_LEN_MAX,
                                 CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
                                 ATTR_PERMISSION_NONE,
                                 GATT_NOTIFY_ATTRIBUTE_WRITE,
@@ -90,7 +96,7 @@ bool serial_svc_update_rx(uint8_t* data, uint8_t data_len) {
                                           data_len,
                                           data);
     if(result) {
-        FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed updating RX charachteristic: %d", result);
+        FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed updating RX characteristic: %d", result);
     }
     return result != BLE_STATUS_SUCCESS;
 }
