@@ -8,6 +8,7 @@ enum SubmenuIndex {
     SubmenuIndexCAME12bit,
     SubmenuIndexCAME24bit,
     SubmenuIndexNeroSketch,
+    SubmenuIndexNeroRadio,
     SubmenuIndexGateTX,
     SubmenuIndexDoorHan,
 };
@@ -64,6 +65,8 @@ const void subghz_scene_set_type_on_enter(void* context) {
         subghz);
     // submenu_add_item(
     //     subghz->submenu, "Nero Sketch", SubmenuIndexNeroSketch, subghz_scene_set_type_submenu_callback, subghz);
+    // submenu_add_item(
+    //     subghz->submenu, "Nero Radio", SubmenuIndexNeroRadio, subghz_scene_set_type_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu,
         "Gate TX_433",
@@ -131,6 +134,9 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
             }
             break;
         // case SubmenuIndexNeroSketch:
+        //     /* code */
+        //     break;
+        // case SubmenuIndexNeroRadio:
         //     /* code */
         //     break;
         case SubmenuIndexGateTX:
