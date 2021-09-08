@@ -76,7 +76,6 @@ static void subghz_transmitter_button_right(Canvas* canvas, const char* str) {
 }
 
 void subghz_transmitter_draw(Canvas* canvas, SubghzTransmitterModel* model) {
-
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -125,7 +124,6 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
 void subghz_transmitter_enter(void* context) {
     furi_assert(context);
     // SubghzTransmitter* subghz_transmitter = context;
-
 }
 
 void subghz_transmitter_exit(void* context) {
