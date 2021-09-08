@@ -2,6 +2,24 @@
 #include "archive_favorites.h"
 #include "../archive_i.h"
 
+bool filter_by_extension(FileInfo* file_info, const char* tab_ext, const char* name) {
+    furi_assert(file_info);
+    furi_assert(tab_ext);
+    furi_assert(name);
+
+    bool result = false;
+
+    if(strcmp(tab_ext, "*") == 0) {
+        result = true;
+    } else if(strstr(name, tab_ext) != NULL) {
+        result = true;
+    } else if(file_info->flags & FSF_DIRECTORY) {
+        result = true;
+    }
+
+    return result;
+}
+
 void archive_trim_file_ext(char* name) {
     size_t str_len = strlen(name);
     char* end = name + str_len;
@@ -10,6 +28,24 @@ void archive_trim_file_ext(char* name) {
     }
     if((end > name && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
         *end = '\0';
+    }
+}
+
+void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
+    furi_assert(file);
+    furi_assert(file_info);
+
+    for(size_t i = 0; i < SIZEOF_ARRAY(known_ext); i++) {
+        if(string_search_str(file->name, known_ext[i], 0) != STRING_FAILURE) {
+            file->type = i;
+            return;
+        }
+    }
+
+    if(file_info->flags & FSF_DIRECTORY) {
+        file->type = ArchiveFileTypeFolder;
+    } else {
+        file->type = ArchiveFileTypeUnknown;
     }
 }
 

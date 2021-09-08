@@ -18,7 +18,6 @@
 #include "views/archive_main_view.h"
 #include "scenes/archive_scene.h"
 
-#define MAX_DEPTH 32
 #define MAX_FILE_SIZE 128
 
 typedef enum {

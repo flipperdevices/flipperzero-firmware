@@ -6,22 +6,14 @@
 #include <gui/elements.h>
 #include <furi.h>
 #include <storage/storage.h>
+#include "../helpers/archive_files.h"
+#include "../helpers/archive_favorites.h"
 
 #define MAX_LEN_PX 110
 #define MAX_NAME_LEN 255
 #define FRAME_HEIGHT 12
 #define MENU_ITEMS 4
-
-typedef enum {
-    ArchiveFileTypeIButton,
-    ArchiveFileTypeNFC,
-    ArchiveFileTypeSubGhz,
-    ArchiveFileTypeLFRFID,
-    ArchiveFileTypeIrda,
-    ArchiveFileTypeFolder,
-    ArchiveFileTypeUnknown,
-    AppIdTotal,
-} ArchiveFileTypeEnum;
+#define MAX_DEPTH 32
 
 typedef enum {
     ArchiveTabFavorites,
@@ -33,12 +25,6 @@ typedef enum {
     ArchiveTabBrowser,
     ArchiveTabTotal,
 } ArchiveTabEnum;
-
-typedef struct {
-    string_t name;
-    ArchiveFileTypeEnum type;
-    bool fav;
-} ArchiveFile_t;
 
 static const char* known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
@@ -75,6 +61,35 @@ typedef struct ArchiveMainView ArchiveMainView;
 
 typedef void (*ArchiveMainViewCallback)(ArchiveBrowserEvent event, void* context);
 
+typedef enum {
+    BrowserActionBrowse,
+    BrowserActionItemMenu,
+    BrowserActionTotal,
+} BrowserActionEnum;
+
+struct ArchiveMainView {
+    View* view;
+    ArchiveMainViewCallback callback;
+    void* context;
+
+    string_t name;
+    string_t path;
+};
+
+typedef struct {
+    ArchiveTabEnum tab_idx;
+    BrowserActionEnum action;
+    files_array_t files;
+
+    uint8_t depth;
+    uint8_t menu_idx;
+
+    uint16_t idx;
+    uint16_t last_idx[MAX_DEPTH];
+    uint16_t list_offset;
+
+} ArchiveMainViewModel;
+
 void archive_browser_set_callback(
     ArchiveMainView* main_view,
     ArchiveMainViewCallback callback,
@@ -85,40 +100,13 @@ View* archive_main_get_view(ArchiveMainView* main_view);
 ArchiveMainView* main_view_alloc();
 void main_view_free(ArchiveMainView* main_view);
 
-static void ArchiveFile_t_init(ArchiveFile_t* obj) {
-    obj->type = ArchiveFileTypeUnknown;
-    string_init(obj->name);
-}
-
-static void ArchiveFile_t_init_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    obj->type = src->type;
-    string_init_set(obj->name, src->name);
-}
-
-static void ArchiveFile_t_set(ArchiveFile_t* obj, const ArchiveFile_t* src) {
-    obj->type = src->type;
-    string_set(obj->name, src->name);
-}
-
-static void ArchiveFile_t_clear(ArchiveFile_t* obj) {
-    string_clear(obj->name);
-}
-
-ARRAY_DEF(
-    files_array,
-    ArchiveFile_t,
-    (INIT(API_2(ArchiveFile_t_init)),
-     SET(API_6(ArchiveFile_t_set)),
-     INIT_SET(API_6(ArchiveFile_t_init_set)),
-     CLEAR(API_2(ArchiveFile_t_clear))))
-
-size_t archive_file_array_size(ArchiveMainView* main_view);
 void archive_file_array_remove_selected(ArchiveMainView* main_view);
 void archive_file_array_clean(ArchiveMainView* main_view);
 
 void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
 void archive_browser_update(ArchiveMainView* main_view);
 
+size_t archive_file_array_size(ArchiveMainView* main_view);
 ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view);
 const char* archive_get_path(ArchiveMainView* main_view);
 const char* archive_get_name(ArchiveMainView* main_view);

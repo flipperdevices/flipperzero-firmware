@@ -1,8 +1,6 @@
 #include <furi.h>
 #include "../archive_i.h"
 #include "archive_main_view.h"
-#include "../helpers/archive_files.h"
-#include "../helpers/archive_favorites.h"
 
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
@@ -30,33 +28,6 @@ static const Icon* ArchiveItemIcons[] = {
     [ArchiveFileTypeFolder] = &I_dir_10px,
     [ArchiveFileTypeUnknown] = &I_unknown_10px,
 };
-
-typedef enum {
-    BrowserActionBrowse,
-    BrowserActionMenu,
-    BrowserActionTotal,
-} BrowserActionEnum;
-
-struct ArchiveMainView {
-    View* view;
-    ArchiveMainViewCallback callback;
-    void* context;
-
-    string_t name;
-    string_t path;
-};
-
-typedef struct {
-    BrowserActionEnum action;
-    uint8_t depth;
-    uint16_t last_idx[MAX_DEPTH];
-    ArchiveTabEnum tab_idx;
-    uint8_t menu_idx;
-    uint16_t idx;
-    uint16_t list_offset;
-    files_array_t files;
-
-} ArchiveMainViewModel;
 
 void archive_browser_set_callback(
     ArchiveMainView* main_view,
@@ -162,7 +133,6 @@ const char* archive_get_path(ArchiveMainView* main_view) {
 }
 const char* archive_get_name(ArchiveMainView* main_view) {
     ArchiveFile_t* selected = archive_get_current_file(main_view);
-
     return string_get_cstr(selected->name);
 }
 
@@ -195,42 +165,6 @@ void archive_browser_update(ArchiveMainView* main_view) {
     update_offset(main_view);
 }
 
-static bool filter_by_extension(ArchiveTabEnum tab_id, FileInfo* file_info, const char* name) {
-    furi_assert(file_info);
-    furi_assert(name);
-
-    bool result = false;
-    const char* filter_ext_ptr = get_tab_ext(tab_id);
-
-    if(strcmp(filter_ext_ptr, "*") == 0) {
-        result = true;
-    } else if(strstr(name, filter_ext_ptr) != NULL) {
-        result = true;
-    } else if(file_info->flags & FSF_DIRECTORY) {
-        result = true;
-    }
-
-    return result;
-}
-
-static void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
-    furi_assert(file);
-    furi_assert(file_info);
-
-    for(size_t i = 0; i < SIZEOF_ARRAY(known_ext); i++) {
-        if(string_search_str(file->name, known_ext[i], 0) != STRING_FAILURE) {
-            file->type = i;
-            return;
-        }
-    }
-
-    if(file_info->flags & FSF_DIRECTORY) {
-        file->type = ArchiveFileTypeFolder;
-    } else {
-        file->type = ArchiveFileTypeUnknown;
-    }
-}
-
 void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name) {
     furi_assert(main_view);
     furi_assert(file_info);
@@ -238,7 +172,7 @@ void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, cons
 
     ArchiveFile_t item;
 
-    if(filter_by_extension(archive_get_tab(main_view), file_info, name)) {
+    if(filter_by_extension(file_info, get_tab_ext(archive_get_tab(main_view)), name)) {
         ArchiveFile_t_init(&item);
         string_init_set_str(item.name, name);
         set_file_type(&item, file_info);
@@ -337,7 +271,7 @@ static void draw_list(Canvas* canvas, ArchiveMainViewModel* model) {
         elements_scrollbar_pos(canvas, 126, 15, 49, model->idx, array_size);
     }
 
-    if(model->action == BrowserActionMenu) {
+    if(model->action == BrowserActionItemMenu) {
         render_item_menu(canvas, model);
     }
 }
@@ -401,7 +335,7 @@ static void archive_show_file_menu(ArchiveMainView* main_view) {
         main_view->view, (ArchiveMainViewModel * model) {
             ArchiveFile_t* selected;
             selected = files_array_get(model->files, model->idx);
-            model->action = BrowserActionMenu;
+            model->action = BrowserActionItemMenu;
             model->menu_idx = 0;
             selected->fav = is_known_app(selected->type) ? archive_is_favorite(
                                                                string_get_cstr(main_view->path),
@@ -447,8 +381,8 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
     ArchiveFile_t* selected = archive_get_current_file(main_view);
-    const char* path = string_get_cstr(main_view->path);
-    const char* name = string_get_cstr(selected->name);
+    const char* path = archive_get_path(main_view);
+    const char* name = archive_get_name(main_view);
 
     uint8_t idx;
     with_view_model(
@@ -466,7 +400,7 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
     case 1:
         if(is_known_app(selected->type)) {
             if(!archive_is_favorite(path, name)) {
-                string_set(main_view->name, selected->name);
+                archive_set_name(main_view, string_get_cstr(selected->name));
                 archive_add_to_favorites(path, name);
             } else {
                 // delete from favorites
@@ -570,7 +504,7 @@ bool archive_view_input(InputEvent* event, void* context) {
         });
 
     switch(action) {
-    case BrowserActionMenu:
+    case BrowserActionItemMenu:
 
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyUp || event->key == InputKeyDown) {
@@ -643,7 +577,7 @@ bool archive_view_input(InputEvent* event, void* context) {
             ArchiveFile_t* selected = archive_get_current_file(main_view);
 
             if(selected) {
-                string_set(main_view->name, selected->name);
+                archive_set_name(main_view, string_get_cstr(selected->name));
                 if(selected->type == ArchiveFileTypeFolder) {
                     if(event->type == InputTypeShort) {
                         archive_enter_dir(main_view, main_view->name);
