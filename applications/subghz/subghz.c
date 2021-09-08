@@ -102,11 +102,6 @@ SubGhz* subghz_alloc() {
         SubGhzViewReceiver,
         subghz_receiver_get_view(subghz->subghz_receiver));
 
-    // Dialog
-    subghz->dialog_ex = dialog_ex_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher, SubGhzViewDialogEx, dialog_ex_get_view(subghz->dialog_ex));
-
     // Popup
     subghz->popup = popup_alloc();
     view_dispatcher_add_view(
@@ -221,10 +216,6 @@ void subghz_free(SubGhz* subghz) {
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);
     submenu_free(subghz->submenu);
-
-    // DialogEx
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewDialogEx);
-    dialog_ex_free(subghz->dialog_ex);
 
     // Popup
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewPopup);

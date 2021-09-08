@@ -15,7 +15,6 @@
 #include <notification/notification-messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
-#include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/widget.h>
@@ -86,7 +85,6 @@ struct SubGhz {
     ViewDispatcher* view_dispatcher;
 
     Submenu* submenu;
-    DialogEx* dialog_ex;
     Popup* popup;
     TextInput* text_input;
     Widget* widget;
@@ -106,7 +104,6 @@ struct SubGhz {
 typedef enum {
     SubGhzViewMenu,
 
-    SubGhzViewDialogEx,
     SubGhzViewReceiver,
     SubGhzViewPopup,
     SubGhzViewTextInput,
