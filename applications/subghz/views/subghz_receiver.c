@@ -1,8 +1,7 @@
 #include "subghz_receiver.h"
 #include "../subghz_i.h"
 #include <math.h>
-#include <furi.h>
-#include <furi-hal.h>
+
 #include <input/input.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -147,8 +146,6 @@ void subghz_receiver_draw(Canvas* canvas, SubghzReceiverModel* model) {
 
     bool scrollbar = model->history_item > 4;
     string_t str_buff;
-    //char buffer[64];
-    //uint32_t frequency;
     string_init(str_buff);
 
     SubGhzReceiverMenuItem* item_menu;

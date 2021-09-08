@@ -11,7 +11,6 @@
 #include "views/subghz_receiver.h"
 
 void subghz_begin(FuriHalSubGhzPreset preset) {
-    furi_assert(preset);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
     furi_hal_subghz_load_preset(preset);
