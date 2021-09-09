@@ -16,6 +16,8 @@
 
 #include <furi-hal.h>
 
+#define BLE_TAG "BLE"
+
 typedef struct _tSecurityParams {
   uint8_t ioCapability;
   uint8_t mitm_mode;
@@ -204,7 +206,7 @@ bool APP_BLE_Start() {
 
 void SVCCTL_SvcInit() {
     // Dummy function to prevent unused services initialization
-    // TODO refactore
+    // TODO refactor
 }
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
@@ -221,94 +223,62 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
   switch (event_pckt->evt) {
     case EVT_DISCONN_COMPLETE:
     {
-      hci_disconnection_complete_event_rp0 *disconnection_complete_event;
-      disconnection_complete_event = (hci_disconnection_complete_event_rp0 *) event_pckt->data;
+      hci_disconnection_complete_event_rp0 *disconnection_complete_event = (hci_disconnection_complete_event_rp0 *) event_pckt->data;
 
       if (disconnection_complete_event->Connection_Handle == BleApplicationContext.BleApplicationContext_legacy.connectionHandle) {
         BleApplicationContext.BleApplicationContext_legacy.connectionHandle = 0;
         BleApplicationContext.Device_Connection_Status = APP_BLE_IDLE;
-        APP_DBG_MSG("\r\n\r** DISCONNECTION EVENT WITH CLIENT \r\n");
+        FURI_LOG_I(BLE_TAG, "DISCONNECTION EVENT WITH CLIENT ");
       }
-      /* restart advertising */
+      // Restart advertising
       Adv_Request(APP_BLE_FAST_ADV);
       furi_hal_power_insomnia_exit();
     }
-    break; /* EVT_DISCONN_COMPLETE */
+    break;
 
     case EVT_LE_META_EVENT:
-    {
       meta_evt = (evt_le_meta_event*) event_pckt->data;
-      switch (meta_evt->subevent)
-      {
+      switch (meta_evt->subevent) {
         case EVT_LE_CONN_UPDATE_COMPLETE:
-          APP_DBG_MSG("\r\n\r** CONNECTION UPDATE EVENT WITH CLIENT \r\n");
-
-          /* USER CODE BEGIN EVT_LE_CONN_UPDATE_COMPLETE */
-
-          /* USER CODE END EVT_LE_CONN_UPDATE_COMPLETE */
+          FURI_LOG_I(BLE_TAG, "Connection uodate event");
           break;
+
         case EVT_LE_PHY_UPDATE_COMPLETE:
-          APP_DBG_MSG("EVT_UPDATE_PHY_COMPLETE \r\n");
+          FURI_LOG_I(BLE_TAG, "EVT_UPDATE_PHY_COMPLETE ");
           evt_le_phy_update_complete = (hci_le_phy_update_complete_event_rp0*)meta_evt->data;
-          if (evt_le_phy_update_complete->Status == 0)
-          {
-            APP_DBG_MSG("EVT_UPDATE_PHY_COMPLETE, status ok \r\n");
+          if(evt_le_phy_update_complete->Status) {
+            FURI_LOG_E(BLE_TAG, "Update PHY failed, status %d", evt_le_phy_update_complete->Status);
+          } else {
+            FURI_LOG_I(BLE_TAG, "Update PHY succeed");
           }
-          else
-          {
-            APP_DBG_MSG("EVT_UPDATE_PHY_COMPLETE, status nok \r\n");
-          }
-
           ret = hci_le_read_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,&TX_PHY,&RX_PHY);
-          if (ret == BLE_STATUS_SUCCESS)
-          {
-            APP_DBG_MSG("Read_PHY success \r\n");
-
-            if ((TX_PHY == TX_2M) && (RX_PHY == RX_2M))
-            {
-              APP_DBG_MSG("PHY Param  TX= %d, RX= %d \r\n", TX_PHY, RX_PHY);
-            }
-            else
-            {
-              APP_DBG_MSG("PHY Param  TX= %d, RX= %d \r\n", TX_PHY, RX_PHY);
-            }
-          }
-          else
-          {
-            APP_DBG_MSG("Read conf not succeess \r\n");
+          if(ret) {
+            FURI_LOG_E(BLE_TAG, "Read PHY failed, status: %d", ret);
+          } else {
+            FURI_LOG_I(BLE_TAG, "PHY Params  TX= %d, RX= %d ", TX_PHY, RX_PHY);
           }
           break;
+
         case EVT_LE_CONN_COMPLETE:
-        {
           furi_hal_power_insomnia_enter();
-          hci_le_connection_complete_event_rp0 *connection_complete_event;
+          hci_le_connection_complete_event_rp0* connection_complete_event = (hci_le_connection_complete_event_rp0 *) meta_evt->data;
+          FURI_LOG_I(BLE_TAG, "Connection complete for connection handle 0x%x", connection_complete_event->Connection_Handle);
 
-          /**
-           * The connection is done, there is no need anymore to schedule the LP ADV
-           */
-          connection_complete_event = (hci_le_connection_complete_event_rp0 *) meta_evt->data;
-
+          // Stop advertising as connection completed
           HW_TS_Stop(BleApplicationContext.Advertising_mgr_timer_Id);
 
-          APP_DBG_MSG("EVT_LE_CONN_COMPLETE for connection handle 0x%x\r\n", connection_complete_event->Connection_Handle);
-          if (BleApplicationContext.Device_Connection_Status == APP_BLE_LP_CONNECTING)
-          {
-            /* Connection as client */
-            BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_CLIENT;
-          }
-          else
-          {
-            /* Connection as server */
-            BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_SERVER;
-          }
+          // Update connection status and handle
+          BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_SERVER;
           BleApplicationContext.BleApplicationContext_legacy.connectionHandle = connection_complete_event->Connection_Handle;
-        }
-        break; /* HCI_EVT_LE_CONN_COMPLETE */
+
+          // Start pairing by sending security request
+          aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
+        break;
+
         default:
           break;
       }
-    }
-    break; /* HCI_EVT_LE_META_EVENT */
+    break;
 
     case EVT_VENDOR:
       blue_evt = (evt_blue_aci*) event_pckt->data;
@@ -316,74 +286,71 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
         aci_gap_pairing_complete_event_rp0 *pairing_complete;
 
       case EVT_BLUE_GAP_LIMITED_DISCOVERABLE: 
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_LIMITED_DISCOVERABLE \r\n");
-          break; /* EVT_BLUE_GAP_LIMITED_DISCOVERABLE */
+        FURI_LOG_I(BLE_TAG, "Limited discoverable event");
+          break;
           
       case EVT_BLUE_GAP_PASS_KEY_REQUEST:  
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_PASS_KEY_REQUEST \r\n");
-
-        aci_gap_pass_key_resp(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,123456);
-
-        APP_DBG_MSG("\r\n\r** aci_gap_pass_key_resp \r\n");
-          break; /* EVT_BLUE_GAP_PASS_KEY_REQUEST */
+        aci_gap_pass_key_resp(
+          BleApplicationContext.BleApplicationContext_legacy.connectionHandle,
+          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin);
+        FURI_LOG_I(BLE_TAG, "Pass key request event. Pin: %d", BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin);
+          break;
 
       case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:    
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_AUTHORIZATION_REQUEST \r\n");
-          break; /* EVT_BLUE_GAP_AUTHORIZATION_REQUEST */
+        FURI_LOG_I(BLE_TAG, "Authorization request event");
+          break;
 
-      case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:   
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED \r\n");
-          break; /* EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED */
+      case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:
+        FURI_LOG_I(BLE_TAG, "Slave security initiated");
+          break;
 
       case EVT_BLUE_GAP_BOND_LOST:    
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_BOND_LOST \r\n");
+        FURI_LOG_I(BLE_TAG, "Bond lost event. Start rebonding");
           aci_gap_allow_rebond(BleApplicationContext.BleApplicationContext_legacy.connectionHandle);
-        APP_DBG_MSG("\r\n\r** Send allow rebond \r\n");
+        FURI_LOG_I(BLE_TAG, "Send allow rebond ");
           break; /* EVT_BLUE_GAP_BOND_LOST */
 
       case EVT_BLUE_GAP_DEVICE_FOUND:  
-        APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_DEVICE_FOUND \r\n");
+        FURI_LOG_I(BLE_TAG, "EVT_BLUE_GAP_DEVICE_FOUND ");
           break; /* EVT_BLUE_GAP_DEVICE_FOUND */
 
       case EVT_BLUE_GAP_ADDR_NOT_RESOLVED:
-         APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_DEVICE_FOUND \r\n");
+         FURI_LOG_I(BLE_TAG, "EVT_BLUE_GAP_DEVICE_FOUND ");
           break; /* EVT_BLUE_GAP_DEVICE_FOUND */
       
       case (EVT_BLUE_GAP_KEYPRESS_NOTIFICATION):
-         APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_KEYPRESS_NOTIFICATION \r\n");
+         FURI_LOG_I(BLE_TAG, "EVT_BLUE_GAP_KEYPRESS_NOTIFICATION ");
           break; /* EVT_BLUE_GAP_KEY_PRESS_NOTIFICATION */    
 
        case (EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE):
-          APP_DBG_MSG("numeric_value = %ld\r\n",
+          FURI_LOG_I(BLE_TAG, "numeric_value = %ld",
                       ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
 
-          APP_DBG_MSG("Hex_value = %lx\r\n",
+          FURI_LOG_I(BLE_TAG, "Hex_value = %lx",
                       ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
 
           aci_gap_numeric_comparison_value_confirm_yesno(BleApplicationContext.BleApplicationContext_legacy.connectionHandle, 1); /* CONFIRM_YES = 1 */
 
-          APP_DBG_MSG("\r\n\r** aci_gap_numeric_comparison_value_confirm_yesno-->YES \r\n");
+          FURI_LOG_I(BLE_TAG, "aci_gap_numeric_comparison_value_confirm_yesno-->YES ");
           break;
 
         case (EVT_BLUE_GAP_PAIRING_CMPLT):
           {
             pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
-
-            APP_DBG_MSG("BLE_CTRL_App_Notification: EVT_BLUE_GAP_PAIRING_CMPLT, pairing_complete->Status = %d\r\n",pairing_complete->Status);
-            if (pairing_complete->Status == 0) {
-              APP_DBG_MSG("\r\n\r** Pairing OK \r\n");
+            if (pairing_complete->Status) {
+              FURI_LOG_E(BLE_TAG, "Pairing failed with status: %d. Terminating connection", pairing_complete->Status);
+              aci_gap_terminate(BleApplicationContext.BleApplicationContext_legacy.connectionHandle, 5);
             } else {
-              APP_DBG_MSG("\r\n\r** Pairing KO \r\n");
+              FURI_LOG_I(BLE_TAG, "Pairing complete");
             }
           }
           break;
 
-      /* USER CODE END ecode */
         case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
-          APP_DBG_MSG("\r\n\r** EVT_BLUE_GAP_PROCEDURE_COMPLETE \r\n");
+          FURI_LOG_I(BLE_TAG, "EVT_BLUE_GAP_PROCEDURE_COMPLETE ");
           break;
       }
-      break; /* EVT_VENDOR */
+      break;
       default:
         break;
   }
@@ -520,7 +487,7 @@ static void Ble_Hci_Gap_Gatt_Init() {
 
     if (aci_gatt_update_char_value(gap_service_handle, gap_dev_name_char_handle, 0, strlen(name), (uint8_t *) name))
     {
-      BLE_DBG_SVCCTL_MSG("Device Name aci_gatt_update_char_value failed.\r\n");
+      BLE_DBG_SVCCTL_MSG("Device Name aci_gatt_update_char_value failed.");
     }
   }
 
@@ -530,7 +497,7 @@ static void Ble_Hci_Gap_Gatt_Init() {
                                 2,
                                 (uint8_t *)&appearance))
   {
-    BLE_DBG_SVCCTL_MSG("Appearance aci_gatt_update_char_value failed.\r\n");
+    BLE_DBG_SVCCTL_MSG("Appearance aci_gatt_update_char_value failed.");
   }
   /**
    * Initialize Default PHY
@@ -540,23 +507,23 @@ static void Ble_Hci_Gap_Gatt_Init() {
   /**
    * Initialize IO capability
    */
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.ioCapability = CFG_IO_CAPABILITY;
+  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.ioCapability = IO_CAP_DISPLAY_ONLY;
   aci_gap_set_io_capability(BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.ioCapability);
 
   /**
    * Initialize authentication
    */
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.mitm_mode = CFG_MITM_PROTECTION;
+  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.mitm_mode = 1;
   BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMin = CFG_ENCRYPTION_KEY_SIZE_MIN;
   BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMax = CFG_ENCRYPTION_KEY_SIZE_MAX;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Use_Fixed_Pin = CFG_USED_FIXED_PIN;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin = CFG_FIXED_PIN;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode = CFG_BONDING_MODE;
+  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Use_Fixed_Pin = 1;
+  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin = 123321;
+  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode = 1;
 
   aci_gap_set_authentication_requirement(BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode,
                                          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.mitm_mode,
-                                         CFG_SC_SUPPORT,
-                                         CFG_KEYPRESS_NOTIFICATION_SUPPORT,
+                                         1,
+                                         0,
                                          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMin,
                                          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMax,
                                          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Use_Fixed_Pin,
@@ -595,7 +562,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
      */
     HW_TS_Stop(BleApplicationContext.Advertising_mgr_timer_Id);
 
-    APP_DBG_MSG("First index in %d state \r\n", BleApplicationContext.Device_Connection_Status);
+    FURI_LOG_I(BLE_TAG, "First index in %d state ", BleApplicationContext.Device_Connection_Status);
 
     if ((New_Status == APP_BLE_LP_ADV)
         && ((BleApplicationContext.Device_Connection_Status == APP_BLE_FAST_ADV)
@@ -605,11 +572,11 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
       ret = aci_gap_set_non_discoverable();
       if (ret == BLE_STATUS_SUCCESS)
       {
-        APP_DBG_MSG("Successfully Stopped Advertising \r\n");
+        FURI_LOG_I(BLE_TAG, "Successfully Stopped Advertising ");
       }
       else
       {
-        APP_DBG_MSG("Stop Advertising Failed , result: %d \r\n", ret);
+        FURI_LOG_E(BLE_TAG, "Stop Advertising Failed, result: %d", ret);
       }
     }
 
@@ -623,7 +590,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
         Min_Inter,
         Max_Inter,
         PUBLIC_ADDR,
-        NO_WHITE_LIST_USE, /* use white list */
+        0,
         strlen(name),
         (uint8_t*)name,
         BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen,
@@ -633,24 +600,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
     if(ret) {
       FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
     }
-
-    /* Update Advertising data */
-    ret = aci_gap_update_adv_data(sizeof(manuf_data), (uint8_t*) manuf_data);
-    if (ret == BLE_STATUS_SUCCESS) {
-      if (New_Status == APP_BLE_FAST_ADV) {
-        APP_DBG_MSG("Successfully Start Fast Advertising \r\n" );
-        /* Start Timer to STOP ADV - TIMEOUT */
-        HW_TS_Start(BleApplicationContext.Advertising_mgr_timer_Id, INITIAL_ADV_TIMEOUT);
-      } else {
-        APP_DBG_MSG("Successfully Start Low Power Advertising \r\n");
-      }
-    } else {
-      if (New_Status == APP_BLE_FAST_ADV) {
-        APP_DBG_MSG("Start Fast Advertising Failed , result: %d \r\n", ret);
-      } else {
-        APP_DBG_MSG("Start Low Power Advertising Failed , result: %d \r\n", ret);
-      }
-    }
+    HW_TS_Start(BleApplicationContext.Advertising_mgr_timer_Id, INITIAL_ADV_TIMEOUT);
 }
 
 const uint8_t* BleGetBdAddress( void ) {
