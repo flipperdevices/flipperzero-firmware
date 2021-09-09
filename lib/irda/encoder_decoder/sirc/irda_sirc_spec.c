@@ -3,24 +3,24 @@
 
 static const IrdaProtocolSpecification irda_sirc_protocol_specification = {
       .name = "SIRC",
-      .address_length = 2,
-      .command_length = 2,
+      .address_length = 5,
+      .command_length = 7,
       .frequency = IRDA_SIRC_CARRIER_FREQUENCY,
       .duty_cycle = IRDA_SIRC_DUTY_CYCLE,
 };
 
 static const IrdaProtocolSpecification irda_sirc15_protocol_specification = {
       .name = "SIRC15",
-      .address_length = 2,
-      .command_length = 2,
+      .address_length = 8,
+      .command_length = 7,
       .frequency = IRDA_SIRC_CARRIER_FREQUENCY,
       .duty_cycle = IRDA_SIRC_DUTY_CYCLE,
 };
 
 static const IrdaProtocolSpecification irda_sirc20_protocol_specification = {
       .name = "SIRC20",
-      .address_length = 4,
-      .command_length = 2,
+      .address_length = 13,
+      .command_length = 7,
       .frequency = IRDA_SIRC_CARRIER_FREQUENCY,
       .duty_cycle = IRDA_SIRC_DUTY_CYCLE,
 };

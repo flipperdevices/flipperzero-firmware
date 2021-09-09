@@ -118,7 +118,7 @@ IrdaProtocol irda_get_protocol_by_name(const char* protocol_name);
  * Get address length by protocol enum.
  *
  * \param[in]   protocol    - protocol identifier.
- * \return      length of address in nibbles.
+ * \return      length of address in bits.
  */
 uint8_t irda_get_protocol_address_length(IrdaProtocol protocol);
 
@@ -126,7 +126,7 @@ uint8_t irda_get_protocol_address_length(IrdaProtocol protocol);
  * Get command length by protocol enum.
  *
  * \param[in]   protocol    - protocol identifier.
- * \return      length of command in nibbles.
+ * \return      length of command in bits.
  */
 uint8_t irda_get_protocol_command_length(IrdaProtocol protocol);
 
