@@ -58,6 +58,7 @@ void furi_hal_init() {
     furi_hal_vibro_init();
     furi_hal_subghz_init();
     furi_hal_nfc_init();
+    furi_hal_rfid_init();
 
     // FreeRTOS glue
     furi_hal_os_init();

@@ -9,6 +9,10 @@
 #define LFRFID_EMULATE_TIM htim2
 #define LFRFID_EMULATE_CHANNEL TIM_CHANNEL_3
 
+void furi_hal_rfid_init() {
+    furi_hal_rfid_pins_reset();
+}
+
 void furi_hal_rfid_pins_reset() {
     // ibutton bus disable
     furi_hal_ibutton_stop();
@@ -20,6 +24,8 @@ void furi_hal_rfid_pins_reset() {
     // from both sides
     hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
     hal_gpio_write(&gpio_rfid_pull, true);
+
+    hal_gpio_init_simple(&gpio_rfid_carrier, GpioModeAnalog);
 }
 
 void furi_hal_rfid_pins_emulate() {
@@ -35,7 +41,6 @@ void furi_hal_rfid_pins_emulate() {
     hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
     hal_gpio_write(&gpio_rfid_carrier_out, false);
 
-    //gpio_rfid_carrier
     hal_gpio_init_ex(
         &gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioSpeedLow, GpioPullUp, GpioAltFn2TIM2);
 }
