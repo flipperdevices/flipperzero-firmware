@@ -1,9 +1,25 @@
 #include "../subghz_i.h"
 
-void subghz_scene_receiver_info_callback(GuiButtonType result, void* context) {
+typedef enum {
+    SubGhzSceneReceiverInfoCustomEventTxStart,
+    SubGhzSceneReceiverInfoCustomEventTxStop,
+    SubGhzSceneReceiverInfoCustomEventSave,
+} SubGhzSceneReceiverInfoCustomEvent;
+
+void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
-    view_dispatcher_send_custom_event(subghz->view_dispatcher, result);
+
+    if((result == GuiButtonTypeCenter) && (type == InputTypePress)) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzSceneReceiverInfoCustomEventTxStart);
+    } else if((result == GuiButtonTypeCenter) && (type == InputTypeRelease)) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzSceneReceiverInfoCustomEventTxStop);
+    } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubGhzSceneReceiverInfoCustomEventSave);
+    }
 }
 
 static bool subghz_scene_receiver_info_update_parser(void* context) {
@@ -83,7 +99,7 @@ const void subghz_scene_receiver_info_on_enter(void* context) {
 const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GuiButtonTypeCenterPress) {
+        if(event.event == SubGhzSceneReceiverInfoCustomEventTxStart) {
             //CC1101 Stop RX -> Start TX
             subghz->state_notifications = NOTIFICATION_TX_STATE;
             if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {
@@ -102,7 +118,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
                 subghz->txrx->txrx_state = SubGhzTxRxStateTx;
             }
             return true;
-        } else if(event.event == GuiButtonTypeCenterRelease) {
+        } else if(event.event == SubGhzSceneReceiverInfoCustomEventTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
@@ -119,7 +135,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
             }
             subghz->state_notifications = NOTIFICATION_RX_STATE;
             return true;
-        } else if(event.event == GuiButtonTypeRight) {
+        } else if(event.event == SubGhzSceneReceiverInfoCustomEventSave) {
             //CC1101 Stop RX -> Save
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {
