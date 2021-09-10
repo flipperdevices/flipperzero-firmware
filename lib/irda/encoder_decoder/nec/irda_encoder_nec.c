@@ -27,19 +27,27 @@ void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message) {
 
     uint32_t* data = (void*) encoder->data;
     if (message->protocol == IrdaProtocolNEC) {
-        *data = (address | (address_inverse << 8));
+        *data = address;
+        *data |= address_inverse << 8;
+        *data |= command << 16;
+        *data |= command_inverse << 24;
+        encoder->bits_to_encode = 32;
     } else if (message->protocol == IrdaProtocolNECext) {
         *data = (uint16_t) message->address;
+        *data |= (message->command << 16) & 0xFFFF0000ul;
+        encoder->bits_to_encode = 32;
+    } else if (message->protocol == IrdaProtocolNEC42) {
+        encoder->bits_to_encode = 42;
+    } else {
+        furi_assert(0);
     }
-    *data |= command << 16;
-    *data |= command_inverse << 24;
 }
 
 IrdaStatus irda_encoder_nec_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
     furi_assert(encoder);
 
     /* space + 2 timings preambule + payload + stop bit */
-    uint32_t timings_encoded_up_to_repeat = 1 + 2 + encoder->protocol->databit_len * 2 + 1;
+    uint32_t timings_encoded_up_to_repeat = 1 + 2 + encoder->bits_to_encode * 2 + 1;
     uint32_t repeat_cnt = encoder->timings_encoded - timings_encoded_up_to_repeat;
 
     furi_assert(encoder->timings_encoded >= timings_encoded_up_to_repeat);
