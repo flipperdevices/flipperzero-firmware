@@ -397,7 +397,7 @@ void subghz_hopper_update(SubGhz* subghz) {
     }
 
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-        subghz_rx_end(subghz);  
+        subghz_rx_end(subghz);
     };
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
         subghz_parser_reset(subghz->txrx->parser);

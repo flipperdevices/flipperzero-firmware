@@ -79,8 +79,7 @@ const void subghz_scene_receiver_on_enter(void* context) {
     string_clear(str_buff);
     subghz_scene_receiver_update_statusbar(subghz);
     subghz_receiver_set_callback(subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
-    subghz_parser_enable_dump(
-        subghz->txrx->parser, subghz_scene_add_to_history_callback, subghz);
+    subghz_parser_enable_dump(subghz->txrx->parser, subghz_scene_add_to_history_callback, subghz);
 
     subghz->state_notifications = NOTIFICATION_RX_STATE;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
