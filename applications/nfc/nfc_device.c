@@ -8,8 +8,9 @@
 
 static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
+static const char* nfc_app_shadow_extension = ".shd";
 
-static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
+static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len, uint8_t delim_len) {
     string_strim(str);
     uint8_t nibble_high = 0;
     uint8_t nibble_low = 0;
@@ -19,7 +20,7 @@ static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len) {
         if(hex_char_to_hex_nibble(string_get_char(str, 0), &nibble_high) &&
            hex_char_to_hex_nibble(string_get_char(str, 1), &nibble_low)) {
             buff[i] = (nibble_high << 4) | nibble_low;
-            string_right(str, 3);
+            string_right(str, delim_len + 2);
         } else {
             parsed = false;
             break;
@@ -59,7 +60,7 @@ bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_string) {
 }
 
 uint16_t nfc_device_prepare_uid_string(NfcDevice* dev, string_t uid_string) {
-    NfcDeviceCommomData* uid_data = &dev->dev_data.nfc_data;
+    NfcDeviceCommonData* uid_data = &dev->dev_data.nfc_data;
     string_printf(uid_string, "UID len: %02X UID: ", dev->dev_data.nfc_data.uid_len);
     for(uint8_t i = 0; i < uid_data->uid_len; i++) {
         string_cat_printf(uid_string, "%02X ", uid_data->uid[i]);
@@ -74,28 +75,28 @@ uint16_t nfc_device_prepare_uid_string(NfcDevice* dev, string_t uid_string) {
 }
 
 bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
-    NfcDeviceCommomData* uid_data = &dev->dev_data.nfc_data;
+    NfcDeviceCommonData* uid_data = &dev->dev_data.nfc_data;
     bool parsed = false;
 
     do {
         // strlen("UID len: ") = 9
         string_right(uid_string, 9);
-        if(!nfc_device_read_hex(uid_string, &uid_data->uid_len, 1)) {
+        if(!nfc_device_read_hex(uid_string, &uid_data->uid_len, 1, 1)) {
             break;
         }
         // strlen("UID: ") = 5
         string_right(uid_string, 5);
-        if(!nfc_device_read_hex(uid_string, uid_data->uid, uid_data->uid_len)) {
+        if(!nfc_device_read_hex(uid_string, uid_data->uid, uid_data->uid_len, 1)) {
             break;
         }
         // strlen("ATQA: ") = 6
         string_right(uid_string, 6);
-        if(!nfc_device_read_hex(uid_string, uid_data->atqa, 2)) {
+        if(!nfc_device_read_hex(uid_string, uid_data->atqa, 2, 1)) {
             break;
         }
         // strlen("SAK: ") = 5
         string_right(uid_string, 5);
-        if(!nfc_device_read_hex(uid_string, &uid_data->sak, 1)) {
+        if(!nfc_device_read_hex(uid_string, &uid_data->sak, 1, 1)) {
             break;
         }
         parsed = true;
@@ -148,13 +149,13 @@ bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string
     do {
         // strlen("Signature: ") = 11
         string_right(mifare_ul_string, 11);
-        if(!nfc_device_read_hex(mifare_ul_string, data->signature, sizeof(data->signature))) {
+        if(!nfc_device_read_hex(mifare_ul_string, data->signature, sizeof(data->signature), 1)) {
             break;
         }
         // strlen("Version: ") = 9
         string_right(mifare_ul_string, 9);
         if(!nfc_device_read_hex(
-               mifare_ul_string, (uint8_t*)&data->version, sizeof(data->version))) {
+               mifare_ul_string, (uint8_t*)&data->version, sizeof(data->version), 1)) {
             break;
         }
         string_strim(mifare_ul_string);
@@ -183,7 +184,7 @@ bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string
         string_right(mifare_ul_string, ws + 1);
         // Read data
         for(uint16_t i = 0; i < data->data_size; i += 4) {
-            if(!nfc_device_read_hex(mifare_ul_string, &data->data[i], 4)) {
+            if(!nfc_device_read_hex(mifare_ul_string, &data->data[i], 4, 1)) {
                 break;
             }
         }
@@ -203,6 +204,16 @@ uint16_t nfc_device_prepare_bank_card_string(NfcDevice* dev, string_t bank_card_
     for(uint8_t i = 0; i < sizeof(data->number); i++) {
         string_cat_printf(bank_card_string, " %02X", data->number[i]);
     }
+    if(data->exp_mon) {
+        string_cat_printf(
+            bank_card_string, "\nExp date: %02X/%02X", data->exp_mon, data->exp_year);
+    }
+    if(data->country_code) {
+        string_cat_printf(bank_card_string, "\nCountry code: %04X", data->country_code);
+    }
+    if(data->currency_code) {
+        string_cat_printf(bank_card_string, "\nCurrency code: %04X", data->currency_code);
+    }
     return string_size(bank_card_string);
 }
 
@@ -210,6 +221,7 @@ bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string
     NfcEmvData* data = &dev->dev_data.emv_data;
     bool parsed = false;
     int res = 0;
+    uint8_t code[2] = {};
     memset(data, 0, sizeof(NfcEmvData));
 
     do {
@@ -221,7 +233,7 @@ bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string
         string_right(bank_card_string, 9);
         size_t ws = string_search_char(bank_card_string, ':');
         string_right(bank_card_string, ws + 1);
-        if(!nfc_device_read_hex(bank_card_string, data->aid, data->aid_len)) {
+        if(!nfc_device_read_hex(bank_card_string, data->aid, data->aid_len, 1)) {
             break;
         }
         res = sscanf(string_get_cstr(bank_card_string), "Name: %s\n", data->name);
@@ -232,10 +244,34 @@ bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string
         string_right(bank_card_string, ws + 1);
         // strlen("Number: ") = 8
         string_right(bank_card_string, 8);
-        if(!nfc_device_read_hex(bank_card_string, data->number, sizeof(data->number))) {
+        if(!nfc_device_read_hex(bank_card_string, data->number, sizeof(data->number), 1)) {
             break;
         }
         parsed = true;
+        // Check expiration date presence
+        ws = string_search_str(bank_card_string, "Exp date: ");
+        if(ws != STRING_FAILURE) {
+            // strlen("Exp date: ") = 10
+            string_right(bank_card_string, 10);
+            nfc_device_read_hex(bank_card_string, &data->exp_mon, 1, 1);
+            nfc_device_read_hex(bank_card_string, &data->exp_year, 1, 1);
+        }
+        // Check country code presence
+        ws = string_search_str(bank_card_string, "Country code: ");
+        if(ws != STRING_FAILURE) {
+            // strlen("Country code: ") = 14
+            string_right(bank_card_string, 14);
+            nfc_device_read_hex(bank_card_string, code, 2, 0);
+            data->country_code = code[0] << 8 | code[1];
+        }
+        // Check currency code presence
+        ws = string_search_str(bank_card_string, "Currency code: ");
+        if(ws != STRING_FAILURE) {
+            // strlen("Currency code: ") = 15
+            string_right(bank_card_string, 15);
+            nfc_device_read_hex(bank_card_string, code, 2, 0);
+            data->currency_code = code[0] << 8 | code[1];
+        }
     } while(0);
 
     return parsed;
@@ -247,7 +283,11 @@ void nfc_device_set_name(NfcDevice* dev, const char* name) {
     strlcpy(dev->dev_name, name, NFC_DEV_NAME_MAX_LEN);
 }
 
-bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
+static bool nfc_device_save_file(
+    NfcDevice* dev,
+    const char* dev_name,
+    const char* folder,
+    const char* extension) {
     furi_assert(dev);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -263,7 +303,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             break;
         };
         // First remove nfc device file if it was saved
-        string_printf(dev_file_name, "%s/%s%s", nfc_app_folder, dev_name, nfc_app_extension);
+        string_printf(dev_file_name, "%s/%s%s", folder, dev_name, extension);
         if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
             break;
         };
@@ -304,16 +344,42 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
     return true;
 }
 
+bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
+    return nfc_device_save_file(dev, dev_name, nfc_app_folder, nfc_app_extension);
+}
+
+bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name) {
+    dev->shadow_file_exist = true;
+    return nfc_device_save_file(dev, dev_name, nfc_app_folder, nfc_app_shadow_extension);
+}
+
 static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevice* dev) {
     string_t temp_string;
     string_init(temp_string);
     bool parsed = false;
 
     do {
-        // Open key file
-        if(!file_worker_open(file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        // Check existance of shadow file
+        size_t ext_start = string_search_str(path, nfc_app_extension);
+        string_set_n(temp_string, path, 0, ext_start);
+        string_cat_printf(temp_string, "%s", nfc_app_shadow_extension);
+        if(!file_worker_is_file_exist(
+               file_worker, string_get_cstr(temp_string), &dev->shadow_file_exist)) {
             break;
         }
+        // Open shadow file if it exists. If not - open original
+        if(dev->shadow_file_exist) {
+            if(!file_worker_open(
+                   file_worker, string_get_cstr(temp_string), FSAM_READ, FSOM_OPEN_EXISTING)) {
+                break;
+            }
+        } else {
+            if(!file_worker_open(
+                   file_worker, string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+                break;
+            }
+        }
+
         // Read and parse format from 1st line
         if(!file_worker_read_until(file_worker, temp_string, '\n')) {
             break;
@@ -415,12 +481,60 @@ void nfc_device_clear(NfcDevice* dev) {
 bool nfc_device_delete(NfcDevice* dev) {
     furi_assert(dev);
 
-    bool result = false;
+    bool result = true;
     FileWorker* file_worker = file_worker_alloc(false);
     string_t file_path;
-    string_init_printf(file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_extension);
-    result = file_worker_remove(file_worker, string_get_cstr(file_path));
+
+    do {
+        // Delete original file
+        string_init_printf(file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_extension);
+        if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
+            result = false;
+            break;
+        }
+        // Delete shadow file if it exists
+        if(dev->shadow_file_exist) {
+            string_clean(file_path);
+            string_printf(
+                file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_shadow_extension);
+            if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
+                result = false;
+                break;
+            }
+        }
+    } while(0);
+
     string_clear(file_path);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return result;
+}
+
+bool nfc_device_restore(NfcDevice* dev) {
+    furi_assert(dev);
+    furi_assert(dev->shadow_file_exist);
+
+    bool result = true;
+    FileWorker* file_worker = file_worker_alloc(false);
+    string_t path;
+
+    do {
+        string_init_printf(
+            path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_shadow_extension);
+        if(!file_worker_remove(file_worker, string_get_cstr(path))) {
+            result = false;
+            break;
+        }
+        dev->shadow_file_exist = false;
+        string_clean(path);
+        string_printf(path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_extension);
+        if(!nfc_device_load_data(file_worker, path, dev)) {
+            result = false;
+            break;
+        }
+    } while(0);
+
+    string_clear(path);
     file_worker_close(file_worker);
     file_worker_free(file_worker);
     return result;

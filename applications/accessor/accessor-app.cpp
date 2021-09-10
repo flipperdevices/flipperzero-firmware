@@ -1,6 +1,6 @@
 #include "accessor-app.h"
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <stdarg.h>
 
 void AccessorApp::run(void) {
@@ -33,16 +33,15 @@ void AccessorApp::run(void) {
 
 AccessorApp::AccessorApp()
     : onewire_master{&ibutton_gpio} {
-    api_hal_power_insomnia_enter();
+    furi_hal_power_insomnia_enter();
     notification = static_cast<NotificationApp*>(furi_record_open("notification"));
-    notify_init();
-    api_hal_power_enable_otg();
+    furi_hal_power_enable_otg();
 }
 
 AccessorApp::~AccessorApp() {
-    api_hal_power_disable_otg();
+    furi_hal_power_disable_otg();
     furi_record_close("notification");
-    api_hal_power_insomnia_exit();
+    furi_hal_power_insomnia_exit();
 }
 
 AccessorAppViewManager* AccessorApp::get_view_manager() {
@@ -104,33 +103,12 @@ AccessorApp::Scene AccessorApp::get_previous_scene() {
 
 /***************************** NOTIFY *******************************/
 
-void AccessorApp::notify_init() {
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-    GPIO_InitStruct.Pin = PB3_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-    HAL_GPIO_Init(PB3_GPIO_Port, &GPIO_InitStruct);
-}
-
 void AccessorApp::notify_green_blink() {
     notification_message(notification, &sequence_blink_green_10);
 }
 
 void AccessorApp::notify_success() {
     notification_message(notification, &sequence_success);
-
-    hal_pwm_set(0.5, 1760 / 2, &htim2, TIM_CHANNEL_2);
-    delay(100);
-    hal_pwm_stop(&htim2, TIM_CHANNEL_2);
-
-    delay(100);
-
-    hal_pwm_set(0.5, 1760, &htim2, TIM_CHANNEL_2);
-    delay(100);
-    hal_pwm_stop(&htim2, TIM_CHANNEL_2);
 }
 
 /*************************** TEXT STORE *****************************/

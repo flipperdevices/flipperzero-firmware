@@ -1,4 +1,4 @@
-#include "../irda-app.hpp"
+#include "../irda-app.h"
 #include "gui/modules/text_input.h"
 
 void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
@@ -13,7 +13,7 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
             0,
             "%.4s_%0*lX",
             irda_get_protocol_name(message->protocol),
-            irda_get_protocol_command_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_command_length(message->protocol), 4),
             message->command);
     } else {
         auto raw_signal = signal.get_raw_signal();
@@ -26,7 +26,7 @@ void IrdaAppSceneLearnEnterName::on_enter(IrdaApp* app) {
         IrdaApp::text_input_callback,
         app,
         app->get_text_store(0),
-        app->get_text_store_size(),
+        IrdaAppRemoteManager::max_button_name_length,
         false);
 
     view_manager->switch_to(IrdaAppViewManager::ViewType::TextInput);

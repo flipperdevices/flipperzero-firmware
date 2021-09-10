@@ -63,6 +63,14 @@ static uint16_t emv_parse_TLV(uint8_t* dest, uint8_t* src, uint16_t* idx) {
     return len;
 }
 
+static bool emv_decode_search_tag_u16_r(uint16_t tag, uint8_t* buff, uint16_t* idx) {
+    if((buff[*idx] << 8 | buff[*idx + 1]) == tag) {
+        *idx = *idx + 3;
+        return true;
+    }
+    return false;
+}
+
 uint16_t emv_prepare_select_ppse(uint8_t* dest) {
     const uint8_t emv_select_ppse[] = {
         0x00, 0xA4, // SELECT ppse
@@ -214,13 +222,23 @@ uint16_t emv_prepare_read_sfi_record(uint8_t* dest, uint8_t sfi, uint8_t record_
 }
 
 bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app) {
+    bool pan_parsed = false;
     for(uint16_t i = 0; i < len; i++) {
         if(buff[i] == EMV_TAG_PAN) {
             memcpy(app->card_number, &buff[i + 2], 8);
-            return true;
+            pan_parsed = true;
+        } else if(emv_decode_search_tag_u16_r(EMV_TAG_EXP_DATE, buff, &i)) {
+            app->exp_year = buff[i++];
+            app->exp_month = buff[i++];
+        } else if(emv_decode_search_tag_u16_r(EMV_TAG_CURRENCY_CODE, buff, &i)) {
+            app->currency_code = (buff[i] << 8) | buff[i + 1];
+            i += 2;
+        } else if(emv_decode_search_tag_u16_r(EMV_TAG_COUNTRY_CODE, buff, &i)) {
+            app->country_code = (buff[i] << 8) | buff[i + 1];
+            i += 2;
         }
     }
-    return false;
+    return pan_parsed;
 }
 
 uint16_t emv_select_ppse_ans(uint8_t* buff) {

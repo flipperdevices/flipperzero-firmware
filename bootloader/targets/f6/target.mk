@@ -21,6 +21,7 @@ C_SOURCES		+= $(CUBE_DIR)/Drivers/CMSIS/Device/ST/STM32WBxx/Source/Templates/sys
 C_SOURCES		+= $(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c
 C_SOURCES		+= $(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_gpio.c
 C_SOURCES		+= $(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_i2c.c
+C_SOURCES		+= $(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_spi.c
 
 CFLAGS			+= -I$(CUBE_DIR)/Drivers/CMSIS/Include
 CFLAGS			+= -I$(CUBE_DIR)/Drivers/CMSIS/Device/ST/STM32WBxx/Include
@@ -34,8 +35,8 @@ CFLAGS			+= -I$(DRIVERS_DIR)
 C_SOURCES		+= $(DRIVERS_DIR)/lp5562.c
 
 # API-HAL
-CFLAGS			+= -I$(TARGET_DIR)/api-hal
-C_SOURCES		+= $(wildcard $(TARGET_DIR)/api-hal/*.c)
+CFLAGS			+= -I$(TARGET_DIR)/furi-hal
+C_SOURCES		+= $(wildcard $(TARGET_DIR)/furi-hal/*.c)
 
 # Version generation
 C_SOURCES		+= $(PROJECT_ROOT)/lib/toolbox/version.c

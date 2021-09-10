@@ -118,6 +118,20 @@ static void widget_add_element(Widget* widget, WidgetElement* element) {
         });
 }
 
+void widget_add_string_multi_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    Font font,
+    const char* text) {
+    furi_assert(widget);
+    WidgetElement* string_multi_element =
+        widget_element_string_multi_create(x, y, horizontal, vertical, font, text);
+    widget_add_element(widget, string_multi_element);
+}
+
 void widget_add_string_element(
     Widget* widget,
     uint8_t x,
@@ -149,4 +163,16 @@ void widget_add_icon_element(Widget* widget, uint8_t x, uint8_t y, const Icon* i
     furi_assert(icon);
     WidgetElement* icon_element = widget_element_icon_create(x, y, icon);
     widget_add_element(widget, icon_element);
+}
+
+void widget_add_frame_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    uint8_t radius) {
+    furi_assert(widget);
+    WidgetElement* frame_element = widget_element_frame_create(x, y, width, height, radius);
+    widget_add_element(widget, frame_element);
 }

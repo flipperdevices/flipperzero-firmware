@@ -2,8 +2,8 @@
 #include <gui/view.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
-#include <api-hal.h>
-#include <api-hal-version.h>
+#include <furi-hal.h>
+#include <furi-hal-version.h>
 
 static char* Lockmenu_Items[3] = {"Lock", "Set PIN", "DUMB mode"};
 
@@ -14,7 +14,7 @@ void dolphin_view_first_start_draw(Canvas* canvas, void* model) {
     canvas_set_font(canvas, FontSecondary);
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
-    const char* my_name = api_hal_version_get_name_ptr();
+    const char* my_name = furi_hal_version_get_name_ptr();
     if(m->page == 0) {
         canvas_draw_icon(canvas, 0, height - 48, &I_DolphinFirstStart0_70x53);
         elements_multiline_text_framed(canvas, 75, 20, "Hey m8,\npress > to\ncontinue");
@@ -63,7 +63,7 @@ void dolphin_view_idle_main_draw(Canvas* canvas, void* model) {
         canvas_draw_icon_animation(canvas, 0, -3, m->animation);
     }
 
-    if(m->hint_timeout > 0) {
+    if(m->hint_timeout) {
         m->hint_timeout--;
         if(m->locked) {
             canvas_draw_icon(canvas, 13, 5, &I_LockPopup_100x49);
@@ -98,9 +98,18 @@ void dolphin_view_lockmenu_draw(Canvas* canvas, void* model) {
         if(m->door_left_x == -57) {
             for(uint8_t i = 0; i < 3; ++i) {
                 canvas_draw_str_aligned(
-                    canvas, 64, 13 + (i * 17), AlignCenter, AlignCenter, Lockmenu_Items[i]);
+                    canvas,
+                    64,
+                    13 + (i * 17),
+                    AlignCenter,
+                    AlignCenter,
+                    (m->hint_timeout && m->idx == i) ? "Not implemented" : Lockmenu_Items[i]);
                 if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
             }
+        }
+
+        if(m->hint_timeout) {
+            m->hint_timeout--;
         }
     }
 }
@@ -119,20 +128,20 @@ void dolphin_view_idle_down_draw(Canvas* canvas, void* model) {
 
     if(m->screen != DolphinViewStatsMeta) {
         // Hardware version
-        const char* my_name = api_hal_version_get_name_ptr();
+        const char* my_name = furi_hal_version_get_name_ptr();
         snprintf(
             buffer,
             sizeof(buffer),
             "HW: %d.F%dB%dC%d %s",
-            api_hal_version_get_hw_version(),
-            api_hal_version_get_hw_target(),
-            api_hal_version_get_hw_body(),
-            api_hal_version_get_hw_connect(),
+            furi_hal_version_get_hw_version(),
+            furi_hal_version_get_hw_target(),
+            furi_hal_version_get_hw_body(),
+            furi_hal_version_get_hw_connect(),
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 5, 23, buffer);
 
-        ver = m->screen == DolphinViewStatsBoot ? api_hal_version_get_boot_version() :
-                                                  api_hal_version_get_firmware_version();
+        ver = m->screen == DolphinViewStatsBoot ? furi_hal_version_get_boot_version() :
+                                                  furi_hal_version_get_firmware_version();
 
         if(!ver) {
             canvas_draw_str(canvas, 5, 33, "No info");
@@ -178,7 +187,7 @@ void dolphin_view_hw_mismatch_draw(Canvas* canvas, void* model) {
 
     char buffer[64];
     canvas_set_font(canvas, FontSecondary);
-    snprintf(buffer, 64, "HW target: F%d", api_hal_version_get_hw_target());
+    snprintf(buffer, 64, "HW target: F%d", furi_hal_version_get_hw_target());
     canvas_draw_str(canvas, 5, 27, buffer);
     canvas_draw_str(canvas, 5, 38, "FW target: " TARGET);
 }

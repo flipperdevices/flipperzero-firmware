@@ -22,10 +22,13 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
 
     instance->common.name = "Star Line"; 
     instance->common.code_min_count_bit_for_found = 64;
-    instance->common.te_shot = 250;
+    instance->common.te_short = 250;
     instance->common.te_long = 500;
     instance->common.te_delta = 120;
+    instance->common.type_protocol = TYPE_PROTOCOL_DYNAMIC;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_star_line_to_str;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_star_line_to_load_protocol;
 
     return instance;
 }
@@ -33,6 +36,17 @@ SubGhzProtocolStarLine* subghz_protocol_star_line_alloc(SubGhzKeystore* keystore
 void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance) {
     furi_assert(instance);
     free(instance);
+}
+
+const char* subghz_protocol_star_line_find_and_get_manufacture_name (void* context){
+    SubGhzProtocolStarLine* instance = context;
+    subghz_protocol_star_line_check_remote_controller(instance);
+    return instance->manufacture_name;
+}
+
+const char* subghz_protocol_star_line_get_manufacture_name (void* context){
+    SubGhzProtocolStarLine* instance = context;
+    return instance->manufacture_name;
 }
 
 /** Send bit 
@@ -43,16 +57,16 @@ void subghz_protocol_star_line_free(SubGhzProtocolStarLine* instance) {
 void subghz_protocol_star_line_send_bit(SubGhzProtocolStarLine* instance, uint8_t bit) {
     if (bit) {
         //send bit 1
-        SUBGHZ_TX_PIN_HIGTH();
+        SUBGHZ_TX_PIN_HIGH();
         delay_us(instance->common.te_long);
         SUBGHZ_TX_PIN_LOW();
         delay_us(instance->common.te_long);
     } else {
         //send bit 0
-        SUBGHZ_TX_PIN_HIGTH();
-        delay_us(instance->common.te_shot);
+        SUBGHZ_TX_PIN_HIGH();
+        delay_us(instance->common.te_short);
         SUBGHZ_TX_PIN_LOW();
-        delay_us(instance->common.te_shot);
+        delay_us(instance->common.te_short);
     }
 }
 
@@ -60,7 +74,7 @@ void subghz_protocol_star_line_send_key(SubGhzProtocolStarLine* instance, uint64
     while (repeat--) {
         //Send header
         for(uint8_t i = 0; i < 6; i++){
-            SUBGHZ_TX_PIN_HIGTH();
+            SUBGHZ_TX_PIN_HIGH();
             delay_us(instance->common.te_long * 2);
             SUBGHZ_TX_PIN_LOW();
             delay_us(instance->common.te_long * 2); 
@@ -174,7 +188,7 @@ uint8_t subghz_protocol_star_line_check_remote_controller_selector(SubGhzProtoco
  * @param instance SubGhzProtocolStarLine instance
  */
 void subghz_protocol_star_line_check_remote_controller(SubGhzProtocolStarLine* instance) {
-    uint64_t key = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+    uint64_t key = subghz_protocol_common_reverse_key(instance->common.code_last_found, instance->common.code_last_count_bit);
     uint32_t key_fix = key >> 32;
     uint32_t key_hop = key & 0x00000000ffffffff;
 
@@ -182,10 +196,6 @@ void subghz_protocol_star_line_check_remote_controller(SubGhzProtocolStarLine* i
 
     instance ->common.serial= key_fix&0x00FFFFFF;
     instance->common.btn = key_fix >> 24;
-
-
-    if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
-
 }
 
 void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool level, uint32_t duration) {
@@ -222,7 +232,9 @@ void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool leve
                 instance->common.parser_step = 0;
                 if (instance->common.code_count_bit>= instance->common.code_min_count_bit_for_found) {
                     if(instance->common.code_last_found != instance->common.code_found){
-                        subghz_protocol_star_line_check_remote_controller(instance);
+                        instance->common.code_last_found = instance->common.code_found;
+                        instance->common.code_last_count_bit = instance->common.code_count_bit;
+                        if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
                     }
                 }
                 instance->common.code_found = 0;
@@ -240,8 +252,8 @@ void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool leve
         break;
     case 3:
         if(!level){
-                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_shot)< instance->common.te_delta)
-                    && (DURATION_DIFF(duration,instance->common.te_shot)< instance->common.te_delta)) {
+                if ((DURATION_DIFF(instance->common.te_last,instance->common.te_short)< instance->common.te_delta)
+                    && (DURATION_DIFF(duration,instance->common.te_short)< instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
                 instance->common.parser_step = 2;
             } else if ((DURATION_DIFF(instance->common.te_last,instance->common.te_long )< instance->common.te_delta)
@@ -259,29 +271,42 @@ void subghz_protocol_star_line_parse(SubGhzProtocolStarLine* instance, bool leve
 }
 
 void subghz_protocol_star_line_to_str(SubGhzProtocolStarLine* instance, string_t output) {
-    uint32_t code_found_hi = instance->common.code_found >> 32;
-    uint32_t code_found_lo = instance->common.code_found & 0x00000000ffffffff;
+    subghz_protocol_star_line_check_remote_controller(instance);
+    uint32_t code_found_hi = instance->common.code_last_found >> 32;
+    uint32_t code_found_lo = instance->common.code_last_found & 0x00000000ffffffff;
 
-    uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
+    uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_last_found, instance->common.code_last_count_bit);
 
     uint32_t code_found_reverse_hi = code_found_reverse>>32;
     uint32_t code_found_reverse_lo = code_found_reverse&0x00000000ffffffff;
     string_cat_printf(
         output,
-        "Protocol %s, %d Bit\r\n"
-        "KEY:0x%lX%lX\r\n"
-        "FIX:%08lX MF:%s \r\n"
-        "HOP:%08lX \r\n"
-        "SN:%06lX CNT:%04X B:%02lX\r\n",
+        "%s %dbit\r\n"
+        "Key:%08lX%08lX\r\n"
+        "Fix:0x%08lX    Cnt:%04X\r\n"
+        "Hop:0x%08lX    Btn:%02lX\r\n"
+        "MF:%s\r\n"
+        "Sn:0x%07lX \r\n",
         instance->common.name,
-        instance->common.code_count_bit,
+        instance->common.code_last_count_bit,
         code_found_hi,
         code_found_lo,
         code_found_reverse_hi,
-        instance->manufacture_name,
+        instance->common.cnt,
         code_found_reverse_lo,
-        instance->common.serial,
-        instance->common.cnt, 
-        instance->common.btn
+        instance->common.btn,
+        instance->manufacture_name,
+        instance->common.serial
     );
+}
+
+void subghz_decoder_star_line_to_load_protocol(
+    SubGhzProtocolStarLine* instance,
+    void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    subghz_protocol_star_line_check_remote_controller(instance);
 }

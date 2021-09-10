@@ -1,6 +1,6 @@
 #include "rfid-reader.h"
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <stm32wbxx_ll_cortex.h>
 #include <tim.h>
 
@@ -20,7 +20,10 @@ void RfidReader::decode(bool polarity) {
     uint32_t period = current_dwt_value - last_dwt_value;
     last_dwt_value = current_dwt_value;
 
-    //decoder_gpio_out.process_front(polarity, period);
+#ifdef RFID_GPIO_DEBUG
+    decoder_gpio_out.process_front(polarity, period);
+#endif
+
     switch(type) {
     case Type::Normal:
         decoder_em.process_front(polarity, period);
@@ -49,11 +52,11 @@ void RfidReader::switch_mode() {
     switch(type) {
     case Type::Normal:
         type = Type::Indala;
-        api_hal_rfid_change_read_config(62500.0f, 0.25f);
+        furi_hal_rfid_change_read_config(62500.0f, 0.25f);
         break;
     case Type::Indala:
         type = Type::Normal;
-        api_hal_rfid_change_read_config(125000.0f, 0.5f);
+        furi_hal_rfid_change_read_config(125000.0f, 0.5f);
         break;
     }
 
@@ -76,9 +79,9 @@ RfidReader::RfidReader() {
 void RfidReader::start() {
     type = Type::Normal;
 
-    api_hal_rfid_pins_read();
-    api_hal_rfid_tim_read(125000, 0.5);
-    api_hal_rfid_tim_read_start();
+    furi_hal_rfid_pins_read();
+    furi_hal_rfid_tim_read(125000, 0.5);
+    furi_hal_rfid_tim_read_start();
     start_comparator();
 
     switch_timer_reset();
@@ -86,27 +89,16 @@ void RfidReader::start() {
 }
 
 void RfidReader::start_forced(RfidReader::Type _type) {
-    type = _type;
-    switch(type) {
-    case Type::Normal:
-        start();
-        break;
-    case Type::Indala:
-        api_hal_rfid_pins_read();
-        api_hal_rfid_tim_read(62500.0f, 0.25f);
-        api_hal_rfid_tim_read_start();
-        start_comparator();
-
-        switch_timer_reset();
-        last_readed_count = 0;
-        break;
+    start();
+    if(_type == Type::Indala) {
+        switch_mode();
     }
 }
 
 void RfidReader::stop() {
-    api_hal_rfid_pins_reset();
-    api_hal_rfid_tim_read_stop();
-    api_hal_rfid_tim_reset();
+    furi_hal_rfid_pins_reset();
+    furi_hal_rfid_tim_read_stop();
+    furi_hal_rfid_tim_reset();
     stop_comparator();
 }
 

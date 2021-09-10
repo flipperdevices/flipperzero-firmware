@@ -1,6 +1,6 @@
-#include "../irda-app.hpp"
+#include "../irda-app.h"
 #include "irda.h"
-#include "../irda-app-file-parser.hpp"
+#include "../irda-app-file-parser.h"
 #include <memory>
 
 static void dialog_result_callback(DialogExResult result, void* context) {
@@ -27,9 +27,9 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
         app->set_text_store(
             1,
             "A: 0x%0*lX\nC: 0x%0*lX\n",
-            irda_get_protocol_address_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_address_length(message->protocol), 4),
             message->address,
-            irda_get_protocol_command_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_command_length(message->protocol), 4),
             message->command);
         dialog_ex_set_header(dialog_ex, app->get_text_store(0), 95, 10, AlignCenter, AlignCenter);
         dialog_ex_set_text(dialog_ex, app->get_text_store(1), 75, 23, AlignLeft, AlignTop);
@@ -51,6 +51,10 @@ void IrdaAppSceneLearnSuccess::on_enter(IrdaApp* app) {
 
 bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
     bool consumed = false;
+    if(event->type == IrdaAppEvent::Type::Tick) {
+        /* Send event every tick to suppress any switching off green light */
+        app->notify_green_on();
+    }
 
     if(event->type == IrdaAppEvent::Type::DialogExSelected) {
         switch(event->payload.dialog_ex_result) {

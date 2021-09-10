@@ -1,3 +1,4 @@
+#include "irda.h"
 #include "irda_protocol_defs_i.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,6 +18,7 @@ bool irda_decoder_samsung32_interpret(IrdaCommonDecoder* decoder) {
     if ((address1 == address2) && (command == (uint8_t) ~command_inverse)) {
         decoder->message.command = command;
         decoder->message.address = address1;
+        decoder->message.protocol = IrdaProtocolSamsung32;
         decoder->message.repeat = false;
         result = true;
     }
@@ -37,11 +39,11 @@ IrdaStatus irda_decoder_samsung32_decode_repeat(IrdaCommonDecoder* decoder) {
 
     if ((decoder->timings[0] > IRDA_SAMSUNG_REPEAT_PAUSE_MIN)
         && (decoder->timings[0] < IRDA_SAMSUNG_REPEAT_PAUSE_MAX)
-        && MATCH_PREAMBLE_TIMING(decoder->timings[1], IRDA_SAMSUNG_REPEAT_MARK, preamble_tolerance)
-        && MATCH_PREAMBLE_TIMING(decoder->timings[2], IRDA_SAMSUNG_REPEAT_SPACE, preamble_tolerance)
-        && MATCH_BIT_TIMING(decoder->timings[3], decoder->protocol->timings.bit1_mark, bit_tolerance)
-        && MATCH_BIT_TIMING(decoder->timings[4], decoder->protocol->timings.bit1_space, bit_tolerance)
-        && MATCH_BIT_TIMING(decoder->timings[5], decoder->protocol->timings.bit1_mark, bit_tolerance)
+        && MATCH_TIMING(decoder->timings[1], IRDA_SAMSUNG_REPEAT_MARK, preamble_tolerance)
+        && MATCH_TIMING(decoder->timings[2], IRDA_SAMSUNG_REPEAT_SPACE, preamble_tolerance)
+        && MATCH_TIMING(decoder->timings[3], decoder->protocol->timings.bit1_mark, bit_tolerance)
+        && MATCH_TIMING(decoder->timings[4], decoder->protocol->timings.bit1_space, bit_tolerance)
+        && MATCH_TIMING(decoder->timings[5], decoder->protocol->timings.bit1_mark, bit_tolerance)
         ) {
         status = IrdaStatusReady;
         decoder->timings_cnt = 0;

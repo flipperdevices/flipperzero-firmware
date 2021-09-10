@@ -1,5 +1,5 @@
-#include "irda-app.hpp"
-#include "irda/irda-app-file-parser.hpp"
+#include "irda-app.h"
+#include "irda/irda-app-file-parser.h"
 #include <irda_worker.h>
 #include <furi.h>
 #include <gui/gui.h>
@@ -47,6 +47,18 @@ int32_t IrdaApp::run(void* args) {
 
     return 0;
 };
+
+IrdaApp::IrdaApp() {
+    furi_check(IrdaAppRemoteManager::max_button_name_length < get_text_store_size());
+    notification = static_cast<NotificationApp*>(furi_record_open("notification"));
+    irda_worker = irda_worker_alloc();
+}
+
+IrdaApp::~IrdaApp() {
+    irda_worker_free(irda_worker);
+    furi_record_close("notification");
+    for(auto& [key, scene] : scenes) delete scene;
+}
 
 IrdaAppViewManager* IrdaApp::get_view_manager() {
     return &view_manager;
@@ -222,20 +234,31 @@ void IrdaApp::notify_click() {
     notification_message_block(notification, &sequence);
 }
 
-void IrdaApp::notify_click_and_blink() {
+void IrdaApp::notify_click_and_green_blink() {
     static const NotificationSequence sequence = {
         &message_click,
         &message_delay_1,
         &message_sound_off,
-        &message_red_0,
         &message_green_255,
-        &message_blue_0,
         &message_delay_10,
         &message_green_0,
+        &message_do_not_reset,
         NULL,
     };
 
     notification_message_block(notification, &sequence);
+}
+
+void IrdaApp::notify_blink_green() {
+    static const NotificationSequence sequence = {
+        &message_green_255,
+        &message_delay_10,
+        &message_green_0,
+        &message_do_not_reset,
+        NULL,
+    };
+
+    notification_message(notification, &sequence);
 }
 
 void IrdaApp::notify_double_vibro() {

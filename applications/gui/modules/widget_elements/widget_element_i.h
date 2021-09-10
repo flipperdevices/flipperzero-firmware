@@ -6,6 +6,8 @@ typedef enum {
     GuiButtonTypeLeft,
     GuiButtonTypeCenter,
     GuiButtonTypeRight,
+    GuiButtonTypeCenterPress,
+    GuiButtonTypeCenterRelease,
 } GuiButtonType;
 
 typedef void (*ButtonCallback)(GuiButtonType result, void* context);
@@ -28,6 +30,15 @@ struct WidgetElement {
     Widget* parent;
 };
 
+/* Create multi string element */
+WidgetElement* widget_element_string_multi_create(
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    Font font,
+    const char* text);
+
 /* Create string element */
 WidgetElement* widget_element_string_create(
     uint8_t x,
@@ -44,5 +55,13 @@ WidgetElement* widget_element_button_create(
     ButtonCallback callback,
     void* context);
 
-/* Create icon element element */
+/* Create icon element */
 WidgetElement* widget_element_icon_create(uint8_t x, uint8_t y, const Icon* icon);
+
+/* Create frame element */
+WidgetElement* widget_element_frame_create(
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    uint8_t radius);

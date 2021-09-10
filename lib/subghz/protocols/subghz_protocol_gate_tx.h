@@ -16,14 +16,13 @@ SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc();
  */
 void subghz_protocol_gate_tx_free(SubGhzProtocolGateTX* instance);
 
-/** Sends the key on the air
+/** Get upload protocol
  * 
  * @param instance - SubGhzProtocolGateTX instance
- * @param key - key send
- * @param bit - count bit key
- * @param repeat - repeat send key
+ * @param encoder - SubGhzProtocolCommonEncoder encoder
+ * @return bool
  */
-void subghz_protocol_gate_tx_send_key(SubGhzProtocolGateTX* instance, uint64_t key, uint8_t bit, uint8_t repeat);
+bool subghz_protocol_gate_tx_send_key(SubGhzProtocolGateTX* instance, SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolGateTX instance
@@ -43,3 +42,25 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
  * @param output   - output string
  */
 void subghz_protocol_gate_tx_to_str(SubGhzProtocolGateTX* instance, string_t output);
+
+/** Get a string to save the protocol
+ * 
+ * @param instance  - SubGhzProtocolGateTX instance
+ * @param output    - the resulting string
+ */
+void subghz_protocol_gate_tx_to_save_str(SubGhzProtocolGateTX* instance, string_t output);
+
+/** Loading protocol from file
+ * 
+ * @param file_worker - FileWorker file_worker
+ * @param instance - SubGhzProtocolGateTX instance
+ * @return bool
+ */
+bool subghz_protocol_gate_tx_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolGateTX* instance);
+
+/** Loading protocol from bin data
+ * 
+ * @param instance - SubGhzProtocolGateTX instance
+ * @param context - SubGhzProtocolCommonLoad context
+ */
+void subghz_decoder_gate_tx_to_load_protocol(SubGhzProtocolGateTX* instance, void* context);

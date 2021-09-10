@@ -23,6 +23,7 @@ inline static void input_timer_stop(osTimerId_t timer_id) {
 void input_press_timer_callback(void* arg) {
     InputPinState* input_pin = arg;
     InputEvent event;
+    event.sequence = input_pin->counter;
     event.key = input_pin->pin->key;
     input_pin->press_counter++;
     if(input_pin->press_counter == INPUT_LONG_PRESS_COUNTS) {
@@ -91,7 +92,32 @@ void input_cli_send(Cli* cli, string_t args, void* context) {
     notify_pubsub(&input->event_pubsub, &event);
 }
 
-int32_t input_task() {
+const char* input_get_key_name(InputKey key) {
+    for(size_t i = 0; i < input_pins_count; i++) {
+        if(input_pins[i].key == key) {
+            return input_pins[i].name;
+        }
+    }
+    return "Unknown";
+}
+
+const char* input_get_type_name(InputType type) {
+    switch(type) {
+    case InputTypePress:
+        return "Press";
+    case InputTypeRelease:
+        return "Release";
+    case InputTypeShort:
+        return "Short";
+    case InputTypeLong:
+        return "Long";
+    case InputTypeRepeat:
+        return "Repeat";
+    }
+    return "Unknown";
+}
+
+int32_t input_srv() {
     input = furi_alloc(sizeof(Input));
     input->thread = osThreadGetId();
     init_pubsub(&input->event_pubsub);
@@ -103,10 +129,9 @@ int32_t input_task() {
             input->cli, "input_send", CliCommandFlagParallelSafe, input_cli_send, input);
     }
 
-    const size_t pin_count = input_pins_count;
-    input->pin_states = furi_alloc(pin_count * sizeof(InputPinState));
+    input->pin_states = furi_alloc(input_pins_count * sizeof(InputPinState));
 
-    for(size_t i = 0; i < pin_count; i++) {
+    for(size_t i = 0; i < input_pins_count; i++) {
         GpioPin gpio = {(GPIO_TypeDef*)input_pins[i].port, (uint16_t)input_pins[i].pin};
         hal_gpio_add_int_callback(&gpio, input_isr, NULL);
         input->pin_states[i].pin = &input_pins[i];
@@ -119,7 +144,7 @@ int32_t input_task() {
 
     while(1) {
         bool is_changing = false;
-        for(size_t i = 0; i < pin_count; i++) {
+        for(size_t i = 0; i < input_pins_count; i++) {
             bool state = GPIO_Read(input->pin_states[i]);
             if(input->pin_states[i].debounce > 0 &&
                input->pin_states[i].debounce < INPUT_DEBOUNCE_TICKS) {
@@ -131,14 +156,15 @@ int32_t input_task() {
                 // Common state info
                 InputEvent event;
                 event.key = input->pin_states[i].pin->key;
-                event.type = input->pin_states[i].state ? InputTypePress : InputTypeRelease;
-                // Send Press/Release event
-                notify_pubsub(&input->event_pubsub, &event);
 
                 // Short / Long / Repeat timer routine
                 if(state) {
+                    input->counter++;
+                    input->pin_states[i].counter = input->counter;
+                    event.sequence = input->pin_states[i].counter;
                     input_timer_start(input->pin_states[i].press_timer, INPUT_PRESS_TICKS);
                 } else {
+                    event.sequence = input->pin_states[i].counter;
                     input_timer_stop(input->pin_states[i].press_timer);
                     if(input->pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
                         event.type = InputTypeShort;
@@ -146,6 +172,10 @@ int32_t input_task() {
                     }
                     input->pin_states[i].press_counter = 0;
                 }
+
+                // Send Press/Release event
+                event.type = input->pin_states[i].state ? InputTypePress : InputTypeRelease;
+                notify_pubsub(&input->event_pubsub, &event);
             }
         }
 

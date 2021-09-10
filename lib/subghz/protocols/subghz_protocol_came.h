@@ -16,14 +16,15 @@ SubGhzProtocolCame* subghz_protocol_came_alloc();
  */
 void subghz_protocol_came_free(SubGhzProtocolCame* instance);
 
-/** Sends the key on the air
+/** Get upload protocol
  * 
  * @param instance - SubGhzProtocolCame instance
- * @param key - key send
- * @param bit - count bit key
- * @param repeat - repeat send key
+ * @param encoder - SubGhzProtocolCommonEncoder encoder
+ * @return bool
  */
-void subghz_protocol_came_send_key(SubGhzProtocolCame* instance, uint64_t key, uint8_t bit, uint8_t repeat);
+bool subghz_protocol_came_send_key(
+    SubGhzProtocolCame* instance,
+    SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolCame instance
@@ -36,3 +37,34 @@ void subghz_protocol_came_reset(SubGhzProtocolCame* instance);
  * @param data - LevelDuration level_duration
  */
 void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32_t duration);
+
+/** Outputting information from the parser
+ * 
+ * @param instance - SubGhzProtocolCame* instance
+ * @param output   - output string
+ */
+void subghz_protocol_came_to_str(SubGhzProtocolCame* instance, string_t output);
+
+/** Get a string to save the protocol
+ * 
+ * @param instance  - SubGhzProtocolCame instance
+ * @param output    - the resulting string
+ */
+void subghz_protocol_came_to_save_str(SubGhzProtocolCame* instance, string_t output);
+
+/** Loading protocol from file
+ * 
+ * @param file_worker - FileWorker file_worker
+ * @param instance - SubGhzProtocolCame instance
+ * @return bool
+ */
+bool subghz_protocol_came_to_load_protocol_from_file(
+    FileWorker* file_worker,
+    SubGhzProtocolCame* instance);
+
+/** Loading protocol from bin data
+ * 
+ * @param instance - SubGhzProtocolCame instance
+ * @param context - SubGhzProtocolCommonLoad context
+ */
+void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context);

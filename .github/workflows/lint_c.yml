@@ -1,6 +1,13 @@
 name: 'Lint C/C++ with clang-format'
 
-on: push
+on: 
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
 
 env:
   TARGETS: f6
@@ -36,8 +43,20 @@ jobs:
       - name: 'Build docker image'
         uses: ./.github/actions/docker
 
-      - name: 'Check syntax'
+      - name: 'Check code formatting'
+        id: syntax_check
         uses: ./.github/actions/docker
-        continue-on-error: false
         with:
-          run: /syntax_check.sh
+          run: SET_GH_OUTPUT=1 /syntax_check.sh
+
+      - name: Report code formatting errors
+        if: failure() && steps.syntax_check.outputs.errors && github.event.pull_request
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Please fix following code formatting errors:
+            ```
+            ${{ steps.syntax_check.outputs.errors }}
+            ```
+            You might want to run `docker compose exec dev /syntax_check.sh` for an auto-fix.

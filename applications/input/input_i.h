@@ -9,7 +9,7 @@
 #include <furi.h>
 #include <cli/cli.h>
 #include <m-string.h>
-#include <api-hal-gpio.h>
+#include <furi-hal-gpio.h>
 
 #define INPUT_DEBOUNCE_TICKS_HALF (INPUT_DEBOUNCE_TICKS / 2)
 #define INPUT_PRESS_TICKS 150
@@ -24,6 +24,7 @@ typedef struct {
     volatile uint8_t debounce;
     volatile osTimerId_t press_timer;
     volatile uint8_t press_counter;
+    volatile uint32_t counter;
 } InputPinState;
 
 /* Input state */
@@ -32,6 +33,7 @@ typedef struct {
     PubSub event_pubsub;
     InputPinState* pin_states;
     Cli* cli;
+    volatile uint32_t counter;
 } Input;
 
 /* Input press timer callback */

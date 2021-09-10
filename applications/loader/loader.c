@@ -15,7 +15,7 @@ static void loader_menu_callback(void* _ctx) {
             LOADER_LOG_TAG, "Can't start app. %s is running", loader_instance->current_app->name);
         return;
     }
-    api_hal_power_insomnia_enter();
+    furi_hal_power_insomnia_enter();
     loader_instance->current_app = flipper_app;
 
     FURI_LOG_I(
@@ -39,7 +39,7 @@ static void loader_cli_callback(Cli* cli, string_t args, void* _ctx) {
     }
 
     loader_instance->lock_semaphore++;
-    api_hal_power_insomnia_enter();
+    furi_hal_power_insomnia_enter();
     loader_instance->current_app = flipper_app;
     printf("Starting furi application %s", loader_instance->current_app->name);
     furi_thread_set_name(loader_instance->thread, flipper_app->name);
@@ -133,7 +133,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
             heap_diff,
             furi_thread_get_heap_size(instance->thread));
-        api_hal_power_insomnia_exit();
+        furi_hal_power_insomnia_exit();
         loader_unlock(instance);
     }
 }
@@ -238,7 +238,7 @@ static void loader_build_menu() {
     with_value_mutex(
         loader_instance->menu_vm, (Menu * menu) {
             MenuItem* menu_debug =
-                menu_item_alloc_menu("Debug tools", icon_animation_alloc(&A_Settings_14));
+                menu_item_alloc_menu("Debug tools", icon_animation_alloc(&A_Debug_14));
 
             for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
                 // Add menu item
@@ -291,7 +291,7 @@ static void loader_build_menu() {
         });
 }
 
-int32_t loader(void* p) {
+int32_t loader_srv(void* p) {
     FURI_LOG_I(LOADER_LOG_TAG, "Starting");
 
     loader_instance = loader_alloc();

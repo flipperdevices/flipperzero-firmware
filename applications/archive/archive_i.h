@@ -5,67 +5,36 @@
 #include <furi.h>
 #include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
 #include <gui/modules/text_input.h>
 #include <loader/loader.h>
 
 #include <m-string.h>
 #include <m-array.h>
 #include <storage/storage.h>
-#include "archive_views.h"
 #include "applications.h"
+#include "file-worker.h"
 
-#define MAX_DEPTH 32
-#define MAX_FILES 100 //temp
+#include "views/archive_main_view.h"
+#include "scenes/archive_scene.h"
+
 #define MAX_FILE_SIZE 128
 
 typedef enum {
-    ArchiveViewMain,
+    ArchiveViewBrowser,
     ArchiveViewTextInput,
     ArchiveViewTotal,
 } ArchiveViewEnum;
-
-static const char* flipper_app_name[] = {
-    [ArchiveFileTypeIButton] = "iButton",
-    [ArchiveFileTypeNFC] = "NFC",
-    [ArchiveFileTypeSubOne] = "Sub-1 GHz",
-    [ArchiveFileTypeLFRFID] = "125 kHz RFID",
-    [ArchiveFileTypeIrda] = "Infrared",
-};
-
-static const char* known_ext[] = {
-    [ArchiveFileTypeIButton] = ".ibtn",
-    [ArchiveFileTypeNFC] = ".nfc",
-    [ArchiveFileTypeSubOne] = ".sub1",
-    [ArchiveFileTypeLFRFID] = ".rfid",
-    [ArchiveFileTypeIrda] = ".ir",
-};
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/any/favorites",
     [ArchiveTabIButton] = "/any/ibutton",
     [ArchiveTabNFC] = "/any/nfc",
-    [ArchiveTabSubOne] = "/any/subone",
+    [ArchiveTabSubGhz] = "/any/subghz/saved",
     [ArchiveTabLFRFID] = "/any/lfrfid",
     [ArchiveTabIrda] = "/any/irda",
     [ArchiveTabBrowser] = "/any",
 };
-
-static inline const char* get_tab_ext(ArchiveTabEnum tab) {
-    switch(tab) {
-    case ArchiveTabIButton:
-        return known_ext[ArchiveFileTypeIButton];
-    case ArchiveTabNFC:
-        return known_ext[ArchiveFileTypeNFC];
-    case ArchiveTabSubOne:
-        return known_ext[ArchiveFileTypeSubOne];
-    case ArchiveTabLFRFID:
-        return known_ext[ArchiveFileTypeLFRFID];
-    case ArchiveTabIrda:
-        return known_ext[ArchiveFileTypeIrda];
-    default:
-        return "*";
-    }
-}
 
 static inline const char* get_default_path(ArchiveFileTypeEnum type) {
     switch(type) {
@@ -73,8 +42,8 @@ static inline const char* get_default_path(ArchiveFileTypeEnum type) {
         return tab_default_paths[ArchiveTabIButton];
     case ArchiveFileTypeNFC:
         return tab_default_paths[ArchiveTabNFC];
-    case ArchiveFileTypeSubOne:
-        return tab_default_paths[ArchiveTabSubOne];
+    case ArchiveFileTypeSubGhz:
+        return tab_default_paths[ArchiveTabSubGhz];
     case ArchiveFileTypeLFRFID:
         return tab_default_paths[ArchiveTabLFRFID];
     case ArchiveFileTypeIrda:
@@ -101,27 +70,11 @@ typedef struct {
     EventType type;
 } AppEvent;
 
-typedef struct {
-    ArchiveTabEnum tab_id;
-    string_t name;
-    string_t path;
-    char text_input_buffer[MAX_NAME_LEN];
-
-    uint8_t depth;
-    uint16_t last_idx[MAX_DEPTH];
-
-    bool menu;
-} ArchiveBrowser;
-
 struct ArchiveApp {
-    osMessageQueueId_t event_queue;
-    FuriThread* app_thread;
-    Loader* loader;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
-    View* view_archive_main;
+    SceneManager* scene_manager;
+    ArchiveMainView* main_view;
     TextInput* text_input;
-
-    Storage* api;
-    ArchiveBrowser browser;
+    char text_store[MAX_NAME_LEN];
 };

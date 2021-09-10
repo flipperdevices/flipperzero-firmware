@@ -1,10 +1,12 @@
 #pragma once
 //#include "decoder-analyzer.h"
 #include "decoder-gpio-out.h"
-#include "decoder-emmarine.h"
+#include "decoder-emmarin.h"
 #include "decoder-hid26.h"
 #include "decoder-indala.h"
 #include "key-info.h"
+
+//#define RFID_GPIO_DEBUG 1
 
 class RfidReader {
 public:
@@ -26,8 +28,10 @@ private:
     friend struct RfidReaderAccessor;
 
     //DecoderAnalyzer decoder_analyzer;
-    //DecoderGpioOut decoder_gpio_out;
-    DecoderEMMarine decoder_em;
+#ifdef RFID_GPIO_DEBUG
+    DecoderGpioOut decoder_gpio_out;
+#endif
+    DecoderEMMarin decoder_em;
     DecoderHID26 decoder_hid26;
     DecoderIndala decoder_indala;
 

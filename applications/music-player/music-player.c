@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 
 #include <gui/gui.h>
 #include <input/input.h>
@@ -358,7 +358,7 @@ void music_player_thread(void* p) {
     }
 }
 
-int32_t music_player(void* p) {
+int32_t music_player_app(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(MusicDemoEvent), NULL);
 
     State _state;
@@ -383,11 +383,6 @@ int32_t music_player(void* p) {
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    // open input record
-    PubSub* input_events_record = furi_record_open("input_events");
-    // prepare "do nothing" event
-    InputEvent input_event = {InputKeyRight, true};
-
     // start player thread
     // TODO change to fuirac_start
     osThreadAttr_t player_attr = {.name = "music_player_thread", .stack_size = 512};
@@ -410,14 +405,8 @@ int32_t music_player(void* p) {
                 // press events
                 if(event.value.input.type == InputTypeShort &&
                    event.value.input.key == InputKeyBack) {
-                    osThreadTerminate(player);
-                    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
-                    view_port_enabled_set(view_port, false);
-                    gui_remove_view_port(gui, view_port);
-                    view_port_free(view_port);
-                    osMessageQueueDelete(event_queue);
-
-                    return 0;
+                    release_mutex(&state_mutex, state);
+                    break;
                 }
 
                 if(event.value.input.type == InputTypePress &&
@@ -442,9 +431,6 @@ int32_t music_player(void* p) {
                 }
 
             } else if(event.type == EventTypeNote) {
-                // send "do nothing" event to prevent display backlight off
-                notify_pubsub(input_events_record, &input_event);
-
                 state->note_record = event.value.note_record;
 
                 for(size_t i = note_stack_size - 1; i > 0; i--) {
@@ -459,6 +445,15 @@ int32_t music_player(void* p) {
         view_port_update(view_port);
         release_mutex(&state_mutex, state);
     }
+
+    osThreadTerminate(player);
+    hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+    view_port_enabled_set(view_port, false);
+    gui_remove_view_port(gui, view_port);
+    furi_record_close("gui");
+    view_port_free(view_port);
+    osMessageQueueDelete(event_queue);
+    delete_mutex(&state_mutex);
 
     return 0;
 }

@@ -1,12 +1,13 @@
 #include "furi/check.h"
-#include "irda_common_i.h"
+#include "irda.h"
+#include "common/irda_common_i.h"
 #include <stdint.h>
 #include "../irda_i.h"
 #include "irda_protocol_defs_i.h"
 #include <furi.h>
 
 static const uint32_t repeat_timings[] = {
-    IRDA_NEC_REPEAT_PAUSE2,
+    IRDA_NEC_REPEAT_PERIOD - IRDA_NEC_REPEAT_MARK - IRDA_NEC_REPEAT_SPACE - IRDA_NEC_BIT1_MARK,
     IRDA_NEC_REPEAT_MARK,
     IRDA_NEC_REPEAT_SPACE,
     IRDA_NEC_BIT1_MARK,
@@ -14,6 +15,7 @@ static const uint32_t repeat_timings[] = {
 
 void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message) {
     furi_assert(encoder_ptr);
+    furi_assert(message);
 
     IrdaCommonEncoder* encoder = encoder_ptr;
     irda_common_encoder_reset(encoder);
@@ -24,24 +26,11 @@ void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message) {
     uint8_t command_inverse = ~command;
 
     uint32_t* data = (void*) encoder->data;
-    *data |= address;
-    *data |= address_inverse << 8;
-    *data |= command << 16;
-    *data |= command_inverse << 24;
-}
-
-void irda_encoder_necext_reset(void* encoder_ptr, const IrdaMessage* message) {
-    furi_assert(encoder_ptr);
-
-    IrdaCommonEncoder* encoder = encoder_ptr;
-    irda_common_encoder_reset(encoder);
-
-    uint16_t address = message->address;
-    uint8_t command = message->command;
-    uint8_t command_inverse = ~command;
-
-    uint32_t* data = (void*) encoder->data;
-    *data |= address;
+    if (message->protocol == IrdaProtocolNEC) {
+        *data = (address | (address_inverse << 8));
+    } else if (message->protocol == IrdaProtocolNECext) {
+        *data = (uint16_t) message->address;
+    }
     *data |= command << 16;
     *data |= command_inverse << 24;
 }
@@ -55,20 +44,17 @@ IrdaStatus irda_encoder_nec_encode_repeat(IrdaCommonEncoder* encoder, uint32_t* 
 
     furi_assert(encoder->timings_encoded >= timings_encoded_up_to_repeat);
 
-    if (repeat_cnt > 0)
+    if (repeat_cnt > 0) {
         *duration = repeat_timings[repeat_cnt % COUNT_OF(repeat_timings)];
-    else
-        *duration = IRDA_NEC_REPEAT_PAUSE1;
+    } else {
+        *duration = IRDA_NEC_REPEAT_PERIOD - encoder->timings_sum;
+    }
 
     *level = repeat_cnt % 2;
     ++encoder->timings_encoded;
     bool done = (!((repeat_cnt + 1) % COUNT_OF(repeat_timings)));
 
     return done ? IrdaStatusDone : IrdaStatusOk;
-}
-
-void* irda_encoder_necext_alloc(void) {
-    return irda_common_encoder_alloc(&protocol_necext);
 }
 
 void* irda_encoder_nec_alloc(void) {

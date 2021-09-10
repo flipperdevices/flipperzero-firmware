@@ -1,9 +1,11 @@
 #include "subghz_cli.h"
 
 #include <furi.h>
-#include <api-hal.h>
+#include <furi-hal.h>
 #include <stream_buffer.h>
 #include <lib/subghz/protocols/subghz_protocol.h>
+#include <lib/subghz/protocols/subghz_protocol_common.h>
+#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
 #define SUBGHZ_FREQUENCY_RANGE_STR \
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
@@ -31,7 +33,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
             cli_print_usage("subghz_tx_carrier", "<Frequency in HZ>", string_get_cstr(args));
             return;
         }
-        if(!api_hal_subghz_is_frequency_valid(frequency)) {
+        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
             printf(
                 "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
                 frequency);
@@ -39,14 +41,14 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
         }
     }
 
-    api_hal_subghz_reset();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    frequency = furi_hal_subghz_set_frequency_and_path(frequency);
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
 
-    api_hal_subghz_tx();
+    furi_hal_subghz_tx();
 
     printf("Transmitting at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
@@ -54,8 +56,8 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
         osDelay(250);
     }
 
-    api_hal_subghz_set_path(ApiHalSubGhzPathIsolate);
-    api_hal_subghz_sleep();
+    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
+    furi_hal_subghz_sleep();
 }
 
 void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
@@ -68,7 +70,7 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
             cli_print_usage("subghz_tx_carrier", "<Frequency in HZ>", string_get_cstr(args));
             return;
         }
-        if(!api_hal_subghz_is_frequency_valid(frequency)) {
+        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
             printf(
                 "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
                 frequency);
@@ -76,32 +78,28 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
         }
     }
 
-    api_hal_subghz_reset();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     printf("Receiving at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
 
-    api_hal_subghz_rx();
+    furi_hal_subghz_rx();
 
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(250);
-        printf("RSSI: %03.1fdbm\r", api_hal_subghz_get_rssi());
+        printf("RSSI: %03.1fdbm\r", furi_hal_subghz_get_rssi());
         fflush(stdout);
     }
 
-    api_hal_subghz_set_path(ApiHalSubGhzPathIsolate);
-    api_hal_subghz_sleep();
+    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
+    furi_hal_subghz_sleep();
 }
-
-#define SUBGHZ_PT_SHORT 376
-#define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
-#define SUBGHZ_PT_GUARD 10600
 
 void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     uint32_t frequency = 433920000;
-    size_t repeat = 10;
     uint32_t key = 0x0074BADE;
+    size_t repeat = 10;
 
     if(string_size(args)) {
         int ret = sscanf(string_get_cstr(args), "%lx %lu %u", &key, &frequency, &repeat);
@@ -118,7 +116,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
                 string_get_cstr(args));
             return;
         }
-        if(!api_hal_subghz_is_frequency_valid(frequency)) {
+        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
             printf(
                 "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
                 frequency);
@@ -126,41 +124,35 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         }
     }
 
-    size_t subghz_test_data_size = 25 * 2 * sizeof(uint32_t);
-    uint32_t* subghz_test_data = furi_alloc(subghz_test_data_size);
-
-    size_t pos = 0;
-    for(uint8_t i = 0; i < 24; i++) {
-        uint8_t byte = i / 8;
-        uint8_t bit = i % 8;
-        bool value = (((uint8_t*)&key)[2 - byte] >> (7 - bit)) & 1;
-        if(value) {
-            subghz_test_data[pos++] = SUBGHZ_PT_SHORT;
-            subghz_test_data[pos++] = SUBGHZ_PT_LONG;
-        } else {
-            subghz_test_data[pos++] = SUBGHZ_PT_LONG;
-            subghz_test_data[pos++] = SUBGHZ_PT_SHORT;
-        }
-    }
-    subghz_test_data[pos++] = SUBGHZ_PT_SHORT;
-    subghz_test_data[pos++] = SUBGHZ_PT_SHORT + SUBGHZ_PT_GUARD;
-
     printf(
         "Transmitting at %lu, key %lx, repeat %u. Press CTRL+C to stop\r\n",
         frequency,
         key,
         repeat);
 
-    api_hal_subghz_reset();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+    SubGhzDecoderPrinceton* protocol = subghz_decoder_princeton_alloc();
+    protocol->common.code_last_found = key;
+    protocol->common.code_last_count_bit = 24;
 
-    api_hal_subghz_start_async_tx(subghz_test_data, subghz_test_data_size, repeat);
-    api_hal_subghz_wait_async_tx();
-    api_hal_subghz_stop_async_tx();
+    SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
+    encoder->repeat = repeat;
 
-    free(subghz_test_data);
-    api_hal_subghz_sleep();
+    subghz_protocol_princeton_send_key(protocol, encoder);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    frequency = furi_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
+
+    while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
+        printf(".");
+        fflush(stdout);
+        osDelay(333);
+    }
+    furi_hal_subghz_stop_async_tx();
+    furi_hal_subghz_sleep();
+
+    subghz_decoder_princeton_free(protocol);
+    subghz_protocol_encoder_common_free(encoder);
 }
 
 typedef struct {
@@ -200,7 +192,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
             cli_print_usage("subghz_rx", "<Frequency in HZ>", string_get_cstr(args));
             return;
         }
-        if(!api_hal_subghz_is_frequency_valid(frequency)) {
+        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
             printf(
                 "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
                 frequency);
@@ -214,19 +206,18 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     furi_check(instance->stream);
 
     SubGhzProtocol* protocol = subghz_protocol_alloc();
-    subghz_protocol_load_keeloq_file(protocol, "/ext/assets/subghz/keeloq_mfcodes");
-    subghz_protocol_load_nice_flor_s_file(protocol, "/ext/assets/subghz/nice_floor_s_rx");
+    subghz_protocol_load_keeloq_file(protocol, "/ext/subghz/keeloq_mfcodes");
+    subghz_protocol_load_nice_flor_s_file(protocol, "/ext/subghz/nice_floor_s_rx");
     subghz_protocol_enable_dump_text(protocol, subghz_cli_command_rx_text_callback, instance);
 
     // Configure radio
-    api_hal_subghz_reset();
-    api_hal_subghz_load_preset(ApiHalSubGhzPresetOokAsync);
-    frequency = api_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     // Prepare and start RX
-    api_hal_subghz_set_async_rx_callback(subghz_cli_command_rx_callback, instance);
-    api_hal_subghz_start_async_rx();
+    furi_hal_subghz_start_async_rx(subghz_cli_command_rx_callback, instance);
 
     // Wait for packets to arrive
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);
@@ -247,8 +238,8 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     }
 
     // Shutdown radio
-    api_hal_subghz_stop_async_rx();
-    api_hal_subghz_sleep();
+    furi_hal_subghz_stop_async_rx();
+    furi_hal_subghz_sleep();
 
     printf("\r\nPackets recieved %u\r\n", instance->packet_count);
 

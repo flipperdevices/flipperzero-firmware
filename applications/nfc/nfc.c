@@ -1,5 +1,5 @@
 #include "nfc_i.h"
-#include "api-hal-nfc.h"
+#include "furi-hal-nfc.h"
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -136,23 +136,6 @@ void nfc_free(Nfc* nfc) {
     free(nfc);
 }
 
-int32_t nfc_task(void* p) {
-    Nfc* nfc = nfc_alloc();
-
-    // Check argument and run corresponding scene
-    if(p && nfc_device_load(&nfc->dev, p)) {
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-    } else {
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
-    }
-
-    view_dispatcher_run(nfc->view_dispatcher);
-
-    nfc_free(nfc);
-
-    return 0;
-}
-
 void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
     va_list args;
     va_start(args, text);
@@ -164,4 +147,22 @@ void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
 
 void nfc_text_store_clear(Nfc* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
+}
+
+int32_t nfc_app(void* p) {
+    Nfc* nfc = nfc_alloc();
+    char* args = p;
+
+    // Check argument and run corresponding scene
+    if((*args != '\0') && nfc_device_load(&nfc->dev, p)) {
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+    } else {
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
+    }
+
+    view_dispatcher_run(nfc->view_dispatcher);
+
+    nfc_free(nfc);
+
+    return 0;
 }

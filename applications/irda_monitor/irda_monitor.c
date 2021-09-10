@@ -4,8 +4,8 @@
 #include <irda_worker.h>
 #include <stdio.h>
 #include <furi.h>
-#include <api-hal-irda.h>
-#include <api-hal.h>
+#include <furi-hal-irda.h>
+#include <furi-hal.h>
 #include <gui/view_port.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
@@ -58,24 +58,24 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
     IrdaMonitor* irda_monitor = context;
 
     if(irda_worker_signal_is_decoded(received_signal)) {
-        const IrdaMessage* message = irda_worker_get_decoded_message(received_signal);
+        const IrdaMessage* message = irda_worker_get_decoded_signal(received_signal);
         snprintf(
             irda_monitor->display_text,
             sizeof(irda_monitor->display_text),
             "%s\nA:0x%0*lX\nC:0x%0*lX\n%s\n",
             irda_get_protocol_name(message->protocol),
-            irda_get_protocol_address_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_address_length(message->protocol), 4),
             message->address,
-            irda_get_protocol_command_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_command_length(message->protocol), 4),
             message->command,
             message->repeat ? " R" : "");
         view_port_update(irda_monitor->view_port);
         printf(
             "== %s, A:0x%0*lX, C:0x%0*lX%s ==\r\n",
             irda_get_protocol_name(message->protocol),
-            irda_get_protocol_address_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_address_length(message->protocol), 4),
             message->address,
-            irda_get_protocol_command_length(message->protocol),
+            ROUND_UP_TO(irda_get_protocol_command_length(message->protocol), 4),
             message->command,
             message->repeat ? " R" : "");
     } else {
@@ -112,10 +112,10 @@ int32_t irda_monitor_app(void* p) {
     gui_add_view_port(gui, irda_monitor->view_port, GuiLayerFullscreen);
 
     irda_monitor->worker = irda_worker_alloc();
-    irda_worker_set_context(irda_monitor->worker, irda_monitor);
-    irda_worker_start(irda_monitor->worker);
-    irda_worker_set_received_signal_callback(irda_monitor->worker, signal_received_callback);
-    irda_worker_enable_blink_on_receiving(irda_monitor->worker, true);
+    irda_worker_rx_start(irda_monitor->worker);
+    irda_worker_rx_set_received_signal_callback(
+        irda_monitor->worker, signal_received_callback, irda_monitor);
+    irda_worker_rx_enable_blink_on_receiving(irda_monitor->worker, true);
 
     while(1) {
         InputEvent event;
@@ -126,7 +126,7 @@ int32_t irda_monitor_app(void* p) {
         }
     }
 
-    irda_worker_stop(irda_monitor->worker);
+    irda_worker_rx_stop(irda_monitor->worker);
     irda_worker_free(irda_monitor->worker);
     osMessageQueueDelete(irda_monitor->event_queue);
     view_port_enabled_set(irda_monitor->view_port, false);
