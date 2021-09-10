@@ -1,0 +1,3 @@
+* proto3_singular_msgs:true
+SubSubAMessage.somestring max_size:64
+SubSubBMessage.somestring max_size:64

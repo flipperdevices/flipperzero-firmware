@@ -1,0 +1,13 @@
+syntax="proto3";
+
+package first;
+
+import "nanopb_generator_bug/first/a/aa.proto";
+import "nanopb_generator_bug/first/a/ab.proto";
+
+message A {
+    oneof oneof_a {
+        a.A obj_a = 1;
+        a.B obj_b = 2;
+    }
+}

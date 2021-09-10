@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "nanopb.proto";
+
+message SubMessage {
+    repeated int32 foo = 1;
+}
+
+message MainMessage {
+    SubMessage submsg = 1 [(nanopb).proto3_singular_msgs = true];
+}
+

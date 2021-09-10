@@ -1,0 +1,12 @@
+# Regression test for #504:
+# Non empty submessage considered empty on FT_POINTER fields with address aligned on 0x100
+
+Import('env', 'malloc_env')
+
+env.NanopbProto(["test.proto"])
+test = malloc_env.Program(["test.c",
+                 "test.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(test)

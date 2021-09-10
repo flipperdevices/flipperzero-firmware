@@ -1,0 +1,8 @@
+# Regression test for #644:
+# Generator fails to account for padding when estimating struct size
+
+Import("env")
+
+env.NanopbProto("int64.proto")
+env.Object("int64.pb.c")
+

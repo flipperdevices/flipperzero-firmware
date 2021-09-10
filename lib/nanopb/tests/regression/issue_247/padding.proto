@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "nanopb.proto";
+
+message SubMessage {
+    bool boolfield = 1;
+    int64 intfield = 2;
+}
+
+message TestMessage {
+    SubMessage submsg = 1 [(nanopb).proto3_singular_msgs = true];
+}
+

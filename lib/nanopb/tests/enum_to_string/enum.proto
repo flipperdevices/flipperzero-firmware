@@ -1,0 +1,19 @@
+/* Test enum to string function generation */
+
+syntax = "proto2";
+
+import "nanopb.proto";
+
+option (nanopb_fileopt).enum_to_string = true;
+
+enum MyEnum {
+    VALUE1 = 1;
+    VALUE2 = 2;
+    VALUE15 = 15;
+}
+
+enum MyShortNameEnum {
+    option (nanopb_enumopt).long_names = false;
+    MSNE_VALUE256 = 256;
+}
+

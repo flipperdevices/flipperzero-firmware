@@ -1,0 +1,22 @@
+/* Test out-of-order enum values.
+ */
+
+syntax = "proto3";
+
+enum Language {
+    UNKNOWN = 0;
+    ENGLISH_EN_GB = 12;
+    ENGLISH_EN_US = 1;
+    FRENCH_FR_FR = 2;
+    ITALIAN_IT_IT = 3;
+    GERMAN_DE_DE = 4;
+    SPANISH_ES_AR = 13;
+    SPANISH_ES_ES = 5;
+    SPANISH_ES_MX = 14;
+    SWEDISH_SV_SE = 6;
+    DUTCH_NL_NL = 7;
+    KOREAN_KO_KR = 8;
+    JAPANESE_JA_JP = 9;
+    CHINESE_SIMPLIFIED_ZH_CN = 10;
+    CHINESE_TRADITIONAL_ZH_TW = 11;
+}

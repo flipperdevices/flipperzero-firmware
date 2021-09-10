@@ -1,0 +1,21 @@
+Import("env")
+
+env.NanopbProto("doublemsg")
+
+# Define the compilation options
+opts = env.Clone()
+opts.Append(CPPDEFINES = {'PB_CONVERT_DOUBLE_FLOAT': 1})
+
+if opts.get('EMBEDDED') == 'AVR':
+    opts.Append(CFLAGS = "-Wno-overflow")
+
+# Build new version of core
+strict = opts.Clone()
+strict.Append(CFLAGS = strict['CORECFLAGS'])
+strict.Object("pb_decode_fldbl.o", "$NANOPB/pb_decode.c")
+strict.Object("pb_encode_fldbl.o", "$NANOPB/pb_encode.c")
+strict.Object("pb_common_fldbl.o", "$NANOPB/pb_common.c")
+
+# Build and run test
+test = opts.Program(["float_double_conversion.c", "doublemsg.pb.c", "pb_encode_fldbl.o", "pb_decode_fldbl.o", "pb_common_fldbl.o"])
+env.RunTest(test)

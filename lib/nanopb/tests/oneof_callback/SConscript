@@ -1,0 +1,22 @@
+# Test decoder callback support inside oneofs.
+
+Import('env')
+
+env.NanopbProto('oneof')
+
+enc = env.Program(['encode_oneof.c',
+                'oneof.pb.c',
+                '$COMMON/pb_encode.o',
+                '$COMMON/pb_common.o'])
+
+dec = env.Program(['decode_oneof.c',
+                'oneof.pb.c',
+                '$COMMON/pb_decode.o',
+                '$COMMON/pb_common.o'])
+
+for i in range(1,7):
+    # Encode message, then decode with protoc and test program and compare.
+    e = env.RunTest("message%d.pb" % i, enc, ARGS = [str(i)])
+    d1 = env.Decode([e, "oneof.proto"], MESSAGE = "OneOfMessage")
+    d2 = env.RunTest("message%d.txt" % i, [dec, e])
+    env.Compare([d1, d2])

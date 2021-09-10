@@ -1,0 +1,21 @@
+# Regression test for issue #547:
+# Buffer overflow when encoding bytes with size set to 65535
+
+Import("env")
+
+env.NanopbProto("test.proto")
+
+# Define the compilation options
+opts = env.Clone()
+opts.Append(CPPDEFINES = {'PB_FIELD_32BIT': 1})
+
+# Build new version of core
+strict = opts.Clone()
+strict.Append(CFLAGS = strict['CORECFLAGS'])
+strict.Object("pb_encode_fields32.o", "$NANOPB/pb_encode.c")
+strict.Object("pb_common_fields32.o", "$NANOPB/pb_common.c")
+
+# Build and run test
+test = opts.Program(["test.c", "test.pb.c", "pb_encode_fields32.o", "pb_common_fields32.o"])
+
+env.RunTest(test)

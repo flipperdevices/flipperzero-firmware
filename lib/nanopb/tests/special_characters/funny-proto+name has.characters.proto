@@ -1,0 +1,21 @@
+syntax="proto2";
+
+message WorkingMessage {
+        required int32 b = 1;
+        required int32 Z = 2;
+}
+
+message FailingMessageBecauseMembersAreMacroParameter {
+        required int32 a = 1;
+        required int32 X = 2;
+}
+
+message TestMacroParametersAndUnderscores {
+        required int32 a     = 1;
+        required int32 a_    = 2;
+        required int32 X     = 3;
+        required int32 X_    = 4;
+        required int32 X__   = 5;
+        required int32 X___  = 6;
+        required int32 X____ = 7;
+}

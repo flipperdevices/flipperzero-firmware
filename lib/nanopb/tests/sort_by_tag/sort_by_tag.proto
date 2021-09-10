@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message Unsorted
+{
+    uint32 first = 99;
+    oneof oneof {
+        uint32 second = 80;
+        uint32 third = 50;
+    }
+    uint32 last = 1;
+}
+
+message Sorted
+{
+    uint32 first = 99;
+    oneof oneof {
+        uint32 second = 80;
+        uint32 third = 50;
+    }
+    uint32 last = 1;
+}

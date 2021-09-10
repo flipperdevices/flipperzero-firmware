@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+message DecodesOK 
+{
+    uint32          a   = 1;
+    uint32          b   = 2;
+}
+
+message NoDecode
+{
+    string          name = 1;
+}
+
+message TestMessage
+{
+    enum MessageType
+    {
+        A   = 0;
+        B   = 1;
+        C   = 2;
+    }
+
+    MessageType     messageType = 1;
+    uint32          x           = 2;
+    uint32          y           = 3;
+    uint32          ip1         = 4;
+
+    oneof payload
+    {
+        DecodesOK       pla5    = 5;
+        DecodesOK       pla6    = 6;
+        DecodesOK       pla7    = 7;
+        DecodesOK       pla8    = 8;
+        DecodesOK       pla9    = 9;
+        DecodesOK       pla10   = 10;
+        NoDecode        plb11   = 12;
+    }
+
+    uint32          ip2         = 11;
+}
+

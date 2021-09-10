@@ -1,0 +1,7 @@
+# Check that generator gives a warning about large extension field number.
+
+Import('env')
+
+env.NanopbProto('large_extension')
+
+env.Match(['large_extension.pb.c', 'large_extension.expected'])

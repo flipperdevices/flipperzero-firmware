@@ -1,0 +1,16 @@
+syntax = "proto2";
+package A;
+
+message A {
+    message B {
+        optional uint32 val = 1;
+    }
+    optional B b = 1;
+}
+
+message AP {
+    message B {
+        optional uint32 val = 1;
+    }
+    optional B m = 1;
+}

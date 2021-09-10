@@ -1,0 +1,11 @@
+syntax = "proto2";
+import 'nanopb.proto';
+
+message DefaultsMsg {
+    optional bytes b1 = 1 [default = "\xDE\xAD\x00\xBE\xEF", (nanopb).max_size = 5, (nanopb).fixed_length=true];
+    optional bytes b2 = 2 [default = "\xDE\xAD\x00\xBE\xEF", (nanopb).max_size = 5];
+    optional bytes b3 = 3 [default = "\xDE\xAD\000\xBE\xEF", (nanopb).max_size = 15];
+    optional string s1 = 4 [default = "äö", (nanopb).max_size = 8];
+}
+
+

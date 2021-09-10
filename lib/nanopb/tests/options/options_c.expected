@@ -1,0 +1,3 @@
+PB_BIND\(Message1, Message1, AUTO\)
+PB_BIND\(WideMessage, WideMessage, 4\)
+PB_BIND\(WideMessage2, WideMessage2, 8\)

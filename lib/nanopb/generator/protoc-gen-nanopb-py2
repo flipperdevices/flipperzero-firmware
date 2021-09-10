@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# This file is used to invoke nanopb_generator.py2 as a plugin
+# to protoc on Linux and other *nix-style systems.
+#
+# The difference from protoc-gen-nanopb is that this executes with Python 2.
+#
+# Use it like this:
+# protoc --plugin=protoc-gen-nanopb=..../protoc-gen-nanopb-py2 --nanopb_out=dir foo.proto
+#
+# Note that if you use the binary package of nanopb, the protoc
+# path is already set up properly and there is no need to give
+# --plugin= on the command line.
+
+MYPATH=$(dirname "$0")
+exec "$MYPATH/nanopb_generator.py2" --protoc-plugin

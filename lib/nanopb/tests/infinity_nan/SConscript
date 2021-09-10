@@ -1,0 +1,8 @@
+# Build and run a basic test for floating point default values.
+
+Import("env")
+
+env.NanopbProto("floats")
+test = env.Program(["infinity_nan_test.c", "floats.pb.c", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+
+env.RunTest(test)

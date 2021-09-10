@@ -1,0 +1,11 @@
+# Regression test for #342:
+# Possible null-pointer dereference in pb_decode.c
+
+Import("env")
+
+env.NanopbProto("extensions")
+testprog = env.Program(["test_extensions.c", "extensions.pb.c",
+                '$COMMON/pb_decode.o', '$COMMON/pb_encode.o', '$COMMON/pb_common.o'])
+
+env.RunTest(testprog)
+

@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message SubMessage3 {
+    required uint32 foo = 1;
+}
+
+message SubMessage2 {
+    oneof oneof {
+        SubMessage3 submsg = 1 [(nanopb).submsg_callback = true];
+    }
+}
+
+message SubMessage1 {
+    repeated SubMessage2 msgs = 1 [(nanopb).max_count = 16];
+}
+
+message MainMessage {
+    required SubMessage1 msg = 1;
+    required uint32 foo = 2;
+}
+

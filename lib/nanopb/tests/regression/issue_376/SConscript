@@ -1,0 +1,14 @@
+# Regression test for #376:
+# Problem with fixed array inside proto3 submessage
+
+Import("env")
+
+env.NanopbProto(["fixed_array.proto", "fixed_array.options"])
+testprog = env.Program(["test_fixarray.c",
+                 "fixed_array.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(testprog)
+

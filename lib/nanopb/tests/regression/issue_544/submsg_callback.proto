@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message SubMessage {
+    required uint32 foo = 1;
+}
+
+message MyMessage {
+    oneof oneof {
+        SubMessage submsg = 1 [(nanopb).submsg_callback = true];
+    }
+}

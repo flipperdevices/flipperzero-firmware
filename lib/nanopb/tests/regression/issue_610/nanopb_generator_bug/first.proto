@@ -1,0 +1,11 @@
+syntax="proto3";
+
+import "nanopb_generator_bug/first/a.proto";
+import "nanopb_generator_bug/first/b.proto";
+
+message First {
+    oneof oneof_first {
+        first.A obj_a = 1;
+        first.B obj_b = 2;
+    }
+}

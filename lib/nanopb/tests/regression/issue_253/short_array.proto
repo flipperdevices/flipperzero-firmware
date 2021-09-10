@@ -1,0 +1,7 @@
+syntax = "proto2";
+import "nanopb.proto";
+
+message TestMessage {
+    repeated uint32 rep_uint32 = 1 [(nanopb).max_count = 1];
+}
+

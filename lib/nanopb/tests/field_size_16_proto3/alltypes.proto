@@ -1,0 +1,100 @@
+syntax = "proto3";
+// package name placeholder
+
+message SubMessage {
+    string substuff1 = 1;
+    int32 substuff2 = 2;
+    fixed32 substuff3 = 3;
+}
+
+message EmptyMessage {
+
+}
+
+enum HugeEnum {
+    HE_Zero = 0;
+    Negative = -2147483647; /* protoc doesn't accept -2147483648 here */
+    Positive =  2147483647;
+}
+
+message Limits {
+    int32      int32_min  =  1;
+    int32      int32_max  =  2;
+    uint32     uint32_min =  3;
+    uint32     uint32_max =  4;
+    int64      int64_min  =  5;
+    int64      int64_max  =  6;
+    uint64     uint64_min =  7;
+    uint64     uint64_max =  8;
+    HugeEnum   enum_min   =  9;
+    HugeEnum   enum_max   = 10;
+}
+
+enum MyEnum {
+    Zero = 0;
+    First = 1;
+    Second = 2;
+    Truth = 42;
+}
+
+message AllTypes {
+    int32      sng_int32   = 1;
+    int64      sng_int64   = 2;
+    uint32     sng_uint32  = 3;
+    uint64     sng_uint64  = 4;
+    sint32     sng_sint32  = 5;
+    sint64     sng_sint64  = 6;
+    bool       sng_bool    = 7;
+    
+    fixed32    sng_fixed32 = 8;
+    sfixed32   sng_sfixed32= 9;
+    float      sng_float   = 10;
+    
+    fixed64    sng_fixed64 = 11;
+    sfixed64   sng_sfixed64= 12;
+    double     sng_double  = 13;
+    
+    string     sng_string  = 14;
+    bytes      sng_bytes   = 15;
+    SubMessage sng_submsg  = 16;
+    MyEnum     sng_enum    = 17;
+    EmptyMessage sng_emptymsg = 18;
+    bytes      sng_fbytes  = 19;
+
+    repeated int32      rep_int32   = 21 [packed = true];
+    repeated int64      rep_int64   = 22 [packed = true];
+    repeated uint32     rep_uint32  = 23 [packed = true];
+    repeated uint64     rep_uint64  = 24 [packed = true];
+    repeated sint32     rep_sint32  = 25 [packed = true];
+    repeated sint64     rep_sint64  = 26 [packed = true];
+    repeated bool       rep_bool    = 27 [packed = true];
+    
+    repeated fixed32    rep_fixed32 = 28 [packed = true];
+    repeated sfixed32   rep_sfixed32= 29 [packed = true];
+    repeated float      rep_float   = 30 [packed = true];
+    
+    repeated fixed64    rep_fixed64 = 31 [packed = true];
+    repeated sfixed64   rep_sfixed64= 32 [packed = true];
+    repeated double     rep_double  = 33 [packed = true];
+    
+    repeated string     rep_string  = 34;
+    repeated bytes      rep_bytes   = 35;
+    repeated SubMessage rep_submsg  = 36;
+    repeated MyEnum     rep_enum    = 37 [packed = true];
+    repeated EmptyMessage rep_emptymsg = 38;
+    repeated bytes      rep_fbytes  = 39;
+    
+    oneof oneof
+    {
+        SubMessage oneof_msg1 = 59;
+        EmptyMessage oneof_msg2 = 60;
+    }
+    
+    // Check that extreme integer values are handled correctly
+    Limits     req_limits = 98;
+
+    // Just to make sure that the size of the fields has been calculated
+    // properly, i.e. otherwise a bug in last field might not be detected.
+    int32      end = 99;
+}
+

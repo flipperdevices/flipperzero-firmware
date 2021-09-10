@@ -1,0 +1,17 @@
+# Regression test for #494:
+# Using sizeof on anonymous union not allowed in C++, in message_size oneof sizing fallback
+
+Import('env')
+import os, sys
+
+# The build rules here are a bit tricky to make the normal dependency
+# resolution intentionally fail. This causes the generator to use the fallback
+# define which had the problem with C++.
+env.Command("oneof.pb", "oneof.proto", "$PROTOC $PROTOCFLAGS -I$BUILDDIR/regression/issue_494 -o$TARGETS $SOURCES")
+env.Command(["oneof.pb.c", "oneof.pb.h"], "oneof.pb", env['NANOPB_GENERATOR'] + " -D$BUILDDIR/regression/issue_494 $SOURCES")
+env.NanopbProto("submessage.proto")
+env.Depends("oneof.pb", "submessage.proto")
+
+test = env.Program(["oneof_size.cc"])
+env.Depends(test, "oneof.pb.h")
+env.RunTest(test)

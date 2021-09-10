@@ -1,0 +1,13 @@
+#!/usr/bin/env python2
+# This file is a wrapper around nanopb_generator.py in case you want to run
+# it with Python 2 instead of default Python 3. This only exists for backwards
+# compatibility, do not use for new projects.
+
+from nanopb_generator import *
+
+if __name__ == '__main__':
+    # Check if we are running as a plugin under protoc
+    if 'protoc-gen-' in sys.argv[0] or '--protoc-plugin' in sys.argv:
+        main_plugin()
+    else:
+        main_cli()

@@ -1,0 +1,11 @@
+syntax = "proto3";
+import "nanopb.proto";
+
+message SubMessage {
+    repeated uint32 rep_uint32 = 1 [(nanopb).max_count = 3];
+}
+
+message TestMessage {
+    SubMessage submsg = 1 [(nanopb).proto3_singular_msgs = true];
+}
+

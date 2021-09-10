@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "a.proto";
+
+package b;
+
+message B {
+  oneof data {
+     a.AUnknown unknown = 1;
+     int32 x = 2;
+  }
+}
+
+message B2 {
+  oneof data {
+     a.AUnknown unknown = 1;
+     a.A unknown2 = 2;
+  }
+}

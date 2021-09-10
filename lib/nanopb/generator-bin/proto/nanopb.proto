@@ -1,0 +1,179 @@
+// Custom options for defining:
+// - Maximum size of string/bytes
+// - Maximum number of elements in array
+//
+// These are used by nanopb to generate statically allocable structures
+// for memory-limited environments.
+
+syntax = "proto2";
+import "google/protobuf/descriptor.proto";
+
+option java_package = "fi.kapsi.koti.jpa.nanopb";
+
+enum FieldType {
+    FT_DEFAULT = 0; // Automatically decide field type, generate static field if possible.
+    FT_CALLBACK = 1; // Always generate a callback field.
+    FT_POINTER = 4; // Always generate a dynamically allocated field.
+    FT_STATIC = 2; // Generate a static field or raise an exception if not possible.
+    FT_IGNORE = 3; // Ignore the field completely.
+    FT_INLINE = 5; // Legacy option, use the separate 'fixed_length' option instead
+}
+
+enum IntSize {
+    IS_DEFAULT = 0; // Default, 32/64bit based on type in .proto
+    IS_8 = 8;
+    IS_16 = 16;
+    IS_32 = 32;
+    IS_64 = 64;
+}
+
+enum TypenameMangling {
+    M_NONE = 0; // Default, no typename mangling
+    M_STRIP_PACKAGE = 1; // Strip current package name
+    M_FLATTEN = 2; // Only use last path component
+    M_PACKAGE_INITIALS = 3; // Replace the package name by the initials
+}
+
+enum DescriptorSize {
+    DS_AUTO = 0; // Select minimal size based on field type
+    DS_1 = 1;    // 1 word; up to 15 byte fields, no arrays
+    DS_2 = 2;    // 2 words; up to 4095 byte fields, 4095 entry arrays
+    DS_4 = 4;    // 4 words; up to 2^32-1 byte fields, 2^16-1 entry arrays
+    DS_8 = 8;    // 8 words; up to 2^32-1 entry arrays
+}
+
+// This is the inner options message, which basically defines options for
+// a field. When it is used in message or file scope, it applies to all
+// fields.
+message NanoPBOptions {
+  // Allocated size for 'bytes' and 'string' fields.
+  // For string fields, this should include the space for null terminator.
+  optional int32 max_size = 1;
+  
+  // Maximum length for 'string' fields. Setting this is equivalent
+  // to setting max_size to a value of length+1.
+  optional int32 max_length = 14;
+  
+  // Allocated number of entries in arrays ('repeated' fields)
+  optional int32 max_count = 2;
+  
+  // Size of integer fields. Can save some memory if you don't need
+  // full 32 bits for the value.
+  optional IntSize int_size = 7 [default = IS_DEFAULT];
+
+  // Force type of field (callback or static allocation)
+  optional FieldType type = 3 [default = FT_DEFAULT];
+  
+  // Use long names for enums, i.e. EnumName_EnumValue.
+  optional bool long_names = 4 [default = true];
+  
+  // Add 'packed' attribute to generated structs.
+  // Note: this cannot be used on CPUs that break on unaligned
+  // accesses to variables.
+  optional bool packed_struct = 5 [default = false];
+  
+  // Add 'packed' attribute to generated enums.
+  optional bool packed_enum = 10 [default = false];
+  
+  // Skip this message
+  optional bool skip_message = 6 [default = false];
+
+  // Generate oneof fields as normal optional fields instead of union.
+  optional bool no_unions = 8 [default = false];
+
+  // integer type tag for a message
+  optional uint32 msgid = 9;
+
+  // decode oneof as anonymous union
+  optional bool anonymous_oneof = 11 [default = false];
+
+  // Proto3 singular field does not generate a "has_" flag
+  optional bool proto3 = 12 [default = false];
+  
+  // Force proto3 messages to have no "has_" flag.
+  // This was default behavior until nanopb-0.4.0.
+  optional bool proto3_singular_msgs = 21 [default = false];
+
+  // Generate an enum->string mapping function (can take up lots of space).
+  optional bool enum_to_string = 13 [default = false];
+
+  // Generate bytes arrays with fixed length
+  optional bool fixed_length = 15 [default = false];
+
+  // Generate repeated field with fixed count
+  optional bool fixed_count = 16 [default = false];
+
+  // Generate message-level callback that is called before decoding submessages.
+  // This can be used to set callback fields for submsgs inside oneofs.
+  optional bool submsg_callback = 22 [default = false];
+
+  // Shorten or remove package names from type names.
+  // This option applies only on the file level.
+  optional TypenameMangling mangle_names = 17 [default = M_NONE];
+
+  // Data type for storage associated with callback fields.
+  optional string callback_datatype = 18 [default = "pb_callback_t"];
+
+  // Callback function used for encoding and decoding.
+  // Prior to nanopb-0.4.0, the callback was specified in per-field pb_callback_t
+  // structure. This is still supported, but does not work inside e.g. oneof or pointer
+  // fields. Instead, a new method allows specifying a per-message callback that
+  // will be called for all callback fields in a message type.
+  optional string callback_function = 19 [default = "pb_default_field_callback"];
+
+  // Select the size of field descriptors. This option has to be defined
+  // for the whole message, not per-field. Usually automatic selection is
+  // ok, but if it results in compilation errors you can increase the field
+  // size here.
+  optional DescriptorSize descriptorsize = 20 [default = DS_AUTO];
+
+  // Set default value for has_ fields.
+  optional bool default_has = 23 [default = false];
+
+  // Extra files to include in generated `.pb.h`
+  repeated string include = 24;
+
+  // Automatic includes to exlude from generated `.pb.h`
+  // Same as nanopb_generator.py command line flag -x.
+  repeated string exclude = 26;
+
+  // Package name that applies only for nanopb.
+  optional string package = 25;
+  
+  // Override type of the field in generated C code. Only to be used with related field types
+  optional google.protobuf.FieldDescriptorProto.Type type_override = 27;
+
+  // Due to historical reasons, nanopb orders fields in structs by their tag number
+  // instead of the order in .proto. Set this to false to keep the .proto order.
+  // The default value will probably change to false in nanopb-0.5.0.
+  optional bool sort_by_tag = 28 [default = true];
+}
+
+// Extensions to protoc 'Descriptor' type in order to define options
+// inside a .proto file.
+//
+// Protocol Buffers extension number registry
+// --------------------------------
+// Project:  Nanopb
+// Contact:  Petteri Aimonen <jpa@kapsi.fi>
+// Web site: http://kapsi.fi/~jpa/nanopb
+// Extensions: 1010 (all types)
+// --------------------------------
+
+extend google.protobuf.FileOptions {
+    optional NanoPBOptions nanopb_fileopt = 1010;
+}
+
+extend google.protobuf.MessageOptions {
+    optional NanoPBOptions nanopb_msgopt = 1010;
+}
+
+extend google.protobuf.EnumOptions {
+    optional NanoPBOptions nanopb_enumopt = 1010;
+}
+
+extend google.protobuf.FieldOptions {
+    optional NanoPBOptions nanopb = 1010;
+}
+
+

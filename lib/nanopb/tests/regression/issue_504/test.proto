@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message MyMessage
+{
+    SubMessage submessage = 1 [(nanopb).proto3_singular_msgs = true];
+}
+
+message SubMessage
+{
+    string somestring = 1 [(nanopb).type = FT_POINTER];
+    SubMessage2 submsg2 = 2 [(nanopb).type = FT_POINTER];
+}
+
+message SubMessage2
+{
+    uint32 foo = 1;
+}

@@ -1,0 +1,15 @@
+# Test that the generator options work as expected.
+
+Import("env")
+
+env.NanopbProto("options")
+env.Object('options.pb.c')
+env.Match('options_h.matched', ['options.pb.h', 'options_h.expected'])
+env.Match('options_c.matched', ['options.pb.c', 'options_c.expected'])
+
+env.NanopbProto("proto3_options")
+env.Object('proto3_options.pb.c')
+env.Match(['proto3_options.pb.h', 'proto3_options.expected'])
+
+p = env.Program(["options.c", "options.pb.c", "$COMMON/pb_decode.o", "$COMMON/pb_encode.o", "$COMMON/pb_common.o"])
+env.RunTest(p)

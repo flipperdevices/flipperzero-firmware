@@ -1,0 +1,10 @@
+# Regression test for #493:
+# Maximum recursion depth exceeded in generator
+
+Import("env")
+
+env.NanopbProto("test.proto")
+
+# Note that test.pb.c will fail compilation due to recursive static definition.
+# This is to be expected.
+

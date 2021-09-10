@@ -1,0 +1,4 @@
+* max_size:32
+* max_count:8
+*.*fbytes fixed_length:true max_size:4
+*.req_limits proto3_singular_msgs:true

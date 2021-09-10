@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package enterprise;
+
+message BigData {
+   repeated BigEvent events = 1;
+}
+
+message BigEvent {
+   oneof event {
+      BigValue1 data1 = 1;
+      BigValue2 data2 = 2;
+      BigValue3 data3 = 3;
+      BigValue4 data4 = 4;
+      BigValue5 data5 = 5;
+      BigValue6 data6 = 6;
+      BigValue7 data7 = 7;
+      BigValue8 data8 = 8;
+      BigValue9 data9 = 9;
+      BigValue10 data10 = 10;
+      BigValue11 data11 = 11;
+      BigValue12 data12 = 12;
+      BigValue13 data13 = 13;
+      BigValue14 data14 = 14;
+      BigValue15 data15 = 15;
+      BigValue16 data16 = 16;
+      BigValue17 data17 = 17;
+      BigValue18 data18 = 18;
+      BigValue19 data19 = 19;
+      BigValue20 data20 = 20;
+      BigValue21 data21 = 21;
+      BigValue22 data22 = 22;
+      BigValue23 data23 = 23;
+      BigValue24 data24 = 24;
+      BigValue25 data25 = 25;
+      BigValue26 data26 = 26;
+      BigValue27 data27 = 27;
+      BigValue28 data28 = 28;
+      BigValue29 data29 = 29;
+      BigValue30 data30 = 30;
+      BigValue31 data31 = 31;
+      BigValue32 data32 = 32;
+   }
+}
+
+message BigValue1 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue2 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue3 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue4 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue5 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue6 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue7 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue8 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue9 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue10 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue11 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue12 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue13 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue14 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue15 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue16 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue17 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue18 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue19 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue20 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue21 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue22 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue23 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue24 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue25 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue26 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue27 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue28 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue29 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue30 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue31 {
+   int32 key = 1;
+   bytes value = 2;
+}
+
+message BigValue32 {
+   int32 key = 1;
+   bytes value = 2;
+}

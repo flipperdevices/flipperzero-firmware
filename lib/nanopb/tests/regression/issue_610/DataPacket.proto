@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+import "LogMessage.proto";
+
+message DataPacket {
+    oneof packet {
+        LogMessage log_message = 1;
+    }
+}
+

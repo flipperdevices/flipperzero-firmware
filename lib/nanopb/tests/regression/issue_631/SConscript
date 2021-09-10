@@ -1,0 +1,8 @@
+# Regression test for #631:
+# Wrong initializer generation
+
+Import("env")
+
+env.NanopbProto("submsg_callback.proto")
+t = env.Program(["test.c", "submsg_callback.pb.c", "$COMMON/pb_common.o"])
+env.RunTest(t)

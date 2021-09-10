@@ -1,0 +1,11 @@
+# Check that the int8_t and uint8_t types are not used in the nanopb core.
+
+Import("env")
+env.Match('pb_decode_c.matched', ["$NANOPB/pb_decode.c", 'uint8.expected'])
+env.Match('pb_decode_h.matched', ["$NANOPB/pb_decode.h", 'uint8.expected'])
+env.Match('pb_encode_c.matched', ["$NANOPB/pb_encode.c", 'uint8.expected'])
+env.Match('pb_encode_h.matched', ["$NANOPB/pb_encode.h", 'uint8.expected'])
+env.Match('pb_common_c.matched', ["$NANOPB/pb_common.c", 'uint8.expected'])
+env.Match('pb_common_h.matched', ["$NANOPB/pb_common.h", 'uint8.expected'])
+env.Match('pb_h.matched', ["$NANOPB/pb.h", 'uint8.expected'])
+

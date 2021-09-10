@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+import 'nanopb.proto';
+
+// Repeated callback inside submessage inside oneof
+message SubMsg1
+{
+    repeated int32 array = 1;
+}
+
+// String callback inside submessage inside oneof
+message SubMsg2
+{
+    string strvalue = 1;
+}
+
+// String callback directly inside oneof
+message SubMsg3
+{
+    oneof values
+    {
+        int32 intvalue = 1;
+        string strvalue = 2 [(nanopb).callback_datatype = "const char*"];
+    }
+}
+
+message OneOfMessage
+{
+    option (nanopb_msgopt).submsg_callback = true;
+
+    int32 prefix = 1;
+    oneof values
+    {
+        int32 intvalue = 5;
+        string strvalue = 6 [(nanopb).max_size = 8];
+        SubMsg1 submsg1 = 7;
+        SubMsg2 submsg2 = 8;
+        SubMsg3 submsg3 = 9;
+    }
+    int32 suffix = 99;
+}

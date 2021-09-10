@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+import "protobuf/any.proto";
+
+message SimpleMessage {
+    google.protobuf.Any any = 1;
+}
+

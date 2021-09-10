@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message Repro {
+  oneof value_type {
+    bool boolean_value = 1;
+    bytes bytes_value = 5 [(nanopb).type = FT_POINTER];
+  }
+}

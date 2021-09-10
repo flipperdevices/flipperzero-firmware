@@ -1,0 +1,14 @@
+# Regression test for #453:
+# Warning for float conversion with default values.
+
+Import("env")
+
+env2 = env.Clone()
+
+if 'gcc' in env['CC']:
+    env2.Append(CFLAGS = '-Wconversion')
+
+env2.NanopbProto("test.proto")
+testprog = env2.Program(["test.c"])
+env2.RunTest(testprog)
+

@@ -1,0 +1,11 @@
+# Regression test for #524:
+# Generator fails to find dependencies from another package namespace
+
+Import('env')
+
+env.NanopbProto("submessage.proto")
+env.NanopbProto("oneof.proto")
+env.Depends("oneof.pb.c", "submessage.proto")
+env.Object("oneof.pb.c")
+env.Match(["oneof.pb.h", "oneof.expected"])
+

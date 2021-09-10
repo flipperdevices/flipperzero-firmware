@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+message MainMessage {
+    oneof oneof1 {
+        uint32 oneof1_uint32 = 1;
+    }
+    oneof oneof2 {
+        uint32 oneof2_uint32 = 2;
+    }
+}
+

@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+message SimpleMessage {
+  optional uint32 number = 1;
+  extensions 100 to max;
+}
+
+message ExtMessage {
+  extend SimpleMessage {
+    optional ExtMessage ext_message_ext = 1100;
+  }
+  optional uint32 second_number = 1;
+}
+

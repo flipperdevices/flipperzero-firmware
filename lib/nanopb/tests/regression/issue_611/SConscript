@@ -1,0 +1,8 @@
+# Regression test for #611:
+# Enum messages inside OneOf generated as ENUM instead of UENUM
+
+Import("env")
+
+env.NanopbProto("uenum.proto")
+env.Match(["uenum.pb.h", "uenum.expected"])
+env.Object("uenum.pb.c")

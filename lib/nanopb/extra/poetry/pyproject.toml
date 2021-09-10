@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "nanopb"
+version = "0.4.5"
+description = "Nanopb is a small code-size Protocol Buffers implementation in ansi C. It is especially suitable for use in microcontrollers, but fits any memory restricted system."
+authors = ["Petteri Aimonen <jpa@npb.mail.kapsi.fi>"]
+license = "Zlib"
+repository = "https://github.com/nanopb/nanopb/"
+readme = "README.md"
+homepage = "https://jpa.kapsi.fi/nanopb/"
+documentation = "https://jpa.kapsi.fi/nanopb/docs/index.html"
+keywords = ["protobuf", "protoc"]
+classifiers = ["Topic :: Software Development :: Build Tools"]
+include = ["nanopb/**/*", "nanopb/__init__.py"]
+
+[tool.poetry.scripts]
+nanopb_generator = "nanopb.generator.nanopb_generator:main_cli"
+protoc-gen-nanopb = "nanopb.generator.nanopb_generator:main_plugin"
+
+[tool.poetry.dependencies]
+python = ">=2.7"
+protobuf = ">=3.6"
+grpcio-tools = {version = ">=1.26.0rc1", allow-prereleases = true, optional=true}
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.extras]
+grpcio-tools = ["grpcio-tools"]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

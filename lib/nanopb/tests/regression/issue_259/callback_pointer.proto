@@ -1,0 +1,11 @@
+syntax = "proto2";
+import 'nanopb.proto';
+
+message SubMessage {
+    optional int32 foo = 1 [(nanopb).type = FT_CALLBACK];
+}
+
+message MainMessage {
+    optional SubMessage bar = 1 [(nanopb).type = FT_POINTER];
+}
+

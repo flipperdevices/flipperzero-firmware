@@ -1,0 +1,10 @@
+# This builds a simple utility that decodes a binary protobuf message.
+# It is similar to protoc --decode_raw, except it produces useful information
+# even for corrupted messages.
+
+Import("env")
+
+dec = env.Program(["raw_decode.c", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+
+env.RunTest([dec, "$BUILD/alltypes/encode_alltypes.output"])
+

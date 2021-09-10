@@ -1,0 +1,7 @@
+# Regression test for #545:
+# Field descriptor width automatic sizing is inaccurate with oneofs
+
+Import("env")
+env.NanopbProto("submsg_callback")
+env.Object("submsg_callback.pb.c")
+

@@ -1,0 +1,8 @@
+# Test comment inclusion from .proto to .pb.h
+
+Import("env")
+
+env.NanopbProto("comments")
+env.Object("comments.pb.c")
+env.Match(['comments.pb.h', 'comments.expected'])
+

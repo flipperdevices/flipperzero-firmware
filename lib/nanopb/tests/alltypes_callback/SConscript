@@ -1,0 +1,28 @@
+# Test the AllTypes encoding & decoding using callbacks for all fields.
+
+Import("env", "malloc_env")
+
+c = Copy("$TARGET", "$SOURCE")
+env.Command("alltypes.proto", "#alltypes/alltypes.proto", c)
+
+env.NanopbProto(["alltypes", "alltypes.options"])
+enc = env.Program(["encode_alltypes_callback.c", "alltypes.pb.c", "$COMMON/pb_encode.o", "$COMMON/pb_common.o"])
+dec = env.Program(["decode_alltypes_callback.c", "alltypes.pb.c", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+
+refdec = "$BUILD/alltypes/decode_alltypes$PROGSUFFIX"
+
+# Encode and compare results
+env.RunTest(enc)
+env.RunTest("decode_alltypes.output", [refdec, "encode_alltypes_callback.output"])
+env.RunTest("decode_alltypes_callback.output", [dec, "encode_alltypes_callback.output"])
+
+# Do the same thing with the optional fields present
+env.RunTest("optionals.output", enc, ARGS = ['1'])
+env.RunTest("optionals.refdecout", [refdec, "optionals.output"], ARGS = ['1'])
+env.RunTest("optionals.decout", [dec, "optionals.output"], ARGS = ['1'])
+
+# Try with malloc support also
+mallocbin1 = malloc_env.Object("decode_with_malloc.o", "decode_alltypes_callback.c")
+mallocbin2 = malloc_env.Object("alltypes_malloc.pb.o", "alltypes.pb.c")
+mallocdec = malloc_env.Program("decode_with_malloc", [mallocbin1, mallocbin2, "$COMMON/pb_decode_with_malloc.o", "$COMMON/pb_common_with_malloc.o", "$COMMON/malloc_wrappers.o"])
+env.RunTest("decode_with_malloc.output", [mallocdec, "encode_alltypes_callback.output"])

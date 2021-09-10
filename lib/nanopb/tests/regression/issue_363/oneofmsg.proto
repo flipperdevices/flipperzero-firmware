@@ -1,0 +1,10 @@
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message BodyMessage {
+    oneof body_type {
+        bytes device_data_crypted = 1 [(nanopb).max_size = 252];
+        bytes device_config_crypted = 2 [(nanopb).max_size = 252];
+    }
+}

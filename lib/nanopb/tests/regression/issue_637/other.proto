@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message SecondOneof {
+    repeated int32 foo = 1;
+}
+

@@ -1,0 +1,21 @@
+# Check that callback fields inside malloc()ed messages
+# are correctly initialized.
+
+Import('env', 'malloc_env')
+
+env.NanopbProto('callback_pointer')
+
+p = malloc_env.Program(["callback_pointer.c",
+                         "callback_pointer.pb.c",
+                         "$COMMON/pb_decode_with_malloc.o",
+                         "$COMMON/pb_common_with_malloc.o",
+                         "$COMMON/malloc_wrappers.o"])
+
+# Run test under valgrind if available
+kwargs = {}
+if env.get("VALGRIND"):
+    kwargs['COMMAND'] = env['VALGRIND']
+    kwargs['ARGS'] = ["-q", "--error-exitcode=99", p[0].abspath]
+
+env.RunTest(p, **kwargs)
+

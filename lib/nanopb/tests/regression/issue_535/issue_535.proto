@@ -1,0 +1,10 @@
+/* Test generation of enums with aliases */
+
+syntax = "proto3";
+
+enum EnumWithAliases {
+  option allow_alias = true;
+  First = 0;
+  Second = 1;
+  AlsoSecond = 1;
+}

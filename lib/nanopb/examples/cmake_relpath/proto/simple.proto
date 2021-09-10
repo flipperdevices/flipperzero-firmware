@@ -1,0 +1,11 @@
+// A very simple protocol definition, consisting of only
+// one message.
+syntax = "proto2";
+
+import "sub/unlucky.proto";
+
+message SimpleMessage {
+    required int32 lucky_number = 1;
+    required UnluckyNumber unlucky = 2;
+}
+

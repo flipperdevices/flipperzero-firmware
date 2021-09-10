@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+enum my_enum {
+  E0 = 0;
+  E240 = 240;
+  E1 = -1;
+}
+
+enum my_uenum {
+  U0 = 0;
+  U240 = 240;
+}
+
+message my_message_regular {
+   required my_enum MyEnum = 1;
+   required my_uenum MyUEnum = 2;
+}
+
+message my_message_oneof {
+  required uint32 Data1 = 1;
+  oneof Data {
+    bool null = 2;
+    my_enum MyEnum = 3;
+    my_uenum MyUEnum = 4;
+  }
+}
+
+

@@ -1,0 +1,13 @@
+# Regression test for Issue 229: problem encoding message that has
+# multiple oneof fields
+Import('env')
+
+env.NanopbProto('multiple_oneof')
+
+p = env.Program(["multiple_oneof.c",
+                 "multiple_oneof.pb.c",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+env.RunTest(p)
+

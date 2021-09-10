@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+option(nanopb_fileopt).include = '<vector>';
+
+message SubMessage {
+  sint32 actual_value = 1;
+}
+
+message TestMessage {
+  // Instead of std::vector<SubMessage> callback handles wrapping/unwrapping of the int.
+  repeated SubMessage submessages = 1 [(nanopb).callback_datatype = "std::vector<int>"];
+}

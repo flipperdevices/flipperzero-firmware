@@ -1,0 +1,25 @@
+# Test mangle_names option
+
+Import('env')
+
+def set_mangling(type):
+    def command(target, source, env):
+        with open(str(source[0])) as src, open(str(target[0]), "w") as dst:
+            dst.write("* mangle_names:{}\n".format(type))
+            dst.write(src.read())
+    return command
+
+env.Command("strip_package.options", "with_package.options", set_mangling("M_STRIP_PACKAGE"))
+env.Command("strip_package.proto", "with_package.proto", Copy("$TARGET", "$SOURCE"))
+env.NanopbProto(["strip_package", "strip_package.options"])
+env.Program(["test_strip_package.c", "strip_package.pb.c", '$COMMON/pb_common.o'])
+
+env.Command("flatten.options", "with_package.options", set_mangling("M_FLATTEN"))
+env.Command("flatten.proto", "with_package.proto", Copy("$TARGET", "$SOURCE"))
+env.NanopbProto(["flatten", "flatten.options"])
+env.Program(["test_flatten.c", "flatten.pb.c", '$COMMON/pb_common.o'])
+
+env.Command("package_initials.options", "with_package.options", set_mangling("M_PACKAGE_INITIALS"))
+env.Command("package_initials.proto", "with_package.proto", Copy("$TARGET", "$SOURCE"))
+env.NanopbProto(["package_initials", "package_initials.options"])
+env.Program(["test_package_initials.c", "package_initials.pb.c", '$COMMON/pb_common.o'])

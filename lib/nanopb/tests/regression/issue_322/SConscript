@@ -1,0 +1,14 @@
+# Check that default values with special characters are
+# correctly handled.
+
+Import('env')
+
+env.NanopbProto('defaults')
+
+p = env.Program(["defaults.c",
+                 "defaults.pb.c",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(p)
+

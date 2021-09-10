@@ -1,0 +1,23 @@
+# Test usage of Any type
+
+Import("env")
+
+incpath = env.Clone()
+incpath.Append(PROTOCPATH = '#any_type')
+incpath.Append(CPPPATH = '$BUILD/any_type')
+
+incpath.NanopbProto("anytest")
+incpath.NanopbProto(["google/protobuf/any", "google/protobuf/any.options"])
+incpath.NanopbProto("google/protobuf/duration")
+
+enc = incpath.Program(["encode_any.c", "anytest.pb.c", "google/protobuf/any.pb.c",
+                       "google/protobuf/duration.pb.c",
+                       "$COMMON/pb_encode.o", "$COMMON/pb_common.o"])
+
+dec = incpath.Program(["decode_any.c", "anytest.pb.c", "google/protobuf/any.pb.c",
+                       "google/protobuf/duration.pb.c",
+                       "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+
+env.RunTest(enc)
+env.RunTest([dec, "encode_any.output"])
+

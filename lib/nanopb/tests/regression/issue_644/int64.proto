@@ -1,0 +1,21 @@
+syntax = "proto2";
+message MessageTest {
+    optional int64 test1 = 1;
+    optional int64 test2 = 2;
+    optional int64 test3 = 3;
+    optional int64 test4 = 4;
+    optional int64 test5 = 5;
+    optional int64 test6 = 6;
+    optional int64 test7 = 7;
+    optional int64 test8 = 8;
+    optional int64 test9 = 9;
+    optional int64 test10 = 10;
+    optional int64 test11 = 11;
+    optional int64 test12 = 12;
+    optional int64 test13 = 13;
+    optional int64 test14 = 14;
+    optional int64 test15 = 15;
+    optional int64 test16 = 16;
+    optional int64 test17 = 17;
+}
+

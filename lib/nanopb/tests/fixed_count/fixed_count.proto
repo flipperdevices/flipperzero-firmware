@@ -1,0 +1,21 @@
+/* Test nanopb fixed count option. */
+
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message Message1
+{
+    repeated int32 data = 1 [(nanopb).max_count = 3, (nanopb).fixed_count = true];
+}
+
+message Message2
+{
+    repeated Message1 data = 1 [(nanopb).max_count = 2, (nanopb).fixed_count = true];
+}
+
+message Message3
+{
+    repeated Message2 data1 = 1 [(nanopb).max_count = 2, (nanopb).fixed_count = true];
+    repeated Message2 data2 = 2 [(nanopb).max_count = 2, (nanopb).fixed_count = true];
+}

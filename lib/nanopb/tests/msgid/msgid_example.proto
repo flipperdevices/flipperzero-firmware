@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message MyMessage1
+{
+    option (nanopb_msgopt).msgid = 1;
+
+    int32 intvalue = 1;
+}
+
+message MyMessage2
+{
+    option (nanopb_msgopt).msgid = 2;
+
+    int32 intvalue = 1;
+    string strvalue = 2 [(nanopb).max_size = 16];
+}
+
+message MyMessage3
+{
+    option (nanopb_msgopt).msgid = 3;
+
+    bool boolvalue = 1;
+}

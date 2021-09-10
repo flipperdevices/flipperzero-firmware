@@ -1,0 +1,8 @@
+# Test that different sizes of enum fields are properly encoded and decoded.
+
+Import('env')
+
+env.NanopbProto('enumminmax')
+
+p = env.Program(["enumminmax_unittests.c",])
+env.RunTest(p)

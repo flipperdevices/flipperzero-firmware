@@ -1,0 +1,44 @@
+# Test correct relative paths and creation of intermediate directories
+# when input files are part of a multi-level directory structure:
+#
+# user@host:.../build$ nanopb_generator -D . -I ../proto ../proto/simple.proto
+# user@host:.../build$ nanopb_generator -D . -I ../proto ../proto/protobuf/any.proto
+#
+# should result in:
+#
+# |-- build
+# |   |-- protobuf
+# |   |   +-- any.pb.c
+# |   |   +-- any.pb.h
+# |   +-- simple.pb.c
+# |   +-- simple.pb.h
+# +-- proto
+#     |-- protobuf
+#     |   +-- any.proto
+#     +-- simple.proto
+
+
+Import('env')
+import os, sys
+
+# As of 0.4.2, SCons rules still go through protoc that handles paths correctly
+# by itself. To test direct nanopb_generator usage we invoke it manually here.
+env.Command(["build/protobuf/any.pb.h", "build/simple.pb.h", "build/protobuf/any.pb.c", "build/simple.pb.c",],
+            ["proto/protobuf/any.proto", "proto/simple.proto"],
+[
+    Delete("$BUILDDIR/generator_relative_paths/build"),
+    Mkdir("$BUILDDIR/generator_relative_paths/build"),
+    env['NANOPB_GENERATOR'] + " -D$BUILDDIR/generator_relative_paths/build -I$BUILDDIR/generator_relative_paths/proto $SOURCES"
+])
+
+env.Match("simple_pb_h_ok", ["build/simple.pb.h", "simple.expected"])
+env.Match("simple_pb_c_ok", ["build/simple.pb.c", "simple.expected"])
+env.Match("any_pb_h_ok", ["build/protobuf/any.pb.h", "any.expected"])
+env.Match("any_pb_c_ok", ["build/protobuf/any.pb.c", "any.expected"])
+
+# Test when not using -D
+env.Command(["test.pb.c", "test.pb.h"], "test.proto",
+            env['NANOPB_GENERATOR'] + " test.proto",
+            chdir = True)
+env.Match("test_pb_h_ok", ["test.pb.h", "test.expected"])
+env.Match("test_pb_c_ok", ["test.pb.c", "test.expected"])

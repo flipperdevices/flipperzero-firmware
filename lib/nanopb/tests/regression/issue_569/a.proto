@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package a;
+
+message AUnknown {
+  string data = 1;
+}
+
+message A {
+  oneof data {
+     AUnknown unknown = 1;
+     int32 x = 2;
+  }
+}

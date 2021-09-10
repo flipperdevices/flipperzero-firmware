@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message MixedMessage {
+    optional int32 proto2_value = 1 [default = 100];
+    optional int32 proto3_value = 2 [default = 200, (nanopb).proto3 = true];
+}

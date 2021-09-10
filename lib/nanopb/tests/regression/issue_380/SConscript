@@ -1,0 +1,9 @@
+# Regression test for #380:
+# mangle_names:M_STRIP_PACKAGE is broken when message name (partially)
+# matches package name
+
+Import("env")
+
+env.NanopbProto(["manglenames.proto", "manglenames.options"])
+env.Object("manglenames.pb.o", "manglenames.pb.c")
+

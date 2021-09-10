@@ -1,0 +1,2 @@
+syntax = "proto3";
+import "storage.proto";

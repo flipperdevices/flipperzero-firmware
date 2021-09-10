@@ -1,0 +1,5 @@
+# Test functions in pb_common.c
+
+Import('env')
+p = env.Program(["common_unittests.c", "$BUILD/alltypes/alltypes.pb.c"])
+env.RunTest(p)

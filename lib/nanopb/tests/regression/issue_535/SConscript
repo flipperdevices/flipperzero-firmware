@@ -1,0 +1,6 @@
+# Regression test for #535:
+# Generator crash on enums with aliases
+
+Import("env")
+env.NanopbProto("issue_535")
+env.Object("issue_535.pb.c")

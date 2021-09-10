@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message TestMessage {
+    optional int32 opt_int = 1;
+    int32 normal_int = 2;
+    optional int32 opt_int2 = 3;
+    int32 normal_int2 = 4;
+}
+

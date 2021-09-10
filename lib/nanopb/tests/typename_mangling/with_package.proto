@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package com.example.nanopb;
+
+message TopLevelMessage {
+    required uint32 base_field = 1;
+    required NestedMessage nested = 2;
+    optional ShortIfNone short_if_none = 3;
+    optional ShortIfStripPackage short_if_strip_package = 4;
+    optional ShortIfFlatten short_if_flatten = 5;
+
+    message NestedMessage {
+        required NestedLevel2 nested = 1;
+
+        message NestedLevel2 {
+            required NestedLevel3 nested = 1;
+
+            message NestedLevel3 {
+                required uint32 nothing = 1;
+            }
+        }
+    }
+
+    enum ShortIfNone {
+        IfNone_A = 1;
+        IfNone_B = 2;
+    }
+
+    enum ShortIfStripPackage {
+        IfPackage_A = 1;
+        IfPackage_B = 2;
+    }
+
+    enum ShortIfFlatten {
+        IfFlatten_A = 1;
+        IfFlatten_B = 2;
+    }
+}

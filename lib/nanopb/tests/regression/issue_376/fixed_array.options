@@ -1,0 +1,2 @@
+SubMessage.data fixed_count:true,max_count:8
+MainMessage.submsg proto3_singular_msgs:true

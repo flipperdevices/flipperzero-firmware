@@ -1,0 +1,13 @@
+# Regression test for #522:
+# Compile Errors when using UENUM on atmega32u4
+
+Import('env')
+
+env2 = env.Clone()
+env2.Append(CPPDEFINES = {'UENUM': '_SFR_MEM8', 'BOOL': 'foobar_bool_t',
+                          'INT32': '1234', 'OPTIONAL': 'xyz_t',
+                          'REPEATED': '0', 'STATIC': 'static',
+                          'CALLBACK': '9999'})
+env2.NanopbProto("uenum.proto")
+env2.Object(["uenum.pb.c"])
+

@@ -1,0 +1,22 @@
+# Test the 'msgid' feature for identifying encoded messages
+
+Import('env')
+
+env.NanopbProto('msgid_example')
+
+enc = env.Program(['encode_msgid.c',
+                'msgid_example.pb.c',
+                '$COMMON/pb_encode.o',
+                '$COMMON/pb_common.o'])
+
+dec = env.Program(['decode_msgid.c',
+                'msgid_example.pb.c',
+                '$COMMON/pb_decode.o',
+                '$COMMON/pb_common.o'])
+
+env.RunTest("message1.pb", enc, ARGS = ['1'])
+env.RunTest("message1.txt", [dec, 'message1.pb'])
+env.RunTest("message2.pb", enc, ARGS = ['2'])
+env.RunTest("message2.txt", [dec, 'message2.pb'])
+env.RunTest("message3.pb", enc, ARGS = ['3'])
+env.RunTest("message3.txt", [dec, 'message3.pb'])

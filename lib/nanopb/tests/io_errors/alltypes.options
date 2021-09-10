@@ -1,0 +1,8 @@
+* max_size:16
+* max_count:5
+*.*fbytes fixed_length:true max_size:4
+*.*farray fixed_count:true max_count:5
+*.*farray2 fixed_count:true max_count:3
+IntSizes.*int8 int_size:IS_8
+IntSizes.*int16 int_size:IS_16
+DescriptorSize8 descriptorsize:DS_8

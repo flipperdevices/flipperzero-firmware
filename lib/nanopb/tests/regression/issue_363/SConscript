@@ -1,0 +1,14 @@
+# Regression test for #363:
+# Incorrect PB_STATIC_ASSERT for bytes inside oneof
+
+Import("env")
+
+env.NanopbProto("oneofmsg.proto")
+testprog = env.Program(["test_oneofmsg.c",
+                 "oneofmsg.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(testprog)
+

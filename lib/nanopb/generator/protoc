@@ -1,0 +1,28 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import os.path
+from nanopb_generator import invoke_protoc
+
+if __name__ == '__main__':
+    # Add argument so that protoc-gen-nanopb gets found
+    if getattr(sys, 'frozen', False):
+        mypath = os.path.dirname(sys.executable) # For pyInstaller
+    else:
+        mypath = os.path.dirname(__file__)
+
+    if os.path.isfile(os.path.join(mypath, "protoc-gen-nanopb.exe")):
+        protoc_gen_nanopb = os.path.join(mypath, "protoc-gen-nanopb.exe")
+    elif os.name == 'nt':
+        protoc_gen_nanopb = os.path.join(mypath, "protoc-gen-nanopb.bat")
+    else:
+        protoc_gen_nanopb = os.path.join(mypath, "protoc-gen-nanopb")
+
+    args = sys.argv[1:]
+
+    if os.path.isfile(protoc_gen_nanopb):
+         args = ['--plugin=protoc-gen-nanopb=%s' % protoc_gen_nanopb] + args
+
+    status = invoke_protoc(['protoc'] + args)
+    sys.exit(status)

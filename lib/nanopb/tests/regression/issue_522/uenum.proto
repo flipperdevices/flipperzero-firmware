@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+enum ReadingType {
+   UNKNOWN = 0;
+   TEMP = 1;
+   HUMIDITY = 2;
+   PRESSURE = 3;
+   CO2 = 4;
+   LIGHT = 5;
+   POWER = 6;
+}
+
+message Reading {
+   ReadingType readingType = 1;
+   float floatVal = 2;
+}
+
+message Lora {
+   float rssi = 1;
+   float frequency_error = 2;
+   float snr = 3;
+}
+
+message Meta {
+   int32 device_id = 1;
+   string device_type = 2;
+   float voltage = 3;
+   Lora lora =  4;
+}
+
+message Packet {
+   int32 packet_id = 1;
+   Meta meta = 2;
+   repeated Reading data = 3;
+}  
+

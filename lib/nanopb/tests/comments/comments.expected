@@ -1,0 +1,6 @@
+Enum1Comment
+LeadingEnumComment
+ENUMVAL2.*TrailingEnumComment
+Message1Comment
+member2.*TrailingMemberComment
+

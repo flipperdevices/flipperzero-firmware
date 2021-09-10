@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "submessage.proto";
+
+package mymessage;
+
+message MyMessage
+{
+    oneof foo
+    {
+        submessage.SubMessage1 msg1 = 1;
+        submessage.SubMessage2 msg2 = 2;
+        submessage.SubMessage3 msg3 = 3;
+    }
+}

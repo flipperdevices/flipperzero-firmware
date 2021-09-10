@@ -1,0 +1,12 @@
+/* Test CPP descriptor generation */
+
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message MyEmptyMessage {
+}
+
+message MyNonEmptyMessage {
+    optional uint32 field = 1;
+}

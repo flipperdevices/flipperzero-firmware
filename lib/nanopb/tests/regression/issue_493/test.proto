@@ -1,0 +1,9 @@
+syntax = "proto2";
+import "nanopb.proto";
+
+message MyMessage {
+    option (nanopb_msgopt).msgid = 8;
+    oneof configuration_flash {
+        MyMessage my_message_v1 = 1;
+    }
+}

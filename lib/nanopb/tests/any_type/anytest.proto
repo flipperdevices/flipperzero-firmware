@@ -1,0 +1,27 @@
+// This file is an example and test case on handling the Any type in nanopb.
+// The Any type is defined in Google-provided any.proto file:
+// message Any {
+//      string type_url = 1;
+//      bytes value = 2;
+// }
+//
+// The type_url field identifies the type of message, and the message data
+// is inside the bytes field.
+//
+// The encoding follows the basic format of protobuf and doesn't require
+// special support to handle. In this example, we just set maximum size for
+// the type_url and value fields, and then call pb_decode() again on the value.
+//
+// This does result in unnecessarily copying the data around, so for larger
+// values it is preferrable to use callbacks on the fields instead.
+
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+message BaseMessage {
+    int32 start = 1;
+    google.protobuf.Any details = 2;
+    int32 end = 3;
+}
+
+

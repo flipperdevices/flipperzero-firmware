@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "other.proto";
+
+message FirstOneof {}
+
+message Bar {
+  oneof content {
+    FirstOneof first = 1;
+    SecondOneof second = 2;
+  }
+}
+
+message Foo {
+  Bar bar = 1;
+}
+
+

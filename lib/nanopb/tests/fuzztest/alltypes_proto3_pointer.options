@@ -1,0 +1,4 @@
+* type:FT_POINTER
+*.static_msg type:FT_STATIC
+*.*fbytes fixed_length:true max_size:4
+*.req_limits proto3_singular_msgs:true

@@ -1,0 +1,49 @@
+# Run the alltypes test case, but compile with PB_WITHOUT_64BIT.
+
+Import("env")
+
+env.NanopbProto(["alltypes", "alltypes.options"])
+
+# Define the compilation options
+opts = env.Clone()
+opts.Append(CPPDEFINES = {'PB_WITHOUT_64BIT': 1, 'HAVE_STDINT_H': 0, 'PB_SYSTEM_HEADER': '\\"no_64bit_syshdr.h\\"'})
+opts.Append(CPPPATH = "#without_64bit")
+
+if 'SYSHDR' in opts:
+    opts.Append(CPPDEFINES = {'PB_OLD_SYSHDR': opts['SYSHDR']})
+
+# Build new version of core
+strict = opts.Clone()
+strict.Append(CFLAGS = strict['CORECFLAGS'])
+strict.Object("pb_decode_no64bit.o", "$NANOPB/pb_decode.c")
+strict.Object("pb_encode_no64bit.o", "$NANOPB/pb_encode.c")
+strict.Object("pb_common_no64bit.o", "$NANOPB/pb_common.c")
+
+# Now build and run the test normally.
+enc = opts.Program(["encode_alltypes.c", "alltypes.pb.c", "pb_encode_no64bit.o", "pb_common_no64bit.o"])
+dec = opts.Program(["decode_alltypes.c", "alltypes.pb.c", "pb_decode_no64bit.o", "pb_common_no64bit.o"])
+
+env.RunTest(enc)
+env.RunTest([dec, "encode_alltypes.output"])
+
+# Re-encode the data using protoc, and check that the results from nanopb
+# match byte-per-byte to the protoc output.
+env.Decode("encode_alltypes.output.decoded",
+           ["encode_alltypes.output", "alltypes.proto"],
+           MESSAGE='AllTypes')
+env.Encode("encode_alltypes.output.recoded",
+           ["encode_alltypes.output.decoded", "alltypes.proto"],
+           MESSAGE='AllTypes')
+env.Compare(["encode_alltypes.output", "encode_alltypes.output.recoded"])
+
+
+# Do the same checks with the optional fields present.
+env.RunTest("optionals.output", enc, ARGS = ['1'])
+env.RunTest("optionals.decout", [dec, "optionals.output"], ARGS = ['1'])
+env.Decode("optionals.output.decoded",
+           ["optionals.output", "alltypes.proto"],
+           MESSAGE='AllTypes')
+env.Encode("optionals.output.recoded",
+           ["optionals.output.decoded", "alltypes.proto"],
+           MESSAGE='AllTypes')
+env.Compare(["optionals.output", "optionals.output.recoded"])

@@ -1,0 +1,31 @@
+# Regression test for #610:
+# Error "'dict_values' object does not support indexing" while compiling .proto files
+
+Import("env")
+
+# First the simple case with two files
+env.NanopbProto("LogMessage.proto")
+env.NanopbProto(["DataPacket.proto", "LogMessage.proto"])
+env.Object("LogMessage.pb.c")
+env.Object("DataPacket.pb.c")
+
+# Then the complex hierarchy case
+all_files = [
+'nanopb_generator_bug/first/a/aa.proto',
+'nanopb_generator_bug/first/a/ab.proto',
+'nanopb_generator_bug/first/a.proto',
+'nanopb_generator_bug/first/b/ba.proto',
+'nanopb_generator_bug/first/b.proto',
+'nanopb_generator_bug/first.proto'
+]
+
+env2 = env.Clone()
+env2.Append(CPPPATH = "$BUILD/regression/issue_610")
+
+for f in all_files:
+    env2.NanopbProto([f] + all_files)
+
+for f in all_files:
+    env2.Object(f.replace('.proto', '.pb.c'))
+
+env2.Match(["nanopb_generator_bug/first.pb.h", "first.expected"])

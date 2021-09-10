@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message MainMessage {
+    SubMessage submsg = 1;
+}
+
+message SubMessage {
+    repeated int32 data = 1;
+}
+
+

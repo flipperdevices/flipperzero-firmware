@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+import "nanopb.proto";
+
+message MyMessage {
+    required bytes mybytes = 1 [(nanopb).max_size = 512];
+}

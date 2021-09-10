@@ -1,0 +1,4 @@
+*.rep_* type:FT_CALLBACK
+*.oneof_* submsg_callback:true
+*.Limits.int64_min type:FT_CALLBACK
+*.DescriptorSize8 descriptorsize:DS_8

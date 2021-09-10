@@ -1,0 +1,13 @@
+# Regression test for Issue 242: pb_encode does not encode tag for
+# extension fields that is all zeros
+Import('env')
+
+env.NanopbProto('zero_value')
+
+p = env.Program(["zero_value.c",
+                 "zero_value.pb.c",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+env.RunTest(p)
+

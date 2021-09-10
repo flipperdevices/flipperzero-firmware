@@ -1,0 +1,16 @@
+# Regression test for #569:
+# Compilation error when dependent message size is not defined.
+
+Import("env")
+
+# For C compiler
+env.NanopbProto("a")
+env.NanopbProto("b")
+env.Object("a.pb.c")
+env.Object("b.pb.c")
+
+# For C++ compiler
+env.NanopbProtoCpp("a")
+env.NanopbProtoCpp("b")
+env.Object("a_cpp.o", "a.pb.cpp")
+env.Object("b_cpp.o", "b.pb.cpp")

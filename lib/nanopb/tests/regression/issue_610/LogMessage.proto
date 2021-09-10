@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message LogMessage {
+    string msg = 1;
+}

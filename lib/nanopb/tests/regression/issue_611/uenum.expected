@@ -1,0 +1,5 @@
+STATIC.* ONEOF.* ENUM.*MyEnum
+STATIC.* ONEOF.* UENUM.*MyUEnum
+! [^U]ENUM.*MyUEnum
+! UENUM.*MyEnum
+

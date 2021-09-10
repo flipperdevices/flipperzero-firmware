@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+import 'nanopb.proto';
+
+message SubMsg1 {
+    optional float number1 = 1 [default = 1];
+}
+
+message SubMsg2 {
+    repeated uint32 number2 = 1;
+}
+
+message SubMsgCB {
+    option (nanopb_msgopt).submsg_callback = true;
+    repeated SubMsg1 field1 = 1;
+    oneof data {
+        uint32 uint = 2;
+        sint32 sint = 3 [default = 3];
+        SubMsg2 vuint = 4;
+    }
+}
+

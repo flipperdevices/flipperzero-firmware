@@ -1,0 +1,5 @@
+* long_names:true
+
+com.example.nanopb.TopLevelMessage.ShortIfNone long_names:false
+TopLevelMessage.ShortIfStripPackage long_names:false
+ShortIfFlatten long_names: false

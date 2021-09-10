@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+message Floats {
+    optional float float_pos_inf = 1 [default = inf];
+    optional float float_neg_inf = 2 [default = -inf];
+    optional float float_pos_nan = 3 [default = nan];
+    optional float float_neg_nan = 4 [default = -nan];
+    optional double double_pos_inf = 5 [default = inf];
+    optional double double_neg_inf = 6 [default = -inf];
+    optional double double_pos_nan = 7 [default = nan];
+    optional double double_neg_nan = 8 [default = -nan];
+}

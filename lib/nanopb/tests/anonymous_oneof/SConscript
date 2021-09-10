@@ -1,0 +1,19 @@
+# Test anonymous_oneof generator option
+
+Import('env')
+
+# Anonymous oneofs are supported by clang and gcc
+if 'clang' in env['CC'] or 'gcc' in env['CC']:
+    env2 = env.Clone()
+    if '-pedantic' in env2['CFLAGS']:
+        env2['CFLAGS'].remove('-pedantic')
+    env2.NanopbProto('oneof')
+
+    dec = env2.Program(['decode_oneof.c',
+                        'oneof.pb.c',
+                        '$COMMON/pb_decode.o',
+                        '$COMMON/pb_common.o'])
+
+    env2.RunTest("message1.txt", [dec, '$BUILD/oneof/message1.pb'], ARGS = ['1'])
+    env2.RunTest("message2.txt", [dec, '$BUILD/oneof/message2.pb'], ARGS = ['2'])
+    env2.RunTest("message3.txt", [dec, '$BUILD/oneof/message3.pb'], ARGS = ['3'])

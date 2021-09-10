@@ -1,0 +1,8 @@
+# Test sort_by_tag generator option
+
+Import("env")
+
+env.NanopbProto(["sort_by_tag.proto", "sort_by_tag.options"])
+test = env.Program(["sort_by_tag.c", "sort_by_tag.pb.c", "$COMMON/pb_encode.o", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+env.RunTest(test)
+

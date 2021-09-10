@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message SubMsg
+{
+    int32 field = 1;
+}
+
+message Message1
+{
+    int32 proto3_default = 1;
+    int32 proto3_off = 2 [(nanopb).proto3 = false];
+    int32 proto3_on = 3 [(nanopb).proto3 = true];
+    SubMsg normal_submsg = 4;
+    SubMsg sng_submsg = 5 [(nanopb).proto3_singular_msgs = true];
+}
+

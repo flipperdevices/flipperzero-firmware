@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message SubMessage1
+{
+    uint32 foo = 1;
+}
+
+message SubMessage2
+{
+    uint32 foo = 1;
+}
+
+message SubMessage3
+{
+    uint32 foo = 1;
+    uint32 bar = 2;
+}

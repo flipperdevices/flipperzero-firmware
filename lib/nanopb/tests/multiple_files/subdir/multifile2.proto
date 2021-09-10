@@ -1,0 +1,30 @@
+syntax = "proto2";
+
+package subdir;
+
+import "multifile1.proto";
+
+message Callback2Message {
+    required TestMessage tstmsg = 1;
+    required SubMessage submsg = 2;
+}
+
+message SmallMessage {
+    required bool dummy = 1;
+}
+
+message OneofMessage {
+    oneof msgs {
+        StaticMessage tstmsg = 1;
+        SmallMessage msg2 = 2;
+    }
+}
+
+message Enums {
+    required SignedEnum senum = 1;
+    required UnsignedEnum uenum = 2;
+}
+
+message SubdirMessage {
+    required int32 foo = 1 [default = 15];
+}

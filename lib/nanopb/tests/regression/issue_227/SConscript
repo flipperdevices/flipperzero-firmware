@@ -1,0 +1,14 @@
+# Regression test for Issue 227:Using proto3 type fields can cause unaligned access
+# NOTE: This test will only detect problems when run with clang sanitizer (which
+# is done regularly by a jenkins run).
+
+Import('env')
+
+env.NanopbProto('unaligned_uint64')
+
+p = env.Program(["unaligned_uint64.c",
+                 "unaligned_uint64.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+env.RunTest(p)
+

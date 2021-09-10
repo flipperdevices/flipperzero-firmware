@@ -1,0 +1,12 @@
+# Regression test for Issue 249: proto3 mode pb_decode() corrupts callback fields
+Import('env')
+
+env.NanopbProto('test')
+
+p = env.Program(["test.c",
+                 "test.pb.c",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+env.RunTest(p)
+

@@ -1,0 +1,8 @@
+# Regression test for issue #407: Extension fields > 255 not parsed correctly
+
+Import("env")
+
+env.NanopbProto("extensions")
+test = env.Program(["test_extensions.c", "extensions.pb.c", "$COMMON/pb_encode.o", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+env.RunTest(test)
+

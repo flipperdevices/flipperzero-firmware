@@ -1,0 +1,28 @@
+Import('env')
+
+import os
+
+base_env = env.Clone()
+base_env.Replace(NANOPBFLAGS = '--cpp-descriptor')
+base_env.NanopbProtoCpp('message')
+
+# not enabled for "c++03", which fails with "warning: offset of on non-POD type 'TestMessage'"
+# 'offsetof' in C++98 requires POD type, C++11 standard relaxes that to standard-layout class.
+# see: http://www.cplusplus.com/reference/cstddef/offsetof/
+for std in ["c++11", "c++14", "c++17", "c++20"]:
+    e = base_env.Clone()
+    e.Append(CXXFLAGS = '-std={}'.format(std))
+
+    # Make sure compiler supports this version of C++ before we actually run the
+    # test.
+    conf = Configure(e)
+    compiler_valid = conf.CheckCXX() and conf.CheckCXXHeader('vector')
+    e = conf.Finish()
+    if not compiler_valid:
+        print("Skipping {} test - compiler doesn't support it".format(std))
+        continue
+
+    sources = [ 'cxx_callback_datatype.cpp', 'message.pb.cpp', '$NANOPB/pb_decode.c', '$NANOPB/pb_encode.c', '$NANOPB/pb_common.c' ]
+    objects = [ e.Object('{}_{}'.format(os.path.basename(s), std), s) for s in sources ]
+    p = e.Program(target = 'cxx_callback_datatype_{}'.format(std), source = objects)
+    e.RunTest(p)

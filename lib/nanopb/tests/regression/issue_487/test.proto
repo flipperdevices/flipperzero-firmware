@@ -1,0 +1,16 @@
+syntax = "proto2";
+package a.b.c;
+
+message TopLevel {
+    optional uint32 field = 1 [default = 0];
+    optional NestedTypeA foo = 2;
+
+    message NestedTypeA {
+        optional NestedTypeB bar = 1;
+
+        message NestedTypeB {
+            optional uint32 foobar = 1;
+        }
+    }
+}
+

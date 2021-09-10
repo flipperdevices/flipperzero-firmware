@@ -1,0 +1,24 @@
+# Test proto3 "optional" field types.
+# This is supported in protoc 3.12 and newer.
+
+Import('env')
+import re
+
+version = None
+if 'PROTOC_VERSION' in env:
+    match = re.search('([0-9]+).([0-9]+).([0-9]+)', env['PROTOC_VERSION'])
+    version = (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
+# Oneof is supported by protoc >= 3.12.0
+if env.GetOption('clean') or (version and (version[0] > 3 or (version[0] == 3 and version[1] >= 12))):
+    
+    env2 = env.Clone()
+    env2.Append(PROTOCFLAGS = "--experimental_allow_proto3_optional")
+    
+    env2.NanopbProto("optional.proto")
+    opt = env2.Program(["optional.c", "optional.pb.c",
+                     "$COMMON/pb_decode.o", "$COMMON/pb_encode.o",
+                     "$COMMON/pb_common.o"])
+    env2.RunTest(opt)
+
+

@@ -1,0 +1,14 @@
+# Test that pb_check_proto3_default_value() correctly skips padding
+# bytes in submessage structures.
+
+Import("env")
+
+env.NanopbProto("padding")
+
+p = env.Program(["padding.c",
+                 "padding.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(p)
+

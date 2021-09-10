@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+message Property
+{
+    enum Mode
+    {
+        INVALID = 0;
+        A = 1;
+        B = 2;
+        C = 3;
+    }
+
+    oneof field
+    {
+        Mode   DeviceA_Mode     = 1;
+        uint32 DeviceA_Size     = 2;
+        uint32 DeviceA_Length   = 3;
+
+        Mode   DeviceB_Mode     = 4;
+        uint32 DeviceB_Size     = 5;
+        uint32 DeviceB_Length   = 6;
+    }
+}
+
+message SettingsGroup
+{
+    message Settings
+    {
+        message Command
+        {
+            uint32 label                 = 1;
+            repeated Property properties = 2;
+        }
+
+        uint32      id      = 1;
+        string      name    = 2;
+        uint32      flags   = 3;
+        bool        en      = 5;
+        Command     begin   = 6;
+        Command     end     = 7;
+    }
+
+    Settings settings   = 1;
+    uint32 version      = 2;
+}

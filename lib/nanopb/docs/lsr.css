@@ -1,0 +1,233 @@
+/*
+Original author: Peter Parente
+Date: 2008/01/22
+Version: 1.0 (modified)
+Copyright: This stylesheet has been placed in the public domain - free to edit and use for all uses.
+
+--
+
+Heavily modified for use in nanopb documentation.
+2011-2020 Petteri Aimonen
+*/
+
+body {
+  font: 100% sans-serif;
+  background: #ffffff;
+  color: black;
+  margin: 2em;
+  padding: 0em 2em;
+  max-width: 1200px;
+}
+
+p.topic-title {
+  font-weight: bold;
+}
+
+table.docinfo {
+  text-align: left;
+  margin: 2em 0em;
+}
+
+a[href] {
+  color: #436976;
+  background-color: transparent;
+}
+
+a.toc-backref {
+  text-decoration: none;
+}
+
+h1 a[href] {
+  color: #003a6b;
+  text-decoration: none;
+  background-color: transparent;
+}
+
+a.strong {
+  font-weight: bold;
+}
+
+img {
+  margin: 0;
+  border: 0;
+}
+
+blockquote {
+  border-left: 3px solid black;
+  background-color: #f6f6f6;
+  padding: 0.5em 1em 0.2em 1em;
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+p {
+  margin: 0.5em 0 1em 0;
+  line-height: 1.5em;
+}
+
+p a:visited {
+  color: purple;
+  background-color: transparent;
+}
+
+p a:active {
+  color: red;
+  background-color: transparent;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+p img {
+  border: 0;
+  margin: 0;
+}
+
+p.rubric {
+  font-weight: bold;
+  font-style: italic;
+}
+
+em, cite {
+  font-style: normal;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+pre {
+  border-left: 3px double #aaa;
+  padding: 5px 10px;
+  background-color: #f6f6f6;
+}
+
+code {
+  border: 1px solid rgba(128, 128, 128, 0.1);
+  padding: 1px 5px;
+  border-radius: 5px;
+  background-color: rgba(128, 128, 128, 0.05);
+  white-space: nowrap;
+}
+
+pre code {
+  border: none;
+  background-color: transparent;
+  padding: 0px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #000;
+  background-color: transparent;
+  margin: 0em;
+  padding-top: 0.5em;
+}
+
+h1 {
+  color: #003a6b;
+  font-size: 180%;
+  margin-bottom: 0.5em;
+  border-bottom: 2px solid #aaa;
+}
+
+h2 {
+  color: #003a6b;
+  font-size: 130%;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #aaa;
+  margin-top: 1.5em;
+}
+
+h3 {
+  font-size: 120%;
+  margin-bottom: 0.5em;
+  margin-top: 1.0em;
+}
+
+h4 {
+  font-size: 110%;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
+h5 {
+  font-size: 105%;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+h6 {
+  font-size: 100%;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+dt {
+  font-style: italic;
+}
+
+dd {
+  margin-bottom: 1.5em;
+}
+
+
+
+table {
+  text-align: left;
+  border-collapse: collapse;
+  margin: 1.5em 0em;
+}
+
+table td, table th {
+  padding: 0.25em 1em;
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+#index {
+  margin: 2em 2em 2em 0em;
+  padding: 0em 1em;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555;
+  max-width: 20em;
+}
+
+#index h2 {
+  margin-bottom: 0em;
+  margin-top: 0em;
+  color: #003a6b;
+  font-size: 100%;
+  border-bottom: 1px solid #aaa;
+  font-weight: bold;
+}
+
+#feedback_link {
+  float: right;
+}
+
+#feedback {
+  visibility: hidden;
+  padding: 1em;
+  border-radius: 5px;
+  position: fixed;
+  top: 10em;
+  right: 10em;
+  background: white;
+  border-top: 1px solid #aaa;
+  border-left: 1px solid #aaa;
+  border-bottom: 2px solid #555;
+  border-right: 2px solid #555;
+}
+
+#feedback:target {
+  visibility: visible;
+}
+
+#feedback .cancel {
+  color: #666;
+  padding-left: 2em;
+}

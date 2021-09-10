@@ -1,0 +1,13 @@
+# Regression test for security issue GHSA-gcx3-7m76-287p
+# "Out-of-memory condition on repeated field can result in invalid free()"
+
+Import("malloc_env")
+
+malloc_env.NanopbProto("test")
+
+test = malloc_env.Program(["test.c", "test.pb.c",
+                          "$COMMON/pb_decode_with_malloc.o",
+                          "$COMMON/pb_common_with_malloc.o",
+                          "$COMMON/malloc_wrappers.o"])
+                          
+malloc_env.RunTest([test, 'test_input.pb'])

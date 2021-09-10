@@ -1,0 +1,14 @@
+# Test that fixed count option works.
+
+Import("env")
+
+env.NanopbProto("fixed_count")
+env.Object("fixed_count.pb.c")
+
+p = env.Program(["fixed_count_unittests.c",
+                 "fixed_count.pb.c",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(p)

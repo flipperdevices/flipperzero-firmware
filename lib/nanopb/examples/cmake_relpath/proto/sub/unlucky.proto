@@ -1,0 +1,5 @@
+syntax = "proto2";
+
+message UnluckyNumber {
+	required uint32 number = 1;
+}

@@ -1,0 +1,32 @@
+language: c
+dist: focal
+
+# Test using both gcc and clang
+env:
+    - CC=gcc     CXX=g++
+    - CC=clang   CXX=clang++
+
+addons:
+    apt:
+        packages:
+            - scons
+            - python3
+            - python3-protobuf
+            - protobuf-compiler
+
+
+before_install:
+    - export PATH=$HOME/.local/bin:$HOME/protobuf/bin:$PATH
+    - export MAKEFLAGS=-j$(nproc)
+    - $CC --version
+    - $CXX --version
+    - python --version
+    - lsb_release -a
+
+script:
+    - pushd tests && scons CC=$CC CXX=$CXX && popd
+
+notifications:
+    email:
+        recipients:
+            - jpa@travis.mail.kapsi.fi

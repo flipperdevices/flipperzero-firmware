@@ -1,0 +1,10 @@
+# Regression test for #617:
+# Unordered field numbers inside oneof can cause fields to be ignored
+
+Import("env")
+
+env.NanopbProto(["oneof.proto", "oneof.options"])
+
+test = env.Program(["test_oneof.c", "oneof.pb.c", "$COMMON/pb_decode.o", "$COMMON/pb_common.o"])
+env.RunTest(test)
+

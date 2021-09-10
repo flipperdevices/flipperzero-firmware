@@ -1,0 +1,9 @@
+# Regression test for #637:
+# Generator produces incorrect output when a oneof is used
+
+Import("env")
+
+env.NanopbProto("other.proto")
+env.NanopbProto(["oneof.proto", "other.proto"])
+env.Object("oneof.pb.c")
+env.Object("test.c")

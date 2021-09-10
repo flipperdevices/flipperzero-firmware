@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+message BaseMessage {
+    extensions 100 to 200;
+}
+
+extend BaseMessage {
+    optional string string_extension = 100;
+}
+
+

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "submessage.proto";
+
+message MyMessage
+{
+    oneof foo
+    {
+        SubMessage1 msg1 = 1;
+        SubMessage2 msg2 = 2;
+        SubMessage3 msg3 = 3;
+    }
+}

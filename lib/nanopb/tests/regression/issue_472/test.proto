@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "nanopb.proto";
+
+message FirmwareUpdateCommand {
+	string version = 1;
+	uint32 size = 2;
+}
+
+message CommandWrapperMessage {
+	option (nanopb_msgopt).submsg_callback = true;
+
+    oneof payload {
+		FirmwareUpdateCommand firmware_update = 1;
+    }
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+import 'nanopb.proto';
+
+message MainMessage {
+    string foo = 1 [(nanopb).max_size = 3];
+    string bar = 2 [(nanopb).max_size = 8];
+}
+

@@ -1,0 +1,16 @@
+# Regression test for Issue 256: Proto3 mode skips submessages even when
+# later array fields have non-zero value
+
+Import('env')
+
+env.NanopbProto('submsg_array')
+
+p = env.Program(['submsg_array.c',
+                 'submsg_array.pb.c', 
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(p)
+
+

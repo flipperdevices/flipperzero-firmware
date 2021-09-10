@@ -1,0 +1,15 @@
+# Regression test for Issue 253: Wrong calculated message maximum size
+
+Import('env')
+
+env.NanopbProto('short_array')
+
+p = env.Program(['short_array.c',
+                 'short_array.pb.c', 
+                 "$COMMON/pb_decode.o",
+                 "$COMMON/pb_encode.o",
+                 "$COMMON/pb_common.o"])
+
+env.RunTest(p)
+
+

@@ -1,0 +1,12 @@
+# Regression test for #647:
+# Ill-formed oneof message leads to calling free on an arbitrary pointer
+
+Import("env")
+
+env.NanopbProto("repro.proto")
+
+test = env.Program(["repro.c", "repro.pb.c",
+                    "$COMMON/pb_decode_with_malloc.o",
+                    "$COMMON/pb_common_with_malloc.o",
+                    "$COMMON/malloc_wrappers.o"])
+env.RunTest(test)
