@@ -30,11 +30,21 @@ PKA_HandleTypeDef hpka;
 void MX_PKA_Init(void)
 {
 
+  /* USER CODE BEGIN PKA_Init 0 */
+
+  /* USER CODE END PKA_Init 0 */
+
+  /* USER CODE BEGIN PKA_Init 1 */
+
+  /* USER CODE END PKA_Init 1 */
   hpka.Instance = PKA;
   if (HAL_PKA_Init(&hpka) != HAL_OK)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN PKA_Init 2 */
+
+  /* USER CODE END PKA_Init 2 */
 
 }
 

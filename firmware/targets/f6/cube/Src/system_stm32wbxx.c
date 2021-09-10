@@ -60,13 +60,12 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics. 
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2019-2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the 
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
@@ -121,14 +120,29 @@
   * @{
   */
 
-/*!< Uncomment the following line if you need to relocate your vector Table in
-     Internal SRAM. */
+/* Note: Following vector table addresses must be defined in line with linker
+         configuration. */
+/*!< Uncomment the following line if you need to relocate CPU1 CM4 and/or CPU2
+     CM0+ vector table anywhere in Sram or Flash. Else vector table will be kept
+     at address 0x00 which correspond to automatic remap of boot address selected */
+/* #define USER_VECT_TAB_ADDRESS */
+#if defined(USER_VECT_TAB_ADDRESS)
+ /*!< Uncomment this line for user vector table remap in Sram else user remap
+      will be done in Flash. */
 /* #define VECT_TAB_SRAM */
-#define VECT_TAB_OFFSET         0x0U            /*!< Vector Table base offset field.
+#if defined(VECT_TAB_SRAM)
+#define VECT_TAB_BASE_ADDRESS   SRAM1_BASE      /*!< Vector Table base address field.
                                                      This value must be a multiple of 0x200. */
+#define VECT_TAB_OFFSET         0x00000000U     /*!< Vector Table base offset field.
+                                                     This value must be a multiple of 0x200. */
+#else
+#define VECT_TAB_BASE_ADDRESS   FLASH_BASE      /*!< Vector Table base address field.
+                                                     This value must be a multiple of 0x200. */
+#define VECT_TAB_OFFSET         0x00000000U     /*!< Vector Table base offset field.
+                                                     This value must be a multiple of 0x200. */
+#endif
+#endif
 
-#define VECT_TAB_BASE_ADDRESS   SRAM1_BASE       /*!< Vector Table base offset field.
-                                                     This value must be a multiple of 0x200. */
 /**
   * @}
   */
@@ -161,7 +175,7 @@
   const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
 
-#if defined(STM32WB55xx) || defined(STM32WB5Mxx) || defined(STM32WB35xx)
+#if defined(STM32WB55xx) || defined(STM32WB5Mxx) || defined(STM32WB35xx) || defined (STM32WB15xx) || defined (STM32WB10xx)
   const uint32_t SmpsPrescalerTable[4UL][6UL]={{1UL,3UL,2UL,2UL,1UL,2UL}, \
                                         {2UL,6UL,4UL,3UL,2UL,4UL}, \
                                         {4UL,12UL,8UL,6UL,4UL,8UL}, \
@@ -191,12 +205,9 @@
   */
 void SystemInit(void)
 {
+#if defined(USER_VECT_TAB_ADDRESS)
   /* Configure the Vector Table location add offset address ------------------*/
-#if defined(VECT_TAB_SRAM) && defined(VECT_TAB_BASE_ADDRESS)  
-  /* program in SRAMx */
-  SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET;  /* Vector Table Relocation in Internal SRAMx for CPU1 */
-#else    /* program in FLASH */
-  SCB->VTOR = VECT_TAB_OFFSET;              /* Vector Table Relocation in Internal FLASH */
+  SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET;
 #endif
 
   /* FPU settings ------------------------------------------------------------*/

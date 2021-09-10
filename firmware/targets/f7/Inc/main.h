@@ -78,8 +78,8 @@ void Error_Handler(void);
 #define RFID_PULL_Pin GPIO_PIN_2
 #define RFID_RF_IN_GPIO_Port GPIOC
 #define RFID_RF_IN_Pin GPIO_PIN_5
-#define RFID_TUNE_GPIO_Port GPIOA
-#define RFID_TUNE_Pin GPIO_PIN_8
+#define RFID_CARRIER_GPIO_Port GPIOA
+#define RFID_CARRIER_Pin GPIO_PIN_15
 
 #define RF_SW_0_GPIO_Port GPIOC
 #define RF_SW_0_Pin GPIO_PIN_4
@@ -93,7 +93,7 @@ void Error_Handler(void);
 #define SPEAKER_Pin GPIO_PIN_8
 
 #define VIBRO_GPIO_Port GPIOA
-#define VIBRO_Pin GPIO_PIN_15
+#define VIBRO_Pin GPIO_PIN_8
 
 #define iBTN_GPIO_Port GPIOB
 #define iBTN_Pin GPIO_PIN_14

@@ -30,6 +30,13 @@ COMP_HandleTypeDef hcomp1;
 void MX_COMP1_Init(void)
 {
 
+  /* USER CODE BEGIN COMP1_Init 0 */
+
+  /* USER CODE END COMP1_Init 0 */
+
+  /* USER CODE BEGIN COMP1_Init 1 */
+
+  /* USER CODE END COMP1_Init 1 */
   hcomp1.Instance = COMP1;
   hcomp1.Init.InputMinus = COMP_INPUT_MINUS_1_4VREFINT;
   hcomp1.Init.InputPlus = COMP_INPUT_PLUS_IO1;
@@ -43,6 +50,9 @@ void MX_COMP1_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN COMP1_Init 2 */
+
+  /* USER CODE END COMP1_Init 2 */
 
 }
 

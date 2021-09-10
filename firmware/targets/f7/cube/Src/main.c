@@ -163,6 +163,11 @@ void SystemClock_Config(void)
   }
 
   LL_PWR_EnableBkUpAccess();
+  if(LL_RCC_GetRTCClockSource() != LL_RCC_RTC_CLKSOURCE_LSE)
+  {
+    LL_RCC_ForceBackupDomainReset();
+    LL_RCC_ReleaseBackupDomainReset();
+  }
   LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_MEDIUMLOW);
   LL_RCC_LSE_Enable();
 
@@ -229,8 +234,6 @@ void SystemClock_Config(void)
   }
   if(LL_RCC_GetRTCClockSource() != LL_RCC_RTC_CLKSOURCE_LSE)
   {
-    LL_RCC_ForceBackupDomainReset();
-    LL_RCC_ReleaseBackupDomainReset();
     LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
   }
   LL_RCC_EnableRTC();
@@ -239,6 +242,7 @@ void SystemClock_Config(void)
   LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
   LL_RCC_SetRNGClockSource(LL_RCC_RNG_CLKSOURCE_CLK48);
   LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLLSAI1);
+  LL_RCC_SetCLK48ClockSource(LL_RCC_CLK48_CLKSOURCE_PLLSAI1);
   LL_RCC_SetSMPSClockSource(LL_RCC_SMPS_CLKSOURCE_HSE);
   LL_RCC_SetSMPSPrescaler(LL_RCC_SMPS_DIV_1);
   LL_RCC_SetRFWKPClockSource(LL_RCC_RFWKP_CLKSOURCE_LSE);

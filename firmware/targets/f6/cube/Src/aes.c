@@ -35,6 +35,13 @@ __ALIGN_BEGIN static const uint32_t pKeyAES2[4] __ALIGN_END = {
 void MX_AES1_Init(void)
 {
 
+  /* USER CODE BEGIN AES1_Init 0 */
+
+  /* USER CODE END AES1_Init 0 */
+
+  /* USER CODE BEGIN AES1_Init 1 */
+
+  /* USER CODE END AES1_Init 1 */
   hcryp1.Instance = AES1;
   hcryp1.Init.DataType = CRYP_DATATYPE_32B;
   hcryp1.Init.KeySize = CRYP_KEYSIZE_128B;
@@ -46,12 +53,22 @@ void MX_AES1_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN AES1_Init 2 */
+
+  /* USER CODE END AES1_Init 2 */
 
 }
 /* AES2 init function */
 void MX_AES2_Init(void)
 {
 
+  /* USER CODE BEGIN AES2_Init 0 */
+
+  /* USER CODE END AES2_Init 0 */
+
+  /* USER CODE BEGIN AES2_Init 1 */
+
+  /* USER CODE END AES2_Init 1 */
   hcryp2.Instance = AES2;
   hcryp2.Init.DataType = CRYP_DATATYPE_32B;
   hcryp2.Init.KeySize = CRYP_KEYSIZE_128B;
@@ -63,6 +80,9 @@ void MX_AES2_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN AES2_Init 2 */
+
+  /* USER CODE END AES2_Init 2 */
 
 }
 
