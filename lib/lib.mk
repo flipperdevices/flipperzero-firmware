@@ -108,3 +108,7 @@ CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*/*.cpp)
 
 # Toolbox
 C_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.c)
+
+# protobuf
+CFLAGS			+= -I$(LIB_DIR)/nanopb
+C_SOURCES		+= $(wildcard $(LIB_DIR)/nanopb/*.c)
