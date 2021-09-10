@@ -7,3 +7,6 @@
 [submodule "lib/littlefs"]
 	path = lib/littlefs
 	url = https://github.com/littlefs-project/littlefs.git
+[submodule "lib/nanopb"]
+	path = lib/nanopb
+	url = https://github.com/nanopb/nanopb.git
