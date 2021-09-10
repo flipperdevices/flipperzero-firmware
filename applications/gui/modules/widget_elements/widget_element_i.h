@@ -31,7 +31,7 @@ struct WidgetElement {
 };
 
 /* Create multi string element */
-WidgetElement* widget_element_string_multi_create(
+WidgetElement* widget_element_string_multiline_create(
     uint8_t x,
     uint8_t y,
     Align horizontal,

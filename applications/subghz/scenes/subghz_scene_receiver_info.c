@@ -51,7 +51,7 @@ const void subghz_scene_receiver_info_on_enter(void* context) {
         string_t text;
         string_init(text);
         subghz->txrx->protocol_result->to_string(subghz->txrx->protocol_result, text);
-        widget_add_string_multi_element(
+        widget_add_string_multiline_element(
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, string_get_cstr(text));
         string_clear(text);
 
