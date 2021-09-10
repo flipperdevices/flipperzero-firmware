@@ -156,22 +156,22 @@ SubGhz* subghz_alloc() {
     subghz->txrx = furi_alloc(sizeof(SubGhzTxRx));
     subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
-    subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+    subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
-    subghz->txrx->protocol = subghz_parser_alloc();
+    subghz->txrx->parser = subghz_parser_alloc();
     subghz_worker_set_overrun_callback(
         subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_parser_reset);
     subghz_worker_set_pair_callback(
         subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_parse);
-    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->protocol);
+    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->parser);
 
     //Init Error_str
     string_init(subghz->error_str);
 
-    subghz_parser_load_keeloq_file(subghz->txrx->protocol, "/ext/subghz/keeloq_mfcodes");
-    subghz_parser_load_nice_flor_s_file(subghz->txrx->protocol, "/ext/subghz/nice_floor_s_rx");
+    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
+    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_floor_s_rx");
 
     //subghz_parser_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
 
@@ -232,7 +232,7 @@ void subghz_free(SubGhz* subghz) {
     subghz->gui = NULL;
 
     //Worker & Protocol & History
-    subghz_parser_free(subghz->txrx->protocol);
+    subghz_parser_free(subghz->txrx->parser);
     subghz_worker_free(subghz->txrx->worker);
     subghz_history_free(subghz->txrx->history);
     free(subghz->txrx);
