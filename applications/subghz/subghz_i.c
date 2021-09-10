@@ -164,7 +164,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
         // strlen("Protocol: ") = 10
         string_right(temp_str, 10);
         subghz->txrx->protocol_result =
-            subghz_protocol_get_by_name(subghz->txrx->protocol, string_get_cstr(temp_str));
+            subghz_parser_get_by_name(subghz->txrx->protocol, string_get_cstr(temp_str));
         if(subghz->txrx->protocol_result == NULL) {
             break;
         }
@@ -308,7 +308,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         // strlen("Protocol: ") = 10
         string_right(temp_str, 10);
         subghz->txrx->protocol_result =
-            subghz_protocol_get_by_name(subghz->txrx->protocol, string_get_cstr(temp_str));
+            subghz_parser_get_by_name(subghz->txrx->protocol, string_get_cstr(temp_str));
         if(subghz->txrx->protocol_result == NULL) {
             break;
         }
@@ -389,7 +389,7 @@ void subghz_hopper_update(void* context) {
         txrx->txrx_state = SubGhzTxRxStateIdle;
     };
     if(txrx->txrx_state == SubGhzTxRxStateIdle) {
-        subghz_protocol_reset(txrx->protocol);
+        subghz_parser_reset(txrx->protocol);
         txrx->frequency = subghz_hopper_frequencies[txrx->hopper_idx_frequency];
         subghz_rx(txrx->worker, txrx->frequency);
         txrx->txrx_state = SubGhzTxRxStateRx;

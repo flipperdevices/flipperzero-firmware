@@ -8,7 +8,7 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, void* context) {
 
 static bool subghz_scene_receiver_info_update_parser(void* context) {
     SubGhz* subghz = context;
-    subghz->txrx->protocol_result = subghz_protocol_get_by_name(
+    subghz->txrx->protocol_result = subghz_parser_get_by_name(
         subghz->txrx->protocol,
         subghz_history_get_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
 

@@ -22,7 +22,8 @@
 #include <subghz/scenes/subghz_scene.h>
 
 #include <lib/subghz/subghz_worker.h>
-#include <lib/subghz/protocols/subghz_protocol.h>
+
+#include <lib/subghz/subghz_parser.h>
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include "subghz_history.h"
 
@@ -59,7 +60,7 @@ typedef enum {
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
-    SubGhzProtocol* protocol;
+    SubGhzParser* protocol;
     SubGhzProtocolCommon* protocol_result;
     SubGhzProtocolCommonEncoder* encoder;
     uint32_t frequency;
