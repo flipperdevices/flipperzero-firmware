@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Europe/London)]} {
-    LoadTimeZoneFile Europe/London
-}
-set TZData(:GB-Eire) $TZData(:Europe/London)

@@ -1,3 +1,0 @@
-* long_names     : false
-SettingsGroup.Settings.name               max_length : 32
-SettingsGroup.Settings.Command.properties max_count  : 6

@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Australia/Adelaide)]} {
-    LoadTimeZoneFile Australia/Adelaide
-}
-set TZData(:Australia/South) $TZData(:Australia/Adelaide)

@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-
-set TZData(:MST) {
-    {-9223372036854775808 -25200 0 MST}
-}

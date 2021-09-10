@@ -1,7 +1,0 @@
-syntax = "proto2";
-import "nanopb.proto";
-
-message MyMessage {
-    repeated string values = 1 [(nanopb).type = FT_POINTER];
-}
-

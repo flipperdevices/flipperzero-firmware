@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Pacific/Pohnpei)]} {
-    LoadTimeZoneFile Pacific/Pohnpei
-}
-set TZData(:Pacific/Ponape) $TZData(:Pacific/Pohnpei)

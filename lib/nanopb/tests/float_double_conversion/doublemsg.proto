@@ -1,5 +1,0 @@
-syntax = "proto2";
-
-message DoubleMsg {
-    required double value = 1;
-}

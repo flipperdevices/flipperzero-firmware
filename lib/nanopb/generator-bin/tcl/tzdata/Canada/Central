@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(America/Winnipeg)]} {
-    LoadTimeZoneFile America/Winnipeg
-}
-set TZData(:Canada/Central) $TZData(:America/Winnipeg)

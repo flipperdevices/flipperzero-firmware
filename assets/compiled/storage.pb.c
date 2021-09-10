@@ -6,4 +6,14 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+PB_BIND(StorageListRequest, StorageListRequest, AUTO)
+
+
+PB_BIND(StorageListAnswer, StorageListAnswer, AUTO)
+
+
+PB_BIND(StorageListEOF, StorageListEOF, AUTO)
+
+
+
 

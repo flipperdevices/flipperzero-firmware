@@ -1,7 +1,0 @@
-syntax = 'proto2';
-
-message MyMessage
-{
-    optional float myfield = 1 [default = 1.234];
-}
-

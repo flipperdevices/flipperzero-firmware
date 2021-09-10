@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Asia/Ulaanbaatar)]} {
-    LoadTimeZoneFile Asia/Ulaanbaatar
-}
-set TZData(:Asia/Ulan_Bator) $TZData(:Asia/Ulaanbaatar)

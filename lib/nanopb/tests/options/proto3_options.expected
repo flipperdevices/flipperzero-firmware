@@ -1,5 +1,0 @@
-! bool has_proto3_default
-bool has_proto3_off
-! bool has_proto3_on
-bool has_normal_submsg
-! bool has_sng_submsg

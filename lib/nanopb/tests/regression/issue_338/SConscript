@@ -1,7 +1,0 @@
-# Check that generator doesn't exceed memory limits
-
-Import('env')
-
-env.NanopbProto('bigvalue')
-
-

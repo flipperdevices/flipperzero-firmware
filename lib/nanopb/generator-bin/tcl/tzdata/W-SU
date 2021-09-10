@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Europe/Moscow)]} {
-    LoadTimeZoneFile Europe/Moscow
-}
-set TZData(:W-SU) $TZData(:Europe/Moscow)

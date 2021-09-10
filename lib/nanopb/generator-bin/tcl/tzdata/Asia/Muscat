@@ -1,5 +1,0 @@
-# created by tools/tclZIC.tcl - do not edit
-if {![info exists TZData(Asia/Dubai)]} {
-    LoadTimeZoneFile Asia/Dubai
-}
-set TZData(:Asia/Muscat) $TZData(:Asia/Dubai)

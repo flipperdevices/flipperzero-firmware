@@ -9,9 +9,84 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+/* Enum definitions */
+typedef enum _StorageListAnswer_FileType { 
+    StorageListAnswer_FileType_FILE = 0, 
+    StorageListAnswer_FileType_DIR = 1 
+} StorageListAnswer_FileType;
+
+/* Struct definitions */
+typedef struct _StorageListEOF { 
+    char dummy_field;
+} StorageListEOF;
+
+typedef struct _StorageListRequest { 
+    pb_callback_t path; 
+} StorageListRequest;
+
+typedef struct _StorageListAnswer { 
+    StorageListAnswer_FileType type; 
+    pb_callback_t name; 
+    bool has_size;
+    uint64_t size; 
+} StorageListAnswer;
+
+
+/* Helper constants for enums */
+#define _StorageListAnswer_FileType_MIN StorageListAnswer_FileType_FILE
+#define _StorageListAnswer_FileType_MAX StorageListAnswer_FileType_DIR
+#define _StorageListAnswer_FileType_ARRAYSIZE ((StorageListAnswer_FileType)(StorageListAnswer_FileType_DIR+1))
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Initializer values for message structs */
+#define StorageListRequest_init_default          {{{NULL}, NULL}}
+#define StorageListAnswer_init_default           {_StorageListAnswer_FileType_MIN, {{NULL}, NULL}, false, 0}
+#define StorageListEOF_init_default              {0}
+#define StorageListRequest_init_zero             {{{NULL}, NULL}}
+#define StorageListAnswer_init_zero              {_StorageListAnswer_FileType_MIN, {{NULL}, NULL}, false, 0}
+#define StorageListEOF_init_zero                 {0}
+
+/* Field tags (for use in manual encoding/decoding) */
+#define StorageListRequest_path_tag              1
+#define StorageListAnswer_type_tag               1
+#define StorageListAnswer_name_tag               2
+#define StorageListAnswer_size_tag               3
+
+/* Struct field encoding specification for nanopb */
+#define StorageListRequest_FIELDLIST(X, a) \
+X(a, CALLBACK, SINGULAR, STRING,   path,              1)
+#define StorageListRequest_CALLBACK pb_default_field_callback
+#define StorageListRequest_DEFAULT NULL
+
+#define StorageListAnswer_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UENUM,    type,              1) \
+X(a, CALLBACK, SINGULAR, STRING,   name,              2) \
+X(a, STATIC,   OPTIONAL, UINT64,   size,              3)
+#define StorageListAnswer_CALLBACK pb_default_field_callback
+#define StorageListAnswer_DEFAULT NULL
+
+#define StorageListEOF_FIELDLIST(X, a) \
+
+#define StorageListEOF_CALLBACK NULL
+#define StorageListEOF_DEFAULT NULL
+
+extern const pb_msgdesc_t StorageListRequest_msg;
+extern const pb_msgdesc_t StorageListAnswer_msg;
+extern const pb_msgdesc_t StorageListEOF_msg;
+
+/* Defines for backwards compatibility with code written before nanopb-0.4.0 */
+#define StorageListRequest_fields &StorageListRequest_msg
+#define StorageListAnswer_fields &StorageListAnswer_msg
+#define StorageListEOF_fields &StorageListEOF_msg
+
+/* Maximum encoded size of messages (where known) */
+/* StorageListRequest_size depends on runtime parameters */
+/* StorageListAnswer_size depends on runtime parameters */
+#define StorageListEOF_size                      0
 
 #ifdef __cplusplus
 } /* extern "C" */
