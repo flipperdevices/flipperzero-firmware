@@ -7,6 +7,7 @@ const char* const subghz_frequencies_text[] = {
     "387.00",
     "433.08",
     "433.92",
+    "434.42",
     "434.78",
     "438.90",
     "464.00",
@@ -26,6 +27,7 @@ const uint32_t subghz_frequencies[] = {
     387000000,
     433075000, /* LPD433 first */
     433920000, /* LPD433 mid */
+    434420000,
     434775000, /* LPD433 last channels */
     438900000,
     464000000,
