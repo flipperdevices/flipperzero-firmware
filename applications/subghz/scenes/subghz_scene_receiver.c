@@ -90,9 +90,7 @@ const void subghz_scene_receiver_on_enter(void* context) {
         subghz_begin(subghz, subghz->txrx->preset);
         subghz_rx(subghz, subghz->txrx->frequency);
     }
-    if(subghz->txrx->idx_menu_chosen != 0) {
-        subghz_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
-    }
+    subghz_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
 }
@@ -125,6 +123,7 @@ const bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event
             break;
         case SubghzReceverEventConfig:
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+            subghz->txrx->idx_menu_chosen = subghz_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
             break;
