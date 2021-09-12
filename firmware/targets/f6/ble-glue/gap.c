@@ -1,118 +1,56 @@
 #include "gap.h"
 
 #include "app_entry.h"
-#include "app_common.h"
-#include "dbg_trace.h"
 #include "ble.h"
-#include "tl.h"
-#include "app_ble.h"
 
 #include "cmsis_os.h"
-#include "shci.h"
 #include "otp.h"
 #include "dev_info_service.h"
 #include "battery_service.h"
 #include "serial_service.h"
 
 #include <applications/bt/bt_service/bt.h>
-
 #include <furi-hal.h>
-
 
 #define GAP_TAG "BLE"
 
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
-#define BD_ADDR_SIZE_LOCAL    6
-
-typedef struct _tSecurityParams {
-  uint8_t ioCapability;
-  uint8_t mitm_mode;
-  uint8_t bonding_mode;
-  uint8_t Use_Fixed_Pin;
-  uint8_t encryptionKeySizeMin;
-  uint8_t encryptionKeySizeMax;
-  uint32_t Fixed_Pin;
-  uint8_t initiateSecurity;
-} tSecurityParams;
-
-typedef struct _tBLEProfileGlobalContext {
-  tSecurityParams bleSecurityParam;
-  uint16_t gapServiceHandle;
-  uint16_t devNameCharHandle;
-  uint16_t appearanceCharHandle;
-  uint16_t connectionHandle;
-  uint8_t advtServUUIDlen;
-  uint8_t advtServUUID[100];
-} BleGlobalContext_t;
+#define BD_ADDR_SIZE_LOCAL 6
 
 typedef struct {
-  BleGlobalContext_t BleApplicationContext_legacy;
-  APP_BLE_ConnStatus_t Device_Connection_Status;
-  uint8_t Advertising_mgr_timer_Id;
+  uint16_t gap_svc_handle;
+  uint16_t dev_name_char_handle;
+  uint16_t appearance_char_handle;
+  uint16_t connection_handle;
+  uint8_t adv_svc_uuid_len;
+  uint8_t adv_svc_uuid[20];
+} GapSvc;
+
+typedef struct {
+  GapSvc gap_svc;
+  GapState state;
+  uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
   Bt* bt;
   osTimerId advertise_timer;
-} BleApplicationContext_t;
+  osThreadAttr_t thread_attr;
+  osThreadId_t thread_id;
+} Gap;
 
-static const uint8_t M_bd_addr[BD_ADDR_SIZE_LOCAL] = {
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0x0000000000FF)),
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0x00000000FF00) >> 8),
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0x000000FF0000) >> 16),
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0x0000FF000000) >> 24),
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0x00FF00000000) >> 32),
-    (uint8_t)((CFG_ADV_BD_ADDRESS & 0xFF0000000000) >> 40)
-};
+// Identity root key
+static const uint8_t gap_irk[16] = {0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0};
+// Encryption root key
+static const uint8_t gap_erk[16] = {0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21,0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21};
+// Appearence characteristic UUID
+static const uint8_t gap_appearence_char_uuid[] = {0x00, 0x86};
+// Default MAC address
+static const uint8_t gap_default_mac_addr[] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72};
 
-static uint8_t bd_addr_udn[BD_ADDR_SIZE_LOCAL];
+static Gap* gap = NULL;
 
-static const uint8_t BLE_CFG_IR_VALUE[16] = CFG_BLE_IRK;
-static const uint8_t BLE_CFG_ER_VALUE[16] = CFG_BLE_ERK;
-
-uint8_t  manuf_data[14] = {
-    sizeof(manuf_data)-1, AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
-    0x01/*SKD version */,
-    0x00 /* Generic*/,
-    0x00 /* GROUP A Feature  */,
-    0x00 /* GROUP A Feature */,
-    0x00 /* GROUP B Feature */,
-    0x00 /* GROUP B Feature */,
-    0x00, /* BLE MAC start -MSB */
-    0x00,
-    0x00,
-    0x00,
-    0x00,
-    0x00, /* BLE MAC stop */
-
-};
-
-PLACE_IN_SECTION("BLE_APP_CONTEXT") static BleApplicationContext_t BleApplicationContext;
-PLACE_IN_SECTION("BLE_APP_CONTEXT") static uint16_t AdvIntervalMin, AdvIntervalMax;
-
-osThreadId_t AdvUpdateProcessId;
-
-const osThreadAttr_t AdvUpdateProcess_attr = {
-    .name = CFG_ADV_UPDATE_PROCESS_NAME,
-    .attr_bits = CFG_ADV_UPDATE_PROCESS_ATTR_BITS,
-    .cb_mem = CFG_ADV_UPDATE_PROCESS_CB_MEM,
-    .cb_size = CFG_ADV_UPDATE_PROCESS_CB_SIZE,
-    .stack_mem = CFG_ADV_UPDATE_PROCESS_STACK_MEM,
-    .priority = CFG_ADV_UPDATE_PROCESS_PRIORITY,
-    .stack_size = CFG_ADV_UPDATE_PROCESS_STACK_SIZE
-};
-
-static void Ble_Hci_Gap_Gatt_Init();
-static const uint8_t* BleGetBdAddress( void );
-static void Adv_Request( APP_BLE_ConnStatus_t New_Status );
-static void Adv_Mgr( void );
-static void AdvUpdateProcess(void *argument);
-static void Adv_Update( void );
-
-static void set_advertisment_service_uid(uint8_t* uid, uint8_t uin_len);
-
-static void gap_advetise_timer_callback(void* context) {
-    Adv_Mgr();
-}
+static void gap_advertise(GapState new_state);
+static void gap_app(void *arg);
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 {
@@ -120,7 +58,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
   evt_le_meta_event *meta_evt;
   evt_blue_aci *blue_evt;
   hci_le_phy_update_complete_event_rp0 *evt_le_phy_update_complete;
-  uint8_t TX_PHY, RX_PHY;
+  uint8_t tx_phy;
+  uint8_t rx_phy;
   tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
 
   event_pckt = (hci_event_pckt*) ((hci_uart_pckt *) pckt)->data;
@@ -128,139 +67,129 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
   switch (event_pckt->evt) {
     case EVT_DISCONN_COMPLETE:
     {
-      hci_disconnection_complete_event_rp0 *disconnection_complete_event = (hci_disconnection_complete_event_rp0 *) event_pckt->data;
-
-      if (disconnection_complete_event->Connection_Handle == BleApplicationContext.BleApplicationContext_legacy.connectionHandle) {
-        BleApplicationContext.BleApplicationContext_legacy.connectionHandle = 0;
-        BleApplicationContext.Device_Connection_Status = APP_BLE_IDLE;
-        FURI_LOG_I(GAP_TAG, "DISCONNECTION EVENT WITH CLIENT ");
-      }
-      // Restart advertising
-      Adv_Request(APP_BLE_FAST_ADV);
-      furi_hal_power_insomnia_exit();
+        hci_disconnection_complete_event_rp0 *disconnection_complete_event = (hci_disconnection_complete_event_rp0 *) event_pckt->data;
+        if (disconnection_complete_event->Connection_Handle == gap->gap_svc.connection_handle) {
+            gap->gap_svc.connection_handle = 0;
+            gap->state = GapStateIdle;
+            FURI_LOG_I(GAP_TAG, "Disconnect from client");
+        }
+        // Restart advertising
+        gap_advertise(GapStateAdvFast);
+        furi_hal_power_insomnia_exit();
     }
     break;
 
     case EVT_LE_META_EVENT:
-      meta_evt = (evt_le_meta_event*) event_pckt->data;
-      switch (meta_evt->subevent) {
-        case EVT_LE_CONN_UPDATE_COMPLETE:
-          FURI_LOG_I(GAP_TAG, "Connection uodate event");
-          break;
+        meta_evt = (evt_le_meta_event*) event_pckt->data;
+        switch (meta_evt->subevent) {
+            case EVT_LE_CONN_UPDATE_COMPLETE:
+            FURI_LOG_D(GAP_TAG, "Connection update event");
+            break;
 
-        case EVT_LE_PHY_UPDATE_COMPLETE:
-          FURI_LOG_I(GAP_TAG, "EVT_UPDATE_PHY_COMPLETE ");
-          evt_le_phy_update_complete = (hci_le_phy_update_complete_event_rp0*)meta_evt->data;
-          if(evt_le_phy_update_complete->Status) {
-            FURI_LOG_E(GAP_TAG, "Update PHY failed, status %d", evt_le_phy_update_complete->Status);
-          } else {
-            FURI_LOG_I(GAP_TAG, "Update PHY succeed");
-          }
-          ret = hci_le_read_phy(BleApplicationContext.BleApplicationContext_legacy.connectionHandle,&TX_PHY,&RX_PHY);
-          if(ret) {
-            FURI_LOG_E(GAP_TAG, "Read PHY failed, status: %d", ret);
-          } else {
-            FURI_LOG_I(GAP_TAG, "PHY Params  TX= %d, RX= %d ", TX_PHY, RX_PHY);
-          }
-          break;
+            case EVT_LE_PHY_UPDATE_COMPLETE:
+            evt_le_phy_update_complete = (hci_le_phy_update_complete_event_rp0*)meta_evt->data;
+            if(evt_le_phy_update_complete->Status) {
+                FURI_LOG_E(GAP_TAG, "Update PHY failed, status %d", evt_le_phy_update_complete->Status);
+            } else {
+                FURI_LOG_I(GAP_TAG, "Update PHY succeed");
+            }
+            ret = hci_le_read_phy(gap->gap_svc.connection_handle,&tx_phy,&rx_phy);
+            if(ret) {
+                FURI_LOG_E(GAP_TAG, "Read PHY failed, status: %d", ret);
+            } else {
+                FURI_LOG_I(GAP_TAG, "PHY Params TX= %d, RX= %d ", tx_phy, rx_phy);
+            }
+            break;
 
-        case EVT_LE_CONN_COMPLETE:
-          furi_hal_power_insomnia_enter();
-          hci_le_connection_complete_event_rp0* connection_complete_event = (hci_le_connection_complete_event_rp0 *) meta_evt->data;
-          FURI_LOG_I(GAP_TAG, "Connection complete for connection handle 0x%x", connection_complete_event->Connection_Handle);
+            case EVT_LE_CONN_COMPLETE:
+            furi_hal_power_insomnia_enter();
+            hci_le_connection_complete_event_rp0* connection_complete_event = (hci_le_connection_complete_event_rp0 *) meta_evt->data;
+            FURI_LOG_I(GAP_TAG, "Connection complete for connection handle 0x%x", connection_complete_event->Connection_Handle);
 
-          // Stop advertising as connection completed
-          osTimerStop(BleApplicationContext.advertise_timer);
+            // Stop advertising as connection completed
+            osTimerStop(gap->advertise_timer);
 
-          // Update connection status and handle
-          BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_SERVER;
-          BleApplicationContext.BleApplicationContext_legacy.connectionHandle = connection_complete_event->Connection_Handle;
+            // Update connection status and handle
+            gap->state = GapStateConnected;
+            gap->gap_svc.connection_handle = connection_complete_event->Connection_Handle;
 
-          // Start pairing by sending security request
-          aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
-        break;
+            // Start pairing by sending security request
+            aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
+            break;
 
-        default:
-          break;
-      }
+            default:
+            break;
+        }
     break;
 
     case EVT_VENDOR:
-      blue_evt = (evt_blue_aci*) event_pckt->data;
-      switch (blue_evt->ecode) {
-        aci_gap_pairing_complete_event_rp0 *pairing_complete;
+        blue_evt = (evt_blue_aci*) event_pckt->data;
+        switch (blue_evt->ecode) {
+            aci_gap_pairing_complete_event_rp0 *pairing_complete;
 
-      case EVT_BLUE_GAP_LIMITED_DISCOVERABLE: 
-        FURI_LOG_I(GAP_TAG, "Limited discoverable event");
-          break;
-          
-      case EVT_BLUE_GAP_PASS_KEY_REQUEST:
-      {
-          uint32_t pin = rand() % 999999;
-          aci_gap_pass_key_resp(
-            BleApplicationContext.BleApplicationContext_legacy.connectionHandle, pin);
-        FURI_LOG_I(GAP_TAG, "Pass key request event. Pin: %d", pin);
-        bt_pin_code_show(BleApplicationContext.bt, pin);
-      }
-          break;
+        case EVT_BLUE_GAP_LIMITED_DISCOVERABLE:
+            FURI_LOG_I(GAP_TAG, "Limited discoverable event");
+            break;
 
-      case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:    
-        FURI_LOG_I(GAP_TAG, "Authorization request event");
-          break;
+        case EVT_BLUE_GAP_PASS_KEY_REQUEST:
+        {
+            // Generate random PIN code
+            uint32_t pin = rand() % 999999;
+            aci_gap_pass_key_resp(gap->gap_svc.connection_handle, pin);
+            FURI_LOG_I(GAP_TAG, "Pass key request event. Pin: %d", pin);
+            bt_pin_code_show(gap->bt, pin);
+        }
+            break;
 
-      case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:
-        FURI_LOG_I(GAP_TAG, "Slave security initiated");
-          break;
+        case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:
+            FURI_LOG_I(GAP_TAG, "Authorization request event");
+            break;
 
-      case EVT_BLUE_GAP_BOND_LOST:    
-        FURI_LOG_I(GAP_TAG, "Bond lost event. Start rebonding");
-          aci_gap_allow_rebond(BleApplicationContext.BleApplicationContext_legacy.connectionHandle);
-        FURI_LOG_I(GAP_TAG, "Send allow rebond ");
-          break; /* EVT_BLUE_GAP_BOND_LOST */
+        case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:
+            FURI_LOG_I(GAP_TAG, "Slave security initiated");
+            break;
 
-      case EVT_BLUE_GAP_DEVICE_FOUND:  
-        FURI_LOG_I(GAP_TAG, "EVT_BLUE_GAP_DEVICE_FOUND ");
-          break; /* EVT_BLUE_GAP_DEVICE_FOUND */
+        case EVT_BLUE_GAP_BOND_LOST:
+            FURI_LOG_I(GAP_TAG, "Bond lost event. Start rebonding");
+            aci_gap_allow_rebond(gap->gap_svc.connection_handle);
+            break;
 
-      case EVT_BLUE_GAP_ADDR_NOT_RESOLVED:
-         FURI_LOG_I(GAP_TAG, "EVT_BLUE_GAP_DEVICE_FOUND ");
-          break; /* EVT_BLUE_GAP_DEVICE_FOUND */
-      
-      case (EVT_BLUE_GAP_KEYPRESS_NOTIFICATION):
-         FURI_LOG_I(GAP_TAG, "EVT_BLUE_GAP_KEYPRESS_NOTIFICATION ");
-          break; /* EVT_BLUE_GAP_KEY_PRESS_NOTIFICATION */    
+        case EVT_BLUE_GAP_DEVICE_FOUND:
+            FURI_LOG_I(GAP_TAG, "Device found event");
+            break;
 
-       case (EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE):
-          FURI_LOG_I(GAP_TAG, "numeric_value = %ld",
-                      ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
+        case EVT_BLUE_GAP_ADDR_NOT_RESOLVED:
+            FURI_LOG_I(GAP_TAG, "Address not resolved event");
+            break;
 
-          FURI_LOG_I(GAP_TAG, "Hex_value = %lx",
-                      ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
+        case EVT_BLUE_GAP_KEYPRESS_NOTIFICATION:
+            FURI_LOG_I(GAP_TAG, "Key press notification event");
+            break;
 
-          aci_gap_numeric_comparison_value_confirm_yesno(BleApplicationContext.BleApplicationContext_legacy.connectionHandle, 1); /* CONFIRM_YES = 1 */
-
-          FURI_LOG_I(GAP_TAG, "aci_gap_numeric_comparison_value_confirm_yesno-->YES ");
-          break;
+        case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE:
+            FURI_LOG_I(GAP_TAG, "Hex_value = %lx",
+                        ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
+            aci_gap_numeric_comparison_value_confirm_yesno(gap->gap_svc.connection_handle, 1);
+            break;
 
         case (EVT_BLUE_GAP_PAIRING_CMPLT):
-          {
+        {
             pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
             if (pairing_complete->Status) {
-              FURI_LOG_E(GAP_TAG, "Pairing failed with status: %d. Terminating connection", pairing_complete->Status);
-              aci_gap_terminate(BleApplicationContext.BleApplicationContext_legacy.connectionHandle, 5);
+            FURI_LOG_E(GAP_TAG, "Pairing failed with status: %d. Terminating connection", pairing_complete->Status);
+            aci_gap_terminate(gap->gap_svc.connection_handle, 5);
             } else {
-              FURI_LOG_I(GAP_TAG, "Pairing complete");
+            FURI_LOG_I(GAP_TAG, "Pairing complete");
             }
-          }
-          break;
+        }
+            break;
 
         case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
-          FURI_LOG_I(GAP_TAG, "EVT_BLUE_GAP_PROCEDURE_COMPLETE ");
-          break;
-      }
-      break;
-      default:
-        break;
+            FURI_LOG_I(GAP_TAG, "Procedure complete event");
+            break;
+        }
+        default:
+            break;
   }
 
   return SVCCTL_UserEvtFlowEnable;
@@ -268,27 +197,170 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 
 void SVCCTL_SvcInit() {
     // Dummy function to prevent unused services initialization
-    // TODO refactor
+    // TODO refactor (disable all services in WPAN config)
+}
+
+static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
+    gap->gap_svc.adv_svc_uuid_len = 1;
+    if(uid_len == 2) {
+        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_16_BIT_SERV_UUID;
+    } else if (uid_len == 4) {
+        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_32_BIT_SERV_UUID;
+    } else if(uid_len == 16) {
+        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
+    }
+    memcpy(&gap->gap_svc.adv_svc_uuid[1], uid, uid_len);
+    gap->gap_svc.adv_svc_uuid_len += uid_len;
+}
+
+GapState gap_get_status() {
+    return gap->state;
+}
+
+void gap_init_mac_address(Gap* gap) {
+    uint8_t *otp_addr;
+    uint32_t udn;
+    uint32_t company_id;
+    uint32_t device_id;
+
+    udn = LL_FLASH_GetUDN();
+    if(udn != 0xFFFFFFFF) {
+        company_id = LL_FLASH_GetSTCompanyID();
+        device_id = LL_FLASH_GetDeviceID();
+        gap->mac_address[0] = (uint8_t)(udn & 0x000000FF);
+        gap->mac_address[1] = (uint8_t)( (udn & 0x0000FF00) >> 8 );
+        gap->mac_address[2] = (uint8_t)( (udn & 0x00FF0000) >> 16 );
+        gap->mac_address[3] = (uint8_t)device_id;
+        gap->mac_address[4] = (uint8_t)(company_id & 0x000000FF);;
+        gap->mac_address[5] = (uint8_t)( (company_id & 0x0000FF00) >> 8 );
+    } else {
+        otp_addr = OTP_Read(0);
+        if(otp_addr) {
+            memcpy(gap->mac_address, ((OTP_ID0_t*)otp_addr)->bd_address, sizeof(gap->mac_address));
+        } else {
+            memcpy(gap->mac_address, gap_default_mac_addr, sizeof(gap->mac_address));
+        }
+    }
+}
+
+static void gap_init_svc(Gap* gap) {
+    tBleStatus status;
+    uint32_t srd_bd_addr[2];
+
+    //HCI Reset to synchronise BLE Stack*/
+    hci_reset();
+    // Configure mac address
+    gap_init_mac_address(gap);
+    aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, (uint8_t*)gap->mac_address);
+
+    /* Static random Address
+     * The two upper bits shall be set to 1
+     * The lowest 32bits is read from the UDN to differentiate between devices
+     * The RNG may be used to provide a random number on each power on
+     */
+    srd_bd_addr[1] = 0x0000ED6E;
+    srd_bd_addr[0] = LL_FLASH_GetUDN();
+    aci_hal_write_config_data( CONFIG_DATA_RANDOM_ADDRESS_OFFSET, CONFIG_DATA_RANDOM_ADDRESS_LEN, (uint8_t*)srd_bd_addr );
+    // Set Identity root key used to derive LTK and CSRK
+    aci_hal_write_config_data( CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, (uint8_t*)gap_irk );
+    // Set Encryption root key used to derive LTK and CSRK
+    aci_hal_write_config_data( CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, (uint8_t*)gap_erk );
+    // Set TX Power to 0 dBm
+    aci_hal_set_tx_power_level(1, 0x19);
+    // Initialize GATT interface
+    aci_gatt_init();
+    // Initialize GAP interface
+    const char *name = furi_hal_version_get_device_name_ptr();
+    aci_gap_init(GAP_PERIPHERAL_ROLE, 0, strlen(name),
+                &gap->gap_svc.gap_svc_handle, &gap->gap_svc.dev_name_char_handle, &gap->gap_svc.appearance_char_handle);
+
+    // Set GAP characteristics
+    status = aci_gatt_update_char_value(gap->gap_svc.gap_svc_handle, gap->gap_svc.dev_name_char_handle, 0, strlen(name), (uint8_t *) name);
+    if (status) {
+        FURI_LOG_E(GAP_TAG, "Failed updating name characteristic: %d", status);
+    }
+    status = aci_gatt_update_char_value(gap->gap_svc.gap_svc_handle, gap->gap_svc.appearance_char_handle, 0, 2, gap_appearence_char_uuid);
+    if(status) {
+        FURI_LOG_E(GAP_TAG, "Failed updating appearence characteristic: %d", status);
+    }
+    // Set default PHY
+    hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
+    // Set I/O capability
+    aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    // Setup  authentication
+    aci_gap_set_authentication_requirement(1, 1, 1, 0, 8, 16, 1, 0, PUBLIC_ADDR);
+    // Configure whitelist
+    aci_gap_configure_whitelist();
+}
+
+static void gap_advertise(GapState new_state)
+{
+    tBleStatus status;
+    uint16_t min_interval;
+    uint16_t max_interval;
+
+    if (new_state == GapStateAdvFast) {
+        min_interval = 0x80; // 80 ms
+        max_interval = 0xa0; // 100 ms
+    } else {
+        min_interval = 0x0640; // 1 s
+        max_interval = 0x0fa0; // 2.5 s
+    }
+    // Stop advertising timer
+    osTimerStop(gap->advertise_timer);
+
+    if ((new_state == GapStateAdvLowPower) && ((gap->state == GapStateAdvFast) || (gap->state == GapStateAdvLowPower))) {
+        // Stop advertising
+        status = aci_gap_set_non_discoverable();
+        if (status) {
+            FURI_LOG_E(GAP_TAG, "Stop Advertising Failed, result: %d", status);
+        }
+    }
+    // Configure advertising
+    gap->state = new_state;
+    const char* name = furi_hal_version_get_ble_local_device_name_ptr();
+    status = aci_gap_set_discoverable(ADV_IND, min_interval, max_interval, PUBLIC_ADDR, 0,
+                                        strlen(name), (uint8_t*)name,
+                                        gap->gap_svc.adv_svc_uuid_len, gap->gap_svc.adv_svc_uuid, 0, 0);
+    if(status) {
+        FURI_LOG_E(GAP_TAG, "Set discoverable err: %d", status);
+    }
+    osTimerStart(gap->advertise_timer, INITIAL_ADV_TIMEOUT);
+}
+
+static void gap_advertise_request(Gap* gap) {
+    osThreadFlagsSet(gap->thread_id, 1);
+}
+
+static void gap_advetise_timer_callback(void* context) {
+    furi_assert(context);
+    Gap* gap = context;
+    gap_advertise_request(gap);
 }
 
 bool gap_init() {
     if (APPE_Status() != BleGlueStatusStarted) {
         return false;
     }
+
+    gap = furi_alloc(sizeof(Gap));
     srand(DWT->CYCCNT);
     // Open Bt record
-    BleApplicationContext.bt = furi_record_open("bt");
+    gap->bt = furi_record_open("bt");
     // Create advertising timer
-    BleApplicationContext.advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, &BleApplicationContext, NULL);
+    gap->advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, &gap, NULL);
     // Initialization of HCI & GATT & GAP layer
-    Ble_Hci_Gap_Gatt_Init();
+    gap_init_svc(gap);
     // Initialization of the BLE Services
     SVCCTL_Init();
     // Initialization of the BLE App Context
-    BleApplicationContext.Device_Connection_Status = APP_BLE_IDLE;
-    BleApplicationContext.BleApplicationContext_legacy.connectionHandle = 0xFFFF;
-    // From here, all initialization are BLE application specific
-    AdvUpdateProcessId = osThreadNew(AdvUpdateProcess, NULL, &AdvUpdateProcess_attr);
+    gap->state = GapStateIdle;
+    gap->gap_svc.connection_handle = 0xFFFF;
+
+    // Thread configuration
+    gap->thread_attr.name = "BLE advertising";
+    gap->thread_attr.stack_size = 512;
+    gap->thread_id = osThreadNew(gap_app, NULL, &gap->thread_attr);
 
     // Start Device Information service
     dev_info_svc_start();
@@ -296,306 +368,20 @@ bool gap_init() {
     battery_svc_start();
     // Initialize Serial application
     serial_svc_init();
-    // Create timer to handle the connection state machine
+    // Configure advirtise service UUID
     uint8_t adv_service_uid[2];
     adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
     adv_service_uid[1] = 0x30;
 
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
-    /* Initialize intervals for reconnexion without intervals update */
-    AdvIntervalMin = CFG_FAST_CONN_ADV_INTERVAL_MIN;
-    AdvIntervalMax = CFG_FAST_CONN_ADV_INTERVAL_MAX;
-
-    Adv_Request(APP_BLE_FAST_ADV);
+    gap_advertise(GapStateAdvFast);
     return true;
 }
 
-static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
-    BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen = 1;
-    if(uid_len == 2) {
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_16_BIT_SERV_UUID;
-    } else if (uid_len == 4) {
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_32_BIT_SERV_UUID;
-    } else if(uid_len == 16) {
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUID[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
+static void gap_app(void *arg) {
+    // TODO Exit from app, stop service, clean memory
+    while(1) {
+        osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
+        gap_advertise(GapStateAdvLowPower);
     }
-    memcpy(&BleApplicationContext.BleApplicationContext_legacy.advtServUUID[1], uid, uid_len);
-    BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen += uid_len;
-}
-
-APP_BLE_ConnStatus_t gap_get_connection_status() {
-    return BleApplicationContext.Device_Connection_Status;
-}
-
-static void Ble_Hci_Gap_Gatt_Init() {
-  uint8_t role;
-  uint16_t gap_service_handle, gap_dev_name_char_handle, gap_appearance_char_handle;
-  const uint8_t *bd_addr;
-  uint32_t srd_bd_addr[2];
-  uint16_t appearance[1] = { BLE_CFG_GAP_APPEARANCE };
-
-  /*HCI Reset to synchronise BLE Stack*/
-  hci_reset();
-
-  /**
-   * Write the BD Address
-   */
-  bd_addr = BleGetBdAddress();
-  aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET,
-                            CONFIG_DATA_PUBADDR_LEN,
-                            (uint8_t*) bd_addr);
-
-  /* BLE MAC in ADV Packet */
-  manuf_data[ sizeof(manuf_data)-6] = bd_addr[5];
-  manuf_data[ sizeof(manuf_data)-5] = bd_addr[4];
-  manuf_data[ sizeof(manuf_data)-4] = bd_addr[3];
-  manuf_data[ sizeof(manuf_data)-3] = bd_addr[2];
-  manuf_data[ sizeof(manuf_data)-2] = bd_addr[1];
-  manuf_data[ sizeof(manuf_data)-1] = bd_addr[0];
-
-  /**
-   * Write Identity root key used to derive LTK and CSRK
-   */
-    aci_hal_write_config_data(CONFIG_DATA_IR_OFFSET,
-    CONFIG_DATA_IR_LEN,
-                            (uint8_t*) BLE_CFG_IR_VALUE);
-
-   /**
-   * Write Encryption root key used to derive LTK and CSRK
-   */
-    aci_hal_write_config_data(CONFIG_DATA_ER_OFFSET,
-    CONFIG_DATA_ER_LEN,
-                            (uint8_t*) BLE_CFG_ER_VALUE);
-
-   /**
-   * Write random bd_address
-   */
-   /* random_bd_address = R_bd_address;
-    aci_hal_write_config_data(CONFIG_DATA_RANDOM_ADDRESS_WR,
-    CONFIG_DATA_RANDOM_ADDRESS_LEN,
-                            (uint8_t*) random_bd_address);
-  */
-
-  /**
-   * Static random Address
-   * The two upper bits shall be set to 1
-   * The lowest 32bits is read from the UDN to differentiate between devices
-   * The RNG may be used to provide a random number on each power on
-   */
-  srd_bd_addr[1] =  0x0000ED6E;
-  srd_bd_addr[0] =  LL_FLASH_GetUDN( );
-  aci_hal_write_config_data( CONFIG_DATA_RANDOM_ADDRESS_OFFSET, CONFIG_DATA_RANDOM_ADDRESS_LEN, (uint8_t*)srd_bd_addr );
-
-  /**
-   * Write Identity root key used to derive LTK and CSRK
-   */
-    aci_hal_write_config_data( CONFIG_DATA_IR_OFFSET, CONFIG_DATA_IR_LEN, (uint8_t*)BLE_CFG_IR_VALUE );
-
-   /**
-   * Write Encryption root key used to derive LTK and CSRK
-   */
-    aci_hal_write_config_data( CONFIG_DATA_ER_OFFSET, CONFIG_DATA_ER_LEN, (uint8_t*)BLE_CFG_ER_VALUE );
-
-  /**
-   * Set TX Power to 0dBm.
-   */
-  aci_hal_set_tx_power_level(1, CFG_TX_POWER);
-
-  /**
-   * Initialize GATT interface
-   */
-  aci_gatt_init();
-
-  /**
-   * Initialize GAP interface
-   */
-  role = 0;
-
-#if (BLE_CFG_PERIPHERAL == 1)
-  role |= GAP_PERIPHERAL_ROLE;
-#endif
-
-#if (BLE_CFG_CENTRAL == 1)
-  role |= GAP_CENTRAL_ROLE;
-#endif
-
-  if (role > 0)
-  {
-    const char *name = furi_hal_version_get_device_name_ptr();
-    aci_gap_init(role, 0,
-                 strlen(name),
-                 &gap_service_handle, &gap_dev_name_char_handle, &gap_appearance_char_handle);
-
-    if (aci_gatt_update_char_value(gap_service_handle, gap_dev_name_char_handle, 0, strlen(name), (uint8_t *) name))
-    {
-      BLE_DBG_SVCCTL_MSG("Device Name aci_gatt_update_char_value failed.");
-    }
-  }
-
-  if(aci_gatt_update_char_value(gap_service_handle,
-                                gap_appearance_char_handle,
-                                0,
-                                2,
-                                (uint8_t *)&appearance))
-  {
-    BLE_DBG_SVCCTL_MSG("Appearance aci_gatt_update_char_value failed.");
-  }
-  /**
-   * Initialize Default PHY
-   */
-  hci_le_set_default_phy(ALL_PHYS_PREFERENCE,TX_2M_PREFERRED,RX_2M_PREFERRED);
-
-  /**
-   * Initialize IO capability
-   */
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.ioCapability = IO_CAP_DISPLAY_ONLY;
-  aci_gap_set_io_capability(BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.ioCapability);
-
-  /**
-   * Initialize authentication
-   */
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.mitm_mode = 1;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMin = CFG_ENCRYPTION_KEY_SIZE_MIN;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMax = CFG_ENCRYPTION_KEY_SIZE_MAX;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Use_Fixed_Pin = 1;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin = 123321;
-  BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode = 1;
-
-  aci_gap_set_authentication_requirement(BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode,
-                                         BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.mitm_mode,
-                                         1,
-                                         0,
-                                         BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMin,
-                                         BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.encryptionKeySizeMax,
-                                         BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Use_Fixed_Pin,
-                                         BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin,
-                                         PUBLIC_ADDR
-                                         );
-
-  /**
-   * Initialize whitelist
-   */
-   if (BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.bonding_mode)
-   {
-     aci_gap_configure_whitelist();
-   }
-}
-
-static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
-{
-  tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
-  uint16_t Min_Inter, Max_Inter;
-
-  if (New_Status == APP_BLE_FAST_ADV)
-  {
-    Min_Inter = AdvIntervalMin;
-    Max_Inter = AdvIntervalMax;
-  }
-  else
-  {
-    Min_Inter = CFG_LP_CONN_ADV_INTERVAL_MIN;
-    Max_Inter = CFG_LP_CONN_ADV_INTERVAL_MAX;
-  }
-
-    /**
-     * Stop the timer, it will be restarted for a new shot
-     * It does not hurt if the timer was not running
-     */
-    osTimerStop(BleApplicationContext.advertise_timer);
-
-    FURI_LOG_I(GAP_TAG, "First index in %d state ", BleApplicationContext.Device_Connection_Status);
-
-    if ((New_Status == APP_BLE_LP_ADV)
-        && ((BleApplicationContext.Device_Connection_Status == APP_BLE_FAST_ADV)
-            || (BleApplicationContext.Device_Connection_Status == APP_BLE_LP_ADV)))
-    {
-      /* Connection in ADVERTISE mode have to stop the current advertising */
-      ret = aci_gap_set_non_discoverable();
-      if (ret == BLE_STATUS_SUCCESS)
-      {
-        FURI_LOG_I(GAP_TAG, "Successfully Stopped Advertising ");
-      }
-      else
-      {
-        FURI_LOG_E(GAP_TAG, "Stop Advertising Failed, result: %d", ret);
-      }
-    }
-
-    BleApplicationContext.Device_Connection_Status = New_Status;
-
-    const char* name = furi_hal_version_get_ble_local_device_name_ptr();
-
-    /* Start Fast or Low Power Advertising */
-    ret = aci_gap_set_discoverable(
-        ADV_IND,
-        Min_Inter,
-        Max_Inter,
-        PUBLIC_ADDR,
-        0,
-        strlen(name),
-        (uint8_t*)name,
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUIDlen,
-        BleApplicationContext.BleApplicationContext_legacy.advtServUUID,
-        0,
-        0);
-    if(ret) {
-      FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
-    }
-    osTimerStart(BleApplicationContext.advertise_timer, INITIAL_ADV_TIMEOUT);
-}
-
-const uint8_t* BleGetBdAddress( void ) {
-  uint8_t *otp_addr;
-  const uint8_t *bd_addr;
-  uint32_t udn;
-  uint32_t company_id;
-  uint32_t device_id;
-
-  udn = LL_FLASH_GetUDN();
-
-  if(udn != 0xFFFFFFFF) {
-    company_id = LL_FLASH_GetSTCompanyID();
-    device_id = LL_FLASH_GetDeviceID();
-
-    bd_addr_udn[0] = (uint8_t)(udn & 0x000000FF);
-    bd_addr_udn[1] = (uint8_t)( (udn & 0x0000FF00) >> 8 );
-    bd_addr_udn[2] = (uint8_t)( (udn & 0x00FF0000) >> 16 );
-    bd_addr_udn[3] = (uint8_t)device_id;
-    bd_addr_udn[4] = (uint8_t)(company_id & 0x000000FF);;
-    bd_addr_udn[5] = (uint8_t)( (company_id & 0x0000FF00) >> 8 );
-
-    bd_addr = (const uint8_t *)bd_addr_udn;
-  } else {
-    otp_addr = OTP_Read(0);
-    if(otp_addr) {
-      bd_addr = ((OTP_ID0_t*)otp_addr)->bd_address;
-    } else {
-      bd_addr = M_bd_addr;
-    }
-  }
-
-  return bd_addr;
-}
-
-static void Adv_Mgr( void ) {
-  /**
-   * The code shall be executed in the background as an aci command may be sent
-   * The background is the only place where the application can make sure a new aci command
-   * is not sent if there is a pending one
-   */
-  osThreadFlagsSet( AdvUpdateProcessId, 1 );
-}
-
-static void AdvUpdateProcess(void *argument) {
-  UNUSED(argument);
-
-  for(;;) {
-    osThreadFlagsWait( 1, osFlagsWaitAny, osWaitForever);
-    Adv_Update( );
-  }
-}
-
-static void Adv_Update( void ) {
-  Adv_Request(APP_BLE_LP_ADV);
-
 }

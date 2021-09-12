@@ -6,15 +6,8 @@
 #include "ble.h"
 #include "tl.h"
 #include "app_ble.h"
-
-#include "cmsis_os.h"
 #include "shci.h"
-#include "otp.h"
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "serial_service.h"
-
-#include <applications/bt/bt_service/bt.h>
+#include "cmsis_os.h"
 
 #include <furi-hal.h>
 
