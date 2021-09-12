@@ -125,7 +125,7 @@ void subghz_tx_stop(SubGhz* subghz) {
     subghz_protocol_encoder_common_free(subghz->txrx->encoder);
     subghz_idle(subghz);
     //if protocol dynamic then we save the last upload
-    if(subghz->txrx->protocol_result->type_protocol == TYPE_PROTOCOL_DYNAMIC) {
+    if(subghz->txrx->protocol_result->type_protocol == SubGhzProtocolCommonTypeDynamic) {
         subghz_save_protocol_to_file(subghz, subghz->text_store);
     }
     notification_message(subghz->notifications, &sequence_reset_red);
