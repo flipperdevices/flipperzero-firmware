@@ -14,6 +14,8 @@
 #include "battery_service.h"
 #include "serial_service.h"
 
+#include <applications/bt/bt_service/bt.h>
+
 #include <furi-hal.h>
 
 #define BLE_TAG "BLE"
@@ -43,6 +45,7 @@ typedef struct {
   BleGlobalContext_t BleApplicationContext_legacy;
   APP_BLE_ConnStatus_t Device_Connection_Status;
   uint8_t Advertising_mgr_timer_Id;
+  Bt* bt;
 } BleApplicationContext_t;
 
 
@@ -168,6 +171,9 @@ bool APP_BLE_Start() {
   if (APPE_Status() != BleGlueStatusStarted) {
     return false;
   }
+  srand(DWT->CYCCNT);
+  // Open Bt record
+  BleApplicationContext.bt = furi_record_open("bt");
   // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
   // Initialization of the BLE Services
@@ -289,11 +295,14 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
         FURI_LOG_I(BLE_TAG, "Limited discoverable event");
           break;
           
-      case EVT_BLUE_GAP_PASS_KEY_REQUEST:  
-        aci_gap_pass_key_resp(
-          BleApplicationContext.BleApplicationContext_legacy.connectionHandle,
-          BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin);
-        FURI_LOG_I(BLE_TAG, "Pass key request event. Pin: %d", BleApplicationContext.BleApplicationContext_legacy.bleSecurityParam.Fixed_Pin);
+      case EVT_BLUE_GAP_PASS_KEY_REQUEST:
+      {
+          uint32_t pin = rand() % 999999;
+          aci_gap_pass_key_resp(
+            BleApplicationContext.BleApplicationContext_legacy.connectionHandle, pin);
+        FURI_LOG_I(BLE_TAG, "Pass key request event. Pin: %d", pin);
+        bt_pin_code_show(BleApplicationContext.bt, pin);
+      }
           break;
 
       case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:    
