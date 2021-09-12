@@ -46,11 +46,12 @@ typedef struct {
   APP_BLE_ConnStatus_t Device_Connection_Status;
   uint8_t Advertising_mgr_timer_Id;
   Bt* bt;
+  osTimerId advertise_timer;
 } BleApplicationContext_t;
 
 
-#define FAST_ADV_TIMEOUT               (30*1000*1000/CFG_TS_TICK_VAL) /**< 30s */
-#define INITIAL_ADV_TIMEOUT            (60*1000*1000/CFG_TS_TICK_VAL) /**< 60s */
+#define FAST_ADV_TIMEOUT 30000
+#define INITIAL_ADV_TIMEOUT 60000
 
 #define BD_ADDR_SIZE_LOCAL    6
 
@@ -167,6 +168,10 @@ bool APP_BLE_Init() {
 
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uin_len);
 
+static void gap_advetise_timer_callback(void* context) {
+    Adv_Mgr();
+}
+
 bool APP_BLE_Start() {
   if (APPE_Status() != BleGlueStatusStarted) {
     return false;
@@ -174,6 +179,8 @@ bool APP_BLE_Start() {
   srand(DWT->CYCCNT);
   // Open Bt record
   BleApplicationContext.bt = furi_record_open("bt");
+  // Create advertising timer
+  BleApplicationContext.advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, &BleApplicationContext, NULL);
   // Initialization of HCI & GATT & GAP layer
   Ble_Hci_Gap_Gatt_Init();
   // Initialization of the BLE Services
@@ -196,7 +203,6 @@ bool APP_BLE_Start() {
   // Initialize Serial application
   serial_svc_init();
   // Create timer to handle the connection state machine
-  HW_TS_Create(CFG_TIM_PROC_ID_ISR, &(BleApplicationContext.Advertising_mgr_timer_Id), hw_ts_SingleShot, Adv_Mgr);
   uint8_t adv_service_uid[2];
   adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
   adv_service_uid[1] = 0x30;
@@ -271,7 +277,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
           FURI_LOG_I(BLE_TAG, "Connection complete for connection handle 0x%x", connection_complete_event->Connection_Handle);
 
           // Stop advertising as connection completed
-          HW_TS_Stop(BleApplicationContext.Advertising_mgr_timer_Id);
+          osTimerStop(BleApplicationContext.advertise_timer);
 
           // Update connection status and handle
           BleApplicationContext.Device_Connection_Status = APP_BLE_CONNECTED_SERVER;
@@ -569,7 +575,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
      * Stop the timer, it will be restarted for a new shot
      * It does not hurt if the timer was not running
      */
-    HW_TS_Stop(BleApplicationContext.Advertising_mgr_timer_Id);
+    osTimerStop(BleApplicationContext.advertise_timer);
 
     FURI_LOG_I(BLE_TAG, "First index in %d state ", BleApplicationContext.Device_Connection_Status);
 
@@ -609,7 +615,7 @@ static void Adv_Request(APP_BLE_ConnStatus_t New_Status)
     if(ret) {
       FURI_LOG_E("APP ble", "Set discoverable err: %d", ret);
     }
-    HW_TS_Start(BleApplicationContext.Advertising_mgr_timer_Id, INITIAL_ADV_TIMEOUT);
+    osTimerStart(BleApplicationContext.advertise_timer, INITIAL_ADV_TIMEOUT);
 }
 
 const uint8_t* BleGetBdAddress( void ) {
