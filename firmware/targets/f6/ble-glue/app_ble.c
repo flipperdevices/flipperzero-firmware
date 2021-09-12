@@ -191,8 +191,8 @@ bool APP_BLE_Start() {
 
   // Initialize DIS Application
   dev_info_service_init();
-  // Initialize BAS Application
-  battery_svc_init();
+  // Start Battery service
+  battery_svc_start();
   // Initialize Serial application
   serial_svc_init();
   // Create timer to handle the connection state machine
