@@ -189,8 +189,8 @@ bool APP_BLE_Start() {
   manuf_data[sizeof(manuf_data)-8] = CFG_FEATURE_OTA_REBOOT;
 #endif
 
-  // Initialize DIS Application
-  dev_info_service_init();
+  // Start Device Information service
+  dev_info_svc_start();
   // Start Battery service
   battery_svc_start();
   // Initialize Serial application

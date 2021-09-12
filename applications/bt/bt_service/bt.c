@@ -25,7 +25,7 @@ static ViewPort* bt_statusbar_view_port_alloc() {
 static void bt_pin_code_show_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
     string_t pin_str;
-    string_init_printf(pin_str, "%d", pin);
+    string_init_printf(pin_str, "%06d", pin);
     dialog_message_set_text(
         bt->dialog_message, string_get_cstr(pin_str), 64, 32, AlignCenter, AlignCenter);
     dialog_message_set_buttons(bt->dialog_message, "Back", NULL, NULL);
