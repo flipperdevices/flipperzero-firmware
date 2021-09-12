@@ -76,16 +76,20 @@ class Copro:
             manifest["copro"]["fus"]["files"],
             "stm32wb5x_FUS_fw_for_fus_0_5_3.bin",
             condition="==0.5.3",
+            address="0x080EC000",
         )
         # New FUS Update
         self.addFile(
             manifest["copro"]["fus"]["files"],
             "stm32wb5x_FUS_fw.bin",
             condition=">0.5.3",
+            address="0x080EC000",
         )
         # BLE Full Stack
         self.addFile(
-            manifest["copro"]["radio"]["files"], "stm32wb5x_BLE_Stack_full_fw.bin"
+            manifest["copro"]["radio"]["files"],
+            "stm32wb5x_BLE_Stack_full_fw.bin",
+            address="0x080CA000",
         )
         # Save manifest to
         json.dump(manifest, open(manifest_file, "w"))
