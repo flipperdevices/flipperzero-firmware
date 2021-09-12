@@ -27,16 +27,12 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
                 ret = SVCCTL_EvtAckFlowEnable;
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "TX descriptor event");
             } else if(attribute_modified->Attr_Handle == serial_svc.tx_char_handle + 1) {
-                FURI_LOG_I(SERIAL_SERVICE_TAG, "Data len: %d", attribute_modified->Attr_Data_Length);
-                for(uint8_t i = 0; i < attribute_modified->Attr_Data_Length; i++) {
-                    printf("%02X ", attribute_modified->Attr_Data[i]);
-                }
-                printf("\r\n");
+                FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
                 ret = SVCCTL_EvtAckFlowEnable;
             }
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
-            FURI_LOG_I(SERIAL_SERVICE_TAG, "Ack received", blecore_evt->ecode);
+            FURI_LOG_D(SERIAL_SERVICE_TAG, "Ack received", blecore_evt->ecode);
             ret = SVCCTL_EvtAckFlowEnable;
         }
     }
