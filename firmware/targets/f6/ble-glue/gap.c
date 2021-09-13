@@ -366,8 +366,8 @@ bool gap_init() {
     dev_info_svc_start();
     // Start Battery service
     battery_svc_start();
-    // Initialize Serial application
-    serial_svc_init();
+    // Start Serial application
+    serial_svc_start();
     // Configure advirtise service UUID
     uint8_t adv_service_uid[2];
     adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
