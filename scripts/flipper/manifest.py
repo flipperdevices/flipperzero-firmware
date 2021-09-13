@@ -3,6 +3,7 @@ import logging
 import os
 
 from .utils import *
+from .fstree import *
 
 MANIFEST_VERSION = 0
 
@@ -92,7 +93,8 @@ class ManifestRecordFile(ManifestRecord):
 
     @staticmethod
     def fromLine(line):
-        return ManifestRecordFile(*line.split(":", 3))
+        data = line.split(":", 3)
+        return ManifestRecordFile(data[2], data[0], data[1])
 
     def toLine(self):
         return f"{self.tag}:{self.md5}:{self.size}:{self.path}\n"
@@ -152,6 +154,15 @@ class Manifest:
                     os.path.getsize(full_file_path),
                 )
 
+    def toFsTree(self):
+        root = FsNode("", FsNode.Type.Directory)
+        for record in self.records:
+            if isinstance(record, ManifestRecordDirectory):
+                root.addDirectory(record.path)
+            elif isinstance(record, ManifestRecordFile):
+                root.addFile(record.path, record.md5, record.size)
+        return root
+
     @staticmethod
     def compare(left: "Manifest", right: "Manifest"):
-        return [], [], []
+        return compare_fs_trees(left.toFsTree(), right.toFsTree())
