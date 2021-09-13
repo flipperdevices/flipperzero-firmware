@@ -1,0 +1,6 @@
+ADD_SCENE(dolphin, main, Main)
+ADD_SCENE(dolphin, lock_menu, LockMenu)
+ADD_SCENE(dolphin, locked, Locked)
+ADD_SCENE(dolphin, debug, Debug)
+ADD_SCENE(dolphin, first_start, FirstStart)
+ADD_SCENE(dolphin, hw_mismatch, HwMismatch)

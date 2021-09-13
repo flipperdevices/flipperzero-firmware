@@ -1,22 +1,36 @@
 #pragma once
 
-#include "dolphin.h"
-#include "dolphin_state.h"
-#include "dolphin_views.h"
-
 #include <furi.h>
 #include <furi-hal.h>
+#include <menu/menu.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
-#include <gui/canvas.h>
-#include <menu/menu.h>
-
+#include <gui/scene_manager.h>
 #include <assets_icons.h>
-#include <stdint.h>
 
-#define UNLOCK_RST_TIMEOUT 500 // keypress counter reset timeout (ms)
-#define HINT_TIMEOUT_L 3 // low refresh rate timeout (app ticks)
-#define HINT_TIMEOUT_H 40 // high refresh rate timeout (app ticks)
+#include "dolphin.h"
+#include "helpers/dolphin_state.h"
+
+#include "views/dolphin_main_view.h"
+#include "views/dolphin_first_start_view.h"
+#include "views/dolphin_hw_mismatch_view.h"
+#include "views/dolphin_lock_menu_view.h"
+#include "views/dolphin_locked_view.h"
+#include "views/dolphin_debug_view.h"
+#include "scenes/dolphin_scene.h"
+
+#define UNLOCK_RST_TIMEOUT 200
+#define HINT_TIMEOUT 2
+
+typedef enum {
+    DolphinViewMain,
+    DolphinViewLockMenu,
+    DolphinViewLocked,
+    DolphinViewDebug,
+    DolphinViewFirstStart,
+    DolphinViewHwMismatch,
+    DolphinViewTotal,
+} DolphinViewEnum;
 
 typedef enum {
     DolphinEventTypeDeed,
@@ -42,19 +56,18 @@ struct Dolphin {
     FuriThread* scene_thread;
     // GUI
     Gui* gui;
-    ViewDispatcher* idle_view_dispatcher;
-    View* idle_view_first_start;
-    View* idle_view_main;
-    View* idle_view_dolphin_stats;
-    View* view_hw_mismatch;
-    View* view_lockmenu;
+    ViewDispatcher* view_dispatcher;
+    SceneManager* scene_manager;
+
+    DolphinFirstStartView* first_start_view;
+    DolphinHwMismatchView* hw_mismatch_view;
+    DolphinMainView* main_view;
+    DolphinLockMenuView* lock_menu;
+    DolphinLockedView* locked_view;
+    DolphinDebugView* debug_view;
+
     ViewPort* lock_viewport;
     IconAnimation* lock_icon;
-
-    bool locked;
-    uint8_t lock_count;
-    uint32_t lock_lastpress;
-    osTimerId_t timeout_timer;
 };
 
 Dolphin* dolphin_alloc();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dolphin_deed.h"
+#include "helpers/dolphin_deed.h"
 
 typedef struct Dolphin Dolphin;
 
