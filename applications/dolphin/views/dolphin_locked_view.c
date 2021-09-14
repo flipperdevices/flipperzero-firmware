@@ -39,18 +39,32 @@ void dolphin_locked_view_render(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     DolphinLockedViewModel* m = model;
 
-    if(m->animation) {
+    canvas_clear(canvas);
+
+    if(m->door_left_x) {
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_icon(canvas, m->door_left_x, 0, &I_DoorLeft_70x55);
+        canvas_draw_icon(canvas, m->door_right_x, 0, &I_DoorRight_70x55);
+    }
+
+    m->exit_timeout--;
+    m->door_left_x = CLAMP(m->door_left_x + 5, 0, -57);
+    m->door_right_x = CLAMP(m->door_right_x - 5, 115, 60);
+
+    if(m->door_left_x > -10) {
+        canvas_set_font(canvas, FontPrimary);
+        elements_multiline_text_framed(canvas, 42, 30, "Locked");
+    }
+
+    if(m->animation && !m->door_left_x) {
         canvas_draw_icon_animation(canvas, 0, -3, m->animation);
     }
 
-    if(m->hint_timeout) {
+    if(m->hint_timeout && !m->door_left_x) {
         m->hint_timeout--;
 
         canvas_draw_icon(canvas, 13, 5, &I_LockPopup_100x49);
         elements_multiline_text(canvas, 65, 20, "To unlock\npress:");
-        // } else {
-        //     canvas_set_font(canvas, FontPrimary);
-        //     elements_multiline_text_framed(canvas, 42, 30, "Unlocked");
     }
 }
 
@@ -100,6 +114,15 @@ DolphinLockedView* dolphin_locked_view_alloc() {
     view_set_input_callback(locked_view->view, dolphin_locked_view_input);
 
     dolphin_scene_handler_set_scene(locked_view, idle_scenes[random() % COUNT_OF(idle_scenes)]);
+
+    with_view_model(
+        locked_view->view, (DolphinLockedViewModel * model) {
+            // defaults
+            model->door_left_x = -57;
+            model->door_right_x = 115;
+            return true;
+        });
+
     return locked_view;
 }
 

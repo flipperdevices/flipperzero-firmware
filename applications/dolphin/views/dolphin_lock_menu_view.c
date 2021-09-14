@@ -44,39 +44,19 @@ void dolphin_lock_menu_render(Canvas* canvas, void* model) {
     DolphinLockMenuViewModel* m = model;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon(canvas, m->door_left_x, 0, &I_DoorLeft_70x55);
-    canvas_draw_icon(canvas, m->door_right_x, 0, &I_DoorRight_70x55);
+    canvas_draw_icon(canvas, -57, 0, &I_DoorLeft_70x55);
+    canvas_draw_icon(canvas, 115, 0, &I_DoorRight_70x55);
     canvas_set_font(canvas, FontSecondary);
 
-    if(m->locked) {
-        m->exit_timeout--;
-
-        m->door_left_x = CLAMP(m->door_left_x + 5, 0, -57);
-        m->door_right_x = CLAMP(m->door_right_x - 5, 115, 60);
-
-        // if(m->door_left_x > -10) {
-        //     canvas_set_font(canvas, FontPrimary);
-        //     elements_multiline_text_framed(canvas, 42, 30, "Locked");
-        // }
-
-    } else {
-        if(m->door_left_x == -57) {
-            for(uint8_t i = 0; i < 3; ++i) {
-                canvas_draw_str_aligned(
-                    canvas,
-                    64,
-                    13 + (i * 17),
-                    AlignCenter,
-                    AlignCenter,
-                    (m->hint_timeout && m->idx == i && m->idx) ? "Not implemented" :
-                                                                 Lockmenu_Items[i]);
-                if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
-            }
-        }
-
-        if(m->hint_timeout) {
-            m->hint_timeout--;
-        }
+    for(uint8_t i = 0; i < 3; ++i) {
+        canvas_draw_str_aligned(
+            canvas,
+            64,
+            13 + (i * 17),
+            AlignCenter,
+            AlignCenter,
+            (m->hint_timeout && m->idx == i && m->idx) ? "Not implemented" : Lockmenu_Items[i]);
+        if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
     }
 }
 
@@ -123,14 +103,6 @@ DolphinLockMenuView* dolphin_lock_menu_alloc() {
     view_set_context(lock_menu->view, lock_menu);
     view_set_draw_callback(lock_menu->view, (ViewDrawCallback)dolphin_lock_menu_render);
     view_set_input_callback(lock_menu->view, dolphin_lock_menu_input);
-
-    with_view_model(
-        lock_menu->view, (DolphinLockMenuViewModel * model) {
-            // defaults
-            model->door_left_x = -57;
-            model->door_right_x = 115;
-            return true;
-        });
 
     return lock_menu;
 }

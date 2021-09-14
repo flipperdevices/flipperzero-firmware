@@ -23,6 +23,8 @@ const bool dolphin_scene_locked_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DolphinLockedEventUnlock:
+            scene_manager_set_scene_state(
+                dolphin->scene_manager, DolphinSceneMain, DolphinMainEventUnlocked);
             scene_manager_next_scene(dolphin->scene_manager, DolphinSceneMain);
             consumed = true;
             break;
@@ -31,6 +33,7 @@ const bool dolphin_scene_locked_on_event(void* context, SceneManagerEvent event)
             break;
         }
     }
+
     return consumed;
 }
 

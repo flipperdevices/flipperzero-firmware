@@ -8,6 +8,9 @@
 #include <storage/storage.h>
 
 typedef enum {
+    DolphinDebugEventWrongDeed,
+    DolphinDebugEventDeed,
+    DolphinDebugEventSaveState,
     DolphinDebugEventExit,
 } DolphinDebugEvent;
 
@@ -45,3 +48,4 @@ View* dolphin_debug_get_view(DolphinDebugView* debug_view);
 DolphinDebugView* dolphin_debug_view_alloc();
 void dolphin_debug_view_free(DolphinDebugView* debug_view);
 void dolphin_debug_get_dolphin_data(DolphinDebugView* debug_view, DolphinState* state);
+void dolphin_debug_reset_screen_idx(DolphinDebugView* debug_view);

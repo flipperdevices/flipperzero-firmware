@@ -23,6 +23,24 @@ const bool dolphin_scene_debug_on_event(void* context, SceneManagerEvent event) 
         switch(event.event) {
         case DolphinDebugEventExit:
             scene_manager_next_scene(dolphin->scene_manager, DolphinSceneMain);
+            dolphin_debug_get_dolphin_data(dolphin->debug_view, dolphin->state);
+            consumed = true;
+            break;
+
+        case DolphinDebugEventDeed:
+            dolphin_state_on_deed(dolphin->state, DolphinDeedIButtonEmulate); // temp
+            dolphin_debug_get_dolphin_data(dolphin->debug_view, dolphin->state);
+            consumed = true;
+            break;
+
+        case DolphinDebugEventWrongDeed:
+            dolphin_state_on_deed(dolphin->state, DolphinDeedWrong);
+            dolphin_debug_get_dolphin_data(dolphin->debug_view, dolphin->state);
+            consumed = true;
+            break;
+
+        case DolphinDebugEventSaveState:
+            dolphin_state_save(dolphin->state);
             consumed = true;
             break;
 
@@ -34,5 +52,7 @@ const bool dolphin_scene_debug_on_event(void* context, SceneManagerEvent event) 
 }
 
 const void dolphin_scene_debug_on_exit(void* context) {
-    // Dolphin* dolphin = (Dolphin*)context;
+    Dolphin* dolphin = (Dolphin*)context;
+    dolphin_debug_get_dolphin_data(dolphin->debug_view, dolphin->state);
+    dolphin_debug_reset_screen_idx(dolphin->debug_view);
 }

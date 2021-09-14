@@ -24,9 +24,6 @@ struct DolphinLockMenuView {
 
 typedef struct {
     uint8_t idx;
-    int8_t door_left_x;
-    int8_t door_right_x;
-    uint8_t exit_timeout;
     uint8_t hint_timeout;
     bool locked;
 } DolphinLockMenuViewModel;

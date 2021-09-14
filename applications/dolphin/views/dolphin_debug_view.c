@@ -90,7 +90,7 @@ bool dolphin_debug_view_input(InputEvent* event, void* context) {
     DolphinDebugView* debug_view = context;
 
     if(event->type != InputTypeShort) return false;
-
+    DolphinViewStatsScreens current = 0;
     with_view_model(
         debug_view->view, (DolphinDebugViewModel * model) {
             if(event->key == InputKeyDown) {
@@ -99,20 +99,21 @@ bool dolphin_debug_view_input(InputEvent* event, void* context) {
                 model->screen = ((model->screen - 1) + DolphinViewStatsTotalCount) %
                                 DolphinViewStatsTotalCount;
             }
+            current = model->screen;
             return true;
         });
 
-    // if(current == DolphinViewStatsMeta) {
-    //     if(event->key == InputKeyLeft) {
-    //         dolphin_deed(dolphin, DolphinDeedWrong);
-    //     } else if(event->key == InputKeyRight) {
-    //         dolphin_deed(dolphin, DolphinDeedIButtonRead);
-    //     } else if(event->key == InputKeyOk) {
-    //         dolphin_save(dolphin);
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    if(current == DolphinViewStatsMeta) {
+        if(event->key == InputKeyLeft) {
+            debug_view->callback(DolphinDebugEventWrongDeed, debug_view->context);
+        } else if(event->key == InputKeyRight) {
+            debug_view->callback(DolphinDebugEventDeed, debug_view->context);
+        } else if(event->key == InputKeyOk) {
+            debug_view->callback(DolphinDebugEventSaveState, debug_view->context);
+        } else {
+            return false;
+        }
+    }
 
     if(event->key == InputKeyBack) {
         debug_view->callback(DolphinDebugEventExit, debug_view->context);
@@ -144,6 +145,14 @@ void dolphin_debug_get_dolphin_data(DolphinDebugView* debug_view, DolphinState* 
         debug_view->view, (DolphinDebugViewModel * model) {
             model->icounter = dolphin_state_get_icounter(state);
             model->butthurt = dolphin_state_get_butthurt(state);
+            return true;
+        });
+}
+
+void dolphin_debug_reset_screen_idx(DolphinDebugView* debug_view) {
+    with_view_model(
+        debug_view->view, (DolphinDebugViewModel * model) {
+            model->screen = 0;
             return true;
         });
 }

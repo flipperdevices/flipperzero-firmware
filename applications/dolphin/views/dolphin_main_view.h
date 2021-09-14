@@ -10,6 +10,7 @@ typedef enum {
     DolphinMainEventOpenMenu,
     DolphinMainEventOpenLockMenu,
     DolphinMainEventOpenDebug,
+    DolphinMainEventUnlocked,
     DolphinMainEventOpenArchive,
 } DolphinMainEvent;
 
@@ -27,7 +28,7 @@ typedef struct {
     IconAnimation* animation;
     uint8_t scene_num;
     uint8_t hint_timeout;
-    bool locked;
+    bool unlocked;
 } DolphinMainViewModel;
 
 void dolphin_main_set_callback(

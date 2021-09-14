@@ -1,6 +1,7 @@
 #include "../dolphin_i.h"
 #include "../views/dolphin_main_view.h"
 #include "applications.h"
+#define MAIN_VIEW_DEFAULT (0UL)
 
 static void dolphin_switch_to_app(Dolphin* dolphin, const FlipperApplication* flipper_app) {
     furi_assert(dolphin);
@@ -31,6 +32,11 @@ const void dolphin_scene_main_on_enter(void* context) {
 
     dolphin_main_set_callback(main_view, dolphin_scene_main_callback, dolphin);
     view_port_enabled_set(dolphin->lock_viewport, false);
+
+    if(scene_manager_get_scene_state(dolphin->scene_manager, DolphinSceneMain) ==
+       DolphinMainEventUnlocked) {
+        dolphin_main_view_unlocked(dolphin->main_view);
+    }
 
     view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewMain);
 }
@@ -66,9 +72,12 @@ const bool dolphin_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     }
+
     return consumed;
 }
 
 const void dolphin_scene_main_on_exit(void* context) {
-    // Dolphin* dolphin = (Dolphin*)context;
+    Dolphin* dolphin = (Dolphin*)context;
+    scene_manager_set_scene_state(dolphin->scene_manager, DolphinSceneMain, MAIN_VIEW_DEFAULT);
+    dolphin_main_view_reset_hint(dolphin->main_view);
 }

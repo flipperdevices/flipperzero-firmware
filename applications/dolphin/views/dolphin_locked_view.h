@@ -25,6 +25,9 @@ struct DolphinLockedView {
 typedef struct {
     IconAnimation* animation;
     uint8_t scene_num;
+    int8_t door_left_x;
+    int8_t door_right_x;
+    uint8_t exit_timeout;
     uint8_t hint_timeout;
 
 } DolphinLockedViewModel;
@@ -39,3 +42,5 @@ View* dolphin_locked_get_view(DolphinLockedView* locked_view);
 void dolphin_locked_reset_counter(DolphinLockedView* locked_view);
 DolphinLockedView* dolphin_locked_view_alloc();
 void dolphin_locked_view_free(DolphinLockedView* locked_view);
+void dolphin_main_view_unlocked(DolphinMainView* main_view);
+void dolphin_main_view_reset_hint(DolphinMainView* main_view);
