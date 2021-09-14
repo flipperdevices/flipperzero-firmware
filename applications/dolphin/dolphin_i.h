@@ -19,7 +19,8 @@
 #include "views/dolphin_debug_view.h"
 #include "scenes/dolphin_scene.h"
 
-#define HINT_TIMEOUT 2
+#define HINT_TIMEOUT_L 2
+#define HINT_TIMEOUT_H 11
 
 typedef enum {
     DolphinViewMain,

@@ -29,7 +29,7 @@ static void lock_menu_callback(void* context, uint8_t index) {
     default: // wip message
         with_view_model(
             lock_menu->view, (DolphinLockMenuViewModel * model) {
-                model->hint_timeout = HINT_TIMEOUT;
+                model->hint_timeout = HINT_TIMEOUT_L;
                 return true;
             });
         break;
