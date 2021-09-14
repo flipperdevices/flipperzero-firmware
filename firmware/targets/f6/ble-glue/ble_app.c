@@ -4,6 +4,7 @@
 #include "ble.h"
 #include "shci.h"
 #include "cmsis_os.h"
+#include "gap.h"
 
 #include <furi-hal.h>
 

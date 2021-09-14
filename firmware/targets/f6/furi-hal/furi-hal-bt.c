@@ -13,8 +13,20 @@ void furi_hal_bt_init() {
     APPE_Init();
 }
 
-bool furi_hal_bt_start_app() {
+bool furi_hal_bt_init_app() {
     return gap_init();
+}
+
+void furi_hal_bt_start_advertising() {
+    if(gap_get_state() == GapStateIdle) {
+        gap_start_advertising();
+    }
+}
+
+void furi_hal_bt_stop_advertising() {
+    if(furi_hal_bt_is_alive()) {
+        gap_stop_advertising();
+    }
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
@@ -40,7 +52,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    return APPE_Status() == BleGlueStatusStarted;
+    return gap_get_state() > GapStateIdle;
 }
 
 bool furi_hal_bt_wait_startup() {
