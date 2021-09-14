@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 /** FuriHalCryptoKey Type */
 typedef enum {
@@ -29,12 +31,36 @@ void furi_hal_crypto_init();
 
 /** Store key in crypto storage
  * @param key - FuriHalCryptoKey to store. Only Master, Simple or Encrypted
- * @return - key_index in store
+ * @param slot - pinter to int where store slot number will be saved
+ * @return true on success
  */
-uint8_t furi_hal_crypto_store_add_key(FuriHalCryptoKey* key);
+bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot);
 
-/** Load key into AES engine
- * 
- * @param key_index - key index that was returned on store key step
+/** Init AES engine and load key from crypto store
+ * @param slot - store slot number
+ * @return true on success
  */
-void furi_hal_crypto_store_load_key(uint8_t key_index);
+bool furi_hal_crypto_store_load_key(uint8_t slot, uint8_t* iv);
+
+/** Unload key engine and deinit AES engine
+ * @param slot - store slot number
+ * @return true on success
+ */
+bool furi_hal_crypto_store_unload_key(uint8_t slot);
+
+
+/** Encrypt data
+ * @param input - pointer to input data
+ * @param output - pointer to output data
+ * @param size - input/output buffer size in bytes
+ * @return true on success
+ */
+bool furi_hal_crypto_encrypt(const uint8_t *input, uint8_t *output, size_t size);
+
+/** Decrypt data
+ * @param input - pointer to input data
+ * @param output - pointer to output data
+ * @param size - input/output buffer size in bytes
+ * @return true on success
+ */
+bool furi_hal_crypto_decrypt(const uint8_t *input, uint8_t *output, size_t size);
