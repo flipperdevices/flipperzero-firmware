@@ -97,14 +97,15 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
 
         // Signature verification
         uint8_t buffer[ENCLAVE_SIGNATURE_SIZE];
-        bool original = false;
+        bool enclave_valid = false;
         if(furi_hal_crypto_store_load_key(ENCLAVE_SIGNATURE_KEY_SLOT, enclave_signature_iv)) {
             if(furi_hal_crypto_encrypt(enclave_signature_input, buffer, ENCLAVE_SIGNATURE_SIZE)) {
-                original = memcmp(buffer, enclave_signature_expected, ENCLAVE_SIGNATURE_SIZE) == 0;
+                enclave_valid =
+                    memcmp(buffer, enclave_signature_expected, ENCLAVE_SIGNATURE_SIZE) == 0;
             }
             furi_hal_crypto_store_unload_key(ENCLAVE_SIGNATURE_KEY_SLOT);
         }
-        printf("enclave_valid       : %s\r\n", original ? "true" : "false");
+        printf("enclave_valid       : %s\r\n", enclave_valid ? "true" : "false");
     } else {
         printf("radio_alive         : false\r\n");
     }
