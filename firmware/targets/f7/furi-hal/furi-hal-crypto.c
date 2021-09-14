@@ -35,7 +35,7 @@ bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot) {
     return SHCI_C2_FUS_StoreUsrKey(&pParam, slot) == SHCI_Success;
 }
 
-bool furi_hal_crypto_store_load_key(uint8_t slot, uint8_t* iv) {
+bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv) {
     furi_assert(slot > 0 && slot <= 100);
 
     crypt.Instance = AES1;

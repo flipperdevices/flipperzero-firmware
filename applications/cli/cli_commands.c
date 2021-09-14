@@ -7,6 +7,15 @@
 #include <notification/notification-messages.h>
 #include <shci.h>
 
+#define ENCLAVE_SIGNATURE_KEY_SLOT 1
+#define ENCLAVE_SIGNATURE_SIZE 16
+static const uint8_t enclave_signature_iv[16] =
+    {0x32, 0xe6, 0xa7, 0x85, 0x20, 0xae, 0x0b, 0xf0, 0x00, 0xb6, 0x30, 0x9b, 0xd5, 0x42, 0x9e, 0xa6};
+static const uint8_t enclave_signature_input[ENCLAVE_SIGNATURE_SIZE] =
+    {0xdc, 0x76, 0x15, 0x1e, 0x69, 0xe8, 0xdc, 0xd3, 0x4a, 0x71, 0x0b, 0x42, 0x71, 0xe0, 0xa9, 0x78};
+static const uint8_t enclave_signature_expected[ENCLAVE_SIGNATURE_SIZE] =
+    {0x5c, 0xcd, 0x4a, 0xa5, 0xb, 0x60, 0x83, 0x51, 0xef, 0xb9, 0xb4, 0x57, 0x3, 0xb4, 0x19, 0x61};
+
 /* 
  * Device Info Command
  * This command is intended to be used by humans and machines
@@ -85,6 +94,17 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
             printf("%02X", ble_mac[i]);
         }
         printf("\r\n");
+
+        // Signature verification
+        uint8_t buffer[ENCLAVE_SIGNATURE_SIZE];
+        bool original = false;
+        if(furi_hal_crypto_store_load_key(ENCLAVE_SIGNATURE_KEY_SLOT, enclave_signature_iv)) {
+            if(furi_hal_crypto_encrypt(enclave_signature_input, buffer, ENCLAVE_SIGNATURE_SIZE)) {
+                original = memcmp(buffer, enclave_signature_expected, ENCLAVE_SIGNATURE_SIZE) == 0;
+            }
+            furi_hal_crypto_store_unload_key(ENCLAVE_SIGNATURE_KEY_SLOT);
+        }
+        printf("enclave_valid       : %s\r\n", original ? "true" : "false");
     } else {
         printf("radio_alive         : false\r\n");
     }

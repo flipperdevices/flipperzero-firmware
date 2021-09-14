@@ -40,7 +40,7 @@ bool furi_hal_crypto_store_add_key(FuriHalCryptoKey* key, uint8_t* slot);
  * @param slot - store slot number
  * @return true on success
  */
-bool furi_hal_crypto_store_load_key(uint8_t slot, uint8_t* iv);
+bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv);
 
 /** Unload key engine and deinit AES engine
  * @param slot - store slot number
