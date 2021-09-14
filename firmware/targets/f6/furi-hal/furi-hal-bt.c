@@ -4,7 +4,6 @@
 #include <stm32wbxx.h>
 #include <shci.h>
 #include <cmsis_os2.h>
-#include <app_ble.h>
 #include <gap.h>
 
 void furi_hal_bt_init() {
