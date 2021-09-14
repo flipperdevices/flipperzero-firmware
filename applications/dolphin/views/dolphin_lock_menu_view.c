@@ -24,11 +24,9 @@ static void lock_menu_callback(void* context, uint8_t index) {
     furi_assert(context);
     DolphinLockMenuView* lock_menu = context;
     switch(index) {
-    // lock
-    case 0:
+    case 0: // lock
         lock_menu->callback(DolphinLockMenuEventLock, lock_menu->context);
-    default:
-        // wip message
+    default: // wip message
         with_view_model(
             lock_menu->view, (DolphinLockMenuViewModel * model) {
                 model->hint_timeout = HINT_TIMEOUT;
@@ -70,14 +68,12 @@ bool dolphin_lock_menu_input(InputEvent* event, void* context) {
     furi_assert(context);
 
     DolphinLockMenuView* lock_menu = context;
+    uint8_t idx;
 
     if(event->type != InputTypeShort) return false;
-
-    uint8_t idx;
     with_view_model(
         lock_menu->view, (DolphinLockMenuViewModel * model) {
             model->hint_timeout = 0; // clear hint timeout
-
             if(event->key == InputKeyUp) {
                 model->idx = CLAMP(model->idx - 1, 2, 0);
             } else if(event->key == InputKeyDown) {

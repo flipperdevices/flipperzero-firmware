@@ -8,8 +8,8 @@
 #include <storage/storage.h>
 
 typedef enum {
-    DolphinDebugEventWrongDeed,
     DolphinDebugEventDeed,
+    DolphinDebugEventWrongDeed,
     DolphinDebugEventSaveState,
     DolphinDebugEventExit,
 } DolphinDebugEvent;

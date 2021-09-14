@@ -19,7 +19,6 @@
 #include "views/dolphin_debug_view.h"
 #include "scenes/dolphin_scene.h"
 
-#define UNLOCK_RST_TIMEOUT 200
 #define HINT_TIMEOUT 2
 
 typedef enum {
@@ -32,22 +31,7 @@ typedef enum {
     DolphinViewTotal,
 } DolphinViewEnum;
 
-typedef enum {
-    DolphinEventTypeDeed,
-    DolphinEventTypeSave,
-    DolphinEventTypeTick,
-} DolphinEventType;
-
-typedef struct {
-    DolphinEventType type;
-    union {
-        DolphinDeed deed;
-    };
-} DolphinEvent;
-
 struct Dolphin {
-    // Internal message queue
-    osMessageQueueId_t event_queue;
     // State
     DolphinState* state;
     // Menu

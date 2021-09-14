@@ -10,7 +10,6 @@ const void dolphin_scene_lock_menu_on_enter(void* context) {
     Dolphin* dolphin = (Dolphin*)context;
 
     dolphin_lock_menu_set_callback(dolphin->lock_menu, dolphin_scene_lock_menu_callback, dolphin);
-    dolphin_lock_menu_reset_idx(dolphin->lock_menu);
     view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewLockMenu);
 }
 
@@ -38,5 +37,6 @@ const bool dolphin_scene_lock_menu_on_event(void* context, SceneManagerEvent eve
 }
 
 const void dolphin_scene_lock_menu_on_exit(void* context) {
-    // Dolphin* dolphin = (Dolphin*)context;
+    Dolphin* dolphin = (Dolphin*)context;
+    dolphin_lock_menu_reset_idx(dolphin->lock_menu);
 }

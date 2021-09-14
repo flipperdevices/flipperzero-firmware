@@ -1,6 +1,7 @@
 #include <furi.h>
 #include "../dolphin_i.h"
 #include "dolphin_locked_view.h"
+
 static const Icon* idle_scenes[] = {&A_Wink_128x64, &A_WatchingTV_128x64};
 
 void dolphin_locked_set_callback(
@@ -25,6 +26,14 @@ static void
         });
 }
 
+void dolphin_locked_reset_door_pos(DolphinLockedView* locked_view) {
+    with_view_model(
+        locked_view->view, (DolphinLockedViewModel * model) {
+            model->door_left_x = -57;
+            model->door_right_x = 115;
+            return true;
+        });
+}
 void dolphin_locked_reset_counter(DolphinLockedView* locked_view) {
     locked_view->lock_count = 0;
     locked_view->lock_lastpress = 0;
@@ -47,7 +56,6 @@ void dolphin_locked_view_render(Canvas* canvas, void* model) {
         canvas_draw_icon(canvas, m->door_right_x, 0, &I_DoorRight_70x55);
     }
 
-    m->exit_timeout--;
     m->door_left_x = CLAMP(m->door_left_x + 5, 0, -57);
     m->door_right_x = CLAMP(m->door_right_x - 5, 115, 60);
 
@@ -62,7 +70,7 @@ void dolphin_locked_view_render(Canvas* canvas, void* model) {
 
     if(m->hint_timeout && !m->door_left_x) {
         m->hint_timeout--;
-
+        canvas_set_font(canvas, FontSecondary);
         canvas_draw_icon(canvas, 13, 5, &I_LockPopup_100x49);
         elements_multiline_text(canvas, 65, 20, "To unlock\npress:");
     }
@@ -96,7 +104,7 @@ bool dolphin_locked_view_input(InputEvent* event, void* context) {
             locked_view->lock_count++;
         }
 
-        if(locked_view->lock_count == 2) {
+        if(locked_view->lock_count == UNLOCK_CNT) {
             locked_view->lock_count = 0;
             locked_view->callback(DolphinLockedEventUnlock, locked_view->context);
         }
@@ -114,15 +122,6 @@ DolphinLockedView* dolphin_locked_view_alloc() {
     view_set_input_callback(locked_view->view, dolphin_locked_view_input);
 
     dolphin_scene_handler_set_scene(locked_view, idle_scenes[random() % COUNT_OF(idle_scenes)]);
-
-    with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
-            // defaults
-            model->door_left_x = -57;
-            model->door_right_x = 115;
-            return true;
-        });
-
     return locked_view;
 }
 

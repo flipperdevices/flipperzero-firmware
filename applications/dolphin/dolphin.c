@@ -1,81 +1,23 @@
 #include "dolphin_i.h"
-#include <stdlib.h>
-#include "applications.h"
 
 static void lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(context);
-    Dolphin* dolphin = context;
+    Dolphin* dolphin = (Dolphin*)context;
     canvas_draw_icon_animation(canvas, 0, 0, dolphin->lock_icon);
 }
 
-// void dolphin_save(Dolphin* dolphin) {
-//     furi_assert(dolphin);
-//     DolphinEvent event;
-//     event.type = DolphinEventTypeSave;
-//     furi_check(osMessageQueuePut(dolphin->event_queue, &event, 0, osWaitForever) == osOK);
-// }
+void dolphin_save(Dolphin* dolphin) {
+    furi_assert(dolphin);
+    DolphinDebugView* debug_view = dolphin->debug_view;
+    debug_view->callback(DolphinDebugEventSaveState, debug_view->context);
+}
 
-// void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
-//     furi_assert(dolphin);
-//     DolphinEvent event;
-//     event.type = DolphinEventTypeDeed;
-//     event.deed = deed;
-//     furi_check(osMessageQueuePut(dolphin->event_queue, &event, 0, osWaitForever) == osOK);
-// }
-
-// int32_t dolphin_srv() {
-//     Dolphin* dolphin = dolphin_alloc();
-
-//     if(dolphin_state_load(dolphin->state)) {
-//         view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewIdleMain);
-//     } else {
-//         view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewFirstStart);
-//     }
-
-//     with_view_model(
-//         dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
-//             model->icounter = dolphin_state_get_icounter(dolphin->state);
-//             model->butthurt = dolphin_state_get_butthurt(dolphin->state);
-//             return true;
-//         });
-
-//     furi_record_create("dolphin", dolphin);
-
-//     if(!furi_hal_version_do_i_belong_here()) {
-//         view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewHwMismatch);
-//     }
-
-//     DolphinEvent event;
-//     while(1) {
-//         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
-
-//         DolphinViewLockMenuModel* lock_model = view_get_model(dolphin->view_lockmenu);
-
-//         if(lock_model->locked && lock_model->exit_timeout == 0 &&
-//            osTimerIsRunning(dolphin->timeout_timer)) {
-//             osTimerStop(dolphin->timeout_timer);
-//             osDelay(1); // smol enterprise delay
-//             view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewIdleMain);
-//         }
-
-//         if(event.type == DolphinEventTypeTick) {
-//             view_commit_model(dolphin->view_lockmenu, true);
-
-//         } else if(event.type == DolphinEventTypeDeed) {
-//             dolphin_state_on_deed(dolphin->state, event.deed);
-//             with_view_model(
-//                 dolphin->idle_view_dolphin_stats, (DolphinViewStatsModel * model) {
-//                     model->icounter = dolphin_state_get_icounter(dolphin->state);
-//                     model->butthurt = dolphin_state_get_butthurt(dolphin->state);
-//                     return true;
-//                 });
-//         } else if(event.type == DolphinEventTypeSave) {
-//             dolphin_state_save(dolphin->state);
-//         }
-//     }
-//     dolphin_free(dolphin);
-//     return 0;
-// }
+void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
+    furi_assert(dolphin);
+    UNUSED(deed); // seperate callbacks for each deed type?
+    DolphinDebugView* debug_view = dolphin->debug_view;
+    debug_view->callback(DolphinDebugEventDeed, debug_view->context);
+}
 
 bool dolphin_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -93,13 +35,9 @@ Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
 
     dolphin->state = dolphin_state_alloc();
-    // Menu
     dolphin->menu_vm = furi_record_open("menu");
-
     dolphin->gui = furi_record_open("gui");
-    // Scene thread
     dolphin->scene_thread = furi_thread_alloc();
-
     dolphin->view_dispatcher = view_dispatcher_alloc();
     dolphin->scene_manager = scene_manager_alloc(&dolphin_scene_handlers, dolphin);
 

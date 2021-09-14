@@ -6,6 +6,9 @@
 #include <gui/elements.h>
 #include <furi.h>
 
+#define UNLOCK_RST_TIMEOUT 200
+#define UNLOCK_CNT 2 // 3 actually
+
 typedef enum {
     DolphinLockedEventUnlock,
 } DolphinLockedEvent;
@@ -27,7 +30,6 @@ typedef struct {
     uint8_t scene_num;
     int8_t door_left_x;
     int8_t door_right_x;
-    uint8_t exit_timeout;
     uint8_t hint_timeout;
 
 } DolphinLockedViewModel;
@@ -37,9 +39,10 @@ void dolphin_locked_set_callback(
     DolphinLockedViewCallback callback,
     void* context);
 
-View* dolphin_locked_get_view(DolphinLockedView* locked_view);
-
 void dolphin_locked_reset_counter(DolphinLockedView* locked_view);
+void dolphin_locked_reset_door_pos(DolphinLockedView* locked_view);
+
+View* dolphin_locked_get_view(DolphinLockedView* locked_view);
 DolphinLockedView* dolphin_locked_view_alloc();
 void dolphin_locked_view_free(DolphinLockedView* locked_view);
 void dolphin_main_view_unlocked(DolphinMainView* main_view);

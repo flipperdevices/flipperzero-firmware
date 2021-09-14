@@ -11,8 +11,8 @@ const void dolphin_scene_locked_on_enter(void* context) {
     DolphinLockedView* locked_view = dolphin->locked_view;
 
     dolphin_locked_set_callback(locked_view, dolphin_scene_locked_callback, dolphin);
+    dolphin_locked_reset_door_pos(dolphin->locked_view);
     view_port_enabled_set(dolphin->lock_viewport, true);
-    dolphin_locked_reset_counter(dolphin->locked_view);
     view_dispatcher_switch_to_view(dolphin->view_dispatcher, DolphinViewLocked);
 }
 
@@ -38,5 +38,6 @@ const bool dolphin_scene_locked_on_event(void* context, SceneManagerEvent event)
 }
 
 const void dolphin_scene_locked_on_exit(void* context) {
-    // Dolphin* dolphin = (Dolphin*)context;
+    Dolphin* dolphin = (Dolphin*)context;
+    dolphin_locked_reset_counter(dolphin->locked_view);
 }

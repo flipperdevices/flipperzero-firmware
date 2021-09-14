@@ -1,6 +1,7 @@
 #include <furi.h>
 #include "../dolphin_i.h"
 #include "dolphin_main_view.h"
+
 static const Icon* idle_scenes[] = {&A_Wink_128x64, &A_WatchingTV_128x64};
 
 void dolphin_main_set_callback(

@@ -69,6 +69,7 @@ void dolphin_debug_view_render(Canvas* canvas, void* model) {
 
     } else {
         char buffer[64];
+
         canvas_set_font(canvas, FontSecondary);
         snprintf(buffer, 64, "Icounter: %ld", m->icounter);
         canvas_draw_str(canvas, 5, 30, buffer);
