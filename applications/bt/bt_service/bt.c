@@ -68,13 +68,14 @@ int32_t bt_srv() {
         FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
     } else {
         view_port_enabled_set(bt->statusbar_view_port, true);
-        if(bt->bt_settings.enabled) {
-            bool bt_app_started = furi_hal_bt_start_app();
-            if(!bt_app_started) {
-                FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
-            } else {
-                FURI_LOG_I(BT_SERVICE_TAG, "BT App started");
+        if(furi_hal_bt_init_app()) {
+            FURI_LOG_I(BT_SERVICE_TAG, "BLE stack started");
+            if(bt->bt_settings.enabled) {
+                furi_hal_bt_start_advertising();
+                FURI_LOG_I(BT_SERVICE_TAG, "Start advertising");
             }
+        } else {
+            FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
         }
     }
 
