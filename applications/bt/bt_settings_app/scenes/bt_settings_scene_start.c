@@ -2,14 +2,14 @@
 #include "furi-hal-bt.h"
 
 enum BtSetting {
-    BtSettingOn,
     BtSettingOff,
+    BtSettingOn,
     BtSettingNum,
 };
 
 const char* const bt_settings_text[BtSettingNum] = {
-    "On",
     "Off",
+    "On",
 };
 
 static void bt_settings_scene_start_var_list_change_callback(VariableItem* item) {
