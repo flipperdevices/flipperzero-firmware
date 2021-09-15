@@ -184,10 +184,9 @@ static void run_decoder(
                 message_decoded = message_decoded_check;
             }
 
-//            mu_assert(message_counter < message_expected_len, "decoded more than expected");
-//            compare_message_results(message_decoded, &message_expected[message_counter]);
+            mu_assert(message_counter < message_expected_len, "decoded more than expected");
+            compare_message_results(message_decoded, &message_expected[message_counter]);
 
-            printf("DECODED protocol: %02X, adr: %08lX, cmd %04lX%s\r\n", message_decoded->protocol, message_decoded->address, message_decoded->command, message_decoded->repeat ? " R" : "");
             ++message_counter;
         }
         level = !level;
@@ -223,21 +222,16 @@ MU_TEST(test_mix) {
     RUN_DECODER(test_decoder_rc6_input1, test_decoder_rc6_expected1);
     RUN_DECODER(test_decoder_necext_input1, test_decoder_necext_expected1);
     RUN_DECODER(test_decoder_sirc_input5, test_decoder_sirc_expected5);
+    RUN_DECODER(test_decoder_nec_input3, test_decoder_nec_expected3);
     RUN_DECODER(test_decoder_rc5_input5, test_decoder_rc5_expected5);
     RUN_DECODER(test_decoder_samsung32_input1, test_decoder_samsung32_expected1);
     RUN_DECODER(test_decoder_sirc_input3, test_decoder_sirc_expected3);
 }
 
-MU_TEST(test_decoder_nec1) {
+MU_TEST(test_decoder_nec) {
     RUN_DECODER(test_decoder_nec_input1, test_decoder_nec_expected1);
-}
-
-MU_TEST(test_decoder_nec42_1) {
-    RUN_DECODER(test_decoder_nec42_input1, test_decoder_nec42_expected1);
-}
-
-MU_TEST(test_decoder_nec2) {
     RUN_DECODER(test_decoder_nec_input2, test_decoder_nec_expected2);
+    RUN_DECODER(test_decoder_nec_input3, test_decoder_nec_expected3);
 }
 
 MU_TEST(test_decoder_unexpected_end_in_sequence) {
@@ -297,6 +291,8 @@ MU_TEST(test_encoder_rc6) {
 MU_TEST(test_encoder_decoder_all) {
     RUN_ENCODER_DECODER(test_nec);
     RUN_ENCODER_DECODER(test_necext);
+    RUN_ENCODER_DECODER(test_nec42);
+    RUN_ENCODER_DECODER(test_nec42ext);
     RUN_ENCODER_DECODER(test_samsung32);
     RUN_ENCODER_DECODER(test_rc6);
     RUN_ENCODER_DECODER(test_rc5);
@@ -306,7 +302,6 @@ MU_TEST(test_encoder_decoder_all) {
 MU_TEST_SUITE(test_irda_decoder_encoder) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
-    MU_RUN_TEST(test_decoder_nec42_1);
     MU_RUN_TEST(test_encoder_sirc);
     MU_RUN_TEST(test_decoder_sirc);
     MU_RUN_TEST(test_encoder_rc5x);
@@ -315,8 +310,7 @@ MU_TEST_SUITE(test_irda_decoder_encoder) {
     MU_RUN_TEST(test_decoder_rc6);
     MU_RUN_TEST(test_encoder_rc6);
     MU_RUN_TEST(test_decoder_unexpected_end_in_sequence);
-    MU_RUN_TEST(test_decoder_nec1);
-    MU_RUN_TEST(test_decoder_nec2);
+    MU_RUN_TEST(test_decoder_nec);
     MU_RUN_TEST(test_decoder_samsung32);
     MU_RUN_TEST(test_decoder_necext1);
     MU_RUN_TEST(test_mix);

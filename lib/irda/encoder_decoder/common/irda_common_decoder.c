@@ -71,7 +71,7 @@ static bool irda_check_preamble(IrdaCommonDecoder* decoder) {
 
 /**
  * decoder->protocol->databit_len[0] contains biggest amount of bits, for this protocol.
- * decoder->protocol->databit_len[1...] contains values less, but which can be decoded
+ * decoder->protocol->databit_len[1...] contains lesser values, but which can be decoded
  * for some protocol modifications.
  */
 static IrdaStatus irda_common_decode_bits(IrdaCommonDecoder* decoder) {
@@ -232,7 +232,6 @@ IrdaMessage* irda_common_decode(IrdaCommonDecoder* decoder, bool level, uint32_t
                     continue;
                 } else if (decoder->protocol->databit_len[0] == decoder->databit_cnt) {
                     /* error: can't decode largest protocol - begin decoding from start */
-                    furi_assert(0);     // TMP: has to be veeeery rare.
                     decoder->state = IrdaCommonDecoderStateWaitPreamble;
                 }
             } else if (status == IrdaStatusError) {

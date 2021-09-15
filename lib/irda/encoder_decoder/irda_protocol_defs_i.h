@@ -23,13 +23,13 @@
 #define IRDA_NEC_PREAMBLE_MARK          9000
 #define IRDA_NEC_PREAMBLE_SPACE         4500
 #define IRDA_NEC_BIT1_MARK              560
-#define IRDA_NEC_BIT1_SPACE             1600
+#define IRDA_NEC_BIT1_SPACE             1690
 #define IRDA_NEC_BIT0_MARK              560
 #define IRDA_NEC_BIT0_SPACE             560
 #define IRDA_NEC_REPEAT_PERIOD          110000
 #define IRDA_NEC_SILENCE                IRDA_NEC_REPEAT_PERIOD
 #define IRDA_NEC_MIN_SPLIT_TIME         IRDA_NEC_REPEAT_PAUSE_MIN
-#define IRDA_NEC_REPEAT_PAUSE_MIN       20000
+#define IRDA_NEC_REPEAT_PAUSE_MIN       4000
 #define IRDA_NEC_REPEAT_PAUSE_MAX       150000
 #define IRDA_NEC_REPEAT_MARK            9000
 #define IRDA_NEC_REPEAT_SPACE           2250

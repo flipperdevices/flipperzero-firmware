@@ -23,7 +23,7 @@ typedef enum {
     IrdaProtocolNEC = 0,
     IrdaProtocolNECext,
     IrdaProtocolNEC42,
-    IrdaProtocolApple,
+    IrdaProtocolNEC42ext,
     IrdaProtocolSamsung32,
     IrdaProtocolRC6,
     IrdaProtocolRC5,

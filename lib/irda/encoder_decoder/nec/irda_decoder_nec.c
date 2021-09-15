@@ -39,18 +39,22 @@ bool irda_decoder_nec_interpret(IrdaCommonDecoder* decoder) {
         uint16_t* data2 = (void*) (data1 + 1);
         uint16_t address = *data1 & 0x1FFF;
         uint16_t address_inverse = (*data1 >> 13) & 0x1FFF;
-        uint16_t command = ((*data1 >> 26) & 0x3F) & (*data2 & 0x3);
+        uint16_t command = ((*data1 >> 26) & 0x3F) | ((*data2 & 0x3) << 6);
         uint16_t command_inverse = (*data2 >> 2) & 0xFF;
 
-        if ((address == (~address_inverse & 0x1FFFF))
-            && (command == (~command_inverse & 0x1FFFF))) {
+        if ((address == (~address_inverse & 0x1FFF))
+            && (command == (~command_inverse & 0xFF))) {
             decoder->message.protocol = IrdaProtocolNEC42;
             decoder->message.address = address;
             decoder->message.command = command;
             decoder->message.repeat = false;
             result = true;
         } else {
-            furi_assert(0);
+            decoder->message.protocol = IrdaProtocolNEC42ext;
+            decoder->message.address = address | (address_inverse << 13);
+            decoder->message.command = command | (command_inverse << 8);
+            decoder->message.repeat = false;
+            result = true;
         }
     }
 

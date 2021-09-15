@@ -20,23 +20,34 @@ void irda_encoder_nec_reset(void* encoder_ptr, const IrdaMessage* message) {
     IrdaCommonEncoder* encoder = encoder_ptr;
     irda_common_encoder_reset(encoder);
 
-    uint8_t address = message->address;
-    uint8_t address_inverse = ~address;
-    uint8_t command = message->command;
-    uint8_t command_inverse = ~command;
-
-    uint32_t* data = (void*) encoder->data;
+    uint32_t* data1 = (void*) encoder->data;
+    uint32_t* data2 = data1 + 1;
     if (message->protocol == IrdaProtocolNEC) {
-        *data = address;
-        *data |= address_inverse << 8;
-        *data |= command << 16;
-        *data |= command_inverse << 24;
+        uint8_t address = message->address;
+        uint8_t address_inverse = ~address;
+        uint8_t command = message->command;
+        uint8_t command_inverse = ~command;
+        *data1 = address;
+        *data1 |= address_inverse << 8;
+        *data1 |= command << 16;
+        *data1 |= command_inverse << 24;
         encoder->bits_to_encode = 32;
     } else if (message->protocol == IrdaProtocolNECext) {
-        *data = (uint16_t) message->address;
-        *data |= (message->command << 16) & 0xFFFF0000ul;
+        *data1 = (uint16_t) message->address;
+        *data1 |= (message->command & 0xFFFF) << 16;
         encoder->bits_to_encode = 32;
     } else if (message->protocol == IrdaProtocolNEC42) {
+        /* 13 address + 13 inverse address + 8 command + 8 inv command */
+        *data1 = message->address & 0x1FFFUL;
+        *data1 |= (~message->address & 0x1FFFUL) << 13;
+        *data1 |= ((message->command & 0x3FUL) << 26);
+        *data2 = (message->command & 0xC0UL) >> 6;
+        *data2 |= (~message->command & 0xFFUL) << 2;
+        encoder->bits_to_encode = 42;
+    } else if (message->protocol == IrdaProtocolNEC42ext) {
+        *data1 = message->address & 0x3FFFFFF;
+        *data1 |= ((message->command & 0x3F) << 26);
+        *data2 = (message->command & 0xFFC0) >> 6;
         encoder->bits_to_encode = 42;
     } else {
         furi_assert(0);

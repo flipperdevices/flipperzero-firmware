@@ -6,7 +6,7 @@
 #include "irda_i.h"
 #include <stdint.h>
 
-static IrdaStatus irda_common_encode_value(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
+static IrdaStatus irda_common_encode_bits(IrdaCommonEncoder* encoder, uint32_t* duration, bool* level) {
     IrdaStatus status = encoder->protocol->encode(encoder, duration, level);
     furi_assert(status == IrdaStatusOk);
     ++encoder->timings_encoded;
@@ -113,7 +113,7 @@ IrdaStatus irda_common_encode(IrdaCommonEncoder* encoder, uint32_t* duration, bo
         }
         /* FALLTHROUGH */
     case IrdaCommonEncoderStateEncode:
-        status = irda_common_encode_value(encoder, duration, level);
+        status = irda_common_encode_bits(encoder, duration, level);
         if (status == IrdaStatusDone) {
             if (encoder->protocol->encode_repeat) {
                 encoder->state = IrdaCommonEncoderStateEncodeRepeat;
