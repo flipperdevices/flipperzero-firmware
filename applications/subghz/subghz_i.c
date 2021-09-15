@@ -22,7 +22,7 @@ void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset) {
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz);
     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-        furi_check(0);
+        furi_crash(NULL);
     }
     furi_assert(
         subghz->txrx->txrx_state != SubGhzTxRxStateRx &&
@@ -43,7 +43,7 @@ uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
 uint32_t subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz);
     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-        furi_check(0);
+        furi_crash(NULL);
     }
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
