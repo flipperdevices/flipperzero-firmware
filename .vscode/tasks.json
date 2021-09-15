@@ -1,0 +1,85 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Debug",
+      "type": "shell",
+      "command": "make -C firmware -j9 APP_RELEASE=1 TARGET=f6 debug",
+      "presentation": {
+        "echo": false,
+        "focus": true,
+        "group": "flipper",
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "pattern": {
+            "regexp": "."
+        },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+    {
+      "label": "Flash",
+      "type": "shell",
+      "command": "make -C firmware -j9 APP_RELEASE=1 TARGET=f6 flash",
+      "presentation": {
+        "echo": false,
+        "focus": false,
+        "group": "flipper",
+        "panel": "dedicated"
+      },
+    },
+    {
+      "label": "Monitor",
+      "type": "shell",
+      "command": "minicom -D /dev/tty.usbmodem*02 -b 230400",
+      "presentation": {
+        "echo": false,
+        "focus": false,
+        "group": "flipper",
+        "panel": "dedicated"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+            "regexp": "."
+        },
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+        },
+      },
+    },
+    {
+      "label": "Build and monitor",
+      "dependsOn": ["Flash", "Monitor"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true,
+        "instanceLimit": 1,
+      },
+    },
+    {
+      "label": "Debug and monitor",
+      "dependsOn": ["Debug", "Monitor"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "test",
+        "isDefault": true,
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true,
+        "instanceLimit": 1,
+      },
+    },
+  ],
+}

@@ -1,0 +1,25 @@
+{
+    // cortex-debug plugin required
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "cwd": "${workspaceRoot}",
+            "executable": "firmware/.obj/f6/firmware.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "debugServerArgs": "-c \"stm32wbx.cpu configure -rtos auto\"  -c \"init\"",
+            "svdFile": "${workspaceRoot}/debug/STM32WB55_CM4.svd",
+            "interface": "swd",
+            "rtos": "FreeRTOS",
+            "configFiles": [
+                "interface/stlink.cfg",
+                "debug/stm32wbx.cfg"
+            ]
+        }
+    ]
+}
+
+
+                
