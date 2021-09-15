@@ -42,22 +42,29 @@ void dolphin_locked_update_hint_timeout(DolphinLockedView* locked_view) {
 void dolphin_locked_reset_door_pos(DolphinLockedView* locked_view) {
     with_view_model(
         locked_view->view, (DolphinLockedViewModel * model) {
+            model->animation_seq_end = false;
             model->door_left_x = -57;
             model->door_right_x = 115;
             return true;
         });
 }
 
-void dolphin_locked_trigger_redraw(DolphinLockedView* locked_view) {
-    int8_t door_pos;
+void dolphin_locked_manage_redraw(DolphinLockedView* locked_view) {
+    bool animation_seq_end;
 
     with_view_model(
         locked_view->view, (DolphinLockedViewModel * model) {
-            door_pos = model->door_left_x;
+            model->animation_seq_end = !model->door_left_x;
+            animation_seq_end = model->animation_seq_end;
+
+            if(!model->animation_seq_end) {
+                model->door_left_x = CLAMP(model->door_left_x + 5, 0, -57);
+                model->door_right_x = CLAMP(model->door_right_x - 5, 115, 60);
+            }
             return true;
         });
 
-    if(door_pos > -10) {
+    if(animation_seq_end) {
         osTimerStop(locked_view->timer);
     }
 }
@@ -65,6 +72,7 @@ void dolphin_locked_trigger_redraw(DolphinLockedView* locked_view) {
 void dolphin_locked_reset_counter(DolphinLockedView* locked_view) {
     locked_view->lock_count = 0;
     locked_view->lock_lastpress = 0;
+
     with_view_model(
         locked_view->view, (DolphinLockedViewModel * model) {
             model->hint_timeout = 0;
@@ -78,22 +86,19 @@ void dolphin_locked_view_render(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    if(m->door_left_x) {
-        m->door_left_x = CLAMP(m->door_left_x + 5, 0, -57);
-        m->door_right_x = CLAMP(m->door_right_x - 5, 115, 60);
-
+    if(!m->animation_seq_end) {
         canvas_draw_icon(canvas, m->door_left_x, 0, &I_DoorLeft_70x55);
         canvas_draw_icon(canvas, m->door_right_x, 0, &I_DoorRight_70x55);
     }
 
-    if(m->animation && !m->door_left_x) {
+    if(m->animation && m->animation_seq_end) {
         canvas_draw_icon_animation(canvas, 0, -3, m->animation);
     }
 
     if(m->hint_timeout) {
         m->hint_timeout--;
 
-        if(m->door_left_x) {
+        if(!m->animation_seq_end) {
             canvas_set_font(canvas, FontPrimary);
             elements_multiline_text_framed(canvas, 42, 30, "Locked");
         } else {

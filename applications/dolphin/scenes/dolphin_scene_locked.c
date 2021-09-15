@@ -33,7 +33,7 @@ const bool dolphin_scene_locked_on_event(void* context, SceneManagerEvent event)
             consumed = true;
             break;
         case DolphinLockedEventUpdate:
-            dolphin_locked_trigger_redraw(dolphin->locked_view);
+            dolphin_locked_manage_redraw(dolphin->locked_view);
             consumed = true;
         default:
             break;
