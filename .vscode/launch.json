@@ -9,9 +9,8 @@
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
-            "debugServerArgs": "-c \"stm32wbx.cpu configure -rtos auto\"  -c \"init\"",
+            "openOCDLaunchCommands": ["transport select hla_swd", "stm32wbx.cpu configure -rtos auto", "init"],
             "svdFile": "${workspaceRoot}/debug/STM32WB55_CM4.svd",
-            "interface": "swd",
             "rtos": "FreeRTOS",
             "configFiles": [
                 "interface/stlink.cfg",
