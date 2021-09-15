@@ -327,7 +327,6 @@ static void gap_advertise_start(GapState new_state)
         }
     }
     // Configure advertising
-    gap->state = new_state;
     const char* name = furi_hal_version_get_ble_local_device_name_ptr();
     status = aci_gap_set_discoverable(ADV_IND, min_interval, max_interval, PUBLIC_ADDR, 0,
                                         strlen(name), (uint8_t*)name,
@@ -335,6 +334,8 @@ static void gap_advertise_start(GapState new_state)
     if(status) {
         FURI_LOG_E(GAP_TAG, "Set discoverable err: %d", status);
     }
+    gap->state = new_state;
+    bt_update_statusbar(gap->bt);
     osTimerStart(gap->advertise_timer, INITIAL_ADV_TIMEOUT);
 }
 
@@ -348,6 +349,7 @@ static void gap_advertise_stop() {
         osTimerStop(gap->advertise_timer);
         aci_gap_set_non_discoverable();
         gap->state = GapStateIdle;
+        bt_update_statusbar(gap->bt);
     }
 }
 
