@@ -52,7 +52,8 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    return APPE_Status() == BleGlueStatusStarted;
+    BleGlueStatus status = APPE_Status();
+    return (status == BleGlueStatusBroken) || (status == BleGlueStatusStarted);
 }
 
 bool furi_hal_bt_is_active() {
