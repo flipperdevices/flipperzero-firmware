@@ -19,6 +19,9 @@ void furi_hal_bt_start_advertising();
 /** Stop advertising */
 void furi_hal_bt_stop_advertising();
 
+/** Returns true if BLE is advertising */
+bool furi_hal_bt_is_active();
+
 /** Get BT/BLE system component state */
 void furi_hal_bt_dump_state(string_t buffer);
 

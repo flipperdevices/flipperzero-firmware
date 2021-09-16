@@ -24,7 +24,7 @@ void furi_hal_bt_start_advertising() {
 }
 
 void furi_hal_bt_stop_advertising() {
-    if(furi_hal_bt_is_alive()) {
+    if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
     }
 }
@@ -52,6 +52,10 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
+    return APPE_Status() == BleGlueStatusStarted;
+}
+
+bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
 }
 
