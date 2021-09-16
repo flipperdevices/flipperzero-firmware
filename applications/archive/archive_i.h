@@ -19,6 +19,7 @@
 #include "scenes/archive_scene.h"
 
 #define MAX_FILE_SIZE 128
+#define DEFAULT_TAB_DIR InputKeyRight //default tab swith direction
 
 typedef enum {
     ArchiveViewBrowser,

@@ -63,6 +63,41 @@ bool archive_get_filenames(void* context, uint8_t tab_id, const char* path) {
     return true;
 }
 
+bool archive_dir_empty(void* context, const char* path) { // can be better
+    furi_assert(context);
+
+    FileInfo file_info;
+    Storage* fs_api = furi_record_open("storage");
+    File* directory = storage_file_alloc(fs_api);
+    char name[MAX_NAME_LEN];
+
+    if(!storage_dir_open(directory, path)) {
+        storage_dir_close(directory);
+        storage_file_free(directory);
+        return false;
+    }
+
+    bool files_found = false;
+    while(1) {
+        if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
+            break;
+        }
+        if(files_found) {
+            break;
+        } else if(storage_file_get_error(directory) == FSE_OK) {
+            files_found = name[0];
+        } else {
+            return false;
+        }
+    }
+    storage_dir_close(directory);
+    storage_file_free(directory);
+
+    furi_record_close("storage");
+
+    return files_found;
+}
+
 bool archive_read_dir(void* context, const char* path) {
     furi_assert(context);
 
@@ -116,7 +151,6 @@ void archive_file_append(const char* path, string_t string) {
     if(!file_worker_write(file_worker, string_get_cstr(string), string_size(string))) {
         FURI_LOG_E("Archive", "Append write error");
     }
-
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 }
@@ -126,18 +160,22 @@ void archive_delete_file(void* context, string_t path, string_t name) {
     furi_assert(path);
     furi_assert(name);
     ArchiveMainView* main_view = context;
-    FileWorker* file_worker = file_worker_alloc(false);
+    FileWorker* file_worker = file_worker_alloc(true);
 
     string_t full_path;
     string_init(full_path);
     string_printf(full_path, "%s/%s", string_get_cstr(path), string_get_cstr(name));
-    file_worker_remove(file_worker, string_get_cstr(full_path));
+    bool res = file_worker_remove(file_worker, string_get_cstr(full_path));
     file_worker_free(file_worker);
-    string_clear(full_path);
 
     if(archive_is_favorite(string_get_cstr(path), string_get_cstr(name))) {
-        archive_favorites_delete(string_get_cstr(path), string_get_cstr(name));
+        archive_favorites_delete(string_get_cstr(full_path));
     }
 
-    archive_file_array_remove_selected(main_view);
+    string_clear(full_path);
+    if(res) archive_file_array_remove_selected(main_view);
+
+    if(!archive_file_array_size(main_view) && !archive_get_depth(main_view)) {
+        archive_switch_tab(main_view, DEFAULT_TAB_DIR);
+    }
 }

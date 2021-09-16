@@ -130,6 +130,7 @@ uint8_t archive_get_depth(ArchiveMainView* main_view) {
 const char* archive_get_path(ArchiveMainView* main_view) {
     return string_get_cstr(main_view->path);
 }
+
 const char* archive_get_name(ArchiveMainView* main_view) {
     ArchiveFile_t* selected = archive_get_current_file(main_view);
     return string_get_cstr(selected->name);
@@ -140,28 +141,6 @@ void archive_set_name(ArchiveMainView* main_view, const char* name) {
     furi_assert(name);
 
     string_set(main_view->name, name);
-}
-
-void archive_browser_update(ArchiveMainView* main_view) {
-    furi_assert(main_view);
-
-    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
-
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            uint16_t idx = 0;
-            while(idx < files_array_size(model->files)) {
-                ArchiveFile_t* current = files_array_get(model->files, idx);
-                if(!string_search(current->name, string_get_cstr(main_view->name))) {
-                    model->idx = idx;
-                    break;
-                }
-                ++idx;
-            }
-            return true;
-        });
-
-    update_offset(main_view);
 }
 
 void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name) {
@@ -207,6 +186,9 @@ static void render_item_menu(Canvas* canvas, ArchiveMainViewModel* model) {
         string_set_str(menu[2], "---");
     } else if(selected->fav) {
         string_set_str(menu[1], "Unpin");
+    } else if(model->tab_idx == ArchiveTabFavorites) {
+        string_set_str(menu[1], "Unpin");
+        string_set_str(menu[2], "---");
     }
 
     for(size_t i = 0; i < MENU_ITEMS; i++) {
@@ -375,10 +357,73 @@ static void archive_run_in_app(
     string_clear(full_path);
     furi_record_close("loader");
 }
+static void archive_switch_dir(ArchiveMainView* main_view, const char* path) {
+    furi_assert(main_view);
+    furi_assert(path);
+
+    string_set(main_view->path, path);
+    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
+
+    if(archive_file_array_size(main_view)) {
+        update_offset(main_view);
+    }
+}
+
+void archive_switch_tab(ArchiveMainView* main_view, InputKey key) {
+    furi_assert(main_view);
+
+    ArchiveTabEnum tab = archive_get_tab(main_view);
+
+    if(key == InputKeyLeft) {
+        tab = ((tab - 1) + ArchiveTabTotal) % ArchiveTabTotal;
+    } else if(key == InputKeyRight) {
+        tab = (tab + 1) % ArchiveTabTotal;
+    }
+    archive_set_tab(main_view, tab);
+
+    if((tab != ArchiveTabFavorites && !archive_dir_empty(main_view, tab_default_paths[tab])) ||
+       (tab == ArchiveTabFavorites && !archive_favorites_count(main_view))) {
+        archive_switch_tab(main_view, key);
+    } else {
+        archive_switch_dir(main_view, tab_default_paths[archive_get_tab(main_view)]);
+        with_view_model(
+            main_view->view, (ArchiveMainViewModel * model) {
+                model->idx = 0;
+                model->depth = 0;
+                return true;
+            });
+    }
+}
+void archive_browser_update(ArchiveMainView* main_view) {
+    furi_assert(main_view);
+
+    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
+
+    if(!archive_file_array_size(main_view) && !archive_get_depth(main_view)) {
+        archive_switch_tab(main_view, DEFAULT_TAB_DIR);
+    } else {
+        with_view_model(
+            main_view->view, (ArchiveMainViewModel * model) {
+                uint16_t idx = 0;
+                while(idx < files_array_size(model->files)) {
+                    ArchiveFile_t* current = files_array_get(model->files, idx);
+                    if(!string_search(current->name, string_get_cstr(main_view->name))) {
+                        model->idx = idx;
+                        break;
+                    }
+                    ++idx;
+                }
+                return true;
+            });
+
+        update_offset(main_view);
+    }
+}
 
 static void archive_file_menu_callback(ArchiveMainView* main_view) {
     furi_assert(main_view);
 
+    ArchiveTabEnum tab = archive_get_tab(main_view);
     ArchiveFile_t* selected = archive_get_current_file(main_view);
     const char* path = archive_get_path(main_view);
     const char* name = archive_get_name(main_view);
@@ -398,20 +443,34 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
         break;
     case 1:
         if(is_known_app(selected->type)) {
-            if(!archive_is_favorite(path, name)) {
+            string_t full_path;
+            string_init(full_path);
+            string_printf(full_path, "%s/%s", (path), (name));
+
+            if(!archive_is_favorite(path, name) && tab != ArchiveTabFavorites) {
                 archive_set_name(main_view, string_get_cstr(selected->name));
-                archive_add_to_favorites(path, name);
+                archive_add_to_favorites(string_get_cstr(full_path));
             } else {
-                // delete from favorites
-                archive_favorites_delete(path, name);
+                if(tab == ArchiveTabFavorites) {
+                    archive_favorites_delete(name);
+                    archive_file_array_remove_selected(main_view);
+                    if(!archive_file_array_size(main_view)) {
+                        archive_switch_tab(main_view, DEFAULT_TAB_DIR);
+                    }
+                } else {
+                    archive_favorites_delete(string_get_cstr(full_path));
+                }
             }
+            string_clear(full_path);
             archive_close_file_menu(main_view);
         }
         break;
     case 2:
         // open rename view
         if(is_known_app(selected->type)) {
-            main_view->callback(ArchiveBrowserEventRename, main_view->context);
+            if(tab != ArchiveTabFavorites) {
+                main_view->callback(ArchiveBrowserEventRename, main_view->context);
+            }
         }
         break;
     case 3:
@@ -425,28 +484,6 @@ static void archive_file_menu_callback(ArchiveMainView* main_view) {
         break;
     }
     selected = NULL;
-}
-
-static void archive_switch_dir(ArchiveMainView* main_view, const char* path) {
-    furi_assert(main_view);
-    furi_assert(path);
-
-    string_set(main_view->path, path);
-    archive_get_filenames(main_view, archive_get_tab(main_view), string_get_cstr(main_view->path));
-    update_offset(main_view);
-}
-
-void archive_switch_tab(ArchiveMainView* main_view) {
-    furi_assert(main_view);
-
-    with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
-            model->idx = 0;
-            model->depth = 0;
-            return true;
-        });
-
-    archive_switch_dir(main_view, tab_default_paths[archive_get_tab(main_view)]);
 }
 
 static void archive_enter_dir(ArchiveMainView* main_view, string_t name) {
@@ -527,23 +564,9 @@ bool archive_view_input(InputEvent* event, void* context) {
         break;
 
     case BrowserActionBrowse:
-
         if(event->type == InputTypeShort) {
-            if(event->key == InputKeyLeft) {
-                ArchiveTabEnum tab = archive_get_tab(main_view);
-                if(tab) {
-                    archive_set_tab(main_view, CLAMP(tab - 1, ArchiveTabTotal, 0));
-                    archive_switch_tab(main_view);
-                    return true;
-                }
-            } else if(event->key == InputKeyRight) {
-                ArchiveTabEnum tab = archive_get_tab(main_view);
-
-                if(tab < ArchiveTabTotal - 1) {
-                    archive_set_tab(main_view, CLAMP(tab + 1, ArchiveTabTotal - 1, 0));
-                    archive_switch_tab(main_view);
-                    return true;
-                }
+            if(event->key == InputKeyLeft || event->key == InputKeyRight) {
+                archive_switch_tab(main_view, event->key);
 
             } else if(event->key == InputKeyBack) {
                 if(!archive_get_depth(main_view)) {
@@ -590,6 +613,10 @@ bool archive_view_input(InputEvent* event, void* context) {
                                 archive_run_in_app(main_view, selected, true);
                             }
                         } else {
+                            archive_show_file_menu(main_view);
+                        }
+                    } else if(event->type == InputTypeLong) {
+                        if(archive_get_tab(main_view) == ArchiveTabFavorites) {
                             archive_show_file_menu(main_view);
                         }
                     }

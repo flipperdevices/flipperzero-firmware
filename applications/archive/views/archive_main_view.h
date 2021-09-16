@@ -105,11 +105,13 @@ void archive_file_array_clean(ArchiveMainView* main_view);
 
 void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
 void archive_browser_update(ArchiveMainView* main_view);
+void archive_switch_tab(ArchiveMainView* main_view, InputKey key);
 
 size_t archive_file_array_size(ArchiveMainView* main_view);
 ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view);
 const char* archive_get_path(ArchiveMainView* main_view);
 const char* archive_get_name(ArchiveMainView* main_view);
+uint8_t archive_get_depth(ArchiveMainView* main_view);
 void archive_set_name(ArchiveMainView* main_view, const char* name);
 
 static inline bool is_known_app(ArchiveFileTypeEnum type) {
