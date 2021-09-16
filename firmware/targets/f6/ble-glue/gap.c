@@ -10,6 +10,7 @@
 #include "serial_service.h"
 
 #include <applications/bt/bt_service/bt.h>
+#include <applications/dialogs/dialogs.h>
 #include <furi-hal.h>
 
 #define GAP_TAG "BLE"
@@ -20,25 +21,27 @@
 #define BD_ADDR_SIZE_LOCAL 6
 
 typedef struct {
-  uint16_t gap_svc_handle;
-  uint16_t dev_name_char_handle;
-  uint16_t appearance_char_handle;
-  uint16_t connection_handle;
-  uint8_t adv_svc_uuid_len;
-  uint8_t adv_svc_uuid[20];
+    uint16_t gap_svc_handle;
+    uint16_t dev_name_char_handle;
+    uint16_t appearance_char_handle;
+    uint16_t connection_handle;
+    uint8_t adv_svc_uuid_len;
+    uint8_t adv_svc_uuid[20];
 } GapSvc;
 
 typedef struct {
-  GapSvc gap_svc;
-  GapState state;
-  osMutexId_t state_mutex;
-  uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
-  Bt* bt;
-  osTimerId advertise_timer;
-  osThreadAttr_t thread_attr;
-  osThreadId_t thread_id;
-  osMessageQueueId_t command_queue;
-  bool enable_adv;
+    GapSvc gap_svc;
+    GapState state;
+    osMutexId_t state_mutex;
+    uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
+    Bt* bt;
+    DialogMessage* dialog_message;
+    DialogsApp* dialogs;
+    osTimerId advertise_timer;
+    osThreadAttr_t thread_attr;
+    osThreadId_t thread_id;
+    osMessageQueueId_t command_queue;
+    bool enable_adv;
 } Gap;
 
 typedef enum {
@@ -61,6 +64,17 @@ static Gap* gap = NULL;
 static void gap_advertise_start(GapState new_state);
 static void gap_app(void *arg);
 
+static bool gap_pin_code_display_and_confirm(uint32_t pin) {
+    string_t pin_str;
+    string_init_printf(pin_str, "%06d", pin);
+    dialog_message_set_text(
+        gap->dialog_message, string_get_cstr(pin_str), 64, 32, AlignCenter, AlignCenter);
+    dialog_message_set_buttons(gap->dialog_message, "Cancel", "Ok", NULL);
+    DialogMessageButton btn = dialog_message_show(gap->dialogs, gap->dialog_message);
+    string_clear(pin_str);
+    return btn == DialogMessageButtonCenter;
+}
+
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 {
     hci_event_pckt *event_pckt;
@@ -69,6 +83,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
     hci_le_phy_update_complete_event_rp0 *evt_le_phy_update_complete;
     uint8_t tx_phy;
     uint8_t rx_phy;
+    uint32_t pin;
     tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
 
     event_pckt = (hci_event_pckt*) ((hci_uart_pckt *) pckt)->data;
@@ -144,13 +159,11 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 break;
 
             case EVT_BLUE_GAP_PASS_KEY_REQUEST:
-            {
                 // Generate random PIN code
-                uint32_t pin = rand() % 999999;
+                pin = rand() % 999999;
                 aci_gap_pass_key_resp(gap->gap_svc.connection_handle, pin);
                 FURI_LOG_I(GAP_TAG, "Pass key request event. Pin: %d", pin);
                 bt_pin_code_show(gap->bt, pin);
-            }
                 break;
 
             case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:
@@ -179,9 +192,10 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 break;
 
             case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE:
-                FURI_LOG_I(GAP_TAG, "Hex_value = %lx",
-                            ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
-                aci_gap_numeric_comparison_value_confirm_yesno(gap->gap_svc.connection_handle, 1);
+                pin = ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value;
+                FURI_LOG_I(GAP_TAG, "Pin code: %d", pin);
+                bool accept_connection = gap_pin_code_display_and_confirm(pin);
+                aci_gap_numeric_comparison_value_confirm_yesno(gap->gap_svc.connection_handle, accept_connection);
                 break;
 
             case EVT_BLUE_GAP_PAIRING_CMPLT:
@@ -296,7 +310,7 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
-    aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
     // Setup  authentication
     aci_gap_set_authentication_requirement(1, 1, 1, 0, 8, 16, 1, 0, PUBLIC_ADDR);
     // Configure whitelist
@@ -379,6 +393,8 @@ bool gap_init() {
     srand(DWT->CYCCNT);
     // Open Bt record
     gap->bt = furi_record_open("bt");
+    gap->dialogs = furi_record_open("dialogs");
+    gap->dialog_message = dialog_message_alloc();
     // Create advertising timer
     gap->advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, NULL, NULL);
     // Initialization of GATT & GAP layer
