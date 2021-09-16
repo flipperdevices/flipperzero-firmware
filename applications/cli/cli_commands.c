@@ -52,6 +52,7 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
     const Version* boot_version = furi_hal_version_get_boot_version();
     if(boot_version) {
         printf("boot_version        : %s\r\n", version_get_version(boot_version));
+        printf("boot_target         : %s\r\n", version_get_target(boot_version));
         printf("boot_commit         : %s\r\n", version_get_githash(boot_version));
         printf("boot_branch         : %s\r\n", version_get_gitbranch(boot_version));
         printf("boot_build_date     : %s\r\n", version_get_builddate(boot_version));
