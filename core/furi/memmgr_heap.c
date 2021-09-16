@@ -162,6 +162,7 @@ size_t memmgr_heap_get_thread_memory(osThreadId_t thread_id) {
         MemmgrHeapAllocDict_t* alloc_dict =
             MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
         if(alloc_dict) {
+            leftovers = 0;
             MemmgrHeapAllocDict_it_t alloc_dict_it;
             for(MemmgrHeapAllocDict_it(alloc_dict_it, *alloc_dict);
                 !MemmgrHeapAllocDict_end_p(alloc_dict_it);
