@@ -1,6 +1,7 @@
 #include "../archive_i.h"
 #include "../helpers/archive_favorites.h"
 #include "../helpers/archive_files.h"
+#include "../helpers/archive_browser.h"
 
 #define SCENE_RENAME_CUSTOM_EVENT (0UL)
 

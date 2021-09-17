@@ -1,6 +1,5 @@
 #include "archive_files.h"
-#include "archive_favorites.h"
-#include "../archive_i.h"
+#include "archive_browser.h"
 
 bool filter_by_extension(FileInfo* file_info, const char* tab_ext, const char* name) {
     furi_assert(file_info);

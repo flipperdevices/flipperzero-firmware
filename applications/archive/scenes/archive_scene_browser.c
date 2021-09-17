@@ -1,5 +1,35 @@
 #include "../archive_i.h"
+#include "../helpers/archive_files.h"
+#include "../helpers/archive_favorites.h"
+#include "../helpers/archive_browser.h"
 #include "../views/archive_main_view.h"
+
+static const char* flipper_app_name[] = {
+    [ArchiveFileTypeIButton] = "iButton",
+    [ArchiveFileTypeNFC] = "NFC",
+    [ArchiveFileTypeSubGhz] = "Sub-GHz",
+    [ArchiveFileTypeLFRFID] = "125 kHz RFID",
+    [ArchiveFileTypeIrda] = "Infrared",
+};
+
+static void archive_run_in_app(
+    ArchiveMainView* main_view,
+    ArchiveFile_t* selected,
+    bool full_path_provided) {
+    Loader* loader = furi_record_open("loader");
+
+    string_t full_path;
+    if(!full_path_provided) {
+        string_init_printf(
+            full_path, "%s/%s", string_get_cstr(main_view->path), string_get_cstr(selected->name));
+    } else {
+        string_init_set(full_path, selected->name);
+    }
+    loader_start(loader, flipper_app_name[selected->type], string_get_cstr(full_path));
+
+    string_clear(full_path);
+    furi_record_close("loader");
+}
 
 void archive_scene_browser_callback(ArchiveBrowserEvent event, void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
@@ -17,16 +47,79 @@ const void archive_scene_browser_on_enter(void* context) {
 
 const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     ArchiveApp* archive = (ArchiveApp*)context;
+    ArchiveMainView* main_view = archive->main_view;
+    ArchiveFile_t* selected = archive_get_current_file(main_view);
+    ArchiveTabEnum tab = archive_get_tab(main_view);
+    const char* path = archive_get_path(main_view);
+    const char* name = archive_get_name(main_view);
     bool consumed;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case ArchiveBrowserEventRename:
-            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
+        case ArchiveBrowserEventFileMenuOpen:
+            archive_show_file_menu(main_view, true);
             consumed = true;
             break;
+        case ArchiveBrowserEventFileMenuClose:
+            archive_show_file_menu(main_view, false);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuRun:
+            if(is_known_app(selected->type)) {
+                archive_run_in_app(main_view, selected, tab == ArchiveTabFavorites);
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuPin:
+            if(is_known_app(selected->type)) {
+                string_t full_path;
+                string_init(full_path);
+                string_printf(full_path, "%s/%s", path, name);
+
+                if(!archive_is_favorite(path, name) && tab != ArchiveTabFavorites) {
+                    archive_set_name(main_view, string_get_cstr(selected->name));
+                    archive_add_to_favorites(string_get_cstr(full_path));
+                } else {
+                    if(tab == ArchiveTabFavorites) {
+                        archive_favorites_delete(name);
+                        archive_file_array_remove_selected(main_view);
+                        if(!archive_file_array_size(main_view)) {
+                            archive_switch_tab(main_view, DEFAULT_TAB_DIR);
+                        }
+                    } else {
+                        archive_favorites_delete(string_get_cstr(full_path));
+                    }
+                }
+                string_clear(full_path);
+            }
+            archive_show_file_menu(main_view, false);
+            consumed = true;
+            break;
+
+        case ArchiveBrowserEventFileMenuRename:
+            if(is_known_app(selected->type)) {
+                if(tab != ArchiveTabFavorites) {
+                    scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
+                }
+            }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuDelete:
+            archive_delete_file(main_view, main_view->path, selected->name);
+            archive_show_file_menu(main_view, false);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventEnterDir:
+            archive_enter_dir(archive->main_view, selected->name);
+            consumed = true;
+            break;
+
         case ArchiveBrowserEventExit:
-            view_dispatcher_stop(archive->view_dispatcher);
+            if(archive_get_depth(archive->main_view)) {
+                archive_leave_dir(archive->main_view);
+            } else {
+                view_dispatcher_stop(archive->view_dispatcher);
+            }
             consumed = true;
             break;
 

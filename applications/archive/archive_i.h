@@ -9,23 +9,10 @@
 #include <gui/modules/text_input.h>
 #include <loader/loader.h>
 
-#include <m-string.h>
-#include <m-array.h>
-#include <storage/storage.h>
-#include "applications.h"
-#include "file-worker.h"
-
 #include "views/archive_main_view.h"
 #include "scenes/archive_scene.h"
 
 #define MAX_FILE_SIZE 128
-#define DEFAULT_TAB_DIR InputKeyRight //default tab swith direction
-
-typedef enum {
-    ArchiveViewBrowser,
-    ArchiveViewTextInput,
-    ArchiveViewTotal,
-} ArchiveViewEnum;
 
 static const char* tab_default_paths[] = {
     [ArchiveTabFavorites] = "/any/favorites",
@@ -59,17 +46,10 @@ static inline const char* get_favorites_path() {
 }
 
 typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-    EventTypeExit,
-} EventType;
-
-typedef struct {
-    union {
-        InputEvent input;
-    } value;
-    EventType type;
-} AppEvent;
+    ArchiveViewBrowser,
+    ArchiveViewTextInput,
+    ArchiveViewTotal,
+} ArchiveViewEnum;
 
 struct ArchiveApp {
     Gui* gui;

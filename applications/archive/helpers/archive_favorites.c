@@ -1,6 +1,6 @@
+
 #include "archive_favorites.h"
-#include "archive_files.h"
-#include "../views/archive_main_view.h"
+#include "archive_browser.h"
 
 uint16_t archive_favorites_count(void* context) {
     furi_assert(context);
