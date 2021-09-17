@@ -2,7 +2,7 @@
 #include "../helpers/archive_files.h"
 #include "../helpers/archive_favorites.h"
 #include "../helpers/archive_browser.h"
-#include "../views/archive_main_view.h"
+#include "../views/archive_browser_view.h"
 
 static const char* flipper_app_name[] = {
     [ArchiveFileTypeIButton] = "iButton",
@@ -13,7 +13,7 @@ static const char* flipper_app_name[] = {
 };
 
 static void archive_run_in_app(
-    ArchiveMainView* main_view,
+    ArchiveBrowserView* browser,
     ArchiveFile_t* selected,
     bool full_path_provided) {
     Loader* loader = furi_record_open("loader");
@@ -21,7 +21,7 @@ static void archive_run_in_app(
     string_t full_path;
     if(!full_path_provided) {
         string_init_printf(
-            full_path, "%s/%s", string_get_cstr(main_view->path), string_get_cstr(selected->name));
+            full_path, "%s/%s", string_get_cstr(browser->path), string_get_cstr(selected->name));
     } else {
         string_init_set(full_path, selected->name);
     }
@@ -38,35 +38,35 @@ void archive_scene_browser_callback(ArchiveBrowserEvent event, void* context) {
 
 const void archive_scene_browser_on_enter(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
-    ArchiveMainView* main_view = archive->main_view;
+    ArchiveBrowserView* browser = archive->browser;
 
-    archive_browser_set_callback(main_view, archive_scene_browser_callback, archive);
-    archive_browser_update(main_view);
+    archive_browser_set_callback(browser, archive_scene_browser_callback, archive);
+    archive_update_focus(browser);
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 }
 
 const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     ArchiveApp* archive = (ArchiveApp*)context;
-    ArchiveMainView* main_view = archive->main_view;
-    ArchiveFile_t* selected = archive_get_current_file(main_view);
-    ArchiveTabEnum tab = archive_get_tab(main_view);
-    const char* path = archive_get_path(main_view);
-    const char* name = archive_get_name(main_view);
+    ArchiveBrowserView* browser = archive->browser;
+    ArchiveFile_t* selected = archive_get_current_file(browser);
+    ArchiveTabEnum tab = archive_get_tab(browser);
+    const char* path = archive_get_path(browser);
+    const char* name = archive_get_name(browser);
     bool consumed;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case ArchiveBrowserEventFileMenuOpen:
-            archive_show_file_menu(main_view, true);
+            archive_show_file_menu(browser, true);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuClose:
-            archive_show_file_menu(main_view, false);
+            archive_show_file_menu(browser, false);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
             if(is_known_app(selected->type)) {
-                archive_run_in_app(main_view, selected, tab == ArchiveTabFavorites);
+                archive_run_in_app(browser, selected, tab == ArchiveTabFavorites);
             }
             consumed = true;
             break;
@@ -77,14 +77,14 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
                 string_printf(full_path, "%s/%s", path, name);
 
                 if(!archive_is_favorite(path, name) && tab != ArchiveTabFavorites) {
-                    archive_set_name(main_view, string_get_cstr(selected->name));
+                    archive_set_name(browser, string_get_cstr(selected->name));
                     archive_add_to_favorites(string_get_cstr(full_path));
                 } else {
                     if(tab == ArchiveTabFavorites) {
                         archive_favorites_delete(name);
-                        archive_file_array_remove_selected(main_view);
-                        if(!archive_file_array_size(main_view)) {
-                            archive_switch_tab(main_view, DEFAULT_TAB_DIR);
+                        archive_file_array_rm_selected(browser);
+                        if(!archive_file_array_size(browser)) {
+                            archive_switch_tab(browser, DEFAULT_TAB_DIR);
                         }
                     } else {
                         archive_favorites_delete(string_get_cstr(full_path));
@@ -92,7 +92,7 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
                 }
                 string_clear(full_path);
             }
-            archive_show_file_menu(main_view, false);
+            archive_show_file_menu(browser, false);
             consumed = true;
             break;
 
@@ -105,18 +105,18 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:
-            archive_delete_file(main_view, main_view->path, selected->name);
-            archive_show_file_menu(main_view, false);
+            archive_delete_file(browser, browser->path, selected->name);
+            archive_show_file_menu(browser, false);
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
-            archive_enter_dir(archive->main_view, selected->name);
+            archive_enter_dir(archive->browser, selected->name);
             consumed = true;
             break;
 
         case ArchiveBrowserEventExit:
-            if(archive_get_depth(archive->main_view)) {
-                archive_leave_dir(archive->main_view);
+            if(archive_get_depth(archive->browser)) {
+                archive_leave_dir(archive->browser);
             } else {
                 view_dispatcher_stop(archive->view_dispatcher);
             }

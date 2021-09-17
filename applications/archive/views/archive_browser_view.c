@@ -1,6 +1,6 @@
 #include <furi.h>
 #include "../archive_i.h"
-#include "archive_main_view.h"
+#include "archive_browser_view.h"
 #include "../helpers/archive_browser.h"
 
 static const char* ArchiveTabNames[] = {
@@ -23,16 +23,16 @@ static const Icon* ArchiveItemIcons[] = {
 };
 
 void archive_browser_set_callback(
-    ArchiveMainView* main_view,
-    ArchiveMainViewCallback callback,
+    ArchiveBrowserView* browser,
+    ArchiveBrowserViewCallback callback,
     void* context) {
-    furi_assert(main_view);
+    furi_assert(browser);
     furi_assert(callback);
-    main_view->callback = callback;
-    main_view->context = context;
+    browser->callback = callback;
+    browser->context = context;
 }
 
-static void render_item_menu(Canvas* canvas, ArchiveMainViewModel* model) {
+static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 71, 17, 57, 46);
     canvas_set_color(canvas, ColorBlack);
@@ -80,7 +80,7 @@ static void archive_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
     canvas_draw_dot(canvas, scrollbar ? 121 : 126, (15 + idx * FRAME_HEIGHT) + 11);
 }
 
-static void draw_list(Canvas* canvas, ArchiveMainViewModel* model) {
+static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
     furi_assert(model);
 
     size_t array_size = files_array_size(model->files);
@@ -124,7 +124,7 @@ static void draw_list(Canvas* canvas, ArchiveMainViewModel* model) {
     }
 }
 
-static void archive_render_status_bar(Canvas* canvas, ArchiveMainViewModel* model) {
+static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* model) {
     furi_assert(model);
 
     const char* tab_name = ArchiveTabNames[model->tab_idx];
@@ -160,7 +160,7 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveMainViewModel* mode
 }
 
 void archive_view_render(Canvas* canvas, void* model) {
-    ArchiveMainViewModel* m = model;
+    ArchiveBrowserViewModel* m = model;
 
     archive_render_status_bar(canvas, model);
 
@@ -172,22 +172,29 @@ void archive_view_render(Canvas* canvas, void* model) {
     }
 }
 
-View* archive_main_get_view(ArchiveMainView* main_view) {
-    furi_assert(main_view);
-    return main_view->view;
+View* archive_main_get_view(ArchiveBrowserView* browser) {
+    furi_assert(browser);
+    return browser->view;
 }
 
 bool archive_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    ArchiveMainView* main_view = context;
+    ArchiveBrowserView* browser = context;
 
-    if(archive_in_file_menu(main_view)) {
+    bool in_menu;
+    with_view_model(
+        browser->view, (ArchiveBrowserViewModel * model) {
+            in_menu = model->menu;
+            return true;
+        });
+
+    if(in_menu) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyUp || event->key == InputKeyDown) {
                 with_view_model(
-                    main_view->view, (ArchiveMainViewModel * model) {
+                    browser->view, (ArchiveBrowserViewModel * model) {
                         if(event->key == InputKeyUp) {
                             model->menu_idx = ((model->menu_idx - 1) + MENU_ITEMS) % MENU_ITEMS;
                         } else if(event->key == InputKeyDown) {
@@ -200,28 +207,28 @@ bool archive_view_input(InputEvent* event, void* context) {
             if(event->key == InputKeyOk) {
                 uint8_t idx;
                 with_view_model(
-                    main_view->view, (ArchiveMainViewModel * model) {
+                    browser->view, (ArchiveBrowserViewModel * model) {
                         idx = model->menu_idx;
                         return true;
                     });
 
-                main_view->callback(file_menu_actions[idx], main_view->context);
+                browser->callback(file_menu_actions[idx], browser->context);
             } else if(event->key == InputKeyBack) {
-                main_view->callback(ArchiveBrowserEventFileMenuClose, main_view->context);
+                browser->callback(ArchiveBrowserEventFileMenuClose, browser->context);
             }
         }
 
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyLeft || event->key == InputKeyRight) {
-                archive_switch_tab(main_view, event->key);
+                archive_switch_tab(browser, event->key);
             } else if(event->key == InputKeyBack) {
-                main_view->callback(ArchiveBrowserEventExit, main_view->context);
+                browser->callback(ArchiveBrowserEventExit, browser->context);
             }
         }
         if(event->key == InputKeyUp || event->key == InputKeyDown) {
             with_view_model(
-                main_view->view, (ArchiveMainViewModel * model) {
+                browser->view, (ArchiveBrowserViewModel * model) {
                     uint16_t num_elements = (uint16_t)files_array_size(model->files);
                     if((event->type == InputTypeShort || event->type == InputTypeRepeat)) {
                         if(event->key == InputKeyUp) {
@@ -233,28 +240,28 @@ bool archive_view_input(InputEvent* event, void* context) {
 
                     return true;
                 });
-            update_offset(main_view);
+            archive_update_offset(browser);
         }
 
         if(event->key == InputKeyOk) {
-            ArchiveFile_t* selected = archive_get_current_file(main_view);
+            ArchiveFile_t* selected = archive_get_current_file(browser);
 
             if(selected) {
-                archive_set_name(main_view, string_get_cstr(selected->name));
+                archive_set_name(browser, string_get_cstr(selected->name));
 
                 if(event->type == InputTypeShort) {
-                    if(archive_get_tab(main_view) == ArchiveTabFavorites) {
-                        main_view->callback(ArchiveBrowserEventFileMenuRun, main_view->context);
+                    if(archive_get_tab(browser) == ArchiveTabFavorites) {
+                        browser->callback(ArchiveBrowserEventFileMenuRun, browser->context);
                     } else if(selected->type == ArchiveFileTypeFolder) {
-                        main_view->callback(ArchiveBrowserEventEnterDir, main_view->context);
+                        browser->callback(ArchiveBrowserEventEnterDir, browser->context);
                     } else {
-                        main_view->callback(ArchiveBrowserEventFileMenuOpen, main_view->context);
+                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
                 } else if(event->type == InputTypeLong) {
-                    if(archive_get_tab(main_view) == ArchiveTabFavorites) {
-                        main_view->callback(ArchiveBrowserEventFileMenuOpen, main_view->context);
+                    if(archive_get_tab(browser) == ArchiveTabFavorites) {
+                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     } else if(selected->type == ArchiveFileTypeFolder) {
-                        main_view->callback(ArchiveBrowserEventFileMenuOpen, main_view->context);
+                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
                 }
             }
@@ -264,38 +271,38 @@ bool archive_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-ArchiveMainView* main_view_alloc() {
-    ArchiveMainView* main_view = furi_alloc(sizeof(ArchiveMainView));
-    main_view->view = view_alloc();
-    view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(ArchiveMainViewModel));
-    view_set_context(main_view->view, main_view);
-    view_set_draw_callback(main_view->view, (ViewDrawCallback)archive_view_render);
-    view_set_input_callback(main_view->view, archive_view_input);
+ArchiveBrowserView* browser_alloc() {
+    ArchiveBrowserView* browser = furi_alloc(sizeof(ArchiveBrowserView));
+    browser->view = view_alloc();
+    view_allocate_model(browser->view, ViewModelTypeLocking, sizeof(ArchiveBrowserViewModel));
+    view_set_context(browser->view, browser);
+    view_set_draw_callback(browser->view, (ViewDrawCallback)archive_view_render);
+    view_set_input_callback(browser->view, archive_view_input);
 
-    string_init(main_view->name);
-    string_init(main_view->path);
+    string_init(browser->name);
+    string_init(browser->path);
 
     with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
+        browser->view, (ArchiveBrowserViewModel * model) {
             files_array_init(model->files);
             return true;
         });
 
-    return main_view;
+    return browser;
 }
 
-void main_view_free(ArchiveMainView* main_view) {
-    furi_assert(main_view);
+void browser_free(ArchiveBrowserView* browser) {
+    furi_assert(browser);
 
     with_view_model(
-        main_view->view, (ArchiveMainViewModel * model) {
+        browser->view, (ArchiveBrowserViewModel * model) {
             files_array_clear(model->files);
             return false;
         });
 
-    string_clear(main_view->name);
-    string_clear(main_view->path);
+    string_clear(browser->name);
+    string_clear(browser->path);
 
-    view_free(main_view->view);
-    free(main_view);
+    view_free(browser->view);
+    free(browser);
 }

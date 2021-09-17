@@ -1,7 +1,18 @@
 #pragma once
+
 #include "../archive_i.h"
 
 #define DEFAULT_TAB_DIR InputKeyRight //default tab swith direction
+
+static const char* tab_default_paths[] = {
+    [ArchiveTabFavorites] = "/any/favorites",
+    [ArchiveTabIButton] = "/any/ibutton",
+    [ArchiveTabNFC] = "/any/nfc",
+    [ArchiveTabSubGhz] = "/any/subghz/saved",
+    [ArchiveTabLFRFID] = "/any/lfrfid",
+    [ArchiveTabIrda] = "/any/irda",
+    [ArchiveTabBrowser] = "/any",
+};
 
 static const char* known_ext[] = {
     [ArchiveFileTypeIButton] = ".ibtn",
@@ -27,35 +38,32 @@ static inline const char* get_tab_ext(ArchiveTabEnum tab) {
         return "*";
     }
 }
+
+static inline const char* archive_get_default_path(ArchiveTabEnum tab) {
+    return tab_default_paths[tab];
+}
+
 inline bool is_known_app(ArchiveFileTypeEnum type) {
     return (type != ArchiveFileTypeFolder && type != ArchiveFileTypeUnknown);
 }
 
-void update_offset(ArchiveMainView* main_view);
+void archive_update_offset(ArchiveBrowserView* browser);
+void archive_update_focus(ArchiveBrowserView* browser);
 
-size_t archive_file_array_size(ArchiveMainView* main_view);
-void archive_file_array_remove_selected(ArchiveMainView* main_view);
-void archive_file_array_clean(ArchiveMainView* main_view);
+size_t archive_file_array_size(ArchiveBrowserView* browser);
+void archive_file_array_rm_selected(ArchiveBrowserView* browser);
+void archive_file_array_rm_all(ArchiveBrowserView* browser);
 
-ArchiveFile_t* archive_get_current_file(ArchiveMainView* main_view);
-ArchiveTabEnum archive_get_tab(ArchiveMainView* main_view);
+ArchiveFile_t* archive_get_current_file(ArchiveBrowserView* browser);
+ArchiveTabEnum archive_get_tab(ArchiveBrowserView* browser);
+uint8_t archive_get_depth(ArchiveBrowserView* browser);
+const char* archive_get_path(ArchiveBrowserView* browser);
+const char* archive_get_name(ArchiveBrowserView* browser);
 
-void archive_set_tab(ArchiveMainView* main_view, ArchiveTabEnum tab);
+void archive_set_name(ArchiveBrowserView* browser, const char* name);
+void archive_add_item(ArchiveBrowserView* browser, FileInfo* file_info, const char* name);
+void archive_show_file_menu(ArchiveBrowserView* browser, bool show);
 
-uint8_t archive_get_depth(ArchiveMainView* main_view);
-const char* archive_get_path(ArchiveMainView* main_view);
-const char* archive_get_name(ArchiveMainView* main_view);
-
-void archive_set_name(ArchiveMainView* main_view, const char* name);
-
-void archive_view_add_item(ArchiveMainView* main_view, FileInfo* file_info, const char* name);
-
-void archive_show_file_menu(ArchiveMainView* main_view, bool show);
-bool archive_in_file_menu(ArchiveMainView* main_view);
-
-void archive_switch_dir(ArchiveMainView* main_view, const char* path);
-void archive_switch_tab(ArchiveMainView* main_view, InputKey key);
-void archive_enter_dir(ArchiveMainView* main_view, string_t name);
-void archive_leave_dir(ArchiveMainView* main_view);
-
-void archive_browser_update(ArchiveMainView* main_view);
+void archive_switch_tab(ArchiveBrowserView* browser, InputKey key);
+void archive_enter_dir(ArchiveBrowserView* browser, string_t name);
+void archive_leave_dir(ArchiveBrowserView* browser);

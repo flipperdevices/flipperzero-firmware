@@ -34,7 +34,7 @@ uint16_t archive_favorites_count(void* context) {
 bool archive_favorites_read(void* context) {
     furi_assert(context);
 
-    ArchiveMainView* archive_view = context;
+    ArchiveBrowserView* archive_view = context;
     FileWorker* file_worker = file_worker_alloc(true);
 
     string_t buffer;
@@ -52,7 +52,7 @@ bool archive_favorites_read(void* context) {
                 break;
             }
 
-            archive_view_add_item(archive_view, &file_info, string_get_cstr(buffer));
+            archive_add_item(archive_view, &file_info, string_get_cstr(buffer));
             string_clean(buffer);
         }
     }

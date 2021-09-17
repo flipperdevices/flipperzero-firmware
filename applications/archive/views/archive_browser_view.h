@@ -44,9 +44,9 @@ static const uint8_t file_menu_actions[MENU_ITEMS] = {
     [3] = ArchiveBrowserEventFileMenuDelete,
 };
 
-typedef struct ArchiveMainView ArchiveMainView;
+typedef struct ArchiveBrowserView ArchiveBrowserView;
 
-typedef void (*ArchiveMainViewCallback)(ArchiveBrowserEvent event, void* context);
+typedef void (*ArchiveBrowserViewCallback)(ArchiveBrowserEvent event, void* context);
 
 typedef enum {
     BrowserActionBrowse,
@@ -54,9 +54,9 @@ typedef enum {
     BrowserActionTotal,
 } BrowserActionEnum;
 
-struct ArchiveMainView {
+struct ArchiveBrowserView {
     View* view;
-    ArchiveMainViewCallback callback;
+    ArchiveBrowserViewCallback callback;
     void* context;
 
     string_t name;
@@ -65,6 +65,7 @@ struct ArchiveMainView {
 
 typedef struct {
     ArchiveTabEnum tab_idx;
+    ArchiveTabEnum last_tab;
     files_array_t files;
 
     uint8_t depth;
@@ -75,14 +76,14 @@ typedef struct {
     uint16_t last_idx[MAX_DEPTH];
     uint16_t list_offset;
 
-} ArchiveMainViewModel;
+} ArchiveBrowserViewModel;
 
 void archive_browser_set_callback(
-    ArchiveMainView* main_view,
-    ArchiveMainViewCallback callback,
+    ArchiveBrowserView* browser,
+    ArchiveBrowserViewCallback callback,
     void* context);
 
-View* archive_main_get_view(ArchiveMainView* main_view);
+View* archive_main_get_view(ArchiveBrowserView* browser);
 
-ArchiveMainView* main_view_alloc();
-void main_view_free(ArchiveMainView* main_view);
+ArchiveBrowserView* browser_alloc();
+void browser_free(ArchiveBrowserView* browser);
