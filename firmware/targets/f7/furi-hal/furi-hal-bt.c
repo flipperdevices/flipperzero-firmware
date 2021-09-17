@@ -85,7 +85,9 @@ bool furi_hal_bt_lock_flash(bool erase_flag) {
 
     if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
 
-    while(LL_FLASH_IsActiveFlag_OperationSuspended()) {};
+    while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
+        osDelay(1);
+    };
 
     __disable_irq();
 
