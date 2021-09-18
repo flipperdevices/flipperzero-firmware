@@ -10,7 +10,7 @@ uint16_t archive_favorites_count(void* context) {
     string_t buffer;
     string_init(buffer);
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_ALWAYS);
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
     uint16_t lines = 0;
 
     if(result) {
@@ -41,7 +41,7 @@ bool archive_favorites_read(void* context) {
     FileInfo file_info;
     string_init(buffer);
 
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_ALWAYS);
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
         while(1) {
@@ -112,7 +112,7 @@ bool archive_is_favorite(const char* file_path, const char* name) {
     bool found = false;
 
     string_init_printf(path, "%s/%s", file_path, name);
-    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_ALWAYS);
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
         while(1) {

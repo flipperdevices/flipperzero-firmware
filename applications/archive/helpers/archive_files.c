@@ -19,14 +19,12 @@ bool filter_by_extension(FileInfo* file_info, const char* tab_ext, const char* n
     return result;
 }
 
-void archive_trim_file_ext(char* name) {
-    size_t str_len = strlen(name);
-    char* end = name + str_len;
-    while(end > name && *end != '.' && *end != '\\' && *end != '/') {
-        --end;
-    }
-    if((end > name && *end == '.') && (*(end - 1) != '\\' && *(end - 1) != '/')) {
-        *end = '\0';
+void archive_trim_file_path(char* name, bool ext) {
+    char* slash = strrchr(name, '/') + 1;
+    if(strlen(slash)) strlcpy(name, slash, strlen(slash) + 1);
+    if(ext) {
+        char* dot = strrchr(name, '.');
+        if(strlen(dot)) *dot = '\0';
     }
 }
 

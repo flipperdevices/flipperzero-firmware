@@ -93,15 +93,9 @@ static void draw_list(Canvas* canvas, ArchiveBrowserViewModel* model) {
         size_t idx = CLAMP(i + model->list_offset, array_size, 0);
         ArchiveFile_t* file = files_array_get(model->files, CLAMP(idx, array_size - 1, 0));
 
-        string_init_set(str_buff, file->name);
-        string_right(str_buff, string_search_rchar(str_buff, '/') + 1);
-        strlcpy(cstr_buff, string_get_cstr(str_buff), string_size(str_buff) + 1);
-
-        if(is_known_app(file->type)) archive_trim_file_ext(cstr_buff);
-
-        string_clean(str_buff);
-        string_set_str(str_buff, cstr_buff);
-
+        strlcpy(cstr_buff, string_get_cstr(file->name), string_size(file->name) + 1);
+        archive_trim_file_path(cstr_buff, is_known_app(file->type));
+        string_init_set_str(str_buff, cstr_buff);
         elements_string_fit_width(canvas, str_buff, scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX);
 
         if(model->idx == idx) {
@@ -145,12 +139,8 @@ static void archive_render_status_bar(Canvas* canvas, ArchiveBrowserViewModel* m
     canvas_draw_line(canvas, 107, 1, 107, 11);
     canvas_draw_line(canvas, 108, 12, 126, 12);
 
-    if(model->tab_idx > 0) {
-        canvas_draw_icon(canvas, 112, 2, &I_ButtonLeft_4x7);
-    }
-    if(model->tab_idx < SIZEOF_ARRAY(ArchiveTabNames) - 1) {
-        canvas_draw_icon(canvas, 120, 2, &I_ButtonRight_4x7);
-    }
+    canvas_draw_icon(canvas, 112, 2, &I_ButtonLeft_4x7);
+    canvas_draw_icon(canvas, 120, 2, &I_ButtonRight_4x7);
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_dot(canvas, 50, 0);

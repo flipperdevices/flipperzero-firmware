@@ -17,7 +17,7 @@ const void archive_scene_rename_on_enter(void* context) {
     ArchiveFile_t* current = archive_get_current_file(archive->browser);
     strlcpy(archive->text_store, string_get_cstr(current->name), MAX_NAME_LEN);
 
-    archive_trim_file_ext(archive->text_store);
+    archive_trim_file_path(archive->text_store, true);
 
     text_input_set_header_text(text_input, "Rename:");
 
