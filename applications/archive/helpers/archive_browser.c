@@ -37,7 +37,7 @@ void archive_update_focus(ArchiveBrowserView* browser) {
                     }
                     ++idx;
                 }
-                return true;
+                return false;
             });
 
         archive_update_offset(browser);
@@ -49,7 +49,7 @@ size_t archive_file_array_size(ArchiveBrowserView* browser) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             size = files_array_size(model->files);
-            return true;
+            return false;
         });
     return size;
 }
@@ -59,8 +59,12 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
         browser->view, (ArchiveBrowserViewModel * model) {
             files_array_remove_v(model->files, model->idx, model->idx + 1);
             model->idx = CLAMP(model->idx, files_array_size(model->files) - 1, 0);
-            return true;
+            return false;
         });
+
+    if(!archive_file_array_size(browser) && !archive_get_depth(browser)) {
+        archive_switch_tab(browser, DEFAULT_TAB_DIR);
+    }
 
     archive_update_offset(browser);
 }
@@ -80,7 +84,7 @@ ArchiveFile_t* archive_get_current_file(ArchiveBrowserView* browser) {
             selected = files_array_size(model->files) > 0 ?
                            files_array_get(model->files, model->idx) :
                            NULL;
-            return true;
+            return false;
         });
     return selected;
 }
@@ -90,7 +94,7 @@ ArchiveTabEnum archive_get_tab(ArchiveBrowserView* browser) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             tab_id = model->tab_idx;
-            return true;
+            return false;
         });
     return tab_id;
 }
@@ -100,7 +104,7 @@ uint8_t archive_get_depth(ArchiveBrowserView* browser) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             depth = model->depth;
-            return true;
+            return false;
         });
 
     return depth;
@@ -126,14 +130,14 @@ void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             model->tab_idx = tab;
-            return true;
+            return false;
         });
 }
 void archive_set_last_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             model->last_tab = model->tab_idx;
-            return true;
+            return false;
         });
 }
 
@@ -152,7 +156,7 @@ void archive_add_item(ArchiveBrowserView* browser, FileInfo* file_info, const ch
         with_view_model(
             browser->view, (ArchiveBrowserViewModel * model) {
                 files_array_push_back(model->files, item);
-                return true;
+                return false;
             });
 
         ArchiveFile_t_clear(&item);
@@ -167,13 +171,13 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
             model->menu_idx = 0;
 
             if(show) {
-                ArchiveFile_t* selected;
-                selected = files_array_get(model->files, model->idx);
-                selected->fav =
-                    is_known_app(selected->type) ?
-                        archive_is_favorite(
-                            string_get_cstr(browser->path), string_get_cstr(selected->name)) :
-                        false;
+                ArchiveFile_t* selected = files_array_get(model->files, model->idx);
+                selected->fav = is_known_app(selected->type) ?
+                                    archive_is_favorite(
+                                        "%s/%s",
+                                        string_get_cstr(browser->path),
+                                        string_get_cstr(selected->name)) :
+                                    false;
             }
 
             return true;
@@ -186,15 +190,6 @@ void archive_switch_dir(ArchiveBrowserView* browser, const char* path) {
 
     string_set(browser->path, path);
     archive_get_filenames(browser, archive_get_tab(browser), string_get_cstr(browser->path));
-
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
-            if(model->last_tab != model->tab_idx) {
-                model->idx = 0;
-                model->depth = 0;
-            }
-            return true;
-        });
 
     if(archive_file_array_size(browser)) {
         archive_update_offset(browser);
@@ -218,7 +213,16 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
        (tab == ArchiveTabFavorites && !archive_favorites_count(browser))) {
         archive_switch_tab(browser, key);
     } else {
-        archive_switch_dir(browser, archive_get_default_path(archive_get_tab(browser)));
+        with_view_model(
+            browser->view, (ArchiveBrowserViewModel * model) {
+                if(model->last_tab != model->tab_idx) {
+                    model->idx = 0;
+                    model->depth = 0;
+                }
+                return false;
+            });
+
+        archive_switch_dir(browser, archive_get_default_path(tab));
     }
     archive_set_last_tab(browser, tab);
 }

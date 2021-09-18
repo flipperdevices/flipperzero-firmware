@@ -62,8 +62,13 @@ bool archive_favorites_read(void* context) {
     return result;
 }
 
-bool archive_favorites_delete(const char* file_path) {
-    furi_assert(file_path);
+bool archive_favorites_delete(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    uint8_t len = vsnprintf(NULL, 0, format, args);
+    char filename[len + 1];
+    vsnprintf(filename, len + 1, format, args);
+    va_end(args);
 
     FileWorker* file_worker = file_worker_alloc(true);
 
@@ -80,11 +85,8 @@ bool archive_favorites_delete(const char* file_path) {
                 break;
             }
 
-            if(string_search_str(buffer, file_path)) {
-                string_t temp;
-                string_init_printf(temp, "%s\r\n", string_get_cstr(buffer));
-                archive_file_append(ARCHIVE_FAV_TEMP_PATH, temp);
-                string_clear(temp);
+            if(string_search_str(buffer, filename)) {
+                archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\r\n", string_get_cstr(buffer));
             }
         }
     }
@@ -100,18 +102,19 @@ bool archive_favorites_delete(const char* file_path) {
     return result;
 }
 
-bool archive_is_favorite(const char* file_path, const char* name) {
-    furi_assert(file_path);
-    furi_assert(name);
+bool archive_is_favorite(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    uint8_t len = vsnprintf(NULL, 0, format, args);
+    char filename[len + 1];
+    vsnprintf(filename, len + 1, format, args);
+    va_end(args);
 
     FileWorker* file_worker = file_worker_alloc(true);
-
-    string_t path;
     string_t buffer;
     string_init(buffer);
-    bool found = false;
 
-    string_init_printf(path, "%s/%s", file_path, name);
+    bool found = false;
     bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
 
     if(result) {
@@ -122,7 +125,7 @@ bool archive_is_favorite(const char* file_path, const char* name) {
             if(!string_size(buffer)) {
                 break;
             }
-            if(!string_search(buffer, path)) {
+            if(!string_search_str(buffer, filename)) {
                 found = true;
                 break;
             }
@@ -130,7 +133,6 @@ bool archive_is_favorite(const char* file_path, const char* name) {
     }
 
     string_clear(buffer);
-    string_clear(path);
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 
@@ -146,10 +148,8 @@ bool archive_favorites_rename(const char* file_path, const char* src, const char
 
     string_t path;
     string_t buffer;
-    string_t temp;
 
     string_init(buffer);
-    string_init(temp);
     string_init(path);
 
     string_printf(path, "%s/%s", file_path, src);
@@ -163,14 +163,14 @@ bool archive_favorites_rename(const char* file_path, const char* src, const char
             if(!string_size(buffer)) {
                 break;
             }
-            string_printf(
-                temp, "%s\r\n", string_search(buffer, path) ? string_get_cstr(buffer) : dst);
-            archive_file_append(ARCHIVE_FAV_TEMP_PATH, temp);
-            string_clean(temp);
+
+            archive_file_append(
+                ARCHIVE_FAV_TEMP_PATH,
+                "%s\r\n",
+                string_search(buffer, path) ? string_get_cstr(buffer) : dst);
         }
     }
 
-    string_clear(temp);
     string_clear(buffer);
     string_clear(path);
 
@@ -185,9 +185,6 @@ bool archive_favorites_rename(const char* file_path, const char* src, const char
 
 void archive_add_to_favorites(const char* file_path) {
     furi_assert(file_path);
-    string_t buffer_src;
 
-    string_init_printf(buffer_src, "%s\r\n", file_path);
-    archive_file_append(ARCHIVE_FAV_PATH, buffer_src);
-    string_clear(buffer_src);
+    archive_file_append(ARCHIVE_FAV_PATH, "%s\r\n", file_path);
 }

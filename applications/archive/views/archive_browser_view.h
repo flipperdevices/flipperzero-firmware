@@ -83,7 +83,7 @@ void archive_browser_set_callback(
     ArchiveBrowserViewCallback callback,
     void* context);
 
-View* archive_main_get_view(ArchiveBrowserView* browser);
+View* archive_browser_get_view(ArchiveBrowserView* browser);
 
 ArchiveBrowserView* browser_alloc();
 void browser_free(ArchiveBrowserView* browser);

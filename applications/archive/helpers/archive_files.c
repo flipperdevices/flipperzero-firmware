@@ -51,16 +51,16 @@ bool archive_get_filenames(void* context, uint8_t tab_id, const char* path) {
 
     ArchiveBrowserView* browser = context;
     archive_file_array_rm_all(browser);
-
+    bool res;
     if(tab_id != ArchiveTabFavorites) {
-        archive_read_dir(browser, path);
+        res = archive_read_dir(browser, path);
     } else {
-        archive_favorites_read(browser);
+        res = archive_favorites_read(browser);
     }
-    return true;
+    return res;
 }
 
-bool archive_dir_empty(void* context, const char* path) { // can be better
+bool archive_dir_empty(void* context, const char* path) { // can be simpler?
     furi_assert(context);
 
     FileInfo file_info;
@@ -103,6 +103,7 @@ bool archive_read_dir(void* context, const char* path) {
     Storage* fs_api = furi_record_open("storage");
     File* directory = storage_file_alloc(fs_api);
     char name[MAX_NAME_LEN];
+    size_t files_cnt = 0;
 
     if(!storage_dir_open(directory, path)) {
         storage_dir_close(directory);
@@ -114,13 +115,11 @@ bool archive_read_dir(void* context, const char* path) {
         if(!storage_dir_read(directory, &file_info, name, MAX_NAME_LEN)) {
             break;
         }
-
-        uint16_t files_cnt = archive_file_array_size(browser);
-
         if(files_cnt > MAX_FILES) {
             break;
         } else if(storage_file_get_error(directory) == FSE_OK) {
             archive_add_item(browser, &file_info, name);
+            ++files_cnt;
         } else {
             storage_dir_close(directory);
             storage_file_free(directory);
@@ -135,9 +134,15 @@ bool archive_read_dir(void* context, const char* path) {
     return true;
 }
 
-void archive_file_append(const char* path, string_t string) {
+void archive_file_append(const char* path, const char* format, ...) {
     furi_assert(path);
-    furi_assert(string);
+
+    va_list args;
+    va_start(args, format);
+    uint8_t len = vsnprintf(NULL, 0, format, args);
+    char cstr_buff[len + 1];
+    vsnprintf(cstr_buff, len + 1, format, args);
+    va_end(args);
 
     FileWorker* file_worker = file_worker_alloc(false);
 
@@ -145,9 +150,10 @@ void archive_file_append(const char* path, string_t string) {
         FURI_LOG_E("Archive", "Append open error");
     }
 
-    if(!file_worker_write(file_worker, string_get_cstr(string), string_size(string))) {
+    if(!file_worker_write(file_worker, cstr_buff, strlen(cstr_buff))) {
         FURI_LOG_E("Archive", "Append write error");
     }
+
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 }
@@ -162,17 +168,17 @@ void archive_delete_file(void* context, string_t path, string_t name) {
     string_t full_path;
     string_init(full_path);
     string_printf(full_path, "%s/%s", string_get_cstr(path), string_get_cstr(name));
+
     bool res = file_worker_remove(file_worker, string_get_cstr(full_path));
     file_worker_free(file_worker);
 
-    if(archive_is_favorite(string_get_cstr(path), string_get_cstr(name))) {
+    if(archive_is_favorite(string_get_cstr(full_path))) {
         archive_favorites_delete(string_get_cstr(full_path));
     }
 
-    string_clear(full_path);
-    if(res) archive_file_array_rm_selected(browser);
-
-    if(!archive_file_array_size(browser) && !archive_get_depth(browser)) {
-        archive_switch_tab(browser, DEFAULT_TAB_DIR);
+    if(res) {
+        archive_file_array_rm_selected(browser);
     }
+
+    string_clear(full_path);
 }

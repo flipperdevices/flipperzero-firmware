@@ -154,7 +154,7 @@ void archive_view_render(Canvas* canvas, void* model) {
 
     archive_render_status_bar(canvas, model);
 
-    if(files_array_size(m->files) > 0) {
+    if(files_array_size(m->files)) {
         draw_list(canvas, m);
     } else {
         canvas_draw_str_aligned(
@@ -162,7 +162,7 @@ void archive_view_render(Canvas* canvas, void* model) {
     }
 }
 
-View* archive_main_get_view(ArchiveBrowserView* browser) {
+View* archive_browser_get_view(ArchiveBrowserView* browser) {
     furi_assert(browser);
     return browser->view;
 }
@@ -177,7 +177,7 @@ bool archive_view_input(InputEvent* event, void* context) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             in_menu = model->menu;
-            return true;
+            return false;
         });
 
     if(in_menu) {
@@ -201,7 +201,6 @@ bool archive_view_input(InputEvent* event, void* context) {
                         idx = model->menu_idx;
                         return true;
                     });
-
                 browser->callback(file_menu_actions[idx], browser->context);
             } else if(event->key == InputKeyBack) {
                 browser->callback(ArchiveBrowserEventFileMenuClose, browser->context);
@@ -237,10 +236,11 @@ bool archive_view_input(InputEvent* event, void* context) {
             ArchiveFile_t* selected = archive_get_current_file(browser);
 
             if(selected) {
+                ArchiveTabEnum tab = archive_get_tab(browser);
                 archive_set_name(browser, string_get_cstr(selected->name));
 
                 if(event->type == InputTypeShort) {
-                    if(archive_get_tab(browser) == ArchiveTabFavorites) {
+                    if(tab == ArchiveTabFavorites) {
                         browser->callback(ArchiveBrowserEventFileMenuRun, browser->context);
                     } else if(selected->type == ArchiveFileTypeFolder) {
                         browser->callback(ArchiveBrowserEventEnterDir, browser->context);
@@ -248,7 +248,7 @@ bool archive_view_input(InputEvent* event, void* context) {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
                 } else if(event->type == InputTypeLong) {
-                    if(archive_get_tab(browser) == ArchiveTabFavorites) {
+                    if(tab == ArchiveTabFavorites) {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     } else if(selected->type == ArchiveFileTypeFolder) {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);

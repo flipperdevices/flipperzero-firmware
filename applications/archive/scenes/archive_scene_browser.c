@@ -72,25 +72,16 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
             break;
         case ArchiveBrowserEventFileMenuPin:
             if(is_known_app(selected->type)) {
-                string_t full_path;
-                string_init(full_path);
-                string_printf(full_path, "%s/%s", path, name);
-
-                if(!archive_is_favorite(path, name) && tab != ArchiveTabFavorites) {
-                    archive_set_name(browser, string_get_cstr(selected->name));
-                    archive_add_to_favorites(string_get_cstr(full_path));
+                if(!archive_is_favorite("%s/%s", path, name) && tab != ArchiveTabFavorites) {
+                    archive_file_append(ARCHIVE_FAV_PATH, "%s/%s\r\n", path, name);
                 } else {
                     if(tab == ArchiveTabFavorites) {
                         archive_favorites_delete(name);
                         archive_file_array_rm_selected(browser);
-                        if(!archive_file_array_size(browser)) {
-                            archive_switch_tab(browser, DEFAULT_TAB_DIR);
-                        }
                     } else {
-                        archive_favorites_delete(string_get_cstr(full_path));
+                        archive_favorites_delete("%s/%s", path, name);
                     }
                 }
-                string_clear(full_path);
             }
             archive_show_file_menu(browser, false);
             consumed = true;

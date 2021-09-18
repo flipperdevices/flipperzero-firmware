@@ -34,7 +34,7 @@ ArchiveApp* archive_alloc() {
     archive->browser = browser_alloc();
 
     view_dispatcher_add_view(
-        archive->view_dispatcher, ArchiveViewBrowser, archive_main_get_view(archive->browser));
+        archive->view_dispatcher, ArchiveViewBrowser, archive_browser_get_view(archive->browser));
 
     view_dispatcher_add_view(
         archive->view_dispatcher, ArchiveViewTextInput, text_input_get_view(archive->text_input));
