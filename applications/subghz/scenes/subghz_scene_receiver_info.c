@@ -113,7 +113,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
                 if(!subghz_tx_start(subghz)) {
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
-                } else{
+                } else {
                     subghz->state_notifications = NOTIFICATION_TX_STATE;
                 }
             }
