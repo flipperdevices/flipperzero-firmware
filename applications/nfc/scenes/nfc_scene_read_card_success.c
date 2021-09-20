@@ -22,7 +22,7 @@ void nfc_scene_read_card_success_on_enter(void* context) {
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "More");
-    dialog_ex_set_header(dialog_ex, nfc_get_dev_type(data->device), 36, 8, AlignLeft, AlignCenter);
+    dialog_ex_set_header(dialog_ex, nfc_get_dev_type((rfalNfcDevType)data->device), 36, 8, AlignLeft, AlignCenter);
     dialog_ex_set_icon(dialog_ex, 8, 13, &I_Medium_chip_22x21);
     // Display UID
     if(data->uid_len == 4) {
