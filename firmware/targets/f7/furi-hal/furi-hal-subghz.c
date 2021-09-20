@@ -1,4 +1,5 @@
 #include "furi-hal-subghz.h"
+#include "furi-hal-version.h"
 
 #include <furi-hal-gpio.h>
 #include <furi-hal-spi.h>
@@ -10,6 +11,7 @@
 #include <stdio.h>
 
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
+static volatile SubGhzState furi_hal_subghz_state_Tx_Rx = SubGhzStateTxRx;
 
 static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
@@ -41,11 +43,11 @@ static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
      0x18}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
     /* Automatic Gain Control */
-    {CC1101_AGCTRL0,
+    {CC1101_AGCCTRL0,
      0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
-    {CC1101_AGCTRL1,
+    {CC1101_AGCCTRL1,
      0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
 
     /* Wake on radio and timeouts control */
     {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
@@ -99,11 +101,15 @@ static const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
      0x18}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
     /* Automatic Gain Control */
-    {CC1101_AGCTRL0,
-     0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
-    {CC1101_AGCTRL1,
-     0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    // {CC1101_AGCTRL0,0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
+    // {CC1101_AGCTRL1,0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    // {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    //MAGN_TARGET for RX filter BW =< 100 kHz is 0x3. For higher RX filter BW's MAGN_TARGET is 0x7.
+    {CC1101_AGCCTRL0,
+     0x91}, // 10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
+    {CC1101_AGCCTRL1,
+     0x0}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
+    {CC1101_AGCCTRL2, 0x07}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
 
     /* Wake on radio and timeouts control */
     {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
@@ -157,11 +163,11 @@ static const uint8_t furi_hal_subghz_preset_2fsk_async_regs[][2] = {
      0x16}, // no frequency offset compensation, POST_K same as PRE_K, PRE_K is 4K, GATE is off
 
     /* Automatic Gain Control */
-    {CC1101_AGCTRL0,
+    {CC1101_AGCCTRL0,
      0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
-    {CC1101_AGCTRL1,
+    {CC1101_AGCCTRL1,
      0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
 
     /* Wake on radio and timeouts control */
     {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
@@ -201,7 +207,9 @@ static const uint8_t furi_hal_subghz_preset_2fsk_async_patable[8] = {
     0x00,
     0x00,
     0x00,
-    0x00};
+    0x00
+
+};
 
 void furi_hal_subghz_init() {
     furi_assert(furi_hal_subghz_state == SubGhzStateInit);
@@ -279,7 +287,7 @@ void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     } else if(preset == FuriHalSubGhzPreset2FSKAsync) {
         furi_hal_subghz_load_registers(furi_hal_subghz_preset_2fsk_async_regs);
         furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
-    }else {
+    } else {
         furi_crash(NULL);
     }
 }
@@ -356,10 +364,12 @@ void furi_hal_subghz_rx() {
     furi_hal_spi_device_return(device);
 }
 
-void furi_hal_subghz_tx() {
+bool furi_hal_subghz_tx() {
+    if(furi_hal_subghz_state_Tx_Rx != SubGhzStateTxRx) return false;
     const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
     cc1101_switch_to_tx(device);
     furi_hal_spi_device_return(device);
+    return true;
 }
 
 float furi_hal_subghz_get_rssi() {
@@ -386,6 +396,47 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     return true;
 }
 
+static void furi_hal_subghz_is_frequency_chek_txrx_region(uint32_t value) {
+    bool txrx = false;
+    switch(furi_hal_version_get_hw_region()) {
+    case FuriHalVersionRegionEuRu:
+        //433,05..434,79; 868,15..868,55
+        if(!(value >= 433050000 && value <= 434790000) &&
+           !(value >= 868150000 && value <= 8680550000)) {
+        } else {
+            txrx = true;
+        }
+        break;
+    case FuriHalVersionRegionUsCaAu:
+        //304,10..315,25; 433,05..434,79; 915,00..928,00
+        if(!(value >= 304100000 && value <= 315250000) &&
+           !(value >= 433050000 && value <= 434790000) &&
+           !(value >= 915000000 && value <= 928000000)) {
+        } else {
+            txrx = true;
+        }
+        break;
+    case FuriHalVersionRegionJp:
+        //312,00..315,25; 920,50..923,50
+        if(!(value >= 312000000 && value <= 315250000) &&
+           !(value >= 920500000 && value <= 923500000)) {
+        } else {
+            txrx = true;
+        }
+        break;
+
+    default:
+        txrx = true;
+        break;
+    }
+
+    if(txrx) {
+        furi_hal_subghz_state_Tx_Rx = SubGhzStateTxRx;
+    } else {
+        furi_hal_subghz_state_Tx_Rx = SubGhzStateOnlyRx;
+    }
+}
+
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = furi_hal_subghz_set_frequency(value);
     if(value >= 299999755 && value <= 348000335) {
@@ -397,6 +448,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     } else {
         furi_crash(NULL);
     }
+    furi_hal_subghz_is_frequency_chek_txrx_region(value);
     return value;
 }
 
@@ -608,6 +660,8 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz_state == SubGhzStateAsyncTx) {
                 furi_hal_subghz_state = SubGhzStateAsyncTxLast;
+                //forcibly pulls the pin to the ground so that there is no carrier
+                hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
             } else {
                 furi_hal_subghz_state = SubGhzStateAsyncTxEnd;
                 LL_TIM_DisableCounter(TIM2);
@@ -619,6 +673,9 @@ static void furi_hal_subghz_async_tx_timer_isr() {
 void furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context) {
     furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
     furi_assert(callback);
+
+    //If transmission is prohibited by regional settings
+    if(furi_hal_subghz_state_Tx_Rx != SubGhzStateTxRx) return;
 
     furi_hal_subghz_async_tx.callback = callback;
     furi_hal_subghz_async_tx.callback_context = context;
