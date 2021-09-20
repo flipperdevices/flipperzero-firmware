@@ -4,7 +4,6 @@
 #include <stm32wbxx.h>
 #include <shci.h>
 #include <cmsis_os2.h>
-#include <app_ble.h>
 #include <gap.h>
 
 void furi_hal_bt_init() {
@@ -14,8 +13,20 @@ void furi_hal_bt_init() {
     APPE_Init();
 }
 
-bool furi_hal_bt_start_app() {
+bool furi_hal_bt_init_app() {
     return gap_init();
+}
+
+void furi_hal_bt_start_advertising() {
+    if(gap_get_state() == GapStateIdle) {
+        gap_start_advertising();
+    }
+}
+
+void furi_hal_bt_stop_advertising() {
+    if(furi_hal_bt_is_active()) {
+        gap_stop_advertising();
+    }
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
@@ -41,12 +52,17 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    return APPE_Status() == BleGlueStatusStarted;
+    BleGlueStatus status = APPE_Status();
+    return (status == BleGlueStatusBroken) || (status == BleGlueStatusStarted);
+}
+
+bool furi_hal_bt_is_active() {
+    return gap_get_state() > GapStateIdle;
 }
 
 bool furi_hal_bt_wait_startup() {
     uint8_t counter = 0;
-    while (APPE_Status() == BleGlueStatusStartup) {
+    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBroken)) {
         osDelay(10);
         counter++;
         if (counter > 1000) {
@@ -56,31 +72,34 @@ bool furi_hal_bt_wait_startup() {
     return true;
 }
 
-bool furi_hal_bt_lock_flash() {
+bool furi_hal_bt_lock_flash(bool erase_flag) {
     if (!furi_hal_bt_wait_startup()) {
         return false;
     }
-    if (APPE_Status() == BleGlueStatusUninitialized) {
-        HAL_FLASH_Unlock();
-    } else {
-        while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
-            osDelay(1);
-        }
-        SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
-        HAL_FLASH_Unlock();
-        while(LL_FLASH_IsOperationSuspended()) {};
+    
+    while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
+        osDelay(1);
     }
+
+    HAL_FLASH_Unlock();
+
+    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
+
+    while(LL_FLASH_IsActiveFlag_OperationSuspended()) {};
+
+    __disable_irq();
+
     return true;
 }
 
-void furi_hal_bt_unlock_flash() {
-    if (APPE_Status() == BleGlueStatusUninitialized) {
-        HAL_FLASH_Lock();
-    } else {
-        SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
-        HAL_FLASH_Lock();
-        HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
-    }
+void furi_hal_bt_unlock_flash(bool erase_flag) {
+    __enable_irq();
+
+    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
+
+    HAL_FLASH_Lock();
+
+    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
 }
 
 void furi_hal_bt_start_tone_tx(uint8_t channel, uint8_t power) {
