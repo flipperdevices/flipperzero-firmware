@@ -26,6 +26,9 @@ void furi_hal_bt_start_advertising() {
 void furi_hal_bt_stop_advertising() {
     if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
+        while(furi_hal_bt_is_active()) {
+            osDelay(1);
+        }
     }
 }
 
