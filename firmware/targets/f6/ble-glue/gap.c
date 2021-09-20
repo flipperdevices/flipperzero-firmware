@@ -11,6 +11,8 @@
 
 #include <applications/bt/bt_service/bt.h>
 #include <applications/dialogs/dialogs.h>
+#include <applications/notification/notification.h>
+#include <applications/notification/notification-messages.h>
 #include <furi-hal.h>
 
 #define GAP_TAG "BLE"
@@ -37,6 +39,7 @@ typedef struct {
     Bt* bt;
     DialogMessage* dialog_message;
     DialogsApp* dialogs;
+    NotificationApp* notification;
     osTimerId advertise_timer;
     osThreadAttr_t thread_attr;
     osThreadId_t thread_id;
@@ -69,10 +72,11 @@ static bool gap_pin_code_display_and_confirm(uint32_t pin) {
     string_init_printf(pin_str, "%06d", pin);
     dialog_message_set_text(
         gap->dialog_message, string_get_cstr(pin_str), 64, 32, AlignCenter, AlignCenter);
-    dialog_message_set_buttons(gap->dialog_message, "Cancel", "Ok", NULL);
+    dialog_message_set_buttons(gap->dialog_message, "Cancel", NULL, "Pairing");
+    notification_message(gap->notification, &sequence_display_on);
     DialogMessageButton btn = dialog_message_show(gap->dialogs, gap->dialog_message);
     string_clear(pin_str);
-    return btn == DialogMessageButtonCenter;
+    return btn == DialogMessageButtonRight;
 }
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
@@ -96,7 +100,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             if (disconnection_complete_event->Connection_Handle == gap->gap_svc.connection_handle) {
                 gap->gap_svc.connection_handle = 0;
                 gap->state = GapStateIdle;
-                FURI_LOG_I(GAP_TAG, "Disconnect from client");
+                FURI_LOG_I(GAP_TAG, "Disconnect from client. Reason: %X", disconnection_complete_event->Reason);
             }
             if(gap->enable_adv) {
                 // Restart advertising
@@ -393,6 +397,7 @@ bool gap_init() {
     srand(DWT->CYCCNT);
     // Open Bt record
     gap->bt = furi_record_open("bt");
+    gap->notification = furi_record_open("notification");
     gap->dialogs = furi_record_open("dialogs");
     gap->dialog_message = dialog_message_alloc();
     // Create advertising timer
