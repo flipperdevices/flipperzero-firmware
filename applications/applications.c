@@ -16,6 +16,7 @@ extern int32_t power_srv(void* p);
 extern int32_t storage_srv(void* p);
 
 // Apps
+extern int32_t desktop_app(void* p);
 extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t blink_test_app(void* p);
@@ -142,6 +143,10 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
 
+#ifdef APP_DESKTOP
+    {.app = desktop_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef APP_IBUTTON
     {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
 #endif
@@ -193,6 +198,9 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #endif
 #ifdef SRV_STORAGE
     storage_cli_init,
+#endif
+#ifdef APP_DESKTOP
+    (void*)desktop_app,
 #endif
 };
 

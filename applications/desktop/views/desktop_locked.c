@@ -1,12 +1,12 @@
 #include <furi.h>
-#include "../dolphin_i.h"
-#include "dolphin_locked_view.h"
+#include "../desktop_i.h"
+#include "desktop_locked.h"
 
 static const Icon* idle_scenes[] = {&A_Wink_128x64, &A_WatchingTV_128x64};
 
-void dolphin_locked_set_callback(
-    DolphinLockedView* locked_view,
-    DolphinLockedViewCallback callback,
+void desktop_locked_set_callback(
+    DesktopLockedView* locked_view,
+    DesktopLockedViewCallback callback,
     void* context) {
     furi_assert(locked_view);
     furi_assert(callback);
@@ -15,15 +15,15 @@ void dolphin_locked_set_callback(
 }
 
 void locked_view_timer_callback(void* context) {
-    DolphinLockedView* locked_view = context;
-    locked_view->callback(DolphinLockedEventUpdate, locked_view->context);
+    DesktopLockedView* locked_view = context;
+    locked_view->callback(DesktopLockedEventUpdate, locked_view->context);
 }
 
 // temporary locked screen animation managment
 static void
-    dolphin_scene_handler_set_scene(DolphinLockedView* locked_view, const Icon* icon_data) {
+    desktop_scene_handler_set_scene(DesktopLockedView* locked_view, const Icon* icon_data) {
     with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
+        locked_view->view, (DesktopLockedViewModel * model) {
             if(model->animation) icon_animation_free(model->animation);
             model->animation = icon_animation_alloc(icon_data);
             icon_animation_start(model->animation);
@@ -31,17 +31,17 @@ static void
         });
 }
 
-void dolphin_locked_update_hint_timeout(DolphinLockedView* locked_view) {
+void desktop_locked_update_hint_timeout(DesktopLockedView* locked_view) {
     with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
+        locked_view->view, (DesktopLockedViewModel * model) {
             model->hint_timeout = HINT_TIMEOUT_H;
             return true;
         });
 }
 
-void dolphin_locked_reset_door_pos(DolphinLockedView* locked_view) {
+void desktop_locked_reset_door_pos(DesktopLockedView* locked_view) {
     with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
+        locked_view->view, (DesktopLockedViewModel * model) {
             model->animation_seq_end = false;
             model->door_left_x = -57;
             model->door_right_x = 115;
@@ -49,11 +49,11 @@ void dolphin_locked_reset_door_pos(DolphinLockedView* locked_view) {
         });
 }
 
-void dolphin_locked_manage_redraw(DolphinLockedView* locked_view) {
+void desktop_locked_manage_redraw(DesktopLockedView* locked_view) {
     bool animation_seq_end;
 
     with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
+        locked_view->view, (DesktopLockedViewModel * model) {
             model->animation_seq_end = !model->door_left_x;
             animation_seq_end = model->animation_seq_end;
 
@@ -69,19 +69,19 @@ void dolphin_locked_manage_redraw(DolphinLockedView* locked_view) {
     }
 }
 
-void dolphin_locked_reset_counter(DolphinLockedView* locked_view) {
+void desktop_locked_reset_counter(DesktopLockedView* locked_view) {
     locked_view->lock_count = 0;
     locked_view->lock_lastpress = 0;
 
     with_view_model(
-        locked_view->view, (DolphinLockedViewModel * model) {
+        locked_view->view, (DesktopLockedViewModel * model) {
             model->hint_timeout = 0;
             return true;
         });
 }
 
-void dolphin_locked_view_render(Canvas* canvas, void* model) {
-    DolphinLockedViewModel* m = model;
+void desktop_locked_render(Canvas* canvas, void* model) {
+    DesktopLockedViewModel* m = model;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -109,19 +109,19 @@ void dolphin_locked_view_render(Canvas* canvas, void* model) {
     }
 }
 
-View* dolphin_locked_get_view(DolphinLockedView* locked_view) {
+View* desktop_locked_get_view(DesktopLockedView* locked_view) {
     furi_assert(locked_view);
     return locked_view->view;
 }
 
-bool dolphin_locked_view_input(InputEvent* event, void* context) {
+bool desktop_locked_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    DolphinLockedView* locked_view = context;
+    DesktopLockedView* locked_view = context;
     if(event->type == InputTypeShort) {
         with_view_model(
-            locked_view->view, (DolphinLockedViewModel * model) {
+            locked_view->view, (DesktopLockedViewModel * model) {
                 model->hint_timeout = HINT_TIMEOUT_L;
                 return true;
             });
@@ -140,7 +140,7 @@ bool dolphin_locked_view_input(InputEvent* event, void* context) {
 
             if(locked_view->lock_count == UNLOCK_CNT) {
                 locked_view->lock_count = 0;
-                locked_view->callback(DolphinLockedEventUnlock, locked_view->context);
+                locked_view->callback(DesktopLockedEventUnlock, locked_view->context);
             }
         }
     }
@@ -148,22 +148,22 @@ bool dolphin_locked_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-DolphinLockedView* dolphin_locked_view_alloc() {
-    DolphinLockedView* locked_view = furi_alloc(sizeof(DolphinLockedView));
+DesktopLockedView* desktop_locked_alloc() {
+    DesktopLockedView* locked_view = furi_alloc(sizeof(DesktopLockedView));
     locked_view->view = view_alloc();
     locked_view->timer =
         osTimerNew(locked_view_timer_callback, osTimerPeriodic, locked_view, NULL);
 
-    view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DolphinLockedViewModel));
+    view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DesktopLockedViewModel));
     view_set_context(locked_view->view, locked_view);
-    view_set_draw_callback(locked_view->view, (ViewDrawCallback)dolphin_locked_view_render);
-    view_set_input_callback(locked_view->view, dolphin_locked_view_input);
+    view_set_draw_callback(locked_view->view, (ViewDrawCallback)desktop_locked_render);
+    view_set_input_callback(locked_view->view, desktop_locked_input);
 
-    dolphin_scene_handler_set_scene(locked_view, idle_scenes[random() % COUNT_OF(idle_scenes)]);
+    desktop_scene_handler_set_scene(locked_view, idle_scenes[random() % COUNT_OF(idle_scenes)]);
     return locked_view;
 }
 
-void dolphin_locked_view_free(DolphinLockedView* locked_view) {
+void desktop_locked_free(DesktopLockedView* locked_view) {
     furi_assert(locked_view);
     osTimerDelete(locked_view->timer);
     view_free(locked_view->view);

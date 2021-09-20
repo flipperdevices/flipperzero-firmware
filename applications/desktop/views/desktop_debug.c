@@ -1,10 +1,13 @@
 #include <furi.h>
-#include "../dolphin_i.h"
-#include "dolphin_debug_view.h"
+#include "../desktop_i.h"
+#include "desktop_debug.h"
 
-void dolphin_debug_set_callback(
-    DolphinDebugView* debug_view,
-    DolphinDebugViewCallback callback,
+#include "applications/dolphin/helpers/dolphin_state.h"
+#include "applications/dolphin/dolphin.h"
+
+void desktop_debug_set_callback(
+    DesktopDebugView* debug_view,
+    DesktopDebugViewCallback callback,
     void* context) {
     furi_assert(debug_view);
     furi_assert(callback);
@@ -12,20 +15,20 @@ void dolphin_debug_set_callback(
     debug_view->context = context;
 }
 
-void dolphin_debug_view_render(Canvas* canvas, void* model) {
+void desktop_debug_render(Canvas* canvas, void* model) {
     canvas_clear(canvas);
-    DolphinDebugViewModel* m = model;
+    DesktopDebugViewModel* m = model;
     const Version* ver;
     char buffer[64];
 
-    static const char* headers[] = {"FW Version info:", "Boot Version info:", "Dolphin info:"};
+    static const char* headers[] = {"FW Version info:", "Boot Version info:", "Desktop info:"};
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 13, headers[m->screen]);
     canvas_set_font(canvas, FontSecondary);
 
-    if(m->screen != DolphinViewStatsMeta) {
+    if(m->screen != DesktopViewStatsMeta) {
         // Hardware version
         const char* my_name = furi_hal_version_get_name_ptr();
         snprintf(
@@ -39,7 +42,7 @@ void dolphin_debug_view_render(Canvas* canvas, void* model) {
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 5, 23, buffer);
 
-        ver = m->screen == DolphinViewStatsBoot ? furi_hal_version_get_boot_version() :
+        ver = m->screen == DesktopViewStatsBoot ? furi_hal_version_get_boot_version() :
                                                   furi_hal_version_get_firmware_version();
 
         if(!ver) {
@@ -79,80 +82,84 @@ void dolphin_debug_view_render(Canvas* canvas, void* model) {
     }
 }
 
-View* dolphin_debug_get_view(DolphinDebugView* debug_view) {
+View* desktop_debug_get_view(DesktopDebugView* debug_view) {
     furi_assert(debug_view);
     return debug_view->view;
 }
 
-bool dolphin_debug_view_input(InputEvent* event, void* context) {
+bool desktop_debug_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    DolphinDebugView* debug_view = context;
+    DesktopDebugView* debug_view = context;
 
     if(event->type != InputTypeShort) return false;
-    DolphinViewStatsScreens current = 0;
+    DesktopViewStatsScreens current = 0;
     with_view_model(
-        debug_view->view, (DolphinDebugViewModel * model) {
+        debug_view->view, (DesktopDebugViewModel * model) {
             if(event->key == InputKeyDown) {
-                model->screen = (model->screen + 1) % DolphinViewStatsTotalCount;
+                model->screen = (model->screen + 1) % DesktopViewStatsTotalCount;
             } else if(event->key == InputKeyUp) {
-                model->screen = ((model->screen - 1) + DolphinViewStatsTotalCount) %
-                                DolphinViewStatsTotalCount;
+                model->screen = ((model->screen - 1) + DesktopViewStatsTotalCount) %
+                                DesktopViewStatsTotalCount;
             }
             current = model->screen;
             return true;
         });
 
-    if(current == DolphinViewStatsMeta) {
+    if(current == DesktopViewStatsMeta) {
         if(event->key == InputKeyLeft) {
-            debug_view->callback(DolphinDebugEventWrongDeed, debug_view->context);
+            debug_view->callback(DesktopDebugEventWrongDeed, debug_view->context);
         } else if(event->key == InputKeyRight) {
-            debug_view->callback(DolphinDebugEventDeed, debug_view->context);
+            debug_view->callback(DesktopDebugEventDeed, debug_view->context);
         } else if(event->key == InputKeyOk) {
-            debug_view->callback(DolphinDebugEventSaveState, debug_view->context);
+            debug_view->callback(DesktopDebugEventSaveState, debug_view->context);
         } else {
             return false;
         }
     }
 
     if(event->key == InputKeyBack) {
-        debug_view->callback(DolphinDebugEventExit, debug_view->context);
+        debug_view->callback(DesktopDebugEventExit, debug_view->context);
     }
 
     return true;
 }
 
-DolphinDebugView* dolphin_debug_view_alloc() {
-    DolphinDebugView* debug_view = furi_alloc(sizeof(DolphinDebugView));
+DesktopDebugView* desktop_debug_alloc() {
+    DesktopDebugView* debug_view = furi_alloc(sizeof(DesktopDebugView));
     debug_view->view = view_alloc();
-    view_allocate_model(debug_view->view, ViewModelTypeLocking, sizeof(DolphinDebugViewModel));
+    view_allocate_model(debug_view->view, ViewModelTypeLocking, sizeof(DesktopDebugViewModel));
     view_set_context(debug_view->view, debug_view);
-    view_set_draw_callback(debug_view->view, (ViewDrawCallback)dolphin_debug_view_render);
-    view_set_input_callback(debug_view->view, dolphin_debug_view_input);
+    view_set_draw_callback(debug_view->view, (ViewDrawCallback)desktop_debug_render);
+    view_set_input_callback(debug_view->view, desktop_debug_input);
 
     return debug_view;
 }
 
-void dolphin_debug_view_free(DolphinDebugView* debug_view) {
+void desktop_debug_free(DesktopDebugView* debug_view) {
     furi_assert(debug_view);
 
     view_free(debug_view->view);
     free(debug_view);
 }
 
-void dolphin_debug_get_dolphin_data(DolphinDebugView* debug_view, DolphinState* state) {
+void desktop_debug_get_dolphin_data(DesktopDebugView* debug_view) {
+    Dolphin* dolphin = furi_record_open("dolphin");
+    DolphinDeedWeight stats = dolphin_stats(dolphin);
     with_view_model(
-        debug_view->view, (DolphinDebugViewModel * model) {
-            model->icounter = dolphin_state_get_icounter(state);
-            model->butthurt = dolphin_state_get_butthurt(state);
+        debug_view->view, (DesktopDebugViewModel * model) {
+            model->icounter = stats.icounter;
+            model->butthurt = stats.butthurt;
             return true;
         });
+
+    furi_record_close("dolphin");
 }
 
-void dolphin_debug_reset_screen_idx(DolphinDebugView* debug_view) {
+void desktop_debug_reset_screen_idx(DesktopDebugView* debug_view) {
     with_view_model(
-        debug_view->view, (DolphinDebugViewModel * model) {
+        debug_view->view, (DesktopDebugViewModel * model) {
             model->screen = 0;
             return true;
         });

@@ -1,13 +1,13 @@
 #include <furi.h>
-#include "../dolphin_i.h"
+#include "../desktop_i.h"
 #include <furi-hal.h>
 #include <furi-hal-version.h>
 
-#include "dolphin_hw_mismatch_view.h"
+#include "desktop_hw_mismatch.h"
 
-void dolphin_hw_mismatch_set_callback(
-    DolphinHwMismatchView* main_view,
-    DolphinHwMismatchViewCallback callback,
+void desktop_hw_mismatch_set_callback(
+    DesktopHwMismatchView* main_view,
+    DesktopHwMismatchViewCallback callback,
     void* context) {
     furi_assert(main_view);
     furi_assert(callback);
@@ -15,7 +15,7 @@ void dolphin_hw_mismatch_set_callback(
     main_view->context = context;
 }
 
-void dolphin_hw_mismatch_view_render(Canvas* canvas, void* model) {
+void desktop_hw_mismatch_render(Canvas* canvas, void* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -28,38 +28,37 @@ void dolphin_hw_mismatch_view_render(Canvas* canvas, void* model) {
     canvas_draw_str(canvas, 5, 38, "FW target: " TARGET);
 }
 
-View* dolphin_hw_mismatch_get_view(DolphinHwMismatchView* hw_mismatch_view) {
+View* desktop_hw_mismatch_get_view(DesktopHwMismatchView* hw_mismatch_view) {
     furi_assert(hw_mismatch_view);
     return hw_mismatch_view->view;
 }
 
-bool dolphin_hw_mismatch_view_input(InputEvent* event, void* context) {
+bool desktop_hw_mismatch_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
 
-    DolphinHwMismatchView* hw_mismatch_view = context;
+    DesktopHwMismatchView* hw_mismatch_view = context;
 
     if(event->type == InputTypeShort) {
-        hw_mismatch_view->callback(DolphinHwMismatchEventExit, hw_mismatch_view->context);
+        hw_mismatch_view->callback(DesktopHwMismatchEventExit, hw_mismatch_view->context);
     }
 
     return true;
 }
 
-DolphinHwMismatchView* dolphin_hw_mismatch_view_alloc() {
-    DolphinHwMismatchView* hw_mismatch_view = furi_alloc(sizeof(DolphinHwMismatchView));
+DesktopHwMismatchView* desktop_hw_mismatch_alloc() {
+    DesktopHwMismatchView* hw_mismatch_view = furi_alloc(sizeof(DesktopHwMismatchView));
     hw_mismatch_view->view = view_alloc();
     view_allocate_model(
-        hw_mismatch_view->view, ViewModelTypeLocking, sizeof(DolphinHwMismatchViewModel));
+        hw_mismatch_view->view, ViewModelTypeLocking, sizeof(DesktopHwMismatchViewModel));
     view_set_context(hw_mismatch_view->view, hw_mismatch_view);
-    view_set_draw_callback(
-        hw_mismatch_view->view, (ViewDrawCallback)dolphin_hw_mismatch_view_render);
-    view_set_input_callback(hw_mismatch_view->view, dolphin_hw_mismatch_view_input);
+    view_set_draw_callback(hw_mismatch_view->view, (ViewDrawCallback)desktop_hw_mismatch_render);
+    view_set_input_callback(hw_mismatch_view->view, desktop_hw_mismatch_input);
 
     return hw_mismatch_view;
 }
 
-void dolphin_hw_mismatch_view_free(DolphinHwMismatchView* hw_mismatch_view) {
+void desktop_hw_mismatch_free(DesktopHwMismatchView* hw_mismatch_view) {
     furi_assert(hw_mismatch_view);
 
     view_free(hw_mismatch_view->view);

@@ -1,10 +1,10 @@
 #include <furi.h>
-#include "../dolphin_i.h"
-#include "dolphin_first_start_view.h"
+#include "../desktop_i.h"
+#include "desktop_first_start.h"
 
-void dolphin_first_start_set_callback(
-    DolphinFirstStartView* first_start_view,
-    DolphinFirstStartViewCallback callback,
+void desktop_first_start_set_callback(
+    DesktopFirstStartView* first_start_view,
+    DesktopFirstStartViewCallback callback,
     void* context) {
     furi_assert(first_start_view);
     furi_assert(callback);
@@ -12,8 +12,8 @@ void dolphin_first_start_set_callback(
     first_start_view->context = context;
 }
 
-void dolphin_first_start_view_render(Canvas* canvas, void* model) {
-    DolphinFirstStartViewModel* m = model;
+void desktop_first_start_render(Canvas* canvas, void* model) {
+    DesktopFirstStartViewModel* m = model;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -44,7 +44,7 @@ void dolphin_first_start_view_render(Canvas* canvas, void* model) {
             "%s %s%s",
             "I am",
             my_name ? my_name : "Unknown",
-            ",\ncyberdolphin\nliving in your\npocket >");
+            ",\ncyberdesktop\nliving in your\npocket >");
         canvas_draw_icon(canvas, 0, height - 48, &I_DolphinFirstStart5_54x49);
         elements_multiline_text_framed(canvas, 60, 17, buf);
     } else if(m->page == 6) {
@@ -62,23 +62,23 @@ void dolphin_first_start_view_render(Canvas* canvas, void* model) {
     }
 }
 
-View* dolphin_first_start_get_view(DolphinFirstStartView* first_start_view) {
+View* desktop_first_start_get_view(DesktopFirstStartView* first_start_view) {
     furi_assert(first_start_view);
     return first_start_view->view;
 }
 
-bool dolphin_first_start_view_input(InputEvent* event, void* context) {
+bool desktop_first_start_input(InputEvent* event, void* context) {
     furi_assert(event);
-    DolphinFirstStartView* first_start_view = context;
+    DesktopFirstStartView* first_start_view = context;
 
     if(event->type == InputTypeShort) {
-        DolphinFirstStartViewModel* model = view_get_model(first_start_view->view);
+        DesktopFirstStartViewModel* model = view_get_model(first_start_view->view);
         if(event->key == InputKeyLeft) {
             if(model->page > 0) model->page--;
         } else if(event->key == InputKeyRight) {
             uint32_t page = ++model->page;
             if(page > 8) {
-                first_start_view->callback(DolphinFirstStartCompleted, first_start_view->context);
+                first_start_view->callback(DesktopFirstStartCompleted, first_start_view->context);
             }
         }
         view_commit_model(first_start_view->view, true);
@@ -87,20 +87,19 @@ bool dolphin_first_start_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-DolphinFirstStartView* dolphin_first_start_view_alloc() {
-    DolphinFirstStartView* first_start_view = furi_alloc(sizeof(DolphinFirstStartView));
+DesktopFirstStartView* desktop_first_start_alloc() {
+    DesktopFirstStartView* first_start_view = furi_alloc(sizeof(DesktopFirstStartView));
     first_start_view->view = view_alloc();
     view_allocate_model(
-        first_start_view->view, ViewModelTypeLocking, sizeof(DolphinFirstStartViewModel));
+        first_start_view->view, ViewModelTypeLocking, sizeof(DesktopFirstStartViewModel));
     view_set_context(first_start_view->view, first_start_view);
-    view_set_draw_callback(
-        first_start_view->view, (ViewDrawCallback)dolphin_first_start_view_render);
-    view_set_input_callback(first_start_view->view, dolphin_first_start_view_input);
+    view_set_draw_callback(first_start_view->view, (ViewDrawCallback)desktop_first_start_render);
+    view_set_input_callback(first_start_view->view, desktop_first_start_input);
 
     return first_start_view;
 }
 
-void dolphin_first_start_view_free(DolphinFirstStartView* first_start_view) {
+void desktop_first_start_free(DesktopFirstStartView* first_start_view) {
     furi_assert(first_start_view);
 
     view_free(first_start_view->view);
