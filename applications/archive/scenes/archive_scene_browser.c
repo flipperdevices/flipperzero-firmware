@@ -17,7 +17,7 @@ void archive_scene_browser_on_enter(void* context) {
 
 bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     ArchiveApp* archive = (ArchiveApp*)context;
-    bool consumed;
+    bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
