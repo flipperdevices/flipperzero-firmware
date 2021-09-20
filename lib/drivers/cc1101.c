@@ -174,6 +174,7 @@ uint8_t cc1101_read_fifo(const FuriHalSpiDevice* device, uint8_t* data, uint8_t*
 
     // First byte - packet length
     furi_hal_spi_bus_trx(device->bus, buff_tx, buff_rx, 2, CC1101_TIMEOUT);
+    // FIXME: index is out of bounds
     *size = buff_rx[2];
     furi_hal_spi_bus_trx(device->bus, &buff_tx[1], data, *size, CC1101_TIMEOUT);
     cc1101_flush_rx(device);
