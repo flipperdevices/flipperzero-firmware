@@ -12,10 +12,10 @@ void archive_update_offset(ArchiveBrowserView* browser) {
                 model->list_offset = model->idx - 3;
             } else if(model->list_offset < model->idx - bounds) {
                 model->list_offset = CLAMP(model->idx - 2, array_size - bounds, 0);
-            } else if(
-                ((array_size - bounds) - model->idx) && model->list_offset > model->idx - bounds) {
+            } else if(model->list_offset > model->idx - bounds) {
                 model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
             }
+
             return true;
         });
 }
