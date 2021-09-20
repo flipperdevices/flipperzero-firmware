@@ -38,6 +38,7 @@ void bt_settings_scene_start_on_enter(void* context) {
         variable_item_set_current_value_index(item, BtSettingOff);
         variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
     }
+    item = variable_item_list_add(var_item_list, "Pair new device", 0, NULL, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BtSettingsAppViewVarItemList);
 }
