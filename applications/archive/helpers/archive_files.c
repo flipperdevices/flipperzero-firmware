@@ -46,13 +46,14 @@ void set_file_type(ArchiveFile_t* file, FileInfo* file_info) {
     }
 }
 
-bool archive_get_filenames(void* context, uint8_t tab_id, const char* path) {
+bool archive_get_filenames(void* context, const char* path) {
     furi_assert(context);
 
+    bool res;
     ArchiveBrowserView* browser = context;
     archive_file_array_rm_all(browser);
-    bool res;
-    if(tab_id != ArchiveTabFavorites) {
+
+    if(archive_get_tab(browser) != ArchiveTabFavorites) {
         res = archive_read_dir(browser, path);
     } else {
         res = archive_favorites_read(browser);
@@ -166,8 +167,7 @@ void archive_delete_file(void* context, string_t path, string_t name) {
     FileWorker* file_worker = file_worker_alloc(true);
 
     string_t full_path;
-    string_init(full_path);
-    string_printf(full_path, "%s/%s", string_get_cstr(path), string_get_cstr(name));
+    string_init_printf(full_path, "%s/%s", string_get_cstr(path), string_get_cstr(name));
 
     bool res = file_worker_remove(file_worker, string_get_cstr(full_path));
     file_worker_free(file_worker);

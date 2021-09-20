@@ -49,8 +49,6 @@ const bool archive_scene_rename_on_event(void* context, SceneManagerEvent event)
             string_init_printf(buffer_src, "%s/%s", path, name);
             string_init_printf(buffer_dst, "%s/%s", path, archive->text_store);
 
-            archive_set_name(archive->browser, archive->text_store);
-
             // append extension
             ArchiveFile_t* file = archive_get_current_file(archive->browser);
 

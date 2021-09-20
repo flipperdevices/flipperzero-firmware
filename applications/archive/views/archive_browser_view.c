@@ -199,7 +199,7 @@ bool archive_view_input(InputEvent* event, void* context) {
                 with_view_model(
                     browser->view, (ArchiveBrowserViewModel * model) {
                         idx = model->menu_idx;
-                        return true;
+                        return false;
                     });
                 browser->callback(file_menu_actions[idx], browser->context);
             } else if(event->key == InputKeyBack) {
@@ -236,21 +236,19 @@ bool archive_view_input(InputEvent* event, void* context) {
             ArchiveFile_t* selected = archive_get_current_file(browser);
 
             if(selected) {
-                ArchiveTabEnum tab = archive_get_tab(browser);
-                archive_set_name(browser, string_get_cstr(selected->name));
+                bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
+                bool folder = selected->type == ArchiveFileTypeFolder;
 
                 if(event->type == InputTypeShort) {
-                    if(tab == ArchiveTabFavorites) {
+                    if(favorites) {
                         browser->callback(ArchiveBrowserEventFileMenuRun, browser->context);
-                    } else if(selected->type == ArchiveFileTypeFolder) {
+                    } else if(folder) {
                         browser->callback(ArchiveBrowserEventEnterDir, browser->context);
                     } else {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
                 } else if(event->type == InputTypeLong) {
-                    if(tab == ArchiveTabFavorites) {
-                        browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
-                    } else if(selected->type == ArchiveFileTypeFolder) {
+                    if(folder || favorites) {
                         browser->callback(ArchiveBrowserEventFileMenuOpen, browser->context);
                     }
                 }
@@ -269,7 +267,6 @@ ArchiveBrowserView* browser_alloc() {
     view_set_draw_callback(browser->view, (ViewDrawCallback)archive_view_render);
     view_set_input_callback(browser->view, archive_view_input);
 
-    string_init(browser->name);
     string_init(browser->path);
 
     with_view_model(
@@ -290,7 +287,6 @@ void browser_free(ArchiveBrowserView* browser) {
             return false;
         });
 
-    string_clear(browser->name);
     string_clear(browser->path);
 
     view_free(browser->view);

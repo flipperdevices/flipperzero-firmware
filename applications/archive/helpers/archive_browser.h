@@ -48,7 +48,7 @@ inline bool is_known_app(ArchiveFileTypeEnum type) {
 }
 
 void archive_update_offset(ArchiveBrowserView* browser);
-void archive_update_focus(ArchiveBrowserView* browser);
+void archive_update_focus(ArchiveBrowserView* browser, const char* target);
 
 size_t archive_file_array_size(ArchiveBrowserView* browser);
 void archive_file_array_rm_selected(ArchiveBrowserView* browser);
@@ -60,7 +60,6 @@ uint8_t archive_get_depth(ArchiveBrowserView* browser);
 const char* archive_get_path(ArchiveBrowserView* browser);
 const char* archive_get_name(ArchiveBrowserView* browser);
 
-void archive_set_name(ArchiveBrowserView* browser, const char* name);
 void archive_add_item(ArchiveBrowserView* browser, FileInfo* file_info, const char* name);
 void archive_show_file_menu(ArchiveBrowserView* browser, bool show);
 

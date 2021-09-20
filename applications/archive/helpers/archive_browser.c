@@ -1,4 +1,5 @@
 #include "archive_browser.h"
+#include "math.h"
 
 void archive_update_offset(ArchiveBrowserView* browser) {
     furi_assert(browser);
@@ -11,17 +12,19 @@ void archive_update_offset(ArchiveBrowserView* browser) {
                 model->list_offset = model->idx - 3;
             } else if(model->list_offset < model->idx - bounds) {
                 model->list_offset = CLAMP(model->idx - 2, array_size - bounds, 0);
-            } else if(model->list_offset > model->idx - bounds) {
+            } else if(
+                ((array_size - bounds) - model->idx) && model->list_offset > model->idx - bounds) {
                 model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
             }
             return true;
         });
 }
 
-void archive_update_focus(ArchiveBrowserView* browser) {
+void archive_update_focus(ArchiveBrowserView* browser, const char* target) {
     furi_assert(browser);
+    furi_assert(target);
 
-    archive_get_filenames(browser, archive_get_tab(browser), string_get_cstr(browser->path));
+    archive_get_filenames(browser, string_get_cstr(browser->path));
 
     if(!archive_file_array_size(browser) && !archive_get_depth(browser)) {
         archive_switch_tab(browser, DEFAULT_TAB_DIR);
@@ -31,7 +34,7 @@ void archive_update_focus(ArchiveBrowserView* browser) {
                 uint16_t idx = 0;
                 while(idx < files_array_size(model->files)) {
                     ArchiveFile_t* current = files_array_get(model->files, idx);
-                    if(!string_search(current->name, string_get_cstr(browser->name))) {
+                    if(!string_search(current->name, target)) {
                         model->idx = idx;
                         break;
                     }
@@ -73,7 +76,7 @@ void archive_file_array_rm_all(ArchiveBrowserView* browser) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             files_array_clean(model->files);
-            return true;
+            return false;
         });
 }
 
@@ -81,9 +84,8 @@ ArchiveFile_t* archive_get_current_file(ArchiveBrowserView* browser) {
     ArchiveFile_t* selected;
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
-            selected = files_array_size(model->files) > 0 ?
-                           files_array_get(model->files, model->idx) :
-                           NULL;
+            selected = files_array_size(model->files) ? files_array_get(model->files, model->idx) :
+                                                        NULL;
             return false;
         });
     return selected;
@@ -117,13 +119,6 @@ const char* archive_get_path(ArchiveBrowserView* browser) {
 const char* archive_get_name(ArchiveBrowserView* browser) {
     ArchiveFile_t* selected = archive_get_current_file(browser);
     return string_get_cstr(selected->name);
-}
-
-void archive_set_name(ArchiveBrowserView* browser, const char* name) {
-    furi_assert(browser);
-    furi_assert(name);
-
-    string_set(browser->name, name);
 }
 
 void archive_set_tab(ArchiveBrowserView* browser, ArchiveTabEnum tab) {
@@ -172,12 +167,8 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
 
             if(show) {
                 ArchiveFile_t* selected = files_array_get(model->files, model->idx);
-                selected->fav = is_known_app(selected->type) ?
-                                    archive_is_favorite(
-                                        "%s/%s",
-                                        string_get_cstr(browser->path),
-                                        string_get_cstr(selected->name)) :
-                                    false;
+                selected->fav = archive_is_favorite(
+                    "%s/%s", string_get_cstr(browser->path), string_get_cstr(selected->name));
             }
 
             return true;
@@ -189,16 +180,12 @@ void archive_switch_dir(ArchiveBrowserView* browser, const char* path) {
     furi_assert(path);
 
     string_set(browser->path, path);
-    archive_get_filenames(browser, archive_get_tab(browser), string_get_cstr(browser->path));
-
-    if(archive_file_array_size(browser)) {
-        archive_update_offset(browser);
-    }
+    archive_get_filenames(browser, string_get_cstr(browser->path));
+    archive_update_offset(browser);
 }
 
 void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     furi_assert(browser);
-
     ArchiveTabEnum tab = archive_get_tab(browser);
 
     if(key == InputKeyLeft) {
@@ -208,6 +195,7 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     }
 
     archive_set_tab(browser, tab);
+
     if((tab != ArchiveTabFavorites &&
         !archive_dir_empty(browser, archive_get_default_path(tab))) ||
        (tab == ArchiveTabFavorites && !archive_favorites_count(browser))) {
@@ -221,7 +209,6 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
                 }
                 return false;
             });
-
         archive_switch_dir(browser, archive_get_default_path(tab));
     }
     archive_set_last_tab(browser, tab);
@@ -230,7 +217,6 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
 void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
     furi_assert(browser);
     furi_assert(name);
-
     // update last index
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
@@ -238,11 +224,11 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
                 CLAMP(model->idx, files_array_size(model->files) - 1, 0);
             model->idx = 0;
             model->depth = CLAMP(model->depth + 1, MAX_DEPTH, 0);
-            return true;
+            return false;
         });
 
     string_cat(browser->path, "/");
-    string_cat(browser->path, browser->name);
+    string_cat(browser->path, name);
 
     archive_switch_dir(browser, string_get_cstr(browser->path));
 }
@@ -262,7 +248,7 @@ void archive_leave_dir(ArchiveBrowserView* browser) {
         browser->view, (ArchiveBrowserViewModel * model) {
             model->depth = CLAMP(model->depth - 1, MAX_DEPTH, 0);
             model->idx = model->last_idx[model->depth];
-            return true;
+            return false;
         });
 
     archive_switch_dir(browser, path);

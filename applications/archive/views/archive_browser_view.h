@@ -59,7 +59,6 @@ struct ArchiveBrowserView {
     ArchiveBrowserViewCallback callback;
     void* context;
 
-    string_t name;
     string_t path;
 };
 

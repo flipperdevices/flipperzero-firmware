@@ -41,7 +41,7 @@ const void archive_scene_browser_on_enter(void* context) {
     ArchiveBrowserView* browser = archive->browser;
 
     archive_browser_set_callback(browser, archive_scene_browser_callback, archive);
-    archive_update_focus(browser);
+    archive_update_focus(browser, archive->text_store);
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 }
 
@@ -49,9 +49,11 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
     ArchiveApp* archive = (ArchiveApp*)context;
     ArchiveBrowserView* browser = archive->browser;
     ArchiveFile_t* selected = archive_get_current_file(browser);
-    ArchiveTabEnum tab = archive_get_tab(browser);
+
     const char* path = archive_get_path(browser);
     const char* name = archive_get_name(browser);
+    bool known_app = is_known_app(selected->type);
+    bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
     bool consumed;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -65,22 +67,20 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(is_known_app(selected->type)) {
-                archive_run_in_app(browser, selected, tab == ArchiveTabFavorites);
+            if(known_app) {
+                archive_run_in_app(browser, selected, favorites);
             }
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuPin:
-            if(is_known_app(selected->type)) {
-                if(!archive_is_favorite("%s/%s", path, name) && tab != ArchiveTabFavorites) {
-                    archive_file_append(ARCHIVE_FAV_PATH, "%s/%s\r\n", path, name);
+            if(favorites) {
+                archive_favorites_delete(name);
+                archive_file_array_rm_selected(browser);
+            } else if(known_app) {
+                if(archive_is_favorite("%s/%s", path, name)) {
+                    archive_favorites_delete("%s/%s", path, name);
                 } else {
-                    if(tab == ArchiveTabFavorites) {
-                        archive_favorites_delete(name);
-                        archive_file_array_rm_selected(browser);
-                    } else {
-                        archive_favorites_delete("%s/%s", path, name);
-                    }
+                    archive_file_append(ARCHIVE_FAV_PATH, "%s/%s\r\n", path, name);
                 }
             }
             archive_show_file_menu(browser, false);
@@ -88,10 +88,8 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
             break;
 
         case ArchiveBrowserEventFileMenuRename:
-            if(is_known_app(selected->type)) {
-                if(tab != ArchiveTabFavorites) {
-                    scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
-                }
+            if(known_app && !favorites) {
+                scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
             }
             consumed = true;
             break;
@@ -101,13 +99,13 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
             consumed = true;
             break;
         case ArchiveBrowserEventEnterDir:
-            archive_enter_dir(archive->browser, selected->name);
+            archive_enter_dir(browser, selected->name);
             consumed = true;
             break;
 
         case ArchiveBrowserEventExit:
-            if(archive_get_depth(archive->browser)) {
-                archive_leave_dir(archive->browser);
+            if(archive_get_depth(browser)) {
+                archive_leave_dir(browser);
             } else {
                 view_dispatcher_stop(archive->view_dispatcher);
             }
