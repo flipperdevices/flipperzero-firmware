@@ -18,12 +18,14 @@ struct SubghzTestPacket {
 
     SubGhzDecoderPrinceton* decoder;
     SubGhzEncoderPrinceton* encoder;
-
     volatile size_t packet_rx;
+    SubghzTestPacketCallback callback;
+    void* context;
 };
 
 typedef enum {
     SubghzTestPacketModelStatusRx,
+    SubghzTestPacketModelStatusOnlyRx,
     SubghzTestPacketModelStatusTx,
 } SubghzTestPacketModelStatus;
 
@@ -38,6 +40,16 @@ typedef struct {
 } SubghzTestPacketModel;
 
 volatile bool subghz_test_packet_overrun = false;
+
+void subghz_test_packet_set_callback(
+    SubghzTestPacket* subghz_test_packet,
+    SubghzTestPacketCallback callback,
+    void* context) {
+    furi_assert(subghz_test_packet);
+    furi_assert(callback);
+    subghz_test_packet->callback = callback;
+    subghz_test_packet->context = context;
+}
 
 static void subghz_test_packet_rx_callback(bool level, uint32_t duration, void* context) {
     furi_assert(context);
@@ -54,6 +66,16 @@ static void subghz_test_packet_rx_pt_callback(SubGhzProtocolCommon* parser, void
 static void subghz_test_packet_rssi_timer_callback(void* context) {
     furi_assert(context);
     SubghzTestPacket* instance = context;
+
+    bool ret = false;
+    with_view_model(
+        instance->view, (SubghzTestPacketModel * model) {
+            if(model->status == SubghzTestPacketModelStatusOnlyRx) {
+                ret = true;
+            }
+            return false;
+        });
+    if(ret) return;
 
     with_view_model(
         instance->view, (SubghzTestPacketModel * model) {
@@ -138,11 +160,10 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
             if(model->status == SubghzTestPacketModelStatusRx) {
                 furi_hal_subghz_stop_async_rx();
             } else {
-                if(model->repeat > 0 ){
+                if(model->repeat > 0) {
                     model->repeat = 1;
                     furi_hal_subghz_stop_async_tx();
                 }
-                
             }
 
             if(event->key == InputKeyLeft) {
@@ -154,10 +175,10 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 if(model->path < FuriHalSubGhzPath868) model->path++;
             } else if(event->key == InputKeyOk) {
-                if(model->status == SubghzTestPacketModelStatusTx) {
-                    model->status = SubghzTestPacketModelStatusRx;
-                } else {
+                if(model->status == SubghzTestPacketModelStatusRx) {
                     model->status = SubghzTestPacketModelStatusTx;
+                } else {
+                    model->status = SubghzTestPacketModelStatusRx;
                 }
             }
 
@@ -168,11 +189,16 @@ static bool subghz_test_packet_input(InputEvent* event, void* context) {
             if(model->status == SubghzTestPacketModelStatusRx) {
                 furi_hal_subghz_start_async_rx(subghz_test_packet_rx_callback, instance);
             } else {
-                model->repeat = SUBGHZ_TEST_PACKET_REPEAT;
-                ;
-                subghz_encoder_princeton_set(
-                    instance->encoder, 0x00AABBCC, SUBGHZ_TEST_PACKET_REPEAT_KEY);
-                furi_hal_subghz_start_async_tx(subghz_encoder_princeton_yield, instance->encoder);
+                if(!furi_hal_subghz_tx()) {
+                    model->status = SubghzTestPacketModelStatusOnlyRx;
+                    instance->callback(SubghzTestPacketEventOnlyRx, instance->context);
+                } else {
+                    model->repeat = SUBGHZ_TEST_PACKET_REPEAT;
+                    subghz_encoder_princeton_set(
+                        instance->encoder, 0x00AABBCC, SUBGHZ_TEST_PACKET_REPEAT_KEY);
+                    furi_hal_subghz_start_async_tx(
+                        subghz_encoder_princeton_yield, instance->encoder);
+                }
             }
 
             return true;
@@ -217,7 +243,7 @@ void subghz_test_packet_exit(void* context) {
         instance->view, (SubghzTestPacketModel * model) {
             if(model->status == SubghzTestPacketModelStatusRx) {
                 furi_hal_subghz_stop_async_rx();
-            } else if(model->repeat > 0){
+            } else if(model->repeat > 0) {
                 furi_hal_subghz_stop_async_tx();
             }
             return true;

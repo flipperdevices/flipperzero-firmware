@@ -40,19 +40,19 @@ uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
     return value;
 }
 
-uint32_t subghz_tx(SubGhz* subghz, uint32_t frequency) {
+static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz);
     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
         furi_crash(NULL);
     }
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
-    uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_cc1101_g0, true);
-    furi_hal_subghz_tx();
+    bool ret = furi_hal_subghz_tx();
     subghz->txrx->txrx_state = SubGhzTxRxStateTx;
-    return value;
+    return ret;
 }
 
 void subghz_idle(SubGhz* subghz) {
@@ -90,9 +90,10 @@ static void subghz_frequency_preset_to_str(SubGhz* subghz, string_t output) {
         (int)subghz->txrx->preset);
 }
 
-void subghz_tx_start(SubGhz* subghz) {
+bool subghz_tx_start(SubGhz* subghz) {
     furi_assert(subghz);
 
+    bool ret = false;
     subghz->txrx->encoder = subghz_protocol_encoder_common_alloc();
     subghz->txrx->encoder->repeat = 200; //max repeat with the button held down
     //get upload
@@ -105,16 +106,23 @@ void subghz_tx_start(SubGhz* subghz) {
                 subghz_begin(subghz, FuriHalSubGhzPresetOok270Async);
             }
             if(subghz->txrx->frequency) {
-                subghz_tx(subghz, subghz->txrx->frequency);
+                ret = subghz_tx(subghz, subghz->txrx->frequency);
             } else {
-                subghz_tx(subghz, 433920000);
+                ret = subghz_tx(subghz, 433920000);
             }
 
-            //Start TX
-            furi_hal_subghz_start_async_tx(
-                subghz_protocol_encoder_common_yield, subghz->txrx->encoder);
+            if(ret) {
+                //Start TX
+                furi_hal_subghz_start_async_tx(
+                    subghz_protocol_encoder_common_yield, subghz->txrx->encoder);
+            }
         }
     }
+    if(!ret) {
+        subghz_protocol_encoder_common_free(subghz->txrx->encoder);
+        subghz_idle(subghz);
+    }
+    return ret;
 }
 
 void subghz_tx_stop(SubGhz* subghz) {

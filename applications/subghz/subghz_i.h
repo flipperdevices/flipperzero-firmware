@@ -121,7 +121,7 @@ void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset);
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);
 void subghz_rx_end(SubGhz* subghz);
 void subghz_sleep(SubGhz* subghz);
-void subghz_tx_start(SubGhz* subghz);
+bool subghz_tx_start(SubGhz* subghz);
 void subghz_tx_stop(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
 bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name);

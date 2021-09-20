@@ -26,15 +26,18 @@ typedef enum {
 
 /** SubGhz state */
 typedef enum {
-    SubGhzStateInit,        /** Init pending */
+    SubGhzStateInit,                /** Init pending */
 
-    SubGhzStateIdle,        /** Idle, energy save mode */
+    SubGhzStateIdle,                /** Idle, energy save mode */
 
-    SubGhzStateAsyncRx,   /** Async RX started */
+    SubGhzStateAsyncRx,             /** Async RX started */
 
-    SubGhzStateAsyncTx,   /** Async TX started, DMA and timer is on */
-    SubGhzStateAsyncTxLast, /** Async TX continue, DMA completed and timer got last value to go */
-    SubGhzStateAsyncTxEnd,  /** Async TX complete, cleanup needed */
+    SubGhzStateAsyncTx,             /** Async TX started, DMA and timer is on */
+    SubGhzStateAsyncTxLast,         /** Async TX continue, DMA completed and timer got last value to go */
+    SubGhzStateAsyncTxEnd,          /** Async TX complete, cleanup needed */
+
+    SubGhzStateOnlyRx,              /**only Rx*/
+    SubGhzStateTxRx,                /**TxRx*/
 } SubGhzState;
 
 /** Initialize and switch to power save mode
@@ -100,8 +103,10 @@ void furi_hal_subghz_idle();
 /** Switch to Recieve */
 void furi_hal_subghz_rx();
 
-/** Switch to Transmit */
-void furi_hal_subghz_tx();
+/** Switch to Transmit
+* @return true if the transfer is allowed by belonging to the region
+*/
+bool furi_hal_subghz_tx();
 
 /** Get RSSI value in dBm */
 float furi_hal_subghz_get_rssi();

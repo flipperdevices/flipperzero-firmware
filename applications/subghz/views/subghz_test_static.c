@@ -29,6 +29,8 @@ struct SubghzTestStatic {
     SubGhzEncoderPrinceton* encoder;
     uint8_t satus_tx;
     osTimerId timer;
+    SubghzTestStaticCallback callback;
+    void* context;
 };
 
 typedef struct {
@@ -37,6 +39,16 @@ typedef struct {
     uint8_t button;
     size_t repeat;
 } SubghzTestStaticModel;
+
+void subghz_test_static_set_callback(
+    SubghzTestStatic* subghz_test_static,
+    SubghzTestStaticCallback callback,
+    void* context) {
+    furi_assert(subghz_test_static);
+    furi_assert(callback);
+    subghz_test_static->callback = callback;
+    subghz_test_static->context = context;
+}
 
 static void subghz_test_static_timer_callback(void* context) {
     furi_assert(context);
@@ -115,21 +127,23 @@ bool subghz_test_static_input(InputEvent* event, void* context) {
                 if(event->type == InputTypePress) {
                     furi_hal_subghz_idle();
                     furi_hal_subghz_set_frequency_and_path(subghz_frequencies[model->frequency]);
+                    if(!furi_hal_subghz_tx()) {
+                        instance->callback(SubghzTestStaticEventOnlyRx, instance->context);
+                    } else {
+                        model->repeat = SUBGHZ_TEST_PACKET_REPEAT;
+                        notification_message_block(notification, &sequence_set_red_255);
+                        FURI_LOG_I("SubghzTestStatic", "TX Start");
 
-                    model->repeat = SUBGHZ_TEST_PACKET_REPEAT;
-                    notification_message_block(notification, &sequence_set_red_255);
-                    FURI_LOG_I("SubghzTestStatic", "TX Start");
+                        subghz_encoder_princeton_set(
+                            instance->encoder,
+                            subghz_test_static_keys[model->button],
+                            SUBGHZ_TEST_PACKET_REPEAT_KEY);
 
-                    subghz_encoder_princeton_set(
-                        instance->encoder,
-                        subghz_test_static_keys[model->button],
-                        SUBGHZ_TEST_PACKET_REPEAT_KEY);
-
-                    furi_hal_subghz_start_async_tx(
-                        subghz_encoder_princeton_yield, instance->encoder);
-                    instance->satus_tx = SubghzTestStaticStatusTX;
-                    osTimerStart(instance->timer, 400);
-
+                        furi_hal_subghz_start_async_tx(
+                            subghz_encoder_princeton_yield, instance->encoder);
+                        instance->satus_tx = SubghzTestStaticStatusTX;
+                        osTimerStart(instance->timer, 400);
+                    }
                 } else if(event->type == InputTypeRelease) {
                     if(instance->satus_tx == SubghzTestStaticStatusTX) {
                         FURI_LOG_I("SubghzTestStatic", "TX Stop");
