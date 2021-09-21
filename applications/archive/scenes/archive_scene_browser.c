@@ -36,7 +36,7 @@ void archive_scene_browser_callback(ArchiveBrowserEvent event, void* context) {
     view_dispatcher_send_custom_event(archive->view_dispatcher, event);
 }
 
-const void archive_scene_browser_on_enter(void* context) {
+void archive_scene_browser_on_enter(void* context) {
     ArchiveApp* archive = (ArchiveApp*)context;
     ArchiveBrowserView* browser = archive->browser;
 
@@ -45,7 +45,7 @@ const void archive_scene_browser_on_enter(void* context) {
     view_dispatcher_switch_to_view(archive->view_dispatcher, ArchiveViewBrowser);
 }
 
-const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
+bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
     ArchiveApp* archive = (ArchiveApp*)context;
     ArchiveBrowserView* browser = archive->browser;
     ArchiveFile_t* selected = archive_get_current_file(browser);
@@ -54,7 +54,7 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
     const char* name = archive_get_name(browser);
     bool known_app = is_known_app(selected->type);
     bool favorites = archive_get_tab(browser) == ArchiveTabFavorites;
-    bool consumed;
+    bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
@@ -119,6 +119,6 @@ const bool archive_scene_browser_on_event(void* context, SceneManagerEvent event
     return consumed;
 }
 
-const void archive_scene_browser_on_exit(void* context) {
+void archive_scene_browser_on_exit(void* context) {
     // ArchiveApp* archive = (ArchiveApp*)context;
 }
