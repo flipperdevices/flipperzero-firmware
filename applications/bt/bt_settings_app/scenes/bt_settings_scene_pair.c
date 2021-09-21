@@ -17,6 +17,7 @@ void bt_settings_scene_pair_on_enter(void* context) {
     } else {
         dialog_ex_set_context(app->dialog, app);
         dialog_ex_set_header(app->dialog, "Activate\nBluetooth", 10, 32, AlignLeft, AlignCenter);
+        dialog_ex_set_icon(app->dialog, 70, 22, &I_BLE_big_11x17);
         dialog_ex_set_result_callback(app->dialog, bt_settings_scene_pair_dialog_callback);
         dialog_ex_set_left_button_text(app->dialog, "Back");
     }
