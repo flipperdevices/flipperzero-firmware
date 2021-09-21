@@ -8,6 +8,7 @@
 #define SUBGHZ_PT_SHORT 400
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
 #define SUBGHZ_PT_GUARD (SUBGHZ_PT_SHORT * 30)
+#define SUBGHZ_PT_COUNT_KEY 5
 
 struct SubGhzEncoderPrinceton {
     uint32_t key;
@@ -48,7 +49,7 @@ void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key
     instance->key = key;
     instance->repeat = repeat + 1;
     instance->front = 48;
-    instance->count_key = 5;
+    instance->count_key = SUBGHZ_PT_COUNT_KEY + 7;
 }
 
 size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance) {
@@ -74,13 +75,13 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
             ret = level_duration_make(level, level ? instance->te : instance->te * 3);
         }
     } else {
-        if(--instance->count_key !=0 ){
+        if(--instance->count_key != 0) {
             ret = level_duration_make(level, level ? instance->te : instance->te * 30);
         } else {
-            instance->count_key = 5;
-            ret = level_duration_make(level, level ? instance->te : 150*1000);
+            instance->count_key = SUBGHZ_PT_COUNT_KEY + 6;
+            instance->front = 48;
+            ret = level_duration_make(level, level ? instance->te : 150 * 1000);
         }
-        
     }
 
     instance->front++;
