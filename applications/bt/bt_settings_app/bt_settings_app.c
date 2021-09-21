@@ -40,6 +40,12 @@ BtSettingsApp* bt_settings_app_alloc() {
     app->dialog = dialog_ex_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BtSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtSettingsAppViewPopup, popup_get_view(app->popup));
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtSettingsAppViewWidget, widget_get_view(app->widget));
 
     scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneStart);
     return app;
@@ -52,6 +58,10 @@ void bt_settings_app_free(BtSettingsApp* app) {
     variable_item_list_free(app->var_item_list);
     view_dispatcher_remove_view(app->view_dispatcher, BtSettingsAppViewDialog);
     dialog_ex_free(app->dialog);
+    view_dispatcher_remove_view(app->view_dispatcher, BtSettingsAppViewPopup);
+    popup_free(app->popup);
+    view_dispatcher_remove_view(app->view_dispatcher, BtSettingsAppViewWidget);
+    widget_free(app->widget);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);

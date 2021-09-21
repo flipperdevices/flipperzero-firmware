@@ -8,6 +8,8 @@
 
 #include <gui/modules/variable-item-list.h>
 #include <gui/modules/dialog_ex.h>
+#include <gui/modules/widget.h>
+#include <gui/modules/popup.h>
 
 #include "../bt_settings.h"
 #include "scenes/bt_settings_scene.h"
@@ -19,9 +21,13 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
     DialogEx* dialog;
+    Popup* popup;
+    Widget* widget;
 } BtSettingsApp;
 
 typedef enum {
     BtSettingsAppViewVarItemList,
     BtSettingsAppViewDialog,
+    BtSettingsAppViewPopup,
+    BtSettingsAppViewWidget,
 } BtSettingsAppView;
