@@ -118,6 +118,7 @@ bool subghz_test_carrier_input(InputEvent* event, void* context) {
                 hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
                 hal_gpio_write(&gpio_cc1101_g0, true);
                 if(!furi_hal_subghz_tx()) {
+                    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
                     subghz_test_carrier->callback(
                         SubghzTestCarrierEventOnlyRx, subghz_test_carrier->context);
                 }

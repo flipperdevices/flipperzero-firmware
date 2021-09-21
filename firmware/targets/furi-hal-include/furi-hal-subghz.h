@@ -36,9 +36,13 @@ typedef enum {
     SubGhzStateAsyncTxLast,         /** Async TX continue, DMA completed and timer got last value to go */
     SubGhzStateAsyncTxEnd,          /** Async TX complete, cleanup needed */
 
-    SubGhzStateOnlyRx,              /**only Rx*/
-    SubGhzStateTxRx,                /**TxRx*/
 } SubGhzState;
+
+/** SubGhz regulation, receive transmission on the current frequency for the region */
+typedef enum {
+    SubGhzRegulationOnlyRx, /**only Rx*/
+    SubGhzRegulationTxRx, /**TxRx*/
+} SubGhzRegulation;
 
 /** Initialize and switch to power save mode
  * Used by internal API-HAL initalization routine
@@ -157,8 +161,9 @@ typedef LevelDuration (*FuriHalSubGhzAsyncTxCallback)(void* context);
 
 /** Start async TX
  * Initializes GPIO, TIM2 and DMA1 for signal output
+ * @return true if the transfer is allowed by belonging to the region
  */
-void furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context);
+bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context);
 
 /** Wait for async transmission to complete */
 bool furi_hal_subghz_is_async_tx_complete();

@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
-static volatile SubGhzState furi_hal_subghz_state_Tx_Rx = SubGhzStateTxRx;
+static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
 
 static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
@@ -365,7 +365,7 @@ void furi_hal_subghz_rx() {
 }
 
 bool furi_hal_subghz_tx() {
-    if(furi_hal_subghz_state_Tx_Rx != SubGhzStateTxRx) return false;
+    if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
     const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
     cc1101_switch_to_tx(device);
     furi_hal_spi_device_return(device);
@@ -393,10 +393,28 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
        !(value >= 778999847 && value <= 928000000)) {
         return false;
     }
+
     return true;
 }
 
-static void furi_hal_subghz_is_frequency_chek_txrx_region(uint32_t value) {
+uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
+    value = furi_hal_subghz_set_frequency(value);
+    if(value >= 299999755 && value <= 348000335) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
+    } else if(value >= 386999938 && value <= 464000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
+    } else if(value >= 778999847 && value <= 928000000) {
+        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
+    } else {
+        furi_crash(NULL);
+    }
+    return value;
+}
+
+uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
+    const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
+    
+    //checking regional settings
     bool txrx = false;
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
@@ -431,29 +449,10 @@ static void furi_hal_subghz_is_frequency_chek_txrx_region(uint32_t value) {
     }
 
     if(txrx) {
-        furi_hal_subghz_state_Tx_Rx = SubGhzStateTxRx;
+        furi_hal_subghz_regulation = SubGhzRegulationTxRx;
     } else {
-        furi_hal_subghz_state_Tx_Rx = SubGhzStateOnlyRx;
+        furi_hal_subghz_regulation = SubGhzRegulationOnlyRx;
     }
-}
-
-uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
-    value = furi_hal_subghz_set_frequency(value);
-    if(value >= 299999755 && value <= 348000335) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath315);
-    } else if(value >= 386999938 && value <= 464000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath433);
-    } else if(value >= 778999847 && value <= 928000000) {
-        furi_hal_subghz_set_path(FuriHalSubGhzPath868);
-    } else {
-        furi_crash(NULL);
-    }
-    furi_hal_subghz_is_frequency_chek_txrx_region(value);
-    return value;
-}
-
-uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
-    const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
 
     uint32_t real_frequency = cc1101_set_frequency(device, value);
     cc1101_calibrate(device);
@@ -670,12 +669,12 @@ static void furi_hal_subghz_async_tx_timer_isr() {
     }
 }
 
-void furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context) {
+bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context) {
     furi_assert(furi_hal_subghz_state == SubGhzStateIdle);
     furi_assert(callback);
 
     //If transmission is prohibited by regional settings
-    if(furi_hal_subghz_state_Tx_Rx != SubGhzStateTxRx) return;
+    if(furi_hal_subghz_regulation != SubGhzRegulationTxRx) return false;
 
     furi_hal_subghz_async_tx.callback = callback;
     furi_hal_subghz_async_tx.callback_context = context;
@@ -751,6 +750,7 @@ void furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
+    return true;
 }
 
 bool furi_hal_subghz_is_async_tx_complete() {

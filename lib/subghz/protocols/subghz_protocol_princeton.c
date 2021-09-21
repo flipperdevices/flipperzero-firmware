@@ -14,6 +14,7 @@ struct SubGhzEncoderPrinceton {
     uint16_t te;
     size_t repeat;
     size_t front;
+    size_t count_key;
 };
 
 typedef enum {
@@ -47,6 +48,7 @@ void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key
     instance->key = key;
     instance->repeat = repeat + 1;
     instance->front = 48;
+    instance->count_key = 5;
 }
 
 size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance) {
@@ -72,7 +74,13 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
             ret = level_duration_make(level, level ? instance->te : instance->te * 3);
         }
     } else {
-        ret = level_duration_make(level, level ? instance->te : instance->te * 30);
+        if(--instance->count_key !=0 ){
+            ret = level_duration_make(level, level ? instance->te : instance->te * 30);
+        } else {
+            instance->count_key = 5;
+            ret = level_duration_make(level, level ? instance->te : 150*1000);
+        }
+        
     }
 
     instance->front++;
