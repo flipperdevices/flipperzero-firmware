@@ -9,6 +9,7 @@
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
 #define SUBGHZ_PT_GUARD (SUBGHZ_PT_SHORT * 30)
 #define SUBGHZ_PT_COUNT_KEY 5
+#define SUBGHZ_PT_TIMEOUT 320
 
 struct SubGhzEncoderPrinceton {
     uint32_t key;
@@ -16,6 +17,8 @@ struct SubGhzEncoderPrinceton {
     size_t repeat;
     size_t front;
     size_t count_key;
+    uint32_t time_higth;
+    uint32_t time_low;
 };
 
 typedef enum {
@@ -50,6 +53,8 @@ void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key
     instance->repeat = repeat + 1;
     instance->front = 48;
     instance->count_key = SUBGHZ_PT_COUNT_KEY + 7;
+    instance->time_higth = 0;
+    instance->time_low = 0;
 }
 
 size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance) {
@@ -57,9 +62,25 @@ size_t subghz_encoder_princeton_get_repeat_left(SubGhzEncoderPrinceton* instance
     return instance->repeat;
 }
 
+void subghz_encoder_princeton_print_log(void* context) {
+    SubGhzEncoderPrinceton* instance = context;
+    float duty_cycle =
+        ((float)instance->time_higth / (instance->time_higth + instance->time_low)) * 100;
+    FURI_LOG_I(
+        "EncoderPrinceton",
+        "HIGTH=%dus, LOW=%dus, DutyCycle=%d,%d%%",
+        instance->time_higth,
+        instance->time_low,
+        (uint32_t)duty_cycle,
+        (uint32_t)((duty_cycle - (uint32_t)duty_cycle) * 100));
+}
+
 LevelDuration subghz_encoder_princeton_yield(void* context) {
     SubGhzEncoderPrinceton* instance = context;
-    if(instance->repeat == 0) return level_duration_reset();
+    if(instance->repeat == 0) {
+        subghz_encoder_princeton_print_log(instance);
+        return level_duration_reset();
+    }
 
     size_t bit = instance->front / 2;
     bool level = !(instance->front % 2);
@@ -71,16 +92,32 @@ LevelDuration subghz_encoder_princeton_yield(void* context) {
         bool value = (((uint8_t*)&instance->key)[2 - byte] >> (7 - bit_in_byte)) & 1;
         if(value) {
             ret = level_duration_make(level, level ? instance->te * 3 : instance->te);
+            if(level)
+                instance->time_higth += instance->te * 3;
+            else
+                instance->time_low += instance->te;
         } else {
             ret = level_duration_make(level, level ? instance->te : instance->te * 3);
+            if(level)
+                instance->time_higth += instance->te;
+            else
+                instance->time_low += instance->te * 3;
         }
     } else {
         if(--instance->count_key != 0) {
             ret = level_duration_make(level, level ? instance->te : instance->te * 30);
+            if(level)
+                instance->time_higth += instance->te;
+            else
+                instance->time_low += instance->te * 30;
         } else {
             instance->count_key = SUBGHZ_PT_COUNT_KEY + 6;
             instance->front = 48;
-            ret = level_duration_make(level, level ? instance->te : 150 * 1000);
+            ret = level_duration_make(level, level ? instance->te : SUBGHZ_PT_TIMEOUT * 1000);
+            if(level)
+                instance->time_higth += instance->te;
+            else
+                instance->time_low += SUBGHZ_PT_TIMEOUT * 1000;
         }
     }
 
