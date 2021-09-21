@@ -7,14 +7,14 @@ void subghz_scene_test_packet_callback(SubghzTestPacketEvent event, void* contex
     view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
 }
 
-const void subghz_scene_test_packet_on_enter(void* context) {
+void subghz_scene_test_packet_on_enter(void* context) {
     SubGhz* subghz = context;
     subghz_test_packet_set_callback(
         subghz->subghz_test_packet, subghz_scene_test_packet_callback, subghz);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTestPacket);
 }
 
-const bool subghz_scene_test_packet_on_event(void* context, SceneManagerEvent event) {
+bool subghz_scene_test_packet_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzTestPacketEventOnlyRx) {
@@ -25,6 +25,6 @@ const bool subghz_scene_test_packet_on_event(void* context, SceneManagerEvent ev
     return false;
 }
 
-const void subghz_scene_test_packet_on_exit(void* context) {
+void subghz_scene_test_packet_on_exit(void* context) {
     // SubGhz* subghz = context;
 }
