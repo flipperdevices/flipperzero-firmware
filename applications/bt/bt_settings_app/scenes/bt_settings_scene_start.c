@@ -7,10 +7,21 @@ enum BtSetting {
     BtSettingNum,
 };
 
+#define BT_SETTINGS_SCENE_START_PAIR_EVENT (3UL)
+
 const char* const bt_settings_text[BtSettingNum] = {
     "Off",
     "On",
 };
+
+static void bt_setting_scene_start_var_list_enter_callback(void* context, uint32_t index) {
+    furi_assert(context);
+    BtSettingsApp* app = context;
+    if(index == 1) {
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, BT_SETTINGS_SCENE_START_PAIR_EVENT);
+    }
+}
 
 static void bt_settings_scene_start_var_list_change_callback(VariableItem* item) {
     BtSettingsApp* app = variable_item_get_context(item);
@@ -39,6 +50,8 @@ void bt_settings_scene_start_on_enter(void* context) {
         variable_item_set_current_value_text(item, bt_settings_text[BtSettingOff]);
     }
     item = variable_item_list_add(var_item_list, "Pair new device", 0, NULL, app);
+    variable_item_list_set_enter_callback(
+        var_item_list, bt_setting_scene_start_var_list_enter_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, BtSettingsAppViewVarItemList);
 }
@@ -54,6 +67,8 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == BtSettingOff) {
             app->settings.enabled = false;
             furi_hal_bt_stop_advertising();
+        } else if(event.event == BT_SETTINGS_SCENE_START_PAIR_EVENT) {
+            scene_manager_next_scene(app->scene_manager, BtSettingsAppScenePair);
         }
         consumed = true;
     }

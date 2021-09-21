@@ -7,6 +7,7 @@
 #include <gui/scene_manager.h>
 
 #include <gui/modules/variable-item-list.h>
+#include <gui/modules/dialog_ex.h>
 
 #include "../bt_settings.h"
 #include "scenes/bt_settings_scene.h"
@@ -17,6 +18,10 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    DialogEx* dialog;
 } BtSettingsApp;
 
-typedef enum { BtSettingsAppViewVarItemList } BtSettingsAppView;
+typedef enum {
+    BtSettingsAppViewVarItemList,
+    BtSettingsAppViewDialog,
+} BtSettingsAppView;

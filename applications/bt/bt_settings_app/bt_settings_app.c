@@ -31,11 +31,15 @@ BtSettingsApp* bt_settings_app_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
+    // Views
     app->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         BtSettingsAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
+    app->dialog = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtSettingsAppViewDialog, dialog_ex_get_view(app->dialog));
 
     scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneStart);
     return app;
@@ -43,9 +47,11 @@ BtSettingsApp* bt_settings_app_alloc() {
 
 void bt_settings_app_free(BtSettingsApp* app) {
     furi_assert(app);
-    // Variable item list
+    // Views
     view_dispatcher_remove_view(app->view_dispatcher, BtSettingsAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, BtSettingsAppViewDialog);
+    dialog_ex_free(app->dialog);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
