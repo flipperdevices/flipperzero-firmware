@@ -2,6 +2,7 @@
 #include <assets_icons.h>
 
 // Services
+extern int32_t rpc_srv(void* p);
 extern int32_t bt_srv(void* p);
 extern int32_t cli_srv(void* p);
 extern int32_t dialogs_srv(void* p);
@@ -54,6 +55,10 @@ extern int32_t bt_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
+#ifdef SRV_RPC
+    {.app = rpc_srv, .name = "RPC", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef SRV_BT
     {.app = bt_srv, .name = "BT", .stack_size = 1024, .icon = NULL},
 #endif

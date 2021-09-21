@@ -5,13 +5,99 @@
 #define PB_FLIPPER_PB_H_INCLUDED
 #include <pb.h>
 #include "storage.pb.h"
+#include "status.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
+/* Enum definitions */
+typedef enum _CommandStatus { 
+    CommandStatus_OK = 0, 
+    CommandStatus_ERROR = 1, 
+    CommandStatus_ERROR_NO_SPACE = 2, 
+    CommandStatus_ERROR_NO_FILE = 3 
+} CommandStatus;
+
+/* Struct definitions */
+typedef struct _Main { 
+    uint64_t command_id; 
+    CommandStatus command_status; 
+    bool last; 
+    pb_size_t which_content;
+    union {
+        Status_PingRequest ping_request;
+        Status_PingResponse ping_response;
+        Storage_ListRequest storage_list_request;
+        Storage_ListResponse storage_list_response;
+        Storage_ReadRequest storage_read_request;
+        Storage_ReadResponse storage_read_response;
+        Storage_WriteRequest storage_write_request;
+        Storage_DeleteRequest storage_delete_request;
+    } content; 
+} Main;
+
+
+/* Helper constants for enums */
+#define _CommandStatus_MIN CommandStatus_OK
+#define _CommandStatus_MAX CommandStatus_ERROR_NO_FILE
+#define _CommandStatus_ARRAYSIZE ((CommandStatus)(CommandStatus_ERROR_NO_FILE+1))
+
+
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/* Initializer values for message structs */
+#define Main_init_default                        {0, _CommandStatus_MIN, 0, 0, {Status_PingRequest_init_default}}
+#define Main_init_zero                           {0, _CommandStatus_MIN, 0, 0, {Status_PingRequest_init_zero}}
+
+/* Field tags (for use in manual encoding/decoding) */
+#define Main_command_id_tag                      1
+#define Main_command_status_tag                  2
+#define Main_last_tag                            3
+#define Main_ping_request_tag                    4
+#define Main_ping_response_tag                   5
+#define Main_storage_list_request_tag            6
+#define Main_storage_list_response_tag           7
+#define Main_storage_read_request_tag            8
+#define Main_storage_read_response_tag           9
+#define Main_storage_write_request_tag           10
+#define Main_storage_delete_request_tag          11
+
+/* Struct field encoding specification for nanopb */
+#define Main_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT64,   command_id,        1) \
+X(a, STATIC,   SINGULAR, UENUM,    command_status,    2) \
+X(a, STATIC,   SINGULAR, BOOL,     last,              3) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,ping_request,content.ping_request),   4) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,ping_response,content.ping_response),   5) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_list_request,content.storage_list_request),   6) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_list_response,content.storage_list_response),   7) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_read_request,content.storage_read_request),   8) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_read_response,content.storage_read_response),   9) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_write_request,content.storage_write_request),  10) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (content,storage_delete_request,content.storage_delete_request),  11)
+#define Main_CALLBACK NULL
+#define Main_DEFAULT NULL
+#define Main_content_ping_request_MSGTYPE Status_PingRequest
+#define Main_content_ping_response_MSGTYPE Status_PingResponse
+#define Main_content_storage_list_request_MSGTYPE Storage_ListRequest
+#define Main_content_storage_list_response_MSGTYPE Storage_ListResponse
+#define Main_content_storage_read_request_MSGTYPE Storage_ReadRequest
+#define Main_content_storage_read_response_MSGTYPE Storage_ReadResponse
+#define Main_content_storage_write_request_MSGTYPE Storage_WriteRequest
+#define Main_content_storage_delete_request_MSGTYPE Storage_DeleteRequest
+
+extern const pb_msgdesc_t Main_msg;
+
+/* Defines for backwards compatibility with code written before nanopb-0.4.0 */
+#define Main_fields &Main_msg
+
+/* Maximum encoded size of messages (where known) */
+#if defined(Storage_ListRequest_size) && defined(Storage_ListResponse_size) && defined(Storage_ReadRequest_size) && defined(Storage_ReadResponse_size) && defined(Storage_WriteRequest_size) && defined(Storage_DeleteRequest_size)
+#define Main_size                                (15 + sizeof(union Main_content_size_union))
+union Main_content_size_union {char f6[(6 + Storage_ListRequest_size)]; char f7[(6 + Storage_ListResponse_size)]; char f8[(6 + Storage_ReadRequest_size)]; char f9[(6 + Storage_ReadResponse_size)]; char f10[(6 + Storage_WriteRequest_size)]; char f11[(6 + Storage_DeleteRequest_size)]; char f0[2];};
 #endif
 
 #ifdef __cplusplus

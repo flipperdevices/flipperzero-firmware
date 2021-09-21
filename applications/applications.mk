@@ -47,6 +47,12 @@ APP_VIBRO_DEMO = 1
 endif
 
 
+SRV_RPC ?= 0
+ifeq ($(SRV_RPC), 1)
+SRV_CLI		= 1
+CFLAGS		+= -DSRV_RPC
+endif
+
 SRV_BT ?= 0
 ifeq ($(SRV_BT), 1)
 SRV_CLI		= 1

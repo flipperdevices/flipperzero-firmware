@@ -6,13 +6,25 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(StorageListRequest, StorageListRequest, AUTO)
+PB_BIND(Storage_Element, Storage_Element, AUTO)
 
 
-PB_BIND(StorageListAnswer, StorageListAnswer, AUTO)
+PB_BIND(Storage_ListRequest, Storage_ListRequest, AUTO)
 
 
-PB_BIND(StorageListEOF, StorageListEOF, AUTO)
+PB_BIND(Storage_ListResponse, Storage_ListResponse, AUTO)
+
+
+PB_BIND(Storage_ReadRequest, Storage_ReadRequest, AUTO)
+
+
+PB_BIND(Storage_ReadResponse, Storage_ReadResponse, AUTO)
+
+
+PB_BIND(Storage_WriteRequest, Storage_WriteRequest, AUTO)
+
+
+PB_BIND(Storage_DeleteRequest, Storage_DeleteRequest, AUTO)
 
 
 
