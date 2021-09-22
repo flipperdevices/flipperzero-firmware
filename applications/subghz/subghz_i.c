@@ -300,7 +300,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     do {
         if(!file_worker_open(
                file_worker, string_get_cstr(protocol_file_name), FSAM_READ, FSOM_OPEN_EXISTING)) {
-            break;
+            return res;
         }
         // Read and parse frequency from 1st line
         if(!file_worker_read_until(file_worker, temp_str, '\n')) {
