@@ -52,6 +52,7 @@ extern void subghz_cli_init();
 extern int32_t notification_settings_app(void* p);
 extern int32_t storage_settings_app(void* p);
 extern int32_t bt_settings_app(void* p);
+extern int32_t desktop_settings_app(void* p);
 extern int32_t about_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
@@ -143,10 +144,6 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
-
-#ifdef APP_DESKTOP
-    {.app = desktop_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
-#endif
 
 #ifdef APP_IBUTTON
     {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
@@ -276,6 +273,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_BT
     {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_DESKTOP
+    {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT

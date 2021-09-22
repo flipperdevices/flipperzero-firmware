@@ -79,6 +79,8 @@ bool desktop_main_input(InputEvent* event, void* context) {
         main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
     } else if(event->key == InputKeyDown && event->type == InputTypeShort) {
         main_view->callback(DesktopMainEventOpenArchive, main_view->context);
+    } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+        main_view->callback(DesktopMainEventOpenFavorite, main_view->context);
     }
     desktop_main_reset_hint(main_view);
 

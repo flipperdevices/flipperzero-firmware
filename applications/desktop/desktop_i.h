@@ -18,6 +18,8 @@
 #include "views/desktop_debug.h"
 #include "scenes/desktop_scene.h"
 
+#include "desktop/desktop_settings/desktop_settings.h"
+
 #define HINT_TIMEOUT_L 2
 #define HINT_TIMEOUT_H 11
 
@@ -47,6 +49,7 @@ struct Desktop {
     DesktopLockMenuView* lock_menu;
     DesktopLockedView* locked_view;
     DesktopDebugView* debug_view;
+    DesktopSettings settings;
 
     ViewPort* lock_viewport;
     IconAnimation* lock_icon;
