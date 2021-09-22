@@ -159,21 +159,6 @@ void power_free(Power* power) {
     free(power);
 }
 
-void power_off(Power* power) {
-    furi_assert(power);
-    furi_hal_power_off();
-    view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewDisconnect);
-}
-
-void power_reboot(Power* power, PowerBootMode mode) {
-    if(mode == PowerBootModeNormal) {
-        furi_hal_boot_set_mode(FuriHalBootModeNormal);
-    } else if(mode == PowerBootModeDfu) {
-        furi_hal_boot_set_mode(FuriHalBootModeDFU);
-    }
-    furi_hal_power_reset();
-}
-
 static void power_charging_indication_handler(Power* power, NotificationApp* notifications) {
     if(furi_hal_power_is_charging()) {
         if(furi_hal_power_get_pct() == 100) {
