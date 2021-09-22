@@ -12,6 +12,12 @@ static bool power_settings_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
+static void power_settings_tick_event_callback(void* context) {
+    furi_assert(context);
+    PowerSettingsApp* app = context;
+    scene_manager_handle_tick_event(app->scene_manager);
+}
+
 PowerSettingsApp* power_settings_app_alloc() {
     PowerSettingsApp* app = furi_alloc(sizeof(PowerSettingsApp));
 
@@ -28,9 +34,16 @@ PowerSettingsApp* power_settings_app_alloc() {
         app->view_dispatcher, power_settings_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, power_settings_back_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, power_settings_tick_event_callback, 2000);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
+    app->batery_info = battery_info_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        PowerSettingsAppViewBatteryInfo,
+        battery_info_get_view(app->batery_info));
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, PowerSettingsAppViewSubmenu, submenu_get_view(app->submenu));
@@ -46,6 +59,8 @@ PowerSettingsApp* power_settings_app_alloc() {
 void power_settings_app_free(PowerSettingsApp* app) {
     furi_assert(app);
     // Views
+    view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewBatteryInfo);
+    battery_info_free(app->batery_info);
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewSubmenu);
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewDialog);

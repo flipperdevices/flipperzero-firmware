@@ -1,19 +1,13 @@
-#include "power.h"
+#include "power_i.h"
 #include "power_cli.h"
 #include "power_views.h"
 
 #include <furi.h>
 #include <furi-hal.h>
-
-#include <menu/menu.h>
-#include <menu/menu_item.h>
-
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
 #include <gui/view_port.h>
 #include <gui/view.h>
-#include <gui/view_dispatcher.h>
-#include <gui/modules/dialog.h>
 #include <assets_icons.h>
 #include <stm32wbxx.h>
 
@@ -21,30 +15,6 @@
 #include <applications/bt/bt_service/bt.h>
 
 #define POWER_OFF_TIMEOUT 30
-
-typedef enum {
-    PowerStateNotCharging,
-    PowerStateCharging,
-    PowerStateCharged,
-} PowerState;
-
-struct Power {
-    ViewDispatcher* view_dispatcher;
-    View* info_view;
-    View* off_view;
-    View* disconnect_view;
-
-    ViewPort* battery_view_port;
-
-    Dialog* dialog;
-
-    ValueMutex* menu_vm;
-    Cli* cli;
-    Bt* bt;
-    MenuItem* menu;
-
-    PowerState state;
-};
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
@@ -111,6 +81,8 @@ Power* power_alloc() {
     power_cli_init(power->cli, power);
 
     power->bt = furi_record_open("bt");
+
+    power->info_mtx = osMutexNew(NULL);
 
     power->menu = menu_item_alloc_menu("Power", icon_animation_alloc(&A_Power_14));
     menu_item_subitem_add(
@@ -182,6 +154,21 @@ static void power_charging_indication_handler(Power* power, NotificationApp* not
     }
 }
 
+static void power_update_info(Power* power) {
+    PowerInfo* info = &power->info;
+    info->charge = furi_hal_power_get_pct();
+    info->health = furi_hal_power_get_bat_health_pct();
+    info->capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
+    info->capacity_full = furi_hal_power_get_battery_full_capacity();
+    info->current_charger = furi_hal_power_get_battery_current(FuriHalPowerICCharger);
+    info->current_gauge = furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge);
+    info->voltage_charger = furi_hal_power_get_battery_voltage(FuriHalPowerICCharger);
+    info->voltage_gauge = furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge);
+    info->voltage_vbus = furi_hal_power_get_usb_voltage();
+    info->temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
+    info->temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
+}
+
 int32_t power_srv(void* p) {
     (void)p;
     Power* power = power_alloc();
@@ -200,29 +187,32 @@ int32_t power_srv(void* p) {
     while(1) {
         bool battery_low = false;
 
-        with_view_model(
-            power->info_view, (PowerInfoModel * model) {
-                model->charge = furi_hal_power_get_pct();
-                battery_level = model->charge;
-                model->health = furi_hal_power_get_bat_health_pct();
-                model->capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
-                model->capacity_full = furi_hal_power_get_battery_full_capacity();
-                model->current_charger = furi_hal_power_get_battery_current(FuriHalPowerICCharger);
-                model->current_gauge = furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge);
-                model->voltage_charger = furi_hal_power_get_battery_voltage(FuriHalPowerICCharger);
-                model->voltage_gauge = furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge);
-                model->voltage_vbus = furi_hal_power_get_usb_voltage();
-                model->temperature_charger =
-                    furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
-                model->temperature_gauge =
-                    furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
+        // with_view_model(
+        //     power->info_view, (PowerInfoModel * model) {
+        //         model->charge = furi_hal_power_get_pct();
+        //         battery_level = model->charge;
+        //         model->health = furi_hal_power_get_bat_health_pct();
+        //         model->capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
+        //         model->capacity_full = furi_hal_power_get_battery_full_capacity();
+        //         model->current_charger = furi_hal_power_get_battery_current(FuriHalPowerICCharger);
+        //         model->current_gauge = furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge);
+        //         model->voltage_charger = furi_hal_power_get_battery_voltage(FuriHalPowerICCharger);
+        //         model->voltage_gauge = furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge);
+        //         model->voltage_vbus = furi_hal_power_get_usb_voltage();
+        //         model->temperature_charger =
+        //             furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
+        //         model->temperature_gauge =
+        //             furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
 
-                if(model->charge == 0 && model->voltage_vbus < 4.0f) {
-                    battery_low = true;
-                }
+        //         if(model->charge == 0 && model->voltage_vbus < 4.0f) {
+        //             battery_low = true;
+        //         }
 
-                return true;
-            });
+        //         return true;
+        //     });
+        osMutexAcquire(power->info_mtx, osWaitForever);
+        power_update_info(power);
+        osMutexRelease(power->info_mtx);
 
         with_view_model(
             power->off_view, (PowerOffModel * model) {

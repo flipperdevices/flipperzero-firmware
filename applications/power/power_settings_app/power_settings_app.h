@@ -7,6 +7,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 
+#include "views/battery_info.h"
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 
@@ -17,11 +18,14 @@ typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
+    BatteryInfo* batery_info;
     Submenu* submenu;
     DialogEx* dialog;
+    PowerInfo info;
 } PowerSettingsApp;
 
 typedef enum {
+    PowerSettingsAppViewBatteryInfo,
     PowerSettingsAppViewSubmenu,
     PowerSettingsAppViewDialog,
 } PowerSettingsAppView;
