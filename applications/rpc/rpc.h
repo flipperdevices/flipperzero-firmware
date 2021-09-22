@@ -1,0 +1,17 @@
+#pragma once
+#include <stddef.h>
+#include <stdint.h>
+#include "cmsis_os.h"
+
+typedef struct RpcInstance RpcInstance;
+typedef struct RpcSession RpcSession;
+
+
+typedef void (*RpcSendBytesCallback) (void* context, uint8_t* bytes, size_t bytes_len);
+
+
+RpcSession* rpc_open_session(RpcInstance* rpc);
+void rpc_close_session(RpcSession* session);
+void rpc_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback, void* context);
+size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout);
+
