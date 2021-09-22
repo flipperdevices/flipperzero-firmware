@@ -202,7 +202,9 @@ void archive_switch_tab(ArchiveBrowserView* browser, InputKey key) {
     if((tab != ArchiveTabFavorites &&
         !archive_dir_empty(browser, archive_get_default_path(tab))) ||
        (tab == ArchiveTabFavorites && !archive_favorites_count(browser))) {
-        archive_switch_tab(browser, key);
+        if(tab != ArchiveTabBrowser) {
+            archive_switch_tab(browser, key);
+        }
     } else {
         with_view_model(
             browser->view, (ArchiveBrowserViewModel * model) {
