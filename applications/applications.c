@@ -52,6 +52,7 @@ extern int32_t notification_settings_app(void* p);
 extern int32_t storage_settings_app(void* p);
 extern int32_t bt_settings_app(void* p);
 extern int32_t about_settings_app(void* p);
+extern int32_t power_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
@@ -272,6 +273,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef APP_ABOUT
     {.app = about_settings_app, .name = "About", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef SRV_POWER
+    {.app = power_settings_app, .name = "Power", .stack_size = 1024, .icon = NULL},
 #endif
 };
 
