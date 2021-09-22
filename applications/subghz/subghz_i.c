@@ -353,6 +353,30 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     return res;
 }
 
+bool subghz_delete_file(SubGhz* subghz) {
+    furi_assert(subghz);
+
+    bool result = true;
+    FileWorker* file_worker = file_worker_alloc(false);
+    string_t file_path;
+
+    do {
+        // Get key file path
+        string_init_printf(
+            file_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->text_store, SUBGHZ_APP_EXTENSION);
+        // Delete original file
+        if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
+            result = false;
+            break;
+        }
+    } while(0);
+
+    string_clear(file_path);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return result;
+}
+
 uint32_t subghz_random_serial(void) {
     static bool rand_generator_inited = false;
 
