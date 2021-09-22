@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <power/power.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -12,6 +13,7 @@
 #include "scenes/power_settings_scene.h"
 
 typedef struct {
+    Power* power;
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;

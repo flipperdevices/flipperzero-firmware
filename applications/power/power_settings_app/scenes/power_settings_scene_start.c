@@ -46,11 +46,11 @@ bool power_settings_scene_start_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PowerSettingsSubmenuIndexBatteryInfo) {
-            // scene_manager_next_scene(app->scene_manager, );
+            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneBatteryInfo);
         } else if(event.event == PowerSettingsSubmenuIndexReboot) {
-            // scene_manager_next_scene(app->scene_manager, );
+            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneReboot);
         } else if(event.event == PowerSettingsSubmenuIndexReboot) {
-            // scene_manager_next_scene(app->scene_manager, );
+            scene_manager_next_scene(app->scene_manager, PowerSettingsAppScenePowerOff);
         }
         scene_manager_set_scene_state(app->scene_manager, PowerSettingsAppSceneStart, event.event);
         consumed = true;
