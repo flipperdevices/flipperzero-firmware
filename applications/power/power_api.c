@@ -3,13 +3,11 @@
 #include "furi-hal-power.h"
 #include "furi-hal-boot.h"
 
-void power_off(Power* power) {
-    furi_assert(power);
+void power_off() {
     furi_hal_power_off();
 }
 
-void power_reboot(Power* power, PowerBootMode mode) {
-    furi_assert(power);
+void power_reboot(PowerBootMode mode) {
     if(mode == PowerBootModeNormal) {
         furi_hal_boot_set_mode(FuriHalBootModeNormal);
     } else if(mode == PowerBootModeDfu) {

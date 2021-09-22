@@ -39,9 +39,9 @@ void power_menu_off_callback(void* context) {
 void power_menu_reset_dialog_result(DialogResult result, void* context) {
     Power* power = context;
     if(result == DialogResultLeft) {
-        power_reboot(power, PowerBootModeDfu);
+        power_reboot(PowerBootModeDfu);
     } else if(result == DialogResultRight) {
-        power_reboot(power, PowerBootModeNormal);
+        power_reboot(PowerBootModeNormal);
     } else if(result == DialogResultBack) {
         view_dispatcher_switch_to_view(power->view_dispatcher, VIEW_NONE);
     }

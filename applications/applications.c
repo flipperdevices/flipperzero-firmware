@@ -46,6 +46,7 @@ extern void lfrfid_cli_init();
 extern void nfc_cli_init();
 extern void storage_cli_init();
 extern void subghz_cli_init();
+extern void power_cli_init();
 
 // Settings
 extern int32_t notification_settings_app(void* p);

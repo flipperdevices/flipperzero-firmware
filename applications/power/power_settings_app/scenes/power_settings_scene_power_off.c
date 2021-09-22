@@ -30,7 +30,7 @@ bool power_settings_scene_power_off_on_event(void* context, SceneManagerEvent ev
         if(event.event == DialogExResultLeft) {
             scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == DialogExResultRight) {
-            power_off(app->power);
+            power_off();
         }
         consumed = true;
     }

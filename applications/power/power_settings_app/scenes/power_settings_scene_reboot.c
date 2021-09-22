@@ -33,14 +33,13 @@ void power_settings_scene_reboot_on_enter(void* context) {
 }
 
 bool power_settings_scene_reboot_on_event(void* context, SceneManagerEvent event) {
-    PowerSettingsApp* app = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PowerSettingsRebootSubmenuIndexDfu) {
-            power_reboot(app->power, PowerBootModeDfu);
+            power_reboot(PowerBootModeDfu);
         } else if(event.event == PowerSettingsRebootSubmenuIndexOs) {
-            power_reboot(app->power, PowerBootModeNormal);
+            power_reboot(PowerBootModeNormal);
         }
         consumed = true;
     }

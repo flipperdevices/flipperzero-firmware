@@ -28,15 +28,13 @@ typedef struct {
 } PowerInfo;
 
 /** Power off device
- * @param power - Power instance
  */
-void power_off(Power* power);
+void power_off();
 
 /** Reboot device
- * @param power - Power instance
  * @param mode - PowerBootMode
  */
-void power_reboot(Power* power, PowerBootMode mode);
+void power_reboot(PowerBootMode mode);
 
 /** Get power info
  * @param power - Power instance
