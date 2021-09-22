@@ -183,7 +183,7 @@ int32_t about_settings_app(void* p) {
     size_t screen_index = 0;
     DialogMessageButton screen_result;
 
-    // empty screen to prevent
+    // draw empty screen to prevent menu flickering
     view_dispatcher_add_view(
         view_dispatcher, empty_screen_index, empty_screen_get_view(empty_screen));
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
