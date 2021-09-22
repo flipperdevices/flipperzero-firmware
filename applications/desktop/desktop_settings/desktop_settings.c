@@ -20,10 +20,13 @@ bool desktop_settings_load(DesktopSettings* desktop_settings) {
     file_worker_free(file_worker);
 
     if(file_loaded) {
-        FURI_LOG_I(DESKTOP_SETTINGS_TAG, "Settings load success");
-        osKernelLock();
-        *desktop_settings = settings;
-        osKernelUnlock();
+        if(settings.version != DESKTOP_SETTINGS_VER) {
+            FURI_LOG_E(DESKTOP_SETTINGS_TAG, "Settings version mismatch");
+        } else {
+            osKernelLock();
+            *desktop_settings = settings;
+            osKernelUnlock();
+        }
     } else {
         FURI_LOG_E(DESKTOP_SETTINGS_TAG, "Settings load failed");
     }

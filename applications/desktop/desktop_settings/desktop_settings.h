@@ -3,7 +3,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define DESKTOP_SETTINGS_VER (0)
+
 typedef struct {
+    uint8_t version;
     uint16_t favorite;
 } DesktopSettings;
 

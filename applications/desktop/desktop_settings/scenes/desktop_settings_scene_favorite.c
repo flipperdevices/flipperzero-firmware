@@ -20,6 +20,8 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             app);
     }
 
+    submenu_set_header(app->submenu, "Quick access app:");
+    submenu_set_selected_item(app->submenu, app->settings.favorite);
     view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewFavorite);
 }
 

@@ -14,10 +14,11 @@ static bool desktop_settings_back_event_callback(void* context) {
 
 DesktopSettingsApp* desktop_settings_app_alloc() {
     DesktopSettingsApp* app = furi_alloc(sizeof(DesktopSettingsApp));
-    // Load settings
-    desktop_settings_load(&app->settings);
-    app->gui = furi_record_open("gui");
 
+    app->settings.version = DESKTOP_SETTINGS_VER;
+    desktop_settings_load(&app->settings);
+
+    app->gui = furi_record_open("gui");
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&desktop_settings_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);

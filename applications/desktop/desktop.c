@@ -112,8 +112,6 @@ int32_t desktop_app(void* p) {
     Desktop* desktop = desktop_alloc();
     Dolphin* dolphin = furi_record_open("dolphin");
 
-    desktop_settings_load(&desktop->settings);
-
     if(dolphin_load(dolphin)) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
     } else {
