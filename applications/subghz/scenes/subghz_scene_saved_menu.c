@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexEmulate,
-    //SubmenuIndexEdit,
+    SubmenuIndexEdit,
     SubmenuIndexDelete,
 };
 
@@ -19,12 +19,12 @@ void subghz_scene_saved_menu_on_enter(void* context) {
         SubmenuIndexEmulate,
         subghz_scene_saved_menu_submenu_callback,
         subghz);
-    // submenu_add_item(
-    //     subghz->submenu,
-    //     "Edit name",
-    //     SubmenuIndexEdit,
-    //     subghz_scene_saved_menu_submenu_callback,
-    //     subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Edit name",
+        SubmenuIndexEdit,
+        subghz_scene_saved_menu_submenu_callback,
+        subghz);
     submenu_add_item(
         subghz->submenu,
         "Delete",
@@ -53,13 +53,12 @@ bool subghz_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexDelete);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDelete);
             return true;
+        } else if(event.event == SubmenuIndexEdit) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexEdit);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
+            return true;
         }
-        // else if(event.event == SubmenuIndexEdit) {
-        //     scene_manager_set_scene_state(
-        //         subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexEdit);
-        //     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
-        //     return true;
-        // }
     }
     return false;
 }

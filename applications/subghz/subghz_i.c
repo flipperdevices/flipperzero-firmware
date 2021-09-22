@@ -133,8 +133,9 @@ void subghz_tx_stop(SubGhz* subghz) {
     subghz_protocol_encoder_common_free(subghz->txrx->encoder);
     subghz_idle(subghz);
     //if protocol dynamic then we save the last upload
-    if(subghz->txrx->protocol_result->type_protocol == SubGhzProtocolCommonTypeDynamic) {
-        subghz_save_protocol_to_file(subghz, subghz->text_store);
+    if((subghz->txrx->protocol_result->type_protocol == SubGhzProtocolCommonTypeDynamic) &&
+       (strcmp(subghz->file_name, ""))) {
+        subghz_save_protocol_to_file(subghz, subghz->file_name);
     }
     notification_message(subghz->notifications, &sequence_reset_red);
 }
@@ -276,8 +277,8 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         file_worker,
         SUBGHZ_APP_PATH_FOLDER,
         SUBGHZ_APP_EXTENSION,
-        subghz->text_store,
-        sizeof(subghz->text_store),
+        subghz->file_name,
+        sizeof(subghz->file_name),
         NULL);
 
     if(res) {
@@ -286,7 +287,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
             protocol_file_name,
             "%s/%s%s",
             SUBGHZ_APP_PATH_FOLDER,
-            subghz->text_store,
+            subghz->file_name,
             SUBGHZ_APP_EXTENSION);
     } else {
         string_clear(temp_str);
@@ -363,7 +364,11 @@ bool subghz_delete_file(SubGhz* subghz) {
     do {
         // Get key file path
         string_init_printf(
-            file_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->text_store, SUBGHZ_APP_EXTENSION);
+            file_path,
+            "%s/%s%s",
+            SUBGHZ_APP_PATH_FOLDER,
+            subghz->file_name_tmp,
+            SUBGHZ_APP_EXTENSION);
         // Delete original file
         if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
             result = false;
@@ -375,6 +380,12 @@ bool subghz_delete_file(SubGhz* subghz) {
     file_worker_close(file_worker);
     file_worker_free(file_worker);
     return result;
+}
+
+void subghz_file_name_clear(SubGhz* subghz) {
+    furi_assert(subghz);
+    memset(subghz->file_name, 0, sizeof(subghz->file_name));
+    memset(subghz->file_name_tmp, 0, sizeof(subghz->file_name_tmp));
 }
 
 uint32_t subghz_random_serial(void) {

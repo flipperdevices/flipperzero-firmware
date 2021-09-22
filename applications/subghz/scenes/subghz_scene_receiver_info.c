@@ -148,6 +148,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             }
             if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_string &&
                strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
+                subghz_file_name_clear(subghz);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
