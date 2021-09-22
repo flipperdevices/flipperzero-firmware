@@ -53,7 +53,7 @@ bool subghz_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexDelete);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDelete);
             return true;
-        } 
+        }
         // else if(event.event == SubmenuIndexEdit) {
         //     scene_manager_set_scene_state(
         //         subghz->scene_manager, SubGhzSceneSavedMenu, SubmenuIndexEdit);
