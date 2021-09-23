@@ -6,7 +6,7 @@
 #include <gui/view_port.h>
 #include <gui/view.h>
 
-#define POWER_OFF_TIMEOUT 30
+#define POWER_OFF_TIMEOUT 90
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);

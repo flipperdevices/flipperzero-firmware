@@ -1,5 +1,6 @@
 #include "power_off.h"
 #include <furi.h>
+#include <gui/elements.h>
 
 struct PowerOff {
     View* view;
@@ -16,11 +17,15 @@ static void power_off_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 15, "!!! Low Battery !!!");
+    canvas_draw_str_aligned(canvas, 64, 1, AlignCenter, AlignTop, "Battery low!");
+    canvas_draw_icon(canvas, 0, 18, &I_BatteryBody_52x28);
+    canvas_draw_icon(canvas, 16, 25, &I_FaceNopower_29x14);
+    elements_bubble(canvas, 54, 17, 70, 30);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 30, "Connect to charger");
-    snprintf(buff, sizeof(buff), "Or poweroff in %lds", model->time_left_sec);
-    canvas_draw_str(canvas, 5, 42, buff);
+    elements_multiline_text_aligned(
+        canvas, 70, 23, AlignLeft, AlignTop, "Connect me\n to charger.");
+    snprintf(buff, sizeof(buff), "Poweroff in %lds.", model->time_left_sec);
+    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignBottom, buff);
 }
 
 PowerOff* power_off_alloc() {

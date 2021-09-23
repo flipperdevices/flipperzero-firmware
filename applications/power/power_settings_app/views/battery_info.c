@@ -1,5 +1,6 @@
 #include "battery_info.h"
 #include <furi.h>
+#include <gui/elements.h>
 
 struct BatteryInfo {
     View* view;
@@ -35,20 +36,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
     }
 
     // Draw bubble
-    canvas_draw_frame(canvas, 57, 0, 71, 39);
-    canvas_draw_line(canvas, 53, 23, 57, 19);
-    canvas_draw_line(canvas, 53, 23, 57, 27);
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 57, 0, 2, 2);
-    canvas_draw_box(canvas, 57, 37, 2, 2);
-    canvas_draw_box(canvas, 126, 0, 2, 2);
-    canvas_draw_box(canvas, 126, 37, 2, 2);
-    canvas_draw_line(canvas, 57, 20, 57, 26);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_dot(canvas, 58, 1);
-    canvas_draw_dot(canvas, 58, 37);
-    canvas_draw_dot(canvas, 126, 1);
-    canvas_draw_dot(canvas, 126, 37);
+    elements_bubble(canvas, 53, 0, 71, 39);
 
     // Set text
     if(charge_current > 0) {
