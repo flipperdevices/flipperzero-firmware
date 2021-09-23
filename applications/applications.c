@@ -38,7 +38,7 @@ extern int32_t bt_debug_app(void* p);
 // Dolphin internals
 extern int32_t passport_app(void* p);
 extern int32_t food_minigame_app(void* p);
-extern int32_t dolphin_scene_app(void* p);
+extern int32_t flipper_world_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -266,9 +266,9 @@ const FlipperApplication FLIPPER_ARCHIVE =
     {.app = archive_app, .name = "Archive", .stack_size = 4096, .icon = &A_FileManager_14};
 #endif
 
-#ifdef SRV_DOLPHIN
+#ifdef APP_DESKTOP
 const FlipperApplication FLIPPER_SCENE =
-    {.app = dolphin_scene_app, .name = "Scenes", .stack_size = 1024, .icon = &A_Games_14};
+    {.app = flipper_world_app, .name = "Scenes", .stack_size = 1024, .icon = &A_Games_14};
 
 const FlipperApplication FLIPPER_SCENE_APPS[] = {
     {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = &A_Games_14},

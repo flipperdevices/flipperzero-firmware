@@ -72,7 +72,12 @@ const bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
             consumed = true;
             break;
+        case DesktopMainEventOpenFlipperScenes:
+            desktop_switch_to_app(desktop, &FLIPPER_SCENE);
 
+            // desktop_switch_to_app(desktop, &FLIPPER_SCENE);
+            consumed = true;
+            break;
         default:
             break;
         }

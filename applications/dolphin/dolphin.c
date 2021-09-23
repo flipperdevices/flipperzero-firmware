@@ -29,6 +29,10 @@ DolphinDeedWeight dolphin_stats(Dolphin* dolphin) {
     return stats;
 }
 
+DolphinState* dolphin_get_state(Dolphin* dolphin) {
+    return dolphin->state;
+}
+
 Dolphin* dolphin_alloc() {
     Dolphin* dolphin = furi_alloc(sizeof(Dolphin));
 

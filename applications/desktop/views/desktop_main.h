@@ -13,6 +13,7 @@ typedef enum {
     DesktopMainEventUnlocked,
     DesktopMainEventOpenArchive,
     DesktopMainEventOpenFavorite,
+    DesktopMainEventOpenFlipperScenes,
 } DesktopMainEvent;
 
 typedef struct DesktopMainView DesktopMainView;

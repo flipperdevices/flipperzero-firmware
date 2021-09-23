@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/dolphin_deed.h"
+#include "helpers/dolphin_state.h"
 
 typedef struct Dolphin Dolphin;
 
@@ -28,3 +29,5 @@ void dolphin_save(Dolphin* dolphin);
  */
 
 DolphinDeedWeight dolphin_stats(Dolphin* dolphin);
+
+DolphinState* dolphin_get_state(Dolphin* dolphin);
