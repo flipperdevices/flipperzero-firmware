@@ -1,11 +1,10 @@
 #include "power_i.h"
-#include "power_views.h"
+#include "views/power_off.h"
 
 #include <furi.h>
 #include <furi-hal.h>
 #include <gui/view_port.h>
 #include <gui/view.h>
-#include <assets_icons.h>
 
 #define POWER_OFF_TIMEOUT 30
 
@@ -16,16 +15,27 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     canvas_draw_box(canvas, 2, 2, power->info.charge / 5, 4);
 }
 
+static ViewPort* power_battery_view_port_alloc(Power* power) {
+    ViewPort* battery_view_port = view_port_alloc();
+    view_port_set_width(battery_view_port, icon_get_width(&I_Battery_26x8));
+    view_port_draw_callback_set(battery_view_port, power_draw_battery_callback, power);
+    gui_add_view_port(power->gui, battery_view_port, GuiLayerStatusBarRight);
+    return battery_view_port;
+}
+
 Power* power_alloc() {
     Power* power = furi_alloc(sizeof(Power));
 
-    power->state = PowerStateNotCharging;
+    // Records
     power->bt = furi_record_open("bt");
     power->notification = furi_record_open("notification");
     power->gui = furi_record_open("gui");
 
+    // State initialization
+    power->state = PowerStateNotCharging;
     power->info_mtx = osMutexNew(NULL);
 
+    // Gui
     power->view_dispatcher = view_dispatcher_alloc();
 
     power->off_view = view_alloc();
@@ -35,10 +45,8 @@ Power* power_alloc() {
     view_dispatcher_attach_to_gui(
         power->view_dispatcher, power->gui, ViewDispatcherTypeFullscreen);
 
-    power->battery_view_port = view_port_alloc();
-    view_port_set_width(power->battery_view_port, icon_get_width(&I_Battery_26x8));
-    view_port_draw_callback_set(power->battery_view_port, power_draw_battery_callback, power);
-    gui_add_view_port(power->gui, power->battery_view_port, GuiLayerStatusBarRight);
+    // Battery view port
+    power->battery_view_port = power_battery_view_port_alloc(power);
 
     return power;
 }

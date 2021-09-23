@@ -1,6 +1,6 @@
 #include "power_cli.h"
 
-#include "power.h"
+#include <power/power_service/power.h>
 #include <cli/cli.h>
 #include <furi-hal.h>
 

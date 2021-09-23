@@ -7,7 +7,6 @@
 #include <gui/view_dispatcher.h>
 #include <gui/gui.h>
 #include <notification/notification-messages.h>
-
 #include <bt/bt_service/bt.h>
 
 typedef enum {

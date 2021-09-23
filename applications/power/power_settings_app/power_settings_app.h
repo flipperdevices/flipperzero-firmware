@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi.h>
-#include <power/power.h>
+#include <power/power_service/power.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>

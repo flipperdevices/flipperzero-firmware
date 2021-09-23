@@ -1,4 +1,4 @@
-#include "power_views.h"
+#include "power_off.h"
 #include <gui/elements.h>
 
 static void draw_stat(Canvas* canvas, int x, int y, const Icon* icon, char* val) {
