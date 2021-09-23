@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <furi/pubsub.h>
 
 typedef struct Power Power;
 
@@ -8,6 +9,22 @@ typedef enum {
     PowerBootModeNormal,
     PowerBootModeDfu,
 } PowerBootMode;
+
+typedef enum {
+    PowerEventTypeStopCharging,
+    PowerEventTypeStartCharging,
+    PowerEventTypeFullyCharged,
+    PowerEventTypeBatteryLevelChanged,
+} PowerEventType;
+
+typedef union {
+    uint8_t battery_level;
+} PowerEventData;
+
+typedef struct {
+    PowerEventType type;
+    PowerEventData data;
+} PowerEvent;
 
 typedef struct {
     float current_charger;
@@ -41,3 +58,8 @@ void power_reboot(PowerBootMode mode);
  * @param info - PowerInfo instance
  */
 void power_get_info(Power* power, PowerInfo* info);
+
+/** Get power event pubsub handler
+ * @param power - Power instance
+ */
+PubSub* power_get_pubsub(Power* power);

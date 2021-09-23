@@ -24,3 +24,8 @@ void power_get_info(Power* power, PowerInfo* info) {
     memcpy(info, &power->info, sizeof(power->info));
     osMutexRelease(power->info_mtx);
 }
+
+PubSub* power_get_pubsub(Power* power) {
+    furi_assert(power);
+    return &power->event_pubsub;
+}

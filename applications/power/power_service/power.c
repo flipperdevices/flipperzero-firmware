@@ -27,9 +27,11 @@ Power* power_alloc() {
     Power* power = furi_alloc(sizeof(Power));
 
     // Records
-    power->bt = furi_record_open("bt");
     power->notification = furi_record_open("notification");
     power->gui = furi_record_open("gui");
+
+    // Pubsub
+    init_pubsub(&power->event_pubsub);
 
     // State initialization
     power->state = PowerStateNotCharging;
@@ -53,26 +55,44 @@ Power* power_alloc() {
 
 void power_free(Power* power) {
     furi_assert(power);
+
+    // Records
+    furi_record_close("notification");
+    furi_record_close("gui");
+
+    // Gui
+    view_dispatcher_remove_view(power->view_dispatcher, PowerViewOff);
+    power_off_free(power->power_off);
+    view_port_free(power->battery_view_port);
+
+    // State
+    osMutexDelete(power->info_mtx);
     free(power);
 }
 
-static void power_charging_indication_handler(Power* power) {
+static void power_check_charging_state(Power* power) {
     if(furi_hal_power_is_charging()) {
         if(power->info.charge == 100) {
             if(power->state != PowerStateCharged) {
                 notification_internal_message(power->notification, &sequence_charged);
                 power->state = PowerStateCharged;
+                power->event.type = PowerEventTypeFullyCharged;
+                notify_pubsub(&power->event_pubsub, &power->event);
             }
         } else {
             if(power->state != PowerStateCharging) {
                 notification_internal_message(power->notification, &sequence_charging);
                 power->state = PowerStateCharging;
+                power->event.type = PowerEventTypeStartCharging;
+                notify_pubsub(&power->event_pubsub, &power->event);
             }
         }
     } else {
         if(power->state != PowerStateNotCharging) {
             notification_internal_message(power->notification, &sequence_not_charging);
             power->state = PowerStateNotCharging;
+            power->event.type = PowerEventTypeStopCharging;
+            notify_pubsub(&power->event_pubsub, &power->event);
         }
     }
 }
@@ -120,35 +140,40 @@ static void power_check_low_battery(Power* power) {
     }
 }
 
+static void power_check_battery_level_change(Power* power) {
+    if(power->battery_level != power->info.charge) {
+        power->battery_level = power->info.charge;
+        power->event.type = PowerEventTypeBatteryLevelChanged;
+        power->event.data.battery_level = power->battery_level;
+        notify_pubsub(&power->event_pubsub, &power->event);
+    }
+}
+
 int32_t power_srv(void* p) {
     (void)p;
     Power* power = power_alloc();
     furi_record_create("power", power);
 
-    uint8_t battery_level = 0;
-    uint8_t battery_level_prev = 0;
     while(1) {
         // Update data from gauge and charger
         power_update_info(power);
 
-        battery_level = power->info.charge;
-
         // Check low battery level
         power_check_low_battery(power);
 
-        // Process charging state
-        power_charging_indication_handler(power);
+        // Check and notify about charging state
+        power_check_charging_state(power);
 
-        if(battery_level_prev != battery_level) {
-            battery_level_prev = battery_level;
-            bt_update_battery_level(power->bt, battery_level);
-        }
+        // Check and notify about battery level change
+        power_check_battery_level_change(power);
 
         // Update battery view port
         view_port_update(power->battery_view_port);
 
-        osDelay(1024);
+        osDelay(1000);
     }
+
+    power_free(power);
 
     return 0;
 }
