@@ -16,6 +16,7 @@ extern int32_t power_srv(void* p);
 extern int32_t storage_srv(void* p);
 
 // Apps
+extern int32_t desktop_app(void* p);
 extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t blink_test_app(void* p);
@@ -56,6 +57,7 @@ extern void subghz_cli_init();
 extern int32_t notification_settings_app(void* p);
 extern int32_t storage_settings_app(void* p);
 extern int32_t bt_settings_app(void* p);
+extern int32_t desktop_settings_app(void* p);
 extern int32_t about_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
@@ -200,6 +202,9 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef SRV_STORAGE
     storage_cli_init,
 #endif
+#ifdef APP_DESKTOP
+    (void*)desktop_app,
+#endif
 };
 
 const size_t FLIPPER_ON_SYSTEM_START_COUNT =
@@ -286,6 +291,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_BT
     {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_DESKTOP
+    {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT
