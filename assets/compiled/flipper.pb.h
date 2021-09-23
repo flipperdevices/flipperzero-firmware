@@ -32,14 +32,14 @@ typedef struct _PB_Main {
     pb_callback_t cb_content;
     pb_size_t which_content;
     union {
-        Status_PingRequest ping_request;
-        Status_PingResponse ping_response;
-        Storage_ListRequest storage_list_request;
-        Storage_ListResponse storage_list_response;
-        Storage_ReadRequest storage_read_request;
-        Storage_ReadResponse storage_read_response;
-        Storage_WriteRequest storage_write_request;
-        Storage_DeleteRequest storage_delete_request;
+        PB_Status_PingRequest ping_request;
+        PB_Status_PingResponse ping_response;
+        PB_Storage_ListRequest storage_list_request;
+        PB_Storage_ListResponse storage_list_response;
+        PB_Storage_ReadRequest storage_read_request;
+        PB_Storage_ReadResponse storage_read_response;
+        PB_Storage_WriteRequest storage_write_request;
+        PB_Storage_DeleteRequest storage_delete_request;
         PB_Dummy dummy;
     } content; 
 } PB_Main;
@@ -57,9 +57,9 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define PB_Dummy_init_default                    {0}
-#define PB_Main_init_default                     {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {Status_PingRequest_init_default}}
+#define PB_Main_init_default                     {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {PB_Status_PingRequest_init_default}}
 #define PB_Dummy_init_zero                       {0}
-#define PB_Main_init_zero                        {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {Status_PingRequest_init_zero}}
+#define PB_Main_init_zero                        {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {PB_Status_PingRequest_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_Main_command_id_tag                   1
@@ -96,14 +96,14 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_delete_request,content.stora
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,dummy,content.dummy),  12)
 #define PB_Main_CALLBACK NULL
 #define PB_Main_DEFAULT NULL
-#define PB_Main_content_ping_request_MSGTYPE Status_PingRequest
-#define PB_Main_content_ping_response_MSGTYPE Status_PingResponse
-#define PB_Main_content_storage_list_request_MSGTYPE Storage_ListRequest
-#define PB_Main_content_storage_list_response_MSGTYPE Storage_ListResponse
-#define PB_Main_content_storage_read_request_MSGTYPE Storage_ReadRequest
-#define PB_Main_content_storage_read_response_MSGTYPE Storage_ReadResponse
-#define PB_Main_content_storage_write_request_MSGTYPE Storage_WriteRequest
-#define PB_Main_content_storage_delete_request_MSGTYPE Storage_DeleteRequest
+#define PB_Main_content_ping_request_MSGTYPE PB_Status_PingRequest
+#define PB_Main_content_ping_response_MSGTYPE PB_Status_PingResponse
+#define PB_Main_content_storage_list_request_MSGTYPE PB_Storage_ListRequest
+#define PB_Main_content_storage_list_response_MSGTYPE PB_Storage_ListResponse
+#define PB_Main_content_storage_read_request_MSGTYPE PB_Storage_ReadRequest
+#define PB_Main_content_storage_read_response_MSGTYPE PB_Storage_ReadResponse
+#define PB_Main_content_storage_write_request_MSGTYPE PB_Storage_WriteRequest
+#define PB_Main_content_storage_delete_request_MSGTYPE PB_Storage_DeleteRequest
 #define PB_Main_content_dummy_MSGTYPE PB_Dummy
 
 extern const pb_msgdesc_t PB_Dummy_msg;
@@ -115,9 +115,9 @@ extern const pb_msgdesc_t PB_Main_msg;
 
 /* Maximum encoded size of messages (where known) */
 #define PB_Dummy_size                            0
-#if defined(Storage_ListRequest_size) && defined(Storage_ListResponse_size) && defined(Storage_ReadRequest_size) && defined(Storage_ReadResponse_size) && defined(Storage_WriteRequest_size) && defined(Storage_DeleteRequest_size)
+#if defined(PB_Storage_ListRequest_size) && defined(PB_Storage_ListResponse_size) && defined(PB_Storage_ReadRequest_size) && defined(PB_Storage_ReadResponse_size) && defined(PB_Storage_WriteRequest_size) && defined(PB_Storage_DeleteRequest_size)
 #define PB_Main_size                             (15 + sizeof(union PB_Main_content_size_union))
-union PB_Main_content_size_union {char f6[(6 + Storage_ListRequest_size)]; char f7[(6 + Storage_ListResponse_size)]; char f8[(6 + Storage_ReadRequest_size)]; char f9[(6 + Storage_ReadResponse_size)]; char f10[(6 + Storage_WriteRequest_size)]; char f11[(6 + Storage_DeleteRequest_size)]; char f0[2];};
+union PB_Main_content_size_union {char f6[(6 + PB_Storage_ListRequest_size)]; char f7[(6 + PB_Storage_ListResponse_size)]; char f8[(6 + PB_Storage_ReadRequest_size)]; char f9[(6 + PB_Storage_ReadResponse_size)]; char f10[(6 + PB_Storage_WriteRequest_size)]; char f11[(6 + PB_Storage_DeleteRequest_size)]; char f0[2];};
 #endif
 
 #ifdef __cplusplus

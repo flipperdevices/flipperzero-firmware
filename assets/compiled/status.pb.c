@@ -6,10 +6,10 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(Status_PingRequest, Status_PingRequest, AUTO)
+PB_BIND(PB_Status_PingRequest, PB_Status_PingRequest, AUTO)
 
 
-PB_BIND(Status_PingResponse, Status_PingResponse, AUTO)
+PB_BIND(PB_Status_PingResponse, PB_Status_PingResponse, AUTO)
 
 
 

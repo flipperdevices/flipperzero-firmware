@@ -1,3 +1,4 @@
+#include "flipper.pb.h"
 #include "rpc_i.h"
 #include "status.pb.h"
 
@@ -6,6 +7,7 @@ void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
     msg_response.not_last = false;
     msg_response.command_status = PB_CommandStatus_OK;
     msg_response.command_id = msg_request->command_id;
+    msg_response.which_content = PB_Main_ping_response_tag;
 
     rpc_encode_and_send(context, &msg_response);
 }
