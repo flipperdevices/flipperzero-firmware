@@ -265,7 +265,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 #endif
 
 #ifdef SRV_NOTIFICATION
-    {.app = notification_settings_app, .name = "Notification", .stack_size = 1024, .icon = NULL},
+    {.app = notification_settings_app,
+     .name = "LCD and notifications",
+     .stack_size = 1024,
+     .icon = NULL},
 #endif
 
 #ifdef SRV_STORAGE
