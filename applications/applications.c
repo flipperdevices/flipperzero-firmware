@@ -260,6 +260,10 @@ const FlipperApplication FLIPPER_ARCHIVE =
 
 // Settings menu
 const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
+#ifdef SRV_BT
+    {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef SRV_NOTIFICATION
     {.app = notification_settings_app, .name = "Notification", .stack_size = 1024, .icon = NULL},
 #endif
@@ -268,16 +272,12 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
     {.app = storage_settings_app, .name = "Storage", .stack_size = 2048, .icon = NULL},
 #endif
 
-#ifdef SRV_BT
-    {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#ifdef SRV_POWER
+    {.app = power_settings_app, .name = "Power", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT
     {.app = about_settings_app, .name = "About", .stack_size = 1024, .icon = NULL},
-#endif
-
-#ifdef SRV_POWER
-    {.app = power_settings_app, .name = "Power", .stack_size = 1024, .icon = NULL},
 #endif
 };
 
