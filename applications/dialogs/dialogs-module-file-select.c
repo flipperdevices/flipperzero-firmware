@@ -5,19 +5,26 @@
 typedef struct {
     osSemaphoreId_t semaphore;
     bool result;
+    bool processed;
 } DialogsAppFileSelectContext;
 
 static void dialogs_app_file_select_back_callback(void* context) {
     furi_assert(context);
     DialogsAppFileSelectContext* file_select_context = context;
+    if(file_select_context->processed) return;
+
     file_select_context->result = false;
+    file_select_context->processed = true;
     API_LOCK_UNLOCK(file_select_context->semaphore);
 }
 
 static void dialogs_app_file_select_callback(bool result, void* context) {
     furi_assert(context);
     DialogsAppFileSelectContext* file_select_context = context;
+    if(file_select_context->processed) return;
+
     file_select_context->result = result;
+    file_select_context->processed = true;
     API_LOCK_UNLOCK(file_select_context->semaphore);
 }
 
@@ -28,6 +35,7 @@ bool dialogs_app_process_module_file_select(const DialogsAppMessageDataFileSelec
     DialogsAppFileSelectContext* file_select_context =
         furi_alloc(sizeof(DialogsAppFileSelectContext));
     file_select_context->semaphore = API_LOCK_INIT_LOCKED();
+    file_select_context->processed = false;
 
     ViewHolder* view_holder = view_holder_alloc();
     view_holder_attach_to_gui(view_holder, gui);
