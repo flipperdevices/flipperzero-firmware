@@ -1,9 +1,10 @@
 #include "../nfc_i.h"
 
-void nfc_scene_delete_widget_callback(GuiButtonType result, void* context) {
+void nfc_scene_delete_widget_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = (Nfc*)context;
-
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    }
 }
 
 void nfc_scene_delete_on_enter(void* context) {
@@ -18,7 +19,7 @@ void nfc_scene_delete_on_enter(void* context) {
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "Delete", nfc_scene_delete_widget_callback, nfc);
     char uid_str[32];
-    NfcDeviceCommomData* data = &nfc->dev.dev_data.nfc_data;
+    NfcDeviceCommonData* data = &nfc->dev.dev_data.nfc_data;
     if(data->uid_len == 4) {
         snprintf(
             uid_str,
@@ -65,7 +66,7 @@ void nfc_scene_delete_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-const bool nfc_scene_delete_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_delete_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -84,7 +85,7 @@ const bool nfc_scene_delete_on_event(void* context, SceneManagerEvent event) {
     return false;
 }
 
-const void nfc_scene_delete_on_exit(void* context) {
+void nfc_scene_delete_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     widget_clear(nfc->widget);

@@ -7,9 +7,11 @@ enum {
     NfcSceneDeviceInfoData,
 };
 
-void nfc_scene_device_info_widget_callback(GuiButtonType result, void* context) {
+void nfc_scene_device_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    }
 }
 
 void nfc_scene_device_info_dialog_callback(DialogExResult result, void* context) {
@@ -22,9 +24,11 @@ void nfc_scene_device_info_text_box_callback(void* context) {
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_SCENE_DEVICE_INFO_BACK_EVENT);
 }
 
-void nfc_scene_device_info_bank_card_callback(GuiButtonType result, void* context) {
+void nfc_scene_device_info_bank_card_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_SCENE_DEVICE_INFO_BACK_EVENT);
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_SCENE_DEVICE_INFO_BACK_EVENT);
+    }
 }
 
 void nfc_scene_device_info_on_enter(void* context) {
@@ -38,7 +42,7 @@ void nfc_scene_device_info_on_enter(void* context) {
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "Data", nfc_scene_device_info_widget_callback, nfc);
     char uid_str[32];
-    NfcDeviceCommomData* data = &nfc->dev.dev_data.nfc_data;
+    NfcDeviceCommonData* data = &nfc->dev.dev_data.nfc_data;
     if(data->uid_len == 4) {
         snprintf(
             uid_str,
@@ -123,7 +127,7 @@ void nfc_scene_device_info_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-const bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneDeviceInfo);
@@ -158,7 +162,7 @@ const bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event
     return consumed;
 }
 
-const void nfc_scene_device_info_on_exit(void* context) {
+void nfc_scene_device_info_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Clear Custom Widget

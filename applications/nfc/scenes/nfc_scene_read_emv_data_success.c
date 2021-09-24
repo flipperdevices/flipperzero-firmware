@@ -1,16 +1,20 @@
 #include "../nfc_i.h"
 #include "../helpers/nfc_emv_parser.h"
 
-void nfc_scene_read_emv_data_success_widget_callback(GuiButtonType result, void* context) {
+void nfc_scene_read_emv_data_success_widget_callback(
+    GuiButtonType result,
+    InputType type,
+    void* context) {
     Nfc* nfc = (Nfc*)context;
-
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    }
 }
 
 void nfc_scene_read_emv_data_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
     NfcEmvData* emv_data = &nfc->dev.dev_data.emv_data;
-    NfcDeviceCommomData* nfc_data = &nfc->dev.dev_data.nfc_data;
+    NfcDeviceCommonData* nfc_data = &nfc->dev.dev_data.nfc_data;
 
     // Clear device name
     nfc_device_set_name(&nfc->dev, "");
@@ -109,7 +113,7 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-const bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -128,7 +132,7 @@ const bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerE
     return false;
 }
 
-const void nfc_scene_read_emv_data_success_on_exit(void* context) {
+void nfc_scene_read_emv_data_success_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     widget_clear(nfc->widget);

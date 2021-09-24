@@ -7,6 +7,15 @@
 #include <notification/notification-messages.h>
 #include <shci.h>
 
+#define ENCLAVE_SIGNATURE_KEY_SLOT 1
+#define ENCLAVE_SIGNATURE_SIZE 16
+static const uint8_t enclave_signature_iv[16] =
+    {0x32, 0xe6, 0xa7, 0x85, 0x20, 0xae, 0x0b, 0xf0, 0x00, 0xb6, 0x30, 0x9b, 0xd5, 0x42, 0x9e, 0xa6};
+static const uint8_t enclave_signature_input[ENCLAVE_SIGNATURE_SIZE] =
+    {0xdc, 0x76, 0x15, 0x1e, 0x69, 0xe8, 0xdc, 0xd3, 0x4a, 0x71, 0x0b, 0x42, 0x71, 0xe0, 0xa9, 0x78};
+static const uint8_t enclave_signature_expected[ENCLAVE_SIGNATURE_SIZE] =
+    {0x1b, 0xb3, 0xcf, 0x16, 0xc, 0x27, 0xf7, 0xf2, 0xf0, 0x7e, 0x5f, 0xbe, 0xfe, 0x89, 0x52, 0xe1};
+
 /* 
  * Device Info Command
  * This command is intended to be used by humans and machines
@@ -43,6 +52,7 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
     const Version* boot_version = furi_hal_version_get_boot_version();
     if(boot_version) {
         printf("boot_version        : %s\r\n", version_get_version(boot_version));
+        printf("boot_target         : %s\r\n", version_get_target(boot_version));
         printf("boot_commit         : %s\r\n", version_get_githash(boot_version));
         printf("boot_branch         : %s\r\n", version_get_gitbranch(boot_version));
         printf("boot_build_date     : %s\r\n", version_get_builddate(boot_version));
@@ -52,6 +62,7 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
         printf("firmware_version    : %s\r\n", version_get_version(firmware_version));
+        printf("firmware_target     : %s\r\n", version_get_target(firmware_version));
         printf("firmware_commit     : %s\r\n", version_get_githash(firmware_version));
         printf("firmware_branch     : %s\r\n", version_get_gitbranch(firmware_version));
         printf("firmware_build_date : %s\r\n", version_get_builddate(firmware_version));
@@ -85,6 +96,18 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
             printf("%02X", ble_mac[i]);
         }
         printf("\r\n");
+
+        // Signature verification
+        uint8_t buffer[ENCLAVE_SIGNATURE_SIZE];
+        bool enclave_valid = false;
+        if(furi_hal_crypto_store_load_key(ENCLAVE_SIGNATURE_KEY_SLOT, enclave_signature_iv)) {
+            if(furi_hal_crypto_encrypt(enclave_signature_input, buffer, ENCLAVE_SIGNATURE_SIZE)) {
+                enclave_valid =
+                    memcmp(buffer, enclave_signature_expected, ENCLAVE_SIGNATURE_SIZE) == 0;
+            }
+            furi_hal_crypto_store_unload_key(ENCLAVE_SIGNATURE_KEY_SLOT);
+        }
+        printf("enclave_valid       : %s\r\n", enclave_valid ? "true" : "false");
     } else {
         printf("radio_alive         : false\r\n");
     }
@@ -115,7 +138,7 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
         }
         // Right Column
         if(!CliCommandTree_end_p(it_right)) {
-            printf(string_get_cstr(*CliCommandTree_ref(it_right)->key_ptr));
+            printf("%s", string_get_cstr(*CliCommandTree_ref(it_right)->key_ptr));
             CliCommandTree_next(it_right);
         }
     };
@@ -123,7 +146,7 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
     if(string_size(args) > 0) {
         cli_nl();
         printf("Also I have no clue what '");
-        printf(string_get_cstr(args));
+        printf("%s", string_get_cstr(args));
         printf("' is.");
     }
 }
@@ -363,17 +386,19 @@ void cli_command_ps(Cli* cli, string_t args, void* context) {
     const uint8_t threads_num_max = 32;
     osThreadId_t threads_id[threads_num_max];
     uint8_t thread_num = osThreadEnumerate(threads_id, threads_num_max);
-    printf("%d threads in total:\r\n", thread_num);
-    printf("%-20s %-14s %-14s %s\r\n", "Name", "Stack start", "Stack alloc", "Stack watermark");
+    printf(
+        "%-20s %-14s %-8s %-8s %s\r\n", "Name", "Stack start", "Heap", "Stack", "Stack min free");
     for(uint8_t i = 0; i < thread_num; i++) {
         TaskControlBlock* tcb = (TaskControlBlock*)threads_id[i];
         printf(
-            "%-20s 0x%-12lx %-14ld %ld\r\n",
+            "%-20s 0x%-12lx %-8d %-8ld %-8ld\r\n",
             osThreadGetName(threads_id[i]),
             (uint32_t)tcb->pxStack,
-            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(uint32_t),
-            osThreadGetStackSpace(threads_id[i]) * sizeof(uint32_t));
+            memmgr_heap_get_thread_memory(threads_id[i]),
+            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t),
+            osThreadGetStackSpace(threads_id[i]));
     }
+    printf("\r\nTotal: %d", thread_num);
 }
 
 void cli_command_free(Cli* cli, string_t args, void* context) {

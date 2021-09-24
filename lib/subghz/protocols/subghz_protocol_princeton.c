@@ -5,7 +5,7 @@
  *
  */
 
-#define SUBGHZ_PT_SHORT 450
+#define SUBGHZ_PT_SHORT 400
 #define SUBGHZ_PT_LONG (SUBGHZ_PT_SHORT * 3)
 #define SUBGHZ_PT_GUARD (SUBGHZ_PT_SHORT * 30)
 
@@ -16,6 +16,11 @@ struct SubGhzEncoderPrinceton {
     size_t front;
 };
 
+typedef enum {
+    PrincetonDecoderStepReset = 0,
+    PrincetonDecoderStepSaveDuration,
+    PrincetonDecoderStepCheckDuration,
+} PrincetonDecoderStep;
 
 SubGhzEncoderPrinceton* subghz_encoder_princeton_alloc() {
     SubGhzEncoderPrinceton* instance = furi_alloc(sizeof(SubGhzEncoderPrinceton));
@@ -27,15 +32,14 @@ void subghz_encoder_princeton_free(SubGhzEncoderPrinceton* instance) {
     free(instance);
 }
 
-void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder){
-   SubGhzDecoderPrinceton* pricenton = decoder;
-    if((pricenton->te) !=0){
+void subghz_encoder_princeton_set_te(SubGhzEncoderPrinceton* instance, void* decoder) {
+    SubGhzDecoderPrinceton* pricenton = decoder;
+    if((pricenton->te) != 0) {
         instance->te = pricenton->te;
-    }else{
+    } else {
         instance->te = SUBGHZ_PT_SHORT;
     }
 }
-
 
 void subghz_encoder_princeton_set(SubGhzEncoderPrinceton* instance, uint32_t key, size_t repeat) {
     furi_assert(instance);
@@ -88,16 +92,18 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.code_min_count_bit_for_found = 24;
     instance->common.te_short = SUBGHZ_PT_SHORT; //150;
     instance->common.te_long = SUBGHZ_PT_LONG; //450;
-    instance->common.te_delta = 200; //50;
-    instance->common.type_protocol = TYPE_PROTOCOL_STATIC;
+    instance->common.te_delta = 250; //50;
+    instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
     instance->common.to_save_string =
         (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
-    instance->common.to_load_protocol=
-        (SubGhzProtocolCommonLoad)subghz_decoder_princeton_to_load_protocol;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_decoder_princeton_to_load_protocol_from_file;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_princeton_to_load_protocol;
     instance->common.get_upload_protocol =
-        (SubGhzProtocolEncoderCommonGetUpLoad)subghz_protocol_princeton_send_key;
-        
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_princeton_send_key;
+
     return instance;
 }
 
@@ -106,36 +112,43 @@ void subghz_decoder_princeton_free(SubGhzDecoderPrinceton* instance) {
     free(instance);
 }
 
-bool subghz_protocol_princeton_send_key(SubGhzDecoderPrinceton* instance, SubGhzProtocolEncoderCommon* encoder){
+uint16_t subghz_protocol_princeton_get_te(void* context) {
+    SubGhzDecoderPrinceton* instance = context;
+    return instance->te;
+}
+
+bool subghz_protocol_princeton_send_key(
+    SubGhzDecoderPrinceton* instance,
+    SubGhzProtocolCommonEncoder* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
     size_t index = 0;
-    encoder->size_upload =(instance->common.code_last_count_bit * 2) + 2;
+    encoder->size_upload = (instance->common.code_last_count_bit * 2) + 2;
     if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
-    
+
     //Send key data
-    for (uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
-        if(bit_read(instance->common.code_last_found, i - 1)){
+    for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+        if(bit_read(instance->common.code_last_found, i - 1)) {
             //send bit 1
-            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te*3);
+            encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te * 3);
             encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te);
-        }else{
+        } else {
             //send bit 0
             encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te);
-            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te*3);
+            encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te * 3);
         }
     }
 
     //Send Stop bit
     encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->te);
     //Send PT_GUARD
-    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te*30);
+    encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->te * 30);
 
     return true;
 }
 
 void subghz_decoder_princeton_reset(SubGhzDecoderPrinceton* instance) {
-    instance->common.parser_step = 0;
+    instance->common.parser_step = PrincetonDecoderStepReset;
 }
 
 void subghz_decoder_princeton_parse(
@@ -143,29 +156,29 @@ void subghz_decoder_princeton_parse(
     bool level,
     uint32_t duration) {
     switch(instance->common.parser_step) {
-    case 0:
+    case PrincetonDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 36) <
                         instance->common.te_delta * 36)) {
             //Found Preambula
-            instance->common.parser_step = 1;
+            instance->common.parser_step = PrincetonDecoderStepSaveDuration;
             instance->common.code_found = 0;
             instance->common.code_count_bit = 0;
         } else {
-            instance->common.parser_step = 0;
+            instance->common.parser_step = PrincetonDecoderStepReset;
         }
         break;
-    case 1:
+    case PrincetonDecoderStepSaveDuration:
         //save duration
         if(level) {
             instance->common.te_last = duration;
-            instance->common.parser_step = 2;
+            instance->common.parser_step = PrincetonDecoderStepCheckDuration;
         }
         break;
-    case 2:
+    case PrincetonDecoderStepCheckDuration:
         if(!level) {
             if(duration >= (instance->common.te_short * 10 + instance->common.te_delta)) {
-                instance->common.parser_step = 1;
-                if(instance->common.code_count_bit >=
+                instance->common.parser_step = PrincetonDecoderStepSaveDuration;
+                if(instance->common.code_count_bit ==
                    instance->common.code_min_count_bit_for_found) {
                     if(instance->common.code_last_found == instance->common.code_found) {
                         //instance->te = (instance->te+instance->common.te_last)/2; //Option 1 TE averaging
@@ -194,18 +207,18 @@ void subghz_decoder_princeton_parse(
                (DURATION_DIFF(duration, instance->common.te_long) <
                 instance->common.te_delta * 3)) {
                 subghz_protocol_common_add_bit(&instance->common, 0);
-                instance->common.parser_step = 1;
+                instance->common.parser_step = PrincetonDecoderStepSaveDuration;
             } else if(
                 (DURATION_DIFF(instance->common.te_last, instance->common.te_long) <
                  instance->common.te_delta * 3) &&
                 (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
                 subghz_protocol_common_add_bit(&instance->common, 1);
-                instance->common.parser_step = 1;
+                instance->common.parser_step = PrincetonDecoderStepSaveDuration;
             } else {
-                instance->common.parser_step = 0;
+                instance->common.parser_step = PrincetonDecoderStepReset;
             }
         } else {
-            instance->common.parser_step = 0;
+            instance->common.parser_step = PrincetonDecoderStepReset;
         }
         break;
     }
@@ -221,17 +234,18 @@ void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t 
 
     string_cat_printf(
         output,
-        "%s %d Bit te %dus\r\n"
-        " KEY:0x%08lX\r\n"
-        " YEK:0x%08lX\r\n"
-        " SN:0x%05lX BTN:%02X\r\n",
+        "%s %dbit\r\n"
+        "Key:0x%08lX\r\n"
+        "Yek:0x%08lX\r\n"
+        "Sn:0x%05lX BTN:%02X\r\n"
+        "Te:%dus\r\n",
         instance->common.name,
         instance->common.code_last_count_bit,
-        instance->te,
         code_found_lo,
         code_found_reverse_lo,
         instance->common.serial,
-        instance->common.btn);
+        instance->common.btn,
+        instance->te);
 }
 
 void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, string_t output) {
@@ -247,7 +261,9 @@ void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, stri
         (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
 }
 
-bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDecoderPrinceton* instance){
+bool subghz_decoder_princeton_to_load_protocol_from_file(
+    FileWorker* file_worker,
+    SubGhzDecoderPrinceton* instance) {
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);
@@ -294,4 +310,15 @@ bool subghz_decoder_princeton_to_load_protocol(FileWorker* file_worker, SubGhzDe
     string_clear(temp_str);
 
     return loaded;
+}
+
+void subghz_decoder_princeton_to_load_protocol(SubGhzDecoderPrinceton* instance, void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+    instance->te = data->param1;
+    instance->common.serial = instance->common.code_last_found >> 4;
+    instance->common.btn = (uint8_t)instance->common.code_last_found & 0x00000F;
 }

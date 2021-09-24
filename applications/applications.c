@@ -32,12 +32,14 @@ extern int32_t scened_app(void* p);
 extern int32_t storage_test_app(void* p);
 extern int32_t subghz_app(void* p);
 extern int32_t vibro_test_app(void* p);
+extern int32_t bt_debug_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
 
 // On system start hooks declaration
 extern void bt_cli_init();
+extern void crypto_cli_init();
 extern void ibutton_cli_init();
 extern void irda_cli_init();
 extern void lfrfid_cli_init();
@@ -48,6 +50,8 @@ extern void subghz_cli_init();
 // Settings
 extern int32_t notification_settings_app(void* p);
 extern int32_t storage_settings_app(void* p);
+extern int32_t bt_settings_app(void* p);
+extern int32_t about_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
@@ -148,7 +152,7 @@ const FlipperApplication FLIPPER_APPS[] = {
 #endif
 
 #ifdef APP_SUBGHZ
-    {.app = subghz_app, .name = "Sub-1 GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
+    {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_LF_RFID
@@ -169,6 +173,9 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 
 // On system start hooks
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
+#ifdef SRV_CLI
+    crypto_cli_init,
+#endif
     irda_cli_init,
 #ifdef APP_NFC
     nfc_cli_init,
@@ -236,6 +243,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 #ifdef APP_LF_RFID
     {.app = lfrfid_debug_app, .name = "LF-RFID Debug", .stack_size = 1024, .icon = &A_125khz_14},
 #endif
+
+#ifdef SRV_BT
+    {.app = bt_debug_app, .name = "Bluetooth Debug", .stack_size = 1024, .icon = NULL},
+#endif
 };
 
 const size_t FLIPPER_DEBUG_APPS_COUNT = sizeof(FLIPPER_DEBUG_APPS) / sizeof(FlipperApplication);
@@ -253,6 +264,14 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_STORAGE
     {.app = storage_settings_app, .name = "Storage", .stack_size = 2048, .icon = NULL},
+#endif
+
+#ifdef SRV_BT
+    {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_ABOUT
+    {.app = about_settings_app, .name = "About", .stack_size = 1024, .icon = NULL},
 #endif
 };
 

@@ -1,0 +1,190 @@
+
+#include "archive_favorites.h"
+#include "archive_browser.h"
+
+uint16_t archive_favorites_count(void* context) {
+    furi_assert(context);
+
+    FileWorker* file_worker = file_worker_alloc(true);
+
+    string_t buffer;
+    string_init(buffer);
+
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    uint16_t lines = 0;
+
+    if(result) {
+        while(1) {
+            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+                break;
+            }
+            if(!string_size(buffer)) {
+                break;
+            }
+            ++lines;
+        }
+    }
+
+    string_clear(buffer);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return lines;
+}
+
+bool archive_favorites_read(void* context) {
+    furi_assert(context);
+
+    ArchiveBrowserView* archive_view = context;
+    FileWorker* file_worker = file_worker_alloc(true);
+
+    string_t buffer;
+    FileInfo file_info;
+    string_init(buffer);
+
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(result) {
+        while(1) {
+            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+                break;
+            }
+            if(!string_size(buffer)) {
+                break;
+            }
+
+            archive_add_item(archive_view, &file_info, string_get_cstr(buffer));
+            string_clean(buffer);
+        }
+    }
+    string_clear(buffer);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return result;
+}
+
+bool archive_favorites_delete(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    uint8_t len = vsnprintf(NULL, 0, format, args);
+    char filename[len + 1];
+    vsnprintf(filename, len + 1, format, args);
+    va_end(args);
+
+    FileWorker* file_worker = file_worker_alloc(true);
+
+    string_t buffer;
+    string_init(buffer);
+
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+    if(result) {
+        while(1) {
+            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+                break;
+            }
+            if(!string_size(buffer)) {
+                break;
+            }
+
+            if(string_search_str(buffer, filename)) {
+                archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\r\n", string_get_cstr(buffer));
+            }
+        }
+    }
+
+    string_clear(buffer);
+
+    file_worker_close(file_worker);
+    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
+    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+
+    file_worker_free(file_worker);
+
+    return result;
+}
+
+bool archive_is_favorite(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    uint8_t len = vsnprintf(NULL, 0, format, args);
+    char filename[len + 1];
+    vsnprintf(filename, len + 1, format, args);
+    va_end(args);
+
+    FileWorker* file_worker = file_worker_alloc(true);
+    string_t buffer;
+    string_init(buffer);
+
+    bool found = false;
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(result) {
+        while(1) {
+            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+                break;
+            }
+            if(!string_size(buffer)) {
+                break;
+            }
+            if(!string_search_str(buffer, filename)) {
+                found = true;
+                break;
+            }
+        }
+    }
+
+    string_clear(buffer);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+
+    return found;
+}
+
+bool archive_favorites_rename(const char* file_path, const char* src, const char* dst) {
+    furi_assert(file_path);
+    furi_assert(src);
+    furi_assert(dst);
+
+    FileWorker* file_worker = file_worker_alloc(true);
+
+    string_t path;
+    string_t buffer;
+
+    string_init(buffer);
+    string_init(path);
+
+    string_printf(path, "%s/%s", file_path, src);
+    bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
+
+    if(result) {
+        while(1) {
+            if(!file_worker_read_until(file_worker, buffer, '\n')) {
+                break;
+            }
+            if(!string_size(buffer)) {
+                break;
+            }
+
+            archive_file_append(
+                ARCHIVE_FAV_TEMP_PATH,
+                "%s\r\n",
+                string_search(buffer, path) ? string_get_cstr(buffer) : dst);
+        }
+    }
+
+    string_clear(buffer);
+    string_clear(path);
+
+    file_worker_close(file_worker);
+    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
+    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+
+    file_worker_free(file_worker);
+
+    return result;
+}
+
+void archive_add_to_favorites(const char* file_path) {
+    furi_assert(file_path);
+
+    archive_file_append(ARCHIVE_FAV_PATH, "%s\r\n", file_path);
+}

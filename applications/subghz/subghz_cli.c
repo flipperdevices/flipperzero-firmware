@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi-hal.h>
 #include <stream_buffer.h>
-#include <lib/subghz/protocols/subghz_protocol.h>
+#include <lib/subghz/subghz_parser.h>
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
@@ -42,7 +42,7 @@ void subghz_cli_command_tx_carrier(Cli* cli, string_t args, void* context) {
     }
 
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
 
     hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -79,7 +79,7 @@ void subghz_cli_command_rx_carrier(Cli* cli, string_t args, void* context) {
     }
 
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     printf("Receiving at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
@@ -134,12 +134,12 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     protocol->common.code_last_found = key;
     protocol->common.code_last_count_bit = 24;
 
-    SubGhzProtocolEncoderCommon* encoder = subghz_protocol_encoder_common_alloc();
+    SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
     encoder->repeat = repeat;
 
     subghz_protocol_princeton_send_key(protocol, encoder);
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
 
@@ -179,7 +179,7 @@ static void subghz_cli_command_rx_callback(bool level, uint32_t duration, void* 
 static void subghz_cli_command_rx_text_callback(string_t text, void* context) {
     SubGhzCliCommandRx* instance = context;
     instance->packet_count++;
-    printf(string_get_cstr(text));
+    printf("%s", string_get_cstr(text));
 }
 
 void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
@@ -205,14 +205,14 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
     furi_check(instance->stream);
 
-    SubGhzProtocol* protocol = subghz_protocol_alloc();
-    subghz_protocol_load_keeloq_file(protocol, "/ext/assets/subghz/keeloq_mfcodes");
-    subghz_protocol_load_nice_flor_s_file(protocol, "/ext/assets/subghz/nice_floor_s_rx");
-    subghz_protocol_enable_dump_text(protocol, subghz_cli_command_rx_text_callback, instance);
+    SubGhzParser* parser = subghz_parser_alloc();
+    subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes");
+    subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_floor_s_rx");
+    subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
 
     // Configure radio
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOokAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
@@ -228,11 +228,11 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
                 printf(".");
-                subghz_protocol_reset(protocol);
+                subghz_parser_reset(parser);
             } else {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
-                subghz_protocol_parse(protocol, level, duration);
+                subghz_parser_parse(parser, level, duration);
             }
         }
     }
@@ -244,7 +244,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     printf("\r\nPackets recieved %u\r\n", instance->packet_count);
 
     // Cleanup
-    subghz_protocol_free(protocol);
+    subghz_parser_free(parser);
     vStreamBufferDelete(instance->stream);
     free(instance);
 }

@@ -2,21 +2,27 @@
 #include <furi-hal-ibutton.h>
 #include <furi-hal-resources.h>
 
+#include <stm32wbxx_ll_tim.h>
+
 #define LFRFID_READ_TIM htim1
 #define LFRFID_READ_CHANNEL TIM_CHANNEL_1
 #define LFRFID_EMULATE_TIM htim2
 #define LFRFID_EMULATE_CHANNEL TIM_CHANNEL_3
+
+void furi_hal_rfid_init() {
+    furi_hal_rfid_pins_reset();
+}
 
 void furi_hal_rfid_pins_reset() {
     // ibutton bus disable
     furi_hal_ibutton_stop();
 
     // pulldown rfid antenna
-    hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
+    hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_carrier_out, false);
 
     // from both sides
-    hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
+    hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_pull, true);
 }
 
@@ -30,7 +36,7 @@ void furi_hal_rfid_pins_emulate() {
         &gpio_rfid_pull, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // pull rfid antenna from carrier side
-    hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
+    hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_carrier_out, false);
 }
 
@@ -40,7 +46,7 @@ void furi_hal_rfid_pins_read() {
     furi_hal_ibutton_pin_low();
 
     // dont pull rfid antenna
-    hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioSpeedLow, GpioPullNo);
+    hal_gpio_init(&gpio_rfid_pull, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     hal_gpio_write(&gpio_rfid_pull, false);
 
     // carrier pin to timer out
@@ -52,7 +58,7 @@ void furi_hal_rfid_pins_read() {
         GpioAltFn1TIM1);
 
     // comparator in
-    hal_gpio_init(&gpio_rfid_data_in, GpioModeAnalog, GpioSpeedLow, GpioPullNo);
+    hal_gpio_init(&gpio_rfid_data_in, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 void furi_hal_rfid_tim_read(float freq, float duty_cycle) {
@@ -216,7 +222,11 @@ void furi_hal_rfid_tim_emulate_stop() {
 
 void furi_hal_rfid_tim_reset() {
     HAL_TIM_Base_DeInit(&LFRFID_READ_TIM);
+    LL_TIM_DeInit(TIM1);
+    LL_APB2_GRP1_DisableClock(LL_APB2_GRP1_PERIPH_TIM1);
     HAL_TIM_Base_DeInit(&LFRFID_EMULATE_TIM);
+    LL_TIM_DeInit(TIM2);
+    LL_APB1_GRP1_DisableClock(LL_APB1_GRP1_PERIPH_TIM2);
 }
 
 bool furi_hal_rfid_is_tim_emulate(TIM_HandleTypeDef* hw) {
@@ -242,7 +252,7 @@ void furi_hal_rfid_set_emulate_pulse(uint32_t pulse) {
         LFRFID_EMULATE_TIM.Instance->CCR4 = pulse;
         break;
     default:
-        furi_check(0);
+        furi_crash(NULL);
         break;
     }
 }
@@ -266,7 +276,7 @@ void furi_hal_rfid_set_read_pulse(uint32_t pulse) {
         LFRFID_TIM.Instance->CCR4 = pulse;
         break;
     default:
-        furi_check(0);
+        furi_crash(NULL);
         break;
     }
 }

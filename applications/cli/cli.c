@@ -46,7 +46,7 @@ void cli_stdout_callback(void* _cookie, const char* data, size_t size) {
     furi_hal_vcp_tx((const uint8_t*)data, size);
 }
 
-void cli_write(Cli* cli, uint8_t* buffer, size_t size) {
+void cli_write(Cli* cli, const uint8_t* buffer, size_t size) {
     return furi_hal_vcp_tx(buffer, size);
 }
 
@@ -276,7 +276,7 @@ static void cli_handle_escape(Cli* cli, char c) {
             string_set(cli->line, cli->last_line);
             cli->cursor_position = string_size(cli->line);
             // Show new line to user
-            printf(string_get_cstr(cli->line));
+            printf("%s", string_get_cstr(cli->line));
         }
     } else if(c == 'B') {
     } else if(c == 'C') {

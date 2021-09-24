@@ -1,11 +1,11 @@
 #include "../nfc_i.h"
 
-const void nfc_scene_emulate_uid_on_enter(void* context) {
+void nfc_scene_emulate_uid_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Setup view
     Popup* popup = nfc->popup;
-    NfcDeviceCommomData* data = &nfc->dev.dev_data.nfc_data;
+    NfcDeviceCommonData* data = &nfc->dev.dev_data.nfc_data;
 
     if(strcmp(nfc->dev.dev_name, "")) {
         nfc_text_store_set(nfc, "%s", nfc->dev.dev_name);
@@ -35,7 +35,7 @@ const void nfc_scene_emulate_uid_on_enter(void* context) {
     nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev.dev_data, NULL, nfc);
 }
 
-const bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeTick) {
@@ -45,7 +45,7 @@ const bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event
     return false;
 }
 
-const void nfc_scene_emulate_uid_on_exit(void* context) {
+void nfc_scene_emulate_uid_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Stop worker

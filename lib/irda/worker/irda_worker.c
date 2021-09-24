@@ -118,7 +118,14 @@ static void irda_worker_process_timeout(IrdaWorker* instance) {
     if (instance->signal.timings_cnt < 2)
         return;
 
-    instance->signal.decoded = false;
+    const IrdaMessage* message_decoded = irda_check_decoder_ready(instance->irda_decoder);
+    if (message_decoded) {
+        instance->signal.message = *message_decoded;
+        instance->signal.timings_cnt = 0;
+        instance->signal.decoded = true;
+    } else {
+        instance->signal.decoded = false;
+    }
     if (instance->rx.received_signal_callback)
         instance->rx.received_signal_callback(instance->rx.received_signal_context, &instance->signal);
 }
@@ -132,7 +139,7 @@ static void irda_worker_process_timings(IrdaWorker* instance, uint32_t duration,
         if (instance->rx.received_signal_callback)
             instance->rx.received_signal_callback(instance->rx.received_signal_context, &instance->signal);
     } else {
-        /* Skip first timing if it's starts from Space */
+        /* Skip first timing if it starts from Space */
         if ((instance->signal.timings_cnt == 0) && !level) {
             return;
         }
@@ -253,6 +260,7 @@ void irda_worker_rx_start(IrdaWorker* instance) {
     furi_hal_irda_async_rx_start();
     furi_hal_irda_async_rx_set_timeout(IRDA_WORKER_RX_TIMEOUT);
 
+    instance->rx.overrun = false;
     instance->state = IrdaWorkerStateRunRx;
 }
 
@@ -267,10 +275,10 @@ void irda_worker_rx_stop(IrdaWorker* instance) {
     osEventFlagsSet(instance->events, IRDA_WORKER_EXIT);
     furi_thread_join(instance->thread);
 
-    BaseType_t xReturn = pdFAIL;
-    xReturn = xStreamBufferReset(instance->stream);
+    BaseType_t xReturn = xStreamBufferReset(instance->stream);
     furi_assert(xReturn == pdPASS);
-    instance->state = IrdaWorkerStateIdle;
+    (void)xReturn;
+
     instance->state = IrdaWorkerStateIdle;
 }
 
@@ -424,6 +432,7 @@ static bool irda_worker_tx_fill_buffer(IrdaWorker* instance) {
         }
         uint32_t written_size = xStreamBufferSend(instance->stream, &timing, sizeof(IrdaWorkerTiming), 0);
         furi_assert(sizeof(IrdaWorkerTiming) == written_size);
+        (void)written_size;
     }
 
     return new_data_available;
@@ -528,6 +537,7 @@ void irda_worker_tx_stop(IrdaWorker* instance) {
     BaseType_t xReturn = pdFAIL;
     xReturn = xStreamBufferReset(instance->stream);
     furi_assert(xReturn == pdPASS);
+    (void)xReturn;
     instance->state = IrdaWorkerStateIdle;
 }
 

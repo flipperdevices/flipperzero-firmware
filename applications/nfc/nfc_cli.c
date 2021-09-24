@@ -27,7 +27,7 @@ void nfc_cli_detect(Cli* cli, string_t args, void* context) {
         if(dev_cnt > 0) {
             printf("Found %d devices\r\n", dev_cnt);
             for(uint8_t i = 0; i < dev_cnt; i++) {
-                printf("%d found: %s ", i + 1, nfc_get_dev_type(dev_list[i].type));
+                printf("%d found: %s ", i + 1, nfc_get_rfal_type(dev_list[i].type));
                 if(dev_list[i].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
                     printf("type: %s, ", nfc_get_nfca_type(dev_list[i].dev.nfca.type));
                 }
@@ -54,7 +54,7 @@ void nfc_cli_emulate(Cli* cli, string_t args, void* context) {
     printf("Emulating NFC-A Type: T2T UID: CF72D440 SAK: 20 ATQA: 00/04\r\n");
     printf("Press Ctrl+C to abort\r\n");
 
-    NfcDeviceCommomData params = {
+    NfcDeviceCommonData params = {
         .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1, 0x34},
         .uid_len = 7,
         .atqa = {0x44, 0x00},

@@ -7,7 +7,7 @@ void subghz_scene_save_success_popup_callback(void* context) {
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SCENE_SAVE_SUCCESS_CUSTOM_EVENT);
 }
 
-const void subghz_scene_save_success_on_enter(void* context) {
+void subghz_scene_save_success_on_enter(void* context) {
     SubGhz* subghz = context;
 
     // Setup view
@@ -21,18 +21,22 @@ const void subghz_scene_save_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewPopup);
 }
 
-const bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) {
+bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SCENE_SAVE_SUCCESS_CUSTOM_EVENT) {
-            return scene_manager_search_and_switch_to_previous_scene(
-                subghz->scene_manager, SubGhzSceneStart);
+            if(!scene_manager_search_and_switch_to_previous_scene(
+                   subghz->scene_manager, SubGhzSceneReceiver)) {
+                scene_manager_search_and_switch_to_previous_scene(
+                    subghz->scene_manager, SubGhzSceneStart);
+            }
+            return true;
         }
     }
     return false;
 }
 
-const void subghz_scene_save_success_on_exit(void* context) {
+void subghz_scene_save_success_on_exit(void* context) {
     SubGhz* subghz = context;
 
     // Clear view
