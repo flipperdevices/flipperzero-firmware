@@ -6,13 +6,8 @@
 
 void power_cli_poweroff(Cli* cli, string_t args, void* context) {
     power_off();
-    // Check if USB is connected
-    if(furi_hal_power_get_usb_voltage() > 4.0f) {
-        printf("Disconnect USB for safe shutdown\r\n");
-    }
-    // Wait user to disconnect usb
-    while(1)
-        ;
+    printf("It's now safe to disconnect USB from your flipper\r\n");
+    while(cli_getc(cli)){}
 }
 
 void power_cli_reboot(Cli* cli, string_t args, void* context) {
