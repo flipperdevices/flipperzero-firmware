@@ -57,10 +57,10 @@ bool dialogs_app_process_module_file_select(const DialogsAppMessageDataFileSelec
 
     ret = file_select_context->result;
 
-    free(file_select_context);
     view_holder_stop(view_holder);
     view_holder_free(view_holder);
     file_select_free(file_select);
+    free(file_select_context);
     furi_record_close("gui");
 
     return ret;
