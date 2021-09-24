@@ -32,9 +32,8 @@
   ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 
 */
-
 #include "u8g2.h"
-
+#include <furi/common_defines.h>
 
 void u8g2_SetBitmapMode(u8g2_t *u8g2, uint8_t is_transparent) {
   u8g2->bitmap_transparency = is_transparent;
@@ -103,16 +102,16 @@ void u8g2_DrawBitmap(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t cnt
 }
 
 
-
-void u8g2_DrawHXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t len, const uint8_t *b)
+void u8g2_DrawHXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t len, const uint8_t *b,  uint8_t option)
 {
   uint8_t mask;
   uint8_t color = u8g2->draw_color;
   uint8_t ncolor = (color == 0 ? 1 : 0);
-#ifdef U8G2_WITH_INTERSECTION
-  if ( u8g2_IsIntersection(u8g2, x, y, x+len, y+1) == 0 ) 
-    return;
-#endif /* U8G2_WITH_INTERSECTION */
+  
+// #ifdef U8G2_WITH_INTERSECTION
+//   if ( u8g2_IsIntersection(u8g2, x, y, x+len, y+1) == 0 ) 
+//     return;
+// #endif /* U8G2_WITH_INTERSECTION */
   
   mask = 1;
   while(len > 0) {
@@ -123,7 +122,16 @@ void u8g2_DrawHXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t len, 
       u8g2->draw_color = ncolor;
       u8g2_DrawHVLine(u8g2, x, y, 1, 0);
     }
-    x++;
+
+    if ( option == U8G2_DRAW_XBM_MIRROR_H || option == U8G2_DRAW_XBM_MIRROR_BOTH )
+    {
+      x--;
+    }
+    else
+    {
+      x++;
+    }
+
     mask <<= 1;
     if ( mask == 0 )
     {
@@ -135,29 +143,54 @@ void u8g2_DrawHXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t len, 
   u8g2->draw_color = color;
 }
 
-
-void u8g2_DrawXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h, const uint8_t *bitmap)
+void u8g2_DrawXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h, const uint8_t *bitmap, uint8_t option)
 {
   u8g2_uint_t blen;
   blen = w;
   blen += 7;
   blen >>= 3;
-#ifdef U8G2_WITH_INTERSECTION
-  if ( u8g2_IsIntersection(u8g2, x, y, x+w, y+h) == 0 ) 
-    return;
-#endif /* U8G2_WITH_INTERSECTION */
+
+// #ifdef U8G2_WITH_INTERSECTION
+//   if ( u8g2_IsIntersection(u8g2, x, y, x+w, y+h) == 0 ) 
+//     return;
+// #endif /* U8G2_WITH_INTERSECTION */
   
   while( h > 0 )
   {
-    u8g2_DrawHXBM(u8g2, x, y, w, bitmap);
-    bitmap += blen;
-    y++;
-    h--;
+   
+    if ( option == U8G2_DRAW_XBM_MIRROR_BOTH )
+    {
+
+      u8g2_DrawHXBM(u8g2, (w + x), (y + h) - y, w, bitmap, option);
+      bitmap += blen;
+      y--;
+      h--;
+    }
+    else if ( option == U8G2_DRAW_XBM_MIRROR_H )
+    {
+      u8g2_DrawHXBM(u8g2, (w + x), y, w, bitmap, option);
+      bitmap += blen;
+      y++;
+      h--;
+    }
+
+    else if ( option == U8G2_DRAW_XBM_MIRROR_V )
+    {
+      u8g2_DrawHXBM(u8g2, x, (y + h) - y, w, bitmap, option);
+      bitmap += blen;
+      y--;
+      h--;
+    }
+
+    else if ( option == U8G2_DRAW_XBM_NORMAL )
+    {
+      u8g2_DrawHXBM(u8g2, x, y, w, bitmap, option);
+      bitmap += blen;
+      y++;
+      h--;
+    }
   }
 }
-
-
-
 
 
 

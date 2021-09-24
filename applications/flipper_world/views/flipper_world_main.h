@@ -44,6 +44,8 @@ typedef struct {
 typedef struct {
     const DolphinGfxAsset frames[MAX_FRAMES];
     const uint8_t total;
+    bool flip_v;
+    bool flip_h;
 } DolphinFrame;
 
 typedef struct {

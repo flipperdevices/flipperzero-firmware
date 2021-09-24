@@ -133,11 +133,21 @@ void dolphin_scene_render_dolphin(Canvas* canvas, FlipperMainViewModel* model) {
 
     canvas_set_bitmap_mode(canvas, true);
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon(
-        canvas, model->player.x, model->player.y, model->current_frame->frames[model->frame_idx].b);
+    canvas_draw_icon_advanced(
+        canvas,
+        model->player.x,
+        model->player.y,
+        model->current_frame->frames[model->frame_idx].b,
+        model->current_frame->flip_h,
+        model->current_frame->flip_v);
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon(
-        canvas, model->player.x, model->player.y, model->current_frame->frames[model->frame_idx].f);
+    canvas_draw_icon_advanced(
+        canvas,
+        model->player.x,
+        model->player.y,
+        model->current_frame->frames[model->frame_idx].f,
+        model->current_frame->flip_h,
+        model->current_frame->flip_v);
     canvas_set_bitmap_mode(canvas, false);
 }
 

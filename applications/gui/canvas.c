@@ -198,7 +198,8 @@ void canvas_draw_icon_animation(
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        icon_animation_get_data(icon_animation));
+        icon_animation_get_data(icon_animation),
+        U8G2_DRAW_XBM_NORMAL);
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
@@ -208,7 +209,40 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     u8g2_DrawXBM(
-        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+        &canvas->fb,
+        x,
+        y,
+        icon_get_width(icon),
+        icon_get_height(icon),
+        icon_get_data(icon),
+        U8G2_DRAW_XBM_NORMAL);
+}
+
+void canvas_draw_icon_advanced(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const Icon* icon,
+    bool flip_h,
+    bool flip_v) {
+    furi_assert(canvas);
+    furi_assert(icon);
+
+    uint8_t options = (flip_h && flip_v)  ? U8G2_DRAW_XBM_MIRROR_BOTH :
+                      (flip_h && !flip_v) ? U8G2_DRAW_XBM_MIRROR_H :
+                      (!flip_h && flip_v) ? U8G2_DRAW_XBM_MIRROR_V :
+                                            U8G2_DRAW_XBM_NORMAL;
+
+    x += canvas->offset_x;
+    y += canvas->offset_y;
+    u8g2_DrawXBM(
+        &canvas->fb,
+        x,
+        y,
+        icon_get_width(icon),
+        icon_get_height(icon),
+        icon_get_data(icon),
+        options);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
@@ -291,7 +325,7 @@ void canvas_draw_xbm(
     furi_assert(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, w, h, bitmap);
+    u8g2_DrawXBM(&canvas->fb, x, y, w, h, bitmap, U8G2_DRAW_XBM_NORMAL);
 }
 
 void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {

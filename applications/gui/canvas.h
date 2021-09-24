@@ -116,6 +116,22 @@ void canvas_draw_icon_animation(
  */
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon);
 
+/** Draw icon at position defined by x,y. Can be mirrored horizontally/vertically
+ * @param canvas - canvas instance
+ * @param x - x coordinate
+ * @param y - y coordinate
+ * @param icon - data pointer to Icon
+ * @param flip_h - flip horizontally
+ * @param flip_v - flip vertically
+ */
+void canvas_draw_icon_advanced(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const Icon* icon,
+    bool flip_h,
+    bool flip_v);
+
 /*
  * Draw xbm icon of width, height at position defined by x,y.
  */
