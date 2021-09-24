@@ -68,7 +68,7 @@ void subghz_encoder_princeton_print_log(void* context) {
         ((float)instance->time_higth / (instance->time_higth + instance->time_low)) * 100;
     FURI_LOG_I(
         "EncoderPrinceton",
-        "HIGTH=%dus, LOW=%dus, DutyCycle=%d,%d%%",
+        "Radio ON=%dus, OFF=%dus, DutyCycle=%d,%d%%",
         instance->time_higth,
         instance->time_low,
         (uint32_t)duty_cycle,
