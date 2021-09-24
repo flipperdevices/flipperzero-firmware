@@ -11,22 +11,18 @@
 #define MAX_FRAMES 3
 
 typedef enum {
+    FlipperActionsIdle,
+    FlipperActionsEmote,
+    FlipperActionsInteract,
+    FlipperActionsMovement,
+} FlipperActions;
+
+typedef enum {
     FlipperMainEventUpdate,
     FlipperMainEventStartFoodGame,
     FlipperMainEventStartPassport,
     FlipperMainEventExit,
 } FlipperMainEvent;
-
-typedef struct FlipperMainView FlipperMainView;
-
-typedef void (*FlipperMainViewCallback)(FlipperMainEvent event, void* context);
-
-struct FlipperMainView {
-    View* view;
-    FlipperMainViewCallback callback;
-    void* context;
-    osTimerId_t timer;
-};
 
 typedef struct {
     int32_t x;
@@ -34,19 +30,11 @@ typedef struct {
 } Vec2;
 
 typedef enum {
-    DirUp = 0,
-    DirRight,
-    DirDown,
-    DirLeft,
+    DirUp = InputKeyUp,
+    DirRight = InputKeyRight,
+    DirDown = InputKeyDown,
+    DirLeft = InputKeyLeft,
 } FrameDirectionEnum;
-
-typedef enum {
-    MoveUp = 0,
-    MoveRight,
-    MoveDown,
-    MoveLeft,
-    MoveIdle,
-} MovementDirectionEnum;
 
 typedef struct {
     const Icon* f;
@@ -64,10 +52,7 @@ typedef struct {
     Vec2 player_v;
     Vec2 screen;
 
-    int32_t player_speed;
-    // MovementDirectionEnum direction;
-    // MovementDirectionEnum last_direction;
-
+    FlipperActions action;
     FrameDirectionEnum frame_group;
     FrameDirectionEnum last_group;
     FrameDirectionEnum frame_pending;
@@ -80,6 +65,7 @@ typedef struct {
     bool use_pending;
     bool debug;
 
+    uint8_t player_speed;
     uint8_t player_anim;
     uint8_t frame_idx;
 
@@ -87,12 +73,22 @@ typedef struct {
     uint8_t emote_id;
     uint8_t previous_emote;
 
-    uint8_t action;
     uint8_t prev_action;
     uint8_t action_timeout;
     uint8_t dialog_progress;
 
 } FlipperMainViewModel;
+
+typedef struct FlipperMainView FlipperMainView;
+
+typedef void (*FlipperMainViewCallback)(FlipperMainEvent event, void* context);
+
+struct FlipperMainView {
+    View* view;
+    FlipperMainViewCallback callback;
+    void* context;
+    osTimerId_t timer;
+};
 
 void flipper_main_set_callback(
     FlipperMainView* main_view,
@@ -102,7 +98,7 @@ void flipper_main_set_callback(
 View* flipper_main_get_view(FlipperMainView* main_view);
 
 FlipperMainView* flipper_world_main_alloc();
+
 void flipper_world_main_free(FlipperMainView* main_view);
 
 void flipper_world_tick_handler(FlipperMainView* main_view);
-void flipper_world_user_input(FlipperMainView* main_view, InputEvent* input);

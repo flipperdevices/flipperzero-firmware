@@ -18,39 +18,34 @@ void flipper_world_user_input(FlipperMainView* main_view, InputEvent* input) {
     with_view_model(
         main_view->view, (FlipperMainViewModel * model) {
             model->last_group = model->frame_group;
-            if(input->type == InputTypePress) {
-                model->action = MINDCONTROL;
+
+            if(input->type == InputTypePress && input->key != InputKeyOk) {
+                model->action = FlipperActionsMovement;
             }
 
-            if(model->action == MINDCONTROL) {
-                if(input->type == InputTypePress) {
-                    if(input->key == InputKeyRight) {
-                        model->frame_pending = DirRight;
-                    } else if(input->key == InputKeyLeft) {
-                        model->frame_pending = DirLeft;
-                    } else if(input->key == InputKeyUp) {
-                        model->frame_pending = DirUp;
-                    } else if(input->key == InputKeyDown) {
-                        model->frame_pending = DirDown;
-                    }
+            if(model->action == FlipperActionsMovement) {
+                if(input->type == InputTypePress && input->key != InputKeyOk) {
+                    model->frame_pending = input->key;
                 }
                 if(input->type == InputTypeRelease) {
-                    model->action = IDLE;
-
-                } else if(input->type == InputTypeShort) {
-                    if(input->key == InputKeyOk) {
-                        model->prev_action = MINDCONTROL;
-                        model->action = INTERACT;
-                        model->use_pending = true;
-                        model->action_timeout = 0;
-                    }
+                    model->action = FlipperActionsIdle;
                 }
             }
+
+            if(input->type == InputTypeShort) {
+                if(input->key == InputKeyOk) {
+                    model->action = FlipperActionsInteract;
+                    model->use_pending = true;
+                    model->action_timeout = 0;
+                }
+            }
+
             return true;
         });
 }
 
 void flipper_world_transition_handler(FlipperMainViewModel* model) {
+    uint8_t total = 0;
     uint8_t speed_mod = (!!model->player_v.x || !!model->player_v.y || model->transition ||
                          model->transition_pending) ?
                             6 :
@@ -62,7 +57,7 @@ void flipper_world_transition_handler(FlipperMainViewModel* model) {
         model->current_frame = dolphin_frames[model->frame_group][model->frame_type];
     }
 
-    uint8_t total = model->current_frame->frames[2].f == NULL ? 2 : 3;
+    total = !model->current_frame->frames[2].f ? 2 : 3;
 
     if(model->transition_pending && !model->frame_idx) {
         model->transition_pending = false;
@@ -74,6 +69,7 @@ void flipper_world_transition_handler(FlipperMainViewModel* model) {
         model->frame_group = model->last_group;
         model->transition = !(model->frame_idx == total - 1);
     } else {
+        model->last_group = model->frame_group;
         model->frame_group = model->frame_type;
     }
 
@@ -89,12 +85,10 @@ void flipper_world_tick_handler(FlipperMainView* main_view) {
     uint8_t action = 0;
     with_view_model(
         main_view->view, (FlipperMainViewModel * model) {
-            if(model->action == IDLE) {
-                if(model->player_speed > 0) {
-                    model->player_speed = model->player_speed - 2;
-                }
+            if(model->action == FlipperActionsIdle) {
+                model->player_speed = MAX(model->player_speed - 2, 0);
             } else {
-                model->player_speed = CLAMP(model->player_speed + 5, SPEED_X * 10, 0);
+                model->player_speed = MIN(model->player_speed + 5, SPEED_X * 10);
             }
 
             if(model->frame_pending == DirRight) {
@@ -125,12 +119,12 @@ void flipper_world_tick_handler(FlipperMainView* main_view) {
                     model->player.x - model->player_v.x / 20, DOLPHIN_WIDTH * 2, DOLPHIN_CENTER);
             }
             action = model->action;
-            model->action = action == INTERACT ? IDLE : model->action;
+            model->action = action == FlipperActionsInteract ? FlipperActionsIdle : model->action;
             flipper_world_transition_handler(model);
             return true;
         });
 
-    if(action == INTERACT) flipper_world_item_callback(main_view);
+    if(action == FlipperActionsInteract) flipper_world_item_callback(main_view);
 }
 
 void dolphin_scene_render_dolphin(Canvas* canvas, FlipperMainViewModel* model) {
@@ -240,11 +234,11 @@ FlipperMainView* flipper_world_main_alloc() {
     with_view_model(
         main_view->view, (FlipperMainViewModel * model) {
             // defaults
-            model->player.y = DOLPHIN_DEFAULT_Y;
-            model->player.x = DOLPHIN_CENTER;
-            model->action = IDLE;
             model->player_global.x = 160;
             model->player_global.y = WORLD_HEIGHT;
+            model->player.y = DOLPHIN_DEFAULT_Y;
+            model->player.x = DOLPHIN_CENTER;
+            model->action = FlipperActionsIdle;
 
             model->frame_group = DirRight;
             model->frame_type = DirRight;

@@ -42,8 +42,6 @@
 
 #define DIALOG_PROGRESS 250
 
-enum Actions { IDLE = 0, EMOTE, INTERACT, MINDCONTROL };
-
 typedef enum {
     FlipperWorldViewMain,
     FlipperWorldFoodGame,

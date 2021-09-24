@@ -38,21 +38,6 @@ const Item** get_scene(FlipperMainViewModel* state) {
     return Scenes[state->scene_id];
 }
 
-// static void dolphin_scene_start_app(FlipperMainViewModel* state, const FlipperApplication* flipper_app) {
-//     furi_assert(state);
-//     furi_assert(flipper_app);
-
-//     state->scene_app_thread = furi_thread_alloc();
-
-//     furi_assert(flipper_app->app);
-//     furi_assert(flipper_app->name);
-
-//     furi_thread_set_name(state->scene_app_thread, flipper_app->name);
-//     furi_thread_set_stack_size(state->scene_app_thread, flipper_app->stack_size);
-//     furi_thread_set_callback(state->scene_app_thread, flipper_app->app);
-//     furi_thread_start(state->scene_app_thread);
-// }
-
 uint16_t roll_new(uint16_t prev, uint16_t max) {
     uint16_t val = 999;
     while(val != prev) {
