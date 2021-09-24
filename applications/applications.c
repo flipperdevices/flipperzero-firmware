@@ -145,16 +145,12 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
 
-#ifdef APP_IBUTTON
-    {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
+#ifdef APP_SUBGHZ
+    {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_NFC
     {.app = nfc_app, .name = "NFC", .stack_size = 4096, .icon = &A_NFC_14},
-#endif
-
-#ifdef APP_SUBGHZ
-    {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_LF_RFID
@@ -163,6 +159,10 @@ const FlipperApplication FLIPPER_APPS[] = {
 
 #ifdef APP_IRDA
     {.app = irda_app, .name = "Infrared", .stack_size = 1024 * 3, .icon = &A_Infrared_14},
+#endif
+
+#ifdef APP_IBUTTON
+    {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
 #endif
 
 #ifdef APP_GPIO_TEST
@@ -193,6 +193,9 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #endif
 #ifdef SRV_BT
     bt_cli_init,
+#endif
+#ifdef SRV_POWER
+    power_cli_init,
 #endif
 #ifdef SRV_STORAGE
     storage_cli_init,
