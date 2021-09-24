@@ -43,7 +43,7 @@ size_t furi_hal_vcp_rx(uint8_t* buffer, size_t size) {
         &&xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream) >= APP_RX_DATA_SIZE) {
         furi_hal_vcp->rx_stream_full = false;
         // data accepted, start waiting for next packet
-        USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+        USBD_CDC_ReceivePacket(&hUsbDeviceFS, CDC_1_INDEX);
     }
 
     return received;
@@ -67,7 +67,7 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
             batch_size = APP_TX_DATA_SIZE;
         }
 
-        if (CDC_Transmit_FS((uint8_t*)buffer, batch_size) == USBD_OK) {
+        if (CDC_Transmit_FS((uint8_t*)buffer, batch_size, CDC_1_INDEX) == USBD_OK) {
             size -= batch_size;
             buffer += batch_size;
         } else {
@@ -114,7 +114,7 @@ void furi_hal_vcp_on_cdc_rx(const uint8_t* buffer, size_t size) {
     furi_check(ret == size);
     
     if (xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream) >= APP_RX_DATA_SIZE) {
-        USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+        USBD_CDC_ReceivePacket(&hUsbDeviceFS, CDC_1_INDEX);
     } else {
         furi_hal_vcp->rx_stream_full = true;
     }

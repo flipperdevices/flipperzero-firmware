@@ -1,7 +1,7 @@
 #include "stm32wbxx.h"
 #include "stm32wbxx_hal.h"
 
-#include <furi-hal-vcp_i.h>
+#include <furi-hal-usb.h>
 
 #include "usbd_def.h"
 #include "usbd_core.h"
@@ -114,7 +114,7 @@ void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd) {
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd) {
     USBD_LL_Suspend((USBD_HandleTypeDef*)hpcd->pData);
 
-    furi_hal_vcp_on_usb_suspend();
+    furi_hal_usb_on_suspend();
     
     if (hpcd->Init.low_power_enable) {
         /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
@@ -134,7 +134,7 @@ void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd) {
         SystemClockConfig_Resume();
     }
 
-    furi_hal_vcp_on_usb_resume();
+    furi_hal_usb_on_resume();
 
     USBD_LL_Resume((USBD_HandleTypeDef*)hpcd->pData);
 }
@@ -253,6 +253,8 @@ USBD_StatusTypeDef USBD_LL_Start(USBD_HandleTypeDef *pdev) {
 USBD_StatusTypeDef USBD_LL_Stop(USBD_HandleTypeDef *pdev) {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
+
+    furi_hal_usb_on_suspend();
 
     hal_status = HAL_PCD_Stop(pdev->pData);
 
@@ -465,6 +467,7 @@ void USBD_LL_Delay(uint32_t Delay) {
  */
 void *USBD_static_malloc(uint32_t size) {
     static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+    memset(mem, 0, sizeof(mem));
     return mem;
 }
 

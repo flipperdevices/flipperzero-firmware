@@ -120,13 +120,13 @@ C_SOURCES += \
 CFLAGS += \
 	-I$(TARGET_DIR)/usb-glue \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc \
-	-I$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
+	-I$(TARGET_DIR)/usb-glue/class-cdc-dual
 C_SOURCES += \
 	$(wildcard $(TARGET_DIR)/usb-glue/*.c) \
 	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
+	$(TARGET_DIR)/usb-glue/class-cdc-dual/usbd_cdc_dual.c
 
 # Furi HAL
 FURI_HAL_OS_DEBUG ?= 0

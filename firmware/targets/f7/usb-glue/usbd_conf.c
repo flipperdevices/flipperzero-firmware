@@ -1,11 +1,11 @@
 #include "stm32wbxx.h"
 #include "stm32wbxx_hal.h"
 
-#include <furi-hal-vcp_i.h>
+#include <furi-hal-usb.h>
 
 #include "usbd_def.h"
 #include "usbd_core.h"
-#include "usbd_cdc.h"
+#include <usbd_cdc_dual.h>
 
 PCD_HandleTypeDef hpcd_USB_FS;
 void Error_Handler(void);
@@ -114,7 +114,7 @@ void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd) {
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd) {
     USBD_LL_Suspend((USBD_HandleTypeDef*)hpcd->pData);
 
-    furi_hal_vcp_on_usb_suspend();
+    furi_hal_usb_on_suspend();
     
     if (hpcd->Init.low_power_enable) {
         /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
@@ -134,7 +134,7 @@ void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd) {
         SystemClockConfig_Resume();
     }
 
-    furi_hal_vcp_on_usb_resume();
+    furi_hal_usb_on_resume();
 
     USBD_LL_Resume((USBD_HandleTypeDef*)hpcd->pData);
 }
@@ -191,6 +191,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
     hpcd_USB_FS.Init.dev_endpoints = 8;
     hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
     hpcd_USB_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
+    hpcd_USB_FS.Init.ep0_mps = EP_MPS_8;
     hpcd_USB_FS.Init.Sof_enable = DISABLE;
     hpcd_USB_FS.Init.low_power_enable = DISABLE;
     hpcd_USB_FS.Init.lpm_enable = DISABLE;
@@ -200,12 +201,16 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev) {
         Error_Handler();
     }
 
-    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);
-    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x58);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x28);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x60);
 
-    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x81 , PCD_SNG_BUF, 0xC0);
-    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x01 , PCD_SNG_BUF, 0x110);
-    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x82 , PCD_SNG_BUF, 0x100);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_1_IN_EP, PCD_SNG_BUF, 0xC0);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_1_OUT_EP, PCD_SNG_BUF, 0x110);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_1_CMD_EP, PCD_SNG_BUF, 0x100);
+
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_2_IN_EP, PCD_SNG_BUF, 0x180);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_2_OUT_EP, PCD_SNG_BUF, 0x1C0);
+    HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData, CDC_2_CMD_EP, PCD_SNG_BUF, 0x1D0);
 
     return USBD_OK;
 }
@@ -248,6 +253,8 @@ USBD_StatusTypeDef USBD_LL_Start(USBD_HandleTypeDef *pdev) {
 USBD_StatusTypeDef USBD_LL_Stop(USBD_HandleTypeDef *pdev) {
     HAL_StatusTypeDef hal_status = HAL_OK;
     USBD_StatusTypeDef usb_status = USBD_OK;
+
+    furi_hal_usb_on_suspend();
 
     hal_status = HAL_PCD_Stop(pdev->pData);
 
@@ -460,6 +467,7 @@ void USBD_LL_Delay(uint32_t Delay) {
  */
 void *USBD_static_malloc(uint32_t size) {
     static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+    memset(mem, 0, sizeof(mem));
     return mem;
 }
 

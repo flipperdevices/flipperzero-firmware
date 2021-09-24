@@ -1,13 +1,14 @@
 #include "usbd_cdc_if.h"
 #include <furi-hal-vcp_i.h>
+#include <furi-hal-console.h>
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 static int8_t CDC_Init_FS(void);
 static int8_t CDC_DeInit_FS(void);
-static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length);
-static int8_t CDC_Receive_FS(uint8_t* pbuf, uint32_t *Len);
-static int8_t CDC_TransmitCplt_FS(uint8_t *pbuf, uint32_t *Len, uint8_t epnum);
+static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length, uint16_t index);
+static int8_t CDC_Receive_FS(uint8_t* pbuf, uint32_t* Len, uint16_t index);
+static int8_t CDC_TransmitCplt_FS(uint8_t* pbuf, uint32_t* Len, uint8_t epnum, uint16_t index);
 
 USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 {
@@ -45,7 +46,7 @@ static int8_t CDC_DeInit_FS(void) {
  * @param  length: Number of data to be sent (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length) {
+static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length, uint16_t index) {
     if (cmd == CDC_SEND_ENCAPSULATED_COMMAND) {
     } else if (cmd == CDC_GET_ENCAPSULATED_RESPONSE) {
     } else if (cmd == CDC_SET_COMM_FEATURE) {
@@ -71,11 +72,12 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length) {
         /*******************************************************************************/
     } else if (cmd == CDC_GET_LINE_CODING) {
     } else if (cmd == CDC_SET_CONTROL_LINE_STATE) {
-        furi_hal_vcp_on_cdc_control_line(((USBD_SetupReqTypedef*)pbuf)->wValue);
+        if (index == CDC_1_INDEX){
+            furi_hal_vcp_on_cdc_control_line(((USBD_SetupReqTypedef*)pbuf)->wValue);
+        }
     } else if (cmd == CDC_SEND_BREAK) {
     } else {
     }
-
     return (USBD_OK);
 }
 
@@ -92,13 +94,18 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length) {
  * @param  Len: Number of data received (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len) {
-    if (*Len) {
-        furi_hal_vcp_on_cdc_rx(Buf, *Len);
+static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t* Len, uint16_t index) {
+    if (index == CDC_1_INDEX){
+        if(*Len) {
+            furi_hal_vcp_on_cdc_rx(Buf, *Len);
+        } else {
+            USBD_CDC_ReceivePacket(&hUsbDeviceFS, index);
+        }
     } else {
-        USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+        // transmit data from second cdc to uart
+        furi_hal_console_tx(Buf, *Len);
+        USBD_CDC_ReceivePacket(&hUsbDeviceFS, index);
     }
-    
     return (USBD_OK);
 }
 
@@ -108,8 +115,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len) {
  * @param  Len: Number of data to be sent (in bytes)
  * @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
  */
-uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
-{
+uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len, uint16_t index) {
     uint8_t result = USBD_OK;
 
     USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
@@ -118,7 +124,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
     }
     memcpy(UserTxBufferFS, Buf, Len);
     USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, Len);
-    result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
+    result = USBD_CDC_TransmitPacket(&hUsbDeviceFS, index);
 
     return result;
 }
@@ -133,10 +139,12 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
  * @param  Len: Number of data received (in bytes)
  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
  */
-static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum) {
+static int8_t CDC_TransmitCplt_FS(uint8_t* Buf, uint32_t* Len, uint8_t epnum, uint16_t index) {
     uint8_t result = USBD_OK;
 
-    furi_hal_vcp_on_cdc_tx_complete(*Len);
+    if (index == CDC_1_INDEX){
+        furi_hal_vcp_on_cdc_tx_complete(*Len);
+    }
 
     return result;
 }

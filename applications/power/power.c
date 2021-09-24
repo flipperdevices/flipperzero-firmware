@@ -88,10 +88,14 @@ void power_menu_reset_callback(void* context) {
 }
 
 void power_menu_enable_otg_callback(void* context) {
+    furi_hal_usb_init(UsbModeVcpDual);
+    //furi_hal_usb_enable();
     furi_hal_power_enable_otg();
 }
 
 void power_menu_disable_otg_callback(void* context) {
+    furi_hal_usb_init(UsbModeVcpSingle);
+    //furi_hal_usb_disable();
     furi_hal_power_disable_otg();
 }
 
