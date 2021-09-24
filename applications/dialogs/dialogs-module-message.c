@@ -5,6 +5,7 @@
 typedef struct {
     osSemaphoreId_t semaphore;
     DialogMessageButton result;
+    bool processed;
 } DialogsAppMessageContext;
 
 struct DialogMessage {
@@ -29,13 +30,18 @@ struct DialogMessage {
 static void dialogs_app_message_back_callback(void* context) {
     furi_assert(context);
     DialogsAppMessageContext* message_context = context;
+    if(message_context->processed) return;
+
     message_context->result = DialogMessageButtonBack;
+    message_context->processed = true;
     API_LOCK_UNLOCK(message_context->semaphore);
 }
 
 static void dialogs_app_message_callback(DialogExResult result, void* context) {
     furi_assert(context);
     DialogsAppMessageContext* message_context = context;
+    if(message_context->processed) return;
+
     switch(result) {
     case DialogExResultLeft:
         message_context->result = DialogMessageButtonLeft;
@@ -47,6 +53,7 @@ static void dialogs_app_message_callback(DialogExResult result, void* context) {
         message_context->result = DialogMessageButtonCenter;
         break;
     }
+    message_context->processed = true;
     API_LOCK_UNLOCK(message_context->semaphore);
 }
 
@@ -56,6 +63,7 @@ DialogMessageButton dialogs_app_process_module_message(const DialogsAppMessageDa
     const DialogMessage* message = data->message;
     DialogsAppMessageContext* message_context = furi_alloc(sizeof(DialogsAppMessageContext));
     message_context->semaphore = API_LOCK_INIT_LOCKED();
+    message_context->processed = false;
 
     ViewHolder* view_holder = view_holder_alloc();
     view_holder_attach_to_gui(view_holder, gui);
@@ -89,10 +97,10 @@ DialogMessageButton dialogs_app_process_module_message(const DialogsAppMessageDa
 
     ret = message_context->result;
 
-    free(message_context);
     view_holder_stop(view_holder);
     view_holder_free(view_holder);
     dialog_ex_free(dialog_ex);
+    free(message_context);
     furi_record_close("gui");
 
     return ret;
