@@ -19,5 +19,7 @@ void rpc_encode_and_send(RpcInstance* rpc, const PB_Main* main_message);
 void rpc_add_handler(RpcInstance* rpc, pb_size_t message_tag, RpcHandler* handler);
 
 void* rpc_system_status_alloc(RpcInstance* rpc);
+void* rpc_system_storage_alloc(RpcInstance* rpc);
+void rpc_system_storage_free(void* ctx);
 
 

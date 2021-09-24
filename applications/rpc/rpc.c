@@ -21,6 +21,9 @@
 #define RPC_EVENT_DISCONNECT        (1 << 1)
 #define RPC_EVENTS_ALL              (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
+#define DEBUG_OUTPUT        0
+
+
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
 typedef struct {
@@ -33,6 +36,10 @@ static RpcSystemCallbacks rpc_systems[] = {
     {
         .alloc = rpc_system_status_alloc,
         .free = NULL,
+    },
+    {
+        .alloc = rpc_system_storage_alloc,
+        .free = rpc_system_storage_free,
     },
 };
 
@@ -129,6 +136,16 @@ size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, 
 
     size_t bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
     osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
+
+#if DEBUG_OUTPUT
+    uint8_t* buf = encoded_bytes;
+    size_t bytes_received = size;
+    printf("==> %d:", size);
+    for (int i = 0; i < bytes_received; ++i) {
+        printf(" %X", buf[i]);
+    }
+    printf("\r\n");
+#endif
     return bytes_sent;
 }
 
@@ -137,6 +154,9 @@ bool rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
     uint32_t flags = 0;
     size_t bytes_received = 0;
 
+#if DEBUG_OUTPUT
+    printf("ASK %d", count);
+#endif
     while (1) {
         bytes_received += xStreamBufferReceive(rpc->stream, buf + bytes_received, count - bytes_received, 0);
         if (count == bytes_received) {
@@ -155,6 +175,14 @@ bool rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
         }
     }
 
+#if DEBUG_OUTPUT
+    printf("<== %d:", count);
+    for (int i = 0; i < bytes_received; ++i) {
+        printf(" %X", buf[i]);
+    }
+    printf("\r\n");
+#endif
+
     return (count == bytes_received);
 }
 
@@ -162,19 +190,19 @@ void rpc_encode_and_send(RpcInstance* rpc, const PB_Main* main_message) {
     furi_assert(rpc);
     furi_assert(main_message);
     RpcSession* session = &rpc->session;
+    pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
-    size_t size = 0;
-    bool result = pb_get_encoded_size(&size, &PB_Main_msg, &main_message);
-    furi_check(result && size);
+    bool result = pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
+    furi_check(result && ostream.bytes_written);
 
-    uint8_t* buffer = furi_alloc(size);
-    pb_ostream_t ostream = pb_ostream_from_buffer(buffer, size);
+    uint8_t* buffer = furi_alloc(ostream.bytes_written);
+    ostream = pb_ostream_from_buffer(buffer, ostream.bytes_written);
 
-    pb_encode(&ostream, &PB_Main_msg, &main_message);
+    pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
 
     osMutexAcquire(session->send_bytes_mutex, osWaitForever);
     if (session->send_bytes_callback) {
-       session->send_bytes_callback(session->send_bytes_context, buffer, size);
+       session->send_bytes_callback(session->send_bytes_context, buffer, ostream.bytes_written);
     }
     osMutexRelease(session->send_bytes_mutex);
     free(buffer);
@@ -200,15 +228,15 @@ int32_t rpc_srv(void* p) {
     pb_istream_t istream = {
         .callback = rpc_pb_stream_read,
         .state = rpc,
-        .bytes_left = 0x7FFFFFFF,
         .errmsg = "",
     };
 
     while(1) {
-        if (pb_decode(&istream, &PB_Main_msg, rpc->decoded_message)) {
+        istream.bytes_left = 0x7FFFFFFF;
+        if (pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
             RpcHandler* handler = RpcHandlerDict_get(rpc->handlers, rpc->decoded_message->which_content);
 
-            if (handler && handler->decode_submessage) {
+            if (handler && handler->message_handler) {
                 handler->message_handler(rpc->decoded_message, handler->context);
             } else if (!handler) {
                 FURI_LOG_E(RPC_TAG, "Unhandled message, tag: %d\r\n", rpc->decoded_message->which_content);

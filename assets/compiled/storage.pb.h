@@ -21,7 +21,7 @@ typedef struct _PB_Storage_DeleteRequest {
 } PB_Storage_DeleteRequest;
 
 typedef struct _PB_Storage_ListRequest { 
-    pb_callback_t path; 
+    char *path; 
 } PB_Storage_ListRequest;
 
 typedef struct _PB_Storage_ListResponse { 
@@ -45,7 +45,7 @@ typedef struct _PB_Storage_ReadResponse {
 } PB_Storage_ReadResponse;
 
 typedef struct _PB_Storage_WriteRequest { 
-    pb_callback_t path; 
+    char *path; 
     bool has_storage_element;
     PB_Storage_Element storage_element; 
 } PB_Storage_WriteRequest;
@@ -63,18 +63,18 @@ extern "C" {
 
 /* Initializer values for message structs */
 #define PB_Storage_Element_init_default          {_PB_Storage_Element_FileType_MIN, {{NULL}, NULL}, 0, {{NULL}, NULL}}
-#define PB_Storage_ListRequest_init_default      {{{NULL}, NULL}}
+#define PB_Storage_ListRequest_init_default      {NULL}
 #define PB_Storage_ListResponse_init_default     {{{NULL}, NULL}}
 #define PB_Storage_ReadRequest_init_default      {{{NULL}, NULL}}
 #define PB_Storage_ReadResponse_init_default     {false, PB_Storage_Element_init_default}
-#define PB_Storage_WriteRequest_init_default     {{{NULL}, NULL}, false, PB_Storage_Element_init_default}
+#define PB_Storage_WriteRequest_init_default     {NULL, false, PB_Storage_Element_init_default}
 #define PB_Storage_DeleteRequest_init_default    {{{NULL}, NULL}}
 #define PB_Storage_Element_init_zero             {_PB_Storage_Element_FileType_MIN, {{NULL}, NULL}, 0, {{NULL}, NULL}}
-#define PB_Storage_ListRequest_init_zero         {{{NULL}, NULL}}
+#define PB_Storage_ListRequest_init_zero         {NULL}
 #define PB_Storage_ListResponse_init_zero        {{{NULL}, NULL}}
 #define PB_Storage_ReadRequest_init_zero         {{{NULL}, NULL}}
 #define PB_Storage_ReadResponse_init_zero        {false, PB_Storage_Element_init_zero}
-#define PB_Storage_WriteRequest_init_zero        {{{NULL}, NULL}, false, PB_Storage_Element_init_zero}
+#define PB_Storage_WriteRequest_init_zero        {NULL, false, PB_Storage_Element_init_zero}
 #define PB_Storage_DeleteRequest_init_zero       {{{NULL}, NULL}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -100,8 +100,8 @@ X(a, CALLBACK, SINGULAR, BYTES,    data,              4)
 #define PB_Storage_Element_DEFAULT NULL
 
 #define PB_Storage_ListRequest_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   path,              1)
-#define PB_Storage_ListRequest_CALLBACK pb_default_field_callback
+X(a, POINTER,  SINGULAR, STRING,   path,              1)
+#define PB_Storage_ListRequest_CALLBACK NULL
 #define PB_Storage_ListRequest_DEFAULT NULL
 
 #define PB_Storage_ListResponse_FIELDLIST(X, a) \
@@ -122,9 +122,9 @@ X(a, STATIC,   OPTIONAL, MESSAGE,  storage_element,   1)
 #define PB_Storage_ReadResponse_storage_element_MSGTYPE PB_Storage_Element
 
 #define PB_Storage_WriteRequest_FIELDLIST(X, a) \
-X(a, CALLBACK, SINGULAR, STRING,   path,              1) \
+X(a, POINTER,  SINGULAR, STRING,   path,              1) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  storage_element,   2)
-#define PB_Storage_WriteRequest_CALLBACK pb_default_field_callback
+#define PB_Storage_WriteRequest_CALLBACK NULL
 #define PB_Storage_WriteRequest_DEFAULT NULL
 #define PB_Storage_WriteRequest_storage_element_MSGTYPE PB_Storage_Element
 
