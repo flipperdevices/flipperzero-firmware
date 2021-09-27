@@ -20,7 +20,6 @@ struct Menu {
 
     // State
     MenuItem* root;
-    MenuItem* settings;
     MenuItem* current;
 };
 
@@ -62,10 +61,6 @@ void menu_build_main(Menu* menu) {
 
 void menu_item_add(Menu* menu, MenuItem* item) {
     menu_item_subitem_add(menu->root, item);
-}
-
-void menu_settings_item_add(Menu* menu, MenuItem* item) {
-    menu_item_subitem_add(menu->settings, item);
 }
 
 void menu_draw_primary(Menu* menu, Canvas* canvas) {
@@ -190,7 +185,6 @@ void menu_update(Menu* menu) {
         }
     }
 
-    menu_event_activity_notify(menu->event);
     view_port_update(menu->view_port);
 }
 
@@ -324,8 +318,6 @@ int32_t menu_srv(void* p) {
             menu_ok(menu);
         } else if(m.type == MenuMessageTypeBack) {
             menu_back(menu);
-        } else if(m.type == MenuMessageTypeIdle) {
-            menu_exit(menu);
         } else {
             // TODO: fail somehow?
         }

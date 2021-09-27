@@ -11,13 +11,6 @@ struct MenuEvent {
     osMessageQueueId_t mqueue;
 };
 
-void MenuEventimeout_callback(void* arg) {
-    MenuEvent* menu_event = arg;
-    MenuMessage message;
-    message.type = MenuMessageTypeIdle;
-    osMessageQueuePut(menu_event->mqueue, &message, 0, osWaitForever);
-}
-
 MenuEvent* menu_event_alloc() {
     MenuEvent* menu_event = furi_alloc(sizeof(MenuEvent));
     menu_event->mqueue = osMessageQueueNew(MENU_MESSAGE_MQUEUE_SIZE, sizeof(MenuMessage), NULL);
@@ -29,10 +22,6 @@ void menu_event_free(MenuEvent* menu_event) {
     furi_assert(menu_event);
     furi_check(osMessageQueueDelete(menu_event->mqueue) == osOK);
     free(menu_event);
-}
-
-void menu_event_activity_notify(MenuEvent* menu_event) {
-    furi_assert(menu_event);
 }
 
 MenuMessage menu_event_next(MenuEvent* menu_event) {
