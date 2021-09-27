@@ -81,8 +81,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = input_srv, .name = "Input", .stack_size = 1024, .icon = NULL},
 #endif
 
-#ifdef SRV_MENU
-    {.app = menu_srv, .name = "Menu", .stack_size = 1024, .icon = NULL},
+#ifdef SRV_LOADER
     {.app = loader_srv, .name = "Loader", .stack_size = 1024, .icon = NULL},
 #endif
 
