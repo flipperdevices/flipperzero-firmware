@@ -26,6 +26,7 @@ struct Loader {
     ViewDispatcher* view_dispatcher;
     Submenu* primary_submenu;
     Submenu* plugins_menu;
+    Submenu* debug_menu;
     Submenu* settings_menu;
     size_t free_heap_size;
     osMutexId_t mutex;
@@ -35,5 +36,6 @@ struct Loader {
 typedef enum {
     LoaderMenuViewPrimary,
     LoaderMenuViewPlugins,
+    LoaderMenuViewDebug,
     LoaderMenuViewSettings,
 } LoaderMenuView;
