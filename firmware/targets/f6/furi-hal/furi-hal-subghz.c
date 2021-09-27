@@ -137,23 +137,21 @@ static const uint8_t furi_hal_subghz_preset_2fsk_async_regs[][2] = {
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
 
-    /* FIFO and internals */
-    {CC1101_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION
-
-    /* Packet engine */
-    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
-
     /* Frequency Synthesizer Control */
     {CC1101_FSCTRL1, 0x06}, // IF = (26*10^6) / (2^10) * 0x06 = 152343.75Hz
 
-    // Modem Configuration
-    {CC1101_MDMCFG0, 0x00},
-    {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
-    {CC1101_MDMCFG3, 0x8B}, // Data rate is 19.5885 kBaud
-    {CC1101_MDMCFG4, 0x69}, // Rx BW filter is 270.833333 kHz
+    /* Packet engine */
+    {CC1101_PKTCTRL0, 0x32}, // Async, continious, no whitening
+    {CC1101_PKTCTRL1, 0x04},
 
-    {CC1101_DEVIATN, 0x47}, //Deviation 47.607422 khz
+    // // Modem Configuration
+    {CC1101_MDMCFG0, 0x00},
+    {CC1101_MDMCFG1, 0x2},
+    {CC1101_MDMCFG2, 0x4}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
+    {CC1101_MDMCFG3, 0x83}, // Data rate is 4.79794 kBaud
+    {CC1101_MDMCFG4, 0x67}, //Rx BW filter is 270.833333 kHz
+    //{ CC1101_DEVIATN, 0x14 }, //Deviation 4.760742 kHz
+    {CC1101_DEVIATN, 0x04}, //Deviation 2.380371 kHz
 
     /* Main Radio Control State Machine */
     {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
@@ -164,17 +162,17 @@ static const uint8_t furi_hal_subghz_preset_2fsk_async_regs[][2] = {
 
     /* Automatic Gain Control */
     {CC1101_AGCCTRL0,
-     0x40}, // 01 - Low hysteresis, small asymmetric dead zone, medium gain; 00 - 8 samples agc; 00 - Normal AGC, 00 - 4dB boundary
+     0x91}, //10 - Medium hysteresis, medium asymmetric dead zone, medium gain ; 01 - 16 samples agc; 00 - Normal AGC, 01 - 8dB boundary
     {CC1101_AGCCTRL1,
      0x00}, // 0; 0 - LNA 2 gain is decreased to minimum before decreasing LNA gain; 00 - Relative carrier sense threshold disabled; 0000 - RSSI to MAIN_TARGET
-    {CC1101_AGCCTRL2, 0x03}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 011 - MAIN_TARGET 24 dB
+    {CC1101_AGCCTRL2, 0x07}, // 00 - DVGA all; 000 - MAX LNA+LNA2; 111 - MAIN_TARGET 42 dB
 
     /* Wake on radio and timeouts control */
     {CC1101_WORCTRL, 0xFB}, // WOR_RES is 2^15 periods (0.91 - 0.94 s) 16.5 - 17.2 hours
 
     /* Frontend configuration */
     {CC1101_FREND0, 0x10}, // Adjusts current TX LO buffer
-    {CC1101_FREND1, 0xB6}, //
+    {CC1101_FREND1, 0x56},
 
     /* Frequency Synthesizer Calibration, valid for 433.92 */
     {CC1101_FSCAL3, 0xE9},
@@ -531,7 +529,7 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     TIM_InitStruct.Prescaler = 64 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     TIM_InitStruct.Autoreload = 0x7FFFFFFE;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
 
     // Timer: advanced
@@ -554,7 +552,7 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
-    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV1);
+    LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV32_N8);
 
     // ISR setup
     furi_hal_interrupt_set_timer_isr(TIM2, furi_hal_subghz_capture_ISR);
