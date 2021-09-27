@@ -12,6 +12,7 @@ typedef struct {
     uint16_t svc_handle;
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
+    RpcSession* rpc_session;
 } SerialSvc;
 
 static SerialSvc* serial_svc;
@@ -19,6 +20,10 @@ static SerialSvc* serial_svc;
 static const uint8_t service_uuid[] = {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
 static const uint8_t char_rx_uuid[] = {0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
 static const uint8_t char_tx_uuid[] = {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
+
+void serial_svc_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
+    serial_svc_update_rx(bytes, bytes_len);
+}
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
@@ -34,7 +39,8 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "TX descriptor event");
             } else if(attribute_modified->Attr_Handle == serial_svc->tx_char_handle + 1) {
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
-                serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
+                rpc_feed_bytes(serial_svc->rpc_session, attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, 1000);
+                // serial_svc_update_rx(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length);
                 ret = SVCCTL_EvtAckFlowEnable;
             }
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
@@ -45,7 +51,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     return ret;
 }
 
-void serial_svc_start() {
+void serial_svc_start(RpcInstance* rpc) {
     tBleStatus status;
     serial_svc = furi_alloc(sizeof(SerialSvc));
     // Register event handler
@@ -104,6 +110,14 @@ void serial_svc_stop() {
         free(serial_svc);
         serial_svc = NULL;
     }
+}
+
+void serial_svc_set_rpc_session(RpcSession* rpc_session) {
+    furi_assert(rpc_session);
+    // Set session
+    serial_svc->rpc_session = rpc_session;
+    // Set callback
+    rpc_set_send_bytes_callback(serial_svc->rpc_session, serial_svc_rpc_send_bytes_callback, NULL);
 }
 
 
