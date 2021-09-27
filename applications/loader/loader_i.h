@@ -8,8 +8,6 @@
 
 #include <gui/modules/submenu.h>
 
-#include <menu/menu.h>
-#include <menu/menu_item.h>
 #include <applications.h>
 #include <assets_icons.h>
 
@@ -21,7 +19,6 @@ struct Loader {
     const FlipperApplication* current_app;
     string_t args;
     Cli* cli;
-    ValueMutex* menu_vm;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* primary_submenu;
