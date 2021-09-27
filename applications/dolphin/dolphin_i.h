@@ -9,7 +9,7 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/canvas.h>
-#include <menu/menu.h>
+#include <loader/loader.h>
 
 #include <assets_icons.h>
 #include <stdint.h>
@@ -36,8 +36,6 @@ struct Dolphin {
     osMessageQueueId_t event_queue;
     // State
     DolphinState* state;
-    // Menu
-    ValueMutex* menu_vm;
     // Scene
     FuriThread* scene_thread;
     // GUI

@@ -120,8 +120,7 @@ bool dolphin_view_idle_main_input(InputEvent* event, void* context) {
     // unlocked
     if(!dolphin->locked) {
         if(event->key == InputKeyOk && event->type == InputTypeShort) {
-            with_value_mutex(
-                dolphin->menu_vm, (Menu * menu) { menu_ok(menu); });
+            loader_show_menu();
         } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
             osTimerStart(dolphin->timeout_timer, 64);
             view_dispatcher_switch_to_view(dolphin->idle_view_dispatcher, DolphinViewLockMenu);
@@ -274,8 +273,6 @@ Dolphin* dolphin_alloc() {
     furi_check(dolphin->event_queue);
     // State
     dolphin->state = dolphin_state_alloc();
-    // Menu
-    dolphin->menu_vm = furi_record_open("menu");
     // Scene thread
     dolphin->scene_thread = furi_thread_alloc();
     // GUI
@@ -375,9 +372,6 @@ void dolphin_free(Dolphin* dolphin) {
     dolphin->gui = NULL;
 
     furi_thread_free(dolphin->scene_thread);
-
-    furi_record_close("menu");
-    dolphin->menu_vm = NULL;
 
     dolphin_state_free(dolphin->state);
 
