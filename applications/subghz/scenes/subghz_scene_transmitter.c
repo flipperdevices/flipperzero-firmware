@@ -39,7 +39,7 @@ static void subghz_scene_transmitter_update_data_show(void* context) {
         } else if(subghz->txrx->preset == FuriHalSubGhzPreset2FSKAsync) {
             snprintf(preset_str, sizeof(preset_str), "FM");
         } else {
-            furi_check(0);
+            furi_crash(NULL);
         }
 
         subghz_transmitter_add_data_to_show(
@@ -70,21 +70,19 @@ const bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent ev
         if(event.event == SubghzTransmitterEventSendStart) {
             subghz->state_notifications = NOTIFICATION_TX_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                subghz_rx_end(subghz->txrx->worker);
-                subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+                subghz_rx_end(subghz);
             }
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
+            if((subghz->txrx->txrx_state == SubGhzTxRxStateIdle) ||
+               (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                 subghz_tx_start(subghz);
                 subghz_scene_transmitter_update_data_show(subghz);
-                subghz->txrx->txrx_state = SubGhzTxRxStateTx;
             }
             return true;
         } else if(event.event == SubghzTransmitterEventSendStop) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
                 subghz_tx_stop(subghz);
-                subghz_sleep();
-                subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+                subghz_sleep(subghz);
             }
             return true;
         } else if(event.event == SubghzTransmitterEventBack) {
