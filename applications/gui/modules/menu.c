@@ -30,7 +30,7 @@ static void menu_process_ok(Menu* menu);
 
 static void menu_draw_callback(Canvas* canvas, void* _model) {
     MenuModel* model = _model;
-    
+
     canvas_clear(canvas);
 
     uint8_t position = model->position;
@@ -42,22 +42,28 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         canvas_set_font(canvas, FontSecondary);
         shift_position = (0 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
-        canvas_draw_icon_animation(canvas, 4, 3, item->icon);
-        icon_animation_stop(item->icon);
+        if(item->icon) {
+            canvas_draw_icon_animation(canvas, 4, 3, item->icon);
+            icon_animation_stop(item->icon);
+        }
         canvas_draw_str(canvas, 22, 14, item->label);
         // Second line main
         canvas_set_font(canvas, FontPrimary);
         shift_position = (1 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
-        canvas_draw_icon_animation(canvas, 4, 25, item->icon);
-        icon_animation_start(item->icon);
+        if(item->icon) {
+            canvas_draw_icon_animation(canvas, 4, 25, item->icon);
+            icon_animation_start(item->icon);
+        }
         canvas_draw_str(canvas, 22, 36, item->label);
         // Third line
         canvas_set_font(canvas, FontSecondary);
         shift_position = (2 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
-        canvas_draw_icon_animation(canvas, 4, 47, item->icon);
-        icon_animation_stop(item->icon);
+        if(item->icon) {
+            canvas_draw_icon_animation(canvas, 4, 47, item->icon);
+            icon_animation_stop(item->icon);
+        }
         canvas_draw_str(canvas, 22, 58, item->label);
         // Frame and scrollbar
         elements_frame(canvas, 0, 21, 128 - 5, 21);
@@ -120,7 +126,7 @@ void menu_free(Menu* menu) {
 
 View* menu_get_view(Menu* menu) {
     furi_assert(menu);
-    return(menu->view);
+    return (menu->view);
 }
 
 MenuItem* menu_add_item(
@@ -132,18 +138,18 @@ MenuItem* menu_add_item(
     void* context) {
     furi_assert(menu);
     furi_assert(label);
-    
+
     MenuItem* item = NULL;
     with_view_model(
-    menu->view, (MenuModel * model) {
-        item = MenuItemArray_push_new(model->items);
-        item->label = label;
-        item->icon = icon;
-        item->index = index;
-        item->callback = callback;
-        item->callback_context = context;
-        return true;
-    });
+        menu->view, (MenuModel * model) {
+            item = MenuItemArray_push_new(model->items);
+            item->label = label;
+            item->icon = icon;
+            item->index = index;
+            item->callback = callback;
+            item->callback_context = context;
+            return true;
+        });
 
     return item;
 }
@@ -167,8 +173,8 @@ static void menu_process_up(Menu* menu) {
             } else {
                 model->position = MenuItemArray_size(model->items) - 1;
             }
-        return true;
-    });
+            return true;
+        });
 }
 
 static void menu_process_down(Menu* menu) {
@@ -179,8 +185,8 @@ static void menu_process_down(Menu* menu) {
             } else {
                 model->position = 0;
             }
-        return true;
-    });
+            return true;
+        });
 }
 
 static void menu_process_ok(Menu* menu) {
@@ -190,8 +196,8 @@ static void menu_process_ok(Menu* menu) {
             if(model->position < MenuItemArray_size(model->items)) {
                 item = MenuItemArray_get(model->items, model->position);
             }
-        return true;
-    });
+            return true;
+        });
     if(item && item->callback) {
         item->callback(item->callback_context, item->index);
     }
