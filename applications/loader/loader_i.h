@@ -6,7 +6,7 @@
 
 #include <gui/view_dispatcher.h>
 
-#include <gui/modules/icon_menu.h>
+#include <gui/modules/menu.h>
 #include <gui/modules/submenu.h>
 
 #include <applications.h>
