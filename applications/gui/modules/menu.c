@@ -21,7 +21,6 @@ ARRAY_DEF(MenuItemArray, MenuItem, M_POD_OPLIST);
 typedef struct {
     MenuItemArray_t items;
     uint8_t position;
-    uint8_t window_position;
 } MenuModel;
 
 static void menu_process_up(Menu* menu);
@@ -106,7 +105,6 @@ Menu* menu_alloc() {
         menu->view, (MenuModel * model) {
             MenuItemArray_init(model->items);
             model->position = 0;
-            model->window_position = 0;
             return true;
         });
 
@@ -160,7 +158,6 @@ void menu_clean(Menu* menu) {
         menu->view, (MenuModel * model) {
             MenuItemArray_clean(model->items);
             model->position = 0;
-            model->window_position = 0;
             return true;
         });
 }
