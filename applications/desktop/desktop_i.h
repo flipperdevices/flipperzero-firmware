@@ -52,7 +52,6 @@ struct Desktop {
     DesktopSettings settings;
 
     ViewPort* lock_viewport;
-    IconAnimation* lock_icon;
 };
 
 Desktop* desktop_alloc();
