@@ -9,7 +9,6 @@ extern int32_t dolphin_srv(void* p);
 extern int32_t gui_srv(void* p);
 extern int32_t input_srv(void* p);
 extern int32_t loader_srv(void* p);
-extern int32_t menu_srv(void* p);
 extern int32_t notification_srv(void* p);
 extern int32_t power_observer_srv(void* p);
 extern int32_t power_srv(void* p);
