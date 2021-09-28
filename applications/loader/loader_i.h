@@ -21,11 +21,13 @@ struct Loader {
     string_t args;
     Cli* cli;
     Gui* gui;
+
     ViewDispatcher* view_dispatcher;
     Menu* primary_menu;
     Submenu* plugins_menu;
     Submenu* debug_menu;
     Submenu* settings_menu;
+
     size_t free_heap_size;
     osMutexId_t mutex;
     volatile uint8_t lock_semaphore;
