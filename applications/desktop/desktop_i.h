@@ -1,14 +1,15 @@
 #pragma once
 
+#include "desktop.h"
+
 #include <furi.h>
 #include <furi-hal.h>
-#include <menu/menu.h>
+
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <assets_icons.h>
-
-#include "desktop.h"
+#include <storage/storage.h>
 
 #include "views/desktop_main.h"
 #include "views/desktop_first_start.h"
@@ -34,8 +35,6 @@ typedef enum {
 } DesktopViewEnum;
 
 struct Desktop {
-    // Menu
-    ValueMutex* menu_vm;
     // Scene
     FuriThread* scene_thread;
     // GUI
@@ -52,7 +51,6 @@ struct Desktop {
     DesktopSettings settings;
 
     ViewPort* lock_viewport;
-    IconAnimation* lock_icon;
 };
 
 Desktop* desktop_alloc();

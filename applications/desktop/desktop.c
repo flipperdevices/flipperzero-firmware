@@ -1,10 +1,8 @@
 #include "desktop_i.h"
-#include "applications/dolphin/dolphin.h"
 
-static void lock_icon_callback(Canvas* canvas, void* context) {
-    furi_assert(context);
-    Desktop* desktop = (Desktop*)context;
-    canvas_draw_icon_animation(canvas, 0, 0, desktop->lock_icon);
+static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
+    furi_assert(canvas);
+    canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
 }
 
 bool desktop_custom_event_callback(void* context, uint32_t event) {
@@ -22,7 +20,6 @@ bool desktop_back_event_callback(void* context) {
 Desktop* desktop_alloc() {
     Desktop* desktop = furi_alloc(sizeof(Desktop));
 
-    desktop->menu_vm = furi_record_open("menu");
     desktop->gui = furi_record_open("gui");
     desktop->scene_thread = furi_thread_alloc();
     desktop->view_dispatcher = view_dispatcher_alloc();
@@ -67,10 +64,9 @@ Desktop* desktop_alloc() {
         desktop_hw_mismatch_get_view(desktop->hw_mismatch_view));
 
     // Lock icon
-    desktop->lock_icon = icon_animation_alloc(&I_Lock_8x8);
     desktop->lock_viewport = view_port_alloc();
-    view_port_set_width(desktop->lock_viewport, icon_animation_get_width(desktop->lock_icon));
-    view_port_draw_callback_set(desktop->lock_viewport, lock_icon_callback, desktop);
+    view_port_set_width(desktop->lock_viewport, icon_get_width(&I_Lock_8x8));
+    view_port_draw_callback_set(desktop->lock_viewport, desktop_lock_icon_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);
     gui_add_view_port(desktop->gui, desktop->lock_viewport, GuiLayerStatusBarLeft);
 
@@ -103,21 +99,26 @@ void desktop_free(Desktop* desktop) {
     furi_thread_free(desktop->scene_thread);
 
     furi_record_close("menu");
-    desktop->menu_vm = NULL;
 
     free(desktop);
 }
 
-int32_t desktop_app(void* p) {
-    Desktop* desktop = desktop_alloc();
-    Dolphin* dolphin = furi_record_open("dolphin");
+static bool desktop_is_first_start() {
+    Storage* storage = furi_record_open("storage");
+    bool exists = storage_common_stat(storage, "/int/first_start", NULL) == FSE_OK;
+    furi_record_close("storage");
 
-    if(dolphin_load(dolphin)) {
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
-    } else {
+    return exists;
+}
+
+int32_t desktop_srv(void* p) {
+    Desktop* desktop = desktop_alloc();
+
+    scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
+
+    if(desktop_is_first_start()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFirstStart);
     }
-    furi_record_close("dolphin");
 
     if(!furi_hal_version_do_i_belong_here()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneHwMismatch);
