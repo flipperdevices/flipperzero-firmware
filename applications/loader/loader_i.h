@@ -6,6 +6,7 @@
 
 #include <gui/view_dispatcher.h>
 
+#include <gui/modules/icon_menu.h>
 #include <gui/modules/submenu.h>
 
 #include <applications.h>
@@ -21,7 +22,7 @@ struct Loader {
     Cli* cli;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
-    Submenu* primary_submenu;
+    Menu* primary_menu;
     Submenu* plugins_menu;
     Submenu* debug_menu;
     Submenu* settings_menu;

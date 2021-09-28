@@ -207,9 +207,9 @@ static Loader* loader_alloc() {
     instance->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_attach_to_gui(instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
     // Primary menu
-    instance->primary_submenu = submenu_alloc();
-    view_set_previous_callback(submenu_get_view(instance->primary_submenu), loader_exit);
-    view_dispatcher_add_view(instance->view_dispatcher, LoaderMenuViewPrimary, submenu_get_view(instance->primary_submenu));
+    instance->primary_menu = menu_alloc();
+    view_set_previous_callback(menu_get_view(instance->primary_menu), loader_exit);
+    view_dispatcher_add_view(instance->view_dispatcher, LoaderMenuViewPrimary, menu_get_view(instance->primary_menu));
     // Plugins menu
     instance->plugins_menu = submenu_alloc();
     view_set_previous_callback(submenu_get_view(instance->plugins_menu), loader_back_to_primary_menu);
@@ -274,11 +274,12 @@ static void loader_build_menu() {
     // Build Primary menu
     size_t i;
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        submenu_add_item(loader_instance->primary_submenu, FLIPPER_APPS[i].name, i, loader_menu_callback, (void*)&FLIPPER_APPS[i]);
+        menu_add_item(loader_instance->primary_menu, FLIPPER_APPS[i].name,
+        FLIPPER_APPS[i].icon ? icon_animation_alloc(FLIPPER_APPS[i].icon) : NULL, i, loader_menu_callback, (void*)&FLIPPER_APPS[i]);
     }
-    submenu_add_item(loader_instance->primary_submenu, "Plugins", i++, loader_plugin_menu_callback, NULL);
-    submenu_add_item(loader_instance->primary_submenu, "Debug tools", i++, loader_debug_menu_callback, NULL);
-    submenu_add_item(loader_instance->primary_submenu, "Settings", i++, loader_settings_menu_callback, NULL);
+    menu_add_item(loader_instance->primary_menu, "Plugins", icon_animation_alloc(&A_Plugins_14), i++, loader_plugin_menu_callback, NULL);
+    menu_add_item(loader_instance->primary_menu, "Debug tools", icon_animation_alloc(&A_Debug_14), i++, loader_debug_menu_callback, NULL);
+    menu_add_item(loader_instance->primary_menu, "Settings", icon_animation_alloc(&A_Settings_14), i++, loader_settings_menu_callback, NULL);
 
     FURI_LOG_I(LOADER_LOG_TAG, "Building plugins menu");
     // with_value_mutex(
