@@ -43,18 +43,21 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         shift_position = (0 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
         canvas_draw_icon_animation(canvas, 4, 3, item->icon);
+        icon_animation_stop(item->icon);
         canvas_draw_str(canvas, 22, 14, item->label);
         // Second line main
         canvas_set_font(canvas, FontPrimary);
         shift_position = (1 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
         canvas_draw_icon_animation(canvas, 4, 25, item->icon);
+        icon_animation_start(item->icon);
         canvas_draw_str(canvas, 22, 36, item->label);
         // Third line
         canvas_set_font(canvas, FontSecondary);
         shift_position = (2 + position + items_count - 1) % items_count;
         item = MenuItemArray_get(model->items, shift_position);
         canvas_draw_icon_animation(canvas, 4, 47, item->icon);
+        icon_animation_stop(item->icon);
         canvas_draw_str(canvas, 22, 58, item->label);
         // Frame and scrollbar
         elements_frame(canvas, 0, 21, 128 - 5, 21);
