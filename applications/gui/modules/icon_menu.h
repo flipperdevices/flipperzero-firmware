@@ -7,7 +7,7 @@ extern "C" {
 
 typedef struct Menu Menu;
 typedef struct MenuItem MenuItem;
-typedef void (*MenuItemCallback)(uint32_t index, void* context);
+typedef void (*MenuItemCallback)(void* context, uint32_t index);
 
 Menu* menu_alloc();
 

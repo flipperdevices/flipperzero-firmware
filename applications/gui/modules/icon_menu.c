@@ -157,13 +157,39 @@ void menu_clean(Menu* menu) {
 }
 
 static void menu_process_up(Menu* menu) {
-
+    with_view_model(
+        menu->view, (MenuModel * model) {
+            if(model->position > 0) {
+                model->position--;
+            } else {
+                model->position = MenuItemArray_size(model->items) - 1;
+            }
+        return true;
+    });
 }
 
 static void menu_process_down(Menu* menu) {
-
+    with_view_model(
+        menu->view, (MenuModel * model) {
+            if(model->position < MenuItemArray_size(model->items) - 1) {
+                model->position++;
+            } else {
+                model->position = 0;
+            }
+        return true;
+    });
 }
 
 static void menu_process_ok(Menu* menu) {
-
+    MenuItem* item = NULL;
+    with_view_model(
+        menu->view, (MenuModel * model) {
+            if(model->position < MenuItemArray_size(model->items)) {
+                item = MenuItemArray_get(model->items, model->position);
+            }
+        return true;
+    });
+    if(item && item->callback) {
+        item->callback(item->callback_context, item->index);
+    }
 }
