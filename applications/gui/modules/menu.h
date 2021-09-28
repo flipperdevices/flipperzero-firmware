@@ -7,7 +7,6 @@ extern "C" {
 
 /** Menu anonymous structure */
 typedef struct Menu Menu;
-typedef struct MenuItem MenuItem;
 typedef void (*MenuItemCallback)(void* context, uint32_t index);
 
 /** Menu allocation and initialization
@@ -33,9 +32,8 @@ View* menu_get_view(Menu* menu);
  * @param index - menu item index
  * @param callback - MenuItemCallback instance
  * @param context - pointer to context
- * @return MenuItem instance
  */
-MenuItem* menu_add_item(
+void menu_add_item(
     Menu* menu,
     const char* label,
     IconAnimation* icon,

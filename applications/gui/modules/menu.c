@@ -8,13 +8,13 @@ struct Menu {
     View* view;
 };
 
-struct MenuItem {
+typedef struct {
     const char* label;
     IconAnimation* icon;
     uint32_t index;
     MenuItemCallback callback;
     void* callback_context;
-};
+} MenuItem;
 
 ARRAY_DEF(MenuItemArray, MenuItem, M_POD_OPLIST);
 
@@ -127,7 +127,7 @@ View* menu_get_view(Menu* menu) {
     return (menu->view);
 }
 
-MenuItem* menu_add_item(
+void menu_add_item(
     Menu* menu,
     const char* label,
     IconAnimation* icon,
@@ -148,8 +148,6 @@ MenuItem* menu_add_item(
             item->callback_context = context;
             return true;
         });
-
-    return item;
 }
 
 void menu_clean(Menu* menu) {
