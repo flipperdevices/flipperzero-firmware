@@ -69,6 +69,15 @@ bool loader_start(Loader* instance, const char* name, const char* args) {
     }
 
     if(!flipper_app) {
+        for(size_t i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
+            if(strcmp(FLIPPER_DEBUG_APPS[i].name, name) == 0) {
+                flipper_app = &FLIPPER_DEBUG_APPS[i];
+                break;
+            }
+        }
+    }
+
+    if(!flipper_app) {
         FURI_LOG_E(LOADER_LOG_TAG, "Can't find application with name %s", name);
         return false;
     }
@@ -329,12 +338,16 @@ int32_t loader_srv(void* p) {
 
     // Call on start hooks
     for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
-        (*FLIPPER_ON_SYSTEM_START[i])();
+        FLIPPER_ON_SYSTEM_START[i]();
     }
 
     FURI_LOG_I(LOADER_LOG_TAG, "Started");
 
     furi_record_create("loader", loader_instance);
+
+#ifdef LOADER_AUTOSTART
+    loader_start(loader_instance, LOADER_AUTOSTART, NULL);
+#endif
 
     while(1) {
         uint32_t flags = osThreadFlagsWait(LOADER_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
