@@ -44,7 +44,13 @@ class Main:
         self.logger.addHandler(self.handler)
         # execute requested function
         self.loadOB()
-        self.args.func()
+
+        return_code = self.args.func()
+        if isinstance(return_code, int):
+            return return_code
+        else:
+            self.logger.error(f"Forgotten return code")
+            return 255
 
     def loadOB(self):
         self.logger.info(f"Loading Option Bytes data")
@@ -70,11 +76,11 @@ class Main:
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output.decode())
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
-            return
+            return 127
         except Exception as e:
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
             self.logger.exception(e)
-            return
+            return 126
         ob_correct = True
         for line in output.decode().split("\n"):
             line = line.strip()
@@ -98,9 +104,10 @@ class Main:
                 ob_correct = False
         if ob_correct:
             self.logger.info(f"OB Check OK")
+            return 0
         else:
             self.logger.error(f"OB Check FAIL")
-            exit(255)
+            return 255
 
     def set(self):
         self.logger.info(f"Setting Option Bytes")
@@ -124,12 +131,14 @@ class Main:
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output.decode())
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
-            return
+            return 125
         except Exception as e:
             self.logger.error(f"Failed to call STM32_Programmer_CLI")
             self.logger.exception(e)
-            return
+            return 124
+        return 0
 
 
 if __name__ == "__main__":
-    Main()()
+    return_code = Main()()
+    exit(return_code)
