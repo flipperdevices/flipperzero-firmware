@@ -34,7 +34,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 # stm32_print_devices_by_family(FAMILY H7)
 # stm32_print_devices_by_family(FAMILY F4)
 
-set(SUPPORTED_BOARDS F407VG H743ZI)
+set(SUPPORTED_BOARDS F407VG H743ZI L552ZE)
 option(FREERTOS_F407VG_EXAMPLE "Compile FreeRTOS example for the F407VG board" OFF)
 option(FREERTOS_H743ZI_EXAMPLE "Compile FreeRTOS example for the H743ZI board" OFF)
 option(FREERTOS_L552ZE_EXAMPLE "Compile FreeRTOS example for the L552ZE board" OFF)
