@@ -37,12 +37,7 @@ typedef enum {
 } FrameDirectionEnum;
 
 typedef struct {
-    const Icon* f;
-    const Icon* b;
-} DolphinGfxAsset;
-
-typedef struct {
-    const DolphinGfxAsset frames[MAX_FRAMES];
+    const uint16_t frames[MAX_FRAMES];
     const uint8_t total;
     bool flip_v;
     bool flip_h;
@@ -59,6 +54,8 @@ typedef struct {
     FrameDirectionEnum last_group;
     FrameDirectionEnum frame_pending;
     FrameDirectionEnum frame_type;
+
+    uint8_t* xbm_test_mask;
 
     const DolphinFrame* current_frame;
 

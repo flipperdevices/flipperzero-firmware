@@ -75,13 +75,6 @@ ifeq ($(APP_UNIT_TESTS), 1)
 CFLAGS		+= -DAPP_UNIT_TESTS
 endif
 
-<<<<<<< HEAD
-SRV_BLINK ?= 0
-ifeq ($(SRV_BLINK), 1)
-CFLAGS		+= -DSRV_BLINK
-APP_BLINK = 1
-endif
-=======
 
 APP_ARCHIVE ?= 0
 ifeq ($(APP_ARCHIVE), 1)
@@ -90,7 +83,6 @@ SRV_GUI		= 1
 endif
 
 
->>>>>>> 0126b3aba474b84fc5dfe57bcd42c5b9fc05e634
 APP_BLINK ?= 0
 ifeq ($(APP_BLINK), 1)
 CFLAGS		+= -DAPP_BLINK

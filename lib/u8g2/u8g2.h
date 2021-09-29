@@ -1233,15 +1233,10 @@ void u8g2_SetDrawColor(u8g2_t *u8g2, uint8_t color) U8G2_NOINLINE;  /* u8g: u8g_
 
 /*==========================================*/
 /* u8g2_bitmap.c */
-#define U8G2_DRAW_XBM_MIRROR_H 0x01
-#define U8G2_DRAW_XBM_MIRROR_V 0x02
-#define U8G2_DRAW_XBM_MIRROR_BOTH 0x03
-#define U8G2_DRAW_XBM_NORMAL 0x04
-
 void u8g2_SetBitmapMode(u8g2_t *u8g2, uint8_t is_transparent);
 void u8g2_DrawHorizontalBitmap(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t len, const uint8_t *b);
 void u8g2_DrawBitmap(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t cnt, u8g2_uint_t h, const uint8_t *bitmap);
-void u8g2_DrawXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h, const uint8_t *bitmap, uint8_t option);
+void u8g2_DrawXBM(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h, const uint8_t *bitmap);
 void u8g2_DrawXBMP(u8g2_t *u8g2, u8g2_uint_t x, u8g2_uint_t y, u8g2_uint_t w, u8g2_uint_t h, const uint8_t *bitmap);	/* assumes bitmap in PROGMEM */
 
 

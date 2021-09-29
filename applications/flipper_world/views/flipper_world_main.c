@@ -5,6 +5,8 @@
 
 #include "../assets/items.h"
 #include "../assets/meta.h"
+#include "../assets/anim.h"
+#include "../assets/mask.h"
 #include "flipper_world_main.h"
 
 void main_view_timer_callback(void* context) {
@@ -53,11 +55,11 @@ void flipper_world_transition_handler(FlipperMainViewModel* model) {
 
     model->transition_pending = model->frame_group != model->frame_pending;
 
-    if(*&dolphin_frames[model->frame_group][model->frame_type]->frames[model->frame_idx].f) {
+    if(*&dolphin_frames[model->frame_group][model->frame_type]->frames[model->frame_idx]) {
         model->current_frame = dolphin_frames[model->frame_group][model->frame_type];
     }
 
-    total = !model->current_frame->frames[2].f ? 2 : 3;
+    total = !model->current_frame->frames[2] ? 2 : 3;
 
     if(model->transition_pending && !model->frame_idx) {
         model->transition_pending = false;
@@ -131,24 +133,23 @@ void dolphin_scene_render_dolphin(Canvas* canvas, FlipperMainViewModel* model) {
     furi_assert(model);
     furi_assert(canvas);
 
-    canvas_set_bitmap_mode(canvas, true);
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_icon_advanced(
-        canvas,
-        model->player.x,
-        model->player.y,
-        model->current_frame->frames[model->frame_idx].b,
-        model->current_frame->flip_h,
-        model->current_frame->flip_v);
-    canvas_set_color(canvas, ColorBlack);
-    canvas_draw_icon_advanced(
-        canvas,
-        model->player.x,
-        model->player.y,
-        model->current_frame->frames[model->frame_idx].f,
-        model->current_frame->flip_h,
-        model->current_frame->flip_v);
     canvas_set_bitmap_mode(canvas, false);
+    canvas_set_color(canvas, ColorWhite);
+
+    u8g2_SetFont(&canvas->fb, dolphin_mask_font);
+    canvas_draw_glyph(
+        canvas,
+        model->player.x,
+        model->player.y + 61,
+        model->current_frame->frames[model->frame_idx]);
+
+    u8g2_SetFont(&canvas->fb, dolphin_font);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_glyph(
+        canvas,
+        model->player.x,
+        model->player.y + 61,
+        model->current_frame->frames[model->frame_idx]);
 }
 
 bool item_screen_bounds_x(int32_t pos) {
@@ -190,7 +191,7 @@ void dolphin_scene_render(Canvas* canvas, FlipperMainViewModel* model) {
             buf,
             "%d:%d %d/%dP%dL%d T%d-%d",
             model->frame_idx,
-            model->current_frame->frames[2].f == NULL ? 2 : 3,
+            model->current_frame->frames[2] ? 2 : 3,
             model->frame_group,
             model->frame_type,
             model->frame_pending,
@@ -258,6 +259,7 @@ FlipperMainView* flipper_world_main_alloc() {
             model->screen.x = model->player.x;
             model->screen.y = model->player.y;
             model->current_frame = &right;
+
             // model->debug = true;
             return true;
         });
