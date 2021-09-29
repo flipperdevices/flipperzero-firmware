@@ -407,6 +407,11 @@ void text_input_set_result_callback(
             model->text_buffer = text_buffer;
             model->text_buffer_size = text_buffer_size;
             model->clear_default_text = clear_default_text;
+            if(text_buffer[0] != '\0') {
+                // Set focus on Save
+                model->selected_row = 2;
+                model->selected_column = 8;
+            }
             return true;
         });
 }
