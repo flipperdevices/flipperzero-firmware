@@ -29,7 +29,7 @@ void subghz_scene_set_type_submenu_callback(void* context, uint32_t index) {
     view_dispatcher_send_custom_event(subghz->view_dispatcher, index);
 }
 
-const void subghz_scene_set_type_on_enter(void* context) {
+void subghz_scene_set_type_on_enter(void* context) {
     SubGhz* subghz = context;
 
     submenu_add_item(
@@ -85,7 +85,7 @@ const void subghz_scene_set_type_on_enter(void* context) {
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewMenu);
 }
 
-const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
+bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     bool generated_protocol = false;
 
@@ -174,6 +174,7 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
         if(generated_protocol) {
             subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
             subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
+            subghz_file_name_clear(subghz);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             return true;
         }
@@ -182,7 +183,7 @@ const bool subghz_scene_set_type_on_event(void* context, SceneManagerEvent event
     return false;
 }
 
-const void subghz_scene_set_type_on_exit(void* context) {
+void subghz_scene_set_type_on_exit(void* context) {
     SubGhz* subghz = context;
     submenu_clean(subghz->submenu);
 }
