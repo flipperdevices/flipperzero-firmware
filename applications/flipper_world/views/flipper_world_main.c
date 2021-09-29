@@ -5,8 +5,8 @@
 
 #include "../assets/items.h"
 #include "../assets/meta.h"
-#include "../assets/anim.h"
-#include "../assets/mask.h"
+#include "../assets/dolphin_mask_glyphs.h"
+#include "../assets/dolphin_glyphs.h"
 #include "flipper_world_main.h"
 
 void main_view_timer_callback(void* context) {
@@ -136,14 +136,14 @@ void dolphin_scene_render_dolphin(Canvas* canvas, FlipperMainViewModel* model) {
     canvas_set_bitmap_mode(canvas, false);
     canvas_set_color(canvas, ColorWhite);
 
-    u8g2_SetFont(&canvas->fb, dolphin_mask_font);
+    u8g2_SetFont(&canvas->fb, dolphin_mask_glyphs);
     canvas_draw_glyph(
         canvas,
         model->player.x,
         model->player.y + 61,
         model->current_frame->frames[model->frame_idx]);
 
-    u8g2_SetFont(&canvas->fb, dolphin_font);
+    u8g2_SetFont(&canvas->fb, dolphin_glyphs);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_glyph(
         canvas,
