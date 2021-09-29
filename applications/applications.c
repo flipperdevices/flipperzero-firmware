@@ -10,11 +10,11 @@ extern int32_t dolphin_srv(void* p);
 extern int32_t gui_srv(void* p);
 extern int32_t input_srv(void* p);
 extern int32_t loader_srv(void* p);
-extern int32_t menu_srv(void* p);
 extern int32_t notification_srv(void* p);
 extern int32_t power_observer_srv(void* p);
 extern int32_t power_srv(void* p);
 extern int32_t storage_srv(void* p);
+extern int32_t desktop_srv(void* p);
 
 // Apps
 extern int32_t accessor_app(void* p);
@@ -47,11 +47,15 @@ extern void lfrfid_cli_init();
 extern void nfc_cli_init();
 extern void storage_cli_init();
 extern void subghz_cli_init();
+extern void power_cli_init();
 
 // Settings
 extern int32_t notification_settings_app(void* p);
 extern int32_t storage_settings_app(void* p);
 extern int32_t bt_settings_app(void* p);
+extern int32_t desktop_settings_app(void* p);
+extern int32_t about_settings_app(void* p);
+extern int32_t power_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
@@ -75,6 +79,10 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = dolphin_srv, .name = "Dolphin", .stack_size = 1024, .icon = NULL},
 #endif
 
+#ifdef SRV_DESKTOP
+    {.app = desktop_srv, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef SRV_GUI
     {.app = gui_srv, .name = "Gui", .stack_size = 8192, .icon = NULL},
 #endif
@@ -83,8 +91,7 @@ const FlipperApplication FLIPPER_SERVICES[] = {
     {.app = input_srv, .name = "Input", .stack_size = 1024, .icon = NULL},
 #endif
 
-#ifdef SRV_MENU
-    {.app = menu_srv, .name = "Menu", .stack_size = 1024, .icon = NULL},
+#ifdef SRV_LOADER
     {.app = loader_srv, .name = "Loader", .stack_size = 1024, .icon = NULL},
 #endif
 
@@ -103,43 +110,6 @@ const FlipperApplication FLIPPER_SERVICES[] = {
 #ifdef SRV_STORAGE
     {.app = storage_srv, .name = "Storage", .stack_size = 4096, .icon = NULL},
 #endif
-
-/* Fake services (autorun) */
-#ifdef SRV_BLINK
-    {.app = blink_test_app, .name = "Blink", .stack_size = 1024, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_LF_RFID
-    {.app = lfrfid_app, .name = "125 kHz RFID", .stack_size = 2048, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_IRDA
-    {.app = irda_app, .name = "Infrared", .stack_size = 1024 * 3, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_MUSIC_PLAYER
-    {.app = music_player_app, .name = "Music Player", .stack_size = 1024, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_IBUTTON
-    {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_GPIO_TEST
-    {.app = gpio_test_app, .name = "GPIO Test", .stack_size = 1024, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_KEYPAD_TEST
-    {.app = keypad_test_app, .name = "Keypad Test", .stack_size = 1024, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_ACCESSOR
-    {.app = accessor_app, .name = "Accessor", .stack_size = 4096, .icon = &A_Plugins_14},
-#endif
-
-#ifdef SRV_STORAGE_TEST
-    {.app = storage_test_app, .name = "Storage Test", .stack_size = 1024, .icon = &A_Plugins_14},
-#endif
 };
 
 const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperApplication);
@@ -147,16 +117,12 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
 
-#ifdef APP_IBUTTON
-    {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
+#ifdef APP_SUBGHZ
+    {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_NFC
     {.app = nfc_app, .name = "NFC", .stack_size = 4096, .icon = &A_NFC_14},
-#endif
-
-#ifdef APP_SUBGHZ
-    {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_LF_RFID
@@ -165,6 +131,10 @@ const FlipperApplication FLIPPER_APPS[] = {
 
 #ifdef APP_IRDA
     {.app = irda_app, .name = "Infrared", .stack_size = 1024 * 3, .icon = &A_Infrared_14},
+#endif
+
+#ifdef APP_IBUTTON
+    {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
 #endif
 
 #ifdef APP_GPIO_TEST
@@ -180,22 +150,35 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef SRV_CLI
     crypto_cli_init,
 #endif
+
+#ifdef APP_IRDA
     irda_cli_init,
+#endif
+
 #ifdef APP_NFC
     nfc_cli_init,
 #endif
+
 #ifdef APP_SUBGHZ
     subghz_cli_init,
 #endif
+
 #ifdef APP_LF_RFID
     lfrfid_cli_init,
 #endif
+
 #ifdef APP_IBUTTON
     ibutton_cli_init,
 #endif
+
 #ifdef SRV_BT
     bt_cli_init,
 #endif
+
+#ifdef SRV_POWER
+    power_cli_init,
+#endif
+
 #ifdef SRV_STORAGE
     storage_cli_init,
 #endif
@@ -262,16 +245,31 @@ const FlipperApplication FLIPPER_ARCHIVE =
 
 // Settings menu
 const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
+#ifdef SRV_BT
+    {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef SRV_NOTIFICATION
-    {.app = notification_settings_app, .name = "Notification", .stack_size = 1024, .icon = NULL},
+    {.app = notification_settings_app,
+     .name = "LCD and notifications",
+     .stack_size = 1024,
+     .icon = NULL},
 #endif
 
 #ifdef SRV_STORAGE
     {.app = storage_settings_app, .name = "Storage", .stack_size = 2048, .icon = NULL},
 #endif
 
-#ifdef SRV_BT
-    {.app = bt_settings_app, .name = "Bluetooth", .stack_size = 1024, .icon = NULL},
+#ifdef SRV_POWER
+    {.app = power_settings_app, .name = "Power", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef SRV_DESKTOP
+    {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_ABOUT
+    {.app = about_settings_app, .name = "About", .stack_size = 1024, .icon = NULL},
 #endif
 };
 

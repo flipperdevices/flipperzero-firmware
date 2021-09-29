@@ -41,7 +41,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-const void subghz_scene_receiver_info_on_enter(void* context) {
+void subghz_scene_receiver_info_on_enter(void* context) {
     SubGhz* subghz = context;
 
     if(subghz_scene_receiver_info_update_parser(subghz)) {
@@ -96,12 +96,11 @@ const void subghz_scene_receiver_info_on_enter(void* context) {
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewWidget);
 }
 
-const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
+bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzSceneReceiverInfoCustomEventTxStart) {
             //CC1101 Stop RX -> Start TX
-            subghz->state_notifications = NOTIFICATION_TX_STATE;
             if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {
                 subghz->txrx->hopper_state = SubGhzHopperStatePause;
             }
@@ -112,7 +111,11 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
                 return false;
             }
             if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
-                subghz_tx_start(subghz);
+                if(!subghz_tx_start(subghz)) {
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+                } else {
+                    subghz->state_notifications = NOTIFICATION_TX_STATE;
+                }
             }
             return true;
         } else if(event.event == SubGhzSceneReceiverInfoCustomEventTxStop) {
@@ -145,6 +148,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
             }
             if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_string &&
                strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
+                subghz_file_name_clear(subghz);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
@@ -167,7 +171,7 @@ const bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent 
     return false;
 }
 
-const void subghz_scene_receiver_info_on_exit(void* context) {
+void subghz_scene_receiver_info_on_exit(void* context) {
     SubGhz* subghz = context;
     widget_clear(subghz->widget);
 }

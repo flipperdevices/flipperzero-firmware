@@ -1,6 +1,8 @@
 #pragma once
 #include <gui/icon.h>
 
+extern const Icon I_Certification1_103x23;
+extern const Icon I_Certification2_119x30;
 extern const Icon A_WatchingTV_128x64;
 extern const Icon A_Wink_128x64;
 extern const Icon I_dir_10px;
@@ -94,6 +96,7 @@ extern const Icon I_RFIDDolphinSend_97x61;
 extern const Icon I_RFIDDolphinReceive_97x61;
 extern const Icon I_SDQuestion_35x43;
 extern const Icon I_SDError_43x35;
+extern const Icon I_Cry_dolph_55x52;
 extern const Icon I_BadUsb_9x8;
 extern const Icon I_PlaceholderR_30x13;
 extern const Icon I_Background_128x8;
