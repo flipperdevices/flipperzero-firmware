@@ -105,7 +105,7 @@ void gpio_test_free(GpioTest* instance) {
     free(instance);
 }
 
-int32_t gpio_test_app(void* p) {
+int32_t gpio_app(void* p) {
     GpioTest* gpio_test = gpio_test_alloc();
 
     InputEvent event;
