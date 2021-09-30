@@ -51,6 +51,8 @@ int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create("dolphin", dolphin);
 
+    dolphin_load(dolphin);
+
     DolphinEvent event;
     while(1) {
         furi_check(osMessageQueueGet(dolphin->event_queue, &event, NULL, osWaitForever) == osOK);
