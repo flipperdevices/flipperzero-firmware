@@ -9,7 +9,7 @@
 PB_BIND(PB_Dummy, PB_Dummy, AUTO)
 
 
-PB_BIND(PB_Main, PB_Main, 2)
+PB_BIND(PB_Main, PB_Main, AUTO)
 
 
 

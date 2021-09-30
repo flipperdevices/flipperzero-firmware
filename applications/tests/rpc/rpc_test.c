@@ -25,15 +25,17 @@ LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)
 static RpcInstance* rpc = NULL;
 static RpcSession* session = NULL;
 static StreamBufferHandle_t output_stream = NULL;
-static uint64_t command_id = 0;
+static uint32_t command_id = 0;
 
 #define TEST_RPC_TAG                    "TEST_RPC"
 #define MAX_RECEIVE_OUTPUT_TIMEOUT      3000
 #define MAX_NAME_LENGTH                 255
 
-#define DEBUG_PRINT    1
+#define DEBUG_PRINT    0
 
 #define BYTES(x)        (x), sizeof(x)
+
+void rpc_print_message(const PB_Main* message);
 
 static void test_setup(void) {
     furi_assert(!rpc);
@@ -107,7 +109,7 @@ MU_TEST(test_ping_raw) {
     compare_expected_bytes(BYTES(expected_ping_response), output_stream);
 }
 
-static void test_rpc_create_storage_list_request(PB_Main* request, const char* path, uint64_t command_id) {
+static void test_rpc_create_storage_list_request(PB_Main* request, const char* path, uint32_t command_id) {
     furi_assert(request);
     furi_assert(path);
 
@@ -119,7 +121,7 @@ static void test_rpc_create_storage_list_request(PB_Main* request, const char* p
     request->command_id = command_id;
     request->command_status = 0;
     request->cb_content.funcs.encode = NULL;
-    request->which_content = PB_Main_storage_list_response_tag;
+    request->which_content = PB_Main_storage_list_request_tag;
     request->not_last = false;
     request->content.storage_list_request = list;
 }
@@ -180,72 +182,29 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
     }
 }
 
-#if DEBUG_PRINT
-static void test_rpc_print_message(const PB_Main* message) {
-    FURI_LOG_I(TEST_RPC_TAG, "PB_Main:");
-    FURI_LOG_I(TEST_RPC_TAG, "\tresult: %d cmd_id: %lld (%s) {", 
-            message->command_status,
-            message->command_id,
-            (!message->not_last) ? "last" : "not_last");
-    switch(message->which_content) {
-    case PB_Main_dummy_tag:
-    case PB_Main_ping_response_tag:
-    case PB_Main_ping_request_tag:
-    case PB_Main_storage_list_request_tag:
-    case PB_Main_storage_delete_request_tag:
-    case PB_Main_storage_read_request_tag:
-    case PB_Main_storage_write_request_tag:
-    case PB_Main_storage_read_response_tag:
-        /* not implemented yet */
-        break;
-    case PB_Main_storage_list_response_tag: {
-        const PB_Storage_Element* element = message->content.storage_list_response.storage_element;
-        size_t element_count = message->content.storage_list_response.storage_element_count;
-        for (int j = 0; j < element_count; ++j) {
-            FURI_LOG_I(TEST_RPC_TAG, "\t[%s] \'%s\' size: %d",
-                    element->type == PB_Storage_Element_FileType_DIR ? "d" : "f",
-                    element->name,
-                    element->size);
-            /* TODO: add print data */
-            ++element;
-        }
-    }
-    }
-    FURI_LOG_I(TEST_RPC_TAG, "}");
-}
-#endif  // DEBUG_PRINT
-
 static bool test_rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
     StreamBufferHandle_t stream_buffer = istream->state;
     size_t bytes_received = 0;
 
-#if DEBUG_PRINT
-    printf("TEST_ASK %d", count);
-#endif
     bytes_received = xStreamBufferReceive(stream_buffer, buf, count, MAX_RECEIVE_OUTPUT_TIMEOUT);
-
-#if DEBUG_PRINT
-    printf("TEST_<== %d:", count);
-    for (int i = 0; i < bytes_received; ++i) {
-        printf(" [%X]", buf[i]);
-    }
-    printf("\r\n");
-#endif
 
     return (count == bytes_received);
 }
 
-static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const char* path, uint64_t command_id) {
+static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const char* path, uint32_t command_id) {
+#if DEBUG_PRINT
+    FURI_LOG_I(TEST_RPC_TAG, "sizeof PB_Main: %ld", sizeof(PB_Main));
+    FURI_LOG_I(TEST_RPC_TAG, "Storage list path: \'%.128s\', cmd_id: %ld", path, command_id);
+#endif
 
     Storage* fs_api = furi_record_open("storage");
     File* dir = storage_file_alloc(fs_api);
-
-    FURI_LOG_I(TEST_RPC_TAG, "Storage list path: \'%.128s\', cmd_id: %lld", path, command_id);
 
     PB_Main response = {
         .command_id = command_id,
         .not_last = false,
         .which_content = PB_Main_storage_list_request_tag,
+        /* other fields (e.g. elements ptrs) explicitly initialized by 0 */
     };
     PB_Storage_ListResponse* list = &response.content.storage_list_response;
     response.which_content = PB_Main_storage_list_response_tag;
@@ -264,12 +223,12 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
         if (storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if ((i + 1) == COUNT_OF(list->storage_element)) {
+            if (i == COUNT_OF(list->storage_element)) {
                 list->storage_element_count = i;
                 response.not_last = true;
 #if DEBUG_PRINT
-                test_rpc_print_message(&response);
-#endif  // DEBUG_PRINT
+                rpc_print_message(&response);
+#endif
                 MsgList_push_back(msg_list, response);
                 i = 0;
             }
@@ -277,7 +236,7 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
                                             ? PB_Storage_Element_FileType_DIR
                                             : PB_Storage_Element_FileType_FILE;
             list->storage_element[i].size = fileinfo.size;
-            list->storage_element[i].data.funcs.encode = NULL;
+            list->storage_element[i].data = NULL;
             /* memory free inside rpc_encode_and_send() -> pb_release() */
             list->storage_element[i].name = name;
             ++i;
@@ -290,9 +249,12 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
     list->storage_element_count = i;
     response.not_last = false;
 #if DEBUG_PRINT
-    test_rpc_print_message(&response);
-#endif  // DEBUG_PRINT
+    rpc_print_message(&response);
+#endif
     MsgList_push_back(msg_list, response);
+
+    /* m-lib bug: list push_back places element into a head of the list, so revert order */
+    MsgList_reverse(msg_list);
 
     storage_dir_close(dir);
     storage_file_free(dir);
@@ -300,32 +262,34 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
     furi_record_close("storage");
 }
 
+static void test_rpc_decode_and_compare(MsgList_t expected_msg_list) {
+    furi_check(MsgList_size(expected_msg_list));
 
-static void test_rpc_decode_and_compare(MsgList_t msg_list) {
-    MsgList_it_ct list_it;
-    MsgList_it(list_it, msg_list);
+    pb_istream_t istream = {
+        .callback = test_rpc_pb_stream_read,
+        .state = output_stream,
+        .errmsg = NULL,
+        .bytes_left = 0x7FFFFFFF,
+    };
+    /* other fields explicitly initialized by 0 */
+    PB_Main result = { .cb_content.funcs.decode = NULL };
 
-    while(1) {
-        pb_istream_t istream = {
-            .callback = test_rpc_pb_stream_read,
-            .state = output_stream,
-            .errmsg = NULL,
-            .bytes_left = 0x7FFFFFFF,
-        };
-        PB_Main result;
+    for M_EACH(expected_msg, expected_msg_list, MsgList_t) {
         if (!pb_decode_ex(&istream, &PB_Main_msg, &result, PB_DECODE_DELIMITED)) {
+            mu_assert(0, "not all expected messages decoded (maybe increase MAX_RECEIVE_OUTPUT_TIMEOUT)");
             break;
         }
 
-        if (MsgList_end_p(list_it)) {
-            mu_assert(0, "got more messages than expected");
-            break;
-        }
-        test_rpc_compare_messages(&result, MsgList_ref(list_it));
-        MsgList_next(list_it);
+        test_rpc_compare_messages(&result, expected_msg);
+        pb_release(&PB_Main_msg, &result);
     }
+}
 
-    mu_assert(MsgList_end_p(list_it), "not all expected messages decoded");
+static void test_rpc_free_list(MsgList_t msg_list) {
+    for M_EACH(it, msg_list, MsgList_t) {
+        pb_release(&PB_Main_msg, it);
+    }
+    MsgList_clear(msg_list);
 }
 
 MU_TEST(test_storage_list) {
@@ -333,13 +297,14 @@ MU_TEST(test_storage_list) {
     MsgList_t msg_list;
     MsgList_init(msg_list);
 
-    test_rpc_system_storage_list_create_list(msg_list, "/", command_id);
+    test_rpc_system_storage_list_create_list(msg_list, "/ext", command_id);
     rpc_set_send_bytes_callback(session, output_bytes_callback, output_stream);
-    test_rpc_create_storage_list_request(&request, "/", command_id);
+    test_rpc_create_storage_list_request(&request, "/ext", command_id);
     test_rpc_encode_and_feed(&request);
     test_rpc_decode_and_compare(msg_list);
 
-    MsgList_clear(msg_list);
+    pb_release(&PB_Main_msg, &request);
+    test_rpc_free_list(msg_list);
 }
 
 
@@ -370,13 +335,9 @@ MU_TEST(test_storage_list_raw) {
 MU_TEST_SUITE(test_irda_decoder_encoder) {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
-    volatile int a = 0;
-    if (a) {
-        MU_RUN_TEST(test_ping_raw);
-        MU_RUN_TEST(test_storage_list);
-    } else {
-        MU_RUN_TEST(test_storage_list_raw);
-    }
+    MU_RUN_TEST(test_ping_raw);
+    MU_RUN_TEST(test_storage_list_raw);
+    MU_RUN_TEST(test_storage_list);
 }
 
 int run_minunit_test_rpc() {

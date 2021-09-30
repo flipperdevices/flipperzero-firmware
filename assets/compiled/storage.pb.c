@@ -12,7 +12,7 @@ PB_BIND(PB_Storage_Element, PB_Storage_Element, AUTO)
 PB_BIND(PB_Storage_ListRequest, PB_Storage_ListRequest, AUTO)
 
 
-PB_BIND(PB_Storage_ListResponse, PB_Storage_ListResponse, 2)
+PB_BIND(PB_Storage_ListResponse, PB_Storage_ListResponse, AUTO)
 
 
 PB_BIND(PB_Storage_ReadRequest, PB_Storage_ReadRequest, AUTO)

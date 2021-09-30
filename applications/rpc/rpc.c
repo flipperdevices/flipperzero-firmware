@@ -22,7 +22,7 @@
 #define RPC_EVENT_DISCONNECT        (1 << 1)
 #define RPC_EVENTS_ALL              (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
-#define DEBUG_OUTPUT        1
+#define DEBUG_OUTPUT        0
 
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
@@ -65,6 +65,41 @@ struct RpcInstance {
 
 
 static bool content_callback(pb_istream_t *stream, const pb_field_t *field, void **arg);
+
+
+void rpc_print_message(const PB_Main* message) {
+    FURI_LOG_I(RPC_TAG, "PB_Main: {");
+    FURI_LOG_I(RPC_TAG, "\tresult: %d cmd_id: %d (%s) {",
+            message->command_status,
+            message->command_id,
+            (!message->not_last) ? "last" : "not_last");
+    switch(message->which_content) {
+    case PB_Main_dummy_tag:
+    case PB_Main_ping_response_tag:
+    case PB_Main_ping_request_tag:
+    case PB_Main_storage_list_request_tag:
+    case PB_Main_storage_delete_request_tag:
+    case PB_Main_storage_read_request_tag:
+    case PB_Main_storage_write_request_tag:
+    case PB_Main_storage_read_response_tag:
+        /* not implemented yet */
+        break;
+    case PB_Main_storage_list_response_tag: {
+        const PB_Storage_Element* element = message->content.storage_list_response.storage_element;
+        size_t element_count = message->content.storage_list_response.storage_element_count;
+        for (int j = 0; j < element_count; ++j) {
+            FURI_LOG_I(RPC_TAG, "\t\t[%s] \'%s\' size: %d",
+                    element->type == PB_Storage_Element_FileType_DIR ? "d" : "f",
+                    element->name,
+                    element->size);
+            /* TODO: add print data */
+            ++element;
+        }
+    }
+    }
+    FURI_LOG_I(RPC_TAG, "\t}");
+    FURI_LOG_I(RPC_TAG, "}");
+}
 
 
 static RpcInstance* rpc_alloc(void) {

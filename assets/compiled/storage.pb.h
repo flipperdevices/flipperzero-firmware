@@ -31,8 +31,8 @@ typedef struct _PB_Storage_ReadRequest {
 typedef struct _PB_Storage_Element { 
     PB_Storage_Element_FileType type; 
     char *name; 
-    uint64_t size; 
-    pb_callback_t data; 
+    uint32_t size; 
+    pb_bytes_array_t *data; 
 } PB_Storage_Element;
 
 typedef struct _PB_Storage_ListResponse { 
@@ -63,14 +63,14 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define PB_Storage_Element_init_default          {_PB_Storage_Element_FileType_MIN, NULL, 0, {{NULL}, NULL}}
+#define PB_Storage_Element_init_default          {_PB_Storage_Element_FileType_MIN, NULL, 0, NULL}
 #define PB_Storage_ListRequest_init_default      {NULL}
 #define PB_Storage_ListResponse_init_default     {0, {PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default, PB_Storage_Element_init_default}}
 #define PB_Storage_ReadRequest_init_default      {NULL}
 #define PB_Storage_ReadResponse_init_default     {false, PB_Storage_Element_init_default}
 #define PB_Storage_WriteRequest_init_default     {NULL, false, PB_Storage_Element_init_default}
 #define PB_Storage_DeleteRequest_init_default    {NULL}
-#define PB_Storage_Element_init_zero             {_PB_Storage_Element_FileType_MIN, NULL, 0, {{NULL}, NULL}}
+#define PB_Storage_Element_init_zero             {_PB_Storage_Element_FileType_MIN, NULL, 0, NULL}
 #define PB_Storage_ListRequest_init_zero         {NULL}
 #define PB_Storage_ListResponse_init_zero        {0, {PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero, PB_Storage_Element_init_zero}}
 #define PB_Storage_ReadRequest_init_zero         {NULL}
@@ -95,9 +95,9 @@ extern "C" {
 #define PB_Storage_Element_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    type,              1) \
 X(a, POINTER,  SINGULAR, STRING,   name,              2) \
-X(a, STATIC,   SINGULAR, UINT64,   size,              3) \
-X(a, CALLBACK, SINGULAR, BYTES,    data,              4)
-#define PB_Storage_Element_CALLBACK pb_default_field_callback
+X(a, STATIC,   SINGULAR, UINT32,   size,              3) \
+X(a, POINTER,  SINGULAR, BYTES,    data,              4)
+#define PB_Storage_Element_CALLBACK NULL
 #define PB_Storage_Element_DEFAULT NULL
 
 #define PB_Storage_ListRequest_FIELDLIST(X, a) \

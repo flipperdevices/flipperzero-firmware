@@ -10,7 +10,7 @@
 #define RPC_TAG     "RPC_STORAGE"
 #define MAX_NAME_LENGTH         255
 
-#define DEBUG_PRINT     1
+#define DEBUG_PRINT     0
 
 typedef struct {
     RpcInstance* rpc;
@@ -19,13 +19,17 @@ typedef struct {
 } RpcStorageSystem;
 
 
+void rpc_print_message(const PB_Main* message);
+
 static void rpc_system_storage_list_process(const PB_Main* request, void* context) {
     furi_assert(request);
 
     Storage* fs_api = furi_record_open("storage");
     File* dir = storage_file_alloc(fs_api);
 
+#if DEBUG_PRINT
     FURI_LOG_I(RPC_TAG, "Storage list path: \'%.128s\', cmd_id: %d", request->content.storage_list_request.path, request->command_id);
+#endif
 
     PB_Main response = {
         .command_id = request->command_id,
@@ -49,23 +53,12 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
         if (storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if ((i + 1) == COUNT_OF(list->storage_element)) {
+            if (i == COUNT_OF(list->storage_element)) {
                 list->storage_element_count = i;
                 response.not_last = true;
 #if DEBUG_PRINT
-                PB_Storage_Element* element = response.content.storage_list_response.storage_element;
-                size_t element_count = response.content.storage_list_response.storage_element_count;
-                FURI_LOG_I(RPC_TAG, "Encode (result %d) cmd_id %d (%s) %d elements:", 
-                        response.command_status,
-                        response.command_id,
-                        (!response.not_last) ? "last" : "not_last",
-                        element_count);
-                for (int j = 0; j < element_count; ++j) {
-                    FURI_LOG_I(RPC_TAG, "\t \'%s\' %d  %s", element->name, element->size,
-                            element->type == PB_Storage_Element_FileType_DIR ? "d" : "f");
-                    element++;
-                }
-#endif  // DEBUG_PRINT
+                rpc_print_message(&response);
+#endif
                 rpc_encode_and_send(context, &response);
                 i = 0;
             }
@@ -73,7 +66,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                                             ? PB_Storage_Element_FileType_DIR
                                             : PB_Storage_Element_FileType_FILE;
             list->storage_element[i].size = fileinfo.size;
-            list->storage_element[i].data.funcs.encode = NULL;
+            list->storage_element[i].data = NULL;
             /* memory free inside rpc_encode_and_send() -> pb_release() */
             list->storage_element[i].name = name;
             ++i;
@@ -86,19 +79,8 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     list->storage_element_count = i;
     response.not_last = false;
 #if DEBUG_PRINT
-                PB_Storage_Element* element = response.content.storage_list_response.storage_element;
-                size_t element_count = response.content.storage_list_response.storage_element_count;
-                FURI_LOG_I(RPC_TAG, "Encode (result %d) cmd_id %d (%s) %d elements:", 
-                        response.command_status,
-                        response.command_id,
-                        (!response.not_last) ? "last" : "not_last",
-                        element_count);
-                for (int j = 0; j < element_count; ++j) {
-                    FURI_LOG_I(RPC_TAG, "\t \'%s\' %d  %s", element->name, element->size,
-                            element->type == PB_Storage_Element_FileType_DIR ? "d" : "f");
-                    element++;
-                }
-#endif  // DEBUG_PRINT
+    rpc_print_message(&response);
+#endif
     rpc_encode_and_send(context, &response);
 
     storage_dir_close(dir);

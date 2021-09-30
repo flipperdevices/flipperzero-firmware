@@ -26,7 +26,7 @@ typedef struct _PB_Dummy {
 } PB_Dummy;
 
 typedef struct _PB_Main { 
-    uint64_t command_id; 
+    uint32_t command_id; 
     PB_CommandStatus command_status; 
     bool not_last; 
     pb_callback_t cb_content;
@@ -82,7 +82,7 @@ extern "C" {
 #define PB_Dummy_DEFAULT NULL
 
 #define PB_Main_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT64,   command_id,        1) \
+X(a, STATIC,   SINGULAR, UINT32,   command_id,        1) \
 X(a, STATIC,   SINGULAR, UENUM,    command_status,    2) \
 X(a, STATIC,   SINGULAR, BOOL,     not_last,          3) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,ping_request,content.ping_request),   4) \
@@ -116,7 +116,7 @@ extern const pb_msgdesc_t PB_Main_msg;
 /* Maximum encoded size of messages (where known) */
 #define PB_Dummy_size                            0
 #if defined(PB_Storage_ListRequest_size) && defined(PB_Storage_ListResponse_size) && defined(PB_Storage_ReadRequest_size) && defined(PB_Storage_ReadResponse_size) && defined(PB_Storage_WriteRequest_size) && defined(PB_Storage_DeleteRequest_size)
-#define PB_Main_size                             (15 + sizeof(union PB_Main_content_size_union))
+#define PB_Main_size                             (10 + sizeof(union PB_Main_content_size_union))
 union PB_Main_content_size_union {char f6[(6 + PB_Storage_ListRequest_size)]; char f7[(6 + PB_Storage_ListResponse_size)]; char f8[(6 + PB_Storage_ReadRequest_size)]; char f9[(6 + PB_Storage_ReadResponse_size)]; char f10[(6 + PB_Storage_WriteRequest_size)]; char f11[(6 + PB_Storage_DeleteRequest_size)]; char f0[2];};
 #endif
 
