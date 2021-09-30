@@ -7,7 +7,7 @@
 
 enum GpioItem {
     GpioItemOtg,
-    GpioItemTester,
+    GpioItemTest,
 };
 
 enum GpioOtg {
@@ -24,7 +24,7 @@ const char* const gpio_otg_text[GpioOtgSettingsNum] = {
 static void gpio_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     GpioApp* app = context;
-    if(index == GpioItemTester) {
+    if(index == GpioItemTest) {
         view_dispatcher_send_custom_event(
             app->view_dispatcher, GPIO_SCENE_START_CUSTOM_EVENT_TEST);
     }
