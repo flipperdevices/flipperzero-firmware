@@ -12,7 +12,6 @@ void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
     rpc_encode_and_send(context, &msg_response);
 }
 
-
 void* rpc_system_status_alloc(RpcInstance* rpc) {
     RpcHandler rpc_handler = {
         .message_handler = rpc_system_status_ping_process,
@@ -24,5 +23,3 @@ void* rpc_system_status_alloc(RpcInstance* rpc) {
 
     return NULL;
 }
-
-

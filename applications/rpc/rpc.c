@@ -16,14 +16,13 @@
 #include <m-dict.h>
 #include "rpc_i.h"
 
-#define RPC_TAG     "RPC"
+#define RPC_TAG "RPC"
 
-#define RPC_EVENT_NEW_DATA          (1 << 0)
-#define RPC_EVENT_DISCONNECT        (1 << 1)
-#define RPC_EVENTS_ALL              (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
+#define RPC_EVENT_NEW_DATA (1 << 0)
+#define RPC_EVENT_DISCONNECT (1 << 1)
+#define RPC_EVENTS_ALL (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
-#define DEBUG_OUTPUT        0
-
+#define DEBUG_OUTPUT 0
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
@@ -63,16 +62,16 @@ struct RpcInstance {
     PB_Main* decoded_message;
 };
 
-
-static bool content_callback(pb_istream_t *stream, const pb_field_t *field, void **arg);
-
+static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg);
 
 void rpc_print_message(const PB_Main* message) {
     FURI_LOG_I(RPC_TAG, "PB_Main: {");
-    FURI_LOG_I(RPC_TAG, "\tresult: %d cmd_id: %d (%s) {",
-            message->command_status,
-            message->command_id,
-            (!message->not_last) ? "last" : "not_last");
+    FURI_LOG_I(
+        RPC_TAG,
+        "\tresult: %d cmd_id: %d (%s) {",
+        message->command_status,
+        message->command_id,
+        (!message->not_last) ? "last" : "not_last");
     switch(message->which_content) {
     case PB_Main_dummy_tag:
     case PB_Main_ping_response_tag:
@@ -87,11 +86,13 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_storage_list_response_tag: {
         const PB_Storage_Element* element = message->content.storage_list_response.storage_element;
         size_t element_count = message->content.storage_list_response.storage_element_count;
-        for (int j = 0; j < element_count; ++j) {
-            FURI_LOG_I(RPC_TAG, "\t\t[%s] \'%s\' size: %d",
-                    element->type == PB_Storage_Element_FileType_DIR ? "d" : "f",
-                    element->name,
-                    element->size);
+        for(int j = 0; j < element_count; ++j) {
+            FURI_LOG_I(
+                RPC_TAG,
+                "\t\t[%s] \'%s\' size: %d",
+                element->type == PB_Storage_Element_FileType_DIR ? "d" : "f",
+                element->name,
+                element->size);
             /* TODO: add print data */
             ++element;
         }
@@ -100,7 +101,6 @@ void rpc_print_message(const PB_Main* message) {
     FURI_LOG_I(RPC_TAG, "\t}");
     FURI_LOG_I(RPC_TAG, "}");
 }
-
 
 static RpcInstance* rpc_alloc(void) {
     RpcInstance* rpc = furi_alloc(sizeof(RpcInstance));
@@ -122,7 +122,7 @@ RpcSession* rpc_open_session(RpcInstance* rpc) {
     furi_assert(rpc);
     bool result = false;
     furi_check(osMutexAcquire(rpc->busy_mutex, osWaitForever) == osOK);
-    if (rpc->busy) {
+    if(rpc->busy) {
         result = false;
     } else {
         rpc->busy = true;
@@ -130,18 +130,18 @@ RpcSession* rpc_open_session(RpcInstance* rpc) {
     }
     furi_check(osMutexRelease(rpc->busy_mutex) == osOK);
 
-    if (result) {
+    if(result) {
         RpcSession* session = &rpc->session;
         session->send_bytes_mutex = osMutexNew(NULL);
         session->rpc = rpc;
         session->terminate_session = false;
         session->system_contexts = furi_alloc(COUNT_OF(rpc_systems) * sizeof(void*));
-        for (int i = 0; i < COUNT_OF(rpc_systems); ++i) {
+        for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
             session->system_contexts[i] = rpc_systems[i].alloc(rpc);
         }
     }
 
-    return result ? &rpc->session : NULL;       /* support 1 open session for now */
+    return result ? &rpc->session : NULL; /* support 1 open session for now */
 }
 
 void rpc_close_session(RpcSession* session) {
@@ -165,7 +165,8 @@ void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callb
     osMutexRelease(session->send_bytes_mutex);
 }
 
-size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
+size_t
+    rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     RpcInstance* rpc = session->rpc;
     furi_assert(rpc->busy);
@@ -178,7 +179,7 @@ size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, 
     uint8_t* buf = encoded_bytes;
     size_t bytes_received = size;
     printf("==> %d:", size);
-    for (int i = 0; i < bytes_received; ++i) {
+    for(int i = 0; i < bytes_received; ++i) {
         printf(" {%X}", buf[i]);
     }
     printf("\r\n");
@@ -187,7 +188,7 @@ size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, 
     return bytes_sent;
 }
 
-bool rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
+bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     RpcInstance* rpc = istream->state;
     uint32_t flags = 0;
     size_t bytes_received = 0;
@@ -195,14 +196,15 @@ bool rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
 #if DEBUG_OUTPUT
     printf("ASK %d", count);
 #endif
-    while (1) {
-        bytes_received += xStreamBufferReceive(rpc->stream, buf + bytes_received, count - bytes_received, 0);
-        if (count == bytes_received) {
+    while(1) {
+        bytes_received +=
+            xStreamBufferReceive(rpc->stream, buf + bytes_received, count - bytes_received, 0);
+        if(count == bytes_received) {
             break;
         } else {
             flags = osEventFlagsWait(rpc->events, RPC_EVENTS_ALL, 0, osWaitForever);
-            if (flags & RPC_EVENT_DISCONNECT) {
-                if (xStreamBufferIsEmpty(rpc->stream)) {
+            if(flags & RPC_EVENT_DISCONNECT) {
+                if(xStreamBufferIsEmpty(rpc->stream)) {
                     rpc->session.terminate_session = true;
                     break;
                 } else {
@@ -216,7 +218,7 @@ bool rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
 #if DEBUG_OUTPUT
     osMutexAcquire(rpc->busy_mutex, osWaitForever);
     printf("<== %d:", count);
-    for (int i = 0; i < bytes_received; ++i) {
+    for(int i = 0; i < bytes_received; ++i) {
         printf(" [%X]", buf[i]);
     }
     printf("\r\n");
@@ -241,21 +243,21 @@ void rpc_encode_and_send(RpcInstance* rpc, PB_Main* main_message) {
     pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
 
     osMutexAcquire(session->send_bytes_mutex, osWaitForever);
-    if (session->send_bytes_callback) {
-       session->send_bytes_callback(session->send_bytes_context, buffer, ostream.bytes_written);
+    if(session->send_bytes_callback) {
+        session->send_bytes_callback(session->send_bytes_context, buffer, ostream.bytes_written);
     }
     osMutexRelease(session->send_bytes_mutex);
     pb_release(&PB_Main_msg, main_message);
     free(buffer);
 }
 
-static bool content_callback(pb_istream_t *stream, const pb_field_t *field, void **arg) {
+static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {
     furi_assert(stream);
     RpcInstance* rpc = *arg;
 
     RpcHandler* handler = RpcHandlerDict_get(rpc->handlers, field->tag);
 
-    if (handler && handler->decode_submessage) {
+    if(handler && handler->decode_submessage) {
         handler->decode_submessage(stream, field, arg);
     }
 
@@ -274,23 +276,27 @@ int32_t rpc_srv(void* p) {
             .bytes_left = 0x7FFFFFFF,
         };
 
-        if (pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
-            RpcHandler* handler = RpcHandlerDict_get(rpc->handlers, rpc->decoded_message->which_content);
+        if(pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
+            RpcHandler* handler =
+                RpcHandlerDict_get(rpc->handlers, rpc->decoded_message->which_content);
 
-            if (handler && handler->message_handler) {
+            if(handler && handler->message_handler) {
                 handler->message_handler(rpc->decoded_message, handler->context);
-            } else if (!handler) {
-                FURI_LOG_E(RPC_TAG, "Unhandled message, tag: %d\r\n", rpc->decoded_message->which_content);
+            } else if(!handler) {
+                FURI_LOG_E(
+                    RPC_TAG,
+                    "Unhandled message, tag: %d\r\n",
+                    rpc->decoded_message->which_content);
             }
             pb_release(&PB_Main_msg, rpc->decoded_message);
         } else {
             pb_release(&PB_Main_msg, rpc->decoded_message);
             RpcSession* session = &rpc->session;
-            if (session->terminate_session) {
+            if(session->terminate_session) {
                 session->terminate_session = false;
                 osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
                 FURI_LOG_I(RPC_TAG, "Session terminated\r\n");
-                for (int i = 0; i < COUNT_OF(rpc_systems); ++i) {
+                for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
                     if(rpc_systems[i].free) {
                         rpc_systems[i].free(session->system_contexts[i]);
                     }
@@ -299,8 +305,8 @@ int32_t rpc_srv(void* p) {
                 RpcHandlerDict_clean(rpc->handlers);
                 rpc->busy = false;
             } else {
-                FURI_LOG_E(RPC_TAG, "Decode failed, error: \'%.128s\'\r\n",
-                        PB_GET_ERROR(&istream));
+                FURI_LOG_E(
+                    RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
             }
         }
     }
@@ -312,5 +318,3 @@ void rpc_add_handler(RpcInstance* rpc, pb_size_t message_tag, RpcHandler* handle
 
     RpcHandlerDict_set_at(rpc->handlers, message_tag, *handler);
 }
-
-

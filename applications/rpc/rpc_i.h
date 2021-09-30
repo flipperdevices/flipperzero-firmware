@@ -10,7 +10,7 @@ typedef void (*RpcSystemFree)(void*);
 typedef void (*PBMessageHandler)(const PB_Main* msg_request, void* context);
 
 typedef struct {
-    bool (*decode_submessage)(pb_istream_t *stream, const pb_field_t *field, void **arg);
+    bool (*decode_submessage)(pb_istream_t* stream, const pb_field_t* field, void** arg);
     PBMessageHandler message_handler;
     void* context;
 } RpcHandler;
@@ -21,5 +21,3 @@ void rpc_add_handler(RpcInstance* rpc, pb_size_t message_tag, RpcHandler* handle
 void* rpc_system_status_alloc(RpcInstance* rpc);
 void* rpc_system_storage_alloc(RpcInstance* rpc);
 void rpc_system_storage_free(void* ctx);
-
-

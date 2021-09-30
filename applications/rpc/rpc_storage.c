@@ -7,17 +7,16 @@
 #include "storage.pb.h"
 #include "storage/storage.h"
 
-#define RPC_TAG     "RPC_STORAGE"
-#define MAX_NAME_LENGTH         255
+#define RPC_TAG "RPC_STORAGE"
+#define MAX_NAME_LENGTH 255
 
-#define DEBUG_PRINT     0
+#define DEBUG_PRINT 0
 
 typedef struct {
     RpcInstance* rpc;
     Storage* storage;
 
 } RpcStorageSystem;
-
 
 void rpc_print_message(const PB_Main* message);
 
@@ -28,7 +27,11 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     File* dir = storage_file_alloc(fs_api);
 
 #if DEBUG_PRINT
-    FURI_LOG_I(RPC_TAG, "Storage list path: \'%.128s\', cmd_id: %d", request->content.storage_list_request.path, request->command_id);
+    FURI_LOG_I(
+        RPC_TAG,
+        "Storage list path: \'%.128s\', cmd_id: %d",
+        request->content.storage_list_request.path,
+        request->command_id);
 #endif
 
     PB_Main response = {
@@ -52,8 +55,8 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     while(!finish) {
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
-        if (storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if (i == COUNT_OF(list->storage_element)) {
+        if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
+            if(i == COUNT_OF(list->storage_element)) {
                 list->storage_element_count = i;
                 response.not_last = true;
 #if DEBUG_PRINT
@@ -62,9 +65,9 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                 rpc_encode_and_send(context, &response);
                 i = 0;
             }
-            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY)
-                                            ? PB_Storage_Element_FileType_DIR
-                                            : PB_Storage_Element_FileType_FILE;
+            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
+                                                PB_Storage_Element_FileType_DIR :
+                                                PB_Storage_Element_FileType_FILE;
             list->storage_element[i].size = fileinfo.size;
             list->storage_element[i].data = NULL;
             /* memory free inside rpc_encode_and_send() -> pb_release() */
@@ -136,4 +139,3 @@ void rpc_system_storage_free(void* ctx) {
     furi_record_close("storage");
     free(storage_system);
 }
-

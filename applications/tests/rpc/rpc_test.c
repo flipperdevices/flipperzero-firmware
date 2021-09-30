@@ -14,7 +14,6 @@
 #include <pb_encode.h>
 #include <m-list.h>
 
-
 /* TODO: check does it copy whole struct into List API, maybe should use M_PTR_OPLIST ?*/
 LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)
 #define M_OPL_MsgList_t() LIST_OPLIST(MsgList)
@@ -27,13 +26,13 @@ static RpcSession* session = NULL;
 static StreamBufferHandle_t output_stream = NULL;
 static uint32_t command_id = 0;
 
-#define TEST_RPC_TAG                    "TEST_RPC"
-#define MAX_RECEIVE_OUTPUT_TIMEOUT      3000
-#define MAX_NAME_LENGTH                 255
+#define TEST_RPC_TAG "TEST_RPC"
+#define MAX_RECEIVE_OUTPUT_TIMEOUT 3000
+#define MAX_NAME_LENGTH 255
 
-#define DEBUG_PRINT    0
+#define DEBUG_PRINT 0
 
-#define BYTES(x)        (x), sizeof(x)
+#define BYTES(x) (x), sizeof(x)
 
 void rpc_print_message(const PB_Main* message);
 
@@ -43,7 +42,7 @@ static void test_setup(void) {
     furi_assert(!output_stream);
 
     rpc = furi_record_open("rpc");
-    for (int i = 0; !session && (i < 10000); ++i) {
+    for(int i = 0; !session && (i < 10000); ++i) {
         session = rpc_open_session(rpc);
         delay(1);
     }
@@ -68,15 +67,19 @@ static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size
     furi_assert(bytes_sent == got_size);
 }
 
-static void compare_expected_bytes(uint8_t* expected_bytes, size_t expected_size, StreamBufferHandle_t stream_buffer) {
+static void compare_expected_bytes(
+    uint8_t* expected_bytes,
+    size_t expected_size,
+    StreamBufferHandle_t stream_buffer) {
     furi_assert(expected_bytes);
     furi_assert(expected_size);
     uint8_t* got_bytes = furi_alloc(expected_size);
 
-    size_t got_size = xStreamBufferReceive(stream_buffer, got_bytes, expected_size, MAX_RECEIVE_OUTPUT_TIMEOUT);
+    size_t got_size =
+        xStreamBufferReceive(stream_buffer, got_bytes, expected_size, MAX_RECEIVE_OUTPUT_TIMEOUT);
     mu_check(got_size == expected_size);
 
-    for (size_t i = 0; i < got_size; ++i) {
+    for(size_t i = 0; i < got_size; ++i) {
         mu_check(got_bytes[i] == expected_bytes[i]);
     }
 
@@ -87,19 +90,18 @@ static void compare_expected_bytes(uint8_t* expected_bytes, size_t expected_size
 //}
 
 MU_TEST(test_ping_raw) {
-
-// command_id: 0x123
-// command_status: 4
-// not_last: 0
-// ping_request: {
-// }
+    // command_id: 0x123
+    // command_status: 4
+    // not_last: 0
+    // ping_request: {
+    // }
     static uint8_t input_ping_request[] = {0x07, 0x08, 0xA3, 0x02, 0x10, 0x04, 0x22, 0x00};
 
-// command_id: 0x123
-// command_status: 0
-// not_last: 0
-// ping_response: {
-// }
+    // command_id: 0x123
+    // command_status: 0
+    // not_last: 0
+    // ping_response: {
+    // }
     static uint8_t expected_ping_response[] = {0x05, 0x08, 0xA3, 0x02, 0x2A, 0x00};
 
     rpc_set_send_bytes_callback(session, output_bytes_callback, output_stream);
@@ -109,7 +111,8 @@ MU_TEST(test_ping_raw) {
     compare_expected_bytes(BYTES(expected_ping_response), output_stream);
 }
 
-static void test_rpc_create_storage_list_request(PB_Main* request, const char* path, uint32_t command_id) {
+static void
+    test_rpc_create_storage_list_request(PB_Main* request, const char* path, uint32_t command_id) {
     furi_assert(request);
     furi_assert(path);
 
@@ -169,12 +172,18 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
         size_t expected_elements = expected->content.storage_list_response.storage_element_count;
         size_t result_elements = result->content.storage_list_response.storage_element_count;
         mu_check(result_elements == expected_elements);
-        for (int i = 0; i < expected_elements; ++i) {
-            PB_Storage_Element* result_element = &result->content.storage_list_response.storage_element[i];
-            PB_Storage_Element* expected_element = &expected->content.storage_list_response.storage_element[i];
-            mu_assert(!strcmp(result_element->name, expected_element->name), "storage list: name mismatch");
-            mu_assert(result_element->size == expected_element->size, "storage list: size mismatch");
-            mu_assert(result_element->type == expected_element->type, "storage list: type mismatch");
+        for(int i = 0; i < expected_elements; ++i) {
+            PB_Storage_Element* result_element =
+                &result->content.storage_list_response.storage_element[i];
+            PB_Storage_Element* expected_element =
+                &expected->content.storage_list_response.storage_element[i];
+            mu_assert(
+                !strcmp(result_element->name, expected_element->name),
+                "storage list: name mismatch");
+            mu_assert(
+                result_element->size == expected_element->size, "storage list: size mismatch");
+            mu_assert(
+                result_element->type == expected_element->type, "storage list: type mismatch");
             // TODO: add data comparation
         }
         break;
@@ -182,7 +191,7 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
     }
 }
 
-static bool test_rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_t count) {
+static bool test_rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     StreamBufferHandle_t stream_buffer = istream->state;
     size_t bytes_received = 0;
 
@@ -191,7 +200,10 @@ static bool test_rpc_pb_stream_read(pb_istream_t *istream, pb_byte_t *buf, size_
     return (count == bytes_received);
 }
 
-static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const char* path, uint32_t command_id) {
+static void test_rpc_system_storage_list_create_list(
+    MsgList_t msg_list,
+    const char* path,
+    uint32_t command_id) {
 #if DEBUG_PRINT
     FURI_LOG_I(TEST_RPC_TAG, "sizeof PB_Main: %ld", sizeof(PB_Main));
     FURI_LOG_I(TEST_RPC_TAG, "Storage list path: \'%.128s\', cmd_id: %ld", path, command_id);
@@ -222,8 +234,8 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
     while(!finish) {
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
-        if (storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if (i == COUNT_OF(list->storage_element)) {
+        if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
+            if(i == COUNT_OF(list->storage_element)) {
                 list->storage_element_count = i;
                 response.not_last = true;
 #if DEBUG_PRINT
@@ -232,9 +244,9 @@ static void test_rpc_system_storage_list_create_list(MsgList_t msg_list, const c
                 MsgList_push_back(msg_list, response);
                 i = 0;
             }
-            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY)
-                                            ? PB_Storage_Element_FileType_DIR
-                                            : PB_Storage_Element_FileType_FILE;
+            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
+                                                PB_Storage_Element_FileType_DIR :
+                                                PB_Storage_Element_FileType_FILE;
             list->storage_element[i].size = fileinfo.size;
             list->storage_element[i].data = NULL;
             /* memory free inside rpc_encode_and_send() -> pb_release() */
@@ -272,23 +284,27 @@ static void test_rpc_decode_and_compare(MsgList_t expected_msg_list) {
         .bytes_left = 0x7FFFFFFF,
     };
     /* other fields explicitly initialized by 0 */
-    PB_Main result = { .cb_content.funcs.decode = NULL };
+    PB_Main result = {.cb_content.funcs.decode = NULL};
 
-    for M_EACH(expected_msg, expected_msg_list, MsgList_t) {
-        if (!pb_decode_ex(&istream, &PB_Main_msg, &result, PB_DECODE_DELIMITED)) {
-            mu_assert(0, "not all expected messages decoded (maybe increase MAX_RECEIVE_OUTPUT_TIMEOUT)");
-            break;
+    for
+        M_EACH(expected_msg, expected_msg_list, MsgList_t) {
+            if(!pb_decode_ex(&istream, &PB_Main_msg, &result, PB_DECODE_DELIMITED)) {
+                mu_assert(
+                    0,
+                    "not all expected messages decoded (maybe increase MAX_RECEIVE_OUTPUT_TIMEOUT)");
+                break;
+            }
+
+            test_rpc_compare_messages(&result, expected_msg);
+            pb_release(&PB_Main_msg, &result);
         }
-
-        test_rpc_compare_messages(&result, expected_msg);
-        pb_release(&PB_Main_msg, &result);
-    }
 }
 
 static void test_rpc_free_list(MsgList_t msg_list) {
-    for M_EACH(it, msg_list, MsgList_t) {
-        pb_release(&PB_Main_msg, it);
-    }
+    for
+        M_EACH(it, msg_list, MsgList_t) {
+            pb_release(&PB_Main_msg, it);
+        }
     MsgList_clear(msg_list);
 }
 
@@ -307,26 +323,23 @@ MU_TEST(test_storage_list) {
     test_rpc_free_list(msg_list);
 }
 
-
-
-
 MU_TEST(test_storage_list_raw) {
-// command_id: 0x123
-// command_status: 0
-// not_last: 0
-// storage_list_request: {
-//     path:"/E/music/kirkorov"
-// }
-    static uint8_t input_bytes_list[] = {24 /*0x18*/,
-        0x08, 0xA3, 0x02, 0x32, 0x13, 0x0A, 0x11, 0x2F,
-        0x45, 0x2F, 0x6D, 0x75, 0x73, 0x69, 0x63, 0x2F,
-        0x6B, 0x69, 0x72, 0x6B, 0x6F, 0x72, 0x6F, 0x76};
+    // command_id: 0x123
+    // command_status: 0
+    // not_last: 0
+    // storage_list_request: {
+    //     path:"/E/music/kirkorov"
+    // }
+    static uint8_t input_bytes_list[] = {24 /*0x18*/, 0x08, 0xA3, 0x02, 0x32, 0x13, 0x0A,
+                                         0x11,        0x2F, 0x45, 0x2F, 0x6D, 0x75, 0x73,
+                                         0x69,        0x63, 0x2F, 0x6B, 0x69, 0x72, 0x6B,
+                                         0x6F,        0x72, 0x6F, 0x76};
 
     rpc_set_send_bytes_callback(session, output_bytes_callback, output_stream);
     size_t bytes_sent = rpc_feed_bytes(session, BYTES(input_bytes_list), 0);
     furi_check(bytes_sent == sizeof(input_bytes_list));
 
-    delay(1000);        // tmp
+    delay(1000); // tmp
 
     static uint8_t expected_ping_response[] = {7, 0x08, 0xA3, 0x02, 0x10, 0x03, 0x3A, 0x00};
     compare_expected_bytes(BYTES(expected_ping_response), output_stream);
