@@ -13,6 +13,7 @@ typedef struct {
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
     RpcSession* rpc_session;
+    osSemaphoreId_t rpc_sem;
 } SerialSvc;
 
 static SerialSvc* serial_svc;
@@ -23,6 +24,7 @@ static const uint8_t char_tx_uuid[] = {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45,
 
 void serial_svc_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
     serial_svc_update_rx(bytes, bytes_len);
+    osSemaphoreAcquire(serial_svc->rpc_sem, osWaitForever);
 }
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
@@ -44,6 +46,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
                 ret = SVCCTL_EvtAckFlowEnable;
             }
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
+            osSemaphoreRelease(serial_svc->rpc_sem);
             FURI_LOG_D(SERIAL_SERVICE_TAG, "Ack received", blecore_evt->ecode);
             ret = SVCCTL_EvtAckFlowEnable;
         }
@@ -54,6 +57,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
 void serial_svc_start(RpcInstance* rpc) {
     tBleStatus status;
     serial_svc = furi_alloc(sizeof(SerialSvc));
+    serial_svc->rpc_sem = osSemaphoreNew(1, 0, NULL);
     // Register event handler
     SVCCTL_RegisterSvcHandler(serial_svc_event_handler);
 
@@ -125,7 +129,7 @@ bool serial_svc_update_rx(uint8_t* data, uint8_t data_len) {
     if(data_len > SERIAL_SVC_DATA_LEN_MAX) {
         return false;
     }
-
+    FURI_LOG_D(SERIAL_SERVICE_TAG, "Updating char %d len", data_len);
     tBleStatus result = aci_gatt_update_char_value(serial_svc->svc_handle,
                                         serial_svc->rx_char_handle,
                                         0,
