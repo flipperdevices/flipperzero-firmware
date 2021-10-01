@@ -16,8 +16,11 @@ typedef struct {
 } RpcHandler;
 
 void rpc_encode_and_send(RpcInstance* rpc, PB_Main* main_message);
+void rpc_encode_and_send_empty(RpcInstance* rpc, uint32_t command_id, PB_CommandStatus status);
 void rpc_add_handler(RpcInstance* rpc, pb_size_t message_tag, RpcHandler* handler);
 
 void* rpc_system_status_alloc(RpcInstance* rpc);
 void* rpc_system_storage_alloc(RpcInstance* rpc);
 void rpc_system_storage_free(void* ctx);
+void rpc_print_message(const PB_Main* message);
+

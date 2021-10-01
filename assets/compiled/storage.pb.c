@@ -27,5 +27,14 @@ PB_BIND(PB_Storage_WriteRequest, PB_Storage_WriteRequest, AUTO)
 PB_BIND(PB_Storage_DeleteRequest, PB_Storage_DeleteRequest, AUTO)
 
 
+PB_BIND(PB_Storage_MkdirRequest, PB_Storage_MkdirRequest, AUTO)
+
+
+PB_BIND(PB_Storage_Md5sumRequest, PB_Storage_Md5sumRequest, AUTO)
+
+
+PB_BIND(PB_Storage_Md5sumResponse, PB_Storage_Md5sumResponse, AUTO)
+
+
 
 
