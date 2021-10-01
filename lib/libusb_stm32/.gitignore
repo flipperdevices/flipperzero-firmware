@@ -1,0 +1,26 @@
+#compile artefacts
+obj/*
+html/*
+*.hex
+*.elf
+*.map
+*.a
+*.bin
+
+#ide/editor files
+*.depend
+*.ebp
+*.elay
+*.sublime-project
+*.sublime-workspace
+.vscode
+
+#debug
+svd/*
+openocd.cfg
+
+#doxydoc artefacts
+html/*
+
+#other junk
+.DS_Store

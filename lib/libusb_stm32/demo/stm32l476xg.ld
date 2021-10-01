@@ -1,0 +1,11 @@
+ENTRY(Reset_Handler)
+MEMORY
+{
+    ROM    (rx): ORIGIN = 0x08000000, LENGTH = 1024K
+    BANK0  (rx): ORIGIN = 0x08000000, LENGTH = 512K
+    BANK1  (rx): ORIGIN = 0x08080000, LENGTH = 512K
+    RAM   (rwx): ORIGIN = 0x20000000, LENGTH = 96K
+    RAM2  (rwx): ORIGIN = 0x10000000, LENGTH = 32K
+}
+
+INCLUDE sections.ld
