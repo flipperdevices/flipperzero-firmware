@@ -197,11 +197,8 @@ bool iButtonApp::save_key(const char* key_name) {
     string_init(key_file_name);
 
     do {
-        // Set full file name
-        string_printf(key_file_name, "%s/%s%s", app_folder, key.get_name(), app_extension);
-
         // First remove key if it was saved (we rename the key)
-        if(!storage_simply_remove(storage, string_get_cstr(key_file_name))) break;
+        if(!delete_key()) break;
 
         // Save the key
         key.set_name(key_name);
@@ -225,13 +222,17 @@ bool iButtonApp::save_key(const char* key_name) {
                "Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8"))
             break;
 
-        if(!file.write_hex_array("Data", key.get_data(), key.get_type_data_size()))  break;
+        if(!file.write_hex_array("Data", key.get_data(), key.get_type_data_size())) break;
         result = true;
 
     } while(false);
 
     file.close();
     string_clear(key_file_name);
+
+    if(!result) {
+        dialog_message_show_storage_error(dialogs, "Cannot save\nkey file");
+    }
 
     return result;
 }
@@ -268,6 +269,10 @@ bool iButtonApp::load_key_data(string_t key_path) {
 
     file.close();
     string_clear(data);
+
+    if(!result) {
+        dialog_message_show_storage_error(dialogs, "Cannot load\nkey file");
+    }
 
     return result;
 }
@@ -327,5 +332,7 @@ bool iButtonApp::delete_key() {
 }
 
 void iButtonApp::make_app_folder() {
-    storage_common_mkdir(storage, app_folder);
+    if(storage_simply_mkdir(storage, app_folder)) {
+        dialog_message_show_storage_error(dialogs, "Cannot create\napp folder");
+    }
 }
