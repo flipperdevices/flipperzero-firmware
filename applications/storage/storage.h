@@ -240,6 +240,14 @@ FS_Error storage_sd_status(Storage* api);
  */
 bool storage_simply_remove(Storage* storage, const char* path);
 
+/**
+ * Creates a directory
+ * @param storage 
+ * @param path 
+ * @return true on success or if directory is already exist
+ */
+bool storage_simply_mkdir(Storage* storage, const char* path);
+
 #ifdef __cplusplus
 }
 #endif
