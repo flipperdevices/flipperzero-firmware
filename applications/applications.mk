@@ -2,8 +2,8 @@ APP_DIR		= $(PROJECT_ROOT)/applications
 LIB_DIR		= $(PROJECT_ROOT)/lib
 
 CFLAGS		+= -I$(APP_DIR)
-C_SOURCES	+= $(shell find $(APP_DIR) -name *.c)
-CPP_SOURCES	+= $(shell find $(APP_DIR) -name *.cpp)
+C_SOURCES	+= $(shell find $(APP_DIR) -name "*.c")
+CPP_SOURCES	+= $(shell find $(APP_DIR) -name "*.cpp")
 
 
 APP_RELEASE ?= 1
@@ -24,7 +24,7 @@ SRV_STORAGE	= 1
 # Apps
 SRV_DESKTOP	= 1
 APP_ARCHIVE	= 1
-APP_GPIO_TEST = 1
+APP_GPIO = 1
 APP_IBUTTON	= 1
 APP_IRDA	= 1
 APP_LF_RFID	= 1
@@ -135,9 +135,9 @@ SRV_GUI		= 1
 endif
 
 
-APP_GPIO_TEST ?= 0
-ifeq ($(APP_GPIO_TEST), 1)
-CFLAGS		+= -DAPP_GPIO_TEST
+APP_GPIO ?= 0
+ifeq ($(APP_GPIO), 1)
+CFLAGS		+= -DAPP_GPIO
 SRV_GUI		= 1
 endif
 
