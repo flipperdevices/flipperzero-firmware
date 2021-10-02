@@ -381,3 +381,9 @@ void storage_file_free(File* file) {
 
     free(file);
 }
+
+bool storage_simply_remove(Storage* storage, const char* path) {
+    FS_Error result;
+    result = storage_common_remove(storage, path);
+    return result == FSE_OK || result == FSE_NOT_EXIST;
+}
