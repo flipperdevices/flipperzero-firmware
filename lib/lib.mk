@@ -108,3 +108,4 @@ CPP_SOURCES		+= $(wildcard $(LIB_DIR)/app-scened-template/*/*.cpp)
 
 # Toolbox
 C_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.c)
+CPP_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.cpp)
