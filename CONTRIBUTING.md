@@ -17,7 +17,7 @@ See the [ReadMe](ReadMe.md) to get an overview of the project. Here are some hel
 
 ## Getting started
 
-Before writing code and creating PR make sure that it aligns with our misson and guidlines:
+Before writing code and creating PR make sure that it aligns with our mission and guidlines:
 
 - All our devices are intended for research and education.
 - PR that contains code intended to commit crimes is not going to be accepted.
