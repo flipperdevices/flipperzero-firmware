@@ -20,7 +20,7 @@ See the [ReadMe](ReadMe.md) to get an overview of the project. Here are some hel
 Before writing code and creating PR make sure that it aligns with our misson and guidlines:
 
 - All our devices are intended for research and education.
-- PR that contains code that is intended to commit crimes is not going to be accepted.
+- PR that contains code intended to commit crimes is not going to be accepted.
 - Your PR must contain code compatiable with project [LICENSE](LICENSE).
 - PR will only be merged if it pass CI/CD.
 - PR will only be merged if it pass review by code owner.
