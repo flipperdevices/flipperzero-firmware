@@ -110,6 +110,14 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         widget_add_string_element(nfc->widget, 7, 32, AlignLeft, AlignTop, FontSecondary, exp_str);
     }
 
+    // Send notification
+    if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadEmvDataSuccess) ==
+       NFC_SEND_NOTIFICATION_TRUE) {
+        notification_message(nfc->notifications, &sequence_success);
+        scene_manager_set_scene_state(
+            nfc->scene_manager, NfcSceneReadEmvDataSuccess, NFC_SEND_NOTIFICATION_FALSE);
+    }
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 

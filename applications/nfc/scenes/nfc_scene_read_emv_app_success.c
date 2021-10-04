@@ -42,6 +42,14 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
     dialog_ex_set_context(dialog_ex, nfc);
     dialog_ex_set_result_callback(dialog_ex, nfc_scene_read_emv_app_success_dialog_callback);
 
+    // Send notification
+    if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadEmvAppSuccess) ==
+       NFC_SEND_NOTIFICATION_TRUE) {
+        notification_message(nfc->notifications, &sequence_success);
+        scene_manager_set_scene_state(
+            nfc->scene_manager, NfcSceneReadEmvAppSuccess, NFC_SEND_NOTIFICATION_FALSE);
+    }
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDialogEx);
 }
 
