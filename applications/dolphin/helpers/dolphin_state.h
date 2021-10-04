@@ -3,6 +3,8 @@
 #include "dolphin_deed.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <rtc.h>
+#include <time.h>
 
 typedef struct DolphinState DolphinState;
 
@@ -21,6 +23,8 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed);
 uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state);
 
 uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state);
+
+uint64_t dolphin_state_get_timestamp(DolphinState* dolphin_state);
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state);
 

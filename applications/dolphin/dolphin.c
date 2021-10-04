@@ -91,6 +91,7 @@ int32_t dolphin_srv(void* p) {
             } else if(event.type == DolphinEventTypeStats) {
                 event.stats->icounter = dolphin_state_get_icounter(dolphin->state);
                 event.stats->butthurt = dolphin_state_get_butthurt(dolphin->state);
+                event.stats->timestamp = dolphin_state_get_timestamp(dolphin->state);
             } else if(event.type == DolphinEventTypeFlush) {
                 dolphin_state_save(dolphin->state);
             }

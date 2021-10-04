@@ -9,6 +9,11 @@
 #define UNLOCK_RST_TIMEOUT 200
 #define UNLOCK_CNT 2 // 3 actually
 
+#define DOOR_L_POS -57
+#define DOOR_L_POS_MAX 0
+#define DOOR_R_POS 115
+#define DOOR_R_POS_MIN 60
+
 typedef enum {
     DesktopLockedEventUnlock,
     DesktopLockedEventUpdate,

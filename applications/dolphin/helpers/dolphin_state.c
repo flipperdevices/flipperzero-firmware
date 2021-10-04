@@ -25,6 +25,7 @@ typedef struct {
     uint32_t flags;
     uint32_t icounter;
     uint32_t butthurt;
+    uint64_t timestamp;
 } DolphinStoreData;
 
 typedef struct {
@@ -171,12 +172,32 @@ void dolphin_state_clear(DolphinState* dolphin_state) {
     memset(&dolphin_state->data, 0, sizeof(DolphinStoreData));
 }
 
+static uint64_t dolphin_state_timestamp() {
+    RTC_TimeTypeDef time;
+    RTC_DateTypeDef date;
+    struct tm current;
+
+    HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
+    HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+    current.tm_year = date.Year + 100;
+    current.tm_mday = date.Date;
+    current.tm_mon = date.Month - 1;
+
+    current.tm_hour = time.Hours;
+    current.tm_min = time.Minutes;
+    current.tm_sec = time.Seconds;
+
+    return mktime(&current);
+}
+
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     const DolphinDeedWeight* deed_weight = dolphin_deed_weight(deed);
     int32_t icounter = dolphin_state->data.icounter + deed_weight->icounter;
 
     if(icounter >= 0) {
         dolphin_state->data.icounter = icounter;
+        dolphin_state->data.timestamp = dolphin_state_timestamp();
     }
 
     dolphin_state->dirty = true;
@@ -188,6 +209,10 @@ uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
 
 uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
     return dolphin_state->data.butthurt;
+}
+
+uint64_t dolphin_state_get_timestamp(DolphinState* dolphin_state) {
+    return dolphin_state->data.timestamp;
 }
 
 uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
