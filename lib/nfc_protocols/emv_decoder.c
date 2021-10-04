@@ -226,9 +226,11 @@ bool emv_decode_read_sfi_record(uint8_t* buff, uint16_t len, EmvApplication* app
     bool pan_parsed = false;
     for(uint16_t i = 0; i < len; i++) {
         if(buff[i] == EMV_TAG_PAN) {
-            app->card_number_len = buff[i + 1];
-            memcpy(app->card_number, &buff[i + 2], app->card_number_len);
-            pan_parsed = true;
+            if(buff[i + 1] == 8 || buff[i + 1] == 10) {
+                app->card_number_len = buff[i + 1];
+                memcpy(app->card_number, &buff[i + 2], app->card_number_len);
+                pan_parsed = true;
+            }
         } else if(emv_decode_search_tag_u16_r(EMV_TAG_EXP_DATE, buff, &i)) {
             app->exp_year = buff[i++];
             app->exp_month = buff[i++];
