@@ -1,9 +1,7 @@
 #pragma once
 
-#pragma once
-
-#include <stdint.h>
+#include <furi.h>
 #include <assets_icons.h>
-#include <gui/view.h>
+#include "dolphin/dolphin.h"
 
 const Icon* desktop_get_icon();
