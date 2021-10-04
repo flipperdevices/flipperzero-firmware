@@ -16,9 +16,6 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     NfcEmvData* emv_data = &nfc->dev.dev_data.emv_data;
     NfcDeviceCommonData* nfc_data = &nfc->dev.dev_data.nfc_data;
 
-    // Clear device name
-    nfc_device_set_name(&nfc->dev, "");
-
     // Setup Custom Widget view
     // Add frame
     widget_add_frame_element(nfc->widget, 0, 0, 128, 64, 6);
@@ -129,6 +126,8 @@ bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent e
             return scene_manager_search_and_switch_to_previous_scene(
                 nfc->scene_manager, NfcSceneReadEmvAppSuccess);
         } else if(event.event == GuiButtonTypeRight) {
+            // Clear device name
+            nfc_device_set_name(&nfc->dev, "");
             nfc->dev.format = NfcDeviceSaveFormatBankCard;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;

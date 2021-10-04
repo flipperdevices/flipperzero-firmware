@@ -451,7 +451,7 @@ bool nfc_file_select(NfcDevice* dev) {
         nfc_app_extension,
         dev->file_name,
         sizeof(dev->file_name),
-        NULL);
+        dev->dev_name);
     if(res) {
         string_t dev_str;
 
@@ -474,7 +474,6 @@ void nfc_device_clear(NfcDevice* dev) {
     furi_assert(dev);
 
     memset(&dev->dev_data, 0, sizeof(dev->dev_data));
-    nfc_device_set_name(dev, "");
     dev->format = NfcDeviceSaveFormatUid;
 }
 
