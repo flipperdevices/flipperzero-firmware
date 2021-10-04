@@ -82,15 +82,15 @@ uint16_t furi_hal_power_insomnia_level() {
 }
 
 void furi_hal_power_insomnia_enter() {
-    osThreadSuspendAll();
+    vTaskSuspendAll();
     furi_hal_power.insomnia++;
-    osThreadResumeAll();
+    xTaskResumeAll();
 }
 
 void furi_hal_power_insomnia_exit() {
-    osThreadSuspendAll();
+    vTaskSuspendAll();
     furi_hal_power.insomnia--;
-    osThreadResumeAll();
+    xTaskResumeAll();
 }
 
 bool furi_hal_power_sleep_available() {
@@ -290,19 +290,19 @@ void furi_hal_power_disable_external_3_3v(){
 }
 
 void furi_hal_power_suppress_charge_enter() {
-    osThreadSuspendAll();
+    vTaskSuspendAll();
     if (furi_hal_power.suppress_charge == 0) {
         bq25896_disable_charging();
     }
     furi_hal_power.suppress_charge++;
-    osThreadResumeAll();
+    xTaskResumeAll();
 }
 
 void furi_hal_power_suppress_charge_exit() {
-    osThreadSuspendAll();
+    vTaskSuspendAll();
     furi_hal_power.suppress_charge--;
     if (furi_hal_power.suppress_charge == 0) {
         bq25896_enable_charging();
     }
-    osThreadResumeAll();
+    xTaskResumeAll();
 }
