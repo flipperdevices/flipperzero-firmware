@@ -415,6 +415,10 @@ static bool nfc_device_load_data(FileWorker* file_worker, string_t path, NfcDevi
         parsed = true;
     } while(0);
 
+    if(!parsed) {
+        file_worker_show_error(file_worker, "Can not parse\nfile");
+    }
+
     string_clear(temp_string);
     return parsed;
 }
