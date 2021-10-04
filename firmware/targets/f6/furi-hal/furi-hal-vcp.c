@@ -22,10 +22,11 @@ static FuriHalVcp* furi_hal_vcp = NULL;
 static const uint8_t ascii_soh = 0x01;
 static const uint8_t ascii_eot = 0x04;
 
-static uint8_t rx_buf[APP_RX_DATA_SIZE];
+static uint8_t* vcp_rx_buf;
 
 void furi_hal_vcp_init() {
     furi_hal_vcp = furi_alloc(sizeof(FuriHalVcp));
+    vcp_rx_buf = furi_alloc(APP_RX_DATA_SIZE);
     furi_hal_vcp->connected = false;
     
     furi_hal_vcp->rx_stream = xStreamBufferCreate(FURI_HAL_VCP_RX_BUFFER_SIZE, 1);
@@ -67,7 +68,7 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
             batch_size = APP_TX_DATA_SIZE;
         }
 
-        cdc_send((uint8_t*)buffer, batch_size);
+        furi_hal_cdc_send(0, (uint8_t*)buffer, batch_size);
         size -= batch_size;
         buffer += batch_size;
     }
@@ -109,27 +110,30 @@ void furi_hal_vcp_on_cdc_control_line(uint8_t state) {
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void furi_hal_vcp_on_cdc_rx(void) { 
+void furi_hal_vcp_on_cdc_rx(uint8_t if_num) { 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    uint16_t max_len = xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream);
-    if (max_len > 0) {
-        if (max_len > APP_RX_DATA_SIZE)
-            max_len = APP_RX_DATA_SIZE;
-        int32_t size = cdc_receive(rx_buf, max_len);
+    if (if_num == 0) {
+        uint16_t max_len = xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream);
+        if (max_len > 0) {
+            if (max_len > APP_RX_DATA_SIZE)
+                max_len = APP_RX_DATA_SIZE;
+            int32_t size = furi_hal_cdc_receive(0, vcp_rx_buf, max_len);
 
-        if (size > 0) {
-            size_t ret = xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, rx_buf, size, &xHigherPriorityTaskWoken);
-            furi_check(ret == size);
-        }
-    } else {
-        furi_hal_vcp->rx_stream_full = true;
-    };
+            if (size > 0) {
+                size_t ret = xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, vcp_rx_buf, size, &xHigherPriorityTaskWoken);
+                furi_check(ret == size);
+            }
+        } else {
+            furi_hal_vcp->rx_stream_full = true;
+        };
+    }
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void furi_hal_vcp_on_cdc_tx_complete(void) {
-    osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
+void furi_hal_vcp_on_cdc_tx_complete(uint8_t if_num) {
+    if (if_num == 0)
+        osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
 }
 

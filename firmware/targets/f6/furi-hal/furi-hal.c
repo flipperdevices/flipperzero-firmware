@@ -34,7 +34,6 @@ void furi_hal_init() {
 
     // VCP + USB
     furi_hal_vcp_init();
-    //MX_USB_Device_Init();
     furi_hal_usb_init();
     furi_hal_usb_set_config(UsbModeVcpSingle);
     FURI_LOG_I("HAL", "USB OK");

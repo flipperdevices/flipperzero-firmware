@@ -4,7 +4,6 @@
 #include "task.h"
 #include "usbd_core.h"
 
-//extern PCD_HandleTypeDef hpcd_USB_FS;
 extern usbd_device udev;
 extern COMP_HandleTypeDef hcomp1;
 extern RTC_HandleTypeDef hrtc;

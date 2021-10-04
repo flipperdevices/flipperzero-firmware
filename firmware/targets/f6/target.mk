@@ -117,18 +117,6 @@ C_SOURCES += \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/shci_tl_if.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci/shci.c
 
-# USB glue 
-#CFLAGS += \
-	-I$(TARGET_DIR)/usb-glue \
-	-I$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Inc \
-	-I$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc
-#C_SOURCES += \
-	$(wildcard $(TARGET_DIR)/usb-glue/*.c) \
-	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
-	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
-	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-	$(CUBE_DIR)/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
-
 # USB stack
 CFLAGS += \
 	-DSTM32WB \

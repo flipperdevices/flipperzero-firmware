@@ -22,7 +22,7 @@ errors=$($CLANG_FORMAT_BIN --verbose -style=file -n --Werror --ferror-limit=0 $C
 
 if [[ -z "$errors" ]]; then
     echo "Code looks fine for me!"
-    exit 0.
+    exit 0
 fi
 
 if [[ -n "${SET_GH_OUTPUT}" ]]; then
