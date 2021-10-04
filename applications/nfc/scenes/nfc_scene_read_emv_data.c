@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define NFC_READ_EMV_DATA_CUSTOM_EVENT (0UL)
+#define NFC_READ_EMV_DATA_CUSTOM_EVENT (10UL)
 
 void nfc_read_emv_data_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
