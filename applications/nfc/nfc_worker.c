@@ -284,8 +284,8 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                 }
                 if(emv_decode_get_proc_opt(rx_buff, *rx_len, &emv_app)) {
                     FURI_LOG_I(NFC_WORKER_TAG, "Card number parsed");
-                    memcpy(
-                        result->emv_data.number, emv_app.card_number, sizeof(emv_app.card_number));
+                    result->emv_data.number_len = emv_app.card_number_len;
+                    memcpy(result->emv_data.number, emv_app.card_number, emv_app.card_number_len);
                     // Notify caller and exit
                     if(nfc_worker->callback) {
                         nfc_worker->callback(nfc_worker->context);
@@ -320,10 +320,11 @@ void nfc_worker_read_emv(NfcWorker* nfc_worker) {
                     }
                     if(pan_found) {
                         FURI_LOG_I(NFC_WORKER_TAG, "Card PAN found");
+                        result->emv_data.number_len = emv_app.card_number_len;
                         memcpy(
                             result->emv_data.number,
                             emv_app.card_number,
-                            sizeof(emv_app.card_number));
+                            result->emv_data.number_len);
                         if(emv_app.exp_month) {
                             result->emv_data.exp_mon = emv_app.exp_month;
                             result->emv_data.exp_year = emv_app.exp_year;

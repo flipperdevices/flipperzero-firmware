@@ -36,20 +36,15 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
     widget_add_string_element(
         nfc->widget, 64, 3, AlignCenter, AlignTop, FontSecondary, nfc->dev.dev_data.emv_data.name);
     // Add cad number
-    char pan_str[32];
-    snprintf(
-        pan_str,
-        sizeof(pan_str),
-        "%02X%02X %02X%02X %02X%02X %02X%02X",
-        emv_data->number[0],
-        emv_data->number[1],
-        emv_data->number[2],
-        emv_data->number[3],
-        emv_data->number[4],
-        emv_data->number[5],
-        emv_data->number[6],
-        emv_data->number[7]);
-    widget_add_string_element(nfc->widget, 64, 13, AlignCenter, AlignTop, FontSecondary, pan_str);
+    string_t pan_str;
+    string_init(pan_str);
+    for(uint8_t i = 0; i < emv_data->number_len; i += 2) {
+        string_cat_printf(pan_str, "%02X%02X ", emv_data->number[i], emv_data->number[i + 1]);
+    }
+    string_strim(pan_str);
+    widget_add_string_element(
+        nfc->widget, 64, 13, AlignCenter, AlignTop, FontSecondary, string_get_cstr(pan_str));
+    string_clear(pan_str);
     // Parse country code
     string_t country_name;
     string_init(country_name);

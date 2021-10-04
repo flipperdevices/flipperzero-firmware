@@ -40,7 +40,8 @@ typedef struct {
     char name[32];
     uint8_t aid[16];
     uint16_t aid_len;
-    uint8_t number[8];
+    uint8_t number[10];
+    uint8_t number_len;
     uint8_t exp_mon;
     uint8_t exp_year;
     uint16_t country_code;
