@@ -18,13 +18,13 @@
 typedef struct {
     volatile uint8_t insomnia;
     volatile uint8_t deep_insomnia;
-    volatile uint8_t supress_charge;
+    volatile uint8_t suppress_charge;
 } FuriHalPower;
 
 static volatile FuriHalPower furi_hal_power = {
     .insomnia = 0,
     .deep_insomnia = 1,
-    .supress_charge = 0,
+    .suppress_charge = 0,
 };
 
 const ParamCEDV cedv = {
@@ -82,11 +82,15 @@ uint16_t furi_hal_power_insomnia_level() {
 }
 
 void furi_hal_power_insomnia_enter() {
+    osThreadSuspendAll();
     furi_hal_power.insomnia++;
+    osThreadResumeAll();
 }
 
 void furi_hal_power_insomnia_exit() {
+    osThreadSuspendAll();
     furi_hal_power.insomnia--;
+    osThreadResumeAll();
 }
 
 bool furi_hal_power_sleep_available() {
@@ -286,15 +290,19 @@ void furi_hal_power_disable_external_3_3v(){
 }
 
 void furi_hal_power_suppress_charge_enter() {
-    if (furi_hal_power.supress_charge == 0) {
+    osThreadSuspendAll();
+    if (furi_hal_power.suppress_charge == 0) {
         bq25896_disable_charging();
     }
-    furi_hal_power.supress_charge++;
+    furi_hal_power.suppress_charge++;
+    osThreadResumeAll();
 }
 
 void furi_hal_power_suppress_charge_exit() {
-    furi_hal_power.supress_charge--;
-    if (furi_hal_power.supress_charge == 0) {
+    osThreadSuspendAll();
+    furi_hal_power.suppress_charge--;
+    if (furi_hal_power.suppress_charge == 0) {
         bq25896_enable_charging();
     }
+    osThreadResumeAll();
 }
