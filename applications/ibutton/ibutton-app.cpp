@@ -332,7 +332,7 @@ bool iButtonApp::delete_key() {
 }
 
 void iButtonApp::make_app_folder() {
-    if(storage_simply_mkdir(storage, app_folder)) {
+    if(!storage_simply_mkdir(storage, app_folder)) {
         dialog_message_show_storage_error(dialogs, "Cannot create\napp folder");
     }
 }
