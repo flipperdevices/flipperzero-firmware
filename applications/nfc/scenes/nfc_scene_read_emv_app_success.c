@@ -26,12 +26,13 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
     bool aid_found = nfc_emv_parser_get_aid_name(emv_data->aid, emv_data->aid_len, aid);
     if(!aid_found) {
         for(uint8_t i = 0; i < emv_data->aid_len; i++) {
-            string_cat_printf(aid, " %02X", emv_data->aid[i]);
+            string_cat_printf(aid, "%02X", emv_data->aid[i]);
         }
     }
     nfc_text_store_set(
         nfc,
-        NFC_SCENE_READ_SUCCESS_SHIFT "UID: %02X %02X %02X %02X \n\n%s",
+        NFC_SCENE_READ_SUCCESS_SHIFT "UID: %02X %02X %02X %02X \n" NFC_SCENE_READ_SUCCESS_SHIFT
+                                     "Application:\n%s",
         nfc_data->uid[0],
         nfc_data->uid[1],
         nfc_data->uid[2],
