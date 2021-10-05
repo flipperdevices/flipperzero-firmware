@@ -6,6 +6,9 @@
 extern "C" {
 #endif
 
+typedef void(*GapOnConnectCallback) (void* context);
+typedef void(*GapOnDisconnectCallback) (void* context);
+
 typedef enum {
     GapStateIdle,
     GapStateAdvFast,
@@ -13,7 +16,7 @@ typedef enum {
     GapStateConnected,
 } GapState;
 
-bool gap_init();
+bool gap_init(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_disconnect_cb, void* context);
 
 void gap_start_advertising();
 

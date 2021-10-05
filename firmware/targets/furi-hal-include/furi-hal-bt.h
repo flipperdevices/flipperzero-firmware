@@ -7,6 +7,10 @@
 
 #include <m-string.h>
 #include <stdbool.h>
+#include <gap.h>
+#include <serial_service.h>
+
+#define FURI_HAL_BT_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,11 +20,8 @@ extern "C" {
  */
 void furi_hal_bt_init();
 
-/** Start BLE app
- *
- * @return     true if app inited
- */
-bool furi_hal_bt_init_app();
+/** Start BLE app */
+bool furi_hal_bt_init_app(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_disconnect_cb, void* context);
 
 /** Start advertising
  */
@@ -48,10 +49,11 @@ void furi_hal_bt_dump_state(string_t buffer);
  */
 bool furi_hal_bt_is_alive();
 
-/** Wait for Core2 startup
- *
- * @return     true if success, otherwise timeouted
- */
+void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+
+bool furi_hal_bt_tx(uint8_t* data, uint16_t size);
+
+/** Wait for Core2 startup */
 bool furi_hal_bt_wait_startup();
 
 /** Lock shared access to flash controller
