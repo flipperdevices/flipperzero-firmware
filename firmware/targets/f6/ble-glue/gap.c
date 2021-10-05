@@ -212,11 +212,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
     return SVCCTL_UserEvtFlowEnable;
 }
 
-void SVCCTL_SvcInit() {
-    // Dummy function to prevent unused services initialization
-    // TODO refactor (disable all services in WPAN config)
-}
-
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
     gap->gap_svc.adv_svc_uuid_len = 1;
     if(uid_len == 2) {
