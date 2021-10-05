@@ -10,12 +10,13 @@
 
 extern struct UsbInterface usb_cdc_single;
 extern struct UsbInterface usb_cdc_dual;
+extern struct UsbInterface usb_hid;
 
 static struct UsbInterface* const usb_if_modes[UsbModesNum] = {
     NULL,
     &usb_cdc_single,
     &usb_cdc_dual,
-    NULL,//&usb_hid,
+    &usb_hid,
     NULL,//&usb_hid_u2f,
 };
 
@@ -29,6 +30,7 @@ static void susp_evt(usbd_device *dev, uint8_t event, uint8_t ep);
 static void wkup_evt(usbd_device *dev, uint8_t event, uint8_t ep);
 
 struct UsbCfg{
+    osTimerId_t reconnect_tmr;
     UsbMode mode_cur;
     UsbMode mode_next;
     bool enabled;
@@ -40,6 +42,7 @@ static void furi_hal_usb_tmr_cb(void* context);
 void furi_hal_usb_init(void) {
     
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+    LL_PWR_EnableVddUSB();
     
     GPIO_InitStruct.Pin = LL_GPIO_PIN_11 | LL_GPIO_PIN_12;
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
@@ -49,21 +52,15 @@ void furi_hal_usb_init(void) {
     GPIO_InitStruct.Alternate = LL_GPIO_AF_10;
     LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    LL_RCC_HSI48_Enable();
-    while (LL_RCC_HSI48_IsReady() == 0);
-    LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_HSI48);
-
-    LL_PWR_EnableVddUSB();
-
     usbd_init(&udev, &usbd_hw, USB_EP0_SIZE, ubuf, sizeof(ubuf));
+    usbd_enable(&udev, true);
 
     usbd_reg_descr(&udev, usb_descriptor_get);
     usbd_reg_event(&udev, usbd_evt_susp, susp_evt);
     usbd_reg_event(&udev, usbd_evt_wkup, wkup_evt);
 
-    usbd_enable(&udev, true);
-
     usb_config.enabled = false;
+    usb_config.reconnect_tmr = NULL;
     HAL_NVIC_SetPriority(USB_LP_IRQn, 5, 0);
     NVIC_EnableIRQ(USB_LP_IRQn);
 
@@ -71,14 +68,13 @@ void furi_hal_usb_init(void) {
 }
 
 void furi_hal_usb_set_config(UsbMode new_mode) {
-    static osTimerId_t reconnect_tmr = NULL;
     if (new_mode != usb_config.mode_cur) {
         if (usb_config.enabled) {
             usb_config.mode_next = new_mode;
-            if (reconnect_tmr == NULL)
-                reconnect_tmr = osTimerNew(furi_hal_usb_tmr_cb, osTimerOnce, NULL, NULL);
+            if (usb_config.reconnect_tmr == NULL)
+                usb_config.reconnect_tmr = osTimerNew(furi_hal_usb_tmr_cb, osTimerOnce, NULL, NULL);
             furi_hal_usb_disable();
-            osTimerStart(reconnect_tmr, USB_RECONNECT_DELAY);
+            osTimerStart(usb_config.reconnect_tmr, USB_RECONNECT_DELAY);
         }
         else {
             if (usb_if_modes[usb_config.mode_cur] != NULL)

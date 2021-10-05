@@ -32,7 +32,7 @@ void usb_test_submenu_callback(void* context, uint32_t index) {
     } else if(index == UsbTestSubmenuIndexVcpDual) {
         furi_hal_usb_set_config(UsbModeVcpDual);
     } else if(index == UsbTestSubmenuIndexHid) {
-        //furi_hal_usb_set_config(UsbModeHid);
+        furi_hal_usb_set_config(UsbModeHid);
     } else if(index == UsbTestSubmenuIndexHidU2F) {
         //furi_hal_usb_set_config(UsbModeU2F);
     }
@@ -64,7 +64,7 @@ UsbTestApp* usb_test_app_alloc() {
     submenu_add_item(
         app->submenu, "Dual VCP", UsbTestSubmenuIndexVcpDual, usb_test_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "TODO: HID KB+Mouse", UsbTestSubmenuIndexHid, usb_test_submenu_callback, app);
+        app->submenu, "HID KB+Mouse", UsbTestSubmenuIndexHid, usb_test_submenu_callback, app);
     submenu_add_item(
         app->submenu, "TODO: HID U2F", UsbTestSubmenuIndexHidU2F, usb_test_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_test_exit);
