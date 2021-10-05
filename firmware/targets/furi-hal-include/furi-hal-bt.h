@@ -20,7 +20,10 @@ extern "C" {
  */
 void furi_hal_bt_init();
 
-/** Start BLE app */
+/** Start BLE app
+ * @param event_cb - BleEventCallback instance
+ * @param context - pointer to context
+*/
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context);
 
 /** Start advertising
@@ -49,8 +52,17 @@ void furi_hal_bt_dump_state(string_t buffer);
  */
 bool furi_hal_bt_is_alive();
 
+/** Set data event callbacks
+ * @param on_received_cb - SerialSvcDataReceivedCallback instance
+ * @param on_sent_cb - SerialSvcDataSentCallback instance
+ * @param context - pointer to context
+ */
 void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
 
+/** Send data through BLE
+ * @param data - data buffer
+ * @param size - data buffer size
+ */
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size);
 
 /** Wait for Core2 startup */
