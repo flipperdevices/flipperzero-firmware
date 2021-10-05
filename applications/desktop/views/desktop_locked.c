@@ -127,7 +127,6 @@ bool desktop_locked_input(InputEvent* event, void* context) {
             uint32_t press_time = osKernelGetTickCount();
 
             // check if pressed sequentially
-            FURI_LOG_I("DesktopLockedView", "Last: %d, Now: %d, Count: %d", locked_view->lock_lastpress, press_time, locked_view->lock_count);
             if(press_time - locked_view->lock_lastpress > UNLOCK_RST_TIMEOUT) {
                 locked_view->lock_lastpress = press_time;
                 locked_view->lock_count = 0;
