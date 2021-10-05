@@ -61,7 +61,70 @@ Bt* bt_alloc() {
     PubSub* power_pubsub = power_get_pubsub(bt->power);
     subscribe_pubsub(power_pubsub, bt_battery_level_changed_callback, bt);
 
+    // RPC
+    bt->rpc = furi_record_open("rpc");
+    bt->rpc_sem = osSemaphoreNew(1, 0, NULL);
+
     return bt;
+}
+
+// Called from GAP thread from Serial service
+static void bt_on_data_received_callback(uint8_t* data, uint16_t size, void* context) {
+    furi_assert(context);
+    Bt* bt = context;
+
+    size_t bytes_processed = rpc_feed_bytes(bt->rpc_session, data, size, 1000);
+    if(bytes_processed != size) {
+        FURI_LOG_E(BT_SERVICE_TAG, "Only %d of %d bytes processed by RPC", bytes_processed, size);
+    }
+}
+
+// Called from GAP thread from Serial service
+static void bt_on_data_sent_callback(void* context) {
+    furi_assert(context);
+    Bt* bt = context;
+
+    osSemaphoreRelease(bt->rpc_sem);
+}
+
+// Called from RPC thread
+void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
+    furi_assert(context);
+    Bt* bt = context;
+
+    size_t bytes_sent = 0;
+    while(bytes_sent < bytes_len) {
+        size_t bytes_remain = bytes_len - bytes_sent;
+        if(bytes_remain > FURI_HAL_BT_PACKET_SIZE_MAX) {
+            furi_hal_bt_tx(&bytes[bytes_sent], FURI_HAL_BT_PACKET_SIZE_MAX);
+            bytes_sent += FURI_HAL_BT_PACKET_SIZE_MAX;
+        } else {
+            furi_hal_bt_tx(&bytes[bytes_sent], bytes_remain);
+            bytes_sent += bytes_remain;
+        }
+        osSemaphoreAcquire(bt->rpc_sem, osWaitForever);
+    }
+}
+
+// Called from BLE HCI thread
+static void bt_on_connect_callback(void* context) {
+    furi_assert(context);
+    Bt* bt = context;
+
+    FURI_LOG_I(BT_SERVICE_TAG, "Open RPC connection");
+    bt->rpc_session = rpc_open_session(bt->rpc);
+    rpc_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback, bt);
+    furi_hal_bt_set_data_event_callbacks(
+        bt_on_data_received_callback, bt_on_data_sent_callback, bt);
+}
+
+// Called from BLE HCI thread
+static void bt_on_disconnect_callback(void* context) {
+    furi_assert(context);
+    Bt* bt = context;
+
+    FURI_LOG_I(BT_SERVICE_TAG, "Close RPC connection");
+    rpc_close_session(bt->rpc_session);
 }
 
 int32_t bt_srv() {
@@ -72,7 +135,7 @@ int32_t bt_srv() {
         FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
     } else {
         view_port_enabled_set(bt->statusbar_view_port, true);
-        if(furi_hal_bt_init_app()) {
+        if(furi_hal_bt_init_app(bt_on_connect_callback, bt_on_disconnect_callback, bt)) {
             FURI_LOG_I(BT_SERVICE_TAG, "BLE stack started");
             if(bt->bt_settings.enabled) {
                 furi_hal_bt_start_advertising();
