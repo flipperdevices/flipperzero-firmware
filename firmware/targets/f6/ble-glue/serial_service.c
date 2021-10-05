@@ -23,8 +23,18 @@ static const uint8_t char_rx_uuid[] = {0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45,
 static const uint8_t char_tx_uuid[] = {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
 
 void serial_svc_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
-    serial_svc_update_rx(bytes, bytes_len);
-    osSemaphoreAcquire(serial_svc->rpc_sem, osWaitForever);
+    size_t bytes_sent = 0;
+    while(bytes_sent < bytes_len) {
+        size_t bytes_remain = bytes_len - bytes_sent;
+        if(bytes_remain > SERIAL_SVC_DATA_LEN_MAX) {
+            serial_svc_update_rx(&bytes[bytes_sent], SERIAL_SVC_DATA_LEN_MAX);
+            bytes_sent += SERIAL_SVC_DATA_LEN_MAX;
+        } else {
+            serial_svc_update_rx(&bytes[bytes_sent], bytes_remain);
+            bytes_sent += bytes_remain;
+        }
+        osSemaphoreAcquire(serial_svc->rpc_sem, osWaitForever);
+    }
 }
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
