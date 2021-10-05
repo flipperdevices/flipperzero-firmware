@@ -33,7 +33,10 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
     Bt* bt = context;
     const PowerEvent* event = _event;
     if(event->type == PowerEventTypeBatteryLevelChanged) {
-        bt_update_battery_level(bt, event->data.battery_level);
+        BtMessage message = {
+            .type = BtMessageTypeUpdateBatteryLevel,
+            .data.battery_level = event->data.battery_level};
+        furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
     }
 }
 
@@ -88,7 +91,7 @@ static void bt_on_data_sent_callback(void* context) {
 }
 
 // Called from RPC thread
-void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
+static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
     furi_assert(context);
     Bt* bt = context;
 
@@ -106,29 +109,34 @@ void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len)
     }
 }
 
-// Called from BLE HCI thread
-static void bt_on_connect_callback(void* context) {
+// Called from GAP thread
+static void bt_on_gap_event_callback(BleEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
 
-    FURI_LOG_I(BT_SERVICE_TAG, "Open RPC connection");
-    bt->rpc_session = rpc_open_session(bt->rpc);
-    rpc_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback, bt);
-    furi_hal_bt_set_data_event_callbacks(
-        bt_on_data_received_callback, bt_on_data_sent_callback, bt);
-    // Update battery level
-    PowerInfo info;
-    power_get_info(bt->power, &info);
-    bt_update_battery_level(bt, info.charge);
-}
-
-// Called from BLE HCI thread
-static void bt_on_disconnect_callback(void* context) {
-    furi_assert(context);
-    Bt* bt = context;
-
-    FURI_LOG_I(BT_SERVICE_TAG, "Close RPC connection");
-    rpc_close_session(bt->rpc_session);
+    if(event.type == BleEventTypeConnected) {
+        FURI_LOG_I(BT_SERVICE_TAG, "Open RPC connection");
+        bt->rpc_session = rpc_open_session(bt->rpc);
+        rpc_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback, bt);
+        furi_hal_bt_set_data_event_callbacks(
+            bt_on_data_received_callback, bt_on_data_sent_callback, bt);
+        // Update battery level
+        PowerInfo info;
+        power_get_info(bt->power, &info);
+        BtMessage message = {
+            .type = BtMessageTypeUpdateBatteryLevel, .data.battery_level = info.charge};
+        furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    } else if(event.type == BleEventTypeDisconnected) {
+        FURI_LOG_I(BT_SERVICE_TAG, "Close RPC connection");
+        rpc_close_session(bt->rpc_session);
+    } else if(event.type == BleEventTypeStartAdvertising || event.type == BleEventTypeStopAdvertising) {
+        BtMessage message = {.type = BtMessageTypeUpdateStatusbar};
+        furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    } else if(event.type == BleEventTypePinCodeShow) {
+        BtMessage message = {
+            .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
+        furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    }
 }
 
 int32_t bt_srv() {
@@ -139,11 +147,10 @@ int32_t bt_srv() {
         FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
     } else {
         view_port_enabled_set(bt->statusbar_view_port, true);
-        if(furi_hal_bt_init_app(bt_on_connect_callback, bt_on_disconnect_callback, bt)) {
+        if(furi_hal_bt_init_app(bt_on_gap_event_callback, bt)) {
             FURI_LOG_I(BT_SERVICE_TAG, "BLE stack started");
             if(bt->bt_settings.enabled) {
                 furi_hal_bt_start_advertising();
-                FURI_LOG_I(BT_SERVICE_TAG, "Start advertising");
             }
         } else {
             FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
