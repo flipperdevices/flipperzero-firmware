@@ -21,7 +21,7 @@ extern "C" {
 void furi_hal_bt_init();
 
 /** Start BLE app */
-bool furi_hal_bt_init_app(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_disconnect_cb, void* context);
+bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context);
 
 /** Start advertising
  */

@@ -34,8 +34,7 @@ typedef struct {
     osMutexId_t state_mutex;
     uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
     Bt* bt;
-    GapOnConnectCallback on_connect_cb;
-    GapOnDisconnectCallback on_disconnect_cb;
+    BleEventCallback on_event_cb;
     void* context;
     osTimerId advertise_timer;
     osThreadAttr_t thread_attr;
@@ -91,9 +90,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 gap_start_advertising();
                 furi_hal_power_insomnia_exit();
             }
-            if(gap->on_disconnect_cb) {
-                gap->on_disconnect_cb(gap->context);
-            }
+            BleEvent event = {.type = BleEventTypeDisconnected};
+            gap->on_event_cb(event, gap->context);
         }
         break;
 
@@ -155,7 +153,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 uint32_t pin = rand() % 999999;
                 aci_gap_pass_key_resp(gap->gap_svc.connection_handle, pin);
                 FURI_LOG_I(GAP_TAG, "Pass key request event. Pin: %d", pin);
-                bt_pin_code_show(gap->bt, pin);
+                BleEvent event = {.type = BleEventTypePinCodeShow, .data.pin_code = pin};
+                gap->on_event_cb(event, gap->context);
             }
                 break;
 
@@ -197,9 +196,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                     aci_gap_terminate(gap->gap_svc.connection_handle, 5);
                 } else {
                     FURI_LOG_I(GAP_TAG, "Pairing complete");
-                    if(gap->on_connect_cb) {
-                        gap->on_connect_cb(gap->context);
-                    }
+                    BleEvent event = {.type = BleEventTypeConnected};
+                    gap->on_event_cb(event, gap->context);
                 }
                 break;
 
@@ -344,7 +342,8 @@ static void gap_advertise_start(GapState new_state)
         FURI_LOG_E(GAP_TAG, "Set discoverable err: %d", status);
     }
     gap->state = new_state;
-    bt_update_statusbar(gap->bt);
+    BleEvent event = {.type = BleEventTypeStartAdvertising};
+    gap->on_event_cb(event, gap->context);
     osTimerStart(gap->advertise_timer, INITIAL_ADV_TIMEOUT);
 }
 
@@ -358,17 +357,20 @@ static void gap_advertise_stop() {
         osTimerStop(gap->advertise_timer);
         aci_gap_set_non_discoverable();
         gap->state = GapStateIdle;
-        bt_update_statusbar(gap->bt);
     }
+    BleEvent event = {.type = BleEventTypeStopAdvertising};
+    gap->on_event_cb(event, gap->context);
 }
 
 void gap_start_advertising() {
+    FURI_LOG_I(GAP_TAG, "Start advertising");
     gap->enable_adv = true;
     GapCommand command = GapCommandAdvFast;
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
 }
 
 void gap_stop_advertising() {
+    FURI_LOG_I(GAP_TAG, "Stop advertising");
     gap->enable_adv = false;
     GapCommand command = GapCommandAdvStop;
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
@@ -379,7 +381,7 @@ static void gap_advetise_timer_callback(void* context) {
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
 }
 
-bool gap_init(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_disconnect_cb, void* context) {
+bool gap_init(BleEventCallback on_event_cb, void* context) {
     if (APPE_Status() != BleGlueStatusStarted) {
         return false;
     }
@@ -421,9 +423,8 @@ bool gap_init(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_dis
 
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
 
-    // Set connection callbacks
-    gap->on_connect_cb = on_connect_cb;
-    gap->on_disconnect_cb = on_disconnect_cb;
+    // Set callback
+    gap->on_event_cb = on_event_cb;
     gap->context = context;
     return true;
 }

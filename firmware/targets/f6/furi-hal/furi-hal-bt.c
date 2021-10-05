@@ -5,6 +5,8 @@
 #include <shci.h>
 #include <cmsis_os2.h>
 
+#include <furi.h>
+
 void furi_hal_bt_init() {
     // Explicitly tell that we are in charge of CLK48 domain
     HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
@@ -12,8 +14,9 @@ void furi_hal_bt_init() {
     APPE_Init();
 }
 
-bool furi_hal_bt_init_app(GapOnConnectCallback on_connect_cb, GapOnDisconnectCallback on_disconnect_cb, void* context) {
-    return gap_init(on_connect_cb, on_disconnect_cb, context);
+bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context) {
+    furi_assert(event_cb);
+    return gap_init(event_cb, context);
 }
 
 void furi_hal_bt_start_advertising() {
