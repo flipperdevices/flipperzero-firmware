@@ -116,6 +116,10 @@ static void bt_on_connect_callback(void* context) {
     rpc_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback, bt);
     furi_hal_bt_set_data_event_callbacks(
         bt_on_data_received_callback, bt_on_data_sent_callback, bt);
+    // Update battery level
+    PowerInfo info;
+    power_get_info(bt->power, &info);
+    bt_update_battery_level(bt, info.charge);
 }
 
 // Called from BLE HCI thread
