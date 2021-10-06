@@ -1,6 +1,14 @@
 stages:
   - build
   - test
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: "$CI_COMMIT_BRANCH"
 
 variables:
   IDF_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@${IDF_MIRROR_HOST}/espressif/esp-idf.git
@@ -60,3 +68,16 @@ run_tests:
     - export QEMU_PATH=/opt/qemu/bin/qemu-system-xtensa
     - ./run_test.sh qemu
     - ./run_test.sh host
+
+push_to_the_components_registry:
+  stage: deploy
+  image: python:3.10-alpine
+  tags:
+    - build
+    - internet
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$FORCE_PUSH_COMPONENT == "1"'
+  script:
+    - pip install idf-component-manager
+    - python -m idf_component_manager upload-component --allow-existing --name=esp-serial-flasher --namespace=espressif
