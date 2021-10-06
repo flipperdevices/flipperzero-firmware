@@ -2,8 +2,8 @@ APP_DIR		= $(PROJECT_ROOT)/applications
 LIB_DIR		= $(PROJECT_ROOT)/lib
 
 CFLAGS		+= -I$(APP_DIR)
-C_SOURCES	+= $(shell find $(APP_DIR) -name *.c)
-CPP_SOURCES	+= $(shell find $(APP_DIR) -name *.cpp)
+C_SOURCES	+= $(shell find $(APP_DIR) -name "*.c")
+CPP_SOURCES	+= $(shell find $(APP_DIR) -name "*.cpp")
 
 
 APP_RELEASE ?= 1
@@ -24,7 +24,7 @@ SRV_STORAGE	= 1
 # Apps
 SRV_DESKTOP	= 1
 APP_ARCHIVE	= 1
-APP_GPIO_TEST = 1
+APP_GPIO = 1
 APP_IBUTTON	= 1
 APP_IRDA	= 1
 APP_LF_RFID	= 1
@@ -43,6 +43,7 @@ APP_KEYPAD_TEST = 1
 APP_SD_TEST	= 1
 APP_UNIT_TESTS = 0
 APP_VIBRO_DEMO = 1
+APP_USB_TEST = 1
 endif
 
 
@@ -121,6 +122,14 @@ SRV_GUI		= 1
 endif
 
 
+APP_USB_TEST ?= 0
+ifeq ($(APP_USB_TEST), 1)
+CFLAGS		+= -DAPP_USB_TEST
+SRV_INPUT = 1
+SRV_GUI = 1
+endif 
+
+
 APP_KEYPAD_TEST ?= 0
 ifeq ($(APP_KEYPAD_TEST), 1)
 CFLAGS		+= -DAPP_KEYPAD_TEST
@@ -135,9 +144,9 @@ SRV_GUI		= 1
 endif
 
 
-APP_GPIO_TEST ?= 0
-ifeq ($(APP_GPIO_TEST), 1)
-CFLAGS		+= -DAPP_GPIO_TEST
+APP_GPIO ?= 0
+ifeq ($(APP_GPIO), 1)
+CFLAGS		+= -DAPP_GPIO
 SRV_GUI		= 1
 endif
 
@@ -204,7 +213,7 @@ CFLAGS		+= -DSRV_LOADER
 SRV_GUI		= 1
 # Loader autostart hook
 LOADER_AUTOSTART ?= ""
-ifneq ($(strip $(LOADER_AUTOSTART)),)
+ifneq ($(strip $(LOADER_AUTOSTART)), "")
 CFLAGS		+= -DLOADER_AUTOSTART="\"$(LOADER_AUTOSTART)\""
 endif
 # Loader autostart hook END

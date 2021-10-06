@@ -43,7 +43,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetUid)) {
                 nfc->dev.dev_data.nfc_data = nfc->dev_edit_data;
             }
-            memcpy(&nfc->dev.dev_name, nfc->text_store, strlen(nfc->text_store));
+            strlcpy(nfc->dev.dev_name, nfc->text_store, strlen(nfc->text_store) + 1);
             if(nfc_device_save(&nfc->dev, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 return true;
@@ -60,6 +60,5 @@ void nfc_scene_save_name_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Clear view
-    text_input_set_header_text(nfc->text_input, NULL);
-    text_input_set_result_callback(nfc->text_input, NULL, NULL, NULL, 0, false);
+    text_input_clean(nfc->text_input);
 }
