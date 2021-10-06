@@ -130,7 +130,7 @@ static void power_check_low_battery(Power* power) {
     // Check battery charge and vbus voltage
     if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f)) {
         if(!power->battery_low) {
-            view_dispatcher_set_view_front(power->view_dispatcher);
+            view_dispatcher_send_to_front(power->view_dispatcher);
             view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewOff);
         }
         power->battery_low = true;
