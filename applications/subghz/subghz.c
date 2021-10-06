@@ -132,7 +132,7 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher,
         SubGhzViewVariableItemList,
         variable_item_list_get_view(subghz->variable_item_list));
-    
+
     // Frequency Analyzer
     subghz->subghz_frequency_analyzer = subghz_frequency_analyzer_alloc();
     view_dispatcher_add_view(
