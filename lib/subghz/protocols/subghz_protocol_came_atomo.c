@@ -93,6 +93,22 @@ void subghz_protocol_came_atomo_parse(
                    instance->common.code_min_count_bit_for_found) {
                     instance->common.code_last_found = instance->common.code_found;
                     instance->common.code_last_count_bit = instance->common.code_count_bit;
+                    // uint32_t code_found_hi = instance->common.code_last_found >> 32;
+                    // uint32_t code_found_lo = instance->common.code_last_found & 0x00000000ffffffff;
+
+                    // uint64_t code_found_reverse = subghz_protocol_common_reverse_key(
+                    //     instance->common.code_last_found, instance->common.code_last_count_bit);
+
+                    // uint32_t code_found_reverse_hi = code_found_reverse >> 32;
+                    // uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
+                    // FURI_LOG_I(
+                    //     "ATOMO",
+                    //     "%08lX%08lX  %08lX%08lX  %d",
+                    //     code_found_hi,
+                    //     code_found_lo,
+                    //     code_found_reverse_hi,
+                    //     code_found_reverse_lo,
+                    //     instance->common.code_last_count_bit);
                     if(instance->common.callback)
                         instance->common.callback(
                             (SubGhzProtocolCommon*)instance, instance->common.context);
