@@ -11,7 +11,7 @@ workflow:
     - if: "$CI_COMMIT_BRANCH"
 
 variables:
-  IDF_REPO: https://gitlab-ci-token:${CI_JOB_TOKEN}@${IDF_MIRROR_HOST}/espressif/esp-idf.git
+  IDF_REPO: https://github.com/espressif/esp-idf.git
   STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
   SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
@@ -33,13 +33,15 @@ variables:
   tar -xjf gcc-arm-none-eabi.tar.bz2
   mv gcc-arm-none-eabi-* gcc-arm-none-eabi
 
-before_script:
-  # Use CI Tools
-  - curl -sSL ${CIT_LOADER_URL} | sh
-  - source citools/import_functions
-  - PATH=$CI_PROJECT_DIR/esp-idf/tools:$PATH
+.build_test_template:
+  before_script:
+    # Use CI Tools
+    - curl -sSL ${CIT_LOADER_URL} | sh
+    - source citools/import_functions
+    - PATH=$CI_PROJECT_DIR/esp-idf/tools:$PATH
 
 build_with_idf:
+  extends: .build_test_template
   stage: build
   image: $CI_DOCKER_REGISTRY/esp-env:v4.4-1
   tags:
@@ -58,6 +60,7 @@ build_with_idf:
     - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 .. && cmake --build .
 
 run_tests:
+  extends: .build_test_template
   stage: test
   image: ${CI_DOCKER_REGISTRY}/qemu:esp-develop-20191124
   tags:
