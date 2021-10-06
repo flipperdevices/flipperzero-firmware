@@ -139,6 +139,12 @@ void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_
  */
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
+/** Set current view on top
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ */
+void view_dispatcher_set_view_front(ViewDispatcher* view_dispatcher);
+
 /** Attach ViewDispatcher to GUI
  *
  * @param      view_dispatcher  ViewDispatcher instance
