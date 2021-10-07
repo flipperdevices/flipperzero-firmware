@@ -7,23 +7,20 @@
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
+#include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
 #include <assets_icons.h>
 #include <storage/storage.h>
 
 #include "views/desktop_main.h"
 #include "views/desktop_first_start.h"
-#include "views/desktop_hw_mismatch.h"
 #include "views/desktop_lock_menu.h"
 #include "views/desktop_locked.h"
 #include "views/desktop_debug.h"
 
 #include "scenes/desktop_scene.h"
-
+#include "helpers/desktop_animation.h"
 #include "desktop/desktop_settings/desktop_settings.h"
-
-#define HINT_TIMEOUT_L 2
-#define HINT_TIMEOUT_H 11
 
 typedef enum {
     DesktopViewMain,
@@ -44,7 +41,7 @@ struct Desktop {
     SceneManager* scene_manager;
 
     DesktopFirstStartView* first_start_view;
-    DesktopHwMismatchView* hw_mismatch_view;
+    Popup* hw_mismatch_popup;
     DesktopMainView* main_view;
     DesktopLockMenuView* lock_menu;
     DesktopLockedView* locked_view;
