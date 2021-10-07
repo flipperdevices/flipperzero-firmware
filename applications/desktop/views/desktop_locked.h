@@ -6,7 +6,7 @@
 #include <gui/elements.h>
 #include <furi.h>
 
-#define UNLOCK_RST_TIMEOUT 200
+#define UNLOCK_RST_TIMEOUT 300
 #define UNLOCK_CNT 2 // 3 actually
 
 typedef enum {
@@ -30,10 +30,11 @@ struct DesktopLockedView {
 
 typedef struct {
     IconAnimation* animation;
+    uint32_t hint_expire_at;
+
     uint8_t scene_num;
     int8_t door_left_x;
     int8_t door_right_x;
-    uint8_t hint_timeout;
     bool animation_seq_end;
 
 } DesktopLockedViewModel;

@@ -59,7 +59,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenDebug:
-            scene_manager_next_scene(desktop->scene_manager, DesktopViewDebug);
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
             consumed = true;
             break;
 
@@ -67,6 +67,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
             consumed = true;
             break;
+
         case DesktopMainEventOpenFavorite:
             desktop_settings_load(&desktop->settings);
             desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);

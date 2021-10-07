@@ -22,6 +22,6 @@ uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state);
 
 uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state);
 
-uint32_t dolphin_state_get_level(DolphinState* dolphin_state);
+uint32_t dolphin_state_get_level(uint32_t icounter);
 
-uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, uint32_t level, bool remaining);
+uint32_t dolphin_state_xp_to_levelup(uint32_t icounter, uint32_t level, bool remaining);

@@ -35,6 +35,7 @@ typedef struct {
 struct DolphinState {
     Storage* fs_api;
     DolphinStoreData data;
+    bool dirty;
 };
 
 DolphinState* dolphin_state_alloc() {
@@ -49,8 +50,12 @@ void dolphin_state_free(DolphinState* dolphin_state) {
 }
 
 bool dolphin_state_save(DolphinState* dolphin_state) {
+    if(!dolphin_state->dirty) {
+        return true;
+    }
+
+    FURI_LOG_I("dolphin-state", "State is dirty, saving to \"%s\"", DOLPHIN_STORE_KEY);
     DolphinStore store;
-    FURI_LOG_I("dolphin-state", "Saving state to \"%s\"", DOLPHIN_STORE_KEY);
     // Calculate checksum
     uint8_t* source = (uint8_t*)&dolphin_state->data;
     uint8_t checksum = 0;
@@ -88,7 +93,10 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
     storage_file_close(file);
     storage_file_free(file);
 
+    dolphin_state->dirty = !save_result;
+
     FURI_LOG_I("dolphin-state", "Saved");
+
     return save_result;
 }
 
@@ -153,6 +161,9 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
 
     storage_file_close(file);
     storage_file_free(file);
+
+    dolphin_state->dirty = !load_result;
+
     return load_result;
 }
 
@@ -167,6 +178,8 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     if(icounter >= 0) {
         dolphin_state->data.icounter = icounter;
     }
+
+    dolphin_state->dirty = true;
 }
 
 uint32_t dolphin_state_get_icounter(DolphinState* dolphin_state) {
@@ -177,13 +190,13 @@ uint32_t dolphin_state_get_butthurt(DolphinState* dolphin_state) {
     return dolphin_state->data.butthurt;
 }
 
-uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
+uint32_t dolphin_state_get_level(uint32_t icounter) {
     return 0.5f +
-           sqrtf(1.0f + 8.0f * ((float)dolphin_state->data.icounter / DOLPHIN_LVL_THRESHOLD)) /
+           sqrtf(1.0f + 8.0f * ((float)icounter / DOLPHIN_LVL_THRESHOLD)) /
                2.0f;
 }
 
-uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, uint32_t level, bool remaining) {
+uint32_t dolphin_state_xp_to_levelup(uint32_t icounter, uint32_t level, bool remaining) {
     return (DOLPHIN_LVL_THRESHOLD * level * (level + 1) / 2) -
-           (remaining ? dolphin_state->data.icounter : 0);
+           (remaining ? icounter : 0);
 }

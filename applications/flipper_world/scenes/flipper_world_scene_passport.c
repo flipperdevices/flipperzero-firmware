@@ -19,17 +19,17 @@ const void flipper_world_scene_passport_on_enter(void* context) {
     FlipperPassportView* passport = flipper_world->passport;
 
     Dolphin* dolphin = furi_record_open("dolphin");
-    DolphinState* state = dolphin_get_state(dolphin);
+    DolphinStats state = dolphin_stats(dolphin);
 
     with_view_model(
         passport->view, (FlipperPassportViewModel * model) {
-            model->butthurt = CLAMP(dolphin_state_get_butthurt(state), BUTTHURT_MAX - 1, 0);
-            model->current_level = dolphin_state_get_level(state);
+            model->butthurt = CLAMP(state.butthurt, BUTTHURT_MAX - 1, 0);
+            model->current_level = dolphin_state_get_level(state.icounter);
             uint32_t prev_cap =
-                dolphin_state_xp_to_levelup(state, model->current_level - 1, false);
+                dolphin_state_xp_to_levelup(state.icounter, model->current_level - 1, false);
             model->exp =
-                (dolphin_state_xp_to_levelup(state, model->current_level, true) * 63) /
-                (dolphin_state_xp_to_levelup(state, model->current_level, false) - prev_cap);
+                (dolphin_state_xp_to_levelup(state.icounter, model->current_level, true) * 63) /
+                (dolphin_state_xp_to_levelup(state.icounter, model->current_level, false) - prev_cap);
             model->portrait_level = CLAMP(floor(model->current_level / 14), MOODS_TOTAL - 1, 0);
             model->name = furi_hal_version_get_name_ptr();
             return true;
