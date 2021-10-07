@@ -194,9 +194,11 @@ uint64_t dolphin_state_timestamp() {
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     const DolphinDeedWeight* deed_weight = dolphin_deed_weight(deed);
     int32_t icounter = dolphin_state->data.icounter + deed_weight->icounter;
+    int32_t butthurt = dolphin_state->data.butthurt;
 
     if(icounter >= 0) {
         dolphin_state->data.icounter = icounter;
+        dolphin_state->data.butthurt = MAX(butthurt - deed_weight->icounter, 0);
         dolphin_state->data.timestamp = dolphin_state_timestamp();
     }
 
