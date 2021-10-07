@@ -94,7 +94,11 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:
-            archive_delete_file(browser, browser->path, selected->name);
+            if(favorites) {
+                archive_delete_file(browser, "%s", name);
+            } else {
+                archive_delete_file(browser, "%s/%s", path, name);
+            }
             archive_show_file_menu(browser, false);
             consumed = true;
             break;

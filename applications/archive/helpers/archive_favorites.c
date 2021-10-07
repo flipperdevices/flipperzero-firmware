@@ -86,7 +86,7 @@ bool archive_favorites_delete(const char* format, ...) {
             }
 
             if(string_search_str(buffer, filename)) {
-                archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\r\n", string_get_cstr(buffer));
+                archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(buffer));
             }
         }
     }
@@ -166,7 +166,7 @@ bool archive_favorites_rename(const char* file_path, const char* src, const char
 
             archive_file_append(
                 ARCHIVE_FAV_TEMP_PATH,
-                "%s\r\n",
+                "%s\n",
                 string_search(buffer, path) ? string_get_cstr(buffer) : dst);
         }
     }
@@ -186,5 +186,5 @@ bool archive_favorites_rename(const char* file_path, const char* src, const char
 void archive_add_to_favorites(const char* file_path) {
     furi_assert(file_path);
 
-    archive_file_append(ARCHIVE_FAV_PATH, "%s\r\n", file_path);
+    archive_file_append(ARCHIVE_FAV_PATH, "%s\n", file_path);
 }
