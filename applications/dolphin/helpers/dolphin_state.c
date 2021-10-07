@@ -221,13 +221,10 @@ uint64_t dolphin_state_get_timestamp(DolphinState* dolphin_state) {
     return dolphin_state->data.timestamp;
 }
 
-uint32_t dolphin_state_get_level(DolphinState* dolphin_state) {
-    return 0.5f +
-           sqrtf(1.0f + 8.0f * ((float)dolphin_state->data.icounter / DOLPHIN_LVL_THRESHOLD)) /
-               2.0f;
+uint32_t dolphin_state_get_level(uint32_t icounter) {
+    return 0.5f + sqrtf(1.0f + 8.0f * ((float)icounter / DOLPHIN_LVL_THRESHOLD)) / 2.0f;
 }
 
-uint32_t dolphin_state_xp_to_levelup(DolphinState* dolphin_state, uint32_t level, bool remaining) {
-    return (DOLPHIN_LVL_THRESHOLD * level * (level + 1) / 2) -
-           (remaining ? dolphin_state->data.icounter : 0);
+uint32_t dolphin_state_xp_to_levelup(uint32_t icounter, uint32_t level, bool remaining) {
+    return (DOLPHIN_LVL_THRESHOLD * level * (level + 1) / 2) - (remaining ? icounter : 0);
 }

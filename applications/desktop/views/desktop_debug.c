@@ -56,7 +56,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             "%s [%s]",
             version_get_version(ver),
             version_get_builddate(ver));
-        canvas_draw_str(canvas, 5, 33, buffer);
+        canvas_draw_str(canvas, 5, 32, buffer);
 
         snprintf(
             buffer,
@@ -68,16 +68,22 @@ void desktop_debug_render(Canvas* canvas, void* model) {
 
         snprintf(
             buffer, sizeof(buffer), "[%s] %s", version_get_target(ver), version_get_gitbranch(ver));
-        canvas_draw_str(canvas, 5, 53, buffer);
+        canvas_draw_str(canvas, 5, 54, buffer);
 
     } else {
         char buffer[64];
+        uint32_t current_lvl = dolphin_state_get_level(m->icounter);
+        uint32_t remaining = dolphin_state_xp_to_levelup(m->icounter, current_lvl, true);
 
         canvas_set_font(canvas, FontSecondary);
         snprintf(buffer, 64, "Icounter: %ld  Butthurt %ld", m->icounter, m->butthurt);
-        canvas_draw_str(canvas, 5, 26, buffer);
+        canvas_draw_str(canvas, 5, 23, buffer);
+
+        snprintf(buffer, 64, "Level: %ld  To level up: %ld", current_lvl, remaining);
+        canvas_draw_str(canvas, 5, 33, buffer);
+
         snprintf(buffer, 64, "%s", asctime(localtime((const time_t*)&m->timestamp)));
-        canvas_draw_str(canvas, 5, 40, buffer);
+        canvas_draw_str(canvas, 5, 43, buffer);
         canvas_draw_str(canvas, 0, 53, "[< >] icounter value   [ok] save");
     }
 }
