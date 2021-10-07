@@ -108,8 +108,12 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
 
     File* file = storage_file_alloc(dolphin_state->fs_api);
     bool load_result = storage_file_open(file, DOLPHIN_STORE_KEY, FSAM_READ, FSOM_OPEN_EXISTING);
-
-    if(load_result) {
+    if(!load_result) {
+        FURI_LOG_E(
+            "dolphin-state",
+            "Load failed. Storage returned: %s",
+            storage_file_get_error_desc(file));
+    } else {
         uint16_t bytes_count = storage_file_read(file, &store, sizeof(DolphinStore));
 
         if(bytes_count != sizeof(DolphinStore)) {
@@ -118,12 +122,8 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
     }
 
     if(!load_result) {
-        FURI_LOG_E(
-            "dolphin-state",
-            "Load failed. Storage returned: %s",
-            storage_file_get_error_desc(file));
+        FURI_LOG_E("dolphin-state", "DolphinStore size mismatch");
     } else {
-        FURI_LOG_I("dolphin-state", "State loaded, verifying header");
         if(store.header.magic == DOLPHIN_STORE_HEADER_MAGIC &&
            store.header.version == DOLPHIN_STORE_HEADER_VERSION) {
             FURI_LOG_I(
@@ -151,7 +151,7 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
         } else {
             FURI_LOG_E(
                 "dolphin-state",
-                "Magic(%d != %d) and Version(%d != %d) mismatch",
+                "Magic(%d != %d) or Version(%d != %d) mismatch",
                 store.header.magic,
                 DOLPHIN_STORE_HEADER_MAGIC,
                 store.header.version,
