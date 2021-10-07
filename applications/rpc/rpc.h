@@ -14,4 +14,3 @@ void rpc_close_session(RpcSession* session);
 void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback, void* context);
 size_t
     rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout);
-

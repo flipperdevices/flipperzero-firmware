@@ -23,4 +23,3 @@ void* rpc_system_status_alloc(RpcInstance* rpc);
 void* rpc_system_storage_alloc(RpcInstance* rpc);
 void rpc_system_storage_free(void* ctx);
 void rpc_print_message(const PB_Main* message);
-

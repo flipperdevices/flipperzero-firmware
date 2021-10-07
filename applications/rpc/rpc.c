@@ -65,25 +65,36 @@ struct RpcInstance {
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg);
 
-static size_t rpc_sprint_element(char* str, size_t str_size, const char* prefix, const PB_Storage_Element* element, size_t elements_size) {
+static size_t rpc_sprint_element(
+    char* str,
+    size_t str_size,
+    const char* prefix,
+    const PB_Storage_Element* element,
+    size_t elements_size) {
     size_t cnt = 0;
 
-    for (int i = 0; i < elements_size; ++i, ++element) {
-        cnt += snprintf(str + cnt, str_size - cnt, "%s[%c] size: %5ld",
-                prefix,
-                element->type == PB_Storage_Element_FileType_DIR ? 'd' : 'f',
-                element->size);
+    for(int i = 0; i < elements_size; ++i, ++element) {
+        cnt += snprintf(
+            str + cnt,
+            str_size - cnt,
+            "%s[%c] size: %5ld",
+            prefix,
+            element->type == PB_Storage_Element_FileType_DIR ? 'd' : 'f',
+            element->size);
 
-        if (element->name) {
+        if(element->name) {
             cnt += snprintf(str + cnt, str_size - cnt, " \'%s\'", element->name);
         }
 
-        if (element->data && element->data->size) {
-            cnt += snprintf(str + cnt, str_size - cnt, " (%d):\'%.*s%s\'",
-                    element->data->size,
-                    MIN(element->data->size, 30),
-                    element->data->bytes,
-                    element->data->size > 30 ? "..." : "");
+        if(element->data && element->data->size) {
+            cnt += snprintf(
+                str + cnt,
+                str_size - cnt,
+                " (%d):\'%.*s%s\'",
+                element->data->size,
+                MIN(element->data->size, 30),
+                element->data->bytes,
+                element->data->size > 30 ? "..." : "");
         }
 
         cnt += snprintf(str + cnt, str_size - cnt, "\r\n");
@@ -92,18 +103,18 @@ static size_t rpc_sprint_element(char* str, size_t str_size, const char* prefix,
     return cnt;
 }
 
-#define ADD_STR(s, c, ...)                      \
-    snprintf(s + c, sizeof(s) - c, ##__VA_ARGS__);
+#define ADD_STR(s, c, ...) snprintf(s + c, sizeof(s) - c, ##__VA_ARGS__);
 
-#define ADD_STR_ELEMENT(s, c, ...)              \
-    rpc_sprint_element(s + c, sizeof(s) - c, ##__VA_ARGS__);
+#define ADD_STR_ELEMENT(s, c, ...) rpc_sprint_element(s + c, sizeof(s) - c, ##__VA_ARGS__);
 
 void rpc_print_message(const PB_Main* message) {
     char str[500];
     size_t cnt = 0;
 
-    cnt += snprintf(str + cnt, sizeof(str) - cnt,
-            "PB_Main: {\r\n\tresult: %d cmd_id: %ld (%s)\r\n",
+    cnt += snprintf(
+        str + cnt,
+        sizeof(str) - cnt,
+        "PB_Main: {\r\n\tresult: %d cmd_id: %ld (%s)\r\n",
         message->command_status,
         message->command_id,
         message->not_last ? "not_last" : "last");
@@ -124,7 +135,7 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_storage_delete_request_tag: {
         cnt += ADD_STR(str, cnt, "\tdelete {\r\n");
         const char* path = message->content.storage_delete_request.path;
-        if (path) {
+        if(path) {
             cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
         }
         break;
@@ -135,7 +146,7 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_storage_list_request_tag: {
         cnt += ADD_STR(str, cnt, "\tlist_request {\r\n");
         const char* path = message->content.storage_list_request.path;
-        if (path) {
+        if(path) {
             cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
         }
         break;
@@ -143,7 +154,7 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_storage_read_request_tag: {
         cnt += ADD_STR(str, cnt, "\tread_request {\r\n");
         const char* path = message->content.storage_read_request.path;
-        if (path) {
+        if(path) {
             cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
         }
         break;
@@ -151,19 +162,21 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_storage_write_request_tag: {
         cnt += ADD_STR(str, cnt, "\twrite_request {\r\n");
         const char* path = message->content.storage_write_request.path;
-        if (path) {
+        if(path) {
             cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
         }
-        if (message->content.storage_write_request.has_storage_element) {
-            const PB_Storage_Element* element = &message->content.storage_write_request.storage_element;
+        if(message->content.storage_write_request.has_storage_element) {
+            const PB_Storage_Element* element =
+                &message->content.storage_write_request.storage_element;
             cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", element, 1);
         }
         break;
     }
     case PB_Main_storage_read_response_tag:
         cnt += ADD_STR(str, cnt, "\tread_response {\r\n");
-        if (message->content.storage_read_response.has_storage_element) {
-            const PB_Storage_Element* element = &message->content.storage_read_response.storage_element;
+        if(message->content.storage_read_response.has_storage_element) {
+            const PB_Storage_Element* element =
+                &message->content.storage_read_response.storage_element;
             cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", element, 1);
         }
         break;
@@ -305,20 +318,21 @@ void rpc_encode_and_send(RpcInstance* rpc, PB_Main* main_message) {
 
 #if DEBUG_PRINT
         printf("\r\nREPONSE DEC(%d): {", ostream.bytes_written);
-        for (int i = 0; i < ostream.bytes_written; ++i) {
+        for(int i = 0; i < ostream.bytes_written; ++i) {
             printf("%d, ", buffer[i]);
         }
         printf("}\r\n");
 
         printf("REPONSE HEX(%d): {", ostream.bytes_written);
-        for (int i = 0; i < ostream.bytes_written; ++i) {
-            printf("%02X" , buffer[i]);
+        for(int i = 0; i < ostream.bytes_written; ++i) {
+            printf("%02X", buffer[i]);
         }
         printf("}\r\n\r\n");
-#endif  // DEBUG_PRINT
+#endif // DEBUG_PRINT
 
         if(session->send_bytes_callback) {
-            session->send_bytes_callback(session->send_bytes_context, buffer, ostream.bytes_written);
+            session->send_bytes_callback(
+                session->send_bytes_context, buffer, ostream.bytes_written);
         }
         osMutexRelease(session->send_bytes_mutex);
     }
@@ -408,4 +422,3 @@ void rpc_encode_and_send_empty(RpcInstance* rpc, uint32_t command_id, PB_Command
     rpc_encode_and_send(rpc, &message);
     pb_release(&PB_Main_msg, &message);
 }
-
