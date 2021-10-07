@@ -10,7 +10,9 @@ void archive_update_offset(ArchiveBrowserView* browser) {
 
             if(array_size > 3 && model->idx >= array_size - 1) {
                 model->list_offset = model->idx - 3;
-            } else if(model->last_offset != model->list_offset && model->tab_idx == model->last_tab) {
+            } else if(
+                model->last_offset && model->last_offset != model->list_offset &&
+                model->tab_idx == model->last_tab) {
                 model->list_offset = model->last_offset;
                 model->last_offset = !model->last_offset;
             } else if(model->list_offset < model->idx - bounds) {
