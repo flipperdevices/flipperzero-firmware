@@ -2,6 +2,7 @@
 
 #include "usb.h"
 
+/** USB device modes */
 typedef enum {
     UsbModeNone,
     UsbModeVcpSingle,
@@ -12,10 +13,20 @@ typedef enum {
     UsbModesNum,
 } UsbMode;
 
+/** USB device low-level initialization
+ */
 void furi_hal_usb_init();
 
+/** Set USB device configuration
+ *
+ * @param      mode         new USB device mode
+ */
 void furi_hal_usb_set_config(UsbMode mode);
 
+/** Disable USB device
+ */
 void furi_hal_usb_disable();
 
+/** Enable USB device
+ */
 void furi_hal_usb_enable();
