@@ -11,9 +11,27 @@ struct SubGhzFrequencyAnalyzerWorker {
     uint8_t count_repet;
     FrequencyRSSI frequency_rssi_buf;
 
+    float filVal;
+
     SubGhzFrequencyAnalyzerWorkerPairCallback pair_callback;
     void* context;
 };
+
+// running average with adaptive coefficient
+static uint32_t subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
+    SubGhzFrequencyAnalyzerWorker* instance,
+    uint32_t newVal) {
+    float k;
+    float newValFloat = newVal;
+    // the sharpness of the filter depends on the absolute value of the difference
+    if(abs(newValFloat - instance->filVal) > 500000)
+        k = 0.9;
+    else
+        k = 0.03;
+
+    instance->filVal += (newValFloat - instance->filVal) * k;
+    return (uint32_t)instance->filVal;
+}
 
 /** Worker thread
  * 
@@ -65,25 +83,21 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         }
 
         if(frequency_rssi.rssi > -90.0) {
-            instance->count_repet = 25;
-            if(instance->frequency_rssi_buf.frequency) {
-                instance->frequency_rssi_buf.frequency =
-                    (instance->frequency_rssi_buf.frequency + frequency_rssi.frequency) / 2;
-
-            } else {
-                instance->frequency_rssi_buf.frequency = frequency_rssi.frequency;
+            instance->count_repet = 10;
+            if(instance->filVal) {
+                frequency_rssi.frequency =
+                    subghz_frequency_analyzer_worker_expRunningAverageAdaptive(
+                        instance, frequency_rssi.frequency);
             }
             if(instance->pair_callback)
                 instance->pair_callback(
-                    instance->context,
-                    instance->frequency_rssi_buf.frequency,
-                    frequency_rssi.rssi);
+                    instance->context, frequency_rssi.frequency, frequency_rssi.rssi);
 
         } else {
             if(instance->count_repet > 0) {
                 instance->count_repet--;
             } else {
-                instance->frequency_rssi_buf.frequency = 0;
+                instance->filVal = 0;
                 if(instance->pair_callback) instance->pair_callback(instance->context, 0, 0);
             }
         }
@@ -142,6 +156,7 @@ void subghz_frequency_analyzer_worker_stop(SubGhzFrequencyAnalyzerWorker* instan
     furi_assert(instance->worker_running);
 
     //Stop CC1101
+    furi_hal_subghz_idle();
     furi_hal_subghz_sleep();
 
     instance->worker_running = false;
