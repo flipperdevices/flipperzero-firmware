@@ -172,7 +172,7 @@ void dolphin_state_clear(DolphinState* dolphin_state) {
     memset(&dolphin_state->data, 0, sizeof(DolphinStoreData));
 }
 
-static uint64_t dolphin_state_timestamp() {
+uint64_t dolphin_state_timestamp() {
     RTC_TimeTypeDef time;
     RTC_DateTypeDef date;
     struct tm current;
@@ -200,6 +200,12 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
         dolphin_state->data.timestamp = dolphin_state_timestamp();
     }
 
+    dolphin_state->dirty = true;
+}
+
+void dolphin_state_butthurted(DolphinState* dolphin_state) {
+    dolphin_state->data.butthurt++;
+    dolphin_state->data.timestamp = dolphin_state_timestamp();
     dolphin_state->dirty = true;
 }
 

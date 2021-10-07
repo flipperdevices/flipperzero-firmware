@@ -1,6 +1,6 @@
 #include "dolphin_i.h"
 #include <furi.h>
-
+#define DOLPHIN_TIMEGATE 86400 // one day
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
@@ -77,6 +77,18 @@ void dolphin_event_release(Dolphin* dolphin, DolphinEvent* event) {
     }
 }
 
+static void dolphin_check_butthurt(DolphinState* state) {
+    furi_assert(state);
+
+    float diff_time = difftime(dolphin_state_get_timestamp(state), dolphin_state_timestamp());
+    FURI_LOG_I("dolphin-state", "Butthurt check, time diff %.0f", fabs(diff_time));
+    if((fabs(diff_time)) > DOLPHIN_TIMEGATE) {
+        // increase butthurt
+        FURI_LOG_I("dolphin-state", "Increasing butthurt");
+        dolphin_state_butthurted(state);
+    }
+}
+
 int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create("dolphin", dolphin);
@@ -97,6 +109,7 @@ int32_t dolphin_srv(void* p) {
             }
             dolphin_event_release(dolphin, &event);
         } else {
+            dolphin_check_butthurt(dolphin->state);
             dolphin_state_save(dolphin->state);
         }
     }

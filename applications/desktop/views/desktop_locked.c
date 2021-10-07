@@ -18,7 +18,7 @@ void locked_view_timer_callback(void* context) {
 }
 
 // temporary locked screen animation managment
-static void desktop_locked_set_dolphin_animation(DesktopLockedView* locked_view) {
+void desktop_locked_set_dolphin_animation(DesktopLockedView* locked_view) {
     with_view_model(
         locked_view->view, (DesktopLockedViewModel * model) {
             if(model->animation) icon_animation_free(model->animation);
@@ -175,7 +175,6 @@ DesktopLockedView* desktop_locked_alloc() {
     view_set_enter_callback(locked_view->view, desktop_locked_enter);
     view_set_exit_callback(locked_view->view, desktop_locked_exit);
 
-    desktop_locked_set_dolphin_animation(locked_view);
     return locked_view;
 }
 

@@ -101,8 +101,6 @@ DesktopMainView* desktop_main_alloc() {
     view_set_enter_callback(main_view->view, desktop_main_enter);
     view_set_exit_callback(main_view->view, desktop_main_exit);
 
-    desktop_main_switch_dolphin_animation(main_view);
-
     return main_view;
 }
 
