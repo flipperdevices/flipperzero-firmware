@@ -123,6 +123,22 @@ void rpc_print_message(const PB_Main* message) {
         /* not implemented yet */
         cnt += ADD_STR(str, cnt, "\tNOT_IMPLEMENTED (%d) {\r\n", message->which_content);
         break;
+    case PB_Main_storage_md5sum_request_tag: {
+        cnt += ADD_STR(str, cnt, "\tmd5sum_request {\r\n");
+        const char* path = message->content.storage_md5sum_request.path;
+        if(path) {
+            cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
+        }
+        break;
+    }
+    case PB_Main_storage_md5sum_response_tag: {
+        cnt += ADD_STR(str, cnt, "\tmd5sum_response {\r\n");
+        const char* path = message->content.storage_md5sum_response.md5sum;
+        if(path) {
+            cnt += ADD_STR(str, cnt, "\t\tmd5sum: %s\r\n", path);
+        }
+        break;
+    }
     case PB_Main_ping_request_tag:
         cnt += ADD_STR(str, cnt, "\tping_request {\r\n");
         break;

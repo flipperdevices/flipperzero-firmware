@@ -9,6 +9,7 @@
 #include "storage/filesystem-api-defines.h"
 #include "storage/storage.h"
 #include <stdint.h>
+#include <lib/toolbox/md5.h>
 
 #define RPC_TAG "RPC_STORAGE"
 #define MAX_NAME_LENGTH 255
@@ -304,7 +305,58 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
     RpcStorageSystem* rpc_storage = context;
     rpc_system_storage_reset_state(rpc_storage, true);
 
-    rpc_encode_and_send_empty(rpc_storage->rpc, request->command_id, PB_CommandStatus_OK);
+    const char* filename = request->content.storage_md5sum_request.path;
+    if(!filename) {
+        rpc_encode_and_send_empty(
+            rpc_storage->rpc, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+        return;
+    }
+
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
+
+    if(storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        const uint16_t read_size = 512;
+        const uint8_t hash_size = 16;
+        uint8_t* data = malloc(read_size);
+        uint8_t* hash = malloc(sizeof(uint8_t) * hash_size);
+        md5_context* md5_ctx = malloc(sizeof(md5_context));
+
+        md5_starts(md5_ctx);
+        while(true) {
+            uint16_t readed_size = storage_file_read(file, data, read_size);
+            if(readed_size == 0) break;
+            md5_update(md5_ctx, data, readed_size);
+        }
+        md5_finish(md5_ctx, hash);
+        free(md5_ctx);
+
+        PB_Main response = {
+            .command_id = request->command_id,
+            .command_status = PB_CommandStatus_OK,
+            .which_content = PB_Main_storage_md5sum_response_tag,
+            .not_last = false,
+        };
+
+        char* md5sum = response.content.storage_md5sum_response.md5sum;
+        size_t md5sum_size = sizeof(response.content.storage_md5sum_response.md5sum);
+        furi_assert(hash_size <= ((md5sum_size - 1) / 2));
+        for(uint8_t i = 0; i < hash_size; i++) {
+            md5sum += sprintf(md5sum, "%02x", hash[i]);
+        }
+
+        free(hash);
+        free(data);
+        storage_file_close(file);
+        rpc_encode_and_send(rpc_storage->rpc, &response);
+    } else {
+        rpc_encode_and_send_empty(
+            rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
+    }
+
+    storage_file_free(file);
+
+    furi_record_close("storage");
 }
 
 void* rpc_system_storage_alloc(RpcInstance* rpc) {
