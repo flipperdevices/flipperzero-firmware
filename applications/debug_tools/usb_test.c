@@ -25,7 +25,6 @@ typedef enum {
     UsbTestSubmenuIndexHidU2F,
 
     UsbTestSubmenuIndexHidBadUsb,
-    UsbTestSubmenuIndexHidMouse,
 } SubmenuIndex;
 
 static void keyboard_print_task(void* context);
@@ -50,12 +49,12 @@ void usb_test_submenu_callback(void* context, uint32_t index) {
             app->thread = osThreadNew(keyboard_print_task, (void*)app, &app->thread_attr);
         else if(eTaskGetState(app->thread) == eDeleted)
             app->thread = osThreadNew(keyboard_print_task, (void*)app, &app->thread_attr);
-    } else if(index == UsbTestSubmenuIndexHidMouse) {
     }
 }
 
 static void keyboard_print_task(void* context) {
     //UsbTestApp* app = context;
+    FURI_LOG_I("BadUSB", "Start");
     File* script_file = storage_file_alloc(furi_record_open("storage"));
 
     if(storage_file_open(script_file, "/ext/badusb.txt", FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -64,8 +63,8 @@ static void keyboard_print_task(void* context) {
         do {
             ret = storage_file_read(script_file, buffer, 16);
             for(uint16_t i = 0; i < ret; i++) {
-                furi_hal_hid_kb_press(HID_ASCII_TO_KEY(buffer[i]));
-                furi_hal_hid_kb_release(HID_ASCII_TO_KEY(buffer[i]));
+                if(furi_hal_hid_kb_press(HID_ASCII_TO_KEY(buffer[i])) == false) break;
+                if(furi_hal_hid_kb_release(HID_ASCII_TO_KEY(buffer[i])) == false) break;
             }
         } while(ret > 0);
     } else {
@@ -74,6 +73,8 @@ static void keyboard_print_task(void* context) {
     furi_hal_hid_kb_release_all();
     storage_file_close(script_file);
     storage_file_free(script_file);
+
+    FURI_LOG_I("BadUSB", "End");
 
     osThreadExit();
 }
@@ -108,19 +109,13 @@ UsbTestApp* usb_test_app_alloc() {
     submenu_add_item(
         app->submenu, "HID KB+Mouse", UsbTestSubmenuIndexHid, usb_test_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "TODO: HID U2F", UsbTestSubmenuIndexHidU2F, usb_test_submenu_callback, app);
-    submenu_add_item(
         app->submenu,
         "[HID] Send script",
         UsbTestSubmenuIndexHidBadUsb,
         usb_test_submenu_callback,
         app);
     submenu_add_item(
-        app->submenu,
-        "[HID] Mouse demo",
-        UsbTestSubmenuIndexHidMouse,
-        usb_test_submenu_callback,
-        app);
+        app->submenu, "TODO: HID U2F", UsbTestSubmenuIndexHidU2F, usb_test_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_test_exit);
     view_dispatcher_add_view(app->view_dispatcher, 0, submenu_get_view(app->submenu));
 

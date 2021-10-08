@@ -254,48 +254,56 @@ static const uint16_t hid_asciimap[] = {
 #define HID_ASCII_TO_KEY(x) (((uint8_t)x < 128) ? (hid_asciimap[(uint8_t)x]) : KEY_NONE)
 
 /** HID mouse buttons */
-#define HID_MOUSE_BTN_LEFT          (1 << 0)
-#define HID_MOUSE_BTN_WHEEL         (1 << 1)
-#define HID_MOUSE_BTN_RIGHT         (1 << 2)
+enum HidMouseButtons {
+    HID_MOUSE_BTN_LEFT      = (1 << 0),
+    HID_MOUSE_BTN_RIGHT     = (1 << 1),
+    HID_MOUSE_BTN_WHEEL     = (1 << 2),
+};
+
+/** Get USB HID connection state
+ *
+ * @return      true / false
+ */
+bool furi_hal_hid_is_connected();
 
 /** Set the following key to pressed state and send HID report
  *
  * @param      button  key code
  */
-void furi_hal_hid_kb_press(uint16_t button);
+bool furi_hal_hid_kb_press(uint16_t button);
 
 /** Set the following key to released state and send HID report
  *
  * @param      button  key code
  */
-void furi_hal_hid_kb_release(uint16_t button);
+bool furi_hal_hid_kb_release(uint16_t button);
 
 /** Clear all pressed keys and send HID report
  *
  */
-void furi_hal_hid_kb_release_all();
+bool furi_hal_hid_kb_release_all();
 
 /** Set mouse movement and send HID report
  *
  * @param      dx  x coordinate delta
  * @param      dy  y coordinate delta
  */
-void furi_hal_hid_mouse_move(int8_t dx, int8_t dy);
+bool furi_hal_hid_mouse_move(int8_t dx, int8_t dy);
 
 /** Set mouse button to pressed state and send HID report
  *
  * @param      button  key code
  */
-void furi_hal_hid_mouse_press(uint8_t button);
+bool furi_hal_hid_mouse_press(uint8_t button);
 
 /** Set mouse button to released state and send HID report
  *
  * @param      button  key code
  */
-void furi_hal_hid_mouse_release(uint8_t button);
+bool furi_hal_hid_mouse_release(uint8_t button);
 
 /** Set mouse wheel position and send HID report
  *
  * @param      delta  number of scroll steps
  */
-void furi_hal_hid_mouse_scroll(int8_t delta);
+bool furi_hal_hid_mouse_scroll(int8_t delta);

@@ -25,12 +25,17 @@ struct HidConfigDescriptor {
     struct HidIadDescriptor             iad_0;
 } __attribute__((packed));
 
+enum HidReportId {
+    ReportIdKeyboard = 1,
+    ReportIdMouse = 2,
+};
+
 /* HID report: keyboard+mouse */
 static const uint8_t hid_report_desc[] = {
     HID_USAGE_PAGE(HID_PAGE_DESKTOP),
     HID_USAGE(HID_DESKTOP_KEYBOARD),
     HID_COLLECTION(HID_APPLICATION_COLLECTION),
-        HID_REPORT_ID(1),
+        HID_REPORT_ID(ReportIdKeyboard),
         HID_USAGE_PAGE(HID_DESKTOP_KEYPAD),
         HID_USAGE_MINIMUM(HID_KEYBOARD_L_CTRL),
         HID_USAGE_MAXIMUM(HID_KEYBOARD_R_GUI),
@@ -56,7 +61,7 @@ static const uint8_t hid_report_desc[] = {
     HID_COLLECTION(HID_APPLICATION_COLLECTION),
         HID_USAGE(HID_DESKTOP_POINTER),
         HID_COLLECTION(HID_PHYSICAL_COLLECTION),
-            HID_REPORT_ID(2),
+            HID_REPORT_ID(ReportIdMouse),
             HID_USAGE_PAGE(HID_PAGE_BUTTON),
             HID_USAGE_MINIMUM(1),
             HID_USAGE_MAXIMUM(3),
@@ -182,12 +187,18 @@ static void hid_deinit(usbd_device *dev);
 static void hid_on_wakeup(usbd_device *dev);
 static void hid_on_suspend(usbd_device *dev);
 
+static bool hid_send_report(uint8_t report_id);
 static usbd_respond hid_ep_config (usbd_device *dev, uint8_t cfg);
 static usbd_respond hid_control (usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback);
 static usbd_device* usb_dev;
 static osSemaphoreId_t hid_semaphore = NULL;
+static bool hid_connected = false;
 
-void furi_hal_hid_kb_press(uint16_t button) {
+bool furi_hal_hid_is_connected() {
+    return hid_connected;
+}
+
+bool furi_hal_hid_kb_press(uint16_t button) {
     for (uint8_t key_nb = 0; key_nb < HID_KB_MAX_KEYS; key_nb++) {
         if (hid_report.keyboard.btn[key_nb] == 0) {
             hid_report.keyboard.btn[key_nb] = button & 0xFF;
@@ -195,11 +206,10 @@ void furi_hal_hid_kb_press(uint16_t button) {
         }
     }
     hid_report.keyboard.mods |= (button >> 8);
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.keyboard, sizeof(hid_report.keyboard));
+    return hid_send_report(ReportIdKeyboard);
 }
 
-void furi_hal_hid_kb_release(uint16_t button) {
+bool furi_hal_hid_kb_release(uint16_t button) {
     for (uint8_t key_nb = 0; key_nb < HID_KB_MAX_KEYS; key_nb++) {
         if (hid_report.keyboard.btn[key_nb] == (button & 0xFF)) {
             hid_report.keyboard.btn[key_nb] = 0;
@@ -207,45 +217,41 @@ void furi_hal_hid_kb_release(uint16_t button) {
         }
     }
     hid_report.keyboard.mods &= ~(button >> 8);
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.keyboard, sizeof(hid_report.keyboard));
+    return hid_send_report(ReportIdKeyboard);
 }
 
-void furi_hal_hid_kb_release_all() {
+bool furi_hal_hid_kb_release_all() {
     for (uint8_t key_nb = 0; key_nb < HID_KB_MAX_KEYS; key_nb++) {
         hid_report.keyboard.btn[key_nb] = 0;
     }
     hid_report.keyboard.mods = 0;
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.keyboard, sizeof(hid_report.keyboard));
+    return hid_send_report(ReportIdKeyboard);
 }
 
-void furi_hal_hid_mouse_move(int8_t dx, int8_t dy) {
+bool furi_hal_hid_mouse_move(int8_t dx, int8_t dy) {
     hid_report.mouse.x = dx;
     hid_report.mouse.y = dy;
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+    bool state = hid_send_report(ReportIdMouse);
     hid_report.mouse.x = 0;
     hid_report.mouse.y = 0;
+    return state;
 }
 
-void furi_hal_hid_mouse_press(uint8_t button) {
+bool furi_hal_hid_mouse_press(uint8_t button) {
     hid_report.mouse.btn |= button;
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+    return hid_send_report(ReportIdMouse);
 }
 
-void furi_hal_hid_mouse_release(uint8_t button) {
+bool furi_hal_hid_mouse_release(uint8_t button) {
     hid_report.mouse.btn &= ~button;
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+    return hid_send_report(ReportIdMouse);
 }
 
-void furi_hal_hid_mouse_scroll(int8_t delta) {
-    hid_report.mouse.wheel = delta;    
-    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
-    usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+bool furi_hal_hid_mouse_scroll(int8_t delta) {
+    hid_report.mouse.wheel = delta;
+    bool state = hid_send_report(ReportIdMouse);
     hid_report.mouse.wheel = 0;
+    return state;
 }
 
 struct UsbInterface usb_hid = {
@@ -267,8 +273,8 @@ static void hid_init(usbd_device* dev, struct UsbInterface* intf) {
     if (hid_semaphore == NULL)
         hid_semaphore = osSemaphoreNew(1, 1, NULL);
     usb_dev = dev;
-    hid_report.keyboard.report_id = 1;
-    hid_report.mouse.report_id = 2;
+    hid_report.keyboard.report_id = ReportIdKeyboard;
+    hid_report.mouse.report_id = ReportIdMouse;
 
     usbd_reg_config(dev, hid_ep_config);
     usbd_reg_control(dev, hid_control);    
@@ -282,9 +288,30 @@ static void hid_deinit(usbd_device *dev) {
 }
 
 static void hid_on_wakeup(usbd_device *dev) {
+    hid_connected = true;
 }
 
 static void hid_on_suspend(usbd_device *dev) {
+    if (hid_connected == true) {
+        hid_connected = false;
+        osSemaphoreRelease(hid_semaphore);
+    }
+}
+
+static bool hid_send_report(uint8_t report_id)
+{
+    if ((hid_semaphore == NULL) || (hid_connected == false))
+        return false;
+
+    furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
+    if (hid_connected == true) {
+        if (report_id == ReportIdKeyboard)
+            usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.keyboard, sizeof(hid_report.keyboard));
+        else
+            usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+        return true;
+    }
+    return false;
 }
 
 static void hid_ep_callback(usbd_device *dev, uint8_t event, uint8_t ep) {
