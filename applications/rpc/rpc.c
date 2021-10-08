@@ -65,36 +65,36 @@ struct RpcInstance {
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg);
 
-static size_t rpc_sprint_element(
+static size_t rpc_sprint_msg_file(
     char* str,
     size_t str_size,
     const char* prefix,
-    const PB_Storage_Element* element,
-    size_t elements_size) {
+    const PB_Storage_File* msg_file,
+    size_t msg_files_size) {
     size_t cnt = 0;
 
-    for(int i = 0; i < elements_size; ++i, ++element) {
+    for(int i = 0; i < msg_files_size; ++i, ++msg_file) {
         cnt += snprintf(
             str + cnt,
             str_size - cnt,
             "%s[%c] size: %5ld",
             prefix,
-            element->type == PB_Storage_Element_FileType_DIR ? 'd' : 'f',
-            element->size);
+            msg_file->type == PB_Storage_File_FileType_DIR ? 'd' : 'f',
+            msg_file->size);
 
-        if(element->name) {
-            cnt += snprintf(str + cnt, str_size - cnt, " \'%s\'", element->name);
+        if(msg_file->name) {
+            cnt += snprintf(str + cnt, str_size - cnt, " \'%s\'", msg_file->name);
         }
 
-        if(element->data && element->data->size) {
+        if(msg_file->data && msg_file->data->size) {
             cnt += snprintf(
                 str + cnt,
                 str_size - cnt,
                 " (%d):\'%.*s%s\'",
-                element->data->size,
-                MIN(element->data->size, 30),
-                element->data->bytes,
-                element->data->size > 30 ? "..." : "");
+                msg_file->data->size,
+                MIN(msg_file->data->size, 30),
+                msg_file->data->bytes,
+                msg_file->data->size > 30 ? "..." : "");
         }
 
         cnt += snprintf(str + cnt, str_size - cnt, "\r\n");
@@ -105,7 +105,7 @@ static size_t rpc_sprint_element(
 
 #define ADD_STR(s, c, ...) snprintf(s + c, sizeof(s) - c, ##__VA_ARGS__);
 
-#define ADD_STR_ELEMENT(s, c, ...) rpc_sprint_element(s + c, sizeof(s) - c, ##__VA_ARGS__);
+#define ADD_STR_ELEMENT(s, c, ...) rpc_sprint_msg_file(s + c, sizeof(s) - c, ##__VA_ARGS__);
 
 void rpc_print_message(const PB_Main* message) {
     char str[500];
@@ -165,26 +165,24 @@ void rpc_print_message(const PB_Main* message) {
         if(path) {
             cnt += ADD_STR(str, cnt, "\t\tpath: %s\r\n", path);
         }
-        if(message->content.storage_write_request.has_storage_element) {
-            const PB_Storage_Element* element =
-                &message->content.storage_write_request.storage_element;
-            cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", element, 1);
+        if(message->content.storage_write_request.has_file) {
+            const PB_Storage_File* msg_file = &message->content.storage_write_request.file;
+            cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", msg_file, 1);
         }
         break;
     }
     case PB_Main_storage_read_response_tag:
         cnt += ADD_STR(str, cnt, "\tread_response {\r\n");
-        if(message->content.storage_read_response.has_storage_element) {
-            const PB_Storage_Element* element =
-                &message->content.storage_read_response.storage_element;
-            cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", element, 1);
+        if(message->content.storage_read_response.has_file) {
+            const PB_Storage_File* msg_file = &message->content.storage_read_response.file;
+            cnt += ADD_STR_ELEMENT(str, cnt, "\t\t\t", msg_file, 1);
         }
         break;
     case PB_Main_storage_list_response_tag: {
-        const PB_Storage_Element* element = message->content.storage_list_response.storage_element;
-        size_t element_count = message->content.storage_list_response.storage_element_count;
+        const PB_Storage_File* msg_file = message->content.storage_list_response.file;
+        size_t msg_file_count = message->content.storage_list_response.file_count;
         cnt += ADD_STR(str, cnt, "\tlist_response {\r\n");
-        cnt += ADD_STR_ELEMENT(str, cnt, "\t\t", element, element_count);
+        cnt += ADD_STR_ELEMENT(str, cnt, "\t\t", msg_file, msg_file_count);
     }
     }
     cnt += ADD_STR(str, cnt, "\t}\r\n}\r\n");

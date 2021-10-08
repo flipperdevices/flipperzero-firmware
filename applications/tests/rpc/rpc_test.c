@@ -226,7 +226,7 @@ static void test_rpc_add_read_or_write_to_list(
 
     do {
         PB_Main* request = MsgList_push_new(msg_list);
-        PB_Storage_Element* element = NULL;
+        PB_Storage_File* msg_file = NULL;
 
         request->command_id = command_id;
         request->command_status = PB_CommandStatus_OK;
@@ -236,18 +236,18 @@ static void test_rpc_add_read_or_write_to_list(
             request->content.storage_write_request.path = furi_alloc(path_size);
             strncpy(request->content.storage_write_request.path, path, path_size);
             request->which_content = PB_Main_storage_write_request_tag;
-            request->content.storage_write_request.has_storage_element = true;
-            element = &request->content.storage_write_request.storage_element;
+            request->content.storage_write_request.has_file = true;
+            msg_file = &request->content.storage_write_request.file;
         } else {
             request->which_content = PB_Main_storage_read_response_tag;
-            request->content.storage_read_response.has_storage_element = true;
-            element = &request->content.storage_read_response.storage_element;
+            request->content.storage_read_response.has_file = true;
+            msg_file = &request->content.storage_read_response.file;
         }
 
-        element->data = furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(pattern_size));
-        element->data->size = pattern_size;
+        msg_file->data = furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(pattern_size));
+        msg_file->data->size = pattern_size;
 
-        memcpy(element->data->bytes, pattern, pattern_size);
+        memcpy(msg_file->data->bytes, pattern, pattern_size);
 
         --pattern_repeats;
         request->not_last = (pattern_repeats > 0);
@@ -290,20 +290,19 @@ static void test_rpc_encode_and_feed(MsgList_t msg_list) {
     MsgList_reverse(msg_list);
 }
 
-static void test_rpc_compare_storage_element(
-    PB_Storage_Element* result_element,
-    PB_Storage_Element* expected_element) {
-    mu_check(!result_element->name == !expected_element->name);
-    if(result_element->name) {
-        mu_check(!strcmp(result_element->name, expected_element->name));
+static void
+    test_rpc_compare_file(PB_Storage_File* result_msg_file, PB_Storage_File* expected_msg_file) {
+    mu_check(!result_msg_file->name == !expected_msg_file->name);
+    if(result_msg_file->name) {
+        mu_check(!strcmp(result_msg_file->name, expected_msg_file->name));
     }
-    mu_check(result_element->size == expected_element->size);
-    mu_check(result_element->type == expected_element->type);
+    mu_check(result_msg_file->size == expected_msg_file->size);
+    mu_check(result_msg_file->type == expected_msg_file->type);
 
-    mu_check(!result_element->data == !expected_element->data);
-    mu_check(result_element->data->size == expected_element->data->size);
-    for(int i = 0; i < result_element->data->size; ++i) {
-        mu_check(result_element->data->bytes[i] == expected_element->data->bytes[i]);
+    mu_check(!result_msg_file->data == !expected_msg_file->data);
+    mu_check(result_msg_file->data->size == expected_msg_file->data->size);
+    for(int i = 0; i < result_msg_file->data->size; ++i) {
+        mu_check(result_msg_file->data->bytes[i] == expected_msg_file->data->bytes[i]);
     }
 }
 
@@ -332,30 +331,26 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
         mu_check(0);
         break;
     case PB_Main_storage_read_response_tag: {
-        bool result_has_element = result->content.storage_read_response.has_storage_element;
-        bool expected_has_element = expected->content.storage_read_response.has_storage_element;
-        mu_check(result_has_element == expected_has_element);
+        bool result_has_msg_file = result->content.storage_read_response.has_file;
+        bool expected_has_msg_file = expected->content.storage_read_response.has_file;
+        mu_check(result_has_msg_file == expected_has_msg_file);
 
-        if(result_has_element) {
-            PB_Storage_Element* result_element =
-                &result->content.storage_read_response.storage_element;
-            PB_Storage_Element* expected_element =
-                &expected->content.storage_read_response.storage_element;
-            test_rpc_compare_storage_element(result_element, expected_element);
+        if(result_has_msg_file) {
+            PB_Storage_File* result_msg_file = &result->content.storage_read_response.file;
+            PB_Storage_File* expected_msg_file = &expected->content.storage_read_response.file;
+            test_rpc_compare_file(result_msg_file, expected_msg_file);
         } else {
             mu_check(0);
         }
     } break;
     case PB_Main_storage_list_response_tag: {
-        size_t expected_elements = expected->content.storage_list_response.storage_element_count;
-        size_t result_elements = result->content.storage_list_response.storage_element_count;
-        mu_check(result_elements == expected_elements);
-        for(int i = 0; i < expected_elements; ++i) {
-            PB_Storage_Element* result_element =
-                &result->content.storage_list_response.storage_element[i];
-            PB_Storage_Element* expected_element =
-                &expected->content.storage_list_response.storage_element[i];
-            test_rpc_compare_storage_element(result_element, expected_element);
+        size_t expected_msg_files = expected->content.storage_list_response.file_count;
+        size_t result_msg_files = result->content.storage_list_response.file_count;
+        mu_check(result_msg_files == expected_msg_files);
+        for(int i = 0; i < expected_msg_files; ++i) {
+            PB_Storage_File* result_msg_file = &result->content.storage_list_response.file[i];
+            PB_Storage_File* expected_msg_file = &expected->content.storage_list_response.file[i];
+            test_rpc_compare_file(result_msg_file, expected_msg_file);
         }
         break;
     }
@@ -385,7 +380,7 @@ static void test_rpc_storage_list_create_expected_list(
         .command_id = command_id,
         .not_last = false,
         .which_content = PB_Main_storage_list_request_tag,
-        /* other fields (e.g. elements ptrs) explicitly initialized by 0 */
+        /* other fields (e.g. msg_files ptrs) explicitly initialized by 0 */
     };
     PB_Storage_ListResponse* list = &response.content.storage_list_response;
     response.which_content = PB_Main_storage_list_response_tag;
@@ -405,19 +400,18 @@ static void test_rpc_storage_list_create_expected_list(
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if(i == COUNT_OF(list->storage_element)) {
-                list->storage_element_count = i;
+            if(i == COUNT_OF(list->file)) {
+                list->file_count = i;
                 response.not_last = true;
                 MsgList_push_back(msg_list, response);
                 i = 0;
             }
-            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
-                                                PB_Storage_Element_FileType_DIR :
-                                                PB_Storage_Element_FileType_FILE;
-            list->storage_element[i].size = fileinfo.size;
-            list->storage_element[i].data = NULL;
+            list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ? PB_Storage_File_FileType_DIR :
+                                                                    PB_Storage_File_FileType_FILE;
+            list->file[i].size = fileinfo.size;
+            list->file[i].data = NULL;
             /* memory free inside rpc_encode_and_send() -> pb_release() */
-            list->storage_element[i].name = name;
+            list->file[i].name = name;
             ++i;
         } else {
             finish = true;
@@ -425,7 +419,7 @@ static void test_rpc_storage_list_create_expected_list(
         }
     }
 
-    list->storage_element_count = i;
+    list->file_count = i;
     response.not_last = false;
     MsgList_push_back(msg_list, response);
 
@@ -447,7 +441,7 @@ static void test_rpc_decode_and_compare(MsgList_t expected_msg_list) {
     /* other fields explicitly initialized by 0 */
     PB_Main result = {.cb_content.funcs.decode = NULL};
 
-    /* mlib adds elements into start of list, so reverse it */
+    /* mlib adds msg_files into start of list, so reverse it */
     MsgList_reverse(expected_msg_list);
     for
         M_EACH(expected_msg, expected_msg_list, MsgList_t) {
@@ -526,13 +520,12 @@ static void test_rpc_add_read_to_list_by_reading_real_file(
             response->command_status = PB_CommandStatus_OK;
             response->not_last = false;
             response->which_content = PB_Main_storage_read_response_tag;
-            response->content.storage_read_response.has_storage_element = true;
+            response->content.storage_read_response.has_file = true;
 
-            response->content.storage_read_response.storage_element.data =
+            response->content.storage_read_response.file.data =
                 furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(MIN(size_left, MAX_DATA_SIZE)));
-            uint8_t* buffer = response->content.storage_read_response.storage_element.data->bytes;
-            uint16_t* read_size_msg =
-                &response->content.storage_read_response.storage_element.data->size;
+            uint8_t* buffer = response->content.storage_read_response.file.data->bytes;
+            uint16_t* read_size_msg = &response->content.storage_read_response.file.data->size;
             size_t read_size = MIN(size_left, MAX_DATA_SIZE);
             *read_size_msg = storage_file_read(file, buffer, read_size);
             size_left -= read_size;

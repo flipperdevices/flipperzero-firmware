@@ -6,7 +6,7 @@
 #error Regenerate this file with the current version of nanopb generator.
 #endif
 
-PB_BIND(PB_Storage_Element, PB_Storage_Element, AUTO)
+PB_BIND(PB_Storage_File, PB_Storage_File, AUTO)
 
 
 PB_BIND(PB_Storage_ListRequest, PB_Storage_ListRequest, AUTO)

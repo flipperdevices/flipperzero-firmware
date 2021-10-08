@@ -128,22 +128,21 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
         FileInfo fileinfo;
         char* name = furi_alloc(MAX_NAME_LENGTH + 1);
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if(i == COUNT_OF(list->storage_element)) {
-                list->storage_element_count = i;
+            if(i == COUNT_OF(list->file)) {
+                list->file_count = i;
                 response.not_last = true;
                 rpc_encode_and_send(rpc_storage->rpc, &response);
                 pb_release(&PB_Main_msg, &response);
                 i = 0;
             }
-            list->storage_element[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
-                                                PB_Storage_Element_FileType_DIR :
-                                                PB_Storage_Element_FileType_FILE;
-            list->storage_element[i].size = fileinfo.size;
-            list->storage_element[i].data = NULL;
-            list->storage_element[i].name = name;
+            list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ? PB_Storage_File_FileType_DIR :
+                                                                    PB_Storage_File_FileType_FILE;
+            list->file[i].size = fileinfo.size;
+            list->file[i].data = NULL;
+            list->file[i].name = name;
             ++i;
         } else {
-            list->storage_element_count = i;
+            list->file_count = i;
             finish = true;
             free(name);
         }
@@ -178,13 +177,12 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
     if(storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         size_t size_left = storage_file_size(file);
-        response->content.storage_read_response.has_storage_element = true;
-        response->content.storage_read_response.storage_element.data =
+        response->content.storage_read_response.has_file = true;
+        response->content.storage_read_response.file.data =
             furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(MIN(size_left, MAX_DATA_SIZE)));
         do {
-            uint8_t* buffer = response->content.storage_read_response.storage_element.data->bytes;
-            uint16_t* read_size_msg =
-                &response->content.storage_read_response.storage_element.data->size;
+            uint8_t* buffer = response->content.storage_read_response.file.data->bytes;
+            uint16_t* read_size_msg = &response->content.storage_read_response.file.data->size;
 
             size_t read_size = MIN(size_left, MAX_DATA_SIZE);
             *read_size_msg = storage_file_read(file, buffer, read_size);
@@ -239,8 +237,8 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     File* file = rpc_storage->file;
 
     if(result) {
-        uint8_t* buffer = request->content.storage_write_request.storage_element.data->bytes;
-        size_t buffer_size = request->content.storage_write_request.storage_element.data->size;
+        uint8_t* buffer = request->content.storage_write_request.file.data->bytes;
+        size_t buffer_size = request->content.storage_write_request.file.data->size;
 
         uint16_t written_size = storage_file_write(file, buffer, buffer_size);
         result = (written_size == buffer_size);
