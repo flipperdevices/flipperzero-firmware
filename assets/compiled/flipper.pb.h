@@ -32,6 +32,9 @@ typedef enum _PB_CommandStatus {
 } PB_CommandStatus;
 
 /* Struct definitions */
+/* There are Server commands (e.g. Storage_write), which have no body message
+ in response. But 'oneof' obligate to have at least 1 encoded message
+ in scope. For this needs Empty message is implemented. */
 typedef struct _PB_Empty { 
     char dummy_field;
 } PB_Empty;
