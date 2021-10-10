@@ -83,7 +83,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         }
 
         if(frequency_rssi.rssi > -90.0) {
-            instance->count_repet = 10;
+            instance->count_repet = 20;
             if(instance->filVal) {
                 frequency_rssi.frequency =
                     subghz_frequency_analyzer_worker_expRunningAverageAdaptive(

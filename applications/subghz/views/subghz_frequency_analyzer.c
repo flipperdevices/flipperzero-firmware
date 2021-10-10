@@ -9,6 +9,9 @@
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 #include "../helpers/subghz_frequency_analyzer_worker.h"
 
+#include <assets_icons.h>
+
+
 typedef enum {
     SubghzFrequencyAnalyzerStatusIDLE,
 } SubghzFrequencyAnalyzerStatus;
@@ -23,10 +26,6 @@ struct SubghzFrequencyAnalyzer {
 typedef struct {
     uint32_t frequency;
     float rssi;
-    uint32_t history_frequency;
-    string_t history_frequency1;
-    string_t history_frequency2;
-    string_t history_frequency3;
 } SubghzFrequencyAnalyzerModel;
 
 void subghz_frequency_analyzer_set_callback(
@@ -39,39 +38,43 @@ void subghz_frequency_analyzer_set_callback(
     subghz_frequency_analyzer->context = context;
 }
 
+void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, float rssi) {
+    uint8_t x = 48;
+    uint8_t y = 56;
+    uint8_t column_number = 0;
+    if(rssi) {
+        rssi = (rssi + 90) / 3;
+        for(size_t i = 1; i < (uint8_t)rssi; i++) {
+            if(i > 20) break;
+            if(i % 4) {
+                column_number++;
+                canvas_draw_box(canvas, x + 2 * i, y - column_number, 2, 4 + column_number);
+            }
+        }
+    }
+}
+
 void subghz_frequency_analyzer_draw(Canvas* canvas, SubghzFrequencyAnalyzerModel* model) {
     char buffer[64];
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 8, "Frequency Analyzer");
-    canvas_draw_line(canvas, 0, 11, 128, 11);
-
     canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 20, 8, "Frequency Analyzer");
 
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "RSSI: %ld.%ld dBm",
-        (int32_t)(model->rssi),
-        (int32_t)fabs(model->rssi * 10) % 10);
-    canvas_draw_str(canvas, 8, 40, buffer);
+    canvas_draw_str(canvas, 28, 60, "RSSI");
+    subghz_frequency_analyzer_draw_rssi(canvas, model->rssi);
 
     //Frequency
+    canvas_set_font(canvas, FontBigNumbers);
     snprintf(
         buffer,
         sizeof(buffer),
-        "Freq: %03ld.%03ld",
+        "%03ld.%03ld",
         model->frequency / 1000000 % 1000,
         model->frequency / 1000 % 1000);
-    canvas_draw_str(canvas, 8, 25, buffer);
-    canvas_draw_str(canvas, 73, 25, "MHz");
+    canvas_draw_str(canvas, 8, 35, buffer);
+    canvas_draw_icon(canvas, 96, 24, &I_MHz_25x11);
 
-    canvas_draw_str(canvas, 90, 42, string_get_cstr(model->history_frequency1));
-    canvas_draw_str(canvas, 90, 52, string_get_cstr(model->history_frequency2));
-    canvas_draw_str(canvas, 90, 62, string_get_cstr(model->history_frequency3));
-    canvas_draw_line(canvas, 87, 31, 128, 31);
-    canvas_draw_line(canvas, 87, 31, 87, 64);
 }
 
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
@@ -91,22 +94,6 @@ void subghz_frequency_analyzer_pair_callback(void* context, uint32_t frequency, 
         instance->view, (SubghzFrequencyAnalyzerModel * model) {
             model->rssi = rssi;
             model->frequency = frequency;
-            if(!frequency && model->history_frequency) {
-                string_set(model->history_frequency3, model->history_frequency2);
-                string_set(model->history_frequency2, model->history_frequency1);
-                char buffer[64];
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "%03ld.%03ld",
-                    model->history_frequency / 1000000 % 1000,
-                    model->history_frequency / 1000 % 1000);
-
-                string_set_str(model->history_frequency1, buffer);
-                model->history_frequency = 0;
-            } else if(frequency) {
-                model->history_frequency = frequency;
-            }
             return true;
         });
 }
@@ -129,10 +116,6 @@ void subghz_frequency_analyzer_enter(void* context) {
         instance->view, (SubghzFrequencyAnalyzerModel * model) {
             model->rssi = 0;
             model->frequency = 0;
-            model->history_frequency = 0;
-            string_set(model->history_frequency1, "0");
-            string_set(model->history_frequency2, "0");
-            string_set(model->history_frequency3, "0");
             return true;
         });
 }
@@ -150,10 +133,6 @@ void subghz_frequency_analyzer_exit(void* context) {
     with_view_model(
         instance->view, (SubghzFrequencyAnalyzerModel * model) {
             model->rssi = 0;
-            model->frequency = 0;
-            string_clean(model->history_frequency1);
-            string_clean(model->history_frequency2);
-            string_clean(model->history_frequency3);
             return true;
         });
 }
@@ -174,10 +153,6 @@ SubghzFrequencyAnalyzer* subghz_frequency_analyzer_alloc() {
     with_view_model(
         instance->view, (SubghzFrequencyAnalyzerModel * model) {
             model->rssi = 0;
-            model->frequency = 0;
-            string_init(model->history_frequency1);
-            string_init(model->history_frequency2);
-            string_init(model->history_frequency3);
             return true;
         });
 
