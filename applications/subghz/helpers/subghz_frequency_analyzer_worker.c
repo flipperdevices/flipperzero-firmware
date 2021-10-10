@@ -46,6 +46,13 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
     uint32_t frequency;
     uint32_t frequency_start;
 
+    //Start CC1101
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_subghz_set_frequency(433920000);
+    furi_hal_subghz_flush_rx();
+    furi_hal_subghz_rx();
+
     while(instance->worker_running) {
         osDelay(10);
         frequency_rssi.rssi = -127.0f;
@@ -102,6 +109,11 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             }
         }
     }
+
+    //Stop CC1101
+    furi_hal_subghz_idle();
+    furi_hal_subghz_sleep();
+
     return 0;
 }
 
@@ -141,23 +153,12 @@ void subghz_frequency_analyzer_worker_start(SubGhzFrequencyAnalyzerWorker* insta
 
     instance->worker_running = true;
 
-    //Start CC1101
-    furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
-    furi_hal_subghz_set_frequency(433920000);
-    furi_hal_subghz_flush_rx();
-    furi_hal_subghz_rx();
-
     furi_thread_start(instance->thread);
 }
 
 void subghz_frequency_analyzer_worker_stop(SubGhzFrequencyAnalyzerWorker* instance) {
     furi_assert(instance);
     furi_assert(instance->worker_running);
-
-    //Stop CC1101
-    furi_hal_subghz_idle();
-    furi_hal_subghz_sleep();
 
     instance->worker_running = false;
 
