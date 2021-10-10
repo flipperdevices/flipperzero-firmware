@@ -126,6 +126,14 @@ void flipper_file_free(FlipperFile* flipper_file);
 bool flipper_file_open_read(FlipperFile* flipper_file, const char* filename);
 
 /**
+ * Open file for writing and add values to the end of file.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param filename File name and path
+ * @return True on success
+ */
+bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename);
+
+/**
  * Open file for writing. Creates a new file, or deletes the contents of the file if it already exists.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param filename File name and path
@@ -139,6 +147,13 @@ bool flipper_file_new_write(FlipperFile* flipper_file, const char* filename);
  * @return True on success
  */
 bool flipper_file_close(FlipperFile* flipper_file);
+
+/**
+ * Rewind the file RW pointer.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @return True on success
+ */
+bool flipper_file_rewind(FlipperFile* flipper_file);
 
 /**
  * Read the header (file type and version) from the file.
@@ -174,6 +189,15 @@ bool flipper_file_write_header_cstr(
     const uint32_t version);
 
 /**
+ * Get the count of values by key
+ * @param flipper_file 
+ * @param key 
+ * @param count 
+ * @return bool 
+ */
+bool flipper_file_get_value_count(FlipperFile* flipper_file, const char* key, uint32_t* count);
+
+/**
  * Read a string from a file by Key
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
@@ -201,38 +225,60 @@ bool flipper_file_write_string(FlipperFile* flipper_file, const char* key, strin
 bool flipper_file_write_string_cstr(FlipperFile* flipper_file, const char* key, const char* data);
 
 /**
- * Read uint32 from a file by Key
+ * Read array of uint32 from a file by Key
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
  * @param data Value
+ * @param data_size Values count
  * @return True on success
  */
-bool flipper_file_read_uint32(FlipperFile* flipper_file, const char* key, uint32_t* data);
+bool flipper_file_read_uint32(
+    FlipperFile* flipper_file,
+    const char* key,
+    uint32_t* data,
+    const uint16_t data_size);
 
 /**
- * Write key and uint32 to file.
+ * Write key and array of uint32 to file.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
  * @param data Value
+ * @param data_size Values count
  * @return True on success
  */
-bool flipper_file_write_uint32(FlipperFile* flipper_file, const char* key, const uint32_t data);
+bool flipper_file_write_uint32(
+    FlipperFile* flipper_file,
+    const char* key,
+    const uint32_t* data,
+    const uint16_t data_size);
 
 /**
- * Write comment to file.
+ * Read array of float from a file by Key
  * @param flipper_file Pointer to a FlipperFile instance
- * @param data Comment text
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
  * @return True on success
  */
-bool flipper_file_write_comment(FlipperFile* flipper_file, string_t data);
+bool flipper_file_read_float(
+    FlipperFile* flipper_file,
+    const char* key,
+    float* data,
+    const uint16_t data_size);
 
 /**
- * Write comment to file. Plain C string version.
+ * Write key and array of float to file.
  * @param flipper_file Pointer to a FlipperFile instance
- * @param data Comment text
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
  * @return True on success
  */
-bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data);
+bool flipper_file_write_float(
+    FlipperFile* flipper_file,
+    const char* key,
+    const float* data,
+    const uint16_t data_size);
 
 /**
  * Read hex array from a file by Key
@@ -253,7 +299,7 @@ bool flipper_file_read_hex_array(
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
  * @param data Value
- * @param data_size Value size
+ * @param data_size Values count
  * @return True on success
  */
 bool flipper_file_write_hex_array(
@@ -261,6 +307,30 @@ bool flipper_file_write_hex_array(
     const char* key,
     const uint8_t* data,
     const uint16_t data_size);
+
+/**
+ * Write comment to file.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param data Comment text
+ * @return True on success
+ */
+bool flipper_file_write_comment(FlipperFile* flipper_file, string_t data);
+
+/**
+ * Write comment to file. Plain C string version.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param data Comment text
+ * @return True on success
+ */
+bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data);
+
+/**
+ * Delete key and its value from file
+ * @param flipper_file 
+ * @param key 
+ * @return bool 
+ */
+bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key);
 
 #ifdef __cplusplus
 }
