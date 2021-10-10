@@ -14,7 +14,7 @@ const char flipper_file_eoln = '\n';
 const char flipper_file_eolr = '\r';
 const char flipper_file_delimiter = ':';
 const char flipper_file_comment = '#';
-const char* flipper_file_scratchpad = ".scratch.pad";
+const char* flipper_file_scratchpad = "/any/.scratch.pad";
 
 /**
  * Negative seek helper
