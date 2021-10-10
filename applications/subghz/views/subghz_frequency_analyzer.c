@@ -11,7 +11,6 @@
 
 #include <assets_icons.h>
 
-
 typedef enum {
     SubghzFrequencyAnalyzerStatusIDLE,
 } SubghzFrequencyAnalyzerStatus;
@@ -74,7 +73,6 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubghzFrequencyAnalyzerModel
         model->frequency / 1000 % 1000);
     canvas_draw_str(canvas, 8, 35, buffer);
     canvas_draw_icon(canvas, 96, 24, &I_MHz_25x11);
-
 }
 
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {

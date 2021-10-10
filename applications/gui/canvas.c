@@ -122,7 +122,6 @@ void canvas_set_font(Canvas* canvas, Font font) {
     }
 }
 
-
 void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
     furi_assert(canvas);
     if(!str) return;
