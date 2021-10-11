@@ -1,11 +1,7 @@
-#include "nfc_device_i.h"
+#include "nfc_device.h"
 
 #include <lib/toolbox/path.h>
-#include <lib/toolbox/hex.h>
 #include <lib/toolbox/flipper-file.h>
-
-// TODO remove file worker
-#include <file-worker.h>
 
 static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
@@ -397,33 +393,29 @@ void nfc_device_clear(NfcDevice* dev) {
 bool nfc_device_delete(NfcDevice* dev) {
     furi_assert(dev);
 
-    bool result = true;
-    FileWorker* file_worker = file_worker_alloc(false);
+    bool deleted = false;
     string_t file_path;
+    string_init(file_path);
 
     do {
         // Delete original file
         string_init_printf(file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_extension);
-        if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
-            result = false;
-            break;
-        }
+        if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
         // Delete shadow file if it exists
         if(dev->shadow_file_exist) {
-            string_clean(file_path);
             string_printf(
                 file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_shadow_extension);
-            if(!file_worker_remove(file_worker, string_get_cstr(file_path))) {
-                result = false;
-                break;
-            }
+                if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
         }
+        deleted = true;
     } while(0);
 
+    if(!deleted) {
+        dialog_message_show_storage_error(dev->dialogs, "Can not remove file");
+    }
+
     string_clear(file_path);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
-    return result;
+    return deleted;
 }
 
 bool nfc_device_restore(NfcDevice* dev) {
