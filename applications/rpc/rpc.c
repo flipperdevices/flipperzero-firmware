@@ -42,6 +42,10 @@ static RpcSystemCallbacks rpc_systems[] = {
         .alloc = rpc_system_storage_alloc,
         .free = rpc_system_storage_free,
     },
+    {
+        .alloc = rpc_system_app_alloc,
+        .free = NULL,
+    },
 };
 
 struct RpcSession {
@@ -123,6 +127,28 @@ void rpc_print_message(const PB_Main* message) {
         /* not implemented yet */
         cnt += ADD_STR(str, cnt, "\tNOT_IMPLEMENTED (%d) {\r\n", message->which_content);
         break;
+    case PB_Main_app_start_tag: {
+        cnt += ADD_STR(str, cnt, "\tapp_start {\r\n");
+        const char* name = message->content.app_start.name;
+        const char* args = message->content.app_start.args;
+        if(name) {
+            cnt += ADD_STR(str, cnt, "\t\tname: %s\r\n", name);
+        }
+        if(args) {
+            cnt += ADD_STR(str, cnt, "\t\targs: %s\r\n", args);
+        }
+        break;
+    }
+    case PB_Main_app_lock_status_request_tag: {
+        cnt += ADD_STR(str, cnt, "\tapp_lock_status_request {\r\n");
+        break;
+    }
+    case PB_Main_app_lock_status_response_tag: {
+        cnt += ADD_STR(str, cnt, "\tapp_lock_status_response {\r\n");
+        bool lock_status = message->content.app_lock_status_response.locked;
+        cnt += ADD_STR(str, cnt, "\t\tlocked: %s\r\n", lock_status ? "true" : "false");
+        break;
+    }
     case PB_Main_storage_md5sum_request_tag: {
         cnt += ADD_STR(str, cnt, "\tmd5sum_request {\r\n");
         const char* path = message->content.storage_md5sum_request.path;

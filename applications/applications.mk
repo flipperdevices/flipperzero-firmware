@@ -5,6 +5,7 @@ CFLAGS		+= -I$(APP_DIR)
 C_SOURCES	+= $(shell find $(APP_DIR) -name "*.c")
 CPP_SOURCES	+= $(shell find $(APP_DIR) -name "*.cpp")
 
+WITH_UNIT_TESTS ?= 0
 
 APP_RELEASE ?= 1
 ifeq ($(APP_RELEASE), 1)
@@ -42,7 +43,6 @@ APP_BLINK	= 1
 APP_IRDA_MONITOR = 1
 APP_KEYPAD_TEST = 1
 APP_SD_TEST	= 1
-APP_UNIT_TESTS = 0
 APP_VIBRO_DEMO = 1
 APP_USB_TEST = 1
 endif
@@ -60,9 +60,8 @@ SRV_GUI		= 1
 endif
 
 
-APP_UNIT_TESTS	?= 0
-ifeq ($(APP_UNIT_TESTS), 1)
-CFLAGS		+= -DAPP_UNIT_TESTS
+ifeq ($(WITH_UNIT_TESTS), 1)
+CFLAGS		+= -DWITH_UNIT_TESTS
 endif
 
 
