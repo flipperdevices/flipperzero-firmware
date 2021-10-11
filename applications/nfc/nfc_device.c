@@ -405,7 +405,7 @@ bool nfc_device_delete(NfcDevice* dev) {
         if(dev->shadow_file_exist) {
             string_printf(
                 file_path, "%s/%s%s", nfc_app_folder, dev->dev_name, nfc_app_shadow_extension);
-                if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
+            if(!storage_simply_remove(dev->storage, string_get_cstr(file_path))) break;
         }
         deleted = true;
     } while(0);
