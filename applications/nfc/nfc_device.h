@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <storage/storage.h>
+#include <dialogs/dialogs.h>
 
 #include "mifare_ultralight.h"
 
@@ -59,6 +60,7 @@ typedef struct {
 
 typedef struct {
     Storage* storage;
+    DialogsApp* dialogs;
     NfcDeviceData dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN + 1];
     char file_name[NFC_FILE_NAME_MAX_LEN];

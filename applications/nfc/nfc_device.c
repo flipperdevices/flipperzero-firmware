@@ -1,24 +1,29 @@
 #include "nfc_device_i.h"
 
-#include <file-worker.h>
 #include <lib/toolbox/path.h>
 #include <lib/toolbox/hex.h>
+#include <lib/toolbox/flipper-file.h>
 
-#define NFC_DEVICE_MAX_DATA_LEN 14
+// TODO remove file worker
+#include <file-worker.h>
 
 static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
 static const char* nfc_app_shadow_extension = ".shd";
+static const char* nfc_file_header = "Flipper NFC device";
+static const uint32_t nfc_file_version = 1;
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* nfc_dev = furi_alloc(sizeof(NfcDevice));
     nfc_dev->storage = furi_record_open("storage");
+    nfc_dev->dialogs = furi_record_open("dialogs");
     return nfc_dev;
 }
 
 void nfc_device_free(NfcDevice* nfc_dev) {
     furi_assert(nfc_dev);
     furi_record_close("storage");
+    furi_record_close("dialogs");
     free(nfc_dev);
 }
 
@@ -41,7 +46,7 @@ static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len, uint8
     return parsed;
 }
 
-uint16_t nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string) {
+void nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string) {
     if(dev->format == NfcDeviceSaveFormatUid) {
         string_set_str(format_string, "UID\n");
     } else if(dev->format == NfcDeviceSaveFormatBankCard) {
@@ -51,7 +56,6 @@ uint16_t nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string
     } else {
         string_set_str(format_string, "Unknown\n");
     }
-    return string_size(format_string);
 }
 
 bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_string) {
@@ -69,21 +73,6 @@ bool nfc_device_parse_format_string(NfcDevice* dev, string_t format_string) {
         return true;
     }
     return false;
-}
-
-uint16_t nfc_device_prepare_uid_string(NfcDevice* dev, string_t uid_string) {
-    NfcDeviceCommonData* uid_data = &dev->dev_data.nfc_data;
-    string_printf(uid_string, "UID len: %02X UID: ", dev->dev_data.nfc_data.uid_len);
-    for(uint8_t i = 0; i < uid_data->uid_len; i++) {
-        string_cat_printf(uid_string, "%02X ", uid_data->uid[i]);
-    }
-    string_cat_printf(
-        uid_string,
-        "ATQA: %02X %02X SAK: %02X\n",
-        uid_data->atqa[0],
-        uid_data->atqa[1],
-        uid_data->sak);
-    return string_size(uid_string);
 }
 
 bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
@@ -117,37 +106,52 @@ bool nfc_device_parse_uid_string(NfcDevice* dev, string_t uid_string) {
     return parsed;
 }
 
-uint16_t nfc_device_prepare_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
+static bool nfc_device_save_mifare_ul_data(FlipperFile* file, NfcDevice* dev) {
+    bool saved = false;
     MifareUlData* data = &dev->dev_data.mf_ul_data;
-    string_printf(mifare_ul_string, "Signature:");
-    for(uint8_t i = 0; i < sizeof(data->signature); i++) {
-        string_cat_printf(mifare_ul_string, " %02X", data->signature[i]);
-    }
-    string_cat_printf(mifare_ul_string, "\nVersion:");
-    uint8_t* version = (uint8_t*)&data->version;
-    for(uint8_t i = 0; i < sizeof(data->version); i++) {
-        string_cat_printf(mifare_ul_string, " %02X", version[i]);
-    }
-    for(uint8_t i = 0; i < 3; i++) {
-        string_cat_printf(
-            mifare_ul_string,
-            "\nCounter %d: %lu Tearing flag %d: %02X",
-            i,
-            data->counter[i],
-            i,
-            data->tearing[i]);
-    }
-    string_cat_printf(mifare_ul_string, "\nData size: %d\n", data->data_size);
-    for(uint16_t i = 0; i < data->data_size; i += 4) {
-        string_cat_printf(
-            mifare_ul_string,
-            "%02X %02X %02X %02X\n",
-            data->data[i],
-            data->data[i + 1],
-            data->data[i + 2],
-            data->data[i + 3]);
-    }
-    return string_size(mifare_ul_string);
+    string_t temp_str;
+    string_init(temp_str);
+
+    // Save Mifare Ultralight specific data
+    do {
+        if(!flipper_file_write_comment_cstr(file, "Mifare Ultralight specific data")) break;
+        if(!flipper_file_write_hex_array(
+               file, "Signature", data->signature, sizeof(data->signature)))
+            break;
+        if(!flipper_file_write_hex_array(
+               file, "Mifare version", (uint8_t*)&data->version, sizeof(data->version)))
+            break;
+        // Write conters and tearing flags data
+        bool counters_saved = true;
+        for(uint8_t i = 0; i < 3; i++) {
+            string_printf(temp_str, "Counter %d", i);
+            if(!flipper_file_write_uint32(file, string_get_cstr(temp_str), data->counter[i])) {
+                counters_saved = false;
+                break;
+            }
+            string_printf(temp_str, "Tearing %d", i);
+            if(!flipper_file_write_hex_array(
+                   file, string_get_cstr(temp_str), &data->tearing[i], 1)) {
+                counters_saved = false;
+                break;
+            }
+        }
+        if(!counters_saved) break;
+        // Write pages data
+        bool pages_saved = true;
+        for(uint16_t i = 0; i < data->data_size; i += 4) {
+            string_printf(temp_str, "Page %d", i / 4);
+            if(!flipper_file_write_hex_array(file, string_get_cstr(temp_str), &data->data[i], 4)) {
+                pages_saved = false;
+                break;
+            }
+        }
+        if(!pages_saved) break;
+        saved = true;
+    } while(false);
+
+    string_clear(temp_str);
+    return saved;
 }
 
 bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string) {
@@ -206,28 +210,30 @@ bool nfc_device_parse_mifare_ul_string(NfcDevice* dev, string_t mifare_ul_string
     return parsed;
 }
 
-uint16_t nfc_device_prepare_bank_card_string(NfcDevice* dev, string_t bank_card_string) {
+static bool nfc_device_save_bank_card_data(FlipperFile* file, NfcDevice* dev) {
+    bool saved = false;
     NfcEmvData* data = &dev->dev_data.emv_data;
-    string_printf(bank_card_string, "AID len: %d, AID:", data->aid_len);
-    for(uint8_t i = 0; i < data->aid_len; i++) {
-        string_cat_printf(bank_card_string, " %02X", data->aid[i]);
-    }
-    string_cat_printf(
-        bank_card_string, "\nName: %s\nNumber len: %d\nNumber:", data->name, data->number_len);
-    for(uint8_t i = 0; i < data->number_len; i++) {
-        string_cat_printf(bank_card_string, " %02X", data->number[i]);
-    }
-    if(data->exp_mon) {
-        string_cat_printf(
-            bank_card_string, "\nExp date: %02X/%02X", data->exp_mon, data->exp_year);
-    }
-    if(data->country_code) {
-        string_cat_printf(bank_card_string, "\nCountry code: %04X", data->country_code);
-    }
-    if(data->currency_code) {
-        string_cat_printf(bank_card_string, "\nCurrency code: %04X", data->currency_code);
-    }
-    return string_size(bank_card_string);
+
+    do {
+        // Write Bank card specific data
+        if(!flipper_file_write_comment_cstr(file, "Bank card specific data")) break;
+        if(!flipper_file_write_hex_array(file, "AID", data->aid, data->aid_len)) break;
+        if(!flipper_file_write_string_cstr(file, "Name", data->name)) break;
+        if(!flipper_file_write_hex_array(file, "Number", data->number, data->number_len)) break;
+        if(data->exp_mon) {
+            uint8_t exp_data[2] = {data->exp_mon, data->exp_mon};
+            if(!flipper_file_write_hex_array(file, "Exp data", exp_data, sizeof(exp_data))) break;
+        }
+        if(data->country_code) {
+            if(!flipper_file_write_uint32(file, "Country code", data->country_code)) break;
+        }
+        if(data->currency_code) {
+            if(!flipper_file_write_uint32(file, "Currency code", data->currency_code)) break;
+        }
+        saved = true;
+    } while(false);
+
+    return saved;
 }
 
 bool nfc_device_parse_bank_card_string(NfcDevice* dev, string_t bank_card_string) {
@@ -309,58 +315,51 @@ static bool nfc_device_save_file(
     const char* extension) {
     furi_assert(dev);
 
-    FileWorker* file_worker = file_worker_alloc(false);
-    string_t dev_file_name;
-    string_init(dev_file_name);
+    bool saved = false;
+    FlipperFile* file = flipper_file_alloc(dev->storage);
     string_t temp_str;
     string_init(temp_str);
-    uint16_t string_len = 0;
 
     do {
         // Create nfc directory if necessary
-        if(!file_worker_mkdir(file_worker, nfc_app_folder)) {
-            break;
-        };
+        if(!storage_simply_mkdir(dev->storage, nfc_app_folder)) break;
         // First remove nfc device file if it was saved
-        string_printf(dev_file_name, "%s/%s%s", folder, dev_name, extension);
-        if(!file_worker_remove(file_worker, string_get_cstr(dev_file_name))) {
-            break;
-        };
+        string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
+        if(!storage_simply_remove(dev->storage, string_get_cstr(temp_str))) break;
         // Open file
-        if(!file_worker_open(
-               file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        if(!flipper_file_new_write(file, string_get_cstr(temp_str))) break;
+        // Write header
+        if(!flipper_file_write_header_cstr(file, nfc_file_header, nfc_file_version)) break;
+        // Write nfc device type
+        if(!flipper_file_write_comment_cstr(
+               file, "Nfc device type can be UID, Mifare Ultralight, Bank card"))
             break;
-        }
-        // Prepare and write format name on 1st line
-        string_len = nfc_device_prepare_format_string(dev, temp_str);
-        if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+        nfc_device_prepare_format_string(dev, temp_str);
+        if(!flipper_file_write_string(file, "Device type", temp_str)) break;
+        // Write UID, ATQA, SAK
+        if(!flipper_file_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
             break;
-        }
-        // Prepare and write UID data on 2nd line
-        string_len = nfc_device_prepare_uid_string(dev, temp_str);
-        if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
+        if(!flipper_file_write_hex_array(
+               file, "UID", dev->dev_data.nfc_data.uid, dev->dev_data.nfc_data.uid_len))
             break;
-        }
+        if(!flipper_file_write_hex_array(file, "ATQA", dev->dev_data.nfc_data.atqa, 2)) break;
+        if(!flipper_file_write_hex_array(file, "SAK", &dev->dev_data.nfc_data.sak, 1)) break;
         // Save more data if necessary
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
-            string_len = nfc_device_prepare_mifare_ul_string(dev, temp_str);
-            if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
-                break;
-            }
+            if(!nfc_device_save_mifare_ul_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatBankCard) {
-            string_len = nfc_device_prepare_bank_card_string(dev, temp_str);
-            if(!file_worker_write(file_worker, string_get_cstr(temp_str), string_len)) {
-                break;
-            }
+            if(!nfc_device_save_bank_card_data(file, dev)) break;
         }
+        saved = true;
     } while(0);
 
+    if(!saved) {
+        dialog_message_show_storage_error(dev->dialogs, "Can not save\nkey file");
+    }
     string_clear(temp_str);
-    string_clear(dev_file_name);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
-
-    return true;
+    flipper_file_close(file);
+    flipper_file_free(file);
+    return saved;
 }
 
 bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
