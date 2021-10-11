@@ -63,17 +63,15 @@ bool archive_favorites_read(void* context) {
 }
 
 bool archive_favorites_delete(const char* format, ...) {
+    string_t buffer;
+    string_t filename;
     va_list args;
     va_start(args, format);
-    uint8_t len = vsnprintf(NULL, 0, format, args);
-    char filename[len + 1];
-    vsnprintf(filename, len + 1, format, args);
+    string_init_vprintf(filename, format, args);
     va_end(args);
 
-    FileWorker* file_worker = file_worker_alloc(true);
-
-    string_t buffer;
     string_init(buffer);
+    FileWorker* file_worker = file_worker_alloc(true);
 
     bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
     if(result) {
@@ -85,13 +83,14 @@ bool archive_favorites_delete(const char* format, ...) {
                 break;
             }
 
-            if(string_search_str(buffer, filename)) {
+            if(string_search(buffer, filename)) {
                 archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(buffer));
             }
         }
     }
 
     string_clear(buffer);
+    string_clear(filename);
 
     file_worker_close(file_worker);
     file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
@@ -103,16 +102,15 @@ bool archive_favorites_delete(const char* format, ...) {
 }
 
 bool archive_is_favorite(const char* format, ...) {
+    string_t buffer;
+    string_t filename;
     va_list args;
     va_start(args, format);
-    uint8_t len = vsnprintf(NULL, 0, format, args);
-    char filename[len + 1];
-    vsnprintf(filename, len + 1, format, args);
+    string_init_vprintf(filename, format, args);
     va_end(args);
 
-    FileWorker* file_worker = file_worker_alloc(true);
-    string_t buffer;
     string_init(buffer);
+    FileWorker* file_worker = file_worker_alloc(true);
 
     bool found = false;
     bool result = file_worker_open(file_worker, ARCHIVE_FAV_PATH, FSAM_READ, FSOM_OPEN_EXISTING);
@@ -125,7 +123,7 @@ bool archive_is_favorite(const char* format, ...) {
             if(!string_size(buffer)) {
                 break;
             }
-            if(!string_search_str(buffer, filename)) {
+            if(!string_search(buffer, filename)) {
                 found = true;
                 break;
             }
@@ -133,6 +131,7 @@ bool archive_is_favorite(const char* format, ...) {
     }
 
     string_clear(buffer);
+    string_clear(filename);
     file_worker_close(file_worker);
     file_worker_free(file_worker);
 

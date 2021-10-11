@@ -162,24 +162,25 @@ void archive_file_append(const char* path, const char* format, ...) {
 void archive_delete_file(void* context, const char* format, ...) {
     furi_assert(context);
 
+    string_t filename;
     va_list args;
     va_start(args, format);
-    uint8_t len = vsnprintf(NULL, 0, format, args);
-    char cstr_buff[len + 1];
-    vsnprintf(cstr_buff, len + 1, format, args);
+    string_init_vprintf(filename, format, args);
     va_end(args);
 
     ArchiveBrowserView* browser = context;
     FileWorker* file_worker = file_worker_alloc(true);
 
-    bool res = file_worker_remove(file_worker, cstr_buff);
+    bool res = file_worker_remove(file_worker, string_get_cstr(filename));
     file_worker_free(file_worker);
 
-    if(archive_is_favorite("%s", cstr_buff)) {
-        archive_favorites_delete("%s", cstr_buff);
+    if(archive_is_favorite("%s", string_get_cstr(filename))) {
+        archive_favorites_delete("%s", string_get_cstr(filename));
     }
 
     if(res) {
         archive_file_array_rm_selected(browser);
     }
+
+    string_clear(filename);
 }
