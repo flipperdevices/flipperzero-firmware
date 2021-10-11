@@ -64,7 +64,7 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     return ret;
 }
 
-void serial_svc_start(RpcInstance* rpc) {
+void serial_svc_start(Rpc* rpc) {
     tBleStatus status;
     serial_svc = furi_alloc(sizeof(SerialSvc));
     serial_svc->rpc_sem = osSemaphoreNew(1, 0, NULL);

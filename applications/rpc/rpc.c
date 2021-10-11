@@ -48,12 +48,12 @@ struct RpcSession {
     RpcSendBytesCallback send_bytes_callback;
     void* send_bytes_context;
     osMutexId_t send_bytes_mutex;
-    RpcInstance* rpc;
+    Rpc* rpc;
     bool terminate_session;
     void** system_contexts;
 };
 
-struct RpcInstance {
+struct Rpc {
     bool busy;
     osMutexId_t busy_mutex;
     RpcSession session;
@@ -117,7 +117,7 @@ void rpc_print_message(const PB_Main* message) {
         "PB_Main: {\r\n\tresult: %d cmd_id: %ld (%s)\r\n",
         message->command_status,
         message->command_id,
-        message->not_last ? "not_last" : "last");
+        message->has_next ? "has_next" : "last");
     switch(message->which_content) {
     default:
         /* not implemented yet */
@@ -205,8 +205,8 @@ void rpc_print_message(const PB_Main* message) {
     printf("%s", str);
 }
 
-static RpcInstance* rpc_alloc(void) {
-    RpcInstance* rpc = furi_alloc(sizeof(RpcInstance));
+static Rpc* rpc_alloc(void) {
+    Rpc* rpc = furi_alloc(sizeof(Rpc));
     rpc->busy_mutex = osMutexNew(NULL);
     rpc->busy = false;
     rpc->events = osEventFlagsNew(NULL);
@@ -221,7 +221,7 @@ static RpcInstance* rpc_alloc(void) {
     return rpc;
 }
 
-RpcSession* rpc_open_session(RpcInstance* rpc) {
+RpcSession* rpc_open_session(Rpc* rpc) {
     furi_assert(rpc);
     bool result = false;
     furi_check(osMutexAcquire(rpc->busy_mutex, osWaitForever) == osOK);
@@ -272,7 +272,7 @@ void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callb
 size_t
     rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
-    RpcInstance* rpc = session->rpc;
+    Rpc* rpc = session->rpc;
     furi_assert(rpc->busy);
 
     size_t bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
@@ -282,7 +282,7 @@ size_t
 }
 
 bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
-    RpcInstance* rpc = istream->state;
+    Rpc* rpc = istream->state;
     uint32_t flags = 0;
     size_t bytes_received = 0;
 
@@ -308,7 +308,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     return (count == bytes_received);
 }
 
-void rpc_encode_and_send(RpcInstance* rpc, PB_Main* main_message) {
+void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
     furi_assert(rpc);
     furi_assert(main_message);
     RpcSession* session = &rpc->session;
@@ -355,7 +355,7 @@ void rpc_encode_and_send(RpcInstance* rpc, PB_Main* main_message) {
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {
     furi_assert(stream);
-    RpcInstance* rpc = *arg;
+    Rpc* rpc = *arg;
 
     RpcHandler* handler = RpcHandlerDict_get(rpc->handlers, field->tag);
 
@@ -367,7 +367,7 @@ static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void
 }
 
 int32_t rpc_srv(void* p) {
-    RpcInstance* rpc = rpc_alloc();
+    Rpc* rpc = rpc_alloc();
     furi_record_create("rpc", rpc);
 
     while(1) {
@@ -420,17 +420,17 @@ int32_t rpc_srv(void* p) {
     return 0;
 }
 
-void rpc_add_handler(RpcInstance* rpc, pb_size_t message_tag, RpcHandler* handler) {
+void rpc_add_handler(Rpc* rpc, pb_size_t message_tag, RpcHandler* handler) {
     furi_assert(RpcHandlerDict_get(rpc->handlers, message_tag) == NULL);
 
     RpcHandlerDict_set_at(rpc->handlers, message_tag, *handler);
 }
 
-void rpc_encode_and_send_empty(RpcInstance* rpc, uint32_t command_id, PB_CommandStatus status) {
+void rpc_encode_and_send_empty(Rpc* rpc, uint32_t command_id, PB_CommandStatus status) {
     PB_Main message = {
         .command_id = command_id,
         .command_status = status,
-        .not_last = false,
+        .has_next = false,
         .which_content = PB_Main_empty_tag,
     };
     rpc_encode_and_send(rpc, &message);

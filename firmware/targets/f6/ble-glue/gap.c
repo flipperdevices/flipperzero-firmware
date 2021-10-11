@@ -35,7 +35,7 @@ typedef struct {
   osMutexId_t state_mutex;
   uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
   Bt* bt;
-  RpcInstance* rpc;
+  Rpc* rpc;
   RpcSession* rpc_session;
   osTimerId advertise_timer;
   osThreadAttr_t thread_attr;

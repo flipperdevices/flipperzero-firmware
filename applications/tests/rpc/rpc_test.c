@@ -21,7 +21,7 @@ LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)
 /* MinUnit test framework doesn't allow passing context into tests,
  * so we have to use global variables
  */
-static RpcInstance* rpc = NULL;
+static Rpc* rpc = NULL;
 static RpcSession* session = NULL;
 static StreamBufferHandle_t output_stream = NULL;
 static uint32_t command_id = 0;
@@ -180,7 +180,7 @@ static void test_rpc_add_ping_to_list(MsgList_t msg_list, bool request, uint32_t
     response->command_id = command_id;
     response->command_status = PB_CommandStatus_OK;
     response->cb_content.funcs.encode = NULL;
-    response->not_last = false;
+    response->has_next = false;
     response->which_content = (request == PING_REQUEST) ? PB_Main_ping_request_tag :
                                                           PB_Main_ping_response_tag;
 }
@@ -199,7 +199,7 @@ static void test_rpc_create_simple_message(
     message->command_status = PB_CommandStatus_OK;
     message->cb_content.funcs.encode = NULL;
     message->which_content = tag;
-    message->not_last = false;
+    message->has_next = false;
     switch(tag) {
     case PB_Main_storage_list_request_tag:
         message->content.storage_list_request.path = str_copy;
@@ -266,7 +266,7 @@ static void test_rpc_add_read_or_write_to_list(
         memcpy(msg_file->data->bytes, pattern, pattern_size);
 
         --pattern_repeats;
-        request->not_last = (pattern_repeats > 0);
+        request->has_next = (pattern_repeats > 0);
     } while(pattern_repeats);
 }
 
@@ -325,7 +325,7 @@ static void
 static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
     mu_check(result->command_id == expected->command_id);
     mu_check(result->command_status == expected->command_status);
-    mu_check(result->not_last == expected->not_last);
+    mu_check(result->has_next == expected->has_next);
     mu_check(result->which_content == expected->which_content);
     if(result->command_status != PB_CommandStatus_OK) {
         mu_check(result->which_content == PB_Main_empty_tag);
@@ -399,7 +399,7 @@ static void test_rpc_storage_list_create_expected_list(
 
     PB_Main response = {
         .command_id = command_id,
-        .not_last = false,
+        .has_next = false,
         .which_content = PB_Main_storage_list_request_tag,
         /* other fields (e.g. msg_files ptrs) explicitly initialized by 0 */
     };
@@ -423,7 +423,7 @@ static void test_rpc_storage_list_create_expected_list(
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
             if(i == COUNT_OF(list->file)) {
                 list->file_count = i;
-                response.not_last = true;
+                response.has_next = true;
                 MsgList_push_back(msg_list, response);
                 i = 0;
             }
@@ -441,7 +441,7 @@ static void test_rpc_storage_list_create_expected_list(
     }
 
     list->file_count = i;
-    response.not_last = false;
+    response.has_next = false;
     MsgList_push_back(msg_list, response);
 
     storage_dir_close(dir);
@@ -518,7 +518,7 @@ static void
     response->command_id = command_id;
     response->command_status = status;
     response->cb_content.funcs.encode = NULL;
-    response->not_last = false;
+    response->has_next = false;
     response->which_content = PB_Main_empty_tag;
 }
 
@@ -539,7 +539,7 @@ static void test_rpc_add_read_to_list_by_reading_real_file(
             PB_Main* response = MsgList_push_new(msg_list);
             response->command_id = command_id;
             response->command_status = PB_CommandStatus_OK;
-            response->not_last = false;
+            response->has_next = false;
             response->which_content = PB_Main_storage_read_response_tag;
             response->content.storage_read_response.has_file = true;
 
@@ -553,7 +553,7 @@ static void test_rpc_add_read_to_list_by_reading_real_file(
             result = (*read_size_msg == read_size);
 
             if(result) {
-                response->not_last = (size_left > 0);
+                response->has_next = (size_left > 0);
             }
         } while((size_left != 0) && result);
 
@@ -737,7 +737,7 @@ MU_TEST(test_storage_interrupt_continuous_same_system) {
         3,
         command_id);
 
-    /* replace last packet (not_last == false) with another command */
+    /* replace last packet (has_next == false) with another command */
     PB_Main message_to_remove;
     MsgList_pop_back(&message_to_remove, input_msg_list);
     pb_release(&PB_Main_msg, &message_to_remove);
@@ -787,7 +787,7 @@ MU_TEST(test_storage_interrupt_continuous_another_system) {
         .command_id = command_id + 1,
         .command_status = PB_CommandStatus_OK,
         .cb_content.funcs.encode = NULL,
-        .not_last = false,
+        .has_next = false,
         .which_content = PB_Main_ping_request_tag,
     };
 

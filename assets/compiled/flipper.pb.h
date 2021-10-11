@@ -18,7 +18,7 @@ typedef enum _PB_CommandStatus {
     PB_CommandStatus_ERROR_DECODE = 2, /* *< Command can't be decoded successfully - command_id in response may be wrong! */
     PB_CommandStatus_ERROR_NOT_IMPLEMENTED = 3, /* *< Command succesfully decoded, but not implemented (deprecated or not yet implemented) */
     PB_CommandStatus_ERROR_BUSY = 4, /* *< Somebody took global lock, so not all commands are available */
-    PB_CommandStatus_ERROR_CONTINUOUS_COMMAND_INTERRUPTED = 14, /* *< Not received not_last == 0 */
+    PB_CommandStatus_ERROR_CONTINUOUS_COMMAND_INTERRUPTED = 14, /* *< Not received has_next == 0 */
     PB_CommandStatus_ERROR_INVALID_PARAMETERS = 15, /* *< not provided (or provided invalid) crucial parameters to perform rpc */
     PB_CommandStatus_ERROR_STORAGE_NOT_READY = 5, /* *< FS not ready */
     PB_CommandStatus_ERROR_STORAGE_EXIST = 6, /* *< File/Dir alrady exist */
@@ -42,7 +42,7 @@ typedef struct _PB_Empty {
 typedef struct _PB_Main { 
     uint32_t command_id; 
     PB_CommandStatus command_status; 
-    bool not_last; 
+    bool has_next; 
     pb_callback_t cb_content;
     pb_size_t which_content;
     union {
@@ -81,7 +81,7 @@ extern "C" {
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_Main_command_id_tag                   1
 #define PB_Main_command_status_tag               2
-#define PB_Main_not_last_tag                     3
+#define PB_Main_has_next_tag                     3
 #define PB_Main_empty_tag                        4
 #define PB_Main_ping_request_tag                 5
 #define PB_Main_ping_response_tag                6
@@ -104,7 +104,7 @@ extern "C" {
 #define PB_Main_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UINT32,   command_id,        1) \
 X(a, STATIC,   SINGULAR, UENUM,    command_status,    2) \
-X(a, STATIC,   SINGULAR, BOOL,     not_last,          3) \
+X(a, STATIC,   SINGULAR, BOOL,     has_next,          3) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,empty,content.empty),   4) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,ping_request,content.ping_request),   5) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,ping_response,content.ping_response),   6) \

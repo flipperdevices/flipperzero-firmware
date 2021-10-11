@@ -21,7 +21,7 @@ typedef enum {
 } RpcStorageState;
 
 typedef struct {
-    RpcInstance* rpc;
+    Rpc* rpc;
     Storage* api;
     File* file;
     RpcStorageState state;
@@ -109,7 +109,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
 
     PB_Main response = {
         .command_id = request->command_id,
-        .not_last = false,
+        .has_next = false,
         .which_content = PB_Main_storage_list_request_tag,
         .command_status = PB_CommandStatus_OK,
     };
@@ -131,7 +131,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
         if(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
             if(i == COUNT_OF(list->file)) {
                 list->file_count = i;
-                response.not_last = true;
+                response.has_next = true;
                 rpc_encode_and_send(rpc_storage->rpc, &response);
                 pb_release(&PB_Main_msg, &response);
                 i = 0;
@@ -149,7 +149,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
         }
     }
 
-    response.not_last = false;
+    response.has_next = false;
     rpc_encode_and_send(rpc_storage->rpc, &response);
     pb_release(&PB_Main_msg, &response);
 
@@ -191,7 +191,7 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
             result = (*read_size_msg == read_size);
 
             if(result) {
-                response->not_last = (size_left > 0);
+                response->has_next = (size_left > 0);
                 rpc_encode_and_send(rpc_storage->rpc, response);
                 // no pb_release(...);
             }
@@ -244,7 +244,7 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
         uint16_t written_size = storage_file_write(file, buffer, buffer_size);
         result = (written_size == buffer_size);
 
-        if(result && !request->not_last) {
+        if(result && !request->has_next) {
             rpc_encode_and_send_empty(
                 rpc_storage->rpc, rpc_storage->current_command_id, PB_CommandStatus_OK);
             rpc_system_storage_reset_state(rpc_storage, false);
@@ -335,7 +335,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
             .command_id = request->command_id,
             .command_status = PB_CommandStatus_OK,
             .which_content = PB_Main_storage_md5sum_response_tag,
-            .not_last = false,
+            .has_next = false,
         };
 
         char* md5sum = response.content.storage_md5sum_response.md5sum;
@@ -359,7 +359,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
     furi_record_close("storage");
 }
 
-void* rpc_system_storage_alloc(RpcInstance* rpc) {
+void* rpc_system_storage_alloc(Rpc* rpc) {
     furi_assert(rpc);
 
     RpcStorageSystem* rpc_storage = furi_alloc(sizeof(RpcStorageSystem));
