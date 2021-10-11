@@ -13,8 +13,8 @@ void nfc_scene_read_emv_data_success_widget_callback(
 
 void nfc_scene_read_emv_data_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
-    NfcEmvData* emv_data = &nfc->dev.dev_data.emv_data;
-    NfcDeviceCommonData* nfc_data = &nfc->dev.dev_data.nfc_data;
+    NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
+    NfcDeviceCommonData* nfc_data = &nfc->dev->dev_data.nfc_data;
 
     // Setup Custom Widget view
     // Add frame
@@ -34,7 +34,7 @@ void nfc_scene_read_emv_data_success_on_enter(void* context) {
         nfc);
     // Add card name
     widget_add_string_element(
-        nfc->widget, 64, 3, AlignCenter, AlignTop, FontSecondary, nfc->dev.dev_data.emv_data.name);
+        nfc->widget, 64, 3, AlignCenter, AlignTop, FontSecondary, nfc->dev->dev_data.emv_data.name);
     // Add cad number
     string_t pan_str;
     string_init(pan_str);
@@ -122,8 +122,8 @@ bool nfc_scene_read_emv_data_success_on_event(void* context, SceneManagerEvent e
                 nfc->scene_manager, NfcSceneReadEmvAppSuccess);
         } else if(event.event == GuiButtonTypeRight) {
             // Clear device name
-            nfc_device_set_name(&nfc->dev, "");
-            nfc->dev.format = NfcDeviceSaveFormatBankCard;
+            nfc_device_set_name(nfc->dev, "");
+            nfc->dev->format = NfcDeviceSaveFormatBankCard;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             return true;
         }

@@ -10,6 +10,18 @@ static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
 static const char* nfc_app_shadow_extension = ".shd";
 
+NfcDevice* nfc_device_alloc() {
+    NfcDevice* nfc_dev = furi_alloc(sizeof(NfcDevice));
+    nfc_dev->storage = furi_record_open("storage");
+    return nfc_dev;
+}
+
+void nfc_device_free(NfcDevice* nfc_dev) {
+    furi_assert(nfc_dev);
+    furi_record_close("storage");
+    free(nfc_dev);
+}
+
 static bool nfc_device_read_hex(string_t str, uint8_t* buff, uint16_t len, uint8_t delim_len) {
     string_strim(str);
     uint8_t nibble_high = 0;

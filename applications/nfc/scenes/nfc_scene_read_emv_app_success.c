@@ -13,8 +13,8 @@ void nfc_scene_read_emv_app_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Setup view
-    NfcDeviceCommonData* nfc_data = &nfc->dev.dev_data.nfc_data;
-    NfcEmvData* emv_data = &nfc->dev.dev_data.emv_data;
+    NfcDeviceCommonData* nfc_data = &nfc->dev->dev_data.nfc_data;
+    NfcEmvData* emv_data = &nfc->dev->dev_data.emv_data;
     DialogEx* dialog_ex = nfc->dialog_ex;
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
     dialog_ex_set_right_button_text(dialog_ex, "Run app");

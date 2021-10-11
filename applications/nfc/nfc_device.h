@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <storage/storage.h>
 
 #include "mifare_ultralight.h"
 
@@ -57,12 +58,17 @@ typedef struct {
 } NfcDeviceData;
 
 typedef struct {
+    Storage* storage;
     NfcDeviceData dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN + 1];
     char file_name[NFC_FILE_NAME_MAX_LEN];
     NfcDeviceSaveFormat format;
     bool shadow_file_exist;
 } NfcDevice;
+
+NfcDevice* nfc_device_alloc();
+
+void nfc_device_free(NfcDevice* nfc_dev);
 
 void nfc_device_set_name(NfcDevice* dev, const char* name);
 
