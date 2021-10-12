@@ -9,7 +9,6 @@
 #include "battery_service.h"
 #include "serial_service.h"
 
-#include <applications/bt/bt_service/bt.h>
 #include <furi-hal.h>
 
 #define GAP_TAG "BLE"
@@ -33,7 +32,6 @@ typedef struct {
     GapState state;
     osMutexId_t state_mutex;
     uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
-    Bt* bt;
     BleEventCallback on_event_cb;
     void* context;
     osTimerId advertise_timer;
@@ -383,8 +381,6 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
 
     gap = furi_alloc(sizeof(Gap));
     srand(DWT->CYCCNT);
-    // Open records
-    gap->bt = furi_record_open("bt");
     // Create advertising timer
     gap->advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, NULL, NULL);
     // Initialization of GATT & GAP layer
