@@ -110,6 +110,7 @@ static void clean_directory(Storage* fs_api, const char* clean_dir) {
         free(name);
     } else {
         FS_Error error = storage_common_mkdir(fs_api, clean_dir);
+        (void) error;
         furi_assert(error == FSE_OK);
     }
 
@@ -174,6 +175,7 @@ static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size
     StreamBufferHandle_t stream_buffer = ctx;
 
     size_t bytes_sent = xStreamBufferSend(stream_buffer, got_bytes, got_size, osWaitForever);
+    (void) bytes_sent;
     furi_assert(bytes_sent == got_size);
 }
 
@@ -596,6 +598,7 @@ static void test_storage_read_run(const char* path, uint32_t command_id) {
 static void test_create_dir(const char* path) {
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_mkdir(fs_api, path);
+    (void) error;
     furi_assert((error == FSE_OK) || (error == FSE_EXIST));
     furi_record_close("storage");
 }
@@ -874,6 +877,7 @@ MU_TEST(test_storage_mkdir) {
 
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_remove(fs_api, TEST_DIR "dir1");
+    (void) error;
     furi_assert(error == FSE_OK);
     furi_record_close("storage");
 
