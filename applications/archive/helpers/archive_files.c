@@ -138,11 +138,10 @@ bool archive_read_dir(void* context, const char* path) {
 void archive_file_append(const char* path, const char* format, ...) {
     furi_assert(path);
 
+    string_t string;
     va_list args;
     va_start(args, format);
-    uint8_t len = vsnprintf(NULL, 0, format, args);
-    char cstr_buff[len + 1];
-    vsnprintf(cstr_buff, len + 1, format, args);
+    string_init_vprintf(string, format, args);
     va_end(args);
 
     FileWorker* file_worker = file_worker_alloc(false);
@@ -151,7 +150,7 @@ void archive_file_append(const char* path, const char* format, ...) {
         FURI_LOG_E("Archive", "Append open error");
     }
 
-    if(!file_worker_write(file_worker, cstr_buff, strlen(cstr_buff))) {
+    if(!file_worker_write(file_worker, string_get_cstr(string), string_size(string))) {
         FURI_LOG_E("Archive", "Append write error");
     }
 

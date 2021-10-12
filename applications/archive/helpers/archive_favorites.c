@@ -34,7 +34,7 @@ uint16_t archive_favorites_count(void* context) {
 bool archive_favorites_read(void* context) {
     furi_assert(context);
 
-    ArchiveBrowserView* archive_view = context;
+    ArchiveBrowserView* browser = context;
     FileWorker* file_worker = file_worker_alloc(true);
 
     string_t buffer;
@@ -52,7 +52,7 @@ bool archive_favorites_read(void* context) {
                 break;
             }
 
-            archive_add_item(archive_view, &file_info, string_get_cstr(buffer));
+            archive_add_item(browser, &file_info, string_get_cstr(buffer));
             string_clean(buffer);
         }
     }
@@ -186,4 +186,21 @@ void archive_add_to_favorites(const char* file_path) {
     furi_assert(file_path);
 
     archive_file_append(ARCHIVE_FAV_PATH, "%s\n", file_path);
+}
+
+void archive_favorites_save(void* context) {
+    furi_assert(context);
+
+    ArchiveBrowserView* browser = context;
+    FileWorker* file_worker = file_worker_alloc(true);
+
+    for(size_t i = 0; i < archive_file_array_size(browser); i++) {
+        ArchiveFile_t* item = archive_get_file_at(browser, i);
+        archive_file_append(ARCHIVE_FAV_TEMP_PATH, "%s\n", string_get_cstr(item->name));
+    }
+
+    file_worker_remove(file_worker, ARCHIVE_FAV_PATH);
+    file_worker_rename(file_worker, ARCHIVE_FAV_TEMP_PATH, ARCHIVE_FAV_PATH);
+
+    file_worker_free(file_worker);
 }
