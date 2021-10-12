@@ -14,7 +14,12 @@ const char flipper_file_eoln = '\n';
 const char flipper_file_eolr = '\r';
 const char flipper_file_delimiter = ':';
 const char flipper_file_comment = '#';
-const char* flipper_file_scratchpad = "/any/.scratch.pad";
+
+#ifdef __linux__ 
+    const char* flipper_file_scratchpad = ".scratch.pad";
+#else
+    const char* flipper_file_scratchpad = "/any/.scratch.pad";
+#endif
 
 /**
  * Negative seek helper
@@ -405,10 +410,28 @@ bool flipper_file_open_read(FlipperFile* flipper_file, const char* filename) {
 
 bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
+
     bool result = storage_file_open(flipper_file->file, filename, FSAM_WRITE, FSOM_OPEN_APPEND);
 
-    // TODO:
-    // check for '/n' at the end of file and add if not exist
+    // Add EOL if it is not there
+    if(storage_file_size(flipper_file->file) >= 1) {
+        do {
+            char last_char;
+            result = false;
+
+            if(!flipper_file_seek(flipper_file->file, -1)) break;
+
+            uint16_t bytes_were_read = storage_file_read(flipper_file->file, &last_char, 1);
+            if(bytes_were_read != 1) break;
+
+            if(last_char != flipper_file_eoln) {
+                if(!flipper_file_write_eol(flipper_file->file)) break;
+            }
+
+            result = true;
+        } while(false);
+    }
+
     return result;
 }
 
@@ -668,7 +691,9 @@ bool flipper_file_write_float(
             if(!result) break;
         }
 
-        result = flipper_file_write_eol(flipper_file->file);
+        if(result) {
+            result = flipper_file_write_eol(flipper_file->file);
+        }
     } while(false);
 
     string_clear(value);
@@ -765,15 +790,16 @@ bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key) {
     bool result = false;
     File* scratch_file = storage_file_alloc(flipper_file->storage);
 
-    uint32_t position = storage_file_tell(flipper_file->file);
-
     do {
+        // get size
         uint64_t file_size = storage_file_size(flipper_file->file);
         if(file_size == 0) break;
 
         if(!storage_file_seek(flipper_file->file, 0, true)) break;
 
+        // find key
         if(!flipper_file_seek_to_key(flipper_file->file, key)) break;
+        // get key start position
         uint64_t start_position = storage_file_tell(flipper_file->file) - strlen(key);
         if(start_position >= 2) {
             start_position -= 2;
@@ -782,38 +808,43 @@ bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key) {
             break;
         }
 
+        // get value end position
         if(!flipper_file_seek_to_next_line(flipper_file->file)) break;
         uint64_t end_position = storage_file_tell(flipper_file->file);
+        // newline symbol
         if(end_position < file_size) {
             end_position += 1;
         }
 
+        // open scratchpad
         const char* scratch_name = "";
         if(!flipper_file_get_scratchpad_name(&scratch_name)) break;
 
         if(!storage_file_open(scratch_file, scratch_name, FSAM_WRITE, FSOM_CREATE_ALWAYS)) break;
 
+        // copy key file before key to scratchpad
         if(!flipper_file_copy(flipper_file->file, scratch_file, 0, start_position)) break;
+        // copy key file after key value to scratchpad
         if(!flipper_file_copy(flipper_file->file, scratch_file, end_position, file_size)) break;
 
         file_size = storage_file_tell(scratch_file);
         if(file_size == 0) break;
 
         if(!storage_file_seek(flipper_file->file, 0, true)) break;
+
+        // copy whole scratchpad file to the original file
         if(!flipper_file_copy(scratch_file, flipper_file->file, 0, file_size)) break;
 
+        // and truncate original file
         if(!storage_file_truncate(flipper_file->file)) break;
 
+        // close and remove scratchpad file
         if(!storage_file_close(scratch_file)) break;
         if(storage_common_remove(flipper_file->storage, scratch_name) != FSE_OK) break;
         result = true;
     } while(false);
 
     storage_file_free(scratch_file);
-
-    if(!storage_file_seek(flipper_file->file, position, true)) {
-        result = false;
-    }
 
     return result;
 }
