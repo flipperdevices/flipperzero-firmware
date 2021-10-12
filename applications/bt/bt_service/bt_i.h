@@ -39,7 +39,7 @@ struct Bt {
     DialogsApp* dialogs;
     DialogMessage* dialog_message;
     Power* power;
-    RpcInstance* rpc;
+    Rpc* rpc;
     RpcSession* rpc_session;
     osSemaphoreId_t rpc_sem;
 };
