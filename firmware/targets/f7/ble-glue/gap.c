@@ -83,7 +83,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             if (disconnection_complete_event->Connection_Handle == gap->gap_svc.connection_handle) {
                 gap->gap_svc.connection_handle = 0;
                 gap->state = GapStateIdle;
-                FURI_LOG_I(GAP_TAG, "Disconnect from client");
+                FURI_LOG_I(GAP_TAG, "Disconnect from client. Reason: %d", disconnection_complete_event->Reason);
             }
             if(gap->enable_adv) {
                 // Restart advertising
