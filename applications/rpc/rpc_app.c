@@ -5,7 +5,6 @@
 #include <furi.h>
 #include <loader/loader.h>
 
-
 void rpc_system_app_start_process(const PB_Main* request, void* context) {
     Rpc* rpc = context;
     furi_assert(rpc);
@@ -15,16 +14,16 @@ void rpc_system_app_start_process(const PB_Main* request, void* context) {
 
     Loader* loader = furi_record_open("loader");
     const char* app_name = request->content.app_start.name;
-    if (app_name) {
+    if(app_name) {
         const char* app_args = request->content.app_start.args;
         LoaderStatus status = loader_start(loader, app_name, app_args);
-        if (status == LoaderStatusErrorAppStarted) {
+        if(status == LoaderStatusErrorAppStarted) {
             result = PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED;
-        } else if (status == LoaderStatusErrorInternal) {
+        } else if(status == LoaderStatusErrorInternal) {
             result = PB_CommandStatus_ERROR_APP_CANT_START;
-        } else if (status == LoaderStatusErrorUnknownApp) {
+        } else if(status == LoaderStatusErrorUnknownApp) {
             result = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
-        } else if (status == LoaderStatusOk) {
+        } else if(status == LoaderStatusOk) {
             result = PB_CommandStatus_OK;
         } else {
             furi_assert(0);

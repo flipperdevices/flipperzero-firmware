@@ -24,7 +24,7 @@ void unit_tests_cli_run(Cli* cli, string_t args, void* context) {
     NotificationApp* notification = furi_record_open("notification");
     furi_record_close("notification");
 
-    if (loader_is_locked(loader)) {
+    if(loader_is_locked(loader)) {
         FURI_LOG_E("UNIT_TESTS", "RPC: stop all applications to run tests");
         notification_message(notification, &sequence_blink_magenta_100);
     } else {
@@ -49,4 +49,3 @@ void unit_tests_cli_init() {
     cli_add_command(cli, "run_unit_tests", CliCommandFlagParallelSafe, unit_tests_cli_run, NULL);
     furi_record_close("cli");
 }
-

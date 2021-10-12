@@ -110,7 +110,7 @@ static void clean_directory(Storage* fs_api, const char* clean_dir) {
         free(name);
     } else {
         FS_Error error = storage_common_mkdir(fs_api, clean_dir);
-        (void) error;
+        (void)error;
         furi_assert(error == FSE_OK);
     }
 
@@ -175,7 +175,7 @@ static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size
     StreamBufferHandle_t stream_buffer = ctx;
 
     size_t bytes_sent = xStreamBufferSend(stream_buffer, got_bytes, got_size, osWaitForever);
-    (void) bytes_sent;
+    (void)bytes_sent;
     furi_assert(bytes_sent == got_size);
 }
 
@@ -598,7 +598,7 @@ static void test_storage_read_run(const char* path, uint32_t command_id) {
 static void test_create_dir(const char* path) {
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_mkdir(fs_api, path);
-    (void) error;
+    (void)error;
     furi_assert((error == FSE_OK) || (error == FSE_EXIST));
     furi_record_close("storage");
 }
@@ -877,7 +877,7 @@ MU_TEST(test_storage_mkdir) {
 
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_remove(fs_api, TEST_DIR "dir1");
-    (void) error;
+    (void)error;
     furi_assert(error == FSE_OK);
     furi_record_close("storage");
 
@@ -1030,14 +1030,18 @@ MU_TEST_SUITE(test_rpc_storage) {
     MU_RUN_TEST(test_storage_interrupt_continuous_another_system);
 }
 
-static void test_app_create_request(PB_Main* request, const char* app_name, const char* app_args, uint32_t command_id) {
+static void test_app_create_request(
+    PB_Main* request,
+    const char* app_name,
+    const char* app_args,
+    uint32_t command_id) {
     request->command_id = command_id;
     request->command_status = PB_CommandStatus_OK;
     request->cb_content.funcs.encode = NULL;
     request->which_content = PB_Main_app_start_tag;
     request->has_next = false;
 
-    if (app_name) {
+    if(app_name) {
         char* msg_app_name = furi_alloc(strlen(app_name) + 1);
         strcpy(msg_app_name, app_name);
         request->content.app_start.name = msg_app_name;
@@ -1045,7 +1049,7 @@ static void test_app_create_request(PB_Main* request, const char* app_name, cons
         request->content.app_start.name = NULL;
     }
 
-    if (app_args) {
+    if(app_args) {
         char* msg_app_args = furi_alloc(strlen(app_args) + 1);
         strcpy(msg_app_args, app_args);
         request->content.app_start.args = msg_app_args;
@@ -1054,7 +1058,11 @@ static void test_app_create_request(PB_Main* request, const char* app_name, cons
     }
 }
 
-static void test_app_start_run(const char* app_name, const char* app_args, PB_CommandStatus status, uint32_t command_id) {
+static void test_app_start_run(
+    const char* app_name,
+    const char* app_args,
+    PB_CommandStatus status,
+    uint32_t command_id) {
     PB_Main request;
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
@@ -1098,7 +1106,8 @@ MU_TEST(test_app_start_and_lock_status) {
     test_app_start_run(NULL, "/ext/file", PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_start_run(NULL, NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
-    test_app_start_run("skynet_destroy_world_app", NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
+    test_app_start_run(
+        "skynet_destroy_world_app", NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
 
     test_app_start_run("Dummy Test App", "0", PB_CommandStatus_OK, ++command_id);
@@ -1109,7 +1118,8 @@ MU_TEST(test_app_start_and_lock_status) {
     test_app_get_status_lock_run(true, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
-    test_app_start_run("Dummy Test App", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
+    test_app_start_run(
+        "Dummy Test App", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
     delay(200);
     test_app_get_status_lock_run(false, ++command_id);
 
@@ -1119,12 +1129,12 @@ MU_TEST(test_app_start_and_lock_status) {
     test_app_start_run("Infrared", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
-    test_app_start_run("2_girls_1_app", "0", PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
+    test_app_start_run(
+        "2_girls_1_app", "0", PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
     delay(500);
     test_app_get_status_lock_run(false, ++command_id);
-
 }
 
 MU_TEST_SUITE(test_rpc_app) {
@@ -1145,10 +1155,9 @@ int run_minunit_test_rpc() {
 int32_t dummy_test_app(void* p) {
     int timeout = atoi((const char*)p);
 
-    if (timeout > 0) {
+    if(timeout > 0) {
         delay(timeout);
     }
 
     return 0;
 }
-
