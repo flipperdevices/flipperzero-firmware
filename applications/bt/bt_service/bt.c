@@ -128,7 +128,10 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
     } else if(event.type == BleEventTypeDisconnected) {
         FURI_LOG_I(BT_SERVICE_TAG, "Close RPC connection");
-        rpc_close_session(bt->rpc_session);
+        if(bt->rpc_session) {
+            rpc_close_session(bt->rpc_session);
+            bt->rpc_session = NULL;
+        }
     } else if(event.type == BleEventTypeStartAdvertising || event.type == BleEventTypeStopAdvertising) {
         BtMessage message = {.type = BtMessageTypeUpdateStatusbar};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
