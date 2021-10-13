@@ -89,7 +89,10 @@ static size_t rpc_sprintf_msg_file(
         }
 
         if(msg_file->data && msg_file->data->size) {
-            string_cat_printf(str, " (%d):\'%.*s%s\'", msg_file->data->size, MIN(msg_file->data->size, 30), msg_file->data->bytes,
+            string_cat_printf(str, " (%d):\'%.*s%s\'",
+                    msg_file->data->size,
+                    MIN(msg_file->data->size, 30),
+                    msg_file->data->bytes,
                 msg_file->data->size > 30 ? "..." : "");
         }
 

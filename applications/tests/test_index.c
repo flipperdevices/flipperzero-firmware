@@ -30,8 +30,8 @@ void unit_tests_cli_run(Cli* cli, string_t args, void* context) {
     } else {
         notification_message_block(notification, &sequence_set_only_blue_255);
 
-        test_result |= run_minunit();
-        test_result |= run_minunit_test_irda_decoder_encoder();
+//        test_result |= run_minunit();
+//        test_result |= run_minunit_test_irda_decoder_encoder();
         test_result |= run_minunit_test_rpc();
 
         if(test_result == 0) {

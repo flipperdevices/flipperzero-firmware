@@ -1144,6 +1144,7 @@ MU_TEST_SUITE(test_rpc_app) {
 }
 
 int run_minunit_test_rpc() {
+
     MU_RUN_SUITE(test_rpc_storage);
     MU_RUN_SUITE(test_rpc_status);
     MU_RUN_SUITE(test_rpc_app);
