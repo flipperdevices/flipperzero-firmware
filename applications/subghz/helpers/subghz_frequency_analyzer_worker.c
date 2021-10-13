@@ -5,24 +5,22 @@
 
 #include "../subghz_i.h"
 
-static const uint8_t subghz_preset_ook_58khz[][2] =
-    {
-        {CC1101_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
-        {CC1101_MDMCFG4, 0xF5}, // Rx BW filter is 58.035714kHz
-        {CC1101_TEST2, 0x81}, // FIFOTHR ADC_RETENTION=1 matched value
-        {CC1101_TEST1, 0x35}, // FIFOTHR ADC_RETENTION=1 matched value
-        /* End  */
-        {0, 0},
+static const uint8_t subghz_preset_ook_58khz[][2] = {
+    {CC1101_FIFOTHR, 0x47}, // The only important bit is ADC_RETENTION, FIFO Tx=33 Rx=32
+    {CC1101_MDMCFG4, 0xF5}, // Rx BW filter is 58.035714kHz
+    {CC1101_TEST2, 0x81}, // FIFOTHR ADC_RETENTION=1 matched value
+    {CC1101_TEST1, 0x35}, // FIFOTHR ADC_RETENTION=1 matched value
+    /* End  */
+    {0, 0},
 };
 
-static const uint8_t subghz_preset_ook_650khz[][2] =
-    {
-        {CC1101_FIFOTHR, 0x07}, // The only important bit is ADC_RETENTION
-        {CC1101_MDMCFG4, 0x17}, // Rx BW filter is 650.000kHz
-        {CC1101_TEST2, 0x88},
-        {CC1101_TEST1, 0x31},
-        /* End  */
-        {0, 0},
+static const uint8_t subghz_preset_ook_650khz[][2] = {
+    {CC1101_FIFOTHR, 0x07}, // The only important bit is ADC_RETENTION
+    {CC1101_MDMCFG4, 0x17}, // Rx BW filter is 650.000kHz
+    {CC1101_TEST2, 0x88},
+    {CC1101_TEST1, 0x31},
+    /* End  */
+    {0, 0},
 };
 
 struct SubGhzFrequencyAnalyzerWorker {
