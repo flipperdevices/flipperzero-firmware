@@ -11,7 +11,7 @@ int run_minunit();
 int run_minunit_test_irda_decoder_encoder();
 int run_minunit_test_rpc();
 
-void unit_tests_cli_run(Cli* cli, string_t args, void* context) {
+void unit_tests_cli(Cli* cli, string_t args, void* context) {
     uint32_t test_result = 0;
     minunit_run = 0;
     minunit_assert = 0;
@@ -46,6 +46,6 @@ void unit_tests_cli_run(Cli* cli, string_t args, void* context) {
 
 void unit_tests_cli_init() {
     Cli* cli = furi_record_open("cli");
-    cli_add_command(cli, "run_unit_tests", CliCommandFlagParallelSafe, unit_tests_cli_run, NULL);
+    cli_add_command(cli, "unit_tests", CliCommandFlagParallelSafe, unit_tests_cli, NULL);
     furi_record_close("cli");
 }

@@ -5,7 +5,6 @@ CFLAGS		+= -I$(APP_DIR)
 C_SOURCES	+= $(shell find $(APP_DIR) -name "*.c")
 CPP_SOURCES	+= $(shell find $(APP_DIR) -name "*.cpp")
 
-WITH_UNIT_TESTS ?= 0
 
 APP_RELEASE ?= 1
 ifeq ($(APP_RELEASE), 1)
@@ -60,8 +59,9 @@ SRV_GUI		= 1
 endif
 
 
-ifeq ($(WITH_UNIT_TESTS), 1)
-CFLAGS		+= -DWITH_UNIT_TESTS
+APP_UNIT_TESTS ?= 0
+ifeq ($(APP_UNIT_TESTS), 1)
+CFLAGS		+= -DAPP_UNIT_TESTS
 endif
 
 

@@ -20,7 +20,7 @@ extern int32_t desktop_srv(void* p);
 extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t blink_test_app(void* p);
-extern int32_t dummy_test_app(void* p);
+extern int32_t delay_test_app(void* p);
 extern int32_t gpio_app(void* p);
 extern int32_t ibutton_app(void* p);
 extern int32_t irda_app(void* p);
@@ -185,7 +185,7 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
     storage_cli_init,
 #endif
 
-#ifdef WITH_UNIT_TESTS
+#ifdef APP_UNIT_TESTS
     unit_tests_cli_init,
 #endif
 };
@@ -241,8 +241,8 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
     {.app = bt_debug_app, .name = "Bluetooth Debug", .stack_size = 1024, .icon = NULL},
 #endif
 
-#ifdef WITH_UNIT_TESTS
-    {.app = dummy_test_app, .name = "Dummy Test App", .stack_size = 1024, .icon = &A_Plugins_14},
+#ifdef APP_UNIT_TESTS
+    {.app = delay_test_app, .name = "Delay Test App", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 };
 
