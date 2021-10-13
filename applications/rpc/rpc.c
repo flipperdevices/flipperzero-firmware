@@ -269,7 +269,6 @@ void rpc_close_session(RpcSession* session) {
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
 
-    osMutexDelete(session->send_bytes_mutex);
     rpc_set_send_bytes_callback(session, NULL, NULL);
     osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
 }
@@ -344,8 +343,6 @@ void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
     pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
 
     {
-        osMutexAcquire(session->send_bytes_mutex, osWaitForever);
-
 #if DEBUG_PRINT
         printf("\r\nREPONSE DEC(%d): {", ostream.bytes_written);
         for(int i = 0; i < ostream.bytes_written; ++i) {
@@ -360,6 +357,7 @@ void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
         printf("}\r\n\r\n");
 #endif // DEBUG_PRINT
 
+        osMutexAcquire(session->send_bytes_mutex, osWaitForever);
         if(session->send_bytes_callback) {
             session->send_bytes_callback(
                 session->send_bytes_context, buffer, ostream.bytes_written);
@@ -424,6 +422,7 @@ int32_t rpc_srv(void* p) {
                     }
                 }
                 free(session->system_contexts);
+                osMutexDelete(session->send_bytes_mutex);
                 RpcHandlerDict_clean(rpc->handlers);
                 rpc->busy = false;
             } else {
