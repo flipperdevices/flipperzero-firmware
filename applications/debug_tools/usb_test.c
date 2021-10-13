@@ -4,16 +4,12 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/gui.h>
-#include "furi-hal-usb-hid.h"
-#include <storage/storage.h>
 #include <cmsis_os.h>
 
 typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    osThreadAttr_t thread_attr;
-    osThreadId_t thread;
 } UsbTestApp;
 
 typedef enum {
@@ -23,15 +19,11 @@ typedef enum {
     UsbTestSubmenuIndexVcpDual,
     UsbTestSubmenuIndexHid,
     UsbTestSubmenuIndexHidU2F,
-
-    UsbTestSubmenuIndexHidBadUsb,
 } SubmenuIndex;
-
-static void keyboard_print_task(void* context);
 
 void usb_test_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
-    UsbTestApp* app = context;
+    //UsbTestApp* app = context;
     if(index == UsbTestSubmenuIndexEnable) {
         furi_hal_usb_enable();
     } else if(index == UsbTestSubmenuIndexDisable) {
@@ -44,39 +36,7 @@ void usb_test_submenu_callback(void* context, uint32_t index) {
         furi_hal_usb_set_config(UsbModeHid);
     } else if(index == UsbTestSubmenuIndexHidU2F) {
         //furi_hal_usb_set_config(UsbModeU2F);
-    } else if(index == UsbTestSubmenuIndexHidBadUsb) {
-        if(app->thread == NULL)
-            app->thread = osThreadNew(keyboard_print_task, (void*)app, &app->thread_attr);
-        else if(eTaskGetState(app->thread) == eDeleted)
-            app->thread = osThreadNew(keyboard_print_task, (void*)app, &app->thread_attr);
     }
-}
-
-static void keyboard_print_task(void* context) {
-    //UsbTestApp* app = context;
-    FURI_LOG_I("BadUSB", "Start");
-    File* script_file = storage_file_alloc(furi_record_open("storage"));
-
-    if(storage_file_open(script_file, "/ext/badusb.txt", FSAM_READ, FSOM_OPEN_EXISTING)) {
-        char buffer[16];
-        uint16_t ret;
-        do {
-            ret = storage_file_read(script_file, buffer, 16);
-            for(uint16_t i = 0; i < ret; i++) {
-                if(furi_hal_hid_kb_press(HID_ASCII_TO_KEY(buffer[i])) == false) break;
-                if(furi_hal_hid_kb_release(HID_ASCII_TO_KEY(buffer[i])) == false) break;
-            }
-        } while(ret > 0);
-    } else {
-        FURI_LOG_E("BadUSB", "Script file open error");
-    }
-    furi_hal_hid_kb_release_all();
-    storage_file_close(script_file);
-    storage_file_free(script_file);
-
-    FURI_LOG_I("BadUSB", "End");
-
-    osThreadExit();
 }
 
 uint32_t usb_test_exit(void* context) {
@@ -85,8 +45,6 @@ uint32_t usb_test_exit(void* context) {
 
 UsbTestApp* usb_test_app_alloc() {
     UsbTestApp* app = furi_alloc(sizeof(UsbTestApp));
-    app->thread_attr.name = "hid_keyboard";
-    app->thread_attr.stack_size = 1024;
 
     // Gui
     app->gui = furi_record_open("gui");
@@ -108,12 +66,6 @@ UsbTestApp* usb_test_app_alloc() {
         app->submenu, "Dual VCP", UsbTestSubmenuIndexVcpDual, usb_test_submenu_callback, app);
     submenu_add_item(
         app->submenu, "HID KB+Mouse", UsbTestSubmenuIndexHid, usb_test_submenu_callback, app);
-    submenu_add_item(
-        app->submenu,
-        "[HID] Send script",
-        UsbTestSubmenuIndexHidBadUsb,
-        usb_test_submenu_callback,
-        app);
     submenu_add_item(
         app->submenu, "TODO: HID U2F", UsbTestSubmenuIndexHidU2F, usb_test_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_test_exit);

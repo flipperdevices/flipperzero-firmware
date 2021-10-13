@@ -46,6 +46,7 @@ APP_UNIT_TESTS = 0
 APP_VIBRO_DEMO = 1
 APP_USB_TEST = 1
 APP_USB_MOUSE = 1
+APP_BAD_USB = 1
 endif
 
 
@@ -134,6 +135,13 @@ endif
 APP_USB_MOUSE ?= 0
 ifeq ($(APP_USB_MOUSE), 1)
 CFLAGS		+= -DAPP_USB_MOUSE
+SRV_INPUT = 1
+SRV_GUI = 1
+endif
+
+APP_BAD_USB ?= 0
+ifeq ($(APP_BAD_USB), 1)
+CFLAGS		+= -DAPP_BAD_USB
 SRV_INPUT = 1
 SRV_GUI = 1
 endif 
