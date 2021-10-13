@@ -24,7 +24,7 @@
 #define RPC_EVENT_DISCONNECT (1 << 1)
 #define RPC_EVENTS_ALL (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
-#define DEBUG_PRINT 1
+#define DEBUG_PRINT 0
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
@@ -78,7 +78,8 @@ static size_t rpc_sprintf_msg_file(
     size_t cnt = 0;
 
     for(int i = 0; i < msg_files_size; ++i, ++msg_file) {
-        string_cat_printf(str,
+        string_cat_printf(
+            str,
             "%s[%c] size: %5ld",
             prefix,
             msg_file->type == PB_Storage_File_FileType_DIR ? 'd' : 'f',
@@ -89,10 +90,12 @@ static size_t rpc_sprintf_msg_file(
         }
 
         if(msg_file->data && msg_file->data->size) {
-            string_cat_printf(str, " (%d):\'%.*s%s\'",
-                    msg_file->data->size,
-                    MIN(msg_file->data->size, 30),
-                    msg_file->data->bytes,
+            string_cat_printf(
+                str,
+                " (%d):\'%.*s%s\'",
+                msg_file->data->size,
+                MIN(msg_file->data->size, 30),
+                msg_file->data->bytes,
                 msg_file->data->size > 30 ? "..." : "");
         }
 
@@ -106,7 +109,9 @@ void rpc_print_message(const PB_Main* message) {
     string_t str;
     string_init(str);
 
-    string_cat_printf(str, "PB_Main: {\r\n\tresult: %d cmd_id: %ld (%s)\r\n",
+    string_cat_printf(
+        str,
+        "PB_Main: {\r\n\tresult: %d cmd_id: %ld (%s)\r\n",
         message->command_status,
         message->command_id,
         message->has_next ? "has_next" : "last");
@@ -344,17 +349,27 @@ void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
 
     {
 #if DEBUG_PRINT
-        printf("\r\nREPONSE DEC(%d): {", ostream.bytes_written);
-        for(int i = 0; i < ostream.bytes_written; ++i) {
-            printf("%d, ", buffer[i]);
-        }
-        printf("}\r\n");
+        string_t str;
+        string_init(str);
+        string_reserve(str, 100 + ostream.bytes_written * 5);
 
-        printf("REPONSE HEX(%d): {", ostream.bytes_written);
+        string_cat_printf(str, "\r\nREPONSE DEC(%d): {", ostream.bytes_written);
         for(int i = 0; i < ostream.bytes_written; ++i) {
-            printf("%02X", buffer[i]);
+            string_cat_printf(str, "%d, ", buffer[i]);
         }
-        printf("}\r\n\r\n");
+        string_cat_printf(str, "}\r\n");
+
+        printf("%s", string_get_cstr(str));
+        string_clean(str);
+        string_reserve(str, 100 + ostream.bytes_written * 3);
+
+        string_cat_printf(str, "REPONSE HEX(%d): {", ostream.bytes_written);
+        for(int i = 0; i < ostream.bytes_written; ++i) {
+            string_cat_printf(str, "%02X", buffer[i]);
+        }
+        string_cat_printf(str, "}\r\n\r\n");
+
+        printf("%s", string_get_cstr(str));
 #endif // DEBUG_PRINT
 
         osMutexAcquire(session->send_bytes_mutex, osWaitForever);
