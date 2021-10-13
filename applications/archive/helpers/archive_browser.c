@@ -10,7 +10,9 @@ void archive_update_offset(ArchiveBrowserView* browser) {
 
             if(array_size > 3 && model->idx >= array_size - 1) {
                 model->list_offset = model->idx - 3;
-            } else if(model->last_offset && model->last_offset != model->list_offset) {
+            } else if(
+                model->last_offset && model->last_offset != model->list_offset &&
+                model->tab_idx == model->last_tab) {
                 model->list_offset = model->last_offset;
                 model->last_offset = !model->last_offset;
             } else if(model->list_offset < model->idx - bounds) {
@@ -18,7 +20,6 @@ void archive_update_offset(ArchiveBrowserView* browser) {
             } else if(model->list_offset > model->idx - bounds) {
                 model->list_offset = CLAMP(model->idx - 1, array_size - bounds, 0);
             }
-
             return true;
         });
 }
@@ -75,6 +76,31 @@ void archive_file_array_rm_selected(ArchiveBrowserView* browser) {
     archive_update_offset(browser);
 }
 
+void archive_file_array_swap(ArchiveBrowserView* browser, int8_t d) {
+    with_view_model(
+        browser->view, (ArchiveBrowserViewModel * model) {
+            ArchiveFile_t temp;
+            size_t array_size = files_array_size(model->files) - 1;
+            uint8_t swap_idx = CLAMP(model->idx + d, array_size, 0);
+
+            if(model->idx == 0 && d < 0) {
+                ArchiveFile_t_init(&temp);
+                files_array_pop_at(&temp, model->files, array_size);
+                files_array_push_at(model->files, model->idx, temp);
+                ArchiveFile_t_clear(&temp);
+            } else if(model->idx == array_size && d > 0) {
+                ArchiveFile_t_init(&temp);
+                files_array_pop_at(&temp, model->files, model->last_idx);
+                files_array_push_at(model->files, array_size, temp);
+                ArchiveFile_t_clear(&temp);
+            } else {
+                files_array_swap_at(model->files, model->idx, swap_idx);
+            }
+
+            return false;
+        });
+}
+
 void archive_file_array_rm_all(ArchiveBrowserView* browser) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
@@ -89,6 +115,18 @@ ArchiveFile_t* archive_get_current_file(ArchiveBrowserView* browser) {
         browser->view, (ArchiveBrowserViewModel * model) {
             selected = files_array_size(model->files) ? files_array_get(model->files, model->idx) :
                                                         NULL;
+            return false;
+        });
+    return selected;
+}
+
+ArchiveFile_t* archive_get_file_at(ArchiveBrowserView* browser, size_t idx) {
+    ArchiveFile_t* selected;
+    idx = CLAMP(idx, archive_file_array_size(browser), 0);
+
+    with_view_model(
+        browser->view, (ArchiveBrowserViewModel * model) {
+            selected = files_array_size(model->files) ? files_array_get(model->files, idx) : NULL;
             return false;
         });
     return selected;
@@ -174,6 +212,14 @@ void archive_show_file_menu(ArchiveBrowserView* browser, bool show) {
                     "%s/%s", string_get_cstr(browser->path), string_get_cstr(selected->name));
             }
 
+            return true;
+        });
+}
+
+void archive_favorites_move_mode(ArchiveBrowserView* browser, bool active) {
+    with_view_model(
+        browser->view, (ArchiveBrowserViewModel * model) {
+            model->move_fav = active;
             return true;
         });
 }

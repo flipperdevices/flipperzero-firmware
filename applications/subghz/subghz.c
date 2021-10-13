@@ -133,6 +133,13 @@ SubGhz* subghz_alloc() {
         SubGhzViewVariableItemList,
         variable_item_list_get_view(subghz->variable_item_list));
 
+    // Frequency Analyzer
+    subghz->subghz_frequency_analyzer = subghz_frequency_analyzer_alloc();
+    view_dispatcher_add_view(
+        subghz->view_dispatcher,
+        SubGhzViewFrequencyAnalyzer,
+        subghz_frequency_analyzer_get_view(subghz->subghz_frequency_analyzer));
+
     // Carrier Test Module
     subghz->subghz_test_carrier = subghz_test_carrier_alloc();
     view_dispatcher_add_view(
@@ -215,6 +222,10 @@ void subghz_free(SubGhz* subghz) {
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewVariableItemList);
     variable_item_list_free(subghz->variable_item_list);
 
+    // Frequency Analyzer
+    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewFrequencyAnalyzer);
+    subghz_frequency_analyzer_free(subghz->subghz_frequency_analyzer);
+
     // Submenu
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewMenu);
     submenu_free(subghz->submenu);
@@ -260,7 +271,11 @@ int32_t subghz_app(void* p) {
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
     }
 
+    furi_hal_power_suppress_charge_enter();
+
     view_dispatcher_run(subghz->view_dispatcher);
+
+    furi_hal_power_suppress_charge_exit();
 
     subghz_free(subghz);
 

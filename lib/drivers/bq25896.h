@@ -12,11 +12,20 @@ void bq25896_poweroff();
 /** Is currently charging */
 bool bq25896_is_charging();
 
+/** Enable charging */
+void bq25896_enable_charging();
+
+/** Disable charging */
+void bq25896_disable_charging();
+
 /** Enable otg */
 void bq25896_enable_otg();
 
 /** Disable otg */
 void bq25896_disable_otg();
+
+/** Is otg enabled */
+bool bq25896_is_otg_enabled();
 
 /** Get VBUS Voltage in mV */
 uint16_t bq25896_get_vbus_voltage();

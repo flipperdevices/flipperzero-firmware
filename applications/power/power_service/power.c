@@ -41,6 +41,10 @@ Power* power_alloc() {
 
     // Gui
     power->view_dispatcher = view_dispatcher_alloc();
+    power->popup = popup_alloc();
+    popup_set_header(
+        power->popup, "Disconnect USB for safe\nshutdown", 64, 26, AlignCenter, AlignTop);
+    view_dispatcher_add_view(power->view_dispatcher, PowerViewPopup, popup_get_view(power->popup));
     power->power_off = power_off_alloc();
     view_dispatcher_add_view(
         power->view_dispatcher, PowerViewOff, power_off_get_view(power->power_off));
@@ -63,6 +67,8 @@ void power_free(Power* power) {
     // Gui
     view_dispatcher_remove_view(power->view_dispatcher, PowerViewOff);
     power_off_free(power->power_off);
+    view_dispatcher_remove_view(power->view_dispatcher, PowerViewPopup);
+    popup_free(power->popup);
     view_port_free(power->battery_view_port);
 
     // State
@@ -97,29 +103,34 @@ static void power_check_charging_state(Power* power) {
     }
 }
 
-static void power_update_info(Power* power) {
+static bool power_update_info(Power* power) {
+    PowerInfo info;
+
+    info.charge = furi_hal_power_get_pct();
+    info.health = furi_hal_power_get_bat_health_pct();
+    info.capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
+    info.capacity_full = furi_hal_power_get_battery_full_capacity();
+    info.current_charger = furi_hal_power_get_battery_current(FuriHalPowerICCharger);
+    info.current_gauge = furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge);
+    info.voltage_charger = furi_hal_power_get_battery_voltage(FuriHalPowerICCharger);
+    info.voltage_gauge = furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge);
+    info.voltage_vbus = furi_hal_power_get_usb_voltage();
+    info.temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
+    info.temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
+
     osMutexAcquire(power->info_mtx, osWaitForever);
-    PowerInfo* info = &power->info;
-
-    info->charge = furi_hal_power_get_pct();
-    info->health = furi_hal_power_get_bat_health_pct();
-    info->capacity_remaining = furi_hal_power_get_battery_remaining_capacity();
-    info->capacity_full = furi_hal_power_get_battery_full_capacity();
-    info->current_charger = furi_hal_power_get_battery_current(FuriHalPowerICCharger);
-    info->current_gauge = furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge);
-    info->voltage_charger = furi_hal_power_get_battery_voltage(FuriHalPowerICCharger);
-    info->voltage_gauge = furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge);
-    info->voltage_vbus = furi_hal_power_get_usb_voltage();
-    info->temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
-    info->temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
-
+    bool need_refresh = power->info.charge != info.charge;
+    power->info = info;
     osMutexRelease(power->info_mtx);
+
+    return need_refresh;
 }
 
 static void power_check_low_battery(Power* power) {
     // Check battery charge and vbus voltage
     if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f)) {
         if(!power->battery_low) {
+            view_dispatcher_send_to_front(power->view_dispatcher);
             view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewOff);
         }
         power->battery_low = true;
@@ -135,7 +146,7 @@ static void power_check_low_battery(Power* power) {
         if(power->power_off_timeout) {
             power_off_set_time_left(power->power_off, power->power_off_timeout--);
         } else {
-            power_off();
+            power_off(power);
         }
     }
 }
@@ -156,7 +167,7 @@ int32_t power_srv(void* p) {
 
     while(1) {
         // Update data from gauge and charger
-        power_update_info(power);
+        bool need_refresh = power_update_info(power);
 
         // Check low battery level
         power_check_low_battery(power);
@@ -168,7 +179,7 @@ int32_t power_srv(void* p) {
         power_check_battery_level_change(power);
 
         // Update battery view port
-        view_port_update(power->battery_view_port);
+        if(need_refresh) view_port_update(power->battery_view_port);
 
         osDelay(1000);
     }
