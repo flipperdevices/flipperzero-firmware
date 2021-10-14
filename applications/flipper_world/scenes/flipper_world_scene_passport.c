@@ -29,7 +29,8 @@ const void flipper_world_scene_passport_on_enter(void* context) {
                 dolphin_state_xp_to_levelup(state.icounter, model->current_level - 1, false);
             model->exp =
                 (dolphin_state_xp_to_levelup(state.icounter, model->current_level, true) * 63) /
-                (dolphin_state_xp_to_levelup(state.icounter, model->current_level, false) - prev_cap);
+                (dolphin_state_xp_to_levelup(state.icounter, model->current_level, false) -
+                 prev_cap);
             model->portrait_level = CLAMP(floor(model->current_level / 14), MOODS_TOTAL - 1, 0);
             model->name = furi_hal_version_get_name_ptr();
             return true;

@@ -1,7 +1,6 @@
 #include <gui/elements.h>
 #include "applications.h"
 #include "items_i.h"
-#include "emotes.h"
 #include <gui/icon_i.h>
 
 const Item Food = {
@@ -71,7 +70,6 @@ static void dolphin_scene_type_text(
 
 const void flipper_world_item_callback(FlipperMainView* main_view) {
     furi_assert(main_view);
-    FURI_LOG_E("WORLD", "ITEM CALLBACK");
 
     with_view_model(
         main_view->view, (FlipperMainViewModel * model) {
@@ -125,6 +123,10 @@ void food_redraw(Canvas* canvas, void* s) {
     furi_assert(s);
     FlipperMainViewModel* state = s;
 
+    const char* emotes[] = {
+        "Lets play!",
+    };
+
     const Icon* food_frames[] = {
         &I_food1_61x98,
         &I_food2_61x98,
@@ -148,11 +150,11 @@ void food_redraw(Canvas* canvas, void* s) {
             state,
             (Food.pos.x - state->player_global.x) * PARALLAX(Food.layer) + 90,
             state->screen.y + 8,
-            console_emotes[state->emote_id]);
+            emotes[state->emote_id]);
 
     } else {
         state->dialog_progress = 0;
-        state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(console_emotes));
+        state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(emotes));
     }
 
     canvas_draw_icon(
@@ -175,40 +177,47 @@ void console_redraw(Canvas* canvas, void* s) {
     furi_assert(s);
     FlipperMainViewModel* state = s;
 
-    const Icon* console[] = {
-        &I_Console_74x67_0,
-        &I_Console_74x67_1,
-        &I_Console_74x67_2,
-        &I_Console_74x67_3,
-        &I_Console_74x67_4,
-        &I_Console_74x67_5,
-        &I_Console_74x67_6,
-        &I_Console_74x67_7,
-        &I_Console_74x67_8,
+    const char* emotes[] = {
+        "Run it, m8",
+        "Lets GOOOO",
+        "Click it, buddy",
+        "I wanna play",
+        "Wtf is this?",
+        "Just do it",
+        "JUST DO IT!",
+    };
+
+    const Icon* console_display[] = {
+        &I_Display_0_25x18,
+        &I_Display_1_25x18,
+        &I_Display_2_25x18,
+        &I_Display_3_25x18,
+        &I_Display_4_25x18,
+        &I_Display_5_25x18,
+        &I_Display_6_25x18,
+        &I_Display_7_25x18,
+        &I_Display_8_25x18,
+        &I_Display_9_25x18,
 
     };
 
-    uint8_t frame = ((HAL_GetTick() / 100) % SIZEOF_ARRAY(console));
+    uint8_t frame = ((osKernelGetTickCount() / 100) % SIZEOF_ARRAY(console_display));
 
-    canvas_draw_icon(
-        canvas,
-        (Console.pos.x - state->player_global.x) * PARALLAX(Console.layer),
-        Console.pos.y - state->player_global.y,
-        console[frame]);
+    uint16_t pos_x = (Console.pos.x - state->player_global.x) * PARALLAX(Console.layer);
+    uint16_t pos_y = Console.pos.y - state->player_global.y;
+
+    canvas_draw_icon(canvas, pos_x, pos_y, &I_Console_74x67);
+
+    canvas_draw_icon(canvas, pos_x + 17, pos_y + 10, console_display[frame]);
 
     canvas_set_bitmap_mode(canvas, true);
 
     if(is_nearby(state)) {
-        dolphin_scene_type_text(
-            canvas,
-            state,
-            (Console.pos.x - state->player_global.x) * PARALLAX(Console.layer) - 25,
-            Console.pos.y - state->player_global.y + 14,
-            console_emotes[state->emote_id]);
+        dolphin_scene_type_text(canvas, state, pos_x - 25, pos_y + 14, emotes[state->emote_id]);
 
     } else {
         state->dialog_progress = 0;
-        state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(console_emotes));
+        state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(emotes));
     }
 }
 
