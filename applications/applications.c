@@ -39,9 +39,7 @@ extern int32_t usb_test_app(void* p);
 extern int32_t usb_mouse_app(void* p);
 extern int32_t bad_usb_app(void* p);
 
-// Dolphin internals
-extern int32_t passport_app(void* p);
-extern int32_t food_minigame_app(void* p);
+// Dolphin
 extern int32_t flipper_world_app(void* p);
 
 // Plugins
@@ -269,16 +267,9 @@ const FlipperApplication FLIPPER_ARCHIVE =
     {.app = archive_app, .name = "Archive", .stack_size = 4096, .icon = &A_FileManager_14};
 #endif
 
-#ifdef APP_DESKTOP
-const FlipperApplication FLIPPER_SCENE =
+#ifdef APP_FLIPPER_WORLD
+const FlipperApplication FLIPPER_WORLD =
     {.app = flipper_world_app, .name = "Scenes", .stack_size = 1024, .icon = &A_Games_14};
-
-const FlipperApplication FLIPPER_SCENE_APPS[] = {
-    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = &A_Games_14},
-    {.app = food_minigame_app, .name = "Food minigame", .stack_size = 1024, .icon = &A_Games_14},
-};
-
-const size_t FLIPPER_SCENE_APPS_COUNT = sizeof(FLIPPER_SCENE_APPS) / sizeof(FlipperApplication);
 
 #endif
 

@@ -42,13 +42,10 @@ extern const size_t FLIPPER_PLUGINS_COUNT;
 extern const FlipperApplication FLIPPER_DEBUG_APPS[];
 extern const size_t FLIPPER_DEBUG_APPS_COUNT;
 
-/* Seperate scene app holder
- * Spawned by loader
+/* Desktop apps
+ * For access from idle screen
  */
-extern const FlipperApplication FLIPPER_SCENE;
-extern const FlipperApplication FLIPPER_SCENE_APPS[];
-extern const size_t FLIPPER_SCENE_APPS_COUNT;
-
+extern const FlipperApplication FLIPPER_WORLD;
 extern const FlipperApplication FLIPPER_ARCHIVE;
 
 /* Settings list

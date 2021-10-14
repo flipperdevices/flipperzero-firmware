@@ -75,9 +75,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopMainEventOpenFlipperScenes:
-            desktop_switch_to_app(desktop, &FLIPPER_SCENE);
-
-            // desktop_switch_to_app(desktop, &FLIPPER_SCENE);
+            desktop_switch_to_app(desktop, &FLIPPER_WORLD);
             consumed = true;
             break;
         default:

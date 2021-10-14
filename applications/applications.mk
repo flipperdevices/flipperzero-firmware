@@ -24,6 +24,7 @@ SRV_STORAGE	= 1
 
 # Apps
 SRV_DESKTOP	= 1
+APP_FLIPPER_WORLD = 1
 APP_ARCHIVE	= 1
 APP_GPIO = 1
 APP_IBUTTON	= 1
@@ -53,11 +54,10 @@ endif
 # that will be shown in menu
 # Prefix with APP_*
 
-
-APP_DESKTOP ?= 0
+APP_FLIPPER_WORLD ?= 0
 ifeq ($(APP_NFC), 1)
-CFLAGS		+= -DAPP_DESKTOP
-APP_DESKTOP = 1
+CFLAGS		+= -DAPP_FLIPPER_WORLD
+APP_FLIPPER_WORLD = 1
 endif
 
 APP_ARCHIVE ?= 0
