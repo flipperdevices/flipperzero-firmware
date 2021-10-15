@@ -58,7 +58,7 @@ typedef struct {
     uint16_t input_buffer_size; /* input buffer size */
 
     /* Input buffer, then expansion window buffer */
-    uint8_t buffers[];
+    uint8_t* buffers;
 #else
     /* Input buffer, then expansion window buffer */
     uint8_t buffers[(1 << HEATSHRINK_DECODER_WINDOW_BITS(_))
@@ -72,7 +72,7 @@ typedef struct {
  * size of 2^lookahead_sz2. (The window buffer and lookahead sizes
  * must match the settings used when the data was compressed.)
  * Returns NULL on error. */
-heatshrink_decoder *heatshrink_decoder_alloc(uint16_t input_buffer_size,
+heatshrink_decoder *heatshrink_decoder_alloc(uint8_t* buffer, uint16_t input_buffer_size,
     uint8_t expansion_buffer_sz2, uint8_t lookahead_sz2);
 
 /* Free a decoder. */

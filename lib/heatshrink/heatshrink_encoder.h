@@ -67,7 +67,7 @@ typedef struct {
     struct hs_index *search_index;
 #endif
     /* input buffer and / sliding window for expansion */
-    uint8_t buffer[];
+    uint8_t* buffer;
 #else
     #if HEATSHRINK_USE_INDEX
         struct hs_index search_index;
@@ -80,7 +80,7 @@ typedef struct {
 #if HEATSHRINK_DYNAMIC_ALLOC
 /* Allocate a new encoder struct and its buffers.
  * Returns NULL on error. */
-heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
+heatshrink_encoder *heatshrink_encoder_alloc(uint8_t* buffer, uint8_t window_sz2,
     uint8_t lookahead_sz2);
 
 /* Free an encoder. */

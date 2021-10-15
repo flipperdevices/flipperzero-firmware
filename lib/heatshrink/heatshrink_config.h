@@ -1,14 +1,16 @@
 #ifndef HEATSHRINK_CONFIG_H
 #define HEATSHRINK_CONFIG_H
 
+#include <furi.h>
+
 /* Should functionality assuming dynamic allocation be used? */
 #ifndef HEATSHRINK_DYNAMIC_ALLOC
-#define HEATSHRINK_DYNAMIC_ALLOC 0
+#define HEATSHRINK_DYNAMIC_ALLOC 1
 #endif
 
 #if HEATSHRINK_DYNAMIC_ALLOC
     /* Optional replacement of malloc/free */
-    #define HEATSHRINK_MALLOC(SZ) malloc(SZ)
+    #define HEATSHRINK_MALLOC(SZ) furi_alloc(SZ)
     #define HEATSHRINK_FREE(P, SZ) free(P)
 #else
     /* Required parameters for static configuration */

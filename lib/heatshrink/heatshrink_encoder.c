@@ -67,7 +67,7 @@ static uint8_t push_outgoing_bits(heatshrink_encoder *hse, output_info *oi);
 static void push_literal_byte(heatshrink_encoder *hse, output_info *oi);
 
 #if HEATSHRINK_DYNAMIC_ALLOC
-heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
+heatshrink_encoder *heatshrink_encoder_alloc(uint8_t* buffer, uint8_t window_sz2,
         uint8_t lookahead_sz2) {
     if ((window_sz2 < HEATSHRINK_MIN_WINDOW_BITS) ||
         (window_sz2 > HEATSHRINK_MAX_WINDOW_BITS) ||
@@ -82,10 +82,11 @@ heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
      * will be scanned for useful backreferences. */
     size_t buf_sz = (2 << window_sz2);
 
-    heatshrink_encoder *hse = HEATSHRINK_MALLOC(sizeof(*hse) + buf_sz);
+    heatshrink_encoder *hse = HEATSHRINK_MALLOC(sizeof(*hse));
     if (hse == NULL) { return NULL; }
     hse->window_sz2 = window_sz2;
     hse->lookahead_sz2 = lookahead_sz2;
+    hse->buffer = buffer;
     heatshrink_encoder_reset(hse);
 
 #if HEATSHRINK_USE_INDEX
@@ -104,20 +105,16 @@ heatshrink_encoder *heatshrink_encoder_alloc(uint8_t window_sz2,
 }
 
 void heatshrink_encoder_free(heatshrink_encoder *hse) {
-    size_t buf_sz = (2 << HEATSHRINK_ENCODER_WINDOW_BITS(hse));
 #if HEATSHRINK_USE_INDEX
     size_t index_sz = sizeof(struct hs_index) + hse->search_index->size;
     HEATSHRINK_FREE(hse->search_index, index_sz);
     (void)index_sz;
 #endif
-    HEATSHRINK_FREE(hse, sizeof(heatshrink_encoder) + buf_sz);
-    (void)buf_sz;
+    HEATSHRINK_FREE(hse, sizeof(heatshrink_encoder));
 }
 #endif
 
 void heatshrink_encoder_reset(heatshrink_encoder *hse) {
-    size_t buf_sz = (2 << HEATSHRINK_ENCODER_WINDOW_BITS(hse));
-    memset(hse->buffer, 0, buf_sz);
     hse->input_size = 0;
     hse->state = HSES_NOT_FULL;
     hse->match_scan_index = 0;

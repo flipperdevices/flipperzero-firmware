@@ -46,7 +46,8 @@ static uint16_t get_bits(heatshrink_decoder *hsd, uint8_t count);
 static void push_byte(heatshrink_decoder *hsd, output_info *oi, uint8_t byte);
 
 #if HEATSHRINK_DYNAMIC_ALLOC
-heatshrink_decoder *heatshrink_decoder_alloc(uint16_t input_buffer_size,
+heatshrink_decoder *heatshrink_decoder_alloc(uint8_t* buffer,
+                                             uint16_t input_buffer_size,
                                              uint8_t window_sz2,
                                              uint8_t lookahead_sz2) {
     if ((window_sz2 < HEATSHRINK_MIN_WINDOW_BITS) ||
@@ -56,13 +57,13 @@ heatshrink_decoder *heatshrink_decoder_alloc(uint16_t input_buffer_size,
         (lookahead_sz2 >= window_sz2)) {
         return NULL;
     }
-    size_t buffers_sz = (1 << window_sz2) + input_buffer_size;
-    size_t sz = sizeof(heatshrink_decoder) + buffers_sz;
+    size_t sz = sizeof(heatshrink_decoder);
     heatshrink_decoder *hsd = HEATSHRINK_MALLOC(sz);
     if (hsd == NULL) { return NULL; }
     hsd->input_buffer_size = input_buffer_size;
     hsd->window_sz2 = window_sz2;
     hsd->lookahead_sz2 = lookahead_sz2;
+    hsd->buffers = buffer;
     heatshrink_decoder_reset(hsd);
     LOG("-- allocated decoder with buffer size of %zu (%zu + %u + %u)\n",
         sz, sizeof(heatshrink_decoder), (1 << window_sz2), input_buffer_size);
@@ -70,17 +71,13 @@ heatshrink_decoder *heatshrink_decoder_alloc(uint16_t input_buffer_size,
 }
 
 void heatshrink_decoder_free(heatshrink_decoder *hsd) {
-    size_t buffers_sz = (1 << hsd->window_sz2) + hsd->input_buffer_size;
-    size_t sz = sizeof(heatshrink_decoder) + buffers_sz;
+    size_t sz = sizeof(heatshrink_decoder);
     HEATSHRINK_FREE(hsd, sz);
     (void)sz;   /* may not be used by free */
 }
 #endif
 
 void heatshrink_decoder_reset(heatshrink_decoder *hsd) {
-    size_t buf_sz = 1 << HEATSHRINK_DECODER_WINDOW_BITS(hsd);
-    size_t input_sz = HEATSHRINK_DECODER_INPUT_BUFFER_SIZE(hsd);
-    memset(hsd->buffers, 0, buf_sz + input_sz);
     hsd->state = HSDS_TAG_BIT;
     hsd->input_size = 0;
     hsd->input_index = 0;
