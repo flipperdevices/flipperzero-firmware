@@ -8,8 +8,6 @@
 #include "canvas.h"
 #include <u8g2.h>
 
-#include <lib/heatshrink/heatshrink_decoder.h>
-
 /** Canvas structure
  */
 struct Canvas {
@@ -19,7 +17,6 @@ struct Canvas {
     uint8_t offset_y;
     uint8_t width;
     uint8_t height;
-    heatshrink_decoder decoder;
 };
 
 /** Allocate memory and initialize canvas

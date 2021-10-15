@@ -23,8 +23,6 @@ Canvas* canvas_init() {
     u8g2_SendBuffer(&canvas->fb);
 
     furi_hal_power_insomnia_exit();
-    heatshrink_decoder_reset(&canvas->decoder);
-
     return canvas;
 }
 
@@ -192,28 +190,15 @@ void canvas_draw_icon_animation(
 
     x += canvas->offset_x;
     y += canvas->offset_y;
-    size_t data_processed = 0;
-    uint8_t* data_in = (uint8_t*)icon_animation_get_data(icon_animation);
-    uint8_t* data_out = NULL;
-    uint8_t decoded[1024] = {};
-    if(data_in[0]) {
-        // Data is compressed
-        size_t data_size = data_in[2] | (data_in[3] << 8);
-        heatshrink_decoder_sink(&canvas->decoder, &data_in[4], data_size, &data_processed);
-        while(heatshrink_decoder_poll(&canvas->decoder, decoded, 1024, &data_processed) == HSDR_POLL_MORE) {};
-        heatshrink_decoder_reset(&canvas->decoder);
-        data_out = decoded;
-    } else {
-        // Data is not compressed
-        data_out = &data_in[1];
-    }
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_animation_get_data(icon_animation), &icon_data);
     u8g2_DrawXBM(
         &canvas->fb,
         x,
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        data_out);
+        icon_data);
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
@@ -222,23 +207,9 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
 
     x += canvas->offset_x;
     y += canvas->offset_y;
-    size_t data_processed = 0;
-    uint8_t* data_in = (uint8_t*)icon_get_data(icon);
-    uint8_t* data_out = NULL;
-    uint8_t decoded[1024] = {};
-    if(data_in[0]) {
-        // Data is compressed
-        size_t data_size = data_in[2] | (data_in[3] << 8);
-        heatshrink_decoder_sink(&canvas->decoder, &data_in[4], data_size, &data_processed);
-        while(heatshrink_decoder_poll(&canvas->decoder, decoded, 1024, &data_processed) == HSDR_POLL_MORE) {};
-        heatshrink_decoder_reset(&canvas->decoder);
-        data_out = decoded;
-    } else {
-        // Data is not compressed
-        data_out = &data_in[1];
-    }
-    u8g2_DrawXBM(
-        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), data_out);
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_get_data(icon), &icon_data);
+    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
