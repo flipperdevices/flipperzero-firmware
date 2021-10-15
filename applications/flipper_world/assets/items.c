@@ -37,6 +37,14 @@ const Item** get_scene(FlipperMainViewModel* state) {
     return Scenes[state->scene_id];
 }
 
+void draw_animation_sequence(Canvas* canvas, uint16_t x, uint16_t y, AnimationSequence* data) {
+    uint8_t frame = ((HAL_GetTick() / 200) % data->len);
+    uint16_t pos_x = x + data->rel_pos.x;
+    uint16_t pos_y = y + data->rel_pos.y;
+
+    canvas_draw_icon(canvas, pos_x + data->path[frame].x, pos_y + data->path[frame].y, data->icon);
+}
+
 uint16_t roll_new(uint16_t prev, uint16_t max) {
     uint16_t val = 999;
     while(val != prev) {
@@ -127,43 +135,59 @@ void food_redraw(Canvas* canvas, void* s) {
         "Lets play!",
     };
 
-    const Icon* food_frames[] = {
-        &I_food1_61x98,
-        &I_food2_61x98,
-        &I_food3_61x98,
-        &I_food4_61x98,
-        &I_food5_61x98,
-        &I_food6_61x98,
-        &I_food7_61x98,
-        &I_food8_61x98,
-        &I_food9_61x98,
-        &I_food10_61x98,
-        &I_food11_61x98,
-        &I_food12_61x98,
+    AnimationSequence burger = {
+        .icon = &I_burger_45x37,
+        .rel_pos = {10, 40},
+        .len = 6,
+        .path = {{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 2}, {0, 1}},
     };
 
-    uint8_t frame = ((HAL_GetTick() / 200) % SIZEOF_ARRAY(food_frames));
+    AnimationSequence hotdog = {
+        .icon = &I_hotdog_36x44,
+        .rel_pos = {20, 0},
+        .len = 5,
+        .path = {{1, 2}, {2, 2}, {1, 1}, {0, 0}, {0, 1}},
+    };
+
+    AnimationSequence soda = {
+        .icon = &I_soda23x37,
+        .rel_pos = {0, 20},
+        .len = 6,
+        .path = {{0, 2}, {0, 1}, {0, 0}, {0, 0}, {0, 1}, {0, 2}},
+    };
+
+    AnimationSequence fish1 = {
+        .icon = &I_fish1_13x32,
+        .rel_pos = {11, -10},
+        .len = 5,
+        .path = {{0, -1}, {0, -4}, {1, 1}, {0, -4}, {1, 0}},
+    };
+
+    AnimationSequence fish2 = {
+        .icon = &I_fish2_10x10,
+        .rel_pos = {43, -5},
+        .len = 6,
+        .path = {{-5, 5}, {-3, 4}, {-2, 3}, {-4, 6}, {-2, 2}, {0, 0}},
+    };
+
+    uint16_t pos_x = (Food.pos.x - state->player_global.x) * PARALLAX(Food.layer);
+    uint16_t pos_y = Food.pos.y - state->player_global.y;
+
+    canvas_set_bitmap_mode(canvas, true);
+
+    draw_animation_sequence(canvas, pos_x, pos_y, &hotdog);
+    draw_animation_sequence(canvas, pos_x, pos_y, &soda);
+    draw_animation_sequence(canvas, pos_x, pos_y, &fish1);
+    draw_animation_sequence(canvas, pos_x, pos_y, &fish2);
+    draw_animation_sequence(canvas, pos_x, pos_y, &burger);
 
     if(is_nearby(state) && (state->player_global.y > Food.pos.y)) {
-        dolphin_scene_type_text(
-            canvas,
-            state,
-            (Food.pos.x - state->player_global.x) * PARALLAX(Food.layer) + 90,
-            state->screen.y + 8,
-            emotes[state->emote_id]);
+        dolphin_scene_type_text(canvas, state, pos_x + 90, pos_y + 8, emotes[state->emote_id]);
 
     } else {
         state->dialog_progress = 0;
         state->emote_id = roll_new(state->previous_emote, SIZEOF_ARRAY(emotes));
     }
-
-    canvas_draw_icon(
-        canvas,
-        (Food.pos.x - state->player_global.x) * PARALLAX(Food.layer),
-        Food.pos.y - state->player_global.y,
-        food_frames[frame]);
-
-    canvas_set_bitmap_mode(canvas, true);
 }
 
 void food_callback(void* context) {
