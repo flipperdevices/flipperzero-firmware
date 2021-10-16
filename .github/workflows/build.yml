@@ -57,13 +57,13 @@ jobs:
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
             REF=${{ github.head_ref }}
           fi
-          BRANCH_OR_TAG=${REF##*/}
+          BRANCH_OR_TAG=${REF#refs/*/}
           SHA=$(git rev-parse --short HEAD)
           
           if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_OR_TAG}
+            SUFFIX=${BRANCH_OR_TAG//\//_}
           else
-            SUFFIX=${BRANCH_OR_TAG}-$(date +'%d%m%Y')-${SHA}
+            SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
           fi
           
           echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
