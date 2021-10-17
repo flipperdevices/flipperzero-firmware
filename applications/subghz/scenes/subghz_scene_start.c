@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexRead =10,
+    SubmenuIndexRead = 10,
     SubmenuIndexSaved,
     SubmenuIndexTest,
     SubmenuIndexAddManualy,
@@ -20,7 +20,11 @@ void subghz_scene_start_on_enter(void* context) {
         subghz->state_notifications = NOTIFICATION_IDLE_STATE;
     }
     submenu_add_item(
-        subghz->submenu, "Save Raw", SubmenuIndexSaveRAW, subghz_scene_start_submenu_callback, subghz);
+        subghz->submenu,
+        "Save Raw",
+        SubmenuIndexSaveRAW,
+        subghz_scene_start_submenu_callback,
+        subghz);
     submenu_add_item(
         subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
     submenu_add_item(

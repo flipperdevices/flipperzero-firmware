@@ -5,8 +5,7 @@ void subghz_scene_delete_callback(GuiButtonType result, InputType type, void* co
     furi_assert(context);
     SubGhz* subghz = context;
     if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneDelete);
+        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneDelete);
     }
 }
 

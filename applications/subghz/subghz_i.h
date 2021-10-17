@@ -6,7 +6,6 @@
 #include "views/subghz_frequency_analyzer.h"
 #include "views/subghz_save_raw.h"
 
-
 #include "views/subghz_test_static.h"
 #include "views/subghz_test_carrier.h"
 #include "views/subghz_test_packet.h"
