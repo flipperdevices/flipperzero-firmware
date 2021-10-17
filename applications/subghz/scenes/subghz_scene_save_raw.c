@@ -31,7 +31,7 @@ void subghz_scene_save_raw_parse(SubGhzProtocolCommon* instance, bool level, uin
     subghz_protocol_raw_parse((SubGhzProtocolRAW*)instance, level, duration);
 }
 
-void subghz_scene_save_raw_callback(SubghzSaveRAWEvent event, void* context) {
+void subghz_scene_save_raw_callback(SubghzCustomEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
@@ -57,7 +57,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case SubghzSaveRAWEventBack:
+        case SubghzCustomEventViewSaveRAWBack:
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
@@ -70,12 +70,12 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
             break;
-        case SubghzSaveRAWEventConfig:
+        case SubghzCustomEventViewSaveRAWConfig:
             scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneSaveRAW, 1);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
             break;
-        case SubghzSaveRAWEventIDLE:
+        case SubghzCustomEventViewSaveRAWIDLE:
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
@@ -85,7 +85,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             return true;
             break;
-        case SubghzSaveRAWEventREC:
+        case SubghzCustomEventViewSaveRAWREC:
             if(subghz_protocol_save_raw_to_file_init(
                    (SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw,
                    "Raw",
@@ -103,7 +103,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             }
             return true;
             break;
-        case SubghzSaveRAWEventMore:
+        case SubghzCustomEventViewSaveRAWMore:
             //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
             break;

@@ -1,7 +1,7 @@
 #include "../subghz_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexRead,
+    SubmenuIndexRead =10,
     SubmenuIndexSaved,
     SubmenuIndexTest,
     SubmenuIndexAddManualy,

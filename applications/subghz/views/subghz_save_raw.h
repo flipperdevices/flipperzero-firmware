@@ -1,19 +1,11 @@
 #pragma once
 
 #include <gui/view.h>
-
-typedef enum {
-    //SubghzSaveRAWEventOnlyRx,
-    SubghzSaveRAWEventBack,
-    SubghzSaveRAWEventIDLE,
-    SubghzSaveRAWEventREC,
-    SubghzSaveRAWEventConfig,
-    SubghzSaveRAWEventMore,
-} SubghzSaveRAWEvent;
+#include "../helpers/subghz_custom_event.h"
 
 typedef struct SubghzSaveRAW SubghzSaveRAW;
 
-typedef void (*SubghzSaveRAWCallback)(SubghzSaveRAWEvent event, void* context);
+typedef void (*SubghzSaveRAWCallback)(SubghzCustomEvent event, void* context);
 
 void subghz_save_raw_set_callback(
     SubghzSaveRAW* subghz_save_raw,

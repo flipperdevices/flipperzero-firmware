@@ -98,12 +98,6 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
     subghz->txrx->hopper_state = hopping_value[index];
 }
 
-void subghz_scene_receiver_config_callback(SubghzReceverEvent event, void* context) {
-    furi_assert(context);
-    SubGhz* subghz = context;
-    view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
-}
-
 void subghz_scene_receiver_config_on_enter(void* context) {
     SubGhz* subghz = context;
     VariableItem* item;
