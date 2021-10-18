@@ -46,7 +46,7 @@ void subghz_save_raw_add_data_statusbar(
     SubghzSaveRAW* instance,
     const char* frequency_str,
     const char* preset_str) {
-    furi_assert(subghz_receiver);
+    furi_assert(instance);
     with_view_model(
         instance->view, (SubghzSaveRAWModel * model) {
             string_set(model->frequency_str, frequency_str);
@@ -56,7 +56,7 @@ void subghz_save_raw_add_data_statusbar(
 }
 
 void subghz_save_raw_add_data_rssi(SubghzSaveRAW* instance, float rssi) {
-    furi_assert(subghz_receiver);
+    furi_assert(instance);
     uint8_t u_rssi = 0;
 
     if(rssi < -90) {
@@ -78,7 +78,7 @@ void subghz_save_raw_add_data_rssi(SubghzSaveRAW* instance, float rssi) {
 }
 
 void subghz_save_raw_update_sample_write(SubghzSaveRAW* instance, size_t sample) {
-    furi_assert(subghz_receiver);
+    furi_assert(instance);
 
     with_view_model(
         instance->view, (SubghzSaveRAWModel * model) {

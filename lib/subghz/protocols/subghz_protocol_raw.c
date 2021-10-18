@@ -50,7 +50,6 @@ void subghz_protocol_raw_free(SubGhzProtocolRAW* instance) {
 }
 
 void subghz_protocol_raw_reset(SubGhzProtocolRAW* instance) {
-    //instance->common.parser_step = RAWDecoderStepReset;
     instance->ind_write = 0;
 }
 
