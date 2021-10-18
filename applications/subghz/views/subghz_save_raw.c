@@ -94,7 +94,7 @@ void subghz_save_raw_draw_rssi(Canvas* canvas, SubghzSaveRAWModel* model) {
         for(int i = model->ind_write; i >= 0; i--) {
             canvas_draw_line(canvas, i, 47, i, 47 - model->rssi_history[i]);
         }
-        if(model->ind_write > 0) {
+        if(model->ind_write > 3) {
             canvas_draw_line(canvas, model->ind_write, 47, model->ind_write, 13);
             canvas_draw_line(canvas, model->ind_write - 2, 12, model->ind_write + 2, 12);
             canvas_draw_line(canvas, model->ind_write - 1, 13, model->ind_write + 1, 13);
