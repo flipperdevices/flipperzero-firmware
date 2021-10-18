@@ -8,7 +8,7 @@ void subghz_scene_transmitter_callback(SubghzCustomEvent event, void* context) {
     view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
 }
 
-static void subghz_scene_transmitter_update_data_show(void* context) {
+bool subghz_scene_transmitter_update_data_show(void* context) {
     SubGhz* subghz = context;
 
     if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->get_upload_protocol) {
@@ -51,17 +51,22 @@ static void subghz_scene_transmitter_update_data_show(void* context) {
             preset_str,
             show_button);
         string_clear(key_str);
-    } else {
-        string_set(subghz->error_str, "Protocol not found");
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+
+        return true;
     }
+    return false;
 }
 
 void subghz_scene_transmitter_on_enter(void* context) {
     SubGhz* subghz = context;
+    if(!subghz_scene_transmitter_update_data_show(subghz)) {
+        view_dispatcher_send_custom_event(
+            subghz->view_dispatcher, SubghzCustomEventViewTransmitterError);
+    }
+
     subghz_transmitter_set_callback(
         subghz->subghz_transmitter, subghz_scene_transmitter_callback, subghz);
-    subghz_scene_transmitter_update_data_show(subghz);
+
     subghz->state_notifications = NOTIFICATION_IDLE_STATE;
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTransmitter);
 }
@@ -96,6 +101,9 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
+        } else if(event.event == SubghzCustomEventViewTransmitterError) {
+            string_set(subghz->error_str, "Protocol not found");
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
         }
     } else if(event.type == SceneManagerEventTypeTick) {
         if(subghz->state_notifications == NOTIFICATION_TX_STATE) {

@@ -3,7 +3,7 @@
 #include "protocols/subghz_protocol_common.h"
 
 typedef void (*SubGhzProtocolTextCallback)(string_t text, void* context);
-typedef void (*SubGhzProtocolCommonCallbackDump)(SubGhzProtocolCommon *parser, void* context);
+typedef void (*SubGhzProtocolCommonCallbackDump)(SubGhzProtocolCommon* parser, void* context);
 
 typedef struct SubGhzParser SubGhzParser;
 
@@ -33,7 +33,10 @@ SubGhzProtocolCommon* subghz_parser_get_by_name(SubGhzParser* instance, const ch
  * @param callback - SubGhzProtocolTextCallback callback
  * @param context
  */
-void subghz_parser_enable_dump_text(SubGhzParser* instance, SubGhzProtocolTextCallback callback, void* context);
+void subghz_parser_enable_dump_text(
+    SubGhzParser* instance,
+    SubGhzProtocolTextCallback callback,
+    void* context);
 
 /** Outputting data SubGhzParser from all parsers
  * 
@@ -41,7 +44,10 @@ void subghz_parser_enable_dump_text(SubGhzParser* instance, SubGhzProtocolTextCa
  * @param callback - SubGhzProtocolTextCallback callback
  * @param context
  */
-void subghz_parser_enable_dump(SubGhzParser* instance, SubGhzProtocolCommonCallbackDump callback, void* context);
+void subghz_parser_enable_dump(
+    SubGhzParser* instance,
+    SubGhzProtocolCommonCallbackDump callback,
+    void* context);
 
 /** File name rainbow table Nice Flor-S
  * 
@@ -62,6 +68,8 @@ void subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_nam
  * @param instance - SubGhzParser instance
  */
 void subghz_parser_reset(SubGhzParser* instance);
+
+void subghz_parser_raw_parse(SubGhzParser* instance, bool level, uint32_t duration);
 
 /** Loading data into all parsers
  * 

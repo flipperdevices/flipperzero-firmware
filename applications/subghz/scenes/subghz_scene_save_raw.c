@@ -1,6 +1,7 @@
 #include "../subghz_i.h"
 #include "../views/subghz_save_raw.h"
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
+#include <lib/subghz/subghz_parser.h>
 
 static void subghz_scene_save_raw_update_statusbar(void* context) {
     furi_assert(context);
@@ -27,10 +28,6 @@ static void subghz_scene_save_raw_update_statusbar(void* context) {
     subghz_save_raw_add_data_statusbar(subghz->subghz_save_raw, frequency_str, preset_str);
 }
 
-void subghz_scene_save_raw_parse(SubGhzProtocolCommon* instance, bool level, uint32_t duration) {
-    subghz_protocol_raw_parse((SubGhzProtocolRAW*)instance, level, duration);
-}
-
 void subghz_scene_save_raw_callback(SubghzCustomEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -42,13 +39,11 @@ void subghz_scene_save_raw_on_enter(void* context) {
     subghz_scene_save_raw_update_statusbar(subghz);
     subghz_save_raw_set_callback(subghz->subghz_save_raw, subghz_scene_save_raw_callback, subghz);
 
-    subghz->txrx->protocol_save_raw = (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
-    subghz_protocol_raw_reset((SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw);
+    subghz->txrx->protocol_result = subghz_parser_get_by_name(subghz->txrx->parser, "RAW");
+    furi_assert(subghz->txrx->protocol_result);
 
-    subghz_worker_set_overrun_callback(subghz->txrx->worker, NULL);
     subghz_worker_set_pair_callback(
-        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_scene_save_raw_parse);
-    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->protocol_save_raw);
+        subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_raw_parse);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewSaveRAW);
 }
@@ -65,7 +60,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
             subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
             subghz_protocol_save_raw_to_file_stop(
-                (SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw);
+                (SubGhzProtocolRAW*)subghz->txrx->protocol_result);
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
@@ -81,13 +76,13 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz_sleep(subghz);
             };
             subghz_protocol_save_raw_to_file_stop(
-                (SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw);
+                (SubGhzProtocolRAW*)subghz->txrx->protocol_result);
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             return true;
             break;
         case SubghzCustomEventViewSaveRAWREC:
             if(subghz_protocol_save_raw_to_file_init(
-                   (SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw,
+                   (SubGhzProtocolRAW*)subghz->txrx->protocol_result,
                    "Raw",
                    subghz->txrx->frequency,
                    subghz->txrx->preset)) {
@@ -104,7 +99,19 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             return true;
             break;
         case SubghzCustomEventViewSaveRAWMore:
-            //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
+            if(strcmp(
+                   subghz_protocol_get_last_file_name(
+                       (SubGhzProtocolRAW*)subghz->txrx->protocol_result),
+                   "")) {
+                strlcpy(
+                    subghz->file_name,
+                    subghz_protocol_get_last_file_name(
+                        (SubGhzProtocolRAW*)subghz->txrx->protocol_result),
+                    strlen(subghz_protocol_get_last_file_name(
+                        (SubGhzProtocolRAW*)subghz->txrx->protocol_result)) +
+                        1);
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedMenu);
+            }
             return true;
             break;
 
@@ -118,7 +125,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_save_raw_update_sample_write(
                 subghz->subghz_save_raw,
                 subghz_save_protocol_raw_get_sample_write(
-                    (SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw));
+                    (SubGhzProtocolRAW*)subghz->txrx->protocol_result));
             subghz_save_raw_add_data_rssi(subghz->subghz_save_raw, furi_hal_subghz_get_rssi());
             break;
         default:
@@ -139,12 +146,6 @@ void subghz_scene_save_raw_on_exit(void* context) {
     subghz->state_notifications = NOTIFICATION_IDLE_STATE;
 
     //Сallback restoration
-    subghz_worker_set_overrun_callback(
-        subghz->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_parser_reset);
     subghz_worker_set_pair_callback(
         subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_parser_parse);
-    subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->parser);
-
-    //Free RAW protocol
-    subghz_protocol_raw_free((SubGhzProtocolRAW*)subghz->txrx->protocol_save_raw);
 }

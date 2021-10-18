@@ -38,11 +38,13 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzCustomEventSceneSaveName) {
-            if(strcmp(subghz->file_name, "") &&
-               subghz_save_protocol_to_file(subghz, subghz->file_name)) {
+            if(strcmp(subghz->file_name, "")) {
                 if(strcmp(subghz->file_name_tmp, "")) {
-                    subghz_delete_file(subghz);
+                    subghz_rename_file(subghz);
+                } else {
+                    subghz_save_protocol_to_file(subghz, subghz->file_name);
                 }
+
                 subghz_file_name_clear(subghz);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);
                 return true;
