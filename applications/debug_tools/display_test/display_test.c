@@ -162,8 +162,8 @@ DisplayTest* display_test_alloc() {
         COUNT_OF(config_regulation_ratio_value),
         display_config_set_regulation_ratio,
         instance);
-    variable_item_set_current_value_index(item, 6);
-    variable_item_set_current_value_text(item, config_regulation_ratio_text[6]);
+    variable_item_set_current_value_index(item, 5);
+    variable_item_set_current_value_text(item, config_regulation_ratio_text[5]);
     // Contrast
     item = variable_item_list_add(
         instance->variable_item_list, "Contrast:", 64, display_config_set_contrast, instance);

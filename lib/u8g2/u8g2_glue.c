@@ -74,23 +74,22 @@ uint8_t u8x8_hw_spi_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_
 #define ST756X_CMD_REGULATION_RATIO 0b00100000  /**< 0:0 Regulation resistor ration: last 3bits */
 #define ST756X_CMD_SET_EV           0b10000001  /**< 0:0 Set electronic volume: 5 bits in next byte */
 #define ST756X_CMD_SET_BOOSTER      0b11111000  /**< 0:0 Set Booster level, 4X(0) or 5X(1): last bit in next byte */
-#define ST756X_CMD_POWER_SAVE       0b00000000  /**< 0:0 Compound command: Display OFF + All Pixel ON */
 #define ST756X_CMD_NOP              0b11100011  /**< 0:0 No operation */
 
 static const uint8_t u8x8_d_st756x_powersave0_seq[] = {
-    U8X8_START_TRANSFER(),              /* enable chip, delay is part of the transfer start */
-    U8X8_C(0x0a4),                      /* all pixel off, issue 142 */
-    U8X8_C(0x0af),                      /* display on */
-    U8X8_END_TRANSFER(),                /* disable chip */
-    U8X8_END()                          /* end of sequence */
+    U8X8_START_TRANSFER(),                  /* enable chip, delay is part of the transfer start */
+    U8X8_C(ST756X_CMD_ALL_PIXEL_ON | 0b0),  /* all pixel off */
+    U8X8_C(ST756X_CMD_ON_OFF | 0b1),        /* display on */
+    U8X8_END_TRANSFER(),                    /* disable chip */
+    U8X8_END()                              /* end of sequence */
 };
 
 static const uint8_t u8x8_d_st756x_powersave1_seq[] = {
-    U8X8_START_TRANSFER(),              /* enable chip, delay is part of the transfer start */
-    U8X8_C(0x0ae),                      /* display off */
-    U8X8_C(0x0a5),                      /* enter powersafe: all pixel on, issue 142 */
-    U8X8_END_TRANSFER(),                /* disable chip */
-    U8X8_END()                          /* end of sequence */
+    U8X8_START_TRANSFER(),                  /* enable chip, delay is part of the transfer start */
+    U8X8_C(ST756X_CMD_ON_OFF | 0b0),        /* display off */
+    U8X8_C(ST756X_CMD_ALL_PIXEL_ON | 0b1),  /* all pixel on */
+    U8X8_END_TRANSFER(),                    /* disable chip */
+    U8X8_END()                              /* end of sequence */
 };
 
 static const uint8_t u8x8_d_st756x_flip0_seq[] = {
@@ -191,7 +190,6 @@ void u8x8_d_st756x_erc_init(u8x8_t *u8x8, uint8_t contrast, uint8_t regulation_r
     regulation_ratio = regulation_ratio & 0b111;
 
     u8x8_cad_StartTransfer(u8x8);
-    u8x8_cad_SendCmd(u8x8, ST756X_CMD_NOP);
     // Reset
     u8x8_cad_SendCmd(u8x8, ST756X_CMD_RESET);
     // Bias: 1/7(0b1) or 1/9(0b0)
