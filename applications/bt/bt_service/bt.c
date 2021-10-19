@@ -18,10 +18,11 @@ static ViewPort* bt_statusbar_view_port_alloc() {
 static void bt_pin_code_show_event_handler(Bt* bt, uint32_t pin) {
     furi_assert(bt);
     string_t pin_str;
-    string_init_printf(pin_str, "%06d", pin);
+    dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
+    string_init_printf(pin_str, "Pairing code\n%06d", pin);
     dialog_message_set_text(
-        bt->dialog_message, string_get_cstr(pin_str), 64, 32, AlignCenter, AlignCenter);
-    dialog_message_set_buttons(bt->dialog_message, "Back", NULL, NULL);
+        bt->dialog_message, string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
+    dialog_message_set_buttons(bt->dialog_message, "Quit", NULL, NULL);
     dialog_message_show(bt->dialogs, bt->dialog_message);
     string_clear(pin_str);
 }
