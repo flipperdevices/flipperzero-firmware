@@ -34,8 +34,7 @@ RUN git clone https://github.com/rusdacent/hex2dfu.git && \
     hex2dfu -h
 
 RUN git clone --depth 1 --branch v0.4.1 https://github.com/atomicobject/heatshrink.git && \
-    cd heatshrink && make && mv ./heatshrink /usr/local/bin/heatshrink  && \
-    heatshrink -h
+    cd heatshrink && make && mv ./heatshrink /usr/local/bin/heatshrink
 
 COPY entrypoint.sh syntax_check.sh /
 
