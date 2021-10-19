@@ -154,7 +154,7 @@ DisplayTest* display_test_alloc() {
         display_config_set_bias,
         instance);
     variable_item_set_current_value_index(item, 1);
-    variable_item_set_current_value_text(item, config_bias_text[0]);
+    variable_item_set_current_value_text(item, config_bias_text[1]);
     // Regulation Ratio
     item = variable_item_list_add(
         instance->variable_item_list,
