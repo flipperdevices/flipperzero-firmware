@@ -8,10 +8,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/** Defines encoder and decoder window size */
 #define FURI_HAL_COMPRESS_EXP_BUFF_SIZE_LOG (8)
+
+/** Defines encoder and decoder lookahead buffer size */
 #define FURI_HAL_COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG (4)
 
-/** FuriHalCompress control strucrute */
+/** FuriHalCompress control structure */
 typedef struct FuriHalCompress FuriHalCompress;
 
 /** Initialize icon decoder
