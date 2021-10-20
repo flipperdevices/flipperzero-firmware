@@ -24,6 +24,7 @@ Canvas* canvas_init() {
     u8g2_ClearBuffer(&canvas->fb);
     u8g2_SetPowerSave(&canvas->fb, 0);
     u8g2_SendBuffer(&canvas->fb);
+    u8g2_SetFontDirection(&canvas->fb, 0);
 
     furi_hal_power_insomnia_exit();
 
@@ -101,6 +102,13 @@ void canvas_set_color(Canvas* canvas, Color color) {
     furi_assert(canvas);
     u8g2_SetDrawColor(&canvas->fb, color);
 }
+
+
+void canvas_set_font_direction(Canvas* canvas, uint8_t dir) {
+    furi_assert(canvas);
+    u8g2_SetFontDirection(&canvas->fb, dir);
+}
+
 
 void canvas_invert_color(Canvas* canvas) {
     canvas->fb.draw_color = !canvas->fb.draw_color;
