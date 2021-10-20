@@ -1,6 +1,7 @@
 import logging
 import subprocess
 
+
 class CubeProgrammer:
     """STM32 Cube Programmer cli wrapper"""
 
@@ -24,9 +25,8 @@ class CubeProgrammer:
         except subprocess.CalledProcessError as e:
             print(e.output)
             raise e
-        assert(output)
+        assert output
         return output.decode()
-
 
     def getVersion(self):
         output = self._execute(["--version"])
@@ -61,5 +61,5 @@ class CubeProgrammer:
         for key, (value, attr) in option_bytes.items():
             if "w" in attr:
                 options.append(f"{key}={value}")
-        self._execute([ "-ob", *options ])
+        self._execute(["-ob", *options])
         return True

@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 
+
 class App:
     def __init__(self):
         # Argument Parser

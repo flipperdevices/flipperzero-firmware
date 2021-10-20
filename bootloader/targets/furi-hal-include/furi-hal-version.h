@@ -21,33 +21,33 @@ extern "C" {
 
 /** OTP Versions enum */
 typedef enum {
-    FuriHalVersionOtpVersion0=0x00,
-    FuriHalVersionOtpVersion1=0x01,
-    FuriHalVersionOtpVersion2=0x02,
-    FuriHalVersionOtpVersionEmpty=0xFFFFFFFE,
-    FuriHalVersionOtpVersionUnknown=0xFFFFFFFF,
+    FuriHalVersionOtpVersion0 = 0x00,
+    FuriHalVersionOtpVersion1 = 0x01,
+    FuriHalVersionOtpVersion2 = 0x02,
+    FuriHalVersionOtpVersionEmpty = 0xFFFFFFFE,
+    FuriHalVersionOtpVersionUnknown = 0xFFFFFFFF,
 } FuriHalVersionOtpVersion;
 
 /** Device Colors */
 typedef enum {
-    FuriHalVersionColorUnknown=0x00,
-    FuriHalVersionColorBlack=0x01,
-    FuriHalVersionColorWhite=0x02,
+    FuriHalVersionColorUnknown = 0x00,
+    FuriHalVersionColorBlack = 0x01,
+    FuriHalVersionColorWhite = 0x02,
 } FuriHalVersionColor;
 
 /** Device Regions */
 typedef enum {
-    FuriHalVersionRegionUnknown=0x00,
-    FuriHalVersionRegionEuRu=0x01,
-    FuriHalVersionRegionUsCaAu=0x02,
-    FuriHalVersionRegionJp=0x03,
+    FuriHalVersionRegionUnknown = 0x00,
+    FuriHalVersionRegionEuRu = 0x01,
+    FuriHalVersionRegionUsCaAu = 0x02,
+    FuriHalVersionRegionJp = 0x03,
 } FuriHalVersionRegion;
 
 /** Device Display */
 typedef enum {
-    FuriHalVersionDisplayUnknown=0x00,
-    FuriHalVersionDisplayErc=0x01,
-    FuriHalVersionDisplayMgg=0x02,
+    FuriHalVersionDisplayUnknown = 0x00,
+    FuriHalVersionDisplayErc = 0x01,
+    FuriHalVersionDisplayMgg = 0x02,
 } FuriHalVersionDisplay;
 
 /** Init flipper version
