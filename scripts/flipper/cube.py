@@ -23,7 +23,9 @@ class CubeProgrammer:
                 ]
             )
         except subprocess.CalledProcessError as e:
-            print(e.output)
+            if e.output:
+                print("Process output:\n", e.output.decode())
+            print("Process return code:", e.returncode)
             raise e
         assert output
         return output.decode()
@@ -63,3 +65,15 @@ class CubeProgrammer:
                 options.append(f"{key}={value}")
         self._execute(["-ob", *options])
         return True
+
+    def flashBin(self, address, filename):
+        self._execute(
+            [
+                "-d",
+                filename,
+                f"{address}",
+            ]
+        )
+
+    def resetTarget(self):
+        self._execute([])
