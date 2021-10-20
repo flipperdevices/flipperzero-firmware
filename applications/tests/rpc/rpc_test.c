@@ -74,7 +74,8 @@ static void test_rpc_storage_setup(void) {
 
     output_stream = xStreamBufferCreate(1000, 1);
     mu_assert(session, "failed to start session");
-    rpc_set_send_bytes_callback(session, output_bytes_callback, output_stream);
+    rpc_set_send_bytes_callback(session, output_bytes_callback);
+    rpc_set_session_context(session, output_stream);
 }
 
 static void test_rpc_storage_teardown(void) {

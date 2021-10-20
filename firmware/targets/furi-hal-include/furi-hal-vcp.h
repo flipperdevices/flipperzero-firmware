@@ -44,6 +44,8 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
  */
 void furi_hal_vcp_tx(const uint8_t* buffer, size_t size);
 
+bool furi_hal_vcp_is_connected(void);
+
 #ifdef __cplusplus
 }
 #endif

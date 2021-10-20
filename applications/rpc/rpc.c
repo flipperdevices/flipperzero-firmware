@@ -4,6 +4,7 @@
 #include "furi-hal-delay.h"
 #include "furi/check.h"
 #include "furi/log.h"
+#include "rpc/rpc.h"
 #include <m-string.h>
 #include "pb.h"
 #include "pb_decode.h"
@@ -24,7 +25,7 @@
 #define RPC_EVENT_DISCONNECT (1 << 1)
 #define RPC_EVENTS_ALL (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
-#define DEBUG_PRINT 0
+#define DEBUG_PRINT 1
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
@@ -51,10 +52,11 @@ static RpcSystemCallbacks rpc_systems[] = {
 
 struct RpcSession {
     RpcSendBytesCallback send_bytes_callback;
-    void* send_bytes_context;
-    osMutexId_t send_bytes_mutex;
+    RpcSessionClosedCallback closed_callback;
+    void* context;
     Rpc* rpc;
-    bool terminate_session;
+    bool terminate;
+    osMutexId_t terminate_mutex;
     void** system_contexts;
 };
 
@@ -69,6 +71,25 @@ struct Rpc {
 };
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg);
+
+static void rpc_close_session_process(const PB_Main* msg_request, void* context) {
+    furi_assert(msg_request);
+    furi_assert(context);
+
+    Rpc* rpc = context;
+    PB_Main msg_response =  {
+        .has_next = false,
+        .command_status = PB_CommandStatus_OK,
+        .command_id = msg_request->command_id,
+        .which_content = PB_Main_stop_session_tag,
+    };
+
+    rpc_encode_and_send(context, &msg_response);
+    rpc_close_session(&rpc->session);
+    if (rpc->session.closed_callback) {
+        rpc->session.closed_callback(rpc->session.context);
+    }
+}
 
 static size_t rpc_sprintf_msg_file(
     string_t str,
@@ -105,6 +126,31 @@ static size_t rpc_sprintf_msg_file(
     return cnt;
 }
 
+void rpc_print_data(const char* prefix, uint8_t* buffer, size_t size) {
+    string_t str;
+    string_init(str);
+    string_reserve(str, 100 + size * 5);
+
+    string_cat_printf(str, "\r\n%s DEC(%d): {", prefix, size);
+    for(int i = 0; i < size; ++i) {
+        string_cat_printf(str, "%d, ", buffer[i]);
+    }
+    string_cat_printf(str, "}\r\n");
+
+    printf("%s", string_get_cstr(str));
+    string_clean(str);
+    string_reserve(str, 100 + size * 3);
+
+    string_cat_printf(str, "%s HEX(%d): {", prefix, size);
+    for(int i = 0; i < size; ++i) {
+        string_cat_printf(str, "%02X", buffer[i]);
+    }
+    string_cat_printf(str, "}\r\n\r\n");
+
+    printf("%s", string_get_cstr(str));
+    string_clear(str);
+}
+
 void rpc_print_message(const PB_Main* message) {
     string_t str;
     string_init(str);
@@ -119,6 +165,9 @@ void rpc_print_message(const PB_Main* message) {
     default:
         /* not implemented yet */
         string_cat_printf(str, "\tNOT_IMPLEMENTED (%d) {\r\n", message->which_content);
+        break;
+    case PB_Main_stop_session_tag:
+        string_cat_printf(str, "\tstop_session {\r\n");
         break;
     case PB_Main_app_start_tag: {
         string_cat_printf(str, "\tapp_start {\r\n");
@@ -256,13 +305,22 @@ RpcSession* rpc_open_session(Rpc* rpc) {
 
     if(result) {
         RpcSession* session = &rpc->session;
-        session->send_bytes_mutex = osMutexNew(NULL);
+        session->terminate_mutex = osMutexNew(NULL);
         session->rpc = rpc;
-        session->terminate_session = false;
+        session->terminate = false;
         session->system_contexts = furi_alloc(COUNT_OF(rpc_systems) * sizeof(void*));
         for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
             session->system_contexts[i] = rpc_systems[i].alloc(rpc);
         }
+
+        RpcHandler rpc_handler = {
+            .message_handler = rpc_close_session_process,
+            .decode_submessage = NULL,
+            .context = rpc,
+        };
+        rpc_add_handler(rpc, PB_Main_stop_session_tag, &rpc_handler);
+
+        xStreamBufferReset(rpc->stream);
         FURI_LOG_D(RPC_TAG, "Session started\r\n");
     }
 
@@ -272,31 +330,70 @@ RpcSession* rpc_open_session(Rpc* rpc) {
 void rpc_close_session(RpcSession* session) {
     furi_assert(session);
     furi_assert(session->rpc);
-    furi_assert(session->rpc->busy);
 
-    rpc_set_send_bytes_callback(session, NULL, NULL);
-    osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
+    osMutexAcquire(session->terminate_mutex, osWaitForever);
+    if (!session->terminate) {
+        session->terminate = true;
+        osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
+    }
+    osMutexRelease(session->terminate_mutex);
 }
 
-void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback, void* context) {
+static void rpc_free_session(RpcSession* session) {
+    furi_assert(session);
+
+    for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
+        if(rpc_systems[i].free) {
+            rpc_systems[i].free(session->system_contexts[i]);
+        }
+    }
+    free(session->system_contexts);
+    osMutexDelete(session->terminate_mutex);
+    RpcHandlerDict_clean(session->rpc->handlers);
+
+    session->context = NULL;
+    session->closed_callback = NULL;
+    session->send_bytes_callback = NULL;
+}
+
+void rpc_set_session_context(RpcSession* session, void* context) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
+    furi_assert(!session->terminate);
 
-    osMutexAcquire(session->send_bytes_mutex, osWaitForever);
-    session->send_bytes_callback = callback;
-    session->send_bytes_context = context;
-    osMutexRelease(session->send_bytes_mutex);
+    session->context = context;
 }
 
-size_t
-    rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
+void rpc_set_session_closed_callback(RpcSession* session, RpcSessionClosedCallback callback) {
+    furi_assert(session);
+    furi_assert(session->rpc);
+    furi_assert(session->rpc->busy);
+    furi_assert(!session->terminate);
+
+    session->closed_callback = callback;
+}
+
+void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
+    furi_assert(session);
+    furi_assert(session->rpc);
+    furi_assert(session->rpc->busy);
+    furi_assert(!session->terminate);
+
+    session->send_bytes_callback = callback;
+}
+
+size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     Rpc* rpc = session->rpc;
-    furi_assert(rpc->busy);
+    size_t bytes_sent = 0;
 
-    size_t bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
-    osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
+    osMutexAcquire(session->terminate_mutex, osWaitForever);
+    if (!session->terminate) {
+        bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
+        osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
+    }
+    osMutexRelease(session->terminate_mutex);
 
     return bytes_sent;
 }
@@ -315,7 +412,6 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
             flags = osEventFlagsWait(rpc->events, RPC_EVENTS_ALL, 0, osWaitForever);
             if(flags & RPC_EVENT_DISCONNECT) {
                 if(xStreamBufferIsEmpty(rpc->stream)) {
-                    rpc->session.terminate_session = true;
                     break;
                 } else {
                     /* Save disconnect flag and continue reading buffer */
@@ -324,6 +420,10 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
             }
         }
     }
+
+#if DEBUG_PRINT
+    rpc_print_data("INPUT", buf, bytes_received);
+#endif
 
     return (count == bytes_received);
 }
@@ -347,38 +447,17 @@ void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
 
     pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
 
-    {
 #if DEBUG_PRINT
-        string_t str;
-        string_init(str);
-        string_reserve(str, 100 + ostream.bytes_written * 5);
+    rpc_print_data("OUTPUT", buffer, ostream.bytes_written);
+#endif
 
-        string_cat_printf(str, "\r\nREPONSE DEC(%d): {", ostream.bytes_written);
-        for(int i = 0; i < ostream.bytes_written; ++i) {
-            string_cat_printf(str, "%d, ", buffer[i]);
-        }
-        string_cat_printf(str, "}\r\n");
-
-        printf("%s", string_get_cstr(str));
-        string_clean(str);
-        string_reserve(str, 100 + ostream.bytes_written * 3);
-
-        string_cat_printf(str, "REPONSE HEX(%d): {", ostream.bytes_written);
-        for(int i = 0; i < ostream.bytes_written; ++i) {
-            string_cat_printf(str, "%02X", buffer[i]);
-        }
-        string_cat_printf(str, "}\r\n\r\n");
-
-        printf("%s", string_get_cstr(str));
-#endif // DEBUG_PRINT
-
-        osMutexAcquire(session->send_bytes_mutex, osWaitForever);
-        if(session->send_bytes_callback) {
-            session->send_bytes_callback(
-                session->send_bytes_context, buffer, ostream.bytes_written);
-        }
-        osMutexRelease(session->send_bytes_mutex);
+    osMutexAcquire(session->terminate_mutex, osWaitForever);
+    if(!session->terminate && session->send_bytes_callback) {
+        session->send_bytes_callback(
+            session->context, buffer, ostream.bytes_written);
     }
+    osMutexRelease(session->terminate_mutex);
+
     free(buffer);
 }
 
@@ -427,18 +506,10 @@ int32_t rpc_srv(void* p) {
         } else {
             pb_release(&PB_Main_msg, rpc->decoded_message);
             RpcSession* session = &rpc->session;
-            if(session->terminate_session) {
-                session->terminate_session = false;
-                osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
+            if(session->terminate && xStreamBufferIsEmpty(rpc->stream)) {
                 FURI_LOG_D(RPC_TAG, "Session terminated\r\n");
-                for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
-                    if(rpc_systems[i].free) {
-                        rpc_systems[i].free(session->system_contexts[i]);
-                    }
-                }
-                free(session->system_contexts);
-                osMutexDelete(session->send_bytes_mutex);
-                RpcHandlerDict_clean(rpc->handlers);
+                osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
+                rpc_free_session(&rpc->session);
                 rpc->busy = false;
             } else {
                 xStreamBufferReset(rpc->stream);
@@ -466,3 +537,4 @@ void rpc_encode_and_send_empty(Rpc* rpc, uint32_t command_id, PB_CommandStatus s
     rpc_encode_and_send(rpc, &message);
     pb_release(&PB_Main_msg, &message);
 }
+
