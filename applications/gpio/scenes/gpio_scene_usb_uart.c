@@ -231,7 +231,6 @@ static void vcp_on_line_config(struct usb_cdc_line_coding* config) {
             furi_hal_usart_set_br(config->dwDTERate);
         else if(usb_uart->cfg_cur.uart_ch == UsbUartPortLPUART1)
             furi_hal_lpuart_set_br(config->dwDTERate);
-        FURI_LOG_I("uart", "set baudrate %lu", config->dwDTERate);
     }
 }
 
