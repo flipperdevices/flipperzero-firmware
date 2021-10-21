@@ -42,6 +42,10 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewFavorite);
             consumed = true;
             break;
+        case DesktopSettingsStartSubmenuIndexPinSetup:
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeMenu);
+            consumed = true;
+            break;
         }
     }
     return consumed;
