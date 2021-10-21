@@ -8,6 +8,8 @@ import os
 from flipper.app import App
 from flipper.cube import CubeProgrammer
 
+STATEMENT = "AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE"
+
 
 class Main(App):
     def init(self):
@@ -20,14 +22,18 @@ class Main(App):
             "core1boot", help="Flash Core1 Bootloader"
         )
         self._addArgsSWD(self.parser_core1boot)
-        self.parser_core1boot.add_argument("bootloader", type=str, help="Bootloader binary")
+        self.parser_core1boot.add_argument(
+            "bootloader", type=str, help="Bootloader binary"
+        )
         self.parser_core1boot.set_defaults(func=self.core1boot)
         # Core 1 firmware
         self.parser_core1firmware = self.subparsers.add_parser(
             "core1firmware", help="Flash Core1 Firmware"
         )
         self._addArgsSWD(self.parser_core1firmware)
-        self.parser_core1firmware.add_argument("firmware", type=str, help="Firmware binary")
+        self.parser_core1firmware.add_argument(
+            "firmware", type=str, help="Firmware binary"
+        )
         self.parser_core1firmware.set_defaults(func=self.core1firmware)
         # Core 1 all
         self.parser_core1 = self.subparsers.add_parser(
@@ -42,12 +48,30 @@ class Main(App):
             "core2fus", help="Flash Core2 Firmware Update Service"
         )
         self._addArgsSWD(self.parser_core2fus)
+        self.parser_core2fus.add_argument(
+            "--statement",
+            type=str,
+            help="NEVER FLASH FUS, IT WILL ERASE CRYPTO ENCLAVE",
+            required=True,
+        )
+        self.parser_core2fus.add_argument(
+            "fus_address", type=str, help="Firmware Update Service Address"
+        )
+        self.parser_core2fus.add_argument(
+            "fus", type=str, help="Firmware Update Service Binary"
+        )
         self.parser_core2fus.set_defaults(func=self.core2fus)
-        # Core 2 radio stack 
+        # Core 2 radio stack
         self.parser_core2radio = self.subparsers.add_parser(
             "core2radio", help="Flash Core2 Radio stack"
         )
         self._addArgsSWD(self.parser_core2radio)
+        self.parser_core2radio.add_argument(
+            "radio_address", type=str, help="Radio Stack Binary Address"
+        )
+        self.parser_core2radio.add_argument(
+            "radio", type=str, help="Radio Stack Binary"
+        )
         self.parser_core2radio.set_defaults(func=self.core2radio)
 
     def _addArgsSWD(self, parser):
@@ -59,16 +83,16 @@ class Main(App):
         self.logger.info(f"Wiping flash")
         cp = CubeProgrammer("swd")
         self.logger.info(f"Setting RDP to 0xBB")
-        cp.setOptionBytes({"RDP":("0xBB", "rw")})
+        cp.setOptionBytes({"RDP": ("0xBB", "rw")})
         self.logger.info(f"Verifying RDP")
-        r = cp.checkOptionBytes({"RDP":("0xBB", "rw")})
-        assert(r == True)
+        r = cp.checkOptionBytes({"RDP": ("0xBB", "rw")})
+        assert r == True
         self.logger.info(f"Result: {r}")
         self.logger.info(f"Setting RDP to 0xAA")
-        cp.setOptionBytes({"RDP":("0xAA", "rw")})
+        cp.setOptionBytes({"RDP": ("0xAA", "rw")})
         self.logger.info(f"Verifying RDP")
-        r = cp.checkOptionBytes({"RDP":("0xAA", "rw")})
-        assert(r == True)
+        r = cp.checkOptionBytes({"RDP": ("0xAA", "rw")})
+        assert r == True
         self.logger.info(f"Result: {r}")
         self.logger.info(f"Complete")
         return 0
@@ -95,14 +119,32 @@ class Main(App):
         cp.flashBin("0x08000000", self.args.bootloader)
         self.logger.info(f"Flashing firmware")
         cp.flashBin("0x08008000", self.args.firmware)
-        self.logger.info(f"Complete")
         cp.resetTarget()
+        self.logger.info(f"Complete")
         return 0
 
     def core2fus(self):
+        if self.args.statement != STATEMENT:
+            self.logger.error(
+                f"PLEASE DON'T. THIS FEATURE INTENDED ONLY FOR FACTORY FLASHING"
+            )
+            return 1
+        self.logger.info(f"Flashing Firmware Update Service")
+        cp = CubeProgrammer(self.args.port)
+        cp.flashCore2(self.args.fus_address, self.args.fus)
+        self.logger.info(f"Complete")
         return 0
 
     def core2radio(self):
+        if int(self.args.radio_address, 16) > 0x080E0000:
+            self.logger.error(f"I KNOW WHAT YOU DID LAST SUMMER")
+            return 1
+        cp = CubeProgrammer(self.args.port)
+        self.logger.info(f"Removing Current Radio Stack")
+        cp.deleteCore2RadioStack()
+        self.logger.info(f"Flashing Radio Stack")
+        cp.flashCore2(self.args.radio_address, self.args.radio)
+        self.logger.info(f"Complete")
         return 0
 
 

@@ -75,5 +75,17 @@ class CubeProgrammer:
             ]
         )
 
+    def flashCore2(self, address, filename):
+        self._execute(
+            [
+                "-fwupgrade",
+                filename,
+                f"{address}",
+            ]
+        )
+
+    def deleteCore2RadioStack(self):
+        self._execute(["-fwdelete"])
+
     def resetTarget(self):
         self._execute([])
