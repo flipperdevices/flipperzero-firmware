@@ -13,7 +13,7 @@ SubGhzProtocolCommonEncoder* subghz_protocol_encoder_common_alloc() {
 void subghz_protocol_encoder_common_free(SubGhzProtocolCommonEncoder* instance) {
     furi_assert(instance);
     if(instance->callback_end) {
-        instance->callback_end((SubGhzProtocolCommon*)instance->context);
+        instance->callback_end((SubGhzProtocolCommon*)instance->context_end);
     }
     free(instance->upload);
     free(instance);

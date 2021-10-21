@@ -24,8 +24,7 @@ struct SubGhzFileEncoderWorker {
  * @param context 
  */
 void subghz_file_encoder_worker_add_livel_duration(SubGhzFileEncoderWorker* instance, int duration) {
-    LevelDuration level_duration = {
-        .level = 0, .duration = LEVEL_DURATION_RESERVED}; //level_duration_make(level, duration);
+    LevelDuration level_duration = {.level = 0, .duration = LEVEL_DURATION_RESERVED};
 
     if(duration < 0 && !instance->level) {
         instance->duration += duration;
@@ -42,13 +41,12 @@ void subghz_file_encoder_worker_add_livel_duration(SubGhzFileEncoderWorker* inst
         instance->level = true;
         instance->duration = 0;
     } else if(duration == 0) {
-        printf("!!!!1!!!!! \r\n");
         level_duration = level_duration_reset();
     }
 
     if(level_duration.duration != LEVEL_DURATION_RESERVED) {
-        size_t ret =
-            xStreamBufferSend(instance->stream, &level_duration, sizeof(LevelDuration), 10);
+        //size_t ret =
+        xStreamBufferSend(instance->stream, &level_duration, sizeof(LevelDuration), 10);
     }
 }
 
@@ -106,12 +104,13 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
 
     bool res = false;
     do {
-        if(!file_worker_open(instance->file_worker, string_get_cstr(instance->file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        if(!file_worker_open(
+               instance->file_worker,
+               string_get_cstr(instance->file_path),
+               FSAM_READ,
+               FSOM_OPEN_EXISTING)) {
             break;
         }
-
-        res = true;
-
         //todo skips 3 lines file header
         if(!file_worker_read_until(instance->file_worker, instance->str_data, '\n')) {
             // break;
@@ -128,26 +127,25 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
     while(res && instance->worker_running) {
         size_t stream_free_byte = xStreamBufferSpacesAvailable(instance->stream);
         if((stream_free_byte / sizeof(LevelDuration)) > SUBGHZ_FILE_ENCODER_LOAD) {
-            printf("!!!!READ!!!!! \r\n");
             if(file_worker_read_until(instance->file_worker, instance->str_data, '\n')) {
-                printf("!!!!READ1!!!!! \r\n");
                 if(!subghz_file_encoder_worker_data_parse(
                        instance,
                        string_get_cstr(instance->str_data),
                        strlen(string_get_cstr(instance->str_data)))) {
-                    printf("!!!!2!!!!! \r\n");
                     subghz_file_encoder_worker_add_livel_duration(instance, 0);
                     break;
                 }
             } else {
-                printf("!!!!3!!!!! \r\n");
                 subghz_file_encoder_worker_add_livel_duration(instance, 0);
                 break;
             }
         }
     }
-    printf("!!!STOP_W!!! \r\n");
-    subghz_file_encoder_worker_stop(instance);
+    //waiting for the end of the transfer
+    while(instance->worker_running) {
+        osDelay(50);
+    }
+    file_worker_close(instance->file_worker);
     return 0;
 }
 
@@ -186,6 +184,7 @@ bool subghz_file_encoder_worker_start(SubGhzFileEncoderWorker* instance, const c
     furi_assert(instance);
     furi_assert(!instance->worker_running);
 
+    xStreamBufferReset(instance->stream);
     string_set(instance->file_path, file_path);
     instance->worker_running = true;
     furi_thread_start(instance->thread);
@@ -197,7 +196,6 @@ void subghz_file_encoder_worker_stop(SubGhzFileEncoderWorker* instance) {
     furi_assert(instance->worker_running);
 
     instance->worker_running = false;
-    file_worker_close(instance->file_worker);
     furi_thread_join(instance->thread);
 }
 
