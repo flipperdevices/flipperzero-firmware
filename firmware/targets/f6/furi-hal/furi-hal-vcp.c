@@ -52,6 +52,17 @@ void furi_hal_vcp_init() {
     FURI_LOG_I("FuriHalVcp", "Init OK");
 }
 
+void furi_hal_vcp_enable() {
+    furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
+    furi_hal_vcp->connected = true;
+}
+
+void furi_hal_vcp_disable() {
+    furi_hal_cdc_set_callbacks(VCP_IF_NUM, NULL);
+    furi_hal_vcp->connected = false;
+    osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
+}
+
 size_t furi_hal_vcp_rx(uint8_t* buffer, size_t size) {
     furi_assert(furi_hal_vcp);
 

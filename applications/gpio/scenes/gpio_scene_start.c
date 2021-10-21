@@ -70,7 +70,7 @@ void gpio_scene_start_on_enter(void* context) {
         variable_item_set_current_value_text(item, gpio_otg_text[GpioOtgOff]);
     }
     variable_item_list_add(var_item_list, "GPIO tester", 0, NULL, NULL);
-    variable_item_list_add(var_item_list, "Serial port", 0, NULL, NULL);
+    variable_item_list_add(var_item_list, "USB-UART bridge", 0, NULL, NULL);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewVarItemList);
 }

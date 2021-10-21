@@ -8,8 +8,6 @@
 #define USB_UART_RX_BUF_SIZE (USB_PKT_LEN * 3)
 #define USB_UART_TX_BUF_SIZE (USB_PKT_LEN * 3)
 
-#define VCP_UART_IF_NUM 1
-
 typedef enum {
     WorkerCmdStop = (1 << 0),
 
@@ -37,6 +35,7 @@ typedef struct {
 typedef struct {
     UsbUartConfig cfg_cur;
     UsbUartConfig cfg_set;
+    char br_text[8];
 
     bool running;
     osThreadId_t parent_thread;
@@ -109,7 +108,6 @@ static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data) {
 }
 
 static void usb_uart_worker(void* context) {
-    FURI_LOG_I("USB UART worker", "Start");
 
     memcpy(&usb_uart->cfg_cur, &usb_uart->cfg_set, sizeof(UsbUartConfig));
 
@@ -124,19 +122,30 @@ static void usb_uart_worker(void* context) {
     usb_uart->tx_thread_attr.stack_size = 512;
 
     UsbMode usb_mode_prev = furi_hal_usb_get_config();
-    furi_hal_usb_set_config(UsbModeVcpDual);
+    if (usb_uart->cfg_cur.vcp_ch == 0) {
+        furi_hal_usb_set_config(UsbModeVcpSingle);
+        furi_hal_vcp_disable();
+    } else {
+        furi_hal_usb_set_config(UsbModeVcpDual);
+    }
 
     if(usb_uart->cfg_cur.uart_ch == UsbUartPortUSART1) {
         furi_hal_usart_init();
         furi_hal_usart_set_irq_cb(usb_uart_on_irq_cb);
-        if(usb_uart->cfg_cur.baudrate != 0) furi_hal_usart_set_br(usb_uart->cfg_cur.baudrate);
+        if(usb_uart->cfg_cur.baudrate != 0) 
+            furi_hal_usart_set_br(usb_uart->cfg_cur.baudrate);
+        else
+            vcp_on_line_config(furi_hal_cdc_get_port_settings(usb_uart->cfg_cur.vcp_ch));
     } else if(usb_uart->cfg_cur.uart_ch == UsbUartPortLPUART1) {
         furi_hal_lpuart_init();
         furi_hal_lpuart_set_irq_cb(usb_uart_on_irq_cb);
-        if(usb_uart->cfg_cur.baudrate != 0) furi_hal_lpuart_set_br(usb_uart->cfg_cur.baudrate);
+        if(usb_uart->cfg_cur.baudrate != 0) 
+            furi_hal_lpuart_set_br(usb_uart->cfg_cur.baudrate);
+        else
+            vcp_on_line_config(furi_hal_cdc_get_port_settings(usb_uart->cfg_cur.vcp_ch));
     }
 
-    furi_hal_cdc_set_callbacks(VCP_UART_IF_NUM, &cdc_cb);
+    furi_hal_cdc_set_callbacks(usb_uart->cfg_cur.vcp_ch, &cdc_cb);
     usb_uart->tx_thread = osThreadNew(usb_uart_tx_thread, NULL, &usb_uart->tx_thread_attr);
 
     while(1) {
@@ -147,14 +156,13 @@ static void usb_uart_worker(void* context) {
             len = xStreamBufferReceive(usb_uart->rx_stream, usb_uart->rx_buf, USB_PKT_LEN, 0);
             if(len > 0) {
                 if(osSemaphoreAcquire(usb_uart->usb_sof_sem, 100) == osOK)
-                    furi_hal_cdc_send(VCP_UART_IF_NUM, usb_uart->rx_buf, len);
+                    furi_hal_cdc_send(usb_uart->cfg_cur.vcp_ch, usb_uart->rx_buf, len);
                 else
                     xStreamBufferReset(usb_uart->rx_stream);
             }
         } while(len > 0);
     }
 
-    FURI_LOG_I("USB UART worker", "End");
     osThreadTerminate(usb_uart->tx_thread);
 
     if(usb_uart->cfg_cur.uart_ch == UsbUartPortUSART1)
@@ -162,8 +170,10 @@ static void usb_uart_worker(void* context) {
     else if(usb_uart->cfg_cur.uart_ch == UsbUartPortLPUART1)
         furi_hal_lpuart_deinit();
 
-    furi_hal_cdc_set_callbacks(VCP_UART_IF_NUM, NULL);
+    furi_hal_cdc_set_callbacks(usb_uart->cfg_cur.vcp_ch, NULL);
     furi_hal_usb_set_config(usb_mode_prev);
+    if (usb_uart->cfg_cur.vcp_ch == 0)
+        furi_hal_vcp_enable();
 
     vStreamBufferDelete(usb_uart->rx_stream);
     osSemaphoreDelete(usb_uart->rx_done_sem);
@@ -200,7 +210,7 @@ static void vcp_on_cdc_rx() {
     uint16_t max_len = xStreamBufferSpacesAvailable(usb_uart->tx_stream);
     if(max_len > 0) {
         if(max_len > USB_PKT_LEN) max_len = USB_PKT_LEN;
-        int32_t size = furi_hal_cdc_receive(VCP_UART_IF_NUM, usb_uart->tx_buf, max_len);
+        int32_t size = furi_hal_cdc_receive(usb_uart->cfg_cur.vcp_ch, usb_uart->tx_buf, max_len);
 
         if(size > 0) {
             size_t ret = xStreamBufferSendFromISR(
@@ -218,11 +228,12 @@ static void vcp_on_cdc_control_line(uint8_t state) {
 }
 
 static void vcp_on_line_config(struct usb_cdc_line_coding* config) {
-    if(usb_uart->cfg_cur.baudrate == 0) {
+    if((usb_uart->cfg_cur.baudrate == 0) && (config->dwDTERate != 0)) {
         if(usb_uart->cfg_cur.uart_ch == UsbUartPortUSART1)
             furi_hal_usart_set_br(config->dwDTERate);
         else if(usb_uart->cfg_cur.uart_ch == UsbUartPortLPUART1)
             furi_hal_lpuart_set_br(config->dwDTERate);
+        FURI_LOG_I("uart", "set baudrate %lu", config->dwDTERate);
     }
 }
 
@@ -288,9 +299,8 @@ static void line_baudrate_cb(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
 
     if(index > 0) {
-        char br_text[8];
-        snprintf(br_text, 7, "%lu", baudrate_list[index - 1]);
-        variable_item_set_current_value_text(item, br_text);
+        snprintf(usb_uart->br_text, 7, "%lu", baudrate_list[index - 1]);
+        variable_item_set_current_value_text(item, usb_uart->br_text);
         usb_uart->cfg_set.baudrate = baudrate_list[index - 1];
     } else {
         variable_item_set_current_value_text(item, baudrate_mode[index]);
@@ -301,8 +311,6 @@ static void line_baudrate_cb(VariableItem* item) {
 static void gpio_scene_usb_uart_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     GpioApp* app = context;
-
-    FURI_LOG_I("USB UART menu", "idx: %lu", index);
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 

@@ -432,6 +432,12 @@ void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb) {
         callbacks[if_num] = cb;
 }
 
+struct usb_cdc_line_coding* furi_hal_cdc_get_port_settings(uint8_t if_num) {
+    if (if_num < 2)
+        return &cdc_config[if_num];
+    return NULL;
+}
+
 void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
     if (if_num == 0)
         usbd_ep_write(usb_dev, CDC0_TXD_EP, buf, len);
