@@ -2,7 +2,7 @@
 #include <gui/elements.h>
 #include <furi.h>
 
-#define MAX_CODE_LEN 12
+#define MAX_CODE_LEN 10
 
 struct CodeInput {
     View* view;
@@ -21,11 +21,12 @@ typedef enum {
 } CodeInputsEnum;
 
 typedef struct {
-    uint8_t local_buffer[CodeInputTotal][MAX_CODE_LEN];
-    uint8_t input_length[CodeInputTotal];
+    uint8_t state;
     uint8_t current;
     bool ext_update;
-    uint8_t state;
+
+    uint8_t input_length[CodeInputTotal];
+    uint8_t local_buffer[CodeInputTotal][MAX_CODE_LEN];
 
     CodeInputOkCallback ok_callback;
     CodeInputFailCallback fail_callback;
@@ -133,7 +134,7 @@ static void code_input_draw_sequence(
     uint8_t x,
     uint8_t y,
     bool active) {
-    uint8_t pos_x = x + 8;
+    uint8_t pos_x = x + 6;
     uint8_t pos_y = y + 3;
 
     if(active) canvas_draw_icon(canvas, x - 4, y + 5, &I_ButtonRightSmall_3x5);
@@ -248,7 +249,6 @@ static void code_input_handle_ok(CodeInputModel* model) {
 static void code_input_handle_dpad(CodeInputModel* model, InputKey key) {
     uint8_t at = model->current;
     uint8_t idx = model->input_length[at];
-
     model->local_buffer[at][idx] = key;
     model->input_length[at] = CLAMP(idx + 1, MAX_CODE_LEN, 0);
 }
