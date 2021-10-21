@@ -65,6 +65,7 @@ void furi_hal_compress_icon_decode(const uint8_t* icon_data, uint8_t** decoded_b
                 &data_processed) == HSDR_POLL_MORE
             ) {};
         heatshrink_decoder_reset(icon_decoder->decoder);
+        memset(icon_decoder->compress_buff, 0, sizeof(icon_decoder->compress_buff));
         *decoded_buff = icon_decoder->decoded_buff;
     } else {
         *decoded_buff = (uint8_t*)&icon_data[1];
