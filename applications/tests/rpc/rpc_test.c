@@ -1113,20 +1113,20 @@ MU_TEST(test_app_start_and_lock_status) {
         "skynet_destroy_world_app", NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "0", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "0", PB_CommandStatus_OK, ++command_id);
     delay(100);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "200", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "200", PB_CommandStatus_OK, ++command_id);
     test_app_get_status_lock_run(true, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
     test_app_start_run(
-        "Delay Test App", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
+        "Delay Test", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
     delay(200);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "500", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "500", PB_CommandStatus_OK, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
     test_app_start_run("Infrared", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
