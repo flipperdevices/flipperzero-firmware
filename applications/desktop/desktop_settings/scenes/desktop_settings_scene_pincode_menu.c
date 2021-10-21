@@ -5,12 +5,6 @@ static void desktop_settings_scene_pincode_menu_submenu_callback(void* context, 
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
-typedef enum {
-    PincodeSubmenuSetPin,
-    PincodeSubmenuResetPin,
-    PincodeSubmenuDisable,
-    PincodeSubmenuTotal,
-} PincodeSubmenuIndex;
 
 void desktop_settings_scene_pincode_menu_on_enter(void* context) {
     DesktopSettingsApp* app = context;
@@ -21,22 +15,22 @@ void desktop_settings_scene_pincode_menu_on_enter(void* context) {
         submenu_add_item(
             submenu,
             "Set Pin",
-            PincodeSubmenuSetPin,
+            CodeEventsSetPin,
             desktop_settings_scene_pincode_menu_submenu_callback,
             app);
 
     } else {
         submenu_add_item(
             submenu,
-            "Reset Pin",
-            PincodeSubmenuResetPin,
+            "Change Pin",
+            CodeEventsChangePin,
             desktop_settings_scene_pincode_menu_submenu_callback,
             app);
 
         submenu_add_item(
             submenu,
             "Disable",
-            PincodeSubmenuDisable,
+            CodeEventsDisablePin,
             desktop_settings_scene_pincode_menu_submenu_callback,
             app);
     }
@@ -52,15 +46,21 @@ bool desktop_settings_scene_pincode_menu_on_event(void* context, SceneManagerEve
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case PincodeSubmenuSetPin:
+        case CodeEventsSetPin:
+            scene_manager_set_scene_state(
+                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
             consumed = true;
             break;
-        case PincodeSubmenuResetPin:
+        case CodeEventsChangePin:
+            scene_manager_set_scene_state(
+                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
             consumed = true;
             break;
-        case PincodeSubmenuDisable:
+        case CodeEventsDisablePin:
+            scene_manager_set_scene_state(
+                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
             scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
             consumed = true;
             break;

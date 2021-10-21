@@ -14,11 +14,11 @@ extern "C" {
 /** Code input anonymous structure  */
 typedef struct CodeInput CodeInput;
 
-/** callback that is executed on save button press */
-typedef void (*CodeInputCallback)(void* context);
+/** callback that is executed when entered code matches ext buffer */
+typedef void (*CodeInputOkCallback)(void* context);
 
-/** callback that is executed when code buffer is changed */
-typedef void (*CodeChangedCallback)(void* context);
+/** callback that is executed when entered code does not matches ext buffer */
+typedef void (*CodeInputFailCallback)(void* context);
 
 /** Allocate and initialize code input. This code input is used to enter codes.
  *
@@ -43,19 +43,21 @@ View* code_input_get_view(CodeInput* code_input);
 /** Set code input result callback
  *
  * @param      code_input        code input instance
- * @param      input_callback    input callback fn
- * @param      changed_callback  changed callback fn
+ * @param      ok_callback    ok callback fn
+ * @param      fail_callback  fail callback fn
  * @param      callback_context  callback context
- * @param      codes             buffer to use
- * @param      codes_count       buffer length
+ * @param      buffer       buffer to use
+ * @param      buffer_length       buffer length
+ * @param      update  set true to update buffer 
  */
 void code_input_set_result_callback(
     CodeInput* code_input,
-    CodeInputCallback input_callback,
-    CodeChangedCallback changed_callback,
+    CodeInputOkCallback ok_callback,
+    CodeInputFailCallback fail_callback,
     void* callback_context,
-    uint8_t* codes,
-    uint8_t codes_count);
+    uint8_t* buffer,
+    uint8_t* buffer_length,
+    bool update);
 
 /** Set code input header text
  *

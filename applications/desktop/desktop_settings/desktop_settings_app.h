@@ -13,6 +13,12 @@
 #include "scenes/desktop_settings_scene.h"
 
 typedef enum {
+    CodeEventsSetPin,
+    CodeEventsChangePin,
+    CodeEventsDisablePin,
+} CodeEventsEnum;
+
+typedef enum {
     DesktopSettingsAppViewMain,
     DesktopSettingsAppViewFavorite,
     DesktopSettingsAppViewPincodeMenu,
