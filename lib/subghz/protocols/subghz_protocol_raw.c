@@ -37,7 +37,7 @@ SubGhzProtocolRAW* subghz_protocol_raw_alloc(void) {
 
     instance->common.name = "RAW";
     instance->common.code_min_count_bit_for_found = 0;
-    instance->common.te_short = 100;
+    instance->common.te_short = 80;
     instance->common.te_long = 32700;
     instance->common.te_delta = 0;
     instance->common.type_protocol = SubGhzProtocolCommonTypeRAW;
@@ -63,7 +63,6 @@ void subghz_protocol_raw_file_encoder_worker_stop(void* context) {
     furi_assert(context);
     SubGhzProtocolRAW* instance = context;
     if(subghz_file_encoder_worker_is_running(instance->file_worker_encoder)) {
-        printf("!!!STOP!!! \r\n");
         subghz_file_encoder_worker_stop(instance->file_worker_encoder);
         subghz_file_encoder_worker_free(instance->file_worker_encoder);
         instance->file_is_open = RAWFileIsOpenClose;
@@ -82,14 +81,14 @@ bool subghz_protocol_raw_send_key(
 
     if(subghz_file_encoder_worker_start(
            instance->file_worker_encoder, string_get_cstr(instance->file_name))) {
+        //the worker needs a file in order to open and read part of the file
+        osDelay(100);
         instance->file_is_open = RAWFileIsOpenRead;
         subghz_protocol_encoder_common_set_callback(
             encoder, subghz_file_encoder_worker_get_level_duration, instance->file_worker_encoder);
         subghz_protocol_encoder_common_set_callback_end(
             encoder, subghz_protocol_raw_file_encoder_worker_stop, instance);
 
-        //the worker needs a file in order to open and read part of the file
-        osDelay(50);
         loaded = true;
     } else {
         subghz_protocol_raw_file_encoder_worker_stop(instance);

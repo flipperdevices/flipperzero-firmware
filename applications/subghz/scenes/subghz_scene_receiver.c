@@ -104,6 +104,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case SubghzCustomEventViewReceverBack:
             // Stop CC1101 Rx
+            subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);

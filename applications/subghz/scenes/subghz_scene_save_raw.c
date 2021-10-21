@@ -63,6 +63,7 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
                 (SubGhzProtocolRAW*)subghz->txrx->protocol_result);
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
+            subghz->state_notifications = NOTIFICATION_IDLE_STATE;
             return true;
             break;
         case SubghzCustomEventViewSaveRAWConfig:
@@ -78,6 +79,11 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_protocol_save_raw_to_file_stop(
                 (SubGhzProtocolRAW*)subghz->txrx->protocol_result);
             subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+            //send the name of the saved file to the account
+            subghz_save_raw_set_file_name(
+                subghz->subghz_save_raw,
+                subghz_protocol_get_last_file_name(
+                    (SubGhzProtocolRAW*)subghz->txrx->protocol_result));
             return true;
             break;
         case SubghzCustomEventViewSaveRAWREC:
