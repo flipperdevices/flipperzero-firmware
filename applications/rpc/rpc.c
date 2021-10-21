@@ -25,7 +25,7 @@
 #define RPC_EVENT_DISCONNECT (1 << 1)
 #define RPC_EVENTS_ALL (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
 
-#define DEBUG_PRINT 1
+#define DEBUG_PRINT 0
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
@@ -54,9 +54,9 @@ struct RpcSession {
     RpcSendBytesCallback send_bytes_callback;
     RpcSessionClosedCallback closed_callback;
     void* context;
+    osMutexId_t callbacks_mutex;
     Rpc* rpc;
     bool terminate;
-    osMutexId_t terminate_mutex;
     void** system_contexts;
 };
 
@@ -77,18 +77,13 @@ static void rpc_close_session_process(const PB_Main* msg_request, void* context)
     furi_assert(context);
 
     Rpc* rpc = context;
-    PB_Main msg_response =  {
-        .has_next = false,
-        .command_status = PB_CommandStatus_OK,
-        .command_id = msg_request->command_id,
-        .which_content = PB_Main_stop_session_tag,
-    };
+    rpc_encode_and_send_empty(rpc, msg_request->command_id, PB_CommandStatus_OK);
 
-    rpc_encode_and_send(context, &msg_response);
-    rpc_close_session(&rpc->session);
+    osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
     if (rpc->session.closed_callback) {
         rpc->session.closed_callback(rpc->session.context);
     }
+    osMutexRelease(rpc->session.callbacks_mutex);
 }
 
 static size_t rpc_sprintf_msg_file(
@@ -305,9 +300,11 @@ RpcSession* rpc_open_session(Rpc* rpc) {
 
     if(result) {
         RpcSession* session = &rpc->session;
-        session->terminate_mutex = osMutexNew(NULL);
+        session->callbacks_mutex = osMutexNew(NULL);
         session->rpc = rpc;
         session->terminate = false;
+        xStreamBufferReset(rpc->stream);
+
         session->system_contexts = furi_alloc(COUNT_OF(rpc_systems) * sizeof(void*));
         for(int i = 0; i < COUNT_OF(rpc_systems); ++i) {
             session->system_contexts[i] = rpc_systems[i].alloc(rpc);
@@ -320,7 +317,6 @@ RpcSession* rpc_open_session(Rpc* rpc) {
         };
         rpc_add_handler(rpc, PB_Main_stop_session_tag, &rpc_handler);
 
-        xStreamBufferReset(rpc->stream);
         FURI_LOG_D(RPC_TAG, "Session started\r\n");
     }
 
@@ -330,13 +326,11 @@ RpcSession* rpc_open_session(Rpc* rpc) {
 void rpc_close_session(RpcSession* session) {
     furi_assert(session);
     furi_assert(session->rpc);
+    furi_assert(session->rpc->busy);
 
-    osMutexAcquire(session->terminate_mutex, osWaitForever);
-    if (!session->terminate) {
-        session->terminate = true;
-        osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
-    }
-    osMutexRelease(session->terminate_mutex);
+    rpc_set_send_bytes_callback(session, NULL);
+    rpc_set_session_closed_callback(session, NULL);
+    osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
 }
 
 static void rpc_free_session(RpcSession* session) {
@@ -348,7 +342,7 @@ static void rpc_free_session(RpcSession* session) {
         }
     }
     free(session->system_contexts);
-    osMutexDelete(session->terminate_mutex);
+    osMutexDelete(session->callbacks_mutex);
     RpcHandlerDict_clean(session->rpc->handlers);
 
     session->context = NULL;
@@ -360,40 +354,45 @@ void rpc_set_session_context(RpcSession* session, void* context) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
-    furi_assert(!session->terminate);
 
+    osMutexAcquire(session->callbacks_mutex, osWaitForever);
     session->context = context;
+    osMutexRelease(session->callbacks_mutex);
 }
 
 void rpc_set_session_closed_callback(RpcSession* session, RpcSessionClosedCallback callback) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
-    furi_assert(!session->terminate);
 
+    osMutexAcquire(session->callbacks_mutex, osWaitForever);
     session->closed_callback = callback;
+    osMutexRelease(session->callbacks_mutex);
 }
 
 void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
-    furi_assert(!session->terminate);
 
+    osMutexAcquire(session->callbacks_mutex, osWaitForever);
     session->send_bytes_callback = callback;
+    osMutexRelease(session->callbacks_mutex);
 }
 
+/* Doesn't forbid using rpc_feed_bytes() after session close - it's safe.
+ * Because any bytes received in buffer will be flushed before next session.
+ * If bytes get into stream buffer before it's get epmtified and this
+ * command is gets processed - it's safe either. But case of it is quite
+ * odd: client sends close request and sends command after.
+ */
 size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     Rpc* rpc = session->rpc;
-    size_t bytes_sent = 0;
+    furi_assert(rpc->busy);
 
-    osMutexAcquire(session->terminate_mutex, osWaitForever);
-    if (!session->terminate) {
-        bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
-        osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
-    }
-    osMutexRelease(session->terminate_mutex);
+    size_t bytes_sent = xStreamBufferSend(rpc->stream, encoded_bytes, size, timeout);
+    osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
 
     return bytes_sent;
 }
@@ -402,6 +401,8 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     Rpc* rpc = istream->state;
     uint32_t flags = 0;
     size_t bytes_received = 0;
+
+    furi_assert(istream->bytes_left);
 
     while(1) {
         bytes_received +=
@@ -412,6 +413,9 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
             flags = osEventFlagsWait(rpc->events, RPC_EVENTS_ALL, 0, osWaitForever);
             if(flags & RPC_EVENT_DISCONNECT) {
                 if(xStreamBufferIsEmpty(rpc->stream)) {
+                    rpc->session.terminate = true;
+                    istream->bytes_left = 0;
+                    bytes_received = 0;
                     break;
                 } else {
                     /* Save disconnect flag and continue reading buffer */
@@ -451,12 +455,11 @@ void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
     rpc_print_data("OUTPUT", buffer, ostream.bytes_written);
 #endif
 
-    osMutexAcquire(session->terminate_mutex, osWaitForever);
-    if(!session->terminate && session->send_bytes_callback) {
-        session->send_bytes_callback(
-            session->context, buffer, ostream.bytes_written);
+    osMutexAcquire(session->callbacks_mutex, osWaitForever);
+    if(session->send_bytes_callback) {
+        session->send_bytes_callback(session->context, buffer, ostream.bytes_written);
     }
-    osMutexRelease(session->terminate_mutex);
+    osMutexRelease(session->callbacks_mutex);
 
     free(buffer);
 }
@@ -483,7 +486,7 @@ int32_t rpc_srv(void* p) {
             .callback = rpc_pb_stream_read,
             .state = rpc,
             .errmsg = NULL,
-            .bytes_left = 0x7FFFFFFF,
+            .bytes_left = 1024, /* max incoming message size */
         };
 
         if(pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
@@ -502,20 +505,19 @@ int32_t rpc_srv(void* p) {
                     "Unhandled message, tag: %d\r\n",
                     rpc->decoded_message->which_content);
             }
-            pb_release(&PB_Main_msg, rpc->decoded_message);
         } else {
-            pb_release(&PB_Main_msg, rpc->decoded_message);
-            RpcSession* session = &rpc->session;
-            if(session->terminate && xStreamBufferIsEmpty(rpc->stream)) {
-                FURI_LOG_D(RPC_TAG, "Session terminated\r\n");
-                osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
-                rpc_free_session(&rpc->session);
-                rpc->busy = false;
-            } else {
-                xStreamBufferReset(rpc->stream);
-                FURI_LOG_E(
-                    RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
-            }
+            xStreamBufferReset(rpc->stream);
+            FURI_LOG_E(
+                RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
+        }
+
+        pb_release(&PB_Main_msg, rpc->decoded_message);
+
+        if(rpc->session.terminate) {
+            FURI_LOG_D(RPC_TAG, "Session terminated\r\n");
+            osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
+            rpc_free_session(&rpc->session);
+            rpc->busy = false;
         }
     }
     return 0;
@@ -537,4 +539,3 @@ void rpc_encode_and_send_empty(Rpc* rpc, uint32_t command_id, PB_CommandStatus s
     rpc_encode_and_send(rpc, &message);
     pb_release(&PB_Main_msg, &message);
 }
-

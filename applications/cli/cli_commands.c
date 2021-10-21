@@ -1,12 +1,7 @@
 #include "cli_commands.h"
-#include "cli/cli.h"
-#include "cmsis_os2.h"
-#include <furi/record.h>
-#include <rpc/rpc.h>
 #include <furi-hal.h>
 #include <furi-hal-gpio.h>
 #include <rtc.h>
-#include <stdint.h>
 #include <task-control-block.h>
 #include <time.h>
 #include <notification/notification-messages.h>
@@ -53,6 +48,8 @@ static const uint8_t enclave_signature_expected[ENCLAVE_SIGNATURE_KEY_SLOTS][ENC
     {0x8d, 0x5e, 0x27, 0xbc, 0x14, 0x4f, 0x08, 0xa8, 0x2b, 0x14, 0x89, 0x5e, 0xdf, 0x77, 0x04, 0x31},
     {0xc9, 0xf7, 0x03, 0xf1, 0x6c, 0x65, 0xad, 0x49, 0x74, 0xbe, 0x00, 0x54, 0xfd, 0xa6, 0x9c, 0x32},
 };
+
+void cli_command_start_rpc_session(Cli* cli, string_t args, void* context);
 
 /* 
  * Device Info Command
@@ -465,77 +462,6 @@ void cli_command_free(Cli* cli, string_t args, void* context) {
 void cli_command_free_blocks(Cli* cli, string_t args, void* context) {
     memmgr_heap_printf_free_blocks();
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-typedef struct {
-    Cli* cli;
-    bool session_closed;
-} CliRpc;
-
-static void cli_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
-    furi_assert(context);
-    furi_assert(bytes);
-    furi_assert(bytes_len);
-//    CliRpc* cli_rpc = context;
-
-//    cli_write(cli_rpc->cli, bytes, bytes_len);
-}
-
-static void cli_session_closed_callback(void* context) {
-    furi_assert(context);
-    CliRpc* cli_rpc = context;
-
-    cli_rpc->session_closed = true;
-}
-
-#define CLI_READ_BUFFER_SIZE    (0x40 * 16)
-static void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
-    Rpc* rpc = furi_record_open("rpc");
-    furi_record_close("rpc");
-
-    furi_stdglue_set_global_stdout_callback(cli_stdout_callback);   // dbg
-    RpcSession* rpc_session = rpc_open_session(rpc);
-    if (rpc_session == NULL) {
-        printf("Another session is in progress\r\n");
-        return;
-    }
-
-    CliRpc cli_rpc = {.cli = cli, .session_closed = false};
-    rpc_set_send_bytes_callback(rpc_session, cli_send_bytes_callback);
-    rpc_set_session_closed_callback(rpc_session, cli_session_closed_callback);
-    rpc_set_session_context(rpc_session, &cli_rpc);
-
-    uint8_t* buffer = furi_alloc(CLI_READ_BUFFER_SIZE);
-
-    printf("Session started, it can be closed by RPC command\r\n");
-
-    size_t size_received = 0;
-    bool exit = false;
-
-    while (!exit) {
-        size_received = furi_hal_vcp_rx_with_timeout(buffer, CLI_READ_BUFFER_SIZE, 50);
-        if (!furi_hal_vcp_is_connected()) {
-            exit = true;
-        } else if (cli_rpc.session_closed) {
-            break;
-        }
-
-        if (size_received) {
-            size_t size_sent = rpc_feed_bytes(rpc_session, buffer, size_received, 3000);
-            furi_assert(size_sent == size_received);    // dbg
-        }
-    }
-
-    printf("stop it now\r\n");
-    rpc_close_session(rpc_session);
-    delay(500);                                         // dbg
-    furi_stdglue_set_global_stdout_callback(NULL);      // dbg
-
-    free(buffer);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);

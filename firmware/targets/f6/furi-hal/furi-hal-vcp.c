@@ -1,4 +1,3 @@
-#include "furi/check.h"
 #include <furi-hal-vcp_i.h>
 #include <furi-hal-usb-cdc_i.h>
 
@@ -9,8 +8,6 @@
 #define APP_TX_DATA_SIZE CDC_DATA_SZ
 #define FURI_HAL_VCP_RX_BUFFER_SIZE (APP_RX_DATA_SIZE * 16)
 
-typedef void (*FuriHalVcpControlLineCallback)(void* context, uint8_t state);
-
 typedef struct {
     volatile bool connected;
 
@@ -18,8 +15,6 @@ typedef struct {
     volatile bool rx_stream_full;
 
     osSemaphoreId_t tx_semaphore;
-    FuriHalVcpControlLineCallback control_line_callback;
-    void* control_line_callback_context;
 } FuriHalVcp;
 
 static FuriHalVcp* furi_hal_vcp = NULL;
@@ -100,19 +95,12 @@ void furi_hal_vcp_on_cdc_control_line(uint8_t state) {
     if (dtr) {
         if (!furi_hal_vcp->connected) {
             furi_hal_vcp->connected = true;
-            if (furi_hal_vcp->control_line_callback) {
-                furi_hal_vcp->control_line_callback(furi_hal_vcp->control_line_callback, state);
-            } else {
-                xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, &ascii_soh, 1, &xHigherPriorityTaskWoken); // SOH 
-            }
+            xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, &ascii_soh, 1, &xHigherPriorityTaskWoken); // SOH 
+
         }
     } else {
         if (furi_hal_vcp->connected) {
-            if (furi_hal_vcp->control_line_callback) {
-                furi_hal_vcp->control_line_callback(furi_hal_vcp->control_line_callback, state);
-            } else {
-                xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, &ascii_eot, 1, &xHigherPriorityTaskWoken); // EOT
-            }
+            xStreamBufferSendFromISR(furi_hal_vcp->rx_stream, &ascii_eot, 1, &xHigherPriorityTaskWoken); // EOT
             furi_hal_vcp->connected = false;
         }
     }
@@ -147,12 +135,6 @@ void furi_hal_vcp_on_cdc_rx(uint8_t if_num) {
 void furi_hal_vcp_on_cdc_tx_complete(uint8_t if_num) {
     if (if_num == 0)
         osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
-}
-
-void furi_hal_vcp_set_control_line_callback(FuriHalVcpControlLineCallback callback, void* context) {
-    furi_check(!furi_hal_vcp->connected);
-    furi_hal_vcp->control_line_callback = callback;
-    furi_hal_vcp->control_line_callback_context = context;
 }
 
 bool furi_hal_vcp_is_connected(void) {

@@ -137,3 +137,7 @@ void furi_hal_vcp_on_cdc_tx_complete(uint8_t if_num) {
         osSemaphoreRelease(furi_hal_vcp->tx_semaphore);
 }
 
+bool furi_hal_vcp_is_connected(void) {
+    return furi_hal_vcp->connected;
+}
+
