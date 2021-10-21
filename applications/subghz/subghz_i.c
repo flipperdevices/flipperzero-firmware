@@ -191,7 +191,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
         if(!subghz->txrx->protocol_result->to_load_protocol_from_file(
-               file_worker, subghz->txrx->protocol_result)) {
+               file_worker, subghz->txrx->protocol_result, string_get_cstr(path))) {
             break;
         }
         loaded = true;
@@ -337,7 +337,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
 
         if(subghz->txrx->protocol_result->to_load_protocol_from_file == NULL ||
            !subghz->txrx->protocol_result->to_load_protocol_from_file(
-               file_worker, subghz->txrx->protocol_result)) {
+               file_worker, subghz->txrx->protocol_result, string_get_cstr(protocol_file_name))) {
             break;
         }
         res = true;

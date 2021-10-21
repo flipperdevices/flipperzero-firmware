@@ -59,11 +59,13 @@ void subghz_protocol_came_atomo_to_str(SubGhzProtocolCameAtomo* instance, string
 //  *
 //  * @param file_worker - FileWorker file_worker
 //  * @param instance - SubGhzProtocolCameAtomo instance
+//  * @param file_path - file path
 //  * @return bool
 //  */
 // bool subghz_protocol_came_atomo_to_load_protocol_from_file(
 //     FileWorker* file_worker,
-//     SubGhzProtocolCameAtomo* instance);
+//     SubGhzProtocolCameAtomo* instance, 
+//     const char* file_path);
 
 /** Loading protocol from bin data
  * 

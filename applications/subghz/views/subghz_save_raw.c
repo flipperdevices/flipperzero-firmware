@@ -125,14 +125,16 @@ void subghz_save_raw_draw_rssi(Canvas* canvas, SubghzSaveRAWModel* model) {
 
 void subghz_save_raw_draw(Canvas* canvas, SubghzSaveRAWModel* model) {
     canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 5, 8, string_get_cstr(model->frequency_str));
     canvas_draw_str(canvas, 40, 8, string_get_cstr(model->preset_str));
     canvas_draw_str_aligned(
         canvas, 126, 0, AlignRight, AlignTop, string_get_cstr(model->sample_write));
 
-    canvas_draw_line(canvas, 0, 14, 128, 14);
+    canvas_draw_line(canvas, 0, 14, 115, 14);
     subghz_save_raw_draw_rssi(canvas, model);
-    canvas_draw_line(canvas, 0, 48, 128, 48);
+    canvas_draw_line(canvas, 0, 48, 115, 48);
+    canvas_draw_line(canvas, 115, 14, 115, 48);
 
     if(model->satus == SubghzSaveRAWStatusIDLE) {
         elements_button_left(canvas, "Config");
@@ -141,6 +143,11 @@ void subghz_save_raw_draw(Canvas* canvas, SubghzSaveRAWModel* model) {
     } else {
         elements_button_center(canvas, "Stop");
     }
+
+    canvas_set_font_direction(canvas, 3);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 126, 42, "RSSI");
+    canvas_set_font_direction(canvas, 0);
 }
 
 bool subghz_save_raw_input(InputEvent* event, void* context) {

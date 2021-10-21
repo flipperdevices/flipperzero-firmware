@@ -110,6 +110,18 @@ bool subghz_scene_save_raw_on_event(void* context, SceneManagerEvent event) {
                     strlen(subghz_protocol_get_last_file_name(
                         (SubGhzProtocolRAW*)subghz->txrx->protocol_result)) +
                         1);
+                //set the path to read the file
+                string_t temp_str;
+                string_init_printf(
+                    temp_str,
+                    "%s/%s%s",
+                    SUBGHZ_APP_PATH_FOLDER,
+                    subghz->file_name,
+                    SUBGHZ_APP_EXTENSION);
+                subghz_protocol_set_last_file_name(
+                    (SubGhzProtocolRAW*)subghz->txrx->protocol_result, string_get_cstr(temp_str));
+                string_clear(temp_str);
+
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSavedMenu);
             }
             return true;

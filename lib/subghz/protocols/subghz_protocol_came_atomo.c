@@ -178,7 +178,8 @@ void subghz_protocol_came_atomo_to_str(SubGhzProtocolCameAtomo* instance, string
 
 // bool subghz_protocol_came_atomo_to_load_protocol_from_file(
 //     FileWorker* file_worker,
-//     SubGhzProtocolCameAtomo* instance) {
+//     SubGhzProtocolCameAtomo* instance,
+//     const char* file_path) {
 //     bool loaded = false;
 //     string_t temp_str;
 //     string_init(temp_str);

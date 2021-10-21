@@ -41,13 +41,16 @@ typedef void (*SubGhzProtocolCommonGetStrSave)(SubGhzProtocolCommon* instance, s
 
 //Load protocol from file
 typedef bool (
-    *SubGhzProtocolCommonLoadFromFile)(FileWorker* file_worker, SubGhzProtocolCommon* instance);
+    *SubGhzProtocolCommonLoadFromFile)(FileWorker* file_worker, SubGhzProtocolCommon* instance, const char* file_path);
 //Load protocol
 typedef void (*SubGhzProtocolCommonLoadFromRAW)(SubGhzProtocolCommon* instance, void* context);
 //Get upload encoder protocol
 typedef bool (*SubGhzProtocolCommonEncoderGetUpLoad)(
     SubGhzProtocolCommon* instance,
     SubGhzProtocolCommonEncoder* encoder);
+
+typedef LevelDuration (*SubGhzProtocolCommonEncoderCallback)(void* context);
+typedef void (*SubGhzProtocolCommonEncoderCallbackEnd)(void* context);
 
 struct SubGhzProtocolCommon {
     const char* name;
@@ -89,6 +92,11 @@ struct SubGhzProtocolCommonEncoder {
     size_t front;
     size_t size_upload;
     LevelDuration* upload;
+
+    SubGhzProtocolCommonEncoderCallback callback;
+    SubGhzProtocolCommonEncoderCallbackEnd callback_end;
+    void* context;
+    void* context_end;
 };
 
 struct SubGhzProtocolCommonLoad {
@@ -110,6 +118,16 @@ SubGhzProtocolCommonEncoder* subghz_protocol_encoder_common_alloc();
  * @param instance 
  */
 void subghz_protocol_encoder_common_free(SubGhzProtocolCommonEncoder* instance);
+
+void subghz_protocol_encoder_common_set_callback(
+    SubGhzProtocolCommonEncoder* instance,
+    SubGhzProtocolCommonEncoderCallback callback,
+    void* context);
+
+void subghz_protocol_encoder_common_set_callback_end(
+    SubGhzProtocolCommonEncoder* instance,
+    SubGhzProtocolCommonEncoderCallbackEnd callback_end,
+    void* context_end);
 
 /** Get count repeat left
  * 

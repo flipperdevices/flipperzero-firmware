@@ -45,23 +45,9 @@ void subghz_protocol_raw_parse(SubGhzProtocolRAW* instance, bool level, uint32_t
  */
 void subghz_protocol_raw_to_str(SubGhzProtocolRAW* instance, string_t output);
 
-// /** Get a string to save the protocol
-//  *
-//  * @param instance  - SubGhzProtocolRAW instance
-//  * @param output    - the resulting string
-//  */
-// void subghz_protocol_raw_to_save_str(SubGhzProtocolRAW* instance, string_t output);
-
-// /** Loading protocol from bin data
-//  *
-//  * @param instance - SubGhzProtocolRAW instance
-//  * @param context - SubGhzProtocolCommonLoad context
-//  */
-// void subghz_decoder_raw_to_load_protocol(SubGhzProtocolRAW* instance, void* context);
-
-void subghz_protocol_raw_print(SubGhzProtocolRAW* instance);
-
 const char* subghz_protocol_get_last_file_name(SubGhzProtocolRAW* instance);
+
+void subghz_protocol_set_last_file_name(SubGhzProtocolRAW* instance, const char* name);
 
 bool subghz_protocol_save_raw_to_file_init(
     SubGhzProtocolRAW* instance,
@@ -74,4 +60,5 @@ size_t subghz_save_protocol_raw_get_sample_write(SubGhzProtocolRAW* instance);
 
 bool subghz_protocol_raw_to_load_protocol_from_file(
     FileWorker* file_worker,
-    SubGhzProtocolRAW* instance);
+    SubGhzProtocolRAW* instance,
+    const char* file_path);
