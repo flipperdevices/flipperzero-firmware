@@ -8,13 +8,9 @@ static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
 
     Bt* bt = context;
     if(bt->status == BtStatusAdvertising) {
-        view_port_set_width(bt->statusbar_view_port, 5);
         canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_5x8);
-        view_port_update(bt->statusbar_view_port);
     } else if(bt->status == BtStatusConnected) {
-        view_port_set_width(bt->statusbar_view_port, 11);
         canvas_draw_icon(canvas, 0, 0, &I_BT_Pair_11x8);
-        view_port_update(bt->statusbar_view_port);
     }
 }
 
@@ -164,6 +160,18 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
     }
 }
 
+static void bt_statusbar_update(Bt* bt) {
+    if(bt->status == BtStatusAdvertising) {
+        view_port_set_width(bt->statusbar_view_port, 5);
+        view_port_enabled_set(bt->statusbar_view_port, true);
+    } else if(bt->status == BtStatusConnected) {
+        view_port_set_width(bt->statusbar_view_port, 11);
+        view_port_enabled_set(bt->statusbar_view_port, true);
+    } else {
+        view_port_enabled_set(bt->statusbar_view_port, false);
+    }
+}
+
 int32_t bt_srv() {
     Bt* bt = bt_alloc();
     furi_record_create("bt", bt);
@@ -182,14 +190,14 @@ int32_t bt_srv() {
         }
     }
     // Update statusbar
-    view_port_enabled_set(bt->statusbar_view_port, furi_hal_bt_is_active());
+    bt_statusbar_update(bt);
 
     BtMessage message;
     while(1) {
         furi_check(osMessageQueueGet(bt->message_queue, &message, NULL, osWaitForever) == osOK);
         if(message.type == BtMessageTypeUpdateStatusbar) {
             // Update statusbar
-            view_port_enabled_set(bt->statusbar_view_port, furi_hal_bt_is_active());
+            bt_statusbar_update(bt);
         } else if(message.type == BtMessageTypeUpdateBatteryLevel) {
             // Update battery level
             if(furi_hal_bt_is_active()) {
