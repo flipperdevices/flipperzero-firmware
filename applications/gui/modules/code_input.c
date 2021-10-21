@@ -8,20 +8,33 @@ struct CodeInput {
     View* view;
 };
 
+typedef enum {
+    CodeInputStateVerify,
+    CodeInputStateUpdate,
+    CodeInputStateTotal,
+} CodeInputStateEnum;
+
+typedef enum {
+    CodeInputFirst,
+    CodeInputSecond,
+    CodeInputTotal,
+} CodeInputsEnum;
+
 typedef struct {
-    const char* header;
-
-    InputKey* ext_buffer;
-    uint8_t ext_buffer_length;
-
-    InputKey local_buffer[2][MAX_CODE_LEN];
-    uint8_t input_length[2];
+    uint8_t local_buffer[CodeInputTotal][MAX_CODE_LEN];
+    uint8_t input_length[CodeInputTotal];
     uint8_t current;
+    bool ext_update;
+    uint8_t state;
 
-    CodeInputCallback input_callback;
-    CodeChangedCallback changed_callback;
+    CodeInputOkCallback ok_callback;
+    CodeInputFailCallback fail_callback;
     void* callback_context;
 
+    const char* header;
+
+    uint8_t* ext_buffer;
+    uint8_t* ext_buffer_length;
 } CodeInputModel;
 
 static const Icon* keys_assets[] = {
@@ -30,6 +43,78 @@ static const Icon* keys_assets[] = {
     [InputKeyRight] = &I_ButtonRight_4x7,
     [InputKeyLeft] = &I_ButtonLeft_4x7,
 };
+
+/**
+ * @brief Compare local buffers
+ * 
+ * @param model 
+ */
+static bool code_input_compare_local(CodeInputModel* model) {
+    bool match = false;
+
+    do {
+        match = (model->input_length[CodeInputFirst] && model->input_length[CodeInputSecond]);
+        if(!match) {
+            break;
+        }
+        match = (model->input_length[CodeInputFirst] == model->input_length[CodeInputSecond]);
+        if(!match) {
+            break;
+        }
+        for(size_t i = 0; i < model->input_length[CodeInputFirst]; i++) {
+            match =
+                (model->local_buffer[CodeInputFirst][i] ==
+                 model->local_buffer[CodeInputSecond][i]);
+            if(!match) {
+                break;
+            }
+        }
+
+    } while(false);
+
+    return match;
+}
+
+/**
+ * @brief Compare ext with local
+ * 
+ * @param model 
+ */
+static bool code_input_compare_ext(CodeInputModel* model) {
+    bool match = false;
+
+    do {
+        match = (model->input_length[CodeInputFirst] && *model->ext_buffer_length);
+        if(!match) {
+            break;
+        }
+        match = (model->input_length[CodeInputFirst] == *model->ext_buffer_length);
+        if(!match) {
+            break;
+        }
+        for(size_t i = 0; i < *model->ext_buffer_length; i++) {
+            match = (model->local_buffer[CodeInputFirst][i] == model->ext_buffer[i]);
+            if(!match) {
+                break;
+            }
+        }
+
+    } while(false);
+
+    return match;
+}
+
+/**
+ * @brief Set ext buffer
+ * 
+ * @param model 
+ */
+static void code_input_set_ext(CodeInputModel* model) {
+    *model->ext_buffer_length = model->input_length[CodeInputFirst];
+    for(size_t i = 0; i <= model->input_length[CodeInputFirst]; i++) {
+        model->ext_buffer[i] = model->local_buffer[CodeInputFirst][i];
+    }
+}
 
 /**
  * @brief Draw input sequence
@@ -51,18 +136,25 @@ static void code_input_draw_sequence(
     uint8_t pos_x = x + 8;
     uint8_t pos_y = y + 3;
 
-    if(active) {
-        canvas_draw_icon(canvas, x - 4, y + 5, &I_ButtonRightSmall_3x5);
-    }
+    if(active) canvas_draw_icon(canvas, x - 4, y + 5, &I_ButtonRightSmall_3x5);
 
     elements_slightly_rounded_frame(canvas, x, y, 116, 15);
 
     for(size_t i = 0; i < length; i++) {
-        uint8_t offset_y = buffer[i] < 2 ? 2 + (buffer[i] * 2) :
-                                           1; // maybe symmetrical assets? :-/
+        // maybe symmetrical assets? :-/
+        uint8_t offset_y = buffer[i] < 2 ? 2 + (buffer[i] * 2) : 1;
         canvas_draw_icon(canvas, pos_x, pos_y + offset_y, keys_assets[buffer[i]]);
         pos_x += buffer[i] > 1 ? 9 : 11;
     }
+}
+
+/**
+ * @brief Reset input count
+ * 
+ * @param model 
+ */
+static void code_input_reset_count(CodeInputModel* model) {
+    model->input_length[model->current] = 0;
 }
 
 /**
@@ -70,9 +162,9 @@ static void code_input_draw_sequence(
  * 
  * @param model 
  */
-static void code_input_call_input_callback(CodeInputModel* model) {
-    if(model->input_callback != NULL) {
-        model->input_callback(model->callback_context);
+static void code_input_call_ok_callback(CodeInputModel* model) {
+    if(model->ok_callback != NULL) {
+        model->ok_callback(model->callback_context);
     }
 }
 
@@ -81,9 +173,9 @@ static void code_input_call_input_callback(CodeInputModel* model) {
  * 
  * @param model 
  */
-static void code_input_call_changed_callback(CodeInputModel* model) {
-    if(model->changed_callback != NULL) {
-        model->changed_callback(model->callback_context);
+static void code_input_call_fail_callback(CodeInputModel* model) {
+    if(model->fail_callback != NULL) {
+        model->fail_callback(model->callback_context);
     }
 }
 
@@ -99,11 +191,11 @@ static bool code_input_handle_back(CodeInputModel* model) {
     }
 
     if(model->input_length[model->current]) {
-        model->input_length[model->current] = 0;
+        code_input_reset_count(model);
         return true;
     }
 
-    code_input_call_changed_callback(model);
+    code_input_call_fail_callback(model);
     return false;
 }
 
@@ -113,25 +205,52 @@ static bool code_input_handle_back(CodeInputModel* model) {
  * @param model 
  */
 static void code_input_handle_ok(CodeInputModel* model) {
-    if(model->current < 1 && model->input_length[model->current]) {
-        model->current++;
-    } else {
-        bool match = false;
+    switch(model->state) {
+    case CodeInputStateVerify:
 
-        match = (model->input_length[0] > 0 && model->input_length[1] > 0);
+        if(code_input_compare_ext(model)) {
+            if(model->ext_update) {
+                model->state = CodeInputStateUpdate;
+            } else {
+                code_input_call_ok_callback(model);
+            }
+        }
+        code_input_reset_count(model);
+        break;
 
-        match = (model->input_length[0] == model->input_length[1]);
+    case CodeInputStateUpdate:
 
-        if(match) {
-            for(size_t i = 0; i < model->input_length[0]; i++) {
-                match = model->local_buffer[0][i] == model->local_buffer[1][i];
+        if(!model->current && model->input_length[model->current]) {
+            model->current++;
+        } else {
+            if(code_input_compare_local(model)) {
+                if(model->ext_update) {
+                    code_input_set_ext(model);
+                }
+                code_input_call_ok_callback(model);
+            } else {
+                code_input_reset_count(model);
             }
         }
 
-        if(match) {
-            code_input_call_input_callback(model);
-        }
+        break;
+    default:
+        break;
     }
+}
+
+/**
+ * @brief Handle D-pad keys
+ * 
+ * @param model 
+ * @param key 
+ */
+static void code_input_handle_dpad(CodeInputModel* model, InputKey key) {
+    uint8_t at = model->current;
+    uint8_t idx = model->input_length[at];
+
+    model->local_buffer[at][idx] = key;
+    model->input_length[at] = CLAMP(idx + 1, MAX_CODE_LEN, 0);
 }
 
 /**
@@ -150,13 +269,38 @@ static void code_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontSecondary);
 
-    code_input_draw_sequence(
-        canvas, model->local_buffer[0], model->input_length[0], 6, 14, !model->current);
+    switch(model->state) {
+    case CodeInputStateVerify:
+        code_input_draw_sequence(
+            canvas,
+            model->local_buffer[CodeInputFirst],
+            model->input_length[CodeInputFirst],
+            6,
+            30,
+            true);
+        break;
+    case CodeInputStateUpdate:
+        code_input_draw_sequence(
+            canvas,
+            model->local_buffer[CodeInputFirst],
+            model->input_length[CodeInputFirst],
+            6,
+            14,
+            !model->current);
+        code_input_draw_sequence(
+            canvas,
+            model->local_buffer[CodeInputSecond],
+            model->input_length[CodeInputSecond],
+            6,
+            44,
+            model->current);
 
-    if(model->current) canvas_draw_str(canvas, 2, 39, "Repeat code");
+        if(model->current) canvas_draw_str(canvas, 2, 39, "Repeat code");
 
-    code_input_draw_sequence(
-        canvas, model->local_buffer[1], model->input_length[1], 6, 44, model->current);
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -180,7 +324,6 @@ static bool code_input_view_input_callback(InputEvent* event, void* context) {
                     consumed = code_input_handle_back(model);
                     return true;
                 });
-
             break;
 
         case InputKeyOk:
@@ -195,18 +338,10 @@ static bool code_input_view_input_callback(InputEvent* event, void* context) {
 
             with_view_model(
                 code_input->view, (CodeInputModel * model) {
-                    uint8_t at = model->current;
-                    uint8_t idx = model->input_length[model->current];
-
-                    model->local_buffer[at][idx] = event->key;
-                    model->input_length[at] = CLAMP(idx + 1, model->ext_buffer_length, 0);
-
-                    FURI_LOG_I(
-                        "Code Input", "Key: %d At: %d Len: %d", event->key, model->current, idx);
+                    code_input_handle_dpad(model, event->key);
                     return true;
                 });
             consumed = true;
-
             break;
         }
     }
@@ -221,10 +356,11 @@ static bool code_input_view_input_callback(InputEvent* event, void* context) {
  */
 static void code_input_reset_model_input_data(CodeInputModel* model) {
     model->current = 0;
-    model->input_length[0] = 0;
-    model->input_length[1] = 0;
+    model->input_length[CodeInputFirst] = 0;
+    model->input_length[CodeInputSecond] = 0;
     model->ext_buffer = NULL;
-    model->ext_buffer_length = 0;
+    model->ext_update = false;
+    model->state = 0;
 }
 
 /** 
@@ -243,8 +379,8 @@ CodeInput* code_input_alloc() {
     with_view_model(
         code_input->view, (CodeInputModel * model) {
             model->header = "";
-            model->input_callback = NULL;
-            model->changed_callback = NULL;
+            model->ok_callback = NULL;
+            model->fail_callback = NULL;
             model->callback_context = NULL;
             code_input_reset_model_input_data(model);
             return true;
@@ -276,30 +412,36 @@ View* code_input_get_view(CodeInput* code_input) {
 }
 
 /** 
- * @brief Deinitialize and free code input
+ * @brief Set code input callbacks
  * 
  * @param code_input code input instance
- * @param input_callback input callback fn
- * @param changed_callback changed callback fn
+ * @param ok_callback input callback fn
+ * @param fail_callback code match callback fn
  * @param callback_context callback context
- * @param sequence buffer to use
- * @param length buffer length
+ * @param buffer buffer 
+ * @param buffer_length ptr to buffer length uint
+ * @param ext_update  true to update buffer 
  */
 void code_input_set_result_callback(
     CodeInput* code_input,
-    CodeInputCallback input_callback,
-    CodeChangedCallback changed_callback,
+    CodeInputOkCallback ok_callback,
+    CodeInputFailCallback fail_callback,
     void* callback_context,
     uint8_t* buffer,
-    uint8_t buffer_length) {
+    uint8_t* buffer_length,
+    bool ext_update) {
     with_view_model(
         code_input->view, (CodeInputModel * model) {
             code_input_reset_model_input_data(model);
-            model->input_callback = input_callback;
-            model->changed_callback = changed_callback;
+            model->ok_callback = ok_callback;
+            model->fail_callback = fail_callback;
             model->callback_context = callback_context;
+
             model->ext_buffer = buffer;
             model->ext_buffer_length = buffer_length;
+            model->state = (*buffer_length == 0) ? 1 : 0;
+            model->ext_update = ext_update;
+
             return true;
         });
 }
