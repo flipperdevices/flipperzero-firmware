@@ -6,7 +6,7 @@ typedef struct {
     bool session_closed;
 } CliRpc;
 
-#define CLI_READ_BUFFER_SIZE    100
+#define CLI_READ_BUFFER_SIZE 100
 
 static void cli_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
     furi_assert(context);
@@ -29,7 +29,7 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
     furi_record_close("rpc");
 
     RpcSession* rpc_session = rpc_open_session(rpc);
-    if (rpc_session == NULL) {
+    if(rpc_session == NULL) {
         printf("Another session is in progress\r\n");
         return;
     }
@@ -44,13 +44,13 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
     size_t size_received = 0;
     bool exit = false;
 
-    while (!exit) {
+    while(!exit) {
         size_received = furi_hal_vcp_rx_with_timeout(buffer, CLI_READ_BUFFER_SIZE, 50);
-        if (!furi_hal_vcp_is_connected() || cli_rpc.session_closed) {
+        if(!furi_hal_vcp_is_connected() || cli_rpc.session_closed) {
             break;
         }
 
-        if (size_received) {
+        if(size_received) {
             rpc_feed_bytes(rpc_session, buffer, size_received, 3000);
         }
     }
@@ -59,5 +59,3 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
 
     free(buffer);
 }
-
-

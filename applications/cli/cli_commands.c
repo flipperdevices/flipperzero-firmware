@@ -480,5 +480,6 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
     cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
 
-    cli_add_command(cli, "start_rpc_session", CliCommandFlagDefault, cli_command_start_rpc_session, NULL);
+    cli_add_command(
+        cli, "start_rpc_session", CliCommandFlagDefault, cli_command_start_rpc_session, NULL);
 }

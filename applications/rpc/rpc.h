@@ -77,5 +77,3 @@ void rpc_set_session_closed_callback(RpcSession* session, RpcSessionClosedCallba
  * @return              actually consumed bytes
  */
 size_t rpc_feed_bytes(RpcSession* session, uint8_t* buffer, size_t size, TickType_t timeout);
-
-

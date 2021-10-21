@@ -80,7 +80,7 @@ static void rpc_close_session_process(const PB_Main* msg_request, void* context)
     rpc_encode_and_send_empty(rpc, msg_request->command_id, PB_CommandStatus_OK);
 
     osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
-    if (rpc->session.closed_callback) {
+    if(rpc->session.closed_callback) {
         rpc->session.closed_callback(rpc->session.context);
     }
     osMutexRelease(rpc->session.callbacks_mutex);
@@ -386,7 +386,8 @@ void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callb
  * command is gets processed - it's safe either. But case of it is quite
  * odd: client sends close request and sends command after.
  */
-size_t rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
+size_t
+    rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     Rpc* rpc = session->rpc;
     furi_assert(rpc->busy);
@@ -507,8 +508,7 @@ int32_t rpc_srv(void* p) {
             }
         } else {
             xStreamBufferReset(rpc->stream);
-            FURI_LOG_E(
-                RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
+            FURI_LOG_E(RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
         }
 
         pb_release(&PB_Main_msg, rpc->decoded_message);
