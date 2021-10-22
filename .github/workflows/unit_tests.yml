@@ -41,13 +41,14 @@ jobs:
       - name: 'Build Docker image'
         uses: ./.github/actions/docker
 
-      - name: 'Build and flash firmware with unit tests'
+      - name: 'Build firmware with unit tests'
         uses: ./.github/actions/docker
         with:
-          run: make flash APP_UNIT_TESTS=1
+          run: make APP_UNIT_TESTS=1
+
+      - name: 'Flash the test device'
+        run: make flash APP_UNIT_TESTS=1
 
       - name: 'Run unit tests'
         timeout-minutes: 1
-        uses: ./.github/actions/docker
-        with:
-          run: python3 scripts/unit_tests.py
+        run: python3 scripts/unit_tests.py
