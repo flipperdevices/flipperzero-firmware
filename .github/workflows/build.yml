@@ -42,7 +42,7 @@ jobs:
           key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
           restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
 
-      - name: 'Build docker image'
+      - name: 'Build Docker image'
         uses: ./.github/actions/docker
 
       - name: 'Make artifacts directory'
@@ -72,22 +72,13 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
-      - name: 'Build bootloader in docker'
+      - name: 'Build bootloader and firmware'
         uses: ./.github/actions/docker
         with:
           run: |
             for TARGET in ${TARGETS}
             do
-              make -j$(nproc) -C bootloader TARGET=${TARGET}
-            done
-
-      - name: 'Build firmware in docker'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            for TARGET in ${TARGETS}
-            do
-              make -j$(nproc) -C firmware TARGET=${TARGET}
+              make TARGET=${TARGET}
             done
 
       - name: 'Generate full hex file'
