@@ -1,0 +1,53 @@
+name: 'Run unit tests'
+
+on: 
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  unit_tests:
+    timeout-minutes: 10
+    runs-on: [self-hosted, koteeq]
+    steps:
+      - name: 'Cleanup workspace'
+        uses: AutoModality/action-clean@v1
+
+      - name: 'Decontaminate previous build leftovers'
+        run: |
+          if [ -d .git ]
+          then
+            git submodule status \
+              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
+          fi
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Docker cache'
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+        with:
+          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+
+      - name: 'Build Docker image'
+        uses: ./.github/actions/docker
+
+      - name: 'Build and flash firmware with unit tests'
+        uses: ./.github/actions/docker
+        with:
+          run: make flash APP_UNIT_TESTS=1
+
+      - name: 'Run unit tests'
+        timeout-minutes: 1
+        uses: ./.github/actions/docker
+        with:
+          run: python3 scripts/unit_tests.py
