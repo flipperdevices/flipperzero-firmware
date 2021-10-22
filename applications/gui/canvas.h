@@ -37,6 +37,14 @@ typedef enum {
     CanvasOrientationVertical,
 } CanvasOrientation;
 
+/** Font rotation */
+typedef enum {
+    CanvasFontDirectionLeftToRight =0U,
+    CanvasFontDirectionTopToDown,
+    CanvasFontDirectionRightToLeft,
+    CanvasFontDirectionDownToTop,
+} CanvasFontDirection;
+
 /** Canvas anonymouse structure */
 typedef struct Canvas Canvas;
 
@@ -79,15 +87,11 @@ void canvas_set_color(Canvas* canvas, Color color);
 
 /** Set font swap
  * Argument String Rotation Description
- *   0        0 degree      Left to right
- *   1        90 degree     Top to down
- *   2        180 degree    Right to left
- *   3        270 degree    Down to top
  *
  * @param      canvas  Canvas instance
  * @param      dir     Direction font
  */
-void canvas_set_font_direction(Canvas* canvas, uint8_t dir);
+void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir);
 
 /** Invert drawing color
  *

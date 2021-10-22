@@ -24,7 +24,6 @@ Canvas* canvas_init() {
     u8g2_ClearBuffer(&canvas->fb);
     u8g2_SetPowerSave(&canvas->fb, 0);
     u8g2_SendBuffer(&canvas->fb);
-    u8g2_SetFontDirection(&canvas->fb, 0);
 
     furi_hal_power_insomnia_exit();
 
