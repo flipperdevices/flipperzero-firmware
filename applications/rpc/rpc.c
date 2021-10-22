@@ -500,21 +500,21 @@ int32_t rpc_srv(void* p) {
 
             if(handler && handler->message_handler) {
                 handler->message_handler(rpc->decoded_message, handler->context);
-            } else if(!handler) {
+            } else if(!handler && !rpc->session.terminate) {
                 FURI_LOG_E(
-                    RPC_TAG,
-                    "Unhandled message, tag: %d\r\n",
-                    rpc->decoded_message->which_content);
+                    RPC_TAG, "Unhandled message, tag: %d", rpc->decoded_message->which_content);
             }
         } else {
             xStreamBufferReset(rpc->stream);
-            FURI_LOG_E(RPC_TAG, "Decode failed, error: \'%.128s\'\r\n", PB_GET_ERROR(&istream));
+            if(!rpc->session.terminate) {
+                FURI_LOG_E(RPC_TAG, "Decode failed, error: \'%.128s\'", PB_GET_ERROR(&istream));
+            }
         }
 
         pb_release(&PB_Main_msg, rpc->decoded_message);
 
         if(rpc->session.terminate) {
-            FURI_LOG_D(RPC_TAG, "Session terminated\r\n");
+            FURI_LOG_D(RPC_TAG, "Session terminated");
             osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
             rpc_free_session(&rpc->session);
             rpc->busy = false;

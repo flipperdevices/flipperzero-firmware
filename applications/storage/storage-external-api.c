@@ -1,6 +1,10 @@
+#include <furi/record.h>
+#include <m-string.h>
 #include "storage.h"
 #include "storage-i.h"
 #include "storage-message.h"
+
+#define MAX_NAME_LENGTH 256
 
 #define S_API_PROLOGUE                                      \
     osSemaphoreId_t semaphore = osSemaphoreNew(1, 0, NULL); \
@@ -380,6 +384,56 @@ void storage_file_free(File* file) {
     }
 
     free(file);
+}
+
+bool storage_simply_remove_recursive(Storage* storage, const char* path) {
+    File* dir = storage_file_alloc(storage);
+    char* name = furi_alloc(MAX_NAME_LENGTH + 1);
+    FileInfo fileinfo;
+    string_t cur_dir;
+    string_init_set_str(cur_dir, path);
+    string_t fullname;
+    bool result = false;
+
+    if(storage_simply_remove(storage, path)) {
+        return true;
+    }
+
+    while(1) {
+    next_dir:
+        if(!storage_dir_open(dir, string_get_cstr(cur_dir))) {
+            storage_dir_close(dir);
+            break;
+        }
+
+        while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
+            if(fileinfo.flags & FSF_DIRECTORY) {
+                string_cat_printf(cur_dir, "/%s", name);
+                storage_dir_close(dir);
+                goto next_dir; // 'continue' for outer cycle
+            }
+
+            string_init_printf(fullname, "%s/%s", string_get_cstr(cur_dir), name);
+            FS_Error error = storage_common_remove(storage, string_get_cstr(fullname));
+            furi_assert(error == FSE_OK);
+            string_clear(fullname);
+        }
+        storage_dir_close(dir);
+        FS_Error error = storage_common_remove(storage, string_get_cstr(cur_dir));
+        furi_assert(error == FSE_OK);
+
+        if(string_cmp(cur_dir, path)) {
+            size_t last_char = string_search_rchar(cur_dir, '/');
+            furi_assert(last_char != STRING_FAILURE);
+            string_left(cur_dir, last_char);
+        } else {
+            result = true;
+            break;
+        }
+    }
+
+    free(name);
+    return result;
 }
 
 bool storage_simply_remove(Storage* storage, const char* path) {

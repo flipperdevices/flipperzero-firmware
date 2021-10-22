@@ -198,10 +198,12 @@ static void test_rpc_create_simple_message(
     const char* str,
     uint32_t command_id) {
     furi_assert(message);
-    furi_assert(str);
 
-    char* str_copy = furi_alloc(strlen(str) + 1);
-    strcpy(str_copy, str);
+    char* str_copy = NULL;
+    if(str) {
+        str_copy = furi_alloc(strlen(str) + 1);
+        strcpy(str_copy, str);
+    }
     message->command_id = command_id;
     message->command_status = PB_CommandStatus_OK;
     message->cb_content.funcs.encode = NULL;
@@ -403,6 +405,38 @@ static bool test_rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_
     return (count == bytes_received);
 }
 
+static void
+    test_rpc_storage_list_create_expected_list_root(MsgList_t msg_list, uint32_t command_id) {
+    PB_Main* message = MsgList_push_new(msg_list);
+    message->has_next = false;
+    message->cb_content.funcs.encode = NULL;
+    message->command_id = command_id;
+    message->which_content = PB_Main_storage_list_response_tag;
+
+    message->content.storage_list_response.file_count = 3;
+    message->content.storage_list_response.file[0].data = NULL;
+    message->content.storage_list_response.file[1].data = NULL;
+    message->content.storage_list_response.file[2].data = NULL;
+
+    message->content.storage_list_response.file[0].size = 0;
+    message->content.storage_list_response.file[1].size = 0;
+    message->content.storage_list_response.file[2].size = 0;
+
+    message->content.storage_list_response.file[0].type = PB_Storage_File_FileType_DIR;
+    message->content.storage_list_response.file[1].type = PB_Storage_File_FileType_DIR;
+    message->content.storage_list_response.file[2].type = PB_Storage_File_FileType_DIR;
+
+    char* str = furi_alloc(4);
+    strcpy(str, "any");
+    message->content.storage_list_response.file[0].name = str;
+    str = furi_alloc(4);
+    strcpy(str, "int");
+    message->content.storage_list_response.file[1].name = str;
+    str = furi_alloc(4);
+    strcpy(str, "ext");
+    message->content.storage_list_response.file[2].name = str;
+}
+
 static void test_rpc_storage_list_create_expected_list(
     MsgList_t msg_list,
     const char* path,
@@ -506,7 +540,11 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
     MsgList_init(expected_msg_list);
 
     test_rpc_create_simple_message(&request, PB_Main_storage_list_request_tag, path, command_id);
-    test_rpc_storage_list_create_expected_list(expected_msg_list, path, command_id);
+    if(!strcmp(path, "/")) {
+        test_rpc_storage_list_create_expected_list_root(expected_msg_list, command_id);
+    } else {
+        test_rpc_storage_list_create_expected_list(expected_msg_list, path, command_id);
+    }
     test_rpc_encode_and_feed_one(&request);
     test_rpc_decode_and_compare(expected_msg_list);
 
@@ -515,6 +553,7 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
 }
 
 MU_TEST(test_storage_list) {
+    test_rpc_storage_list_run("/", ++command_id);
     test_rpc_storage_list_run("/ext/nfc", ++command_id);
 
     test_rpc_storage_list_run("/int", ++command_id);
@@ -598,12 +637,23 @@ static void test_storage_read_run(const char* path, uint32_t command_id) {
     test_rpc_free_msg_list(expected_msg_list);
 }
 
+static bool test_is_exists(const char* path) {
+    Storage* fs_api = furi_record_open("storage");
+    FileInfo fileinfo;
+    FS_Error result = storage_common_stat(fs_api, path, &fileinfo);
+
+    furi_check((result == FSE_OK) || (result == FSE_NOT_EXIST));
+
+    return result == FSE_OK;
+}
+
 static void test_create_dir(const char* path) {
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_mkdir(fs_api, path);
     (void)error;
     furi_assert((error == FSE_OK) || (error == FSE_EXIST));
     furi_record_close("storage");
+    furi_check(test_is_exists(path));
 }
 
 static void test_create_file(const char* path, size_t size) {
@@ -626,6 +676,7 @@ static void test_create_file(const char* path, size_t size) {
     storage_file_free(file);
 
     furi_record_close("storage");
+    furi_check(test_is_exists(path));
 }
 
 MU_TEST(test_storage_read) {
@@ -830,12 +881,17 @@ MU_TEST(test_storage_interrupt_continuous_another_system) {
     test_rpc_free_msg_list(expected_msg_list);
 }
 
-static void test_storage_delete_run(const char* path, size_t command_id, PB_CommandStatus status) {
+static void test_storage_delete_run(
+    const char* path,
+    size_t command_id,
+    PB_CommandStatus status,
+    bool recursive) {
     PB_Main request;
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
     test_rpc_create_simple_message(&request, PB_Main_storage_delete_request_tag, path, command_id);
+    request.content.storage_delete_request.recursive = recursive;
     test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
 
     test_rpc_encode_and_feed_one(&request);
@@ -845,16 +901,69 @@ static void test_storage_delete_run(const char* path, size_t command_id, PB_Comm
     test_rpc_free_msg_list(expected_msg_list);
 }
 
-MU_TEST(test_storage_delete) {
-    test_create_file(TEST_DIR "empty.txt", 0);
-    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK);
-    test_storage_delete_run(
-        TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_ERROR_STORAGE_NOT_EXIST);
+#define TEST_DIR_RMRF_NAME TEST_DIR "rmrf_test"
+#define TEST_DIR_RMRF TEST_DIR_RMRF_NAME "/"
+MU_TEST(test_storage_delete_recursive) {
+    test_create_dir(TEST_DIR_RMRF_NAME);
 
-    test_create_dir(TEST_DIR "dir1");
-    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    test_create_dir(TEST_DIR_RMRF "dir1");
+    test_create_file(TEST_DIR_RMRF "dir1/file1", 1);
+
+    test_create_dir(TEST_DIR_RMRF "dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir2");
+    test_create_file(TEST_DIR_RMRF "dir1/dir2/file1", 1);
+    test_create_file(TEST_DIR_RMRF "dir1/dir2/file2", 1);
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1/dir1/dir1");
+
+    test_create_dir(TEST_DIR_RMRF "dir2");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2");
+    test_create_file(TEST_DIR_RMRF "dir2/dir2/file1", 1);
+
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1/dir1/dir1");
+    test_create_file(TEST_DIR_RMRF "dir2/dir2/dir1/dir1/dir1/file1", 1);
+
     test_storage_delete_run(
-        TEST_DIR "dir1", ++command_id, PB_CommandStatus_ERROR_STORAGE_NOT_EXIST);
+        TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY, false);
+    mu_check(test_is_exists(TEST_DIR_RMRF_NAME));
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+
+    test_create_dir(TEST_DIR_RMRF_NAME);
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+
+    test_create_dir(TEST_DIR "file1");
+    test_storage_delete_run(TEST_DIR "file1", ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR "file1"));
+}
+
+MU_TEST(test_storage_delete) {
+    test_storage_delete_run(NULL, ++command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS, false);
+
+    furi_check(!test_is_exists(TEST_DIR "empty.txt"));
+    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "empty.txt"));
+
+    test_create_file(TEST_DIR "empty.txt", 0);
+    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "empty.txt"));
+
+    furi_check(!test_is_exists(TEST_DIR "dir1"));
+    test_create_dir(TEST_DIR "dir1");
+    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "dir1"));
+
+    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "dir1"));
 }
 
 static void test_storage_mkdir_run(const char* path, size_t command_id, PB_CommandStatus status) {
@@ -873,18 +982,17 @@ static void test_storage_mkdir_run(const char* path, size_t command_id, PB_Comma
 }
 
 MU_TEST(test_storage_mkdir) {
+    furi_check(!test_is_exists(TEST_DIR "dir1"));
     test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    mu_check(test_is_exists(TEST_DIR "dir1"));
+
     test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_ERROR_STORAGE_EXIST);
+    mu_check(test_is_exists(TEST_DIR "dir1"));
+
+    furi_check(!test_is_exists(TEST_DIR "dir2"));
     test_create_dir(TEST_DIR "dir2");
     test_storage_mkdir_run(TEST_DIR "dir2", ++command_id, PB_CommandStatus_ERROR_STORAGE_EXIST);
-
-    Storage* fs_api = furi_record_open("storage");
-    FS_Error error = storage_common_remove(fs_api, TEST_DIR "dir1");
-    (void)error;
-    furi_assert(error == FSE_OK);
-    furi_record_close("storage");
-
-    test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    mu_check(test_is_exists(TEST_DIR "dir2"));
 }
 
 static void test_storage_calculate_md5sum(const char* path, char* md5sum) {
@@ -1027,6 +1135,7 @@ MU_TEST_SUITE(test_rpc_storage) {
     MU_RUN_TEST(test_storage_write_read);
     MU_RUN_TEST(test_storage_write);
     MU_RUN_TEST(test_storage_delete);
+    MU_RUN_TEST(test_storage_delete_recursive);
     MU_RUN_TEST(test_storage_mkdir);
     MU_RUN_TEST(test_storage_md5sum);
     MU_RUN_TEST(test_storage_interrupt_continuous_same_system);

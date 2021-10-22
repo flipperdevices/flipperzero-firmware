@@ -30,6 +30,7 @@ typedef enum _PB_CommandStatus {
     PB_CommandStatus_ERROR_STORAGE_INTERNAL = 11, /* *< Internal error */
     PB_CommandStatus_ERROR_STORAGE_NOT_IMPLEMENTED = 12, /* *< Functon not implemented */
     PB_CommandStatus_ERROR_STORAGE_ALREADY_OPEN = 13, /* *< File/Dir already opened */
+    PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY = 18, /* *< Directory, you're going to remove is not empty */
     PB_CommandStatus_ERROR_APP_CANT_START = 16, /* *< Can't start app - internal error */
     PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED = 17 /* *< Another app is running */
 } PB_CommandStatus;
@@ -75,8 +76,8 @@ typedef struct _PB_Main {
 
 /* Helper constants for enums */
 #define _PB_CommandStatus_MIN PB_CommandStatus_OK
-#define _PB_CommandStatus_MAX PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED
-#define _PB_CommandStatus_ARRAYSIZE ((PB_CommandStatus)(PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED+1))
+#define _PB_CommandStatus_MAX PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY
+#define _PB_CommandStatus_ARRAYSIZE ((PB_CommandStatus)(PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY+1))
 
 
 #ifdef __cplusplus
