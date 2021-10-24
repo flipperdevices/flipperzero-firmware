@@ -16,6 +16,13 @@ SubGhzProtocolCameAtomo* subghz_protocol_came_atomo_alloc();
  */
 void subghz_protocol_came_atomo_free(SubGhzProtocolCameAtomo* instance);
 
+/** File name rainbow table CAME Atomo
+ * 
+ * @param instance - SubGhzProtocolCameAtomo instance
+ * @param file_name - "path/file_name"
+ */
+void subghz_protocol_came_atomo_name_file(SubGhzProtocolCameAtomo* instance, const char* name);
+
 // /** Get upload protocol
 //  *
 //  * @param instance - SubGhzProtocolCameAtomo instance
@@ -64,7 +71,7 @@ void subghz_protocol_came_atomo_to_str(SubGhzProtocolCameAtomo* instance, string
 //  */
 // bool subghz_protocol_came_atomo_to_load_protocol_from_file(
 //     FileWorker* file_worker,
-//     SubGhzProtocolCameAtomo* instance, 
+//     SubGhzProtocolCameAtomo* instance,
 //     const char* file_path);
 
 /** Loading protocol from bin data

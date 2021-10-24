@@ -202,6 +202,11 @@ void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* fil
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS], file_name);
 }
 
+void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name) {
+    subghz_protocol_came_atomo_name_file(
+        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo], file_name);
+}
+
 void subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_name) {
     subghz_keystore_load(instance->keystore, file_name);
 }
