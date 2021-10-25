@@ -387,17 +387,20 @@ void storage_file_free(File* file) {
 }
 
 bool storage_simply_remove_recursive(Storage* storage, const char* path) {
-    File* dir = storage_file_alloc(storage);
-    char* name = furi_alloc(MAX_NAME_LENGTH + 1);
+    furi_assert(storage);
+    furi_assert(path);
     FileInfo fileinfo;
-    string_t cur_dir;
-    string_init_set_str(cur_dir, path);
-    string_t fullname;
     bool result = false;
+    string_t fullname;
+    string_t cur_dir;
 
     if(storage_simply_remove(storage, path)) {
         return true;
     }
+
+    char* name = furi_alloc(MAX_NAME_LENGTH + 1);
+    File* dir = storage_file_alloc(storage);
+    string_init_set_str(cur_dir, path);
 
     while(1) {
     next_dir:
@@ -432,6 +435,8 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         }
     }
 
+    storage_file_free(dir);
+    string_clear(cur_dir);
     free(name);
     return result;
 }
