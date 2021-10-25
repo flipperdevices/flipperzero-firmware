@@ -55,12 +55,11 @@ static const uint8_t enclave_signature_expected[ENCLAVE_SIGNATURE_KEY_SLOTS][ENC
  * Keys and values format MUST NOT BE changed
  */
 void cli_command_device_info(Cli* cli, string_t args, void* context) {
+    // Device Info version
+    printf("device_info_major   : %d\r\n", 1);
+    printf("device_info_minor   : %d\r\n", 0);
     // Model name
     printf("hardware_model      : %s\r\n", furi_hal_version_get_model_name());
-    const char* name = furi_hal_version_get_name_ptr();
-    if(name) {
-        printf("hardware_name       : %s\r\n", name);
-    }
 
     // Unique ID
     printf("hardware_uid        : ");
@@ -70,35 +69,45 @@ void cli_command_device_info(Cli* cli, string_t args, void* context) {
     }
     printf("\r\n");
 
+    // OTP Revision
+    printf("hardware_otp_ver    : %d\r\n", furi_hal_version_get_otp_version());
+    printf("hardware_timestamp  : %lu\r\n", furi_hal_version_get_hw_timestamp());
+
     // Board Revision
     printf("hardware_ver        : %d\r\n", furi_hal_version_get_hw_version());
     printf("hardware_target     : %d\r\n", furi_hal_version_get_hw_target());
     printf("hardware_body       : %d\r\n", furi_hal_version_get_hw_body());
     printf("hardware_connect    : %d\r\n", furi_hal_version_get_hw_connect());
-    printf("hardware_timestamp  : %lu\r\n", furi_hal_version_get_hw_timestamp());
+    printf("hardware_display    : %d\r\n", furi_hal_version_get_hw_display());
 
-    // Color and Region
+    // Board Personification
     printf("hardware_color      : %d\r\n", furi_hal_version_get_hw_color());
     printf("hardware_region     : %d\r\n", furi_hal_version_get_hw_region());
+    const char* name = furi_hal_version_get_name_ptr();
+    if(name) {
+        printf("hardware_name       : %s\r\n", name);
+    }
 
     // Bootloader Version
     const Version* boot_version = furi_hal_version_get_boot_version();
     if(boot_version) {
-        printf("boot_version        : %s\r\n", version_get_version(boot_version));
-        printf("boot_target         : %s\r\n", version_get_target(boot_version));
         printf("boot_commit         : %s\r\n", version_get_githash(boot_version));
         printf("boot_branch         : %s\r\n", version_get_gitbranch(boot_version));
+        printf("boot_branch_num     : %s\r\n", version_get_gitbranchnum(boot_version));
+        printf("boot_version        : %s\r\n", version_get_version(boot_version));
         printf("boot_build_date     : %s\r\n", version_get_builddate(boot_version));
+        printf("boot_target         : %d\r\n", version_get_target(boot_version));
     }
 
     // Firmware version
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
-        printf("firmware_version    : %s\r\n", version_get_version(firmware_version));
-        printf("firmware_target     : %s\r\n", version_get_target(firmware_version));
         printf("firmware_commit     : %s\r\n", version_get_githash(firmware_version));
         printf("firmware_branch     : %s\r\n", version_get_gitbranch(firmware_version));
+        printf("firmware_branch_num : %s\r\n", version_get_gitbranchnum(firmware_version));
+        printf("firmware_version    : %s\r\n", version_get_version(firmware_version));
         printf("firmware_build_date : %s\r\n", version_get_builddate(firmware_version));
+        printf("firmware_target     : %d\r\n", version_get_target(firmware_version));
     }
 
     WirelessFwInfo_t pWirelessInfo;

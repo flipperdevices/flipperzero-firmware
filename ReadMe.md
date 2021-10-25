@@ -49,11 +49,11 @@ One liner: `./flash_core1_main.sh`
 
 2. Reboot Flipper to Bootloader 
  - Press and hold `← Left` + `↩ Back` for reset 
- - Release `← Left` and keep holding `↩ Back` until blue LED lights up
- - Release `↩ Back`
-![Switch to DFU sequence](https://habrastorage.org/webt/uu/c3/g2/uuc3g2n36f2sju19rskcvjzjf6w.png)
+ - Release `↩ Back` and keep holding `← Left` until blue LED lights up
+ - Release `← Left`
+<!-- ![Switch to DFU sequence](https://habrastorage.org/webt/uu/c3/g2/uuc3g2n36f2sju19rskcvjzjf6w.png) -->
 
-1. Run `dfu-util -D full.dfu -a 0`
+3. Run `dfu-util -D full.dfu -a 0`
 
 # Build from source
 
@@ -70,29 +70,41 @@ One liner: `./flash_core1_main.sh`
    docker-compose up -d
    ```
 
+## Compile everything
+
+```sh
+docker-compose exec dev make -j$(nproc)
+```
+
+## Flash everything
+
+```sh
+docker-compose exec dev make -j$(nproc) whole
+```
+
 ## Compile bootloader
 
 ```sh
-docker-compose exec dev make -j$(nproc) -C bootloader TARGET=f6
+docker-compose exec dev make -j$(nproc) -C bootloader
 ```
 
 Bootloader compilation results:
-* `bootloader/.obj/f6/bootloader.elf`
-* `bootloader/.obj/f6/bootloader.hex`
-* `bootloader/.obj/f6/bootloader.bin`
-* **`bootloader/.obj/f6/bootloader.dfu`** - should be used to flash
+* `bootloader/.obj/f7/bootloader.elf`
+* `bootloader/.obj/f7/bootloader.hex`
+* `bootloader/.obj/f7/bootloader.bin`
+* **`bootloader/.obj/f7/bootloader.dfu`** - should be used to flash
 
 ## Compile firmware
 
 ```sh
-docker-compose exec dev make -j$(nproc) -C firmware TARGET=f6
+docker-compose exec dev make -j$(nproc) -C firmware
 ```
 
 Firmware compilation results:
-* `firmware/.obj/f6/firmware.elf`
-* `firmware/.obj/f6/firmware.hex`
-* `firmware/.obj/f6/firmware.bin`
-* **`firmware/.obj/f6/firmware.dfu`** - should be used to flash
+* `firmware/.obj/f7/firmware.elf`
+* `firmware/.obj/f7/firmware.hex`
+* `firmware/.obj/f7/firmware.bin`
+* **`firmware/.obj/f7/firmware.dfu`** - should be used to flash
 
 ## Concatenate bootloader and firmware
 
@@ -103,19 +115,19 @@ That's exactly how we generate our `full` builds.
 1. Concatenate HEX files:
    ```sh
    docker-compose exec dev srec_cat \
-    bootloader/.obj/f6/bootloader.hex -Intel \
-    firmware/.obj/f6/firmware.hex -Intel \
-    -o firmware/.obj/f6/full.hex -Intel
+    bootloader/.obj/f7/bootloader.hex -Intel \
+    firmware/.obj/f7/firmware.hex -Intel \
+    -o firmware/.obj/f7/full.hex -Intel
    ```
 2. Convert HEX to DFU:
    ```sh
    docker-compose exec dev hex2dfu \
-    -i firmware/.obj/f6/full.hex \
-    -o firmware/.obj/f6/full.dfu \
-    -l "Flipper Zero F6"
+    -i firmware/.obj/f7/full.hex \
+    -o firmware/.obj/f7/full.dfu \
+    -l "Flipper Zero F7"
    ```
 
-Finally, you will have **`firmware/.obj/f6/full.dfu`** file that can be distributed and flashed.
+Finally, you will have **`firmware/.obj/f7/full.dfu`** file that can be distributed and flashed.
 
 # Links
 * Discord: [flipp.dev/discord](https://flipp.dev/discord)
