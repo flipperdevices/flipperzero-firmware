@@ -119,7 +119,6 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
     }
 
     rpc_send_and_release(rpc_storage->rpc, &response);
-    pb_release(&PB_Main_msg, &response);
 }
 
 static void rpc_system_storage_list_process(const PB_Main* request, void* context) {
@@ -164,7 +163,6 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                 list->file_count = i;
                 response.has_next = true;
                 rpc_send_and_release(rpc_storage->rpc, &response);
-                pb_release(&PB_Main_msg, &response);
                 i = 0;
             }
             list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ? PB_Storage_File_FileType_DIR :
@@ -182,7 +180,6 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
 
     response.has_next = false;
     rpc_send_and_release(rpc_storage->rpc, &response);
-    pb_release(&PB_Main_msg, &response);
 
     storage_dir_close(dir);
     storage_file_free(dir);
@@ -199,9 +196,6 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
     /* use same message memory to send reponse */
     PB_Main* response = furi_alloc(sizeof(PB_Main));
-    response->command_id = request->command_id;
-    response->which_content = PB_Main_storage_read_response_tag;
-    response->command_status = PB_CommandStatus_OK;
     const char* path = request->content.storage_read_request.path;
     Storage* fs_api = furi_record_open("storage");
     File* file = storage_file_alloc(fs_api);
@@ -209,10 +203,13 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
     if(storage_file_open(file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         size_t size_left = storage_file_size(file);
-        response->content.storage_read_response.has_file = true;
-        response->content.storage_read_response.file.data =
-            furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(MIN(size_left, MAX_DATA_SIZE)));
         do {
+            response->command_id = request->command_id;
+            response->which_content = PB_Main_storage_read_response_tag;
+            response->command_status = PB_CommandStatus_OK;
+            response->content.storage_read_response.has_file = true;
+            response->content.storage_read_response.file.data =
+                furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(MIN(size_left, MAX_DATA_SIZE)));
             uint8_t* buffer = response->content.storage_read_response.file.data->bytes;
             uint16_t* read_size_msg = &response->content.storage_read_response.file.data->size;
 
@@ -224,7 +221,6 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
             if(result) {
                 response->has_next = (size_left > 0);
                 rpc_send_and_release(rpc_storage->rpc, response);
-                // no pb_release(...);
             }
         } while((size_left != 0) && result);
 
@@ -237,7 +233,6 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
             rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
     }
 
-    pb_release(&PB_Main_msg, response);
     free(response);
     storage_file_close(file);
     storage_file_free(file);
@@ -415,7 +410,6 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
         free(data);
         storage_file_close(file);
         rpc_send_and_release(rpc_storage->rpc, &response);
-        pb_release(&PB_Main_msg, &response);
     } else {
         rpc_send_and_release_empty(
             rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));

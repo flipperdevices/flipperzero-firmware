@@ -430,9 +430,9 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     return (count == bytes_received);
 }
 
-void rpc_send_and_release(Rpc* rpc, PB_Main* main_message) {
+void rpc_send_and_release(Rpc* rpc, PB_Main* message) {
     furi_assert(rpc);
-    furi_assert(main_message);
+    furi_assert(message);
     RpcSession* session = &rpc->session;
     pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
@@ -441,13 +441,13 @@ void rpc_send_and_release(Rpc* rpc, PB_Main* main_message) {
     rpc_print_message(main_message);
 #endif
 
-    bool result = pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
+    bool result = pb_encode_ex(&ostream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
     furi_check(result && ostream.bytes_written);
 
     uint8_t* buffer = furi_alloc(ostream.bytes_written);
     ostream = pb_ostream_from_buffer(buffer, ostream.bytes_written);
 
-    pb_encode_ex(&ostream, &PB_Main_msg, main_message, PB_ENCODE_DELIMITED);
+    pb_encode_ex(&ostream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
 
 #if DEBUG_PRINT
     rpc_print_data("OUTPUT", buffer, ostream.bytes_written);
@@ -460,6 +460,7 @@ void rpc_send_and_release(Rpc* rpc, PB_Main* main_message) {
     osMutexRelease(session->callbacks_mutex);
 
     free(buffer);
+    pb_release(&PB_Main_msg, message);
 }
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg) {
