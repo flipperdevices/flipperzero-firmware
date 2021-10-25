@@ -1273,7 +1273,6 @@ int run_minunit_test_rpc() {
 
     MU_RUN_SUITE(test_rpc_status);
     MU_RUN_SUITE(test_rpc_app);
-    MU_REPORT();
 
     return MU_EXIT_CODE;
 }

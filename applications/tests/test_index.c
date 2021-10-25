@@ -11,6 +11,21 @@ int run_minunit();
 int run_minunit_test_irda_decoder_encoder();
 int run_minunit_test_rpc();
 
+void minunit_print_progress(void) {
+    static char progress[] = {'\\', '|', '/', '-'};
+    static uint8_t progress_counter = 0;
+    static TickType_t last_tick = 0;
+    TickType_t current_tick = xTaskGetTickCount();
+    if (current_tick - last_tick > 20) {
+        last_tick = current_tick;
+        printf("[%c]\033[3D", progress[++progress_counter % COUNT_OF(progress)]);
+    }
+}
+
+void minunit_print_fail(const char* str) {
+    printf("%s\n", str);
+}
+
 void unit_tests_cli(Cli* cli, string_t args, void* context) {
     uint32_t test_result = 0;
     minunit_run = 0;
