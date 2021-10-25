@@ -102,7 +102,7 @@ void canvas_set_color(Canvas* canvas, Color color) {
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
-void canvas_set_font_direction(Canvas* canvas, uint8_t dir) {
+void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir) {
     furi_assert(canvas);
     u8g2_SetFontDirection(&canvas->fb, dir);
 }
