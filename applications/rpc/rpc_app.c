@@ -57,6 +57,7 @@ void rpc_system_app_lock_status_process(const PB_Main* request, void* context) {
     furi_record_close("loader");
 
     rpc_encode_and_send(rpc, &response);
+    pb_release(&PB_Main_msg, &response);
 }
 
 void* rpc_system_app_alloc(Rpc* rpc) {

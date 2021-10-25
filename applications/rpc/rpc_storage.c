@@ -119,6 +119,7 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
     }
 
     rpc_encode_and_send(rpc_storage->rpc, &response);
+    pb_release(&PB_Main_msg, &response);
 }
 
 static void rpc_system_storage_list_process(const PB_Main* request, void* context) {
@@ -414,6 +415,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
         free(data);
         storage_file_close(file);
         rpc_encode_and_send(rpc_storage->rpc, &response);
+        pb_release(&PB_Main_msg, &response);
     } else {
         rpc_encode_and_send_empty(
             rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
