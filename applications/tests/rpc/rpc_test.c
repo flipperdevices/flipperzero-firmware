@@ -56,7 +56,7 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected);
 static void test_rpc_decode_and_compare(MsgList_t expected_msg_list);
 static void test_rpc_free_msg_list(MsgList_t msg_list);
 
-static void test_rpc_storage_setup(void) {
+static void test_rpc_setup(void) {
     furi_assert(!rpc);
     furi_assert(!session);
     furi_assert(!output_stream);
@@ -68,21 +68,13 @@ static void test_rpc_storage_setup(void) {
     }
     furi_assert(session);
 
-    Storage* fs_api = furi_record_open("storage");
-    clean_directory(fs_api, TEST_DIR_NAME);
-    furi_record_close("storage");
-
     output_stream = xStreamBufferCreate(1000, 1);
     mu_assert(session, "failed to start session");
     rpc_session_set_send_bytes_callback(session, output_bytes_callback);
     rpc_session_set_context(session, output_stream);
 }
 
-static void test_rpc_storage_teardown(void) {
-    Storage* fs_api = furi_record_open("storage");
-    clean_directory(fs_api, TEST_DIR_NAME);
-    furi_record_close("storage");
-
+static void test_rpc_teardown(void) {
     rpc_session_close(session);
     furi_record_close("rpc");
     vStreamBufferDelete(output_stream);
@@ -90,6 +82,22 @@ static void test_rpc_storage_teardown(void) {
     output_stream = NULL;
     rpc = NULL;
     session = NULL;
+}
+
+static void test_rpc_storage_setup(void) {
+    test_rpc_setup();
+
+    Storage* fs_api = furi_record_open("storage");
+    clean_directory(fs_api, TEST_DIR_NAME);
+    furi_record_close("storage");
+}
+
+static void test_rpc_storage_teardown(void) {
+    Storage* fs_api = furi_record_open("storage");
+    clean_directory(fs_api, TEST_DIR_NAME);
+    furi_record_close("storage");
+
+    test_rpc_teardown();
 }
 
 static void clean_directory(Storage* fs_api, const char* clean_dir) {
@@ -1122,7 +1130,7 @@ MU_TEST(test_ping) {
 //       4) test for fill buffer till end (great varint) and close connection
 
 MU_TEST_SUITE(test_rpc_status) {
-    MU_SUITE_CONFIGURE(&test_rpc_storage_setup, &test_rpc_storage_teardown);
+    MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_ping);
 }
@@ -1249,13 +1257,20 @@ MU_TEST(test_app_start_and_lock_status) {
 }
 
 MU_TEST_SUITE(test_rpc_app) {
-    MU_SUITE_CONFIGURE(&test_rpc_storage_setup, &test_rpc_storage_teardown);
+    MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_app_start_and_lock_status);
 }
 
 int run_minunit_test_rpc() {
-    MU_RUN_SUITE(test_rpc_storage);
+    Storage* storage = furi_record_open("storage");
+    furi_record_close("storage");
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_E("UNIT_TESTS", "SD card not mounted - skip storage tests");
+    } else {
+        MU_RUN_SUITE(test_rpc_storage);
+    }
+
     MU_RUN_SUITE(test_rpc_status);
     MU_RUN_SUITE(test_rpc_app);
     MU_REPORT();
