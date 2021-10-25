@@ -96,12 +96,10 @@ void canvas_set_color(Canvas* canvas, Color color) {
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
-
 void canvas_set_font_direction(Canvas* canvas, uint8_t dir) {
     furi_assert(canvas);
     u8g2_SetFontDirection(&canvas->fb, dir);
 }
-
 
 void canvas_invert_color(Canvas* canvas) {
     canvas->fb.draw_color = !canvas->fb.draw_color;

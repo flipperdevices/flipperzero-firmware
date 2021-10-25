@@ -191,7 +191,7 @@ bool subghz_save_raw_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         with_view_model(
             instance->view, (SubghzSaveRAWModel * model) {
-                if(model->satus == SubghzSaveRAWStatusIDLE||
+                if(model->satus == SubghzSaveRAWStatusIDLE ||
                    model->satus == SubghzSaveRAWStatusStart) {
                     instance->callback(SubghzCustomEventViewSaveRAWConfig, instance->context);
                 }

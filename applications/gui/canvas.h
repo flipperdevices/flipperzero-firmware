@@ -37,9 +37,9 @@ typedef enum {
     CanvasOrientationVertical,
 } CanvasOrientation;
 
-/** Font rotation */
+/** Font Direction */
 typedef enum {
-    CanvasFontDirectionLeftToRight =0U,
+    CanvasFontDirectionLeftToRight,
     CanvasFontDirectionTopToDown,
     CanvasFontDirectionRightToLeft,
     CanvasFontDirectionDownToTop,
