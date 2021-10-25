@@ -20,13 +20,13 @@ void subghz_scene_start_on_enter(void* context) {
         subghz->state_notifications = NOTIFICATION_IDLE_STATE;
     }
     submenu_add_item(
+        subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
+    submenu_add_item(
         subghz->submenu,
-        "Save Raw",
+        "Read Raw",
         SubmenuIndexSaveRAW,
         subghz_scene_start_submenu_callback,
         subghz);
-    submenu_add_item(
-        subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu, "Saved", SubmenuIndexSaved, subghz_scene_start_submenu_callback, subghz);
     submenu_add_item(
