@@ -74,7 +74,7 @@ static void rpc_close_session_process(const PB_Main* msg_request, void* context)
     furi_assert(context);
 
     Rpc* rpc = context;
-    rpc_encode_and_send_empty(rpc, msg_request->command_id, PB_CommandStatus_OK);
+    rpc_send_and_release_empty(rpc, msg_request->command_id, PB_CommandStatus_OK);
 
     osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
     if(rpc->session.closed_callback) {
@@ -430,7 +430,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     return (count == bytes_received);
 }
 
-void rpc_encode_and_send(Rpc* rpc, PB_Main* main_message) {
+void rpc_send_and_release(Rpc* rpc, PB_Main* main_message) {
     furi_assert(rpc);
     furi_assert(main_message);
     RpcSession* session = &rpc->session;
@@ -531,13 +531,13 @@ void rpc_add_handler(Rpc* rpc, pb_size_t message_tag, RpcHandler* handler) {
     RpcHandlerDict_set_at(rpc->handlers, message_tag, *handler);
 }
 
-void rpc_encode_and_send_empty(Rpc* rpc, uint32_t command_id, PB_CommandStatus status) {
+void rpc_send_and_release_empty(Rpc* rpc, uint32_t command_id, PB_CommandStatus status) {
     PB_Main message = {
         .command_id = command_id,
         .command_status = status,
         .has_next = false,
         .which_content = PB_Main_empty_tag,
     };
-    rpc_encode_and_send(rpc, &message);
+    rpc_send_and_release(rpc, &message);
     pb_release(&PB_Main_msg, &message);
 }

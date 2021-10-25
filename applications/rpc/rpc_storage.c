@@ -35,7 +35,7 @@ static void rpc_system_storage_reset_state(RpcStorageSystem* rpc_storage, bool s
 
     if(rpc_storage->state != RpcStorageStateIdle) {
         if(send_error) {
-            rpc_encode_and_send_empty(
+            rpc_send_and_release_empty(
                 rpc_storage->rpc,
                 rpc_storage->current_command_id,
                 PB_CommandStatus_ERROR_CONTINUOUS_COMMAND_INTERRUPTED);
@@ -118,7 +118,7 @@ static void rpc_system_storage_list_root(const PB_Main* request, void* context) 
         response.content.storage_list_response.file[i].name = str;
     }
 
-    rpc_encode_and_send(rpc_storage->rpc, &response);
+    rpc_send_and_release(rpc_storage->rpc, &response);
     pb_release(&PB_Main_msg, &response);
 }
 
@@ -163,7 +163,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
             if(i == COUNT_OF(list->file)) {
                 list->file_count = i;
                 response.has_next = true;
-                rpc_encode_and_send(rpc_storage->rpc, &response);
+                rpc_send_and_release(rpc_storage->rpc, &response);
                 pb_release(&PB_Main_msg, &response);
                 i = 0;
             }
@@ -181,7 +181,7 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
     }
 
     response.has_next = false;
-    rpc_encode_and_send(rpc_storage->rpc, &response);
+    rpc_send_and_release(rpc_storage->rpc, &response);
     pb_release(&PB_Main_msg, &response);
 
     storage_dir_close(dir);
@@ -223,17 +223,17 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
             if(result) {
                 response->has_next = (size_left > 0);
-                rpc_encode_and_send(rpc_storage->rpc, response);
+                rpc_send_and_release(rpc_storage->rpc, response);
                 // no pb_release(...);
             }
         } while((size_left != 0) && result);
 
         if(!result) {
-            rpc_encode_and_send_empty(
+            rpc_send_and_release_empty(
                 rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
         }
     } else {
-        rpc_encode_and_send_empty(
+        rpc_send_and_release_empty(
             rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
     }
 
@@ -276,14 +276,14 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
         result = (written_size == buffer_size);
 
         if(result && !request->has_next) {
-            rpc_encode_and_send_empty(
+            rpc_send_and_release_empty(
                 rpc_storage->rpc, rpc_storage->current_command_id, PB_CommandStatus_OK);
             rpc_system_storage_reset_state(rpc_storage, false);
         }
     }
 
     if(!result) {
-        rpc_encode_and_send_empty(
+        rpc_send_and_release_empty(
             rpc_storage->rpc,
             rpc_storage->current_command_id,
             rpc_system_storage_get_file_error(file));
@@ -341,7 +341,7 @@ static void rpc_system_storage_delete_process(const PB_Main* request, void* cont
     }
 
     furi_record_close("storage");
-    rpc_encode_and_send_empty(rpc_storage->rpc, request->command_id, status);
+    rpc_send_and_release_empty(rpc_storage->rpc, request->command_id, status);
 }
 
 static void rpc_system_storage_mkdir_process(const PB_Main* request, void* context) {
@@ -360,7 +360,7 @@ static void rpc_system_storage_mkdir_process(const PB_Main* request, void* conte
     } else {
         status = PB_CommandStatus_ERROR_INVALID_PARAMETERS;
     }
-    rpc_encode_and_send_empty(rpc_storage->rpc, request->command_id, status);
+    rpc_send_and_release_empty(rpc_storage->rpc, request->command_id, status);
 }
 
 static void rpc_system_storage_md5sum_process(const PB_Main* request, void* context) {
@@ -372,7 +372,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
 
     const char* filename = request->content.storage_md5sum_request.path;
     if(!filename) {
-        rpc_encode_and_send_empty(
+        rpc_send_and_release_empty(
             rpc_storage->rpc, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
         return;
     }
@@ -414,10 +414,10 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
         free(hash);
         free(data);
         storage_file_close(file);
-        rpc_encode_and_send(rpc_storage->rpc, &response);
+        rpc_send_and_release(rpc_storage->rpc, &response);
         pb_release(&PB_Main_msg, &response);
     } else {
-        rpc_encode_and_send_empty(
+        rpc_send_and_release_empty(
             rpc_storage->rpc, request->command_id, rpc_system_storage_get_file_error(file));
     }
 
