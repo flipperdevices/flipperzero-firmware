@@ -30,16 +30,16 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
     Rpc* rpc = furi_record_open("rpc");
     furi_record_close("rpc");
 
-    RpcSession* rpc_session = rpc_open_session(rpc);
+    RpcSession* rpc_session = rpc_session_open(rpc);
     if(rpc_session == NULL) {
         printf("Another session is in progress\r\n");
         return;
     }
 
     CliRpc cli_rpc = {.cli = cli, .session_closed = false};
-    rpc_set_session_context(rpc_session, &cli_rpc);
-    rpc_set_send_bytes_callback(rpc_session, cli_send_bytes_callback);
-    rpc_set_session_closed_callback(rpc_session, cli_session_closed_callback);
+    rpc_session_set_context(rpc_session, &cli_rpc);
+    rpc_session_set_send_bytes_callback(rpc_session, cli_send_bytes_callback);
+    rpc_session_set_close_callback(rpc_session, cli_session_closed_callback);
 
     uint8_t* buffer = furi_alloc(CLI_READ_BUFFER_SIZE);
     size_t size_received = 0;
@@ -51,11 +51,10 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
         }
 
         if(size_received) {
-            rpc_feed_bytes(rpc_session, buffer, size_received, 3000);
+            rpc_session_feed(rpc_session, buffer, size_received, 3000);
         }
     }
 
-    rpc_close_session(rpc_session);
-
+    rpc_session_close(rpc_session);
     free(buffer);
 }

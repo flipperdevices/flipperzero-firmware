@@ -283,7 +283,7 @@ static Rpc* rpc_alloc(void) {
     return rpc;
 }
 
-RpcSession* rpc_open_session(Rpc* rpc) {
+RpcSession* rpc_session_open(Rpc* rpc) {
     furi_assert(rpc);
     bool result = false;
     furi_check(osMutexAcquire(rpc->busy_mutex, osWaitForever) == osOK);
@@ -320,13 +320,13 @@ RpcSession* rpc_open_session(Rpc* rpc) {
     return result ? &rpc->session : NULL; /* support 1 open session for now */
 }
 
-void rpc_close_session(RpcSession* session) {
+void rpc_session_close(RpcSession* session) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
 
-    rpc_set_send_bytes_callback(session, NULL);
-    rpc_set_session_closed_callback(session, NULL);
+    rpc_session_set_send_bytes_callback(session, NULL);
+    rpc_session_set_close_callback(session, NULL);
     osEventFlagsSet(session->rpc->events, RPC_EVENT_DISCONNECT);
 }
 
@@ -347,7 +347,7 @@ static void rpc_free_session(RpcSession* session) {
     session->send_bytes_callback = NULL;
 }
 
-void rpc_set_session_context(RpcSession* session, void* context) {
+void rpc_session_set_context(RpcSession* session, void* context) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
@@ -357,7 +357,7 @@ void rpc_set_session_context(RpcSession* session, void* context) {
     osMutexRelease(session->callbacks_mutex);
 }
 
-void rpc_set_session_closed_callback(RpcSession* session, RpcSessionClosedCallback callback) {
+void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallback callback) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
@@ -367,7 +367,7 @@ void rpc_set_session_closed_callback(RpcSession* session, RpcSessionClosedCallba
     osMutexRelease(session->callbacks_mutex);
 }
 
-void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
+void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback) {
     furi_assert(session);
     furi_assert(session->rpc);
     furi_assert(session->rpc->busy);
@@ -384,7 +384,7 @@ void rpc_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callb
  * odd: client sends close request and sends command after.
  */
 size_t
-    rpc_feed_bytes(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
+    rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     Rpc* rpc = session->rpc;
     furi_assert(rpc->busy);

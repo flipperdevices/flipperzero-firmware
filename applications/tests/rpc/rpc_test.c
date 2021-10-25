@@ -63,7 +63,7 @@ static void test_rpc_storage_setup(void) {
 
     rpc = furi_record_open("rpc");
     for(int i = 0; !session && (i < 10000); ++i) {
-        session = rpc_open_session(rpc);
+        session = rpc_session_open(rpc);
         delay(1);
     }
     furi_assert(session);
@@ -74,8 +74,8 @@ static void test_rpc_storage_setup(void) {
 
     output_stream = xStreamBufferCreate(1000, 1);
     mu_assert(session, "failed to start session");
-    rpc_set_send_bytes_callback(session, output_bytes_callback);
-    rpc_set_session_context(session, output_stream);
+    rpc_session_set_send_bytes_callback(session, output_bytes_callback);
+    rpc_session_set_context(session, output_stream);
 }
 
 static void test_rpc_storage_teardown(void) {
@@ -83,7 +83,7 @@ static void test_rpc_storage_teardown(void) {
     clean_directory(fs_api, TEST_DIR_NAME);
     furi_record_close("storage");
 
-    rpc_close_session(session);
+    rpc_session_close(session);
     furi_record_close("rpc");
     vStreamBufferDelete(output_stream);
     ++command_id;
@@ -295,7 +295,7 @@ static void test_rpc_encode_and_feed_one(PB_Main* request) {
     size_t bytes_left = ostream.bytes_written;
     uint8_t* buffer_ptr = buffer;
     do {
-        size_t bytes_sent = rpc_feed_bytes(session, buffer_ptr, bytes_left, 1000);
+        size_t bytes_sent = rpc_session_feed(session, buffer_ptr, bytes_left, 1000);
         mu_check(bytes_sent > 0);
 
         bytes_left -= bytes_sent;
