@@ -1,23 +1,20 @@
-#include "cmsis_os.h"
-#include "cmsis_os2.h"
-#include "flipper.pb.h"
-#include "furi-hal-delay.h"
-#include "furi/check.h"
-#include "furi/log.h"
-#include "rpc/rpc.h"
-#include <m-string.h>
-#include "pb.h"
-#include "pb_decode.h"
-#include "pb_encode.h"
-#include "portmacro.h"
-#include "status.pb.h"
-#include "storage.pb.h"
+#include "rpc_i.h"
+#include <pb.h>
+#include <pb_decode.h>
+#include <pb_encode.h>
+#include <status.pb.h>
+#include <storage.pb.h>
+#include <flipper.pb.h>
+#include <cmsis_os.h>
+#include <cmsis_os2.h>
+#include <portmacro.h>
+#include <furi.h>
+#include <cli/cli.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <furi.h>
 #include <stream_buffer.h>
+#include <m-string.h>
 #include <m-dict.h>
-#include "rpc_i.h"
 
 #define RPC_TAG "RPC"
 
@@ -481,6 +478,11 @@ static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void
 int32_t rpc_srv(void* p) {
     Rpc* rpc = rpc_alloc();
     furi_record_create("rpc", rpc);
+
+    Cli* cli = furi_record_open("cli");
+
+    cli_add_command(
+        cli, "start_rpc_session", CliCommandFlagDefault, cli_command_start_rpc_session, NULL);
 
     while(1) {
         pb_istream_t istream = {

@@ -1,5 +1,7 @@
-#include "cli_i.h"
+#include <cli/cli.h>
+#include <furi.h>
 #include <rpc/rpc.h>
+#include <furi-hal-vcp.h>
 
 typedef struct {
     Cli* cli;
@@ -40,11 +42,9 @@ void cli_command_start_rpc_session(Cli* cli, string_t args, void* context) {
     rpc_set_session_closed_callback(rpc_session, cli_session_closed_callback);
 
     uint8_t* buffer = furi_alloc(CLI_READ_BUFFER_SIZE);
-
     size_t size_received = 0;
-    bool exit = false;
 
-    while(!exit) {
+    while(1) {
         size_received = furi_hal_vcp_rx_with_timeout(buffer, CLI_READ_BUFFER_SIZE, 50);
         if(!furi_hal_vcp_is_connected() || cli_rpc.session_closed) {
             break;

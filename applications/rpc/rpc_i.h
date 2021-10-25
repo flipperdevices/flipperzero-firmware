@@ -1,9 +1,10 @@
 #pragma once
 #include "rpc.h"
-#include "pb.h"
-#include "pb_decode.h"
-#include "pb_encode.h"
-#include "flipper.pb.h"
+#include <pb.h>
+#include <pb_decode.h>
+#include <pb_encode.h>
+#include <flipper.pb.h>
+#include <cli/cli.h>
 
 typedef void* (*RpcSystemAlloc)(Rpc*);
 typedef void (*RpcSystemFree)(void*);
@@ -25,3 +26,6 @@ void rpc_system_storage_free(void* ctx);
 void* rpc_system_app_alloc(Rpc* rpc);
 
 void rpc_print_message(const PB_Main* message);
+void cli_command_start_rpc_session(Cli* cli, string_t args, void* context);
+
+

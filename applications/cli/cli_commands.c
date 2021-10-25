@@ -49,8 +49,6 @@ static const uint8_t enclave_signature_expected[ENCLAVE_SIGNATURE_KEY_SLOTS][ENC
     {0xc9, 0xf7, 0x03, 0xf1, 0x6c, 0x65, 0xad, 0x49, 0x74, 0xbe, 0x00, 0x54, 0xfd, 0xa6, 0x9c, 0x32},
 };
 
-void cli_command_start_rpc_session(Cli* cli, string_t args, void* context);
-
 /* 
  * Device Info Command
  * This command is intended to be used by humans and machines
@@ -479,7 +477,4 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
     cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
-
-    cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagDefault, cli_command_start_rpc_session, NULL);
 }
