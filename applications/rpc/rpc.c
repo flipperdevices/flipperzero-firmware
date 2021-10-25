@@ -483,7 +483,7 @@ int32_t rpc_srv(void* p) {
     Cli* cli = furi_record_open("cli");
 
     cli_add_command(
-        cli, "start_rpc_session", CliCommandFlagDefault, cli_command_start_rpc_session, NULL);
+        cli, "start_rpc_session", CliCommandFlagDefault, rpc_cli_command_start_session, NULL);
 
     while(1) {
         pb_istream_t istream = {

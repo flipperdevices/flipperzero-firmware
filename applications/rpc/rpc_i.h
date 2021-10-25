@@ -26,6 +26,6 @@ void rpc_system_storage_free(void* ctx);
 void* rpc_system_app_alloc(Rpc* rpc);
 
 void rpc_print_message(const PB_Main* message);
-void cli_command_start_rpc_session(Cli* cli, string_t args, void* context);
+void rpc_cli_command_start_session(Cli* cli, string_t args, void* context);
 
 
