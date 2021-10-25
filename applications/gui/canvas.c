@@ -4,9 +4,7 @@
 
 #include <furi.h>
 #include <furi-hal.h>
-
-uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
-uint8_t u8x8_hw_spi_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
+#include <u8g2_glue.h>
 
 Canvas* canvas_init() {
     Canvas* canvas = furi_alloc(sizeof(Canvas));
@@ -14,19 +12,16 @@ Canvas* canvas_init() {
     furi_hal_power_insomnia_enter();
 
     canvas->orientation = CanvasOrientationHorizontal;
-    u8g2_Setup_st7565_erc12864_alt_f(
-        &canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
+    u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
 
     // send init sequence to the display, display is in sleep mode after this
     u8g2_InitDisplay(&canvas->fb);
-    u8g2_SetContrast(&canvas->fb, 36);
     // wake up display
     u8g2_ClearBuffer(&canvas->fb);
     u8g2_SetPowerSave(&canvas->fb, 0);
     u8g2_SendBuffer(&canvas->fb);
 
     furi_hal_power_insomnia_exit();
-
     return canvas;
 }
 
@@ -44,7 +39,6 @@ void canvas_reset(Canvas* canvas) {
 
 void canvas_commit(Canvas* canvas) {
     furi_assert(canvas);
-    u8g2_SetPowerSave(&canvas->fb, 0); // wake up display
     u8g2_SendBuffer(&canvas->fb);
 }
 
@@ -201,13 +195,15 @@ void canvas_draw_icon_animation(
 
     x += canvas->offset_x;
     y += canvas->offset_y;
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_animation_get_data(icon_animation), &icon_data);
     u8g2_DrawXBM(
         &canvas->fb,
         x,
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        icon_animation_get_data(icon_animation));
+        icon_data);
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
@@ -216,8 +212,9 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
 
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(
-        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_get_data(icon), &icon_data);
+    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
