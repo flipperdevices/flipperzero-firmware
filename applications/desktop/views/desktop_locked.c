@@ -147,19 +147,19 @@ bool desktop_locked_input(InputEvent* event, void* context) {
             locked_view->callback(event->key, locked_view->context);
         } else {
             desktop_locked_update_hint_timeout(locked_view);
-        }
 
-        if(event->key == InputKeyBack) {
-            press_time = osKernelGetTickCount();
-            // check if pressed sequentially
-            if(press_time - locked_view->lock_lastpress < UNLOCK_RST_TIMEOUT) {
-                locked_view->lock_lastpress = press_time;
-                locked_view->lock_count++;
-            }
+            if(event->key == InputKeyBack) {
+                press_time = osKernelGetTickCount();
+                // check if pressed sequentially
+                if(press_time - locked_view->lock_lastpress < UNLOCK_RST_TIMEOUT) {
+                    locked_view->lock_lastpress = press_time;
+                    locked_view->lock_count++;
+                }
 
-            if(locked_view->lock_count == UNLOCK_CNT) {
-                locked_view->lock_count = 0;
-                locked_view->callback(DesktopLockedEventUnlock, locked_view->context);
+                if(locked_view->lock_count == UNLOCK_CNT) {
+                    locked_view->lock_count = 0;
+                    locked_view->callback(DesktopLockedEventUnlock, locked_view->context);
+                }
             }
         }
 
