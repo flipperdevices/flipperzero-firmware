@@ -32,17 +32,10 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, DesktopSettingsAppViewMenu, submenu_get_view(app->submenu));
+
     app->code_input = code_input_alloc();
-
-    view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewMain, submenu_get_view(app->submenu));
-
-    view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewFavorite, submenu_get_view(app->submenu));
-
-    view_dispatcher_add_view(
-        app->view_dispatcher, DesktopSettingsAppViewPincodeMenu, submenu_get_view(app->submenu));
-
     view_dispatcher_add_view(
         app->view_dispatcher,
         DesktopSettingsAppViewPincodeInput,
@@ -55,11 +48,9 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
 void desktop_settings_app_free(DesktopSettingsApp* app) {
     furi_assert(app);
     // Variable item list
-    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewMain);
-    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewFavorite);
-    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewPincodeMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewPincodeInput);
+    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
     submenu_free(app->submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, DesktopSettingsAppViewPincodeInput);
     code_input_free(app->code_input);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

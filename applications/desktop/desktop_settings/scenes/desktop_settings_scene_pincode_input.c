@@ -5,7 +5,7 @@
 void desktop_settings_scene_ok_callback(void* context) {
     DesktopSettingsApp* app = context;
     uint32_t state =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppViewPincodeInput);
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
 
     if(state == CodeEventsDisablePin) {
         memset(app->settings.pincode.data, 0, app->settings.pincode.length * sizeof(uint8_t));
@@ -20,7 +20,7 @@ void desktop_settings_scene_pincode_input_on_enter(void* context) {
     CodeInput* code_input = app->code_input;
 
     uint32_t state =
-        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppViewPincodeInput);
+        scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
     bool update = state != CodeEventsDisablePin;
 
     code_input_set_header_text(code_input, "PIN Code Setup");

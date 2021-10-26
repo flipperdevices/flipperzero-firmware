@@ -37,7 +37,7 @@ void desktop_settings_scene_pincode_menu_on_enter(void* context) {
 
     submenu_set_header(app->submenu, "Pin code settings:");
     submenu_set_selected_item(app->submenu, app->menu_idx);
-    view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewPincodeMenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
 
 bool desktop_settings_scene_pincode_menu_on_event(void* context, SceneManagerEvent event) {
@@ -48,20 +48,20 @@ bool desktop_settings_scene_pincode_menu_on_event(void* context, SceneManagerEve
         switch(event.event) {
         case CodeEventsSetPin:
             scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
+                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
             consumed = true;
             break;
         case CodeEventsChangePin:
             scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
+                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
             consumed = true;
             break;
         case CodeEventsDisablePin:
             scene_manager_set_scene_state(
-                app->scene_manager, DesktopSettingsAppViewPincodeInput, event.event);
-            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppViewPincodeInput);
+                app->scene_manager, DesktopSettingsAppScenePinCodeInput, event.event);
+            scene_manager_next_scene(app->scene_manager, DesktopSettingsAppScenePinCodeInput);
             consumed = true;
             break;
         default:

@@ -19,9 +19,7 @@ typedef enum {
 } CodeEventsEnum;
 
 typedef enum {
-    DesktopSettingsAppViewMain,
-    DesktopSettingsAppViewFavorite,
-    DesktopSettingsAppViewPincodeMenu,
+    DesktopSettingsAppViewMenu,
     DesktopSettingsAppViewPincodeInput,
 } DesktopSettingsAppView;
 

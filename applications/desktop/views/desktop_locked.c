@@ -132,7 +132,7 @@ bool desktop_locked_input(InputEvent* event, void* context) {
     with_view_model(
         locked_view->view, (DesktopLockedViewModel * model) {
             locked_with_pin = model->pin_lock;
-            return true;
+            return false;
         });
 
     if(event->type == InputTypeShort) {

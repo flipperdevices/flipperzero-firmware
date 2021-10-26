@@ -17,7 +17,6 @@ typedef struct {
 
     PinCode pincode;
     bool locked;
-
 } DesktopSettings;
 
 bool desktop_settings_load(DesktopSettings* desktop_settings);
