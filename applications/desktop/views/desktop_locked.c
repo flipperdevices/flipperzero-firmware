@@ -66,7 +66,6 @@ void desktop_locked_manage_redraw(DesktopLockedView* locked_view) {
 
     if(animation_seq_end) {
         osTimerStop(locked_view->timer);
-        locked_view->callback(DesktopLockedEventJustAnimate, locked_view->context);
     }
 }
 
@@ -77,6 +76,14 @@ void desktop_locked_reset_counter(DesktopLockedView* locked_view) {
     with_view_model(
         locked_view->view, (DesktopLockedViewModel * model) {
             model->hint_expire_at = 0;
+            return true;
+        });
+}
+
+void desktop_locked_with_pin(DesktopLockedView* locked_view, bool locked) {
+    with_view_model(
+        locked_view->view, (DesktopLockedViewModel * model) {
+            model->pin_lock = locked;
             return true;
         });
 }
@@ -101,7 +108,7 @@ void desktop_locked_render(Canvas* canvas, void* model) {
             canvas_set_font(canvas, FontPrimary);
             elements_multiline_text_framed(canvas, 42, 30, "Locked");
 
-        } else {
+        } else if(!m->pin_lock) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_icon(canvas, 13, 5, &I_LockPopup_100x49);
             elements_multiline_text(canvas, 65, 20, "To unlock\npress:");
@@ -117,18 +124,35 @@ View* desktop_locked_get_view(DesktopLockedView* locked_view) {
 bool desktop_locked_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
-
     DesktopLockedView* locked_view = context;
+
+    uint32_t press_time = 0;
+    bool locked_with_pin = false;
+
+    with_view_model(
+        locked_view->view, (DesktopLockedViewModel * model) {
+            locked_with_pin = model->pin_lock;
+            return true;
+        });
+
     if(event->type == InputTypeShort) {
-        desktop_locked_update_hint_timeout(locked_view);
+        if(locked_with_pin) {
+            press_time = osKernelGetTickCount();
+
+            if(press_time - locked_view->lock_lastpress > UNLOCK_RST_TIMEOUT * 3) {
+                locked_view->lock_lastpress = press_time;
+                locked_view->callback(DesktopLockedEventInputReset, locked_view->context);
+            }
+
+            locked_view->callback(event->key, locked_view->context);
+        } else {
+            desktop_locked_update_hint_timeout(locked_view);
+        }
 
         if(event->key == InputKeyBack) {
-            uint32_t press_time = osKernelGetTickCount();
+            press_time = osKernelGetTickCount();
             // check if pressed sequentially
-            if(press_time - locked_view->lock_lastpress > UNLOCK_RST_TIMEOUT) {
-                locked_view->lock_lastpress = press_time;
-                locked_view->lock_count = 0;
-            } else if(press_time - locked_view->lock_lastpress < UNLOCK_RST_TIMEOUT) {
+            if(press_time - locked_view->lock_lastpress < UNLOCK_RST_TIMEOUT) {
                 locked_view->lock_lastpress = press_time;
                 locked_view->lock_count++;
             }
@@ -137,6 +161,11 @@ bool desktop_locked_input(InputEvent* event, void* context) {
                 locked_view->lock_count = 0;
                 locked_view->callback(DesktopLockedEventUnlock, locked_view->context);
             }
+        }
+
+        if(press_time - locked_view->lock_lastpress > UNLOCK_RST_TIMEOUT) {
+            locked_view->lock_lastpress = press_time;
+            locked_view->lock_count = 0;
         }
     }
     // All events consumed

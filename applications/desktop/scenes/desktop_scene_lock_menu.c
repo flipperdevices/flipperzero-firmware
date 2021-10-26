@@ -23,6 +23,8 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case DesktopLockMenuEventLock:
+            scene_manager_set_scene_state(
+                desktop->scene_manager, DesktopSceneLocked, DesktopLockedNoPin);
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             consumed = true;
             break;
@@ -32,8 +34,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
                 desktop->settings.locked = true;
                 desktop_settings_save(&desktop->settings);
                 scene_manager_set_scene_state(
-                    desktop->scene_manager, DesktopSceneLocked, DesktopLockedEventJustAnimate);
-
+                    desktop->scene_manager, DesktopSceneLocked, DesktopLockedWithPin);
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
             } else {
                 scene_manager_next_scene(desktop->scene_manager, DesktopScenePinSetup);
