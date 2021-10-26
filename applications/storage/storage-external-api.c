@@ -423,7 +423,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         }
         storage_dir_close(dir);
 
-        if (go_deeper) {
+        if(go_deeper) {
             go_deeper = false;
             continue;
         }

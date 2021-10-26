@@ -390,32 +390,32 @@ void minunit_print_fail(const char* error);
             return;                                                                   \
         } else { minunit_print_progress(); })
 
-#define mu_assert_null(result)                                       \
-    MU__SAFE_BLOCK(                                                  \
+#define mu_assert_null(result)                                                    \
+    MU__SAFE_BLOCK(                                                               \
         minunit_assert++; if(result == NULL) { minunit_print_progress(); } else { \
-            snprintf(                                                \
-                minunit_last_message,                                \
-                MINUNIT_MESSAGE_LEN,                                 \
-                "%s failed:\n\t%s:%d: Expected result was not NULL", \
-                __func__,                                            \
-                __FILE__,                                            \
-                __LINE__);                                           \
-            minunit_status = 1;                                      \
-            return;                                                  \
+            snprintf(                                                             \
+                minunit_last_message,                                             \
+                MINUNIT_MESSAGE_LEN,                                              \
+                "%s failed:\n\t%s:%d: Expected result was not NULL",              \
+                __func__,                                                         \
+                __FILE__,                                                         \
+                __LINE__);                                                        \
+            minunit_status = 1;                                                   \
+            return;                                                               \
         })
 
-#define mu_assert_not_null(result)                                   \
-    MU__SAFE_BLOCK(                                                  \
+#define mu_assert_not_null(result)                                                \
+    MU__SAFE_BLOCK(                                                               \
         minunit_assert++; if(result != NULL) { minunit_print_progress(); } else { \
-            snprintf(                                                \
-                minunit_last_message,                                \
-                MINUNIT_MESSAGE_LEN,                                 \
-                "%s failed:\n\t%s:%d: Expected result was not NULL", \
-                __func__,                                            \
-                __FILE__,                                            \
-                __LINE__);                                           \
-            minunit_status = 1;                                      \
-            return;                                                  \
+            snprintf(                                                             \
+                minunit_last_message,                                             \
+                MINUNIT_MESSAGE_LEN,                                              \
+                "%s failed:\n\t%s:%d: Expected result was not NULL",              \
+                __func__,                                                         \
+                __FILE__,                                                         \
+                __LINE__);                                                        \
+            minunit_status = 1;                                                   \
+            return;                                                               \
         })
 
 #define mu_assert_pointers_eq(pointer1, pointer2)                                                  \

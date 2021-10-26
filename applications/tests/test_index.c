@@ -7,7 +7,7 @@
 #include <cli/cli.h>
 #include <loader/loader.h>
 
-#define TESTS_TAG   "UNIT_TESTS"
+#define TESTS_TAG "UNIT_TESTS"
 
 int run_minunit();
 int run_minunit_test_irda_decoder_encoder();
@@ -18,7 +18,7 @@ void minunit_print_progress(void) {
     static uint8_t progress_counter = 0;
     static TickType_t last_tick = 0;
     TickType_t current_tick = xTaskGetTickCount();
-    if (current_tick - last_tick > 20) {
+    if(current_tick - last_tick > 20) {
         last_tick = current_tick;
         printf("[%c]\033[3D", progress[++progress_counter % COUNT_OF(progress)]);
     }
@@ -57,7 +57,7 @@ void unit_tests_cli(Cli* cli, string_t args, void* context) {
             delay(200); /* wait for tested services and apps to deallocate */
             uint32_t heap_after = memmgr_get_free_heap();
             notification_message(notification, &sequence_success);
-            if (heap_after != heap_before) {
+            if(heap_after != heap_before) {
                 FURI_LOG_E(TESTS_TAG, "Leaked: %d", heap_before - heap_after);
             } else {
                 FURI_LOG_I(TESTS_TAG, "No leaks");
