@@ -57,9 +57,9 @@ static void line_port_cb(VariableItem* item) {
 
     variable_item_set_current_value_text(item, uart_ch[index]);
 
-    if (index == 0)
+    if(index == 0)
         cfg_set->uart_ch = FuriHalUartIdUSART1;
-    else if (index == 1)
+    else if(index == 1)
         cfg_set->uart_ch = FuriHalUartIdLPUART1;
 }
 
@@ -82,10 +82,12 @@ static void line_baudrate_cb(VariableItem* item) {
 static void gpio_scene_usb_uart_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     GpioApp* app = context;
-    if (index == UsbUartLineIndexEnable)
-        view_dispatcher_send_custom_event(app->view_dispatcher, GPIO_SCENE_USB_UART_CUSTOM_EVENT_ENABLE);
-    else if (index == UsbUartLineIndexDisable)
-        view_dispatcher_send_custom_event(app->view_dispatcher, GPIO_SCENE_USB_UART_CUSTOM_EVENT_DISABLE);
+    if(index == UsbUartLineIndexEnable)
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, GPIO_SCENE_USB_UART_CUSTOM_EVENT_ENABLE);
+    else if(index == UsbUartLineIndexDisable)
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, GPIO_SCENE_USB_UART_CUSTOM_EVENT_DISABLE);
 }
 
 void gpio_scene_usb_uart_on_enter(void* context) {

@@ -19,8 +19,8 @@ typedef enum {
 
 } WorkerEvtFlags;
 
-#define WORKER_ALL_RX_EVENTS       (WorkerEvtStop | WorkerEvtRxReady)
-#define WORKER_ALL_TX_EVENTS       (WorkerEvtTxStop | WorkerEvtTxReady)
+#define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxReady)
+#define WORKER_ALL_TX_EVENTS (WorkerEvtTxStop | WorkerEvtTxReady)
 
 typedef struct {
     UsbUartConfig cfg;
@@ -76,7 +76,6 @@ static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data) {
 }
 
 static int32_t usb_uart_worker(void* context) {
-
     memcpy(&usb_uart->cfg, context, sizeof(UsbUartConfig));
 
     usb_uart->rx_stream = xStreamBufferCreate(USB_UART_RX_BUF_SIZE, 1);
@@ -114,16 +113,17 @@ static int32_t usb_uart_worker(void* context) {
     furi_thread_start(usb_uart->tx_thread);
 
     while(1) {
-        uint32_t events = osEventFlagsWait(usb_uart->events, WORKER_ALL_RX_EVENTS, osFlagsWaitAny, osWaitForever);
+        uint32_t events = osEventFlagsWait(
+            usb_uart->events, WORKER_ALL_RX_EVENTS, osFlagsWaitAny, osWaitForever);
         furi_check((events & osFlagsError) == 0);
-        if (events & WorkerEvtStop)
-            break;
-        if (events & WorkerEvtRxReady) {
+        if(events & WorkerEvtStop) break;
+        if(events & WorkerEvtRxReady) {
             size_t len = 0;
             do {
                 len = xStreamBufferReceive(usb_uart->rx_stream, usb_uart->rx_buf, USB_PKT_LEN, 0);
                 if(len > 0) {
-                    if ((osEventFlagsWait(usb_uart->events, WorkerEvtSof, osFlagsWaitAny, 100) & osFlagsError) == 0)
+                    if((osEventFlagsWait(usb_uart->events, WorkerEvtSof, osFlagsWaitAny, 100) &
+                        osFlagsError) == 0)
                         furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
                     else
                         xStreamBufferReset(usb_uart->rx_stream);
@@ -154,18 +154,19 @@ static int32_t usb_uart_worker(void* context) {
 static int32_t usb_uart_tx_thread(void* context) {
     uint8_t data[USB_PKT_LEN];
     while(1) {
-        uint32_t events = osEventFlagsWait(usb_uart->events, WORKER_ALL_TX_EVENTS, osFlagsWaitAny, osWaitForever);
+        uint32_t events = osEventFlagsWait(
+            usb_uart->events, WORKER_ALL_TX_EVENTS, osFlagsWaitAny, osWaitForever);
         furi_check((events & osFlagsError) == 0);
-        if (events & WorkerEvtTxStop)
-            break;
-        if (events & WorkerEvtTxReady) {
+        if(events & WorkerEvtTxStop) break;
+        if(events & WorkerEvtTxReady) {
             size_t len = 0;
             do {
                 len = xStreamBufferReceive(usb_uart->tx_stream, &data, 1, 0);
                 if(len > 0) {
                     furi_hal_uart_tx(usb_uart->cfg.uart_ch, data, len);
                 }
-                if ((usb_uart->buf_full == true) && (xStreamBufferBytesAvailable(usb_uart->tx_stream) == 0)) {
+                if((usb_uart->buf_full == true) &&
+                   (xStreamBufferBytesAvailable(usb_uart->tx_stream) == 0)) {
                     // Stream buffer was overflown, but now is free. Reading USB buffer to resume USB transfers
                     usb_uart->buf_full = false;
                     int32_t size = furi_hal_cdc_receive(usb_uart->cfg.vcp_ch, data, USB_PKT_LEN);
@@ -215,7 +216,6 @@ static void vcp_on_line_config(struct usb_cdc_line_coding* config) {
         furi_hal_uart_set_br(usb_uart->cfg.uart_ch, config->dwDTERate);
 }
 
-
 void usb_uart_enable(UsbUartConfig* cfg) {
     if(running == false) {
         running = true;
@@ -226,7 +226,7 @@ void usb_uart_enable(UsbUartConfig* cfg) {
         furi_thread_set_stack_size(usb_uart->thread, 1024);
         furi_thread_set_context(usb_uart->thread, cfg);
         furi_thread_set_callback(usb_uart->thread, usb_uart_worker);
-        
+
         usb_uart->events = osEventFlagsNew(NULL);
 
         furi_thread_start(usb_uart->thread);
