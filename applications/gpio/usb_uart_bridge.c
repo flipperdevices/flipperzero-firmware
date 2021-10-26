@@ -91,6 +91,7 @@ static int32_t usb_uart_worker(void* context) {
     if(usb_uart->cfg.vcp_ch == 0) {
         furi_hal_usb_set_config(UsbModeVcpSingle);
         furi_hal_vcp_disable();
+        osEventFlagsSet(usb_uart->events, WorkerEvtSof);
     } else {
         furi_hal_usb_set_config(UsbModeVcpDual);
     }
