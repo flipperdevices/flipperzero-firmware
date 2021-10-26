@@ -7,8 +7,6 @@ void desktop_settings_scene_ok_callback(void* context) {
     uint32_t state =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppViewPincodeInput);
 
-    FURI_LOG_I("Code input", "State %ld", state);
-
     if(state == CodeEventsDisablePin) {
         memset(app->settings.pincode.data, 0, app->settings.pincode.length * sizeof(uint8_t));
         app->settings.pincode.length = 0;

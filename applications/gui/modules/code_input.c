@@ -274,7 +274,8 @@ static void code_input_handle_dpad(CodeInputModel* model, InputKey key) {
  */
 static void code_input_view_draw_callback(Canvas* canvas, void* _model) {
     CodeInputModel* model = _model;
-
+    uint8_t y_offset = 0;
+    if(!strlen(model->header)) y_offset = 5;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
@@ -289,7 +290,7 @@ static void code_input_view_draw_callback(Canvas* canvas, void* _model) {
             model->local_buffer[CodeInputFirst],
             model->input_length[CodeInputFirst],
             6,
-            30,
+            30 - y_offset,
             true);
         break;
     case CodeInputStateUpdate:
@@ -298,17 +299,17 @@ static void code_input_view_draw_callback(Canvas* canvas, void* _model) {
             model->local_buffer[CodeInputFirst],
             model->input_length[CodeInputFirst],
             6,
-            14,
+            14 - y_offset,
             !model->current);
         code_input_draw_sequence(
             canvas,
             model->local_buffer[CodeInputSecond],
             model->input_length[CodeInputSecond],
             6,
-            44,
+            44 - y_offset,
             model->current);
 
-        if(model->current) canvas_draw_str(canvas, 2, 39, "Repeat code");
+        if(model->current) canvas_draw_str(canvas, 2, 39 - y_offset, "Repeat code");
 
         break;
     default:

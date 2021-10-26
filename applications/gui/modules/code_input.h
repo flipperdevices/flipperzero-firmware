@@ -66,8 +66,24 @@ void code_input_set_result_callback(
  */
 void code_input_set_header_text(CodeInput* code_input, const char* text);
 
+/** Compare two buffers
+ *
+ * @param      in       buffer to compare to source
+ * @param      len_in   length of input buffer
+ * @param      src      source buffer
+ * @param      len_src  length of insourceput buffer
+ * @return     true if buffers match
+ */
+
 bool code_input_compare(uint8_t* in, size_t len_in, uint8_t* src, size_t len_src);
 
+/** Push input into the end of array
+ *
+ * @param      buffer   buffer
+ * @param      length   length of buffer
+ * @param      key      input key
+ * @return     new length of input buffer
+ */
 size_t code_input_push(uint8_t* buffer, size_t length, InputKey key);
 
 #ifdef __cplusplus

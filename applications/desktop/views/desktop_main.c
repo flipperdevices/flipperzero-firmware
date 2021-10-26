@@ -41,7 +41,7 @@ void desktop_main_render(Canvas* canvas, void* model) {
 
     if(now < m->hint_expire_at) {
         canvas_set_font(canvas, FontPrimary);
-        elements_multiline_text_framed(canvas, 42, 32, "Unlocked");
+        elements_multiline_text_framed(canvas, 42, 30, "Unlocked");
     }
 }
 

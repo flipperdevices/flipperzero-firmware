@@ -12,7 +12,7 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_settings_load(&desktop->settings);
 
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
-    desktop_lock_menu_pin_set(desktop->lock_menu, &desktop->settings.pincode.length > 0);
+    desktop_lock_menu_pin_set(desktop->lock_menu, desktop->settings.pincode.length > 0);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewLockMenu);
 }
 

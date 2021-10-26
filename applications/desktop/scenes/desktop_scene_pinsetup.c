@@ -12,7 +12,6 @@ void desktop_scene_pinsetup_on_enter(void* context) {
     Desktop* app = context;
     CodeInput* code_input = app->code_input;
 
-    code_input_set_header_text(code_input, "PIN Code Setup");
     code_input_set_result_callback(
         code_input,
         desktop_scene_ok_callback,
