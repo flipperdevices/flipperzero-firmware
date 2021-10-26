@@ -46,34 +46,49 @@ static const Icon* keys_assets[] = {
 };
 
 /**
+ * @brief Compare buffers
+ * 
+ * @param in Input buffer pointer
+ * @param len_in Input array length
+ * @param src Source buffer pointer
+ * @param len_src Source array length
+ */
+
+bool code_input_compare(uint8_t* in, size_t len_in, uint8_t* src, size_t len_src) {
+    bool result = false;
+    do {
+        result = (len_in && len_src);
+        if(!result) {
+            break;
+        }
+        result = (len_in == len_src);
+        if(!result) {
+            break;
+        }
+        for(size_t i = 0; i < len_in; i++) {
+            result = (in[i] == src[i]);
+            if(!result) {
+                break;
+            }
+        }
+    } while(false);
+
+    return result;
+}
+
+/**
  * @brief Compare local buffers
  * 
  * @param model 
  */
 static bool code_input_compare_local(CodeInputModel* model) {
-    bool match = false;
+    uint8_t* source = model->local_buffer[CodeInputFirst];
+    size_t source_length = model->input_length[CodeInputFirst];
 
-    do {
-        match = (model->input_length[CodeInputFirst] && model->input_length[CodeInputSecond]);
-        if(!match) {
-            break;
-        }
-        match = (model->input_length[CodeInputFirst] == model->input_length[CodeInputSecond]);
-        if(!match) {
-            break;
-        }
-        for(size_t i = 0; i < model->input_length[CodeInputFirst]; i++) {
-            match =
-                (model->local_buffer[CodeInputFirst][i] ==
-                 model->local_buffer[CodeInputSecond][i]);
-            if(!match) {
-                break;
-            }
-        }
+    uint8_t* input = model->local_buffer[CodeInputSecond];
+    size_t input_length = model->input_length[CodeInputSecond];
 
-    } while(false);
-
-    return match;
+    return code_input_compare(input, input_length, source, source_length);
 }
 
 /**
@@ -82,27 +97,13 @@ static bool code_input_compare_local(CodeInputModel* model) {
  * @param model 
  */
 static bool code_input_compare_ext(CodeInputModel* model) {
-    bool match = false;
+    uint8_t* input = model->local_buffer[CodeInputFirst];
+    size_t input_length = model->input_length[CodeInputFirst];
 
-    do {
-        match = (model->input_length[CodeInputFirst] && *model->ext_buffer_length);
-        if(!match) {
-            break;
-        }
-        match = (model->input_length[CodeInputFirst] == *model->ext_buffer_length);
-        if(!match) {
-            break;
-        }
-        for(size_t i = 0; i < *model->ext_buffer_length; i++) {
-            match = (model->local_buffer[CodeInputFirst][i] == model->ext_buffer[i]);
-            if(!match) {
-                break;
-            }
-        }
+    uint8_t* source = model->ext_buffer;
+    size_t source_length = *model->ext_buffer_length;
 
-    } while(false);
-
-    return match;
+    return code_input_compare(input, input_length, source, source_length);
 }
 
 /**
@@ -241,6 +242,19 @@ static void code_input_handle_ok(CodeInputModel* model) {
 }
 
 /**
+ * @brief Handle input
+ * 
+ * @param model 
+ * @param key 
+ */
+
+size_t code_input_push(uint8_t* buffer, size_t length, InputKey key) {
+    buffer[length] = key;
+    length = CLAMP(length + 1, MAX_CODE_LEN, 0);
+    return length;
+}
+
+/**
  * @brief Handle D-pad keys
  * 
  * @param model 
@@ -248,9 +262,8 @@ static void code_input_handle_ok(CodeInputModel* model) {
  */
 static void code_input_handle_dpad(CodeInputModel* model, InputKey key) {
     uint8_t at = model->current;
-    uint8_t idx = model->input_length[at];
-    model->local_buffer[at][idx] = key;
-    model->input_length[at] = CLAMP(idx + 1, MAX_CODE_LEN, 0);
+    size_t new_length = code_input_push(model->local_buffer[at], model->input_length[at], key);
+    model->input_length[at] = new_length;
 }
 
 /**

@@ -34,6 +34,8 @@ void desktop_scene_main_on_enter(void* context) {
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);
 
+    desktop_settings_load(&desktop->settings);
+
     if(scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneMain) ==
        DesktopMainEventUnlocked) {
         desktop_main_unlocked(desktop->main_view);
@@ -43,11 +45,43 @@ void desktop_scene_main_on_enter(void* context) {
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
 }
 
+static bool desktop_scene_main_check_pin(Desktop* desktop, DesktopMainEvent event) {
+    bool match = false;
+
+    size_t length = desktop->pincode_buffer.length;
+    if(event < DesktopMainEventOpenMenu) {
+        length = code_input_push(desktop->pincode_buffer.data, length, event);
+        desktop->pincode_buffer.length = length;
+
+        match = code_input_compare(
+            desktop->pincode_buffer.data,
+            length,
+            desktop->settings.pincode.data,
+            desktop->settings.pincode.length);
+
+        if(match) {
+            desktop->pincode_buffer.length = 0;
+            desktop->settings.locked = false;
+            desktop_settings_save(&desktop->settings);
+            desktop_main_unlocked(desktop->main_view);
+        }
+
+        return true;
+    } else {
+        desktop->pincode_buffer.length = 0;
+        return false;
+    }
+}
+
 bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
     Desktop* desktop = (Desktop*)context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        if(desktop->settings.locked) {
+            return desktop_scene_main_check_pin(desktop, event.event);
+        }
+
         switch(event.event) {
         case DesktopMainEventOpenMenu:
             loader_show_menu();

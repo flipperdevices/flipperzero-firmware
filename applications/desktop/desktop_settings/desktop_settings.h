@@ -16,6 +16,7 @@ typedef struct {
     uint16_t favorite;
 
     PinCode pincode;
+    bool locked;
 
 } DesktopSettings;
 

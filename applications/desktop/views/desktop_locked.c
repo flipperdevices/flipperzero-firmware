@@ -66,6 +66,7 @@ void desktop_locked_manage_redraw(DesktopLockedView* locked_view) {
 
     if(animation_seq_end) {
         osTimerStop(locked_view->timer);
+        locked_view->callback(DesktopLockedEventJustAnimate, locked_view->context);
     }
 }
 

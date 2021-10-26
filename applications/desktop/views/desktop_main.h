@@ -7,12 +7,14 @@
 #include <furi.h>
 
 typedef enum {
-    DesktopMainEventOpenMenu,
     DesktopMainEventOpenLockMenu,
+    DesktopMainEventOpenArchive,
+    DesktopMainEventKeyRight,
+    DesktopMainEventOpenFavorite,
+    DesktopMainEventOpenMenu,
+    DesktopMainEventKeyBack,
     DesktopMainEventOpenDebug,
     DesktopMainEventUnlocked,
-    DesktopMainEventOpenArchive,
-    DesktopMainEventOpenFavorite,
 } DesktopMainEvent;
 
 typedef struct DesktopMainView DesktopMainView;

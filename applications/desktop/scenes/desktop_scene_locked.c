@@ -36,6 +36,16 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         case DesktopLockedEventUpdate:
             desktop_locked_manage_redraw(desktop->locked_view);
             consumed = true;
+            break;
+        case DesktopLockedEventJustAnimate:
+            if(scene_manager_get_scene_state(desktop->scene_manager, DesktopViewLocked) ==
+               DesktopLockedEventJustAnimate) {
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopViewLocked, DesktopLockedEventUpdate);
+                scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
+            }
+            consumed = true;
+            break;
         default:
             break;
         }

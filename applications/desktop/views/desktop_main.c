@@ -41,7 +41,7 @@ void desktop_main_render(Canvas* canvas, void* model) {
 
     if(now < m->hint_expire_at) {
         canvas_set_font(canvas, FontPrimary);
-        elements_multiline_text_framed(canvas, 42, 30, "Unlocked");
+        elements_multiline_text_framed(canvas, 42, 32, "Unlocked");
     }
 }
 
@@ -66,6 +66,10 @@ bool desktop_main_input(InputEvent* event, void* context) {
         main_view->callback(DesktopMainEventOpenArchive, main_view->context);
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         main_view->callback(DesktopMainEventOpenFavorite, main_view->context);
+    } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
+        main_view->callback(DesktopMainEventKeyRight, main_view->context);
+    } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
+        main_view->callback(DesktopMainEventKeyBack, main_view->context);
     }
     desktop_main_reset_hint(main_view);
 

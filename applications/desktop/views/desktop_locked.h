@@ -17,6 +17,7 @@
 typedef enum {
     DesktopLockedEventUnlock,
     DesktopLockedEventUpdate,
+    DesktopLockedEventJustAnimate,
 } DesktopLockedEvent;
 
 typedef struct DesktopLockedView DesktopLockedView;

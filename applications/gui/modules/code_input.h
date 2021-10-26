@@ -66,6 +66,10 @@ void code_input_set_result_callback(
  */
 void code_input_set_header_text(CodeInput* code_input, const char* text);
 
+bool code_input_compare(uint8_t* in, size_t len_in, uint8_t* src, size_t len_src);
+
+size_t code_input_push(uint8_t* buffer, size_t length, InputKey key);
+
 #ifdef __cplusplus
 }
 #endif
