@@ -942,7 +942,7 @@ MU_TEST(test_storage_delete_recursive) {
     mu_check(test_is_exists(TEST_DIR_RMRF_NAME));
     test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
     mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
-    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, false);
     mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
 
     test_create_dir(TEST_DIR_RMRF_NAME);
