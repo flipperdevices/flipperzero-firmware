@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DESKTOP_SETTINGS_VER (0)
+#define DESKTOP_SETTINGS_VER (1)
 #define PIN_MAX_LENGTH 12
 
 typedef struct {
