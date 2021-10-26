@@ -75,6 +75,27 @@ void widget_add_string_element(
     Font font,
     const char* text);
 
+/** Add String Element
+ *
+ * @param      widget      Widget instance
+ * @param      x           x coordinate
+ * @param      y           y coordinate
+ * @param      width       width to fit text
+ * @param      height      height to fit text
+ * @param      horizontal  Align instance
+ * @param      vertical    Align instance
+ * @param[in]  text        The text
+ */
+void widget_add_text_box_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    Align horizontal,
+    Align vertical,
+    const char* text);
+
 /** Add Button Element
  *
  * @param      widget       Widget instance

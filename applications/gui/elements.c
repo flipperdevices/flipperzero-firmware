@@ -376,8 +376,6 @@ void elements_text_box(
     const char* text) {
     furi_assert(canvas);
 
-    elements_slightly_rounded_frame(canvas, x, y, width, height);
-
     ElementTextBoxLine line[ELEMENTS_MAX_LINES_NUM];
     bool bold = false;
     bool mono = false;
@@ -512,6 +510,7 @@ void elements_text_box(
             uint8_t free_pixel_num = height - total_height_min;
             uint8_t fill_pixel = 0;
             uint8_t j = 1;
+            line[0].y = line[0].height;
             while(fill_pixel < free_pixel_num) {
                 line[j].y = line[j - 1].y + line[j - 1].leading_min + 1;
                 fill_pixel++;
