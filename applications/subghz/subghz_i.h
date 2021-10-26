@@ -4,7 +4,7 @@
 #include "views/subghz_receiver.h"
 #include "views/subghz_transmitter.h"
 #include "views/subghz_frequency_analyzer.h"
-#include "views/subghz_save_raw.h"
+#include "views/subghz_read_raw.h"
 
 #include "views/subghz_test_static.h"
 #include "views/subghz_test_carrier.h"
@@ -65,14 +65,12 @@ struct SubGhzTxRx {
     SubGhzWorker* worker;
     SubGhzParser* parser;
     SubGhzProtocolCommon* protocol_result;
-    //SubGhzProtocolCommon* protocol_save_raw;
     SubGhzProtocolCommonEncoder* encoder;
     uint32_t frequency;
     FuriHalSubGhzPreset preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
     SubGhzTxRxState txrx_state;
-    //bool hopper_runing;
     SubGhzHopperState hopper_state;
     uint8_t hopper_timeout;
     uint8_t hopper_idx_frequency;
@@ -102,7 +100,7 @@ struct SubGhz {
     VariableItemList* variable_item_list;
 
     SubghzFrequencyAnalyzer* subghz_frequency_analyzer;
-    SubghzSaveRAW* subghz_save_raw;
+    SubghzReadRAW* subghz_read_raw;
     SubghzTestStatic* subghz_test_static;
     SubghzTestCarrier* subghz_test_carrier;
     SubghzTestPacket* subghz_test_packet;
@@ -119,7 +117,7 @@ typedef enum {
     SubGhzViewTransmitter,
     SubGhzViewVariableItemList,
     SubGhzViewFrequencyAnalyzer,
-    SubGhzViewSaveRAW,
+    SubGhzViewReadRAW,
     SubGhzViewStatic,
     SubGhzViewTestCarrier,
     SubGhzViewTestPacket,

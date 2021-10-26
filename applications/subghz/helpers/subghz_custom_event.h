@@ -15,11 +15,11 @@ typedef enum {
     SubghzCustomEventViewReceverConfig,
     SubghzCustomEventViewReceverBack,
 
-    SubghzCustomEventViewSaveRAWBack,
-    SubghzCustomEventViewSaveRAWIDLE,
-    SubghzCustomEventViewSaveRAWREC,
-    SubghzCustomEventViewSaveRAWConfig,
-    SubghzCustomEventViewSaveRAWMore,
+    SubghzCustomEventViewReadRAWBack,
+    SubghzCustomEventViewReadRAWIDLE,
+    SubghzCustomEventViewReadRAWREC,
+    SubghzCustomEventViewReadRAWConfig,
+    SubghzCustomEventViewReadRAWMore,
 
     SubghzCustomEventViewTransmitterBack,
     SubghzCustomEventViewTransmitterSendStart,
