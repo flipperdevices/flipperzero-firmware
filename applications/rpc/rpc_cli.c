@@ -27,8 +27,7 @@ static void rpc_session_close_callback(void* context) {
 }
 
 void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
-    Rpc* rpc = furi_record_open("rpc");
-    furi_record_close("rpc");
+    Rpc* rpc = context;
 
     RpcSession* rpc_session = rpc_session_open(rpc);
     if(rpc_session == NULL) {
