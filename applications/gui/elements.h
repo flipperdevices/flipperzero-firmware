@@ -16,6 +16,11 @@
 extern "C" {
 #endif
 
+#define ELEMENTS_MAX_LINES_NUM (7)
+#define ELEMENTS_BOLD_MARKER '#'
+#define ELEMENTS_MONO_MARKER '*'
+#define ELEMENTS_INVERSED_MARKER '!'
+
 /** Draw progress bar.
  * @param x - progress bar position on X axis
  * @param y - progress bar position on Y axis
@@ -134,6 +139,16 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
  * @param width - max width
  */
 void elements_string_fit_width(Canvas* canvas, string_t string, uint8_t width);
+
+void elements_text_box(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    Align horizontal,
+    Align vertical,
+    const char* text);
 
 #ifdef __cplusplus
 }
