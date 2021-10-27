@@ -194,7 +194,6 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             });
     }
 
-
     return true;
 }
 
