@@ -1,0 +1,248 @@
+#include "subghz_protocol_normann.h"
+#include "subghz_protocol_common.h"
+
+/*
+ * Help
+ * https://phreakerclub.com/447
+ *
+ */
+
+struct SubGhzProtocolNormann {
+    SubGhzProtocolCommon common;
+};
+
+typedef enum {
+    NormannDecoderStepReset = 0,
+    NormannDecoderStepFoundStartHeader,
+    NormannDecoderStepFoundHeader,
+    NormannDecoderStepFoundStartBit,
+    NormannDecoderStepSaveDuration,
+    NormannDecoderStepCheckDuration,
+} NormannDecoderStep;
+
+SubGhzProtocolNormann* subghz_protocol_normann_alloc() {
+    SubGhzProtocolNormann* instance = furi_alloc(sizeof(SubGhzProtocolNormann));
+
+    instance->common.name = "Normann";
+    instance->common.code_min_count_bit_for_found = 12;
+    instance->common.te_short = 518;
+    instance->common.te_long = 1036;
+    instance->common.te_delta = 200;
+    instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
+    instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_normann_to_str;
+    instance->common.to_save_string =
+        (SubGhzProtocolCommonGetStrSave)subghz_protocol_normann_to_save_str;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_normann_to_load_protocol_from_file;
+    instance->common.to_load_protocol =
+        (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_normann_to_load_protocol;
+    instance->common.get_upload_protocol =
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_normann_send_key;
+
+    return instance;
+}
+
+void subghz_protocol_normann_free(SubGhzProtocolNormann* instance) {
+    furi_assert(instance);
+    free(instance);
+}
+
+bool subghz_protocol_normann_send_key(
+    SubGhzProtocolNormann* instance,
+    SubGhzProtocolCommonEncoder* encoder) {
+    furi_assert(instance);
+    furi_assert(encoder);
+    // size_t index = 0;
+    // encoder->size_upload = (instance->common.code_last_count_bit * 2) + 2;
+    // if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
+    // //Send header
+    // encoder->upload[index++] =
+    //     level_duration_make(false, (uint32_t)instance->common.te_short * 36);
+    // //Send start bit
+    // encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
+    // //Send key data
+    // for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+    //     if(bit_read(instance->common.code_last_found, i - 1)) {
+    //         //send bit 1
+    //         encoder->upload[index++] =
+    //             level_duration_make(false, (uint32_t)instance->common.te_long);
+    //         encoder->upload[index++] =
+    //             level_duration_make(true, (uint32_t)instance->common.te_short);
+    //     } else {
+    //         //send bit 0
+    //         encoder->upload[index++] =
+    //             level_duration_make(false, (uint32_t)instance->common.te_short);
+    //         encoder->upload[index++] =
+    //             level_duration_make(true, (uint32_t)instance->common.te_long);
+    //     }
+    // }
+    // return true;
+}
+
+void subghz_protocol_normann_reset(SubGhzProtocolNormann* instance) {
+    instance->common.parser_step = NormannDecoderStepReset;
+}
+
+void subghz_protocol_normann_parse(SubGhzProtocolNormann* instance, bool level, uint32_t duration) {
+    switch(instance->common.parser_step) {
+    case NormannDecoderStepReset:
+        if((level) && (DURATION_DIFF(duration, instance->common.te_short * 63) <
+                       instance->common.te_delta * 63)) {
+            instance->common.parser_step = NormannDecoderStepFoundStartHeader;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    case NormannDecoderStepFoundStartHeader:
+        if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 63) <
+                        instance->common.te_delta * 63)) {
+            instance->common.parser_step = NormannDecoderStepFoundHeader;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    case NormannDecoderStepFoundHeader:
+        if((level) && (DURATION_DIFF(duration, instance->common.te_short * 24) <
+                       instance->common.te_delta * 24)) {
+            instance->common.parser_step = NormannDecoderStepFoundStartBit;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    case NormannDecoderStepFoundStartBit:
+        if((!level) &&
+           (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
+            instance->common.parser_step = NormannDecoderStepSaveDuration;
+            instance->common.code_found = 0;
+            instance->common.code_count_bit = 0;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    case NormannDecoderStepSaveDuration:
+        if(level) { //save interval
+            if(duration >= (instance->common.te_short * 5)) {
+                instance->common.parser_step = NormannDecoderStepFoundStartBit;
+                if(instance->common.code_count_bit >=
+                   instance->common.code_min_count_bit_for_found) {
+                    instance->common.serial = 0x0;
+                    instance->common.btn = 0x0;
+
+                    instance->common.code_last_found = instance->common.code_found;
+                    instance->common.code_last_count_bit = instance->common.code_count_bit;
+
+                    if(instance->common.callback)
+                        instance->common.callback(
+                            (SubGhzProtocolCommon*)instance, instance->common.context);
+                }
+                break;
+            }
+            instance->common.te_last = duration;
+            instance->common.parser_step = NormannDecoderStepCheckDuration;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    case NormannDecoderStepCheckDuration:
+        if(!level) {
+            if((DURATION_DIFF(instance->common.te_last, instance->common.te_short) <
+                instance->common.te_delta) &&
+               (DURATION_DIFF(duration, instance->common.te_long) < instance->common.te_delta)) {
+                subghz_protocol_common_add_bit(&instance->common, 0);
+                instance->common.parser_step = NormannDecoderStepSaveDuration;
+            } else if(
+                (DURATION_DIFF(instance->common.te_last, instance->common.te_long) <
+                 instance->common.te_delta) &&
+                (DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta)) {
+                subghz_protocol_common_add_bit(&instance->common, 1);
+                instance->common.parser_step = NormannDecoderStepSaveDuration;
+            } else
+                instance->common.parser_step = NormannDecoderStepReset;
+        } else {
+            instance->common.parser_step = NormannDecoderStepReset;
+        }
+        break;
+    }
+}
+
+void subghz_protocol_normann_to_str(SubGhzProtocolNormann* instance, string_t output) {
+    uint32_t code_found_hi = instance->common.code_last_found >> 32;
+    uint32_t code_found_lo = instance->common.code_last_found & 0x00000000ffffffff;
+    instance->common.btn = (instance->common.code_last_found >> 4) & 0xF;
+
+    string_cat_printf(
+        output,
+        "%s %dbit\r\n"
+        "Key:0x%03lX%08lX\r\n"
+        "Btn:0x%01X",
+        instance->common.name,
+        instance->common.code_last_count_bit,
+        code_found_hi,
+        code_found_lo,
+        instance->common.btn);
+}
+
+void subghz_protocol_normann_to_save_str(SubGhzProtocolNormann* instance, string_t output) {
+    string_printf(
+        output,
+        "Protocol: %s\n"
+        "Bit: %d\n"
+        "Key: %08lX%08lX\n",
+        instance->common.name,
+        instance->common.code_last_count_bit,
+        (uint32_t)(instance->common.code_last_found >> 32),
+        (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
+}
+
+bool subghz_protocol_normann_to_load_protocol_from_file(
+    FileWorker* file_worker,
+    SubGhzProtocolNormann* instance,
+    const char* file_path) {
+    bool loaded = false;
+    string_t temp_str;
+    string_init(temp_str);
+    int res = 0;
+    int data = 0;
+
+    do {
+        // Read and parse bit data from 2nd line
+        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
+            break;
+        }
+        res = sscanf(string_get_cstr(temp_str), "Bit: %d\n", &data);
+        if(res != 1) {
+            break;
+        }
+        instance->common.code_last_count_bit = (uint8_t)data;
+
+        // Read and parse key data from 3nd line
+        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
+            break;
+        }
+        // strlen("Key: ") = 5
+        string_right(temp_str, 5);
+
+        uint8_t buf_key[8] = {0};
+        if(!subghz_protocol_common_read_hex(temp_str, buf_key, 8)) {
+            break;
+        }
+
+        for(uint8_t i = 0; i < 8; i++) {
+            instance->common.code_last_found = instance->common.code_last_found << 8 | buf_key[i];
+        }
+
+        loaded = true;
+    } while(0);
+
+    string_clear(temp_str);
+
+    return loaded;
+}
+
+void subghz_decoder_normann_to_load_protocol(SubGhzProtocolNormann* instance, void* context) {
+    furi_assert(context);
+    furi_assert(instance);
+    SubGhzProtocolCommonLoad* data = context;
+    instance->common.code_last_found = data->code_found;
+    instance->common.code_last_count_bit = data->code_count_bit;
+}
