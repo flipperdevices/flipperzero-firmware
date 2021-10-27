@@ -21,8 +21,6 @@ void subghz_read_raw_add_data_statusbar(
     const char* frequency_str,
     const char* preset_str);
 
-void subghz_read_raw_set_file_name(SubghzReadRAW* instance, const char* file_name);
-
 void subghz_read_raw_update_sample_write(SubghzReadRAW* instance, size_t sample);
 
 void subghz_read_raw_add_data_rssi(SubghzReadRAW* instance, float rssi);

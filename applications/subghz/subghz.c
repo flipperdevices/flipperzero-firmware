@@ -174,6 +174,7 @@ SubGhz* subghz_alloc() {
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
+    subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
     subghz->txrx->parser = subghz_parser_alloc();

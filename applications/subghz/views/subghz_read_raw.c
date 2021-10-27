@@ -15,12 +15,11 @@ typedef enum {
     SubghzReadRAWStatusStart,
     SubghzReadRAWStatusIDLE,
     SubghzReadRAWStatusREC,
-    SubghzReadRAWStatusShowName,
+    //SubghzReadRAWStatusShowName,
 } SubghzReadRAWStatus;
 
 struct SubghzReadRAW {
     View* view;
-    osTimerId timer;
     SubghzReadRAWCallback callback;
     void* context;
 };
@@ -29,7 +28,6 @@ typedef struct {
     string_t frequency_str;
     string_t preset_str;
     string_t sample_write;
-    string_t file_name;
     uint8_t* rssi_history;
     bool rssi_history_end;
     uint8_t ind_write;
@@ -55,26 +53,6 @@ void subghz_read_raw_add_data_statusbar(
         instance->view, (SubghzReadRAWModel * model) {
             string_set(model->frequency_str, frequency_str);
             string_set(model->preset_str, preset_str);
-            return true;
-        });
-}
-
-void subghz_read_raw_set_file_name(SubghzReadRAW* instance, const char* file_name) {
-    furi_assert(instance);
-    with_view_model(
-        instance->view, (SubghzReadRAWModel * model) {
-            string_set(model->file_name, file_name);
-            return true;
-        });
-}
-
-static void subghz_read_raw_timer_callback(void* context) {
-    furi_assert(context);
-    SubghzReadRAW* instance = context;
-
-    with_view_model(
-        instance->view, (SubghzReadRAWModel * model) {
-            model->satus = SubghzReadRAWStatusIDLE;
             return true;
         });
 }
@@ -150,16 +128,10 @@ void subghz_read_raw_draw_rssi(Canvas* canvas, SubghzReadRAWModel* model) {
 void subghz_read_raw_draw(Canvas* canvas, SubghzReadRAWModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    if(model->satus != SubghzReadRAWStatusShowName) {
-        canvas_draw_str(canvas, 5, 8, string_get_cstr(model->frequency_str));
-        canvas_draw_str(canvas, 40, 8, string_get_cstr(model->preset_str));
-        canvas_draw_str_aligned(
-            canvas, 126, 0, AlignRight, AlignTop, string_get_cstr(model->sample_write));
-    } else {
-        canvas_draw_str_aligned(
-            canvas, 61, 1, AlignRight, AlignTop, string_get_cstr(model->file_name));
-        canvas_draw_str(canvas, 65, 8, "Saved!");
-    }
+    canvas_draw_str(canvas, 5, 8, string_get_cstr(model->frequency_str));
+    canvas_draw_str(canvas, 40, 8, string_get_cstr(model->preset_str));
+    canvas_draw_str_aligned(
+        canvas, 126, 0, AlignRight, AlignTop, string_get_cstr(model->sample_write));
 
     canvas_draw_line(canvas, 0, 14, 115, 14);
     subghz_read_raw_draw_rssi(canvas, model);
@@ -216,16 +188,12 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
                     model->rssi_history_end = false;
                 } else {
                     instance->callback(SubghzCustomEventViewReadRAWIDLE, instance->context);
-                    model->satus = SubghzReadRAWStatusShowName;
-                    osTimerStart(instance->timer, 1024);
+                    model->satus = SubghzReadRAWStatusIDLE;
                 }
                 return true;
             });
     }
 
-    if(event->key == InputKeyBack) {
-        return false;
-    }
 
     return true;
 }
@@ -259,7 +227,6 @@ void subghz_read_raw_exit(void* context) {
             string_clean(model->frequency_str);
             string_clean(model->preset_str);
             string_clean(model->sample_write);
-            string_clean(model->file_name);
             free(model->rssi_history);
             return true;
         });
@@ -277,14 +244,11 @@ SubghzReadRAW* subghz_read_raw_alloc() {
     view_set_enter_callback(instance->view, subghz_read_raw_enter);
     view_set_exit_callback(instance->view, subghz_read_raw_exit);
 
-    instance->timer = osTimerNew(subghz_read_raw_timer_callback, osTimerOnce, instance, NULL);
-
     with_view_model(
         instance->view, (SubghzReadRAWModel * model) {
             string_init(model->frequency_str);
             string_init(model->preset_str);
             string_init(model->sample_write);
-            string_init(model->file_name);
             return true;
         });
 
@@ -299,10 +263,8 @@ void subghz_read_raw_free(SubghzReadRAW* instance) {
             string_clear(model->frequency_str);
             string_clear(model->preset_str);
             string_clear(model->sample_write);
-            string_clear(model->file_name);
             return true;
         });
-    osTimerDelete(instance->timer);
     view_free(instance->view);
     free(instance);
 }

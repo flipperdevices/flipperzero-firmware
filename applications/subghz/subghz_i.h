@@ -47,7 +47,7 @@ extern const uint32_t subghz_frequencies_433_92;
 
 /** SubGhzTxRx state */
 typedef enum {
-    SubGhzTxRxStateIdle,
+    SubGhzTxRxStateIDLE,
     SubGhzTxRxStateRx,
     SubGhzTxRxStateTx,
     SubGhzTxRxStateSleep,
@@ -60,6 +60,15 @@ typedef enum {
     SubGhzHopperStatePause,
     SubGhzHopperStateRSSITimeOut,
 } SubGhzHopperState;
+
+/** SubGhzRxKeyState state */
+typedef enum {
+    SubGhzRxKeyStateIDLE,
+    SubGhzRxKeyStateNoSave,
+    SubGhzRxKeyStateNeedSave,
+    SubGhzRxKeyStateAddKey,
+    SubGhzRxKeyStateExit,
+} SubGhzRxKeyState;
 
 struct SubGhzTxRx {
     SubGhzWorker* worker;
@@ -74,6 +83,7 @@ struct SubGhzTxRx {
     SubGhzHopperState hopper_state;
     uint8_t hopper_timeout;
     uint8_t hopper_idx_frequency;
+    SubGhzRxKeyState rx_key_state;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -130,6 +140,7 @@ void subghz_sleep(SubGhz* subghz);
 bool subghz_tx_start(SubGhz* subghz);
 void subghz_tx_stop(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path);
+bool subghz_get_next_name_file(SubGhz* subghz);
 bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
