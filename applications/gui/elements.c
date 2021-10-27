@@ -383,14 +383,13 @@ void elements_text_box(
     bool inversed_present = false;
     Font current_font = FontSecondary;
     Font prev_font = FontSecondary;
-    CanvasFontParameters font_params;
-    canvas_get_font_params(canvas, current_font, &font_params);
+    CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
 
     // Fill line parameters
-    uint8_t line_leading_min = font_params.leading_min;
-    uint8_t line_leading_default = font_params.leading_default;
-    uint8_t line_height = font_params.height;
-    uint8_t line_descender = font_params.descender;
+    uint8_t line_leading_min = font_params->leading_min;
+    uint8_t line_leading_default = font_params->leading_default;
+    uint8_t line_height = font_params->height;
+    uint8_t line_descender = font_params->descender;
     uint8_t line_num = 0;
     uint8_t line_width = 0;
     uint8_t line_len = 0;
@@ -407,11 +406,11 @@ void elements_text_box(
         line_len++;
         // Identify line height
         if(prev_font != current_font) {
-            canvas_get_font_params(canvas, current_font, &font_params);
-            line_leading_min = MAX(line_leading_min, font_params.leading_min);
-            line_leading_default = MAX(line_leading_default, font_params.leading_default);
-            line_height = MAX(line_height, font_params.height);
-            line_descender = MAX(line_descender, font_params.descender);
+            font_params = canvas_get_font_params(canvas, current_font);
+            line_leading_min = MAX(line_leading_min, font_params->leading_min);
+            line_leading_default = MAX(line_leading_default, font_params->leading_default);
+            line_height = MAX(line_height, font_params->height);
+            line_descender = MAX(line_descender, font_params->descender);
             prev_font = current_font;
         }
         // Set the font
@@ -482,9 +481,9 @@ void elements_text_box(
                 line[line_num].text = &text[i + 1];
             }
 
-            line_leading_min = font_params.leading_min;
-            line_height = font_params.height;
-            line_descender = font_params.descender;
+            line_leading_min = font_params->leading_min;
+            line_height = font_params->height;
+            line_descender = font_params->descender;
             line_width = 0;
             line_len = 0;
         }

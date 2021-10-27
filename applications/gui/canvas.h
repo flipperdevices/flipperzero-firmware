@@ -92,9 +92,10 @@ uint8_t canvas_current_font_height(Canvas* canvas);
  *
  * @param      canvas  Canvas instance
  * @param      font    Font
- * @param      params  pointer to CanvasFontParameters structure
+ *
+ * @return     pointer to CanvasFontParameters structure
  */
-void canvas_get_font_params(Canvas* canvas, Font font, CanvasFontParameters* params);
+CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font);
 
 /** Clear canvas
  *

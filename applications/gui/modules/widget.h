@@ -75,7 +75,7 @@ void widget_add_string_element(
     Font font,
     const char* text);
 
-/** Add String Element
+/** Add Text Box Element
  *
  * @param      widget      Widget instance
  * @param      x           x coordinate
