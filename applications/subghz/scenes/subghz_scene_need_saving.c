@@ -24,12 +24,12 @@ void subghz_scene_need_saving_on_enter(void* context) {
         AlignCenter,
         AlignCenter,
         FontSecondary,
-        "There are accepted,\nbut not saved keys.\nDo you want to save?");
+        "There is an unsaved data.\nDo you want to save it?");
 
     widget_add_button_element(
         subghz->widget, GuiButtonTypeRight, "Save", subghz_scene_need_saving_callback, subghz);
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeLeft, "No Save", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeLeft, "Delete", subghz_scene_need_saving_callback, subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewWidget);
 }
