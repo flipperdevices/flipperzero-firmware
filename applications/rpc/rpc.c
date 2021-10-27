@@ -45,7 +45,10 @@ static RpcSystemCallbacks rpc_systems[] = {
         .alloc = rpc_system_app_alloc,
         .free = NULL,
     },
-};
+    {
+        .alloc = rpc_system_screen_alloc,
+        .free = NULL,
+    }};
 
 struct RpcSession {
     RpcSendBytesCallback send_bytes_callback;
@@ -161,10 +164,10 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_stop_session_tag:
         string_cat_printf(str, "\tstop_session {\r\n");
         break;
-    case PB_Main_app_start_tag: {
+    case PB_Main_app_start_request_tag: {
         string_cat_printf(str, "\tapp_start {\r\n");
-        const char* name = message->content.app_start.name;
-        const char* args = message->content.app_start.args;
+        const char* name = message->content.app_start_request.name;
+        const char* args = message->content.app_start_request.args;
         if(name) {
             string_cat_printf(str, "\t\tname: %s\r\n", name);
         }

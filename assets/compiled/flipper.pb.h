@@ -7,6 +7,7 @@
 #include "storage.pb.h"
 #include "status.pb.h"
 #include "application.pb.h"
+#include "screen.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -15,12 +16,14 @@
 /* Enum definitions */
 typedef enum _PB_CommandStatus { 
     PB_CommandStatus_OK = 0, 
+    /* *< Common Errors */
     PB_CommandStatus_ERROR = 1, /* *< Unknown error */
     PB_CommandStatus_ERROR_DECODE = 2, /* *< Command can't be decoded successfully - command_id in response may be wrong! */
     PB_CommandStatus_ERROR_NOT_IMPLEMENTED = 3, /* *< Command succesfully decoded, but not implemented (deprecated or not yet implemented) */
     PB_CommandStatus_ERROR_BUSY = 4, /* *< Somebody took global lock, so not all commands are available */
     PB_CommandStatus_ERROR_CONTINUOUS_COMMAND_INTERRUPTED = 14, /* *< Not received has_next == 0 */
     PB_CommandStatus_ERROR_INVALID_PARAMETERS = 15, /* *< not provided (or provided invalid) crucial parameters to perform rpc */
+    /* *< Storage Errors */
     PB_CommandStatus_ERROR_STORAGE_NOT_READY = 5, /* *< FS not ready */
     PB_CommandStatus_ERROR_STORAGE_EXIST = 6, /* *< File/Dir alrady exist */
     PB_CommandStatus_ERROR_STORAGE_NOT_EXIST = 7, /* *< File/Dir does not exist */
@@ -31,6 +34,7 @@ typedef enum _PB_CommandStatus {
     PB_CommandStatus_ERROR_STORAGE_NOT_IMPLEMENTED = 12, /* *< Functon not implemented */
     PB_CommandStatus_ERROR_STORAGE_ALREADY_OPEN = 13, /* *< File/Dir already opened */
     PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY = 18, /* *< Directory, you're going to remove is not empty */
+    /* *< Application Errors */
     PB_CommandStatus_ERROR_APP_CANT_START = 16, /* *< Can't start app - internal error */
     PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED = 17 /* *< Another app is running */
 } PB_CommandStatus;
@@ -66,10 +70,13 @@ typedef struct _PB_Main {
         PB_Storage_MkdirRequest storage_mkdir_request;
         PB_Storage_Md5sumRequest storage_md5sum_request;
         PB_Storage_Md5sumResponse storage_md5sum_response;
-        PB_App_Start app_start;
+        PB_App_StartRequest app_start_request;
         PB_App_LockStatusRequest app_lock_status_request;
         PB_App_LockStatusResponse app_lock_status_response;
         PB_StopSession stop_session;
+        PB_Screen_StartStreamRequest screen_start_stream_request;
+        PB_Screen_StopStreamRequest screen_stop_stream_request;
+        PB_Screen_StreamFrame screen_stream_frame;
     } content; 
 } PB_Main;
 
@@ -108,10 +115,13 @@ extern "C" {
 #define PB_Main_storage_mkdir_request_tag        13
 #define PB_Main_storage_md5sum_request_tag       14
 #define PB_Main_storage_md5sum_response_tag      15
-#define PB_Main_app_start_tag                    16
+#define PB_Main_app_start_request_tag            16
 #define PB_Main_app_lock_status_request_tag      17
 #define PB_Main_app_lock_status_response_tag     18
 #define PB_Main_stop_session_tag                 19
+#define PB_Main_screen_start_stream_request_tag  20
+#define PB_Main_screen_stop_stream_request_tag   21
+#define PB_Main_screen_stream_frame_tag          22
 
 /* Struct field encoding specification for nanopb */
 #define PB_Empty_FIELDLIST(X, a) \
@@ -140,10 +150,13 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_delete_request,content.stora
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_mkdir_request,content.storage_mkdir_request),  13) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_md5sum_request,content.storage_md5sum_request),  14) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,storage_md5sum_response,content.storage_md5sum_response),  15) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,app_start,content.app_start),  16) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,app_start_request,content.app_start_request),  16) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,app_lock_status_request,content.app_lock_status_request),  17) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,app_lock_status_response,content.app_lock_status_response),  18) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,stop_session,content.stop_session),  19)
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,stop_session,content.stop_session),  19) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,screen_start_stream_request,content.screen_start_stream_request),  20) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,screen_stop_stream_request,content.screen_stop_stream_request),  21) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,screen_stream_frame,content.screen_stream_frame),  22)
 #define PB_Main_CALLBACK NULL
 #define PB_Main_DEFAULT NULL
 #define PB_Main_content_empty_MSGTYPE PB_Empty
@@ -158,10 +171,13 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,stop_session,content.stop_session), 
 #define PB_Main_content_storage_mkdir_request_MSGTYPE PB_Storage_MkdirRequest
 #define PB_Main_content_storage_md5sum_request_MSGTYPE PB_Storage_Md5sumRequest
 #define PB_Main_content_storage_md5sum_response_MSGTYPE PB_Storage_Md5sumResponse
-#define PB_Main_content_app_start_MSGTYPE PB_App_Start
+#define PB_Main_content_app_start_request_MSGTYPE PB_App_StartRequest
 #define PB_Main_content_app_lock_status_request_MSGTYPE PB_App_LockStatusRequest
 #define PB_Main_content_app_lock_status_response_MSGTYPE PB_App_LockStatusResponse
 #define PB_Main_content_stop_session_MSGTYPE PB_StopSession
+#define PB_Main_content_screen_start_stream_request_MSGTYPE PB_Screen_StartStreamRequest
+#define PB_Main_content_screen_stop_stream_request_MSGTYPE PB_Screen_StopStreamRequest
+#define PB_Main_content_screen_stream_frame_MSGTYPE PB_Screen_StreamFrame
 
 extern const pb_msgdesc_t PB_Empty_msg;
 extern const pb_msgdesc_t PB_StopSession_msg;
@@ -175,9 +191,9 @@ extern const pb_msgdesc_t PB_Main_msg;
 /* Maximum encoded size of messages (where known) */
 #define PB_Empty_size                            0
 #define PB_StopSession_size                      0
-#if defined(PB_Storage_ListRequest_size) && defined(PB_Storage_ListResponse_size) && defined(PB_Storage_ReadRequest_size) && defined(PB_Storage_ReadResponse_size) && defined(PB_Storage_WriteRequest_size) && defined(PB_Storage_DeleteRequest_size) && defined(PB_Storage_MkdirRequest_size) && defined(PB_Storage_Md5sumRequest_size) && defined(PB_App_Start_size)
+#if defined(PB_Storage_ListRequest_size) && defined(PB_Storage_ListResponse_size) && defined(PB_Storage_ReadRequest_size) && defined(PB_Storage_ReadResponse_size) && defined(PB_Storage_WriteRequest_size) && defined(PB_Storage_DeleteRequest_size) && defined(PB_Storage_MkdirRequest_size) && defined(PB_Storage_Md5sumRequest_size) && defined(PB_App_StartRequest_size) && defined(PB_Screen_StreamFrame_size)
 #define PB_Main_size                             (10 + sizeof(union PB_Main_content_size_union))
-union PB_Main_content_size_union {char f7[(6 + PB_Storage_ListRequest_size)]; char f8[(6 + PB_Storage_ListResponse_size)]; char f9[(6 + PB_Storage_ReadRequest_size)]; char f10[(6 + PB_Storage_ReadResponse_size)]; char f11[(6 + PB_Storage_WriteRequest_size)]; char f12[(6 + PB_Storage_DeleteRequest_size)]; char f13[(6 + PB_Storage_MkdirRequest_size)]; char f14[(6 + PB_Storage_Md5sumRequest_size)]; char f16[(7 + PB_App_Start_size)]; char f0[36];};
+union PB_Main_content_size_union {char f7[(6 + PB_Storage_ListRequest_size)]; char f8[(6 + PB_Storage_ListResponse_size)]; char f9[(6 + PB_Storage_ReadRequest_size)]; char f10[(6 + PB_Storage_ReadResponse_size)]; char f11[(6 + PB_Storage_WriteRequest_size)]; char f12[(6 + PB_Storage_DeleteRequest_size)]; char f13[(6 + PB_Storage_MkdirRequest_size)]; char f14[(6 + PB_Storage_Md5sumRequest_size)]; char f16[(7 + PB_App_StartRequest_size)]; char f22[(7 + PB_Screen_StreamFrame_size)]; char f0[36];};
 #endif
 
 #ifdef __cplusplus

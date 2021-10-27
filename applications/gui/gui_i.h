@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include <cli/cli.h>
+#include <rpc/rpc.h>
 #include "canvas.h"
 #include "canvas_i.h"
 #include "view_port.h"
@@ -75,3 +76,5 @@ void gui_unlock(Gui* gui);
 void gui_cli_screen_stream_callback(uint8_t* data, size_t size, void* context);
 
 void gui_cli_screen_stream(Cli* cli, string_t args, void* context);
+
+void gui_rpc_screen_stream_callback(uint8_t* data, size_t size, void* context);
