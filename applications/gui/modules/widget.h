@@ -84,7 +84,10 @@ void widget_add_string_element(
  * @param      height      height to fit text
  * @param      horizontal  Align instance
  * @param      vertical    Align instance
- * @param[in]  text        The text
+ * @param[in]  text        Formatted text. The following formats are available:
+ *                          "\e#Bold text\e#" - bold font is used
+ *                          "\e*Monospaced text\e*" - monospaced font is used
+ *                          "\e#Inversed text\e#" - white text on black background
  */
 void widget_add_text_box_element(
     Widget* widget,

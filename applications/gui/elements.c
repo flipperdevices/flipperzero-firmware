@@ -401,6 +401,7 @@ void elements_text_box(
 
     canvas_set_font(canvas, FontSecondary);
 
+    // Fill all lines
     line[0].text = text;
     for(i = 0; !full_text_processed; i++) {
         line_len++;
@@ -413,7 +414,6 @@ void elements_text_box(
             line_descender = MAX(line_descender, font_params.descender);
             prev_font = current_font;
         }
-
         // Set the font
         if(text[i] == '\e' && text[i + 1]) {
             i++;
@@ -441,11 +441,10 @@ void elements_text_box(
             }
             continue;
         }
-
         if(text[i] != '\n') {
             line_width += canvas_glyph_width(canvas, text[i]);
         }
-
+        // Process new line
         if(text[i] == '\n' || text[i] == '\0' || line_width > width) {
             if(line_width > width) {
                 line_width -= canvas_glyph_width(canvas, text[i--]);
@@ -491,7 +490,7 @@ void elements_text_box(
         }
     }
 
-    // Process lines
+    // Set vertical alignment for all lines
     if(full_text_processed) {
         if(total_height_default < height) {
             if(vertical == AlignTop) {
