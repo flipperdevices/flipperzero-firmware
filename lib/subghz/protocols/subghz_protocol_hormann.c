@@ -1,12 +1,6 @@
 #include "subghz_protocol_hormann.h"
 #include "subghz_protocol_common.h"
 
-/*
- * Help
- * https://phreakerclub.com/447
- *
- */
-
 struct SubGhzProtocolHormann {
     SubGhzProtocolCommon common;
 };
