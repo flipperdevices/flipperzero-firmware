@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "cmsis_os.h"
 
+#define RPC_BUFFER_SIZE (1024)
+
 /** Rpc interface. Used for opening session only. */
 typedef struct Rpc Rpc;
 /** Rpc session interface */
@@ -77,3 +79,11 @@ void rpc_session_set_close_callback(RpcSession* session, RpcSessionClosedCallbac
  * @return              actually consumed bytes
  */
 size_t rpc_session_feed(RpcSession* session, uint8_t* buffer, size_t size, TickType_t timeout);
+
+/** Get available size of RPC buffer
+ *
+ * @param   session     pointer to RpcSession descriptor
+ *
+ * @return              bytes available in buffer
+ */
+size_t rpc_session_get_available_size(RpcSession* session);

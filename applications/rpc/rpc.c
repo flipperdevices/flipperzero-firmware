@@ -272,7 +272,7 @@ static Rpc* rpc_alloc(void) {
     rpc->busy_mutex = osMutexNew(NULL);
     rpc->busy = false;
     rpc->events = osEventFlagsNew(NULL);
-    rpc->stream = xStreamBufferCreate(256, 1);
+    rpc->stream = xStreamBufferCreate(RPC_BUFFER_SIZE, 1);
 
     rpc->decoded_message = furi_alloc(sizeof(PB_Main));
     rpc->decoded_message->cb_content.funcs.decode = content_callback;
@@ -393,6 +393,12 @@ size_t
     osEventFlagsSet(rpc->events, RPC_EVENT_NEW_DATA);
 
     return bytes_sent;
+}
+
+size_t rpc_session_get_available_size(RpcSession* session) {
+    furi_assert(session);
+    Rpc* rpc = session->rpc;
+    return xStreamBufferSpacesAvailable(rpc->stream);
 }
 
 bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
