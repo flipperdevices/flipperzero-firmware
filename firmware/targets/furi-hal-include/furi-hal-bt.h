@@ -57,7 +57,7 @@ bool furi_hal_bt_is_alive();
  * @param on_sent_cb - SerialSvcDataSentCallback instance
  * @param context - pointer to context
  */
-void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
 
 /** Send data through BLE
  * @param data - data buffer

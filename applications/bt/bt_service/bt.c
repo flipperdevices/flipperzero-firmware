@@ -80,7 +80,7 @@ Bt* bt_alloc() {
 }
 
 // Called from GAP thread from Serial service
-static void bt_on_data_received_callback(uint8_t* data, uint16_t size, void* context) {
+static uint16_t bt_on_data_received_callback(uint8_t* data, uint16_t size, void* context) {
     furi_assert(context);
     Bt* bt = context;
 
@@ -88,6 +88,7 @@ static void bt_on_data_received_callback(uint8_t* data, uint16_t size, void* con
     if(bytes_processed != size) {
         FURI_LOG_E(BT_SERVICE_TAG, "Only %d of %d bytes processed by RPC", bytes_processed, size);
     }
+    return rpc_session_get_available_size(bt->rpc_session);
 }
 
 // Called from GAP thread from Serial service
@@ -133,7 +134,7 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
         rpc_session_set_context(bt->rpc_session, bt);
         furi_hal_bt_set_data_event_callbacks(
-            bt_on_data_received_callback, bt_on_data_sent_callback, bt);
+            RPC_BUFFER_SIZE, bt_on_data_received_callback, bt_on_data_sent_callback, bt);
         // Update battery level
         PowerInfo info;
         power_get_info(bt->power, &info);

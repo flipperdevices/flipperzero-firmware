@@ -7,19 +7,28 @@
 #define SERIAL_SERVICE_TAG "serial service"
 
 typedef struct {
+    uint16_t buff_size;
+    uint16_t buff_available_size;
+} SerialFlowCtrl;
+
+typedef struct {
     uint16_t svc_handle;
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
+    uint16_t flow_ctrl_char_handle;
+    SerialFlowCtrl flow_ctrl;
     SerialSvcDataReceivedCallback on_received_cb;
     SerialSvcDataSentCallback on_sent_cb;
     void* context;
 } SerialSvc;
 
-static SerialSvc* serial_svc;
+static SerialSvc* serial_svc = NULL;
 
 static const uint8_t service_uuid[] = {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
 static const uint8_t char_rx_uuid[] = {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
 static const uint8_t char_tx_uuid[] = {0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
+static const uint8_t flow_ctrl_uuid[] = {0x00, 0x00, 0xfe, 0x63, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
+
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
@@ -36,7 +45,12 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
             } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 if(serial_svc->on_received_cb) {
-                    serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
+                    serial_svc->flow_ctrl.buff_available_size =
+                        serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
+                    if(serial_svc->flow_ctrl.buff_available_size < SERIAL_SVC_DATA_LEN_MAX) {
+                        FURI_LOG_W(SERIAL_SERVICE_TAG, "Buffer size: %d. Available: %d", serial_svc->flow_ctrl.buff_size, serial_svc->flow_ctrl.buff_available_size);
+                        aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(SerialFlowCtrl), (uint8_t*)&serial_svc->flow_ctrl);
+                    }
                 }
                 ret = SVCCTL_EvtAckFlowEnable;
             }
@@ -58,7 +72,7 @@ void serial_svc_start() {
     SVCCTL_RegisterSvcHandler(serial_svc_event_handler);
 
     // Add service
-    status = aci_gatt_add_service(UUID_TYPE_128, (Service_UUID_t *)service_uuid, PRIMARY_SERVICE, 6, &serial_svc->svc_handle);
+    status = aci_gatt_add_service(UUID_TYPE_128, (Service_UUID_t *)service_uuid, PRIMARY_SERVICE, 10, &serial_svc->svc_handle);
     if(status) {
         FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to add Serial service: %d", status);
     }
@@ -78,7 +92,7 @@ void serial_svc_start() {
 
     // Add TX characteristic
     status = aci_gatt_add_char(serial_svc->svc_handle, UUID_TYPE_128, (const Char_UUID_t*)char_tx_uuid,
-                                SERIAL_SVC_DATA_LEN_MAX,                                  
+                                SERIAL_SVC_DATA_LEN_MAX,
                                 CHAR_PROP_READ | CHAR_PROP_INDICATE,
                                 ATTR_PERMISSION_AUTHEN_READ,
                                 GATT_DONT_NOTIFY_EVENTS,
@@ -88,12 +102,27 @@ void serial_svc_start() {
     if(status) {
         FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to add TX characteristic: %d", status);
     }
+        // Add Flow Control characteristic
+    status = aci_gatt_add_char(serial_svc->svc_handle, UUID_TYPE_128, (const Char_UUID_t*)flow_ctrl_uuid,
+                                sizeof(SerialFlowCtrl),
+                                CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+                                ATTR_PERMISSION_AUTHEN_READ,
+                                GATT_DONT_NOTIFY_EVENTS,
+                                10,
+                                CHAR_VALUE_LEN_CONSTANT,
+                                &serial_svc->flow_ctrl_char_handle);
+    if(status) {
+        FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to add Flow Control characteristic: %d", status);
+    }
 }
 
-void serial_svc_set_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
+void serial_svc_set_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
+    furi_assert(serial_svc);
     serial_svc->on_received_cb = on_received_cb;
     serial_svc->on_sent_cb = on_sent_cb;
     serial_svc->context = context;
+    serial_svc->flow_ctrl.buff_size = buff_size;
+    serial_svc->flow_ctrl.buff_available_size = buff_size;
 }
 
 void serial_svc_stop() {
@@ -107,6 +136,10 @@ void serial_svc_stop() {
         status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->rx_char_handle);
         if(status) {
             FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to delete RX characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle);
+        if(status) {
+            FURI_LOG_E(SERIAL_SERVICE_TAG, "Failed to delete Flow Control characteristic: %d", status);
         }
         // Delete service
         status = aci_gatt_del_service(serial_svc->svc_handle);

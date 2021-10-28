@@ -34,8 +34,8 @@ void furi_hal_bt_stop_advertising() {
     }
 }
 
-void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
-    serial_svc_set_callbacks(on_received_cb, on_sent_cb, context);
+void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
+    serial_svc_set_callbacks(buff_size, on_received_cb, on_sent_cb, context);
 }
 
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
