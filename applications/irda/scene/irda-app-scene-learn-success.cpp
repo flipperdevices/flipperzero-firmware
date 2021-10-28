@@ -70,7 +70,7 @@ bool IrdaAppSceneLearnSuccess::on_event(IrdaApp* app, IrdaAppEvent* event) {
             app->switch_to_next_scene_without_saving(IrdaApp::Scene::Learn);
             break;
         case DialogExResultCenter: {
-            app->notify_space_blink();
+            app->notify_sent_just_learnt();
             auto signal = app->get_received_signal();
             signal.transmit();
             break;
