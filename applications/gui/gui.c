@@ -173,6 +173,7 @@ void gui_redraw(Gui* gui) {
 
     canvas_commit(gui->canvas);
     if(gui->canvas_callback) {
+        //TODO race condition when NULLing this from another thread (?)
         gui->canvas_callback(
             canvas_get_buffer(gui->canvas),
             canvas_get_buffer_size(gui->canvas),
@@ -284,28 +285,6 @@ void gui_cli_screen_stream(Cli* cli, string_t args, void* context) {
 
     gui_set_framebuffer_callback(gui, NULL);
     gui_set_framebuffer_callback_context(gui, NULL);
-}
-
-void gui_rpc_screen_stream_callback(uint8_t* data, size_t size, void* context) {
-    furi_assert(data);
-    furi_assert(size == 1024);
-    furi_assert(context);
-
-    Rpc* rpc = context;
-
-    PB_Main* frame = furi_alloc(sizeof(PB_Main));
-
-    frame->which_content = PB_Main_screen_stream_frame_tag;
-    frame->command_status = PB_CommandStatus_OK;
-    frame->content.screen_stream_frame.data = furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(size));
-    uint8_t* buffer = frame->content.screen_stream_frame.data->bytes;
-    uint16_t* frame_size_msg = &frame->content.screen_stream_frame.data->size;
-    *frame_size_msg = size;
-    memcpy(buffer, data, size);
-
-    rpc_send_and_release(rpc, frame);
-
-    free(frame);
 }
 
 void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {

@@ -47,7 +47,7 @@ static RpcSystemCallbacks rpc_systems[] = {
     },
     {
         .alloc = rpc_system_screen_alloc,
-        .free = NULL,
+        .free = rpc_system_screen_free,
     }};
 
 struct RpcSession {
@@ -263,6 +263,15 @@ void rpc_print_message(const PB_Main* message) {
         string_cat_printf(str, "\tlist_response {\r\n");
         rpc_sprintf_msg_file(str, "\t\t", msg_file, msg_file_count);
     }
+    case PB_Main_screen_start_stream_request_tag:
+        string_cat_printf(str, "\tstart_stream {\r\n");
+        break;
+    case PB_Main_screen_stop_stream_request_tag:
+        string_cat_printf(str, "\tstop_stream {\r\n");
+        break;
+    case PB_Main_screen_stream_frame_tag:
+        string_cat_printf(str, "\tstream_frame {\r\n");
+        break;
     }
     string_cat_printf(str, "\t}\r\n}\r\n");
     printf("%s", string_get_cstr(str));

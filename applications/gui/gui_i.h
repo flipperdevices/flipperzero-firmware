@@ -76,5 +76,3 @@ void gui_unlock(Gui* gui);
 void gui_cli_screen_stream_callback(uint8_t* data, size_t size, void* context);
 
 void gui_cli_screen_stream(Cli* cli, string_t args, void* context);
-
-void gui_rpc_screen_stream_callback(uint8_t* data, size_t size, void* context);
