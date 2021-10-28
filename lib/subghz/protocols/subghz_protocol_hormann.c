@@ -25,8 +25,8 @@ SubGhzProtocolHormann* subghz_protocol_hormann_alloc() {
 
     instance->common.name = "Hormann HSM";
     instance->common.code_min_count_bit_for_found = 44;
-    instance->common.te_short = 518;
-    instance->common.te_long = 1036;
+    instance->common.te_short = 511;
+    instance->common.te_long = 1022;
     instance->common.te_delta = 200;
     instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_hormann_to_str;
@@ -52,31 +52,42 @@ bool subghz_protocol_hormann_send_key(
     SubGhzProtocolCommonEncoder* encoder) {
     furi_assert(instance);
     furi_assert(encoder);
-    // size_t index = 0;
-    // encoder->size_upload = (instance->common.code_last_count_bit * 2) + 2;
-    // if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
-    // //Send header
-    // encoder->upload[index++] =
-    //     level_duration_make(false, (uint32_t)instance->common.te_short * 36);
-    // //Send start bit
-    // encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short);
-    // //Send key data
-    // for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
-    //     if(bit_read(instance->common.code_last_found, i - 1)) {
-    //         //send bit 1
-    //         encoder->upload[index++] =
-    //             level_duration_make(false, (uint32_t)instance->common.te_long);
-    //         encoder->upload[index++] =
-    //             level_duration_make(true, (uint32_t)instance->common.te_short);
-    //     } else {
-    //         //send bit 0
-    //         encoder->upload[index++] =
-    //             level_duration_make(false, (uint32_t)instance->common.te_short);
-    //         encoder->upload[index++] =
-    //             level_duration_make(true, (uint32_t)instance->common.te_long);
-    //     }
-    // }
-    // return true;
+
+    size_t index = 0;
+    encoder->size_upload = 3 + (instance->common.code_last_count_bit * 2 + 2) * 20 + 1;
+    if(encoder->size_upload > SUBGHZ_ENCODER_UPLOAD_MAX_SIZE) return false;
+    //Send header
+    encoder->upload[index++] =
+        level_duration_make(false, (uint32_t)instance->common.te_short * 64);
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short * 64);
+    encoder->upload[index++] =
+        level_duration_make(false, (uint32_t)instance->common.te_short * 64);
+    encoder->repeat = 10;
+
+    for(size_t repeat = 0; repeat < 20; repeat++) {
+        //Send start bit
+        encoder->upload[index++] =
+            level_duration_make(true, (uint32_t)instance->common.te_short * 24);
+        encoder->upload[index++] = level_duration_make(false, (uint32_t)instance->common.te_short);
+        //Send key data
+        for(uint8_t i = instance->common.code_last_count_bit; i > 0; i--) {
+            if(bit_read(instance->common.code_last_found, i - 1)) {
+                //send bit 1
+                encoder->upload[index++] =
+                    level_duration_make(true, (uint32_t)instance->common.te_long);
+                encoder->upload[index++] =
+                    level_duration_make(false, (uint32_t)instance->common.te_short);
+            } else {
+                //send bit 0
+                encoder->upload[index++] =
+                    level_duration_make(true, (uint32_t)instance->common.te_short);
+                encoder->upload[index++] =
+                    level_duration_make(false, (uint32_t)instance->common.te_long);
+            }
+        }
+    }
+    encoder->upload[index++] = level_duration_make(true, (uint32_t)instance->common.te_short * 24);
+    return true;
 }
 
 void subghz_protocol_hormann_reset(SubGhzProtocolHormann* instance) {
@@ -86,16 +97,16 @@ void subghz_protocol_hormann_reset(SubGhzProtocolHormann* instance) {
 void subghz_protocol_hormann_parse(SubGhzProtocolHormann* instance, bool level, uint32_t duration) {
     switch(instance->common.parser_step) {
     case HormannDecoderStepReset:
-        if((level) && (DURATION_DIFF(duration, instance->common.te_short * 63) <
-                       instance->common.te_delta * 63)) {
+        if((level) && (DURATION_DIFF(duration, instance->common.te_short * 64) <
+                       instance->common.te_delta * 64)) {
             instance->common.parser_step = HormannDecoderStepFoundStartHeader;
         } else {
             instance->common.parser_step = HormannDecoderStepReset;
         }
         break;
     case HormannDecoderStepFoundStartHeader:
-        if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 63) <
-                        instance->common.te_delta * 63)) {
+        if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 64) <
+                        instance->common.te_delta * 64)) {
             instance->common.parser_step = HormannDecoderStepFoundHeader;
         } else {
             instance->common.parser_step = HormannDecoderStepReset;
@@ -172,7 +183,8 @@ void subghz_protocol_hormann_to_str(SubGhzProtocolHormann* instance, string_t ou
 
     string_cat_printf(
         output,
-        "%s %dbit\r\n"
+        "%s\r\n"
+        "%dbit\r\n"
         "Key:0x%03lX%08lX\r\n"
         "Btn:0x%01X",
         instance->common.name,
