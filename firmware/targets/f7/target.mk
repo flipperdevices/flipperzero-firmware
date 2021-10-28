@@ -24,6 +24,8 @@ LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions 
 LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group
 
+HARDWARE_TARGET = 7
+
 MXPROJECT_DIR = $(TARGET_DIR)
 
 # Entry Point
@@ -70,6 +72,7 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_spi.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usart.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_lpuart.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c
 
 # FreeRTOS
