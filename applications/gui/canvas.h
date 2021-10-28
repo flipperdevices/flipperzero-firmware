@@ -20,7 +20,15 @@ typedef enum {
 } Color;
 
 /** Fonts enumeration */
-typedef enum { FontPrimary, FontSecondary, FontKeyboard, FontBigNumbers } Font;
+typedef enum {
+    FontPrimary,
+    FontSecondary,
+    FontKeyboard,
+    FontBigNumbers,
+
+    // Keep last for fonts number calculation
+    FontTotalNumber,
+} Font;
 
 /** Alignment enumeration */
 typedef enum {
@@ -36,6 +44,22 @@ typedef enum {
     CanvasOrientationHorizontal,
     CanvasOrientationVertical,
 } CanvasOrientation;
+
+/** Font Direction */
+typedef enum {
+    CanvasFontDirectionLeftToRight,
+    CanvasFontDirectionTopToDown,
+    CanvasFontDirectionRightToLeft,
+    CanvasFontDirectionDownToTop,
+} CanvasFontDirection;
+
+/** Font parameters */
+typedef struct {
+    uint8_t leading_default;
+    uint8_t leading_min;
+    uint8_t height;
+    uint8_t descender;
+} CanvasFontParameters;
 
 /** Canvas anonymouse structure */
 typedef struct Canvas Canvas;
@@ -64,6 +88,15 @@ uint8_t canvas_height(Canvas* canvas);
  */
 uint8_t canvas_current_font_height(Canvas* canvas);
 
+/** Get font parameters
+ *
+ * @param      canvas  Canvas instance
+ * @param      font    Font
+ *
+ * @return     pointer to CanvasFontParameters structure
+ */
+CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font);
+
 /** Clear canvas
  *
  * @param      canvas  Canvas instance
@@ -76,6 +109,14 @@ void canvas_clear(Canvas* canvas);
  * @param      color   Color
  */
 void canvas_set_color(Canvas* canvas, Color color);
+
+/** Set font swap
+ * Argument String Rotation Description
+ *
+ * @param      canvas  Canvas instance
+ * @param      dir     Direction font
+ */
+void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir);
 
 /** Invert drawing color
  *
