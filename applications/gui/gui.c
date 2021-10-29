@@ -1,7 +1,4 @@
 #include "gui_i.h"
-#include <rpc/rpc_i.h>
-#include <rpc/rpc.h>
-#include "flipper.pb.h"
 
 ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
     // Iterating backward

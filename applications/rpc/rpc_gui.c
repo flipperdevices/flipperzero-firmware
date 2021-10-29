@@ -1,9 +1,7 @@
 #include "flipper.pb.h"
 #include "rpc_i.h"
 #include "gui.pb.h"
-#include <gui/gui.h>
 #include <gui/gui_i.h>
-#include <input/input.h>
 
 void rpc_system_gui_screen_frame_callback(uint8_t* data, size_t size, void* context) {
     furi_assert(data);

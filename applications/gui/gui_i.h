@@ -12,7 +12,6 @@
 #include <stdio.h>
 
 #include <cli/cli.h>
-#include <rpc/rpc.h>
 #include "canvas.h"
 #include "canvas_i.h"
 #include "view_port.h"
