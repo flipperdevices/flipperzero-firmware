@@ -118,6 +118,11 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     }
 }
 
+static void bt_rpc_buffer_is_empty_callback(void* context) {
+    furi_assert(context);
+    furi_hal_bt_notify_buffer_is_empty();
+}
+
 // Called from GAP thread
 static void bt_on_gap_event_callback(BleEvent event, void* context) {
     furi_assert(context);
@@ -132,6 +137,7 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         FURI_LOG_I(BT_SERVICE_TAG, "Open RPC connection");
         bt->rpc_session = rpc_session_open(bt->rpc);
         rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
+        rpc_session_set_buffer_is_empty_callback(bt->rpc_session, bt_rpc_buffer_is_empty_callback);
         rpc_session_set_context(bt->rpc_session, bt);
         furi_hal_bt_set_data_event_callbacks(
             RPC_BUFFER_SIZE, bt_on_data_received_callback, bt_on_data_sent_callback, bt);

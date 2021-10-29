@@ -38,6 +38,10 @@ void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataRecei
     serial_svc_set_callbacks(buff_size, on_received_cb, on_sent_cb, context);
 }
 
+void furi_hal_bt_notify_buffer_is_empty() {
+    serial_svc_notify_buffer_is_empty();
+}
+
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
     if(size > FURI_HAL_BT_PACKET_SIZE_MAX) {
         return false;

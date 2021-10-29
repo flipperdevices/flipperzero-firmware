@@ -46,14 +46,9 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
             } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 if(serial_svc->on_received_cb) {
-                    serial_svc->bytes_ready_to_receive -= attribute_modified->Attr_Data_Length;
+                    serial_svc->bytes_ready_to_receive -= MIN(serial_svc->bytes_ready_to_receive, attribute_modified->Attr_Data_Length);
                     serial_svc->flow_ctrl.buff_available_size =
                         serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
-                    if(serial_svc->bytes_ready_to_receive < SERIAL_SVC_DATA_LEN_MAX) {
-                        FURI_LOG_W(SERIAL_SERVICE_TAG, "Buffer size: %d. Available: %d", serial_svc->flow_ctrl.buff_size, serial_svc->flow_ctrl.buff_available_size);
-                        aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(SerialFlowCtrl), (uint8_t*)&serial_svc->flow_ctrl);
-                        serial_svc->bytes_ready_to_receive = serial_svc->flow_ctrl.buff_available_size;
-                    }
                 }
                 ret = SVCCTL_EvtAckFlowEnable;
             }
@@ -126,6 +121,18 @@ void serial_svc_set_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback 
     serial_svc->context = context;
     serial_svc->flow_ctrl.buff_size = buff_size;
     serial_svc->flow_ctrl.buff_available_size = buff_size;
+    serial_svc->bytes_ready_to_receive = serial_svc->flow_ctrl.buff_available_size;
+}
+
+void serial_svc_notify_buffer_is_empty() {
+    furi_assert(serial_svc);
+    FURI_LOG_W(SERIAL_SERVICE_TAG, "Buffer is empty. Wait for another %d bytes", serial_svc->bytes_ready_to_receive);
+    if(serial_svc->bytes_ready_to_receive == 0) {
+        FURI_LOG_I(SERIAL_SERVICE_TAG, "Buffer is empty. Notifying client");
+        serial_svc->flow_ctrl.buff_available_size = serial_svc->flow_ctrl.buff_size;
+        serial_svc->bytes_ready_to_receive = serial_svc->flow_ctrl.buff_size;
+        aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(SerialFlowCtrl), (uint8_t*)&serial_svc->flow_ctrl);
+    }
 }
 
 void serial_svc_stop() {
