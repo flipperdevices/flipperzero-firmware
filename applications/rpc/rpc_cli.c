@@ -49,8 +49,15 @@ void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        if(size_received) {
-            rpc_session_feed(rpc_session, buffer, size_received, 3000);
+        for(int sent = 0; sent < size_received;) {
+            sent += rpc_session_feed(rpc_session, &buffer[sent], size_received - sent, 3000);
+            if(sent != size_received) {
+                FURI_LOG_W(
+                    "RPC_CLI",
+                    "Can't feed session for 3 sec. Left size %ld of %ld",
+                    size_received - sent,
+                    size_received);
+            }
         }
     }
 
