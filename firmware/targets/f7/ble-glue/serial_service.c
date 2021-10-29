@@ -7,16 +7,12 @@
 #define SERIAL_SERVICE_TAG "serial service"
 
 typedef struct {
-    uint16_t buff_size;
-    uint16_t buff_available_size;
-} SerialFlowCtrl;
-
-typedef struct {
     uint16_t svc_handle;
     uint16_t rx_char_handle;
     uint16_t tx_char_handle;
     uint16_t flow_ctrl_char_handle;
-    SerialFlowCtrl flow_ctrl;
+    uint32_t buff_size;
+    uint16_t buff_free_size;
     uint16_t bytes_ready_to_receive;
     SerialSvcDataReceivedCallback on_received_cb;
     SerialSvcDataSentCallback on_sent_cb;
@@ -29,7 +25,6 @@ static const uint8_t service_uuid[] = {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48,
 static const uint8_t char_tx_uuid[] = {0x00, 0x00, 0xfe, 0x61, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
 static const uint8_t char_rx_uuid[] = {0x00, 0x00, 0xfe, 0x62, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
 static const uint8_t flow_ctrl_uuid[] = {0x00, 0x00, 0xfe, 0x63, 0x8e, 0x22, 0x45, 0x41, 0x9d, 0x4c, 0x21, 0xed, 0xae, 0x82, 0xed, 0x19};
-
 
 static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
     SVCCTL_EvtAckStatus_t ret = SVCCTL_EvtNotAck;
@@ -44,11 +39,12 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
                 ret = SVCCTL_EvtAckFlowEnable;
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "RX descriptor event");
             } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
-                FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
+                FURI_LOG_I(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 if(serial_svc->on_received_cb) {
                     serial_svc->bytes_ready_to_receive -= MIN(serial_svc->bytes_ready_to_receive, attribute_modified->Attr_Data_Length);
-                    serial_svc->flow_ctrl.buff_available_size =
+                    serial_svc->buff_free_size =
                         serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
+                    FURI_LOG_W(SERIAL_SERVICE_TAG, "RPC available buff size: %d", serial_svc->buff_free_size);
                 }
                 ret = SVCCTL_EvtAckFlowEnable;
             }
@@ -102,7 +98,7 @@ void serial_svc_start() {
     }
         // Add Flow Control characteristic
     status = aci_gatt_add_char(serial_svc->svc_handle, UUID_TYPE_128, (const Char_UUID_t*)flow_ctrl_uuid,
-                                sizeof(SerialFlowCtrl),
+                                sizeof(uint32_t),
                                 CHAR_PROP_READ | CHAR_PROP_NOTIFY,
                                 ATTR_PERMISSION_AUTHEN_READ,
                                 GATT_DONT_NOTIFY_EVENTS,
@@ -119,19 +115,22 @@ void serial_svc_set_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback 
     serial_svc->on_received_cb = on_received_cb;
     serial_svc->on_sent_cb = on_sent_cb;
     serial_svc->context = context;
-    serial_svc->flow_ctrl.buff_size = buff_size;
-    serial_svc->flow_ctrl.buff_available_size = buff_size;
-    serial_svc->bytes_ready_to_receive = serial_svc->flow_ctrl.buff_available_size;
+    serial_svc->buff_size = buff_size;
+    serial_svc->buff_free_size = buff_size;
+    serial_svc->bytes_ready_to_receive = buff_size;
+    uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
+    aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(uint32_t), (uint8_t*)&buff_size_reversed);
 }
 
 void serial_svc_notify_buffer_is_empty() {
     furi_assert(serial_svc);
     FURI_LOG_W(SERIAL_SERVICE_TAG, "Buffer is empty. Wait for another %d bytes", serial_svc->bytes_ready_to_receive);
     if(serial_svc->bytes_ready_to_receive == 0) {
-        FURI_LOG_I(SERIAL_SERVICE_TAG, "Buffer is empty. Notifying client");
-        serial_svc->flow_ctrl.buff_available_size = serial_svc->flow_ctrl.buff_size;
-        serial_svc->bytes_ready_to_receive = serial_svc->flow_ctrl.buff_size;
-        aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(SerialFlowCtrl), (uint8_t*)&serial_svc->flow_ctrl);
+        FURI_LOG_I("Notify", "Buffer is empty. Notifying client");
+        serial_svc->buff_free_size = serial_svc->buff_size;
+        serial_svc->bytes_ready_to_receive = serial_svc->buff_size;
+        uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
+        aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(uint32_t), (uint8_t*)&buff_size_reversed);
     }
 }
 
@@ -165,7 +164,7 @@ bool serial_svc_update_tx(uint8_t* data, uint8_t data_len) {
     if(data_len > SERIAL_SVC_DATA_LEN_MAX) {
         return false;
     }
-    FURI_LOG_D(SERIAL_SERVICE_TAG, "Updating char %d len", data_len);
+    FURI_LOG_W(SERIAL_SERVICE_TAG, "Updating char %d len", data_len);
     tBleStatus result = aci_gatt_update_char_value(serial_svc->svc_handle,
                                         serial_svc->tx_char_handle,
                                         0,
