@@ -49,6 +49,7 @@ static RpcSystemCallbacks rpc_systems[] = {
 
 struct RpcSession {
     RpcSendBytesCallback send_bytes_callback;
+    RpcBufferIsEmptyCallback buffer_is_empty_callback;
     RpcSessionClosedCallback closed_callback;
     void* context;
     osMutexId_t callbacks_mutex;
@@ -345,6 +346,7 @@ static void rpc_free_session(RpcSession* session) {
     session->context = NULL;
     session->closed_callback = NULL;
     session->send_bytes_callback = NULL;
+    session->buffer_is_empty_callback = NULL;
 }
 
 void rpc_session_set_context(RpcSession* session, void* context) {
@@ -374,6 +376,18 @@ void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallba
 
     osMutexAcquire(session->callbacks_mutex, osWaitForever);
     session->send_bytes_callback = callback;
+    osMutexRelease(session->callbacks_mutex);
+}
+
+void rpc_session_set_buffer_is_empty_callback(
+    RpcSession* session,
+    RpcBufferIsEmptyCallback callback) {
+    furi_assert(session);
+    furi_assert(callback);
+    furi_assert(session->rpc->busy);
+
+    osMutexAcquire(session->callbacks_mutex, osWaitForever);
+    session->buffer_is_empty_callback = callback;
     osMutexRelease(session->callbacks_mutex);
 }
 
@@ -411,6 +425,11 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
     while(1) {
         bytes_received +=
             xStreamBufferReceive(rpc->stream, buf + bytes_received, count - bytes_received, 0);
+        if(xStreamBufferIsEmpty(rpc->stream)) {
+            if(rpc->session.buffer_is_empty_callback) {
+                rpc->session.buffer_is_empty_callback(rpc->session.context);
+            }
+        }
         if(count == bytes_received) {
             break;
         } else {

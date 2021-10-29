@@ -13,6 +13,8 @@ typedef struct RpcSession RpcSession;
 
 /** Callback to send to client any data (e.g. response to command) */
 typedef void (*RpcSendBytesCallback)(void* context, uint8_t* bytes, size_t bytes_len);
+/** Callback to notify client that buffer is empty */
+typedef void (*RpcBufferIsEmptyCallback)(void* context);
 /** Callback to notify transport layer that close_session command
  * is received. Any other actions lays on transport layer.
  * No destruction or session close preformed. */
@@ -60,6 +62,15 @@ void rpc_session_set_context(RpcSession* session, void* context);
  * @param   callback    callback to send bytes to client (can be NULL)
  */
 void rpc_session_set_send_bytes_callback(RpcSession* session, RpcSendBytesCallback callback);
+
+/** Set callback to notify that buffer is empty
+ *
+ * @param   session     pointer to RpcSession descriptor
+ * @param   callback    callback to notify client that buffer is empty (can be NULL)
+ */
+void rpc_session_set_buffer_is_empty_callback(
+    RpcSession* session,
+    RpcBufferIsEmptyCallback callback);
 
 /** Set callback to be called when RPC command to close session is received
  *  WARN: It's forbidden to call RPC API within RpcSessionClosedCallback
