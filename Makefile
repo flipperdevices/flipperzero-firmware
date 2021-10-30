@@ -49,12 +49,16 @@ firmware_clean:
 
 .PHONY: bootloader_flash
 bootloader_flash:
+ifeq ($(FORCE), '1')
 	rm $(PROJECT_ROOT)/bootloader/.obj/f*/flash || true
+endif
 	$(MAKE) -C $(PROJECT_ROOT)/bootloader -j$(NPROCS) flash
 
 .PHONY: firmware_flash
 firmware_flash:
+ifeq ($(FORCE), '1')
 	rm $(PROJECT_ROOT)/firmware/.obj/f*/flash || true
+endif
 	$(MAKE) -C $(PROJECT_ROOT)/firmware -j$(NPROCS) flash
 
 .PHONY: flash_radio
