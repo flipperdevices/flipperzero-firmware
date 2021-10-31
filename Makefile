@@ -77,8 +77,16 @@ flash_radio_fus:
 	@echo "================    JUST DON'T    ================"
 	@echo
 
-.PHONY: 
+.PHONY: flash_radio_fus_please_i_m_not_going_to_complain
 flash_radio_fus_please_i_m_not_going_to_complain:
 	$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw_for_fus_0_5_3.bin
 	$(PROJECT_ROOT)/scripts/flash.py core2fus 0x080EC000 --statement=AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE $(COPRO_DIR)/stm32wb5x_FUS_fw.bin
 	$(PROJECT_ROOT)/scripts/ob.py set
+
+FORMAT_SOURCES = $(shell find applications bootloader core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
+
+.PHONY: format
+format:
+	@echo "Formatting sources with clang-format"
+	@clang-format -style=file -i $(FORMAT_SOURCES)
+

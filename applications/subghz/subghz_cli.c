@@ -307,7 +307,7 @@ void subghz_cli_command_crypto_keeloq(Cli* cli, string_t args) {
     string_clear(source);
 }
 
-void subghz_cli_command_crypto(Cli* cli, string_t args, void* context) {
+void subghz_cli_command(Cli* cli, string_t args, void* context) {
     string_t cmd;
     string_init(cmd);
 
@@ -317,7 +317,7 @@ void subghz_cli_command_crypto(Cli* cli, string_t args, void* context) {
             break;
         }
 
-        if(string_cmp_str(cmd, "keeloq") == 0) {
+        if(string_cmp_str(cmd, "encrypt_keeloq") == 0) {
             subghz_cli_command_crypto_keeloq(cli, args);
             break;
         }
@@ -337,7 +337,7 @@ void subghz_cli_init() {
         cli, "subghz_rx_carrier", CliCommandFlagDefault, subghz_cli_command_rx_carrier, NULL);
     cli_add_command(cli, "subghz_tx", CliCommandFlagDefault, subghz_cli_command_tx, NULL);
     cli_add_command(cli, "subghz_rx", CliCommandFlagDefault, subghz_cli_command_rx, NULL);
-    cli_add_command(cli, "subghz_crypto", CliCommandFlagDefault, subghz_cli_command_crypto, NULL);
+    cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
 
     furi_record_close("cli");
 }
