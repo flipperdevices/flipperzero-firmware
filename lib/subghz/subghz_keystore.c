@@ -187,7 +187,7 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing or incorrect header");
             break;
         }
-        if(!flipper_file_read_uint32(flipper_file, "Encryption", (uint32_t*)&encryption)) {
+        if(!flipper_file_read_uint32(flipper_file, "Encryption", (uint32_t*)&encryption, 1)) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing encryption type");
             break;
         }
@@ -241,7 +241,8 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to add header");
             break;
         }
-        if(!flipper_file_write_uint32(flipper_file, "Encryption", SubGhzKeystoreEncryptionAES256)) {
+        SubGhzKeystoreEncryption encryption = SubGhzKeystoreEncryptionAES256;
+        if(!flipper_file_write_uint32(flipper_file, "Encryption", (uint32_t*)&encryption, 1)) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to add Encryption");
             break;
         }
