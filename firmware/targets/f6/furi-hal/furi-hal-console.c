@@ -1,4 +1,5 @@
 #include <furi-hal-console.h>
+#include <furi-hal-uart.h>
 
 #include <stdbool.h>
 #include <stm32wbxx_ll_gpio.h>
@@ -7,49 +8,27 @@
 
 #include <furi.h>
 
+#define CONSOLE_BAUDRATE 230400
+
 volatile bool furi_hal_console_alive = false;
 
 void furi_hal_console_init() {
-    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = LL_GPIO_PIN_6|LL_GPIO_PIN_7;
-    GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-    GPIO_InitStruct.Alternate = LL_GPIO_AF_7;
-    LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-    LL_USART_InitTypeDef USART_InitStruct = {0};
-    USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
-    USART_InitStruct.BaudRate = 230400;
-    USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
-    USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
-    USART_InitStruct.Parity = LL_USART_PARITY_NONE;
-    USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX;
-    USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
-    USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
-    LL_USART_Init(USART1, &USART_InitStruct);
-    LL_USART_SetTXFIFOThreshold(USART1, LL_USART_FIFOTHRESHOLD_1_2);
-    LL_USART_EnableFIFO(USART1);
-    LL_USART_ConfigAsyncMode(USART1);
-
-    LL_USART_Enable(USART1);
-
-    while(!LL_USART_IsActiveFlag_TEACK(USART1)) ;
+    furi_hal_uart_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
     furi_hal_console_alive = true;
 
     FURI_LOG_I("FuriHalConsole", "Init OK");
 }
 
-static void furi_hal_console_uart_tx(const uint8_t* buffer, size_t buffer_size) {
-    while(buffer_size > 0) {
-        while (!LL_USART_IsActiveFlag_TXE(USART1));
+void furi_hal_console_enable() {
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL);
+    while (!LL_USART_IsActiveFlag_TC(USART1));
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
+    furi_hal_console_alive = true;
+}
 
-        LL_USART_TransmitData8(USART1, *buffer);
-
-        buffer++;
-        buffer_size--;
-    }
+void furi_hal_console_disable() {
+    while (!LL_USART_IsActiveFlag_TC(USART1));
+    furi_hal_console_alive = false;
 }
 
 void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size) {
@@ -57,7 +36,7 @@ void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size) {
         return;
 
     // Transmit data
-    furi_hal_console_uart_tx(buffer, buffer_size);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
     // Wait for TC flag to be raised for last char
     while (!LL_USART_IsActiveFlag_TC(USART1));
 }
@@ -67,9 +46,9 @@ void furi_hal_console_tx_with_new_line(const uint8_t* buffer, size_t buffer_size
         return;
 
     // Transmit data
-    furi_hal_console_uart_tx(buffer, buffer_size);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)buffer, buffer_size);
     // Transmit new line symbols
-    furi_hal_console_uart_tx((const uint8_t*)"\r\n", 2);
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t*)"\r\n", 2);
     // Wait for TC flag to be raised for last char
     while (!LL_USART_IsActiveFlag_TC(USART1));
 }

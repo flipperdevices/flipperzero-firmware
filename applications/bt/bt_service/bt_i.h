@@ -11,8 +11,15 @@
 
 #include <dialogs/dialogs.h>
 #include <power/power_service/power.h>
+#include <applications/rpc/rpc.h>
 
 #include "../bt_settings.h"
+
+typedef enum {
+    BtStatusOff,
+    BtStatusAdvertising,
+    BtStatusConnected,
+} BtStatus;
 
 typedef enum {
     BtMessageTypeUpdateStatusbar,
@@ -32,10 +39,14 @@ typedef struct {
 
 struct Bt {
     BtSettings bt_settings;
+    BtStatus status;
     osMessageQueueId_t message_queue;
     Gui* gui;
     ViewPort* statusbar_view_port;
     DialogsApp* dialogs;
     DialogMessage* dialog_message;
     Power* power;
+    Rpc* rpc;
+    RpcSession* rpc_session;
+    osSemaphoreId_t rpc_sem;
 };

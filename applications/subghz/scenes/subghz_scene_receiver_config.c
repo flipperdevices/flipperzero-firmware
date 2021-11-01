@@ -1,15 +1,17 @@
 #include "../subghz_i.h"
 
-#define PRESET_COUNT 3
+#define PRESET_COUNT 4
 const char* const preset_text[PRESET_COUNT] = {
     "AM270",
     "AM650",
-    "FM",
+    "FM238",
+    "FM476",
 };
 const uint32_t preset_value[PRESET_COUNT] = {
     FuriHalSubGhzPresetOok270Async, /** OOK, bandwidth 270kHz, asynchronous */
     FuriHalSubGhzPresetOok650Async, /** OOK, bandwidth 650kHz, asynchronous */
-    FuriHalSubGhzPreset2FSKAsync, /** FM, asynchronous */
+    FuriHalSubGhzPreset2FSKDev238Async, /** FM, deviation 2.380371 kHz, asynchronous */
+    FuriHalSubGhzPreset2FSKDev476Async, /** FM, deviation 4.760742 kHz, asynchronous */
 };
 
 #define HOPPING_COUNT 2
@@ -64,6 +66,8 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
     if(subghz->txrx->hopper_state == SubGhzHopperStateOFF) {
         variable_item_set_current_value_text(item, subghz_frequencies_text[index]);
         subghz->txrx->frequency = subghz_frequencies[index];
+    } else {
+        variable_item_set_current_value_index(item, subghz_frequencies_433_92);
     }
 }
 
@@ -86,20 +90,22 @@ static void subghz_scene_receiver_config_set_hopping_runing(VariableItem* item) 
                 subghz->scene_manager, SubGhzSceneReceiverConfig),
             subghz_frequencies_text[subghz_frequencies_433_92]);
         subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+        variable_item_set_current_value_index(
+            (VariableItem*)scene_manager_get_scene_state(
+                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            subghz_frequencies_433_92);
     } else {
         variable_item_set_current_value_text(
             (VariableItem*)scene_manager_get_scene_state(
                 subghz->scene_manager, SubGhzSceneReceiverConfig),
             " -----");
+        variable_item_set_current_value_index(
+            (VariableItem*)scene_manager_get_scene_state(
+                subghz->scene_manager, SubGhzSceneReceiverConfig),
+            subghz_frequencies_433_92);
     }
 
     subghz->txrx->hopper_state = hopping_value[index];
-}
-
-void subghz_scene_receiver_config_callback(SubghzReceverEvent event, void* context) {
-    furi_assert(context);
-    SubGhz* subghz = context;
-    view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
 }
 
 void subghz_scene_receiver_config_on_enter(void* context) {
@@ -120,16 +126,19 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, subghz_frequencies_text[value_index]);
 
-    item = variable_item_list_add(
-        subghz->variable_item_list,
-        "Hopping:",
-        HOPPING_COUNT,
-        subghz_scene_receiver_config_set_hopping_runing,
-        subghz);
-    value_index = subghz_scene_receiver_config_hopper_value_index(
-        subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, hopping_text[value_index]);
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+       SubghzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Hopping:",
+            HOPPING_COUNT,
+            subghz_scene_receiver_config_set_hopping_runing,
+            subghz);
+        value_index = subghz_scene_receiver_config_hopper_value_index(
+            subghz->txrx->hopper_state, hopping_value, HOPPING_COUNT, subghz);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, hopping_text[value_index]);
+    }
 
     item = variable_item_list_add(
         subghz->variable_item_list,
@@ -153,4 +162,6 @@ bool subghz_scene_receiver_config_on_event(void* context, SceneManagerEvent even
 void subghz_scene_receiver_config_on_exit(void* context) {
     SubGhz* subghz = context;
     variable_item_list_clean(subghz->variable_item_list);
+    scene_manager_set_scene_state(
+        subghz->scene_manager, SubGhzSceneReadRAW, SubghzCustomEventManagerNoSet);
 }

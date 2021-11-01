@@ -17,6 +17,14 @@ extern "C" {
  */
 void furi_hal_vcp_init();
 
+/** Disable VCP to make CDC interface usable by other application
+ */
+void furi_hal_vcp_disable();
+
+/** Enable VCP
+ */
+void furi_hal_vcp_enable();
+
 /** Recieve data from VCP Waits till some data arrives, never returns 0
  *
  * @param      buffer  pointer to buffer
@@ -43,6 +51,12 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
  * @param      size    buffer size
  */
 void furi_hal_vcp_tx(const uint8_t* buffer, size_t size);
+
+/** Check whether VCP is connected
+ *
+ * @return     true if connected
+ */
+bool furi_hal_vcp_is_connected(void);
 
 #ifdef __cplusplus
 }

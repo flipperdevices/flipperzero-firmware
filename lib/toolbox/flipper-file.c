@@ -848,3 +848,10 @@ bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key) {
 
     return result;
 }
+
+File* flipper_file_get_file(FlipperFile* flipper_file) {
+    furi_assert(flipper_file);
+    furi_assert(flipper_file->file);
+
+    return flipper_file->file;
+}

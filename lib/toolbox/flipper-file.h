@@ -39,7 +39,7 @@
  * Writing:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFile file = flipper_file_alloc(storage);
+ * FlipperFile* file = flipper_file_alloc(storage);
  * 
  * do {
  *     const uint32_t version = 1;
@@ -65,7 +65,7 @@
  * Reading:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFile file = flipper_file_alloc(storage);
+ * FlipperFile* file = flipper_file_alloc(storage);
  * 
  * do {
  *     uint32_t version = 1;
@@ -331,6 +331,16 @@ bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data
  * @return bool 
  */
 bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key);
+
+/** Get file descriptor.
+ *
+ * We higly don't recommend to use it.
+ * This instance is owned by FlipperFile.
+ *
+ * @param      flipper_file pointer to FlipperFile instance
+ * @return     pointer to File instance
+ */
+File* flipper_file_get_file(FlipperFile* flipper_file);
 
 #ifdef __cplusplus
 }

@@ -24,6 +24,8 @@ LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs
 CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions 
 LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group
 
+HARDWARE_TARGET = 6
+
 MXPROJECT_DIR = $(TARGET_DIR)
 
 # Entry Point
@@ -70,6 +72,7 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_spi.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usart.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_lpuart.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c
 
 # FreeRTOS
@@ -150,9 +153,9 @@ C_SOURCES += \
 
 # Linker options
 ifeq ($(NO_BOOTLOADER), 1)
-LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_no_boot.ld
+LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_no_bootloader.ld
 else
-LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_boot.ld
+LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_with_bootloader.ld
 endif
 
 SVD_FILE = ../debug/STM32WB55_CM4.svd

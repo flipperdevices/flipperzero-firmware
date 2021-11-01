@@ -4,26 +4,31 @@
 
 #include <furi.h>
 #include <furi-hal.h>
+#include <u8g2_glue.h>
 
-uint8_t u8g2_gpio_and_delay_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
-uint8_t u8x8_hw_spi_stm32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr);
+const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
+    [FontPrimary] = {.leading_default = 12, .leading_min = 11, .height = 8, .descender = 2},
+    [FontSecondary] = {.leading_default = 11, .leading_min = 9, .height = 7, .descender = 2},
+    [FontKeyboard] = {.leading_default = 11, .leading_min = 9, .height = 7, .descender = 2},
+    [FontBigNumbers] = {.leading_default = 18, .leading_min = 16, .height = 15, .descender = 0},
+};
 
 Canvas* canvas_init() {
     Canvas* canvas = furi_alloc(sizeof(Canvas));
 
     furi_hal_power_insomnia_enter();
 
+    // Setup u8g2
+    u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
     canvas->orientation = CanvasOrientationHorizontal;
-    u8g2_Setup_st7565_erc12864_alt_f(
-        &canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
-
-    // send init sequence to the display, display is in sleep mode after this
+    // Initialize display
     u8g2_InitDisplay(&canvas->fb);
-    u8g2_SetContrast(&canvas->fb, 36);
-    // wake up display
-    u8g2_ClearBuffer(&canvas->fb);
+    // Wake up display
     u8g2_SetPowerSave(&canvas->fb, 0);
-    u8g2_SendBuffer(&canvas->fb);
+
+    // Clear buffer and send to device
+    canvas_clear(canvas);
+    canvas_commit(canvas);
 
     furi_hal_power_insomnia_exit();
 
@@ -37,14 +42,16 @@ void canvas_free(Canvas* canvas) {
 
 void canvas_reset(Canvas* canvas) {
     furi_assert(canvas);
+
     canvas_clear(canvas);
+
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
+    canvas_set_font_direction(canvas, CanvasFontDirectionLeftToRight);
 }
 
 void canvas_commit(Canvas* canvas) {
     furi_assert(canvas);
-    u8g2_SetPowerSave(&canvas->fb, 0); // wake up display
     u8g2_SendBuffer(&canvas->fb);
 }
 
@@ -92,6 +99,12 @@ uint8_t canvas_current_font_height(Canvas* canvas) {
     return font_height;
 }
 
+CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font) {
+    furi_assert(canvas);
+    furi_assert(font < FontTotalNumber);
+    return (CanvasFontParameters*)&canvas_font_params[font];
+}
+
 void canvas_clear(Canvas* canvas) {
     furi_assert(canvas);
     u8g2_ClearBuffer(&canvas->fb);
@@ -102,6 +115,11 @@ void canvas_set_color(Canvas* canvas, Color color) {
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
+void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir) {
+    furi_assert(canvas);
+    u8g2_SetFontDirection(&canvas->fb, dir);
+}
+
 void canvas_invert_color(Canvas* canvas) {
     canvas->fb.draw_color = !canvas->fb.draw_color;
 }
@@ -110,11 +128,13 @@ void canvas_set_font(Canvas* canvas, Font font) {
     furi_assert(canvas);
     u8g2_SetFontMode(&canvas->fb, 1);
     if(font == FontPrimary) {
-        u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tf);
+        u8g2_SetFont(&canvas->fb, u8g2_font_helvB08_tr);
     } else if(font == FontSecondary) {
         u8g2_SetFont(&canvas->fb, u8g2_font_haxrcorp4089_tr);
     } else if(font == FontKeyboard) {
-        u8g2_SetFont(&canvas->fb, u8g2_font_profont11_mf);
+        u8g2_SetFont(&canvas->fb, u8g2_font_profont11_mr);
+    } else if(font == FontBigNumbers) {
+        u8g2_SetFont(&canvas->fb, u8g2_font_profont22_tn);
     } else {
         furi_crash(NULL);
     }
@@ -192,13 +212,15 @@ void canvas_draw_icon_animation(
 
     x += canvas->offset_x;
     y += canvas->offset_y;
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_animation_get_data(icon_animation), &icon_data);
     u8g2_DrawXBM(
         &canvas->fb,
         x,
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        icon_animation_get_data(icon_animation));
+        icon_data);
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
@@ -207,8 +229,9 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
 
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(
-        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_get_data(icon));
+    uint8_t* icon_data = NULL;
+    furi_hal_compress_icon_decode(icon_get_data(icon), &icon_data);
+    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
