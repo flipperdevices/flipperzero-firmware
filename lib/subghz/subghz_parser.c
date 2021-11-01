@@ -16,6 +16,8 @@
 #include "protocols/subghz_protocol_nero_radio.h"
 #include "protocols/subghz_protocol_scher_khan.h"
 #include "protocols/subghz_protocol_kia.h"
+#include "protocols/subghz_protocol_raw.h"
+#include "protocols/subghz_protocol_hormann.h"
 
 #include "subghz_keystore.h"
 
@@ -38,6 +40,8 @@ typedef enum {
     SubGhzProtocolTypeNeroRadio,
     SubGhzProtocolTypeScherKhan,
     SubGhzProtocolTypeKIA,
+    SubGhzProtocolTypeRAW,
+    SubGhzProtocolTypeHormann,
 
     SubGhzProtocolTypeMax,
 } SubGhzProtocolType;
@@ -109,6 +113,10 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
     instance->protocols[SubGhzProtocolTypeKIA] =
         (SubGhzProtocolCommon*)subghz_protocol_kia_alloc();
+    instance->protocols[SubGhzProtocolTypeRAW] =
+        (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
+    instance->protocols[SubGhzProtocolTypeHormann] =
+        (SubGhzProtocolCommon*)subghz_protocol_hormann_alloc();
 
     return instance;
 }
@@ -143,6 +151,9 @@ void subghz_parser_free(SubGhzParser* instance) {
     subghz_protocol_scher_khan_free(
         (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     subghz_protocol_kia_free((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
+    subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
+    subghz_protocol_hormann_free(
+        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
 
     subghz_keystore_free(instance->keystore);
 
@@ -197,6 +208,11 @@ void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* fil
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS], file_name);
 }
 
+void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name) {
+    subghz_protocol_came_atomo_name_file(
+        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo], file_name);
+}
+
 void subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_name) {
     subghz_keystore_load(instance->keystore, file_name);
 }
@@ -229,6 +245,14 @@ void subghz_parser_reset(SubGhzParser* instance) {
     subghz_protocol_scher_khan_reset(
         (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     subghz_protocol_kia_reset((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
+    subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
+    subghz_protocol_hormann_reset(
+        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
+}
+
+void subghz_parser_raw_parse(SubGhzParser* instance, bool level, uint32_t duration) {
+    subghz_protocol_raw_parse(
+        (SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW], level, duration);
 }
 
 void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) {
@@ -274,4 +298,6 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
         duration);
     subghz_protocol_kia_parse(
         (SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA], level, duration);
+    subghz_protocol_hormann_parse(
+        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann], level, duration);
 }

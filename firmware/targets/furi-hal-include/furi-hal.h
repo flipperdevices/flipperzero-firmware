@@ -9,7 +9,7 @@
 template <unsigned int N> struct STOP_EXTERNING_ME {};
 #endif
 
-#include "furi-hal-boot.h"
+#include "furi-hal-bootloader.h"
 #include "furi-hal-clock.h"
 #include "furi-hal-crypto.h"
 #include "furi-hal-console.h"
@@ -36,7 +36,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi-hal-usb.h"
 #include "furi-hal-usb-hid.h"
 #include "furi-hal-compress.h"
-#include "furi-hal-lpuart.h"
+#include "furi-hal-uart.h"
 
 /** Init furi-hal */
 void furi_hal_init();
