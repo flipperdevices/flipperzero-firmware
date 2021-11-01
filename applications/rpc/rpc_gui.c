@@ -3,12 +3,17 @@
 #include "gui.pb.h"
 #include <gui/gui_i.h>
 
+typedef struct {
+    Rpc* rpc;
+    Gui* gui;
+} RpcGuiSystem;
+
 void rpc_system_gui_screen_frame_callback(uint8_t* data, size_t size, void* context) {
     furi_assert(data);
     furi_assert(size == 1024);
     furi_assert(context);
 
-    Rpc* rpc = context;
+    RpcGuiSystem* rpc_gui = context;
 
     PB_Main* frame = furi_alloc(sizeof(PB_Main));
 
@@ -20,32 +25,36 @@ void rpc_system_gui_screen_frame_callback(uint8_t* data, size_t size, void* cont
     *frame_size_msg = size;
     memcpy(buffer, data, size);
 
-    rpc_send_and_release(rpc, frame);
+    rpc_send_and_release(rpc_gui->rpc, frame);
 
     free(frame);
 }
 
 void rpc_system_gui_start_screen_stream_process(const PB_Main* request, void* context) {
-    rpc_send_and_release_empty(context, request->command_id, PB_CommandStatus_OK);
+    furi_assert(request);
+    furi_assert(context);
+    RpcGuiSystem* rpc_gui = context;
 
-    Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback(gui, rpc_system_gui_screen_frame_callback, context);
-    furi_record_close("gui");
+    rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
+
+    gui_set_framebuffer_callback(rpc_gui->gui, rpc_system_gui_screen_frame_callback, context);
 }
 
 void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, void* context) {
-    rpc_send_and_release_empty(context, request->command_id, PB_CommandStatus_OK);
+    furi_assert(request);
+    furi_assert(context);
+    RpcGuiSystem* rpc_gui = context;
 
-    Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback(gui, NULL, NULL);
-    furi_record_close("gui");
+    rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
+
+    gui_set_framebuffer_callback(rpc_gui->gui, NULL, NULL);
 }
 
 void rpc_system_gui_send_input_event_request_process(const PB_Main* request, void* context) {
-    Rpc* rpc = context;
-    furi_assert(rpc);
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_gui_send_input_event_request_tag);
+    furi_assert(context);
+    RpcGuiSystem* rpc_gui = context;
 
     InputEvent event;
 
@@ -100,7 +109,7 @@ void rpc_system_gui_send_input_event_request_process(const PB_Main* request, voi
 
     if(invalid) {
         rpc_send_and_release_empty(
-            context, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+            rpc_gui->rpc, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
         return;
     }
 
@@ -108,14 +117,20 @@ void rpc_system_gui_send_input_event_request_process(const PB_Main* request, voi
     furi_check(input_events);
     notify_pubsub(input_events, &event);
     furi_record_close("input_events");
-    rpc_send_and_release_empty(context, request->command_id, PB_CommandStatus_OK);
+    rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
 }
 
 void* rpc_system_gui_alloc(Rpc* rpc) {
+    furi_assert(rpc);
+
+    RpcGuiSystem* rpc_gui = furi_alloc(sizeof(RpcGuiSystem));
+    rpc_gui->gui = furi_record_open("gui");
+    rpc_gui->rpc = rpc;
+
     RpcHandler rpc_handler = {
         .message_handler = NULL,
         .decode_submessage = NULL,
-        .context = rpc,
+        .context = rpc_gui,
     };
 
     rpc_handler.message_handler = rpc_system_gui_start_screen_stream_process;
@@ -131,7 +146,8 @@ void* rpc_system_gui_alloc(Rpc* rpc) {
 }
 
 void rpc_system_gui_free(void* ctx) {
-    Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback(gui, NULL, NULL);
+    RpcGuiSystem* rpc_gui = ctx;
+    gui_set_framebuffer_callback(rpc_gui->gui, NULL, NULL);
     furi_record_close("gui");
+    free(rpc_gui);
 }
