@@ -64,6 +64,7 @@ static bool subghz_keystore_process_line(SubGhzKeystore* instance, char* line) {
     key = strtoull(skey, NULL, 16);
     if (ret == 3) {
         subghz_keystore_add_key(instance, name, key, type);
+        FURI_LOG_I("Load man", " %s \t %d \t %s", skey, type, name);
         return true;
     } else {
         FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Failed to load line: %s\r\n", line);
