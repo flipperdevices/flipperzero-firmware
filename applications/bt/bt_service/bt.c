@@ -87,53 +87,53 @@ Bt* bt_alloc() {
 }
 
 // Called from GAP thread from Serial service
-static uint16_t bt_on_data_received_callback(uint8_t* data, uint16_t size, void* context) {
-    furi_assert(context);
-    Bt* bt = context;
+// static uint16_t bt_on_data_received_callback(uint8_t* data, uint16_t size, void* context) {
+//     furi_assert(context);
+//     Bt* bt = context;
 
-    size_t bytes_processed = rpc_session_feed(bt->rpc_session, data, size, 1000);
-    if(bytes_processed != size) {
-        FURI_LOG_E(TAG, "Only %d of %d bytes processed by RPC", bytes_processed, size);
-    }
-    return rpc_session_get_available_size(bt->rpc_session);
-}
+//     size_t bytes_processed = rpc_session_feed(bt->rpc_session, data, size, 1000);
+//     if(bytes_processed != size) {
+//         FURI_LOG_E(TAG, "Only %d of %d bytes processed by RPC", bytes_processed, size);
+//     }
+//     return rpc_session_get_available_size(bt->rpc_session);
+// }
 
 // Called from GAP thread from Serial service
-static void bt_on_data_sent_callback(void* context) {
-    furi_assert(context);
-    Bt* bt = context;
+// static void bt_on_data_sent_callback(void* context) {
+//     furi_assert(context);
+//     Bt* bt = context;
 
-    osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_BUFF_SENT);
-}
+//     osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_BUFF_SENT);
+// }
 
 // Called from RPC thread
-static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
-    furi_assert(context);
-    Bt* bt = context;
+// static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t bytes_len) {
+//     furi_assert(context);
+//     Bt* bt = context;
 
-    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL);
-    size_t bytes_sent = 0;
-    while(bytes_sent < bytes_len) {
-        size_t bytes_remain = bytes_len - bytes_sent;
-        if(bytes_remain > bt->max_packet_size) {
-            furi_hal_bt_tx(&bytes[bytes_sent], bt->max_packet_size);
-            bytes_sent += bt->max_packet_size;
-        } else {
-            furi_hal_bt_tx(&bytes[bytes_sent], bytes_remain);
-            bytes_sent += bytes_remain;
-        }
-        uint32_t event_flag =
-            osEventFlagsWait(bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny, osWaitForever);
-        if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
-            break;
-        }
-    }
-}
+//     osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL);
+//     size_t bytes_sent = 0;
+//     while(bytes_sent < bytes_len) {
+//         size_t bytes_remain = bytes_len - bytes_sent;
+//         if(bytes_remain > FURI_HAL_BT_PACKET_SIZE_MAX) {
+//             furi_hal_bt_tx(&bytes[bytes_sent], FURI_HAL_BT_PACKET_SIZE_MAX);
+//             bytes_sent += FURI_HAL_BT_PACKET_SIZE_MAX;
+//         } else {
+//             furi_hal_bt_tx(&bytes[bytes_sent], bytes_remain);
+//             bytes_sent += bytes_remain;
+//         }
+//         uint32_t event_flag =
+//             osEventFlagsWait(bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny, osWaitForever);
+//         if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
+//             break;
+//         }
+//     }
+// }
 
-static void bt_rpc_buffer_is_empty_callback(void* context) {
-    furi_assert(context);
-    furi_hal_bt_notify_buffer_is_empty();
-}
+// static void bt_rpc_buffer_is_empty_callback(void* context) {
+//     furi_assert(context);
+//     furi_hal_bt_notify_buffer_is_empty();
+// }
 
 // Called from GAP thread
 static void bt_on_gap_event_callback(BleEvent event, void* context) {
@@ -146,13 +146,13 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         BtMessage message = {.type = BtMessageTypeUpdateStatusbar};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
         // Open RPC session
-        FURI_LOG_I(TAG, "Open RPC connection");
-        bt->rpc_session = rpc_session_open(bt->rpc);
-        rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
-        rpc_session_set_buffer_is_empty_callback(bt->rpc_session, bt_rpc_buffer_is_empty_callback);
-        rpc_session_set_context(bt->rpc_session, bt);
-        furi_hal_bt_set_data_event_callbacks(
-            RPC_BUFFER_SIZE, bt_on_data_received_callback, bt_on_data_sent_callback, bt);
+        // FURI_LOG_I(TAG, "Open RPC connection");
+        // bt->rpc_session = rpc_session_open(bt->rpc);
+        // rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
+        // rpc_session_set_buffer_is_empty_callback(bt->rpc_session, bt_rpc_buffer_is_empty_callback);
+        // rpc_session_set_context(bt->rpc_session, bt);
+        // furi_hal_bt_set_data_event_callbacks(
+        //     RPC_BUFFER_SIZE, bt_on_data_received_callback, bt_on_data_sent_callback, bt);
         // Update battery level
         PowerInfo info;
         power_get_info(bt->power, &info);
@@ -160,13 +160,13 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         message.data.battery_level = info.charge;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
     } else if(event.type == BleEventTypeDisconnected) {
-        if(bt->rpc_session) {
-            FURI_LOG_I(TAG, "Close RPC connection");
-            osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
-            rpc_session_close(bt->rpc_session);
-            furi_hal_bt_set_data_event_callbacks(0, NULL, NULL, NULL);
-            bt->rpc_session = NULL;
-        }
+        // if(bt->rpc_session) {
+        //     FURI_LOG_I(TAG, "Close RPC connection");
+        //     osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
+        //     rpc_session_close(bt->rpc_session);
+        //     furi_hal_bt_set_data_event_callbacks(0, NULL, NULL, NULL);
+        //     bt->rpc_session = NULL;
+        // }
     } else if(event.type == BleEventTypeStartAdvertising) {
         bt->status = BtStatusAdvertising;
         BtMessage message = {.type = BtMessageTypeUpdateStatusbar};

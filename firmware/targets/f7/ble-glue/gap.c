@@ -7,6 +7,7 @@
 #include "dev_info_service.h"
 #include "battery_service.h"
 #include "serial_service.h"
+#include "hid_service.h"
 
 #include <furi-hal.h>
 
@@ -220,7 +221,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 }
 
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
-    gap->gap_svc.adv_svc_uuid_len = 1;
     if(uid_len == 2) {
         gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_16_BIT_SERV_UUID;
     } else if (uid_len == 4) {
@@ -228,7 +228,7 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
     } else if(uid_len == 16) {
         gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
     }
-    memcpy(&gap->gap_svc.adv_svc_uuid[1], uid, uid_len);
+    memcpy(&gap->gap_svc.adv_svc_uuid[gap->gap_svc.adv_svc_uuid_len], uid, uid_len);
     gap->gap_svc.adv_svc_uuid_len += uid_len;
 }
 
@@ -410,6 +410,8 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     // Command queue allocation
     gap->command_queue = osMessageQueueNew(8, sizeof(GapCommand), NULL);
 
+    // Start HID service
+    hid_svc_start();
     // Start Device Information service
     dev_info_svc_start();
     // Start Battery service
@@ -418,10 +420,19 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     // serial_svc_start();
     // Configure advirtise service UUID
     uint8_t adv_service_uid[2];
-    adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
-    adv_service_uid[1] = 0x30;
-
+    // adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
+    // adv_service_uid[1] = 0x30;
+    // uint8_t adv_service_uid[2];
+    gap->gap_svc.adv_svc_uuid_len = 1;
+    adv_service_uid[0] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID && 0xff;
+    adv_service_uid[1] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID >> 8;
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    // adv_service_uid[0] = DEVICE_INFORMATION_SERVICE_UUID && 0xff;
+    // adv_service_uid[1] = DEVICE_INFORMATION_SERVICE_UUID >> 8;
+    // set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
+    // adv_service_uid[0] = BATTERY_SERVICE_UUID && 0xff;
+    // adv_service_uid[1] = BATTERY_SERVICE_UUID >> 8;
+    // set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
 
     // Set callback
     gap->on_event_cb = on_event_cb;
