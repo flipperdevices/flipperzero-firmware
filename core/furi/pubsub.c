@@ -49,10 +49,6 @@ FuriPubSubSubscription*
     // initialize item
     item->callback = callback;
     item->callback_context = callback_context;
-    item->self = pubsub;
-
-    // TODO unsubscribe pubsub on app exit
-    //flapp_on_exit(furi_pubsub_unsubscribe, item);
 
     furi_check(osMutexRelease(pubsub->mutex) == osOK);
 
