@@ -137,6 +137,9 @@ static void vcp_on_cdc_control_line(uint8_t state) {
 static void vcp_on_cdc_rx() { 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
+    if (furi_hal_vcp->connected == false)
+        return;
+
     uint16_t max_len = xStreamBufferSpacesAvailable(furi_hal_vcp->rx_stream);
     if (max_len > 0) {
         if (max_len > APP_RX_DATA_SIZE)
