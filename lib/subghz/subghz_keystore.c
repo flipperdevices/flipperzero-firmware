@@ -142,6 +142,8 @@ static bool subghz_keystore_read_file(SubGhzKeystore* instance, File* file, uint
                 memset(decrypted_line, 0, SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE);
                 memset(encrypted_line, 0, SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE);
                 encrypted_line_cursor = 0;
+            } else if (buffer[i] == '\r' || buffer[i] == '\n') {
+                // do not add line endings to the buffer
             } else {
                 if (encrypted_line_cursor < SUBGHZ_KEYSTORE_FILE_ENCRYPTED_LINE_SIZE) {
                     encrypted_line[encrypted_line_cursor] = buffer[i];
@@ -182,7 +184,7 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
             break;
         }
         if(!flipper_file_read_header(flipper_file, filetype, &version)) {
-            FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "MIssing or incorrect header");
+            FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing or incorrect header");
             break;
         }
         if(!flipper_file_read_uint32(flipper_file, "Encryption", (uint32_t*)&encryption)) {
