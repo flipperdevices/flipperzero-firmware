@@ -37,6 +37,8 @@ void furi_pubsub_free(FuriPubSub* pubsub) {
     FuriPubSubSubscriptionList_clear(pubsub->items);
 
     furi_check(osMutexDelete(pubsub->mutex) == osOK);
+
+    free(pubsub);
 }
 
 FuriPubSubSubscription*
