@@ -1,7 +1,6 @@
 #include "loader/loader.h"
 #include "loader_i.h"
 
-
 #define LOADER_THREAD_FLAG_SHOW_MENU (1 << 0)
 #define LOADER_THREAD_FLAG_ALL (LOADER_THREAD_FLAG_SHOW_MENU)
 

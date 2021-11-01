@@ -20,7 +20,7 @@ struct FuriPubSub {
 
 FuriPubSub* furi_pubsub_alloc() {
     FuriPubSub* pubsub = furi_alloc(sizeof(FuriPubSub));
-   
+
     pubsub->mutex = osMutexNew(NULL);
     furi_assert(pubsub->mutex);
 
@@ -39,7 +39,8 @@ void furi_pubsub_free(FuriPubSub* pubsub) {
     furi_check(osMutexDelete(pubsub->mutex) == osOK);
 }
 
-FuriPubSubSubscription* furi_pubsub_subscribe(FuriPubSub* pubsub, FuriPubSubCallback callback, void* callback_context) {
+FuriPubSubSubscription*
+    furi_pubsub_subscribe(FuriPubSub* pubsub, FuriPubSubCallback callback, void* callback_context) {
     furi_check(osMutexAcquire(pubsub->mutex, osWaitForever) == osOK);
     // put uninitialized item to the list
     FuriPubSubSubscription* item = FuriPubSubSubscriptionList_push_raw(pubsub->items);

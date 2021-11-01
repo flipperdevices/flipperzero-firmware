@@ -24,7 +24,8 @@ void test_furi_pubsub() {
     mu_assert_pointers_not_eq(test_pubsub, NULL);
 
     // subscribe pubsub case
-    test_pubsub_subscription = furi_pubsub_subscribe(test_pubsub, test_pubsub_handler, (void*)&context_value);
+    test_pubsub_subscription =
+        furi_pubsub_subscribe(test_pubsub, test_pubsub_handler, (void*)&context_value);
     mu_assert_pointers_not_eq(test_pubsub_subscription, NULL);
 
     /// notify pubsub case
