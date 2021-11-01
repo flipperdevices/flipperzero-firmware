@@ -34,7 +34,7 @@ void test_furi_pubsub() {
     mu_assert_int_eq(pubsub_context_value, context_value);
 
     // unsubscribe pubsub case
-    furi_pubsub_unsubscribe(test_pubsub_subscription);
+    furi_pubsub_unsubscribe(test_pubsub, test_pubsub_subscription);
 
     /// notify unsubscribed pubsub case
     furi_pubsub_publish(test_pubsub, (void*)&notify_value_1);

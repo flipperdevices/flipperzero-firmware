@@ -4,13 +4,16 @@
 extern "C" {
 #endif
 
-typedef void (*FuriPubSubCallback)(const void*, void*);
+/** FuriPubSub Callback type */
+typedef void (*FuriPubSubCallback)(const void* message, void* context);
 
+/** FuriPubSub type */
 typedef struct FuriPubSub FuriPubSub;
 
+/** FuriPubSubSubscription type */
 typedef struct FuriPubSubSubscription FuriPubSubSubscription;
 
-/** Allocate and init FuriPubSub
+/** Allocate FuriPubSub
  *
  * Reentrable, Not threadsafe, one owner
  *
@@ -37,15 +40,20 @@ void furi_pubsub_free(FuriPubSub* pubsub);
 FuriPubSubSubscription*
     furi_pubsub_subscribe(FuriPubSub* pubsub, FuriPubSubCallback callback, void* callback_context);
 
-/** `furi_pubsub_unsubscribe` to unregister callback.
+/** Unsubscribe from FuriPubSub
+ * 
+ * No use of `pubsub_subscription` allowed after call of this method
+ * Threadsafe, Reentrable.
  *
+ * @param      pubsub               pointer to FuriPubSub instance
  * @param      pubsub_subscription  pointer to FuriPubSubSubscription instance
  */
-void furi_pubsub_unsubscribe(FuriPubSubSubscription* pubsub_subscription);
+void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_subscription);
 
-/**
- * Use `furi_pubsub_publish` to notify subscribers.
+/** Publish message to FuriPubSub
  *
+ * Threadsafe, Reentrable.
+ * 
  * @param      pubsub   pointer to FuriPubSub instance
  * @param      message  message pointer to publish
  */

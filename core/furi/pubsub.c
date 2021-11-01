@@ -8,7 +8,6 @@
 struct FuriPubSubSubscription {
     FuriPubSubCallback callback;
     void* callback_context;
-    FuriPubSub* self;
 };
 
 LIST_DEF(FuriPubSubSubscriptionList, FuriPubSubSubscription, M_POD_OPLIST);
@@ -60,10 +59,9 @@ FuriPubSubSubscription*
     return item;
 }
 
-void furi_pubsub_unsubscribe(FuriPubSubSubscription* pubsub_subscription) {
-    furi_assert(pubsub_subscription);
-    FuriPubSub* pubsub = pubsub_subscription->self;
+void furi_pubsub_unsubscribe(FuriPubSub* pubsub, FuriPubSubSubscription* pubsub_subscription) {
     furi_assert(pubsub);
+    furi_assert(pubsub_subscription);
 
     furi_check(osMutexAcquire(pubsub->mutex, osWaitForever) == osOK);
     bool result = false;
