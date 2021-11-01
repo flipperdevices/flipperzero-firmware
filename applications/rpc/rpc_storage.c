@@ -51,7 +51,7 @@ static void rpc_system_storage_reset_state(RpcStorageSystem* rpc_storage, bool s
     }
 }
 
-static PB_CommandStatus rpc_system_storage_get_error(FS_Error fs_error) {
+PB_CommandStatus rpc_system_storage_get_error(FS_Error fs_error) {
     PB_CommandStatus pb_error;
     switch(fs_error) {
     case FSE_OK:
