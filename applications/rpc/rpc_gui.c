@@ -29,8 +29,7 @@ void rpc_system_gui_start_screen_stream_process(const PB_Main* request, void* co
     rpc_send_and_release_empty(context, request->command_id, PB_CommandStatus_OK);
 
     Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback_context(gui, context);
-    gui_set_framebuffer_callback(gui, rpc_system_gui_screen_frame_callback);
+    gui_set_framebuffer_callback(gui, rpc_system_gui_screen_frame_callback, context);
     furi_record_close("gui");
 }
 
@@ -38,8 +37,7 @@ void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, void* con
     rpc_send_and_release_empty(context, request->command_id, PB_CommandStatus_OK);
 
     Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback(gui, NULL);
-    gui_set_framebuffer_callback_context(gui, NULL);
+    gui_set_framebuffer_callback(gui, NULL, NULL);
     furi_record_close("gui");
 }
 
@@ -134,7 +132,6 @@ void* rpc_system_gui_alloc(Rpc* rpc) {
 
 void rpc_system_gui_free(void* ctx) {
     Gui* gui = furi_record_open("gui");
-    gui_set_framebuffer_callback(gui, NULL);
-    gui_set_framebuffer_callback_context(gui, NULL);
+    gui_set_framebuffer_callback(gui, NULL, NULL);
     furi_record_close("gui");
 }
