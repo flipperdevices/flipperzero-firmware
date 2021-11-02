@@ -319,8 +319,6 @@ void subghz_cli_command_encrypt_raw(Cli* cli, string_t args) {
     string_init(source);
     string_init(destination);
 
-    //SubGhzKeystore* keystore = subghz_keystore_alloc();
-
     do {
         if(!args_read_string_and_trim(args, source)) {
             subghz_cli_command_print_usage();
@@ -343,13 +341,8 @@ void subghz_cli_command_encrypt_raw(Cli* cli, string_t args) {
             break;
         }
 
-        // if(!subghz_keystore_save(keystore, string_get_cstr(destination), iv)) {
-        //     printf("Failed to save Keystore");
-        //     break;
-        // }
     } while(false);
 
-    //subghz_keystore_free(keystore);
     string_clear(destination);
     string_clear(source);
 }

@@ -466,7 +466,7 @@ bool subghz_keystore_raw_encrypted_save(
     return encrypted;
 }
 
-bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* data, size_t len) {
+bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t* data, size_t len) {
 
     bool result = false;
     uint8_t iv[16];
@@ -506,7 +506,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* d
             break;
         }
 
-        if(bias < 16) {
+        if(offset < 16) {
             if(!flipper_file_read_hex_array(flipper_file, "IV", iv, 16)) {
                 FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing IV");
                 break;
@@ -519,7 +519,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* d
             break;
         }
 
-        size_t bufer_size = (((len+bias) / 16) + 1) * 32;
+        size_t bufer_size = (((len+offset) / 16) + 1) * 32;
         furi_assert(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE >= bufer_size * 2);
 
         char buffer[bufer_size];
@@ -530,13 +530,13 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* d
 
         size_t size = storage_file_size(file);
         size -= storage_file_tell(file);
-        if(size < (bias * 2 + len * 2)) {
-            FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Went outside the file");
+        if(size < (offset * 2 + len * 2)) {
+            FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Seek position exceeds file size");
             break;
         }
 
-        if(bias >= 16) {
-            storage_file_seek(file, ((bias / 16) - 1) * 32, false);
+        if(offset >= 16) {
+            storage_file_seek(file, ((offset / 16) - 1) * 32, false);
             ret = storage_file_read(file, buffer, 32);
             furi_assert(ret == 32);
             for(uint16_t i = 0; i < ret - 1; i += 2) {
@@ -573,7 +573,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* d
                 FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Decryption failed");
                 break;
             }
-            memcpy(data, (uint8_t*)decrypted_line + (bias - (bias / 16) * 16), len);
+            memcpy(data, (uint8_t*)decrypted_line + (offset - (offset / 16) * 16), len);
 
         } while(0);
         furi_hal_crypto_store_unload_key(SUBGHZ_KEYSTORE_FILE_ENCRYPTION_KEY_SLOT);

@@ -62,8 +62,8 @@ bool subghz_keystore_raw_encrypted_save(
 /** Get decrypt RAW data to file
  * 
  * @param file_name - const char* full path to the input file
- * @param bias - offset from the start of the RAW data
+ * @param offset - offset from the start of the RAW data
  * @param data - returned array
  * @param len - required data length
  */
-bool subghz_keystore_raw_get_data(const char* file_name, size_t bias, uint8_t* data, size_t len);
+bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t* data, size_t len);
