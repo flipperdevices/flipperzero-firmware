@@ -337,7 +337,8 @@ void subghz_cli_command_encrypt_raw(Cli* cli, string_t args) {
             break;
         }
 
-        if(!subghz_keystore_raw_encrypted_save(string_get_cstr(source), string_get_cstr(destination), iv)) {
+        if(!subghz_keystore_raw_encrypted_save(
+               string_get_cstr(source), string_get_cstr(destination), iv)) {
             printf("Failed to save Keystore");
             break;
         }
