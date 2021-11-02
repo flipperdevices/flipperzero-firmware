@@ -111,19 +111,6 @@ uint8_t subghz_nice_flor_s_get_byte_in_file(SubGhzProtocolNiceFlorS* instance, u
     } else {
         return 0;
     }
-    // if(!instance->rainbow_table_file_name) return 0;
-
-    // uint8_t buffer = 0;
-    // FileWorker* file_worker = file_worker_alloc(true);
-    // if(file_worker_open(
-    //        file_worker, instance->rainbow_table_file_name, FSAM_READ, FSOM_OPEN_EXISTING)) {
-    //     file_worker_seek(file_worker, address, true);
-    //     file_worker_read(file_worker, &buffer, 1);
-    // }
-    // file_worker_close(file_worker);
-    // file_worker_free(file_worker);
-
-    //return buffer;
 }
 
 /** Decrypt protocol Nice Flor S
