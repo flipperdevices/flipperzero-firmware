@@ -261,10 +261,12 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
 
 void subghz_cli_command_print_usage() {
     printf("Usage:\r\n");
-    printf("subghz_crypto <cmd> <args>\r\n");
+    printf("subghz <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf(
-        "\tkeeloq <plain_text_file> <encrypted_file> <IV:16 bytes in hex>\t - Encrypt keeloq manufacture keys\r\n");
+        "\tencrypt_keeloq <path_decrypted_file> <path_encrypted_file> <IV:16 bytes in hex>\t - Encrypt keeloq manufacture keys\r\n");
+    printf(
+        "\tencrypt_raw <path_decrypted_file> <path_encrypted_file> <IV:16 bytes in hex>\t - Encrypt RAW data\r\n");
 }
 
 void subghz_cli_command_encrypt_keeloq(Cli* cli, string_t args) {
@@ -309,6 +311,48 @@ void subghz_cli_command_encrypt_keeloq(Cli* cli, string_t args) {
     string_clear(source);
 }
 
+void subghz_cli_command_encrypt_raw(Cli* cli, string_t args) {
+    uint8_t iv[16];
+
+    string_t source;
+    string_t destination;
+    string_init(source);
+    string_init(destination);
+
+    //SubGhzKeystore* keystore = subghz_keystore_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, source)) {
+            subghz_cli_command_print_usage();
+            break;
+        }
+
+        if(!args_read_string_and_trim(args, destination)) {
+            subghz_cli_command_print_usage();
+            break;
+        }
+
+        if(!args_read_hex_bytes(args, iv, 16)) {
+            subghz_cli_command_print_usage();
+            break;
+        }
+
+        if(!subghz_keystore_raw_encrypted_save(string_get_cstr(source), string_get_cstr(destination), iv)) {
+            printf("Failed to save Keystore");
+            break;
+        }
+
+        // if(!subghz_keystore_save(keystore, string_get_cstr(destination), iv)) {
+        //     printf("Failed to save Keystore");
+        //     break;
+        // }
+    } while(false);
+
+    //subghz_keystore_free(keystore);
+    string_clear(destination);
+    string_clear(source);
+}
+
 void subghz_cli_command(Cli* cli, string_t args, void* context) {
     string_t cmd;
     string_init(cmd);
@@ -321,6 +365,11 @@ void subghz_cli_command(Cli* cli, string_t args, void* context) {
 
         if(string_cmp_str(cmd, "encrypt_keeloq") == 0) {
             subghz_cli_command_encrypt_keeloq(cli, args);
+            break;
+        }
+
+        if(string_cmp_str(cmd, "encrypt_raw") == 0) {
+            subghz_cli_command_encrypt_raw(cli, args);
             break;
         }
 
