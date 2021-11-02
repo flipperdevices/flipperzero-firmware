@@ -518,8 +518,12 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t*
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing Encrypt_data");
             break;
         }
-
-        size_t bufer_size = (((len+offset) / 16) + 1) * 32;
+        size_t bufer_size;
+        if(len > (16 - offset%16)){
+            bufer_size = 32;
+        } else {
+            bufer_size = (((len) / 16) + 2) * 32;
+        }
         furi_assert(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE >= bufer_size * 2);
 
         char buffer[bufer_size];
