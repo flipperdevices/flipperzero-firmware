@@ -3,7 +3,7 @@
 #include <callback-connector.h>
 #include <m-string.h>
 #include <toolbox/path.h>
-#include <toolbox/flipper-file.h>
+#include <flipper-file/flipper-file.h>
 
 const char* iButtonApp::app_folder = "/any/ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
@@ -223,8 +223,7 @@ bool iButtonApp::save_key(const char* key_name) {
                file, "Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8"))
             break;
 
-        if(!flipper_file_write_hex_array(file, "Data", key.get_data(), key.get_type_data_size()))
-            break;
+        if(!flipper_file_write_hex(file, "Data", key.get_data(), key.get_type_data_size())) break;
         result = true;
 
     } while(false);
@@ -263,8 +262,7 @@ bool iButtonApp::load_key_data(string_t key_path) {
 
         // key data
         uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0};
-        if(!flipper_file_read_hex_array(
-               file, "Data", key_data, key.get_type_data_size_by_type(type)))
+        if(!flipper_file_read_hex(file, "Data", key_data, key.get_type_data_size_by_type(type)))
             break;
 
         key.set_type(type);

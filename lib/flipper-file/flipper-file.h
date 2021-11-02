@@ -17,8 +17,10 @@
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
  * String: text
- * Uint32: 1
- * Hex Array: A4 B3 C2 D1 12 FF
+ * Int32: 1 2 -3 4
+ * Uint32: 1 2 3 4
+ * Float: 1.0 1234.654
+ * Hex: A4 B3 C2 D1 12 FF
  * ~~~~~~~~~~~~~~~~~~~~~
  * 
  * End of line is LF when writing, but CR is supported when reading.
@@ -33,13 +35,13 @@
  * # Just test file
  * String: String value
  * UINT: 1234
- * Hex Array: 00 01 FF A3
+ * Hex: 00 01 FF A3
  * ~~~~~~~~~~~~~~~~~~~~~
  * 
  * Writing:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFile* file = flipper_file_alloc(storage);
+ * FlipperFile file = flipper_file_alloc(storage);
  * 
  * do {
  *     const uint32_t version = 1;
@@ -52,8 +54,8 @@
  *     if(!flipper_file_write_header_cstr(file, "Flipper Test File", version)) break;
  *     if(!flipper_file_write_comment_cstr(file, "Just test file")) break;
  *     if(!flipper_file_write_string_cstr(file, "String", string_value)) break;
- *     if(!flipper_file_flipper_file_write_uint32(file, "UINT", uint32_value)) break;
- *     if(!flipper_file_write_hex_array(file, "Hex Array", array, array_size)) break;
+ *     if(!flipper_file_flipper_file_write_uint32(file, "UINT", &uint32_value, 1)) break;
+ *     if(!flipper_file_write_hex(file, "Hex Array", array, array_size)) break;
  *     
  *     // signal that the file was written successfully
  * } while(0);
@@ -65,7 +67,7 @@
  * Reading:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFile* file = flipper_file_alloc(storage);
+ * FlipperFile file = flipper_file_alloc(storage);
  * 
  * do {
  *     uint32_t version = 1;
@@ -80,8 +82,8 @@
  *     if(!flipper_file_open_read(file, "/ext/flipper_file_test")) break;
  *     if(!flipper_file_read_header(file, file_type, &version)) break;
  *     if(!flipper_file_read_string(file, "String", string_value)) break;
- *     if(!flipper_file_read_uint32(file, "UINT", &uint32_value)) break;
- *     if(!flipper_file_read_hex_array(file, "Hex Array", array, array_size)) break;
+ *     if(!flipper_file_read_uint32(file, "UINT", &uint32_value, 1)) break;
+ *     if(!flipper_file_read_hex(file, "Hex Array", array, array_size)) break;
  *     
  *     // signal that the file was read successfully
  * } while(0);
@@ -253,6 +255,34 @@ bool flipper_file_write_uint32(
     const uint16_t data_size);
 
 /**
+ * Read array of int32 from a file by Key
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_read_int32(
+    FlipperFile* flipper_file,
+    const char* key,
+    int32_t* data,
+    const uint16_t data_size);
+
+/**
+ * Write key and array of int32 to file.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_write_int32(
+    FlipperFile* flipper_file,
+    const char* key,
+    const int32_t* data,
+    const uint16_t data_size);
+
+/**
  * Read array of float from a file by Key
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
@@ -288,7 +318,7 @@ bool flipper_file_write_float(
  * @param data_size Value size
  * @return True on success
  */
-bool flipper_file_read_hex_array(
+bool flipper_file_read_hex(
     FlipperFile* flipper_file,
     const char* key,
     uint8_t* data,
@@ -302,7 +332,7 @@ bool flipper_file_read_hex_array(
  * @param data_size Values count
  * @return True on success
  */
-bool flipper_file_write_hex_array(
+bool flipper_file_write_hex(
     FlipperFile* flipper_file,
     const char* key,
     const uint8_t* data,
@@ -325,20 +355,93 @@ bool flipper_file_write_comment(FlipperFile* flipper_file, string_t data);
 bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data);
 
 /**
- * Delete key and its value from file
- * @param flipper_file 
- * @param key 
- * @return bool 
+ * Removes the first matching key and its value from the file. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param key Key
+ * @return True on success
  */
 bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key);
 
+/**
+ * Updates the value of the first matching key to a string value. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @return True on success
+ */
+bool flipper_file_update_string(FlipperFile* flipper_file, const char* key, string_t data);
+
+/**
+ * Updates the value of the first matching key to a string value. Plain C version. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @return True on success
+ */
+bool flipper_file_update_string_cstr(FlipperFile* flipper_file, const char* key, const char* data);
+
+/**
+ * Updates the value of the first matching key to a uint32 array value. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_update_uint32(
+    FlipperFile* flipper_file,
+    const char* key,
+    const uint32_t* data,
+    const uint16_t data_size);
+
+/**
+ * Updates the value of the first matching key to a int32 array value. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_update_int32(
+    FlipperFile* flipper_file,
+    const char* key,
+    const int32_t* data,
+    const uint16_t data_size);
+
+/**
+ * Updates the value of the first matching key to a float array value. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_update_float(
+    FlipperFile* flipper_file,
+    const char* key,
+    const float* data,
+    const uint16_t data_size);
+
+/**
+ * Updates the value of the first matching key to a hex array value. Changes the RW pointer to an unknown position.
+ * @param flipper_file Pointer to a FlipperFile instance 
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_file_update_hex(
+    FlipperFile* flipper_file,
+    const char* key,
+    const uint8_t* data,
+    const uint16_t data_size);
+
 /** Get file descriptor.
- *
+ * 
  * We higly don't recommend to use it.
  * This instance is owned by FlipperFile.
- *
- * @param      flipper_file pointer to FlipperFile instance
- * @return     pointer to File instance
+ * @param flipper_file 
+ * @return File* 
  */
 File* flipper_file_get_file(FlipperFile* flipper_file);
 

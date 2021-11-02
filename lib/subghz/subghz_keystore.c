@@ -4,8 +4,8 @@
 #include <furi-hal.h>
 
 #include <storage/storage.h>
-#include <lib/toolbox/hex.h>
-#include <lib/toolbox/flipper-file.h>
+#include <toolbox/hex.h>
+#include <flipper-file/flipper-file.h>
 
 #define SUBGHZ_KEYSTORE_TAG "SubGhzParser"
 
@@ -202,7 +202,7 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
         if (encryption == SubGhzKeystoreEncryptionNone) {
             result = subghz_keystore_read_file(instance, file, NULL);
         }else if (encryption == SubGhzKeystoreEncryptionAES256) {
-            if(!flipper_file_read_hex_array(flipper_file, "IV", iv, 16)) {
+            if(!flipper_file_read_hex(flipper_file, "IV", iv, 16)) {
                 FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Missing IV");
                 break;
             }
@@ -246,7 +246,7 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to add Encryption");
             break;
         }
-        if(!flipper_file_write_hex_array(flipper_file, "IV", iv, 16)) {
+        if(!flipper_file_write_hex(flipper_file, "IV", iv, 16)) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to add IV");
             break;
         }

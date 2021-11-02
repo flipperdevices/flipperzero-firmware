@@ -16,8 +16,8 @@
 #include "scene/lfrfid-app-scene-delete-confirm.h"
 #include "scene/lfrfid-app-scene-delete-success.h"
 
-#include <lib/toolbox/path.h>
-#include <lib/toolbox/flipper-file.h>
+#include <toolbox/path.h>
+#include <flipper-file/flipper-file.h>
 
 const char* LfRfidApp::app_folder = "/any/lfrfid";
 const char* LfRfidApp::app_extension = ".rfid";
@@ -143,8 +143,7 @@ bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
 
         // key data
         uint8_t key_data[loaded_key.get_type_data_count()] = {};
-        if(!flipper_file_read_hex_array(file, "Data", key_data, loaded_key.get_type_data_count()))
-            break;
+        if(!flipper_file_read_hex(file, "Data", key_data, loaded_key.get_type_data_count())) break;
         loaded_key.set_data(key_data, loaded_key.get_type_data_count());
 
         path_extract_filename_no_ext(path, str_result);
@@ -180,7 +179,7 @@ bool LfRfidApp::save_key_data(const char* path, RfidKey* key) {
         if(!flipper_file_write_comment_cstr(
                file, "Data size for EM4100 is 5, for H10301 is 3, for I40134 is 3"))
             break;
-        if(!flipper_file_write_hex_array(file, "Data", key->get_data(), key->get_type_data_count()))
+        if(!flipper_file_write_hex(file, "Data", key->get_data(), key->get_type_data_count()))
             break;
         result = true;
     } while(0);
