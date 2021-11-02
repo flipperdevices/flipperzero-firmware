@@ -524,7 +524,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t*
         } else {
             bufer_size = (((len) / 16) + 2) * 32;
         }
-        furi_assert(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE >= bufer_size * 2);
+        furi_assert(SUBGHZ_KEYSTORE_FILE_DECRYPTED_LINE_SIZE >= bufer_size / 2);
 
         char buffer[bufer_size];
         size_t ret = 0;
