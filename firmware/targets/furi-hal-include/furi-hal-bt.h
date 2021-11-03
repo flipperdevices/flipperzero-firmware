@@ -9,6 +9,9 @@
 #include <stdbool.h>
 #include <gap.h>
 #include <serial_service.h>
+#include <app_entry.h>
+#include <ble_app.h>
+
 
 #define FURI_HAL_BT_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
 
@@ -19,6 +22,12 @@ extern "C" {
 /** Initialize
  */
 void furi_hal_bt_init();
+
+/** Start 2nd core and BLE stack
+ *
+ * @return true on success
+ */
+bool furi_hal_bt_start_core2();
 
 /** Start BLE app
  * @param event_cb - BleEventCallback instance
@@ -51,6 +60,14 @@ void furi_hal_bt_dump_state(string_t buffer);
  * @return     true if core2 is alive
  */
 bool furi_hal_bt_is_alive();
+
+bool furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size);
+
+void furi_hal_bt_keys_storage_buff_sem_acquire();
+
+void furi_hal_bt_keys_storage_buff_sem_release();
+
+void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallback callback, void* context);
 
 /** Set data event callbacks
  * @param on_received_cb - SerialSvcDataReceivedCallback instance
