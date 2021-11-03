@@ -46,17 +46,18 @@ bool ble_app_init() {
     };
     hci_init(ble_app_hci_event_handler, (void*)&hci_tl_config);
 
+    // TODO configure when rebonding issue is solved
     // Configure 2nd core
-    SHCI_C2_CONFIG_Cmd_Param_t config_param = {
-        .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
-        .Config1 =SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
-        .BleNvmRamAddress = (uint32_t)ble_app_nvm,
-        .EvtMask1 = SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
-    };
-    status = SHCI_C2_Config(&config_param);
-    if(status) {
-        FURI_LOG_E(BLE_APP_TAG, "Failed to configure 2nd core: %d", status);
-    }
+    // SHCI_C2_CONFIG_Cmd_Param_t config_param = {
+    //     .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
+    //     .Config1 =SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,
+    //     .BleNvmRamAddress = (uint32_t)ble_app_nvm,
+    //     .EvtMask1 = SHCI_C2_CONFIG_EVTMASK1_BIT1_BLE_NVM_RAM_UPDATE_ENABLE,
+    // };
+    // status = SHCI_C2_Config(&config_param);
+    // if(status) {
+    //     FURI_LOG_E(BLE_APP_TAG, "Failed to configure 2nd core: %d", status);
+    // }
 
     // Start ble stack on 2nd core
     SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
