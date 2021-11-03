@@ -1,6 +1,5 @@
 #include "gap.h"
 
-#include "app_entry.h"
 #include "ble.h"
 
 #include "cmsis_os.h"
