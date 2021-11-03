@@ -324,7 +324,7 @@ FS_Error storage_file_get_error(File* file) {
     return file->error_id;
 }
 
-int32_t storage_file_get_internal_error(File* file){
+int32_t storage_file_get_internal_error(File* file) {
     furi_check(file != NULL);
     return file->internal_error_id;
 }
