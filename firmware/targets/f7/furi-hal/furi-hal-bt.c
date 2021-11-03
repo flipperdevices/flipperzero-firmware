@@ -12,6 +12,18 @@ void furi_hal_bt_init() {
     furi_hal_bt_core2_mtx = osMutexNew(NULL);
 }
 
+static bool furi_hal_bt_wait_startup() {
+    uint16_t counter = 0;
+    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBleStackMissing)) {
+        osDelay(10);
+        counter++;
+        if (counter > 1000) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool furi_hal_bt_start_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
 
@@ -73,12 +85,14 @@ void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallbac
     ble_glue_set_key_storage_changed_callback(callback, context);
 }
 
-void furi_hal_bt_keys_storage_buff_sem_acquire() {
-    while(HAL_HSEM_FastTake(8) != HAL_OK);
+void furi_hal_bt_nvm_sram_sem_acquire() {
+    while(HAL_HSEM_FastTake(CFG_HW_BLE_NVM_SRAM_SEMID) != HAL_OK) {
+        osDelay(1);
+    }
 }
 
-void furi_hal_bt_keys_storage_buff_sem_release() {
-    HAL_HSEM_Release(8, HSEM_CPU1_COREID);
+void furi_hal_bt_nvm_sram_sem_release() {
+    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, HSEM_CPU1_COREID);
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
@@ -105,32 +119,17 @@ void furi_hal_bt_dump_state(string_t buffer) {
 
 bool furi_hal_bt_is_alive() {
     BleGlueStatus status = APPE_Status();
-    return (status == BleGlueStatusBroken) || (status == BleGlueStatusStarted);
+    return (status == BleGlueStatusBleStackMissing) || (status == BleGlueStatusStarted);
 }
 
 bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
 }
 
-bool furi_hal_bt_wait_startup() {
-    uint16_t counter = 0;
-    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBroken)) {
-        osDelay(10);
-        counter++;
-        if (counter > 1000) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool furi_hal_bt_lock_flash(bool erase_flag) {
-    bool ret = false;
+void furi_hal_bt_lock_flash(bool erase_flag) {
     osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
     BleGlueStatus status = APPE_Status();
-    if(status == BleGlueStatusUninitialized) {
-        ret = true;
-    } else if(status == BleGlueStatusStarted || status == BleGlueStatusBroken) {
+    if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
         while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
             osDelay(1);
         }
@@ -144,20 +143,20 @@ bool furi_hal_bt_lock_flash(bool erase_flag) {
         };
 
         __disable_irq();
-        ret = true;
     }
-
-    return ret;
 }
 
 void furi_hal_bt_unlock_flash(bool erase_flag) {
-    __enable_irq();
+    BleGlueStatus status = APPE_Status();
+    if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
+        __enable_irq();
 
-    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
+        if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
 
-    HAL_FLASH_Lock();
+        HAL_FLASH_Lock();
 
-    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
+        HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
+    }
     osMutexRelease(furi_hal_bt_core2_mtx);
 }
 

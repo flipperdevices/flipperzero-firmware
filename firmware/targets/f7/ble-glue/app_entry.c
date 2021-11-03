@@ -153,7 +153,7 @@ static void APPE_SysUserEvtRx( void * pPayload ) {
       ble_glue_status = BleGlueStatusStarted;
     } else {
       FURI_LOG_E("Core2", "BLE stack startup failed");
-      ble_glue_status = BleGlueStatusBroken;
+      ble_glue_status = BleGlueStatusBleStackMissing;
     }
   } else if(p_sys_event->subevtcode == SHCI_SUB_EVT_ERROR_NOTIF) {
       FURI_LOG_E("Core2", "Error during initialization");

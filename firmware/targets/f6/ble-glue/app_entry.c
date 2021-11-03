@@ -141,7 +141,7 @@ static void APPE_SysUserEvtRx( void * pPayload ) {
     ble_glue_status = BleGlueStatusStarted;
   } else {
     FURI_LOG_E("Core2", "BLE stack startup failed");
-    ble_glue_status = BleGlueStatusBroken;
+    ble_glue_status = BleGlueStatusBleStackMissing;
   }
   furi_hal_power_insomnia_exit();
 }

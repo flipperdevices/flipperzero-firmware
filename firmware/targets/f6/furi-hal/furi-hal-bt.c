@@ -69,7 +69,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
 
 bool furi_hal_bt_is_alive() {
     BleGlueStatus status = APPE_Status();
-    return (status == BleGlueStatusBroken) || (status == BleGlueStatusStarted);
+    return (status == BleGlueStatusBleStackMissing) || (status == BleGlueStatusStarted);
 }
 
 bool furi_hal_bt_is_active() {
@@ -78,7 +78,7 @@ bool furi_hal_bt_is_active() {
 
 bool furi_hal_bt_wait_startup() {
     uint16_t counter = 0;
-    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBroken)) {
+    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBleStackMissing)) {
         osDelay(10);
         counter++;
         if (counter > 1000) {
