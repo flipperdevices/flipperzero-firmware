@@ -519,7 +519,7 @@ bool subghz_keystore_raw_get_data(const char* file_name, size_t offset, uint8_t*
         }
 
         size_t bufer_size;
-        if(len > (16 - offset % 16)) {
+        if(len <= (16 - offset % 16)) {
             bufer_size = 32;
         } else {
             bufer_size = (((len) / 16) + 2) * 32;
