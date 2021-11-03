@@ -4,6 +4,7 @@
 #include "ble_app.h"
 #include "ble.h"
 #include "tl.h"
+#include "shci.h"
 #include "cmsis_os.h"
 #include "shci_tl.h"
 #include "app_debug.h"
@@ -23,6 +24,8 @@ osSemaphoreId_t SemShciId;
 osThreadId_t ShciUserEvtProcessId;
 
 volatile static BleGlueStatus ble_glue_status = BleGlueStatusUninitialized;
+static BleGlueKeyStorageChangedCallback key_storage_changed_callback = NULL;
+void* key_storage_changed_context = NULL;
 
 const osThreadAttr_t ShciUserEvtProcess_attr = {
     .name = CFG_SHCI_USER_EVT_PROCESS_NAME,
@@ -42,6 +45,12 @@ static void APPE_SysUserEvtRx( void * pPayload );
 
 BleGlueStatus APPE_Status() {
   return ble_glue_status;
+}
+
+void ble_glue_set_key_storage_changed_callback(BleGlueKeyStorageChangedCallback callback, void* context) {
+  furi_assert(callback);
+  key_storage_changed_callback = callback;
+  key_storage_changed_context = context;
 }
 
 void APPE_Init() {
@@ -135,13 +144,24 @@ static void APPE_SysUserEvtRx( void * pPayload ) {
   UNUSED(pPayload);
   /* Traces channel initialization */
   // APPD_EnableCPU2( );
+
+  TL_AsynchEvt_t *p_sys_event = (TL_AsynchEvt_t*)(((tSHCI_UserEvtRxParam*)pPayload)->pckt->evtserial.evt.payload);
   
-  if(ble_app_init()) {
-    FURI_LOG_I("Core2", "BLE stack started");
-    ble_glue_status = BleGlueStatusStarted;
-  } else {
-    FURI_LOG_E("Core2", "BLE stack startup failed");
-    ble_glue_status = BleGlueStatusBroken;
+  if(p_sys_event->subevtcode == SHCI_SUB_EVT_CODE_READY) {
+    if(ble_app_init()) {
+      FURI_LOG_I("Core2", "BLE stack started");
+      ble_glue_status = BleGlueStatusStarted;
+    } else {
+      FURI_LOG_E("Core2", "BLE stack startup failed");
+      ble_glue_status = BleGlueStatusBroken;
+    }
+  } else if(p_sys_event->subevtcode == SHCI_SUB_EVT_ERROR_NOTIF) {
+      FURI_LOG_E("Core2", "Error during initialization");
+  } else if(p_sys_event->subevtcode == SHCI_SUB_EVT_BLE_NVM_RAM_UPDATE) {
+      SHCI_C2_BleNvmRamUpdate_Evt_t* p_sys_ble_nvm_ram_update_event = (SHCI_C2_BleNvmRamUpdate_Evt_t*)p_sys_event->payload;
+      if(key_storage_changed_callback) {
+        key_storage_changed_callback((uint8_t*)p_sys_ble_nvm_ram_update_event->StartAddress, p_sys_ble_nvm_ram_update_event->Size, key_storage_changed_context);
+      }
   }
   furi_hal_power_insomnia_exit();
 }
