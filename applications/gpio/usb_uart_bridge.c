@@ -4,8 +4,8 @@
 #include <furi-hal-usb-cdc_i.h>
 #include "usb_cdc.h"
 
-#define USB_PKT_LEN CDC_DATA_SZ
-#define USB_UART_RX_BUF_SIZE (USB_PKT_LEN * 5)
+#define USB_CDC_PKT_LEN CDC_DATA_SZ
+#define USB_UART_RX_BUF_SIZE (USB_CDC_PKT_LEN * 5)
 
 typedef enum {
     WorkerEvtStop = (1 << 0),
@@ -13,9 +13,6 @@ typedef enum {
 
     WorkerEvtTxStop = (1 << 2),
     WorkerEvtCdcRx = (1 << 3),
-
-    WorkerEvtSof = (1 << 4),
-
 } WorkerEvtFlags;
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
@@ -31,7 +28,9 @@ typedef struct {
 
     osMutexId_t usb_mutex;
 
-    uint8_t rx_buf[USB_PKT_LEN];
+    osSemaphoreId_t tx_sem;
+
+    uint8_t rx_buf[USB_CDC_PKT_LEN];
 
     bool buf_full;
 } UsbUartParams;
@@ -63,13 +62,8 @@ static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data) {
     if(ev == UartIrqEventRXNE) {
         xStreamBufferSendFromISR(usb_uart->rx_stream, &data, 1, &xHigherPriorityTaskWoken);
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-
-        size_t ret = xStreamBufferBytesAvailable(usb_uart->rx_stream);
-        if(ret > USB_PKT_LEN)
-            osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtRxDone);
-
-    } else if(ev == UartIrqEventIDLE)
         osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtRxDone);
+    }
 }
 
 static int32_t usb_uart_worker(void* context) {
@@ -77,6 +71,7 @@ static int32_t usb_uart_worker(void* context) {
 
     usb_uart->rx_stream = xStreamBufferCreate(USB_UART_RX_BUF_SIZE, 1);
 
+    usb_uart->tx_sem = osSemaphoreNew(1, 1, NULL);
     usb_uart->usb_mutex = osMutexNew(NULL);
 
     usb_uart->tx_thread = furi_thread_alloc();
@@ -89,7 +84,6 @@ static int32_t usb_uart_worker(void* context) {
     if(usb_uart->cfg.vcp_ch == 0) {
         furi_hal_usb_set_config(UsbModeVcpSingle);
         furi_hal_vcp_disable();
-        osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtSof);
     } else {
         furi_hal_usb_set_config(UsbModeVcpDual);
     }
@@ -117,20 +111,17 @@ static int32_t usb_uart_worker(void* context) {
         furi_check((events & osFlagsError) == 0);
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
-            size_t len = 0;
-            do {
-                len = xStreamBufferReceive(usb_uart->rx_stream, usb_uart->rx_buf, USB_PKT_LEN, 0);
-                if(len > 0) {
-                    if((osThreadFlagsWait(WorkerEvtSof, osFlagsWaitAny, 100) & osFlagsError) ==
-                       0) {
-                        furi_check(osMutexAcquire(usb_uart->usb_mutex, osWaitForever) == osOK);
-                        furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
-                        furi_check(osMutexRelease(usb_uart->usb_mutex) == osOK);
-                    } else {
-                        xStreamBufferReset(usb_uart->rx_stream);
-                    }
+            size_t len =
+                xStreamBufferReceive(usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
+            if(len > 0) {
+                if(osSemaphoreAcquire(usb_uart->tx_sem, 100) == osOK) {
+                    furi_check(osMutexAcquire(usb_uart->usb_mutex, osWaitForever) == osOK);
+                    furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
+                    furi_check(osMutexRelease(usb_uart->usb_mutex) == osOK);
+                } else {
+                    xStreamBufferReset(usb_uart->rx_stream);
                 }
-            } while(len > 0);
+            }
         }
     }
 
@@ -149,19 +140,20 @@ static int32_t usb_uart_worker(void* context) {
 
     vStreamBufferDelete(usb_uart->rx_stream);
     osMutexDelete(usb_uart->usb_mutex);
+    osSemaphoreDelete(usb_uart->tx_sem);
 
     return 0;
 }
 
 static int32_t usb_uart_tx_thread(void* context) {
-    uint8_t data[USB_PKT_LEN];
+    uint8_t data[USB_CDC_PKT_LEN];
     while(1) {
         uint32_t events = osThreadFlagsWait(WORKER_ALL_TX_EVENTS, osFlagsWaitAny, osWaitForever);
         furi_check((events & osFlagsError) == 0);
         if(events & WorkerEvtTxStop) break;
         if(events & WorkerEvtCdcRx) {
             furi_check(osMutexAcquire(usb_uart->usb_mutex, osWaitForever) == osOK);
-            int32_t size = furi_hal_cdc_receive(usb_uart->cfg.vcp_ch, data, USB_PKT_LEN);
+            int32_t size = furi_hal_cdc_receive(usb_uart->cfg.vcp_ch, data, USB_CDC_PKT_LEN);
             furi_check(osMutexRelease(usb_uart->usb_mutex) == osOK);
 
             if(size > 0) {
@@ -175,7 +167,7 @@ static int32_t usb_uart_tx_thread(void* context) {
 /* VCP callbacks */
 
 static void vcp_on_cdc_tx_complete() {
-    osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtSof);
+    osSemaphoreRelease(usb_uart->tx_sem);
 }
 
 static void vcp_on_cdc_rx() {
