@@ -40,11 +40,11 @@ static void appe_Tl_Init( void );
 static void APPE_SysStatusNot( SHCI_TL_CmdStatus_t status );
 static void APPE_SysUserEvtRx( void * pPayload );
 
-BleGlueStatus APPE_Status() {
+BleGlueStatus ble_glue_get_status() {
   return ble_glue_status;
 }
 
-void APPE_Init() {
+void ble_glue_init() {
   ble_glue_status = BleGlueStatusStartup;
   SystemPower_Config(); /**< Configure the system Power Mode */
 

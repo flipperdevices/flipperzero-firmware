@@ -190,7 +190,6 @@ int32_t bt_srv() {
     if(!bt_load_key_storage(bt)) {
         FURI_LOG_W(BT_SERVICE_TAG, "Failed to load saved bonding keys");
     }
-    furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
     // Start 2nd core
     if(!furi_hal_bt_start_core2()) {
         FURI_LOG_E(BT_SERVICE_TAG, "Core2 startup failed");
@@ -205,6 +204,7 @@ int32_t bt_srv() {
             FURI_LOG_E(BT_SERVICE_TAG, "BT App start failed");
         }
     }
+    furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 
     // Update statusbar
     bt_statusbar_update(bt);

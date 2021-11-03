@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <gap.h>
 #include <serial_service.h>
-#include <app_entry.h>
+#include <ble_glue.h>
 #include <ble_app.h>
 
 

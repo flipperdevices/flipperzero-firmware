@@ -11,7 +11,7 @@ void furi_hal_bt_init() {
     // Explicitly tell that we are in charge of CLK48 domain
     HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
     // Start Core2, init HCI and start GAP/GATT
-    APPE_Init();
+    ble_glue_init();
 }
 
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context) {
@@ -46,7 +46,7 @@ bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if (status == BleGlueStatusStarted) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
@@ -68,7 +68,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     return (status == BleGlueStatusBleStackMissing) || (status == BleGlueStatusStarted);
 }
 
@@ -78,7 +78,7 @@ bool furi_hal_bt_is_active() {
 
 bool furi_hal_bt_wait_startup() {
     uint16_t counter = 0;
-    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBleStackMissing)) {
+    while (!(ble_glue_get_status() == BleGlueStatusStarted || ble_glue_get_status() == BleGlueStatusBleStackMissing)) {
         osDelay(10);
         counter++;
         if (counter > 1000) {

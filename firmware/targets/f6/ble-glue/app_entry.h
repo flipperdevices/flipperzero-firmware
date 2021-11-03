@@ -11,9 +11,9 @@ typedef enum {
     BleGlueStatusStarted
 } BleGlueStatus;
 
-void APPE_Init();
+void ble_glue_init();
 
-BleGlueStatus APPE_Status();
+BleGlueStatus ble_glue_get_status();
 
 #ifdef __cplusplus
 } /* extern "C" */

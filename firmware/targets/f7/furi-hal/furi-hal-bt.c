@@ -14,7 +14,7 @@ void furi_hal_bt_init() {
 
 static bool furi_hal_bt_wait_startup() {
     uint16_t counter = 0;
-    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBleStackMissing)) {
+    while (!(ble_glue_get_status() == BleGlueStatusStarted || ble_glue_get_status() == BleGlueStatusBleStackMissing)) {
         osDelay(10);
         counter++;
         if (counter > 1000) {
@@ -32,7 +32,7 @@ bool furi_hal_bt_start_core2() {
     // Explicitly tell that we are in charge of CLK48 domain
     HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
     // Start Core2
-    APPE_Init();
+    ble_glue_init();
     // Wait for Core2 start
     ret = furi_hal_bt_wait_startup();
     osMutexRelease(furi_hal_bt_core2_mtx);
@@ -72,7 +72,7 @@ bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
 
 bool furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
     bool ret = false;
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if(status == BleGlueStatusUninitialized || BleGlueStatusStarted) {
         ble_app_get_key_storage_buff(key_buff_addr, key_buff_size);
         ret = true;
@@ -96,7 +96,7 @@ void furi_hal_bt_nvm_sram_sem_release() {
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if (status == BleGlueStatusStarted) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
@@ -118,7 +118,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     return (status == BleGlueStatusBleStackMissing) || (status == BleGlueStatusStarted);
 }
 
@@ -128,7 +128,7 @@ bool furi_hal_bt_is_active() {
 
 void furi_hal_bt_lock_flash(bool erase_flag) {
     osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
         while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
             osDelay(1);
@@ -147,7 +147,7 @@ void furi_hal_bt_lock_flash(bool erase_flag) {
 }
 
 void furi_hal_bt_unlock_flash(bool erase_flag) {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
         __enable_irq();
 

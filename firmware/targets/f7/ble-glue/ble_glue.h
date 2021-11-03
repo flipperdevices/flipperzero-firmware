@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,9 +15,10 @@ typedef enum {
     BleGlueStatusStarted
 } BleGlueStatus;
 
-void APPE_Init();
+void ble_glue_init();
 
-BleGlueStatus APPE_Status();
+BleGlueStatus ble_glue_get_status();
+
 void ble_glue_set_key_storage_changed_callback(BleGlueKeyStorageChangedCallback callback, void* context);
 
 #ifdef __cplusplus
