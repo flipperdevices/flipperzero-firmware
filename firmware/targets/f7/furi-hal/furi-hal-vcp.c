@@ -104,15 +104,16 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
                 vcp->rx_buf_len = 0;
             }
             rx_cnt++;
-            return rx_cnt;
+            break;
         }
 
-        if (osSemaphoreAcquire(vcp->rx_sem, timeout) == osErrorTimeout)
-            return rx_cnt;
-        
-        furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
+        if (osSemaphoreAcquire(vcp->rx_sem, timeout) != osOK) {
+            break;
+        }
+
+        // furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
         size_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->rx_buf, USB_CDC_PKT_LEN);
-        furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
+        // furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
 
         vcp->rx_buf_len = len;
         vcp->rx_buf_start = 0;
@@ -150,9 +151,9 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
             batch_size = USB_CDC_PKT_LEN;
         }
 
-        furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
+        // furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
         furi_hal_cdc_send(VCP_IF_NUM, (uint8_t*)buffer, batch_size);
-        furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
+        // furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
 
         size -= batch_size;
         buffer += batch_size;
