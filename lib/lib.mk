@@ -122,5 +122,5 @@ CFLAGS			+= -I$(LIB_DIR)/heatshrink
 C_SOURCES		+= $(wildcard $(LIB_DIR)/heatshrink/*.c)
 
 # Toolbox
-CFLAGS			+= -I$(LIB_DIR)/flipper-file
-C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper-file/*.c)
+CFLAGS			+= -I$(LIB_DIR)/flipper_file
+C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_file/*.c)
