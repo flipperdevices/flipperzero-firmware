@@ -51,7 +51,7 @@ bool flipper_file_read_valid_key(File* file, string_t key) {
                     if(accumulate) {
                         // we found the delimiter, move the rw pointer to the correct location
                         // and signal that we have found something
-                        if(!file_tool_seek(file, i - bytes_were_read)) {
+                        if(!file_helper_seek(file, i - bytes_were_read)) {
                             error = true;
                             break;
                         }
@@ -85,7 +85,7 @@ bool flipper_file_seek_to_key(File* file, const char* key) {
     while(!storage_file_eof(file)) {
         if(flipper_file_read_valid_key(file, readed_key)) {
             if(string_cmp_str(readed_key, key) == 0) {
-                if(!file_tool_seek(file, 2)) break;
+                if(!file_helper_seek(file, 2)) break;
 
                 found = true;
                 break;
@@ -101,11 +101,11 @@ bool flipper_file_write_key(File* file, const char* key) {
     bool result = false;
 
     do {
-        result = file_tool_write(file, key, strlen(key));
+        result = file_helper_write(file, key, strlen(key));
         if(!result) break;
 
         const char delimiter_buffer[2] = {flipper_file_delimiter, ' '};
-        result = file_tool_write(file, delimiter_buffer, sizeof(delimiter_buffer));
+        result = file_helper_write(file, delimiter_buffer, sizeof(delimiter_buffer));
     } while(false);
 
     return result;

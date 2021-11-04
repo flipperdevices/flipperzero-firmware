@@ -16,7 +16,7 @@ extern const char flipper_file_eolr;
  * @param offset 
  * @return bool 
  */
-bool file_tool_seek(File* file, int32_t offset);
+bool file_helper_seek(File* file, int32_t offset);
 
 /**
  * Writes data to a file as a hexadecimal array.
@@ -25,7 +25,7 @@ bool file_tool_seek(File* file, int32_t offset);
  * @param data_size 
  * @return true on success write 
  */
-bool file_tool_write_hex(File* file, const uint8_t* data, const uint16_t data_size);
+bool file_helper_write_hex(File* file, const uint8_t* data, const uint16_t data_size);
 
 /**
  * Reads data as a string from the stored rw pointer to the \\n symbol position. Ignores \r.
@@ -33,14 +33,14 @@ bool file_tool_write_hex(File* file, const uint8_t* data, const uint16_t data_si
  * @param str_result 
  * @return true on success read
  */
-bool file_tool_read_line(File* file, string_t str_result);
+bool file_helper_read_line(File* file, string_t str_result);
 
 /**
  * Moves the RW pointer to the beginning of the next line
  * @param file 
  * @return bool 
  */
-bool file_tool_seek_to_next_line(File* file);
+bool file_helper_seek_to_next_line(File* file);
 
 /**
  * Read one value from array-like string (separated by ' ')
@@ -48,7 +48,7 @@ bool file_tool_seek_to_next_line(File* file);
  * @param value 
  * @return bool 
  */
-bool file_tool_read_value(File* file, string_t value, bool* last);
+bool file_helper_read_value(File* file, string_t value, bool* last);
 
 /**
  * Write helper
@@ -57,24 +57,24 @@ bool file_tool_read_value(File* file, string_t value, bool* last);
  * @param data_size 
  * @return bool 
  */
-bool file_tool_write(File* file, const void* data, uint16_t data_size);
+bool file_helper_write(File* file, const void* data, uint16_t data_size);
 
 /**
  * Write EOL
  * @param file 
  * @return bool 
  */
-bool file_tool_write_eol(File* file);
+bool file_helper_write_eol(File* file);
 
 /**
- * 
+ * Appends part of one file to the end of another file
  * @param file_from 
  * @param file_to 
  * @param start_offset 
  * @param stop_offset 
  * @return bool 
  */
-bool file_tool_copy(File* file_from, File* file_to, uint64_t start_offset, uint64_t stop_offset);
+bool file_helper_copy(File* file_from, File* file_to, uint64_t start_offset, uint64_t stop_offset);
 
 #ifdef __cplusplus
 }

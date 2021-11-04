@@ -44,13 +44,13 @@ bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
             char last_char;
             result = false;
 
-            if(!file_tool_seek(flipper_file->file, -1)) break;
+            if(!file_helper_seek(flipper_file->file, -1)) break;
 
             uint16_t bytes_were_read = storage_file_read(flipper_file->file, &last_char, 1);
             if(bytes_were_read != 1) break;
 
             if(last_char != flipper_file_eoln) {
-                if(!file_tool_write_eol(flipper_file->file)) break;
+                if(!file_helper_write_eol(flipper_file->file)) break;
             }
 
             result = true;
@@ -137,7 +137,7 @@ bool flipper_file_get_value_count(FlipperFile* flipper_file, const char* key, ui
 
         result = true;
         while(true) {
-            if(!file_tool_read_value(flipper_file->file, value, &last)) {
+            if(!file_helper_read_value(flipper_file->file, value, &last)) {
                 result = false;
                 break;
             }
@@ -162,13 +162,13 @@ bool flipper_file_write_comment(FlipperFile* flipper_file, string_t data) {
     bool result = false;
     do {
         const char comment_buffer[2] = {flipper_file_comment, ' '};
-        result = file_tool_write(flipper_file->file, comment_buffer, sizeof(comment_buffer));
+        result = file_helper_write(flipper_file->file, comment_buffer, sizeof(comment_buffer));
         if(!result) break;
 
-        result = file_tool_write(flipper_file->file, string_get_cstr(data), string_size(data));
+        result = file_helper_write(flipper_file->file, string_get_cstr(data), string_size(data));
         if(!result) break;
 
-        result = file_tool_write_eol(flipper_file->file);
+        result = file_helper_write_eol(flipper_file->file);
     } while(false);
 
     return result;
@@ -212,7 +212,7 @@ bool flipper_file_delete_key_and_call(
         }
 
         // get value end position
-        if(!file_tool_seek_to_next_line(flipper_file->file)) break;
+        if(!file_helper_seek_to_next_line(flipper_file->file)) break;
         uint64_t end_position = storage_file_tell(flipper_file->file);
         // newline symbol
         if(end_position < file_size) {
@@ -228,7 +228,7 @@ bool flipper_file_delete_key_and_call(
             break;
 
         // copy key file before key to scratchpad
-        if(!file_tool_copy(flipper_file->file, scratch_file, 0, start_position)) break;
+        if(!file_helper_copy(flipper_file->file, scratch_file, 0, start_position)) break;
 
         // do something in between if needed
         if(call != NULL) {
@@ -236,7 +236,7 @@ bool flipper_file_delete_key_and_call(
         };
 
         // copy key file after key value to scratchpad
-        if(!file_tool_copy(flipper_file->file, scratch_file, end_position, file_size)) break;
+        if(!file_helper_copy(flipper_file->file, scratch_file, end_position, file_size)) break;
 
         file_size = storage_file_tell(scratch_file);
         if(file_size == 0) break;
@@ -244,7 +244,7 @@ bool flipper_file_delete_key_and_call(
         if(!storage_file_seek(flipper_file->file, 0, true)) break;
 
         // copy whole scratchpad file to the original file
-        if(!file_tool_copy(scratch_file, flipper_file->file, 0, file_size)) break;
+        if(!file_helper_copy(scratch_file, flipper_file->file, 0, file_size)) break;
 
         // and truncate original file
         if(!storage_file_truncate(flipper_file->file)) break;
@@ -303,11 +303,11 @@ bool flipper_file_write_internal(
                 string_cat(value, " ");
             }
 
-            result = file_tool_write(file, string_get_cstr(value), string_size(value));
+            result = file_helper_write(file, string_get_cstr(value), string_size(value));
             if(!result) break;
         }
 
-        result = file_tool_write_eol(file);
+        result = file_helper_write_eol(file);
     } while(false);
 
     string_clear(value);
@@ -328,7 +328,7 @@ bool flipper_file_read_internal(
         result = true;
         for(uint16_t i = 0; i < data_size; i++) {
             bool last = false;
-            result = file_tool_read_value(file, value, &last);
+            result = file_helper_read_value(file, value, &last);
             if(result) {
                 int scan_values = 0;
                 switch(type) {

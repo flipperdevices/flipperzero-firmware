@@ -3,12 +3,12 @@
 const char flipper_file_eoln = '\n';
 const char flipper_file_eolr = '\r';
 
-bool file_tool_seek(File* file, int32_t offset) {
+bool file_helper_seek(File* file, int32_t offset) {
     uint64_t position = storage_file_tell(file);
     return storage_file_seek(file, position + offset, true);
 }
 
-bool file_tool_write_hex(File* file, const uint8_t* data, const uint16_t data_size) {
+bool file_helper_write_hex(File* file, const uint8_t* data, const uint16_t data_size) {
     const uint8_t byte_text_size = 3;
     char byte_text[byte_text_size];
 
@@ -37,7 +37,7 @@ bool file_tool_write_hex(File* file, const uint8_t* data, const uint16_t data_si
     return result;
 }
 
-bool file_tool_read_line(File* file, string_t str_result) {
+bool file_helper_read_line(File* file, string_t str_result) {
     string_clean(str_result);
     const uint8_t buffer_size = 32;
     uint8_t buffer[buffer_size];
@@ -51,7 +51,7 @@ bool file_tool_read_line(File* file, string_t str_result) {
         bool error = false;
         for(uint16_t i = 0; i < bytes_were_read; i++) {
             if(buffer[i] == flipper_file_eoln) {
-                if(!file_tool_seek(file, i - bytes_were_read)) {
+                if(!file_helper_seek(file, i - bytes_were_read)) {
                     error = true;
                     break;
                 }
@@ -73,7 +73,7 @@ bool file_tool_read_line(File* file, string_t str_result) {
     return string_size(str_result) != 0;
 }
 
-bool file_tool_seek_to_next_line(File* file) {
+bool file_helper_seek_to_next_line(File* file) {
     const uint8_t buffer_size = 32;
     uint8_t buffer[buffer_size];
     bool result = false;
@@ -90,7 +90,7 @@ bool file_tool_seek_to_next_line(File* file) {
 
         for(uint16_t i = 0; i < bytes_were_read; i++) {
             if(buffer[i] == flipper_file_eoln) {
-                if(!file_tool_seek(file, i - bytes_were_read)) {
+                if(!file_helper_seek(file, i - bytes_were_read)) {
                     error = true;
                     break;
                 }
@@ -108,7 +108,7 @@ bool file_tool_seek_to_next_line(File* file) {
     return result;
 }
 
-bool file_tool_read_value(File* file, string_t value, bool* last) {
+bool file_helper_read_value(File* file, string_t value, bool* last) {
     string_clean(value);
     const uint8_t buffer_size = 32;
     uint8_t buffer[buffer_size];
@@ -130,7 +130,7 @@ bool file_tool_read_value(File* file, string_t value, bool* last) {
         for(uint16_t i = 0; i < bytes_were_read; i++) {
             if(buffer[i] == flipper_file_eoln) {
                 if(string_size(value) > 0) {
-                    if(!file_tool_seek(file, i - bytes_were_read)) {
+                    if(!file_helper_seek(file, i - bytes_were_read)) {
                         error = true;
                         break;
                     }
@@ -143,7 +143,7 @@ bool file_tool_read_value(File* file, string_t value, bool* last) {
                 }
             } else if(buffer[i] == ' ') {
                 if(string_size(value) > 0) {
-                    if(!file_tool_seek(file, i - bytes_were_read)) {
+                    if(!file_helper_seek(file, i - bytes_were_read)) {
                         error = true;
                         break;
                     }
@@ -166,16 +166,16 @@ bool file_tool_read_value(File* file, string_t value, bool* last) {
     return result;
 }
 
-bool file_tool_write(File* file, const void* data, uint16_t data_size) {
+bool file_helper_write(File* file, const void* data, uint16_t data_size) {
     uint16_t bytes_written = storage_file_write(file, data, data_size);
     return bytes_written == data_size;
 }
 
-bool file_tool_write_eol(File* file) {
-    return file_tool_write(file, &flipper_file_eoln, sizeof(char));
+bool file_helper_write_eol(File* file) {
+    return file_helper_write(file, &flipper_file_eoln, sizeof(char));
 }
 
-bool file_tool_copy(File* file_from, File* file_to, uint64_t start_offset, uint64_t stop_offset) {
+bool file_helper_copy(File* file_from, File* file_to, uint64_t start_offset, uint64_t stop_offset) {
     bool result = false;
 
     const uint8_t buffer_size = 32;

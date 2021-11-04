@@ -16,10 +16,10 @@ static bool flipper_file_write_string_internal(
         result = flipper_file_write_key(file, key);
         if(!result) break;
 
-        result = file_tool_write(file, string_get_cstr(data), string_size(data));
+        result = file_helper_write(file, string_get_cstr(data), string_size(data));
         if(!result) break;
 
-        result = file_tool_write_eol(file);
+        result = file_helper_write_eol(file);
     } while(false);
 
     return result;
@@ -30,7 +30,7 @@ bool flipper_file_read_string(FlipperFile* flipper_file, const char* key, string
 
     bool result = false;
     if(flipper_file_seek_to_key(flipper_file->file, key)) {
-        if(file_tool_read_line(flipper_file->file, data)) {
+        if(file_helper_read_line(flipper_file->file, data)) {
             result = true;
         }
     }
