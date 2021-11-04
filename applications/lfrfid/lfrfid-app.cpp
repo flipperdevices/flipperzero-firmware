@@ -17,7 +17,7 @@
 #include "scene/lfrfid-app-scene-delete-success.h"
 
 #include <toolbox/path.h>
-#include <flipper-file/flipper-file.h>
+#include <flipper_file/flipper_file.h>
 
 const char* LfRfidApp::app_folder = "/any/lfrfid";
 const char* LfRfidApp::app_extension = ".rfid";

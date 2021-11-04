@@ -1,16 +1,7 @@
-#include "file-tool.h"
+#include "file_helper.h"
 
 const char flipper_file_eoln = '\n';
 const char flipper_file_eolr = '\r';
-
-#ifndef MIN
-#define MIN(a, b)               \
-    ({                          \
-        __typeof__(a) _a = (a); \
-        __typeof__(b) _b = (b); \
-        _a < _b ? _a : _b;      \
-    })
-#endif
 
 bool file_tool_seek(File* file, int32_t offset) {
     uint64_t position = storage_file_tell(file);

@@ -1,7 +1,8 @@
 #include <furi.h>
-#include "flipper-file.h"
-#include "flipper-file-i.h"
-#include "flipper-file-tool.h"
+
+#include "flipper_file.h"
+#include "flipper_file_i.h"
+#include "flipper_file_helper.h"
 
 static bool flipper_file_write_hex_internal(
     File* file,

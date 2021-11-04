@@ -1,4 +1,4 @@
-#include "flipper-file-tool.h"
+#include "flipper_file_helper.h"
 
 const char* flipper_file_filetype_key = "Filetype";
 const char* flipper_file_version_key = "Version";

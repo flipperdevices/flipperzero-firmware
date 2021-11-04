@@ -1,8 +1,8 @@
 #include <furi.h>
-#include "file-tool.h"
-#include "flipper-file-tool.h"
-#include "flipper-file.h"
-#include "flipper-file-i.h"
+#include "file_helper.h"
+#include "flipper_file_helper.h"
+#include "flipper_file.h"
+#include "flipper_file_i.h"
 #include <inttypes.h>
 #include <toolbox/hex.h>
 
@@ -337,7 +337,14 @@ bool flipper_file_read_internal(
                 }; break;
                 case FlipperFileValueFloat: {
                     float* data = _data;
-                    scan_values = sscanf(string_get_cstr(value), "%f", &data[i]);
+                    // newlib-nano does not have sscanf for floats
+                    // scan_values = sscanf(string_get_cstr(value), "%f", &data[i]);
+                    char* end_char;
+                    data[i] = strtof(string_get_cstr(value), &end_char);
+                    if(*end_char == 0) {
+                        // very probably ok
+                        scan_values = 1;
+                    }
                 }; break;
                 case FlipperFileValueInt32: {
                     int32_t* data = _data;

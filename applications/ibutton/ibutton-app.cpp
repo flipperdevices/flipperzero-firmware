@@ -3,7 +3,7 @@
 #include <callback-connector.h>
 #include <m-string.h>
 #include <toolbox/path.h>
-#include <flipper-file/flipper-file.h>
+#include <flipper_file/flipper_file.h>
 
 const char* iButtonApp::app_folder = "/any/ibutton";
 const char* iButtonApp::app_extension = ".ibtn";
