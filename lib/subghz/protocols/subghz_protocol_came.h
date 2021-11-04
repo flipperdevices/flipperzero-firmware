@@ -45,12 +45,13 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
  */
 void subghz_protocol_came_to_str(SubGhzProtocolCame* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolCame instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_came_to_save_str(SubGhzProtocolCame* instance, string_t output);
+bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 

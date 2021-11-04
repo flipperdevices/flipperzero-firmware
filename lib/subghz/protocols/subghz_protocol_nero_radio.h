@@ -54,12 +54,15 @@ void subghz_protocol_nero_radio_parse(
  */
 void subghz_protocol_nero_radio_to_str(SubGhzProtocolNeroRadio* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolNeroRadio instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_nero_radio_to_save_str(SubGhzProtocolNeroRadio* instance, string_t output);
+bool subghz_protocol_nero_radio_to_save_file(
+    SubGhzProtocolNeroRadio* instance,
+    FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 

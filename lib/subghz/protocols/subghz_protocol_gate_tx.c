@@ -21,8 +21,8 @@ SubGhzProtocolGateTX* subghz_protocol_gate_tx_alloc(void) {
     instance->common.te_delta = 100;
     instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_gate_tx_to_str;
-    instance->common.to_save_string =
-        (SubGhzProtocolCommonGetStrSave)subghz_protocol_gate_tx_to_save_str;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_protocol_gate_tx_to_save_file;
     instance->common.to_load_protocol_from_file =
         (SubGhzProtocolCommonLoadFromFile)subghz_protocol_gate_tx_to_load_protocol_from_file;
     instance->common.to_load_protocol =
@@ -169,15 +169,10 @@ void subghz_protocol_gate_tx_to_str(SubGhzProtocolGateTX* instance, string_t out
         instance->common.btn);
 }
 
-void subghz_protocol_gate_tx_to_save_str(SubGhzProtocolGateTX* instance, string_t output) {
-    string_printf(
-        output,
-        "Protocol: %s\n"
-        "Bit: %d\n"
-        "Key: %08lX\n",
-        instance->common.name,
-        instance->common.code_last_count_bit,
-        (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
+bool subghz_protocol_gate_tx_to_save_file(
+    SubGhzProtocolGateTX* instance,
+    FlipperFile* flipper_file) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
 }
 
 bool subghz_protocol_gate_tx_to_load_protocol_from_file(

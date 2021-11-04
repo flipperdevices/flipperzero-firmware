@@ -48,12 +48,15 @@ void subghz_protocol_came_twee_parse(
  */
 void subghz_protocol_came_twee_to_str(SubGhzProtocolCameTwee* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolCameTwee instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_came_twee_to_save_str(SubGhzProtocolCameTwee* instance, string_t output);
+bool subghz_protocol_came_twee_to_save_file(
+    SubGhzProtocolCameTwee* instance,
+    FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 

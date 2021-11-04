@@ -54,12 +54,15 @@ void subghz_protocol_nero_sketch_parse(
  */
 void subghz_protocol_nero_sketch_to_str(SubGhzProtocolNeroSketch* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolNeroSketch instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_nero_sketch_to_save_str(SubGhzProtocolNeroSketch* instance, string_t output);
+bool subghz_protocol_nero_sketch_to_save_file(
+    SubGhzProtocolNeroSketch* instance,
+    FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 

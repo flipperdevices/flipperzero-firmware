@@ -76,12 +76,13 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
  */
 void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolKeeloq instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output);
+bool subghz_protocol_keeloq_to_save_file(SubGhzProtocolKeeloq* instance, FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 

@@ -36,8 +36,8 @@ SubGhzProtocolCameTwee* subghz_protocol_came_twee_alloc() {
     instance->common.te_delta = 250;
     instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_came_twee_to_str;
-    instance->common.to_save_string =
-        (SubGhzProtocolCommonGetStrSave)subghz_protocol_came_twee_to_save_str;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_protocol_came_twee_to_save_file;
     instance->common.to_load_protocol_from_file =
         (SubGhzProtocolCommonLoadFromFile)subghz_protocol_came_twee_to_load_protocol_from_file;
     instance->common.to_load_protocol =
@@ -327,16 +327,10 @@ void subghz_protocol_came_twee_to_str(SubGhzProtocolCameTwee* instance, string_t
         CNT_TO_DIP(instance->common.cnt));
 }
 
-void subghz_protocol_came_twee_to_save_str(SubGhzProtocolCameTwee* instance, string_t output) {
-    string_printf(
-        output,
-        "Protocol: %s\n"
-        "Bit: %d\n"
-        "Key: %08lX%08lX\r\n",
-        instance->common.name,
-        instance->common.code_last_count_bit,
-        (uint32_t)(instance->common.code_last_found >> 32),
-        (uint32_t)(instance->common.code_last_found & 0xFFFFFFFF));
+bool subghz_protocol_came_twee_to_save_file(
+    SubGhzProtocolCameTwee* instance,
+    FlipperFile* flipper_file) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
 }
 
 bool subghz_protocol_came_twee_to_load_protocol_from_file(

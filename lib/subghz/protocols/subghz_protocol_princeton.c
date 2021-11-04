@@ -141,8 +141,8 @@ SubGhzDecoderPrinceton* subghz_decoder_princeton_alloc(void) {
     instance->common.te_delta = 250; //50;
     instance->common.type_protocol = SubGhzProtocolCommonTypeStatic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_decoder_princeton_to_str;
-    instance->common.to_save_string =
-        (SubGhzProtocolCommonGetStrSave)subghz_decoder_princeton_to_save_str;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_decoder_princeton_to_save_file;
     instance->common.to_load_protocol_from_file =
         (SubGhzProtocolCommonLoadFromFile)subghz_decoder_princeton_to_load_protocol_from_file;
     instance->common.to_load_protocol =
@@ -293,17 +293,39 @@ void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t 
         instance->te);
 }
 
-void subghz_decoder_princeton_to_save_str(SubGhzDecoderPrinceton* instance, string_t output) {
-    string_printf(
-        output,
-        "Protocol: %s\n"
-        "Bit: %d\n"
-        "Te: %d\n"
-        "Key: %08lX\n",
-        instance->common.name,
-        instance->common.code_last_count_bit,
-        instance->te,
-        (uint32_t)(instance->common.code_last_found & 0x00000000ffffffff));
+bool subghz_decoder_princeton_to_save_file(
+    SubGhzDecoderPrinceton* instance,
+    FlipperFile* flipper_file) {
+    bool res = false;
+    do {
+        if(!flipper_file_write_string_cstr(flipper_file, "Protocol", instance->common.name)) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Protocol");
+            break;
+        }
+        if(!flipper_file_write_uint32(
+               flipper_file, "Bit", (uint32_t*)&instance->common.code_last_count_bit, 1)) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Bit");
+            break;
+        }
+        if(!flipper_file_write_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1)) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Te");
+            break;
+        }
+        uint8_t key_data[sizeof(uint64_t)] = {0};
+
+        for(size_t i = 0; i < sizeof(uint64_t); i++) {
+            key_data[sizeof(uint64_t) - i - 1] = (instance->common.code_last_found >> i * 8) &
+                                                 0xFF;
+        }
+
+        if(!flipper_file_write_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Key");
+            break;
+        }
+        res = true;
+    } while(false);
+
+    return res;
 }
 
 bool subghz_decoder_princeton_to_load_protocol_from_file(

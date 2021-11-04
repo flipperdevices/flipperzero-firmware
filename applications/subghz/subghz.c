@@ -119,6 +119,9 @@ SubGhz* subghz_alloc() {
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewWidget, widget_get_view(subghz->widget));
 
+    //Dialog
+    subghz->dialogs = furi_record_open("dialogs");
+
     // Transmitter
     subghz->subghz_transmitter = subghz_transmitter_alloc();
     view_dispatcher_add_view(
@@ -223,6 +226,9 @@ void subghz_free(SubGhz* subghz) {
     // Custom Widget
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewWidget);
     widget_free(subghz->widget);
+
+    //Dialog
+    furi_record_close("dialogs");
 
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTransmitter);

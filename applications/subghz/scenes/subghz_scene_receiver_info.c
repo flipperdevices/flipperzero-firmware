@@ -68,7 +68,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
             subghz->widget, 0, 0, AlignLeft, AlignTop, FontSecondary, string_get_cstr(text));
         string_clear(text);
 
-        if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_string &&
+        if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
            strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
             widget_add_button_element(
                 subghz->widget,
@@ -144,7 +144,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
-            if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_string &&
+            if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
                strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
                 subghz_file_name_clear(subghz);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);

@@ -13,6 +13,7 @@
 #include <furi.h>
 #include <furi-hal.h>
 #include <gui/gui.h>
+#include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <notification/notification-messages.h>
 #include <gui/view_dispatcher.h>
@@ -101,6 +102,7 @@ struct SubGhz {
     Popup* popup;
     TextInput* text_input;
     Widget* widget;
+    DialogsApp* dialogs;
     char file_name[SUBGHZ_TEXT_STORE_SIZE + 1];
     char file_name_tmp[SUBGHZ_TEXT_STORE_SIZE + 1];
     uint8_t state_notifications;
