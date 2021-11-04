@@ -10,10 +10,8 @@
 
 #define BLE_APP_TAG "ble app"
 
-#define BLE_APP_NVM_LEN (256)
-
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
-PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_APP_NVM_LEN];
+PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
 
 typedef struct {
     osMutexId_t hci_mtx;
