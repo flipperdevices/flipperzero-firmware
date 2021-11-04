@@ -440,7 +440,6 @@ struct usb_cdc_line_coding* furi_hal_cdc_get_port_settings(uint8_t if_num) {
 }
 
 void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
-    furi_hal_console_printf("tx 0x%x, %d\r\n", buf, len);
     if (if_num == 0)
         usbd_ep_write(usb_dev, CDC0_TXD_EP, buf, len);
     else
@@ -453,12 +452,10 @@ int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len) {
         len = usbd_ep_read(usb_dev, CDC0_RXD_EP, buf, max_len);
     else
         len = usbd_ep_read(usb_dev, CDC1_RXD_EP, buf, max_len);
-    furi_hal_console_printf("rx 0x%x, %d of %d\r\n", buf, len, max_len);
     return ((len < 0) ? 0 : len);
 }
 
 static void cdc_on_wakeup(usbd_device *dev) {
-    furi_hal_console_puts("wake\r\n");
     for (uint8_t i = 0; i < IF_NUM_MAX; i++) {
         if (callbacks[i] != NULL) {
             if (callbacks[i]->state_callback != NULL)
@@ -468,7 +465,6 @@ static void cdc_on_wakeup(usbd_device *dev) {
 }
 
 static void cdc_on_suspend(usbd_device *dev) {
-    furi_hal_console_puts("susp\r\n");
     for (uint8_t i = 0; i < IF_NUM_MAX; i++) {
         if (callbacks[i] != NULL) {
             if (callbacks[i]->state_callback != NULL)
@@ -478,7 +474,6 @@ static void cdc_on_suspend(usbd_device *dev) {
 }
 
 static void cdc_rx_ep_callback (usbd_device *dev, uint8_t event, uint8_t ep) {
-    furi_hal_console_puts("ep\r\n");
     uint8_t if_num = 0;
     if (ep == CDC0_RXD_EP)
         if_num = 0;
