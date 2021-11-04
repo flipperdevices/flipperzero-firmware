@@ -14,17 +14,14 @@ typedef enum {
 typedef struct {
     volatile bool connected;
 
-    uint8_t rx_buf[USB_CDC_PKT_LEN];
-    uint8_t rx_buf_start;
-    uint8_t rx_buf_len;
+    uint8_t rx_buffer[USB_CDC_PKT_LEN];
+    uint8_t rx_buffer_cursor;
+    uint8_t rx_buffer_length;
 
     osMessageQueueId_t event_queue;
 
-    osMutexId_t usb_mutex;
-
-    osSemaphoreId_t tx_sem;
-    osSemaphoreId_t rx_sem;
-
+    osSemaphoreId_t tx_semaphore;
+    osSemaphoreId_t rx_semaphore;
 } FuriHalVcp;
 
 static void vcp_on_cdc_tx_complete();
@@ -49,10 +46,8 @@ void furi_hal_vcp_init() {
     vcp = furi_alloc(sizeof(FuriHalVcp));
     vcp->connected = false;
 
-    vcp->usb_mutex = osMutexNew(NULL);
-
-    vcp->tx_sem = osSemaphoreNew(1, 1, NULL);
-    vcp->rx_sem = osSemaphoreNew(1, 0, NULL);
+    vcp->tx_semaphore = osSemaphoreNew(1, 1, NULL);
+    vcp->rx_semaphore = osSemaphoreNew(1, 0, NULL);
 
     vcp->event_queue = osMessageQueueNew(8, sizeof(VcpEvent), NULL);
 
@@ -66,8 +61,9 @@ void furi_hal_vcp_enable() {
     VcpEvent evt = VcpConnect;
     osMessageQueuePut(vcp->event_queue, &evt, 0, 0);
     vcp->connected = true;
-    osSemaphoreRelease(vcp->tx_sem);
-    osSemaphoreRelease(vcp->rx_sem);
+
+    osSemaphoreRelease(vcp->tx_semaphore);
+    osSemaphoreRelease(vcp->rx_semaphore);
 }
 
 void furi_hal_vcp_disable() {
@@ -75,8 +71,8 @@ void furi_hal_vcp_disable() {
     VcpEvent evt = VcpDisconnect;
     osMessageQueuePut(vcp->event_queue, &evt, 0, 0);
     vcp->connected = false;
-    osSemaphoreRelease(vcp->tx_sem);
-    osSemaphoreRelease(vcp->rx_sem);
+    osSemaphoreRelease(vcp->tx_semaphore);
+    osSemaphoreRelease(vcp->rx_semaphore);
 }
 
 size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeout) {
@@ -87,11 +83,11 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
 
     VcpEvent evt = VcpDisconnect;
 
-    if (vcp->rx_buf_len > 0) {
-        size_t len = (vcp->rx_buf_len > size) ? (size) : (vcp->rx_buf_len);
-        memcpy(&buffer[rx_cnt], &vcp->rx_buf[vcp->rx_buf_start], len);
-        vcp->rx_buf_len -= len;
-        vcp->rx_buf_start += len;
+    if (vcp->rx_buffer_length > 0) {
+        size_t len = (vcp->rx_buffer_length > size) ? (size) : (vcp->rx_buffer_length);
+        memcpy(&buffer[rx_cnt], &vcp->rx_buffer[vcp->rx_buffer_cursor], len);
+        vcp->rx_buffer_length -= len;
+        vcp->rx_buffer_cursor += len;
         rx_cnt += len;
     }
 
@@ -101,30 +97,29 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
                 buffer[rx_cnt] = ascii_soh;
             else {
                 buffer[rx_cnt] = ascii_eot;
-                vcp->rx_buf_len = 0;
+                vcp->rx_buffer_length = 0;
             }
             rx_cnt++;
-            return rx_cnt;
+            break;
         }
 
-        if (osSemaphoreAcquire(vcp->rx_sem, timeout) == osErrorTimeout)
-            return rx_cnt;
-        
-        furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
-        size_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->rx_buf, USB_CDC_PKT_LEN);
-        furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
+        if (osSemaphoreAcquire(vcp->rx_semaphore, timeout) != osOK) {
+            break;
+        }
 
-        vcp->rx_buf_len = len;
-        vcp->rx_buf_start = 0;
+        size_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->rx_buffer, USB_CDC_PKT_LEN);
 
-        if (vcp->rx_buf_len > (size - rx_cnt)) {
+        vcp->rx_buffer_length = len;
+        vcp->rx_buffer_cursor = 0;
+
+        if (vcp->rx_buffer_length > (size - rx_cnt)) {
             len = size - rx_cnt;
-            memcpy(&buffer[rx_cnt], vcp->rx_buf, len);
-            vcp->rx_buf_len -= len;
-            vcp->rx_buf_start += len;
+            memcpy(&buffer[rx_cnt], vcp->rx_buffer, len);
+            vcp->rx_buffer_length -= len;
+            vcp->rx_buffer_cursor += len;
         } else {
-            memcpy(&buffer[rx_cnt], vcp->rx_buf, vcp->rx_buf_len);
-            vcp->rx_buf_len = 0;
+            memcpy(&buffer[rx_cnt], vcp->rx_buffer, vcp->rx_buffer_length);
+            vcp->rx_buffer_length = 0;
         }
         rx_cnt += len;
     }
@@ -141,7 +136,7 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
     furi_assert(vcp);
 
     while (size > 0 && vcp->connected) {
-        furi_check(osSemaphoreAcquire(vcp->tx_sem, osWaitForever) == osOK);
+        furi_check(osSemaphoreAcquire(vcp->tx_semaphore, osWaitForever) == osOK);
         if (!vcp->connected)
             break;
 
@@ -150,9 +145,7 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
             batch_size = USB_CDC_PKT_LEN;
         }
 
-        furi_check(osMutexAcquire(vcp->usb_mutex, osWaitForever) == osOK);
         furi_hal_cdc_send(VCP_IF_NUM, (uint8_t*)buffer, batch_size);
-        furi_check(osMutexRelease(vcp->usb_mutex) == osOK);
 
         size -= batch_size;
         buffer += batch_size;
@@ -161,15 +154,12 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
 
 static void vcp_state_callback(uint8_t state) {
     if (state == 1) {
-        osSemaphoreRelease(vcp->rx_sem);
-        //osSemaphoreRelease(vcp->tx_sem);
-    }
-    else if (vcp->connected) {
+        furi_check(osSemaphoreRelease(vcp->rx_semaphore) == osOK);
+    } else if (vcp->connected) {
         vcp->connected = false;
-        osSemaphoreRelease(vcp->rx_sem);
         VcpEvent evt = VcpDisconnect;
         osMessageQueuePut(vcp->event_queue, &evt, 0, 0);
-        //osSemaphoreRelease(vcp->tx_sem);
+        furi_check(osSemaphoreRelease(vcp->rx_semaphore) == osOK);
     }
 }
 
@@ -181,28 +171,28 @@ static void vcp_on_cdc_control_line(uint8_t state) {
         if (!vcp->connected) {
             vcp->connected = true;
             VcpEvent evt = VcpConnect;
-            osMessageQueuePut(vcp->event_queue, &evt, 0, 0);
+            furi_check(osMessageQueuePut(vcp->event_queue, &evt, 0, 0) == osOK);
         }
     } else {
         if (vcp->connected) {
             VcpEvent evt = VcpDisconnect;
-            osMessageQueuePut(vcp->event_queue, &evt, 0, 0);
             vcp->connected = false;
+            furi_check(osMessageQueuePut(vcp->event_queue, &evt, 0, 0) == osOK);
         }
     }
 
-    osSemaphoreRelease(vcp->tx_sem);
-    osSemaphoreRelease(vcp->rx_sem);
+    osSemaphoreRelease(vcp->tx_semaphore);
+    osSemaphoreRelease(vcp->rx_semaphore);
 }
 
 static void vcp_on_cdc_rx() {
     if (vcp->connected == false)
         return;
-    osSemaphoreRelease(vcp->rx_sem);
+    osSemaphoreRelease(vcp->rx_semaphore);
 }
 
 static void vcp_on_cdc_tx_complete() {
-    osSemaphoreRelease(vcp->tx_sem);
+    osSemaphoreRelease(vcp->tx_semaphore);
 }
 
 bool furi_hal_vcp_is_connected(void) {
