@@ -461,6 +461,15 @@ void cli_command_free_blocks(Cli* cli, string_t args, void* context) {
     memmgr_heap_printf_free_blocks();
 }
 
+/* 
+ * Ping Command
+ * This command is intended to be used by humans and machines
+ * For autotests purposes. To check that cli alive.
+ */
+void cli_command_ping(Cli* cli, string_t args, void* context) {
+    printf("pong\r\n");
+}
+
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
     cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
@@ -473,8 +482,10 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);
+    cli_add_command(cli, "ping", CliCommandFlagParallelSafe, cli_command_ping, NULL);
 
     cli_add_command(cli, "vibro", CliCommandFlagDefault, cli_command_vibro, NULL);
     cli_add_command(cli, "led", CliCommandFlagDefault, cli_command_led, NULL);
     cli_add_command(cli, "gpio_set", CliCommandFlagDefault, cli_command_gpio_set, NULL);
 }
+
