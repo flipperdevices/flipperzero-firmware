@@ -57,13 +57,13 @@ bool subghz_protocol_hormann_to_save_file(
 
 /** Loading protocol from file
  * 
- * @param file_worker - FileWorker file_worker
+ * @param flipper_file - FlipperFile 
  * @param instance - SubGhzProtocolHormann instance
  * @param file_path - file path
  * @return bool
  */
 bool subghz_protocol_hormann_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolHormann* instance,
     const char* file_path);
 

@@ -1,4 +1,5 @@
 #include "subghz_i.h"
+#include <lib/toolbox/path.h>
 
 const char* const subghz_frequencies_text[] = {
     "300.00",
@@ -286,6 +287,12 @@ int32_t subghz_app(void* p) {
 
     // Check argument and run corresponding scene
     if(p && subghz_key_load(subghz, p)) {
+        string_t filename;
+        path_extract_filename_no_ext(p, filename);
+        strlcpy(
+            subghz->file_name, string_get_cstr(filename), strlen(string_get_cstr(filename)) + 1);
+        string_clear(filename);
+
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
     } else {
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);

@@ -176,44 +176,15 @@ bool subghz_protocol_gate_tx_to_save_file(
 }
 
 bool subghz_protocol_gate_tx_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolGateTX* instance,
     const char* file_path) {
-    bool loaded = false;
-    string_t temp_str;
-    string_init(temp_str);
-    int res = 0;
-    int data = 0;
-
-    do {
-        // Read and parse bit data from 2nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        res = sscanf(string_get_cstr(temp_str), "Bit: %d\n", &data);
-        if(res != 1) {
-            break;
-        }
-        instance->common.code_last_count_bit = (uint8_t)data;
-
-        // Read and parse key data from 3nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        uint32_t temp_key = 0;
-        res = sscanf(string_get_cstr(temp_str), "Key: %08lX\n", &temp_key);
-        if(res != 1) {
-            break;
-        }
-        instance->common.code_last_found = (uint64_t)temp_key;
+    if(subghz_protocol_common_to_load_protocol_from_file(
+           (SubGhzProtocolCommon*)instance, flipper_file)) {
         subghz_protocol_gate_tx_check_remote_controller(instance);
-
-        loaded = true;
-    } while(0);
-
-    string_clear(temp_str);
-
-    return loaded;
+        return true;
+    }
+    return false;
 }
 
 void subghz_decoder_gate_tx_to_load_protocol(SubGhzProtocolGateTX* instance, void* context) {

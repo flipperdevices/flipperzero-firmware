@@ -334,49 +334,15 @@ bool subghz_protocol_came_twee_to_save_file(
 }
 
 bool subghz_protocol_came_twee_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolCameTwee* instance,
     const char* file_path) {
-    bool loaded = false;
-    string_t temp_str;
-    string_init(temp_str);
-    int res = 0;
-    int data = 0;
-
-    do {
-        // Read and parse bit data from 2nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        res = sscanf(string_get_cstr(temp_str), "Bit: %d\n", &data);
-        if(res != 1) {
-            break;
-        }
-        instance->common.code_last_count_bit = (uint8_t)data;
-
-        // Read and parse key data from 3nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        // strlen("Key: ") = 5
-        string_right(temp_str, 5);
-
-        uint8_t buf_key[8] = {0};
-        if(!subghz_protocol_common_read_hex(temp_str, buf_key, 8)) {
-            break;
-        }
-
-        for(uint8_t i = 0; i < 8; i++) {
-            instance->common.code_last_found = instance->common.code_last_found << 8 | buf_key[i];
-        }
-
-        loaded = true;
-    } while(0);
-
-    string_clear(temp_str);
-
-    subghz_protocol_came_twee_remote_controller(instance);
-    return loaded;
+    if(subghz_protocol_common_to_load_protocol_from_file(
+           (SubGhzProtocolCommon*)instance, flipper_file)) {
+        subghz_protocol_came_twee_remote_controller(instance);
+        return true;
+    }
+    return false;
 }
 
 void subghz_decoder_came_twee_to_load_protocol(SubGhzProtocolCameTwee* instance, void* context) {

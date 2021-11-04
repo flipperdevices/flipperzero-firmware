@@ -174,43 +174,11 @@ bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFile
 }
 
 bool subghz_protocol_came_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolCame* instance,
     const char* file_path) {
-    bool loaded = false;
-    string_t temp_str;
-    string_init(temp_str);
-    int res = 0;
-    int data = 0;
-
-    do {
-        // Read and parse bit data from 2nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        res = sscanf(string_get_cstr(temp_str), "Bit: %d\n", &data);
-        if(res != 1) {
-            break;
-        }
-        instance->common.code_last_count_bit = (uint8_t)data;
-
-        // Read and parse key data from 3nd line
-        if(!file_worker_read_until(file_worker, temp_str, '\n')) {
-            break;
-        }
-        uint32_t temp_key = 0;
-        res = sscanf(string_get_cstr(temp_str), "Key: %08lX\n", &temp_key);
-        if(res != 1) {
-            break;
-        }
-        instance->common.code_last_found = (uint64_t)temp_key;
-
-        loaded = true;
-    } while(0);
-
-    string_clear(temp_str);
-
-    return loaded;
+    return subghz_protocol_common_to_load_protocol_from_file(
+        (SubGhzProtocolCommon*)instance, flipper_file);
 }
 
 void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context) {

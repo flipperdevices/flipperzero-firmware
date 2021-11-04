@@ -57,13 +57,13 @@ bool subghz_protocol_gate_tx_to_save_file(
 
 /** Loading protocol from file
  * 
- * @param file_worker - FileWorker file_worker
+ * @param flipper_file - FlipperFile 
  * @param instance - SubGhzProtocolGateTX instance
  * @param file_path - file path
  * @return bool
  */
 bool subghz_protocol_gate_tx_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolGateTX* instance,
     const char* file_path);
 

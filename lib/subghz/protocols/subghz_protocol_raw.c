@@ -160,7 +160,10 @@ bool subghz_protocol_raw_save_to_file_init(
         }
         // Open file
         if(!file_worker_open(
-               instance->file_worker, string_get_cstr(dev_file_name), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+               instance->file_worker,
+               string_get_cstr(dev_file_name),
+               FSAM_WRITE,
+               FSOM_CREATE_ALWAYS)) {
             break;
         }
 
@@ -272,9 +275,10 @@ size_t subghz_protocol_raw_get_sample_write(SubGhzProtocolRAW* instance) {
 }
 
 bool subghz_protocol_raw_to_load_protocol_from_file(
-    FileWorker* file_worker,
+    FlipperFile* flipper_file,
     SubGhzProtocolRAW* instance,
     const char* file_path) {
+    furi_assert(file_path);
     subghz_protocol_set_last_file_name(instance, file_path);
     return true;
 }

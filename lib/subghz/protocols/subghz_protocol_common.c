@@ -170,7 +170,6 @@ bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len) 
 }
 
 bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file) {
-    
     furi_assert(instance);
     furi_assert(flipper_file);
     bool res = false;
@@ -198,4 +197,38 @@ bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, Flipper
     } while(false);
 
     return res;
+}
+
+bool subghz_protocol_common_to_load_protocol_from_file(
+    SubGhzProtocolCommon* instance,
+    FlipperFile* flipper_file) {
+    furi_assert(instance);
+    furi_assert(flipper_file);
+    bool loaded = false;
+    string_t temp_str;
+    string_init(temp_str);
+    uint32_t temp_data = 0;
+
+    do {
+        if(!flipper_file_read_uint32(flipper_file, "Bit", (uint32_t*)&temp_data, 1)) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing Bit");
+            break;
+        }
+        instance->code_last_count_bit = (uint8_t)temp_data;
+
+        uint8_t key_data[sizeof(uint64_t)] = {0};
+        if(!flipper_file_read_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing Key");
+            break;
+        }
+        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+            instance->code_last_found = instance->code_last_found << 8 | key_data[i];
+        }
+
+        loaded = true;
+    } while(0);
+
+    string_clear(temp_str);
+
+    return loaded;
 }

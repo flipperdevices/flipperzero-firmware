@@ -42,11 +42,14 @@ typedef void (*SubGhzProtocolCommonCallback)(SubGhzProtocolCommon* parser, void*
 typedef void (*SubGhzProtocolCommonToStr)(SubGhzProtocolCommon* instance, string_t output);
 
 //Get string to save
-typedef bool (*SubGhzProtocolCommonSaveFile)(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
+typedef bool (
+    *SubGhzProtocolCommonSaveFile)(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
 
 //Load protocol from file
-typedef bool (
-    *SubGhzProtocolCommonLoadFromFile)(FileWorker* file_worker, SubGhzProtocolCommon* instance, const char* file_path);
+typedef bool (*SubGhzProtocolCommonLoadFromFile)(
+    FlipperFile* flipper_file,
+    SubGhzProtocolCommon* instance,
+    const char* file_path);
 //Load protocol
 typedef void (*SubGhzProtocolCommonLoadFromRAW)(SubGhzProtocolCommon* instance, void* context);
 //Get upload encoder protocol
@@ -209,3 +212,13 @@ bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len);
  * @return bool
  */
 bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
+
+/** Loading data to a file
+ * 
+ * @param instance  - SubGhzProtocolCommon instance
+ * @param flipper_file - FlipperFile 
+ * @return bool
+ */
+bool subghz_protocol_common_to_load_protocol_from_file(
+    SubGhzProtocolCommon* instance,
+    FlipperFile* flipper_file);
