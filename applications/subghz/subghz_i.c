@@ -372,7 +372,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         string_printf(
             file_name, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
 
-        subghz_key_load(subghz, string_get_cstr(file_name));
+        res = subghz_key_load(subghz, string_get_cstr(file_name));
     }
 
     string_clear(file_name);
