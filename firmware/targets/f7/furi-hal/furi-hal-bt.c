@@ -92,7 +92,7 @@ void furi_hal_bt_nvm_sram_sem_acquire() {
 }
 
 void furi_hal_bt_nvm_sram_sem_release() {
-    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, HSEM_CPU1_COREID);
+    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
@@ -126,37 +126,88 @@ bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
 }
 
-void furi_hal_bt_lock_flash(bool erase_flag) {
-    osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
-    BleGlueStatus status = ble_glue_get_status();
-    if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
-        while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
-            osDelay(1);
-        }
+static void furi_hal_bt_lock_flash_core2(bool erase_flag) {
+    // Take flash controller ownership 
+    while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
+        taskYIELD();
+    }
 
-        HAL_FLASH_Unlock();
+    // Unlock flash operation
+    HAL_FLASH_Unlock();
 
-        if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
+    // Erase activity notification
+    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
 
+    while(true) {
+        // Wait till flash controller become usable
         while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
-            osDelay(1);
+            taskYIELD();
         };
 
-        __disable_irq();
+        // Just a little more love
+        taskENTER_CRITICAL();
+
+        // Actually we already have mutex for it, but specification is specification
+        if (HAL_HSEM_IsSemTaken(CFG_HW_BLOCK_FLASH_REQ_BY_CPU1_SEMID)) {
+            taskEXIT_CRITICAL();
+            continue;
+        }
+
+        // Take sempahopre and prevent core2 from anyting funky
+        if (HAL_HSEM_FastTake(CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID) != HAL_OK) {
+            taskEXIT_CRITICAL();
+            continue;
+        }
+
+        break;
     }
 }
 
-void furi_hal_bt_unlock_flash(bool erase_flag) {
+void furi_hal_bt_lock_flash(bool erase_flag) {
+    // Acquire dangerous ops mutex
+    osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
+
+    // If Core2 is running use IPC locking
     BleGlueStatus status = ble_glue_get_status();
     if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
-        __enable_irq();
-
-        if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
-
-        HAL_FLASH_Lock();
-
-        HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
+        furi_hal_bt_lock_flash_core2(erase_flag);
+    } else { 
+        HAL_FLASH_Unlock();
     }
+}
+
+static void furi_hal_bt_unlock_flash_core2(bool erase_flag) {
+    // Funky ops are ok at this point
+    HAL_HSEM_Release(CFG_HW_BLOCK_FLASH_REQ_BY_CPU2_SEMID, 0);
+
+    // Task switching is ok
+    taskEXIT_CRITICAL();
+
+    // Doesn't make much sense, does it?
+    while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY)) {
+        taskYIELD();
+    }
+
+    // Erase activity over, core2 can continue
+    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
+
+    // Lock flash controller
+    HAL_FLASH_Lock();
+
+    // Release flash controller ownership
+    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, 0);
+}
+
+void furi_hal_bt_unlock_flash(bool erase_flag) {
+    // If Core2 is running use IPC locking
+    BleGlueStatus status = ble_glue_get_status();
+    if(status == BleGlueStatusStarted || status == BleGlueStatusBleStackMissing) {
+        furi_hal_bt_unlock_flash_core2(erase_flag);
+    } else { 
+        HAL_FLASH_Lock();
+    }
+
+    // Release dangerous ops mutex
     osMutexRelease(furi_hal_bt_core2_mtx);
 }
 

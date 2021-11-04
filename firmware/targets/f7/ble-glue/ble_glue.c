@@ -127,6 +127,11 @@ static void ble_glue_sys_user_event_callback( void * pPayload ) {
         if(ble_app_init()) {
             FURI_LOG_I("Core2", "BLE stack started");
             ble_glue->status = BleGlueStatusStarted;
+            if(SHCI_C2_SetFlashActivityControl(FLASH_ACTIVITY_CONTROL_SEM7) == SHCI_Success) {
+                FURI_LOG_I("Core2", "Flash activity control switched to SEM7");
+            } else {
+                FURI_LOG_E("Core2", "Failed to switch flash activity control to SEM7");
+            }
         } else {
             FURI_LOG_E("Core2", "BLE stack startup failed");
             ble_glue->status = BleGlueStatusBleStackMissing;
