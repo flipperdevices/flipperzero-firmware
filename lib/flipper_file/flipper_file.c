@@ -25,16 +25,18 @@ void flipper_file_free(FlipperFile* flipper_file) {
     free(flipper_file);
 }
 
-bool flipper_file_open_read(FlipperFile* flipper_file, const char* filename) {
+bool flipper_file_open_existing(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
-    bool result = storage_file_open(flipper_file->file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
+    bool result = storage_file_open(
+        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_OPEN_EXISTING);
     return result;
 }
 
 bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
 
-    bool result = storage_file_open(flipper_file->file, filename, FSAM_WRITE, FSOM_OPEN_APPEND);
+    bool result =
+        storage_file_open(flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_OPEN_APPEND);
 
     // Add EOL if it is not there
     if(storage_file_size(flipper_file->file) >= 1) {
@@ -58,9 +60,10 @@ bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename) {
     return result;
 }
 
-bool flipper_file_new_write(FlipperFile* flipper_file, const char* filename) {
+bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
-    bool result = storage_file_open(flipper_file->file, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    bool result = storage_file_open(
+        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_ALWAYS);
     return result;
 }
 
@@ -220,7 +223,9 @@ bool flipper_file_delete_key_and_call(
         const char* scratch_name = "";
         if(!flipper_file_get_scratchpad_name(&scratch_name)) break;
 
-        if(!storage_file_open(scratch_file, scratch_name, FSAM_WRITE, FSOM_CREATE_ALWAYS)) break;
+        if(!storage_file_open(
+               scratch_file, scratch_name, FSAM_READ | FSAM_WRITE, FSOM_CREATE_ALWAYS))
+            break;
 
         // copy key file before key to scratchpad
         if(!file_tool_copy(flipper_file->file, scratch_file, 0, start_position)) break;
@@ -278,7 +283,7 @@ bool flipper_file_write_internal(
             switch(type) {
             case FlipperFileValueHex: {
                 const uint8_t* data = _data;
-                string_printf(value, "%" PRIX8, data[i]);
+                string_printf(value, "%02X", data[i]);
             }; break;
             case FlipperFileValueFloat: {
                 const float* data = _data;

@@ -50,7 +50,7 @@
  *     const uint16_t array_size = 4;
  *     const uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};
  *     
- *     if(!flipper_file_new_write(file, "/ext/flipper_file_test")) break;
+ *     if(!flipper_file_open_always(file, "/ext/flipper_file_test")) break;
  *     if(!flipper_file_write_header_cstr(file, "Flipper Test File", version)) break;
  *     if(!flipper_file_write_comment_cstr(file, "Just test file")) break;
  *     if(!flipper_file_write_string_cstr(file, "String", string_value)) break;
@@ -79,7 +79,7 @@
  *     string_init(file_type);
  *     string_init(string_value);
  *     
- *     if(!flipper_file_open_read(file, "/ext/flipper_file_test")) break;
+ *     if(!flipper_file_open_existing(file, "/ext/flipper_file_test")) break;
  *     if(!flipper_file_read_header(file, file_type, &version)) break;
  *     if(!flipper_file_read_string(file, "String", string_value)) break;
  *     if(!flipper_file_read_uint32(file, "UINT", &uint32_value, 1)) break;
@@ -120,15 +120,15 @@ FlipperFile* flipper_file_alloc(Storage* storage);
 void flipper_file_free(FlipperFile* flipper_file);
 
 /**
- * Open file for reading.
+ * Open existing file.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param filename File name and path
  * @return True on success
  */
-bool flipper_file_open_read(FlipperFile* flipper_file, const char* filename);
+bool flipper_file_open_existing(FlipperFile* flipper_file, const char* filename);
 
 /**
- * Open file for writing and add values to the end of file.
+ * Open existing file for writing and add values to the end of file.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param filename File name and path
  * @return True on success
@@ -136,12 +136,12 @@ bool flipper_file_open_read(FlipperFile* flipper_file, const char* filename);
 bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename);
 
 /**
- * Open file for writing. Creates a new file, or deletes the contents of the file if it already exists.
+ * Open file. Creates a new file, or deletes the contents of the file if it already exists.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param filename File name and path
  * @return True on success
  */
-bool flipper_file_new_write(FlipperFile* flipper_file, const char* filename);
+bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename);
 
 /**
  * Close the file.
@@ -355,7 +355,7 @@ bool flipper_file_write_comment(FlipperFile* flipper_file, string_t data);
 bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data);
 
 /**
- * Removes the first matching key and its value from the file. Changes the RW pointer to an unknown position.
+ * Removes the first matching key and its value from the file. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance
  * @param key Key
  * @return True on success
@@ -363,7 +363,7 @@ bool flipper_file_write_comment_cstr(FlipperFile* flipper_file, const char* data
 bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key);
 
 /**
- * Updates the value of the first matching key to a string value. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a string value. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value
@@ -372,7 +372,7 @@ bool flipper_file_delete_key(FlipperFile* flipper_file, const char* key);
 bool flipper_file_update_string(FlipperFile* flipper_file, const char* key, string_t data);
 
 /**
- * Updates the value of the first matching key to a string value. Plain C version. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a string value. Plain C version. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value
@@ -381,7 +381,7 @@ bool flipper_file_update_string(FlipperFile* flipper_file, const char* key, stri
 bool flipper_file_update_string_cstr(FlipperFile* flipper_file, const char* key, const char* data);
 
 /**
- * Updates the value of the first matching key to a uint32 array value. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a uint32 array value. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value
@@ -395,7 +395,7 @@ bool flipper_file_update_uint32(
     const uint16_t data_size);
 
 /**
- * Updates the value of the first matching key to a int32 array value. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a int32 array value. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value
@@ -409,7 +409,7 @@ bool flipper_file_update_int32(
     const uint16_t data_size);
 
 /**
- * Updates the value of the first matching key to a float array value. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a float array value. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value
@@ -423,7 +423,7 @@ bool flipper_file_update_float(
     const uint16_t data_size);
 
 /**
- * Updates the value of the first matching key to a hex array value. Changes the RW pointer to an unknown position.
+ * Updates the value of the first matching key to a hex array value. Changes the RW pointer to an undefined position.
  * @param flipper_file Pointer to a FlipperFile instance 
  * @param key Key
  * @param data Value

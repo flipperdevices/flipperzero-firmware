@@ -125,7 +125,7 @@ bool LfRfidApp::load_key_data(const char* path, RfidKey* key) {
     string_init(str_result);
 
     do {
-        if(!flipper_file_open_read(file, path)) break;
+        if(!flipper_file_open_existing(file, path)) break;
 
         // header
         uint32_t version;
@@ -169,7 +169,7 @@ bool LfRfidApp::save_key_data(const char* path, RfidKey* key) {
     bool result = false;
 
     do {
-        if(!flipper_file_new_write(file, path)) break;
+        if(!flipper_file_open_always(file, path)) break;
         if(!flipper_file_write_header_cstr(file, app_filetype, 1)) break;
         if(!flipper_file_write_comment_cstr(file, "Key type can be EM4100, H10301 or I40134"))
             break;

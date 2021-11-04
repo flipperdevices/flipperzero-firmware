@@ -184,7 +184,7 @@ bool subghz_keystore_load(SubGhzKeystore* instance, const char* file_name) {
 
     FlipperFile* flipper_file = flipper_file_alloc(storage);
     do {
-        if(!flipper_file_open_read(flipper_file, file_name)) {
+        if(!flipper_file_open_existing(flipper_file, file_name)) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to open file for read: %s", file_name);
             break;
         }
@@ -238,7 +238,7 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
 
     FlipperFile* flipper_file = flipper_file_alloc(storage);
     do {
-        if(!flipper_file_new_write(flipper_file, file_name)) {
+        if(!flipper_file_open_always(flipper_file, file_name)) {
             FURI_LOG_E(SUBGHZ_KEYSTORE_TAG, "Unable to open file for write: %s", file_name);
             break;
         }

@@ -207,7 +207,7 @@ bool iButtonApp::save_key(const char* key_name) {
         string_printf(key_file_name, "%s/%s%s", app_folder, key.get_name(), app_extension);
 
         // Open file for write
-        if(!flipper_file_new_write(file, string_get_cstr(key_file_name))) break;
+        if(!flipper_file_open_always(file, string_get_cstr(key_file_name))) break;
 
         // Write header
         if(!flipper_file_write_header_cstr(file, iButtonApp::app_filetype, 1)) break;
@@ -247,7 +247,7 @@ bool iButtonApp::load_key_data(string_t key_path) {
     string_init(data);
 
     do {
-        if(!flipper_file_open_read(file, string_get_cstr(key_path))) break;
+        if(!flipper_file_open_existing(file, string_get_cstr(key_path))) break;
 
         // header
         uint32_t version;

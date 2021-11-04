@@ -20,8 +20,8 @@ bool file_tool_write_hex(File* file, const uint8_t* data, const uint16_t data_si
         if(i != 0) {
             // space
             const char space = ' ';
-            bytes_written = storage_file_write(file, &space, sizeof(space));
-            if(bytes_written != sizeof(space)) {
+            bytes_written = storage_file_write(file, &space, sizeof(char));
+            if(bytes_written != sizeof(char)) {
                 result = false;
                 break;
             }
@@ -172,7 +172,7 @@ bool file_tool_write(File* file, const void* data, uint16_t data_size) {
 }
 
 bool file_tool_write_eol(File* file) {
-    return file_tool_write(file, &flipper_file_eoln, sizeof(flipper_file_eoln));
+    return file_tool_write(file, &flipper_file_eoln, sizeof(char));
 }
 
 bool file_tool_copy(File* file_from, File* file_to, uint64_t start_offset, uint64_t stop_offset) {
