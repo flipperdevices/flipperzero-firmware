@@ -50,7 +50,7 @@
  *     const uint16_t array_size = 4;
  *     const uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};
  *     
- *     if(!flipper_file_open_always(file, "/ext/flipper_file_test")) break;
+ *     if(!flipper_file_open_new(file, "/ext/flipper_file_test")) break;
  *     if(!flipper_file_write_header_cstr(file, "Flipper Test File", version)) break;
  *     if(!flipper_file_write_comment_cstr(file, "Just test file")) break;
  *     if(!flipper_file_write_string_cstr(file, "String", string_value)) break;
@@ -142,6 +142,14 @@ bool flipper_file_open_append(FlipperFile* flipper_file, const char* filename);
  * @return True on success
  */
 bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename);
+
+/**
+ * Open file. Creates a new file, fails if file already exists.
+ * @param flipper_file Pointer to a FlipperFile instance
+ * @param filename File name and path
+ * @return True on success
+ */
+bool flipper_file_open_new(FlipperFile* flipper_file, const char* filename);
 
 /**
  * Close the file.

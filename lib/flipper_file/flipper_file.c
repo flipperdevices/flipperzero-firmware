@@ -67,6 +67,13 @@ bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename) {
     return result;
 }
 
+bool flipper_file_open_new(FlipperFile* flipper_file, const char* filename) {
+    furi_assert(flipper_file);
+    bool result = storage_file_open(
+        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_NEW);
+    return result;
+}
+
 bool flipper_file_close(FlipperFile* flipper_file) {
     furi_assert(flipper_file);
     if(storage_file_is_open(flipper_file->file)) {
