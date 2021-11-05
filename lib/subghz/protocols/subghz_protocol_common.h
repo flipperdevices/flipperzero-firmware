@@ -3,7 +3,6 @@
 #include <m-string.h>
 #include <furi-hal.h>
 #include <stdint.h>
-#include "file-worker.h"
 #include <lib/flipper_file/flipper_file.h>
 
 #define bit_read(value, bit) (((value) >> (bit)) & 0x01)

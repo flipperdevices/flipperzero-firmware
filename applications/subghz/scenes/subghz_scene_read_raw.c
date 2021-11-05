@@ -106,11 +106,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->rx_key_state != SubGhzRxKeyStateIDLE) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
+                subghz_get_preset_name(subghz, subghz->error_str);
                 if(subghz_protocol_raw_save_to_file_init(
                        (SubGhzProtocolRAW*)subghz->txrx->protocol_result,
                        "Raw_temp",
                        subghz->txrx->frequency,
-                       subghz->txrx->preset)) {
+                       string_get_cstr(subghz->error_str))) {
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                         subghz_begin(subghz, subghz->txrx->preset);
@@ -127,14 +128,14 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
         case SubghzCustomEventViewReadRAWMore:
             if(strcmp(
-                   subghz_protocol_get_last_file_name(
+                   subghz_protocol_raw_get_last_file_name(
                        (SubGhzProtocolRAW*)subghz->txrx->protocol_result),
                    "")) {
                 strlcpy(
                     subghz->file_name,
-                    subghz_protocol_get_last_file_name(
+                    subghz_protocol_raw_get_last_file_name(
                         (SubGhzProtocolRAW*)subghz->txrx->protocol_result),
-                    strlen(subghz_protocol_get_last_file_name(
+                    strlen(subghz_protocol_raw_get_last_file_name(
                         (SubGhzProtocolRAW*)subghz->txrx->protocol_result)) +
                         1);
                 //set the path to read the file
@@ -145,7 +146,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     SUBGHZ_APP_PATH_FOLDER,
                     subghz->file_name,
                     SUBGHZ_APP_EXTENSION);
-                subghz_protocol_set_last_file_name(
+                subghz_protocol_raw_set_last_file_name(
                     (SubGhzProtocolRAW*)subghz->txrx->protocol_result, string_get_cstr(temp_str));
                 string_clear(temp_str);
 

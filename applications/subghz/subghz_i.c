@@ -6,12 +6,11 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <notification/notification-messages.h>
-#include "file-worker.h"
 #include <lib/flipper_file/flipper_file.h>
 #include "../notification/notification.h"
 #include "views/subghz_receiver.h"
 
-static bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
+bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
         subghz->txrx->preset = FuriHalSubGhzPresetOok270Async;
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
@@ -27,7 +26,7 @@ static bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
     return true;
 }
 
-static bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
+bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
     const char* preset_name;
     switch(subghz->txrx->preset) {
     case FuriHalSubGhzPresetOok270Async:
@@ -250,23 +249,22 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
 bool subghz_get_next_name_file(SubGhz* subghz) {
     furi_assert(subghz);
 
-    FileWorker* file_worker = file_worker_alloc(false);
+    Storage* storage = furi_record_open("storage");
     string_t temp_str;
     string_init(temp_str);
     bool res = false;
 
     if(strcmp(subghz->file_name, "")) {
         //get the name of the next free file
-        file_worker_get_next_filename(
-            file_worker, SUBGHZ_RAW_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
+        storage_get_next_filename(
+            storage, SUBGHZ_RAW_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
 
         memcpy(subghz->file_name, string_get_cstr(temp_str), strlen(string_get_cstr(temp_str)));
         res = true;
     }
 
     string_clear(temp_str);
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
+    furi_record_close("storage");
 
     return res;
 }
