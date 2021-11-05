@@ -7,6 +7,13 @@
 
 #include <m-string.h>
 #include <stdbool.h>
+#include <gap.h>
+#include <serial_service.h>
+#include <ble_glue.h>
+#include <ble_app.h>
+
+
+#define FURI_HAL_BT_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,11 +23,17 @@ extern "C" {
  */
 void furi_hal_bt_init();
 
-/** Start BLE app
+/** Start 2nd core and BLE stack
  *
- * @return     true if app inited
+ * @return true on success
  */
-bool furi_hal_bt_init_app();
+bool furi_hal_bt_start_core2();
+
+/** Start BLE app
+ * @param event_cb - BleEventCallback instance
+ * @param context - pointer to context
+*/
+bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context);
 
 /** Start advertising
  */
@@ -48,19 +61,50 @@ void furi_hal_bt_dump_state(string_t buffer);
  */
 bool furi_hal_bt_is_alive();
 
-/** Wait for Core2 startup
+/** Get key storage buffer address and size
  *
- * @return     true if success, otherwise timeouted
+ * @param       key_buff_addr   pointer to store buffer address
+ * @param       key_buff_size   pointer to store buffer size
+ *
+ * @return      true on success
  */
-bool furi_hal_bt_wait_startup();
+bool furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size);
+
+/** Get SRAM2 hardware semaphore
+ * @note Must be called before SRAM2 read/write operations
+ */
+void furi_hal_bt_nvm_sram_sem_acquire();
+
+/** Release SRAM2 hardware semaphore
+ * @note Must be called after SRAM2 read/write operations
+ */
+void furi_hal_bt_nvm_sram_sem_release();
+
+/** Set key storage change callback
+ *
+ * @param       callback    BleGlueKeyStorageChangedCallback instance
+ * @param       context     pointer to context
+ */
+void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallback callback, void* context);
+
+/** Set data event callbacks
+ * @param on_received_cb - SerialSvcDataReceivedCallback instance
+ * @param on_sent_cb - SerialSvcDataSentCallback instance
+ * @param context - pointer to context
+ */
+void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+
+/** Send data through BLE
+ * @param data - data buffer
+ * @param size - data buffer size
+ */
+bool furi_hal_bt_tx(uint8_t* data, uint16_t size);
 
 /** Lock shared access to flash controller
  *
  * @param[in]  erase_flag  true if erase operation
- *
- * @return     true if lock was successful, false if not
  */
-bool furi_hal_bt_lock_flash(bool erase_flag);
+void furi_hal_bt_lock_flash(bool erase_flag);
 
 /** Unlock shared access to flash controller
  *

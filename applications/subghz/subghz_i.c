@@ -16,7 +16,7 @@ void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset) {
     furi_hal_subghz_idle();
     furi_hal_subghz_load_preset(preset);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
-    subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+    subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
 uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
@@ -59,7 +59,7 @@ void subghz_idle(SubGhz* subghz) {
     furi_assert(subghz);
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
-    subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+    subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
 void subghz_rx_end(SubGhz* subghz) {
@@ -70,7 +70,7 @@ void subghz_rx_end(SubGhz* subghz) {
         furi_hal_subghz_stop_async_rx();
     }
     furi_hal_subghz_idle();
-    subghz->txrx->txrx_state = SubGhzTxRxStateIdle;
+    subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
 void subghz_sleep(SubGhz* subghz) {
@@ -191,7 +191,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
         if(!subghz->txrx->protocol_result->to_load_protocol_from_file(
-               file_worker, subghz->txrx->protocol_result)) {
+               file_worker, subghz->txrx->protocol_result, string_get_cstr(path))) {
             break;
         }
         loaded = true;
@@ -206,6 +206,30 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
     file_worker_free(file_worker);
 
     return loaded;
+}
+
+bool subghz_get_next_name_file(SubGhz* subghz) {
+    furi_assert(subghz);
+
+    FileWorker* file_worker = file_worker_alloc(false);
+    string_t temp_str;
+    string_init(temp_str);
+    bool res = false;
+
+    if(strcmp(subghz->file_name, "")) {
+        //get the name of the next free file
+        file_worker_get_next_filename(
+            file_worker, SUBGHZ_RAW_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION, temp_str);
+
+        memcpy(subghz->file_name, string_get_cstr(temp_str), strlen(string_get_cstr(temp_str)));
+        res = true;
+    }
+
+    string_clear(temp_str);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+
+    return res;
 }
 
 bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
@@ -334,8 +358,10 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
         if(subghz->txrx->protocol_result == NULL) {
             break;
         }
-        if(!subghz->txrx->protocol_result->to_load_protocol_from_file(
-               file_worker, subghz->txrx->protocol_result)) {
+
+        if(subghz->txrx->protocol_result->to_load_protocol_from_file == NULL ||
+           !subghz->txrx->protocol_result->to_load_protocol_from_file(
+               file_worker, subghz->txrx->protocol_result, string_get_cstr(protocol_file_name))) {
             break;
         }
         res = true;
@@ -352,6 +378,28 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     file_worker_free(file_worker);
 
     return res;
+}
+
+bool subghz_rename_file(SubGhz* subghz) {
+    furi_assert(subghz);
+    bool ret = false;
+    string_t old_path;
+    string_t new_path;
+
+    FileWorker* file_worker = file_worker_alloc(false);
+
+    string_init_printf(
+        old_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name_tmp, SUBGHZ_APP_EXTENSION);
+
+    string_init_printf(
+        new_path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
+
+    ret = file_worker_rename(file_worker, string_get_cstr(old_path), string_get_cstr(new_path));
+    string_clear(old_path);
+    string_clear(new_path);
+    file_worker_close(file_worker);
+    file_worker_free(file_worker);
+    return ret;
 }
 
 bool subghz_delete_file(SubGhz* subghz) {
@@ -442,7 +490,7 @@ void subghz_hopper_update(SubGhz* subghz) {
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
     };
-    if(subghz->txrx->txrx_state == SubGhzTxRxStateIdle) {
+    if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_parser_reset(subghz->txrx->parser);
         subghz->txrx->frequency = subghz_hopper_frequencies[subghz->txrx->hopper_idx_frequency];
         subghz_rx(subghz, subghz->txrx->frequency);

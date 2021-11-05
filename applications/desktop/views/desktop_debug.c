@@ -42,7 +42,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
             my_name ? my_name : "Unknown");
         canvas_draw_str(canvas, 5, 23, buffer);
 
-        ver = m->screen == DesktopViewStatsBoot ? furi_hal_version_get_boot_version() :
+        ver = m->screen == DesktopViewStatsBoot ? furi_hal_version_get_bootloader_version() :
                                                   furi_hal_version_get_firmware_version();
 
         if(!ver) {
@@ -67,7 +67,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         canvas_draw_str(canvas, 5, 43, buffer);
 
         snprintf(
-            buffer, sizeof(buffer), "[%s] %s", version_get_target(ver), version_get_gitbranch(ver));
+            buffer, sizeof(buffer), "[%d] %s", version_get_target(ver), version_get_gitbranch(ver));
         canvas_draw_str(canvas, 5, 54, buffer);
 
     } else {

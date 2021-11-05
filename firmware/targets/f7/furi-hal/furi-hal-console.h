@@ -9,6 +9,10 @@ extern "C" {
 
 void furi_hal_console_init();
 
+void furi_hal_console_enable();
+
+void furi_hal_console_disable();
+
 void furi_hal_console_tx(const uint8_t* buffer, size_t buffer_size);
 
 void furi_hal_console_tx_with_new_line(const uint8_t* buffer, size_t buffer_size);

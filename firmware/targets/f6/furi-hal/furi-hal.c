@@ -16,7 +16,7 @@ void furi_hal_init() {
 
     MX_RTC_Init();
     FURI_LOG_I("HAL", "RTC OK");
-    furi_hal_boot_init();
+    furi_hal_bootloader_init();
     furi_hal_version_init();
 
     furi_hal_spi_init();
@@ -33,9 +33,9 @@ void furi_hal_init() {
     furi_hal_crypto_init();
 
     // VCP + USB
-    furi_hal_vcp_init();
     furi_hal_usb_init();
     furi_hal_usb_set_config(UsbModeVcpSingle);
+    furi_hal_vcp_init();
     FURI_LOG_I("HAL", "USB OK");
 
     furi_hal_i2c_init();
@@ -48,6 +48,7 @@ void furi_hal_init() {
     furi_hal_nfc_init();
     furi_hal_rfid_init();
     furi_hal_bt_init();
+    furi_hal_compress_icon_init();
 
     // FreeRTOS glue
     furi_hal_os_init();

@@ -189,7 +189,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     } else if(input_event->type == InputTypePress) {
         gui->ongoing_input |= key_bit;
     } else if(!(gui->ongoing_input & key_bit)) {
-        FURI_LOG_W(
+        FURI_LOG_D(
             "Gui",
             "non-complementary input, discarding key: %s type: %s, sequence: %p",
             input_get_key_name(input_event->key),
@@ -211,7 +211,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     if(view_port && view_port == gui->ongoing_input_view_port) {
         view_port_input(view_port, input_event);
     } else if(gui->ongoing_input_view_port && input_event->type == InputTypeRelease) {
-        FURI_LOG_W(
+        FURI_LOG_D(
             "Gui",
             "ViewPort changed while key press %p -> %p. Sending key: %s, type: %s, sequence: %p to previous view port",
             gui->ongoing_input_view_port,
@@ -221,7 +221,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
             input_event->sequence);
         view_port_input(gui->ongoing_input_view_port, input_event);
     } else {
-        FURI_LOG_W(
+        FURI_LOG_D(
             "Gui",
             "ViewPort changed while key press %p -> %p. Discarding key: %s, type: %s, sequence: %p",
             gui->ongoing_input_view_port,
@@ -258,8 +258,7 @@ void gui_cli_screen_stream_callback(uint8_t* data, size_t size, void* context) {
 void gui_cli_screen_stream(Cli* cli, string_t args, void* context) {
     furi_assert(context);
     Gui* gui = context;
-    gui_set_framebuffer_callback_context(gui, gui);
-    gui_set_framebuffer_callback(gui, gui_cli_screen_stream_callback);
+    gui_set_framebuffer_callback(gui, gui_cli_screen_stream_callback, gui);
     gui_redraw(gui);
 
     // Wait for control events
@@ -279,8 +278,7 @@ void gui_cli_screen_stream(Cli* cli, string_t args, void* context) {
         }
     }
 
-    gui_set_framebuffer_callback(gui, NULL);
-    gui_set_framebuffer_callback_context(gui, NULL);
+    gui_set_framebuffer_callback(gui, NULL, NULL);
 }
 
 void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
@@ -387,14 +385,12 @@ void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port) {
     gui_unlock(gui);
 }
 
-void gui_set_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback) {
+void gui_set_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context) {
     furi_assert(gui);
+    gui_lock(gui);
     gui->canvas_callback = callback;
-}
-
-void gui_set_framebuffer_callback_context(Gui* gui, void* context) {
-    furi_assert(gui);
     gui->canvas_callback_context = context;
+    gui_unlock(gui);
 }
 
 Gui* gui_alloc() {
@@ -414,7 +410,7 @@ Gui* gui_alloc() {
     gui->input_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
     gui->input_events = furi_record_open("input_events");
     furi_check(gui->input_events);
-    subscribe_pubsub(gui->input_events, gui_input_events_callback, gui);
+    furi_pubsub_subscribe(gui->input_events, gui_input_events_callback, gui);
     // Cli
     gui->cli = furi_record_open("cli");
     cli_add_command(

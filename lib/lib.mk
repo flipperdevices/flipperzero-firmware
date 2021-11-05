@@ -9,8 +9,7 @@ CFLAGS			+= -I$(LIB_DIR)/mlib
 # U8G2 display library
 U8G2_DIR		= $(LIB_DIR)/u8g2
 CFLAGS			+= -I$(U8G2_DIR)
-C_SOURCES		+= $(U8G2_DIR)/u8x8_d_st7565.c
-C_SOURCES		+= $(U8G2_DIR)/u8g2_d_setup.c
+C_SOURCES		+= $(U8G2_DIR)/u8g2_glue.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_intersection.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_setup.c
 C_SOURCES		+= $(U8G2_DIR)/u8g2_d_memory.c
@@ -38,7 +37,7 @@ C_SOURCES		+= $(FATFS_DIR)/option/unicode.c
 
 # Little FS
 LITTLEFS_DIR	= $(LIB_DIR)/littlefs
-CFLAGS			+= -I$(LITTLEFS_DIR)
+CFLAGS			+= -I$(LITTLEFS_DIR) -DLFS_CONFIG=lfs_config.h
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs.c
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs_util.c
 
@@ -113,3 +112,15 @@ CPP_SOURCES		+= $(wildcard $(LIB_DIR)/toolbox/*.cpp)
 # USB Stack
 CFLAGS			+= -I$(LIB_DIR)/libusb_stm32/inc
 C_SOURCES		+= $(wildcard $(LIB_DIR)/libusb_stm32/src/*.c)
+
+# protobuf
+CFLAGS			+= -I$(LIB_DIR)/nanopb
+C_SOURCES		+= $(wildcard $(LIB_DIR)/nanopb/*.c)
+
+# heatshrink
+CFLAGS			+= -I$(LIB_DIR)/heatshrink
+C_SOURCES		+= $(wildcard $(LIB_DIR)/heatshrink/*.c)
+
+# Toolbox
+CFLAGS			+= -I$(LIB_DIR)/flipper_file
+C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_file/*.c)

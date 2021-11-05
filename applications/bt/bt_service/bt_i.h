@@ -11,13 +11,21 @@
 
 #include <dialogs/dialogs.h>
 #include <power/power_service/power.h>
+#include <applications/rpc/rpc.h>
 
 #include "../bt_settings.h"
+
+typedef enum {
+    BtStatusOff,
+    BtStatusAdvertising,
+    BtStatusConnected,
+} BtStatus;
 
 typedef enum {
     BtMessageTypeUpdateStatusbar,
     BtMessageTypeUpdateBatteryLevel,
     BtMessageTypePinCodeShow,
+    BtMessageTypeKeysStorageUpdated,
 } BtMessageType;
 
 typedef union {
@@ -31,11 +39,17 @@ typedef struct {
 } BtMessage;
 
 struct Bt {
+    uint8_t* bt_keys_addr_start;
+    uint16_t bt_keys_size;
     BtSettings bt_settings;
+    BtStatus status;
     osMessageQueueId_t message_queue;
     Gui* gui;
     ViewPort* statusbar_view_port;
     DialogsApp* dialogs;
     DialogMessage* dialog_message;
     Power* power;
+    Rpc* rpc;
+    RpcSession* rpc_session;
+    osSemaphoreId_t rpc_sem;
 };

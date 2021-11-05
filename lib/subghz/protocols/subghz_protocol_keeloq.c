@@ -69,7 +69,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
         M_EACH(manufacture_code, *subghz_keystore_get_data(instance->keystore), SubGhzKeyArray_t) {
             switch(manufacture_code->type) {
             case KEELOQ_LEARNING_SIMPLE:
-                //Simple Learning
+                // Simple Learning
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, manufacture_code->key);
                 if((decrypt >> 28 == btn) &&
                    (((((uint16_t)(decrypt >> 16)) & 0x3FF) == end_serial) ||
@@ -436,7 +436,8 @@ void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t
 
 bool subghz_protocol_keeloq_to_load_protocol_from_file(
     FileWorker* file_worker,
-    SubGhzProtocolKeeloq* instance) {
+    SubGhzProtocolKeeloq* instance,
+    const char* file_path) {
     bool loaded = false;
     string_t temp_str;
     string_init(temp_str);

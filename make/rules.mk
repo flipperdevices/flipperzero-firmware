@@ -32,7 +32,7 @@ CHECK_AND_REINIT_SUBMODULES_SHELL=\
 	fi
 $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
-all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu
+all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
@@ -53,6 +53,10 @@ $(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).hex
 		-i $(OBJ_DIR)/$(PROJECT).hex \
 		-o $(OBJ_DIR)/$(PROJECT).dfu \
 		-l "Flipper Zero $(shell echo $(TARGET) | tr a-z A-Z)" > /dev/null
+
+$(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
+	@echo "\tJSON\t" $@
+	@python3 ../scripts/meta.py -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $< "->" $@
@@ -125,14 +129,6 @@ zz: clean
 zzz: clean
 	$(MAKE) debug
 
-FORMAT_SOURCES := $(shell find ../applications -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-FORMAT_SOURCES += $(shell find ../bootloader -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-FORMAT_SOURCES += $(shell find ../core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-
-format:
-	@echo "Formatting sources with clang-format"
-	@clang-format -style=file -i $(FORMAT_SOURCES)
-
 generate_cscope_db:
 	@echo "$(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES)" | tr ' ' '\n' > $(OBJ_DIR)/source.list.p
 	@cat ~/headers.list >> $(OBJ_DIR)/source.list.p
@@ -140,7 +136,7 @@ generate_cscope_db:
 	@cscope -b -k -i $(OBJ_DIR)/source.list -f $(OBJ_DIR)/cscope.out
 	@rm -rf $(OBJ_DIR)/source.list $(OBJ_DIR)/source.list.p
 
+# Prevent make from trying to find .d targets
+%.d: ;
 
-ifneq ("$(wildcard $(OBJ_DIR)/*.d)","")
 -include $(DEPS)
-endif
