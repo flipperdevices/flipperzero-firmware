@@ -2,10 +2,6 @@
 
 #include "subghz_protocol_common.h"
 
-#define SUBGHZ_RAW_TAG "SubGhzRAW"
-#define SUBGHZ_RAW_FILE_VERSION 1
-#define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
-
 typedef struct SubGhzProtocolRAW SubGhzProtocolRAW;
 
 /** Allocate SubGhzProtocolRAW

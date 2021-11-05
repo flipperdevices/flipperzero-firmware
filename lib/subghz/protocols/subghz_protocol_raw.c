@@ -32,7 +32,7 @@ SubGhzProtocolRAW* subghz_protocol_raw_alloc(void) {
     instance->last_level = false;
 
     instance->storage = furi_record_open("storage");
-    //instance->flipper_file = flipper_file_alloc(instance->storage);
+    instance->flipper_file = flipper_file_alloc(instance->storage);
     instance->file_is_open = RAWFileIsOpenClose;
     string_init(instance->file_name);
 
@@ -139,7 +139,7 @@ bool subghz_protocol_raw_save_to_file_init(
     const char* preset) {
     furi_assert(instance);
 
-    instance->flipper_file = flipper_file_alloc(instance->storage);
+    //instance->flipper_file = flipper_file_alloc(instance->storage);
     string_t dev_file_name;
     string_init(dev_file_name);
     bool init = false;

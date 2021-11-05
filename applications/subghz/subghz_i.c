@@ -194,11 +194,14 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(strcmp(string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE) != 0 ||
-           version != SUBGHZ_KEY_FILE_VERSION) {
+        if(((!strcmp(string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE)) ||
+            (!strcmp(string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
+           version == SUBGHZ_KEY_FILE_VERSION) {
+
+           } else {
             FURI_LOG_E(SUBGHZ_KEY_TAG, "Type or version mismatch");
             break;
-        }
+           }
 
         if(!flipper_file_read_uint32(
                flipper_file, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {

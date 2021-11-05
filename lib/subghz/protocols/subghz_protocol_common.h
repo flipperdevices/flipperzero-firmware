@@ -25,6 +25,11 @@
 #define SUBGHZ_KEY_FILE_VERSION 1
 #define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
 
+#define SUBGHZ_RAW_TAG "SubGhzRAW"
+#define SUBGHZ_RAW_FILE_VERSION 1
+#define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
+
+
 typedef enum {
     SubGhzProtocolCommonTypeUnknown,
     SubGhzProtocolCommonTypeStatic,
