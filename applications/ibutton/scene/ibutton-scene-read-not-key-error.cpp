@@ -22,7 +22,7 @@ void iButtonSceneReadNotKeyError::on_enter(iButtonApp* app) {
         key_data[5],
         key_data[6],
         key_data[7],
-        maxim_crc8(key_data, 7));
+        maxim_crc8(key_data, 7, MAXIM_CRC8_INIT));
 
     dialog_ex_set_header(dialog_ex, "ERROR:", 64, 10, AlignCenter, AlignCenter);
     dialog_ex_set_text(dialog_ex, app->get_text_store(), 64, 19, AlignCenter, AlignTop);

@@ -15,7 +15,7 @@ OneWireDevice::OneWireDevice(
     id_storage[4] = id_5;
     id_storage[5] = id_6;
     id_storage[6] = id_7;
-    id_storage[7] = maxim_crc8(id_storage, 7);
+    id_storage[7] = maxim_crc8(id_storage, 7, MAXIM_CRC8_INIT);
 }
 
 OneWireDevice::~OneWireDevice() {

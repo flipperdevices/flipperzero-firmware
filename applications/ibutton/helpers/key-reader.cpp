@@ -15,7 +15,7 @@ KeyReader::Error KeyReader::read(iButtonKey* key) {
         switch(key_type) {
         case iButtonKeyType::KeyDallas:
             if(verify_key(key_type, tmp_key_data, 8)) {
-                if(maxim_crc8(tmp_key_data, 8) == 0) {
+                if(maxim_crc8(tmp_key_data, 8, MAXIM_CRC8_INIT) == 0) {
                     if(tmp_key_data[0] == 0x01) {
                         result = KeyReader::Error::OK;
                     } else {
