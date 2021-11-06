@@ -1,13 +1,13 @@
 #include "nfc_device.h"
 
 #include <lib/toolbox/path.h>
-#include <lib/toolbox/flipper-file.h>
+#include <lib/flipper_file/flipper_file.h>
 
 static const char* nfc_app_folder = "/any/nfc";
 static const char* nfc_app_extension = ".nfc";
 static const char* nfc_app_shadow_extension = ".shd";
 static const char* nfc_file_header = "Flipper NFC device";
-static const uint32_t nfc_file_version = 1;
+static const uint32_t nfc_file_version = 2;
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* nfc_dev = furi_alloc(sizeof(NfcDevice));
@@ -25,13 +25,13 @@ void nfc_device_free(NfcDevice* nfc_dev) {
 
 void nfc_device_prepare_format_string(NfcDevice* dev, string_t format_string) {
     if(dev->format == NfcDeviceSaveFormatUid) {
-        string_set_str(format_string, "UID\n");
+        string_set_str(format_string, "UID");
     } else if(dev->format == NfcDeviceSaveFormatBankCard) {
-        string_set_str(format_string, "Bank card\n");
+        string_set_str(format_string, "Bank card");
     } else if(dev->format == NfcDeviceSaveFormatMifareUl) {
-        string_set_str(format_string, "Mifare Ultralight\n");
+        string_set_str(format_string, "Mifare Ultralight");
     } else {
-        string_set_str(format_string, "Unknown\n");
+        string_set_str(format_string, "Unknown");
     }
 }
 
@@ -61,34 +61,33 @@ static bool nfc_device_save_mifare_ul_data(FlipperFile* file, NfcDevice* dev) {
     // Save Mifare Ultralight specific data
     do {
         if(!flipper_file_write_comment_cstr(file, "Mifare Ultralight specific data")) break;
-        if(!flipper_file_write_hex_array(
-               file, "Signature", data->signature, sizeof(data->signature)))
+        if(!flipper_file_write_hex(file, "Signature", data->signature, sizeof(data->signature)))
             break;
-        if(!flipper_file_write_hex_array(
+        if(!flipper_file_write_hex(
                file, "Mifare version", (uint8_t*)&data->version, sizeof(data->version)))
             break;
         // Write conters and tearing flags data
         bool counters_saved = true;
         for(uint8_t i = 0; i < 3; i++) {
             string_printf(temp_str, "Counter %d", i);
-            if(!flipper_file_write_uint32(file, string_get_cstr(temp_str), data->counter[i])) {
+            if(!flipper_file_write_uint32(file, string_get_cstr(temp_str), &data->counter[i], 1)) {
                 counters_saved = false;
                 break;
             }
             string_printf(temp_str, "Tearing %d", i);
-            if(!flipper_file_write_hex_array(
-                   file, string_get_cstr(temp_str), &data->tearing[i], 1)) {
+            if(!flipper_file_write_hex(file, string_get_cstr(temp_str), &data->tearing[i], 1)) {
                 counters_saved = false;
                 break;
             }
         }
         if(!counters_saved) break;
         // Write pages data
-        if(!flipper_file_write_uint32(file, "Pages total", data->data_size / 4)) break;
+        uint32_t pages_total = data->data_size / 4;
+        if(!flipper_file_write_uint32(file, "Pages total", &pages_total, 1)) break;
         bool pages_saved = true;
         for(uint16_t i = 0; i < data->data_size; i += 4) {
             string_printf(temp_str, "Page %d", i / 4);
-            if(!flipper_file_write_hex_array(file, string_get_cstr(temp_str), &data->data[i], 4)) {
+            if(!flipper_file_write_hex(file, string_get_cstr(temp_str), &data->data[i], 4)) {
                 pages_saved = false;
                 break;
             }
@@ -109,24 +108,22 @@ bool nfc_device_load_mifare_ul_data(FlipperFile* file, NfcDevice* dev) {
 
     do {
         // Read signature
-        if(!flipper_file_read_hex_array(
-               file, "Signature", data->signature, sizeof(data->signature)))
+        if(!flipper_file_read_hex(file, "Signature", data->signature, sizeof(data->signature)))
             break;
         // Read Mifare version
-        if(!flipper_file_read_hex_array(
+        if(!flipper_file_read_hex(
                file, "Mifare version", (uint8_t*)&data->version, sizeof(data->version)))
             break;
         // Read counters and tearing flags
         bool counters_parsed = true;
         for(uint8_t i = 0; i < 3; i++) {
             string_printf(temp_str, "Counter %d", i);
-            if(!flipper_file_read_uint32(file, string_get_cstr(temp_str), &data->counter[i])) {
+            if(!flipper_file_read_uint32(file, string_get_cstr(temp_str), &data->counter[i], 1)) {
                 counters_parsed = false;
                 break;
             }
             string_printf(temp_str, "Tearing %d", i);
-            if(!flipper_file_read_hex_array(
-                   file, string_get_cstr(temp_str), &data->tearing[i], 1)) {
+            if(!flipper_file_read_hex(file, string_get_cstr(temp_str), &data->tearing[i], 1)) {
                 counters_parsed = false;
                 break;
             }
@@ -134,13 +131,12 @@ bool nfc_device_load_mifare_ul_data(FlipperFile* file, NfcDevice* dev) {
         if(!counters_parsed) break;
         // Read pages
         uint32_t pages = 0;
-        if(!flipper_file_read_uint32(file, "Pages total", &pages)) break;
+        if(!flipper_file_read_uint32(file, "Pages total", &pages, 1)) break;
         data->data_size = pages * 4;
         bool pages_parsed = true;
         for(uint16_t i = 0; i < pages; i++) {
             string_printf(temp_str, "Page %d", i);
-            if(!flipper_file_read_hex_array(
-                   file, string_get_cstr(temp_str), &data->data[i * 4], 4)) {
+            if(!flipper_file_read_hex(file, string_get_cstr(temp_str), &data->data[i * 4], 4)) {
                 pages_parsed = false;
                 break;
             }
@@ -156,24 +152,25 @@ bool nfc_device_load_mifare_ul_data(FlipperFile* file, NfcDevice* dev) {
 static bool nfc_device_save_bank_card_data(FlipperFile* file, NfcDevice* dev) {
     bool saved = false;
     NfcEmvData* data = &dev->dev_data.emv_data;
+    uint32_t data_temp = 0;
 
     do {
         // Write Bank card specific data
         if(!flipper_file_write_comment_cstr(file, "Bank card specific data")) break;
-        if(!flipper_file_write_uint32(file, "AID len", data->aid_len)) break;
-        if(!flipper_file_write_hex_array(file, "AID", data->aid, data->aid_len)) break;
+        if(!flipper_file_write_hex(file, "AID", data->aid, data->aid_len)) break;
         if(!flipper_file_write_string_cstr(file, "Name", data->name)) break;
-        if(!flipper_file_write_uint32(file, "Number len", data->number_len)) break;
-        if(!flipper_file_write_hex_array(file, "Number", data->number, data->number_len)) break;
+        if(!flipper_file_write_hex(file, "Number", data->number, data->number_len)) break;
         if(data->exp_mon) {
             uint8_t exp_data[2] = {data->exp_mon, data->exp_year};
-            if(!flipper_file_write_hex_array(file, "Exp data", exp_data, sizeof(exp_data))) break;
+            if(!flipper_file_write_hex(file, "Exp data", exp_data, sizeof(exp_data))) break;
         }
         if(data->country_code) {
-            if(!flipper_file_write_uint32(file, "Country code", data->country_code)) break;
+            data_temp = data->country_code;
+            if(!flipper_file_write_uint32(file, "Country code", &data_temp, 1)) break;
         }
         if(data->currency_code) {
-            if(!flipper_file_write_uint32(file, "Currency code", data->currency_code)) break;
+            data_temp = data->currency_code;
+            if(!flipper_file_write_uint32(file, "Currency code", &data_temp, 1)) break;
         }
         saved = true;
     } while(false);
@@ -185,32 +182,32 @@ bool nfc_device_load_bank_card_data(FlipperFile* file, NfcDevice* dev) {
     bool parsed = false;
     NfcEmvData* data = &dev->dev_data.emv_data;
     memset(data, 0, sizeof(NfcEmvData));
+    uint32_t data_cnt = 0;
     string_t temp_str;
     string_init(temp_str);
-    uint32_t temp_uint32 = 0;
 
     do {
         // Load essential data
-        if(!flipper_file_read_uint32(file, "AID len", &temp_uint32)) break;
-        data->aid_len = temp_uint32;
-        if(!flipper_file_read_hex_array(file, "AID", data->aid, data->aid_len)) break;
+        if(!flipper_file_get_value_count(file, "AID", &data_cnt)) break;
+        data->aid_len = data_cnt;
+        if(!flipper_file_read_hex(file, "AID", data->aid, data->aid_len)) break;
         if(!flipper_file_read_string(file, "Name", temp_str)) break;
         strlcpy(data->name, string_get_cstr(temp_str), sizeof(data->name));
-        if(!flipper_file_read_uint32(file, "Number len", &temp_uint32)) break;
-        data->number_len = temp_uint32;
-        if(!flipper_file_read_hex_array(file, "Number", data->number, data->number_len)) break;
+        if(!flipper_file_get_value_count(file, "Number", &data_cnt)) break;
+        data->number_len = data_cnt;
+        if(!flipper_file_read_hex(file, "Number", data->number, data->number_len)) break;
         parsed = true;
         // Load optional data
         uint8_t exp_data[2] = {};
-        if(flipper_file_read_hex_array(file, "Exp data", exp_data, 2)) {
+        if(flipper_file_read_hex(file, "Exp data", exp_data, 2)) {
             data->exp_mon = exp_data[0];
             data->exp_year = exp_data[1];
         }
-        if(flipper_file_read_uint32(file, "Country code", &temp_uint32)) {
-            data->country_code = temp_uint32;
+        if(flipper_file_read_uint32(file, "Country code", &data_cnt, 1)) {
+            data->country_code = data_cnt;
         }
-        if(flipper_file_read_uint32(file, "Currency code", &temp_uint32)) {
-            data->currency_code = temp_uint32;
+        if(flipper_file_read_uint32(file, "Currency code", &data_cnt, 1)) {
+            data->currency_code = data_cnt;
         }
     } while(false);
 
@@ -242,9 +239,8 @@ static bool nfc_device_save_file(
         if(!storage_simply_mkdir(dev->storage, nfc_app_folder)) break;
         // First remove nfc device file if it was saved
         string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
-        if(!storage_simply_remove(dev->storage, string_get_cstr(temp_str))) break;
         // Open file
-        if(!flipper_file_new_write(file, string_get_cstr(temp_str))) break;
+        if(!flipper_file_open_always(file, string_get_cstr(temp_str))) break;
         // Write header
         if(!flipper_file_write_header_cstr(file, nfc_file_header, nfc_file_version)) break;
         // Write nfc device type
@@ -256,10 +252,9 @@ static bool nfc_device_save_file(
         // Write UID, ATQA, SAK
         if(!flipper_file_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
             break;
-        if(!flipper_file_write_uint32(file, "UID len", data->uid_len)) break;
-        if(!flipper_file_write_hex_array(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_file_write_hex_array(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_file_write_hex_array(file, "SAK", &data->sak, 1)) break;
+        if(!flipper_file_write_hex(file, "UID", data->uid, data->uid_len)) break;
+        if(!flipper_file_write_hex(file, "ATQA", data->atqa, 2)) break;
+        if(!flipper_file_write_hex(file, "SAK", &data->sak, 1)) break;
         // Save more data if necessary
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_save_mifare_ul_data(file, dev)) break;
@@ -291,9 +286,10 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
     bool parsed = false;
     FlipperFile* file = flipper_file_alloc(dev->storage);
     NfcDeviceCommonData* data = &dev->dev_data.nfc_data;
-    uint32_t temp_uint32 = 0;
+    uint32_t data_cnt = 0;
     string_t temp_str;
     string_init(temp_str);
+    bool depricated_version = false;
 
     do {
         // Check existance of shadow file
@@ -304,23 +300,27 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
             storage_common_stat(dev->storage, string_get_cstr(temp_str), NULL) == FSE_OK;
         // Open shadow file if it exists. If not - open original
         if(dev->shadow_file_exist) {
-            if(!flipper_file_open_read(file, string_get_cstr(temp_str))) break;
+            if(!flipper_file_open_existing(file, string_get_cstr(temp_str))) break;
         } else {
-            if(!flipper_file_open_read(file, string_get_cstr(path))) break;
+            if(!flipper_file_open_existing(file, string_get_cstr(path))) break;
         }
         // Read and verify file header
         uint32_t version = 0;
         if(!flipper_file_read_header(file, temp_str, &version)) break;
+        if(version != nfc_file_version) {
+            depricated_version = true;
+            break;
+        }
         if(string_cmp_str(temp_str, nfc_file_header) || (version != nfc_file_version)) break;
         // Read Nfc device type
         if(!flipper_file_read_string(file, "Device type", temp_str)) break;
         if(!nfc_device_parse_format_string(dev, temp_str)) break;
         // Read and parse UID, ATQA and SAK
-        if(!flipper_file_read_uint32(file, "UID len", &temp_uint32)) break;
-        data->uid_len = temp_uint32;
-        if(!flipper_file_read_hex_array(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_file_read_hex_array(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_file_read_hex_array(file, "SAK", &data->sak, 1)) break;
+        if(!flipper_file_get_value_count(file, "UID", &data_cnt)) break;
+        data->uid_len = data_cnt;
+        if(!flipper_file_read_hex(file, "UID", data->uid, data->uid_len)) break;
+        if(!flipper_file_read_hex(file, "ATQA", data->atqa, 2)) break;
+        if(!flipper_file_read_hex(file, "SAK", &data->sak, 1)) break;
         // Parse other data
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_load_mifare_ul_data(file, dev)) break;
@@ -331,7 +331,11 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
     } while(false);
 
     if(!parsed) {
-        dialog_message_show_storage_error(dev->dialogs, "Can not parse\nfile");
+        if(depricated_version) {
+            dialog_message_show_storage_error(dev->dialogs, "File format depricated");
+        } else {
+            dialog_message_show_storage_error(dev->dialogs, "Can not parse\nfile");
+        }
     }
 
     string_clear(temp_str);

@@ -12,7 +12,7 @@ void nfc_scene_delete_on_enter(void* context) {
 
     // Setup Custom Widget view
     char delete_str[64];
-    snprintf(delete_str, sizeof(delete_str), "\e#Delete %s\e#", nfc->dev.dev_name);
+    snprintf(delete_str, sizeof(delete_str), "\e#Delete %s\e#", nfc->dev->dev_name);
     widget_add_text_box_element(nfc->widget, 0, 0, 128, 24, AlignCenter, AlignCenter, delete_str);
     widget_add_button_element(
         nfc->widget, GuiButtonTypeLeft, "Back", nfc_scene_delete_widget_callback, nfc);
