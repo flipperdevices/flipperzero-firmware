@@ -1,33 +1,11 @@
 #include <furi.h>
 #include <furi-hal.h>
 #include "ibutton_writer.h"
-#include "../one_wire_host.h"
-
-#define RW1990_1_CMD_WRITE_RECORD_FLAG 0xD1
-#define RW1990_1_CMD_READ_RECORD_FLAG 0xB5
-#define RW1990_1_CMD_WRITE_ROM 0xD5
-
-#define RW1990_2_CMD_WRITE_RECORD_FLAG 0x1D
-#define RW1990_2_CMD_READ_RECORD_FLAG 0x1E
-#define RW1990_2_CMD_WRITE_ROM 0xD5
-
-#define TM2004_CMD_READ_STATUS 0xAA
-#define TM2004_CMD_READ_MEMORY 0xF0
-#define TM2004_CMD_WRITE_ROM 0x3C
-#define TM2004_CMD_FINALIZATION 0x35
-#define TM2004_ANSWER_READ_MEMORY 0xF5
-
-#define TM01_CMD_WRITE_RECORD_FLAG 0xC1
-#define TM01_CMD_WRITE_ROM 0xC5
-#define TM01_CMD_SWITCH_TO_CYFRAL 0xCA
-#define TM01_CMD_SWITCH_TO_METAKOM 0xCB
-
-#define DS1990_CMD_READ_ROM 0x33
+#include "ibutton_key_command.h"
 
 /*********************** PRIVATE ***********************/
 
 struct iButtonWriter {
-    const GpioPin* gpio;
     OneWireHost* host;
 };
 
@@ -276,15 +254,13 @@ static iButtonWriterResult writer_write_DS1990(iButtonWriter* writer, iButtonKey
 
 /*********************** PUBLIC ***********************/
 
-iButtonWriter* ibutton_writer_alloc(const GpioPin* gpio) {
+iButtonWriter* ibutton_writer_alloc(OneWireHost* host) {
     iButtonWriter* writer = malloc(sizeof(iButtonWriter));
-    writer->gpio = gpio;
-    writer->host = onewire_host_alloc(writer->gpio);
+    writer->host = host;
     return writer;
 }
 
 void ibutton_writer_free(iButtonWriter* writer) {
-    onewire_host_free(writer->host);
     free(writer);
 }
 

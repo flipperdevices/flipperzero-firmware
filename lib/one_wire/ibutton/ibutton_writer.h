@@ -1,6 +1,7 @@
 #pragma once
 #include <furi-hal-gpio.h>
 #include "ibutton_key.h"
+#include "../one_wire_host.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,7 +16,7 @@ typedef enum {
 
 typedef struct iButtonWriter iButtonWriter;
 
-iButtonWriter* ibutton_writer_alloc(const GpioPin* gpio);
+iButtonWriter* ibutton_writer_alloc(OneWireHost* host);
 void ibutton_writer_free(iButtonWriter* writer);
 iButtonWriterResult ibutton_writer_write(iButtonWriter* writer, iButtonKey* key);
 void start(iButtonWriter* writer);
