@@ -13,7 +13,6 @@ typedef struct {
     uint16_t flow_ctrl_char_handle;
     osMutexId_t buff_size_mtx;
     uint32_t buff_size;
-    uint16_t buff_free_size;
     uint16_t bytes_ready_to_receive;
     SerialSvcDataReceivedCallback on_received_cb;
     SerialSvcDataSentCallback on_sent_cb;
@@ -40,15 +39,20 @@ static SVCCTL_EvtAckStatus_t serial_svc_event_handler(void *event) {
                 ret = SVCCTL_EvtAckFlowEnable;
                 FURI_LOG_D(SERIAL_SERVICE_TAG, "RX descriptor event");
             } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
-                FURI_LOG_I(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
-                furi_check(osMutexAcquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
+                FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
                 if(serial_svc->on_received_cb) {
+                    furi_check(osMutexAcquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
+                    if(attribute_modified->Attr_Data_Length > serial_svc->bytes_ready_to_receive) {
+                        FURI_LOG_W(
+                            SERIAL_SERVICE_TAG, "Received %d, while was ready to receive %d bytes. Can lead to buffer overflow!",
+                            attribute_modified->Attr_Data_Length, serial_svc->bytes_ready_to_receive);
+                    }
                     serial_svc->bytes_ready_to_receive -= MIN(serial_svc->bytes_ready_to_receive, attribute_modified->Attr_Data_Length);
-                    serial_svc->buff_free_size =
+                    uint32_t buff_free_size =
                         serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
-                    FURI_LOG_W(SERIAL_SERVICE_TAG, "RPC available buff size: %d", serial_svc->buff_free_size);
+                    FURI_LOG_D(SERIAL_SERVICE_TAG, "Available buff size: %d", buff_free_size);
+                    furi_check(osMutexRelease(serial_svc->buff_size_mtx) == osOK);
                 }
-                furi_check(osMutexRelease(serial_svc->buff_size_mtx) == osOK);
                 ret = SVCCTL_EvtAckFlowEnable;
             }
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
@@ -121,7 +125,6 @@ void serial_svc_set_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback 
     serial_svc->on_sent_cb = on_sent_cb;
     serial_svc->context = context;
     serial_svc->buff_size = buff_size;
-    serial_svc->buff_free_size = buff_size;
     serial_svc->bytes_ready_to_receive = buff_size;
     uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
     aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(uint32_t), (uint8_t*)&buff_size_reversed);
@@ -133,13 +136,10 @@ void serial_svc_notify_buffer_is_empty() {
 
     furi_check(osMutexAcquire(serial_svc->buff_size_mtx, osWaitForever) == osOK);
     if(serial_svc->bytes_ready_to_receive == 0) {
-        FURI_LOG_I("Notify", "Buffer is empty. Notifying client");
-        serial_svc->buff_free_size = serial_svc->buff_size;
+        FURI_LOG_D(SERIAL_SERVICE_TAG, "Buffer is empty. Notifying client");
         serial_svc->bytes_ready_to_receive = serial_svc->buff_size;
         uint32_t buff_size_reversed = REVERSE_BYTES_U32(serial_svc->buff_size);
         aci_gatt_update_char_value(serial_svc->svc_handle, serial_svc->flow_ctrl_char_handle, 0, sizeof(uint32_t), (uint8_t*)&buff_size_reversed);
-    } else {
-        FURI_LOG_W("Empty buff", "No notify. Wait for another %d bytes", serial_svc->bytes_ready_to_receive);
     }
     furi_check(osMutexRelease(serial_svc->buff_size_mtx) == osOK);
 }
@@ -176,8 +176,6 @@ bool serial_svc_update_tx(uint8_t* data, uint8_t data_len) {
     if(data_len > SERIAL_SVC_DATA_LEN_MAX) {
         return false;
     }
-    // TODO delete
-    FURI_LOG_W("TX", "%d bytes", data_len);
     tBleStatus result = aci_gatt_update_char_value(serial_svc->svc_handle,
                                         serial_svc->tx_char_handle,
                                         0,
