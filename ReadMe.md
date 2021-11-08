@@ -57,7 +57,8 @@ One liner: `./flash_core1_main.sh`
 
 # Build from source
 
-## Prerequisites
+## Docker
+### Prerequisites
 
 1. Install [Docker Engine and Docker Compose](https://www.docker.com/get-started)
 2. Clone the repo:
@@ -70,19 +71,19 @@ One liner: `./flash_core1_main.sh`
    docker-compose up -d
    ```
 
-## Compile everything
+### Compile everything
 
 ```sh
 docker-compose exec dev make -j$(nproc)
 ```
 
-## Flash everything
+### Flash everything
 
 ```sh
 docker-compose exec dev make -j$(nproc) whole
 ```
 
-## Compile bootloader
+### Compile bootloader
 
 ```sh
 docker-compose exec dev make -j$(nproc) -C bootloader
@@ -94,7 +95,7 @@ Bootloader compilation results:
 * `bootloader/.obj/f7/bootloader.bin`
 * **`bootloader/.obj/f7/bootloader.dfu`** - should be used to flash
 
-## Compile firmware
+### Compile firmware
 
 ```sh
 docker-compose exec dev make -j$(nproc) -C firmware
@@ -106,7 +107,7 @@ Firmware compilation results:
 * `firmware/.obj/f7/firmware.bin`
 * **`firmware/.obj/f7/firmware.dfu`** - should be used to flash
 
-## Concatenate bootloader and firmware
+### Concatenate bootloader and firmware
 
 You might want to do this to distribute the firmware as a single file.
 
@@ -128,6 +129,41 @@ That's exactly how we generate our `full` builds.
    ```
 
 Finally, you will have **`firmware/.obj/f7/full.dfu`** file that can be distributed and flashed.
+
+## MacOS
+### Prerequisites
+1. Install `gcc-arm-embedded`
+```
+brew install --cask gcc-arm-embedded
+```
+
+2. Install `open-ocd` if you want use debugger
+```
+brew install open-ocd
+```
+
+3. Build hex2dfu from source. Clone repo, build executable file and copy it to `PATH`
+```
+git clone git@github.com:rusdacent/hex2dfu.git
+cd hex2dfu
+gcc hex2dfu.c ED25519/*.c -o hex2dfu
+sudo cp hex2dfu /usr/local/bin
+```
+
+### Compile firmware
+```
+make -j$(nproc)
+```
+
+### Flash to device via STLink
+```
+make -j$(nproc) flash
+```
+
+### Launch GNU Debugger
+```
+make -j$(nproc) debug
+```
 
 # Links
 * Discord: [flipp.dev/discord](https://flipp.dev/discord)
