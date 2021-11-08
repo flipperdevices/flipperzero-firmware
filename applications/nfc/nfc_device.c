@@ -307,11 +307,10 @@ static bool nfc_device_load_data(NfcDevice* dev, string_t path) {
         // Read and verify file header
         uint32_t version = 0;
         if(!flipper_file_read_header(file, temp_str, &version)) break;
-        if(version != nfc_file_version) {
+        if(string_cmp_str(temp_str, nfc_file_header) || (version != nfc_file_version)) {
             depricated_version = true;
             break;
         }
-        if(string_cmp_str(temp_str, nfc_file_header) || (version != nfc_file_version)) break;
         // Read Nfc device type
         if(!flipper_file_read_string(file, "Device type", temp_str)) break;
         if(!nfc_device_parse_format_string(dev, temp_str)) break;
