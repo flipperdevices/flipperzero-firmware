@@ -86,8 +86,6 @@ void subghz_protocol_nice_flo_parse(SubGhzProtocolNiceFlo* instance, bool level,
                         instance->common.te_delta * 36)) {
             //Found header Nice Flo
             instance->common.parser_step = NiceFloDecoderStepFoundStartBit;
-        } else {
-            instance->common.parser_step = NiceFloDecoderStepReset;
         }
         break;
     case NiceFloDecoderStepFoundStartBit:

@@ -88,8 +88,6 @@ void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32
                         instance->common.te_delta * 51)) { //Need protocol 36 te_short
             //Found header CAME
             instance->common.parser_step = CameDecoderStepFoundStartBit;
-        } else {
-            instance->common.parser_step = CameDecoderStepReset;
         }
         break;
     case CameDecoderStepFoundStartBit:

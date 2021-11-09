@@ -247,8 +247,6 @@ void subghz_protocol_came_twee_parse(
                 ManchesterEventShortLow,
                 &instance->manchester_saved_state,
                 NULL);
-        } else {
-            instance->common.parser_step = CameTweeDecoderStepReset;
         }
         break;
     case CameTweeDecoderStepDecoderData:

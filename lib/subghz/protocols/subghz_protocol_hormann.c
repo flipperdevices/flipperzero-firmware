@@ -94,8 +94,6 @@ void subghz_protocol_hormann_parse(SubGhzProtocolHormann* instance, bool level, 
         if((level) && (DURATION_DIFF(duration, instance->common.te_short * 64) <
                        instance->common.te_delta * 64)) {
             instance->common.parser_step = HormannDecoderStepFoundStartHeader;
-        } else {
-            instance->common.parser_step = HormannDecoderStepReset;
         }
         break;
     case HormannDecoderStepFoundStartHeader:

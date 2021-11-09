@@ -94,8 +94,6 @@ void subghz_protocol_gate_tx_parse(SubGhzProtocolGateTX* instance, bool level, u
                         instance->common.te_delta * 47)) {
             //Found Preambula
             instance->common.parser_step = GateTXDecoderStepFoundStartBit;
-        } else {
-            instance->common.parser_step = GateTXDecoderStepReset;
         }
         break;
     case GateTXDecoderStepFoundStartBit:

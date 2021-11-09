@@ -314,10 +314,7 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
            DURATION_DIFF(duration, instance->common.te_short) < instance->common.te_delta) {
             instance->common.parser_step = KeeloqDecoderStepCheckPreambula;
             instance->common.header_count++;
-        } else {
-            instance->common.parser_step = KeeloqDecoderStepReset;
         }
-
         break;
     case KeeloqDecoderStepCheckPreambula:
         if((!level) &&

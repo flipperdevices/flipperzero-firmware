@@ -210,8 +210,6 @@ void subghz_decoder_princeton_parse(
             instance->common.code_found = 0;
             instance->common.code_count_bit = 0;
             instance->te = 0;
-        } else {
-            instance->common.parser_step = PrincetonDecoderStepReset;
         }
         break;
     case PrincetonDecoderStepSaveDuration:
@@ -296,35 +294,11 @@ void subghz_decoder_princeton_to_str(SubGhzDecoderPrinceton* instance, string_t 
 bool subghz_decoder_princeton_to_save_file(
     SubGhzDecoderPrinceton* instance,
     FlipperFile* flipper_file) {
-    bool res = false;
-    do {
-        if(!flipper_file_write_string_cstr(flipper_file, "Protocol", instance->common.name)) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Protocol");
-            break;
-        }
-        if(!flipper_file_write_uint32(
-               flipper_file, "Bit", (uint32_t*)&instance->common.code_last_count_bit, 1)) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Bit");
-            break;
-        }
-        if(!flipper_file_write_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1)) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Te");
-            break;
-        }
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-
-        for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->common.code_last_found >> i * 8) &
-                                                 0xFF;
-        }
-
-        if(!flipper_file_write_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Key");
-            break;
-        }
-        res = true;
-    } while(false);
-
+    bool res = subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+    if(res) {
+        res = flipper_file_write_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1);
+        if(!res) FURI_LOG_E(SUBGHZ_KEY_TAG, "Unable to add Te");
+    }
     return res;
 }
 
@@ -332,40 +306,12 @@ bool subghz_decoder_princeton_to_load_protocol_from_file(
     FlipperFile* flipper_file,
     SubGhzDecoderPrinceton* instance,
     const char* file_path) {
-    bool loaded = false;
-    string_t temp_str;
-    string_init(temp_str);
-    uint32_t temp_data = 0;
-
-    do {
-        if(!flipper_file_read_uint32(flipper_file, "Bit", (uint32_t*)&temp_data, 1)) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing Bit");
-            break;
-        }
-        instance->common.code_last_count_bit = (uint8_t)temp_data;
-
-        if(!flipper_file_read_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1)) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing TE");
-            break;
-        }
-
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        if(!flipper_file_read_hex(flipper_file, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing Key");
-            break;
-        }
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            instance->common.code_last_found = instance->common.code_last_found << 8 | key_data[i];
-        }
-
-        instance->common.serial = instance->common.code_last_found >> 4;
-        instance->common.btn = (uint8_t)instance->common.code_last_found & 0x00000F;
-
-        loaded = true;
-    } while(0);
-
-    string_clear(temp_str);
-
+    bool loaded = subghz_protocol_common_to_load_protocol_from_file(
+        (SubGhzProtocolCommon*)instance, flipper_file);
+    if(loaded) {
+        loaded = flipper_file_read_uint32(flipper_file, "TE", (uint32_t*)&instance->te, 1);
+        if(!loaded) FURI_LOG_E(SUBGHZ_KEY_TAG, "Missing TE");
+    }
     return loaded;
 }
 

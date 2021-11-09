@@ -84,23 +84,6 @@ void subghz_protocol_nero_radio_reset(SubGhzProtocolNeroRadio* instance) {
     instance->common.parser_step = NeroRadioDecoderStepReset;
 }
 
-/** Analysis of received data
- * 
- * @param instance SubGhzProtocolNeroRadio instance
- */
-// void subghz_protocol_nero_radio_check_remote_controller(SubGhzProtocolNeroRadio* instance) {
-//     //пока не понятно с серийником, но код статический
-//     // uint64_t code_found_reverse = subghz_protocol_common_reverse_key(instance->common.code_found, instance->common.code_count_bit);
-//     // uint32_t code_fix = code_found_reverse & 0xFFFFFFFF;
-//     // //uint32_t code_hop = (code_found_reverse >> 24) & 0xFFFFF;
-
-//     // instance->common.serial = code_fix & 0xFFFFFFF;
-//     // instance->common.btn = (code_fix >> 28) & 0x0F;
-
-//     //if (instance->common.callback) instance->common.callback((SubGhzProtocolCommon*)instance, instance->common.context);
-
-// }
-
 void subghz_protocol_nero_radio_parse(
     SubGhzProtocolNeroRadio* instance,
     bool level,
@@ -112,8 +95,6 @@ void subghz_protocol_nero_radio_parse(
             instance->common.parser_step = NeroRadioDecoderStepCheckPreambula;
             instance->common.te_last = duration;
             instance->common.header_count = 0;
-        } else {
-            instance->common.parser_step = NeroRadioDecoderStepReset;
         }
         break;
     case NeroRadioDecoderStepCheckPreambula:
