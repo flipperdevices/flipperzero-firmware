@@ -50,6 +50,30 @@ bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
     return true;
 }
 
+void subghz_get_frequency_modulation(SubGhz* subghz, string_t frequency, string_t modulation) {
+    furi_assert(subghz);
+    if(frequency != NULL) {
+        string_printf(
+            frequency,
+            "%03ld.%02ld",
+            subghz->txrx->frequency / 1000000 % 1000,
+            subghz->txrx->frequency / 10000 % 100);
+    }
+
+    if(modulation != NULL) {
+        if(subghz->txrx->preset == FuriHalSubGhzPresetOok650Async ||
+           subghz->txrx->preset == FuriHalSubGhzPresetOok270Async) {
+            string_set(modulation, "AM");
+        } else if(
+            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev238Async ||
+            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev476Async) {
+            string_set(modulation, "FM");
+        } else {
+            furi_crash(NULL);
+        }
+    }
+}
+
 void subghz_begin(SubGhz* subghz, FuriHalSubGhzPreset preset) {
     furi_assert(subghz);
     furi_hal_subghz_reset();
@@ -197,11 +221,10 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
         if(((!strcmp(string_get_cstr(temp_str), SUBGHZ_KEY_FILE_TYPE)) ||
             (!strcmp(string_get_cstr(temp_str), SUBGHZ_RAW_FILE_TYPE))) &&
            version == SUBGHZ_KEY_FILE_VERSION) {
-
-           } else {
+        } else {
             FURI_LOG_E(SUBGHZ_KEY_TAG, "Type or version mismatch");
             break;
-           }
+        }
 
         if(!flipper_file_read_uint32(
                flipper_file, "Frequency", (uint32_t*)&subghz->txrx->frequency, 1)) {

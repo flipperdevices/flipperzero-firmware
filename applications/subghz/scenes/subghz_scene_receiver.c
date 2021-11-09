@@ -3,29 +3,25 @@
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
-    char frequency_str[20];
-    char preset_str[10];
     string_t history_stat_str;
     string_init(history_stat_str);
     if(!subghz_history_get_text_space_left(subghz->txrx->history, history_stat_str)) {
-        snprintf(
-            frequency_str,
-            sizeof(frequency_str),
-            "%03ld.%02ld",
-            subghz->txrx->frequency / 1000000 % 1000,
-            subghz->txrx->frequency / 10000 % 100);
-        if(subghz->txrx->preset == FuriHalSubGhzPresetOok650Async ||
-           subghz->txrx->preset == FuriHalSubGhzPresetOok270Async) {
-            snprintf(preset_str, sizeof(preset_str), "AM");
-        } else if(
-            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev238Async ||
-            subghz->txrx->preset == FuriHalSubGhzPreset2FSKDev476Async) {
-            snprintf(preset_str, sizeof(preset_str), "FM");
-        } else {
-            furi_crash(NULL);
-        }
+        string_t frequency_str;
+        string_t modulation_str;
+
+        string_init(frequency_str);
+        string_init(modulation_str);
+
+        subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+
         subghz_receiver_add_data_statusbar(
-            subghz->subghz_receiver, frequency_str, preset_str, string_get_cstr(history_stat_str));
+            subghz->subghz_receiver,
+            string_get_cstr(frequency_str),
+            string_get_cstr(modulation_str),
+            string_get_cstr(history_stat_str));
+
+        string_clear(frequency_str);
+        string_clear(modulation_str);
     } else {
         subghz_receiver_add_data_statusbar(
             subghz->subghz_receiver, string_get_cstr(history_stat_str), "", "");
