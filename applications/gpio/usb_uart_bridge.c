@@ -8,11 +8,12 @@
 #define USB_UART_RX_BUF_SIZE (USB_CDC_PKT_LEN * 5)
 
 typedef enum {
-    WorkerEvtStop = (1 << 0),
-    WorkerEvtRxDone = (1 << 1),
+    WorkerEvtReserved = (1 << 0), // Reserved for StreamBuffer internal event
+    WorkerEvtStop = (1 << 1),
+    WorkerEvtRxDone = (1 << 2),
 
-    WorkerEvtTxStop = (1 << 2),
-    WorkerEvtCdcRx = (1 << 3),
+    WorkerEvtTxStop = (1 << 3),
+    WorkerEvtCdcRx = (1 << 4),
 } WorkerEvtFlags;
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
