@@ -25,7 +25,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     } else {
         subghz_receiver_add_data_statusbar(
             subghz->subghz_receiver, string_get_cstr(history_stat_str), "", "");
-        subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+        subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
     string_clear(history_stat_str);
 }
@@ -79,7 +79,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz_receiver_set_callback(subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
     subghz_parser_enable_dump(subghz->txrx->parser, subghz_scene_add_to_history_callback, subghz);
 
-    subghz->state_notifications = NOTIFICATION_RX_STATE;
+    subghz->state_notifications = SubGhzNotificationStateRX;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
     };
@@ -100,7 +100,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case SubghzCustomEventViewReceverBack:
             // Stop CC1101 Rx
-            subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
@@ -121,7 +121,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             return true;
             break;
         case SubghzCustomEventViewReceverConfig:
-            subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz->txrx->idx_menu_chosen = subghz_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
@@ -136,7 +136,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         }
 
         switch(subghz->state_notifications) {
-        case NOTIFICATION_RX_STATE:
+        case SubGhzNotificationStateRX:
             notification_message(subghz->notifications, &sequence_blink_blue_10);
             break;
         default:
