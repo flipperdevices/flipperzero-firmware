@@ -23,6 +23,12 @@ extern "C" {
  */
 void furi_hal_bt_init();
 
+/** Lock core2 state transition */
+void furi_hal_bt_lock_core2();
+
+/** Lock core2 state transition */
+void furi_hal_bt_unlock_core2();
+
 /** Start 2nd core and BLE stack
  *
  * @return true on success
@@ -92,25 +98,16 @@ void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallbac
  * @param on_sent_cb - SerialSvcDataSentCallback instance
  * @param context - pointer to context
  */
-void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+
+/** Notify that buffer is empty */
+void furi_hal_bt_notify_buffer_is_empty();
 
 /** Send data through BLE
  * @param data - data buffer
  * @param size - data buffer size
  */
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size);
-
-/** Lock shared access to flash controller
- *
- * @param[in]  erase_flag  true if erase operation
- */
-void furi_hal_bt_lock_flash(bool erase_flag);
-
-/** Unlock shared access to flash controller
- *
- * @param[in]  erase_flag  true if erase operation
- */
-void furi_hal_bt_unlock_flash(bool erase_flag);
 
 /** Start ble tone tx at given channel and power
  *
