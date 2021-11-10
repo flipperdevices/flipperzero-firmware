@@ -26,15 +26,15 @@ void onewire_host_free(OneWireHost* host) {
 }
 
 static inline void onewire_host_gpio_high(OneWireHost* host) {
-    hal_gpio_write(host->gpio, true);
+    furi_hal_ibutton_pin_high();
 }
 
 static inline void onewire_host_gpio_low(OneWireHost* host) {
-    hal_gpio_write(host->gpio, false);
+    furi_hal_ibutton_pin_low();
 }
 
 static inline bool onewire_host_gpio_read(OneWireHost* host) {
-    return hal_gpio_read(host->gpio);
+    return furi_hal_ibutton_pin_get_level();
 }
 
 bool onewire_host_reset(OneWireHost* host) {
@@ -135,11 +135,11 @@ void onewire_host_skip(OneWireHost* host) {
 }
 
 void onewire_host_start(OneWireHost* host) {
-    hal_gpio_init(host->gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    furi_hal_ibutton_start();
 }
 
 void onewire_host_stop(OneWireHost* host) {
-    hal_gpio_init(host->gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_ibutton_stop();
 }
 
 void onewire_host_reset_search(OneWireHost* host) {
