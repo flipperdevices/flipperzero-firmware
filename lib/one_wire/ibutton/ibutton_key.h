@@ -25,6 +25,13 @@ iButtonKey* ibutton_key_alloc();
 void ibutton_key_free(iButtonKey* key);
 
 /**
+ * Copy key
+ * @param to 
+ * @param from 
+ */
+void ibutton_key_set(iButtonKey* to, const iButtonKey* from);
+
+/**
  * Set key data
  * @param key 
  * @param data 

@@ -20,6 +20,10 @@ void ibutton_key_free(iButtonKey* key) {
     free(key);
 }
 
+void ibutton_key_set(iButtonKey* to, const iButtonKey* from) {
+    memcpy(to, from, sizeof(iButtonKey));
+}
+
 void ibutton_key_set_data(iButtonKey* key, uint8_t* data, uint8_t data_count) {
     furi_check(data_count > 0);
     furi_check(data_count <= IBUTTON_KEY_DATA_SIZE);
