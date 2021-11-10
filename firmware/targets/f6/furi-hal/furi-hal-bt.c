@@ -1,5 +1,4 @@
 #include <furi-hal-bt.h>
-#include <app_entry.h>
 #include <ble.h>
 #include <stm32wbxx.h>
 #include <shci.h>
@@ -7,11 +6,47 @@
 
 #include <furi.h>
 
+osMutexId_t furi_hal_bt_core2_mtx = NULL;
+
 void furi_hal_bt_init() {
+    furi_hal_bt_core2_mtx = osMutexNew(NULL);
+}
+
+void furi_hal_bt_lock_core2() {
+    furi_assert(furi_hal_bt_core2_mtx);
+    furi_check(osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever) == osOK);
+}
+
+void furi_hal_bt_unlock_core2() {
+    furi_assert(furi_hal_bt_core2_mtx);
+    furi_check(osMutexRelease(furi_hal_bt_core2_mtx) == osOK);
+}
+
+static bool furi_hal_bt_wait_startup() {
+    uint16_t counter = 0;
+    while (!(ble_glue_get_status() == BleGlueStatusStarted || ble_glue_get_status() == BleGlueStatusBleStackMissing)) {
+        osDelay(10);
+        counter++;
+        if (counter > 1000) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool furi_hal_bt_start_core2() {
+    furi_assert(furi_hal_bt_core2_mtx);
+
+    bool ret = false;
+    osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
     // Explicitly tell that we are in charge of CLK48 domain
     HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
-    // Start Core2, init HCI and start GAP/GATT
-    APPE_Init();
+    // Start Core2
+    ble_glue_init();
+    // Wait for Core2 start
+    ret = furi_hal_bt_wait_startup();
+    osMutexRelease(furi_hal_bt_core2_mtx);
+    return ret;
 }
 
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context) {
@@ -34,8 +69,12 @@ void furi_hal_bt_stop_advertising() {
     }
 }
 
-void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
-    serial_svc_set_callbacks(on_received_cb, on_sent_cb, context);
+void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
+    serial_svc_set_callbacks(buff_size, on_received_cb, on_sent_cb, context);
+}
+
+void furi_hal_bt_notify_buffer_is_empty() {
+    serial_svc_notify_buffer_is_empty();
 }
 
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
@@ -45,8 +84,33 @@ bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
     return serial_svc_update_tx(data, size);
 }
 
+bool furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
+    bool ret = false;
+    BleGlueStatus status = ble_glue_get_status();
+    if(status == BleGlueStatusUninitialized || BleGlueStatusStarted) {
+        ble_app_get_key_storage_buff(key_buff_addr, key_buff_size);
+        ret = true;
+    }
+    return ret;
+}
+
+void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallback callback, void* context) {
+    furi_assert(callback);
+    ble_glue_set_key_storage_changed_callback(callback, context);
+}
+
+void furi_hal_bt_nvm_sram_sem_acquire() {
+    while(HAL_HSEM_FastTake(CFG_HW_BLE_NVM_SRAM_SEMID) != HAL_OK) {
+        osDelay(1);
+    }
+}
+
+void furi_hal_bt_nvm_sram_sem_release() {
+    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
+}
+
 void furi_hal_bt_dump_state(string_t buffer) {
-    BleGlueStatus status = APPE_Status();
+    BleGlueStatus status = ble_glue_get_status();
     if (status == BleGlueStatusStarted) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
@@ -68,56 +132,12 @@ void furi_hal_bt_dump_state(string_t buffer) {
 }
 
 bool furi_hal_bt_is_alive() {
-    BleGlueStatus status = APPE_Status();
-    return (status == BleGlueStatusBroken) || (status == BleGlueStatusStarted);
+    BleGlueStatus status = ble_glue_get_status();
+    return (status == BleGlueStatusBleStackMissing) || (status == BleGlueStatusStarted);
 }
 
 bool furi_hal_bt_is_active() {
     return gap_get_state() > GapStateIdle;
-}
-
-bool furi_hal_bt_wait_startup() {
-    uint16_t counter = 0;
-    while (!(APPE_Status() == BleGlueStatusStarted || APPE_Status() == BleGlueStatusBroken)) {
-        osDelay(10);
-        counter++;
-        if (counter > 1000) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool furi_hal_bt_lock_flash(bool erase_flag) {
-    if (!furi_hal_bt_wait_startup()) {
-        return false;
-    }
-    
-    while (HAL_HSEM_FastTake(CFG_HW_FLASH_SEMID) != HAL_OK) {
-        osDelay(1);
-    }
-
-    HAL_FLASH_Unlock();
-
-    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_ON);
-
-    while(LL_FLASH_IsActiveFlag_OperationSuspended()) {
-        osDelay(1);
-    };
-
-    __disable_irq();
-
-    return true;
-}
-
-void furi_hal_bt_unlock_flash(bool erase_flag) {
-    __enable_irq();
-
-    if(erase_flag) SHCI_C2_FLASH_EraseActivity(ERASE_ACTIVITY_OFF);
-
-    HAL_FLASH_Lock();
-
-    HAL_HSEM_Release(CFG_HW_FLASH_SEMID, HSEM_CPU1_COREID);
 }
 
 void furi_hal_bt_start_tone_tx(uint8_t channel, uint8_t power) {

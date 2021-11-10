@@ -9,6 +9,9 @@
 #include <stdbool.h>
 #include <gap.h>
 #include <serial_service.h>
+#include <ble_glue.h>
+#include <ble_app.h>
+
 
 #define FURI_HAL_BT_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
 
@@ -19,6 +22,18 @@ extern "C" {
 /** Initialize
  */
 void furi_hal_bt_init();
+
+/** Lock core2 state transition */
+void furi_hal_bt_lock_core2();
+
+/** Lock core2 state transition */
+void furi_hal_bt_unlock_core2();
+
+/** Start 2nd core and BLE stack
+ *
+ * @return true on success
+ */
+bool furi_hal_bt_start_core2();
 
 /** Start BLE app
  * @param event_cb - BleEventCallback instance
@@ -52,35 +67,47 @@ void furi_hal_bt_dump_state(string_t buffer);
  */
 bool furi_hal_bt_is_alive();
 
+/** Get key storage buffer address and size
+ *
+ * @param       key_buff_addr   pointer to store buffer address
+ * @param       key_buff_size   pointer to store buffer size
+ *
+ * @return      true on success
+ */
+bool furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size);
+
+/** Get SRAM2 hardware semaphore
+ * @note Must be called before SRAM2 read/write operations
+ */
+void furi_hal_bt_nvm_sram_sem_acquire();
+
+/** Release SRAM2 hardware semaphore
+ * @note Must be called after SRAM2 read/write operations
+ */
+void furi_hal_bt_nvm_sram_sem_release();
+
+/** Set key storage change callback
+ *
+ * @param       callback    BleGlueKeyStorageChangedCallback instance
+ * @param       context     pointer to context
+ */
+void furi_hal_bt_set_key_storage_change_callback(BleGlueKeyStorageChangedCallback callback, void* context);
+
 /** Set data event callbacks
  * @param on_received_cb - SerialSvcDataReceivedCallback instance
  * @param on_sent_cb - SerialSvcDataSentCallback instance
  * @param context - pointer to context
  */
-void furi_hal_bt_set_data_event_callbacks(SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context);
+
+/** Notify that buffer is empty */
+void furi_hal_bt_notify_buffer_is_empty();
 
 /** Send data through BLE
  * @param data - data buffer
  * @param size - data buffer size
  */
 bool furi_hal_bt_tx(uint8_t* data, uint16_t size);
-
-/** Wait for Core2 startup */
-bool furi_hal_bt_wait_startup();
-
-/** Lock shared access to flash controller
- *
- * @param[in]  erase_flag  true if erase operation
- *
- * @return     true if lock was successful, false if not
- */
-bool furi_hal_bt_lock_flash(bool erase_flag);
-
-/** Unlock shared access to flash controller
- *
- * @param[in]  erase_flag  true if erase operation
- */
-void furi_hal_bt_unlock_flash(bool erase_flag);
 
 /** Start ble tone tx at given channel and power
  *
