@@ -17,48 +17,41 @@
 
 typedef enum {
     NO_ERROR = 0,
-    READ_TIMESLOT_TIMEOUT,
-    WRITE_TIMESLOT_TIMEOUT,
-    WAIT_RESET_TIMEOUT,
     VERY_LONG_RESET,
     VERY_SHORT_RESET,
     PRESENCE_LOW_ON_LINE,
-    READ_TIMESLOT_TIMEOUT_LOW,
     AWAIT_TIMESLOT_TIMEOUT_HIGH,
-    PRESENCE_HIGH_ON_LINE,
     INCORRECT_ONEWIRE_CMD,
-    INCORRECT_SLAVE_USAGE,
-    TRIED_INCORRECT_WRITE,
-    FIRST_TIMESLOT_TIMEOUT,
     FIRST_BIT_OF_BYTE_TIMEOUT,
     RESET_IN_PROGRESS
 } OneWireSlaveError;
 
 struct OneWireSlave {
     OneWireSlaveError error;
-    const GpioPin* pin;
+    const GpioPin* gpio;
     OneWireDevice* device;
     OneWireSlaveResultCallback result_cb;
     void* result_cb_ctx;
 };
 
 /*********************** PRIVATE ***********************/
+
 void onewire_slave_pin_set_float(OneWireSlave* bus) {
-    hal_gpio_write(bus->pin, true);
+    hal_gpio_write(bus->gpio, true);
 }
 
 void onewire_slave_pin_set_low(OneWireSlave* bus) {
-    hal_gpio_write(bus->pin, false);
+    hal_gpio_write(bus->gpio, false);
 }
 
 void onewire_slave_pin_init_interrupt_in_isr_ctx(OneWireSlave* bus) {
-    hal_gpio_init(bus->pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
-    __HAL_GPIO_EXTI_CLEAR_IT(bus->pin->pin);
+    hal_gpio_init(bus->gpio, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
+    __HAL_GPIO_EXTI_CLEAR_IT(bus->gpio->pin);
 }
 
 void onewire_slave_pin_init_opendrain_in_isr_ctx(OneWireSlave* bus) {
-    hal_gpio_init(bus->pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    __HAL_GPIO_EXTI_CLEAR_IT(bus->pin->pin);
+    hal_gpio_init(bus->gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    __HAL_GPIO_EXTI_CLEAR_IT(bus->gpio->pin);
 }
 
 uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, const bool pin_value) {
@@ -68,7 +61,7 @@ uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, cons
 
     do {
         time_captured = DWT->CYCCNT;
-        if(hal_gpio_read(bus->pin) != pin_value) {
+        if(hal_gpio_read(bus->gpio) != pin_value) {
             uint32_t remaining_time = time_ticks - (time_captured - start);
             remaining_time /= instructions_per_us;
             return remaining_time;
@@ -232,7 +225,7 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
 static void exti_cb(void* context) {
     OneWireSlave* bus = context;
 
-    volatile bool input_state = hal_gpio_read(bus->pin);
+    volatile bool input_state = hal_gpio_read(bus->gpio);
     static uint32_t pulse_start = 0;
 
     if(input_state) {
@@ -261,7 +254,7 @@ static void exti_cb(void* context) {
 OneWireSlave* onewire_slave_alloc(const GpioPin* pin) {
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
     bus->error = NO_ERROR;
-    bus->pin = pin;
+    bus->gpio = pin;
     bus->device = NULL;
     bus->result_cb = NULL;
     bus->result_cb_ctx = NULL;
@@ -274,14 +267,14 @@ void onewire_slave_free(OneWireSlave* bus) {
 }
 
 void onewire_slave_start(OneWireSlave* bus) {
-    hal_gpio_add_int_callback(bus->pin, exti_cb, bus);
-    hal_gpio_init(bus->pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
+    hal_gpio_add_int_callback(bus->gpio, exti_cb, bus);
+    hal_gpio_init(bus->gpio, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
     onewire_slave_pin_set_float(bus);
 }
 
 void onewire_slave_stop(OneWireSlave* bus) {
-    hal_gpio_init(bus->pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
-    hal_gpio_remove_int_callback(bus->pin);
+    hal_gpio_init(bus->gpio, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    hal_gpio_remove_int_callback(bus->gpio);
     onewire_slave_detach(bus);
 }
 
@@ -295,6 +288,14 @@ void onewire_slave_detach(OneWireSlave* bus) {
         onewire_device_detach(bus->device);
     }
     bus->device = NULL;
+}
+
+void onewire_slave_set_result_callback(
+    OneWireSlave* bus,
+    OneWireSlaveResultCallback result_cb,
+    void* context) {
+    bus->result_cb = result_cb;
+    bus->result_cb_ctx = context;
 }
 
 bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length) {
@@ -334,12 +335,4 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_
         data[bytes_received] = value;
     }
     return (bytes_received != data_length);
-}
-
-void onewire_slave_set_result_callback(
-    OneWireSlave* bus,
-    OneWireSlaveResultCallback result_cb,
-    void* context) {
-    bus->result_cb = result_cb;
-    bus->result_cb_ctx = context;
 }
