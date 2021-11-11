@@ -264,6 +264,7 @@ void rpc_print_message(const PB_Main* message) {
         size_t msg_file_count = message->content.storage_list_response.file_count;
         string_cat_printf(str, "\tlist_response {\r\n");
         rpc_sprintf_msg_file(str, "\t\t", msg_file, msg_file_count);
+        break;
     }
     case PB_Main_gui_start_screen_stream_request_tag:
         string_cat_printf(str, "\tstart_screen_stream {\r\n");
@@ -271,8 +272,8 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_gui_stop_screen_stream_request_tag:
         string_cat_printf(str, "\tstop_screen_stream {\r\n");
         break;
-    case PB_Main_gui_screen_stream_frame_tag:
-        string_cat_printf(str, "\tscreen_stream_frame {\r\n");
+    case PB_Main_gui_screen_frame_tag:
+        string_cat_printf(str, "\tscreen_frame {\r\n");
         break;
     case PB_Main_gui_send_input_event_request_tag:
         string_cat_printf(str, "\tsend_input_event {\r\n");
@@ -280,6 +281,12 @@ void rpc_print_message(const PB_Main* message) {
             str, "\t\tkey: %d\r\n", message->content.gui_send_input_event_request.key);
         string_cat_printf(
             str, "\t\type: %d\r\n", message->content.gui_send_input_event_request.type);
+        break;
+    case PB_Main_gui_start_virtual_display_request_tag:
+        string_cat_printf(str, "\tstart_virtual_display {\r\n");
+        break;
+    case PB_Main_gui_stop_virtual_display_request_tag:
+        string_cat_printf(str, "\tstop_virtual_display {\r\n");
         break;
     }
     string_cat_printf(str, "\t}\r\n}\r\n");
@@ -535,7 +542,7 @@ int32_t rpc_srv(void* p) {
             .callback = rpc_pb_stream_read,
             .state = rpc,
             .errmsg = NULL,
-            .bytes_left = 1024, /* max incoming message size */
+            .bytes_left = 1536, /* max incoming message size */
         };
 
         if(pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
