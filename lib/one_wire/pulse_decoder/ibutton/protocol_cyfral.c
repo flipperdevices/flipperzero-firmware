@@ -24,7 +24,8 @@ struct ProtocolCyfral {
     CyfralState state;
     CyfralBitState bit_state;
 
-    // ready flag, key is readed and valid
+    // ready flag, key is read and valid
+    // TODO: atomic access
     bool ready;
     // key data storage
     uint16_t key_data;

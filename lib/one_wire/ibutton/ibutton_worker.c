@@ -9,6 +9,7 @@
 
 #include "../pulse_decoder/pulse_decoder.h"
 #include "../pulse_decoder/ibutton/protocol_cyfral.h"
+#include "../pulse_decoder/ibutton/protocol_metakom.h"
 
 #define IBUTTON_WORKER_DONOTHING_QUANT osWaitForever
 #define IBUTTON_WORKER_READ_QUANT 100
@@ -56,6 +57,7 @@ struct iButtonWorker {
 
     PulseDecoder* pulse_decoder;
     ProtocolCyfral* protocol_cyfral;
+    ProtocolMetakom* protocol_metakom;
     uint32_t last_dwt_value;
 
     iButtonWorkerReadCallback read_cb;
@@ -83,6 +85,7 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->mode_quant = IBUTTON_WORKER_DONOTHING_QUANT;
     worker->pulse_decoder = pulse_decoder_alloc();
     worker->protocol_cyfral = protocol_cyfral_alloc();
+    worker->protocol_metakom = protocol_metakom_alloc();
     worker->last_dwt_value = 0;
     worker->read_cb = NULL;
     worker->read_cb_ctx = NULL;
@@ -101,6 +104,10 @@ iButtonWorker* ibutton_worker_alloc() {
         worker->pulse_decoder,
         protocol_cyfral_get_protocol(worker->protocol_cyfral),
         PulseProtocolCyfral);
+    pulse_decoder_add_protocol(
+        worker->pulse_decoder,
+        protocol_metakom_get_protocol(worker->protocol_metakom),
+        PulseProtocolMetakom);
 
     return worker;
 }
@@ -182,7 +189,7 @@ bool ibutton_worker_read_comparator(iButtonWorker* worker) {
     worker->last_dwt_value = DWT->CYCCNT;
     HAL_COMP_Start(&hcomp1);
 
-    // TODO: rework with thread events, set from the decoder
+    // TODO: rework with thread events, "pulse_decoder_get_decoded_index_with_timeout"
     delay(100);
     int32_t decoded_index = pulse_decoder_get_decoded_index(worker->pulse_decoder);
     if(decoded_index >= 0) {
@@ -196,6 +203,13 @@ bool ibutton_worker_read_comparator(iButtonWorker* worker) {
         ibutton_key_set_type(worker->key_p, iButtonKeyCyfral);
         ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
         result = true;
+        break;
+    case PulseProtocolMetakom:
+        furi_check(worker->key_p != NULL);
+        ibutton_key_set_type(worker->key_p, iButtonKeyMetakom);
+        ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
+        result = true;
+        break;
         break;
     default:
         break;
@@ -290,15 +304,17 @@ void ibutton_worker_switch_mode(iButtonWorker* worker, iButtonWorkerMode mode) {
         worker->mode_quant = IBUTTON_WORKER_DONOTHING_QUANT;
         break;
     case iButtonWorkerRead:
-        worker->mode_quant = IBUTTON_WORKER_READ_QUANT;
         furi_hal_power_enable_otg();
+        worker->mode_quant = IBUTTON_WORKER_READ_QUANT;
         ibutton_worker_tick(worker);
         break;
     case iButtonWorkerWrite:
+        furi_hal_power_enable_otg();
         worker->mode_quant = IBUTTON_WORKER_WRITE_QUANT;
         ibutton_worker_tick(worker);
         break;
     case iButtonWorkerEmulate:
+        furi_hal_power_disable_otg();
         worker->mode_quant = IBUTTON_WORKER_EMULATE_QUANT;
         ibutton_worker_tick(worker);
         break;
