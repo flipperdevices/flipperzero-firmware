@@ -51,9 +51,9 @@ void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, void* con
     furi_assert(context);
     RpcGuiSystem* rpc_gui = context;
 
-    rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
-
     gui_set_framebuffer_callback(rpc_gui->gui, NULL, NULL);
+
+    rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
 }
 
 void rpc_system_gui_send_input_event_request_process(const PB_Main* request, void* context) {
