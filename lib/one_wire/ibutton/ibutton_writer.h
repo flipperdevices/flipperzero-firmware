@@ -19,8 +19,8 @@ typedef struct iButtonWriter iButtonWriter;
 iButtonWriter* ibutton_writer_alloc(OneWireHost* host);
 void ibutton_writer_free(iButtonWriter* writer);
 iButtonWriterResult ibutton_writer_write(iButtonWriter* writer, iButtonKey* key);
-void start(iButtonWriter* writer);
-void stop(iButtonWriter* writer);
+void ibutton_writer_start(iButtonWriter* writer);
+void ibutton_writer_stop(iButtonWriter* writer);
 
 #ifdef __cplusplus
 }

@@ -283,12 +283,12 @@ iButtonWriterResult ibutton_writer_write(iButtonWriter* writer, iButtonKey* key)
     return result;
 }
 
-void start(iButtonWriter* writer) {
+void ibutton_writer_start(iButtonWriter* writer) {
     furi_hal_power_enable_otg();
     onewire_host_start(writer->host);
 }
 
-void stop(iButtonWriter* writer) {
+void ibutton_writer_stop(iButtonWriter* writer) {
     furi_hal_power_disable_otg();
     onewire_host_stop(writer->host);
 }

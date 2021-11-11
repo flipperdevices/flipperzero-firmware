@@ -2,6 +2,7 @@
 #include <furi-hal.h>
 #include <atomic.h>
 #include "ibutton_worker.h"
+#include "ibutton_writer.h"
 #include "ibutton_key_command.h"
 #include "../one_wire_host.h"
 #include "../one_wire_slave.h"
@@ -49,6 +50,7 @@ struct iButtonWorker {
     OneWireHost* host;
     OneWireSlave* slave;
     OneWireDevice* device;
+    iButtonWriter* writer;
     const GpioPin* gpio;
     iButtonWorkerMode mode;
     uint32_t mode_quant;
@@ -79,13 +81,14 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->key_data = malloc(ibutton_key_get_max_size());
     worker->host = onewire_host_alloc(worker->gpio);
     worker->slave = onewire_slave_alloc(worker->gpio);
+    worker->writer = ibutton_writer_alloc(worker->host);
     worker->device = onewire_device_alloc(0, 0, 0, 0, 0, 0, 0, 0);
-    worker->messages = osMessageQueueNew(1, sizeof(iButtonMessage), NULL);
-    worker->mode = iButtonWorkerDoNothing;
-    worker->mode_quant = IBUTTON_WORKER_DONOTHING_QUANT;
     worker->pulse_decoder = pulse_decoder_alloc();
     worker->protocol_cyfral = protocol_cyfral_alloc();
     worker->protocol_metakom = protocol_metakom_alloc();
+    worker->messages = osMessageQueueNew(1, sizeof(iButtonMessage), NULL);
+    worker->mode = iButtonWorkerDoNothing;
+    worker->mode_quant = IBUTTON_WORKER_DONOTHING_QUANT;
     worker->last_dwt_value = 0;
     worker->read_cb = NULL;
     worker->read_cb_ctx = NULL;
@@ -120,11 +123,31 @@ void ibutton_worker_read_set_callback(
     worker->read_cb = callback;
     worker->read_cb_ctx = context;
 }
+void ibutton_worker_write_set_callback(
+    iButtonWorker* worker,
+    iButtonWorkerWriteCallback callback,
+    void* context) {
+    furi_check(worker->mode == iButtonWorkerDoNothing);
+    worker->write_cb = callback;
+    worker->write_cb_ctx = context;
+}
+
 void ibutton_worker_read_start(iButtonWorker* worker, iButtonKey* key) {
     iButtonMessage message = {.type = iButtonMessageRead, .data.key = key};
     furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
 }
+
 void ibutton_worker_read_stop(iButtonWorker* worker) {
+    iButtonMessage message = {.type = iButtonMessageStop};
+    furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
+}
+
+void ibutton_worker_write_start(iButtonWorker* worker, iButtonKey* key) {
+    iButtonMessage message = {.type = iButtonMessageWrite, .data.key = key};
+    furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
+}
+
+void ibutton_worker_write_stop(iButtonWorker* worker) {
     iButtonMessage message = {.type = iButtonMessageStop};
     furi_check(osMessageQueuePut(worker->messages, &message, 0, osWaitForever) == osOK);
 }
@@ -132,6 +155,8 @@ void ibutton_worker_read_stop(iButtonWorker* worker) {
 void ibutton_worker_free(iButtonWorker* worker) {
     pulse_decoder_free(worker->pulse_decoder);
     protocol_cyfral_free(worker->protocol_cyfral);
+
+    ibutton_writer_free(worker->writer);
 
     onewire_slave_stop(worker->slave);
     onewire_slave_free(worker->slave);
@@ -275,6 +300,26 @@ void ibutton_worker_read_tick(iButtonWorker* worker) {
 }
 
 void ibutton_worker_write_tick(iButtonWorker* worker) {
+    furi_check(worker->key_p != NULL);
+    iButtonWriterResult writer_result = ibutton_writer_write(worker->writer, worker->key_p);
+    iButtonWorkerWriteResult result = iButtonWorkerWriteOK;
+    switch(writer_result) {
+    case iButtonWriterOK:
+        result = iButtonWorkerWriteOK;
+        break;
+    case iButtonWriterSameKey:
+        result = iButtonWorkerWriteSameKey;
+        break;
+    case iButtonWriterNoDetect:
+        result = iButtonWorkerWriteNoDetect;
+        break;
+    case iButtonWriterCannotWrite:
+        result = iButtonWorkerWriteCannotWrite;
+        break;
+    }
+    if(worker->write_cb != NULL) {
+        worker->write_cb(worker->write_cb_ctx, result);
+    }
 }
 
 void ibutton_worker_emulate_tick(iButtonWorker* worker) {
@@ -300,6 +345,7 @@ void ibutton_worker_switch_mode(iButtonWorker* worker, iButtonWorkerMode mode) {
     worker->mode = mode;
     switch(mode) {
     case iButtonWorkerDoNothing:
+        ibutton_writer_stop(worker->writer);
         furi_hal_power_disable_otg();
         worker->mode_quant = IBUTTON_WORKER_DONOTHING_QUANT;
         break;
@@ -309,7 +355,7 @@ void ibutton_worker_switch_mode(iButtonWorker* worker, iButtonWorkerMode mode) {
         ibutton_worker_tick(worker);
         break;
     case iButtonWorkerWrite:
-        furi_hal_power_enable_otg();
+        ibutton_writer_start(worker->writer);
         worker->mode_quant = IBUTTON_WORKER_WRITE_QUANT;
         ibutton_worker_tick(worker);
         break;
