@@ -145,8 +145,11 @@ static int32_t vcp_worker(void* context) {
         if((flags & VcpEvtEnable) && !enabled){
             furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
             enabled = true;
-            vcp->connected = true;
-            xStreamBufferSend(vcp->rx_stream, &ascii_soh, 1, osWaitForever);
+            furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN); // flush Rx buffer
+            if (furi_hal_cdc_get_ctrl_line_state(VCP_IF_NUM) & (1 << 0)) {
+                vcp->connected = true;
+                xStreamBufferSend(vcp->rx_stream, &ascii_soh, 1, osWaitForever);
+            }
         }
 
         // VCP disabled
