@@ -144,10 +144,10 @@ C_SOURCES += $(wildcard $(FURI_HAL_DIR)/*.c)
 # Other
 CFLAGS += \
 	-I$(MXPROJECT_DIR)/Inc \
-	-I$(MXPROJECT_DIR)/Src/fatfs
+	-I$(MXPROJECT_DIR)/fatfs
 C_SOURCES += \
 	$(wildcard $(MXPROJECT_DIR)/Src/*.c) \
-	$(wildcard $(MXPROJECT_DIR)/Src/fatfs/*.c)
+	$(wildcard $(MXPROJECT_DIR)/fatfs/*.c)
 
 # Linker options
 ifeq ($(NO_BOOTLOADER), 1)

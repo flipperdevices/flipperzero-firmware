@@ -7,6 +7,8 @@
 
 #include <stm32wbxx_ll_cortex.h>
 
+#include <fatfs.h>
+
 #define TAG "FuriHal"
 
 void furi_hal_init() {
@@ -56,6 +58,10 @@ void furi_hal_init() {
 
     // FreeRTOS glue
     furi_hal_os_init();
+
+    // FatFS driver initialization
+    MX_FATFS_Init();
+    FURI_LOG_I(TAG, "FATFS OK");
 
     // Partial null pointer dereference protection
     LL_MPU_Disable();
