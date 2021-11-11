@@ -10,6 +10,7 @@ typedef struct {
     Gui* gui;
     ViewPort* virtual_display_view_port;
     uint8_t* virtual_display_buffer;
+    bool virtual_display_not_empty;
 } RpcGuiSystem;
 
 void rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, void* context) {
@@ -130,6 +131,13 @@ static void rpc_system_gui_virtual_display_render_callback(Canvas* canvas, void*
     furi_assert(context);
     RpcGuiSystem* rpc_gui = context;
 
+    if(!rpc_gui->virtual_display_not_empty) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, "Virtual Display");
+        canvas_draw_str_aligned(canvas, 64, 36, AlignCenter, AlignCenter, "Waiting for frames...");
+        return;
+    }
+
     canvas_draw_xbm(canvas, 0, 0, canvas->width, canvas->height, rpc_gui->virtual_display_buffer);
 }
 
@@ -176,6 +184,7 @@ void rpc_system_gui_stop_virtual_display_process(const PB_Main* request, void* c
     view_port_free(rpc_gui->virtual_display_view_port);
     free(rpc_gui->virtual_display_buffer);
     rpc_gui->virtual_display_view_port = NULL;
+    rpc_gui->virtual_display_not_empty = false;
 
     rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
 }
@@ -195,6 +204,7 @@ void rpc_system_gui_virtual_display_frame_process(const PB_Main* request, void* 
         rpc_gui->virtual_display_buffer,
         request->content.gui_screen_frame.data->bytes,
         buffer_size);
+    rpc_gui->virtual_display_not_empty = true;
     view_port_update(rpc_gui->virtual_display_view_port);
 }
 
@@ -242,6 +252,7 @@ void rpc_system_gui_free(void* ctx) {
         view_port_free(rpc_gui->virtual_display_view_port);
         free(rpc_gui->virtual_display_buffer);
         rpc_gui->virtual_display_view_port = NULL;
+        rpc_gui->virtual_display_not_empty = false;
     }
 
     gui_set_framebuffer_callback(rpc_gui->gui, NULL, NULL);
