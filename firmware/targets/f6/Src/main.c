@@ -6,6 +6,8 @@
 #include <furi-hal.h>
 #include <flipper.h>
 
+#define TAG "FuriHal"
+
 int main(void) {
     // Initialize FURI layer
     furi_init();
@@ -18,11 +20,11 @@ int main(void) {
 
     // 3rd party
     MX_FATFS_Init();
-    FURI_LOG_I("HAL", "FATFS OK");
+    FURI_LOG_I(TAG, "FATFS OK");
 
     // CMSIS initialization
     osKernelInitialize();
-    FURI_LOG_I("HAL", "KERNEL OK");
+    FURI_LOG_I(TAG, "KERNEL OK");
 
     // Init flipper
     flipper_init();

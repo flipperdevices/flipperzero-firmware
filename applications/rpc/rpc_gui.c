@@ -3,7 +3,7 @@
 #include "gui.pb.h"
 #include <gui/gui_i.h>
 
-#define RPC_GUI_TAG "RpcGui"
+#define TAG "RpcGui"
 
 typedef struct {
     Rpc* rpc;
@@ -186,7 +186,7 @@ void rpc_system_gui_virtual_display_frame_process(const PB_Main* request, void* 
     RpcGuiSystem* rpc_gui = context;
 
     if(!rpc_gui->virtual_display_view_port) {
-        FURI_LOG_W(RPC_GUI_TAG, "Virtual display is not started, ignoring incoming frame packet");
+        FURI_LOG_W(TAG, "Virtual display is not started, ignoring incoming frame packet");
         return;
     }
 

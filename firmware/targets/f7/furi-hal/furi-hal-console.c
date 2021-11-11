@@ -8,6 +8,8 @@
 
 #include <furi.h>
 
+#define TAG "FuriHalConsole"
+
 #define CONSOLE_BAUDRATE 230400
 
 volatile bool furi_hal_console_alive = false;
@@ -16,7 +18,7 @@ void furi_hal_console_init() {
     furi_hal_uart_init(FuriHalUartIdUSART1, CONSOLE_BAUDRATE);
     furi_hal_console_alive = true;
 
-    FURI_LOG_I("FuriHalConsole", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_console_enable() {

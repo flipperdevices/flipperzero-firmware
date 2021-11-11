@@ -16,7 +16,7 @@
 #include <m-string.h>
 #include <m-dict.h>
 
-#define RPC_TAG "RPC"
+#define TAG "RpcSrv"
 
 #define RPC_EVENT_NEW_DATA (1 << 0)
 #define RPC_EVENT_DISCONNECT (1 << 1)
@@ -342,7 +342,7 @@ RpcSession* rpc_session_open(Rpc* rpc) {
         };
         rpc_add_handler(rpc, PB_Main_stop_session_tag, &rpc_handler);
 
-        FURI_LOG_D(RPC_TAG, "Session started\r\n");
+        FURI_LOG_D(TAG, "Session started\r\n");
     }
 
     return result ? &rpc->session : NULL; /* support 1 open session for now */
@@ -489,7 +489,7 @@ void rpc_send_and_release(Rpc* rpc, PB_Main* message) {
     pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
 #if DEBUG_PRINT
-    FURI_LOG_I(RPC_TAG, "OUTPUT:");
+    FURI_LOG_I(TAG, "OUTPUT:");
     rpc_print_message(message);
 #endif
 
@@ -547,7 +547,7 @@ int32_t rpc_srv(void* p) {
 
         if(pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
 #if DEBUG_PRINT
-            FURI_LOG_I(RPC_TAG, "INPUT:");
+            FURI_LOG_I(TAG, "INPUT:");
             rpc_print_message(rpc->decoded_message);
 #endif
             RpcHandler* handler =
@@ -556,20 +556,19 @@ int32_t rpc_srv(void* p) {
             if(handler && handler->message_handler) {
                 handler->message_handler(rpc->decoded_message, handler->context);
             } else if(!handler && !rpc->session.terminate) {
-                FURI_LOG_E(
-                    RPC_TAG, "Unhandled message, tag: %d", rpc->decoded_message->which_content);
+                FURI_LOG_E(TAG, "Unhandled message, tag: %d", rpc->decoded_message->which_content);
             }
         } else {
             xStreamBufferReset(rpc->stream);
             if(!rpc->session.terminate) {
-                FURI_LOG_E(RPC_TAG, "Decode failed, error: \'%.128s\'", PB_GET_ERROR(&istream));
+                FURI_LOG_E(TAG, "Decode failed, error: \'%.128s\'", PB_GET_ERROR(&istream));
             }
         }
 
         pb_release(&PB_Main_msg, rpc->decoded_message);
 
         if(rpc->session.terminate) {
-            FURI_LOG_D(RPC_TAG, "Session terminated");
+            FURI_LOG_D(TAG, "Session terminated");
             osEventFlagsClear(rpc->events, RPC_EVENTS_ALL);
             rpc_free_session(&rpc->session);
             rpc->busy = false;

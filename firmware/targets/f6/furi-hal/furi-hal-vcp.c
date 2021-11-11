@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <stream_buffer.h>
 
+#define TAG "FuriHalVcp"
+
 #define USB_CDC_PKT_LEN CDC_DATA_SZ
 #define VCP_RX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
 #define VCP_TX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
@@ -66,7 +68,7 @@ void furi_hal_vcp_init() {
     furi_thread_set_callback(vcp->thread, vcp_worker);
     furi_thread_start(vcp->thread);
 
-    FURI_LOG_I("FuriHalVcp", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 static int32_t vcp_worker(void* context) {
