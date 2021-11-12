@@ -275,7 +275,6 @@ void onewire_slave_start(OneWireSlave* bus) {
 void onewire_slave_stop(OneWireSlave* bus) {
     hal_gpio_init(bus->gpio, GpioModeInput, GpioPullNo, GpioSpeedLow);
     hal_gpio_remove_int_callback(bus->gpio);
-    onewire_slave_detach(bus);
 }
 
 void onewire_slave_attach(OneWireSlave* bus, OneWireDevice* device) {

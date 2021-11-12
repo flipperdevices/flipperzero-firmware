@@ -47,21 +47,20 @@ void ibutton_worker_read_set_callback(
     iButtonWorkerReadCallback callback,
     void* context);
 void ibutton_worker_read_start(iButtonWorker* worker, iButtonKey* key);
-void ibutton_worker_read_stop(iButtonWorker* worker);
 
 void ibutton_worker_write_set_callback(
     iButtonWorker* worker,
     iButtonWorkerWriteCallback callback,
     void* context);
 void ibutton_worker_write_start(iButtonWorker* worker, iButtonKey* key);
-void ibutton_worker_write_stop(iButtonWorker* worker);
 
 void ibutton_worker_emulate_set_callback(
     iButtonWorker* worker,
     iButtonWorkerEmulateCallback callback,
     void* context);
 void ibutton_worker_emulate_start(iButtonWorker* worker, iButtonKey* key);
-void ibutton_worker_emulate_stop(iButtonWorker* worker);
+
+void ibutton_worker_stop(iButtonWorker* worker);
 
 #ifdef __cplusplus
 }
