@@ -9,6 +9,7 @@
 #include <cmsis_os2.h>
 #include <portmacro.h>
 #include <furi.h>
+
 #include <cli/cli.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -21,8 +22,6 @@
 #define RPC_EVENT_NEW_DATA (1 << 0)
 #define RPC_EVENT_DISCONNECT (1 << 1)
 #define RPC_EVENTS_ALL (RPC_EVENT_DISCONNECT | RPC_EVENT_NEW_DATA)
-
-#define DEBUG_PRINT 0
 
 DICT_DEF2(RpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, RpcHandler, M_POD_OPLIST)
 
@@ -475,7 +474,7 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
         }
     }
 
-#if DEBUG_PRINT
+#if SRV_RPC_DEBUG
     rpc_print_data("INPUT", buf, bytes_received);
 #endif
 
@@ -488,7 +487,7 @@ void rpc_send_and_release(Rpc* rpc, PB_Main* message) {
     RpcSession* session = &rpc->session;
     pb_ostream_t ostream = PB_OSTREAM_SIZING;
 
-#if DEBUG_PRINT
+#if SRV_RPC_DEBUG
     FURI_LOG_I(TAG, "OUTPUT:");
     rpc_print_message(message);
 #endif
@@ -501,7 +500,7 @@ void rpc_send_and_release(Rpc* rpc, PB_Main* message) {
 
     pb_encode_ex(&ostream, &PB_Main_msg, message, PB_ENCODE_DELIMITED);
 
-#if DEBUG_PRINT
+#if SRV_RPC_DEBUG
     rpc_print_data("OUTPUT", buffer, ostream.bytes_written);
 #endif
 
@@ -542,11 +541,11 @@ int32_t rpc_srv(void* p) {
             .callback = rpc_pb_stream_read,
             .state = rpc,
             .errmsg = NULL,
-            .bytes_left = 1536, /* max incoming message size */
+            .bytes_left = RPC_MAX_MESSAGE_SIZE, /* max incoming message size */
         };
 
         if(pb_decode_ex(&istream, &PB_Main_msg, rpc->decoded_message, PB_DECODE_DELIMITED)) {
-#if DEBUG_PRINT
+#if SRV_RPC_DEBUG
             FURI_LOG_I(TAG, "INPUT:");
             rpc_print_message(rpc->decoded_message);
 #endif
