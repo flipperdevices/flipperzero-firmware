@@ -3,6 +3,8 @@
 #include <stream_buffer.h>
 #include <furi.h>
 
+#define TAG "SubGhzWorker"
+
 struct SubGhzWorker {
     FuriThread* thread;
     StreamBufferHandle_t stream;
@@ -54,7 +56,7 @@ static int32_t subghz_worker_thread_callback(void* context) {
             xStreamBufferReceive(instance->stream, &level_duration, sizeof(LevelDuration), 10);
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
-                printf(".");
+                FURI_LOG_E(TAG, "Overrun buffer");;
                 if(instance->overrun_callback) instance->overrun_callback(instance->context);
             } else {
                 bool level = level_duration_get_level(level_duration);
@@ -90,12 +92,12 @@ SubGhzWorker* subghz_worker_alloc() {
     SubGhzWorker* instance = furi_alloc(sizeof(SubGhzWorker));
 
     instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "subghz_worker");
+    furi_thread_set_name(instance->thread, "SubghzWorker");
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, subghz_worker_thread_callback);
 
-    instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
+    instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 2048, sizeof(LevelDuration));
 
     //setting filter
     instance->filter_running = true;
