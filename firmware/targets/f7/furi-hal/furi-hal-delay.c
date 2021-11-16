@@ -3,6 +3,7 @@
 #include <furi.h>
 #include <cmsis_os2.h>
 
+#define TAG "FuriHalDelay"
 uint32_t instructions_per_us;
 
 void furi_hal_delay_init(void) {
@@ -10,7 +11,7 @@ void furi_hal_delay_init(void) {
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
     DWT->CYCCNT = 0U;
     instructions_per_us = SystemCoreClock / 1000000.0f;
-    FURI_LOG_I("FuriHalDelay", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 void delay_us(float microseconds) {
