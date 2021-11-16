@@ -18,7 +18,7 @@ extern "C" void lfrfid_cli_init() {
 
 void lfrfid_cli_print_usage() {
     printf("Usage:\r\n");
-    printf("rfid read <optional key_type>\r\n");
+    printf("rfid read <optional: normal | indala>\r\n");
     printf("rfid <write | emulate> <key_type> <key_data>\r\n");
     printf("\t<key_type> choose from:\r\n");
     printf("\tEM4100, EM-Marin (5 bytes key_data)\r\n");
@@ -50,10 +50,18 @@ void lfrfid_cli_read(Cli* cli, string_t args) {
     string_init(type_string);
     bool simple_mode = true;
     LfrfidKeyType type;
+    RfidReader::Type reader_type = RfidReader::Type::Normal;
+    static const uint8_t data_size = LFRFID_KEY_SIZE;
+    uint8_t data[data_size] = {0};
 
     if(args_read_string_and_trim(args, type_string)) {
         simple_mode = false;
-        if(!lfrfid_cli_get_key_type(type_string, &type)) {
+
+        if(string_cmp_str(type_string, "normal") == 0) {
+            reader_type = RfidReader::Type::Normal;
+        } else if(string_cmp_str(type_string, "indala") == 0) {
+            reader_type = RfidReader::Type::Indala;
+        } else {
             lfrfid_cli_print_usage();
             string_clear(type_string);
             return;
@@ -63,19 +71,8 @@ void lfrfid_cli_read(Cli* cli, string_t args) {
     if(simple_mode) {
         reader.start();
     } else {
-        switch(type) {
-        case LfrfidKeyType::KeyEM4100:
-        case LfrfidKeyType::KeyH10301:
-            reader.start_forced(RfidReader::Type::Normal);
-            break;
-        case LfrfidKeyType::KeyI40134:
-            reader.start_forced(RfidReader::Type::Indala);
-            break;
-        }
+        reader.start_forced(reader_type);
     }
-
-    static const uint8_t data_size = LFRFID_KEY_SIZE;
-    uint8_t data[data_size] = {0};
 
     printf("Reading RFID...\r\nPress Ctrl+C to abort\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
