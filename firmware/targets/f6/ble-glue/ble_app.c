@@ -8,7 +8,7 @@
 
 #include <furi-hal.h>
 
-#define BLE_APP_TAG "ble app"
+#define TAG "Bt"
 
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
@@ -33,7 +33,7 @@ bool ble_app_init() {
     ble_app->hci_mtx = osMutexNew(NULL);
     ble_app->hci_sem = osSemaphoreNew(1, 0, NULL);
     // HCI transport layer thread to handle user asynch events
-    ble_app->hci_thread_attr.name = "ble hci";
+    ble_app->hci_thread_attr.name = "BleHciWorker";
     ble_app->hci_thread_attr.stack_size = 1024;
     ble_app->hci_thread_id = osThreadNew(ble_app_hci_thread, NULL, &ble_app->hci_thread_attr);
 
@@ -53,7 +53,7 @@ bool ble_app_init() {
     };
     status = SHCI_C2_Config(&config_param);
     if(status) {
-        FURI_LOG_E(BLE_APP_TAG, "Failed to configure 2nd core: %d", status);
+        FURI_LOG_E(TAG, "Failed to configure 2nd core: %d", status);
     }
 
     // Start ble stack on 2nd core
@@ -82,7 +82,7 @@ bool ble_app_init() {
     };
     status = SHCI_C2_BLE_Init(&ble_init_cmd_packet);
     if(status) {
-        FURI_LOG_E(BLE_APP_TAG, "Failed to start ble stack: %d", status);
+        FURI_LOG_E(TAG, "Failed to start ble stack: %d", status);
     }
     return status == SHCI_Success;
 }

@@ -57,7 +57,7 @@
 #endif /* CMSIS_device_header */
 
 #define configENABLE_FPU                         1
-#define configENABLE_MPU                         1
+#define configENABLE_MPU                         0
 
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          0
@@ -101,6 +101,9 @@
 #define configTIMER_TASK_PRIORITY                ( 2 )
 #define configTIMER_QUEUE_LENGTH                 32
 #define configTIMER_TASK_STACK_DEPTH             256
+#define configTIMER_SERVICE_TASK_NAME          "TimersSrv"
+
+#define configIDLE_TASK_NAME                  "(-_-)"
 
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function. */
