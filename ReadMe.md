@@ -137,12 +137,12 @@ Finally, you will have **`firmware/.obj/f7/full.dfu`** file that can be distribu
 brew install --cask gcc-arm-embedded
 ```
 
-2. Install `open-ocd` if you want use debugger
+2. Install `open-ocd` if you want to use a debugger
 ```
 brew install open-ocd
 ```
 
-3. Build hex2dfu from source. Clone repo, build executable file and copy it to `PATH`
+3. Build hex2dfu from source. Clone repo, build executable file, and copy it to `PATH`
 ```
 git clone git@github.com:rusdacent/hex2dfu.git
 cd hex2dfu
@@ -161,11 +161,11 @@ make flash
 ```
 
 ### Flash firmware to device via USB
-Before you need install `dfu-util` on your mac:
+Before you need to install `dfu-util` on your mac:
 ```
 brew install dfu-util
 ```
-Then you need build firmware code via `make` command and then you can flash on your Flipper:
+Then you need to build firmware code via `make` command and then you can flash on your Flipper:
 ```
 dfu-util -a 0 -D firmware/.obj/f7/firmware.dfu
 ```
@@ -193,11 +193,11 @@ sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-size /usr
 sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-objcopy /usr/bin/arm-none-eabi-objcopy
 ```
 
-If your unzip command fail with error `bzip2: Cannot exec: No such file or directory` you need install bzip2 before:
+If your unzip command fail with an error `bzip2: Cannot exec: No such file or directory` you need install bzip2 before:
 ```
 sudo apt-get install bzip2
 ```
-3. Build hex2dfu from source. Clone repo, build executable file and copy it to `PATH`
+3. Build hex2dfu from source. Clone repo, build executable file, and copy it to `PATH`
 ```
 git clone https://github.com/rusdacent/hex2dfu.git
 cd hex2dfu 
@@ -220,11 +220,11 @@ make flash
 ```
 
 ### Flash firmware to device via USB
-Before you need install `dfu-util` on your mac:
+Before you need to install `dfu-util` on your mac:
 ```
 sudo apt install dfu-util
 ```
-Then you need build firmware code via `make` command and then you can flash on your Flipper:
+Then you need to build firmware code via `make` command and then you can flash on your Flipper:
 ```
 dfu-util -a 0 -D firmware/.obj/f7/firmware.dfu
 ```
