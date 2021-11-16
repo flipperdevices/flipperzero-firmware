@@ -74,19 +74,19 @@ One liner: `./flash_core1_main.sh`
 ### Compile everything
 
 ```sh
-docker-compose exec dev make -j$(nproc)
+docker-compose exec dev make
 ```
 
 ### Flash everything
 
 ```sh
-docker-compose exec dev make -j$(nproc) whole
+docker-compose exec dev make whole
 ```
 
 ### Compile bootloader
 
 ```sh
-docker-compose exec dev make -j$(nproc) -C bootloader
+docker-compose exec dev make -C bootloader
 ```
 
 Bootloader compilation results:
@@ -98,7 +98,7 @@ Bootloader compilation results:
 ### Compile firmware
 
 ```sh
-docker-compose exec dev make -j$(nproc) -C firmware
+docker-compose exec dev make -C firmware
 ```
 
 Firmware compilation results:
@@ -152,17 +152,28 @@ sudo cp hex2dfu /usr/local/bin
 
 ### Compile firmware
 ```
-make -j$(nproc)
+make
 ```
 
 ### Flash to device via STLink
 ```
-make -j$(nproc) flash
+make flash
 ```
+
+### Flash firmware to device via USB
+Before you need install `dfu-util` on your mac:
+```
+brew install dfu-util
+```
+Then you need build firmware code via `make` command and then you can flash on your Flipper:
+```
+dfu-util -a 0 -D firmware/.obj/f7/firmware.dfu
+```
+Where `f7` - target
 
 ### Launch GNU Debugger
 ```
-make -j$(nproc) debug
+make debug
 ```
 
 # Links
