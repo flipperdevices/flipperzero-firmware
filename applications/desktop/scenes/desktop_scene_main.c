@@ -70,7 +70,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenFavorite:
-            desktop_settings_load(&desktop->settings);
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
             desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
             consumed = true;
             break;

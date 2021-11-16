@@ -22,7 +22,9 @@ void subghz_protocol_nero_radio_free(SubGhzProtocolNeroRadio* instance);
  * @param encoder - SubGhzProtocolCommonEncoder encoder
  * @return bool
  */
-bool subghz_protocol_nero_radio_send_key(SubGhzProtocolNeroRadio* instance, SubGhzProtocolCommonEncoder* encoder);
+bool subghz_protocol_nero_radio_send_key(
+    SubGhzProtocolNeroRadio* instance,
+    SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolNeroRadio instance
@@ -40,7 +42,10 @@ void subghz_protocol_nero_radio_check_remote_controller(SubGhzProtocolNeroRadio*
  * @param instance - SubGhzProtocolNeroRadio instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_nero_radio_parse(SubGhzProtocolNeroRadio* instance, bool level, uint32_t duration);
+void subghz_protocol_nero_radio_parse(
+    SubGhzProtocolNeroRadio* instance,
+    bool level,
+    uint32_t duration);
 
 /** Outputting information from the parser
  * 
@@ -49,20 +54,27 @@ void subghz_protocol_nero_radio_parse(SubGhzProtocolNeroRadio* instance, bool le
  */
 void subghz_protocol_nero_radio_to_str(SubGhzProtocolNeroRadio* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolNeroRadio instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_nero_radio_to_save_str(SubGhzProtocolNeroRadio* instance, string_t output);
+bool subghz_protocol_nero_radio_to_save_file(
+    SubGhzProtocolNeroRadio* instance,
+    FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 
- * @param file_worker - FileWorker file_worker
+ * @param flipper_file - FlipperFile
  * @param instance - SubGhzProtocolNeroRadio instance
+ * @param file_path - file path
  * @return bool
  */
-bool subghz_protocol_nero_radio_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolNeroRadio* instance);
+bool subghz_protocol_nero_radio_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolNeroRadio* instance,
+    const char* file_path);
 
 /** Loading protocol from bin data
  * 

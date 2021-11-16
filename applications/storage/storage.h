@@ -197,6 +197,12 @@ const char* storage_error_get_desc(FS_Error error_id);
  */
 FS_Error storage_file_get_error(File* file);
 
+/** Retrieves the internal (storage-specific) error id from the file object
+ * @param file pointer to file object. Pointer must not point to NULL. YOU CANNOT RETREIVE THE INTERNAL ERROR ID IF THE FILE HAS BEEN CLOSED
+ * @return FS_Error error id
+ */
+int32_t storage_file_get_internal_error(File* file);
+
 /** Retrieves the error text from the file object
  * @param file pointer to file object. Pointer must not point to NULL. YOU CANNOT RETREIVE THE ERROR TEXT IF THE FILE HAS BEEN CLOSED
  * @return const char* error text
@@ -241,12 +247,36 @@ FS_Error storage_sd_status(Storage* api);
 bool storage_simply_remove(Storage* storage, const char* path);
 
 /**
+ * Removes a file/directory from the repository, the directory can be not empty
+ * @param storage pointer to the api
+ * @param path
+ * @return true on success or if file/dir is not exist
+ */
+bool storage_simply_remove_recursive(Storage* storage, const char* path);
+
+/**
  * Creates a directory
  * @param storage 
  * @param path 
  * @return true on success or if directory is already exist
  */
 bool storage_simply_mkdir(Storage* storage, const char* path);
+
+/**
+ * @brief Get next free filename.
+ * 
+ * @param storage
+ * @param dirname 
+ * @param filename 
+ * @param fileextension 
+ * @param nextfilename return name
+ */
+void storage_get_next_filename(
+    Storage* storage,
+    const char* dirname,
+    const char* filename,
+    const char* fileextension,
+    string_t nextfilename);
 
 #ifdef __cplusplus
 }

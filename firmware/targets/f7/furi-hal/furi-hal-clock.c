@@ -5,6 +5,8 @@
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_utils.h>
 
+#define TAG "FuriHalClock"
+
 #define HS_CLOCK_IS_READY() (LL_RCC_HSE_IsReady() && LL_RCC_HSI_IsReady())
 #define LS_CLOCK_IS_READY() (LL_RCC_LSE_IsReady() && LL_RCC_LSI1_IsReady())
 
@@ -84,6 +86,7 @@ void furi_hal_clock_init() {
     LL_RCC_EnableRTC();
 
     LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
+    LL_RCC_SetLPUARTClockSource(LL_RCC_LPUART1_CLKSOURCE_PCLK1);
     LL_RCC_SetADCClockSource(LL_RCC_ADC_CLKSOURCE_PLLSAI1);
     LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
     LL_RCC_SetRNGClockSource(LL_RCC_RNG_CLKSOURCE_CLK48);
@@ -117,11 +120,12 @@ void furi_hal_clock_init() {
     // APB1
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB);
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+    LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_LPUART1);
 
     // APB2
     LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_USART1);
 
-    FURI_LOG_I("FuriHalClock", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_clock_switch_to_hsi() {

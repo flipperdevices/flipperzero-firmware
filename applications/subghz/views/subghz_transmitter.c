@@ -93,9 +93,9 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         with_view_model(
             subghz_transmitter->view, (SubghzTransmitterModel * model) {
-                string_clean(model->frequency_str);
-                string_clean(model->preset_str);
-                string_clean(model->key_str);
+                string_reset(model->frequency_str);
+                string_reset(model->preset_str);
+                string_reset(model->key_str);
                 model->show_button = 0;
                 return false;
             });
@@ -111,10 +111,12 @@ bool subghz_transmitter_input(InputEvent* event, void* context) {
         });
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
-        subghz_transmitter->callback(SubghzTransmitterEventSendStart, subghz_transmitter->context);
+        subghz_transmitter->callback(
+            SubghzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
         return true;
     } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypeRelease) {
-        subghz_transmitter->callback(SubghzTransmitterEventSendStop, subghz_transmitter->context);
+        subghz_transmitter->callback(
+            SubghzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
         return true;
     }
 

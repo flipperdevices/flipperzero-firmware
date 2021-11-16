@@ -81,7 +81,7 @@ void widget_clear(Widget* widget) {
                 element->free(element);
                 ElementArray_next(it);
             }
-            ElementArray_clean(model->element);
+            ElementArray_reset(model->element);
             return true;
         });
 }
@@ -144,6 +144,21 @@ void widget_add_string_element(
     WidgetElement* string_element =
         widget_element_string_create(x, y, horizontal, vertical, font, text);
     widget_add_element(widget, string_element);
+}
+
+void widget_add_text_box_element(
+    Widget* widget,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    Align horizontal,
+    Align vertical,
+    const char* text) {
+    furi_assert(widget);
+    WidgetElement* text_box_element =
+        widget_element_text_box_create(x, y, width, height, horizontal, vertical, text);
+    widget_add_element(widget, text_box_element);
 }
 
 void widget_add_button_element(

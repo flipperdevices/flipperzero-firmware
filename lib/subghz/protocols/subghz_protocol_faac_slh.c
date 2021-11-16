@@ -95,8 +95,6 @@ void subghz_protocol_faac_slh_parse(SubGhzProtocolFaacSLH* instance, bool level,
         if((level) && (DURATION_DIFF(duration, instance->common.te_long * 2) <
                        instance->common.te_delta * 3)) {
             instance->common.parser_step = FaacSLHDecoderStepFoundPreambula;
-        } else {
-            instance->common.parser_step = FaacSLHDecoderStepReset;
         }
         break;
     case FaacSLHDecoderStepFoundPreambula:
@@ -167,7 +165,7 @@ void subghz_protocol_faac_slh_to_str(SubGhzProtocolFaacSLH* instance, string_t o
     string_cat_printf(
         output,
         "%s %dbit\r\n"
-        "Key:0x%lX%08lX\r\n"
+        "Key:%lX%08lX\r\n"
         "Fix:%08lX \r\n"
         "Hop:%08lX \r\n"
         "Sn:%07lX Btn:%lX\r\n",

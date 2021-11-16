@@ -32,7 +32,7 @@ CHECK_AND_REINIT_SUBMODULES_SHELL=\
 	fi
 $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
-all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu
+all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
@@ -53,6 +53,10 @@ $(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).hex
 		-i $(OBJ_DIR)/$(PROJECT).hex \
 		-o $(OBJ_DIR)/$(PROJECT).dfu \
 		-l "Flipper Zero $(shell echo $(TARGET) | tr a-z A-Z)" > /dev/null
+
+$(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
+	@echo "\tJSON\t" $@
+	@python3 ../scripts/meta.py -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $< "->" $@
@@ -96,7 +100,7 @@ debug_other:
 		-ex "svd_load $(SVD_FILE)" \
 
 
-blackmagic: flash
+blackmagic:
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote $(BLACKMAGIC)' \
 		-ex 'monitor swdp_scan' \
@@ -124,14 +128,6 @@ zz: clean
 
 zzz: clean
 	$(MAKE) debug
-
-FORMAT_SOURCES := $(shell find ../applications -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-FORMAT_SOURCES += $(shell find ../bootloader -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-FORMAT_SOURCES += $(shell find ../core -iname "*.h" -o -iname "*.c" -o -iname "*.cpp")
-
-format:
-	@echo "Formatting sources with clang-format"
-	@clang-format -style=file -i $(FORMAT_SOURCES)
 
 generate_cscope_db:
 	@echo "$(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES)" | tr ' ' '\n' > $(OBJ_DIR)/source.list.p

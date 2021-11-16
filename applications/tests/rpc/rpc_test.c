@@ -29,7 +29,7 @@ static RpcSession* session = NULL;
 static StreamBufferHandle_t output_stream = NULL;
 static uint32_t command_id = 0;
 
-#define TEST_RPC_TAG "TEST_RPC"
+#define TAG "UnitTestsRpc"
 #define MAX_RECEIVE_OUTPUT_TIMEOUT 3000
 #define MAX_NAME_LENGTH 255
 #define MAX_DATA_SIZE 512 // have to be exact as in rpc_storage.c
@@ -56,25 +56,40 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected);
 static void test_rpc_decode_and_compare(MsgList_t expected_msg_list);
 static void test_rpc_free_msg_list(MsgList_t msg_list);
 
-static void test_rpc_storage_setup(void) {
+static void test_rpc_setup(void) {
     furi_assert(!rpc);
     furi_assert(!session);
     furi_assert(!output_stream);
 
     rpc = furi_record_open("rpc");
     for(int i = 0; !session && (i < 10000); ++i) {
-        session = rpc_open_session(rpc);
+        session = rpc_session_open(rpc);
         delay(1);
     }
     furi_assert(session);
 
+    output_stream = xStreamBufferCreate(1000, 1);
+    mu_assert(session, "failed to start session");
+    rpc_session_set_send_bytes_callback(session, output_bytes_callback);
+    rpc_session_set_context(session, output_stream);
+}
+
+static void test_rpc_teardown(void) {
+    rpc_session_close(session);
+    furi_record_close("rpc");
+    vStreamBufferDelete(output_stream);
+    ++command_id;
+    output_stream = NULL;
+    rpc = NULL;
+    session = NULL;
+}
+
+static void test_rpc_storage_setup(void) {
+    test_rpc_setup();
+
     Storage* fs_api = furi_record_open("storage");
     clean_directory(fs_api, TEST_DIR_NAME);
     furi_record_close("storage");
-
-    output_stream = xStreamBufferCreate(1000, 1);
-    mu_assert(session, "failed to start session");
-    rpc_set_send_bytes_callback(session, output_bytes_callback, output_stream);
 }
 
 static void test_rpc_storage_teardown(void) {
@@ -82,13 +97,7 @@ static void test_rpc_storage_teardown(void) {
     clean_directory(fs_api, TEST_DIR_NAME);
     furi_record_close("storage");
 
-    rpc_close_session(session);
-    furi_record_close("rpc");
-    vStreamBufferDelete(output_stream);
-    ++command_id;
-    output_stream = NULL;
-    rpc = NULL;
-    session = NULL;
+    test_rpc_teardown();
 }
 
 static void clean_directory(Storage* fs_api, const char* clean_dir) {
@@ -197,16 +206,21 @@ static void test_rpc_create_simple_message(
     const char* str,
     uint32_t command_id) {
     furi_assert(message);
-    furi_assert(str);
 
-    char* str_copy = furi_alloc(strlen(str) + 1);
-    strcpy(str_copy, str);
+    char* str_copy = NULL;
+    if(str) {
+        str_copy = furi_alloc(strlen(str) + 1);
+        strcpy(str_copy, str);
+    }
     message->command_id = command_id;
     message->command_status = PB_CommandStatus_OK;
     message->cb_content.funcs.encode = NULL;
     message->which_content = tag;
     message->has_next = false;
     switch(tag) {
+    case PB_Main_storage_stat_request_tag:
+        message->content.storage_stat_request.path = str_copy;
+        break;
     case PB_Main_storage_list_request_tag:
         message->content.storage_list_request.path = str_copy;
         break;
@@ -292,7 +306,7 @@ static void test_rpc_encode_and_feed_one(PB_Main* request) {
     size_t bytes_left = ostream.bytes_written;
     uint8_t* buffer_ptr = buffer;
     do {
-        size_t bytes_sent = rpc_feed_bytes(session, buffer_ptr, bytes_left, 1000);
+        size_t bytes_sent = rpc_session_feed(session, buffer_ptr, bytes_left, 1000);
         mu_check(bytes_sent > 0);
 
         bytes_left -= bytes_sent;
@@ -358,6 +372,19 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
         mu_check(result_locked == expected_locked);
         break;
     }
+    case PB_Main_storage_stat_response_tag: {
+        bool result_has_msg_file = result->content.storage_stat_response.has_file;
+        bool expected_has_msg_file = expected->content.storage_stat_response.has_file;
+        mu_check(result_has_msg_file == expected_has_msg_file);
+
+        if(result_has_msg_file) {
+            PB_Storage_File* result_msg_file = &result->content.storage_stat_response.file;
+            PB_Storage_File* expected_msg_file = &expected->content.storage_stat_response.file;
+            test_rpc_compare_file(result_msg_file, expected_msg_file);
+        } else {
+            mu_check(0);
+        }
+    } break;
     case PB_Main_storage_read_response_tag: {
         bool result_has_msg_file = result->content.storage_read_response.has_file;
         bool expected_has_msg_file = expected->content.storage_read_response.has_file;
@@ -402,6 +429,38 @@ static bool test_rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_
     return (count == bytes_received);
 }
 
+static void
+    test_rpc_storage_list_create_expected_list_root(MsgList_t msg_list, uint32_t command_id) {
+    PB_Main* message = MsgList_push_new(msg_list);
+    message->has_next = false;
+    message->cb_content.funcs.encode = NULL;
+    message->command_id = command_id;
+    message->which_content = PB_Main_storage_list_response_tag;
+
+    message->content.storage_list_response.file_count = 3;
+    message->content.storage_list_response.file[0].data = NULL;
+    message->content.storage_list_response.file[1].data = NULL;
+    message->content.storage_list_response.file[2].data = NULL;
+
+    message->content.storage_list_response.file[0].size = 0;
+    message->content.storage_list_response.file[1].size = 0;
+    message->content.storage_list_response.file[2].size = 0;
+
+    message->content.storage_list_response.file[0].type = PB_Storage_File_FileType_DIR;
+    message->content.storage_list_response.file[1].type = PB_Storage_File_FileType_DIR;
+    message->content.storage_list_response.file[2].type = PB_Storage_File_FileType_DIR;
+
+    char* str = furi_alloc(4);
+    strcpy(str, "any");
+    message->content.storage_list_response.file[0].name = str;
+    str = furi_alloc(4);
+    strcpy(str, "int");
+    message->content.storage_list_response.file[1].name = str;
+    str = furi_alloc(4);
+    strcpy(str, "ext");
+    message->content.storage_list_response.file[2].name = str;
+}
+
 static void test_rpc_storage_list_create_expected_list(
     MsgList_t msg_list,
     const char* path,
@@ -412,11 +471,10 @@ static void test_rpc_storage_list_create_expected_list(
     PB_Main response = {
         .command_id = command_id,
         .has_next = false,
-        .which_content = PB_Main_storage_list_request_tag,
+        .which_content = PB_Main_storage_list_response_tag,
         /* other fields (e.g. msg_files ptrs) explicitly initialized by 0 */
     };
     PB_Storage_ListResponse* list = &response.content.storage_list_response;
-    response.which_content = PB_Main_storage_list_response_tag;
 
     bool finish = false;
     int i = 0;
@@ -505,7 +563,11 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
     MsgList_init(expected_msg_list);
 
     test_rpc_create_simple_message(&request, PB_Main_storage_list_request_tag, path, command_id);
-    test_rpc_storage_list_create_expected_list(expected_msg_list, path, command_id);
+    if(!strcmp(path, "/")) {
+        test_rpc_storage_list_create_expected_list_root(expected_msg_list, command_id);
+    } else {
+        test_rpc_storage_list_create_expected_list(expected_msg_list, path, command_id);
+    }
     test_rpc_encode_and_feed_one(&request);
     test_rpc_decode_and_compare(expected_msg_list);
 
@@ -514,6 +576,7 @@ static void test_rpc_storage_list_run(const char* path, uint32_t command_id) {
 }
 
 MU_TEST(test_storage_list) {
+    test_rpc_storage_list_run("/", ++command_id);
     test_rpc_storage_list_run("/ext/nfc", ++command_id);
 
     test_rpc_storage_list_run("/int", ++command_id);
@@ -597,12 +660,22 @@ static void test_storage_read_run(const char* path, uint32_t command_id) {
     test_rpc_free_msg_list(expected_msg_list);
 }
 
+static bool test_is_exists(const char* path) {
+    Storage* fs_api = furi_record_open("storage");
+    FileInfo fileinfo;
+    FS_Error result = storage_common_stat(fs_api, path, &fileinfo);
+    furi_check((result == FSE_OK) || (result == FSE_NOT_EXIST));
+    furi_record_close("storage");
+    return result == FSE_OK;
+}
+
 static void test_create_dir(const char* path) {
     Storage* fs_api = furi_record_open("storage");
     FS_Error error = storage_common_mkdir(fs_api, path);
     (void)error;
     furi_assert((error == FSE_OK) || (error == FSE_EXIST));
     furi_record_close("storage");
+    furi_check(test_is_exists(path));
 }
 
 static void test_create_file(const char* path, size_t size) {
@@ -625,6 +698,60 @@ static void test_create_file(const char* path, size_t size) {
     storage_file_free(file);
 
     furi_record_close("storage");
+    furi_check(test_is_exists(path));
+}
+
+static void test_rpc_storage_stat_run(const char* path, uint32_t command_id) {
+    PB_Main request;
+    MsgList_t expected_msg_list;
+    MsgList_init(expected_msg_list);
+
+    test_rpc_create_simple_message(&request, PB_Main_storage_stat_request_tag, path, command_id);
+
+    Storage* fs_api = furi_record_open("storage");
+    FileInfo fileinfo;
+    FS_Error error = storage_common_stat(fs_api, path, &fileinfo);
+    furi_record_close("storage");
+
+    PB_Main* response = MsgList_push_new(expected_msg_list);
+    response->command_id = command_id;
+    response->command_status = rpc_system_storage_get_error(error);
+    response->has_next = false;
+    response->which_content = PB_Main_empty_tag;
+
+    if(error == FSE_OK) {
+        response->which_content = PB_Main_storage_stat_response_tag;
+        response->content.storage_stat_response.has_file = true;
+        response->content.storage_stat_response.file.type = (fileinfo.flags & FSF_DIRECTORY) ?
+                                                                PB_Storage_File_FileType_DIR :
+                                                                PB_Storage_File_FileType_FILE;
+        response->content.storage_stat_response.file.size = fileinfo.size;
+    }
+
+    test_rpc_encode_and_feed_one(&request);
+    test_rpc_decode_and_compare(expected_msg_list);
+
+    pb_release(&PB_Main_msg, &request);
+    test_rpc_free_msg_list(expected_msg_list);
+}
+
+#define TEST_DIR_STAT_NAME TEST_DIR "stat_dir"
+#define TEST_DIR_STAT TEST_DIR_STAT_NAME "/"
+MU_TEST(test_storage_stat) {
+    test_create_dir(TEST_DIR_STAT_NAME);
+    test_create_file(TEST_DIR_STAT "empty.txt", 0);
+    test_create_file(TEST_DIR_STAT "l33t.txt", 1337);
+
+    test_rpc_storage_stat_run("/", ++command_id);
+    test_rpc_storage_stat_run("/int", ++command_id);
+    test_rpc_storage_stat_run("/ext", ++command_id);
+
+    test_rpc_storage_stat_run(TEST_DIR_STAT "empty.txt", ++command_id);
+    test_rpc_storage_stat_run(TEST_DIR_STAT "l33t.txt", ++command_id);
+    test_rpc_storage_stat_run(TEST_DIR_STAT "missing", ++command_id);
+    test_rpc_storage_stat_run(TEST_DIR_STAT_NAME, ++command_id);
+
+    test_rpc_storage_stat_run(TEST_DIR_STAT, ++command_id);
 }
 
 MU_TEST(test_storage_read) {
@@ -829,12 +956,17 @@ MU_TEST(test_storage_interrupt_continuous_another_system) {
     test_rpc_free_msg_list(expected_msg_list);
 }
 
-static void test_storage_delete_run(const char* path, size_t command_id, PB_CommandStatus status) {
+static void test_storage_delete_run(
+    const char* path,
+    size_t command_id,
+    PB_CommandStatus status,
+    bool recursive) {
     PB_Main request;
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
     test_rpc_create_simple_message(&request, PB_Main_storage_delete_request_tag, path, command_id);
+    request.content.storage_delete_request.recursive = recursive;
     test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
 
     test_rpc_encode_and_feed_one(&request);
@@ -844,16 +976,69 @@ static void test_storage_delete_run(const char* path, size_t command_id, PB_Comm
     test_rpc_free_msg_list(expected_msg_list);
 }
 
-MU_TEST(test_storage_delete) {
-    test_create_file(TEST_DIR "empty.txt", 0);
-    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK);
-    test_storage_delete_run(
-        TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_ERROR_STORAGE_NOT_EXIST);
+#define TEST_DIR_RMRF_NAME TEST_DIR "rmrf_test"
+#define TEST_DIR_RMRF TEST_DIR_RMRF_NAME "/"
+MU_TEST(test_storage_delete_recursive) {
+    test_create_dir(TEST_DIR_RMRF_NAME);
 
-    test_create_dir(TEST_DIR "dir1");
-    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    test_create_dir(TEST_DIR_RMRF "dir1");
+    test_create_file(TEST_DIR_RMRF "dir1/file1", 1);
+
+    test_create_dir(TEST_DIR_RMRF "dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir2");
+    test_create_file(TEST_DIR_RMRF "dir1/dir2/file1", 1);
+    test_create_file(TEST_DIR_RMRF "dir1/dir2/file2", 1);
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir1/dir3/dir1/dir1/dir1/dir1");
+
+    test_create_dir(TEST_DIR_RMRF "dir2");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2");
+    test_create_file(TEST_DIR_RMRF "dir2/dir2/file1", 1);
+
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1/dir1");
+    test_create_dir(TEST_DIR_RMRF "dir2/dir2/dir1/dir1/dir1");
+    test_create_file(TEST_DIR_RMRF "dir2/dir2/dir1/dir1/dir1/file1", 1);
+
     test_storage_delete_run(
-        TEST_DIR "dir1", ++command_id, PB_CommandStatus_ERROR_STORAGE_NOT_EXIST);
+        TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_ERROR_STORAGE_DIR_NOT_EMPTY, false);
+    mu_check(test_is_exists(TEST_DIR_RMRF_NAME));
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+
+    test_create_dir(TEST_DIR_RMRF_NAME);
+    test_storage_delete_run(TEST_DIR_RMRF_NAME, ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR_RMRF_NAME));
+
+    test_create_dir(TEST_DIR "file1");
+    test_storage_delete_run(TEST_DIR "file1", ++command_id, PB_CommandStatus_OK, true);
+    mu_check(!test_is_exists(TEST_DIR "file1"));
+}
+
+MU_TEST(test_storage_delete) {
+    test_storage_delete_run(NULL, ++command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS, false);
+
+    furi_check(!test_is_exists(TEST_DIR "empty.txt"));
+    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "empty.txt"));
+
+    test_create_file(TEST_DIR "empty.txt", 0);
+    test_storage_delete_run(TEST_DIR "empty.txt", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "empty.txt"));
+
+    furi_check(!test_is_exists(TEST_DIR "dir1"));
+    test_create_dir(TEST_DIR "dir1");
+    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "dir1"));
+
+    test_storage_delete_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK, false);
+    mu_check(!test_is_exists(TEST_DIR "dir1"));
 }
 
 static void test_storage_mkdir_run(const char* path, size_t command_id, PB_CommandStatus status) {
@@ -872,18 +1057,17 @@ static void test_storage_mkdir_run(const char* path, size_t command_id, PB_Comma
 }
 
 MU_TEST(test_storage_mkdir) {
+    furi_check(!test_is_exists(TEST_DIR "dir1"));
     test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    mu_check(test_is_exists(TEST_DIR "dir1"));
+
     test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_ERROR_STORAGE_EXIST);
+    mu_check(test_is_exists(TEST_DIR "dir1"));
+
+    furi_check(!test_is_exists(TEST_DIR "dir2"));
     test_create_dir(TEST_DIR "dir2");
     test_storage_mkdir_run(TEST_DIR "dir2", ++command_id, PB_CommandStatus_ERROR_STORAGE_EXIST);
-
-    Storage* fs_api = furi_record_open("storage");
-    FS_Error error = storage_common_remove(fs_api, TEST_DIR "dir1");
-    (void)error;
-    furi_assert(error == FSE_OK);
-    furi_record_close("storage");
-
-    test_storage_mkdir_run(TEST_DIR "dir1", ++command_id, PB_CommandStatus_OK);
+    mu_check(test_is_exists(TEST_DIR "dir2"));
 }
 
 static void test_storage_calculate_md5sum(const char* path, char* md5sum) {
@@ -1013,7 +1197,7 @@ MU_TEST(test_ping) {
 //       4) test for fill buffer till end (great varint) and close connection
 
 MU_TEST_SUITE(test_rpc_status) {
-    MU_SUITE_CONFIGURE(&test_rpc_storage_setup, &test_rpc_storage_teardown);
+    MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_ping);
 }
@@ -1021,11 +1205,13 @@ MU_TEST_SUITE(test_rpc_status) {
 MU_TEST_SUITE(test_rpc_storage) {
     MU_SUITE_CONFIGURE(&test_rpc_storage_setup, &test_rpc_storage_teardown);
 
+    MU_RUN_TEST(test_storage_stat);
     MU_RUN_TEST(test_storage_list);
     MU_RUN_TEST(test_storage_read);
     MU_RUN_TEST(test_storage_write_read);
     MU_RUN_TEST(test_storage_write);
     MU_RUN_TEST(test_storage_delete);
+    MU_RUN_TEST(test_storage_delete_recursive);
     MU_RUN_TEST(test_storage_mkdir);
     MU_RUN_TEST(test_storage_md5sum);
     MU_RUN_TEST(test_storage_interrupt_continuous_same_system);
@@ -1040,23 +1226,23 @@ static void test_app_create_request(
     request->command_id = command_id;
     request->command_status = PB_CommandStatus_OK;
     request->cb_content.funcs.encode = NULL;
-    request->which_content = PB_Main_app_start_tag;
+    request->which_content = PB_Main_app_start_request_tag;
     request->has_next = false;
 
     if(app_name) {
         char* msg_app_name = furi_alloc(strlen(app_name) + 1);
         strcpy(msg_app_name, app_name);
-        request->content.app_start.name = msg_app_name;
+        request->content.app_start_request.name = msg_app_name;
     } else {
-        request->content.app_start.name = NULL;
+        request->content.app_start_request.name = NULL;
     }
 
     if(app_args) {
         char* msg_app_args = furi_alloc(strlen(app_args) + 1);
         strcpy(msg_app_args, app_args);
-        request->content.app_start.args = msg_app_args;
+        request->content.app_start_request.args = msg_app_args;
     } else {
-        request->content.app_start.args = NULL;
+        request->content.app_start_request.args = NULL;
     }
 }
 
@@ -1112,20 +1298,19 @@ MU_TEST(test_app_start_and_lock_status) {
         "skynet_destroy_world_app", NULL, PB_CommandStatus_ERROR_INVALID_PARAMETERS, ++command_id);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "0", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "0", PB_CommandStatus_OK, ++command_id);
     delay(100);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "200", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "200", PB_CommandStatus_OK, ++command_id);
     test_app_get_status_lock_run(true, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
-    test_app_start_run(
-        "Delay Test App", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
+    test_app_start_run("Delay Test", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
     delay(200);
     test_app_get_status_lock_run(false, ++command_id);
 
-    test_app_start_run("Delay Test App", "500", PB_CommandStatus_OK, ++command_id);
+    test_app_start_run("Delay Test", "500", PB_CommandStatus_OK, ++command_id);
     delay(100);
     test_app_get_status_lock_run(true, ++command_id);
     test_app_start_run("Infrared", "0", PB_CommandStatus_ERROR_APP_SYSTEM_LOCKED, ++command_id);
@@ -1140,16 +1325,22 @@ MU_TEST(test_app_start_and_lock_status) {
 }
 
 MU_TEST_SUITE(test_rpc_app) {
-    MU_SUITE_CONFIGURE(&test_rpc_storage_setup, &test_rpc_storage_teardown);
+    MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_app_start_and_lock_status);
 }
 
 int run_minunit_test_rpc() {
-    MU_RUN_SUITE(test_rpc_storage);
+    Storage* storage = furi_record_open("storage");
+    furi_record_close("storage");
+    if(storage_sd_status(storage) != FSE_OK) {
+        FURI_LOG_E(TAG, "SD card not mounted - skip storage tests");
+    } else {
+        MU_RUN_SUITE(test_rpc_storage);
+    }
+
     MU_RUN_SUITE(test_rpc_status);
     MU_RUN_SUITE(test_rpc_app);
-    MU_REPORT();
 
     return MU_EXIT_CODE;
 }

@@ -2,11 +2,14 @@
 
 #include <furi.h>
 #include "file-worker.h"
+#include "../subghz_keystore.h"
 /*
  * https://phreakerclub.com/1615
  * https://phreakerclub.com/forum/showthread.php?t=2360
  * https://vrtp.ru/index.php?showtopic=27867
  */
+
+#define TAG "SubGhzNiceFlorS"
 
 struct SubGhzProtocolNiceFlorS {
     SubGhzProtocolCommon common;
@@ -44,7 +47,7 @@ void subghz_protocol_nice_flor_s_free(SubGhzProtocolNiceFlorS* instance) {
 
 void subghz_protocol_nice_flor_s_name_file(SubGhzProtocolNiceFlorS* instance, const char* name) {
     instance->rainbow_table_file_name = name;
-    printf("Loading Nice FloR S rainbow table %s\r\n", name);
+    FURI_LOG_I(TAG, "Loading rainbow table from %s", name);
 }
 
 /** Send bit 
@@ -103,17 +106,13 @@ void subghz_protocol_nice_flor_s_send_key(
 uint8_t subghz_nice_flor_s_get_byte_in_file(SubGhzProtocolNiceFlorS* instance, uint32_t address) {
     if(!instance->rainbow_table_file_name) return 0;
 
-    uint8_t buffer = 0;
-    FileWorker* file_worker = file_worker_alloc(true);
-    if(file_worker_open(
-           file_worker, instance->rainbow_table_file_name, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        file_worker_seek(file_worker, address, true);
-        file_worker_read(file_worker, &buffer, 1);
+    uint8_t buffer[1] = {0};
+    if(subghz_keystore_raw_get_data(
+           instance->rainbow_table_file_name, address, buffer, sizeof(uint8_t))) {
+        return buffer[0];
+    } else {
+        return 0;
     }
-    file_worker_close(file_worker);
-    file_worker_free(file_worker);
-
-    return buffer;
 }
 
 /** Decrypt protocol Nice Flor S
@@ -169,8 +168,6 @@ void subghz_protocol_nice_flor_s_parse(
                         instance->common.te_delta * 38)) {
             //Found start header Nice Flor-S
             instance->common.parser_step = NiceFlorSDecoderStepCheckHeader;
-        } else {
-            instance->common.parser_step = NiceFlorSDecoderStepReset;
         }
         break;
     case NiceFlorSDecoderStepCheckHeader:

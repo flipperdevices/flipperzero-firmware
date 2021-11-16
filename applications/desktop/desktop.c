@@ -1,4 +1,5 @@
 #include "desktop_i.h"
+#include <furi-hal-lock.h>
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
@@ -41,6 +42,7 @@ Desktop* desktop_alloc() {
     desktop->debug_view = desktop_debug_alloc();
     desktop->first_start_view = desktop_first_start_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
+    desktop->code_input = code_input_alloc();
 
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewMain, desktop_main_get_view(desktop->main_view));
@@ -62,7 +64,8 @@ Desktop* desktop_alloc() {
         desktop->view_dispatcher,
         DesktopViewHwMismatch,
         popup_get_view(desktop->hw_mismatch_popup));
-
+    view_dispatcher_add_view(
+        desktop->view_dispatcher, DesktopViewPinSetup, code_input_get_view(desktop->code_input));
     // Lock icon
     desktop->lock_viewport = view_port_alloc();
     view_port_set_width(desktop->lock_viewport, icon_get_width(&I_Lock_8x8));
@@ -82,6 +85,7 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewDebug);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewFirstStart);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewHwMismatch);
+    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewPinSetup);
 
     view_dispatcher_free(desktop->view_dispatcher);
     scene_manager_free(desktop->scene_manager);
@@ -92,6 +96,7 @@ void desktop_free(Desktop* desktop) {
     desktop_debug_free(desktop->debug_view);
     desktop_first_start_free(desktop->first_start_view);
     popup_free(desktop->hw_mismatch_popup);
+    code_input_free(desktop->code_input);
 
     furi_record_close("gui");
     desktop->gui = NULL;
@@ -113,8 +118,21 @@ static bool desktop_is_first_start() {
 
 int32_t desktop_srv(void* p) {
     Desktop* desktop = desktop_alloc();
+    bool loaded = LOAD_DESKTOP_SETTINGS(&desktop->settings);
+    if(!loaded) {
+        furi_hal_lock_set(false);
+        memset(&desktop->settings, 0, sizeof(desktop->settings));
+        SAVE_DESKTOP_SETTINGS(&desktop->settings);
+    }
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
+
+    if(furi_hal_lock_get()) {
+        furi_hal_usb_disable();
+        scene_manager_set_scene_state(
+            desktop->scene_manager, DesktopSceneLocked, DesktopLockedWithPin);
+        scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
+    }
 
     if(desktop_is_first_start()) {
         scene_manager_next_scene(desktop->scene_manager, DesktopSceneFirstStart);

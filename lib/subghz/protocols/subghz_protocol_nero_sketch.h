@@ -22,7 +22,9 @@ void subghz_protocol_nero_sketch_free(SubGhzProtocolNeroSketch* instance);
  * @param encoder - SubGhzProtocolCommonEncoder encoder
  * @return bool
  */
-bool subghz_protocol_nero_sketch_send_key(SubGhzProtocolNeroSketch* instance, SubGhzProtocolCommonEncoder* encoder);
+bool subghz_protocol_nero_sketch_send_key(
+    SubGhzProtocolNeroSketch* instance,
+    SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolNeroSketch instance
@@ -40,7 +42,10 @@ void subghz_protocol_nero_sketch_check_remote_controller(SubGhzProtocolNeroSketc
  * @param instance - SubGhzProtocolNeroSketch instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool level, uint32_t duration);
+void subghz_protocol_nero_sketch_parse(
+    SubGhzProtocolNeroSketch* instance,
+    bool level,
+    uint32_t duration);
 
 /** Outputting information from the parser
  * 
@@ -49,20 +54,27 @@ void subghz_protocol_nero_sketch_parse(SubGhzProtocolNeroSketch* instance, bool 
  */
 void subghz_protocol_nero_sketch_to_str(SubGhzProtocolNeroSketch* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolNeroSketch instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_nero_sketch_to_save_str(SubGhzProtocolNeroSketch* instance, string_t output);
+bool subghz_protocol_nero_sketch_to_save_file(
+    SubGhzProtocolNeroSketch* instance,
+    FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 
- * @param file_worker - FileWorker file_worker
+ * @param flipper_file - FlipperFile
  * @param instance - SubGhzProtocolNeroSketch instance
+ * @param file_path - file path
  * @return bool
  */
-bool subghz_protocol_nero_sketch_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolNeroSketch* instance);
+bool subghz_protocol_nero_sketch_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolNeroSketch* instance,
+    const char* file_path);
 
 /** Loading protocol from bin data
  * 

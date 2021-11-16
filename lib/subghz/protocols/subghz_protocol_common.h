@@ -3,7 +3,7 @@
 #include <m-string.h>
 #include <furi-hal.h>
 #include <stdint.h>
-#include "file-worker.h"
+#include <lib/flipper_file/flipper_file.h>
 
 #define bit_read(value, bit) (((value) >> (bit)) & 0x01)
 #define bit_set(value, bit) ((value) |= (1UL << (bit)))
@@ -16,13 +16,24 @@
 
 #define SUBGHZ_APP_FOLDER "/any/subghz"
 #define SUBGHZ_APP_PATH_FOLDER "/any/subghz/saved"
+#define SUBGHZ_RAW_FOLDER "/ext/subghz"
+#define SUBGHZ_RAW_PATH_FOLDER "/ext/subghz/saved"
 #define SUBGHZ_APP_EXTENSION ".sub"
 #define SUBGHZ_ENCODER_UPLOAD_MAX_SIZE 2048
+
+#define SUBGHZ_PARSER_TAG "SubGhzParser"
+#define SUBGHZ_KEY_FILE_VERSION 1
+#define SUBGHZ_KEY_FILE_TYPE "Flipper SubGhz Key File"
+
+#define SUBGHZ_RAW_FILE_VERSION 1
+#define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
+
 
 typedef enum {
     SubGhzProtocolCommonTypeUnknown,
     SubGhzProtocolCommonTypeStatic,
     SubGhzProtocolCommonTypeDynamic,
+    SubGhzProtocolCommonTypeRAW,
 } SubGhzProtocolCommonType;
 
 typedef struct SubGhzProtocolCommon SubGhzProtocolCommon;
@@ -34,17 +45,23 @@ typedef void (*SubGhzProtocolCommonCallback)(SubGhzProtocolCommon* parser, void*
 typedef void (*SubGhzProtocolCommonToStr)(SubGhzProtocolCommon* instance, string_t output);
 
 //Get string to save
-typedef void (*SubGhzProtocolCommonGetStrSave)(SubGhzProtocolCommon* instance, string_t output);
+typedef bool (
+    *SubGhzProtocolCommonSaveFile)(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
 
 //Load protocol from file
-typedef bool (
-    *SubGhzProtocolCommonLoadFromFile)(FileWorker* file_worker, SubGhzProtocolCommon* instance);
+typedef bool (*SubGhzProtocolCommonLoadFromFile)(
+    FlipperFile* flipper_file,
+    SubGhzProtocolCommon* instance,
+    const char* file_path);
 //Load protocol
 typedef void (*SubGhzProtocolCommonLoadFromRAW)(SubGhzProtocolCommon* instance, void* context);
 //Get upload encoder protocol
 typedef bool (*SubGhzProtocolCommonEncoderGetUpLoad)(
     SubGhzProtocolCommon* instance,
     SubGhzProtocolCommonEncoder* encoder);
+
+typedef LevelDuration (*SubGhzProtocolCommonEncoderCallback)(void* context);
+typedef void (*SubGhzProtocolCommonEncoderCallbackEnd)(void* context);
 
 struct SubGhzProtocolCommon {
     const char* name;
@@ -71,7 +88,7 @@ struct SubGhzProtocolCommon {
     /* Dump To String */
     SubGhzProtocolCommonToStr to_string;
     /* Get string to save */
-    SubGhzProtocolCommonGetStrSave to_save_string;
+    SubGhzProtocolCommonSaveFile to_save_file;
     /* Load protocol from file */
     SubGhzProtocolCommonLoadFromFile to_load_protocol_from_file;
     /* Load protocol from RAW data */
@@ -86,6 +103,11 @@ struct SubGhzProtocolCommonEncoder {
     size_t front;
     size_t size_upload;
     LevelDuration* upload;
+
+    SubGhzProtocolCommonEncoderCallback callback;
+    SubGhzProtocolCommonEncoderCallbackEnd callback_end;
+    void* context;
+    void* context_end;
 };
 
 struct SubGhzProtocolCommonLoad {
@@ -107,6 +129,16 @@ SubGhzProtocolCommonEncoder* subghz_protocol_encoder_common_alloc();
  * @param instance 
  */
 void subghz_protocol_encoder_common_free(SubGhzProtocolCommonEncoder* instance);
+
+void subghz_protocol_encoder_common_set_callback(
+    SubGhzProtocolCommonEncoder* instance,
+    SubGhzProtocolCommonEncoderCallback callback,
+    void* context);
+
+void subghz_protocol_encoder_common_set_callback_end(
+    SubGhzProtocolCommonEncoder* instance,
+    SubGhzProtocolCommonEncoderCallbackEnd callback_end,
+    void* context_end);
 
 /** Get count repeat left
  * 
@@ -175,3 +207,21 @@ void subghz_protocol_common_to_str(SubGhzProtocolCommon* instance, string_t outp
  * @return bool
  */
 bool subghz_protocol_common_read_hex(string_t str, uint8_t* buff, uint16_t len);
+
+/** Adding data to a file
+ * 
+ * @param instance  - SubGhzProtocolCommon instance
+ * @param flipper_file - FlipperFile 
+ * @return bool
+ */
+bool subghz_protocol_common_to_save_file(SubGhzProtocolCommon* instance, FlipperFile* flipper_file);
+
+/** Loading data to a file
+ * 
+ * @param instance  - SubGhzProtocolCommon instance
+ * @param flipper_file - FlipperFile 
+ * @return bool
+ */
+bool subghz_protocol_common_to_load_protocol_from_file(
+    SubGhzProtocolCommon* instance,
+    FlipperFile* flipper_file);

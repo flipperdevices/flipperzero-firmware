@@ -2,7 +2,7 @@
 #include <lfs.h>
 #include <furi-hal.h>
 
-#define TAG "storage-int"
+#define TAG "StorageInt"
 #define STORAGE_PATH "/int"
 
 typedef struct {
@@ -119,9 +119,9 @@ static int storage_int_device_erase(const struct lfs_config* c, lfs_block_t bloc
     LFSData* lfs_data = c->context;
     size_t page = lfs_data->start_page + block;
 
-    FURI_LOG_D(TAG, "Device erase: page %d, translated page: %d", block, page);
+    FURI_LOG_D(TAG, "Device erase: page %d, translated page: %x", block, page);
 
-    if(furi_hal_flash_erase(page, 1)) {
+    if(furi_hal_flash_erase(page)) {
         return 0;
     } else {
         return -1;
@@ -163,15 +163,15 @@ static LFSData* storage_int_lfs_data_alloc() {
 
 static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
     int err;
-    FuriHalBootFlag boot_flags = furi_hal_boot_get_flags();
+    FuriHalBootloaderFlag bootloader_flags = furi_hal_bootloader_get_flags();
     lfs_t* lfs = &lfs_data->lfs;
 
-    if(boot_flags & FuriHalBootFlagFactoryReset) {
+    if(bootloader_flags & FuriHalBootloaderFlagFactoryReset) {
         // Factory reset
         err = lfs_format(lfs, &lfs_data->config);
         if(err == 0) {
             FURI_LOG_I(TAG, "Factory reset: Format successful, trying to mount");
-            furi_hal_boot_set_flags(boot_flags & ~FuriHalBootFlagFactoryReset);
+            furi_hal_bootloader_set_flags(bootloader_flags & ~FuriHalBootloaderFlagFactoryReset);
             err = lfs_mount(lfs, &lfs_data->config);
             if(err == 0) {
                 FURI_LOG_I(TAG, "Factory reset: Mounted");

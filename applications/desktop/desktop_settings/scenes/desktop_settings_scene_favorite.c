@@ -1,5 +1,6 @@
 #include "../desktop_settings_app.h"
 #include "applications.h"
+#include "desktop/desktop_settings/desktop_settings.h"
 
 static void desktop_settings_scene_favorite_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -22,7 +23,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     submenu_set_header(app->submenu, "Quick access app:");
     submenu_set_selected_item(app->submenu, app->settings.favorite);
-    view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewFavorite);
+    view_dispatcher_switch_to_view(app->view_dispatcher, DesktopSettingsAppViewMenu);
 }
 
 bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent event) {
@@ -43,5 +44,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
 void desktop_settings_scene_favorite_on_exit(void* context) {
     DesktopSettingsApp* app = context;
+    SAVE_DESKTOP_SETTINGS(&app->settings);
     submenu_clean(app->submenu);
 }

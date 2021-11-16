@@ -10,6 +10,8 @@
 #include <cc1101.h>
 #include <stdio.h>
 
+#define TAG "FuriHalSubGhz"
+
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
 
@@ -303,7 +305,7 @@ void furi_hal_subghz_init() {
     cc1101_shutdown(device);
 
     furi_hal_spi_device_return(device);
-    FURI_LOG_I("FuriHalSubGhz", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_subghz_sleep() {
@@ -658,6 +660,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
         bool is_odd = samples % 2;
         LevelDuration ld =
             furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
+        if(level_duration_is_wait(ld)) return;
         if(level_duration_is_reset(ld)) {
             // One more even sample required to end at low level
             if(is_odd) {
@@ -675,7 +678,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             }
 
             uint32_t duration = level_duration_get_duration(ld);
-            assert(duration > 0);
+            furi_assert(duration > 0);
             *buffer = duration;
             buffer++;
             samples--;

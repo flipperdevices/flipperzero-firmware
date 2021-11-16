@@ -53,7 +53,9 @@ uint64_t subghz_protocol_keeloq_gen_key(void* context);
  * @param encoder - SubGhzProtocolCommonEncoder encoder
  * @return bool
  */
-bool subghz_protocol_keeloq_send_key(SubGhzProtocolKeeloq* instance, SubGhzProtocolCommonEncoder* encoder);
+bool subghz_protocol_keeloq_send_key(
+    SubGhzProtocolKeeloq* instance,
+    SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolKeeloq instance
@@ -74,20 +76,25 @@ void subghz_protocol_keeloq_parse(SubGhzProtocolKeeloq* instance, bool level, ui
  */
 void subghz_protocol_keeloq_to_str(SubGhzProtocolKeeloq* instance, string_t output);
 
-/** Get a string to save the protocol
+/** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolKeeloq instance
- * @param output    - the resulting string
+ * @param flipper_file - FlipperFile 
+ * @return bool
  */
-void subghz_protocol_keeloq_to_save_str(SubGhzProtocolKeeloq* instance, string_t output);
+bool subghz_protocol_keeloq_to_save_file(SubGhzProtocolKeeloq* instance, FlipperFile* flipper_file);
 
 /** Loading protocol from file
  * 
- * @param file_worker - FileWorker file_worker
+  * @param flipper_file - FlipperFile 
  * @param instance - SubGhzProtocolKeeloq instance
+ * @param file_path - file path
  * @return bool
  */
-bool subghz_protocol_keeloq_to_load_protocol_from_file(FileWorker* file_worker, SubGhzProtocolKeeloq* instance);
+bool subghz_protocol_keeloq_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolKeeloq* instance,
+    const char* file_path);
 
 /** Loading protocol from bin data
  * 
