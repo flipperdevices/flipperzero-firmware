@@ -197,7 +197,38 @@ If your unzip command fail with error `bzip2: Cannot exec: No such file or direc
 ```
 sudo apt-get install bzip2
 ```
+3. Build hex2dfu from source. Clone repo, build executable file and copy it to `PATH`
+```
+git clone https://github.com/rusdacent/hex2dfu.git
+cd hex2dfu 
+gcc hex2dfu.c ED25519/*.c -o hex2dfu 
+mv ./hex2dfu /usr/local/bin/hex2dfu 
+```
+4. Install `open-ocd` if you want use debugger
+```
+sudo apt install openocd
+```
 
+### Compile firmware
+```
+make
+```
+
+### Flash to device via STLink
+```
+make flash
+```
+
+### Flash firmware to device via USB
+Before you need install `dfu-util` on your mac:
+```
+sudo apt install dfu-util
+```
+Then you need build firmware code via `make` command and then you can flash on your Flipper:
+```
+dfu-util -a 0 -D firmware/.obj/f7/firmware.dfu
+```
+Where `f7` - target
 
 # Links
 * Discord: [flipp.dev/discord](https://flipp.dev/discord)
