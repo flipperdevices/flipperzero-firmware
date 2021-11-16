@@ -176,6 +176,29 @@ Where `f7` - target
 make debug
 ```
 
+## Linux
+### Prerequisites
+First, let's install `gcc-arm-embedded`. This is harder than it looks since [the ppa repository](https://launchpad.net/gcc-arm-embedded) is marked deprecated.
+1. Download latest gcc-arm-none-eabi from [arm site](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+```
+wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+```
+2. Then unzip it to any directory and move/link your executables to the directory that is in the PATH. For example (please, replace `ggcc-arm-none-eabi-10.3-2021.10` to your version):
+```
+sudo tar xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /usr/share/
+sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gcc /usr/bin/arm-none-eabi-gcc 
+sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-g++ /usr/bin/arm-none-eabi-g++
+sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gdb /usr/bin/arm-none-eabi-gdb
+sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-size /usr/bin/arm-none-eabi-size
+sudo ln -s /usr/share/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-objcopy /usr/bin/arm-none-eabi-objcopy
+```
+
+If your unzip command fail with error `bzip2: Cannot exec: No such file or directory` you need install bzip2 before:
+```
+sudo apt-get install bzip2
+```
+
+
 # Links
 * Discord: [flipp.dev/discord](https://flipp.dev/discord)
 * Website: [flipperzero.one](https://flipperzero.one)
