@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "../pulse_protocol.h"
+#include "../../pulse_protocols/pulse_protocol.h"
 
 #ifdef __cplusplus
 extern "C" {
