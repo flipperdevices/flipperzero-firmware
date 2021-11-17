@@ -82,7 +82,7 @@ static int32_t vcp_worker(void* context) {
         uint32_t flags = osThreadFlagsWait(VCP_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         furi_assert((flags & osFlagsError) == 0);
 
-        // New data received
+        // Rx buffer was read, maybe there is enough space for new data?
         if((flags & VcpEvtStreamRx) && enabled && missed_rx > 0) {
 #ifdef FURI_HAL_USB_VCP_DEBUG
             furi_hal_console_puts("VCP StreamRx\r\n");
@@ -93,7 +93,7 @@ static int32_t vcp_worker(void* context) {
             }
         }
 
-        // Rx buffer was read, maybe there is enough space for new data?
+        // New data received
         if((flags & VcpEvtRx)) {
             if (xStreamBufferSpacesAvailable(vcp->rx_stream) >= USB_CDC_PKT_LEN) {
                 int32_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN);
