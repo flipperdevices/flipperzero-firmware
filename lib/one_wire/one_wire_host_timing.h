@@ -1,3 +1,12 @@
+/**
+ * @file one_wire_host_timing.h
+ * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
+ * @version 1.0
+ * @date 2021-11-18
+ * 
+ * 1-Wire library, timing list
+ */
+
 #pragma once
 
 #define OWH_TIMING_A 9

@@ -1,3 +1,12 @@
+/**
+ * @file ibutton_writer.h
+ * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
+ * @version 1.0
+ * @date 2021-11-18
+ * 
+ * iButton blanks writer
+ */
+
 #pragma once
 #include <furi-hal-gpio.h>
 #include "ibutton_key.h"
@@ -16,10 +25,37 @@ typedef enum {
 
 typedef struct iButtonWriter iButtonWriter;
 
+/**
+ * Allocate writer
+ * @param host 
+ * @return iButtonWriter* 
+ */
 iButtonWriter* ibutton_writer_alloc(OneWireHost* host);
+
+/**
+ * Deallocate writer
+ * @param writer 
+ */
 void ibutton_writer_free(iButtonWriter* writer);
+
+/**
+ * Write key to blank
+ * @param writer 
+ * @param key 
+ * @return iButtonWriterResult 
+ */
 iButtonWriterResult ibutton_writer_write(iButtonWriter* writer, iButtonKey* key);
+
+/**
+ * Start writing. Must be called before write attempt
+ * @param writer 
+ */
 void ibutton_writer_start(iButtonWriter* writer);
+
+/**
+ * Stop writing
+ * @param writer 
+ */
 void ibutton_writer_stop(iButtonWriter* writer);
 
 #ifdef __cplusplus

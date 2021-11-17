@@ -1,3 +1,12 @@
+/**
+ * @file ibutton_worker_i.h
+ * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
+ * @version 1.0
+ * @date 2021-11-18
+ * 
+ * iButton worker, internal definitions 
+ */
+
 #pragma once
 #include "ibutton_worker.h"
 #include "ibutton_writer.h"

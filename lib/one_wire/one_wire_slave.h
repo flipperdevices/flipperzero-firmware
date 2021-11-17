@@ -1,3 +1,12 @@
+/**
+ * @file one_wire_slave.h
+ * @author Sergey Gavrilov (who.just.the.doctor@gmail.com)
+ * @version 1.0
+ * @date 2021-11-18
+ * 
+ * 1-Wire slave library. Currently it can only emulate ID.
+ */
+
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
@@ -11,18 +20,50 @@ typedef struct OneWireDevice OneWireDevice;
 typedef struct OneWireSlave OneWireSlave;
 typedef void (*OneWireSlaveResultCallback)(void* context);
 
+/**
+ * Allocate onewire slave
+ * @param pin 
+ * @return OneWireSlave* 
+ */
 OneWireSlave* onewire_slave_alloc(const GpioPin* pin);
+
+/**
+ * Free onewire slave
+ * @param bus 
+ */
 void onewire_slave_free(OneWireSlave* bus);
 
+/**
+ * Start working with the bus
+ * @param bus 
+ */
 void onewire_slave_start(OneWireSlave* bus);
+
+/**
+ * Stop working with the bus
+ * @param bus 
+ */
 void onewire_slave_stop(OneWireSlave* bus);
 
+/**
+ * Attach device for emulation
+ * @param bus 
+ * @param device 
+ */
 void onewire_slave_attach(OneWireSlave* bus, OneWireDevice* device);
+
+/**
+ * Detach device from bus
+ * @param bus 
+ */
 void onewire_slave_detach(OneWireSlave* bus);
 
-bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length);
-bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_length);
-
+/**
+ * Set a callback to report emulation success
+ * @param bus 
+ * @param result_cb 
+ * @param context 
+ */
 void onewire_slave_set_result_callback(
     OneWireSlave* bus,
     OneWireSlaveResultCallback result_cb,

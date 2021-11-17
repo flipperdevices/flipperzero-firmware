@@ -289,6 +289,6 @@ void ibutton_writer_start(iButtonWriter* writer) {
 }
 
 void ibutton_writer_stop(iButtonWriter* writer) {
-    furi_hal_power_disable_otg();
     onewire_host_stop(writer->host);
+    furi_hal_power_disable_otg();
 }
