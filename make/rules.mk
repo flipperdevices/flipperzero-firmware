@@ -33,6 +33,7 @@ CHECK_AND_REINIT_SUBMODULES_SHELL=\
 $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
+	@:
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
 	@echo "\tLD\t" $@
@@ -47,16 +48,17 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).hex
+$(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).bin
 	@echo "\tDFU\t" $@
-	@hex2dfu \
-		-i $(OBJ_DIR)/$(PROJECT).hex \
+	@../scripts/bin2dfu.py \
+		-i $(OBJ_DIR)/$(PROJECT).bin \
 		-o $(OBJ_DIR)/$(PROJECT).dfu \
+		-a $(FLASH_ADDRESS) \
 		-l "Flipper Zero $(shell echo $(TARGET) | tr a-z A-Z)" > /dev/null
 
 $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@echo "\tJSON\t" $@
-	@python3 ../scripts/meta.py -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
+	@../scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $< "->" $@

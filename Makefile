@@ -12,12 +12,14 @@ endif
 
 .PHONY: all
 all: bootloader_all firmware_all
+	@$(PROJECT_ROOT)/scripts/dist.sh
 
 .PHONY: whole
 whole: flash_radio bootloader_flash firmware_flash
 
 .PHONY: clean
 clean: bootloader_clean firmware_clean
+	@rm -rf $(PROJECT_ROOT)/dist
 
 .PHONY: flash
 flash: bootloader_flash firmware_flash
