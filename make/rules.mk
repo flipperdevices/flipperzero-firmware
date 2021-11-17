@@ -61,15 +61,15 @@ $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@../scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCC\t" $< "->" $@
+	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tASM\t" $< "->" $@
+	@echo "\tASM\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCPP\t" $< "->" $@
+	@echo "\tCPP\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
