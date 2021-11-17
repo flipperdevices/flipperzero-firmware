@@ -308,7 +308,6 @@ static void vcp_on_line_config(struct usb_cdc_line_coding* config) {
 
 void usb_uart_enable(UsbUartConfig* cfg) {
     if(running == false) {
-        FURI_LOG_I("UsbUart", "Enable");
         running = true;
         usb_uart = furi_alloc(sizeof(UsbUartBridge));
 
@@ -326,7 +325,6 @@ void usb_uart_enable(UsbUartConfig* cfg) {
 
 void usb_uart_disable() {
     if(running == true) {
-        FURI_LOG_I("UsbUart", "Disable");
         osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtStop);
         furi_thread_join(usb_uart->thread);
         furi_thread_free(usb_uart->thread);
@@ -336,7 +334,6 @@ void usb_uart_disable() {
 }
 
 void usb_uart_set_config(UsbUartConfig* cfg) {
-    FURI_LOG_I("UsbUart", "Set Config");
     furi_assert(usb_uart);
     furi_assert(cfg);
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));

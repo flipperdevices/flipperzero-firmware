@@ -356,6 +356,7 @@ static usbd_respond cdc_ep_config (usbd_device *dev, uint8_t cfg);
 static usbd_respond cdc_control (usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback);
 static usbd_device* usb_dev;
 static struct UsbInterface* cdc_if_cur = NULL;
+static bool connected = false;
 static CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
 
 struct UsbInterface usb_cdc_single = {
@@ -429,20 +430,33 @@ static void cdc_deinit(usbd_device *dev) {
 }
 
 void furi_hal_cdc_set_callbacks(uint8_t if_num, CdcCallbacks* cb) {
-    if (if_num < 2)
-        callbacks[if_num] = cb;
+    furi_assert(if_num < IF_NUM_MAX);
+
+    if (callbacks[if_num] != NULL) {
+        if (callbacks[if_num]->state_callback != NULL) {
+            if (connected == true)
+                callbacks[if_num]->state_callback(0);
+        }
+    }
+
+    callbacks[if_num] = cb;
+
+    if (callbacks[if_num] != NULL) {
+        if (callbacks[if_num]->state_callback != NULL) {
+            if (connected == true)
+                callbacks[if_num]->state_callback(1);
+        }
+    }
 }
 
 struct usb_cdc_line_coding* furi_hal_cdc_get_port_settings(uint8_t if_num) {
-    if (if_num < 2)
-        return &cdc_config[if_num];
-    return NULL;
+    furi_assert(if_num < IF_NUM_MAX);
+    return &cdc_config[if_num];
 }
 
 uint8_t furi_hal_cdc_get_ctrl_line_state(uint8_t if_num) {
-    if (if_num < 2)
-        return cdc_ctrl_line_state[if_num];
-    return 0;
+    furi_assert(if_num < IF_NUM_MAX);
+    return cdc_ctrl_line_state[if_num];
 }
 
 void furi_hal_cdc_send(uint8_t if_num, uint8_t* buf, uint16_t len) {
@@ -462,6 +476,7 @@ int32_t furi_hal_cdc_receive(uint8_t if_num, uint8_t* buf, uint16_t max_len) {
 }
 
 static void cdc_on_wakeup(usbd_device *dev) {
+    connected = true;
     for (uint8_t i = 0; i < IF_NUM_MAX; i++) {
         if (callbacks[i] != NULL) {
             if (callbacks[i]->state_callback != NULL)
@@ -471,6 +486,7 @@ static void cdc_on_wakeup(usbd_device *dev) {
 }
 
 static void cdc_on_suspend(usbd_device *dev) {
+    connected = false;
     for (uint8_t i = 0; i < IF_NUM_MAX; i++) {
         cdc_ctrl_line_state[i] = 0;
         if (callbacks[i] != NULL) {
