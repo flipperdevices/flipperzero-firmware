@@ -28,9 +28,10 @@ cp firmware/.obj/${TARGET}/firmware.json \
 # generate full.bin
 cp dist/${TARGET}/flipper-z-${TARGET}-bootloader-${suffix}.bin \
     dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin
-dd if=/dev/null of=dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin bs=1 count=0 seek=32768
+dd if=/dev/null of=dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin bs=1 count=0 seek=32768 2> /dev/null
 dd if=dist/${TARGET}/flipper-z-${TARGET}-firmware-${suffix}.bin \
-    >>dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin
+    >>dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin \
+    2> /dev/null
 
 # generate full.dfu
 ./scripts/bin2dfu.py \
