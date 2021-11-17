@@ -29,7 +29,7 @@ cp firmware/.obj/${TARGET}/firmware.json \
 cp dist/${TARGET}/flipper-z-${TARGET}-bootloader-${suffix}.bin \
     dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin
 dd if=/dev/null of=dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin bs=1 count=0 seek=32768 2> /dev/null
-dd if=dist/${TARGET}/flipper-z-${TARGET}-firmware-${suffix}.bin \
+cat dist/${TARGET}/flipper-z-${TARGET}-firmware-${suffix}.bin \
     >>dist/${TARGET}/flipper-z-${TARGET}-full-${suffix}.bin \
     2> /dev/null
 
