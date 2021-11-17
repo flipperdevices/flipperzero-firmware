@@ -10,6 +10,8 @@ else ifeq ($(OS), Darwin)
 NPROCS := $(shell sysctl -n hw.ncpu)
 endif
 
+include	$(PROJECT_ROOT)/make/defaults.mk
+
 .PHONY: all
 all: bootloader_all firmware_all
 	@$(PROJECT_ROOT)/scripts/dist.sh
@@ -19,7 +21,7 @@ whole: flash_radio bootloader_flash firmware_flash
 
 .PHONY: clean
 clean: bootloader_clean firmware_clean
-	@rm -rf $(PROJECT_ROOT)/dist
+	@rm -rf $(PROJECT_ROOT)/dist/$(TARGET)
 
 .PHONY: flash
 flash: bootloader_flash firmware_flash
