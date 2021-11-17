@@ -1,4 +1,4 @@
-#include "../storage-settings.h"
+#include "../storage_settings.h"
 
 static void storage_settings_scene_sd_info_dialog_callback(DialogExResult result, void* context) {
     StorageSettings* app = context;
@@ -70,5 +70,5 @@ void storage_settings_scene_sd_info_on_exit(void* context) {
     dialog_ex_set_result_callback(dialog_ex, NULL);
     dialog_ex_set_context(dialog_ex, NULL);
 
-    string_clean(app->text_string);
+    string_reset(app->text_string);
 }
