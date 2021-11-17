@@ -4,9 +4,11 @@
 #include "../one_wire_host.h"
 #include "../one_wire_slave.h"
 #include "../one_wire_device.h"
-#include "../pulse_decoder/pulse_decoder.h"
-#include "../pulse_decoder/ibutton/protocol_cyfral.h"
-#include "../pulse_decoder/ibutton/protocol_metakom.h"
+#include "../pulse_protocols/pulse_decoder.h"
+#include "pulse_protocols/protocol_cyfral.h"
+#include "pulse_protocols/protocol_metakom.h"
+#include "encoder/encoder_cyfral.h"
+#include "encoder/encoder_metakom.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +33,11 @@ typedef enum {
     iButtonWorkerEmulate = 3,
 } iButtonWorkerMode;
 
+typedef enum {
+    iButtonEmulateModeCyfral,
+    iButtonEmulateModeMetakom,
+} iButtonEmulateMode;
+
 struct iButtonWorker {
     iButtonKey* key_p;
     uint8_t* key_data;
@@ -52,6 +59,10 @@ struct iButtonWorker {
     iButtonWorkerWriteCallback write_cb;
     iButtonWorkerEmulateCallback emulate_cb;
     void* cb_ctx;
+
+    EncoderCyfral* encoder_cyfral;
+    EncoderMetakom* encoder_metakom;
+    iButtonEmulateMode emulate_mode;
 };
 
 extern const iButtonWorkerModeType ibutton_worker_modes[];

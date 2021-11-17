@@ -209,6 +209,88 @@ void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
     onewire_slave_detach(worker->slave);
 }
 
+void ibutton_worker_emulate_timer_cb(void* hw, void* context) {
+    TIM_HandleTypeDef* htim = (TIM_HandleTypeDef*)(hw);
+
+    if(htim->Instance == TIM1) {
+        furi_assert(context);
+        iButtonWorker* worker = context;
+
+        bool polarity;
+        uint32_t length;
+
+        switch(worker->emulate_mode) {
+        case iButtonEmulateModeCyfral:
+            encoder_cyfral_get_pulse(worker->encoder_cyfral, &polarity, &length);
+            break;
+        case iButtonEmulateModeMetakom:
+            encoder_metakom_get_pulse(worker->encoder_metakom, &polarity, &length);
+            break;
+        }
+
+        htim->Instance->ARR = length;
+
+        if(polarity) {
+            furi_hal_ibutton_pin_high();
+        } else {
+            furi_hal_ibutton_pin_low();
+        }
+    }
+}
+
+void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
+    furi_assert(worker->key_p);
+    const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
+    const uint8_t key_size = ibutton_key_get_max_size();
+
+    switch(ibutton_key_get_type(worker->key_p)) {
+    case iButtonKeyDS1990:
+        return;
+        break;
+    case iButtonKeyCyfral:
+        worker->emulate_mode = iButtonEmulateModeCyfral;
+        encoder_cyfral_reset(worker->encoder_cyfral);
+        encoder_cyfral_set_data(worker->encoder_cyfral, key_id, key_size);
+        break;
+    case iButtonKeyMetakom:
+        worker->emulate_mode = iButtonEmulateModeMetakom;
+        encoder_metakom_reset(worker->encoder_metakom);
+        encoder_metakom_set_data(worker->encoder_metakom, key_id, key_size);
+        break;
+    }
+
+    api_interrupt_add(ibutton_worker_emulate_timer_cb, InterruptTypeTimerUpdate, worker);
+
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+
+    htim1.Instance = TIM1;
+    htim1.Init.Prescaler = 0;
+    htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim1.Init.Period = 0;
+    htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim1.Init.RepetitionCounter = 0;
+    htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    if(HAL_TIM_Base_Init(&htim1) != HAL_OK) {
+        Error_Handler();
+    }
+    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+    if(HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK) {
+        Error_Handler();
+    }
+    HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
+
+    hal_gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    furi_hal_ibutton_start();
+
+    HAL_TIM_Base_Start_IT(&htim1);
+}
+
+void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
+    HAL_TIM_Base_Stop_IT(&htim1);
+
+    api_interrupt_remove(ibutton_worker_emulate_timer_cb, InterruptTypeTimerUpdate);
+}
+
 void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_assert(worker->key_p);
     switch(ibutton_key_get_type(worker->key_p)) {
@@ -217,6 +299,7 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
         break;
     case iButtonKeyCyfral:
     case iButtonKeyMetakom:
+        ibutton_worker_emulate_timer_start(worker);
         break;
     }
 }
@@ -232,6 +315,7 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
         break;
     case iButtonKeyCyfral:
     case iButtonKeyMetakom:
+        ibutton_worker_emulate_timer_stop(worker);
         break;
     }
 }

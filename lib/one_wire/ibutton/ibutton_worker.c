@@ -40,6 +40,9 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->emulate_cb = NULL;
     worker->cb_ctx = NULL;
 
+    worker->encoder_cyfral = encoder_cyfral_alloc();
+    worker->encoder_metakom = encoder_metakom_alloc();
+
     worker->thread = furi_thread_alloc();
     furi_thread_set_name(worker->thread, "ibutton_worker");
     furi_thread_set_callback(worker->thread, ibutton_worker_thread);
@@ -117,6 +120,9 @@ void ibutton_worker_free(iButtonWorker* worker) {
     onewire_host_stop(worker->host);
     onewire_host_free(worker->host);
     onewire_device_free(worker->device);
+
+    encoder_cyfral_free(worker->encoder_cyfral);
+    encoder_metakom_free(worker->encoder_metakom);
 
     osMessageQueueDelete(worker->messages);
 
