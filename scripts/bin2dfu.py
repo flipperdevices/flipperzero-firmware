@@ -40,54 +40,27 @@ class Main(App):
         with open(self.args.input, mode="rb") as file:
             bin = file.read()
 
-        data = struct.pack(
-            "<II",
-            self.args.address,  # dwElementAddress
-            len(bin)            # dwElementSize
-        ) + bin                 # Data
+        data = struct.pack("<II", self.args.address, len(bin)) + bin
 
         # Target prefix
-        #
         szTargetName = self.args.label.encode("ascii")
 
-        data = struct.pack(
-            "<6sBI255sII",
-            b"Target",          # szSignature
-            0,                  # bAlternateSetting
-            1,                  # bTargetNamed
-            szTargetName,       # szTargetName
-            len(data),          # dwTargetSize
-            1                   # dwNbElements
-        ) + data
+        data = (
+            struct.pack("<6sBI255sII", b"Target", 0, 1, szTargetName, len(data), 1)
+            + data
+        )
 
         # Prefix
-        #
-        data = struct.pack(
-            "<5sBIB",
-            b"DfuSe",           # szSignature
-            0x01,               # bVersion,
-            len(data)+11,       # DFUImageSize,
-            1                   # bTargets
-        ) + data
+        data = struct.pack("<5sBIB", b"DfuSe", 0x01, len(data) + 11, 1) + data
 
         # Suffix
-        #
         data += struct.pack(
-            "<HHHH3sB",
-            0xFFFF,         # bcdDevice
-            self.args.pid,       # idProduct
-            self.args.vid,       # idVendor
-            0x011a,         # bdcDFU
-            b"UFD",         # ucDfuSignature
-            16              # bLength
+            "<HHHH3sB", 0xFFFF, self.args.pid, self.args.vid, 0x011A, b"UFD", 16
         )
 
         dwCRC = ~crc32(data) & 0xFFFFFFFF
 
-        data += struct.pack(
-            "<I",
-            dwCRC           # dwCRC
-        )
+        data += struct.pack("<I", dwCRC)
 
         open(self.args.output, "wb").write(data)
         return 0
