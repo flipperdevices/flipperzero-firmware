@@ -1,5 +1,6 @@
 #include "furi-hal-version.h"
 #include "furi-hal-usb_i.h"
+#include "furi-hal-usb.h"
 #include "furi-hal-usb-cdc_i.h"
 #include <furi.h>
 

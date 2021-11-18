@@ -2,16 +2,25 @@
 
 #include "usb.h"
 
-/** USB device modes */
-typedef enum {
-    UsbModeNone,
-    UsbModeVcpSingle,
-    UsbModeVcpDual,
-    UsbModeHid,
-    UsbModeU2F,
+struct UsbInterface {
+    void (*init)(usbd_device *dev, struct UsbInterface* intf);
+    void (*deinit)(usbd_device *dev);
+    void (*wakeup)(usbd_device *dev);
+    void (*suspend)(usbd_device *dev);    
 
-    UsbModesNum,
-} UsbMode;
+    struct usb_device_descriptor* dev_descr;
+
+    void* str_manuf_descr;
+    void* str_prod_descr;
+    void* str_serial_descr;
+
+    void* cfg_descr;
+};
+
+/** USB device interface modes */
+extern struct UsbInterface usb_cdc_single;
+extern struct UsbInterface usb_cdc_dual;
+extern struct UsbInterface usb_hid;
 
 /** USB device low-level initialization
  */
@@ -21,13 +30,13 @@ void furi_hal_usb_init();
  *
  * @param      mode new USB device mode
  */
-void furi_hal_usb_set_config(UsbMode mode);
+void furi_hal_usb_set_config(struct UsbInterface* new_if);
 
 /** Get USB device configuration
  *
  * @return    current USB device mode
  */
-UsbMode furi_hal_usb_get_config();
+struct UsbInterface* furi_hal_usb_get_config();
 
 /** Disable USB device
  */

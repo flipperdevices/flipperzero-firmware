@@ -88,10 +88,10 @@ static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data) {
 
 static void usb_uart_vcp_init(uint8_t vcp_ch) {
     if(vcp_ch == 0) {
-        furi_hal_usb_set_config(UsbModeVcpSingle);
+        furi_hal_usb_set_config(&usb_cdc_single);
         furi_hal_vcp_disable();
     } else {
-        furi_hal_usb_set_config(UsbModeVcpDual);
+        furi_hal_usb_set_config(&usb_cdc_dual);
     }
     furi_hal_cdc_set_callbacks(vcp_ch, &cdc_cb);
 }
@@ -156,7 +156,7 @@ static int32_t usb_uart_worker(void* context) {
     furi_thread_set_context(usb_uart->tx_thread, NULL);
     furi_thread_set_callback(usb_uart->tx_thread, usb_uart_tx_thread);
 
-    UsbMode usb_mode_prev = furi_hal_usb_get_config();
+    struct UsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     usb_uart_vcp_init(usb_uart->cfg.vcp_ch);
     usb_uart_serial_init(usb_uart->cfg.uart_ch);
     usb_uart_set_baudrate(usb_uart->cfg.baudrate);
