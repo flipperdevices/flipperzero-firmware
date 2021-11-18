@@ -9,6 +9,8 @@
 #define VCP_RX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
 #define VCP_TX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
 
+//#define FURI_HAL_USB_VCP_DEBUG
+
 #define VCP_IF_NUM 0
 
 typedef enum {
@@ -111,6 +113,12 @@ static int32_t vcp_worker(void* context) {
             }
         }
 
+
+        if((flags & VcpEvtStreamTx) && ((enabled == false) || (vcp->connected == false))) {
+            xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
+            furi_hal_console_puts(" [r] ");
+        }
+
         // New data in Tx buffer
         if((flags & VcpEvtStreamTx) && enabled) {
 #ifdef FURI_HAL_USB_VCP_DEBUG
@@ -137,9 +145,9 @@ static int32_t vcp_worker(void* context) {
 
         // VCP session opened
         if((flags & VcpEvtConnect) && enabled) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
+//#ifdef FURI_HAL_USB_VCP_DEBUG
             furi_hal_console_puts("VCP Connect\r\n");
-#endif
+//#endif
             if (vcp->connected == false) {
                 vcp->connected = true;
                 xStreamBufferSend(vcp->rx_stream, &ascii_soh, 1, osWaitForever);
@@ -148,20 +156,21 @@ static int32_t vcp_worker(void* context) {
 
         // VCP session closed
         if((flags & VcpEvtDisconnect) && enabled) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
+//#ifdef FURI_HAL_USB_VCP_DEBUG
             furi_hal_console_puts("VCP Disconnect\r\n");
-#endif
+//#endif
             if (vcp->connected == true) {
                 vcp->connected = false;
+                xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
                 xStreamBufferSend(vcp->rx_stream, &ascii_eot, 1, osWaitForever);
             }
         }
 
         // VCP enabled
         if((flags & VcpEvtEnable) && !enabled){
-#ifdef FURI_HAL_USB_VCP_DEBUG
+//#ifdef FURI_HAL_USB_VCP_DEBUG
             furi_hal_console_puts("VCP Enable\r\n");
-#endif
+//#endif
             furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
             enabled = true;
             furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN); // flush Rx buffer
@@ -173,11 +182,12 @@ static int32_t vcp_worker(void* context) {
 
         // VCP disabled
         if((flags & VcpEvtDisable) && enabled) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
+//#ifdef FURI_HAL_USB_VCP_DEBUG
             furi_hal_console_puts("VCP Disable\r\n");
-#endif
+//#endif
             enabled = false;
             vcp->connected = false;
+            xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
             xStreamBufferSend(vcp->rx_stream, &ascii_eot, 1, osWaitForever);
         }
     }
@@ -196,6 +206,8 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
     furi_assert(vcp);
     furi_assert(buffer);
 
+    furi_hal_console_printf("rx start %u: ", size);
+
     size_t rx_cnt = 0;
 
     while (size > 0) {
@@ -204,6 +216,7 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
             batch_size = VCP_RX_BUF_SIZE;
 
         size_t len = xStreamBufferReceive(vcp->rx_stream, buffer, batch_size, timeout);
+        furi_hal_console_printf("%u ", batch_size);
         if (len == 0)
             break;
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamRx);
@@ -211,6 +224,8 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
         buffer += len;
         rx_cnt += len;
     }
+
+    furi_hal_console_puts("end\r\n");
     return rx_cnt;
 }
 
@@ -223,17 +238,22 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
     furi_assert(vcp);
     furi_assert(buffer);
 
+    furi_hal_console_printf("tx start %u: ", size);
+
     while (size > 0) {
         size_t batch_size = size;
-        if (batch_size > VCP_TX_BUF_SIZE)
-            batch_size = VCP_TX_BUF_SIZE;
+        if (batch_size > USB_CDC_PKT_LEN)
+            batch_size = USB_CDC_PKT_LEN;
 
         xStreamBufferSend(vcp->tx_stream, buffer, batch_size, osWaitForever);
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamTx);
 
+        furi_hal_console_printf("%u ", batch_size);
+
         size -= batch_size;
         buffer += batch_size;
     }
+    furi_hal_console_puts("end\r\n");
 }
 
 static void vcp_state_callback(uint8_t state) {
@@ -271,4 +291,3 @@ bool furi_hal_vcp_is_connected(void) {
     furi_assert(vcp);
     return vcp->connected;
 }
-
