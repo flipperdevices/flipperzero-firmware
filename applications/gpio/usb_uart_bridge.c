@@ -76,7 +76,7 @@ static CdcCallbacks cdc_cb = {
 
 static int32_t usb_uart_tx_thread(void* context);
 
-static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data) {
+static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     if(ev == UartIrqEventRXNE) {
