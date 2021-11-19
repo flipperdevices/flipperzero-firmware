@@ -26,7 +26,7 @@
 #define GUI_STATUS_BAR_HEIGHT 13
 
 #define GUI_MAIN_X 0
-#define GUI_MAIN_Y 9
+#define GUI_MAIN_Y GUI_STATUS_BAR_HEIGHT
 #define GUI_MAIN_WIDTH GUI_DISPLAY_WIDTH
 #define GUI_MAIN_HEIGHT (GUI_DISPLAY_HEIGHT - GUI_MAIN_Y)
 
@@ -52,6 +52,7 @@ struct Gui {
     osMessageQueueId_t input_queue;
     FuriPubSub* input_events;
     uint8_t ongoing_input;
+    GuiStatusBarBackground status_bar_background_color;
     ViewPort* ongoing_input_view_port;
 
     // Cli

@@ -72,8 +72,8 @@ void desktop_debug_render(Canvas* canvas, void* model) {
 
     } else {
         char buffer[64];
-        uint32_t current_lvl = dolphin_state_get_level(m->icounter);
-        uint32_t remaining = dolphin_state_xp_to_levelup(m->icounter, current_lvl, true);
+        uint32_t current_lvl = 1; // dbg_  dolphin_state_get_level(m->icounter);
+        uint32_t remaining = dolphin_state_xp_to_levelup(m->icounter);
 
         canvas_set_font(canvas, FontSecondary);
         snprintf(buffer, 64, "Icounter: %ld  Butthurt %ld", m->icounter, m->butthurt);

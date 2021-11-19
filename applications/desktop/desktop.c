@@ -1,5 +1,17 @@
+#include "assets_icons.h"
+#include "cmsis_os2.h"
+#include "desktop/desktop.h"
 #include "desktop_i.h"
+#include <dolphin/dolphin.h>
+#include <furi/pubsub.h>
+#include <furi/record.h>
+#include "portmacro.h"
+#include "storage/filesystem-api-defines.h"
+#include "storage/storage.h"
 #include <furi-hal-lock.h>
+#include <stdint.h>
+#include <power/power_service/power.h>
+#include "helpers/desktop_animation.h"
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
@@ -25,6 +37,8 @@ Desktop* desktop_alloc() {
     desktop->scene_thread = furi_thread_alloc();
     desktop->view_dispatcher = view_dispatcher_alloc();
     desktop->scene_manager = scene_manager_alloc(&desktop_scene_handlers, desktop);
+
+    desktop->animation = desktop_animation_alloc();
 
     view_dispatcher_enable_queue(desktop->view_dispatcher);
     view_dispatcher_attach_to_gui(
@@ -79,6 +93,7 @@ Desktop* desktop_alloc() {
 void desktop_free(Desktop* desktop) {
     furi_assert(desktop);
 
+    desktop_animation_free(desktop->animation);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewMain);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewLockMenu);
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewLocked);
@@ -116,8 +131,46 @@ static bool desktop_is_first_start() {
     return exists;
 }
 
+static void desktop_dolphin_state_changed_callback(const void* message, void* context) {
+    Desktop* desktop = context;
+//    const DolphinPubsubEvent* event = message;
+//    if (!desktop->update_animation_flag && *event == DolphinPubsubEventUpdate) {
+//        desktop->update_animation_flag = true;
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
+//    }
+}
+
+static void desktop_storage_state_changed_callback(const void* message, void* context) {
+    Desktop* desktop = context;
+//    if (!desktop->update_animation_flag) {
+//        desktop->update_animation_flag = true;
+        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
+//    }
+}
+
+//static void desktop_power_state_changed_callback(const void* message, void* context) {
+//    Desktop* desktop = context;
+//    if (!desktop->storage_check) {
+//        desktop->power_check = true;
+//        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
+//    }
+//}
+
 int32_t desktop_srv(void* p) {
     Desktop* desktop = desktop_alloc();
+
+    Dolphin* dolphin = furi_record_open("dolphin");
+    FuriPubSub* dolphin_pubsub = dolphin_get_pubsub(dolphin);
+    FuriPubSubSubscription* dolphin_subscription = furi_pubsub_subscribe(dolphin_pubsub, desktop_dolphin_state_changed_callback, desktop);
+
+    Storage* storage = furi_record_open("storage");
+    FuriPubSub* storage_pubsub = storage_get_pubsub(storage);
+    FuriPubSubSubscription* storage_subscription = furi_pubsub_subscribe(storage_pubsub, desktop_storage_state_changed_callback, desktop);
+
+//    Power* power = furi_record_open("power");
+//    FuriPubSub* power_pubsub = power_get_pubsub(power);
+//    FuriPubSubSubscription* power_subscription = furi_pubsub_subscribe(power_pubsub, desktop_power_state_changed_callback, desktop);
+
     bool loaded = LOAD_DESKTOP_SETTINGS(&desktop->settings);
     if(!loaded) {
         furi_hal_lock_set(false);
@@ -143,7 +196,11 @@ int32_t desktop_srv(void* p) {
     }
 
     view_dispatcher_run(desktop->view_dispatcher);
+    furi_pubsub_unsubscribe(dolphin_pubsub, dolphin_subscription);
+    furi_pubsub_unsubscribe(storage_pubsub, storage_subscription);
+//    furi_pubsub_unsubscribe(power_pubsub, power_subscription);
     desktop_free(desktop);
 
     return 0;
 }
+

@@ -2,6 +2,11 @@
 
 #define TAG "GuiSrv"
 
+void gui_set_status_bar_background(Gui* gui, GuiStatusBarBackground color) {
+    furi_assert(gui);
+    gui->status_bar_background_color = color;
+}
+
 ViewPort* gui_view_port_find_enabled(ViewPortArray_t array) {
     // Iterating backward
     ViewPortArray_it_t it;
@@ -54,6 +59,10 @@ void gui_redraw_status_bar(Gui* gui) {
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
     canvas_draw_icon(gui->canvas, 0, 0, &I_Background_128x11);
+
+    if (gui->status_bar_background_color == GuiStatusBarBackgroundBlack) {
+        canvas_draw_box(gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_STATUS_BAR_WIDTH, GUI_STATUS_BAR_HEIGHT);
+    }
 
     // Right side
     x = GUI_DISPLAY_WIDTH;
@@ -417,6 +426,8 @@ Gui* gui_alloc() {
     gui->cli = furi_record_open("cli");
     cli_add_command(
         gui->cli, "screen_stream", CliCommandFlagParallelSafe, gui_cli_screen_stream, gui);
+
+    gui->status_bar_background_color = GuiStatusBarBackgroundWhite;
 
     return gui;
 }

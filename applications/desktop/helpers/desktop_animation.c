@@ -1,28 +1,394 @@
-#include "desktop_animation.h"
+#include "desktop/helpers/desktop_animation.h"
+#include "assets_icons.h"
+#include "desktop_animation_i.h"
+#include "cmsis_os2.h"
+#include "furi/common_defines.h"
+#include "furi/record.h"
+#include "storage/filesystem-api-defines.h"
+#include <power/power_service/power.h>
+#include <m-list.h>
+#include <storage/storage.h>
+#include <desktop/desktop.h>
+#include <dolphin/dolphin.h>
 
-#define TAG "DesktopAnimation"
 
-static const Icon* idle_scenes[] = {&A_Wink_128x64, &A_WatchingTV_128x64};
+static const char* state_strs_dbg[] = {
+    "Basic",
+    "Active",
+    "LevelUpIsPending",
+    "SDEmpty",
+    "SDOk",
+    "SDCorrupted",
+};
 
-const Icon* desktop_get_icon() {
-    uint8_t new = 0;
 
-#if 0
-    // checking dolphin state here to choose appropriate animation
+LIST_DEF(AnimationList, const PairedAnimation*, M_PTR_OPLIST)
+#define M_OPL_AnimationList_t() LIST_OPLIST(AnimationList)
+
+#define PUSH_BACK_ANIMATIONS(listname, animations)          \
+    for (int i = 0; i < COUNT_OF(animations); ++i) {        \
+        AnimationList_push_back(listname, &(animations)[i]);\
+    }
+
+#define IS_BLOCKING_ANIMATION(x)        (((x) != DesktopAnimationStateBasic) && ((x) != DesktopAnimationStateActive))
+#define IS_ONESHOT_ANIMATION(x)         ((x) == DesktopAnimationStateLevelUpIsPending)
+
+static void desktop_animation_timer_callback(void* context);
+
+struct DesktopAnimation {
+    bool sd_shown_empty;
+    bool sd_shown_corrupted;
+    osTimerId_t timer;
+    const PairedAnimation* current;
+    const Icon* current_blocking_icon;
+    const Icon** current_one_shot_icons;
+    uint8_t one_shot_animation_counter;
+    uint8_t one_shot_animation_size;
+    DesktopAnimationState state;
+    TickType_t basic_started_at;
+    TickType_t active_finished_at;
+    AnimationChangedCallback animation_changed_callback;
+    void* animation_changed_callback_context;
+};
+
+DesktopAnimation* desktop_animation_alloc(void) {
+    DesktopAnimation* animation = furi_alloc(sizeof(DesktopAnimation));
+
+    animation->timer = osTimerNew(desktop_animation_timer_callback, osTimerPeriodic /* osTimerOnce */, animation, NULL);
+    animation->active_finished_at = 0;
+    animation->basic_started_at = 0;
+    animation->animation_changed_callback = NULL;
+    animation->animation_changed_callback_context = NULL;
+    desktop_start_new_idle_animation(animation);
+
+    return animation;
+}
+
+void desktop_animation_free(DesktopAnimation* animation) {
+    furi_assert(animation);
+
+    osTimerDelete(animation->timer);     // can we delete timer without stopping ?
+    free(animation);
+}
+
+void desktop_animation_set_animation_changed_callback(DesktopAnimation* animation,
+        AnimationChangedCallback callback,
+        void* context) {
+    furi_assert(animation);
+
+    animation->animation_changed_callback = callback;
+    animation->animation_changed_callback_context = context;
+}
+
+void desktop_start_new_idle_animation(DesktopAnimation* animation) {
+    Dolphin* dolphin = furi_record_open("dolphin");
+    DolphinStats stats = dolphin_stats(dolphin);
+    furi_record_close("dolphin");
+
+    furi_assert((stats.level >= 1) && (stats.level <= 3));
+    uint8_t level = stats.level;
+    bool angry = stats.butthurt > 0;
+
+    AnimationList_t animation_list;
+    AnimationList_init(animation_list);
+
+    if (!angry) {
+        PUSH_BACK_ANIMATIONS(animation_list, calm_animation);
+        switch (level) {
+        case 1:
+            PUSH_BACK_ANIMATIONS(animation_list, level_1_animation);
+            break;
+        case 2:
+            PUSH_BACK_ANIMATIONS(animation_list, level_2_animation);
+            break;
+        case 3:
+            PUSH_BACK_ANIMATIONS(animation_list, level_3_animation);
+            break;
+        default:
+            furi_assert(0);
+        }
+    } else {
+        PUSH_BACK_ANIMATIONS(animation_list, mad_animation);
+    }
+
+    Power* power = furi_record_open("power");
+    PowerInfo info;
+    power_get_info(power, &info);
+
+    if (!power_is_battery_well(&info)) {
+        PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation);
+    }
+
+    Storage* storage = furi_record_open("storage");
+    FS_Error sd_status = storage_sd_status(storage);
+    animation->current = NULL;
+
+    if (sd_status == FSE_NOT_READY) {
+        PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation);
+    }
+
+    uint32_t whole_weight = 0;
+    for M_EACH(item, animation_list, AnimationList_t) {
+        whole_weight += (*item)->basic->weight;
+    }
+
+    uint32_t lucky_number = random() % whole_weight;
+    uint32_t weight = 0;
+
+    const PairedAnimation* selected = NULL;
+    for M_EACH(item, animation_list, AnimationList_t) {
+        if (lucky_number < weight) {
+            break;
+        }
+        weight += (*item)->basic->weight;
+        selected = *item;
+    }
+    animation->basic_started_at = osKernelGetTickCount();
+    animation->current = selected;
+    FURI_LOG_W("Desktop", "New Basic Animation, %p", selected);
+    osTimerStart(animation->timer, animation->current->basic->duration * 1000);
+    animation->state = DesktopAnimationStateBasic;
+    furi_assert(selected);
+    AnimationList_clear(animation_list);
+}
+
+static void desktop_animation_timer_callback(void* context) {
+    furi_assert(context);
+    DesktopAnimation* animation = context;
+    TickType_t now_ms = osKernelGetTickCount();
+    AnimationList_t animation_list;
+    AnimationList_init(animation_list);
+    bool new_basic_animation = false;
+
+    FURI_LOG_W("DBG", "timer callback, state: %s", state_strs_dbg[animation->state]);
+
+    if (animation->state == DesktopAnimationStateActive) {
+        FURI_LOG_W("Desktop", "Active animation finished");
+        animation->state = DesktopAnimationStateBasic;
+        TickType_t basic_lasts_ms = now_ms - animation->basic_started_at;
+        animation->active_finished_at = now_ms;
+        TickType_t basic_duration_ms = animation->current->basic->duration * 1000;
+        if (basic_lasts_ms > basic_duration_ms) {
+            // if active animation finished, and basic duration came to an end
+            // select new idle animation
+            new_basic_animation = true;
+            FURI_LOG_W("Desktop", "Select New Basic Animation (after active)");
+        } else {
+            // if active animation finished, but basic duration is not finished
+            // play current animation for the rest of time
+            FURI_LOG_W("Desktop", "Set timer to %lu", basic_duration_ms - basic_lasts_ms);
+            furi_assert(basic_duration_ms != basic_lasts_ms);
+            osTimerStart(animation->timer, basic_duration_ms - basic_lasts_ms);
+            FURI_LOG_W("Desktop", "Continue Current Basic Animation");
+        }
+    } else if (animation->state == DesktopAnimationStateBasic) {
+        // if basic animation finished
+        // select new idle animation
+        new_basic_animation = true;
+        FURI_LOG_W("Desktop", "Select New Basic Animation");
+    } else {
+        FURI_LOG_E("Desktop", "DUMMY TIMER CALLBACK (state %s)", state_strs_dbg[animation->state]);
+    }
+
+    if (new_basic_animation) {
+        animation->basic_started_at = now_ms;
+        animation->active_finished_at = 0;
+        desktop_start_new_idle_animation(animation);
+    }
+
+    // for oneshot generate events every time
+    if (animation->animation_changed_callback) {
+        FURI_LOG_W("DBG", "update_callback(), state: %s", state_strs_dbg[animation->state]);
+        animation->animation_changed_callback(animation->animation_changed_callback_context);
+    }
+}
+
+void desktop_animation_activate(DesktopAnimation* animation) {
+    furi_assert(animation);
+
+    if (animation->state != DesktopAnimationStateBasic) {
+        FURI_LOG_W("Desktop", "can't activate animation: state %s", state_strs_dbg[animation->state]);
+        return;
+    }
+
+    if (animation->state == DesktopAnimationStateActive) {
+        FURI_LOG_W("Desktop", "can't activate animation: already active");
+        return;
+    }
+
+    if (!animation->current->active) {
+        FURI_LOG_W("Desktop", "can't activate animation: No active");
+        return;
+    }
+
+    TickType_t now = osKernelGetTickCount();
+    TickType_t time_since_last_active = now - animation->active_finished_at;
+
+    if (time_since_last_active > (animation->current->basic->active_cooldown * 1000)) {
+        FURI_LOG_W("Desktop", "animation activated");
+        animation->state = DesktopAnimationStateActive;
+        FURI_LOG_W("Desktop", "Set timer to %lu", animation->current->active->duration * 1000);
+        furi_assert(animation->current->active->duration > 0);
+        osTimerStart(animation->timer, animation->current->active->duration * 1000);
+        if (animation->animation_changed_callback) {
+            animation->animation_changed_callback(animation->animation_changed_callback_context);
+        }
+    } else {
+        FURI_LOG_W("Desktop", "can't activate animation: active_cooldown");
+    }
+}
+
+static const Icon* desktop_animation_get_current_idle_animation(DesktopAnimation* animation) {
+    const Icon* active_icon = animation->current->active->icon;
+    const Icon* basic_icon = animation->current->basic->icon;
+    return (animation->state == DesktopAnimationStateActive && active_icon)
+        ? active_icon
+        : basic_icon;
+}
+
+// Every time somebody starts 'desktop_animation_get_animation()'
+// 1) check if there is a new level
+// 2) check if there is SD card corruption
+// 3) check if the SD card is empty
+// 4) if all false - get idle animation
+
+const Icon* desktop_animation_get_animation(DesktopAnimation* animation) {
+    Dolphin* dolphin = furi_record_open("dolphin");
+    Storage* storage = furi_record_open("storage");
+    const Icon* icon = NULL;
+    furi_assert(animation);
+    FS_Error sd_status = storage_sd_status(storage);
+
+    if(IS_BLOCKING_ANIMATION(animation->state)) {
+        // don't give new animation till blocked animation
+        // is reseted
+        FURI_LOG_W("DBG", "get_animation() blocking(no check), state: %s", state_strs_dbg[animation->state]);
+        icon = animation->current_blocking_icon;
+    }
+
+    if (!icon) {
+        if(sd_status == FSE_INTERNAL) {
+            osTimerStop(animation->timer);
+            icon = &A_CardBad_128x51;
+            animation->current_blocking_icon = icon;
+            animation->state = DesktopAnimationStateSDCorrupted;
+            animation->sd_shown_corrupted = true;
+        } else if (sd_status == FSE_OK) {
+            animation->sd_shown_corrupted = false;
+        }
+    }
+
+    if (!icon) {
+        FS_Error error = storage_common_stat(storage, "/ext/manifest.txt", NULL);
+        if ((error != FSE_OK) && !animation->sd_shown_empty && (sd_status != FSE_NOT_READY)) {
+            osTimerStop(animation->timer);
+//            icon = &A_CardEmpty_128x51;
+            icon = &A_Tamagotchi_14;   // not ready yet
+            animation->current_blocking_icon = icon;
+            animation->state = DesktopAnimationStateSDEmpty;
+            animation->sd_shown_empty = true;
+        }
+        if ((error == FSE_OK) && animation->sd_shown_empty) {
+            osTimerStop(animation->timer);
+            icon = &A_CardOk_128x51;
+            animation->current_blocking_icon = icon;
+            animation->state = DesktopAnimationStateSDOk;
+            animation->sd_shown_empty = false;
+        }
+    }
+
+    DolphinStats stats = dolphin_stats(dolphin);
+    if(!icon && stats.level_up_is_pending) {
+        osTimerStop(animation->timer);
+        icon = &A_LevelUpPending_128x51;
+        animation->current_blocking_icon = icon;
+        animation->state = DesktopAnimationStateLevelUpIsPending;
+    }
+
+    if (!icon) {
+        icon = desktop_animation_get_current_idle_animation(animation);
+    }
+
+    furi_record_close("storage");
+    furi_record_close("dolphin");
+
+    FURI_LOG_W("DBG", "get_animation(), state: %s", state_strs_dbg[animation->state]);
+    return icon;
+}
+
+DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation) {
+    furi_assert(animation);
+    DesktopAnimationState was_state = animation->state;
+
+    bool reset_animation = false;
+
+    switch(animation->state) {
+    case DesktopAnimationStateActive:
+    case DesktopAnimationStateBasic:
+        /* nothing */
+        break;
+    case DesktopAnimationStateLevelUpIsPending:
+        /* do nothing, main scene should change itself */
+        break;
+    case DesktopAnimationStateSDCorrupted:
+        reset_animation = true;
+    case DesktopAnimationStateSDEmpty:
+        reset_animation = true;
+    case DesktopAnimationStateSDOk:
+        reset_animation = true;
+        break;
+    default:
+        furi_assert(0);
+    }
+
+    if (reset_animation) {
+        desktop_start_new_idle_animation(animation);
+    }
+
+    FURI_LOG_W("DBG", "Right click, state: %s -> %s", state_strs_dbg[was_state], state_strs_dbg[animation->state]);
+    return animation->state;
+}
+
+#define LEVELUP_FRAME_RATE      (0.2)
+
+void desktop_animation_start_oneshot_levelup(DesktopAnimation* animation) {
+    animation->one_shot_animation_counter = 0;
+    animation->state = DesktopAnimationStateLevelUpIsPending;
+    FURI_LOG_W("DBG", "One shot start");
 
     Dolphin* dolphin = furi_record_open("dolphin");
     DolphinStats stats = dolphin_stats(dolphin);
-    float timediff = fabs(difftime(stats.timestamp, dolphin_state_timestamp()));
+    furi_record_close("dolphin");
+    furi_assert(stats.level_up_is_pending);
+    if (stats.level == 1) {
+        animation->current_one_shot_icons = animation_level2up;
+        animation->one_shot_animation_size = COUNT_OF(animation_level2up);
+    } else if (stats.level == 2) {
+        animation->current_one_shot_icons = animation_level3up;
+        animation->one_shot_animation_size = COUNT_OF(animation_level3up);
+    } else {
+        furi_assert(0);
+    }
+    osTimerStart(animation->timer, LEVELUP_FRAME_RATE * 1000);
+}
 
-    FURI_LOG_I(TAG, "background change");
-    FURI_LOG_I(TAG, "icounter: %d", stats.icounter);
-    FURI_LOG_I(TAG, "butthurt: %d", stats.butthurt);
-    FURI_LOG_I(TAG, "time since deeed: %.0f", timediff);
-#endif
+const Icon* desktop_animation_get_oneshot_frame(DesktopAnimation* animation) {
+    furi_assert(IS_ONESHOT_ANIMATION(animation->state));
+    furi_assert(animation->one_shot_animation_size > 0);
+    const Icon* icon = NULL;
+    FURI_LOG_W("DBG", "One shot get frame");
 
-    if((random() % 100) > 50) { // temp rnd selection
-        new = random() % COUNT_OF(idle_scenes);
+    if(animation->one_shot_animation_counter < animation->one_shot_animation_size) {
+        icon = animation->current_one_shot_icons[animation->one_shot_animation_counter];
+        ++animation->one_shot_animation_counter;
+    } else {
+        animation->state = DesktopAnimationStateBasic;
+        animation->one_shot_animation_size = 0;
+        osTimerStop(animation->timer);
+        FURI_LOG_W("DBG", "One shot get frame - stopped");
+        icon = NULL;
     }
 
-    return idle_scenes[new];
+    return icon;
 }
+
