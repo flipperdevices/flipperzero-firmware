@@ -23,7 +23,6 @@ void desktop_scene_locked_on_enter(void* context) {
     desktop_locked_reset_door_pos(locked_view);
     desktop_locked_update_hint_timeout(locked_view);
 
-    desktop_animation_activate(desktop->animation);
     desktop_animation_set_animation_changed_callback(desktop->animation,
             desktop_scene_locked_animation_changed_callback,
             desktop);
@@ -84,7 +83,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopMainEventUpdateAnimation: {
             const Icon* icon = desktop_animation_get_animation(desktop->animation);
-            desktop_main_switch_dolphin_animation(desktop->main_view, icon);
+            desktop_locked_set_dolphin_animation(desktop->locked_view, icon);
             consumed = true;
             break;
         }

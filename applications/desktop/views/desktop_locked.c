@@ -23,6 +23,7 @@ void desktop_locked_set_dolphin_animation(DesktopLockedView* locked_view, const 
             if(model->animation) icon_animation_free(model->animation);
             model->animation = icon_animation_alloc(icon);
             view_tie_icon_animation(locked_view->view, model->animation);
+            icon_animation_start(model->animation);
             return true;
         });
 }

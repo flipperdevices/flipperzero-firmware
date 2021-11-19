@@ -125,7 +125,7 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
         dolphin_state->data.icounter += MIN(xp_to_levelup, deed_weight->icounter);
     }
 
-    uint32_t new_butthurt = CLAMP(dolphin_state->data.butthurt + deed_weight->butthurt, 0, 5);
+    uint32_t new_butthurt = CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, 5, 0);
 
     if (!!dolphin_state->data.butthurt != !!new_butthurt) {
         mood_changed = true;
