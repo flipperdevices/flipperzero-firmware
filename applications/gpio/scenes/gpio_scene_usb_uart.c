@@ -24,11 +24,11 @@ void gpio_scene_usb_uart_on_enter(void* context) {
         scene_usb_uart->cfg.flow_pins = 0;
         scene_usb_uart->cfg.baudrate_mode = 0;
         scene_usb_uart->cfg.baudrate = 0;
-        usb_uart_enable(&scene_usb_uart->cfg);
+        app->usb_uart_bridge = usb_uart_enable(&scene_usb_uart->cfg);
     }
 
-    usb_uart_get_config(&scene_usb_uart->cfg);
-    usb_uart_get_state(&scene_usb_uart->state);
+    usb_uart_get_config(app->usb_uart_bridge, &scene_usb_uart->cfg);
+    usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
 
     gpio_usb_uart_set_callback(app->gpio_usb_uart, gpio_scene_usb_uart_callback, app);
     scene_manager_set_scene_state(app->scene_manager, GpioAppViewUsbUart, 0);
@@ -44,7 +44,7 @@ bool gpio_scene_usb_uart_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeTick) {
         uint32_t tx_cnt_last = scene_usb_uart->state.tx_cnt;
         uint32_t rx_cnt_last = scene_usb_uart->state.rx_cnt;
-        usb_uart_get_state(&scene_usb_uart->state);
+        usb_uart_get_state(app->usb_uart_bridge, &scene_usb_uart->state);
         gpio_usb_uart_update_state(
             app->gpio_usb_uart, &scene_usb_uart->cfg, &scene_usb_uart->state);
         if(tx_cnt_last != scene_usb_uart->state.tx_cnt)
@@ -59,7 +59,7 @@ void gpio_scene_usb_uart_on_exit(void* context) {
     GpioApp* app = context;
     uint32_t prev_state = scene_manager_get_scene_state(app->scene_manager, GpioAppViewUsbUart);
     if(prev_state == 0) {
-        usb_uart_disable();
+        usb_uart_disable(app->usb_uart_bridge);
         free(scene_usb_uart);
     }
 }

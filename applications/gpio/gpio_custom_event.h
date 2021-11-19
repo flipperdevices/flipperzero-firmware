@@ -7,8 +7,4 @@ typedef enum {
     GpioStartEventUsbUart,
 
     GpioUsbUartEventConfig,
-
-    GpioUsbUartEventEnable,
-    GpioUsbUartEventDisable,
-
 } GpioCustomEvent;

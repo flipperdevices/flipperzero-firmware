@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+typedef struct UsbUartBridge UsbUartBridge;
+
 typedef struct {
     uint8_t vcp_ch;
     uint8_t uart_ch;
@@ -16,12 +18,12 @@ typedef struct {
     uint32_t baudrate_cur;
 } UsbUartState;
 
-void usb_uart_enable(UsbUartConfig* cfg);
+UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg);
 
-void usb_uart_disable();
+void usb_uart_disable(UsbUartBridge* usb_uart);
 
-void usb_uart_set_config(UsbUartConfig* cfg);
+void usb_uart_set_config(UsbUartBridge* usb_uart, UsbUartConfig* cfg);
 
-void usb_uart_get_config(UsbUartConfig* cfg);
+void usb_uart_get_config(UsbUartBridge* usb_uart, UsbUartConfig* cfg);
 
-void usb_uart_get_state(UsbUartState* st);
+void usb_uart_get_state(UsbUartBridge* usb_uart, UsbUartState* st);

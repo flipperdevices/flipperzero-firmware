@@ -32,28 +32,22 @@ bool gpio_scene_usb_uart_cfg_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GpioUsbUartEventEnable) {
-            usb_uart_enable(cfg_set);
-        } else if(event.event == GpioUsbUartEventDisable) {
-            usb_uart_disable();
-        }
-        consumed = true;
     }
     return consumed;
 }
 
 static void line_vcp_cb(VariableItem* item) {
-    //GpioApp* app = variable_item_get_context(item);
+    GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, vcp_ch[index]);
 
     cfg_set->vcp_ch = index;
-    usb_uart_set_config(cfg_set);
+    usb_uart_set_config(app->usb_uart_bridge, cfg_set);
 }
 
 static void line_port_cb(VariableItem* item) {
-    //GpioApp* app = variable_item_get_context(item);
+    GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, uart_ch[index]);
@@ -62,21 +56,21 @@ static void line_port_cb(VariableItem* item) {
         cfg_set->uart_ch = FuriHalUartIdUSART1;
     else if(index == 1)
         cfg_set->uart_ch = FuriHalUartIdLPUART1;
-    usb_uart_set_config(cfg_set);
+    usb_uart_set_config(app->usb_uart_bridge, cfg_set);
 }
 
 static void line_flow_cb(VariableItem* item) {
-    //GpioApp* app = variable_item_get_context(item);
+    GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, flow_pins[index]);
 
     cfg_set->flow_pins = index;
-    usb_uart_set_config(cfg_set);
+    usb_uart_set_config(app->usb_uart_bridge, cfg_set);
 }
 
 static void line_baudrate_cb(VariableItem* item) {
-    //GpioApp* app = variable_item_get_context(item);
+    GpioApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     char br_text[8];
@@ -90,7 +84,7 @@ static void line_baudrate_cb(VariableItem* item) {
         cfg_set->baudrate = 0;
     }
     cfg_set->baudrate_mode = index;
-    usb_uart_set_config(cfg_set);
+    usb_uart_set_config(app->usb_uart_bridge, cfg_set);
 }
 
 void gpio_scene_usb_uart_cfg_on_enter(void* context) {
@@ -98,7 +92,7 @@ void gpio_scene_usb_uart_cfg_on_enter(void* context) {
     VariableItemList* var_item_list = app->var_item_list;
 
     cfg_set = furi_alloc(sizeof(UsbUartConfig));
-    usb_uart_get_config(cfg_set);
+    usb_uart_get_config(app->usb_uart_bridge, cfg_set);
 
     VariableItem* item;
     char br_text[8];

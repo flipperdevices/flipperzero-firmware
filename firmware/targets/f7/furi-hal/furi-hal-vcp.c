@@ -37,10 +37,10 @@ typedef struct {
 } FuriHalVcp;
 
 static int32_t vcp_worker(void* context);
-static void vcp_on_cdc_tx_complete();
-static void vcp_on_cdc_rx();
-static void vcp_state_callback(uint8_t state);
-static void vcp_on_cdc_control_line(uint8_t state);
+static void vcp_on_cdc_tx_complete(void* context);
+static void vcp_on_cdc_rx(void* context);
+static void vcp_state_callback(void* context, uint8_t state);
+static void vcp_on_cdc_control_line(void* context, uint8_t state);
 
 static CdcCallbacks cdc_cb = {
     vcp_on_cdc_tx_complete,
@@ -76,7 +76,7 @@ static int32_t vcp_worker(void* context) {
     bool tx_idle = false;
     size_t missed_rx = 0;
 
-    furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
+    furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb, NULL);
 
     while (1) {
         uint32_t flags = osThreadFlagsWait(VCP_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
@@ -86,9 +86,9 @@ static int32_t vcp_worker(void* context) {
         if((flags & VcpEvtEnable) && !enabled){
 #ifdef FURI_HAL_USB_VCP_DEBUG
             FURI_LOG_D(TAG, "Enable");
-#endif
+#endif            
             flags |= VcpEvtTx;
-            furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
+            furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb, NULL);
             enabled = true;
             furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN); // flush Rx buffer
             if (furi_hal_cdc_get_ctrl_line_state(VCP_IF_NUM) & (1 << 0)) {
@@ -99,9 +99,9 @@ static int32_t vcp_worker(void* context) {
 
         // VCP disabled
         if((flags & VcpEvtDisable) && enabled) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
+#ifdef FURI_HAL_USB_VCP_DEBUG            
             FURI_LOG_D(TAG, "Disable");
-#endif
+#endif            
             enabled = false;
             vcp->connected = false;
             xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
@@ -261,13 +261,13 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
 #endif    
 }
 
-static void vcp_state_callback(uint8_t state) {
+static void vcp_state_callback(void* context, uint8_t state) {
     if (state == 0) {
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtDisconnect);
     }
 }
 
-static void vcp_on_cdc_control_line(uint8_t state) {
+static void vcp_on_cdc_control_line(void* context, uint8_t state) {
     // bit 0: DTR state, bit 1: RTS state
     bool dtr = state & (1 << 0);
 
@@ -278,12 +278,12 @@ static void vcp_on_cdc_control_line(uint8_t state) {
     }
 }
 
-static void vcp_on_cdc_rx() {
+static void vcp_on_cdc_rx(void* context) {
     uint32_t ret = osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtRx);
     furi_assert((ret & osFlagsError) == 0);
 }
 
-static void vcp_on_cdc_tx_complete() {
+static void vcp_on_cdc_tx_complete(void* context) {
     osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtTx);
 }
 

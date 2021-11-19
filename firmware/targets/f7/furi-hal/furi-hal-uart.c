@@ -6,8 +6,8 @@
 
 #include <furi.h>
 
-static void (*irq_cb[2])(uint8_t ev, uint8_t data);
-static void irq_ctx[2];
+static void (*irq_cb[2])(uint8_t ev, uint8_t data, void* context);
+static void* irq_ctx[2];
 
 static void furi_hal_usart_init(uint32_t baud) {
     hal_gpio_init_ex(

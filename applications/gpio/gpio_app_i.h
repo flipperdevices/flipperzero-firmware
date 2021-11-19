@@ -4,6 +4,7 @@
 #include "gpio_item.h"
 #include "scenes/gpio_scene.h"
 #include "gpio_custom_event.h"
+#include "usb_uart_bridge.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -23,6 +24,7 @@ struct GpioApp {
     VariableItemList* var_item_list;
     GpioTest* gpio_test;
     GpioUsbUart* gpio_usb_uart;
+    UsbUartBridge* usb_uart_bridge;
 };
 
 typedef enum {
