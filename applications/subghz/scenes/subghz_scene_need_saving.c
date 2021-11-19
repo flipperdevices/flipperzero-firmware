@@ -18,18 +18,20 @@ void subghz_scene_need_saving_on_enter(void* context) {
     SubGhz* subghz = context;
 
     widget_add_string_multiline_element(
+        subghz->widget, 64, 13, AlignCenter, AlignCenter, FontPrimary, "Exit to Gub-Ghz menu?");
+    widget_add_string_multiline_element(
         subghz->widget,
         64,
-        25,
+        32,
         AlignCenter,
         AlignCenter,
         FontSecondary,
-        "There is an unsaved data.\nDo you want to save it?");
+        "All unsaved will be\nlost.");
 
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeRight, "Save", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeRight, "Stay", subghz_scene_need_saving_callback, subghz);
     widget_add_button_element(
-        subghz->widget, GuiButtonTypeLeft, "Delete", subghz_scene_need_saving_callback, subghz);
+        subghz->widget, GuiButtonTypeLeft, "Exit", subghz_scene_need_saving_callback, subghz);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewWidget);
 }
