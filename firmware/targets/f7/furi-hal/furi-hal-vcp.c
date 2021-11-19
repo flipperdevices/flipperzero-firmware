@@ -9,23 +9,21 @@
 #define VCP_RX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
 #define VCP_TX_BUF_SIZE (USB_CDC_PKT_LEN * 3)
 
-//#define FURI_HAL_USB_VCP_DEBUG
-
 #define VCP_IF_NUM 0
 
 typedef enum {
     VcpEvtReserved      = (1 << 0), // Reserved for StreamBuffer internal event
-    VcpEvtConnect       = (1 << 1),
-    VcpEvtDisconnect    = (1 << 2),
-    VcpEvtEnable        = (1 << 3),
-    VcpEvtDisable       = (1 << 4),
-    VcpEvtRx            = (1 << 5),
-    VcpEvtTx            = (1 << 6),
-    VcpEvtStreamRx      = (1 << 7),
-    VcpEvtStreamTx      = (1 << 8),
+    VcpEvtEnable        = (1 << 1),
+    VcpEvtDisable       = (1 << 2),
+    VcpEvtConnect       = (1 << 3),
+    VcpEvtDisconnect    = (1 << 4),
+    VcpEvtStreamRx      = (1 << 5),
+    VcpEvtRx            = (1 << 6),
+    VcpEvtStreamTx      = (1 << 7),
+    VcpEvtTx            = (1 << 8),
 } WorkerEvtFlags;
 
-#define VCP_THREAD_FLAG_ALL (VcpEvtConnect | VcpEvtDisconnect | VcpEvtEnable | VcpEvtDisable | VcpEvtRx | VcpEvtTx | VcpEvtStreamRx | VcpEvtStreamTx)
+#define VCP_THREAD_FLAG_ALL (VcpEvtEnable | VcpEvtDisable | VcpEvtConnect | VcpEvtDisconnect | VcpEvtRx | VcpEvtTx | VcpEvtStreamRx | VcpEvtStreamTx)
 
 typedef struct {
     FuriThread* thread;
@@ -84,93 +82,10 @@ static int32_t vcp_worker(void* context) {
         uint32_t flags = osThreadFlagsWait(VCP_THREAD_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         furi_assert((flags & osFlagsError) == 0);
 
-        // Rx buffer was read, maybe there is enough space for new data?
-        if((flags & VcpEvtStreamRx) && enabled && missed_rx > 0) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP StreamRx\r\n");
-#endif
-            if (xStreamBufferSpacesAvailable(vcp->rx_stream) >= USB_CDC_PKT_LEN) {
-                flags |= VcpEvtRx;
-                missed_rx--;
-            }
-        }
-
-        // New data received
-        if((flags & VcpEvtRx)) {
-            if (xStreamBufferSpacesAvailable(vcp->rx_stream) >= USB_CDC_PKT_LEN) {
-                int32_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN);
-#ifdef FURI_HAL_USB_VCP_DEBUG
-                furi_hal_console_printf("VCP Rx %d\r\n", len);
-#endif
-                if (len > 0) {
-                    furi_check(xStreamBufferSend(vcp->rx_stream, vcp->data_buffer, len, osWaitForever) == len);
-                }
-            } else {
-#ifdef FURI_HAL_USB_VCP_DEBUG
-                furi_hal_console_puts("VCP Rx missed\r\n");
-#endif
-                missed_rx++;
-            }
-        }
-
-
-        if((flags & VcpEvtStreamTx) && ((enabled == false) || (vcp->connected == false))) {
-            xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
-            furi_hal_console_puts(" [r] ");
-        }
-
-        // New data in Tx buffer
-        if((flags & VcpEvtStreamTx) && enabled) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP StreamTx\r\n");
-#endif
-            if (tx_idle) {
-                flags |= VcpEvtTx;
-            }
-        }
-
-        // CDC write transfer done
-        if((flags & VcpEvtTx) && enabled) {
-            size_t len = xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
-#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_printf("VCP Tx %d\r\n", len);
-#endif
-            if (len > 0) { // Some data left in Tx buffer. Sending it now
-                tx_idle = false;
-                furi_hal_cdc_send(VCP_IF_NUM, vcp->data_buffer, len);
-            } else { // There is nothing to send. Set flag to start next transfer instantly
-                tx_idle = true;
-            }
-        }
-
-        // VCP session opened
-        if((flags & VcpEvtConnect) && enabled) {
-//#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP Connect\r\n");
-//#endif
-            if (vcp->connected == false) {
-                vcp->connected = true;
-                xStreamBufferSend(vcp->rx_stream, &ascii_soh, 1, osWaitForever);
-            }
-        }
-
-        // VCP session closed
-        if((flags & VcpEvtDisconnect) && enabled) {
-//#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP Disconnect\r\n");
-//#endif
-            if (vcp->connected == true) {
-                vcp->connected = false;
-                xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
-                xStreamBufferSend(vcp->rx_stream, &ascii_eot, 1, osWaitForever);
-            }
-        }
-
         // VCP enabled
         if((flags & VcpEvtEnable) && !enabled){
-//#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP Enable\r\n");
-//#endif
+            FURI_LOG_D(TAG, "Enable");
+            flags |= VcpEvtTx;
             furi_hal_cdc_set_callbacks(VCP_IF_NUM, &cdc_cb);
             enabled = true;
             furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN); // flush Rx buffer
@@ -182,13 +97,73 @@ static int32_t vcp_worker(void* context) {
 
         // VCP disabled
         if((flags & VcpEvtDisable) && enabled) {
-//#ifdef FURI_HAL_USB_VCP_DEBUG
-            furi_hal_console_puts("VCP Disable\r\n");
-//#endif
+            FURI_LOG_D(TAG, "Disable");
             enabled = false;
             vcp->connected = false;
             xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
             xStreamBufferSend(vcp->rx_stream, &ascii_eot, 1, osWaitForever);
+        }
+
+        // VCP session opened
+        if((flags & VcpEvtConnect) && enabled) {
+            FURI_LOG_D(TAG, "Connect");
+            if (vcp->connected == false) {
+                vcp->connected = true;
+                xStreamBufferSend(vcp->rx_stream, &ascii_soh, 1, osWaitForever);
+            }
+        }
+
+        // VCP session closed
+        if((flags & VcpEvtDisconnect) && enabled) {
+            FURI_LOG_D(TAG, "Disconnect");
+            if (vcp->connected == true) {
+                vcp->connected = false;
+                xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
+                xStreamBufferSend(vcp->rx_stream, &ascii_eot, 1, osWaitForever);
+            }
+        }
+
+        // Rx buffer was read, maybe there is enough space for new data?
+        if((flags & VcpEvtStreamRx) && enabled && missed_rx > 0) {
+            FURI_LOG_D(TAG, "StreamRx");
+            if (xStreamBufferSpacesAvailable(vcp->rx_stream) >= USB_CDC_PKT_LEN) {
+                flags |= VcpEvtRx;
+                missed_rx--;
+            }
+        }
+
+        // New data received
+        if((flags & VcpEvtRx)) {
+            if (xStreamBufferSpacesAvailable(vcp->rx_stream) >= USB_CDC_PKT_LEN) {
+                int32_t len = furi_hal_cdc_receive(VCP_IF_NUM, vcp->data_buffer, USB_CDC_PKT_LEN);
+                FURI_LOG_D(TAG, "Rx %d", len);
+                if (len > 0) {
+                    furi_check(xStreamBufferSend(vcp->rx_stream, vcp->data_buffer, len, osWaitForever) == len);
+                }
+            } else {
+                FURI_LOG_D(TAG, "Rx missed");
+                missed_rx++;
+            }
+        }
+
+        // New data in Tx buffer
+        if((flags & VcpEvtStreamTx) && enabled) {
+            FURI_LOG_D(TAG, "StreamTx");
+            if (tx_idle) {
+                flags |= VcpEvtTx;
+            }
+        }
+
+        // CDC write transfer done
+        if((flags & VcpEvtTx) && enabled) {
+            size_t len = xStreamBufferReceive(vcp->tx_stream, vcp->data_buffer, USB_CDC_PKT_LEN, 0);
+            FURI_LOG_D(TAG, "Tx %d", len);
+            if (len > 0) { // Some data left in Tx buffer. Sending it now
+                tx_idle = false;
+                furi_hal_cdc_send(VCP_IF_NUM, vcp->data_buffer, len);
+            } else { // There is nothing to send. Set flag to start next transfer instantly
+                tx_idle = true;
+            }
         }
     }
     return 0;
@@ -206,7 +181,7 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
     furi_assert(vcp);
     furi_assert(buffer);
 
-    furi_hal_console_printf("rx start %u: ", size);
+    FURI_LOG_D(TAG, "rx %u start", size);
 
     size_t rx_cnt = 0;
 
@@ -216,7 +191,7 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
             batch_size = VCP_RX_BUF_SIZE;
 
         size_t len = xStreamBufferReceive(vcp->rx_stream, buffer, batch_size, timeout);
-        furi_hal_console_printf("%u ", batch_size);
+        FURI_LOG_D(TAG, "%u ", batch_size);
         if (len == 0)
             break;
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamRx);
@@ -225,7 +200,7 @@ size_t furi_hal_vcp_rx_with_timeout(uint8_t* buffer, size_t size, uint32_t timeo
         rx_cnt += len;
     }
 
-    furi_hal_console_puts("end\r\n");
+    FURI_LOG_D(TAG, "rx %u end", size);
     return rx_cnt;
 }
 
@@ -238,9 +213,9 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
     furi_assert(vcp);
     furi_assert(buffer);
 
-    furi_hal_console_printf("tx start %u: ", size);
+    FURI_LOG_D(TAG, "tx %u start", size);
 
-    while (size > 0) {
+    while (size > 0 && vcp->connected) {
         size_t batch_size = size;
         if (batch_size > USB_CDC_PKT_LEN)
             batch_size = USB_CDC_PKT_LEN;
@@ -248,18 +223,15 @@ void furi_hal_vcp_tx(const uint8_t* buffer, size_t size) {
         xStreamBufferSend(vcp->tx_stream, buffer, batch_size, osWaitForever);
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtStreamTx);
 
-        furi_hal_console_printf("%u ", batch_size);
+        FURI_LOG_D(TAG, "%u ", batch_size);
 
         size -= batch_size;
         buffer += batch_size;
     }
-    furi_hal_console_puts("end\r\n");
+    FURI_LOG_D(TAG, "tx %u end", size);
 }
 
 static void vcp_state_callback(uint8_t state) {
-#ifdef FURI_HAL_USB_VCP_DEBUG
-    furi_hal_console_puts("VCP State\r\n");
-#endif
     if (state == 0) {
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtDisconnect);
     }
@@ -268,9 +240,7 @@ static void vcp_state_callback(uint8_t state) {
 static void vcp_on_cdc_control_line(uint8_t state) {
     // bit 0: DTR state, bit 1: RTS state
     bool dtr = state & (1 << 0);
-#ifdef FURI_HAL_USB_VCP_DEBUG
-    furi_hal_console_puts("VCP CtrlLine\r\n");
-#endif
+
     if (dtr == true) {
         osThreadFlagsSet(furi_thread_get_thread_id(vcp->thread), VcpEvtConnect);
     } else {
