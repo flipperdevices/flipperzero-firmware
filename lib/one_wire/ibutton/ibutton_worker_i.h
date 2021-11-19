@@ -54,7 +54,6 @@ struct iButtonWorker {
     OneWireSlave* slave;
     OneWireDevice* device;
     iButtonWriter* writer;
-    const GpioPin* gpio;
     iButtonWorkerMode mode_index;
     osMessageQueueId_t messages;
     FuriThread* thread;

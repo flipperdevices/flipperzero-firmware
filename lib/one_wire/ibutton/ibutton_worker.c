@@ -22,11 +22,10 @@ static int32_t ibutton_worker_thread(void* thread_context);
 
 iButtonWorker* ibutton_worker_alloc() {
     iButtonWorker* worker = malloc(sizeof(iButtonWorker));
-    worker->gpio = &ibutton_gpio;
     worker->key_p = NULL;
     worker->key_data = malloc(ibutton_key_get_max_size());
-    worker->host = onewire_host_alloc(worker->gpio);
-    worker->slave = onewire_slave_alloc(worker->gpio);
+    worker->host = onewire_host_alloc();
+    worker->slave = onewire_slave_alloc();
     worker->writer = ibutton_writer_alloc(worker->host);
     worker->device = onewire_device_alloc(0, 0, 0, 0, 0, 0, 0, 0);
     worker->pulse_decoder = pulse_decoder_alloc();

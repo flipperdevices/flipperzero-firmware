@@ -30,7 +30,7 @@ void furi_hal_rfid_pins_reset() {
 
 void furi_hal_rfid_pins_emulate() {
     // ibutton low
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
 
     // pull pin to timer out
@@ -47,7 +47,7 @@ void furi_hal_rfid_pins_emulate() {
 
 void furi_hal_rfid_pins_read() {
     // ibutton low
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
 
     // dont pull rfid antenna

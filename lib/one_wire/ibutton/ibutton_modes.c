@@ -280,7 +280,7 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
     HAL_NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn);
 
     hal_gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
 
     HAL_TIM_Base_Start_IT(&htim1);
 }

@@ -4,8 +4,6 @@
 #include "one_wire_host_timing.h"
 
 struct OneWireHost {
-    const GpioPin* gpio;
-
     // global search state
     unsigned char saved_rom[8];
     uint8_t last_discrepancy;
@@ -13,9 +11,8 @@ struct OneWireHost {
     bool last_device_flag;
 };
 
-OneWireHost* onewire_host_alloc(const GpioPin* gpio) {
+OneWireHost* onewire_host_alloc() {
     OneWireHost* host = malloc(sizeof(OneWireHost));
-    host->gpio = gpio;
     onewire_host_reset_search(host);
     return host;
 }
@@ -25,42 +22,30 @@ void onewire_host_free(OneWireHost* host) {
     free(host);
 }
 
-static inline void onewire_host_gpio_high(OneWireHost* host) {
-    furi_hal_ibutton_pin_high();
-}
-
-static inline void onewire_host_gpio_low(OneWireHost* host) {
-    furi_hal_ibutton_pin_low();
-}
-
-static inline bool onewire_host_gpio_read(OneWireHost* host) {
-    return furi_hal_ibutton_pin_get_level();
-}
-
 bool onewire_host_reset(OneWireHost* host) {
     uint8_t r;
     uint8_t retries = 125;
 
     // wait until the gpio is high
-    onewire_host_gpio_high(host);
+    furi_hal_ibutton_pin_high();
     do {
         if(--retries == 0) return 0;
         delay_us(2);
-    } while(!onewire_host_gpio_read(host));
+    } while(!furi_hal_ibutton_pin_get_level());
 
     // pre delay
     delay_us(OWH_RESET_DELAY_PRE);
 
     // drive low
-    onewire_host_gpio_low(host);
+    furi_hal_ibutton_pin_low();
     delay_us(OWH_RESET_DRIVE);
 
     // release
-    onewire_host_gpio_high(host);
+    furi_hal_ibutton_pin_high();
     delay_us(OWH_RESET_RELEASE);
 
     // read and post delay
-    r = !onewire_host_gpio_read(host);
+    r = !furi_hal_ibutton_pin_get_level();
     delay_us(OWH_RESET_DELAY_POST);
 
     return r;
@@ -70,15 +55,15 @@ bool onewire_host_read_bit(OneWireHost* host) {
     bool result;
 
     // drive low
-    onewire_host_gpio_low(host);
+    furi_hal_ibutton_pin_low();
     delay_us(OWH_READ_DRIVE);
 
     // release
-    onewire_host_gpio_high(host);
+    furi_hal_ibutton_pin_high();
     delay_us(OWH_READ_RELEASE);
 
     // read and post delay
-    result = onewire_host_gpio_read(host);
+    result = furi_hal_ibutton_pin_get_level();
     delay_us(OWH_READ_DELAY_POST);
 
     return result;
@@ -105,19 +90,19 @@ void onewire_host_read_bytes(OneWireHost* host, uint8_t* buffer, uint16_t count)
 void onewire_host_write_bit(OneWireHost* host, bool value) {
     if(value) {
         // drive low
-        onewire_host_gpio_low(host);
+        furi_hal_ibutton_pin_low();
         delay_us(OWH_WRITE_1_DRIVE);
 
         // release
-        onewire_host_gpio_high(host);
+        furi_hal_ibutton_pin_high();
         delay_us(OWH_WRITE_1_RELEASE);
     } else {
         // drive low
-        onewire_host_gpio_low(host);
+        furi_hal_ibutton_pin_low();
         delay_us(OWH_WRITE_0_DRIVE);
 
         // release
-        onewire_host_gpio_high(host);
+        furi_hal_ibutton_pin_high();
         delay_us(OWH_WRITE_0_RELEASE);
     }
 }
@@ -135,7 +120,7 @@ void onewire_host_skip(OneWireHost* host) {
 }
 
 void onewire_host_start(OneWireHost* host) {
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
 }
 
 void onewire_host_stop(OneWireHost* host) {
