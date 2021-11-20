@@ -134,5 +134,6 @@ int32_t dolphin_srv(void* p) {
 
 void dolphin_upgrade_level(Dolphin* dolphin) {
     dolphin_state_increase_level(dolphin->state);
+    dolphin_flush(dolphin);
 }
 

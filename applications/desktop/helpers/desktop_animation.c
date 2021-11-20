@@ -125,6 +125,8 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
 
     if (sd_status == FSE_NOT_READY) {
         PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation);
+        animation->sd_shown_corrupted = false;
+        animation->sd_shown_empty = false;
     }
 
     uint32_t whole_weight = 0;
@@ -280,10 +282,9 @@ const Icon* desktop_animation_get_animation(DesktopAnimation* animation) {
 
     if (!icon) {
         FS_Error error = storage_common_stat(storage, "/ext/manifest.txt", NULL);
-        if ((error != FSE_OK) && !animation->sd_shown_empty && (sd_status != FSE_NOT_READY)) {
+        if ((error != FSE_OK) && !animation->sd_shown_empty && (sd_status == FSE_OK)) {
             osTimerStop(animation->timer);
-//            icon = &A_CardEmpty_128x51;
-            icon = &A_Tamagotchi_14;   // not ready yet
+            icon = &A_CardNoDB_128x51;
             animation->current_blocking_icon = icon;
             animation->state = DesktopAnimationStateSDEmpty;
             animation->sd_shown_empty = true;

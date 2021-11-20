@@ -29,30 +29,6 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
     furi_thread_start(desktop->scene_thread);
 }
 
-static void desktop_scene_main_storage_status_changed_callback(const void* message, void* context) {
-    furi_assert(context);
-    Desktop* desktop = context;
-    StorageStatus status = *(const StorageStatus*) message;
-    switch(status) {
-    case StorageStatusOK:
-    case StorageStatusNotAccessible:
-    case StorageStatusNotReady:
-    case StorageStatusErrorInternal:
-        /* do nothing */
-        break;
-    case StorageStatusNoFS:
-        break;
-    case StorageStatusNotMounted:
-    default:
-        furi_assert(0);
-    }
-
-//    if (!desktop->update_animation_flag) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
-//        desktop->update_animation_flag = true;
-//    }
-}
-
 void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
@@ -70,12 +46,6 @@ static void desktop_scene_main_animation_changed_callback(void* context) {
 void desktop_scene_main_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopMainView* main_view = desktop->main_view;
-
-    Storage* storage = furi_record_open("storage");
-    desktop->storage_changed = furi_pubsub_subscribe(storage_get_pubsub(storage),
-            desktop_scene_main_storage_status_changed_callback,
-            desktop);
-    furi_record_close("storage");
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);

@@ -7,6 +7,7 @@ extern const Icon A_BadBattery_128x51;
 extern const Icon A_BoxActive_128x51;
 extern const Icon A_Box_128x51;
 extern const Icon A_CardBad_128x51;
+extern const Icon A_CardNoDB_128x51;
 extern const Icon A_CardOk_128x51;
 extern const Icon A_CryActive_128x51;
 extern const Icon A_Cry_128x51;
