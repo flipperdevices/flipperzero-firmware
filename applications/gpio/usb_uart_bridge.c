@@ -6,7 +6,6 @@
 
 #define USB_CDC_PKT_LEN CDC_DATA_SZ
 #define USB_UART_RX_BUF_SIZE (USB_CDC_PKT_LEN * 5)
-#define UART_MAX_BR 1000000
 
 #define USB_CDC_BIT_DTR (1 << 0)
 #define USB_CDC_BIT_RTS (1 << 1)
@@ -78,8 +77,8 @@ static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
     if(ev == UartIrqEventRXNE) {
         xStreamBufferSendFromISR(usb_uart->rx_stream, &data, 1, &xHigherPriorityTaskWoken);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         osThreadFlagsSet(furi_thread_get_thread_id(usb_uart->thread), WorkerEvtRxDone);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }
 
@@ -122,7 +121,7 @@ static void usb_uart_set_baudrate(UsbUartBridge* usb_uart, uint32_t baudrate) {
     } else {
         struct usb_cdc_line_coding* line_cfg =
             furi_hal_cdc_get_port_settings(usb_uart->cfg.vcp_ch);
-        if((line_cfg->dwDTERate > 0) && (line_cfg->dwDTERate <= UART_MAX_BR)) {
+        if(line_cfg->dwDTERate > 0) {
             furi_hal_uart_set_br(usb_uart->cfg.uart_ch, line_cfg->dwDTERate);
             usb_uart->st.baudrate_cur = line_cfg->dwDTERate;
         }
