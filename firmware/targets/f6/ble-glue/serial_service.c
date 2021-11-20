@@ -172,7 +172,7 @@ void serial_svc_stop() {
     }
 }
 
-bool serial_svc_update_tx(uint8_t* data, uint8_t data_len) {
+bool serial_svc_update_tx(uint8_t* data, uint16_t data_len) {
     if(data_len > SERIAL_SVC_DATA_LEN_MAX) {
         return false;
     }
