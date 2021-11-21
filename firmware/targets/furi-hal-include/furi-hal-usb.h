@@ -2,11 +2,13 @@
 
 #include "usb.h"
 
+typedef struct UsbInterface UsbInterface;
+
 struct UsbInterface {
-    void (*init)(usbd_device *dev, struct UsbInterface* intf);
+    void (*init)(usbd_device *dev, UsbInterface* intf);
     void (*deinit)(usbd_device *dev);
     void (*wakeup)(usbd_device *dev);
-    void (*suspend)(usbd_device *dev);    
+    void (*suspend)(usbd_device *dev);
 
     struct usb_device_descriptor* dev_descr;
 
@@ -18,9 +20,9 @@ struct UsbInterface {
 };
 
 /** USB device interface modes */
-extern struct UsbInterface usb_cdc_single;
-extern struct UsbInterface usb_cdc_dual;
-extern struct UsbInterface usb_hid;
+extern UsbInterface usb_cdc_single;
+extern UsbInterface usb_cdc_dual;
+extern UsbInterface usb_hid;
 
 /** USB device low-level initialization
  */
@@ -30,13 +32,13 @@ void furi_hal_usb_init();
  *
  * @param      mode new USB device mode
  */
-void furi_hal_usb_set_config(struct UsbInterface* new_if);
+void furi_hal_usb_set_config(UsbInterface* new_if);
 
 /** Get USB device configuration
  *
  * @return    current USB device mode
  */
-struct UsbInterface* furi_hal_usb_get_config();
+UsbInterface* furi_hal_usb_get_config();
 
 /** Disable USB device
  */

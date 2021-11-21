@@ -9,8 +9,8 @@
 
 #define USB_RECONNECT_DELAY 500
 
-static struct UsbInterface* usb_if_cur;
-static struct UsbInterface* usb_if_next;
+static UsbInterface* usb_if_cur;
+static UsbInterface* usb_if_next;
 
 static const struct usb_string_descriptor dev_lang_desc = USB_ARRAY_DESC(USB_LANGID_ENG_US);
 
@@ -58,7 +58,7 @@ void furi_hal_usb_init(void) {
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_usb_set_config(struct UsbInterface* new_if) {
+void furi_hal_usb_set_config(UsbInterface* new_if) {
     if (new_if != usb_if_cur) {
         if (usb_config.enabled) {
             usb_if_next = new_if;
@@ -80,7 +80,7 @@ void furi_hal_usb_set_config(struct UsbInterface* new_if) {
     }
 }
 
-struct UsbInterface* furi_hal_usb_get_config() {
+UsbInterface* furi_hal_usb_get_config() {
     return usb_if_cur;
 }
 

@@ -183,7 +183,7 @@ static struct HidReport {
     struct HidReportMouse mouse;
 } __attribute__((packed)) hid_report;
 
-static void hid_init(usbd_device* dev, struct UsbInterface* intf);
+static void hid_init(usbd_device* dev, UsbInterface* intf);
 static void hid_deinit(usbd_device *dev);
 static void hid_on_wakeup(usbd_device *dev);
 static void hid_on_suspend(usbd_device *dev);
@@ -255,7 +255,7 @@ bool furi_hal_hid_mouse_scroll(int8_t delta) {
     return state;
 }
 
-struct UsbInterface usb_hid = {
+UsbInterface usb_hid = {
     .init = hid_init,
     .deinit = hid_deinit,
     .wakeup = hid_on_wakeup,
@@ -270,7 +270,7 @@ struct UsbInterface usb_hid = {
     .cfg_descr = (void*)&hid_cfg_desc,
 };
 
-static void hid_init(usbd_device* dev, struct UsbInterface* intf) {
+static void hid_init(usbd_device* dev, UsbInterface* intf) {
     if (hid_semaphore == NULL)
         hid_semaphore = osSemaphoreNew(1, 1, NULL);
     usb_dev = dev;

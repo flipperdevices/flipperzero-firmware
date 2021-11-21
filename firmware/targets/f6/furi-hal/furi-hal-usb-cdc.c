@@ -348,7 +348,7 @@ static const struct CdcConfigDescriptorDual cdc_cfg_desc_dual = {
 static struct usb_cdc_line_coding cdc_config[IF_NUM_MAX] = {};
 static uint8_t cdc_ctrl_line_state[IF_NUM_MAX];
 
-static void cdc_init(usbd_device* dev, struct UsbInterface* intf);
+static void cdc_init(usbd_device* dev, UsbInterface* intf);
 static void cdc_deinit(usbd_device *dev);
 static void cdc_on_wakeup(usbd_device *dev);
 static void cdc_on_suspend(usbd_device *dev);
@@ -356,12 +356,12 @@ static void cdc_on_suspend(usbd_device *dev);
 static usbd_respond cdc_ep_config (usbd_device *dev, uint8_t cfg);
 static usbd_respond cdc_control (usbd_device *dev, usbd_ctlreq *req, usbd_rqc_callback *callback);
 static usbd_device* usb_dev;
-static struct UsbInterface* cdc_if_cur = NULL;
+static UsbInterface* cdc_if_cur = NULL;
 static bool connected = false;
 static CdcCallbacks* callbacks[IF_NUM_MAX] = {NULL};
 static void* cb_ctx[IF_NUM_MAX];
 
-struct UsbInterface usb_cdc_single = {
+UsbInterface usb_cdc_single = {
     .init = cdc_init,
     .deinit = cdc_deinit,
     .wakeup = cdc_on_wakeup,
@@ -376,7 +376,7 @@ struct UsbInterface usb_cdc_single = {
     .cfg_descr = (void*)&cdc_cfg_desc_single,
 };
 
-struct UsbInterface usb_cdc_dual = {
+UsbInterface usb_cdc_dual = {
     .init = cdc_init,
     .deinit = cdc_deinit,
     .wakeup = cdc_on_wakeup,
@@ -391,7 +391,7 @@ struct UsbInterface usb_cdc_dual = {
     .cfg_descr = (void*)&cdc_cfg_desc_dual,
 };
 
-static void cdc_init(usbd_device* dev, struct UsbInterface* intf) {
+static void cdc_init(usbd_device* dev, UsbInterface* intf) {
     usb_dev = dev;
     cdc_if_cur = intf;
     
