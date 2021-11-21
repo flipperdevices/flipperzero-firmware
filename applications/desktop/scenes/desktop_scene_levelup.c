@@ -75,9 +75,9 @@ void desktop_scene_levelup_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
     desktop->update_animation_flag = false;
 
-    desktop_start_new_idle_animation(desktop->animation);
     Dolphin* dolphin = furi_record_open("dolphin");
     dolphin_upgrade_level(dolphin);
     furi_record_close("dolphin");
     desktop_animation_set_animation_changed_callback(desktop->animation, NULL, NULL);
+    desktop_start_new_idle_animation(desktop->animation);
 }
