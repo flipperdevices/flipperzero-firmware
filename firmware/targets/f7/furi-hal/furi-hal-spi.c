@@ -12,18 +12,21 @@
 #define TAG "FuriHalSpi"
 
 void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
-    // Spi structure is const, but mutex is not
-    // Need some hell-ish casting to make it work
-    // 
-    if (bus->mutex == NULL) {
-        *(osMutexId_t*)(bus->mutex) = osMutexNew(NULL);
+    furi_assert(bus);
+    furi_assert(bus->mutex);
+
+    if (*bus->mutex == NULL) {
+        *bus->mutex = osMutexNew(NULL);
     }
+
     hal_gpio_init_ex(bus->miso, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
     hal_gpio_init_ex(bus->mosi, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
     hal_gpio_init_ex(bus->clk, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
 }
 
 void furi_hal_spi_device_cs_init(const FuriHalSpiDevice* device) {
+    furi_assert(device);
+
     hal_gpio_init(
         device->chip_select,
         GpioModeOutputPushPull,
@@ -49,12 +52,14 @@ void furi_hal_spi_init() {
 
 void furi_hal_spi_bus_lock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    furi_check(osMutexAcquire(*bus->mutex, osWaitForever) == osOK);
+    furi_assert(bus->mutex);
+    furi_check(osMutexAcquire(*(bus->mutex), osWaitForever) == osOK);
 }
 
 void furi_hal_spi_bus_unlock(const FuriHalSpiBus* bus) {
     furi_assert(bus);
-    furi_check(osMutexRelease(*bus->mutex) == osOK);
+    furi_assert(bus->mutex);
+    furi_check(osMutexRelease(*(bus->mutex)) == osOK);
 }
 
 void furi_hal_spi_bus_configure(const FuriHalSpiBus* bus, const LL_SPI_InitTypeDef* config) {

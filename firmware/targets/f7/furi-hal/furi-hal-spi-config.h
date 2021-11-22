@@ -19,7 +19,7 @@ extern const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow;
  */
 typedef struct {
     const SPI_TypeDef* spi;
-    const osMutexId_t* mutex;
+    osMutexId_t **const mutex;
     const GpioPin* miso;
     const GpioPin* mosi;
     const GpioPin* clk;
