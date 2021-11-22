@@ -8,6 +8,14 @@ void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
     msg_response.command_status = PB_CommandStatus_OK;
     msg_response.command_id = msg_request->command_id;
     msg_response.which_content = PB_Main_ping_response_tag;
+    if (msg_request->content.ping_request.data->size > 0) {
+        msg_response.content.ping_response.data =
+            furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(msg_request->content.ping_request.data->size));
+        memcpy(msg_response.content.ping_response.data->bytes, 
+               msg_request->content.ping_request.data->bytes,
+               msg_request->content.ping_request.data->size);
+        msg_response.content.ping_response.data->size = msg_request->content.ping_request.data->size;
+    }
 
     rpc_send_and_release(context, &msg_response);
     pb_release(&PB_Main_msg, &msg_response);
