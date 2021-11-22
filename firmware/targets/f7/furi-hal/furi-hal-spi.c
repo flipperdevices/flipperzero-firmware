@@ -15,25 +15,28 @@ void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
     // Spi structure is const, but mutex is not
     // Need some hell-ish casting to make it work
     // 
-    *(osMutexId_t*)(bus->mutex) = osMutexNew(NULL);
+    if (bus->mutex == NULL) {
+        *(osMutexId_t*)(bus->mutex) = osMutexNew(NULL);
+    }
     hal_gpio_init_ex(bus->miso, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
     hal_gpio_init_ex(bus->mosi, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
     hal_gpio_init_ex(bus->clk, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
 }
 
 void furi_hal_spi_device_cs_init(const FuriHalSpiDevice* device) {
-    hal_gpio_write(device->chip_select, true);
     hal_gpio_init(
         device->chip_select,
         GpioModeOutputPushPull,
         GpioPullNo,
         GpioSpeedVeryHigh
     );
+    hal_gpio_write(device->chip_select, true);
 }
 
 void furi_hal_spi_init() {
     for (size_t i=0; i<FuriHalSpiDeviceIdMax; ++i) {
-        if (furi_hal_spi_devices[i].auto_init) {
+        // for devices that are native to the bus, configure CS immediately
+        if (furi_hal_spi_devices[i].main_bus_config == NULL) {
             furi_hal_spi_device_cs_init(&furi_hal_spi_devices[i]);
         }
     }
@@ -143,12 +146,23 @@ const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id) {
     const FuriHalSpiDevice* device = &furi_hal_spi_devices[device_id];
     furi_assert(device);
     furi_hal_spi_bus_lock(device->bus);
+
+    // device requires alternate bus configuration - and has delayed CS init
+    if (device->main_bus_config != NULL) {
+        furi_hal_spi_bus_init(device->bus);
+        furi_hal_spi_device_cs_init(device);
+    }
+
     furi_hal_spi_device_configure(device);
 
     return device;
 }
 
 void furi_hal_spi_device_return(const FuriHalSpiDevice* device) {
+    if (device->main_bus_config != NULL) {
+        // restore original bus configuration
+        furi_hal_spi_bus_init(device->main_bus_config);
+    }
     furi_hal_spi_bus_unlock(device->bus);
 }
 

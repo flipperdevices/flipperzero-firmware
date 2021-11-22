@@ -33,7 +33,7 @@ typedef struct {
     const FuriHalSpiBus* bus;
     const LL_SPI_InitTypeDef* config;
     const GpioPin* chip_select;
-    const bool auto_init;
+    const FuriHalSpiBus* main_bus_config; // bus configuration to restore after releasing device
 } FuriHalSpiDevice;
 
 /** FURI HAL SPI Standard Device IDs */
@@ -59,7 +59,7 @@ extern const FuriHalSpiBus spi_r;
 extern const FuriHalSpiBus spi_d;
 
 /** Furi Hal Spi devices */
-extern const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax];
+extern const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax+1];
 
 #ifdef __cplusplus
 }
