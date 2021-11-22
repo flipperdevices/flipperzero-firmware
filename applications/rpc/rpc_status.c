@@ -3,7 +3,7 @@
 #include "status.pb.h"
 
 void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
-    if (msg_request->has_next) {
+    if(msg_request->has_next) {
         rpc_send_and_release_empty(
             context, msg_request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
         return;
@@ -17,9 +17,8 @@ void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
 
     const PB_Status_PingRequest* request = &msg_request->content.ping_request;
     PB_Status_PingResponse* response = &msg_response.content.ping_response;
-    if (request->data && (request->data->size > 0)) {
-        response->data =
-            furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(request->data->size));
+    if(request->data && (request->data->size > 0)) {
+        response->data = furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(request->data->size));
         memcpy(response->data->bytes, request->data->bytes, request->data->size);
         response->data->size = request->data->size;
     }
