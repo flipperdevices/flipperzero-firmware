@@ -162,7 +162,7 @@ void hid_svc_start() {
     status = aci_gatt_add_char(hid_svc->svc_handle,
                                UUID_TYPE_16,
                                &char_uuid,
-                               HID_SVC_REPORT_REF_LEN,
+                               HID_SVC_INFO_LEN,
                                CHAR_PROP_READ,
                                ATTR_PERMISSION_NONE,
                                GATT_DONT_NOTIFY_EVENTS,
@@ -200,7 +200,39 @@ bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
                                                    len,
                                                    data);
     if(status) {
-        FURI_LOG_E(TAG, "Failed updating report map characteristoc");
+        FURI_LOG_E(TAG, "Failed updating report map characteristic");
+        return false;
+    }
+    return true;
+}
+
+bool hid_svc_update_input_report(uint8_t* data, uint16_t len) {
+    furi_assert(data);
+    furi_assert(hid_svc);
+
+    tBleStatus status = aci_gatt_update_char_value(hid_svc->svc_handle,
+                                                   hid_svc->report_char_handle,
+                                                   0,
+                                                   len,
+                                                   data);
+    if(status) {
+        FURI_LOG_E(TAG, "Failed updating report characteristic");
+        return false;
+    }
+    return true;
+}
+
+bool hid_svc_update_info(uint8_t* data, uint16_t len) {
+    furi_assert(data);
+    furi_assert(hid_svc);
+
+    tBleStatus status = aci_gatt_update_char_value(hid_svc->svc_handle,
+                                                   hid_svc->info_char_handle,
+                                                   0,
+                                                   len,
+                                                   data);
+    if(status) {
+        FURI_LOG_E(TAG, "Failed updating info characteristic");
         return false;
     }
     return true;
