@@ -11,29 +11,35 @@
 
 #define TAG "FuriHalSpi"
 
-void furi_hal_spi_init() {
+void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
     // Spi structure is const, but mutex is not
     // Need some hell-ish casting to make it work
-    *(osMutexId_t*)spi_r.mutex = osMutexNew(NULL);
-    *(osMutexId_t*)spi_d.mutex = osMutexNew(NULL);
     // 
+    *(osMutexId_t*)(bus->mutex) = osMutexNew(NULL);
+    hal_gpio_init_ex(bus->miso, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
+    hal_gpio_init_ex(bus->mosi, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
+    hal_gpio_init_ex(bus->clk, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
+}
+
+void furi_hal_spi_device_cs_init(const FuriHalSpiDevice* device) {
+    hal_gpio_write(device->chip_select, true);
+    hal_gpio_init(
+        device->chip_select,
+        GpioModeOutputPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh
+    );
+}
+
+void furi_hal_spi_init() {
     for (size_t i=0; i<FuriHalSpiDeviceIdMax; ++i) {
-        hal_gpio_write(furi_hal_spi_devices[i].chip_select, true);
-        hal_gpio_init(
-            furi_hal_spi_devices[i].chip_select,
-            GpioModeOutputPushPull,
-            GpioPullNo,
-            GpioSpeedVeryHigh
-        );
+        if (furi_hal_spi_devices[i].auto_init) {
+            furi_hal_spi_device_cs_init(&furi_hal_spi_devices[i]);
+        }
     }
 
-    hal_gpio_init_ex(&gpio_spi_r_miso, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn5SPI1);
-    hal_gpio_init_ex(&gpio_spi_r_mosi, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn5SPI1);
-    hal_gpio_init_ex(&gpio_spi_r_sck, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn5SPI1);
-
-    hal_gpio_init_ex(&gpio_spi_d_miso, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
-    hal_gpio_init_ex(&gpio_spi_d_mosi, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
-    hal_gpio_init_ex(&gpio_spi_d_sck, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn5SPI2);
+    furi_hal_spi_bus_init(&spi_r);
+    furi_hal_spi_bus_init(&spi_d);
 
     FURI_LOG_I(TAG, "Init OK");
 }

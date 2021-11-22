@@ -23,6 +23,7 @@ typedef struct {
     const GpioPin* miso;
     const GpioPin* mosi;
     const GpioPin* clk;
+    const GpioAltFn alt_fn;
 } FuriHalSpiBus;
 
 /** FURI HAL SPI Device handler
@@ -32,6 +33,7 @@ typedef struct {
     const FuriHalSpiBus* bus;
     const LL_SPI_InitTypeDef* config;
     const GpioPin* chip_select;
+    const bool auto_init;
 } FuriHalSpiDevice;
 
 /** FURI HAL SPI Standard Device IDs */

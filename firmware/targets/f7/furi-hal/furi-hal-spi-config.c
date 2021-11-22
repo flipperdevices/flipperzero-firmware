@@ -99,6 +99,7 @@ const FuriHalSpiBus spi_r = {
     .miso=&gpio_spi_r_miso,
     .mosi=&gpio_spi_r_mosi,
     .clk=&gpio_spi_r_sck,
+    .alt_fn=GpioAltFn5SPI1,
 };
 
 const FuriHalSpiBus spi_d = {
@@ -107,6 +108,7 @@ const FuriHalSpiBus spi_d = {
     .miso=&gpio_spi_d_miso,
     .mosi=&gpio_spi_d_mosi,
     .clk=&gpio_spi_d_sck,
+    .alt_fn=GpioAltFn5SPI2,
 };
 
 const FuriHalSpiBus spi_ext = {
@@ -115,13 +117,14 @@ const FuriHalSpiBus spi_ext = {
     .miso=&gpio_spi_ext_miso,
     .mosi=&gpio_spi_ext_mosi,
     .clk=&gpio_spi_ext_sck,
+    .alt_fn=GpioAltFn5SPI1,
 };
 
 const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax] = {
-    { .bus=&spi_r, .config=&furi_hal_spi_config_subghz, .chip_select=&gpio_subghz_cs, },
-    { .bus=&spi_d, .config=&furi_hal_spi_config_display, .chip_select=&gpio_display_cs, },
-    { .bus=&spi_d, .config=&furi_hal_spi_config_sd_fast, .chip_select=&gpio_sdcard_cs, },
-    { .bus=&spi_d, .config=&furi_hal_spi_config_sd_slow, .chip_select=&gpio_sdcard_cs, },
-    { .bus=&spi_r, .config=&furi_hal_spi_config_nfc, .chip_select=&gpio_nfc_cs },
-    { .bus=&spi_ext, .config=&furi_hal_spi_config_ext_spi, .chip_select=&gpio_spi_ext_cs },
+    { .bus=&spi_r,   .config=&furi_hal_spi_config_subghz,  .chip_select=&gpio_subghz_cs,  .auto_init = true, },
+    { .bus=&spi_d,   .config=&furi_hal_spi_config_display, .chip_select=&gpio_display_cs, .auto_init = true, },
+    { .bus=&spi_d,   .config=&furi_hal_spi_config_sd_fast, .chip_select=&gpio_sdcard_cs,  .auto_init = true, },
+    { .bus=&spi_d,   .config=&furi_hal_spi_config_sd_slow, .chip_select=&gpio_sdcard_cs,  .auto_init = true, },
+    { .bus=&spi_r,   .config=&furi_hal_spi_config_nfc,     .chip_select=&gpio_nfc_cs,     .auto_init = true, },
+    { .bus=&spi_ext, .config=&furi_hal_spi_config_ext_spi, .chip_select=&gpio_spi_ext_cs, .auto_init = false, },
 };
