@@ -131,13 +131,13 @@ const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax] = {
         .chip_select = &gpio_sdcard_cs,
     },
     {
-        .bus = &spi_r, 
-        .config = &furi_hal_spi_config_nfc, 
+        .bus = &spi_r,
+        .config = &furi_hal_spi_config_nfc,
         .chip_select = &gpio_nfc_cs
     },
     {
-        .bus = &spi_ext, 
-        .config = &furi_hal_spi_config_ext_spi, 
+        .bus = &spi_ext,
+        .config = &furi_hal_spi_config_ext_spi,
         .chip_select = &gpio_spi_ext_cs
     },
 };

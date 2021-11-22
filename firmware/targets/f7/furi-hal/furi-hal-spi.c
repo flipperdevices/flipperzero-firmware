@@ -124,7 +124,7 @@ bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t*
             tx_size--;
             tx_allowed = false;
         }
-        
+
         if(LL_SPI_IsActiveFlag_RXNE((SPI_TypeDef *)bus->spi)) {
             *rx_buffer = LL_SPI_ReceiveData8((SPI_TypeDef *)bus->spi);
             rx_buffer++;
