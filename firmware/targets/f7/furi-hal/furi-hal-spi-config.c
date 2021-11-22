@@ -90,12 +90,9 @@ const LL_SPI_InitTypeDef furi_hal_spi_config_ext_spi = {
     .CRCPoly = 7,
 };
 
-osMutexId_t spi_mutex_d = NULL;
-osMutexId_t spi_mutex_r = NULL;
-
 const FuriHalSpiBus spi_r = {
     .spi=SPI_R,
-    .mutex=&spi_mutex_r,
+    .mutex=NULL,
     .miso=&gpio_spi_r_miso,
     .mosi=&gpio_spi_r_mosi,
     .clk=&gpio_spi_r_sck,
@@ -104,7 +101,7 @@ const FuriHalSpiBus spi_r = {
 
 const FuriHalSpiBus spi_d = {
     .spi=SPI_D,
-    .mutex=&spi_mutex_d,
+    .mutex=NULL,
     .miso=&gpio_spi_d_miso,
     .mosi=&gpio_spi_d_mosi,
     .clk=&gpio_spi_d_sck,
@@ -113,7 +110,7 @@ const FuriHalSpiBus spi_d = {
 
 const FuriHalSpiBus spi_ext = {
     .spi=SPI_R,
-    .mutex=&spi_mutex_r,
+    .mutex=NULL, // FIXME -- must use spi_r mutex
     .miso=&gpio_spi_ext_miso,
     .mosi=&gpio_spi_ext_mosi,
     .clk=&gpio_spi_ext_sck,
