@@ -41,6 +41,7 @@ typedef enum {
     FuriHalSpiDeviceIdSdCardFast,    /** SDCARD: fast mode, after initialization */
     FuriHalSpiDeviceIdSdCardSlow,    /** SDCARD: slow mode, before initialization */
     FuriHalSpiDeviceIdNfc,           /** NFC: ST25R3916, pretty standard, but RFAL makes it complex */
+    FuriHalSpiDeviceIdExtSpi,        /** External SPI interface */
 
     FuriHalSpiDeviceIdMax,           /** Service Value, do not use */
 } FuriHalSpiDeviceId;

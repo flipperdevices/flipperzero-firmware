@@ -50,6 +50,7 @@ extern const GpioPin gpio_display_rst;
 extern const GpioPin gpio_display_di;
 extern const GpioPin gpio_sdcard_cs;
 extern const GpioPin gpio_nfc_cs;
+extern const GpioPin gpio_spi_ext_cs;
 
 extern const GpioPin gpio_spi_d_miso;
 extern const GpioPin gpio_spi_d_mosi;
@@ -57,6 +58,9 @@ extern const GpioPin gpio_spi_d_sck;
 extern const GpioPin gpio_spi_r_miso;
 extern const GpioPin gpio_spi_r_mosi;
 extern const GpioPin gpio_spi_r_sck;
+extern const GpioPin gpio_spi_ext_miso;
+extern const GpioPin gpio_spi_ext_mosi;
+extern const GpioPin gpio_spi_ext_sck;
 
 extern const GpioPin gpio_ext_pc0;
 extern const GpioPin gpio_ext_pc1;

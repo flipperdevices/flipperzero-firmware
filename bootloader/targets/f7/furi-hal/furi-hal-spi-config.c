@@ -75,6 +75,19 @@ const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow = {
     .CRCPoly = 7,
 };
 
+const LL_SPI_InitTypeDef furi_hal_spi_config_ext_spi = {
+    .Mode = LL_SPI_MODE_MASTER,
+    .TransferDirection = LL_SPI_FULL_DUPLEX,
+    .DataWidth = LL_SPI_DATAWIDTH_8BIT,
+    .ClockPolarity = LL_SPI_POLARITY_LOW,
+    .ClockPhase = LL_SPI_PHASE_1EDGE,
+    .NSS = LL_SPI_NSS_SOFT,
+    .BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV16,
+    .BitOrder = LL_SPI_MSB_FIRST,
+    .CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE,
+    .CRCPoly = 7,
+};
+
 const FuriHalSpiBus spi_r = {
     .spi = SPI_R,
     .miso = &gpio_spi_r_miso,
@@ -87,6 +100,13 @@ const FuriHalSpiBus spi_d = {
     .miso = &gpio_spi_d_miso,
     .mosi = &gpio_spi_d_mosi,
     .clk = &gpio_spi_d_sck,
+};
+
+const FuriHalSpiBus spi_ext = {
+    .spi = SPI_R,
+    .miso = &gpio_spi_ext_miso,
+    .mosi = &gpio_spi_ext_mosi,
+    .clk = &gpio_spi_ext_sck,
 };
 
 const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax] = {
@@ -110,5 +130,14 @@ const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax] = {
         .config = &furi_hal_spi_config_sd_slow,
         .chip_select = &gpio_sdcard_cs,
     },
-    {.bus = &spi_r, .config = &furi_hal_spi_config_nfc, .chip_select = &gpio_nfc_cs},
+    {
+        .bus = &spi_r, 
+        .config = &furi_hal_spi_config_nfc, 
+        .chip_select = &gpio_nfc_cs
+    },
+    {
+        .bus = &spi_ext, 
+        .config = &furi_hal_spi_config_ext_spi, 
+        .chip_select = &gpio_spi_ext_cs
+    },
 };

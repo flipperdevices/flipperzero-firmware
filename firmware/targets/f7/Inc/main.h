@@ -47,6 +47,9 @@ void Error_Handler(void);
 #define NFC_CS_GPIO_Port GPIOE
 #define NFC_CS_Pin GPIO_PIN_4
 
+#define SPI_EXT_CS_GPIO_Port GPIOA
+#define SPI_EXT_CS_Pin GPIO_PIN_4
+
 #define PA4_GPIO_Port GPIOA
 #define PA4_Pin GPIO_PIN_4
 #define PA6_GPIO_Port GPIOA
@@ -116,6 +119,13 @@ void Error_Handler(void);
 #define SPI_R_MOSI_Pin GPIO_PIN_5
 #define SPI_R_SCK_GPIO_Port GPIOA
 #define SPI_R_SCK_Pin GPIO_PIN_5
+
+#define SPI_EXT_MISO_GPIO_Port GPIOA
+#define SPI_EXT_MISO_Pin GPIO_PIN_6
+#define SPI_EXT_MOSI_GPIO_Port GPIOA
+#define SPI_EXT_MOSI_Pin GPIO_PIN_7
+#define SPI_EXT_SCK_GPIO_Port GPIOB
+#define SPI_EXT_SCK_Pin GPIO_PIN_3
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;

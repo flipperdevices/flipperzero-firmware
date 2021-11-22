@@ -13,6 +13,7 @@ const GpioPin gpio_display_rst = {.port = DISPLAY_RST_GPIO_Port, .pin = DISPLAY_
 const GpioPin gpio_display_di = {.port = DISPLAY_DI_GPIO_Port, .pin = DISPLAY_DI_Pin};
 const GpioPin gpio_sdcard_cs = {.port = SD_CS_GPIO_Port, .pin = SD_CS_Pin};
 const GpioPin gpio_nfc_cs = {.port = NFC_CS_GPIO_Port, .pin = NFC_CS_Pin};
+const GpioPin gpio_spi_ext_cs = {.port = SPI_EXT_CS_GPIO_Port, .pin = SPI_EXT_CS_Pin};
 
 const GpioPin gpio_spi_d_miso = {.port = SPI_D_MISO_GPIO_Port, .pin = SPI_D_MISO_Pin};
 const GpioPin gpio_spi_d_mosi = {.port = SPI_D_MOSI_GPIO_Port, .pin = SPI_D_MOSI_Pin};
@@ -20,6 +21,9 @@ const GpioPin gpio_spi_d_sck = {.port = SPI_D_SCK_GPIO_Port, .pin = SPI_D_SCK_Pi
 const GpioPin gpio_spi_r_miso = {.port = SPI_R_MISO_GPIO_Port, .pin = SPI_R_MISO_Pin};
 const GpioPin gpio_spi_r_mosi = {.port = SPI_R_MOSI_GPIO_Port, .pin = SPI_R_MOSI_Pin};
 const GpioPin gpio_spi_r_sck = {.port = SPI_R_SCK_GPIO_Port, .pin = SPI_R_SCK_Pin};
+const GpioPin gpio_spi_ext_miso = {.port = SPI_EXT_MISO_GPIO_Port, .pin = SPI_EXT_MISO_Pin};
+const GpioPin gpio_spi_ext_mosi = {.port = SPI_EXT_MOSI_GPIO_Port, .pin = SPI_EXT_MOSI_Pin};
+const GpioPin gpio_spi_ext_sck = {.port = SPI_EXT_SCK_GPIO_Port, .pin = SPI_EXT_SCK_Pin};
 
 const GpioPin gpio_ext_pc0 = {.port = GPIOC, .pin = LL_GPIO_PIN_0};
 const GpioPin gpio_ext_pc1 = {.port = GPIOC, .pin = LL_GPIO_PIN_1};
