@@ -107,7 +107,7 @@ static void snake_game_input_callback(InputEvent* input_event, osMessageQueueId_
     furi_assert(event_queue);
 
     SnakeEvent event = {.type = EventTypeKey, .input = *input_event};
-    osMessageQueuePut(event_queue, &event, 0, 0);
+    osMessageQueuePut(event_queue, &event, 0, osWaitForever);
 }
 
 static void snake_game_update_timer_callback(osMessageQueueId_t event_queue) {
