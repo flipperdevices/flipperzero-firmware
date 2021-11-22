@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #define HID_SVC_REPORT_MAP_MAX_LEN (80)
 #define HID_SVC_REPORT_MAX_LEN (80)
 #define HID_SVC_BOOT_KEYBOARD_INPUT_REPORT_MAX_LEN (80)
@@ -8,3 +11,4 @@
 #define HID_SVC_CONTROL_POINT_LEN (1)
 
 void hid_svc_start();
+bool hid_svc_update_report_map(uint8_t* data, uint16_t len);

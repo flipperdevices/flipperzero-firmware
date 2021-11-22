@@ -4,7 +4,7 @@
 
 #include <furi.h>
 
-#define HID_SVC_TAG "HID service"
+#define TAG "HID service"
 
 typedef struct {
     uint16_t svc_handle;
@@ -66,7 +66,7 @@ void hid_svc_start() {
                                   30,
                                   &hid_svc->svc_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add HID service: %d", status);
+        FURI_LOG_E(TAG, "Failed to add HID service: %d", status);
     }
     // Add Protocol mode characterstics
     char_uuid.Char_UUID_16 = PROTOCOL_MODE_CHAR_UUID;
@@ -81,7 +81,7 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_CONSTANT,
                                &hid_svc->protocol_mode_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add protocol mode characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add protocol mode characteristic: %d", status);
     }
     // Update Protocol mode characteristic
     uint8_t protocol_mode = 1;
@@ -91,7 +91,7 @@ void hid_svc_start() {
                                         1,
                                         &protocol_mode);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to update protocol mode characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to update protocol mode characteristic: %d", status);
     }
     // Add Report characterstics
     char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
@@ -106,7 +106,7 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_VARIABLE,
                                &hid_svc->report_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add report characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add report characteristic: %d", status);
     }
     // Add Report descriptor
     uint8_t desc_val[] = {0x00, 0x01};
@@ -125,7 +125,7 @@ void hid_svc_start() {
                                     CHAR_VALUE_LEN_CONSTANT,
                                     &hid_svc->report_ref_desc_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add report reference descriptor: %d", status);
+        FURI_LOG_E(TAG, "Failed to add report reference descriptor: %d", status);
     }
     // Add Report Map characteristic
     char_uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID;
@@ -140,7 +140,7 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_VARIABLE,
                                &hid_svc->report_map_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add report map characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add report map characteristic: %d", status);
     }
     // Add Boot Keyboard characteristic
     char_uuid.Char_UUID_16 = BOOT_KEYBOARD_INPUT_REPORT_CHAR_UUID;
@@ -155,7 +155,7 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_VARIABLE,
                                &hid_svc->keyboard_boot_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add report map characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add report map characteristic: %d", status);
     }
     // Add Information characteristic
     char_uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID;
@@ -170,7 +170,7 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_CONSTANT,
                                &hid_svc->info_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add information characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add information characteristic: %d", status);
     }
     // Add Control Point characteristic
     char_uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID;
@@ -185,7 +185,23 @@ void hid_svc_start() {
                                CHAR_VALUE_LEN_CONSTANT,
                                &hid_svc->ctrl_point_char_handle);
     if(status) {
-        FURI_LOG_E(HID_SVC_TAG, "Failed to add control point characteristic: %d", status);
+        FURI_LOG_E(TAG, "Failed to add control point characteristic: %d", status);
     }
-    FURI_LOG_W(HID_SVC_TAG, "HID service started");
+    FURI_LOG_W(TAG, "HID service started");
+}
+
+bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
+    furi_assert(data);
+    furi_assert(hid_svc);
+
+    tBleStatus status = aci_gatt_update_char_value(hid_svc->svc_handle,
+                                                   hid_svc->report_map_char_handle,
+                                                   0,
+                                                   len,
+                                                   data);
+    if(status) {
+        FURI_LOG_E(TAG, "Failed updating report map characteristoc");
+        return false;
+    }
+    return true;
 }
