@@ -17,7 +17,7 @@ void rpc_system_status_ping_process(const PB_Main* msg_request, void* context) {
 
     const PB_Status_PingRequest* request = &msg_request->content.ping_request;
     PB_Status_PingResponse* response = &msg_response.content.ping_response;
-    if (request->data->size > 0) {
+    if (request->data && (request->data->size > 0)) {
         response->data =
             furi_alloc(PB_BYTES_ARRAY_T_ALLOCSIZE(request->data->size));
         memcpy(response->data->bytes, request->data->bytes, request->data->size);
