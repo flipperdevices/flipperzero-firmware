@@ -11,7 +11,7 @@
 
 #define TAG "FuriHalSpi"
 
-void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
+static void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
     furi_assert(bus);
     furi_assert(bus->mutex);
 
@@ -24,7 +24,7 @@ void furi_hal_spi_bus_init(const FuriHalSpiBus* bus) {
     hal_gpio_init_ex(bus->clk, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, bus->alt_fn);
 }
 
-void furi_hal_spi_device_cs_init(const FuriHalSpiDevice* device) {
+static void furi_hal_spi_device_cs_init(const FuriHalSpiDevice* device) {
     furi_assert(device);
 
     hal_gpio_init(
@@ -140,12 +140,14 @@ bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t*
 
 void furi_hal_spi_device_configure(const FuriHalSpiDevice* device) {
     furi_assert(device);
+    furi_assert(device->bus);
     furi_assert(device->config);
 
     furi_hal_spi_bus_configure(device->bus, device->config);
 }
 
-const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id) {
+
+static const FuriHalSpiDevice* furi_hal_spi_device_preconfigure_bus(FuriHalSpiDeviceId device_id) {
     furi_assert(device_id < FuriHalSpiDeviceIdMax);
 
     const FuriHalSpiDevice* device = &furi_hal_spi_devices[device_id];
@@ -158,7 +160,24 @@ const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id) {
         furi_hal_spi_device_cs_init(device);
     }
 
+    return device;
+}
+
+const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id) {
+    const FuriHalSpiDevice* device = furi_hal_spi_device_preconfigure_bus(device_id);
+    furi_assert(device);
     furi_hal_spi_device_configure(device);
+    return device;
+}
+
+const FuriHalSpiDevice* furi_hal_spi_custom_device_get(const LL_SPI_InitTypeDef* device_config) {
+    if (device_config == NULL) {
+        device_config = &furi_hal_spi_config_ext_spi_default;
+    }
+
+    const FuriHalSpiDevice* device = furi_hal_spi_device_preconfigure_bus(FuriHalSpiDeviceIdExtSpi);
+    furi_assert(device);
+    furi_hal_spi_bus_configure(device->bus, device_config);
 
     return device;
 }

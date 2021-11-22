@@ -13,6 +13,7 @@ extern const LL_SPI_InitTypeDef furi_hal_spi_config_subghz;
 extern const LL_SPI_InitTypeDef furi_hal_spi_config_display;
 extern const LL_SPI_InitTypeDef furi_hal_spi_config_sd_fast;
 extern const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow;
+extern const LL_SPI_InitTypeDef furi_hal_spi_config_ext_spi_default;
 
 /** FURI HAL SPI BUS handler
  * Structure content may change at some point
@@ -59,7 +60,7 @@ extern const FuriHalSpiBus spi_r;
 extern const FuriHalSpiBus spi_d;
 
 /** Furi Hal Spi devices */
-extern const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax+1];
+extern const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax];
 
 #ifdef __cplusplus
 }

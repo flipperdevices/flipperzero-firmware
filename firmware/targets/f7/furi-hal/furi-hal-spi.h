@@ -60,16 +60,26 @@ bool furi_hal_spi_bus_trx(const FuriHalSpiBus* bus, uint8_t* tx_buffer, uint8_t*
 /* Device Level API */
 
 /** Reconfigure SPI bus for device
- * @param device - device description
+ * @param device - device description. 
  */
 void furi_hal_spi_device_configure(const FuriHalSpiDevice* device);
 
 /** Get Device handle
  * And lock access to the corresponding SPI BUS
  * @param device_id - device identifier
+ *   For FuriHalSpiDeviceIdExtSpi, uses default config. 
+ *   For custom SPI config, use furi_hal_spi_custom_device_get
  * @return device handle
  */
 const FuriHalSpiDevice* furi_hal_spi_device_get(FuriHalSpiDeviceId device_id);
+
+/** Get Custom Device handle
+ * And lock access to the corresponding SPI BUS
+ * @param device_config - device configuration descriptor
+ *   If NULL, default configuration is used.
+ * @return device handle
+ */
+const FuriHalSpiDevice* furi_hal_spi_custom_device_get(const LL_SPI_InitTypeDef* device_config);
 
 /** Return Device handle
  * And unlock access to the corresponding SPI BUS

@@ -77,7 +77,7 @@ const LL_SPI_InitTypeDef furi_hal_spi_config_sd_slow = {
 
 
 
-const LL_SPI_InitTypeDef furi_hal_spi_config_ext_spi = {
+const LL_SPI_InitTypeDef furi_hal_spi_config_ext_spi_default = {
     .Mode = LL_SPI_MODE_MASTER,
     .TransferDirection = LL_SPI_FULL_DUPLEX,
     .DataWidth = LL_SPI_DATAWIDTH_8BIT,
@@ -120,12 +120,41 @@ const FuriHalSpiBus spi_ext = {
     .alt_fn=GpioAltFn5SPI1,
 };
 
-const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax + 1] = {
-    { .bus=&spi_r,   .config=&furi_hal_spi_config_subghz,  .chip_select=&gpio_subghz_cs,  .main_bus_config = NULL, },
-    { .bus=&spi_d,   .config=&furi_hal_spi_config_display, .chip_select=&gpio_display_cs, .main_bus_config = NULL, },
-    { .bus=&spi_d,   .config=&furi_hal_spi_config_sd_fast, .chip_select=&gpio_sdcard_cs,  .main_bus_config = NULL, },
-    { .bus=&spi_d,   .config=&furi_hal_spi_config_sd_slow, .chip_select=&gpio_sdcard_cs,  .main_bus_config = NULL, },
-    { .bus=&spi_r,   .config=&furi_hal_spi_config_nfc,     .chip_select=&gpio_nfc_cs,     .main_bus_config = NULL, },
-    { .bus=&spi_ext, .config=&furi_hal_spi_config_ext_spi, .chip_select=&gpio_spi_ext_cs, .main_bus_config = &spi_r, },
-    { NULL }
+const FuriHalSpiDevice furi_hal_spi_devices[FuriHalSpiDeviceIdMax] = {
+    { 
+        .bus=&spi_r,   
+        .config=&furi_hal_spi_config_subghz,          
+        .chip_select=&gpio_subghz_cs,  
+        .main_bus_config = NULL,
+    },
+    { 
+        .bus=&spi_d,   
+        .config=&furi_hal_spi_config_display,         
+        .chip_select=&gpio_display_cs, 
+        .main_bus_config = NULL,
+    },
+    { 
+        .bus=&spi_d,   
+        .config=&furi_hal_spi_config_sd_fast,         
+        .chip_select=&gpio_sdcard_cs,  
+        .main_bus_config = NULL,
+    },
+    { 
+        .bus=&spi_d,   
+        .config=&furi_hal_spi_config_sd_slow,         
+        .chip_select=&gpio_sdcard_cs,  
+        .main_bus_config = NULL,
+    },
+    { 
+        .bus=&spi_r,   
+        .config=&furi_hal_spi_config_nfc,             
+        .chip_select=&gpio_nfc_cs,     
+        .main_bus_config = NULL,
+    },
+    { 
+        .bus=&spi_ext, 
+        .config=&furi_hal_spi_config_ext_spi_default, 
+        .chip_select=&gpio_spi_ext_cs, 
+        .main_bus_config = &spi_r,
+    },
 };
