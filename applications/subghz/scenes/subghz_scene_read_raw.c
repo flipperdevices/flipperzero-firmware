@@ -80,9 +80,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
             };
-            //Restore default setting
-            subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
-            subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
             //Stop save file
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolRAW*)subghz->txrx->protocol_result);
@@ -93,6 +90,9 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateExit;
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
+                //Restore default setting
+                subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+                subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }
