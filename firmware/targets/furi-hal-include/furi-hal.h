@@ -26,6 +26,7 @@ template <unsigned int N> struct STOP_EXTERNING_ME {};
 #include "furi-hal-interrupt.h"
 #include "furi-hal-version.h"
 #include "furi-hal-bt.h"
+#include "furi-hal-bt-hid.h"
 #include "furi-hal-spi.h"
 #include "furi-hal-flash.h"
 #include "furi-hal-subghz.h"

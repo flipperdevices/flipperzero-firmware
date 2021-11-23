@@ -26,30 +26,17 @@ static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void *event) {
     // aci_gatt_attribute_modified_event_rp0* attribute_modified;
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
-            // attribute_modified = (aci_gatt_attribute_modified_event_rp0*)blecore_evt->data;
-            // if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 2) {
-            //     // Descriptor handle
-            //     ret = SVCCTL_EvtAckFlowEnable;
-            //     FURI_LOG_D(SERIAL_SERVICE_TAG, "RX descriptor event");
-            // } else if(attribute_modified->Attr_Handle == serial_svc->rx_char_handle + 1) {
-            //     FURI_LOG_D(SERIAL_SERVICE_TAG, "Received %d bytes", attribute_modified->Attr_Data_Length);
-            //     if(serial_svc->on_received_cb) {
-            //         serial_svc->on_received_cb(attribute_modified->Attr_Data, attribute_modified->Attr_Data_Length, serial_svc->context);
-            //     }
-            // }
+            // TODO process modification events
             ret = SVCCTL_EvtAckFlowEnable;
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
-            // FURI_LOG_D(TAG, "Ack received", blecore_evt->ecode);
-            // if(serial_svc->on_sent_cb) {
-            //     serial_svc->on_sent_cb(serial_svc->context);
-            // }
+            // TODO process notification confirmation
             ret = SVCCTL_EvtAckFlowEnable;
         }
     }
     return ret;
 }
 
-void hid_svc_start() {
+bool hid_svc_start() {
     tBleStatus status;
     hid_svc = furi_alloc(sizeof(HIDSvc));
     Service_UUID_t svc_uuid = {};
@@ -188,6 +175,7 @@ void hid_svc_start() {
         FURI_LOG_E(TAG, "Failed to add control point characteristic: %d", status);
     }
     FURI_LOG_W(TAG, "HID service started");
+    return status != BLE_STATUS_SUCCESS;
 }
 
 bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
@@ -236,4 +224,9 @@ bool hid_svc_update_info(uint8_t* data, uint16_t len) {
         return false;
     }
     return true;
+}
+
+bool hid_svc_stop() {
+    furi_assert(hid_svc);
+    
 }

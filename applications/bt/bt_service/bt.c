@@ -210,23 +210,21 @@ int32_t bt_srv() {
 
     // Read keys
     if(!bt_load_key_storage(bt)) {
-        FURI_LOG_W(TAG, "Failed to load saved bonding keys");
+        FURI_LOG_W(TAG, "Failed to load bonding keys");
     }
-    // Start 2nd core
+
+    // Start BLE stack
     if(!furi_hal_bt_start_core2()) {
         FURI_LOG_E(TAG, "Core2 startup failed");
-    } else {
-        view_port_enabled_set(bt->statusbar_view_port, true);
-        if(furi_hal_bt_init_app(bt_on_gap_event_callback, bt)) {
-            FURI_LOG_I(TAG, "BLE stack started");
-            if(bt->bt_settings.enabled) {
-                furi_hal_bt_start_advertising();
-            }
-        } else {
-            FURI_LOG_E(TAG, "BT App start failed");
+    } else if(furi_hal_bt_init_app(bt_on_gap_event_callback, bt)) {
+        FURI_LOG_I(TAG, "BLE stack started");
+        if(bt->bt_settings.enabled) {
+            furi_hal_bt_start_advertising();
         }
+        furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
+    } else {
+        FURI_LOG_E(TAG, "BT App start failed");
     }
-    furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
 
     // Update statusbar
     bt_statusbar_update(bt);
