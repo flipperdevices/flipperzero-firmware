@@ -6,11 +6,9 @@ void subghz_scene_need_saving_callback(GuiButtonType result, InputType type, voi
     SubGhz* subghz = context;
 
     if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneNeedStay);
+        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneStay);
     } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneNeedExit);
+        view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneExit);
     }
 }
 
@@ -39,11 +37,11 @@ void subghz_scene_need_saving_on_enter(void* context) {
 bool subghz_scene_need_saving_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventSceneNeedStay) {
+        if(event.event == SubghzCustomEventSceneStay) {
             subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
             scene_manager_previous_scene(subghz->scene_manager);
             return true;
-        } else if(event.event == SubghzCustomEventSceneNeedExit) {
+        } else if(event.event == SubghzCustomEventSceneExit) {
             if(subghz->txrx->rx_key_state == SubGhzRxKeyStateExit) {
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
                 scene_manager_search_and_switch_to_previous_scene(
