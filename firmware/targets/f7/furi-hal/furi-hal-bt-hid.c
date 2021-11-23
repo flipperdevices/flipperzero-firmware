@@ -66,7 +66,7 @@ FuriHalBtHidKbReport* kb_report = NULL;
 bool furi_hal_bt_hid_init() {
     bool result = false;
     do {
-        if(!hid_svc_start()) break;
+        hid_svc_start();
         kb_report = furi_alloc(sizeof(FuriHalBtHidKbReport));
         // Configure Report Map characteristic
         if(!hid_svc_update_report_map(furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data))) break;
@@ -86,7 +86,7 @@ bool furi_hal_bt_hid_init() {
 
 void furi_hal_bt_hid_deinit() {
     furi_assert(kb_report);
-    // hid_svc_stop();
+    hid_svc_stop();
     free(kb_report);
 }
 
@@ -103,7 +103,6 @@ bool furi_hal_bt_hid_kb_press(uint16_t button) {
 }
 
 bool furi_hal_bt_hid_kb_release(uint16_t button) {
-    furi_assert(kb_report);
     furi_assert(kb_report);
     for (uint8_t i = 0; i < FURI_HAL_BT_HID_KB_KEYS_MAX; i++) {
         if (kb_report->key[i] == (button & 0xFF)) {

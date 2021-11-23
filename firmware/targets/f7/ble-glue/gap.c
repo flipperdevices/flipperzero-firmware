@@ -411,7 +411,7 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     gap->command_queue = osMessageQueueNew(8, sizeof(GapCommand), NULL);
 
     // Start HID service
-    hid_svc_start();
+    // hid_svc_start();
     // Start Device Information service
     dev_info_svc_start();
     // Start Battery service
@@ -427,12 +427,6 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     adv_service_uid[0] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID && 0xff;
     adv_service_uid[1] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID >> 8;
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
-    // adv_service_uid[0] = DEVICE_INFORMATION_SERVICE_UUID && 0xff;
-    // adv_service_uid[1] = DEVICE_INFORMATION_SERVICE_UUID >> 8;
-    // set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
-    // adv_service_uid[0] = BATTERY_SERVICE_UUID && 0xff;
-    // adv_service_uid[1] = BATTERY_SERVICE_UUID >> 8;
-    // set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
 
     // Set callback
     gap->on_event_cb = on_event_cb;

@@ -4,7 +4,7 @@
 
 #include <furi.h>
 
-#define TAG "HID service"
+#define TAG "BtHid"
 
 typedef struct {
     uint16_t svc_handle;
@@ -26,17 +26,17 @@ static SVCCTL_EvtAckStatus_t hid_svc_event_handler(void *event) {
     // aci_gatt_attribute_modified_event_rp0* attribute_modified;
     if(event_pckt->evt == HCI_VENDOR_SPECIFIC_DEBUG_EVT_CODE) {
         if(blecore_evt->ecode == ACI_GATT_ATTRIBUTE_MODIFIED_VSEVT_CODE) {
-            // TODO process modification events
+            // Process modification events
             ret = SVCCTL_EvtAckFlowEnable;
         } else if(blecore_evt->ecode == ACI_GATT_SERVER_CONFIRMATION_VSEVT_CODE) {
-            // TODO process notification confirmation
+            // Process notification confirmation
             ret = SVCCTL_EvtAckFlowEnable;
         }
     }
     return ret;
 }
 
-bool hid_svc_start() {
+void hid_svc_start() {
     tBleStatus status;
     hid_svc = furi_alloc(sizeof(HIDSvc));
     Service_UUID_t svc_uuid = {};
@@ -174,8 +174,6 @@ bool hid_svc_start() {
     if(status) {
         FURI_LOG_E(TAG, "Failed to add control point characteristic: %d", status);
     }
-    FURI_LOG_W(TAG, "HID service started");
-    return status != BLE_STATUS_SUCCESS;
 }
 
 bool hid_svc_update_report_map(uint8_t* data, uint16_t len) {
@@ -226,7 +224,41 @@ bool hid_svc_update_info(uint8_t* data, uint16_t len) {
     return true;
 }
 
-bool hid_svc_stop() {
-    furi_assert(hid_svc);
-    
+void hid_svc_stop() {
+    tBleStatus status;
+    if(hid_svc) {
+        // Delete characteristics
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->report_map_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Report Map characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->report_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Report characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->protocol_mode_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Protocol Mode characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->keyboard_boot_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Keyboard Boot characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->info_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Information characteristic: %d", status);
+        }
+        status = aci_gatt_del_char(hid_svc->svc_handle, hid_svc->ctrl_point_char_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete Control Point characteristic: %d", status);
+        }
+        // Delete service
+        status = aci_gatt_del_service(hid_svc->svc_handle);
+        if(status) {
+            FURI_LOG_E(TAG, "Failed to delete HID service: %d", status);
+        }
+        // Delete buffer size mutex
+        free(hid_svc);
+        hid_svc = NULL;
+    }
 }

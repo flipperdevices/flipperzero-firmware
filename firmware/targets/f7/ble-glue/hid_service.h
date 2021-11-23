@@ -10,8 +10,12 @@
 #define HID_SVC_INFO_LEN (4)
 #define HID_SVC_CONTROL_POINT_LEN (1)
 
-bool hid_svc_start();
+void hid_svc_start();
+
+void hid_svc_stop();
+
 bool hid_svc_update_report_map(uint8_t* data, uint16_t len);
+
 bool hid_svc_update_input_report(uint8_t* data, uint16_t len);
+
 bool hid_svc_update_info(uint8_t* data, uint16_t len);
-bool hid_svc_stop();

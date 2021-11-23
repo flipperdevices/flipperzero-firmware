@@ -44,6 +44,7 @@ int32_t ble_keyboard_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    furi_hal_bt_hid_init();
 
     BleKeyboardEvent event;
     while(1) {
@@ -108,6 +109,7 @@ int32_t ble_keyboard_app(void* p) {
     }
 
     // remove & free all stuff created by app
+    furi_hal_bt_hid_deinit();
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);
