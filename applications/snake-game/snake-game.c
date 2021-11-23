@@ -348,7 +348,7 @@ int32_t snake_game_app(void* p) {
         if(event_status == osOK) {
             // press events
             if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypeShort) {
+                if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
                     case InputKeyUp:
                         snake_state->nextMovement = DirectionUp;
