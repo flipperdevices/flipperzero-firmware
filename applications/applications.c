@@ -20,6 +20,7 @@ extern int32_t desktop_srv(void* p);
 extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t bad_usb_app(void* p);
+extern int32_t uart_echo_app(void* p);
 extern int32_t blink_test_app(void* p);
 extern int32_t bt_debug_app(void* p);
 extern int32_t delay_test_app(void* p);
@@ -41,6 +42,7 @@ extern int32_t vibro_test_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
+extern int32_t snake_game_app(void* p);
 
 // On system start hooks declaration
 extern void bt_cli_init();
@@ -202,6 +204,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player_app, .name = "Music Player", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
+
+#ifdef APP_SNAKE_GAME
+    {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
@@ -234,6 +240,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 
 #ifdef APP_BAD_USB
     {.app = bad_usb_app, .name = "Bad USB test", .stack_size = 2048, .icon = NULL},
+#endif
+
+#ifdef APP_UART_ECHO
+    {.app = uart_echo_app, .name = "Uart Echo", .stack_size = 2048, .icon = NULL},
 #endif
 
 #ifdef APP_IRDA_MONITOR
