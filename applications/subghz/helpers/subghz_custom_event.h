@@ -14,8 +14,8 @@ typedef enum {
     SubghzCustomEventSceneShowError,
     SubghzCustomEventSceneShowOnlyRX,
 
-    SubghzCustomEventSceneNeedSavingNo,
-    SubghzCustomEventSceneNeedSavingYes,
+    SubghzCustomEventSceneNeedExit,
+    SubghzCustomEventSceneNeedStay,
 
     SubghzCustomEventViewReceverOK,
     SubghzCustomEventViewReceverConfig,

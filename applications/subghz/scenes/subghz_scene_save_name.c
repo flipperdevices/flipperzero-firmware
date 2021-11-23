@@ -20,7 +20,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty = true;
     } else {
         memcpy(subghz->file_name_tmp, subghz->file_name, strlen(subghz->file_name) + 1);
-        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAWMenu) ==
+        if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
            SubghzCustomEventManagerSet) {
             subghz_get_next_name_file(subghz);
         }
@@ -68,5 +68,5 @@ void subghz_scene_save_name_on_exit(void* context) {
     // Clear view
     text_input_clean(subghz->text_input);
     scene_manager_set_scene_state(
-        subghz->scene_manager, SubGhzSceneReadRAWMenu, SubghzCustomEventManagerNoSet);
+        subghz->scene_manager, SubGhzSceneReadRAW, SubghzCustomEventManagerNoSet);
 }
