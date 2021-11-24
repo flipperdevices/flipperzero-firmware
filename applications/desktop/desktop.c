@@ -41,7 +41,7 @@ Desktop* desktop_alloc() {
 
     view_dispatcher_enable_queue(desktop->view_dispatcher);
     view_dispatcher_attach_to_gui(
-        desktop->view_dispatcher, desktop->gui, ViewDispatcherTypeWindow);
+        desktop->view_dispatcher, desktop->gui, ViewDispatcherTypeDesktop);
 
     view_dispatcher_set_event_callback_context(desktop->view_dispatcher, desktop);
     view_dispatcher_set_custom_event_callback(
