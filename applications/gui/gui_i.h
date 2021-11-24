@@ -52,7 +52,6 @@ struct Gui {
     osMessageQueueId_t input_queue;
     FuriPubSub* input_events;
     uint8_t ongoing_input;
-    GuiStatusBarBackground status_bar_background_color;
     ViewPort* ongoing_input_view_port;
 
     // Cli

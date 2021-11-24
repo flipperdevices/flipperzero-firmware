@@ -24,12 +24,6 @@ typedef enum {
     GuiLayerMAX /**< Don't use or move, special value */
 } GuiLayer;
 
-/** Gui status bar background colors */
-typedef enum {
-    GuiStatusBarBackgroundWhite,
-    GuiStatusBarBackgroundBlack,
-} GuiStatusBarBackground;
-
 /** Gui Canvas Commit Callback */
 typedef void (*GuiCanvasCommitCallback)(uint8_t* data, size_t size, void* context);
 
@@ -82,13 +76,6 @@ void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port);
  * @param      context   GuiCanvasCommitCallback context
  */
 void gui_set_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context);
-
-/** Set black or white background for status bar
- *
- * @param      gui       Gui instance
- * @param      color     Black or White color
- */
-void gui_set_status_bar_background(Gui* gui, GuiStatusBarBackground color);
 
 #ifdef __cplusplus
 }

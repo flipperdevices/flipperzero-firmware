@@ -146,12 +146,4 @@ void dolphin_state_butthurted(DolphinState* dolphin_state) {
 void dolphin_state_increase_level(DolphinState* dolphin_state) {
     ++dolphin_state->data.icounter;
     dolphin_state->dirty = true;
-    //    if ((dolphin_state->data.level == 1) && (dolphin_state->data.icounter == LEVEL2_THRESHOLD)) {
-    //        dolphin_state->data.level = 2;
-    //    } else if ((dolphin_state->data.level == 2) && (dolphin_state->data.icounter == LEVEL3_THRESHOLD)) {
-    //        dolphin_state->data.level = 3;
-    //    } else {
-    //        /* should not be called without reason */
-    //        furi_assert(0);
-    //    }
 }

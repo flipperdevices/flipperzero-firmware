@@ -36,10 +36,7 @@ void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
 static void desktop_scene_main_animation_changed_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    //    if (!desktop->update_animation_flag) {
     view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
-    //        desktop->update_animation_flag = true;
-    //    }
 }
 
 void desktop_scene_main_on_enter(void* context) {
@@ -95,8 +92,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventUpdateAnimation: {
-            FURI_LOG_I("Desktop", "EventUpdateAnimation");
-            desktop->update_animation_flag = false;
             const Icon* icon = desktop_animation_get_animation(desktop->animation);
             desktop_main_switch_dolphin_animation(desktop->main_view, icon);
             consumed = true;
@@ -106,7 +101,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         case DesktopMainEventRightShort: {
             DesktopAnimationState state = desktop_animation_handle_right(desktop->animation);
             if(state == DesktopAnimationStateLevelUpIsPending) {
-                FURI_LOG_W("DBG", "go to LevelUp scene");
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneLevelUp);
             }
             break;
@@ -117,11 +111,9 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
 
         if(event.event != DesktopMainEventUpdateAnimation) {
-            //            FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
             desktop_animation_activate(desktop->animation);
         }
     } else if(event.type != SceneManagerEventTypeTick) {
-        //        FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
         desktop_animation_activate(desktop->animation);
     }
 

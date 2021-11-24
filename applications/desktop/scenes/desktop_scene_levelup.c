@@ -16,7 +16,6 @@
 
 static void desktop_scene_levelup_callback(DesktopMainEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
-    printf("LevelUp event: %u\r\n", event);
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
 
@@ -36,13 +35,9 @@ void desktop_scene_levelup_on_enter(void* context) {
         desktop->animation, desktop_scene_levelup_animation_changed_callback, desktop);
 
     desktop_animation_start_oneshot_levelup(desktop->animation);
-    //    const Icon* icon = desktop_animation_get_animation(desktop->animation);
-    //    furi_assert(icon);
     const Icon* icon = desktop_animation_get_oneshot_frame(desktop->animation);
     desktop_main_switch_dolphin_icon(desktop->main_view, icon);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
-    // disable update events from other sources than animation timer
-    desktop->update_animation_flag = true;
     scene_manager_set_scene_state(
         desktop->scene_manager, DesktopSceneLevelUp, LEVELUP_SCENE_PLAYING);
 }
@@ -54,8 +49,6 @@ bool desktop_scene_levelup_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(main_event == DesktopMainEventUpdateOneShotAnimation) {
-            FURI_LOG_W("Desktop", "Levelup Update");
-
             const Icon* icon = desktop_animation_get_oneshot_frame(desktop->animation);
             if(icon) {
                 desktop_main_switch_dolphin_icon(desktop->main_view, icon);
@@ -77,7 +70,6 @@ bool desktop_scene_levelup_on_event(void* context, SceneManagerEvent event) {
 
 void desktop_scene_levelup_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
-    desktop->update_animation_flag = false;
 
     Dolphin* dolphin = furi_record_open("dolphin");
     dolphin_upgrade_level(dolphin);

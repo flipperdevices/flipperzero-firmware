@@ -44,7 +44,6 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    bool update_animation_flag;
     DesktopAnimation* animation;
     DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
@@ -53,7 +52,6 @@ struct Desktop {
     DesktopLockedView* locked_view;
     DesktopDebugView* debug_view;
     CodeInput* code_input;
-    FuriPubSubSubscription* storage_changed;
 
     DesktopSettings settings;
     PinCode pincode_buffer;
