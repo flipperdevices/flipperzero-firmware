@@ -60,8 +60,13 @@ void gui_redraw_status_bar(Gui* gui) {
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
     canvas_draw_icon(gui->canvas, 0, 0, &I_Background_128x11);
 
-    if (gui->status_bar_background_color == GuiStatusBarBackgroundBlack) {
-        canvas_draw_box(gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_STATUS_BAR_WIDTH, GUI_STATUS_BAR_HEIGHT);
+    if(gui->status_bar_background_color == GuiStatusBarBackgroundBlack) {
+        canvas_draw_box(
+            gui->canvas,
+            GUI_STATUS_BAR_X,
+            GUI_STATUS_BAR_Y,
+            GUI_STATUS_BAR_WIDTH,
+            GUI_STATUS_BAR_HEIGHT);
     }
 
     // Right side

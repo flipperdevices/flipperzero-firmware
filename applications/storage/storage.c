@@ -63,7 +63,7 @@ void storage_tick(Storage* app) {
         }
     }
 
-    if (app->storage[ST_EXT].status != app->prev_ext_storage_status) {
+    if(app->storage[ST_EXT].status != app->prev_ext_storage_status) {
         app->prev_ext_storage_status = app->storage[ST_EXT].status;
         furi_pubsub_publish(app->pubsub, &app->storage[ST_EXT].status);
     }

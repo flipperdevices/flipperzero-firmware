@@ -10,9 +10,8 @@
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
 #define DOLPHIN_LVL_THRESHOLD 20.0f
-#define LEVEL2_THRESHOLD        20
-#define LEVEL3_THRESHOLD        100
-
+#define LEVEL2_THRESHOLD 20
+#define LEVEL3_THRESHOLD 100
 
 DolphinState* dolphin_state_alloc() {
     return furi_alloc(sizeof(DolphinState));
@@ -85,9 +84,9 @@ bool dolphin_state_is_levelup(uint32_t icounter) {
 }
 
 uint8_t dolphin_get_level(uint32_t icounter) {
-    if (icounter <= LEVEL2_THRESHOLD) {
+    if(icounter <= LEVEL2_THRESHOLD) {
         return 1;
-    } else if (icounter <= LEVEL3_THRESHOLD) {
+    } else if(icounter <= LEVEL3_THRESHOLD) {
         return 2;
     } else {
         return 3;
@@ -96,12 +95,12 @@ uint8_t dolphin_get_level(uint32_t icounter) {
 
 uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
     uint32_t threshold = 0;
-    if (icounter <= LEVEL2_THRESHOLD) {
+    if(icounter <= LEVEL2_THRESHOLD) {
         threshold = LEVEL2_THRESHOLD;
-    } else if (icounter <= LEVEL3_THRESHOLD) {
+    } else if(icounter <= LEVEL3_THRESHOLD) {
         threshold = LEVEL3_THRESHOLD;
     } else {
-        threshold = (uint32_t) -1;
+        threshold = (uint32_t)-1;
     }
     return threshold - icounter;
 }
@@ -112,22 +111,23 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     bool level_up = false;
     bool mood_changed = false;
 
-    if (icounter <= 0) {
+    if(icounter <= 0) {
         icounter = 0;
-        if (dolphin_state->data.icounter == 0) {
+        if(dolphin_state->data.icounter == 0) {
             return false;
         }
     }
 
     uint8_t xp_to_levelup = dolphin_state_xp_to_levelup(dolphin_state->data.icounter);
-    if (xp_to_levelup) {
+    if(xp_to_levelup) {
         level_up = true;
         dolphin_state->data.icounter += MIN(xp_to_levelup, deed_weight->icounter);
     }
 
-    uint32_t new_butthurt = CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, 14, 0);
+    uint32_t new_butthurt =
+        CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, 14, 0);
 
-    if (!!dolphin_state->data.butthurt != !!new_butthurt) {
+    if(!!dolphin_state->data.butthurt != !!new_butthurt) {
         mood_changed = true;
     }
     dolphin_state->data.butthurt = new_butthurt;
@@ -146,13 +146,12 @@ void dolphin_state_butthurted(DolphinState* dolphin_state) {
 void dolphin_state_increase_level(DolphinState* dolphin_state) {
     ++dolphin_state->data.icounter;
     dolphin_state->dirty = true;
-//    if ((dolphin_state->data.level == 1) && (dolphin_state->data.icounter == LEVEL2_THRESHOLD)) {
-//        dolphin_state->data.level = 2;
-//    } else if ((dolphin_state->data.level == 2) && (dolphin_state->data.icounter == LEVEL3_THRESHOLD)) {
-//        dolphin_state->data.level = 3;
-//    } else {
-//        /* should not be called without reason */
-//        furi_assert(0);
-//    }
+    //    if ((dolphin_state->data.level == 1) && (dolphin_state->data.icounter == LEVEL2_THRESHOLD)) {
+    //        dolphin_state->data.level = 2;
+    //    } else if ((dolphin_state->data.level == 2) && (dolphin_state->data.icounter == LEVEL3_THRESHOLD)) {
+    //        dolphin_state->data.level = 3;
+    //    } else {
+    //        /* should not be called without reason */
+    //        furi_assert(0);
+    //    }
 }
-

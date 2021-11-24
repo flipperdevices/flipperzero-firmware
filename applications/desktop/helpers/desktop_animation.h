@@ -19,7 +19,7 @@ typedef enum {
 
 struct BasicAnimation {
     const Icon* icon;
-    uint16_t duration;   // sec
+    uint16_t duration; // sec
     uint16_t active_cooldown;
     uint8_t weight;
     uint16_t butthurt_level_mask;
@@ -27,7 +27,7 @@ struct BasicAnimation {
 
 struct ActiveAnimation {
     const Icon* icon;
-    uint16_t duration;   // sec
+    uint16_t duration; // sec
 };
 
 typedef struct {
@@ -35,12 +35,15 @@ typedef struct {
     const ActiveAnimation* active;
 } PairedAnimation;
 
-typedef void (*AnimationChangedCallback) (void*);
+typedef void (*AnimationChangedCallback)(void*);
 
 DesktopAnimation* desktop_animation_alloc(void);
 void desktop_animation_free(DesktopAnimation*);
 void desktop_animation_activate(DesktopAnimation* instance);
-void desktop_animation_set_animation_changed_callback(DesktopAnimation* instance, AnimationChangedCallback callback, void* context);
+void desktop_animation_set_animation_changed_callback(
+    DesktopAnimation* instance,
+    AnimationChangedCallback callback,
+    void* context);
 
 DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation);
 
@@ -50,4 +53,3 @@ const Icon* desktop_animation_get_animation(DesktopAnimation* animation);
 const Icon* desktop_animation_get_oneshot_frame(DesktopAnimation* animation);
 
 void desktop_start_new_idle_animation(DesktopAnimation* animation);
-

@@ -24,4 +24,3 @@
 //void storage_unsubsribe_for_status_change(Storage* storage, FuriPubSubSubscription* subscription) {
 //    furi_pubsub_unsubscribe(storage->pubsub, subscription);
 //}
-

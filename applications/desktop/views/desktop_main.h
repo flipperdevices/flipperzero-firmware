@@ -49,4 +49,3 @@ void desktop_main_switch_dolphin_animation(DesktopMainView* main_view, const Ico
 void desktop_main_unlocked(DesktopMainView* main_view);
 void desktop_main_reset_hint(DesktopMainView* main_view);
 void desktop_main_switch_dolphin_icon(DesktopMainView* main_view, const Icon* icon);
-

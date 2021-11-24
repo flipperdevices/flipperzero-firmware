@@ -107,7 +107,7 @@ int32_t dolphin_srv(void* p) {
     while(1) {
         if(osMessageQueueGet(dolphin->event_queue, &event, NULL, 60000) == osOK) {
             if(event.type == DolphinEventTypeDeed) {
-                if (dolphin_state_on_deed(dolphin->state, event.deed)) {
+                if(dolphin_state_on_deed(dolphin->state, event.deed)) {
                     DolphinPubsubEvent event = DolphinPubsubEventUpdate;
                     furi_pubsub_publish(dolphin->pubsub, &event);
                 }
@@ -116,7 +116,8 @@ int32_t dolphin_srv(void* p) {
                 event.stats->butthurt = dolphin->state->data.butthurt;
                 event.stats->timestamp = dolphin->state->data.timestamp;
                 event.stats->level = dolphin_get_level(dolphin->state->data.icounter);
-                event.stats->level_up_is_pending = !dolphin_state_xp_to_levelup(dolphin->state->data.icounter);
+                event.stats->level_up_is_pending =
+                    !dolphin_state_xp_to_levelup(dolphin->state->data.icounter);
             } else if(event.type == DolphinEventTypeFlush) {
                 dolphin_state_save(dolphin->state);
             }
@@ -136,4 +137,3 @@ void dolphin_upgrade_level(Dolphin* dolphin) {
     dolphin_state_increase_level(dolphin->state);
     dolphin_flush(dolphin);
 }
-

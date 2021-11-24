@@ -24,7 +24,6 @@ struct DolphinState {
     bool dirty;
 };
 
-
 DolphinState* dolphin_state_alloc();
 
 void dolphin_state_free(DolphinState* dolphin_state);
@@ -48,4 +47,3 @@ bool dolphin_state_is_levelup(uint32_t icounter);
 void dolphin_state_increase_level(DolphinState* dolphin_state);
 
 uint8_t dolphin_get_level(uint32_t icounter);
-

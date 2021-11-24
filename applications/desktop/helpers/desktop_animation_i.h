@@ -6,31 +6,25 @@
 
 // Calm/Mad Basic Idle Animations
 
-#define COMMON_BASIC_DURATION       (60 * 60)
-#define COMMON_ACTIVE_CYCLES        7
-#define COMMON_ACTIVE_COOLDOWN      30
-#define COMMON_WEIGHT               3
+#define COMMON_BASIC_DURATION (60 * 60)
+#define COMMON_ACTIVE_CYCLES 7
+#define COMMON_ACTIVE_COOLDOWN 30
+#define COMMON_WEIGHT 3
 
-#define BUTTHURT_LEVEL(x)           (1UL << (x))
-#define BUTTHURT_LEVEL_0            0
+#define BUTTHURT_LEVEL(x) (1UL << (x))
+#define BUTTHURT_LEVEL_0 0
 
 // frames * cycles / frame_rate
-#define COMMON_ACTIVE_DURATION(x)   ((x) * COMMON_ACTIVE_CYCLES / 2)
+#define COMMON_ACTIVE_DURATION(x) ((x)*COMMON_ACTIVE_CYCLES / 2)
 
 static const BasicAnimation animation_TV = {
     .icon = &A_TV_128x51,
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7)};
 
 static const ActiveAnimation animation_TV_active = {
     .icon = &A_TVActive_128x51,
@@ -42,18 +36,10 @@ static const BasicAnimation animation_sleep = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-        | BUTTHURT_LEVEL(10)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8) |
+                           BUTTHURT_LEVEL(9) | BUTTHURT_LEVEL(10)};
 
 static const ActiveAnimation animation_sleep_active = {
     .icon = &A_SleepActive_128x51,
@@ -78,13 +64,8 @@ static const BasicAnimation animation_laptop = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5)};
 
 static const ActiveAnimation animation_laptop_active = {
     .icon = &A_LaptopActive_128x51,
@@ -96,16 +77,9 @@ static const BasicAnimation animation_knife = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-        | BUTTHURT_LEVEL(10)
-        | BUTTHURT_LEVEL(11)
-        | BUTTHURT_LEVEL(12)
-        | BUTTHURT_LEVEL(13)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(5) | BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) |
+                           BUTTHURT_LEVEL(8) | BUTTHURT_LEVEL(9) | BUTTHURT_LEVEL(10) |
+                           BUTTHURT_LEVEL(11) | BUTTHURT_LEVEL(12) | BUTTHURT_LEVEL(13)};
 
 static const ActiveAnimation animation_knife_active = {
     .icon = &A_KnifeActive_128x51,
@@ -117,18 +91,10 @@ static const BasicAnimation animation_cry = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-        | BUTTHURT_LEVEL(10)
-        | BUTTHURT_LEVEL(11)
-        | BUTTHURT_LEVEL(12)
-        | BUTTHURT_LEVEL(13)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8) |
+                           BUTTHURT_LEVEL(9) | BUTTHURT_LEVEL(10) | BUTTHURT_LEVEL(11) |
+                           BUTTHURT_LEVEL(12) | BUTTHURT_LEVEL(13)};
 
 static const ActiveAnimation animation_cry_active = {
     .icon = &A_CryActive_128x51,
@@ -140,14 +106,9 @@ static const BasicAnimation animation_box = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-        | BUTTHURT_LEVEL(10)
-        | BUTTHURT_LEVEL(11)
-        | BUTTHURT_LEVEL(12)
-        | BUTTHURT_LEVEL(13)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8) | BUTTHURT_LEVEL(9) |
+                           BUTTHURT_LEVEL(10) | BUTTHURT_LEVEL(11) | BUTTHURT_LEVEL(12) |
+                           BUTTHURT_LEVEL(13)};
 
 static const ActiveAnimation animation_box_active = {
     .icon = &A_BoxActive_128x51,
@@ -159,8 +120,7 @@ static const BasicAnimation animation_waves = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2)};
 
 static const ActiveAnimation animation_waves_active = {
     .icon = &A_WavesActive_128x51,
@@ -174,15 +134,9 @@ static const BasicAnimation animation_level1furippa = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7)};
 
 static const ActiveAnimation animation_level1furippa_active = {
     .icon = &A_Level1FurippaActive_128x51,
@@ -194,8 +148,7 @@ static const BasicAnimation animation_level1read = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2)};
 
 static const ActiveAnimation animation_level1read_active = {
     .icon = &A_Level1ReadActive_128x51,
@@ -207,16 +160,9 @@ static const BasicAnimation animation_level1toys = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8)};
 
 static const ActiveAnimation animation_level1toys_active = {
     .icon = &A_Level1ToysActive_128x51,
@@ -228,15 +174,9 @@ static const BasicAnimation animation_level2furippa = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7)};
 
 static const ActiveAnimation animation_level2furippa_active = {
     .icon = &A_Level2FurippaActive_128x51,
@@ -248,17 +188,10 @@ static const BasicAnimation animation_level2soldering = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8) |
+                           BUTTHURT_LEVEL(9)};
 
 static const ActiveAnimation animation_level2soldering_active = {
     .icon = &A_Level2SolderingActive_128x51,
@@ -270,16 +203,9 @@ static const BasicAnimation animation_level2hack = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8)};
 
 static const ActiveAnimation animation_level2hack_active = {
     .icon = &A_Level2HackActive_128x51,
@@ -291,15 +217,9 @@ static const BasicAnimation animation_level3furippa = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7)};
 
 static const ActiveAnimation animation_level3furippa_active = {
     .icon = &A_Level3FurippaActive_128x51,
@@ -311,17 +231,10 @@ static const BasicAnimation animation_level3hijack = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-        | BUTTHURT_LEVEL(9)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8) |
+                           BUTTHURT_LEVEL(9)};
 
 static const ActiveAnimation animation_level3hijack_active = {
     .icon = &A_Level3HijackActive_128x51,
@@ -333,16 +246,9 @@ static const BasicAnimation animation_level3lab = {
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
-    .butthurt_level_mask = BUTTHURT_LEVEL(0)
-        | BUTTHURT_LEVEL(1)
-        | BUTTHURT_LEVEL(2)
-        | BUTTHURT_LEVEL(3)
-        | BUTTHURT_LEVEL(4)
-        | BUTTHURT_LEVEL(5)
-        | BUTTHURT_LEVEL(6)
-        | BUTTHURT_LEVEL(7)
-        | BUTTHURT_LEVEL(8)
-};
+    .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2) |
+                           BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5) |
+                           BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7) | BUTTHURT_LEVEL(8)};
 
 static const ActiveAnimation animation_level3lab_active = {
     .icon = &A_Level3LabActive_128x51,
@@ -384,17 +290,17 @@ const Icon* animation_level3up[] = {
 // Blocking Idle Animations & One shot Animations represented as naked Icon
 
 static const PairedAnimation calm_animation[] = {
-    {.basic = &animation_TV,        .active = &animation_TV_active},
-    {.basic = &animation_waves,     .active = &animation_waves_active},
-    {.basic = &animation_sleep,     .active = &animation_sleep_active},
-    {.basic = &animation_laptop,    .active = &animation_laptop_active},
+    {.basic = &animation_TV, .active = &animation_TV_active},
+    {.basic = &animation_waves, .active = &animation_waves_active},
+    {.basic = &animation_sleep, .active = &animation_sleep_active},
+    {.basic = &animation_laptop, .active = &animation_laptop_active},
 };
 
 static const PairedAnimation mad_animation[] = {
-    {.basic = &animation_cry,       .active = &animation_cry_active},
-    {.basic = &animation_knife,     .active = &animation_knife_active},
-    {.basic = &animation_box,       .active = &animation_box_active},
-    {.basic = &animation_leaving,   .active = &animation_leaving_active},
+    {.basic = &animation_cry, .active = &animation_cry_active},
+    {.basic = &animation_knife, .active = &animation_knife_active},
+    {.basic = &animation_box, .active = &animation_box_active},
+    {.basic = &animation_leaving, .active = &animation_leaving_active},
 };
 
 static const PairedAnimation level_1_animation[] = {
@@ -422,4 +328,3 @@ static const PairedAnimation no_sd_animation[] = {
 static const PairedAnimation check_battery_animation[] = {
     {.basic = &animation_bad_battery, .active = NULL},
 };
-

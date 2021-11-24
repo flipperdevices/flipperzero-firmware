@@ -86,9 +86,9 @@ bool desktop_main_input(InputEvent* event, void* context) {
         main_view->callback(DesktopMainEventRightShort, main_view->context);
     }
 
-//    if (event->type == InputTypeShort) {
-//        main_view->callback(DesktopMainEventAnyKeyShort, main_view->context);
-//    }
+    //    if (event->type == InputTypeShort) {
+    //        main_view->callback(DesktopMainEventAnyKeyShort, main_view->context);
+    //    }
 
     desktop_main_reset_hint(main_view);
 

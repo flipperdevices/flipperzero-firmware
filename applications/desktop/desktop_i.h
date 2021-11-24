@@ -25,7 +25,6 @@
 #include "desktop/desktop_settings/desktop_settings.h"
 #include <gui/icon.h>
 
-
 typedef enum {
     DesktopViewMain,
     DesktopViewLockMenu,
@@ -65,4 +64,3 @@ struct Desktop {
 Desktop* desktop_alloc();
 
 void desktop_free(Desktop* desktop);
-

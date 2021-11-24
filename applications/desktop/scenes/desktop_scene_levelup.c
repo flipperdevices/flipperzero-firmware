@@ -11,9 +11,8 @@
 #include <loader/loader.h>
 #include <m-list.h>
 
-#define LEVELUP_SCENE_PLAYING   0
-#define LEVELUP_SCENE_STOPPED   1
-
+#define LEVELUP_SCENE_PLAYING 0
+#define LEVELUP_SCENE_STOPPED 1
 
 static void desktop_scene_levelup_callback(DesktopMainEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -24,7 +23,8 @@ static void desktop_scene_levelup_callback(DesktopMainEvent event, void* context
 static void desktop_scene_levelup_animation_changed_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateOneShotAnimation);
+    view_dispatcher_send_custom_event(
+        desktop->view_dispatcher, DesktopMainEventUpdateOneShotAnimation);
 }
 
 void desktop_scene_levelup_on_enter(void* context) {
@@ -32,17 +32,19 @@ void desktop_scene_levelup_on_enter(void* context) {
     DesktopMainView* main_view = desktop->main_view;
 
     desktop_main_set_callback(main_view, desktop_scene_levelup_callback, desktop);
-    desktop_animation_set_animation_changed_callback(desktop->animation, desktop_scene_levelup_animation_changed_callback, desktop);
+    desktop_animation_set_animation_changed_callback(
+        desktop->animation, desktop_scene_levelup_animation_changed_callback, desktop);
 
     desktop_animation_start_oneshot_levelup(desktop->animation);
-//    const Icon* icon = desktop_animation_get_animation(desktop->animation);
-//    furi_assert(icon);
+    //    const Icon* icon = desktop_animation_get_animation(desktop->animation);
+    //    furi_assert(icon);
     const Icon* icon = desktop_animation_get_oneshot_frame(desktop->animation);
     desktop_main_switch_dolphin_icon(desktop->main_view, icon);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
     // disable update events from other sources than animation timer
     desktop->update_animation_flag = true;
-    scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLevelUp, LEVELUP_SCENE_PLAYING);
+    scene_manager_set_scene_state(
+        desktop->scene_manager, DesktopSceneLevelUp, LEVELUP_SCENE_PLAYING);
 }
 
 bool desktop_scene_levelup_on_event(void* context, SceneManagerEvent event) {
@@ -51,18 +53,20 @@ bool desktop_scene_levelup_on_event(void* context, SceneManagerEvent event) {
     DesktopMainEvent main_event = event.event;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if (main_event == DesktopMainEventUpdateOneShotAnimation) {
+        if(main_event == DesktopMainEventUpdateOneShotAnimation) {
             FURI_LOG_W("Desktop", "Levelup Update");
 
             const Icon* icon = desktop_animation_get_oneshot_frame(desktop->animation);
-            if (icon) {
+            if(icon) {
                 desktop_main_switch_dolphin_icon(desktop->main_view, icon);
             } else {
-                scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneLevelUp, LEVELUP_SCENE_STOPPED);
+                scene_manager_set_scene_state(
+                    desktop->scene_manager, DesktopSceneLevelUp, LEVELUP_SCENE_STOPPED);
             }
             consumed = true;
         } else {
-            if(scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLevelUp) == LEVELUP_SCENE_STOPPED) {
+            if(scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLevelUp) ==
+               LEVELUP_SCENE_STOPPED) {
                 scene_manager_previous_scene(desktop->scene_manager);
             }
         }

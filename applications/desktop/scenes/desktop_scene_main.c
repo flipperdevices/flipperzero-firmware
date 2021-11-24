@@ -10,7 +10,6 @@
 #include <m-list.h>
 #define MAIN_VIEW_DEFAULT (0UL)
 
-
 static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
@@ -37,10 +36,10 @@ void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
 static void desktop_scene_main_animation_changed_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-//    if (!desktop->update_animation_flag) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
-//        desktop->update_animation_flag = true;
-//    }
+    //    if (!desktop->update_animation_flag) {
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
+    //        desktop->update_animation_flag = true;
+    //    }
 }
 
 void desktop_scene_main_on_enter(void* context) {
@@ -56,7 +55,8 @@ void desktop_scene_main_on_enter(void* context) {
     }
 
     desktop_animation_activate(desktop->animation);
-    desktop_animation_set_animation_changed_callback(desktop->animation, desktop_scene_main_animation_changed_callback, desktop);
+    desktop_animation_set_animation_changed_callback(
+        desktop->animation, desktop_scene_main_animation_changed_callback, desktop);
     const Icon* icon = desktop_animation_get_animation(desktop->animation);
     desktop_main_switch_dolphin_animation(desktop->main_view, icon);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
@@ -68,60 +68,60 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            case DesktopMainEventOpenMenu:
-                loader_show_menu();
-                consumed = true;
-                break;
+        case DesktopMainEventOpenMenu:
+            loader_show_menu();
+            consumed = true;
+            break;
 
-            case DesktopMainEventOpenLockMenu:
-                scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
-                consumed = true;
-                break;
+        case DesktopMainEventOpenLockMenu:
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
+            consumed = true;
+            break;
 
-            case DesktopMainEventOpenDebug:
-                scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
-                consumed = true;
-                break;
+        case DesktopMainEventOpenDebug:
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);
+            consumed = true;
+            break;
 
-            case DesktopMainEventOpenArchive:
-                desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
-                consumed = true;
-                break;
+        case DesktopMainEventOpenArchive:
+            desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
+            consumed = true;
+            break;
 
-            case DesktopMainEventOpenFavorite:
-                LOAD_DESKTOP_SETTINGS(&desktop->settings);
-                desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
-                consumed = true;
-                break;
+        case DesktopMainEventOpenFavorite:
+            LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
+            consumed = true;
+            break;
 
-            case DesktopMainEventUpdateAnimation: {
-                FURI_LOG_I("Desktop", "EventUpdateAnimation");
-                desktop->update_animation_flag = false;
-                const Icon* icon = desktop_animation_get_animation(desktop->animation);
-                desktop_main_switch_dolphin_animation(desktop->main_view, icon);
-                consumed = true;
-                break;
+        case DesktopMainEventUpdateAnimation: {
+            FURI_LOG_I("Desktop", "EventUpdateAnimation");
+            desktop->update_animation_flag = false;
+            const Icon* icon = desktop_animation_get_animation(desktop->animation);
+            desktop_main_switch_dolphin_animation(desktop->main_view, icon);
+            consumed = true;
+            break;
+        }
+
+        case DesktopMainEventRightShort: {
+            DesktopAnimationState state = desktop_animation_handle_right(desktop->animation);
+            if(state == DesktopAnimationStateLevelUpIsPending) {
+                FURI_LOG_W("DBG", "go to LevelUp scene");
+                scene_manager_next_scene(desktop->scene_manager, DesktopSceneLevelUp);
             }
+            break;
+        }
 
-            case DesktopMainEventRightShort: {
-                DesktopAnimationState state = desktop_animation_handle_right(desktop->animation);
-                if (state == DesktopAnimationStateLevelUpIsPending) {
-                    FURI_LOG_W("DBG", "go to LevelUp scene");
-                    scene_manager_next_scene(desktop->scene_manager, DesktopSceneLevelUp);
-                }
-                break;
-            }
-
-            default:
-                break;
+        default:
+            break;
         }
 
         if(event.event != DesktopMainEventUpdateAnimation) {
-//            FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
+            //            FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
             desktop_animation_activate(desktop->animation);
         }
     } else if(event.type != SceneManagerEventTypeTick) {
-//        FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
+        //        FURI_LOG_W("DBG", "main_scene event %lu, activate animation", event.type);
         desktop_animation_activate(desktop->animation);
     }
 

@@ -83,7 +83,12 @@ void desktop_debug_render(Canvas* canvas, void* model) {
         snprintf(buffer, 64, "Icounter: %ld  Butthurt %ld", m->icounter, m->butthurt);
         canvas_draw_str(canvas, 5, 19, buffer);
 
-        snprintf(buffer, 64, "Level: %ld  To level up: %ld", current_lvl, (remaining == (uint32_t)(-1) ? remaining : 0));
+        snprintf(
+            buffer,
+            64,
+            "Level: %ld  To level up: %ld",
+            current_lvl,
+            (remaining == (uint32_t)(-1) ? remaining : 0));
         canvas_draw_str(canvas, 5, 29, buffer);
 
         snprintf(buffer, 64, "%s", asctime(localtime((const time_t*)&m->timestamp)));

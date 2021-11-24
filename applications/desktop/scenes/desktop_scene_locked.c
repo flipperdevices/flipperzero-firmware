@@ -23,9 +23,8 @@ void desktop_scene_locked_on_enter(void* context) {
     desktop_locked_reset_door_pos(locked_view);
     desktop_locked_update_hint_timeout(locked_view);
 
-    desktop_animation_set_animation_changed_callback(desktop->animation,
-            desktop_scene_locked_animation_changed_callback,
-            desktop);
+    desktop_animation_set_animation_changed_callback(
+        desktop->animation, desktop_scene_locked_animation_changed_callback, desktop);
     const Icon* icon = desktop_animation_get_animation(desktop->animation);
     desktop_locked_set_dolphin_animation(locked_view, icon);
 
