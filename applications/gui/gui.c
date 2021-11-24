@@ -86,7 +86,8 @@ void gui_redraw_status_bar(Gui* gui) {
 
             canvas_set_color(gui->canvas, ColorBlack);
 
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+            canvas_frame_set(
+                gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
 
             view_port_draw(view_port, gui->canvas);
         }
