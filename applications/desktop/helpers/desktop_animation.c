@@ -25,10 +25,15 @@ static const char* state_strs_dbg[] = {
 LIST_DEF(AnimationList, const PairedAnimation*, M_PTR_OPLIST)
 #define M_OPL_AnimationList_t() LIST_OPLIST(AnimationList)
 
-#define PUSH_BACK_ANIMATIONS(listname, animations)          \
-    for (int i = 0; i < COUNT_OF(animations); ++i) {        \
-        AnimationList_push_back(listname, &(animations)[i]);\
+#define PUSH_BACK_ANIMATIONS(listname, animations, butthurt)            \
+    for (int i = 0; i < COUNT_OF(animations); ++i) {                    \
+        if (!(animations)[i].basic->butthurt_level_mask                 \
+            || ((animations)[i].basic->butthurt_level_mask              \
+                & BUTTHURT_LEVEL(butthurt))) {                          \
+            AnimationList_push_back(animation_list, &(animations)[i]);  \
+        }                                                               \
     }
+
 
 #define IS_BLOCKING_ANIMATION(x)        (((x) != DesktopAnimationStateBasic) && ((x) != DesktopAnimationStateActive))
 #define IS_ONESHOT_ANIMATION(x)         ((x) == DesktopAnimationStateLevelUpIsPending)
@@ -36,8 +41,8 @@ LIST_DEF(AnimationList, const PairedAnimation*, M_PTR_OPLIST)
 static void desktop_animation_timer_callback(void* context);
 
 struct DesktopAnimation {
-    bool sd_shown_empty;
-    bool sd_shown_corrupted;
+    bool sd_shown_error_db;
+    bool sd_shown_error_card_bad;
     osTimerId_t timer;
     const PairedAnimation* current;
     const Icon* current_blocking_icon;
@@ -55,7 +60,7 @@ DesktopAnimation* desktop_animation_alloc(void) {
     DesktopAnimation* animation = furi_alloc(sizeof(DesktopAnimation));
 
     animation->timer = osTimerNew(desktop_animation_timer_callback, osTimerPeriodic /* osTimerOnce */, animation, NULL);
-    animation->active_finished_at = 0;
+    animation->active_finished_at = (TickType_t) (-30);
     animation->basic_started_at = 0;
     animation->animation_changed_callback = NULL;
     animation->animation_changed_callback_context = NULL;
@@ -87,28 +92,24 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
 
     furi_assert((stats.level >= 1) && (stats.level <= 3));
     uint8_t level = stats.level;
-    bool angry = stats.butthurt > 0;
 
     AnimationList_t animation_list;
     AnimationList_init(animation_list);
 
-    if (!angry) {
-        PUSH_BACK_ANIMATIONS(animation_list, calm_animation);
-        switch (level) {
-        case 1:
-            PUSH_BACK_ANIMATIONS(animation_list, level_1_animation);
-            break;
-        case 2:
-            PUSH_BACK_ANIMATIONS(animation_list, level_2_animation);
-            break;
-        case 3:
-            PUSH_BACK_ANIMATIONS(animation_list, level_3_animation);
-            break;
-        default:
-            furi_assert(0);
-        }
-    } else {
-        PUSH_BACK_ANIMATIONS(animation_list, mad_animation);
+    PUSH_BACK_ANIMATIONS(animation_list, mad_animation, stats.butthurt);
+    PUSH_BACK_ANIMATIONS(animation_list, calm_animation, stats.butthurt);
+    switch (level) {
+    case 1:
+        PUSH_BACK_ANIMATIONS(animation_list, level_1_animation, stats.butthurt);
+        break;
+    case 2:
+        PUSH_BACK_ANIMATIONS(animation_list, level_2_animation, stats.butthurt);
+        break;
+    case 3:
+        PUSH_BACK_ANIMATIONS(animation_list, level_3_animation, stats.butthurt);
+        break;
+    default:
+        furi_assert(0);
     }
 
     Power* power = furi_record_open("power");
@@ -116,7 +117,7 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
     power_get_info(power, &info);
 
     if (!power_is_battery_well(&info)) {
-        PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation);
+        PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation, stats.butthurt);
     }
 
     Storage* storage = furi_record_open("storage");
@@ -124,9 +125,9 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
     animation->current = NULL;
 
     if (sd_status == FSE_NOT_READY) {
-        PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation);
-        animation->sd_shown_corrupted = false;
-        animation->sd_shown_empty = false;
+        PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation, stats.butthurt);
+        animation->sd_shown_error_card_bad = false;
+        animation->sd_shown_error_db = false;
     }
 
     uint32_t whole_weight = 0;
@@ -194,7 +195,6 @@ static void desktop_animation_timer_callback(void* context) {
 
     if (new_basic_animation) {
         animation->basic_started_at = now_ms;
-        animation->active_finished_at = 0;
         desktop_start_new_idle_animation(animation);
     }
 
@@ -274,27 +274,20 @@ const Icon* desktop_animation_get_animation(DesktopAnimation* animation) {
             icon = &A_CardBad_128x51;
             animation->current_blocking_icon = icon;
             animation->state = DesktopAnimationStateSDCorrupted;
-            animation->sd_shown_corrupted = true;
+            animation->sd_shown_error_card_bad = true;
+            animation->sd_shown_error_db = false;
+        } else if (sd_status == FSE_NOT_READY) {
+            animation->sd_shown_error_card_bad = false;
+            animation->sd_shown_error_db = false;
         } else if (sd_status == FSE_OK) {
-            animation->sd_shown_corrupted = false;
-        }
-    }
-
-    if (!icon) {
-        FS_Error error = storage_common_stat(storage, "/ext/manifest.txt", NULL);
-        if ((error != FSE_OK) && !animation->sd_shown_empty && (sd_status == FSE_OK)) {
-            osTimerStop(animation->timer);
-            icon = &A_CardNoDB_128x51;
-            animation->current_blocking_icon = icon;
-            animation->state = DesktopAnimationStateSDEmpty;
-            animation->sd_shown_empty = true;
-        }
-        if ((error == FSE_OK) && animation->sd_shown_empty) {
-            osTimerStop(animation->timer);
-            icon = &A_CardOk_128x51;
-            animation->current_blocking_icon = icon;
-            animation->state = DesktopAnimationStateSDOk;
-            animation->sd_shown_empty = false;
+            bool db_exists = storage_common_stat(storage, "/ext/manifest.txt", NULL) == FSE_OK;
+            if (db_exists && !animation->sd_shown_error_db) {
+                osTimerStop(animation->timer);
+                icon = &A_CardNoDB_128x51;
+                animation->current_blocking_icon = icon;
+                animation->state = DesktopAnimationStateSDEmpty;
+                animation->sd_shown_error_db = true;
+            }
         }
     }
 
@@ -322,6 +315,7 @@ DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation
     DesktopAnimationState was_state = animation->state;
 
     bool reset_animation = false;
+    bool update_animation = false;
 
     switch(animation->state) {
     case DesktopAnimationStateActive:
@@ -333,9 +327,13 @@ DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation
         break;
     case DesktopAnimationStateSDCorrupted:
         reset_animation = true;
+        break;
     case DesktopAnimationStateSDEmpty:
-        reset_animation = true;
-    case DesktopAnimationStateSDOk:
+        animation->state = DesktopAnimationStateSDEmptyURL;
+        animation->current_blocking_icon = &A_CardNoDBUrl_128x51;
+        update_animation = true;
+        break;
+    case DesktopAnimationStateSDEmptyURL:
         reset_animation = true;
         break;
     default:
@@ -344,6 +342,13 @@ DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation
 
     if (reset_animation) {
         desktop_start_new_idle_animation(animation);
+        update_animation = true;
+    }
+
+    if (update_animation) {
+        if (animation->animation_changed_callback) {
+            animation->animation_changed_callback(animation->animation_changed_callback_context);
+        }
     }
 
     FURI_LOG_W("DBG", "Right click, state: %s -> %s", state_strs_dbg[was_state], state_strs_dbg[animation->state]);

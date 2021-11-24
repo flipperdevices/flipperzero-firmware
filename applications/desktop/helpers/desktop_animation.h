@@ -13,7 +13,7 @@ typedef enum {
     DesktopAnimationStateActive,
     DesktopAnimationStateLevelUpIsPending,
     DesktopAnimationStateSDEmpty,
-    DesktopAnimationStateSDOk,
+    DesktopAnimationStateSDEmptyURL,
     DesktopAnimationStateSDCorrupted,
 } DesktopAnimationState;
 
@@ -22,6 +22,7 @@ struct BasicAnimation {
     uint16_t duration;   // sec
     uint16_t active_cooldown;
     uint8_t weight;
+    uint16_t butthurt_level_mask;
 };
 
 struct ActiveAnimation {
