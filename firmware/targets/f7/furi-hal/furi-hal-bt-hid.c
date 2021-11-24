@@ -63,31 +63,30 @@ static uint8_t furi_hal_bt_hid_report_map_data[] = {
 
 FuriHalBtHidKbReport* kb_report = NULL;
 
-bool furi_hal_bt_hid_init() {
-    bool result = false;
-    do {
-        hid_svc_start();
-        kb_report = furi_alloc(sizeof(FuriHalBtHidKbReport));
-        // Configure Report Map characteristic
-        if(!hid_svc_update_report_map(furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data))) break;
-        // Configure HID Information characteristic
-        uint8_t hid_info_val[4] = {
-            FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION & 0x00ff,
-            (FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION & 0xff00) >> 8,
-            FURI_HAL_BT_INFO_COUNTRY_CODE,
-            FURI_HAL_BT_HID_INFO_FLAG_REMOTE_WAKE_MSK | FURI_HAL_BT_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK,
-        };
-        if(!hid_svc_update_info(hid_info_val, sizeof(hid_info_val))) break;
-        result = true;
-    } while(false);
-    
-    return result;
+void furi_hal_bt_hid_start() {
+    hid_svc_start();
+    kb_report = furi_alloc(sizeof(FuriHalBtHidKbReport));
+    // Configure Report Map characteristic
+    hid_svc_update_report_map(furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data));
+    // Configure HID Information characteristic
+    uint8_t hid_info_val[4] = {
+        FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION & 0x00ff,
+        (FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION & 0xff00) >> 8,
+        FURI_HAL_BT_INFO_COUNTRY_CODE,
+        FURI_HAL_BT_HID_INFO_FLAG_REMOTE_WAKE_MSK | FURI_HAL_BT_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK,
+    };
+    hid_svc_update_info(hid_info_val, sizeof(hid_info_val));
 }
 
-void furi_hal_bt_hid_deinit() {
+void furi_hal_bt_hid_stop() {
     furi_assert(kb_report);
     hid_svc_stop();
     free(kb_report);
+    kb_report = NULL;
+}
+
+bool furi_hal_bt_hid_is_started() {
+    return kb_report != NULL;
 }
 
 bool furi_hal_bt_hid_kb_press(uint16_t button) {

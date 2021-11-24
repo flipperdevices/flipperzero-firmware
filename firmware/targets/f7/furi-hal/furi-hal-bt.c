@@ -4,11 +4,91 @@
 #include <shci.h>
 #include <cmsis_os2.h>
 
+#include "dev_info_service.h"
+#include "battery_service.h"
+#include "serial_service.h"
+#include "furi-hal-bt-hid.h"
+
 #include <furi.h>
 
 #define TAG "FuriHalBt"
 
 osMutexId_t furi_hal_bt_core2_mtx = NULL;
+
+#define FURI_HA_BT_MAX_SERVICES_IN_PROFILE (3)
+
+typedef enum {
+    FuriHalBtServiceDeviceInfo,
+    FuriHalBtServiceBattery,
+    FuriHalBtServiceSerial,
+    FuriHalBtServiceHidKeyboard,
+} FuriHalBtServiceType;
+
+typedef void (*FuriHalBtServiceStart)(void);
+typedef void (*FuriHalBtServiceStop)(void);
+typedef bool (*FuriHalBtServiceIsStarted)(void);
+
+typedef struct {
+    FuriHalBtServiceType service;
+    FuriHalBtServiceStart start;
+    FuriHalBtServiceStop stop;
+    FuriHalBtServiceIsStarted is_started;
+} FuriHalBtService;
+
+typedef struct {
+    FuriHalBtService service[FURI_HA_BT_MAX_SERVICES_IN_PROFILE];
+    uint8_t service_num;
+    uint16_t appearance_char;
+    uint16_t advertise_service_uuid;
+} FuriHalBtProfileConfig;
+
+const FuriHalBtService device_info_service = {
+    .service = FuriHalBtServiceDeviceInfo,
+    .start = dev_info_svc_start,
+    .stop = dev_info_svc_stop,
+    .is_started = dev_info_svc_is_started,
+};
+
+const FuriHalBtService battery_service = {
+    .service = FuriHalBtServiceBattery,
+    .start = battery_svc_start,
+    .stop = battery_svc_stop,
+    .is_started = battery_svc_is_started,
+};
+
+const FuriHalBtService serial_service = {
+    .service = FuriHalBtServiceSerial,
+    .start = serial_svc_start,
+    .stop = serial_svc_stop,
+    .is_started = serial_svc_is_started,
+};
+
+const FuriHalBtService hid_kb_service = {
+    .service = FuriHalBtServiceHidKeyboard,
+    .start = furi_hal_bt_hid_start,
+    .stop = furi_hal_bt_hid_stop,
+    .is_started = furi_hal_bt_hid_is_started,
+};
+
+FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
+    [FuriHalBtProfileSerial] = {
+        .service[0] = device_info_service,
+        .service[1] = battery_service,
+        .service[2] = serial_service,
+        .service_num = 3,
+        .appearance_char = 0x0100,
+        .advertise_service_uuid = 0x8030,
+    },
+    [FuriHalBtProfileHidKeyboard] = {
+        .service[0] = device_info_service,
+        .service[1] = battery_service,
+        .service[2] = hid_kb_service,
+        .service_num = 3,
+        .appearance_char = GAP_APPEARANCE_KEYBOARD,
+        .advertise_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+    }
+};
+FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
     furi_hal_bt_core2_mtx = osMutexNew(NULL);
@@ -47,6 +127,35 @@ bool furi_hal_bt_start_core2() {
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
     return gap_init(event_cb, context);
+}
+
+void furi_hal_bt_set_profile(FuriHalBtProfile profile) {
+    furi_assert(profile < FuriHalBtProfileNumber);
+
+    // Stop services from current Profile
+    if(current_profile) {
+        for(uint8_t i = 0; i < current_profile->service_num; i++) {
+            // Stop services which are not in next profile
+            bool service_found = false;
+            for(uint8_t j = 0; j < profile_config[profile].service_num; j++) {
+                if(current_profile->service[i].service == profile_config[profile].service[j].service) {
+                    service_found = true;
+                    break;
+                }
+            }
+            if(!service_found) {
+                current_profile->service[i].stop();
+            }
+        }
+    }
+    // Start services from new Profile
+    for(uint8_t i = 0; i < profile_config[profile].service_num; i++) {
+        if(!profile_config[profile].service[i].is_started()) {
+            profile_config[profile].service[i].start();
+        }
+    }
+    // Update current profile
+    current_profile = &profile_config[profile];
 }
 
 void furi_hal_bt_start_advertising() {

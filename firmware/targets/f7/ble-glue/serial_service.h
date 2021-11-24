@@ -20,6 +20,8 @@ void serial_svc_notify_buffer_is_empty();
 
 void serial_svc_stop();
 
+bool serial_svc_is_started();
+
 bool serial_svc_update_tx(uint8_t* data, uint8_t data_len);
 
 #ifdef __cplusplus

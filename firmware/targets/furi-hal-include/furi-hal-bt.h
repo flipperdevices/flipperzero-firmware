@@ -19,6 +19,14 @@
 extern "C" {
 #endif
 
+typedef enum {
+    FuriHalBtProfileSerial,
+    FuriHalBtProfileHidKeyboard,
+
+    // Keep last for Profiles number calculation
+    FuriHalBtProfileNumber,
+} FuriHalBtProfile;
+
 /** Initialize
  */
 void furi_hal_bt_init();
@@ -40,6 +48,11 @@ bool furi_hal_bt_start_core2();
  * @param context - pointer to context
 */
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context);
+
+/** Set BLE Profile
+ * @param profile - FuriHalBtProfile instance
+ */
+void furi_hal_bt_set_profile(FuriHalBtProfile profile);
 
 /** Start advertising
  */

@@ -3,9 +3,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-bool furi_hal_bt_hid_init();
+void furi_hal_bt_hid_start();
 
-void furi_hal_bt_hid_deinit();
+void furi_hal_bt_hid_stop();
+
+bool furi_hal_bt_hid_is_started();
 
 bool furi_hal_bt_hid_kb_press(uint16_t button);
 
