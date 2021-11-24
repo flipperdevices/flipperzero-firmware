@@ -41,6 +41,7 @@ typedef struct {
 struct Bt {
     uint8_t* bt_keys_addr_start;
     uint16_t bt_keys_size;
+    uint16_t max_packet_size;
     BtSettings bt_settings;
     BtStatus status;
     osMessageQueueId_t message_queue;
@@ -51,5 +52,5 @@ struct Bt {
     Power* power;
     Rpc* rpc;
     RpcSession* rpc_session;
-    osSemaphoreId_t rpc_sem;
+    osEventFlagsId_t rpc_event;
 };

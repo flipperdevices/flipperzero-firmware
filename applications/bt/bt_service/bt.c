@@ -4,6 +4,10 @@
 
 #define TAG "BtSrv"
 
+#define BT_RPC_EVENT_BUFF_SENT (1UL << 0)
+#define BT_RPC_EVENT_DISCONNECTED (1UL << 1)
+#define BT_RPC_EVENT_ALL (BT_RPC_EVENT_BUFF_SENT | BT_RPC_EVENT_DISCONNECTED)
+
 static void bt_draw_statusbar_callback(Canvas* canvas, void* context) {
     furi_assert(context);
 
@@ -51,6 +55,8 @@ static void bt_battery_level_changed_callback(const void* _event, void* context)
 
 Bt* bt_alloc() {
     Bt* bt = furi_alloc(sizeof(Bt));
+    // Init default maximum packet size
+    bt->max_packet_size = FURI_HAL_BT_PACKET_SIZE_MAX;
     // Load settings
     if(!bt_settings_load(&bt->bt_settings)) {
         bt_settings_save(&bt->bt_settings);
@@ -75,7 +81,7 @@ Bt* bt_alloc() {
 
     // RPC
     bt->rpc = furi_record_open("rpc");
-    bt->rpc_sem = osSemaphoreNew(1, 0, NULL);
+    bt->rpc_event = osEventFlagsNew(NULL);
 
     return bt;
 }
@@ -97,7 +103,7 @@ static void bt_on_data_sent_callback(void* context) {
     furi_assert(context);
     Bt* bt = context;
 
-    osSemaphoreRelease(bt->rpc_sem);
+    osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_BUFF_SENT);
 }
 
 // Called from RPC thread
@@ -105,17 +111,22 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
     furi_assert(context);
     Bt* bt = context;
 
+    osEventFlagsClear(bt->rpc_event, BT_RPC_EVENT_ALL);
     size_t bytes_sent = 0;
     while(bytes_sent < bytes_len) {
         size_t bytes_remain = bytes_len - bytes_sent;
-        if(bytes_remain > FURI_HAL_BT_PACKET_SIZE_MAX) {
-            furi_hal_bt_tx(&bytes[bytes_sent], FURI_HAL_BT_PACKET_SIZE_MAX);
-            bytes_sent += FURI_HAL_BT_PACKET_SIZE_MAX;
+        if(bytes_remain > bt->max_packet_size) {
+            furi_hal_bt_tx(&bytes[bytes_sent], bt->max_packet_size);
+            bytes_sent += bt->max_packet_size;
         } else {
             furi_hal_bt_tx(&bytes[bytes_sent], bytes_remain);
             bytes_sent += bytes_remain;
         }
-        osSemaphoreAcquire(bt->rpc_sem, osWaitForever);
+        uint32_t event_flag =
+            osEventFlagsWait(bt->rpc_event, BT_RPC_EVENT_ALL, osFlagsWaitAny, osWaitForever);
+        if(event_flag & BT_RPC_EVENT_DISCONNECTED) {
+            break;
+        }
     }
 }
 
@@ -149,9 +160,11 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         message.data.battery_level = info.charge;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
     } else if(event.type == BleEventTypeDisconnected) {
-        FURI_LOG_I(TAG, "Close RPC connection");
         if(bt->rpc_session) {
+            FURI_LOG_I(TAG, "Close RPC connection");
+            osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
             rpc_session_close(bt->rpc_session);
+            furi_hal_bt_set_data_event_callbacks(0, NULL, NULL, NULL);
             bt->rpc_session = NULL;
         }
     } else if(event.type == BleEventTypeStartAdvertising) {
@@ -166,6 +179,8 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         BtMessage message = {
             .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+    } else if(event.type == BleEventTypeUpdateMTU) {
+        bt->max_packet_size = event.data.max_packet_size;
     }
 }
 
