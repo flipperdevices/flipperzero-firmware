@@ -12,6 +12,7 @@ typedef enum {
     SubghzReadRAWStatusIDLE,
     SubghzReadRAWStatusREC,
     SubghzReadRAWStatusTX,
+    SubghzReadRAWStatusTXRepeat,
 } SubghzReadRAWStatus;
 
 void subghz_read_raw_set_callback(

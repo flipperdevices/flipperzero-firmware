@@ -33,7 +33,6 @@ void subghz_scene_read_raw_callback(SubghzCustomEvent event, void* context) {
 void subghz_scene_read_raw_callback_end_tx(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
-    subghz_read_raw_stop_send(subghz->subghz_read_raw);
     view_dispatcher_send_custom_event(
         subghz->view_dispatcher, SubghzCustomEventViewReadRAWSendStop);
 }
@@ -159,6 +158,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz_tx_stop(subghz);
                 subghz_sleep(subghz);
             }
+            subghz_read_raw_stop_send(subghz->subghz_read_raw);
             return true;
             break;
         case SubghzCustomEventViewReadRAWIDLE:
