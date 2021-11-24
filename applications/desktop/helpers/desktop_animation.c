@@ -99,7 +99,7 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
         PUSH_BACK_ANIMATIONS(animation_list, level_3_animation, stats.butthurt);
         break;
     default:
-        furi_assert(0);
+        furi_crash("Dolphin level is out of bounds");
     }
 
     Power* power = furi_record_open("power");
@@ -307,7 +307,7 @@ DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation
         reset_animation = true;
         break;
     default:
-        furi_assert(0);
+        furi_crash("Unhandled desktop animation state");
     }
 
     if(reset_animation) {
@@ -341,7 +341,7 @@ void desktop_animation_start_oneshot_levelup(DesktopAnimation* animation) {
         animation->current_one_shot_icons = animation_level3up;
         animation->one_shot_animation_size = COUNT_OF(animation_level3up);
     } else {
-        furi_assert(0);
+        furi_crash("Dolphin level is out of bounds");
     }
     osTimerStart(animation->timer, LEVELUP_FRAME_RATE * 1000);
 }
