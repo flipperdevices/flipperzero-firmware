@@ -350,11 +350,11 @@ static void gap_advertise_start(GapState new_state)
 }
 
 static void gap_advertise_stop() {
-    if(gap->state == GapStateConnected) {
-        // Terminate connection
-        aci_gap_terminate(gap->gap_svc.connection_handle, 0x13);
-    }
     if(gap->state > GapStateIdle) {
+        if(gap->state == GapStateConnected) {
+            // Terminate connection
+            aci_gap_terminate(gap->gap_svc.connection_handle, 0x13);
+        }
         // Stop advertising
         osTimerStop(gap->advertise_timer);
         aci_gap_set_non_discoverable();
