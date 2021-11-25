@@ -45,6 +45,7 @@ typedef enum {
     GapCommandAdvFast,
     GapCommandAdvLowPower,
     GapCommandAdvStop,
+    GapCommandKillThread,
 } GapCommand;
 
 // Identity root key
@@ -383,7 +384,7 @@ static void gap_advetise_timer_callback(void* context) {
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
 }
 
-bool gap_init(BleEventCallback on_event_cb, void* context) {
+bool gap_init(BleEventCallback on_event_cb, void* context, Profile profile) {
     if (!ble_glue_is_radio_stack_ready()) {
         return false;
     }
@@ -410,22 +411,24 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     // Command queue allocation
     gap->command_queue = osMessageQueueNew(8, sizeof(GapCommand), NULL);
 
-    // Start HID service
-    // hid_svc_start();
     // Start Device Information service
     dev_info_svc_start();
     // Start Battery service
     battery_svc_start();
-    // Start Serial application
-    // serial_svc_start();
-    // Configure advirtise service UUID
+
     uint8_t adv_service_uid[2];
-    // adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
-    // adv_service_uid[1] = 0x30;
-    // uint8_t adv_service_uid[2];
     gap->gap_svc.adv_svc_uuid_len = 1;
-    adv_service_uid[0] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID && 0xff;
-    adv_service_uid[1] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID >> 8;
+    if(profile == ProfileSerial) {
+        // Start Serial application
+        serial_svc_start();
+        adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
+        adv_service_uid[1] = 0x30;
+    } else if(profile == ProfileHidKeyboard) {
+        // Start HID service
+        furi_hal_bt_hid_start();
+        adv_service_uid[0] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID && 0xff;
+        adv_service_uid[1] = HUMAN_INTERFACE_DEVICE_SERVICE_UUID >> 8;
+    }
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
 
     // Set callback
@@ -434,10 +437,20 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     return true;
 }
 
+void gap_kill_thread() {
+    if(gap) {
+        GapCommand command = GapCommandKillThread;
+        osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);
+    }
+}
+
 static void gap_app(void *arg) {
     GapCommand command;
     while(1) {
         furi_check(osMessageQueueGet(gap->command_queue, &command, NULL, osWaitForever) == osOK);
+        if(command == GapCommandKillThread) {
+            break;
+        }
         osMutexAcquire(gap->state_mutex, osWaitForever);
         if(command == GapCommandAdvFast) {
             gap_advertise_start(GapStateAdvFast);
@@ -448,4 +461,11 @@ static void gap_app(void *arg) {
         }
         osMutexRelease(gap->state_mutex);
     }
+    // Free resources
+    osMutexDelete(gap->state_mutex);
+    osMessageQueueDelete(gap->command_queue);
+    osTimerDelete(gap->advertise_timer);
+    free(gap);
+    gap = NULL;
+    osThreadExit();
 }

@@ -124,9 +124,15 @@ bool furi_hal_bt_start_core2() {
     return ret;
 }
 
-bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context) {
+bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtProfile profile) {
     furi_assert(event_cb);
-    return gap_init(event_cb, context);
+    Profile p;
+    if(profile == FuriHalBtProfileHidKeyboard) {
+        p = ProfileHidKeyboard;
+    } else {
+        p = ProfileSerial;
+    }
+    return gap_init(event_cb, context, p);
 }
 
 void furi_hal_bt_set_profile(FuriHalBtProfile profile) {

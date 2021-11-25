@@ -26,11 +26,13 @@ typedef enum {
     BtMessageTypeUpdateBatteryLevel,
     BtMessageTypePinCodeShow,
     BtMessageTypeKeysStorageUpdated,
+    BtMessageTypeSetProfile,
 } BtMessageType;
 
 typedef union {
     uint32_t pin_code;
     uint8_t battery_level;
+    BtProfile profile;
 } BtMessageData;
 
 typedef struct {
@@ -44,6 +46,7 @@ struct Bt {
     uint16_t max_packet_size;
     BtSettings bt_settings;
     BtStatus status;
+    BtProfile profile;
     osMessageQueueId_t message_queue;
     Gui* gui;
     ViewPort* statusbar_view_port;

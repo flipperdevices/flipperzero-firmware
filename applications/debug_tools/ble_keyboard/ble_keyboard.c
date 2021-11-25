@@ -2,6 +2,7 @@
 #include <furi-hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <bt/bt_service/bt.h>
 
 typedef enum {
     EventTypeInput,
@@ -45,7 +46,10 @@ int32_t ble_keyboard_app(void* p) {
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    furi_hal_bt_set_profile(FuriHalBtProfileHidKeyboard);
+    Bt* bt = furi_record_open("bt");
+    bt_set_profile(bt, BtProfileHidKeyboard);
+    osDelay(2000);
+    // furi_hal_bt_set_profile(FuriHalBtProfileHidKeyboard);
 
     BleKeyboardEvent event;
     while(1) {
@@ -110,10 +114,12 @@ int32_t ble_keyboard_app(void* p) {
     }
 
     // remove & free all stuff created by app
-    furi_hal_bt_set_profile(FuriHalBtProfileSerial);
+    bt_set_profile(bt, BtProfileSerial);
+    // furi_hal_bt_set_profile(FuriHalBtProfileSerial);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);
-
+    furi_record_close("gui");
+    furi_record_close("bt");
     return 0;
 }

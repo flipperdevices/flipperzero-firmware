@@ -35,13 +35,20 @@ typedef enum {
     GapStateConnected,
 } GapState;
 
-bool gap_init(BleEventCallback on_event_cb, void* context);
+typedef enum {
+    ProfileSerial,
+    ProfileHidKeyboard,
+} Profile;
+
+bool gap_init(BleEventCallback on_event_cb, void* context, Profile profile);
 
 void gap_start_advertising();
 
 void gap_stop_advertising();
 
 GapState gap_get_state();
+
+void gap_kill_thread();
 
 #ifdef __cplusplus
 }

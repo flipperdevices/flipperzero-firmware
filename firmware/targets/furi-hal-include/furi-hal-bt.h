@@ -47,7 +47,7 @@ bool furi_hal_bt_start_core2();
  * @param event_cb - BleEventCallback instance
  * @param context - pointer to context
 */
-bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context);
+bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtProfile profile);
 
 /** Set BLE Profile
  * @param profile - FuriHalBtProfile instance
