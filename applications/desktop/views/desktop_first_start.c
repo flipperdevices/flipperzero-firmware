@@ -38,13 +38,11 @@ static void desktop_first_start_draw(Canvas* canvas, void* model) {
         elements_multiline_text_framed(
             canvas, 64, 16 + STATUS_BAR_Y_SHIFT, "Thank you\nfor your\nsupport! >");
     } else if(m->page == 3) {
-        canvas_draw_icon(
-            canvas, width - 57, height - 45, &I_DolphinFirstStart3_57x48);
+        canvas_draw_icon(canvas, width - 57, height - 45, &I_DolphinFirstStart3_57x48);
         elements_multiline_text_framed(
             canvas, 0, 16 + STATUS_BAR_Y_SHIFT, "Kickstarter\ncampaign\nwas INSANE! >");
     } else if(m->page == 4) {
-        canvas_draw_icon(
-            canvas, width - 67, height - 51, &I_DolphinFirstStart4_67x53);
+        canvas_draw_icon(canvas, width - 67, height - 51, &I_DolphinFirstStart4_67x53);
         elements_multiline_text_framed(
             canvas, 0, 13 + STATUS_BAR_Y_SHIFT, "Now\nallow me\nto introduce\nmyself >");
     } else if(m->page == 5) {
@@ -66,13 +64,11 @@ static void desktop_first_start_draw(Canvas* canvas, void* model) {
             13 + STATUS_BAR_Y_SHIFT,
             "I can grow\nsmart'n'cool\nif you use me\noften >");
     } else if(m->page == 7) {
-        canvas_draw_icon(
-            canvas, width - 61, height - 51, &I_DolphinFirstStart7_61x51);
+        canvas_draw_icon(canvas, width - 61, height - 51, &I_DolphinFirstStart7_61x51);
         elements_multiline_text_framed(
             canvas, 0, 13 + STATUS_BAR_Y_SHIFT, "As long as\nyou read, write\nand emulate >");
     } else if(m->page == 8) {
-        canvas_draw_icon(
-            canvas, width - 56, height - 51, &I_DolphinFirstStart8_56x51);
+        canvas_draw_icon(canvas, width - 56, height - 51, &I_DolphinFirstStart8_56x51);
         elements_multiline_text_framed(
             canvas,
             0,
