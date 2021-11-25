@@ -214,11 +214,16 @@ void desktop_animation_activate(DesktopAnimation* animation) {
     }
 }
 
-static const Icon* desktop_animation_get_current_idle_animation(DesktopAnimation* animation) {
-    const Icon* active_icon = animation->current->active->icon;
-    const Icon* basic_icon = animation->current->basic->icon;
-    return (animation->state == DesktopAnimationStateActive && active_icon) ? active_icon :
-                                                                              basic_icon;
+static const Icon* desktop_animation_get_current_idle_animation(DesktopAnimation* animation, bool* status_bar_background_black) {
+    const ActiveAnimation* active = animation->current->active;
+    const BasicAnimation* basic = animation->current->basic;
+    if (animation->state == DesktopAnimationStateActive && active->icon) {
+        *status_bar_background_black = active->blacked_status_bar;
+        return active->icon;
+    } else {
+        *status_bar_background_black = basic->blacked_status_bar;
+        return basic->icon;
+    }
 }
 
 // Every time somebody starts 'desktop_animation_get_animation()'
@@ -227,7 +232,7 @@ static const Icon* desktop_animation_get_current_idle_animation(DesktopAnimation
 // 3) check if the SD card is empty
 // 4) if all false - get idle animation
 
-const Icon* desktop_animation_get_animation(DesktopAnimation* animation) {
+const Icon* desktop_animation_get_animation(DesktopAnimation* animation, bool* status_bar_background_black) {
     Dolphin* dolphin = furi_record_open("dolphin");
     Storage* storage = furi_record_open("storage");
     const Icon* icon = NULL;
@@ -272,7 +277,9 @@ const Icon* desktop_animation_get_animation(DesktopAnimation* animation) {
     }
 
     if(!icon) {
-        icon = desktop_animation_get_current_idle_animation(animation);
+        icon = desktop_animation_get_current_idle_animation(animation, status_bar_background_black);
+    } else {
+        status_bar_background_black = false;
     }
 
     furi_record_close("storage");
