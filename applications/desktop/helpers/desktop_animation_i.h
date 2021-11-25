@@ -33,7 +33,7 @@ static const ActiveAnimation animation_TV_active = {
 
 static const BasicAnimation animation_sleep = {
     .icon = &A_Sleep_128x51,
-    .blacked_status_bar = true,
+    .black_status_bar = true,
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
@@ -44,7 +44,7 @@ static const BasicAnimation animation_sleep = {
 
 static const ActiveAnimation animation_sleep_active = {
     .icon = &A_SleepActive_128x51,
-    .blacked_status_bar = true,
+    .black_status_bar = true,
     .duration = COMMON_ACTIVE_DURATION(2),
 };
 

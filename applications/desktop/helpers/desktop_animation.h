@@ -23,13 +23,13 @@ struct BasicAnimation {
     uint16_t duration; // sec
     uint16_t active_cooldown;
     uint8_t weight;
-    bool blacked_status_bar;
+    bool black_status_bar;
     uint16_t butthurt_level_mask;
 };
 
 struct ActiveAnimation {
     const Icon* icon;
-    bool blacked_status_bar;
+    bool black_status_bar;
     uint16_t duration; // sec
 };
 

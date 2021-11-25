@@ -220,10 +220,10 @@ static const Icon* desktop_animation_get_current_idle_animation(
     const ActiveAnimation* active = animation->current->active;
     const BasicAnimation* basic = animation->current->basic;
     if(animation->state == DesktopAnimationStateActive && active->icon) {
-        *status_bar_background_black = active->blacked_status_bar;
+        *status_bar_background_black = active->black_status_bar;
         return active->icon;
     } else {
-        *status_bar_background_black = basic->blacked_status_bar;
+        *status_bar_background_black = basic->black_status_bar;
         return basic->icon;
     }
 }
