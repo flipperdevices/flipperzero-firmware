@@ -84,19 +84,17 @@ static void subghz_keystore_mess_with_iv(uint8_t* iv) {
     asm volatile("movs   r0, #0x0    \n"
                  "movs   r1, #0x0    \n"
                  "movs   r2, #0x0    \n"
-                 "movs   r3, #0x0    \n"
                  "nani:              \n"
                  "ldrb   r1, [r0, %0]\n"
-                 "mov    r2, r1      \n"
-                 "add    r1, r3      \n"
-                 "mov    r3, r2      \n"
+                 "add    r1, r2      \n"
+                 "rsb    r2, r1      \n"
                  "strb   r1, [r0, %0]\n"
                  "adds   r0, #0x1    \n"
                  "cmp    r0, #0xF    \n"
                  "bls    nani        \n"
                  :
                  : "r"(iv)
-                 : "r0", "r1", "r2", "r3", "memory");
+                 : "r0", "r1", "r2", "memory");
 }
 
 static bool subghz_keystore_read_file(SubGhzKeystore* instance, File* file, uint8_t* iv) {
