@@ -55,7 +55,8 @@ void desktop_scene_main_on_enter(void* context) {
     desktop_animation_set_animation_changed_callback(
         desktop->animation, desktop_scene_main_animation_changed_callback, desktop);
     bool status_bar_background_black = false;
-    const Icon* icon = desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
+    const Icon* icon =
+        desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
     desktop_main_switch_dolphin_animation(desktop->main_view, icon, status_bar_background_black);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
 }
@@ -94,8 +95,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case DesktopMainEventUpdateAnimation: {
             bool status_bar_background_black = false;
-            const Icon* icon = desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
-            desktop_main_switch_dolphin_animation(desktop->main_view, icon, status_bar_background_black);
+            const Icon* icon =
+                desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
+            desktop_main_switch_dolphin_animation(
+                desktop->main_view, icon, status_bar_background_black);
             consumed = true;
             break;
         }

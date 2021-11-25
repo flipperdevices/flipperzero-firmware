@@ -52,7 +52,8 @@ DesktopAnimationState desktop_animation_handle_right(DesktopAnimation* animation
 
 void desktop_animation_start_oneshot_levelup(DesktopAnimation* animation);
 
-const Icon* desktop_animation_get_animation(DesktopAnimation* animation, bool* status_bar_background_black);
+const Icon*
+    desktop_animation_get_animation(DesktopAnimation* animation, bool* status_bar_background_black);
 const Icon* desktop_animation_get_oneshot_frame(DesktopAnimation* animation);
 
 void desktop_start_new_idle_animation(DesktopAnimation* animation);

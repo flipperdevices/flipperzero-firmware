@@ -22,7 +22,10 @@ void desktop_main_reset_hint(DesktopMainView* main_view) {
         });
 }
 
-void desktop_main_switch_dolphin_animation(DesktopMainView* main_view, const Icon* icon, bool status_bar_background_black) {
+void desktop_main_switch_dolphin_animation(
+    DesktopMainView* main_view,
+    const Icon* icon,
+    bool status_bar_background_black) {
     with_view_model(
         main_view->view, (DesktopMainViewModel * model) {
             if(model->animation) icon_animation_free(model->animation);
@@ -50,7 +53,7 @@ void desktop_main_render(Canvas* canvas, void* model) {
     DesktopMainViewModel* m = model;
     uint32_t now = osKernelGetTickCount();
 
-    if (m->status_bar_background_black) {
+    if(m->status_bar_background_black) {
         canvas_draw_box(canvas, 0, 0, GUI_STATUS_BAR_WIDTH, GUI_STATUS_BAR_HEIGHT);
     }
     if(m->icon) {

@@ -79,15 +79,22 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             x -= (width + 2);
-            canvas_frame_set(gui->canvas, x - 3, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(
+                gui->canvas, x - 3, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
             canvas_draw_box(gui->canvas, 1, 1, width + 3, 10);
             canvas_set_color(gui->canvas, ColorBlack);
 
-            canvas_draw_rframe(gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
+            canvas_draw_rframe(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
             canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
-            canvas_draw_line(gui->canvas, 2, canvas_height(gui->canvas) - 2, canvas_width(gui->canvas) - 2, canvas_height(gui->canvas) - 2);
+            canvas_draw_line(
+                gui->canvas,
+                2,
+                canvas_height(gui->canvas) - 2,
+                canvas_width(gui->canvas) - 2,
+                canvas_height(gui->canvas) - 2);
 
             canvas_frame_set(
                 gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
@@ -107,32 +114,23 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
 
-            canvas_frame_set(gui->canvas, 0, GUI_STATUS_BAR_Y, x + width + 5, GUI_STATUS_BAR_HEIGHT);
-            canvas_draw_rframe(gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
+            canvas_frame_set(
+                gui->canvas, 0, GUI_STATUS_BAR_Y, x + width + 5, GUI_STATUS_BAR_HEIGHT);
+            canvas_draw_rframe(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
             canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
-            canvas_draw_line(gui->canvas, 2, canvas_height(gui->canvas) - 2, canvas_width(gui->canvas) - 2, canvas_height(gui->canvas) - 2);
-
+            canvas_draw_line(
+                gui->canvas,
+                2,
+                canvas_height(gui->canvas) - 2,
+                canvas_width(gui->canvas) - 2,
+                canvas_height(gui->canvas) - 2);
 
             canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
             canvas_draw_box(gui->canvas, 1, 1, width + 3, 10);
             canvas_set_color(gui->canvas, ColorBlack);
-
-//            if(x == 0) { // Frame start
-//                canvas_draw_box(gui->canvas, 1, 0, 1, 12);
-//                canvas_draw_box(gui->canvas, 0, 1, 1, 11);
-//            }
-//
-//            canvas_draw_box(gui->canvas, 1, 11, width + 4, 2);
-//            canvas_draw_box(gui->canvas, 1, 0, width + 4, 1);
-//            canvas_draw_box(gui->canvas, width + 4, 0, 1, 12);
-//
-//            canvas_set_color(gui->canvas, ColorWhite);
-//            canvas_draw_dot(gui->canvas, width + 4, 0);
-//            canvas_draw_dot(gui->canvas, width + 4, 12);
-//
-//            canvas_set_color(gui->canvas, ColorBlack);
 
             canvas_frame_set(
                 gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);

@@ -17,7 +17,10 @@ void locked_view_timer_callback(void* context) {
     locked_view->callback(DesktopLockedEventUpdate, locked_view->context);
 }
 
-void desktop_locked_set_dolphin_animation(DesktopLockedView* locked_view, const Icon* icon, bool status_bar_background_black) {
+void desktop_locked_set_dolphin_animation(
+    DesktopLockedView* locked_view,
+    const Icon* icon,
+    bool status_bar_background_black) {
     with_view_model(
         locked_view->view, (DesktopLockedViewModel * model) {
             if(model->animation) icon_animation_free(model->animation);
@@ -101,7 +104,7 @@ void desktop_locked_render(Canvas* canvas, void* model) {
     }
 
     if(m->animation && m->animation_seq_end) {
-        if (m->status_bar_background_black) {
+        if(m->status_bar_background_black) {
             canvas_draw_box(canvas, 0, 0, GUI_STATUS_BAR_WIDTH, GUI_STATUS_BAR_HEIGHT);
         }
         canvas_draw_icon_animation(canvas, 0, 0 + STATUS_BAR_Y_SHIFT, m->animation);

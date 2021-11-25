@@ -25,7 +25,7 @@
 #include "desktop/desktop_settings/desktop_settings.h"
 #include <gui/icon.h>
 
-#define STATUS_BAR_Y_SHIFT  13
+#define STATUS_BAR_Y_SHIFT 13
 
 typedef enum {
     DesktopViewMain,
