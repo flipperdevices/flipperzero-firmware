@@ -64,9 +64,9 @@ void desktop_lock_menu_render(Canvas* canvas, void* model) {
         if(i == 1 && !m->pin_set) str = "Set PIN";
         if(m->hint_timeout && m->idx == 2 && m->idx == i) str = "Not implemented";
 
-        canvas_draw_str_aligned(canvas, 64, 13 + (i * 17), AlignCenter, AlignCenter, str);
+        canvas_draw_str_aligned(canvas, 64, 9 + (i * 17), AlignCenter, AlignCenter, str);
 
-        if(m->idx == i) elements_frame(canvas, 15, 5 + (i * 17), 98, 15);
+        if(m->idx == i) elements_frame(canvas, 15, 1 + (i * 17), 98, 15);
     }
 }
 
