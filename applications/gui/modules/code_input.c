@@ -275,7 +275,7 @@ static void code_input_handle_dpad(CodeInputModel* model, InputKey key) {
 static void code_input_view_draw_callback(Canvas* canvas, void* _model) {
     CodeInputModel* model = _model;
     uint8_t y_offset = 0;
-    if(!strlen(model->header)) y_offset = 5;
+    if(!strlen(model->header)) y_offset = 9;
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
