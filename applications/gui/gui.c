@@ -83,7 +83,7 @@ void gui_redraw_status_bar(Gui* gui) {
                 gui->canvas, x - 3, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 1, 1, width + 3, 10);
+            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
             canvas_set_color(gui->canvas, ColorBlack);
 
             canvas_draw_rframe(
@@ -129,7 +129,7 @@ void gui_redraw_status_bar(Gui* gui) {
             canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 1, 1, width + 3, 10);
+            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
             canvas_set_color(gui->canvas, ColorBlack);
 
             canvas_frame_set(
