@@ -18,7 +18,7 @@ void subghz_scene_save_name_on_enter(void* context) {
 
     if(!strcmp(subghz->file_name, "")) {
         set_random_name(subghz->file_name, sizeof(subghz->file_name));
-        
+
     } else {
         memcpy(subghz->file_name_tmp, subghz->file_name, strlen(subghz->file_name) + 1);
         if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
