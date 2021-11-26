@@ -24,6 +24,7 @@
 #include "helpers/desktop_animation.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 #include <gui/icon.h>
+#include <gui/modules/submenu.h>
 
 #define STATUS_BAR_Y_SHIFT 13
 
@@ -35,6 +36,7 @@ typedef enum {
     DesktopViewFirstStart,
     DesktopViewHwMismatch,
     DesktopViewPinSetup,
+    DesktopViewSubmenu,
     DesktopViewTotal,
 } DesktopViewEnum;
 
@@ -46,6 +48,8 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
+    const PairedAnimation* debug_animation;
+    bool debug_animation_active;
     DesktopAnimation* animation;
     DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
@@ -54,6 +58,7 @@ struct Desktop {
     DesktopLockedView* locked_view;
     DesktopDebugView* debug_view;
     CodeInput* code_input;
+    Submenu* submenu;
 
     DesktopSettings settings;
     PinCode pincode_buffer;

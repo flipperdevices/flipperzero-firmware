@@ -14,12 +14,13 @@
 LIST_DEF(AnimationList, const PairedAnimation*, M_PTR_OPLIST)
 #define M_OPL_AnimationList_t() LIST_OPLIST(AnimationList)
 
-#define PUSH_BACK_ANIMATIONS(listname, animations, butthurt)                          \
-    for(int i = 0; i < COUNT_OF(animations); ++i) {                                   \
-        if(!(animations)[i].basic->butthurt_level_mask ||                             \
-           ((animations)[i].basic->butthurt_level_mask & BUTTHURT_LEVEL(butthurt))) { \
-            AnimationList_push_back(animation_list, &(animations)[i]);                \
-        }                                                                             \
+#define PUSH_BACK_ANIMATIONS(listname, animations, butthurt, _level)                            \
+    for(int i = 0; i < COUNT_OF(animations); ++i) {                                             \
+        if((!(animations)[i].basic->butthurt_level_mask ||                                      \
+            ((animations)[i].basic->butthurt_level_mask & BUTTHURT_LEVEL(butthurt))) &&         \
+           (((animations)[i].basic->level == 0) || ((animations)[i].basic->level == _level))) { \
+            AnimationList_push_back(animation_list, &(animations)[i]);                          \
+        }                                                                                       \
     }
 
 #define IS_BLOCKING_ANIMATION(x) \
@@ -81,33 +82,18 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
     furi_record_close("dolphin");
 
     furi_assert((stats.level >= 1) && (stats.level <= 3));
-    uint8_t level = stats.level;
 
     AnimationList_t animation_list;
     AnimationList_init(animation_list);
 
-    PUSH_BACK_ANIMATIONS(animation_list, mad_animation, stats.butthurt);
-    PUSH_BACK_ANIMATIONS(animation_list, calm_animation, stats.butthurt);
-    switch(level) {
-    case 1:
-        PUSH_BACK_ANIMATIONS(animation_list, level_1_animation, stats.butthurt);
-        break;
-    case 2:
-        PUSH_BACK_ANIMATIONS(animation_list, level_2_animation, stats.butthurt);
-        break;
-    case 3:
-        PUSH_BACK_ANIMATIONS(animation_list, level_3_animation, stats.butthurt);
-        break;
-    default:
-        furi_crash("Dolphin level is out of bounds");
-    }
+    PUSH_BACK_ANIMATIONS(animation_list, idle_animations, stats.butthurt, stats.level);
 
     Power* power = furi_record_open("power");
     PowerInfo info;
     power_get_info(power, &info);
 
     if(!power_is_battery_well(&info)) {
-        PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation, stats.butthurt);
+        PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation, stats.butthurt, stats.level);
     }
 
     Storage* storage = furi_record_open("storage");
@@ -115,7 +101,7 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
     animation->current = NULL;
 
     if(sd_status == FSE_NOT_READY) {
-        PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation, stats.butthurt);
+        PUSH_BACK_ANIMATIONS(animation_list, no_sd_animation, stats.butthurt, stats.level);
         animation->sd_shown_error_card_bad = false;
         animation->sd_shown_error_db = false;
     }

@@ -25,6 +25,8 @@ struct BasicAnimation {
     uint8_t weight;
     bool black_status_bar;
     uint16_t butthurt_level_mask;
+    const char* name;
+    uint8_t level;
 };
 
 struct ActiveAnimation {

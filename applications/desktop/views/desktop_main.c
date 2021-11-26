@@ -91,6 +91,10 @@ bool desktop_main_input(InputEvent* event, void* context) {
         main_view->callback(DesktopMainEventOpenFavorite, main_view->context);
     } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
         main_view->callback(DesktopMainEventRightShort, main_view->context);
+    } else if(event->key == InputKeyLeft && event->type == InputTypeLong) {
+        main_view->callback(DesktopMainEventLeftLong, main_view->context);
+    } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
+        main_view->callback(DesktopMainEventBack, main_view->context);
     }
 
     desktop_main_reset_hint(main_view);

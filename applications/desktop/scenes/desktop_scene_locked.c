@@ -30,14 +30,14 @@ void desktop_scene_locked_on_enter(void* context) {
         desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
     desktop_locked_set_dolphin_animation(locked_view, icon, status_bar_background_black);
 
-    uint32_t state = scene_manager_get_scene_state(desktop->scene_manager, DesktopViewLocked);
+    uint32_t state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLocked);
 
     desktop_locked_with_pin(desktop->locked_view, state == DesktopLockedWithPin);
 
     view_port_enabled_set(desktop->lock_viewport, true);
     osTimerStart(locked_view->timer, osKernelGetTickFreq() / 16);
 
-    view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewLocked);
+    view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopSceneLocked);
 }
 
 static bool desktop_scene_locked_check_pin(Desktop* desktop, DesktopMainEvent event) {

@@ -2,6 +2,7 @@
 #include "cmsis_os2.h"
 #include "desktop/desktop.h"
 #include "desktop_i.h"
+#include "gui/modules/submenu.h"
 #include <dolphin/dolphin.h>
 #include <furi/pubsub.h>
 #include <furi/record.h>
@@ -56,6 +57,7 @@ Desktop* desktop_alloc() {
     desktop->first_start_view = desktop_first_start_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->code_input = code_input_alloc();
+    desktop->submenu = submenu_alloc();
 
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewMain, desktop_main_get_view(desktop->main_view));
@@ -79,6 +81,8 @@ Desktop* desktop_alloc() {
         popup_get_view(desktop->hw_mismatch_popup));
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewPinSetup, code_input_get_view(desktop->code_input));
+    view_dispatcher_add_view(
+        desktop->view_dispatcher, DesktopViewSubmenu, submenu_get_view(desktop->submenu));
     // Lock icon
     desktop->lock_viewport = view_port_alloc();
     view_port_set_width(desktop->lock_viewport, icon_get_width(&I_Lock_8x8));
@@ -111,6 +115,7 @@ void desktop_free(Desktop* desktop) {
     desktop_first_start_free(desktop->first_start_view);
     popup_free(desktop->hw_mismatch_popup);
     code_input_free(desktop->code_input);
+    submenu_free(desktop->submenu);
 
     furi_record_close("gui");
     desktop->gui = NULL;

@@ -14,6 +14,8 @@ typedef enum {
     DesktopMainEventOpenDebug,
     DesktopMainEventUnlocked,
     DesktopMainEventRightShort,
+    DesktopMainEventLeftLong,
+    DesktopMainEventBack,
     DesktopMainEventUpdateAnimation,
     DesktopMainEventUpdateOneShotAnimation,
 } DesktopMainEvent;

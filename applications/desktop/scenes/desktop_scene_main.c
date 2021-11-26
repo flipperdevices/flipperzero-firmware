@@ -108,8 +108,14 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             if(state == DesktopAnimationStateLevelUpIsPending) {
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneLevelUp);
             }
+            consumed = true;
             break;
         }
+
+        case DesktopMainEventLeftLong:
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneAnimationDebug);
+            consumed = true;
+            break;
 
         default:
             break;
