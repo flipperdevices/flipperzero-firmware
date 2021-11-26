@@ -87,6 +87,8 @@ void furi_hal_i2c_bus_handle_power_event(
         LL_I2C_DisableGeneralCall(handle->bus->i2c);
         LL_I2C_EnableClockStretching(handle->bus->i2c);
     } else if(event == FuriHalI2cBusHandleEventDetach) {
+        hal_gpio_write(&gpio_i2c_power_sda, 1);
+        hal_gpio_write(&gpio_i2c_power_scl, 1);
         hal_gpio_init_ex(
             &gpio_i2c_power_sda, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
         hal_gpio_init_ex(
