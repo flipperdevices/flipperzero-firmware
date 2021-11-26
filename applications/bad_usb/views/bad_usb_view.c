@@ -33,17 +33,17 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     }
 
     if(model->state.state == BadUsbStateNotConnected) {
-        //canvas_draw_icon(canvas, 4, 19, &I_EviSmile1_18x21);
+        canvas_draw_icon(canvas, 4, 22, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 27, AlignRight, AlignBottom, "Connect");
         canvas_draw_str_aligned(canvas, 127, 39, AlignRight, AlignBottom, "to USB");
     } else if(model->state.state == BadUsbStateFileError) {
-        //canvas_draw_icon(canvas, 4, 19, &I_EviSmile1_18x21);
+        canvas_draw_icon(canvas, 4, 22, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 27, AlignRight, AlignBottom, "File");
         canvas_draw_str_aligned(canvas, 127, 39, AlignRight, AlignBottom, "ERROR");
     } else if(model->state.state == BadUsbStateScriptError) {
-        //canvas_draw_icon(canvas, 4, 19, &I_EviSmile1_18x21);
+        canvas_draw_icon(canvas, 4, 22, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
         canvas_set_font(canvas, FontSecondary);
@@ -52,7 +52,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 127, 46, AlignRight, AlignBottom, string_get_cstr(disp_str));
         string_reset(disp_str);
     } else if(model->state.state == BadUsbStateIdle) {
-        //canvas_draw_icon(canvas, 4, 19, &I_EviSmile1_18x21);
+        canvas_draw_icon(canvas, 4, 22, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 36, AlignRight, AlignBottom, "0");
         canvas_draw_icon(canvas, 117, 22, &I_Percent_10x14);
@@ -92,7 +92,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
             canvas, 127, 46, AlignRight, AlignBottom, string_get_cstr(disp_str));
         string_reset(disp_str);
     } else {
-        //canvas_draw_icon(canvas, 4, 19, &I_EviSmile1_18x21);
+        canvas_draw_icon(canvas, 4, 22, &I_Clock_18x18);
     }
 
     string_clear(disp_str);
