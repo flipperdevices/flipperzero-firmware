@@ -14,12 +14,20 @@
 
 #define ANIMATION_NO_SD (200)
 #define ANIMATION_BAD_BATTERY (201)
+#define ANIMATION_CARD_BAD (202)
+#define ANIMATION_CARD_NO_DB (203)
+#define ANIMATION_CARD_NO_DB_URL (204)
+#define ANIMATION_LEVELUP_PENDING (205)
 
 #define EVENT_BIT_SUBMENU (0x40000000)
 
 extern const PairedAnimation idle_animations[17];
 extern const PairedAnimation no_sd_animation[1];
 extern const PairedAnimation check_battery_animation[1];
+extern const PairedAnimation card_bad_animation[1];
+extern const PairedAnimation no_db_animation[1];
+extern const PairedAnimation no_db_url_animation[1];
+extern const PairedAnimation levelup_pending_animation[1];
 
 void desktop_scene_animation_debug_callback(DesktopMainEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -59,6 +67,34 @@ void desktop_scene_animation_debug_on_enter(void* context) {
         desktop_scene_animation_list_submenu_callback,
         desktop);
 
+    submenu_add_item(
+        desktop->submenu,
+        card_bad_animation[0].basic->name,
+        EVENT_BIT_SUBMENU | ANIMATION_CARD_BAD,
+        desktop_scene_animation_list_submenu_callback,
+        desktop);
+
+    submenu_add_item(
+        desktop->submenu,
+        no_db_animation[0].basic->name,
+        EVENT_BIT_SUBMENU | ANIMATION_CARD_NO_DB,
+        desktop_scene_animation_list_submenu_callback,
+        desktop);
+
+    submenu_add_item(
+        desktop->submenu,
+        no_db_url_animation[0].basic->name,
+        EVENT_BIT_SUBMENU | ANIMATION_CARD_NO_DB_URL,
+        desktop_scene_animation_list_submenu_callback,
+        desktop);
+
+    submenu_add_item(
+        desktop->submenu,
+        levelup_pending_animation[0].basic->name,
+        EVENT_BIT_SUBMENU | ANIMATION_LEVELUP_PENDING,
+        desktop_scene_animation_list_submenu_callback,
+        desktop);
+
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewSubmenu);
 }
 
@@ -77,6 +113,18 @@ bool desktop_scene_animation_debug_on_event(void* context, SceneManagerEvent eve
                 break;
             case ANIMATION_BAD_BATTERY:
                 desktop->debug_animation = &check_battery_animation[0];
+                break;
+            case ANIMATION_CARD_NO_DB:
+                desktop->debug_animation = &no_db_animation[0];
+                break;
+            case ANIMATION_CARD_NO_DB_URL:
+                desktop->debug_animation = &no_db_url_animation[0];
+                break;
+            case ANIMATION_CARD_BAD:
+                desktop->debug_animation = &card_bad_animation[0];
+                break;
+            case ANIMATION_LEVELUP_PENDING:
+                desktop->debug_animation = &levelup_pending_animation[0];
                 break;
             default:
                 desktop->debug_animation = &idle_animations[event.event];

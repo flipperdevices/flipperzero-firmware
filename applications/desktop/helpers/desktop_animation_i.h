@@ -338,3 +338,37 @@ const PairedAnimation no_sd_animation[] = {
 const PairedAnimation check_battery_animation[] = {
     {.basic = &animation_bad_battery, .active = NULL},
 };
+
+// Blocking animations
+
+static const BasicAnimation animation_card_bad = {
+    DEFINE_ICON_AND_NAME(A_CardBad_128x51),
+};
+
+static const BasicAnimation animation_card_no_db = {
+    DEFINE_ICON_AND_NAME(A_CardNoDB_128x51),
+};
+
+static const BasicAnimation animation_card_no_db_url = {
+    DEFINE_ICON_AND_NAME(A_CardNoDBUrl_128x51),
+};
+
+static const BasicAnimation animation_levelup_pending = {
+    DEFINE_ICON_AND_NAME(A_LevelUpPending_128x51),
+};
+
+const PairedAnimation card_bad_animation[] = {
+    {.basic = &animation_card_bad, .active = NULL},
+};
+
+const PairedAnimation no_db_animation[] = {
+    {.basic = &animation_card_no_db, .active = NULL},
+};
+
+const PairedAnimation no_db_url_animation[] = {
+    {.basic = &animation_card_no_db_url, .active = NULL},
+};
+
+const PairedAnimation levelup_pending_animation[] = {
+    {.basic = &animation_levelup_pending, .active = NULL},
+};
