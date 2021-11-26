@@ -107,6 +107,14 @@ static bool ducky_get_number(char* param, uint32_t* val) {
     return false;
 }
 
+static uint32_t ducky_get_command_len(char* line) {
+    uint32_t len = strlen(line);
+    for(uint32_t i = 0; i < len; i++) {
+        if(line[i] == ' ') return i;
+    }
+    return 0;
+}
+
 static bool ducky_string(char* param) {
     uint32_t i = 0;
     while(param[i] != '\0') {
@@ -129,9 +137,17 @@ static uint16_t ducky_get_keycode(char* param, bool accept_chars) {
 }
 
 static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
-    //uint32_t line_len = string_size(line);
+    uint32_t line_len = string_size(line);
     char* line_t = (char*)string_get_cstr(line);
     bool state = false;
+
+    for(uint32_t i = 0; i < line_len; i++) {
+        if((line_t[i] != ' ') && (line_t[i] != '\t') && (line_t[i] != '\n')) {
+            line_t = &line_t[i];
+            break; // Skip spaces and tabs
+        }
+        if(i == line_len - 1) return 0; // Skip empty lines
+    }
 
     FURI_LOG_I(WORKER_TAG, "line:%s", line_t);
 
@@ -141,7 +157,7 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         return (0);
     } else if(strncmp(line_t, ducky_cmd_delay, strlen(ducky_cmd_delay)) == 0) {
         // DELAY
-        line_t = &line_t[args_get_first_word_length(line) + 1];
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
         uint32_t delay_val = 0;
         state = ducky_get_number(line_t, &delay_val);
         if((state) && (delay_val > 0)) {
@@ -152,17 +168,17 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         (strncmp(line_t, ducky_cmd_defdelay_1, strlen(ducky_cmd_defdelay_1)) == 0) ||
         (strncmp(line_t, ducky_cmd_defdelay_2, strlen(ducky_cmd_defdelay_2)) == 0)) {
         // DEFAULT_DELAY
-        line_t = &line_t[args_get_first_word_length(line) + 1];
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
         state = ducky_get_number(line_t, &bad_usb->defdelay);
         return (state) ? (0) : (-1);
     } else if(strncmp(line_t, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
-        line_t = &line_t[args_get_first_word_length(line) + 1];
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
         state = ducky_string(line_t);
         return (state) ? (0) : (-1);
     } else if(strncmp(line_t, ducky_cmd_repeat, strlen(ducky_cmd_repeat)) == 0) {
         // REPEAT
-        line_t = &line_t[args_get_first_word_length(line) + 1];
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
         state = ducky_get_number(line_t, &bad_usb->repeat_cnt);
         return (state) ? (0) : (-1);
     } else {
@@ -171,7 +187,7 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         if(key == KEY_NONE) return (-1);
         if((key & 0xFF00) != 0) {
             // It's a modifier key
-            line_t = &line_t[args_get_first_word_length(line) + 1];
+            line_t = &line_t[ducky_get_command_len(line_t) + 1];
             key |= ducky_get_keycode(line_t, true);
         }
         furi_hal_hid_kb_press(key);
