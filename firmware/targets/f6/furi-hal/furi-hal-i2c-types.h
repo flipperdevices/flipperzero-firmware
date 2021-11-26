@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stm32wbxx_ll_i2c.h>
-#include <cmsis_os2.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,8 +11,12 @@ typedef struct FuriHalI2cBusHandle FuriHalI2cBusHandle;
 
 /** FuriHal i2c bus states */
 typedef enum {
-    FuriHalI2cBusEventInit, /**< Bus initialize event */
-    FuriHalI2cBusEventDeinit, /**< Bus deinitialize event  */
+    FuriHalI2cBusEventInit, /**< Bus initialization event, called on system start */
+    FuriHalI2cBusEventDeinit, /**< Bus deinitialization event, called on system stop */
+    FuriHalI2cBusEventLock, /**< Bus lock event, called before activation */
+    FuriHalI2cBusEventUnlock, /**< Bus unlock event, called after deactivation */
+    FuriHalI2cBusEventActivate, /**< Bus activation event, called before handle activation */
+    FuriHalI2cBusEventDeactivate, /**< Bus deactivation event, called after handle deactivation  */
 } FuriHalI2cBusEvent;
 
 /** FuriHal i2c bus event callback */
@@ -22,15 +25,14 @@ typedef void (*FuriHalI2cBusEventCallback)(FuriHalI2cBus* bus, FuriHalI2cBusEven
 /** FuriHal i2c bus */
 struct FuriHalI2cBus {
     I2C_TypeDef* i2c;
-    osMutexId_t mutex;
     FuriHalI2cBusHandle* current_handle;
     FuriHalI2cBusEventCallback callback;
 };
 
 /** FuriHal i2c handle states */
 typedef enum {
-    FuriHalI2cBusHandleEventAttach, /**< Handle attach: connect gpio and apply bus config */
-    FuriHalI2cBusHandleEventDetach, /**< Handle detach: disconnect gpio and reset bus config */
+    FuriHalI2cBusHandleEventActivate, /**< Handle activate: connect gpio and apply bus config */
+    FuriHalI2cBusHandleEventDeactivate, /**< Handle deactivate: disconnect gpio and reset bus config */
 } FuriHalI2cBusHandleEvent;
 
 /** FuriHal i2c handle event callback */

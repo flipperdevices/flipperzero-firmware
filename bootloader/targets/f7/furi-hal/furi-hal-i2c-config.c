@@ -19,13 +19,17 @@
 
 static void furi_hal_i2c_bus_power_event(FuriHalI2cBus* bus, FuriHalI2cBusEvent event) {
     if(event == FuriHalI2cBusEventInit) {
-        LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
-
         LL_RCC_SetI2CClockSource(LL_RCC_I2C1_CLKSOURCE_PCLK1);
-        LL_I2C_Enable(bus->i2c);
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C1);
+        bus->current_handle = NULL;
     } else if(event == FuriHalI2cBusEventDeinit) {
-        LL_I2C_Disable(bus->i2c);
+    } else if(event == FuriHalI2cBusEventLock) {
+    } else if(event == FuriHalI2cBusEventUnlock) {
+    } else if(event == FuriHalI2cBusEventActivate) {
+        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C1);
+    } else if(event == FuriHalI2cBusEventDeactivate) {
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C1);
     }
 }
 
@@ -36,11 +40,12 @@ FuriHalI2cBus furi_hal_i2c_bus_power = {
 };
 
 static void furi_hal_i2c_bus_external_event(FuriHalI2cBus* bus, FuriHalI2cBusEvent event) {
-    if(event == FuriHalI2cBusEventInit) {
+    if(event == FuriHalI2cBusEventActivate) {
+        LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C3);
         LL_RCC_SetI2CClockSource(LL_RCC_I2C3_CLKSOURCE_PCLK1);
-        LL_I2C_Enable(bus->i2c);
-    } else if(event == FuriHalI2cBusEventDeinit) {
-        LL_I2C_Disable(bus->i2c);
+        LL_APB1_GRP1_ReleaseReset(LL_APB1_GRP1_PERIPH_I2C3);
+    } else if(event == FuriHalI2cBusEventDeactivate) {
+        LL_APB1_GRP1_ForceReset(LL_APB1_GRP1_PERIPH_I2C3);
     }
 }
 
@@ -53,7 +58,8 @@ FuriHalI2cBus furi_hal_i2c_bus_external = {
 void furi_hal_i2c_bus_handle_power_event(
     FuriHalI2cBusHandle* handle,
     FuriHalI2cBusHandleEvent event) {
-    if(event == FuriHalI2cBusHandleEventAttach) {
+    if(event == FuriHalI2cBusHandleEventActivate) {
+        LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
         hal_gpio_init_ex(
             &gpio_i2c_power_sda,
             GpioModeAltFunctionOpenDrain,
@@ -86,7 +92,9 @@ void furi_hal_i2c_bus_handle_power_event(
         LL_I2C_DisableOwnAddress2(handle->bus->i2c);
         LL_I2C_DisableGeneralCall(handle->bus->i2c);
         LL_I2C_EnableClockStretching(handle->bus->i2c);
-    } else if(event == FuriHalI2cBusHandleEventDetach) {
+        LL_I2C_Enable(handle->bus->i2c);
+    } else if(event == FuriHalI2cBusHandleEventDeactivate) {
+        LL_I2C_Disable(handle->bus->i2c);
         hal_gpio_write(&gpio_i2c_power_sda, 1);
         hal_gpio_write(&gpio_i2c_power_scl, 1);
         hal_gpio_init_ex(

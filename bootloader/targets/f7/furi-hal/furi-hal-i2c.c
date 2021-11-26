@@ -7,33 +7,32 @@
 
 #include <assert.h>
 
-static void furi_hal_i2c_init_bus(FuriHalI2cBus* bus) {
-    bus->current_handle = NULL;
-}
-
 void furi_hal_i2c_init() {
-    furi_hal_i2c_init_bus(&furi_hal_i2c_bus_power);
-    furi_hal_i2c_init_bus(&furi_hal_i2c_bus_external);
+    furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventInit);
 }
 
 void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle) {
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventLock);
+
     assert(handle->bus->current_handle == NULL);
 
     handle->bus->current_handle = handle;
 
-    handle->bus->callback(handle->bus, FuriHalI2cBusEventInit);
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventActivate);
 
-    handle->callback(handle, FuriHalI2cBusHandleEventAttach);
+    handle->callback(handle, FuriHalI2cBusHandleEventActivate);
 }
 
 void furi_hal_i2c_release(FuriHalI2cBusHandle* handle) {
     assert(handle->bus->current_handle == handle);
 
-    handle->callback(handle, FuriHalI2cBusHandleEventDetach);
+    handle->callback(handle, FuriHalI2cBusHandleEventDeactivate);
 
-    handle->bus->callback(handle->bus, FuriHalI2cBusEventDeinit);
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventDeactivate);
 
     handle->bus->current_handle = NULL;
+
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventUnlock);
 }
 
 bool furi_hal_i2c_tx(

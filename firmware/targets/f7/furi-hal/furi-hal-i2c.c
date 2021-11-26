@@ -8,40 +8,36 @@
 
 #define TAG "FuriHalI2C"
 
-static void furi_hal_i2c_init_bus(FuriHalI2cBus* bus) {
-    furi_assert(bus->mutex == NULL);
-    bus->mutex = osMutexNew(NULL);
-    bus->current_handle = NULL;
-}
-
 void furi_hal_i2c_init() {
-    furi_hal_i2c_init_bus(&furi_hal_i2c_bus_power);
-    furi_hal_i2c_init_bus(&furi_hal_i2c_bus_external);
+    furi_hal_i2c_bus_power.callback(&furi_hal_i2c_bus_power, FuriHalI2cBusEventInit);
+    furi_hal_i2c_bus_external.callback(&furi_hal_i2c_bus_external, FuriHalI2cBusEventInit);
     FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_i2c_acquire(FuriHalI2cBusHandle* handle) {
-    furi_check(osMutexAcquire(handle->bus->mutex, osWaitForever) == osOK);
-
+    // Lock bus access
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventLock);
+    // Ensuree that no active handle set
     furi_check(handle->bus->current_handle == NULL);
-
+    // Set current handle
     handle->bus->current_handle = handle;
-
-    handle->bus->callback(handle->bus, FuriHalI2cBusEventInit);
-
-    handle->callback(handle, FuriHalI2cBusHandleEventAttach);
+    // Activate bus
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventActivate);
+    // Activate handle
+    handle->callback(handle, FuriHalI2cBusHandleEventActivate);
 }
 
 void furi_hal_i2c_release(FuriHalI2cBusHandle* handle) {
+    // Ensure that current handle is our handle
     furi_check(handle->bus->current_handle == handle);
-
-    handle->callback(handle, FuriHalI2cBusHandleEventDetach);
-
-    handle->bus->callback(handle->bus, FuriHalI2cBusEventDeinit);
-
+    // Deactivate handle
+    handle->callback(handle, FuriHalI2cBusHandleEventDeactivate);
+    // Deactivate bus
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventDeactivate);
+    // Reset current handle
     handle->bus->current_handle = NULL;
-
-    furi_check(osMutexRelease(handle->bus->mutex) == osOK);
+    // Unlock bus
+    handle->bus->callback(handle->bus, FuriHalI2cBusEventUnlock);
 }
 
 bool furi_hal_i2c_tx(
