@@ -256,16 +256,22 @@ float furi_hal_power_get_battery_current(FuriHalPowerIC ic) {
     return ret;
 }
 
-float furi_hal_power_get_battery_temperature(FuriHalPowerIC ic) {
+static float furi_hal_power_get_battery_temperature_internal(FuriHalPowerIC ic) {
     float ret = 0.0f;
 
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     if (ic == FuriHalPowerICCharger) {
         // Linear approximation, +/- 5 C
         ret = (71.0f - (float)bq25896_get_ntc_mpct(&furi_hal_i2c_handle_power)/1000) / 0.6f;
     } else if (ic == FuriHalPowerICFuelGauge) {
         ret = ((float)bq27220_get_temperature(&furi_hal_i2c_handle_power) - 2731.0f) / 10.0f;
     }
+
+    return ret;
+}
+
+float furi_hal_power_get_battery_temperature(FuriHalPowerIC ic) {
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
+    float ret = furi_hal_power_get_battery_temperature_internal(ic);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
     return ret;
@@ -316,7 +322,7 @@ void furi_hal_power_dump_state() {
         );
         printf(
             "bq27220: Voltage: %dmV, Current: %dmA, Temperature: %dC\r\n",
-            bq27220_get_voltage(&furi_hal_i2c_handle_power), bq27220_get_current(&furi_hal_i2c_handle_power), (int)furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge)
+            bq27220_get_voltage(&furi_hal_i2c_handle_power), bq27220_get_current(&furi_hal_i2c_handle_power), (int)furi_hal_power_get_battery_temperature_internal(FuriHalPowerICFuelGauge)
         );
     }
 

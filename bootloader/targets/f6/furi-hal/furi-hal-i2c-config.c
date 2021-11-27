@@ -108,3 +108,42 @@ FuriHalI2cBusHandle furi_hal_i2c_handle_power = {
     .bus = &furi_hal_i2c_bus_power,
     .callback = furi_hal_i2c_bus_handle_power_event,
 };
+
+void furi_hal_i2c_bus_handle_external_event(
+    FuriHalI2cBusHandle* handle,
+    FuriHalI2cBusHandleEvent event) {
+    if(event == FuriHalI2cBusHandleEventActivate) {
+        hal_gpio_init_ex(
+            &gpio_ext_pc0, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
+        hal_gpio_init_ex(
+            &gpio_ext_pc1, GpioModeAltFunctionOpenDrain, GpioPullNo, GpioSpeedLow, GpioAltFn4I2C3);
+
+        LL_I2C_InitTypeDef I2C_InitStruct = {0};
+        I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
+        I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
+        I2C_InitStruct.DigitalFilter = 0;
+        I2C_InitStruct.OwnAddress1 = 0;
+        I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
+        I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
+        I2C_InitStruct.Timing = FURI_HAL_I2C_CONFIG_POWER_I2C_TIMINGS_100;
+        LL_I2C_Init(handle->bus->i2c, &I2C_InitStruct);
+
+        LL_I2C_EnableAutoEndMode(handle->bus->i2c);
+        LL_I2C_SetOwnAddress2(handle->bus->i2c, 0, LL_I2C_OWNADDRESS2_NOMASK);
+        LL_I2C_DisableOwnAddress2(handle->bus->i2c);
+        LL_I2C_DisableGeneralCall(handle->bus->i2c);
+        LL_I2C_EnableClockStretching(handle->bus->i2c);
+        LL_I2C_Enable(handle->bus->i2c);
+    } else if(event == FuriHalI2cBusHandleEventDeactivate) {
+        LL_I2C_Disable(handle->bus->i2c);
+        hal_gpio_write(&gpio_ext_pc0, 1);
+        hal_gpio_write(&gpio_ext_pc1, 1);
+        hal_gpio_init_ex(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
+        hal_gpio_init_ex(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow, GpioAltFnUnused);
+    }
+}
+
+FuriHalI2cBusHandle furi_hal_i2c_handle_external = {
+    .bus = &furi_hal_i2c_bus_external,
+    .callback = furi_hal_i2c_bus_handle_external_event,
+};
