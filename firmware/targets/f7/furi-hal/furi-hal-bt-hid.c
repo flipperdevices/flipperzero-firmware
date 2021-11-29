@@ -1,5 +1,8 @@
 #include "furi-hal-bt-hid.h"
+#include "dev_info_service.h"
+#include "battery_service.h"
 #include "hid_service.h"
+
 #include <furi.h>
 
 #define FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION (0x0101)
@@ -64,7 +67,19 @@ static uint8_t furi_hal_bt_hid_report_map_data[] = {
 FuriHalBtHidKbReport* kb_report = NULL;
 
 void furi_hal_bt_hid_start() {
-    hid_svc_start();
+    // Start device info
+    if(!dev_info_svc_is_started()) {
+        dev_info_svc_start();
+    }
+    // Start battery service
+    if(!battery_svc_is_started()) {
+        battery_svc_start();
+    }
+    // Start HID service
+    if(!hid_svc_is_started()) {
+        hid_svc_start();
+    }
+    // Configure HID Keyboard
     kb_report = furi_alloc(sizeof(FuriHalBtHidKbReport));
     // Configure Report Map characteristic
     hid_svc_update_report_map(furi_hal_bt_hid_report_map_data, sizeof(furi_hal_bt_hid_report_map_data));
@@ -80,13 +95,18 @@ void furi_hal_bt_hid_start() {
 
 void furi_hal_bt_hid_stop() {
     furi_assert(kb_report);
-    hid_svc_stop();
+    // Stop all services
+    if(dev_info_svc_is_started()) {
+        dev_info_svc_stop();
+    }
+    if(battery_svc_is_started()) {
+        battery_svc_stop();
+    }
+    if(hid_svc_is_started()) {
+        hid_svc_stop();
+    }
     free(kb_report);
     kb_report = NULL;
-}
-
-bool furi_hal_bt_hid_is_started() {
-    return kb_report != NULL;
 }
 
 bool furi_hal_bt_hid_kb_press(uint16_t button) {

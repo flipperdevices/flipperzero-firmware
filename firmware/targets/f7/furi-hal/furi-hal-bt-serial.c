@@ -1,10 +1,9 @@
 #include "furi-hal-bt-serial.h"
-
-#include <furi.h>
-
 #include "dev_info_service.h"
 #include "battery_service.h"
 #include "serial_service.h"
+
+#include <furi.h>
 
 void furi_hal_bt_serial_start() {
     // Start device info

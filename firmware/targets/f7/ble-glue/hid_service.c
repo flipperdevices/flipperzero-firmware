@@ -224,6 +224,10 @@ bool hid_svc_update_info(uint8_t* data, uint16_t len) {
     return true;
 }
 
+bool hid_svc_is_started() {
+    return hid_svc != NULL;
+}
+
 void hid_svc_stop() {
     tBleStatus status;
     if(hid_svc) {

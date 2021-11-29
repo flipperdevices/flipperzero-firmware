@@ -211,7 +211,7 @@ static void bt_change_profile(Bt* bt, BtProfile profile) {
     while(bt->status != BtStatusOff) {
         osDelay(10);
     };
-    if(bt->profile == BtProfileSerial) {
+    if(bt->profile == BtProfileSerial && bt->rpc_session) {
         FURI_LOG_I(TAG, "Close RPC connection");
         osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         rpc_session_close(bt->rpc_session);
