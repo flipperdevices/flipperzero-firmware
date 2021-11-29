@@ -7,14 +7,13 @@
 #include <furi-hal-version.h>
 #include <furi-hal-bt-hid.h>
 #include <furi-hal-bt-serial.h>
+#include "battery_service.h"
 
 #include <furi.h>
 
 #define TAG "FuriHalBt"
 
 osMutexId_t furi_hal_bt_core2_mtx = NULL;
-
-#define FURI_HA_BT_MAX_SERVICES_IN_PROFILE (3)
 
 typedef void (*FuriHalBtProfileStart)(void);
 typedef void (*FuriHalBtProfileStop)(void);
@@ -89,6 +88,7 @@ static bool furi_hal_bt_start_core2() {
 
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
+    furi_assert(profile < FuriHalBtProfileNumber);
     bool ret = true;
 
     do {
@@ -120,6 +120,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
 
 bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
+    furi_assert(profile < FuriHalBtProfileNumber);
     bool ret = true;
 
     FURI_LOG_I(TAG, "Stop current profile services");
@@ -132,7 +133,7 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb,
     gap_kill_thread();
     ble_app_kill_thread();
     // TODO change delay to event
-    osDelay(100);
+    osDelay(200);
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
     ble_glue_kill_thread();
@@ -157,6 +158,12 @@ void furi_hal_bt_stop_advertising() {
         while(furi_hal_bt_is_active()) {
             osDelay(1);
         }
+    }
+}
+
+void furi_hal_bt_update_battery_level(uint8_t battery_level) {
+    if(battery_svc_is_started()) {
+        battery_svc_update_level(battery_level);
     }
 }
 

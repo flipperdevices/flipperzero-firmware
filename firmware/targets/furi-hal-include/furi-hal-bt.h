@@ -52,6 +52,12 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
 */
 bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context);
 
+/** Update battery level
+ *
+ * @param battery_level - battery level
+ */
+void furi_hal_bt_update_battery_level(uint8_t battery_level);
+
 /** Start advertising
  */
 void furi_hal_bt_start_advertising();

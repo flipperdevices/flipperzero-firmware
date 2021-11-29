@@ -266,9 +266,7 @@ int32_t bt_srv() {
             bt_statusbar_update(bt);
         } else if(message.type == BtMessageTypeUpdateBatteryLevel) {
             // Update battery level
-            if(furi_hal_bt_is_active()) {
-                battery_svc_update_level(message.data.battery_level);
-            }
+            furi_hal_bt_update_battery_level(message.data.battery_level);
         } else if(message.type == BtMessageTypePinCodeShow) {
             // Display PIN code
             bt_pin_code_show_event_handler(bt, message.data.pin_code);
