@@ -20,6 +20,7 @@ typedef enum {
     FuriHalSubGhzPresetOok650Async,     /**< OOK, bandwidth 650kHz, asynchronous */
     FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
     FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 4.760742 kHz, asynchronous */
+    FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
 } FuriHalSubGhzPreset;
 
 /** Switchable Radio Paths */
@@ -89,6 +90,18 @@ void furi_hal_subghz_load_patable(const uint8_t data[8]);
  * @param      size  size
  */
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
+
+/** Read available packet from FIFO
+ *
+ * @return     bool
+ */
+bool furi_hal_subghz_read_available_packet() ;
+
+/** Check recive packet from FIFO
+ *
+ * @return     bool
+ */
+bool furi_hal_subghz_check_crc_packet();
 
 /** Read packet from FIFO
  *
