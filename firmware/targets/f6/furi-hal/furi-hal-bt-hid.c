@@ -134,7 +134,7 @@ bool furi_hal_bt_hid_kb_release(uint16_t button) {
     return hid_svc_update_input_report((uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));
 }
 
-bool furi_hal_bt_hid_kb_release_all(uint16_t button) {
+bool furi_hal_bt_hid_kb_release_all() {
     furi_assert(kb_report);
     memset(kb_report, 0, sizeof(FuriHalBtHidKbReport));
     return hid_svc_update_input_report((uint8_t*)kb_report, sizeof(FuriHalBtHidKbReport));

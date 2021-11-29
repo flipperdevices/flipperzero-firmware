@@ -38,23 +38,28 @@ void furi_hal_bt_unlock_core2();
 
 /** Start BLE app
  *
- * @param profile
- * @param event_cb - BleEventCallback instance
- * @param context - pointer to context
+ * @param profile   FuriHalBtProfile instance
+ * @param event_cb  BleEventCallback instance
+ * @param context   pointer to context
+ *
+ * @return          true on success
 */
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context);
 
 /** Change BLE app
  * Restarts 2nd core
  *
- * @param event_cb - BleEventCallback instance
- * @param context - pointer to context
+ * @param profile   FuriHalBtProfile instance
+ * @param event_cb  BleEventCallback instance
+ * @param context   pointer to context
+ *
+ * @return          true on success
 */
 bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context);
 
 /** Update battery level
  *
- * @param battery_level - battery level
+ * @param battery_level battery level
  */
 void furi_hal_bt_update_battery_level(uint8_t battery_level);
 
