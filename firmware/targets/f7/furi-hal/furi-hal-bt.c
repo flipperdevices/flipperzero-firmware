@@ -8,6 +8,7 @@
 #include "battery_service.h"
 #include "serial_service.h"
 #include "furi-hal-bt-hid.h"
+#include "furi-hal-bt-serial.h"
 
 #include <furi.h>
 
@@ -17,73 +18,26 @@ osMutexId_t furi_hal_bt_core2_mtx = NULL;
 
 #define FURI_HA_BT_MAX_SERVICES_IN_PROFILE (3)
 
-typedef enum {
-    FuriHalBtServiceDeviceInfo,
-    FuriHalBtServiceBattery,
-    FuriHalBtServiceSerial,
-    FuriHalBtServiceHidKeyboard,
-} FuriHalBtServiceType;
-
-typedef void (*FuriHalBtServiceStart)(void);
-typedef void (*FuriHalBtServiceStop)(void);
-typedef bool (*FuriHalBtServiceIsStarted)(void);
+typedef void (*FuriHalBtProfileStart)(void);
+typedef void (*FuriHalBtProfileStop)(void);
 
 typedef struct {
-    FuriHalBtServiceType service;
-    FuriHalBtServiceStart start;
-    FuriHalBtServiceStop stop;
-    FuriHalBtServiceIsStarted is_started;
-} FuriHalBtService;
-
-typedef struct {
-    FuriHalBtService service[FURI_HA_BT_MAX_SERVICES_IN_PROFILE];
-    uint8_t service_num;
+    FuriHalBtProfileStart start;
+    FuriHalBtProfileStart stop;
     uint16_t appearance_char;
     uint16_t advertise_service_uuid;
 } FuriHalBtProfileConfig;
 
-const FuriHalBtService device_info_service = {
-    .service = FuriHalBtServiceDeviceInfo,
-    .start = dev_info_svc_start,
-    .stop = dev_info_svc_stop,
-    .is_started = dev_info_svc_is_started,
-};
-
-const FuriHalBtService battery_service = {
-    .service = FuriHalBtServiceBattery,
-    .start = battery_svc_start,
-    .stop = battery_svc_stop,
-    .is_started = battery_svc_is_started,
-};
-
-const FuriHalBtService serial_service = {
-    .service = FuriHalBtServiceSerial,
-    .start = serial_svc_start,
-    .stop = serial_svc_stop,
-    .is_started = serial_svc_is_started,
-};
-
-const FuriHalBtService hid_kb_service = {
-    .service = FuriHalBtServiceHidKeyboard,
-    .start = furi_hal_bt_hid_start,
-    .stop = furi_hal_bt_hid_stop,
-    .is_started = furi_hal_bt_hid_is_started,
-};
-
 FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
     [FuriHalBtProfileSerial] = {
-        .service[0] = device_info_service,
-        .service[1] = battery_service,
-        .service[2] = serial_service,
-        .service_num = 3,
+        .start = furi_hal_bt_serial_start,
+        .stop = furi_hal_bt_serial_stop,
         .appearance_char = 0x0100,
         .advertise_service_uuid = 0x8030,
     },
     [FuriHalBtProfileHidKeyboard] = {
-        .service[0] = device_info_service,
-        .service[1] = battery_service,
-        .service[2] = hid_kb_service,
-        .service_num = 3,
+        .start = furi_hal_bt_hid_start,
+        .stop = furi_hal_bt_hid_stop,
         .appearance_char = GAP_APPEARANCE_KEYBOARD,
         .advertise_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
     }
@@ -135,35 +89,6 @@ bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtPro
     return gap_init(event_cb, context, p);
 }
 
-void furi_hal_bt_set_profile(FuriHalBtProfile profile) {
-    furi_assert(profile < FuriHalBtProfileNumber);
-
-    // Stop services from current Profile
-    if(current_profile) {
-        for(uint8_t i = 0; i < current_profile->service_num; i++) {
-            // Stop services which are not in next profile
-            bool service_found = false;
-            for(uint8_t j = 0; j < profile_config[profile].service_num; j++) {
-                if(current_profile->service[i].service == profile_config[profile].service[j].service) {
-                    service_found = true;
-                    break;
-                }
-            }
-            if(!service_found) {
-                current_profile->service[i].stop();
-            }
-        }
-    }
-    // Start services from new Profile
-    for(uint8_t i = 0; i < profile_config[profile].service_num; i++) {
-        if(!profile_config[profile].service[i].is_started()) {
-            profile_config[profile].service[i].start();
-        }
-    }
-    // Update current profile
-    current_profile = &profile_config[profile];
-}
-
 void furi_hal_bt_start_advertising() {
     if(gap_get_state() == GapStateIdle) {
         gap_start_advertising();
@@ -177,21 +102,6 @@ void furi_hal_bt_stop_advertising() {
             osDelay(1);
         }
     }
-}
-
-void furi_hal_bt_set_data_event_callbacks(uint16_t buff_size, SerialSvcDataReceivedCallback on_received_cb, SerialSvcDataSentCallback on_sent_cb, void* context) {
-    serial_svc_set_callbacks(buff_size, on_received_cb, on_sent_cb, context);
-}
-
-void furi_hal_bt_notify_buffer_is_empty() {
-    serial_svc_notify_buffer_is_empty();
-}
-
-bool furi_hal_bt_tx(uint8_t* data, uint16_t size) {
-    if(size > FURI_HAL_BT_PACKET_SIZE_MAX) {
-        return false;
-    }
-    return serial_svc_update_tx(data, size);
 }
 
 void furi_hal_bt_get_key_storage_buff(uint8_t** key_buff_addr, uint16_t* key_buff_size) {
