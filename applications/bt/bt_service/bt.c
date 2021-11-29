@@ -2,9 +2,6 @@
 #include "battery_service.h"
 #include "bt_keys_storage.h"
 
-// TODO use only furi-hal-bt calls
-#include "shci.h"
-
 #define TAG "BtSrv"
 
 #define BT_RPC_EVENT_BUFF_SENT (1UL << 0)
@@ -206,11 +203,6 @@ static void bt_statusbar_update(Bt* bt) {
 }
 
 static void bt_change_profile(Bt* bt, BtProfile profile) {
-    FURI_LOG_I(TAG, "Disconnect and stop advertising");
-    furi_hal_bt_stop_advertising();
-    while(bt->status != BtStatusOff) {
-        osDelay(10);
-    };
     if(bt->profile == BtProfileSerial && bt->rpc_session) {
         FURI_LOG_I(TAG, "Close RPC connection");
         osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
@@ -218,39 +210,22 @@ static void bt_change_profile(Bt* bt, BtProfile profile) {
         furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
         bt->rpc_session = NULL;
     }
-    FURI_LOG_I(TAG, "Shutdow 2nd core");
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
-    FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
-    gap_kill_thread();
-    ble_app_kill_thread();
-    // TODO change delay to event
-    osDelay(1000);
-    // TODO use only furi-hal-bt calls
-    FURI_LOG_I(TAG, "Reset SHCI");
-    SHCI_C2_Reinit();
-    ble_glue_kill_thread();
-    FURI_LOG_I(TAG, "Start BT initialization");
-    furi_hal_bt_init();
-    if(!furi_hal_bt_start_core2()) {
-        FURI_LOG_E(TAG, "Core2 startup failed");
-        ble_glue_kill_thread();
+
+    FuriHalBtProfile furi_profile;
+    if(profile == BtProfileHidKeyboard) {
+        furi_profile = FuriHalBtProfileHidKeyboard;
     } else {
-        view_port_enabled_set(bt->statusbar_view_port, true);
-        FuriHalBtProfile p;
-        if(profile == BtProfileHidKeyboard) {
-            p = FuriHalBtProfileHidKeyboard;
-        } else {
-            p = FuriHalBtProfileSerial;
+        furi_profile = FuriHalBtProfileSerial;
+    }
+
+    if(furi_hal_bt_change_app(furi_profile, bt_on_gap_event_callback, bt)) {
+        FURI_LOG_I(TAG, "Bt App started");
+        if(bt->bt_settings.enabled) {
+            furi_hal_bt_start_advertising();
         }
-        if(furi_hal_bt_init_app(bt_on_gap_event_callback, bt, p)) {
-            FURI_LOG_I(TAG, "BLE stack started");
-            if(bt->bt_settings.enabled) {
-                furi_hal_bt_start_advertising();
-            }
-            bt->profile = profile;
-        } else {
-            FURI_LOG_E(TAG, "BT App start failed");
-        }
+        bt->profile = profile;
+    } else {
+        FURI_LOG_E(TAG, "Failed to start Bt App");
     }
 }
 
@@ -264,9 +239,7 @@ int32_t bt_srv() {
     }
 
     // Start BLE stack
-    if(!furi_hal_bt_start_core2()) {
-        FURI_LOG_E(TAG, "Core2 startup failed");
-    } else if(furi_hal_bt_init_app(bt_on_gap_event_callback, bt, FuriHalBtProfileSerial)) {
+    if(furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
         FURI_LOG_I(TAG, "BLE stack started");
         if(bt->bt_settings.enabled) {
             furi_hal_bt_start_advertising();

@@ -72,12 +72,14 @@ void furi_hal_bt_unlock_core2() {
     furi_check(osMutexRelease(furi_hal_bt_core2_mtx) == osOK);
 }
 
-bool furi_hal_bt_start_core2() {
+static bool furi_hal_bt_start_core2() {
     furi_assert(furi_hal_bt_core2_mtx);
 
     osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
     // Explicitly tell that we are in charge of CLK48 domain
-    HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
+        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    }
     // Start Core2
     bool ret = ble_glue_start();
     osMutexRelease(furi_hal_bt_core2_mtx);
@@ -85,15 +87,60 @@ bool furi_hal_bt_start_core2() {
     return ret;
 }
 
-bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtProfile profile) {
+bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
-    GapConfig config = profile_config[profile].config;
-    if(profile == FuriHalBtProfileSerial) {
-        config.adv_service_uuid |= furi_hal_version_get_hw_color();
-    }
-    bool ret = gap_init(&config, event_cb, context);
-    if(ret) {
+    bool ret = true;
+
+    do {
+        // Start 2nd core
+        ret = furi_hal_bt_start_core2();
+        if(!ret) {
+            ble_app_kill_thread();
+            FURI_LOG_E(TAG, "Failed to start 2nd core");
+            break;
+        }
+        // Configure GAP
+        GapConfig config = profile_config[profile].config;
+        if(profile == FuriHalBtProfileSerial) {
+            config.adv_service_uuid |= furi_hal_version_get_hw_color();
+        }
+        ret = gap_init(&config, event_cb, context);
+        if(!ret) {
+            gap_kill_thread();
+            FURI_LOG_E(TAG, "Failed to init GAP");
+            break;
+        }
+        // Start selected profile services
         profile_config[profile].start();
+    } while(false);
+    current_profile = &profile_config[profile];
+
+    return ret;
+}
+
+bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
+    furi_assert(event_cb);
+    bool ret = true;
+
+    FURI_LOG_I(TAG, "Stop current profile services");
+    current_profile->stop();
+    FURI_LOG_I(TAG, "Disconnect and stop advertising");
+    furi_hal_bt_stop_advertising();
+    FURI_LOG_I(TAG, "Shutdow 2nd core");
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+    FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
+    gap_kill_thread();
+    ble_app_kill_thread();
+    // TODO change delay to event
+    osDelay(100);
+    FURI_LOG_I(TAG, "Reset SHCI");
+    SHCI_C2_Reinit();
+    ble_glue_kill_thread();
+    FURI_LOG_I(TAG, "Start BT initialization");
+    furi_hal_bt_init();
+    ret = furi_hal_bt_start_app(profile, event_cb, context);
+    if(ret) {
+        current_profile = &profile_config[profile];
     }
     return ret;
 }

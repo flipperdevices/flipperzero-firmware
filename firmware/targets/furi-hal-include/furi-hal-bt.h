@@ -36,17 +36,21 @@ void furi_hal_bt_lock_core2();
 /** Lock core2 state transition */
 void furi_hal_bt_unlock_core2();
 
-/** Start 2nd core and BLE stack
- *
- * @return true on success
- */
-bool furi_hal_bt_start_core2();
-
 /** Start BLE app
+ *
+ * @param profile
  * @param event_cb - BleEventCallback instance
  * @param context - pointer to context
 */
-bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtProfile profile);
+bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context);
+
+/** Change BLE app
+ * Restarts 2nd core
+ *
+ * @param event_cb - BleEventCallback instance
+ * @param context - pointer to context
+*/
+bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context);
 
 /** Start advertising
  */

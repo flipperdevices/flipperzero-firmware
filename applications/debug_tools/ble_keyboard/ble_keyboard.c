@@ -49,7 +49,6 @@ int32_t ble_keyboard_app(void* p) {
     Bt* bt = furi_record_open("bt");
     bt_set_profile(bt, BtProfileHidKeyboard);
     osDelay(2000);
-    // furi_hal_bt_set_profile(FuriHalBtProfileHidKeyboard);
 
     BleKeyboardEvent event;
     while(1) {
@@ -115,7 +114,6 @@ int32_t ble_keyboard_app(void* p) {
 
     // remove & free all stuff created by app
     bt_set_profile(bt, BtProfileSerial);
-    // furi_hal_bt_set_profile(FuriHalBtProfileSerial);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);

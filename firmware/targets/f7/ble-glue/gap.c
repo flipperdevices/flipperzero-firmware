@@ -49,8 +49,6 @@ typedef enum {
 static const uint8_t gap_irk[16] = {0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0};
 // Encryption root key
 static const uint8_t gap_erk[16] = {0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21,0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21};
-// Appearence characteristic UUID
-static const uint8_t gap_appearence_char_uuid[] = {GAP_APPEARANCE_KEYBOARD & 0xff, GAP_APPEARANCE_KEYBOARD >> 8};
 // Default MAC address
 static const uint8_t gap_default_mac_addr[] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72};
 
@@ -292,6 +290,7 @@ static void gap_init_svc(Gap* gap) {
     if (status) {
         FURI_LOG_E(TAG, "Failed updating name characteristic: %d", status);
     }
+    uint8_t gap_appearence_char_uuid[2] = {gap->config->appearance_char & 0xff, gap->config->appearance_char >> 8};
     status = aci_gatt_update_char_value(gap->service.gap_svc_handle, gap->service.appearance_char_handle, 0, 2, gap_appearence_char_uuid);
     if(status) {
         FURI_LOG_E(TAG, "Failed updating appearence characteristic: %d", status);
