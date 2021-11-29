@@ -4,11 +4,9 @@
 #include <shci.h>
 #include <cmsis_os2.h>
 
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "serial_service.h"
-#include "furi-hal-bt-hid.h"
-#include "furi-hal-bt-serial.h"
+#include <furi-hal-version.h>
+#include <furi-hal-bt-hid.h>
+#include <furi-hal-bt-serial.h>
 
 #include <furi.h>
 
@@ -24,6 +22,7 @@ typedef void (*FuriHalBtProfileStop)(void);
 typedef struct {
     FuriHalBtProfileStart start;
     FuriHalBtProfileStart stop;
+    GapConfig config;
     uint16_t appearance_char;
     uint16_t advertise_service_uuid;
 } FuriHalBtProfileConfig;
@@ -32,14 +31,22 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
     [FuriHalBtProfileSerial] = {
         .start = furi_hal_bt_serial_start,
         .stop = furi_hal_bt_serial_stop,
-        .appearance_char = 0x0100,
-        .advertise_service_uuid = 0x8030,
+        .config = {
+            .adv_service_uuid = 0x3080,
+            .appearance_char = 0x8600,
+            .bonding_mode = true,
+            .mitm_enable = true,
+        },
     },
     [FuriHalBtProfileHidKeyboard] = {
         .start = furi_hal_bt_hid_start,
         .stop = furi_hal_bt_hid_stop,
-        .appearance_char = GAP_APPEARANCE_KEYBOARD,
-        .advertise_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+        .config = {
+            .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
+            .appearance_char = GAP_APPEARANCE_KEYBOARD,
+            .bonding_mode = true,
+            .mitm_enable = false,
+        },
     }
 };
 FuriHalBtProfileConfig* current_profile = NULL;
@@ -80,13 +87,15 @@ bool furi_hal_bt_start_core2() {
 
 bool furi_hal_bt_init_app(BleEventCallback event_cb, void* context, FuriHalBtProfile profile) {
     furi_assert(event_cb);
-    Profile p;
-    if(profile == FuriHalBtProfileHidKeyboard) {
-        p = ProfileHidKeyboard;
-    } else {
-        p = ProfileSerial;
+    GapConfig config = profile_config[profile].config;
+    if(profile == FuriHalBtProfileSerial) {
+        config.adv_service_uuid |= furi_hal_version_get_hw_color();
     }
-    return gap_init(event_cb, context, p);
+    bool ret = gap_init(&config, event_cb, context);
+    if(ret) {
+        profile_config[profile].start();
+    }
+    return ret;
 }
 
 void furi_hal_bt_start_advertising() {
