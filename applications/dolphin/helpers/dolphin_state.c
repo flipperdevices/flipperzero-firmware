@@ -12,9 +12,8 @@
 #define DOLPHIN_LVL_THRESHOLD 20.0f
 #define LEVEL2_THRESHOLD 20
 #define LEVEL3_THRESHOLD 100
-#define BUTTHURT_MAX    14
-#define BUTTHURT_MIN    0
-
+#define BUTTHURT_MAX 14
+#define BUTTHURT_MIN 0
 
 DolphinState* dolphin_state_alloc() {
     return furi_alloc(sizeof(DolphinState));
@@ -54,8 +53,9 @@ bool dolphin_state_load(DolphinState* dolphin_state) {
         DOLPHIN_STATE_HEADER_MAGIC,
         DOLPHIN_STATE_HEADER_VERSION);
 
-    if (success) {
-        if ((dolphin_state->data.butthurt > BUTTHURT_MAX) || (dolphin_state->data.butthurt < BUTTHURT_MIN)) {
+    if(success) {
+        if((dolphin_state->data.butthurt > BUTTHURT_MAX) ||
+           (dolphin_state->data.butthurt < BUTTHURT_MIN)) {
             success = false;
         }
     }
@@ -133,8 +133,10 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
         dolphin_state->data.icounter += MIN(xp_to_levelup, deed_weight->icounter);
     }
 
-    uint32_t new_butthurt =
-        CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
+    uint32_t new_butthurt = CLAMP(
+        ((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt,
+        BUTTHURT_MAX,
+        BUTTHURT_MIN);
 
     if(!!dolphin_state->data.butthurt != !!new_butthurt) {
         mood_changed = true;
@@ -147,7 +149,7 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
 }
 
 void dolphin_state_butthurted(DolphinState* dolphin_state) {
-    if (dolphin_state->data.butthurt < BUTTHURT_MAX) {
+    if(dolphin_state->data.butthurt < BUTTHURT_MAX) {
         dolphin_state->data.butthurt++;
         FURI_LOG_I("DolphinState", "Increasing butthurt");
         dolphin_state->data.timestamp = dolphin_state_timestamp();
