@@ -20,8 +20,10 @@ typedef enum {
  *
  * @param bt        Bt instance
  * @param profile   BtProfile
+ *
+ * @return          true on success
  */
-void bt_set_profile(Bt* bt, BtProfile profile);
+bool bt_set_profile(Bt* bt, BtProfile profile);
 
 #ifdef __cplusplus
 }

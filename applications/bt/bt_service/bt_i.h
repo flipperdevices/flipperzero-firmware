@@ -15,6 +15,8 @@
 
 #include "../bt_settings.h"
 
+#define BT_API_UNLOCK_EVENT (1UL << 0)
+
 typedef enum {
     BtStatusOff,
     BtStatusAdvertising,
@@ -38,6 +40,7 @@ typedef union {
 typedef struct {
     BtMessageType type;
     BtMessageData data;
+    bool* result;
 } BtMessage;
 
 struct Bt {
@@ -56,4 +59,5 @@ struct Bt {
     Rpc* rpc;
     RpcSession* rpc_session;
     osEventFlagsId_t rpc_event;
+    osEventFlagsId_t api_event;
 };

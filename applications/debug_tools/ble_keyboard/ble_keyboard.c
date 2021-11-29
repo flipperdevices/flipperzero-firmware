@@ -4,6 +4,8 @@
 #include <input/input.h>
 #include <bt/bt_service/bt.h>
 
+#define TAG "BleKeyboardApp"
+
 typedef enum {
     EventTypeInput,
 } EventType;
@@ -35,6 +37,13 @@ static void ble_keyboard_input_callback(InputEvent* input_event, void* ctx) {
 }
 
 int32_t ble_keyboard_app(void* p) {
+    Bt* bt = furi_record_open("bt");
+    if(!bt_set_profile(bt, BtProfileHidKeyboard)) {
+        FURI_LOG_E(TAG, "Failed to switch profile");
+        furi_record_close("bt");
+        return -1;
+    }
+
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(BleKeyboardEvent), NULL);
     furi_check(event_queue);
     ViewPort* view_port = view_port_alloc();
@@ -45,10 +54,6 @@ int32_t ble_keyboard_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-
-    Bt* bt = furi_record_open("bt");
-    bt_set_profile(bt, BtProfileHidKeyboard);
-    osDelay(2000);
 
     BleKeyboardEvent event;
     while(1) {
@@ -113,11 +118,11 @@ int32_t ble_keyboard_app(void* p) {
     }
 
     // remove & free all stuff created by app
-    bt_set_profile(bt, BtProfileSerial);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     osMessageQueueDelete(event_queue);
     furi_record_close("gui");
+    bt_set_profile(bt, BtProfileSerial);
     furi_record_close("bt");
     return 0;
 }

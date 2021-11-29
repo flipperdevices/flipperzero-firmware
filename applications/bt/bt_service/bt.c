@@ -84,6 +84,9 @@ Bt* bt_alloc() {
     bt->rpc = furi_record_open("rpc");
     bt->rpc_event = osEventFlagsNew(NULL);
 
+    // API evnent
+    bt->api_event = osEventFlagsNew(NULL);
+
     return bt;
 }
 
@@ -202,7 +205,7 @@ static void bt_statusbar_update(Bt* bt) {
     }
 }
 
-static void bt_change_profile(Bt* bt, BtProfile profile) {
+static void bt_change_profile(Bt* bt, BtMessage* message) {
     if(bt->profile == BtProfileSerial && bt->rpc_session) {
         FURI_LOG_I(TAG, "Close RPC connection");
         osEventFlagsSet(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
@@ -212,7 +215,7 @@ static void bt_change_profile(Bt* bt, BtProfile profile) {
     }
 
     FuriHalBtProfile furi_profile;
-    if(profile == BtProfileHidKeyboard) {
+    if(message->data.profile == BtProfileHidKeyboard) {
         furi_profile = FuriHalBtProfileHidKeyboard;
     } else {
         furi_profile = FuriHalBtProfileSerial;
@@ -223,10 +226,13 @@ static void bt_change_profile(Bt* bt, BtProfile profile) {
         if(bt->bt_settings.enabled) {
             furi_hal_bt_start_advertising();
         }
-        bt->profile = profile;
+        bt->profile = message->data.profile;
+        *message->result = true;
     } else {
         FURI_LOG_E(TAG, "Failed to start Bt App");
+        *message->result = false;
     }
+    osEventFlagsSet(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
 int32_t bt_srv() {
@@ -269,7 +275,7 @@ int32_t bt_srv() {
         } else if(message.type == BtMessageTypeKeysStorageUpdated) {
             bt_save_key_storage(bt);
         } else if(message.type == BtMessageTypeSetProfile) {
-            bt_change_profile(bt, message.data.profile);
+            bt_change_profile(bt, &message);
         }
     }
     return 0;
