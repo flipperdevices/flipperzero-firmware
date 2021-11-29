@@ -3,12 +3,9 @@
 #include "ble.h"
 
 #include "cmsis_os.h"
-#include "otp.h"
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "serial_service.h"
-
 #include <furi-hal.h>
+#include "otp.h"
+
 
 #define TAG "BtGap"
 
@@ -24,13 +21,14 @@ typedef struct {
     uint16_t connection_handle;
     uint8_t adv_svc_uuid_len;
     uint8_t adv_svc_uuid[20];
+    uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
 } GapSvc;
 
 typedef struct {
-    GapSvc gap_svc;
+    GapSvc service;
+    GapConfig* config;
     GapState state;
     osMutexId_t state_mutex;
-    uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
     BleEventCallback on_event_cb;
     void* context;
     osTimerId advertise_timer;
@@ -44,14 +42,13 @@ typedef enum {
     GapCommandAdvFast,
     GapCommandAdvLowPower,
     GapCommandAdvStop,
+    GapCommandKillThread,
 } GapCommand;
 
 // Identity root key
 static const uint8_t gap_irk[16] = {0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0};
 // Encryption root key
 static const uint8_t gap_erk[16] = {0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21,0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21};
-// Appearence characteristic UUID
-static const uint8_t gap_appearence_char_uuid[] = {0x00, 0x86};
 // Default MAC address
 static const uint8_t gap_default_mac_addr[] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72};
 
@@ -77,8 +74,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
         case EVT_DISCONN_COMPLETE:
         {
             hci_disconnection_complete_event_rp0 *disconnection_complete_event = (hci_disconnection_complete_event_rp0 *) event_pckt->data;
-            if (disconnection_complete_event->Connection_Handle == gap->gap_svc.connection_handle) {
-                gap->gap_svc.connection_handle = 0;
+            if (disconnection_complete_event->Connection_Handle == gap->service.connection_handle) {
+                gap->service.connection_handle = 0;
                 gap->state = GapStateIdle;
                 FURI_LOG_I(TAG, "Disconnect from client. Reason: %d", disconnection_complete_event->Reason);
             }
@@ -106,7 +103,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 } else {
                     FURI_LOG_I(TAG, "Update PHY succeed");
                 }
-                ret = hci_le_read_phy(gap->gap_svc.connection_handle,&tx_phy,&rx_phy);
+                ret = hci_le_read_phy(gap->service.connection_handle,&tx_phy,&rx_phy);
                 if(ret) {
                     FURI_LOG_E(TAG, "Read PHY failed, status: %d", ret);
                 } else {
@@ -124,7 +121,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 
                 // Update connection status and handle
                 gap->state = GapStateConnected;
-                gap->gap_svc.connection_handle = connection_complete_event->Connection_Handle;
+                gap->service.connection_handle = connection_complete_event->Connection_Handle;
 
                 // Start pairing by sending security request
                 aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
@@ -148,7 +145,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             {
                 // Generate random PIN code
                 uint32_t pin = rand() % 999999;
-                aci_gap_pass_key_resp(gap->gap_svc.connection_handle, pin);
+                aci_gap_pass_key_resp(gap->service.connection_handle, pin);
                 FURI_LOG_I(TAG, "Pass key request event. Pin: %d", pin);
                 BleEvent event = {.type = BleEventTypePinCodeShow, .data.pin_code = pin};
                 gap->on_event_cb(event, gap->context);
@@ -175,7 +172,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 
             case EVT_BLUE_GAP_BOND_LOST:
                 FURI_LOG_I(TAG, "Bond lost event. Start rebonding");
-                aci_gap_allow_rebond(gap->gap_svc.connection_handle);
+                aci_gap_allow_rebond(gap->service.connection_handle);
                 break;
 
             case EVT_BLUE_GAP_DEVICE_FOUND:
@@ -193,14 +190,14 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE:
                 FURI_LOG_I(TAG, "Hex_value = %lx",
                             ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
-                aci_gap_numeric_comparison_value_confirm_yesno(gap->gap_svc.connection_handle, 1);
+                aci_gap_numeric_comparison_value_confirm_yesno(gap->service.connection_handle, 1);
                 break;
 
             case EVT_BLUE_GAP_PAIRING_CMPLT:
                 pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
                 if (pairing_complete->Status) {
                     FURI_LOG_E(TAG, "Pairing failed with status: %d. Terminating connection", pairing_complete->Status);
-                    aci_gap_terminate(gap->gap_svc.connection_handle, 5);
+                    aci_gap_terminate(gap->service.connection_handle, 5);
                 } else {
                     FURI_LOG_I(TAG, "Pairing complete");
                     BleEvent event = {.type = BleEventTypeConnected};
@@ -220,23 +217,18 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 }
 
 static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
-    gap->gap_svc.adv_svc_uuid_len = 1;
     if(uid_len == 2) {
-        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_16_BIT_SERV_UUID;
+        gap->service.adv_svc_uuid[0] = AD_TYPE_16_BIT_SERV_UUID;
     } else if (uid_len == 4) {
-        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_32_BIT_SERV_UUID;
+        gap->service.adv_svc_uuid[0] = AD_TYPE_32_BIT_SERV_UUID;
     } else if(uid_len == 16) {
-        gap->gap_svc.adv_svc_uuid[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
+        gap->service.adv_svc_uuid[0] = AD_TYPE_128_BIT_SERV_UUID_CMPLT_LIST;
     }
-    memcpy(&gap->gap_svc.adv_svc_uuid[1], uid, uid_len);
-    gap->gap_svc.adv_svc_uuid_len += uid_len;
+    memcpy(&gap->service.adv_svc_uuid[gap->service.adv_svc_uuid_len], uid, uid_len);
+    gap->service.adv_svc_uuid_len += uid_len;
 }
 
-GapState gap_get_state() {
-    return gap->state;
-}
-
-void gap_init_mac_address(Gap* gap) {
+static void gap_init_mac_address(Gap* gap) {
     uint8_t *otp_addr;
     uint32_t udn;
     uint32_t company_id;
@@ -246,18 +238,18 @@ void gap_init_mac_address(Gap* gap) {
     if(udn != 0xFFFFFFFF) {
         company_id = LL_FLASH_GetSTCompanyID();
         device_id = LL_FLASH_GetDeviceID();
-        gap->mac_address[0] = (uint8_t)(udn & 0x000000FF);
-        gap->mac_address[1] = (uint8_t)( (udn & 0x0000FF00) >> 8 );
-        gap->mac_address[2] = (uint8_t)( (udn & 0x00FF0000) >> 16 );
-        gap->mac_address[3] = (uint8_t)device_id;
-        gap->mac_address[4] = (uint8_t)(company_id & 0x000000FF);;
-        gap->mac_address[5] = (uint8_t)( (company_id & 0x0000FF00) >> 8 );
+        gap->service.mac_address[0] = (uint8_t)(udn & 0x000000FF);
+        gap->service.mac_address[1] = (uint8_t)( (udn & 0x0000FF00) >> 8 );
+        gap->service.mac_address[2] = (uint8_t)( (udn & 0x00FF0000) >> 16 );
+        gap->service.mac_address[3] = (uint8_t)device_id;
+        gap->service.mac_address[4] = (uint8_t)(company_id & 0x000000FF);;
+        gap->service.mac_address[5] = (uint8_t)( (company_id & 0x0000FF00) >> 8 );
     } else {
         otp_addr = OTP_Read(0);
         if(otp_addr) {
-            memcpy(gap->mac_address, ((OTP_ID0_t*)otp_addr)->bd_address, sizeof(gap->mac_address));
+            memcpy(gap->service.mac_address, ((OTP_ID0_t*)otp_addr)->bd_address, sizeof(gap->service.mac_address));
         } else {
-            memcpy(gap->mac_address, gap_default_mac_addr, sizeof(gap->mac_address));
+            memcpy(gap->service.mac_address, gap_default_mac_addr, sizeof(gap->service.mac_address));
         }
     }
 }
@@ -270,7 +262,7 @@ static void gap_init_svc(Gap* gap) {
     hci_reset();
     // Configure mac address
     gap_init_mac_address(gap);
-    aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, (uint8_t*)gap->mac_address);
+    aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, (uint8_t*)gap->service.mac_address);
 
     /* Static random Address
      * The two upper bits shall be set to 1
@@ -291,14 +283,15 @@ static void gap_init_svc(Gap* gap) {
     // Initialize GAP interface
     const char *name = furi_hal_version_get_device_name_ptr();
     aci_gap_init(GAP_PERIPHERAL_ROLE, 0, strlen(name),
-                &gap->gap_svc.gap_svc_handle, &gap->gap_svc.dev_name_char_handle, &gap->gap_svc.appearance_char_handle);
+                &gap->service.gap_svc_handle, &gap->service.dev_name_char_handle, &gap->service.appearance_char_handle);
 
     // Set GAP characteristics
-    status = aci_gatt_update_char_value(gap->gap_svc.gap_svc_handle, gap->gap_svc.dev_name_char_handle, 0, strlen(name), (uint8_t *) name);
+    status = aci_gatt_update_char_value(gap->service.gap_svc_handle, gap->service.dev_name_char_handle, 0, strlen(name), (uint8_t *) name);
     if (status) {
         FURI_LOG_E(TAG, "Failed updating name characteristic: %d", status);
     }
-    status = aci_gatt_update_char_value(gap->gap_svc.gap_svc_handle, gap->gap_svc.appearance_char_handle, 0, 2, gap_appearence_char_uuid);
+    uint8_t gap_appearence_char_uuid[2] = {gap->config->appearance_char & 0xff, gap->config->appearance_char >> 8};
+    status = aci_gatt_update_char_value(gap->service.gap_svc_handle, gap->service.appearance_char_handle, 0, 2, gap_appearence_char_uuid);
     if(status) {
         FURI_LOG_E(TAG, "Failed updating appearence characteristic: %d", status);
     }
@@ -307,7 +300,7 @@ static void gap_init_svc(Gap* gap) {
     // Set I/O capability
     aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
     // Setup  authentication
-    aci_gap_set_authentication_requirement(1, 1, 1, 0, 8, 16, 1, 0, PUBLIC_ADDR);
+    aci_gap_set_authentication_requirement(gap->config->bonding_mode, gap->config->mitm_enable, 1, 0, 8, 16, 1, 0, PUBLIC_ADDR);
     // Configure whitelist
     aci_gap_configure_whitelist();
 }
@@ -339,7 +332,7 @@ static void gap_advertise_start(GapState new_state)
     const char* name = furi_hal_version_get_ble_local_device_name_ptr();
     status = aci_gap_set_discoverable(ADV_IND, min_interval, max_interval, PUBLIC_ADDR, 0,
                                         strlen(name), (uint8_t*)name,
-                                        gap->gap_svc.adv_svc_uuid_len, gap->gap_svc.adv_svc_uuid, 0, 0);
+                                        gap->service.adv_svc_uuid_len, gap->service.adv_svc_uuid, 0, 0);
     if(status) {
         FURI_LOG_E(TAG, "Set discoverable err: %d", status);
     }
@@ -350,11 +343,11 @@ static void gap_advertise_start(GapState new_state)
 }
 
 static void gap_advertise_stop() {
-    if(gap->state == GapStateConnected) {
-        // Terminate connection
-        aci_gap_terminate(gap->gap_svc.connection_handle, 0x13);
-    }
     if(gap->state > GapStateIdle) {
+        if(gap->state == GapStateConnected) {
+            // Terminate connection
+            aci_gap_terminate(gap->service.connection_handle, 0x13);
+        }
         // Stop advertising
         osTimerStop(gap->advertise_timer);
         aci_gap_set_non_discoverable();
@@ -383,12 +376,13 @@ static void gap_advetise_timer_callback(void* context) {
     furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
 }
 
-bool gap_init(BleEventCallback on_event_cb, void* context) {
+bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context) {
     if (!ble_glue_is_radio_stack_ready()) {
         return false;
     }
 
     gap = furi_alloc(sizeof(Gap));
+    gap->config = config;
     srand(DWT->CYCCNT);
     // Create advertising timer
     gap->advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, NULL, NULL);
@@ -399,7 +393,7 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     // Initialization of the GAP state
     gap->state_mutex = osMutexNew(NULL);
     gap->state = GapStateIdle;
-    gap->gap_svc.connection_handle = 0xFFFF;
+    gap->service.connection_handle = 0xFFFF;
     gap->enable_adv = true;
 
     // Thread configuration
@@ -410,17 +404,10 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     // Command queue allocation
     gap->command_queue = osMessageQueueNew(8, sizeof(GapCommand), NULL);
 
-    // Start Device Information service
-    dev_info_svc_start();
-    // Start Battery service
-    battery_svc_start();
-    // Start Serial application
-    serial_svc_start();
-    // Configure advirtise service UUID
     uint8_t adv_service_uid[2];
-    adv_service_uid[0] = 0x80 | furi_hal_version_get_hw_color();
-    adv_service_uid[1] = 0x30;
-
+    gap->service.adv_svc_uuid_len = 1;
+    adv_service_uid[0] = gap->config->adv_service_uuid & 0xff;
+    adv_service_uid[1] = gap->config->adv_service_uuid >> 8;
     set_advertisment_service_uid(adv_service_uid, sizeof(adv_service_uid));
 
     // Set callback
@@ -429,10 +416,24 @@ bool gap_init(BleEventCallback on_event_cb, void* context) {
     return true;
 }
 
+GapState gap_get_state() {
+    return gap->state;
+}
+
+void gap_kill_thread() {
+    if(gap) {
+        GapCommand command = GapCommandKillThread;
+        osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);
+    }
+}
+
 static void gap_app(void *arg) {
     GapCommand command;
     while(1) {
         furi_check(osMessageQueueGet(gap->command_queue, &command, NULL, osWaitForever) == osOK);
+        if(command == GapCommandKillThread) {
+            break;
+        }
         osMutexAcquire(gap->state_mutex, osWaitForever);
         if(command == GapCommandAdvFast) {
             gap_advertise_start(GapStateAdvFast);
@@ -443,4 +444,11 @@ static void gap_app(void *arg) {
         }
         osMutexRelease(gap->state_mutex);
     }
+    // Free resources
+    osMutexDelete(gap->state_mutex);
+    osMessageQueueDelete(gap->command_queue);
+    osTimerDelete(gap->advertise_timer);
+    free(gap);
+    gap = NULL;
+    osThreadExit();
 }

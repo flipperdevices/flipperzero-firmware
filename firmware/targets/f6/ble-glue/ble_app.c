@@ -10,6 +10,10 @@
 
 #define TAG "Bt"
 
+#define BLE_APP_FLAG_HCI_EVENT (1UL << 0)
+#define BLE_APP_FLAG_KILL_THREAD (1UL << 1)
+#define BLE_APP_FLAG_ALL (BLE_APP_FLAG_HCI_EVENT | BLE_APP_FLAG_KILL_THREAD)
+
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
 
@@ -92,16 +96,33 @@ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
     *size = sizeof(ble_app_nvm);
 }
 
-static void ble_app_hci_thread(void *arg) {
-    while(1) {
-        osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
-        hci_user_evt_proc();
+void ble_app_kill_thread() {
+    if(ble_app) {
+        osThreadFlagsSet(ble_app->hci_thread_id, BLE_APP_FLAG_KILL_THREAD);
     }
+}
+
+static void ble_app_hci_thread(void *arg) {
+    uint32_t flags = 0;
+    while(1) {
+        flags = osThreadFlagsWait(BLE_APP_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        if(flags & BLE_APP_FLAG_HCI_EVENT) {
+            hci_user_evt_proc();
+        }
+        if(flags & BLE_APP_FLAG_KILL_THREAD) {
+            break;
+        }
+    }
+    // Free resources
+    osMutexDelete(ble_app->hci_mtx);
+    osSemaphoreDelete(ble_app->hci_sem);
+    free(ble_app);
+    osThreadExit();
 }
 
 // Called by WPAN lib
 void hci_notify_asynch_evt(void* pdata) {
-    osThreadFlagsSet(ble_app->hci_thread_id, 1);
+    osThreadFlagsSet(ble_app->hci_thread_id, BLE_APP_FLAG_HCI_EVENT);
 }
 
 void hci_cmd_resp_release(uint32_t flag) {

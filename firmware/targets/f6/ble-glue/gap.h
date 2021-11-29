@@ -35,13 +35,22 @@ typedef enum {
     GapStateConnected,
 } GapState;
 
-bool gap_init(BleEventCallback on_event_cb, void* context);
+typedef struct {
+    uint16_t adv_service_uuid;
+    uint16_t appearance_char;
+    bool bonding_mode;
+    bool mitm_enable;
+} GapConfig;
+
+bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context);
 
 void gap_start_advertising();
 
 void gap_stop_advertising();
 
 GapState gap_get_state();
+
+void gap_kill_thread();
 
 #ifdef __cplusplus
 }

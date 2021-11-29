@@ -12,6 +12,10 @@
 
 #define TAG "Core2"
 
+#define BLE_GLUE_FLAG_SHCI_EVENT (1UL << 0)
+#define BLE_GLUE_FLAG_KILL_THREAD (1UL << 1)
+#define BLE_GLUE_FLAG_ALL (BLE_GLUE_FLAG_SHCI_EVENT | BLE_GLUE_FLAG_KILL_THREAD)
+
 #define POOL_SIZE (CFG_TLBLE_EVT_QUEUE_LENGTH*4U*DIVC(( sizeof(TL_PacketHeader_t) + TL_BLE_EVENT_FRAME_SIZE ), 4U))
 
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint8_t ble_glue_event_pool[POOL_SIZE];
@@ -205,18 +209,44 @@ static void ble_glue_sys_user_event_callback( void * pPayload ) {
     }
 }
 
+static void ble_glue_clear_shared_memory() {
+    memset(ble_glue_event_pool, 0, sizeof(ble_glue_event_pool));
+    memset(&ble_glue_system_cmd_buff, 0, sizeof(ble_glue_system_cmd_buff));
+    memset(ble_glue_system_spare_event_buff, 0, sizeof(ble_glue_system_spare_event_buff));
+    memset(ble_glue_ble_spare_event_buff, 0, sizeof(ble_glue_ble_spare_event_buff));
+}
+
+void ble_glue_kill_thread() {
+    if(ble_glue) {
+        osThreadFlagsSet(ble_glue->shci_user_event_thread_id, BLE_GLUE_FLAG_KILL_THREAD);
+    }
+}
+
 // Wrap functions
 static void ble_glue_user_event_thread(void *argument) {
     UNUSED(argument);
-    for(;;) {
-        osThreadFlagsWait(1, osFlagsWaitAny, osWaitForever);
-        shci_user_evt_proc();
+    uint32_t flags = 0;
+    while(true) {
+        flags = osThreadFlagsWait(BLE_GLUE_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        if(flags & BLE_GLUE_FLAG_SHCI_EVENT) {
+            shci_user_evt_proc();
+        }
+        if(flags & BLE_GLUE_FLAG_KILL_THREAD) {
+            break;
+        }
     }
+    // Free resources
+    osMutexDelete(ble_glue->shci_mtx);
+    osSemaphoreDelete(ble_glue->shci_sem);
+    free(ble_glue);
+    ble_glue = NULL;
+    ble_glue_clear_shared_memory();
+    osThreadExit();
 }
 
 void shci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
-    osThreadFlagsSet(ble_glue->shci_user_event_thread_id, 1);
+    osThreadFlagsSet(ble_glue->shci_user_event_thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
 }
 
 void shci_cmd_resp_release(uint32_t flag) {
