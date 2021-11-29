@@ -12,6 +12,9 @@
 #define DOLPHIN_LVL_THRESHOLD 20.0f
 #define LEVEL2_THRESHOLD 20
 #define LEVEL3_THRESHOLD 100
+#define BUTTHURT_MAX    14
+#define BUTTHURT_MIN    0
+
 
 DolphinState* dolphin_state_alloc() {
     return furi_alloc(sizeof(DolphinState));
@@ -44,20 +47,26 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
 }
 
 bool dolphin_state_load(DolphinState* dolphin_state) {
-    bool loaded = saved_struct_load(
+    bool success = saved_struct_load(
         DOLPHIN_STATE_PATH,
         &dolphin_state->data,
         sizeof(DolphinStoreData),
         DOLPHIN_STATE_HEADER_MAGIC,
         DOLPHIN_STATE_HEADER_VERSION);
 
-    if(!loaded) {
+    if (success) {
+        if ((dolphin_state->data.butthurt > BUTTHURT_MAX) || (dolphin_state->data.butthurt < BUTTHURT_MIN)) {
+            success = false;
+        }
+    }
+
+    if(!success) {
         FURI_LOG_W(TAG, "Reset dolphin-state");
         memset(dolphin_state, 0, sizeof(*dolphin_state));
         dolphin_state->dirty = true;
     }
 
-    return loaded;
+    return success;
 }
 
 uint64_t dolphin_state_timestamp() {
@@ -125,7 +134,7 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     }
 
     uint32_t new_butthurt =
-        CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, 14, 0);
+        CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
 
     if(!!dolphin_state->data.butthurt != !!new_butthurt) {
         mood_changed = true;
@@ -138,9 +147,12 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
 }
 
 void dolphin_state_butthurted(DolphinState* dolphin_state) {
-    dolphin_state->data.butthurt++;
-    dolphin_state->data.timestamp = dolphin_state_timestamp();
-    dolphin_state->dirty = true;
+    if (dolphin_state->data.butthurt < BUTTHURT_MAX) {
+        dolphin_state->data.butthurt++;
+        FURI_LOG_I("DolphinState", "Increasing butthurt");
+        dolphin_state->data.timestamp = dolphin_state_timestamp();
+        dolphin_state->dirty = true;
+    }
 }
 
 void dolphin_state_increase_level(DolphinState* dolphin_state) {
