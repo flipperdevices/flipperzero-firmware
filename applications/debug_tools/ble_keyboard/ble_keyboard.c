@@ -1,8 +1,10 @@
 #include <furi.h>
-#include <furi-hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <bt/bt_service/bt.h>
+#include <furi-hal-bt.h>
+#include <furi-hal-bt-hid.h>
+#include <furi-hal-usb-hid.h>
 
 #define TAG "BleKeyboardApp"
 

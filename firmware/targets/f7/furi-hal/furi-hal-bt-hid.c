@@ -18,6 +18,7 @@ typedef struct {
     uint8_t key[FURI_HAL_BT_HID_KB_KEYS_MAX];
 } FuriHalBtHidKbReport;
 
+// TODO rework with HID defines
 static uint8_t furi_hal_bt_hid_report_map_data[] = {
     0x05, 0x01,       // Usage Page (Generic Desktop)
     0x09, 0x06,       // Usage (Keyboard)
