@@ -34,7 +34,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .adv_service_uuid = 0x3080,
             .appearance_char = 0x8600,
             .bonding_mode = true,
-            .mitm_enable = true,
+            .display_pin_enable = true,
         },
     },
     [FuriHalBtProfileHidKeyboard] = {
@@ -44,7 +44,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
             .appearance_char = GAP_APPEARANCE_KEYBOARD,
             .bonding_mode = true,
-            .mitm_enable = false,
+            .display_pin_enable = false,
         },
     }
 };
@@ -55,7 +55,9 @@ void furi_hal_bt_init() {
     furi_assert(furi_hal_bt_core2_mtx);
 
     // Explicitly tell that we are in charge of CLK48 domain
-    HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
+        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
+    }
 
     // Start Core2
     ble_glue_init();

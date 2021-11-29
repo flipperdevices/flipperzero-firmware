@@ -39,7 +39,7 @@ typedef struct {
     uint16_t adv_service_uuid;
     uint16_t appearance_char;
     bool bonding_mode;
-    bool mitm_enable;
+    bool display_pin_enable;
 } GapConfig;
 
 bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context);

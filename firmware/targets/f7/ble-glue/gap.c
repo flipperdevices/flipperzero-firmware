@@ -298,9 +298,22 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
-    aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    if(gap->config->display_pin_enable) {
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    } else {
+        aci_gap_set_io_capability(IO_CAP_NO_INPUT_NO_OUTPUT);
+    }
     // Setup  authentication
-    aci_gap_set_authentication_requirement(gap->config->bonding_mode, gap->config->mitm_enable, 1, 0, 8, 16, 1, 0, PUBLIC_ADDR);
+    aci_gap_set_authentication_requirement(
+        gap->config->bonding_mode,
+        CFG_MITM_PROTECTION,
+        CFG_SC_SUPPORT,
+        CFG_KEYPRESS_NOTIFICATION_SUPPORT,
+        CFG_ENCRYPTION_KEY_SIZE_MIN,
+        CFG_ENCRYPTION_KEY_SIZE_MAX,
+        CFG_USED_FIXED_PIN,
+        0,
+        PUBLIC_ADDR);
     // Configure whitelist
     aci_gap_configure_whitelist();
 }
