@@ -12,19 +12,17 @@
 #define TAG "FuriHalSpi"
 
 void furi_hal_spi_init() {
+    furi_hal_spi_bus_init(&furi_hal_spi_bus_r);
+    furi_hal_spi_bus_init(&furi_hal_spi_bus_d);
 
-    furi_hal_spi_bus_init(&spi_r);
-    furi_hal_spi_bus_init(&spi_d);
-
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_config_subghz);
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_config_nfc);
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_config_display);
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_config_sd_fast);
-    furi_hal_spi_bus_handle_init(&furi_hal_spi_config_sd_slow);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_subghz);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_display);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_slow);
 
     FURI_LOG_I(TAG, "Init OK");
 }
-
 
 void furi_hal_spi_bus_init(FuriHalSpiBus* bus) {
     furi_assert(bus);

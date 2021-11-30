@@ -1,8 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 #include <furi-hal-gpio.h>
+
 #include <stm32wbxx_ll_spi.h>
-#include <cmsis_os2.h>
+#include <stm32wbxx_ll_rcc.h>
+#include <stm32wbxx_ll_bus.h>
 
 #ifdef __cplusplus
 extern "C" {

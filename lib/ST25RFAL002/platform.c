@@ -50,11 +50,11 @@ void platformSetIrqCallback(PlatformIrqCallback callback) {
 HAL_StatusTypeDef platformSpiTxRx(const uint8_t *txBuf, uint8_t *rxBuf, uint16_t len) {
     bool ret = false;
     if (txBuf && rxBuf) {
-        ret = furi_hal_spi_bus_trx(&furi_hal_spi_config_nfc, (uint8_t*)txBuf, rxBuf, len, 1000);
+        ret = furi_hal_spi_bus_trx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)txBuf, rxBuf, len, 1000);
     } else if (txBuf) {
-        ret = furi_hal_spi_bus_tx(&furi_hal_spi_config_nfc, (uint8_t*)txBuf, len, 1000);
+        ret = furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)txBuf, len, 1000);
     } else if (rxBuf) {
-        ret = furi_hal_spi_bus_rx(&furi_hal_spi_config_nfc, (uint8_t*)rxBuf, len, 1000);
+        ret = furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_nfc, (uint8_t*)rxBuf, len, 1000);
     }
 
     if(!ret) {
@@ -66,9 +66,9 @@ HAL_StatusTypeDef platformSpiTxRx(const uint8_t *txBuf, uint8_t *rxBuf, uint16_t
 }
 
 void platformProtectST25RComm() {
-    furi_hal_spi_acquire(&furi_hal_spi_config_nfc);
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_nfc);
 }
 
 void platformUnprotectST25RComm() {
-    furi_hal_spi_release(&furi_hal_spi_config_nfc);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_nfc);
 }

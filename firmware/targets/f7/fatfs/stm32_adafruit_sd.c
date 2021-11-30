@@ -310,8 +310,8 @@ void SD_SPI_Bus_To_Normal_State(){
   */
 uint8_t BSP_SD_Init(bool reset_card) {
     /* Slow speed init */
-    furi_hal_spi_acquire(&furi_hal_spi_config_sd_slow);
-    furi_hal_sd_spi_handle = &furi_hal_spi_config_sd_slow;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_slow);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_slow;
 
     /* We must reset card in spi_lock context */
     if(reset_card) {
@@ -341,7 +341,7 @@ uint8_t BSP_SD_Init(bool reset_card) {
     }
 
     furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_config_sd_slow);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_slow);
 
     /* SD initialized and set to SPI mode properly */
     return res;

@@ -87,13 +87,13 @@ Diskio_drvTypeDef USER_Driver = {
 DSTATUS USER_initialize(BYTE pdrv) {
     /* USER CODE BEGIN INIT */
 
-    furi_hal_spi_acquire(&furi_hal_spi_config_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_config_sd_fast;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
     DSTATUS status = User_CheckStatus(pdrv);
 
     furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_config_sd_fast);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return status;
     /* USER CODE END INIT */
@@ -122,8 +122,8 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     /* USER CODE BEGIN READ */
     DRESULT res = RES_ERROR;
 
-    furi_hal_spi_acquire(&furi_hal_spi_config_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_config_sd_fast;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
     if(BSP_SD_ReadBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the read operation is finished */
@@ -133,7 +133,7 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     }
 
     furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_config_sd_fast);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return res;
     /* USER CODE END READ */
@@ -153,8 +153,8 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     /* USER CODE HERE */
     DRESULT res = RES_ERROR;
 
-    furi_hal_spi_acquire(&furi_hal_spi_config_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_config_sd_fast;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
     if(BSP_SD_WriteBlocks((uint32_t*)buff, (uint32_t)(sector), count, SD_DATATIMEOUT) == MSD_OK) {
         /* wait until the Write operation is finished */
@@ -164,7 +164,7 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     }
 
     furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_config_sd_fast);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return res;
     /* USER CODE END WRITE */
@@ -186,8 +186,8 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
 
     if(Stat & STA_NOINIT) return RES_NOTRDY;
 
-    furi_hal_spi_acquire(&furi_hal_spi_config_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_config_sd_fast;
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
     switch(cmd) {
     /* Make sure that no pending write process */
@@ -221,7 +221,7 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
     }
 
     furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_config_sd_fast);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return res;
     /* USER CODE END IOCTL */
