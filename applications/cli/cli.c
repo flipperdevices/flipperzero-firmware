@@ -131,6 +131,7 @@ static void cli_handle_backspace(Cli* cli) {
         string_cat_str(temp, string_get_cstr(cli->line) + cli->cursor_position);
         string_move(cli->line, temp);
         cli->cursor_position--;
+        string_clear(temp);
     } else {
         cli_putc(CliSymbolAsciiBell);
     }
@@ -336,6 +337,7 @@ void cli_process_input(Cli* cli) {
             // Print character in replace mode
             printf("\e[4h%c\e[4l", c);
             fflush(stdout);
+            string_clear(temp);
         }
         cli->cursor_position++;
     } else {
