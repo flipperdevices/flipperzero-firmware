@@ -104,7 +104,7 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
         int ret = sscanf(string_get_cstr(args), "%lu", &frequency);
         if(ret != 1) {
             printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
-            //cli_print_usage("subghz_tx_carrier", "<Frequency in HZ>", string_get_cstr(args));
+            cli_print_usage("subghz_txrx", "<Frequency in HZ>", string_get_cstr(args));
             return;
         }
         if(!furi_hal_subghz_is_frequency_valid(frequency)) {
@@ -114,9 +114,15 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
             return;
         }
     }
+    if(!furi_hal_subghz_check_txrx(frequency)) {
+        printf("In your region, only reception on this frequency (%lu) is allowed,\r\n"
+               "the actual operation of the application is not possible\r\n ",
+               frequency);
+        return;
+    }
 
     SubGhzTxRxWorker* subghz_txrx = subghz_tx_rx_worker_alloc();
-    subghz_tx_rx_worker_start(subghz_txrx);
+    subghz_tx_rx_worker_start(subghz_txrx,frequency);
 
     printf("Receiving at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
@@ -124,33 +130,44 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
     furi_hal_power_suppress_charge_enter();
     size_t message_max_len = 64;
     uint8_t message[64] = {0};
-    size_t len = 0;
-
     string_t input;
     string_init(input);
+    string_t name;
+    string_init(name);
     char c;
     bool exit = false;
 
-    string_printf(input, "\033[0;33m%s\033[0m:", furi_hal_version_get_name_ptr());
+    string_printf(name, "\033[0;33m%s\033[0m:", furi_hal_version_get_name_ptr());
+    string_set(input, name);
     printf("%s", string_get_cstr(input));
     fflush(stdout);
 
     while(!exit) {
-        //while(cli_read(cli, (uint8_t*)&c, 1) == 1) {
         if(furi_hal_vcp_rx_with_timeout((uint8_t*)&c, 1, 0) == 1) {
             if(c == CliSymbolAsciiETX) {
                 printf("\r\n");
                 exit = true;
                 break;
-            } else if(c >= 0x20 && c < 0x7F) {
+            } else if((c >= 0x20 && c < 0x7F) || (c >= 0x80 && c < 0xF0)) {
                 putc(c, stdout);
                 fflush(stdout);
                 string_push_back(input, c);
+            } else if(c == CliSymbolAsciiBackspace) {
+                size_t len = string_size(input);
+                if(len > string_size(name)) {
+                    string_set_strn(input, string_get_cstr(input), len - 1);
+                    printf("\r");
+                    for(uint8_t i = 0; i < len; i++) {
+                        printf(" ");
+                    }
+                    printf("\r%s", string_get_cstr(input));
+                    fflush(stdout);
+                }
             } else if(c == CliSymbolAsciiCR) {
                 printf("\r\n");
                 subghz_tx_rx_worker_add_tx(
                     subghz_txrx, (uint8_t*)string_get_cstr(input), strlen(string_get_cstr(input)));
-                string_printf(input, "\033[0;33m%s\033[0m:", furi_hal_version_get_name_ptr());
+                string_printf(input, "%s", string_get_cstr(name));
                 printf("%s", string_get_cstr(input));
                 fflush(stdout);
             }
@@ -158,15 +175,13 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
 
         if(subghz_tx_rx_worker_available_rx(subghz_txrx)) {
             memset(message, 0x00, message_max_len);
-
-            len = subghz_tx_rx_worker_read_rx(subghz_txrx, message, message_max_len);
-
+            subghz_tx_rx_worker_read_rx(subghz_txrx, message, message_max_len);
             printf("\r");
             for(uint8_t i = 0; i < 80; i++) {
                 printf(" ");
             }
 
-            printf("\r %s (len=%d)\r\n", message, len);
+            printf("\r %s \r\n", message);
 
             printf("%s", string_get_cstr(input));
             fflush(stdout);
@@ -175,7 +190,7 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
 
     printf("\r\nExit subghz_txrx\r\n");
     string_clear(input);
-
+    string_clear(name);
     furi_hal_power_suppress_charge_exit();
 
     if(subghz_tx_rx_worker_is_running(subghz_txrx)) {
@@ -472,8 +487,7 @@ void subghz_cli_init() {
     cli_add_command(cli, "subghz_tx", CliCommandFlagDefault, subghz_cli_command_tx, NULL);
     cli_add_command(cli, "subghz_rx", CliCommandFlagDefault, subghz_cli_command_rx, NULL);
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
-    cli_add_command(
-        cli, "subghz_txrx", CliCommandFlagDefault, subghz_cli_command_txrx, NULL);
+    cli_add_command(cli, "subghz_txrx", CliCommandFlagDefault, subghz_cli_command_txrx, NULL);
 
     furi_record_close("cli");
 }

@@ -44,7 +44,7 @@ void subghz_tx_rx_worker_free(SubGhzTxRxWorker* instance);
  * @param instance SubGhzTxRxWorker instance
  * @return bool - true if ok
  */
-bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance);
+bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency);
 
 /** Stop SubGhzTxRxWorker
  * 

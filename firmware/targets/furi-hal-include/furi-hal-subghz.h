@@ -161,6 +161,14 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
 
+/** Сheck if transmission is allowed in your area on this frequency
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     bool
+ */
+bool furi_hal_subghz_check_txrx(uint32_t value);
+
 /** Set frequency
  *
  * @param      value  frequency in Hz

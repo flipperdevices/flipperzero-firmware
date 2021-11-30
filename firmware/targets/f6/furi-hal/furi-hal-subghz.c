@@ -460,9 +460,7 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
-    const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
-
+bool furi_hal_subghz_check_txrx(uint32_t value) {
     //checking regional settings
     bool txrx = false;
     switch(furi_hal_version_get_hw_region()) {
@@ -496,8 +494,13 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
         txrx = true;
         break;
     }
+    return txrx;
+}
 
-    if(txrx) {
+uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
+    const FuriHalSpiDevice* device = furi_hal_spi_device_get(FuriHalSpiDeviceIdSubGhz);
+
+    if(furi_hal_subghz_check_txrx(value)) {
         furi_hal_subghz_regulation = SubGhzRegulationTxRx;
     } else {
         furi_hal_subghz_regulation = SubGhzRegulationOnlyRx;

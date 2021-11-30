@@ -18,7 +18,7 @@ struct SubGhzTxRxWorker {
 
     SubGhzTxRxWorkerStatus satus;
 
-    string_t str_data;
+    uint32_t frequency;
 
     SubGhzTxRxWorkerCallbackEnd callback_end;
     void* context_end;
@@ -144,10 +144,9 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
-    furi_hal_subghz_set_frequency_and_path(433920000);
+    furi_hal_subghz_set_frequency_and_path(instance->frequency);
     furi_hal_subghz_flush_rx();
 
-    //furi_hal_subghz_rx();
     uint8_t data[64] = {0};
     size_t size_tx = 0;
     uint8_t size_rx[1] = {0};
@@ -161,13 +160,13 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
             if(size_tx > GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE) {
                 xStreamBufferReceive(
                     instance->stream_tx, &data, GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE, 40);
-                    subghz_tx_rx_worker_tx(instance, data, GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE);
+                subghz_tx_rx_worker_tx(instance, data, GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE);
             } else {
                 //todo проверку сколько записал
                 xStreamBufferReceive(instance->stream_tx, &data, size_tx, 40);
                 subghz_tx_rx_worker_tx(instance, data, size_tx);
             }
-            
+
         } else {
             //recive
             memset(data, 0x00, 64);
@@ -229,16 +228,22 @@ void subghz_tx_rx_worker_free(SubGhzTxRxWorker* instance) {
     free(instance);
 }
 
-bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance) {
+bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency) {
     furi_assert(instance);
     furi_assert(!instance->worker_running);
-
+    bool res = false;
     xStreamBufferReset(instance->stream_tx);
     xStreamBufferReset(instance->stream_rx);
 
     instance->worker_running = true;
 
-    bool res = furi_thread_start(instance->thread);
+    furi_thread_start(instance->thread);
+
+    if(furi_hal_subghz_check_txrx(frequency)) {
+        instance->frequency = frequency;
+        res = true;
+    }
+
     return res;
 }
 
