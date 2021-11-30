@@ -2,7 +2,7 @@
 
 #include <furi-hal.h>
 
-typedef void (*SubGhzTxRxWorkerCallbackEnd)(void* context);
+typedef void (*SubGhzTxRxWorkerCallbackHaveRead)(void* context);
 
 typedef struct SubGhzTxRxWorker SubGhzTxRxWorker;
 
@@ -12,19 +12,41 @@ typedef enum {
     SubGhzTxRxWorkerStatusRx,
 } SubGhzTxRxWorkerStatus;
 
-bool subghz_tx_rx_worker_add_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size);
-size_t subghz_tx_rx_worker_available_rx(SubGhzTxRxWorker* instance);
-size_t subghz_tx_rx_worker_read_rx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size);
+/** SubGhzTxRxWorker, add data to transfer
+ * 
+ * @param instance  SubGhzTxRxWorker instance
+ * @param data      *data
+ * @param size      data size
+ * @return bool     true if ok
+ */
+bool subghz_tx_rx_worker_write(SubGhzTxRxWorker* instance, uint8_t* data, size_t size);
 
-/** End callback SubGhzTxRxWorker
+/** SubGhzTxRxWorker, get available data
+ * 
+ * @param instance   SubGhzTxRxWorker instance
+ * @return size_t    data size
+ */
+size_t subghz_tx_rx_worker_available(SubGhzTxRxWorker* instance);
+
+/** SubGhzTxRxWorker, read data
+ * 
+ * @param instance   SubGhzTxRxWorker instance
+ * @param data       *data
+ * @param size       max data size, which can be read
+ * @return size_t    data size, how much is actually read
+ */
+size_t subghz_tx_rx_worker_read(SubGhzTxRxWorker* instance, uint8_t* data, size_t size);
+
+/** Сallback SubGhzTxRxWorker when there is data to read in an empty buffer
  * 
  * @param instance SubGhzTxRxWorker instance
- * @param callback SubGhzTxRxWorkerCallbackEnd callback
+ * @param callback SubGhzTxRxWorkerCallbackHaveRead callback
+ * @param context
  */
-void subghz_tx_rx_worker_callback_end(
+void subghz_tx_rx_worker_set_callback_have_read(
     SubGhzTxRxWorker* instance,
-    SubGhzTxRxWorkerCallbackEnd callback_end,
-    void* context_end);
+    SubGhzTxRxWorkerCallbackHaveRead callback,
+    void* context);
 
 /** Allocate SubGhzTxRxWorker
  * 
@@ -37,7 +59,6 @@ SubGhzTxRxWorker* subghz_tx_rx_worker_alloc();
  * @param instance SubGhzTxRxWorker instance
  */
 void subghz_tx_rx_worker_free(SubGhzTxRxWorker* instance);
-
 
 /** Start SubGhzTxRxWorker
  * 

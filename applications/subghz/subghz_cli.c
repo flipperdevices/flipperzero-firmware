@@ -115,14 +115,15 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
         }
     }
     if(!furi_hal_subghz_check_txrx(frequency)) {
-        printf("In your region, only reception on this frequency (%lu) is allowed,\r\n"
-               "the actual operation of the application is not possible\r\n ",
-               frequency);
+        printf(
+            "In your region, only reception on this frequency (%lu) is allowed,\r\n"
+            "the actual operation of the application is not possible\r\n ",
+            frequency);
         return;
     }
 
     SubGhzTxRxWorker* subghz_txrx = subghz_tx_rx_worker_alloc();
-    subghz_tx_rx_worker_start(subghz_txrx,frequency);
+    subghz_tx_rx_worker_start(subghz_txrx, frequency);
 
     printf("Receiving at frequency %lu Hz\r\n", frequency);
     printf("Press CTRL+C to stop\r\n");
@@ -165,7 +166,7 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
                 }
             } else if(c == CliSymbolAsciiCR) {
                 printf("\r\n");
-                subghz_tx_rx_worker_add_tx(
+                subghz_tx_rx_worker_write(
                     subghz_txrx, (uint8_t*)string_get_cstr(input), strlen(string_get_cstr(input)));
                 string_printf(input, "%s", string_get_cstr(name));
                 printf("%s", string_get_cstr(input));
@@ -173,15 +174,15 @@ void subghz_cli_command_txrx(Cli* cli, string_t args, void* context) {
             }
         }
 
-        if(subghz_tx_rx_worker_available_rx(subghz_txrx)) {
+        if(subghz_tx_rx_worker_available(subghz_txrx)) {
             memset(message, 0x00, message_max_len);
-            subghz_tx_rx_worker_read_rx(subghz_txrx, message, message_max_len);
+            subghz_tx_rx_worker_read(subghz_txrx, message, message_max_len);
             printf("\r");
             for(uint8_t i = 0; i < 80; i++) {
                 printf(" ");
             }
 
-            printf("\r %s \r\n", message);
+            printf("\r %s\r\n", message);
 
             printf("%s", string_get_cstr(input));
             fflush(stdout);

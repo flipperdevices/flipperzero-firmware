@@ -5,8 +5,11 @@
 
 #define TAG "SubGhzTxRxWorker"
 
-#define GUBGHZ_TXRX_WORKER_BUF_SIZE 4096
+#define GUBGHZ_TXRX_WORKER_BUF_SIZE 2048
+//you can not set more than 62 because it will not fit into the FIFO ss1101
 #define GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE 60
+
+#define GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF 40
 
 struct SubGhzTxRxWorker {
     FuriThread* thread;
@@ -20,50 +23,58 @@ struct SubGhzTxRxWorker {
 
     uint32_t frequency;
 
-    SubGhzTxRxWorkerCallbackEnd callback_end;
-    void* context_end;
+    SubGhzTxRxWorkerCallbackHaveRead callback_have_read;
+    void* context_have_read;
 };
 
-bool subghz_tx_rx_worker_add_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
+bool subghz_tx_rx_worker_write(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
     furi_assert(instance);
     bool ret = false;
     size_t stream_tx_free_byte = xStreamBufferSpacesAvailable(instance->stream_tx);
     if(size && (stream_tx_free_byte >= size)) {
-        if(xStreamBufferSend(instance->stream_tx, data, size, 40) == size) {
+        if(xStreamBufferSend(
+               instance->stream_tx, data, size, GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF) ==
+           size) {
             ret = true;
         }
     }
     return ret;
 }
 
-size_t subghz_tx_rx_worker_available_rx(SubGhzTxRxWorker* instance) {
+size_t subghz_tx_rx_worker_available(SubGhzTxRxWorker* instance) {
     furi_assert(instance);
     return xStreamBufferBytesAvailable(instance->stream_rx);
 }
 
-size_t subghz_tx_rx_worker_read_rx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
+size_t subghz_tx_rx_worker_read(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
     furi_assert(instance);
     size_t len = 0;
     size_t stream_rx_byte = xStreamBufferBytesAvailable(instance->stream_rx);
 
     if(stream_rx_byte > 0) {
         if(stream_rx_byte <= size) {
-            len = xStreamBufferReceive(instance->stream_rx, data, stream_rx_byte, 40);
+            len = xStreamBufferReceive(
+                instance->stream_rx,
+                data,
+                stream_rx_byte,
+                GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
         } else {
-            len = xStreamBufferReceive(instance->stream_rx, data, size, 40);
+            len = xStreamBufferReceive(
+                instance->stream_rx, data, size, GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
         }
     }
     return len;
 }
 
-void subghz_tx_rx_worker_callback_end(
+void subghz_tx_rx_worker_set_callback_have_read(
     SubGhzTxRxWorker* instance,
-    SubGhzTxRxWorkerCallbackEnd callback_end,
-    void* context_end) {
+    SubGhzTxRxWorkerCallbackHaveRead callback,
+    void* context) {
     furi_assert(instance);
-    furi_assert(callback_end);
-    instance->callback_end = callback_end;
-    instance->context_end = context_end;
+    furi_assert(callback);
+    furi_assert(context);
+    instance->callback_have_read = callback;
+    instance->context_have_read = context;
 }
 
 bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* size) {
@@ -88,14 +99,10 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
     if(furi_hal_subghz_read_available_packet()) {
         if(furi_hal_subghz_check_crc_packet()) {
             furi_hal_subghz_read_packet(data, size);
-            //memset(data, 0, 64);
-            furi_hal_subghz_flush_rx();
-            furi_hal_subghz_rx();
             ret = true;
-        } else {
-            furi_hal_subghz_flush_rx();
-            furi_hal_subghz_rx();
         }
+        furi_hal_subghz_flush_rx();
+        furi_hal_subghz_rx();
     }
     return ret;
 }
@@ -124,9 +131,6 @@ void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t si
             break;
         }
     }
-
-    FURI_LOG_I(TAG, "Transmit");
-
     furi_hal_subghz_idle();
     instance->satus = SubGhzTxRxWorkerStatusIDLE;
 }
@@ -147,53 +151,60 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     furi_hal_subghz_set_frequency_and_path(instance->frequency);
     furi_hal_subghz_flush_rx();
 
-    uint8_t data[64] = {0};
+    uint8_t data[GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE] = {0};
     size_t size_tx = 0;
     uint8_t size_rx[1] = {0};
     uint8_t timeout_tx = 0;
+    bool callback_rx = false;
 
     while(instance->worker_running) {
         //transmit
         size_tx = xStreamBufferBytesAvailable(instance->stream_tx);
         if(size_tx > 0 && !timeout_tx) {
-            timeout_tx = 4; //20ms
+            timeout_tx = 20; //20ms
             if(size_tx > GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE) {
                 xStreamBufferReceive(
-                    instance->stream_tx, &data, GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE, 40);
+                    instance->stream_tx,
+                    &data,
+                    GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE,
+                    GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                 subghz_tx_rx_worker_tx(instance, data, GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE);
             } else {
-                //todo проверку сколько записал
-                xStreamBufferReceive(instance->stream_tx, &data, size_tx, 40);
+                //todo checking that he managed to write all the data to the TX buffer
+                xStreamBufferReceive(
+                    instance->stream_tx, &data, size_tx, GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                 subghz_tx_rx_worker_tx(instance, data, size_tx);
             }
-
         } else {
             //recive
-            memset(data, 0x00, 64);
             if(subghz_tx_rx_worker_rx(instance, data, size_rx)) {
-                //FURI_LOG_I(TAG, "Receiv size=%d  data=%s", size_rx[0], data);
                 if(xStreamBufferSpacesAvailable(instance->stream_rx) >= size_rx[0]) {
-                    //todo проверку сколько записал
-                    xStreamBufferSend(instance->stream_rx, &data, size_rx[0], 40);
+                    if(instance->callback_have_read &&
+                       xStreamBufferBytesAvailable(instance->stream_rx) == 0) {
+                        callback_rx = true;
+                    }
+                    //todo checking that he managed to write all the data to the RX buffer
+                    xStreamBufferSend(
+                        instance->stream_rx,
+                        &data,
+                        size_rx[0],
+                        GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
+                    if(callback_rx) {
+                        instance->callback_have_read(instance->context_have_read);
+                        callback_rx = false;
+                    }
                 } else {
-                    //todo переполнение приемного бувера
+                    //todo RX buffer overflow
                 }
             }
         }
 
         if(timeout_tx) timeout_tx--;
-        osDelay(5);
+        osDelay(1);
     }
 
     furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
     furi_hal_subghz_sleep();
-
-    // while(instance->worker_running) {
-    //     if(instance->worker_stoping) {
-    //         if(instance->callback_end) instance->callback_end(instance->context_end);
-    //     }
-    //     osDelay(50);
-    // }
 
     FURI_LOG_I(TAG, "Worker stop");
     return 0;
