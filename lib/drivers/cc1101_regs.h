@@ -89,14 +89,14 @@ extern "C" {
 #define CC1101_STATUS_PARTNUM           0x30    /** Chip ID Part Number */
 #define CC1101_STATUS_VERSION           0x31    /** Chip ID Version */
 #define CC1101_STATUS_FREQEST           0x32    /** Frequency Offset Estimate from Demodulator */
-#define CC1101_STATUS_LQI               0x33    /** Demodulator Estimate for Link Quality 7bit-CRC, 6..0-LQI*/
+#define CC1101_STATUS_LQI               0x33    /** Demodulator Estimate for Link Quality, 7bit-CRC, 6..0-LQI*/
 #define CC1101_STATUS_RSSI              0x34    /** Received Signal Strength Indication */
 #define CC1101_STATUS_MARCSTATE         0x35    /** Main Radio Control State Machine State */
 #define CC1101_STATUS_WORTIME1          0x36    /** High Byte of WOR Time */
 #define CC1101_STATUS_WORTIME0          0x37    /** Low Byte of WOR Time */
 #define CC1101_STATUS_PKTSTATUS         0x38    /** Current GDOx Status and Packet Status */
 #define CC1101_STATUS_VCO_VC_DAC        0x39    /** Current Setting from PLL Calibration Module */
-#define CC1101_STATUS_TXBYTES           0x3A    /** Underflow and Number of Bytes 7bit-Underflow, 6..0-Number of Bytes*/
+#define CC1101_STATUS_TXBYTES           0x3A    /** Underflow and Number of Bytes, 7bit-Underflow, 6..0-Number of Bytes*/
 #define CC1101_STATUS_RXBYTES           0x3B    /** Overflow and Number of Bytes, 7bit-Overflow*, 6..0-Number of Bytes*/
 #define CC1101_STATUS_RCCTRL1_STATUS    0x3C    /** Last RC Oscillator Calibration Result */
 #define CC1101_STATUS_RCCTRL0_STATUS    0x3D    /** Last RC Oscillator Calibration Result */

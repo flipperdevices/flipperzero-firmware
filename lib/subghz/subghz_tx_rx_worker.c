@@ -6,7 +6,7 @@
 #define TAG "SubGhzTxRxWorker"
 
 #define GUBGHZ_TXRX_WORKER_BUF_SIZE 2048
-//you can not set more than 62 because it will not fit into the FIFO ss1101
+//you can not set more than 62 because it will not fit into the FIFO CC1101
 #define GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE 60
 
 #define GUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF 40
