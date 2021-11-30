@@ -73,12 +73,11 @@
 #endif
 
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()\
-    uint32_t primask_bit = __get_PRIMASK();\
+#define FURI_CRITICAL_ENTER()               \
+    uint32_t primask_bit = __get_PRIMASK(); \
     __disable_irq()
 #endif
 
 #ifndef FURI_CRITICAL_EXIT
-#define FURI_CRITICAL_EXIT()\
-    __set_PRIMASK(primask_bit)
+#define FURI_CRITICAL_EXIT() __set_PRIMASK(primask_bit)
 #endif
