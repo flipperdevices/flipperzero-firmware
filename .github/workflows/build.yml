@@ -73,6 +73,11 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
+      - name: 'Bundle scripts'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
+
       - name: 'Build the firmware in docker'
         uses: ./.github/actions/docker
         with:
@@ -91,11 +96,6 @@ jobs:
             do
               mv dist/${TARGET}/* artifacts/
             done
-
-      - name: 'Bundle scripts'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
 
       - name: 'Bundle resources'
         if: ${{ !github.event.pull_request.head.repo.fork }}
