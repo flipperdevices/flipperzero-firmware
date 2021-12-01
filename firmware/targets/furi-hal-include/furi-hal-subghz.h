@@ -91,17 +91,17 @@ void furi_hal_subghz_load_patable(const uint8_t data[8]);
  */
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
 
-/** Read available packet from FIFO
+/** Check if recieve pipe is not empty
  *
- * @return     bool
+ * @return     true if not empty
  */
-bool furi_hal_subghz_read_available_packet() ;
+bool furi_hal_subghz_rx_pipe_not_empty();
 
-/** Check recive packet from FIFO
+/** Check if recieved data crc is valid
  *
- * @return     bool
+ * @return     true if valid
  */
-bool furi_hal_subghz_check_crc_packet();
+bool furi_hal_subghz_is_rx_data_crc_valid();
 
 /** Read packet from FIFO
  *
@@ -161,13 +161,13 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
 
-/** Сheck if transmission is allowed in your area on this frequency
+/** Сheck if transmission is allowed on this frequency for your flipper region
  *
  * @param      value  frequency in Hz
  *
- * @return     bool
+ * @return     true if allowed
  */
-bool furi_hal_subghz_check_txrx(uint32_t value);
+bool furi_hal_subghz_is_tx_allowed(uint32_t value);
 
 /** Set frequency
  *

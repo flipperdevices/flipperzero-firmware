@@ -96,8 +96,8 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
         }
     }
 
-    if(furi_hal_subghz_read_available_packet()) {
-        if(furi_hal_subghz_check_crc_packet()) {
+    if(furi_hal_subghz_rx_pipe_not_empty()) {
+        if(furi_hal_subghz_is_rx_data_crc_valid()) {
             furi_hal_subghz_read_packet(data, size);
             ret = true;
         }
@@ -250,7 +250,7 @@ bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency) {
 
     furi_thread_start(instance->thread);
 
-    if(furi_hal_subghz_check_txrx(frequency)) {
+    if(furi_hal_subghz_is_tx_allowed(frequency)) {
         instance->frequency = frequency;
         res = true;
     }

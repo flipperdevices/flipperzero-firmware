@@ -438,7 +438,7 @@ void furi_hal_subghz_flush_rx() {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 }
 
-bool furi_hal_subghz_read_available_packet() {
+bool furi_hal_subghz_rx_pipe_not_empty() {
     CC1101RxBytes status[1];
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
@@ -451,7 +451,7 @@ bool furi_hal_subghz_read_available_packet() {
     }
 }
 
-bool furi_hal_subghz_check_crc_packet() {
+bool furi_hal_subghz_is_rx_data_crc_valid() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     uint8_t data[1];
     cc1101_read_reg(&furi_hal_spi_bus_handle_subghz, CC1101_STATUS_LQI | CC1101_BURST, data);
@@ -544,16 +544,16 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     return value;
 }
 
-bool furi_hal_subghz_check_txrx(uint32_t value) {
+bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
     //checking regional settings
-    bool txrx = false;
+    bool is_allowed = false;
     switch(furi_hal_version_get_hw_region()) {
     case FuriHalVersionRegionEuRu:
         //433,05..434,79; 868,15..868,55
         if(!(value >= 433050000 && value <= 434790000) &&
            !(value >= 868150000 && value <= 868550000)) {
         } else {
-            txrx = true;
+            is_allowed = true;
         }
         break;
     case FuriHalVersionRegionUsCaAu:
@@ -562,7 +562,7 @@ bool furi_hal_subghz_check_txrx(uint32_t value) {
            !(value >= 433050000 && value <= 434790000) &&
            !(value >= 915000000 && value <= 928000000)) {
         } else {
-            txrx = true;
+            is_allowed = true;
         }
         break;
     case FuriHalVersionRegionJp:
@@ -570,21 +570,21 @@ bool furi_hal_subghz_check_txrx(uint32_t value) {
         if(!(value >= 312000000 && value <= 315250000) &&
            !(value >= 920500000 && value <= 923500000)) {
         } else {
-            txrx = true;
+            is_allowed = true;
         }
         break;
 
     default:
-        txrx = true;
+        is_allowed = true;
         break;
     }
-    return txrx;
+    return is_allowed;
 }
 
 uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
 
-    if(furi_hal_subghz_check_txrx(value)) {
+    if(furi_hal_subghz_is_tx_allowed(value)) {
         furi_hal_subghz_regulation = SubGhzRegulationTxRx;
     } else {
         furi_hal_subghz_regulation = SubGhzRegulationOnlyRx;
