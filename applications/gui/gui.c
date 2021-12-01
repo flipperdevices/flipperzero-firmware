@@ -1,3 +1,4 @@
+#include "gui/canvas.h"
 #include "gui_i.h"
 
 #define TAG "GuiSrv"
@@ -53,7 +54,19 @@ void gui_redraw_status_bar(Gui* gui) {
     canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
+
+    /* for support black theme - paint white area and
+     * draw icon with transparent white color
+     */
+    canvas_set_color(gui->canvas, ColorWhite);
+    canvas_draw_box(gui->canvas, 1, 1, 9, 7);
+    canvas_draw_box(gui->canvas, 7, 3, 58, 6);
+    canvas_draw_box(gui->canvas, 61, 1, 32, 7);
+    canvas_draw_box(gui->canvas, 89, 3, 38, 6);
+    canvas_set_color(gui->canvas, ColorBlack);
+    canvas_set_bitmap_mode(gui->canvas, 1);
     canvas_draw_icon(gui->canvas, 0, 0, &I_Background_128x11);
+    canvas_set_bitmap_mode(gui->canvas, 0);
 
     // Right side
     x = GUI_DISPLAY_WIDTH;
@@ -66,27 +79,25 @@ void gui_redraw_status_bar(Gui* gui) {
             if(!width) width = 8;
             x_used += width;
             x -= (width + 2);
-            canvas_frame_set(gui->canvas, x - 3, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(
+                gui->canvas, x - 3, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 1, 1, width + 3, 11);
-
+            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
             canvas_set_color(gui->canvas, ColorBlack);
 
-            canvas_draw_box(gui->canvas, 1, 0, 1, 12);
-            canvas_draw_box(gui->canvas, 0, 1, 1, 11);
+            canvas_draw_rframe(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
+            canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
+            canvas_draw_line(
+                gui->canvas,
+                2,
+                canvas_height(gui->canvas) - 2,
+                canvas_width(gui->canvas) - 2,
+                canvas_height(gui->canvas) - 2);
 
-            canvas_draw_box(gui->canvas, 1, 11, width + 4, 2);
-            canvas_draw_box(gui->canvas, 1, 0, width + 4, 1);
-            canvas_draw_box(gui->canvas, width + 4, 1, 1, 11);
-
-            canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_dot(gui->canvas, width + 4, 0);
-            canvas_draw_dot(gui->canvas, width + 4, 12);
-
-            canvas_set_color(gui->canvas, ColorBlack);
-
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
+            canvas_frame_set(
+                gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
 
             view_port_draw(view_port, gui->canvas);
         }
@@ -102,30 +113,27 @@ void gui_redraw_status_bar(Gui* gui) {
             width = view_port_get_width(view_port);
             if(!width) width = 8;
             x_used += width;
-            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width, GUI_STATUS_BAR_HEIGHT);
+
+            canvas_frame_set(
+                gui->canvas, 0, GUI_STATUS_BAR_Y, x + width + 5, GUI_STATUS_BAR_HEIGHT);
+            canvas_draw_rframe(
+                gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas), 1);
+            canvas_draw_line(gui->canvas, 1, 1, 1, canvas_height(gui->canvas) - 2);
+            canvas_draw_line(
+                gui->canvas,
+                2,
+                canvas_height(gui->canvas) - 2,
+                canvas_width(gui->canvas) - 2,
+                canvas_height(gui->canvas) - 2);
+
+            canvas_frame_set(gui->canvas, x, GUI_STATUS_BAR_Y, width + 5, GUI_STATUS_BAR_HEIGHT);
 
             canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_box(gui->canvas, 1, 1, width + 3, 11);
-
-            canvas_set_color(gui->canvas, ColorBlack);
-
-            if(x == 0) { // Frame start
-                canvas_draw_box(gui->canvas, 1, 0, 1, 12);
-                canvas_draw_box(gui->canvas, 0, 1, 1, 11);
-            }
-
-            canvas_draw_box(gui->canvas, 1, 11, width + 4, 2);
-            canvas_draw_box(gui->canvas, 1, 0, width + 4, 1);
-            canvas_draw_box(gui->canvas, width + 4, 0, 1, 12);
-
-            canvas_set_color(gui->canvas, ColorWhite);
-            canvas_draw_dot(gui->canvas, width + 4, 0);
-            canvas_draw_dot(gui->canvas, width + 4, 12);
-
+            canvas_draw_box(gui->canvas, 2, 1, width + 2, 10);
             canvas_set_color(gui->canvas, ColorBlack);
 
             canvas_frame_set(
-                gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_HEIGHT);
+                gui->canvas, x + 3, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
 
             x += (width + 2);
@@ -134,10 +142,10 @@ void gui_redraw_status_bar(Gui* gui) {
     }
 }
 
-bool gui_redraw_normal(Gui* gui) {
+bool gui_redraw_window(Gui* gui) {
     canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
-    canvas_frame_set(gui->canvas, GUI_MAIN_X, GUI_MAIN_Y, GUI_MAIN_WIDTH, GUI_MAIN_HEIGHT);
-    ViewPort* view_port = gui_view_port_find_enabled(gui->layers[GuiLayerMain]);
+    canvas_frame_set(gui->canvas, GUI_WINDOW_X, GUI_WINDOW_Y, GUI_WINDOW_WIDTH, GUI_WINDOW_HEIGHT);
+    ViewPort* view_port = gui_view_port_find_enabled(gui->layers[GuiLayerWindow]);
     if(view_port) {
         view_port_draw(view_port, gui->canvas);
         return true;
@@ -145,10 +153,10 @@ bool gui_redraw_normal(Gui* gui) {
     return false;
 }
 
-bool gui_redraw_none(Gui* gui) {
+bool gui_redraw_desktop(Gui* gui) {
     canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
-    canvas_frame_set(gui->canvas, GUI_MAIN_X, GUI_MAIN_Y, GUI_MAIN_WIDTH, GUI_MAIN_HEIGHT);
-    ViewPort* view_port = gui_view_port_find_enabled(gui->layers[GuiLayerNone]);
+    canvas_frame_set(gui->canvas, 0, 0, GUI_DISPLAY_WIDTH, GUI_DISPLAY_HEIGHT);
+    ViewPort* view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
     if(view_port) {
         view_port_draw(view_port, gui->canvas);
         return true;
@@ -164,8 +172,8 @@ void gui_redraw(Gui* gui) {
     canvas_reset(gui->canvas);
 
     if(!gui_redraw_fs(gui)) {
-        if(!gui_redraw_normal(gui)) {
-            gui_redraw_none(gui);
+        if(!gui_redraw_window(gui)) {
+            gui_redraw_desktop(gui);
         }
         gui_redraw_status_bar(gui);
     }
@@ -203,8 +211,8 @@ void gui_input(Gui* gui, InputEvent* input_event) {
     gui_lock(gui);
 
     ViewPort* view_port = gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]);
-    if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerMain]);
-    if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerNone]);
+    if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerWindow]);
+    if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
 
     if(!(gui->ongoing_input & ~key_bit) && input_event->type == InputTypePress) {
         gui->ongoing_input_view_port = view_port;

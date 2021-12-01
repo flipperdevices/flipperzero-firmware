@@ -42,6 +42,7 @@ extern int32_t vibro_test_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
+extern int32_t snake_game_app(void* p);
 
 // On system start hooks declaration
 extern void bt_cli_init();
@@ -147,6 +148,10 @@ const FlipperApplication FLIPPER_APPS[] = {
     {.app = ibutton_app, .name = "iButton", .stack_size = 2048, .icon = &A_iButton_14},
 #endif
 
+#ifdef APP_BAD_USB
+    {.app = bad_usb_app, .name = "Bad USB", .stack_size = 2048, .icon = &A_BadUsb_14},
+#endif
+
 };
 
 const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
@@ -203,6 +208,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player_app, .name = "Music Player", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
+
+#ifdef APP_SNAKE_GAME
+    {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
 };
 
 const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApplication);
@@ -231,10 +240,6 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 
 #ifdef APP_USB_MOUSE
     {.app = usb_mouse_app, .name = "USB Mouse demo", .stack_size = 1024, .icon = NULL},
-#endif
-
-#ifdef APP_BAD_USB
-    {.app = bad_usb_app, .name = "Bad USB test", .stack_size = 2048, .icon = NULL},
 #endif
 
 #ifdef APP_UART_ECHO
