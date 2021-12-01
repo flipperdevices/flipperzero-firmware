@@ -474,7 +474,7 @@ void cli_command_i2c(Cli* cli, string_t args, void* context) {
         for(uint8_t column = 0; column <= 0xF; column++) {
             bool ret =
                 furi_hal_i2c_rx(&furi_hal_i2c_handle_external, (row << 4) + column, &test, 1, 2);
-            printf("%c ", ret ? '+' : '-');
+            printf("%c ", ret ? '#' : '-');
         }
         printf("\r\n");
     }
