@@ -442,7 +442,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
         }
     }
 
-    printf("\r\nExit subghz_txrx\r\n");
+    printf("\r\nExit chat\r\n");
     string_clear(input);
     string_clear(name);
     furi_hal_power_suppress_charge_exit();
