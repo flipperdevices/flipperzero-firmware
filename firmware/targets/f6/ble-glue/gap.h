@@ -13,6 +13,7 @@ typedef enum {
     BleEventTypeStartAdvertising,
     BleEventTypeStopAdvertising,
     BleEventTypePinCodeShow,
+    BleEventTypePinCodeVerify,
     BleEventTypeUpdateMTU,
 } BleEventType;
 
@@ -26,7 +27,7 @@ typedef struct {
     BleEventData data;
 } BleEvent;
 
-typedef void(*BleEventCallback) (BleEvent event, void* context);
+typedef bool(*BleEventCallback) (BleEvent event, void* context);
 
 typedef enum {
     GapStateIdle,
@@ -35,11 +36,16 @@ typedef enum {
     GapStateConnected,
 } GapState;
 
+typedef enum {
+    GapPairingPinCodeShow,
+    GapPairingPinCodeVerifyYesNo,
+} GapPairing;
+
 typedef struct {
     uint16_t adv_service_uuid;
     uint16_t appearance_char;
     bool bonding_mode;
-    bool display_pin_enable;
+    GapPairing pairing_method;
 } GapConfig;
 
 bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context);

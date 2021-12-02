@@ -34,7 +34,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .adv_service_uuid = 0x3080,
             .appearance_char = 0x8600,
             .bonding_mode = true,
-            .display_pin_enable = true,
+            .pairing_method = GapPairingPinCodeShow,
         },
     },
     [FuriHalBtProfileHidKeyboard] = {
@@ -44,7 +44,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .adv_service_uuid = HUMAN_INTERFACE_DEVICE_SERVICE_UUID,
             .appearance_char = GAP_APPEARANCE_KEYBOARD,
             .bonding_mode = true,
-            .display_pin_enable = false,
+            .pairing_method = GapPairingPinCodeVerifyYesNo,
         },
     }
 };
