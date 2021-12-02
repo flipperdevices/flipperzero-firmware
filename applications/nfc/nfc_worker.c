@@ -503,7 +503,7 @@ void nfc_worker_read_mifare_ul(NfcWorker* nfc_worker) {
                     FURI_LOG_D(
                         TAG,
                         "Mifare Ultralight Type: %d, Pages: %d",
-                        mf_ul_read.type,
+                        mf_ul_read.data.type,
                         mf_ul_read.pages_to_read);
                     FURI_LOG_D(TAG, "Reading signature ...");
                     tx_len = mf_ul_prepare_read_signature(tx_buff);

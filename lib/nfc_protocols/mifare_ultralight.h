@@ -52,6 +52,7 @@ typedef struct {
 } MfUltralightManufacturerBlock;
 
 typedef struct {
+    MfUltralightType type;
     MfUltralightVersion version;
     uint8_t signature[32];
     uint32_t counter[3];
@@ -69,7 +70,6 @@ typedef struct {
 } MifareUlAuthData;
 
 typedef struct {
-    MfUltralightType type;
     uint8_t pages_to_read;
     uint8_t pages_readed;
     bool support_fast_read;
