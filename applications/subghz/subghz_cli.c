@@ -440,6 +440,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
             printf("%s", string_get_cstr(input));
             fflush(stdout);
         }
+        osDelay(1);
     }
 
     printf("\r\nExit chat\r\n");
