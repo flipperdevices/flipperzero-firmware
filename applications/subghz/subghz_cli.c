@@ -406,7 +406,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 putc(c, stdout);
                 fflush(stdout);
                 string_push_back(input, c);
-            } else if((c == CliSymbolAsciiBackspace) || (c== CliSymbolAsciiDel)) {
+            } else if((c == CliSymbolAsciiBackspace) || (c == CliSymbolAsciiDel)) {
                 size_t len = string_size(input);
                 if(len > string_size(name)) {
                     printf("%s", "\e[D\e[1P");
