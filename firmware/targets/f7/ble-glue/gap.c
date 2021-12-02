@@ -146,7 +146,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 // Generate random PIN code
                 uint32_t pin = rand() % 999999;
                 aci_gap_pass_key_resp(gap->service.connection_handle, pin);
-                FURI_LOG_I(TAG, "Pass key request event. Pin: %d", pin);
+                FURI_LOG_I(TAG, "Pass key request event. Pin: %06d", pin);
                 BleEvent event = {.type = BleEventTypePinCodeShow, .data.pin_code = pin};
                 gap->on_event_cb(event, gap->context);
             }
@@ -188,10 +188,14 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
                 break;
 
             case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE:
-                FURI_LOG_I(TAG, "Hex_value = %lx",
-                            ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value);
-                aci_gap_numeric_comparison_value_confirm_yesno(gap->service.connection_handle, 1);
+            {
+                uint32_t pin = ((aci_gap_numeric_comparison_value_event_rp0 *)(blue_evt->data))->Numeric_Value;
+                FURI_LOG_I(TAG, "Verify numeric comparison: %06d", pin);
+                BleEvent event = {.type = BleEventTypePinCodeVerify, .data.pin_code = pin};
+                bool result = gap->on_event_cb(event, gap->context);
+                aci_gap_numeric_comparison_value_confirm_yesno(gap->service.connection_handle, result);
                 break;
+            }
 
             case EVT_BLUE_GAP_PAIRING_CMPLT:
                 pairing_complete = (aci_gap_pairing_complete_event_rp0*)blue_evt->data;
@@ -298,13 +302,19 @@ static void gap_init_svc(Gap* gap) {
     // Set default PHY
     hci_le_set_default_phy(ALL_PHYS_PREFERENCE, TX_2M_PREFERRED, RX_2M_PREFERRED);
     // Set I/O capability
-    aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    bool keypress_supported = false;
+    if(gap->config->pairing_method == GapPairingPinCodeShow) {
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_ONLY);
+    } else if(gap->config->pairing_method == GapPairingPinCodeVerifyYesNo){
+        aci_gap_set_io_capability(IO_CAP_DISPLAY_YES_NO);
+        keypress_supported = true;
+    }
     // Setup  authentication
     aci_gap_set_authentication_requirement(
         gap->config->bonding_mode,
         CFG_MITM_PROTECTION,
         CFG_SC_SUPPORT,
-        CFG_KEYPRESS_NOTIFICATION_SUPPORT,
+        keypress_supported,
         CFG_ENCRYPTION_KEY_SIZE_MIN,
         CFG_ENCRYPTION_KEY_SIZE_MAX,
         CFG_USED_FIXED_PIN,
@@ -430,6 +440,7 @@ GapState gap_get_state() {
 }
 
 void gap_kill_thread() {
+    gap->enable_adv = false;
     if(gap) {
         GapCommand command = GapCommandKillThread;
         osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);

@@ -39,6 +39,19 @@ static void bt_pin_code_show_event_handler(Bt* bt, uint32_t pin) {
     string_clear(pin_str);
 }
 
+static bool bt_pin_code_verify_event_handler(Bt* bt, uint32_t pin) {
+    furi_assert(bt);
+    string_t pin_str;
+    dialog_message_set_icon(bt->dialog_message, &I_BLE_Pairing_128x64, 0, 0);
+    string_init_printf(pin_str, "Verify code\n%06d", pin);
+    dialog_message_set_text(
+        bt->dialog_message, string_get_cstr(pin_str), 64, 4, AlignCenter, AlignTop);
+    dialog_message_set_buttons(bt->dialog_message, "Cancel", "Ok", NULL);
+    DialogMessageButton button = dialog_message_show(bt->dialogs, bt->dialog_message);
+    string_clear(pin_str);
+    return button == DialogMessageButtonCenter;
+}
+
 static void bt_battery_level_changed_callback(const void* _event, void* context) {
     furi_assert(_event);
     furi_assert(context);
@@ -135,9 +148,10 @@ static void bt_rpc_send_bytes_callback(void* context, uint8_t* bytes, size_t byt
 }
 
 // Called from GAP thread
-static void bt_on_gap_event_callback(BleEvent event, void* context) {
+static bool bt_on_gap_event_callback(BleEvent event, void* context) {
     furi_assert(context);
     Bt* bt = context;
+    bool ret = false;
 
     if(event.type == BleEventTypeConnected) {
         // Update status bar
@@ -160,6 +174,7 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
         message.type = BtMessageTypeUpdateBatteryLevel;
         message.data.battery_level = info.charge;
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        ret = true;
     } else if(event.type == BleEventTypeDisconnected) {
         if(bt->profile == BtProfileSerial && bt->rpc_session) {
             FURI_LOG_I(TAG, "Close RPC connection");
@@ -168,21 +183,29 @@ static void bt_on_gap_event_callback(BleEvent event, void* context) {
             furi_hal_bt_serial_set_event_callback(0, NULL, NULL);
             bt->rpc_session = NULL;
         }
+        ret = true;
     } else if(event.type == BleEventTypeStartAdvertising) {
         bt->status = BtStatusAdvertising;
         BtMessage message = {.type = BtMessageTypeUpdateStatusbar};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        ret = true;
     } else if(event.type == BleEventTypeStopAdvertising) {
         bt->status = BtStatusOff;
         BtMessage message = {.type = BtMessageTypeUpdateStatusbar};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        ret = true;
     } else if(event.type == BleEventTypePinCodeShow) {
         BtMessage message = {
             .type = BtMessageTypePinCodeShow, .data.pin_code = event.data.pin_code};
         furi_check(osMessageQueuePut(bt->message_queue, &message, 0, osWaitForever) == osOK);
+        ret = true;
+    } else if(event.type == BleEventTypePinCodeVerify) {
+        ret = bt_pin_code_verify_event_handler(bt, event.data.pin_code);
     } else if(event.type == BleEventTypeUpdateMTU) {
         bt->max_packet_size = event.data.max_packet_size;
+        ret = true;
     }
+    return ret;
 }
 
 static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void* context) {
@@ -226,6 +249,7 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
         if(bt->bt_settings.enabled) {
             furi_hal_bt_start_advertising();
         }
+        furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
         bt->profile = message->data.profile;
         *message->result = true;
     } else {
