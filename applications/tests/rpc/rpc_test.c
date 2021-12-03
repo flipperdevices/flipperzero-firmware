@@ -196,8 +196,8 @@ static void test_rpc_add_ping_to_list(MsgList_t msg_list, bool request, uint32_t
     response->command_status = PB_CommandStatus_OK;
     response->cb_content.funcs.encode = NULL;
     response->has_next = false;
-    response->which_content = (request == PING_REQUEST) ? PB_Main_ping_request_tag :
-                                                          PB_Main_ping_response_tag;
+    response->which_content = (request == PING_REQUEST) ? PB_Main_system_ping_request_tag :
+                                                          PB_Main_system_ping_response_tag;
 }
 
 static void test_rpc_create_simple_message(
@@ -353,10 +353,10 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
 
     switch(result->which_content) {
     case PB_Main_empty_tag:
-    case PB_Main_ping_response_tag:
+    case PB_Main_system_ping_response_tag:
         /* nothing to check */
         break;
-    case PB_Main_ping_request_tag:
+    case PB_Main_system_ping_request_tag:
     case PB_Main_storage_list_request_tag:
     case PB_Main_storage_read_request_tag:
     case PB_Main_storage_write_request_tag:
@@ -928,7 +928,7 @@ MU_TEST(test_storage_interrupt_continuous_another_system) {
         .command_status = PB_CommandStatus_OK,
         .cb_content.funcs.encode = NULL,
         .has_next = false,
-        .which_content = PB_Main_ping_request_tag,
+        .which_content = PB_Main_system_ping_request_tag,
     };
 
     MsgList_it_t it;
@@ -1196,7 +1196,7 @@ MU_TEST(test_ping) {
 //       3) test for one push of several packets
 //       4) test for fill buffer till end (great varint) and close connection
 
-MU_TEST_SUITE(test_rpc_status) {
+MU_TEST_SUITE(test_rpc_system) {
     MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_ping);
@@ -1339,7 +1339,7 @@ int run_minunit_test_rpc() {
         MU_RUN_SUITE(test_rpc_storage);
     }
 
-    MU_RUN_SUITE(test_rpc_status);
+    MU_RUN_SUITE(test_rpc_system);
     MU_RUN_SUITE(test_rpc_app);
 
     return MU_EXIT_CODE;

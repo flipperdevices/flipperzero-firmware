@@ -33,7 +33,7 @@ typedef struct {
 
 static RpcSystemCallbacks rpc_systems[] = {
     {
-        .alloc = rpc_system_status_alloc,
+        .alloc = rpc_system_system_alloc,
         .free = NULL,
     },
     {
@@ -203,10 +203,10 @@ void rpc_print_message(const PB_Main* message) {
         }
         break;
     }
-    case PB_Main_ping_request_tag:
+    case PB_Main_system_ping_request_tag:
         string_cat_printf(str, "\tping_request {\r\n");
         break;
-    case PB_Main_ping_response_tag:
+    case PB_Main_system_ping_response_tag:
         string_cat_printf(str, "\tping_response {\r\n");
         break;
     case PB_Main_storage_mkdir_request_tag:
