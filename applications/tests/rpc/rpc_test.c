@@ -1212,6 +1212,56 @@ MU_TEST(test_storage_md5sum) {
     test_storage_md5sum_run(TEST_DIR "file2.txt", ++command_id, md5sum2, PB_CommandStatus_OK);
 }
 
+static void test_rpc_storage_rename_run(
+    const char* old_path,
+    const char* new_path,
+    uint32_t command_id,
+    PB_CommandStatus status) {
+    PB_Main request;
+    MsgList_t expected_msg_list;
+    MsgList_init(expected_msg_list);
+
+    char* str_old_path = furi_alloc(strlen(old_path) + 1);
+    strcpy(str_old_path, old_path);
+    char* str_new_path = furi_alloc(strlen(new_path) + 1);
+    strcpy(str_new_path, new_path);
+
+    request.command_id = command_id;
+    request.command_status = PB_CommandStatus_OK;
+    request.cb_content.funcs.encode = NULL;
+    request.which_content = PB_Main_storage_rename_request_tag;
+    request.has_next = false;
+    request.content.storage_rename_request.old_path = str_old_path;
+    request.content.storage_rename_request.new_path = str_new_path;
+
+    test_rpc_add_empty_to_list(expected_msg_list, status, command_id);
+
+    test_rpc_encode_and_feed_one(&request);
+    test_rpc_decode_and_compare(expected_msg_list);
+
+    pb_release(&PB_Main_msg, &request);
+    test_rpc_free_msg_list(expected_msg_list);
+}
+
+MU_TEST(test_storage_rename) {
+    test_rpc_storage_rename_run(
+        NULL, NULL, ++command_id, PB_CommandStatus_ERROR_STORAGE_INVALID_NAME);
+
+    furi_check(!test_is_exists(TEST_DIR "empty.txt"));
+    test_create_file(TEST_DIR "empty.txt", 0);
+    test_rpc_storage_rename_run(
+        TEST_DIR "empty.txt", TEST_DIR "empty2.txt", ++command_id, PB_CommandStatus_OK);
+    mu_check(!test_is_exists(TEST_DIR "empty.txt"));
+    mu_check(test_is_exists(TEST_DIR "empty2.txt"));
+
+    furi_check(!test_is_exists(TEST_DIR "dir1"));
+    test_create_dir(TEST_DIR "dir1");
+    test_rpc_storage_rename_run(
+        TEST_DIR "dir1", TEST_DIR "dir2", ++command_id, PB_CommandStatus_OK);
+    mu_check(!test_is_exists(TEST_DIR "dir1"));
+    mu_check(test_is_exists(TEST_DIR "dir2"));
+}
+
 MU_TEST(test_ping) {
     MsgList_t input_msg_list;
     MsgList_init(input_msg_list);
@@ -1265,6 +1315,7 @@ MU_TEST_SUITE(test_rpc_storage) {
     MU_RUN_TEST(test_storage_delete_recursive);
     MU_RUN_TEST(test_storage_mkdir);
     MU_RUN_TEST(test_storage_md5sum);
+    MU_RUN_TEST(test_storage_rename);
     MU_RUN_TEST(test_storage_interrupt_continuous_same_system);
     MU_RUN_TEST(test_storage_interrupt_continuous_another_system);
 }

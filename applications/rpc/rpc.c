@@ -297,6 +297,14 @@ void rpc_print_message(const PB_Main* message) {
         rpc_sprintf_msg_file(str, "\t\t", msg_file, msg_file_count);
         break;
     }
+    case PB_Main_storage_rename_request_tag: {
+        string_cat_printf(str, "\trename_request {\r\n");
+        string_cat_printf(
+            str, "\t\told_path: %s\r\n", message->content.storage_rename_request.old_path);
+        string_cat_printf(
+            str, "\t\tnew_path: %s\r\n", message->content.storage_rename_request.new_path);
+        break;
+    }
     case PB_Main_gui_start_screen_stream_request_tag:
         string_cat_printf(str, "\tstart_screen_stream {\r\n");
         break;
