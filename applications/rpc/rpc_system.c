@@ -2,10 +2,17 @@
 #include "rpc_i.h"
 #include "status.pb.h"
 
+#include <power/power_service/power.h>
+
 void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
+    furi_assert(msg_request);
+    furi_assert(msg_request->which_content == PB_Main_system_ping_request_tag);
+    furi_assert(context);
+    Rpc* rpc = context;
+
     if(msg_request->has_next) {
         rpc_send_and_release_empty(
-            context, msg_request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+            rpc, msg_request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
         return;
     }
 
@@ -23,17 +30,39 @@ void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
         response->data->size = request->data->size;
     }
 
-    rpc_send_and_release(context, &msg_response);
+    rpc_send_and_release(rpc, &msg_response);
+}
+
+void rpc_system_system_reboot_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_reboot_request_tag);
+    furi_assert(context);
+    Rpc* rpc = context;
+
+    const int mode = request->content.system_reboot_request.mode;
+
+    if(mode == PB_System_RebootRequest_RebootMode_OS) {
+        power_reboot(PowerBootModeNormal);
+    } else if(mode == PB_System_RebootRequest_RebootMode_DFU) {
+        power_reboot(PowerBootModeDfu);
+    } else {
+        rpc_send_and_release_empty(
+            rpc, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+    }
 }
 
 void* rpc_system_system_alloc(Rpc* rpc) {
     RpcHandler rpc_handler = {
-        .message_handler = rpc_system_system_ping_process,
+        .message_handler = NULL,
         .decode_submessage = NULL,
         .context = rpc,
     };
 
+    rpc_handler.message_handler = rpc_system_system_ping_process;
     rpc_add_handler(rpc, PB_Main_system_ping_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_reboot_process;
+    rpc_add_handler(rpc, PB_Main_system_reboot_request_tag, &rpc_handler);
 
     return NULL;
 }
