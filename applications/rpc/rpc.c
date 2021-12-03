@@ -223,6 +223,38 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_empty_tag:
         string_cat_printf(str, "\tempty {\r\n");
         break;
+    case PB_Main_storage_info_request_tag: {
+        string_cat_printf(str, "\tinfo_request {\r\n");
+        const char* path = message->content.storage_info_request.path;
+        if(path) {
+            string_cat_printf(str, "\t\tpath: %s\r\n", path);
+        }
+        break;
+    }
+    case PB_Main_storage_info_response_tag: {
+        string_cat_printf(str, "\tinfo_response {\r\n");
+        string_cat_printf(
+            str, "\t\ttotal_space: %lu\r\n", message->content.storage_info_response.total_space);
+        string_cat_printf(
+            str, "\t\tfree_space: %lu\r\n", message->content.storage_info_response.free_space);
+        break;
+    }
+    case PB_Main_storage_stat_request_tag: {
+        string_cat_printf(str, "\tstat_request {\r\n");
+        const char* path = message->content.storage_stat_request.path;
+        if(path) {
+            string_cat_printf(str, "\t\tpath: %s\r\n", path);
+        }
+        break;
+    }
+    case PB_Main_storage_stat_response_tag: {
+        string_cat_printf(str, "\tstat_response {\r\n");
+        if(message->content.storage_stat_response.has_file) {
+            const PB_Storage_File* msg_file = &message->content.storage_stat_response.file;
+            rpc_sprintf_msg_file(str, "\t\t\t", msg_file, 1);
+        }
+        break;
+    }
     case PB_Main_storage_list_request_tag: {
         string_cat_printf(str, "\tlist_request {\r\n");
         const char* path = message->content.storage_list_request.path;
