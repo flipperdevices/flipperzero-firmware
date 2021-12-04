@@ -6,15 +6,44 @@
  */
 #include "spectrum_analyzer.h"
 #include "spectrum_analyzer_worker.h"
+
 #include <furi.h>
+#include <cc1101.h>
 
-
-
+ uint8_t calibration_values[3][DOTS_COUNT];
 
 static int32_t spectrum_analyzer_worker_thread(void* context) {
 	SpectrumAnalyzerWorker* instance = context;
-    while(instance->worker_running)
-    	osDelay(1000);
+    
+    // Start CC1011
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+
+    // Calibrate and store calibration values for all
+    // working frequences 
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    for (uint8_t i=0; i<DOTS_COUNT; i++) {
+        furi_hal_subghz_set_frequency(instance->start_freq);
+        cc1101_read_cal_values(&furi_hal_spi_bus_handle_subghz,
+                            &calibration_values[0][i],
+                            &calibration_values[2][i],
+                            &calibration_values[3][i]);
+    }
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+    // Start receiver
+    furi_hal_subghz_flush_rx();
+    furi_hal_subghz_rx(); 
+    
+    
+    while(instance->worker_running) {
+    	osDelay(10);
+
+        // Read RSSI for current channnel
+    
+        // Fast frequency hop (chapter 28.2 of CC1101 datasheet)
+
+    }
+
     return 0;
 }
 

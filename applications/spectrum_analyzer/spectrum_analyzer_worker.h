@@ -5,8 +5,8 @@
  *      Author: forthe
  */
 
-#ifndef APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_WORKER_H_
-#define APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_WORKER_H_
+#pragma once 
+
 #include <furi-hal.h>
 
 typedef struct {
@@ -24,11 +24,10 @@ typedef struct  {
     uint32_t bandwidth;
 
     void* context;
-}SpectrumAnalyzerWorker;
+} SpectrumAnalyzerWorker;
 
 
 
 SpectrumAnalyzerWorker* spectrum_analyzer_worker_alloc();
 void spectrum_analyzer_worker_free(SpectrumAnalyzerWorker* instance);
 
-#endif /* APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_WORKER_H_ */
