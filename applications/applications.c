@@ -33,6 +33,7 @@ extern int32_t keypad_test_app(void* p);
 extern int32_t lfrfid_app(void* p);
 extern int32_t lfrfid_debug_app(void* p);
 extern int32_t nfc_app(void* p);
+extern int32_t passport_app(void* p);
 extern int32_t scened_app(void* p);
 extern int32_t storage_test_app(void* p);
 extern int32_t subghz_app(void* p);
@@ -152,6 +153,9 @@ const FlipperApplication FLIPPER_APPS[] = {
     {.app = bad_usb_app, .name = "Bad USB", .stack_size = 2048, .icon = &A_BadUsb_14},
 #endif
 
+#ifdef APP_PASSPORT
+    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = &A_Passport_14},
+#endif
 };
 
 const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
