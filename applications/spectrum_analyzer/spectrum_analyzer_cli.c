@@ -6,6 +6,7 @@
  */
 #include "spectrum_analyzer_cli.h"
 #include "spectrum_analyzer.h"
+#include "spectrum_analyzer_worker.h"
 #include <furi.h>
 #include <furi-hal.h>
 
@@ -30,6 +31,18 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
 //            return;
 
     }
+    printf("Starting worker\n");
+    SpectrumAnalyzerWorker* worker = spectrum_analyzer_worker_alloc();
+    printf("Worker started\n");
+    while(!cli_cmd_interrupt_received(cli)) {
+        osDelay(250);
+        FuriThreadState state = furi_thread_get_state(worker->thread);
+        printf("state=%i\n\r", state);
+
+    }
+    printf("Stop worker\n");
+    spectrum_analyzer_worker_free(worker);
+
 }
 
 
