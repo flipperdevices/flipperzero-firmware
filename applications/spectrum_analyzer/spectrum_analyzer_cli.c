@@ -36,7 +36,13 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
     printf("Worker started\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(1000);
-        printf("tick\r\n");
+        uint8_t rssi_ind = 0;
+        printf("RSSI vals: ");
+        for(rssi_ind = 0; rssi_ind < DOTS_COUNT; rssi_ind++)
+        {
+        	printf("%u ", worker->rssi_buf[rssi_ind]);
+        }
+        printf("\n\r");
     }
     printf("Stop worker\n");
     spectrum_analyzer_worker_free(worker);
