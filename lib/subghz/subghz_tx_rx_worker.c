@@ -78,7 +78,7 @@ void subghz_tx_rx_worker_set_callback_have_read(
 }
 
 bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* size) {
-    uint8_t timeout = 20;
+    uint8_t timeout = 100;
     bool ret = false;
     if(instance->satus != SubGhzTxRxWorkerStatusRx) {
         furi_hal_subghz_rx();
@@ -95,8 +95,15 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
             break;
         }
     }
-
+    
     if(furi_hal_subghz_rx_pipe_not_empty()) {
+
+        FURI_LOG_I(
+            "TAG",
+            "RSSI: %03.1fdbm LQI: %d",
+            furi_hal_subghz_get_rssi(),
+            furi_hal_subghz_get_lqi());
+
         if(furi_hal_subghz_is_rx_data_crc_valid()) {
             furi_hal_subghz_read_packet(data, size);
             ret = true;
@@ -108,15 +115,13 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
 }
 
 void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
-    uint8_t timeout = 40;
+    uint8_t timeout = 200;
     if(instance->satus != SubGhzTxRxWorkerStatusIDLE) {
         furi_hal_subghz_idle();
     }
     furi_hal_subghz_write_packet(data, size);
-    instance->satus = SubGhzTxRxWorkerStatusTx;
-
     furi_hal_subghz_tx(); //start send
-
+    instance->satus = SubGhzTxRxWorkerStatusTx;
     while(!hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be set -> sync transmitted
         osDelay(1);
         if(!--timeout) {
@@ -145,7 +150,8 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
 
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
+    //furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
     hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     furi_hal_subghz_set_frequency_and_path(instance->frequency);
