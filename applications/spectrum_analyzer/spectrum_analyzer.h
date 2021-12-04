@@ -7,6 +7,6 @@
 
 #pragma once
 
-#define DOTS_COUNT (20)
+#define DOTS_COUNT (50)
 
 
