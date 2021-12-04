@@ -25,23 +25,20 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
 
     // Calibrate and store calibration values for all
     // working frequences 
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+    
     for (uint8_t i=0; i<DOTS_COUNT; i++) {
         furi_hal_subghz_set_frequency(instance->start_freq + bandwidth*i);
+        furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
         cc1101_read_cal_values(&furi_hal_spi_bus_handle_subghz,
                             &calibration_values[0][i],
                             &calibration_values[1][i],
                             &calibration_values[2][i]);
-
-        printf("FSCAL1 = %i ", calibration_values[0][i]);
-        printf("FSCAL2 = %i ", calibration_values[1][i]);
-        printf("FSCAL3 = %i \r\n", calibration_values[2][i]);
+        furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     }
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
     
-    // // Start receiver
-    // furi_hal_subghz_flush_rx();
-    // furi_hal_subghz_rx(); 
+    // Start receiver
+    furi_hal_subghz_flush_rx();
+    furi_hal_subghz_rx(); 
     
     while(instance->worker_running) {
     	osDelay(1000);
