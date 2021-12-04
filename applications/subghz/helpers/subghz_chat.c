@@ -36,7 +36,7 @@ static int32_t subghz_chat_worker_thread(void* context) {
     return 0;
 }
 
-static void subghz_chat_worker_udate_event_chat(void* context) {
+static void subghz_chat_worker_update_rx_event_chat(void* context) {
     furi_assert(context);
     SubGhzChatWorker* instance = context;
     SubghzChatQueue event = {.event = SubghzChatEventRXData};
@@ -73,7 +73,7 @@ bool subghz_chat_worker_start(SubGhzChatWorker* instance, uint32_t frequency) {
     if(subghz_tx_rx_worker_start(instance->subghz_txrx, frequency)) {
         osMessageQueueReset(instance->event_queue);
         subghz_tx_rx_worker_set_callback_have_read(
-            instance->subghz_txrx, subghz_chat_worker_udate_event_chat, instance);
+            instance->subghz_txrx, subghz_chat_worker_update_rx_event_chat, instance);
 
         instance->worker_running = true;
 
