@@ -16,7 +16,6 @@ typedef struct {
     char c;
 } SubghzChatQueue;
 
-
 SubGhzChatWorker* subghz_chat_worker_alloc();
 void subghz_chat_worker_free(SubGhzChatWorker* instance);
 bool subghz_chat_worker_start(SubGhzChatWorker* instance, uint32_t frequency);

@@ -462,8 +462,8 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     printf("%s", string_get_cstr(input));
                     fflush(stdout);
                     //echo
-                    osDelay(100);
-                    subghz_chat_worker_write(subghz_chat, message, len);
+                    // osDelay(100);
+                    // subghz_chat_worker_write(subghz_chat, message, len);
                 } while(subghz_chat_worker_available(subghz_chat));
                 notification_message(notification, &sequence_single_vibro);
                 break;
