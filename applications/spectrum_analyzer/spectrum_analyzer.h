@@ -1,0 +1,15 @@
+/*
+ * spectrum_analyzer.h
+ *
+ *  Created on: Dec 4, 2021
+ *      Author: forthe
+ */
+
+#ifndef APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_
+#define APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_
+
+
+#define DOTS_COUNT (50)
+
+
+#endif /* APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_ */
