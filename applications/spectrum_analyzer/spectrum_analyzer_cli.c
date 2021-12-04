@@ -31,14 +31,12 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
 //            return;
 
     }
-    printf("Starting worker\n");
+    printf("Starting worker\r\n");
     SpectrumAnalyzerWorker* worker = spectrum_analyzer_worker_alloc();
-    printf("Worker started\n");
+    printf("Worker started\r\n");
     while(!cli_cmd_interrupt_received(cli)) {
-        osDelay(250);
-        FuriThreadState state = furi_thread_get_state(worker->thread);
-        printf("state=%i\n\r", state);
-
+        osDelay(1000);
+        printf("tick\r\n");
     }
     printf("Stop worker\n");
     spectrum_analyzer_worker_free(worker);

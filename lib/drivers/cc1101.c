@@ -15,44 +15,48 @@ CC1101Status cc1101_strobe(FuriHalSpiBusHandle* handle, uint8_t strobe) {
     return rx[0];
 }
 
-// CC1101Status cc1101_write_burst(FuriHalSpiBusHandle* handle, 
-//                                 uint8_t addr, 
-//                                 uint8_t * data, 
-//                                 uint8_t size) {
+CC1101Status cc1101_write_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size) {
     
+    assert(size < 64);
+    assert(data != NULL);
 
-//     uint8_t tx[64] = { 0 };
-//     tx[0] = addr | CC1101_BURST;
+    uint8_t tx[64] = { 0 };
+    tx[0] = addr | CC1101_BURST;
 
-//     CC1101Status rx[64] = { 0 };
+    CC1101Status rx[64] = { 0 };
 
-//     while(hal_gpio_read(handle->miso));
-//     furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size, CC1101_TIMEOUT);
+    while(hal_gpio_read(handle->miso));
+    furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size+1, CC1101_TIMEOUT);
 
-//     for (uint8_t i=0; i<size; i++) {
-//         assert((rx[i].CHIP_RDYn) == 0);
-//     }
+    for (uint8_t i=0; i<size; i++) {
+        assert((rx[i].CHIP_RDYn) == 0);
+    }
     
-//     return rx[size-1];
-// }
+    return rx[size];
+}
 
-// CC1101Status cc1101_read_burst(FuriHalSpiBusHandle* handle, 
-//                                 uint8_t addr, 
-//                                 uint8_t * data, 
-//                                 uint8_t size) {
-//     assert(sizeof(CC1101Status) == 1);
+CC1101Status cc1101_read_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size) {
+    assert(sizeof(CC1101Status) == 1);
+    assert(size < 64);
+    assert(data != NULL);
 
-//     uint8_t tx[64] = { 0 };
-//     tx[0] = addr | CC1101_BURST | CC1101_READ;
-//     CC1101Status rx[64] = {0};
+    uint8_t tx[64] = { 0 };
+    tx[0] = addr | CC1101_BURST | CC1101_READ;
+    CC1101Status rx[64] = {0};
 
-//     while(hal_gpio_read(handle->miso));
-//     furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size, CC1101_TIMEOUT);
+    while(hal_gpio_read(handle->miso));
+    furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size+1, CC1101_TIMEOUT);
 
-//     assert((rx[0].CHIP_RDYn) == 0);
-//     *data = *(uint8_t*)&rx[1];
-//     return rx[0];
-// }
+    assert((rx[0].CHIP_RDYn) == 0);
+    *data = *(uint8_t*)&rx[1];
+    return rx[0];
+}
 
 CC1101Status cc1101_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) {
     uint8_t tx[2] = { reg, data };
@@ -164,6 +168,7 @@ uint32_t cc1101_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value) {
     // Sanity check
     assert((real_value & CC1101_FMASK) == real_value);
 
+    // Burst write?
     cc1101_write_reg(handle, CC1101_FREQ2, (real_value >> 16) & 0xFF);
     cc1101_write_reg(handle, CC1101_FREQ1, (real_value >> 8 ) & 0xFF);
     cc1101_write_reg(handle, CC1101_FREQ0, (real_value >> 0 ) & 0xFF);
