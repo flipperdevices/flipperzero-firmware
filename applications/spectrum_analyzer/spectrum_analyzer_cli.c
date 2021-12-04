@@ -33,6 +33,11 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
     }
     printf("Starting worker\n");
     SpectrumAnalyzerWorker* worker = spectrum_analyzer_worker_alloc();
+//    worker->start_freq =frequency_start;
+//    worker->end_freq =frequency_end;
+//    worker->bandwidth =bandwidth;
+//    furi_thread_join(worker->thread);
+    spectrum_analyzer_worker_start(worker);
     printf("Worker started\n");
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(250);

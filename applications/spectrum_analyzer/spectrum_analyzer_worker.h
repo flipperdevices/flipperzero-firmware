@@ -18,7 +18,6 @@ typedef struct  {
     FuriThread* thread;
 
     volatile bool worker_running;
-    FrequencyRSSI frequency_rssi_buf[DOTS_COUNT];
     uint32_t start_freq;
     uint32_t end_freq;
     uint32_t bandwidth;
@@ -30,5 +29,6 @@ typedef struct  {
 
 SpectrumAnalyzerWorker* spectrum_analyzer_worker_alloc();
 void spectrum_analyzer_worker_free(SpectrumAnalyzerWorker* instance);
+void spectrum_analyzer_worker_start(SpectrumAnalyzerWorker* instance);
 
 #endif /* APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_WORKER_H_ */
