@@ -18,7 +18,7 @@ typedef struct  {
     FuriThread* thread;
 
     volatile bool worker_running;
-    FrequencyRSSI frequency_rssi_buf[DOTS_COUNT];
+    uint8_t rssi_buf[DOTS_COUNT];
     uint32_t start_freq;
     uint32_t end_freq;
     uint32_t bandwidth;
