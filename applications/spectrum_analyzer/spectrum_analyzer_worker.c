@@ -21,16 +21,17 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
     {
     	osDelay(100);
     	float step = (instance->start_freq - instance->end_freq)/DOTS_COUNT;
-		float cur_freq = instance->start_freq
-
-    	for (uint16_t dot = 0; dot < DOTS_COUNT; dot++)
+		float cur_freq = instance->start_freq;
+		uint16_t dot;
+    	for (dot = 0; dot < DOTS_COUNT; dot++)
     	{
     		furi_hal_subghz_idle();
-			frequency = furi_hal_subghz_set_frequency(subghz_frequencies[i]);
+			furi_hal_subghz_set_frequency((uint32_t)cur_freq);
 			furi_hal_subghz_rx();
 			osDelay(3);
-			float rssi = furi_hal_subghz_get_rssi();
+//			float rssi = furi_hal_subghz_get_rssi();
 			// [TODO] Закинуть рсси и частоту в модель
+			cur_freq += step;
     	}
     }
     return 0;
