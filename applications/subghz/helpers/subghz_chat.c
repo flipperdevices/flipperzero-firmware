@@ -58,7 +58,7 @@ SubGhzChatWorker* subghz_chat_worker_alloc() {
 
 void subghz_chat_worker_free(SubGhzChatWorker* instance) {
     furi_assert(instance);
-    osMessageQueueReset(instance->event_queue);
+    osMessageQueueDelete(instance->event_queue);
     subghz_tx_rx_worker_free(instance->subghz_txrx);
     furi_thread_free(instance->thread);
 
