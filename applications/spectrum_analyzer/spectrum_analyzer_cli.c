@@ -47,16 +47,19 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
     while(!cli_cmd_interrupt_received(cli)) {
         osDelay(100);
         uint8_t rssi_ind = 0;
+
+        printf("RSSI vals:\n\r");
         printf("\033[2J");
-        printf("RSSI vals:\r\n");
         for(rssi_ind = 0; rssi_ind < DOTS_COUNT; rssi_ind++)
         {
+        	printf("%.1f ", worker->rssi_buf[rssi_ind].rssi);
+
             printf("%04d ", (int) worker->rssi_buf[rssi_ind].frequency);
             for (float lvl = -100; lvl<worker->rssi_buf[rssi_ind].rssi; lvl += 1) {
                 printf("=");
             }
             printf("\r\n");
-        	//printf("%.1f ", worker->rssi_buf[rssi_ind]);
+
         }
         printf("\n\r");
     }
