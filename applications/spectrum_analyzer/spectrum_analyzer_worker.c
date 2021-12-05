@@ -56,6 +56,7 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
         }
     }
 
+
     return 0;
 }
 
@@ -67,8 +68,7 @@ SpectrumAnalyzerWorker* spectrum_analyzer_worker_alloc() {
     furi_thread_set_stack_size(instance->thread, 2048);
     furi_thread_set_context(instance->thread, instance);
     furi_thread_set_callback(instance->thread, spectrum_analyzer_worker_thread);
-    instance->worker_running = 1;
-    furi_thread_start(instance->thread);
+
 
     return instance;
 }
@@ -76,10 +76,31 @@ SpectrumAnalyzerWorker* spectrum_analyzer_worker_alloc() {
 
 void spectrum_analyzer_worker_free(SpectrumAnalyzerWorker* instance) {
     furi_assert(instance);
-    instance->worker_running = 0;
-    furi_thread_join(instance->thread);
 
     furi_thread_free(instance->thread);
 
     free(instance);
+}
+
+void spectrum_analyzer_worker_start(SpectrumAnalyzerWorker* instance) {
+    furi_assert(instance);
+    furi_assert(!instance->worker_running);
+
+    instance->worker_running = true;
+
+    furi_thread_start(instance->thread);
+}
+
+void spectrum_analyzer_worker_stop(SpectrumAnalyzerWorker* instance) {
+    furi_assert(instance);
+    furi_assert(instance->worker_running);
+
+    instance->worker_running = false;
+
+    furi_thread_join(instance->thread);
+}
+
+bool spectrum_analyzer_worker_is_running(SpectrumAnalyzerWorker* instance) {
+    furi_assert(instance);
+    return instance->worker_running;
 }
