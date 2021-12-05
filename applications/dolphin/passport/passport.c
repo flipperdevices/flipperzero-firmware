@@ -41,10 +41,10 @@ static void render_callback(Canvas* canvas, void* ctx) {
     char mood_str[32];
     uint8_t mood = 0;
 
-    if (stats->butthurt <= 4) {
+    if(stats->butthurt <= 4) {
         mood = 0;
         snprintf(mood_str, 20, "Mood: Happy");
-    } else if (stats->butthurt <= 9) {
+    } else if(stats->butthurt <= 9) {
         mood = 1;
         snprintf(mood_str, 20, "Mood: Ok");
     } else {
@@ -54,8 +54,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     uint32_t xp_progress = 0;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
-    uint32_t xp_for_current_level = xp_to_levelup + dolphin_state_xp_above_last_levelup(stats->icounter);
-    if (stats->level == 3) {
+    uint32_t xp_for_current_level =
+        xp_to_levelup + dolphin_state_xp_above_last_levelup(stats->icounter);
+    if(stats->level == 3) {
         xp_progress = 0;
     } else {
         xp_progress = xp_to_levelup * 64 / xp_for_current_level;
