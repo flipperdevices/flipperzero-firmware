@@ -14,20 +14,27 @@
 uint8_t calibration_values[3][DOTS_COUNT];
 float spect_buf[DOTS_COUNT];
 
+
+//static uint16_t freq_steps[] = {812, 650, 541, 464, 406, 325, 270, 232, 203, 162, 135, 116, 102, 81, 68, 58};
+static uint16_t freq_steps_good[] = {500, 300, 250, 225, 200, 150, 125, 100, 100, 75, 50, 50, 50, 50, 25, 10};
+
 static int32_t spectrum_analyzer_worker_thread(void* context) {
 	SpectrumAnalyzerWorker* instance = context;
-    
-    instance->start_freq = 850000000;
-    instance->bandwidth = 500000;
 
+    uint32_t freq_step = freq_steps_good[instance->bandwidth]*1000;
     // Start CC1011
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+
+    cc1101_write_reg(&furi_hal_spi_bus_handle_subghz, CC1101_MDMCFG4,  0x7 | (instance->bandwidth << 4));
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
     // Calibrate and store calibration values for all
     // working frequences 
     for (uint8_t i=0; i<DOTS_COUNT; i++) {
-        furi_hal_subghz_set_frequency(instance->start_freq + instance->bandwidth * i);
+
+        furi_hal_subghz_set_frequency(instance->start_freq + freq_step * i);
         furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
         cc1101_read_cal_values(&furi_hal_spi_bus_handle_subghz,
                             &calibration_values[0][i],
@@ -36,7 +43,9 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
         furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
 
         // fill initial values
-        instance->rssi_buf[i].frequency = instance->start_freq + instance->bandwidth * i;
+
+
+        instance->rssi_buf[i].frequency = instance->start_freq + freq_step * i;
         instance->rssi_buf[i].rssi = -100;
     }
     
@@ -46,7 +55,7 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
             // Fast frequency hop (chapter 28.2 of CC1101 datasheet)
             furi_hal_subghz_idle();
             
-            furi_hal_subghz_set_frequency_and_path_fast(instance->start_freq + instance->bandwidth * i);
+            furi_hal_subghz_set_frequency_and_path_fast(instance->start_freq + freq_step * i);
             furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
             cc1101_write_cal_values(&furi_hal_spi_bus_handle_subghz,
                                     calibration_values[0][i],
@@ -60,11 +69,13 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
             spect_buf[i] = furi_hal_subghz_get_rssi();
 
             // Processing out buffer
+
             if (spect_buf[i] > instance->rssi_buf[i].rssi) {
                 instance->rssi_buf[i].rssi = spect_buf[i];
             }  
             else {
-                instance->rssi_buf[i].rssi -= 0.1f; 
+
+                instance->rssi_buf[i].rssi -= 1.0f;
             }
         }
     }
