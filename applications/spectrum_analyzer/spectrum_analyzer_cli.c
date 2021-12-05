@@ -13,15 +13,14 @@
 
 void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
 	uint32_t frequency_start;
-	uint32_t frequency_end;
 	uint32_t bandwidth;
     if(string_size(args)) {
         int ret = sscanf(
-        		string_get_cstr(args), "%lu %lu %lu", &frequency_start,
-				&frequency_end, &bandwidth);
-        printf("Start %lu, end %lu", frequency_start, frequency_end);
+        		string_get_cstr(args), "%lu %lu", &frequency_start,
+				&bandwidth);
+        printf("Start %lu, bw bits %lu", frequency_start, bandwidth);
         if(ret != 3) {
-            cli_print_usage("spectrum_analyzer", "<Frequency_start Frequency_end bandwidth in HZ>", string_get_cstr(args));
+            cli_print_usage("spectrum_analyzer", "<Frequency_start Frequency_end bandwidth from list 812 650 541 464 406 325 270 232 203 162 135 116 102 81 68 58>", string_get_cstr(args));
             return;
         }
 //        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
@@ -34,10 +33,8 @@ void cli_command_spectrum_analyzer(Cli* cli, string_t args, void* context) {
     printf("Starting worker\r\n");
     SpectrumAnalyzerWorker* worker = spectrum_analyzer_worker_alloc();
 
-//    worker->start_freq =frequency_start;
-//    worker->end_freq =frequency_end;
-//    worker->bandwidth =bandwidth;
-//    furi_thread_join(worker->thread);
+    worker->start_freq = frequency_start;
+    worker->bandwidth = bandwidth;
     spectrum_analyzer_worker_start(worker);
     printf("Worker started\n");
     while(!cli_cmd_interrupt_received(cli)) {
