@@ -10,13 +10,15 @@
 #include <furi.h>
 #include <cc1101.h>
 
- uint8_t calibration_values[3][DOTS_COUNT];
+// TODO: dynamically allocated
+uint8_t calibration_values[3][DOTS_COUNT];
+float spect_buf[DOTS_COUNT];
 
 static int32_t spectrum_analyzer_worker_thread(void* context) {
 	SpectrumAnalyzerWorker* instance = context;
     
-    instance->start_freq = 800000000;
-    instance->bandwidth = 2000000;
+    instance->start_freq = 850000000;
+    instance->bandwidth = 500000;
 
     // Start CC1011
     furi_hal_subghz_reset();
@@ -24,7 +26,6 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
 
     // Calibrate and store calibration values for all
     // working frequences 
-    
     for (uint8_t i=0; i<DOTS_COUNT; i++) {
         furi_hal_subghz_set_frequency(instance->start_freq + instance->bandwidth *i);
         furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
@@ -33,16 +34,17 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
                             &calibration_values[1][i],
                             &calibration_values[2][i]);
         furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
+        // fill initial values
+        instance->rssi_buf[i] = -120;
     }
-    
-    // Start receiver
-    furi_hal_subghz_flush_rx();
-    furi_hal_subghz_rx(); 
     
     while(instance->worker_running) {
         
         for (uint8_t i=0; i<DOTS_COUNT; i++) {
             // Fast frequency hop (chapter 28.2 of CC1101 datasheet)
+            furi_hal_subghz_idle();
+            
             furi_hal_subghz_set_frequency_fast(instance->start_freq + instance->bandwidth * i);
             furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
             cc1101_write_cal_values(&furi_hal_spi_bus_handle_subghz,
@@ -50,9 +52,15 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
                                     calibration_values[1][i],
                                     calibration_values[2][i]);
             furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+            furi_hal_subghz_rx();
+            osDelay(3);
             
             // Read RSSI for current channnel
-            instance->rssi_buf[i] = (uint8_t) (-1 * furi_hal_subghz_get_rssi());
+            spect_buf[i] = furi_hal_subghz_get_rssi();
+
+            // Processing out buffer
+            if (spect_buf[i] > instance->rssi_buf[i])   instance->rssi_buf[i] = spect_buf[i];
+            else instance->rssi_buf[i]--; 
         }
     }
 
