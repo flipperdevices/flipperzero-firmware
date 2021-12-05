@@ -74,15 +74,13 @@ static void view_spectrum_analyzer_chart_draw_callback(Canvas* canvas, void* con
 static void view_spectrum_analyzer_chart_enter(void* context){
     ViewSpectrumAnalyzerChart* instance = context;
 
-    instance->ptr = spectrum_analyzer_worker_alloc();
-
     spectrum_analyzer_worker_start(instance->ptr);
 }
 
 static void view_spectrum_analyzer_chart_exit(void* context){
     // ViewSpectrumAnalyzerChart* instance = context;
     
-    //view is switched. may free something or idle worker
+    spectrum_analyzer_worker_stop(instance->ptr);
 }
 
 static bool view_spectrum_analyzer_chart_input_callback(InputEvent* event, void* context){

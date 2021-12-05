@@ -20,7 +20,7 @@
 
 extern const uint32_t config_base_width[];
 
-extern const uint32_t config_step[];
+extern const uint16_t freq_steps[];
 
 extern const char* const config_user_gay[];
 
@@ -40,6 +40,7 @@ typedef struct {
     VariableItemList* variable_item_list;
 
     uint32_t base_width;
+    uint16_t step;
     bool user_gay;
 
     SpectrumAnalyzerWorker* worker;///worker updates RSSI

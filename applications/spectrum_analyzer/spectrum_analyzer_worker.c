@@ -15,7 +15,7 @@ uint8_t calibration_values[3][DOTS_COUNT];
 float spect_buf[DOTS_COUNT];
 
 
-//static uint16_t freq_steps[] = {812, 650, 541, 464, 406, 325, 270, 232, 203, 162, 135, 116, 102, 81, 68, 58};
+// static uint16_t freq_steps[] = {812, 650, 541, 464, 406, 325, 270, 232, 203, 162, 135, 116, 102, 81, 68, 58};
 static uint16_t freq_steps_good[] = {500, 300, 250, 225, 200, 150, 125, 100, 100, 75, 50, 50, 50, 50, 25, 10};
 
 static int32_t spectrum_analyzer_worker_thread(void* context) {

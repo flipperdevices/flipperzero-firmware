@@ -2,18 +2,16 @@
 #include "views/spectrum_analyzer_chart.h"
 
 const uint32_t config_base_width[] = {
-    365 * 1000000,
-    433,
-    866
+    400000000,
+    433000000,
+    866000000
 };
 
-const uint32_t config_step[] = {
-
-};
+static uint16_t freq_steps[] = {812, 650, 541, 464, 406, 325, 270, 232, 203, 162, 135, 116, 102, 81, 68, 58};
 
 const char* const config_user_gay[] = {
-    "GAY?",
-    "PIDOR?"
+    "OK?",
+    "Not ok?"
 };
 
 void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance){
@@ -23,6 +21,12 @@ void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance){
 
     item = variable_item_list_add(
         instance->variable_item_list, "Width:",
+        COUNT_OF(config_base_width), spectrum_analyzer_set_base_width, 
+        instance
+    );
+
+    item = variable_item_list_add(
+        instance->variable_item_list, "Step:",
         COUNT_OF(config_base_width), spectrum_analyzer_set_base_width, 
         instance
     );
@@ -56,7 +60,8 @@ void spectrum_analyzer_menu_callback(void* context, uint32_t index) {
 
 //update config and notify worker
 void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance){
-
+    instance->worker->start_freq = instance->base_width;
+    instance->worker->bandwidth = instance->step;
 
     gui_update(instance->gui);
 }
@@ -81,6 +86,18 @@ void spectrum_analyzer_set_user_gay(VariableItem* item){
     instance->user_gay = true;
     
     FURI_LOG_I(TAG, "он нажал");
+}
+
+void spectrum_analyzer_set_step(VariableItem* item){
+    SpectrumAnalyzer* instance = variable_item_get_context(item);
+    uint8_t i = variable_item_get_current_value_index(item);
+    string_t tmp;
+    string_init(tmp);
+    string_cat_printf(tmp, "%u", freq_steps[i]);
+    variable_item_set_current_value_text(item, string_get_cstr(tmp));
+    string_clear(tmp);
+    instance->step = freq_steps[i];
+    spectrum_analyzer_config_apply(instance);
 }
 
 SpectrumAnalyzer* spectrum_analyzer_alloc(){
