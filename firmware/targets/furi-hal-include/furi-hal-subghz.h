@@ -161,6 +161,15 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
 
+/** Set frequency and path This function automatically selects antenna matching
+ * network without calibration
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     real frequency in herz
+ */
+uint32_t furi_hal_subghz_set_frequency_and_path_fast(uint32_t value);
+
 /** Сheck if transmission is allowed on this frequency for your flipper region
  *
  * @param      value  frequency in Hz

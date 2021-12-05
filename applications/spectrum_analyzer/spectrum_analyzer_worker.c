@@ -46,7 +46,7 @@ static int32_t spectrum_analyzer_worker_thread(void* context) {
             // Fast frequency hop (chapter 28.2 of CC1101 datasheet)
             furi_hal_subghz_idle();
             
-            furi_hal_subghz_set_frequency_fast(instance->start_freq + instance->bandwidth * i);
+            furi_hal_subghz_set_frequency_and_path_fast(instance->start_freq + instance->bandwidth * i);
             furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
             cc1101_write_cal_values(&furi_hal_spi_bus_handle_subghz,
                                     calibration_values[0][i],
