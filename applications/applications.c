@@ -152,10 +152,6 @@ const FlipperApplication FLIPPER_APPS[] = {
 #ifdef APP_BAD_USB
     {.app = bad_usb_app, .name = "Bad USB", .stack_size = 2048, .icon = &A_BadUsb_14},
 #endif
-
-#ifdef APP_PASSPORT
-    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = &A_Passport_14},
-#endif
 };
 
 const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
@@ -305,6 +301,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_DESKTOP
     {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_PASSPORT
+    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT
