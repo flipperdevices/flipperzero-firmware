@@ -10,7 +10,6 @@
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
-#include <lib/subghz/subghz_tx_rx_worker.h>
 #include "helpers/subghz_chat.h"
 
 #include <notification/notification-messages.h>
@@ -519,6 +518,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_clear(input);
     string_clear(name);
     string_clear(output);
+    string_clear(sysmsg);
     furi_hal_power_suppress_charge_exit();
     furi_record_close("notification");
 
