@@ -15,6 +15,49 @@ CC1101Status cc1101_strobe(FuriHalSpiBusHandle* handle, uint8_t strobe) {
     return rx[0];
 }
 
+CC1101Status cc1101_write_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size) {
+    
+    assert(size < 64);
+    assert(data != NULL);
+
+    uint8_t tx[64] = { 0 };
+    tx[0] = addr | CC1101_BURST;
+
+    CC1101Status rx[64] = { 0 };
+
+    while(hal_gpio_read(handle->miso));
+    furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size+1, CC1101_TIMEOUT);
+
+    for (uint8_t i=0; i<size; i++) {
+        assert((rx[i].CHIP_RDYn) == 0);
+    }
+    
+    return rx[size];
+}
+
+CC1101Status cc1101_read_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size) {
+    assert(sizeof(CC1101Status) == 1);
+    assert(size < 64);
+    assert(data != NULL);
+
+    uint8_t tx[64] = { 0 };
+    tx[0] = addr | CC1101_BURST | CC1101_READ;
+    CC1101Status rx[64] = {0};
+
+    while(hal_gpio_read(handle->miso));
+    furi_hal_spi_bus_trx(handle, tx, (uint8_t*)rx, size+1, CC1101_TIMEOUT);
+
+    assert((rx[0].CHIP_RDYn) == 0);
+    *data = *(uint8_t*)&rx[1];
+    return rx[0];
+}
+
 CC1101Status cc1101_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) {
     uint8_t tx[2] = { reg, data };
     CC1101Status rx[2] = { 0 };
@@ -93,12 +136,39 @@ void cc1101_flush_tx(FuriHalSpiBusHandle* handle) {
     cc1101_strobe(handle, CC1101_STROBE_SFTX);
 }
 
+void cc1101_read_cal_values(FuriHalSpiBusHandle* handle, 
+                                uint8_t * FSCAL1_val, 
+                                uint8_t * FSCAL2_val,
+                                uint8_t * FSCAL3_val) {
+
+    uint8_t tmp_buf[3];
+
+    cc1101_read_burst(handle, CC1101_FSCAL3, tmp_buf, 3);
+
+    *FSCAL3_val = tmp_buf[0];
+    *FSCAL2_val = tmp_buf[0];
+    *FSCAL1_val = tmp_buf[0];
+}
+
+void cc1101_write_cal_values(FuriHalSpiBusHandle* handle, 
+                                uint8_t FSCAL1_val, 
+                                uint8_t FSCAL2_val,
+                                uint8_t FSCAL3_val) {
+    uint8_t tmp_buf[3];
+    tmp_buf[0] = FSCAL3_val;
+    tmp_buf[1] = FSCAL2_val;
+    tmp_buf[2] = FSCAL1_val;
+
+    cc1101_write_burst(handle, CC1101_FSCAL3, tmp_buf, 3);
+}
+
 uint32_t cc1101_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value) {
     uint64_t real_value = (uint64_t)value * CC1101_FDIV / CC1101_QUARTZ;
 
     // Sanity check
     assert((real_value & CC1101_FMASK) == real_value);
 
+    // Burst write?
     cc1101_write_reg(handle, CC1101_FREQ2, (real_value >> 16) & 0xFF);
     cc1101_write_reg(handle, CC1101_FREQ1, (real_value >> 8 ) & 0xFF);
     cc1101_write_reg(handle, CC1101_FREQ0, (real_value >> 0 ) & 0xFF);
