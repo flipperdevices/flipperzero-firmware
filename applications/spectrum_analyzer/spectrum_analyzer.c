@@ -123,9 +123,15 @@ SpectrumAnalyzer* spectrum_analyzer_alloc(){
 }
 
 void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
+    //free menu
     view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewMenu);
     submenu_free(instance->menu);
 
+    //free chart
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
+    view_display_test_free(instance->view_spectrum_analyzer_chart);
+
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
     variable_item_list_free(instance->variable_item_list);
 
     view_dispatcher_free(instance->view_dispatcher);
