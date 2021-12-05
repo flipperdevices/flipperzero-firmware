@@ -95,15 +95,10 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
             break;
         }
     }
-    
+
     if(furi_hal_subghz_rx_pipe_not_empty()) {
-
         FURI_LOG_I(
-            "TAG",
-            "RSSI: %03.1fdbm LQI: %d",
-            furi_hal_subghz_get_rssi(),
-            furi_hal_subghz_get_lqi());
-
+            TAG, "RSSI: %03.1fdbm LQI: %d", furi_hal_subghz_get_rssi(), furi_hal_subghz_get_lqi());
         if(furi_hal_subghz_is_rx_data_crc_valid()) {
             furi_hal_subghz_read_packet(data, size);
             ret = true;
@@ -157,7 +152,7 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
     furi_hal_subghz_set_frequency_and_path(instance->frequency);
     furi_hal_subghz_flush_rx();
 
-    uint8_t data[GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE] = {0};
+    uint8_t data[GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE + 1] = {0};
     size_t size_tx = 0;
     uint8_t size_rx[1] = {0};
     uint8_t timeout_tx = 0;
@@ -167,7 +162,7 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
         //transmit
         size_tx = xStreamBufferBytesAvailable(instance->stream_tx);
         if(size_tx > 0 && !timeout_tx) {
-            timeout_tx = 20; //20ms
+            timeout_tx = 10; //20ms
             if(size_tx > GUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE) {
                 xStreamBufferReceive(
                     instance->stream_tx,

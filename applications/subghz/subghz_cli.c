@@ -401,6 +401,8 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_init(input);
     string_t name;
     string_init(name);
+    string_t output;
+    string_init(output);
     string_t sysmsg;
     string_init(sysmsg);
     bool exit = false;
@@ -419,7 +421,8 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
         case SubghzChatEventInputData:
             if(chat_event.c == CliSymbolAsciiETX) {
                 printf("\r\n");
-                exit = true;
+                chat_event.event = SubghzChatEventUserExit;
+                subghz_chat_worker_set_event_chat(subghz_chat, &chat_event);
                 break;
             } else if(
                 (chat_event.c == CliSymbolAsciiBackspace) || (chat_event.c == CliSymbolAsciiDel)) {
@@ -431,11 +434,20 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 }
             } else if(chat_event.c == CliSymbolAsciiCR) {
                 printf("\r\n");
-                subghz_chat_worker_write(
-                    subghz_chat, (uint8_t*)string_get_cstr(input), strlen(string_get_cstr(input)));
+                string_push_back(input, '\r');
+                string_push_back(input, '\n');
+                while(!subghz_chat_worker_write(
+                    subghz_chat,
+                    (uint8_t*)string_get_cstr(input),
+                    strlen(string_get_cstr(input)))) {
+                    delay(10);
+                }
+
                 string_printf(input, "%s", string_get_cstr(name));
                 printf("%s", string_get_cstr(input));
                 fflush(stdout);
+            } else if(chat_event.c == CliSymbolAsciiLF) {
+                //cut out the symbol \n
             } else {
                 putc(chat_event.c, stdout);
                 fflush(stdout);
@@ -454,29 +466,47 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 do {
                     memset(message, 0x00, message_max_len);
                     size_t len = subghz_chat_worker_read(subghz_chat, message, message_max_len);
-                    printf("\r");
-                    for(uint8_t i = 0; i < 80; i++) {
-                        printf(" ");
+                    for(size_t i = 0; i < len; i++) {
+                        string_push_back(output, message[i]);
+                        if(message[i] == '\n') {
+                            printf("\r");
+                            for(uint8_t i = 0; i < 80; i++) {
+                                printf(" ");
+                            }
+                            printf("\r %s", string_get_cstr(output));
+                            printf("%s", string_get_cstr(input));
+                            fflush(stdout);
+                            string_reset(output);
+                        }
                     }
-                    printf("\r %s\r\n", message);
-                    printf("%s", string_get_cstr(input));
-                    fflush(stdout);
+
                     //echo
                     // osDelay(100);
                     // subghz_chat_worker_write(subghz_chat, message, len);
                 } while(subghz_chat_worker_available(subghz_chat));
+                break;
+            case SubghzChatEventNewMessage:
                 notification_message(notification, &sequence_single_vibro);
                 break;
             case SubghzChatEventUserEntrance:
                 string_printf(
-                    sysmsg, "\033[0;34m%s joined chat.\033[0m", furi_hal_version_get_name_ptr());
+                    sysmsg,
+                    "\033[0;34m%s joined chat.\033[0m\r\n",
+                    furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(
                     subghz_chat,
                     (uint8_t*)string_get_cstr(sysmsg),
                     strlen(string_get_cstr(sysmsg)));
                 break;
             case SubghzChatEventUserExit:
-                /* code */
+                string_printf(
+                    sysmsg, "\033[0;31m%s left chat.\033[0m\r\n", furi_hal_version_get_name_ptr());
+                subghz_chat_worker_write(
+                    subghz_chat,
+                    (uint8_t*)string_get_cstr(sysmsg),
+                    strlen(string_get_cstr(sysmsg)));
+                delay(10);
+                exit = true;
                 break;
             default:
                 FURI_LOG_W("SubGhzChat", "Error event");
@@ -485,15 +515,10 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
         }
     }
 
-    string_printf(sysmsg, "\033[0;31m%s left chat.\033[0m", furi_hal_version_get_name_ptr());
-    subghz_chat_worker_write(
-        subghz_chat, (uint8_t*)string_get_cstr(sysmsg), strlen(string_get_cstr(sysmsg)));
-    osDelay(10);
-
     printf("\r\nExit chat\r\n");
     string_clear(input);
     string_clear(name);
-    string_clear(sysmsg);
+    string_clear(output);
     furi_hal_power_suppress_charge_exit();
     furi_record_close("notification");
 
