@@ -1,6 +1,5 @@
 #pragma once
 
-#include "views/spectrum_analyzer_chart.h"
 #include "spectrum_analyzer_worker.h"
 
 #include <furi-hal.h>
@@ -18,12 +17,6 @@
 
 #define TAG "Spectrum Analyzer"
 
-extern const uint32_t config_base_width[];
-
-extern const uint16_t freq_steps[];
-
-extern const char* const config_user_gay[];
-
 /* Application views */
 typedef enum {
     SpectrumAnalyzerViewMenu,///Configurations menu (appears on boot)
@@ -36,10 +29,11 @@ typedef struct {
     Gui* gui;
     Submenu* menu;
     ViewDispatcher* view_dispatcher;
-    ViewSpectrumAnalyzerChart* view_spectrum_analyzer_chart;
+    View* view_spectrum_analyzer_chart;
     VariableItemList* variable_item_list;
+    osTimerId_t timer;///need to updateGUI on tick
 
-    uint32_t base_width;
+    uint32_t base_freq;
     uint16_t step;
     bool user_gay;
 
@@ -60,6 +54,10 @@ void spectrum_analyzer_menu_callback(void* context, uint32_t index);
 
 void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance);
 
-void spectrum_analyzer_set_base_width(VariableItem* item);
+void spectrum_analyzer_config_set_base_width(VariableItem* item);
 
-void spectrum_analyzer_set_user_gay(VariableItem* item);
+void spectrum_analyzer_config_set_user_gay(VariableItem* item);
+
+void spectrum_analyzer_config_set_step(VariableItem* item);
+
+void spectrum_analyzer_update_spectrum(void* context);
