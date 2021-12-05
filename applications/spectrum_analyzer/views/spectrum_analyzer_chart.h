@@ -9,3 +9,5 @@ ViewSpectrumAnalyzerChart* view_spectrum_analyzer_chart_alloc();
 void view_spectrum_analyzer_chart_free(ViewSpectrumAnalyzerChart* instance);
 
 View* view_spectrum_analyzer_chart_get_view(ViewSpectrumAnalyzerChart* instance);
+
+void view_spectrum_analyzer_set_data(ViewSpectrumAnalyzerChart* instance, void* ptr);

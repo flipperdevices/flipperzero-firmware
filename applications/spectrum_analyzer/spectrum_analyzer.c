@@ -2,7 +2,7 @@
 #include "views/spectrum_analyzer_chart.h"
 
 const uint32_t config_base_width[] = {
-    365,
+    365 * 1000000,
     433,
     866
 };
@@ -56,7 +56,9 @@ void spectrum_analyzer_menu_callback(void* context, uint32_t index) {
 
 //update config and notify worker
 void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance){
-    return;
+
+
+    gui_update(instance->gui);
 }
 
 //edit config items
@@ -65,7 +67,7 @@ void spectrum_analyzer_set_base_width(VariableItem* item){
     uint8_t i = variable_item_get_current_value_index(item);
     string_t tmp;
     string_init(tmp);
-    string_cat_printf(tmp, "%u", i);
+    string_cat_printf(tmp, "%u", config_base_width[i]);
     variable_item_set_current_value_text(item, string_get_cstr(tmp));
     string_clear(tmp);
     instance->base_width = config_base_width[i];
@@ -94,8 +96,12 @@ SpectrumAnalyzer* spectrum_analyzer_alloc(){
     view_dispatcher_attach_to_gui(instance->view_dispatcher, 
                     instance->gui, ViewDispatcherTypeFullscreen);
 
-    //Spectrum Analyzer !!!
+    //only alloc. setup in _chart and config
+    instance->worker = spectrum_analyzer_worker_alloc();
+
+    //Spectrum Analyzer Chart !!!
     instance->view_spectrum_analyzer_chart = view_spectrum_analyzer_chart_alloc();
+    view_spectrum_analyzer_set_data(instance->view_spectrum_analyzer_chart, instance->worker);
     view = view_spectrum_analyzer_chart_get_view(instance->view_spectrum_analyzer_chart);
     view_set_previous_callback(view, spectrum_analyzer_previous_callback);
     view_dispatcher_add_view(instance->view_dispatcher, SpectrumAnalyzerViewChart, view);
