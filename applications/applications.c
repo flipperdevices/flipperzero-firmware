@@ -39,6 +39,7 @@ extern int32_t subghz_app(void* p);
 extern int32_t usb_mouse_app(void* p);
 extern int32_t usb_test_app(void* p);
 extern int32_t vibro_test_app(void* p);
+extern int32_t spectrum_analyzer_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -124,6 +125,10 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 
 // Main menu APP
 const FlipperApplication FLIPPER_APPS[] = {
+
+#ifdef APP_SPECTRUM_ANALYZER
+    {.app = spectrum_analyzer_app, .name = "Spectrum Analyzer", .stack_size = 2048, .icon = &A_Sub1ghz_14},
+#endif
 
 #ifdef APP_SUBGHZ
     {.app = subghz_app, .name = "Sub-GHz", .stack_size = 2048, .icon = &A_Sub1ghz_14},

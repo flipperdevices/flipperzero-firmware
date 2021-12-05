@@ -9,6 +9,8 @@
 
 #include <furi-hal.h>
 
+#define DOTS_COUNT (50)
+
 typedef struct {
     uint32_t frequency;
     float rssi;

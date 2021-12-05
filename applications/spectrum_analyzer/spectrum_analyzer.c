@@ -104,7 +104,8 @@ SpectrumAnalyzer* spectrum_analyzer_alloc(){
     instance->variable_item_list = variable_item_list_alloc();
     view = variable_item_list_get_view(instance->variable_item_list);
     view_set_previous_callback(view, spectrum_analyzer_previous_callback);
-    view_dispatcher_add_view(instance->view_dispatcher, SpectrumAnalyzerViewMenu, view);
+    view_dispatcher_add_view(instance->view_dispatcher, SpectrumAnalyzerViewConfig, view);
+    spectrum_analyzer_config_items_init(instance);
 
     //Menu
     instance->menu = submenu_alloc();
@@ -113,7 +114,7 @@ SpectrumAnalyzer* spectrum_analyzer_alloc(){
     view_dispatcher_add_view(instance->view_dispatcher,
                 SpectrumAnalyzerViewMenu, view);
 
-    submenu_add_item(instance->menu, "Configure", SpectrumAnalyzerViewMenu,
+    submenu_add_item(instance->menu, "Configure", SpectrumAnalyzerViewConfig,
     spectrum_analyzer_menu_callback, instance);
 
     submenu_add_item(instance->menu, "Chart", SpectrumAnalyzerViewChart,
@@ -129,9 +130,9 @@ void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
 
     //free chart
     view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
-    view_display_test_free(instance->view_spectrum_analyzer_chart);
+    view_spectrum_analyzer_chart_free(instance->view_spectrum_analyzer_chart);
 
-    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewConfig);
     variable_item_list_free(instance->variable_item_list);
 
     view_dispatcher_free(instance->view_dispatcher);
