@@ -1,15 +1,65 @@
-/*
- * spectrum_analyzer.h
- *
- *  Created on: Dec 4, 2021
- *      Author: forthe
- */
+#pragma once
 
-#ifndef APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_
-#define APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_
+#include "views/spectrum_analyzer_chart.h"
+#include "spectrum_analyzer_worker.h"
 
+#include <furi-hal.h>
+#include <furi.h>
+
+#include <gui/gui_i.h>
+#include <gui/canvas_i.h>
+#include <gui/modules/menu.h>
+
+#include <gui/view_dispatcher.h>
+#include <gui/modules/submenu.h>
+#include <gui/modules/variable-item-list.h>
+
+#include <stdint.h>
+
+#define TAG "Spectrum Analyzer"
 
 #define DOTS_COUNT (50)
 
+extern const uint32_t config_base_width[];
 
-#endif /* APPLICATIONS_SPECTRUM_ANALYZER_SPECTRUM_ANALYZER_H_ */
+extern const uint32_t config_step[];
+
+extern const char* const config_user_gay[];
+
+/* Application views */
+typedef enum {
+    SpectrumAnalyzerViewMenu,///Configurations menu (appears on boot)
+    SpectrumAnalyzerViewChart///Chart that displays values with selected setup
+} SpectrumAnalyzerView;
+
+/* Application Instance */
+typedef struct {
+    Gui* gui;
+    Submenu* menu;
+    ViewDispatcher* view_dispatcher;
+    ViewSpectrumAnalyzerChart* view_spectrum_analyzer_chart;
+    VariableItemList* variable_item_list;
+
+    uint32_t base_width;
+    bool user_gay;
+
+    SpectrumAnalyzerWorker* worker;///worker updates RSSI
+} SpectrumAnalyzer;
+
+SpectrumAnalyzer* spectrum_analyzer_alloc();//init
+
+void spectrum_analyzer_free();//termination
+
+void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance);
+
+uint32_t spectrum_analyzer_exit_callback(void* context);
+
+uint32_t spectrum_analyzer_previous_callback(void* context);
+
+void spectrum_analyzer_menu_callback(void* context, uint32_t index);
+
+void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance);
+
+void spectrum_analyzer_set_base_width(VariableItem* item);
+
+void spectrum_analyzer_set_user_gay(VariableItem* item);
