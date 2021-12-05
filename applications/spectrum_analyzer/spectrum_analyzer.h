@@ -1,5 +1,6 @@
 #pragma once
 
+<<<<<<< HEAD
 #include "views/spectrum_analyzer_chart.h"
 #include "spectrum_analyzer_worker.h"
 
@@ -17,6 +18,9 @@
 #include <stdint.h>
 
 #define TAG "Spectrum Analyzer"
+=======
+#pragma once
+>>>>>>> spectrum_analyzer
 
 #define DOTS_COUNT (50)
 
@@ -62,4 +66,7 @@ void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance);
 
 void spectrum_analyzer_set_base_width(VariableItem* item);
 
+<<<<<<< HEAD
 void spectrum_analyzer_set_user_gay(VariableItem* item);
+=======
+>>>>>>> spectrum_analyzer

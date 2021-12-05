@@ -21,6 +21,34 @@ extern "C" {
  */
 CC1101Status cc1101_strobe(FuriHalSpiBusHandle* handle, uint8_t strobe);
 
+/** Burst Write device registers
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * @param      addr    - address of the first register
+ * @param      data    - data to write
+ * @param      size    - size of data to write
+ *
+ * @return     device status
+ */
+CC1101Status cc1101_write_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size);
+
+/** Burst Read device registers
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * @param      addr    - address of the first register
+ * @param      data    - data to read
+ * @param      size    - size of data to read
+ *
+ * @return     device status
+ */
+CC1101Status cc1101_read_burst(FuriHalSpiBusHandle* handle, 
+                                uint8_t addr, 
+                                uint8_t * data, 
+                                uint8_t size);
+
 /** Write device register
  *
  * @param      handle  - pointer to FuriHalSpiHandle
@@ -123,6 +151,33 @@ void cc1101_flush_rx(FuriHalSpiBusHandle* handle);
  */
 void cc1101_flush_tx(FuriHalSpiBusHandle* handle);
 
+/** Read radio calibration values
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * @param[out] FSCAL1_val    - pointer to data
+ * @param[out] FSCAL2_val    - pointer to data
+ * @param[out] FSCAL3_val    - pointer to data
+ *
+ */
+void cc1101_read_cal_values(FuriHalSpiBusHandle* handle, 
+                                uint8_t * FSCAL1_val, 
+                                uint8_t * FSCAL2_val,
+                                uint8_t * FSCAL3_val);
+
+/** Write radio calibration values
+ *
+ * @param      handle  - pointer to FuriHalSpiHandle
+ * @param FSCAL1_val    - data
+ * @param FSCAL2_val    - data
+ * @param FSCAL3_val    - data
+ *
+ */
+void cc1101_write_cal_values(FuriHalSpiBusHandle* handle, 
+                                uint8_t FSCAL1_val, 
+                                uint8_t FSCAL2_val,
+                                uint8_t FSCAL3_val);
+
+
 /** Set Frequency
  *
  * @param      handle  - pointer to FuriHalSpiHandle
@@ -140,13 +195,6 @@ uint32_t cc1101_set_frequency(FuriHalSpiBusHandle* handle, uint32_t value);
  * @return     real inermediate frequency that were synthesized
  */
 uint32_t cc1101_set_intermediate_frequency(FuriHalSpiBusHandle* handle, uint32_t value);
-
-/** Set Power Amplifier level table, ramp
- *
- * @param      handle  - pointer to FuriHalSpiHandle
- * @param      value   - array of power level values
- */
-void cc1101_set_pa_table(FuriHalSpiBusHandle* handle, const uint8_t value[8]);
 
 /** Set Power Amplifier level table, ramp
  *

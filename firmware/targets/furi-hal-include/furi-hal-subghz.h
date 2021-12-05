@@ -177,6 +177,14 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency(uint32_t value);
 
+/** Fasr set frequency with no calibration
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     real frequency in herz
+ */
+uint32_t furi_hal_subghz_set_frequency_fast(uint32_t value);
+
 /** Set path
  *
  * @param      path  path to use

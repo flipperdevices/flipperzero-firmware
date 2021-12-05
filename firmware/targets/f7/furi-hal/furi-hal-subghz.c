@@ -603,6 +603,27 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     return real_frequency;
 }
 
+uint32_t furi_hal_subghz_set_frequency_fast(uint32_t value) {
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
+
+    if(furi_hal_subghz_is_tx_allowed(value)) {
+        furi_hal_subghz_regulation = SubGhzRegulationTxRx;
+    } else {
+        furi_hal_subghz_regulation = SubGhzRegulationOnlyRx;
+    }
+
+    uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
+
+    while(true) {
+        CC1101Status status = cc1101_get_status(&furi_hal_spi_bus_handle_subghz);
+        if(status.STATE == CC1101StateIDLE) break;
+    }
+
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
+
+    return real_frequency;
+}
+
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
     if(path == FuriHalSubGhzPath433) {
