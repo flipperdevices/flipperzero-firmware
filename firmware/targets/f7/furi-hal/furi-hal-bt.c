@@ -92,23 +92,6 @@ static bool furi_hal_bt_start_core2() {
     return ret;
 }
 
-static bool furi_hal_bt_set_mac_address(FuriHalBtProfileConfig* profile_config) {
-    bool res = false;
-    uint32_t udn = LL_FLASH_GetUDN();
-    if(udn != 0xFFFFFFFF) {
-        uint32_t company_id = LL_FLASH_GetSTCompanyID();
-        uint32_t device_id = LL_FLASH_GetDeviceID();
-        profile_config->config.mac_address[0] = (uint8_t)(udn & 0x000000FF);
-        profile_config->config.mac_address[1] = (uint8_t)((udn & 0x0000FF00) >> 8 );
-        profile_config->config.mac_address[2] = (uint8_t)((udn & 0x00FF0000) >> 16 );
-        profile_config->config.mac_address[3] = (uint8_t)device_id;
-        profile_config->config.mac_address[4] = (uint8_t)(company_id & 0x000000FF);
-        profile_config->config.mac_address[5] = (uint8_t)((company_id & 0x0000FF00) >> 8);
-        res = true;
-    }
-    return res;
-}
-
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
     furi_assert(profile < FuriHalBtProfileNumber);
@@ -123,16 +106,29 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
             break;
         }
         // Set mac address
-        furi_hal_bt_set_mac_address(&profile_config[profile]);
+        memcpy(
+            profile_config[profile].config.mac_address,
+            furi_hal_version_get_ble_mac(),
+            sizeof(profile_config[profile].config.mac_address)
+        );
+        // Set advertise name
+        strlcpy(
+            profile_config[profile].config.adv_name,
+            furi_hal_version_get_ble_local_device_name_ptr(),
+            FURI_HAL_VERSION_DEVICE_NAME_LENGTH
+        );
         // Configure GAP
-        GapConfig config = profile_config[profile].config;
+        GapConfig* config = &profile_config[profile].config;
         if(profile == FuriHalBtProfileSerial) {
-            config.adv_service_uuid |= furi_hal_version_get_hw_color();
+            config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
-            config.mac_address[2]++;
+            config->mac_address[2]++;
+            // Change name Flipper -> Clicker
+            const char* clicker_str = "Clicker";
+            memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str) - 1);
         }
-        ret = gap_init(&config, event_cb, context);
+        ret = gap_init(config, event_cb, context);
         if(!ret) {
             gap_kill_thread();
             FURI_LOG_E(TAG, "Failed to init GAP");

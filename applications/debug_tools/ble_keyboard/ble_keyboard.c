@@ -46,7 +46,9 @@ int32_t ble_keyboard_app(void* p) {
         return -1;
     }
     bool bt_turned_on = furi_hal_bt_is_active();
-    furi_hal_bt_start_advertising();
+    if(!bt_turned_on) {
+        furi_hal_bt_start_advertising();
+    }
 
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(BleKeyboardEvent), NULL);
     furi_check(event_queue);

@@ -19,6 +19,7 @@ typedef struct {
     uint16_t connection_handle;
     uint8_t adv_svc_uuid_len;
     uint8_t adv_svc_uuid[20];
+    char* adv_name;
 } GapSvc;
 
 typedef struct {
@@ -76,7 +77,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             }
             if(gap->enable_adv) {
                 // Restart advertising
-                gap_start_advertising();
+                gap_advertise_start(GapCommandAdvFast);
                 furi_hal_power_insomnia_exit();
             }
             BleEvent event = {.type = BleEventTypeDisconnected};
@@ -253,7 +254,8 @@ static void gap_init_svc(Gap* gap) {
     // Initialize GATT interface
     aci_gatt_init();
     // Initialize GAP interface
-    const char *name = furi_hal_version_get_device_name_ptr();
+    // Skip fist symbol AD_TYPE_COMPLETE_LOCAL_NAME
+    char *name = gap->service.adv_name + 1;
     aci_gap_init(GAP_PERIPHERAL_ROLE, 0, strlen(name),
                 &gap->service.gap_svc_handle, &gap->service.dev_name_char_handle, &gap->service.appearance_char_handle);
 
@@ -316,9 +318,8 @@ static void gap_advertise_start(GapState new_state)
         }
     }
     // Configure advertising
-    const char* name = furi_hal_version_get_ble_local_device_name_ptr();
     status = aci_gap_set_discoverable(ADV_IND, min_interval, max_interval, PUBLIC_ADDR, 0,
-                                        strlen(name), (uint8_t*)name,
+                                        strlen(gap->service.adv_name), (uint8_t*)gap->service.adv_name,
                                         gap->service.adv_svc_uuid_len, gap->service.adv_svc_uuid, 0, 0);
     if(status) {
         FURI_LOG_E(TAG, "Set discoverable err: %d", status);
@@ -347,6 +348,7 @@ static void gap_advertise_stop() {
 void gap_start_advertising() {
     osMutexAcquire(gap->state_mutex, osWaitForever);
     if(gap->state == GapStateIdle) {
+        gap->state = GapStateStartingAdv;
         FURI_LOG_I(TAG, "Start advertising");
         gap->enable_adv = true;
         GapCommand command = GapCommandAdvFast;
@@ -382,6 +384,7 @@ bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context) {
     // Create advertising timer
     gap->advertise_timer = osTimerNew(gap_advetise_timer_callback, osTimerOnce, NULL, NULL);
     // Initialization of GATT & GAP layer
+    gap->service.adv_name = config->adv_name;
     gap_init_svc(gap);
     // Initialization of the BLE Services
     SVCCTL_Init();
@@ -420,11 +423,13 @@ GapState gap_get_state() {
 }
 
 void gap_kill_thread() {
+    osMutexAcquire(gap->state_mutex, osWaitForever);
     gap->enable_adv = false;
     if(gap) {
         GapCommand command = GapCommandKillThread;
         osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);
     }
+    osMutexRelease(gap->state_mutex);
 }
 
 static void gap_app(void *arg) {
