@@ -16,7 +16,33 @@ static const char* const config_user_gay[] = {
     "Pidor?"
 };
 
+void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
+    furi_assert(instance);
+
+    //free chart
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
+    view_spectrum_analyzer_chart_free(instance->view_spectrum_analyzer_chart);
+
+    //free menu
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewMenu);
+    submenu_free(instance->menu);
+
+    //free settings
+    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewConfig);
+    variable_item_list_free(instance->variable_item_list);
+
+    //free worker
+    spectrum_analyzer_worker_free(instance->worker);
+
+    view_dispatcher_free(instance->view_dispatcher);
+    furi_record_close("gui");
+
+    free(instance);
+}
+
 void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance){
+    furi_assert(instance);
+
     VariableItem* item;
     instance->base_freq = config_base_freq[0];
     instance->step = config_freq_steps[0];
@@ -24,7 +50,7 @@ void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance){
 
     item = variable_item_list_add(
         instance->variable_item_list, "Freq:",
-        COUNT_OF(config_base_freq), spectrum_analyzer_config_set_base_width, 
+        COUNT_OF(config_base_freq), spectrum_analyzer_config_set_base_freq, 
         instance
     );
 
@@ -54,7 +80,7 @@ uint32_t spectrum_analyzer_exit_callback(void* context){
     return VIEW_NONE;
 }
 
-//when user presses 'back'
+//when user presses 'back' in menu
 uint32_t spectrum_analyzer_previous_callback(void* context) {
     return SpectrumAnalyzerViewMenu;
 }
@@ -62,17 +88,34 @@ uint32_t spectrum_analyzer_previous_callback(void* context) {
 void spectrum_analyzer_menu_callback(void* context, uint32_t index) {
     SpectrumAnalyzer* instance = (SpectrumAnalyzer*)context;
 
+    furi_assert(instance);
+    furi_assert(instance->worker);
+
+    if (index == SpectrumAnalyzerViewChart &&
+    !spectrum_analyzer_worker_is_running(instance->worker)) {
+
+        spectrum_analyzer_worker_start(instance->worker);
+        instance->view_spectrum_analyzer_chart->view->model = instance->worker->rssi_buf;
+
+    } else if (spectrum_analyzer_worker_is_running(instance->worker)) {
+
+        spectrum_analyzer_worker_stop(instance->worker);
+
+    }
+
     view_dispatcher_switch_to_view(instance->view_dispatcher, index);
 }
 
 //update config and notify worker
 void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance){
+    furi_assert(instance->worker);
+
     instance->worker->start_freq = instance->base_freq * 1000000;
     instance->worker->bandwidth = instance->step;
 }
 
 //edit config items
-void spectrum_analyzer_config_set_base_width(VariableItem* item){
+void spectrum_analyzer_config_set_base_freq(VariableItem* item){
     SpectrumAnalyzer* instance = variable_item_get_context(item);
     uint8_t i = variable_item_get_current_value_index(item);
     string_t tmp;
@@ -108,29 +151,26 @@ void spectrum_analyzer_config_set_step(VariableItem* item){
 SpectrumAnalyzer* spectrum_analyzer_alloc(){
     SpectrumAnalyzer* instance = furi_alloc(sizeof(SpectrumAnalyzer));
 
+    //worker init
+    instance->worker = spectrum_analyzer_worker_alloc();
+
+    instance->worker->start_freq = config_base_freq[0] * 1000000; 
+    instance->worker->bandwidth = config_freq_steps[0];
+
     View* view = NULL;
 
+    //dispatcher init
     instance->gui = furi_record_open("gui");
     instance->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_attach_to_gui(instance->view_dispatcher, 
                     instance->gui, ViewDispatcherTypeFullscreen);
 
-    //only alloc. setup in spectrum_analyzer_config_apply
-    instance->worker = spectrum_analyzer_worker_alloc();
-
     //init chart
-    instance->view_spectrum_analyzer_chart = view_alloc();
-    view = instance->view_spectrum_analyzer_chart;
+    instance->view_spectrum_analyzer_chart = view_spectrum_analyzer_chart_alloc();
+    view = view_spectrum_analyzer_chart_get_view(instance->view_spectrum_analyzer_chart);
     view_set_previous_callback(view, spectrum_analyzer_previous_callback);
     view_dispatcher_add_view(instance->view_dispatcher, SpectrumAnalyzerViewChart, view);
-
-    view_set_context(view, instance);
-
-    view_set_draw_callback(view, view_spectrum_analyzer_chart_draw_callback);
-    view_set_input_callback(view, view_spectrum_analyzer_chart_input_callback);
-    view_set_enter_callback(view, view_spectrum_analyzer_chart_enter);
-    view_set_exit_callback(view, view_spectrum_analyzer_chart_exit);
 
     //Config
     instance->variable_item_list = variable_item_list_alloc();
@@ -152,42 +192,7 @@ SpectrumAnalyzer* spectrum_analyzer_alloc(){
     submenu_add_item(instance->menu, "Chart", SpectrumAnalyzerViewChart,
     spectrum_analyzer_menu_callback, instance);
 
-    //init timer
-    instance->timer = osTimerNew(spectrum_analyzer_update_spectrum, 
-    osTimerPeriodic, instance, NULL);
-
     return instance;
-}
-
-void spectrum_analyzer_update_spectrum(void* context){
-    SpectrumAnalyzer* instance = context;
-
-    gui_update(instance->gui);
-}
-
-void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
-    //free timer
-    osTimerDelete(instance->timer);
-
-    //free worker
-    spectrum_analyzer_worker_free(instance->worker);
-
-    //free menu
-    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewMenu);
-    submenu_free(instance->menu);
-
-    //free chart
-    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewChart);
-    view_free(instance->view_spectrum_analyzer_chart);
-
-    //free settings
-    view_dispatcher_remove_view(instance->view_dispatcher, SpectrumAnalyzerViewConfig);
-    variable_item_list_free(instance->variable_item_list);
-
-    view_dispatcher_free(instance->view_dispatcher);
-    furi_record_close("gui");
-
-    free(instance);
 }
 
 int32_t spectrum_analyzer_run(SpectrumAnalyzer* instance) {

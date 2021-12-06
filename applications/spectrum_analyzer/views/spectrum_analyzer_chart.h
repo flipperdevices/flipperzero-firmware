@@ -1,20 +1,27 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../spectrum_analyzer.h"
+#include "../spectrum_analyzer_worker.h"
+
+typedef struct {
+    View* view;
+    osTimerId_t timer;
+} ViewSpectrumAnalyzerChart;
+
+typedef struct {
+    FrequencyRSSI* rssi_buf;
+} ViewSpectrumAnalyzerModel;
+
+ViewSpectrumAnalyzerChart* view_spectrum_analyzer_chart_alloc();///init
+
+void view_spectrum_analyzer_chart_free(ViewSpectrumAnalyzerChart* instance);///exit
+
+View* view_spectrum_analyzer_chart_get_view(ViewSpectrumAnalyzerChart* instance);///follow view-model priciples
+
+void view_spectrum_analyzer_draw_callback(Canvas* canvas, void* context);
+
+void view_spectrum_analyzer_enter_callback(void* context);
+
+void view_spectrum_analyzer_exit_callback(void* context);
 
 void view_spectrum_analyzer_timer_callback(void* context);
-
-void view_spectrum_analyzer_chart_draw_callback(Canvas* canvas, void* context);
-
-void view_spectrum_analyzer_chart_clear(SpectrumAnalyzer* instance);
-
-void view_spectrum_analyzer_chart_zoom_out(SpectrumAnalyzer* instance);
-
-void view_spectrum_analyzer_chart_zoom_in(SpectrumAnalyzer* instance);
-
-bool view_spectrum_analyzer_chart_input_callback(InputEvent* event, void* context);
-
-void view_spectrum_analyzer_chart_exit(void* context);
-
-void view_spectrum_analyzer_chart_enter(void* context);

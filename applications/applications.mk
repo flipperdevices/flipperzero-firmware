@@ -33,6 +33,7 @@ APP_NFC		= 1
 APP_SUBGHZ	= 1
 APP_ABOUT	= 1
 APP_SPECTRUM_ANALYZER = 1
+APP_ABA = 1
 
 # Plugins
 APP_MUSIC_PLAYER = 1
@@ -57,8 +58,6 @@ endif
 # Applications
 # that will be shown in menu
 # Prefix with APP_*
-
-
 APP_IRDA_MONITOR	?= 0
 ifeq ($(APP_IRDA_MONITOR), 1)
 CFLAGS		+= -DAPP_IRDA_MONITOR
@@ -99,7 +98,6 @@ CFLAGS		+= -DAPP_SPECTRUM_ANALYZER
 SRV_GUI		= 1
 SRV_CLI		= 1
 endif
-
 
 APP_ABOUT ?= 0
 ifeq ($(APP_ABOUT), 1)

@@ -33,4 +33,5 @@ SpectrumAnalyzerWorker* spectrum_analyzer_worker_alloc();
 void spectrum_analyzer_worker_free(SpectrumAnalyzerWorker* instance);
 void spectrum_analyzer_worker_start(SpectrumAnalyzerWorker* instance);
 void spectrum_analyzer_worker_stop(SpectrumAnalyzerWorker* instance);
+bool spectrum_analyzer_worker_is_running(SpectrumAnalyzerWorker* instance);
 
