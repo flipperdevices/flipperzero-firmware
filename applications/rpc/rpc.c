@@ -209,6 +209,17 @@ void rpc_print_message(const PB_Main* message) {
     case PB_Main_system_ping_response_tag:
         string_cat_printf(str, "\tping_response {\r\n");
         break;
+    case PB_Main_system_device_info_request_tag:
+        string_cat_printf(str, "\tdevice_info_request {\r\n");
+        break;
+    case PB_Main_system_device_info_response_tag:
+        string_cat_printf(str, "\tdevice_info_response {\r\n");
+        string_cat_printf(
+            str,
+            "\t\t%s: %s\r\n",
+            message->content.system_device_info_response.key,
+            message->content.system_device_info_response.value);
+        break;
     case PB_Main_storage_mkdir_request_tag:
         string_cat_printf(str, "\tmkdir {\r\n");
         break;
