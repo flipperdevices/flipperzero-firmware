@@ -307,13 +307,9 @@ static const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
     {CC1101_ADDR, 0x00},
     {CC1101_PKTLEN, 0x00},
 
-
     {CC1101_MDMCFG4, 0xC8}, //Modem Configuration 9.99
     {CC1101_MDMCFG3, 0x93}, //Modem Configuration
     {CC1101_MDMCFG2, 0x12}, // 2: 16/16 sync word bits detected
-
-    //{CC1101_MDMCFG0, 0xF8}, //поу молчанию
-    //{CC1101_MDMCFG1, 0x22}, //поу молчанию
 
     {CC1101_DEVIATN, 0x34}, //Deviation = 19.042969
     {CC1101_MCSM0, 0x18}, //Main Radio Control State Machine Configuration
@@ -322,13 +318,6 @@ static const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
     {CC1101_AGCCTRL2, 0x43 },   //AGC Control
     {CC1101_AGCCTRL1, 0x40},
     {CC1101_AGCCTRL0, 0x91},
-
-    
-    //при частоте больше 76кб, дев 34 bw 232
-    //{ CC1101_BSCFG, 0x1C }, //востановление усиления до обнаружения синхрослова
-    //{CC1101_AGCCTRL2, 0xC7},
-    //{CC1101_AGCCTRL1, 0x0},
-    //{CC1101_AGCCTRL0, 0xB2},
 
     {CC1101_WORCTRL, 0xFB}, //Wake On Radio Control
     {CC1101_FSCAL3, 0xE9}, //Frequency Synthesizer Calibration
