@@ -12,8 +12,6 @@
 #define FAST_ADV_TIMEOUT 30000
 #define INITIAL_ADV_TIMEOUT 60000
 
-#define BD_ADDR_SIZE_LOCAL 6
-
 typedef struct {
     uint16_t gap_svc_handle;
     uint16_t dev_name_char_handle;
@@ -21,7 +19,6 @@ typedef struct {
     uint16_t connection_handle;
     uint8_t adv_svc_uuid_len;
     uint8_t adv_svc_uuid[20];
-    uint8_t mac_address[BD_ADDR_SIZE_LOCAL];
 } GapSvc;
 
 typedef struct {
@@ -49,8 +46,6 @@ typedef enum {
 static const uint8_t gap_irk[16] = {0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0,0x12,0x34,0x56,0x78,0x9a,0xbc,0xde,0xf0};
 // Encryption root key
 static const uint8_t gap_erk[16] = {0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21,0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21};
-// Default MAC address
-static const uint8_t gap_default_mac_addr[] = {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72};
 
 static Gap* gap = NULL;
 
@@ -77,7 +72,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
             if (disconnection_complete_event->Connection_Handle == gap->service.connection_handle) {
                 gap->service.connection_handle = 0;
                 gap->state = GapStateIdle;
-                FURI_LOG_I(TAG, "Disconnect from client. Reason: %d", disconnection_complete_event->Reason);
+                FURI_LOG_I(TAG, "Disconnect from client. Reason: %02X", disconnection_complete_event->Reason);
             }
             if(gap->enable_adv) {
                 // Restart advertising
@@ -232,32 +227,6 @@ static void set_advertisment_service_uid(uint8_t* uid, uint8_t uid_len) {
     gap->service.adv_svc_uuid_len += uid_len;
 }
 
-static void gap_init_mac_address(Gap* gap) {
-    uint8_t *otp_addr;
-    uint32_t udn;
-    uint32_t company_id;
-    uint32_t device_id;
-
-    udn = LL_FLASH_GetUDN();
-    if(udn != 0xFFFFFFFF) {
-        company_id = LL_FLASH_GetSTCompanyID();
-        device_id = LL_FLASH_GetDeviceID();
-        gap->service.mac_address[0] = (uint8_t)(udn & 0x000000FF);
-        gap->service.mac_address[1] = (uint8_t)( (udn & 0x0000FF00) >> 8 );
-        gap->service.mac_address[2] = (uint8_t)( (udn & 0x00FF0000) >> 16 );
-        gap->service.mac_address[3] = (uint8_t)device_id;
-        gap->service.mac_address[4] = (uint8_t)(company_id & 0x000000FF);;
-        gap->service.mac_address[5] = (uint8_t)( (company_id & 0x0000FF00) >> 8 );
-    } else {
-        otp_addr = OTP_Read(0);
-        if(otp_addr) {
-            memcpy(gap->service.mac_address, ((OTP_ID0_t*)otp_addr)->bd_address, sizeof(gap->service.mac_address));
-        } else {
-            memcpy(gap->service.mac_address, gap_default_mac_addr, sizeof(gap->service.mac_address));
-        }
-    }
-}
-
 static void gap_init_svc(Gap* gap) {
     tBleStatus status;
     uint32_t srd_bd_addr[2];
@@ -265,8 +234,7 @@ static void gap_init_svc(Gap* gap) {
     // HCI Reset to synchronise BLE Stack
     hci_reset();
     // Configure mac address
-    gap_init_mac_address(gap);
-    aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, (uint8_t*)gap->service.mac_address);
+    aci_hal_write_config_data(CONFIG_DATA_PUBADDR_OFFSET, CONFIG_DATA_PUBADDR_LEN, gap->config->mac_address);
 
     /* Static random Address
      * The two upper bits shall be set to 1
@@ -377,17 +345,25 @@ static void gap_advertise_stop() {
 }
 
 void gap_start_advertising() {
-    FURI_LOG_I(TAG, "Start advertising");
-    gap->enable_adv = true;
-    GapCommand command = GapCommandAdvFast;
-    furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
+    osMutexAcquire(gap->state_mutex, osWaitForever);
+    if(gap->state == GapStateIdle) {
+        FURI_LOG_I(TAG, "Start advertising");
+        gap->enable_adv = true;
+        GapCommand command = GapCommandAdvFast;
+        furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
+    }
+    osMutexRelease(gap->state_mutex);
 }
 
 void gap_stop_advertising() {
-    FURI_LOG_I(TAG, "Stop advertising");
-    gap->enable_adv = false;
-    GapCommand command = GapCommandAdvStop;
-    furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
+    osMutexAcquire(gap->state_mutex, osWaitForever);
+    if(gap->state > GapStateIdle) {
+        FURI_LOG_I(TAG, "Stop advertising");
+        gap->enable_adv = false;
+        GapCommand command = GapCommandAdvStop;
+        furi_check(osMessageQueuePut(gap->command_queue, &command, 0, 0) == osOK);
+    }
+    osMutexRelease(gap->state_mutex);
 }
 
 static void gap_advetise_timer_callback(void* context) {
@@ -436,7 +412,11 @@ bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context) {
 }
 
 GapState gap_get_state() {
-    return gap->state;
+    GapState state;
+    osMutexAcquire(gap->state_mutex, osWaitForever);
+    state = gap->state;
+    osMutexRelease(gap->state_mutex );
+    return state;
 }
 
 void gap_kill_thread() {
@@ -451,10 +431,10 @@ static void gap_app(void *arg) {
     GapCommand command;
     while(1) {
         furi_check(osMessageQueueGet(gap->command_queue, &command, NULL, osWaitForever) == osOK);
+        osMutexAcquire(gap->state_mutex, osWaitForever);
         if(command == GapCommandKillThread) {
             break;
         }
-        osMutexAcquire(gap->state_mutex, osWaitForever);
         if(command == GapCommandAdvFast) {
             gap_advertise_start(GapStateAdvFast);
         } else if(command == GapCommandAdvLowPower) {

@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define GAP_MAC_ADDR_SIZE (6)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,6 +48,7 @@ typedef struct {
     uint16_t appearance_char;
     bool bonding_mode;
     GapPairing pairing_method;
+    uint8_t mac_address[GAP_MAC_ADDR_SIZE];
 } GapConfig;
 
 bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context);

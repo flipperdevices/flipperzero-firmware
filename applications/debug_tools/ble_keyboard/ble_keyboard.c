@@ -45,6 +45,8 @@ int32_t ble_keyboard_app(void* p) {
         furi_record_close("bt");
         return -1;
     }
+    bool bt_turned_on = furi_hal_bt_is_active();
+    furi_hal_bt_start_advertising();
 
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(BleKeyboardEvent), NULL);
     furi_check(event_queue);
@@ -119,6 +121,9 @@ int32_t ble_keyboard_app(void* p) {
         view_port_update(view_port);
     }
 
+    if(bt_turned_on) {
+        furi_hal_bt_stop_advertising();
+    }
     // remove & free all stuff created by app
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);

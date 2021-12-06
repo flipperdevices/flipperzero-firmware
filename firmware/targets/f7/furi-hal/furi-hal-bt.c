@@ -13,6 +13,8 @@
 
 #define TAG "FuriHalBt"
 
+#define FURI_HAL_BT_DEFAULT_MAC_ADDR {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}
+
 osMutexId_t furi_hal_bt_core2_mtx = NULL;
 
 typedef void (*FuriHalBtProfileStart)(void);
@@ -35,6 +37,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .appearance_char = 0x8600,
             .bonding_mode = true,
             .pairing_method = GapPairingPinCodeShow,
+            .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
         },
     },
     [FuriHalBtProfileHidKeyboard] = {
@@ -45,6 +48,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .appearance_char = GAP_APPEARANCE_KEYBOARD,
             .bonding_mode = true,
             .pairing_method = GapPairingPinCodeVerifyYesNo,
+            .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
         },
     }
 };
@@ -88,6 +92,23 @@ static bool furi_hal_bt_start_core2() {
     return ret;
 }
 
+static bool furi_hal_bt_set_mac_address(FuriHalBtProfileConfig* profile_config) {
+    bool res = false;
+    uint32_t udn = LL_FLASH_GetUDN();
+    if(udn != 0xFFFFFFFF) {
+        uint32_t company_id = LL_FLASH_GetSTCompanyID();
+        uint32_t device_id = LL_FLASH_GetDeviceID();
+        profile_config->config.mac_address[0] = (uint8_t)(udn & 0x000000FF);
+        profile_config->config.mac_address[1] = (uint8_t)((udn & 0x0000FF00) >> 8 );
+        profile_config->config.mac_address[2] = (uint8_t)((udn & 0x00FF0000) >> 16 );
+        profile_config->config.mac_address[3] = (uint8_t)device_id;
+        profile_config->config.mac_address[4] = (uint8_t)(company_id & 0x000000FF);
+        profile_config->config.mac_address[5] = (uint8_t)((company_id & 0x0000FF00) >> 8);
+        res = true;
+    }
+    return res;
+}
+
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, void* context) {
     furi_assert(event_cb);
     furi_assert(profile < FuriHalBtProfileNumber);
@@ -101,10 +122,15 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
             FURI_LOG_E(TAG, "Failed to start 2nd core");
             break;
         }
+        // Set mac address
+        furi_hal_bt_set_mac_address(&profile_config[profile]);
         // Configure GAP
         GapConfig config = profile_config[profile].config;
         if(profile == FuriHalBtProfileSerial) {
             config.adv_service_uuid |= furi_hal_version_get_hw_color();
+        } else if(profile == FuriHalBtProfileHidKeyboard) {
+            // Change MAC address for HID profile
+            config.mac_address[2]++;
         }
         ret = gap_init(&config, event_cb, context);
         if(!ret) {
