@@ -531,13 +531,12 @@ void cli_command_sound_tone(Cli* cli, string_t args, void* context) {
 
 void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
     float volumes[] = {0.01, 0.02, 0.05, 0.1, 0.5};
-    float freq = 2000; //600;
-    float volume = volumes[1];  //default
-    float duration_unit = 100;
+    float freq = 600;
+    float volume = volumes[3];  //default
+    float duration_unit = 200;
     uint16_t i, j, k;
 
-    static const struct {const char letter, *code;}
-    MorseMap[] = {
+    static const struct {const char letter, *code;} MorseMap[] = {
         { 'A', ".-" },
         { 'B', "-..." },
         { 'C', "-.-." },
@@ -564,8 +563,8 @@ void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
         { 'X', "-..-" },
         { 'Y', "-.--" },
         { 'Z', "--.." },
-        { ' ', "       " }, //Gap between word, seven units 
-            
+        { ' ', "    " }, //Gap between word, seven units, but 3 already after each symbol
+
         { '1', ".----" },
         { '2', "..---" },
         { '3', "...--" },
@@ -576,7 +575,7 @@ void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
         { '8', "---.." },
         { '9', "----." },
         { '0', "-----" },
-            
+
         { '.', "·-·-·-" },
         { ',', "--..--" },
         { '?', "..--.." },
@@ -604,6 +603,8 @@ void cli_command_sound_morse(Cli* cli, string_t args, void* context) {
                         hal_pwm_set(volume, freq, &SPEAKER_TIM, SPEAKER_CH);
                         delay(duration_unit*3);
                         hal_pwm_stop(&SPEAKER_TIM, SPEAKER_CH);
+                    } else {
+                        delay(duration_unit);
                     }
                 }
                 delay(duration_unit*3);
