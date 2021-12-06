@@ -425,11 +425,26 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 break;
             } else if(
                 (chat_event.c == CliSymbolAsciiBackspace) || (chat_event.c == CliSymbolAsciiDel)) {
-                size_t len = string_size(input);
-                if(len > string_size(name)) {
+                size_t len = string_length_u(input);
+                if(len > string_length_u(name)) {
                     printf("%s", "\e[D\e[1P");
                     fflush(stdout);
-                    string_set_strn(input, string_get_cstr(input), len - 1);
+                    //delete 1 char UTF
+                    const char* str = string_get_cstr(input);
+                    size_t size = 0;
+                    m_str1ng_utf8_state_e s = M_STRING_UTF8_STARTING;
+                    string_unicode_t u = 0;
+                    string_reset(sysmsg);
+                    while(*str) {
+                        m_str1ng_utf8_decode(*str, &s, &u);
+                        if((s == M_STRING_UTF8_ERROR) || s == M_STRING_UTF8_STARTING) {
+                            string_push_u(sysmsg, u);
+                            if(++size >= len - 1) break;
+                            s = M_STRING_UTF8_STARTING;
+                        }
+                        str++;
+                    }
+                    string_set(input, sysmsg);
                 }
             } else if(chat_event.c == CliSymbolAsciiCR) {
                 printf("\r\n");
@@ -451,15 +466,6 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 putc(chat_event.c, stdout);
                 fflush(stdout);
                 string_push_back(input, chat_event.c);
-                //printf("\r%s", string_get_cstr(input));
-                // m_str1ng_utf8_decode(c, &c_state_u, &c_u);
-                // if((c_state_u == M_STRING_UTF8_STARTING) || (c_state_u == M_STRING_UTF8_ERROR)) {
-                //     string_reset(str_c_u);
-                //     string_push_u(str_c_u, c_u);
-                //     printf("%s", string_get_cstr(str_c_u));
-                //     string_push_u(input, c_u);
-                //     fflush(stdout);
-                // }
                 break;
             case SubghzChatEventRXData:
                 do {
@@ -478,10 +484,6 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                             string_reset(output);
                         }
                     }
-
-                    //echo
-                    // osDelay(100);
-                    // subghz_chat_worker_write(subghz_chat, message, len);
                 } while(subghz_chat_worker_available(subghz_chat));
                 break;
             case SubghzChatEventNewMessage:
