@@ -36,8 +36,8 @@ typedef enum {
 typedef struct {
     osMutexId_t shci_mtx;
     osSemaphoreId_t shci_sem;
-    osThreadId_t shci_user_event_thread_id;
-    osThreadAttr_t shci_user_event_thread_attr;
+    osEventFlagsId_t event_flags;
+    FuriThread* thread;
     BleGlueStatus status;
     BleGlueKeyStorageChangedCallback callback;
     void* context;
@@ -45,7 +45,7 @@ typedef struct {
 
 static BleGlue* ble_glue = NULL;
 
-static void ble_glue_user_event_thread(void *argument);
+static int32_t ble_glue_shci_thread(void *argument);
 static void ble_glue_sys_status_not_callback(SHCI_TL_CmdStatus_t status);
 static void ble_glue_sys_user_event_callback(void* pPayload);
 
@@ -59,8 +59,6 @@ void ble_glue_set_key_storage_changed_callback(BleGlueKeyStorageChangedCallback 
 void ble_glue_init() {
     ble_glue = furi_alloc(sizeof(BleGlue));
     ble_glue->status = BleGlueStatusStartup;
-    ble_glue->shci_user_event_thread_attr.name = "BleShciWorker";
-    ble_glue->shci_user_event_thread_attr.stack_size = 1024;
 
     // Configure the system Power Mode
     // Select HSI as system clock source after Wake Up from Stop mode
@@ -79,9 +77,15 @@ void ble_glue_init() {
 
     ble_glue->shci_mtx = osMutexNew(NULL);
     ble_glue->shci_sem = osSemaphoreNew(1, 0, NULL);
+    ble_glue->event_flags = osEventFlagsNew(NULL);
 
     // FreeRTOS system task creation
-    ble_glue->shci_user_event_thread_id = osThreadNew(ble_glue_user_event_thread, NULL, &ble_glue->shci_user_event_thread_attr);
+    ble_glue->thread = furi_thread_alloc();
+    furi_thread_set_name(ble_glue->thread, "BleShciWorker");
+    furi_thread_set_stack_size(ble_glue->thread, 1024);
+    furi_thread_set_context(ble_glue->thread, ble_glue);
+    furi_thread_set_callback(ble_glue->thread, ble_glue_shci_thread);
+    furi_thread_start(ble_glue->thread);
 
     // System channel initialization
     SHci_Tl_Init_Conf.p_cmdbuffer = (uint8_t*)&ble_glue_system_cmd_buff;
@@ -218,16 +222,19 @@ static void ble_glue_clear_shared_memory() {
 
 void ble_glue_kill_thread() {
     if(ble_glue) {
-        osThreadFlagsSet(ble_glue->shci_user_event_thread_id, BLE_GLUE_FLAG_KILL_THREAD);
+        osEventFlagsSet(ble_glue->event_flags, BLE_GLUE_FLAG_KILL_THREAD);
     }
+    furi_thread_join(ble_glue->thread);
+    furi_thread_free(ble_glue->thread);
+    free(ble_glue);
+    ble_glue = NULL;
 }
 
 // Wrap functions
-static void ble_glue_user_event_thread(void *argument) {
-    UNUSED(argument);
+static int32_t ble_glue_shci_thread(void* context) {
     uint32_t flags = 0;
     while(true) {
-        flags = osThreadFlagsWait(BLE_GLUE_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        flags = osEventFlagsWait(ble_glue->event_flags, BLE_GLUE_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         if(flags & BLE_GLUE_FLAG_SHCI_EVENT) {
             shci_user_evt_proc();
         }
@@ -238,15 +245,17 @@ static void ble_glue_user_event_thread(void *argument) {
     // Free resources
     osMutexDelete(ble_glue->shci_mtx);
     osSemaphoreDelete(ble_glue->shci_sem);
-    free(ble_glue);
-    ble_glue = NULL;
+    osEventFlagsDelete(ble_glue->event_flags);
     ble_glue_clear_shared_memory();
-    osThreadExit();
+
+    return 0;
 }
 
 void shci_notify_asynch_evt(void* pdata) {
     UNUSED(pdata);
-    osThreadFlagsSet(ble_glue->shci_user_event_thread_id, BLE_GLUE_FLAG_SHCI_EVENT);
+    if(ble_glue) {
+        osEventFlagsSet(ble_glue->event_flags, BLE_GLUE_FLAG_SHCI_EVENT);
+    }
 }
 
 void shci_cmd_resp_release(uint32_t flag) {

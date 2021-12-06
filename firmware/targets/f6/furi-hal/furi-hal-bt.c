@@ -13,6 +13,8 @@
 
 #define TAG "FuriHalBt"
 
+#define FURI_HAL_BT_DEFAULT_MAC_ADDR {0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72}
+
 osMutexId_t furi_hal_bt_core2_mtx = NULL;
 
 typedef void (*FuriHalBtProfileStart)(void);
@@ -35,6 +37,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .appearance_char = 0x8600,
             .bonding_mode = true,
             .pairing_method = GapPairingPinCodeShow,
+            .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
         },
     },
     [FuriHalBtProfileHidKeyboard] = {
@@ -45,6 +48,7 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
             .appearance_char = GAP_APPEARANCE_KEYBOARD,
             .bonding_mode = true,
             .pairing_method = GapPairingPinCodeVerifyYesNo,
+            .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
         },
     }
 };
@@ -101,12 +105,30 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
             FURI_LOG_E(TAG, "Failed to start 2nd core");
             break;
         }
+        // Set mac address
+        memcpy(
+            profile_config[profile].config.mac_address,
+            furi_hal_version_get_ble_mac(),
+            sizeof(profile_config[profile].config.mac_address)
+        );
+        // Set advertise name
+        strlcpy(
+            profile_config[profile].config.adv_name,
+            furi_hal_version_get_ble_local_device_name_ptr(),
+            FURI_HAL_VERSION_DEVICE_NAME_LENGTH
+        );
         // Configure GAP
-        GapConfig config = profile_config[profile].config;
+        GapConfig* config = &profile_config[profile].config;
         if(profile == FuriHalBtProfileSerial) {
-            config.adv_service_uuid |= furi_hal_version_get_hw_color();
+            config->adv_service_uuid |= furi_hal_version_get_hw_color();
+        } else if(profile == FuriHalBtProfileHidKeyboard) {
+            // Change MAC address for HID profile
+            config->mac_address[2]++;
+            // Change name Flipper -> Clicker
+            const char* clicker_str = "Clicker";
+            memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str) - 1);
         }
-        ret = gap_init(&config, event_cb, context);
+        ret = gap_init(config, event_cb, context);
         if(!ret) {
             gap_kill_thread();
             FURI_LOG_E(TAG, "Failed to init GAP");
@@ -134,8 +156,7 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb,
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
     gap_kill_thread();
     ble_app_kill_thread();
-    // TODO change delay to event
-    osDelay(200);
+    osDelay(100);
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
     ble_glue_kill_thread();
