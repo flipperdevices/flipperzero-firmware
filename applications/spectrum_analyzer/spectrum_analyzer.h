@@ -1,65 +1,51 @@
 #pragma once
 
 #include "spectrum_analyzer_worker.h"
-#include "views/spectrum_analyzer_chart.h"
 
 #include <furi-hal.h>
 #include <furi.h>
 
 #include <gui/gui_i.h>
 #include <gui/canvas_i.h>
-#include <gui/modules/menu.h>
-
-#include <gui/view_dispatcher.h>
-#include <gui/view_port.h>
-#include <gui/view_dispatcher_i.h>
-#include <gui/view_port_i.h>
-#include <gui/view.h>
-#include <gui/modules/submenu.h>
-#include <gui/modules/variable-item-list.h>
 
 #include <stdint.h>
+#include <m-string.h>
 
 #define TAG "Spectrum Analyzer"
 
-/* Application views */
 typedef enum {
-    SpectrumAnalyzerViewMenu,///Configurations menu (appears on boot)
-    SpectrumAnalyzerViewChart,///Chart that displays values with selected setup
-    SpectrumAnalyzerViewConfig///Variable list configuration
-} SpectrumAnalyzerView;
+    SpectrumAnalyzerEventTypeTick,
+    SpectrumAnalyzerEventTypeKey,
+    SpectrumAnalyzerEventTypeDbg
+} SpectrumAnalyzerEventType;
+
+typedef struct {
+    SpectrumAnalyzerEventType type;
+    InputEvent input;
+} SpectrumAnalyzerEvent;
 
 /* Application */
 typedef struct {
     Gui* gui;///ptr to gui
-    Submenu* menu;///entry menu
-    ViewDispatcher* view_dispatcher;///manages views
-    VariableItemList* variable_item_list;///config items
-    ViewSpectrumAnalyzerChart* view_spectrum_analyzer_chart;///chart view
-
-    uint32_t base_freq;
-    uint16_t step;
-    bool user_gay;
+    ViewPort* view_port;///view_port for drawing
 
     SpectrumAnalyzerWorker* worker;///worker updates RSSI
+
+    uint8_t curr_freq_id;
+    uint8_t curr_step_id;
+
+    osMessageQueueId_t event_queue;///queue for selfdispatch
+    osTimerId_t timer;///tick timer
 } SpectrumAnalyzer;
 
 SpectrumAnalyzer* spectrum_analyzer_alloc();//init
 
 void spectrum_analyzer_free();//termination
 
-void spectrum_analyzer_config_items_init(SpectrumAnalyzer* instance);///init config items
+void spectrum_analyzer_draw_callback(Canvas* canvas, void* context);
 
-uint32_t spectrum_analyzer_exit_callback(void* context);///exit
+void spectrum_analyzer_timer_callback(void* context);
 
-uint32_t spectrum_analyzer_previous_callback(void* context);///return to main menu
+void spectrum_analyzer_input_callback(InputEvent* input_event, void* context);
 
-void spectrum_analyzer_menu_callback(void* context, uint32_t index);///switch from menu
-
-void spectrum_analyzer_config_apply(SpectrumAnalyzer* instance);///process user input
-
-void spectrum_analyzer_config_set_base_freq(VariableItem* item);///set base freq
-
-void spectrum_analyzer_config_set_user_gay(VariableItem* item);///set joke setting
-
-void spectrum_analyzer_config_set_step(VariableItem* item);///set step
+void spectrum_analyzer_draw_bottom_menu(Canvas* canvas, void* context);

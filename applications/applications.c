@@ -127,7 +127,7 @@ const size_t FLIPPER_SERVICES_COUNT = sizeof(FLIPPER_SERVICES) / sizeof(FlipperA
 const FlipperApplication FLIPPER_APPS[] = {
 
 #ifdef APP_SPECTRUM_ANALYZER
-    {.app = spectrum_analyzer_app, .name = "Spectrum Analyzer", .stack_size = 4096, .icon = &A_Sub1ghz_14},
+    {.app = spectrum_analyzer_app, .name = "Spectrum Analyzer", .stack_size = 2048, .icon = &A_Sub1ghz_14},
 #endif
 
 #ifdef APP_SUBGHZ
