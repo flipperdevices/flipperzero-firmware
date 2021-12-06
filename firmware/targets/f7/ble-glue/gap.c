@@ -4,8 +4,7 @@
 
 #include "cmsis_os.h"
 #include <furi-hal.h>
-#include "otp.h"
-
+#include <furi.h>
 
 #define TAG "BtGap"
 
@@ -30,8 +29,7 @@ typedef struct {
     BleEventCallback on_event_cb;
     void* context;
     osTimerId advertise_timer;
-    osThreadAttr_t thread_attr;
-    osThreadId_t thread_id;
+    FuriThread* thread;
     osMessageQueueId_t command_queue;
     bool enable_adv;
 } Gap;
@@ -51,19 +49,19 @@ static const uint8_t gap_erk[16] = {0xfe,0xdc,0xba,0x09,0x87,0x65,0x43,0x21,0xfe
 static Gap* gap = NULL;
 
 static void gap_advertise_start(GapState new_state);
-static void gap_app(void *arg);
+static int32_t gap_app(void* context);
 
 SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification( void *pckt )
 {
-    hci_event_pckt *event_pckt;
-    evt_le_meta_event *meta_evt;
-    evt_blue_aci *blue_evt;
-    hci_le_phy_update_complete_event_rp0 *evt_le_phy_update_complete;
+    hci_event_pckt* event_pckt;
+    evt_le_meta_event* meta_evt;
+    evt_blue_aci* blue_evt;
+    hci_le_phy_update_complete_event_rp0* evt_le_phy_update_complete;
     uint8_t tx_phy;
     uint8_t rx_phy;
     tBleStatus ret = BLE_STATUS_INVALID_PARAMS;
 
-    event_pckt = (hci_event_pckt*) ((hci_uart_pckt *) pckt)->data;
+    event_pckt = (hci_event_pckt*)((hci_uart_pckt*)pckt)->data;
 
     osMutexAcquire(gap->state_mutex, osWaitForever);
     switch (event_pckt->evt) {
@@ -395,9 +393,12 @@ bool gap_init(GapConfig* config, BleEventCallback on_event_cb, void* context) {
     gap->enable_adv = true;
 
     // Thread configuration
-    gap->thread_attr.name = "BleGapWorker";
-    gap->thread_attr.stack_size = 1024;
-    gap->thread_id = osThreadNew(gap_app, NULL, &gap->thread_attr);
+    gap->thread = furi_thread_alloc();
+    furi_thread_set_name(gap->thread, "BleGapWorker");
+    furi_thread_set_stack_size(gap->thread, 1024);
+    furi_thread_set_context(gap->thread, gap);
+    furi_thread_set_callback(gap->thread, gap_app);
+    furi_thread_start(gap->thread);
 
     // Command queue allocation
     gap->command_queue = osMessageQueueNew(8, sizeof(GapCommand), NULL);
@@ -430,9 +431,13 @@ void gap_kill_thread() {
         osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);
     }
     osMutexRelease(gap->state_mutex);
+    furi_thread_join(gap->thread);
+    furi_thread_free(gap->thread);
+    free(gap);
+    gap = NULL;
 }
 
-static void gap_app(void *arg) {
+static int32_t gap_app(void *context) {
     GapCommand command;
     while(1) {
         furi_check(osMessageQueueGet(gap->command_queue, &command, NULL, osWaitForever) == osOK);
@@ -453,7 +458,6 @@ static void gap_app(void *arg) {
     osMutexDelete(gap->state_mutex);
     osMessageQueueDelete(gap->command_queue);
     osTimerDelete(gap->advertise_timer);
-    free(gap);
-    gap = NULL;
-    osThreadExit();
+
+    return 0;
 }

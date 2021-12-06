@@ -20,14 +20,14 @@ PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SI
 typedef struct {
     osMutexId_t hci_mtx;
     osSemaphoreId_t hci_sem;
-    osThreadId_t hci_thread_id;
-    osThreadAttr_t hci_thread_attr;
+    FuriThread* thread;
+    osEventFlagsId_t event_flags;
 } BleApp;
 
-static BleApp* ble_app;
+static BleApp* ble_app = NULL;
 
-static void ble_app_hci_thread(void *arg);
-static void ble_app_hci_event_handler(void * pPayload);
+static int32_t ble_app_hci_thread(void* context);
+static void ble_app_hci_event_handler(void* pPayload);
 static void ble_app_hci_status_not_handler(HCI_TL_CmdStatus_t status);
 
 bool ble_app_init() {
@@ -36,10 +36,14 @@ bool ble_app_init() {
     // Allocate semafore and mutex for ble command buffer access
     ble_app->hci_mtx = osMutexNew(NULL);
     ble_app->hci_sem = osSemaphoreNew(1, 0, NULL);
+    ble_app->event_flags = osEventFlagsNew(NULL);
     // HCI transport layer thread to handle user asynch events
-    ble_app->hci_thread_attr.name = "BleHciWorker";
-    ble_app->hci_thread_attr.stack_size = 1024;
-    ble_app->hci_thread_id = osThreadNew(ble_app_hci_thread, NULL, &ble_app->hci_thread_attr);
+    ble_app->thread = furi_thread_alloc();
+    furi_thread_set_name(ble_app->thread, "BleHciWorker");
+    furi_thread_set_stack_size(ble_app->thread, 1024);
+    furi_thread_set_context(ble_app->thread, ble_app);
+    furi_thread_set_callback(ble_app->thread, ble_app_hci_thread);
+    furi_thread_start(ble_app->thread);
 
     // Initialize Ble Transport Layer
     HCI_TL_HciInitConf_t hci_tl_config = {
@@ -98,14 +102,18 @@ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
 
 void ble_app_kill_thread() {
     if(ble_app) {
-        osThreadFlagsSet(ble_app->hci_thread_id, BLE_APP_FLAG_KILL_THREAD);
+        osEventFlagsSet(ble_app->event_flags, BLE_APP_FLAG_KILL_THREAD);
     }
+    furi_thread_join(ble_app->thread);
+    furi_thread_free(ble_app->thread);
+    free(ble_app);
+    ble_app = NULL;
 }
 
-static void ble_app_hci_thread(void *arg) {
+static int32_t ble_app_hci_thread(void *arg) {
     uint32_t flags = 0;
     while(1) {
-        flags = osThreadFlagsWait(BLE_APP_FLAG_ALL, osFlagsWaitAny, osWaitForever);
+        flags = osEventFlagsWait(ble_app->event_flags, BLE_APP_FLAG_ALL, osFlagsWaitAny, osWaitForever);
         if(flags & BLE_APP_FLAG_HCI_EVENT) {
             hci_user_evt_proc();
         }
@@ -116,13 +124,16 @@ static void ble_app_hci_thread(void *arg) {
     // Free resources
     osMutexDelete(ble_app->hci_mtx);
     osSemaphoreDelete(ble_app->hci_sem);
-    free(ble_app);
-    osThreadExit();
+    osEventFlagsDelete(ble_app->event_flags);
+
+    return 0;
 }
 
 // Called by WPAN lib
 void hci_notify_asynch_evt(void* pdata) {
-    osThreadFlagsSet(ble_app->hci_thread_id, BLE_APP_FLAG_HCI_EVENT);
+    if(ble_app) {
+        osEventFlagsSet(ble_app->event_flags, BLE_APP_FLAG_HCI_EVENT);
+    }
 }
 
 void hci_cmd_resp_release(uint32_t flag) {

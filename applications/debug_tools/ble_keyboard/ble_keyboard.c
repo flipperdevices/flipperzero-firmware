@@ -68,6 +68,7 @@ int32_t ble_keyboard_app(void* p) {
         if(event_status == osOK) {
             if(event.type == EventTypeInput) {
                 if(event.input.type == InputTypeLong && event.input.key == InputKeyBack) {
+                    furi_hal_bt_hid_kb_release_all();
                     break;
                 }
 
