@@ -424,17 +424,17 @@ GapState gap_get_state() {
 }
 
 void gap_kill_thread() {
-    osMutexAcquire(gap->state_mutex, osWaitForever);
-    gap->enable_adv = false;
     if(gap) {
+        osMutexAcquire(gap->state_mutex, osWaitForever);
+        gap->enable_adv = false;
         GapCommand command = GapCommandKillThread;
         osMessageQueuePut(gap->command_queue, &command, 0, osWaitForever);
+        osMutexRelease(gap->state_mutex);
+        furi_thread_join(gap->thread);
+        furi_thread_free(gap->thread);
+        free(gap);
+        gap = NULL;
     }
-    osMutexRelease(gap->state_mutex);
-    furi_thread_join(gap->thread);
-    furi_thread_free(gap->thread);
-    free(gap);
-    gap = NULL;
 }
 
 static int32_t gap_app(void *context) {
@@ -457,7 +457,9 @@ static int32_t gap_app(void *context) {
     // Free resources
     osMutexDelete(gap->state_mutex);
     osMessageQueueDelete(gap->command_queue);
-    osTimerDelete(gap->advertise_timer);
+    osTimerStop(gap->advertise_timer);
+    while(xTimerIsTimerActive(gap->advertise_timer) == pdTRUE) osDelay(1);
+    furi_check(osTimerDelete(gap->advertise_timer) == osOK);
 
     return 0;
 }

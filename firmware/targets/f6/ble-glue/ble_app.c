@@ -103,23 +103,23 @@ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
 void ble_app_kill_thread() {
     if(ble_app) {
         osEventFlagsSet(ble_app->event_flags, BLE_APP_FLAG_KILL_THREAD);
+        furi_thread_join(ble_app->thread);
+        furi_thread_free(ble_app->thread);
+        free(ble_app);
+        ble_app = NULL;
+        memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
     }
-    furi_thread_join(ble_app->thread);
-    furi_thread_free(ble_app->thread);
-    free(ble_app);
-    ble_app = NULL;
-    memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
 }
 
 static int32_t ble_app_hci_thread(void *arg) {
     uint32_t flags = 0;
     while(1) {
         flags = osEventFlagsWait(ble_app->event_flags, BLE_APP_FLAG_ALL, osFlagsWaitAny, osWaitForever);
-        if(flags & BLE_APP_FLAG_HCI_EVENT) {
-            hci_user_evt_proc();
-        }
         if(flags & BLE_APP_FLAG_KILL_THREAD) {
             break;
+        }
+        if(flags & BLE_APP_FLAG_HCI_EVENT) {
+            hci_user_evt_proc();
         }
     }
     // Free resources
@@ -149,11 +149,13 @@ static void ble_app_hci_event_handler( void * pPayload ) {
     SVCCTL_UserEvtFlowStatus_t svctl_return_status;
     tHCI_UserEvtRxParam *pParam = (tHCI_UserEvtRxParam *)pPayload;
 
-    svctl_return_status = SVCCTL_UserEvtRx((void *)&(pParam->pckt->evtserial));
-    if (svctl_return_status != SVCCTL_UserEvtFlowDisable) {
-        pParam->status = HCI_TL_UserEventFlow_Enable;
-    } else {
-        pParam->status = HCI_TL_UserEventFlow_Disable;
+    if(ble_app) {
+        svctl_return_status = SVCCTL_UserEvtRx((void *)&(pParam->pckt->evtserial));
+        if (svctl_return_status != SVCCTL_UserEvtFlowDisable) {
+            pParam->status = HCI_TL_UserEventFlow_Enable;
+        } else {
+            pParam->status = HCI_TL_UserEventFlow_Disable;
+        }
     }
 }
 

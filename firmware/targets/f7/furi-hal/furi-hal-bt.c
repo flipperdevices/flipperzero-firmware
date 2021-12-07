@@ -154,8 +154,8 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb,
     FURI_LOG_I(TAG, "Shutdow 2nd core");
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
-    gap_kill_thread();
     ble_app_kill_thread();
+    gap_kill_thread();
     osDelay(100);
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
