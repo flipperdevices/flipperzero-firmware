@@ -138,11 +138,15 @@ void hci_notify_asynch_evt(void* pdata) {
 }
 
 void hci_cmd_resp_release(uint32_t flag) {
-    osSemaphoreRelease(ble_app->hci_sem);
+    if(ble_app) {
+       osSemaphoreRelease(ble_app->hci_sem);
+    }
 }
 
 void hci_cmd_resp_wait(uint32_t timeout) {
-    osSemaphoreAcquire(ble_app->hci_sem, osWaitForever);
+    if(ble_app) {
+        osSemaphoreAcquire(ble_app->hci_sem, osWaitForever);
+    }
 }
 
 static void ble_app_hci_event_handler( void * pPayload ) {
