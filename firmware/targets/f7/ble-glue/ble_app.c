@@ -108,6 +108,7 @@ void ble_app_kill_thread() {
     furi_thread_free(ble_app->thread);
     free(ble_app);
     ble_app = NULL;
+    memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
 }
 
 static int32_t ble_app_hci_thread(void *arg) {
