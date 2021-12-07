@@ -209,8 +209,7 @@ static void test_rpc_create_simple_message(
 
     char* str_copy = NULL;
     if(str) {
-        str_copy = furi_alloc(strlen(str) + 1);
-        strcpy(str_copy, str);
+        str_copy = strdup(str);
     }
     message->command_id = command_id;
     message->command_status = PB_CommandStatus_OK;
@@ -271,9 +270,7 @@ static void test_rpc_add_read_or_write_to_list(
         request->command_status = PB_CommandStatus_OK;
 
         if(write == WRITE_REQUEST) {
-            size_t path_size = strlen(path) + 1;
-            request->content.storage_write_request.path = furi_alloc(path_size);
-            strncpy(request->content.storage_write_request.path, path, path_size);
+            request->content.storage_write_request.path = strdup(path);
             request->which_content = PB_Main_storage_write_request_tag;
             request->content.storage_write_request.has_file = true;
             msg_file = &request->content.storage_write_request.file;
@@ -1221,10 +1218,8 @@ static void test_rpc_storage_rename_run(
     MsgList_t expected_msg_list;
     MsgList_init(expected_msg_list);
 
-    char* str_old_path = furi_alloc(strlen(old_path) + 1);
-    strcpy(str_old_path, old_path);
-    char* str_new_path = furi_alloc(strlen(new_path) + 1);
-    strcpy(str_new_path, new_path);
+    char* str_old_path = strdup(old_path);
+    char* str_new_path = strdup(new_path);
 
     request.command_id = command_id;
     request.command_status = PB_CommandStatus_OK;
@@ -1332,16 +1327,14 @@ static void test_app_create_request(
     request->has_next = false;
 
     if(app_name) {
-        char* msg_app_name = furi_alloc(strlen(app_name) + 1);
-        strcpy(msg_app_name, app_name);
+        char* msg_app_name = strdup(app_name);
         request->content.app_start_request.name = msg_app_name;
     } else {
         request->content.app_start_request.name = NULL;
     }
 
     if(app_args) {
-        char* msg_app_args = furi_alloc(strlen(app_args) + 1);
-        strcpy(msg_app_args, app_args);
+        char* msg_app_args = strdup(app_args);
         request->content.app_start_request.args = msg_app_args;
     } else {
         request->content.app_start_request.args = NULL;

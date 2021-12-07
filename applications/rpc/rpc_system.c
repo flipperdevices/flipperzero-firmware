@@ -67,10 +67,8 @@ void rpc_system_system_device_info_callback(
     furi_assert(context);
     RpcSystemSystemDeviceInfoContext* ctx = context;
 
-    char* str_key = furi_alloc(strlen(key) + 1);
-    strcpy(str_key, key);
-    char* str_value = furi_alloc(strlen(value) + 1);
-    strcpy(str_value, value);
+    char* str_key = strdup(key);
+    char* str_value = strdup(value);
 
     ctx->response->has_next = !last;
     ctx->response->content.system_device_info_response.key = str_key;
