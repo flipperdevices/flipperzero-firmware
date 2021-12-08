@@ -33,12 +33,14 @@ extern int32_t keypad_test_app(void* p);
 extern int32_t lfrfid_app(void* p);
 extern int32_t lfrfid_debug_app(void* p);
 extern int32_t nfc_app(void* p);
+extern int32_t passport_app(void* p);
 extern int32_t scened_app(void* p);
 extern int32_t storage_test_app(void* p);
 extern int32_t subghz_app(void* p);
 extern int32_t usb_mouse_app(void* p);
 extern int32_t usb_test_app(void* p);
 extern int32_t vibro_test_app(void* p);
+extern int32_t ble_keyboard_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -151,7 +153,6 @@ const FlipperApplication FLIPPER_APPS[] = {
 #ifdef APP_BAD_USB
     {.app = bad_usb_app, .name = "Bad USB", .stack_size = 2048, .icon = &A_BadUsb_14},
 #endif
-
 };
 
 const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
@@ -218,6 +219,10 @@ const size_t FLIPPER_PLUGINS_COUNT = sizeof(FLIPPER_PLUGINS) / sizeof(FlipperApp
 
 // Plugin menu
 const FlipperApplication FLIPPER_DEBUG_APPS[] = {
+#ifdef APP_BLE_KEYBOARD
+    {.app = ble_keyboard_app, .name = "BLE keyboard demo", .stack_size = 1024, .icon = NULL},
+#endif
+
 #ifdef APP_BLINK
     {.app = blink_test_app, .name = "Blink Test", .stack_size = 1024, .icon = NULL},
 #endif
@@ -301,6 +306,10 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_DESKTOP
     {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_PASSPORT
+    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT
