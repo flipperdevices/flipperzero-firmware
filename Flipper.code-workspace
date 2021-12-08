@@ -1,0 +1,23 @@
+{
+"folders": [
+	{
+		"path": "."
+	}
+],
+   "settings": {
+      "git.ignoreLimitWarning": true,
+      "workbench.colorCustomizations": {
+         "activityBar.background": "#aa8d4a",
+         "titleBar.activeBackground": "#7f5e11",
+         "titleBar.activeForeground": "#FFFFFF",
+      },
+      "python.pythonPath": "/usr/bin/python",
+      "makefile.extensionOutputFolder": "./.vscode",
+      "files.associations": {
+         "Makefile*": "makefile",
+         "furi.h": "c",
+         "freertos.h": "c",
+         "timers.h": "c"
+      }
+   }
+}

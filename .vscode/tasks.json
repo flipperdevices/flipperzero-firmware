@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "group": "build",
+      "command": "make",
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "group": "build",
+      "command": "make clean",
+      "problemMatcher": []
+    },
+    {
+      "label": "Write firmware",
+      "type": "shell",
+      "command": "make firmware_flash",
+      "problemMatcher": []
+    }
+  ]
+}

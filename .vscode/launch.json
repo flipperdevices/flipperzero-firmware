@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Upload & Run Flipper",
+      "cwd": "${workspaceRoot}",
+      "executable": "./firmware/.obj/f7/firmware.elf",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "stlink",
+      "preLaunchTask": "Build",
+      "svdFile": "./debug/STM32WB55_CM4.svd",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "./debug/stm32wbx.cfg"
+      ],
+      "showDevDebugOutput": false,
+      "rtos": "FreeRTOS",
+    },
+    {
+      "name": "Attach Flipper",
+      "cwd": "${workspaceRoot}",
+      "executable": "./firmware/.obj/f7/firmware.elf",
+      "request": "attach",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "device": "stlink",
+      "svdFile": "./debug/STM32WB55_CM4.svd",
+      "configFiles": [
+        "interface/stlink.cfg",
+        "./debug/stm32wbx.cfg"
+      ],
+      "showDevDebugOutput": false,
+      "rtos": "FreeRTOS",
+    }
+  ]
+}
+
+
+
+
+
