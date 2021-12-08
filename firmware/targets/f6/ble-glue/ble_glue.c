@@ -220,7 +220,7 @@ static void ble_glue_clear_shared_memory() {
     memset(ble_glue_ble_spare_event_buff, 0, sizeof(ble_glue_ble_spare_event_buff));
 }
 
-void ble_glue_thread_terminate() {
+void ble_glue_thread_stop() {
     if(ble_glue) {
         osEventFlagsSet(ble_glue->event_flags, BLE_GLUE_FLAG_KILL_THREAD);
         furi_thread_join(ble_glue->thread);

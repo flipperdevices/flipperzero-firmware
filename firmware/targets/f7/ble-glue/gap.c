@@ -423,7 +423,7 @@ GapState gap_get_state() {
     return state;
 }
 
-void gap_thread_terminate() {
+void gap_thread_stop() {
     if(gap) {
         osMutexAcquire(gap->state_mutex, osWaitForever);
         gap->enable_adv = false;
