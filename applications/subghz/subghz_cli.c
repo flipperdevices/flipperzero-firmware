@@ -405,7 +405,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_t sysmsg;
     string_init(sysmsg);
     bool exit = false;
-    SubghzChatQueue chat_event;
+    SubghzChatEvent chat_event;
 
     NotificationApp* notification = furi_record_open("notification");
 
@@ -421,7 +421,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
             if(chat_event.c == CliSymbolAsciiETX) {
                 printf("\r\n");
                 chat_event.event = SubghzChatEventUserExit;
-                subghz_chat_worker_set_event_chat(subghz_chat, &chat_event);
+                subghz_chat_worker_put_event_chat(subghz_chat, &chat_event);
                 break;
             } else if(
                 (chat_event.c == CliSymbolAsciiBackspace) || (chat_event.c == CliSymbolAsciiDel)) {
@@ -516,7 +516,6 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
         }
     }
 
-    printf("\r\nExit chat\r\n");
     string_clear(input);
     string_clear(name);
     string_clear(output);
@@ -528,6 +527,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
         subghz_chat_worker_stop(subghz_chat);
         subghz_chat_worker_free(subghz_chat);
     }
+    printf("\r\nExit chat\r\n");
 }
 
 static void subghz_cli_command(Cli* cli, string_t args, void* context) {
