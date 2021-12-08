@@ -63,7 +63,7 @@ void gap_stop_advertising();
 
 GapState gap_get_state();
 
-void gap_kill_thread();
+void gap_thread_terminate();
 
 #ifdef __cplusplus
 }

@@ -100,11 +100,12 @@ void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size) {
     *size = sizeof(ble_app_nvm);
 }
 
-void ble_app_kill_thread() {
+void ble_app_thread_terminate() {
     if(ble_app) {
         osEventFlagsSet(ble_app->event_flags, BLE_APP_FLAG_KILL_THREAD);
         furi_thread_join(ble_app->thread);
         furi_thread_free(ble_app->thread);
+        // Wait to make sure that EventFlags delivers pending events before memory free
         osDelay(50);
         // Free resources
         osMutexDelete(ble_app->hci_mtx);

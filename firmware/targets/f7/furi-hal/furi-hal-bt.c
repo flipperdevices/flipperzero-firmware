@@ -101,7 +101,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
         // Start 2nd core
         ret = furi_hal_bt_start_core2();
         if(!ret) {
-            ble_app_kill_thread();
+            ble_app_thread_terminate();
             FURI_LOG_E(TAG, "Failed to start 2nd core");
             break;
         }
@@ -130,7 +130,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
         }
         ret = gap_init(config, event_cb, context);
         if(!ret) {
-            gap_kill_thread();
+            gap_thread_terminate();
             FURI_LOG_E(TAG, "Failed to init GAP");
             break;
         }
@@ -154,11 +154,11 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb,
     FURI_LOG_I(TAG, "Shutdow 2nd core");
     LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
-    ble_app_kill_thread();
-    gap_kill_thread();
+    ble_app_thread_terminate();
+    gap_thread_terminate();
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
-    ble_glue_kill_thread();
+    ble_glue_thread_terminate();
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
     ret = furi_hal_bt_start_app(profile, event_cb, context);

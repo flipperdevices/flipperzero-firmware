@@ -423,7 +423,7 @@ GapState gap_get_state() {
     return state;
 }
 
-void gap_kill_thread() {
+void gap_thread_terminate() {
     if(gap) {
         osMutexAcquire(gap->state_mutex, osWaitForever);
         gap->enable_adv = false;
@@ -432,7 +432,6 @@ void gap_kill_thread() {
         osMutexRelease(gap->state_mutex);
         furi_thread_join(gap->thread);
         furi_thread_free(gap->thread);
-        osDelay(50);
         // Free resources
         osMutexDelete(gap->state_mutex);
         osMessageQueueDelete(gap->command_queue);

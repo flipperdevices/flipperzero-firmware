@@ -9,7 +9,7 @@ extern "C" {
 
 bool ble_app_init();
 void ble_app_get_key_storage_buff(uint8_t** addr, uint16_t* size);
-void ble_app_kill_thread();
+void ble_app_thread_terminate();
 
 #ifdef __cplusplus
 }

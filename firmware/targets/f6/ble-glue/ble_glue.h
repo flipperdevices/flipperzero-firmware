@@ -38,7 +38,7 @@ bool ble_glue_is_radio_stack_ready();
  */
 void ble_glue_set_key_storage_changed_callback(BleGlueKeyStorageChangedCallback callback, void* context);
 
-void ble_glue_kill_thread();
+void ble_glue_thread_terminate();
 
 #ifdef __cplusplus
 }
