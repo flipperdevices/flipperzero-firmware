@@ -84,6 +84,15 @@ flash: $(OBJ_DIR)/flash
 
 upload: $(OBJ_DIR)/upload
 
+reboot_to_dfu:
+	stty -f /dev/cu.usbmodemflip_* 115200
+	echo -en "dfu\r\n" > /dev/cu.usbmodemflip_*
+
+reboot_to_app:
+	dfu-util -d 0483:df11 -a 0 -s :leave &> /dev/null ; exit 0
+	sleep 0.5
+	dfu-util -d 0483:df11 -s $(FLASH_ADDRESS) -a 0 -R &> /dev/null ; exit 0
+
 debug: flash
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
