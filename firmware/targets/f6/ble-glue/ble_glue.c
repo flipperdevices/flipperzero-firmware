@@ -223,11 +223,17 @@ static void ble_glue_clear_shared_memory() {
 void ble_glue_kill_thread() {
     if(ble_glue) {
         osEventFlagsSet(ble_glue->event_flags, BLE_GLUE_FLAG_KILL_THREAD);
+        furi_thread_join(ble_glue->thread);
+        furi_thread_free(ble_glue->thread);
+        osDelay(50);
+        // Free resources
+        osMutexDelete(ble_glue->shci_mtx);
+        osSemaphoreDelete(ble_glue->shci_sem);
+        osEventFlagsDelete(ble_glue->event_flags);
+        ble_glue_clear_shared_memory();
+        free(ble_glue);
+        ble_glue = NULL;
     }
-    furi_thread_join(ble_glue->thread);
-    furi_thread_free(ble_glue->thread);
-    free(ble_glue);
-    ble_glue = NULL;
 }
 
 // Wrap functions
@@ -242,11 +248,6 @@ static int32_t ble_glue_shci_thread(void* context) {
             break;
         }
     }
-    // Free resources
-    osMutexDelete(ble_glue->shci_mtx);
-    osSemaphoreDelete(ble_glue->shci_sem);
-    osEventFlagsDelete(ble_glue->event_flags);
-    ble_glue_clear_shared_memory();
 
     return 0;
 }
@@ -260,10 +261,14 @@ void shci_notify_asynch_evt(void* pdata) {
 
 void shci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
-    osSemaphoreRelease(ble_glue->shci_sem);
+    if(ble_glue) {
+        osSemaphoreRelease(ble_glue->shci_sem);
+    }
 }
 
 void shci_cmd_resp_wait(uint32_t timeout) {
     UNUSED(timeout);
-    osSemaphoreAcquire(ble_glue->shci_sem, osWaitForever);
+    if(ble_glue) {
+        osSemaphoreAcquire(ble_glue->shci_sem, osWaitForever);
+    }
 }

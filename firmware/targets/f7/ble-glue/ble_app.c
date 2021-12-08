@@ -105,6 +105,11 @@ void ble_app_kill_thread() {
         osEventFlagsSet(ble_app->event_flags, BLE_APP_FLAG_KILL_THREAD);
         furi_thread_join(ble_app->thread);
         furi_thread_free(ble_app->thread);
+        osDelay(50);
+        // Free resources
+        osMutexDelete(ble_app->hci_mtx);
+        osSemaphoreDelete(ble_app->hci_sem);
+        osEventFlagsDelete(ble_app->event_flags);
         free(ble_app);
         ble_app = NULL;
         memset(&ble_app_cmd_buffer, 0, sizeof(ble_app_cmd_buffer));
@@ -122,10 +127,6 @@ static int32_t ble_app_hci_thread(void *arg) {
             hci_user_evt_proc();
         }
     }
-    // Free resources
-    osMutexDelete(ble_app->hci_mtx);
-    osSemaphoreDelete(ble_app->hci_sem);
-    osEventFlagsDelete(ble_app->event_flags);
 
     return 0;
 }

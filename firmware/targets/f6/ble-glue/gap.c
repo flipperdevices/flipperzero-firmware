@@ -432,6 +432,13 @@ void gap_kill_thread() {
         osMutexRelease(gap->state_mutex);
         furi_thread_join(gap->thread);
         furi_thread_free(gap->thread);
+        osDelay(50);
+        // Free resources
+        osMutexDelete(gap->state_mutex);
+        osMessageQueueDelete(gap->command_queue);
+        osTimerStop(gap->advertise_timer);
+        while(xTimerIsTimerActive(gap->advertise_timer) == pdTRUE) osDelay(1);
+        furi_check(osTimerDelete(gap->advertise_timer) == osOK);
         free(gap);
         gap = NULL;
     }
@@ -454,12 +461,6 @@ static int32_t gap_app(void *context) {
         }
         osMutexRelease(gap->state_mutex);
     }
-    // Free resources
-    osMutexDelete(gap->state_mutex);
-    osMessageQueueDelete(gap->command_queue);
-    osTimerStop(gap->advertise_timer);
-    while(xTimerIsTimerActive(gap->advertise_timer) == pdTRUE) osDelay(1);
-    furi_check(osTimerDelete(gap->advertise_timer) == osOK);
 
     return 0;
 }

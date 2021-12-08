@@ -156,7 +156,6 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, BleEventCallback event_cb,
     FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
     ble_app_kill_thread();
     gap_kill_thread();
-    osDelay(100);
     FURI_LOG_I(TAG, "Reset SHCI");
     SHCI_C2_Reinit();
     ble_glue_kill_thread();
