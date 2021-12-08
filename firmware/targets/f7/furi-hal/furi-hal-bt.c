@@ -55,8 +55,10 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
 FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
-    furi_hal_bt_core2_mtx = osMutexNew(NULL);
-    furi_assert(furi_hal_bt_core2_mtx);
+    if(!furi_hal_bt_core2_mtx) {
+        furi_hal_bt_core2_mtx = osMutexNew(NULL);
+        furi_assert(furi_hal_bt_core2_mtx);
+    }
 
     // Explicitly tell that we are in charge of CLK48 domain
     if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
