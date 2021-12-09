@@ -1,6 +1,7 @@
 #include "bt_hid_keyboard.h"
 #include <furi.h>
 #include <furi-hal-bt-hid.h>
+#include <furi-hal-usb-hid.h>
 #include <gui/elements.h>
 
 struct BtHidKeyboard {
@@ -96,19 +97,19 @@ static void bt_hid_keyboard_process_press(BtHidKeyboard* bt_hid_keyboard, InputE
         bt_hid_keyboard->view, (BtHidKeyboardModel * model) {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
-                // furi_hal_bt_hid_kb_press();
+                furi_hal_bt_hid_kb_press(KEY_UP_ARROW);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = true;
-                // furi_hal_bt_hid_kb_press();
+                furi_hal_bt_hid_kb_press(KEY_DOWN_ARROW);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = true;
-                // furi_hal_bt_hid_kb_press();
+                furi_hal_bt_hid_kb_press(KEY_LEFT_ARROW);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = true;
-                // furi_hal_bt_hid_kb_press();
+                furi_hal_bt_hid_kb_press(KEY_RIGHT_ARROW);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = true;
-                // furi_hal_bt_hid_kb_press();
+                furi_hal_bt_hid_kb_press(KEY_SPACE);
             }
             return true;
         });
@@ -119,19 +120,19 @@ static void bt_hid_keyboard_process_release(BtHidKeyboard* bt_hid_keyboard, Inpu
         bt_hid_keyboard->view, (BtHidKeyboardModel * model) {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
-                // furi_hal_bt_hid_kb_release();
+                furi_hal_bt_hid_kb_release(KEY_UP_ARROW);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = false;
-                // furi_hal_bt_hid_kb_release();
+                furi_hal_bt_hid_kb_release(KEY_DOWN_ARROW);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = false;
-                // furi_hal_bt_hid_kb_release();
+                furi_hal_bt_hid_kb_release(KEY_LEFT_ARROW);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = false;
-                // furi_hal_bt_hid_kb_release();
+                furi_hal_bt_hid_kb_release(KEY_RIGHT_ARROW);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = false;
-                // furi_hal_bt_hid_kb_release();
+                furi_hal_bt_hid_kb_release(KEY_SPACE);
             }
             return true;
         });
@@ -175,4 +176,13 @@ void bt_hid_keyboard_free(BtHidKeyboard* bt_hid_keyboard) {
 View* bt_hid_keyboard_get_view(BtHidKeyboard* bt_hid_keyboard) {
     furi_assert(bt_hid_keyboard);
     return bt_hid_keyboard->view;
+}
+
+void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool connected) {
+    furi_assert(bt_hid_keyboard);
+    with_view_model(
+        bt_hid_keyboard->view, (BtHidKeyboardModel * model) {
+            model->connected = connected;
+            return true;
+        });
 }

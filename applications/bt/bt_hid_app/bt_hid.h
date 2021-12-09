@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <bt/bt_service/bt.h>
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
@@ -9,6 +10,7 @@
 #include "views/bt_hid_keyboard.h"
 
 typedef struct {
+    Bt* bt;
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;

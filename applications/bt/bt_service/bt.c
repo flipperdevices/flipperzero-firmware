@@ -288,6 +288,9 @@ int32_t bt_srv() {
         if(message.type == BtMessageTypeUpdateStatusbar) {
             // Update statusbar
             bt_statusbar_update(bt);
+            if(bt->status_changed_cb) {
+                bt->status_changed_cb(bt->status, bt->status_changed_ctx);
+            }
         } else if(message.type == BtMessageTypeUpdateBatteryLevel) {
             // Update battery level
             furi_hal_bt_update_battery_level(message.data.battery_level);

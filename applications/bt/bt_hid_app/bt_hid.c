@@ -1,6 +1,8 @@
 #include "bt_hid.h"
 #include <furi-hal-bt.h>
 
+#define TAG "BtHidApp"
+
 enum BtDebugSubmenuIndex {
     BtHidSubmenuIndexKeyboard,
     BtHidSubmenuIndexMediaController,
@@ -22,6 +24,12 @@ uint32_t bt_hid_exit(void* context) {
 
 uint32_t bt_hid_start_view(void* context) {
     return BtHidViewSubmenu;
+}
+
+void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
+    furi_assert(context);
+    BtHid* bt_hid = context;
+    bt_hid_keyboard_set_connected_status(bt_hid->bt_hid_keyboard, status == BtStatusConnected);
 }
 
 BtHid* bt_hid_app_alloc() {
@@ -86,9 +94,33 @@ void bt_hid_app_free(BtHid* app) {
 }
 
 int32_t bt_hid_app(void* p) {
+    // Switch profile ti Hid
     BtHid* app = bt_hid_app_alloc();
+    Bt* bt = furi_record_open("bt");
+    bt_set_status_changed_callback(bt, bt_hid_connection_status_changed_callback, app);
+    if(!bt_set_profile(bt, BtProfileHidKeyboard)) {
+        FURI_LOG_E(TAG, "Failed to switch profile");
+        furi_record_close("bt");
+        return -1;
+    }
+    // Save bt status and start advertising
+    bool bt_turned_on = furi_hal_bt_is_active();
+    if(!bt_turned_on) {
+        furi_hal_bt_start_advertising();
+    }
+
+    app->bt = bt;
 
     view_dispatcher_run(app->view_dispatcher);
+
+    // Stop advertising if bt was off
+    if(bt_turned_on) {
+        furi_hal_bt_stop_advertising();
+    }
+    // Change back profile to Serial
+    bt_set_profile(bt, BtProfileSerial);
+    bt_set_status_changed_callback(app->bt, NULL, NULL);
+    furi_record_close("bt");
 
     bt_hid_app_free(app);
 

@@ -18,12 +18,6 @@
 #define BT_API_UNLOCK_EVENT (1UL << 0)
 
 typedef enum {
-    BtStatusOff,
-    BtStatusAdvertising,
-    BtStatusConnected,
-} BtStatus;
-
-typedef enum {
     BtMessageTypeUpdateStatusbar,
     BtMessageTypeUpdateBatteryLevel,
     BtMessageTypePinCodeShow,
@@ -60,4 +54,6 @@ struct Bt {
     RpcSession* rpc_session;
     osEventFlagsId_t rpc_event;
     osEventFlagsId_t api_event;
+    BtStatusChangedCallback status_changed_cb;
+    void* status_changed_ctx;
 };
