@@ -101,10 +101,8 @@ static void input_cli_dump_events_callback(const void* value, void* ctx) {
 
 static void input_cli_dump(Cli* cli, string_t args, void* context) {
     osMessageQueueId_t input_queue = osMessageQueueNew(8, sizeof(InputEvent), NULL);
-    FuriPubSub* input_events = furi_record_open("input_events");
-    furi_check(input_events);
     FuriPubSubSubscription* input_subscription =
-        furi_pubsub_subscribe(input_events, input_cli_dump_events_callback, input_queue);
+        furi_pubsub_subscribe(input->event_pubsub, input_cli_dump_events_callback, input_queue);
 
     bool stop = false;
     InputEvent input_event;
@@ -121,8 +119,7 @@ static void input_cli_dump(Cli* cli, string_t args, void* context) {
         }
     }
 
-    furi_pubsub_unsubscribe(input_events, input_subscription);
-    furi_record_close("input_events");
+    furi_pubsub_unsubscribe(input->event_pubsub, input_subscription);
     osMessageQueueDelete(input_queue);
 }
 
@@ -160,7 +157,7 @@ int32_t input_srv() {
     input->cli = furi_record_open("cli");
     if(input->cli) {
         cli_add_command(
-            input->cli, "input_send", CliCommandFlagParallelSafe, input_cli_send, input);
+            input->cli, "input_send", CliCommandFlagParallelSafe, input_cli_send, NULL);
         cli_add_command(
             input->cli, "input_dump", CliCommandFlagParallelSafe, input_cli_dump, NULL);
     }
