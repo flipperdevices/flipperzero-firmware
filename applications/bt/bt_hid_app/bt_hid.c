@@ -5,7 +5,7 @@
 
 enum BtDebugSubmenuIndex {
     BtHidSubmenuIndexKeyboard,
-    BtHidSubmenuIndexMediaController,
+    BtHidSubmenuIndexMedia,
 };
 
 void bt_hid_submenu_callback(void* context, uint32_t index) {
@@ -13,8 +13,8 @@ void bt_hid_submenu_callback(void* context, uint32_t index) {
     BtHid* app = context;
     if(index == BtHidSubmenuIndexKeyboard) {
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewKeyboard);
-    } else if(index == BtHidSubmenuIndexMediaController) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewMediaController);
+    } else if(index == BtHidSubmenuIndexMedia) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewMedia);
     }
 }
 
@@ -48,11 +48,7 @@ BtHid* bt_hid_app_alloc() {
     submenu_add_item(
         app->submenu, "Clicker", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
     submenu_add_item(
-        app->submenu,
-        "Media controller",
-        BtHidSubmenuIndexMediaController,
-        bt_hid_submenu_callback,
-        app);
+        app->submenu, "Media controller", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->submenu));
@@ -60,12 +56,10 @@ BtHid* bt_hid_app_alloc() {
     view_set_previous_callback(bt_hid_keyboard_get_view(app->bt_hid_keyboard), bt_hid_start_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewKeyboard, bt_hid_keyboard_get_view(app->bt_hid_keyboard));
-    // app->bt_packet_test = bt_packet_test_alloc();
-    // view_set_previous_callback(bt_packet_test_get_view(app->bt_packet_test), bt_hid_start_view);
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher,
-    //     BtHidViewPacketTest,
-    //     bt_packet_test_get_view(app->bt_packet_test));
+    app->bt_hid_media = bt_hid_media_alloc();
+    view_set_previous_callback(bt_hid_media_get_view(app->bt_hid_media), bt_hid_start_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtHidViewMedia, bt_hid_media_get_view(app->bt_hid_media));
 
     // Switch to menu
     view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewSubmenu);
@@ -81,8 +75,8 @@ void bt_hid_app_free(BtHid* app) {
     submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewKeyboard);
     bt_hid_keyboard_free(app->bt_hid_keyboard);
-    // view_dispatcher_remove_view(app->view_dispatcher, BtHidViewPacketTest);
-    // bt_packet_test_free(app->bt_packet_test);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewMedia);
+    bt_hid_media_get_view(app->bt_hid_media);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close gui record
