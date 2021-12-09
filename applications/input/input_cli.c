@@ -1,5 +1,5 @@
 #include <cli/cli.h>
-#include <input/input.h>
+#include "input.h"
 
 static void input_dump_events_callback(const void* value, void* ctx) {
     furi_assert(value);
@@ -35,7 +35,7 @@ static void input_dump(Cli* cli, string_t args, void* context) {
     osMessageQueueDelete(input_queue);
 }
 
-void input_dump_cli_init() {
+void input_cli_init() {
     Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "input_dump", CliCommandFlagParallelSafe, input_dump, NULL);
     furi_record_close("cli");
