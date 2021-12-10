@@ -17,8 +17,8 @@ void KeyEmulator::start(iButtonKey* key) {
     anything_emulated = false;
     stop();
 
-    // release pull pin, to prevent low-pass filtering by the RFID part of the schematic
-    furi_hal_rfid_pin_pull_release();
+    // pulldown pull pin, to prevent low-pass filtering by the RFID part of the schematic
+    furi_hal_rfid_pin_pull_pulldown();
 
     switch(key->get_key_type()) {
     case iButtonKeyType::KeyDallas:

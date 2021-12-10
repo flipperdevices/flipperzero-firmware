@@ -33,6 +33,10 @@ void furi_hal_rfid_pins_read();
  */
 void furi_hal_rfid_pin_pull_release();
 
+/** Pulldown rfid pull pin
+ */
+void furi_hal_rfid_pin_pull_pulldown();
+
 /** Config rfid timer to read state
  *
  * @param      freq        timer frequency
