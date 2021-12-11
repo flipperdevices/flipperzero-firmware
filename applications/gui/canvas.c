@@ -304,6 +304,33 @@ void canvas_draw_disc(Canvas* canvas, uint8_t x, uint8_t y, uint8_t radius) {
     u8g2_DrawDisc(&canvas->fb, x, y, radius, U8G2_DRAW_ALL);
 }
 
+void canvas_draw_arrow(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t side,
+    uint8_t height,
+    CanvasDirection dir) {
+    furi_assert(canvas);
+    if(dir == CanvasDirectionDownToTop) {
+        canvas_draw_line(canvas, x - side / 2, y, x + side / 2, y);
+        canvas_draw_line(canvas, x - side / 2, y - 1, x, y - height);
+        canvas_draw_line(canvas, x, y - height, x + side / 2, y - 1);
+    } else if(dir == CanvasDirectionTopToDown) {
+        canvas_draw_line(canvas, x - side / 2, y, x + side / 2, y);
+        canvas_draw_line(canvas, x - side / 2, y + 1, x, y + height);
+        canvas_draw_line(canvas, x, y + height, x + side / 2, y + 1);
+    } else if(dir == CanvasDirectionRightToLeft) {
+        canvas_draw_line(canvas, x, y - side / 2, x, y + side / 2);
+        canvas_draw_line(canvas, x - 1, y - side / 2, x - height, y);
+        canvas_draw_line(canvas, x - height, y, x - 1, y + side / 2);
+    } else if(dir == CanvasDirectionLeftToRight) {
+        canvas_draw_line(canvas, x, y - side / 2, x, y + side / 2);
+        canvas_draw_line(canvas, x + 1, y - side / 2, x + height, y);
+        canvas_draw_line(canvas, x + height, y, x + 1, y + side / 2);
+    }
+}
+
 void canvas_draw_xbm(
     Canvas* canvas,
     uint8_t x,

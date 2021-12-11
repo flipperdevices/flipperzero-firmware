@@ -273,6 +273,23 @@ void canvas_draw_circle(Canvas* canvas, uint8_t x, uint8_t y, uint8_t r);
  */
 void canvas_draw_disc(Canvas* canvas, uint8_t x, uint8_t y, uint8_t r);
 
+/** Draw arrow with central point at x, y, side length len and direction dir
+ *
+ * @param       canvas  Canvas instance
+ * @param       x       x coordinate of central point
+ * @param       y       y coordinate of central point
+ * @param       side    length of arrow side
+ * @param       height  length of arrow height
+ * @param       dir     CanvasDirection arrow orientaion
+ */
+void canvas_draw_arrow(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t side,
+    uint8_t height,
+    CanvasDirection dir);
+
 /** Draw glyph
  *
  * @param      canvas  Canvas instance
