@@ -4,15 +4,15 @@
 #define TAG "BtHidApp"
 
 enum BtDebugSubmenuIndex {
-    BtHidSubmenuIndexKeyboard,
+    BtHidSubmenuIndexKeynote,
     BtHidSubmenuIndexMedia,
 };
 
 void bt_hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     BtHid* app = context;
-    if(index == BtHidSubmenuIndexKeyboard) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewKeyboard);
+    if(index == BtHidSubmenuIndexKeynote) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewKeynote);
     } else if(index == BtHidSubmenuIndexMedia) {
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewMedia);
     }
@@ -29,7 +29,7 @@ uint32_t bt_hid_start_view(void* context) {
 void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     furi_assert(context);
     BtHid* bt_hid = context;
-    bt_hid_keyboard_set_connected_status(bt_hid->bt_hid_keyboard, status == BtStatusConnected);
+    bt_hid_keynote_set_connected_status(bt_hid->bt_hid_keynote, status == BtStatusConnected);
 }
 
 BtHid* bt_hid_app_alloc() {
@@ -46,16 +46,16 @@ BtHid* bt_hid_app_alloc() {
     // Views
     app->submenu = submenu_alloc();
     submenu_add_item(
-        app->submenu, "Clicker", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
+        app->submenu, "Keynote", BtHidSubmenuIndexKeynote, bt_hid_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "Media controller", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
+        app->submenu, "Media player", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->submenu));
-    app->bt_hid_keyboard = bt_hid_keyboard_alloc();
-    view_set_previous_callback(bt_hid_keyboard_get_view(app->bt_hid_keyboard), bt_hid_start_view);
+    app->bt_hid_keynote = bt_hid_keynote_alloc();
+    view_set_previous_callback(bt_hid_keynote_get_view(app->bt_hid_keynote), bt_hid_start_view);
     view_dispatcher_add_view(
-        app->view_dispatcher, BtHidViewKeyboard, bt_hid_keyboard_get_view(app->bt_hid_keyboard));
+        app->view_dispatcher, BtHidViewKeynote, bt_hid_keynote_get_view(app->bt_hid_keynote));
     app->bt_hid_media = bt_hid_media_alloc();
     view_set_previous_callback(bt_hid_media_get_view(app->bt_hid_media), bt_hid_start_view);
     view_dispatcher_add_view(
@@ -73,8 +73,8 @@ void bt_hid_app_free(BtHid* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewSubmenu);
     submenu_free(app->submenu);
-    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewKeyboard);
-    bt_hid_keyboard_free(app->bt_hid_keyboard);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewKeynote);
+    bt_hid_keynote_free(app->bt_hid_keynote);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewMedia);
     bt_hid_media_get_view(app->bt_hid_media);
     view_dispatcher_free(app->view_dispatcher);
@@ -88,7 +88,7 @@ void bt_hid_app_free(BtHid* app) {
 }
 
 int32_t bt_hid_app(void* p) {
-    // Switch profile ti Hid
+    // Switch profile to Hid
     BtHid* app = bt_hid_app_alloc();
     Bt* bt = furi_record_open("bt");
     bt_set_status_changed_callback(bt, bt_hid_connection_status_changed_callback, app);

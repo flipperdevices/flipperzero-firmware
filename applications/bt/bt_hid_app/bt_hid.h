@@ -7,7 +7,7 @@
 #include <gui/view_dispatcher.h>
 
 #include <gui/modules/submenu.h>
-#include "views/bt_hid_keyboard.h"
+#include "views/bt_hid_keynote.h"
 #include "views/bt_hid_media.h"
 
 typedef struct {
@@ -15,12 +15,12 @@ typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    BtHidKeyboard* bt_hid_keyboard;
+    BtHidKeynote* bt_hid_keynote;
     BtHidMedia* bt_hid_media;
 } BtHid;
 
 typedef enum {
     BtHidViewSubmenu,
-    BtHidViewKeyboard,
+    BtHidViewKeynote,
     BtHidViewMedia,
 } BtHidView;

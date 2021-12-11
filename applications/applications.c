@@ -206,7 +206,7 @@ const size_t FLIPPER_ON_SYSTEM_START_COUNT =
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {
 #ifdef APP_BLE_HID
-    {.app = bt_hid_app, .name = "BleKeyboard", .stack_size = 1024, .icon = NULL},
+    {.app = bt_hid_app, .name = "Bluetooth remote", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_MUSIC_PLAYER

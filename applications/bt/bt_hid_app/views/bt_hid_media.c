@@ -23,7 +23,8 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
 
     // Header
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "Comming soon!");
+    canvas_draw_circle(canvas, 96, 32, 31);
+    canvas_draw_circle(canvas, 96, 32, 12);
 }
 
 static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* event) {
