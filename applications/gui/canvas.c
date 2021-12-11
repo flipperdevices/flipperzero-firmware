@@ -47,7 +47,7 @@ void canvas_reset(Canvas* canvas) {
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    canvas_set_font_direction(canvas, CanvasFontDirectionLeftToRight);
+    canvas_set_font_direction(canvas, CanvasDirectionLeftToRight);
 }
 
 void canvas_commit(Canvas* canvas) {
@@ -115,7 +115,7 @@ void canvas_set_color(Canvas* canvas, Color color) {
     u8g2_SetDrawColor(&canvas->fb, color);
 }
 
-void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir) {
+void canvas_set_font_direction(Canvas* canvas, CanvasDirection dir) {
     furi_assert(canvas);
     u8g2_SetFontDirection(&canvas->fb, dir);
 }

@@ -47,11 +47,11 @@ typedef enum {
 
 /** Font Direction */
 typedef enum {
-    CanvasFontDirectionLeftToRight,
-    CanvasFontDirectionTopToDown,
-    CanvasFontDirectionRightToLeft,
-    CanvasFontDirectionDownToTop,
-} CanvasFontDirection;
+    CanvasDirectionLeftToRight,
+    CanvasDirectionTopToDown,
+    CanvasDirectionRightToLeft,
+    CanvasDirectionDownToTop,
+} CanvasDirection;
 
 /** Font parameters */
 typedef struct {
@@ -116,7 +116,7 @@ void canvas_set_color(Canvas* canvas, Color color);
  * @param      canvas  Canvas instance
  * @param      dir     Direction font
  */
-void canvas_set_font_direction(Canvas* canvas, CanvasFontDirection dir);
+void canvas_set_font_direction(Canvas* canvas, CanvasDirection dir);
 
 /** Invert drawing color
  *
