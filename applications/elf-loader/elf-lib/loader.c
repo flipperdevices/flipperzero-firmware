@@ -36,7 +36,7 @@ typedef struct {
 
     void* stack;
 
-    const ELFEnv_t* env;
+    ELFResolver resolver;
 } ELFExec_t;
 
 #endif
@@ -69,7 +69,7 @@ static int read_section_name(ELFExec_t* e, off_t off, char* buf, size_t max) {
     return ret;
 }
 
-static int readSymbolName(ELFExec_t* e, off_t off, char* buf, size_t max) {
+static int read_symbol_name(ELFExec_t* e, off_t off, char* buf, size_t max) {
     int ret = -1;
     off_t offset = e->symbol_table_strings + off;
     off_t old = storage_file_tell(e->fd);
@@ -138,7 +138,7 @@ static int read_section_header(ELFExec_t* e, int n, Elf32_Shdr* h) {
     return 0;
 }
 
-static int readSection(ELFExec_t* e, int n, Elf32_Shdr* h, char* name, size_t nlen) {
+static int read_section(ELFExec_t* e, int n, Elf32_Shdr* h, char* name, size_t nlen) {
     if(read_section_header(e, n, h) != 0) return -1;
     if(h->sh_name) return read_section_name(e, h->sh_name, name, nlen);
     return 0;
@@ -151,10 +151,10 @@ static int read_symbol(ELFExec_t* e, int n, Elf32_Sym* sym, char* name, size_t n
     if(storage_file_seek(e->fd, pos, true))
         if(storage_file_read(e->fd, sym, sizeof(Elf32_Sym)) == sizeof(Elf32_Sym)) {
             if(sym->st_name)
-                ret = readSymbolName(e, sym->st_name, name, nlen);
+                ret = read_symbol_name(e, sym->st_name, name, nlen);
             else {
                 Elf32_Shdr shdr;
-                ret = readSection(e, sym->st_shndx, &shdr, name, nlen);
+                ret = read_section(e, sym->st_shndx, &shdr, name, nlen);
             }
         }
     (void)storage_file_seek(e->fd, old, true);
@@ -237,10 +237,10 @@ static ELFSection_t* section_of(ELFExec_t* e, int index) {
 
 static Elf32_Addr address_of(ELFExec_t* e, Elf32_Sym* sym, const char* sName) {
     if(sym->st_shndx == SHN_UNDEF) {
-        int i;
-        for(i = 0; i < e->env->exported_size; i++)
-            if(strcmp(e->env->exported[i].name, sName) == 0)
-                return (Elf32_Addr)(e->env->exported[i].ptr);
+        Elf32_Addr addr = 0;
+        if(e->resolver(sName, &addr)) {
+            return addr;
+        }
     } else {
         ELFSection_t* symSec = section_of(e, sym->st_shndx);
         if(symSec) return ((Elf32_Addr)symSec->data) + sym->st_value;
@@ -400,7 +400,7 @@ static int relocate_section(ELFExec_t* e, ELFSection_t* s, const char* name) {
             return -1;
         }
     } else
-        FURI_LOG_I(TAG, "No relocation index"); /* Not an error */
+        FURI_LOG_D(TAG, "No relocation index"); /* Not an error */
     return 0;
 }
 
@@ -454,7 +454,7 @@ static int loader_jump_to(ELFExec_t* e) {
 #endif
 }
 
-int loader_exec_elf(const char* path, const ELFEnv_t* env, Storage* storage) {
+int loader_exec_elf(const char* path, ELFResolver resolver, Storage* storage) {
     ELFExec_t exec;
     File* file = storage_file_alloc(storage);
     int result = -1;
@@ -472,7 +472,7 @@ int loader_exec_elf(const char* path, const ELFEnv_t* env, Storage* storage) {
             break;
         }
 
-        exec.env = env;
+        exec.resolver = resolver;
         if(IS_FLAGS_SET(load_symbols(&exec), FoundValid)) {
             int ret = -1;
             if(relocate_sections(&exec) == 0) ret = loader_jump_to(&exec);

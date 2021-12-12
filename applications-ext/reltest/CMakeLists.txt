@@ -41,6 +41,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
 	-mword-relocations
     -mlong-calls
     -fno-common
+    -nostdlib
 )
 
 target_link_options(${PROJECT_NAME}.elf PRIVATE 
@@ -51,6 +52,7 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mthumb
     -mlong-calls
     -fno-common
+    -nostdlib
 	-T "${CMAKE_SOURCE_DIR}/../application-ext.ld"
 )
 

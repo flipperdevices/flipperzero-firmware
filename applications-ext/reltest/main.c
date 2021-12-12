@@ -1,6 +1,6 @@
-#include "../../applications/elf-loader/elf-loader-sys-api.h"
+int printf(const char* __restrict, ...);
 
 int main(void) {
-    syscalls.printf(">> Hello from external ELF application <<\r\n");
+    printf("Hello, out is %d\r\n", 123);
     return 0;
 }

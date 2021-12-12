@@ -2,6 +2,7 @@
 #define LOADER_H_
 
 #include <storage/storage.h>
+#include "../elf-addr-resolver.h"
 
 #ifdef __cplusplus__
 extern "C" {
@@ -40,12 +41,12 @@ typedef struct {
 /**
  * Execute ELF file from "path" with environment "env"
  * @param path Path to file to load
- * @param env Pointer to environment struct
+ * @param resolver
  * @retval 0 On successful
  * @retval -1 On fail
  * @todo Error information
  */
-extern int loader_exec_elf(const char* path, const ELFEnv_t* env, Storage* storage);
+extern int loader_exec_elf(const char* path, ELFResolver resolver, Storage* storage);
 
 /** @} */
 

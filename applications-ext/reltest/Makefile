@@ -9,10 +9,10 @@ SRC=main.c start.c
 OPT?=0
 
 CFLAGS=-mcpu=cortex-m3 -mthumb -O$(OPT) -ggdb3 \
-	-mword-relocations -mlong-calls -fno-common
+	-mword-relocations -mlong-calls -fno-common -nostdlib
 
 LDFLAGS=-r -Bsymbolic -nostartfiles \
-	-mcpu=cortex-m3 -mthumb -mlong-calls -fno-common \
+	-mcpu=cortex-m3 -mthumb -mlong-calls -fno-common -nostdlib \
 	-T ../application-ext.ld
 
 OBJS=$(SRC:.c=.o)
