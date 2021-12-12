@@ -17,7 +17,7 @@ int32_t elf_loader_app(void* p) {
 
     FURI_LOG_I("elf_loader_app", "Loader start");
     int ret = loader_exec_elf(APP_PATH, &env, storage);
-    FURI_LOG_I("elf_loader_app", "Loader ret: %i", ret);
+    FURI_LOG_I("elf_loader_app", "Loader returned: %i", ret);
 
     furi_log_set_level(FURI_LOG_LEVEL);
     furi_record_close("storage");

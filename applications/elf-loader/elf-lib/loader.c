@@ -80,7 +80,7 @@ static int readSymbolName(ELFExec_t* e, off_t off, char* buf, size_t max) {
 }
 
 static void free_section(ELFSection_t* s) {
-    if(s->data) free(s->data);
+    if(s->data) aligned_free(s->data);
     s->data = NULL;
 }
 
@@ -112,23 +112,20 @@ static int load_section_data(ELFExec_t* e, ELFSection_t* s, Elf32_Shdr* h) {
         FURI_LOG_I(TAG, " No data for section");
         return 0;
     }
-    // TODO memalign
-    //s->data = LOADER_ALIGN_ALLOC(h->sh_size, h->sh_addralign, h->sh_flags);
-    s->data = malloc(h->sh_size);
 
-    if(!s->data) {
-        FURI_LOG_E(TAG, "    GET MEMORY fail");
-        return -1;
-    }
+    s->data = aligned_malloc(h->sh_size, h->sh_addralign);
+
     if(!storage_file_seek(e->fd, h->sh_offset, true)) {
         FURI_LOG_E(TAG, "    seek fail");
         free_section(s);
         return -1;
     }
+
     if(storage_file_read(e->fd, s->data, h->sh_size) != h->sh_size) {
         FURI_LOG_E(TAG, "     read data fail");
         return -1;
     }
+
     /* FURI_LOG_D(TAG, "DATA: "); */
     dump_data(s->data, h->sh_size);
     return 0;
@@ -419,8 +416,7 @@ static int relocate_sections(ELFExec_t* e) {
 
 #define APP_STACK_SIZE 2048
 void arch_jump_to(entry_t entry) {
-    // TODO: align stack by 8
-    void* stack = malloc(APP_STACK_SIZE);
+    void* stack = aligned_malloc(APP_STACK_SIZE, 8);
 
     register uint32_t saved = 0;
     void* tos = stack + APP_STACK_SIZE;
@@ -439,7 +435,7 @@ void arch_jump_to(entry_t entry) {
     /* saved->sp */
     __asm__ volatile("MOV sp, %0\n\t" : : "r"(saved));
 
-    free(stack);
+    aligned_free(stack);
 }
 
 static int loader_jump_to(ELFExec_t* e) {
