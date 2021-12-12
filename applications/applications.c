@@ -41,6 +41,7 @@ extern int32_t usb_mouse_app(void* p);
 extern int32_t usb_test_app(void* p);
 extern int32_t vibro_test_app(void* p);
 extern int32_t ble_keyboard_app(void* p);
+extern int32_t i2c_scanner_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -273,6 +274,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 
 #ifdef APP_DISPLAY_TEST
     {.app = display_test_app, .name = "Display Test", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_I2C_SCANNER
+    {.app = i2c_scanner_app, .name = "I2C Scanner", .stack_size = 1024, .icon = NULL},
 #endif
 };
 
