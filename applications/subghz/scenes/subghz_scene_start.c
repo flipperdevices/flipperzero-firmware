@@ -41,9 +41,10 @@ void subghz_scene_start_on_enter(void* context) {
         SubmenuIndexFrequencyAnalyzer,
         subghz_scene_start_submenu_callback,
         subghz);
+#ifdef LAB_TESTS
     submenu_add_item(
         subghz->submenu, "Test", SubmenuIndexTest, subghz_scene_start_submenu_callback, subghz);
-
+#endif
     submenu_set_selected_item(
         subghz->submenu, scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneStart));
 
