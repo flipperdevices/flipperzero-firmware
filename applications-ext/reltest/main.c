@@ -1,6 +1,9 @@
-int printf(const char* __restrict, ...);
+#include <stdlib.h>
+#include <stdint.h>
+
+extern int32_t snake_game_app(void* p);
 
 int main(void) {
-    printf("Hello, out is %d\r\n", 123);
+    snake_game_app(NULL);
     return 0;
 }

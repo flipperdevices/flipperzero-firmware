@@ -18,17 +18,66 @@ find_program(CMAKE_ASM_COMPILER NAMES ${STM32_TARGET_TRIPLET}-gcc PATHS ${TOOLCH
 find_program(CMAKE_AR NAMES ${STM32_TARGET_TRIPLET}-ar PATHS ${TOOLCHAIN_BIN_PATH})
 find_program(CMAKE_OBJCOPY NAMES ${STM32_TARGET_TRIPLET}-objcopy PATHS ${TOOLCHAIN_BIN_PATH})
 find_program(CMAKE_OBJDUMP NAMES ${STM32_TARGET_TRIPLET}-objdump PATHS ${TOOLCHAIN_BIN_PATH})
+find_program(CMAKE_STRIP NAMES ${STM32_TARGET_TRIPLET}-strip PATHS ${TOOLCHAIN_BIN_PATH})
 find_program(SIZE NAMES ${STM32_TARGET_TRIPLET}-size PATHS ${TOOLCHAIN_BIN_PATH})
-
 
 # project start
 PROJECT("plugin" C CXX ASM)
 
-include_directories(${CMAKE_SOURCE_DIR})
+set(CUBE_DIR "${CMAKE_SOURCE_DIR}/../../lib/STM32CubeWB")
+
+set(INCLUDES 
+    "${CMAKE_SOURCE_DIR}"
+    "${CMAKE_SOURCE_DIR}/../.."
+    "${CMAKE_SOURCE_DIR}/../../core"
+    "${CMAKE_SOURCE_DIR}/../../applications"
+    "${CMAKE_SOURCE_DIR}/../../applications/input"
+    "${CMAKE_SOURCE_DIR}/../../assets/compiled"
+    "${CMAKE_SOURCE_DIR}/../../firmware/targets/furi-hal-include"
+    "${CMAKE_SOURCE_DIR}/../../lib"
+    "${CMAKE_SOURCE_DIR}/../../lib/mlib"
+    "${CMAKE_SOURCE_DIR}/../../lib/u8g2"
+    "${CMAKE_SOURCE_DIR}/../../lib/ST25RFAL002"
+    "${CMAKE_SOURCE_DIR}/../../lib/ST25RFAL002/include"
+    "${CMAKE_SOURCE_DIR}/../../lib/ST25RFAL002/source/st25r3916"
+    "${CMAKE_SOURCE_DIR}/../../lib/callbackconnector"
+    "${CMAKE_SOURCE_DIR}/../../lib/app-template"
+    "${CMAKE_SOURCE_DIR}/../../firmware/targets/Inc"
+    "${CMAKE_SOURCE_DIR}/../../lib/callback-connector"
+    "${CMAKE_SOURCE_DIR}/../../lib/fnv1a-hash"
+    "${CMAKE_SOURCE_DIR}/../../lib/onewire"
+    "${CMAKE_SOURCE_DIR}/../../lib/littlefs"
+    "${CMAKE_SOURCE_DIR}/../../lib/cyfral"
+    "${CMAKE_SOURCE_DIR}/../../lib/drivers"
+    "${CMAKE_SOURCE_DIR}/../../lib/common-api"
+    "${CMAKE_SOURCE_DIR}/../../lib/version"
+    "${CMAKE_SOURCE_DIR}/../../lib/irda/encoder_decoder"
+    "${CMAKE_SOURCE_DIR}/../../lib/irda/worker"
+    "${CMAKE_SOURCE_DIR}/../../lib/args"
+    "${CMAKE_SOURCE_DIR}/../../lib/app-scened-template"
+    "${CMAKE_SOURCE_DIR}/../../lib/app_scene_template"
+    "${CMAKE_SOURCE_DIR}/../../lib/file_reader"
+    "${CMAKE_SOURCE_DIR}/../../lib/nfc_protocols"
+    "${CMAKE_SOURCE_DIR}/../../lib/nanopb"
+    "${CMAKE_SOURCE_DIR}/../../lib/libusb_stm32/inc"
+    "${CMAKE_SOURCE_DIR}/../../firmware/targets/f6/Inc"
+    "${CMAKE_SOURCE_DIR}/../../firmware/targets/f6/furi-hal"
+    "${CUBE_DIR}/Drivers/CMSIS/Device/ST/STM32WBxx/Include"
+	"${CUBE_DIR}/Drivers/CMSIS/Device/ST"
+	"${CUBE_DIR}/Drivers/CMSIS/Include"
+    "${CUBE_DIR}/Drivers/STM32WBxx_HAL_Driver/Inc"
+	"${CUBE_DIR}/Drivers/STM32WBxx_HAL_Driver/Inc/Legacy"
+    "${CUBE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/include"
+    "${CUBE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"
+    "${CUBE_DIR}/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F"
+)
+
+include_directories(${INCLUDES})
 
 set(SOURCES 
     "main.c"
     "start.c"
+    "snake-game.c"
 )
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
@@ -56,7 +105,7 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
 	-T "${CMAKE_SOURCE_DIR}/../application-ext.ld"
 )
 
-# # Modify compile flags to change optimization level from O3 to O0
+# Modify compile flags to change optimization level from O3 to O0
 string(REGEX REPLACE "([\\/\\-]O)3" "\\10"
   CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 string(REGEX REPLACE "([\\/\\-]O)3" "\\10"
@@ -79,8 +128,23 @@ set(COMMON_FLAGS
     NDEBUG
 )
 
+set(OTHER_FLAGS
+    __STM32WBxx_FAMILY 
+    __STM32WB55_SUBFAMILY 
+    ARM_MATH_CM4 -DSTM32WB 
+    USB_PMASIZE=0x400 
+    STM32WB55xx 
+    USE_FULL_LL_DRIVER 
+    USE_HAL_DRIVER 
+    HAVE_FREERTOS 
+    PB_ENABLE_MALLOC 
+    PB_WITHOUT_64BIT 
+    _GNU_SOURCE
+)
+
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE 
     ${COMMON_FLAGS}
+    ${OTHER_FLAGS}
 )
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
@@ -92,10 +156,9 @@ set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINKER_LANGUAGE C)
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${SIZE} ${PROJECT_NAME}.elf)
 
-# Make binary file.
+# Make stripped elf file
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-    COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
+    COMMAND ${CMAKE_STRIP} -g -o ${PROJECT_NAME}-striped.elf $<TARGET_FILE:${PROJECT_NAME}.elf>
     COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")
 

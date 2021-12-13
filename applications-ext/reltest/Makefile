@@ -1,10 +1,12 @@
+$(error Now you're on your own, please bring the Makefile (I think you only need the includes) to match CMakeLists.txt)
+
 CROSS?=arm-none-eabi-
 CC=$(CROSS)gcc
 LD=$(CROSS)gcc
 STRIP=$(CROSS)strip
 SIZE=$(CROSS)size
 
-SRC=main.c start.c
+SRC=main.c start.c snake-game.c
 
 OPT?=0
 
