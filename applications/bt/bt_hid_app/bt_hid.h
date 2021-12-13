@@ -7,6 +7,7 @@
 #include <gui/view_dispatcher.h>
 
 #include <gui/modules/submenu.h>
+#include <gui/modules/dialog_ex.h>
 #include "views/bt_hid_keynote.h"
 #include "views/bt_hid_media.h"
 
@@ -15,12 +16,15 @@ typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    DialogEx* dialog;
     BtHidKeynote* bt_hid_keynote;
     BtHidMedia* bt_hid_media;
+    uint32_t view_id;
 } BtHid;
 
 typedef enum {
     BtHidViewSubmenu,
     BtHidViewKeynote,
     BtHidViewMedia,
+    BtHidViewExitConfirm,
 } BtHidView;

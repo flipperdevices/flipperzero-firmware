@@ -12,24 +12,38 @@ void bt_hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     BtHid* app = context;
     if(index == BtHidSubmenuIndexKeynote) {
+        app->view_id = BtHidViewKeynote;
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewKeynote);
     } else if(index == BtHidSubmenuIndexMedia) {
+        app->view_id = BtHidViewMedia;
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewMedia);
     }
+}
+
+void bt_hid_dialog_callback(DialogExResult result, void* context) {
+    furi_assert(context);
+    BtHid* app = context;
+    if(result == DialogExResultLeft) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewSubmenu);
+    } else if(result == DialogExResultRight) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
+    }
+}
+
+uint32_t bt_hid_exit_confirm_view(void* context) {
+    return BtHidViewExitConfirm;
 }
 
 uint32_t bt_hid_exit(void* context) {
     return VIEW_NONE;
 }
 
-uint32_t bt_hid_start_view(void* context) {
-    return BtHidViewSubmenu;
-}
-
 void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     furi_assert(context);
     BtHid* bt_hid = context;
-    bt_hid_keynote_set_connected_status(bt_hid->bt_hid_keynote, status == BtStatusConnected);
+    bool connected = status == BtStatusConnected;
+    bt_hid_keynote_set_connected_status(bt_hid->bt_hid_keynote, connected);
+    bt_hid_media_set_connected_status(bt_hid->bt_hid_media, connected);
 }
 
 BtHid* bt_hid_app_alloc() {
@@ -43,7 +57,7 @@ BtHid* bt_hid_app_alloc() {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    // Views
+    // Submenu view
     app->submenu = submenu_alloc();
     submenu_add_item(
         app->submenu, "Keynote", BtHidSubmenuIndexKeynote, bt_hid_submenu_callback, app);
@@ -52,12 +66,27 @@ BtHid* bt_hid_app_alloc() {
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->submenu));
+
+    // Dialog view
+    app->dialog = dialog_ex_alloc();
+    dialog_ex_set_result_callback(app->dialog, bt_hid_dialog_callback);
+    dialog_ex_set_context(app->dialog, app);
+    dialog_ex_set_left_button_text(app->dialog, "Exit");
+    dialog_ex_set_right_button_text(app->dialog, "Stay");
+    dialog_ex_set_header(app->dialog, "Close current app?", 16, 12, AlignLeft, AlignTop);
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtHidViewExitConfirm, dialog_ex_get_view(app->dialog));
+
+    // Keynote view
     app->bt_hid_keynote = bt_hid_keynote_alloc();
-    view_set_previous_callback(bt_hid_keynote_get_view(app->bt_hid_keynote), bt_hid_start_view);
+    view_set_previous_callback(
+        bt_hid_keynote_get_view(app->bt_hid_keynote), bt_hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewKeynote, bt_hid_keynote_get_view(app->bt_hid_keynote));
+
+    // Media view
     app->bt_hid_media = bt_hid_media_alloc();
-    view_set_previous_callback(bt_hid_media_get_view(app->bt_hid_media), bt_hid_start_view);
+    view_set_previous_callback(bt_hid_media_get_view(app->bt_hid_media), bt_hid_exit_confirm_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewMedia, bt_hid_media_get_view(app->bt_hid_media));
 
@@ -73,10 +102,12 @@ void bt_hid_app_free(BtHid* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewSubmenu);
     submenu_free(app->submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewExitConfirm);
+    dialog_ex_free(app->dialog);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewKeynote);
     bt_hid_keynote_free(app->bt_hid_keynote);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewMedia);
-    bt_hid_media_get_view(app->bt_hid_media);
+    bt_hid_media_free(app->bt_hid_media);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close gui record

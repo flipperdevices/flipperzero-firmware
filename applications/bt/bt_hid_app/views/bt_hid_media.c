@@ -143,7 +143,9 @@ static bool bt_hid_media_input_callback(InputEvent* event, void* context) {
         bt_hid_media_process_release(bt_hid_media, event);
         consumed = true;
     } else if(event->type == InputTypeShort) {
-        consumed = true;
+        if(event->key == InputKeyBack) {
+            furi_hal_bt_hid_media_release_all();
+        }
     }
 
     return consumed;

@@ -144,7 +144,9 @@ static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
         bt_hid_keynote_process_release(bt_hid_keynote, event);
         consumed = true;
     } else if(event->type == InputTypeShort) {
-        consumed = true;
+        if(event->key == InputKeyBack) {
+            furi_hal_hid_kb_release_all();
+        }
     }
 
     return consumed;
