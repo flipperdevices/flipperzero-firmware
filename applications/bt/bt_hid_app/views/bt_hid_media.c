@@ -90,19 +90,19 @@ static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* eve
         bt_hid_media->view, (BtHidMediaModel * model) {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
-                furi_hal_bt_hid_kb_press(KEY_UP_ARROW);
+                furi_hal_bt_hid_media_press(FuriHalBtHidMediaVolumeUp);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = true;
-                furi_hal_bt_hid_kb_press(KEY_DOWN_ARROW);
+                furi_hal_bt_hid_media_press(FuriHalBtHidMediaVolumeDown);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = true;
-                furi_hal_bt_hid_kb_press(KEY_LEFT_ARROW);
+                furi_hal_bt_hid_media_press(FuriHalBtHidMediaScanPrevious);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = true;
-                furi_hal_bt_hid_kb_press(KEY_RIGHT_ARROW);
+                furi_hal_bt_hid_media_press(FuriHalBtHidMediaScanNext);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = true;
-                furi_hal_bt_hid_kb_press(KEY_SPACE);
+                furi_hal_bt_hid_media_press(FuriHalBtHidMediaPlayPause);
             }
             return true;
         });
@@ -113,19 +113,19 @@ static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* e
         bt_hid_media->view, (BtHidMediaModel * model) {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
-                furi_hal_bt_hid_kb_release(KEY_UP_ARROW);
+                furi_hal_bt_hid_media_release(FuriHalBtHidMediaVolumeUp);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = false;
-                furi_hal_bt_hid_kb_release(KEY_DOWN_ARROW);
+                furi_hal_bt_hid_media_release(FuriHalBtHidMediaVolumeDown);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = false;
-                furi_hal_bt_hid_kb_release(KEY_LEFT_ARROW);
+                furi_hal_bt_hid_media_release(FuriHalBtHidMediaScanPrevious);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = false;
-                furi_hal_bt_hid_kb_release(KEY_RIGHT_ARROW);
+                furi_hal_bt_hid_media_release(FuriHalBtHidMediaScanNext);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = false;
-                furi_hal_bt_hid_kb_release(KEY_SPACE);
+                furi_hal_bt_hid_media_release(FuriHalBtHidMediaPlayPause);
             }
             return true;
         });
