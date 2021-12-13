@@ -3,7 +3,9 @@
 enum SubmenuIndex {
     SubmenuIndexRead = 10,
     SubmenuIndexSaved,
+#ifdef LAB_TESTS
     SubmenuIndexTest,
+#endif
     SubmenuIndexAddManualy,
     SubmenuIndexFrequencyAnalyzer,
     SubmenuIndexReadRAW,
@@ -81,11 +83,13 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexFrequencyAnalyzer);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneFrequencyAnalyzer);
             return true;
+#ifdef LAB_TESTS
         } else if(event.event == SubmenuIndexTest) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
             return true;
+#endif
         }
     }
     return false;
