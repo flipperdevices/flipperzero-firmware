@@ -186,10 +186,14 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
             uint8_t start_page = buff_rx[1];
             uint8_t end_page = buff_rx[2];
             if((start_page < page_num) &&
-               (end_page < page_num) && (start_page < end_page)) {
-                tx_len = (end_page - start_page) * 4;
+               (end_page < page_num) && (start_page < (end_page + 1))) {
+                tx_len = ((end_page + 1) - start_page) * 4;
                 memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], tx_len);
-               }
+            } else {
+                // TODO make 4-bit NAK
+                buff_tx[0] = 0x0;
+                tx_len = 1;
+            }
         }
     } else if(cmd == MF_UL_WRITE) {
         uint8_t write_page = buff_rx[1];
