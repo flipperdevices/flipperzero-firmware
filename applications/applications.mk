@@ -318,7 +318,7 @@ CFLAGS		+= -DSRV_STORAGE
 endif
 
 
-LAB_TESTS ?= 0
+LAB_TESTS ?= 1
 ifeq ($(LAB_TESTS), 1)
 CFLAGS += -DLAB_TESTS
 endif
