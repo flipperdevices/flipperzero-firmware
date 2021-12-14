@@ -145,6 +145,7 @@ uint16_t mf_ul_prepare_write(uint8_t* dest, uint16_t page_addr, uint32_t data) {
 
 void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data) {
     mf_ul_emulate->data = *data;
+    mf_ul_emulate->auth_data = NULL;
     mf_ul_emulate->data_changed = false;
     if(data->version.storage_size == 0) {
         mf_ul_emulate->type = MfUltralightTypeUnknown;
@@ -155,6 +156,37 @@ void mf_ul_prepare_emulation(MifareUlDevice* mf_ul_emulate, MifareUlData* data) 
     } else if(data->version.storage_size == 0x0E) {
         mf_ul_emulate->type = MfUltralightTypeUL21;
         mf_ul_emulate->support_fast_read = true;
+    } else if(data->version.storage_size == 0x0F) {
+        mf_ul_emulate->type = MfUltralightTypeNTAG213;
+        mf_ul_emulate->support_fast_read = true;
+    } else if(data->version.storage_size == 0x11) {
+        mf_ul_emulate->type = MfUltralightTypeNTAG215;
+        mf_ul_emulate->support_fast_read = true;
+    } else if(data->version.storage_size == 0x13) {
+        mf_ul_emulate->type = MfUltralightTypeNTAG216;
+        mf_ul_emulate->support_fast_read = true;
+    }
+
+    if(mf_ul_emulate->type >= MfUltralightTypeNTAG213) {
+        uint16_t pwd_page = (data->data_size / 4) - 2;
+        mf_ul_emulate->auth_data = (MifareUlAuthData*)&data->data[pwd_page * 4];
+    }
+}
+
+void mf_ul_protect_auth_data_on_read_command(
+    uint8_t* tx_buff,
+    uint8_t start_page,
+    uint8_t end_page,
+    MifareUlDevice* mf_ul_emulate) {
+    if(mf_ul_emulate->type >= MfUltralightTypeNTAG213) {
+        uint8_t pwd_page = (mf_ul_emulate->data.data_size / 4) - 2;
+        uint8_t pack_page = pwd_page + 1;
+        if((start_page <= pwd_page) && (end_page >= pwd_page)) {
+            memset(&tx_buff[(pwd_page - start_page) * 4], 0, 4);
+        }
+        if((start_page <= pack_page) && (end_page >= pack_page)) {
+            memset(&tx_buff[(pack_page - start_page) * 4], 0, 2);
+        }
     }
 }
 
@@ -180,6 +212,8 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
             } else {
                 memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], tx_len);
             }
+            mf_ul_protect_auth_data_on_read_command(
+                buff_tx, start_page, (start_page + 4), mf_ul_emulate);
         }
     } else if(cmd == MF_UL_FAST_READ_CMD) {
         if(mf_ul_emulate->support_fast_read) {
@@ -189,6 +223,8 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
                (end_page < page_num) && (start_page < (end_page + 1))) {
                 tx_len = ((end_page + 1) - start_page) * 4;
                 memcpy(buff_tx, &mf_ul_emulate->data.data[start_page * 4], tx_len);
+                mf_ul_protect_auth_data_on_read_command(
+                    buff_tx, start_page, end_page, mf_ul_emulate);
             } else {
                 // TODO make 4-bit NAK
                 buff_tx[0] = 0x0;
@@ -221,6 +257,22 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
             // TODO make 4-bit ACK
             buff_tx[0] = 0x0A;
             tx_len = 1;
+        }
+    } else if(cmd == MF_UL_AUTH) {
+        if(mf_ul_emulate->type >= MfUltralightTypeNTAG213) {
+            if(memcmp(&buff_rx[1], mf_ul_emulate->auth_data->pwd, 4) == 0) {
+                buff_tx[0] = mf_ul_emulate->auth_data->pack.raw[0];
+                buff_tx[1] = mf_ul_emulate->auth_data->pack.raw[1];
+                tx_len = 2;
+            } else if(!mf_ul_emulate->auth_data->pack.value) {
+                buff_tx[0] = 0x80;
+                buff_tx[1] = 0x80;
+                tx_len = 2;
+            } else {
+                // TODO make 4-bit NAK
+                buff_tx[0] = 0x0;
+                tx_len = 1;
+            }
         }
     } else if(cmd == MF_UL_READ_SIG) {
         // Check 2nd byte = 0x00 - RFU
