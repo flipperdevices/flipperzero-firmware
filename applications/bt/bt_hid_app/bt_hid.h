@@ -5,6 +5,7 @@
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
+#include <applications/notification/notification.h>
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
@@ -14,6 +15,7 @@
 typedef struct {
     Bt* bt;
     Gui* gui;
+    NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     DialogEx* dialog;

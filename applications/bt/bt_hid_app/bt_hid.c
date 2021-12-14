@@ -1,5 +1,6 @@
 #include "bt_hid.h"
 #include <furi-hal-bt.h>
+#include <applications/notification/notification-messages.h>
 
 #define TAG "BtHidApp"
 
@@ -41,7 +42,12 @@ uint32_t bt_hid_exit(void* context) {
 void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     furi_assert(context);
     BtHid* bt_hid = context;
-    bool connected = status == BtStatusConnected;
+    bool connected = (status == BtStatusConnected);
+    if(connected) {
+        notification_message(bt_hid->notifications, &sequence_set_blue_255);
+    } else {
+        notification_message(bt_hid->notifications, &sequence_reset_blue);
+    }
     bt_hid_keynote_set_connected_status(bt_hid->bt_hid_keynote, connected);
     bt_hid_media_set_connected_status(bt_hid->bt_hid_media, connected);
 }
@@ -51,6 +57,9 @@ BtHid* bt_hid_app_alloc() {
 
     // Gui
     app->gui = furi_record_open("gui");
+
+    // Notifications
+    app->notifications = furi_record_open("notification");
 
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
@@ -99,6 +108,9 @@ BtHid* bt_hid_app_alloc() {
 void bt_hid_app_free(BtHid* app) {
     furi_assert(app);
 
+    // Reset notification
+    notification_message(app->notifications, &sequence_reset_blue);
+
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewSubmenu);
     submenu_free(app->submenu);
@@ -110,9 +122,11 @@ void bt_hid_app_free(BtHid* app) {
     bt_hid_media_free(app->bt_hid_media);
     view_dispatcher_free(app->view_dispatcher);
 
-    // Close gui record
+    // Close records
     furi_record_close("gui");
     app->gui = NULL;
+    furi_record_close("notification");
+    app->notifications = NULL;
 
     // Free rest
     free(app);
@@ -138,6 +152,7 @@ int32_t bt_hid_app(void* p) {
 
     view_dispatcher_run(app->view_dispatcher);
 
+    bt_set_status_changed_callback(bt, NULL, NULL);
     // Stop advertising if bt was off
     if(bt_turned_on) {
         furi_hal_bt_stop_advertising();
