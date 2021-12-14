@@ -17,72 +17,82 @@ typedef struct {
     bool connected;
 } BtHidMediaModel;
 
+static void bt_hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
+    canvas_draw_triangle(canvas, x, y, 5, 3, dir);
+    if(dir == CanvasDirectionBottomToTop) {
+        canvas_draw_dot(canvas, x, y - 1);
+    } else if(dir == CanvasDirectionTopToBottom) {
+        canvas_draw_dot(canvas, x, y + 1);
+    } else if(dir == CanvasDirectionRightToLeft) {
+        canvas_draw_dot(canvas, x - 1, y);
+    } else if(dir == CanvasDirectionLeftToRight) {
+        canvas_draw_dot(canvas, x + 1, y);
+    }
+}
+
 static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     BtHidMediaModel* model = context;
 
     // Header
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 3, 0, AlignLeft, AlignTop, "Media player");
+    elements_multiline_text_aligned(canvas, 9, 3, AlignLeft, AlignTop, "Media player");
     canvas_set_font(canvas, FontSecondary);
 
     // Connected status
-    canvas_draw_icon(canvas, 20, 24, &I_Medium_ble_12x21);
     if(model->connected) {
-        canvas_draw_icon(canvas, 34, 28, &I_Waves_9x13);
-        elements_multiline_text_aligned(canvas, 3, 62, AlignLeft, AlignBottom, "Connected");
+        canvas_draw_icon(canvas, 23, 17, &I_Ble_connected_38x34);
+        elements_multiline_text_aligned(canvas, 35, 61, AlignCenter, AlignBottom, "Connected");
     } else {
-        canvas_draw_icon(canvas, 35, 30, &I_Cross_9x9);
-        elements_multiline_text_aligned(canvas, 3, 62, AlignLeft, AlignBottom, "Disconnected");
+        canvas_draw_icon(canvas, 23, 17, &I_Ble_disconnected_24x34);
+        elements_multiline_text_aligned(canvas, 35, 61, AlignCenter, AlignBottom, "Disconnected");
     }
 
     // Keypad circles
-    canvas_draw_circle(canvas, 96, 32, 31);
-    canvas_draw_circle(canvas, 96, 32, 12);
+    canvas_draw_icon(canvas, 76, 8, &I_Circles_47x47);
 
     // Up
     if(model->up_pressed) {
-        canvas_draw_disc(canvas, 96, 10, 8);
+        canvas_draw_icon(canvas, 93, 9, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 91, 6, &I_Vol_up_12x9);
+    canvas_draw_icon(canvas, 96, 12, &I_Volup_8x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
     if(model->down_pressed) {
-        canvas_draw_disc(canvas, 96, 54, 7);
+        canvas_draw_icon(canvas, 93, 41, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 91, 51, &I_Vol_dwn_10x7);
+    canvas_draw_icon(canvas, 96, 45, &I_Voldwn_6x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
     if(model->left_pressed) {
-        canvas_draw_disc(canvas, 75, 32, 7);
+        canvas_draw_icon(canvas, 77, 25, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_arrow(canvas, 79, 32, 7, 4, CanvasDirectionRightToLeft);
-    canvas_draw_arrow(canvas, 74, 32, 7, 4, CanvasDirectionRightToLeft);
+    bt_hid_media_draw_arrow(canvas, 82, 31, CanvasDirectionRightToLeft);
+    bt_hid_media_draw_arrow(canvas, 86, 31, CanvasDirectionRightToLeft);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
     if(model->right_pressed) {
-        canvas_draw_disc(canvas, 117, 32, 7);
+        canvas_draw_icon(canvas, 109, 25, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_arrow(canvas, 113, 32, 7, 4, CanvasDirectionLeftToRight);
-    canvas_draw_arrow(canvas, 118, 32, 7, 4, CanvasDirectionLeftToRight);
+    bt_hid_media_draw_arrow(canvas, 112, 31, CanvasDirectionLeftToRight);
+    bt_hid_media_draw_arrow(canvas, 116, 31, CanvasDirectionLeftToRight);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
     if(model->ok_pressed) {
-        canvas_draw_disc(canvas, 96, 32, 8);
+        canvas_draw_icon(canvas, 93, 25, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_arrow(canvas, 91, 32, 7, 4, CanvasDirectionLeftToRight);
-    canvas_draw_box(canvas, 97, 29, 2, 7);
-    canvas_draw_box(canvas, 100, 29, 2, 7);
-    canvas_set_color(canvas, ColorBlack);
+    bt_hid_media_draw_arrow(canvas, 96, 31, CanvasDirectionLeftToRight);
+    canvas_draw_line(canvas, 100, 29, 100, 33);
+    canvas_draw_line(canvas, 102, 29, 102, 33);
 }
 
 static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* event) {

@@ -48,9 +48,9 @@ typedef enum {
 /** Font Direction */
 typedef enum {
     CanvasDirectionLeftToRight,
-    CanvasDirectionTopToDown,
+    CanvasDirectionTopToBottom,
     CanvasDirectionRightToLeft,
-    CanvasDirectionDownToTop,
+    CanvasDirectionBottomToTop,
 } CanvasDirection;
 
 /** Font parameters */
@@ -273,20 +273,20 @@ void canvas_draw_circle(Canvas* canvas, uint8_t x, uint8_t y, uint8_t r);
  */
 void canvas_draw_disc(Canvas* canvas, uint8_t x, uint8_t y, uint8_t r);
 
-/** Draw arrow with central point at x, y, side length len and direction dir
+/** Draw triangle with given base and height lengths and their intersection coordinate
  *
  * @param       canvas  Canvas instance
- * @param       x       x coordinate of central point
- * @param       y       y coordinate of central point
- * @param       side    length of arrow side
- * @param       height  length of arrow height
- * @param       dir     CanvasDirection arrow orientaion
+ * @param       x       x coordinate of base and height intersection
+ * @param       y       y coordinate of base and height intersection
+ * @param       base    length of triangle side
+ * @param       height  length of triangle height
+ * @param       dir     CanvasDirection triangle orientaion
  */
-void canvas_draw_arrow(
+void canvas_draw_triangle(
     Canvas* canvas,
     uint8_t x,
     uint8_t y,
-    uint8_t side,
+    uint8_t base,
     uint8_t height,
     CanvasDirection dir);
 

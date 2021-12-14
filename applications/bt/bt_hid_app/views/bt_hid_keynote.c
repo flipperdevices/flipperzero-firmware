@@ -17,73 +17,81 @@ typedef struct {
     bool connected;
 } BtHidKeynoteModel;
 
+static void bt_hid_keynote_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
+    canvas_draw_triangle(canvas, x, y, 5, 3, dir);
+    if(dir == CanvasDirectionBottomToTop) {
+        canvas_draw_line(canvas, x, y + 6, x, y - 1);
+    } else if(dir == CanvasDirectionTopToBottom) {
+        canvas_draw_line(canvas, x, y - 6, x, y + 1);
+    } else if(dir == CanvasDirectionRightToLeft) {
+        canvas_draw_line(canvas, x + 6, y, x - 1, y);
+    } else if(dir == CanvasDirectionLeftToRight) {
+        canvas_draw_line(canvas, x - 6, y, x + 1, y);
+    }
+}
+
 static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     BtHidKeynoteModel* model = context;
 
     // Header
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 3, 2, AlignLeft, AlignTop, "Keynote");
+    elements_multiline_text_aligned(canvas, 9, 3, AlignLeft, AlignTop, "Keynote");
     canvas_set_font(canvas, FontSecondary);
 
     // Connected status
-    canvas_draw_icon(canvas, 22, 24, &I_Medium_ble_12x21);
     if(model->connected) {
-        canvas_draw_icon(canvas, 36, 28, &I_Waves_9x13);
-        elements_multiline_text_aligned(canvas, 3, 13, AlignLeft, AlignTop, "Connected");
+        canvas_draw_icon(canvas, 18, 18, &I_Ble_connected_38x34);
+        elements_multiline_text_aligned(canvas, 9, 60, AlignLeft, AlignBottom, "Connected");
     } else {
-        canvas_draw_icon(canvas, 37, 30, &I_Cross_9x9);
-        elements_multiline_text_aligned(canvas, 3, 13, AlignLeft, AlignTop, "Disconnected");
+        canvas_draw_icon(canvas, 18, 18, &I_Ble_disconnected_24x34);
+        elements_multiline_text_aligned(canvas, 3, 60, AlignLeft, AlignBottom, "Disconnected");
     }
 
     // Up
+    canvas_draw_icon(canvas, 86, 4, &I_Button_18x18);
     if(model->up_pressed) {
-        elements_slightly_rounded_box(canvas, 90, 26, 17, 17);
+        elements_slightly_rounded_box(canvas, 89, 6, 13, 13);
         canvas_set_color(canvas, ColorWhite);
-    } else {
-        elements_slightly_rounded_frame(canvas, 90, 26, 17, 17);
     }
-    canvas_draw_arrow(canvas, 98, 36, 9, 5, CanvasDirectionDownToTop);
+    bt_hid_keynote_draw_arrow(canvas, 95, 10, CanvasDirectionBottomToTop);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
+    canvas_draw_icon(canvas, 86, 25, &I_Button_18x18);
     if(model->down_pressed) {
-        elements_slightly_rounded_box(canvas, 90, 47, 17, 17);
+        elements_slightly_rounded_box(canvas, 89, 27, 13, 13);
         canvas_set_color(canvas, ColorWhite);
-    } else {
-        elements_slightly_rounded_frame(canvas, 90, 47, 17, 17);
     }
-    canvas_draw_arrow(canvas, 98, 53, 9, 5, CanvasDirectionTopToDown);
+    bt_hid_keynote_draw_arrow(canvas, 95, 35, CanvasDirectionTopToBottom);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
+    canvas_draw_icon(canvas, 65, 25, &I_Button_18x18);
     if(model->left_pressed) {
-        elements_slightly_rounded_box(canvas, 69, 47, 17, 17);
+        elements_slightly_rounded_box(canvas, 68, 27, 13, 13);
         canvas_set_color(canvas, ColorWhite);
-    } else {
-        elements_slightly_rounded_frame(canvas, 69, 47, 17, 17);
     }
-    canvas_draw_arrow(canvas, 79, 55, 9, 5, CanvasDirectionRightToLeft);
+    bt_hid_keynote_draw_arrow(canvas, 72, 33, CanvasDirectionRightToLeft);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
+    canvas_draw_icon(canvas, 107, 25, &I_Button_18x18);
     if(model->right_pressed) {
-        elements_slightly_rounded_box(canvas, 111, 47, 17, 17);
+        elements_slightly_rounded_box(canvas, 110, 27, 13, 13);
         canvas_set_color(canvas, ColorWhite);
-    } else {
-        elements_slightly_rounded_frame(canvas, 111, 47, 17, 17);
     }
-    canvas_draw_arrow(canvas, 117, 55, 9, 5, CanvasDirectionLeftToRight);
+    bt_hid_keynote_draw_arrow(canvas, 118, 33, CanvasDirectionLeftToRight);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
+    canvas_draw_icon(canvas, 63, 45, &I_Space_65x18);
     if(model->ok_pressed) {
-        elements_slightly_rounded_box(canvas, 0, 47, 64, 17);
+        elements_slightly_rounded_box(canvas, 66, 47, 60, 13);
         canvas_set_color(canvas, ColorWhite);
-    } else {
-        elements_slightly_rounded_frame(canvas, 0, 47, 64, 17);
     }
-    elements_multiline_text_aligned(canvas, 32, 58, AlignCenter, AlignBottom, "OK = Space");
+    canvas_draw_icon(canvas, 74, 49, &I_Ok_btn_9x9);
+    elements_multiline_text_aligned(canvas, 91, 56, AlignLeft, AlignBottom, "Space");
 }
 
 static void bt_hid_keynote_process_press(BtHidKeynote* bt_hid_keynote, InputEvent* event) {
