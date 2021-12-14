@@ -636,7 +636,7 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                             break;
                         }
                     } else {
-                        FURI_LOG_W(TAG, "Not valid command: %02X", rx_buff[0]);
+                        FURI_LOG_D(TAG, "Not valid command: %02X", rx_buff[0]);
                         furi_hal_nfc_deactivate();
                         break;
                     }
@@ -653,7 +653,7 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                 nfc_worker->callback(nfc_worker->context);
             }
         }
-        FURI_LOG_W(TAG, "Can't find reader");
+        FURI_LOG_D(TAG, "Can't find reader");
         osThreadYield();
     }
 }
