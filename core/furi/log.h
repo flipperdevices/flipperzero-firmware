@@ -32,7 +32,7 @@ typedef enum {
 #define FURI_LOG_CLR_W FURI_LOG_CLR(FURI_LOG_CLR_BROWN)
 #define FURI_LOG_CLR_I FURI_LOG_CLR(FURI_LOG_CLR_GREEN)
 #define FURI_LOG_CLR_D FURI_LOG_CLR(FURI_LOG_CLR_BLUE)
-#define FURI_LOG_CLR_V
+#define FURI_LOG_CLR_T FURI_LOG_CLR(FURI_LOG_CLR_PURPLE)
 
 typedef void (*FuriLogPuts)(const char* data);
 typedef uint32_t (*FuriLogTimestamp)(void);
