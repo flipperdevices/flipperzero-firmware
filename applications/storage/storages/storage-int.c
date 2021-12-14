@@ -69,7 +69,7 @@ static int storage_int_device_read(
     LFSData* lfs_data = c->context;
     size_t address = lfs_data->start_address + block * c->block_size + off;
 
-    FURI_LOG_D(
+    FURI_LOG_T(
         TAG,
         "Device read: block %d, off %d, buffer: %p, size %d, translated address: %p",
         block,
@@ -92,7 +92,7 @@ static int storage_int_device_prog(
     LFSData* lfs_data = c->context;
     size_t address = lfs_data->start_address + block * c->block_size + off;
 
-    FURI_LOG_D(
+    FURI_LOG_T(
         TAG,
         "Device prog: block %d, off %d, buffer: %p, size %d, translated address: %p",
         block,
