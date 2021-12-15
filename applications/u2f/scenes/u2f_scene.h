@@ -3,11 +3,11 @@
 #include <gui/scene_manager.h>
 
 // Generate scene id and total number
-#define ADD_SCENE(prefix, name, id) U2FScene##id,
+#define ADD_SCENE(prefix, name, id) U2fScene##id,
 typedef enum {
 #include "u2f_scene_config.h"
-    U2FSceneNum,
-} U2FScene;
+    U2fSceneNum,
+} U2fScene;
 #undef ADD_SCENE
 
 extern const SceneManagerHandlers u2f_scene_handlers;

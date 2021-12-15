@@ -151,17 +151,17 @@ static usbd_device* usb_dev;
 static osSemaphoreId_t hid_u2f_semaphore = NULL;
 static bool hid_u2f_connected = false;
 
-static HidU2FCallback callback;
+static HidU2fCallback callback;
 static void* cb_ctx;
 
 bool furi_hal_hid_u2f_is_connected() {
     return hid_u2f_connected;
 }
 
-void furi_hal_hid_u2f_set_callback(HidU2FCallback cb, void* ctx) {
+void furi_hal_hid_u2f_set_callback(HidU2fCallback cb, void* ctx) {
     if (callback != NULL) {
         if (hid_u2f_connected == true)
-            callback(HidU2FDisconnected, cb_ctx);
+            callback(HidU2fDisconnected, cb_ctx);
     }
 
     callback = cb;
@@ -169,7 +169,7 @@ void furi_hal_hid_u2f_set_callback(HidU2FCallback cb, void* ctx) {
 
     if (callback != NULL) {
         if (hid_u2f_connected == true)
-            callback(HidU2FConnected, cb_ctx);
+            callback(HidU2fConnected, cb_ctx);
     }
 }
 
@@ -206,7 +206,7 @@ static void hid_u2f_deinit(usbd_device* dev) {
 static void hid_u2f_on_wakeup(usbd_device* dev) {
     hid_u2f_connected = true;
     if (callback != NULL)
-        callback(HidU2FConnected, cb_ctx);
+        callback(HidU2fConnected, cb_ctx);
 }
 
 static void hid_u2f_on_suspend(usbd_device* dev) {
@@ -214,7 +214,7 @@ static void hid_u2f_on_suspend(usbd_device* dev) {
         hid_u2f_connected = false;
         osSemaphoreRelease(hid_u2f_semaphore);
         if (callback != NULL)
-            callback(HidU2FDisconnected, cb_ctx);
+            callback(HidU2fDisconnected, cb_ctx);
     }
 }
 
@@ -234,7 +234,7 @@ uint32_t furi_hal_hid_u2f_get_request(uint8_t* data) {
 
 static void hid_u2f_rx_ep_callback (usbd_device *dev, uint8_t event, uint8_t ep) {
     if (callback != NULL)
-        callback(HidU2FRequest, cb_ctx);
+        callback(HidU2fRequest, cb_ctx);
 }
 
 static void hid_u2f_tx_ep_callback (usbd_device *dev, uint8_t event, uint8_t ep) {

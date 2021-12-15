@@ -2,15 +2,22 @@
 
 #include <gui/view.h>
 
-typedef struct U2F U2F;
-typedef void (*U2FOkCallback)(InputType type, void* context);
+typedef struct U2fView U2fView;
+typedef void (*U2fOkCallback)(InputType type, void* context);
 
-U2F* u2f_alloc();
+typedef enum {
+    U2fMsgNone,
+    U2fMsgRegister,
+    U2fMsgAuth,
+    U2fMsgError,
+} U2fViewMsg;
 
-void u2f_free(U2F* u2f);
+U2fView* u2f_view_alloc();
 
-View* u2f_get_view(U2F* u2f);
+void u2f_view_free(U2fView* u2f);
 
-void u2f_set_ok_callback(U2F* u2f, U2FOkCallback callback, void* context);
+View* u2f_view_get_view(U2fView* u2f);
 
-void u2f_set_state(U2F* u2f); //, U2FState* st);
+void u2f_view_set_ok_callback(U2fView* u2f, U2fOkCallback callback, void* context);
+
+void u2f_view_set_state(U2fView* u2f, U2fViewMsg msg);

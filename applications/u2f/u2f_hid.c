@@ -26,6 +26,17 @@
 #define U2F_HID_WINK (U2F_HID_TYPE_INIT | 0x08) // Send device identification wink
 #define U2F_HID_ERROR (U2F_HID_TYPE_INIT | 0x3f) // Error response
 
+#define U2F_HID_ERR_NONE 0x00 // No error
+#define U2F_HID_ERR_INVALID_CMD 0x01 // Invalid command
+#define U2F_HID_ERR_INVALID_PAR 0x02 // Invalid parameter
+#define U2F_HID_ERR_INVALID_LEN 0x03 // Invalid message length
+#define U2F_HID_ERR_INVALID_SEQ 0x04 // Invalid message sequencing
+#define U2F_HID_ERR_MSG_TIMEOUT 0x05 // Message has timed out
+#define U2F_HID_ERR_CHANNEL_BUSY 0x06 // Channel busy
+#define U2F_HID_ERR_LOCK_REQUIRED 0x0a // Command requires channel lock
+#define U2F_HID_ERR_SYNC_FAIL 0x0b // SYNC command failed
+#define U2F_HID_ERR_OTHER 0x7f // Other unspecified error
+
 #define U2F_HID_BROADCAST_CID 0xFFFFFFFF
 
 typedef enum {
@@ -37,36 +48,45 @@ typedef enum {
     WorkerEvtUnlock = (1 << 5),
 } WorkerEvtFlags;
 
-struct U2FHid_packet {
+struct U2fHid_packet {
     uint32_t cid;
     uint16_t len;
     uint8_t cmd;
     uint8_t payload[U2F_HID_MAX_PAYLOAD_LEN];
 };
 
-struct U2FHid {
+struct U2fHid {
     FuriThread* thread;
-    struct U2FHid_packet packet;
+    osTimerId_t lock_timer;
+    struct U2fHid_packet packet;
     uint8_t seq_id_last;
     uint16_t req_buf_ptr;
     uint32_t req_len_left;
     uint32_t lock_cid;
     bool lock;
+    U2fData* u2f_instance;
 };
 
-static void u2f_hid_event_callback(HidU2FEvent ev, void* context) {
+static void u2f_hid_event_callback(HidU2fEvent ev, void* context) {
     furi_assert(context);
-    U2FHid* u2f_hid = context;
+    U2fHid* u2f_hid = context;
 
-    if(ev == HidU2FDisconnected)
+    if(ev == HidU2fDisconnected)
         osThreadFlagsSet(furi_thread_get_thread_id(u2f_hid->thread), WorkerEvtDisconnect);
-    else if(ev == HidU2FConnected)
+    else if(ev == HidU2fConnected)
         osThreadFlagsSet(furi_thread_get_thread_id(u2f_hid->thread), WorkerEvtConnect);
-    else if(ev == HidU2FRequest)
+    else if(ev == HidU2fRequest)
         osThreadFlagsSet(furi_thread_get_thread_id(u2f_hid->thread), WorkerEvtRequest);
 }
 
-static void u2f_hid_send_response(U2FHid* u2f_hid) {
+static void u2f_hid_lock_timeout_callback(void* context) {
+    furi_assert(context);
+    U2fHid* u2f_hid = context;
+
+    osThreadFlagsSet(furi_thread_get_thread_id(u2f_hid->thread), WorkerEvtUnlock);
+}
+
+static void u2f_hid_send_response(U2fHid* u2f_hid) {
     uint8_t packet_buf[HID_U2F_PACKET_LEN];
     uint16_t len_remain = u2f_hid->packet.len;
     uint8_t len_cur = 0;
@@ -100,14 +120,14 @@ static void u2f_hid_send_response(U2FHid* u2f_hid) {
     }
 }
 
-static void u2f_hid_send_error(U2FHid* u2f_hid, uint8_t error) {
+static void u2f_hid_send_error(U2fHid* u2f_hid, uint8_t error) {
     u2f_hid->packet.len = 1;
     u2f_hid->packet.cmd = U2F_HID_ERROR;
-    u2f_hid->packet.payload[0] = error; // TODO: error codes
+    u2f_hid->packet.payload[0] = error;
     u2f_hid_send_response(u2f_hid);
 }
 
-static bool u2f_hid_parse_request(U2FHid* u2f_hid) {
+static bool u2f_hid_parse_request(U2fHid* u2f_hid) {
     FURI_LOG_I(
         WORKER_TAG,
         "Req cid=%lX cmd=%x len=%u",
@@ -117,25 +137,29 @@ static bool u2f_hid_parse_request(U2FHid* u2f_hid) {
 
     if(u2f_hid->packet.cmd == U2F_HID_PING) { // PING - echo request back
         u2f_hid_send_response(u2f_hid);
+
     } else if(u2f_hid->packet.cmd == U2F_HID_MSG) { // MSG - U2F message
         if((u2f_hid->lock == true) && (u2f_hid->packet.cid != u2f_hid->lock_cid)) return false;
-        uint16_t resp_len = u2f_msg_parse(u2f_hid->packet.payload, u2f_hid->packet.len);
+        uint16_t resp_len =
+            u2f_msg_parse(u2f_hid->u2f_instance, u2f_hid->packet.payload, u2f_hid->packet.len);
         if(resp_len > 0) {
             u2f_hid->packet.len = resp_len;
             u2f_hid_send_response(u2f_hid);
         } else
             return false;
+
     } else if(u2f_hid->packet.cmd == U2F_HID_LOCK) { // LOCK - lock all channels except current
         if(u2f_hid->packet.len != 1) return false;
         uint8_t lock_timeout = u2f_hid->packet.payload[0];
-        if(lock_timeout == 0) {
+        if(lock_timeout == 0) { // Lock off
             u2f_hid->lock = false;
             u2f_hid->lock_cid = 0;
-        } else {
+        } else { // Lock on
             u2f_hid->lock = true;
             u2f_hid->lock_cid = u2f_hid->packet.cid;
+            osTimerStart(u2f_hid->lock_timer, lock_timeout * 1000);
         }
-        //TODO: lock timeout timer
+
     } else if(u2f_hid->packet.cmd == U2F_HID_INIT) { // INIT - channel initialization request
         if((u2f_hid->packet.len != 8) || (u2f_hid->packet.cid != U2F_HID_BROADCAST_CID) ||
            (u2f_hid->lock == true))
@@ -149,9 +173,10 @@ static bool u2f_hid_parse_request(U2FHid* u2f_hid) {
         u2f_hid->packet.payload[15] = 1; // Device build version
         u2f_hid->packet.payload[16] = 1; // Capabilities: wink
         u2f_hid_send_response(u2f_hid);
+
     } else if(u2f_hid->packet.cmd == U2F_HID_WINK) { // WINK - notify user
         if(u2f_hid->packet.len != 0) return false;
-        // TODO: WINK
+        u2f_wink(u2f_hid->u2f_instance);
         u2f_hid->packet.len = 0;
         u2f_hid_send_response(u2f_hid);
     } else
@@ -160,11 +185,15 @@ static bool u2f_hid_parse_request(U2FHid* u2f_hid) {
 }
 
 static int32_t u2f_hid_worker(void* context) {
-    U2FHid* u2f_hid = context;
+    U2fHid* u2f_hid = context;
     uint8_t packet_buf[HID_U2F_PACKET_LEN];
 
     FURI_LOG_I(WORKER_TAG, "Init");
-    u2f_init();
+
+    UsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    furi_hal_usb_set_config(&usb_hid_u2f);
+
+    u2f_hid->lock_timer = osTimerNew(u2f_hid_lock_timeout_callback, osTimerOnce, u2f_hid, NULL);
 
     furi_hal_hid_u2f_set_callback(u2f_hid_event_callback, u2f_hid);
 
@@ -226,7 +255,7 @@ static int32_t u2f_hid_worker(void* context) {
                 }
                 if(u2f_hid->req_len_left == 0) {
                     if(u2f_hid_parse_request(u2f_hid) == false) {
-                        u2f_hid_send_error(u2f_hid, 0x18);
+                        u2f_hid_send_error(u2f_hid, U2F_HID_ERR_INVALID_CMD);
                     }
                     FURI_LOG_I(WORKER_TAG, "Req done");
                 }
@@ -238,19 +267,23 @@ static int32_t u2f_hid_worker(void* context) {
             u2f_hid->lock_cid = 0;
         }
     }
+    osTimerStop(u2f_hid->lock_timer);
+    osTimerDelete(u2f_hid->lock_timer);
 
     furi_hal_hid_u2f_set_callback(NULL, NULL);
-
+    furi_hal_usb_set_config(usb_mode_prev);
     FURI_LOG_I(WORKER_TAG, "End");
 
     return 0;
 }
 
-U2FHid* u2f_hid_start() {
-    U2FHid* u2f_hid = furi_alloc(sizeof(U2FHid));
+U2fHid* u2f_hid_start(U2fData* u2f_inst) {
+    U2fHid* u2f_hid = furi_alloc(sizeof(U2fHid));
+
+    u2f_hid->u2f_instance = u2f_inst;
 
     u2f_hid->thread = furi_thread_alloc();
-    furi_thread_set_name(u2f_hid->thread, "U2FHidWorker");
+    furi_thread_set_name(u2f_hid->thread, "U2fHidWorker");
     furi_thread_set_stack_size(u2f_hid->thread, 2048);
     furi_thread_set_context(u2f_hid->thread, u2f_hid);
     furi_thread_set_callback(u2f_hid->thread, u2f_hid_worker);
@@ -258,7 +291,7 @@ U2FHid* u2f_hid_start() {
     return u2f_hid;
 }
 
-void u2f_hid_stop(U2FHid* u2f_hid) {
+void u2f_hid_stop(U2fHid* u2f_hid) {
     furi_assert(u2f_hid);
     osThreadFlagsSet(furi_thread_get_thread_id(u2f_hid->thread), WorkerEvtStop);
     furi_thread_join(u2f_hid->thread);

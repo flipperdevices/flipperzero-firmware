@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-typedef struct U2FApp U2FApp;
+typedef struct U2fApp U2fApp;
 
 #ifdef __cplusplus
 }

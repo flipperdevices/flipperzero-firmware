@@ -26,5 +26,5 @@ const SceneManagerHandlers u2f_scene_handlers = {
     .on_enter_handlers = u2f_scene_on_enter_handlers,
     .on_event_handlers = u2f_scene_on_event_handlers,
     .on_exit_handlers = u2f_scene_on_exit_handlers,
-    .scene_num = U2FSceneNum,
+    .scene_num = U2fSceneNum,
 };

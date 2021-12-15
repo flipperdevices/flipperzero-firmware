@@ -3,12 +3,12 @@
 #define HID_U2F_PACKET_LEN 64
 
 typedef enum {
-    HidU2FDisconnected,
-    HidU2FConnected,
-    HidU2FRequest,
-} HidU2FEvent;
+    HidU2fDisconnected,
+    HidU2fConnected,
+    HidU2fRequest,
+} HidU2fEvent;
 
-typedef void (*HidU2FCallback)(HidU2FEvent ev, void* context);
+typedef void (*HidU2fCallback)(HidU2fEvent ev, void* context);
 
 /** Get HID U2F connection state
  *
@@ -21,7 +21,7 @@ bool furi_hal_hid_u2f_is_connected();
  * @param      cb  callback
  * @param      ctx  callback context
  */
-void furi_hal_hid_u2f_set_callback(HidU2FCallback cb, void* ctx);
+void furi_hal_hid_u2f_set_callback(HidU2fCallback cb, void* ctx);
 
 /** Get received U2F HID packet
  *

@@ -6,11 +6,27 @@ extern "C" {
 
 #include <furi.h>
 
-void u2f_init();
+typedef enum {
+    U2fNotifyRegister,
+    U2fNotifyAuth,
+    U2fNotifyWink,
+} U2fNotifyEvent;
 
-uint16_t u2f_msg_parse(uint8_t* buf, uint16_t len);
+typedef struct U2fData U2fData;
 
-uint32_t u2f_get_random();
+typedef void (*U2fEvtCallback)(U2fNotifyEvent evt, void* context);
+
+bool u2f_alloc(U2fData** U2F_inst);
+
+void u2f_free(U2fData* U2F);
+
+void u2f_set_event_callback(U2fData* U2F, U2fEvtCallback callback, void* context);
+
+void u2f_confirm_user_present(U2fData* U2F);
+
+uint16_t u2f_msg_parse(U2fData* U2F, uint8_t* buf, uint16_t len);
+
+void u2f_wink(U2fData* U2F);
 
 #ifdef __cplusplus
 }
