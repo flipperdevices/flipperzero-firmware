@@ -25,7 +25,8 @@ void bt_hid_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     BtHid* app = context;
     if(result == DialogExResultLeft) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewSubmenu);
+        // TODO switch to Submenu after Media is done
+        view_dispatcher_stop(app->view_dispatcher);
     } else if(result == DialogExResultRight) {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
     }
@@ -44,9 +45,9 @@ void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     BtHid* bt_hid = context;
     bool connected = (status == BtStatusConnected);
     if(connected) {
-        notification_message(bt_hid->notifications, &sequence_set_blue_255);
+        notification_internal_message(bt_hid->notifications, &sequence_set_blue_255);
     } else {
-        notification_message(bt_hid->notifications, &sequence_reset_blue);
+        notification_internal_message(bt_hid->notifications, &sequence_reset_blue);
     }
     bt_hid_keynote_set_connected_status(bt_hid->bt_hid_keynote, connected);
     bt_hid_media_set_connected_status(bt_hid->bt_hid_media, connected);
@@ -99,8 +100,8 @@ BtHid* bt_hid_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewMedia, bt_hid_media_get_view(app->bt_hid_media));
 
-    // Switch to menu
-    view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewSubmenu);
+    // TODO switch to menu after Media is done
+    view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewKeynote);
 
     return app;
 }
@@ -109,7 +110,7 @@ void bt_hid_app_free(BtHid* app) {
     furi_assert(app);
 
     // Reset notification
-    notification_message(app->notifications, &sequence_reset_blue);
+    notification_internal_message(app->notifications, &sequence_reset_blue);
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewSubmenu);

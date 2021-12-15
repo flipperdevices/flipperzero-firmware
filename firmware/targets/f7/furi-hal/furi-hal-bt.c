@@ -126,8 +126,8 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, BleEventCallback event_cb, 
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
             config->mac_address[2]++;
-            // Change name Flipper -> Remote
-            const char* clicker_str = "Remote ";
+            // Change name Flipper -> Keynote
+            const char* clicker_str = "Keynote";
             memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
         }
         ret = gap_init(config, event_cb, context);
