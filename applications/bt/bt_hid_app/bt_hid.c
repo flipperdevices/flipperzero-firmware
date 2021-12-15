@@ -56,8 +56,14 @@ void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
 BtHid* bt_hid_app_alloc() {
     BtHid* app = furi_alloc(sizeof(BtHid));
 
+    // Load Bluetooth settings
+    bt_settings_load(&app->bt_settings);
+
     // Gui
     app->gui = furi_record_open("gui");
+
+    // Bt
+    app->bt = furi_record_open("bt");
 
     // Notifications
     app->notifications = furi_record_open("notification");
@@ -128,6 +134,8 @@ void bt_hid_app_free(BtHid* app) {
     app->gui = NULL;
     furi_record_close("notification");
     app->notifications = NULL;
+    furi_record_close("bt");
+    app->bt = NULL;
 
     // Free rest
     free(app);
@@ -136,32 +144,24 @@ void bt_hid_app_free(BtHid* app) {
 int32_t bt_hid_app(void* p) {
     // Switch profile to Hid
     BtHid* app = bt_hid_app_alloc();
-    Bt* bt = furi_record_open("bt");
-    bt_set_status_changed_callback(bt, bt_hid_connection_status_changed_callback, app);
-    if(!bt_set_profile(bt, BtProfileHidKeyboard)) {
+    bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
+    // Change profile
+    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch profile");
-        furi_record_close("bt");
+        bt_hid_app_free(app);
         return -1;
     }
-    // Save bt status and start advertising
-    bool bt_turned_on = furi_hal_bt_is_active();
-    if(!bt_turned_on) {
-        furi_hal_bt_start_advertising();
-    }
-
-    app->bt = bt;
+    furi_hal_bt_start_advertising();
 
     view_dispatcher_run(app->view_dispatcher);
 
-    bt_set_status_changed_callback(bt, NULL, NULL);
+    bt_set_status_changed_callback(app->bt, NULL, NULL);
     // Stop advertising if bt was off
-    if(bt_turned_on) {
+    if(app->bt_settings.enabled) {
         furi_hal_bt_stop_advertising();
     }
     // Change back profile to Serial
-    bt_set_profile(bt, BtProfileSerial);
-    bt_set_status_changed_callback(app->bt, NULL, NULL);
-    furi_record_close("bt");
+    bt_set_profile(app->bt, BtProfileSerial);
 
     bt_hid_app_free(app);
 

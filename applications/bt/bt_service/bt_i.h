@@ -12,6 +12,7 @@
 #include <dialogs/dialogs.h>
 #include <power/power_service/power.h>
 #include <applications/rpc/rpc.h>
+#include <applications/notification/notification.h>
 
 #include "../bt_settings.h"
 
@@ -45,6 +46,7 @@ struct Bt {
     BtStatus status;
     BtProfile profile;
     osMessageQueueId_t message_queue;
+    NotificationApp* notification;
     Gui* gui;
     ViewPort* statusbar_view_port;
     DialogsApp* dialogs;
