@@ -327,9 +327,11 @@ esp_loader_error_t esp_loader_flash_verify(void)
         return ESP_LOADER_ERROR_UNSUPPORTED_FUNC;
     }
 
-    uint8_t raw_md5[16];
-    uint8_t hex_md5[MD5_SIZE + 1];
-    uint8_t received_md5[MD5_SIZE + 1];
+    uint8_t raw_md5[16] = {0};
+
+    /* Zero termination and new line character require 2 bytes */
+    uint8_t hex_md5[MD5_SIZE + 2] = {0};
+    uint8_t received_md5[MD5_SIZE + 2] = {0};
 
     md5_final(raw_md5);
     hexify(raw_md5, hex_md5);
