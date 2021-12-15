@@ -16,12 +16,14 @@
 #include "esp_targets.h"
 #include <stddef.h>
 
+#define MAX_MAGIC_VALUES 2
+
 typedef esp_loader_error_t (*read_spi_config_t)(uint32_t efuse_base, uint32_t *spi_config);
 
 typedef struct {
     target_registers_t regs;
     uint32_t efuse_base;
-    uint32_t chip_magic_value;
+    uint32_t chip_magic_value[MAX_MAGIC_VALUES];
     read_spi_config_t read_spi_config;
 } esp_target_t;
 
@@ -51,7 +53,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen  = 0,
         },
         .efuse_base = 0,            // Not used
-        .chip_magic_value  = 0xfff0c101,
+        .chip_magic_value  = { 0xfff0c101, 0 },
         .read_spi_config = NULL,    // Not used
     },
 
@@ -67,7 +69,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32_SPI_REG_BASE + 0x2c,
         },
         .efuse_base = 0x3ff5A000,
-        .chip_magic_value  = 0x00f01d83,
+        .chip_magic_value  = { 0x00f01d83, 0 },
         .read_spi_config = spi_config_esp32,
     },
 
@@ -83,7 +85,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32S2_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x3f41A000,
-        .chip_magic_value  = 0x000007c6,
+        .chip_magic_value  = { 0x000007c6, 0 },
         .read_spi_config = spi_config_esp32xx,
     },
 
@@ -99,7 +101,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x60008800,
-        .chip_magic_value = 0x6921506f,
+        .chip_magic_value = { 0x6921506f, 0x1b31506f },
         .read_spi_config = spi_config_esp32xx,
     },
 
@@ -115,7 +117,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32C3_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x60007000,
-        .chip_magic_value = 0x00000009,
+        .chip_magic_value = { 0x00000009, 0 },
         .read_spi_config = spi_config_esp32xx, // !
     },
 };
@@ -131,10 +133,12 @@ esp_loader_error_t loader_detect_chip(target_chip_t *target_chip, const target_r
     RETURN_ON_ERROR( esp_loader_read_register(CHIP_DETECT_MAGIC_REG_ADDR,  &magic_value) );
 
     for (int chip = 0; chip < ESP_MAX_CHIP; chip++) {
-        if (magic_value == esp_target[chip].chip_magic_value) {
-            *target_chip = (target_chip_t)chip;
-            *target_data = (target_registers_t *)&esp_target[chip];
-            return ESP_LOADER_SUCCESS;
+        for(int index = 0; index < MAX_MAGIC_VALUES; index++) {
+            if (magic_value == esp_target[chip].chip_magic_value[index]) {
+                *target_chip = (target_chip_t)chip;
+                *target_data = (target_registers_t *)&esp_target[chip];
+                return ESP_LOADER_SUCCESS;
+            }
         }
     }
 

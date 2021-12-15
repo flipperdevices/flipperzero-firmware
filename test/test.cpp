@@ -119,12 +119,11 @@ map<target_chip_t, uint32_t> chip_magic_value = {
     {ESP32S3_CHIP,  0x00000009},
 };
 
-void queue_connect_response(target_chip_t target = ESP32_CHIP)
+void queue_connect_response(target_chip_t target = ESP32_CHIP, uint32_t magic_value = 0)
 {
     // Set magic value register used for detection of attached chip
     auto magic_value_response = read_reg_response;
-    magic_value_response.data.common.value = chip_magic_value[target];
-
+    magic_value_response.data.common.value = magic_value ? magic_value : chip_magic_value[target];
     clear_buffers();
     queue_response(sync_response);
     queue_response(magic_value_response);
@@ -201,6 +200,12 @@ TEST_CASE( "Can detect attached target" )
         REQUIRE( esp_loader_get_target() == ESP32C3_CHIP );
     }
 
+    SECTION( "Can detect ESP32C3 rev3" ) {
+        queue_connect_response(ESP32C3_CHIP, 0x1b31506f);
+        REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
+        REQUIRE( esp_loader_get_target() == ESP32C3_CHIP );
+    }
+
     SECTION( "Can detect ESP32S3" ) {
         queue_connect_response(ESP32S3_CHIP);
         REQUIRE_SUCCESS( esp_loader_connect(&connect_config) );
@@ -214,7 +219,7 @@ TEST_CASE( "Can detect attached target" )
     }
 
     SECTION( "Can detect unknown chip" ) {
-        queue_connect_response(ESP_UNKNOWN_CHIP);
+        queue_connect_response(ESP_UNKNOWN_CHIP, 0xaaaaaaaa);
         REQUIRE( esp_loader_connect(&connect_config) == ESP_LOADER_ERROR_INVALID_TARGET);
     }
 }
