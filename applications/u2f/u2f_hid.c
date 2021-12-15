@@ -207,7 +207,6 @@ static int32_t u2f_hid_worker(void* context) {
         if(flags & WorkerEvtConnect) FURI_LOG_I(WORKER_TAG, "Connect");
         if(flags & WorkerEvtDisconnect) FURI_LOG_I(WORKER_TAG, "Disconnect");
         if(flags & WorkerEvtRequest) {
-            FURI_LOG_I(WORKER_TAG, "Request");
             uint32_t len_cur = furi_hal_hid_u2f_get_request(packet_buf);
             if(len_cur > 0) {
                 if((packet_buf[4] & U2F_HID_TYPE_MASK) == U2F_HID_TYPE_INIT) {
@@ -225,14 +224,12 @@ static int32_t u2f_hid_worker(void* context) {
                     u2f_hid->seq_id_last = 0;
                     u2f_hid->req_buf_ptr = len_cur;
                     if(len_cur > 0) memcpy(u2f_hid->packet.payload, &packet_buf[7], len_cur);
-                    FURI_LOG_I(WORKER_TAG, "Rd len=%u left=%u", len_cur, u2f_hid->req_len_left);
                 } else {
                     // Continuation packet
                     if(u2f_hid->req_len_left > 0) {
                         uint32_t cid_temp = 0;
                         memcpy(&cid_temp, packet_buf, 4);
                         uint8_t seq_temp = packet_buf[4];
-                        FURI_LOG_I(WORKER_TAG, "Cont seq=%u", seq_temp);
                         if((cid_temp == u2f_hid->packet.cid) &&
                            (seq_temp == u2f_hid->seq_id_last)) {
                             if(u2f_hid->req_len_left > (len_cur - 5)) {
@@ -248,8 +245,6 @@ static int32_t u2f_hid_worker(void* context) {
                                 len_cur);
                             u2f_hid->req_buf_ptr += len_cur;
                             u2f_hid->seq_id_last++;
-                            FURI_LOG_I(
-                                WORKER_TAG, "Rd len=%u left=%u", len_cur, u2f_hid->req_len_left);
                         }
                     }
                 }
@@ -257,10 +252,8 @@ static int32_t u2f_hid_worker(void* context) {
                     if(u2f_hid_parse_request(u2f_hid) == false) {
                         u2f_hid_send_error(u2f_hid, U2F_HID_ERR_INVALID_CMD);
                     }
-                    FURI_LOG_I(WORKER_TAG, "Req done");
                 }
-            } else
-                FURI_LOG_E(WORKER_TAG, "Wrong packet len %u!", len_cur);
+            }
         }
         if(flags & WorkerEvtUnlock) {
             u2f_hid->lock = false;

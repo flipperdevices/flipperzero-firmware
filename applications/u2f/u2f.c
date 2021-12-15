@@ -3,8 +3,6 @@
 #include "u2f_hid.h"
 #include "u2f_data.h"
 #include <furi-hal.h>
-
-#include <furi-hal-console.h>
 #include <furi-hal-trng.h>
 
 #include "toolbox/sha256.h"
@@ -88,15 +86,6 @@ struct U2fData {
     U2fEvtCallback callback;
     void* context;
 };
-
-static void u2f_dump(char* tag, uint8_t* buf, uint32_t len) {
-    furi_hal_console_printf("%s [%u]:", tag, len);
-    for(uint16_t i = 0; i < len; i++) {
-        if(i % 32 == 0) furi_hal_console_printf("\r\n");
-        furi_hal_console_printf("%02X", buf[i]);
-    }
-    furi_hal_console_printf("\r\n");
-}
 
 static int u2f_uecc_random(uint8_t* dest, unsigned size) {
     furi_hal_trng_fill_buf(dest, size);
@@ -204,32 +193,25 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     hmac_sha256_context hmac_ctx;
     sha256_context sha_ctx;
 
-    u2f_dump("Challenge:", req->challenge, 32);
-    u2f_dump("AppID:", req->app_id, 32);
-
     handle.len = 32 * 2;
     // Generate random nonce
     furi_hal_trng_fill_buf(handle.nonce, 32);
-    u2f_dump("Nonce", handle.nonce, 32);
 
     // Generate private key
     hmac_sha256_init(&hmac_ctx, U2F->device_key);
     hmac_sha256_update(&hmac_ctx, req->app_id, 32);
     hmac_sha256_update(&hmac_ctx, handle.nonce, 32);
     hmac_sha256_finish(&hmac_ctx, U2F->device_key, private);
-    u2f_dump("Private key", private, 32);
 
     // Generate private key handle
     hmac_sha256_init(&hmac_ctx, U2F->device_key);
     hmac_sha256_update(&hmac_ctx, private, 32);
     hmac_sha256_update(&hmac_ctx, req->app_id, 32);
     hmac_sha256_finish(&hmac_ctx, U2F->device_key, handle.hash);
-    u2f_dump("Key handle", handle.hash, 32 * 2);
 
     // Generate public key
     pub_key.format = 0x04; // Uncompressed point
     uECC_compute_public_key(private, pub_key.xy, U2F->p_curve);
-    u2f_dump("Public key", pub_key.xy, 64);
 
     // Generate signature
     uint8_t reserved_byte = 0;
@@ -240,10 +222,8 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     sha256_update(&sha_ctx, handle.hash, handle.len);
     sha256_update(&sha_ctx, (uint8_t*)&pub_key, 65);
     sha256_finish(&sha_ctx, hash);
-    u2f_dump("Hash", hash, 32);
 
     uECC_sign(U2F->cert_key, hash, 32, signature, U2F->p_curve);
-    u2f_dump("Signature", signature, 64);
 
     // Encode response message
     resp->reserved = 0x05;
@@ -251,7 +231,6 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     memcpy(&(resp->key_handle), &handle, sizeof(U2fKeyHandle));
     uint32_t cert_len = u2f_cert_load(resp->cert);
     uint8_t signature_len = u2f_der_encode_signature(resp->cert + cert_len, signature);
-    u2f_dump("Signature encoded", resp->cert + cert_len, signature_len);
     memcpy(resp->cert + cert_len + signature_len, state_no_error, 2);
 
     return (sizeof(U2fRegisterResp) + cert_len + signature_len + 2);
@@ -267,11 +246,6 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     uint8_t flags = 0;
     uint8_t hash[32];
     uint8_t signature[64];
-
-    u2f_dump("Control:", &req->p1, 1);
-    u2f_dump("Challenge:", req->challenge, 32);
-    u2f_dump("AppID:", req->app_id, 32);
-    u2f_dump("Handle:", req->key_handle.hash, 64);
 
     if(U2F->callback != NULL) U2F->callback(U2fNotifyAuth, U2F->context);
     if(U2F->user_present == true) {
@@ -291,24 +265,21 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     sha256_update(&sha_ctx, (uint8_t*)&(U2F->counter), 4);
     sha256_update(&sha_ctx, req->challenge, 32);
     sha256_finish(&sha_ctx, hash);
-    u2f_dump("Hash", hash, 32);
 
     // Recover private key
     hmac_sha256_init(&hmac_ctx, U2F->device_key);
     hmac_sha256_update(&hmac_ctx, req->app_id, 32);
     hmac_sha256_update(&hmac_ctx, req->key_handle.nonce, 32);
     hmac_sha256_finish(&hmac_ctx, U2F->device_key, priv_key);
-    u2f_dump("Private key", priv_key, 32);
 
     // Generate and verify private key handle
     hmac_sha256_init(&hmac_ctx, U2F->device_key);
     hmac_sha256_update(&hmac_ctx, priv_key, 32);
     hmac_sha256_update(&hmac_ctx, req->app_id, 32);
     hmac_sha256_finish(&hmac_ctx, U2F->device_key, mac_control);
-    u2f_dump("MAC", mac_control, 32);
 
     if(memcmp(req->key_handle.hash, mac_control, 32) != 0) {
-        FURI_LOG_I(TAG, "Wrong handle!");
+        FURI_LOG_W(TAG, "Wrong handle!");
         memcpy(&buf[0], state_wrong_data, 2);
         return 2;
     }
@@ -319,12 +290,10 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
     }
 
     uECC_sign(priv_key, hash, 32, signature, U2F->p_curve);
-    u2f_dump("Signature", signature, 64);
 
     resp->user_present = flags;
     resp->counter = U2F->counter;
     uint8_t signature_len = u2f_der_encode_signature(resp->signature, signature);
-    u2f_dump("Signature encoded", resp->signature, signature_len);
     memcpy(resp->signature + signature_len, state_no_error, 2);
 
     FURI_LOG_I(TAG, "Counter: %lu", U2F->counter);
