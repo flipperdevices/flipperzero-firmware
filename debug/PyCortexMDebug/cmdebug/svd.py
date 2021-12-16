@@ -24,7 +24,6 @@ import traceback
 import re
 import warnings
 import x2d
-from pprint import pprint
 
 
 class SmartDict:
