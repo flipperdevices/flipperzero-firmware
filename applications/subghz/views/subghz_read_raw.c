@@ -377,9 +377,12 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
         with_view_model(
             instance->view, (SubghzReadRAWModel * model) {
-                //Save
                 if(model->satus == SubghzReadRAWStatusIDLE) {
+                    //Save
                     instance->callback(SubghzCustomEventViewReadRAWSave, instance->context);
+                } else if(model->satus == SubghzReadRAWStatusLoadKeyIDLE) {
+                    //More
+                    instance->callback(SubghzCustomEventViewReadRAWMore, instance->context);
                 }
                 return true;
             });

@@ -42,8 +42,11 @@ void subghz_scene_save_name_on_enter(void* context) {
 
 bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
-
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeBack) {
+        memcpy(subghz->file_name, subghz->file_name_tmp, strlen(subghz->file_name_tmp) + 1);
+        scene_manager_previous_scene(subghz->scene_manager);
+        return true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzCustomEventSceneSaveName) {
             if(strcmp(subghz->file_name, "")) {
                 if(strcmp(subghz->file_name_tmp, "")) {

@@ -6,6 +6,9 @@ typedef enum {
 
     SubghzCustomEventSceneDeleteSuccess = 100,
     SubghzCustomEventSceneDelete,
+    SubghzCustomEventSceneDeleteRAW,
+    SubghzCustomEventSceneDeleteRAWBack,
+
     SubghzCustomEventSceneReceiverInfoTxStart,
     SubghzCustomEventSceneReceiverInfoTxStop,
     SubghzCustomEventSceneReceiverInfoSave,
@@ -31,6 +34,7 @@ typedef enum {
     SubghzCustomEventViewReadRAWSave,
     SubghzCustomEventViewReadRAWVibro,
     SubghzCustomEventViewReadRAWTXRXStop,
+    SubghzCustomEventViewReadRAWMore,
 
     SubghzCustomEventViewTransmitterBack,
     SubghzCustomEventViewTransmitterSendStart,
