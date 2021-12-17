@@ -296,8 +296,7 @@ int32_t subghz_app(void* p) {
         string_init(filename);
 
         path_extract_filename_no_ext(p, filename);
-        strlcpy(
-            subghz->file_name, string_get_cstr(filename), strlen(string_get_cstr(filename)) + 1);
+        strcpy(subghz->file_name, string_get_cstr(filename));
         string_clear(filename);
 
         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
