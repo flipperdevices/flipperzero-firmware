@@ -1,3 +1,8 @@
+/*
+*    Give up hope, everyone who enters here!!!
+*      Оставь надежду, всяк сюда входящий!!!
+*/
+
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
 

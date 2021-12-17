@@ -30,6 +30,7 @@ typedef enum {
     SubghzCustomEventViewReadRAWSendStop,
     SubghzCustomEventViewReadRAWSave,
     SubghzCustomEventViewReadRAWVibro,
+    SubghzCustomEventViewReadRAWTXRXStop,
 
     SubghzCustomEventViewTransmitterBack,
     SubghzCustomEventViewTransmitterSendStart,

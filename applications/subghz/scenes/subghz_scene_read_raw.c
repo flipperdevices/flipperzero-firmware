@@ -40,15 +40,23 @@ void subghz_scene_read_raw_callback_end_tx(void* context) {
 void subghz_scene_read_raw_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz->txrx->rx_key_state == SubGhzRxKeyStateBack) {
+    switch(subghz->txrx->rx_key_state) {
+    case SubGhzRxKeyStateBack:
         subghz_read_raw_set_status(subghz->subghz_read_raw, SubghzReadRAWStatusIDLE, "");
-    } else if(subghz->txrx->rx_key_state == SubGhzRxKeyStateRAWLoad) {
+        break;
+    case SubGhzRxKeyStateRAWLoad:
         subghz_read_raw_set_status(
-            subghz->subghz_read_raw, SubghzReadRAWStatusTX, subghz->file_name);
-        subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
-    } else {
+            subghz->subghz_read_raw, SubghzReadRAWStatusLoadKeyTX, subghz->file_name);
+        subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+        break;
+    case SubGhzRxKeyStateRAWSave:
+        subghz_read_raw_set_status(subghz->subghz_read_raw, SubghzReadRAWStatusSaveKey, "");
+        subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+        break;
+    default:
         subghz_read_raw_set_status(subghz->subghz_read_raw, SubghzReadRAWStatusStart, "");
         subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+        break;
     }
 
     subghz_scene_read_raw_update_statusbar(subghz);
@@ -100,6 +108,20 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     subghz->scene_manager, SubGhzSceneStart);
             }
 
+            return true;
+            break;
+        case SubghzCustomEventViewReadRAWTXRXStop:
+            //Stop TX
+            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
+                subghz_tx_stop(subghz);
+                subghz_sleep(subghz);
+            }
+            //Stop RX
+            if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
+                subghz_rx_end(subghz);
+                subghz_sleep(subghz);
+            };
+            subghz->state_notifications = SubGhzNotificationStateIDLE;
             return true;
             break;
         case SubghzCustomEventViewReadRAWConfig:
@@ -154,7 +176,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
                         subghz->state_notifications = SubGhzNotificationStateTX;
-                        subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
                     }
                 }
             }
@@ -199,6 +220,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         subghz_rx(subghz, subghz->txrx->frequency);
                     }
                     subghz->state_notifications = SubGhzNotificationStateRX;
+                    subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
                 } else {
                     string_set(subghz->error_str, "No SD card");
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
