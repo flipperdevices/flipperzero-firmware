@@ -56,10 +56,6 @@ void subghz_scene_delete_raw_on_enter(void* context) {
 
 bool subghz_scene_delete_raw_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
-    // if(event.type == SceneManagerEventTypeBack) {
-    //     return scene_manager_previous_scene(subghz->scene_manager);
-    //     return true;
-    // } else 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubghzCustomEventSceneDeleteRAW) {
             strcpy(subghz->file_name_tmp, subghz->file_name);

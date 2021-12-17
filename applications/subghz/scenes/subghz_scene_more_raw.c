@@ -26,12 +26,9 @@ void subghz_scene_more_raw_on_enter(void* context) {
         SubmenuIndexDelete,
         subghz_scene_more_raw_submenu_callback,
         subghz);
-    
-     
 
     submenu_set_selected_item(
-        subghz->submenu,
-        scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneMoreRAW));
+        subghz->submenu, scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneMoreRAW));
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewMenu);
 }
