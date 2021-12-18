@@ -23,7 +23,7 @@ void subghz_scene_delete_raw_on_enter(void* context) {
     string_init(modulation_str);
     string_init(text);
 
-    string_printf(text, "Delete\n%s%s", subghz->file_name, SUBGHZ_APP_EXTENSION);
+    string_printf(text, "Delete\n%s?", subghz->file_name);
     widget_add_string_multiline_element(
         subghz->widget, 64, 0, AlignCenter, AlignTop, FontPrimary, string_get_cstr(text));
 

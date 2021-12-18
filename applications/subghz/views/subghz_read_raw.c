@@ -236,7 +236,7 @@ void subghz_read_raw_draw(Canvas* canvas, SubghzReadRAWModel* model) {
     case SubghzReadRAWStatusLoadKeyIDLE:
         elements_button_left(canvas, "New");
         elements_button_center(canvas, "Send");
-        elements_button_right(canvas, "Mode");
+        elements_button_right(canvas, "More");
         canvas_draw_str_aligned(
             canvas, 58, 28, AlignCenter, AlignTop, string_get_cstr(model->file_name));
         break;
@@ -446,7 +446,12 @@ void subghz_read_raw_set_status(
         with_view_model(
             instance->view, (SubghzReadRAWModel * model) {
                 model->satus = SubghzReadRAWStatusLoadKeyIDLE;
-                string_reset(model->file_name);
+                if(!model->ind_write) {
+                    string_set(model->file_name, file_name);
+                    string_set(model->sample_write, "RAW");
+                } else {
+                    string_reset(model->file_name);
+                }
                 return true;
             });
         break;
@@ -469,7 +474,8 @@ void subghz_read_raw_exit(void* context) {
     with_view_model(
         instance->view, (SubghzReadRAWModel * model) {
             if(model->satus != SubghzReadRAWStatusIDLE &&
-               model->satus != SubghzReadRAWStatusStart) {
+               model->satus != SubghzReadRAWStatusStart &&
+               model->satus != SubghzReadRAWStatusLoadKeyIDLE) {
                 instance->callback(SubghzCustomEventViewReadRAWIDLE, instance->context);
                 model->satus = SubghzReadRAWStatusStart;
             }

@@ -59,8 +59,10 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                    SubghzCustomEventManagerSet) {
                     subghz_protocol_raw_set_last_file_name(
                         (SubGhzProtocolRAW*)subghz->txrx->protocol_result, subghz->file_name);
+                } else {
+                    subghz_file_name_clear(subghz);
                 }
-                subghz_file_name_clear(subghz);
+
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);
                 return true;
             } else {
