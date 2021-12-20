@@ -344,15 +344,16 @@ static int load_symbols(ELFExec_t* e) {
     int founded = 0;
     FURI_LOG_I(TAG, "Scan ELF indexs...");
     for(n = 1; n < e->sections; n++) {
-        Elf32_Shdr sectHdr;
+        Elf32_Shdr section_header;
         char name[33] = "<unamed>";
-        if(read_section_header(e, n, &sectHdr) != 0) {
+        if(read_section_header(e, n, &section_header) != 0) {
             FURI_LOG_E(TAG, "Error reading section");
             return -1;
         }
-        if(sectHdr.sh_name) read_section_name(e, sectHdr.sh_name, name, sizeof(name));
+        if(section_header.sh_name)
+            read_section_name(e, section_header.sh_name, name, sizeof(name));
         FURI_LOG_D(TAG, "Examining section %d %s", n, name);
-        founded |= place_info(e, &sectHdr, name, n);
+        founded |= place_info(e, &section_header, name, n);
         if(IS_FLAGS_SET(founded, FoundAll)) return FoundAll;
     }
     FURI_LOG_I(TAG, "Done");
@@ -392,9 +393,9 @@ static void free_elf(ELFExec_t* e) {
 static int relocate_section(ELFExec_t* e, ELFSection_t* s, const char* name) {
     FURI_LOG_D(TAG, "Relocating section %s", name);
     if(s->rel_sec_idx) {
-        Elf32_Shdr sectHdr;
-        if(read_section_header(e, s->rel_sec_idx, &sectHdr) == 0)
-            return relocate(e, &sectHdr, s, name);
+        Elf32_Shdr section_header;
+        if(read_section_header(e, s->rel_sec_idx, &section_header) == 0)
+            return relocate(e, &section_header, s, name);
         else {
             FURI_LOG_E(TAG, "Error reading section header");
             return -1;
