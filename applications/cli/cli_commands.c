@@ -2,10 +2,12 @@
 #include <furi-hal.h>
 #include <furi-hal-gpio.h>
 #include <furi-hal-info.h>
-#include <rtc.h>
 #include <task-control-block.h>
 #include <time.h>
 #include <notification/notification-messages.h>
+
+// Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
+#define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
 
 void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
     printf("%-24s: %s\r\n", key, value);
@@ -58,67 +60,68 @@ void cli_command_help(Cli* cli, string_t args, void* context) {
 }
 
 void cli_command_date(Cli* cli, string_t args, void* context) {
-    RTC_TimeTypeDef time;
-    RTC_DateTypeDef date;
+    FuriHalRtcDateTime datetime = {0};
 
     if(string_size(args) > 0) {
-        uint16_t Hours, Minutes, Seconds, Month, Date, Year, WeekDay;
+        uint16_t hours, minutes, seconds, month, day, year, weekday;
         int ret = sscanf(
             string_get_cstr(args),
-            "%hu:%hu:%hu %hu-%hu-%hu %hu",
-            &Hours,
-            &Minutes,
-            &Seconds,
-            &Month,
-            &Date,
-            &Year,
-            &WeekDay);
-        if(ret == 7) {
-            time.Hours = Hours;
-            time.Minutes = Minutes;
-            time.Seconds = Seconds;
-            time.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-            time.StoreOperation = RTC_STOREOPERATION_RESET;
-            date.WeekDay = WeekDay;
-            date.Month = Month;
-            date.Date = Date;
-            date.Year = Year - 2000;
-            HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BIN);
-            HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BIN);
+            "%hu-%hu-%hu %hu:%hu:%hu %hu",
+            &year,
+            &month,
+            &day,
+            &hours,
+            &minutes,
+            &seconds,
+            &weekday);
 
-            // Verification
-            HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
-            HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+        // Some variables are going to discard upper byte
+        // There will be some funky behaviour which is not breaking anything
+        datetime.hour = hours;
+        datetime.minute = minutes;
+        datetime.second = seconds;
+        datetime.weekday = weekday;
+        datetime.month = month;
+        datetime.day = day;
+        datetime.year = year;
+
+        if(ret != 7) {
             printf(
-                "New time is: %.2d:%.2d:%.2d %.2d-%.2d-%.2d %d",
-                time.Hours,
-                time.Minutes,
-                time.Seconds,
-                date.Month,
-                date.Date,
-                2000 + date.Year,
-                date.WeekDay);
-        } else {
-            printf(
-                "Invalid time format, use `hh:mm:ss MM-DD-YYYY WD`. sscanf %d %s",
+                "Invalid datetime format, use `%s`. sscanf %d %s",
+                "%Y-%m-%d %H:%M:%S %u",
                 ret,
                 string_get_cstr(args));
             return;
         }
-    } else {
-        // TODO add get_datetime to core, not use HAL here
-        // READ ORDER MATTERS! Time then date.
-        HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
-        HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+
+        if(!furi_hal_rtc_validate_datetime(&datetime)) {
+            printf("Invalid datetime data");
+            return;
+        }
+
+        furi_hal_rtc_set_datetime(&datetime);
+        // Verification
+        furi_hal_rtc_get_datetime(&datetime);
         printf(
-            "%.2d:%.2d:%.2d %.2d-%.2d-%.2d %d",
-            time.Hours,
-            time.Minutes,
-            time.Seconds,
-            date.Month,
-            date.Date,
-            2000 + date.Year,
-            date.WeekDay);
+            "New datetime is: " CLI_DATE_FORMAT,
+            datetime.year,
+            datetime.month,
+            datetime.day,
+            datetime.hour,
+            datetime.minute,
+            datetime.second,
+            datetime.weekday);
+    } else {
+        furi_hal_rtc_get_datetime(&datetime);
+        printf(
+            CLI_DATE_FORMAT,
+            datetime.year,
+            datetime.month,
+            datetime.day,
+            datetime.hour,
+            datetime.minute,
+            datetime.second,
+            datetime.weekday);
     }
 }
 
