@@ -1,5 +1,7 @@
 #include "compilesort.hpp"
 #include "elf-hashtable.h"
+#include "elf-symbol.h"
+#include "elf-hashtable-checks.hpp"
 
 #include <gui/gui.h>
 #include <furi.h>
@@ -8,26 +10,6 @@
 #include <algorithm>
 
 #define TAG "elf-hashtable"
-
-#define API_METHOD(x)                                    \
-    sym_entry {                                          \
-        .hash = elf_gnu_hash(#x), .address = (uint32_t)x \
-    }
-
-struct sym_entry {
-    uint32_t hash;
-    uint32_t address;
-};
-
-constexpr bool operator<(const sym_entry& k1, const sym_entry& k2) {
-    return k1.hash < k2.hash;
-}
-
-static constexpr uint32_t elf_gnu_hash(const char* s) {
-    uint32_t h = 0x1505;
-    for(unsigned char c = *s; c != '\0'; c = *++s) h = (h << 5) + h + c;
-    return h;
-}
 
 static constexpr auto elf_addr_table = sort(create_array_t<sym_entry>(
     API_METHOD(acquire_mutex),
@@ -67,6 +49,8 @@ static constexpr auto elf_addr_table = sort(create_array_t<sym_entry>(
     API_METHOD(view_port_free),
     API_METHOD(osMessageQueueDelete),
     API_METHOD(delete_mutex)));
+
+static_assert(!has_hash_collisions(elf_addr_table), "Detected API method hash collision!");
 
 extern "C" bool elf_resolve_from_hashtable(const char* name, Elf32_Addr* address) {
     bool result = false;

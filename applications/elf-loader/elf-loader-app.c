@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-#include "elf-lib/loader.h"
+#include "elf-lib/elf-loader.h"
 #include "elf-loader-sys-api.h"
 #include "elf-cpp/elf-hashtable.h"
 
