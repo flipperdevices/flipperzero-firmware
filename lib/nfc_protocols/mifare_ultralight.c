@@ -197,7 +197,19 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
     uint16_t tx_bits = 0;
     bool command_parsed = false;
 
-    if(cmd == MF_UL_GET_VERSION_CMD) {
+    // Check composite commands
+    if(mf_ul_emulate->comp_write_cmd_started) {
+        // Compatibility write is the only one composit command
+        if(len_rx == 16) {
+            memcpy(&mf_ul_emulate->data.data[mf_ul_emulate->comp_write_page_addr * 4], buff_rx, 4);
+            mf_ul_emulate->data_changed = true;
+            // Send ACK message
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            command_parsed = true;
+        }
+        mf_ul_emulate->comp_write_cmd_started = false;
+    } else if(cmd == MF_UL_GET_VERSION_CMD) {
         if(mf_ul_emulate->data.type != MfUltralightTypeUnknown) {
             tx_bytes = sizeof(mf_ul_emulate->data.version);
             memcpy(buff_tx, &mf_ul_emulate->data.version, tx_bytes);
@@ -237,6 +249,16 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
         if((write_page > 1) && (write_page < page_num - 2)) {
             memcpy(&mf_ul_emulate->data.data[write_page * 4], &buff_rx[2], 4);
             mf_ul_emulate->data_changed = true;
+            // ACK
+            buff_tx[0] = 0x0A;
+            tx_bits = 4;
+            command_parsed = true;
+        }
+    } else if(cmd == MF_UL_COMP_WRITE) {
+        uint8_t write_page = buff_rx[1];
+        if((write_page > 1) && (write_page < page_num - 2)) {
+            mf_ul_emulate->comp_write_cmd_started = true;
+            mf_ul_emulate->comp_write_page_addr = write_page;
             // ACK
             buff_tx[0] = 0x0A;
             tx_bits = 4;
@@ -290,6 +312,9 @@ uint16_t mf_ul_prepare_emulation_response(uint8_t* buff_rx, uint16_t len_rx, uin
             tx_bytes = 1;
             command_parsed = true;
         }
+    } else if(cmd == MF_UL_HALT_START) {
+        tx_bits = 0;
+        command_parsed = true;
     }
 
     if(!command_parsed) {

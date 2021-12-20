@@ -632,6 +632,7 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                         if(tx_len < 8) {
                             err = furi_hal_nfc_raw_bitstream_exchange(
                                 tx_buff, tx_len, &rx_buff, &rx_len, false);
+                            *rx_len /= 8;
                         } else {
                             err = furi_hal_nfc_data_exchange(
                                 tx_buff, tx_len / 8, &rx_buff, &rx_len, false);
@@ -643,7 +644,6 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                             break;
                         }
                     } else {
-                        FURI_LOG_D(TAG, "Not valid command: %02X", rx_buff[0]);
                         furi_hal_nfc_deactivate();
                         break;
                     }

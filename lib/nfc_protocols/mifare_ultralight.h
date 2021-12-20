@@ -8,6 +8,7 @@
 
 #define MF_UL_TEARING_FLAG_DEFAULT (0xBD)
 
+#define MF_UL_HALT_START (0x50)
 #define MF_UL_GET_VERSION_CMD (0x60)
 #define MF_UL_READ_CMD (0x30)
 #define MF_UL_FAST_READ_CMD (0x3A)
@@ -79,6 +80,8 @@ typedef struct {
     bool data_changed;
     MifareUlData data;
     MifareUlAuthData* auth_data;
+    bool comp_write_cmd_started;
+    uint8_t comp_write_page_addr;
 } MifareUlDevice;
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
