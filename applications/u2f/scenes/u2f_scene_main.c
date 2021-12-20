@@ -28,16 +28,6 @@ static void u2f_scene_main_timer_callback(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, U2fCustomEventTimeout);
 }
 
-static void u2f_scene_main_notification(U2fApp* app, uint32_t event) {
-    furi_assert(app);
-    if(event == U2fCustomEventRegister)
-        u2f_view_set_state(app->u2f_view, U2fMsgRegister);
-    else if(event == U2fCustomEventAuth)
-        u2f_view_set_state(app->u2f_view, U2fMsgAuth);
-
-    notification_message(app->notifications, &sequence_success);
-}
-
 bool u2f_scene_main_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
     U2fApp* app = context;
@@ -45,15 +35,18 @@ bool u2f_scene_main_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if((event.event == U2fCustomEventRegister) || (event.event == U2fCustomEventAuth)) {
-            osTimerStop(app->timer);
             osTimerStart(app->timer, U2F_EVENT_TIMEOUT);
             if(app->event_cur == U2fCustomEventNone) {
                 app->event_cur = event.event;
-                u2f_scene_main_notification(app, event.event);
+                if(event.event == U2fCustomEventRegister)
+                    u2f_view_set_state(app->u2f_view, U2fMsgRegister);
+                else if(event.event == U2fCustomEventAuth)
+                    u2f_view_set_state(app->u2f_view, U2fMsgAuth);
+                notification_message(app->notifications, &sequence_success);
             }
             notification_message(app->notifications, &sequence_blink_blue_10);
         } else if(event.event == U2fCustomEventWink) {
-            u2f_scene_main_notification(app, event.event);
+            notification_message(app->notifications, &sequence_blink_green_10);
         } else if(event.event == U2fCustomEventTimeout) {
             app->event_cur = U2fCustomEventNone;
             u2f_view_set_state(app->u2f_view, U2fMsgNone);
