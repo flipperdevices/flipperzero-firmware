@@ -629,8 +629,13 @@ void nfc_worker_emulate_mifare_ul(NfcWorker* nfc_worker) {
                     tx_len = mf_ul_prepare_emulation_response(
                         rx_buff, *rx_len, tx_buff, &mf_ul_emulate);
                     if(tx_len > 0) {
-                        err =
-                            furi_hal_nfc_data_exchange(tx_buff, tx_len, &rx_buff, &rx_len, false);
+                        if(tx_len < 8) {
+                            err = furi_hal_nfc_raw_bitstream_exchange(
+                                tx_buff, tx_len, &rx_buff, &rx_len, false);
+                        } else {
+                            err = furi_hal_nfc_data_exchange(
+                                tx_buff, tx_len / 8, &rx_buff, &rx_len, false);
+                        }
                         if(err == ERR_NONE) {
                             continue;
                         } else {
