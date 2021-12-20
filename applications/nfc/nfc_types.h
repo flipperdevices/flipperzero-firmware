@@ -64,25 +64,17 @@ static inline const char* nfc_guess_protocol(NfcProtocol protocol) {
     }
 }
 
-static inline const char* nfc_get_protocol(NfcProtocol protocol) {
-    if(protocol == NfcDeviceProtocolEMV) {
-        return "EMV bank card";
-    } else if(protocol == NfcDeviceProtocolMifareUl) {
-        return "Mifare Ultralight";
-    } else if(protocol == NfcDeviceProtocolNtag) {
-        return "NTAG";
-    } else {
-        return "Unrecognized";
-    }
-}
-
-static inline const char* nfc_mf_ul_type(MfUltralightType type) {
+static inline const char* nfc_mf_ul_type(MfUltralightType type, bool full_name) {
     if(type == MfUltralightTypeNTAG213) {
         return "NTAG213";
     } else if(type == MfUltralightTypeNTAG215) {
         return "NTAG215";
     } else if(type == MfUltralightTypeNTAG216) {
         return "NTAG216";
+    } else if(type == MfUltralightTypeUL11 && full_name) {
+        return "Mifare Ultralight 11";
+    } else if(type == MfUltralightTypeUL21 && full_name) {
+        return "Mifare Ultralight 21";
     } else {
         return "Mifare Ultralight";
     }

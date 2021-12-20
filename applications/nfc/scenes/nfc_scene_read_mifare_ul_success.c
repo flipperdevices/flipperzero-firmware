@@ -34,7 +34,7 @@ void nfc_scene_read_mifare_ul_success_on_enter(void* context) {
     dialog_ex_set_right_button_text(dialog_ex, "More");
     dialog_ex_set_center_button_text(dialog_ex, "Data");
     dialog_ex_set_header(
-        dialog_ex, nfc_mf_ul_type(mf_ul_data->type), 64, 8, AlignCenter, AlignCenter);
+        dialog_ex, nfc_mf_ul_type(mf_ul_data->type, true), 64, 8, AlignCenter, AlignCenter);
     dialog_ex_set_icon(dialog_ex, 8, 13, &I_Medium_chip_22x21);
     // Display UID
     nfc_text_store_set(

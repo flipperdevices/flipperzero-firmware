@@ -28,6 +28,9 @@ typedef enum {
     MfUltralightTypeNTAG213,
     MfUltralightTypeNTAG215,
     MfUltralightTypeNTAG216,
+
+    // Keep last for number of types calculation
+    MfUltralightTypeNum,
 } MfUltralightType;
 
 typedef struct {
