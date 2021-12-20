@@ -40,6 +40,10 @@ typedef struct {
 } DuckyKey;
 
 static const DuckyKey ducky_keys[] = {
+    {"CTRL-ALT", KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_ALT},
+    {"CTRL-SHIFT", KEY_MOD_LEFT_CTRL | KEY_MOD_LEFT_SHIFT},
+    {"ALT-SHIFT", KEY_MOD_LEFT_ALT | KEY_MOD_LEFT_SHIFT},
+
     {"CTRL", KEY_MOD_LEFT_CTRL},
     {"CONTROL", KEY_MOD_LEFT_CTRL},
     {"SHIFT", KEY_MOD_LEFT_SHIFT},
