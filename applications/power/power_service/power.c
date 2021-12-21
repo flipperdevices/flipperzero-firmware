@@ -7,7 +7,7 @@
 #include <gui/view.h>
 
 #define POWER_OFF_TIMEOUT 90
-#define POWER_BATTERY_WELL_LEVEL 99
+#define POWER_BATTERY_WELL_LEVEL 70
 
 bool power_is_battery_well(PowerInfo* info) {
     return info->health > POWER_BATTERY_WELL_LEVEL;
@@ -17,7 +17,7 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
     canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
-    canvas_draw_box(canvas, 2, 2, power->info.charge / 5, 4);
+    canvas_draw_box(canvas, 2, 2, (power->info.charge + 4) / 5, 4);
 }
 
 static ViewPort* power_battery_view_port_alloc(Power* power) {
@@ -172,6 +172,7 @@ static void power_check_battery_level_change(Power* power) {
 int32_t power_srv(void* p) {
     (void)p;
     Power* power = power_alloc();
+    power_update_info(power);
     furi_record_create("power", power);
 
     while(1) {

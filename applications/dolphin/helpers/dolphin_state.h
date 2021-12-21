@@ -3,7 +3,6 @@
 #include "dolphin_deed.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <rtc.h>
 #include <time.h>
 
 typedef struct DolphinState DolphinState;
@@ -41,6 +40,8 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed);
 void dolphin_state_butthurted(DolphinState* dolphin_state);
 
 uint32_t dolphin_state_xp_to_levelup(uint32_t icounter);
+
+uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter);
 
 bool dolphin_state_is_levelup(uint32_t icounter);
 

@@ -41,8 +41,8 @@ bool subghz_get_preset_name(SubGhz* subghz, string_t preset) {
     case FuriHalSubGhzPreset2FSKDev476Async:
         preset_name = "FuriHalSubGhzPreset2FSKDev476Async";
         break;
-        FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unknown preset");
     default:
+        FURI_LOG_E(SUBGHZ_PARSER_TAG, "Unknown preset");
         return false;
         break;
     }
@@ -320,7 +320,7 @@ bool subghz_save_protocol_to_file(SubGhz* subghz, const char* dev_name) {
             break;
         }
         // Create saved directory if necessary
-        if(!storage_simply_mkdir(storage, SUBGHZ_APP_FOLDER)) {
+        if(!storage_simply_mkdir(storage, SUBGHZ_APP_PATH_FOLDER)) {
             dialog_message_show_storage_error(subghz->dialogs, "Cannot create\nfolder");
             break;
         }

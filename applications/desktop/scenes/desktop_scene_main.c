@@ -113,7 +113,9 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
 
         case DesktopMainEventLeftLong:
+#if SRV_DOLPHIN_STATE_DEBUG == 1
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneAnimationDebug);
+#endif
             consumed = true;
             break;
 

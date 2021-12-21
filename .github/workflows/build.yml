@@ -73,10 +73,16 @@ jobs:
           echo "::set-output name=short-hash::${SHA}"
           echo "::set-output name=default-target::${DEFAULT_TARGET}"
 
+      - name: 'Bundle scripts'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
+
       - name: 'Build the firmware in docker'
         uses: ./.github/actions/docker
         with:
           run: |
+            set -e
             for TARGET in ${TARGETS}
             do
               make TARGET=${TARGET}
@@ -87,10 +93,17 @@ jobs:
         uses: ./.github/actions/docker
         with:
           run: |
+            set -e
             for TARGET in ${TARGETS}
             do
               mv dist/${TARGET}/* artifacts/
             done
+
+      - name: 'Bundle resources'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          ./scripts/assets.py manifest assets/resources
+          tar czpf artifacts/flipper-z-any-resources-${{steps.names.outputs.suffix}}.tgz -C assets resources
 
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -99,17 +112,6 @@ jobs:
           mkdir core2_firmware
           ./scripts/assets.py copro lib/STM32CubeWB core2_firmware STM32WB5x
           tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz core2_firmware
-
-      - name: 'Bundle scripts'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
-
-      - name: 'Bundle resources'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-          ./scripts/assets.py manifest assets/resources
-          tar czpf artifacts/flipper-z-any-resources-${{steps.names.outputs.suffix}}.tgz -C assets resources
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -145,5 +147,5 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            [Click here](https://update.flipperzero.one/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}) to flash the `${{steps.names.outputs.short-hash}}` version of this branch via WebUSB.
+            [Click here](https://update.flipperzero.one/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}&target=${{steps.names.outputs.default-target}}) to flash the `${{steps.names.outputs.short-hash}}` version of this branch via WebUSB.
           edit-mode: replace

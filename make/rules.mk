@@ -77,7 +77,7 @@ $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
 	touch $@
 
 $(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
-	dfu-util -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS) $(DFU_OPTIONS)
+	dfu-util -d 0483:df11 -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS) $(DFU_OPTIONS)
 	touch $@
 
 flash: $(OBJ_DIR)/flash
@@ -108,7 +108,8 @@ blackmagic:
 		-ex 'monitor swdp_scan' \
 		-ex 'monitor debug_bmp enable' \
 		-ex 'attach 1' \
-		-ex "set confirm off" \
+		-ex 'set confirm off' \
+		-ex 'set mem inaccessible-by-default off' \
 		-ex "source ../debug/FreeRTOS/FreeRTOS.py" \
 		-ex "source ../debug/PyCortexMDebug/PyCortexMDebug.py" \
 		-ex "svd_load $(SVD_FILE)" \

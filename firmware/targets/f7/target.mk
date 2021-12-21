@@ -19,9 +19,9 @@ BOOT_CFLAGS		= -DBOOT_ADDRESS=$(BOOT_ADDRESS) -DFW_ADDRESS=$(FW_ADDRESS) -DOS_OF
 MCU_FLAGS		= -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 CFLAGS			+= $(MCU_FLAGS) $(BOOT_CFLAGS) -DSTM32WB55xx -Wall -fdata-sections -ffunction-sections
-LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs 
+LDFLAGS			+= $(MCU_FLAGS) -specs=nosys.specs -specs=nano.specs -u _printf_float
 
-CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions 
+CPPFLAGS		+= -fno-rtti -fno-use-cxa-atexit -fno-exceptions
 LDFLAGS			+= -Wl,--start-group -lstdc++ -lsupc++ -Wl,--end-group
 
 HARDWARE_TARGET = 7
@@ -57,7 +57,6 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_pwr_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rcc.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_rtc_ex.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_hal_tim_ex.c \
@@ -67,6 +66,7 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_i2c.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_lptim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rcc.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rtc.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_spi.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usart.c \
@@ -75,18 +75,19 @@ C_SOURCES += \
 
 # FreeRTOS
 CFLAGS += \
-	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/include \
-	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
-	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
+	-I$(LIB_DIR)/FreeRTOS-Kernel/include \
+	-I$(LIB_DIR)/FreeRTOS-Kernel/portable/GCC/ARM_CM4F \
+	-I$(LIB_DIR)/FreeRTOS-glue/
+
 C_SOURCES += \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/list.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/queue.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/tasks.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/timers.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c \
-	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
+	$(LIB_DIR)/FreeRTOS-Kernel/event_groups.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/list.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/queue.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/stream_buffer.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/tasks.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/timers.c \
+	$(LIB_DIR)/FreeRTOS-Kernel/portable/GCC/ARM_CM4F/port.c \
+	$(LIB_DIR)/FreeRTOS-glue/cmsis_os2.c \
 
 # BLE glue 
 CFLAGS += \

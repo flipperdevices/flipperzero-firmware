@@ -35,7 +35,7 @@ class Main(App):
     def generate(self):
         meta = {}
         for k, v in vars(self.args).items():
-            if k == "project" or k == "func":
+            if k in ["project", "func", "debug"]:
                 continue
             if isinstance(v, str):
                 v = v.strip('"')
@@ -49,7 +49,7 @@ class Main(App):
         for path in self.args.input[0]:
             with open(path, mode="r") as file:
                 dict = json.loads(file.read())
-                full |= dict
+                full.update(dict)
 
         print(json.dumps(full, indent=4))
         return 0

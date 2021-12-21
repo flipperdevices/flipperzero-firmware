@@ -1,7 +1,6 @@
 #include <furi-hal.h>
 
 #include <comp.h>
-#include <rtc.h>
 #include <tim.h>
 #include <gpio.h>
 
@@ -13,6 +12,7 @@
 
 void furi_hal_init() {
     furi_hal_clock_init();
+    furi_hal_rtc_init();
     furi_hal_console_init();
     furi_hal_interrupt_init();
     furi_hal_delay_init();
@@ -20,8 +20,6 @@ void furi_hal_init() {
     MX_GPIO_Init();
     FURI_LOG_I(TAG, "GPIO OK");
 
-    MX_RTC_Init();
-    FURI_LOG_I(TAG, "RTC OK");
     furi_hal_bootloader_init();
     furi_hal_version_init();
 

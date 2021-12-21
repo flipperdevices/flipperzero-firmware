@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <storage/storage.h>
 #include <furi.h>
+#include <furi-hal.h>
 #include <math.h>
 #include <toolbox/saved_struct.h>
 
@@ -12,6 +13,8 @@
 #define DOLPHIN_LVL_THRESHOLD 20.0f
 #define LEVEL2_THRESHOLD 20
 #define LEVEL3_THRESHOLD 100
+#define BUTTHURT_MAX 14
+#define BUTTHURT_MIN 0
 
 DolphinState* dolphin_state_alloc() {
     return furi_alloc(sizeof(DolphinState));
@@ -44,37 +47,42 @@ bool dolphin_state_save(DolphinState* dolphin_state) {
 }
 
 bool dolphin_state_load(DolphinState* dolphin_state) {
-    bool loaded = saved_struct_load(
+    bool success = saved_struct_load(
         DOLPHIN_STATE_PATH,
         &dolphin_state->data,
         sizeof(DolphinStoreData),
         DOLPHIN_STATE_HEADER_MAGIC,
         DOLPHIN_STATE_HEADER_VERSION);
 
-    if(!loaded) {
+    if(success) {
+        if((dolphin_state->data.butthurt > BUTTHURT_MAX) ||
+           (dolphin_state->data.butthurt < BUTTHURT_MIN)) {
+            success = false;
+        }
+    }
+
+    if(!success) {
         FURI_LOG_W(TAG, "Reset dolphin-state");
         memset(dolphin_state, 0, sizeof(*dolphin_state));
         dolphin_state->dirty = true;
     }
 
-    return loaded;
+    return success;
 }
 
 uint64_t dolphin_state_timestamp() {
-    RTC_TimeTypeDef time;
-    RTC_DateTypeDef date;
+    FuriHalRtcDateTime datetime;
     struct tm current;
 
-    HAL_RTC_GetTime(&hrtc, &time, RTC_FORMAT_BIN);
-    HAL_RTC_GetDate(&hrtc, &date, RTC_FORMAT_BIN);
+    furi_hal_rtc_get_datetime(&datetime);
 
-    current.tm_year = date.Year + 100;
-    current.tm_mday = date.Date;
-    current.tm_mon = date.Month - 1;
+    current.tm_year = datetime.year - 1900;
+    current.tm_mday = datetime.day;
+    current.tm_mon = datetime.month - 1;
 
-    current.tm_hour = time.Hours;
-    current.tm_min = time.Minutes;
-    current.tm_sec = time.Seconds;
+    current.tm_hour = datetime.hour;
+    current.tm_min = datetime.minute;
+    current.tm_sec = datetime.second;
 
     return mktime(&current);
 }
@@ -91,6 +99,18 @@ uint8_t dolphin_get_level(uint32_t icounter) {
     } else {
         return 3;
     }
+}
+
+uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
+    uint32_t threshold = 0;
+    if(icounter <= LEVEL2_THRESHOLD) {
+        threshold = 0;
+    } else if(icounter <= LEVEL3_THRESHOLD) {
+        threshold = LEVEL2_THRESHOLD + 1;
+    } else {
+        threshold = LEVEL3_THRESHOLD + 1;
+    }
+    return icounter - threshold;
 }
 
 uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
@@ -124,8 +144,10 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
         dolphin_state->data.icounter += MIN(xp_to_levelup, deed_weight->icounter);
     }
 
-    uint32_t new_butthurt =
-        CLAMP(((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt, 14, 0);
+    uint32_t new_butthurt = CLAMP(
+        ((int32_t)dolphin_state->data.butthurt) + deed_weight->butthurt,
+        BUTTHURT_MAX,
+        BUTTHURT_MIN);
 
     if(!!dolphin_state->data.butthurt != !!new_butthurt) {
         mood_changed = true;
@@ -138,9 +160,12 @@ bool dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
 }
 
 void dolphin_state_butthurted(DolphinState* dolphin_state) {
-    dolphin_state->data.butthurt++;
-    dolphin_state->data.timestamp = dolphin_state_timestamp();
-    dolphin_state->dirty = true;
+    if(dolphin_state->data.butthurt < BUTTHURT_MAX) {
+        dolphin_state->data.butthurt++;
+        FURI_LOG_I("DolphinState", "Increasing butthurt");
+        dolphin_state->data.timestamp = dolphin_state_timestamp();
+        dolphin_state->dirty = true;
+    }
 }
 
 void dolphin_state_increase_level(DolphinState* dolphin_state) {

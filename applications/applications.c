@@ -33,12 +33,14 @@ extern int32_t keypad_test_app(void* p);
 extern int32_t lfrfid_app(void* p);
 extern int32_t lfrfid_debug_app(void* p);
 extern int32_t nfc_app(void* p);
+extern int32_t passport_app(void* p);
 extern int32_t scened_app(void* p);
 extern int32_t storage_test_app(void* p);
 extern int32_t subghz_app(void* p);
 extern int32_t usb_mouse_app(void* p);
 extern int32_t usb_test_app(void* p);
 extern int32_t vibro_test_app(void* p);
+extern int32_t bt_hid_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
@@ -63,6 +65,7 @@ extern int32_t bt_settings_app(void* p);
 extern int32_t desktop_settings_app(void* p);
 extern int32_t about_settings_app(void* p);
 extern int32_t power_settings_app(void* p);
+extern int32_t system_settings_app(void* p);
 
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
@@ -151,7 +154,6 @@ const FlipperApplication FLIPPER_APPS[] = {
 #ifdef APP_BAD_USB
     {.app = bad_usb_app, .name = "Bad USB", .stack_size = 2048, .icon = &A_BadUsb_14},
 #endif
-
 };
 
 const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplication);
@@ -204,6 +206,9 @@ const size_t FLIPPER_ON_SYSTEM_START_COUNT =
 
 // Plugin menu
 const FlipperApplication FLIPPER_PLUGINS[] = {
+#ifdef APP_BLE_HID
+    {.app = bt_hid_app, .name = "Bluetooth remote", .stack_size = 1024, .icon = NULL},
+#endif
 
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player_app, .name = "Music Player", .stack_size = 1024, .icon = &A_Plugins_14},
@@ -301,6 +306,14 @@ const FlipperApplication FLIPPER_SETTINGS_APPS[] = {
 
 #ifdef SRV_DESKTOP
     {.app = desktop_settings_app, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef APP_PASSPORT
+    {.app = passport_app, .name = "Passport", .stack_size = 1024, .icon = NULL},
+#endif
+
+#ifdef SRV_GUI
+    {.app = system_settings_app, .name = "System", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef APP_ABOUT

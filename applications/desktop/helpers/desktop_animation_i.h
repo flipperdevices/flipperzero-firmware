@@ -6,9 +6,9 @@
 
 // Calm/Mad Basic Idle Animations
 
-#define COMMON_BASIC_DURATION (60 * 60)
-#define COMMON_ACTIVE_CYCLES 7
-#define COMMON_ACTIVE_COOLDOWN 30
+#define COMMON_BASIC_DURATION (2 * 60 * 60)
+#define COMMON_ACTIVE_CYCLES 1
+#define COMMON_ACTIVE_COOLDOWN 15
 #define COMMON_WEIGHT 3
 
 #define BUTTHURT_LEVEL(x) (1UL << (x))
@@ -20,7 +20,7 @@
 #define DEFINE_ICON_AND_NAME(x) .name = #x, .icon = &x
 
 static const BasicAnimation animation_TV = {
-    DEFINE_ICON_AND_NAME(A_TV_128x51),
+    DEFINE_ICON_AND_NAME(A_Tv_128x52),
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
@@ -29,12 +29,12 @@ static const BasicAnimation animation_TV = {
                            BUTTHURT_LEVEL(6) | BUTTHURT_LEVEL(7)};
 
 static const ActiveAnimation animation_TV_active = {
-    .icon = &A_TVActive_128x51,
-    .duration = COMMON_ACTIVE_DURATION(2),
+    .icon = &A_TvActive_128x52,
+    .duration = COMMON_ACTIVE_DURATION(6),
 };
 
 static const BasicAnimation animation_sleep = {
-    DEFINE_ICON_AND_NAME(A_Sleep_128x51),
+    DEFINE_ICON_AND_NAME(A_Sleep_128x52),
     .black_status_bar = true,
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
@@ -45,9 +45,9 @@ static const BasicAnimation animation_sleep = {
                            BUTTHURT_LEVEL(9) | BUTTHURT_LEVEL(10)};
 
 static const ActiveAnimation animation_sleep_active = {
-    .icon = &A_SleepActive_128x51,
+    .icon = &A_SleepActive_128x52,
     .black_status_bar = true,
-    .duration = COMMON_ACTIVE_DURATION(2),
+    .duration = COMMON_ACTIVE_DURATION(5),
 };
 
 static const BasicAnimation animation_leaving = {
@@ -64,7 +64,7 @@ static const ActiveAnimation animation_leaving_active = {
 };
 
 static const BasicAnimation animation_laptop = {
-    DEFINE_ICON_AND_NAME(A_Laptop_128x51),
+    DEFINE_ICON_AND_NAME(A_Laptop_128x52),
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
@@ -72,8 +72,8 @@ static const BasicAnimation animation_laptop = {
                            BUTTHURT_LEVEL(3) | BUTTHURT_LEVEL(4) | BUTTHURT_LEVEL(5)};
 
 static const ActiveAnimation animation_laptop_active = {
-    .icon = &A_LaptopActive_128x51,
-    .duration = COMMON_ACTIVE_DURATION(2),
+    .icon = &A_LaptopActive_128x52,
+    .duration = COMMON_ACTIVE_DURATION(8),
 };
 
 static const BasicAnimation animation_knife = {
@@ -120,15 +120,15 @@ static const ActiveAnimation animation_box_active = {
 };
 
 static const BasicAnimation animation_waves = {
-    DEFINE_ICON_AND_NAME(A_Waves_128x51),
+    DEFINE_ICON_AND_NAME(A_Waves_128x52),
     .duration = COMMON_BASIC_DURATION,
     .weight = COMMON_WEIGHT,
     .active_cooldown = COMMON_ACTIVE_COOLDOWN,
     .butthurt_level_mask = BUTTHURT_LEVEL(0) | BUTTHURT_LEVEL(1) | BUTTHURT_LEVEL(2)};
 
 static const ActiveAnimation animation_waves_active = {
-    .icon = &A_WavesActive_128x51,
-    .duration = COMMON_ACTIVE_DURATION(2),
+    .icon = &A_WavesActive_128x52,
+    .duration = COMMON_ACTIVE_DURATION(7),
 };
 
 // Level Idle Animations
