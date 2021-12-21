@@ -19,11 +19,13 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+*.pickle
 
 .obj/
 bindings/
 .DS_Store
 .mxproject
+Brewfile.lock.json
 
 # Visual Studio Code
 .vscode/
@@ -31,3 +33,6 @@ bindings/
 # legendary cmake's
 build
 CMakeLists.txt
+
+# bundle output
+dist

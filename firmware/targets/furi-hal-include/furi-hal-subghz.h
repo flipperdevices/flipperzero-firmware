@@ -20,6 +20,8 @@ typedef enum {
     FuriHalSubGhzPresetOok650Async,     /**< OOK, bandwidth 650kHz, asynchronous */
     FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
     FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 4.760742 kHz, asynchronous */
+    FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
+    FuriHalSubGhzPresetGFSK9_99KbAsync  /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
 } FuriHalSubGhzPreset;
 
 /** Switchable Radio Paths */
@@ -90,6 +92,18 @@ void furi_hal_subghz_load_patable(const uint8_t data[8]);
  */
 void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
 
+/** Check if recieve pipe is not empty
+ *
+ * @return     true if not empty
+ */
+bool furi_hal_subghz_rx_pipe_not_empty();
+
+/** Check if recieved data crc is valid
+ *
+ * @return     true if valid
+ */
+bool furi_hal_subghz_is_rx_data_crc_valid();
+
 /** Read packet from FIFO
  *
  * @param      data  pointer
@@ -100,6 +114,10 @@ void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size);
 /** Flush rx FIFO buffer
  */
 void furi_hal_subghz_flush_rx();
+
+/** Flush tx FIFO buffer
+ */
+void furi_hal_subghz_flush_tx();
 
 /** Shutdown Issue spwd command
  * @warning    registers content will be lost
@@ -131,6 +149,12 @@ bool furi_hal_subghz_tx();
  */
 float furi_hal_subghz_get_rssi();
 
+/** Get LQI
+ *
+ * @return     LQI value
+ */
+uint8_t furi_hal_subghz_get_lqi();
+
 /** Check if frequency is in valid range
  *
  * @param      value  frequency in Hz
@@ -147,6 +171,14 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  * @return     real frequency in herz
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
+
+/** Сheck if transmission is allowed on this frequency for your flipper region
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     true if allowed
+ */
+bool furi_hal_subghz_is_tx_allowed(uint32_t value);
 
 /** Set frequency
  *

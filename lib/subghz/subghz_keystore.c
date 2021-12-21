@@ -77,23 +77,28 @@ static bool subghz_keystore_process_line(SubGhzKeystore* instance, char* line) {
 }
 
 static void subghz_keystore_mess_with_iv(uint8_t* iv) {
+    // Alignment check for `ldrd` instruction
+    furi_assert(((uint32_t)iv) % 4 == 0);
     // Please do not share decrypted manufacture keys
     // Sharing them will bring some discomfort to legal owners
     // And potential legal action against you
     // While you reading this code think about your own personal responsibility
-    asm volatile("movs   r0, #0x0    \n"
-                 "movs   r1, #0x0    \n"
-                 "movs   r2, #0x0    \n"
-                 "movs   r3, #0x0    \n"
-                 "nani:              \n"
-                 "ldrb   r1, [r0, %0]\n"
-                 "mov    r2, r1      \n"
-                 "add    r1, r3      \n"
-                 "mov    r3, r2      \n"
-                 "strb   r1, [r0, %0]\n"
-                 "adds   r0, #0x1    \n"
-                 "cmp    r0, #0xF    \n"
-                 "bls    nani        \n"
+    asm volatile("nani:                    \n"
+                 "ldrd  r0, r2, [%0, #0x0] \n"
+                 "lsl   r1, r0, #8         \n"
+                 "lsl   r3, r2, #8         \n"
+                 "orr   r3, r3, r0, lsr #24\n"
+                 "uadd8 r1, r1, r0         \n"
+                 "uadd8 r3, r3, r2         \n"
+                 "strd  r1, r3, [%0, #0x0] \n"
+                 "ldrd  r1, r3, [%0, #0x8] \n"
+                 "lsl   r0, r1, #8         \n"
+                 "orr   r0, r0, r2, lsr #24\n"
+                 "lsl   r2, r3, #8         \n"
+                 "orr   r2, r2, r1, lsr #24\n"
+                 "uadd8 r1, r1, r0         \n"
+                 "uadd8 r3, r3, r2         \n"
+                 "strd  r1, r3, [%0, #0x8] \n"
                  :
                  : "r"(iv)
                  : "r0", "r1", "r2", "r3", "memory");
@@ -305,12 +310,15 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
                 storage_file_write(file, encrypted_line, strlen(encrypted_line));
                 storage_file_write(file, "\n", 1);
                 encrypted_line_count++;
-
-                FURI_LOG_I(
-                    TAG, "Encrypted: `%s` -> `%s`", decrypted_line, encrypted_line);
             }
         furi_hal_crypto_store_unload_key(SUBGHZ_KEYSTORE_FILE_ENCRYPTION_KEY_SLOT);
-        result = encrypted_line_count == SubGhzKeyArray_size(instance->data);
+        size_t total_keys = SubGhzKeyArray_size(instance->data);
+        result = encrypted_line_count == total_keys;
+        if (result) {
+            FURI_LOG_I(TAG, "Success. Encrypted: %d of %d", encrypted_line_count, total_keys);
+        } else {
+            FURI_LOG_E(TAG, "Failure. Encrypted: %d of %d", encrypted_line_count, total_keys);
+        }
     } while(0);
     flipper_file_close(flipper_file);
     flipper_file_free(flipper_file);

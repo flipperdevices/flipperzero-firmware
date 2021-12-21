@@ -199,12 +199,12 @@ void view_dispatcher_attach_to_gui(
     furi_assert(view_dispatcher->gui == NULL);
     furi_assert(gui);
 
-    if(type == ViewDispatcherTypeNone) {
-        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerNone);
+    if(type == ViewDispatcherTypeDesktop) {
+        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerDesktop);
+    } else if(type == ViewDispatcherTypeWindow) {
+        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerWindow);
     } else if(type == ViewDispatcherTypeFullscreen) {
         gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerFullscreen);
-    } else if(type == ViewDispatcherTypeWindow) {
-        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerMain);
     } else {
         furi_check(NULL);
     }
@@ -258,7 +258,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         if(view_dispatcher->current_view) {
             is_consumed = view_input(view_dispatcher->current_view, event);
         }
-        if(!is_consumed && event->type == InputTypeShort) {
+        if(!is_consumed && (event->type == InputTypeShort || event->type == InputTypeLong)) {
             // TODO remove view navigation handlers
             uint32_t view_id = VIEW_IGNORE;
             if(event->key == InputKeyBack) {
