@@ -51,24 +51,6 @@ const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_frequencies_433_92 = 5;
 
-bool subghz_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    SubGhz* subghz = context;
-    return scene_manager_handle_custom_event(subghz->scene_manager, event);
-}
-
-bool subghz_back_event_callback(void* context) {
-    furi_assert(context);
-    SubGhz* subghz = context;
-    return scene_manager_handle_back_event(subghz->scene_manager);
-}
-
-void subghz_tick_event_callback(void* context) {
-    furi_assert(context);
-    SubGhz* subghz = context;
-    scene_manager_handle_tick_event(subghz->scene_manager);
-}
-
 SubGhz* subghz_alloc() {
     SubGhz* subghz = furi_alloc(sizeof(SubGhz));
 
@@ -80,15 +62,10 @@ SubGhz* subghz_alloc() {
     view_dispatcher_enable_queue(subghz->view_dispatcher);
     view_dispatcher_attach_to_gui(
         subghz->view_dispatcher, subghz->gui, ViewDispatcherTypeFullscreen);
-
-    subghz->scene_manager = scene_manager_alloc(&subghz_scene_handlers, subghz);
-    view_dispatcher_set_event_callback_context(subghz->view_dispatcher, subghz);
-    view_dispatcher_set_custom_event_callback(
-        subghz->view_dispatcher, subghz_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        subghz->view_dispatcher, subghz_back_event_callback);
-    view_dispatcher_set_tick_event_callback(
-        subghz->view_dispatcher, subghz_tick_event_callback, 100);
+    view_dispatcher_allocate_scene_manager(
+        subghz->view_dispatcher, &subghz_scene_handlers, subghz);
+    subghz->scene_manager = view_dispatcher_get_scene_manager(subghz->view_dispatcher);
+    view_dispatcher_set_tick_event_period(subghz->view_dispatcher, 100);
 
     // Open Notification record
     subghz->notifications = furi_record_open("notification");
@@ -255,9 +232,6 @@ void subghz_free(SubGhz* subghz) {
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewPopup);
     popup_free(subghz->popup);
 
-    // Scene manager
-    scene_manager_free(subghz->scene_manager);
-
     // View Dispatcher
     view_dispatcher_free(subghz->view_dispatcher);
 
@@ -295,9 +269,9 @@ int32_t subghz_app(void* p) {
             subghz->file_name, string_get_cstr(filename), strlen(string_get_cstr(filename)) + 1);
         string_clear(filename);
 
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+        view_dispatcher_set_start_scene(subghz->view_dispatcher, SubGhzSceneTransmitter);
     } else {
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+        view_dispatcher_set_start_scene(subghz->view_dispatcher, SubGhzSceneStart);
     }
 
     furi_hal_power_suppress_charge_enter();

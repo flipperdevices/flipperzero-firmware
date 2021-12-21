@@ -2,24 +2,6 @@
 #include <furi.h>
 #include <furi-hal.h>
 
-static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    BadUsbApp* app = context;
-    return scene_manager_handle_custom_event(app->scene_manager, event);
-}
-
-static bool bad_usb_app_back_event_callback(void* context) {
-    furi_assert(context);
-    BadUsbApp* app = context;
-    return scene_manager_handle_back_event(app->scene_manager);
-}
-
-static void bad_usb_app_tick_event_callback(void* context) {
-    furi_assert(context);
-    BadUsbApp* app = context;
-    scene_manager_handle_tick_event(app->scene_manager);
-}
-
 BadUsbApp* bad_usb_app_alloc() {
     BadUsbApp* app = furi_alloc(sizeof(BadUsbApp));
 
@@ -28,24 +10,17 @@ BadUsbApp* bad_usb_app_alloc() {
     app->dialogs = furi_record_open("dialogs");
 
     app->view_dispatcher = view_dispatcher_alloc();
-    app->scene_manager = scene_manager_alloc(&bad_usb_scene_handlers, app);
+    view_dispatcher_allocate_scene_manager(app->view_dispatcher, &bad_usb_scene_handlers, app);
+    view_dispatcher_set_start_scene(app->view_dispatcher, BadUsbSceneFileSelect);
+    app->scene_manager = view_dispatcher_get_scene_manager(app->view_dispatcher);
     view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_tick_event_callback(
-        app->view_dispatcher, bad_usb_app_tick_event_callback, 500);
-
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, bad_usb_app_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, bad_usb_app_back_event_callback);
+    view_dispatcher_set_tick_event_period(app->view_dispatcher, 500);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     app->bad_usb_view = bad_usb_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, BadUsbAppViewWork, bad_usb_get_view(app->bad_usb_view));
-
-    scene_manager_next_scene(app->scene_manager, BadUsbAppViewFileSelect);
 
     return app;
 }
@@ -60,7 +35,6 @@ void bad_usb_app_free(BadUsbApp* app) {
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
 
     // Close records
     furi_record_close("gui");

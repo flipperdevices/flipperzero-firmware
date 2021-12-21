@@ -1,17 +1,5 @@
 #include "storage_settings.h"
 
-static bool storage_settings_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    StorageSettings* app = context;
-    return scene_manager_handle_custom_event(app->scene_manager, event);
-}
-
-static bool storage_settings_back_event_callback(void* context) {
-    furi_assert(context);
-    StorageSettings* app = context;
-    return scene_manager_handle_back_event(app->scene_manager);
-}
-
 static StorageSettings* storage_settings_alloc() {
     StorageSettings* app = malloc(sizeof(StorageSettings));
 
@@ -20,16 +8,13 @@ static StorageSettings* storage_settings_alloc() {
     app->notification = furi_record_open("notification");
 
     app->view_dispatcher = view_dispatcher_alloc();
-    app->scene_manager = scene_manager_alloc(&storage_settings_scene_handlers, app);
+    view_dispatcher_allocate_scene_manager(
+        app->view_dispatcher, &storage_settings_scene_handlers, app);
+    view_dispatcher_set_start_scene(app->view_dispatcher, StorageSettingsStart);
+    app->scene_manager = view_dispatcher_get_scene_manager(app->view_dispatcher);
     string_init(app->text_string);
 
     view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, storage_settings_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, storage_settings_back_event_callback);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -40,8 +25,6 @@ static StorageSettings* storage_settings_alloc() {
     app->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, StorageSettingsViewDialogEx, dialog_ex_get_view(app->dialog_ex));
-
-    scene_manager_next_scene(app->scene_manager, StorageSettingsStart);
 
     return app;
 }
@@ -54,7 +37,6 @@ static void storage_settings_free(StorageSettings* app) {
     dialog_ex_free(app->dialog_ex);
 
     view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
 
     furi_record_close("gui");
     furi_record_close("storage");

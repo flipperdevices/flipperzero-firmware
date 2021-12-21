@@ -3,40 +3,17 @@
 #include <furi.h>
 #include <furi-hal.h>
 
-static bool gpio_app_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    GpioApp* app = context;
-    return scene_manager_handle_custom_event(app->scene_manager, event);
-}
-
-static bool gpio_app_back_event_callback(void* context) {
-    furi_assert(context);
-    GpioApp* app = context;
-    return scene_manager_handle_back_event(app->scene_manager);
-}
-
-static void gpio_app_tick_event_callback(void* context) {
-    furi_assert(context);
-    GpioApp* app = context;
-    scene_manager_handle_tick_event(app->scene_manager);
-}
-
 GpioApp* gpio_app_alloc() {
     GpioApp* app = furi_alloc(sizeof(GpioApp));
 
     app->gui = furi_record_open("gui");
 
     app->view_dispatcher = view_dispatcher_alloc();
-    app->scene_manager = scene_manager_alloc(&gpio_scene_handlers, app);
+    view_dispatcher_allocate_scene_manager(app->view_dispatcher, &gpio_scene_handlers, app);
+    view_dispatcher_set_start_scene(app->view_dispatcher, GpioSceneStart);
+    app->scene_manager = view_dispatcher_get_scene_manager(app->view_dispatcher);
     view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, gpio_app_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, gpio_app_back_event_callback);
-    view_dispatcher_set_tick_event_callback(
-        app->view_dispatcher, gpio_app_tick_event_callback, 100);
+    view_dispatcher_set_tick_event_period(app->view_dispatcher, 100);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -60,8 +37,6 @@ GpioApp* gpio_app_alloc() {
         GpioAppViewUsbUartCfg,
         variable_item_list_get_view(app->var_item_list));
 
-    scene_manager_next_scene(app->scene_manager, GpioSceneStart);
-
     return app;
 }
 
@@ -79,7 +54,6 @@ void gpio_app_free(GpioApp* app) {
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
 
     // Close records
     furi_record_close("gui");

@@ -18,36 +18,20 @@ static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Lock_8x8);
 }
 
-bool desktop_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    Desktop* desktop = (Desktop*)context;
-    return scene_manager_handle_custom_event(desktop->scene_manager, event);
-}
-
-bool desktop_back_event_callback(void* context) {
-    furi_assert(context);
-    Desktop* desktop = (Desktop*)context;
-    return scene_manager_handle_back_event(desktop->scene_manager);
-}
-
 Desktop* desktop_alloc() {
     Desktop* desktop = furi_alloc(sizeof(Desktop));
 
     desktop->gui = furi_record_open("gui");
     desktop->scene_thread = furi_thread_alloc();
     desktop->view_dispatcher = view_dispatcher_alloc();
-    desktop->scene_manager = scene_manager_alloc(&desktop_scene_handlers, desktop);
+    view_dispatcher_allocate_scene_manager(
+        desktop->view_dispatcher, &desktop_scene_handlers, desktop);
+    desktop->scene_manager = view_dispatcher_get_scene_manager(desktop->view_dispatcher);
     desktop->animation = desktop_animation_alloc();
 
     view_dispatcher_enable_queue(desktop->view_dispatcher);
     view_dispatcher_attach_to_gui(
         desktop->view_dispatcher, desktop->gui, ViewDispatcherTypeDesktop);
-
-    view_dispatcher_set_event_callback_context(desktop->view_dispatcher, desktop);
-    view_dispatcher_set_custom_event_callback(
-        desktop->view_dispatcher, desktop_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        desktop->view_dispatcher, desktop_back_event_callback);
 
     desktop->main_view = desktop_main_alloc();
     desktop->lock_menu = desktop_lock_menu_alloc();
@@ -102,7 +86,6 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewPinSetup);
 
     view_dispatcher_free(desktop->view_dispatcher);
-    scene_manager_free(desktop->scene_manager);
 
     desktop_main_free(desktop->main_view);
     desktop_lock_menu_free(desktop->lock_menu);
@@ -160,7 +143,7 @@ int32_t desktop_srv(void* p) {
         SAVE_DESKTOP_SETTINGS(&desktop->settings);
     }
 
-    scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
+    view_dispatcher_set_start_scene(desktop->view_dispatcher, DesktopSceneMain);
 
     if(furi_hal_lock_get()) {
         furi_hal_usb_disable();

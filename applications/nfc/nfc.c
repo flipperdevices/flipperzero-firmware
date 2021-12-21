@@ -1,35 +1,15 @@
 #include "nfc_i.h"
 #include "furi-hal-nfc.h"
 
-bool nfc_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
-    return scene_manager_handle_custom_event(nfc->scene_manager, event);
-}
-
-bool nfc_back_event_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
-    return scene_manager_handle_back_event(nfc->scene_manager);
-}
-
-void nfc_tick_event_callback(void* context) {
-    furi_assert(context);
-    Nfc* nfc = (Nfc*)context;
-    scene_manager_handle_tick_event(nfc->scene_manager);
-}
-
 Nfc* nfc_alloc() {
     Nfc* nfc = furi_alloc(sizeof(Nfc));
 
     nfc->worker = nfc_worker_alloc();
     nfc->view_dispatcher = view_dispatcher_alloc();
-    nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
+    view_dispatcher_allocate_scene_manager(nfc->view_dispatcher, &nfc_scene_handlers, nfc);
+    nfc->scene_manager = view_dispatcher_get_scene_manager(nfc->view_dispatcher);
     view_dispatcher_enable_queue(nfc->view_dispatcher);
-    view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
-    view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
-    view_dispatcher_set_tick_event_callback(nfc->view_dispatcher, nfc_tick_event_callback, 100);
+    view_dispatcher_set_tick_event_period(nfc->view_dispatcher, 100);
 
     // Nfc device
     nfc->dev = nfc_device_alloc();
@@ -128,9 +108,6 @@ void nfc_free(Nfc* nfc) {
     // View Dispatcher
     view_dispatcher_free(nfc->view_dispatcher);
 
-    // Scene Manager
-    scene_manager_free(nfc->scene_manager);
-
     // GUI
     furi_record_close("gui");
     nfc->gui = NULL;
@@ -162,12 +139,12 @@ int32_t nfc_app(void* p) {
     // Check argument and run corresponding scene
     if((*args != '\0') && nfc_device_load(nfc->dev, p)) {
         if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateMifareUl);
+            view_dispatcher_set_start_scene(nfc->view_dispatcher, NfcSceneEmulateMifareUl);
         } else {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            view_dispatcher_set_start_scene(nfc->view_dispatcher, NfcSceneEmulateUid);
         }
     } else {
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
+        view_dispatcher_set_start_scene(nfc->view_dispatcher, NfcSceneStart);
     }
 
     view_dispatcher_run(nfc->view_dispatcher);

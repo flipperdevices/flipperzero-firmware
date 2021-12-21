@@ -1,30 +1,15 @@
 #include "desktop_settings_app.h"
 
-static bool desktop_settings_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    DesktopSettingsApp* app = context;
-    return scene_manager_handle_custom_event(app->scene_manager, event);
-}
-
-static bool desktop_settings_back_event_callback(void* context) {
-    furi_assert(context);
-    DesktopSettingsApp* app = context;
-    return scene_manager_handle_back_event(app->scene_manager);
-}
-
 DesktopSettingsApp* desktop_settings_app_alloc() {
     DesktopSettingsApp* app = furi_alloc(sizeof(DesktopSettingsApp));
 
     app->gui = furi_record_open("gui");
     app->view_dispatcher = view_dispatcher_alloc();
-    app->scene_manager = scene_manager_alloc(&desktop_settings_scene_handlers, app);
+    view_dispatcher_allocate_scene_manager(
+        app->view_dispatcher, &desktop_settings_scene_handlers, app);
+    app->scene_manager = view_dispatcher_get_scene_manager(app->view_dispatcher);
+    view_dispatcher_set_start_scene(app->view_dispatcher, DesktopSettingsAppSceneStart);
     view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, desktop_settings_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, desktop_settings_back_event_callback);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -38,7 +23,6 @@ DesktopSettingsApp* desktop_settings_app_alloc() {
         DesktopSettingsAppViewPincodeInput,
         code_input_get_view(app->code_input));
 
-    scene_manager_next_scene(app->scene_manager, DesktopSettingsAppSceneStart);
     return app;
 }
 
@@ -51,7 +35,6 @@ void desktop_settings_app_free(DesktopSettingsApp* app) {
     code_input_free(app->code_input);
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
     // Records
     furi_record_close("gui");
     free(app);
