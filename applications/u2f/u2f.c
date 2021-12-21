@@ -92,8 +92,17 @@ static int u2f_uecc_random(uint8_t* dest, unsigned size) {
     return 1;
 }
 
-bool u2f_alloc(U2fData** U2F_inst) {
-    U2fData* U2F = furi_alloc(sizeof(U2fData));
+static U2fData* u2f_alloc() {
+    return furi_alloc(sizeof(U2fData));
+}
+
+void u2f_free(U2fData* U2F) {
+    furi_assert(U2F);
+    free(U2F);
+}
+
+bool u2f_init(U2fData** U2F_inst) {
+    U2fData* U2F = u2f_alloc();
     *U2F_inst = U2F;
 
     if(u2f_cert_check() == false) {
@@ -125,11 +134,6 @@ bool u2f_alloc(U2fData** U2F_inst) {
 
     U2F->ready = true;
     return true;
-}
-
-void u2f_free(U2fData* U2F) {
-    furi_assert(U2F);
-    free(U2F);
 }
 
 void u2f_set_event_callback(U2fData* U2F, U2fEvtCallback callback, void* context) {

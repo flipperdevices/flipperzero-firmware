@@ -67,7 +67,7 @@ void u2f_scene_main_on_enter(void* context) {
 
     app->timer = osTimerNew(u2f_scene_main_timer_callback, osTimerOnce, app, NULL);
 
-    app->u2f_ready = u2f_alloc(&(app->u2f_instance));
+    app->u2f_ready = u2f_init(&(app->u2f_instance));
     if(app->u2f_ready == true) {
         u2f_set_event_callback(app->u2f_instance, u2f_scene_main_event_callback, app);
         app->u2f_hid = u2f_hid_start(app->u2f_instance);
