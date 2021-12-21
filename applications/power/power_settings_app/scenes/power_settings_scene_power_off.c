@@ -28,7 +28,7 @@ bool power_settings_scene_power_off_on_event(void* context, SceneManagerEvent ev
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultLeft) {
-            scene_manager_previous_scene(app->scene_manager);
+            view_dispatcher_previous_scene(app->view_dispatcher);
         } else if(event.event == DialogExResultRight) {
             power_off(app->power);
         }

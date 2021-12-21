@@ -5,7 +5,6 @@
 #include <gui/gui.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
-#include <gui/scene_manager.h>
 
 #include "views/battery_info.h"
 #include <gui/modules/submenu.h>
@@ -16,7 +15,6 @@
 typedef struct {
     Power* power;
     Gui* gui;
-    SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     BatteryInfo* batery_info;
     Submenu* submenu;

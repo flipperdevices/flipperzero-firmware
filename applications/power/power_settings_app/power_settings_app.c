@@ -12,7 +12,6 @@ PowerSettingsApp* power_settings_app_alloc() {
     view_dispatcher_allocate_scene_manager(
         app->view_dispatcher, &power_settings_scene_handlers, app);
     view_dispatcher_set_start_scene(app->view_dispatcher, PowerSettingsAppSceneStart);
-    app->scene_manager = view_dispatcher_get_scene_manager(app->view_dispatcher);
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_tick_event_period(app->view_dispatcher, 2000);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);

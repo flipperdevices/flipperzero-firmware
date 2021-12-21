@@ -35,7 +35,8 @@ void power_settings_scene_start_on_enter(void* context) {
         power_settings_scene_start_submenu_callback,
         app);
     submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(app->scene_manager, PowerSettingsAppSceneStart));
+        submenu,
+        view_dispatcher_get_scene_state(app->view_dispatcher, PowerSettingsAppSceneStart));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, PowerSettingsAppViewSubmenu);
 }
@@ -46,13 +47,14 @@ bool power_settings_scene_start_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PowerSettingsSubmenuIndexBatteryInfo) {
-            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneBatteryInfo);
+            view_dispatcher_next_scene(app->view_dispatcher, PowerSettingsAppSceneBatteryInfo);
         } else if(event.event == PowerSettingsSubmenuIndexReboot) {
-            scene_manager_next_scene(app->scene_manager, PowerSettingsAppSceneReboot);
+            view_dispatcher_next_scene(app->view_dispatcher, PowerSettingsAppSceneReboot);
         } else if(event.event == PowerSettingsSubmenuIndexOff) {
-            scene_manager_next_scene(app->scene_manager, PowerSettingsAppScenePowerOff);
+            view_dispatcher_next_scene(app->view_dispatcher, PowerSettingsAppScenePowerOff);
         }
-        scene_manager_set_scene_state(app->scene_manager, PowerSettingsAppSceneStart, event.event);
+        view_dispatcher_set_scene_state(
+            app->view_dispatcher, PowerSettingsAppSceneStart, event.event);
         consumed = true;
     }
     return consumed;
