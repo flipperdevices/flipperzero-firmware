@@ -139,6 +139,9 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             continue;
         }
         if(message.type == ViewDispatcherMessageTypeStop) {
+            if(view_dispatcher->scene_manager) {
+                scene_manager_exit_current_scene(view_dispatcher->scene_manager);
+            }
             break;
         } else if(message.type == ViewDispatcherMessageTypeInput) {
             view_dispatcher_handle_input(view_dispatcher, &message.input);
