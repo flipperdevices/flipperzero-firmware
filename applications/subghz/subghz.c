@@ -196,13 +196,6 @@ SubGhz* subghz_alloc() {
     //Init Error_str
     string_init(subghz->error_str);
 
-    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
-    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
-    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
-    subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
-
-    //subghz_parser_enable_dump_text(subghz->protocol, subghz_text_callback, subghz);
-
     return subghz;
 }
 
@@ -290,6 +283,13 @@ void subghz_free(SubGhz* subghz) {
 int32_t subghz_app(void* p) {
     SubGhz* subghz = subghz_alloc();
 
+    //Load database
+    bool load_database =
+        subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
+    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
+    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
+    subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
+
     // Check argument and run corresponding scene
     if(p && subghz_key_load(subghz, p)) {
         string_t filename;
@@ -299,9 +299,25 @@ int32_t subghz_app(void* p) {
         strcpy(subghz->file_name, string_get_cstr(filename));
         string_clear(filename);
 
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+        if((!strcmp(subghz->txrx->protocol_result->name, "RAW"))) {
+            //Load Raw TX
+            subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
+        } else {
+            //Load transmitter TX
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTransmitter);
+        }
     } else {
-        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+        if(load_database) {
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneStart);
+        } else {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneShowError, SubghzCustomEventManagerSet);
+            string_set(
+                subghz->error_str,
+                "No SD card or\ndatabase found.\nSome app function\nmay be reduced.");
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+        }
     }
 
     furi_hal_power_suppress_charge_enter();

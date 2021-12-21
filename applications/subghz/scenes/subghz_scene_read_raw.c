@@ -133,8 +133,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneSaved)) {
-                    scene_manager_search_and_switch_to_previous_scene(
-                        subghz->scene_manager, SubGhzSceneStart);
+                    if(!scene_manager_search_and_switch_to_previous_scene(
+                           subghz->scene_manager, SubGhzSceneStart)) {
+                        view_dispatcher_stop(subghz->view_dispatcher);
+                    }
                 }
             }
             return true;
@@ -245,7 +247,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     subghz->state_notifications = SubGhzNotificationStateRX;
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
                 } else {
-                    string_set(subghz->error_str, "No SD card");
+                    string_set(subghz->error_str, "Function requires\nan SD card.");
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
                 }
             }

@@ -67,7 +67,7 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 return true;
             } else {
                 string_set(subghz->error_str, "No name file");
-                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowError);
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
                 return true;
             }
         }
