@@ -32,8 +32,33 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
     if(view_dispatcher->queue) {
         osMessageQueueDelete(view_dispatcher->queue);
     }
+    // Free Scene Manager
+    if(view_dispatcher->scene_manager) {
+        scene_manager_free(view_dispatcher->scene_manager);
+    }
     // Free dispatcher
     free(view_dispatcher);
+}
+
+void view_dispatcher_allocate_scene_manager(
+    ViewDispatcher* view_dispatcher,
+    const SceneManagerHandlers* app_scene_handlers,
+    void* context) {
+    furi_assert(view_dispatcher);
+    furi_assert(app_scene_handlers);
+    view_dispatcher->scene_manager = scene_manager_alloc(app_scene_handlers, context);
+}
+
+SceneManager* view_dispatcher_get_scene_manager(ViewDispatcher* view_dispatcher) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    return view_dispatcher->scene_manager;
+}
+
+void view_dispatcher_set_start_scene(ViewDispatcher* view_dispatcher, uint32_t start_scene_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    view_dispatcher->start_scene_id = start_scene_id;
 }
 
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
@@ -42,34 +67,15 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     view_dispatcher->queue = osMessageQueueNew(16, sizeof(ViewDispatcherMessage), NULL);
 }
 
-void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context) {
-    furi_assert(view_dispatcher);
-    view_dispatcher->event_context = context;
-}
+// void view_dispatcher_set_event_callback(ViewDispatcher* view_dispatcher, ViewDispatcherEventCallback callback, void* context) {
+//     furi_assert(view_dispatcher);
+//     furi_assert(callback);
+//     view_dispatcher->event_callback = callback;
+//     view_dispatcher->event_context = context;
+// }
 
-void view_dispatcher_set_navigation_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherNavigationEventCallback callback) {
+void view_dispatcher_set_tick_event_period(ViewDispatcher* view_dispatcher, uint32_t tick_period) {
     furi_assert(view_dispatcher);
-    furi_assert(callback);
-    view_dispatcher->navigation_event_callback = callback;
-}
-
-void view_dispatcher_set_custom_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherCustomEventCallback callback) {
-    furi_assert(view_dispatcher);
-    furi_assert(callback);
-    view_dispatcher->custom_event_callback = callback;
-}
-
-void view_dispatcher_set_tick_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherTickEventCallback callback,
-    uint32_t tick_period) {
-    furi_assert(view_dispatcher);
-    furi_assert(callback);
-    view_dispatcher->tick_event_callback = callback;
     view_dispatcher->tick_period = tick_period;
 }
 
@@ -79,6 +85,9 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
 
     uint32_t tick_period = view_dispatcher->tick_period == 0 ? osWaitForever :
                                                                view_dispatcher->tick_period;
+    if(view_dispatcher->scene_manager) {
+        scene_manager_next_scene(view_dispatcher->scene_manager, view_dispatcher->start_scene_id);
+    }
     ViewDispatcherMessage message;
     while(1) {
         if(osMessageQueueGet(view_dispatcher->queue, &message, NULL, tick_period) != osOK) {
@@ -263,9 +272,8 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
             uint32_t view_id = VIEW_IGNORE;
             if(event->key == InputKeyBack) {
                 view_id = view_previous(view_dispatcher->current_view);
-                if((view_id == VIEW_IGNORE) && (view_dispatcher->navigation_event_callback)) {
-                    is_consumed =
-                        view_dispatcher->navigation_event_callback(view_dispatcher->event_context);
+                if((view_id == VIEW_IGNORE) && (view_dispatcher->scene_manager)) {
+                    is_consumed = scene_manager_handle_back_event(view_dispatcher->scene_manager);
                     if(!is_consumed) {
                         view_dispatcher_stop(view_dispatcher);
                         return;
@@ -290,8 +298,8 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
 }
 
 void view_dispatcher_handle_tick_event(ViewDispatcher* view_dispatcher) {
-    if(view_dispatcher->tick_event_callback) {
-        view_dispatcher->tick_event_callback(view_dispatcher->event_context);
+    if(view_dispatcher->scene_manager) {
+        scene_manager_handle_tick_event(view_dispatcher->scene_manager);
     }
 }
 
@@ -301,9 +309,8 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
         is_consumed = view_custom(view_dispatcher->current_view, event);
     }
     // If custom event is not consumed in View, call callback
-    if(!is_consumed && view_dispatcher->custom_event_callback) {
-        is_consumed =
-            view_dispatcher->custom_event_callback(view_dispatcher->event_context, event);
+    if(!is_consumed && view_dispatcher->scene_manager) {
+        scene_manager_handle_custom_event(view_dispatcher->scene_manager, event);
     }
 }
 

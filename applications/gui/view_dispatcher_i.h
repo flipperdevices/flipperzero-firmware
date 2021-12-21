@@ -25,11 +25,11 @@ struct ViewDispatcher {
     View* ongoing_input_view;
     uint8_t ongoing_input;
 
-    ViewDispatcherCustomEventCallback custom_event_callback;
-    ViewDispatcherNavigationEventCallback navigation_event_callback;
-    ViewDispatcherTickEventCallback tick_event_callback;
-    uint32_t tick_period;
+    // ViewDispatcherEventCallback event_callback;
+    SceneManager* scene_manager;
+    uint32_t start_scene_id;
     void* event_context;
+    uint32_t tick_period;
 };
 
 typedef enum {

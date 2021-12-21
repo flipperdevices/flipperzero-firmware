@@ -22,14 +22,21 @@ typedef enum {
 
 typedef struct ViewDispatcher ViewDispatcher;
 
-/** Prototype for custom event callback */
-typedef bool (*ViewDispatcherCustomEventCallback)(void* context, uint32_t event);
+// typedef enum {
+//     ViewDispatcherEventTypeCustom,
+//     ViewDispatcherEventTypeNavigation,
+//     ViewDispatcherEventTypeTick,
+//     ViewDispatcherEventTypeStop,
+// } ViewDispatcherEventType;
 
-/** Prototype for navigation event callback */
-typedef bool (*ViewDispatcherNavigationEventCallback)(void* context);
+// typedef struct {
+//     ViewDispatcherEventType type;
+//     union {
+//         uint32_t custom_event;
+//     };
+// } VeiwDispatcherEvent;
 
-/** Prototype for tick event callback */
-typedef void (*ViewDispatcherTickEventCallback)(void* context);
+// typedef bool (*ViewDispatcherEventCallback)(VeiwDispatcherEvent event, void* context);
 
 /** Allocate ViewDispatcher instance
  *
@@ -42,6 +49,22 @@ ViewDispatcher* view_dispatcher_alloc();
  * @param      view_dispatcher  pointer to ViewDispatcher
  */
 void view_dispatcher_free(ViewDispatcher* view_dispatcher);
+
+/** Allocate Scene Manager
+ *
+ * @param       view_dispatcher     ViewDispatcher instance
+ * @param       app_scene_handlers  Scene Manager handlers
+ * @param       context             Scene Manager context
+ */
+void view_dispatcher_allocate_scene_manager(
+    ViewDispatcher* view_dispatcher,
+    const SceneManagerHandlers* app_scene_handlers,
+    void* context);
+
+void view_dispatcher_set_start_scene(ViewDispatcher* view_dispatcher, uint32_t start_scene_id);
+
+// REMOVE!
+SceneManager* view_dispatcher_get_scene_manager(ViewDispatcher* view_dispatcher);
 
 /** Enable queue support
  *
@@ -59,45 +82,21 @@ void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher);
  */
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event);
 
-/** Set custom event handler
+/** Set View Dispatcher event handler
  *
- * Called on Custom Event, if it is not consumed by view
+ * Called on View Dispatcher Event
  *
  * @param      view_dispatcher  ViewDispatcher instance
- * @param      callback         ViewDispatcherCustomEventCallback instance
+ * @param      callback         ViewDispatcherEventCallback instance
  */
-void view_dispatcher_set_custom_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherCustomEventCallback callback);
+// void view_dispatcher_set_event_callback(ViewDispatcher* view_dispatcher, ViewDispatcherEventCallback callback, void* context);
 
-/** Set navigation event handler
- *
- * Called on Input Short Back Event, if it is not consumed by view
+/** Set tick event period
  *
  * @param      view_dispatcher  ViewDispatcher instance
- * @param      callback         ViewDispatcherNavigationEventCallback instance
- */
-void view_dispatcher_set_navigation_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherNavigationEventCallback callback);
-
-/** Set tick event handler
- *
- * @param      view_dispatcher  ViewDispatcher instance
- * @param      callback         ViewDispatcherTickEventCallback
  * @param      tick_period      callback call period
  */
-void view_dispatcher_set_tick_event_callback(
-    ViewDispatcher* view_dispatcher,
-    ViewDispatcherTickEventCallback callback,
-    uint32_t tick_period);
-
-/** Set event callback context
- *
- * @param      view_dispatcher  ViewDispatcher instance
- * @param      context          pointer to context
- */
-void view_dispatcher_set_event_callback_context(ViewDispatcher* view_dispatcher, void* context);
+void view_dispatcher_set_tick_event_period(ViewDispatcher* view_dispatcher, uint32_t tick_period);
 
 /** Run ViewDispatcher
  *
