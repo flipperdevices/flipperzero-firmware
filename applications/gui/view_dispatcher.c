@@ -112,6 +112,21 @@ void view_dispatcher_search_and_switch_to_another_scene(
     furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
 }
 
+void view_dispatcher_set_scene_state(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id,
+    uint32_t state) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    scene_manager_set_scene_state(view_dispatcher->scene_manager, scene_id, state);
+}
+
+uint32_t view_dispatcher_get_scene_state(ViewDispatcher* view_dispatcher, uint32_t scene_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    return scene_manager_get_scene_state(view_dispatcher->scene_manager, scene_id);
+}
+
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue == NULL);

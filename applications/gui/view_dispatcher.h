@@ -62,6 +62,13 @@ void view_dispatcher_search_and_switch_to_another_scene(
     ViewDispatcher* view_dispatcher,
     uint32_t scene_id);
 
+void view_dispatcher_set_scene_state(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id,
+    uint32_t state);
+
+uint32_t view_dispatcher_get_scene_state(ViewDispatcher* view_dispatcher, uint32_t scene_id);
+
 /** Enable queue support
  *
  * If queue enabled all input and custom events will be dispatched throw
