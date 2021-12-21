@@ -23,6 +23,10 @@ SubGhzProtocolKIA* subghz_protocol_kia_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_kia_to_str;
     instance->common.to_load_protocol =
         (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_kia_to_load_protocol;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_protocol_kia_to_save_file;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_kia_to_load_protocol_from_file;
 
     return instance;
 }
@@ -186,3 +190,18 @@ void subghz_decoder_kia_to_load_protocol(SubGhzProtocolKIA* instance, void* cont
     instance->common.code_last_count_bit = data->code_count_bit;
     subghz_protocol_kia_check_remote_controller(instance);
 }
+
+bool subghz_protocol_kia_to_save_file(SubGhzProtocolKIA* instance, FlipperFile* flipper_file) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+}
+
+bool subghz_protocol_kia_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolKIA* instance,
+    const char* file_path) {
+    if(subghz_protocol_common_to_load_protocol_from_file(
+           (SubGhzProtocolCommon*)instance, flipper_file)) {
+        subghz_protocol_kia_check_remote_controller(instance);
+        return true;
+    }
+    return false;

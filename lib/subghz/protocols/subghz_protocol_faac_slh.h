@@ -56,3 +56,12 @@ void subghz_protocol_faac_slh_to_str(SubGhzProtocolFaacSLH* instance, string_t o
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_faac_slh_to_load_protocol(SubGhzProtocolFaacSLH* instance, void* context);
+
+bool subghz_protocol_faac_slh_to_save_file(
+    SubGhzProtocolFaacSLH* instance,
+    FlipperFile* flipper_file);
+
+bool subghz_protocol_faac_slh_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolFaacSLH* instance,
+    const char* file_path);

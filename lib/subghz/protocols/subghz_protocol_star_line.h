@@ -72,3 +72,12 @@ void subghz_protocol_star_line_to_str(SubGhzProtocolStarLine* instance, string_t
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_star_line_to_load_protocol(SubGhzProtocolStarLine* instance, void* context);
+
+bool subghz_protocol_star_line_to_save_file(
+    SubGhzProtocolStarLine* instance,
+    FlipperFile* flipper_file);
+
+bool subghz_protocol_star_line_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolStarLine* instance,
+    const char* file_path);

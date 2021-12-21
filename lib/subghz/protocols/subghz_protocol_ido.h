@@ -56,3 +56,12 @@ void subghz_protocol_ido_to_str(SubGhzProtocolIDo* instance, string_t output);
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_ido_to_load_protocol(SubGhzProtocolIDo* instance, void* context);
+
+bool subghz_protocol_ido_to_save_file(
+    SubGhzProtocolIDo* instance,
+    FlipperFile* flipper_file);
+
+bool subghz_protocol_ido_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolIDo* instance,
+    const char* file_path);

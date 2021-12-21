@@ -41,12 +41,12 @@ void subghz_protocol_kia_parse(SubGhzProtocolKIA* instance, bool level, uint32_t
  */
 void subghz_protocol_kia_to_str(SubGhzProtocolKIA* instance, string_t output);
 
-/** Get a string to save the protocol
- * 
- * @param instance  - SubGhzProtocolKIA instance
- * @param output    - the resulting string
- */
-void subghz_protocol_kia_to_save_str(SubGhzProtocolKIA* instance, string_t output);
+bool subghz_protocol_kia_to_save_file(SubGhzProtocolKIA* instance, FlipperFile* flipper_file);
+
+bool subghz_protocol_kia_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolKIA* instance,
+    const char* file_path);
 
 /** Loading protocol from bin data
  * 

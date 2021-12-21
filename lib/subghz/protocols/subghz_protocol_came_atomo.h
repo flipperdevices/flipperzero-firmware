@@ -51,3 +51,10 @@ void subghz_protocol_came_atomo_to_str(SubGhzProtocolCameAtomo* instance, string
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_came_atomo_to_load_protocol(SubGhzProtocolCameAtomo* instance, void* context);
+
+bool subghz_protocol_came_atomo_to_save_file(SubGhzProtocolCameAtomo* instance, FlipperFile* flipper_file);
+
+bool subghz_protocol_came_atomo_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolCameAtomo* instance,
+    const char* file_path);

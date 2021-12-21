@@ -28,6 +28,10 @@ SubGhzProtocolCameAtomo* subghz_protocol_came_atomo_alloc() {
     instance->common.te_delta = 250;
     instance->common.type_protocol = SubGhzProtocolCommonTypeDynamic;
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_came_atomo_to_str;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_protocol_came_atomo_to_save_file;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_came_atomo_to_load_protocol_from_file;
     instance->common.to_load_protocol =
         (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_came_atomo_to_load_protocol;
 
@@ -253,6 +257,21 @@ void subghz_protocol_came_atomo_to_str(SubGhzProtocolCameAtomo* instance, string
         instance->common.btn,
         instance->common.cnt);
 }
+
+bool subghz_protocol_came_atomo_to_save_file(SubGhzProtocolCameAtomo* instance, FlipperFile* flipper_file) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+}
+
+bool subghz_protocol_came_atomo_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolCameAtomo* instance,
+    const char* file_path) {
+    if(subghz_protocol_common_to_load_protocol_from_file(
+           (SubGhzProtocolCommon*)instance, flipper_file)) {
+        subghz_protocol_came_atomo_remote_controller(instance);
+        return true;
+    }
+    return false;
 
 void subghz_decoder_came_atomo_to_load_protocol(SubGhzProtocolCameAtomo* instance, void* context) {
     furi_assert(context);

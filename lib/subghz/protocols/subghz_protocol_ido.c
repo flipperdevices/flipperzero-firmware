@@ -23,6 +23,12 @@ SubGhzProtocolIDo* subghz_protocol_ido_alloc(void) {
     instance->common.to_string = (SubGhzProtocolCommonToStr)subghz_protocol_ido_to_str;
     instance->common.to_load_protocol =
         (SubGhzProtocolCommonLoadFromRAW)subghz_decoder_ido_to_load_protocol;
+    instance->common.to_save_file =
+        (SubGhzProtocolCommonSaveFile)subghz_protocol_ido_to_save_file;
+    instance->common.to_load_protocol_from_file =
+        (SubGhzProtocolCommonLoadFromFile)subghz_protocol_ido_to_load_protocol_from_file;
+    instance->common.get_upload_protocol =
+        (SubGhzProtocolCommonEncoderGetUpLoad)subghz_protocol_ido_send_key;
 
     return instance;
 }
@@ -186,4 +192,21 @@ void subghz_decoder_ido_to_load_protocol(SubGhzProtocolIDo* instance, void* cont
     instance->common.code_last_found = data->code_found;
     instance->common.code_last_count_bit = data->code_count_bit;
     subghz_protocol_ido_check_remote_controller(instance);
+}
+
+bool subghz_protocol_ido_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolIDo* instance,
+    const char* file_path) {
+    if(subghz_protocol_common_to_load_protocol_from_file(
+           (SubGhzProtocolCommon*)instance, flipper_file)) {
+        subghz_protocol_ido_check_remote_controller(instance);
+        return true;
+    }
+    return false;
+
+bool subghz_protocol_ido_to_save_file(
+    SubGhzProtocolIDo* instance,
+    FlipperFile* flipper_file) {
+    return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
 }

@@ -56,3 +56,12 @@ void subghz_protocol_scher_khan_to_str(SubGhzProtocolScherKhan* instance, string
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_scher_khan_to_load_protocol(SubGhzProtocolScherKhan* instance, void* context);
+
+bool subghz_protocol_scher_khan_to_save_file(
+    SubGhzProtocolScherKhan* instance,
+    FlipperFile* flipper_file);
+
+bool subghz_protocol_scher_khan_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolScherKhan* instance,
+    const char* file_path);

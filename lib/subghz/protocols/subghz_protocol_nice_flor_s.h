@@ -57,3 +57,12 @@ void subghz_protocol_nice_flor_s_to_str(SubGhzProtocolNiceFlorS* instance, strin
  * @param context - SubGhzProtocolCommonLoad context
  */
 void subghz_decoder_nice_flor_s_to_load_protocol(SubGhzProtocolNiceFlorS* instance, void* context);
+
+bool subghz_protocol_nice_flor_s_to_save_file(
+    SubGhzProtocolNiceFlorS* instance,
+    FlipperFile* flipper_file);
+
+bool subghz_protocol_nice_flor_s_to_load_protocol_from_file(
+    FlipperFile* flipper_file,
+    SubGhzProtocolNiceFlorS* instance,
+    const char* file_path);
