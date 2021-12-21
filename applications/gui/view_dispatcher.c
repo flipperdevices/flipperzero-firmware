@@ -61,18 +61,62 @@ void view_dispatcher_set_start_scene(ViewDispatcher* view_dispatcher, uint32_t s
     view_dispatcher->start_scene_id = start_scene_id;
 }
 
+void view_dispatcher_next_scene(ViewDispatcher* view_dispatcher, uint32_t scene_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    furi_assert(view_dispatcher->queue);
+    ViewDispatcherMessage message = {
+        .type = ViewDisaptcherMessageTypeNavigationEvent,
+        .navigation_event.type = ViewDispatcherNavigationEventTypeNext,
+        .navigation_event.scene_id = scene_id,
+    };
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
+void view_dispatcher_previous_scene(ViewDispatcher* view_dispatcher) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    furi_assert(view_dispatcher->queue);
+    ViewDispatcherMessage message = {
+        .type = ViewDisaptcherMessageTypeNavigationEvent,
+        .navigation_event.type = ViewDispatcherNavigationEventTypePrevious,
+    };
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
+void view_dispatcher_search_and_switch_to_previous_scene(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    furi_assert(view_dispatcher->queue);
+    ViewDispatcherMessage message = {
+        .type = ViewDisaptcherMessageTypeNavigationEvent,
+        .navigation_event.type = ViewDispatcherNavigationEventTypeSearchPrevious,
+        .navigation_event.scene_id = scene_id,
+    };
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
+void view_dispatcher_search_and_switch_to_another_scene(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id) {
+    furi_assert(view_dispatcher);
+    furi_assert(view_dispatcher->scene_manager);
+    furi_assert(view_dispatcher->queue);
+    ViewDispatcherMessage message = {
+        .type = ViewDisaptcherMessageTypeNavigationEvent,
+        .navigation_event.type = ViewDispatcherNavigationEventTypeSearchAnother,
+        .navigation_event.scene_id = scene_id,
+    };
+    furi_check(osMessageQueuePut(view_dispatcher->queue, &message, 0, osWaitForever) == osOK);
+}
+
 void view_dispatcher_enable_queue(ViewDispatcher* view_dispatcher) {
     furi_assert(view_dispatcher);
     furi_assert(view_dispatcher->queue == NULL);
     view_dispatcher->queue = osMessageQueueNew(16, sizeof(ViewDispatcherMessage), NULL);
 }
-
-// void view_dispatcher_set_event_callback(ViewDispatcher* view_dispatcher, ViewDispatcherEventCallback callback, void* context) {
-//     furi_assert(view_dispatcher);
-//     furi_assert(callback);
-//     view_dispatcher->event_callback = callback;
-//     view_dispatcher->event_context = context;
-// }
 
 void view_dispatcher_set_tick_event_period(ViewDispatcher* view_dispatcher, uint32_t tick_period) {
     furi_assert(view_dispatcher);
@@ -100,6 +144,8 @@ void view_dispatcher_run(ViewDispatcher* view_dispatcher) {
             view_dispatcher_handle_input(view_dispatcher, &message.input);
         } else if(message.type == ViewDispatcherMessageTypeCustomEvent) {
             view_dispatcher_handle_custom_event(view_dispatcher, message.custom_event);
+        } else if(message.type == ViewDisaptcherMessageTypeNavigationEvent) {
+            view_dispatcher_handle_navigation_event(view_dispatcher, message.navigation_event);
         }
     }
 
@@ -312,6 +358,25 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     if(!is_consumed && view_dispatcher->scene_manager) {
         scene_manager_handle_custom_event(view_dispatcher->scene_manager, event);
     }
+}
+
+bool view_dispatcher_handle_navigation_event(
+    ViewDispatcher* view_dispatcher,
+    ViewDispatcherNavigationEvent event) {
+    bool consumed = false;
+    if(event.type == ViewDispatcherNavigationEventTypeNext) {
+        scene_manager_next_scene(view_dispatcher->scene_manager, event.scene_id);
+        consumed = true;
+    } else if(event.type == ViewDispatcherNavigationEventTypePrevious) {
+        consumed = scene_manager_previous_scene(view_dispatcher->scene_manager);
+    } else if(event.type == ViewDispatcherNavigationEventTypeSearchPrevious) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            view_dispatcher->scene_manager, event.scene_id);
+    } else if(event.type == ViewDispatcherNavigationEventTypeSearchAnother) {
+        consumed = scene_manager_search_and_switch_to_another_scene(
+            view_dispatcher->scene_manager, event.scene_id);
+    }
+    return consumed;
 }
 
 void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t event) {

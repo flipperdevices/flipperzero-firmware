@@ -22,22 +22,6 @@ typedef enum {
 
 typedef struct ViewDispatcher ViewDispatcher;
 
-// typedef enum {
-//     ViewDispatcherEventTypeCustom,
-//     ViewDispatcherEventTypeNavigation,
-//     ViewDispatcherEventTypeTick,
-//     ViewDispatcherEventTypeStop,
-// } ViewDispatcherEventType;
-
-// typedef struct {
-//     ViewDispatcherEventType type;
-//     union {
-//         uint32_t custom_event;
-//     };
-// } VeiwDispatcherEvent;
-
-// typedef bool (*ViewDispatcherEventCallback)(VeiwDispatcherEvent event, void* context);
-
 /** Allocate ViewDispatcher instance
  *
  * @return     pointer to ViewDispatcher instance
@@ -65,6 +49,18 @@ void view_dispatcher_set_start_scene(ViewDispatcher* view_dispatcher, uint32_t s
 
 // REMOVE!
 SceneManager* view_dispatcher_get_scene_manager(ViewDispatcher* view_dispatcher);
+
+void view_dispatcher_next_scene(ViewDispatcher* view_dispatcher, uint32_t scene_id);
+
+void view_dispatcher_previous_scene(ViewDispatcher* view_dispatcher);
+
+void view_dispatcher_search_and_switch_to_previous_scene(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id);
+
+void view_dispatcher_search_and_switch_to_another_scene(
+    ViewDispatcher* view_dispatcher,
+    uint32_t scene_id);
 
 /** Enable queue support
  *
