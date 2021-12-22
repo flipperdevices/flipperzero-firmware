@@ -13,7 +13,7 @@
 
 struct SubghzTestPacket {
     View* view;
-    osTimerId timer;
+    osTimerId_t timer;
 
     SubGhzDecoderPrinceton* decoder;
     SubGhzEncoderPrinceton* encoder;
