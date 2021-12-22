@@ -45,6 +45,10 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
         return;
     }
 
+    if (!model->current) {
+        return;
+    }
+
     bool is_active = model->current_frame_idx > model->current->passive_frames;
     const FrameBubble* bubble = model->current_bubble;
 

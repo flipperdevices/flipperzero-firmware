@@ -2,6 +2,7 @@
 
 #include "desktop.h"
 
+#include "dolphin/animations/animation_manager.h"
 #include "gui/view_composed.h"
 #include <furi.h>
 #include <furi-hal.h>
@@ -63,6 +64,8 @@ struct Desktop {
     PinCode pincode_buffer;
 
     ViewPort* lock_viewport;
+
+    AnimationManager* animation_manager;
 };
 
 Desktop* desktop_alloc();

@@ -2,6 +2,7 @@
 #include "../views/desktop_main.h"
 #include "applications.h"
 #include "assets_icons.h"
+#include "dolphin/animations/animation_manager.h"
 #include "dolphin/dolphin.h"
 #include "furi/pubsub.h"
 #include "furi/record.h"
@@ -9,6 +10,25 @@
 #include <loader/loader.h>
 #include <m-list.h>
 #define MAIN_VIEW_DEFAULT (0UL)
+
+
+static void desktop_scene_main_new_idle_animation_callback(void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventNewIdleAnimation);
+}
+
+static void desktop_scene_main_check_animation_callback(void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventCheckAnimation);
+}
+
+static void desktop_scene_main_interact_animation_callback(void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventInteractAnimation);
+}
 
 static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
     furi_assert(desktop);
@@ -36,6 +56,11 @@ void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
 void desktop_scene_main_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopMainView* main_view = desktop->main_view;
+
+    animation_manager_set_context(desktop->animation_manager, desktop);
+    animation_manager_set_new_idle_callbacks(desktop->animation_manager, desktop_scene_main_new_idle_animation_callback);
+    animation_manager_set_check_callbacks(desktop->animation_manager, desktop_scene_main_check_animation_callback);
+    animation_manager_set_interact_callbacks(desktop->animation_manager, desktop_scene_main_interact_animation_callback);
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);
@@ -80,6 +105,19 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
+        case DesktopMainEventCheckAnimation:
+            animation_manager_check_blocking(desktop->animation_manager);
+            consumed = true;
+            break;
+        case DesktopMainEventNewIdleAnimation:
+            animation_manager_start_new_idle_animation(desktop->animation_manager);
+            consumed = true;
+            break;
+        case DesktopMainEventInteractAnimation:
+            animation_manager_interact(desktop->animation_manager);
+            consumed = true;
+            break;
+
         default:
             break;
         }
@@ -91,6 +129,10 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 void desktop_scene_main_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
 
+    animation_manager_set_new_idle_callbacks(desktop->animation_manager, NULL);
+    animation_manager_set_check_callbacks(desktop->animation_manager, NULL);
+    animation_manager_set_interact_callbacks(desktop->animation_manager, NULL);
+    animation_manager_set_context(desktop->animation_manager, desktop);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain, MAIN_VIEW_DEFAULT);
     desktop_main_reset_hint(desktop->main_view);
 }

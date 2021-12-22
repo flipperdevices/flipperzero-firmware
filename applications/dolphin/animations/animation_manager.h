@@ -33,6 +33,10 @@ typedef struct {
     uint16_t active_cooldown;
 } BubbleAnimation;
 
+typedef void (*AnimationManagerInteractCallback)(void*);
+typedef void (*AnimationManagerSetNewIdleAnimationCallback)(void* context);
+typedef void (*AnimationManagerCheckBlockingCallback)(void* context);
+
 AnimationManager* animation_manager_alloc(void);
 void animation_manager_check_blocking(AnimationManager* animation_manager);
 void animation_manager_start_new_idle_animation(AnimationManager* animation_manager);
@@ -42,4 +46,8 @@ void animation_manager_tie_view(AnimationManager* animation_manager, View* view)
 void animation_manager_untie_view(AnimationManager* animation_manager);
 void animation_manager_set_dolphin(AnimationManager* animation_manager, Dolphin* dolphin);
 
+void animation_manager_set_context(AnimationManager* animation_manager, void* context);
+void animation_manager_set_new_idle_callbacks(AnimationManager* animation_manager, AnimationManagerSetNewIdleAnimationCallback callback);
+void animation_manager_set_check_callbacks(AnimationManager* animation_manager, AnimationManagerCheckBlockingCallback callback);
+void animation_manager_set_interact_callbacks(AnimationManager* animation_manager, AnimationManagerInteractCallback callback);
 

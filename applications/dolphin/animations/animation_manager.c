@@ -14,8 +14,6 @@ typedef enum {
     AnimationManagerStateBlocking,
 } AnimationManagerState;
 
-typedef void (*AnimationManagerInteractCallback)(void*);
-
 struct AnimationManager {
     bool sd_shown_error_db;
     bool sd_shown_error_card_bad;
@@ -25,40 +23,56 @@ struct AnimationManager {
     StorageAnimation* current_animation;
     StorageAnimation* next_animation;
     AnimationManagerInteractCallback interact_callback;
-    Dolphin* dolphin;
+    AnimationManagerSetNewIdleAnimationCallback new_idle_callback;
+    AnimationManagerSetNewIdleAnimationCallback check_blocking_callback;
+    void* context;
 };
 
 static StorageAnimation* animation_manager_select_idle_animation(AnimationManager* animation_manager);
+static void animation_manager_replace_current_animation(AnimationManager* animation_manager, StorageAnimation* storage_animation);
+
+void animation_manager_set_context(AnimationManager* animation_manager, void* context) {
+    furi_assert(animation_manager);
+    animation_manager->context = context;
+}
+
+void animation_manager_set_new_idle_callbacks(AnimationManager* animation_manager, AnimationManagerSetNewIdleAnimationCallback callback) {
+    furi_assert(animation_manager);
+    animation_manager->new_idle_callback = callback;
+}
+
+void animation_manager_set_check_callbacks(AnimationManager* animation_manager, AnimationManagerCheckBlockingCallback callback) {
+    furi_assert(animation_manager);
+    animation_manager->check_blocking_callback = callback;
+}
+
+void animation_manager_set_interact_callbacks(AnimationManager* animation_manager, AnimationManagerInteractCallback callback) {
+    furi_assert(animation_manager);
+    animation_manager->interact_callback = callback;
+}
 
 static void animation_manager_storage_state_changed_callback(const void* message, void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
-    DolphinEvent event = { .type = DolphinEventTypeAnimationCheckBlocking };
-    dolphin_event_send_async(animation_manager->dolphin, &event);
+    if (animation_manager->check_blocking_callback) {
+        animation_manager->check_blocking_callback(animation_manager->context);
+    }
 }
 
 static void animation_manager_timer_callback(void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
-    DolphinEvent event = { .type = DolphinEventTypeAnimationStartNewIdle };
-    dolphin_event_send_async(animation_manager->dolphin, &event);
+    if (animation_manager->new_idle_callback) {
+        animation_manager->new_idle_callback(animation_manager->context);
+    }
 }
 
 static void animation_manager_interact_callback(void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
-    DolphinEvent event = { .type = DolphinEventTypeAnimationInteract };
-    dolphin_event_send_async(animation_manager->dolphin, &event);
-}
-
-static void animation_manager_replace_current_animation(AnimationManager* animation_manager, StorageAnimation* storage_animation) {
-    StorageAnimation* previous_animation = animation_manager->current_animation;
-
-    const BubbleAnimation* animation = animation_storage_get_bubble_animation(storage_animation);
-    bubble_animation_view_set_animation(animation_manager->animation_view, animation);
-    animation_manager->current_animation = storage_animation;
-
-    animation_storage_free_animation(previous_animation);
+    if (animation_manager->interact_callback) {
+        animation_manager->interact_callback(animation_manager->context);
+    }
 }
 
 void animation_manager_interact(AnimationManager* animation_manager) {
@@ -66,8 +80,8 @@ void animation_manager_interact(AnimationManager* animation_manager) {
 
     if(animation_manager->state == AnimationManagerStateBlocking) {
         animation_manager->state = AnimationManagerStateIdle;
-        DolphinEvent event = { .type = DolphinEventTypeAnimationCheckBlocking };
-        dolphin_event_send_async(animation_manager->dolphin, &event);
+        /* check if new blocking animation has to be displayed */
+        animation_manager->check_blocking_callback(animation_manager->context);
     }
 }
 
@@ -97,7 +111,9 @@ void animation_manager_check_blocking(AnimationManager* animation_manager) {
         }
     }
 
-    DolphinStats stats = dolphin_stats(animation_manager->dolphin);
+    Dolphin* dolphin = furi_record_open("dolphin");
+    DolphinStats stats = dolphin_stats(dolphin);
+    furi_record_close("dolphin");
     if(!blocking_animation && stats.level_up_is_pending) {
         blocking_animation = animation_storage_find_animation("levelup_is_pending");
     }
@@ -130,10 +146,14 @@ void animation_manager_start_new_idle_animation(AnimationManager* animation_mana
     }
 }
 
-void animation_manager_set_dolphin(AnimationManager* animation_manager, Dolphin* dolphin) {
-    furi_assert(animation_manager);
-    furi_assert(dolphin);
-    animation_manager->dolphin = dolphin;
+static void animation_manager_replace_current_animation(AnimationManager* animation_manager, StorageAnimation* storage_animation) {
+    StorageAnimation* previous_animation = animation_manager->current_animation;
+
+    const BubbleAnimation* animation = animation_storage_get_bubble_animation(storage_animation);
+    bubble_animation_view_set_animation(animation_manager->animation_view, animation);
+    animation_manager->current_animation = storage_animation;
+
+    animation_storage_free_animation(previous_animation);
 }
 
 void animation_manager_freeze(AnimationManager* animation_manager) {
@@ -151,6 +171,8 @@ AnimationManager* animation_manager_alloc(void) {
     Storage* storage = furi_record_open("storage");
     furi_pubsub_subscribe(storage_get_pubsub(storage), animation_manager_storage_state_changed_callback, animation_manager);
     furi_record_close("storage");
+
+    animation_manager_start_new_idle_animation(animation_manager);
 
     return animation_manager;
 }

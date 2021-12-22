@@ -15,8 +15,9 @@ typedef enum {
     DesktopMainEventOpenDebug,
     DesktopMainEventUnlocked,
     DesktopMainEventRightShort,
-    DesktopMainEventUpdateAnimation,
-    DesktopMainEventUpdateOneShotAnimation,
+    DesktopMainEventCheckAnimation,
+    DesktopMainEventNewIdleAnimation,
+    DesktopMainEventInteractAnimation,
 } DesktopMainEvent;
 
 typedef struct DesktopMainView DesktopMainView;

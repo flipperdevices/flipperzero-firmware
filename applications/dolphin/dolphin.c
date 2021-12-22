@@ -46,7 +46,6 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = osMessageQueueNew(8, sizeof(DolphinEvent), NULL);
     dolphin->pubsub = furi_pubsub_alloc();
-    dolphin->animation_manager = animation_manager_alloc();
 
     return dolphin;
 }
@@ -101,7 +100,7 @@ FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
 int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create("dolphin", dolphin);
-    animation_manager_set_dolphin(dolphin->animation_manager, dolphin);
+    dolphin->animation_manager = animation_manager_alloc();
 
     dolphin_state_load(dolphin->state);
 

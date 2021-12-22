@@ -12,6 +12,7 @@
 #include <furi-hal-lock.h>
 #include <stdint.h>
 #include <power/power_service/power.h>
+#include <dolphin/animations/animation_manager.h>
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
@@ -33,6 +34,11 @@ bool desktop_back_event_callback(void* context) {
 Desktop* desktop_alloc() {
     Desktop* desktop = furi_alloc(sizeof(Desktop));
 
+    desktop->animation_manager = animation_manager_alloc();
+
+    animation_manager_check_blocking(desktop->animation_manager);
+
+
     desktop->gui = furi_record_open("gui");
     desktop->scene_thread = furi_thread_alloc();
     desktop->view_dispatcher = view_dispatcher_alloc();
@@ -49,9 +55,7 @@ Desktop* desktop_alloc() {
         desktop->view_dispatcher, desktop_back_event_callback);
 
     desktop->dolphin_view = view_alloc();
-    Dolphin* dolphin = furi_record_open("dolphin");
-    dolphin_tie_view(dolphin, desktop->dolphin_view);
-    furi_record_close("dolphin");
+    animation_manager_tie_view(desktop->animation_manager, desktop->dolphin_view);
 
     desktop->main_view_composed = view_composed_alloc();
     desktop->main_view = desktop_main_alloc();
@@ -119,9 +123,7 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_free(desktop->view_dispatcher);
     scene_manager_free(desktop->scene_manager);
 
-    Dolphin* dolphin = furi_record_open("dolphin");
-    dolphin_untie_view(dolphin);
-    furi_record_close("dolphin");
+    animation_manager_untie_view(desktop->animation_manager);
     view_composed_free(desktop->main_view_composed);
     view_composed_free(desktop->locked_view_composed);
     desktop_main_free(desktop->main_view);
