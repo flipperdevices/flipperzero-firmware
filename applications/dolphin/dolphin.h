@@ -39,6 +39,3 @@ void dolphin_upgrade_level(Dolphin* dolphin);
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
 
-void dolphin_tie_view(Dolphin* dolphin, View* view);
-void dolphin_untie_view(Dolphin* dolphin);
-

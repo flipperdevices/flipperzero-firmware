@@ -1,6 +1,5 @@
 #pragma once
 
-#include "dolphin/animations/animation_manager.h"
 #include "furi/pubsub.h"
 #include <furi.h>
 #include <furi-hal.h>
@@ -32,7 +31,6 @@ struct Dolphin {
     // Queue
     osMessageQueueId_t event_queue;
     FuriPubSub* pubsub;
-    AnimationManager* animation_manager;
 };
 
 Dolphin* dolphin_alloc();

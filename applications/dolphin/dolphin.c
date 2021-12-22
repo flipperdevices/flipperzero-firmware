@@ -100,7 +100,6 @@ FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
 int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create("dolphin", dolphin);
-    dolphin->animation_manager = animation_manager_alloc();
 
     dolphin_state_load(dolphin->state);
 
@@ -121,12 +120,6 @@ int32_t dolphin_srv(void* p) {
                     !dolphin_state_xp_to_levelup(dolphin->state->data.icounter);
             } else if(event.type == DolphinEventTypeFlush) {
                 dolphin_state_save(dolphin->state);
-            } else if(event.type == DolphinEventTypeAnimationCheckBlocking) {
-                animation_manager_check_blocking(dolphin->animation_manager);
-            } else if(event.type == DolphinEventTypeAnimationStartNewIdle) {
-                animation_manager_start_new_idle_animation(dolphin->animation_manager);
-            } else if(event.type == DolphinEventTypeAnimationInteract) {
-                animation_manager_interact(dolphin->animation_manager);
             }
             dolphin_event_release(dolphin, &event);
         } else {
@@ -143,16 +136,5 @@ int32_t dolphin_srv(void* p) {
 void dolphin_upgrade_level(Dolphin* dolphin) {
     dolphin_state_increase_level(dolphin->state);
     dolphin_flush(dolphin);
-}
-
-void dolphin_tie_view(Dolphin* dolphin, View* view) {
-    furi_assert(dolphin);
-    furi_assert(view);
-    animation_manager_tie_view(dolphin->animation_manager, view);
-}
-
-void dolphin_untie_view(Dolphin* dolphin) {
-    furi_assert(dolphin);
-    animation_manager_untie_view(dolphin->animation_manager);
 }
 

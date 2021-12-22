@@ -65,6 +65,15 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
     }
 }
 
+static void bubble_animation_activate(BubbleAnimationView* bubble_animation) {
+    furi_assert(bubble_animation);
+
+    BubbleAnimationViewModel* model = view_get_model(bubble_animation->view);
+    model->current_frame_idx = model->current->active_frames;
+    model->current_bubble = model->current->frame_bubbles[random() % model->current->frame_bubbles_count];
+    view_commit_model(bubble_animation->view, true);
+}
+
 static bool bubble_animation_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     furi_assert(event);
@@ -77,6 +86,8 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
             animation_view->interact_callback(animation_view->interact_callback_context);
         }
         consumed = true;
+    } else {
+        bubble_animation_activate(animation_view);
     }
 
     return consumed;
@@ -131,16 +142,27 @@ static void bubble_animation_timer_callback(void* context) {
 
 BubbleAnimationView* bubble_animation_view_alloc(void) {
     BubbleAnimationView* bubble_animation_view = furi_alloc(sizeof(BubbleAnimationView));
-    bubble_animation_view->view = NULL;
+    bubble_animation_view->view = view_alloc();
     bubble_animation_view->interact_callback = NULL;
     bubble_animation_view->timer = osTimerNew(bubble_animation_timer_callback, osTimerPeriodic, bubble_animation_view, NULL);
+
+    view_allocate_model(bubble_animation_view->view, ViewModelTypeLocking, sizeof(BubbleAnimationViewModel));
+    view_set_context(bubble_animation_view->view, bubble_animation_view);
+    view_set_draw_callback(bubble_animation_view->view, bubble_animation_draw_callback);
+    view_set_input_callback(bubble_animation_view->view, bubble_animation_input_callback);
+
     return bubble_animation_view;
 }
 
 void bubble_animation_view_free(BubbleAnimationView* bubble_animation_view) {
     furi_assert(bubble_animation_view);
 
-    /* dont free bubble_animation_view->view as we don't own it */
+    view_set_draw_callback(bubble_animation_view->view, NULL);
+    view_set_input_callback(bubble_animation_view->view, NULL);
+    view_set_context(bubble_animation_view->view, NULL);
+
+    view_free(bubble_animation_view->view);
+    bubble_animation_view->view = NULL;
     free(bubble_animation_view);
 }
 
@@ -149,27 +171,6 @@ void bubble_animation_view_set_interact_callback(BubbleAnimationView* bubble_ani
 
     bubble_animation_view->interact_callback_context = context;
     bubble_animation_view->interact_callback = callback;
-}
-
-void bubble_animation_view_construct_model_for_view(BubbleAnimationView* bubble_animation_view, View* view) {
-    furi_assert(bubble_animation_view);
-    furi_assert(view);
-
-    view_allocate_model(view, ViewModelTypeLocking, sizeof(BubbleAnimationViewModel));
-    bubble_animation_view->view = view;
-    view_set_context(view, bubble_animation_view);
-    view_set_draw_callback(view, bubble_animation_draw_callback);
-    view_set_input_callback(view, bubble_animation_input_callback);
-}
-
-void bubble_animation_view_destruct_model(BubbleAnimationView* bubble_animation_view) {
-    furi_assert(bubble_animation_view);
-
-    view_set_draw_callback(bubble_animation_view->view, NULL);
-    view_set_input_callback(bubble_animation_view->view, NULL);
-    view_set_context(bubble_animation_view->view, NULL);
-    view_free_model(bubble_animation_view->view);
-    bubble_animation_view->view = NULL;
 }
 
 void bubble_animation_view_set_animation(BubbleAnimationView* bubble_animation_view, const BubbleAnimation* new_bubble_animation) {
@@ -186,15 +187,6 @@ void bubble_animation_view_set_animation(BubbleAnimationView* bubble_animation_v
     view_commit_model(bubble_animation_view->view, true);
 
     osTimerStart(bubble_animation_view->timer, 1000 / new_bubble_animation->frame_rate);
-}
-
-void bubble_animation_activate(BubbleAnimationView* bubble_animation) {
-    furi_assert(bubble_animation);
-
-    BubbleAnimationViewModel* model = view_get_model(bubble_animation->view);
-    model->current_frame_idx = model->current->active_frames;
-    model->current_bubble = model->current->frame_bubbles[random() % model->current->frame_bubbles_count];
-    view_commit_model(bubble_animation->view, true);
 }
 
 static void copy_icon_first_frame(Icon** icon_dst, const Icon* icon_src) {
