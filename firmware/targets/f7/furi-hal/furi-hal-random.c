@@ -47,3 +47,10 @@ void furi_hal_random_fill_buf(uint8_t* buf, uint32_t len) {
     LL_RNG_Disable(RNG);
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RNG_SEMID, 0);
 }
+
+void srand(unsigned seed) {
+}
+
+int rand() {
+    return (furi_hal_random_get() & RAND_MAX);
+}
