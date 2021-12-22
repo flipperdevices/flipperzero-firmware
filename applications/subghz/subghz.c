@@ -288,6 +288,7 @@ int32_t subghz_app(void* p) {
         subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
     subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
     subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
+    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_tx");
     subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
 
     // Check argument and run corresponding scene
