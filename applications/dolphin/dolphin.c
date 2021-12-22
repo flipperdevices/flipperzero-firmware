@@ -156,4 +156,3 @@ void dolphin_untie_view(Dolphin* dolphin) {
     animation_manager_untie_view(dolphin->animation_manager);
 }
 
-

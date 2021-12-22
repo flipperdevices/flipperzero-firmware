@@ -22,7 +22,6 @@
 #include "views/desktop_debug.h"
 
 #include "scenes/desktop_scene.h"
-#include "helpers/desktop_animation.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 #include <gui/icon.h>
 
@@ -47,7 +46,6 @@ struct Desktop {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    DesktopAnimation* animation;
     DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
     DesktopLockMenuView* lock_menu;

@@ -33,12 +33,6 @@ void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
 
-static void desktop_scene_main_animation_changed_callback(void* context) {
-    furi_assert(context);
-    Desktop* desktop = context;
-    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventUpdateAnimation);
-}
-
 void desktop_scene_main_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopMainView* main_view = desktop->main_view;
@@ -51,13 +45,6 @@ void desktop_scene_main_on_enter(void* context) {
         desktop_main_unlocked(desktop->main_view);
     }
 
-    desktop_animation_activate(desktop->animation);
-    desktop_animation_set_animation_changed_callback(
-        desktop->animation, desktop_scene_main_animation_changed_callback, desktop);
-    bool status_bar_background_black = false;
-    const Icon* icon =
-        desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
-    desktop_main_switch_dolphin_animation(desktop->main_view, icon, status_bar_background_black);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
 }
 
@@ -93,33 +80,9 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
 
-        case DesktopMainEventUpdateAnimation: {
-            bool status_bar_background_black = false;
-            const Icon* icon =
-                desktop_animation_get_animation(desktop->animation, &status_bar_background_black);
-            desktop_main_switch_dolphin_animation(
-                desktop->main_view, icon, status_bar_background_black);
-            consumed = true;
-            break;
-        }
-
-        case DesktopMainEventRightShort: {
-            DesktopAnimationState state = desktop_animation_handle_right(desktop->animation);
-            if(state == DesktopAnimationStateLevelUpIsPending) {
-                scene_manager_next_scene(desktop->scene_manager, DesktopSceneLevelUp);
-            }
-            break;
-        }
-
         default:
             break;
         }
-
-        if(event.event != DesktopMainEventUpdateAnimation) {
-            desktop_animation_activate(desktop->animation);
-        }
-    } else if(event.type != SceneManagerEventTypeTick) {
-        desktop_animation_activate(desktop->animation);
     }
 
     return consumed;
@@ -128,7 +91,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 void desktop_scene_main_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
 
-    desktop_animation_set_animation_changed_callback(desktop->animation, NULL, NULL);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain, MAIN_VIEW_DEFAULT);
     desktop_main_reset_hint(desktop->main_view);
 }

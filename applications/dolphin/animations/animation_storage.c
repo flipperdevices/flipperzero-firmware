@@ -6,7 +6,6 @@
 #include "animation_storage_i.h"
 
 
-
 void animation_storage_fill_animation_list(StorageAnimationList_t animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
 
