@@ -35,10 +35,6 @@ Desktop* desktop_alloc() {
     Desktop* desktop = furi_alloc(sizeof(Desktop));
 
     desktop->animation_manager = animation_manager_alloc();
-
-    animation_manager_check_blocking(desktop->animation_manager);
-
-
     desktop->gui = furi_record_open("gui");
     desktop->scene_thread = furi_thread_alloc();
     desktop->view_dispatcher = view_dispatcher_alloc();
@@ -54,21 +50,20 @@ Desktop* desktop_alloc() {
     view_dispatcher_set_navigation_event_callback(
         desktop->view_dispatcher, desktop_back_event_callback);
 
-    desktop->dolphin_view = view_alloc();
-    animation_manager_tie_view(desktop->animation_manager, desktop->dolphin_view);
+    desktop->dolphin_view = animation_manager_get_animation_view(desktop->animation_manager);
 
     desktop->main_view_composed = view_composed_alloc();
     desktop->main_view = desktop_main_alloc();
     view_composed_tie_views(desktop->main_view_composed,
-            desktop_main_get_view(desktop->main_view),
-            desktop->dolphin_view);
+            desktop->dolphin_view,
+            desktop_main_get_view(desktop->main_view));
     view_composed_top_enable(desktop->main_view_composed, true);
 
     desktop->locked_view_composed = view_composed_alloc();
     desktop->locked_view = desktop_locked_alloc();
     view_composed_tie_views(desktop->locked_view_composed,
-            desktop_locked_get_view(desktop->locked_view),
-            desktop->dolphin_view);
+            desktop->dolphin_view,
+            desktop_locked_get_view(desktop->locked_view));
     view_composed_top_enable(desktop->locked_view_composed, true);
 
     desktop->lock_menu = desktop_lock_menu_alloc();
@@ -77,6 +72,7 @@ Desktop* desktop_alloc() {
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->code_input = code_input_alloc();
 
+    printf("view_dispatcher_add_view: num: %d, view: %p\n", DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(
@@ -123,7 +119,7 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_free(desktop->view_dispatcher);
     scene_manager_free(desktop->scene_manager);
 
-    animation_manager_untie_view(desktop->animation_manager);
+    animation_manager_free(desktop->animation_manager);
     view_composed_free(desktop->main_view_composed);
     view_composed_free(desktop->locked_view_composed);
     desktop_main_free(desktop->main_view);

@@ -57,6 +57,7 @@ const BubbleAnimation tv_bubble_animation = {
     .frame_rate = 2,
     .duration = 10,
     .active_cooldown = 3,
+    .active_cycles = 1,
 };
 
 static StorageAnimation StorageAnimationInternal[] = {

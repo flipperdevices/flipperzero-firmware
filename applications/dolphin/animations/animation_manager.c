@@ -2,6 +2,7 @@
 #include "dolphin/animations/animation_manager.h"
 #include "dolphin/dolphin.h"
 #include "furi/check.h"
+#include "furi/pubsub.h"
 #include "furi/record.h"
 #include "storage/filesystem-api-defines.h"
 #include "views/bubble_animation_view.h"
@@ -18,6 +19,7 @@ struct AnimationManager {
     bool sd_shown_error_db;
     bool sd_shown_error_card_bad;
     AnimationManagerState state;
+    FuriPubSubSubscription* pubsub_storage;
     BubbleAnimationView* animation_view;
     osTimerId_t idle_animation_timer;
     StorageAnimation* current_animation;
@@ -51,7 +53,7 @@ void animation_manager_set_interact_callbacks(AnimationManager* animation_manage
     animation_manager->interact_callback = callback;
 }
 
-static void animation_manager_storage_state_changed_callback(const void* message, void* context) {
+static void animation_manager_check_blocking_callback(const void* message, void* context) {
     furi_assert(context);
     AnimationManager* animation_manager = context;
     if (animation_manager->check_blocking_callback) {
@@ -153,13 +155,9 @@ static void animation_manager_replace_current_animation(AnimationManager* animat
     bubble_animation_view_set_animation(animation_manager->animation_view, animation);
     animation_manager->current_animation = storage_animation;
 
-    animation_storage_free_animation(previous_animation);
-}
-
-void animation_manager_freeze(AnimationManager* animation_manager) {
-    furi_assert(animation_manager);
-
-
+    if (previous_animation) {
+        animation_storage_free_animation(previous_animation);
+    }
 }
 
 AnimationManager* animation_manager_alloc(void) {
@@ -169,7 +167,7 @@ AnimationManager* animation_manager_alloc(void) {
     animation_manager->idle_animation_timer = osTimerNew(animation_manager_timer_callback, osTimerOnce, animation_manager, NULL);
 
     Storage* storage = furi_record_open("storage");
-    furi_pubsub_subscribe(storage_get_pubsub(storage), animation_manager_storage_state_changed_callback, animation_manager);
+    animation_manager->pubsub_storage = furi_pubsub_subscribe(storage_get_pubsub(storage), animation_manager_check_blocking_callback, animation_manager);
     furi_record_close("storage");
 
     animation_manager_start_new_idle_animation(animation_manager);
@@ -177,12 +175,21 @@ AnimationManager* animation_manager_alloc(void) {
     return animation_manager;
 }
 
-void animation_manager_tie_view(AnimationManager* animation_manager, View* view) {
-    bubble_animation_view_construct_model_for_view(animation_manager->animation_view, view);
+void animation_manager_free(AnimationManager* animation_manager) {
+    furi_assert(animation_manager);
+
+    Storage* storage = furi_record_open("storage");
+    furi_pubsub_unsubscribe(storage_get_pubsub(storage), animation_manager->pubsub_storage);
+    furi_record_close("storage");
+
+    bubble_animation_view_free(animation_manager->animation_view);
+    osTimerDelete(animation_manager->idle_animation_timer);
 }
 
-void animation_manager_untie_view(AnimationManager* animation_manager) {
-    bubble_animation_view_destruct_model(animation_manager->animation_view);
+View* animation_manager_get_animation_view(AnimationManager* animation_manager) {
+    furi_assert(animation_manager);
+
+    return bubble_animation_get_view(animation_manager->animation_view);
 }
 
 static StorageAnimation* animation_manager_select_idle_animation(AnimationManager* animation_manager) {
@@ -231,3 +238,10 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     furi_assert(selected);
     return selected;
 }
+
+void animation_manager_freeze(AnimationManager* animation_manager) {
+    furi_assert(animation_manager);
+
+    //TODO
+}
+

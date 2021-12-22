@@ -54,7 +54,6 @@ void desktop_main_switch_dolphin_icon(DesktopMainView* main_view, const Icon* ic
 }
 
 void desktop_main_render(Canvas* canvas, void* model) {
-    canvas_clear(canvas);
     DesktopMainViewModel* m = model;
     uint32_t now = osKernelGetTickCount();
 
@@ -83,6 +82,7 @@ bool desktop_main_input(InputEvent* event, void* context) {
     furi_assert(context);
 
     DesktopMainView* main_view = context;
+    bool consumed = false;
 
     if(event->key == InputKeyOk && event->type == InputTypeShort) {
         main_view->callback(DesktopMainEventOpenMenu, main_view->context);
@@ -96,11 +96,13 @@ bool desktop_main_input(InputEvent* event, void* context) {
         main_view->callback(DesktopMainEventOpenFavorite, main_view->context);
     } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
         main_view->callback(DesktopMainEventRightShort, main_view->context);
+    } else if(event->key == InputKeyBack && event->type == InputTypeShort) {
+        consumed = true;
     }
 
     desktop_main_reset_hint(main_view);
 
-    return true;
+    return consumed;
 }
 
 void desktop_main_enter(void* context) {

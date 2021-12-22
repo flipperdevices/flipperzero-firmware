@@ -11,4 +11,5 @@ void bubble_animation_view_free(BubbleAnimationView* bubble_animation_view);
 
 void bubble_animation_view_set_interact_callback(BubbleAnimationView* bubble_animation_view, BubbleAnimationInteractCallback callback, void* context);
 void bubble_animation_view_set_animation(BubbleAnimationView* bubble_animation_view, const BubbleAnimation* new_bubble_animation);
+View* bubble_animation_get_view(BubbleAnimationView* view);
 

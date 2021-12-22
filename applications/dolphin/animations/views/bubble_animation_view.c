@@ -53,7 +53,7 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
     const FrameBubble* bubble = model->current_bubble;
 
     const Icon* icon = model->current->icons[model->current_frame_idx];
-    canvas_draw_icon(canvas, 0, 0, icon);
+    canvas_draw_icon(canvas, 0, canvas_height(canvas) - icon_get_height(icon) /*13*/, icon);
 
     if (is_active && bubble) {
         uint8_t current_active_frame_idx = model->current_frame_idx - model->current->passive_frames;
@@ -86,9 +86,8 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
             animation_view->interact_callback(animation_view->interact_callback_context);
         }
         consumed = true;
-    } else {
-        bubble_animation_activate(animation_view);
     }
+    bubble_animation_activate(animation_view);
 
     return consumed;
 }
@@ -100,7 +99,7 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
     uint8_t passive_frames = model->current->passive_frames;
     uint8_t current_index = model->current_frame_idx;
 
-    if (current_index < passive_frames) {
+    if (current_index >= passive_frames) {
         uint8_t current_active_frame_idx = current_index - passive_frames;
         if (current_active_frame_idx + 1 >= active_frames) {
             ++model->active_cycle;
@@ -125,6 +124,8 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
     } else {
         model->current_frame_idx = (current_index + 1) % passive_frames;
     }
+
+    printf("idx: %d, active_cycle: %d/%d\n", model->current_frame_idx, model->active_cycle, model->current->active_cycles);
 }
 
 static void bubble_animation_timer_callback(void* context) {
@@ -137,6 +138,7 @@ static void bubble_animation_timer_callback(void* context) {
         bubble_animation_next_frame(model);
     }
 
+    printf("bubble_animation_timer: view: %p\n", bubble_animation_view->view);
     view_commit_model(bubble_animation_view->view, true);
 }
 
@@ -227,8 +229,11 @@ void bubble_animation_unfreeze(BubbleAnimationView* view) {
     furi_assert(!model->freeze_frame);
     free_icon_first_frame(&model->freeze_frame);
     view_commit_model(view->view, false);
+}
 
+View* bubble_animation_get_view(BubbleAnimationView* view) {
+    furi_assert(view);
 
-
+    return view->view;
 }
 

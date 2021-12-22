@@ -341,6 +341,7 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
             view_dispatcher_stop(view_dispatcher);
         }
     }
+    printf("set_current_view: %p\n", view_dispatcher->current_view);
 }
 
 void view_dispatcher_update(View* view, void* context) {

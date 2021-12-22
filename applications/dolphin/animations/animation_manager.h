@@ -38,13 +38,12 @@ typedef void (*AnimationManagerSetNewIdleAnimationCallback)(void* context);
 typedef void (*AnimationManagerCheckBlockingCallback)(void* context);
 
 AnimationManager* animation_manager_alloc(void);
+void animation_manager_free(AnimationManager* animation_manager);
 void animation_manager_check_blocking(AnimationManager* animation_manager);
 void animation_manager_start_new_idle_animation(AnimationManager* animation_manager);
 void animation_manager_interact(AnimationManager* animation_manager);
 
-void animation_manager_tie_view(AnimationManager* animation_manager, View* view);
-void animation_manager_untie_view(AnimationManager* animation_manager);
-void animation_manager_set_dolphin(AnimationManager* animation_manager, Dolphin* dolphin);
+View* animation_manager_get_animation_view(AnimationManager* animation_manager);
 
 void animation_manager_set_context(AnimationManager* animation_manager, void* context);
 void animation_manager_set_new_idle_callbacks(AnimationManager* animation_manager, AnimationManagerSetNewIdleAnimationCallback callback);

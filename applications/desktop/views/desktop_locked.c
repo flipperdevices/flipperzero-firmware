@@ -80,7 +80,6 @@ void desktop_locked_with_pin(DesktopLockedView* locked_view, bool locked) {
 void desktop_locked_render(Canvas* canvas, void* model) {
     DesktopLockedViewModel* m = model;
     uint32_t now = osKernelGetTickCount();
-    canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
     if(!m->animation_seq_end) {

@@ -70,6 +70,7 @@ void desktop_scene_main_on_enter(void* context) {
         desktop_main_unlocked(desktop->main_view);
     }
 
+    printf("switch to view: num: %d\n", DesktopViewMain);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
 }
 
