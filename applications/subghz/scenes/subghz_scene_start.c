@@ -55,6 +55,7 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeBack) {
         //exit app
+        scene_manager_stop(subghz->scene_manager);
         view_dispatcher_stop(subghz->view_dispatcher);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {

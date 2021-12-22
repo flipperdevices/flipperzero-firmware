@@ -62,6 +62,7 @@ bool subghz_scene_show_error_on_event(void* context, SceneManagerEvent event) {
                SubghzCustomEventManagerSet) {
                 //exit app
                 if(!scene_manager_previous_scene(subghz->scene_manager)) {
+                    scene_manager_stop(subghz->scene_manager);
                     view_dispatcher_stop(subghz->view_dispatcher);
                 }
             } else {

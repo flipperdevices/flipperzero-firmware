@@ -135,6 +135,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                        subghz->scene_manager, SubGhzSceneSaved)) {
                     if(!scene_manager_search_and_switch_to_previous_scene(
                            subghz->scene_manager, SubGhzSceneStart)) {
+                        scene_manager_stop(subghz->scene_manager);
                         view_dispatcher_stop(subghz->view_dispatcher);
                     }
                 }
