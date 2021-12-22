@@ -34,7 +34,7 @@ void furi_hal_crypto_init();
 
 bool furi_hal_crypto_verify_enclave(uint8_t* keys_nb, uint8_t* valid_keys_nb);
 
-bool firi_hal_crypto_verify_key(uint8_t key_slot);
+bool furi_hal_crypto_verify_key(uint8_t key_slot);
 
 /** Store key in crypto storage
  *

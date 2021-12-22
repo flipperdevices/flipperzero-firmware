@@ -165,7 +165,7 @@ static bool u2f_hid_parse_request(U2fHid* u2f_hid) {
            (u2f_hid->lock == true))
             return false;
         u2f_hid->packet.len = 17;
-        uint32_t random_cid = furi_hal_trng_get_random();
+        uint32_t random_cid = furi_hal_random_get();
         memcpy(&(u2f_hid->packet.payload[8]), &random_cid, 4);
         u2f_hid->packet.payload[12] = 2; // Protocol version
         u2f_hid->packet.payload[13] = 1; // Device version major

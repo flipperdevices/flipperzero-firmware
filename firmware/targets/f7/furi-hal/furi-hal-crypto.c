@@ -1,6 +1,6 @@
 #include <furi-hal-crypto.h>
 #include <furi-hal-bt.h>
-#include <furi-hal-trng.h>
+#include <furi-hal-random.h>
 #include <furi.h>
 #include <shci.h>
 
@@ -62,7 +62,7 @@ static bool furi_hal_crypto_generate_unique_keys(uint8_t start_slot, uint8_t end
         key.type = FuriHalCryptoKeyTypeSimple;
         key.size = FuriHalCryptoKeySize256;
         key.data = key_data;
-        furi_hal_trng_fill_buf(key_data, 32);
+        furi_hal_random_fill_buf(key_data, 32);
         if (!furi_hal_crypto_store_add_key(&key, &slot)) {
             FURI_LOG_E(TAG, "Error writing key to slot %u", slot);
             return false;
@@ -71,7 +71,7 @@ static bool furi_hal_crypto_generate_unique_keys(uint8_t start_slot, uint8_t end
     return true;
 }
 
-bool firi_hal_crypto_verify_key(uint8_t key_slot) {
+bool furi_hal_crypto_verify_key(uint8_t key_slot) {
     uint8_t keys_nb = 0;
     uint8_t valid_keys_nb = 0;
     uint8_t last_valid_slot = ENCLAVE_FACTORY_KEY_SLOTS;

@@ -1,4 +1,4 @@
-#include "furi-hal-trng.h"
+#include "furi-hal-random.h"
 #include <furi.h>
 #include <furi-hal.h>
 
@@ -7,7 +7,7 @@
 
 #include <hw_conf.h>
 
-uint32_t furi_hal_trng_get_random() {
+uint32_t furi_hal_random_get() {
 
     while( LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID));
     LL_RNG_Enable(RNG);
@@ -26,7 +26,7 @@ uint32_t furi_hal_trng_get_random() {
     return random_val;
 }
 
-void furi_hal_trng_fill_buf(uint8_t* buf, uint32_t len) {
+void furi_hal_random_fill_buf(uint8_t* buf, uint32_t len) {
 
     while( LL_HSEM_1StepLock(HSEM, CFG_HW_RNG_SEMID));
     LL_RNG_Enable(RNG);

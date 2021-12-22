@@ -2,7 +2,7 @@
 #include "u2f_hid.h"
 #include <furi-hal.h>
 #include <storage/storage.h>
-#include <furi-hal-trng.h>
+#include <furi-hal-random.h>
 #include <flipper_file.h>
 
 #define TAG "U2F"
@@ -103,7 +103,7 @@ bool u2f_cert_key_load(uint8_t* cert_key) {
     uint32_t version = 0;
 
     // Check if unique key exists in secure eclave and generate it if missing
-    if(!firi_hal_crypto_verify_key(U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE)) return false;
+    if(!furi_hal_crypto_verify_key(U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE)) return false;
 
     string_t filetype;
     string_init(filetype);
@@ -235,8 +235,8 @@ bool u2f_key_generate(uint8_t* device_key) {
     uint8_t key_encrypted[48];
 
     // Generate random IV and key
-    furi_hal_trng_fill_buf(iv, 16);
-    furi_hal_trng_fill_buf(key, 32);
+    furi_hal_random_fill_buf(iv, 16);
+    furi_hal_random_fill_buf(key, 32);
 
     if(!furi_hal_crypto_store_load_key(U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE, iv)) {
         FURI_LOG_E(TAG, "Unable to load encryption key");
@@ -340,8 +340,8 @@ bool u2f_cnt_write(uint32_t cnt_val) {
     uint8_t cnt_encr[48];
 
     // Generate random IV and key
-    furi_hal_trng_fill_buf(iv, 16);
-    furi_hal_trng_fill_buf(cnt.random_salt, 24);
+    furi_hal_random_fill_buf(iv, 16);
+    furi_hal_random_fill_buf(cnt.random_salt, 24);
     cnt.control = U2F_COUNTER_CONTROL_VAL;
     cnt.counter = cnt_val;
 

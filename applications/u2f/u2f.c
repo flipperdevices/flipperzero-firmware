@@ -3,7 +3,7 @@
 #include "u2f_hid.h"
 #include "u2f_data.h"
 #include <furi-hal.h>
-#include <furi-hal-trng.h>
+#include <furi-hal-random.h>
 
 #include "toolbox/sha256.h"
 #include "toolbox/hmac_sha256.h"
@@ -88,7 +88,7 @@ struct U2fData {
 };
 
 static int u2f_uecc_random(uint8_t* dest, unsigned size) {
-    furi_hal_trng_fill_buf(dest, size);
+    furi_hal_random_fill_buf(dest, size);
     return 1;
 }
 
@@ -199,7 +199,7 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
 
     handle.len = 32 * 2;
     // Generate random nonce
-    furi_hal_trng_fill_buf(handle.nonce, 32);
+    furi_hal_random_fill_buf(handle.nonce, 32);
 
     // Generate private key
     hmac_sha256_init(&hmac_ctx, U2F->device_key);
