@@ -130,6 +130,12 @@ void animation_manager_start_new_idle_animation(AnimationManager* animation_mana
     }
 }
 
+void animation_manager_set_dolphin(AnimationManager* animation_manager, Dolphin* dolphin) {
+    furi_assert(animation_manager);
+    furi_assert(dolphin);
+    animation_manager->dolphin = dolphin;
+}
+
 void animation_manager_freeze(AnimationManager* animation_manager) {
     furi_assert(animation_manager);
 
@@ -193,8 +199,8 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     }
 
     for M_EACH(item, meta_list, StorageAnimationList_t) {
-        if (*StorageAnimationList_ref(it) != selected) {
-            animation_storage_free_animation(*StorageAnimationList_ref(it));
+        if (*item != selected) {
+            animation_storage_free_animation(*item);
         }
     }
     StorageAnimationList_clear(meta_list);

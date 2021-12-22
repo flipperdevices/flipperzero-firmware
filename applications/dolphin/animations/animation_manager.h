@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dolphin/dolphin.h"
 #include <gui/view.h>
 #include <stdint.h>
 
@@ -39,5 +40,6 @@ void animation_manager_interact(AnimationManager* animation_manager);
 
 void animation_manager_tie_view(AnimationManager* animation_manager, View* view);
 void animation_manager_untie_view(AnimationManager* animation_manager);
+void animation_manager_set_dolphin(AnimationManager* animation_manager, Dolphin* dolphin);
 
 

@@ -101,6 +101,7 @@ FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin) {
 int32_t dolphin_srv(void* p) {
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create("dolphin", dolphin);
+    animation_manager_set_dolphin(dolphin->animation_manager, dolphin);
 
     dolphin_state_load(dolphin->state);
 

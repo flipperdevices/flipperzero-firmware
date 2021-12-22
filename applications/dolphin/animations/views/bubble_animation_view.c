@@ -193,7 +193,7 @@ void bubble_animation_activate(BubbleAnimationView* bubble_animation) {
     view_commit_model(bubble_animation->view, true);
 }
 
-static void copy_icon_first_frame(Icon** icon_dst, Icon* icon_src) {
+static void copy_icon_first_frame(Icon** icon_dst, const Icon* icon_src) {
     furi_assert(icon_dst);
     furi_assert(!*icon_dst);
     furi_assert(icon_src);

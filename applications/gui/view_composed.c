@@ -57,7 +57,7 @@ ViewComposed* view_composed_alloc(void) {
     ViewComposed* view_composed = furi_alloc(sizeof(ViewComposed));
     view_composed->view = view_alloc();
 
-    view_allocate_model(view_composed->view, ViewModelTypeLocking, sizeof(ViewComposed));
+    view_allocate_model(view_composed->view, ViewModelTypeLocking, sizeof(ViewComposedModel));
     view_set_draw_callback(view_composed->view, view_composed_draw);
     view_set_input_callback(view_composed->view, view_composed_input);
     view_set_context(view_composed->view, view_composed);
@@ -78,7 +78,7 @@ void view_composed_free(ViewComposed* view_composed) {
     free(view_composed);
 }
 
-void view_copmosed_top_enable(ViewComposed* view_composed, bool enable) {
+void view_composed_top_enable(ViewComposed* view_composed, bool enable) {
     furi_assert(view_composed);
 
     ViewComposedModel* view_composed_model = view_get_model(view_composed->view);
