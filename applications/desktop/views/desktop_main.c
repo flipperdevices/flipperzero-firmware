@@ -1,8 +1,13 @@
+#include "dolphin/dolphin.h"
+#include "furi/record.h"
 #include "gui/canvas.h"
+#include "gui/view.h"
+#include "gui/view_composed.h"
 #include "input/input.h"
 #include <furi.h>
 #include "../desktop_i.h"
 #include "desktop_main.h"
+#include "dolphin/animations/views/bubble_animation_view.h"
 
 void desktop_main_set_callback(
     DesktopMainView* main_view,
@@ -119,6 +124,7 @@ void desktop_main_exit(void* context) {
 
 DesktopMainView* desktop_main_alloc() {
     DesktopMainView* main_view = furi_alloc(sizeof(DesktopMainView));
+
     main_view->view = view_alloc();
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(DesktopMainViewModel));
     view_set_context(main_view->view, main_view);

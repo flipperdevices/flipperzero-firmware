@@ -2,6 +2,7 @@
 
 #include "desktop.h"
 
+#include "gui/view_composed.h"
 #include <furi.h>
 #include <furi-hal.h>
 
@@ -49,11 +50,16 @@ struct Desktop {
     DesktopAnimation* animation;
     DesktopFirstStartView* first_start_view;
     Popup* hw_mismatch_popup;
-    DesktopMainView* main_view;
     DesktopLockMenuView* lock_menu;
-    DesktopLockedView* locked_view;
     DesktopDebugView* debug_view;
     CodeInput* code_input;
+
+    View* dolphin_view;
+    DesktopMainView* main_view;
+    DesktopLockedView* locked_view;
+
+    ViewComposed* main_view_composed;
+    ViewComposed* locked_view_composed;
 
     DesktopSettings settings;
     PinCode pincode_buffer;

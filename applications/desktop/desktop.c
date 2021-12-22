@@ -2,6 +2,7 @@
 #include "cmsis_os2.h"
 #include "desktop/desktop.h"
 #include "desktop_i.h"
+#include "gui/view_composed.h"
 #include <dolphin/dolphin.h>
 #include <furi/pubsub.h>
 #include <furi/record.h>
@@ -49,16 +50,31 @@ Desktop* desktop_alloc() {
     view_dispatcher_set_navigation_event_callback(
         desktop->view_dispatcher, desktop_back_event_callback);
 
+    desktop->dolphin_view = view_alloc();
+    Dolphin* dolphin = furi_record_open("dolphin");
+    dolphin_tie_view(dolphin, desktop->dolphin_view);
+    furi_record_close("dolphin");
+
+    desktop->main_view_composed = view_composed_alloc();
     desktop->main_view = desktop_main_alloc();
-    desktop->lock_menu = desktop_lock_menu_alloc();
+    view_composed_tie_views(desktop->main_view_composed,
+            desktop_main_get_view(desktop->main_view),
+            desktop->dolphin_view);
+
+    desktop->locked_view_composed = view_composed_alloc();
     desktop->locked_view = desktop_locked_alloc();
+    view_composed_tie_views(desktop->locked_view_composed,
+            desktop_locked_get_view(desktop->locked_view),
+            desktop->dolphin_view);
+
+    desktop->lock_menu = desktop_lock_menu_alloc();
     desktop->debug_view = desktop_debug_alloc();
     desktop->first_start_view = desktop_first_start_alloc();
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->code_input = code_input_alloc();
 
     view_dispatcher_add_view(
-        desktop->view_dispatcher, DesktopViewMain, desktop_main_get_view(desktop->main_view));
+        desktop->view_dispatcher, DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLockMenu,
@@ -68,7 +84,7 @@ Desktop* desktop_alloc() {
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLocked,
-        desktop_locked_get_view(desktop->locked_view));
+        view_composed_get_view(desktop->locked_view_composed));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewFirstStart,
@@ -104,6 +120,11 @@ void desktop_free(Desktop* desktop) {
     view_dispatcher_free(desktop->view_dispatcher);
     scene_manager_free(desktop->scene_manager);
 
+    Dolphin* dolphin = furi_record_open("dolphin");
+    dolphin_untie_view(dolphin);
+    furi_record_close("dolphin");
+    view_composed_free(desktop->main_view_composed);
+    view_composed_free(desktop->locked_view_composed);
     desktop_main_free(desktop->main_view);
     desktop_lock_menu_free(desktop->lock_menu);
     desktop_locked_free(desktop->locked_view);

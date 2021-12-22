@@ -1,6 +1,7 @@
 #pragma once
 
 #include "furi/pubsub.h"
+#include "gui/view.h"
 #include "helpers/dolphin_deed.h"
 #include <stdbool.h>
 
@@ -37,3 +38,7 @@ void dolphin_flush(Dolphin* dolphin);
 void dolphin_upgrade_level(Dolphin* dolphin);
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
+
+void dolphin_tie_view(Dolphin* dolphin, View* view);
+void dolphin_untie_view(Dolphin* dolphin);
+

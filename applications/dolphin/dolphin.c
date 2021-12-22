@@ -1,5 +1,6 @@
 #include "dolphin/dolphin.h"
 #include "desktop/desktop.h"
+#include "dolphin/animations/animation_manager.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin_i.h"
 #include "furi/pubsub.h"
@@ -45,6 +46,7 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = osMessageQueueNew(8, sizeof(DolphinEvent), NULL);
     dolphin->pubsub = furi_pubsub_alloc();
+    dolphin->animation_manager = animation_manager_alloc();
 
     return dolphin;
 }
@@ -119,6 +121,12 @@ int32_t dolphin_srv(void* p) {
                     !dolphin_state_xp_to_levelup(dolphin->state->data.icounter);
             } else if(event.type == DolphinEventTypeFlush) {
                 dolphin_state_save(dolphin->state);
+            } else if(event.type == DolphinEventTypeAnimationCheckBlocking) {
+                animation_manager_check_blocking(dolphin->animation_manager);
+            } else if(event.type == DolphinEventTypeAnimationStartNewIdle) {
+                animation_manager_start_new_idle_animation(dolphin->animation_manager);
+            } else if(event.type == DolphinEventTypeAnimationInteract) {
+                animation_manager_interact(dolphin->animation_manager);
             }
             dolphin_event_release(dolphin, &event);
         } else {
@@ -136,3 +144,16 @@ void dolphin_upgrade_level(Dolphin* dolphin) {
     dolphin_state_increase_level(dolphin->state);
     dolphin_flush(dolphin);
 }
+
+void dolphin_tie_view(Dolphin* dolphin, View* view) {
+    furi_assert(dolphin);
+    furi_assert(view);
+    animation_manager_tie_view(dolphin->animation_manager, view);
+}
+
+void dolphin_untie_view(Dolphin* dolphin) {
+    furi_assert(dolphin);
+    animation_manager_untie_view(dolphin->animation_manager);
+}
+
+

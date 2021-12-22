@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dolphin/animations/animation_manager.h"
 #include "furi/pubsub.h"
 #include <furi.h>
 #include <furi-hal.h>
@@ -11,6 +12,9 @@ typedef enum {
     DolphinEventTypeDeed,
     DolphinEventTypeStats,
     DolphinEventTypeFlush,
+    DolphinEventTypeAnimationStartNewIdle,
+    DolphinEventTypeAnimationCheckBlocking,
+    DolphinEventTypeAnimationInteract,
 } DolphinEventType;
 
 typedef struct {
@@ -28,6 +32,7 @@ struct Dolphin {
     // Queue
     osMessageQueueId_t event_queue;
     FuriPubSub* pubsub;
+    AnimationManager* animation_manager;
 };
 
 Dolphin* dolphin_alloc();
@@ -39,3 +44,4 @@ void dolphin_event_send_async(Dolphin* dolphin, DolphinEvent* event);
 void dolphin_event_send_wait(Dolphin* dolphin, DolphinEvent* event);
 
 void dolphin_event_release(Dolphin* dolphin, DolphinEvent* event);
+

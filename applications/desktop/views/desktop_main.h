@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gui/view_composed.h"
 #include <gui/gui_i.h>
 #include <gui/view.h>
 #include <gui/canvas.h>
