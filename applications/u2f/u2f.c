@@ -92,7 +92,7 @@ static int u2f_uecc_random(uint8_t* dest, unsigned size) {
     return 1;
 }
 
-static U2fData* u2f_alloc() {
+U2fData* u2f_alloc() {
     return furi_alloc(sizeof(U2fData));
 }
 
@@ -101,29 +101,28 @@ void u2f_free(U2fData* U2F) {
     free(U2F);
 }
 
-bool u2f_init(U2fData** U2F_inst) {
-    U2fData* U2F = u2f_alloc();
-    *U2F_inst = U2F;
+bool u2f_init(U2fData* U2F) {
+    furi_assert(U2F);
 
-    if(u2f_cert_check() == false) {
+    if(u2f_data_cert_check() == false) {
         FURI_LOG_E(TAG, "Certificate load error");
         return false;
     }
-    if(u2f_cert_key_load(U2F->cert_key) == false) {
+    if(u2f_data_cert_key_load(U2F->cert_key) == false) {
         FURI_LOG_E(TAG, "Certificate key load error");
         return false;
     }
-    if(u2f_key_load(U2F->device_key) == false) {
+    if(u2f_data_key_load(U2F->device_key) == false) {
         FURI_LOG_W(TAG, "Key loading error, generating new");
-        if(u2f_key_generate(U2F->device_key) == false) {
+        if(u2f_data_key_generate(U2F->device_key) == false) {
             FURI_LOG_E(TAG, "Key write failed");
             return false;
         }
     }
-    if(u2f_cnt_read(&U2F->counter) == false) {
+    if(u2f_data_cnt_read(&U2F->counter) == false) {
         FURI_LOG_W(TAG, "Counter loading error, resetting counter");
         U2F->counter = 0;
-        if(u2f_cnt_write(0) == false) {
+        if(u2f_data_cnt_write(0) == false) {
             FURI_LOG_E(TAG, "Counter write failed");
             return false;
         }
@@ -233,7 +232,7 @@ static uint16_t u2f_register(U2fData* U2F, uint8_t* buf) {
     resp->reserved = 0x05;
     memcpy(&(resp->pub_key), &pub_key, sizeof(U2fPubKey));
     memcpy(&(resp->key_handle), &handle, sizeof(U2fKeyHandle));
-    uint32_t cert_len = u2f_cert_load(resp->cert);
+    uint32_t cert_len = u2f_data_cert_load(resp->cert);
     uint8_t signature_len = u2f_der_encode_signature(resp->cert + cert_len, signature);
     memcpy(resp->cert + cert_len + signature_len, state_no_error, 2);
 
@@ -302,7 +301,7 @@ static uint16_t u2f_authenticate(U2fData* U2F, uint8_t* buf) {
 
     FURI_LOG_I(TAG, "Counter: %lu", U2F->counter);
     U2F->counter++;
-    u2f_cnt_write(U2F->counter);
+    u2f_data_cnt_write(U2F->counter);
 
     return (sizeof(U2fAuthResp) + signature_len + 2);
 }

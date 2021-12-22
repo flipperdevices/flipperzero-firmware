@@ -36,7 +36,7 @@ typedef struct {
     uint32_t control;
 } __attribute__((packed)) U2fCounterData;
 
-bool u2f_cert_check() {
+bool u2f_data_cert_check() {
     bool state = false;
     Storage* fs_api = furi_record_open("storage");
     File* file = storage_file_alloc(fs_api);
@@ -71,7 +71,7 @@ bool u2f_cert_check() {
     return state;
 }
 
-uint32_t u2f_cert_load(uint8_t* cert) {
+uint32_t u2f_data_cert_load(uint8_t* cert) {
     furi_assert(cert);
 
     Storage* fs_api = furi_record_open("storage");
@@ -92,7 +92,7 @@ uint32_t u2f_cert_load(uint8_t* cert) {
     return len_cur;
 }
 
-bool u2f_cert_key_load(uint8_t* cert_key) {
+bool u2f_data_cert_key_load(uint8_t* cert_key) {
     furi_assert(cert_key);
 
     bool state = false;
@@ -172,7 +172,7 @@ bool u2f_cert_key_load(uint8_t* cert_key) {
     return state;
 }
 
-bool u2f_key_load(uint8_t* device_key) {
+bool u2f_data_key_load(uint8_t* device_key) {
     furi_assert(device_key);
 
     bool state = false;
@@ -226,7 +226,7 @@ bool u2f_key_load(uint8_t* device_key) {
     return state;
 }
 
-bool u2f_key_generate(uint8_t* device_key) {
+bool u2f_data_key_generate(uint8_t* device_key) {
     furi_assert(device_key);
 
     bool state = false;
@@ -275,7 +275,7 @@ bool u2f_key_generate(uint8_t* device_key) {
     return state;
 }
 
-bool u2f_cnt_read(uint32_t* cnt_val) {
+bool u2f_data_cnt_read(uint32_t* cnt_val) {
     furi_assert(cnt_val);
 
     bool state = false;
@@ -333,7 +333,7 @@ bool u2f_cnt_read(uint32_t* cnt_val) {
     return state;
 }
 
-bool u2f_cnt_write(uint32_t cnt_val) {
+bool u2f_data_cnt_write(uint32_t cnt_val) {
     bool state = false;
     uint8_t iv[16];
     U2fCounterData cnt;
