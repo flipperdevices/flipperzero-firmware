@@ -49,29 +49,34 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
         return;
     }
 
-    bool is_active = model->current_frame_idx > model->current->passive_frames;
+    bool is_active = model->current_frame_idx >= model->current->passive_frames;
     const FrameBubble* bubble = model->current_bubble;
 
     const Icon* icon = model->current->icons[model->current_frame_idx];
-    canvas_draw_icon(canvas, 0, canvas_height(canvas) - icon_get_height(icon) /*13*/, icon);
+    canvas_draw_icon(canvas, 0, canvas_height(canvas) - icon_get_height(icon), icon);
 
     if (is_active && bubble) {
         uint8_t current_active_frame_idx = model->current_frame_idx - model->current->passive_frames;
         uint8_t active_frame_number = model->active_cycle * model->current->active_cycles + current_active_frame_idx;
-        if ((bubble->starts_at_frame >= active_frame_number) && (bubble->ends_at_frame <= active_frame_number)) {
+        if ((active_frame_number >= bubble->starts_at_frame) && (active_frame_number <= bubble->ends_at_frame)) {
             const Bubble* b = &bubble->bubble;
             elements_bubble_str(canvas, b->x, b->y, b->str, b->horizontal, b->vertical);
         }
     }
 }
 
-static void bubble_animation_activate(BubbleAnimationView* bubble_animation) {
-    furi_assert(bubble_animation);
+static void bubble_animation_activate(BubbleAnimationView* bubble_animation_view) {
+    furi_assert(bubble_animation_view);
 
-    BubbleAnimationViewModel* model = view_get_model(bubble_animation->view);
+    TickType_t frame_rate = 0;
+
+    BubbleAnimationViewModel* model = view_get_model(bubble_animation_view->view);
     model->current_frame_idx = model->current->active_frames;
     model->current_bubble = model->current->frame_bubbles[random() % model->current->frame_bubbles_count];
-    view_commit_model(bubble_animation->view, true);
+    frame_rate = model->current->frame_rate;
+    view_commit_model(bubble_animation_view->view, true);
+
+    osTimerStart(bubble_animation_view->timer, 1000 / frame_rate);
 }
 
 static bool bubble_animation_input_callback(InputEvent* event, void* context) {
