@@ -14,12 +14,12 @@ MANIFEST_TEMPLATE = {
         "fus": {"version": {"major": 1, "minor": 2, "sub": 0}, "files": []},
         "radio": {
             "version": {
-                "type": 1,
+                "type": 3,
                 "major": 1,
-                "minor": 12,
-                "sub": 1,
+                "minor": 13,
+                "sub": 0,
                 "branch": 0,
-                "release": 1,
+                "release": 5,
             },
             "files": [],
         },
@@ -51,7 +51,7 @@ class Copro:
         if not cube_version or not cube_version.startswith("FW.WB"):
             raise Exception(f"Incorrect Cube package or version info")
         cube_version = cube_version.replace("FW.WB.", "", 1)
-        if cube_version != "1.12.1":
+        if cube_version != "1.13.1":
             raise Exception(f"Unknonwn cube version")
         self.version = cube_version
 
@@ -88,8 +88,8 @@ class Copro:
         # BLE Full Stack
         self.addFile(
             manifest["copro"]["radio"]["files"],
-            "stm32wb5x_BLE_Stack_full_fw.bin",
-            address="0x080CA000",
+            "stm32wb5x_BLE_Stack_light_fw.bin",
+            address="0x080D7000",
         )
         # Save manifest to
         json.dump(manifest, open(manifest_file, "w"))
