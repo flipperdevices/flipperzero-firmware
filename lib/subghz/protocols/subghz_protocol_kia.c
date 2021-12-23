@@ -205,3 +205,4 @@ bool subghz_protocol_kia_to_load_protocol_from_file(
         return true;
     }
     return false;
+    
