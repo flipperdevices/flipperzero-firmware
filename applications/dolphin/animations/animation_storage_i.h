@@ -12,15 +12,15 @@ struct StorageAnimation {
 
 FrameBubble tv_bubble1_2 = {
     .bubble = {.x = 0, .y = 15, .str = "second\nbubble", .horizontal = AlignRight, .vertical = AlignBottom},
-    .starts_at_frame = 5,
-    .ends_at_frame = 6,
+    .starts_at_frame = 4,
+    .ends_at_frame = 4,
     .next_bubble = NULL,
 };
 
 FrameBubble tv_bubble1_1 = {
     .bubble = {.x = 0, .y = 15, .str = "1. first bubble", .horizontal = AlignRight, .vertical = AlignBottom},
-    .starts_at_frame = 2,
-    .ends_at_frame = 4,
+    .starts_at_frame = 1,
+    .ends_at_frame = 2,
     .next_bubble = &tv_bubble1_2,
 };
 

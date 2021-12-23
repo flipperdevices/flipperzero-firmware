@@ -116,15 +116,15 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
             } else {
                 model->current_frame_idx = passive_frames;
             }
-
-            if (model->current_bubble) {
-                uint8_t active_frame_number = model->active_cycle * model->current->active_cycles + current_active_frame_idx;
-                if (model->current_bubble->ends_at_frame > active_frame_number) {
-                    model->current_bubble = model->current_bubble->next_bubble;
-                }
-            }
         } else {
             ++model->current_frame_idx;
+        }
+
+        if (model->current_bubble) {
+            uint8_t active_frame_number = model->active_cycle * model->current->active_cycles + current_active_frame_idx;
+            if (active_frame_number > model->current_bubble->ends_at_frame) {
+                model->current_bubble = model->current_bubble->next_bubble;
+            }
         }
     } else {
         model->current_frame_idx = (current_index + 1) % passive_frames;
