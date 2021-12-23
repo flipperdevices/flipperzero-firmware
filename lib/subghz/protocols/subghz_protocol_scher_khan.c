@@ -261,7 +261,7 @@ bool subghz_protocol_scher_khan_to_load_protocol_from_file(
     return false;
 }
 
-bool subghz_protocol_protocol_scher_khan_to_save_file(
+bool subghz_protocol_scher_khan_to_save_file(
     SubGhzProtocolScherKhan* instance,
     FlipperFile* flipper_file) {
     return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
