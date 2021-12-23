@@ -7,7 +7,7 @@
 struct StorageAnimation {
     const BubbleAnimation* animation;   // in file
     bool external;
-    AnimationMeta meta;
+    PB_FA_StorageAnimationMeta meta;
 };
 
 FrameBubble tv_bubble1_2 = {

@@ -1,18 +1,21 @@
 #pragma once
+#include "animation_storage.pb.h"
 #include <stdint.h>
 #include <m-list.h>
 #include "views/bubble_animation_view.h"
 
 typedef struct StorageAnimation StorageAnimation;
 
-typedef struct {
-    const char* name;
-    uint8_t min_butthurt;
-    uint8_t max_butthurt;
-    uint8_t min_level;
-    uint8_t max_level;
-    uint8_t weight;
-} AnimationMeta;
+//typedef struct {
+//    const char* name;
+//    uint8_t min_butthurt;
+//    uint8_t max_butthurt;
+//    uint8_t min_level;
+//    uint8_t max_level;
+//    uint8_t weight;
+//    PB_FA_StorageAnimationMeta aa;
+//} AnimationMeta;
+
 
 LIST_DEF(StorageAnimationList, StorageAnimation*, M_PTR_OPLIST)
 #define M_OPL_StorageAnimationList_t() LIST_OPLIST(StorageAnimationList)
@@ -22,7 +25,7 @@ const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation*)
 void animation_storage_free_animation(StorageAnimation* storage_animation);
 
 StorageAnimation* animation_storage_find_animation(const char*);
-AnimationMeta* animation_storage_get_meta(StorageAnimation* storage_animation);
+PB_FA_StorageAnimationMeta* animation_storage_get_meta(StorageAnimation* storage_animation);
 const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation* storage_animation);
 void animation_storage_cache_animation(StorageAnimation* storage_animation);
 
