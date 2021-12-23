@@ -43,11 +43,6 @@ message StorageAnimationFile {
     uint32 active_cooldown = 8; // uint16
 }
 
-
-
-
-
-
 message StorageAnimationMetaFile {
     repeated StorageAnimationMeta meta = 1;
 }

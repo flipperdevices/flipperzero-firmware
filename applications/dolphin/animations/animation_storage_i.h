@@ -5,7 +5,7 @@
 #include "gui/canvas.h"
 
 struct StorageAnimation {
-    const BubbleAnimation* animation;   // in file
+    const BubbleAnimation* animation;
     bool external;
     PB_FA_StorageAnimationMeta meta;
 };

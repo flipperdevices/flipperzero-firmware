@@ -21,7 +21,6 @@ static void view_composed_update_callback(View* view_top_or_bottom, void* contex
     furi_assert(context);
 
     View* view_composed_view = context;
-    printf("view_composed_update_callback: view_composed->view %p\n", view_composed_view);
     view_composed_view->update_callback(view_composed_view, view_composed_view->update_callback_context);
 }
 
@@ -33,21 +32,18 @@ static void view_composed_enter(void* context) {
 
     /* if more than 1 composed views hold same view it has to reassign update_callback_context */
     if (model->bottom) {
-        printf("view_composed_enter, BEFORE: bottom update_context: %p\n", model->bottom->update_callback_context);
         view_set_update_callback_context(model->bottom, view_composed->view);
         if (model->bottom->enter_callback) {
             model->bottom->enter_callback(model->bottom->context);
         }
     }
     if (model->top) {
-        printf("view_composed_enter, BEFORE: top update_context: %p\n", model->top->update_callback_context);
         view_set_update_callback_context(model->top, view_composed->view);
         if (model->top->enter_callback) {
             model->top->enter_callback(model->top->context);
         }
     }
 
-    printf("view_composed_enter, AFTER: bottom update_context: %p, top update_context: %p\n", model->bottom->update_callback_context, model->top->update_callback_context);
     view_commit_model(view_composed->view, false);
 }
 
@@ -79,7 +75,6 @@ ViewComposed* view_composed_alloc(void) {
     view_set_draw_callback(view_composed->view, view_composed_draw);
     view_set_input_callback(view_composed->view, view_composed_input);
     view_set_context(view_composed->view, view_composed);
-    printf("view_composed_alloc: view_composed->view %p\n", view_composed->view);
     view_set_enter_callback(view_composed->view, view_composed_enter);
     view_set_exit_callback(view_composed->view, view_composed_exit);
     return view_composed;
@@ -161,7 +156,6 @@ void view_composed_tie_views(ViewComposed* view_composed, View* view_bottom, Vie
     view_set_update_callback(view_top, view_composed_update_callback);
     view_set_update_callback_context(view_top, view_composed->view);
 
-    printf("composed_view tie: bottom: %p, top: %p\n", view_bottom, view_top);
     view_commit_model(view_composed->view, true);
 }
 

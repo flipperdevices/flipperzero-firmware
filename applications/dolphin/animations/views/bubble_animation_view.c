@@ -129,8 +129,6 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
     } else {
         model->current_frame_idx = (current_index + 1) % passive_frames;
     }
-
-    printf("idx: %d, active_cycle: %d/%d\n", model->current_frame_idx, model->active_cycle, model->current->active_cycles);
 }
 
 static void bubble_animation_timer_callback(void* context) {
@@ -143,7 +141,6 @@ static void bubble_animation_timer_callback(void* context) {
         bubble_animation_next_frame(model);
     }
 
-    printf("bubble_animation_timer: view: %p\n", bubble_animation_view->view);
     view_commit_model(bubble_animation_view->view, true);
 }
 

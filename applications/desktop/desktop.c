@@ -72,7 +72,6 @@ Desktop* desktop_alloc() {
     desktop->hw_mismatch_popup = popup_alloc();
     desktop->code_input = code_input_alloc();
 
-    printf("view_dispatcher_add_view: num: %d, view: %p\n", DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(
         desktop->view_dispatcher, DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(

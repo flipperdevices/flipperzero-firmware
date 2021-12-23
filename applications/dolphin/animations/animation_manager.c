@@ -10,6 +10,8 @@
 #include "animation_storage.h"
 #include "storage/storage.h"
 
+#define TAG "ANM_MNGR"
+
 typedef enum {
     AnimationManagerStateIdle,
     AnimationManagerStateBlocking,
@@ -194,7 +196,8 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
 
 static StorageAnimation* animation_manager_select_idle_animation(AnimationManager* animation_manager) {
     StorageAnimationList_t animation_list;
-    animation_storage_fill_animation_list(animation_list);
+    StorageAnimationList_init(animation_list);
+    animation_storage_fill_animation_list(&animation_list);
 
     Dolphin* dolphin = furi_record_open("dolphin");
     DolphinStats stats = dolphin_stats(dolphin);
@@ -203,7 +206,7 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it); StorageAnimationList_next(it)) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
-        const AnimationMeta* meta = animation_storage_get_meta(storage_animation);
+        const PB_FA_StorageAnimationMeta* meta = animation_storage_get_meta(storage_animation);
         if ((stats.butthurt >= meta->min_butthurt)
             && (stats.butthurt <= meta->max_butthurt)
             && (stats.level >= meta->min_level)

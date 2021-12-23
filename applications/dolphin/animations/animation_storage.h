@@ -6,21 +6,10 @@
 
 typedef struct StorageAnimation StorageAnimation;
 
-//typedef struct {
-//    const char* name;
-//    uint8_t min_butthurt;
-//    uint8_t max_butthurt;
-//    uint8_t min_level;
-//    uint8_t max_level;
-//    uint8_t weight;
-//    PB_FA_StorageAnimationMeta aa;
-//} AnimationMeta;
-
-
 LIST_DEF(StorageAnimationList, StorageAnimation*, M_PTR_OPLIST)
 #define M_OPL_StorageAnimationList_t() LIST_OPLIST(StorageAnimationList)
 
-void animation_storage_fill_animation_list(StorageAnimationList_t);
+void animation_storage_fill_animation_list(StorageAnimationList_t*);
 const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation*);
 void animation_storage_free_animation(StorageAnimation* storage_animation);
 
