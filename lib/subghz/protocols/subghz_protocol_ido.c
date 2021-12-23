@@ -204,6 +204,7 @@ bool subghz_protocol_ido_to_load_protocol_from_file(
         return true;
     }
     return false;
+}
 
 bool subghz_protocol_ido_to_save_file(
     SubGhzProtocolIDo* instance,

@@ -259,6 +259,7 @@ bool subghz_protocol_scher_khan_to_load_protocol_from_file(
         return true;
     }
     return false;
+}
 
 bool subghz_protocol_protocol_scher_khan_to_save_file(
     SubGhzProtocolScherKhan* instance,

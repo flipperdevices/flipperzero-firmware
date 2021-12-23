@@ -279,6 +279,7 @@ bool subghz_protocol_nice_flor_s_to_load_protocol_from_file(
         return true;
     }
     return false;
+}
 
 bool subghz_protocol_nice_flor_s_to_save_file(
     SubGhzProtocolNiceFlorS* instance,

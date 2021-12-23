@@ -356,8 +356,10 @@ bool subghz_protocol_star_line_to_load_protocol_from_file(
         return true;
     }
     return false;
+}
 
 bool subghz_protocol_protocol_star_line_to_save_file(
     SubGhzProtocolStarLine* instance,
     FlipperFile* flipper_file) {
     return subghz_protocol_common_to_save_file((SubGhzProtocolCommon*)instance, flipper_file);
+}

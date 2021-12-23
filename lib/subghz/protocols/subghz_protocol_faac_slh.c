@@ -204,6 +204,7 @@ bool subghz_protocol_faac_slh_to_load_protocol_from_file(
         return true;
     }
     return false;
+}
 
 bool subghz_protocol_faac_slh_to_save_file(
     SubGhzProtocolFaacSLH* instance,

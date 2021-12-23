@@ -272,6 +272,7 @@ bool subghz_protocol_came_atomo_to_load_protocol_from_file(
         return true;
     }
     return false;
+}    
 
 void subghz_decoder_came_atomo_to_load_protocol(SubGhzProtocolCameAtomo* instance, void* context) {
     furi_assert(context);
