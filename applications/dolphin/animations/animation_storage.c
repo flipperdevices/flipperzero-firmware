@@ -4,6 +4,7 @@
 #include "m-string.h"
 #include "storage/storage.h"
 #include "animation_storage_i.h"
+#include <cstring>
 
 
 void animation_storage_fill_animation_list(StorageAnimationList_t animation_list) {
@@ -29,7 +30,22 @@ void animation_storage_fill_animation_list(StorageAnimationList_t animation_list
 }
 
 StorageAnimation* animation_storage_find_animation(const char* name) {
-    const StorageAnimation* iterator = NULL;
+    // look through internal animations
+    for (int i = 0; i < COUNT_OF(StorageAnimationInternal); ++i) {
+        if (!strcmp(StorageAnimationInternal[i].meta.name, name)) {
+            return &StorageAnimationInternal[i];
+        }
+    }
+
+    StorageAnimationList_t animation_list;
+    StorageAnimationList_init(animation_list);
+
+    for M_EACH(item, animation_list, StorageAnimationList_t) {
+        if (!strcmp((*item)->meta.name, name)) {
+            animation_storage_cache_animation(storage_animation);
+        }
+    }
+    StorageAnimationList_clear(animation_list);
 
     furi_assert(iterator);
 

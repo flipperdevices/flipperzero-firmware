@@ -1,0 +1,2 @@
+PB_FA.StorageAnimationMeta.name             type:FT_POINTER
+PB_FA.StorageAnimationMeta.name             max_length:64

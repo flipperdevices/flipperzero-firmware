@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+/* protobuf file animation */
+package PB_FA;
+
+enum Align {
+    LEFT = 0;
+    RIGHT = 1;
+    TOP = 2;
+    BOTTOM = 3;
+    CENTER = 4;
+}
+
+message Bubble {
+    uint32 x = 1;
+    uint32 y = 2;
+    string str = 3;
+    Align corner_horizontal = 4;
+    Align corner_vertical = 5;
+}
+
+message AnimationBubble {
+    Bubble bubble = 1;
+    uint32 starts_at_frame = 2;
+    uint32 ends_at_frame = 3;
+}
+
+message AnimationFrame {
+    uint32 width = 1;
+    uint32 height = 2;
+    bytes data = 3;
+}
+
+message StorageAnimationFile {
+    repeated AnimationBubble bubble = 1;
+    repeated AnimationFrame frame = 2;
+    /* whole number of frames = passive_frames + active_frames */
+    uint32 passive_frames = 3;
+    uint32 active_frames = 4;
+    uint32 frame_rate = 5;
+    uint32 active_cycles = 6;
+    uint32 duration = 7;        // uint16
+    uint32 active_cooldown = 8; // uint16
+}
+
+
+
+
+
+
+message StorageAnimationMetaFile {
+    repeated StorageAnimationMeta meta = 1;
+}
+
+/**
+ * This is meta info stored in separate file for all animations.
+ * It contains all info to decide should we upload it now or not.
+ */
+message StorageAnimationMeta {
+    string name = 1;
+    uint32 min_butthurt = 2;
+    uint32 max_butthurt = 3;
+    uint32 min_level = 4;
+    uint32 max_level = 5;
+    uint32 weight = 6;
+}
+

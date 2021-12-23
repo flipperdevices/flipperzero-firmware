@@ -193,15 +193,15 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
 }
 
 static StorageAnimation* animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    StorageAnimationList_t meta_list;
-    animation_storage_fill_animation_list(meta_list);
+    StorageAnimationList_t animation_list;
+    animation_storage_fill_animation_list(animation_list);
 
     Dolphin* dolphin = furi_record_open("dolphin");
     DolphinStats stats = dolphin_stats(dolphin);
     uint32_t whole_weight = 0;
 
     StorageAnimationList_it_t it;
-    for(StorageAnimationList_it(it, meta_list); !StorageAnimationList_end_p(it); StorageAnimationList_next(it)) {
+    for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it); StorageAnimationList_next(it)) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const AnimationMeta* meta = animation_storage_get_meta(storage_animation);
         if ((stats.butthurt >= meta->min_butthurt)
@@ -211,7 +211,7 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
             whole_weight += meta->weight;
         } else {
             animation_storage_free_animation(storage_animation);
-            StorageAnimationList_remove(meta_list, it);
+            StorageAnimationList_remove(animation_list, it);
         }
     }
 
@@ -219,7 +219,7 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     uint32_t weight = 0;
 
     StorageAnimation* selected = NULL;
-    for M_EACH(item, meta_list, StorageAnimationList_t) {
+    for M_EACH(item, animation_list, StorageAnimationList_t) {
         if(lucky_number < weight) {
             break;
         }
@@ -227,12 +227,12 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
         selected = *item;
     }
 
-    for M_EACH(item, meta_list, StorageAnimationList_t) {
+    for M_EACH(item, animation_list, StorageAnimationList_t) {
         if (*item != selected) {
             animation_storage_free_animation(*item);
         }
     }
-    StorageAnimationList_clear(meta_list);
+    StorageAnimationList_clear(animation_list);
     furi_record_close("dolphin");
 
     furi_assert(selected);
