@@ -292,13 +292,15 @@ static void loader_build_menu() {
             loader_menu_callback,
             (void*)&FLIPPER_APPS[i]);
     }
-    menu_add_item(
-        loader_instance->primary_menu,
-        "Plugins",
-        &A_Plugins_14,
-        i++,
-        loader_submenu_callback,
-        (void*)LoaderMenuViewPlugins);
+    if(FLIPPER_PLUGINS_COUNT != 0) {
+        menu_add_item(
+            loader_instance->primary_menu,
+            "Plugins",
+            &A_Plugins_14,
+            i++,
+            loader_submenu_callback,
+            (void*)LoaderMenuViewPlugins);
+    }
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         menu_add_item(
             loader_instance->primary_menu,
