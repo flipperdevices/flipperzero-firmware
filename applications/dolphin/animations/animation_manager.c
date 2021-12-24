@@ -206,7 +206,7 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it); StorageAnimationList_next(it)) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
-        const PB_FA_StorageAnimationMeta* meta = animation_storage_get_meta(storage_animation);
+        const StorageAnimationMeta* meta = animation_storage_get_meta(storage_animation);
         if ((stats.butthurt >= meta->min_butthurt)
             && (stats.butthurt <= meta->max_butthurt)
             && (stats.level >= meta->min_level)

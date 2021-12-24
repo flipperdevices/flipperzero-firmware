@@ -7,7 +7,7 @@
 struct StorageAnimation {
     const BubbleAnimation* animation;
     bool external;
-    PB_FA_StorageAnimationMeta meta;
+    StorageAnimationMeta meta;
 };
 
 FrameBubble tv_bubble1_2 = {
@@ -65,7 +65,7 @@ static StorageAnimation StorageAnimationInternal[] = {
         .animation = &tv_bubble_animation,
         .external = false,
         .meta = {
-            .name = "tv",
+//            .name = "tv",
             .min_butthurt = 0,
             .max_butthurt = 3,
             .min_level = 1,
@@ -75,4 +75,10 @@ static StorageAnimation StorageAnimationInternal[] = {
     },
 };
 
+/* not static inline*/
+__attribute__((constructor))
+void animation_storage_initialize_internal_animations(void) {
+    string_init_set_str(StorageAnimationInternal[0].meta.name, "tv");
+//    string_init_set_str(StorageAnimationInternal[1].meta.name, "no_sd_card");
+}
 

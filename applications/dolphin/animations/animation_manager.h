@@ -28,7 +28,7 @@ typedef struct {
     uint8_t passive_frames;
     uint8_t active_frames;
     uint8_t active_cycles;
-    uint8_t frame_rate;     // frame changes per second
+    uint8_t frame_rate;
     uint16_t duration;
     uint16_t active_cooldown;
 } BubbleAnimation;

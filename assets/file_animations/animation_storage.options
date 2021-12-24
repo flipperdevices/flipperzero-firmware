@@ -1,2 +1,10 @@
 PB_FA.StorageAnimationMeta.name             type:FT_POINTER
 PB_FA.StorageAnimationMeta.name             max_length:64
+
+PB_FA.Bubble.str                            type:FT_POINTER
+PB_FA.Bubble.str                            max_length:64
+
+PB_FA.AnimationFrame.bytes                  type:FT_POINTER
+PB_FA.AnimationFrame.bytes                  max_size:1024
+
+

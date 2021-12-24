@@ -1,0 +1,46 @@
+Filetype: Flipper Animation
+Version: 1
+
+Height: 52
+Width: 128
+Passive frames: 5
+Active frames: 5
+Frames order: 1 2 1 2 1 3 4 5 4 6
+Active cycles: 1
+Frame rate: 2
+Duration: 7200
+Active cooldown: 15
+
+Bubble slots: 2
+
+# Bubble 1.1
+Slot: 1
+X: 10
+Y: 15
+Text: blablabla 1.1
+AlignH: Right
+AlignV: Top
+StartFrame: 1
+EndFrame: 2
+
+# Bubble 1.2
+Slot: 1
+X: 10
+Y: 15
+Text: blablabla 1.2
+AlignH: Right
+AlignV: Top
+StartFrame: 3
+EndFrame: 4
+
+# Bubble 2.1
+Slot: 2
+X: 10
+Y: 15
+Text: blablabla 2.1
+AlignH: Right
+AlignV: Top
+StartFrame: 1
+EndFrame: 2
+
+
