@@ -151,11 +151,11 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
-            if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
-               strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
-                subghz_file_name_clear(subghz);
-                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
-            }
+            //if(subghz->txrx->protocol_result && subghz->txrx->protocol_result->to_save_file &&
+               //strcmp(subghz->txrx->protocol_result->name, "KeeLoq")) {
+                //subghz_file_name_clear(subghz);
+                //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
+            //}
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {

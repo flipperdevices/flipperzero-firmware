@@ -26,7 +26,7 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
            (!strcmp(
                subghz_protocol_keeloq_get_manufacture_name(subghz->txrx->protocol_result),
                "Unknown"))) {
-            show_button = 0;
+            show_button = 1;
         } else {
             show_button = 1;
         }
