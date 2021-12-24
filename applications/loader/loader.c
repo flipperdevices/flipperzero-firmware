@@ -187,7 +187,9 @@ static Loader* loader_alloc() {
 
     instance->mutex = osMutexNew(NULL);
 
+#ifdef SRV_CLI
     instance->cli = furi_record_open("cli");
+#endif
 
     instance->loader_thread = osThreadGetId();
 
@@ -235,7 +237,9 @@ static Loader* loader_alloc() {
 static void loader_free(Loader* instance) {
     furi_assert(instance);
 
-    furi_record_close("cli");
+    if(instance->cli) {
+        furi_record_close("cli");
+    }
 
     osMutexDelete(instance->mutex);
 
@@ -260,6 +264,10 @@ static void loader_free(Loader* instance) {
 }
 
 static void loader_add_cli_command(FlipperApplication* app) {
+    if(loader_instance->cli == NULL) {
+        return;
+    }
+
     string_t cli_name;
     string_init_printf(cli_name, "app_%s", app->name);
     cli_add_command(

@@ -168,7 +168,6 @@ const size_t FLIPPER_APPS_COUNT = sizeof(FLIPPER_APPS) / sizeof(FlipperApplicati
 const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 #ifdef SRV_CLI
     crypto_cli_init,
-#endif
 
 #ifdef APP_IRDA
     irda_cli_init,
@@ -204,6 +203,7 @@ const FlipperOnStartHook FLIPPER_ON_SYSTEM_START[] = {
 
 #ifdef APP_UNIT_TESTS
     unit_tests_cli_init,
+#endif
 #endif
 };
 
