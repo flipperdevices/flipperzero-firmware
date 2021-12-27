@@ -33,20 +33,23 @@ typedef struct {
     uint16_t active_cooldown;
 } BubbleAnimation;
 
-typedef void (*AnimationManagerInteractCallback)(void*);
 typedef void (*AnimationManagerSetNewIdleAnimationCallback)(void* context);
 typedef void (*AnimationManagerCheckBlockingCallback)(void* context);
+typedef void (*AnimationManagerInteractCallback)(void*);
 
 AnimationManager* animation_manager_alloc(void);
 void animation_manager_free(AnimationManager* animation_manager);
-void animation_manager_check_blocking(AnimationManager* animation_manager);
-void animation_manager_start_new_idle_animation(AnimationManager* animation_manager);
-void animation_manager_interact(AnimationManager* animation_manager);
 
 View* animation_manager_get_animation_view(AnimationManager* animation_manager);
 
 void animation_manager_set_context(AnimationManager* animation_manager, void* context);
-void animation_manager_set_new_idle_callbacks(AnimationManager* animation_manager, AnimationManagerSetNewIdleAnimationCallback callback);
-void animation_manager_set_check_callbacks(AnimationManager* animation_manager, AnimationManagerCheckBlockingCallback callback);
-void animation_manager_set_interact_callbacks(AnimationManager* animation_manager, AnimationManagerInteractCallback callback);
+void animation_manager_set_new_idle_callback(AnimationManager* animation_manager, AnimationManagerSetNewIdleAnimationCallback callback);
+void animation_manager_set_check_callback(AnimationManager* animation_manager, AnimationManagerCheckBlockingCallback callback);
+void animation_manager_set_interact_callback(AnimationManager* animation_manager, AnimationManagerInteractCallback callback);
+void animation_manager_start_new_idle_animation(AnimationManager* animation_manager);
+void animation_manager_check_blocking(AnimationManager* animation_manager);
+void animation_manager_interact(AnimationManager* animation_manager);
+
+void animation_manager_load_and_continue_animation(AnimationManager* animation_manager);
+void animation_manager_unload_and_stall_animation(AnimationManager* animation_manager);
 

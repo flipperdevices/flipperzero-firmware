@@ -6,6 +6,7 @@
 #include "dolphin/dolphin.h"
 #include "furi/pubsub.h"
 #include "furi/record.h"
+#include "furi/thread.h"
 #include "storage/storage-glue.h"
 #include <loader/loader.h>
 #include <m-list.h>
@@ -46,6 +47,8 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
     furi_thread_set_callback(desktop->scene_thread, flipper_app->app);
 
     furi_thread_start(desktop->scene_thread);
+
+    furi_thread_join(desktop->scene_thread);
 }
 
 void desktop_scene_main_callback(DesktopMainEvent event, void* context) {
@@ -58,9 +61,9 @@ void desktop_scene_main_on_enter(void* context) {
     DesktopMainView* main_view = desktop->main_view;
 
     animation_manager_set_context(desktop->animation_manager, desktop);
-    animation_manager_set_new_idle_callbacks(desktop->animation_manager, desktop_scene_main_new_idle_animation_callback);
-    animation_manager_set_check_callbacks(desktop->animation_manager, desktop_scene_main_check_animation_callback);
-    animation_manager_set_interact_callbacks(desktop->animation_manager, desktop_scene_main_interact_animation_callback);
+    animation_manager_set_new_idle_callback(desktop->animation_manager, desktop_scene_main_new_idle_animation_callback);
+    animation_manager_set_check_callback(desktop->animation_manager, desktop_scene_main_check_animation_callback);
+    animation_manager_set_interact_callback(desktop->animation_manager, desktop_scene_main_interact_animation_callback);
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);
@@ -95,13 +98,17 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenArchive:
+            animation_manager_unload_and_stall_animation(desktop->animation_manager);
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
+            animation_manager_load_and_continue_animation(desktop->animation_manager);
             consumed = true;
             break;
 
         case DesktopMainEventOpenFavorite:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
+            animation_manager_unload_and_stall_animation(desktop->animation_manager);
             desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
+            animation_manager_load_and_continue_animation(desktop->animation_manager);
             consumed = true;
             break;
 
@@ -129,9 +136,9 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 void desktop_scene_main_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
 
-    animation_manager_set_new_idle_callbacks(desktop->animation_manager, NULL);
-    animation_manager_set_check_callbacks(desktop->animation_manager, NULL);
-    animation_manager_set_interact_callbacks(desktop->animation_manager, NULL);
+    animation_manager_set_new_idle_callback(desktop->animation_manager, NULL);
+    animation_manager_set_check_callback(desktop->animation_manager, NULL);
+    animation_manager_set_interact_callback(desktop->animation_manager, NULL);
     animation_manager_set_context(desktop->animation_manager, desktop);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain, MAIN_VIEW_DEFAULT);
     desktop_main_reset_hint(desktop->main_view);

@@ -70,7 +70,7 @@ static StorageAnimation StorageAnimationInternal[] = {
             .max_butthurt = 3,
             .min_level = 1,
             .max_level = 1,
-            .weight = 3,
+            .weight = 1,
         }
     },
 };
@@ -78,7 +78,7 @@ static StorageAnimation StorageAnimationInternal[] = {
 /* not static inline*/
 __attribute__((constructor))
 void animation_storage_initialize_internal_animations(void) {
-    string_init_set_str(StorageAnimationInternal[0].meta.name, "tv");
+    string_init_set_str(StorageAnimationInternal[0].meta.name, HARDCODED_ANIMATION_NAME);
 //    string_init_set_str(StorageAnimationInternal[1].meta.name, "no_sd_card");
 }
 

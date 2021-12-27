@@ -8,10 +8,17 @@ void desktop_scene_locked_callback(DesktopLockedEvent event, void* context) {
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
 
+static void desktop_scene_locked_new_idle_animation_callback(void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopLockedEventCheckAnimation);
+}
+
 void desktop_scene_locked_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopLockedView* locked_view = desktop->locked_view;
 
+    animation_manager_set_new_idle_callback(desktop->animation_manager, desktop_scene_locked_new_idle_animation_callback);
     desktop_locked_set_callback(locked_view, desktop_scene_locked_callback, desktop);
     desktop_locked_reset_door_pos(locked_view);
     desktop_locked_update_hint_timeout(locked_view);
@@ -68,6 +75,10 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
         case DesktopLockedEventInputReset:
             desktop->pincode_buffer.length = 0;
             break;
+        case DesktopLockedEventCheckAnimation:
+            animation_manager_check_blocking(desktop->animation_manager);
+            consumed = true;
+            break;
         default:
             if(desktop_scene_locked_check_pin(desktop, event.event)) {
                 scene_manager_set_scene_state(
@@ -84,6 +95,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
 
 void desktop_scene_locked_on_exit(void* context) {
     Desktop* desktop = (Desktop*)context;
+    animation_manager_set_new_idle_callback(desktop->animation_manager, NULL);
     desktop_locked_reset_counter(desktop->locked_view);
     osTimerStop(desktop->locked_view->timer);
 }

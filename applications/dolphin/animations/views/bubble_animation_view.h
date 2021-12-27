@@ -13,3 +13,18 @@ void bubble_animation_view_set_interact_callback(BubbleAnimationView* bubble_ani
 void bubble_animation_view_set_animation(BubbleAnimationView* bubble_animation_view, const BubbleAnimation* new_bubble_animation);
 View* bubble_animation_get_view(BubbleAnimationView* view);
 
+/*
+ * Usage:
+ *  animation_view_alloc()
+ *  set_animation()
+ *  ...
+ *  freeze_animation()
+ *   // release animation
+ *  ...
+ *   // allocate animation
+ *  set_animation()
+ *  unfreeze()
+ */
+void bubble_animation_freeze(BubbleAnimationView* view);
+void bubble_animation_unfreeze(BubbleAnimationView* view);
+

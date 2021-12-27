@@ -18,6 +18,7 @@ typedef enum {
     DesktopLockedEventUnlock = 10U,
     DesktopLockedEventUpdate = 11U,
     DesktopLockedEventInputReset = 12U,
+    DesktopLockedEventCheckAnimation = 13U,
 } DesktopLockedEvent;
 
 typedef enum {

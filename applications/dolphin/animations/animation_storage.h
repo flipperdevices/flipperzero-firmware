@@ -5,6 +5,8 @@
 #include "views/bubble_animation_view.h"
 #include <m-string.h>
 
+#define HARDCODED_ANIMATION_NAME "tv"
+
 typedef struct StorageAnimation StorageAnimation;
 
 typedef struct { 
@@ -22,7 +24,7 @@ LIST_DEF(StorageAnimationList, StorageAnimation*, M_PTR_OPLIST)
 
 void animation_storage_fill_animation_list(StorageAnimationList_t*);
 const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation*);
-void animation_storage_free_animation(StorageAnimation* storage_animation);
+void animation_storage_free_storage_animation(StorageAnimation** storage_animation);
 
 StorageAnimation* animation_storage_find_animation(const char*);
 StorageAnimationMeta* animation_storage_get_meta(StorageAnimation* storage_animation);
