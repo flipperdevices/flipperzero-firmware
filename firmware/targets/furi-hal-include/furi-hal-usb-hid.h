@@ -329,3 +329,15 @@ bool furi_hal_hid_mouse_release(uint8_t button);
  * @param      delta  number of scroll steps
  */
 bool furi_hal_hid_mouse_scroll(int8_t delta);
+
+/** Set the following consumer key to pressed state and send HID report
+ *
+ * @param      button  key code
+ */
+bool furi_hal_hid_consumer_key_press(uint16_t button);
+
+/** Set the following consumer key to released state and send HID report
+ *
+ * @param      button  key code
+ */
+bool furi_hal_hid_consumer_key_release(uint16_t button);

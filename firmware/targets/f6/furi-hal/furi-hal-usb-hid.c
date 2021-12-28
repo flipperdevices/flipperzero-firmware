@@ -16,6 +16,10 @@
 #define HID_EP_SZ      0x10
 
 #define HID_KB_MAX_KEYS 6
+#define HID_CONSUMER_MAX_KEYS 2
+
+#define HID_PAGE_CONSUMER 0x0C
+#define HID_CONSUMER_CONTROL 0x01
 
 struct HidIadDescriptor {
     struct usb_iad_descriptor           hid_iad;
@@ -33,6 +37,7 @@ struct HidConfigDescriptor {
 enum HidReportId {
     ReportIdKeyboard = 1,
     ReportIdMouse = 2,
+    ReportIdConsumer = 3,
 };
 
 /* HID report: keyboard+mouse */
@@ -94,6 +99,18 @@ static const uint8_t hid_report_desc[] = {
                 HID_REPORT_COUNT(3),
             HID_INPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_RELATIVE),
         HID_END_COLLECTION,
+    HID_END_COLLECTION,
+    HID_USAGE_PAGE(HID_PAGE_CONSUMER),
+    HID_USAGE(HID_CONSUMER_CONTROL),
+    HID_COLLECTION(HID_APPLICATION_COLLECTION),
+        HID_REPORT_ID(ReportIdConsumer),
+            HID_LOGICAL_MINIMUM(0),
+            HID_RI_LOGICAL_MAXIMUM(16, 0x3FF),
+            HID_USAGE_MINIMUM(0),
+            HID_RI_USAGE_MAXIMUM(16, 0x3FF),
+            HID_REPORT_COUNT(HID_CONSUMER_MAX_KEYS),
+            HID_REPORT_SIZE(16),
+        HID_INPUT(HID_IOF_DATA | HID_IOF_ARRAY | HID_IOF_ABSOLUTE),
     HID_END_COLLECTION,
 };
 
@@ -196,6 +213,11 @@ struct HidReportKB {
     uint8_t btn[HID_KB_MAX_KEYS];
 } __attribute__((packed));
 
+struct HidReportConsumer {
+    uint8_t report_id;
+    uint16_t btn[HID_CONSUMER_MAX_KEYS];
+} __attribute__((packed));
+
 struct HidReportLED {
     uint8_t report_id;
     uint8_t led_state;
@@ -204,6 +226,7 @@ struct HidReportLED {
 static struct HidReport {
     struct HidReportKB keyboard;
     struct HidReportMouse mouse;
+    struct HidReportConsumer consumer;
 } __attribute__((packed)) hid_report;
 
 static void hid_init(usbd_device* dev, UsbInterface* intf);
@@ -300,6 +323,26 @@ bool furi_hal_hid_mouse_scroll(int8_t delta) {
     return state;
 }
 
+bool furi_hal_hid_consumer_key_press(uint16_t button) {
+    for (uint8_t key_nb = 0; key_nb < HID_CONSUMER_MAX_KEYS; key_nb++) {
+        if (hid_report.consumer.btn[key_nb] == 0) {
+            hid_report.consumer.btn[key_nb] = button;
+            break;
+        }
+    }
+    return hid_send_report(ReportIdConsumer);
+}
+
+bool furi_hal_hid_consumer_key_release(uint16_t button) {
+    for (uint8_t key_nb = 0; key_nb < HID_CONSUMER_MAX_KEYS; key_nb++) {
+        if (hid_report.consumer.btn[key_nb] == button) {
+            hid_report.consumer.btn[key_nb] = 0;
+            break;
+        }
+    }
+    return hid_send_report(ReportIdConsumer);
+}
+
 UsbInterface usb_hid = {
     .init = hid_init,
     .deinit = hid_deinit,
@@ -321,6 +364,7 @@ static void hid_init(usbd_device* dev, UsbInterface* intf) {
     usb_dev = dev;
     hid_report.keyboard.report_id = ReportIdKeyboard;
     hid_report.mouse.report_id = ReportIdMouse;
+    hid_report.consumer.report_id = ReportIdConsumer;
 
     usbd_reg_config(dev, hid_ep_config);
     usbd_reg_control(dev, hid_control);    
@@ -359,8 +403,10 @@ static bool hid_send_report(uint8_t report_id)
     if (hid_connected == true) {
         if (report_id == ReportIdKeyboard)
             usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.keyboard, sizeof(hid_report.keyboard));
-        else
+        else if (report_id == ReportIdMouse)
             usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.mouse, sizeof(hid_report.mouse));
+        else if (report_id == ReportIdConsumer)
+            usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.consumer, sizeof(hid_report.consumer));
         return true;
     }
     return false;
