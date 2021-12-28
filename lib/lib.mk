@@ -88,7 +88,7 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/drivers/*.c)
 CFLAGS			+= -I$(LIB_DIR)/file_reader
 CPP_SOURCES		+= $(wildcard $(LIB_DIR)/file_reader/*.cpp)
 
-#irda lib
+# IR lib
 CFLAGS			+= -I$(LIB_DIR)/irda/encoder_decoder
 CFLAGS			+= -I$(LIB_DIR)/irda/worker
 C_SOURCES		+= $(wildcard $(LIB_DIR)/irda/encoder_decoder/*.c)
@@ -124,3 +124,7 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/heatshrink/*.c)
 # Toolbox
 CFLAGS			+= -I$(LIB_DIR)/flipper_file
 C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_file/*.c)
+
+# Micro-ECC
+CFLAGS			+= -I$(LIB_DIR)/micro-ecc
+C_SOURCES		+= $(wildcard $(LIB_DIR)/micro-ecc/*.c)
