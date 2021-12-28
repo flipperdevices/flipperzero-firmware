@@ -2,7 +2,7 @@
 #include "../views/desktop_locked.h"
 #include "desktop/views/desktop_main.h"
 
-void desktop_scene_locked_callback(DesktopLockedEvent event, void* context) {
+void desktop_scene_locked_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
@@ -32,7 +32,7 @@ void desktop_scene_locked_on_enter(void* context) {
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewLocked);
 }
 
-static bool desktop_scene_locked_check_pin(Desktop* desktop, DesktopMainEvent event) {
+static bool desktop_scene_locked_check_pin(Desktop* desktop, DesktopEvent event) {
     bool match = false;
 
     size_t length = desktop->pincode_buffer.length;
@@ -75,7 +75,7 @@ bool desktop_scene_locked_on_event(void* context, SceneManagerEvent event) {
             desktop->pincode_buffer.length = 0;
             break;
         case DesktopLockedEventCheckAnimation:
-            animation_manager_check_blocking(desktop->animation_manager);
+            animation_manager_check_blocking_process(desktop->animation_manager);
             consumed = true;
             break;
         default:

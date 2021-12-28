@@ -33,6 +33,7 @@ bool desktop_back_event_callback(void* context) {
 Desktop* desktop_alloc() {
     Desktop* desktop = furi_alloc(sizeof(Desktop));
 
+    desktop->unload_animation_semaphore = osSemaphoreNew(1, 0, NULL);
     desktop->animation_manager = animation_manager_alloc();
     desktop->gui = furi_record_open("gui");
     desktop->scene_thread = furi_thread_alloc();
@@ -127,6 +128,8 @@ void desktop_free(Desktop* desktop) {
     desktop_first_start_free(desktop->first_start_view);
     popup_free(desktop->hw_mismatch_popup);
     code_input_free(desktop->code_input);
+
+    osSemaphoreDelete(desktop->unload_animation_semaphore);
 
     furi_record_close("gui");
     desktop->gui = NULL;

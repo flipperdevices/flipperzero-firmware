@@ -6,23 +6,11 @@
 #include <gui/canvas.h>
 #include <gui/elements.h>
 #include <furi.h>
-
-typedef enum {
-    DesktopMainEventOpenLockMenu,
-    DesktopMainEventOpenArchive,
-    DesktopMainEventOpenFavorite,
-    DesktopMainEventOpenMenu,
-    DesktopMainEventOpenDebug,
-    DesktopMainEventUnlocked,
-    DesktopMainEventRightShort,
-    DesktopMainEventCheckAnimation,
-    DesktopMainEventNewIdleAnimation,
-    DesktopMainEventInteractAnimation,
-} DesktopMainEvent;
+#include "desktop_events.h"
 
 typedef struct DesktopMainView DesktopMainView;
 
-typedef void (*DesktopMainViewCallback)(DesktopMainEvent event, void* context);
+typedef void (*DesktopMainViewCallback)(DesktopEvent event, void* context);
 
 struct DesktopMainView {
     View* view;

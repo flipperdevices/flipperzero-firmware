@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cmsis_os2.h"
 #include "desktop.h"
 
 #include "dolphin/animations/animation_manager.h"
@@ -66,6 +67,8 @@ struct Desktop {
     ViewPort* lock_viewport;
 
     AnimationManager* animation_manager;
+    osSemaphoreId_t unload_animation_semaphore;
+    FuriPubSubSubscription* app_start_stop_subscription;
 };
 
 Desktop* desktop_alloc();

@@ -1,0 +1,31 @@
+#pragma once
+
+typedef enum {
+    DesktopMainEventOpenLockMenu,
+    DesktopMainEventOpenArchive,
+    DesktopMainEventOpenFavorite,
+    DesktopMainEventOpenMenu,
+    DesktopMainEventOpenDebug,
+    DesktopMainEventUnlocked,
+    DesktopMainEventRightShort,
+    DesktopMainEventCheckAnimation,
+    DesktopMainEventNewIdleAnimation,
+    DesktopMainEventInteractAnimation,
+    DesktopMainEventBeforeAppStarted,
+    DesktopMainEventAfterAppFinished,
+    DesktopLockedEventUnlock,
+    DesktopLockedEventUpdate,
+    DesktopLockedEventInputReset,
+    DesktopLockedEventCheckAnimation,
+    DesktopLockedEventMax,
+    DesktopDebugEventDeed,
+    DesktopDebugEventWrongDeed,
+    DesktopDebugEventSaveState,
+    DesktopDebugEventExit,
+    DesktopFirstStartCompleted,
+    DesktopFirstStartPoweroff,
+    DesktopLockMenuEventLock,
+    DesktopLockMenuEventPinLock,
+    DesktopLockMenuEventExit,
+} DesktopEvent;
+

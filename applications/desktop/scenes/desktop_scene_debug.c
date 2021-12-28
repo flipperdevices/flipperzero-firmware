@@ -3,7 +3,7 @@
 #include <dolphin/dolphin.h>
 #include <dolphin/helpers/dolphin_deed.h>
 
-void desktop_scene_debug_callback(DesktopDebugEvent event, void* context) {
+void desktop_scene_debug_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }

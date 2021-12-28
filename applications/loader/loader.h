@@ -1,5 +1,6 @@
 #pragma once
 
+#include <furi/pubsub.h>
 #include <stdbool.h>
 
 typedef struct Loader Loader;
@@ -10,6 +11,9 @@ typedef enum {
     LoaderStatusErrorUnknownApp,
     LoaderStatusErrorInternal,
 } LoaderStatus;
+
+#define LOADER_BEFORE_APP_STARTED (void*) 0
+#define LOADER_AFTER_APP_FINISHED (void*) 1
 
 /** Start application
  * @param name - application name
@@ -34,3 +38,7 @@ void loader_show_menu();
 
 /** Show primary loader */
 void loader_update_menu();
+
+/** Show primary loader */
+FuriPubSub* loader_get_pubsub();
+

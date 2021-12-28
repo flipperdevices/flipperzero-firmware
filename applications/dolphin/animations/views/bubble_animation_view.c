@@ -135,16 +135,20 @@ static void bubble_animation_activate(BubbleAnimationView* view, bool force) {
     BubbleAnimationViewModel* model = view_get_model(view->view);
     if (!model->current) {
         activate = false;
-    } else if (model->current_frame >= model->current->passive_frames) {
-        activate = false;
-    } else if ((model->active_ended_at + model->current->active_cooldown * 1000) > xTaskGetTickCount()) {
-        activate = false;
-    } else if (model->active_shift) {
-        activate = false;
     } else if (model->freeze_frame) {
         activate = false;
     } else if (model->current->active_frames == 0) {
         activate = false;
+    }
+
+    if (!force) {
+        if ((model->active_ended_at + model->current->active_cooldown * 1000) > xTaskGetTickCount()) {
+            activate = false;
+        } else if (model->active_shift) {
+            activate = false;
+        } else if (model->current_frame >= model->current->passive_frames) {
+            activate = false;
+        }
     }
     view_commit_model(view->view, false);
 
@@ -152,7 +156,6 @@ static void bubble_animation_activate(BubbleAnimationView* view, bool force) {
         return;
     }
 
-    FURI_LOG_I(TAG, "ActivatePending"); // dbg_
     if (ACTIVE_SHIFT > 0) {
         BubbleAnimationViewModel* model = view_get_model(view->view);
         model->active_shift = ACTIVE_SHIFT;
@@ -168,7 +171,7 @@ static void bubble_animation_activate_right_now(BubbleAnimationView* view) {
     uint8_t frame_rate = 0;
 
     BubbleAnimationViewModel* model = view_get_model(view->view);
-    if (model->current && (model->current->active_frames > 0)) {
+    if (model->current && (model->current->active_frames > 0) && (!model->freeze_frame)) {
         model->current_frame = model->current->passive_frames;
         model->current_bubble = bubble_animation_pick_bubble(model, true);
         frame_rate = model->current->frame_rate;
@@ -226,7 +229,6 @@ static void bubble_animation_timer_callback(void* context) {
     view_commit_model(view->view, !activate);
 
     if (activate) {
-        FURI_LOG_I(TAG, "ActivateNow"); // dbg_
         bubble_animation_activate_right_now(view);
     }
 }
@@ -353,7 +355,9 @@ void bubble_animation_freeze(BubbleAnimationView* view) {
     BubbleAnimationViewModel* model = view_get_model(view->view);
     furi_assert(model->current);
     furi_assert(!model->freeze_frame);
-    uint8_t icon_index = bubble_animation_get_icon_index(model);
+    uint8_t icon_index = model->current->active_frames
+        ? model->current->passive_frames
+        : 0;
     model->freeze_frame = bubble_animation_clone_frame(model->current->icons[icon_index]);
     model->current = NULL;
     view_commit_model(view->view, false);
@@ -374,6 +378,7 @@ void bubble_animation_unfreeze(BubbleAnimationView* view) {
     view_commit_model(view->view, true);
 
     osTimerStart(view->timer, 1000 / frame_rate);
+    bubble_animation_activate_right_now(view);
 }
 
 View* bubble_animation_get_view(BubbleAnimationView* view) {
