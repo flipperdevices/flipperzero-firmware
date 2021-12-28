@@ -4,8 +4,13 @@
 #include <lib/toolbox/args.h>
 
 #include "bt_settings.h"
-#include <lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hci_le.h>
-#include <lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gap_aci.h>
+
+static const char* bt_cli_address_types[] = {
+    "Public Device Address",
+    "Random Device Address",
+    "Public Identity Address",
+    "Random (Static) Identity Address",
+};
 
 static void bt_cli_command_info(Cli* cli, string_t args, void* context) {
     string_t buffer;
@@ -140,19 +145,32 @@ static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
     } while(false);
 }
 
+static void bt_cli_scan_callback(GapAddress address, void* context) {
+    furi_assert(context);
+    osMessageQueueId_t queue = context;
+    osMessageQueuePut(queue, &address, NULL, 250);
+}
+
 static void bt_cli_command_scan(Cli* cli, string_t args, void* context) {
-    if(hci_le_set_scan_parameters(1, 0x0201, 0x0200, 0, 0)) {
-        FURI_LOG_E("BT CLI", "Error setting scan parameter");
+    osMessageQueueId_t queue = osMessageQueueNew(20, sizeof(GapAddress), NULL);
+    furi_hal_bt_start_scan(bt_cli_scan_callback, queue);
+
+    GapAddress address = {};
+    bool exit = false;
+    while(!exit) {
+        if(osMessageQueueGet(queue, &address, NULL, 250) == osOK) {
+            if(address.type < sizeof(bt_cli_address_types)) {
+                printf("Found new device. Type: %s, MAC: ", bt_cli_address_types[address.type]);
+                for(uint8_t i = 0; i < sizeof(address.mac) - 1; i++) {
+                    printf("%02X:", address.mac[i]);
+                }
+                printf("%02X\r\n", address.mac[sizeof(address.mac) - 1]);
+            }
+        }
+        exit = cli_cmd_interrupt_received(cli);
     }
-    if(hci_le_set_scan_enable(1, 1)) {
-        FURI_LOG_E("BT CLI", "Error enabling scan");
-    }
-    while(!cli_cmd_interrupt_received(cli)) {
-        osDelay(250);
-    }
-    if(hci_le_set_scan_enable(0, 1)) {
-        FURI_LOG_E("BT CLI", "Error disabling scan");
-    }
+    furi_hal_bt_stop_scan();
+    osMessageQueueDelete(queue);
 }
 
 static void bt_cli_print_usage() {
@@ -160,11 +178,15 @@ static void bt_cli_print_usage() {
     printf("bt <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf("\tinfo\t - get info\r\n");
-    printf("\ttx_carrier\t - start tx carrier test\r\n");
-    printf("\trx_carrier\t - start rx carrier test\r\n");
-    printf("\ttx_pt\t - start tx packet test\r\n");
-    printf("\trx_pt\t - start rx packer test\r\n");
-    printf("\tscan\t - start scanner\r\n");
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        printf("\ttx_carrier\t - start tx carrier test\r\n");
+        printf("\trx_carrier\t - start rx carrier test\r\n");
+        printf("\ttx_pt\t - start tx packet test\r\n");
+        printf("\trx_pt\t - start rx packer test\r\n");
+        if(furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
+            printf("\tscan\t - start scanner\r\n");
+        }
+    }
 }
 
 static void bt_cli(Cli* cli, string_t args, void* context) {
@@ -182,25 +204,29 @@ static void bt_cli(Cli* cli, string_t args, void* context) {
             bt_cli_command_info(cli, args, NULL);
             break;
         }
-        if(string_cmp_str(cmd, "tx_carrier") == 0) {
-            bt_cli_command_carrier_tx(cli, args, NULL);
-            break;
-        }
-        if(string_cmp_str(cmd, "rx_carrier") == 0) {
-            bt_cli_command_carrier_rx(cli, args, NULL);
-            break;
-        }
-        if(string_cmp_str(cmd, "tx_pt") == 0) {
-            bt_cli_command_packet_tx(cli, args, NULL);
-            break;
-        }
-        if(string_cmp_str(cmd, "rx_pt") == 0) {
-            bt_cli_command_packet_rx(cli, args, NULL);
-            break;
-        }
-        if(string_cmp_str(cmd, "scan") == 0) {
-            bt_cli_command_scan(cli, args, NULL);
-            break;
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+            if(string_cmp_str(cmd, "tx_carrier") == 0) {
+                bt_cli_command_carrier_tx(cli, args, NULL);
+                break;
+            }
+            if(string_cmp_str(cmd, "rx_carrier") == 0) {
+                bt_cli_command_carrier_rx(cli, args, NULL);
+                break;
+            }
+            if(string_cmp_str(cmd, "tx_pt") == 0) {
+                bt_cli_command_packet_tx(cli, args, NULL);
+                break;
+            }
+            if(string_cmp_str(cmd, "rx_pt") == 0) {
+                bt_cli_command_packet_rx(cli, args, NULL);
+                break;
+            }
+            if(furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
+                if(string_cmp_str(cmd, "scan") == 0) {
+                    bt_cli_command_scan(cli, args, NULL);
+                    break;
+                }
+            }
         }
 
         bt_cli_print_usage();
@@ -216,7 +242,9 @@ static void bt_cli(Cli* cli, string_t args, void* context) {
 void bt_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open("cli");
+    furi_record_open("bt");
     cli_add_command(cli, "bt", CliCommandFlagDefault, bt_cli, NULL);
+    furi_record_close("bt");
     furi_record_close("cli");
 #endif
 }
