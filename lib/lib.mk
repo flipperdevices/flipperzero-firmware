@@ -41,7 +41,6 @@ CFLAGS			+= -I$(LITTLEFS_DIR) -DLFS_CONFIG=lfs_config.h
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs.c
 C_SOURCES		+= $(LITTLEFS_DIR)/lfs_util.c
 
-ifeq ($(APP_NFC), 1)
 ST25RFAL002_DIR	= $(LIB_DIR)/ST25RFAL002
 CFLAGS			+= -I$(ST25RFAL002_DIR)
 CFLAGS			+= -I$(ST25RFAL002_DIR)/include
@@ -52,7 +51,6 @@ C_SOURCES		+= $(wildcard $(ST25RFAL002_DIR)/source/st25r3916/*.c)
 
 CFLAGS			+= -I$(LIB_DIR)/nfc_protocols
 C_SOURCES		+= $(wildcard $(LIB_DIR)/nfc_protocols/*.c)
-endif
 
 # callback connector (C to CPP) library
 CFLAGS			+= -I$(LIB_DIR)/callback-connector
@@ -124,3 +122,7 @@ C_SOURCES		+= $(wildcard $(LIB_DIR)/heatshrink/*.c)
 # Toolbox
 CFLAGS			+= -I$(LIB_DIR)/flipper_file
 C_SOURCES		+= $(wildcard $(LIB_DIR)/flipper_file/*.c)
+
+# Micro-ECC
+CFLAGS			+= -I$(LIB_DIR)/micro-ecc
+C_SOURCES		+= $(wildcard $(LIB_DIR)/micro-ecc/*.c)

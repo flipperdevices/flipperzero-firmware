@@ -98,16 +98,22 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenArchive:
+#ifdef APP_ARCHIVE
             animation_manager_unload_and_stall_animation(desktop->animation_manager);
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
             animation_manager_load_and_continue_animation(desktop->animation_manager);
+#endif
             consumed = true;
             break;
 
         case DesktopMainEventOpenFavorite:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
             animation_manager_unload_and_stall_animation(desktop->animation_manager);
-            desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
+            if(desktop->settings.favorite < FLIPPER_APPS_COUNT) {
+                desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
+            } else {
+                FURI_LOG_E("DesktopSrv", "Can't find favorite application");
+            }
             animation_manager_load_and_continue_animation(desktop->animation_manager);
             consumed = true;
             break;
