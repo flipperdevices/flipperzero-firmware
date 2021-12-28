@@ -8,6 +8,10 @@
 #define HARDCODED_ANIMATION_NAME "tv"
 #define NO_SD_ANIMATION_NAME "no_sd"
 #define BAD_BATTERY_ANIMATION_NAME "bad_battery"
+#define NO_DB_ANIMATION_NAME "no_db"
+#define BAD_SD_ANIMATION_NAME "bad_sd"
+#define LEVELUP_ANIMATION_NAME "level"
+
 
 typedef struct StorageAnimation StorageAnimation;
 

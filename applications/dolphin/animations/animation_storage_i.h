@@ -73,7 +73,7 @@ const Icon* no_sd_icons[] = {
 };
 
 FrameBubble no_sd_bubble = {
-    .bubble = {.x = 0, .y = 35, .str = "Buy me a\nmicroSD\ncard, plz", .horizontal = AlignRight, .vertical = AlignBottom},
+    .bubble = {.x = 0, .y = 20, .str = "Buy me a\nmicroSD\ncard, plz", .horizontal = AlignRight, .vertical = AlignBottom},
     .starts_at_frame = 0,
     .ends_at_frame = 5,
     .next_bubble = NULL,
@@ -93,12 +93,72 @@ const BubbleAnimation no_sd_bubble_animation = {
     .active_cycles = 1,
 };
 
+
+FrameBubble no_db_bubble = {
+    .bubble = {.x = 0, .y = 20, .str = "NO DATABASE =>", .horizontal = AlignRight, .vertical = AlignBottom},
+    .starts_at_frame = 0,
+    .ends_at_frame = 5,
+    .next_bubble = NULL,
+};
+FrameBubble* no_db_bubbles[] = { &no_db_bubble };
+const BubbleAnimation no_db_bubble_animation = {
+    .icons = no_sd_icons,
+    .frame_bubbles = no_db_bubbles,
+    .frame_bubbles_count = COUNT_OF(no_db_bubbles),
+    .passive_frames = 6,
+    .active_frames = 0,
+    .frame_rate = 2,
+    .duration = 10,
+    .active_cooldown = 3,
+    .active_cycles = 1,
+};
+
+
+FrameBubble bad_sd_bubble = {
+    .bubble = {.x = 0, .y = 20, .str = "BAD SD =>", .horizontal = AlignRight, .vertical = AlignBottom},
+    .starts_at_frame = 0,
+    .ends_at_frame = 5,
+    .next_bubble = NULL,
+};
+FrameBubble* bad_sd_bubbles[] = { &bad_sd_bubble };
+const BubbleAnimation bad_sd_bubble_animation = {
+    .icons = no_sd_icons,
+    .frame_bubbles = bad_sd_bubbles,
+    .frame_bubbles_count = COUNT_OF(bad_sd_bubbles),
+    .passive_frames = 6,
+    .active_frames = 0,
+    .frame_rate = 2,
+    .duration = 10,
+    .active_cooldown = 3,
+    .active_cycles = 1,
+};
+
+
+FrameBubble levelup_bubble = {
+    .bubble = {.x = 0, .y = 20, .str = "Level Up =>", .horizontal = AlignRight, .vertical = AlignBottom},
+    .starts_at_frame = 0,
+    .ends_at_frame = 5,
+    .next_bubble = NULL,
+};
+FrameBubble* levelup_bubbles[] = { &levelup_bubble };
+const BubbleAnimation levelup_bubble_animation = {
+    .icons = no_sd_icons,
+    .frame_bubbles = levelup_bubbles,
+    .frame_bubbles_count = COUNT_OF(levelup_bubbles),
+    .passive_frames = 6,
+    .active_frames = 0,
+    .frame_rate = 2,
+    .duration = 10,
+    .active_cooldown = 3,
+    .active_cycles = 1,
+};
+
+
 static StorageAnimation StorageAnimationInternal[] = {
     {
         .animation = &tv_bubble_animation,
         .external = false,
         .meta = {
-//            .name = "tv",
             .min_butthurt = 0,
             .max_butthurt = 3,
             .min_level = 1,
@@ -110,13 +170,24 @@ static StorageAnimation StorageAnimationInternal[] = {
         .animation = &no_sd_bubble_animation,
         .external = false,
         .meta = {
-//            .name = "no_sd",
             .min_butthurt = 0,
             .max_butthurt = 3,
             .min_level = 1,
             .max_level = 1,
             .weight = 5,
         }
+    },
+    {
+        .animation = &no_db_bubble_animation,
+        .external = false,
+    },
+    {
+        .animation = &bad_sd_bubble_animation,
+        .external = false,
+    },
+    {
+        .animation = &levelup_bubble_animation,
+        .external = false,
     },
 };
 
@@ -125,5 +196,8 @@ __attribute__((constructor))
 void animation_storage_initialize_internal_animations(void) {
     string_init_set_str(StorageAnimationInternal[0].meta.name, HARDCODED_ANIMATION_NAME);
     string_init_set_str(StorageAnimationInternal[1].meta.name, NO_SD_ANIMATION_NAME);
+    string_init_set_str(StorageAnimationInternal[2].meta.name, NO_DB_ANIMATION_NAME);
+    string_init_set_str(StorageAnimationInternal[3].meta.name, BAD_SD_ANIMATION_NAME);
+    string_init_set_str(StorageAnimationInternal[4].meta.name, LEVELUP_ANIMATION_NAME);
 }
 

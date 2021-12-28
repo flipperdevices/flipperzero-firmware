@@ -26,7 +26,6 @@ typedef enum {
 
 struct AnimationManager {
     bool sd_shown_error_db;
-    bool sd_shown_error_card_bad;
     AnimationManagerState state;
     FuriPubSubSubscription* pubsub_subscription_storage;
     FuriPubSubSubscription* pubsub_subscription_dolphin;
@@ -140,16 +139,13 @@ static bool animation_manager_check_blocking(AnimationManager* animation_manager
     FS_Error sd_status = storage_sd_status(storage);
 
     if(sd_status == FSE_INTERNAL) {
-        blocking_animation = animation_storage_find_animation("bad_sd_card");
-        animation_manager->sd_shown_error_card_bad = true;
-        animation_manager->sd_shown_error_db = false;
+        blocking_animation = animation_storage_find_animation(BAD_SD_ANIMATION_NAME);
     } else if(sd_status == FSE_NOT_READY) {
-        animation_manager->sd_shown_error_card_bad = false;
         animation_manager->sd_shown_error_db = false;
     } else if(sd_status == FSE_OK) {
-        bool db_exists = storage_common_stat(storage, "/ext/manifest.txt", NULL) == FSE_OK;
-        if(db_exists && !animation_manager->sd_shown_error_db) {
-            blocking_animation = animation_storage_find_animation("no_db");
+        bool db_exists = storage_common_stat(storage, "/ext/Manifest", NULL) == FSE_OK;
+        if(!db_exists && !animation_manager->sd_shown_error_db) {
+            blocking_animation = animation_storage_find_animation(NO_DB_ANIMATION_NAME);
             animation_manager->sd_shown_error_db = true;
         }
     }
@@ -158,7 +154,7 @@ static bool animation_manager_check_blocking(AnimationManager* animation_manager
     DolphinStats stats = dolphin_stats(dolphin);
     furi_record_close("dolphin");
     if(!blocking_animation && stats.level_up_is_pending) {
-        blocking_animation = animation_storage_find_animation("levelup_is_pending");
+        blocking_animation = animation_storage_find_animation(LEVELUP_ANIMATION_NAME);
     }
 
     if(blocking_animation) {
@@ -258,7 +254,7 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
     uint32_t whole_weight = 0;
 
     StorageAnimationList_it_t it;
-    for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it); StorageAnimationList_next(it)) {
+    for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it); ) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationMeta* meta = animation_storage_get_meta(storage_animation);
         bool skip_animation = false;
@@ -273,11 +269,12 @@ static StorageAnimation* animation_manager_select_idle_animation(AnimationManage
         }
 
         if (skip_animation) {
-            FURI_LOG_D(TAG, "skip \'%s\' animation", string_get_cstr(meta->name));
             animation_storage_free_storage_animation(&storage_animation);
+            /* remove and increase iterator */
             StorageAnimationList_remove(animation_list, it);
         } else {
             whole_weight += meta->weight;
+            StorageAnimationList_next(it);
         }
     }
 
