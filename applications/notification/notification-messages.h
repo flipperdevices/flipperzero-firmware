@@ -42,6 +42,12 @@ extern const NotificationMessage message_vibro_off;
 // Reset
 extern const NotificationMessage message_do_not_reset;
 
+// Override user settings
+extern const NotificationMessage message_force_speaker_volume_setting_1f;
+extern const NotificationMessage message_force_vibro_setting_on;
+extern const NotificationMessage message_force_vibro_setting_off;
+extern const NotificationMessage message_force_display_brightness_setting_1f;
+
 /****************************** Message sequences ******************************/
 
 // Reset
