@@ -99,6 +99,7 @@ extern const NotificationSequence sequence_single_vibro;
 extern const NotificationSequence sequence_double_vibro;
 extern const NotificationSequence sequence_success;
 extern const NotificationSequence sequence_error;
+extern const NotificationSequence sequence_audiovisual_alert;
 
 #ifdef __cplusplus
 }

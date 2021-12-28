@@ -382,3 +382,38 @@ const NotificationSequence sequence_error = {
     &message_sound_off,
     NULL,
 };
+
+const NotificationSequence sequence_audiovisual_alert = {
+    &message_force_speaker_volume_setting_1f,
+    &message_force_vibro_setting_on,
+    &message_force_display_brightness_setting_1f,
+    &message_vibro_on,
+
+    &message_display_on,
+    &message_note_c7,
+    &message_delay_250,
+
+    &message_display_off,
+    &message_note_c4,
+    &message_delay_250,
+
+    &message_display_on,
+    &message_note_c7,
+    &message_delay_250,
+
+    &message_display_off,
+    &message_note_c4,
+    &message_delay_250,
+
+    &message_display_on,
+    &message_note_c7,
+    &message_delay_250,
+
+    &message_display_off,
+    &message_note_c4,
+    &message_delay_250,
+
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
