@@ -97,11 +97,28 @@ static const DuckyKey ducky_keys[] = {
 };
 
 static const char ducky_cmd_comment[] = {"REM"};
-static const char ducky_cmd_delay[] = {"DELAY"};
-static const char ducky_cmd_string[] = {"STRING"};
-static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY"};
-static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY"};
-static const char ducky_cmd_repeat[] = {"REPEAT"};
+static const char ducky_cmd_delay[] = {"DELAY "};
+static const char ducky_cmd_string[] = {"STRING "};
+static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
+static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
+static const char ducky_cmd_repeat[] = {"REPEAT "};
+
+static const char ducky_cmd_altchar[] = {"ALTCHAR "};
+static const char ducky_cmd_altstr_1[] = {"ALTSTRING "};
+static const char ducky_cmd_altstr_2[] = {"ALTCODE "};
+
+static const uint8_t numpad_keys[10] = {
+    KEYPAD_0,
+    KEYPAD_1,
+    KEYPAD_2,
+    KEYPAD_3,
+    KEYPAD_4,
+    KEYPAD_5,
+    KEYPAD_6,
+    KEYPAD_7,
+    KEYPAD_8,
+    KEYPAD_9,
+};
 
 static bool ducky_get_number(char* param, uint32_t* val) {
     uint32_t value = 0;
@@ -120,6 +137,63 @@ static uint32_t ducky_get_command_len(char* line) {
     return 0;
 }
 
+static void ducky_numlock_on() {
+    if((furi_hal_hid_get_led_state() & HID_KB_LED_NUM) == 0) {
+        furi_hal_hid_kb_press(KEY_NUM_LOCK);
+        furi_hal_hid_kb_release(KEY_NUM_LOCK);
+    }
+}
+
+static bool ducky_numpad_press(char num) {
+    if((num < '0') || (num > '9')) return false;
+
+    uint16_t key = numpad_keys[num - '0'];
+    furi_hal_hid_kb_press(key);
+    furi_hal_hid_kb_release(key);
+
+    return true;
+}
+
+static bool ducky_altchar(char* charcode) {
+    uint8_t i = 0;
+    bool state = false;
+
+    //TODO: numlock
+
+    FURI_LOG_I(WORKER_TAG, "char %s", charcode);
+
+    furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT);
+
+    while((charcode[i] != ' ') && (charcode[i] != '\n') && (charcode[i] != '\0')) {
+        state = ducky_numpad_press(charcode[i]);
+        if(state == false) break;
+        i++;
+    }
+
+    furi_hal_hid_kb_release(KEY_MOD_LEFT_ALT);
+    return state;
+}
+
+static bool ducky_altstring(char* param) {
+    uint32_t i = 0;
+    bool state = false;
+
+    while(param[i] != '\0') {
+        if((param[i] < ' ') || (param[i] > '~')) {
+            i++;
+            continue; // Skip non-printable chars
+        }
+
+        char temp_str[4];
+        snprintf(temp_str, 4, "%u", param[i]);
+
+        state = ducky_altchar(temp_str);
+        if(state == false) break;
+        i++;
+    }
+    return state;
+}
+
 static bool ducky_string(char* param) {
     uint32_t i = 0;
     while(param[i] != '\0') {
@@ -132,8 +206,12 @@ static bool ducky_string(char* param) {
 
 static uint16_t ducky_get_keycode(char* param, bool accept_chars) {
     for(uint8_t i = 0; i < (sizeof(ducky_keys) / sizeof(ducky_keys[0])); i++) {
-        if(strncmp(param, ducky_keys[i].name, strlen(ducky_keys[i].name)) == 0)
+        uint8_t key_cmd_len = strlen(ducky_keys[i].name);
+        if((strncmp(param, ducky_keys[i].name, key_cmd_len) == 0) &&
+           ((param[key_cmd_len] == ' ') || (param[key_cmd_len] == '\n') ||
+            (param[key_cmd_len] == '\0'))) {
             return ducky_keys[i].keycode;
+        }
     }
     if((accept_chars) && (strlen(param) > 0)) {
         return (HID_ASCII_TO_KEY(param[0]) & 0xFF);
@@ -180,6 +258,20 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         // STRING
         line_t = &line_t[ducky_get_command_len(line_t) + 1];
         state = ducky_string(line_t);
+        return (state) ? (0) : (-1);
+    } else if(strncmp(line_t, ducky_cmd_altchar, strlen(ducky_cmd_altchar)) == 0) {
+        // ALTCHAR
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
+        ducky_numlock_on();
+        state = ducky_altchar(line_t);
+        return (state) ? (0) : (-1);
+    } else if(
+        (strncmp(line_t, ducky_cmd_altstr_1, strlen(ducky_cmd_altstr_1)) == 0) ||
+        (strncmp(line_t, ducky_cmd_altstr_2, strlen(ducky_cmd_altstr_2)) == 0)) {
+        // ALTSTRING
+        line_t = &line_t[ducky_get_command_len(line_t) + 1];
+        ducky_numlock_on();
+        state = ducky_altstring(line_t);
         return (state) ? (0) : (-1);
     } else if(strncmp(line_t, ducky_cmd_repeat, strlen(ducky_cmd_repeat)) == 0) {
         // REPEAT

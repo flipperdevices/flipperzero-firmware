@@ -255,6 +255,13 @@ typedef void (*HidStateCallback)(bool state, void* context);
 /** ASCII to keycode conversion macro */
 #define HID_ASCII_TO_KEY(x) (((uint8_t)x < 128) ? (hid_asciimap[(uint8_t)x]) : KEY_NONE)
 
+/** HID keyboard leds */
+enum HidKeyboardLeds {
+    HID_KB_LED_NUM          = (1 << 0),
+    HID_KB_LED_CAPS         = (1 << 1),
+    HID_KB_LED_SCROLL       = (1 << 2),
+};
+
 /** HID mouse buttons */
 enum HidMouseButtons {
     HID_MOUSE_BTN_LEFT      = (1 << 0),
@@ -267,6 +274,12 @@ enum HidMouseButtons {
  * @return      true / false
  */
 bool furi_hal_hid_is_connected();
+
+/** Get USB HID keyboard leds state
+ *
+ * @return      leds state
+ */
+uint8_t furi_hal_hid_get_led_state();
 
 /** Set USB HID connect/disconnect callback
  *

@@ -9,9 +9,11 @@
 #include "hid_usage_desktop.h"
 #include "hid_usage_button.h"
 #include "hid_usage_keyboard.h"
+#include "hid_usage_led.h"
 
-#define HID_RIN_EP      0x81
-#define HID_RIN_SZ      0x10
+#define HID_EP_IN      0x81
+#define HID_EP_OUT     0x01
+#define HID_EP_SZ      0x10
 
 #define HID_KB_MAX_KEYS 6
 
@@ -19,7 +21,8 @@ struct HidIadDescriptor {
     struct usb_iad_descriptor           hid_iad;
     struct usb_interface_descriptor     hid;
     struct usb_hid_descriptor           hid_desc;
-    struct usb_endpoint_descriptor      hid_ep;    
+    struct usb_endpoint_descriptor      hid_ep_in;
+    struct usb_endpoint_descriptor      hid_ep_out;
 };
 
 struct HidConfigDescriptor {
@@ -49,7 +52,13 @@ static const uint8_t hid_report_desc[] = {
             HID_REPORT_COUNT(1),
             HID_REPORT_SIZE(8),
         HID_INPUT(HID_IOF_CONSTANT | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
-            HID_REPORT_COUNT(6),
+            HID_USAGE_PAGE(HID_PAGE_LED),
+            HID_REPORT_COUNT(8),
+            HID_REPORT_SIZE(1),
+            HID_USAGE_MINIMUM(1),
+            HID_USAGE_MAXIMUM(8),
+        HID_OUTPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
+            HID_REPORT_COUNT(HID_KB_MAX_KEYS),
             HID_REPORT_SIZE(8),
             HID_LOGICAL_MINIMUM(0),
             HID_LOGICAL_MAXIMUM(101),
@@ -138,7 +147,7 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
             .bDescriptorType        = USB_DTYPE_INTERFACE,
             .bInterfaceNumber       = 0,
             .bAlternateSetting      = 0,
-            .bNumEndpoints          = 1,
+            .bNumEndpoints          = 2,
             .bInterfaceClass        = USB_CLASS_HID,
             .bInterfaceSubClass     = USB_HID_SUBCLASS_NONBOOT,
             .bInterfaceProtocol     = USB_HID_PROTO_NONBOOT,
@@ -153,12 +162,20 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
             .bDescriptorType0       = USB_DTYPE_HID_REPORT,
             .wDescriptorLength0     = sizeof(hid_report_desc),
         },
-        .hid_ep = {
+        .hid_ep_in = {
             .bLength                = sizeof(struct usb_endpoint_descriptor),
             .bDescriptorType        = USB_DTYPE_ENDPOINT,
-            .bEndpointAddress       = HID_RIN_EP,
+            .bEndpointAddress       = HID_EP_IN,
             .bmAttributes           = USB_EPTYPE_INTERRUPT,
-            .wMaxPacketSize         = HID_RIN_SZ,
+            .wMaxPacketSize         = HID_EP_SZ,
+            .bInterval              = 10,
+        },
+        .hid_ep_out = {
+            .bLength                = sizeof(struct usb_endpoint_descriptor),
+            .bDescriptorType        = USB_DTYPE_ENDPOINT,
+            .bEndpointAddress       = HID_EP_OUT,
+            .bmAttributes           = USB_EPTYPE_INTERRUPT,
+            .wMaxPacketSize         = HID_EP_SZ,
             .bInterval              = 10,
         },
     },
@@ -179,6 +196,11 @@ struct HidReportKB {
     uint8_t btn[HID_KB_MAX_KEYS];
 } __attribute__((packed));
 
+struct HidReportLED {
+    uint8_t report_id;
+    uint8_t led_state;
+} __attribute__((packed));
+
 static struct HidReport {
     struct HidReportKB keyboard;
     struct HidReportMouse mouse;
@@ -197,9 +219,14 @@ static osSemaphoreId_t hid_semaphore = NULL;
 static bool hid_connected = false;
 static HidStateCallback callback;
 static void* cb_ctx;
+static uint8_t led_state;
 
 bool furi_hal_hid_is_connected() {
     return hid_connected;
+}
+
+uint8_t furi_hal_hid_get_led_state() {
+    return led_state;
 }
 
 void furi_hal_hid_set_state_callback(HidStateCallback cb, void* ctx) {
@@ -331,16 +358,22 @@ static bool hid_send_report(uint8_t report_id)
     furi_check(osSemaphoreAcquire(hid_semaphore, osWaitForever) == osOK);
     if (hid_connected == true) {
         if (report_id == ReportIdKeyboard)
-            usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.keyboard, sizeof(hid_report.keyboard));
+            usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.keyboard, sizeof(hid_report.keyboard));
         else
-            usbd_ep_write(usb_dev, HID_RIN_EP, &hid_report.mouse, sizeof(hid_report.mouse));
+            usbd_ep_write(usb_dev, HID_EP_IN, &hid_report.mouse, sizeof(hid_report.mouse));
         return true;
     }
     return false;
 }
 
-static void hid_ep_callback(usbd_device *dev, uint8_t event, uint8_t ep) {
-    osSemaphoreRelease(hid_semaphore);
+static void hid_txrx_ep_callback(usbd_device *dev, uint8_t event, uint8_t ep) {
+    if (event == usbd_evt_eptx) {
+        osSemaphoreRelease(hid_semaphore);
+    } else {
+        struct HidReportLED leds;
+        usbd_ep_read(usb_dev, ep, &leds, 2);
+        led_state = leds.led_state;
+    }
 }
 
 /* Configure endpoints */
@@ -348,14 +381,18 @@ static usbd_respond hid_ep_config (usbd_device *dev, uint8_t cfg) {
     switch (cfg) {
     case 0:
         /* deconfiguring device */
-        usbd_ep_deconfig(dev, HID_RIN_EP);
-        usbd_reg_endpoint(dev, HID_RIN_EP, 0);
+        usbd_ep_deconfig(dev, HID_EP_OUT);
+        usbd_ep_deconfig(dev, HID_EP_IN);
+        usbd_reg_endpoint(dev, HID_EP_OUT, 0);
+        usbd_reg_endpoint(dev, HID_EP_IN, 0);
         return usbd_ack;
     case 1:
         /* configuring device */
-        usbd_ep_config(dev, HID_RIN_EP, USB_EPTYPE_INTERRUPT, HID_RIN_SZ);
-        usbd_reg_endpoint(dev, HID_RIN_EP, hid_ep_callback);
-        usbd_ep_write(dev, HID_RIN_EP, 0, 0);
+        usbd_ep_config(dev, HID_EP_IN, USB_EPTYPE_INTERRUPT, HID_EP_SZ);
+        usbd_ep_config(dev, HID_EP_OUT, USB_EPTYPE_INTERRUPT, HID_EP_SZ);
+        usbd_reg_endpoint(dev, HID_EP_IN, hid_txrx_ep_callback);
+        usbd_reg_endpoint(dev, HID_EP_OUT, hid_txrx_ep_callback);
+        usbd_ep_write(dev, HID_EP_IN, 0, 0);
         return usbd_ack;
     default:
         return usbd_fail;
