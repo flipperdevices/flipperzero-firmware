@@ -107,10 +107,8 @@ void desktop_start_new_idle_animation(DesktopAnimation* animation) {
     }
 
     Power* power = furi_record_open("power");
-    PowerInfo info;
-    power_get_info(power, &info);
 
-    if(!power_is_battery_well(&info)) {
+    if(!power_is_battery_healthy(power)) {
         PUSH_BACK_ANIMATIONS(animation_list, check_battery_animation, stats.butthurt);
     }
 
