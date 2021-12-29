@@ -11,7 +11,7 @@
 
 #include <notification/notification-messages.h>
 
-#define POWER_BATTERY_HELTHY_LEVEL 70
+#define POWER_BATTERY_HEALTHY_LEVEL 70
 
 typedef enum {
     PowerStateNotCharging,

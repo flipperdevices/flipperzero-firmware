@@ -40,7 +40,7 @@ bool power_is_battery_healthy(Power* power) {
     furi_assert(power);
     bool is_helthy = false;
     osMutexAcquire(power->api_mtx, osWaitForever);
-    is_helthy = power->info.health > POWER_BATTERY_HELTHY_LEVEL;
+    is_helthy = power->info.health > POWER_BATTERY_HEALTHY_LEVEL;
     osMutexRelease(power->api_mtx);
     return is_helthy;
 }
