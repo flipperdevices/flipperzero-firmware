@@ -21,7 +21,12 @@ void __furi_print_name(void) {
 void __furi_abort(void) {
     __disable_irq();
     asm("bkpt 1");
-    while(1) {
+    /* Mark as returnable function.
+     * Otherwise compiler can don't push regs on stack, and make us see
+     * uncorrect registers when climbing up on stack during debug.
+     */
+    volatile bool never_true = 0;
+    while(!never_true) {
     }
 }
 
