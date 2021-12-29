@@ -2,8 +2,8 @@ import datetime
 import logging
 import os
 
-from .utils import *
-from .fstree import *
+from flipper.utils import *
+from flipper.utils.fstree import *
 
 MANIFEST_VERSION = 0
 

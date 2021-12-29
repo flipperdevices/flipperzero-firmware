@@ -4,7 +4,7 @@ import shutil
 import json
 
 import xml.etree.ElementTree as ET
-from .utils import *
+from flipper.utils import *
 
 CUBE_COPRO_PATH = "Projects/STM32WB_Copro_Wireless_Binaries"
 
