@@ -286,27 +286,27 @@ int32_t bt_srv() {
         FURI_LOG_W(TAG, "Failed to load bonding keys");
     }
 
-    do {
-        // Start radio stack
-        if(!furi_hal_bt_start_radio_stack()) {
-            FURI_LOG_E(TAG, "Radio stack start failed");
-        }
-        FuriHalBtStack stack_type = furi_hal_bt_get_radio_stack();
+    // Start radio stack
+    if(!furi_hal_bt_start_radio_stack()) {
+        FURI_LOG_E(TAG, "Radio stack start failed");
+    }
+    FuriHalBtStack stack_type = furi_hal_bt_get_radio_stack();
 
-        if(stack_type == FuriHalBtStackUnknown) {
-            bt_show_warning(bt, "Unsupported radio stack");
-            break;
-        } else if(stack_type == FuriHalBtStackLight) {
-            if(!furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
-                FURI_LOG_E(TAG, "BLE App start failed");
-                break;
-            }
+    if(stack_type == FuriHalBtStackUnknown) {
+        bt_show_warning(bt, "Unsupported radio stack");
+        bt->status = BtStatusUnavailable;
+    } else if(stack_type == FuriHalBtStackHciLayer) {
+        bt->status = BtStatusUnavailable;
+    } else if(stack_type == FuriHalBtStackLight) {
+        if(!furi_hal_bt_start_app(FuriHalBtProfileSerial, bt_on_gap_event_callback, bt)) {
+            FURI_LOG_E(TAG, "BLE App start failed");
+        } else {
             if(bt->bt_settings.enabled) {
                 furi_hal_bt_start_advertising();
             }
             furi_hal_bt_set_key_storage_change_callback(bt_on_key_storage_change_callback, bt);
         }
-    } while(false);
+    }
 
     furi_record_create("bt", bt);
 
