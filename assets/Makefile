@@ -3,7 +3,7 @@ PROJECT_ROOT		= $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))..)
 include				$(PROJECT_ROOT)/assets/assets.mk
 
 .PHONY: all
-all: icons protobuf file_animations
+all: icons protobuf
 
 $(ASSETS): $(ASSETS_SOURCES) $(ASSETS_COMPILLER)
 	@echo "\tASSETS\t\t" $@
@@ -22,9 +22,6 @@ protobuf: $(PROTOBUF)
 $(PROTOBUF_FILE_ANIMATIONS): $(PROTOBUF_SOURCES_FILE_ANIMATIONS) $(PROTOBUF_COMPILER)
 	@echo "\tFILE ANIMATIONS\t" $(PROTOBUF_FILE_ANIMATIONS_FILENAMES)
 	@$(PROTOBUF_COMPILER) -q -I$(PROTOBUF_FILE_ANIMATIONS_SOURCE_DIR) -D$(PROTOBUF_FILE_ANIMATIONS_COMPILED_DIR) $(PROTOBUF_FILE_ANIMATIONS_SOURCES)
-
-.PHONY: file_animations
-file_animations: $(PROTOBUF_FILE_ANIMATIONS)
 
 $(DOLPHIN_OUTPUT_DIR): $(DOLPHIN_SOURCE_DIR)
 	@echo "\tDOLPHIN"
