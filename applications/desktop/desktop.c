@@ -11,7 +11,7 @@
 #include "storage/storage.h"
 #include <stdint.h>
 #include <power/power_service/power.h>
-#include <dolphin/animations/animation_manager.h>
+#include "animations/animation_manager.h"
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);

@@ -1,6 +1,5 @@
 #include "dolphin/dolphin.h"
 #include "desktop/desktop.h"
-#include "dolphin/animations/animation_manager.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin_i.h"
 #include "furi/pubsub.h"

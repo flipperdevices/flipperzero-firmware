@@ -5,7 +5,6 @@
 #include "cmsis_os2.h"
 #include "desktop/desktop.h"
 #include "desktop/views/desktop_events.h"
-#include "dolphin/animations/animation_manager.h"
 #include "dolphin/dolphin.h"
 #include "furi/pubsub.h"
 #include "furi/record.h"

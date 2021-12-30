@@ -7,7 +7,7 @@
 #include <furi.h>
 #include "../desktop_i.h"
 #include "desktop_main.h"
-#include "dolphin/animations/views/bubble_animation_view.h"
+//#include "../animations/views/bubble_animation_view.h"
 
 void desktop_main_set_callback(
     DesktopMainView* main_view,

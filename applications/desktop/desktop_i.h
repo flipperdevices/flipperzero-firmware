@@ -3,7 +3,7 @@
 #include "cmsis_os2.h"
 #include "desktop.h"
 
-#include "dolphin/animations/animation_manager.h"
+#include "animations/animation_manager.h"
 #include "gui/view_composed.h"
 #include <furi.h>
 #include <furi-hal.h>
@@ -69,6 +69,8 @@ struct Desktop {
     AnimationManager* animation_manager;
     osSemaphoreId_t unload_animation_semaphore;
     FuriPubSubSubscription* app_start_stop_subscription;
+
+    char* text_buffer;
 };
 
 Desktop* desktop_alloc();
