@@ -18,7 +18,8 @@
 
 #define U2F_CERT_STOCK 0 // Stock certificate, private key is encrypted with factory key
 #define U2F_CERT_USER 1 // User certificate, private key is encrypted with unique key
-#define U2F_CERT_USER_UNENCRYPTED 2 // Unencrypted user certificate, will be encrypted after first load
+#define U2F_CERT_USER_UNENCRYPTED \
+    2 // Unencrypted user certificate, will be encrypted after first load
 
 #define U2F_CERT_KEY_FILE_TYPE "Flipper U2F Certificate Key File"
 #define U2F_CERT_KEY_VERSION 1
@@ -186,7 +187,7 @@ bool u2f_data_cert_key_load(uint8_t* cert_key) {
                 FURI_LOG_E(TAG, "Unknown cert type");
                 break;
             }
-            if (key_slot != 0) {
+            if(key_slot != 0) {
                 if(!flipper_file_read_hex(flipper_file, "IV", iv, 16)) {
                     FURI_LOG_E(TAG, "Missing IV");
                     break;
