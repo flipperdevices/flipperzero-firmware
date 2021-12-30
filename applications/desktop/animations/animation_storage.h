@@ -1,5 +1,4 @@
 #pragma once
-#include "animation_storage.pb.h"
 #include <stdint.h>
 #include <m-list.h>
 #include "views/bubble_animation_view.h"

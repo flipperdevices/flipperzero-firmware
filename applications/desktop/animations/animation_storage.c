@@ -12,7 +12,6 @@
 #include "storage/filesystem-api-defines.h"
 #include "storage/storage.h"
 #include "animation_storage_i.h"
-#include "animation_storage.pb.h"
 #include <stdint.h>
 #include <gui/icon_i.h>
 
