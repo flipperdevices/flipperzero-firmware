@@ -33,7 +33,10 @@ void bubble_animation_view_free(BubbleAnimationView* view);
  * @callback    callback to call when button pressed
  * @context     context
  */
-void bubble_animation_view_set_interact_callback(BubbleAnimationView* view, BubbleAnimationInteractCallback callback, void* context);
+void bubble_animation_view_set_interact_callback(
+    BubbleAnimationView* view,
+    BubbleAnimationInteractCallback callback,
+    void* context);
 
 /**
  * Set new animation.
@@ -43,7 +46,9 @@ void bubble_animation_view_set_interact_callback(BubbleAnimationView* view, Bubb
  * @view                    bubble animation view instance
  * @new_bubble_animation    new animation to set
  */
-void bubble_animation_view_set_animation(BubbleAnimationView* view, const BubbleAnimation* new_bubble_animation);
+void bubble_animation_view_set_animation(
+    BubbleAnimationView* view,
+    const BubbleAnimation* new_bubble_animation);
 
 /**
  * Get view of bubble animation.
@@ -82,4 +87,3 @@ void bubble_animation_freeze(BubbleAnimationView* view);
  * @view        bubble animation view instance
  */
 void bubble_animation_unfreeze(BubbleAnimationView* view);
-

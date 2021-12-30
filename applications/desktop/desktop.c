@@ -54,16 +54,18 @@ Desktop* desktop_alloc() {
 
     desktop->main_view_composed = view_composed_alloc();
     desktop->main_view = desktop_main_alloc();
-    view_composed_tie_views(desktop->main_view_composed,
-            desktop->dolphin_view,
-            desktop_main_get_view(desktop->main_view));
+    view_composed_tie_views(
+        desktop->main_view_composed,
+        desktop->dolphin_view,
+        desktop_main_get_view(desktop->main_view));
     view_composed_top_enable(desktop->main_view_composed, true);
 
     desktop->locked_view_composed = view_composed_alloc();
     desktop->locked_view = desktop_locked_alloc();
-    view_composed_tie_views(desktop->locked_view_composed,
-            desktop->dolphin_view,
-            desktop_locked_get_view(desktop->locked_view));
+    view_composed_tie_views(
+        desktop->locked_view_composed,
+        desktop->dolphin_view,
+        desktop_locked_get_view(desktop->locked_view));
     view_composed_top_enable(desktop->locked_view_composed, true);
 
     desktop->lock_menu = desktop_lock_menu_alloc();
@@ -73,7 +75,9 @@ Desktop* desktop_alloc() {
     desktop->code_input = code_input_alloc();
 
     view_dispatcher_add_view(
-        desktop->view_dispatcher, DesktopViewMain, view_composed_get_view(desktop->main_view_composed));
+        desktop->view_dispatcher,
+        DesktopViewMain,
+        view_composed_get_view(desktop->main_view_composed));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLockMenu,

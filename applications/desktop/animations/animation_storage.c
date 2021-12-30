@@ -27,7 +27,6 @@ static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
@@ -75,7 +74,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     flipper_file_free(file);
 
     // add hard-coded animations
-    for (int i = 0; i < COUNT_OF(StorageAnimationInternal); ++i) {
+    for(int i = 0; i < COUNT_OF(StorageAnimationInternal); ++i) {
         StorageAnimationList_push_back(*animation_list, &StorageAnimationInternal[i]);
     }
 
@@ -88,18 +87,18 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
     StorageAnimation* storage_animation = NULL;
 
     /* look through internal animations */
-    for (int i = 0; i < COUNT_OF(StorageAnimationInternal); ++i) {
-        if (!string_cmp_str(StorageAnimationInternal[i].meta.name, name)) {
+    for(int i = 0; i < COUNT_OF(StorageAnimationInternal); ++i) {
+        if(!string_cmp_str(StorageAnimationInternal[i].meta.name, name)) {
             storage_animation = &StorageAnimationInternal[i];
             break;
         }
     }
 
     /* look through external animations */
-    if (!storage_animation) {
+    if(!storage_animation) {
         BubbleAnimation* animation = animation_storage_load_animation(name);
 
-        if (animation != NULL) {
+        if(animation != NULL) {
             storage_animation = furi_alloc(sizeof(StorageAnimation));
             storage_animation->animation = animation;
             storage_animation->external = true;
@@ -124,7 +123,8 @@ StorageAnimationMeta* animation_storage_get_meta(StorageAnimation* storage_anima
     return &storage_animation->meta;
 }
 
-const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation* storage_animation) {
+const BubbleAnimation*
+    animation_storage_get_bubble_animation(StorageAnimation* storage_animation) {
     furi_assert(storage_animation);
     animation_storage_cache_animation(storage_animation);
     return storage_animation->animation;
@@ -133,9 +133,10 @@ const BubbleAnimation* animation_storage_get_bubble_animation(StorageAnimation* 
 void animation_storage_cache_animation(StorageAnimation* storage_animation) {
     furi_assert(storage_animation);
 
-    if (storage_animation->external) {
-        if (!storage_animation->animation) {
-            storage_animation->animation = animation_storage_load_animation(string_get_cstr(storage_animation->meta.name));
+    if(storage_animation->external) {
+        if(!storage_animation->animation) {
+            storage_animation->animation =
+                animation_storage_load_animation(string_get_cstr(storage_animation->meta.name));
         }
     }
 }
@@ -143,7 +144,7 @@ void animation_storage_cache_animation(StorageAnimation* storage_animation) {
 static void animation_storage_free_animation(BubbleAnimation** animation) {
     furi_assert(animation);
 
-    if (*animation) {
+    if(*animation) {
         animation_storage_free_bubbles(*animation);
         animation_storage_free_frames(*animation);
         free(*animation);
@@ -155,8 +156,8 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
     furi_assert(storage_animation);
     furi_assert(*storage_animation);
 
-    if ((*storage_animation)->external) {
-        animation_storage_free_animation((BubbleAnimation**) &(*storage_animation)->animation);
+    if((*storage_animation)->external) {
+        animation_storage_free_animation((BubbleAnimation**)&(*storage_animation)->animation);
 
         string_clear((*storage_animation)->meta.name);
         free(*storage_animation);
@@ -166,15 +167,15 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
 }
 
 static bool animation_storage_cast_align(string_t align_str, Align* align) {
-    if (!string_cmp_str(align_str, "Bottom")) {
+    if(!string_cmp_str(align_str, "Bottom")) {
         *align = AlignBottom;
-    } else if (!string_cmp_str(align_str, "Top")) {
+    } else if(!string_cmp_str(align_str, "Top")) {
         *align = AlignTop;
-    } else if (!string_cmp_str(align_str, "Left")) {
+    } else if(!string_cmp_str(align_str, "Left")) {
         *align = AlignLeft;
-    } else if (!string_cmp_str(align_str, "Right")) {
+    } else if(!string_cmp_str(align_str, "Right")) {
         *align = AlignRight;
-    } else if (!string_cmp_str(align_str, "Center")) {
+    } else if(!string_cmp_str(align_str, "Center")) {
         *align = AlignCenter;
     } else {
         return false;
@@ -191,14 +192,14 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
     uint16_t frames = animation->active_frames + animation->passive_frames;
     furi_assert(frames > 0);
 
-    for (int i = 0; i < frames; ++i) {
+    for(int i = 0; i < frames; ++i) {
         if(!icons[i]) continue;
 
         const Icon* icon = icons[i];
-        free((void*) icon->frames[0]);
+        free((void*)icon->frames[0]);
         free(icon->frames);
-        free((void*) icon);
-        for (int j = i; j < frames; ++j) {
+        free((void*)icon);
+        for(int j = i; j < frames; ++j) {
             if(icons[j] == icon) {
                 icons[j] = NULL;
             }
@@ -211,23 +212,24 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
 
 static Icon* animation_storage_alloc_icon(size_t frame_size) {
     Icon* icon = furi_alloc(sizeof(Icon));
-    icon->frames = furi_alloc(sizeof(const uint8_t *));
+    icon->frames = furi_alloc(sizeof(const uint8_t*));
     icon->frames[0] = furi_alloc(frame_size);
     return icon;
 }
 
 static void animation_storage_free_icon(Icon* icon) {
-    free((void*) icon->frames[0]);
+    free((void*)icon->frames[0]);
     free(icon->frames);
     free(icon);
 }
 
-static bool animation_storage_load_frames(Storage* storage,
-                                    const char* name,
-                                    BubbleAnimation* animation,
-                                    uint32_t* frame_order,
-                                    uint32_t width,
-                                    uint32_t height) {
+static bool animation_storage_load_frames(
+    Storage* storage,
+    const char* name,
+    BubbleAnimation* animation,
+    uint32_t* frame_order,
+    uint32_t width,
+    uint32_t height) {
     furi_assert(!animation->icons);
     uint16_t frame_order_size = animation->passive_frames + animation->active_frames;
 
@@ -239,26 +241,30 @@ static bool animation_storage_load_frames(Storage* storage,
     string_init(filename);
     size_t max_filesize = ROUND_UP_TO(width, 8) * height + 1;
 
-    for (int i = 0; i < frame_order_size; ++i) {
-        if (animation->icons[i])
-            continue;
+    for(int i = 0; i < frame_order_size; ++i) {
+        if(animation->icons[i]) continue;
 
         frames_ok = false;
         string_printf(filename, ANIMATION_DIR "/%s/frame_%d.bm", name, frame_order[i]);
 
-        if (storage_common_stat(storage, string_get_cstr(filename), &file_info) != FSE_OK) break;
-        if (file_info.size > max_filesize) {
-            FURI_LOG_E(TAG, "Filesize %d, max: %d (width %d, height %d)",
-                            file_info.size, max_filesize, width, height);
+        if(storage_common_stat(storage, string_get_cstr(filename), &file_info) != FSE_OK) break;
+        if(file_info.size > max_filesize) {
+            FURI_LOG_E(
+                TAG,
+                "Filesize %d, max: %d (width %d, height %d)",
+                file_info.size,
+                max_filesize,
+                width,
+                height);
             break;
         }
-        if (!storage_file_open(file, string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
+        if(!storage_file_open(file, string_get_cstr(filename), FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_E(TAG, "Can't open file \'%s\'", string_get_cstr(filename));
             break;
         }
 
         Icon* icon = animation_storage_alloc_icon(file_info.size);
-        if (storage_file_read(file, (void*) icon->frames[0], file_info.size) != file_info.size) {
+        if(storage_file_read(file, (void*)icon->frames[0], file_info.size) != file_info.size) {
             FURI_LOG_E(TAG, "Read failed: \'%s\'", string_get_cstr(filename));
             animation_storage_free_icon(icon);
             break;
@@ -270,21 +276,26 @@ static bool animation_storage_load_frames(Storage* storage,
         icon->width = width;
 
         /* Claim 1 allocation for 1 files blob and several links to it */
-        for (int j = i; j < frame_order_size; ++j) {
-            if (frame_order[i] == frame_order[j]) {
+        for(int j = i; j < frame_order_size; ++j) {
+            if(frame_order[i] == frame_order[j]) {
                 animation->icons[j] = icon;
             }
         }
         frames_ok = true;
     }
 
-    if (!frames_ok) {
-        FURI_LOG_E(TAG, "Load \'%s\' failed, %dx%d, size: %d", string_get_cstr(filename),
-                width, height, file_info.size);
+    if(!frames_ok) {
+        FURI_LOG_E(
+            TAG,
+            "Load \'%s\' failed, %dx%d, size: %d",
+            string_get_cstr(filename),
+            width,
+            height,
+            file_info.size);
         animation_storage_free_frames(animation);
         animation->icons = NULL;
     } else {
-        for (int i = 0; i < frame_order_size; ++i) {
+        for(int i = 0; i < frame_order_size; ++i) {
             furi_check(animation->icons[i]);
             furi_check(animation->icons[i]->frames[0]);
         }
@@ -305,30 +316,31 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
 
     do {
         if(!flipper_file_read_uint32(ff, "Bubble slots", &u32value, 1)) break;
-        if (u32value > 20) break;
+        if(u32value > 20) break;
         animation->frame_bubbles_count = u32value;
-        if (animation->frame_bubbles_count == 0) {
+        if(animation->frame_bubbles_count == 0) {
             animation->frame_bubbles = NULL;
             success = true;
             break;
         }
-        animation->frame_bubbles = furi_alloc(sizeof(FrameBubble*) * animation->frame_bubbles_count);
+        animation->frame_bubbles =
+            furi_alloc(sizeof(FrameBubble*) * animation->frame_bubbles_count);
 
         uint32_t current_slot = 0;
-        for (int i = 0; i < animation->frame_bubbles_count; ++i) {
+        for(int i = 0; i < animation->frame_bubbles_count; ++i) {
             animation->frame_bubbles[i] = furi_alloc(sizeof(FrameBubble));
         }
 
         FrameBubble* bubble = animation->frame_bubbles[0];
         int8_t index = -1;
-        for ( ; ; ) {
+        for(;;) {
             if(!flipper_file_read_uint32(ff, "Slot", &current_slot, 1)) break;
             if((current_slot != 0) && (index == -1)) break;
 
             if(current_slot == index) {
                 bubble->next_bubble = furi_alloc(sizeof(FrameBubble));
                 bubble = bubble->next_bubble;
-            } else if (current_slot == index + 1) {
+            } else if(current_slot == index + 1) {
                 ++index;
                 bubble = animation->frame_bubbles[index];
             } else {
@@ -349,7 +361,7 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
             string_replace_all_str(str, "\\n", "\n");
 
             bubble->bubble.str = furi_alloc(string_size(str) + 1);
-            strcpy((char*) bubble->bubble.str, string_get_cstr(str));
+            strcpy((char*)bubble->bubble.str, string_get_cstr(str));
 
             if(!flipper_file_read_string(ff, "AlignH", str)) break;
             if(!animation_storage_cast_align(str, &bubble->bubble.horizontal)) break;
@@ -364,8 +376,8 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
         success = (index + 1) == animation->frame_bubbles_count;
     } while(0);
 
-    if (!success) {
-        if (animation->frame_bubbles) {
+    if(!success) {
+        if(animation->frame_bubbles) {
             FURI_LOG_E(TAG, "Failed to load animation bubbles");
             animation_storage_free_bubbles(animation);
         }
@@ -414,7 +426,8 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!flipper_file_read_uint32(ff, "Frames order", u32array, frames)) break;
 
         /* passive and active frames must be loaded up to this point */
-        if (!animation_storage_load_frames(storage, name, animation, u32array, width, height)) break;
+        if(!animation_storage_load_frames(storage, name, animation, u32array, width, height))
+            break;
 
         if(!flipper_file_read_uint32(ff, "Active cycles", &u32value, 1)) break;
         animation->active_cycles = u32value;
@@ -425,18 +438,18 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!flipper_file_read_uint32(ff, "Active cooldown", &u32value, 1)) break;
         animation->active_cooldown = u32value;
 
-        if (!animation_storage_load_bubbles(animation, ff)) break;
+        if(!animation_storage_load_bubbles(animation, ff)) break;
         success = true;
     } while(0);
 
     string_clear(str);
     flipper_file_close(ff);
     flipper_file_free(ff);
-    if (u32array) {
+    if(u32array) {
         free(u32array);
     }
 
-    if (!success) {
+    if(!success) {
         free(animation);
         animation = NULL;
     }
@@ -445,23 +458,21 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
 }
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation) {
-    if (!animation->frame_bubbles)
-        return;
+    if(!animation->frame_bubbles) return;
 
-    for (int i = 0; i < animation->frame_bubbles_count; ) {
+    for(int i = 0; i < animation->frame_bubbles_count;) {
         FrameBubble** bubble = &animation->frame_bubbles[i];
 
-        if ((*bubble) == NULL)
-            break;
+        if((*bubble) == NULL) break;
 
         while((*bubble)->next_bubble != NULL) {
             bubble = &(*bubble)->next_bubble;
         }
 
-        if ((*bubble)->bubble.str) {
-            free((void*) (*bubble)->bubble.str);
+        if((*bubble)->bubble.str) {
+            free((void*)(*bubble)->bubble.str);
         }
-        if ((*bubble) == animation->frame_bubbles[i]) {
+        if((*bubble) == animation->frame_bubbles[i]) {
             ++i;
         }
         free(*bubble);
@@ -470,4 +481,3 @@ static void animation_storage_free_bubbles(BubbleAnimation* animation) {
     free(animation->frame_bubbles);
     animation->frame_bubbles = NULL;
 }
-

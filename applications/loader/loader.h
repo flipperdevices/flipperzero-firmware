@@ -12,8 +12,8 @@ typedef enum {
     LoaderStatusErrorInternal,
 } LoaderStatus;
 
-#define LOADER_BEFORE_APP_STARTED (void*) 0
-#define LOADER_AFTER_APP_FINISHED (void*) 1
+#define LOADER_BEFORE_APP_STARTED (void*)0
+#define LOADER_AFTER_APP_FINISHED (void*)1
 
 /** Start application
  * @param name - application name
@@ -41,4 +41,3 @@ void loader_update_menu();
 
 /** Show primary loader */
 FuriPubSub* loader_get_pubsub();
-

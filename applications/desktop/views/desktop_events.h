@@ -28,4 +28,3 @@ typedef enum {
     DesktopLockMenuEventPinLock,
     DesktopLockMenuEventExit,
 } DesktopEvent;
-

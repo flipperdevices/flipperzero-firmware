@@ -12,18 +12,28 @@ struct StorageAnimation {
 
 // Hard-coded, always available idle animation
 FrameBubble tv_bubble1 = {
-    .bubble = {.x = 1, .y = 23, .str = "Take the red pill", .horizontal = AlignRight, .vertical = AlignBottom},
+    .bubble =
+        {.x = 1,
+         .y = 23,
+         .str = "Take the red pill",
+         .horizontal = AlignRight,
+         .vertical = AlignBottom},
     .starts_at_frame = 7,
     .ends_at_frame = 9,
     .next_bubble = NULL,
 };
 FrameBubble tv_bubble2 = {
-    .bubble = {.x = 1, .y = 23, .str = "I can joke better", .horizontal = AlignRight, .vertical = AlignBottom},
+    .bubble =
+        {.x = 1,
+         .y = 23,
+         .str = "I can joke better",
+         .horizontal = AlignRight,
+         .vertical = AlignBottom},
     .starts_at_frame = 7,
     .ends_at_frame = 9,
     .next_bubble = NULL,
 };
-FrameBubble* tv_bubbles[] = { &tv_bubble1, &tv_bubble2 };
+FrameBubble* tv_bubbles[] = {&tv_bubble1, &tv_bubble2};
 const Icon* tv_icons[] = {
     &I_tv1,
     &I_tv2,
@@ -60,12 +70,17 @@ const Icon* no_sd_icons[] = {
     &I_no_sd6,
 };
 FrameBubble no_sd_bubble = {
-    .bubble = {.x = 40, .y = 18, .str = "Need an\nSD card", .horizontal = AlignRight, .vertical = AlignBottom},
+    .bubble =
+        {.x = 40,
+         .y = 18,
+         .str = "Need an\nSD card",
+         .horizontal = AlignRight,
+         .vertical = AlignBottom},
     .starts_at_frame = 0,
     .ends_at_frame = 9,
     .next_bubble = NULL,
 };
-FrameBubble* no_sd_bubbles[] = { &no_sd_bubble };
+FrameBubble* no_sd_bubbles[] = {&no_sd_bubble};
 const BubbleAnimation no_sd_bubble_animation = {
     .icons = no_sd_icons,
     .frame_bubbles = no_sd_bubbles,
@@ -91,7 +106,6 @@ const BubbleAnimation no_db_bubble_animation = {
     .frame_rate = 2,
 };
 
-
 const Icon* bad_sd_icons[] = {
     &I_card_bad1,
     &I_card_bad2,
@@ -101,7 +115,6 @@ const BubbleAnimation bad_sd_bubble_animation = {
     .passive_frames = COUNT_OF(bad_sd_icons),
     .frame_rate = 2,
 };
-
 
 const Icon* url_icons[] = {
     &I_url1,
@@ -127,30 +140,27 @@ const BubbleAnimation sd_ok_bubble_animation = {
     .frame_rate = 2,
 };
 
-
 static StorageAnimation StorageAnimationInternal[] = {
-    {
-        .animation = &tv_bubble_animation,
-        .external = false,
-        .meta = {
-            .min_butthurt = 0,
-            .max_butthurt = 11,
-            .min_level = 1,
-            .max_level = 3,
-            .weight = 3,
-        }
-    },
-    {
-        .animation = &no_sd_bubble_animation,
-        .external = false,
-        .meta = {
-            .min_butthurt = 0,
-            .max_butthurt = 14,
-            .min_level = 1,
-            .max_level = 3,
-            .weight = 6,
-        }
-    },
+    {.animation = &tv_bubble_animation,
+     .external = false,
+     .meta =
+         {
+             .min_butthurt = 0,
+             .max_butthurt = 11,
+             .min_level = 1,
+             .max_level = 3,
+             .weight = 3,
+         }},
+    {.animation = &no_sd_bubble_animation,
+     .external = false,
+     .meta =
+         {
+             .min_butthurt = 0,
+             .max_butthurt = 14,
+             .min_level = 1,
+             .max_level = 3,
+             .weight = 6,
+         }},
     {
         .animation = &no_db_bubble_animation,
         .external = false,
@@ -173,7 +183,7 @@ void animation_storage_initialize_internal_animations(void) {
     /* not in constructor - no memory pool yet */
     /* called in 1 thread - no need in double check */
     static bool initialized = false;
-    if (!initialized) {
+    if(!initialized) {
         initialized = true;
         string_init_set_str(StorageAnimationInternal[0].meta.name, HARDCODED_ANIMATION_NAME);
         string_init_set_str(StorageAnimationInternal[1].meta.name, NO_SD_ANIMATION_NAME);
@@ -183,4 +193,3 @@ void animation_storage_initialize_internal_animations(void) {
         string_init_set_str(StorageAnimationInternal[5].meta.name, URL_ANIMATION_NAME);
     }
 }
-

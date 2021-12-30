@@ -21,7 +21,8 @@ static void view_composed_update_callback(View* view_top_or_bottom, void* contex
     furi_assert(context);
 
     View* view_composed_view = context;
-    view_composed_view->update_callback(view_composed_view, view_composed_view->update_callback_context);
+    view_composed_view->update_callback(
+        view_composed_view, view_composed_view->update_callback_context);
 }
 
 static void view_composed_enter(void* context) {
@@ -31,15 +32,15 @@ static void view_composed_enter(void* context) {
     ViewComposedModel* model = view_get_model(view_composed->view);
 
     /* if more than 1 composed views hold same view it has to reassign update_callback_context */
-    if (model->bottom) {
+    if(model->bottom) {
         view_set_update_callback_context(model->bottom, view_composed->view);
-        if (model->bottom->enter_callback) {
+        if(model->bottom->enter_callback) {
             model->bottom->enter_callback(model->bottom->context);
         }
     }
-    if (model->top) {
+    if(model->top) {
         view_set_update_callback_context(model->top, view_composed->view);
-        if (model->top->enter_callback) {
+        if(model->top->enter_callback) {
             model->top->enter_callback(model->top->context);
         }
     }
@@ -53,13 +54,13 @@ static void view_composed_exit(void* context) {
     ViewComposed* view_composed = context;
     ViewComposedModel* model = view_get_model(view_composed->view);
 
-    if (model->bottom) {
-        if (model->bottom->exit_callback) {
+    if(model->bottom) {
+        if(model->bottom->exit_callback) {
             model->bottom->exit_callback(model->bottom->context);
         }
     }
-    if (model->top) {
-        if (model->top->exit_callback) {
+    if(model->top) {
+        if(model->top->exit_callback) {
             model->top->exit_callback(model->top->context);
         }
     }
@@ -100,7 +101,7 @@ static void view_composed_draw(Canvas* canvas, void* model) {
     ViewComposedModel* view_composed_model = model;
 
     view_draw(view_composed_model->bottom, canvas);
-    if (view_composed_model->top_enabled && view_composed_model->top) {
+    if(view_composed_model->top_enabled && view_composed_model->top) {
         view_draw(view_composed_model->top, canvas);
     }
 }
@@ -113,10 +114,10 @@ static bool view_composed_input(InputEvent* event, void* context) {
     ViewComposedModel* view_composed_model = view_get_model(view_composed->view);
     bool consumed = false;
 
-    if (view_composed_model->top_enabled && view_composed_model->top) {
+    if(view_composed_model->top_enabled && view_composed_model->top) {
         consumed = view_input(view_composed_model->top, event);
     }
-    if (!consumed) {
+    if(!consumed) {
         consumed = view_input(view_composed_model->bottom, event);
     }
 
@@ -140,11 +141,11 @@ void view_composed_tie_views(ViewComposed* view_composed, View* view_bottom, Vie
 
     ViewComposedModel* view_composed_model = view_get_model(view_composed->view);
 
-    if (view_composed_model->bottom) {
+    if(view_composed_model->bottom) {
         view_set_update_callback(view_composed_model->bottom, NULL);
         view_set_update_callback_context(view_composed_model->bottom, NULL);
     }
-    if (view_composed_model->top) {
+    if(view_composed_model->top) {
         view_set_update_callback(view_composed_model->top, NULL);
         view_set_update_callback_context(view_composed_model->top, NULL);
     }
@@ -163,4 +164,3 @@ View* view_composed_get_view(ViewComposed* view_composed) {
     furi_assert(view_composed);
     return view_composed->view;
 }
-

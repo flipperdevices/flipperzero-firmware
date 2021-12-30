@@ -17,7 +17,8 @@ void desktop_scene_locked_on_enter(void* context) {
     Desktop* desktop = (Desktop*)context;
     DesktopLockedView* locked_view = desktop->locked_view;
 
-    animation_manager_set_new_idle_callback(desktop->animation_manager, desktop_scene_locked_new_idle_animation_callback);
+    animation_manager_set_new_idle_callback(
+        desktop->animation_manager, desktop_scene_locked_new_idle_animation_callback);
     desktop_locked_set_callback(locked_view, desktop_scene_locked_callback, desktop);
     desktop_locked_reset_door_pos(locked_view);
     desktop_locked_update_hint_timeout(locked_view);

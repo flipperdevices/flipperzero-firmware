@@ -45,7 +45,6 @@ LIST_DEF(StorageAnimationList, StorageAnimation*, M_PTR_OPLIST)
  */
 void animation_storage_fill_animation_list(StorageAnimationList_t* list);
 
-
 /**
  * Get bubble animation of storage animation.
  * Bubble Animation is a structure which describes animation
@@ -98,4 +97,3 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
  * of animations in inner flash.
  */
 void animation_storage_initialize_internal_animations(void);
-

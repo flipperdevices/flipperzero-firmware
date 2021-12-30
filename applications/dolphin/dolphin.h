@@ -38,4 +38,3 @@ void dolphin_flush(Dolphin* dolphin);
 void dolphin_upgrade_level(Dolphin* dolphin);
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
-

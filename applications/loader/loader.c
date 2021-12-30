@@ -254,7 +254,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             furi_thread_get_heap_size(instance->thread));
         furi_hal_power_insomnia_exit();
         loader_unlock(instance);
-        furi_pubsub_publish(loader_instance->pubsub, (void*) LOADER_AFTER_APP_FINISHED);
+        furi_pubsub_publish(loader_instance->pubsub, (void*)LOADER_AFTER_APP_FINISHED);
     }
 }
 
@@ -482,4 +482,3 @@ int32_t loader_srv(void* p) {
 FuriPubSub* loader_get_pubsub() {
     return loader_instance->pubsub;
 }
-

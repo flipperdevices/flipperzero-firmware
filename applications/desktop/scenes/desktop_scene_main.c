@@ -14,15 +14,16 @@
 #include <m-list.h>
 #define MAIN_VIEW_DEFAULT (0UL)
 
-
 static void desktop_scene_main_app_started_callback(const void* message, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    if (message == LOADER_BEFORE_APP_STARTED) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventBeforeAppStarted);
+    if(message == LOADER_BEFORE_APP_STARTED) {
+        view_dispatcher_send_custom_event(
+            desktop->view_dispatcher, DesktopMainEventBeforeAppStarted);
         osSemaphoreAcquire(desktop->unload_animation_semaphore, osWaitForever);
-    } else if (message == LOADER_AFTER_APP_FINISHED) {
-        view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopMainEventAfterAppFinished);
+    } else if(message == LOADER_AFTER_APP_FINISHED) {
+        view_dispatcher_send_custom_event(
+            desktop->view_dispatcher, DesktopMainEventAfterAppFinished);
     }
 }
 
@@ -74,14 +75,16 @@ void desktop_scene_main_on_enter(void* context) {
     DesktopMainView* main_view = desktop->main_view;
 
     animation_manager_set_context(desktop->animation_manager, desktop);
-    animation_manager_set_new_idle_callback(desktop->animation_manager, desktop_scene_main_new_idle_animation_callback);
-    animation_manager_set_check_callback(desktop->animation_manager, desktop_scene_main_check_animation_callback);
-    animation_manager_set_interact_callback(desktop->animation_manager, desktop_scene_main_interact_animation_callback);
+    animation_manager_set_new_idle_callback(
+        desktop->animation_manager, desktop_scene_main_new_idle_animation_callback);
+    animation_manager_set_check_callback(
+        desktop->animation_manager, desktop_scene_main_check_animation_callback);
+    animation_manager_set_interact_callback(
+        desktop->animation_manager, desktop_scene_main_interact_animation_callback);
 
     furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
-    desktop->app_start_stop_subscription = furi_pubsub_subscribe(loader_get_pubsub(),
-            desktop_scene_main_app_started_callback,
-            desktop);
+    desktop->app_start_stop_subscription = furi_pubsub_subscribe(
+        loader_get_pubsub(), desktop_scene_main_app_started_callback, desktop);
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);

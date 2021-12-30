@@ -170,7 +170,13 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
  * @param   horizontal  horizontal aligning
  * @param   vertical    aligning
  */
-void elements_bubble_str(Canvas* canvas, uint8_t x, uint8_t y, const char* text, Align horizontal, Align vertical);
+void elements_bubble_str(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const char* text,
+    Align horizontal,
+    Align vertical);
 
 /** Trim string buffer to fit width in pixels
  *

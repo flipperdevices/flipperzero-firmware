@@ -42,4 +42,3 @@ void dolphin_event_send_async(Dolphin* dolphin, DolphinEvent* event);
 void dolphin_event_send_wait(Dolphin* dolphin, DolphinEvent* event);
 
 void dolphin_event_release(Dolphin* dolphin, DolphinEvent* event);
-

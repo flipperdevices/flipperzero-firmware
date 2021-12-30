@@ -48,10 +48,12 @@ static uint8_t bubble_animation_get_icon_index(BubbleAnimationViewModel* model) 
     uint8_t icon_index = 0;
     const BubbleAnimation* animation = model->current;
 
-    if (model->current_frame < animation->passive_frames) {
+    if(model->current_frame < animation->passive_frames) {
         icon_index = model->current_frame;
     } else {
-        icon_index = (model->current_frame - animation->passive_frames) % animation->active_frames + animation->passive_frames;
+        icon_index =
+            (model->current_frame - animation->passive_frames) % animation->active_frames +
+            animation->passive_frames;
     }
     furi_assert(icon_index < (animation->passive_frames + animation->active_frames));
 
@@ -65,13 +67,13 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
     BubbleAnimationViewModel* model = model_;
     const BubbleAnimation* animation = model->current;
 
-    if (model->freeze_frame) {
+    if(model->freeze_frame) {
         uint8_t y_offset = canvas_height(canvas) - icon_get_height(model->freeze_frame);
         canvas_draw_icon(canvas, 0, y_offset, model->freeze_frame);
         return;
     }
 
-    if (!animation) {
+    if(!animation) {
         return;
     }
 
@@ -83,9 +85,9 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
     canvas_draw_icon(canvas, 0, y_offset, icon);
 
     const FrameBubble* bubble = model->current_bubble;
-    if (bubble) {
-        if ((model->current_frame >= bubble->starts_at_frame)
-            && (model->current_frame <= bubble->ends_at_frame)) {
+    if(bubble) {
+        if((model->current_frame >= bubble->starts_at_frame) &&
+           (model->current_frame <= bubble->ends_at_frame)) {
             const Bubble* b = &bubble->bubble;
             elements_bubble_str(canvas, b->x, b->y, b->str, b->horizontal, b->vertical);
         }
@@ -95,16 +97,16 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
 static FrameBubble* bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
     FrameBubble* bubble = NULL;
 
-    if ((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
+    if((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
         return NULL;
     }
 
     uint8_t index = random() % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
-    for (int i = 0; i < animation->frame_bubbles_count; ++i) {
-        if ((animation->frame_bubbles[i]->starts_at_frame < animation->passive_frames) ^ active) {
-            if (!index) {
+    for(int i = 0; i < animation->frame_bubbles_count; ++i) {
+        if((animation->frame_bubbles[i]->starts_at_frame < animation->passive_frames) ^ active) {
+            if(!index) {
                 bubble = animation->frame_bubbles[i];
             }
             --index;
@@ -121,19 +123,19 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
     BubbleAnimationView* animation_view = context;
     bool consumed = false;
 
-    if (event->type == InputTypePress) {
+    if(event->type == InputTypePress) {
         bubble_animation_activate(animation_view, false);
     }
 
-    if (event->key == InputKeyRight) {
+    if(event->key == InputKeyRight) {
         /* Right button reserved for animation activation, so consume */
         consumed = true;
-        if (event->type == InputTypeShort) {
-            if (animation_view->interact_callback) {
+        if(event->type == InputTypeShort) {
+            if(animation_view->interact_callback) {
                 animation_view->interact_callback(animation_view->interact_callback_context);
             }
         }
-    } else if (event->key == InputKeyBack) {
+    } else if(event->key == InputKeyBack) {
         /* Prevent back button to fall down to common handler - leaving
          * application, so consume */
         consumed = true;
@@ -146,30 +148,31 @@ static void bubble_animation_activate(BubbleAnimationView* view, bool force) {
     furi_assert(view);
     bool activate = true;
     BubbleAnimationViewModel* model = view_get_model(view->view);
-    if (!model->current) {
+    if(!model->current) {
         activate = false;
-    } else if (model->freeze_frame) {
+    } else if(model->freeze_frame) {
         activate = false;
-    } else if (model->current->active_frames == 0) {
+    } else if(model->current->active_frames == 0) {
         activate = false;
     }
 
-    if (!force) {
-        if ((model->active_ended_at + model->current->active_cooldown * 1000) > xTaskGetTickCount()) {
+    if(!force) {
+        if((model->active_ended_at + model->current->active_cooldown * 1000) >
+           xTaskGetTickCount()) {
             activate = false;
-        } else if (model->active_shift) {
+        } else if(model->active_shift) {
             activate = false;
-        } else if (model->current_frame >= model->current->passive_frames) {
+        } else if(model->current_frame >= model->current->passive_frames) {
             activate = false;
         }
     }
     view_commit_model(view->view, false);
 
-    if (!activate && !force) {
+    if(!activate && !force) {
         return;
     }
 
-    if (ACTIVE_SHIFT > 0) {
+    if(ACTIVE_SHIFT > 0) {
         BubbleAnimationViewModel* model = view_get_model(view->view);
         model->active_shift = ACTIVE_SHIFT;
         view_commit_model(view->view, false);
@@ -184,14 +187,14 @@ static void bubble_animation_activate_right_now(BubbleAnimationView* view) {
     uint8_t frame_rate = 0;
 
     BubbleAnimationViewModel* model = view_get_model(view->view);
-    if (model->current && (model->current->active_frames > 0) && (!model->freeze_frame)) {
+    if(model->current && (model->current->active_frames > 0) && (!model->freeze_frame)) {
         model->current_frame = model->current->passive_frames;
         model->current_bubble = bubble_animation_pick_bubble(model, true);
         frame_rate = model->current->frame_rate;
     }
     view_commit_model(view->view, true);
 
-    if (frame_rate) {
+    if(frame_rate) {
         osTimerStart(view->timer, 1000 / frame_rate);
     }
 }
@@ -203,12 +206,14 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
         return;
     }
 
-    if (model->current_frame < model->current->passive_frames) {
+    if(model->current_frame < model->current->passive_frames) {
         model->current_frame = (model->current_frame + 1) % model->current->passive_frames;
     } else {
         ++model->current_frame;
-        model->active_cycle += !((model->current_frame - model->current->passive_frames) % model->current->active_frames);
-        if (model->active_cycle >= model->current->active_cycles) {
+        model->active_cycle +=
+            !((model->current_frame - model->current->passive_frames) %
+              model->current->active_frames);
+        if(model->active_cycle >= model->current->active_cycles) {
             // switch to passive
             model->active_cycle = 0;
             model->current_frame = 0;
@@ -216,8 +221,8 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
             model->active_ended_at = xTaskGetTickCount();
         }
 
-        if (model->current_bubble) {
-            if (model->current_frame > model->current_bubble->ends_at_frame) {
+        if(model->current_bubble) {
+            if(model->current_frame > model->current_bubble->ends_at_frame) {
                 model->current_bubble = model->current_bubble->next_bubble;
             }
         }
@@ -231,17 +236,17 @@ static void bubble_animation_timer_callback(void* context) {
 
     BubbleAnimationViewModel* model = view_get_model(view->view);
 
-    if (model->active_shift > 0) {
+    if(model->active_shift > 0) {
         activate = (--model->active_shift == 0);
     }
 
-    if (!model->freeze_frame && !activate) {
+    if(!model->freeze_frame && !activate) {
         bubble_animation_next_frame(model);
     }
 
     view_commit_model(view->view, !activate);
 
-    if (activate) {
+    if(activate) {
         bubble_animation_activate_right_now(view);
     }
 }
@@ -262,7 +267,7 @@ static Icon* bubble_animation_clone_frame(const Icon* icon_orig) {
      */
     size_t max_bitmap_size = ROUND_UP_TO(icon_orig->width, 8) * icon_orig->height + 1;
     icon_clone->frames[0] = furi_alloc(max_bitmap_size);
-    memcpy((void*) icon_clone->frames[0], icon_orig->frames[0], max_bitmap_size);
+    memcpy((void*)icon_clone->frames[0], icon_orig->frames[0], max_bitmap_size);
 
     return icon_clone;
 }
@@ -271,7 +276,7 @@ static void bubble_animation_release_frame(Icon** icon) {
     furi_assert(icon);
     furi_assert(*icon);
 
-    free((void*) (*icon)->frames[0]);
+    free((void*)(*icon)->frames[0]);
     free((*icon)->frames);
     free(*icon);
     *icon = NULL;
@@ -286,7 +291,7 @@ static void bubble_animation_enter(void* context) {
     uint8_t frame_rate = model->current->frame_rate;
     view_commit_model(view->view, false);
 
-    if (frame_rate) {
+    if(frame_rate) {
         osTimerStart(view->timer, 1000 / frame_rate);
     }
 }
@@ -325,14 +330,19 @@ void bubble_animation_view_free(BubbleAnimationView* view) {
     free(view);
 }
 
-void bubble_animation_view_set_interact_callback(BubbleAnimationView* view, BubbleAnimationInteractCallback callback, void* context) {
+void bubble_animation_view_set_interact_callback(
+    BubbleAnimationView* view,
+    BubbleAnimationInteractCallback callback,
+    void* context) {
     furi_assert(view);
 
     view->interact_callback_context = context;
     view->interact_callback = callback;
 }
 
-void bubble_animation_view_set_animation(BubbleAnimationView* view, const BubbleAnimation* new_animation) {
+void bubble_animation_view_set_animation(
+    BubbleAnimationView* view,
+    const BubbleAnimation* new_animation) {
     furi_assert(view);
     furi_assert(new_animation);
 
@@ -343,8 +353,8 @@ void bubble_animation_view_set_animation(BubbleAnimationView* view, const Bubble
     model->active_ended_at = xTaskGetTickCount() - (model->current->active_cooldown * 1000);
     model->active_bubbles = 0;
     model->passive_bubbles = 0;
-    for (int i = 0; i < new_animation->frame_bubbles_count; ++i) {
-        if (new_animation->frame_bubbles[i]->starts_at_frame < new_animation->passive_frames) {
+    for(int i = 0; i < new_animation->frame_bubbles_count; ++i) {
+        if(new_animation->frame_bubbles[i]->starts_at_frame < new_animation->passive_frames) {
             ++model->passive_bubbles;
         } else {
             ++model->active_bubbles;
@@ -398,4 +408,3 @@ View* bubble_animation_get_view(BubbleAnimationView* view) {
 
     return view->view;
 }
-
