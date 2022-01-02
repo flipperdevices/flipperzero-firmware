@@ -90,6 +90,7 @@ class Main:
         for dirpath, dirnames, filenames in os.walk(self.args.source_directory):
             self.logger.debug(f"Processing directory {dirpath}")
             dirnames.sort()
+            filenames.sort()
             if not filenames:
                 continue
             if "frame_rate" in filenames:

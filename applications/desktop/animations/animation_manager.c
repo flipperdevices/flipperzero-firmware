@@ -16,7 +16,7 @@
 #include <dolphin/dolphin_i.h>
 #include <storage/filesystem-api-defines.h>
 
-#define TAG "ANIMATION"
+#define TAG "AnimationManager"
 
 typedef enum {
     AnimationManagerStateIdle,

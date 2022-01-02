@@ -3,7 +3,7 @@ PROJECT_ROOT		= $(abspath $(dir $(abspath $(firstword $(MAKEFILE_LIST))))..)
 include				$(PROJECT_ROOT)/assets/assets.mk
 
 .PHONY: all
-all: icons protobuf
+all: icons protobuf dolphin
 
 $(ASSETS): $(ASSETS_SOURCES) $(ASSETS_COMPILLER)
 	@echo "\tASSETS\t\t" $@

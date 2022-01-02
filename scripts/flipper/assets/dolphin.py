@@ -2,6 +2,7 @@ import multiprocessing
 import logging
 import os
 import sys
+import shutil
 
 from .icon import *
 
@@ -33,9 +34,18 @@ def pack_animations(source: str, destination: str):
                     destination_directory, os.path.splitext(filename)[0] + ".bm"
                 )
                 to_pack.append((source_filename, destination_filename))
+            elif filename == "meta.txt":
+                source_filename = os.path.join(current_directory, filename)
+                destination_filename = os.path.join(destination_directory, filename)
+                shutil.copyfile(source_filename, destination_filename)
+
     # Process images in parallel
     pool = multiprocessing.Pool()
     pool.map(_pack_animation, to_pack)
+
+    shutil.copyfile(
+        os.path.join(source, "manifest.txt"), os.path.join(destination, "manifest.txt")
+    )
 
 
 def pack_dolphin(source_directory: str, destination_directory: str):

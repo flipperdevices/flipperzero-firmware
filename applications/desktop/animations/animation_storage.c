@@ -18,7 +18,7 @@
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR "/ext/dolphin/animations"
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
-#define TAG "ANIMATION"
+#define TAG "AnimationStorage"
 #define DEBUG_PB 0
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation);
