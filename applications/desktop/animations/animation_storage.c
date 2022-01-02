@@ -269,10 +269,10 @@ static bool animation_storage_load_frames(
             break;
         }
         storage_file_close(file);
-        icon->frame_count = 1;
-        icon->frame_rate = 0;
-        icon->height = height;
-        icon->width = width;
+        FURI_CONST_ASSIGN(icon->frame_count, 1);
+        FURI_CONST_ASSIGN(icon->frame_rate, 0);
+        FURI_CONST_ASSIGN(icon->height, height);
+        FURI_CONST_ASSIGN(icon->width, width);
 
         /* Claim 1 allocation for 1 files blob and several links to it */
         for(int j = i; j < frame_order_size; ++j) {
