@@ -38,11 +38,11 @@ FuriPubSub* power_get_pubsub(Power* power) {
 
 bool power_is_battery_healthy(Power* power) {
     furi_assert(power);
-    bool is_helthy = false;
+    bool is_healthy = false;
     osMutexAcquire(power->api_mtx, osWaitForever);
-    is_helthy = power->info.health > POWER_BATTERY_HEALTHY_LEVEL;
+    is_healthy = power->info.health > POWER_BATTERY_HEALTHY_LEVEL;
     osMutexRelease(power->api_mtx);
-    return is_helthy;
+    return is_healthy;
 }
 
 void power_enable_low_battery_level_notification(Power* power, bool enable) {
