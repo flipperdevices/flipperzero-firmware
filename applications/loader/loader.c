@@ -230,10 +230,12 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     furi_assert(context);
 
     Loader* instance = context;
+    LoaderEvent event;
 
     if(thread_state == FuriThreadStateRunning) {
         instance->free_heap_size = memmgr_get_free_heap();
-        furi_pubsub_publish(loader_instance->pubsub, LOADER_BEFORE_APP_STARTED);
+        event.type = LoaderEventTypeApplicationStarted;
+        furi_pubsub_publish(loader_instance->pubsub, &event);
     } else if(thread_state == FuriThreadStateStopped) {
         /*
          * Current Leak Sanitizer assumes that memory is allocated and freed
@@ -254,7 +256,8 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             furi_thread_get_heap_size(instance->thread));
         furi_hal_power_insomnia_exit();
         loader_unlock(instance);
-        furi_pubsub_publish(loader_instance->pubsub, (void*)LOADER_AFTER_APP_FINISHED);
+        event.type = LoaderEventTypeApplicationStopped;
+        furi_pubsub_publish(loader_instance->pubsub, &event);
     }
 }
 

@@ -17,11 +17,13 @@
 static void desktop_scene_main_app_started_callback(const void* message, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
-    if(message == LOADER_BEFORE_APP_STARTED) {
+    const LoaderEvent* event = message;
+
+    if(event->type == LoaderEventTypeApplicationStarted) {
         view_dispatcher_send_custom_event(
             desktop->view_dispatcher, DesktopMainEventBeforeAppStarted);
         osSemaphoreAcquire(desktop->unload_animation_semaphore, osWaitForever);
-    } else if(message == LOADER_AFTER_APP_FINISHED) {
+    } else if(event->type == LoaderEventTypeApplicationStopped) {
         view_dispatcher_send_custom_event(
             desktop->view_dispatcher, DesktopMainEventAfterAppFinished);
     }

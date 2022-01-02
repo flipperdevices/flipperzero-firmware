@@ -12,8 +12,14 @@ typedef enum {
     LoaderStatusErrorInternal,
 } LoaderStatus;
 
-#define LOADER_BEFORE_APP_STARTED (void*)0
-#define LOADER_AFTER_APP_FINISHED (void*)1
+typedef enum {
+    LoaderEventTypeApplicationStarted,
+    LoaderEventTypeApplicationStopped
+} LoaderEventType;
+
+typedef struct {
+    LoaderEventType type;
+} LoaderEvent;
 
 /** Start application
  * @param name - application name
