@@ -12,7 +12,7 @@ static const char* bt_cli_address_types[] = {
     "Random (Static) Identity Address",
 };
 
-static void bt_cli_command_info(Cli* cli, string_t args, void* context) {
+static void bt_cli_command_hci_info(Cli* cli, string_t args, void* context) {
     string_t buffer;
     string_init(buffer);
     furi_hal_bt_dump_state(buffer);
@@ -74,7 +74,7 @@ static void bt_cli_command_carrier_rx(Cli* cli, string_t args, void* context) {
 static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
     int channel = 0;
     int pattern = 0;
-    int datarate = 0;
+    int datarate = 1;
 
     do {
         if(!args_read_int_and_trim(args, &channel) && (channel < 0 || channel > 39)) {
@@ -116,7 +116,7 @@ static void bt_cli_command_packet_tx(Cli* cli, string_t args, void* context) {
 
 static void bt_cli_command_packet_rx(Cli* cli, string_t args, void* context) {
     int channel = 0;
-    int datarate = 0;
+    int datarate = 1;
 
     do {
         if(!args_read_int_and_trim(args, &channel) && (channel < 0 || channel > 39)) {
@@ -177,15 +177,14 @@ static void bt_cli_print_usage() {
     printf("Usage:\r\n");
     printf("bt <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
-    printf("\tinfo\t - get info\r\n");
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        printf("\ttx_carrier\t - start tx carrier test\r\n");
-        printf("\trx_carrier\t - start rx carrier test\r\n");
-        printf("\ttx_pt\t - start tx packet test\r\n");
-        printf("\trx_pt\t - start rx packer test\r\n");
-        if(furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
-            printf("\tscan\t - start scanner\r\n");
-        }
+    printf("\thci_info\t - HCI info\r\n");
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) &&
+       furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
+        printf("\ttx_carrier <channel:0-39> <power:0-6>\t - start tx carrier test\r\n");
+        printf("\trx_carrier <channel:0-39>\t - start rx carrier test\r\n");
+        printf("\ttx_pt <channel:0-39> <pattern:0-5> <datarate:1-2>\t - start tx packet test\r\n");
+        printf("\trx_pt <channel:0-39> <datarate:1-2>\t - start rx packer test\r\n");
+        printf("\tscan\t - start scanner\r\n");
     }
 }
 
@@ -200,32 +199,31 @@ static void bt_cli(Cli* cli, string_t args, void* context) {
             bt_cli_print_usage();
             break;
         }
-        if(string_cmp_str(cmd, "info") == 0) {
-            bt_cli_command_info(cli, args, NULL);
+        if(string_cmp_str(cmd, "hci_info") == 0) {
+            bt_cli_command_hci_info(cli, args, NULL);
             break;
         }
-        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-            if(string_cmp_str(cmd, "tx_carrier") == 0) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug) &&
+           furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
+            if(string_cmp_str(cmd, "carrier_tx") == 0) {
                 bt_cli_command_carrier_tx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "rx_carrier") == 0) {
+            if(string_cmp_str(cmd, "carrier_rx") == 0) {
                 bt_cli_command_carrier_rx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "tx_pt") == 0) {
+            if(string_cmp_str(cmd, "packet_tx") == 0) {
                 bt_cli_command_packet_tx(cli, args, NULL);
                 break;
             }
-            if(string_cmp_str(cmd, "rx_pt") == 0) {
+            if(string_cmp_str(cmd, "packet_rx") == 0) {
                 bt_cli_command_packet_rx(cli, args, NULL);
                 break;
             }
-            if(furi_hal_bt_get_radio_stack() == FuriHalBtStackHciLayer) {
-                if(string_cmp_str(cmd, "scan") == 0) {
-                    bt_cli_command_scan(cli, args, NULL);
-                    break;
-                }
+            if(string_cmp_str(cmd, "scan") == 0) {
+                bt_cli_command_scan(cli, args, NULL);
+                break;
             }
         }
 
