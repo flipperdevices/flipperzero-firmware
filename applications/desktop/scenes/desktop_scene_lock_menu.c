@@ -2,9 +2,8 @@
 #include "../views/desktop_lock_menu.h"
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
-#include <furi-hal-lock.h>
 
-void desktop_scene_lock_menu_callback(DesktopLockMenuEvent event, void* context) {
+void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
@@ -33,7 +32,7 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopLockMenuEventPinLock:
             if(desktop->settings.pincode.length > 0) {
-                furi_hal_lock_set(true);
+                furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
                 furi_hal_usb_disable();
                 scene_manager_set_scene_state(
                     desktop->scene_manager, DesktopSceneLocked, DesktopLockedWithPin);

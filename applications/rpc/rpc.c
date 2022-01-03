@@ -4,7 +4,6 @@
 #include <pb_decode.h>
 #include <pb_encode.h>
 
-#include <status.pb.h>
 #include <storage.pb.h>
 #include <flipper.pb.h>
 #include <portmacro.h>
@@ -393,7 +392,7 @@ RpcSession* rpc_session_open(Rpc* rpc) {
         };
         rpc_add_handler(rpc, PB_Main_stop_session_tag, &rpc_handler);
 
-        FURI_LOG_D(TAG, "Session started\r\n");
+        FURI_LOG_D(TAG, "Session started");
     }
 
     return result ? &rpc->session : NULL; /* support 1 open session for now */

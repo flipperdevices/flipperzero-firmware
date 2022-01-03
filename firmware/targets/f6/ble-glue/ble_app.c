@@ -16,6 +16,8 @@
 PLACE_IN_SECTION("MB_MEM1") ALIGN(4) static TL_CmdPacket_t ble_app_cmd_buffer;
 PLACE_IN_SECTION("MB_MEM2") ALIGN(4) static uint32_t ble_app_nvm[BLE_NVM_SRAM_SIZE];
 
+_Static_assert(sizeof(SHCI_C2_Ble_Init_Cmd_Packet_t) == 49, "Ble stack config structure size mismatch");
+
 typedef struct {
     osMutexId_t hci_mtx;
     osSemaphoreId_t hci_sem;
@@ -67,24 +69,28 @@ bool ble_app_init() {
     SHCI_C2_Ble_Init_Cmd_Packet_t ble_init_cmd_packet = {
         .Header = {{0,0,0}}, // Header unused
         .Param = {
-            0, // pBleBufferAddress not used
-            0, // BleBufferSize not used
-            CFG_BLE_NUM_GATT_ATTRIBUTES,
-            CFG_BLE_NUM_GATT_SERVICES,
-            CFG_BLE_ATT_VALUE_ARRAY_SIZE,
-            CFG_BLE_NUM_LINK,
-            CFG_BLE_DATA_LENGTH_EXTENSION,
-            CFG_BLE_PREPARE_WRITE_LIST_SIZE,
-            CFG_BLE_MBLOCK_COUNT,
-            CFG_BLE_MAX_ATT_MTU,
-            CFG_BLE_SLAVE_SCA,
-            CFG_BLE_MASTER_SCA,
-            CFG_BLE_LSE_SOURCE,
-            CFG_BLE_MAX_CONN_EVENT_LENGTH,
-            CFG_BLE_HSE_STARTUP_TIME,
-            CFG_BLE_VITERBI_MODE,
-            CFG_BLE_LL_ONLY,
-            0,
+            .pBleBufferAddress = 0, // pBleBufferAddress not used
+            .BleBufferSize = 0, // BleBufferSize not used
+            .NumAttrRecord = CFG_BLE_NUM_GATT_ATTRIBUTES,
+            .NumAttrServ = CFG_BLE_NUM_GATT_SERVICES,
+            .AttrValueArrSize = CFG_BLE_ATT_VALUE_ARRAY_SIZE,
+            .NumOfLinks = CFG_BLE_NUM_LINK,
+            .ExtendedPacketLengthEnable = CFG_BLE_DATA_LENGTH_EXTENSION,
+            .PrWriteListSize = CFG_BLE_PREPARE_WRITE_LIST_SIZE,
+            .MblockCount = CFG_BLE_MBLOCK_COUNT,
+            .AttMtu = CFG_BLE_MAX_ATT_MTU,
+            .SlaveSca = CFG_BLE_SLAVE_SCA,
+            .MasterSca = CFG_BLE_MASTER_SCA,
+            .LsSource = CFG_BLE_LSE_SOURCE,
+            .MaxConnEventLength = CFG_BLE_MAX_CONN_EVENT_LENGTH,
+            .HsStartupTime = CFG_BLE_HSE_STARTUP_TIME,
+            .ViterbiEnable = CFG_BLE_VITERBI_MODE,
+            .Options = CFG_BLE_OPTIONS,
+            .HwVersion = 0,
+            .max_coc_initiator_nbr = 32,
+            .min_tx_power = 0,
+            .max_tx_power = 0,
+            .rx_model_config = 1,
         }
     };
     status = SHCI_C2_BLE_Init(&ble_init_cmd_packet);

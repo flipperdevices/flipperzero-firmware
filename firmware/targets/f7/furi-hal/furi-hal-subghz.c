@@ -285,7 +285,7 @@ static const uint8_t furi_hal_subghz_preset_ook_async_patable[8] = {
     0x00};
 static const uint8_t furi_hal_subghz_preset_ook_async_patable_au[8] = {
     0x00,
-    0x86, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
+    0x37, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
     0x00,
     0x00,
     0x00,
@@ -580,13 +580,13 @@ bool furi_hal_subghz_is_tx_allowed(uint32_t value) {
         }
         break;
     case FuriHalVersionRegionUsCaAu:
-        //304,10..315,25; 433,05..434,79; 915,00..928,00
-        if(!(value >= 304100000 && value <= 315250000) &&
+        //304,10..321,95; 433,05..434,79; 915,00..928,00
+        if(!(value >= 304100000 && value <= 321950000) &&
            !(value >= 433050000 && value <= 434790000) &&
            !(value >= 915000000 && value <= 928000000)) {
         } else {
             if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-                if((value >= 304100000 && value <= 315250000) &&
+                if((value >= 304100000 && value <= 321950000) &&
                    ((furi_hal_subghz_preset == FuriHalSubGhzPresetOok270Async) ||
                     (furi_hal_subghz_preset == FuriHalSubGhzPresetOok650Async))) {
                     furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable_au);
