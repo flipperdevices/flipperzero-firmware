@@ -4,7 +4,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/empty_screen.h>
 #include <m-string.h>
-#include <furi-hal-version.h>
+#include <furi_hal_version.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
