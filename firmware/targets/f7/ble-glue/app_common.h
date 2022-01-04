@@ -36,8 +36,4 @@ extern "C"{
 
 #include "app_conf.h"
 
-#define DIVC( x, y )         (((x)+(y)-1)/(y))
-
-#define DIVR( x, y )         (((x)+((y)/2))/(y))
-
 #endif
