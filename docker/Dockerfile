@@ -33,8 +33,6 @@ RUN wget --progress=dot:giga "https://developer.arm.com/-/media/Files/downloads/
 RUN git clone --depth 1 --branch v0.4.1 https://github.com/atomicobject/heatshrink.git && \
     cd heatshrink && make && mv ./heatshrink /usr/local/bin/heatshrink
 
-COPY entrypoint.sh syntax_check.sh /
-
-RUN chmod +x /syntax_check.sh
+COPY entrypoint.sh /
 
 ENTRYPOINT ["/entrypoint.sh"]

@@ -7,8 +7,10 @@ import subprocess
 
 from flipper.app import App
 
+
 SOURCE_CODE_FILE_EXTENSIONS = [".h", ".c", ".cpp", ".cxx", ".hpp"]
 SOURCE_CODE_FILE_PATTERN = r"^[0-9A-Za-z_]+\.[a-z]+$"
+SOURCE_CODE_DIR_PATTERN = r"^[0-9A-Za-z_]+$"
 
 
 class Main(App):
@@ -31,6 +33,21 @@ class Main(App):
             nargs="+",
         )
         self.parser_format.set_defaults(func=self.format)
+
+    def _check_folders(self, folders: list):
+        show_message = False
+        pattern = re.compile(SOURCE_CODE_DIR_PATTERN)
+        for folder in folders:
+            for dirpath, dirnames, filenames in os.walk(folder):
+                for dirname in dirnames:
+                    if not pattern.match(dirname):
+                        to_fix = os.path.join(dirpath, dirname)
+                        self.logger.warning(f"Found incorrectly named folder {to_fix}")
+                        show_message = True
+        if show_message:
+            self.logger.warning(
+                f"Folders are not renamed automatically, please fix it by yourself"
+            )
 
     def _find_sources(self, folders: list):
         output = []
@@ -97,20 +114,24 @@ class Main(App):
         return True
 
     def check(self):
+        result = 0
         sources = self._find_sources(self.args.input)
         if not self._format_sources(sources, dry_run=True):
-            return 1
+            result |= 0b01
         if not self._apply_file_naming_convention(sources, dry_run=True):
-            return 2
-        return 0
+            result |= 0b10
+        self._check_folders(self.args.input)
+        return result
 
     def format(self):
+        result = 0
         sources = self._find_sources(self.args.input)
         if not self._format_sources(sources):
-            return 1
+            result |= 0b01
         if not self._apply_file_naming_convention(sources):
-            return 2
-        return 0
+            result |= 0b10
+        self._check_folders(self.args.input)
+        return result
 
 
 if __name__ == "__main__":

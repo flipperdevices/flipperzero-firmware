@@ -3,7 +3,8 @@ COPRO_DIR := $(PROJECT_ROOT)/lib/STM32CubeWB/Projects/STM32WB_Copro_Wireless_Bin
 
 PROJECT_SOURCE_DIRECTORIES := \
 	$(PROJECT_ROOT)/applications \
-	$(PROJECT_ROOT)/bootloader \
+	$(PROJECT_ROOT)/bootloader/src \
+	$(PROJECT_ROOT)/bootloader/targets \
 	$(PROJECT_ROOT)/core \
 	$(PROJECT_ROOT)/firmware/targets \
 	$(PROJECT_ROOT)/lib/app-template \
