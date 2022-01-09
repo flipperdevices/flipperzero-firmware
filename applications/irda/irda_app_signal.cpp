@@ -94,6 +94,8 @@ void IrdaAppSignal::set_raw_signal(uint32_t* timings, size_t timings_cnt, uint32
     raw_signal = true;
     payload.raw.timings = timings;
     payload.raw.timings_cnt = timings_cnt;
+    payload.raw.frequency = frequency;
+    payload.raw.duty_cycle = duty_cycle;
 }
 
 void IrdaAppSignal::transmit() const {
