@@ -1,4 +1,3 @@
-#include "sys/_stdint.h"
 #include <furi_hal_delay.h>
 #include <irda.h>
 #include <app_template.h>

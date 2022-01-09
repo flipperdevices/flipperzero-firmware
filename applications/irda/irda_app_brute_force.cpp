@@ -12,9 +12,6 @@ void IrdaAppBruteForce::add_record(int index, const char* name) {
     records[name].amount = 0;
 }
 
-//dbg_
-static volatile int i = 0;
-
 bool IrdaAppBruteForce::calculate_messages() {
     bool result = false;
 
@@ -34,19 +31,6 @@ bool IrdaAppBruteForce::calculate_messages() {
             }
         }
         string_clear(signal_name);
-
-        // dbg_
-        for(const auto& a : records) {
-            printf("%s : %d : index %d\n", a.first.c_str(), a.second.amount, a.second.index);
-        }
-
-//        while(irda_parser_read_signal(ff, signal, signal_name)) {
-//            auto element = records.find(signal_name);
-//            if(element != records.cend()) {
-//                ++element->second.amount;
-//            }
-//            // TODO: check leaks
-//        }
     }
 
     flipper_file_close(ff);
@@ -79,12 +63,7 @@ bool IrdaAppBruteForce::send_next_bruteforce(void) {
     } while(result && current_record.compare(signal_name));
 
     if (result) {
-        ++i;
-        printf("transmit(%d): %s, raw: %d", i, signal_name.c_str(), signal.is_raw());
         signal.transmit();
-    } else {
-        printf("result false, i: %d", i);
-        furi_assert(i == records[current_record].amount);
     }
     return result;
 }
@@ -92,7 +71,6 @@ bool IrdaAppBruteForce::send_next_bruteforce(void) {
 bool IrdaAppBruteForce::start_bruteforce(int index, int& record_amount) {
     bool result = false;
     record_amount = 0;
-    i = 0;
 
     for(const auto& it : records) {
         if(it.second.index == index) {

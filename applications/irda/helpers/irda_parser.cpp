@@ -4,7 +4,6 @@
 #include "irda/helpers/irda_parser.h"
 #include "irda_worker.h"
 #include "m-string.h"
-#include "sys/_stdint.h"
 #include <flipper_file.h>
 #include <memory>
 #include <string>
@@ -64,14 +63,11 @@ bool irda_parser_read_signal(FlipperFile* ff, IrdaAppSignal& signal, std::string
             if (!flipper_file_get_value_count(ff, "data", &timings_cnt)) break;
             if (timings_cnt > MAX_TIMINGS_AMOUNT) break;
             timings = (uint32_t*) furi_alloc(sizeof(uint32_t) * timings_cnt);
-            if (!flipper_file_read_uint32(ff, "data", timings, timings_cnt)) {
-                free(timings);
-                break;
+            if (flipper_file_read_uint32(ff, "data", timings, timings_cnt)) {
+                signal.set_raw_signal(timings, timings_cnt, frequency, duty_cycle);
+                result = true;
             }
-            /* Move 'timings' to signal object, it is responsible
-             * for deallocation now */
-            signal.set_raw_signal(timings, timings_cnt, frequency, duty_cycle);
-            result = true;
+            free(timings);
         } else if (!string_cmp_str(read_string, "parsed")) {
             IrdaMessage parsed_signal;
             if (!flipper_file_read_string(ff, "protocol", read_string)) break;

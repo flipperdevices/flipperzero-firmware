@@ -25,7 +25,6 @@ void IrdaAppSignal::clear_timings() {
 IrdaAppSignal::IrdaAppSignal(const uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle) {
     raw_signal = true;
     copy_raw_signal(timings, timings_cnt, frequency, duty_cycle);
-    FURI_LOG_E("IrdaAppSignal", "constructor %s", __func__);
 }
 
 IrdaAppSignal::IrdaAppSignal(const IrdaMessage* irda_message) {
@@ -45,7 +44,6 @@ IrdaAppSignal& IrdaAppSignal::operator=(const IrdaAppSignal& other) {
                 other.payload.raw.duty_cycle);
     }
 
-    FURI_LOG_E("IrdaAppSignal", "op= %s", __func__);
     return *this;
 }
 
@@ -59,13 +57,10 @@ IrdaAppSignal::IrdaAppSignal(const IrdaAppSignal& other) {
                 other.payload.raw.frequency,
                 other.payload.raw.duty_cycle);
     }
-    FURI_LOG_E("IrdaAppSignal", "constructor copy %s", __func__);
 }
 
 IrdaAppSignal::IrdaAppSignal(IrdaAppSignal&& other) {
     clear_timings();
-
-    FURI_LOG_E("IrdaAppSignal", "move constructor %s", __func__);
 
     raw_signal = other.raw_signal;
     if(!raw_signal) {
@@ -92,10 +87,7 @@ void IrdaAppSignal::set_message(const IrdaMessage* irda_message) {
 void IrdaAppSignal::set_raw_signal(uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle) {
     clear_timings();
     raw_signal = true;
-    payload.raw.timings = timings;
-    payload.raw.timings_cnt = timings_cnt;
-    payload.raw.frequency = frequency;
-    payload.raw.duty_cycle = duty_cycle;
+    copy_raw_signal(timings, timings_cnt, frequency, duty_cycle);
 }
 
 void IrdaAppSignal::transmit() const {

@@ -1,7 +1,6 @@
+#include <file_worker_cpp.h>
+#include <flipper_file.h>
 #include "irda_app_remote_manager.h"
-#include "file_worker_cpp.h"
-#include "flipper_file.h"
-#include "furi/record.h"
 #include "irda/helpers/irda_parser.h"
 #include "irda/irda_app_signal.h"
 
@@ -201,11 +200,13 @@ bool IrdaAppRemoteManager::load(const std::string& remote_name) {
     result = flipper_file_open_existing(ff, make_full_name(remote_name).c_str());
     if(result) {
         string_t header;
+        string_init(header);
         uint32_t version;
         result = flipper_file_read_header(ff, header, &version);
         if (result) {
             result = !string_cmp_str(header, "IR signals file") && (version == 1);
         }
+        string_clear(header);
     }
     if(result) {
         remote = std::make_unique<IrdaAppRemote>(remote_name);
