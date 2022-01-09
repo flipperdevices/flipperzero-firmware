@@ -19,6 +19,13 @@ public:
     IrdaAppRemoteButton(const char* name, const IrdaAppSignal& signal)
         : name(name)
         , signal(signal) {
+            FURI_LOG_E("IrdaAppRemoteButton", "constructor const IrdaAppSignal&");
+    }
+
+    IrdaAppRemoteButton(const char* name, IrdaAppSignal&& signal)
+        : name(name)
+        , signal(std::move(signal)) {
+            FURI_LOG_E("IrdaAppRemoteButton", "constructor IrdaAppSignal&&");
     }
     ~IrdaAppRemoteButton() {
     }

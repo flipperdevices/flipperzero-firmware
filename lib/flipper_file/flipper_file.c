@@ -376,14 +376,17 @@ bool flipper_file_read_internal(
                 }
 
                 if(scan_values != 1) {
+                    furi_assert(0);
                     result = false;
                     break;
                 }
             } else {
+                furi_assert(0);
                 break;
             }
 
             if(last && ((i + 1) != data_size)) {
+                furi_assert(0);
                 result = false;
                 break;
             }

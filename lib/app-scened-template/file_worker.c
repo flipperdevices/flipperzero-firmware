@@ -435,5 +435,7 @@ bool file_worker_is_file_exist(FileWorker* file_worker, const char* filename, bo
     storage_file_close(file);
     storage_file_free(file);
 
-    return file_worker_check_common_errors(file_worker);
+    bool result = file_worker_check_common_errors(file_worker);
+    FURI_LOG_E("FindVacantRemoteName", "filename: \'%s\', %s %s", filename, exist ? "exists" : "NO file", result ? "OK" : "FAILED");
+    return result;
 }
