@@ -1,7 +1,11 @@
 #include "irda_app_signal.h"
 #include <irda_transmit.h>
 
-void IrdaAppSignal::copy_raw_signal(const uint32_t* timings, size_t size, uint32_t frequency, float duty_cycle) {
+void IrdaAppSignal::copy_raw_signal(
+    const uint32_t* timings,
+    size_t size,
+    uint32_t frequency,
+    float duty_cycle) {
     furi_assert(size);
     furi_assert(timings);
 
@@ -22,7 +26,11 @@ void IrdaAppSignal::clear_timings() {
     }
 }
 
-IrdaAppSignal::IrdaAppSignal(const uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle) {
+IrdaAppSignal::IrdaAppSignal(
+    const uint32_t* timings,
+    size_t timings_cnt,
+    uint32_t frequency,
+    float duty_cycle) {
     raw_signal = true;
     copy_raw_signal(timings, timings_cnt, frequency, duty_cycle);
 }
@@ -38,10 +46,11 @@ IrdaAppSignal& IrdaAppSignal::operator=(const IrdaAppSignal& other) {
     if(!raw_signal) {
         payload.message = other.payload.message;
     } else {
-        copy_raw_signal(other.payload.raw.timings,
-                other.payload.raw.timings_cnt,
-                other.payload.raw.frequency,
-                other.payload.raw.duty_cycle);
+        copy_raw_signal(
+            other.payload.raw.timings,
+            other.payload.raw.timings_cnt,
+            other.payload.raw.frequency,
+            other.payload.raw.duty_cycle);
     }
 
     return *this;
@@ -52,10 +61,11 @@ IrdaAppSignal::IrdaAppSignal(const IrdaAppSignal& other) {
     if(!raw_signal) {
         payload.message = other.payload.message;
     } else {
-        copy_raw_signal(other.payload.raw.timings,
-                other.payload.raw.timings_cnt,
-                other.payload.raw.frequency,
-                other.payload.raw.duty_cycle);
+        copy_raw_signal(
+            other.payload.raw.timings,
+            other.payload.raw.timings_cnt,
+            other.payload.raw.frequency,
+            other.payload.raw.duty_cycle);
     }
 }
 
@@ -84,7 +94,11 @@ void IrdaAppSignal::set_message(const IrdaMessage* irda_message) {
     payload.message = *irda_message;
 }
 
-void IrdaAppSignal::set_raw_signal(uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle) {
+void IrdaAppSignal::set_raw_signal(
+    uint32_t* timings,
+    size_t timings_cnt,
+    uint32_t frequency,
+    float duty_cycle) {
     clear_timings();
     raw_signal = true;
     copy_raw_signal(timings, timings_cnt, frequency, duty_cycle);
@@ -94,6 +108,11 @@ void IrdaAppSignal::transmit() const {
     if(!raw_signal) {
         irda_send(&payload.message, 1);
     } else {
-        irda_send_raw_ext(payload.raw.timings, payload.raw.timings_cnt, true, payload.raw.frequency, payload.raw.duty_cycle);
+        irda_send_raw_ext(
+            payload.raw.timings,
+            payload.raw.timings_cnt,
+            true,
+            payload.raw.frequency,
+            payload.raw.duty_cycle);
     }
 }

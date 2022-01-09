@@ -95,6 +95,7 @@ public:
     static inline const uint32_t max_raw_timings_in_signal = 512;
     static inline const uint32_t max_line_length =
         (9 + 1) * IrdaApp::max_raw_timings_in_signal + 100;
+
 private:
     static inline const uint8_t text_store_size = 128;
     static inline const uint8_t text_store_max = 2;

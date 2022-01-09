@@ -3,7 +3,6 @@
 #include <text_store.h>
 #include <file_worker_cpp.h>
 
-
 void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     furi_assert(app);
 
@@ -12,7 +11,8 @@ void IrdaAppSceneRemoteList::on_enter(IrdaApp* app) {
     bool file_select_result;
     auto remote_manager = app->get_remote_manager();
     auto last_selected_remote = remote_manager->get_remote_name();
-    const char* last_selected_remote_name = last_selected_remote.size() ? last_selected_remote.c_str() : nullptr;
+    const char* last_selected_remote_name =
+        last_selected_remote.size() ? last_selected_remote.c_str() : nullptr;
     auto filename_ts = std::make_unique<TextStore>(IrdaAppRemoteManager::max_remote_name_length);
 
     file_select_result = file_worker.file_select(

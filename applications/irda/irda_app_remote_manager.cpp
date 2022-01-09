@@ -15,7 +15,6 @@
 
 static const std::string default_remote_name = "remote";
 
-
 std::string IrdaAppRemoteManager::make_full_name(const std::string& remote_name) const {
     return std::string("") + IrdaApp::irda_directory + "/" + remote_name + IrdaApp::irda_extension;
 }
@@ -176,7 +175,7 @@ bool IrdaAppRemoteManager::store(void) {
     if(result) {
         result = flipper_file_write_header_cstr(ff, "IR signals file", 1);
     }
-    if (result) {
+    if(result) {
         for(const auto& button : remote->buttons) {
             result = irda_parser_save_signal(ff, button.signal, button.name.c_str());
             if(!result) {
@@ -203,7 +202,7 @@ bool IrdaAppRemoteManager::load(const std::string& remote_name) {
         string_init(header);
         uint32_t version;
         result = flipper_file_read_header(ff, header, &version);
-        if (result) {
+        if(result) {
             result = !string_cmp_str(header, "IR signals file") && (version == 1);
         }
         string_clear(header);

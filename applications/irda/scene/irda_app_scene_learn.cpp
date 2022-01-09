@@ -16,7 +16,8 @@ static void signal_received_callback(void* context, IrdaWorkerSignal* received_s
         const uint32_t* timings;
         size_t timings_cnt;
         irda_worker_get_raw_signal(received_signal, &timings, &timings_cnt);
-        IrdaAppSignal signal(timings, timings_cnt, IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE);
+        IrdaAppSignal signal(
+            timings, timings_cnt, IRDA_COMMON_CARRIER_FREQUENCY, IRDA_COMMON_DUTY_CYCLE);
         app->set_received_signal(signal);
     }
 

@@ -62,7 +62,7 @@ bool IrdaAppBruteForce::send_next_bruteforce(void) {
         result = irda_parser_read_signal(ff, signal, signal_name);
     } while(result && current_record.compare(signal_name));
 
-    if (result) {
+    if(result) {
         signal.transmit();
     }
     return result;

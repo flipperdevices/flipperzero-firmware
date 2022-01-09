@@ -20,7 +20,8 @@ private:
         RawSignal raw;
     } payload;
 
-    void copy_raw_signal(const uint32_t* timings, size_t size, uint32_t frequency, float duty_cycle);
+    void
+        copy_raw_signal(const uint32_t* timings, size_t size, uint32_t frequency, float duty_cycle);
     void clear_timings();
 
 public:
@@ -33,7 +34,11 @@ public:
         clear_timings();
     }
 
-    IrdaAppSignal(const uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle);
+    IrdaAppSignal(
+        const uint32_t* timings,
+        size_t timings_cnt,
+        uint32_t frequency,
+        float duty_cycle);
     IrdaAppSignal(const IrdaMessage* irda_message);
 
     IrdaAppSignal(const IrdaAppSignal& other);
@@ -42,7 +47,8 @@ public:
     IrdaAppSignal& operator=(const IrdaAppSignal& signal);
 
     void set_message(const IrdaMessage* irda_message);
-    void set_raw_signal(uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle);
+    void
+        set_raw_signal(uint32_t* timings, size_t timings_cnt, uint32_t frequency, float duty_cycle);
 
     void transmit() const;
 
