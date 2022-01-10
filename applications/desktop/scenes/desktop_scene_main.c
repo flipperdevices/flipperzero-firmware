@@ -81,8 +81,10 @@ void desktop_scene_main_on_enter(void* context) {
         desktop->animation_manager, desktop_scene_main_interact_animation_callback);
 
     furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
+    Loader* loader = furi_record_open("loader");
     desktop->app_start_stop_subscription = furi_pubsub_subscribe(
-        loader_get_pubsub(), desktop_scene_main_app_started_callback, desktop);
+        loader_get_pubsub(loader), desktop_scene_main_app_started_callback, desktop);
+    furi_record_close("loader");
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
     view_port_enabled_set(desktop->lock_viewport, false);
@@ -175,7 +177,9 @@ void desktop_scene_main_on_exit(void* context) {
      * is finished, that's why we can be sure there is no task waiting
      * for start/stop semaphore
      */
-    furi_pubsub_unsubscribe(loader_get_pubsub(), desktop->app_start_stop_subscription);
+    Loader* loader = furi_record_open("loader");
+    furi_pubsub_unsubscribe(loader_get_pubsub(loader), desktop->app_start_stop_subscription);
+    furi_record_close("loader");
     furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
 
     animation_manager_set_new_idle_callback(desktop->animation_manager, NULL);
