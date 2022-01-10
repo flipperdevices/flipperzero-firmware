@@ -157,3 +157,162 @@ bool furi_hal_i2c_trx(
         return false;
     }
 }
+
+bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr, uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    uint8_t unused = 0;
+    bool ret = furi_hal_i2c_rx(handle, i2c_addr, &unused, 1, timeout);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_read_reg_8(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t reg_addr,
+    uint8_t* data,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    bool ret = furi_hal_i2c_trx(handle, i2c_addr, &reg_addr, 1, data, 1, timeout);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_read_reg_16(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t reg_addr,
+    uint16_t* data,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    uint8_t reg_data[2];
+    bool ret = furi_hal_i2c_trx(handle, i2c_addr, &reg_addr, 1, reg_data, 2, timeout);
+    *data = (reg_data[0] << 8) | (reg_data[1]);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_read_mem(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t mem_addr,
+    uint8_t* data,
+    uint8_t len,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    bool ret = furi_hal_i2c_trx(handle, i2c_addr, &mem_addr, 1, data, len, timeout);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_write_reg_8(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t reg_addr,
+    uint8_t data,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    uint8_t tx_data[2];
+    tx_data[0] = reg_addr;
+    tx_data[1] = data;
+
+    bool ret = furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 2, timeout);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_write_reg_16(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t reg_addr,
+    uint16_t data,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    uint8_t tx_data[3];
+    tx_data[0] = reg_addr;
+    tx_data[1] = (data >> 8) & 0xFF;
+    tx_data[2] = data & 0xFF;
+
+    bool ret = furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 3, timeout);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
+
+bool furi_hal_i2c_write_mem(
+    FuriHalI2cBusHandle* handle,
+    uint8_t i2c_addr,
+    uint8_t mem_addr,
+    uint8_t* data,
+    uint8_t len,
+    uint32_t timeout) {
+    furi_check(handle);
+    furi_hal_i2c_acquire(handle);
+
+    furi_check(handle->bus->current_handle == handle);
+    furi_assert(timeout > 0);
+
+    bool ret = true;
+    uint8_t size = len + 1;
+    uint32_t timeout_tick = HAL_GetTick() + timeout;
+
+    do {
+        while(LL_I2C_IsActiveFlag_BUSY(handle->bus->i2c)) {
+            if(HAL_GetTick() >= timeout_tick) {
+                ret = false;
+                break;
+            }
+        }
+
+        if(!ret) {
+            break;
+        }
+
+        LL_I2C_HandleTransfer(
+            handle->bus->i2c,
+            i2c_addr,
+            LL_I2C_ADDRSLAVE_7BIT,
+            size,
+            LL_I2C_MODE_AUTOEND,
+            LL_I2C_GENERATE_START_WRITE);
+
+        while(!LL_I2C_IsActiveFlag_STOP(handle->bus->i2c) || size > 0) {
+            if(LL_I2C_IsActiveFlag_TXIS(handle->bus->i2c)) {
+                if(size == len + 1) {
+                    LL_I2C_TransmitData8(handle->bus->i2c, mem_addr);
+                } else {
+                    LL_I2C_TransmitData8(handle->bus->i2c, (*data));
+                    data++;
+                }
+                size--;
+            }
+
+            if(HAL_GetTick() >= timeout_tick) {
+                ret = false;
+                break;
+            }
+        }
+
+        LL_I2C_ClearFlag_STOP(handle->bus->i2c);
+    } while(0);
+
+    furi_hal_i2c_release(handle);
+    return ret;
+}
