@@ -1,10 +1,6 @@
 #pragma once
 
-#include <gui/gui_i.h>
 #include <gui/view.h>
-#include <gui/canvas.h>
-#include <gui/elements.h>
-#include <furi.h>
 #include "desktop_events.h"
 
 #define UNLOCK_RST_TIMEOUT 300

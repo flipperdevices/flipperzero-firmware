@@ -1,20 +1,15 @@
-#include "animation_manager.h"
-#include "furi_hal_delay.h"
-#include "portmacro.h"
-#include "views/bubble_animation_view.h"
-#include "animation_storage.h"
-
+#include <stdint.h>
+#include <furi.h>
+#include <m-string.h>
+#include <portmacro.h>
 #include <cmsis_os2.h>
 #include <dolphin/dolphin.h>
-#include <furi/check.h>
-#include <furi/pubsub.h>
-#include <furi/record.h>
-#include <m-string.h>
 #include <power/power_service/power.h>
-#include <stdint.h>
 #include <storage/storage.h>
-#include <dolphin/dolphin_i.h>
-#include <storage/filesystem_api_defines.h>
+
+#include "views/bubble_animation_view.h"
+#include "animation_storage.h"
+#include "animation_manager.h"
 
 #define TAG "AnimationManager"
 

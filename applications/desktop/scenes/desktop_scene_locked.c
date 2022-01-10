@@ -1,6 +1,9 @@
+#include <furi_hal.h>
+
 #include "../desktop_i.h"
 #include "../views/desktop_locked.h"
 #include "desktop/views/desktop_main.h"
+#include "desktop_scene.h"
 
 void desktop_scene_locked_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;

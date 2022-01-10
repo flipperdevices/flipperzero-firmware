@@ -1,7 +1,10 @@
-#include "../desktop_i.h"
-#include "../views/desktop_debug.h"
+
 #include <dolphin/dolphin.h>
 #include <dolphin/helpers/dolphin_deed.h>
+
+#include "../desktop_i.h"
+#include "../views/desktop_debug.h"
+#include "desktop_scene.h"
 
 void desktop_scene_debug_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;

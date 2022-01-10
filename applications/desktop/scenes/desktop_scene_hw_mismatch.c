@@ -1,5 +1,6 @@
-#include "../desktop_i.h"
 #include <furi_hal_version.h>
+
+#include "../desktop_i.h"
 
 #define HW_MISMATCH_BACK_EVENT (0UL)
 

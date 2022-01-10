@@ -1,8 +1,9 @@
 #pragma once
 
-#include "dolphin/dolphin.h"
 #include <gui/view.h>
 #include <stdint.h>
+
+#include "dolphin/dolphin.h"
 
 typedef struct AnimationManager AnimationManager;
 

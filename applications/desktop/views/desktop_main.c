@@ -1,13 +1,13 @@
-#include "dolphin/dolphin.h"
-#include "furi/record.h"
-#include "gui/canvas.h"
-#include "gui/view.h"
-#include "gui/view_composed.h"
-#include "input/input.h"
+#include <gui/gui_i.h>
+#include <gui/view.h>
+#include <gui/elements.h>
+#include <gui/canvas.h>
 #include <furi.h>
+#include <input/input.h>
+#include <dolphin/dolphin.h>
+
 #include "../desktop_i.h"
 #include "desktop_main.h"
-//#include "../animations/views/bubble_animation_view.h"
 
 void desktop_main_set_callback(
     DesktopMainView* main_view,

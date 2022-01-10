@@ -1,5 +1,5 @@
 
-#include "cmsis_os2.h"
+#include <cmsis_os2.h>
 #include "../animation_manager.h"
 #include "../animation_storage.h"
 #include "furi_hal_delay.h"

@@ -1,22 +1,15 @@
-#include "animation_manager.h"
-#include "file_worker.h"
-#include "flipper_file.h"
-#include "furi/common_defines.h"
-#include "furi/memmgr.h"
-#include "furi/record.h"
-#include "animation_storage.h"
-#include "gui/canvas.h"
-#include "m-string.h"
-#include "pb.h"
-#include "pb_decode.h"
-#include "storage/filesystem_api_defines.h"
-#include "storage/storage.h"
-#include "animation_storage_i.h"
-#include <stdint.h>
-#include <gui/icon_i.h>
 
-// Read documentation before using it
+#include <stdint.h>
+#include <flipper_file.h>
+#include <furi.h>
 #include <furi/dangerous_defines.h>
+#include <storage/storage.h>
+#include <gui/icon_i.h>
+#include <m-string.h>
+
+#include "animation_manager.h"
+#include "animation_storage.h"
+#include "animation_storage_i.h"
 
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR "/ext/dolphin/animations"

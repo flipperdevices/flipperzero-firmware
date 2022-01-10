@@ -1,17 +1,15 @@
-#include "../desktop_i.h"
-#include "../views/desktop_main.h"
-#include "applications.h"
-#include "assets_icons.h"
-#include "cmsis_os2.h"
+#include <furi.h>
+#include <applications.h>
+#include <assets_icons.h>
+#include <loader/loader.h>
+#include <cmsis_os2.h>
+
+#include "desktop/desktop_i.h"
+#include "desktop/views/desktop_main.h"
 #include "desktop/desktop.h"
 #include "desktop/views/desktop_events.h"
-#include "dolphin/dolphin.h"
-#include "furi/pubsub.h"
-#include "furi/record.h"
-#include "furi/thread.h"
-#include "storage/storage_glue.h"
-#include <loader/loader.h>
-#include <m-list.h>
+#include "desktop_scene.h"
+
 #define MAIN_VIEW_DEFAULT (0UL)
 
 static void desktop_scene_main_app_started_callback(const void* message, void* context) {

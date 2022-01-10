@@ -1,17 +1,15 @@
-#include "assets_icons.h"
-#include "cmsis_os2.h"
-#include "desktop/desktop.h"
-#include "desktop_i.h"
-#include "gui/view_composed.h"
-#include <dolphin/dolphin.h>
-#include <furi/pubsub.h>
-#include <furi/record.h>
-#include "portmacro.h"
-#include "storage/filesystem_api_defines.h"
-#include "storage/storage.h"
-#include <stdint.h>
-#include <power/power_service/power.h>
 #include "animations/animation_manager.h"
+#include "desktop/scenes/desktop_scene.h"
+#include "desktop_i.h"
+
+#include <cmsis_os2.h>
+#include <storage/storage.h>
+#include <assets_icons.h>
+#include <gui/view_composed.h>
+#include <furi.h>
+#include <furi_hal.h>
+#include <portmacro.h>
+#include <stdint.h>
 
 static void desktop_lock_icon_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
