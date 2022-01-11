@@ -160,12 +160,10 @@ bool furi_hal_i2c_trx(
 
 bool furi_hal_i2c_is_device_ready(FuriHalI2cBusHandle* handle, uint8_t i2c_addr, uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     uint8_t unused = 0;
     bool ret = furi_hal_i2c_rx(handle, i2c_addr, &unused, 1, timeout);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -176,11 +174,9 @@ bool furi_hal_i2c_read_reg_8(
     uint8_t* data,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     bool ret = furi_hal_i2c_trx(handle, i2c_addr, &reg_addr, 1, data, 1, timeout);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -191,13 +187,11 @@ bool furi_hal_i2c_read_reg_16(
     uint16_t* data,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     uint8_t reg_data[2];
     bool ret = furi_hal_i2c_trx(handle, i2c_addr, &reg_addr, 1, reg_data, 2, timeout);
     *data = (reg_data[0] << 8) | (reg_data[1]);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -209,11 +203,9 @@ bool furi_hal_i2c_read_mem(
     uint8_t len,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     bool ret = furi_hal_i2c_trx(handle, i2c_addr, &mem_addr, 1, data, len, timeout);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -224,7 +216,6 @@ bool furi_hal_i2c_write_reg_8(
     uint8_t data,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     uint8_t tx_data[2];
     tx_data[0] = reg_addr;
@@ -232,7 +223,6 @@ bool furi_hal_i2c_write_reg_8(
 
     bool ret = furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 2, timeout);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -243,7 +233,6 @@ bool furi_hal_i2c_write_reg_16(
     uint16_t data,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     uint8_t tx_data[3];
     tx_data[0] = reg_addr;
@@ -252,7 +241,6 @@ bool furi_hal_i2c_write_reg_16(
 
     bool ret = furi_hal_i2c_tx(handle, i2c_addr, (const uint8_t*)&tx_data, 3, timeout);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
 
@@ -264,7 +252,6 @@ bool furi_hal_i2c_write_mem(
     uint8_t len,
     uint32_t timeout) {
     furi_check(handle);
-    furi_hal_i2c_acquire(handle);
 
     furi_check(handle->bus->current_handle == handle);
     furi_assert(timeout > 0);
@@ -313,6 +300,5 @@ bool furi_hal_i2c_write_mem(
         LL_I2C_ClearFlag_STOP(handle->bus->i2c);
     } while(0);
 
-    furi_hal_i2c_release(handle);
     return ret;
 }
