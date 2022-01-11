@@ -15,7 +15,12 @@ PROTOBUF_COMPILED_DIR	:= $(ASSETS_COMPILED_DIR)
 PROTOBUF_SOURCES		:= $(shell find $(PROTOBUF_SOURCE_DIR) -type f -iname '*.proto')
 PROTOBUF_FILENAMES		:= $(notdir $(addsuffix .pb.c,$(basename $(PROTOBUF_SOURCES))))
 PROTOBUF				:= $(addprefix $(PROTOBUF_COMPILED_DIR)/,$(PROTOBUF_FILENAMES))
-PROTOBUF_CFLAGS			+= -DPB_ENABLE_MALLOC
+PROTOBUF_VERSION		:= $(shell git -C $(PROTOBUF_SOURCE_DIR) describe --tags --abbrev=0 2>/dev/null || echo 'unknown')
+PROTOBUF_MAJOR_VERSION	:= $(word 1,$(subst ., ,$(call PROTOBUF_VERSION)))
+PROTOBUF_MINOR_VERSION	:= $(word 2,$(subst ., ,$(call PROTOBUF_VERSION)))
+$(if $(PROTOBUF_MAJOR_VERSION),,$(error "Protobuf major version is not specified, $$PROTOBUF_VERSION=$(PROTOBUF_VERSION), please perform git fetch in assets/protobuf directory"))
+$(if $(PROTOBUF_MINOR_VERSION),,$(error "Protobuf minor version is not specified, $$PROTOBUF_VERSION=$(PROTOBUF_VERSION), please perform git fetch in assets/protobuf directory"))
+PROTOBUF_CFLAGS			+= -DPB_ENABLE_MALLOC -DPROTOBUF_MAJOR_VERSION=$(PROTOBUF_MAJOR_VERSION) -DPROTOBUF_MINOR_VERSION=$(PROTOBUF_MINOR_VERSION)
 
 CFLAGS				+= -I$(ASSETS_COMPILED_DIR) $(PROTOBUF_CFLAGS)
 C_SOURCES			+= $(wildcard $(ASSETS_COMPILED_DIR)/*.c)

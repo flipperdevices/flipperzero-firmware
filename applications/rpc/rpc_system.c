@@ -5,7 +5,7 @@
 #include <power/power_service/power.h>
 #include <notification/notification_messages.h>
 
-void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
+static void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
     furi_assert(msg_request);
     furi_assert(msg_request->which_content == PB_Main_system_ping_request_tag);
     furi_assert(context);
@@ -34,7 +34,7 @@ void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
     rpc_send_and_release(rpc, &msg_response);
 }
 
-void rpc_system_system_reboot_process(const PB_Main* request, void* context) {
+static void rpc_system_system_reboot_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_reboot_request_tag);
     furi_assert(context);
@@ -57,7 +57,7 @@ typedef struct {
     PB_Main* response;
 } RpcSystemSystemDeviceInfoContext;
 
-void rpc_system_system_device_info_callback(
+static void rpc_system_system_device_info_callback(
     const char* key,
     const char* value,
     bool last,
@@ -77,7 +77,7 @@ void rpc_system_system_device_info_callback(
     rpc_send_and_release(ctx->rpc, ctx->response);
 }
 
-void rpc_system_system_device_info_process(const PB_Main* request, void* context) {
+static void rpc_system_system_device_info_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_device_info_request_tag);
     furi_assert(context);
@@ -98,7 +98,7 @@ void rpc_system_system_device_info_process(const PB_Main* request, void* context
     free(response);
 }
 
-void rpc_system_system_get_datetime_process(const PB_Main* request, void* context) {
+static void rpc_system_system_get_datetime_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_get_datetime_request_tag);
     furi_assert(context);
@@ -121,9 +121,10 @@ void rpc_system_system_get_datetime_process(const PB_Main* request, void* contex
     response->content.system_get_datetime_response.datetime.weekday = datetime.weekday;
 
     rpc_send_and_release(rpc, response);
+    free(response);
 }
 
-void rpc_system_system_set_datetime_process(const PB_Main* request, void* context) {
+static void rpc_system_system_set_datetime_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_set_datetime_request_tag);
     furi_assert(context);
@@ -148,7 +149,7 @@ void rpc_system_system_set_datetime_process(const PB_Main* request, void* contex
     rpc_send_and_release_empty(rpc, request->command_id, PB_CommandStatus_OK);
 }
 
-void rpc_system_system_factory_reset_process(const PB_Main* request, void* context) {
+static void rpc_system_system_factory_reset_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_factory_reset_request_tag);
     furi_assert(context);
@@ -157,7 +158,7 @@ void rpc_system_system_factory_reset_process(const PB_Main* request, void* conte
     power_reboot(PowerBootModeNormal);
 }
 
-void rpc_system_system_play_audiovisual_alert_process(const PB_Main* request, void* context) {
+static void rpc_system_system_play_audiovisual_alert_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_play_audiovisual_alert_request_tag);
     furi_assert(context);
@@ -168,6 +169,27 @@ void rpc_system_system_play_audiovisual_alert_process(const PB_Main* request, vo
     furi_record_close("notification");
 
     rpc_send_and_release_empty(rpc, request->command_id, PB_CommandStatus_OK);
+}
+
+static void rpc_system_system_protobuf_version_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(request->which_content == PB_Main_system_protobuf_version_request_tag);
+    furi_assert(context);
+
+    Rpc* rpc = context;
+
+    PB_Main* response = furi_alloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+    response->has_next = false;
+    response->command_status = PB_CommandStatus_OK;
+    response->which_content = PB_Main_system_protobuf_version_response_tag;
+    /* crashing here means something wrong with tags in
+     * local repo https://github.com/flipperdevices/flipperzero-protobuf */
+    response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
+    response->content.system_protobuf_version_response.minor = PROTOBUF_MINOR_VERSION;
+
+    rpc_send_and_release(rpc, response);
+    free(response);
 }
 
 void* rpc_system_system_alloc(Rpc* rpc) {
@@ -197,6 +219,9 @@ void* rpc_system_system_alloc(Rpc* rpc) {
 
     rpc_handler.message_handler = rpc_system_system_play_audiovisual_alert_process;
     rpc_add_handler(rpc, PB_Main_system_play_audiovisual_alert_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_system_protobuf_version_process;
+    rpc_add_handler(rpc, PB_Main_system_protobuf_version_request_tag, &rpc_handler);
 
     return NULL;
 }
