@@ -87,37 +87,37 @@ command: 08 00 00 00
 # 
 name: POWER
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 0c 00 00 00 
 # 
 name: MUTE
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 0d 00 00 00 
 # 
 name: VOL+
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 14 00 00 00 
 # 
 name: VOL-
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 15 00 00 00 
 # 
 name: CH+
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 12 00 00 00 
 # 
 name: CH-
 type: parsed
-protocol: NEC
+protocol: Samsung32
 address: 0e 00 00 00 
 command: 13 00 00 00 
 # 
