@@ -30,26 +30,22 @@ void iButtonSceneInfo::on_enter(iButtonApp* app) {
             key_data[6],
             key_data[7]);
         widget_add_string_element(
-            widget, 64, 33, AlignCenter, AlignBottom, FontPrimary, app->get_text_store());
-        widget_add_string_element(
             widget, 64, 45, AlignCenter, AlignBottom, FontSecondary, "Dallas");
         break;
     case iButtonKeyType::KeyMetakom:
         app->set_text_store(
             "%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
         widget_add_string_element(
-            widget, 64, 33, AlignCenter, AlignBottom, FontPrimary, app->get_text_store());
-        widget_add_string_element(
             widget, 64, 45, AlignCenter, AlignBottom, FontSecondary, "Metakom");
         break;
     case iButtonKeyType::KeyCyfral:
         app->set_text_store("%02X %02X", key_data[0], key_data[1]);
         widget_add_string_element(
-            widget, 64, 33, AlignCenter, AlignBottom, FontPrimary, app->get_text_store());
-        widget_add_string_element(
             widget, 64, 45, AlignCenter, AlignBottom, FontSecondary, "Cyfral");
         break;
     }
+    widget_add_string_element(
+        widget, 64, 33, AlignCenter, AlignBottom, FontPrimary, app->get_text_store());
 
     view_manager->switch_to(iButtonAppViewManager::Type::iButtonAppViewWidget);
 }
