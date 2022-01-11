@@ -17,6 +17,7 @@
 #include <lib/toolbox/md5.h>
 #include <cli/cli.h>
 #include <loader/loader.h>
+#include <protobuf_version.h>
 
 LIST_DEF(MsgList, PB_Main, M_POD_OPLIST)
 #define M_OPL_MsgList_t() LIST_OPLIST(MsgList)

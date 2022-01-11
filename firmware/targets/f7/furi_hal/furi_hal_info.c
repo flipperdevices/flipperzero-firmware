@@ -1,6 +1,7 @@
 #include <furi_hal_info.h>
 #include <furi_hal.h>
 #include <shci.h>
+#include <protobuf_version.h>
 
 void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {
     string_t value;

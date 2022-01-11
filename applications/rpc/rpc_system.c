@@ -1,9 +1,10 @@
-#include "flipper.pb.h"
-#include "rpc_i.h"
-
+#include <flipper.pb.h>
 #include <furi_hal.h>
 #include <power/power_service/power.h>
 #include <notification/notification_messages.h>
+#include <protobuf_version.h>
+
+#include "rpc_i.h"
 
 static void rpc_system_system_ping_process(const PB_Main* msg_request, void* context) {
     furi_assert(msg_request);
@@ -183,7 +184,7 @@ static void rpc_system_system_protobuf_version_process(const PB_Main* request, v
     response->has_next = false;
     response->command_status = PB_CommandStatus_OK;
     response->which_content = PB_Main_system_protobuf_version_response_tag;
-    /* crashing here means something wrong with tags in
+    /* build error here means something wrong with tags in
      * local repo https://github.com/flipperdevices/flipperzero-protobuf */
     response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
     response->content.system_protobuf_version_response.minor = PROTOBUF_MINOR_VERSION;
