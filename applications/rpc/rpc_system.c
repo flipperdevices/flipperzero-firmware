@@ -159,7 +159,8 @@ static void rpc_system_system_factory_reset_process(const PB_Main* request, void
     power_reboot(PowerBootModeNormal);
 }
 
-static void rpc_system_system_play_audiovisual_alert_process(const PB_Main* request, void* context) {
+static void
+    rpc_system_system_play_audiovisual_alert_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_system_play_audiovisual_alert_request_tag);
     furi_assert(context);

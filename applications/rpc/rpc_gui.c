@@ -13,7 +13,8 @@ typedef struct {
     bool virtual_display_not_empty;
 } RpcGuiSystem;
 
-static void rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, void* context) {
+static void
+    rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, void* context) {
     furi_assert(data);
     furi_assert(size == 1024);
     furi_assert(context);
@@ -56,7 +57,8 @@ static void rpc_system_gui_stop_screen_stream_process(const PB_Main* request, vo
     rpc_send_and_release_empty(rpc_gui->rpc, request->command_id, PB_CommandStatus_OK);
 }
 
-static void rpc_system_gui_send_input_event_request_process(const PB_Main* request, void* context) {
+static void
+    rpc_system_gui_send_input_event_request_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(request->which_content == PB_Main_gui_send_input_event_request_tag);
     furi_assert(context);
