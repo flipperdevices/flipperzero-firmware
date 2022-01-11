@@ -424,6 +424,15 @@ static void test_rpc_compare_messages(PB_Main* result, PB_Main* expected) {
         mu_check(!strcmp(result_md5sum, expected_md5sum));
         break;
     }
+    case PB_Main_system_protobuf_version_response_tag: {
+        uint32_t major_version_expected = expected->content.system_protobuf_version_response.major;
+        uint32_t minor_version_expected = expected->content.system_protobuf_version_response.minor;
+        uint32_t major_version_result = result->content.system_protobuf_version_response.major;
+        uint32_t minor_version_result = result->content.system_protobuf_version_response.minor;
+        mu_check(major_version_expected == major_version_result);
+        mu_check(minor_version_expected == minor_version_result);
+        break;
+    }
     default:
         furi_assert(0);
         break;
@@ -1286,6 +1295,32 @@ MU_TEST(test_ping) {
     test_rpc_free_msg_list(expected_msg_list);
 }
 
+MU_TEST(test_system_protobuf_version) {
+    MsgList_t expected_msg_list;
+    MsgList_init(expected_msg_list);
+
+    PB_Main request;
+    request.command_id = ++command_id;
+    request.command_status = PB_CommandStatus_OK;
+    request.cb_content.funcs.decode = NULL;
+    request.has_next = false;
+    request.which_content = PB_Main_system_protobuf_version_request_tag;
+
+    PB_Main* response = MsgList_push_new(expected_msg_list);
+    response->command_id = command_id;
+    response->command_status = PB_CommandStatus_OK;
+    response->cb_content.funcs.encode = NULL;
+    response->has_next = false;
+    response->which_content = PB_Main_system_protobuf_version_response_tag;
+    response->content.system_protobuf_version_response.major = PROTOBUF_MAJOR_VERSION;
+    response->content.system_protobuf_version_response.minor = PROTOBUF_MINOR_VERSION;
+
+    test_rpc_encode_and_feed_one(&request);
+    test_rpc_decode_and_compare(expected_msg_list);
+
+    test_rpc_free_msg_list(expected_msg_list);
+}
+
 // TODO: 1) test for rubbish data
 //       2) test for unexpected end of packet
 //       3) test for one push of several packets
@@ -1295,6 +1330,7 @@ MU_TEST_SUITE(test_rpc_system) {
     MU_SUITE_CONFIGURE(&test_rpc_setup, &test_rpc_teardown);
 
     MU_RUN_TEST(test_ping);
+    MU_RUN_TEST(test_system_protobuf_version);
 }
 
 MU_TEST_SUITE(test_rpc_storage) {
