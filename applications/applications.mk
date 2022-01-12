@@ -37,6 +37,7 @@ APP_PASSPORT = 1
 # Plugins
 APP_MUSIC_PLAYER = 1
 APP_SNAKE_GAME = 1
+APP_IMU_MOUSE = 1
 
 # Debug
 APP_ACCESSOR = 1
@@ -224,6 +225,11 @@ CFLAGS		+= -DAPP_IBUTTON
 SRV_GUI		= 1
 endif
 
+APP_IMU_MOUSE ?= 0
+ifeq ($(APP_IMU_MOUSE), 1)
+CFLAGS		+= -DAPP_IMU_MOUSE
+SRV_GUI		= 1
+endif
 
 # Services
 # that will start with OS

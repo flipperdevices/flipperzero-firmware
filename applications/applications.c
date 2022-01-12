@@ -47,6 +47,7 @@ extern int32_t battery_test_app(void* p);
 // Plugins
 extern int32_t music_player_app(void* p);
 extern int32_t snake_game_app(void* p);
+extern int32_t imu_mouse_app(void* p);
 
 // On system start hooks declaration
 extern void bt_on_system_start();
@@ -221,6 +222,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef APP_SNAKE_GAME
     {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
+#ifdef APP_IMU_MOUSE
+    {.app = imu_mouse_app, .name = "IMU Mouse", .stack_size = 2048, .icon = &A_Plugins_14},
 #endif
 };
 
