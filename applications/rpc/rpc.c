@@ -622,7 +622,7 @@ int32_t rpc_srv(void* p) {
 
             if(handler && handler->message_handler) {
                 handler->message_handler(rpc->decoded_message, handler->context);
-            } else if (rpc->decoded_message->which_content == 0) {
+            } else if(rpc->decoded_message->which_content == 0) {
                 /* Receiving zeroes means message is 0-length, which
                  * is valid for proto3: all fields are filled with default values.
                  * 0 - is default value for which_content field.
@@ -631,14 +631,17 @@ int32_t rpc_srv(void* p) {
                  */
                 message_decode_failed = true;
             } else if(!handler && !rpc->session.terminate) {
-                FURI_LOG_E(TAG, "Message(%d) decoded, but not implemented", rpc->decoded_message->which_content);
+                FURI_LOG_E(
+                    TAG,
+                    "Message(%d) decoded, but not implemented",
+                    rpc->decoded_message->which_content);
                 rpc_send_and_release_empty(rpc, 0, PB_CommandStatus_ERROR_NOT_IMPLEMENTED);
             }
         } else {
             message_decode_failed = true;
         }
 
-        if (message_decode_failed) {
+        if(message_decode_failed) {
             xStreamBufferReset(rpc->stream);
             if(!rpc->session.terminate) {
                 /* Protobuf can't determine start and end of message.

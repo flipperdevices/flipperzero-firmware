@@ -205,7 +205,8 @@ static PB_CommandStatus test_rpc_storage_get_file_error(File* file) {
 static void output_bytes_callback(void* ctx, uint8_t* got_bytes, size_t got_size) {
     RpcSessionCallbacksContext* callbacks_context = ctx;
 
-    size_t bytes_sent = xStreamBufferSend(callbacks_context->output_stream, got_bytes, got_size, osWaitForever);
+    size_t bytes_sent =
+        xStreamBufferSend(callbacks_context->output_stream, got_bytes, got_size, osWaitForever);
     (void)bytes_sent;
     furi_assert(bytes_sent == got_size);
 }
@@ -636,8 +637,7 @@ static void
     response->which_content = PB_Main_empty_tag;
 }
 
-static void
-    test_rpc_add_session_stopped_to_list(MsgList_t msg_list) {
+static void test_rpc_add_session_stopped_to_list(MsgList_t msg_list) {
     PB_Main* message = MsgList_push_new(msg_list);
     message->command_id = 0;
     message->command_status = 0;
@@ -1487,9 +1487,10 @@ MU_TEST_SUITE(test_rpc_app) {
     MU_RUN_TEST(test_app_start_and_lock_status);
 }
 
-static void test_send_rubbish(RpcSession* session, const char* pattern, size_t pattern_size, size_t size) {
+static void
+    test_send_rubbish(RpcSession* session, const char* pattern, size_t pattern_size, size_t size) {
     uint8_t* buf = furi_alloc(size);
-    for (int i = 0; i < size; ++i) {
+    for(int i = 0; i < size; ++i) {
         buf[i] = pattern[i % pattern_size];
     }
 
@@ -1498,7 +1499,12 @@ static void test_send_rubbish(RpcSession* session, const char* pattern, size_t p
     free(buf);
 }
 
-static void test_rpc_feed_rubbish(MsgList_t input, MsgList_t expected, const char* pattern, size_t pattern_size, size_t size) {
+static void test_rpc_feed_rubbish(
+    MsgList_t input,
+    MsgList_t expected,
+    const char* pattern,
+    size_t pattern_size,
+    size_t size) {
     test_rpc_setup();
 
     test_rpc_add_empty_to_list(expected, PB_CommandStatus_ERROR_DECODE, 0);
@@ -1509,7 +1515,7 @@ static void test_rpc_feed_rubbish(MsgList_t input, MsgList_t expected, const cha
     test_send_rubbish(session, pattern, pattern_size, size);
 
     test_rpc_decode_and_compare(expected);
-    if (!xSemaphoreTake(callbacks_context.close_session_semaphore, 500)) {
+    if(!xSemaphoreTake(callbacks_context.close_session_semaphore, 500)) {
         mu_assert(0, "session not closed");
         return;
     }
@@ -1588,7 +1594,7 @@ MU_TEST_SUITE(test_rpc_session) {
 
 int run_minunit_test_rpc() {
     volatile bool disable_some_tests = true;
-    if (!disable_some_tests) {
+    if(!disable_some_tests) {
         /* TODO: fix broken test */
         MU_RUN_SUITE(test_rpc_app);
     }
