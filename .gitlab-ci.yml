@@ -22,6 +22,10 @@ variables:
   tags:
     - build
     - internet
+  variables:
+    PEDANTIC_FLAGS: "-Werror -Werror=deprecated-declarations -Werror=unused-variable -Werror=unused-but-set-variable -Werror=unused-function"
+    EXTRA_CFLAGS: "${PEDANTIC_FLAGS}"
+    EXTRA_CXXFLAGS: "${PEDANTIC_FLAGS}"
   script:
     - cd $CI_PROJECT_DIR/examples/esp32_example
     - idf.py build -DMD5_ENABLED=1
