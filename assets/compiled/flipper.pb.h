@@ -50,10 +50,6 @@ typedef struct _PB_Empty {
     char dummy_field;
 } PB_Empty;
 
-typedef struct _PB_SessionStopped { 
-    char dummy_field;
-} PB_SessionStopped;
-
 typedef struct _PB_StopSession { 
     char dummy_field;
 } PB_StopSession;
@@ -102,7 +98,6 @@ typedef struct _PB_Main {
         PB_System_PlayAudiovisualAlertRequest system_play_audiovisual_alert_request;
         PB_System_ProtobufVersionRequest system_protobuf_version_request;
         PB_System_ProtobufVersionResponse system_protobuf_version_response;
-        PB_SessionStopped session_stopped;
     } content; 
 } PB_Main;
 
@@ -120,11 +115,9 @@ extern "C" {
 /* Initializer values for message structs */
 #define PB_Empty_init_default                    {0}
 #define PB_StopSession_init_default              {0}
-#define PB_SessionStopped_init_default           {0}
 #define PB_Main_init_default                     {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {PB_Empty_init_default}}
 #define PB_Empty_init_zero                       {0}
 #define PB_StopSession_init_zero                 {0}
-#define PB_SessionStopped_init_zero              {0}
 #define PB_Main_init_zero                        {0, _PB_CommandStatus_MIN, 0, {{NULL}, NULL}, 0, {PB_Empty_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -168,7 +161,6 @@ extern "C" {
 #define PB_Main_system_play_audiovisual_alert_request_tag 38
 #define PB_Main_system_protobuf_version_request_tag 39
 #define PB_Main_system_protobuf_version_response_tag 40
-#define PB_Main_session_stopped_tag              41
 
 /* Struct field encoding specification for nanopb */
 #define PB_Empty_FIELDLIST(X, a) \
@@ -180,11 +172,6 @@ extern "C" {
 
 #define PB_StopSession_CALLBACK NULL
 #define PB_StopSession_DEFAULT NULL
-
-#define PB_SessionStopped_FIELDLIST(X, a) \
-
-#define PB_SessionStopped_CALLBACK NULL
-#define PB_SessionStopped_DEFAULT NULL
 
 #define PB_Main_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UINT32,   command_id,        1) \
@@ -226,8 +213,7 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_get_datetime_response,content
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_set_datetime_request,content.system_set_datetime_request),  37) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_play_audiovisual_alert_request,content.system_play_audiovisual_alert_request),  38) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_protobuf_version_request,content.system_protobuf_version_request),  39) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_protobuf_version_response,content.system_protobuf_version_response),  40) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,session_stopped,content.session_stopped),  41)
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,system_protobuf_version_response,content.system_protobuf_version_response),  40)
 #define PB_Main_CALLBACK NULL
 #define PB_Main_DEFAULT NULL
 #define PB_Main_content_empty_MSGTYPE PB_Empty
@@ -267,22 +253,18 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,session_stopped,content.session_stop
 #define PB_Main_content_system_play_audiovisual_alert_request_MSGTYPE PB_System_PlayAudiovisualAlertRequest
 #define PB_Main_content_system_protobuf_version_request_MSGTYPE PB_System_ProtobufVersionRequest
 #define PB_Main_content_system_protobuf_version_response_MSGTYPE PB_System_ProtobufVersionResponse
-#define PB_Main_content_session_stopped_MSGTYPE PB_SessionStopped
 
 extern const pb_msgdesc_t PB_Empty_msg;
 extern const pb_msgdesc_t PB_StopSession_msg;
-extern const pb_msgdesc_t PB_SessionStopped_msg;
 extern const pb_msgdesc_t PB_Main_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define PB_Empty_fields &PB_Empty_msg
 #define PB_StopSession_fields &PB_StopSession_msg
-#define PB_SessionStopped_fields &PB_SessionStopped_msg
 #define PB_Main_fields &PB_Main_msg
 
 /* Maximum encoded size of messages (where known) */
 #define PB_Empty_size                            0
-#define PB_SessionStopped_size                   0
 #define PB_StopSession_size                      0
 #if defined(PB_System_PingRequest_size) && defined(PB_System_PingResponse_size) && defined(PB_Storage_ListRequest_size) && defined(PB_Storage_ListResponse_size) && defined(PB_Storage_ReadRequest_size) && defined(PB_Storage_ReadResponse_size) && defined(PB_Storage_WriteRequest_size) && defined(PB_Storage_DeleteRequest_size) && defined(PB_Storage_MkdirRequest_size) && defined(PB_Storage_Md5sumRequest_size) && defined(PB_App_StartRequest_size) && defined(PB_Gui_ScreenFrame_size) && defined(PB_Storage_StatRequest_size) && defined(PB_Storage_StatResponse_size) && defined(PB_Gui_StartVirtualDisplayRequest_size) && defined(PB_Storage_InfoRequest_size) && defined(PB_Storage_RenameRequest_size) && defined(PB_System_DeviceInfoResponse_size)
 #define PB_Main_size                             (10 + sizeof(union PB_Main_content_size_union))
