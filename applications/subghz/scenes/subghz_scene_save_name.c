@@ -55,7 +55,10 @@ void subghz_scene_save_name_on_enter(void* context) {
         dev_name_empty);
 
     text_input_set_validator_callback(
-        text_input, subghz_scene_save_name_validator_callback, subghz->file_name, "test");
+        text_input,
+        subghz_scene_save_name_validator_callback,
+        subghz->file_name,
+        "This name\nexists!\nChoose\nanother one.");
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
 }

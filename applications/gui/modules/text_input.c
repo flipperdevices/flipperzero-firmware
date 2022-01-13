@@ -4,6 +4,7 @@
 
 struct TextInput {
     View* view;
+    osTimerId_t timer;
 };
 
 typedef struct {
@@ -27,6 +28,7 @@ typedef struct {
     TextInputValidatorCallback validator_callback;
     string_t validator_text;
     char* filename;
+    bool valadator_blob;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -240,17 +242,17 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
         }
     }
-
-    // canvas_set_color(canvas, ColorWhite);
-    // canvas_draw_box(canvas, 10, 10, 100, 50);
-    // canvas_set_color(canvas, ColorBlack);
-    // canvas_draw_rframe(canvas, 10, 10, 100, 50, 3);
-    // canvas_draw_rframe(canvas, 11, 11, 98, 48, 3);
-    // canvas_draw_icon(canvas, 15, 7, &I_LockPopup_100x49);
-    // canvas_set_color(canvas, ColorWhite);
-    // canvas_draw_box(canvas, 65, 37, 46, 15);
-    // canvas_set_color(canvas, ColorBlack);
-    // elements_multiline_text(canvas, 70, 27, "Ai AI\n YAI");
+    if(model->valadator_blob) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, 8, 10, 110, 50);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_icon(canvas, 10, 14, &I_WarningDolphin_45x42);
+        canvas_draw_rframe(canvas, 8, 8, 112, 50, 3);
+        canvas_draw_rframe(canvas, 9, 9, 110, 48, 3);
+        elements_multiline_text(canvas, 62, 20, string_get_cstr(model->validator_text));
+        canvas_set_font(canvas, FontKeyboard);
+    }
 }
 
 static void text_input_handle_up(TextInput* text_input) {
@@ -310,11 +312,10 @@ static void text_input_handle_ok(TextInput* text_input) {
             uint8_t text_length = strlen(model->text_buffer);
 
             if(selected == ENTER_KEY) {
-                if(model->validator_callback &&
-                   (!model->validator_callback(model->filename))) {
-                    FURI_LOG_I("EEE", "NO SAVE");
+                if(model->validator_callback && (!model->validator_callback(model->filename))) {
+                    model->valadator_blob = true;
+                    osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
                 } else if(model->callback != 0 && text_length > 0) {
-                    FURI_LOG_I("EEE", "SAVE");
                     model->callback(model->callback_context);
                 }
             } else if(selected == BACKSPACE_KEY) {
@@ -340,6 +341,16 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
+        with_view_model(
+            text_input->view, (TextInputModel * model) {
+                if(model->valadator_blob) {
+                    if(event->key == InputKeyBack) {
+                        consumed = true;
+                    }
+                }
+                model->valadator_blob = false;
+                return false;
+            });
         switch(event->key) {
         case InputKeyUp:
             text_input_handle_up(text_input);
@@ -370,7 +381,11 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
        event->key == InputKeyBack) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
-                text_input_backspace_cb(model);
+                if(model->valadator_blob) {
+                    model->valadator_blob = false;
+                } else {
+                    text_input_backspace_cb(model);
+                }
                 return true;
             });
 
@@ -380,6 +395,17 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
+void text_input_timer_callback(void* context) {
+    furi_assert(context);
+    TextInput* text_input = context;
+
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            model->valadator_blob = false;
+            return true;
+        });
+}
+
 TextInput* text_input_alloc() {
     TextInput* text_input = furi_alloc(sizeof(TextInput));
     text_input->view = view_alloc();
@@ -387,6 +413,8 @@ TextInput* text_input_alloc() {
     view_allocate_model(text_input->view, ViewModelTypeLocking, sizeof(TextInputModel));
     view_set_draw_callback(text_input->view, text_input_view_draw_callback);
     view_set_input_callback(text_input->view, text_input_view_input_callback);
+
+    text_input->timer = osTimerNew(text_input_timer_callback, osTimerOnce, text_input, NULL);
 
     with_view_model(
         text_input->view, (TextInputModel * model) {
@@ -406,6 +434,8 @@ void text_input_free(TextInput* text_input) {
             string_clear(model->validator_text);
             return false;
         });
+    osTimerStop(text_input->timer);
+    osTimerDelete(text_input->timer);
     view_free(text_input->view);
     free(text_input);
 }
@@ -425,6 +455,7 @@ void text_input_clean(TextInput* text_input) {
             model->callback_context = NULL;
             model->validator_callback = NULL;
             string_reset(model->validator_text);
+            model->valadator_blob = false;
             return true;
         });
 }
