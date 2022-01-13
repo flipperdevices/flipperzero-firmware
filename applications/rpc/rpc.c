@@ -59,6 +59,7 @@ struct RpcSession {
     Rpc* rpc;
     bool terminate;
     void** system_contexts;
+    bool decode_error;
 };
 
 struct Rpc {
@@ -72,7 +73,6 @@ struct Rpc {
 };
 
 static bool content_callback(pb_istream_t* stream, const pb_field_t* field, void** arg);
-static void rpc_notify_session_should_be_stopped(Rpc* rpc);
 
 static void rpc_close_session_process(const PB_Main* msg_request, void* context) {
     furi_assert(msg_request);
@@ -81,7 +81,13 @@ static void rpc_close_session_process(const PB_Main* msg_request, void* context)
     Rpc* rpc = context;
 
     rpc_send_and_release_empty(rpc, msg_request->command_id, PB_CommandStatus_OK);
-    rpc_notify_session_should_be_stopped(rpc);
+    osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
+    if(rpc->session.closed_callback) {
+        rpc->session.closed_callback(rpc->session.context);
+    } else {
+        FURI_LOG_W(TAG, "Session stop doesn't processed by transport layer");
+    }
+    osMutexRelease(rpc->session.callbacks_mutex);
 }
 
 static size_t rpc_sprintf_msg_file(
@@ -342,24 +348,6 @@ void rpc_print_message(const PB_Main* message) {
     string_clear(str);
 }
 
-static void rpc_notify_session_should_be_stopped(Rpc* rpc) {
-    PB_Main message = {
-        .command_id = 0,
-        .command_status = PB_CommandStatus_OK,
-        .has_next = false,
-        .which_content = PB_Main_session_stopped_tag,
-    };
-    rpc_send_and_release(rpc, &message);
-
-    osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
-    if(rpc->session.closed_callback) {
-        rpc->session.closed_callback(rpc->session.context);
-    } else {
-        FURI_LOG_W(TAG, "Session stop doesn't processed by transport layer");
-    }
-    osMutexRelease(rpc->session.callbacks_mutex);
-}
-
 static Rpc* rpc_alloc(void) {
     Rpc* rpc = furi_alloc(sizeof(Rpc));
     rpc->busy_mutex = osMutexNew(NULL);
@@ -393,6 +381,7 @@ RpcSession* rpc_session_open(Rpc* rpc) {
         session->callbacks_mutex = osMutexNew(NULL);
         session->rpc = rpc;
         session->terminate = false;
+        session->decode_error = false;
         xStreamBufferReset(rpc->stream);
 
         session->system_contexts = furi_alloc(COUNT_OF(rpc_systems) * sizeof(void*));
@@ -522,6 +511,10 @@ bool rpc_pb_stream_read(pb_istream_t* istream, pb_byte_t* buf, size_t count) {
                 rpc->session.buffer_is_empty_callback(rpc->session.context);
             }
         }
+        if(rpc->session.decode_error) {
+            /* never go out till RPC_EVENT_DISCONNECT come */
+            bytes_received = 0;
+        }
         if(count == bytes_received) {
             break;
         } else {
@@ -635,7 +628,8 @@ int32_t rpc_srv(void* p) {
                     TAG,
                     "Message(%d) decoded, but not implemented",
                     rpc->decoded_message->which_content);
-                rpc_send_and_release_empty(rpc, 0, PB_CommandStatus_ERROR_NOT_IMPLEMENTED);
+                rpc_send_and_release_empty(
+                    rpc, rpc->decoded_message->command_id, PB_CommandStatus_ERROR_NOT_IMPLEMENTED);
             }
         } else {
             message_decode_failed = true;
@@ -657,8 +651,13 @@ int32_t rpc_srv(void* p) {
                  * Companion receives 2 messages: ERROR_DECODE and session_closed.
                  */
                 FURI_LOG_E(TAG, "Decode failed, error: \'%.128s\'", PB_GET_ERROR(&istream));
+                rpc->session.decode_error = true;
                 rpc_send_and_release_empty(rpc, 0, PB_CommandStatus_ERROR_DECODE);
-                rpc_notify_session_should_be_stopped(rpc);
+                osMutexAcquire(rpc->session.callbacks_mutex, osWaitForever);
+                if(rpc->session.closed_callback) {
+                    rpc->session.closed_callback(rpc->session.context);
+                }
+                osMutexRelease(rpc->session.callbacks_mutex);
             }
         }
 
