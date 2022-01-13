@@ -153,6 +153,8 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                     instance->manufacture_name = string_get_cstr(manufacture_code->name);
                     return 1;
                 }
+
+                // Check for mirrored man
                 man_learning = subghz_protocol_keeloq_common_normal_learning(fix, man_rev);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_learning);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
@@ -170,7 +172,6 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 }
 
                 // Check for mirrored man
-
                 man_learning = subghz_protocol_keeloq_common_secure_learning(fix, seed, man_rev);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_learning);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
@@ -178,8 +179,7 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                     return 1;
                 }
 
-                //Magic xor type1 learning
-                
+                // Magic xor type1 learning
                 man_learning = subghz_protocol_keeloq_common_magic_xor_type1_learning(
                     fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_learning);
@@ -189,9 +189,8 @@ uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 }
 
                 // Check for mirrored man
-
-                man_learning = subghz_protocol_keeloq_common_magic_xor_type1_learning(
-                    fix, man_rev);
+                man_learning =
+                    subghz_protocol_keeloq_common_magic_xor_type1_learning(fix, man_rev);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man_learning);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
                     instance->manufacture_name = string_get_cstr(manufacture_code->name);

@@ -23,6 +23,10 @@ typedef struct {
 
     uint8_t selected_row;
     uint8_t selected_column;
+
+    TextInputValidatorCallback validator_callback;
+    string_t validator_text;
+    char* filename;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -236,6 +240,17 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
         }
     }
+
+    // canvas_set_color(canvas, ColorWhite);
+    // canvas_draw_box(canvas, 10, 10, 100, 50);
+    // canvas_set_color(canvas, ColorBlack);
+    // canvas_draw_rframe(canvas, 10, 10, 100, 50, 3);
+    // canvas_draw_rframe(canvas, 11, 11, 98, 48, 3);
+    // canvas_draw_icon(canvas, 15, 7, &I_LockPopup_100x49);
+    // canvas_set_color(canvas, ColorWhite);
+    // canvas_draw_box(canvas, 65, 37, 46, 15);
+    // canvas_set_color(canvas, ColorBlack);
+    // elements_multiline_text(canvas, 70, 27, "Ai AI\n YAI");
 }
 
 static void text_input_handle_up(TextInput* text_input) {
@@ -295,7 +310,11 @@ static void text_input_handle_ok(TextInput* text_input) {
             uint8_t text_length = strlen(model->text_buffer);
 
             if(selected == ENTER_KEY) {
-                if(model->callback != 0 && text_length > 0) {
+                if(model->validator_callback &&
+                   (!model->validator_callback(model->filename))) {
+                    FURI_LOG_I("EEE", "NO SAVE");
+                } else if(model->callback != 0 && text_length > 0) {
+                    FURI_LOG_I("EEE", "SAVE");
                     model->callback(model->callback_context);
                 }
             } else if(selected == BACKSPACE_KEY) {
@@ -369,6 +388,12 @@ TextInput* text_input_alloc() {
     view_set_draw_callback(text_input->view, text_input_view_draw_callback);
     view_set_input_callback(text_input->view, text_input_view_input_callback);
 
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            string_init(model->validator_text);
+            return false;
+        });
+
     text_input_clean(text_input);
 
     return text_input;
@@ -376,6 +401,11 @@ TextInput* text_input_alloc() {
 
 void text_input_free(TextInput* text_input) {
     furi_assert(text_input);
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            string_clear(model->validator_text);
+            return false;
+        });
     view_free(text_input->view);
     free(text_input);
 }
@@ -393,6 +423,8 @@ void text_input_clean(TextInput* text_input) {
             model->text_buffer_size = 0;
             model->callback = NULL;
             model->callback_context = NULL;
+            model->validator_callback = NULL;
+            string_reset(model->validator_text);
             return true;
         });
 }
@@ -421,6 +453,20 @@ void text_input_set_result_callback(
                 model->selected_row = 2;
                 model->selected_column = 8;
             }
+            return true;
+        });
+}
+
+void text_input_set_validator_callback(
+    TextInput* text_input,
+    TextInputValidatorCallback validator_callback,
+    char* filename,
+    char* text_buffer) {
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            model->validator_callback = validator_callback;
+            model->filename = filename;
+            string_set(model->validator_text, text_buffer);
             return true;
         });
 }

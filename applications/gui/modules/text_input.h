@@ -14,6 +14,7 @@ extern "C" {
 /** Text input anonymous structure */
 typedef struct TextInput TextInput;
 typedef void (*TextInputCallback)(void* context);
+typedef bool (*TextInputValidatorCallback)(char* text_buffer);
 
 /** Allocate and initialize text input 
  * 
@@ -62,6 +63,12 @@ void text_input_set_result_callback(
     char* text_buffer,
     size_t text_buffer_size,
     bool clear_default_text);
+
+void text_input_set_validator_callback(
+    TextInput* text_input,
+    TextInputValidatorCallback validator_callback,
+    char* filename,
+    char* text_buffer);
 
 /** Set text input header text
  *
