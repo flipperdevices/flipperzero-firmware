@@ -3,10 +3,26 @@
 #include "file_worker.h"
 #include "../helpers/subghz_custom_event.h"
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
+#include <lib/flipper_file/flipper_file.h>
 
 void subghz_scene_save_name_text_input_callback(void* context) {
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneSaveName);
+}
+
+bool subghz_scene_save_name_validator_callback(char* file_name) {
+    bool ret = true;
+    string_t path;
+    string_init_printf(path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, file_name, SUBGHZ_APP_EXTENSION);
+    Storage* storage = furi_record_open("storage");
+    if(storage_common_stat(storage, string_get_cstr(path), NULL) == FSE_OK) {
+        ret = false;
+    } else {
+        ret = true;
+    }
+    string_clear(path);
+    furi_record_close("storage");
+    return ret;
 }
 
 void subghz_scene_save_name_on_enter(void* context) {
@@ -37,6 +53,10 @@ void subghz_scene_save_name_on_enter(void* context) {
         subghz->file_name,
         22, //Max len name
         dev_name_empty);
+
+    text_input_set_validator_callback(
+        text_input, subghz_scene_save_name_validator_callback, subghz->file_name, "test");
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
 }
 
@@ -50,7 +70,9 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubghzCustomEventSceneSaveName) {
             if(strcmp(subghz->file_name, "")) {
                 if(strcmp(subghz->file_name_tmp, "")) {
-                    subghz_rename_file(subghz);
+                    if(!subghz_rename_file(subghz)) {
+                        return false;
+                    }
                 } else {
                     subghz_save_protocol_to_file(subghz, subghz->file_name);
                 }
