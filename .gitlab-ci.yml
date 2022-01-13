@@ -11,56 +11,67 @@ workflow:
     - if: "$CI_COMMIT_BRANCH"
 
 variables:
-  IDF_REPO: https://github.com/espressif/esp-idf.git
   STM32_CUBE_F4_REPO: https://github.com/STMicroelectronics/STM32CubeF4
-  SERIAL_FLASHER_REPO: ${GITLAB_SSH_SERVER}/espressif/esp-serial-flasher.git
+  STM32_CUBE_F4_REPO_TAG: v1.26.2
+  ARM_TOOLCHAIN_URL: https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
 
-.clone_and_setup_idf: &clone_and_setup_idf |
-  git clone "${IDF_REPO}"
-  cd esp-idf
-  tools/idf_tools.py --non-interactive install all && eval "$(tools/idf_tools.py --non-interactive export)" || exit 1
-  git submodule update --init
-  export IDF_PATH=$(pwd)
-
-.clone_and_setup_stm32: &clone_and_setup_stm32 |
-  cd $CI_PROJECT_DIR
-  git submodule update --init
-  git clone "${STM32_CUBE_F4_REPO}"
-  mkdir $CI_PROJECT_DIR/examples/stm32_example/build
-
-  wget -O gcc-arm-none-eabi.tar.bz2 'https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A'
-  tar -xjf gcc-arm-none-eabi.tar.bz2
-  mv gcc-arm-none-eabi-* gcc-arm-none-eabi
-
-.build_test_template:
-  before_script:
-    # Use CI Tools
-    - curl -sSL ${CIT_LOADER_URL} | sh
-    - source citools/import_functions
-    - PATH=$CI_PROJECT_DIR/esp-idf/tools:$PATH
-
-build_with_idf:
-  extends: .build_test_template
+.build_idf_template:
   stage: build
-  image: $CI_DOCKER_REGISTRY/esp-env:v4.4-1
+  image: espressif/idf:latest
   tags:
     - build
     - internet
   script:
-    - source /opt/pyenv/activate && pyenv global 3.6.13
-    - *clone_and_setup_idf
     - cd $CI_PROJECT_DIR/examples/esp32_example
-    # Build for all supported targets
     - idf.py build -DMD5_ENABLED=1
     - idf.py build -DMD5_ENABLED=0
 
-    - *clone_and_setup_stm32
+build_idf_v3.3:
+  extends: .build_idf_template
+  image: espressif/idf:release-v3.3
+
+build_idf_v4.1:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.1
+
+build_idf_v4.2:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.2
+
+build_idf_v4.3:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.3
+
+build_idf_v4.4:
+  extends: .build_idf_template
+  image: espressif/idf:release-v4.4
+
+build_idf_master:
+  extends: .build_idf_template
+  image: espressif/idf:latest
+
+build_stm32:
+  stage: build
+  # IDF is not necessary for STM32 build, but this image is already used in another job
+  # and it comes with a recent enough CMake version.
+  image: espressif/idf:latest
+  tags:
+    - build
+    - internet
+  script:
+    - cd $CI_PROJECT_DIR
+    - git submodule update --init
+    - git clone --depth=1 -b ${STM32_CUBE_F4_REPO_TAG} ${STM32_CUBE_F4_REPO}
+    - wget --no-verbose -O gcc-arm-none-eabi.tar.bz2 ${ARM_TOOLCHAIN_URL}
+    - tar -xjf gcc-arm-none-eabi.tar.bz2
+    - mv gcc-arm-none-eabi-* gcc-arm-none-eabi
+    - mkdir $CI_PROJECT_DIR/examples/stm32_example/build
     - cd $CI_PROJECT_DIR/examples/stm32_example/build
-    - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 .. && cmake --build .
+    - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 -G Ninja ..
+    - cmake --build .
 
 run_tests:
-  extends: .build_test_template
   stage: test
   image: ${CI_DOCKER_REGISTRY}/qemu:esp-develop-20191124
   tags:
