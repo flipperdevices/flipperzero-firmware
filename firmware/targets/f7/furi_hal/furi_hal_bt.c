@@ -122,22 +122,11 @@ bool furi_hal_bt_start_radio_stack() {
             ble_glue_thread_stop();
             break;
         }
-        // Get FUS status
-        SHCI_FUS_GetState_ErrorCode_t err_code = 0;
-        uint8_t state = SHCI_C2_FUS_GetState(&err_code);
-        if(state == FUS_STATE_VALUE_IDLE) {
-            // When FUS is running we can't read radio stack version correctly
-            // Trying to start radio stack fw, which leads to reset
-            FURI_LOG_W(TAG, "FUS is running. Restart to launch Radio Stack");
-            SHCI_CmdStatus_t status = SHCI_C2_FUS_StartWs();
-            if(status) {
-                FURI_LOG_E(TAG, "Failed to start Radio Stack with status: %02X", status);
-                break;
-            } else {
-                furi_crash("Waiting for reset command from core2");
-            }
+        // If FUS is running, start radio stack fw
+        if(ble_glue_radio_stack_fw_launch_started()) {
+            // If FUS is running do nothing and wait for system reset
+            furi_crash("Waiting for FUS to launch radio stack firmware");
         }
-
         // Check weather we support radio stack
         if(!furi_hal_bt_radio_stack_is_supported(&info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
