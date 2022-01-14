@@ -1,28 +1,33 @@
 cmake_minimum_required(VERSION 3.5)
 
-if (DEFINED ESP_PLATFORM)
+set(srcs src/esp_loader.c
+         src/esp_targets.c
+         src/serial_comm.c
+         src/md5_hash.c
+)
 
+
+if (DEFINED ESP_PLATFORM)
     # Register component to esp-idf build system
-    set(COMPONENT_SRCS
-        src/esp_loader.c
-        src/esp_targets.c
-        src/serial_comm.c
-        src/md5_hash.c
-        port/esp32_port.c)
-    set(COMPONENT_ADD_INCLUDEDIRS "include port")
-    set(COMPONENT_PRIV_INCLUDEDIRS "private_include" )
-    register_component()
-    component_compile_options(-Wstrict-prototypes)
-    set(target ${COMPONENT_LIB})
+    list(APPEND srcs port/esp32_port.c)
+    if ("${IDF_VERSION_MAJOR}.${IDF_VERSION_MINOR}" VERSION_GREATER "4.0")
+        idf_component_register(SRCS ${srcs}
+                               INCLUDE_DIRS include port
+                               PRIV_INCLUDE_DIRS private_include)
+        set(target ${COMPONENT_LIB})
+        component_compile_options(-Wstrict-prototypes)
+    else()
+        # Remove when dropping support for IDF 3.3
+        set(COMPONENT_SRCS ${srcs})
+        set(COMPONENT_ADD_INCLUDEDIRS include port)
+        set(COMPONENT_PRIV_INCLUDEDIRS private_include)
+        register_component()
+        set(target ${COMPONENT_TARGET})
+    endif()
 
 else()
-
     # Create traditional CMake target
-    add_library(flasher 
-        src/esp_loader.c
-        src/esp_targets.c
-        src/serial_comm.c
-        src/md5_hash.c)
+    add_library(flasher ${srcs})
 
     target_include_directories(flasher PUBLIC include port PRIVATE private_include)
 

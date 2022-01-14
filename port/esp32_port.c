@@ -94,11 +94,11 @@ esp_loader_error_t loader_port_esp32_init(const loader_esp32_config_t *config)
     }
 
     // Initialize boot pin selection pins
-    gpio_pad_select_gpio(s_reset_trigger_pin);
+    gpio_reset_pin(s_reset_trigger_pin);
     gpio_set_pull_mode(s_reset_trigger_pin, GPIO_PULLUP_ONLY);
     gpio_set_direction(s_reset_trigger_pin, GPIO_MODE_OUTPUT);
 
-    gpio_pad_select_gpio(s_gpio0_trigger_pin);
+    gpio_reset_pin(s_gpio0_trigger_pin);
     gpio_set_pull_mode(s_gpio0_trigger_pin, GPIO_PULLUP_ONLY);
     gpio_set_direction(s_gpio0_trigger_pin, GPIO_MODE_OUTPUT);
 
