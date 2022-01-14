@@ -51,7 +51,7 @@ void rpc_cli_command_start_session(Cli* cli, string_t args, void* context) {
 
         if(size_received) {
             size_t fed_bytes = rpc_session_feed(rpc_session, buffer, size_received, 3000);
-            (void) fed_bytes;
+            (void)fed_bytes;
             furi_assert(fed_bytes == size_received);
         }
     }
