@@ -26,8 +26,8 @@ typedef struct {
     uint8_t selected_column;
 
     TextInputValidatorCallback validator_callback;
+    void* validator_callback_context;
     string_t validator_text;
-    char* filename;
     bool valadator_blob;
 } TextInputModel;
 
@@ -312,7 +312,7 @@ static void text_input_handle_ok(TextInput* text_input) {
             uint8_t text_length = strlen(model->text_buffer);
 
             if(selected == ENTER_KEY) {
-                if(model->validator_callback && (!model->validator_callback(model->filename))) {
+                if(model->validator_callback && (!model->validator_callback(model->validator_callback_context))) {
                     model->valadator_blob = true;
                     osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
                 } else if(model->callback != 0 && text_length > 0) {
@@ -491,12 +491,12 @@ void text_input_set_result_callback(
 void text_input_set_validator_callback(
     TextInput* text_input,
     TextInputValidatorCallback validator_callback,
-    char* filename,
+    void* validator_callback_context,
     char* text_buffer) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
             model->validator_callback = validator_callback;
-            model->filename = filename;
+            model->validator_callback_context = validator_callback_context;
             string_set(model->validator_text, text_buffer);
             return true;
         });

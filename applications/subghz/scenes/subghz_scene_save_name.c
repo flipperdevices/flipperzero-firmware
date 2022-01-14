@@ -4,11 +4,14 @@
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
 
 void subghz_scene_save_name_text_input_callback(void* context) {
+    furi_assert(context);
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneSaveName);
 }
 
-bool subghz_scene_save_name_validator_callback(char* file_name) {
+bool subghz_scene_save_name_validator_callback(void* context) {
+    furi_assert(context);
+    char* file_name = context;
     bool ret = true;
     string_t path;
     string_init_printf(path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, file_name, SUBGHZ_APP_EXTENSION);
@@ -55,7 +58,7 @@ void subghz_scene_save_name_on_enter(void* context) {
     text_input_set_validator_callback(
         text_input,
         subghz_scene_save_name_validator_callback,
-        subghz->file_name,
+        (void*)subghz->file_name,
         "This name\nexists!\nChoose\nanother one.");
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
