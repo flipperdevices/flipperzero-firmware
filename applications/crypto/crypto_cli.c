@@ -1,4 +1,4 @@
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include <furi.h>
 
 #include <lib/toolbox/args.h>
@@ -312,8 +312,10 @@ void crypto_cli(Cli* cli, string_t args, void* context) {
     string_clear(cmd);
 }
 
-void crypto_cli_init() {
+void crypto_on_system_start() {
+#ifdef SRV_CLI
     Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "crypto", CliCommandFlagDefault, crypto_cli, NULL);
     furi_record_close("cli");
+#endif
 }

@@ -8,8 +8,8 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/submenu.h>
 #include <dialogs/dialogs.h>
-#include <notification/notification-messages.h>
-#include <gui/modules/variable-item-list.h>
+#include <notification/notification_messages.h>
+#include <gui/modules/variable_item_list.h>
 #include "views/u2f_view.h"
 #include "u2f_hid.h"
 #include "u2f.h"
@@ -17,8 +17,12 @@
 typedef enum {
     U2fCustomEventNone,
 
+    U2fCustomEventConnect,
+    U2fCustomEventDisconnect,
+
     U2fCustomEventRegister,
     U2fCustomEventAuth,
+    U2fCustomEventAuthSuccess,
     U2fCustomEventWink,
 
     U2fCustomEventTimeout,

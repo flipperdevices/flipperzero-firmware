@@ -2,22 +2,25 @@
 #include "views/power_off.h"
 
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include <gui/view_port.h>
 #include <gui/view.h>
 
 #define POWER_OFF_TIMEOUT 90
-#define POWER_BATTERY_WELL_LEVEL 70
-
-bool power_is_battery_well(PowerInfo* info) {
-    return info->health > POWER_BATTERY_WELL_LEVEL;
-}
 
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
-    canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
-    canvas_draw_box(canvas, 2, 2, (power->info.charge + 4) / 5, 4);
+    canvas_draw_icon(canvas, 0, 1, &I_Battery_26x8);
+    canvas_draw_box(canvas, 2, 3, (power->info.charge + 4) / 5, 4);
+    if(power->state == PowerStateCharging) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_icon(canvas, 8, 0, &I_Charging_lightning_mask_9x10);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_icon(canvas, 8, 0, &I_Charging_lightning_9x10);
+        canvas_set_bitmap_mode(canvas, 0);
+    }
 }
 
 static ViewPort* power_battery_view_port_alloc(Power* power) {
@@ -42,7 +45,7 @@ Power* power_alloc() {
     power->state = PowerStateNotCharging;
     power->battery_low = false;
     power->power_off_timeout = POWER_OFF_TIMEOUT;
-    power->info_mtx = osMutexNew(NULL);
+    power->api_mtx = osMutexNew(NULL);
 
     // Gui
     power->view_dispatcher = view_dispatcher_alloc();
@@ -58,6 +61,7 @@ Power* power_alloc() {
 
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);
+    power->show_low_bat_level_message = true;
 
     return power;
 }
@@ -73,7 +77,7 @@ void power_free(Power* power) {
     view_port_free(power->battery_view_port);
 
     // State
-    osMutexDelete(power->info_mtx);
+    osMutexDelete(power->api_mtx);
 
     // FuriPubSub
     furi_pubsub_free(power->event_pubsub);
@@ -127,17 +131,18 @@ static bool power_update_info(Power* power) {
     info.temperature_charger = furi_hal_power_get_battery_temperature(FuriHalPowerICCharger);
     info.temperature_gauge = furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
 
-    osMutexAcquire(power->info_mtx, osWaitForever);
+    osMutexAcquire(power->api_mtx, osWaitForever);
     bool need_refresh = power->info.charge != info.charge;
     power->info = info;
-    osMutexRelease(power->info_mtx);
+    osMutexRelease(power->api_mtx);
 
     return need_refresh;
 }
 
 static void power_check_low_battery(Power* power) {
     // Check battery charge and vbus voltage
-    if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f)) {
+    if((power->info.charge == 0) && (power->info.voltage_vbus < 4.0f) &&
+       power->show_low_bat_level_message) {
         if(!power->battery_low) {
             view_dispatcher_send_to_front(power->view_dispatcher);
             view_dispatcher_switch_to_view(power->view_dispatcher, PowerViewOff);

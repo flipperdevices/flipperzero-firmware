@@ -71,7 +71,8 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_tim.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_usart.c \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_lpuart.c \
-	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c \
+	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_rng.c
 
 # FreeRTOS
 CFLAGS += \
@@ -91,7 +92,7 @@ C_SOURCES += \
 
 # BLE glue 
 CFLAGS += \
-	-I$(TARGET_DIR)/ble-glue \
+	-I$(TARGET_DIR)/ble_glue \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/ble \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/ble/core \
@@ -101,7 +102,7 @@ CFLAGS += \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci
 C_SOURCES += \
-	$(wildcard $(TARGET_DIR)/ble-glue/*.c) \
+	$(wildcard $(TARGET_DIR)/ble_glue/*.c) \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/otp.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/stm_list.c \
 	$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/utilities/dbg_trace.c \
@@ -143,7 +144,7 @@ ifeq ($(INVERT_RFID_IN), 1)
 CFLAGS += -DINVERT_RFID_IN
 endif
 
-FURI_HAL_DIR = $(TARGET_DIR)/furi-hal
+FURI_HAL_DIR = $(TARGET_DIR)/furi_hal
 CFLAGS += -I$(FURI_HAL_DIR)
 C_SOURCES += $(wildcard $(FURI_HAL_DIR)/*.c)
 
