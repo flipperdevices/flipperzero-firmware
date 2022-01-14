@@ -9,23 +9,6 @@ void subghz_scene_save_name_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(subghz->view_dispatcher, SubghzCustomEventSceneSaveName);
 }
 
-bool subghz_scene_save_name_validator_callback(void* context) {
-    furi_assert(context);
-    char* file_name = context;
-    bool ret = true;
-    string_t path;
-    string_init_printf(path, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, file_name, SUBGHZ_APP_EXTENSION);
-    Storage* storage = furi_record_open("storage");
-    if(storage_common_stat(storage, string_get_cstr(path), NULL) == FSE_OK) {
-        ret = false;
-    } else {
-        ret = true;
-    }
-    string_clear(path);
-    furi_record_close("storage");
-    return ret;
-}
-
 void subghz_scene_save_name_on_enter(void* context) {
     SubGhz* subghz = context;
 
@@ -55,10 +38,11 @@ void subghz_scene_save_name_on_enter(void* context) {
         22, //Max len name
         dev_name_empty);
 
-    text_input_set_validator_callback(
+    text_input_set_validator_is_file_register(
         text_input,
-        subghz_scene_save_name_validator_callback,
-        (void*)subghz->file_name,
+        SUBGHZ_APP_PATH_FOLDER,
+        subghz->file_name,
+        SUBGHZ_APP_EXTENSION,
         "This name\nexists!\nChoose\nanother one.");
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);

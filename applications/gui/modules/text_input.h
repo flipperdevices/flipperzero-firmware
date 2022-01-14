@@ -64,10 +64,11 @@ void text_input_set_result_callback(
     size_t text_buffer_size,
     bool clear_default_text);
 
-void text_input_set_validator_callback(
+void text_input_set_validator_is_file_register(
     TextInput* text_input,
-    TextInputValidatorCallback validator_callback,
-    void* validator_callback_context,
+    const char* app_path_folder,
+    const char* app_file_name,
+    const char* app_extension,
     char* text_buffer);
 
 /** Set text input header text

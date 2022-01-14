@@ -1,10 +1,12 @@
 #include "text_input.h"
+#include "validators.h"
 #include <gui/elements.h>
 #include <furi.h>
 
 struct TextInput {
     View* view;
     osTimerId_t timer;
+    ValidatorIsFile* validator_is_file;
 };
 
 typedef struct {
@@ -28,7 +30,7 @@ typedef struct {
     TextInputValidatorCallback validator_callback;
     void* validator_callback_context;
     string_t validator_text;
-    bool valadator_blob;
+    bool valadator_result;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -242,7 +244,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
         }
     }
-    if(model->valadator_blob) {
+    if(model->valadator_result) {
         canvas_set_font(canvas, FontSecondary);
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 8, 10, 110, 48);
@@ -312,8 +314,9 @@ static void text_input_handle_ok(TextInput* text_input) {
             uint8_t text_length = strlen(model->text_buffer);
 
             if(selected == ENTER_KEY) {
-                if(model->validator_callback && (!model->validator_callback(model->validator_callback_context))) {
-                    model->valadator_blob = true;
+                if(model->validator_callback &&
+                   (!model->validator_callback(model->validator_callback_context))) {
+                    model->valadator_result = true;
                     osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
                 } else if(model->callback != 0 && text_length > 0) {
                     model->callback(model->callback_context);
@@ -343,12 +346,12 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
-                if(model->valadator_blob) {
+                if(model->valadator_result) {
                     if(event->key == InputKeyBack) {
                         consumed = true;
                     }
                 }
-                model->valadator_blob = false;
+                model->valadator_result = false;
                 return false;
             });
         switch(event->key) {
@@ -381,8 +384,8 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
        event->key == InputKeyBack) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
-                if(model->valadator_blob) {
-                    model->valadator_blob = false;
+                if(model->valadator_result) {
+                    model->valadator_result = false;
                 } else {
                     text_input_backspace_cb(model);
                 }
@@ -401,7 +404,7 @@ void text_input_timer_callback(void* context) {
 
     with_view_model(
         text_input->view, (TextInputModel * model) {
-            model->valadator_blob = false;
+            model->valadator_result = false;
             return true;
         });
 }
@@ -453,9 +456,13 @@ void text_input_clean(TextInput* text_input) {
             model->text_buffer_size = 0;
             model->callback = NULL;
             model->callback_context = NULL;
-            model->validator_callback = NULL;
+            if(text_input->validator_is_file) {
+                model->validator_callback = NULL;
+                model->validator_callback_context = NULL;
+                validator_is_file_free(text_input->validator_is_file);
+            }
             string_reset(model->validator_text);
-            model->valadator_blob = false;
+            model->valadator_result = false;
             return true;
         });
 }
@@ -488,15 +495,20 @@ void text_input_set_result_callback(
         });
 }
 
-void text_input_set_validator_callback(
+void text_input_set_validator_is_file_register(
     TextInput* text_input,
-    TextInputValidatorCallback validator_callback,
-    void* validator_callback_context,
+    const char* app_path_folder,
+    const char* app_file_name,
+    const char* app_extension,
     char* text_buffer) {
+    furi_assert(text_input);
+    text_input->validator_is_file =
+        validator_is_file_alloc(app_path_folder, app_file_name, app_extension);
+
     with_view_model(
         text_input->view, (TextInputModel * model) {
-            model->validator_callback = validator_callback;
-            model->validator_callback_context = validator_callback_context;
+            model->validator_callback = validator_is_file_callback;
+            model->validator_callback_context = text_input->validator_is_file;
             string_set(model->validator_text, text_buffer);
             return true;
         });
