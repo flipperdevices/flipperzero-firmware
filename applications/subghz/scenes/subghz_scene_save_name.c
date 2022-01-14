@@ -1,9 +1,7 @@
 #include "../subghz_i.h"
 #include <lib/toolbox/random_name.h>
-#include "file_worker.h"
 #include "../helpers/subghz_custom_event.h"
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
-#include <lib/flipper_file/flipper_file.h>
 
 void subghz_scene_save_name_text_input_callback(void* context) {
     SubGhz* subghz = context;

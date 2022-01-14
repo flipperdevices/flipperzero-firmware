@@ -245,11 +245,11 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
     if(model->valadator_blob) {
         canvas_set_font(canvas, FontSecondary);
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 8, 10, 110, 50);
+        canvas_draw_box(canvas, 8, 10, 110, 48);
         canvas_set_color(canvas, ColorBlack);
         canvas_draw_icon(canvas, 10, 14, &I_WarningDolphin_45x42);
         canvas_draw_rframe(canvas, 8, 8, 112, 50, 3);
-        canvas_draw_rframe(canvas, 9, 9, 110, 48, 3);
+        canvas_draw_rframe(canvas, 9, 9, 110, 48, 2);
         elements_multiline_text(canvas, 62, 20, string_get_cstr(model->validator_text));
         canvas_set_font(canvas, FontKeyboard);
     }
