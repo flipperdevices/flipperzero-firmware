@@ -2,6 +2,7 @@
 #include <lib/toolbox/random_name.h>
 #include "../helpers/subghz_custom_event.h"
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
+#include <gui/modules/validators.h>
 
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
@@ -38,12 +39,10 @@ void subghz_scene_save_name_on_enter(void* context) {
         22, //Max len name
         dev_name_empty);
 
-    text_input_set_validator_is_file_register(
-        text_input,
-        SUBGHZ_APP_PATH_FOLDER,
-        subghz->file_name,
-        SUBGHZ_APP_EXTENSION,
-        "This name\nexists!\nChoose\nanother one.");
+    ValidatorIsFile* validator_is_file =
+        validator_is_file_alloc_init(SUBGHZ_APP_PATH_FOLDER, SUBGHZ_APP_EXTENSION);
+    text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
+    
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTextInput);
 }
@@ -89,6 +88,10 @@ void subghz_scene_save_name_on_exit(void* context) {
     SubGhz* subghz = context;
 
     // Clear view
+    void* validator_context = text_input_get_validator_callback_context(subghz->text_input);
+    text_input_set_validator(subghz->text_input, NULL, NULL);
+    validator_is_file_free(validator_context);
+    
     text_input_clean(subghz->text_input);
     scene_manager_set_scene_state(
         subghz->scene_manager, SubGhzSceneReadRAW, SubghzCustomEventManagerNoSet);

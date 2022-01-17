@@ -6,6 +6,9 @@
 #pragma once
 
 #include <gui/view.h>
+#include "validators.h"
+#include <m-string.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +17,7 @@ extern "C" {
 /** Text input anonymous structure */
 typedef struct TextInput TextInput;
 typedef void (*TextInputCallback)(void* context);
-typedef bool (*TextInputValidatorCallback)(void* context);
+typedef bool (*TextInputValidatorCallback)(const char* text, string_t error, void* context);
 
 /** Allocate and initialize text input 
  * 
@@ -64,12 +67,14 @@ void text_input_set_result_callback(
     size_t text_buffer_size,
     bool clear_default_text);
 
-void text_input_set_validator_is_file_register(
+void text_input_set_validator(
     TextInput* text_input,
-    const char* app_path_folder,
-    const char* app_file_name,
-    const char* app_extension,
-    char* text_buffer);
+    TextInputValidatorCallback callback,
+    void* callback_context);
+
+TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input);
+
+void* text_input_get_validator_callback_context(TextInput* text_input);
 
 /** Set text input header text
  *

@@ -1,20 +1,19 @@
 #pragma once
 
 // #include <gui/view.h>
+#include <m-string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 typedef struct ValidatorIsFile ValidatorIsFile;
 
-ValidatorIsFile* validator_is_file_alloc(
-    const char* app_path_folder,
-    const char* app_file_name,
-    const char* app_extension);
+ValidatorIsFile*
+    validator_is_file_alloc_init(const char* app_path_folder, const char* app_extension);
 
 void validator_is_file_free(ValidatorIsFile* instance);
 
-bool validator_is_file_callback(void* context);
+bool validator_is_file_callback(const char* text, string_t error, void* context);
 
 #ifdef __cplusplus
 }

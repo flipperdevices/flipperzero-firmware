@@ -1,12 +1,10 @@
 #include "text_input.h"
-#include "validators.h"
 #include <gui/elements.h>
 #include <furi.h>
 
 struct TextInput {
     View* view;
     osTimerId_t timer;
-    ValidatorIsFile* validator_is_file;
 };
 
 typedef struct {
@@ -30,7 +28,7 @@ typedef struct {
     TextInputValidatorCallback validator_callback;
     void* validator_callback_context;
     string_t validator_text;
-    bool valadator_result;
+    bool valadator_message_visible;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -244,7 +242,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
         }
     }
-    if(model->valadator_result) {
+    if(model->valadator_message_visible) {
         canvas_set_font(canvas, FontSecondary);
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 8, 10, 110, 48);
@@ -314,9 +312,11 @@ static void text_input_handle_ok(TextInput* text_input) {
             uint8_t text_length = strlen(model->text_buffer);
 
             if(selected == ENTER_KEY) {
-                if(model->validator_callback &&
-                   (!model->validator_callback(model->validator_callback_context))) {
-                    model->valadator_result = true;
+                if(model->validator_callback && (!model->validator_callback(
+                                                    model->text_buffer,
+                                                    model->validator_text,
+                                                    model->validator_callback_context))) {
+                    model->valadator_message_visible = true;
                     osTimerStart(text_input->timer, osKernelGetTickFreq() * 4);
                 } else if(model->callback != 0 && text_length > 0) {
                     model->callback(model->callback_context);
@@ -346,12 +346,12 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
-                if(model->valadator_result) {
+                if(model->valadator_message_visible) {
                     if(event->key == InputKeyBack) {
                         consumed = true;
                     }
                 }
-                model->valadator_result = false;
+                model->valadator_message_visible = false;
                 return false;
             });
         switch(event->key) {
@@ -384,8 +384,8 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
        event->key == InputKeyBack) {
         with_view_model(
             text_input->view, (TextInputModel * model) {
-                if(model->valadator_result) {
-                    model->valadator_result = false;
+                if(model->valadator_message_visible) {
+                    model->valadator_message_visible = false;
                 } else {
                     text_input_backspace_cb(model);
                 }
@@ -404,7 +404,7 @@ void text_input_timer_callback(void* context) {
 
     with_view_model(
         text_input->view, (TextInputModel * model) {
-            model->valadator_result = false;
+            model->valadator_message_visible = false;
             return true;
         });
 }
@@ -437,7 +437,10 @@ void text_input_free(TextInput* text_input) {
             string_clear(model->validator_text);
             return false;
         });
-    osTimerStop(text_input->timer);
+
+    if(osTimerIsRunning(text_input->timer)) {
+        osTimerStop(text_input->timer);
+    }
     osTimerDelete(text_input->timer);
     view_free(text_input->view);
     free(text_input);
@@ -456,13 +459,10 @@ void text_input_clean(TextInput* text_input) {
             model->text_buffer_size = 0;
             model->callback = NULL;
             model->callback_context = NULL;
-            if(text_input->validator_is_file) {
-                model->validator_callback = NULL;
-                model->validator_callback_context = NULL;
-                validator_is_file_free(text_input->validator_is_file);
-            }
+            model->validator_callback = NULL;
+            model->validator_callback_context = NULL;
             string_reset(model->validator_text);
-            model->valadator_result = false;
+            model->valadator_message_visible = false;
             return true;
         });
 }
@@ -495,23 +495,36 @@ void text_input_set_result_callback(
         });
 }
 
-void text_input_set_validator_is_file_register(
+void text_input_set_validator(
     TextInput* text_input,
-    const char* app_path_folder,
-    const char* app_file_name,
-    const char* app_extension,
-    char* text_buffer) {
-    furi_assert(text_input);
-    text_input->validator_is_file =
-        validator_is_file_alloc(app_path_folder, app_file_name, app_extension);
-
+    TextInputValidatorCallback callback,
+    void* callback_context) {
     with_view_model(
         text_input->view, (TextInputModel * model) {
-            model->validator_callback = validator_is_file_callback;
-            model->validator_callback_context = text_input->validator_is_file;
-            string_set(model->validator_text, text_buffer);
+            model->validator_callback = callback;
+            model->validator_callback_context = callback_context;
             return true;
         });
+}
+
+TextInputValidatorCallback text_input_get_validator_callback(TextInput* text_input) {
+    TextInputValidatorCallback validator_callback = NULL;
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            validator_callback = model->validator_callback;
+            return false;
+        });
+    return validator_callback;
+}
+
+void* text_input_get_validator_callback_context(TextInput* text_input) {
+    void* validator_callback_context = NULL;
+    with_view_model(
+        text_input->view, (TextInputModel * model) {
+            validator_callback_context = model->validator_callback_context;
+            return false;
+        });
+    return validator_callback_context;
 }
 
 void text_input_set_header_text(TextInput* text_input, const char* text) {
