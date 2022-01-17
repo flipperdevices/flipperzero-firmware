@@ -57,7 +57,7 @@ uint64_t subghz_protocol_keeloq_common_normal_learning(uint32_t data, const uint
 uint64_t
     subghz_protocol_keeloq_common_secure_learning(uint32_t data, uint32_t seed, const uint64_t key);
 
-/** Secure Learning
+/** Magic_xor_type1 Learning
  * @param data - serial number (28bit)
  * @param xor - magic xor (64bit)
  * @return manufacture for this serial number (64bit)
