@@ -136,7 +136,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             gap->state = GapStateConnected;
             gap->service.connection_handle = connection_complete_event->Connection_Handle;
 
-            if(aci_l2cap_connection_parameter_update_req(gap->service.connection_handle, 0x06, 0x06, 0, 600)) {
+            if(aci_l2cap_connection_parameter_update_req(gap->service.connection_handle, 0x0C, 0x18, 10, 500)) {
                 FURI_LOG_W(TAG, "Failed to request connection parameters update");
             }
 
