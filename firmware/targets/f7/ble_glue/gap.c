@@ -94,9 +94,15 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
     case EVT_LE_META_EVENT:
         meta_evt = (evt_le_meta_event*)event_pckt->data;
         switch(meta_evt->subevent) {
-        case EVT_LE_CONN_UPDATE_COMPLETE:
-            FURI_LOG_D(TAG, "Connection update event");
+        case EVT_LE_CONN_UPDATE_COMPLETE: {
+            hci_le_connection_update_complete_event_rp0* event = (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
+            FURI_LOG_W(TAG, "Connection parameters:\r\n"
+                            "Connection interval: %d\r\n"
+                            "Connection latency: %d\r\n"
+                            "Supervision timeout: %d\r\n",
+                            event->Conn_Interval, event->Conn_Latency, event->Supervision_Timeout);
             break;
+        }
 
         case EVT_LE_PHY_UPDATE_COMPLETE:
             evt_le_phy_update_complete = (hci_le_phy_update_complete_event_rp0*)meta_evt->data;
@@ -129,6 +135,10 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             // Update connection status and handle
             gap->state = GapStateConnected;
             gap->service.connection_handle = connection_complete_event->Connection_Handle;
+
+            if(aci_l2cap_connection_parameter_update_req(gap->service.connection_handle, 0x06, 0x06, 0, 600)) {
+                FURI_LOG_W(TAG, "Failed to request connection parameters update");
+            }
 
             // Start pairing by sending security request
             aci_gap_slave_security_req(connection_complete_event->Connection_Handle);
@@ -236,6 +246,17 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
             FURI_LOG_I(TAG, "Procedure complete event");
             break;
+
+        case EVT_BLUE_L2CAP_CONNECTION_UPDATE_RESP: {
+            uint16_t result = ((aci_l2cap_connection_update_resp_event_rp0*)(blue_evt->data))->Result;
+            if(result == 0) {
+                FURI_LOG_D(TAG, "Connection parameters accepted");
+            } else if(result == 1) {
+                FURI_LOG_D(TAG, "Connection parameters denied");
+            }
+            break;
+        }
+
         }
     default:
         break;
