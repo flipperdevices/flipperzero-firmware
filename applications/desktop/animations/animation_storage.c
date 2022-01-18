@@ -11,6 +11,7 @@
 #include "animation_storage.h"
 #include "animation_storage_i.h"
 #include <assets_dolphin.h>
+#include <assets_dolphin_essential.h>
 
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR "/ext/dolphin/animations"
@@ -86,11 +87,19 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
     furi_assert(strlen(name));
     StorageAnimation* storage_animation = NULL;
 
-    /* look through internal animations */
-    for(int i = 0; i < StorageAnimationInternalSize; ++i) {
-        if(!strcmp(StorageAnimationInternal[i].meta.name, name)) {
-            storage_animation = (StorageAnimation*)&StorageAnimationInternal[i];
+    for(int i = 0; i < StorageAnimationEssentialSize; ++i) {
+        if(!strcmp(StorageAnimationEssential[i].meta.name, name)) {
+            storage_animation = (StorageAnimation*)&StorageAnimationEssential[i];
             break;
+        }
+    }
+
+    if(!storage_animation) {
+        for(int i = 0; i < StorageAnimationInternalSize; ++i) {
+            if(!strcmp(StorageAnimationInternal[i].meta.name, name)) {
+                storage_animation = (StorageAnimation*) &StorageAnimationInternal[i];
+                break;
+            }
         }
     }
 
