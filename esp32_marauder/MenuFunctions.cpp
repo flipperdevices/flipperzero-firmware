@@ -1202,14 +1202,35 @@ void MenuFunctions::runBoolSetting(String key) {
   //display_obj.tftDrawGreenOnOffButton();
 }
 
-void MenuFunctions::callSetting(String key) {
+String MenuFunctions::callSetting(String key) {
   specSettingMenu.name = key;
   
   String setting_type = settings_obj.getSettingType(key);
 
   if (setting_type == "bool") {
-    this->runBoolSetting(key);
+    return "bool";
   }
+}
+
+void MenuFunctions::displaySetting(String key) {
+  specSettingMenu.name = key;
+
+  bool setting_value = settings_obj.loadSetting<bool>(key);
+
+  display_obj.tft.setTextWrap(false);
+  display_obj.tft.setFreeFont(NULL);
+  display_obj.tft.setCursor(0, 100);
+  display_obj.tft.setTextSize(1);
+    
+  if (!setting_value) {
+    display_obj.tft.setTextColor(TFT_RED);
+    display_obj.tft.println(F("Setting disabled"));
+  }
+  else {
+    display_obj.tft.setTextColor(TFT_GREEN);
+    display_obj.tft.println(F("Setting on"));
+  }
+    
 }
 
 
@@ -1572,10 +1593,13 @@ void MenuFunctions::RunSetup()
     changeMenu(settingsMenu.parentMenu);
   });
   for (int i = 0; i < settings_obj.getNumberSettings(); i++) {
-    addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFT_LIGHTGREY, NULL, 0, [this, i]() {
+    if (this->callSetting(settings_obj.setting_index_to_name(i)) == "bool")
+      addNodes(&settingsMenu, settings_obj.setting_index_to_name(i), TFT_LIGHTGREY, NULL, 0, [this, i]() {
+      settings_obj.toggleSetting(settings_obj.setting_index_to_name(i));
       changeMenu(&specSettingMenu);
-      this->callSetting(settings_obj.setting_index_to_name(i));
-    });
+      //this->callSetting(settings_obj.setting_index_to_name(i));
+      this->displaySetting(settings_obj.setting_index_to_name(i));
+    }, settings_obj.loadSetting<bool>(settings_obj.setting_index_to_name(i)));
   }
 
   // Specific setting menu
@@ -1688,11 +1712,11 @@ void MenuFunctions::showMenuList(Menu * menu, int layer)
 
 
 // Function to add MenuNodes to a menu
-void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * child, int place, std::function<void()> callable)
+void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * child, int place, std::function<void()> callable, bool selected)
 {
   TFT_eSPI_Button new_button;
-  menu->list->add(MenuNode{name, color, place, &new_button, callable});
-  //strcpy(menu->list->get(-1).icon, bluetooth_icon);
+  menu->list->add(MenuNode{name, color, place, &new_button, selected, callable});
+  //menu->list->add(MenuNode{name, color, place, callable});
 }
 
 void MenuFunctions::buildButtons(Menu * menu)
@@ -1747,8 +1771,11 @@ void MenuFunctions::displayCurrentMenu()
       //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(true);
-      display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
-
+      //if (!current_menu->list->get(i).selected)
+        display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
+      //else
+      //  display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
+        
       if (current_menu->list->get(i).name != "Back")
         display_obj.tft.drawXBitmap(0,
                                     KEY_Y + i * (KEY_H + KEY_SPACING_Y) - (ICON_H / 2),

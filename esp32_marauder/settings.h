@@ -25,6 +25,10 @@ class Settings {
     template <typename T>
     T loadSetting(String name);
 
+    template <typename T>
+    T saveSetting(String key, bool value);
+
+    bool toggleSetting(String key);
     String getSettingType(String key);
     String setting_index_to_name(int i);
     int getNumberSettings();

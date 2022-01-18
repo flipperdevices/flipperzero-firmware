@@ -48,7 +48,7 @@
 
 //#define TFT_SHIELD
 #define TFT_DIY
-//#define KIT
+#define KIT
 
 #define SCREEN_WIDTH 240
 #define SCREEN_HEIGHT 320
@@ -131,7 +131,7 @@ class Display
     TFT_eSPI tft = TFT_eSPI();
     TFT_eSprite img = TFT_eSprite(&tft);
     TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
-    const String PROGMEM version_number = "v0.9.3";
+    const String PROGMEM version_number = "v0.9.4";
 
     bool printing = false;
     bool loading = false;

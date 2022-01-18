@@ -109,6 +109,7 @@ struct MenuNode {
   uint16_t color;
   int icon;
   TFT_eSPI_Button* button;
+  bool selected;
   std::function<void()> callable;
 };
 
@@ -173,14 +174,15 @@ class MenuFunctions
 
     //TFT_eSPI_Button key[BUTTON_ARRAY_LEN];
 
-    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable);
+    void addNodes(Menu* menu, String name, uint16_t color, Menu* child, int place, std::function<void()> callable, bool selected = false);
     void drawStatusBar();
     void updateStatusBar();
     void battery(bool initial = false);
     void battery2(bool initial = false);
     void showMenuList(Menu* menu, int layer);
-    void callSetting(String key);
+    String callSetting(String key);
     void runBoolSetting(String ley);
+    void displaySetting(String key);
 
   public:
     MenuFunctions();
