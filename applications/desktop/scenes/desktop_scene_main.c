@@ -2,7 +2,6 @@
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
-#include <cmsis_os2.h>
 
 #include "desktop/desktop_i.h"
 #include "desktop/views/desktop_main.h"
@@ -120,22 +119,22 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
         case DesktopMainEventOpenArchive:
 #ifdef APP_ARCHIVE
-            animation_manager_unload_and_stall_animation(desktop->animation_manager);
             desktop_switch_to_app(desktop, &FLIPPER_ARCHIVE);
-            animation_manager_load_and_continue_animation(desktop->animation_manager);
 #endif
             consumed = true;
             break;
 
         case DesktopMainEventOpenFavorite:
             LOAD_DESKTOP_SETTINGS(&desktop->settings);
-            animation_manager_unload_and_stall_animation(desktop->animation_manager);
             if(desktop->settings.favorite < FLIPPER_APPS_COUNT) {
-                desktop_switch_to_app(desktop, &FLIPPER_APPS[desktop->settings.favorite]);
+                Loader* loader = furi_record_open("loader");
+                LoaderStatus status =
+                    loader_start(loader, FLIPPER_APPS[desktop->settings.favorite].name, NULL);
+                furi_check(status == LoaderStatusOk);
+                furi_record_close("loader");
             } else {
                 FURI_LOG_E("DesktopSrv", "Can't find favorite application");
             }
-            animation_manager_load_and_continue_animation(desktop->animation_manager);
             consumed = true;
             break;
 

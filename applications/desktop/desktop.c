@@ -2,10 +2,9 @@
 #include "desktop/scenes/desktop_scene.h"
 #include "desktop_i.h"
 
-#include <cmsis_os2.h>
 #include <storage/storage.h>
 #include <assets_icons.h>
-#include <gui/view_composed.h>
+#include <gui/view_composite.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <portmacro.h>
@@ -50,21 +49,21 @@ Desktop* desktop_alloc() {
 
     desktop->dolphin_view = animation_manager_get_animation_view(desktop->animation_manager);
 
-    desktop->main_view_composed = view_composed_alloc();
+    desktop->main_view_composite = view_composite_alloc();
     desktop->main_view = desktop_main_alloc();
-    view_composed_tie_views(
-        desktop->main_view_composed,
+    view_composite_tie_views(
+        desktop->main_view_composite,
         desktop->dolphin_view,
         desktop_main_get_view(desktop->main_view));
-    view_composed_top_enable(desktop->main_view_composed, true);
+    view_composite_top_enable(desktop->main_view_composite, true);
 
-    desktop->locked_view_composed = view_composed_alloc();
+    desktop->locked_view_composite = view_composite_alloc();
     desktop->locked_view = desktop_locked_alloc();
-    view_composed_tie_views(
-        desktop->locked_view_composed,
+    view_composite_tie_views(
+        desktop->locked_view_composite,
         desktop->dolphin_view,
         desktop_locked_get_view(desktop->locked_view));
-    view_composed_top_enable(desktop->locked_view_composed, true);
+    view_composite_top_enable(desktop->locked_view_composite, true);
 
     desktop->lock_menu = desktop_lock_menu_alloc();
     desktop->debug_view = desktop_debug_alloc();
@@ -75,7 +74,7 @@ Desktop* desktop_alloc() {
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewMain,
-        view_composed_get_view(desktop->main_view_composed));
+        view_composite_get_view(desktop->main_view_composite));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLockMenu,
@@ -85,7 +84,7 @@ Desktop* desktop_alloc() {
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLocked,
-        view_composed_get_view(desktop->locked_view_composed));
+        view_composite_get_view(desktop->locked_view_composite));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewFirstStart,
@@ -121,8 +120,8 @@ void desktop_free(Desktop* desktop) {
     scene_manager_free(desktop->scene_manager);
 
     animation_manager_free(desktop->animation_manager);
-    view_composed_free(desktop->main_view_composed);
-    view_composed_free(desktop->locked_view_composed);
+    view_composite_free(desktop->main_view_composite);
+    view_composite_free(desktop->locked_view_composite);
     desktop_main_free(desktop->main_view);
     desktop_lock_menu_free(desktop->lock_menu);
     desktop_locked_free(desktop->locked_view);

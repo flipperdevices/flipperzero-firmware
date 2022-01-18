@@ -4,13 +4,13 @@
 #include "views/bubble_animation_view.h"
 #include <m-string.h>
 
-#define HARDCODED_ANIMATION_NAME "tv"
-#define NO_SD_ANIMATION_NAME "no_sd"
-#define BAD_BATTERY_ANIMATION_NAME "bad_battery"
-#define NO_DB_ANIMATION_NAME "no_db"
-#define BAD_SD_ANIMATION_NAME "bad_sd"
-#define SD_OK_ANIMATION_NAME "sd_ok"
-#define URL_ANIMATION_NAME "url"
+#define HARDCODED_ANIMATION_NAME "Tv_128x47"
+#define NO_SD_ANIMATION_NAME "NoSd_128x49"
+#define BAD_BATTERY_ANIMATION_NAME "BadBattery_128x47"
+#define NO_DB_ANIMATION_NAME "NoDb_128x51"
+#define BAD_SD_ANIMATION_NAME "SdBad_128x51"
+#define SD_OK_ANIMATION_NAME "SdOk_128x51"
+#define URL_ANIMATION_NAME "Url_128x51"
 #define LEVELUP_ANIMATION_NAME "level"
 
 /** Main structure to handle animation data.
@@ -20,7 +20,7 @@
 typedef struct StorageAnimation StorageAnimation;
 
 typedef struct {
-    string_t name;
+    const char* name;
     uint8_t min_butthurt;
     uint8_t max_butthurt;
     uint8_t min_level;

@@ -9,8 +9,7 @@
 #include "views/desktop_debug.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
-#include <cmsis_os2.h>
-#include <gui/view_composed.h>
+#include <gui/view_composite.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -49,8 +48,8 @@ struct Desktop {
     DesktopMainView* main_view;
     DesktopLockedView* locked_view;
 
-    ViewComposed* main_view_composed;
-    ViewComposed* locked_view_composed;
+    ViewComposite* main_view_composite;
+    ViewComposite* locked_view_composite;
 
     DesktopSettings settings;
     PinCode pincode_buffer;
@@ -60,8 +59,6 @@ struct Desktop {
     AnimationManager* animation_manager;
     osSemaphoreId_t unload_animation_semaphore;
     FuriPubSubSubscription* app_start_stop_subscription;
-
-    char* text_buffer;
 };
 
 Desktop* desktop_alloc();

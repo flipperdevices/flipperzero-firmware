@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gui/view.h>
+#include <gui/icon_i.h>
 #include <stdint.h>
 
 #include "dolphin/dolphin.h"
@@ -19,13 +20,14 @@ typedef struct FrameBubble {
     Bubble bubble;
     uint8_t starts_at_frame;
     uint8_t ends_at_frame;
-    struct FrameBubble* next_bubble;
+    const struct FrameBubble* next_bubble;
 } FrameBubble;
 
 typedef struct {
-    FrameBubble** frame_bubbles;
-    uint8_t frame_bubbles_count;
-    const Icon** icons;
+    const FrameBubble* const* frame_bubble_sequence;
+    uint8_t frame_bubble_sequence_count;
+    const Icon icon_animation;
+    uint8_t frame_order[16];
     uint8_t passive_frames;
     uint8_t active_frames;
     uint8_t active_cycles;

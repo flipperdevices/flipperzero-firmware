@@ -2,7 +2,7 @@
  * @file icon_i.h
  * GUI: internal Icon API
  */
-
+#pragma once
 #include "icon.h"
 
 struct Icon {

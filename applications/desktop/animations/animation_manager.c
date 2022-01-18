@@ -2,7 +2,6 @@
 #include <furi.h>
 #include <m-string.h>
 #include <portmacro.h>
-#include <cmsis_os2.h>
 #include <dolphin/dolphin.h>
 #include <power/power_service/power.h>
 #include <storage/storage.h>
@@ -194,7 +193,7 @@ static void animation_manager_replace_current_animation(
 
     const BubbleAnimation* animation = animation_storage_get_bubble_animation(storage_animation);
     bubble_animation_view_set_animation(animation_manager->animation_view, animation);
-    const char* new_name = string_get_cstr(animation_storage_get_meta(storage_animation)->name);
+    const char* new_name = animation_storage_get_meta(storage_animation)->name;
     FURI_LOG_I(TAG, "Select \'%s\' animation", new_name);
     animation_manager->current_animation = storage_animation;
 
@@ -204,7 +203,6 @@ static void animation_manager_replace_current_animation(
 }
 
 AnimationManager* animation_manager_alloc(void) {
-    animation_storage_initialize_internal_animations();
     AnimationManager* animation_manager = furi_alloc(sizeof(AnimationManager));
     animation_manager->animation_view = bubble_animation_view_alloc();
     string_init(animation_manager->freezed_animation_name);
@@ -279,9 +277,9 @@ static StorageAnimation*
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
         const StorageAnimationMeta* meta = animation_storage_get_meta(storage_animation);
         bool skip_animation = false;
-        if(battery_is_well && !string_cmp_str(meta->name, BAD_BATTERY_ANIMATION_NAME)) {
+        if(battery_is_well && !strcmp(meta->name, BAD_BATTERY_ANIMATION_NAME)) {
             skip_animation = true;
-        } else if((sd_status != FSE_NOT_READY) && !string_cmp_str(meta->name, NO_SD_ANIMATION_NAME)) {
+        } else if((sd_status != FSE_NOT_READY) && !strcmp(meta->name, NO_SD_ANIMATION_NAME)) {
             skip_animation = true;
         } else if((stats.butthurt < meta->min_butthurt) || (stats.butthurt > meta->max_butthurt)) {
             skip_animation = true;
@@ -324,7 +322,7 @@ static StorageAnimation*
 
     /* cache animation, if failed - choose reliable animation */
     if(!animation_storage_get_bubble_animation(selected)) {
-        const char* name = string_get_cstr(animation_storage_get_meta(selected)->name);
+        const char* name = animation_storage_get_meta(selected)->name;
         FURI_LOG_E(TAG, "Can't upload animation described in manifest: \'%s\'", name);
         animation_storage_free_storage_animation(&selected);
         selected = animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
@@ -341,6 +339,7 @@ void animation_manager_unload_and_stall_animation(AnimationManager* animation_ma
     furi_assert(
         (animation_manager->state == AnimationManagerStateIdle) ||
         (animation_manager->state == AnimationManagerStateBlocked));
+    FURI_LOG_I(TAG, "Unload animation");
 
     if(animation_manager->state == AnimationManagerStateBlocked) {
         animation_manager->state = AnimationManagerStateFreezedBlocked;
@@ -359,7 +358,7 @@ void animation_manager_unload_and_stall_animation(AnimationManager* animation_ma
 
     StorageAnimationMeta* meta = animation_storage_get_meta(animation_manager->current_animation);
     /* copy str, not move, because it can be internal animation */
-    string_set(animation_manager->freezed_animation_name, meta->name);
+    string_set_str(animation_manager->freezed_animation_name, meta->name);
 
     bubble_animation_freeze(animation_manager->animation_view);
     animation_storage_free_storage_animation(&animation_manager->current_animation);
@@ -372,6 +371,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
     furi_assert(
         (animation_manager->state == AnimationManagerStateFreezedIdle) ||
         (animation_manager->state == AnimationManagerStateFreezedBlocked));
+    FURI_LOG_I(TAG, "Load animation");
 
     if(animation_manager->state == AnimationManagerStateFreezedBlocked) {
         StorageAnimation* restore_animation = animation_storage_find_animation(
@@ -421,7 +421,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
     FURI_LOG_D(
         TAG,
         "Load & Continue with \'%s\'",
-        string_get_cstr(animation_storage_get_meta(animation_manager->current_animation)->name));
+        animation_storage_get_meta(animation_manager->current_animation)->name);
 
     bubble_animation_unfreeze(animation_manager->animation_view);
     string_reset(animation_manager->freezed_animation_name);

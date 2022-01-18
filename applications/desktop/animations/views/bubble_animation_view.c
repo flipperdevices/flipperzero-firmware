@@ -1,5 +1,4 @@
 
-#include <cmsis_os2.h>
 #include "../animation_manager.h"
 #include "../animation_storage.h"
 #include "furi_hal_delay.h"
@@ -18,6 +17,7 @@
 #include <timers.h>
 #include "bubble_animation_view.h"
 #include <gui/icon_i.h>
+#include <furi/dangerous_defines.h>
 
 #define ACTIVE_SHIFT 2
 
@@ -43,7 +43,7 @@ struct BubbleAnimationView {
 static void bubble_animation_activate(BubbleAnimationView* view, bool force);
 static void bubble_animation_activate_right_now(BubbleAnimationView* view);
 
-static uint8_t bubble_animation_get_icon_index(BubbleAnimationViewModel* model) {
+static uint8_t bubble_animation_get_frame_index(BubbleAnimationViewModel* model) {
     furi_assert(model);
     uint8_t icon_index = 0;
     const BubbleAnimation* animation = model->current;
@@ -57,7 +57,7 @@ static uint8_t bubble_animation_get_icon_index(BubbleAnimationViewModel* model) 
     }
     furi_assert(icon_index < (animation->passive_frames + animation->active_frames));
 
-    return icon_index;
+    return animation->frame_order[icon_index];
 }
 
 static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
@@ -79,10 +79,12 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
 
     furi_assert(model->current_frame < 255);
 
-    const Icon* icon = animation->icons[bubble_animation_get_icon_index(model)];
-    furi_assert(icon);
-    uint8_t y_offset = canvas_height(canvas) - icon_get_height(icon);
-    canvas_draw_icon(canvas, 0, y_offset, icon);
+    uint8_t index = bubble_animation_get_frame_index(model);
+    uint8_t width = icon_get_width(&animation->icon_animation);
+    uint8_t height = icon_get_height(&animation->icon_animation);
+    uint8_t y_offset = canvas_height(canvas) - height;
+    canvas_draw_bitmap(
+        canvas, 0, y_offset, width, height, animation->icon_animation.frames[index]);
 
     const FrameBubble* bubble = model->current_bubble;
     if(bubble) {
@@ -94,8 +96,9 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
     }
 }
 
-static FrameBubble* bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
-    FrameBubble* bubble = NULL;
+static const FrameBubble*
+    bubble_animation_pick_bubble(BubbleAnimationViewModel* model, bool active) {
+    const FrameBubble* bubble = NULL;
 
     if((model->active_bubbles == 0) && (model->passive_bubbles == 0)) {
         return NULL;
@@ -104,10 +107,11 @@ static FrameBubble* bubble_animation_pick_bubble(BubbleAnimationViewModel* model
     uint8_t index = random() % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
-    for(int i = 0; i < animation->frame_bubbles_count; ++i) {
-        if((animation->frame_bubbles[i]->starts_at_frame < animation->passive_frames) ^ active) {
+    for(int i = 0; i < animation->frame_bubble_sequence_count; ++i) {
+        if((animation->frame_bubble_sequence[i]->starts_at_frame < animation->passive_frames) ^
+           active) {
             if(!index) {
-                bubble = animation->frame_bubbles[i];
+                bubble = animation->frame_bubble_sequence[i];
             }
             --index;
         }
@@ -251,7 +255,11 @@ static void bubble_animation_timer_callback(void* context) {
     }
 }
 
-static Icon* bubble_animation_clone_frame(const Icon* icon_orig) {
+/* always freeze first passive frame, because
+ * animation is always activated at unfreezing and played
+ * passive frame first, and 2 frames after - active
+ */
+static Icon* bubble_animation_clone_first_frame(const Icon* icon_orig) {
     furi_assert(icon_orig);
     furi_assert(icon_orig->frames);
     furi_assert(icon_orig->frames[0]);
@@ -268,6 +276,7 @@ static Icon* bubble_animation_clone_frame(const Icon* icon_orig) {
     size_t max_bitmap_size = ROUND_UP_TO(icon_orig->width, 8) * icon_orig->height + 1;
     icon_clone->frames[0] = furi_alloc(max_bitmap_size);
     memcpy((void*)icon_clone->frames[0], icon_orig->frames[0], max_bitmap_size);
+    FURI_CONST_ASSIGN(icon_clone->frame_count, 1);
 
     return icon_clone;
 }
@@ -353,8 +362,9 @@ void bubble_animation_view_set_animation(
     model->active_ended_at = xTaskGetTickCount() - (model->current->active_cooldown * 1000);
     model->active_bubbles = 0;
     model->passive_bubbles = 0;
-    for(int i = 0; i < new_animation->frame_bubbles_count; ++i) {
-        if(new_animation->frame_bubbles[i]->starts_at_frame < new_animation->passive_frames) {
+    for(int i = 0; i < new_animation->frame_bubble_sequence_count; ++i) {
+        if(new_animation->frame_bubble_sequence[i]->starts_at_frame <
+           new_animation->passive_frames) {
             ++model->passive_bubbles;
         } else {
             ++model->active_bubbles;
@@ -376,12 +386,7 @@ void bubble_animation_freeze(BubbleAnimationView* view) {
     BubbleAnimationViewModel* model = view_get_model(view->view);
     furi_assert(model->current);
     furi_assert(!model->freeze_frame);
-    /* always freeze first passive frame, because
-     * animation is always activated at unfreezing and played
-     * passive frame first, and 2 frames after - active
-     */
-    uint8_t icon_index = 0;
-    model->freeze_frame = bubble_animation_clone_frame(model->current->icons[icon_index]);
+    model->freeze_frame = bubble_animation_clone_first_frame(&model->current->icon_animation);
     model->current = NULL;
     view_commit_model(view->view, false);
     osTimerStop(view->timer);
@@ -395,7 +400,6 @@ void bubble_animation_unfreeze(BubbleAnimationView* view) {
     furi_assert(model->freeze_frame);
     bubble_animation_release_frame(&model->freeze_frame);
     furi_assert(model->current);
-    furi_assert(model->current->icons);
     frame_rate = model->current->frame_rate;
     view_commit_model(view->view, true);
 
