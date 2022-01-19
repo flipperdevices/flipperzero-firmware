@@ -640,7 +640,7 @@ void elements_text_box(
             uint8_t free_pixel_num = height - total_height_min;
             uint8_t fill_pixel = 0;
             uint8_t j = 1;
-            line[0].y = line[0].height;
+            line[0].y = y + line[0].height;
             while(fill_pixel < free_pixel_num) {
                 line[j].y = line[j - 1].y + line[j - 1].leading_min + 1;
                 fill_pixel++;
