@@ -25,6 +25,15 @@ extern UsbInterface usb_cdc_dual;
 extern UsbInterface usb_hid;
 extern UsbInterface usb_hid_u2f;
 
+typedef enum {
+    UsbReset,
+    UsbWakeup,
+    UsbSuspend,
+    UsbDescriptorRequest,
+} UsbStateEvent;
+
+typedef void (*UsbStateCallback)(UsbStateEvent state, void* context);
+
 /** USB device low-level initialization
  */
 void furi_hal_usb_init();
@@ -48,3 +57,11 @@ void furi_hal_usb_disable();
 /** Enable USB device
  */
 void furi_hal_usb_enable();
+
+/** Set USB state callback
+ */
+void furi_hal_usb_set_state_callback(UsbStateCallback cb, void* ctx);
+
+/** Restart USB device
+ */
+void furi_hal_usb_reinit();
