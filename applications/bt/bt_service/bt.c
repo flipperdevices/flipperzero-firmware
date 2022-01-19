@@ -329,6 +329,8 @@ int32_t bt_srv() {
             bt_save_key_storage(bt);
         } else if(message.type == BtMessageTypeSetProfile) {
             bt_change_profile(bt, &message);
+        } else if(message.type == BtMessageTypeForgetBondedDevices) {
+            bt_delete_key_storage(bt);
         }
     }
     return 0;
