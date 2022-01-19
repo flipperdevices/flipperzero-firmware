@@ -130,6 +130,8 @@ typedef struct {
 typedef struct {
     rfalPreTxRxCallback preTxRx; /*!< RFAL's Pre TxRx callback  */
     rfalPostTxRxCallback postTxRx; /*!< RFAL's Post TxRx callback */
+    RfalStateChangedCallback state_changed_cb;
+    void* ctx;
 } rfalCallbacks;
 
 /*! Struct that holds counters to control the FIFO on Tx and Rx                                                                          */
@@ -595,6 +597,8 @@ ReturnCode rfalInitialize(void) {
 
     gRFAL.callbacks.preTxRx = NULL;
     gRFAL.callbacks.postTxRx = NULL;
+    gRFAL.callbacks.state_changed_cb = NULL;
+    gRFAL.callbacks.ctx = NULL;
 
 #if RFAL_FEATURE_NFCV
     /* Initialize NFC-V Data */
@@ -668,6 +672,15 @@ void rfalSetPreTxRxCallback(rfalPreTxRxCallback pFunc) {
 void rfalSetPostTxRxCallback(rfalPostTxRxCallback pFunc) {
     gRFAL.callbacks.postTxRx = pFunc;
 }
+
+void rfal_set_state_changed_callback(RfalStateChangedCallback callback) {
+    gRFAL.callbacks.state_changed_cb = callback;
+}
+
+void rfal_set_callback_context(void* context) {
+    gRFAL.callbacks.ctx = context;
+}
+
 
 /*******************************************************************************/
 ReturnCode rfalDeinitialize(void) {
@@ -1797,7 +1810,7 @@ static void rfalCleanupTransceive(void) {
     /* Execute Post Transceive Callback                                            */
     /*******************************************************************************/
     if(gRFAL.callbacks.postTxRx != NULL) {
-        gRFAL.callbacks.postTxRx();
+        gRFAL.callbacks.postTxRx(gRFAL.callbacks.ctx);
     }
     /*******************************************************************************/
 }
@@ -1838,7 +1851,7 @@ static void rfalPrepareTransceive(void) {
     /* Execute Pre Transceive Callback                                             */
     /*******************************************************************************/
     if(gRFAL.callbacks.preTxRx != NULL) {
-        gRFAL.callbacks.preTxRx();
+        gRFAL.callbacks.preTxRx(gRFAL.callbacks.ctx);
     }
     /*******************************************************************************/
 
@@ -4163,6 +4176,11 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
     } while(reSetState);
 
     gRFAL.Lm.state = newState;
+
+    // Call callback on state change
+    if(gRFAL.callbacks.state_changed_cb) {
+        gRFAL.callbacks.state_changed_cb(gRFAL.callbacks.ctx);
+    }
 
     return ret;
 }
