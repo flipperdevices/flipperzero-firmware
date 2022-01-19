@@ -42,6 +42,12 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .bonding_mode = true,
                     .pairing_method = GapPairingPinCodeShow,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
+                    .conn_param = {
+                        .conn_int_min = 0x06,
+                        .conn_int_max = 0x18,
+                        .slave_latency = 2,
+                        .supervisor_timeout = 200,
+                    },
                 },
         },
     [FuriHalBtProfileHidKeyboard] =
@@ -55,6 +61,13 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .bonding_mode = true,
                     .pairing_method = GapPairingPinCodeVerifyYesNo,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
+                    // TODO optimize
+                    .conn_param = {
+                        .conn_int_min = 0x18,
+                        .conn_int_max = 0x30,
+                        .slave_latency = 20,
+                        .supervisor_timeout = 500,
+                    },
                 },
         },
 };
@@ -275,6 +288,16 @@ void furi_hal_bt_nvm_sram_sem_acquire() {
 
 void furi_hal_bt_nvm_sram_sem_release() {
     HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
+}
+
+bool furi_hal_bt_clear_white_list() {
+    furi_hal_bt_nvm_sram_sem_acquire();
+    tBleStatus status = aci_gap_clear_security_db();
+    if(status) {
+        FURI_LOG_E(TAG, "Clear while list failed with status %d", status);
+    }
+    furi_hal_bt_nvm_sram_sem_release();
+    return status != BLE_STATUS_SUCCESS;
 }
 
 void furi_hal_bt_dump_state(string_t buffer) {
