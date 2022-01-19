@@ -97,7 +97,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         case EVT_LE_CONN_UPDATE_COMPLETE: {
             hci_le_connection_update_complete_event_rp0* event =
                 (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
-            FURI_LOG_D(
+            FURI_LOG_I(
                 TAG,
                 "Connection interal: %d, latency: %d, supervision timeout: %d",
                 event->Conn_Interval,
@@ -137,9 +137,9 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             // Update connection status and handle
             gap->state = GapStateConnected;
             gap->service.connection_handle = connection_complete_event->Connection_Handle;
-
+            GapConnectionParams* params = &gap->config->conn_param;
             if(aci_l2cap_connection_parameter_update_req(
-                   gap->service.connection_handle, 0x18, 0x18 * 2, 20, 500)) {
+                   gap->service.connection_handle, params->conn_int_min, params->conn_int_max, params->slave_latency, params->supervisor_timeout)) {
                 FURI_LOG_W(TAG, "Failed to request connection parameters update");
             }
 
