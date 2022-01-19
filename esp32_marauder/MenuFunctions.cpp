@@ -1212,24 +1212,33 @@ String MenuFunctions::callSetting(String key) {
   }
 }
 
-void MenuFunctions::displaySetting(String key) {
+void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
   specSettingMenu.name = key;
 
   bool setting_value = settings_obj.loadSetting<bool>(key);
+
+  // Make a local copy of menu node
+  MenuNode node = menu->list->get(index);
 
   display_obj.tft.setTextWrap(false);
   display_obj.tft.setFreeFont(NULL);
   display_obj.tft.setCursor(0, 100);
   display_obj.tft.setTextSize(1);
-    
+
+  // Set local copy value
   if (!setting_value) {
     display_obj.tft.setTextColor(TFT_RED);
     display_obj.tft.println(F("Setting disabled"));
+    node.selected = false;
   }
   else {
     display_obj.tft.setTextColor(TFT_GREEN);
     display_obj.tft.println(F("Setting on"));
+    node.selected = true;
   }
+
+  // Put local copy back into menu
+  menu->list->set(index, node);
     
 }
 
@@ -1598,7 +1607,7 @@ void MenuFunctions::RunSetup()
       settings_obj.toggleSetting(settings_obj.setting_index_to_name(i));
       changeMenu(&specSettingMenu);
       //this->callSetting(settings_obj.setting_index_to_name(i));
-      this->displaySetting(settings_obj.setting_index_to_name(i));
+      this->displaySetting(settings_obj.setting_index_to_name(i), &settingsMenu, i + 1);
     }, settings_obj.loadSetting<bool>(settings_obj.setting_index_to_name(i)));
   }
 
@@ -1771,10 +1780,10 @@ void MenuFunctions::displayCurrentMenu()
       //display_obj.key[i].drawButton2(current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(i).name);
       //display_obj.key[i].drawButton(true);
-      //if (!current_menu->list->get(i).selected)
+      if (!current_menu->list->get(i).selected)
         display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
-      //else
-      //  display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
+      else
+        display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
         
       if (current_menu->list->get(i).name != "Back")
         display_obj.tft.drawXBitmap(0,

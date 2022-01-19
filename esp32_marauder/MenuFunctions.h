@@ -182,7 +182,7 @@ class MenuFunctions
     void showMenuList(Menu* menu, int layer);
     String callSetting(String key);
     void runBoolSetting(String ley);
-    void displaySetting(String key);
+    void displaySetting(String key, Menu* menu, int index);
 
   public:
     MenuFunctions();

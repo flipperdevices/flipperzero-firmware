@@ -267,13 +267,13 @@ void WiFiScan::initWiFi(uint8_t scan_mode) {
   // Set the channel
   if (scan_mode != WIFI_SCAN_OFF) {
     Serial.println(F("Initializing WiFi settings..."));
-    this->set_channel = settings_obj.loadSetting<uint8_t>("Channel");
+    //this->set_channel = settings_obj.loadSetting<uint8_t>("Channel");
     this->changeChannel();
   
     this->force_pmkid = settings_obj.loadSetting<bool>("Force PMKID");
     this->force_probe = settings_obj.loadSetting<bool>("Force Probe");
     this->save_pcap = settings_obj.loadSetting<bool>("Save PCAP");
-    this->channel_hop_delay = settings_obj.loadSetting<int>("Channel Hop Delay");
+    //this->channel_hop_delay = settings_obj.loadSetting<int>("Channel Hop Delay");
     Serial.println(F("Initialization complete"));
   }
 }
@@ -1218,6 +1218,8 @@ void WiFiScan::getMAC(char *addr, uint8_t* data, uint16_t offset) {
 
 void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1288,12 +1290,15 @@ void WiFiScan::espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t t
   
   Serial.println();
 
-  sd_obj.addPacket(snifferPacket->payload, len);
+  if (save_packet)
+    sd_obj.addPacket(snifferPacket->payload, len);
   //}
 }
 
 void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1382,8 +1387,9 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
   
         
         Serial.println();
-  
-        sd_obj.addPacket(snifferPacket->payload, len);
+
+        if (save_packet)
+          sd_obj.addPacket(snifferPacket->payload, len);
       }
     }
   }
@@ -1391,6 +1397,8 @@ void WiFiScan::pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
 void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1494,8 +1502,9 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
         Serial.print(access_points->size());
 
         Serial.println();
-  
-        sd_obj.addPacket(snifferPacket->payload, len);
+
+        if (save_packet)
+          sd_obj.addPacket(snifferPacket->payload, len);
       }
     }
   }
@@ -1503,6 +1512,8 @@ void WiFiScan::apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 
 void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1557,13 +1568,16 @@ void WiFiScan::beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       
       Serial.println();
 
-      sd_obj.addPacket(snifferPacket->payload, len);
+      if (save_packet)
+        sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
 
 void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1614,12 +1628,15 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       
       Serial.println();
 
-      sd_obj.addPacket(snifferPacket->payload, len);
+      if (save_packet)
+        sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
 
 void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1675,12 +1692,15 @@ void WiFiScan::probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       
       Serial.println();    
 
-      sd_obj.addPacket(snifferPacket->payload, len);
+      if (save_packet)
+        sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
 
 void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type) {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -1757,7 +1777,8 @@ void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t 
       
       Serial.println();    
 
-      sd_obj.addPacket(snifferPacket->payload, len);
+      if (save_packet)
+        sd_obj.addPacket(snifferPacket->payload, len);
     }
   }
 }
@@ -2075,6 +2096,8 @@ void WiFiScan::sendDeauthAttack(uint32_t currentTime) {
 
 void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
 {
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2101,7 +2124,8 @@ void WiFiScan::wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
       num_probe++;
     }
 
-    sd_obj.addPacket(snifferPacket->payload, len);
+    if (save_packet)
+      sd_obj.addPacket(snifferPacket->payload, len);
 
     if (( (snifferPacket->payload[30] == 0x88 && snifferPacket->payload[31] == 0x8e)|| ( snifferPacket->payload[32] == 0x88 && snifferPacket->payload[33] == 0x8e) ))
       Serial.println("Oh god mgmt EAPOL");
@@ -2161,6 +2185,8 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     sd_obj.addPacket(snifferPacket->payload, len);
   }
   */
+  bool save_packet = settings_obj.loadSetting<bool>("Save PCAP");
+  
   wifi_promiscuous_pkt_t *snifferPacket = (wifi_promiscuous_pkt_t*)buf;
   WifiMgmtHdr *frameControl = (WifiMgmtHdr*)snifferPacket->payload;
   wifi_pkt_rx_ctrl_t ctrl = (wifi_pkt_rx_ctrl_t)snifferPacket->rx_ctrl;
@@ -2206,7 +2232,8 @@ void WiFiScan::eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
     num_eapol++;
   }
 
-  sd_obj.addPacket(snifferPacket->payload, len);
+  if (save_packet)
+    sd_obj.addPacket(snifferPacket->payload, len);
 }
 
 void WiFiScan::eapolMonitorMain(uint32_t currentTime)
