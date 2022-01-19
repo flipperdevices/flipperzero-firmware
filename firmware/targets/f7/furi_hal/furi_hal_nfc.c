@@ -1,9 +1,18 @@
 #include "furi_hal_nfc.h"
 #include <st25r3916.h>
+#include <rfal_rf.h>
+#include <furi.h>
+#include <m-string.h>
 
 #define TAG "FuriHalNfc"
 
 static const uint32_t clocks_in_ms = 64 * 1000;
+
+osEventFlagsId_t event = NULL;
+#define EVENT_FLAG_INTERRUPT (1UL << 0)
+#define EVENT_FLAG_STATE_CHANGED (1UL << 1)
+#define EVENT_FLAG_STOP (1UL << 2)
+#define EVENT_FLAG_ALL (EVENT_FLAG_INTERRUPT | EVENT_FLAG_STATE_CHANGED | EVENT_FLAG_STOP)
 
 void furi_hal_nfc_init() {
     ReturnCode ret = rfalNfcInitialize();
@@ -13,6 +22,7 @@ void furi_hal_nfc_init() {
     } else {
         FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
     }
+    event = osEventFlagsNew(NULL);
 }
 
 bool furi_hal_nfc_is_busy() {
@@ -138,6 +148,75 @@ bool furi_hal_nfc_listen(
         osThreadYield();
     }
     return true;
+}
+
+void rfal_interrupt_callback_handler() {
+    osEventFlagsSet(event, EVENT_FLAG_INTERRUPT);
+}
+
+void rfal_state_changes_callback(void* context) {
+    osEventFlagsSet(event, EVENT_FLAG_STATE_CHANGED);
+}
+
+void furi_hal_nfc_stop() {
+    if(event) {
+        osEventFlagsSet(event, EVENT_FLAG_STOP);
+    }
+}
+
+bool furi_hal_nfc_emulate_nfca(
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak,
+    uint8_t* data_rx,
+    uint16_t* data_size,
+    uint32_t timeout) {
+
+    rfalSetUpperLayerCallback(rfal_interrupt_callback_handler);
+    rfal_set_state_changed_callback(rfal_state_changes_callback);
+
+    rfalLmConfPA config;
+    config.nfcidLen = uid_len;
+    memcpy(config.nfcid, uid, uid_len);
+    memcpy(config.SENS_RES, atqa, RFAL_LM_SENS_RES_LEN);
+    config.SEL_RES = sak;
+    uint8_t listen_buff[256];
+    uint16_t listen_buff_size = 256;
+    uint16_t listen_buff_len = 0;
+
+    rfalLowPowerModeStop();
+    if(rfalListenStart(RFAL_LM_MASK_NFCA, &config, NULL, NULL, listen_buff, rfalConvBytesToBits(listen_buff_size), &listen_buff_len)) {
+        rfalListenStop();
+        FURI_LOG_E(TAG, "Failed to start listen mode");
+        return false;
+    }
+    while(true) {
+        uint32_t flag = osEventFlagsWait(event, EVENT_FLAG_ALL, osFlagsWaitAny, timeout);
+        rfalWorker();
+        bool data_received;
+        rfalLmState state = rfalListenGetState(&data_received, NULL);        
+        bool consumed = false;
+        if(data_received && rfalNfcaListenerIsSleepReq(listen_buff, rfalConvBitsToBytes(listen_buff_len))) {
+            if(rfalListenSleepStart(RFAL_LM_STATE_SLEEP_A, listen_buff, rfalConvBytesToBits(listen_buff_size), &listen_buff_len)) {
+                rfalListenStop();
+                FURI_LOG_E(TAG, "Failed to enter sleep mode");
+                break;
+            } else {
+                FURI_LOG_D(TAG, "Enterted sleep mode");
+                consumed = true;
+            }
+        }
+        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) && data_received && !consumed) {
+            *data_size = listen_buff_len / 8;
+            memcpy(data_rx, listen_buff, *data_size);
+            break;
+        }
+        if(flag == -2) {
+            break;
+        }
+    }
+    return *data_size > 0;
 }
 
 bool furi_hal_nfc_get_first_frame(uint8_t** rx_buff, uint16_t** rx_len) {

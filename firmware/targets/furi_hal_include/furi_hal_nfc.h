@@ -76,6 +76,15 @@ bool furi_hal_nfc_listen(
     bool activate_after_sak,
     uint32_t timeout);
 
+bool furi_hal_nfc_emulate_nfca(
+    uint8_t* uid,
+    uint8_t uid_len,
+    uint8_t* atqa,
+    uint8_t sak,
+    uint8_t* data_rx,
+    uint16_t* data_size,
+    uint32_t timeout);
+
 /** Get first command from reader after activation in emulation mode
  *
  * @param      rx_buff  pointer to receive buffer
@@ -112,6 +121,8 @@ ReturnCode furi_hal_nfc_raw_bitstream_exchange(
 /** NFC deactivate and start sleep
  */
 void furi_hal_nfc_deactivate();
+
+void furi_hal_nfc_stop();
 
 #ifdef __cplusplus
 }
