@@ -1,4 +1,6 @@
+#include "desktop/views/desktop_locked.h"
 #include <furi.h>
+#include <furi_hal.h>
 #include <applications.h>
 #include <assets_icons.h>
 #include <loader/loader.h>
@@ -8,6 +10,7 @@
 #include "desktop/desktop.h"
 #include "desktop/views/desktop_events.h"
 #include "desktop_scene.h"
+#include "desktop_scene_i.h"
 
 #define MAIN_VIEW_DEFAULT (0UL)
 
@@ -78,6 +81,7 @@ void desktop_scene_main_on_enter(void* context) {
         desktop->animation_manager, desktop_scene_main_check_animation_callback);
     animation_manager_set_interact_callback(
         desktop->animation_manager, desktop_scene_main_interact_animation_callback);
+    desktop_locked_set_callback(desktop->locked_view, desktop_scene_main_callback, desktop);
 
     furi_assert(osSemaphoreGetCount(desktop->unload_animation_semaphore) == 0);
     Loader* loader = furi_record_open("loader");
@@ -86,11 +90,21 @@ void desktop_scene_main_on_enter(void* context) {
     furi_record_close("loader");
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
-    view_port_enabled_set(desktop->lock_viewport, false);
 
-    if(scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneMain) ==
-       DesktopMainEventUnlocked) {
-        desktop_main_unlocked(desktop->main_view);
+    DesktopMainSceneState state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneMain);
+    if(state == DesktopMainSceneStateLockedNoPin) {
+        desktop_locked_lock(desktop->locked_view);
+        view_port_enabled_set(desktop->lock_viewport, true);
+    } else if(state == DesktopMainSceneStateLockedWithPin) {
+        LOAD_DESKTOP_SETTINGS(&desktop->settings);
+        furi_assert(desktop->settings.pincode.length > 0);
+        desktop_locked_lock_pincode(desktop->locked_view, desktop->settings.pincode);
+        view_port_enabled_set(desktop->lock_viewport, true);
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
+        furi_hal_usb_disable();
+    } else {
+        furi_assert(state == DesktopMainSceneStateUnlocked);
+        view_port_enabled_set(desktop->lock_viewport, false);
     }
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewMain);
@@ -159,6 +173,18 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             animation_manager_load_and_continue_animation(desktop->animation_manager);
             consumed = true;
             break;
+        case DesktopMainEventUnlocked:
+            consumed = true;
+            furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+            furi_hal_usb_enable();
+            view_port_enabled_set(desktop->lock_viewport, false);
+            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain,
+                    DesktopMainSceneStateUnlocked);
+            break;
+        case DesktopMainEventUpdate:
+            desktop_locked_update(desktop->locked_view);
+            consumed = true;
+            break;
 
         default:
             break;
@@ -186,5 +212,4 @@ void desktop_scene_main_on_exit(void* context) {
     animation_manager_set_interact_callback(desktop->animation_manager, NULL);
     animation_manager_set_context(desktop->animation_manager, desktop);
     scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain, MAIN_VIEW_DEFAULT);
-    desktop_main_reset_hint(desktop->main_view);
 }

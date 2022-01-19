@@ -3,8 +3,7 @@
 #include <gui/view.h>
 #include <gui/icon_i.h>
 #include <stdint.h>
-
-#include "dolphin/dolphin.h"
+#include <dolphin/dolphin.h>
 
 typedef struct AnimationManager AnimationManager;
 
@@ -27,7 +26,7 @@ typedef struct {
     const FrameBubble* const* frame_bubble_sequence;
     uint8_t frame_bubble_sequence_count;
     const Icon icon_animation;
-    uint8_t frame_order[16];
+    uint8_t frame_order[20];
     uint8_t passive_frames;
     uint8_t active_frames;
     uint8_t active_cycles;

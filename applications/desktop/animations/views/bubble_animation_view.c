@@ -1,22 +1,18 @@
 
 #include "../animation_manager.h"
 #include "../animation_storage.h"
-#include "furi_hal_delay.h"
-#include "furi_hal_resources.h"
-#include "furi/check.h"
-#include "furi/memmgr.h"
-#include "gui/canvas.h"
-#include "gui/elements.h"
-#include "gui/view.h"
-#include "input/input.h"
+#include "bubble_animation_view.h"
+
+#include <furi_hal.h>
 #include <furi.h>
-#include "portmacro.h"
-#include <gui/icon.h>
+#include <gui/canvas.h>
+#include <gui/elements.h>
+#include <gui/view.h>
+#include <gui/icon_i.h>
+#include <input/input.h>
 #include <stdint.h>
 #include <FreeRTOS.h>
 #include <timers.h>
-#include "bubble_animation_view.h"
-#include <gui/icon_i.h>
 #include <furi/dangerous_defines.h>
 
 #define ACTIVE_SHIFT 2
@@ -139,10 +135,6 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
                 animation_view->interact_callback(animation_view->interact_callback_context);
             }
         }
-    } else if(event->key == InputKeyBack) {
-        /* Prevent back button to fall down to common handler - leaving
-         * application, so consume */
-        consumed = true;
     }
 
     return consumed;

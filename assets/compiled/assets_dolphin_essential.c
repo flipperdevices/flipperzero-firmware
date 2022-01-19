@@ -1,4 +1,4 @@
-#include "assets_icons.h"
+#include "assets_icons.h"   // TODO: remove
 #include <assets_dolphin.h>
 #include <desktop/animations/animation_storage_i.h>
 #include <desktop/animations/animation_manager.h>
@@ -20,12 +20,17 @@ const BubbleAnimation BA_L0_NoDb_128x51 = {.icon_animation = {.width=128,.height
 extern const uint8_t *_A_L0_Url_128x51[];
 const BubbleAnimation BA_L0_Url_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_Url_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4, .frame_rate = 2};
 
+// NewMail
+extern const uint8_t *_A_L0_NewMail_128x51[];
+const BubbleAnimation BA_L0_NewMail_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=6,.frame_rate=2,.frames=_A_L0_NewMail_128x51}, .frame_order={0, 1, 2, 3, 2, 1}, .passive_frames = 6, .frame_rate = 2};
+
 const StorageAnimation StorageAnimationEssential[] = {
     /* Blocking */
-    {.animation = &BA_L0_SdBad_128x51, .meta = {.name = "L0_SdBad_128x51"}},
-    {.animation = &BA_L0_SdOk_128x51, .meta = {.name = "L0_SdOk_128x51"}},
-    {.animation = &BA_L0_NoDb_128x51, .meta = {.name = "L0_NoDb_128x51"}},
-    {.animation = &BA_L0_Url_128x51, .meta = {.name = "L0_Url_128x51"}},
+    {.animation = &BA_L0_SdBad_128x51, .manifest_info = {.name = "L0_SdBad_128x51"}},
+    {.animation = &BA_L0_SdOk_128x51, .manifest_info = {.name = "L0_SdOk_128x51"}},
+    {.animation = &BA_L0_NoDb_128x51, .manifest_info = {.name = "L0_NoDb_128x51"}},
+    {.animation = &BA_L0_Url_128x51, .manifest_info = {.name = "L0_Url_128x51"}},
+    {.animation = &BA_L0_NewMail_128x51, .manifest_info = {.name = "L0_NewMail_128x51"}},
 };
 
 const size_t StorageAnimationEssentialSize = COUNT_OF(StorageAnimationEssential);

@@ -23,6 +23,58 @@ static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
+static bool animation_storage_load_single_manifest_info(StorageAnimationManifestInfo* manifest_info, const char* name) {
+    furi_assert(manifest_info);
+
+    bool result = false;
+    Storage* storage = furi_record_open("storage");
+    FlipperFile* file = flipper_file_alloc(storage);
+    flipper_file_set_strict_mode(file, false);
+    string_t read_string;
+    string_init(read_string);
+
+    do {
+        uint32_t u32value;
+        if(FSE_OK != storage_sd_status(storage)) break;
+        if(!flipper_file_open_existing(file, ANIMATION_MANIFEST_FILE)) break;
+
+        if(!flipper_file_read_header(file, read_string, &u32value)) break;
+        if(string_cmp_str(read_string, "Flipper Animation Manifest")) break;
+
+        manifest_info->name = NULL;
+
+        while(flipper_file_read_string(file, "Name", read_string) && string_cmp_str(read_string, name))
+            ;
+        if(string_cmp_str(read_string, name)) break;
+
+        manifest_info->name = furi_alloc(string_size(read_string) + 1);
+        strcpy((char*)manifest_info->name, string_get_cstr(read_string));
+
+        if(!flipper_file_read_uint32(file, "Min butthurt", &u32value, 1)) break;
+        manifest_info->min_butthurt = u32value;
+        if(!flipper_file_read_uint32(file, "Max butthurt", &u32value, 1)) break;
+        manifest_info->max_butthurt = u32value;
+        if(!flipper_file_read_uint32(file, "Min level", &u32value, 1)) break;
+        manifest_info->min_level = u32value;
+        if(!flipper_file_read_uint32(file, "Max level", &u32value, 1)) break;
+        manifest_info->max_level = u32value;
+        if(!flipper_file_read_uint32(file, "Weight", &u32value, 1)) break;
+        manifest_info->weight = u32value;
+        result = true;
+    } while(0);
+
+    if (!result && manifest_info->name) {
+        free((void*) manifest_info->name);
+    }
+    string_clear(read_string);
+    flipper_file_close(file);
+    flipper_file_free(file);
+
+    furi_record_close("storage");
+
+    return result;
+}
+
 void animation_storage_fill_animation_list(StorageAnimationList_t* animation_list) {
     furi_assert(sizeof(StorageAnimationList_t) == sizeof(void*));
     furi_assert(!StorageAnimationList_size(*animation_list));
@@ -46,22 +98,22 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
             storage_animation = furi_alloc(sizeof(StorageAnimation));
             storage_animation->external = true;
             storage_animation->animation = NULL;
-            storage_animation->meta.name = NULL;
+            storage_animation->manifest_info.name = NULL;
 
             if(!flipper_file_read_string(file, "Name", read_string)) break;
-            storage_animation->meta.name = furi_alloc(string_size(read_string) + 1);
-            strcpy((char*)storage_animation->meta.name, string_get_cstr(read_string));
+            storage_animation->manifest_info.name = furi_alloc(string_size(read_string) + 1);
+            strcpy((char*)storage_animation->manifest_info.name, string_get_cstr(read_string));
 
             if(!flipper_file_read_uint32(file, "Min butthurt", &u32value, 1)) break;
-            storage_animation->meta.min_butthurt = u32value;
+            storage_animation->manifest_info.min_butthurt = u32value;
             if(!flipper_file_read_uint32(file, "Max butthurt", &u32value, 1)) break;
-            storage_animation->meta.max_butthurt = u32value;
+            storage_animation->manifest_info.max_butthurt = u32value;
             if(!flipper_file_read_uint32(file, "Min level", &u32value, 1)) break;
-            storage_animation->meta.min_level = u32value;
+            storage_animation->manifest_info.min_level = u32value;
             if(!flipper_file_read_uint32(file, "Max level", &u32value, 1)) break;
-            storage_animation->meta.max_level = u32value;
+            storage_animation->manifest_info.max_level = u32value;
             if(!flipper_file_read_uint32(file, "Weight", &u32value, 1)) break;
-            storage_animation->meta.weight = u32value;
+            storage_animation->manifest_info.weight = u32value;
 
             StorageAnimationList_push_back(*animation_list, storage_animation);
         } while(1);
@@ -88,7 +140,7 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
     StorageAnimation* storage_animation = NULL;
 
     for(int i = 0; i < StorageAnimationEssentialSize; ++i) {
-        if(!strcmp(StorageAnimationEssential[i].meta.name, name)) {
+        if(!strcmp(StorageAnimationEssential[i].manifest_info.name, name)) {
             storage_animation = (StorageAnimation*)&StorageAnimationEssential[i];
             break;
         }
@@ -96,7 +148,7 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
 
     if(!storage_animation) {
         for(int i = 0; i < StorageAnimationInternalSize; ++i) {
-            if(!strcmp(StorageAnimationInternal[i].meta.name, name)) {
+            if(!strcmp(StorageAnimationInternal[i].manifest_info.name, name)) {
                 storage_animation = (StorageAnimation*) &StorageAnimationInternal[i];
                 break;
             }
@@ -105,32 +157,26 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
 
     /* look through external animations */
     if(!storage_animation) {
-        BubbleAnimation* animation = animation_storage_load_animation(name);
+        storage_animation = furi_alloc(sizeof(StorageAnimation));
+        storage_animation->external = true;
 
-        if(animation != NULL) {
-            storage_animation = furi_alloc(sizeof(StorageAnimation));
-            storage_animation->animation = animation;
-            storage_animation->external = true;
-            /* meta data takes part in random animation selection, so it
-             * doesn't need here as we exactly know which animation we need,
-             * that's why we can ignore reading manifest.txt file
-             * filling meta data by zeroes */
-            storage_animation->meta.min_butthurt = 0;
-            storage_animation->meta.max_butthurt = 0;
-            storage_animation->meta.min_level = 0;
-            storage_animation->meta.max_level = 0;
-            storage_animation->meta.weight = 0;
-            storage_animation->meta.name = furi_alloc(strlen(name) + 1);
-            strcpy((char*)storage_animation->meta.name, name);
+        bool result = false;
+        result = animation_storage_load_single_manifest_info(&storage_animation->manifest_info, name);
+        if (result) {
+            storage_animation->animation = animation_storage_load_animation(name);
+            result = !!storage_animation->animation;
+        }
+        if(!result) {
+            animation_storage_free_storage_animation(&storage_animation);
         }
     }
 
     return storage_animation;
 }
 
-StorageAnimationMeta* animation_storage_get_meta(StorageAnimation* storage_animation) {
+StorageAnimationManifestInfo* animation_storage_get_meta(StorageAnimation* storage_animation) {
     furi_assert(storage_animation);
-    return &storage_animation->meta;
+    return &storage_animation->manifest_info;
 }
 
 const BubbleAnimation*
@@ -146,7 +192,7 @@ void animation_storage_cache_animation(StorageAnimation* storage_animation) {
     if(storage_animation->external) {
         if(!storage_animation->animation) {
             storage_animation->animation =
-                animation_storage_load_animation(storage_animation->meta.name);
+                animation_storage_load_animation(storage_animation->manifest_info.name);
         }
     }
 }
@@ -169,8 +215,8 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
     if((*storage_animation)->external) {
         animation_storage_free_animation((BubbleAnimation**)&(*storage_animation)->animation);
 
-        if((*storage_animation)->meta.name) {
-            free((void*)(*storage_animation)->meta.name);
+        if((*storage_animation)->manifest_info.name) {
+            free((void*)(*storage_animation)->manifest_info.name);
         }
         free(*storage_animation);
     }

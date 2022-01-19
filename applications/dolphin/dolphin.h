@@ -5,6 +5,10 @@
 #include "helpers/dolphin_deed.h"
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Dolphin Dolphin;
 
 typedef struct {
@@ -18,6 +22,14 @@ typedef struct {
 typedef enum {
     DolphinPubsubEventUpdate,
 } DolphinPubsubEvent;
+
+#define DOLPHIN_DEED(deed)  do {                                    \
+    /* dbg_ */  \
+        FURI_LOG_W("DEED", #deed);                            \
+        Dolphin* dolphin = (Dolphin*) furi_record_open("dolphin");  \
+        dolphin_deed(dolphin, deed);                                \
+        furi_record_close("dolphin");                               \
+    } while(0)
 
 /** Deed complete notification. Call it on deed completion.
  * See dolphin_deed.h for available deeds. In futures it will become part of assets.
@@ -38,3 +50,8 @@ void dolphin_flush(Dolphin* dolphin);
 void dolphin_upgrade_level(Dolphin* dolphin);
 
 FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
+
+#ifdef __cplusplus
+}
+#endif
+

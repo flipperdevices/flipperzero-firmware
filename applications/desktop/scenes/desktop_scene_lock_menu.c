@@ -1,3 +1,4 @@
+#include "desktop/scenes/desktop_scene_i.h"
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
 #include <furi_hal.h>
@@ -29,17 +30,15 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
         switch(event.event) {
         case DesktopLockMenuEventLock:
             scene_manager_set_scene_state(
-                desktop->scene_manager, DesktopSceneLocked, DesktopLockedNoPin);
-            scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
+                desktop->scene_manager, DesktopSceneMain, DesktopMainSceneStateLockedNoPin);
+            scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
             consumed = true;
             break;
         case DesktopLockMenuEventPinLock:
             if(desktop->settings.pincode.length > 0) {
-                furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-                furi_hal_usb_disable();
                 scene_manager_set_scene_state(
-                    desktop->scene_manager, DesktopSceneLocked, DesktopLockedWithPin);
-                scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
+                    desktop->scene_manager, DesktopSceneMain, DesktopMainSceneStateLockedWithPin);
+                scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
             } else {
                 scene_manager_next_scene(desktop->scene_manager, DesktopScenePinSetup);
             }

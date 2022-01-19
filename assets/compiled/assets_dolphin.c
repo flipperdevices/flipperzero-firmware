@@ -26,13 +26,13 @@ const BubbleAnimation BA_L1_NoSd_128x49 = {.icon_animation = {.width=128,.height
 const StorageAnimation StorageAnimationInternal[] = {
     /* System */
     {.animation = &BA_L1_BadBattery_128x47,
-     .meta = {.name = "L1_BadBattery_128x47", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 3,}},
+     .manifest_info = {.name = "L1_BadBattery_128x47", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 3,}},
     {.animation = &BA_L1_NoSd_128x49,
-     .meta = {.name = "L1_NoSd_128x49", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 6,}},
+     .manifest_info = {.name = "L1_NoSd_128x49", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 6,}},
 
     /* Idle */
     {.animation = &BA_L1_Tv_128x47,
-     .meta = {.name = "L1_Tv_128x47", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 3,}},
+     .manifest_info = {.name = "L1_Tv_128x47", .min_butthurt = 0, .max_butthurt = 14, .min_level = 1, .max_level = 3, .weight = 3,}},
 };
 
 const size_t StorageAnimationInternalSize = COUNT_OF(StorageAnimationInternal);

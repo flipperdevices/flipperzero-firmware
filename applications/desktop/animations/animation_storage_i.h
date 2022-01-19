@@ -5,5 +5,5 @@
 struct StorageAnimation {
     const BubbleAnimation* animation;
     bool external;
-    StorageAnimationMeta meta;
+    StorageAnimationManifestInfo manifest_info;
 };

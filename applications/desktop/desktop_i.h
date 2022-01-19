@@ -9,7 +9,7 @@
 #include "views/desktop_debug.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
-#include <gui/view_composite.h>
+#include <gui/view_stack.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -44,12 +44,11 @@ struct Desktop {
     DesktopDebugView* debug_view;
     CodeInput* code_input;
 
-    View* dolphin_view;
     DesktopMainView* main_view;
     DesktopLockedView* locked_view;
 
-    ViewComposite* main_view_composite;
-    ViewComposite* locked_view_composite;
+    ViewStack* main_view_stack;
+    ViewStack* locked_view_stack;
 
     DesktopSettings settings;
     PinCode pincode_buffer;
