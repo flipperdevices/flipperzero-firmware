@@ -277,6 +277,16 @@ void furi_hal_bt_nvm_sram_sem_release() {
     HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
+bool furi_hal_bt_clear_white_list() {
+    furi_hal_bt_nvm_sram_sem_acquire();
+    tBleStatus status = aci_gap_clear_security_db();
+    if(status) {
+        FURI_LOG_E(TAG, "Clear while list failed with status %d", status);
+    }
+    furi_hal_bt_nvm_sram_sem_release();
+    return status != BLE_STATUS_SUCCESS;
+}
+
 void furi_hal_bt_dump_state(string_t buffer) {
     if(furi_hal_bt_is_alive()) {
         uint8_t HCI_Version;

@@ -95,12 +95,14 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         meta_evt = (evt_le_meta_event*)event_pckt->data;
         switch(meta_evt->subevent) {
         case EVT_LE_CONN_UPDATE_COMPLETE: {
-            hci_le_connection_update_complete_event_rp0* event = (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
-            FURI_LOG_W(TAG, "Connection parameters:\r\n"
-                            "Connection interval: %d\r\n"
-                            "Connection latency: %d\r\n"
-                            "Supervision timeout: %d\r\n",
-                            event->Conn_Interval, event->Conn_Latency, event->Supervision_Timeout);
+            hci_le_connection_update_complete_event_rp0* event =
+                (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
+            FURI_LOG_D(
+                TAG,
+                "Connection interal: %d, latency: %d, supervision timeout: %d",
+                event->Conn_Interval,
+                event->Conn_Latency,
+                event->Supervision_Timeout);
             break;
         }
 
@@ -136,7 +138,8 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             gap->state = GapStateConnected;
             gap->service.connection_handle = connection_complete_event->Connection_Handle;
 
-            if(aci_l2cap_connection_parameter_update_req(gap->service.connection_handle, 0x0C, 0x18, 10, 500)) {
+            if(aci_l2cap_connection_parameter_update_req(
+                   gap->service.connection_handle, 0x18, 0x18 * 2, 20, 500)) {
                 FURI_LOG_W(TAG, "Failed to request connection parameters update");
             }
 
@@ -194,28 +197,28 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
         } break;
 
         case EVT_BLUE_GAP_AUTHORIZATION_REQUEST:
-            FURI_LOG_I(TAG, "Authorization request event");
+            FURI_LOG_D(TAG, "Authorization request event");
             break;
 
         case EVT_BLUE_GAP_SLAVE_SECURITY_INITIATED:
-            FURI_LOG_I(TAG, "Slave security initiated");
+            FURI_LOG_D(TAG, "Slave security initiated");
             break;
 
         case EVT_BLUE_GAP_BOND_LOST:
-            FURI_LOG_I(TAG, "Bond lost event. Start rebonding");
+            FURI_LOG_D(TAG, "Bond lost event. Start rebonding");
             aci_gap_allow_rebond(gap->service.connection_handle);
             break;
 
         case EVT_BLUE_GAP_DEVICE_FOUND:
-            FURI_LOG_I(TAG, "Device found event");
+            FURI_LOG_D(TAG, "Device found event");
             break;
 
         case EVT_BLUE_GAP_ADDR_NOT_RESOLVED:
-            FURI_LOG_I(TAG, "Address not resolved event");
+            FURI_LOG_D(TAG, "Address not resolved event");
             break;
 
         case EVT_BLUE_GAP_KEYPRESS_NOTIFICATION:
-            FURI_LOG_I(TAG, "Key press notification event");
+            FURI_LOG_D(TAG, "Key press notification event");
             break;
 
         case EVT_BLUE_GAP_NUMERIC_COMPARISON_VALUE: {
@@ -244,11 +247,12 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             break;
 
         case EVT_BLUE_GAP_PROCEDURE_COMPLETE:
-            FURI_LOG_I(TAG, "Procedure complete event");
+            FURI_LOG_D(TAG, "Procedure complete event");
             break;
 
         case EVT_BLUE_L2CAP_CONNECTION_UPDATE_RESP: {
-            uint16_t result = ((aci_l2cap_connection_update_resp_event_rp0*)(blue_evt->data))->Result;
+            uint16_t result =
+                ((aci_l2cap_connection_update_resp_event_rp0*)(blue_evt->data))->Result;
             if(result == 0) {
                 FURI_LOG_D(TAG, "Connection parameters accepted");
             } else if(result == 1) {
@@ -256,7 +260,6 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
             }
             break;
         }
-
         }
     default:
         break;
