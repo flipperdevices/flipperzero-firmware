@@ -57,7 +57,7 @@ void nfc_worker_stop(NfcWorker* nfc_worker) {
     if(nfc_worker->state == NfcWorkerStateBroken || nfc_worker->state == NfcWorkerStateReady) {
         return;
     }
-
+    furi_hal_nfc_stop();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateStop);
 }
 
@@ -142,11 +142,20 @@ void nfc_worker_detect(NfcWorker* nfc_worker) {
 
 void nfc_worker_emulate(NfcWorker* nfc_worker) {
     NfcDeviceCommonData* data = &nfc_worker->dev_data->nfc_data;
+    NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
     while(nfc_worker->state == NfcWorkerStateEmulate) {
-        if(furi_hal_nfc_listen(data->uid, data->uid_len, data->atqa, data->sak, false, 100)) {
-            FURI_LOG_D(TAG, "Reader detected");
+        if(furi_hal_nfc_emulate_nfca(
+               data->uid,
+               data->uid_len,
+               data->atqa,
+               data->sak,
+               reader_data->data,
+               &reader_data->size,
+               100)) {
+            if(nfc_worker->callback) {
+                nfc_worker->callback(nfc_worker->context);
+            }
         }
-        osDelay(10);
     }
 }
 

@@ -1,59 +1,140 @@
 #include "../nfc_i.h"
 
-void nfc_scene_emulate_uid_on_enter(void* context) {
-    Nfc* nfc = (Nfc*)context;
+#define NFC_EMULATE_UID_WORKER_CUSTOM_EVENT (10UL)
+#define NFC_EMULATE_UID_TEXTBOX_EVENT (11UL)
 
-    // Setup view
-    Popup* popup = nfc->popup;
-    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+enum {
+    NfcSceneEmulateUidStateWidget,
+    NfcSceneEmulateUidStateTextBox,
+};
 
-    if(strcmp(nfc->dev->dev_name, "")) {
-        nfc_text_store_set(nfc, "%s", nfc->dev->dev_name);
-    } else if(data->uid_len == 4) {
-        nfc_text_store_set(
-            nfc, "%02X %02X %02X %02X", data->uid[0], data->uid[1], data->uid[2], data->uid[3]);
-    } else if(data->uid_len == 7) {
-        nfc_text_store_set(
-            nfc,
-            "%02X %02X %02X %02X\n%02X %02X %02X",
-            data->uid[0],
-            data->uid[1],
-            data->uid[2],
-            data->uid[3],
-            data->uid[4],
-            data->uid[5],
-            data->uid[6]);
+void nfc_emulate_uid_worker_callback(void* context) {
+    furi_assert(context);
+    Nfc* nfc = context;
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_EMULATE_UID_WORKER_CUSTOM_EVENT);
+}
+
+void nfc_scene_emulate_uid_widget_callback(GuiButtonType result, InputType type, void* context) {
+    furi_assert(context);
+    Nfc* nfc = context;
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
+}
 
-    popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-    popup_set_header(popup, "Emulating UID", 56, 31, AlignLeft, AlignTop);
-    popup_set_text(popup, nfc->text_store, 56, 43, AlignLeft, AlignTop);
+void nfc_emulate_uid_textbox_callback(void* context) {
+    furi_assert(context);
+    Nfc* nfc = context;
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_EMULATE_UID_TEXTBOX_EVENT);
+}
 
-    // Setup and start worker
+// Add widget with device name or inform that data received
+static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
+    NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
+    Widget* widget = nfc->widget;
+    widget_clear(widget);
+    string_t info_str;
+    string_init(info_str);
 
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    nfc_worker_start(nfc->worker, NfcWorkerStateEmulate, &nfc->dev->dev_data, NULL, nfc);
+    widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61);
+    widget_add_string_element(widget, 56, 32, AlignLeft, AlignTop, FontPrimary, "Emulating UID");
+    if(data_received) {
+        string_printf(info_str, "Received data");
+        widget_add_button_element(
+            widget, GuiButtonTypeCenter, "Data", nfc_scene_emulate_uid_widget_callback, nfc);
+    } else if(strcmp(nfc->dev->dev_name, "")) {
+        string_printf(info_str, "%s", nfc->dev->dev_name);
+    } else {
+        for(uint8_t i = 0; i < data->uid_len; i++) {
+            string_cat_printf(info_str, "%02X ", data->uid[i]);
+        }
+    }
+    string_strim(info_str);
+    widget_add_text_box_element(
+        widget, 56, 43, 70, 21, AlignLeft, AlignTop, string_get_cstr(info_str));
+    string_clear(info_str);
+}
+
+void nfc_scene_emulate_uid_on_enter(void* context) {
+    Nfc* nfc = context;
+
+    // Setup Widget
+    nfc_scene_emulate_uid_widget_config(nfc, false);
+    // Setup TextBox
+    TextBox* text_box = nfc->text_box;
+    text_box_set_font(text_box, TextBoxFontHex);
+    text_box_set_focus(text_box, TextBoxFocusEnd);
+    string_reset(nfc->text_box_store);
+
+    // Set Widget state and view
+    scene_manager_set_scene_state(
+        nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateWidget);
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
+    // Start worker
+    nfc_worker_start(
+        nfc->worker,
+        NfcWorkerStateEmulate,
+        &nfc->dev->dev_data,
+        nfc_emulate_uid_worker_callback,
+        nfc);
 }
 
 bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
+    NfcReaderRequestData* reader_data = &nfc->dev->dev_data.reader_data;
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateUid);
+    bool consumed = false;
 
     if(event.type == SceneManagerEventTypeTick) {
         notification_message(nfc->notifications, &sequence_blink_blue_10);
-        return true;
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == NFC_EMULATE_UID_WORKER_CUSTOM_EVENT) {
+            // Add data button to widget if data is received for the first time
+            if(!string_size(nfc->text_box_store)) {
+                nfc_scene_emulate_uid_widget_config(nfc, true);
+            }
+            // Update TextBox data
+            string_cat_printf(nfc->text_box_store, "R:");
+            for(uint16_t i = 0; i < reader_data->size; i++) {
+                string_cat_printf(nfc->text_box_store, " %02X", reader_data->data[i]);
+            }
+            string_push_back(nfc->text_box_store, '\n');
+            text_box_set_text(nfc->text_box, string_get_cstr(nfc->text_box_store));
+            consumed = true;
+        } else if(event.event == GuiButtonTypeCenter && state == NfcSceneEmulateUidStateWidget) {
+            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateTextBox);
+            consumed = true;
+        } else if(
+            event.event == NFC_EMULATE_UID_TEXTBOX_EVENT &&
+            state == NfcSceneEmulateUidStateTextBox) {
+            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateWidget);
+            consumed = true;
+        }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        if(state == NfcSceneEmulateUidStateTextBox) {
+            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateWidget);
+            consumed = true;
+        }
     }
-    return false;
+
+    return consumed;
 }
 
 void nfc_scene_emulate_uid_on_exit(void* context) {
-    Nfc* nfc = (Nfc*)context;
+    Nfc* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);
 
     // Clear view
-    Popup* popup = nfc->popup;
-    popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
-    popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
-    popup_set_icon(popup, 0, 0, NULL);
+    widget_clear(nfc->widget);
+    text_box_clean(nfc->text_box);
+    string_reset(nfc->text_box_store);
 }
