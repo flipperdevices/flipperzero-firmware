@@ -153,6 +153,27 @@ static bool variable_item_list_input_callback(InputEvent* event, void* context) 
         default:
             break;
         }
+    } else if(event->type == InputTypeRepeat) {
+        switch(event->key) {
+        case InputKeyUp:
+            consumed = true;
+            variable_item_list_process_up(variable_item_list);
+            break;
+        case InputKeyDown:
+            consumed = true;
+            variable_item_list_process_down(variable_item_list);
+            break;
+        case InputKeyLeft:
+            consumed = true;
+            variable_item_list_process_left(variable_item_list);
+            break;
+        case InputKeyRight:
+            consumed = true;
+            variable_item_list_process_right(variable_item_list);
+            break;
+        default:
+            break;
+        }
     }
 
     return consumed;
