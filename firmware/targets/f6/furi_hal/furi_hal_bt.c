@@ -42,12 +42,13 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .bonding_mode = true,
                     .pairing_method = GapPairingPinCodeShow,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
-                    .conn_param = {
-                        .conn_int_min = 0x06,
-                        .conn_int_max = 0x18,
-                        .slave_latency = 2,
-                        .supervisor_timeout = 200,
-                    },
+                    .conn_param =
+                        {
+                            .conn_int_min = 0x06,
+                            .conn_int_max = 0x18,
+                            .slave_latency = 2,
+                            .supervisor_timeout = 200,
+                        },
                 },
         },
     [FuriHalBtProfileHidKeyboard] =
@@ -62,12 +63,13 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .pairing_method = GapPairingPinCodeVerifyYesNo,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
                     // TODO optimize
-                    .conn_param = {
-                        .conn_int_min = 0x18,
-                        .conn_int_max = 0x30,
-                        .slave_latency = 20,
-                        .supervisor_timeout = 500,
-                    },
+                    .conn_param =
+                        {
+                            .conn_int_min = 0x18,
+                            .conn_int_max = 0x30,
+                            .slave_latency = 20,
+                            .supervisor_timeout = 500,
+                        },
                 },
         },
 };
