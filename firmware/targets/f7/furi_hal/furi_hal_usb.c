@@ -152,11 +152,11 @@ static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_
     case USB_DTYPE_STRING:
         if(dnumber == UsbDevLang) {
             desc = &dev_lang_desc;
-        } else if(dnumber == UsbDevManuf) {
+        } else if((dnumber == UsbDevManuf) && (usb_if_cur->str_manuf_descr != NULL)) {
             desc = usb_if_cur->str_manuf_descr;
-        } else if(dnumber == UsbDevProduct) {
+        } else if((dnumber == UsbDevProduct) && (usb_if_cur->str_prod_descr != NULL)) {
             desc = usb_if_cur->str_prod_descr;
-        } else if(dnumber == UsbDevSerial) {
+        } else if((dnumber == UsbDevSerial) && (usb_if_cur->str_serial_descr != NULL)) {
             desc = usb_if_cur->str_serial_descr;
         } else
             return usbd_fail;
