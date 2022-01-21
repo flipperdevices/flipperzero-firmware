@@ -29,8 +29,7 @@ void lp5562_enable(FuriHalI2cBusHandle* handle) {
     delay_us(500);
 }
 
-void 
-lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
+void lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
     uint8_t reg_no;
     if(channel == LP5562ChannelRed) {
         reg_no = LP5562_CHANNEL_RED_CURRENT_REGISTER;
