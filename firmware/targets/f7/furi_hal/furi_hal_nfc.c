@@ -18,11 +18,11 @@ void furi_hal_nfc_init() {
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
+        event = osEventFlagsNew(NULL);
         FURI_LOG_I(TAG, "Init OK");
     } else {
         FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
     }
-    event = osEventFlagsNew(NULL);
 }
 
 bool furi_hal_nfc_is_busy() {
@@ -154,7 +154,7 @@ void rfal_interrupt_callback_handler() {
     osEventFlagsSet(event, EVENT_FLAG_INTERRUPT);
 }
 
-void rfal_state_changes_callback(void* context) {
+void rfal_state_changed_callback(void* context) {
     osEventFlagsSet(event, EVENT_FLAG_STATE_CHANGED);
 }
 
@@ -169,67 +169,74 @@ bool furi_hal_nfc_emulate_nfca(
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak,
-    uint8_t* data_rx,
-    uint16_t* data_size,
+    FuriHalNfcEmulateCallback callback,
+    void* context,
     uint32_t timeout) {
     rfalSetUpperLayerCallback(rfal_interrupt_callback_handler);
-    rfal_set_state_changed_callback(rfal_state_changes_callback);
+    rfal_set_state_changed_callback(rfal_state_changed_callback);
 
     rfalLmConfPA config;
     config.nfcidLen = uid_len;
     memcpy(config.nfcid, uid, uid_len);
     memcpy(config.SENS_RES, atqa, RFAL_LM_SENS_RES_LEN);
     config.SEL_RES = sak;
-    uint8_t listen_buff[256];
-    uint16_t listen_buff_size = 256;
-    uint16_t listen_buff_len = 0;
+    uint8_t buff_rx[256];
+    uint16_t buff_rx_size = 256;
+    uint16_t buff_rx_len = 0;
+    uint8_t buff_tx[256];
+    uint16_t buff_tx_len = 0;
+    uint32_t data_type = FURI_HAL_NFC_TXRX_DEFAULT;
 
     rfalLowPowerModeStop();
-    if(rfalListenStart(
-           RFAL_LM_MASK_NFCA,
-           &config,
-           NULL,
-           NULL,
-           listen_buff,
-           rfalConvBytesToBits(listen_buff_size),
-           &listen_buff_len)) {
+    if(rfalListenStart(RFAL_LM_MASK_NFCA, &config, NULL, NULL, buff_rx, rfalConvBytesToBits(buff_rx_size), &buff_rx_len)) {
         rfalListenStop();
         FURI_LOG_E(TAG, "Failed to start listen mode");
         return false;
     }
     while(true) {
+        buff_rx_len = 0;
+        buff_tx_len = 0;
         uint32_t flag = osEventFlagsWait(event, EVENT_FLAG_ALL, osFlagsWaitAny, timeout);
-        memset(listen_buff, 0, sizeof(listen_buff));
-        bool data_received = false;
-        listen_buff_len = 0;
-        rfalWorker();
-        rfalLmState state = rfalListenGetState(&data_received, NULL);
-        if(data_received &&
-           rfalNfcaListenerIsSleepReq(listen_buff, rfalConvBitsToBytes(listen_buff_len))) {
-            if(rfalListenSleepStart(
-                   RFAL_LM_STATE_SLEEP_A,
-                   listen_buff,
-                   rfalConvBytesToBits(listen_buff_size),
-                   &listen_buff_len)) {
-                rfalListenStop();
-                FURI_LOG_E(TAG, "Failed to enter sleep mode");
-                break;
-            } else {
-                FURI_LOG_D(TAG, "Enterted sleep mode");
-                continue;
-            }
-        }
-        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
-           data_received) {
-            *data_size = listen_buff_len / 8;
-            memcpy(data_rx, listen_buff, *data_size);
-            break;
-        }
         if(flag == osErrorTimeout) {
             break;
         }
+        if(flag == EVENT_FLAG_STOP) {
+            break;
+        }
+        bool data_received = false;
+        buff_rx_len = 0;
+        rfalWorker();
+        rfalLmState state = rfalListenGetState(&data_received, NULL);
+        if(data_received) {
+            rfalTransceiveBlockingRx();
+        }
+        if(data_received && rfalNfcaListenerIsSleepReq(buff_rx, rfalConvBitsToBytes(buff_rx_len))) {
+            if(rfalListenSleepStart(RFAL_LM_STATE_SLEEP_A, buff_rx, rfalConvBytesToBits(buff_rx_size), &buff_rx_len)) {
+                FURI_LOG_E(TAG, "Failed to enter sleep mode");
+                break;
+            } else {
+                continue;
+            }
+        }
+        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) && data_received) {
+            data_received = false;
+            if(callback) {
+                callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
+            }
+            if(!rfalIsExtFieldOn()) {
+                break;
+            }
+            if(buff_tx_len) {
+                if(rfalTransceiveBitsBlockingTx(buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000)) {
+                    FURI_LOG_W(TAG, "Transeive failed");
+                }
+            } else {
+                break;
+            }
+        }
     }
-    return *data_size > 0;
+    rfalListenStop();
+    return true;
 }
 
 bool furi_hal_nfc_get_first_frame(uint8_t** rx_buff, uint16_t** rx_len) {

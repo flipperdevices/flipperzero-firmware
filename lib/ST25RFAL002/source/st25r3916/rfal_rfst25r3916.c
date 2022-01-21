@@ -1533,6 +1533,30 @@ ReturnCode rfalTransceiveBlockingTx(
     return rfalTransceiveRunBlockingTx();
 }
 
+ReturnCode rfalTransceiveBitsBlockingTx(
+    uint8_t* txBuf,
+    uint16_t txBufLen,
+    uint8_t* rxBuf,
+    uint16_t rxBufLen,
+    uint16_t* actLen,
+    uint32_t flags,
+    uint32_t fwt) {
+    ReturnCode ret;
+    rfalTransceiveContext ctx = {
+        .rxBuf = rxBuf,
+        .rxBufLen = rxBufLen,
+        .rxRcvdLen = actLen,
+        .txBuf = txBuf,
+        .txBufLen = txBufLen,
+        .flags = flags,
+        .fwt = fwt,
+    };
+
+    EXIT_ON_ERR(ret, rfalStartTransceive(&ctx));
+
+    return rfalTransceiveRunBlockingTx();
+}
+
 /*******************************************************************************/
 static ReturnCode rfalTransceiveRunBlockingTx(void) {
     ReturnCode ret;
