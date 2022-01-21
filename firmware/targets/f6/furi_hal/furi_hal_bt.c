@@ -44,10 +44,10 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
                     .conn_param =
                         {
-                            .conn_int_min = 0x06,
+                            .conn_int_min = 0x08,
                             .conn_int_max = 0x18,
-                            .slave_latency = 2,
-                            .supervisor_timeout = 500,
+                            .slave_latency = 0,
+                            .supervisor_timeout = 50,
                         },
                 },
         },

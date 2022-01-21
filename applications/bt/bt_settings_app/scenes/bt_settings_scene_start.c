@@ -10,8 +10,8 @@ enum BtSetting {
 };
 
 const char* const bt_settings_text[BtSettingNum] = {
-    "Off",
-    "On",
+    "OFF",
+    "ON",
 };
 
 static void bt_settings_scene_start_var_list_change_callback(VariableItem* item) {
