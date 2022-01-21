@@ -1,5 +1,6 @@
 #include "lp5562.h"
 #include "lp5562_reg.h"
+#include <furi_hal.h>
 
 #include <stdio.h>
 
@@ -24,6 +25,8 @@ void lp5562_configure(FuriHalI2cBusHandle* handle) {
 void lp5562_enable(FuriHalI2cBusHandle* handle) {
     Reg00_Enable reg = {.CHIP_EN = true, .LOG_EN = true};
     furi_hal_i2c_write_reg_8(handle, LP5562_ADDRESS, 0x00, *(uint8_t*)&reg, LP5562_I2C_TIMEOUT);
+    //>488μs delay is required after writing to 0x00 register, otherwise program engine will not work
+    delay_us(500);
 }
 
 void lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
@@ -107,6 +110,10 @@ void lp5562_execute_program(
     if((eng < LP5562Engine1) || (eng > LP5562Engine3)) return;
     uint8_t reg_val = 0;
     uint8_t bit_offset = 0;
+    uint8_t enable_reg = 0;
+
+    // Read old value of enable register
+    furi_hal_i2c_read_reg_8(handle, LP5562_ADDRESS, 0x00, &enable_reg, LP5562_I2C_TIMEOUT);
 
     // Engine configuration
     bit_offset = (3 - eng) * 2;
@@ -114,17 +121,20 @@ void lp5562_execute_program(
     reg_val &= ~(0x3 << bit_offset);
     reg_val |= (0x01 << bit_offset); // load
     furi_hal_i2c_write_reg_8(handle, LP5562_ADDRESS, 0x01, reg_val, LP5562_I2C_TIMEOUT);
+    delay_us(100);
 
     // Program load
     for(uint8_t i = 0; i < 16; i++) {
-        // Program words are big-endian, so it's not possible to load them at once with furi_hal_i2c_write_mem
-        furi_hal_i2c_write_reg_16(
-            handle,
-            LP5562_ADDRESS,
-            0x10 + (0x20 * (eng - 1)) + i * 2,
-            program[i],
-            LP5562_I2C_TIMEOUT);
+        // Program words are big-endian, so reverse byte order before loading
+        program[i] = __REV16(program[i]);
     }
+    furi_hal_i2c_write_mem(
+        handle,
+        LP5562_ADDRESS,
+        0x10 + (0x20 * (eng - 1)),
+        (uint8_t*)program,
+        16 * 2,
+        LP5562_I2C_TIMEOUT);
 
     // Program start
     bit_offset = (3 - eng) * 2;
@@ -133,13 +143,12 @@ void lp5562_execute_program(
     reg_val |= (0x02 << bit_offset); // run
     furi_hal_i2c_write_reg_8(handle, LP5562_ADDRESS, 0x01, reg_val, LP5562_I2C_TIMEOUT);
 
-    furi_hal_i2c_read_reg_8(handle, LP5562_ADDRESS, 0x00, &reg_val, LP5562_I2C_TIMEOUT);
-    reg_val &= ~(0x3 << bit_offset);
-    reg_val |= (0x02 << bit_offset); // run
-    furi_hal_i2c_write_reg_8(handle, LP5562_ADDRESS, 0x00, reg_val, LP5562_I2C_TIMEOUT);
-
     // Switch output to Execution Engine
     lp5562_set_channel_src(handle, ch, eng);
+
+    enable_reg &= ~(0x3 << bit_offset);
+    enable_reg |= (0x02 << bit_offset); // run
+    furi_hal_i2c_write_reg_8(handle, LP5562_ADDRESS, 0x00, enable_reg, LP5562_I2C_TIMEOUT);
 }
 
 void lp5562_execute_ramp(
