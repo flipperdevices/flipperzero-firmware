@@ -2,7 +2,9 @@
 
 #include "usb.h"
 
-typedef struct {
+typedef struct FuriHalUsbInterface FuriHalUsbInterface;
+
+struct FuriHalUsbInterface {
     void (*init)(usbd_device* dev, FuriHalUsbInterface* intf);
     void (*deinit)(usbd_device* dev);
     void (*wakeup)(usbd_device* dev);
@@ -15,7 +17,7 @@ typedef struct {
     void* str_serial_descr;
 
     void* cfg_descr;
-} FuriHalUsbInterface;
+};
 
 /** USB device interface modes */
 extern FuriHalUsbInterface usb_cdc_single;
