@@ -40,5 +40,5 @@ bool bt_settings_scene_forget_dev_confirm_on_event(void* context, SceneManagerEv
 
 void bt_settings_scene_forget_dev_confirm_on_exit(void* context) {
     BtSettingsApp* app = context;
-    dialog_ex_clean(app->dialog);
+    dialog_ex_reset(app->dialog);
 }

@@ -123,11 +123,11 @@ void popup_enable_timeout(Popup* popup);
  */
 void popup_disable_timeout(Popup* popup);
 
-/** Clean popup
+/** Reset popup instance state
  *
  * @param       popup Popup instance
  */
-void popup_clean(Popup* popup);
+void popup_reset(Popup* popup);
 
 #ifdef __cplusplus
 }

@@ -228,7 +228,7 @@ void popup_disable_timeout(Popup* popup) {
     popup->timer_enabled = false;
 }
 
-void popup_clean(Popup* popup) {
+void popup_reset(Popup* popup) {
     furi_assert(popup);
 
     with_view_model(
