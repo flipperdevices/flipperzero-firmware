@@ -2,7 +2,7 @@
 
 #include <power/power_service/power.h>
 #include <cli/cli.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 void power_cli_poweroff(Cli* cli, string_t args, void* context) {
     Power* power = furi_record_open("power");
@@ -42,7 +42,8 @@ void power_cli_ext(Cli* cli, string_t args, void* context) {
     }
 }
 
-void power_cli_init() {
+void power_on_system_start() {
+#ifdef SRV_CLI
     Cli* cli = furi_record_open("cli");
 
     cli_add_command(cli, "poweroff", CliCommandFlagParallelSafe, power_cli_poweroff, NULL);
@@ -53,4 +54,5 @@ void power_cli_init() {
     cli_add_command(cli, "power_ext", CliCommandFlagParallelSafe, power_cli_ext, NULL);
 
     furi_record_close("cli");
+#endif
 }

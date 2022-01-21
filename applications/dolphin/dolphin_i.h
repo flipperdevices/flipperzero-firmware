@@ -2,7 +2,7 @@
 
 #include "furi/pubsub.h"
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 #include "dolphin.h"
 #include "helpers/dolphin_state.h"
@@ -11,6 +11,9 @@ typedef enum {
     DolphinEventTypeDeed,
     DolphinEventTypeStats,
     DolphinEventTypeFlush,
+    DolphinEventTypeAnimationStartNewIdle,
+    DolphinEventTypeAnimationCheckBlocking,
+    DolphinEventTypeAnimationInteract,
 } DolphinEventType;
 
 typedef struct {

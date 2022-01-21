@@ -117,13 +117,14 @@ void elements_frame(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_t
 }
 
 void elements_button_left(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 13;
+    const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 3;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const Icon* icon = &I_ButtonLeft_4x7;
-    const uint8_t icon_offset = 3;
-    const uint8_t icon_width_with_offset = icon->width + icon_offset;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
     const uint8_t x = 0;
@@ -135,21 +136,21 @@ void elements_button_left(Canvas* canvas, const char* str) {
     canvas_draw_line(canvas, x + button_width + 2, y, x + button_width + 2, y - button_height + 2);
 
     canvas_invert_color(canvas);
-    canvas_draw_icon(
-        canvas, x + horizontal_offset, y - button_height + vertical_offset, &I_ButtonLeft_4x7);
+    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonLeft_4x7);
     canvas_draw_str(
         canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
     canvas_invert_color(canvas);
 }
 
 void elements_button_right(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 13;
+    const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 3;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const Icon* icon = &I_ButtonRight_4x7;
-    const uint8_t icon_offset = 3;
-    const uint8_t icon_width_with_offset = icon->width + icon_offset;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
     const uint8_t x = canvas_width(canvas);
@@ -163,21 +164,19 @@ void elements_button_right(Canvas* canvas, const char* str) {
     canvas_invert_color(canvas);
     canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
     canvas_draw_icon(
-        canvas,
-        x - horizontal_offset - icon->width,
-        y - button_height + vertical_offset,
-        &I_ButtonRight_4x7);
+        canvas, x - horizontal_offset - icon->width, y - icon_v_offset, &I_ButtonRight_4x7);
     canvas_invert_color(canvas);
 }
 
 void elements_button_center(Canvas* canvas, const char* str) {
-    const uint8_t button_height = 13;
+    const uint8_t button_height = 12;
     const uint8_t vertical_offset = 3;
     const uint8_t horizontal_offset = 1;
     const uint8_t string_width = canvas_string_width(canvas, str);
     const Icon* icon = &I_ButtonCenter_7x7;
-    const uint8_t icon_offset = 3;
-    const uint8_t icon_width_with_offset = icon->width + icon_offset;
+    const uint8_t icon_h_offset = 3;
+    const uint8_t icon_width_with_offset = icon->width + icon_h_offset;
+    const uint8_t icon_v_offset = icon->height + vertical_offset;
     const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
 
     const uint8_t x = (canvas_width(canvas) - button_width) / 2;
@@ -194,8 +193,7 @@ void elements_button_center(Canvas* canvas, const char* str) {
     canvas_draw_line(canvas, x + button_width + 2, y, x + button_width + 2, y - button_height + 2);
 
     canvas_invert_color(canvas);
-    canvas_draw_icon(
-        canvas, x + horizontal_offset, y - button_height + vertical_offset, &I_ButtonCenter_7x7);
+    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, &I_ButtonCenter_7x7);
     canvas_draw_str(
         canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
     canvas_invert_color(canvas);
@@ -348,6 +346,140 @@ void elements_bubble(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, uint8_
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_line(canvas, x + 4, y_corner - 3, x + 4, y_corner + 3);
     canvas_set_color(canvas, ColorBlack);
+}
+
+void elements_bubble_str(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const char* text,
+    Align horizontal,
+    Align vertical) {
+    furi_assert(canvas);
+    furi_assert(text);
+
+    uint8_t font_y = canvas_current_font_height(canvas);
+    uint16_t str_width = canvas_string_width(canvas, text);
+    // count \n's
+    uint8_t lines = 1;
+    const char* t = text;
+    while(*t != '\0') {
+        if(*t == '\n') {
+            lines++;
+            uint16_t temp_width = canvas_string_width(canvas, t + 1);
+            str_width = temp_width > str_width ? temp_width : str_width;
+        }
+        t++;
+    }
+
+    uint8_t frame_x = x;
+    uint8_t frame_y = y;
+    uint8_t frame_width = str_width + 8;
+    uint8_t frame_height = font_y * lines + 4;
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, frame_x + 1, frame_y + 1, frame_width - 2, frame_height - 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, frame_x, frame_y, frame_width, frame_height, 1);
+    elements_multiline_text(canvas, x + 4, y - 1 + font_y, text);
+
+    uint8_t x1 = 0;
+    uint8_t x2 = 0;
+    uint8_t x3 = 0;
+    uint8_t y1 = 0;
+    uint8_t y2 = 0;
+    uint8_t y3 = 0;
+    if((horizontal == AlignLeft) && (vertical == AlignTop)) {
+        x1 = frame_x;
+        y1 = frame_y;
+        x2 = frame_x - 4;
+        y2 = frame_y;
+        x3 = frame_x;
+        y3 = frame_y + 4;
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 + 2, y2 + 1, 2, 2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignLeft) && (vertical == AlignCenter)) {
+        x1 = frame_x;
+        y1 = frame_y + (frame_height - 1) / 2 - 4;
+        x2 = frame_x - 4;
+        y2 = frame_y + (frame_height - 1) / 2;
+        x3 = frame_x;
+        y3 = frame_y + (frame_height - 1) / 2 + 4;
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 + 2, y2 - 2, 2, 5);
+        canvas_draw_dot(canvas, x2 + 1, y2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignLeft) && (vertical == AlignBottom)) {
+        x1 = frame_x;
+        y1 = frame_y + (frame_height - 1) - 4;
+        x2 = frame_x - 4;
+        y2 = frame_y + (frame_height - 1);
+        x3 = frame_x;
+        y3 = frame_y + (frame_height - 1);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 + 2, y2 - 2, 2, 2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignRight) && (vertical == AlignTop)) {
+        x1 = frame_x + (frame_width - 1);
+        y1 = frame_y;
+        x2 = frame_x + (frame_width - 1) + 4;
+        y2 = frame_y;
+        x3 = frame_x + (frame_width - 1);
+        y3 = frame_y + 4;
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 - 3, y2 + 1, 2, 2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignRight) && (vertical == AlignCenter)) {
+        x1 = frame_x + (frame_width - 1);
+        y1 = frame_y + (frame_height - 1) / 2 - 4;
+        x2 = frame_x + (frame_width - 1) + 4;
+        y2 = frame_y + (frame_height - 1) / 2;
+        x3 = frame_x + (frame_width - 1);
+        y3 = frame_y + (frame_height - 1) / 2 + 4;
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 - 3, y2 - 2, 2, 5);
+        canvas_draw_dot(canvas, x2 - 1, y2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignRight) && (vertical == AlignBottom)) {
+        x1 = frame_x + (frame_width - 1);
+        y1 = frame_y + (frame_height - 1) - 4;
+        x2 = frame_x + (frame_width - 1) + 4;
+        y2 = frame_y + (frame_height - 1);
+        x3 = frame_x + (frame_width - 1);
+        y3 = frame_y + (frame_height - 1);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 - 3, y2 - 2, 2, 2);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignCenter) && (vertical == AlignTop)) {
+        x1 = frame_x + (frame_width - 1) / 2 - 4;
+        y1 = frame_y;
+        x2 = frame_x + (frame_width - 1) / 2;
+        y2 = frame_y - 4;
+        x3 = frame_x + (frame_width - 1) / 2 + 4;
+        y3 = frame_y;
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 - 2, y2 + 2, 5, 2);
+        canvas_draw_dot(canvas, x2, y2 + 1);
+        canvas_set_color(canvas, ColorBlack);
+    } else if((horizontal == AlignCenter) && (vertical == AlignBottom)) {
+        x1 = frame_x + (frame_width - 1) / 2 - 4;
+        y1 = frame_y + (frame_height - 1);
+        x2 = frame_x + (frame_width - 1) / 2;
+        y2 = frame_y + (frame_height - 1) + 4;
+        x3 = frame_x + (frame_width - 1) / 2 + 4;
+        y3 = frame_y + (frame_height - 1);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, x2 - 2, y2 - 3, 5, 2);
+        canvas_draw_dot(canvas, x2, y2 - 1);
+        canvas_set_color(canvas, ColorBlack);
+    }
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_line(canvas, x3, y3, x1, y1);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_line(canvas, x1, y1, x2, y2);
+    canvas_draw_line(canvas, x2, y2, x3, y3);
 }
 
 void elements_string_fit_width(Canvas* canvas, string_t string, uint8_t width) {

@@ -1,13 +1,15 @@
 #include "nfc_cli.h"
 #include "nfc_types.h"
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 
-void nfc_cli_init() {
+void nfc_on_system_start() {
+#ifdef SRV_CLI
     Cli* cli = furi_record_open("cli");
     cli_add_command(cli, "nfc_detect", CliCommandFlagDefault, nfc_cli_detect, NULL);
     cli_add_command(cli, "nfc_emulate", CliCommandFlagDefault, nfc_cli_emulate, NULL);
     furi_record_close("cli");
+#endif
 }
 
 void nfc_cli_detect(Cli* cli, string_t args, void* context) {
