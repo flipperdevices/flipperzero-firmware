@@ -172,7 +172,6 @@ bool furi_hal_nfc_emulate_nfca(
     uint8_t* data_rx,
     uint16_t* data_size,
     uint32_t timeout) {
-
     rfalSetUpperLayerCallback(rfal_interrupt_callback_handler);
     rfal_set_state_changed_callback(rfal_state_changes_callback);
 
@@ -186,33 +185,47 @@ bool furi_hal_nfc_emulate_nfca(
     uint16_t listen_buff_len = 0;
 
     rfalLowPowerModeStop();
-    if(rfalListenStart(RFAL_LM_MASK_NFCA, &config, NULL, NULL, listen_buff, rfalConvBytesToBits(listen_buff_size), &listen_buff_len)) {
+    if(rfalListenStart(
+           RFAL_LM_MASK_NFCA,
+           &config,
+           NULL,
+           NULL,
+           listen_buff,
+           rfalConvBytesToBits(listen_buff_size),
+           &listen_buff_len)) {
         rfalListenStop();
         FURI_LOG_E(TAG, "Failed to start listen mode");
         return false;
     }
     while(true) {
         uint32_t flag = osEventFlagsWait(event, EVENT_FLAG_ALL, osFlagsWaitAny, timeout);
+        memset(listen_buff, 0, sizeof(listen_buff));
+        bool data_received = false;
+        listen_buff_len = 0;
         rfalWorker();
-        bool data_received;
-        rfalLmState state = rfalListenGetState(&data_received, NULL);        
-        bool consumed = false;
-        if(data_received && rfalNfcaListenerIsSleepReq(listen_buff, rfalConvBitsToBytes(listen_buff_len))) {
-            if(rfalListenSleepStart(RFAL_LM_STATE_SLEEP_A, listen_buff, rfalConvBytesToBits(listen_buff_size), &listen_buff_len)) {
+        rfalLmState state = rfalListenGetState(&data_received, NULL);
+        if(data_received &&
+           rfalNfcaListenerIsSleepReq(listen_buff, rfalConvBitsToBytes(listen_buff_len))) {
+            if(rfalListenSleepStart(
+                   RFAL_LM_STATE_SLEEP_A,
+                   listen_buff,
+                   rfalConvBytesToBits(listen_buff_size),
+                   &listen_buff_len)) {
                 rfalListenStop();
                 FURI_LOG_E(TAG, "Failed to enter sleep mode");
                 break;
             } else {
                 FURI_LOG_D(TAG, "Enterted sleep mode");
-                consumed = true;
+                continue;
             }
         }
-        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) && data_received && !consumed) {
+        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
+           data_received) {
             *data_size = listen_buff_len / 8;
             memcpy(data_rx, listen_buff, *data_size);
             break;
         }
-        if(flag == -2) {
+        if(flag == osErrorTimeout) {
             break;
         }
     }

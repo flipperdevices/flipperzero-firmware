@@ -71,6 +71,7 @@ void nfc_scene_emulate_uid_on_enter(void* context) {
         nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateWidget);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
     // Start worker
+    memset(&nfc->dev->dev_data.reader_data, 0, sizeof(NfcReaderRequestData));
     nfc_worker_start(
         nfc->worker,
         NfcWorkerStateEmulate,
@@ -100,6 +101,7 @@ bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
                 string_cat_printf(nfc->text_box_store, " %02X", reader_data->data[i]);
             }
             string_push_back(nfc->text_box_store, '\n');
+            memset(reader_data, 0, sizeof(NfcReaderRequestData));
             text_box_set_text(nfc->text_box, string_get_cstr(nfc->text_box_store));
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter && state == NfcSceneEmulateUidStateWidget) {
@@ -135,6 +137,6 @@ void nfc_scene_emulate_uid_on_exit(void* context) {
 
     // Clear view
     widget_clear(nfc->widget);
-    text_box_clean(nfc->text_box);
+    text_box_reset(nfc->text_box);
     string_reset(nfc->text_box_store);
 }

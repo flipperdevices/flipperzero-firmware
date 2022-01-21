@@ -151,7 +151,7 @@ void nfc_worker_emulate(NfcWorker* nfc_worker) {
                data->sak,
                reader_data->data,
                &reader_data->size,
-               100)) {
+               1000)) {
             if(nfc_worker->callback) {
                 nfc_worker->callback(nfc_worker->context);
             }
