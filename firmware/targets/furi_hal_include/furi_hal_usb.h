@@ -2,10 +2,8 @@
 
 #include "usb.h"
 
-typedef struct UsbInterface UsbInterface;
-
-struct UsbInterface {
-    void (*init)(usbd_device* dev, UsbInterface* intf);
+typedef struct {
+    void (*init)(usbd_device* dev, FuriHalUsbInterface* intf);
     void (*deinit)(usbd_device* dev);
     void (*wakeup)(usbd_device* dev);
     void (*suspend)(usbd_device* dev);
@@ -17,22 +15,22 @@ struct UsbInterface {
     void* str_serial_descr;
 
     void* cfg_descr;
-};
+} FuriHalUsbInterface;
 
 /** USB device interface modes */
-extern UsbInterface usb_cdc_single;
-extern UsbInterface usb_cdc_dual;
-extern UsbInterface usb_hid;
-extern UsbInterface usb_hid_u2f;
+extern FuriHalUsbInterface usb_cdc_single;
+extern FuriHalUsbInterface usb_cdc_dual;
+extern FuriHalUsbInterface usb_hid;
+extern FuriHalUsbInterface usb_hid_u2f;
 
 typedef enum {
-    UsbReset,
-    UsbWakeup,
-    UsbSuspend,
-    UsbDescriptorRequest,
-} UsbStateEvent;
+    FuriHalUsbStateEventReset,
+    FuriHalUsbStateEventWakeup,
+    FuriHalUsbStateEventSuspend,
+    FuriHalUsbStateEventDescriptorRequest,
+} FuriHalUsbStateEvent;
 
-typedef void (*UsbStateCallback)(UsbStateEvent state, void* context);
+typedef void (*FuriHalUsbStateCallback)(FuriHalUsbStateEvent state, void* context);
 
 /** USB device low-level initialization
  */
@@ -42,13 +40,13 @@ void furi_hal_usb_init();
  *
  * @param      mode new USB device mode
  */
-void furi_hal_usb_set_config(UsbInterface* new_if);
+void furi_hal_usb_set_config(FuriHalUsbInterface* new_if);
 
 /** Get USB device configuration
  *
  * @return    current USB device mode
  */
-UsbInterface* furi_hal_usb_get_config();
+FuriHalUsbInterface* furi_hal_usb_get_config();
 
 /** Disable USB device
  */
@@ -60,7 +58,7 @@ void furi_hal_usb_enable();
 
 /** Set USB state callback
  */
-void furi_hal_usb_set_state_callback(UsbStateCallback cb, void* ctx);
+void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx);
 
 /** Restart USB device
  */

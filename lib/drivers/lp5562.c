@@ -29,16 +29,17 @@ void lp5562_enable(FuriHalI2cBusHandle* handle) {
     delay_us(500);
 }
 
-void lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
+void 
+lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
     uint8_t reg_no;
     if(channel == LP5562ChannelRed) {
-        reg_no = 0x07;
+        reg_no = LP5562_CHANNEL_RED_CURRENT_REGISTER;
     } else if(channel == LP5562ChannelGreen) {
-        reg_no = 0x06;
+        reg_no = LP5562_CHANNEL_GREEN_CURRENT_REGISTER;
     } else if(channel == LP5562ChannelBlue) {
-        reg_no = 0x05;
+        reg_no = LP5562_CHANNEL_BLUE_CURRENT_REGISTER;
     } else if(channel == LP5562ChannelWhite) {
-        reg_no = 0x0F;
+        reg_no = LP5562_CHANNEL_WHITE_CURRENT_REGISTER;
     } else {
         return;
     }
@@ -48,13 +49,13 @@ void lp5562_set_channel_current(FuriHalI2cBusHandle* handle, LP5562Channel chann
 void lp5562_set_channel_value(FuriHalI2cBusHandle* handle, LP5562Channel channel, uint8_t value) {
     uint8_t reg_no;
     if(channel == LP5562ChannelRed) {
-        reg_no = 0x04;
+        reg_no = LP5562_CHANNEL_RED_VALUE_REGISTER;
     } else if(channel == LP5562ChannelGreen) {
-        reg_no = 0x03;
+        reg_no = LP5562_CHANNEL_GREEN_VALUE_REGISTER;
     } else if(channel == LP5562ChannelBlue) {
-        reg_no = 0x02;
+        reg_no = LP5562_CHANNEL_BLUE_VALUE_REGISTER;
     } else if(channel == LP5562ChannelWhite) {
-        reg_no = 0x0E;
+        reg_no = LP5562_CHANNEL_WHITE_VALUE_REGISTER;
     } else {
         return;
     }
@@ -65,13 +66,13 @@ uint8_t lp5562_get_channel_value(FuriHalI2cBusHandle* handle, LP5562Channel chan
     uint8_t reg_no;
     uint8_t value;
     if(channel == LP5562ChannelRed) {
-        reg_no = 0x04;
+        reg_no = LP5562_CHANNEL_RED_VALUE_REGISTER;
     } else if(channel == LP5562ChannelGreen) {
-        reg_no = 0x03;
+        reg_no = LP5562_CHANNEL_GREEN_VALUE_REGISTER;
     } else if(channel == LP5562ChannelBlue) {
-        reg_no = 0x02;
+        reg_no = LP5562_CHANNEL_BLUE_VALUE_REGISTER;
     } else if(channel == LP5562ChannelWhite) {
-        reg_no = 0x0E;
+        reg_no = LP5562_CHANNEL_WHITE_VALUE_REGISTER;
     } else {
         return 0;
     }

@@ -137,7 +137,7 @@ static const struct HidConfigDescriptor hid_u2f_cfg_desc = {
         },
 };
 
-static void hid_u2f_init(usbd_device* dev, UsbInterface* intf);
+static void hid_u2f_init(usbd_device* dev, FuriHalUsbInterface* intf);
 static void hid_u2f_deinit(usbd_device* dev);
 static void hid_u2f_on_wakeup(usbd_device* dev);
 static void hid_u2f_on_suspend(usbd_device* dev);
@@ -170,7 +170,7 @@ void furi_hal_hid_u2f_set_callback(HidU2fCallback cb, void* ctx) {
     }
 }
 
-UsbInterface usb_hid_u2f = {
+FuriHalUsbInterface usb_hid_u2f = {
     .init = hid_u2f_init,
     .deinit = hid_u2f_deinit,
     .wakeup = hid_u2f_on_wakeup,
@@ -185,7 +185,7 @@ UsbInterface usb_hid_u2f = {
     .cfg_descr = (void*)&hid_u2f_cfg_desc,
 };
 
-static void hid_u2f_init(usbd_device* dev, UsbInterface* intf) {
+static void hid_u2f_init(usbd_device* dev, FuriHalUsbInterface* intf) {
     if(hid_u2f_semaphore == NULL) hid_u2f_semaphore = osSemaphoreNew(1, 1, NULL);
     usb_dev = dev;
 

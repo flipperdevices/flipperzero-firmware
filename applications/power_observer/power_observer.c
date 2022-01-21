@@ -24,11 +24,11 @@ typedef enum {
     EventRequest = (1 << 1),
 } UsbEvent;
 
-static void usb_state_callback(UsbStateEvent state, void* context) {
+static void usb_state_callback(FuriHalUsbStateEvent state, void* context) {
     PowerObserverSrv* srv = (PowerObserverSrv*)(context);
-    if(state == UsbReset) {
+    if(state == FuriHalUsbStateEventReset) {
         osThreadFlagsSet(srv->thread, EventReset);
-    } else if(state == UsbDescriptorRequest) {
+    } else if(state == FuriHalUsbStateEventDescriptorRequest) {
         osThreadFlagsSet(srv->thread, EventRequest);
     }
 }

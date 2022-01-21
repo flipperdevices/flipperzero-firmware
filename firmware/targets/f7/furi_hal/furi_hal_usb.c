@@ -9,15 +9,15 @@
 
 #define USB_RECONNECT_DELAY 500
 
-static UsbInterface* usb_if_cur;
-static UsbInterface* usb_if_next;
+static FuriHalUsbInterface* usb_if_cur;
+static FuriHalUsbInterface* usb_if_next;
 
 static const struct usb_string_descriptor dev_lang_desc = USB_ARRAY_DESC(USB_LANGID_ENG_US);
 
 static uint32_t ubuf[0x20];
 usbd_device udev;
 
-static UsbStateCallback callback;
+static FuriHalUsbStateCallback callback;
 static void* cb_ctx;
 
 static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_t* length);
@@ -63,7 +63,7 @@ void furi_hal_usb_init(void) {
     FURI_LOG_I(TAG, "Init OK");
 }
 
-void furi_hal_usb_set_config(UsbInterface* new_if) {
+void furi_hal_usb_set_config(FuriHalUsbInterface* new_if) {
     if((new_if != usb_if_cur) && (usb_config.enabled)) { // Interface mode change - first stage
         usb_config.mode_changing = true;
         usb_if_next = new_if;
@@ -105,7 +105,7 @@ void furi_hal_usb_reinit() {
     osTimerStart(usb_config.reconnect_tmr, USB_RECONNECT_DELAY);
 }
 
-UsbInterface* furi_hal_usb_get_config() {
+FuriHalUsbInterface* furi_hal_usb_get_config() {
     return usb_if_cur;
 }
 
@@ -141,7 +141,7 @@ static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_
     switch(dtype) {
     case USB_DTYPE_DEVICE:
         if(callback != NULL) {
-            callback(UsbDescriptorRequest, cb_ctx);
+            callback(FuriHalUsbStateEventDescriptorRequest, cb_ctx);
         }
         desc = usb_if_cur->dev_descr;
         break;
@@ -174,14 +174,14 @@ static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_
     return usbd_ack;
 }
 
-void furi_hal_usb_set_state_callback(UsbStateCallback cb, void* ctx) {
+void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx) {
     callback = cb;
     cb_ctx = ctx;
 }
 
 static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     if(callback != NULL) {
-        callback(UsbReset, cb_ctx);
+        callback(FuriHalUsbStateEventReset, cb_ctx);
     }
 }
 
@@ -191,7 +191,7 @@ static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb_if_cur->suspend(&udev);
     }
     if(callback != NULL) {
-        callback(UsbSuspend, cb_ctx);
+        callback(FuriHalUsbStateEventSuspend, cb_ctx);
     }
 }
 
@@ -201,6 +201,6 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
         usb_if_cur->wakeup(&udev);
     }
     if(callback != NULL) {
-        callback(UsbWakeup, cb_ctx);
+        callback(FuriHalUsbStateEventWakeup, cb_ctx);
     }
 }
