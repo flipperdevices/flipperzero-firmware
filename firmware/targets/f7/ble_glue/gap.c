@@ -99,7 +99,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
                 (hci_le_connection_update_complete_event_rp0*)meta_evt->data;
             FURI_LOG_I(
                 TAG,
-                "Connection interal: %d, latency: %d, supervision timeout: %d",
+                "Connection interval: %d, latency: %d, supervision timeout: %d",
                 event->Conn_Interval,
                 event->Conn_Latency,
                 event->Supervision_Timeout);
