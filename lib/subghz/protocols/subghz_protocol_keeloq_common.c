@@ -77,7 +77,8 @@ inline uint64_t subghz_protocol_keeloq_common_secure_learning(
  * @return manufacture for this serial number (64bit)
  */
 
-inline uint64_t subghz_protocol_keeloq_common_magic_xor_type1_learning(uint32_t data, uint64_t xor) {
+inline uint64_t
+    subghz_protocol_keeloq_common_magic_xor_type1_learning(uint32_t data, uint64_t xor) {
     data &= 0x0FFFFFFF;
     return (((uint64_t)data << 32) | data) ^ xor;
 }

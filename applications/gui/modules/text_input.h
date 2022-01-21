@@ -9,7 +9,6 @@
 #include "validators.h"
 #include <m-string.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

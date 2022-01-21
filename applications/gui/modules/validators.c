@@ -12,12 +12,7 @@ bool validator_is_file_callback(const char* text, string_t error, void* context)
     ValidatorIsFile* instance = context;
     bool ret = true;
     string_t path;
-    string_init_printf(
-        path,
-        "%s/%s%s",
-        instance->app_path_folder,
-        text,
-        instance->app_extension);
+    string_init_printf(path, "%s/%s%s", instance->app_path_folder, text, instance->app_extension);
     Storage* storage = furi_record_open("storage");
     if(storage_common_stat(storage, string_get_cstr(path), NULL) == FSE_OK) {
         ret = false;
@@ -31,9 +26,8 @@ bool validator_is_file_callback(const char* text, string_t error, void* context)
     return ret;
 }
 
-ValidatorIsFile* validator_is_file_alloc_init(
-    const char* app_path_folder,
-    const char* app_extension) {
+ValidatorIsFile*
+    validator_is_file_alloc_init(const char* app_path_folder, const char* app_extension) {
     ValidatorIsFile* instance = furi_alloc(sizeof(ValidatorIsFile));
 
     instance->app_path_folder = app_path_folder;
@@ -46,4 +40,3 @@ void validator_is_file_free(ValidatorIsFile* instance) {
     furi_assert(instance);
     free(instance);
 }
-
