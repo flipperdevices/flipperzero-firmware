@@ -438,11 +438,15 @@ void text_input_free(TextInput* text_input) {
             return false;
         });
 
-    if(osTimerIsRunning(text_input->timer)) {
-        osTimerStop(text_input->timer);
-    }
+    // Send stop command
+    osTimerStop(text_input->timer);
+    // Wait till timer stop
+    while(osTimerIsRunning(text_input->timer)) osDelay(1);
+    // Release allocated memory
     osTimerDelete(text_input->timer);
+
     view_free(text_input->view);
+
     free(text_input);
 }
 
