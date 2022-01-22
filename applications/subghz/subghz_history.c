@@ -169,9 +169,6 @@ bool subghz_history_add_to_history(
             subghz_protocol_somfy_keytis_get_press_duration(protocol);
     }
 
-
-
-    
     instance->history[instance->last_index_write].type_protocol = protocol->type_protocol;
 
     instance->last_index_write++;

@@ -58,7 +58,7 @@ void subghz_protocol_somfy_telis_remote_controller(SubGhzProtocolSomfyTelis* ins
  * 
  *     encrypt              |           decrypt
  *  
- *  package 56 bit    cnt    key  bnt|crc    cnt     serial
+ *  package 56 bit    cnt    key  btn|crc    cnt     serial
  *  0xA7232323312222 - 0   => A7    8 0   | 00 00 | 12 13 00
  *  0xA7222223312222 - 1   => A7    8 5   | 00 01 | 12 13 00
  *  0xA7212123312222 - 2   => A7    8 6   | 00 02 | 12 13 00

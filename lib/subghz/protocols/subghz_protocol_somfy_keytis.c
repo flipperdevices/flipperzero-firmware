@@ -59,7 +59,7 @@ void subghz_protocol_somfy_keytis_remote_controller(SubGhzProtocolSomfyKeytis* i
  * 
  *     encrypt              |           decrypt
  *  
- *  package 80 bit   pdc      key bnt   crc cnt serial
+ *  package 80 bit   pdc      key btn   crc cnt serial
  * 
  * 0xA453537C4B9855 C40019 => 0xA  4  F  7 002F 37D3CD
  * 0xA453537C4B9855 C80026 => 0xA  4  F  7 002F 37D3CD

@@ -45,4 +45,6 @@ void subghz_protocol_somfy_keytis_to_str(SubGhzProtocolSomfyKeytis* instance, st
  * @param instance - SubGhzProtocolSomfyKeytis instance
  * @param context - SubGhzProtocolCommonLoad context
  */
-void subghz_decoder_somfy_keytis_to_load_protocol(SubGhzProtocolSomfyKeytis* instance, void* context);
+void subghz_decoder_somfy_keytis_to_load_protocol(
+    SubGhzProtocolSomfyKeytis* instance,
+    void* context);
