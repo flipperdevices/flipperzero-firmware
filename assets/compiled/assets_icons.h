@@ -3,13 +3,6 @@
 
 extern const Icon I_Certification1_103x23;
 extern const Icon I_Certification2_119x30;
-extern const Icon A_BadBattery_128x47;
-extern const Icon A_NoDb_128x51;
-extern const Icon A_NoSd_128x49;
-extern const Icon A_SdBad_128x51;
-extern const Icon A_SdOk_128x51;
-extern const Icon A_Tv_128x47;
-extern const Icon A_Url_128x51;
 extern const Icon I_125_10px;
 extern const Icon I_Nfc_10px;
 extern const Icon I_ble_10px;

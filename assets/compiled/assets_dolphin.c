@@ -1,5 +1,5 @@
 #include "assets_icons.h"
-#include <assets_animation.h>
+#include <assets_dolphin.h>
 #include <desktop/animations/animation_storage_i.h>
 #include <desktop/animations/animation_manager.h>
 #include <gui/icon_i.h>

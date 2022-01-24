@@ -10,7 +10,7 @@
 #include "animation_manager.h"
 #include "animation_storage.h"
 #include "animation_storage_i.h"
-#include <assets_animation.h>
+#include <assets_dolphin.h>
 
 #define ANIMATION_META_FILE "meta.txt"
 #define ANIMATION_DIR "/ext/dolphin/animations"
