@@ -1,5 +1,6 @@
 import logging
 
+
 class FlipperFormatFile:
     def __init__(self):
         # Storage
@@ -31,21 +32,21 @@ class FlipperFormatFile:
             raise Exception("Unexpected line: not `key:value`")
         return data[0].strip(), data[1].strip()
 
-    def readKey(self, key:str):
-        k,v = self.readKeyValue()
+    def readKey(self, key: str):
+        k, v = self.readKeyValue()
         if k != key:
             raise KeyError(f"Unexpected key {k} != {key}")
         return v
 
-    def readKeyInt(self, key:str):
+    def readKeyInt(self, key: str):
         value = self.readKey(key)
         return int(value) if value else None
 
-    def readKeyIntArray(self, key:str):
+    def readKeyIntArray(self, key: str):
         value = self.readKey(key)
-        return [ int(i) for i in value.split(" ") ] if value else None
+        return [int(i) for i in value.split(" ")] if value else None
 
-    def readKeyFloat(self, key:str):
+    def readKeyFloat(self, key: str):
         value = self.readKey(key)
         return float(value) if value else None
 
@@ -67,7 +68,7 @@ class FlipperFormatFile:
 
         return filetype, version
 
-    def setHeader(self, filetype:str, version:int):
+    def setHeader(self, filetype: str, version: int):
         if self.cursor != 0 and len(self.lines) != 0:
             raise Exception("Can't set header data: file is not empty")
 
@@ -78,6 +79,6 @@ class FlipperFormatFile:
         file = open(filename, "r")
         self.lines = file.readlines()
 
-    def save(self, filename:str):
+    def save(self, filename: str):
         file = open(filename, "w")
         self.write("\n".join(self.lines))

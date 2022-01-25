@@ -7,12 +7,21 @@ import shutil
 from flipper.utils.fff import *
 from .icon import *
 
+
 class DolphinBubbleAnimation:
 
     FILE_TYPE = "Flipper Animation"
     FILE_VERSION = 1
 
-    def __init__(self, name:str, min_butthurt:int, max_butthurt:int, min_level:int, max_level:int, weight:int):
+    def __init__(
+        self,
+        name: str,
+        min_butthurt: int,
+        max_butthurt: int,
+        min_level: int,
+        max_level: int,
+        weight: int,
+    ):
         # Manifest
         self.name = name
         self.min_butthurt = min_butthurt
@@ -20,15 +29,14 @@ class DolphinBubbleAnimation:
         self.min_level = min_level
         self.max_level = max_level
         self.weight = weight
-        # Meta
+        # Meta and data
         self.meta = {}
-        # Frames
         self.frames = []
         self.bubbles = []
         # Logging
         self.logger = logging.getLogger("DolphinBubbleAnimation")
 
-    def load(self, animation_directory:str):
+    def load(self, animation_directory: str):
         if not os.path.isdir(animation_directory):
             raise Exception(f"Animation folder doesn't exists: { animation_directory }")
 
@@ -42,8 +50,13 @@ class DolphinBubbleAnimation:
 
         # Check file header
         filetype, version = file.getHeader()
-        assert(filetype == self.FILE_TYPE)
-        assert(version == self.FILE_VERSION)
+        assert filetype == self.FILE_TYPE
+        assert version == self.FILE_VERSION
+
+        max_frame_number = None
+        unique_frames = None
+        total_frames_count = None
+        bubble_slots_count = None
 
         try:
             # Main meta
@@ -56,14 +69,60 @@ class DolphinBubbleAnimation:
             self.meta["Frame rate"] = file.readKeyInt("Frame rate")
             self.meta["Duration"] = file.readKeyInt("Duration")
             self.meta["Active cooldown"] = file.readKeyInt("Active cooldown")
+            bubble_slots_count = file.readKeyInt("Bubble slots")
 
-            # Total bubble slots
-            bubble_slots = file.readKeyInt("Bubble slots")
+            # Sanity Check
+            assert self.meta["Width"] > 0 and self.meta["Width"] <= 128
+            assert self.meta["Height"] > 0 and self.meta["Height"] <= 128
+            assert self.meta["Passive frames"] > 0
+            assert self.meta["Active frames"] >= 0
+            assert self.meta["Frames order"]
+            if self.meta["Active frames"] > 0:
+                assert self.meta["Active cooldown"] > 0
+                assert self.meta["Active cycles"] > 0
+            else:
+                assert self.meta["Active cooldown"] == 0
+                assert self.meta["Active cycles"] == 0
+            assert self.meta["Frame rate"] > 0
+            assert self.meta["Duration"] > 0
+
+            # Frames sanity check
+            max_frame_number = max(self.meta["Frames order"])
+            ordered_frames_count = len(self.meta["Frames order"])
+            for i in range(max_frame_number):
+                frame_filename = os.path.join(animation_directory, f"frame_{i}.png")
+                assert os.path.isfile(frame_filename)
+                self.frames.append(frame_filename)
+            # Sanity check
+            unique_frames = set(self.meta["Frames order"])
+            unique_frames_count = len(unique_frames)
+            if unique_frames_count != max_frame_number + 1:
+                self.logger.warning(f"Not all frames were used in {self.name}")
+            total_frames_count = self.meta["Passive frames"] + (
+                self.meta["Active frames"] * self.meta["Active cycles"]
+            )
+
+            # Extra checks
+            assert self.meta["Passive frames"] <= total_frames_count
+            assert self.meta["Active frames"] <= total_frames_count
+            print(
+                self.meta["Passive frames"] + self.meta["Active frames"],
+                ordered_frames_count,
+            )
+            assert (
+                self.meta["Passive frames"] + self.meta["Active frames"]
+                == ordered_frames_count
+            )
         except EOFError as e:
             raise Exception("Invalid meta file: too short")
+        except AssertionError as e:
+            self.logger.exception(e)
+            self.logger.error(f"Animation {self.name} got incorrect meta")
+            raise Exception("Meta file is invalid: incorrect data")
 
+        # Bubbles
         bubble_slot = 0
-        while bubble_slot < bubble_slots:
+        while bubble_slot < bubble_slots_count:
             try:
                 # Bubble data
                 bubble = {}
@@ -76,12 +135,29 @@ class DolphinBubbleAnimation:
                 bubble["StartFrame"] = file.readKeyInt("StartFrame")
                 bubble["EndFrame"] = file.readKeyInt("EndFrame")
 
+                # Sanity check
+                assert bubble["Slot"] == bubble_slot
+                assert bubble["X"] >= 0 and bubble["X"] < 128
+                assert bubble["Y"] >= 0 and bubble["Y"] < 128
+                assert len(bubble["Text"]) > 0
+                assert bubble["AlignH"] in ["Left", "Center", "Right"]
+                assert bubble["AlignV"] in ["Bottom", "Center", "Top"]
+                assert bubble["StartFrame"] < total_frames_count
+                assert bubble["EndFrame"] < total_frames_count
+                assert bubble["EndFrame"] > bubble["StartFrame"]
+
                 # Store bubble
                 self.bubbles.append(bubble)
                 bubble_slot += 1
-            except EOFError as e: 
+            except EOFError as e:
                 self.logger.error(f"EOF when reading bubble data at slot {bubble_slot}")
                 raise Exception("Meta file is incomplete: missing bubble data")
+            except AssertionError as e:
+                self.logger.exception(e)
+                self.logger.error(
+                    f"Animation {self.name} bubble slot {bubble_slot} got incorrect data: {bubble}"
+                )
+                raise Exception("Meta file is invalid: incorrect bubble data")
 
 
 class DolphinManifest:
@@ -93,14 +169,14 @@ class DolphinManifest:
         self.animations = []
         self.logger = logging.getLogger("DolphinManifest")
 
-    def load(self, filename:str):
+    def load(self, filename: str):
         file = FlipperFormatFile()
         file.load(filename)
 
         # Check file header
         filetype, version = file.getHeader()
-        assert(filetype == self.FILE_TYPE)
-        assert(version == self.FILE_VERSION)
+        assert filetype == self.FILE_TYPE
+        assert version == self.FILE_VERSION
 
         # Load animation data
         while True:
@@ -125,8 +201,9 @@ class DolphinManifest:
 
                 # Add to array
                 self.animations.append(animation)
-            except EOFError as e: 
+            except EOFError as e:
                 break
+
 
 class Dolphin:
     def __init__(self):
@@ -146,7 +223,7 @@ class Dolphin:
         pass
 
     def load(self, source_directory: str):
-        assert(os.path.exists(source_directory))
+        assert os.path.exists(source_directory)
         # Load Manifest
         manifest_filename = os.path.join(source_directory, "manifest.txt")
         self.logger.info(f"Loading manifest from {manifest_filename}")

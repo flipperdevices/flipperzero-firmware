@@ -56,7 +56,9 @@ class Main(App):
             "dolphin", help="Assemble dolphin resources"
         )
         self.parser_dolphin.add_argument(
-            "type", choices=["internal", "external"], help="Dolphin packaging type, can be `external` or `internal`"
+            "type",
+            choices=["internal", "external"],
+            help="Dolphin packaging type, can be `external` or `internal`",
         )
         self.parser_dolphin.add_argument(
             "input_directory", help="Dolphin source directory"
