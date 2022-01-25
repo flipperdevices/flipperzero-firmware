@@ -2,7 +2,7 @@ Filetype: Flipper Animation Manifest
 Version: 1
 
 # Animation 1
-Name: Waves_128x50
+Name: L1_Waves_128x50
 Min butthurt: 0
 Max butthurt: 5
 Min level: 1
@@ -10,7 +10,7 @@ Max level: 3
 Weight: 3
 
 # Animation 2
-Name: Laptop_128x51
+Name: L1_Laptop_128x51
 Min butthurt: 0
 Max butthurt: 9
 Min level: 1
@@ -18,7 +18,7 @@ Max level: 3
 Weight: 3
 
 # Animation 3
-Name: Sleep_128x64
+Name: L1_Sleep_128x64
 Min butthurt: 0
 Max butthurt: 10
 Min level: 1
@@ -26,9 +26,10 @@ Max level: 3
 Weight: 3
 
 # Animation 4
-Name: Recording_128x51
+Name: L1_Recording_128x51
 Min butthurt: 0
 Max butthurt: 8
 Min level: 1
 Max level: 1
 Weight: 3
+
