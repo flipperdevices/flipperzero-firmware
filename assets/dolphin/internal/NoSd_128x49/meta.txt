@@ -2,22 +2,22 @@ Filetype: Flipper Animation
 Version: 1
 
 Width: 128
-Height: 47
-Passive frames: 2
-Active frames: 4
-Frames order: 0 1 2 3 2 3
-Active cycles: 2
+Height: 49
+Passive frames: 10
+Active frames: 0
+Frames order: 0 1 0 1 0 2 3 4 3 5
+Active cycles: 0
 Frame rate: 2
 Duration: 3600
-Active cooldown: 5
+Active cooldown: 0
 
 Bubble slots: 1
 
 Slot: 0
-X: 1
-Y: 17
-Text: I am happy,\nmy friend!
+X: 40
+Y: 18
+Text: Need an\nSD card
 AlignH: Right
 AlignV: Bottom
-StartFrame: 3
+StartFrame: 0
 EndFrame: 9

@@ -4,20 +4,20 @@ Version: 1
 Width: 128
 Height: 47
 Passive frames: 2
-Active frames: 4
-Frames order: 0 1 2 3 2 3
-Active cycles: 2
+Active frames: 0
+Frames order: 0 1
+Active cycles: 0
 Frame rate: 2
 Duration: 3600
-Active cooldown: 5
+Active cooldown: 0
 
 Bubble slots: 1
 
 Slot: 0
-X: 1
-Y: 17
-Text: I am happy,\nmy friend!
+X: 4
+Y: 21
+Text: I feel so sick!\nI'm dying...
 AlignH: Right
-AlignV: Bottom
-StartFrame: 3
-EndFrame: 9
+AlignV: Center
+StartFrame: 0
+EndFrame: 1
