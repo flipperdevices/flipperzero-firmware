@@ -21,10 +21,12 @@ $(PROTOBUF) &: $(PROTOBUF_SOURCES) $(PROTOBUF_COMPILER)
 protobuf: $(PROTOBUF)
 
 $(DOLPHIN_EXTERNAL_OUTPUT_DIR): $(DOLPHIN_SOURCE_DIR)
+	@echo "\tDOLPHIN essential"
+	@$(ASSETS_COMPILLER) dolphin -s dolphin_essential "$(DOLPHIN_SOURCE_DIR)/essential" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
 	@echo "\tDOLPHIN internal"
-	@$(ASSETS_COMPILLER) dolphin internal "$(DOLPHIN_SOURCE_DIR)/internal" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
+	@$(ASSETS_COMPILLER) dolphin -s dolphin_internal "$(DOLPHIN_SOURCE_DIR)/internal" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
 	@echo "\tDOLPHIN external"
-	@$(ASSETS_COMPILLER) dolphin external "$(DOLPHIN_SOURCE_DIR)/external" "$(DOLPHIN_EXTERNAL_OUTPUT_DIR)"
+	@$(ASSETS_COMPILLER) dolphin "$(DOLPHIN_SOURCE_DIR)/external" "$(DOLPHIN_EXTERNAL_OUTPUT_DIR)"
 
 .PHONY: dolphin
 dolphin: $(DOLPHIN_EXTERNAL_OUTPUT_DIR)

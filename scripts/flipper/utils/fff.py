@@ -50,6 +50,25 @@ class FlipperFormatFile:
         value = self.readKey(key)
         return float(value) if value else None
 
+    def writeLine(self, line: str):
+        self.lines.insert(self.cursor, line)
+        self.cursor += 1
+
+    def writeKey(self, key: str, value):
+        if isinstance(value, (str, int, float)):
+            pass
+        elif isinstance(value, (list, set)):
+            value = " ".join(map(str, value))
+        else:
+            raise Exception("Unknown value type")
+        self.writeLine(f"{key}: {value}")
+
+    def writeEmptyLine(self):
+        self.writeLine("")
+
+    def writeComment(self, text: str):
+        self.writeLine(f"# {text}")
+
     def getHeader(self):
         if self.cursor != 0 and len(self.lines) == 0:
             raise Exception("Can't read header data: cursor not at 0 or file is empty")
@@ -81,4 +100,4 @@ class FlipperFormatFile:
 
     def save(self, filename: str):
         file = open(filename, "w")
-        self.write("\n".join(self.lines))
+        file.write("\n".join(self.lines))

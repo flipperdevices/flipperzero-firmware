@@ -8,6 +8,12 @@ from flipper.utils.fff import *
 from .icon import *
 
 
+def _convert_image_to_bm(pair: set):
+    source, destination = pair
+    image = file2image(source)
+    image.write(destination)
+
+
 class DolphinBubbleAnimation:
 
     FILE_TYPE = "Flipper Animation"
@@ -84,7 +90,7 @@ class DolphinBubbleAnimation:
                 assert self.meta["Active cooldown"] == 0
                 assert self.meta["Active cycles"] == 0
             assert self.meta["Frame rate"] > 0
-            assert self.meta["Duration"] > 0
+            assert self.meta["Duration"] >= 0
 
             # Frames sanity check
             max_frame_number = max(self.meta["Frames order"])
@@ -105,10 +111,6 @@ class DolphinBubbleAnimation:
             # Extra checks
             assert self.meta["Passive frames"] <= total_frames_count
             assert self.meta["Active frames"] <= total_frames_count
-            print(
-                self.meta["Passive frames"] + self.meta["Active frames"],
-                ordered_frames_count,
-            )
             assert (
                 self.meta["Passive frames"] + self.meta["Active frames"]
                 == ordered_frames_count
@@ -159,6 +161,53 @@ class DolphinBubbleAnimation:
                 )
                 raise Exception("Meta file is invalid: incorrect bubble data")
 
+    def save(self, output_directory: str):
+        animation_directory = os.path.join(output_directory, self.name)
+        os.makedirs(animation_directory, exist_ok=True)
+        meta_filename = os.path.join(animation_directory, "meta.txt")
+
+        file = FlipperFormatFile()
+        file.setHeader(self.FILE_TYPE, self.FILE_VERSION)
+        file.writeEmptyLine()
+
+        # Write meta data
+        file.writeKey("Width", self.meta["Width"])
+        file.writeKey("Height", self.meta["Height"])
+        file.writeKey("Passive frames", self.meta["Passive frames"])
+        file.writeKey("Active frames", self.meta["Active frames"])
+        file.writeKey("Frames order", self.meta["Frames order"])
+        file.writeKey("Active cycles", self.meta["Active cycles"])
+        file.writeKey("Frame rate", self.meta["Frame rate"])
+        file.writeKey("Duration", self.meta["Duration"])
+        file.writeKey("Active cooldown", self.meta["Active cooldown"])
+        file.writeEmptyLine()
+
+        file.writeKey("Bubble slots", len(self.bubbles))
+        file.writeEmptyLine()
+
+        # Write bubble data
+        for bubble in self.bubbles:
+            file.writeKey("Slot", bubble["Slot"])
+            file.writeKey("X", bubble["X"])
+            file.writeKey("Y", bubble["Y"])
+            file.writeKey("Text", bubble["Text"])
+            file.writeKey("AlignH", bubble["AlignH"])
+            file.writeKey("AlignV", bubble["AlignV"])
+            file.writeKey("StartFrame", bubble["StartFrame"])
+            file.writeKey("EndFrame", bubble["EndFrame"])
+            file.writeEmptyLine()
+
+        file.save(meta_filename)
+
+        to_pack = []
+        for index, frame in enumerate(self.frames):
+            to_pack.append(
+                (frame, os.path.join(animation_directory, f"frame_{index}.bm"))
+            )
+
+        pool = multiprocessing.Pool()
+        pool.map(_convert_image_to_bm, to_pack)
+
 
 class DolphinManifest:
 
@@ -169,9 +218,11 @@ class DolphinManifest:
         self.animations = []
         self.logger = logging.getLogger("DolphinManifest")
 
-    def load(self, filename: str):
+    def load(self, source_directory: str):
+        manifest_filename = os.path.join(source_directory, "manifest.txt")
+
         file = FlipperFormatFile()
-        file.load(filename)
+        file.load(manifest_filename)
 
         # Check file header
         filetype, version = file.getHeader()
@@ -189,20 +240,54 @@ class DolphinManifest:
                 max_level = file.readKeyInt("Max level")
                 weight = file.readKeyInt("Weight")
 
+                assert len(name) > 0
+                assert min_butthurt >= 0
+                assert max_butthurt >= 0 and max_butthurt >= min_butthurt
+                assert min_level >= 0
+                assert max_level >= 0 and max_level >= min_level
+                assert weight >= 0
+
                 # Initialize animation
                 animation = DolphinBubbleAnimation(
                     name, min_butthurt, max_butthurt, min_level, max_level, weight
                 )
 
                 # Load Animation meta and frames
-                head, tail = os.path.split(filename)
-                animation_directory = os.path.join(head, name)
-                animation.load(animation_directory)
+                animation.load(os.path.join(source_directory, name))
 
                 # Add to array
                 self.animations.append(animation)
             except EOFError as e:
                 break
+
+    def save2code(self, output_directory: str, symbol_name: str):
+        pass
+
+    def save2folder(self, output_directory: str):
+        manifest_filename = os.path.join(output_directory, "manifest.txt")
+        file = FlipperFormatFile()
+        file.setHeader(self.FILE_TYPE, self.FILE_VERSION)
+        file.writeEmptyLine()
+
+        for animation in self.animations:
+            file.writeKey("Name", animation.name)
+            file.writeKey("Min butthurt", animation.min_butthurt)
+            file.writeKey("Max butthurt", animation.max_butthurt)
+            file.writeKey("Min level", animation.min_level)
+            file.writeKey("Max level", animation.max_level)
+            file.writeKey("Weight", animation.weight)
+            file.writeEmptyLine()
+
+            animation.save(output_directory)
+
+        file.save(manifest_filename)
+
+    def save(self, output_directory: str, symbol_name: str):
+        os.makedirs(output_directory, exist_ok=True)
+        if symbol_name:
+            self.save2code(output_directory, symbol_name)
+        else:
+            self.save2folder(output_directory)
 
 
 class Dolphin:
@@ -210,27 +295,11 @@ class Dolphin:
         self.manifest = DolphinManifest()
         self.logger = logging.getLogger("Dolphin")
 
-    @staticmethod
-    def _pack_animation(pair: set):
-        source, destination = pair
-        image = file2image(source)
-        image.write(destination)
-
-    def _pack_internal(self, output_directory: str):
-        pass
-
-    def _pack_external(self, output_directory: str):
-        pass
-
     def load(self, source_directory: str):
-        assert os.path.exists(source_directory)
+        assert os.path.isdir(source_directory)
         # Load Manifest
-        manifest_filename = os.path.join(source_directory, "manifest.txt")
-        self.logger.info(f"Loading manifest from {manifest_filename}")
-        self.manifest.load(manifest_filename)
+        self.logger.info(f"Loading directory {source_directory}")
+        self.manifest.load(source_directory)
 
-    def pack(self, output_directory: str, internal: bool):
-        if internal:
-            self._pack_internal(output_directory)
-        else:
-            self._pack_external(output_directory)
+    def pack(self, output_directory: str, symbol_name: str = None):
+        self.manifest.save(output_directory, symbol_name)

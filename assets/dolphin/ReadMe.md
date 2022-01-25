@@ -1,30 +1,51 @@
 # Dolphin assets
 
-Dolphin assets contains of 3 directories:
-- essential. Animations that compiled into firmware. Consist of blocking animations, which have to be available always. Animations inside always refered by animation name. Converted to assets\_dolphin\_esssential.[h,c]. These blocking animation can be loaded by name, not by random selection.
-- internal. Animations that compiled into firmware. Consist of idle and system animation, such as "NoSd". Converted to assets\_dolphin.[h,c]
-- external. Idle animations that placed on SD card. Just copied to resources directory.
+Dolphin assets are split into 3 parts:
 
-`manifest.txt` file consist of data for random animation selection, such as level, animation name and butthurt. By this file on SD card Flipper understands animation directory name.
-`meta.txt` file describes how animations should be drawn.
-`frame_X.bm` files - are bitmap data files. This is not a raw data, it is prefixed with compression info.
+- essential - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_essential.[h,c]`.
+- internal  - Internal animations that are used for idle dolphin animation. Converted to `assets_dolphin_internal.[h,c]`.
+- external  - External animations that are used for idle dolphin animation. Packed to resource folder and placed on SD card.
 
-#### File manifest.txt
-Key-value order of this file is strict - you can't mess it.
-- `Name` - name of animation. Must be exact as animation directory name.
-- `Min butthurt`, `Max butthurt` - range of mood of dolphin for this animation.
-- `Min level`, `Max level` - range of levels to play animation at. If 0, this animation doesn't participate in random idle animation selection. It can only be selected by precise name. This is used for blocking animation, which brings critical information.
+# Files
+
+- `manifest.txt` - contains animations enumeration that is used for random animation selection. Starting point for Dolphin.
+- `meta.txt`     - contains data that describes how animation is drawn.
+- `frame_X.bm`   - Flipper Compressed Bitmap.
+
+## File manifest.txt
+
+Flipper Format File with ordered keys.
+
+Header:
+
+```
+Filetype: Flipper Animation Manifest
+Version: 1
+```
+
+- `Name` - name of animation. Must be exact animation directory name.
+- `Min butthurt`, `Max butthurt` - range of dolphin's butthurt for this animation.
+- `Min level`, `Max level` - range of dolphin's level for this animation. If 0, this animation doesn't participate in random idle animation selection and can only be selected by exact name.
 - `Weight` - chance of this animation to be choosen at random animation selection.
 
-Some of animations can be discarded from random animation selection, such as L1\_NoSd\_128x49.
+Some animations can be excluded from participation in random animation selection, such as `L1_NoSd_128x49`.
 
-#### File meta.txt
-Key-value order of this file is strict - you can't mess it.
-- `Width` - width of animation (less than 128)
-- `Height` - height of animation (less than 64)
+## File meta.txt
+
+Flipper Format File with ordered keys.
+
+Header:
+
+```
+Filetype: Flipper Animation
+Version: 1
+```
+
+- `Width` - animation width in px (<= 128)
+- `Height` - animation height in px (<= 64)
 - `Passive frames` - number of bitmap frames for passive animation state
 - `Active frames` - number of bitmap frames for active animation state (can be 0)
-- `Frames order` - order of bitmap framesm where first N frames are passive and following M are active. Each X number in order refers to bitmap frame, with name frame\_X.bm. This file must exist. Any X number can be repeated to refer same frame in animation.
+- `Frames order` - order of bitmap frames where first N frames are passive and following M are active. Each X number in order refers to bitmap frame, with name frame\_X.bm. This file must exist. Any X number can be repeated to refer same frame in animation.
 - `Active cycles` - cycles to repeat of N active frames for full active period. E.g. if frames for active cycles are 6 and 7, and active cycles is 3, so full active period plays 6 7 6 7 6 7. Full period of passive + active period are called *total period*.
 - `Frame rate` - number of frames to play for 1 second.
 - `Duration` - total amount of seconds to play 1 animation.
@@ -40,18 +61,21 @@ Key-value order of this file is strict - you can't mess it.
 - `AlignV` - vertical place of bubble corner (Top, Center, Bottom)
 - `StartFrame`, `EndFrame` - frame index range inside whole period to show bubble.
 
-#### Understanding of frame indexes
+### Understanding of frame indexes
+
 For example we have
+
 ```
 Passive frames: 6
 Active frames: 2
 Frames order: 0 1 2 3 4 5 6 7
 Active cycles: 4
 ```
+
 Then we have indexes
+
 ```
                         passive(6)            active (2 * 4)
 Real frames order:   0  1  2  3  4  5     6  7  6  7  6  7  6  7
 Frames indexes:      0  1  2  3  4  5     6  7  8  9  10 11 12 13
 ```
-

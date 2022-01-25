@@ -56,9 +56,10 @@ class Main(App):
             "dolphin", help="Assemble dolphin resources"
         )
         self.parser_dolphin.add_argument(
-            "type",
-            choices=["internal", "external"],
-            help="Dolphin packaging type, can be `external` or `internal`",
+            "-s",
+            "--symbol-name",
+            help="Symbol and file name in dolphin output directory",
+            default=None,
         )
         self.parser_dolphin.add_argument(
             "input_directory", help="Dolphin source directory"
@@ -244,7 +245,7 @@ class Main(App):
         self.logger.info(f"Loading data")
         dolphin.load(self.args.input_directory)
         self.logger.info(f"Packing")
-        dolphin.pack(self.args.output_directory, self.args.type == "internal")
+        dolphin.pack(self.args.output_directory, self.args.symbol_name)
         self.logger.info(f"Complete")
 
         return 0
