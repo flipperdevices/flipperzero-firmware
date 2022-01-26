@@ -14,7 +14,7 @@ SubGhzProtocolCame* subghz_protocol_came_alloc();
  * 
  * @param instance 
  */
-void subghz_protocol_came_free(SubGhzProtocolCame* instance);
+void subghz_protocol_came_free(void* context);
 
 /** Get upload protocol
  * 
@@ -29,45 +29,44 @@ bool subghz_protocol_came_send_key(
 /** Reset internal state
  * @param instance - SubGhzProtocolCame instance
  */
-void subghz_protocol_came_reset(SubGhzProtocolCame* instance);
+void subghz_protocol_came_reset(void* context);
 
 /** Parse accepted duration
  * 
  * @param instance - SubGhzProtocolCame instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32_t duration);
+void subghz_protocol_came_parse(void* context, bool level, uint32_t duration);
 
-/** Outputting information from the parser
+    /** Outputting information from the parser
  * 
  * @param instance - SubGhzProtocolCame* instance
  * @param output   - output string
  */
-void subghz_protocol_came_to_str(SubGhzProtocolCame* instance, string_t output);
+    void subghz_protocol_came_to_str(SubGhzProtocolCame * instance, string_t output);
 
-/** Adding data to a file
+    /** Adding data to a file
  * 
  * @param instance  - SubGhzProtocolCame instance
  * @param flipper_file - FlipperFile 
  * @return bool
  */
-bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFile* flipper_file);
+    bool subghz_protocol_came_to_save_file(
+        SubGhzProtocolCame * instance, FlipperFile * flipper_file);
 
-/** Loading protocol from file
+    /** Loading protocol from file
  * 
  * @param flipper_file - FlipperFile 
  * @param instance - SubGhzProtocolCame instance
  * @param file_path - file path
  * @return bool
  */
-bool subghz_protocol_came_to_load_protocol_from_file(
-    FlipperFile* flipper_file,
-    SubGhzProtocolCame* instance,
-    const char* file_path);
+    bool subghz_protocol_came_to_load_protocol_from_file(
+        FlipperFile * flipper_file, SubGhzProtocolCame * instance, const char* file_path);
 
-/** Loading protocol from bin data
+    /** Loading protocol from bin data
  * 
  * @param instance - SubGhzProtocolCame instance
  * @param context - SubGhzProtocolCommonLoad context
  */
-void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context);
+    void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame * instance, void* context);

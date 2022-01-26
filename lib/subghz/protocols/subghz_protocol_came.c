@@ -40,8 +40,9 @@ SubGhzProtocolCame* subghz_protocol_came_alloc() {
     return instance;
 }
 
-void subghz_protocol_came_free(SubGhzProtocolCame* instance) {
-    furi_assert(instance);
+void subghz_protocol_came_free(void* context) {
+    furi_assert(context);
+    SubGhzProtocolCame* instance = context;
     free(instance);
 }
 
@@ -77,11 +78,15 @@ bool subghz_protocol_came_send_key(
     return true;
 }
 
-void subghz_protocol_came_reset(SubGhzProtocolCame* instance) {
+void subghz_protocol_came_reset(void* context) {
+    furi_assert(context);
+    SubGhzProtocolCame* instance = context;
     instance->common.parser_step = CameDecoderStepReset;
 }
 
-void subghz_protocol_came_parse(SubGhzProtocolCame* instance, bool level, uint32_t duration) {
+void subghz_protocol_came_parse(void* context, bool level, uint32_t duration) {
+    furi_assert(context);
+    SubGhzProtocolCame* instance = context;
     switch(instance->common.parser_step) {
     case CameDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, instance->common.te_short * 51) <
