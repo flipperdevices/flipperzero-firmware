@@ -95,7 +95,7 @@ class DolphinBubbleAnimation:
             # Frames sanity check
             max_frame_number = max(self.meta["Frames order"])
             ordered_frames_count = len(self.meta["Frames order"])
-            for i in range(max_frame_number):
+            for i in range(max_frame_number + 1):
                 frame_filename = os.path.join(animation_directory, f"frame_{i}.png")
                 assert os.path.isfile(frame_filename)
                 self.frames.append(frame_filename)

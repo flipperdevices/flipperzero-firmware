@@ -30,3 +30,12 @@ AlignH: Left
 AlignV: Bottom
 StartFrame: 3
 EndFrame: 5
+
+Slot: 1
+X: 53
+Y: 31
+Text: Just a dream...
+AlignH: Left
+AlignV: Bottom
+StartFrame: 6
+EndFrame: 9

@@ -39,3 +39,12 @@ AlignH: Right
 AlignV: Bottom
 StartFrame: 3
 EndFrame: 5
+
+Slot: 2
+X: 1
+Y: 25
+Text: swim all day
+AlignH: Right
+AlignV: Bottom
+StartFrame: 6
+EndFrame: 9

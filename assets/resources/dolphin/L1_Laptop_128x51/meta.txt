@@ -21,3 +21,12 @@ AlignH: Left
 AlignV: Bottom
 StartFrame: 7
 EndFrame: 10
+
+Slot: 0
+X: 60
+Y: 23
+Text: but not today
+AlignH: Left
+AlignV: Bottom
+StartFrame: 11
+EndFrame: 13
