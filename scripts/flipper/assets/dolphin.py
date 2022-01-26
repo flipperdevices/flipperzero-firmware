@@ -39,6 +39,7 @@ class DolphinBubbleAnimation:
         self.meta = {}
         self.frames = []
         self.bubbles = []
+        self.bubble_slots = None
         # Logging
         self.logger = logging.getLogger("DolphinBubbleAnimation")
 
@@ -62,7 +63,6 @@ class DolphinBubbleAnimation:
         max_frame_number = None
         unique_frames = None
         total_frames_count = None
-        bubble_slots_count = None
 
         try:
             # Main meta
@@ -75,7 +75,7 @@ class DolphinBubbleAnimation:
             self.meta["Frame rate"] = file.readKeyInt("Frame rate")
             self.meta["Duration"] = file.readKeyInt("Duration")
             self.meta["Active cooldown"] = file.readKeyInt("Active cooldown")
-            bubble_slots_count = file.readKeyInt("Bubble slots")
+            self.bubble_slots = file.readKeyInt("Bubble slots")
 
             # Sanity Check
             assert self.meta["Width"] > 0 and self.meta["Width"] <= 128
@@ -123,8 +123,7 @@ class DolphinBubbleAnimation:
             raise Exception("Meta file is invalid: incorrect data")
 
         # Bubbles
-        bubble_slot = 0
-        while bubble_slot < bubble_slots_count:
+        while True:
             try:
                 # Bubble data
                 bubble = {}
@@ -138,7 +137,7 @@ class DolphinBubbleAnimation:
                 bubble["EndFrame"] = file.readKeyInt("EndFrame")
 
                 # Sanity check
-                assert bubble["Slot"] == bubble_slot
+                assert bubble["Slot"] <= self.bubble_slots
                 assert bubble["X"] >= 0 and bubble["X"] < 128
                 assert bubble["Y"] >= 0 and bubble["Y"] < 128
                 assert len(bubble["Text"]) > 0
@@ -150,16 +149,14 @@ class DolphinBubbleAnimation:
 
                 # Store bubble
                 self.bubbles.append(bubble)
-                bubble_slot += 1
-            except EOFError as e:
-                self.logger.error(f"EOF when reading bubble data at slot {bubble_slot}")
-                raise Exception("Meta file is incomplete: missing bubble data")
             except AssertionError as e:
                 self.logger.exception(e)
                 self.logger.error(
                     f"Animation {self.name} bubble slot {bubble_slot} got incorrect data: {bubble}"
                 )
                 raise Exception("Meta file is invalid: incorrect bubble data")
+            except EOFError:
+                break
 
     def save(self, output_directory: str):
         animation_directory = os.path.join(output_directory, self.name)
@@ -182,7 +179,7 @@ class DolphinBubbleAnimation:
         file.writeKey("Active cooldown", self.meta["Active cooldown"])
         file.writeEmptyLine()
 
-        file.writeKey("Bubble slots", len(self.bubbles))
+        file.writeKey("Bubble slots", self.bubble_slots)
         file.writeEmptyLine()
 
         # Write bubble data
@@ -257,7 +254,7 @@ class DolphinManifest:
 
                 # Add to array
                 self.animations.append(animation)
-            except EOFError as e:
+            except EOFError:
                 break
 
     def save2code(self, output_directory: str, symbol_name: str):
