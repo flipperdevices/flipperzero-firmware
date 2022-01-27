@@ -27,6 +27,7 @@ extern FuriHalSpiBus furi_hal_spi_bus_r;
 /** Furi Hal Spi Bus D (Display, SdCard) */
 extern FuriHalSpiBus furi_hal_spi_bus_d;
 
+
 /** CC1101 on `furi_hal_spi_bus_r` */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_subghz;
 

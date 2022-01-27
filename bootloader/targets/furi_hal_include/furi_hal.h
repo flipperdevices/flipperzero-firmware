@@ -3,6 +3,7 @@
 #include <furi_hal_i2c.h>
 #include <furi_hal_light.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_sd.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_version.h>
 
