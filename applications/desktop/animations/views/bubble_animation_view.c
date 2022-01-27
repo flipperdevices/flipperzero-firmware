@@ -186,7 +186,7 @@ static void bubble_animation_activate_right_now(BubbleAnimationView* view) {
     if(model->current && (model->current->active_frames > 0) && (!model->freeze_frame)) {
         model->current_frame = model->current->passive_frames;
         model->current_bubble = bubble_animation_pick_bubble(model, true);
-        frame_rate = model->current->frame_rate;
+        frame_rate = model->current->icon_animation.frame_rate;
     }
     view_commit_model(view->view, true);
 
@@ -289,7 +289,7 @@ static void bubble_animation_enter(void* context) {
     bubble_animation_activate(view, false);
 
     BubbleAnimationViewModel* model = view_get_model(view->view);
-    uint8_t frame_rate = model->current->frame_rate;
+    uint8_t frame_rate = model->current->icon_animation.frame_rate;
     view_commit_model(view->view, false);
 
     if(frame_rate) {
@@ -369,7 +369,7 @@ void bubble_animation_view_set_animation(
     model->active_cycle = 0;
     view_commit_model(view->view, true);
 
-    osTimerStart(view->timer, 1000 / new_animation->frame_rate);
+    osTimerStart(view->timer, 1000 / new_animation->icon_animation.frame_rate);
 }
 
 void bubble_animation_freeze(BubbleAnimationView* view) {
@@ -392,7 +392,7 @@ void bubble_animation_unfreeze(BubbleAnimationView* view) {
     furi_assert(model->freeze_frame);
     bubble_animation_release_frame(&model->freeze_frame);
     furi_assert(model->current);
-    frame_rate = model->current->frame_rate;
+    frame_rate = model->current->icon_animation.frame_rate;
     view_commit_model(view->view, true);
 
     osTimerStart(view->timer, 1000 / frame_rate);

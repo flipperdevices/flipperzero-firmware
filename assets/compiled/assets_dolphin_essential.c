@@ -6,23 +6,23 @@
 
 // Sd Bad
 extern const uint8_t *_A_L0_SdBad_128x51[];
-const BubbleAnimation BA_L0_SdBad_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=2,.frame_rate=2,.frames=_A_L0_SdBad_128x51}, .frame_order={0, 1}, .passive_frames = 2, .frame_rate = 2};
+const BubbleAnimation BA_L0_SdBad_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=2,.frame_rate=2,.frames=_A_L0_SdBad_128x51}, .frame_order={0, 1}, .passive_frames = 2};
 
 // Sd Ok
 extern const uint8_t *_A_L0_SdOk_128x51[];
-const BubbleAnimation BA_L0_SdOk_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_SdOk_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4, .frame_rate = 2};
+const BubbleAnimation BA_L0_SdOk_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_SdOk_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4};
 
 // No Db
 extern const uint8_t *_A_L0_NoDb_128x51[];
-const BubbleAnimation BA_L0_NoDb_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_NoDb_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4, .frame_rate = 2};
+const BubbleAnimation BA_L0_NoDb_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_NoDb_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4};
 
 // Url
 extern const uint8_t *_A_L0_Url_128x51[];
-const BubbleAnimation BA_L0_Url_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_Url_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4, .frame_rate = 2};
+const BubbleAnimation BA_L0_Url_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=4,.frame_rate=2,.frames=_A_L0_Url_128x51}, .frame_order={0, 1, 2, 3}, .passive_frames = 4};
 
 // NewMail
 extern const uint8_t *_A_L0_NewMail_128x51[];
-const BubbleAnimation BA_L0_NewMail_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=6,.frame_rate=2,.frames=_A_L0_NewMail_128x51}, .frame_order={0, 1, 2, 3, 2, 1}, .passive_frames = 6, .frame_rate = 2};
+const BubbleAnimation BA_L0_NewMail_128x51 = {.icon_animation = {.width=128,.height=51,.frame_count=6,.frame_rate=2,.frames=_A_L0_NewMail_128x51}, .frame_order={0, 1, 2, 3, 2, 1}, .passive_frames = 6};
 
 const StorageAnimation StorageAnimationEssential[] = {
     /* Blocking */
