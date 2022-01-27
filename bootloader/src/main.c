@@ -1,4 +1,5 @@
 #include "target.h"
+#include "sd_update.h"
 
 int main() {
     // Initialize hardware
@@ -9,6 +10,7 @@ int main() {
         target_switch2dfu();
         break;
     case BootMode_SDUpdate:
+        execute_sdcard_update();
         target_switch2sdupdate();
         break;
     case BootMode_Normal:

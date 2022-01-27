@@ -145,6 +145,9 @@ void target_gpio_init() {
     // Button: back
     LL_GPIO_SetPinMode(BOOT_DFU_PORT, BOOT_DFU_PIN, LL_GPIO_MODE_INPUT);
     LL_GPIO_SetPinPull(BOOT_DFU_PORT, BOOT_DFU_PIN, LL_GPIO_PULL_UP);
+    // Button: down
+    LL_GPIO_SetPinMode(BOOT_SDUPDATE_PORT, BOOT_SDUPDATE_PIN, LL_GPIO_MODE_INPUT);
+    LL_GPIO_SetPinPull(BOOT_SDUPDATE_PORT, BOOT_SDUPDATE_PIN, LL_GPIO_PULL_UP);
 }
 
 void target_rtc_init() {
