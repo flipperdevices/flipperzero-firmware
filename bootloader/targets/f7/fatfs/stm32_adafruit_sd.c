@@ -422,9 +422,10 @@ uint8_t
     uint32_t offset = 0;
     uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
-    uint8_t* ptr = NULL;
+    //uint8_t* ptr = NULL;
     SD_CmdAnswer_typedef response;
     uint16_t BlockSize = 512;
+    uint8_t ptr[512];
 
     /* Send CMD16 (SD_CMD_SET_BLOCKLEN) to set the size of the block and 
      Check if the SD acknowledged the set block length command: R1 response (0x00: no errors) */
@@ -435,10 +436,10 @@ uint8_t
         goto error;
     }
 
-    ptr = furi_alloc(sizeof(uint8_t) * BlockSize);
-    if(ptr == NULL) {
-        goto error;
-    }
+    //ptr = furi_alloc(sizeof(uint8_t) * BlockSize);
+    //if(ptr == NULL) {
+    //    goto error;
+    //}
     memset(ptr, SD_DUMMY_BYTE, sizeof(uint8_t) * BlockSize);
 
     /* Initialize the address */
@@ -480,7 +481,7 @@ error:
     /* Send dummy byte: 8 Clock pulses of delay */
     SD_IO_CSState(1);
     SD_IO_WriteByte(SD_DUMMY_BYTE);
-    if(ptr != NULL) free(ptr);
+    //if(ptr != NULL) free(ptr);
 
     /* Return the reponse */
     return retr;
@@ -503,7 +504,8 @@ uint8_t BSP_SD_WriteBlocks(
     uint32_t offset = 0;
     uint32_t addr;
     uint8_t retr = BSP_SD_ERROR;
-    uint8_t* ptr = NULL;
+    //uint8_t* ptr = NULL;
+    uint8_t ptr[512];
     SD_CmdAnswer_typedef response;
     uint16_t BlockSize = 512;
 
@@ -516,10 +518,10 @@ uint8_t BSP_SD_WriteBlocks(
         goto error;
     }
 
-    ptr = furi_alloc(sizeof(uint8_t) * BlockSize);
-    if(ptr == NULL) {
-        goto error;
-    }
+    //ptr = furi_alloc(sizeof(uint8_t) * BlockSize);
+    //if(ptr == NULL) {
+    //    goto error;
+    //}
 
     /* Initialize the address */
     addr = (WriteAddr * ((flag_SDHC == 1) ? 1 : BlockSize));
@@ -867,7 +869,8 @@ SD_CmdAnswer_typedef SD_SendCmd(uint8_t Cmd, uint32_t Arg, uint8_t Crc, uint8_t 
         retr.r2 = SD_IO_WriteByte(SD_DUMMY_BYTE);
         /* Set CS High */
         SD_IO_CSState(1);
-        HAL_Delay(1);
+        //HAL_Delay(1);
+        delay(1.f);
         /* Set CS Low */
         SD_IO_CSState(0);
 

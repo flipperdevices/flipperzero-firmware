@@ -1,6 +1,9 @@
 #include "sd_update.h"
 #include <target.h>
+#include <furi_hal.h>
+#include <fatfs.h>
 
 void execute_sdcard_update() {
-    LL_mDelay(3000);
+    MX_FATFS_Init();
+    delay(3000.f);
 }

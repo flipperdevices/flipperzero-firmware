@@ -6,6 +6,7 @@
 #include <furi_hal_sd.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_version.h>
+#include <check.h>
 
 #define furi_assert(value) (void)(value)
 
