@@ -1,0 +1,43 @@
+#include <assets_${symbol_name}$.h>
+#include <desktop/animations/animation_storage_i.h>
+#include <desktop/animations/animation_manager.h>
+#include <gui/icon_i.h>
+
+${ for animation in animations: }$
+${ for frame_number, frame in enumerate(animation.frames): }$
+const uint8_t _A_${ animation.name }$_${ frame_number }$[] = {
+    ${ "%s" % ",".join("0x%x" % i for i in frame)}$
+};
+${ :endfor }$
+
+const uint8_t *_A_${animation.name}$[] = {
+${ for frame_number, frame in enumerate(animation.frames): }$
+    _A_${ animation.name }$_${ frame_number }$,
+${ :endfor }$
+};
+
+const BubbleAnimation BA_${animation.name}$ = {
+    .icon_animation = {
+        .width = ${ animation.meta['Width'] }$,
+        .height = ${ animation.meta['Height'] }$,
+        .frame_count = ${ "%d" % len(animation.frames) }$,
+        .frame_rate = ${ animation.meta['Frame rate'] }$,
+        .frames = _A_${ animation.name }$
+    },
+    .frame_order = { ${ "%s" % ", ".join(str(i) for i in animation.meta['Frames order']) }$ },
+    .passive_frames = ${ animation.meta['Passive frames'] }$,
+};
+${ :endfor }$
+
+const StorageAnimation ${symbol_name}$[] = {
+    ${ for animation in animations: }$
+    {
+        .animation = &BA_${animation.name}$,
+        .manifest_info = {
+            .name = "${animation.name}$"
+        }
+    },
+    ${ :endfor }$
+};
+
+const size_t ${symbol_name}$_size = COUNT_OF(${symbol_name}$);

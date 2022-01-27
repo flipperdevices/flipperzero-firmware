@@ -10,7 +10,7 @@
 #include "animation_manager.h"
 #include "animation_storage.h"
 #include "animation_storage_i.h"
-#include <assets_dolphin.h>
+#include <assets_dolphin_internal.h>
 #include <assets_dolphin_essential.h>
 
 #define ANIMATION_META_FILE "meta.txt"
@@ -126,9 +126,9 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
     flipper_file_free(file);
 
     // add hard-coded animations
-    for(int i = 0; i < StorageAnimationInternalSize; ++i) {
+    for(int i = 0; i < dolphin_internal_size; ++i) {
         StorageAnimationList_push_back(
-            *animation_list, (StorageAnimation*)&StorageAnimationInternal[i]);
+            *animation_list, (StorageAnimation*)&dolphin_internal[i]);
     }
 
     furi_record_close("storage");
@@ -139,17 +139,17 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
     furi_assert(strlen(name));
     StorageAnimation* storage_animation = NULL;
 
-    for(int i = 0; i < StorageAnimationEssentialSize; ++i) {
-        if(!strcmp(StorageAnimationEssential[i].manifest_info.name, name)) {
-            storage_animation = (StorageAnimation*)&StorageAnimationEssential[i];
+    for(int i = 0; i < dolphin_essential_size; ++i) {
+        if(!strcmp(dolphin_essential[i].manifest_info.name, name)) {
+            storage_animation = (StorageAnimation*)&dolphin_essential[i];
             break;
         }
     }
 
     if(!storage_animation) {
-        for(int i = 0; i < StorageAnimationInternalSize; ++i) {
-            if(!strcmp(StorageAnimationInternal[i].manifest_info.name, name)) {
-                storage_animation = (StorageAnimation*) &StorageAnimationInternal[i];
+        for(int i = 0; i < dolphin_internal_size; ++i) {
+            if(!strcmp(dolphin_internal[i].manifest_info.name, name)) {
+                storage_animation = (StorageAnimation*) &dolphin_internal[i];
                 break;
             }
         }

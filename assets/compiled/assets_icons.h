@@ -3,14 +3,6 @@
 
 extern const Icon I_Certification1_103x23;
 extern const Icon I_Certification2_119x30;
-extern const Icon A_L0_NewMail_128x51;
-extern const Icon A_L0_NoDb_128x51;
-extern const Icon A_L0_SdBad_128x51;
-extern const Icon A_L0_SdOk_128x51;
-extern const Icon A_L0_Url_128x51;
-extern const Icon A_L1_BadBattery_128x47;
-extern const Icon A_L1_NoSd_128x49;
-extern const Icon A_L1_Tv_128x47;
 extern const Icon A_Levelup1_128x64;
 extern const Icon A_Levelup2_128x64;
 extern const Icon I_125_10px;

@@ -5,14 +5,18 @@ import sys
 import shutil
 
 from flipper.utils.fff import *
+from flipper.utils.templite import *
 from .icon import *
 
 
 def _convert_image_to_bm(pair: set):
-    source, destination = pair
-    image = file2image(source)
-    image.write(destination)
+    source_filename, destination_filename = pair
+    image = file2image(source_filename)
+    image.write(destination_filename)
 
+def _convert_image(source_filename:str):
+    image = file2image(source_filename)
+    return image.data
 
 class DolphinBubbleAnimation:
 
@@ -205,11 +209,21 @@ class DolphinBubbleAnimation:
         pool = multiprocessing.Pool()
         pool.map(_convert_image_to_bm, to_pack)
 
+    def process(self):
+        pool = multiprocessing.Pool()
+        self.frames = pool.map(_convert_image, self.frames)
+
 
 class DolphinManifest:
 
     FILE_TYPE = "Flipper Animation Manifest"
     FILE_VERSION = 1
+
+    TEMPLATE_DIRECTORY = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "templates"
+    )
+    TEMPLATE_H = os.path.join(TEMPLATE_DIRECTORY, "dolphin.h.tmpl")
+    TEMPLATE_C = os.path.join(TEMPLATE_DIRECTORY, "dolphin.c.tmpl")
 
     def __init__(self):
         self.animations = []
@@ -257,8 +271,25 @@ class DolphinManifest:
             except EOFError:
                 break
 
+    def _renderTemplate(self, template_filename:str, output_filename:str, **kwargs):
+        template = Templite(filename=template_filename)
+        output = template.render(**kwargs)
+        open(output_filename, "w").write(output)
+
     def save2code(self, output_directory: str, symbol_name: str):
-        pass
+        # Process frames
+        for animation in self.animations:
+            animation.process()
+        # Render Header
+        self._renderTemplate(
+            self.TEMPLATE_H, os.path.join(output_directory, f"assets_{symbol_name}.h"),
+            animations=self.animations, symbol_name=symbol_name
+        )
+        # Render Source
+        self._renderTemplate(
+            self.TEMPLATE_C, os.path.join(output_directory, f"assets_{symbol_name}.c"),
+            animations=self.animations, symbol_name=symbol_name
+        )
 
     def save2folder(self, output_directory: str):
         manifest_filename = os.path.join(output_directory, "manifest.txt")
