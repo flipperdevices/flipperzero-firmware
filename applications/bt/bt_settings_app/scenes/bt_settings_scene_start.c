@@ -9,6 +9,11 @@ enum BtSetting {
     BtSettingNum,
 };
 
+enum BtSettingIndex{
+    BtSettingIndexSwitchBt,
+    BtSettingIndexForgetDev,
+};
+
 const char* const bt_settings_text[BtSettingNum] = {
     "OFF",
     "ON",
@@ -25,7 +30,9 @@ static void bt_settings_scene_start_var_list_change_callback(VariableItem* item)
 static void bt_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     BtSettingsApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_START_FORGET_DEV_SELECTED_EVENT);
+    if(index == BtSettingIndexForgetDev) {
+        view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_START_FORGET_DEV_SELECTED_EVENT);
+    }
 }
 
 void bt_settings_scene_start_on_enter(void* context) {
