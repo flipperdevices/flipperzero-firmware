@@ -6,11 +6,13 @@
 */
 void target_init();
 
+typedef enum { BootMode_Normal, BootMode_DFU, BootMode_SDUpdate } BootMode;
+
 /**
- * Check if dfu mode requested
- * @return 1 if dfu mode requested, 0 if not
+ * Get desired boot mode
+ * @return 
  */
-int target_is_dfu_requested();
+BootMode target_get_boot_mode();
 
 /**
  * Switch to dfu mode
@@ -21,5 +23,10 @@ void target_switch2dfu();
  * Switch to OS
  */
 void target_switch2os();
+
+/**
+ * Switch to SD Update
+ */
+void target_switch2sdupdate();
 
 #endif

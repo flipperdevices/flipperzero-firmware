@@ -3,12 +3,20 @@
 int main() {
     // Initialize hardware
     target_init();
-    // Check if dfu requested
-    if(target_is_dfu_requested()) {
+    // Check desired boot mode
+    switch(target_get_boot_mode()) {
+    case BootMode_DFU:
         target_switch2dfu();
+        break;
+    case BootMode_SDUpdate:
+        target_switch2sdupdate();
+        break;
+    case BootMode_Normal:
+    default:
+        target_switch2os();
+        break;
     }
-    // Switch to OS
-    target_switch2os();
+
     // Never should get here
     return 0;
 }

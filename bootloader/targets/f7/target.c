@@ -75,6 +75,9 @@ const uint8_t I_DFU_128x50[] = {
 // Boot to DFU pin
 #define BOOT_DFU_PORT GPIOB
 #define BOOT_DFU_PIN LL_GPIO_PIN_11
+// Boot to update from SD card 
+#define BOOT_SDUPDATE_PORT GPIOC
+#define BOOT_SDUPDATE_PIN LL_GPIO_PIN_6
 // USB pins
 #define BOOT_USB_PORT GPIOA
 #define BOOT_USB_DM_PIN LL_GPIO_PIN_11
@@ -218,21 +221,24 @@ void target_init() {
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 }
 
-int target_is_dfu_requested() {
+BootMode target_get_boot_mode() {
     if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_TAINTED) {
         // Default system state is tainted
         // We must ensure that MCU is cleanly booted
         LL_RTC_BAK_SetRegister(RTC, LL_RTC_BKP_DR0, BOOT_REQUEST_CLEAN);
         NVIC_SystemReset();
     } else if(LL_RTC_BAK_GetRegister(RTC, LL_RTC_BKP_DR0) == BOOT_REQUEST_DFU) {
-        return 1;
+        return BootMode_DFU;
     }
     LL_mDelay(100);
     if(!LL_GPIO_IsInputPinSet(BOOT_DFU_PORT, BOOT_DFU_PIN)) {
-        return 1;
+        return BootMode_DFU;
+    }
+    if(!LL_GPIO_IsInputPinSet(BOOT_SDUPDATE_PORT, BOOT_SDUPDATE_PIN)) {
+        return BootMode_SDUpdate;
     }
 
-    return 0;
+    return BootMode_Normal;
 }
 
 void target_switch(void* offset) {
@@ -259,6 +265,12 @@ void target_switch2dfu() {
 
 void target_switch2os() {
     target_led_control("G");
+    SCB->VTOR = OS_OFFSET;
+    target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
+}
+
+void target_switch2sdupdate() {
+    target_led_control("B");
     SCB->VTOR = OS_OFFSET;
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
