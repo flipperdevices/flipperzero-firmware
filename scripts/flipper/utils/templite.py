@@ -30,6 +30,7 @@ import sys
 import os
 import re
 
+
 class Templite(object):
 
     autowrite = re.compile("(^['\"])|(^[a-zA-Z0-9_\[\]'\.\ \"]+$)")

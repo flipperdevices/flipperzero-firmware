@@ -14,9 +14,11 @@ def _convert_image_to_bm(pair: set):
     image = file2image(source_filename)
     image.write(destination_filename)
 
-def _convert_image(source_filename:str):
+
+def _convert_image(source_filename: str):
     image = file2image(source_filename)
     return image.data
+
 
 class DolphinBubbleAnimation:
 
@@ -271,7 +273,7 @@ class DolphinManifest:
             except EOFError:
                 break
 
-    def _renderTemplate(self, template_filename:str, output_filename:str, **kwargs):
+    def _renderTemplate(self, template_filename: str, output_filename: str, **kwargs):
         template = Templite(filename=template_filename)
         output = template.render(**kwargs)
         open(output_filename, "w").write(output)
@@ -282,13 +284,17 @@ class DolphinManifest:
             animation.process()
         # Render Header
         self._renderTemplate(
-            self.TEMPLATE_H, os.path.join(output_directory, f"assets_{symbol_name}.h"),
-            animations=self.animations, symbol_name=symbol_name
+            self.TEMPLATE_H,
+            os.path.join(output_directory, f"assets_{symbol_name}.h"),
+            animations=self.animations,
+            symbol_name=symbol_name,
         )
         # Render Source
         self._renderTemplate(
-            self.TEMPLATE_C, os.path.join(output_directory, f"assets_{symbol_name}.c"),
-            animations=self.animations, symbol_name=symbol_name
+            self.TEMPLATE_C,
+            os.path.join(output_directory, f"assets_{symbol_name}.c"),
+            animations=self.animations,
+            symbol_name=symbol_name,
         )
 
     def save2folder(self, output_directory: str):
