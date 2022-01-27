@@ -9,7 +9,7 @@ enum BtSetting {
     BtSettingNum,
 };
 
-enum BtSettingIndex{
+enum BtSettingIndex {
     BtSettingIndexSwitchBt,
     BtSettingIndexForgetDev,
 };
@@ -31,7 +31,8 @@ static void bt_settings_scene_start_var_list_enter_callback(void* context, uint3
     furi_assert(context);
     BtSettingsApp* app = context;
     if(index == BtSettingIndexForgetDev) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, SCENE_START_FORGET_DEV_SELECTED_EVENT);
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, SCENE_START_FORGET_DEV_SELECTED_EVENT);
     }
 }
 
