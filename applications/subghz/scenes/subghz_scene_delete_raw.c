@@ -17,7 +17,6 @@ void subghz_scene_delete_raw_on_enter(void* context) {
     SubGhz* subghz = context;
     string_t frequency_str;
     string_t modulation_str;
-    //string_t text;
 
     string_init(frequency_str);
     string_init(modulation_str);
