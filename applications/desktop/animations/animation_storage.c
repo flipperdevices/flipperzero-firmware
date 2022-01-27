@@ -14,7 +14,7 @@
 #include <assets_dolphin_essential.h>
 
 #define ANIMATION_META_FILE "meta.txt"
-#define ANIMATION_DIR "/ext/dolphin/animations"
+#define ANIMATION_DIR "/ext/dolphin"
 #define ANIMATION_MANIFEST_FILE ANIMATION_DIR "/manifest.txt"
 #define TAG "AnimationStorage"
 
