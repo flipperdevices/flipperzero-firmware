@@ -1496,7 +1496,6 @@ ReturnCode rfalTransceiveBlockingTxRx(
     uint32_t flags,
     uint32_t fwt);
 
-
 ReturnCode rfalTransceiveBitsBlockingTx(
     uint8_t* txBuf,
     uint16_t txBufLen,

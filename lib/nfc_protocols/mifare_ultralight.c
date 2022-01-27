@@ -207,7 +207,6 @@ bool mf_ul_prepare_emulation_response(
     uint16_t* buff_tx_len,
     uint32_t* data_type,
     void* context) {
-
     furi_assert(context);
     MifareUlDevice* mf_ul_emulate = context;
     uint8_t cmd = buff_rx[0];

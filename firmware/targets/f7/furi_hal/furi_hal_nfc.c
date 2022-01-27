@@ -188,7 +188,14 @@ bool furi_hal_nfc_emulate_nfca(
     uint32_t data_type = FURI_HAL_NFC_TXRX_DEFAULT;
 
     rfalLowPowerModeStop();
-    if(rfalListenStart(RFAL_LM_MASK_NFCA, &config, NULL, NULL, buff_rx, rfalConvBytesToBits(buff_rx_size), &buff_rx_len)) {
+    if(rfalListenStart(
+           RFAL_LM_MASK_NFCA,
+           &config,
+           NULL,
+           NULL,
+           buff_rx,
+           rfalConvBytesToBits(buff_rx_size),
+           &buff_rx_len)) {
         rfalListenStop();
         FURI_LOG_E(TAG, "Failed to start listen mode");
         return false;
@@ -210,15 +217,21 @@ bool furi_hal_nfc_emulate_nfca(
         if(data_received) {
             rfalTransceiveBlockingRx();
         }
-        if(data_received && rfalNfcaListenerIsSleepReq(buff_rx, rfalConvBitsToBytes(buff_rx_len))) {
-            if(rfalListenSleepStart(RFAL_LM_STATE_SLEEP_A, buff_rx, rfalConvBytesToBits(buff_rx_size), &buff_rx_len)) {
+        if(data_received &&
+           rfalNfcaListenerIsSleepReq(buff_rx, rfalConvBitsToBytes(buff_rx_len))) {
+            if(rfalListenSleepStart(
+                   RFAL_LM_STATE_SLEEP_A,
+                   buff_rx,
+                   rfalConvBytesToBits(buff_rx_size),
+                   &buff_rx_len)) {
                 FURI_LOG_E(TAG, "Failed to enter sleep mode");
                 break;
             } else {
                 continue;
             }
         }
-        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) && data_received) {
+        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
+           data_received) {
             data_received = false;
             if(callback) {
                 callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
@@ -227,7 +240,14 @@ bool furi_hal_nfc_emulate_nfca(
                 break;
             }
             if(buff_tx_len) {
-                if(rfalTransceiveBitsBlockingTx(buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000)) {
+                if(rfalTransceiveBitsBlockingTx(
+                       buff_tx,
+                       buff_tx_len,
+                       buff_rx,
+                       sizeof(buff_rx),
+                       &buff_rx_len,
+                       data_type,
+                       1000)) {
                     FURI_LOG_W(TAG, "Transeive failed");
                 }
             } else {

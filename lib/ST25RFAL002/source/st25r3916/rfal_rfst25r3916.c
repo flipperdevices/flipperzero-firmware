@@ -681,7 +681,6 @@ void rfal_set_callback_context(void* context) {
     gRFAL.callbacks.ctx = context;
 }
 
-
 /*******************************************************************************/
 ReturnCode rfalDeinitialize(void) {
     /* Deinitialize chip */
