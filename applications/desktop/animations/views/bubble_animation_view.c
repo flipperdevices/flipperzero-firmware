@@ -84,10 +84,10 @@ static void bubble_animation_draw_callback(Canvas* canvas, void* model_) {
 
     const FrameBubble* bubble = model->current_bubble;
     if(bubble) {
-        if((model->current_frame >= bubble->starts_at_frame) &&
-           (model->current_frame <= bubble->ends_at_frame)) {
+        if((model->current_frame >= bubble->start_frame) &&
+           (model->current_frame <= bubble->end_frame)) {
             const Bubble* b = &bubble->bubble;
-            elements_bubble_str(canvas, b->x, b->y, b->str, b->horizontal, b->vertical);
+            elements_bubble_str(canvas, b->x, b->y, b->text, b->align_h, b->align_v);
         }
     }
 }
@@ -103,11 +103,11 @@ static const FrameBubble*
     uint8_t index = random() % (active ? model->active_bubbles : model->passive_bubbles);
     const BubbleAnimation* animation = model->current;
 
-    for(int i = 0; i < animation->frame_bubble_sequence_count; ++i) {
-        if((animation->frame_bubble_sequence[i]->starts_at_frame < animation->passive_frames) ^
+    for(int i = 0; i < animation->frame_bubble_sequences_count; ++i) {
+        if((animation->frame_bubble_sequences[i]->start_frame < animation->passive_frames) ^
            active) {
             if(!index) {
-                bubble = animation->frame_bubble_sequence[i];
+                bubble = animation->frame_bubble_sequences[i];
             }
             --index;
         }
@@ -218,7 +218,7 @@ static void bubble_animation_next_frame(BubbleAnimationViewModel* model) {
         }
 
         if(model->current_bubble) {
-            if(model->current_frame > model->current_bubble->ends_at_frame) {
+            if(model->current_frame > model->current_bubble->end_frame) {
                 model->current_bubble = model->current_bubble->next_bubble;
             }
         }
@@ -354,8 +354,8 @@ void bubble_animation_view_set_animation(
     model->active_ended_at = xTaskGetTickCount() - (model->current->active_cooldown * 1000);
     model->active_bubbles = 0;
     model->passive_bubbles = 0;
-    for(int i = 0; i < new_animation->frame_bubble_sequence_count; ++i) {
-        if(new_animation->frame_bubble_sequence[i]->starts_at_frame <
+    for(int i = 0; i < new_animation->frame_bubble_sequences_count; ++i) {
+        if(new_animation->frame_bubble_sequences[i]->start_frame <
            new_animation->passive_frames) {
             ++model->passive_bubbles;
         } else {

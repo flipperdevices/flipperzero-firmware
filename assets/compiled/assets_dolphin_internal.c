@@ -58,6 +58,52 @@ const uint8_t *_A_L1_Tv_128x47[] = {
 
 };
 
+
+
+const FrameBubble L1_Tv_128x47_bubble_0_0;
+
+const FrameBubble L1_Tv_128x47_bubble_1_0;
+
+
+const FrameBubble* const L1_Tv_128x47_bubble_sequences[] = {
+
+    &L1_Tv_128x47_bubble_0_0,
+
+    &L1_Tv_128x47_bubble_1_0,
+
+};
+
+
+
+const FrameBubble L1_Tv_128x47_bubble_0_0 = {
+    .bubble = {
+        .x = 1,
+        .y = 23,
+        .text = "Take the red pill",
+        .align_h = AlignRight,
+        .align_v = AlignBottom,
+    },
+    .start_frame = 7,
+    .end_frame = 9,
+    .next_bubble = NULL,
+};
+
+
+const FrameBubble L1_Tv_128x47_bubble_1_0 = {
+    .bubble = {
+        .x = 1,
+        .y = 23,
+        .text = "I can joke better",
+        .align_h = AlignRight,
+        .align_v = AlignBottom,
+    },
+    .start_frame = 7,
+    .end_frame = 9,
+    .next_bubble = NULL,
+};
+
+
+
 const BubbleAnimation BA_L1_Tv_128x47 = {
     .icon_animation = {
         .width = 128,
@@ -68,6 +114,14 @@ const BubbleAnimation BA_L1_Tv_128x47 = {
     },
     .frame_order = { 0, 1, 2, 3, 4, 5, 6, 7 },
     .passive_frames = 6,
+    .active_frames = 2,
+    .active_cooldown = 5,
+    .active_cycles = 2,
+    .duration = 3600,
+
+    .frame_bubble_sequences = L1_Tv_128x47_bubble_sequences,
+    .frame_bubble_sequences_count = COUNT_OF(L1_Tv_128x47_bubble_sequences),
+
 };
 
 
@@ -88,6 +142,34 @@ const uint8_t *_A_L1_BadBattery_128x47[] = {
 
 };
 
+
+
+const FrameBubble L1_BadBattery_128x47_bubble_0_0;
+
+
+const FrameBubble* const L1_BadBattery_128x47_bubble_sequences[] = {
+
+    &L1_BadBattery_128x47_bubble_0_0,
+
+};
+
+
+
+const FrameBubble L1_BadBattery_128x47_bubble_0_0 = {
+    .bubble = {
+        .x = 4,
+        .y = 21,
+        .text = "I feel so sick!\nI'm dying...",
+        .align_h = AlignRight,
+        .align_v = AlignCenter,
+    },
+    .start_frame = 0,
+    .end_frame = 1,
+    .next_bubble = NULL,
+};
+
+
+
 const BubbleAnimation BA_L1_BadBattery_128x47 = {
     .icon_animation = {
         .width = 128,
@@ -98,6 +180,14 @@ const BubbleAnimation BA_L1_BadBattery_128x47 = {
     },
     .frame_order = { 0, 1 },
     .passive_frames = 2,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 3600,
+
+    .frame_bubble_sequences = L1_BadBattery_128x47_bubble_sequences,
+    .frame_bubble_sequences_count = COUNT_OF(L1_BadBattery_128x47_bubble_sequences),
+
 };
 
 
@@ -142,6 +232,34 @@ const uint8_t *_A_L1_NoSd_128x49[] = {
 
 };
 
+
+
+const FrameBubble L1_NoSd_128x49_bubble_0_0;
+
+
+const FrameBubble* const L1_NoSd_128x49_bubble_sequences[] = {
+
+    &L1_NoSd_128x49_bubble_0_0,
+
+};
+
+
+
+const FrameBubble L1_NoSd_128x49_bubble_0_0 = {
+    .bubble = {
+        .x = 40,
+        .y = 18,
+        .text = "Need an\nSD card",
+        .align_h = AlignRight,
+        .align_v = AlignBottom,
+    },
+    .start_frame = 0,
+    .end_frame = 9,
+    .next_bubble = NULL,
+};
+
+
+
 const BubbleAnimation BA_L1_NoSd_128x49 = {
     .icon_animation = {
         .width = 128,
@@ -152,6 +270,14 @@ const BubbleAnimation BA_L1_NoSd_128x49 = {
     },
     .frame_order = { 0, 1, 0, 1, 0, 2, 3, 4, 3, 5 },
     .passive_frames = 10,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 3600,
+
+    .frame_bubble_sequences = L1_NoSd_128x49_bubble_sequences,
+    .frame_bubble_sequences_count = COUNT_OF(L1_NoSd_128x49_bubble_sequences),
+
 };
 
 
@@ -160,21 +286,36 @@ const StorageAnimation dolphin_internal[] = {
     {
         .animation = &BA_L1_Tv_128x47,
         .manifest_info = {
-            .name = "L1_Tv_128x47"
+            .name = "L1_Tv_128x47",
+            .min_butthurt = 0,
+            .max_butthurt = 14,
+            .min_level = 1,
+            .max_level = 3,
+            .weight = 3,
         }
     },
     
     {
         .animation = &BA_L1_BadBattery_128x47,
         .manifest_info = {
-            .name = "L1_BadBattery_128x47"
+            .name = "L1_BadBattery_128x47",
+            .min_butthurt = 0,
+            .max_butthurt = 14,
+            .min_level = 1,
+            .max_level = 3,
+            .weight = 3,
         }
     },
     
     {
         .animation = &BA_L1_NoSd_128x49,
         .manifest_info = {
-            .name = "L1_NoSd_128x49"
+            .name = "L1_NoSd_128x49",
+            .min_butthurt = 0,
+            .max_butthurt = 14,
+            .min_level = 1,
+            .max_level = 3,
+            .weight = 6,
         }
     },
     

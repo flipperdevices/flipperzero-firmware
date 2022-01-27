@@ -334,27 +334,27 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
     string_t str;
     string_init(str);
     bool success = false;
-    furi_assert(!animation->frame_bubble_sequence);
+    furi_assert(!animation->frame_bubble_sequences);
 
     do {
         if(!flipper_file_read_uint32(ff, "Bubble slots", &u32value, 1)) break;
         if(u32value > 20) break;
-        animation->frame_bubble_sequence_count = u32value;
-        if(animation->frame_bubble_sequence_count == 0) {
-            animation->frame_bubble_sequence = NULL;
+        animation->frame_bubble_sequences_count = u32value;
+        if(animation->frame_bubble_sequences_count == 0) {
+            animation->frame_bubble_sequences = NULL;
             success = true;
             break;
         }
-        animation->frame_bubble_sequence =
-            furi_alloc(sizeof(FrameBubble*) * animation->frame_bubble_sequence_count);
+        animation->frame_bubble_sequences =
+            furi_alloc(sizeof(FrameBubble*) * animation->frame_bubble_sequences_count);
 
         uint32_t current_slot = 0;
-        for(int i = 0; i < animation->frame_bubble_sequence_count; ++i) {
+        for(int i = 0; i < animation->frame_bubble_sequences_count; ++i) {
             FURI_CONST_ASSIGN_PTR(
-                animation->frame_bubble_sequence[i], furi_alloc(sizeof(FrameBubble)));
+                animation->frame_bubble_sequences[i], furi_alloc(sizeof(FrameBubble)));
         }
 
-        const FrameBubble* bubble = animation->frame_bubble_sequence[0];
+        const FrameBubble* bubble = animation->frame_bubble_sequences[0];
         int8_t index = -1;
         for(;;) {
             if(!flipper_file_read_uint32(ff, "Slot", &current_slot, 1)) break;
@@ -365,13 +365,13 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
                 bubble = bubble->next_bubble;
             } else if(current_slot == index + 1) {
                 ++index;
-                bubble = animation->frame_bubble_sequence[index];
+                bubble = animation->frame_bubble_sequences[index];
             } else {
                 /* slots have to start from 0, be ascending sorted, and
                  * have exact number of slots as specified in "Bubble slots" */
                 break;
             }
-            if(index >= animation->frame_bubble_sequence_count) break;
+            if(index >= animation->frame_bubble_sequences_count) break;
 
             if(!flipper_file_read_uint32(ff, "X", &u32value, 1)) break;
             FURI_CONST_ASSIGN(bubble->bubble.x, u32value);
@@ -383,24 +383,24 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFi
 
             string_replace_all_str(str, "\\n", "\n");
 
-            FURI_CONST_ASSIGN_PTR(bubble->bubble.str, furi_alloc(string_size(str) + 1));
-            strcpy((char*)bubble->bubble.str, string_get_cstr(str));
+            FURI_CONST_ASSIGN_PTR(bubble->bubble.text, furi_alloc(string_size(str) + 1));
+            strcpy((char*)bubble->bubble.text, string_get_cstr(str));
 
             if(!flipper_file_read_string(ff, "AlignH", str)) break;
-            if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.horizontal)) break;
+            if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.align_h)) break;
             if(!flipper_file_read_string(ff, "AlignV", str)) break;
-            if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.vertical)) break;
+            if(!animation_storage_cast_align(str, (Align*)&bubble->bubble.align_v)) break;
 
             if(!flipper_file_read_uint32(ff, "StartFrame", &u32value, 1)) break;
-            FURI_CONST_ASSIGN(bubble->starts_at_frame, u32value);
+            FURI_CONST_ASSIGN(bubble->start_frame, u32value);
             if(!flipper_file_read_uint32(ff, "EndFrame", &u32value, 1)) break;
-            FURI_CONST_ASSIGN(bubble->ends_at_frame, u32value);
+            FURI_CONST_ASSIGN(bubble->end_frame, u32value);
         }
-        success = (index + 1) == animation->frame_bubble_sequence_count;
+        success = (index + 1) == animation->frame_bubble_sequences_count;
     } while(0);
 
     if(!success) {
-        if(animation->frame_bubble_sequence) {
+        if(animation->frame_bubble_sequences) {
             FURI_LOG_E(TAG, "Failed to load animation bubbles");
             animation_storage_free_bubbles(animation);
         }
@@ -423,7 +423,7 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
     flipper_file_set_strict_mode(ff, true);
     string_t str;
     string_init(str);
-    animation->frame_bubble_sequence = NULL;
+    animation->frame_bubble_sequences = NULL;
 
     bool success = false;
     do {
@@ -490,10 +490,10 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
 }
 
 static void animation_storage_free_bubbles(BubbleAnimation* animation) {
-    if(!animation->frame_bubble_sequence) return;
+    if(!animation->frame_bubble_sequences) return;
 
-    for(int i = 0; i < animation->frame_bubble_sequence_count;) {
-        const FrameBubble* const* bubble = &animation->frame_bubble_sequence[i];
+    for(int i = 0; i < animation->frame_bubble_sequences_count;) {
+        const FrameBubble* const* bubble = &animation->frame_bubble_sequences[i];
 
         if((*bubble) == NULL) break;
 
@@ -501,15 +501,15 @@ static void animation_storage_free_bubbles(BubbleAnimation* animation) {
             bubble = &(*bubble)->next_bubble;
         }
 
-        if((*bubble)->bubble.str) {
-            free((void*)(*bubble)->bubble.str);
+        if((*bubble)->bubble.text) {
+            free((void*)(*bubble)->bubble.text);
         }
-        if((*bubble) == animation->frame_bubble_sequence[i]) {
+        if((*bubble) == animation->frame_bubble_sequences[i]) {
             ++i;
         }
         free((void*)*bubble);
         FURI_CONST_ASSIGN_PTR(*bubble, NULL);
     }
-    free((void*)animation->frame_bubble_sequence);
-    animation->frame_bubble_sequence = NULL;
+    free((void*)animation->frame_bubble_sequences);
+    animation->frame_bubble_sequences = NULL;
 }

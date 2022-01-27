@@ -34,6 +34,8 @@ const uint8_t *_A_L0_NoDb_128x51[] = {
 
 };
 
+
+
 const BubbleAnimation BA_L0_NoDb_128x51 = {
     .icon_animation = {
         .width = 128,
@@ -44,6 +46,14 @@ const BubbleAnimation BA_L0_NoDb_128x51 = {
     },
     .frame_order = { 0, 1, 2, 3 },
     .passive_frames = 4,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 0,
+
+    .frame_bubble_sequences = NULL,
+    .frame_bubble_sequences_count = 0,
+
 };
 
 
@@ -64,6 +74,8 @@ const uint8_t *_A_L0_SdBad_128x51[] = {
 
 };
 
+
+
 const BubbleAnimation BA_L0_SdBad_128x51 = {
     .icon_animation = {
         .width = 128,
@@ -74,6 +86,14 @@ const BubbleAnimation BA_L0_SdBad_128x51 = {
     },
     .frame_order = { 0, 1 },
     .passive_frames = 2,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 0,
+
+    .frame_bubble_sequences = NULL,
+    .frame_bubble_sequences_count = 0,
+
 };
 
 
@@ -106,6 +126,8 @@ const uint8_t *_A_L0_SdOk_128x51[] = {
 
 };
 
+
+
 const BubbleAnimation BA_L0_SdOk_128x51 = {
     .icon_animation = {
         .width = 128,
@@ -116,6 +138,14 @@ const BubbleAnimation BA_L0_SdOk_128x51 = {
     },
     .frame_order = { 0, 1, 2, 3 },
     .passive_frames = 4,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 0,
+
+    .frame_bubble_sequences = NULL,
+    .frame_bubble_sequences_count = 0,
+
 };
 
 
@@ -148,6 +178,8 @@ const uint8_t *_A_L0_Url_128x51[] = {
 
 };
 
+
+
 const BubbleAnimation BA_L0_Url_128x51 = {
     .icon_animation = {
         .width = 128,
@@ -158,6 +190,14 @@ const BubbleAnimation BA_L0_Url_128x51 = {
     },
     .frame_order = { 0, 1, 2, 3 },
     .passive_frames = 4,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 0,
+
+    .frame_bubble_sequences = NULL,
+    .frame_bubble_sequences_count = 0,
+
 };
 
 
@@ -190,6 +230,8 @@ const uint8_t *_A_L0_NewMail_128x51[] = {
 
 };
 
+
+
 const BubbleAnimation BA_L0_NewMail_128x51 = {
     .icon_animation = {
         .width = 128,
@@ -200,6 +242,14 @@ const BubbleAnimation BA_L0_NewMail_128x51 = {
     },
     .frame_order = { 0, 1, 2, 3, 2, 1 },
     .passive_frames = 6,
+    .active_frames = 0,
+    .active_cooldown = 0,
+    .active_cycles = 0,
+    .duration = 0,
+
+    .frame_bubble_sequences = NULL,
+    .frame_bubble_sequences_count = 0,
+
 };
 
 
@@ -208,35 +258,60 @@ const StorageAnimation dolphin_essential[] = {
     {
         .animation = &BA_L0_NoDb_128x51,
         .manifest_info = {
-            .name = "L0_NoDb_128x51"
+            .name = "L0_NoDb_128x51",
+            .min_butthurt = 0,
+            .max_butthurt = 0,
+            .min_level = 0,
+            .max_level = 0,
+            .weight = 0,
         }
     },
     
     {
         .animation = &BA_L0_SdBad_128x51,
         .manifest_info = {
-            .name = "L0_SdBad_128x51"
+            .name = "L0_SdBad_128x51",
+            .min_butthurt = 0,
+            .max_butthurt = 0,
+            .min_level = 0,
+            .max_level = 0,
+            .weight = 0,
         }
     },
     
     {
         .animation = &BA_L0_SdOk_128x51,
         .manifest_info = {
-            .name = "L0_SdOk_128x51"
+            .name = "L0_SdOk_128x51",
+            .min_butthurt = 0,
+            .max_butthurt = 0,
+            .min_level = 0,
+            .max_level = 0,
+            .weight = 0,
         }
     },
     
     {
         .animation = &BA_L0_Url_128x51,
         .manifest_info = {
-            .name = "L0_Url_128x51"
+            .name = "L0_Url_128x51",
+            .min_butthurt = 0,
+            .max_butthurt = 0,
+            .min_level = 0,
+            .max_level = 0,
+            .weight = 0,
         }
     },
     
     {
         .animation = &BA_L0_NewMail_128x51,
         .manifest_info = {
-            .name = "L0_NewMail_128x51"
+            .name = "L0_NewMail_128x51",
+            .min_butthurt = 0,
+            .max_butthurt = 0,
+            .min_level = 0,
+            .max_level = 0,
+            .weight = 0,
         }
     },
     

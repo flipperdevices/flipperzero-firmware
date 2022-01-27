@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import shutil
+from collections import Counter
 
 from flipper.utils.fff import *
 from flipper.utils.templite import *
@@ -164,6 +165,24 @@ class DolphinBubbleAnimation:
             except EOFError:
                 break
 
+    def prepare(self):
+        counted_bubbles = Counter([bubble["Slot"] for bubble in self.bubbles])
+
+        last_slot = -1
+        bubble_index = 0
+        for bubble in self.bubbles:
+            slot = bubble["Slot"]
+            if slot == last_slot:
+                bubble_index += 1
+            else:
+                last_slot = slot
+                bubble_index = 0
+            bubble["_BubbleIndex"] = bubble_index
+
+            counted_bubbles[slot] -= 1
+            if counted_bubbles[slot] != 0:
+                bubble["_NextBubbleIndex"] = bubble_index + 1
+
     def save(self, output_directory: str):
         animation_directory = os.path.join(output_directory, self.name)
         os.makedirs(animation_directory, exist_ok=True)
@@ -282,6 +301,11 @@ class DolphinManifest:
         # Process frames
         for animation in self.animations:
             animation.process()
+
+        # Prepare substitution data
+        for animation in self.animations:
+            animation.prepare()
+
         # Render Header
         self._renderTemplate(
             self.TEMPLATE_H,
