@@ -32,7 +32,7 @@ void nfc_emulate_uid_textbox_callback(void* context) {
 static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
     NfcDeviceCommonData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
-    widget_clear(widget);
+    widget_reset(widget);
     string_t info_str;
     string_init(info_str);
 
@@ -136,7 +136,7 @@ void nfc_scene_emulate_uid_on_exit(void* context) {
     nfc_worker_stop(nfc->worker);
 
     // Clear view
-    widget_clear(nfc->widget);
+    widget_reset(nfc->widget);
     text_box_reset(nfc->text_box);
     string_reset(nfc->text_box_store);
 }

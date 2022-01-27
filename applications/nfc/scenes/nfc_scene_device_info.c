@@ -184,7 +184,7 @@ void nfc_scene_device_info_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Clear Custom Widget
-    widget_clear(nfc->widget);
+    widget_reset(nfc->widget);
 
     if(nfc->dev->format == NfcDeviceSaveFormatUid) {
         // Clear Dialog
