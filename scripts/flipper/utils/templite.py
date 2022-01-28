@@ -29,17 +29,113 @@ import logging
 import sys
 import os
 import re
+from enum import Enum
+from io import StringIO
 
 
-class Templite(object):
+class TempliteCompiler:
+    class State(Enum):
+        TEXT = 1
+        CONTROL = 2
+        VARIABLE = 3
 
-    autowrite = re.compile("(^['\"])|(^[a-zA-Z0-9_\[\]'\.\ \"]+$)")
-    delimiters = ("${", "}$")
+    def __init__(self, source: str, encoding: str):
+        self.blocks = [f"# -*- coding: {encoding} -*-"]
+        self.block = ""
+        self.source = source
+        self.cursor = 0
+        self.offset = 0
+
+    def processText(self):
+        self.block = self.block.replace("\\", "\\\\").replace('"', '\\"')
+        self.block = "\t" * self.offset + f'write("""{self.block}""")'
+        self.blocks.append(self.block)
+        self.block = ""
+
+    def controlIsEnding(self):
+        block_stripped = self.block.lstrip()
+        if block_stripped.startswith(":"):
+            if not self.offset:
+                raise SyntaxError(
+                    f"no self.block statement to terminate: `{block_stripped}`"
+                )
+            self.offset -= 1
+            self.block = block_stripped[1:]
+            if not self.block.endswith(":"):
+                return True
+        return False
+
+    def processControl(self):
+        self.block = self.block.rstrip()
+
+        if self.controlIsEnding():
+            self.block = ""
+            return
+
+        lines = self.block.splitlines()
+        margin = min(len(l) - len(l.lstrip()) for l in lines if l.strip())
+        self.block = "\n".join("\t" * self.offset + l[margin:] for l in lines)
+        self.blocks.append(self.block)
+        if self.block.endswith(":"):
+            self.offset += 1
+        self.block = ""
+
+    def processVariable(self):
+        self.block = self.block.strip()
+        self.block = "\t" * self.offset + f"write({self.block})"
+        self.blocks.append(self.block)
+        self.block = ""
+
+    def compile(self):
+        state = self.State.TEXT
+
+        # Process template source
+        while self.cursor < len(self.source):
+            # Process plain text till first token occurance
+            if state == self.State.TEXT:
+                if self.source[self.cursor :].startswith("{%"):
+                    state = self.State.CONTROL
+                    self.cursor += 1
+                elif self.source[self.cursor :].startswith("{{"):
+                    state = self.State.VARIABLE
+                    self.cursor += 1
+                else:
+                    self.block += self.source[self.cursor]
+                # Commit self.block if token was found
+                if state != self.State.TEXT:
+                    self.processText()
+            elif state == self.State.CONTROL:
+                if self.source[self.cursor :].startswith("%}"):
+                    self.cursor += 1
+                    state = self.State.TEXT
+                    self.processControl()
+                else:
+                    self.block += self.source[self.cursor]
+            elif state == self.State.VARIABLE:
+                if self.source[self.cursor :].startswith("}}"):
+                    self.cursor += 1
+                    state = self.State.TEXT
+                    self.processVariable()
+                else:
+                    self.block += self.source[self.cursor]
+            else:
+                raise Exception("Unknown State")
+
+            self.cursor += 1
+
+        if state != self.State.TEXT:
+            raise Exception("Last self.block was not closed")
+
+        if self.block:
+            self.processText()
+
+        return "\n".join(self.blocks)
+
+
+class Templite:
     cache = {}
 
-    def __init__(
-        self, text=None, filename=None, encoding="utf-8", delimiters=None, caching=False
-    ):
+    def __init__(self, text=None, filename=None, encoding="utf-8", caching=False):
         """Loads a template from string or file."""
         if filename:
             filename = os.path.abspath(filename)
@@ -53,11 +149,6 @@ class Templite(object):
         # set attributes
         self.encoding = encoding
         self.caching = caching
-        if delimiters:
-            start, end = delimiters
-            if len(start) != 2 or len(end) != 2:
-                raise ValueError("each delimiter must be two characters long")
-            self.delimiters = delimiters
         # check cache
         cache = self.cache
         if caching and key in cache and cache[key][0] == mtime:
@@ -67,51 +158,12 @@ class Templite(object):
         if filename:
             with open(filename) as fh:
                 text = fh.read()
-        self._code = self._compile(text)
+        # Compile template to executable
+        code = TempliteCompiler(text, self.encoding).compile()
+        self._code = compile(code, self.file or "<string>", "exec")
+        # Cache for future use
         if caching:
             cache[key] = (mtime, self._code)
-
-    def _compile(self, source):
-        offset = 0
-        tokens = ["# -*- coding: %s -*-" % self.encoding]
-        start, end = self.delimiters
-        escaped = (re.escape(start), re.escape(end))
-        regex = re.compile("%s(.*?)%s" % escaped, re.DOTALL)
-        for i, part in enumerate(regex.split(source)):
-            part = part.replace("\\".join(start), start)
-            part = part.replace("\\".join(end), end)
-            if i % 2 == 0:
-                if not part:
-                    continue
-                part = part.replace("\\", "\\\\").replace('"', '\\"')
-                part = "\t" * offset + 'write("""%s""")' % part
-            else:
-                part = part.rstrip()
-                if not part:
-                    continue
-                part_stripped = part.lstrip()
-                if part_stripped.startswith(":"):
-                    if not offset:
-                        raise SyntaxError(
-                            "no block statement to terminate: ${%s}$" % part
-                        )
-                    offset -= 1
-                    part = part_stripped[1:]
-                    if not part.endswith(":"):
-                        continue
-                elif self.autowrite.match(part_stripped):
-                    part = "write(%s)" % part_stripped
-                else:
-                    print(" >", part_stripped)
-                lines = part.splitlines()
-                margin = min(len(l) - len(l.lstrip()) for l in lines if l.strip())
-                part = "\n".join("\t" * offset + l[margin:] for l in lines)
-                if part.endswith(":"):
-                    offset += 1
-            tokens.append(part)
-        if offset:
-            raise SyntaxError("%i block statement(s) not terminated" % offset)
-        return compile("\n".join(tokens), self.file or "<string>", "exec")
 
     def render(self, **namespace):
         """Renders the template according to the given namespace."""
