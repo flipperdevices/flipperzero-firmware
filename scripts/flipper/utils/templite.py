@@ -1,7 +1,10 @@
-#!/usr/bin/env python
-#
-#  Templite+
+#  Templite++
 #  A light-weight, fully functional, general purpose templating engine
+#  Proudly made of shit and sticks. Strictly not for production use.
+#  Extremly unsafe and difficult to debug.
+#
+#  Copyright (c) 2022 Flipper Devices
+#  Author: Aleksandr Kutuzov <alletam@gmail.com>
 #
 #  Copyright (c) 2009 joonis new media
 #  Author: Thimo Kraemer <thimo.kraemer@joonis.de>
@@ -25,12 +28,10 @@
 #  MA 02110-1301, USA.
 
 
-import logging
+from enum import Enum
+
 import sys
 import os
-import re
-from enum import Enum
-from io import StringIO
 
 
 class TempliteCompiler:
@@ -52,12 +53,15 @@ class TempliteCompiler:
         self.blocks.append(self.block)
         self.block = ""
 
+    def getLine(self):
+        return self.source[: self.cursor].count("\n") + 1
+
     def controlIsEnding(self):
         block_stripped = self.block.lstrip()
         if block_stripped.startswith(":"):
             if not self.offset:
                 raise SyntaxError(
-                    f"no self.block statement to terminate: `{block_stripped}`"
+                    f"Line: {self.getLine()}, no statement to terminate: `{block_stripped}`"
                 )
             self.offset -= 1
             self.block = block_stripped[1:]
