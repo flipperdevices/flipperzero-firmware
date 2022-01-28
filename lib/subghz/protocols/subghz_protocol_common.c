@@ -70,6 +70,8 @@ void subghz_protocol_common_add_bit(SubGhzProtocolCommon* common, uint8_t bit) {
     common->code_count_bit++;
 }
 
+
+
 bool subghz_protocol_common_check_interval(
     SubGhzProtocolCommon* common,
     uint32_t duration,

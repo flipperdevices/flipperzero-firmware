@@ -18,18 +18,6 @@
 //     uint32_t bit_tolerance;
 // } SubGhzTimings;
 
-typedef struct SubGhzProtocolSpecification {
-    const char* name;
-    const uint16_t te_long;
-    const uint16_t te_short;
-    const uint16_t te_delta;
-    const uint8_t code_count_bit;
-    //SubGhzProtocolSpecificationInDataCallback in_data_callback;
-    //void* in_data_context;
-    //SubGhzProtocolSpecificationEndDataCallback end_data_callback;
-    //void* end_data_context;
-} SubGhzProtocolSpecification;
-
 //typedef const SubGhzProtocolSpecification* (*SubGhzGetProtocolSpec)(void);
 
 typedef void* (*SubGhzAlloc)(void);

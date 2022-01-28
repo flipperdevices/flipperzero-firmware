@@ -5,6 +5,8 @@
 #include <furi.h>
 #include <m-string.h>
 
+#include "subghz_protocol_blocks.h"
+
 #include "protocols/subghz_protocol_came.h"
 
 #define SUBGHZ_PARSER_TAG "SubGhzProtocol"
@@ -29,34 +31,22 @@ typedef struct {
     SubGhzProtocolSpecification protocol_spec;
 } SubGhzEncoderDecoder;
 
-struct SubGhzProtocolDecoder {
-    void** protocol;
-    SubGhzProtocolDecoderCallback callback;
-    void* context;
-};
-
-struct SubGhzProtocolEncoderHandler {
-    void* handler;
-    const SubGhzEncoders* encoder;
-};
-
 static const SubGhzEncoderDecoder subghz_encoder_decoder[] = {
     {.decoder =
-         {.alloc = (void*)subghz_protocol_came_alloc,
-          .decode = subghz_protocol_came_parse,
-          .reset = subghz_protocol_came_reset,
-          .free = subghz_protocol_came_free},
-     .encoder =
+         {.alloc = subghz_protocol_came_decoder_alloc,
+          .decode = subghz_protocol_came_decoder_decode,
+          .reset = subghz_protocol_came_decoder_reset,
+          .free = subghz_protocol_came_decoder_free},
+     .encoder = {.alloc = NULL, .encode = NULL, .reset = NULL, .free = NULL},
+     .protocol_spec =
          {
-             .alloc = NULL,
-             .encode = NULL,
-             .reset = NULL,
-             .free = NULL,
+             .name = SUBGHZ_PROTOCOL_CAME_NAME,
+             .type = SubGhzProtocolCommonTypeStatic,
          }}
 
 };
 
-SubGhzProtocolDecoder* subghz_protocol_alloc_decoder(void) {
+SubGhzProtocolDecoder* subghz_protocol_decoder_alloc(void) {
     SubGhzProtocolDecoder* instance = furi_alloc(sizeof(SubGhzProtocolDecoder));
     instance->protocol = furi_alloc(sizeof(void*) * COUNT_OF(subghz_encoder_decoder));
 
@@ -71,7 +61,7 @@ SubGhzProtocolDecoder* subghz_protocol_alloc_decoder(void) {
     return instance;
 }
 
-void subghz_protocol_free_decoder(SubGhzProtocolDecoder* instance) {
+void subghz_protocol_decoder_free(SubGhzProtocolDecoder* instance) {
     furi_assert(instance);
     furi_assert(instance->protocol);
 
@@ -85,11 +75,46 @@ void subghz_protocol_free_decoder(SubGhzProtocolDecoder* instance) {
     free(instance);
 }
 
+void subghz_protocol_decoder_decode(SubGhzProtocolDecoder* instance, bool level, uint32_t duration) {
+    furi_assert(instance);
+    furi_assert(instance->protocol);
+
+    for(int i = 0; i < COUNT_OF(subghz_encoder_decoder); ++i) {
+        if(subghz_encoder_decoder[i].decoder.decode)
+            subghz_encoder_decoder[i].decoder.decode(instance->protocol[i], level, duration);
+    }
+}
+
+void subghz_protocol_decoder_reset(SubGhzProtocolDecoder* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol);
+
+    for(int i = 0; i < COUNT_OF(subghz_encoder_decoder); ++i) {
+        if(subghz_encoder_decoder[i].decoder.reset)
+            subghz_encoder_decoder[i].decoder.reset(instance->protocol[i]);
+    }
+}
+
+//тут возможно перестарался
+static void
+    subghz_protocol_decoder_rx_callback(SubGhzProtocolDecoderRxCallback* decoder, void* context) {
+    SubGhzProtocolBlockDecoder* instance = context;
+    if(instance->callback) {
+        instance->callback(decoder, instance->context);
+    }
+}
+
 void subghz_protocol_decoder_set_callback(
     SubGhzProtocolDecoder* instance,
     SubGhzProtocolDecoderCallback callback,
     void* context) {
     furi_assert(instance);
+    //???????????????                   ?
+    for(int i = 0; i < COUNT_OF(subghz_encoder_decoder); ++i) {
+        subghz_protocol_blocks_set_decoder_callback(
+            instance->protocol[i], subghz_protocol_decoder_rx_callback, instance);
+    }
+
     instance->callback = callback;
     instance->context = context;
 }
