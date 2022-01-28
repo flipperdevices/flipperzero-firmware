@@ -355,8 +355,7 @@ void bubble_animation_view_set_animation(
     model->active_bubbles = 0;
     model->passive_bubbles = 0;
     for(int i = 0; i < new_animation->frame_bubble_sequences_count; ++i) {
-        if(new_animation->frame_bubble_sequences[i]->start_frame <
-           new_animation->passive_frames) {
+        if(new_animation->frame_bubble_sequences[i]->start_frame < new_animation->passive_frames) {
             ++model->passive_bubbles;
         } else {
             ++model->active_bubbles;

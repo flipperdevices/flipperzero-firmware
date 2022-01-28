@@ -9,8 +9,8 @@
 #include "desktop_locked.h"
 #include <stdint.h>
 
-#define DOOR_MOVING_INTERVAL_MS     (1000/16)
-#define UNLOCKED_HINT_TIMEOUT_MS    (2000)
+#define DOOR_MOVING_INTERVAL_MS (1000 / 16)
+#define UNLOCKED_HINT_TIMEOUT_MS (2000)
 
 struct DesktopLockedView {
     View* view;
@@ -71,7 +71,7 @@ void desktop_locked_update(DesktopLockedView* locked_view) {
     bool stop_timer = false;
 
     DesktopLockedViewModel* model = view_get_model(locked_view->view);
-    if (model->locked) {
+    if(model->locked) {
         if(model->door_left_x != DOOR_L_POS_MAX) {
             model->door_left_x = CLAMP(model->door_left_x + 5, DOOR_L_POS_MAX, DOOR_L_POS);
             model->door_right_x = CLAMP(model->door_right_x - 5, DOOR_R_POS, DOOR_R_POS_MIN);
@@ -150,8 +150,13 @@ bool desktop_locked_input(InputEvent* event, void* context) {
     }
 
     if(locked_with_pin) {
-        locked_view->pincode_input.length = code_input_push(locked_view->pincode_input.data, locked_view->pincode_input.length, event->key);
-        bool match = code_input_compare(locked_view->pincode_input.data, locked_view->pincode_input.length, locked_view->pincode.data, locked_view->pincode.length);
+        locked_view->pincode_input.length = code_input_push(
+            locked_view->pincode_input.data, locked_view->pincode_input.length, event->key);
+        bool match = code_input_compare(
+            locked_view->pincode_input.data,
+            locked_view->pincode_input.length,
+            locked_view->pincode.data,
+            locked_view->pincode.length);
 
         if(match) {
             desktop_locked_unlock(locked_view);
@@ -177,7 +182,8 @@ bool desktop_locked_input(InputEvent* event, void* context) {
 DesktopLockedView* desktop_locked_alloc() {
     DesktopLockedView* locked_view = furi_alloc(sizeof(DesktopLockedView));
     locked_view->view = view_alloc();
-    locked_view->timer = xTimerCreate("Locked view", 1000/16, pdTRUE, locked_view, locked_view_timer_callback);
+    locked_view->timer =
+        xTimerCreate("Locked view", 1000 / 16, pdTRUE, locked_view, locked_view_timer_callback);
 
     view_allocate_model(locked_view->view, ViewModelTypeLocking, sizeof(DesktopLockedViewModel));
     view_set_context(locked_view->view, locked_view);
@@ -227,4 +233,3 @@ static void desktop_locked_unlock(DesktopLockedView* locked_view) {
     locked_view->callback(DesktopMainEventUnlocked, locked_view->context);
     xTimerChangePeriod(locked_view->timer, UNLOCKED_HINT_TIMEOUT_MS, portMAX_DELAY);
 }
-

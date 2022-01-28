@@ -61,8 +61,9 @@ static void animation_manager_replace_current_animation(
     StorageAnimation* storage_animation);
 static void animation_manager_start_new_idle(AnimationManager* animation_manager);
 static bool animation_manager_check_blocking(AnimationManager* animation_manager);
-static bool animation_manager_is_valid_idle_animation(const StorageAnimationManifestInfo* info,
-        const DolphinStats* stats);
+static bool animation_manager_is_valid_idle_animation(
+    const StorageAnimationManifestInfo* info,
+    const DolphinStats* stats);
 static void animation_manager_switch_to_one_shot_view(AnimationManager* animation_manager);
 static void animation_manager_switch_to_animation_view(AnimationManager* animation_manager);
 
@@ -123,15 +124,16 @@ void animation_manager_check_blocking_process(AnimationManager* animation_manage
     if(animation_manager->state == AnimationManagerStateIdle) {
         bool blocked = animation_manager_check_blocking(animation_manager);
 
-        if (!blocked) {
+        if(!blocked) {
             Dolphin* dolphin = furi_record_open("dolphin");
             DolphinStats stats = dolphin_stats(dolphin);
             furi_record_close("dolphin");
 
-            const StorageAnimationManifestInfo* manifest_info = animation_storage_get_meta(animation_manager->current_animation);
+            const StorageAnimationManifestInfo* manifest_info =
+                animation_storage_get_meta(animation_manager->current_animation);
             bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
 
-            if (!valid) {
+            if(!valid) {
                 animation_manager_start_new_idle(animation_manager);
             }
         }
@@ -151,7 +153,7 @@ void animation_manager_new_idle_process(AnimationManager* animation_manager) {
 void animation_manager_interact_process(AnimationManager* animation_manager) {
     furi_assert(animation_manager);
 
-    if (animation_manager->levelup_pending) {
+    if(animation_manager->levelup_pending) {
         animation_manager->levelup_pending = false;
         animation_manager->levelup_active = true;
         animation_manager_switch_to_one_shot_view(animation_manager);
@@ -165,7 +167,7 @@ void animation_manager_interact_process(AnimationManager* animation_manager) {
     } else if(animation_manager->state == AnimationManagerStateBlocked) {
         bool blocked = animation_manager_check_blocking(animation_manager);
 
-        if (!blocked) {
+        if(!blocked) {
             animation_manager_start_new_idle(animation_manager);
         }
     }
@@ -221,7 +223,7 @@ static bool animation_manager_check_blocking(AnimationManager* animation_manager
     if(!blocking_animation && stats.level_up_is_pending) {
         blocking_animation = animation_storage_find_animation(NEW_MAIL_ANIMATION_NAME);
         furi_assert(blocking_animation);
-        if (blocking_animation) {
+        if(blocking_animation) {
             animation_manager->levelup_pending = true;
         }
     }
@@ -312,8 +314,9 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager) 
     return view_stack_get_view(animation_manager->view_stack);
 }
 
-static bool animation_manager_is_valid_idle_animation(const StorageAnimationManifestInfo* info,
-        const DolphinStats* stats) {
+static bool animation_manager_is_valid_idle_animation(
+    const StorageAnimationManifestInfo* info,
+    const DolphinStats* stats) {
     furi_assert(info);
     furi_assert(info->name);
 
@@ -357,7 +360,8 @@ static StorageAnimation*
     StorageAnimationList_it_t it;
     for(StorageAnimationList_it(it, animation_list); !StorageAnimationList_end_p(it);) {
         StorageAnimation* storage_animation = *StorageAnimationList_ref(it);
-        const StorageAnimationManifestInfo* manifest_info = animation_storage_get_meta(storage_animation);
+        const StorageAnimationManifestInfo* manifest_info =
+            animation_storage_get_meta(storage_animation);
         bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
 
         if(valid) {
@@ -432,7 +436,8 @@ void animation_manager_unload_and_stall_animation(AnimationManager* animation_ma
         "Unload animation \'%s\'",
         animation_storage_get_meta(animation_manager->current_animation)->name);
 
-    StorageAnimationManifestInfo* meta = animation_storage_get_meta(animation_manager->current_animation);
+    StorageAnimationManifestInfo* meta =
+        animation_storage_get_meta(animation_manager->current_animation);
     /* copy str, not move, because it can be internal animation */
     string_set_str(animation_manager->freezed_animation_name, meta->name);
 
@@ -467,10 +472,12 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
                 Dolphin* dolphin = furi_record_open("dolphin");
                 DolphinStats stats = dolphin_stats(dolphin);
                 furi_record_close("dolphin");
-                const StorageAnimationManifestInfo* manifest_info = animation_storage_get_meta(restore_animation);
+                const StorageAnimationManifestInfo* manifest_info =
+                    animation_storage_get_meta(restore_animation);
                 bool valid = animation_manager_is_valid_idle_animation(manifest_info, &stats);
-                if (valid) {
-                    animation_manager_replace_current_animation(animation_manager, restore_animation);
+                if(valid) {
+                    animation_manager_replace_current_animation(
+                        animation_manager, restore_animation);
                     animation_manager->state = AnimationManagerStateIdle;
 
                     if(animation_manager->freezed_animation_time_left) {
@@ -526,7 +533,7 @@ static void animation_manager_switch_to_one_shot_view(AnimationManager* animatio
     view_stack_add_view(animation_manager->view_stack, next_view);
     if(stats.level == 1) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup1_128x64);
-    } else if (stats.level == 2) {
+    } else if(stats.level == 2) {
         one_shot_view_start_animation(animation_manager->one_shot_view, &A_Levelup2_128x64);
     } else {
         furi_assert(0);
@@ -544,4 +551,3 @@ static void animation_manager_switch_to_animation_view(AnimationManager* animati
     one_shot_view_free(animation_manager->one_shot_view);
     animation_manager->one_shot_view = NULL;
 }
-

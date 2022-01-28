@@ -3,7 +3,7 @@
 #include "view_stack.h"
 #include "view_i.h"
 
-#define MAX_VIEWS   3
+#define MAX_VIEWS 3
 
 typedef struct {
     View* views[MAX_VIEWS];
@@ -21,7 +21,7 @@ static void view_stack_update_callback(View* view_top_or_bottom, void* context) 
     furi_assert(context);
 
     View* view_stack_view = context;
-    if (view_stack_view->update_callback) {
+    if(view_stack_view->update_callback) {
         view_stack_view->update_callback(
             view_stack_view, view_stack_view->update_callback_context);
     }
@@ -94,7 +94,7 @@ static void view_stack_draw(Canvas* canvas, void* _model) {
     furi_assert(_model);
 
     ViewStackModel* model = _model;
-    for (int i = 0; i < MAX_VIEWS; ++i) {
+    for(int i = 0; i < MAX_VIEWS; ++i) {
         if(model->views[i]) {
             view_draw(model->views[i], canvas);
         }
@@ -109,7 +109,7 @@ static bool view_stack_input(InputEvent* event, void* context) {
     ViewStack* view_stack = context;
 
     ViewStackModel* model = view_get_model(view_stack->view);
-    for (int i = MAX_VIEWS - 1; !consumed && (i >= 0); --i) {
+    for(int i = MAX_VIEWS - 1; !consumed && (i >= 0); --i) {
         if(model->views[i]) {
             consumed = view_input(model->views[i], event);
         }
@@ -125,8 +125,8 @@ void view_stack_add_view(ViewStack* view_stack, View* view) {
 
     bool result = false;
     ViewStackModel* model = view_get_model(view_stack->view);
-    for (int i = 0; i < MAX_VIEWS; ++i) {
-        if (!model->views[i]) {
+    for(int i = 0; i < MAX_VIEWS; ++i) {
+        if(!model->views[i]) {
             model->views[i] = view;
             view_set_update_callback(model->views[i], view_stack_update_callback);
             view_set_update_callback_context(model->views[i], view_stack->view);
@@ -146,8 +146,8 @@ void view_stack_remove_view(ViewStack* view_stack, View* view) {
      * Locking model, so system is consistent at any time. */
     bool result = false;
     ViewStackModel* model = view_get_model(view_stack->view);
-    for (int i = 0; i < MAX_VIEWS; ++i) {
-        if (model->views[i] == view) {
+    for(int i = 0; i < MAX_VIEWS; ++i) {
+        if(model->views[i] == view) {
             view_set_update_callback(model->views[i], NULL);
             view_set_update_callback_context(model->views[i], NULL);
             model->views[i] = NULL;

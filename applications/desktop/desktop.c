@@ -63,9 +63,7 @@ Desktop* desktop_alloc() {
     view_stack_add_view(desktop->main_view_stack, desktop_locked_get_view(desktop->locked_view));
 
     view_dispatcher_add_view(
-        desktop->view_dispatcher,
-        DesktopViewMain,
-        view_stack_get_view(desktop->main_view_stack));
+        desktop->view_dispatcher, DesktopViewMain, view_stack_get_view(desktop->main_view_stack));
     view_dispatcher_add_view(
         desktop->view_dispatcher,
         DesktopViewLockMenu,

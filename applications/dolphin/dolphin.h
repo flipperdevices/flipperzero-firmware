@@ -23,10 +23,11 @@ typedef enum {
     DolphinPubsubEventUpdate,
 } DolphinPubsubEvent;
 
-#define DOLPHIN_DEED(deed)  do {                                    \
-        Dolphin* dolphin = (Dolphin*) furi_record_open("dolphin");  \
-        dolphin_deed(dolphin, deed);                                \
-        furi_record_close("dolphin");                               \
+#define DOLPHIN_DEED(deed)                                        \
+    do {                                                          \
+        Dolphin* dolphin = (Dolphin*)furi_record_open("dolphin"); \
+        dolphin_deed(dolphin, deed);                              \
+        furi_record_close("dolphin");                             \
     } while(0)
 
 /** Deed complete notification. Call it on deed completion.
@@ -52,4 +53,3 @@ FuriPubSub* dolphin_get_pubsub(Dolphin* dolphin);
 #ifdef __cplusplus
 }
 #endif
-

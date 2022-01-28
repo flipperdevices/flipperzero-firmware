@@ -34,4 +34,3 @@ void desktop_locked_free(DesktopLockedView* locked_view);
 
 void desktop_locked_lock_pincode(DesktopLockedView* locked_view, PinCode pincode);
 void desktop_locked_lock(DesktopLockedView* locked_view);
-

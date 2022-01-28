@@ -5,4 +5,3 @@ typedef enum {
     DesktopMainSceneStateLockedWithPin,
     DesktopMainSceneStateLockedNoPin,
 } DesktopMainSceneState;
-

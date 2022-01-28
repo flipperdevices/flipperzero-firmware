@@ -23,10 +23,10 @@ typedef struct {
 } OneShotViewModel;
 
 static void one_shot_view_update_timer_callback(TimerHandle_t xTimer) {
-    OneShotView* view = (void*) pvTimerGetTimerID(xTimer);
+    OneShotView* view = (void*)pvTimerGetTimerID(xTimer);
 
     OneShotViewModel* model = view_get_model(view->view);
-    if ((model->index + 1) < model->icon->frame_count) {
+    if((model->index + 1) < model->icon->frame_count) {
         ++model->index;
     } else {
         model->block_input = false;
@@ -42,7 +42,13 @@ static void one_shot_view_draw(Canvas* canvas, void* model_) {
     OneShotViewModel* model = model_;
     furi_check(model->index < model->icon->frame_count);
     uint8_t y_offset = canvas_height(canvas) - model->icon->height;
-    canvas_draw_bitmap(canvas, 0, y_offset, model->icon->width, model->icon->height, model->icon->frames[model->index]);
+    canvas_draw_bitmap(
+        canvas,
+        0,
+        y_offset,
+        model->icon->width,
+        model->icon->height,
+        model->icon->frames[model->index]);
 }
 
 static bool one_shot_view_input(InputEvent* event, void* context) {
@@ -74,7 +80,8 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
 OneShotView* one_shot_view_alloc(void) {
     OneShotView* view = furi_alloc(sizeof(OneShotView));
     view->view = view_alloc();
-    view->update_timer = xTimerCreate("Update timer", 1000, pdTRUE, view, one_shot_view_update_timer_callback);
+    view->update_timer =
+        xTimerCreate("Update timer", 1000, pdTRUE, view, one_shot_view_update_timer_callback);
 
     view_allocate_model(view->view, ViewModelTypeLocking, sizeof(OneShotViewModel));
     view_set_context(view->view, view);
@@ -121,4 +128,3 @@ View* one_shot_view_get_view(OneShotView* view) {
 
     return view->view;
 }
-

@@ -72,4 +72,3 @@ uint8_t dolphin_deed_get_weight(DolphinDeed deed);
 #ifdef __cplusplus
 }
 #endif
-

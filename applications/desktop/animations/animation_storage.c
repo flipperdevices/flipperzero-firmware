@@ -23,7 +23,9 @@ static void animation_storage_free_frames(BubbleAnimation* animation);
 static void animation_storage_free_animation(BubbleAnimation** storage_animation);
 static BubbleAnimation* animation_storage_load_animation(const char* name);
 
-static bool animation_storage_load_single_manifest_info(StorageAnimationManifestInfo* manifest_info, const char* name) {
+static bool animation_storage_load_single_manifest_info(
+    StorageAnimationManifestInfo* manifest_info,
+    const char* name) {
     furi_assert(manifest_info);
 
     bool result = false;
@@ -45,7 +47,8 @@ static bool animation_storage_load_single_manifest_info(StorageAnimationManifest
 
         /* skip other animation names */
         flipper_file_set_strict_mode(file, false);
-        while(flipper_file_read_string(file, "Name", read_string) && string_cmp_str(read_string, name))
+        while(flipper_file_read_string(file, "Name", read_string) &&
+              string_cmp_str(read_string, name))
             ;
         if(string_cmp_str(read_string, name)) break;
         flipper_file_set_strict_mode(file, true);
@@ -66,8 +69,8 @@ static bool animation_storage_load_single_manifest_info(StorageAnimationManifest
         result = true;
     } while(0);
 
-    if (!result && manifest_info->name) {
-        free((void*) manifest_info->name);
+    if(!result && manifest_info->name) {
+        free((void*)manifest_info->name);
     }
     string_clear(read_string);
     flipper_file_close(file);
@@ -130,8 +133,7 @@ void animation_storage_fill_animation_list(StorageAnimationList_t* animation_lis
 
     // add hard-coded animations
     for(int i = 0; i < dolphin_internal_size; ++i) {
-        StorageAnimationList_push_back(
-            *animation_list, (StorageAnimation*)&dolphin_internal[i]);
+        StorageAnimationList_push_back(*animation_list, (StorageAnimation*)&dolphin_internal[i]);
     }
 
     furi_record_close("storage");
@@ -152,7 +154,7 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
     if(!storage_animation) {
         for(int i = 0; i < dolphin_internal_size; ++i) {
             if(!strcmp(dolphin_internal[i].manifest_info.name, name)) {
-                storage_animation = (StorageAnimation*) &dolphin_internal[i];
+                storage_animation = (StorageAnimation*)&dolphin_internal[i];
                 break;
             }
         }
@@ -164,8 +166,9 @@ StorageAnimation* animation_storage_find_animation(const char* name) {
         storage_animation->external = true;
 
         bool result = false;
-        result = animation_storage_load_single_manifest_info(&storage_animation->manifest_info, name);
-        if (result) {
+        result =
+            animation_storage_load_single_manifest_info(&storage_animation->manifest_info, name);
+        if(result) {
             storage_animation->animation = animation_storage_load_animation(name);
             result = !!storage_animation->animation;
         }

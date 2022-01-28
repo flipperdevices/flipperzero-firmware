@@ -88,7 +88,8 @@ void desktop_scene_main_on_enter(void* context) {
 
     desktop_main_set_callback(main_view, desktop_scene_main_callback, desktop);
 
-    DesktopMainSceneState state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneMain);
+    DesktopMainSceneState state =
+        scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneMain);
     if(state == DesktopMainSceneStateLockedNoPin) {
         desktop_locked_lock(desktop->locked_view);
         view_port_enabled_set(desktop->lock_viewport, true);
@@ -175,8 +176,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
             furi_hal_usb_enable();
             view_port_enabled_set(desktop->lock_viewport, false);
-            scene_manager_set_scene_state(desktop->scene_manager, DesktopSceneMain,
-                    DesktopMainSceneStateUnlocked);
+            scene_manager_set_scene_state(
+                desktop->scene_manager, DesktopSceneMain, DesktopMainSceneStateUnlocked);
             break;
         case DesktopMainEventUpdate:
             desktop_locked_update(desktop->locked_view);

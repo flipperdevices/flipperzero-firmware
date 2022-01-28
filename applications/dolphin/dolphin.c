@@ -9,7 +9,7 @@
 #define DOLPHIN_LOCK_EVENT_FLAG (0x1)
 
 #define TAG "Dolphin"
-#define HOURS_IN_TICKS(x)   ((x) * 60 * 60 * 1000)
+#define HOURS_IN_TICKS(x) ((x)*60 * 60 * 1000)
 
 static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin);
 
@@ -79,9 +79,16 @@ Dolphin* dolphin_alloc() {
     dolphin->state = dolphin_state_alloc();
     dolphin->event_queue = osMessageQueueNew(8, sizeof(DolphinEvent), NULL);
     dolphin->pubsub = furi_pubsub_alloc();
-    dolphin->butthurt_timer = xTimerCreate("Butthurt timer", HOURS_IN_TICKS(2 * 24), pdTRUE, dolphin, dolphin_butthurt_timer_callback);
-    dolphin->flush_timer = xTimerCreate("Flush timer", 30 * 1000, pdFALSE, dolphin, dolphin_flush_timer_callback);
-    dolphin->clear_limits_timer = xTimerCreate("Clear limits timer", HOURS_IN_TICKS(24), pdTRUE, dolphin, dolphin_clear_limits_timer_callback);
+    dolphin->butthurt_timer = xTimerCreate(
+        "Butthurt timer", HOURS_IN_TICKS(2 * 24), pdTRUE, dolphin, dolphin_butthurt_timer_callback);
+    dolphin->flush_timer =
+        xTimerCreate("Flush timer", 30 * 1000, pdFALSE, dolphin, dolphin_flush_timer_callback);
+    dolphin->clear_limits_timer = xTimerCreate(
+        "Clear limits timer",
+        HOURS_IN_TICKS(24),
+        pdTRUE,
+        dolphin,
+        dolphin_clear_limits_timer_callback);
 
     return dolphin;
 }
@@ -129,13 +136,13 @@ static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin) {
     TickType_t now_ticks = xTaskGetTickCount();
     TickType_t timer_expires_at = xTimerGetExpiryTime(dolphin->clear_limits_timer);
 
-    if ((timer_expires_at - now_ticks) > HOURS_IN_TICKS(0.1)) {
+    if((timer_expires_at - now_ticks) > HOURS_IN_TICKS(0.1)) {
         FuriHalRtcDateTime date;
         furi_hal_rtc_get_datetime(&date);
         TickType_t now_time_in_ms = ((date.hour * 60 + date.minute) * 60 + date.second) * 1000;
         TickType_t time_to_clear_limits = 0;
 
-        if (date.hour < 5) {
+        if(date.hour < 5) {
             time_to_clear_limits = HOURS_IN_TICKS(5) - now_time_in_ms;
         } else {
             time_to_clear_limits = HOURS_IN_TICKS(24 + 5) - now_time_in_ms;

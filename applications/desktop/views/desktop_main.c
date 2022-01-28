@@ -72,4 +72,3 @@ void desktop_main_free(DesktopMainView* main_view) {
     view_free(main_view->view);
     free(main_view);
 }
-
