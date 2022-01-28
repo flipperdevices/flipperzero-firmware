@@ -1,4 +1,6 @@
 #include "sd_update.h"
+#include "dfu_headers.h"
+
 #include <target.h>
 #include <furi_hal.h>
 #include <fatfs.h>
@@ -7,12 +9,12 @@
 
 void execute_sdcard_update() {
     FATFS fs;
-    FRESULT fs_res;
+    //FRESULT fs_res;
     FIL fs_file;
     FILINFO fs_stat;
 
     const char fs_root_path[] = "/";
-    const char update_file_path[] = "/firmware/update.bin";
+    const char update_file_path[] = "/firmware/fw.dfu";
     
 
     MX_FATFS_Init();
