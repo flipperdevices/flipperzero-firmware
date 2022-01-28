@@ -1,5 +1,6 @@
 #pragma once
 
+#include <furi_hal_crc.h>
 #include <furi_hal_flash.h>
 #include <furi_hal_i2c.h>
 #include <furi_hal_light.h>

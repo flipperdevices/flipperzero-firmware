@@ -5,7 +5,16 @@
 #include <furi_hal.h>
 #include <fatfs.h>
 
-#define CHECK_FRESULT(result) { if ((result) != FR_OK) { return ; } }
+#define CHECK_FRESULT(result)   \
+    {                           \
+        if((result) != FR_OK) { \
+            return;             \
+        }                       \
+    }
+
+static bool validate_dfu_file(FIL* dfu_file) {
+    return false;
+}
 
 void execute_sdcard_update() {
     FATFS fs;
@@ -15,7 +24,6 @@ void execute_sdcard_update() {
 
     const char fs_root_path[] = "/";
     const char update_file_path[] = "/firmware/fw.dfu";
-    
 
     MX_FATFS_Init();
     if(!hal_sd_detect()) {
@@ -29,6 +37,6 @@ void execute_sdcard_update() {
     CHECK_FRESULT(f_mount(&fs, fs_root_path, 1));
     CHECK_FRESULT(f_stat(update_file_path, &fs_stat));
     CHECK_FRESULT(f_open(&fs_file, update_file_path, FA_OPEN_EXISTING | FA_READ));
- 
+
     delay(3000.f);
 }
