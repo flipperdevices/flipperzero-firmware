@@ -132,7 +132,7 @@ bool desktop_locked_input(InputEvent* event, void* context) {
         bool changed = false;
         locked = model->locked;
         locked_with_pin = model->pin_locked;
-        if(!locked && model->unlocked_hint) {
+        if(!locked && model->unlocked_hint && event->type == InputTypePress) {
             model->unlocked_hint = false;
             changed = true;
         }
