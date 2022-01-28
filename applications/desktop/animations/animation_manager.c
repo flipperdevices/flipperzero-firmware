@@ -306,7 +306,6 @@ void animation_manager_free(AnimationManager* animation_manager) {
     osTimerDelete(animation_manager->idle_animation_timer);
 }
 
-/* Levelup animation lays on upper view_port */
 View* animation_manager_get_animation_view(AnimationManager* animation_manager) {
     furi_assert(animation_manager);
 
@@ -430,7 +429,7 @@ void animation_manager_unload_and_stall_animation(AnimationManager* animation_ma
 
     FURI_LOG_I(
         TAG,
-        "Unload & Freeze with \'%s\'",
+        "Unload animation \'%s\'",
         animation_storage_get_meta(animation_manager->current_animation)->name);
 
     StorageAnimationManifestInfo* meta = animation_storage_get_meta(animation_manager->current_animation);
@@ -503,7 +502,7 @@ void animation_manager_load_and_continue_animation(AnimationManager* animation_m
     }
     FURI_LOG_I(
         TAG,
-        "Load & Continue with \'%s\'",
+        "Load animation \'%s\'",
         animation_storage_get_meta(animation_manager->current_animation)->name);
 
     bubble_animation_unfreeze(animation_manager->animation_view);

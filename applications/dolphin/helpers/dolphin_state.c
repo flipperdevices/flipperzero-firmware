@@ -126,11 +126,8 @@ uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
-    FURI_LOG_I(TAG, "Deed: %d", deed);  // dbg_
     DolphinApp app = dolphin_deed_get_app(deed);
     int8_t weight_limit = dolphin_deed_get_app_limit(app) - dolphin_state->data.icounter_daily_limit[app];
-    FURI_LOG_I(TAG, "Weight limit: %d", weight_limit);  // dbg_
-    furi_assert(weight_limit >= 0); // dbg_
     uint8_t deed_weight = CLAMP(dolphin_deed_get_weight(deed), weight_limit, 0);
 
     uint8_t xp_to_levelup = dolphin_state_xp_to_levelup(dolphin_state->data.icounter);
@@ -158,15 +155,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     dolphin_state->data.timestamp = dolphin_state_timestamp();
     dolphin_state->dirty = true;
 
-    for (int i = 0; i < DolphinAppMAX; ++i) {
-        FURI_LOG_I(TAG, "limit %d_app (%d/%d) butthurt limit %d, icounter %d, butthurt %d",
-                i,
-                dolphin_state->data.icounter_daily_limit[i],
-                dolphin_deed_get_app_limit(app),
-                dolphin_state->data.butthurt_daily_limit,
-                dolphin_state->data.icounter,
-                dolphin_state->data.butthurt);
-    }
+    FURI_LOG_D(TAG, "icounter %d, butthurt %d", dolphin_state->data.icounter, dolphin_state->data.butthurt);
 }
 
 void dolphin_state_butthurted(DolphinState* dolphin_state) {

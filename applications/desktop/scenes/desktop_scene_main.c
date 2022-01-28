@@ -1,4 +1,3 @@
-#include "desktop/views/desktop_locked.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <applications.h>
@@ -7,8 +6,6 @@
 
 #include "desktop/desktop_i.h"
 #include "desktop/views/desktop_main.h"
-#include "desktop/desktop.h"
-#include "desktop/views/desktop_events.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
 

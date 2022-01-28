@@ -9,6 +9,9 @@
 #include "desktop_locked.h"
 #include <stdint.h>
 
+#define DOOR_MOVING_INTERVAL_MS     (1000/16)
+#define UNLOCKED_HINT_TIMEOUT_MS    (2000)
+
 struct DesktopLockedView {
     View* view;
     DesktopLockedViewCallback callback;
@@ -24,8 +27,7 @@ struct DesktopLockedView {
 
 typedef struct {
     uint32_t hint_icon_expire_at;
-    uint32_t hint_unlocked_expire_at;
-    const char* hint_unlocked;
+    bool unlocked_hint;
     bool locked;
     bool pin_locked;
 
@@ -63,23 +65,27 @@ static void desktop_locked_reset_door_pos(DesktopLockedView* locked_view) {
     model->door_left_x = DOOR_L_POS;
     model->door_right_x = DOOR_R_POS;
     view_commit_model(locked_view->view, true);
-    xTimerStart(locked_view->timer, portMAX_DELAY);
 }
 
 void desktop_locked_update(DesktopLockedView* locked_view) {
-    bool animation_seq_end;
+    bool stop_timer = false;
 
     DesktopLockedViewModel* model = view_get_model(locked_view->view);
-    if(model->door_left_x != DOOR_L_POS_MAX) {
-        model->door_left_x = CLAMP(model->door_left_x + 5, DOOR_L_POS_MAX, DOOR_L_POS);
-        model->door_right_x = CLAMP(model->door_right_x - 5, DOOR_R_POS, DOOR_R_POS_MIN);
+    if (model->locked) {
+        if(model->door_left_x != DOOR_L_POS_MAX) {
+            model->door_left_x = CLAMP(model->door_left_x + 5, DOOR_L_POS_MAX, DOOR_L_POS);
+            model->door_right_x = CLAMP(model->door_right_x - 5, DOOR_R_POS, DOOR_R_POS_MIN);
+        } else {
+            model->animation_seq_end = true;
+        }
+        stop_timer = model->animation_seq_end;
     } else {
-        model->animation_seq_end = true;
+        model->unlocked_hint = false;
+        stop_timer = true;
     }
-    animation_seq_end = model->animation_seq_end;
-    view_commit_model(locked_view->view, !animation_seq_end);
+    view_commit_model(locked_view->view, true);
 
-    if(animation_seq_end) {
+    if(stop_timer) {
         xTimerStop(locked_view->timer, portMAX_DELAY);
     }
 }
@@ -101,7 +107,7 @@ void desktop_locked_draw(Canvas* canvas, void* model) {
             elements_multiline_text(canvas, 65, 20 + STATUS_BAR_Y_SHIFT, "To unlock\npress:");
         }
     } else {
-        if(now < m->hint_unlocked_expire_at) {
+        if(m->unlocked_hint) {
             canvas_set_font(canvas, FontPrimary);
             elements_multiline_text_framed(canvas, 42, 30 + STATUS_BAR_Y_SHIFT, "Unlocked");
         }
@@ -126,8 +132,8 @@ bool desktop_locked_input(InputEvent* event, void* context) {
         bool changed = false;
         locked = model->locked;
         locked_with_pin = model->pin_locked;
-        if(!locked && model->hint_unlocked) {
-            model->hint_unlocked = NULL;
+        if(!locked && model->unlocked_hint) {
+            model->unlocked_hint = false;
             changed = true;
         }
         view_commit_model(locked_view->view, changed);
@@ -165,7 +171,6 @@ bool desktop_locked_input(InputEvent* event, void* context) {
 
     locked_view->lock_lastpress = press_time;
 
-    // All events consumed
     return locked;
 }
 
@@ -193,8 +198,10 @@ void desktop_locked_lock(DesktopLockedView* locked_view) {
     locked_view->pincode.length = 0;
     DesktopLockedViewModel* model = view_get_model(locked_view->view);
     model->locked = true;
+    model->pin_locked = false;
     view_commit_model(locked_view->view, true);
     desktop_locked_reset_door_pos(locked_view);
+    xTimerChangePeriod(locked_view->timer, DOOR_MOVING_INTERVAL_MS, portMAX_DELAY);
 }
 
 void desktop_locked_lock_pincode(DesktopLockedView* locked_view, PinCode pincode) {
@@ -205,6 +212,7 @@ void desktop_locked_lock_pincode(DesktopLockedView* locked_view, PinCode pincode
     model->pin_locked = true;
     view_commit_model(locked_view->view, true);
     desktop_locked_reset_door_pos(locked_view);
+    xTimerChangePeriod(locked_view->timer, DOOR_MOVING_INTERVAL_MS, portMAX_DELAY);
 }
 
 static void desktop_locked_unlock(DesktopLockedView* locked_view) {
@@ -214,9 +222,9 @@ static void desktop_locked_unlock(DesktopLockedView* locked_view) {
     DesktopLockedViewModel* model = view_get_model(locked_view->view);
     model->locked = false;
     model->pin_locked = false;
-    model->hint_unlocked_expire_at = osKernelGetTickCount() + osKernelGetTickFreq();
-    model->hint_unlocked = "Unlocked";
+    model->unlocked_hint = true;
     view_commit_model(locked_view->view, true);
     locked_view->callback(DesktopMainEventUnlocked, locked_view->context);
+    xTimerChangePeriod(locked_view->timer, UNLOCKED_HINT_TIMEOUT_MS, portMAX_DELAY);
 }
 

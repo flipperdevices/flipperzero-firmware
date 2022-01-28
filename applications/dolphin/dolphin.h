@@ -24,8 +24,6 @@ typedef enum {
 } DolphinPubsubEvent;
 
 #define DOLPHIN_DEED(deed)  do {                                    \
-    /* dbg_ */  \
-        FURI_LOG_W("DEED", #deed);                            \
         Dolphin* dolphin = (Dolphin*) furi_record_open("dolphin");  \
         dolphin_deed(dolphin, deed);                                \
         furi_record_close("dolphin");                               \

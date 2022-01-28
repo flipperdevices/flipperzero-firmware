@@ -1,10 +1,9 @@
-#include "desktop/scenes/desktop_scene_i.h"
 #include <toolbox/saved_struct.h>
 #include <stdbool.h>
-#include <furi_hal.h>
 
 #include "../desktop_i.h"
 #include "../views/desktop_lock_menu.h"
+#include "desktop_scene_i.h"
 #include "desktop_scene.h"
 
 void desktop_scene_lock_menu_callback(DesktopEvent event, void* context) {

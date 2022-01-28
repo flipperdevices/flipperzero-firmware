@@ -150,17 +150,6 @@ int32_t dolphin_srv(void* p) {
     furi_record_create("dolphin", dolphin);
 
     dolphin_state_load(dolphin->state);
-    {
-        // dbg_
-        dolphin->state->dirty = true;
-        if (dolphin->state->data.icounter == 2941) {
-            dolphin->state->data.icounter = 2940 - 2;
-        } else if (dolphin->state->data.icounter < 740) {
-            dolphin->state->data.icounter = 2940 - 2;
-        }
-        dolphin->state->data.icounter_daily_limit[2] = 0;
-        dolphin_state_save(dolphin->state);
-    }
     xTimerReset(dolphin->butthurt_timer, portMAX_DELAY);
     dolphin_update_clear_limits_timer_period(dolphin);
     xTimerReset(dolphin->clear_limits_timer, portMAX_DELAY);

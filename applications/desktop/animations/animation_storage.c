@@ -29,7 +29,7 @@ static bool animation_storage_load_single_manifest_info(StorageAnimationManifest
     bool result = false;
     Storage* storage = furi_record_open("storage");
     FlipperFile* file = flipper_file_alloc(storage);
-    flipper_file_set_strict_mode(file, false);
+    flipper_file_set_strict_mode(file, true);
     string_t read_string;
     string_init(read_string);
 
@@ -43,9 +43,12 @@ static bool animation_storage_load_single_manifest_info(StorageAnimationManifest
 
         manifest_info->name = NULL;
 
+        /* skip other animation names */
+        flipper_file_set_strict_mode(file, false);
         while(flipper_file_read_string(file, "Name", read_string) && string_cmp_str(read_string, name))
             ;
         if(string_cmp_str(read_string, name)) break;
+        flipper_file_set_strict_mode(file, true);
 
         manifest_info->name = furi_alloc(string_size(read_string) + 1);
         strcpy((char*)manifest_info->name, string_get_cstr(read_string));

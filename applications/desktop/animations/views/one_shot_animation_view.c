@@ -19,7 +19,7 @@ struct OneShotView {
 typedef struct {
     const Icon* icon;
     uint32_t index;
-    bool locked;
+    bool block_input;
 } OneShotViewModel;
 
 static void one_shot_view_update_timer_callback(TimerHandle_t xTimer) {
@@ -29,7 +29,7 @@ static void one_shot_view_update_timer_callback(TimerHandle_t xTimer) {
     if ((model->index + 1) < model->icon->frame_count) {
         ++model->index;
     } else {
-        model->locked = false;
+        model->block_input = false;
         model->index = model->icon->frame_count - 2;
     }
     view_commit_model(view->view, true);
@@ -53,7 +53,7 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
     bool consumed = false;
 
     OneShotViewModel* model = view_get_model(view->view);
-    consumed = model->locked;
+    consumed = model->block_input;
     view_commit_model(view->view, false);
 
     if(!consumed) {
@@ -111,7 +111,7 @@ void one_shot_view_start_animation(OneShotView* view, const Icon* icon) {
     OneShotViewModel* model = view_get_model(view->view);
     model->index = 0;
     model->icon = icon;
-    model->locked = true;
+    model->block_input = true;
     view_commit_model(view->view, true);
     xTimerChangePeriod(view->update_timer, 1000 / model->icon->frame_rate, portMAX_DELAY);
 }

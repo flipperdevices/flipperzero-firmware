@@ -2,12 +2,12 @@
 #include <furi.h>
 
 static const DolphinDeedWeight dolphin_deed_weights[] = {
-    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureStart
-    {3, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureSave
-    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureRawStart
-    {2, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureAddManually
-    {2, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureEmulate
-    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzCaptureFrequencyAnalyzer
+    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzReceiverInfo
+    {3, DolphinAppSubGhz},      // DolphinDeedSubGhzSave
+    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzRawRec
+    {2, DolphinAppSubGhz},      // DolphinDeedSubGhzAddManually
+    {2, DolphinAppSubGhz},      // DolphinDeedSubGhzSend
+    {1, DolphinAppSubGhz},      // DolphinDeedSubGhzFrequencyAnalyzer
 
     {1, DolphinAppRfid},        // DolphinDeedRfidRead
     {3, DolphinAppRfid},        // DolphinDeedRfidReadSuccess

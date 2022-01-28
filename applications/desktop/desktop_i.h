@@ -9,9 +9,9 @@
 #include "views/desktop_debug.h"
 #include "desktop/desktop_settings/desktop_settings.h"
 
-#include <gui/view_stack.h>
 #include <furi.h>
 #include <gui/gui.h>
+#include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/code_input.h>
