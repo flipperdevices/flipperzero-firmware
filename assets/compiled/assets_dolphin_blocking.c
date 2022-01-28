@@ -1,4 +1,4 @@
-#include <assets_dolphin_essential.h>
+#include <assets_dolphin_blocking.h>
 #include <desktop/animations/animation_storage_i.h>
 #include <desktop/animations/animation_manager.h>
 #include <gui/icon_i.h>
@@ -253,7 +253,7 @@ const BubbleAnimation BA_L0_NewMail_128x51 = {
 };
 
 
-const StorageAnimation dolphin_essential[] = {
+const StorageAnimation dolphin_blocking[] = {
 
     {
         .animation = &BA_L0_NoDb_128x51,
@@ -317,4 +317,4 @@ const StorageAnimation dolphin_essential[] = {
 
 };
 
-const size_t dolphin_essential_size = COUNT_OF(dolphin_essential);
+const size_t dolphin_blocking_size = COUNT_OF(dolphin_blocking);

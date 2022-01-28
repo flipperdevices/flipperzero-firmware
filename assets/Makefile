@@ -21,8 +21,8 @@ $(PROTOBUF) &: $(PROTOBUF_SOURCES) $(PROTOBUF_COMPILER)
 protobuf: $(PROTOBUF)
 
 $(DOLPHIN_EXTERNAL_OUTPUT_DIR): $(DOLPHIN_SOURCE_DIR)
-	@echo "\tDOLPHIN essential"
-	@$(ASSETS_COMPILLER) dolphin -s dolphin_essential "$(DOLPHIN_SOURCE_DIR)/essential" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
+	@echo "\tDOLPHIN blocking"
+	@$(ASSETS_COMPILLER) dolphin -s dolphin_blocking "$(DOLPHIN_SOURCE_DIR)/blocking" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
 	@echo "\tDOLPHIN internal"
 	@$(ASSETS_COMPILLER) dolphin -s dolphin_internal "$(DOLPHIN_SOURCE_DIR)/internal" "$(DOLPHIN_INTERNAL_OUTPUT_DIR)"
 	@echo "\tDOLPHIN external"
