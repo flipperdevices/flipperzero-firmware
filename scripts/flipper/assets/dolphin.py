@@ -152,7 +152,7 @@ class DolphinBubbleAnimation:
                 assert bubble["AlignV"] in ["Bottom", "Center", "Top"]
                 assert bubble["StartFrame"] < total_frames_count
                 assert bubble["EndFrame"] < total_frames_count
-                assert bubble["EndFrame"] > bubble["StartFrame"]
+                assert bubble["EndFrame"] >= bubble["StartFrame"]
 
                 # Store bubble
                 self.bubbles.append(bubble)
@@ -166,7 +166,7 @@ class DolphinBubbleAnimation:
                 break
 
     def prepare(self):
-        counted_bubbles = Counter([bubble["Slot"] for bubble in self.bubbles])
+        bubbles_in_slots = Counter([bubble["Slot"] for bubble in self.bubbles])
 
         last_slot = -1
         bubble_index = 0
@@ -179,8 +179,8 @@ class DolphinBubbleAnimation:
                 bubble_index = 0
             bubble["_BubbleIndex"] = bubble_index
 
-            counted_bubbles[slot] -= 1
-            if counted_bubbles[slot] != 0:
+            bubbles_in_slots[slot] -= 1
+            if bubbles_in_slots[slot] != 0:
                 bubble["_NextBubbleIndex"] = bubble_index + 1
 
     def save(self, output_directory: str):

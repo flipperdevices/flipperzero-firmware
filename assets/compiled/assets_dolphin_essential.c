@@ -254,7 +254,7 @@ const BubbleAnimation BA_L0_NewMail_128x51 = {
 
 
 const StorageAnimation dolphin_essential[] = {
-    
+
     {
         .animation = &BA_L0_NoDb_128x51,
         .manifest_info = {
@@ -266,7 +266,7 @@ const StorageAnimation dolphin_essential[] = {
             .weight = 0,
         }
     },
-    
+
     {
         .animation = &BA_L0_SdBad_128x51,
         .manifest_info = {
@@ -278,7 +278,7 @@ const StorageAnimation dolphin_essential[] = {
             .weight = 0,
         }
     },
-    
+
     {
         .animation = &BA_L0_SdOk_128x51,
         .manifest_info = {
@@ -290,7 +290,7 @@ const StorageAnimation dolphin_essential[] = {
             .weight = 0,
         }
     },
-    
+
     {
         .animation = &BA_L0_Url_128x51,
         .manifest_info = {
@@ -302,7 +302,7 @@ const StorageAnimation dolphin_essential[] = {
             .weight = 0,
         }
     },
-    
+
     {
         .animation = &BA_L0_NewMail_128x51,
         .manifest_info = {
@@ -314,7 +314,7 @@ const StorageAnimation dolphin_essential[] = {
             .weight = 0,
         }
     },
-    
+
 };
 
 const size_t dolphin_essential_size = COUNT_OF(dolphin_essential);

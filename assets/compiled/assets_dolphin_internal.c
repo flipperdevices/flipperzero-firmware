@@ -282,7 +282,7 @@ const BubbleAnimation BA_L1_NoSd_128x49 = {
 
 
 const StorageAnimation dolphin_internal[] = {
-    
+
     {
         .animation = &BA_L1_Tv_128x47,
         .manifest_info = {
@@ -294,7 +294,7 @@ const StorageAnimation dolphin_internal[] = {
             .weight = 3,
         }
     },
-    
+
     {
         .animation = &BA_L1_BadBattery_128x47,
         .manifest_info = {
@@ -306,7 +306,7 @@ const StorageAnimation dolphin_internal[] = {
             .weight = 3,
         }
     },
-    
+
     {
         .animation = &BA_L1_NoSd_128x49,
         .manifest_info = {
@@ -318,7 +318,7 @@ const StorageAnimation dolphin_internal[] = {
             .weight = 6,
         }
     },
-    
+
 };
 
 const size_t dolphin_internal_size = COUNT_OF(dolphin_internal);

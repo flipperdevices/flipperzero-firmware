@@ -74,7 +74,7 @@ ${ :endif }$
 ${ :endfor }$
 
 const StorageAnimation ${symbol_name}$[] = {
-    ${ for animation in animations: }$
+${ for animation in animations: }$
     {
         .animation = &BA_${animation.name}$,
         .manifest_info = {
@@ -86,7 +86,7 @@ const StorageAnimation ${symbol_name}$[] = {
             .weight = ${animation.weight}$,
         }
     },
-    ${ :endfor }$
+${ :endfor }$
 };
 
 const size_t ${symbol_name}$_size = COUNT_OF(${symbol_name}$);
