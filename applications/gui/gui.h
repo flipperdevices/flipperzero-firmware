@@ -79,6 +79,16 @@ void gui_view_port_send_to_back(Gui* gui, ViewPort* view_port);
  */
 void gui_set_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, void* context);
 
+/** Set lockdown mode
+ *
+ * When lockdown is enabled only GuiLayerDesktop is show.
+ * This feature prevents services from showing sensetive information when flipper locked
+ *
+ * @param      gui       Gui instance
+ * @param      lockdown  bool, true if enabled
+ */
+void gui_set_lockdown(Gui* gui, bool lockdown);
+
 #ifdef __cplusplus
 }
 #endif
