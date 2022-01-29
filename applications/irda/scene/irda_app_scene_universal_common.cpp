@@ -1,5 +1,6 @@
 #include "../irda_app.h"
 #include "assets_icons.h"
+#include <dolphin/dolphin.h>
 #include "gui/modules/button_menu.h"
 #include "gui/modules/button_panel.h"
 #include "../view/irda_app_brut_view.h"
@@ -84,6 +85,7 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
         if(event->type == IrdaAppEvent::Type::ButtonPanelPressed) {
             int record_amount = 0;
             if(brute_force.start_bruteforce(event->payload.menu_index, record_amount)) {
+                DOLPHIN_DEED(DolphinDeedIrBruteForce);
                 brute_force_started = true;
                 show_popup(app, record_amount);
             } else {
@@ -102,5 +104,5 @@ bool IrdaAppSceneUniversalCommon::on_event(IrdaApp* app, IrdaAppEvent* event) {
 void IrdaAppSceneUniversalCommon::on_exit(IrdaApp* app) {
     IrdaAppViewManager* view_manager = app->get_view_manager();
     ButtonPanel* button_panel = view_manager->get_button_panel();
-    button_panel_clean(button_panel);
+    button_panel_reset(button_panel);
 }

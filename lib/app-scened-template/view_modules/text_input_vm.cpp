@@ -13,7 +13,7 @@ View* TextInputVM::get_view() {
 }
 
 void TextInputVM::clean() {
-    text_input_clean(text_input);
+    text_input_reset(text_input);
 }
 
 void TextInputVM::set_result_callback(
@@ -28,4 +28,12 @@ void TextInputVM::set_result_callback(
 
 void TextInputVM::set_header_text(const char* text) {
     text_input_set_header_text(text_input, text);
+}
+
+void TextInputVM::set_validator(TextInputValidatorCallback callback, void* callback_context) {
+    text_input_set_validator(text_input, callback, callback_context);
+}
+
+void* TextInputVM::get_validator_callback_context() {
+    return text_input_get_validator_callback_context(text_input);
 }
