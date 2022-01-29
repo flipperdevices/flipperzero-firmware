@@ -4,6 +4,12 @@
 #include <furi_hal.h>
 //#include <stdint.h>
 
+#define bit_read(value, bit) (((value) >> (bit)) & 0x01)
+#define bit_set(value, bit) ((value) |= (1UL << (bit)))
+#define bit_clear(value, bit) ((value) &= ~(1UL << (bit)))
+#define bit_write(value, bit, bitvalue) (bitvalue ? bit_set(value, bit) : bit_clear(value, bit))
+#define DURATION_DIFF(x, y) ((x < y) ? (y - x) : (x - y))
+
 typedef struct SubGhzProtocolBlockDecoder SubGhzProtocolBlockDecoder;
 
 typedef void (*SubGhzProtocolDecoderRxCallback)(SubGhzProtocolBlockDecoder* decoder, void* context);
@@ -36,7 +42,7 @@ struct SubGhzProtocolBlockDecoder {
 };
 
 typedef struct {
-    bool start;
+    bool is_runing;
     size_t repeat;
     size_t front;
     size_t size_upload;
@@ -46,9 +52,11 @@ typedef struct {
     SubGhzProtocolCommonEncoderCallbackEnd callback_end;
     void* context;
     void* context_end;
-} SubGhzProtocolBlockEncoders;
+} SubGhzProtocolBlockEncoder;
 
 void subghz_protocol_blocks_add_bit(SubGhzProtocolBlockRuntime* runtime, uint8_t bit);
+
+uint64_t subghz_protocol_blocks_reverse_key(uint64_t key, uint8_t count_bit);
 
 void subghz_protocol_blocks_set_decoder_callback(
     SubGhzProtocolBlockDecoder* block_decoder,

@@ -1,11 +1,20 @@
 #pragma once
 
-#include "subghz_protocol_common.h"
+//#include "subghz_protocol_common.h"
+#include "../subghz_protocol_blocks.h"
 
 #define SUBGHZ_PROTOCOL_CAME_NAME "CAME"
 
 //typedef struct SubGhzProtocolCame SubGhzProtocolCame;
 typedef struct SubGhzProtocolCameDecoder SubGhzProtocolCameDecoder;
+typedef struct SubGhzProtocolCameEcoder SubGhzProtocolCameEcoder;
+
+void* subghz_protocol_came_ecoder_alloc();
+void subghz_protocol_came_ecoder_free(void* context);
+bool subghz_protocol_came_ecoder_load(void* context, void* data);
+void subghz_protocol_came_ecoder_stop(void* context);
+LevelDuration subghz_protocol_came_ecoder_yield(void* context);
+
 
 /** Allocate SubGhzProtocolCame
  * 
@@ -39,14 +48,14 @@ void subghz_protocol_came_decoder_reset(void* context);
  * @param instance - SubGhzProtocolCame instance
  * @param data - LevelDuration level_duration
  */
-void subghz_protocol_came_decoder_decode(void* context, bool level, uint32_t duration);
+void subghz_protocol_came_decoder_feed(void* context, bool level, uint32_t duration);
 
 /** Outputting information from the parser
  * 
  * @param instance - SubGhzProtocolCame* instance
  * @param output   - output string
  */
-void subghz_protocol_came_to_str(void* context, string_t output);
+void subghz_protocol_came_decoder_serialization(void* context, string_t output);
 
 // /** Adding data to a file
 //  * 

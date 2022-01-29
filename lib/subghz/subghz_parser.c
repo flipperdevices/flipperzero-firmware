@@ -27,7 +27,7 @@
 #define SUBGHZ_PARSER_TAG "SubGhzParser"
 
 typedef enum {
-    SubGhzProtocolTypeCame,
+    //SubGhzProtocolTypeCame,
     SubGhzProtocolTypeCameTwee,
     SubGhzProtocolTypeCameAtomo,
     SubGhzProtocolTypeKeeloq,
@@ -85,8 +85,8 @@ SubGhzParser* subghz_parser_alloc() {
 
     instance->keystore = subghz_keystore_alloc();
 
-    instance->protocols[SubGhzProtocolTypeCame] =
-        (SubGhzProtocolCommon*)subghz_protocol_came_alloc();
+    // instance->protocols[SubGhzProtocolTypeCame] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_came_alloc();
     instance->protocols[SubGhzProtocolTypeCameTwee] =
         (SubGhzProtocolCommon*)subghz_protocol_came_twee_alloc();
     instance->protocols[SubGhzProtocolTypeCameAtomo] =
@@ -126,7 +126,7 @@ SubGhzParser* subghz_parser_alloc() {
 void subghz_parser_free(SubGhzParser* instance) {
     furi_assert(instance);
 
-    subghz_protocol_came_free((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
+    //subghz_protocol_came_free((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
     subghz_protocol_came_twee_free(
         (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee]);
     subghz_protocol_came_atomo_free(
@@ -227,7 +227,7 @@ bool subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_nam
 }
 
 void subghz_parser_reset(SubGhzParser* instance) {
-    subghz_protocol_came_reset((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
+    //subghz_protocol_came_reset((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
     subghz_protocol_came_twee_reset(
         (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee]);
     subghz_protocol_came_atomo_reset(
@@ -265,8 +265,8 @@ void subghz_parser_raw_parse(SubGhzParser* instance, bool level, uint32_t durati
 }
 
 void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) {
-    subghz_protocol_came_parse(
-        (SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame], level, duration);
+    // subghz_protocol_came_parse(
+    //     (SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame], level, duration);
     subghz_protocol_came_twee_parse(
         (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee], level, duration);
     subghz_protocol_came_atomo_parse(

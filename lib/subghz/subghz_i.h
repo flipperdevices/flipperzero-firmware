@@ -23,13 +23,17 @@
 typedef void* (*SubGhzAlloc)(void);
 typedef void (*SubGhzFree)(void* context);
 
-typedef void (*SubGhzDecoderReset)(void* context);
-typedef void (*SubGhzDecode)(void* ctx, bool level, uint32_t duration);
+typedef void (*SubGhzDecoderReset)(void* decoder);
+typedef void (*SubGhzDecode)(void* decoder, bool level, uint32_t duration);
+typedef void (*SubGhzDecoderSerialization)(void* decoder, string_t output);
+
 //typedef void (*SubGhzProtocolTextCallback)(string_t text, void* context);
 //typedef SubGhzMessage* (*SubGhzDecoderCheckReady)(void*);
 
-typedef void (*SubGhzEncoderReset)(void* encoder);
-typedef bool (*SubGhzEncode)(void* encoder);
+typedef void (*SubGhzEncoderStop)(void* encoder);
+typedef bool (*SubGhzEncodeLoad)(void* encoder, void* data);
+
+
 
 // static inline uint8_t reverse(uint8_t value) {
 //     uint8_t reverse_value = 0;

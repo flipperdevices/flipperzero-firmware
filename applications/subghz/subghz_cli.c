@@ -10,6 +10,8 @@
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
+#include <lib/subghz/subghz.h>
+
 #include "helpers/subghz_chat.h"
 
 #include <notification/notification_messages.h>
@@ -191,6 +193,15 @@ static void subghz_cli_command_rx_text_callback(string_t text, void* context) {
     printf("%s", string_get_cstr(text));
 }
 
+static void subghz_cli_command_rx_serialization_callback(SubGhzProtocolBlockDecoder* block_decoder, void* context) {
+    SubGhzCliCommandRx* instance = context;
+    instance->packet_count++;
+    //как отсюда вызвать функция сериализации?
+    FURI_LOG_I("IN PKG", "%d", instance->packet_count);
+    //block_decoder.
+    //printf("%s", string_get_cstr(text));
+}
+
 void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     uint32_t frequency = 433920000;
 
@@ -214,12 +225,16 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     instance->stream = xStreamBufferCreate(sizeof(LevelDuration) * 1024, sizeof(LevelDuration));
     furi_check(instance->stream);
 
-    SubGhzParser* parser = subghz_parser_alloc();
-    subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes");
-    subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes_user");
-    subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_flor_s_rx");
-    subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
-    subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
+    // SubGhzParser* parser = subghz_parser_alloc();
+    // subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes");
+    // subghz_parser_load_keeloq_file(parser, "/ext/subghz/keeloq_mfcodes_user");
+    // subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_flor_s_rx");
+    // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
+    // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
+    SubGhzProtocolDecoder* decoder = subghz_protocol_decoder_alloc();
+    subghz_protocol_decoder_set_rx_callback(
+        decoder, subghz_cli_command_rx_serialization_callback, instance);
+
 
     // Configure radio
     furi_hal_subghz_reset();
@@ -241,11 +256,13 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
                 printf(".");
-                subghz_parser_reset(parser);
+                //subghz_parser_reset(parser);
+                subghz_protocol_decoder_reset(decoder);
             } else {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
-                subghz_parser_parse(parser, level, duration);
+                //subghz_parser_parse(parser, level, duration);
+                subghz_protocol_decoder_decode(decoder, level, duration);
             }
         }
     }
@@ -259,7 +276,8 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     printf("\r\nPackets recieved %u\r\n", instance->packet_count);
 
     // Cleanup
-    subghz_parser_free(parser);
+    //subghz_parser_free(parser);
+    subghz_protocol_decoder_free(decoder);
     vStreamBufferDelete(instance->stream);
     free(instance);
 }
