@@ -7,13 +7,17 @@
 
 //typedef struct SubGhzProtocolCame SubGhzProtocolCame;
 typedef struct SubGhzProtocolCameDecoder SubGhzProtocolCameDecoder;
-typedef struct SubGhzProtocolCameEcoder SubGhzProtocolCameEcoder;
+typedef struct SubGhzProtocolCameEncoder SubGhzProtocolCameEncoder;
 
-void* subghz_protocol_came_ecoder_alloc();
-void subghz_protocol_came_ecoder_free(void* context);
-bool subghz_protocol_came_ecoder_load(void* context, void* data);
-void subghz_protocol_came_ecoder_stop(void* context);
-LevelDuration subghz_protocol_came_ecoder_yield(void* context);
+void* subghz_protocol_came_encoder_alloc();
+void subghz_protocol_came_encoder_free(void* context);
+bool subghz_protocol_came_encoder_load(
+    void* context,
+    uint64_t key,
+    uint8_t count_bit,
+    size_t repeat);
+void subghz_protocol_came_encoder_stop(void* context);
+LevelDuration subghz_protocol_came_encoder_yield(void* context);
 
 
 /** Allocate SubGhzProtocolCame
@@ -57,25 +61,25 @@ void subghz_protocol_came_decoder_feed(void* context, bool level, uint32_t durat
  */
 void subghz_protocol_came_decoder_serialization(void* context, string_t output);
 
-// /** Adding data to a file
-//  * 
-//  * @param instance  - SubGhzProtocolCame instance
-//  * @param flipper_file - FlipperFile 
-//  * @return bool
-//  */
-// bool subghz_protocol_came_to_save_file(SubGhzProtocolCame* instance, FlipperFile* flipper_file);
+/** Adding data to a file
+ * 
+ * @param instance  - SubGhzProtocolCame instance
+ * @param flipper_file - FlipperFile 
+ * @return bool
+ */
+bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file);
 
-// /** Loading protocol from file
-//  * 
-//  * @param flipper_file - FlipperFile 
-//  * @param instance - SubGhzProtocolCame instance
-//  * @param file_path - file path
-//  * @return bool
-//  */
-// bool subghz_protocol_came_to_load_protocol_from_file(
-//     FlipperFile* flipper_file,
-//     SubGhzProtocolCame* instance,
-//     const char* file_path);
+/** Loading protocol from file
+ * 
+ * @param flipper_file - FlipperFile 
+ * @param instance - SubGhzProtocolCame instance
+ * @param file_path - file path
+ * @return bool
+ */
+bool subghz_protocol_came_load_file(
+    void* context,
+    FlipperFile* flipper_file,
+    const char* file_path) ;
 
 // /** Loading protocol from bin data
 //  * 

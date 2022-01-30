@@ -136,21 +136,26 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
         key,
         repeat);
 
-    SubGhzDecoderPrinceton* protocol = subghz_decoder_princeton_alloc();
-    protocol->common.code_last_found = key;
-    protocol->common.code_last_count_bit = 24;
+    // SubGhzDecoderPrinceton* protocol = subghz_decoder_princeton_alloc();
+    // protocol->common.code_last_found = key;
+    // protocol->common.code_last_count_bit = 24;
 
-    SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
-    encoder->repeat = repeat;
+    // SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
+    // encoder->repeat = repeat;
 
-    subghz_protocol_princeton_send_key(protocol, encoder);
+    //subghz_protocol_princeton_send_key(protocol, encoder);
+
+    SubGhzProtocolEncoder* encoder = subghz_protocol_encoder_alloc_init("CAME");
+    subghz_protocol_encoder_load(encoder, key, 24, repeat);
+
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = furi_hal_subghz_set_frequency_and_path(frequency);
 
     furi_hal_power_suppress_charge_enter();
 
-    furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
+    //furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
+    furi_hal_subghz_start_async_tx(subghz_protocol_encoder_yield, encoder);
 
     while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
         printf(".");
@@ -162,8 +167,9 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     furi_hal_power_suppress_charge_exit();
 
-    subghz_decoder_princeton_free(protocol);
-    subghz_protocol_encoder_common_free(encoder);
+    //subghz_decoder_princeton_free(protocol);
+    //subghz_protocol_encoder_common_free(encoder);
+    subghz_protocol_encoder_free(encoder);
 }
 
 typedef struct {
@@ -187,19 +193,23 @@ static void subghz_cli_command_rx_callback(bool level, uint32_t duration, void* 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-static void subghz_cli_command_rx_text_callback(string_t text, void* context) {
-    SubGhzCliCommandRx* instance = context;
-    instance->packet_count++;
-    printf("%s", string_get_cstr(text));
-}
+// static void subghz_cli_command_rx_text_callback(string_t text, void* context) {
+//     SubGhzCliCommandRx* instance = context;
+//     instance->packet_count++;
+//     printf("%s", string_get_cstr(text));
+// }
 
-static void subghz_cli_command_rx_serialization_callback(SubGhzProtocolBlockDecoder* block_decoder, void* context) {
+static void subghz_cli_command_rx_serialization_callback(
+    SubGhzProtocolDecoder* decoder,
+    void* context,
+    string_t decoder_name) {
     SubGhzCliCommandRx* instance = context;
     instance->packet_count++;
-    //как отсюда вызвать функция сериализации?
-    FURI_LOG_I("IN PKG", "%d", instance->packet_count);
-    //block_decoder.
-    //printf("%s", string_get_cstr(text));
+    string_t text;
+    string_init(text);
+    subghz_protocol_decoder_serialization(decoder, string_get_cstr(decoder_name), text);
+    printf("%s", string_get_cstr(text));
+    string_clear(text);
 }
 
 void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
@@ -234,7 +244,6 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     SubGhzProtocolDecoder* decoder = subghz_protocol_decoder_alloc();
     subghz_protocol_decoder_set_rx_callback(
         decoder, subghz_cli_command_rx_serialization_callback, instance);
-
 
     // Configure radio
     furi_hal_subghz_reset();

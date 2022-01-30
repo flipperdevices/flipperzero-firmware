@@ -3,10 +3,11 @@
 
 typedef struct SubGhzProtocolDecoder SubGhzProtocolDecoder;
 typedef struct SubGhzProtocolEncoder SubGhzProtocolEncoder;
-typedef struct SubGhzEncoders SubGhzEncoders;
+//typedef struct SubGhzEncoders SubGhzEncoders;
 
 typedef void (
-    *SubGhzProtocolDecoderCallback)(SubGhzProtocolBlockDecoder* block_decoder, void* context);
+    *SubGhzProtocolDecoderCallback)(SubGhzProtocolDecoder* decoder, void* context, string_t decoder_name);
+    //*SubGhzProtocolDecoderCallback)(string_t decoder_name, void* context);
 // typedef void (*SubGhzProtocolSpecificationEndDataCallback)(SubGhzEncoderDecoder* callback, void* context);
 
 typedef enum {
@@ -16,6 +17,13 @@ typedef enum {
     SubGhzProtocolCommonTypeRAW_,
     //.....
 } SubGhzProtocolCommonType_;
+
+typedef enum {
+    SubGhzProtocolStatusNoProtocol = -1,
+    SubGhzProtocolStatusUnknown = 0,
+    SubGhzProtocolStatusNoInit,
+    SubGhzProtocolStatusOk,
+} SubGhzProtocolStatus;
 
 typedef struct {
     const char* name;
@@ -31,7 +39,8 @@ struct SubGhzProtocolDecoder {
 
 struct SubGhzProtocolEncoder {
     void* handler;
-    const SubGhzEncoders* encoder;
+    int index_protocol;
+    //const SubGhzEncoders* encoder;
 };
 
 SubGhzProtocolDecoder* subghz_protocol_decoder_alloc(void);
@@ -42,3 +51,17 @@ void subghz_protocol_decoder_set_rx_callback(
     SubGhzProtocolDecoder* instance,
     SubGhzProtocolDecoderCallback callback,
     void* context);
+SubGhzProtocolStatus subghz_protocol_decoder_serialization(
+    SubGhzProtocolDecoder* instance,
+    const char* protocol_name,
+    string_t output);
+
+SubGhzProtocolEncoder* subghz_protocol_encoder_alloc_init(const char* protocol_name);
+void subghz_protocol_encoder_free(SubGhzProtocolEncoder* instance);
+SubGhzProtocolStatus subghz_protocol_encoder_stop(SubGhzProtocolEncoder* instance);
+SubGhzProtocolStatus subghz_protocol_encoder_load(
+    SubGhzProtocolEncoder* instance,
+    uint64_t key,
+    uint8_t count_bit,
+    size_t repeat);
+LevelDuration subghz_protocol_encoder_yield(void* context);
