@@ -270,23 +270,33 @@ static bool animation_storage_load_frames(
     uint8_t height) {
     uint16_t frame_order_size = animation->passive_frames + animation->active_frames;
 
+    /* The frames should go in order (0...N), without omissions */
+    size_t max_frame_count = 0;
+    for(int i = 0; i < frame_order_size; ++i) {
+        max_frame_count = MAX(max_frame_count, frame_order[i]);
+    }
+
+    if(max_frame_count >= FRAME_ORDER_SIZE) {
+        return false;
+    }
+
+    Icon* icon = (Icon*)&animation->icon_animation;
+    FURI_CONST_ASSIGN(icon->frame_count, max_frame_count + 1);
+    FURI_CONST_ASSIGN(icon->frame_rate, 0);
+    FURI_CONST_ASSIGN(icon->height, height);
+    FURI_CONST_ASSIGN(icon->width, width);
+    icon->frames = furi_alloc(sizeof(const uint8_t*) * icon->frame_count);
+
     bool frames_ok = false;
     File* file = storage_file_alloc(storage);
     FileInfo file_info;
     string_t filename;
     string_init(filename);
     size_t max_filesize = ROUND_UP_TO(width, 8) * height + 1;
-    Icon* icon = (Icon*)&animation->icon_animation;
-    FURI_CONST_ASSIGN(icon->frame_count, frame_order_size);
-    FURI_CONST_ASSIGN(icon->frame_rate, 0);
-    FURI_CONST_ASSIGN(icon->height, height);
-    FURI_CONST_ASSIGN(icon->width, width);
 
-    icon->frames = furi_alloc(sizeof(const uint8_t*) * frame_order_size);
-
-    for(int i = 0; i < frame_order_size; ++i) {
+    for(int i = 0; i < icon->frame_count; ++i) {
         frames_ok = false;
-        string_printf(filename, ANIMATION_DIR "/%s/frame_%d.bm", name, frame_order[i]);
+        string_printf(filename, ANIMATION_DIR "/%s/frame_%d.bm", name, i);
 
         if(storage_common_stat(storage, string_get_cstr(filename), &file_info) != FSE_OK) break;
         if(file_info.size > max_filesize) {

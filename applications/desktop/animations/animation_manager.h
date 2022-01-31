@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <dolphin/dolphin.h>
 
+#define FRAME_ORDER_SIZE (32)
+
 typedef struct AnimationManager AnimationManager;
 
 typedef struct {
@@ -26,7 +28,7 @@ typedef struct {
     const FrameBubble* const* frame_bubble_sequences;
     uint8_t frame_bubble_sequences_count;
     const Icon icon_animation;
-    uint8_t frame_order[20];
+    uint8_t frame_order[FRAME_ORDER_SIZE];
     uint8_t passive_frames;
     uint8_t active_frames;
     uint8_t active_cycles;
