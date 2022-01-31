@@ -37,29 +37,10 @@ size_t furi_hal_flash_get_cycles_count() {
     return FURI_HAL_FLASH_CYCLES_COUNT;
 }
 
-const void* furi_hal_flash_get_free_start_address() {
-    return &__free_flash_start__;
-}
-
 const void* furi_hal_flash_get_free_end_address() {
     uint32_t sfr_reg_val = READ_REG(FLASH->SFR);
     uint32_t sfsa = (READ_BIT(sfr_reg_val, FLASH_SFR_SFSA) >> FLASH_SFR_SFSA_Pos);
     return (const void*)((sfsa * FLASH_PAGE_SIZE) + FLASH_BASE);
-}
-
-size_t furi_hal_flash_get_free_page_start_address() {
-    size_t start = (size_t)furi_hal_flash_get_free_start_address();
-    size_t page_start = start - start % FURI_HAL_FLASH_PAGE_SIZE;
-    if(page_start != start) {
-        page_start += FURI_HAL_FLASH_PAGE_SIZE;
-    }
-    return page_start;
-}
-
-size_t furi_hal_flash_get_free_page_count() {
-    size_t end = (size_t)furi_hal_flash_get_free_end_address();
-    size_t page_start = (size_t)furi_hal_flash_get_free_page_start_address();
-    return (end - page_start) / FURI_HAL_FLASH_PAGE_SIZE;
 }
 
 static void furi_hal_flash_unlock() {

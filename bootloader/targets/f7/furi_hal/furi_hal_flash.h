@@ -34,29 +34,12 @@ size_t furi_hal_flash_get_page_size();
  */
 size_t furi_hal_flash_get_cycles_count();
 
-/** Get free flash start address
- *
- * @return     pointer to free region start
- */
-const void* furi_hal_flash_get_free_start_address();
-
 /** Get free flash end address
  *
  * @return     pointer to free region end
  */
 const void* furi_hal_flash_get_free_end_address();
 
-/** Get first free page start address
- *
- * @return     first free page memory address
- */
-size_t furi_hal_flash_get_free_page_start_address();
-
-/** Get free page count
- *
- * @return     free page count
- */
-size_t furi_hal_flash_get_free_page_count();
 
 /** Erase Flash
  *
