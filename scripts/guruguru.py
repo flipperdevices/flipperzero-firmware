@@ -14,11 +14,12 @@ class Main(App):
     def clearConsole(self):
         os.system("cls" if os.name in ("nt", "dos") else "clear")
 
-    async def rebuild(self):
+    async def rebuild(self, line):
         self.clearConsole()
+        self.logger.info(f"Triggered by: {line}")
         proc = await asyncio.create_subprocess_exec("make")
         await proc.wait()
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
         self.is_building = False
 
     async def run(self):
@@ -30,9 +31,8 @@ class Main(App):
             data = await proc.stdout.readline()
             line = data.decode().strip()
             if not self.is_building:
-                self.logger.info(f"Changed: {line}")
                 self.is_building = True
-                asyncio.create_task(self.rebuild())
+                asyncio.create_task(self.rebuild(line))
 
     def call(self):
         try:

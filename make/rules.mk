@@ -36,6 +36,7 @@ CHECK_AND_REINIT_SUBMODULES_SHELL=\
 	fi
 $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
+
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
 	@:
 
@@ -84,10 +85,14 @@ $(OBJ_DIR)/upload: $(OBJ_DIR)/$(PROJECT).bin
 	dfu-util -d 0483:df11 -D $(OBJ_DIR)/$(PROJECT).bin -a 0 -s $(FLASH_ADDRESS) $(DFU_OPTIONS)
 	touch $@
 
+
+.PHONY: flash
 flash: $(OBJ_DIR)/flash
 
+.PHONY: upload
 upload: $(OBJ_DIR)/upload
 
+.PHONY: debug
 debug: flash
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
@@ -98,6 +103,7 @@ debug: flash
 		-ex "compare-sections" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
 
+.PHONY: debug_other
 debug_other:
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote | openocd -c "gdb_port pipe" $(OPENOCD_OPTS)' \
@@ -105,7 +111,7 @@ debug_other:
 		-ex "source ../debug/PyCortexMDebug/PyCortexMDebug.py" \
 		-ex "svd_load $(SVD_FILE)" \
 
-
+.PHONY: blackmagic
 blackmagic:
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote $(BLACKMAGIC)' \
@@ -120,22 +126,28 @@ blackmagic:
 		-ex "compare-sections" \
 		$(OBJ_DIR)/$(PROJECT).elf; \
 
+.PHONY: openocd
 openocd:
 	openocd $(OPENOCD_OPTS)
 
+.PHONY: clean
 clean:
 	@echo "\tCLEAN\t"
 	@$(RM) -rf $(OBJ_DIR)
 
+.PHONY: z
 z: clean
 	$(MAKE) all
 
+.PHONY: zz
 zz: clean
 	$(MAKE) flash
 
+.PHONY: zzz
 zzz: clean
 	$(MAKE) debug
 
+.PHONY: generate_cscope_db
 generate_cscope_db:
 	@echo "$(C_SOURCES) $(CPP_SOURCES) $(ASM_SOURCES)" | tr ' ' '\n' > $(OBJ_DIR)/source.list.p
 	@cat ~/headers.list >> $(OBJ_DIR)/source.list.p
@@ -143,7 +155,7 @@ generate_cscope_db:
 	@cscope -b -k -i $(OBJ_DIR)/source.list -f $(OBJ_DIR)/cscope.out
 	@rm -rf $(OBJ_DIR)/source.list $(OBJ_DIR)/source.list.p
 
-# Prevent make from trying to find .d targets
+# Prevent make from searching targets for real files
 %.d: ;
 
 %.c: ;
