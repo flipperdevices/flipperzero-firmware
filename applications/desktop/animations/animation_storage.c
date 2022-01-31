@@ -209,6 +209,9 @@ static void animation_storage_free_animation(BubbleAnimation** animation) {
     if(*animation) {
         animation_storage_free_bubbles(*animation);
         animation_storage_free_frames(*animation);
+        if((*animation)->frame_order) {
+            free((void*)(*animation)->frame_order);
+        }
         free(*animation);
         *animation = NULL;
     }
@@ -268,15 +271,15 @@ static bool animation_storage_load_frames(
     uint32_t* frame_order,
     uint8_t width,
     uint8_t height) {
-    uint16_t frame_order_size = animation->passive_frames + animation->active_frames;
+    uint16_t frame_order_count = animation->passive_frames + animation->active_frames;
 
     /* The frames should go in order (0...N), without omissions */
     size_t max_frame_count = 0;
-    for(int i = 0; i < frame_order_size; ++i) {
+    for(int i = 0; i < frame_order_count; ++i) {
         max_frame_count = MAX(max_frame_count, frame_order[i]);
     }
 
-    if(max_frame_count >= FRAME_ORDER_SIZE) {
+    if((max_frame_count >= frame_order_count) || (max_frame_count >= 256 /* max uint8_t */)) {
         return false;
     }
 
@@ -463,14 +466,15 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         uint8_t frames = animation->passive_frames + animation->active_frames;
         uint32_t count = 0;
         if(!flipper_file_get_value_count(ff, "Frames order", &count)) break;
-        if((count != frames) || (frames > COUNT_OF(animation->frame_order))) {
+        if(count != frames) {
             FURI_LOG_E(TAG, "Error loading animation: frames order");
             break;
         }
         u32array = furi_alloc(sizeof(uint32_t) * frames);
         if(!flipper_file_read_uint32(ff, "Frames order", u32array, frames)) break;
+        animation->frame_order = furi_alloc(sizeof(uint8_t) * frames);
         for(int i = 0; i < frames; ++i) {
-            animation->frame_order[i] = u32array[i];
+            FURI_CONST_ASSIGN(animation->frame_order[i], u32array[i]);
         }
 
         /* passive and active frames must be loaded up to this point */
@@ -498,6 +502,9 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
     }
 
     if(!success) {
+        if(animation->frame_order) {
+            free((void*)animation->frame_order);
+        }
         free(animation);
         animation = NULL;
     }
