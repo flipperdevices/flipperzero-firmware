@@ -10,7 +10,8 @@
 #include <lib/subghz/protocols/subghz_protocol_common.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
 
-#include <lib/subghz/subghz.h>
+#include <lib/subghz/receiver.h>
+#include <lib/subghz/transmitter.h>
 
 #include "helpers/subghz_chat.h"
 
@@ -140,13 +141,13 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     // protocol->common.code_last_found = key;
     // protocol->common.code_last_count_bit = 24;
 
-    // SubGhzProtocolCommonEncoder* encoder = subghz_protocol_encoder_common_alloc();
-    // encoder->repeat = repeat;
+    // SubGhzProtocolCommonEncoder* transmitter = subghz_transmitter_common_alloc();
+    // transmitter->repeat = repeat;
 
-    //subghz_protocol_princeton_send_key(protocol, encoder);
+    //subghz_protocol_princeton_send_key(protocol, transmitter);
 
-    SubGhzProtocolEncoder* encoder = subghz_protocol_encoder_alloc_init("CAME");
-    subghz_protocol_encoder_load(encoder, key, 24, repeat);
+    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init("CAME");
+    subghz_transmitter_load(transmitter, key, 24, repeat);
 
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
@@ -154,8 +155,8 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     furi_hal_power_suppress_charge_enter();
 
-    //furi_hal_subghz_start_async_tx(subghz_protocol_encoder_common_yield, encoder);
-    furi_hal_subghz_start_async_tx(subghz_protocol_encoder_yield, encoder);
+    //furi_hal_subghz_start_async_tx(subghz_transmitter_common_yield, transmitter);
+    furi_hal_subghz_start_async_tx(subghz_transmitter_yield, transmitter);
 
     while(!(furi_hal_subghz_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
         printf(".");
@@ -168,8 +169,8 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     furi_hal_power_suppress_charge_exit();
 
     //subghz_decoder_princeton_free(protocol);
-    //subghz_protocol_encoder_common_free(encoder);
-    subghz_protocol_encoder_free(encoder);
+    //subghz_transmitter_common_free(transmitter);
+    subghz_transmitter_free(transmitter);
 }
 
 typedef struct {
@@ -200,14 +201,15 @@ static void subghz_cli_command_rx_callback(bool level, uint32_t duration, void* 
 // }
 
 static void subghz_cli_command_rx_serialization_callback(
-    SubGhzProtocolDecoder* decoder,
-    void* context,
-    string_t decoder_name) {
+    SubGhzReceiver* receiver,
+    SubGhzProtocolDecoderBase* decoder_base,
+    void* context) {
     SubGhzCliCommandRx* instance = context;
     instance->packet_count++;
+
     string_t text;
     string_init(text);
-    subghz_protocol_decoder_serialization(decoder, string_get_cstr(decoder_name), text);
+    subghz_protocol_decoder_base_serialize(decoder_base, text);
     printf("%s", string_get_cstr(text));
     string_clear(text);
 }
@@ -241,9 +243,9 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_flor_s_rx");
     // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
     // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
-    SubGhzProtocolDecoder* decoder = subghz_protocol_decoder_alloc();
-    subghz_protocol_decoder_set_rx_callback(
-        decoder, subghz_cli_command_rx_serialization_callback, instance);
+    SubGhzReceiver* receiver = subghz_receiver_alloc();
+    subghz_receiver_set_rx_callback(
+        receiver, subghz_cli_command_rx_serialization_callback, instance);
 
     // Configure radio
     furi_hal_subghz_reset();
@@ -266,12 +268,12 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
             if(level_duration_is_reset(level_duration)) {
                 printf(".");
                 //subghz_parser_reset(parser);
-                subghz_protocol_decoder_reset(decoder);
+                subghz_receiver_reset(receiver);
             } else {
                 bool level = level_duration_get_level(level_duration);
                 uint32_t duration = level_duration_get_duration(level_duration);
                 //subghz_parser_parse(parser, level, duration);
-                subghz_protocol_decoder_decode(decoder, level, duration);
+                subghz_receiver_decode(receiver, level, duration);
             }
         }
     }
@@ -286,7 +288,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
 
     // Cleanup
     //subghz_parser_free(parser);
-    subghz_protocol_decoder_free(decoder);
+    subghz_receiver_free(receiver);
     vStreamBufferDelete(instance->stream);
     free(instance);
 }

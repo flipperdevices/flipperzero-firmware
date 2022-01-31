@@ -1,8 +1,8 @@
 #pragma once
 
 #include "subghz.h"
-#include "views/subghz_receiver.h"
-#include "views/subghz_transmitter.h"
+#include "views/receiver.h"
+#include "views/transmitter.h"
 #include "views/subghz_frequency_analyzer.h"
 #include "views/subghz_read_raw.h"
 
@@ -113,8 +113,8 @@ struct SubGhz {
     char file_name_tmp[SUBGHZ_TEXT_STORE_SIZE + 1];
     SubGhzNotificationState state_notifications;
 
-    SubghzReceiver* subghz_receiver;
-    SubghzTransmitter* subghz_transmitter;
+    SubghzViewReceiver* subghz_receiver;
+    SubghzViewTransmitter* subghz_transmitter;
     VariableItemList* variable_item_list;
 
     SubghzFrequencyAnalyzer* subghz_frequency_analyzer;

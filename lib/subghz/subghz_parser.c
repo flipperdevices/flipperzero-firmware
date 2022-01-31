@@ -1,6 +1,6 @@
 
 #include "subghz_parser.h"
-#include "protocols/subghz_protocol_came.h"
+#include "protocols/came.h"
 #include "protocols/subghz_protocol_came_twee.h"
 #include "protocols/subghz_protocol_came_atomo.h"
 #include "protocols/subghz_protocol_cfm.h"

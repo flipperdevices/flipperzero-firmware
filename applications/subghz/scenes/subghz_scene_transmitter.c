@@ -1,5 +1,5 @@
 #include "../subghz_i.h"
-#include "../views/subghz_transmitter.h"
+#include "../views/transmitter.h"
 #include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 #include <dolphin/dolphin.h>
 
@@ -33,7 +33,7 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
         }
 
         subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
-        subghz_transmitter_add_data_to_show(
+        subghz_view_transmitter_add_data_to_show(
             subghz->subghz_transmitter,
             string_get_cstr(key_str),
             string_get_cstr(frequency_str),
@@ -57,7 +57,7 @@ void subghz_scene_transmitter_on_enter(void* context) {
             subghz->view_dispatcher, SubghzCustomEventViewTransmitterError);
     }
 
-    subghz_transmitter_set_callback(
+    subghz_view_transmitter_set_callback(
         subghz->subghz_transmitter, subghz_scene_transmitter_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateIDLE;

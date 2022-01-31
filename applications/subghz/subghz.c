@@ -103,11 +103,11 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher, SubGhzViewMenu, submenu_get_view(subghz->submenu));
 
     // Receiver
-    subghz->subghz_receiver = subghz_receiver_alloc();
+    subghz->subghz_receiver = subghz_view_receiver_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewReceiver,
-        subghz_receiver_get_view(subghz->subghz_receiver));
+        subghz_view_receiver_get_view(subghz->subghz_receiver));
 
     // Popup
     subghz->popup = popup_alloc();
@@ -128,11 +128,11 @@ SubGhz* subghz_alloc() {
     subghz->dialogs = furi_record_open("dialogs");
 
     // Transmitter
-    subghz->subghz_transmitter = subghz_transmitter_alloc();
+    subghz->subghz_transmitter = subghz_view_transmitter_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewTransmitter,
-        subghz_transmitter_get_view(subghz->subghz_transmitter));
+        subghz_view_transmitter_get_view(subghz->subghz_transmitter));
 
     // Variable Item List
     subghz->variable_item_list = variable_item_list_alloc();
@@ -215,7 +215,7 @@ void subghz_free(SubGhz* subghz) {
 
     // Receiver
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewReceiver);
-    subghz_receiver_free(subghz->subghz_receiver);
+    subghz_view_receiver_free(subghz->subghz_receiver);
 
     // TextInput
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTextInput);
@@ -230,7 +230,7 @@ void subghz_free(SubGhz* subghz) {
 
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewTransmitter);
-    subghz_transmitter_free(subghz->subghz_transmitter);
+    subghz_view_transmitter_free(subghz->subghz_transmitter);
 
     // Variable Item List
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewVariableItemList);

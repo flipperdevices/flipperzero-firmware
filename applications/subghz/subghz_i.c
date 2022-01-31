@@ -8,7 +8,7 @@
 #include <notification/notification_messages.h>
 #include <lib/flipper_file/flipper_file.h>
 #include "../notification/notification.h"
-#include "views/subghz_receiver.h"
+#include "views/receiver.h"
 
 bool subghz_set_pteset(SubGhz* subghz, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {

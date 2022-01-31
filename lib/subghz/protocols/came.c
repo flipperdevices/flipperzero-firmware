@@ -1,4 +1,10 @@
-#include "subghz_protocol_came.h"
+#include "came.h"
+
+#include "../blocks/const.h"
+#include "../blocks/decoder.h"
+#include "../blocks/encoder.h"
+#include "../blocks/generic.h"
+#include "../blocks/math.h"
 
 /*
  * Help
@@ -6,21 +12,24 @@
  *
  */
 
-static const SubGhzProtocolBlockConst subghz_protocol_came_const = {
+static const SubGhzBlockConst subghz_protocol_came_const = {
     .te_short = 320,
     .te_long = 640,
     .te_delta = 150,
     .min_count_bit_for_found = 12,
 };
 
-struct SubGhzProtocolCameDecoder {
-    SubGhzProtocolBlockDecoder decoder;
-    SubGhzProtocolBlockGeneric generic;
+struct SubGhzProtocolDecoderCame {
+    SubGhzProtocolDecoderBase base;
+
+    SubGhzBlockDecoder decoder;
+    SubGhzBlockGeneric generic;
 };
 
-struct SubGhzProtocolCameEncoder {
+struct SubGhzProtocolEncoderCame {
+    SubGhzProtocolEncoderBase base;
     SubGhzProtocolBlockEncoder encoder;
-    SubGhzProtocolBlockGeneric generic;
+    SubGhzBlockGeneric generic;
 };
 
 typedef enum {
@@ -30,8 +39,8 @@ typedef enum {
     CameDecoderStepCheckDuration,
 } CameDecoderStep;
 
-void* subghz_protocol_came_encoder_alloc() {
-    SubGhzProtocolCameEncoder* instance = furi_alloc(sizeof(SubGhzProtocolCameEncoder));
+void* subghz_protocol_encoder_came_alloc() {
+    SubGhzProtocolEncoderCame* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCame));
     instance->encoder.repeat = 10;
     //подумать о авторасчете длинны аплоад
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
@@ -40,14 +49,14 @@ void* subghz_protocol_came_encoder_alloc() {
     return instance;
 }
 
-void subghz_protocol_came_encoder_free(void* context) {
+void subghz_protocol_encoder_came_free(void* context) {
     furi_assert(context);
-    SubGhzProtocolCameEncoder* instance = context;
+    SubGhzProtocolEncoderCame* instance = context;
     free(instance->encoder.upload);
     free(instance);
 }
 
-static void subghz_protocol_came_ecoder_get_upload(SubGhzProtocolCameEncoder* instance) {
+static void subghz_protocol_came_ecoder_get_upload(SubGhzProtocolEncoderCame* instance) {
     furi_assert(instance);
     instance->encoder.size_upload = (instance->generic.data_count_bit * 2) + 2;
     size_t index = 0;
@@ -75,13 +84,13 @@ static void subghz_protocol_came_ecoder_get_upload(SubGhzProtocolCameEncoder* in
     }
 }
 
-bool subghz_protocol_came_encoder_load(
+bool subghz_protocol_encoder_came_load(
     void* context,
     uint64_t key,
     uint8_t count_bit,
     size_t repeat) {
     furi_assert(context);
-    SubGhzProtocolCameEncoder* instance = context;
+    SubGhzProtocolEncoderCame* instance = context;
     instance->generic.data = key;
     instance->generic.data_count_bit = count_bit;
     instance->encoder.repeat = repeat;
@@ -90,13 +99,13 @@ bool subghz_protocol_came_encoder_load(
     return true;
 }
 
-void subghz_protocol_came_encoder_stop(void* context) {
-    SubGhzProtocolCameEncoder* instance = context;
+void subghz_protocol_encoder_came_stop(void* context) {
+    SubGhzProtocolEncoderCame* instance = context;
     instance->encoder.is_runing = false;
 }
 
-LevelDuration subghz_protocol_came_encoder_yield(void* context) {
-    SubGhzProtocolCameEncoder* instance = context;
+LevelDuration subghz_protocol_encoder_came_yield(void* context) {
+    SubGhzProtocolEncoderCame* instance = context;
 
     if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
         instance->encoder.is_runing = false;
@@ -113,27 +122,27 @@ LevelDuration subghz_protocol_came_encoder_yield(void* context) {
     return ret;
 }
 
-void* subghz_protocol_came_decoder_alloc() {
-    SubGhzProtocolCameDecoder* instance = furi_alloc(sizeof(SubGhzProtocolCameDecoder));
+void* subghz_protocol_decoder_came_alloc() {
+    SubGhzProtocolDecoderCame* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCame));
     instance->generic.protocol_name = SUBGHZ_PROTOCOL_CAME_NAME;
     return instance;
 }
 
-void subghz_protocol_came_decoder_free(void* context) {
+void subghz_protocol_decoder_came_free(void* context) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
+    SubGhzProtocolDecoderCame* instance = context;
     free(instance);
 }
 
-void subghz_protocol_came_decoder_reset(void* context) {
+void subghz_protocol_decoder_came_reset(void* context) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
+    SubGhzProtocolDecoderCame* instance = context;
     instance->decoder.parser_step = CameDecoderStepReset;
 }
 
-void subghz_protocol_came_decoder_feed(void* context, bool level, uint32_t duration) {
+void subghz_protocol_decoder_came_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
+    SubGhzProtocolDecoderCame* instance = context;
     switch(instance->decoder.parser_step) {
     case CameDecoderStepReset:
         if((!level) && (DURATION_DIFF(duration, subghz_protocol_came_const.te_short * 51) <
@@ -168,8 +177,8 @@ void subghz_protocol_came_decoder_feed(void* context, bool level, uint32_t durat
                     instance->generic.data = instance->decoder.decode_data;
                     instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
-                    if(instance->decoder.callback)
-                        instance->decoder.callback(&instance->generic, instance->decoder.context);
+                    if(instance->base.callback)
+                        instance->base.callback(&instance->base, instance->base.context);
                 }
                 break;
             }
@@ -203,9 +212,9 @@ void subghz_protocol_came_decoder_feed(void* context, bool level, uint32_t durat
     }
 }
 
-void subghz_protocol_came_decoder_serialization(void* context, string_t output) {
+void subghz_protocol_decoder_came_serialization(void* context, string_t output) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
+    SubGhzProtocolDecoderCame* instance = context;
 
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
@@ -227,8 +236,8 @@ void subghz_protocol_came_decoder_serialization(void* context, string_t output) 
 
 bool subghz_protocol_came_save_file(void* context, FlipperFile* flipper_file) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
-    return subghz_protocol_block_save_file(&instance->generic, flipper_file);
+    SubGhzProtocolDecoderCame* instance = context;
+    return subghz_block_generic_save_file(&instance->generic, flipper_file);
 }
 
 bool subghz_protocol_came_load_file(
@@ -236,9 +245,8 @@ bool subghz_protocol_came_load_file(
     FlipperFile* flipper_file,
     const char* file_path) {
     furi_assert(context);
-    SubGhzProtocolCameDecoder* instance = context;
-    return subghz_protocol_block_load_file(
-        &instance->generic, flipper_file);
+    SubGhzProtocolDecoderCame* instance = context;
+    return subghz_block_generic_load_file(&instance->generic, flipper_file);
 }
 
 // void subghz_decoder_came_to_load_protocol(SubGhzProtocolCame* instance, void* context) {

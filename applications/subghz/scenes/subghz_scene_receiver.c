@@ -1,5 +1,5 @@
 #include "../subghz_i.h"
-#include "../views/subghz_receiver.h"
+#include "../views/receiver.h"
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
@@ -14,7 +14,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
 
         subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
 
-        subghz_receiver_add_data_statusbar(
+        subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver,
             string_get_cstr(frequency_str),
             string_get_cstr(modulation_str),
@@ -23,7 +23,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
         string_clear(frequency_str);
         string_clear(modulation_str);
     } else {
-        subghz_receiver_add_data_statusbar(
+        subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver, string_get_cstr(history_stat_str), "", "");
         subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
@@ -48,7 +48,7 @@ void subghz_scene_add_to_history_callback(SubGhzProtocolCommon* parser, void* co
         string_reset(str_buff);
         subghz_history_get_text_item_menu(
             subghz->txrx->history, str_buff, subghz_history_get_item(subghz->txrx->history) - 1);
-        subghz_receiver_add_item_to_menu(
+        subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             string_get_cstr(str_buff),
             subghz_history_get_type_protocol(
@@ -70,11 +70,11 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
 
     //Load history to receiver
-    subghz_receiver_exit(subghz->subghz_receiver);
+    subghz_view_receiver_exit(subghz->subghz_receiver);
     for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
         string_reset(str_buff);
         subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
-        subghz_receiver_add_item_to_menu(
+        subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             string_get_cstr(str_buff),
             subghz_history_get_type_protocol(subghz->txrx->history, i));
@@ -82,7 +82,8 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
     string_clear(str_buff);
     subghz_scene_receiver_update_statusbar(subghz);
-    subghz_receiver_set_callback(subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
+    subghz_view_receiver_set_callback(
+        subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
     subghz_parser_enable_dump(subghz->txrx->parser, subghz_scene_add_to_history_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateRX;
@@ -94,7 +95,7 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz_begin(subghz, subghz->txrx->preset);
         subghz_rx(subghz, subghz->txrx->frequency);
     }
-    subghz_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+    subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
 }
@@ -128,13 +129,15 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             return true;
             break;
         case SubghzCustomEventViewReceverOK:
-            subghz->txrx->idx_menu_chosen = subghz_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz->txrx->idx_menu_chosen =
+                subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             return true;
             break;
         case SubghzCustomEventViewReceverConfig:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz->txrx->idx_menu_chosen = subghz_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz->txrx->idx_menu_chosen =
+                subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             return true;
             break;
