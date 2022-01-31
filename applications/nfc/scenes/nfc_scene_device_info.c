@@ -1,8 +1,6 @@
 #include "../nfc_i.h"
 #include "../helpers/nfc_emv_parser.h"
 
-#define NFC_SCENE_DEVICE_INFO_BACK_EVENT (0UL)
-
 enum {
     NfcSceneDeviceInfoUid,
     NfcSceneDeviceInfoData,
@@ -17,13 +15,15 @@ void nfc_scene_device_info_widget_callback(GuiButtonType result, InputType type,
 
 void nfc_scene_device_info_dialog_callback(DialogExResult result, void* context) {
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+    if(result == DialogExResultLeft) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
+    }
 }
 
 void nfc_scene_device_info_bank_card_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = context;
     if(type == InputTypeShort) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_SCENE_DEVICE_INFO_BACK_EVENT);
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
     }
 }
 
@@ -163,7 +163,7 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
                 view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewBankCard);
                 consumed = true;
             }
-        } else if(state == NfcSceneDeviceInfoData && event.event == NFC_SCENE_DEVICE_INFO_BACK_EVENT) {
+        } else if(state == NfcSceneDeviceInfoData && event.event == NfcCustomEventViewExit) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneDeviceInfo, NfcSceneDeviceInfoUid);
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);

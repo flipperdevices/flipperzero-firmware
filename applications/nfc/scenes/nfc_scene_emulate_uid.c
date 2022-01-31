@@ -1,8 +1,5 @@
 #include "../nfc_i.h"
 
-#define NFC_EMULATE_UID_WORKER_CUSTOM_EVENT (10UL)
-#define NFC_EMULATE_UID_TEXTBOX_EVENT (11UL)
-
 enum {
     NfcSceneEmulateUidStateWidget,
     NfcSceneEmulateUidStateTextBox,
@@ -11,7 +8,7 @@ enum {
 void nfc_emulate_uid_worker_callback(void* context) {
     furi_assert(context);
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_EMULATE_UID_WORKER_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
 }
 
 void nfc_scene_emulate_uid_widget_callback(GuiButtonType result, InputType type, void* context) {
@@ -25,7 +22,7 @@ void nfc_scene_emulate_uid_widget_callback(GuiButtonType result, InputType type,
 void nfc_emulate_uid_textbox_callback(void* context) {
     furi_assert(context);
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_EMULATE_UID_TEXTBOX_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 // Add widget with device name or inform that data received
@@ -90,7 +87,7 @@ bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
         notification_message(nfc->notifications, &sequence_blink_blue_10);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NFC_EMULATE_UID_WORKER_CUSTOM_EVENT) {
+        if(event.event == NfcCustomEventWorkerExit) {
             // Add data button to widget if data is received for the first time
             if(!string_size(nfc->text_box_store)) {
                 nfc_scene_emulate_uid_widget_config(nfc, true);
@@ -110,7 +107,7 @@ bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
                 nfc->scene_manager, NfcSceneEmulateUid, NfcSceneEmulateUidStateTextBox);
             consumed = true;
         } else if(
-            event.event == NFC_EMULATE_UID_TEXTBOX_EVENT &&
+            event.event == NfcCustomEventViewExit &&
             state == NfcSceneEmulateUidStateTextBox) {
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
             scene_manager_set_scene_state(
