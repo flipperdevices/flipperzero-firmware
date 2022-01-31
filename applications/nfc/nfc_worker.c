@@ -151,9 +151,11 @@ bool nfc_worker_emulate_uid_callback(
     NfcWorker* nfc_worker = context;
     NfcReaderRequestData* reader_data = &nfc_worker->dev_data->reader_data;
     reader_data->size = buff_rx_len / 8;
-    memcpy(reader_data->data, buff_rx, reader_data->size);
-    if(nfc_worker->callback) {
-        nfc_worker->callback(nfc_worker->context);
+    if(reader_data->size > 0) {
+        memcpy(reader_data->data, buff_rx, reader_data->size);
+        if(nfc_worker->callback) {
+            nfc_worker->callback(nfc_worker->context);
+        }
     }
     return true;
 }
