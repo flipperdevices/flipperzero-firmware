@@ -3,6 +3,7 @@
 #include <rfal_rf.h>
 #include <furi.h>
 #include <m-string.h>
+#include <lib/nfc_protocols/nfca.h>
 
 #define TAG "FuriHalNfc"
 
@@ -164,6 +165,8 @@ void furi_hal_nfc_stop() {
     }
 }
 
+uint8_t rats[] = {0x05, 0x78, 0x80, 0x80, 0x00};
+
 bool furi_hal_nfc_emulate_nfca(
     uint8_t* uid,
     uint8_t uid_len,
@@ -204,10 +207,7 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         buff_tx_len = 0;
         uint32_t flag = osEventFlagsWait(event, EVENT_FLAG_ALL, osFlagsWaitAny, timeout);
-        if(flag == osErrorTimeout) {
-            break;
-        }
-        if(flag == EVENT_FLAG_STOP) {
+        if(flag == osErrorTimeout || flag == EVENT_FLAG_STOP) {
             break;
         }
         bool data_received = false;
@@ -216,19 +216,30 @@ bool furi_hal_nfc_emulate_nfca(
         rfalLmState state = rfalListenGetState(&data_received, NULL);
         if(data_received) {
             rfalTransceiveBlockingRx();
-        }
-        if(data_received &&
-           rfalNfcaListenerIsSleepReq(buff_rx, rfalConvBitsToBytes(buff_rx_len))) {
-            if(rfalListenSleepStart(
-                   RFAL_LM_STATE_SLEEP_A,
-                   buff_rx,
-                   rfalConvBytesToBits(buff_rx_size),
-                   &buff_rx_len)) {
-                FURI_LOG_E(TAG, "Failed to enter sleep mode");
-                break;
-            } else {
+            if(nfca_emulation_handler(buff_rx, buff_rx_len, buff_tx, &buff_tx_len)) {
+                if(rfalListenSleepStart(
+                       RFAL_LM_STATE_SLEEP_A,
+                       buff_rx,
+                       rfalConvBytesToBits(buff_rx_size),
+                       &buff_rx_len)) {
+                    FURI_LOG_E(TAG, "Failed to enter sleep mode");
+                    break;
+                } else {
+                    continue;
+                }
+            }
+            if(buff_tx_len) {
+                rfalTransceiveBitsBlockingTx(
+                    buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000);
                 continue;
             }
+        } else if(data_received && buff_rx[0] == 0xe0) {
+            memcpy(buff_tx, rats, sizeof(rats));
+            buff_tx_len = sizeof(rats) * 8;
+            data_type = FURI_HAL_NFC_TXRX_DEFAULT;
+            rfalTransceiveBitsBlockingTx(
+                buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000);
+            continue;
         }
         if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
            data_received) {
