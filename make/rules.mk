@@ -64,7 +64,7 @@ $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@echo "\tJSON\t" $@
 	@../scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
-$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS 
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
 	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/, , $<)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
@@ -151,5 +151,7 @@ generate_cscope_db:
 %.cpp: ;
 
 %.s: ;
+
+$(OBJ_DIR)/BUILD_FLAGS: ;
 
 -include $(DEPS)
