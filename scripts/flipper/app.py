@@ -38,7 +38,7 @@ class App:
     def call(self):
         if "func" not in self.args:
             self.parser.error("Choose something to do")
-        return_code = self.args.func()
+        return self.args.func()
 
     def init(self):
         raise Exception("init() is not implemented")
