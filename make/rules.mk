@@ -1,12 +1,16 @@
 OBJ_DIR := $(OBJ_DIR)/$(TARGET)
 
 # Include source folder paths to virtual paths
-VPATH = $(sort $(dir $(C_SOURCES)) $(dir $(ASM_SOURCES)) $(dir $(CPP_SOURCES)))
+C_SOURCES := $(abspath ${C_SOURCES})
+ASM_SOURCES := $(abspath ${ASM_SOURCES})
+CPP_SOURCES := $(abspath ${CPP_SOURCES})
 
 # Gather object
-OBJECTS = $(addprefix $(OBJ_DIR)/, $(notdir $(C_SOURCES:.c=.o)))
-OBJECTS += $(addprefix $(OBJ_DIR)/, $(notdir $(ASM_SOURCES:.s=.o)))
-OBJECTS += $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(C_SOURCES:.c=.o))
+OBJECTS += $(addprefix $(OBJ_DIR)/, $(ASM_SOURCES:.s=.o))
+OBJECTS += $(addprefix $(OBJ_DIR)/, $(CPP_SOURCES:.cpp=.o))
+
+OBJECT_DIRS = $(sort $(dir $(OBJECTS)))
 
 # Generate dependencies
 DEPS = $(OBJECTS:.o=.d)
@@ -15,7 +19,7 @@ ifdef DFU_SERIAL
 	DFU_OPTIONS += -S $(DFU_SERIAL)
 endif
 
-$(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
+$(foreach dir, $(OBJECT_DIRS),$(shell mkdir -p $(dir)))
 
 BUILD_FLAGS_SHELL=\
 	echo "$(CFLAGS)" > $(OBJ_DIR)/BUILD_FLAGS.tmp; \
@@ -60,16 +64,16 @@ $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@echo "\tJSON\t" $@
 	@../scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
-$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
+$(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS 
+	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/, , $<)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tASM\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
+	@echo "\tASM\t" $(subst $(PROJECT_ROOT)/, , $<)
 	@$(AS) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCPP\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
+	@echo "\tCPP\t" $(subst $(PROJECT_ROOT)/, , $<)
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
@@ -121,7 +125,7 @@ openocd:
 
 clean:
 	@echo "\tCLEAN\t"
-	@$(RM) $(OBJ_DIR)/*
+	@$(RM) -rf $(OBJ_DIR)
 
 z: clean
 	$(MAKE) all
@@ -141,5 +145,11 @@ generate_cscope_db:
 
 # Prevent make from trying to find .d targets
 %.d: ;
+
+%.c: ;
+
+%.cpp: ;
+
+%.s: ;
 
 -include $(DEPS)
