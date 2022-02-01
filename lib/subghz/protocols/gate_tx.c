@@ -6,6 +6,8 @@
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
 
+#define TAG "SubGhzProtocolGateTx"
+
 static const SubGhzBlockConst subghz_protocol_gate_tx_const = {
     .te_short = 350,
     .te_long = 700,
@@ -82,10 +84,16 @@ void subghz_protocol_encoder_gate_tx_free(void* context) {
     free(instance);
 }
 
-static void subghz_protocol_gate_tx_ecoder_get_upload(SubGhzProtocolEncoderGateTx* instance) {
+static bool subghz_protocol_gate_tx_ecoder_get_upload(SubGhzProtocolEncoderGateTx* instance) {
     furi_assert(instance);
     size_t index = 0;
-    instance->encoder.size_upload = (instance->generic.data_count_bit * 2) + 2;
+    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
+    if(size_upload > instance->encoder.size_upload) {
+        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
+        return false;
+    } else {
+        instance->encoder.size_upload = size_upload;
+    }
     //Send header
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_gate_tx_const.te_short * 49);
@@ -108,6 +116,7 @@ static void subghz_protocol_gate_tx_ecoder_get_upload(SubGhzProtocolEncoderGateT
                 level_duration_make(true, (uint32_t)subghz_protocol_gate_tx_const.te_long);
         }
     }
+    return true;
 }
 
 bool subghz_protocol_encoder_gate_tx_load(

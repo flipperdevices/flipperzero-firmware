@@ -12,6 +12,8 @@
  *
  */
 
+#define TAG "SubGhzProtocolCAME"
+
 static const SubGhzBlockConst subghz_protocol_came_const = {
     .te_short = 320,
     .te_long = 640,
@@ -89,10 +91,16 @@ void subghz_protocol_encoder_came_free(void* context) {
     free(instance);
 }
 
-static void subghz_protocol_came_ecoder_get_upload(SubGhzProtocolEncoderCame* instance) {
+static bool subghz_protocol_came_ecoder_get_upload(SubGhzProtocolEncoderCame* instance) {
     furi_assert(instance);
-    instance->encoder.size_upload = (instance->generic.data_count_bit * 2) + 2;
     size_t index = 0;
+    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
+    if(size_upload > instance->encoder.size_upload) {
+        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
+        return false;
+    } else {
+        instance->encoder.size_upload = size_upload;
+    }
     //Send header
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_came_const.te_short * 36);
@@ -115,6 +123,7 @@ static void subghz_protocol_came_ecoder_get_upload(SubGhzProtocolEncoderCame* in
                 level_duration_make(true, (uint32_t)subghz_protocol_came_const.te_long);
         }
     }
+    return true;
 }
 
 bool subghz_protocol_encoder_came_load(
