@@ -1,6 +1,6 @@
 #include "bt_keys_storage.h"
 #include <furi.h>
-#include <file-worker.h>
+#include <file_worker.h>
 
 #define BT_KEYS_STORAGE_TAG "bt keys storage"
 #define BT_KEYS_STORAGE_PATH "/int/bt.keys"
@@ -38,4 +38,17 @@ bool bt_save_key_storage(Bt* bt) {
     }
     file_worker_free(file_worker);
     return file_saved;
+}
+
+bool bt_delete_key_storage(Bt* bt) {
+    furi_assert(bt);
+    bool delete_succeed = false;
+
+    furi_hal_bt_stop_advertising();
+    delete_succeed = furi_hal_bt_clear_white_list();
+    if(bt->bt_settings.enabled) {
+        furi_hal_bt_start_advertising();
+    }
+
+    return delete_succeed;
 }

@@ -1,4 +1,4 @@
-#include <furi/pubsub.h>
+#include <furi.h>
 #include "loader/loader.h"
 #include "loader_i.h"
 
@@ -217,9 +217,11 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     LoaderEvent event;
 
     if(thread_state == FuriThreadStateRunning) {
-        instance->free_heap_size = memmgr_get_free_heap();
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
+
+        // Snapshot current memory usage
+        instance->free_heap_size = memmgr_get_free_heap();
     } else if(thread_state == FuriThreadStateStopped) {
         /*
          * Current Leak Sanitizer assumes that memory is allocated and freed
@@ -240,6 +242,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             furi_thread_get_heap_size(instance->thread));
         furi_hal_power_insomnia_exit();
         loader_unlock(instance);
+
         event.type = LoaderEventTypeApplicationStopped;
         furi_pubsub_publish(loader_instance->pubsub, &event);
     }
@@ -426,7 +429,7 @@ void loader_show_menu() {
 }
 
 void loader_update_menu() {
-    menu_clean(loader_instance->primary_menu);
+    menu_reset(loader_instance->primary_menu);
     loader_build_menu();
 }
 
@@ -461,11 +464,12 @@ int32_t loader_srv(void* p) {
         }
     }
 
+    furi_record_destroy("loader");
     loader_free(loader_instance);
 
     return 0;
 }
 
-FuriPubSub* loader_get_pubsub() {
-    return loader_instance->pubsub;
+FuriPubSub* loader_get_pubsub(Loader* instance) {
+    return instance->pubsub;
 }

@@ -1,31 +1,24 @@
 #include "bq27220.h"
 #include "bq27220_reg.h"
 
-#include <furi-hal-delay.h>
+#include <furi_hal_delay.h>
 #include <furi/log.h>
 #include <stdbool.h>
 
 #define TAG "Gauge"
 
 uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
-    uint8_t buffer[2] = {address};
-    uint16_t ret = 0;
+    uint16_t buf = 0;
 
-    if(furi_hal_i2c_trx(handle, BQ27220_ADDRESS, buffer, 1, buffer, 2, BQ27220_I2C_TIMEOUT)) {
-        ret = *(uint16_t*)buffer;
-    }
+    furi_hal_i2c_read_mem(
+        handle, BQ27220_ADDRESS, address, (uint8_t*)&buf, 2, BQ27220_I2C_TIMEOUT);
 
-    return ret;
+    return buf;
 }
 
 bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
-    bool ret = false;
-    uint8_t buffer[3];
-
-    buffer[0] = CommandControl;
-    buffer[1] = control & 0xFF;
-    buffer[2] = (control >> 8) & 0xFF;
-    ret = furi_hal_i2c_tx(handle, BQ27220_ADDRESS, buffer, 3, BQ27220_I2C_TIMEOUT);
+    bool ret = furi_hal_i2c_write_mem(
+        handle, BQ27220_ADDRESS, CommandControl, (uint8_t*)&control, 2, BQ27220_I2C_TIMEOUT);
 
     return ret;
 }
@@ -40,22 +33,22 @@ uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
 
 bool bq27220_set_parameter_u16(FuriHalI2cBusHandle* handle, uint16_t address, uint16_t value) {
     bool ret;
-    uint8_t buffer[5];
+    uint8_t buffer[4];
 
-    buffer[0] = CommandSelectSubclass;
-    buffer[1] = address & 0xFF;
-    buffer[2] = (address >> 8) & 0xFF;
-    buffer[3] = (value >> 8) & 0xFF;
-    buffer[4] = value & 0xFF;
-    ret = furi_hal_i2c_tx(handle, BQ27220_ADDRESS, buffer, 5, BQ27220_I2C_TIMEOUT);
+    buffer[0] = address & 0xFF;
+    buffer[1] = (address >> 8) & 0xFF;
+    buffer[2] = (value >> 8) & 0xFF;
+    buffer[3] = value & 0xFF;
+    ret = furi_hal_i2c_write_mem(
+        handle, BQ27220_ADDRESS, CommandSelectSubclass, buffer, 4, BQ27220_I2C_TIMEOUT);
 
     delay_us(10000);
 
     uint8_t checksum = bq27220_get_checksum(&buffer[1], 4);
-    buffer[0] = CommandMACDataSum;
-    buffer[1] = checksum;
-    buffer[2] = 6;
-    ret = furi_hal_i2c_tx(handle, BQ27220_ADDRESS, buffer, 3, BQ27220_I2C_TIMEOUT);
+    buffer[0] = checksum;
+    buffer[1] = 6;
+    ret = furi_hal_i2c_write_mem(
+        handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT);
 
     delay_us(10000);
     return ret;
@@ -102,7 +95,7 @@ bool bq27220_init(FuriHalI2cBusHandle* handle, const ParamCEDV* cedv) {
     bq27220_set_parameter_u16(handle, AddressEDV1, cedv->EDV1);
     bq27220_set_parameter_u16(handle, AddressEDV2, cedv->EDV2);
 
-    bq27220_control(handle, Control_EXIT_CFG_UPDATE);
+    bq27220_control(handle, Control_EXIT_CFG_UPDATE_REINIT);
     delay_us(10000);
     design_cap = bq27220_get_design_capacity(handle);
     if(cedv->design_cap == design_cap) {
@@ -132,7 +125,8 @@ uint8_t bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* b
     }
 }
 
-uint8_t bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status) {
+uint8_t
+    bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status) {
     uint16_t data = bq27220_read_word(handle, CommandOperationStatus);
     if(data == BQ27220_ERROR) {
         return BQ27220_ERROR;

@@ -2,10 +2,10 @@
 
 #include <math.h>
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include <notification/notification-messages.h>
+#include <notification/notification_messages.h>
 #include <lib/flipper_file/flipper_file.h>
 #include "../notification/notification.h"
 #include "views/subghz_receiver.h"
@@ -421,7 +421,7 @@ bool subghz_rename_file(SubGhz* subghz) {
     FS_Error fs_result =
         storage_common_rename(storage, string_get_cstr(old_path), string_get_cstr(new_path));
 
-    if(fs_result != FSE_OK && fs_result != FSE_EXIST) {
+    if(fs_result != FSE_OK) {
         dialog_message_show_storage_error(subghz->dialogs, "Cannot rename\n file/directory");
         ret = false;
     }

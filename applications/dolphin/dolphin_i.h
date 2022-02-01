@@ -2,7 +2,7 @@
 
 #include "furi/pubsub.h"
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 #include "dolphin.h"
 #include "helpers/dolphin_state.h"
@@ -11,9 +11,8 @@ typedef enum {
     DolphinEventTypeDeed,
     DolphinEventTypeStats,
     DolphinEventTypeFlush,
-    DolphinEventTypeAnimationStartNewIdle,
-    DolphinEventTypeAnimationCheckBlocking,
-    DolphinEventTypeAnimationInteract,
+    DolphinEventTypeIncreaseButthurt,
+    DolphinEventTypeClearLimits,
 } DolphinEventType;
 
 typedef struct {
@@ -31,6 +30,9 @@ struct Dolphin {
     // Queue
     osMessageQueueId_t event_queue;
     FuriPubSub* pubsub;
+    TimerHandle_t butthurt_timer;
+    TimerHandle_t flush_timer;
+    TimerHandle_t clear_limits_timer;
 };
 
 Dolphin* dolphin_alloc();

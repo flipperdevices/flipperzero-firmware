@@ -75,8 +75,8 @@ bool flipper_file_open_always(FlipperFile* flipper_file, const char* filename) {
 
 bool flipper_file_open_new(FlipperFile* flipper_file, const char* filename) {
     furi_assert(flipper_file);
-    bool result = storage_file_open(
-        flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_NEW);
+    bool result =
+        storage_file_open(flipper_file->file, filename, FSAM_READ | FSAM_WRITE, FSOM_CREATE_NEW);
     return result;
 }
 
@@ -159,7 +159,7 @@ bool flipper_file_get_value_count(FlipperFile* flipper_file, const char* key, ui
             if(last) break;
         }
 
-    } while(true);
+    } while(false);
 
     if(!storage_file_seek(flipper_file->file, position, true)) {
         result = false;

@@ -1,5 +1,6 @@
 #include "../desktop_settings_app.h"
 #include "applications.h"
+#include "desktop_settings_scene.h"
 
 enum DesktopSettingsStartSubmenuIndex {
     DesktopSettingsStartSubmenuIndexFavorite,
@@ -53,5 +54,5 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent even
 
 void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
-    submenu_clean(app->submenu);
+    submenu_reset(app->submenu);
 }

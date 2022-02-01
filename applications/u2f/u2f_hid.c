@@ -1,14 +1,14 @@
 #include <furi.h>
 #include "u2f_hid.h"
 #include "u2f.h"
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <lib/toolbox/args.h>
-#include <furi-hal-usb-hid-u2f.h>
+#include <furi_hal_usb_hid_u2f.h>
 #include <storage/storage.h>
 
-#include <furi-hal-console.h>
+#include <furi_hal_console.h>
 
 #define TAG "U2FHID"
 #define WORKER_TAG TAG "Worker"
@@ -190,7 +190,7 @@ static int32_t u2f_hid_worker(void* context) {
 
     FURI_LOG_D(WORKER_TAG, "Init");
 
-    UsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_set_config(&usb_hid_u2f);
 
     u2f_hid->lock_timer = osTimerNew(u2f_hid_lock_timeout_callback, osTimerOnce, u2f_hid, NULL);

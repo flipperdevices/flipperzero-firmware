@@ -1,6 +1,6 @@
 #include "../usb_uart_bridge.h"
 #include "../gpio_app_i.h"
-#include "furi-hal.h"
+#include "furi_hal.h"
 
 typedef enum {
     UsbUartLineIndexVcp,
@@ -135,6 +135,6 @@ void gpio_scene_usb_uart_cfg_on_exit(void* context) {
         app->scene_manager,
         GpioAppViewUsbUartCfg,
         variable_item_list_get_selected_item_index(app->var_item_list));
-    variable_item_list_clean(app->var_item_list);
+    variable_item_list_reset(app->var_item_list);
     free(cfg_set);
 }

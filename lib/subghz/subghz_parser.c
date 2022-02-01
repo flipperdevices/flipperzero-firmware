@@ -18,6 +18,8 @@
 #include "protocols/subghz_protocol_kia.h"
 #include "protocols/subghz_protocol_raw.h"
 #include "protocols/subghz_protocol_hormann.h"
+#include "protocols/subghz_protocol_somfy_telis.h"
+#include "protocols/subghz_protocol_somfy_keytis.h"
 
 #include "subghz_keystore.h"
 
@@ -44,6 +46,8 @@ typedef enum {
     SubGhzProtocolTypeKIA,
     SubGhzProtocolTypeRAW,
     SubGhzProtocolTypeHormann,
+    SubGhzProtocolTypeSomfyTelis,
+    SubGhzProtocolTypeSomfyKeytis,
 
     SubGhzProtocolTypeMax,
 } SubGhzProtocolType;
@@ -119,6 +123,10 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
     instance->protocols[SubGhzProtocolTypeHormann] =
         (SubGhzProtocolCommon*)subghz_protocol_hormann_alloc();
+    instance->protocols[SubGhzProtocolTypeSomfyTelis] =
+        (SubGhzProtocolCommon*)subghz_protocol_somfy_telis_alloc();
+    instance->protocols[SubGhzProtocolTypeSomfyKeytis] =
+        (SubGhzProtocolCommon*)subghz_protocol_somfy_keytis_alloc();
 
     return instance;
 }
@@ -156,6 +164,10 @@ void subghz_parser_free(SubGhzParser* instance) {
     subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     subghz_protocol_hormann_free(
         (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
+    subghz_protocol_somfy_telis_free(
+        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
+    subghz_protocol_somfy_keytis_free(
+        (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis]);
 
     subghz_keystore_free(instance->keystore);
 
@@ -217,7 +229,7 @@ void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file
 
 bool subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_name) {
     bool ret = false;
-    if (subghz_keystore_load(instance->keystore, file_name)) {
+    if(subghz_keystore_load(instance->keystore, file_name)) {
         FURI_LOG_I(SUBGHZ_PARSER_TAG, "Successfully loaded keeloq keys from %s", file_name);
         ret = true;
     } else {
@@ -257,6 +269,10 @@ void subghz_parser_reset(SubGhzParser* instance) {
     subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     subghz_protocol_hormann_reset(
         (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
+    subghz_protocol_somfy_telis_reset(
+        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
+    subghz_protocol_somfy_keytis_reset(
+        (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis]);
 }
 
 void subghz_parser_raw_parse(SubGhzParser* instance, bool level, uint32_t duration) {
@@ -309,4 +325,12 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
         (SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA], level, duration);
     subghz_protocol_hormann_parse(
         (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann], level, duration);
+    subghz_protocol_somfy_telis_parse(
+        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis],
+        level,
+        duration);
+    subghz_protocol_somfy_keytis_parse(
+        (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis],
+        level,
+        duration);
 }

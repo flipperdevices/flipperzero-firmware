@@ -1,6 +1,6 @@
 #include "bad_usb_app_i.h"
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 static bool bad_usb_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -71,7 +71,7 @@ void bad_usb_app_free(BadUsbApp* app) {
 }
 
 int32_t bad_usb_app(void* p) {
-    UsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_set_config(&usb_hid);
 
     BadUsbApp* bad_usb_app = bad_usb_app_alloc();

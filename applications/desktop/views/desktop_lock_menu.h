@@ -1,10 +1,6 @@
 #pragma once
 
-#include <gui/gui_i.h>
 #include <gui/view.h>
-#include <gui/canvas.h>
-#include <gui/elements.h>
-#include <furi.h>
 #include "desktop_events.h"
 
 #define HINT_TIMEOUT 2
@@ -32,6 +28,6 @@ void desktop_lock_menu_set_callback(
 
 View* desktop_lock_menu_get_view(DesktopLockMenuView* lock_menu);
 void desktop_lock_menu_pin_set(DesktopLockMenuView* lock_menu, bool pin_is_set);
-void desktop_lock_menu_reset_idx(DesktopLockMenuView* lock_menu);
+void desktop_lock_menu_set_idx(DesktopLockMenuView* lock_menu, uint8_t idx);
 DesktopLockMenuView* desktop_lock_menu_alloc();
 void desktop_lock_menu_free(DesktopLockMenuView* lock_menu);

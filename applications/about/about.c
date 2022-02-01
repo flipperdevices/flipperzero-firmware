@@ -4,7 +4,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/empty_screen.h>
 #include <m-string.h>
-#include <furi-hal-version.h>
+#include <furi_hal_version.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
@@ -14,7 +14,7 @@ static DialogMessageButton product_screen(DialogsApp* dialogs, DialogMessage* me
     const char* screen_header = "Product: Flipper Zero\n"
                                 "Model: FZ.1\n";
     const char* screen_text = "FCC ID: 2A2V6-FZ\n"
-                              "IC ID: 27624-FZ";
+                              "IC: 27624-FZ";
 
     dialog_message_set_header(message, screen_header, 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, screen_text, 0, 26, AlignLeft, AlignTop);
@@ -88,6 +88,12 @@ static DialogMessageButton hw_version_screen(DialogsApp* dialogs, DialogMessage*
         furi_hal_version_get_hw_body(),
         furi_hal_version_get_hw_connect(),
         my_name ? my_name : "Unknown");
+
+    string_cat_printf(buffer, "Serial number:\n");
+    const uint8_t* uid = furi_hal_version_uid();
+    for(size_t i = 0; i < furi_hal_version_uid_size(); i++) {
+        string_cat_printf(buffer, "%02X", uid[i]);
+    }
 
     dialog_message_set_header(message, "HW Version info:", 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, string_get_cstr(buffer), 0, 13, AlignLeft, AlignTop);
