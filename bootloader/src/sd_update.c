@@ -18,7 +18,8 @@
 #define FLIPPER_DFU_PRODUCT 0xdf11
 #define DFU_SUFFIX_VERSION 0x011a
 
-#define FLASH_PAGE_SIZE 4096 // TODO: get from HAL?..
+//#define FLASH_PAGE_SIZE 4096 // TODO: get from HAL?..
+#define FLASH_PAGE_ALIGNMENT_MASK (FLASH_PAGE_SIZE-1)
 
 typedef enum {
     UpdateBlockResult_Unknown,
@@ -28,7 +29,7 @@ typedef enum {
 } UpdateBlockResult;
 
 static const char fs_root_path[] = "/";
-static const char update_file_path[] = "/firmware/bl.dfu";
+static const char update_file_path[] = "/firmware/fw.dfu";
 
 typedef struct {
     FILINFO stat;
@@ -158,12 +159,13 @@ static bool check_address_boundaries(size_t address, bool allow_bl_region) {
     return ((address >= min_allowed_address) && (address < max_allowed_address));
 }
 
-static bool write_flash_region(uint32_t address, uint8_t* data, uint16_t length) {
-    return false;
-}
-
 // Assumes file is open, valid and read pointer is set at the start of image data
 static UpdateBlockResult write_flash_region_from_file(FsFile* dfuf, ImageElementHeader* header) {
+    if ((header->dwElementAddress & FLASH_PAGE_ALIGNMENT_MASK) != 0) {
+        // start address is not aligned by page boundary -- we don't support that. Yet.
+        return UpdateBlockResult_Failed;
+    }
+
     if(!check_address_boundaries(header->dwElementAddress, false) ||
        !check_address_boundaries(header->dwElementAddress + header->dwElementSize, false)) {
         return UpdateBlockResult_Skipped;
@@ -171,14 +173,21 @@ static UpdateBlockResult write_flash_region_from_file(FsFile* dfuf, ImageElement
 
     uint8_t fw_block[FLASH_PAGE_SIZE] = {0};
     uint16_t bytes_read = 0;
-    for(uint32_t element_offs = 0; element_offs < header->dwElementSize; ++element_offs) {
+    for(uint32_t element_offs = 0; element_offs < header->dwElementSize; ) {
         if(f_read(&dfuf->file, fw_block, FLASH_PAGE_SIZE, &bytes_read) != FR_OK) {
             return UpdateBlockResult_Failed;
         }
 
-        if(!write_flash_region(header->dwElementAddress + element_offs, fw_block, bytes_read)) {
+        int16_t i_page = furi_hal_flash_get_page_number(header->dwElementAddress + element_offs);
+        if(i_page < 0) {
+            return false;
+        }
+
+        if (!furi_hal_flash_program_page(i_page, fw_block, bytes_read)) {
             return UpdateBlockResult_Failed;
         }
+
+        element_offs += bytes_read;
     }
 
     return UpdateBlockResult_OK;

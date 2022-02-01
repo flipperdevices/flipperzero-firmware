@@ -40,6 +40,12 @@ size_t furi_hal_flash_get_cycles_count();
  */
 const void* furi_hal_flash_get_free_end_address();
 
+/** Get flash page number for address
+ *
+ * @return     page number, -1 for invalid address
+ */
+int16_t furi_hal_flash_get_page_number(size_t address);
+
 
 /** Erase Flash
  *
@@ -61,3 +67,6 @@ bool furi_hal_flash_erase(uint8_t page);
  * @return     true on success
  */
 bool furi_hal_flash_write_dword(size_t address, uint64_t data);
+
+
+bool furi_hal_flash_program_page(uint8_t page, uint8_t* data, uint16_t length);
