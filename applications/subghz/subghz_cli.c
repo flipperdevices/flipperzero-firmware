@@ -444,7 +444,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     string_t sysmsg;
     string_init(sysmsg);
     bool exit = false;
-    SubghzChatEvent chat_event;
+    SubGhzChatEvent chat_event;
 
     NotificationApp* notification = furi_record_open("notification");
 
@@ -456,10 +456,10 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
     while(!exit) {
         chat_event = subghz_chat_worker_get_event_chat(subghz_chat);
         switch(chat_event.event) {
-        case SubghzChatEventInputData:
+        case SubGhzChatEventInputData:
             if(chat_event.c == CliSymbolAsciiETX) {
                 printf("\r\n");
-                chat_event.event = SubghzChatEventUserExit;
+                chat_event.event = SubGhzChatEventUserExit;
                 subghz_chat_worker_put_event_chat(subghz_chat, &chat_event);
                 break;
             } else if(
@@ -506,7 +506,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                 fflush(stdout);
                 string_push_back(input, chat_event.c);
                 break;
-            case SubghzChatEventRXData:
+            case SubGhzChatEventRXData:
                 do {
                     memset(message, 0x00, message_max_len);
                     size_t len = subghz_chat_worker_read(subghz_chat, message, message_max_len);
@@ -525,10 +525,10 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     }
                 } while(subghz_chat_worker_available(subghz_chat));
                 break;
-            case SubghzChatEventNewMessage:
+            case SubGhzChatEventNewMessage:
                 notification_message(notification, &sequence_single_vibro);
                 break;
-            case SubghzChatEventUserEntrance:
+            case SubGhzChatEventUserEntrance:
                 string_printf(
                     sysmsg,
                     "\033[0;34m%s joined chat.\033[0m\r\n",
@@ -538,7 +538,7 @@ static void subghz_cli_command_chat(Cli* cli, string_t args) {
                     (uint8_t*)string_get_cstr(sysmsg),
                     strlen(string_get_cstr(sysmsg)));
                 break;
-            case SubghzChatEventUserExit:
+            case SubGhzChatEventUserExit:
                 string_printf(
                     sysmsg, "\033[0;31m%s left chat.\033[0m\r\n", furi_hal_version_get_name_ptr());
                 subghz_chat_worker_write(

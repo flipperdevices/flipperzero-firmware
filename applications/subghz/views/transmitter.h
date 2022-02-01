@@ -3,23 +3,23 @@
 #include <gui/view.h>
 #include "../helpers/subghz_custom_event.h"
 
-typedef struct SubghzViewTransmitter SubghzViewTransmitter;
+typedef struct SubGhzViewTransmitter SubGhzViewTransmitter;
 
-typedef void (*SubghzViewTransmitterCallback)(SubghzCustomEvent event, void* context);
+typedef void (*SubGhzViewTransmitterCallback)(SubGhzCustomEvent event, void* context);
 
 void subghz_view_transmitter_set_callback(
-    SubghzViewTransmitter* subghz_transmitter,
-    SubghzViewTransmitterCallback callback,
+    SubGhzViewTransmitter* subghz_transmitter,
+    SubGhzViewTransmitterCallback callback,
     void* context);
 
-SubghzViewTransmitter* subghz_view_transmitter_alloc();
+SubGhzViewTransmitter* subghz_view_transmitter_alloc();
 
-void subghz_view_transmitter_free(SubghzViewTransmitter* subghz_transmitter);
+void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter);
 
-View* subghz_view_transmitter_get_view(SubghzViewTransmitter* subghz_transmitter);
+View* subghz_view_transmitter_get_view(SubGhzViewTransmitter* subghz_transmitter);
 
 void subghz_view_transmitter_add_data_to_show(
-    SubghzViewTransmitter* subghz_transmitter,
+    SubGhzViewTransmitter* subghz_transmitter,
     const char* key_str,
     const char* frequency_str,
     const char* preset_str,

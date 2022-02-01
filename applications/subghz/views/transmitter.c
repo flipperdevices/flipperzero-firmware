@@ -4,9 +4,9 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-struct SubghzViewTransmitter {
+struct SubGhzViewTransmitter {
     View* view;
-    SubghzViewTransmitterCallback callback;
+    SubGhzViewTransmitterCallback callback;
     void* context;
 };
 
@@ -15,11 +15,11 @@ typedef struct {
     string_t preset_str;
     string_t key_str;
     uint8_t show_button;
-} SubghzViewTransmitterModel;
+} SubGhzViewTransmitterModel;
 
 void subghz_view_transmitter_set_callback(
-    SubghzViewTransmitter* subghz_transmitter,
-    SubghzViewTransmitterCallback callback,
+    SubGhzViewTransmitter* subghz_transmitter,
+    SubGhzViewTransmitterCallback callback,
     void* context) {
     furi_assert(subghz_transmitter);
 
@@ -28,14 +28,14 @@ void subghz_view_transmitter_set_callback(
 }
 
 void subghz_view_transmitter_add_data_to_show(
-    SubghzViewTransmitter* subghz_transmitter,
+    SubGhzViewTransmitter* subghz_transmitter,
     const char* key_str,
     const char* frequency_str,
     const char* preset_str,
     uint8_t show_button) {
     furi_assert(subghz_transmitter);
     with_view_model(
-        subghz_transmitter->view, (SubghzViewTransmitterModel * model) {
+        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
             string_set(model->key_str, key_str);
             string_set(model->frequency_str, frequency_str);
             string_set(model->preset_str, preset_str);
@@ -75,7 +75,7 @@ static void subghz_view_transmitter_button_right(Canvas* canvas, const char* str
     canvas_invert_color(canvas);
 }
 
-void subghz_view_transmitter_draw(Canvas* canvas, SubghzViewTransmitterModel* model) {
+void subghz_view_transmitter_draw(Canvas* canvas, SubGhzViewTransmitterModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
@@ -87,12 +87,12 @@ void subghz_view_transmitter_draw(Canvas* canvas, SubghzViewTransmitterModel* mo
 
 bool subghz_view_transmitter_input(InputEvent* event, void* context) {
     furi_assert(context);
-    SubghzViewTransmitter* subghz_transmitter = context;
+    SubGhzViewTransmitter* subghz_transmitter = context;
     bool can_be_sent = false;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         with_view_model(
-            subghz_transmitter->view, (SubghzViewTransmitterModel * model) {
+            subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
                 string_reset(model->frequency_str);
                 string_reset(model->preset_str);
                 string_reset(model->key_str);
@@ -103,7 +103,7 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
     }
 
     with_view_model(
-        subghz_transmitter->view, (SubghzViewTransmitterModel * model) {
+        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
             if(model->show_button) {
                 can_be_sent = true;
             }
@@ -112,11 +112,11 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
 
     if(can_be_sent && event->key == InputKeyOk && event->type == InputTypePress) {
         subghz_transmitter->callback(
-            SubghzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
+            SubGhzCustomEventViewTransmitterSendStart, subghz_transmitter->context);
         return true;
     } else if(can_be_sent && event->key == InputKeyOk && event->type == InputTypeRelease) {
         subghz_transmitter->callback(
-            SubghzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
+            SubGhzCustomEventViewTransmitterSendStop, subghz_transmitter->context);
         return true;
     }
 
@@ -125,21 +125,21 @@ bool subghz_view_transmitter_input(InputEvent* event, void* context) {
 
 void subghz_view_transmitter_enter(void* context) {
     furi_assert(context);
-    // SubghzViewTransmitter* subghz_transmitter = context;
+    // SubGhzViewTransmitter* subghz_transmitter = context;
 }
 
 void subghz_view_transmitter_exit(void* context) {
     furi_assert(context);
-    // SubghzViewTransmitter* subghz_transmitter = context;
+    // SubGhzViewTransmitter* subghz_transmitter = context;
 }
 
-SubghzViewTransmitter* subghz_view_transmitter_alloc() {
-    SubghzViewTransmitter* subghz_transmitter = furi_alloc(sizeof(SubghzViewTransmitter));
+SubGhzViewTransmitter* subghz_view_transmitter_alloc() {
+    SubGhzViewTransmitter* subghz_transmitter = furi_alloc(sizeof(SubGhzViewTransmitter));
 
     // View allocation and configuration
     subghz_transmitter->view = view_alloc();
     view_allocate_model(
-        subghz_transmitter->view, ViewModelTypeLocking, sizeof(SubghzViewTransmitterModel));
+        subghz_transmitter->view, ViewModelTypeLocking, sizeof(SubGhzViewTransmitterModel));
     view_set_context(subghz_transmitter->view, subghz_transmitter);
     view_set_draw_callback(
         subghz_transmitter->view, (ViewDrawCallback)subghz_view_transmitter_draw);
@@ -148,7 +148,7 @@ SubghzViewTransmitter* subghz_view_transmitter_alloc() {
     view_set_exit_callback(subghz_transmitter->view, subghz_view_transmitter_exit);
 
     with_view_model(
-        subghz_transmitter->view, (SubghzViewTransmitterModel * model) {
+        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
             string_init(model->frequency_str);
             string_init(model->preset_str);
             string_init(model->key_str);
@@ -157,11 +157,11 @@ SubghzViewTransmitter* subghz_view_transmitter_alloc() {
     return subghz_transmitter;
 }
 
-void subghz_view_transmitter_free(SubghzViewTransmitter* subghz_transmitter) {
+void subghz_view_transmitter_free(SubGhzViewTransmitter* subghz_transmitter) {
     furi_assert(subghz_transmitter);
 
     with_view_model(
-        subghz_transmitter->view, (SubghzViewTransmitterModel * model) {
+        subghz_transmitter->view, (SubGhzViewTransmitterModel * model) {
             string_clear(model->frequency_str);
             string_clear(model->preset_str);
             string_clear(model->key_str);
@@ -171,7 +171,7 @@ void subghz_view_transmitter_free(SubghzViewTransmitter* subghz_transmitter) {
     free(subghz_transmitter);
 }
 
-View* subghz_view_transmitter_get_view(SubghzViewTransmitter* subghz_transmitter) {
+View* subghz_view_transmitter_get_view(SubGhzViewTransmitter* subghz_transmitter) {
     furi_assert(subghz_transmitter);
     return subghz_transmitter->view;
 }

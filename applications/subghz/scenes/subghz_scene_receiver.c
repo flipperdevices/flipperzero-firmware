@@ -30,7 +30,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     string_clear(history_stat_str);
 }
 
-void subghz_scene_receiver_callback(SubghzCustomEvent event, void* context) {
+void subghz_scene_receiver_callback(SubGhzCustomEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
@@ -97,7 +97,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     }
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
 
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewReceiver);
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
 
 bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
@@ -105,7 +105,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case SubghzCustomEventViewReceverBack:
+        case SubGhzCustomEventViewReceverBack:
 
             // Stop CC1101 Rx
             subghz->state_notifications = SubGhzNotificationStateIDLE;
@@ -128,13 +128,13 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             }
             return true;
             break;
-        case SubghzCustomEventViewReceverOK:
+        case SubGhzCustomEventViewReceverOK:
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             return true;
             break;
-        case SubghzCustomEventViewReceverConfig:
+        case SubGhzCustomEventViewReceverConfig:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);

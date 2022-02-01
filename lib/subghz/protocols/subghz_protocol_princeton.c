@@ -13,7 +13,7 @@
 #define SUBGHZ_PT_COUNT_KEY_868 9
 #define SUBGHZ_PT_TIMEOUT_868 14000
 
-#define TAG "SubghzPrinceton"
+#define TAG "SubGhzPrinceton"
 
 struct SubGhzEncoderPrinceton {
     uint32_t key;

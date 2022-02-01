@@ -113,33 +113,33 @@ struct SubGhz {
     char file_name_tmp[SUBGHZ_TEXT_STORE_SIZE + 1];
     SubGhzNotificationState state_notifications;
 
-    SubghzViewReceiver* subghz_receiver;
-    SubghzViewTransmitter* subghz_transmitter;
+    SubGhzViewReceiver* subghz_receiver;
+    SubGhzViewTransmitter* subghz_transmitter;
     VariableItemList* variable_item_list;
 
-    SubghzFrequencyAnalyzer* subghz_frequency_analyzer;
-    SubghzReadRAW* subghz_read_raw;
-    SubghzTestStatic* subghz_test_static;
-    SubghzTestCarrier* subghz_test_carrier;
-    SubghzTestPacket* subghz_test_packet;
+    SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
+    SubGhzReadRAW* subghz_read_raw;
+    SubGhzTestStatic* subghz_test_static;
+    SubGhzTestCarrier* subghz_test_carrier;
+    SubGhzTestPacket* subghz_test_packet;
     string_t error_str;
 };
 
 typedef enum {
-    SubGhzViewMenu,
+    SubGhzViewIdMenu,
+    SubGhzViewIdReceiver,
+    SubGhzViewIdPopup,
+    SubGhzViewIdTextInput,
+    SubGhzViewIdWidget,
+    SubGhzViewIdTransmitter,
+    SubGhzViewIdVariableItemList,
+    SubGhzViewIdFrequencyAnalyzer,
+    SubGhzViewIdReadRAW,
 
-    SubGhzViewReceiver,
-    SubGhzViewPopup,
-    SubGhzViewTextInput,
-    SubGhzViewWidget,
-    SubGhzViewTransmitter,
-    SubGhzViewVariableItemList,
-    SubGhzViewFrequencyAnalyzer,
-    SubGhzViewReadRAW,
-    SubGhzViewStatic,
-    SubGhzViewTestCarrier,
-    SubGhzViewTestPacket,
-} SubGhzView;
+    SubGhzViewIdStatic,
+    SubGhzViewIdTestCarrier,
+    SubGhzViewIdTestPacket,
+} SubGhzViewId;
 
 bool subghz_set_pteset(SubGhz* subghz, const char* preset);
 bool subghz_get_preset_name(SubGhz* subghz, string_t preset);

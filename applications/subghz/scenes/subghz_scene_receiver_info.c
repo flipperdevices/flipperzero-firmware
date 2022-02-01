@@ -8,13 +8,13 @@ void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, v
 
     if((result == GuiButtonTypeCenter) && (type == InputTypePress)) {
         view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneReceiverInfoTxStart);
+            subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoTxStart);
     } else if((result == GuiButtonTypeCenter) && (type == InputTypeRelease)) {
         view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneReceiverInfoTxStop);
+            subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoTxStop);
     } else if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventSceneReceiverInfoSave);
+            subghz->view_dispatcher, SubGhzCustomEventSceneReceiverInfoSave);
     }
 }
 
@@ -99,13 +99,13 @@ void subghz_scene_receiver_info_on_enter(void* context) {
             subghz->widget, 13, 8, AlignLeft, AlignBottom, FontSecondary, "Error history parse.");
     }
 
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewWidget);
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventSceneReceiverInfoTxStart) {
+        if(event.event == SubGhzCustomEventSceneReceiverInfoTxStart) {
             //CC1101 Stop RX -> Start TX
             if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {
                 subghz->txrx->hopper_state = SubGhzHopperStatePause;
@@ -125,7 +125,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 }
             }
             return true;
-        } else if(event.event == SubghzCustomEventSceneReceiverInfoTxStop) {
+        } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
@@ -140,7 +140,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             }
             subghz->state_notifications = SubGhzNotificationStateRX;
             return true;
-        } else if(event.event == SubghzCustomEventSceneReceiverInfoSave) {
+        } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {

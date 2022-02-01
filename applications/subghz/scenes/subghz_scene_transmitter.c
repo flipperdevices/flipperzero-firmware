@@ -3,7 +3,7 @@
 #include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 #include <dolphin/dolphin.h>
 
-void subghz_scene_transmitter_callback(SubghzCustomEvent event, void* context) {
+void subghz_scene_transmitter_callback(SubGhzCustomEvent event, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
     view_dispatcher_send_custom_event(subghz->view_dispatcher, event);
@@ -54,20 +54,20 @@ void subghz_scene_transmitter_on_enter(void* context) {
     DOLPHIN_DEED(DolphinDeedSubGhzSend);
     if(!subghz_scene_transmitter_update_data_show(subghz)) {
         view_dispatcher_send_custom_event(
-            subghz->view_dispatcher, SubghzCustomEventViewTransmitterError);
+            subghz->view_dispatcher, SubGhzCustomEventViewTransmitterError);
     }
 
     subghz_view_transmitter_set_callback(
         subghz->subghz_transmitter, subghz_scene_transmitter_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateIDLE;
-    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewTransmitter);
+    view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
 }
 
 bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventViewTransmitterSendStart) {
+        if(event.event == SubGhzCustomEventViewTransmitterSendStart) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
@@ -82,19 +82,19 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
                 }
             }
             return true;
-        } else if(event.event == SubghzCustomEventViewTransmitterSendStop) {
+        } else if(event.event == SubGhzCustomEventViewTransmitterSendStop) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
                 subghz_tx_stop(subghz);
                 subghz_sleep(subghz);
             }
             return true;
-        } else if(event.event == SubghzCustomEventViewTransmitterBack) {
+        } else if(event.event == SubGhzCustomEventViewTransmitterBack) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             scene_manager_search_and_switch_to_previous_scene(
                 subghz->scene_manager, SubGhzSceneStart);
             return true;
-        } else if(event.event == SubghzCustomEventViewTransmitterError) {
+        } else if(event.event == SubGhzCustomEventViewTransmitterError) {
             string_set(subghz->error_str, "Protocol not found");
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowErrorSub);
         }
