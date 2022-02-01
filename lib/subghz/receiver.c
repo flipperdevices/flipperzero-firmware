@@ -45,7 +45,7 @@ void subghz_receiver_decode(SubGhzReceiver* instance, bool level, uint32_t durat
 
     for
         M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {
-            item->protocol->decoder->decode(item->protocol_instance, level, duration);
+            item->protocol->decoder->feed(item->protocol_instance, level, duration);
         }
 }
 

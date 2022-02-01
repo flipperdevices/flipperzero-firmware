@@ -24,7 +24,7 @@ void subghz_protocol_decoder_base_set_decoder_callback(
     SubGhzProtocolDecoderBaseRxCallback callback,
     void* context);
 
-SubGhzProtocolStatus subghz_protocol_decoder_base_serialize(
+bool subghz_protocol_decoder_base_serialize(
     SubGhzProtocolDecoderBase* decoder_base,
     string_t output);
 

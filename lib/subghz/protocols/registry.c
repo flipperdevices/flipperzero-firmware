@@ -8,7 +8,7 @@ const SubGhzProtocol* subghz_protocol_registry[] = {
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {
     for(size_t i = 0; i < subghz_protocol_registry_count(); i++) {
-        if(strcmp(name, subghz_protocol_registry[i]->specification.name) == 0) {
+        if(strcmp(name, subghz_protocol_registry[i]->name) == 0) {
             return subghz_protocol_registry[i];
         }
     }

@@ -42,26 +42,30 @@ typedef enum {
 
 const SubGhzProtocolDecoder subghz_protocol_came_decoder = {
     .alloc = subghz_protocol_decoder_came_alloc,
-    .decode = subghz_protocol_decoder_came_feed,
-    .reset = subghz_protocol_decoder_came_reset,
     .free = subghz_protocol_decoder_came_free,
+
+    .feed = subghz_protocol_decoder_came_feed,
+    .reset = subghz_protocol_decoder_came_reset,
+
+    .serialize = subghz_protocol_decoder_came_serialization,
+
     .save_file = subghz_protocol_came_save_file,
-    .serialize = subghz_protocol_decoder_came_serialization};
+};
 
 const SubGhzProtocolEncoder subghz_protocol_came_encoder = {
     .alloc = subghz_protocol_encoder_came_alloc,
+    .free = subghz_protocol_encoder_came_free,
+
     .load = subghz_protocol_encoder_came_load,
     .stop = subghz_protocol_encoder_came_stop,
-    .free = subghz_protocol_encoder_came_free,
     .yield = subghz_protocol_encoder_came_yield,
-    .load_file = subghz_protocol_came_load_file};
+    .load_file = subghz_protocol_came_load_file,
+};
 
 const SubGhzProtocol subghz_protocol_came = {
-    .specification =
-        {
-            .name = SUBGHZ_PROTOCOL_CAME_NAME,
-            .type = SubGhzProtocolCommonTypeStatic_,
-        },
+    .name = SUBGHZ_PROTOCOL_CAME_NAME,
+    .type = SubGhzProtocolCommonTypeStatic_,
+
     .decoder = &subghz_protocol_came_decoder,
     .encoder = &subghz_protocol_came_encoder,
 };
@@ -258,7 +262,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output) 
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n",
-        instance->base.protocol->specification.name,
+        instance->base.protocol->name,
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo);
