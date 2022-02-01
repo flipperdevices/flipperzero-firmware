@@ -87,6 +87,14 @@ static bool menu_input_callback(InputEvent* event, void* context) {
             consumed = true;
             menu_process_ok(menu);
         }
+    } else if(event->type == InputTypeRepeat) {
+        if(event->key == InputKeyUp) {
+            consumed = true;
+            menu_process_up(menu);
+        } else if(event->key == InputKeyDown) {
+            consumed = true;
+            menu_process_down(menu);
+        }
     }
 
     return consumed;
@@ -138,7 +146,7 @@ Menu* menu_alloc() {
 
 void menu_free(Menu* menu) {
     furi_assert(menu);
-    menu_clean(menu);
+    menu_reset(menu);
     view_free(menu->view);
     free(menu);
 }
@@ -172,7 +180,7 @@ void menu_add_item(
         });
 }
 
-void menu_clean(Menu* menu) {
+void menu_reset(Menu* menu) {
     furi_assert(menu);
     with_view_model(
         menu->view, (MenuModel * model) {

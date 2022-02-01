@@ -106,6 +106,14 @@ static bool submenu_view_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
+    } else if(event->type == InputTypeRepeat) {
+        if(event->key == InputKeyUp) {
+            consumed = true;
+            submenu_process_up(submenu);
+        } else if(event->key == InputKeyDown) {
+            consumed = true;
+            submenu_process_down(submenu);
+        }
     }
 
     return consumed;
@@ -169,7 +177,7 @@ void submenu_add_item(
         });
 }
 
-void submenu_clean(Submenu* submenu) {
+void submenu_reset(Submenu* submenu) {
     furi_assert(submenu);
 
     with_view_model(

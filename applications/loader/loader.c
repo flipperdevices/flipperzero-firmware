@@ -1,4 +1,4 @@
-#include <furi/pubsub.h>
+#include <furi.h>
 #include "loader/loader.h"
 #include "loader_i.h"
 
@@ -429,7 +429,7 @@ void loader_show_menu() {
 }
 
 void loader_update_menu() {
-    menu_clean(loader_instance->primary_menu);
+    menu_reset(loader_instance->primary_menu);
     loader_build_menu();
 }
 
@@ -464,11 +464,12 @@ int32_t loader_srv(void* p) {
         }
     }
 
+    furi_record_destroy("loader");
     loader_free(loader_instance);
 
     return 0;
 }
 
-FuriPubSub* loader_get_pubsub() {
-    return loader_instance->pubsub;
+FuriPubSub* loader_get_pubsub(Loader* instance) {
+    return instance->pubsub;
 }

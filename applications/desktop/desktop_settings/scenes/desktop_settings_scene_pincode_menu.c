@@ -1,5 +1,6 @@
 #include "../desktop_settings_app.h"
 #include "applications.h"
+#include "desktop_settings_scene.h"
 
 static void desktop_settings_scene_pincode_menu_submenu_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
@@ -9,7 +10,7 @@ static void desktop_settings_scene_pincode_menu_submenu_callback(void* context, 
 void desktop_settings_scene_pincode_menu_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     Submenu* submenu = app->submenu;
-    submenu_clean(submenu);
+    submenu_reset(submenu);
 
     if(!app->settings.pincode.length) {
         submenu_add_item(
@@ -74,5 +75,5 @@ bool desktop_settings_scene_pincode_menu_on_event(void* context, SceneManagerEve
 
 void desktop_settings_scene_pincode_menu_on_exit(void* context) {
     DesktopSettingsApp* app = context;
-    submenu_clean(app->submenu);
+    submenu_reset(app->submenu);
 }
