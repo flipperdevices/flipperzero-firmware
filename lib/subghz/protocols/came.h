@@ -6,6 +6,10 @@
 typedef struct SubGhzProtocolDecoderCame SubGhzProtocolDecoderCame;
 typedef struct SubGhzProtocolEncoderCame SubGhzProtocolEncoderCame;
 
+extern const SubGhzProtocolDecoder subghz_protocol_came_decoder;
+extern const SubGhzProtocolEncoder subghz_protocol_came_encoder;
+extern const SubGhzProtocol subghz_protocol_came;
+
 void* subghz_protocol_encoder_came_alloc();
 
 void subghz_protocol_encoder_came_free(void* context);

@@ -28,7 +28,7 @@ struct SubGhzProtocolDecoderCame {
 
 struct SubGhzProtocolEncoderCame {
     SubGhzProtocolEncoderBase base;
-    
+
     SubGhzProtocolBlockEncoder encoder;
     SubGhzBlockGeneric generic;
 };
@@ -40,8 +40,37 @@ typedef enum {
     CameDecoderStepCheckDuration,
 } CameDecoderStep;
 
+const SubGhzProtocolDecoder subghz_protocol_came_decoder = {
+    .alloc = subghz_protocol_decoder_came_alloc,
+    .decode = subghz_protocol_decoder_came_feed,
+    .reset = subghz_protocol_decoder_came_reset,
+    .free = subghz_protocol_decoder_came_free,
+    .save_file = subghz_protocol_came_save_file,
+    .serialize = subghz_protocol_decoder_came_serialization};
+
+const SubGhzProtocolEncoder subghz_protocol_came_encoder = {
+    .alloc = subghz_protocol_encoder_came_alloc,
+    .load = subghz_protocol_encoder_came_load,
+    .stop = subghz_protocol_encoder_came_stop,
+    .free = subghz_protocol_encoder_came_free,
+    .yield = subghz_protocol_encoder_came_yield,
+    .load_file = subghz_protocol_came_load_file};
+
+const SubGhzProtocol subghz_protocol_came = {
+    .specification =
+        {
+            .name = SUBGHZ_PROTOCOL_CAME_NAME,
+            .type = SubGhzProtocolCommonTypeStatic_,
+        },
+    .decoder = &subghz_protocol_came_decoder,
+    .encoder = &subghz_protocol_came_encoder,
+};
+
 void* subghz_protocol_encoder_came_alloc() {
     SubGhzProtocolEncoderCame* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCame));
+
+    instance->base.protocol = &subghz_protocol_came;
+
     instance->encoder.repeat = 10;
     //подумать о авторасчете длинны аплоад
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
@@ -125,7 +154,7 @@ LevelDuration subghz_protocol_encoder_came_yield(void* context) {
 
 void* subghz_protocol_decoder_came_alloc() {
     SubGhzProtocolDecoderCame* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCame));
-    instance->base.name = SUBGHZ_PROTOCOL_CAME_NAME;
+    instance->base.protocol = &subghz_protocol_came;
     return instance;
 }
 
@@ -229,7 +258,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output) 
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n",
-        instance->base.name,
+        instance->base.protocol->specification.name,
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo);

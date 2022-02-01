@@ -12,7 +12,7 @@ typedef void (
 
 struct SubGhzProtocolDecoderBase {
     // Decoder general section
-    const char* name;
+    const SubGhzProtocol* protocol;
 
     // Callback section
     SubGhzProtocolDecoderBaseRxCallback callback;
@@ -33,7 +33,7 @@ typedef struct SubGhzProtocolEncoderBase SubGhzProtocolEncoderBase;
 
 struct SubGhzProtocolEncoderBase {
     // Decoder general section
-    const char* name;
+    const SubGhzProtocol* protocol;
 
     // Callback section
 };

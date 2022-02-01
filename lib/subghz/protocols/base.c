@@ -14,10 +14,11 @@ SubGhzProtocolStatus subghz_protocol_decoder_base_serialize(
     string_t output) {
     SubGhzProtocolStatus status = SubGhzProtocolStatusUnknown;
 
-    const SubGhzProtocol* protocol = subghz_protocol_registry_get_by_name(decoder_base->name);
-    if(protocol && protocol->decoder && protocol->decoder->serialization) {
-        protocol->decoder->serialization(decoder_base, output);
+    const SubGhzProtocol* protocol = decoder_base->protocol;
+    if(protocol && protocol->decoder && protocol->decoder->serialize) {
+        protocol->decoder->serialize(decoder_base, output);
         status = SubGhzProtocolStatusOk;
     }
+
     return status;
 }
