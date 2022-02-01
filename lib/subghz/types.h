@@ -7,15 +7,14 @@
 #include <lib/flipper_file/flipper_file.h>
 #include <lib/toolbox/level_duration.h>
 
-#include <m-string.h>
-#include <furi_hal.h>
+#include "environment.h"
 
 //
 // Abstract method types
 //
 
 // Allocator and Deallocator
-typedef void* (*SubGhzAlloc)(void);
+typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Load And Save

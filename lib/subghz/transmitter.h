@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "environment.h"
 #include "protocols/base.h"
 
 typedef struct SubGhzTransmitter SubGhzTransmitter;
@@ -10,7 +11,8 @@ struct SubGhzTransmitter {
     SubGhzProtocolEncoderBase* protocol_instance;
 };
 
-SubGhzTransmitter* subghz_transmitter_alloc_init(const char* protocol_name);
+SubGhzTransmitter*
+    subghz_transmitter_alloc_init(SubGhzEnvironment* environment, const char* protocol_name);
 
 void subghz_transmitter_free(SubGhzTransmitter* instance);
 

@@ -10,7 +10,7 @@ typedef void (*SubGhzReceiverCallback)(
     SubGhzProtocolDecoderBase* decoder_base,
     void* context);
 
-SubGhzReceiver* subghz_receiver_alloc(void);
+SubGhzReceiver* subghz_receiver_alloc(SubGhzEnvironment* environment);
 
 void subghz_receiver_free(SubGhzReceiver* instance);
 

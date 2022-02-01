@@ -10,7 +10,7 @@ extern const SubGhzProtocolDecoder subghz_protocol_came_decoder;
 extern const SubGhzProtocolEncoder subghz_protocol_came_encoder;
 extern const SubGhzProtocol subghz_protocol_came;
 
-void* subghz_protocol_encoder_came_alloc();
+void* subghz_protocol_encoder_came_alloc(SubGhzEnvironment* environment);
 
 void subghz_protocol_encoder_came_free(void* context);
 
@@ -28,7 +28,7 @@ LevelDuration subghz_protocol_encoder_came_yield(void* context);
  * 
  * @return SubGhzProtocolCame* 
  */
-void* subghz_protocol_decoder_came_alloc();
+void* subghz_protocol_decoder_came_alloc(SubGhzEnvironment* environment);
 
 /** Free SubGhzProtocolCame
  * 

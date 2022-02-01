@@ -3,14 +3,15 @@
 #include "protocols/base.h"
 #include "protocols/registry.h"
 
-SubGhzTransmitter* subghz_transmitter_alloc_init(const char* protocol_name) {
+SubGhzTransmitter*
+    subghz_transmitter_alloc_init(SubGhzEnvironment* environment, const char* protocol_name) {
     SubGhzTransmitter* instance = NULL;
     const SubGhzProtocol* protocol = subghz_protocol_registry_get_by_name(protocol_name);
 
     if(protocol && protocol->encoder && protocol->encoder->alloc) {
         instance = furi_alloc(sizeof(SubGhzTransmitter));
         instance->protocol = protocol;
-        instance->protocol_instance = instance->protocol->encoder->alloc();
+        instance->protocol_instance = instance->protocol->encoder->alloc(environment);
     }
 
     return instance;

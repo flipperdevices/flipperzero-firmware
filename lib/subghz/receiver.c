@@ -18,7 +18,7 @@ struct SubGhzReceiver {
     void* context;
 };
 
-SubGhzReceiver* subghz_receiver_alloc(void) {
+SubGhzReceiver* subghz_receiver_alloc(SubGhzEnvironment* environment) {
     SubGhzReceiver* instance = furi_alloc(sizeof(SubGhzReceiver));
     SubGhzReceiverSlotArray_init(instance->slots);
 
@@ -27,7 +27,7 @@ SubGhzReceiver* subghz_receiver_alloc(void) {
 
         if(protocol->decoder && protocol->decoder->alloc) {
             SubGhzReceiverSlot* slot = SubGhzReceiverSlotArray_push_new(instance->slots);
-            slot->base = protocol->decoder->alloc();
+            slot->base = protocol->decoder->alloc(environment);
         }
     }
 

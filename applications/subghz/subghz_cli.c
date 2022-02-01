@@ -146,8 +146,11 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
 
     //subghz_protocol_princeton_send_key(protocol, transmitter);
 
-    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init("CAME");
-    subghz_transmitter_load(transmitter, key, 24, repeat);
+    SubGhzEnvironment* environment = subghz_environment_alloc();
+    subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
+
+    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "CAME");
+    subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
 
     furi_hal_subghz_reset();
     furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
@@ -171,6 +174,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     //subghz_decoder_princeton_free(protocol);
     //subghz_transmitter_common_free(transmitter);
     subghz_transmitter_free(transmitter);
+    subghz_environment_free(environment);
 }
 
 typedef struct {
@@ -243,7 +247,10 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // subghz_parser_load_nice_flor_s_file(parser, "/ext/subghz/nice_flor_s_rx");
     // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
     // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
-    SubGhzReceiver* receiver = subghz_receiver_alloc();
+    SubGhzEnvironment* environment = subghz_environment_alloc();
+    subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
+
+    SubGhzReceiver* receiver = subghz_receiver_alloc(environment);
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
     // Configure radio
@@ -288,6 +295,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // Cleanup
     //subghz_parser_free(parser);
     subghz_receiver_free(receiver);
+    subghz_environment_free(environment);
     vStreamBufferDelete(instance->stream);
     free(instance);
 }
