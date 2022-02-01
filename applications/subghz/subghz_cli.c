@@ -179,7 +179,7 @@ typedef struct {
     size_t packet_count;
 } SubGhzCliCommandRx;
 
-static void subghz_cli_command_rx_callback(bool level, uint32_t duration, void* context) {
+static void subghz_cli_command_rx_capture_callback(bool level, uint32_t duration, void* context) {
     SubGhzCliCommandRx* instance = context;
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -200,7 +200,7 @@ static void subghz_cli_command_rx_callback(bool level, uint32_t duration, void* 
 //     printf("%s", string_get_cstr(text));
 // }
 
-static void subghz_cli_command_rx_serialization_callback(
+static void subghz_cli_command_rx_callback(
     SubGhzReceiver* receiver,
     SubGhzProtocolDecoderBase* decoder_base,
     void* context) {
@@ -244,8 +244,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     // subghz_parser_load_came_atomo_file(parser, "/ext/subghz/came_atomo");
     // subghz_parser_enable_dump_text(parser, subghz_cli_command_rx_text_callback, instance);
     SubGhzReceiver* receiver = subghz_receiver_alloc();
-    subghz_receiver_set_rx_callback(
-        receiver, subghz_cli_command_rx_serialization_callback, instance);
+    subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
     // Configure radio
     furi_hal_subghz_reset();
@@ -256,7 +255,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     furi_hal_power_suppress_charge_enter();
 
     // Prepare and start RX
-    furi_hal_subghz_start_async_rx(subghz_cli_command_rx_callback, instance);
+    furi_hal_subghz_start_async_rx(subghz_cli_command_rx_capture_callback, instance);
 
     // Wait for packets to arrive
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);

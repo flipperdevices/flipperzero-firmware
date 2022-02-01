@@ -1,5 +1,22 @@
 #include "receiver.h"
+
 #include "protocols/registry.h"
+
+#include <m-array.h>
+
+typedef struct {
+    SubGhzProtocolEncoderBase* base;
+} SubGhzReceiverSlot;
+
+ARRAY_DEF(SubGhzReceiverSlotArray, SubGhzReceiverSlot, M_POD_OPLIST);
+#define M_OPL_SubGhzReceiverSlotArray_t() ARRAY_OPLIST(SubGhzReceiverSlotArray, M_POD_OPLIST)
+
+struct SubGhzReceiver {
+    SubGhzReceiverSlotArray_t slots;
+
+    SubGhzReceiverCallback callback;
+    void* context;
+};
 
 SubGhzReceiver* subghz_receiver_alloc(void) {
     SubGhzReceiver* instance = furi_alloc(sizeof(SubGhzReceiver));
@@ -10,8 +27,7 @@ SubGhzReceiver* subghz_receiver_alloc(void) {
 
         if(protocol->decoder && protocol->decoder->alloc) {
             SubGhzReceiverSlot* slot = SubGhzReceiverSlotArray_push_new(instance->slots);
-            slot->protocol = protocol;
-            slot->protocol_instance = protocol->decoder->alloc();
+            slot->base = protocol->decoder->alloc();
         }
     }
 
@@ -29,10 +45,9 @@ void subghz_receiver_free(SubGhzReceiver* instance) {
 
     // Release allocated slots
     for
-        M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {
-            item->protocol->decoder->free(item->protocol_instance);
-            item->protocol = NULL;
-            item->protocol_instance = NULL;
+        M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
+            slot->base->protocol->decoder->free(slot->base);
+            slot->base = NULL;
         }
     SubGhzReceiverSlotArray_clear(instance->slots);
 
@@ -44,8 +59,8 @@ void subghz_receiver_decode(SubGhzReceiver* instance, bool level, uint32_t durat
     furi_assert(instance->slots);
 
     for
-        M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {
-            item->protocol->decoder->feed(item->protocol_instance, level, duration);
+        M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
+            slot->base->protocol->decoder->feed(slot->base, level, duration);
         }
 }
 
@@ -54,8 +69,8 @@ void subghz_receiver_reset(SubGhzReceiver* instance) {
     furi_assert(instance->slots);
 
     for
-        M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {
-            item->protocol->decoder->reset(item->protocol_instance);
+        M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
+            slot->base->protocol->decoder->reset(slot->base);
         }
 }
 
@@ -73,11 +88,9 @@ void subghz_receiver_set_rx_callback(
     furi_assert(instance);
 
     for
-        M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {
+        M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
             subghz_protocol_decoder_base_set_decoder_callback(
-                (SubGhzProtocolDecoderBase*)item->protocol_instance,
-                subghz_receiver_rx_callback,
-                instance);
+                (SubGhzProtocolDecoderBase*)slot->base, subghz_receiver_rx_callback, instance);
         }
 
     instance->callback = callback;

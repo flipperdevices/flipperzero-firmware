@@ -48,7 +48,6 @@ const SubGhzProtocolDecoder subghz_protocol_came_decoder = {
     .reset = subghz_protocol_decoder_came_reset,
 
     .serialize = subghz_protocol_decoder_came_serialization,
-
     .save_file = subghz_protocol_came_save_file,
 };
 

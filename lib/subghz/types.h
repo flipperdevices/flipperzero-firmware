@@ -10,6 +10,10 @@
 #include <m-string.h>
 #include <furi_hal.h>
 
+//
+// Abstract method types
+//
+
 // Allocator and Deallocator
 typedef void* (*SubGhzAlloc)(void);
 typedef void (*SubGhzFree)(void* context);
@@ -18,15 +22,18 @@ typedef void (*SubGhzFree)(void* context);
 typedef bool (*SubGhzSaveFile)(void* context, FlipperFile* flipper_file);
 typedef bool (*SubGhzLoadFile)(void* context, FlipperFile* flipper_file, const char* file_path);
 
+// Serialize and Deserialize
+typedef void (*SubGhzSerialize)(void* decoder, string_t output);
+typedef void (*SubGhzDeserialize)(void* decoder, string_t output);
+
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
 typedef void (*SubGhzDecoderReset)(void* decoder);
-typedef void (*SubGhzDecoderSerialize)(void* decoder, string_t output);
 
 // Encoder specific
 typedef void (*SubGhzEncoderStop)(void* encoder);
-typedef bool (*SubGhzEncodeLoad)(void* encoder, uint64_t key, uint8_t count_bit, size_t repeat);
-typedef LevelDuration (*SubGhzEncodeYield)(void* context);
+typedef bool (*SubGhzEncoderLoad)(void* encoder, uint64_t key, uint8_t count_bit, size_t repeat);
+typedef LevelDuration (*SubGhzEncoderYield)(void* context);
 
 typedef struct {
     SubGhzAlloc alloc;
@@ -34,8 +41,8 @@ typedef struct {
 
     SubGhzDecoderFeed feed;
     SubGhzDecoderReset reset;
-    SubGhzDecoderSerialize serialize;
 
+    SubGhzSerialize serialize;
     SubGhzSaveFile save_file;
 } SubGhzProtocolDecoder;
 
@@ -43,9 +50,9 @@ typedef struct {
     SubGhzAlloc alloc;
     SubGhzFree free;
 
-    SubGhzEncodeLoad load;
+    SubGhzEncoderLoad load;
     SubGhzEncoderStop stop;
-    SubGhzEncodeYield yield;
+    SubGhzEncoderYield yield;
 
     SubGhzLoadFile load_file;
 } SubGhzProtocolEncoder;
