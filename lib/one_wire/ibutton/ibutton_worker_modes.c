@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include "ibutton_worker_i.h"
 #include "ibutton_key_command.h"
 
@@ -293,6 +293,10 @@ void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
 
 void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_assert(worker->key_p);
+
+    furi_hal_rfid_pins_reset();
+    furi_hal_rfid_pin_pull_pulldown();
+
     switch(ibutton_key_get_type(worker->key_p)) {
     case iButtonKeyDS1990:
         ibutton_worker_emulate_dallas_start(worker);
@@ -309,6 +313,9 @@ void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
 
 void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
     furi_assert(worker->key_p);
+
+    furi_hal_rfid_pins_reset();
+
     switch(ibutton_key_get_type(worker->key_p)) {
     case iButtonKeyDS1990:
         ibutton_worker_emulate_dallas_stop(worker);

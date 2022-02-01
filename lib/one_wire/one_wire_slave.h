@@ -10,7 +10,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
-#include <furi-hal-gpio.h>
+#include <furi_hal_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,5 +1,5 @@
 #include "encoder_metakom.h"
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 #define METAKOM_DATA_SIZE sizeof(uint32_t)
 #define METAKOM_PERIOD (125 * instructions_per_us)

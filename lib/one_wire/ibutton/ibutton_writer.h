@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <furi-hal-gpio.h>
+#include <furi_hal_gpio.h>
 #include "ibutton_key.h"
 #include "../one_wire_host.h"
 

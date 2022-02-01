@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include "one_wire_host.h"
 #include "one_wire_host_timing.h"
 

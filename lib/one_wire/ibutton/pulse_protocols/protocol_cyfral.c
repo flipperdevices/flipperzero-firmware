@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <furi/check.h>
-#include <furi-hal-delay.h>
+#include <furi_hal_delay.h>
 
 #define CYFRAL_DATA_SIZE 2
 #define CYFRAL_MAX_PERIOD_US 230

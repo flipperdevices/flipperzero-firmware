@@ -131,7 +131,7 @@ void KeyReader::stop_comaparator(void) {
     furi_hal_rfid_pins_reset();
 
     // rfid_pins_reset will disable ibutton pin
-    furi_hal_ibutton_start();
+    furi_hal_ibutton_start_drive();
 
     HAL_COMP_Stop(&hcomp1);
     api_interrupt_remove(comparator_callback_pointer, InterruptTypeComparatorTrigger);

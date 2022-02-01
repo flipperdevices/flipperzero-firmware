@@ -1,5 +1,5 @@
 #include "encoder_cyfral.h"
-#include <furi-hal.h>
+#include <furi_hal.h>
 
 #define CYFRAL_DATA_SIZE sizeof(uint16_t)
 #define CYFRAL_PERIOD (125 * instructions_per_us)

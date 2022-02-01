@@ -2,8 +2,8 @@
 #include "one_wire_slave_i.h"
 #include "one_wire_device.h"
 #include <furi.h>
-#include <furi-hal-delay.h>
-#include <furi-hal-ibutton.h>
+#include <furi_hal_delay.h>
+#include <furi_hal_ibutton.h>
 
 #define OWS_RESET_MIN 270
 #define OWS_RESET_MAX 960

@@ -1,5 +1,5 @@
 #include <furi.h>
-#include <furi-hal.h>
+#include <furi_hal.h>
 #include <atomic.h>
 #include "ibutton_worker_i.h"
 
