@@ -19,6 +19,6 @@ bool subghz_protocol_decoder_base_serialize(
         decoder_base->protocol->decoder->serialize(decoder_base, output);
         status = true;
     }
-    
+
     return status;
 }

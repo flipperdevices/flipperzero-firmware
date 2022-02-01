@@ -5,7 +5,7 @@
 #include "protocols/subghz_protocol_came_atomo.h"
 #include "protocols/subghz_protocol_cfm.h"
 #include "protocols/subghz_protocol_keeloq.h"
-#include "protocols/subghz_protocol_nice_flo.h"
+//#include "protocols/subghz_protocol_nice_flo.h"
 #include "protocols/subghz_protocol_nice_flor_s.h"
 #include "protocols/subghz_protocol_princeton.h"
 //#include "protocols/subghz_protocol_gate_tx.h"
@@ -33,7 +33,7 @@ typedef enum {
     SubGhzProtocolTypeCameTwee,
     SubGhzProtocolTypeCameAtomo,
     SubGhzProtocolTypeKeeloq,
-    SubGhzProtocolTypeNiceFlo,
+    //SubGhzProtocolTypeNiceFlo,
     SubGhzProtocolTypeNiceFlorS,
     SubGhzProtocolTypePrinceton,
     //SubGhzProtocolTypeGateTX,
@@ -99,8 +99,8 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_protocol_keeloq_alloc(instance->keystore);
     instance->protocols[SubGhzProtocolTypePrinceton] =
         (SubGhzProtocolCommon*)subghz_decoder_princeton_alloc();
-    instance->protocols[SubGhzProtocolTypeNiceFlo] =
-        (SubGhzProtocolCommon*)subghz_protocol_nice_flo_alloc();
+    // instance->protocols[SubGhzProtocolTypeNiceFlo] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_nice_flo_alloc();
     instance->protocols[SubGhzProtocolTypeNiceFlorS] =
         (SubGhzProtocolCommon*)subghz_protocol_nice_flor_s_alloc();
     // instance->protocols[SubGhzProtocolTypeGateTX] =
@@ -143,8 +143,8 @@ void subghz_parser_free(SubGhzParser* instance) {
         (SubGhzProtocolKeeloq*)instance->protocols[SubGhzProtocolTypeKeeloq]);
     subghz_decoder_princeton_free(
         (SubGhzDecoderPrinceton*)instance->protocols[SubGhzProtocolTypePrinceton]);
-    subghz_protocol_nice_flo_free(
-        (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
+    // subghz_protocol_nice_flo_free(
+    //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
     subghz_protocol_nice_flor_s_free(
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
     // subghz_protocol_gate_tx_free(
@@ -248,8 +248,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
         (SubGhzProtocolKeeloq*)instance->protocols[SubGhzProtocolTypeKeeloq]);
     subghz_decoder_princeton_reset(
         (SubGhzDecoderPrinceton*)instance->protocols[SubGhzProtocolTypePrinceton]);
-    subghz_protocol_nice_flo_reset(
-        (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
+    // subghz_protocol_nice_flo_reset(
+    //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
     subghz_protocol_nice_flor_s_reset(
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
     // subghz_protocol_gate_tx_reset(
@@ -295,8 +295,8 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
         (SubGhzDecoderPrinceton*)instance->protocols[SubGhzProtocolTypePrinceton],
         level,
         duration);
-    subghz_protocol_nice_flo_parse(
-        (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo], level, duration);
+    // subghz_protocol_nice_flo_parse(
+    //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo], level, duration);
     subghz_protocol_nice_flor_s_parse(
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS],
         level,
