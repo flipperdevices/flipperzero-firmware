@@ -14,11 +14,11 @@ bool subghz_protocol_decoder_base_serialize(
     string_t output) {
     bool status = false;
 
-    const SubGhzProtocol* protocol = decoder_base->protocol;
-    if(protocol && protocol->decoder && protocol->decoder->serialize) {
-        protocol->decoder->serialize(decoder_base, output);
+    if(decoder_base->protocol && decoder_base->protocol->decoder &&
+       decoder_base->protocol->decoder->serialize) {
+        decoder_base->protocol->decoder->serialize(decoder_base, output);
         status = true;
     }
-
+    
     return status;
 }

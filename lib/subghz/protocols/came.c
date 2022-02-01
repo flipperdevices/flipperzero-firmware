@@ -278,7 +278,7 @@ bool subghz_protocol_came_load_file(
     FlipperFile* flipper_file,
     const char* file_path) {
     furi_assert(context);
-    SubGhzProtocolDecoderCame* instance = context;
+    SubGhzProtocolEncoderCame* instance = context;
     return subghz_block_generic_load_file(&instance->generic, flipper_file);
 }
 

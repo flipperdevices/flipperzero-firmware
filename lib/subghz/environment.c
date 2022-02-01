@@ -27,7 +27,7 @@ void subghz_environment_load_keystore(SubGhzEnvironment* instance, const char* f
 }
 
 SubGhzKeystore*
-    subghz_environment_get_keystore(SubGhzEnvironment* instance, const char* filename) {
+    subghz_environment_get_keystore(SubGhzEnvironment* instance) {
     furi_assert(instance);
 
     return instance->keystore;

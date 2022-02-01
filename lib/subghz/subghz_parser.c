@@ -1,6 +1,6 @@
 
 #include "subghz_parser.h"
-#include "protocols/came.h"
+//#include "protocols/came.h"
 #include "protocols/subghz_protocol_came_twee.h"
 #include "protocols/subghz_protocol_came_atomo.h"
 #include "protocols/subghz_protocol_cfm.h"
@@ -8,7 +8,7 @@
 #include "protocols/subghz_protocol_nice_flo.h"
 #include "protocols/subghz_protocol_nice_flor_s.h"
 #include "protocols/subghz_protocol_princeton.h"
-#include "protocols/subghz_protocol_gate_tx.h"
+//#include "protocols/subghz_protocol_gate_tx.h"
 #include "protocols/subghz_protocol_ido.h"
 #include "protocols/subghz_protocol_faac_slh.h"
 #include "protocols/subghz_protocol_nero_sketch.h"
@@ -36,7 +36,7 @@ typedef enum {
     SubGhzProtocolTypeNiceFlo,
     SubGhzProtocolTypeNiceFlorS,
     SubGhzProtocolTypePrinceton,
-    SubGhzProtocolTypeGateTX,
+    //SubGhzProtocolTypeGateTX,
     SubGhzProtocolTypeIDo,
     SubGhzProtocolTypeFaacSLH,
     SubGhzProtocolTypeNeroSketch,
@@ -103,8 +103,8 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_protocol_nice_flo_alloc();
     instance->protocols[SubGhzProtocolTypeNiceFlorS] =
         (SubGhzProtocolCommon*)subghz_protocol_nice_flor_s_alloc();
-    instance->protocols[SubGhzProtocolTypeGateTX] =
-        (SubGhzProtocolCommon*)subghz_protocol_gate_tx_alloc();
+    // instance->protocols[SubGhzProtocolTypeGateTX] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_gate_tx_alloc();
     instance->protocols[SubGhzProtocolTypeIDo] =
         (SubGhzProtocolCommon*)subghz_protocol_ido_alloc();
     instance->protocols[SubGhzProtocolTypeFaacSLH] =
@@ -147,8 +147,8 @@ void subghz_parser_free(SubGhzParser* instance) {
         (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
     subghz_protocol_nice_flor_s_free(
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
-    subghz_protocol_gate_tx_free(
-        (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
+    // subghz_protocol_gate_tx_free(
+    //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
     subghz_protocol_ido_free((SubGhzProtocolIDo*)instance->protocols[SubGhzProtocolTypeIDo]);
     subghz_protocol_faac_slh_free(
         (SubGhzProtocolFaacSLH*)instance->protocols[SubGhzProtocolTypeFaacSLH]);
@@ -252,8 +252,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
         (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
     subghz_protocol_nice_flor_s_reset(
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
-    subghz_protocol_gate_tx_reset(
-        (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
+    // subghz_protocol_gate_tx_reset(
+    //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
     subghz_protocol_ido_reset((SubGhzProtocolIDo*)instance->protocols[SubGhzProtocolTypeIDo]);
     subghz_protocol_faac_slh_reset(
         (SubGhzProtocolFaacSLH*)instance->protocols[SubGhzProtocolTypeFaacSLH]);
@@ -301,8 +301,8 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS],
         level,
         duration);
-    subghz_protocol_gate_tx_parse(
-        (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX], level, duration);
+    // subghz_protocol_gate_tx_parse(
+    //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX], level, duration);
     subghz_protocol_ido_parse(
         (SubGhzProtocolIDo*)instance->protocols[SubGhzProtocolTypeIDo], level, duration);
     subghz_protocol_faac_slh_parse(

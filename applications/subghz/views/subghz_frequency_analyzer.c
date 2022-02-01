@@ -6,7 +6,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <lib/subghz/protocols/subghz_protocol_princeton.h>
+//#include <lib/subghz/protocols/subghz_protocol_princeton.h>
 #include "../helpers/subghz_frequency_analyzer_worker.h"
 
 #include <assets_icons.h>
