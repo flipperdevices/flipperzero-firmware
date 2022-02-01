@@ -1,11 +1,8 @@
 #pragma once
-
-//#include "subghz_protocol_common.h"
 #include "base.h"
 
 #define SUBGHZ_PROTOCOL_CAME_NAME "CAME"
 
-//typedef struct SubGhzProtocolCame SubGhzProtocolCame;
 typedef struct SubGhzProtocolDecoderCame SubGhzProtocolDecoderCame;
 typedef struct SubGhzProtocolEncoderCame SubGhzProtocolEncoderCame;
 
@@ -34,16 +31,6 @@ void* subghz_protocol_decoder_came_alloc();
  * @param instance 
  */
 void subghz_protocol_decoder_came_free(void* context);
-
-// /** Get upload protocol
-//  *
-//  * @param instance - SubGhzProtocolCame instance
-//  * @param encoder - SubGhzProtocolCommonEncoder encoder
-//  * @return bool
-//  */
-// bool subghz_protocol_came_send_key(
-//     SubGhzProtocolCame* instance,
-//     SubGhzProtocolCommonEncoder* encoder);
 
 /** Reset internal state
  * @param instance - SubGhzProtocolCame instance

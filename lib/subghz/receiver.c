@@ -1,7 +1,6 @@
 #include "receiver.h"
 #include "protocols/registry.h"
 
-//decoder func
 SubGhzReceiver* subghz_receiver_alloc(void) {
     SubGhzReceiver* instance = furi_alloc(sizeof(SubGhzReceiver));
     SubGhzReceiverSlotArray_init(instance->slots);
@@ -60,16 +59,11 @@ void subghz_receiver_reset(SubGhzReceiver* instance) {
         }
 }
 
-//registr callback decoder
-//тут возможно перестарался
 static void subghz_receiver_rx_callback(SubGhzProtocolDecoderBase* decoder_base, void* context) {
     SubGhzReceiver* instance = context;
-    string_t protocol_name;
-    string_init_printf(protocol_name, "%s", decoder_base->name);
     if(instance->callback) {
         instance->callback(instance, decoder_base, instance->context);
     }
-    string_clear(protocol_name);
 }
 
 void subghz_receiver_set_rx_callback(
@@ -77,7 +71,6 @@ void subghz_receiver_set_rx_callback(
     SubGhzReceiverCallback callback,
     void* context) {
     furi_assert(instance);
-    //???????????????                   ?
 
     for
         M_EACH(item, instance->slots, SubGhzReceiverSlotArray_t) {

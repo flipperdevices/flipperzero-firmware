@@ -3,7 +3,6 @@
 #include "protocols/base.h"
 #include "protocols/registry.h"
 
-//encoder func
 SubGhzTransmitter* subghz_transmitter_alloc_init(const char* protocol_name) {
     SubGhzTransmitter* instance = NULL;
     const SubGhzProtocol* protocol = subghz_protocol_registry_get_by_name(protocol_name);

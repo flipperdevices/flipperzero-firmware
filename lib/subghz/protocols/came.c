@@ -28,6 +28,7 @@ struct SubGhzProtocolDecoderCame {
 
 struct SubGhzProtocolEncoderCame {
     SubGhzProtocolEncoderBase base;
+    
     SubGhzProtocolBlockEncoder encoder;
     SubGhzBlockGeneric generic;
 };
@@ -124,7 +125,7 @@ LevelDuration subghz_protocol_encoder_came_yield(void* context) {
 
 void* subghz_protocol_decoder_came_alloc() {
     SubGhzProtocolDecoderCame* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCame));
-    instance->generic.protocol_name = SUBGHZ_PROTOCOL_CAME_NAME;
+    instance->base.name = SUBGHZ_PROTOCOL_CAME_NAME;
     return instance;
 }
 
@@ -228,7 +229,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output) 
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n",
-        instance->generic.protocol_name,
+        instance->base.name,
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo);

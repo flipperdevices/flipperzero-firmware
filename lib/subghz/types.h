@@ -20,6 +20,8 @@ typedef bool (*SubGhzLoadFile)(void* context, FlipperFile* flipper_file, const c
 
 typedef void (*SubGhzDecoderReset)(void* decoder);
 
+typedef void (*SubGhzDecoderSerialization)(void* decoder, string_t output);
+
 typedef void (*SubGhzDecode)(void* decoder, bool level, uint32_t duration);
 
 typedef void (*SubGhzEncoderStop)(void* encoder);
@@ -41,6 +43,7 @@ typedef struct {
     SubGhzDecoderReset reset;
     SubGhzFree free;
     SubGhzSaveFile save_file;
+    SubGhzDecoderSerialization serialization;
 } SubGhzProtocolDecoder;
 
 typedef struct {

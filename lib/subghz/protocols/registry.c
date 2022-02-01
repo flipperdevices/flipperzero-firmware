@@ -8,7 +8,8 @@ SubGhzProtocolDecoder subghz_protocol_came_decoder = {
     .decode = subghz_protocol_decoder_came_feed,
     .reset = subghz_protocol_decoder_came_reset,
     .free = subghz_protocol_decoder_came_free,
-    .save_file = subghz_protocol_came_save_file};
+    .save_file = subghz_protocol_came_save_file,
+    .serialization=subghz_protocol_decoder_came_serialization};
 
 SubGhzProtocolEncoder subghz_protocol_came_encoder = {
     .alloc = subghz_protocol_encoder_came_alloc,

@@ -1,4 +1,5 @@
 #include "base.h"
+#include "registry.h"
 
 void subghz_protocol_decoder_base_set_decoder_callback(
     SubGhzProtocolDecoderBase* decoder_base,
@@ -13,13 +14,10 @@ SubGhzProtocolStatus subghz_protocol_decoder_base_serialize(
     string_t output) {
     SubGhzProtocolStatus status = SubGhzProtocolStatusUnknown;
 
-    // int index = subghz_protocol_index_by_instance(protocol_name);
-    // if(index != SubGhzProtocolStatusNoProtocol) {
-    //     subghz_encoder_decoder[index].decoder.serialization(instance->protocol[index], output);
-    //     status = SubGhzProtocolStatusOk;
-    // } else {
-    //     status = SubGhzProtocolStatusNoProtocol;
-    // }
-
+    const SubGhzProtocol* protocol = subghz_protocol_registry_get_by_name(decoder_base->name);
+    if(protocol && protocol->decoder && protocol->decoder->serialization) {
+        protocol->decoder->serialization(decoder_base, output);
+        status = SubGhzProtocolStatusOk;
+    }
     return status;
 }
