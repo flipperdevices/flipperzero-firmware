@@ -75,6 +75,7 @@ void* subghz_protocol_encoder_came_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderCame* instance = furi_alloc(sizeof(SubGhzProtocolEncoderCame));
 
     instance->base.protocol = &subghz_protocol_came;
+    instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
@@ -166,6 +167,7 @@ LevelDuration subghz_protocol_encoder_came_yield(void* context) {
 void* subghz_protocol_decoder_came_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderCame* instance = furi_alloc(sizeof(SubGhzProtocolDecoderCame));
     instance->base.protocol = &subghz_protocol_came;
+    instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
 }
 
@@ -269,7 +271,7 @@ void subghz_protocol_decoder_came_serialization(void* context, string_t output) 
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n",
-        instance->base.protocol->name,
+        instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo);

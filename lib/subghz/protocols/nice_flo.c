@@ -74,6 +74,7 @@ void* subghz_protocol_encoder_nice_flo_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderNiceFlo* instance = furi_alloc(sizeof(SubGhzProtocolEncoderNiceFlo));
 
     instance->base.protocol = &subghz_protocol_nice_flo;
+    instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
@@ -165,6 +166,7 @@ LevelDuration subghz_protocol_encoder_nice_flo_yield(void* context) {
 void* subghz_protocol_decoder_nice_flo_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderNiceFlo* instance = furi_alloc(sizeof(SubGhzProtocolDecoderNiceFlo));
     instance->base.protocol = &subghz_protocol_nice_flo;
+    instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
 }
 
@@ -266,7 +268,7 @@ void subghz_protocol_decoder_nice_flo_serialization(void* context, string_t outp
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n",
-        instance->base.protocol->name,
+        instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_lo,
         code_found_reverse_lo);

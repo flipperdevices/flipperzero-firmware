@@ -69,6 +69,7 @@ void* subghz_protocol_encoder_gate_tx_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolEncoderGateTx* instance = furi_alloc(sizeof(SubGhzProtocolEncoderGateTx));
 
     instance->base.protocol = &subghz_protocol_gate_tx;
+    instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
@@ -160,6 +161,7 @@ LevelDuration subghz_protocol_encoder_gate_tx_yield(void* context) {
 void* subghz_protocol_decoder_gate_tx_alloc(SubGhzEnvironment* environment) {
     SubGhzProtocolDecoderGateTx* instance = furi_alloc(sizeof(SubGhzProtocolDecoderGateTx));
     instance->base.protocol = &subghz_protocol_gate_tx;
+    instance->generic.protocol_name = instance->base.protocol->name;
     return instance;
 }
 
@@ -245,7 +247,7 @@ void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t du
     }
 }
 
-static void subghz_protocol_decoder_gate_tx_check_remote_controller(
+static void subghz_protocol_gate_tx_check_remote_controller(
     SubGhzBlockGeneric* instance) {
     uint32_t code_found_reverse = subghz_protocol_blocks_reverse_key(
         instance->data, instance->data_count_bit);
@@ -259,13 +261,13 @@ static void subghz_protocol_decoder_gate_tx_check_remote_controller(
 void subghz_protocol_decoder_gate_tx_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderGateTx* instance = context;
-    subghz_protocol_decoder_gate_tx_check_remote_controller(&instance->generic);
+    subghz_protocol_gate_tx_check_remote_controller(&instance->generic);
     string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%06lX\r\n"
         "Sn:%05lX  Btn:%lX\r\n",
-        instance->base.protocol->name,
+        instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data & 0xFFFFFF),
         instance->generic.serial,
