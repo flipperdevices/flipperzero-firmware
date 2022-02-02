@@ -138,26 +138,12 @@ static bool check_address_boundaries(size_t address, bool allow_bl_region) {
 
 typedef bool (*PageTask)(uint8_t i_page, uint8_t* update_block, uint16_t update_block_len);
 
-uint32_t dddda = 0;
 static bool
     page_task_validate_flash(uint8_t i_page, uint8_t* update_block, uint16_t update_block_len) {
     size_t page_addr = furi_hal_flash_get_base() + furi_hal_flash_get_page_size() * i_page;
-    //return (memcmp(update_block, (void*)page_addr, update_block_len) == 0);
-    if (memcmp(update_block, (void*)page_addr, update_block_len)) {
-        dddda = 1;
-        return false;
-    } else {
-        dddda = 2;
-        return true;
-
-    }
+    return (memcmp(update_block, (void*)page_addr, update_block_len) == 0);
 }
 
-//}
-
-//static UpdateBlockResult write_flash_region_from_file(FsFile* dfuf, ImageElementHeader* header) {
-
-uint32_t ddd = 0;
 // Assumes file is open, valid and read pointer is set at the start of image data
 static UpdateBlockResult perform_task_for_update_pages(
     const PageTask task,
@@ -178,7 +164,12 @@ static UpdateBlockResult perform_task_for_update_pages(
     uint8_t fw_block[FLASH_PAGE_SIZE] = {0};
     uint16_t bytes_read = 0;
     for(uint32_t element_offs = 0; element_offs < header->dwElementSize;) {
-        if(f_read(&dfuf->file, fw_block, FLASH_PAGE_SIZE, &bytes_read) != FR_OK) {
+        uint32_t n_bytes_to_read = FLASH_PAGE_SIZE;
+        if(element_offs + n_bytes_to_read > header->dwElementSize) {
+            n_bytes_to_read = header->dwElementSize - element_offs;
+        }
+
+        if(f_read(&dfuf->file, fw_block, n_bytes_to_read, &bytes_read) != FR_OK) {
             return UpdateBlockResult_Failed;
         }
 
@@ -188,7 +179,6 @@ static UpdateBlockResult perform_task_for_update_pages(
         }
 
         if(!task(i_page, fw_block, bytes_read)) {
-            ddd = header->dwElementAddress + element_offs;
             return UpdateBlockResult_Failed;
         }
 
@@ -201,8 +191,6 @@ static UpdateBlockResult perform_task_for_update_pages(
 
     return UpdateBlockResult_OK;
 }
-
-//typedef UpdateBlockResult (*ImageElementTask)(FsFile*, ImageElementHeader*);
 
 static bool dfu_file_process_targets(
     const PageTask task,
