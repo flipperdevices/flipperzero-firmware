@@ -14,7 +14,7 @@ static CRC_HandleTypeDef hcrc = {
 
 void furi_hal_crc_init() {
     __HAL_RCC_CRC_CLK_ENABLE();
-    furi_assert(HAL_CRC_Init(&hcrc) == HAL_OK);
+    furi_check(HAL_CRC_Init(&hcrc) == HAL_OK);
 }
 
 void furi_hal_crc_deinit() {
