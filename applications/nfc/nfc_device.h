@@ -9,8 +9,11 @@
 
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_FILE_NAME_MAX_LEN 120
-
 #define NFC_READER_DATA_MAX_SIZE 64
+
+#define NFC_APP_FOLDER "/any/nfc"
+#define NFC_APP_EXTENSION ".nfc"
+#define NFC_APP_SHADOW_EXTENSION ".shd"
 
 typedef enum {
     NfcDeviceNfca,

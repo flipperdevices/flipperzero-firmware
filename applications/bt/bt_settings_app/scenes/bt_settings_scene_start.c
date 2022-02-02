@@ -1,8 +1,6 @@
 #include "../bt_settings_app.h"
 #include "furi_hal_bt.h"
 
-#define SCENE_START_FORGET_DEV_SELECTED_EVENT (10UL)
-
 enum BtSetting {
     BtSettingOff,
     BtSettingOn,
@@ -32,7 +30,7 @@ static void bt_settings_scene_start_var_list_enter_callback(void* context, uint3
     BtSettingsApp* app = context;
     if(index == BtSettingIndexForgetDev) {
         view_dispatcher_send_custom_event(
-            app->view_dispatcher, SCENE_START_FORGET_DEV_SELECTED_EVENT);
+            app->view_dispatcher, BtSettingsCustomEventForgetDevices);
     }
 }
 
@@ -80,7 +78,7 @@ bool bt_settings_scene_start_on_event(void* context, SceneManagerEvent event) {
             app->settings.enabled = false;
             furi_hal_bt_stop_advertising();
             consumed = true;
-        } else if(event.event == SCENE_START_FORGET_DEV_SELECTED_EVENT) {
+        } else if(event.event == BtSettingsCustomEventForgetDevices) {
             scene_manager_next_scene(app->scene_manager, BtSettingsAppSceneForgetDevConfirm);
             consumed = true;
         }

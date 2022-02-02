@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <dolphin/dolphin.h>
 
 void nfc_scene_save_success_popup_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
@@ -7,6 +8,7 @@ void nfc_scene_save_success_popup_callback(void* context) {
 
 void nfc_scene_save_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
+    DOLPHIN_DEED(DolphinDeedNfcSave);
 
     // Setup view
     Popup* popup = nfc->popup;

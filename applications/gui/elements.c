@@ -594,7 +594,6 @@ void elements_text_box(
             line[line_num].height = line_height;
             line[line_num].descender = line_descender;
             if(total_height_min + line_leading_min > height) {
-                line_num--;
                 break;
             }
             total_height_min += line_leading_min;
