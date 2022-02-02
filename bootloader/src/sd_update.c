@@ -165,7 +165,7 @@ static UpdateBlockResult perform_task_for_update_pages(
     uint16_t bytes_read = 0;
     for(uint32_t element_offs = 0; element_offs < header->dwElementSize;) {
         uint32_t n_bytes_to_read = FLASH_PAGE_SIZE;
-        if(element_offs + n_bytes_to_read > header->dwElementSize) {
+        if((element_offs + n_bytes_to_read) > header->dwElementSize) {
             n_bytes_to_read = header->dwElementSize - element_offs;
         }
 
@@ -175,7 +175,7 @@ static UpdateBlockResult perform_task_for_update_pages(
 
         int16_t i_page = furi_hal_flash_get_page_number(header->dwElementAddress + element_offs);
         if(i_page < 0) {
-            return false;
+            return UpdateBlockResult_Failed;
         }
 
         if(!task(i_page, fw_block, bytes_read)) {
@@ -244,7 +244,7 @@ static const char* update_state_text[] = {
     "Opening update file",
     "Validating image",
     "",
-    "Flashing",
+    "Writing",
     "Verifying",
     "Completed",
     "Error",
@@ -274,7 +274,7 @@ static void render_update_progress() {
 
 static void sdcard_update_set_progress(SdUpdateState state, uint8_t progress_pct) {
     bool render_update = (progress.operation != state) ||
-                         (((progress_pct - progress.rendered_progress) > 5));
+                         (((progress_pct - progress.rendered_progress) > 4));
     progress.operation = state;
     progress.progress = progress_pct;
     if(render_update) {
