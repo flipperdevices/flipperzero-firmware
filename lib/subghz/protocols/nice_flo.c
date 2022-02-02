@@ -89,7 +89,7 @@ void subghz_protocol_encoder_nice_flo_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_nice_flo_ecoder_get_upload(SubGhzProtocolEncoderNiceFlo* instance) {
+static bool subghz_protocol_nice_flo_encoder_get_upload(SubGhzProtocolEncoderNiceFlo* instance) {
     furi_assert(instance);
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
@@ -134,7 +134,7 @@ bool subghz_protocol_encoder_nice_flo_load(
     instance->generic.data = key;
     instance->generic.data_count_bit = count_bit;
     instance->encoder.repeat = repeat;
-    subghz_protocol_nice_flo_ecoder_get_upload(instance);
+    subghz_protocol_nice_flo_encoder_get_upload(instance);
     instance->encoder.is_runing = true;
     return true;
 }

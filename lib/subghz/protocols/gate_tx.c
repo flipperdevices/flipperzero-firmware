@@ -84,7 +84,7 @@ void subghz_protocol_encoder_gate_tx_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_gate_tx_ecoder_get_upload(SubGhzProtocolEncoderGateTx* instance) {
+static bool subghz_protocol_gate_tx_encoder_get_upload(SubGhzProtocolEncoderGateTx* instance) {
     furi_assert(instance);
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
@@ -129,7 +129,7 @@ bool subghz_protocol_encoder_gate_tx_load(
     instance->generic.data = key;
     instance->generic.data_count_bit = count_bit;
     instance->encoder.repeat = repeat;
-    subghz_protocol_gate_tx_ecoder_get_upload(instance);
+    subghz_protocol_gate_tx_encoder_get_upload(instance);
     instance->encoder.is_runing = true;
     return true;
 }
@@ -246,20 +246,20 @@ void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t du
 }
 
 static void subghz_protocol_decoder_gate_tx_check_remote_controller(
-    SubGhzProtocolDecoderGateTx* instance) {
+    SubGhzBlockGeneric* instance) {
     uint32_t code_found_reverse = subghz_protocol_blocks_reverse_key(
-        instance->generic.data, instance->generic.data_count_bit);
+        instance->data, instance->data_count_bit);
 
-    instance->generic.serial = (code_found_reverse & 0xFF) << 12 |
+    instance->serial = (code_found_reverse & 0xFF) << 12 |
                                ((code_found_reverse >> 8) & 0xFF) << 4 |
                                ((code_found_reverse >> 20) & 0x0F);
-    instance->generic.btn = ((code_found_reverse >> 16) & 0x0F);
+    instance->btn = ((code_found_reverse >> 16) & 0x0F);
 }
 
 void subghz_protocol_decoder_gate_tx_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderGateTx* instance = context;
-    subghz_protocol_decoder_gate_tx_check_remote_controller(instance);
+    subghz_protocol_decoder_gate_tx_check_remote_controller(&instance->generic);
     string_cat_printf(
         output,
         "%s %dbit\r\n"

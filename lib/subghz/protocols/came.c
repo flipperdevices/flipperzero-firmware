@@ -77,7 +77,6 @@ void* subghz_protocol_encoder_came_alloc(SubGhzEnvironment* environment) {
     instance->base.protocol = &subghz_protocol_came;
 
     instance->encoder.repeat = 10;
-    //подумать о авторасчете длинны аплоад
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
     instance->encoder.upload = furi_alloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->encoder.is_runing = false;
@@ -91,7 +90,7 @@ void subghz_protocol_encoder_came_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_came_ecoder_get_upload(SubGhzProtocolEncoderCame* instance) {
+static bool subghz_protocol_came_encoder_get_upload(SubGhzProtocolEncoderCame* instance) {
     furi_assert(instance);
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
@@ -136,7 +135,7 @@ bool subghz_protocol_encoder_came_load(
     instance->generic.data = key;
     instance->generic.data_count_bit = count_bit;
     instance->encoder.repeat = repeat;
-    subghz_protocol_came_ecoder_get_upload(instance);
+    subghz_protocol_came_encoder_get_upload(instance);
     instance->encoder.is_runing = true;
     return true;
 }
