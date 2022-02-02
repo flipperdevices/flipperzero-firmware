@@ -4,9 +4,7 @@ static void u2f_scene_error_event_callback(GuiButtonType result, InputType type,
     furi_assert(context);
     U2fApp* app = context;
 
-    if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, U2fCustomEventErrorOk);
-    } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
+    if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, U2fCustomEventErrorBack);
     }
 }
@@ -25,11 +23,6 @@ void u2f_scene_error_on_enter(void* context) {
         FontSecondary,
         "No SD card or\napp data found.\nThis app will not\nwork without\nrequired files.");
 
-    if(0) {
-        widget_add_button_element(
-            app->widget, GuiButtonTypeRight, "Ok", u2f_scene_error_event_callback, app);
-    }
-
     widget_add_button_element(
         app->widget, GuiButtonTypeLeft, "Back", u2f_scene_error_event_callback, app);
 
@@ -41,14 +34,12 @@ bool u2f_scene_error_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == U2fCustomEventErrorOk) {
-            scene_manager_next_scene(app->scene_manager, U2fSceneMain);
-            consumed = true;
-        } else if(event.event == U2fCustomEventErrorBack) {
+        if(event.event == U2fCustomEventErrorBack) {
             view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
         }
     }
+
     return consumed;
 }
 

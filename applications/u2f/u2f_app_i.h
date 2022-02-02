@@ -30,7 +30,6 @@ typedef enum {
 
     U2fCustomEventConfirm,
 
-    U2fCustomEventErrorOk,
     U2fCustomEventErrorBack,
 
 } GpioCustomEvent;
