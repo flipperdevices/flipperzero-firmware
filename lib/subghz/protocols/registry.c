@@ -4,12 +4,14 @@
 #include "gate_tx.h"
 #include "nice_flo.h"
 #include "came_twee.h"
+#include "came_atomo.h"
 
 const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_came,
     &subghz_protocol_gate_tx,
     &subghz_protocol_nice_flo,
     &subghz_protocol_came_twee,
+    &subghz_protocol_came_atomo,
 };
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {

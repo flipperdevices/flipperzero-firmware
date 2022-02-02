@@ -56,12 +56,12 @@ void subghz_parser_enable_dump(
  */
 void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name);
 
-/** File name rainbow table Came Atomo
- * 
- * @param instance - SubGhzParser instance
- * @param file_name - "path/file_name"
- */
-void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name);
+// /** File name rainbow table Came Atomo
+//  * 
+//  * @param instance - SubGhzParser instance
+//  * @param file_name - "path/file_name"
+//  */
+// void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name);
 
 /** File upload manufacture keys
  * 

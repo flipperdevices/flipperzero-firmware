@@ -2,7 +2,7 @@
 #include "subghz_parser.h"
 //#include "protocols/came.h"
 //#include "protocols/subghz_protocol_came_twee.h"
-#include "protocols/subghz_protocol_came_atomo.h"
+// #include "protocols/subghz_protocol_came_atomo.h"
 #include "protocols/subghz_protocol_cfm.h"
 #include "protocols/subghz_protocol_keeloq.h"
 //#include "protocols/subghz_protocol_nice_flo.h"
@@ -31,7 +31,7 @@
 typedef enum {
     //SubGhzProtocolTypeCame,
     //SubGhzProtocolTypeCameTwee,
-    SubGhzProtocolTypeCameAtomo,
+    // SubGhzProtocolTypeCameAtomo,
     SubGhzProtocolTypeKeeloq,
     //SubGhzProtocolTypeNiceFlo,
     SubGhzProtocolTypeNiceFlorS,
@@ -93,8 +93,8 @@ SubGhzParser* subghz_parser_alloc() {
     //     (SubGhzProtocolCommon*)subghz_protocol_came_alloc();
     // instance->protocols[SubGhzProtocolTypeCameTwee] =
     //     (SubGhzProtocolCommon*)subghz_protocol_came_twee_alloc();
-    instance->protocols[SubGhzProtocolTypeCameAtomo] =
-        (SubGhzProtocolCommon*)subghz_protocol_came_atomo_alloc();
+    // instance->protocols[SubGhzProtocolTypeCameAtomo] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_came_atomo_alloc();
     instance->protocols[SubGhzProtocolTypeKeeloq] =
         (SubGhzProtocolCommon*)subghz_protocol_keeloq_alloc(instance->keystore);
     instance->protocols[SubGhzProtocolTypePrinceton] =
@@ -137,8 +137,8 @@ void subghz_parser_free(SubGhzParser* instance) {
     //subghz_protocol_came_free((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
     // subghz_protocol_came_twee_free(
     //     (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee]);
-    subghz_protocol_came_atomo_free(
-        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo]);
+    // subghz_protocol_came_atomo_free(
+    //     (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo]);
     subghz_protocol_keeloq_free(
         (SubGhzProtocolKeeloq*)instance->protocols[SubGhzProtocolTypeKeeloq]);
     subghz_decoder_princeton_free(
@@ -222,10 +222,10 @@ void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* fil
         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS], file_name);
 }
 
-void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name) {
-    subghz_protocol_came_atomo_name_file(
-        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo], file_name);
-}
+// void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name) {
+//     subghz_protocol_came_atomo_name_file(
+//         (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo], file_name);
+// }
 
 bool subghz_parser_load_keeloq_file(SubGhzParser* instance, const char* file_name) {
     bool ret = false;
@@ -242,8 +242,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
     //subghz_protocol_came_reset((SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame]);
     // subghz_protocol_came_twee_reset(
     //     (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee]);
-    subghz_protocol_came_atomo_reset(
-        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo]);
+    // subghz_protocol_came_atomo_reset(
+    //     (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo]);
     subghz_protocol_keeloq_reset(
         (SubGhzProtocolKeeloq*)instance->protocols[SubGhzProtocolTypeKeeloq]);
     subghz_decoder_princeton_reset(
@@ -285,10 +285,10 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
     //     (SubGhzProtocolCame*)instance->protocols[SubGhzProtocolTypeCame], level, duration);
     // subghz_protocol_came_twee_parse(
     //     (SubGhzProtocolCameTwee*)instance->protocols[SubGhzProtocolTypeCameTwee], level, duration);
-    subghz_protocol_came_atomo_parse(
-        (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo],
-        level,
-        duration);
+    // subghz_protocol_came_atomo_parse(
+    //     (SubGhzProtocolCameAtomo*)instance->protocols[SubGhzProtocolTypeCameAtomo],
+    //     level,
+    //     duration);
     subghz_protocol_keeloq_parse(
         (SubGhzProtocolKeeloq*)instance->protocols[SubGhzProtocolTypeKeeloq], level, duration);
     subghz_decoder_princeton_parse(

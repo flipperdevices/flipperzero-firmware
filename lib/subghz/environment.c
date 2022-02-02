@@ -2,12 +2,16 @@
 
 struct SubGhzEnvironment {
     SubGhzKeystore* keystore;
+    const char* came_atomo_rainbow_table_file_name;
+    const char* nice_flor_s_rainbow_table_file_name;
 };
 
 SubGhzEnvironment* subghz_environment_alloc() {
     SubGhzEnvironment* instance = furi_alloc(sizeof(SubGhzEnvironment));
 
     instance->keystore = subghz_keystore_alloc();
+    instance->came_atomo_rainbow_table_file_name = NULL;
+    instance->nice_flor_s_rainbow_table_file_name = NULL;
 
     return instance;
 }
@@ -31,4 +35,28 @@ SubGhzKeystore*
     furi_assert(instance);
 
     return instance->keystore;
+}
+
+void subghz_environment_set_came_atomo_rainbow_table_file_name(SubGhzEnvironment* instance, const char* filename){
+    furi_assert(instance);
+
+    instance->came_atomo_rainbow_table_file_name = filename;
+}
+
+const char* subghz_environment_get_came_atomo_rainbow_table_file_name(SubGhzEnvironment* instance){
+    furi_assert(instance);
+
+    return instance->came_atomo_rainbow_table_file_name;
+}
+
+void subghz_environment_set_nice_flor_s_rainbow_table_file_name(SubGhzEnvironment* instance, const char* filename){
+    furi_assert(instance);
+
+    instance->nice_flor_s_rainbow_table_file_name = filename;
+}
+
+const char* subghz_environment_get_nice_flor_s_rainbow_table_file_name(SubGhzEnvironment* instance){
+    furi_assert(instance);
+
+    return instance->nice_flor_s_rainbow_table_file_name;
 }
