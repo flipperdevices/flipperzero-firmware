@@ -325,17 +325,18 @@ bool furi_hal_flash_program_page(uint8_t page, uint8_t* data, uint16_t _length) 
 
     /* Set PG bit */
     SET_BIT(FLASH->CR, FLASH_CR_PG);
-    size_t data_offset = 0;
-    for(data_offset = 0; data_offset < length; data_offset += 8) {
+    size_t i_dwords = 0;
+    for(i_dwords = 0; i_dwords < (length / 8); ++i_dwords) {
         /* Do the thing */
+        size_t data_offset = i_dwords * 8;
         furi_check(furi_hal_flash_write_dword_internal(
             page_start_address + data_offset, (uint64_t*)&data[data_offset]));
     }
-    int32_t tail_len = length - data_offset;
-    if(tail_len > 0) {
+    if((length % 8) != 0) {
         /* there are more bytes, not fitting into dwords */
         uint64_t tail_data = 0;
-        for(int32_t tail_i = 0; tail_i < tail_len; ++tail_i) {
+        size_t data_offset = i_dwords * 8;
+        for(int32_t tail_i = 0; tail_i < (length % 8); ++tail_i) {
             tail_data |= (((uint64_t)data[data_offset + tail_i]) << (tail_i * 8));
         }
 
