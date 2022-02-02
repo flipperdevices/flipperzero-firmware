@@ -1,7 +1,6 @@
 #include "../bad_usb_app_i.h"
 
 typedef enum {
-    SubghzCustomEventErrorOk,
     SubghzCustomEventErrorBack,
 } BadUsbCustomEvent;
 
@@ -10,9 +9,7 @@ static void
     furi_assert(context);
     BadUsbApp* app = context;
 
-    if((result == GuiButtonTypeRight) && (type == InputTypeShort)) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, SubghzCustomEventErrorOk);
-    } else if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
+    if((result == GuiButtonTypeLeft) && (type == InputTypeShort)) {
         view_dispatcher_send_custom_event(app->view_dispatcher, SubghzCustomEventErrorBack);
     }
 }
@@ -31,11 +28,6 @@ void bad_usb_scene_error_on_enter(void* context) {
         FontSecondary,
         "No SD card or\napp data found.\nThis app will not\nwork without\nrequired files.");
 
-    if(0) {
-        widget_add_button_element(
-            app->widget, GuiButtonTypeRight, "Ok", bad_usb_scene_error_event_callback, app);
-    }
-
     widget_add_button_element(
         app->widget, GuiButtonTypeLeft, "Back", bad_usb_scene_error_event_callback, app);
 
@@ -47,10 +39,7 @@ bool bad_usb_scene_error_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubghzCustomEventErrorOk) {
-            scene_manager_next_scene(app->scene_manager, BadUsbSceneFileSelect);
-            consumed = true;
-        } else if(event.event == SubghzCustomEventErrorBack) {
+        if(event.event == SubghzCustomEventErrorBack) {
             view_dispatcher_stop(app->view_dispatcher);
             consumed = true;
         }
