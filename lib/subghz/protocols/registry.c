@@ -6,6 +6,7 @@
 #include "came_twee.h"
 #include "came_atomo.h"
 #include "faac_slh.h"
+#include "nero_sketch.h"
 
 const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_came,
@@ -14,6 +15,7 @@ const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_came_twee,
     &subghz_protocol_came_atomo,
     &subghz_protocol_faac_slh,
+    &subghz_protocol_nero_sketch,
 };
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {
