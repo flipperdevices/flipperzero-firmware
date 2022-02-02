@@ -10,8 +10,8 @@ int main() {
         target_switch2dfu();
         break;
     case BootMode_SDUpdate:
-        execute_sdcard_update();
-        target_switch2sdupdate();
+        sdcard_update_execute();
+        target_switch2os();
         break;
     case BootMode_Normal:
     default:

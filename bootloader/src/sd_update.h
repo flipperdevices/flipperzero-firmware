@@ -4,6 +4,9 @@
 
 typedef enum {
     SdUpdateState_Unknown,
+    SdUpdateState_Mount,
+    SdUpdateState_Open,
+    SdUpdateState_ValidateImage,
     SdUpdateState_Erase,
     SdUpdateState_Write,
     SdUpdateState_Verify,
@@ -15,7 +18,7 @@ typedef enum {
 
 typedef struct {
     SdUpdateState operation;
-    uint8_t operation_progress;
-} update_status_detail;
+    uint8_t progress, rendered_progress;
+} SdUpdateProgress;
 
-void execute_sdcard_update();
+void sdcard_update_execute();

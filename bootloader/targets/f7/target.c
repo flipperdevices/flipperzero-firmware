@@ -12,9 +12,6 @@
 #include <lib/toolbox/version.h>
 #include <furi_hal.h>
 
-#include <u8g2.h>
-#include <u8g2_glue.h>
-
 const uint8_t I_DFU_128x50[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x07, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x38, 0x00, 0x00, 0x00,
@@ -75,7 +72,7 @@ const uint8_t I_DFU_128x50[] = {
 // Boot to DFU pin
 #define BOOT_DFU_PORT GPIOB
 #define BOOT_DFU_PIN LL_GPIO_PIN_11
-// Boot to update from SD card 
+// Boot to update from SD card
 #define BOOT_SDUPDATE_PORT GPIOC
 #define BOOT_SDUPDATE_PIN LL_GPIO_PIN_6
 // USB pins
@@ -142,7 +139,7 @@ void target_gpio_init() {
     LL_GPIO_SetPinMode(BOOT_USB_PORT, BOOT_USB_DM_PIN, LL_GPIO_MODE_OUTPUT);
     LL_GPIO_SetPinSpeed(BOOT_USB_PORT, BOOT_USB_DM_PIN, LL_GPIO_SPEED_FREQ_VERY_HIGH);
     LL_GPIO_SetPinOutputType(BOOT_USB_PORT, BOOT_USB_DM_PIN, LL_GPIO_OUTPUT_OPENDRAIN);
-    // Button: back
+    // Button: left
     LL_GPIO_SetPinMode(BOOT_DFU_PORT, BOOT_DFU_PIN, LL_GPIO_MODE_INPUT);
     LL_GPIO_SetPinPull(BOOT_DFU_PORT, BOOT_DFU_PIN, LL_GPIO_PULL_UP);
     // Button: down
@@ -190,25 +187,17 @@ void target_usb_wire_reset() {
 }
 
 void target_display_init() {
-    // Prepare gpio
-    hal_gpio_init_simple(&gpio_display_rst, GpioModeOutputPushPull);
-    hal_gpio_init_simple(&gpio_display_di, GpioModeOutputPushPull);
-    // Initialize
-    u8g2_t fb;
-    u8g2_Setup_st756x_flipper(&fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
-    u8g2_InitDisplay(&fb);
     // Create payload
-    u8g2_ClearBuffer(&fb);
-    u8g2_SetDrawColor(&fb, 0x01);
-    u8g2_DrawXBM(&fb, 0, 64 - 50, 128, 50, I_DFU_128x50);
-#ifndef SLIM_BOOTLOADER
-    u8g2_SetFont(&fb, u8g2_font_helvB08_tf);
-    u8g2_DrawStr(&fb, 2, 8, "Update & Recovery Mode");
-    u8g2_DrawStr(&fb, 2, 21, "DFU started");
+    furi_hal_fb_init();
+    u8g2_t* fb = furi_hal_fb_get();
+    u8g2_SetDrawColor(fb, 0x01);
+    u8g2_DrawXBM(fb, 0, 64 - 50, 128, 50, I_DFU_128x50);
+#ifndef SLIM_BOOTLOADER1
+    u8g2_SetFont(fb, u8g2_font_helvB08_tr);
+    u8g2_DrawStr(fb, 2, 8, "Update & Recovery Mode");
+    u8g2_DrawStr(fb, 2, 21, "DFU started");
 #endif
-    // Send buffer
-    u8g2_SetPowerSave(&fb, 0);
-    u8g2_SendBuffer(&fb);
+    furi_hal_fb_present();
 }
 
 void target_init() {
@@ -272,8 +261,8 @@ void target_switch2os() {
     target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
 }
 
-void target_switch2sdupdate() {
-    target_led_control("B");
-    SCB->VTOR = OS_OFFSET;
-    target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
-}
+//void target_switch2sdupdate() {
+//    target_led_control("R");
+//    SCB->VTOR = OS_OFFSET;
+//    target_switch((void*)(BOOT_ADDRESS + OS_OFFSET));
+//}
