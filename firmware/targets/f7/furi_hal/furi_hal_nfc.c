@@ -165,8 +165,6 @@ void furi_hal_nfc_stop() {
     }
 }
 
-uint8_t rats[] = {0x05, 0x78, 0x80, 0x80, 0x00};
-
 bool furi_hal_nfc_emulate_nfca(
     uint8_t* uid,
     uint8_t uid_len,
@@ -229,40 +227,43 @@ bool furi_hal_nfc_emulate_nfca(
                 }
             }
             if(buff_tx_len) {
-                rfalTransceiveBitsBlockingTx(
-                    buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000);
+                ReturnCode ret = rfalTransceiveBitsBlockingTx(
+                    buff_tx,
+                    buff_tx_len,
+                    buff_rx,
+                    sizeof(buff_rx),
+                    &buff_rx_len,
+                    data_type,
+                    RFAL_FWT_NONE);
+                if(ret) {
+                    FURI_LOG_E(TAG, "Tranceive failed with status %d", ret);
+                    break;
+                }
                 continue;
             }
-        } else if(data_received && buff_rx[0] == 0xe0) {
-            memcpy(buff_tx, rats, sizeof(rats));
-            buff_tx_len = sizeof(rats) * 8;
-            data_type = FURI_HAL_NFC_TXRX_DEFAULT;
-            rfalTransceiveBitsBlockingTx(
-                buff_tx, buff_tx_len, buff_rx, sizeof(buff_rx), &buff_rx_len, data_type, 1000);
-            continue;
-        }
-        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
-           data_received) {
-            data_received = false;
-            if(callback) {
-                callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
-            }
-            if(!rfalIsExtFieldOn()) {
-                break;
-            }
-            if(buff_tx_len) {
-                if(rfalTransceiveBitsBlockingTx(
-                       buff_tx,
-                       buff_tx_len,
-                       buff_rx,
-                       sizeof(buff_rx),
-                       &buff_rx_len,
-                       data_type,
-                       1000)) {
-                    FURI_LOG_W(TAG, "Transeive failed");
+            if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax)) {
+                if(callback) {
+                    callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
                 }
-            } else {
-                break;
+                if(!rfalIsExtFieldOn()) {
+                    break;
+                }
+                if(buff_tx_len) {
+                    ReturnCode ret = rfalTransceiveBitsBlockingTx(
+                        buff_tx,
+                        buff_tx_len,
+                        buff_rx,
+                        sizeof(buff_rx),
+                        &buff_rx_len,
+                        data_type,
+                        RFAL_FWT_NONE);
+                    if(ret) {
+                        FURI_LOG_E(TAG, "Tranceive failed with status %d", ret);
+                        continue;
+                    }
+                } else {
+                    break;
+                }
             }
         }
     }

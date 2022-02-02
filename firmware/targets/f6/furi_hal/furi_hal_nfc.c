@@ -3,6 +3,7 @@
 #include <rfal_rf.h>
 #include <furi.h>
 #include <m-string.h>
+#include <lib/nfc_protocols/nfca.h>
 
 #define TAG "FuriHalNfc"
 
@@ -204,10 +205,7 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         buff_tx_len = 0;
         uint32_t flag = osEventFlagsWait(event, EVENT_FLAG_ALL, osFlagsWaitAny, timeout);
-        if(flag == osErrorTimeout) {
-            break;
-        }
-        if(flag == EVENT_FLAG_STOP) {
+        if(flag == osErrorTimeout || flag == EVENT_FLAG_STOP) {
             break;
         }
         bool data_received = false;
@@ -216,42 +214,56 @@ bool furi_hal_nfc_emulate_nfca(
         rfalLmState state = rfalListenGetState(&data_received, NULL);
         if(data_received) {
             rfalTransceiveBlockingRx();
-        }
-        if(data_received &&
-           rfalNfcaListenerIsSleepReq(buff_rx, rfalConvBitsToBytes(buff_rx_len))) {
-            if(rfalListenSleepStart(
-                   RFAL_LM_STATE_SLEEP_A,
-                   buff_rx,
-                   rfalConvBytesToBits(buff_rx_size),
-                   &buff_rx_len)) {
-                FURI_LOG_E(TAG, "Failed to enter sleep mode");
-                break;
-            } else {
-                continue;
-            }
-        }
-        if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax) &&
-           data_received) {
-            data_received = false;
-            if(callback) {
-                callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
-            }
-            if(!rfalIsExtFieldOn()) {
-                break;
+            if(nfca_emulation_handler(buff_rx, buff_rx_len, buff_tx, &buff_tx_len)) {
+                if(rfalListenSleepStart(
+                       RFAL_LM_STATE_SLEEP_A,
+                       buff_rx,
+                       rfalConvBytesToBits(buff_rx_size),
+                       &buff_rx_len)) {
+                    FURI_LOG_E(TAG, "Failed to enter sleep mode");
+                    break;
+                } else {
+                    continue;
+                }
             }
             if(buff_tx_len) {
-                if(rfalTransceiveBitsBlockingTx(
-                       buff_tx,
-                       buff_tx_len,
-                       buff_rx,
-                       sizeof(buff_rx),
-                       &buff_rx_len,
-                       data_type,
-                       1000)) {
-                    FURI_LOG_W(TAG, "Transeive failed");
+                ReturnCode ret = rfalTransceiveBitsBlockingTx(
+                    buff_tx,
+                    buff_tx_len,
+                    buff_rx,
+                    sizeof(buff_rx),
+                    &buff_rx_len,
+                    data_type,
+                    RFAL_FWT_NONE);
+                if(ret) {
+                    FURI_LOG_E(TAG, "Tranceive failed with status %d", ret);
+                    break;
                 }
-            } else {
-                break;
+                continue;
+            }
+            if((state == RFAL_LM_STATE_ACTIVE_A || state == RFAL_LM_STATE_ACTIVE_Ax)) {
+                if(callback) {
+                    callback(buff_rx, buff_rx_len, buff_tx, &buff_tx_len, &data_type, context);
+                }
+                if(!rfalIsExtFieldOn()) {
+                    break;
+                }
+                if(buff_tx_len) {
+                    ReturnCode ret = rfalTransceiveBitsBlockingTx(
+                        buff_tx,
+                        buff_tx_len,
+                        buff_rx,
+                        sizeof(buff_rx),
+                        &buff_rx_len,
+                        data_type,
+                        RFAL_FWT_NONE);
+                    if(ret) {
+                        FURI_LOG_E(TAG, "Tranceive failed with status %d", ret);
+                        continue;
+                    }
+                } else {
+                    break;
+                }
             }
         }
     }
