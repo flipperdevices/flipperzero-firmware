@@ -1,10 +1,11 @@
 #include "../subghz_i.h"
 #include "../views/subghz_read_raw.h"
+#include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/subghz_protocol_raw.h>
 #include <lib/subghz/subghz_parser.h>
 #include <lib/toolbox/path.h>
 
-#define RAW_FILE_NAME "Raw_temp"
+#define RAW_FILE_NAME "Raw_signal_"
 
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
@@ -22,7 +23,7 @@ bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
         path_extract_filename_no_ext(string_get_cstr(temp_str), temp_str);
         strcpy(subghz->file_name, string_get_cstr(temp_str));
         string_printf(
-            temp_str, "%s/%s%s", SUBGHZ_APP_PATH_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
+            temp_str, "%s/%s%s", SUBGHZ_APP_FOLDER, subghz->file_name, SUBGHZ_APP_EXTENSION);
 
         subghz_protocol_raw_set_last_file_name(
             (SubGhzProtocolRAW*)subghz->txrx->protocol_result, string_get_cstr(temp_str));
@@ -199,6 +200,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     if(!subghz_tx_start(subghz)) {
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
+                        DOLPHIN_DEED(DolphinDeedSubGhzSend);
                         subghz->state_notifications = SubGhzNotificationStateTX;
                     }
                 }
@@ -240,6 +242,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                        RAW_FILE_NAME,
                        subghz->txrx->frequency,
                        string_get_cstr(subghz->error_str))) {
+                    DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                         subghz_begin(subghz, subghz->txrx->preset);

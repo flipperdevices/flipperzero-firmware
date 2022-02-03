@@ -6,6 +6,7 @@
 #include <furi_hal_usb_hid.h>
 #include <storage/storage.h>
 #include "bad_usb_script.h"
+#include <dolphin/dolphin.h>
 
 #define TAG "BadUSB"
 #define WORKER_TAG TAG "Worker"
@@ -157,8 +158,6 @@ static bool ducky_numpad_press(const char num) {
 static bool ducky_altchar(const char* charcode) {
     uint8_t i = 0;
     bool state = false;
-
-    //TODO: numlock
 
     FURI_LOG_I(WORKER_TAG, "char %s", charcode);
 
@@ -442,6 +441,7 @@ static int32_t bad_usb_worker(void* context) {
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtToggle) { // Start executing script
+                DOLPHIN_DEED(DolphinDeedBadUsbPlayScript);
                 delay_val = 0;
                 bad_usb->buf_len = 0;
                 bad_usb->st.line_cur = 0;

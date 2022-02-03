@@ -1,14 +1,14 @@
 #include "../nfc_i.h"
-
-#define NFC_READ_EMV_DATA_CUSTOM_EVENT (10UL)
+#include <dolphin/dolphin.h>
 
 void nfc_read_emv_data_worker_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NFC_READ_EMV_DATA_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
 }
 
 void nfc_scene_read_emv_data_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
+    DOLPHIN_DEED(DolphinDeedNfcRead);
 
     // Setup view
     Popup* popup = nfc->popup;
@@ -31,7 +31,7 @@ bool nfc_scene_read_emv_data_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NFC_READ_EMV_DATA_CUSTOM_EVENT) {
+        if(event.event == NfcCustomEventWorkerExit) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneReadEmvDataSuccess, NFC_SEND_NOTIFICATION_TRUE);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadEmvDataSuccess);

@@ -1,12 +1,11 @@
 #include "../nfc_i.h"
 #include <lib/toolbox/random_name.h>
-
-#define SCENE_SAVE_NAME_CUSTOM_EVENT (0UL)
+#include <gui/modules/validators.h>
 
 void nfc_scene_save_name_text_input_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
 
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, SCENE_SAVE_NAME_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventTextInputDone);
 }
 
 void nfc_scene_save_name_on_enter(void* context) {
@@ -29,6 +28,11 @@ void nfc_scene_save_name_on_enter(void* context) {
         nfc->text_store,
         NFC_DEV_NAME_MAX_LEN,
         dev_name_empty);
+
+    ValidatorIsFile* validator_is_file =
+        validator_is_file_alloc_init(NFC_APP_FOLDER, NFC_APP_EXTENSION);
+    text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
 }
 
@@ -36,7 +40,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = (Nfc*)context;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SCENE_SAVE_NAME_CUSTOM_EVENT) {
+        if(event.event == NfcCustomEventTextInputDone) {
             if(strcmp(nfc->dev->dev_name, "")) {
                 nfc_device_delete(nfc->dev);
             }
@@ -60,5 +64,9 @@ void nfc_scene_save_name_on_exit(void* context) {
     Nfc* nfc = (Nfc*)context;
 
     // Clear view
+    void* validator_context = text_input_get_validator_callback_context(nfc->text_input);
+    text_input_set_validator(nfc->text_input, NULL, NULL);
+    validator_is_file_free(validator_context);
+
     text_input_reset(nfc->text_input);
 }

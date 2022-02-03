@@ -9,6 +9,7 @@ const char* const subghz_frequencies_text[] = {
     "348.00",
     "387.00",
     "433.08",
+    "433.42",
     "433.92",
     "434.42",
     "434.78",
@@ -29,6 +30,7 @@ const uint32_t subghz_frequencies[] = {
     /* 387 - 464 */
     387000000,
     433075000, /* LPD433 first */
+    433420000,
     433920000, /* LPD433 mid */
     434420000,
     434775000, /* LPD433 last channels */
@@ -51,7 +53,7 @@ const uint32_t subghz_hopper_frequencies[] = {
 const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
 const uint32_t subghz_hopper_frequencies_count =
     sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
-const uint32_t subghz_frequencies_433_92 = 5;
+const uint32_t subghz_frequencies_433_92 = 6;
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -282,10 +284,10 @@ int32_t subghz_app(void* p) {
 
     //Load database
     bool load_database =
-        subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes");
-    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/keeloq_mfcodes_user");
-    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/nice_flor_s_rx");
-    subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/came_atomo");
+        subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/assets/keeloq_mfcodes");
+    subghz_parser_load_keeloq_file(subghz->txrx->parser, "/ext/subghz/assets/keeloq_mfcodes_user");
+    subghz_parser_load_nice_flor_s_file(subghz->txrx->parser, "/ext/subghz/assets/nice_flor_s_rx");
+    subghz_parser_load_came_atomo_file(subghz->txrx->parser, "/ext/subghz/assets/came_atomo");
 
     // Check argument and run corresponding scene
     if(p && subghz_key_load(subghz, p)) {

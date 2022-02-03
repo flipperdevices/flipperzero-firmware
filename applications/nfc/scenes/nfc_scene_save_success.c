@@ -1,14 +1,14 @@
 #include "../nfc_i.h"
-
-#define SCENE_SAVE_SUCCESS_CUSTOM_EVENT (0UL)
+#include <dolphin/dolphin.h>
 
 void nfc_scene_save_success_popup_callback(void* context) {
     Nfc* nfc = (Nfc*)context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, SCENE_SAVE_SUCCESS_CUSTOM_EVENT);
+    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 void nfc_scene_save_success_on_enter(void* context) {
     Nfc* nfc = (Nfc*)context;
+    DOLPHIN_DEED(DolphinDeedNfcSave);
 
     // Setup view
     Popup* popup = nfc->popup;
@@ -26,7 +26,7 @@ bool nfc_scene_save_success_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SCENE_SAVE_SUCCESS_CUSTOM_EVENT) {
+        if(event.event == NfcCustomEventViewExit) {
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneCardMenu)) {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneCardMenu);
