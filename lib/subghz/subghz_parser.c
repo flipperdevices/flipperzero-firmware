@@ -6,19 +6,19 @@
 #include "protocols/subghz_protocol_cfm.h"
 #include "protocols/subghz_protocol_keeloq.h"
 //#include "protocols/subghz_protocol_nice_flo.h"
-#include "protocols/subghz_protocol_nice_flor_s.h"
+// #include "protocols/subghz_protocol_nice_flor_s.h"
 #include "protocols/subghz_protocol_princeton.h"
 //#include "protocols/subghz_protocol_gate_tx.h"
 //include "protocols/subghz_protocol_ido.h"
 //#include "protocols/subghz_protocol_faac_slh.h"
 //#include "protocols/subghz_protocol_nero_sketch.h"
 #include "protocols/subghz_protocol_star_line.h"
-#include "protocols/subghz_protocol_nero_radio.h"
+// #include "protocols/subghz_protocol_nero_radio.h"
 #include "protocols/subghz_protocol_scher_khan.h"
-#include "protocols/subghz_protocol_kia.h"
+//#include "protocols/subghz_protocol_kia.h"
 #include "protocols/subghz_protocol_raw.h"
-#include "protocols/subghz_protocol_hormann.h"
-#include "protocols/subghz_protocol_somfy_telis.h"
+// #include "protocols/subghz_protocol_hormann.h"
+// #include "protocols/subghz_protocol_somfy_telis.h"
 #include "protocols/subghz_protocol_somfy_keytis.h"
 
 #include "subghz_keystore.h"
@@ -34,19 +34,19 @@ typedef enum {
     // SubGhzProtocolTypeCameAtomo,
     SubGhzProtocolTypeKeeloq,
     //SubGhzProtocolTypeNiceFlo,
-    SubGhzProtocolTypeNiceFlorS,
+    // SubGhzProtocolTypeNiceFlorS,
     SubGhzProtocolTypePrinceton,
     //SubGhzProtocolTypeGateTX,
     //SubGhzProtocolTypeIDo,
     //SubGhzProtocolTypeFaacSLH,
     //SubGhzProtocolTypeNeroSketch,
     SubGhzProtocolTypeStarLine,
-    SubGhzProtocolTypeNeroRadio,
+    // SubGhzProtocolTypeNeroRadio,
     SubGhzProtocolTypeScherKhan,
-    SubGhzProtocolTypeKIA,
+    // SubGhzProtocolTypeKIA,
     SubGhzProtocolTypeRAW,
-    SubGhzProtocolTypeHormann,
-    SubGhzProtocolTypeSomfyTelis,
+    // SubGhzProtocolTypeHormann,
+    // SubGhzProtocolTypeSomfyTelis,
     SubGhzProtocolTypeSomfyKeytis,
 
     SubGhzProtocolTypeMax,
@@ -101,8 +101,8 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_decoder_princeton_alloc();
     // instance->protocols[SubGhzProtocolTypeNiceFlo] =
     //     (SubGhzProtocolCommon*)subghz_protocol_nice_flo_alloc();
-    instance->protocols[SubGhzProtocolTypeNiceFlorS] =
-        (SubGhzProtocolCommon*)subghz_protocol_nice_flor_s_alloc();
+    // instance->protocols[SubGhzProtocolTypeNiceFlorS] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_nice_flor_s_alloc();
     // instance->protocols[SubGhzProtocolTypeGateTX] =
     //     (SubGhzProtocolCommon*)subghz_protocol_gate_tx_alloc();
     // instance->protocols[SubGhzProtocolTypeIDo] =
@@ -113,18 +113,18 @@ SubGhzParser* subghz_parser_alloc() {
     //     (SubGhzProtocolCommon*)subghz_protocol_nero_sketch_alloc();
     instance->protocols[SubGhzProtocolTypeStarLine] =
         (SubGhzProtocolCommon*)subghz_protocol_star_line_alloc(instance->keystore);
-    instance->protocols[SubGhzProtocolTypeNeroRadio] =
-        (SubGhzProtocolCommon*)subghz_protocol_nero_radio_alloc();
-    instance->protocols[SubGhzProtocolTypeScherKhan] =
-        (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
-    instance->protocols[SubGhzProtocolTypeKIA] =
-        (SubGhzProtocolCommon*)subghz_protocol_kia_alloc();
+    // instance->protocols[SubGhzProtocolTypeNeroRadio] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_nero_radio_alloc();
+     instance->protocols[SubGhzProtocolTypeScherKhan] =
+         (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
+    // instance->protocols[SubGhzProtocolTypeKIA] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_kia_alloc();
     instance->protocols[SubGhzProtocolTypeRAW] =
         (SubGhzProtocolCommon*)subghz_protocol_raw_alloc();
-    instance->protocols[SubGhzProtocolTypeHormann] =
-        (SubGhzProtocolCommon*)subghz_protocol_hormann_alloc();
-    instance->protocols[SubGhzProtocolTypeSomfyTelis] =
-        (SubGhzProtocolCommon*)subghz_protocol_somfy_telis_alloc();
+    // instance->protocols[SubGhzProtocolTypeHormann] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_hormann_alloc();
+    // instance->protocols[SubGhzProtocolTypeSomfyTelis] =
+    //     (SubGhzProtocolCommon*)subghz_protocol_somfy_telis_alloc();
     instance->protocols[SubGhzProtocolTypeSomfyKeytis] =
         (SubGhzProtocolCommon*)subghz_protocol_somfy_keytis_alloc();
 
@@ -145,8 +145,8 @@ void subghz_parser_free(SubGhzParser* instance) {
         (SubGhzDecoderPrinceton*)instance->protocols[SubGhzProtocolTypePrinceton]);
     // subghz_protocol_nice_flo_free(
     //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
-    subghz_protocol_nice_flor_s_free(
-        (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
+    // subghz_protocol_nice_flor_s_free(
+    //     (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
     // subghz_protocol_gate_tx_free(
     //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
     // subghz_protocol_ido_free((SubGhzProtocolIDo*)instance->protocols[SubGhzProtocolTypeIDo]);
@@ -156,16 +156,16 @@ void subghz_parser_free(SubGhzParser* instance) {
     //     (SubGhzProtocolNeroSketch*)instance->protocols[SubGhzProtocolTypeNeroSketch]);
     subghz_protocol_star_line_free(
         (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
-    subghz_protocol_nero_radio_free(
-        (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
+    // subghz_protocol_nero_radio_free(
+    //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
     subghz_protocol_scher_khan_free(
         (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
-    subghz_protocol_kia_free((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
+    // subghz_protocol_kia_free((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
     subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
-    subghz_protocol_hormann_free(
-        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
-    subghz_protocol_somfy_telis_free(
-        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
+    // subghz_protocol_hormann_free(
+    //     (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
+    // subghz_protocol_somfy_telis_free(
+    //     (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
     subghz_protocol_somfy_keytis_free(
         (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis]);
 
@@ -217,10 +217,10 @@ void subghz_parser_enable_dump(
     instance->parser_callback_context = context;
 }
 
-void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name) {
-    subghz_protocol_nice_flor_s_name_file(
-        (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS], file_name);
-}
+// void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name) {
+//     subghz_protocol_nice_flor_s_name_file(
+//         (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS], file_name);
+// }
 
 // void subghz_parser_load_came_atomo_file(SubGhzParser* instance, const char* file_name) {
 //     subghz_protocol_came_atomo_name_file(
@@ -250,8 +250,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
         (SubGhzDecoderPrinceton*)instance->protocols[SubGhzProtocolTypePrinceton]);
     // subghz_protocol_nice_flo_reset(
     //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo]);
-    subghz_protocol_nice_flor_s_reset(
-        (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
+    // subghz_protocol_nice_flor_s_reset(
+    //     (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS]);
     // subghz_protocol_gate_tx_reset(
     //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX]);
     // subghz_protocol_ido_reset((SubGhzProtocolIDo*)instance->protocols[SubGhzProtocolTypeIDo]);
@@ -261,16 +261,16 @@ void subghz_parser_reset(SubGhzParser* instance) {
     //     (SubGhzProtocolNeroSketch*)instance->protocols[SubGhzProtocolTypeNeroSketch]);
     subghz_protocol_star_line_reset(
         (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
-    subghz_protocol_nero_radio_reset(
-        (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
+    // subghz_protocol_nero_radio_reset(
+    //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
     subghz_protocol_scher_khan_reset(
         (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
-    subghz_protocol_kia_reset((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
+    // subghz_protocol_kia_reset((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
     subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
-    subghz_protocol_hormann_reset(
-        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
-    subghz_protocol_somfy_telis_reset(
-        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
+    // subghz_protocol_hormann_reset(
+    //     (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann]);
+    // subghz_protocol_somfy_telis_reset(
+    //     (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis]);
     subghz_protocol_somfy_keytis_reset(
         (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis]);
 }
@@ -297,10 +297,10 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
         duration);
     // subghz_protocol_nice_flo_parse(
     //     (SubGhzProtocolNiceFlo*)instance->protocols[SubGhzProtocolTypeNiceFlo], level, duration);
-    subghz_protocol_nice_flor_s_parse(
-        (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS],
-        level,
-        duration);
+    // subghz_protocol_nice_flor_s_parse(
+    //     (SubGhzProtocolNiceFlorS*)instance->protocols[SubGhzProtocolTypeNiceFlorS],
+    //     level,
+    //     duration);
     // subghz_protocol_gate_tx_parse(
     //     (SubGhzProtocolGateTX*)instance->protocols[SubGhzProtocolTypeGateTX], level, duration);
     // subghz_protocol_ido_parse(
@@ -313,22 +313,22 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
     //     duration);
     subghz_protocol_star_line_parse(
         (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine], level, duration);
-    subghz_protocol_nero_radio_parse(
-        (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio],
-        level,
-        duration);
+    // subghz_protocol_nero_radio_parse(
+    //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio],
+    //     level,
+    //     duration);
     subghz_protocol_scher_khan_parse(
         (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan],
         level,
         duration);
-    subghz_protocol_kia_parse(
-        (SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA], level, duration);
-    subghz_protocol_hormann_parse(
-        (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann], level, duration);
-    subghz_protocol_somfy_telis_parse(
-        (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis],
-        level,
-        duration);
+    // subghz_protocol_kia_parse(
+    //     (SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA], level, duration);
+    // subghz_protocol_hormann_parse(
+    //     (SubGhzProtocolHormann*)instance->protocols[SubGhzProtocolTypeHormann], level, duration);
+    // subghz_protocol_somfy_telis_parse(
+    //     (SubGhzProtocolSomfyTelis*)instance->protocols[SubGhzProtocolTypeSomfyTelis],
+    //     level,
+    //     duration);
     subghz_protocol_somfy_keytis_parse(
         (SubGhzProtocolSomfyKeytis*)instance->protocols[SubGhzProtocolTypeSomfyKeytis],
         level,

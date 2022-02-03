@@ -49,12 +49,12 @@ void subghz_parser_enable_dump(
     SubGhzProtocolCommonCallbackDump callback,
     void* context);
 
-/** File name rainbow table Nice Flor-S
- * 
- * @param instance - SubGhzParser instance
- * @param file_name - "path/file_name"
- */
-void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name);
+// /** File name rainbow table Nice Flor-S
+//  * 
+//  * @param instance - SubGhzParser instance
+//  * @param file_name - "path/file_name"
+//  */
+// void subghz_parser_load_nice_flor_s_file(SubGhzParser* instance, const char* file_name);
 
 // /** File name rainbow table Came Atomo
 //  * 

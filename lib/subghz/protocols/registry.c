@@ -8,6 +8,11 @@
 #include "faac_slh.h"
 #include "nero_sketch.h"
 #include "ido.h"
+#include "kia.h"
+#include "hormann.h"
+#include "nero_radio.h"
+#include "nice_flor_s.h"
+#include "somfy_telis.h"
 
 const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_came,
@@ -18,6 +23,11 @@ const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_faac_slh,
     &subghz_protocol_nero_sketch,
     &subghz_protocol_ido,
+    &subghz_protocol_kia,
+    &subghz_protocol_hormann,
+    &subghz_protocol_nero_radio,
+    &subghz_protocol_nice_flor_s,
+    &subghz_protocol_somfy_telis,
 };
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {
