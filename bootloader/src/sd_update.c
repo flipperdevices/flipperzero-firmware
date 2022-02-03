@@ -27,7 +27,7 @@ static bool page_task_validate_flash(
     const uint8_t i_page,
     const uint8_t* update_block,
     uint16_t update_block_len) {
-    size_t page_addr = furi_hal_flash_get_base() + furi_hal_flash_get_page_size() * i_page;
+    const size_t page_addr = furi_hal_flash_get_base() + furi_hal_flash_get_page_size() * i_page;
     return (memcmp(update_block, (void*)page_addr, update_block_len) == 0);
 }
 
@@ -103,7 +103,7 @@ void sdcard_update_execute() {
             break;
         }
 
-        uint8_t valid_targets = dfu_file_validate_headers(&dfu_file, &flipper_dfu_params);
+        const uint8_t valid_targets = dfu_file_validate_headers(&dfu_file, &flipper_dfu_params);
         if(valid_targets == 0) {
             break;
         }

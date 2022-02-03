@@ -11,6 +11,7 @@ int main() {
         break;
     case BootMode_SDUpdate:
         sdcard_update_execute();
+        // fall through after update
     case BootMode_Normal:
     default:
         target_switch2os();

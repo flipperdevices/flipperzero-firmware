@@ -1,7 +1,7 @@
 #include "dfu_file.h"
 #include <furi_hal.h>
 
-#define VALID_FULL_FILE_CRC 0xFFFFFFFF
+#define VALID_WHOLE_FILE_CRC 0xFFFFFFFF
 #define DFU_SUFFIX_VERSION 0x011a
 #define FLASH_PAGE_ALIGNMENT_MASK (FLASH_PAGE_SIZE - 1)
 
@@ -11,6 +11,8 @@ bool dfu_file_validate_crc(FsFile* dfuf, const DfuPageTaskProgressCb progress_cb
     }
 
     f_rewind(&dfuf->file);
+    furi_hal_crc_reset();
+
     uint32_t file_crc = 0;
 
     uint8_t data_buffer[DFU_DATA_BUFFER_MAX_LEN] = {0};
@@ -31,7 +33,7 @@ bool dfu_file_validate_crc(FsFile* dfuf, const DfuPageTaskProgressCb progress_cb
     // Last 4 bytes of DFU file = CRC of previous file contents, inverted
     // If we calculate whole file CRC32, incl. embedded CRC,
     // that should give us 0xFFFFFFFF
-    return file_crc == VALID_FULL_FILE_CRC;
+    return file_crc == VALID_WHOLE_FILE_CRC;
 }
 
 uint8_t dfu_file_validate_headers(FsFile* dfuf, const DfuValidationParams* reference_params) {
@@ -47,7 +49,7 @@ uint8_t dfu_file_validate_headers(FsFile* dfuf, const DfuValidationParams* refer
 
     f_rewind(&dfuf->file);
 
-    uint32_t dfu_suffix_offset = dfuf->stat.fsize - sizeof(DfuSuffix);
+    const uint32_t dfu_suffix_offset = dfuf->stat.fsize - sizeof(DfuSuffix);
 
     CHECK_FRESULT(f_read(&dfuf->file, &dfu_prefix, sizeof(DfuPrefix), &bytes_read));
     if((dfu_prefix.szSignature[0] != 'D') || (dfu_prefix.szSignature[1] != 'f') ||
@@ -66,7 +68,6 @@ uint8_t dfu_file_validate_headers(FsFile* dfuf, const DfuValidationParams* refer
         return 0;
     }
     // TODO: check DfuSignature?..
-    // TODO: check bcdDevice?
 
     if((dfu_suffix.idVendor != reference_params->vendor) ||
        (dfu_suffix.idProduct != reference_params->product) ||
@@ -82,8 +83,10 @@ uint8_t dfu_file_validate_headers(FsFile* dfuf, const DfuValidationParams* refer
 static DfuUpdateBlockResult dfu_file_perform_task_for_update_pages(
     const DfuUpdateTask* task,
     FsFile* dfuf,
-    ImageElementHeader* header) {
+    const ImageElementHeader* header) {
+
     furi_assert(task);
+    furi_assert(header);
     task->progress_cb(0);
     if((header->dwElementAddress & FLASH_PAGE_ALIGNMENT_MASK) != 0) {
         // start address is not aligned by page boundary -- we don't support that. Yet.
@@ -122,7 +125,6 @@ static DfuUpdateBlockResult dfu_file_perform_task_for_update_pages(
     }
 
     task->progress_cb(100);
-
     return UpdateBlockResult_OK;
 }
 
@@ -134,6 +136,7 @@ bool dfu_file_process_targets(const DfuUpdateTask* task, FsFile* dfuf, const uin
     CHECK_FRESULT(f_lseek(&dfuf->file, sizeof(DfuPrefix)));
     for(uint8_t i_target = 0; i_target < n_targets; ++i_target) {
         CHECK_FRESULT(f_read(&dfuf->file, &target_prefix, sizeof(TargetPrefix), &bytes_read));
+        // TODO: look into TargetPrefix and validate/filter?..
         for(uint32_t i_element = 0; i_element < target_prefix.dwNbElements; ++i_element) {
             CHECK_FRESULT(
                 f_read(&dfuf->file, &image_element, sizeof(ImageElementHeader), &bytes_read));
