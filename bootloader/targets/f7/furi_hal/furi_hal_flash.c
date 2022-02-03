@@ -308,7 +308,7 @@ static size_t furi_hal_flash_get_page_address(uint8_t page) {
     return furi_hal_flash_get_base() + page * FURI_HAL_FLASH_PAGE_SIZE;
 }
 
-bool furi_hal_flash_program_page(uint8_t page, uint8_t* data, uint16_t _length) {
+bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16_t _length) {
     uint16_t length = _length;
     furi_check(length <= FURI_HAL_FLASH_PAGE_SIZE);
 

@@ -69,4 +69,4 @@ bool furi_hal_flash_erase(uint8_t page);
 bool furi_hal_flash_write_dword(size_t address, uint64_t data);
 
 
-bool furi_hal_flash_program_page(uint8_t page, uint8_t* data, uint16_t length);
+bool furi_hal_flash_program_page(const uint8_t page, const uint8_t* data, uint16_t length);

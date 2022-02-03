@@ -70,7 +70,7 @@ const char* version_get_version(const Version* v);
  *
  * @return     build date
  */
-const uint8_t version_get_target(const Version* v);
+uint8_t version_get_target(const Version* v);
 
 #ifdef __cplusplus
 }
