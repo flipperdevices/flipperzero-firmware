@@ -2,7 +2,7 @@
 #include <lib/subghz/protocols/subghz_protocol_keeloq.h>
 #include <lib/subghz/protocols/subghz_protocol_star_line.h>
 #include <lib/subghz/protocols/subghz_protocol_princeton.h>
-#include <lib/subghz/protocols/subghz_protocol_somfy_keytis.h>
+// #include <lib/subghz/protocols/subghz_protocol_somfy_keytis.h>
 
 #include <furi.h>
 #include <m-string.h>
@@ -164,10 +164,10 @@ bool subghz_history_add_to_history(
     } else if(strcmp(protocol->name, "Princeton") == 0) {
         instance->history[instance->last_index_write].data1 =
             subghz_protocol_princeton_get_te(protocol);
-    } else if(strcmp(protocol->name, "Somfy Keytis") == 0) {
-        instance->history[instance->last_index_write].data1 =
-            subghz_protocol_somfy_keytis_get_press_duration(protocol);
-    }
+    }//  else if(strcmp(protocol->name, "Somfy Keytis") == 0) {
+    //     instance->history[instance->last_index_write].data1 =
+    //         subghz_protocol_somfy_keytis_get_press_duration(protocol);
+    // }
 
     instance->history[instance->last_index_write].type_protocol = protocol->type_protocol;
 
