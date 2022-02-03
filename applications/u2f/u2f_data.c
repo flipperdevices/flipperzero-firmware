@@ -8,8 +8,8 @@
 #define TAG "U2F"
 
 #define U2F_DATA_FOLDER "/any/u2f/"
-#define U2F_CERT_FILE U2F_DATA_FOLDER "cert.der"
-#define U2F_CERT_KEY_FILE U2F_DATA_FOLDER "cert_key.u2f"
+#define U2F_CERT_FILE U2F_DATA_FOLDER "assets/cert.der"
+#define U2F_CERT_KEY_FILE U2F_DATA_FOLDER "assets/cert_key.u2f"
 #define U2F_KEY_FILE U2F_DATA_FOLDER "key.u2f"
 #define U2F_CNT_FILE U2F_DATA_FOLDER "cnt.u2f"
 
@@ -37,6 +37,26 @@ typedef struct {
     uint8_t random_salt[24];
     uint32_t control;
 } __attribute__((packed)) U2fCounterData;
+
+bool u2f_data_check() {
+    bool state = false;
+    Storage* fs_api = furi_record_open("storage");
+    File* file = storage_file_alloc(fs_api);
+
+    if(storage_file_open(file, U2F_CERT_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        storage_file_close(file);
+        if(storage_file_open(file, U2F_CERT_KEY_FILE, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            state = true;
+        }
+    }
+
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close("storage");
+
+    return state;
+}
 
 bool u2f_data_cert_check() {
     bool state = false;
