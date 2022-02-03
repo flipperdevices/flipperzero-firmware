@@ -8,7 +8,6 @@ typedef struct SubGhzBlockDecoder SubGhzBlockDecoder;
 
 struct SubGhzBlockDecoder {
     uint32_t parser_step;
-    //uint8_t header_count;
     uint32_t te_last;
     uint64_t decode_data;
     uint8_t decode_count_bit;

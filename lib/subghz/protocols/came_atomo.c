@@ -102,6 +102,7 @@ void subghz_protocol_decoder_came_atomo_reset(void* context) {
 void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
+
     ManchesterEvent event = ManchesterEventReset;
     switch(instance->decoder.parser_step) {
     case CameAtomoDecoderStepReset:
@@ -190,17 +191,15 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
 //  * @return atomo_magic_xor
 //  */
 static uint64_t subghz_protocol_came_atomo_get_magic_xor_in_file(
-    SubGhzProtocolDecoderCameAtomo* instance,
+    const char* file_name,
     uint8_t number_atomo_magic_xor) {
-    if(!strcmp(instance->came_atomo_rainbow_table_file_name, ""))
-        return SUBGHZ_NO_CAME_ATOMO_RAINBOW_TABLE;
+    if(!strcmp(file_name, "")) return SUBGHZ_NO_CAME_ATOMO_RAINBOW_TABLE;
 
     uint8_t buffer[sizeof(uint64_t)] = {0};
     uint32_t address = number_atomo_magic_xor * sizeof(uint64_t);
     uint64_t atomo_magic_xor = 0;
 
-    if(subghz_keystore_raw_get_data(
-           instance->came_atomo_rainbow_table_file_name, address, buffer, sizeof(uint64_t))) {
+    if(subghz_keystore_raw_get_data(file_name, address, buffer, sizeof(uint64_t))) {
         for(size_t i = 0; i < sizeof(uint64_t); i++) {
             atomo_magic_xor = (atomo_magic_xor << 8) | buffer[i];
         }
@@ -214,8 +213,9 @@ static uint64_t subghz_protocol_came_atomo_get_magic_xor_in_file(
  * 
  * @param instance SubGhzProtocolDecoderCameAtomo instance
  */
-static void
-    subghz_protocol_came_atomo_remote_controller(SubGhzProtocolDecoderCameAtomo* instance) {
+static void subghz_protocol_came_atomo_remote_controller(
+    SubGhzBlockGeneric* instance,
+    const char* file_name) {
     /* 
     * 0x1fafef3ed0f7d9ef
     * 0x185fcc1531ee86e7
@@ -269,29 +269,30 @@ static void
     * 
     * */
 
-    uint16_t parcel_counter = instance->generic.data >> 48;
+    uint16_t parcel_counter = instance->data >> 48;
     parcel_counter = parcel_counter ^ 0x185F;
     parcel_counter >>= 4;
     uint8_t ind = (parcel_counter + 1) % 32;
-    uint64_t temp_data = instance->generic.data & 0x0000FFFFFFFFFFFF;
-    uint64_t atomo_magic_xor = subghz_protocol_came_atomo_get_magic_xor_in_file(instance, ind);
+    uint64_t temp_data = instance->data & 0x0000FFFFFFFFFFFF;
+    uint64_t atomo_magic_xor = subghz_protocol_came_atomo_get_magic_xor_in_file(file_name, ind);
 
     if(atomo_magic_xor != SUBGHZ_NO_CAME_ATOMO_RAINBOW_TABLE) {
         temp_data = temp_data ^ atomo_magic_xor;
-        instance->generic.cnt = temp_data >> 36;
-        instance->generic.serial = (temp_data >> 4) & 0x000FFFFFFFF;
-        instance->generic.btn = temp_data & 0xF;
+        instance->cnt = temp_data >> 36;
+        instance->serial = (temp_data >> 4) & 0x000FFFFFFFF;
+        instance->btn = temp_data & 0xF;
     } else {
-        instance->generic.cnt = 0;
-        instance->generic.serial = 0;
-        instance->generic.btn = 0;
+        instance->cnt = 0;
+        instance->serial = 0;
+        instance->btn = 0;
     }
 }
 
 void subghz_protocol_decoder_came_atomo_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    subghz_protocol_came_atomo_remote_controller(instance);
+    subghz_protocol_came_atomo_remote_controller(
+        &instance->generic, instance->came_atomo_rainbow_table_file_name);
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
