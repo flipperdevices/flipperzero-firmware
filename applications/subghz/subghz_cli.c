@@ -149,7 +149,7 @@ void subghz_cli_command_tx(Cli* cli, string_t args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
 
-    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "CAME TWEE");
+    SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Nero Radio");
     subghz_transmitter_load(transmitter, key, 24, repeat); // TODO: serialize, deserialize
 
     furi_hal_subghz_reset();
@@ -251,6 +251,7 @@ void subghz_cli_command_rx(Cli* cli, string_t args, void* context) {
     SubGhzEnvironment* environment = subghz_environment_alloc();
     subghz_environment_load_keystore(environment, "/ext/subghz/keeloq_mfcodes");
     subghz_environment_set_came_atomo_rainbow_table_file_name(environment, "/ext/subghz/came_atomo");
+    subghz_environment_set_nice_flor_s_rainbow_table_file_name(environment, "/ext/subghz/nice_flor_s_rx");
 
     SubGhzReceiver* receiver = subghz_receiver_alloc(environment);
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
