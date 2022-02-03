@@ -565,7 +565,7 @@ uint8_t BSP_SD_WriteBlocks(
     retr = BSP_SD_OK;
 
 error:
-    if(ptr != NULL) free(ptr);
+    //if(ptr != NULL) free(ptr);
     /* Send dummy byte: 8 Clock pulses of delay */
     SD_IO_CSState(1);
     SD_IO_WriteByte(SD_DUMMY_BYTE);
