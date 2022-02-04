@@ -14,6 +14,7 @@
 #include "nice_flor_s.h"
 #include "somfy_telis.h"
 #include "somfy_keytis.h"
+#include "scher_khan.h"
 
 const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_came,
@@ -30,6 +31,7 @@ const SubGhzProtocol* subghz_protocol_registry[] = {
     &subghz_protocol_nice_flor_s,
     &subghz_protocol_somfy_telis,
     &subghz_protocol_somfy_keytis,
+    &subghz_protocol_scher_khan,
 };
 
 const SubGhzProtocol* subghz_protocol_registry_get_by_name(const char* name) {

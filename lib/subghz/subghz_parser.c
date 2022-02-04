@@ -14,7 +14,7 @@
 //#include "protocols/subghz_protocol_nero_sketch.h"
 #include "protocols/subghz_protocol_star_line.h"
 // #include "protocols/subghz_protocol_nero_radio.h"
-#include "protocols/subghz_protocol_scher_khan.h"
+// #include "protocols/subghz_protocol_scher_khan.h"
 //#include "protocols/subghz_protocol_kia.h"
 #include "protocols/subghz_protocol_raw.h"
 // #include "protocols/subghz_protocol_hormann.h"
@@ -42,7 +42,7 @@ typedef enum {
     //SubGhzProtocolTypeNeroSketch,
     SubGhzProtocolTypeStarLine,
     // SubGhzProtocolTypeNeroRadio,
-    SubGhzProtocolTypeScherKhan,
+    // SubGhzProtocolTypeScherKhan,
     // SubGhzProtocolTypeKIA,
     SubGhzProtocolTypeRAW,
     // SubGhzProtocolTypeHormann,
@@ -115,8 +115,8 @@ SubGhzParser* subghz_parser_alloc() {
         (SubGhzProtocolCommon*)subghz_protocol_star_line_alloc(instance->keystore);
     // instance->protocols[SubGhzProtocolTypeNeroRadio] =
     //     (SubGhzProtocolCommon*)subghz_protocol_nero_radio_alloc();
-     instance->protocols[SubGhzProtocolTypeScherKhan] =
-         (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
+    //  instance->protocols[SubGhzProtocolTypeScherKhan] =
+    //      (SubGhzProtocolCommon*)subghz_protocol_scher_khan_alloc();
     // instance->protocols[SubGhzProtocolTypeKIA] =
     //     (SubGhzProtocolCommon*)subghz_protocol_kia_alloc();
     instance->protocols[SubGhzProtocolTypeRAW] =
@@ -158,8 +158,8 @@ void subghz_parser_free(SubGhzParser* instance) {
         (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
     // subghz_protocol_nero_radio_free(
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
-    subghz_protocol_scher_khan_free(
-        (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
+    // subghz_protocol_scher_khan_free(
+    //     (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     // subghz_protocol_kia_free((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
     subghz_protocol_raw_free((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     // subghz_protocol_hormann_free(
@@ -263,8 +263,8 @@ void subghz_parser_reset(SubGhzParser* instance) {
         (SubGhzProtocolStarLine*)instance->protocols[SubGhzProtocolTypeStarLine]);
     // subghz_protocol_nero_radio_reset(
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio]);
-    subghz_protocol_scher_khan_reset(
-        (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
+    // subghz_protocol_scher_khan_reset(
+    //     (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan]);
     // subghz_protocol_kia_reset((SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA]);
     subghz_protocol_raw_reset((SubGhzProtocolRAW*)instance->protocols[SubGhzProtocolTypeRAW]);
     // subghz_protocol_hormann_reset(
@@ -317,10 +317,10 @@ void subghz_parser_parse(SubGhzParser* instance, bool level, uint32_t duration) 
     //     (SubGhzProtocolNeroRadio*)instance->protocols[SubGhzProtocolTypeNeroRadio],
     //     level,
     //     duration);
-    subghz_protocol_scher_khan_parse(
-        (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan],
-        level,
-        duration);
+    // subghz_protocol_scher_khan_parse(
+    //     (SubGhzProtocolScherKhan*)instance->protocols[SubGhzProtocolTypeScherKhan],
+    //     level,
+    //     duration);
     // subghz_protocol_kia_parse(
     //     (SubGhzProtocolKIA*)instance->protocols[SubGhzProtocolTypeKIA], level, duration);
     // subghz_protocol_hormann_parse(

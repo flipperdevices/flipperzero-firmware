@@ -219,6 +219,7 @@ void subghz_protocol_decoder_kia_serialization(void* context, string_t output) {
     furi_assert(context);
     SubGhzProtocolDecoderKIA* instance = context;
 
+    subghz_protocol_kia_check_remote_controller(&instance->generic);
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
